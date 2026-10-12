@@ -39,7 +39,7 @@ Six pillars decide every trade-off.
 
 ### What it is not
 
-- **Not a full simulation.** No transit sim, no separate Hunger stat (eating refills Energy instead), no real-time multiplayer.
+- **Not a full simulation.** No 3D map (the city is a 2D map, now and later), no transit sim, no separate Hunger stat (eating refills Energy instead), no real-time multiplayer.
 - **Not pay-to-skip.** Virtual cash can't be bought, and side arcs give no clout or guessing edge. Exclusive events and collector items add clout only with diminishing returns.
 - **Not a stranger-chat app.** Chat is capped at 10 messages a day, filtered, with block, report and an admin review queue.
 - **Not real people or brands.** Every character, business and brand is invented; real landmarks appear only when their names aren't trademarked.
@@ -112,7 +112,7 @@ Stories are the main reason to come back every day: serialized, satirical and sh
 - **The city reacts:** a gala gets cancelled, a building is closed for police activity, a diner gets crowded with fans, a grief hoodie appears in the Shop.
 - **Fair to free players:** every mystery is solvable for free; paid side arcs ($2.99 each) add perspective, evidence and behind-the-scenes color, but never help anyone guess.
 - **Late joiners** catch up on the live story and can still vote in open predictions; finished stories live in the archive.
-- **First story:** "Who Killed Sarah Bird?", a 10-day Queens whodunit. It launches when the player base is ready, not on launch day, and a lighter story follows it. After the pilot, a new story starts every Sunday.
+- **First story:** "Who Killed Sarah Bird?", a 10-day Queens whodunit. It launches when the player base is ready, not on launch day, and a lighter story, a dating comedy, follows it. Lola Lowdown also writes a recurring dating advice column. After the pilot, a new story starts every Sunday.
 
 ## 8. Social and growth
 
@@ -122,6 +122,7 @@ Growth comes from friends and from shared story moments.
 - **Shared talk:** live poll results and the reveal card ("You picked Jett. So did 61% of Queens.") give players something to screenshot and argue about. Every beat has a Share button.
 - **The leaderboard:** clout ranking for Queens and the player's clique.
 - **Chat:** player-to-player messages, 10 a day, with a word filter, block, report and an admin review queue.
+- **Crushes and date nights:** a light romance layer between players who already know each other. Crushes are revealed only when mutual, and a crush invite turns a crush into an invite. Date nights send two players to the same dining place or club event for a shared bonus. No real photos, no stranger matching.
 - **Install:** an add-to-home-screen prompt in the first session, so the game lives on the phone like an app.
 - **Return triggers:** the daily beat, the daily task reset at midnight New York time, prediction close times ("closes tonight") and bills coming due.
 
@@ -165,10 +166,10 @@ P1 is defined in Clarifications section 8. Everything below is **after P1** and 
 | --- | --- |
 | Progression | Clout levels and titles (Nobody → Local → Scene Regular → Known → Famous → Icon), an Icon milestone moment and a prestige option so the top isn't a dead end |
 | Careers | Fame paths with their own verbs: influencer, streamer, artist or DJ, founder or hustler |
-| City | Brooklyn, Manhattan, the Bronx and Staten Island, each with its own rent level and vibe, unlocked at clout thresholds; a 3D map and fully 3D interiors; monuments and postcards in other boroughs; real university names with each university's permission |
+| City | Brooklyn, Manhattan, the Bronx and Staten Island, each with its own rent level and vibe, unlocked at clout thresholds (on the same 2D map; there is no 3D map); fully 3D interiors; monuments and postcards in other boroughs; real university names with each university's permission |
 | City life | Random city events, rush hour, mild crime, weather and seasons, transit costs |
 | Home | Decorating apartments with decor slots and a home score |
-| Social | Crews, home visits, hosted hangouts, roommates splitting rent, daily friend boosts, outfit and home voting, rivals, gifting |
+| Social | Crews, home visits, group hangouts, speed dating, compliment polls, an avatar-only fit-check feed, roommates splitting rent, daily friend boosts, outfit and home voting, rivals, gifting |
 | Growth | Shareable story and milestone cards, deep-link landing pages, tiered referral rewards, streaks, notifications |
 | Stories | City headlines in the News app beyond stories, an insider pass, bundles |
 | Money | A seasonal pass, purchases at places, a marketplace |
@@ -198,6 +199,6 @@ Read this note first, then the spec that owns the area you're working on. When t
 | [Clarifications & Updates (v2)](https://claude.ai/code/artifact/01d1c3ba-3726-4890-9b1e-e52e23ab2707) | Game rules and P1 scope | Onboarding, HUD, economy, events, chat, music, clocks |
 | [World State Layer Brief (v2)](https://claude.ai/code/artifact/1c0a64d7-4da9-49e5-9b24-6668ab6f3076) | Engine behavior | Arcs, beats, effects, predictions, entitlements |
 | [Story Production and Payments Brief (v2)](https://claude.ai/code/artifact/c3583c39-b77e-4504-8866-a9999b537859) | Pipeline and payments | Approval gates, validation, Stripe, refunds |
-| [Design System Guide (v2)](https://claude.ai/code/artifact/d6032dc7-22dd-47b8-94e8-564e80ea5caf) | UI | Tokens, components C1 to C39, motion |
+| [Design System Guide (v2)](https://claude.ai/code/artifact/d6032dc7-22dd-47b8-94e8-564e80ea5caf) | UI | Tokens, components C1 to C41, motion |
 | [Story Quality Brief (v2)](https://claude.ai/code/artifact/7b647d81-7ca8-41ce-b6d3-5e96397f95fd) | Content rules | Writing and checking every story |
 | [Who Killed Sarah Bird? (v2)](https://claude.ai/code/artifact/1d82266e-f479-43f8-9346-e19ba309724a) | The first story's content | Loading the pilot as data |

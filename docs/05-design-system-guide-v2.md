@@ -16,7 +16,7 @@ Seven principles carry every screen.
 4. **One loud button per screen.** A single colored primary (taxi yellow, green or night) plus quiet secondaries.
 5. **Gold means real money.** Gold appears only on real-cash products (section 3), so players can always tell real money from virtual cash at a glance.
 6. **Delight through emoji, gradients and wit.** Emoji replace many icons, gradient banners mark special moments, and the copy is funny.
-7. **Characters are the hero.** Avatars are rendered in soft, high-fidelity 3D on a stage, so the effort goes where players form attachment. The P1 map is 2D.
+7. **Characters are the hero.** Avatars are rendered in soft, high-fidelity 3D on a stage, so the effort goes where players form attachment. The map is 2D, and stays 2D.
 
 ## 2. Brand layer
 
@@ -376,7 +376,7 @@ Shown whenever a story changes a price or closes something.
 
 ## 8. Components: the 2D map
 
-P1 uses a flat, stylized night map of Queens, generated from street geometry and drawn in the map colors from section 3; a 3D map replaces it later through the same map interface.
+The game uses a flat, stylized night map of Queens, generated from street geometry and drawn in the map colors from section 3. There is no 3D map; the map stays 2D as more boroughs are added.
 
 ### C19. Base map
 
@@ -560,6 +560,20 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 - **Collection screen:** opened from the profile (C28) and from a link at the foot of the Possessions sheet. A 2-column grid: owned postcards in full color with a share button; visited but not owned as locked silhouettes with their price and a premium-gold button; unvisited as outlined cards reading "Visit to unlock."
 - Completing the set awards an achievement badge (C12).
 
+### C40. Crush button and "It's mutual" card
+
+- **Crush button:** a 36 pt icon-round with an outline heart on clique members' profiles and on chat threads with a two-way conversation. Tapped, it fills neon-500 and shows a toast: "Crush saved. They'll only find out if it's mutual." A meta line shows the count: "2 of 3 crushes."
+- It never appears on anyone the player isn't connected to, and never shows whether someone has crushed on you.
+- **"It's mutual" card:** a night-reveal card (radius-lg) with both avatars, "It's mutual 👀" in display-md, and two buttons: primary-taxi "Plan a date night" and secondary "Say hi" (opens the chat). The chat thread then shows a small neon-tint "Matched" tag.
+- Delivered in-app only: a Phone badge and a home-screen card (C6 style).
+
+### C41. Date night invite
+
+- **Sending:** from a dining place or club event card (C37, C26), a secondary "Make it a date" button opens a sheet to pick a crush or friend. Exclusive events never show it.
+- **Receiving:** a card with the sender's avatar, the place, its price in tabular figures, and "Expires at midnight" in meta; primary-green "I'm in" and ghost "Not tonight."
+- **Status:** a small two-avatar row on the place card: grey when only one has gone, both lit when both have. The bonus (🙂 Mood and 🔥 clout) shows when both have gone.
+- Copy stays gender-neutral: "Your date is pulling up to Club Phoenix tonight."
+
 ## 11. Iconography, emoji and 3D characters
 
 Three visual languages, on purpose: thin outline icons for navigation, native emoji for personality, and soft 3D renders for characters.
@@ -587,7 +601,7 @@ Three visual languages, on purpose: thin outline icons for navigation, native em
 
 ### Map
 
-P1 uses the 2D night map (section 8). The later 3D map (dusk or night city, desaturated with warm streetlights, so glass pills pop) plugs into the same map interface.
+The map is 2D only (section 8). 3D is used for avatars, and later for interiors, never for the map.
 
 ## 12. Patterns, flows and voice
 
@@ -724,7 +738,7 @@ Work through these in order; the first three set up everything the components de
 - [ ] Ship the token file (section 14) and all three fonts with tabular figures enabled.
 - [ ] Build glass-dark, glass-light, glass-solid and scrim utilities, with the no-blur fallback for low-end Android.
 - [ ] Lock the 2D night map's look: approve one static styled screenshot of Queens before building pins and gestures.
-- [ ] Build components C1 to C39 as isolated, stateful pieces (default, selected, disabled, pressed, and closed or locked where relevant).
+- [ ] Build components C1 to C41 as isolated, stateful pieces (default, selected, disabled, pressed, and closed or locked where relevant).
 - [ ] Replace the old HUD, nav and any reference-era layout with C1 to C5.
 - [ ] Build the four-step creator and fix customization rendering so every choice updates the avatar instantly.
 - [ ] Upgrade avatars to the 3D character spec (section 11).

@@ -138,7 +138,7 @@ The first task is attending a virtual-cash party; inviting friends is an optiona
 
 P1 has one 2D night map, every player starts in Queens, and other boroughs show as locked.
 
-1. **One map.** A 2D night map of Queens. The Real Map view and its toggle are removed. The map reads game data through one coordinate system and a small interface (show pins, move the camera, locate the player, set a borough's lock state), so a 3D map can replace it later without touching game logic.
+1. **One map.** A 2D night map of Queens. The Real Map view and its toggle are removed. The game uses a 2D map only; there is no 3D map, now or later. The map still reads game data through one coordinate system and a small interface (show pins, move the camera, locate the player, set a borough's lock state), so the map's art can be redrawn or new boroughs added without touching game logic.
 2. **Location button.** A button on the map routes back to the player's current location.
 3. **Queens first.** All players start in Queens. It needs activities, places to visit, things to buy, and deals that make significant money.
 4. **Locked boroughs.** Other boroughs appear on the map labelled "Locked: Coming soon."
@@ -268,7 +268,7 @@ Inviting earns clout per invite plus a major bonus when the clique reaches five.
 1. **Button.** "Invite your Clique" sits upper left with a notification pin on first play.
 2. **Invite screen.** The invite interface at the top, clique members' profiles below it, and a progress bar toward the five-member bonus.
 3. **Rewards.** A set clout amount per invite, paid when the invited friend signs up, and a major bonus when the fifth member signs up.
-4. **Payout timing.** Per-invite clout pays out when the invited friend signs up, which stops players spamming invites for clout. Inviting is optional in the first task.
+4. **Payout timing.** Per-invite clout pays out when the invited friend signs up, which stops players spamming invites for clout. Inviting is optional in the first task. A crush invite (section 14) is a variant of the same invite, with the same rewards.
 
 ## 8. Tone, metrics and scope
 
@@ -291,14 +291,13 @@ Inviting earns clout per invite plus a major bonus when the clique reaches five.
 - The invite flow and the PWA prompt.
 - Club events, free story events and exclusive events.
 - Real-money purchases: exclusive events, collector fashion items, story side arcs and monument postcards, through one Stripe Checkout flow.
-- Player-to-player chat with block, report and an admin review queue (section 10).
+- Player-to-player chat with block, report and an admin review queue (section 10), plus crushes, crush invites and date nights (section 14).
 - Background music with mute (section 11).
 - The News app in the Phone, hosting Story mode: "Who Killed Sarah Bird?" with three paid side arcs (section 9).
 - The minimal World State layer, time-travel tool and debug panel (section 12).
 
 ### Later
 
-- A 3D map.
 - City headlines in the News app beyond stories: celebrity news (hookups, breakups, movie deals, tour announcements, endorsements, business deals, rehab, getting kicked out of the club), political scandals, tech founders dating pop stars and mayoral announcements, in a tone that is part satirical, part straight. Some pop up on the map as notifications.
 - The insider pass, bundles and subscriptions.
 - Rivals.
@@ -460,6 +459,20 @@ When rent is due and the bank balance can't cover it, the player gets a grace pe
 ### Clout in P1
 
 Clout is a ranking only: it drives the leaderboard and doesn't gate places, events or purchases in P1. After P1, boroughs unlock at clout thresholds tied to clout levels (see the roadmap in the Game Concept Note).
+
+## 14. Crushes and date nights
+
+A light romance layer between players who already know each other. It uses no real photos, no stranger matching, and no data about anyone's sex or orientation.
+
+1. **Crushes (mutual only).** Players can mark someone they're connected to as a crush: a clique member, or someone they've had at least one two-way chat with. Each player can have up to 3 active crushes. Nothing is revealed unless it's mutual; then both get an "It's mutual" card and a "Matched" label on their chat. Crushes that aren't mutual stay secret forever. Marking a crush pays no clout.
+2. **Crush invites.** A variant of the normal invite with a playful, open message: "I've got a crush on someone in Clout City. Join and find out if it's you." It pays the normal invite clout (section 7). It's never anonymous, and the game never messages anyone directly.
+3. **Date nights.** Invite a crush or a friend to a dining place or a club event, never an exclusive event. The invite lasts until New York midnight; each person goes whenever they're on and pays their own way. Once both have gone, both get a Mood boost and a small clout bonus, separate from the visit's own clout, at most once per day per player.
+4. **Safety.** Blocking cancels everything: a blocked player can't crush on, invite or see the date nights of the player who blocked them. Reports work as in chat (section 10). No "secret admirer" teasers.
+5. **Notifications** are in-app only in P1: a Phone badge and a home-screen card.
+6. **Copy** is gender-neutral everywhere ("Your crush is pulling up to Club Phoenix tonight").
+7. **Romance in the stories.** The second story is a dating comedy, and Lola Lowdown's dating advice column runs in the News app as a recurring mini arc (3 to 4 beats, no predictions).
+
+**After P1:** speed dating, compliment polls and an avatar-only fit-check feed, once there are enough players. Swiping and real-photo feeds aren't planned.
 
 ## Open questions
 

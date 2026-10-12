@@ -22,7 +22,7 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.2 | First Party | The tutorial, the first party, clout, the leaderboard, invite rewards | About 1 week | Rest of 1 and 2 |
 | v0.3 | The City | The first 8 locations, dining and Energy, jobs and gigs, the Shop, Possessions, bills | 1.5 to 2 weeks | 3 |
 | v0.4 | Stories | The News app and Sarah Bird, built and tested but not yet started | 1 to 2 weeks | 4 |
-| v0.5 | Money and Social | Real-money purchases, postcards, chat | 1 to 2 weeks | 5 |
+| v0.5 | Money and Social | Real-money purchases, postcards, chat, crushes and date nights | 1 to 2 weeks | 5 |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -144,10 +144,10 @@ Real-money purchases and player-to-player chat, all in Stripe test mode until v1
 - One Stripe Checkout flow for all four products: exclusive events, collector fashion items, Sarah Bird's three side arcs, and monument postcards (Story Production and Payments Brief).
 - Entitlements by SKU, refunds with clout clawback, and the Collection screen for postcards.
 - Exclusive events in the Events list, and location wave 3: two monuments, a lounge, the fashion boutique and the car dealership.
-- Chat in the Messages app: 10 messages a day, the word filter, block, report, and the admin review queue.
+- Chat in the Messages app: 10 messages a day, the word filter, block, report, and the admin review queue. Then crushes (mutual only), crush invites and date nights on top of it (Clarifications section 14).
 - Analytics for the success metrics: first task, invites, day-1 return, beat opens, predictions and purchases.
 
-**You test:** every product's test purchase unlocks it, a replayed payment doesn't duplicate it, and a refund removes it (and its clout). A report sent from chat appears in the admin queue.
+**You test:** every product's test purchase unlocks it, a replayed payment doesn't duplicate it, and a refund removes it (and its clout). A report sent from chat appears in the admin queue. A mutual crush shows the "It's mutual" card to both players, a one-sided crush shows nothing, and a date night pays its bonus only after both players have gone.
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 
@@ -164,7 +164,7 @@ The finished P1: real art in place, outside reviews done, then a soft launch fol
 **Then, in order**
 
 1. **Soft launch** to 20 to 50 people for 1 to 2 weeks; fix the top problems and tune the economy from real play.
-2. **Approve the next, lighter story.**
+2. **Approve the next, lighter story: the dating comedy.**
 3. **Start the pilot:** set Sarah Bird's start date to a Sunday and plan the launch push around Day 1.
 
 **You test:** every item in the Build Guide's launch checklist passes.
