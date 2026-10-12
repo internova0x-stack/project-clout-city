@@ -7,7 +7,6 @@ import {
 import { type Camera, type CameraLimits, type Viewport, clampCamera, mapToScreen, panBy, zoomAt } from "@/lib/map/camera";
 import { MAP_HEIGHT, MAP_WIDTH, type LatLng, centroid, project, toPath, toPolyline } from "@/lib/map/geo";
 import type { PlacePin } from "@/lib/places";
-import { LockIcon } from "../icons";
 
 /**
  * The small map interface the rest of the game talks to (Clarifications section 4):
@@ -339,7 +338,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
               onClick={tapGuard(() => onLockedTap?.(b.name))}
               aria-label={`${b.name}: Locked, coming soon`}
             >
-              <LockIcon size={14} /> {b.name} <span className="meta">Locked: Coming soon</span>
+              <span aria-hidden="true">🔒</span> {b.name} <span className="meta">Locked: Coming soon</span>
             </button>
           );
         })}

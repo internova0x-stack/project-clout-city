@@ -76,24 +76,22 @@ export function GameChrome({
       <section className={`stats glass-dark${statsOpen ? "" : " collapsed"}`} aria-label="Energy, mood and confidence">
         {statsOpen ? (
           <>
-            <div className="stats-head">
-              <button className="overline" style={{ color: "rgba(255,246,224,.6)" }} onClick={() => onAction("stats")}>Vibes</button>
-              <button className="side-btn" style={{ width: 28, height: 28 }} onClick={() => setStatsOpen(false)} aria-label="Collapse stats">
-                <ChevronDownIcon size={18} />
-              </button>
-            </div>
+            <button className="stats-toggle" onClick={() => setStatsOpen(false)} aria-label="Collapse stats">
+              <ChevronDownIcon size={18} />
+            </button>
             {["Energy", "Mood", "Confidence"].map((s) => (
-              <button key={s} className="stat-row" style={{ display: "block", width: "100%", textAlign: "left" }} onClick={() => onAction("stats")}>
-                <span className="label"><span>{s}</span><span style={{ color: "rgba(255,246,224,.5)" }}>—</span></span>
-                <div className="stat-track empty" />
+              // No levels until the economy ships (v0.3): the bars show their empty track.
+              <button key={s} className="stat-row" onClick={() => onAction("stats")} aria-label={`${s}: coming soon`}>
+                <span className="label">{s}</span>
+                <span className="stat-track" style={{ display: "block" }} />
               </button>
             ))}
           </>
         ) : (
           <button className="stats-mini" onClick={() => setStatsOpen(true)} aria-label="Expand stats">
-            <span className="stat-track empty" />
-            <span className="stat-track empty" />
-            <span className="stat-track empty" />
+            <span className="stat-track" />
+            <span className="stat-track" />
+            <span className="stat-track" />
             <ChevronUpIcon size={16} />
           </button>
         )}

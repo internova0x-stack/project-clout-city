@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CloseIcon } from "./icons";
 
 // Bottom sheet over the world (C13). Drag the handle down, tap the scrim or
-// press Escape to dismiss.
+// press Escape to dismiss. Opens in 320 ms with a spring, closes in 240 ms
+// ease-in (Design System Guide section 13).
 export function Sheet({
   open,
   onClose,
@@ -22,6 +23,16 @@ export function Sheet({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const drag = useRef<{ startY: number; dy: number } | null>(null);
+  // Stay mounted while the closing animation plays.
+  const [rendered, setRendered] = useState(open);
+  const lastChildren = useRef<ReactNode>(children);
+  if (open) lastChildren.current = children;
+  if (open && !rendered) setRendered(true);
+  useEffect(() => {
+    if (open) return;
+    const t = setTimeout(() => setRendered(false), 240);
+    return () => clearTimeout(t);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -37,7 +48,8 @@ export function Sheet({
     };
   }, [open, onClose, dismissible]);
 
-  if (!open) return null;
+  if (!rendered) return null;
+  const closing = !open;
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!dismissible) return;
@@ -59,10 +71,10 @@ export function Sheet({
 
   return (
     <>
-      <div className="scrim" onClick={dismissible ? onClose : undefined} aria-hidden="true" />
+      <div className={`scrim${closing ? " closing" : ""}`} onClick={dismissible && !closing ? onClose : undefined} aria-hidden="true" />
       <div
         ref={ref}
-        className={`sheet${tall ? " tall" : ""}`}
+        className={`sheet${tall ? " tall" : ""}${closing ? " closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={label}
@@ -82,7 +94,7 @@ export function Sheet({
             <CloseIcon size={18} />
           </button>
         )}
-        <div className="sheet-body">{children}</div>
+        <div className="sheet-body">{open ? children : lastChildren.current}</div>
       </div>
     </>
   );

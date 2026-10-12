@@ -58,8 +58,11 @@ export function InviteSheet({
   return (
     <Sheet open={open} onClose={onClose} label="Invite your Clique" tall>
       <div className="stack-24">
-        <div className="stack-4" style={{ paddingRight: 40 }}>
-          <h2 className="display-lg" style={{ margin: 0 }}>Invite your Clique</h2>
+        <div className="stack-4" style={{ paddingRight: 44 }}>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2 className="display-lg" style={{ margin: 0 }}>Invite your Clique</h2>
+            <span className="body-strong" style={{ whiteSpace: "nowrap" }}>{progress.shown} of {size}</span>
+          </div>
           <p className="subtext" style={{ margin: "4px 0 0" }}>
             Main characters need a supporting cast. Send your link; everyone who signs up through it joins your clique.
           </p>
@@ -71,7 +74,7 @@ export function InviteSheet({
             <span className="body-strong" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {link.replace(/^https?:\/\//, "")}
             </span>
-            <button className="icon-round" style={{ width: 32, height: 32 }} onClick={copy} aria-label="Copy invite link">
+            <button className="icon-round" onClick={copy} aria-label="Copy invite link">
               <CopyIcon size={16} />
             </button>
           </div>
@@ -82,14 +85,11 @@ export function InviteSheet({
         </div>
 
         <div className="stack-8">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <span className="title">Your clique</span>
-            <span className="hud-number" style={{ color: "var(--text-1)" }}>{progress.shown} of {size}</span>
-          </div>
+          <span className="title">Your clique</span>
           <div style={{ height: 8, borderRadius: 999, background: "var(--chip-off)", overflow: "hidden" }} role="progressbar" aria-valuemin={0} aria-valuemax={size} aria-valuenow={progress.shown}>
             <div style={{ width: `${progress.ratio * 100}%`, height: "100%", background: "var(--taxi-400)", borderRadius: 999, transition: "width .4s ease-out" }} />
           </div>
-          <p className="meta" style={{ margin: 0 }}>Rewards unlock when the city opens.</p>
+          <p className="meta" style={{ margin: "4px 0 0" }}>Rewards unlock when the city opens.</p>
         </div>
 
         <div className="stack-8">

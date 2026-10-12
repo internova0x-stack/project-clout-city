@@ -46,13 +46,11 @@ export function ComingSoon({
           >
             {copy.emoji}
           </div>
-          <div className="stack-4">
-            <div className="row" style={{ gap: 10 }}>
-              <h2 className="display-lg" style={{ margin: 0 }}>{title ?? copy.title}</h2>
-            </div>
-            <span className="tag tag-event" style={{ marginTop: 8 }}>Coming soon</span>
+          <h2 className="display-lg" style={{ margin: 0, paddingRight: 40 }}>{title ?? copy.title}</h2>
+          <div className="card hazard-edge stack-4" style={{ paddingLeft: 22 }}>
+            <p className="overline" style={{ margin: 0 }}>Coming soon</p>
+            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{copy.body}</p>
           </div>
-          <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{copy.body}</p>
           <button className="btn btn-taxi" onClick={onClose}>Got it</button>
         </div>
       )}
