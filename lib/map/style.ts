@@ -4,6 +4,7 @@
 // never drawn: businesses in Clout City are invented (Clarifications section 4).
 
 import type { StyleSpecification } from "maplibre-gl";
+import { TWO_LANE_M, roadWidth, vehicleSizeExpr } from "./scale.ts";
 
 export type MapTheme = "day" | "night";
 
@@ -27,11 +28,12 @@ export const PALETTES: Record<MapTheme, Palette> = {
     locked: "rgba(60,56,72,.42)", queensEdge: "rgba(242,169,0,.55)",
   },
   night: {
-    land: "#1C1824", water: "#0E1020", waterDeep: "#0A0C18", park: "#1F2A24", blocks: "#221E2B", building: "#2E2839", buildingTall: "#433956",
-    minor: "rgba(255,194,26,.38)", minorCasing: "rgba(0,0,0,0)", major: "rgba(255,194,26,.75)", majorCasing: "rgba(0,0,0,0)",
-    highway: "#FFC21A", highwayCasing: "rgba(0,0,0,0)", roadGlow: "rgba(255,170,40,.35)", rail: "rgba(255,46,136,.6)",
-    label: "rgba(255,246,224,.72)", labelHalo: "rgba(20,17,26,.85)", streetLabel: "rgba(255,246,224,.55)",
-    locked: "rgba(10,8,14,.62)", queensEdge: "rgba(255,194,26,.5)",
+    // Google Maps-style night: navy land, deep blue water, light grey roads.
+    land: "#1D2C4D", water: "#0E1A33", waterDeep: "#0A1328", park: "#1E3B44", blocks: "#22345A", building: "#2A3D66", buildingTall: "#3A5287",
+    minor: "#8C96AB", minorCasing: "#1A2742", major: "#B3BBCB", majorCasing: "#1A2742",
+    highway: "#D7DCE5", highwayCasing: "#5E6C88", roadGlow: "rgba(0,0,0,0)", rail: "rgba(180,190,210,.45)",
+    label: "#B8C6E0", labelHalo: "rgba(14,26,51,.9)", streetLabel: "#C9D1E0",
+    locked: "rgba(8,12,24,.62)", queensEdge: "rgba(255,194,26,.5)",
   },
 };
 
@@ -50,7 +52,7 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
     name: `clout-city-${theme}`,
     glyphs: GLYPHS_URL,
     transition: { duration: 2000, delay: 0 },
-    light: { anchor: "viewport", color: night ? "#FFD9A8" : "#FFFFFF", intensity: night ? 0.25 : 0.4, position: [1.2, 200, 35] },
+    light: { anchor: "viewport", color: night ? "#C9D6FF" : "#FFFFFF", intensity: night ? 0.25 : 0.4, position: [1.2, 200, 35] },
     sources: {
       osm: { type: "vector", url: TILE_SOURCE_URL, attribution: MAP_ATTRIBUTION },
       boroughs: { type: "geojson", data: boroughs },
@@ -86,31 +88,31 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         id: "road-glow", type: "line", source: "osm", "source-layer": "transportation",
         filter: ["in", ["get", "class"], ["literal", ["motorway", ...MAJOR]]],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.roadGlow, "line-width": width(4, 14, 40), "line-blur": width(3, 10, 24) },
+        paint: { "line-color": p.roadGlow, "line-width": roadWidth([[12, 4], [14, 12]], TWO_LANE_M * 2.2), "line-blur": width(3, 10, 24) },
       },
       {
         id: "road-minor-casing", type: "line", source: "osm", "source-layer": "transportation", minzoom: 14,
         filter: ["in", ["get", "class"], ["literal", MINOR]],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.minorCasing, "line-width": width(0.5, 4, 22) },
+        paint: { "line-color": p.minorCasing, "line-width": roadWidth([[12, 0.5], [14, 3.6]], TWO_LANE_M + 1.2) },
       },
       {
         id: "road-major-casing", type: "line", source: "osm", "source-layer": "transportation", minzoom: 11,
         filter: ["in", ["get", "class"], ["literal", MAJOR]],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.majorCasing, "line-width": width(1.5, 7, 30) },
+        paint: { "line-color": p.majorCasing, "line-width": roadWidth([[11, 1.5], [14, 5.6]], TWO_LANE_M * 1.3 + 1.2) },
       },
       {
         id: "road-minor", type: "line", source: "osm", "source-layer": "transportation", minzoom: 12,
         filter: ["in", ["get", "class"], ["literal", MINOR]],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.minor, "line-width": width(0.4, 2.8, 18) },
+        paint: { "line-color": p.minor, "line-width": roadWidth([[12, 0.4], [14, 2.8]], TWO_LANE_M) },
       },
       {
         id: "road-major", type: "line", source: "osm", "source-layer": "transportation",
         filter: ["in", ["get", "class"], ["literal", MAJOR]],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.major, "line-width": width(1, 5, 26) },
+        paint: { "line-color": p.major, "line-width": roadWidth([[11, 1], [14, 4.6]], TWO_LANE_M * 1.3) },
       },
       {
         id: "rail", type: "line", source: "osm", "source-layer": "transportation",
@@ -121,13 +123,13 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         id: "highway-casing", type: "line", source: "osm", "source-layer": "transportation",
         filter: ["==", ["get", "class"], "motorway"],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.highwayCasing, "line-width": width(3, 9, 34) },
+        paint: { "line-color": p.highwayCasing, "line-width": roadWidth([[10, 2], [14, 8]], TWO_LANE_M * 1.6 + 1.2) },
       },
       {
         id: "highway", type: "line", source: "osm", "source-layer": "transportation",
         filter: ["==", ["get", "class"], "motorway"],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.highway, "line-width": width(2, 6.5, 28) },
+        paint: { "line-color": p.highway, "line-width": roadWidth([[10, 1.4], [14, 6.5]], TWO_LANE_M * 1.6) },
       },
       {
         // Top-down cars, SUVs, buses and motorcycles (sprites from components/map/vehicleIcons.ts).
@@ -139,8 +141,8 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
           "icon-pitch-alignment": "map",
           "icon-allow-overlap": true,
           "icon-ignore-placement": true,
-          // Roughly twice life size, so they read on a phone.
-          "icon-size": ["interpolate", ["exponential", 2], ["zoom"], 15, 0.4, 17, 0.9, 19, 3],
+          // Bigger than life so they read on a phone, at the same scale as the road widths.
+          "icon-size": vehicleSizeExpr(),
         },
       },
       {

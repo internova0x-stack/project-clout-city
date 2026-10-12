@@ -1,4 +1,5 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
+import { laneOffsetMeters } from "@/lib/map/scale";
 import { PIXEL_RATIO, VEHICLE_COLORS, drawVehicleIcon, type VehicleKind } from "./vehicleIcons";
 
 // Moving traffic on the map when zoomed in (Milestones v0.3): up to 30 top-down
@@ -13,7 +14,6 @@ const SPEED_UP = 2; // a little faster than real Queens traffic, so it reads as 
 const ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "minor"]);
 const BUS_ROADS = new Set(["trunk", "primary", "secondary"]);
 const M_PER_DEG = 111_320;
-const LANE_OFFSET_M = 3.5;
 
 interface Path { pts: [number, number][]; cum: number[]; length: number; k: number; cls: string; visible: number[] }
 interface Vehicle { path: Path; at: number; speed: number; dir: 1 | -1; kind: VehicleKind; color: number }
@@ -32,7 +32,7 @@ function toPath(coords: [number, number][], cls: string): Path | null {
 }
 
 /** Position (in the right-hand lane for the direction of travel) and compass bearing. */
-function place(v: Vehicle): { at: [number, number]; bearing: number } {
+function place(v: Vehicle, lane: number): { at: [number, number]; bearing: number } {
   const p = v.path;
   let i = 1;
   while (i < p.cum.length - 1 && p.cum[i] < v.at) i++;
@@ -46,8 +46,8 @@ function place(v: Vehicle): { at: [number, number]; bearing: number } {
   if (v.dir < 0) { ex = -ex; ny = -ny; }
   const len = Math.hypot(ex, ny) || 1;
   // Right of travel is (north, -east).
-  const offE = (ny / len) * LANE_OFFSET_M;
-  const offN = (-ex / len) * LANE_OFFSET_M;
+  const offE = (ny / len) * lane;
+  const offN = (-ex / len) * lane;
   return {
     at: [a[0] + (b[0] - a[0]) * t + offE / (p.k * M_PER_DEG), a[1] + (b[1] - a[1]) * t + offN / M_PER_DEG],
     bearing: (Math.atan2(ex, ny) * 180) / Math.PI,
@@ -133,11 +133,12 @@ export function startVehicles(map: MapLibreMap): () => void {
     const dt = last ? Math.min(0.1, (t - last) / 1000) : 0;
     last = t;
     const features: GeoJSON.Feature[] = [];
+    const lane = laneOffsetMeters(map.getZoom());
     for (const v of vehicles) {
       v.at += v.dir * v.speed * dt * SPEED_UP;
       if (v.at > v.path.length) { v.at = v.path.length; v.dir = -1; } // U-turn at the end of the block
       if (v.at < 0) { v.at = 0; v.dir = 1; }
-      const { at, bearing } = place(v);
+      const { at, bearing } = place(v, lane);
       features.push({ type: "Feature", properties: { kind: v.kind, color: v.color, bearing }, geometry: { type: "Point", coordinates: at } });
     }
     source()?.setData({ type: "FeatureCollection", features });
