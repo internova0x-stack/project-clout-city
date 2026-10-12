@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Creator, type CreatorStep } from "@/components/Creator";
 import type { Flow } from "@/components/GameShell";
 import { PreviewHome } from "@/components/preview/PreviewHome";
+import { PreviewRoom } from "@/components/preview/PreviewRoom";
 import { GuestMap } from "@/components/GuestMap";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -14,6 +15,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home             a player who has finished the first session
 //   /preview/home?flow=pwa    open one step of the first session (welcome, tour, party, partyDone, leaderboard, invitePrompt, pwa)
 //   /preview/home?city=off    the home screen before migration 0004 (city screens say "coming soon")
+//   /preview/room?room=cafe|club|counter|astoria_studio&mood=dream&time=night   one 3D room on its own
 //   add &time=day or &time=night to pin the map
 
 const SAMPLE: Player = {
@@ -46,7 +48,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city } = await searchParams;
+  const { time, step, state, flow, city, room, mood } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -100,6 +102,8 @@ export default async function Preview({
         />
       );
     }
+    case "room":
+      return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "dream" ? "dream" : "natural"} />;
     default:
       notFound();
   }

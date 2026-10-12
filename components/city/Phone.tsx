@@ -4,19 +4,20 @@ import { useState } from "react";
 import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
-import { Glyph, tileBackground, type GlyphName } from "../AppGlyph";
+import { tileBackground, type GlyphName } from "../AppGlyph";
 import { LedgerList } from "../game/Sheets";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
 type App = "gigs" | "bank" | "settings" | "news" | "messages";
 
-const APPS: { id: App; label: string; glyph: GlyphName; soon?: boolean }[] = [
-  { id: "news", label: "News", glyph: "news", soon: true },
-  { id: "messages", label: "Messages", glyph: "chat", soon: true },
-  { id: "bank", label: "Bank", glyph: "cash" },
-  { id: "gigs", label: "Gigs", glyph: "briefcase" },
-  { id: "settings", label: "Settings", glyph: "gear" },
+// Emoji on gradient tiles (the gradients come from the shared icon family).
+const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
+  { id: "news", label: "News", emoji: "📰", tile: "news", soon: true },
+  { id: "messages", label: "Messages", emoji: "💬", tile: "chat", soon: true },
+  { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
+  { id: "gigs", label: "Gigs", emoji: "💼", tile: "briefcase" },
+  { id: "settings", label: "Settings", emoji: "⚙️", tile: "gear" },
 ];
 
 const TIER_TAG: Record<GigOffer["tier"], { label: string; cls: string }> = {
@@ -69,8 +70,8 @@ export function PhoneModal({
               <div className="phone-grid">
                 {APPS.map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => setApp(a.id)}>
-                    <span className="phone-icon" style={{ background: tileBackground(a.glyph) }} aria-hidden="true">
-                      <Glyph name={a.glyph} size={32} />
+                    <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
+                      {a.emoji}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                     </span>
                     <span>{a.label}</span>

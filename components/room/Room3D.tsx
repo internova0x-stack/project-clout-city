@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, Color, DirectionalLight, Group, HemisphereLight, Mesh,
+  ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, Color, DirectionalLight, Fog, Group, HemisphereLight, Mesh,
   MeshStandardMaterial, OrthographicCamera, PCFSoftShadowMap, Plane, PlaneGeometry, PointLight, Raycaster, RepeatWrapping,
   RingGeometry, SRGBColorSpace, Scene, Vector2, Vector3, WebGLRenderer, type Object3D,
 } from "three";
@@ -55,10 +55,16 @@ export interface Room3DProps {
   insetBottom?: number;
   /** Lets the screen hide overlapping chrome while furniture is being arranged. */
   onEditingChange?: (editing: boolean) => void;
+  /**
+   * "dream" is the Monument Valley-inspired treatment under review (preview only):
+   * gradient walls, warm-lit and lavender-shaded faces, soft shadows, haze and motes.
+   */
+  mood?: "natural" | "dream";
 }
 
 export default function Room3D(props: Room3DProps) {
-  const { template, layout, look, outfit, daytime, sign, editable, label, insetTop = 120, insetBottom = 96 } = props;
+  const { template, layout, look, outfit, daytime, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "natural" } = props;
+  const dream = mood === "dream";
   const hostRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const propsRef = useRef(props);
@@ -121,15 +127,28 @@ export default function Room3D(props: Room3DProps) {
 
     // Lights
     // Night indoors reads as warm lamplight, not darkness; the club adds colored stage lights.
-    scene.add(new HemisphereLight(night ? 0xffe2c4 : 0xfff6e0, night ? 0x4a3050 : 0x8a7a6a, template.dark ? 1.05 : night ? 0.85 : 1.1));
-    scene.add(new AmbientLight(night ? 0xffd9b8 : 0xffffff, template.dark ? 0.5 : night ? 0.35 : 0.25));
-    const sun = new DirectionalLight(night ? 0xffd2a8 : 0xfff1d6, template.dark ? 0.9 : night ? 0.85 : 1.6);
+    if (dream) {
+      // Monument Valley-style: warm peach key light on the faces it hits, cool lavender in the shade.
+      scene.add(new HemisphereLight(night ? 0xffc9d6 : 0xffe6d6, night ? 0x5a4a9a : 0x9c8cd9, template.dark ? 1.3 : night ? 1.2 : 1.35));
+      scene.add(new AmbientLight(night ? 0xd8c4ff : 0xfff0ea, 0.25));
+    } else {
+      scene.add(new HemisphereLight(night ? 0xffe2c4 : 0xfff6e0, night ? 0x4a3050 : 0x8a7a6a, template.dark ? 1.05 : night ? 0.85 : 1.1));
+      scene.add(new AmbientLight(night ? 0xffd9b8 : 0xffffff, template.dark ? 0.5 : night ? 0.35 : 0.25));
+    }
+    const sun = dream
+      ? new DirectionalLight(night ? 0xffb8a0 : 0xffd2b0, template.dark ? 0.9 : night ? 1.0 : 1.5)
+      : new DirectionalLight(night ? 0xffd2a8 : 0xfff1d6, template.dark ? 0.9 : night ? 0.85 : 1.6);
     sun.position.set(4, 7, 5);
     sun.castShadow = true;
     sun.shadow.mapSize.set(1024, 1024);
     const half = Math.max(template.w, template.d);
     Object.assign(sun.shadow.camera, { left: -half, right: half, top: half, bottom: -half, near: 0.5, far: 25 });
     sun.shadow.bias = -0.0008;
+    if (dream) {
+      sun.position.set(5, 8, 2.5); // light the right-facing walls, leave the left ones in lavender shade
+      sun.shadow.intensity = 0.45;
+      sun.shadow.radius = 6;
+    }
     scene.add(sun);
     const glowLights: PointLight[] = [];
     if (template.dark) {
@@ -143,13 +162,13 @@ export default function Room3D(props: Room3DProps) {
 
     // Room shell: floor, two cutaway walls, trim and a window or sign.
     const room = new Group();
-    const floorTex = floorTexture(template, night);
+    const floorTex = floorTexture(template, night, dream);
     const floor = new Mesh(new PlaneGeometry(template.w, template.d), new MeshStandardMaterial({ map: floorTex, roughness: 0.85 }));
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     floor.userData.floor = true;
     room.add(floor);
-    const wallMat = kit.mat(template.wall, { roughness: 0.95 });
+    const wallMat = dream ? gradientWallMaterial(template, night) : kit.mat(template.wall, { roughness: 0.95 });
     const trimMat = kit.mat(template.wallAccent);
     const back = new Mesh(kit.geo(new BoxGeometry(template.w + 0.12, WALL_H, 0.12)), wallMat);
     back.position.set(-0.06, WALL_H / 2, -template.d / 2 - 0.06);
@@ -180,6 +199,21 @@ export default function Room3D(props: Room3DProps) {
       room.add(board);
     }
     scene.add(room);
+    // Dream mood: haze toward the sky color, and a few slow motes of light.
+    const motes: Mesh[] = [];
+    if (dream) {
+      scene.fog = new Fog(derivedBackdrop(template, daytime).haze, 32, 60);
+      const moteMat = new MeshStandardMaterial({ color: "#ffffff", emissive: night ? "#FFE6B0" : "#ffffff", emissiveIntensity: 0.9, transparent: true, opacity: 0.85 });
+      for (let i = 0; i < 9; i++) {
+        const m = new Mesh(kit.geo(new BoxGeometry(0.07, 0.07, 0.07)), moteMat);
+        const a = i * 2.39;
+        m.position.set(Math.cos(a) * (template.w * 0.45 + (i % 3) * 0.5), 1.2 + (i % 4) * 0.55, Math.sin(a) * (template.d * 0.45 + (i % 2) * 0.6));
+        m.rotation.set(i, i * 0.5, 0);
+        m.userData.baseY = m.position.y;
+        motes.push(m);
+        scene.add(m);
+      }
+    }
 
     const furniture = new Group();
     scene.add(furniture);
@@ -331,6 +365,7 @@ export default function Room3D(props: Room3DProps) {
       for (const n of npcs) stepActor(n, dt, t, reduceMotion);
       if (!reduceMotion) {
         for (const b of wld.built.values()) b.tick?.(t);
+        motes.forEach((m, i) => { m.position.y = m.userData.baseY + Math.sin(t * 0.6 + i) * 0.12; m.rotation.y = t * 0.4 + i; });
         glowLights.forEach((l, i) => { l.position.x = Math.sin(t * 0.7 + i * 2.1) * 2.6; l.position.z = Math.cos(t * 0.5 + i) * 2; });
       }
       // Ring: the tap target while walking, or the selected piece while arranging.
@@ -454,7 +489,7 @@ export default function Room3D(props: Room3DProps) {
       actionsRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template.id, daytime, sign]);
+  }, [template.id, daytime, sign, mood]);
 
   // ---- The player's avatar, re-dressed on Look or outfit changes ----
   const lookKey = JSON.stringify([look, outfit ?? null]);
@@ -469,7 +504,7 @@ export default function Room3D(props: Room3DProps) {
     w.me.parts = parts;
     w.me.mode = "idle";
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lookKey, template.id, daytime, sign]);
+  }, [lookKey, template.id, daytime, sign, mood]);
 
   // Furniture moved or room changed: rebuild placements next frame.
   useEffect(() => {
@@ -482,7 +517,7 @@ export default function Room3D(props: Room3DProps) {
   const tapChip = (it: RoomItem) => actionsRef.current?.goUse(it);
 
   return (
-    <div className="room3d layer" style={{ background: roomBackdrop(template, daytime) }}>
+    <div className="room3d layer" style={{ background: derivedBackdrop(template, daytime).css }}>
       <div ref={hostRef} className="layer" role="img" aria-label={label} />
       {failed && (
         <div className="layer" style={{ display: "grid", placeItems: "center", padding: 32, textAlign: "center" }}>
@@ -643,7 +678,7 @@ function canvas(w: number, h: number) {
   return [c, c.getContext("2d")!] as const;
 }
 
-function floorTexture(t: RoomTemplate, night: boolean): CanvasTexture {
+function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTexture {
   const px = 128;
   const [c, g] = canvas(px * t.w, px * t.d);
   const base = new Color(t.floor);
@@ -672,6 +707,15 @@ function floorTexture(t: RoomTemplate, night: boolean): CanvasTexture {
       g.fillStyle = `rgba(255,255,255,${Math.random() * 0.04})`;
       g.fillRect(Math.random() * c.width, Math.random() * c.height, 3, 3);
     }
+  }
+  if (dream) {
+    // A soft light pool toward the front-right corner, fading to a cooler back corner.
+    const gl = g.createLinearGradient(0, 0, c.width, c.height);
+    gl.addColorStop(0, night ? "rgba(90,74,154,0.28)" : "rgba(156,140,217,0.22)");
+    gl.addColorStop(0.55, "rgba(255,255,255,0)");
+    gl.addColorStop(1, night ? "rgba(255,184,160,0.18)" : "rgba(255,226,200,0.3)");
+    g.fillStyle = gl;
+    g.fillRect(0, 0, c.width, c.height);
   }
   const tex = new CanvasTexture(c);
   tex.colorSpace = SRGBColorSpace;
@@ -723,27 +767,46 @@ function signTexture(text: string, t: RoomTemplate): CanvasTexture {
   return tex;
 }
 
-/** The gradient behind each room (CSS, so it stays crisp and costs nothing to draw). */
-export function roomBackdrop(t: RoomTemplate, daytime: boolean): string {
-  const day = daytime && !t.dark;
-  const g: Record<string, [string, string]> = {
-    club: [
-      "radial-gradient(120% 70% at 85% 10%, rgba(255,175,123,.55), transparent 60%), linear-gradient(170deg, #3A1C71 0%, #8E2DE2 45%, #D76D77 80%, #FFAF7B 115%)",
-      "radial-gradient(120% 70% at 85% 10%, rgba(255,175,123,.55), transparent 60%), linear-gradient(170deg, #3A1C71 0%, #8E2DE2 45%, #D76D77 80%, #FFAF7B 115%)",
-    ],
-    cafe: [
-      "radial-gradient(90% 60% at 20% 0%, rgba(255,255,255,.65), transparent 60%), linear-gradient(165deg, #FFF1D6 0%, #FFD3A5 50%, #FDA085 100%)",
-      "radial-gradient(90% 60% at 80% 0%, rgba(248,177,149,.45), transparent 60%), linear-gradient(165deg, #2C2350 0%, #6C5B7B 45%, #C06C84 80%, #F8B195 115%)",
-    ],
-    counter: [
-      "radial-gradient(90% 60% at 80% 0%, rgba(255,255,255,.6), transparent 60%), linear-gradient(165deg, #E8FCC2 0%, #B5EBC2 50%, #7FD6C2 100%)",
-      "radial-gradient(90% 60% at 20% 0%, rgba(150,230,161,.35), transparent 60%), linear-gradient(165deg, #12233D 0%, #1F4E5F 50%, #2E8B63 90%, #96E6A1 125%)",
-    ],
-    home: [
-      "radial-gradient(100% 60% at 85% 5%, rgba(255,255,255,.55), transparent 60%), linear-gradient(160deg, #FFE1C7 0%, #F9B9D4 50%, #B8B5F6 100%)",
-      "radial-gradient(100% 60% at 15% 0%, rgba(224,69,123,.35), transparent 60%), linear-gradient(160deg, #1B1640 0%, #3D2A6E 50%, #8E3F87 90%, #E0457B 125%)",
-    ],
+/** Walls that fade from a lighter, sky-tinted top to a warmer base (dream mood). */
+function gradientWallMaterial(t: RoomTemplate, night: boolean): MeshStandardMaterial {
+  const [c, g] = canvas(4, 256);
+  const base = new Color(t.wall);
+  const top = base.clone().lerp(new Color(night ? "#E6D8FF" : "#FFFFFF"), night ? 0.15 : 0.35);
+  // Shade toward the room's own accent so natural colors stay natural.
+  const bottom = base.clone().lerp(new Color(t.wallAccent), night ? 0.3 : 0.2).lerp(new Color(night ? "#3A2C5E" : "#ffffff"), night ? 0.15 : 0);
+  const grad = g.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, top.getStyle());
+  grad.addColorStop(1, bottom.getStyle());
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 4, 256);
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  return new MeshStandardMaterial({ map: tex, roughness: 0.95, flatShading: true });
+}
+
+/**
+ * The gradient behind a room, derived from the room's own interior colors (its
+ * walls, accent and floor), so each place's sky is an offshoot of its inside.
+ */
+export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: string; haze: string } {
+  const night = !daytime || !!t.dark;
+  const hsl = (hex: string) => { const o = { h: 0, s: 0, l: 0 }; new Color(hex).getHSL(o, SRGBColorSpace); return o; };
+  const wall = hsl(t.wall);
+  const accent = hsl(t.wallAccent);
+  // Hue drifts from the walls (top) toward the accent (bottom), with saturation lifted
+  // to a pastel so even beige rooms get a warm, delightful sky.
+  const mix = (a: number, b: number, k: number) => { let d = b - a; if (d > 0.5) d -= 1; if (d < -0.5) d += 1; return (a + d * k + 1) % 1; };
+  const sat = (x: number, min: number) => Math.min(0.85, Math.max(min, x * 1.4));
+  const stop = (h: number, s: number, l: number) => new Color().setHSL(h, s, l, SRGBColorSpace).getStyle(SRGBColorSpace);
+  const hTop = mix(wall.h, accent.h, 0.1);
+  const hMid = mix(wall.h, accent.h, 0.5);
+  const hBot = mix(accent.h, (accent.h + 0.94) % 1, 0.5); // a touch cooler at the base, like dusk
+  const top = night ? stop(hTop, sat(wall.s, 0.4), 0.2) : stop(hTop, sat(wall.s, 0.55), 0.9);
+  const mid = night ? stop(hMid, sat(accent.s, 0.45), 0.32) : stop(hMid, sat(accent.s, 0.5), 0.8);
+  const bot = night ? stop(hBot, sat(accent.s, 0.45), 0.42) : stop(hBot, sat(accent.s, 0.45), 0.7);
+  const glow = night ? `hsla(${Math.round(accent.h * 360)},80%,70%,.45)` : `hsla(${Math.round(hTop * 360)},90%,96%,.75)`;
+  return {
+    css: `radial-gradient(85% 45% at 72% 16%, ${glow}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 52%, ${bot} 100%)`,
+    haze: mid,
   };
-  const key = t.id in g ? t.id : "home";
-  return g[key][day ? 0 : 1];
 }
