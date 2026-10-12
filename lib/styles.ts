@@ -15,7 +15,6 @@ export type StyleId =
 export type TopKind = "puffer" | "cardigan" | "vest" | "hoodie" | "crop" | "zip" | "blazer" | "tee";
 export type BottomKind = "pants" | "skirt" | "shorts" | "leggings";
 export type AccessoryKind = "cap" | "tote" | "lanyard" | "choker" | "mat" | "headphones" | "phone" | "none";
-export type HairKind = "short" | "long" | "bun" | "braids" | "curly";
 
 export interface Outfit {
   top: TopKind;
@@ -35,9 +34,6 @@ export interface StartingStyle {
   blurb: string;
   starterItems: string[];
   outfit: Outfit;
-  /** Default hair for the preview; players can change hair freely later. */
-  hair: HairKind;
-  hairColor: string;
 }
 
 export const STARTING_STYLES: StartingStyle[] = [
@@ -52,7 +48,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA",
       accessory: "cap", accessoryColor: "#1F1B26",
     },
-    hair: "short", hairColor: "#1B1410",
   },
   {
     id: "thrift_store_icon",
@@ -65,7 +60,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#4C6A92", shoeColor: "#3A2418",
       accessory: "tote", accessoryColor: "#E9DFC9",
     },
-    hair: "curly", hairColor: "#5A3420",
   },
   {
     id: "midtown_finance",
@@ -78,7 +72,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#C2AE86", shoeColor: "#5A3420",
       accessory: "none", accessoryColor: "#000000",
     },
-    hair: "short", hairColor: "#6B4A2E",
   },
   {
     id: "night_owl_goth",
@@ -91,7 +84,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "skirt", bottomColor: "#14111A", shoeColor: "#0E0C12",
       accessory: "choker", accessoryColor: "#C9C3CF",
     },
-    hair: "long", hairColor: "#0E0C12",
   },
   {
     id: "pilates_princess",
@@ -104,7 +96,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "leggings", bottomColor: "#E9A3B6", shoeColor: "#FFFFFF",
       accessory: "mat", accessoryColor: "#9FD8C4",
     },
-    hair: "bun", hairColor: "#B88A4A",
   },
   {
     id: "startup_founder",
@@ -117,7 +108,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#1F1B26", shoeColor: "#ECE6DC",
       accessory: "lanyard", accessoryColor: "#40B589",
     },
-    hair: "short", hairColor: "#2A1C14",
   },
   {
     id: "influencer_soft_glam",
@@ -130,7 +120,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "skirt", bottomColor: "#C9A98A", shoeColor: "#6E5240",
       accessory: "phone", accessoryColor: "#FFB3D1",
     },
-    hair: "long", hairColor: "#8A5A34",
   },
   {
     id: "arcade_nerd",
@@ -143,7 +132,6 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "shorts", bottomColor: "#4F5A3A", shoeColor: "#D93A2F",
       accessory: "headphones", accessoryColor: "#14111A",
     },
-    hair: "braids", hairColor: "#1B1410",
   },
 ];
 
@@ -155,20 +143,4 @@ export function getStyle(id: string | null | undefined): StartingStyle {
 
 export function isStyleId(id: unknown): id is StyleId {
   return typeof id === "string" && (STYLE_IDS as string[]).includes(id);
-}
-
-/** Skin tones for the Look step: a free choice for every style. */
-export const SKIN_TONES = [
-  "#FFDFC4", "#F0C8A0", "#E0AC69", "#C68642", "#A0673C", "#8D5524", "#6B3E1F", "#4A2A16",
-] as const;
-
-export interface Look {
-  style: StyleId;
-  skin: string;
-}
-
-export const DEFAULT_LOOK: Look = { style: "bodega_drip", skin: SKIN_TONES[3] };
-
-export function isSkinTone(value: unknown): value is string {
-  return typeof value === "string" && (SKIN_TONES as readonly string[]).includes(value);
 }

@@ -3,7 +3,8 @@
 import { cookies } from "next/headers";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
-import { isSkinTone, isStyleId } from "@/lib/styles";
+import { isValidLook, normalizeLook, lookChoices } from "@/lib/look";
+import { isStyleId } from "@/lib/styles";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { cleanName, nameError } from "@/lib/validation";
 
@@ -12,7 +13,7 @@ export type CreateResult = { ok: true } | { ok: false; error: string; field?: "n
 export async function createPlayer(input: {
   name: string;
   style: string;
-  skin: string;
+  look: unknown;
   ageConfirmed?: boolean;
 }): Promise<CreateResult> {
   const supabase = await getServerSupabase();
@@ -25,7 +26,7 @@ export async function createPlayer(input: {
   const problem = nameError(input.name);
   if (problem) return { ok: false, error: problem, field: "name" };
   if (!isStyleId(input.style)) return { ok: false, error: "Pick a starting style." };
-  if (!isSkinTone(input.skin)) return { ok: false, error: "Pick a skin tone." };
+  if (!isValidLook(input.look, input.style)) return { ok: false, error: "Something's off with your look. Try picking again." };
 
   const meta = user.user_metadata ?? {};
   const ageConfirmed = meta.age_confirmed === true || input.ageConfirmed === true;
@@ -39,7 +40,7 @@ export async function createPlayer(input: {
   const { error } = await supabase.rpc("create_player", {
     p_display_name: cleanName(input.name),
     p_starting_style: input.style,
-    p_look: { skin: input.skin },
+    p_look: lookChoices(normalizeLook(input.look, input.style)),
     p_invite_code: invite,
     p_age_confirmed: true,
   });

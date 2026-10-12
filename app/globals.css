@@ -101,14 +101,6 @@ a { color:inherit; }
 .tagline-bar::before,.tagline-bar::after { content:""; position:absolute; top:0; bottom:0; width:6px; background:var(--g-hazard); }
 .tagline-bar::before { left:0; } .tagline-bar::after { right:0; }
 
-.wordmark {
-  font-family:var(--font-display); font-size:40px; line-height:40px; letter-spacing:.01em;
-  background:var(--g-gold); -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:drop-shadow(0 2px 0 #7E5932) drop-shadow(0 6px 16px rgba(0,0,0,.5));
-}
-.wordmark small { display:inline-block; margin-left:6px; padding:2px 6px; font-size:14px; line-height:16px; vertical-align:middle;
-  background:var(--night-900); color:var(--gold-300); -webkit-text-fill-color:var(--gold-300); border:1.5px solid rgba(255,246,224,.14); border-radius:6px; }
-
 /* ---------- Buttons (C8) ---------- */
 .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:52px; padding:0 20px; border-radius:var(--r-md);
   font-size:17px; font-weight:600; transition:transform .1s ease-out, filter .1s ease-out; user-select:none; width:100%; }
@@ -138,7 +130,7 @@ a { color:inherit; }
 .tag { display:inline-flex; align-items:center; height:24px; padding:4px 10px; border-radius:var(--r-pill);
   font-family:var(--font-label); font-weight:700; font-size:14px; line-height:16px; text-transform:uppercase; letter-spacing:.04em; }
 .tag-neutral { background:var(--chip-off); color:var(--text-1); }
-.tag-positive { background:var(--green-tint); color:var(--green-text); }
+.tag-positive { background:var(--green-tint); color:#1F6B4A; }
 .tag-event { background:var(--neon-tint); color:var(--neon-text); }
 .pin-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; border-radius:50%; background:var(--neon-600); box-shadow:0 0 0 2px rgba(20,17,26,.6); }
 .badge-new { display:inline-flex; align-items:center; height:16px; padding:0 6px; border-radius:var(--r-pill); background:var(--neon-600); color:#fff; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
@@ -278,3 +270,14 @@ a { color:inherit; }
 .legal h2 { font-size:16px; line-height:22px; margin-top:28px; }
 .legal p, .legal li { font-size:15px; line-height:22px; color:var(--text-2); }
 .legal .draft { border-left:6px solid; border-image:var(--g-hazard) 1; background:var(--taxi-tint); padding:12px 14px; border-radius:0 12px 12px 0; color:var(--text-1); font-size:14px; }
+
+/* ---------- Creator (C9 binary pills, C10 option chips, C14 step progress) ---------- */
+.step-progress { display:flex; justify-content:center; gap:6px; margin-top:6px; }
+.step-progress span { width:24px; height:5px; border-radius:var(--r-pill); background:rgba(255,246,224,.22); }
+.step-progress span.on { background:var(--taxi-400); }
+.binary { display:flex; gap:8px; }
+.binary button { flex:1; height:40px; border-radius:var(--r-pill); background:var(--chip-off); color:var(--text-1); font-size:15px; font-weight:600; transition:background .2s ease-out, color .2s ease-out; }
+.binary button[aria-pressed="true"] { background:var(--night-900); color:#fff; }
+.option-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.option-chips .chip { height:34px; padding:0 12px; }
+.creator-label { margin:0; font-size:13px; line-height:18px; font-weight:600; color:var(--text-2); }

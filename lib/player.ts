@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getServerSupabase } from "./supabase/server";
-import type { Look, StyleId } from "./styles";
+import type { StyleId } from "./styles";
 
 export interface Player {
   id: string;
   display_name: string;
   starting_style: StyleId;
-  look: Partial<Look>;
+  /** Free Look choices; read through normalizeLook(). */
+  look: Record<string, unknown>;
   invite_code: string;
   onboarding_step: string;
   created_at: string;

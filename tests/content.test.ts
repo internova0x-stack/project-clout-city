@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { STARTING_STYLES, SKIN_TONES } from "../lib/styles.ts";
+import { STARTING_STYLES } from "../lib/styles.ts";
+import { SKIN_TONES } from "../lib/look.ts";
 import { WAVE_1_PINS } from "../lib/places.ts";
 
 test("exactly the eight starting styles from the spec", () => {

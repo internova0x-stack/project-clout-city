@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import { useCallback, useRef, useState } from "react";
 import type { CliqueMember, Player } from "@/lib/player";
 import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { DEFAULT_LOOK, getStyle, isSkinTone, type Look } from "@/lib/styles";
+import { normalizeLook } from "@/lib/look";
+import { getStyle } from "@/lib/styles";
 import { ApartmentBackdrop } from "./ApartmentBackdrop";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
@@ -35,10 +36,7 @@ export function GameShell({
   const [invitePin, setInvitePin] = useState(firstVisit);
   const mapRef = useRef<MapApi>(null);
 
-  const look: Look = {
-    style: player.starting_style ?? DEFAULT_LOOK.style,
-    skin: isSkinTone(player.look?.skin) ? player.look.skin! : DEFAULT_LOOK.skin,
-  };
+  const look = normalizeLook(player.look, player.starting_style);
   const style = getStyle(look.style);
 
   const onAction = useCallback((a: ChromeAction) => {

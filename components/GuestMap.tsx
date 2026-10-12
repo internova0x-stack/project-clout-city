@@ -28,10 +28,14 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
             borderRadius: "var(--r-lg)", padding: 16, textAlign: "center", boxShadow: "var(--elev-2)", animation: "rise-in .4s ease-out",
           }}
         >
-          <div className="wordmark" style={{ fontSize: 30, lineHeight: "32px" }}>
-            CLOUT CITY<small>NYC</small>
-          </div>
-          <div className="tagline-bar" style={{ marginTop: 10 }}>Tap in. Blow up.</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/clout-city-logo-dark.png"
+            alt="Clout City NYC: Tap in. Blow up."
+            width={649}
+            height={318}
+            style={{ width: 220, height: "auto", display: "block", margin: "0 auto" }}
+          />
           <p className="subtext" style={{ color: "rgba(255,246,224,.8)", margin: "10px 0 12px" }}>
             {authError
               ? "That sign-in link expired or was already used. Grab a fresh one."

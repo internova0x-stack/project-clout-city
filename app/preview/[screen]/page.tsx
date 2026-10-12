@@ -10,7 +10,7 @@ const SAMPLE: Player = {
   id: "00000000-0000-0000-0000-000000000000",
   display_name: "Big Sal",
   starting_style: "arcade_nerd",
-  look: { skin: "#C68642" },
+  look: { body: "curvy", skin: "#8D5524", hair: "braids", hairColor: "#14100E", eyes: "#3B2314", glasses: "round", covering: "none" },
   invite_code: "Q7MZ4K",
   onboarding_step: "look_done",
   created_at: new Date(0).toISOString(),

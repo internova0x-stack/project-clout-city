@@ -5,7 +5,8 @@ import {
   ACESFilmicToneMapping, DirectionalLight, HemisphereLight, PerspectiveCamera, PointLight, SRGBColorSpace,
   Scene, SpotLight, WebGLRenderer,
 } from "three";
-import { getStyle, type Look } from "@/lib/styles";
+import type { Look } from "@/lib/look";
+import { getStyle } from "@/lib/styles";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 
 /**
@@ -48,10 +49,10 @@ export default function Avatar3D({
     const scene = new Scene();
     const camera = new PerspectiveCamera(framing === "room" ? 28 : 30, 1, 0.1, 50);
     if (framing === "room") {
-      camera.position.set(0, 1.3, 7.6);
-      camera.lookAt(0, 1.3, 0);
+      camera.position.set(0, 1.05, 5.0);
+      camera.lookAt(0, 1.05, 0);
     } else {
-      camera.position.set(0, 1.35, 6.6);
+      camera.position.set(0, 1.2, 4.9);
       camera.lookAt(0, 1.08, 0);
     }
 
@@ -99,10 +100,10 @@ export default function Avatar3D({
       const parts = s?.parts;
       if (parts && s) {
         if (!reduceMotion) {
-          parts.torso.scale.y = 1 + Math.sin(t * 2.1) * 0.018;
+          parts.torso.scale.y = 1 + Math.sin(t * 2.1) * 0.008;
           parts.body.position.y = Math.sin(t * 2.1) * 0.008;
           if (t > nextBlink) { blinkUntil = t + 0.12; nextBlink = t + 2.5 + Math.random() * 3; }
-          const eyeY = t < blinkUntil ? 0.12 : 1.2;
+          const eyeY = t < blinkUntil ? 0.1 : 1;
           for (const eye of parts.eyes) eye.scale.y = eyeY;
           if (t > nextTurn) { turnTarget = turnTarget === 0 ? (Math.random() < 0.5 ? -0.32 : 0.32) : 0; nextTurn = t + 2 + Math.random() * 3; }
           parts.head.rotation.y += (turnTarget - parts.head.rotation.y) * 0.04;
@@ -143,7 +144,7 @@ export default function Avatar3D({
     }
     s.scene.add(parts.root);
     s.parts = parts;
-  }, [look.style, look.skin, framing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [look.style, look.body, look.skin, look.hair, look.hairColor, look.eyes, look.glasses, look.covering, framing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Drag to spin ----
   const dragX = useRef<number | null>(null);
