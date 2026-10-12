@@ -198,14 +198,14 @@ export function GameShell({
             <Avatar3D look={look} framing="room" label={`${me.display_name}, wearing ${style.label}`} />
           </div>
           <button
-            className="glass-dark profile-chip"
+            className="glass-hud profile-chip"
             onClick={() => setPanel("profile")}
             aria-label="Your profile"
           >
             <span className="lb-avatar" style={{ border: "2px solid var(--taxi-400)", background: "var(--night-700)" }}>{style.emoji}</span>
             <span style={{ textAlign: "left", minWidth: 0 }}>
               <span className="display-sm" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{me.display_name}</span>
-              <span className="meta" style={{ display: "block", color: "rgba(255,246,224,.6)" }}>
+              <span className="meta" style={{ display: "block" }}>
                 {style.label} · {ECONOMY.homes.find((h) => h.id === me.home_id)?.neighborhood ?? "Queens"}
               </span>
             </span>
@@ -222,7 +222,7 @@ export function GameShell({
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}
           />
-          <button className="icon-round dark map-locate" onClick={() => mapRef.current?.locatePlayer()} aria-label="Go to my location">
+          <button className="icon-round map-locate glass-hud" onClick={() => mapRef.current?.locatePlayer()} aria-label="Go to my location">
             <LocateIcon size={20} />
           </button>
         </>

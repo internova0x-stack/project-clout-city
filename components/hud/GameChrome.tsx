@@ -51,7 +51,7 @@ export function GameChrome({
 
   return (
     <>
-      <header className="hud glass-dark" aria-label="Status bar">
+      <header className="hud glass-hud" aria-label="Status bar">
         <div className="hud-cluster">
           <span className="hud-time" aria-label="City time">{time || " "}</span>
           <button className="hud-btn" onClick={() => onAction("daily")} aria-label="Daily tasks">
@@ -83,18 +83,18 @@ export function GameChrome({
       </header>
 
       <div className="under-hud">
-        <button className="pill-glass glass-dark" style={{ position: "relative" }} onClick={() => onAction("invite")}>
+        <button className="pill-glass glass-hud" style={{ position: "relative" }} onClick={() => onAction("invite")}>
           Invite your Clique
           {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
         </button>
         {values?.online != null && values.online >= ECONOMY.playersOnlineThreshold && (
-          <span className="pill-status glass-dark" role="status">
+          <span className="pill-status glass-hud" role="status">
             <span className="dot-green" aria-hidden="true" /> {values.online.toLocaleString()} {values.online === 1 ? "person" : "people"} online
           </span>
         )}
       </div>
 
-      <nav className="side-col glass-dark" aria-label="Quick actions">
+      <nav className="side-col glass-hud" aria-label="Quick actions">
         <button className="side-btn" onClick={() => onAction("tasks")} aria-label="Tasks and goals"><ChecklistIcon /></button>
         <button className="side-btn" data-tour="events" onClick={() => onAction("events")} aria-label="Events">
           <ChampagneIcon />
@@ -105,7 +105,7 @@ export function GameChrome({
         <button className="side-btn" onClick={() => onAction("look")} aria-label="Your look"><PersonIcon /></button>
       </nav>
 
-      <section className={`stats glass-dark${statsOpen ? "" : " collapsed"}`} aria-label="Energy, mood and confidence">
+      <section className={`stats glass-hud${statsOpen ? "" : " collapsed"}`} aria-label="Energy, mood and confidence">
         {statsOpen ? (
           <>
             <button className="stats-toggle" onClick={() => setStatsOpen(false)} aria-label="Collapse stats">
@@ -136,7 +136,7 @@ export function GameChrome({
         )}
       </section>
 
-      <nav className="nav glass-dark" aria-label="Main">
+      <nav className="nav glass-hud" aria-label="Main">
         <button className="nav-tab" aria-current={tab === "home" ? "page" : undefined} onClick={() => onAction("tab:home")}>
           <HouseIcon /> Home
         </button>

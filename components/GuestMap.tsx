@@ -84,7 +84,7 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
       />
 
       <div className="guest-top">
-        <header className="guest-bar glass-dark">
+        <header className="guest-bar glass-hud">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/clout-city-logo-dark-simple.png" alt="Clout City NYC" width={649} height={299} className="guest-logo" />
           <span className="spacer" />
@@ -93,17 +93,17 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
         </header>
 
         <div className="guest-pills" aria-label="Queens right now">
-          <span className="pill-status glass-dark">📍 {GUEST_START.label} · {GUEST_START.tagline}</span>
-          {time && <span className="pill-status glass-dark">{daytime ? "☀️" : "🌙"} {time} · {daytime ? "day" : "night"} in Queens</span>}
+          <span className="pill-status glass-hud">📍 {GUEST_START.label} · {GUEST_START.tagline}</span>
+          {time && <span className="pill-status glass-hud">{daytime ? "☀️" : "🌙"} {time} · {daytime ? "day" : "night"} in Queens</span>}
           {residents !== null && residents > 0 && (
-            <span className="pill-status glass-dark"><span className="dot-green" aria-hidden="true" /> {residents.toLocaleString()} {residents === 1 ? "resident" : "residents"} in Queens</span>
+            <span className="pill-status glass-hud"><span className="dot-green" aria-hidden="true" /> {residents.toLocaleString()} {residents === 1 ? "resident" : "residents"} in Queens</span>
           )}
-          <span className="pill-status glass-dark">🗺️ {WAVE_1_PINS.length} spots on the map</span>
+          <span className="pill-status glass-hud">🗺️ {WAVE_1_PINS.length} spots on the map</span>
         </div>
 
         <div className="chip-row guest-chips" role="group" aria-label="Filter the map">
           {FILTERS.map((f) => (
-            <button key={f.id} className="chip chip-map glass-dark" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+            <button key={f.id} className="chip chip-map glass-hud" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
               {f.label}
             </button>
           ))}
@@ -112,19 +112,19 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
 
       <div className="guest-bottom">
         {arrival && (
-          <div className="ticker glass-dark" role="status" aria-live="polite">
+          <div className="ticker glass-hud" role="status" aria-live="polite">
             <span className="badge-live">Live</span>
             <span className="ticker-text" key={tick}>📍 <strong>@{arrival.display_name}</strong> just moved to Queens</span>
             <span className="meta ticker-time">{timeAgo(arrival.arrived_at)}</span>
           </div>
         )}
-        <section className="guest-card glass-dark" aria-label="Join Clout City">
+        <section className="guest-card glass-hud" aria-label="Join Clout City">
           <p className="body-strong" style={{ margin: 0 }}>
             Become the main character.{" "}
-            <span style={{ fontWeight: 400, color: "rgba(255,246,224,.65)" }}>Free in your browser.</span>
+            <span style={{ fontWeight: 400, color: "var(--text-3)" }}>Free in your browser.</span>
           </p>
           {(authError || invited) && (
-            <p className="subtext" style={{ margin: "6px 0 0", color: authError ? "#FFB4A9" : "rgba(255,246,224,.8)" }}>
+            <p className="subtext" style={{ margin: "6px 0 0", color: authError ? "var(--red-text)" : "var(--text-2)" }}>
               {authError ? "That sign-in link expired or was already used. Grab a fresh one." : "A friend saved you a spot. Claim your name before the city opens."}
             </p>
           )}

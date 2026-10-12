@@ -377,3 +377,47 @@ a { color:inherit; }
 .or-divider { display:flex; align-items:center; gap:10px; color:var(--text-3); font-size:12px; }
 .or-divider::before, .or-divider::after { content:""; flex:1; height:1px; background:var(--divider); }
 .select-card.single[aria-checked="true"] { padding-top:36px; }
+
+/* ---------- Frosted HUD (Oct 12, 2026): near-white translucent glass, like iOS ----------
+   In-world chrome (HUD, nav, side column, stats, pills, map pins, guest screen) uses light
+   frosted glass with dark text, after the Lagos Life reference. Dark glass stays for the
+   avatar stage and reveal cards. */
+:root { --glass-hud:rgba(255,255,255,.74); --glass-hud-border:1px solid rgba(255,255,255,.7); --hud-shadow:0 4px 18px rgba(16,12,24,.14); }
+.glass-hud { background:var(--glass-hud); border:var(--glass-hud-border); color:var(--text-1);
+  -webkit-backdrop-filter:blur(24px) saturate(1.8); backdrop-filter:blur(24px) saturate(1.8); box-shadow:var(--hud-shadow); }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .glass-hud { background:rgba(255,255,255,.94); } }
+.no-blur .glass-hud { -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.94); }
+
+.hud.glass-hud .hud-icon-btn > span.circle { background:rgba(23,20,28,.06); }
+.hud.glass-hud .hud-clout { color:var(--taxi-500); }
+.hud.glass-hud .hud-clout .hud-number { color:var(--text-1); }
+.hud.glass-hud .pin-dot, .glass-hud .pin-dot { box-shadow:0 0 0 2px #fff; }
+.pill-glass.glass-hud, .pill-status.glass-hud { color:var(--text-1); }
+.side-col.glass-hud .side-btn { color:var(--text-1); }
+.side-col.glass-hud .side-btn:active { background:rgba(23,20,28,.06); }
+.stats.glass-hud .stat-row .label { color:var(--text-1); }
+.stats.glass-hud .stat-track { background:rgba(23,20,28,.1); }
+.stats.glass-hud .stats-toggle { color:var(--text-2); }
+.nav.glass-hud .nav-tab { color:var(--text-2); }
+.nav.glass-hud .nav-tab[aria-current="page"] { background:var(--night-900); color:#fff; box-shadow:0 4px 14px rgba(20,17,26,.3); }
+.map-pin-pill.glass-hud { color:var(--text-1); }
+.map-pin .map-pin-stem { background:rgba(23,20,28,.55); }
+.map-pin .map-pin-dot { background:#fff; box-shadow:0 0 0 2px rgba(23,20,28,.5); }
+.map-lock.glass-hud { color:var(--text-1); }
+.map-lock.glass-hud .meta { color:var(--text-3); }
+.chip.chip-map.glass-hud { background:var(--glass-hud); color:var(--text-1); }
+.chip.chip-map.glass-hud[aria-pressed="true"] { background:var(--night-900); color:#fff; border-color:var(--night-900); }
+.guest-card.glass-hud { color:var(--text-1); }
+.guest-card.glass-hud .guest-foot { color:var(--text-3); }
+.glass-hud .btn.guest-login, .guest-card.glass-hud .btn.on-dark-secondary { background:#fff; border:1px solid #E2DBD0; color:var(--night-900); }
+.ticker.glass-hud .ticker-time { color:var(--text-3); }
+.profile-chip.glass-hud .display-sm { color:var(--text-1); }
+
+/* ---------- Primary action color (Oct 12, 2026): Apple Music red ----------
+   The loud button is now a red-pink gradient after the Apple Music icon, with a white
+   label (the darker bottom keeps it near 4.5:1). Taxi yellow stays for clout and accents. */
+:root { --primary-top:#FA2D48; --primary-bottom:#D41834; --primary:#E8203A; --primary-glow:rgba(250,45,72,.35); }
+.btn-taxi { background:linear-gradient(180deg, var(--primary-top), var(--primary-bottom)); color:#fff; text-shadow:0 1px 1px rgba(120,0,20,.25);
+  box-shadow:var(--elev-3), 0 6px 16px var(--primary-glow); }
+.btn-taxi:disabled { background:linear-gradient(180deg, rgba(250,45,72,.4), rgba(212,24,52,.4)); color:rgba(255,255,255,.75); text-shadow:none; box-shadow:none; }
+.step-progress span.on { background:var(--primary-top); }

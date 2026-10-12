@@ -2,7 +2,12 @@
 
 Oct 11, 2026 · @Internovatechnologies
 
-This is the clean builder spec for Clout City's UI: give this version to Claude Code. It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
+This is the clean builder spec for Clout City's UI: give this version to Claude Code.
+
+> **Updates (Oct 12, 2026), decided by the product owner; these win over the sections below:**
+> 1. **Primary button color:** the one loud button uses an Apple Music red gradient (#FA2D48 to #D41834) with a white label, instead of taxi yellow. Taxi yellow remains the clout color and an accent.
+> 2. **In-world chrome:** the HUD, nav bar, side column, stats panel, pills, map pins and guest screen use near-white frosted glass with dark text (iOS-style, after the Lagos Life reference) instead of dark glass. The active nav tab is a night-900 pill with white text. Dark glass remains for the avatar stage and reveal cards.
+> 3. **Avatars:** low-poly, flat-shaded figures with natural proportions (head about a sixth of the height), after the Lagos Life reference, instead of the chibi style in section 11. It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
 
 Sizes were converted from 499 px reference screenshots to iPhone points (1 pt ≈ 1.28 px, 390 pt viewport); treat them as ±2 pt.
 

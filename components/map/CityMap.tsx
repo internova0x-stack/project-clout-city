@@ -186,7 +186,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             return (
               <button
                 key={b.id}
-                className="map-lock glass-dark"
+                className="map-lock glass-hud"
                 style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -50%)` }}
                 onClick={() => onLockedTap?.(b.name)}
                 aria-label={`${b.name}: Locked, coming soon`}
@@ -224,7 +224,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 onClick={() => onPinTap?.(pin)}
                 aria-label={`${pin.name}, ${pin.neighborhood}`}
               >
-                <span className="map-pin-pill glass-dark">
+                <span className="map-pin-pill glass-hud">
                   <span className={`map-pin-tile tile-${pin.category}`} aria-hidden="true">{pin.emoji}</span>
                   <span className="name">{pin.name}</span>
                 </span>

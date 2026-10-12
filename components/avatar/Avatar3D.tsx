@@ -52,8 +52,8 @@ export default function Avatar3D({
       camera.position.set(0, 1.05, 5.0);
       camera.lookAt(0, 1.05, 0);
     } else {
-      camera.position.set(0, 1.2, 4.9);
-      camera.lookAt(0, 1.08, 0);
+      camera.position.set(0, 1.15, 4.4);
+      camera.lookAt(0, 1.0, 0);
     }
 
     scene.add(new HemisphereLight(0xfff6e0, 0x2e2236, 1.15));
