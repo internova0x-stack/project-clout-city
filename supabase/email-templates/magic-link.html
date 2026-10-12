@@ -1,0 +1,18 @@
+<!-- Supabase: Authentication -> Email Templates -> "Magic Link" (and "Confirm signup").
+     Subject: Your Clout City sign-in link -->
+<div style="background:#14111A;padding:32px 20px;font-family:Inter,Arial,sans-serif;color:#FFF6E0;text-align:center">
+  <p style="font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#E1BC85;margin:0 0 8px">Clout City NYC</p>
+  <h1 style="font-size:24px;margin:0 0 12px;color:#FFF6E0">Tap in.</h1>
+  <p style="font-size:15px;line-height:21px;margin:0 0 24px;color:#FFF6E0">
+    Queens is waiting. Tap the button to sign in. No password, no velvet rope.
+  </p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email"
+     style="display:inline-block;background:#FFC21A;color:#14111A;font-weight:600;font-size:17px;padding:14px 28px;border-radius:16px;text-decoration:none">
+    Sign in to Clout City
+  </a>
+  <p style="font-size:13px;line-height:18px;margin:24px 0 4px;color:rgba(255,246,224,.7)">Or type this code in the game:</p>
+  <p style="font-size:28px;letter-spacing:6px;font-weight:700;margin:0;color:#FFC21A">{{ .Token }}</p>
+  <p style="font-size:12px;line-height:16px;margin:24px 0 0;color:rgba(255,246,224,.6)">
+    Didn't ask for this? Ignore it and nothing happens.
+  </p>
+</div>
