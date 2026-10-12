@@ -18,6 +18,7 @@ import { activeGig, dueBills, equippedItems, gigReady, tasksDone, type CityApi, 
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
+import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
@@ -81,6 +82,8 @@ export function GameShell({
   cityApi,
   story: initialStory = null,
   storyApi,
+  catalog: initialCatalog = null,
+  storeApi,
   roomMood = "dream",
 }: {
   player: Player;
@@ -92,6 +95,9 @@ export function GameShell({
   /** v0.4 story feed (World State); null until migration 0007 is applied (the News app then says "soon"). */
   story?: StoryFeed | null;
   storyApi?: StoryApi;
+  /** v0.5 real-money products (migration 0008); without it the Unlock button says purchases aren't open. */
+  catalog?: StoreProduct[] | null;
+  storeApi?: StoreApi;
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
   roomMood?: "natural" | "dream";
   /** Development previews only: pin the map to day or night. */
@@ -126,6 +132,9 @@ export function GameShell({
   const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null }>({ open: false, app: null });
   const [feed, setFeed] = useState<StoryFeed | null>(initialStory);
   const [dismissed, setDismissed] = useState<string[]>([]);
+  const [catalog, setCatalog] = useState<StoreProduct[] | null>(initialCatalog);
+  /** A side story paid for at Stripe, waiting for the webhook to unlock it. */
+  const [unlocking, setUnlocking] = useState<string | null>(null);
   const gameNow = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
 
   const look = normalizeLook(me.look, me.starting_style);
@@ -221,6 +230,53 @@ export function GameShell({
     setPhone({ open: true, app: "news", beat: beat ?? null });
   };
 
+  useEffect(() => {
+    if (storeApi && !initialCatalog) void storeApi.catalog().then((c) => c && setCatalog(c));
+  }, [storeApi, initialCatalog]);
+  // Back from Stripe Checkout: only the webhook unlocks, so show "unlocking" and check until it lands.
+  useEffect(() => {
+    const back = readReturn(window.location.search);
+    if (!back) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("purchase");
+    url.searchParams.delete("sku");
+    window.history.replaceState(null, "", url.toString());
+    if (back.state === "cancelled") return setToast("Checkout cancelled. Nothing was charged.");
+    setUnlocking(back.sku);
+    openNews(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!unlocking || !storeApi || !storyApi) return;
+    const started = Date.now();
+    let stop = false;
+    const check = async () => {
+      const [c, f] = await Promise.all([storeApi.catalog(), storyApi.refresh(offset)]);
+      if (stop) return;
+      if (c) setCatalog(c);
+      if (f.ok) setFeed(f.feed);
+      const p = c?.find((x) => x.sku === unlocking);
+      if (p?.owned) {
+        setUnlocking(null);
+        setToast(`🔓 Unlocked: ${p.name}`);
+      } else if (Date.now() - started > 90_000) {
+        setUnlocking(null);
+        setToast("Payment received. Unlocking can take a minute; it will appear on its own.");
+      }
+    };
+    void check();
+    const t = setInterval(() => void check(), 2500);
+    return () => { stop = true; clearInterval(t); };
+  }, [unlocking, storeApi, storyApi, offset]);
+  const buy = async (sku: string) => {
+    if (!storeApi) return setToast("Purchases aren't switched on yet. Nothing was charged.");
+    setBusy(`buy:${sku}`);
+    const r = await storeApi.checkout(sku).catch(() => ({ ok: false as const, error: "Checkout didn't open. Nothing was charged; try again." }));
+    if (r.ok) return window.location.assign(r.url); // keeps "Opening checkout…" until Stripe loads
+    setBusy(null);
+    setToast(r.error);
+  };
+
   // Pick up the daily tick (tasks, bills) when the player comes back to the tab.
   useEffect(() => {
     if (!cityApi) return;
@@ -251,7 +307,11 @@ export function GameShell({
         shadowGuess: (pid: string, o: string) => void runStory(`shadow:${pid}`, () => storyApi.shadowGuess(pid, o)),
         markSeen: (id: string) => void storyApi.markSeen(id).then((r) => r.ok && setFeed(r.feed)),
         completeTask: (id: string) => void runStory(`task:${id}`, () => storyApi.completeTask(id)),
-        onUnlock: (_arc: FeedArc) => setToast("Side stories can't be bought yet. Nothing was charged."),
+        onUnlock: (arc: FeedArc) => (arc.sku ? void buy(arc.sku) : undefined),
+        product: (sku: string) => {
+          const p = catalog?.find((x) => x.sku === sku);
+          return p ? { price: formatPrice(p.priceCents, p.currency), pending: unlocking === sku || p.pending } : null;
+        },
       }
     : undefined;
   /** A tap on a story task: go where it happens, or open the story for share and evidence tasks. */

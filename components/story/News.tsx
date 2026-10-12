@@ -13,6 +13,8 @@ export interface NewsHandlers {
   markSeen: (beatId: string) => void;
   completeTask: (taskId: string) => void;
   onUnlock: (arc: FeedArc) => void;
+  /** Real-money state of a side story (price from the store catalog, and whether a payment is unlocking). */
+  product?: (sku: string) => { price: string; pending: boolean } | null;
 }
 
 export function NewsApp({ feed, handlers, focusBeat }: { feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null }) {
@@ -300,7 +302,15 @@ function SideArcs({ arcs, feed, handlers }: { arcs: FeedArc[]; feed: StoryFeed; 
           </div>
           <span className="subtext">{a.teaser}</span>
           {a.beats.map((b) => <span key={b.id} className="meta locked-row">🔒 {b.headline}</span>)}
-          <button className="btn btn-gold btn-sm" style={{ width: "100%" }} onClick={() => handlers.onUnlock(a)}>Unlock for $2.99</button>
+          {(() => {
+            const p = a.sku ? handlers.product?.(a.sku) : null;
+            if (p?.pending) return <button className="btn btn-gold btn-sm" style={{ width: "100%" }} disabled>Unlocking… payment received</button>;
+            return (
+              <button className="btn btn-gold btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
+                {handlers.busy === `buy:${a.sku}` ? "Opening checkout…" : p ? `Unlock for ${p.price}` : "Unlock"}
+              </button>
+            );
+          })()}
         </div>
       )))}
     </div>

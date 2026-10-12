@@ -184,7 +184,8 @@ a { color:inherit; }
 .hud { position:absolute; z-index:20; top:calc(12px + var(--safe-top)); left:12px; right:12px; height:48px; border-radius:var(--r-pill);
   display:flex; align-items:center; justify-content:space-between; padding:0 6px 0 14px; box-shadow:var(--elev-2); }
 .hud-cluster { display:flex; align-items:center; gap:4px; }
-.hud-time { min-width:62px; white-space:nowrap; }
+.hud-time { white-space:nowrap; }
+.hud-time + .hud-btn { padding-left:4px; margin-left:2px; }
 .hud-ampm { font-size:12px; margin-left:2px; letter-spacing:.02em; }
 .daily-ring { display:block; flex:none; }
 :root { --done-green:#1FA35C; }
@@ -489,7 +490,7 @@ a { color:inherit; }
 .bill-card.overdue { background:var(--red-tint); box-shadow:inset 3px 0 0 var(--red-500); }
 
 /* Reward toast */
-.gain-toast { position:absolute; z-index:40; top:calc(70px + var(--safe-top)); left:50%; transform:translateX(-50%); max-width:calc(100% - 32px);
+.gain-toast { position:absolute; z-index:70; top:calc(70px + var(--safe-top)); left:50%; transform:translateX(-50%); max-width:calc(100% - 32px);
   padding:10px 16px; border-radius:var(--r-pill); font-weight:600; font-size:14px; white-space:pre-wrap; text-align:center; box-shadow:var(--elev-3);
   animation:toast-in .3s ease-out, fade-out .4s ease-in 2.2s forwards; }
 @keyframes toast-in { from { opacity:0; transform:translate(-50%, -8px); } to { opacity:1; transform:translate(-50%, 0); } }

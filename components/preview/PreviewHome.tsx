@@ -7,7 +7,7 @@ import type { CityResult } from "@/lib/cityState";
 import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
 import {
-  previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
+  previewCheckout, previewStoreCatalog, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
 } from "@/app/preview/storyActions";
 
 // Development previews only: the home screen with an in-memory city and story
@@ -96,6 +96,10 @@ export function PreviewHome({
       city={cityOff ? null : city}
       cityApi={cityOff ? undefined : api}
       storyApi={cityOff || storyOff ? undefined : story}
+      storeApi={cityOff || storyOff ? undefined : {
+        catalog: previewStoreCatalog,
+        checkout: (sku) => previewCheckout(sku, window.location.pathname + window.location.search),
+      }}
       actions={{
         setTutorialState: noop,
         finishHandoff: noop,

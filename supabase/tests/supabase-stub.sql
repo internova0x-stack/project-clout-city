@@ -11,3 +11,5 @@ grant usage on schema auth to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
 grant usage on schema public to anon, authenticated;
 alter default privileges in schema public grant select on tables to anon, authenticated;
+create role service_role nologin;
+grant usage on schema public to service_role;

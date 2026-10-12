@@ -9,6 +9,7 @@ import {
 import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
+import { loadCatalog, startCheckout } from "./storeActions";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,9 @@ export const metadata = { title: "Home · Clout City" };
 export default async function HomePage() {
   const { player } = await requirePlayer();
   const supabase = await getServerSupabase();
-  const [clique, city, story] = await Promise.all([getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed()]);
+  const [clique, city, story, catalog] = await Promise.all([
+    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(),
+  ]);
   return (
     <GameShell
       player={city ? { ...player, ...city.player } : player}
@@ -47,6 +50,8 @@ export default async function HomePage() {
         attendEvent: attendStoryEvent,
         ...(city.devTools ? { devStart: devStartStory, devEntitle: devEntitleStory } : {}),
       } : undefined}
+      catalog={catalog}
+      storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
     />
   );
 }

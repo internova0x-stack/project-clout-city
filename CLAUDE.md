@@ -47,6 +47,9 @@ components live in `app/globals.css`.
 - Game data stores real lat/lng (`lib/map/geo.ts`); the map is swappable behind
   the `MapApi` interface in `components/map/CityMap.tsx`.
 - Gold (`--gold-*`, `--g-gold`) is only for real-money products, the logo and the tagline.
+- Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
+  entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
+  Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.
 - No real brand names; businesses are invented. Copy is satirical and never
   promises features that aren't built.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the

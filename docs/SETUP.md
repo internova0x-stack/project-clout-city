@@ -59,6 +59,39 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
 3. Deploy. Every merge to the main branch redeploys automatically; every pull request
    gets a preview link.
 
+## 2b. Payments (v0.5, Stripe test mode)
+
+Real-money purchases go through hosted Stripe Checkout; only Stripe's webhook unlocks what was
+bought, and a refund locks it again. Until these are set, the Unlock buttons say purchases
+aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
+
+1. Run `supabase/migrations/0008_payments.sql` in the SQL Editor. It adds the catalog
+   (`store_products`, with the three side stories at $2.99), purchases and the webhook log.
+2. In the Stripe dashboard, switch on **Test mode**, then **Developers → API keys**: copy the
+   **Secret key** (`sk_test_…`).
+3. **Developers → Webhooks → Add endpoint**:
+   - URL: `https://<your site>/api/stripe/webhook`
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+     `checkout.session.expired`, `charge.refunded`
+   - Copy its **Signing secret** (`whsec_…`).
+   - Vercel preview links sit behind Vercel's login by default, which Stripe can't pass. Point
+     the webhook at the production address, or add a second endpoint for a preview with
+     **Deployment Protection** off for it.
+4. In Supabase, **Project Settings → API**: copy the **service_role** key. It lets the webhook
+   grant purchases; keep it secret (server only, never in a `NEXT_PUBLIC_` variable).
+5. In Vercel, add three environment variables (Production and Preview), then redeploy:
+   - `STRIPE_SECRET_KEY` = `sk_test_…`
+   - `STRIPE_WEBHOOK_SECRET` = `whsec_…`
+   - `SUPABASE_SERVICE_ROLE_KEY` = the service_role key
+6. Test: open a side story in the News app → **Unlock for $2.99** → pay with card
+   `4242 4242 4242 4242`, any future date, any CVC. Back in the game it shows "Unlocking…" until
+   the webhook lands, then the chapters open. Refund the payment in Stripe (**Payments → Refund**,
+   full amount) and the side story locks again.
+
+Prices are config: `store_products.price_cents` (shown and charged). To charge a Price you
+created in Stripe instead, set `store_products.stripe_price_id`. Don't change a price on a story
+players are following. Before going live: check **Stripe Tax** settings for digital goods.
+
 ## 3. Local development (optional)
 
 ```bash

@@ -3,6 +3,7 @@
 import { loadArcs } from "@/lib/storyContent";
 import { buildFeed, castVote, claimRewards, emptyStoryState, type PlayerStoryState, type VoteCounts } from "@/lib/storyFeedBuild";
 import type { StoryResult } from "@/lib/storyFeed";
+import type { CheckoutResult, StoreProduct } from "@/lib/store";
 import { addDaysISO, predictionWindow } from "@/lib/stories";
 
 // Development previews only: the story world in memory on the dev server, so the
@@ -79,4 +80,29 @@ export async function previewStoryHoursTo(day: number, time = "12:00") {
   const arc = loadArcs().find((a) => a.id === "sarah-bird")!;
   const ms = predictionWindow(arc, { day } as never, { closes_at: { day, time } } as never, start).closes - 59_999;
   return (ms - Date.now()) / 3_600_000;
+}
+
+// ---- Payments, simulated: no Stripe. "Checkout" returns straight to the game, and a
+// pretend webhook unlocks the side story a few seconds later, like the real one.
+const pending = new Set<string>();
+export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
+  if (process.env.NODE_ENV === "production") return null;
+  return loadArcs()
+    .filter((a) => a.type === "side" && a.sku)
+    .map((a) => ({
+      sku: a.sku!, type: "side_arc" as const, name: a.title, priceCents: 299, currency: "usd", parent: a.parent_arc_id ?? null,
+      owned: store.st.skus.includes(a.sku!), pending: pending.has(a.sku!),
+    }));
+}
+export async function previewCheckout(sku: string, returnTo: string): Promise<CheckoutResult> {
+  if (process.env.NODE_ENV === "production") return { ok: false, error: "Previews are off in production." };
+  pending.add(sku);
+  setTimeout(() => {
+    pending.delete(sku);
+    if (!store.st.skus.includes(sku)) store.st.skus.push(sku);
+  }, 4000);
+  const url = new URL(returnTo, "http://preview.local");
+  url.searchParams.set("purchase", "success");
+  url.searchParams.set("sku", sku);
+  return { ok: true, url: `${url.pathname}${url.search}` };
 }
