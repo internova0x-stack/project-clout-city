@@ -39,7 +39,7 @@ Six pillars decide every trade-off.
 
 ### What it is not
 
-- **Not a full simulation.** No 3D map (the city is a 2D map, now and later), no transit sim, no separate Hunger stat (eating refills Energy instead), no real-time multiplayer.
+- **Not a full simulation.** No open-world 3D city (the map is a stylized night map with 3D buildings on a tilted view; you tap to travel, you don't walk the streets), no transit sim, no separate Hunger stat (eating refills Energy instead), no real-time multiplayer.
 - **Not pay-to-skip.** Virtual cash can't be bought, and side arcs give no clout or guessing edge. Exclusive events and collector items add clout only with diminishing returns.
 - **Not a stranger-chat app.** Chat is capped at 10 messages a day, filtered, with block, report and an admin review queue.
 - **Not real people or brands.** Every character, business and brand is invented; real landmarks appear only when their names aren't trademarked.
@@ -166,7 +166,7 @@ P1 is defined in Clarifications section 8. Everything below is **after P1** and 
 | --- | --- |
 | Progression | Clout levels and titles (Nobody → Local → Scene Regular → Known → Famous → Icon), an Icon milestone moment and a prestige option so the top isn't a dead end |
 | Careers | Fame paths with their own verbs: influencer, streamer, artist or DJ, founder or hustler |
-| City | Brooklyn, Manhattan, the Bronx and Staten Island, each with its own rent level and vibe, unlocked at clout thresholds (on the same 2D map; there is no 3D map); fully 3D interiors; monuments and postcards in other boroughs; real university names with each university's permission |
+| City | Brooklyn, Manhattan, the Bronx and Staten Island, each with its own rent level and vibe, unlocked at clout thresholds (on the same stylized map, with its 3D buildings); fully 3D interiors; monuments and postcards in other boroughs; real university names with each university's permission |
 | City life | Random city events, rush hour, mild crime, weather and seasons, transit costs |
 | Home | Decorating apartments with decor slots and a home score |
 | Social | Crews, home visits, group hangouts, speed dating, compliment polls, an avatar-only fit-check feed, roommates splitting rent, daily friend boosts, outfit and home voting, rivals, gifting |

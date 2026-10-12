@@ -29,7 +29,7 @@ Seven principles carry every screen.
 4. **One loud button per screen.** A single colored primary (taxi yellow, green or night) plus quiet secondaries.
 5. **Gold means real money.** Gold appears only on real-cash products (section 3), so players can always tell real money from virtual cash at a glance.
 6. **Delight through emoji, gradients and wit.** Emoji replace many icons, gradient banners mark special moments, and the copy is funny.
-7. **Characters are the hero.** Avatars are rendered in soft, high-fidelity 3D on a stage, so the effort goes where players form attachment. The map is 2D, and stays 2D.
+7. **Characters are the hero.** Avatars are rendered in soft, high-fidelity 3D on a stage, so the effort goes where players form attachment. The map is a stylized night map with 3D buildings on a tilted view (update 7).
 
 ## 2. Brand layer
 
@@ -389,7 +389,7 @@ Shown whenever a story changes a price or closes something.
 
 ## 8. Components: the 2D map
 
-The game uses a flat, stylized night map of Queens, generated from street geometry and drawn in the map colors from section 3. There is no 3D map; the map stays 2D as more boroughs are added.
+The game uses a flat, stylized night map of Queens, generated from street geometry and drawn in the map colors from section 3. Buildings are extruded in 3D on a tilted view (update 7, kept by the product owner's decision on Oct 12, 2026); new boroughs use the same style.
 
 ### C19. Base map
 
@@ -614,7 +614,7 @@ Three visual languages, on purpose: thin outline icons for navigation, native em
 
 ### Map
 
-The map is 2D only (section 8). 3D is used for avatars, and later for interiors, never for the map.
+3D is used for avatars, interiors and the map's buildings (section 8 and update 7).
 
 ## 12. Patterns, flows and voice
 

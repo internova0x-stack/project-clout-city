@@ -138,7 +138,7 @@ The first task is attending a virtual-cash party; inviting friends is an optiona
 
 P1 has one 2D night map, every player starts in Queens, and other boroughs show as locked.
 
-1. **One map.** A 2D night map of Queens. The Real Map view and its toggle are removed. The game uses a 2D map only; there is no 3D map, now or later. The map still reads game data through one coordinate system and a small interface (show pins, move the camera, locate the player, set a borough's lock state), so the map's art can be redrawn or new boroughs added without touching game logic.
+1. **One map.** A 2D night map of Queens. The Real Map view and its toggle are removed. The map is drawn in the 2D night style with 3D buildings on a tilted view (kept by the product owner's decision, Oct 12, 2026; see Design Guide update 7). The map still reads game data through one coordinate system and a small interface (show pins, move the camera, locate the player, set a borough's lock state), so the map's art can be redrawn or new boroughs added without touching game logic.
 2. **Location button.** A button on the map routes back to the player's current location.
 3. **Queens first.** All players start in Queens. It needs activities, places to visit, things to buy, and deals that make significant money.
 4. **Locked boroughs.** Other boroughs appear on the map labelled "Locked: Coming soon."
