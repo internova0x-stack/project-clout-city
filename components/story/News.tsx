@@ -15,6 +15,8 @@ export interface NewsHandlers {
   onUnlock: (arc: FeedArc) => void;
   /** Real-money state of a side story (price from the store catalog, and whether a payment is unlocking). */
   product?: (sku: string) => { price: string; pending: boolean } | null;
+  /** Analytics: a beat was shared. */
+  onShared?: () => void;
 }
 
 export function NewsApp({ feed, handlers, focusBeat }: { feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null }) {
@@ -120,6 +122,7 @@ export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc:
     } catch {
       return; // cancelled share sheet
     }
+    handlers.onShared?.();
     if (shareTask && !shareTask.done) handlers.completeTask(shareTask.id);
   };
   return (

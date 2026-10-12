@@ -68,22 +68,41 @@ export function PartyDoneCard({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-interface Row { rank: number; display_name: string; starting_style: string; clout: number; is_me: boolean }
+interface Row { id?: string; rank: number; display_name: string; starting_style: string; clout: number; is_me: boolean }
 
 /** C27: the clout leaderboard, Queens or Clique. */
 export function LeaderboardSheet({
-  open, onClose, cta, myClout,
-}: { open: boolean; onClose: () => void; cta?: { label: string; onClick: () => void }; myClout: number }) {
+  open, onClose, cta, myClout, onOpenPlayer, fetchRows,
+}: {
+  open: boolean; onClose: () => void; cta?: { label: string; onClick: () => void }; myClout: number;
+  /** v0.5: tap a row to open that player's card (and message them). */
+  onOpenPlayer?: (id: string) => void;
+  /** Development previews: sample rows instead of the database. */
+  fetchRows?: (scope: "queens" | "clique") => Promise<Row[]>;
+}) {
   const [scope, setScope] = useState<"queens" | "clique">("queens");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [me, setMe] = useState<{ rank: number; total: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
+    if (fetchRows) {
+      setRows(null);
+      void fetchRows(scope).then((r) => {
+        setRows(r);
+        const m = r.find((x) => x.is_me);
+        if (m) setMe({ rank: m.rank, total: r.length });
+      });
+      return;
+    }
     const supabase = getBrowserSupabase();
     if (!supabase) return setRows([]);
     setRows(null);
-    supabase.rpc("leaderboard", { p_scope: scope, p_limit: 50 }).then(({ data }) => setRows((data as Row[]) ?? []));
+    // leaderboard_people (0010) adds player ids for profile cards; older databases fall back.
+    supabase.rpc("leaderboard_people", { p_scope: scope, p_limit: 50 }).then(({ data, error }) => {
+      if (!error) return setRows((data as Row[]) ?? []);
+      supabase.rpc("leaderboard", { p_scope: scope, p_limit: 50 }).then(({ data: d }) => setRows((d as Row[]) ?? []));
+    });
     supabase.rpc("my_rank", { p_scope: scope }).then(({ data }) => {
       const r = Array.isArray(data) ? data[0] : data;
       if (r) setMe({ rank: Number(r.rank), total: Number(r.total) });
@@ -108,7 +127,13 @@ export function LeaderboardSheet({
             {rows === null && <p className="meta" style={{ margin: 0 }}>Counting heads…</p>}
             {rows?.length === 0 && <p className="meta" style={{ margin: 0 }}>Nobody here yet. Invite your clique to fill the board.</p>}
             {rows?.map((r) => (
-              <div key={`${r.rank}-${r.display_name}`} className={`lb-row${r.is_me ? " me" : ""}`}>
+              <div
+                key={`${r.rank}-${r.display_name}`}
+                className={`lb-row${r.is_me ? " me" : ""}${r.id && onOpenPlayer && !r.is_me ? " tappable" : ""}`}
+                role={r.id && onOpenPlayer && !r.is_me ? "button" : undefined}
+                tabIndex={r.id && onOpenPlayer && !r.is_me ? 0 : undefined}
+                onClick={() => r.id && !r.is_me && onOpenPlayer?.(r.id)}
+              >
                 <span className="meta" style={{ width: 28 }}>{r.rank}</span>
                 <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
                 <span className="title" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

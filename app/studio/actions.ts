@@ -1,7 +1,7 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Review, type StudioArc, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -84,4 +84,23 @@ export async function studioContent(arc: string): Promise<{ ok: true; arcs: Arc[
     if (data) arcs.push({ ...(data as Arc), status: row?.status ?? (data as Arc).status });
   }
   return { ok: true, arcs };
+}
+
+// ---- Chat review queue and metrics (migration 0010) ----
+async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise<Admin<T>> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  const { data, error } = await supabase.rpc(fn, args);
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? "Run migration 0010 first." : studioError(error.message) };
+  return { ok: true, data: data as T };
+}
+export async function studioReports(status: "open" | "all") {
+  return admin<StudioReport[]>("admin_reports", { p_status: status });
+}
+export async function studioReportAction(id: number, action: "dismiss" | "warn" | "mute" | "ban") {
+  const r = await admin<unknown>("admin_report_action", { p_report: id, p_action: action });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+export async function studioMetrics() {
+  return admin<StudioMetrics>("admin_metrics");
 }

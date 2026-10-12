@@ -28,6 +28,42 @@ export interface StudioArc {
   votes: Record<string, number>;
 }
 
+/** One report in the chat review queue (admin_reports, migration 0010). */
+export interface StudioReport {
+  id: number;
+  reason: "harassment" | "spam" | "inappropriate" | "other";
+  note: string | null;
+  status: "open" | "dismissed" | "warned" | "muted" | "banned";
+  at: string;
+  reviewedAt: string | null;
+  messageId: number | null;
+  reporter: { id: string; name: string };
+  reported: { id: string; name: string; warned: boolean; mutedUntil: string | null; banned: boolean; reports: number };
+  messages: { id: number; from: string; body: string; at: string; reported: boolean }[];
+}
+
+/** The success metrics (admin_metrics, migration 0010; Clarifications section 8). */
+export interface StudioMetrics {
+  players: number;
+  newThisWeek: number;
+  firstTask: number;
+  invited: number;
+  invitesJoined: number;
+  day1Cohort: number;
+  day1Returned: number;
+  activeToday: number;
+  beatOpens: number;
+  readers: number;
+  votes: number;
+  voters: number;
+  purchases: Record<string, { count: number; cents: number }>;
+  refunds: number;
+  messagesToday: number;
+  openReports: number;
+}
+
+export type Admin<T> = { ok: true; data: T } | { ok: false; error: string };
+
 export type StudioResult = { ok: true; arcs: StudioArc[]; message?: string } | { ok: false; error: string; problems?: string[] };
 
 export interface StudioApi {
@@ -40,6 +76,10 @@ export interface StudioApi {
   beatStatus(arc: string, beat: string, status: Status): Promise<StudioResult>;
   /** Full content of an arc and its side arcs, for the player preview. */
   content(arc: string): Promise<{ ok: true; arcs: Arc[] } | { ok: false; error: string }>;
+  /** Chat review queue: open first, newest first. */
+  reports?(status: "open" | "all"): Promise<Admin<StudioReport[]>>;
+  reportAction?(id: number, action: "dismiss" | "warn" | "mute" | "ban"): Promise<Admin<null>>;
+  metrics?(): Promise<Admin<StudioMetrics>>;
 }
 
 const ERRORS: Record<string, string> = {
@@ -55,6 +95,7 @@ const ERRORS: Record<string, string> = {
   bad_arc: "That file isn't a story.",
   bad_status: "Unknown status.",
   bad_decision: "Unknown decision.",
+  unknown_report: "That report is gone.",
 };
 
 export function studioError(message: string | undefined): string {

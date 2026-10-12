@@ -10,6 +10,7 @@ import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
+import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, track } from "./chatActions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +19,12 @@ export const metadata = { title: "Home · Clout City" };
 export default async function HomePage() {
   const { player } = await requirePlayer();
   const supabase = await getServerSupabase();
-  const [clique, city, story, catalog] = await Promise.all([
-    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(),
+  const [clique, city, story, catalog, chat] = await Promise.all([
+    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(),
   ]);
+  // Migration 0010 switches on chat; a banned account sees only a notice.
+  const chatOn = chat.ok;
+  if (chat.ok && chat.data.banned) return <Suspended />;
   return (
     <GameShell
       player={city ? { ...player, ...city.player } : player}
@@ -53,6 +57,20 @@ export default async function HomePage() {
       } : undefined}
       catalog={catalog}
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
+      chat={chatOn ? { list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard } : undefined}
+      track={chatOn ? track : undefined}
     />
+  );
+}
+
+function Suspended() {
+  return (
+    <main className="studio studio-gate">
+      <section className="studio-card stack-12">
+        <h1 className="display-lg" style={{ margin: 0 }}>Account suspended</h1>
+        <p className="body" style={{ margin: 0 }}>After a review of reported messages, this account can&apos;t play right now.</p>
+        <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
+      </section>
+    </main>
   );
 }

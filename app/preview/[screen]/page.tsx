@@ -11,6 +11,10 @@ import {
   previewStudioBeatStatus, previewStudioContent, previewStudioList, previewStudioReview, previewStudioSchedule, previewStudioSetDay,
   previewStudioStatus, previewStudioUpload,
 } from "../studioActions";
+import {
+  previewChatBlock, previewChatList, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard,
+  previewPlayerCard, previewStudioMetrics, previewStudioReportAction, previewStudioReports,
+} from "../chatActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
 
@@ -130,6 +134,7 @@ export default async function Preview({
           api={{
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
             beatStatus: previewStudioBeatStatus, content: previewStudioContent,
+            reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics,
           }}
         />
       );

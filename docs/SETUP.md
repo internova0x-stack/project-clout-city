@@ -93,6 +93,12 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    ($0.99, after a visit), two collector fashion pieces ($4.99 and $3.99) and two exclusive
    parties at the lounge, this coming Friday and Saturday, 10 PM to 2 AM New York time.
 
+8. Run `supabase/migrations/0010_social.sql`. It switches on chat in the Phone's Messages app
+   (10 messages a day, a word filter, block and report), player cards from the leaderboard, the
+   chat review queue and the metrics dashboard (both in the Studio at `/studio`, for the same
+   admins as stories), and the analytics they read. The daily limit, the mute length and the
+   filtered words live in `game_settings` row `chat`; add words there, one lowercase word each.
+
 **Adding a party** (an exclusive event) in the SQL Editor; times are New York time:
 
 ```sql

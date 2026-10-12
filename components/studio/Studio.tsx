@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { placeById } from "@/lib/city";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type Review, type StudioApi, type StudioArc, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 
 // The Story Studio (/studio): a separate admin page, outside the game. Upload a
@@ -19,6 +20,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -52,7 +54,17 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         </div>
       </header>
 
-      {note && (
+      {(api.reports || api.metrics) && (
+        <div className="segmented studio-tabs" role="group" aria-label="Studio">
+          <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
+          {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
+          {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Metrics</button>}
+        </div>
+      )}
+      {tab === "reports" && <Reports api={api} />}
+      {tab === "metrics" && <Metrics api={api} />}
+
+      {tab === "stories" && note && (
         <div className={`studio-note ${note.kind}`} role="status">
           <span className="body-strong">{note.text}</span>
           {note.problems && <ul>{note.problems.map((p) => <li key={p} className="meta">{p}</li>)}</ul>}
@@ -60,7 +72,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         </div>
       )}
 
-      <div className="studio-grid">
+      {tab === "stories" && <div className="studio-grid">
         <aside className="stack-12">
           <Upload busy={busy} onUpload={(json) => apply("upload", () => api.upload(json))} />
           <p className="overline" style={{ margin: "8px 0 0" }}>Stories</p>
@@ -81,7 +93,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         ) : (
           <section className="studio-card"><p className="subtext">Pick a story.</p></section>
         )}
-      </div>
+      </div>}
     </main>
   );
 }
@@ -364,4 +376,121 @@ export function describeEffect(e: StoryEffect): string {
     default:
       return e.type;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Reports: the chat review queue (Clarifications 10.6)
+// ---------------------------------------------------------------------------
+const REASON: Record<StudioReport["reason"], string> = { harassment: "Harassment", spam: "Spam", inappropriate: "Inappropriate", other: "Other" };
+
+function Reports({ api }: { api: StudioApi }) {
+  const [status, setStatus] = useState<"open" | "all">("open");
+  const [rows, setRows] = useState<StudioReport[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<number | null>(null);
+  const load = useCallback(async () => {
+    const r = await api.reports!(status);
+    if (r.ok) { setRows(r.data); setError(null); } else setError(r.error);
+  }, [api, status]);
+  useEffect(() => { setRows(null); void load(); }, [load]);
+  const act = async (id: number, action: "dismiss" | "warn" | "mute" | "ban") => {
+    if (action === "ban" && !window.confirm("Ban this player? They lose access to the game.")) return;
+    setBusy(id);
+    const r = await api.reportAction!(id, action);
+    setBusy(null);
+    if (!r.ok) return setError(r.error);
+    void load();
+  };
+  return (
+    <section className="stack-12">
+      <div className="row" style={{ gap: 8 }}>
+        <button className="chip" aria-pressed={status === "open"} onClick={() => setStatus("open")}>Open</button>
+        <button className="chip" aria-pressed={status === "all"} onClick={() => setStatus("all")}>All</button>
+      </div>
+      {error && <div className="studio-note error"><span className="body-strong">{error}</span></div>}
+      {rows === null && !error && <p className="meta">Loading…</p>}
+      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>Nothing to review. Queens is behaving, for once.</p></section>}
+      {rows?.map((r) => (
+        <article key={r.id} className="studio-card stack-8">
+          <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+            <span className="title">{REASON[r.reason]}: {r.reporter.name} reported {r.reported.name}</span>
+            <span className={`tag studio-review ${r.status === "open" ? "draft" : r.status === "dismissed" ? "approved" : "declined"}`}>{r.status}</span>
+          </div>
+          <span className="meta">
+            {new Date(r.at).toLocaleString()} · {r.reported.name} has {r.reported.reports} report{r.reported.reports === 1 ? "" : "s"}
+            {r.reported.warned ? " · warned before" : ""}{r.reported.mutedUntil ? " · muted" : ""}{r.reported.banned ? " · banned" : ""}
+          </span>
+          {r.note && <span className="body">“{r.note}”</span>}
+          <div className="studio-transcript">
+            {r.messages.length === 0 && <span className="meta">No messages in this conversation.</span>}
+            {r.messages.map((m) => (
+              <div key={m.id} className={`studio-line${m.reported ? " flagged" : ""}`}>
+                <span className="body-strong">{m.from}</span> <span className="body">{m.body}</span>
+                <span className="meta"> · {new Date(m.at).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+          {r.status === "open" && (
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-secondary btn-sm" disabled={busy !== null} onClick={() => void act(r.id, "dismiss")}>Dismiss</button>
+              <button className="btn btn-secondary btn-sm" disabled={busy !== null} onClick={() => void act(r.id, "warn")}>Warn</button>
+              <button className="btn btn-destructive btn-sm" disabled={busy !== null} onClick={() => void act(r.id, "mute")}>Mute from chat</button>
+              <button className="btn btn-destructive btn-sm" disabled={busy !== null} onClick={() => void act(r.id, "ban")}>Ban</button>
+            </div>
+          )}
+        </article>
+      ))}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Metrics: the success metrics (Clarifications 8)
+// ---------------------------------------------------------------------------
+const pct = (n: number, d: number) => (d > 0 ? `${Math.round((100 * n) / d)}%` : "—");
+const PRODUCT: Record<string, string> = { side_arc: "Side stories", exclusive_event: "Exclusive events", collector_item: "Collector fashion", postcard: "Postcards" };
+
+function Metrics({ api }: { api: StudioApi }) {
+  const [m, setM] = useState<StudioMetrics | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { void api.metrics!().then((r) => (r.ok ? setM(r.data) : setError(r.error))); }, [api]);
+  if (error) return <div className="studio-note error"><span className="body-strong">{error}</span></div>;
+  if (!m) return <p className="meta">Loading…</p>;
+  const revenue = Object.values(m.purchases).reduce((n, p) => n + p.cents, 0);
+  const tiles: { label: string; value: string; sub: string; goal?: string }[] = [
+    { label: "Day-1 return", value: pct(m.day1Returned, m.day1Cohort), sub: `${m.day1Returned.toLocaleString()} of ${m.day1Cohort.toLocaleString()} came back the next day`, goal: "Goal 35–40%" },
+    { label: "First task done", value: pct(m.firstTask, m.players), sub: `${m.firstTask.toLocaleString()} of ${m.players.toLocaleString()} players` },
+    { label: "Sent an invite", value: pct(m.invited, m.players), sub: `${m.invitesJoined.toLocaleString()} friends joined through a link` },
+    { label: "Players", value: m.players.toLocaleString(), sub: `${m.newThisWeek.toLocaleString()} new this week · ${m.activeToday.toLocaleString()} active today` },
+    { label: "Story readers", value: m.readers.toLocaleString(), sub: `${m.beatOpens.toLocaleString()} beat opens` },
+    { label: "Predictions", value: m.votes.toLocaleString(), sub: `from ${m.voters.toLocaleString()} players` },
+    { label: "Revenue (test mode)", value: formatPrice(revenue), sub: `${m.refunds} refund${m.refunds === 1 ? "" : "s"}` },
+    { label: "Chat", value: m.messagesToday.toLocaleString(), sub: `messages today · ${m.openReports} open report${m.openReports === 1 ? "" : "s"}` },
+  ];
+  return (
+    <section className="stack-16">
+      <div className="studio-tiles">
+        {tiles.map((t) => (
+          <div key={t.label} className="studio-card studio-tile">
+            <span className="overline">{t.label}</span>
+            <span className="display-lg tabular">{t.value}</span>
+            <span className="meta">{t.sub}</span>
+            {t.goal && <span className="meta" style={{ color: "var(--text-2)" }}>{t.goal}</span>}
+          </div>
+        ))}
+      </div>
+      <div className="studio-card stack-8">
+        <span className="overline">Purchases by product</span>
+        {Object.keys(PRODUCT).map((k) => {
+          const p = m.purchases[k] ?? { count: 0, cents: 0 };
+          return (
+            <div key={k} className="ledger-row" style={{ padding: "6px 0" }}>
+              <span className="body">{PRODUCT[k]}</span>
+              <span className="body-strong tabular">{p.count.toLocaleString()} · {formatPrice(p.cents)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
 }

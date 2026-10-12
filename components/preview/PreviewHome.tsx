@@ -8,6 +8,10 @@ import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
 import type { StoreApi, StoreProduct } from "@/lib/store";
 import { placeById } from "@/lib/city";
+import type { ChatApi } from "@/lib/chat";
+import {
+  previewChatBlock, previewChatList, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
+} from "@/app/preview/chatActions";
 import {
   previewCheckout, previewStoreAttended, previewStoreCatalog, previewStoreVisited, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
 } from "@/app/preview/storyActions";
@@ -113,6 +117,10 @@ export function PreviewHome({
     },
   }), [sim]);
 
+  const chat = useMemo<ChatApi>(() => ({
+    list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
+    block: previewChatBlock, report: previewChatReport, card: previewPlayerCard,
+  }), []);
   const noop = async () => {};
   return (
     <GameShell
@@ -125,6 +133,8 @@ export function PreviewHome({
       cityApi={cityOff ? undefined : api}
       storyApi={cityOff || storyOff ? undefined : story}
       storeApi={cityOff || storyOff ? undefined : storeApi}
+      chat={cityOff ? undefined : chat}
+      leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,
         finishHandoff: noop,

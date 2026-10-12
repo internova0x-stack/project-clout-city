@@ -21,6 +21,8 @@ import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
+import { PlayerCardSheet } from "./chat/PlayerCard";
+import type { ChatApi } from "@/lib/chat";
 import type { ShopCategory } from "@/lib/city";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
@@ -86,6 +88,9 @@ export function GameShell({
   storyApi,
   catalog: initialCatalog = null,
   storeApi,
+  chat,
+  track,
+  leaderboardRows,
   roomMood = "dream",
 }: {
   player: Player;
@@ -100,6 +105,12 @@ export function GameShell({
   /** v0.5 real-money products (migration 0008); without it the Unlock button says purchases aren't open. */
   catalog?: StoreProduct[] | null;
   storeApi?: StoreApi;
+  /** v0.5 chat (migration 0010): Messages in the Phone, player cards from the leaderboard. */
+  chat?: ChatApi;
+  /** v0.5 analytics: one event per name per day (sessions for day-1 return, invites shared). */
+  track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared") => void;
+  /** Development previews: sample leaderboard rows. */
+  leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
   roomMood?: "natural" | "dream";
   /** Development previews only: pin the map to day or night. */
@@ -138,6 +149,18 @@ export function GameShell({
   /** A side story paid for at Stripe, waiting for the webhook to unlock it. */
   const [unlocking, setUnlocking] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState<ShopCategory>("fashion");
+  const [chatWith, setChatWith] = useState<{ id: string; name: string; style: string } | null>(null);
+  const [chatUnread, setChatUnread] = useState(0);
+  const [cardId, setCardId] = useState<string | null>(null);
+  // A session a day counts toward day-1 return; unread messages badge the Phone.
+  useEffect(() => { track?.("session"); }, [track]);
+  useEffect(() => {
+    if (!chat) return;
+    const check = () => void chat.list().then((r) => r.ok && setChatUnread(r.data.reduce((n, c) => n + c.unread, 0)));
+    check();
+    const t = setInterval(check, 60_000);
+    return () => clearInterval(t);
+  }, [chat]);
   const gameNow = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
 
   const look = normalizeLook(me.look, me.starting_style);
@@ -296,6 +319,7 @@ export function GameShell({
 
   const money: MoneyHandlers = {
     busy,
+    onShared: () => track?.("postcard_shared"),
     buy: (sku) => void buy(sku),
     attend: (id) => {
       if (!cityApi?.attendExclusiveEvent) return;
@@ -337,6 +361,7 @@ export function GameShell({
         markSeen: (id: string) => void storyApi.markSeen(id).then((r) => r.ok && setFeed(r.feed)),
         completeTask: (id: string) => void runStory(`task:${id}`, () => storyApi.completeTask(id)),
         onUnlock: (arc: FeedArc) => (arc.sku ? void buy(arc.sku) : undefined),
+        onShared: () => track?.("beat_shared"),
         product: (sku: string) => {
           const p = catalog?.find((x) => x.sku === sku);
           return p ? { price: formatPrice(p.priceCents, p.currency), pending: unlocking === sku || p.pending } : null;
@@ -422,9 +447,11 @@ export function GameShell({
     try {
       if (navigator.share) {
         await navigator.share({ title: "Clout City NYC", text: "Pull up. I'm at a party in Clout City.", url });
+        track?.("invite_shared");
         return true;
       }
       await navigator.clipboard.writeText(url);
+      track?.("invite_shared");
       return true;
     } catch {
       return false; // a cancelled share sheet never blocks the party
@@ -599,7 +626,7 @@ export function GameShell({
           online,
           eventsBadge: !partyDone,
           billsBadge: !!city && dueBills(city).length > 0,
-          phoneBadge: payoutReady || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
+          phoneBadge: payoutReady || chatUnread > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <GainToast gain={gain} message={toast} onDone={clearGain} />
@@ -644,7 +671,22 @@ export function GameShell({
         onClose={() => (flow === "leaderboard" ? setFlow("invitePrompt") : setPanel(null))}
         cta={flow === "leaderboard" ? { label: "Climb the ladder", onClick: () => setFlow("invitePrompt") } : undefined}
         myClout={me.clout}
+        onOpenPlayer={chat ? (id) => setCardId(id) : undefined}
+        fetchRows={leaderboardRows}
       />
+      {chat && (
+        <PlayerCardSheet
+          playerId={cardId}
+          api={chat}
+          onClose={() => setCardId(null)}
+          onMessage={(p) => {
+            setCardId(null);
+            setPanel(null);
+            setChatWith(p);
+            setPhone({ open: true, app: "messages" });
+          }}
+        />
+      )}
       {flow === "invitePrompt" && (
         <InvitePrompt
           cliqueCount={clique.length}
@@ -730,9 +772,14 @@ export function GameShell({
         open={phone.open}
         initialApp={phone.app}
         focusBeat={phone.beat}
+        chat={chat}
+        chatWith={chatWith}
+        chatUnread={chatUnread}
+        onChatUnread={setChatUnread}
+        onToast={setToast}
         story={storyOn ? feed : null}
         news={storyOn ? news : undefined}
-        onClose={() => setPhone({ open: false, app: null })}
+        onClose={() => { setPhone({ open: false, app: null }); setChatWith(null); }}
         time={clock.time}
         state={cityOn ? city : null}
         busy={busy}

@@ -57,3 +57,13 @@ your account. In development, `/preview/home?story=3` opens the game on Day 3 wi
 and `/preview/studio` opens the Studio on an in-memory copy of `content/stories/`.
 
 The pilot isn't scheduled yet: per `docs/07`, Sarah Bird's start date is set at v1.0.
+
+## Reports and metrics (v0.5)
+
+The Studio has two more tabs for the same admins:
+
+- **Reports:** chat reports, open ones first, newest first. Each shows who reported whom, the
+  reason and note, and the conversation with the reported message highlighted. **Dismiss**,
+  **Warn**, **Mute from chat** (7 days by default) or **Ban** (the account can't play).
+- **Metrics:** the success metrics: day-1 return against the 35 to 40% goal, first task done,
+  invites sent, story readers and predictions, purchases by product (test mode) and chat activity.

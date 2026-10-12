@@ -7,6 +7,8 @@ import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { LedgerList } from "../game/Sheets";
 import { NewsApp, type NewsHandlers } from "../story/News";
+import { MessagesApp } from "../chat/Messages";
+import type { ChatApi } from "@/lib/chat";
 import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
@@ -31,6 +33,7 @@ const TIER_TAG: Record<GigOffer["tier"], { label: string; cls: string }> = {
 /** C29: the Phone, with the Gigs, Bank and Settings apps (News and Messages arrive later). */
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast,
 }: {
   open: boolean;
   onClose: () => void;
@@ -45,6 +48,12 @@ export function PhoneModal({
   story?: StoryFeed | null;
   news?: NewsHandlers;
   focusBeat?: string | null;
+  /** v0.5 chat (migration 0010); without it Messages says it opens soon. */
+  chat?: ChatApi;
+  chatWith?: { id: string; name: string; style: string } | null;
+  chatUnread?: number;
+  onChatUnread?: (n: number) => void;
+  onToast?: (text: string) => void;
 }) {
   const [app, setApp] = useState<App | null>(initialApp ?? null);
   const [lastInitial, setLastInitial] = useState(initialApp);
@@ -79,6 +88,7 @@ export function PhoneModal({
                       {a.emoji}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
+                      {a.id === "messages" && chatUnread > 0 && <span className="count-badge">{chatUnread}</span>}
                     </span>
                     <span>{a.label}</span>
                   </button>
@@ -106,7 +116,9 @@ export function PhoneModal({
                 </div>
               )}
               {app === "news" && (news ? <NewsApp feed={story ?? null} handlers={news} focusBeat={focusBeat} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
-              {app === "messages" && <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />}
+              {app === "messages" && (chat
+                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} />
+                : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}
             </div>
           )}
         </div>

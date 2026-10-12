@@ -14,6 +14,8 @@ export interface MoneyHandlers {
   busy: string | null;
   buy: (sku: string) => void;
   attend: (eventId: string) => void;
+  /** Analytics: a postcard was shared. */
+  onShared?: () => void;
 }
 
 const when = (iso: string) =>
@@ -104,6 +106,7 @@ export function CollectionSheet({ open, onClose, products, h, badge }: {
     try {
       if (navigator.share) await navigator.share({ title: "Clout City", text, url: window.location.origin });
       else await navigator.clipboard?.writeText(`${text} ${window.location.origin}`);
+      h.onShared?.();
     } catch {
       /* cancelled share sheet */
     }
