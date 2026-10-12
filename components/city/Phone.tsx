@@ -136,7 +136,7 @@ function GigsApp({ state, now, busy, onAccept, onCollect }: { state: CityState; 
             <span className="title" style={{ display: "block" }}>{active.title}</span>
             <div className="gig-progress"><span style={{ width: `${pct}%` }} /></div>
             {ready ? (
-              <button className="btn btn-green btn-sm" disabled={busy !== null} onClick={() => onCollect(active.id)}>
+              <button className="btn btn-taxi btn-sm" disabled={busy !== null} onClick={() => onCollect(active.id)}>
                 {busy === `gig:${active.id}` ? "…" : `Collect ${formatCash(active.pay)}`}
               </button>
             ) : (
@@ -158,7 +158,7 @@ function GigsApp({ state, now, busy, onAccept, onCollect }: { state: CityState; 
               <span className="money-pos">{formatCash(g.pay)}</span> · ⚡ −{g.energy} · ⏱ {g.wait_minutes >= 60 ? `${g.wait_minutes / 60} h` : `${g.wait_minutes} min`}
             </span>
             {!av.ok && <span className="meta reason">{av.reason}</span>}
-            <button className="btn btn-green btn-sm" disabled={!av.ok || busy !== null} onClick={() => onAccept(g.id)}>
+            <button className="btn btn-taxi btn-sm" disabled={!av.ok || busy !== null} onClick={() => onAccept(g.id)}>
               {busy === `gig:${g.id}` ? "…" : "Take the gig"}
             </button>
             <span className="meta">Expires at midnight.</span>

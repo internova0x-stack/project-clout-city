@@ -48,7 +48,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {av.ok && av.note && <span className="meta">{av.note}</span>}
             </div>
             <button
-              className={`btn ${spends ? "btn-green" : "btn-taxi"} btn-sm`}
+              className={"btn btn-taxi btn-sm"}
               disabled={!av.ok || handlers.busy !== null}
               onClick={() => (a.kind === "gigs" ? handlers.onOpenGigs() : handlers.onAction(place.id, a.id))}
             >
@@ -72,7 +72,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {open && !av.ok && <span className="meta reason">{av.reason}</span>}
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
             </div>
-            <button className="btn btn-green btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
+            <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
               {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
             </button>
           </div>

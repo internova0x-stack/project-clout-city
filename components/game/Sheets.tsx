@@ -156,7 +156,7 @@ export function EventsSheet({
                   <>
                     {!isOpen && <span className="meta">Doors open in {realMinutesUntilOpen(ev, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay)} min</span>}
                     {isOpen && !av.ok && <span className="meta reason">{av.reason}</span>}
-                    <button className="btn btn-green btn-sm" disabled={!av.ok || busy !== null} onClick={() => onAttend(ev.id)}>
+                    <button className="btn btn-taxi btn-sm" disabled={!av.ok || busy !== null} onClick={() => onAttend(ev.id)}>
                       {busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
                     </button>
                   </>

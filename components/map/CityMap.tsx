@@ -31,6 +31,8 @@ export interface CityMapProps {
   onLockedTap?: (boroughName: string) => void;
   /** Hide the map's own credits control when the screen shows them elsewhere. */
   attributionControl?: boolean;
+  /** Camera tilt in degrees (0 = straight down). */
+  initialPitch?: number;
   /** Moving cars on the streets when zoomed in (v0.3). */
   vehicles?: boolean;
 }
@@ -47,7 +49,7 @@ const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45 },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -85,10 +87,14 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
           center: lngLat(initialCenter),
           zoom: initialZoom,
           minZoom: MIN_ZOOM,
+          // Tilted so the 3D buildings read; two-finger drag changes the tilt.
+          pitch: initialPitch,
+          maxPitch: 60,
           maxZoom: MAX_ZOOM,
           maxBounds: NYC_BOUNDS,
           dragRotate: false,
           pitchWithRotate: false,
+          touchPitch: true,
           attributionControl: attributionControl ? { compact: true } : false,
           fadeDuration: 150,
         });

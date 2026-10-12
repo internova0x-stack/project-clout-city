@@ -53,7 +53,7 @@ export function ShopSheet({
                     <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
                   ) : (
                     <div className="stack-4">
-                      <button className={`btn btn-green btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
+                      <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
                         {formatCash(item.price)}
                       </button>
                       {!!item.rentPerWeek && (
@@ -87,7 +87,7 @@ export function ShopSheet({
               {after < 0 && <p className="error-text" style={{ margin: 0 }}>You&apos;re {formatCash(-after)} short. Work a shift or take a gig.</p>}
               {confirm.mode === "rent" && <p className="meta" style={{ margin: 0 }}>Bills {formatCash(price)} every week until you return it.</p>}
               <button
-                className="btn btn-green"
+                className="btn btn-taxi"
                 disabled={after < 0 || busy !== null}
                 onClick={async () => { if (await onBuy(confirm.item.sku, confirm.mode)) setConfirm(null); }}
               >
@@ -269,7 +269,7 @@ export function BillsSheet({
                 <span className="title" style={{ display: "block" }}>{BILL_LABEL[b.kind]}</span>
                 <span className="meta">{billStatusLine(b, today)}</span>
               </div>
-              <button className="btn btn-green btn-sm" disabled={short || busy !== null} onClick={() => onPay(b.id)}>
+              <button className="btn btn-taxi btn-sm" disabled={short || busy !== null} onClick={() => onPay(b.id)}>
                 {busy === `bill:${b.id}` ? "…" : `Pay ${formatCash(b.amount)}`}
               </button>
             </div>

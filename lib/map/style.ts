@@ -13,7 +13,7 @@ export const MAP_ATTRIBUTION =
   '<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>';
 
 interface Palette {
-  land: string; water: string; waterDeep: string; park: string; blocks: string; building: string;
+  land: string; water: string; waterDeep: string; park: string; blocks: string; building: string; buildingTall: string;
   minor: string; minorCasing: string; major: string; majorCasing: string; highway: string; highwayCasing: string;
   roadGlow: string; rail: string; label: string; labelHalo: string; streetLabel: string;
   locked: string; queensEdge: string;
@@ -21,13 +21,13 @@ interface Palette {
 
 export const PALETTES: Record<MapTheme, Palette> = {
   day: {
-    land: "#D3EAC8", water: "#8ED3F4", waterDeep: "#6CC4EE", park: "#A7DB9C", blocks: "#DCDCDE", building: "#C9C9CF",
+    land: "#D3EAC8", water: "#8ED3F4", waterDeep: "#6CC4EE", park: "#A7DB9C", blocks: "#DCDCDE", building: "#ECEAF0", buildingTall: "#D6D3DE",
     minor: "#FFFFFF", minorCasing: "#C4C4C8", major: "#FFFFFF", majorCasing: "#B9B9BF", highway: "#F7C744", highwayCasing: "#D9A21B",
     roadGlow: "rgba(0,0,0,0)", rail: "#A9A9B2", label: "#4F4A56", labelHalo: "rgba(255,255,255,.9)", streetLabel: "#6B6570",
     locked: "rgba(60,56,72,.42)", queensEdge: "rgba(242,169,0,.55)",
   },
   night: {
-    land: "#1C1824", water: "#0E1020", waterDeep: "#0A0C18", park: "#1F2A24", blocks: "#221E2B", building: "#2B2535",
+    land: "#1C1824", water: "#0E1020", waterDeep: "#0A0C18", park: "#1F2A24", blocks: "#221E2B", building: "#2E2839", buildingTall: "#433956",
     minor: "rgba(255,194,26,.38)", minorCasing: "rgba(0,0,0,0)", major: "rgba(255,194,26,.75)", majorCasing: "rgba(0,0,0,0)",
     highway: "#FFC21A", highwayCasing: "rgba(0,0,0,0)", roadGlow: "rgba(255,170,40,.35)", rail: "rgba(255,46,136,.6)",
     label: "rgba(255,246,224,.72)", labelHalo: "rgba(20,17,26,.85)", streetLabel: "rgba(255,246,224,.55)",
@@ -50,6 +50,7 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
     name: `clout-city-${theme}`,
     glyphs: GLYPHS_URL,
     transition: { duration: 2000, delay: 0 },
+    light: { anchor: "viewport", color: night ? "#FFD9A8" : "#FFFFFF", intensity: night ? 0.25 : 0.4, position: [1.2, 200, 35] },
     sources: {
       osm: { type: "vector", url: TILE_SOURCE_URL, attribution: MAP_ATTRIBUTION },
       boroughs: { type: "geojson", data: boroughs },
@@ -79,14 +80,6 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
       {
         id: "water-edge", type: "line", source: "osm", "source-layer": "water",
         paint: { "line-color": p.waterDeep, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0, 14, 2], "line-blur": 2 },
-      },
-      {
-        id: "buildings", type: "fill", source: "osm", "source-layer": "building", minzoom: 14,
-        paint: {
-          "fill-color": p.building,
-          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 14, 0, 15.5, 1],
-          "fill-outline-color": night ? "rgba(255,194,26,.12)" : "#B4B4BA",
-        },
       },
       // Road glow (night only): a soft, wide halo under the main streets.
       {
@@ -136,6 +129,38 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.highway, "line-width": width(2, 6.5, 28) },
       },
+      {
+        // Top-down cars, SUVs, buses and motorcycles (sprites from components/map/vehicleIcons.ts).
+        id: "vehicles", type: "symbol", source: "vehicles", minzoom: 15,
+        layout: {
+          "icon-image": ["concat", "veh-", ["get", "kind"], "-", ["to-string", ["get", "color"]], night ? "-n" : "-d"],
+          "icon-rotate": ["get", "bearing"],
+          "icon-rotation-alignment": "map",
+          "icon-pitch-alignment": "map",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          // Roughly twice life size, so they read on a phone.
+          "icon-size": ["interpolate", ["exponential", 2], ["zoom"], 15, 0.4, 17, 0.9, 19, 3],
+        },
+      },
+      {
+        // 3D buildings from OpenStreetMap heights; they rise in as you zoom to street level.
+        id: "buildings-3d", type: "fill-extrusion", source: "osm", "source-layer": "building", minzoom: 13,
+        filter: ["!=", ["get", "hide_3d"], true],
+        paint: {
+          "fill-extrusion-color": [
+            "interpolate", ["linear"], ["coalesce", ["get", "render_height"], 10], 0, p.building, 80, p.buildingTall,
+          ] as unknown as string,
+          "fill-extrusion-height": [
+            "interpolate", ["linear"], ["zoom"], 13, 0, 14.5, ["coalesce", ["get", "render_height"], 9],
+          ] as unknown as number,
+          "fill-extrusion-base": [
+            "interpolate", ["linear"], ["zoom"], 13, 0, 14.5, ["coalesce", ["get", "render_min_height"], 0],
+          ] as unknown as number,
+          "fill-extrusion-opacity": night ? 0.92 : 0.96,
+          "fill-extrusion-vertical-gradient": true,
+        },
+      },
       // Locked boroughs: dimmed, with a hazard-striped edge (C19).
       {
         id: "borough-locked", type: "fill", source: "boroughs",
@@ -156,20 +181,6 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         id: "queens-edge", type: "line", source: "boroughs",
         filter: ["==", ["get", "id"], "queens"],
         paint: { "line-color": p.queensEdge, "line-width": 2, "line-blur": 1 },
-      },
-      {
-        // Top-down cars, SUVs, buses and motorcycles (sprites from components/map/vehicleIcons.ts).
-        id: "vehicles", type: "symbol", source: "vehicles", minzoom: 15,
-        layout: {
-          "icon-image": ["concat", "veh-", ["get", "kind"], "-", ["to-string", ["get", "color"]], night ? "-n" : "-d"],
-          "icon-rotate": ["get", "bearing"],
-          "icon-rotation-alignment": "map",
-          "icon-pitch-alignment": "map",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          // Roughly twice life size, so they read on a phone.
-          "icon-size": ["interpolate", ["exponential", 2], ["zoom"], 15, 0.4, 17, 0.9, 19, 3],
-        },
       },
       {
         id: "street-names", type: "symbol", source: "osm", "source-layer": "transportation_name", minzoom: 15,

@@ -398,7 +398,7 @@ function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorA
     <StepSheet
       cta={
         <button
-          className="btn btn-green"
+          className="btn btn-taxi"
           disabled={!pick || pending}
           onClick={() =>
             pick &&
