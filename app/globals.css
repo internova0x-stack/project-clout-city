@@ -20,6 +20,7 @@
   /* gradients */
   --g-gold:linear-gradient(180deg,#FEF3C0 0%,#E1BC85 35%,#AD8759 70%,#7E5932 100%);
   --g-neon:linear-gradient(90deg,#FFC21A,#FF6A3D,#FF2E88);
+  --g-story:linear-gradient(100deg,#9FDCFF 0%,#8EE6D8 55%,#7FE0A8 100%);
   --g-stage:linear-gradient(180deg,#1B1622,#2E2236);
   --g-hazard:repeating-linear-gradient(45deg,#FFC21A 0 8px,#14111A 8px 16px);
   --g-night-reveal:radial-gradient(circle at 100% 0%,rgba(255,46,136,.30),transparent 55%),radial-gradient(circle at 0% 100%,rgba(255,194,26,.20),transparent 55%),#14111A;
@@ -570,7 +571,7 @@ a { color:inherit; }
 .reason-banner.price { background:var(--neon-tint); }
 .reason-banner.info { background:var(--taxi-tint); }
 .story-prompt { position:absolute; z-index:17; top:calc(118px + var(--safe-top)); left:12px; right:12px; max-width:520px; margin:0 auto; display:flex; align-items:stretch;
-  border-radius:var(--r-lg); background:var(--g-neon); box-shadow:var(--elev-3); animation:rise-in .4s ease-out; }
+  border-radius:var(--r-lg); background:var(--g-story); box-shadow:var(--elev-3), 0 6px 18px rgba(46,160,140,.25); animation:rise-in .4s ease-out; }
 .story-prompt-main { flex:1; min-width:0; display:flex; align-items:center; gap:10px; padding:12px; color:var(--night-900); }
 .story-prompt-tile { width:40px; height:40px; border-radius:var(--r-sm); background:#fff; display:grid; place-items:center; font-size:20px; flex:none; box-shadow:var(--elev-1); }
 .story-prompt-close { width:36px; display:grid; place-items:center; color:rgba(20,17,26,.6); }
