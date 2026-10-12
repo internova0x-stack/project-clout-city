@@ -10,7 +10,10 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle } from "@/lib/styles";
-import { PLACES, placeById, type Place } from "@/lib/city";
+import { CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
+import { cityMinutes } from "@/lib/cityClock";
+import { GAME_CONFIG } from "@/lib/config";
+import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
 import { activeGig, dueBills, equippedItems, gigReady, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
@@ -18,7 +21,6 @@ import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal } from "./city/Phone";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, type PlaceHandlers } from "./city/Places";
-import { ApartmentBackdrop } from "./ApartmentBackdrop";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
@@ -31,7 +33,7 @@ import { Sheet } from "./Sheet";
 import { useCityClock } from "./useCityClock";
 import { usePlayersOnline } from "./usePresence";
 
-const Avatar3D = dynamic(() => import("./avatar/Avatar3D"), { ssr: false });
+const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
 
 export interface GameActions {
   setTutorialState: (state: "done" | "skipped") => Promise<void>;
@@ -95,6 +97,7 @@ export function GameShell({
   const pendingPwa = useRef(false);
   const online = usePlayersOnline(player.id);
   const [busy, setBusy] = useState<string | null>(null);
+  const [arranging, setArranging] = useState(false);
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [place, setPlace] = useState<Place | null>(null);
@@ -158,6 +161,17 @@ export function GameShell({
     setInside(null);
     setPlace(p);
     mapRef.current?.moveCamera(p.at, 15.5);
+  };
+  /** A tap on something in a place's room: run its action, or the event that's on. */
+  const useInPlace = (p: Place, it: RoomItem) => {
+    if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
+    if (it.use?.kind !== "events") return;
+    const minutes = cityMinutes(gameNow, GAME_CONFIG.cityClock);
+    const events = CLUB_EVENTS.filter((e) => e.placeId === p.id);
+    const live = events.find((e) => eventOpen(e, minutes) && !city?.attendedToday.includes(e.id));
+    if (live) return handlers.onAttendEvent(live.id);
+    const next = events.filter((e) => !eventOpen(e, minutes)).sort((a, b) => realMinutesUntilOpen(a, minutes) - realMinutesUntilOpen(b, minutes))[0];
+    setToast(next ? `Dancing solo. ${next.name} opens in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went tonight. Dancing anyway.");
   };
   const clearGain = useCallback(() => { setGain(null); setToast(null); }, []);
   const gig = city ? activeGig(city) : undefined;
@@ -288,22 +302,41 @@ export function GameShell({
   const onLockedTap = useCallback((name: string) => setSoon({ key: "place", title: `${name} is locked` }), []);
 
   return (
-    <main className={`game${inside && city ? " inside" : ""}`}>
+    <main className={`game${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}`}>
       {inside && city ? (
         <InteriorScene
           place={inside}
           state={city}
-          daytime={daytime}
           handlers={handlers}
           onBack={() => setInside(null)}
-          avatar={<Avatar3D look={look} outfit={outfit} framing="room" interactive={false} label={`${me.display_name} inside ${inside.name}`} />}
+          room={
+            <Room3D
+              template={PLACE_TEMPLATES[inside.template && inside.template !== "apartment" ? inside.template : "cafe"]}
+              look={look}
+              outfit={outfit}
+              daytime={daytime}
+              sign={inside.name}
+              label={`${me.display_name} inside ${inside.name}`}
+              insetBottom={170}
+              onUse={(it) => useInPlace(inside, it)}
+            />
+          }
         />
       ) : tab === "home" ? (
         <div className="layer">
-          <ApartmentBackdrop daytime={daytime} />
-          <div style={{ position: "absolute", left: 0, right: 0, bottom: "max(64px, 7%)", height: "54%" }}>
-            <Avatar3D look={look} outfit={outfit} framing="room" label={`${me.display_name}, wearing ${style.label}`} />
-          </div>
+          <Room3D
+            template={HOME_TEMPLATES[me.home_id ?? ""] ?? HOME_TEMPLATES.astoria_studio}
+            layout={city?.homeLayout}
+            look={look}
+            outfit={outfit}
+            daytime={daytime}
+            editable={cityOn && flow === "none"}
+            label={`${me.display_name} at home, wearing ${style.label}`}
+            insetBottom={170}
+            onUse={(it) => { if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile"); }}
+            onEditingChange={setArranging}
+            onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
+          />
           <button
             className="glass-hud profile-chip"
             onClick={() => setPanel("profile")}

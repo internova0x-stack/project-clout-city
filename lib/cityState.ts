@@ -77,6 +77,8 @@ export interface CityState {
   /** Staging time travel: added to the real clock everywhere. */
   clockOffsetSeconds: number;
   devTools: boolean;
+  /** Saved furniture positions at home (lib/rooms.ts LayoutEntry[]), or null for the default. */
+  homeLayout: unknown;
 }
 
 /** What changed after an action, for the reward toast. */
@@ -103,6 +105,7 @@ export interface CityApi {
   equipItem(itemId: number, on: boolean): Promise<CityResult>;
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
+  saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,6 +127,7 @@ const ERRORS: Record<string, string> = {
   not_rentable: "That can't be rented.",
   not_wearable: "You can't wear that. You could try, but no.",
   dev_tools_off: "Time travel is switched off here.",
+  bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
 };
 

@@ -20,6 +20,11 @@ export interface AvatarParts {
   torso: Object3D;
   /** Eye groups, squashed on the y axis to blink. */
   eyes: Object3D[];
+  /** Hip-pivoted legs and shoulder-pivoted arms (left, right), swung to walk or bent to sit. */
+  legs: Object3D[];
+  /** Knee pivots inside each leg (left, right). */
+  knees: Object3D[];
+  arms: Object3D[];
   dispose(): void;
 }
 
@@ -167,17 +172,35 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const thighR = outfit.bottom === "leggings" ? b.thigh * 0.97 : outfit.bottom === "pants" ? b.thigh * 1.06 : b.thigh;
   const calfR = outfit.bottom === "pants" ? b.calf * 1.18 : b.calf;
   const boots = outfit.bottom === "skirt";
+  const legs: Object3D[] = [];
+  const knees: Object3D[] = [];
   for (const s of [-1, 1]) {
     const hipX = s * (b.hip * 0.5);
     const ankleX = s * 0.1;
-    body.add(taper(thighR, calfR * 1.05, [hipX, 0.9, 0], [s * 0.092, 0.5, 0.008], legMat));
-    body.add(taper(calfR * 1.05, calfR * 0.72, [s * 0.092, 0.5, 0.008], [ankleX, 0.1, 0], legMat));
-    if (outfit.bottom === "shorts") body.add(taper(thighR * 1.18, thighR * 1.02, [hipX, 0.92, 0], [s * 0.096, 0.68, 0.005], bottom));
-    if (boots) body.add(mesh(geo(new CylinderGeometry(b.calf * 1.2, b.calf * 1.25, 0.3, 7)), shoe, ankleX, 0.22, 0));
+    // Pivot at the hip so the whole leg swings; parts keep their body-space positions.
+    const leg = new Group();
+    leg.position.set(0, 0.9, 0);
+    const inner = new Group();
+    inner.position.set(0, -0.9, 0);
+    leg.add(inner);
+    inner.add(taper(thighR, calfR * 1.05, [hipX, 0.9, 0], [s * 0.092, 0.5, 0.008], legMat));
+    if (outfit.bottom === "shorts") inner.add(taper(thighR * 1.18, thighR * 1.02, [hipX, 0.92, 0], [s * 0.096, 0.68, 0.005], bottom));
+    // Knee pivot for the lower leg.
+    const knee = new Group();
+    knee.position.set(0, 0.5, 0.008);
+    const lower = new Group();
+    lower.position.set(0, -0.5, -0.008);
+    knee.add(lower);
+    inner.add(knee);
+    knees.push(knee);
+    lower.add(taper(calfR * 1.05, calfR * 0.72, [s * 0.092, 0.5, 0.008], [ankleX, 0.1, 0], legMat));
+    if (boots) lower.add(mesh(geo(new CylinderGeometry(b.calf * 1.2, b.calf * 1.25, 0.3, 7)), shoe, ankleX, 0.22, 0));
     const foot = mesh(geo(new CapsuleGeometry(0.05, 0.12, 2, 6)), shoe, ankleX * 1.05, 0.05, 0.045);
     foot.rotation.x = Math.PI / 2;
     foot.scale.set(1.15, 1, 0.95);
-    body.add(foot);
+    lower.add(foot);
+    body.add(leg);
+    legs.push(leg);
   }
 
   // ---- Bottoms ----
@@ -241,8 +264,10 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const shortSleeves = outfit.top === "tee" || outfit.top === "crop";
   const sleeveMat = outfit.top === "vest" ? accent : top;
   const armScale = outfit.top === "puffer" ? 1.35 : 1;
+  const arms: Object3D[] = [];
   for (const s of [-1, 1]) {
     const arm = new Group();
+    arms.push(arm);
     arm.position.set(s * (b.shoulder - 0.005), 1.42, 0);
     arm.rotation.z = s * 0.13;
     arm.add(taper(b.arm * 1.12 * armScale, b.forearm * 1.08 * armScale, [0, 0, 0], [0, -0.28, -0.01], shortSleeves ? skin : sleeveMat));
@@ -521,6 +546,9 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     head,
     torso,
     eyes,
+    legs,
+    knees,
+    arms,
     dispose() {
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, eventAvailability, type CityState } from "@/lib/cityState";
@@ -9,7 +10,7 @@ import { distanceMiles, type LatLng } from "@/lib/map/geo";
 import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
-import { InteriorBackdrop, PlaceArt } from "./PlaceArt";
+import { PlaceArt } from "./PlaceArt";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = { food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home" };
 
@@ -122,31 +123,33 @@ export function LocationSheet({
   );
 }
 
-/** C38: the interior. The avatar stands in the scene; actions sit in a panel; back returns to the map. */
+/** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, daytime, handlers, onBack, avatar,
+  place, state, handlers, onBack, room,
 }: {
   place: Place;
   state: CityState;
-  daytime: boolean;
   handlers: PlaceHandlers;
   onBack: () => void;
-  avatar: React.ReactNode;
+  room: React.ReactNode;
 }) {
-  const template = place.template && place.template !== "apartment" ? place.template : "cafe";
+  const [open, setOpen] = useState(false);
   return (
     <div className="layer interior">
-      <InteriorBackdrop template={template} place={place} daytime={daytime} />
-      <div className="interior-avatar">{avatar}</div>
+      {room}
       <button className="pill-glass glass-hud interior-back" onClick={onBack}>
         <ChevronLeftIcon size={18} /> Map
       </button>
-      <section className="interior-panel" aria-label={`${place.name} actions`}>
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+      <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
+        <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="display-sm">{place.emoji} {place.name}</span>
-          <span className="meta">{place.neighborhood}</span>
-        </div>
-        <ActionList place={place} state={state} handlers={handlers} compact />
+          <span className="meta">{open ? "Hide" : "All actions"}</span>
+        </button>
+        {open ? (
+          <ActionList place={place} state={state} handlers={handlers} compact />
+        ) : (
+          <p className="meta" style={{ margin: "4px 0 0" }}>Tap the floor to walk. Tap a label to use it.</p>
+        )}
       </section>
     </div>
   );

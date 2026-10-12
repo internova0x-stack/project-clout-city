@@ -39,6 +39,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     attendedToday: [],
     clockOffsetSeconds: 0,
     devTools: true,
+    homeLayout: null,
   };
 }
 
@@ -167,6 +168,10 @@ export function createSimApi(initial: CityState): CityApi {
       b.status = "paid";
       b.paid_at = new Date(now()).toISOString();
       return ok({ cash: -b.amount });
+    },
+    saveHomeLayout(layout) {
+      s.homeLayout = layout;
+      return ok();
     },
     setClockOffset(hours) {
       s.clockOffsetSeconds = Math.round(hours * 3600);

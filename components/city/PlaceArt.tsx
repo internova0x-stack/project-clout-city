@@ -1,8 +1,8 @@
-// Placeholder illustrations for places (C37) and their interiors (C38). Drawn from
+// Placeholder illustrations for places (C37). Drawn from
 // each place's palette so every location looks distinct; real art replaces these
-// through the same components, keyed by place id and template.
+// through the same component, keyed by place id.
 
-import type { InteriorTemplate, Place } from "@/lib/city";
+import type { Place } from "@/lib/city";
 
 /** 16:9 exterior for the location card. */
 export function PlaceArt({ place, daytime }: { place: Place; daytime: boolean }) {
@@ -65,98 +65,6 @@ export function PlaceArt({ place, daytime }: { place: Place; daytime: boolean })
           {place.emoji} {place.name.length > 16 ? place.name.split(" ").slice(0, 2).join(" ") : place.name}
         </text>
       </g>
-    </svg>
-  );
-}
-
-/** Full-screen interior backdrop (C38): club, café and counter-shop templates. */
-export function InteriorBackdrop({ template, place, daytime }: { template: Exclude<InteriorTemplate, "apartment">; place: Place; daytime: boolean }) {
-  const [a, b, c] = place.palette;
-  const id = `ib-${place.id}`;
-  const light = template === "club" ? false : daytime;
-  return (
-    <svg className="layer" viewBox="0 0 390 844" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <defs>
-        <linearGradient id={`${id}-wall`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={template === "club" ? "#120E1A" : light ? b : c} />
-          <stop offset="1" stopColor={template === "club" ? c : light ? shade(b, -0.12) : shade(c, 0.1)} />
-        </linearGradient>
-        <radialGradient id={`${id}-glow`} cx=".5" cy=".2" r=".7">
-          <stop offset="0" stopColor={a} stopOpacity={template === "club" ? 0.55 : 0.25} />
-          <stop offset="1" stopColor={a} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="390" height="844" fill={`url(#${id}-wall)`} />
-      <rect width="390" height="844" fill={`url(#${id}-glow)`} />
-
-      {template === "club" && (
-        <g>
-          {[-1, 1].map((s) => (
-            <polygon key={s} points={`195,90 ${195 + s * 60},90 ${195 + s * 260},640 ${195 + s * 120},640`} fill={s < 0 ? a : b} opacity=".18" />
-          ))}
-          <circle cx="195" cy="110" r="26" fill="#C9CED6" />
-          {Array.from({ length: 24 }).map((_, i) => (
-            <rect key={i} x={177 + (i % 6) * 6} y={92 + Math.floor(i / 6) * 9} width="5" height="7" fill="#fff" opacity={(i * 7) % 3 ? 0.35 : 0.9} />
-          ))}
-          <rect x="30" y="330" width="330" height="40" rx="8" fill="#1F1B26" />
-          <text x="195" y="357" textAnchor="middle" fontSize="20" fontWeight="800" letterSpacing="3" fill={a} fontFamily="system-ui, sans-serif">{place.name.toUpperCase()}</text>
-          <rect y="610" width="390" height="234" fill="#0E0B12" />
-          {Array.from({ length: 6 }).map((_, r) =>
-            Array.from({ length: 7 }).map((__, k) => (
-              <rect key={`${r}-${k}`} x={k * 58 - 10 + (r % 2) * 29} y={620 + r * 38} width="54" height="34" rx="3"
-                fill={(r + k) % 3 === 0 ? a : (r + k) % 3 === 1 ? b : "#1F1B26"} opacity=".35" />
-            )),
-          )}
-        </g>
-      )}
-
-      {template === "cafe" && (
-        <g>
-          <rect x="30" y="140" width="330" height="190" rx="12" fill={light ? "#FFF6E0" : "#2A2530"} opacity=".85" />
-          <text x="195" y="190" textAnchor="middle" fontSize="22" fontWeight="800" fill={c} fontFamily="system-ui, sans-serif">{place.name}</text>
-          {["Oat latte ... $6", "Gossip shot ... $4", "Avocado toast ... $14"].map((t, i) => (
-            <text key={t} x="70" y={232 + i * 30} fontSize="15" fill={light ? "#4F4A56" : "#FFF6E0"} fontFamily="system-ui, sans-serif">{t}</text>
-          ))}
-          {[60, 150, 240, 330].map((x) => (
-            <g key={x}>
-              <line x1={x} y1="0" x2={x} y2="80" stroke="#1F1B26" strokeWidth="2" />
-              <circle cx={x} cy="92" r="14" fill={a} />
-              <circle cx={x} cy="92" r="24" fill="#FFC21A" opacity=".18" />
-            </g>
-          ))}
-          <rect y="560" width="390" height="70" fill={a} />
-          <rect y="548" width="390" height="16" fill={shade(a, -0.25)} />
-          <rect y="630" width="390" height="214" fill={shade(c, -0.1)} />
-          {[40, 120, 300].map((x) => <rect key={x} x={x} y="520" width="34" height="30" rx="4" fill="#fff" opacity=".9" />)}
-        </g>
-      )}
-
-      {template === "counter" && (
-        <g>
-          {Array.from({ length: 4 }).map((_, r) => (
-            <g key={r}>
-              <rect x="20" y={130 + r * 90} width="350" height="8" fill="#1F1B26" opacity=".6" />
-              {Array.from({ length: 9 }).map((__, k) => (
-                <rect key={k} x={28 + k * 38} y={92 + r * 90} width="30" height="38" rx="3"
-                  fill={[a, b, "#D93A2F", "#6C8CFF", "#FFF6E0"][(r * 3 + k) % 5]} opacity=".9" />
-              ))}
-            </g>
-          ))}
-          <rect x="40" y="480" width="150" height="34" rx="6" fill="#14111A" />
-          <text x="115" y="503" textAnchor="middle" fontSize="15" fontWeight="800" fill={b} fontFamily="system-ui, sans-serif">OPEN 24 HRS</text>
-          <rect y="560" width="390" height="80" fill={a} />
-          <rect y="548" width="390" height="16" fill={shade(a, -0.3)} />
-          <rect y="640" width="390" height="204" fill={light ? "#CFC6B8" : "#2A2530"} />
-          <g transform="translate(300 528)">
-            <ellipse cx="0" cy="18" rx="22" ry="10" fill="#E8A44A" />
-            <circle cx="16" cy="6" r="10" fill="#E8A44A" />
-            <polygon points="10,-2 14,-12 18,-2" fill="#E8A44A" />
-            <polygon points="18,-2 22,-12 24,0" fill="#E8A44A" />
-          </g>
-        </g>
-      )}
-
-      {!light && <rect width="390" height="844" fill="#0A0814" opacity={template === "club" ? 0 : 0.25} />}
     </svg>
   );
 }

@@ -53,6 +53,9 @@ export async function equipItem(itemId: number, on: boolean) {
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });
 }
+export async function saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]) {
+  return run("save_home_layout", { p_layout: layout });
+}
 export async function setClockOffset(hours: number) {
   return run("dev_set_clock_offset", { p_hours: hours });
 }

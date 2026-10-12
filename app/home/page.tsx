@@ -4,7 +4,7 @@ import { getClique, requirePlayer } from "@/lib/player";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { attendFirstParty, finishHandoff, setMusicMuted, setTutorialState } from "./actions";
 import {
-  acceptGig, attendClubEvent, buyItem, collectGig, doCityAction, equipItem, payBill, refreshCity, sellItem, setClockOffset,
+  acceptGig, attendClubEvent, buyItem, collectGig, doCityAction, equipItem, payBill, refreshCity, saveHomeLayout, sellItem, setClockOffset,
 } from "./cityActions";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +32,7 @@ export default async function HomePage() {
         equipItem,
         payBill,
         setClockOffset,
+        saveHomeLayout,
       }}
     />
   );

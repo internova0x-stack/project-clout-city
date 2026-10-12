@@ -27,7 +27,7 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    button says Google isn't switched on yet and email keeps working.
 8. **Realtime (v0.2)**: the "people online" pill uses Supabase Realtime presence, which is on by
    default. Nothing to set up.
-9. **The city (v0.3)**: run `0004_the_city.sql`. Until it runs, the game still opens and the
+9. **The city (v0.3)**: run `0004_the_city.sql`, `0005_monthly_bills.sql` and `0006_home_layout.sql`. Until it runs, the game still opens and the
    city screens show "Coming soon". The economy content (places, prices, Shop) lives in
    `game_settings` row `city`; regenerate it from `lib/city.ts` with
    `node --experimental-strip-types scripts/gen-city-seed.ts` in a new migration when it changes.
