@@ -7,6 +7,7 @@ import { actionAvailability, eventAvailability, type CityState } from "@/lib/cit
 import { GAME_CONFIG } from "@/lib/config";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
+import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
@@ -173,7 +174,7 @@ export function PlacesSheet({
             const visited = (state?.visitsToday[p.id] ?? 0) > 0;
             return (
               <button key={p.id} className="list-row" onClick={() => onPick(p)}>
-                <span className={`map-pin-tile tile-${p.category}`} aria-hidden="true" style={{ width: 40, height: 40, fontSize: 20 }}>{p.emoji}</span>
+                <span className="map-pin-tile" aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 12, background: tileBackground(glyphFor(p)) }}><Glyph name={glyphFor(p)} size={24} /></span>
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                   <span className="title" style={{ display: "block" }}>{p.name}</span>
                   <span className="meta">{p.neighborhood} · {d.toFixed(1)} mi{visited ? " · Visited today" : ""}</span>

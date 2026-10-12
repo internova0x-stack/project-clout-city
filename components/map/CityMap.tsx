@@ -7,6 +7,7 @@ import boroughData from "@/lib/map/boroughs.geo.json";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { buildMapStyle, type MapTheme } from "@/lib/map/style";
+import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { startVehicles } from "./vehicles";
 import type { PlacePin } from "@/lib/places";
 
@@ -240,7 +241,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 aria-label={`${pin.name}, ${pin.neighborhood}`}
               >
                 <span className="map-pin-pill glass-hud">
-                  <span className={`map-pin-tile tile-${pin.category}`} aria-hidden="true">{pin.emoji}</span>
+                  <span className="map-pin-tile" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={14} /></span>
                   <span className="name">{pin.name}</span>
                 </span>
                 <span className="map-pin-stem" />

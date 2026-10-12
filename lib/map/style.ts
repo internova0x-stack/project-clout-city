@@ -37,7 +37,12 @@ export const PALETTES: Record<MapTheme, Palette> = {
   },
 };
 
-const MINOR = ["minor", "service", "track"];
+// Service alleys and tracks are left out: in New York many run through building
+// passages and parking garages, so with 3D buildings they look like roads going
+// under buildings. Tunnels are left out for the same reason.
+const MINOR = ["minor"];
+const NOT_TUNNEL = ["!=", ["get", "brunnel"], "tunnel"];
+const BRIDGE = ["==", ["get", "brunnel"], "bridge"];
 const MAJOR = ["primary", "secondary", "tertiary", "trunk"];
 
 /** Line widths in pixels by zoom, so streets thicken as you zoom in like a street map. */
@@ -86,31 +91,31 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
       // Road glow (night only): a soft, wide halo under the main streets.
       {
         id: "road-glow", type: "line", source: "osm", "source-layer": "transportation",
-        filter: ["in", ["get", "class"], ["literal", ["motorway", ...MAJOR]]],
+        filter: ["all", ["in", ["get", "class"], ["literal", ["motorway", ...MAJOR]]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.roadGlow, "line-width": roadWidth([[12, 4], [14, 12]], TWO_LANE_M * 2.2), "line-blur": width(3, 10, 24) },
       },
       {
         id: "road-minor-casing", type: "line", source: "osm", "source-layer": "transportation", minzoom: 14,
-        filter: ["in", ["get", "class"], ["literal", MINOR]],
+        filter: ["all", ["in", ["get", "class"], ["literal", MINOR]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.minorCasing, "line-width": roadWidth([[12, 0.5], [14, 3.6]], TWO_LANE_M + 1.2) },
       },
       {
         id: "road-major-casing", type: "line", source: "osm", "source-layer": "transportation", minzoom: 11,
-        filter: ["in", ["get", "class"], ["literal", MAJOR]],
+        filter: ["all", ["in", ["get", "class"], ["literal", MAJOR]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.majorCasing, "line-width": roadWidth([[11, 1.5], [14, 5.6]], TWO_LANE_M * 1.3 + 1.2) },
       },
       {
         id: "road-minor", type: "line", source: "osm", "source-layer": "transportation", minzoom: 12,
-        filter: ["in", ["get", "class"], ["literal", MINOR]],
+        filter: ["all", ["in", ["get", "class"], ["literal", MINOR]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.minor, "line-width": roadWidth([[12, 0.4], [14, 2.8]], TWO_LANE_M) },
       },
       {
         id: "road-major", type: "line", source: "osm", "source-layer": "transportation",
-        filter: ["in", ["get", "class"], ["literal", MAJOR]],
+        filter: ["all", ["in", ["get", "class"], ["literal", MAJOR]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.major, "line-width": roadWidth([[11, 1], [14, 4.6]], TWO_LANE_M * 1.3) },
       },
@@ -121,13 +126,13 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
       },
       {
         id: "highway-casing", type: "line", source: "osm", "source-layer": "transportation",
-        filter: ["==", ["get", "class"], "motorway"],
+        filter: ["all", ["==", ["get", "class"], "motorway"], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.highwayCasing, "line-width": roadWidth([[10, 2], [14, 8]], TWO_LANE_M * 1.6 + 1.2) },
       },
       {
         id: "highway", type: "line", source: "osm", "source-layer": "transportation",
-        filter: ["==", ["get", "class"], "motorway"],
+        filter: ["all", ["==", ["get", "class"], "motorway"], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.highway, "line-width": roadWidth([[10, 1.4], [14, 6.5]], TWO_LANE_M * 1.6) },
       },
@@ -161,6 +166,23 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
           ] as unknown as number,
           "fill-extrusion-opacity": night ? 0.92 : 0.96,
           "fill-extrusion-vertical-gradient": true,
+        },
+      },
+      // Bridges and elevated highways are drawn again above the 3D buildings, so
+      // nothing appears to pass under a building.
+      {
+        id: "bridge-casing", type: "line", source: "osm", "source-layer": "transportation", minzoom: 13,
+        filter: ["all", ["in", ["get", "class"], ["literal", ["motorway", ...MAJOR]]], BRIDGE],
+        layout: { "line-cap": "butt", "line-join": "round" },
+        paint: { "line-color": p.highwayCasing, "line-width": roadWidth([[13, 3], [14, 8]], TWO_LANE_M * 1.6 + 1.2) },
+      },
+      {
+        id: "bridge", type: "line", source: "osm", "source-layer": "transportation", minzoom: 13,
+        filter: ["all", ["in", ["get", "class"], ["literal", ["motorway", ...MAJOR]]], BRIDGE],
+        layout: { "line-cap": "butt", "line-join": "round" },
+        paint: {
+          "line-color": ["case", ["==", ["get", "class"], "motorway"], p.highway, p.major] as unknown as string,
+          "line-width": roadWidth([[13, 2], [14, 6.5]], TWO_LANE_M * 1.6),
         },
       },
       // Locked boroughs: dimmed, with a hazard-striped edge (C19).

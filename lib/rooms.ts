@@ -45,7 +45,7 @@ export interface RoomTemplate {
   wallAccent: string;
   floor: string;
   floorKind: "wood" | "tile" | "concrete" | "checker";
-  /** Night-only club lighting and an always-dim room. */
+  /** Club lighting: warm night-time interior with colored stage lights, whatever the hour. */
   dark?: boolean;
   window?: boolean;
   items: RoomItem[];
@@ -139,7 +139,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
 
 export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter", RoomTemplate> = {
   club: {
-    id: "club", w: 8.0, d: 7.0, wall: "#1F1B26", wallAccent: "#FF2E88", floor: "#14111A", floorKind: "concrete", dark: true,
+    id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
       { id: "bar", kind: "bar", x: -2.2, z: -2.9, rot: 0, use: { kind: "action", actionId: "visit" }, label: "Get seen" },
       { id: "stool-1", kind: "barStool", x: -3.2, z: -2.1, rot: 0 },

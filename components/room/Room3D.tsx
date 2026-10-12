@@ -99,7 +99,7 @@ export default function Room3D(props: Room3DProps) {
     if (!host) return;
     let renderer: WebGLRenderer;
     try {
-      renderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference: "low-power" });
+      renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
     } catch {
       setFailed(true);
       return;
@@ -107,7 +107,8 @@ export default function Room3D(props: Room3DProps) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = template.dark ? 1.15 : 1.0;
+    renderer.setClearColor(0x000000, 0);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.domElement.style.touchAction = "none";
@@ -116,12 +117,13 @@ export default function Room3D(props: Room3DProps) {
     const night = !daytime || !!template.dark;
     const kit = makeKit();
     const scene = new Scene();
-    scene.background = new Color(template.dark ? "#0B0910" : daytime ? "#2A2433" : "#120F1A");
+    // Transparent: the gradient behind the room is CSS (see roomBackdrop).
 
     // Lights
-    scene.add(new HemisphereLight(night ? 0x8ea0ff : 0xfff6e0, night ? 0x1a1426 : 0x8a7a6a, template.dark ? 0.7 : night ? 0.55 : 1.1));
-    scene.add(new AmbientLight(0xffffff, template.dark ? 0.35 : 0.25));
-    const sun = new DirectionalLight(night ? 0xc9d6ff : 0xfff1d6, template.dark ? 0.35 : night ? 0.6 : 1.6);
+    // Night indoors reads as warm lamplight, not darkness; the club adds colored stage lights.
+    scene.add(new HemisphereLight(night ? 0xffe2c4 : 0xfff6e0, night ? 0x4a3050 : 0x8a7a6a, template.dark ? 1.05 : night ? 0.85 : 1.1));
+    scene.add(new AmbientLight(night ? 0xffd9b8 : 0xffffff, template.dark ? 0.5 : night ? 0.35 : 0.25));
+    const sun = new DirectionalLight(night ? 0xffd2a8 : 0xfff1d6, template.dark ? 0.9 : night ? 0.85 : 1.6);
     sun.position.set(4, 7, 5);
     sun.castShadow = true;
     sun.shadow.mapSize.set(1024, 1024);
@@ -131,8 +133,8 @@ export default function Room3D(props: Room3DProps) {
     scene.add(sun);
     const glowLights: PointLight[] = [];
     if (template.dark) {
-      for (const [c, x] of [[0xff2e88, -2], [0x6b2bd9, 2], [0xffc21a, 0]] as const) {
-        const l = new PointLight(c, 9, 10, 1.4);
+      for (const [c, x] of [[0xff2e88, -2], [0x8a5cff, 2], [0xffc21a, 0]] as const) {
+        const l = new PointLight(c, 12, 11, 1.2);
         l.position.set(x, 2.3, 0);
         scene.add(l);
         glowLights.push(l);
@@ -181,6 +183,9 @@ export default function Room3D(props: Room3DProps) {
 
     const furniture = new Group();
     scene.add(furniture);
+    // A warm pool of light from the floor lamp after dark.
+    const lampLight = night && !template.dark ? new PointLight(0xffc98a, 6, 6, 1.4) : null;
+    if (lampLight) scene.add(lampLight);
     const ring = new Mesh(new RingGeometry(0.1, 0.13, 32), new MeshStandardMaterial({ color: "#40B589", emissive: "#40B589", transparent: true, opacity: 0.9 }));
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.02;
@@ -380,6 +385,7 @@ export default function Room3D(props: Room3DProps) {
         }
         b.obj.position.set(it.x, 0, it.z);
         b.obj.rotation.y = (it.rot * Math.PI) / 2;
+        if (lampLight && it.kind === "floorLamp") lampLight.position.set(it.x, 1.5, it.z);
       }
     }
 
@@ -476,7 +482,7 @@ export default function Room3D(props: Room3DProps) {
   const tapChip = (it: RoomItem) => actionsRef.current?.goUse(it);
 
   return (
-    <div className="room3d layer">
+    <div className="room3d layer" style={{ background: roomBackdrop(template, daytime) }}>
       <div ref={hostRef} className="layer" role="img" aria-label={label} />
       {failed && (
         <div className="layer" style={{ display: "grid", placeItems: "center", padding: 32, textAlign: "center" }}>
@@ -715,4 +721,29 @@ function signTexture(text: string, t: RoomTemplate): CanvasTexture {
   const tex = new CanvasTexture(c);
   tex.colorSpace = SRGBColorSpace;
   return tex;
+}
+
+/** The gradient behind each room (CSS, so it stays crisp and costs nothing to draw). */
+export function roomBackdrop(t: RoomTemplate, daytime: boolean): string {
+  const day = daytime && !t.dark;
+  const g: Record<string, [string, string]> = {
+    club: [
+      "radial-gradient(120% 70% at 85% 10%, rgba(255,175,123,.55), transparent 60%), linear-gradient(170deg, #3A1C71 0%, #8E2DE2 45%, #D76D77 80%, #FFAF7B 115%)",
+      "radial-gradient(120% 70% at 85% 10%, rgba(255,175,123,.55), transparent 60%), linear-gradient(170deg, #3A1C71 0%, #8E2DE2 45%, #D76D77 80%, #FFAF7B 115%)",
+    ],
+    cafe: [
+      "radial-gradient(90% 60% at 20% 0%, rgba(255,255,255,.65), transparent 60%), linear-gradient(165deg, #FFF1D6 0%, #FFD3A5 50%, #FDA085 100%)",
+      "radial-gradient(90% 60% at 80% 0%, rgba(248,177,149,.45), transparent 60%), linear-gradient(165deg, #2C2350 0%, #6C5B7B 45%, #C06C84 80%, #F8B195 115%)",
+    ],
+    counter: [
+      "radial-gradient(90% 60% at 80% 0%, rgba(255,255,255,.6), transparent 60%), linear-gradient(165deg, #E8FCC2 0%, #B5EBC2 50%, #7FD6C2 100%)",
+      "radial-gradient(90% 60% at 20% 0%, rgba(150,230,161,.35), transparent 60%), linear-gradient(165deg, #12233D 0%, #1F4E5F 50%, #2E8B63 90%, #96E6A1 125%)",
+    ],
+    home: [
+      "radial-gradient(100% 60% at 85% 5%, rgba(255,255,255,.55), transparent 60%), linear-gradient(160deg, #FFE1C7 0%, #F9B9D4 50%, #B8B5F6 100%)",
+      "radial-gradient(100% 60% at 15% 0%, rgba(224,69,123,.35), transparent 60%), linear-gradient(160deg, #1B1640 0%, #3D2A6E 50%, #8E3F87 90%, #E0457B 125%)",
+    ],
+  };
+  const key = t.id in g ? t.id : "home";
+  return g[key][day ? 0 : 1];
 }

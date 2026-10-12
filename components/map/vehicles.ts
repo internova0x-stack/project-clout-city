@@ -59,7 +59,7 @@ function roadPaths(map: MapLibreMap): Path[] {
   const paths: Path[] = [];
   for (const f of map.querySourceFeatures("osm", { sourceLayer: "transportation" })) {
     const cls = String(f.properties?.class);
-    if (!ROAD_CLASSES.has(cls)) continue;
+    if (!ROAD_CLASSES.has(cls) || f.properties?.brunnel === "tunnel") continue;
     const g = f.geometry;
     const lines = g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
     for (const line of lines) {

@@ -4,18 +4,19 @@ import { useState } from "react";
 import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
+import { Glyph, tileBackground, type GlyphName } from "../AppGlyph";
 import { LedgerList } from "../game/Sheets";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
 type App = "gigs" | "bank" | "settings" | "news" | "messages";
 
-const APPS: { id: App; label: string; emoji: string; bg: string; soon?: boolean }[] = [
-  { id: "news", label: "News", emoji: "📰", bg: "linear-gradient(160deg,#FF2E88,#B0135A)", soon: true },
-  { id: "messages", label: "Messages", emoji: "💬", bg: "linear-gradient(160deg,#5BE07A,#2E8B63)", soon: true },
-  { id: "bank", label: "Bank", emoji: "💵", bg: "linear-gradient(160deg,#6CD4A6,#1F6B4A)" },
-  { id: "gigs", label: "Gigs", emoji: "💼", bg: "linear-gradient(160deg,#FFC21A,#E8692E)" },
-  { id: "settings", label: "Settings", emoji: "⚙️", bg: "linear-gradient(160deg,#9AA0AA,#4F4A56)" },
+const APPS: { id: App; label: string; glyph: GlyphName; soon?: boolean }[] = [
+  { id: "news", label: "News", glyph: "news", soon: true },
+  { id: "messages", label: "Messages", glyph: "chat", soon: true },
+  { id: "bank", label: "Bank", glyph: "cash" },
+  { id: "gigs", label: "Gigs", glyph: "briefcase" },
+  { id: "settings", label: "Settings", glyph: "gear" },
 ];
 
 const TIER_TAG: Record<GigOffer["tier"], { label: string; cls: string }> = {
@@ -68,8 +69,8 @@ export function PhoneModal({
               <div className="phone-grid">
                 {APPS.map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => setApp(a.id)}>
-                    <span className="phone-icon" style={{ background: a.bg }} aria-hidden="true">
-                      {a.emoji}
+                    <span className="phone-icon" style={{ background: tileBackground(a.glyph) }} aria-hidden="true">
+                      <Glyph name={a.glyph} size={32} />
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                     </span>
                     <span>{a.label}</span>
