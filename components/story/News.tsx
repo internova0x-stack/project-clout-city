@@ -101,7 +101,7 @@ function Quiet({ text }: { text: string }) {
 const Byline = () => (
   <div className="row" style={{ gap: 8 }}>
     <span className="lola-avatar" style={{ width: 24, height: 24, fontSize: 13 }} aria-hidden="true">💋</span>
-    <span className="meta">Lola Lowdown</span>
+    <span className="meta" style={{ whiteSpace: "nowrap" }}>Lola Lowdown</span>
   </div>
 );
 
@@ -123,8 +123,8 @@ export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc:
     if (shareTask && !shareTask.done) handlers.completeTask(shareTask.id);
   };
   return (
-    <article id={`beat-${beat.id}`} className="beat-card stack-8">
-      <div className="row" style={{ justifyContent: "space-between" }}>
+    <article id={`beat-${beat.id}`} className="beat-card">
+      <div className="row beat-head" style={{ justifyContent: "space-between" }}>
         <span className="overline">{arc.title}</span>
         <span className="row" style={{ gap: 6 }}>
           {!beat.seen && <span className="badge-new">New</span>}
@@ -132,17 +132,20 @@ export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc:
         </span>
       </div>
       {beat.previously && (
-        <p className="subtext" style={{ margin: 0 }}><span className="overline" style={{ marginRight: 6 }}>Previously</span><em>{beat.previously}</em></p>
+        <div className="beat-prev">
+          <span className="overline">Previously</span>
+          <p className="subtext" style={{ margin: 0 }}><em>{beat.previously}</em></p>
+        </div>
       )}
-      <h3 className="display-md" style={{ margin: 0 }}>{beat.headline}</h3>
+      <h3 className="display-md beat-headline">{beat.headline}</h3>
       {!hideBody && (
         <>
-          {beat.body && <p className="body" style={{ margin: 0 }}>{beat.body}</p>}
-          {beat.hook && <p className="title" style={{ margin: 0 }}>{beat.hook}</p>}
+          {beat.body && <p className="body beat-body">{beat.body}</p>}
+          {beat.hook && <p className="title beat-hook">{beat.hook}</p>}
         </>
       )}
       {beat.cardNote && <p className="meta" style={{ margin: 0 }}>🗳️ {beat.cardNote}</p>}
-      <div className="row" style={{ justifyContent: "space-between" }}>
+      <div className="row beat-foot" style={{ justifyContent: "space-between" }}>
         <Byline />
         <button className="btn btn-night btn-sm" onClick={share}>↗ Share{shareTask && !shareTask.done ? ` · +${shareTask.clout} 🔥` : ""}</button>
       </div>
@@ -290,12 +293,12 @@ function SideArcs({ arcs, feed, handlers }: { arcs: FeedArc[]; feed: StoryFeed; 
     <div className="stack-8">
       <p className="overline" style={{ margin: "8px 0 0" }}>Side stories</p>
       {arcs.map((a) => (a.entitled ? (
-        <div key={a.id} className="stack-8">
-          <span className="title">{a.emoji} {a.title}</span>
+        <div key={a.id} className="stack-12">
+          <span className="title" style={{ display: "block", marginTop: 8 }}>{a.emoji} {a.title}</span>
           {[...a.beats].reverse().map((b) => <BeatCard key={b.id} arc={a} beat={b} feed={feed} handlers={handlers} />)}
         </div>
       ) : (
-        <div key={a.id} className="side-teaser stack-8">
+        <div key={a.id} className="side-teaser stack-12">
           <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
             <span className="title" style={{ minWidth: 0 }}>{a.emoji} {a.title}</span>
             <span className="tag tag-gold">✨ Real cash</span>
@@ -304,9 +307,9 @@ function SideArcs({ arcs, feed, handlers }: { arcs: FeedArc[]; feed: StoryFeed; 
           {a.beats.map((b) => <span key={b.id} className="meta locked-row">🔒 {b.headline}</span>)}
           {(() => {
             const p = a.sku ? handlers.product?.(a.sku) : null;
-            if (p?.pending) return <button className="btn btn-gold btn-sm" style={{ width: "100%" }} disabled>Unlocking… payment received</button>;
+            if (p?.pending) return <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled>Unlocking… payment received</button>;
             return (
-              <button className="btn btn-gold btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
+              <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
                 {handlers.busy === `buy:${a.sku}` ? "Opening checkout…" : p ? `Unlock for ${p.price}` : "Unlock"}
               </button>
             );
