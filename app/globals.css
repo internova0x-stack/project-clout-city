@@ -527,8 +527,8 @@ a { color:inherit; }
 /* Staging time travel */
 .dev-clock { position:absolute; z-index:30; left:12px; top:calc(116px + var(--safe-top)); }
 .game.inside .dev-clock { left:auto; right:12px; top:calc(76px + var(--safe-top)); }
-.dev-clock-pill { background:#6B2BD9; color:#fff; box-shadow:var(--elev-2); }
-.dev-clock-panel { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:var(--r-lg); background:rgba(107,43,217,.92); max-width:300px; }
+.dev-clock-pill { background:linear-gradient(180deg, var(--primary-top), var(--primary-bottom)); color:#fff; box-shadow:var(--elev-2), 0 4px 12px rgba(212,24,52,.3); }
+.dev-clock-panel { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:var(--r-lg); background:linear-gradient(180deg, var(--primary-top), var(--primary-bottom)); box-shadow:var(--elev-3); max-width:300px; }
 .dev-clock-panel .chip { height:32px; padding:0 10px; font-size:13px; }
 
 /* Walkable 3D rooms */

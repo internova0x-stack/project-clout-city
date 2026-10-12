@@ -10,7 +10,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\"",
-    "test:db": "bash scripts/test-db.sh"
+    "test:db": "bash scripts/test-db.sh",
+    "validate:stories": "node --experimental-strip-types --no-warnings scripts/validate-stories.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

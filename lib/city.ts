@@ -58,6 +58,10 @@ export interface PlaceAction {
   confidence?: number;
   /** Witty one-liner under the action. */
   blurb: string;
+  /** Fixed clout instead of the price-based amount (story actions such as the memorial wall). */
+  clout?: number;
+  /** Hidden until a story effect unlocks it (World State place_state unlock_action). */
+  storyUnlock?: boolean;
 }
 
 export interface Place {
@@ -76,6 +80,8 @@ export interface Place {
   palette: [string, string, string];
   tags: string[];
   actions: PlaceAction[];
+  /** Story places (location wave 2) appear on the map only once their arc has started. */
+  story?: string;
 }
 
 export const PLACES: Place[] = [
@@ -141,6 +147,53 @@ export const PLACES: Place[] = [
     lore: "Glass, steel and a lobby that smells like ambition and burnt coffee. The gigs board in the lobby is where careers start, or at least side hustles.",
     actions: [
       { id: "gigs", kind: "gigs", label: "Check the gigs board", energy: 0, blurb: "Bigger pay than a shift. Bigger egos too." },
+    ],
+  },
+  // ---- Location wave 2 (Milestones v0.4): "Who Killed Sarah Bird?" story places, scene cards only ----
+  {
+    id: "skyline-pier", name: "Skyline Pier Residences", emoji: "🏙️", category: "places", neighborhood: "Long Island City", story: "sarah-bird",
+    at: [40.7478, -73.9592], depth: "scene", palette: ["#9DB2FF", "#E8E2EE", "#2A2350"],
+    tags: ["skyline_pier", "residential", "waterfront"],
+    lore: "Glass, concierge and a lobby that smells like eucalyptus and old money pretending to be new. Ray has worked the front desk for twenty years and writes everything down in a little paper book.",
+    actions: [
+      { id: "lobby", kind: "visit", label: "Stop by the lobby", price: 0, energy: 5, blurb: "Ray nods. Ray writes something down." },
+      { id: "memorial", kind: "visit", label: "Leave flowers at the memorial wall", price: 0, energy: 2, clout: 10, mood: 4, storyUnlock: true, blurb: "White roses, handwritten notes and a lot of quiet. Rest easy, Glass Bird." },
+    ],
+  },
+  {
+    id: "hunters-pier", name: "Hunter's Pier", emoji: "🌊", category: "parks", neighborhood: "Long Island City", story: "sarah-bird",
+    at: [40.7432, -73.9612], depth: "scene", palette: ["#7FB3E8", "#F6C9A0", "#2F6B5F"],
+    tags: ["hunters_pier", "waterfront", "park"],
+    lore: "A pier with the best skyline view in Queens and the worst seagulls in the five boroughs. Joggers, dates and one guy with a saxophone, every single night.",
+    actions: [
+      { id: "hangout", kind: "hangout", label: "Watch the skyline", energy: 5, mood: 8, blurb: "The city looks better from over here. Most things do." },
+    ],
+  },
+  {
+    id: "rockaway-diner", name: "Rockaway Diner", emoji: "🥞", category: "food", neighborhood: "Astoria", tier: "Budget", story: "sarah-bird",
+    at: [40.7712, -73.9158], depth: "scene", palette: ["#E5484D", "#F4E3C8", "#2A2530"],
+    tags: ["rockaway_diner", "diner", "dining_budget"],
+    lore: "Vinyl booths, a pie case that rotates like it's auditioning and coffee that has never once been described as artisanal. The waitresses call everyone \"hon\" and mean it.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Grab a booth and a stack", price: 14, energy: -25, blurb: "Pancakes the size of hubcaps. The syrup is self-serve and so is the gossip." },
+    ],
+  },
+  {
+    id: "radiant-harbor", name: "Radiant Harbor Church", emoji: "⛪", category: "places", neighborhood: "Astoria", story: "sarah-bird",
+    at: [40.7738, -73.9296], depth: "scene", palette: ["#F2C46B", "#F4E3C8", "#3A2C5E"],
+    tags: ["radiant_harbor", "church"],
+    lore: "A warm congregation, a very good choir and a building-fund thermometer that's been at 90% for three years. The pastor hosts a podcast. Of course he does.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Sit in on a service", price: 0, energy: 5, mood: 5, blurb: "The choir is genuinely incredible. The coffee after is genuinely not." },
+    ],
+  },
+  {
+    id: "pressed-iron-gym", name: "Pressed Iron Gym", emoji: "🏋️", category: "places", neighborhood: "Astoria", story: "sarah-bird",
+    at: [40.7662, -73.9118], depth: "scene", palette: ["#6C8CFF", "#C7CCD4", "#1F1B26"],
+    tags: ["pressed_iron", "gym"],
+    lore: "Chalk dust, mirrors and men who grunt in full sentences. The front desk keeps very good membership records, which some people find inconvenient.",
+    actions: [
+      { id: "workout", kind: "visit", label: "Buy a day pass and lift", price: 15, energy: 20, confidence: 6, mood: 3, blurb: "You lifted. You were seen lifting. Both count." },
     ],
   },
 ];
@@ -219,6 +272,8 @@ export interface ShopItem {
   rentPerWeek?: number;
   /** Houses: replaces the rented home. */
   neighborhood?: string;
+  /** Only sold while a story effect opens it (World State availability "open" by sku). */
+  storyOnly?: boolean;
 }
 
 export const SHOP_CATEGORIES: { id: ShopCategory; label: string; emoji: string }[] = [
@@ -237,6 +292,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "fit-wide-trousers", category: "fashion", name: "Wide-leg trousers", emoji: "👖", price: 140, clout: 18, rating: 3, blurb: "Extra fabric, extra confidence.", wear: { slot: "bottom", kind: "pants", color: "#C2AE86" } },
   { sku: "fit-mini-skirt", category: "fashion", name: "Pleated mini skirt", emoji: "👗", price: 120, clout: 16, rating: 3, blurb: "Brunch-approved. Weather-ignored.", wear: { slot: "bottom", kind: "skirt", color: "#6B2BD9" } },
   { sku: "fit-chunky-sneakers", category: "fashion", name: "Chunky dad sneakers", emoji: "👟", price: 210, clout: 28, rating: 4, blurb: "Ugly on purpose. Expensive on purpose.", wear: { slot: "shoes", color: "#ECE6DC" } },
+  { sku: "forever-our-bird-hoodie", category: "fashion", name: "\"Forever Our Bird\" hoodie", emoji: "🕊️", price: 85, clout: 12, rating: 2, storyOnly: true, blurb: "Loretta's grief merch, $85, \"for healing.\" Limited time, unlimited questions.", wear: { slot: "top", kind: "hoodie", color: "#F4F1EA", accent: "#6C8CFF" } },
   { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 55, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
   // Cars
   { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 14000, clout: 120, rating: 2, rentPerWeek: 350, blurb: "Previously loved. Heavily. It still gets you to the club." },
@@ -297,10 +353,16 @@ export function realMinutesUntilOpen(ev: ClubEvent, cityMinutes: number, realHou
 export function citySeed() {
   return {
     economy: CITY_ECONOMY,
-    places: PLACES.map((p) => ({ id: p.id, actions: p.actions.map((a) => ({ id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0 })) })),
+    places: PLACES.map((p) => ({
+      id: p.id, tags: p.tags, story: p.story ?? null,
+      actions: p.actions.map((a) => ({
+        id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
+        clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false,
+      })),
+    })),
     events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood })),
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
-    shop: SHOP_ITEMS.map((i) => ({ sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null })),
+    shop: SHOP_ITEMS.map((i) => ({ sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null, storyOnly: i.storyOnly ?? false })),
     homeLocations: HOME_LOCATIONS,
   };
 }

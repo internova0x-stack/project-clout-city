@@ -1,0 +1,624 @@
+{
+  "id": "sarah-bird",
+  "title": "Who Killed Sarah Bird?",
+  "type": "main",
+  "tier": "free",
+  "status": "active",
+  "start_at": null,
+  "start_weekday": "sunday",
+  "borough_scope": [
+    "queens"
+  ],
+  "prompt": "Queens has a whodunit. Think you can crack it?",
+  "emoji": "🕊️",
+  "answer_key": {
+    "killer": "pastor-vale",
+    "server_only": true
+  },
+  "badges": [
+    {
+      "id": "called-it",
+      "name": "Called It",
+      "emoji": "🎯",
+      "line": "You named the killer before Queens did."
+    },
+    {
+      "id": "lolas-favorite",
+      "name": "Lola's Favorite",
+      "emoji": "💋",
+      "line": "Three for three. Lola would like a word."
+    },
+    {
+      "id": "armchair-detective",
+      "name": "Armchair Detective",
+      "emoji": "🕵️",
+      "line": "You solved it from the archive. Late, but right."
+    }
+  ],
+  "bonus_badge": {
+    "badge": "lolas-favorite",
+    "requires": [
+      "P1",
+      "P2",
+      "P3"
+    ]
+  },
+  "shadow_badge": "armchair-detective",
+  "tasks": [
+    {
+      "id": "story:sarah-bird:leave-flowers",
+      "label": "Leave flowers at Skyline Pier",
+      "do": {
+        "place": "skyline-pier",
+        "action": "lobby"
+      },
+      "clout": 20
+    },
+    {
+      "id": "story:sarah-bird:light-candle",
+      "label": "Light a candle at the vigil",
+      "do": {
+        "event": "sb-vigil"
+      },
+      "clout": 25
+    },
+    {
+      "id": "story:sarah-bird:share-rumor",
+      "label": "Spill it: share the Theo rumor",
+      "do": {
+        "share": "sb-3"
+      },
+      "clout": 15
+    },
+    {
+      "id": "story:sarah-bird:ask-ray",
+      "label": "Ask Ray what he saw",
+      "do": {
+        "place": "skyline-pier",
+        "action": "lobby"
+      },
+      "clout": 20
+    },
+    {
+      "id": "story:sarah-bird:rewatch-story",
+      "label": "Rewatch Sarah's last story",
+      "do": {
+        "evidence": "sb-5"
+      },
+      "clout": 10
+    },
+    {
+      "id": "story:sarah-bird:visit-church",
+      "label": "Pay Radiant Harbor a visit",
+      "do": {
+        "place": "radiant-harbor",
+        "action": "visit"
+      },
+      "clout": 25
+    }
+  ],
+  "events": [
+    {
+      "id": "sb-vigil",
+      "name": "Candlelight vigil for Sarah",
+      "place": "hunters-pier",
+      "attendable": true,
+      "energy": 10,
+      "clout": 30,
+      "mood": 4,
+      "blurb": "Hundreds of candles, one ring light and a lot of people who never met her crying anyway. Free to attend."
+    },
+    {
+      "id": "harbor-dome-gala",
+      "name": "Harbor Dome groundbreaking gala",
+      "place": "radiant-harbor",
+      "attendable": false,
+      "blurb": "Announced for next week, \"thanks to an anonymous gift.\" Invitation only, champagne optional, questions discouraged."
+    }
+  ],
+  "beats": [
+    {
+      "id": "sb-1",
+      "day": 1,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Queens' Glass Bird Goes Quiet",
+          "previously": null,
+          "body": "Sarah Bird, 27, the voice behind \"Glass Bird\" and 7.5 million followers, was found unconscious in her Long Island City penthouse and pronounced dead this afternoon at 4:30 PM. She'd spent Sunday brunch with her mother, Loretta, and Pastor Gideon Vale, who brought his famous chamomile blessing tea, as always. Everyone is cooperating with police, darlings. Everyone.",
+          "hook": "Her phone still shows a livestream scheduled for tomorrow. Its title: \"The Big Announcement.\""
+        }
+      ],
+      "effects": [
+        {
+          "type": "availability",
+          "tags": [
+            "skyline_pier"
+          ],
+          "state": "restricted",
+          "allow": [
+            "lobby"
+          ],
+          "reason": "Police activity: lobby only",
+          "expires_day": 9
+        },
+        {
+          "type": "chatter_topic",
+          "topic": "sarah-bird",
+          "phase": "early",
+          "priority": 2
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:sarah-bird:leave-flowers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sb-2",
+      "day": 2,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Vigil, Vibes, and a Very Missing Boyfriend",
+          "previously": "Sarah Bird died after a Sunday brunch with her mom and her pastor.",
+          "body": "Hundreds packed Hunter's Pier for a candlelight vigil led by Pastor Vale, co-trustee of Sarah's charity, the Bird Song Foundation. Loretta livestreamed it with a ring light \"for the fans.\" Boyfriend Jett Calloway didn't show, saying he was \"at the gym all afternoon\" on Sunday.",
+          "hook": "Pressed Iron Gym says Jett cancelled his membership two months ago."
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "hunters-pier",
+          "spawn_event": "sb-vigil",
+          "expires_day": 3
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:sarah-bird:light-candle"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sb-3",
+      "day": 3,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Best Friend, Better Secret",
+          "previously": "Sarah's boyfriend Jett skipped her vigil, and his gym alibi doesn't exist.",
+          "body": "Photos surfaced of Sarah holding hands in a Rockaway Diner booth with Theo Marsh: Jett's best friend and the co-writer of \"Glass Bird.\" A source says she ended it the night before she died, and Theo replied, \"You'll regret this.\"",
+          "hook": "A service-door camera caught Theo entering her building at 2:15 PM on Sunday."
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "rockaway-diner",
+          "add_tags": [
+            "sarahs_booth"
+          ],
+          "note": "Sarah's booth"
+        },
+        {
+          "type": "price_multiplier",
+          "tags": [
+            "rockaway_diner"
+          ],
+          "applies_to": "visit_price",
+          "multiplier": 1.5,
+          "reason": "Fans are packing Sarah's booth",
+          "expires_day": 7
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:sarah-bird:share-rumor"
+          ]
+        }
+      ],
+      "prediction": {
+        "id": "P1",
+        "question": "Why was Theo at Sarah's service door at 2:15 PM?",
+        "options": [
+          {
+            "id": "confront",
+            "label": "To confront her"
+          },
+          {
+            "id": "apologize",
+            "label": "To apologize"
+          },
+          {
+            "id": "meet-jett",
+            "label": "To meet Jett"
+          },
+          {
+            "id": "take-back",
+            "label": "To take something back"
+          }
+        ],
+        "closes_at": {
+          "day": 4,
+          "time": "23:59"
+        },
+        "reveal_beat": "sb-5",
+        "correct": "apologize",
+        "reward": {
+          "clout": 50
+        },
+        "changeable": true,
+        "roasts": {
+          "confront": "You picked confrontation. Theo brought white roses. Read the room, hon.",
+          "meet-jett": "You picked a bro meetup. Those two haven't been bros since Tuesdays started.",
+          "take-back": "You picked a heist. The only thing he took was the long walk home."
+        }
+      }
+    },
+    {
+      "id": "sb-4",
+      "day": 4,
+      "status": "active",
+      "news": [
+        {
+          "headline": "The Doorman's Ledger",
+          "previously": "Sarah was secretly seeing Theo, Jett's best friend, who was at her building the day she died.",
+          "body": "Doorman Ray keeps a paper sign-out book, and police have it. Loretta left at 12:10 PM and \"slammed the lobby door hard enough to wake Brooklyn.\" Pastor Vale signed out at 12:52 PM, though he told reporters he left \"right behind Loretta.\"",
+          "hook": "One more entry: Jett's key fob opened the garage at 1:34 PM. So much for the gym."
+        }
+      ],
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "sarah-bird",
+          "phase": "mid",
+          "priority": 2
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:sarah-bird:ask-ray"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sb-5",
+      "day": 5,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Flowers at the Door",
+          "previously": "The doorman's book puts Loretta, the pastor and Jett at Sarah's building on Sunday.",
+          "body": "Police confirm Theo left white roses and a note at Sarah's door: \"I'm sorry. I'll wait as long as you need. T.\" He says he knocked at 2:15 PM and nobody answered. Fans also found Sarah's last story, posted 12:31 PM: a teacup, a sun-logo thermos, and the caption \"one last cup before the big news.\"",
+          "hook": "If Sarah couldn't answer the door at 2:15, what happened between 12:31 and 2:15?"
+        }
+      ],
+      "evidence": {
+        "title": "Sarah's last story, 12:31 PM",
+        "kind": "story-post",
+        "lines": [
+          "@sarahbird",
+          "A teacup on a marble counter. Behind it, a thermos with a little sun logo.",
+          "\"one last cup before the big news ☕✨\"",
+          "Posted 12:31 PM · 2.1M views"
+        ]
+      },
+      "effects": [
+        {
+          "type": "task_injection",
+          "add": [
+            "story:sarah-bird:rewatch-story"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sb-6",
+      "day": 6,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Momager Math",
+          "previously": "Sarah stopped answering her door sometime between 12:31 PM and 2:15 PM on Sunday.",
+          "body": "A leaked contract shows Loretta earns 25% of everything Sarah makes, forever, and is beneficiary of a $3M life policy. Sarah had booked an entertainment lawyer for Monday to \"end a management agreement.\" Loretta also dropped a \"Forever Our Bird\" hoodie, $85, \"for healing.\"",
+          "hook": "A police inventory leak lists sleeping pills in Loretta's handbag."
+        }
+      ],
+      "effects": [
+        {
+          "type": "availability",
+          "sku": "forever-our-bird-hoodie",
+          "state": "open",
+          "reason": "Limited drop: \"Forever Our Bird\"",
+          "expires_day": 10
+        }
+      ],
+      "prediction": {
+        "id": "P2",
+        "question": "Who killed Sarah Bird?",
+        "options": [
+          {
+            "id": "jett",
+            "label": "Jett"
+          },
+          {
+            "id": "theo",
+            "label": "Theo"
+          },
+          {
+            "id": "loretta",
+            "label": "Loretta"
+          },
+          {
+            "id": "pastor-vale",
+            "label": "Pastor Vale"
+          }
+        ],
+        "closes_at": {
+          "day": 7,
+          "time": "23:59"
+        },
+        "reveal_beat": "sb-9",
+        "correct": "pastor-vale",
+        "reward": {
+          "clout": 200,
+          "badge": "called-it"
+        },
+        "changeable": true,
+        "roasts": {
+          "jett": "You picked Jett. So did most of Queens. The pastor thanks you for your support.",
+          "theo": "You picked Theo. He brought roses and an apology. Respectfully, no.",
+          "loretta": "You picked Loretta. Wrong drug, wrong motive, right vibes."
+        }
+      }
+    },
+    {
+      "id": "sb-7",
+      "day": 7,
+      "status": "active",
+      "news": [
+        {
+          "headline": "The Tea, the Thermos, and the Gift",
+          "previously": "Loretta stood to lose a fortune if Sarah fired her, and police found sleeping pills in her bag.",
+          "body": "Toxicology: Sarah had a sedative in her system, carried in her tea, and it is not the drug Loretta is prescribed. The sun-logo thermos from her last story is nowhere in the apartment. Sarah's accountant says she asked for a full audit of the Bird Song Foundation on the Friday before she died, and Pastor Vale just announced the Harbor Dome groundbreaking, \"thanks to an anonymous gift.\"",
+          "hook": "Jett's lawyer, unprompted: \"My client took nothing from that apartment except what was his.\""
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "radiant-harbor",
+          "spawn_event": "harbor-dome-gala",
+          "expires_day": 9
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:sarah-bird:visit-church"
+          ]
+        }
+      ],
+      "prediction": {
+        "id": "P3",
+        "question": "Where is the missing tea thermos?",
+        "options": [
+          {
+            "id": "jetts-car",
+            "label": "Jett's car"
+          },
+          {
+            "id": "lorettas-handbag",
+            "label": "Loretta's handbag"
+          },
+          {
+            "id": "radiant-harbor",
+            "label": "Radiant Harbor Church"
+          },
+          {
+            "id": "east-river",
+            "label": "The East River"
+          }
+        ],
+        "closes_at": {
+          "day": 7,
+          "time": "23:59"
+        },
+        "reveal_beat": "sb-9",
+        "correct": "radiant-harbor",
+        "reward": {
+          "clout": 75
+        },
+        "changeable": true,
+        "roasts": {
+          "jetts-car": "You picked Jett's car. It's full of sneaker boxes. Only sneaker boxes.",
+          "lorettas-handbag": "You picked the handbag. It held pills, a ring light and zero thermoses.",
+          "east-river": "You picked the East River. Dramatic. Wrong, but dramatic."
+        }
+      }
+    },
+    {
+      "id": "sb-8",
+      "day": 8,
+      "status": "active",
+      "points_at_answer": true,
+      "card_note": "Voting closed. The truth drops tomorrow.",
+      "news": [
+        {
+          "headline": "Case Closed? (Queens Thinks So)",
+          "previously": "The sedative was in Sarah's tea, the thermos is missing, and Jett's lawyer is nervous.",
+          "body": "Jett was brought in for questioning after bank records showed $40,000 moved from Sarah's account to his resale business. Loretta posted \"JUSTICE\" in giant letters, and Pastor Vale prayed for Jett on Blessed & Booked. The comment section has closed the case.",
+          "hook": "Detective Nia Okafor skipped the press conference. She was spotted in Astoria, outside a church, holding a warrant and a photo of a thermos."
+        }
+      ],
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "sarah-bird",
+          "phase": "late",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "sb-9",
+      "day": 9,
+      "status": "active",
+      "news": [
+        {
+          "headline": "The Pastor Is Not Available for Comment",
+          "previously": "The internet blamed Jett, but the detective went to Astoria.",
+          "body": "Pastor Gideon Vale was arrested at Radiant Harbor Church, where police found the sun-logo thermos washed and back on a shelf. The audit Sarah ordered shows $1.2M moved from her foundation to a company building the Harbor Dome. Elevator logs show Jett never left the garage level, and Vale was alone with Sarah for 42 minutes.",
+          "hook": "Police also recovered Sarah's draft for \"The Big Announcement.\" Tomorrow, Queens finally hears it."
+        }
+      ],
+      "effects": [
+        {
+          "type": "availability",
+          "tags": [
+            "radiant_harbor"
+          ],
+          "state": "closed",
+          "reason": "Closed: police activity",
+          "expires_day": 10
+        },
+        {
+          "type": "place_state",
+          "place": "radiant-harbor",
+          "cancel_event": "harbor-dome-gala",
+          "note": "Gala cancelled",
+          "expires_day": 10
+        },
+        {
+          "type": "flag",
+          "set": "sarah-bird-solved"
+        }
+      ]
+    },
+    {
+      "id": "sb-10",
+      "day": 10,
+      "status": "active",
+      "news": [
+        {
+          "headline": "The Big Announcement",
+          "previously": "Pastor Vale was arrested for Sarah's death after police found the thermos at his church.",
+          "body": "Sarah's draft was simple: she was leaving the church, handing her foundation to independent trustees, releasing her own album, and \"starting over with only the people who never asked me for anything.\" Theo gets his songwriting credit, Jett has to repay the $40K, and Loretta quietly pulled the hoodie. Rest easy, Glass Bird.",
+          "hook": "Lola's sign-off: \"Ray the doorman says someone new just moved into the penthouse. And Loretta is already asking for their number.\""
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "skyline-pier",
+          "unlock_action": "memorial",
+          "note": "Memorial wall"
+        },
+        {
+          "type": "chatter_topic",
+          "topic": "sarah-bird",
+          "phase": "post",
+          "priority": 2
+        }
+      ]
+    }
+  ],
+  "chatter": {
+    "sarah-bird": {
+      "early": {
+        "bartender": [
+          "Third \"Glass Bird\" request tonight. I'm not crying, the limes are strong.",
+          "Somebody tipped me a candle emoji. Just the emoji. On a receipt.",
+          "Her song came on and the whole bar went quiet. Even the guy who never goes quiet."
+        ],
+        "barista": [
+          "Her mom ordered a large and asked if it came with a ring light.",
+          "Everybody's ordering whatever Sarah ordered. Nobody knows what Sarah ordered.",
+          "We put her song on the playlist. The espresso machine is the only one not crying."
+        ],
+        "doorman": [
+          "Ray's been writing in that little book for twenty years. Finally matters.",
+          "Cops asked me who comes and goes. I said everybody, officer. This is Queens."
+        ],
+        "driver": [
+          "Dropped a guy at the vigil wearing her face on a hoodie. The mom's hoodie.",
+          "Three fares today just wanted to drive past her building. Slowly. With the windows down."
+        ],
+        "clerk": [
+          "The cat's been sitting by the radio every time they play her song. The cat knows things.",
+          "People keep buying white roses at 2 AM. We don't even sell roses. They keep asking."
+        ]
+      },
+      "mid": {
+        "bartender": [
+          "Forty-two minutes, that doorman says. What takes forty-two minutes after brunch?",
+          "Half the bar says Jett, half says the mom. The other half can't count."
+        ],
+        "barista": [
+          "I'm not saying it was the tea. I'm saying nobody's ordered chamomile in three days.",
+          "A guy asked if our oat milk was \"police-approved.\" Sir, this is a café."
+        ],
+        "doorman": [
+          "Jett parked in her spot like he paid the rent. He didn't.",
+          "Every doorman in Queens just bought a little notebook. Ray's a legend now."
+        ],
+        "driver": [
+          "Took Theo to Rockaway once. Played her song four times, then asked me to stop.",
+          "Lady in the back asked me to drive past the diner booth. I said ma'am, it's a booth."
+        ],
+        "clerk": [
+          "Everyone's a detective now. Nobody's a customer.",
+          "Guy bought a chopped cheese and explained the whole timeline. I just wanted the exact change."
+        ]
+      },
+      "late": {
+        "bartender": [
+          "Everyone in here says Jett. Everyone in here also said the Comets would make the playoffs.",
+          "The comment section closed the case. The comment section also thinks the moon is a hologram."
+        ],
+        "barista": [
+          "Detective came in, ordered nothing, asked about thermoses. Rude, but intriguing.",
+          "Somebody saw a cop in Astoria with a picture of a thermos. A thermos. Think about it."
+        ],
+        "doorman": [
+          "The pastor tipped Ray a hundred once. Never before, never since.",
+          "Ray hasn't put that little book down all week. He sleeps with it, probably."
+        ],
+        "driver": [
+          "Drove a cop to Astoria this morning. Church district. Make of that what you will.",
+          "Everybody's saying it's over. The detective didn't look like it was over."
+        ],
+        "clerk": [
+          "Funny how nobody's talking about the church. Funny how that works.",
+          "The cat stopped sitting by the radio. The cat thinks it's not who you think."
+        ]
+      },
+      "post": {
+        "bartender": [
+          "First round's on the house. To the Bird.",
+          "Her album's coming out after all. I'm putting it on repeat and you can't stop me."
+        ],
+        "barista": [
+          "We're calling the new latte \"The Big Announcement.\" Too soon?",
+          "Chamomile's back on the menu. Nobody's ordering it. Respect."
+        ],
+        "doorman": [
+          "New tenant upstairs. Nice. Doesn't drink tea.",
+          "Ray's book is going in a museum, probably. He says it's going in a drawer."
+        ],
+        "driver": [
+          "Everyone's asking for the church route now. It's closed, people.",
+          "Drove Theo to the memorial wall. He sat there an hour. Didn't charge him the wait."
+        ],
+        "clerk": [
+          "The cat's back by the radio. They're playing her song again.",
+          "People still bring white roses. We still don't sell them. Now we kind of want to."
+        ]
+      }
+    }
+  }
+}

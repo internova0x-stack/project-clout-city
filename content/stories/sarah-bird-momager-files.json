@@ -1,0 +1,39 @@
+{
+  "id": "sarah-bird-momager-files",
+  "title": "The Momager Files",
+  "type": "side",
+  "kind": "evidence",
+  "parent_arc_id": "sarah-bird",
+  "tier": "premium",
+  "sku": "side_sarah_bird_momager_files",
+  "status": "active",
+  "teaser": "Loretta kept every receipt. Every single one.",
+  "emoji": "🗂️",
+  "beats": [
+    { "id": "mf-1", "day": 1, "status": "active", "effects": [], "news": [{
+      "headline": "Contract, Page 14",
+      "body": "The management deal: 25% forever, including Sarah's \"likeness after death.\" Loretta drafted it herself, on Sarah's 16th birthday.",
+      "hook": "A sticky note on page 14: \"She'll never read this far.\""
+    }] },
+    { "id": "mf-2", "day": 3, "status": "active", "effects": [], "news": [{
+      "headline": "Voice Note, Saturday, 11:48 PM",
+      "body": "Loretta to her sister, the night before brunch, slightly breathless: \"Tomorrow I'm finally getting what I'm owed.\"",
+      "hook": "Owed what, and by whom?"
+    }] },
+    { "id": "mf-3", "day": 5, "status": "active", "effects": [], "news": [{
+      "headline": "The Policy",
+      "body": "The $3M life policy, with premiums paid from Sarah's account, was raised by Loretta this summer. Last month Sarah filled in a beneficiary change form.",
+      "hook": "She never signed it."
+    }] },
+    { "id": "mf-4", "day": 7, "status": "active", "effects": [], "news": [{
+      "headline": "The Receipts Folder",
+      "body": "\"What I'm owed\" was $60K Loretta spent on Sarah's first demo and first lease when Sarah was 17, and she kept every receipt. Sarah's statements also show $30K a month to Loretta, plus Jett's \"loans.\"",
+      "hook": "The last receipt is a florist order for white roses, placed Sunday at 11:02 AM."
+    }] },
+    { "id": "mf-5", "day": 9, "status": "active", "effects": [], "news": [{
+      "headline": "What Loretta Kept",
+      "body": "The roses were a brunch peace offering with a card, \"I'm sorry too. Mom,\" never delivered because she stormed out. Sarah had drafted a reply promising her mother 10% for life. One more line in Sarah's statements: a $25K monthly \"tithe\" to Radiant Harbor, which stopped the day she ordered the audit.",
+      "hook": "Loretta reads the draft and asks if it's legally binding."
+    }] }
+  ]
+}
