@@ -13,7 +13,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -23,14 +23,14 @@ export function PreviewHome({
   storyOff?: boolean;
   /** Start the pilot so today is this story day (the first refresh does it). */
   storyDay?: number;
+  /** All five daily tasks already done (to see the HUD's finished state). */
+  tasksDone?: boolean;
 }) {
-  const city = useMemo(
-    () => ({
-      ...sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id }),
-      devTools,
-    }),
-    [player, devTools],
-  );
+  const city = useMemo(() => {
+    const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
+    if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
+    return { ...s, devTools };
+  }, [player, devTools, tasksDone]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => createSimApi(city, () => feedRef.current), [city]);
 

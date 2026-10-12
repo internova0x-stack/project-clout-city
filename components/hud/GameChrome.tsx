@@ -4,8 +4,8 @@ import { useState } from "react";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import type { ComingSoonKey } from "../ComingSoon";
 import {
-  BuildingIcon, ChampagneIcon, CheckIcon, ChecklistIcon, ChevronDownIcon, ChevronUpIcon, DiamondIcon,
-  FlameIcon, HouseIcon, MapPinIcon, PersonIcon, PhoneIcon, ReceiptIcon, SpeakerIcon, SpeakerOffIcon, StoreIcon,
+  BuildingIcon, ChampagneIcon, ChecklistIcon, ChevronDownIcon, ChevronUpIcon, DiamondIcon,
+  HouseIcon, MapPinIcon, PersonIcon, PhoneIcon, ReceiptIcon, SpeakerIcon, SpeakerOffIcon, StoreIcon,
 } from "../icons";
 
 export type ChromeAction = ComingSoonKey | "invite" | "tab:home" | "tab:map" | "leaderboard";
@@ -55,9 +55,11 @@ export function GameChrome({
     <>
       <header className="hud glass-hud" aria-label="Status bar">
         <div className="hud-cluster">
-          <span className="hud-time" aria-label="City time">{time || " "}</span>
-          <button className="hud-btn" onClick={() => onAction("daily")} aria-label="Daily tasks">
-            <CheckIcon size={20} />
+          <span className="hud-time hud-number" aria-label="City time">
+            {time ? <>{time.split(" ")[0]}{time.includes(" ") && <small className="hud-ampm">{time.split(" ").slice(1).join(" ")}</small>}</> : "\u00a0"}
+          </span>
+          <button className="hud-btn" onClick={() => onAction("daily")} aria-label={values ? `Daily tasks, ${values.dailyDone} of ${values.dailyTotal} done` : "Daily tasks"}>
+            <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
           </button>
           <button
@@ -71,7 +73,7 @@ export function GameChrome({
         </div>
         <div className="hud-cluster">
           <button className="hud-btn hud-clout" data-tour="clout" onClick={() => onAction(values ? "leaderboard" : "clout")} aria-label="Clout score">
-            <FlameIcon size={20} />
+            <FlameFilled size={20} />
             <span className="hud-number">{values ? values.clout.toLocaleString() : "—"}</span>
           </button>
           <button className="hud-icon-btn" data-tour="money" onClick={() => onAction("networth")} aria-label="Net worth">
@@ -160,5 +162,47 @@ export function GameChrome({
         </button>
       </nav>
     </>
+  );
+}
+
+/** Daily tasks: a ring that fills as tasks get done; the tick appears only when all are done. */
+function DailyRing({ done, total, size = 22 }: { done: number; total: number; size?: number }) {
+  const complete = total > 0 && done >= total;
+  const r = 9;
+  const c = 2 * Math.PI * r;
+  const frac = total > 0 ? Math.min(1, done / total) : 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={`daily-ring${complete ? " complete" : ""}`}>
+      {complete ? (
+        <>
+          <circle cx="12" cy="12" r="10.5" fill="var(--done-green)" />
+          <path d="m7.8 12.4 2.9 2.9 5.5-5.8" fill="none" stroke="#fff" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      ) : (
+        <>
+          <circle cx="12" cy="12" r={r} fill="none" stroke="currentColor" strokeOpacity={0.22} strokeWidth={3} />
+          {frac > 0 && (
+            <circle cx="12" cy="12" r={r} fill="none" stroke="var(--done-green)" strokeWidth={3} strokeLinecap="round"
+              strokeDasharray={`${c * frac} ${c}`} transform="rotate(-90 12 12)" />
+          )}
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Clout: a solid flame (a warm gradient with a light core). */
+function FlameFilled({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <linearGradient id="hud-flame" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFC21A" />
+          <stop offset="1" stopColor="#FF6A3D" />
+        </linearGradient>
+      </defs>
+      <path d="M12 2.5c.6 2.7 2.2 4.9 4.2 6.6 2.1 1.8 3.3 3.8 3.3 6.1a7.5 7.5 0 1 1-15 0c0-1.5.5-2.9 1.4-3.9.3 1.6 1.4 2.7 2.8 2.7A2.6 2.6 0 0 0 11.3 11c0-1.2-.4-1.9-.9-2.9-1-2-.2-3.9 1.6-5.6z" fill="url(#hud-flame)" />
+      <path d="M12.2 13.2c1.6 1.3 2.6 2.5 2.6 4a2.8 2.8 0 0 1-5.6 0c0-1.3.9-2.6 3-4z" fill="#FFF1C2" opacity={0.9} />
+    </svg>
   );
 }
