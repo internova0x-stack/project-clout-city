@@ -2,7 +2,7 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.1 "Tap In"** (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.2 "First Party"** (in progress on the branch; v0.1 "Tap In" is live) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/01-game-concept-note.md`: the big picture.
@@ -24,13 +24,20 @@ components live in `app/globals.css`.
   with sample data (development only, 404 in production).
 - `npm run typecheck`, `npm test` (Node's built-in test runner, `tests/*.test.ts`),
   `npm run build`.
+- `npm run test:db`: runs every migration on a throwaway local Postgres (needs the
+  Postgres 16 binaries) and the SQL scenario tests in `supabase/tests/`.
+- `/preview/creator?step=0-3` and `/preview/home?state=new` walk the creator and the
+  first session with sample data (development only).
 
 ## Rules for this codebase
 - Player data is permanent from day one: change the schema only with a new file in
   `supabase/migrations/`, never by editing an applied one.
 - Writes to `players`/`invites` go through security-definer SQL functions; RLS
   blocks direct writes.
-- Tunable numbers live in `lib/config.ts`, not in components.
+- Tunable numbers live in `lib/config.ts` (client) and `game_settings` (economy, in the
+  database, mirrored by `lib/economy.ts` and checked by `tests/economy.test.ts`).
+- Every cash and clout change writes a `ledger` row, unique per (player, currency, kind, ref),
+  so rewards pay once and refunds can take back exactly what was given.
 - Game data stores real lat/lng (`lib/map/geo.ts`); the map is swappable behind
   the `MapApi` interface in `components/map/CityMap.tsx`.
 - Gold (`--gold-*`, `--g-gold`) is only for real-money products, the logo and the tagline.

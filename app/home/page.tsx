@@ -1,17 +1,13 @@
 import { GameShell } from "@/components/GameShell";
 import { getClique, requirePlayer } from "@/lib/player";
+import { attendFirstParty, finishHandoff, setMusicMuted, setTutorialState } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Home · Clout City" };
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function HomePage() {
   const { player } = await requirePlayer();
   const clique = await getClique();
-  const params = await searchParams;
-  return <GameShell player={player} clique={clique} firstVisit={params.welcome === "1"} />;
+  return <GameShell player={player} clique={clique} actions={{ setTutorialState, attendFirstParty, finishHandoff, setMusicMuted }} />;
 }

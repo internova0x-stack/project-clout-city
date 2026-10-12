@@ -20,6 +20,13 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    email is opened on a different phone or computer, and it includes a 6-digit code
    players can type into the game instead.
 6. **Project Settings → API**: copy the Project URL and the `anon` public key.
+7. **Google sign-in (v0.2, optional)**: **Authentication → Sign In / Providers → Google**.
+   Turn it on and paste a Google OAuth client ID and secret (create them in Google Cloud
+   Console → APIs & Services → Credentials → OAuth client ID → Web application, with the
+   redirect URI Supabase shows on that page). Until this is done, the "Continue with Google"
+   button says Google isn't switched on yet and email keeps working.
+8. **Realtime (v0.2)**: the "people online" pill uses Supabase Realtime presence, which is on by
+   default. Nothing to set up.
 
 > Supabase's built-in email sender is rate-limited (a few emails an hour) and meant for
 > testing. Before sharing the link widely, add an SMTP provider under

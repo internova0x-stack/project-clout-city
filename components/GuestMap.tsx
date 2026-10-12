@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { GUEST_START, WAVE_1_PINS, type PlacePin } from "@/lib/places";
+import { music, readLocalMuted } from "@/lib/music";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { CityMap } from "./map/CityMap";
 import { SignUpSheet, type AuthMode } from "./SignUpSheet";
@@ -59,7 +60,15 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
   }, [arrivals.length]);
 
   const pins = useMemo(() => (filter === "all" ? WAVE_1_PINS : WAVE_1_PINS.filter((p) => p.category === filter)), [filter]);
-  const signUp = () => setAuth("signup");
+  // The first tap on anything interactive opens sign-up and starts the music.
+  const startMusic = () => {
+    music().setMuted(readLocalMuted());
+    music().start();
+  };
+  const signUp = () => {
+    startMusic();
+    setAuth("signup");
+  };
   const arrival = arrivals.length ? arrivals[tick % arrivals.length] : null;
 
   return (
@@ -80,7 +89,7 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
           <img src="/brand/clout-city-logo-dark-simple.png" alt="Clout City NYC" width={649} height={299} className="guest-logo" />
           <span className="spacer" />
           <button className="btn btn-taxi guest-bar-btn" onClick={signUp}>Sign up</button>
-          <button className="btn btn-secondary guest-bar-btn guest-login" onClick={() => setAuth("login")}>Log in</button>
+          <button className="btn btn-secondary guest-bar-btn guest-login" onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
         </header>
 
         <div className="guest-pills" aria-label="Queens right now">
@@ -121,7 +130,7 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
           )}
           <div className="row" style={{ gap: 8, marginTop: 12 }}>
             <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
-            <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => setAuth("login")}>Log in</button>
+            <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
           </div>
           <p className="meta guest-foot">
             A parody · 18+ · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · No ad trackers
