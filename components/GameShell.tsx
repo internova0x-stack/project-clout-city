@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
@@ -10,6 +10,14 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle } from "@/lib/styles";
+import { PLACES, placeById, type Place } from "@/lib/city";
+import { activeGig, dueBills, equippedItems, gigReady, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { outfitWith } from "@/lib/wardrobe";
+import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
+import { GainToast, useGameNow } from "./city/Common";
+import { DevClock } from "./city/DevClock";
+import { PhoneModal } from "./city/Phone";
+import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, type PlaceHandlers } from "./city/Places";
 import { ApartmentBackdrop } from "./ApartmentBackdrop";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
@@ -35,7 +43,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | null;
+type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "places" | "bills" | "look" | "shop" | "possessions" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 
@@ -54,16 +62,22 @@ export function GameShell({
   actions,
   daytimeOverride,
   previewFlow,
+  city: initialCity = null,
+  cityApi,
 }: {
   player: Player;
   clique: CliqueMember[];
   actions: GameActions;
+  /** v0.3 city state; null until migration 0004 is applied (the city screens then say "coming soon"). */
+  city?: CityState | null;
+  cityApi?: CityApi;
   /** Development previews only: pin the map to day or night. */
   daytimeOverride?: boolean;
   /** Development previews only: open a step of the first session directly. */
   previewFlow?: Flow;
 }) {
-  const clock = useCityClock();
+  const [city, setCity] = useState<CityState | null>(initialCity);
+  const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
   const daytime = daytimeOverride ?? clock.daytime;
   const [tab, setTab] = useState<Tab>("home");
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
@@ -80,9 +94,74 @@ export function GameShell({
   // The invite screen opened from the invite prompt returns to the install prompt when closed.
   const pendingPwa = useRef(false);
   const online = usePlayersOnline(player.id);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [gain, setGain] = useState<Gain | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [place, setPlace] = useState<Place | null>(null);
+  const [inside, setInside] = useState<Place | null>(null);
+  const [phone, setPhone] = useState<{ open: boolean; app: "gigs" | null }>({ open: false, app: null });
+  const gameNow = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
 
   const look = normalizeLook(me.look, me.starting_style);
   const style = getStyle(look.style);
+  const worn = city ? equippedItems(city) : [];
+  const outfit = worn.length ? outfitWith(style.outfit, worn) : undefined;
+  const home = homeLocation(me.home_id);
+  const cityOn = !!(city && cityApi);
+  const cityPins = useMemo(() => CITY_PINS(home), [home]);
+
+  // ---- City actions: one at a time; the server's answer replaces local state ----
+  const applyCity = useCallback((r: CityResult): boolean => {
+    if (!r.ok) {
+      setToast(r.error);
+      return false;
+    }
+    setCity(r.state);
+    const p = r.state.player;
+    setMe((m) => ({ ...m, bank_cash: p.bank_cash, clout: p.clout, energy: p.energy, mood: p.mood, confidence: p.confidence, home_id: p.home_id }));
+    if (r.gain) setGain(r.gain);
+    return true;
+  }, []);
+  const run = useCallback(
+    async (key: string, call: () => Promise<CityResult>): Promise<boolean> => {
+      setBusy(key);
+      try {
+        return applyCity(await call());
+      } catch {
+        setToast("The city glitched. Try again.");
+        return false;
+      } finally {
+        setBusy(null);
+      }
+    },
+    [applyCity],
+  );
+  // Pick up the daily tick (tasks, bills) when the player comes back to the tab.
+  useEffect(() => {
+    if (!cityApi) return;
+    const onVis = () => { if (document.visibilityState === "visible") void cityApi.refresh().then((r) => r.ok && applyCity(r)); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [cityApi, applyCity]);
+
+  const handlers: PlaceHandlers = {
+    busy,
+    onAction: (pl, a) => cityApi && void run(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
+    onAttendEvent: (id) => cityApi && void run(`event:${id}`, () => cityApi.attendEvent(id)),
+    onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
+  };
+  const openPlace = (id: string) => {
+    const p = placeById(id);
+    if (!p) return;
+    setPanel(null);
+    setTab("map");
+    setInside(null);
+    setPlace(p);
+    mapRef.current?.moveCamera(p.at, 15.5);
+  };
+  const clearGain = useCallback(() => { setGain(null); setToast(null); }, []);
+  const gig = city ? activeGig(city) : undefined;
+  const payoutReady = !!gig && gigReady(gig, gameNow);
   const partyDone = me.first_party_at !== null;
   const handedOff = me.onboarding_step === "handoff_done";
 
@@ -183,22 +262,47 @@ export function GameShell({
         return setPanel("events");
       }
       if (a === "networth") markPin("networth");
+      if (cityOn) {
+        if (a === "places") return setPanel("places");
+        if (a === "bills") return setPanel("bills");
+        if (a === "look") return setPanel("look");
+        if (a === "shop") return setPanel("shop");
+        if (a === "networth") return setPanel("possessions");
+        if (a === "phone") return setPhone({ open: true, app: null });
+      }
       setSoon({ key: a });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flow],
+    [flow, cityOn],
   );
 
-  const onPinTap = useCallback((pin: PlacePin) => setSoon({ key: "place", title: pin.name }), []);
+  const onPinTap = useCallback(
+    (pin: PlacePin) => {
+      if (pin.id === "home") return setTab("home");
+      const p = cityOn ? placeById(pin.id) : undefined;
+      if (p) return setPlace(p);
+      setSoon({ key: "place", title: pin.name });
+    },
+    [cityOn],
+  );
   const onLockedTap = useCallback((name: string) => setSoon({ key: "place", title: `${name} is locked` }), []);
 
   return (
-    <main className="game">
-      {tab === "home" ? (
+    <main className={`game${inside && city ? " inside" : ""}`}>
+      {inside && city ? (
+        <InteriorScene
+          place={inside}
+          state={city}
+          daytime={daytime}
+          handlers={handlers}
+          onBack={() => setInside(null)}
+          avatar={<Avatar3D look={look} outfit={outfit} framing="room" interactive={false} label={`${me.display_name} inside ${inside.name}`} />}
+        />
+      ) : tab === "home" ? (
         <div className="layer">
           <ApartmentBackdrop daytime={daytime} />
           <div style={{ position: "absolute", left: 0, right: 0, bottom: "max(64px, 7%)", height: "54%" }}>
-            <Avatar3D look={look} framing="room" label={`${me.display_name}, wearing ${style.label}`} />
+            <Avatar3D look={look} outfit={outfit} framing="room" label={`${me.display_name}, wearing ${style.label}`} />
           </div>
           <button
             className="glass-hud profile-chip"
@@ -209,7 +313,7 @@ export function GameShell({
             <span style={{ textAlign: "left", minWidth: 0 }}>
               <span className="display-sm" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{me.display_name}</span>
               <span className="meta" style={{ display: "block" }}>
-                {style.label} · {ECONOMY.homes.find((h) => h.id === me.home_id)?.neighborhood ?? "Queens"}
+                {style.label} · {city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.neighborhood ?? "Queens"}
               </span>
             </span>
           </button>
@@ -218,9 +322,10 @@ export function GameShell({
         <>
           <CityMap
             ref={mapRef}
-            pins={WAVE_1_PINS}
-            player={{ at: DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
-            initialCenter={DEFAULT_PLAYER_LOCATION}
+            pins={cityOn ? cityPins : WAVE_1_PINS}
+            vehicles={cityOn}
+            player={{ at: cityOn ? home : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
+            initialCenter={cityOn ? home : DEFAULT_PLAYER_LOCATION}
             daytime={daytime}
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}
@@ -241,14 +346,20 @@ export function GameShell({
         values={{
           clout: me.clout,
           bank: me.bank_cash,
-          dailyDone: 0,
-          dailyTotal: 5,
+          dailyDone: city ? tasksDone(city) : 0,
+          dailyTotal: city?.tasks.length || 5,
           stats: { energy: me.energy, mood: me.mood, confidence: me.confidence },
           muted,
           online,
           eventsBadge: !partyDone,
+          billsBadge: !!city && dueBills(city).length > 0,
+          phoneBadge: payoutReady,
         }}
       />
+      <GainToast gain={gain} message={toast} onDone={clearGain} />
+      {city?.devTools && cityApi && (
+        <DevClock offsetSeconds={city.clockOffsetSeconds} busy={busy !== null} onSet={(h) => void run("dev", () => cityApi.setClockOffset(h))} />
+      )}
 
       {/* ---- Guided first session ---- */}
       {flow === "welcome" && (
@@ -281,8 +392,53 @@ export function GameShell({
       {flow === "pwa" && <PwaPrompt onDone={endHandoff} />}
 
       {/* ---- Panels ---- */}
-      <TasksSheet open={panel === "tasks"} onClose={() => setPanel(null)} partyDone={partyDone} onOpenParty={openParty} cliqueCount={clique.length} />
-      <EventsSheet open={panel === "events"} onClose={() => setPanel(null)} partyDone={partyDone} onOpenParty={openParty} />
+      <TasksSheet open={panel === "tasks"} onClose={() => setPanel(null)} partyDone={partyDone} onOpenParty={openParty} cliqueCount={clique.length} city={cityOn ? city : null} onOpenPlace={openPlace} />
+      <EventsSheet
+        open={panel === "events"}
+        onClose={() => setPanel(null)}
+        partyDone={partyDone}
+        onOpenParty={openParty}
+        city={cityOn ? city : null}
+        busy={busy}
+        onAttend={(id) => handlers.onAttendEvent(id)}
+      />
+      {city && cityApi && (
+        <>
+          <LocationSheet
+            place={place}
+            state={city}
+            daytime={daytime}
+            handlers={handlers}
+            from={home}
+            onClose={() => setPlace(null)}
+            onGoInside={(p) => { setPlace(null); setInside(p); }}
+          />
+          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} onPick={(p) => openPlace(p.id)} />
+          <ShopSheet open={panel === "shop"} onClose={() => setPanel(null)} state={city} busy={busy} onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))} />
+          <PossessionsSheet open={panel === "possessions"} onClose={() => setPanel(null)} state={city} style={me.starting_style} busy={busy} onSell={(id) => run(`sell:${id}`, () => cityApi.sellItem(id))} />
+          <LookSheet
+            open={panel === "look"}
+            onClose={() => setPanel(null)}
+            state={city}
+            busy={busy}
+            onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
+            onShop={() => setPanel("shop")}
+          />
+          <BillsSheet open={panel === "bills"} onClose={() => setPanel(null)} state={city} busy={busy} onPay={(id) => void run(`bill:${id}`, () => cityApi.payBill(id))} />
+        </>
+      )}
+      <PhoneModal
+        open={phone.open}
+        initialApp={phone.app}
+        onClose={() => setPhone({ open: false, app: null })}
+        time={clock.time}
+        state={cityOn ? city : null}
+        busy={busy}
+        onAccept={(id) => cityApi && void run(`gig:${id}`, () => cityApi.acceptGig(id))}
+        onCollect={(id) => cityApi && void run(`gig:${id}`, () => cityApi.collectGig(id))}
+        muted={muted}
+        onToggleSound={toggleSound}
+      />
       <BankSheet open={panel === "bank"} onClose={() => setPanel(null)} bank={me.bank_cash} />
       <InviteSheet
         open={panel === "invite"}
@@ -323,3 +479,8 @@ export function GameShell({
   );
 }
 
+/** v0.3 pins: every built place plus the player's home. */
+const CITY_PINS = (home: readonly [number, number]): PlacePin[] => [
+  ...PLACES,
+  { id: "home", name: "Home", emoji: "🏠", category: "home", neighborhood: "Your place", at: home, tags: ["home"] },
+];

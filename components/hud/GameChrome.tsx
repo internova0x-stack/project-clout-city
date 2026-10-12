@@ -19,6 +19,8 @@ export interface ChromeValues {
   muted: boolean;
   online: number | null;
   eventsBadge: boolean;
+  billsBadge?: boolean;
+  phoneBadge?: boolean;
 }
 
 const statLevel = (v: number) => (v >= 60 ? "good" : v >= 30 ? "mid" : "low");
@@ -101,7 +103,10 @@ export function GameChrome({
           {values?.eventsBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}
         </button>
         <button className="side-btn" onClick={() => onAction("places")} aria-label="Places"><BuildingIcon /></button>
-        <button className="side-btn" onClick={() => onAction("bills")} aria-label="Bills"><ReceiptIcon /></button>
+        <button className="side-btn" onClick={() => onAction("bills")} aria-label="Bills">
+          <ReceiptIcon />
+          {values?.billsBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}
+        </button>
         <button className="side-btn" onClick={() => onAction("look")} aria-label="Your look"><PersonIcon /></button>
       </nav>
 
@@ -144,7 +149,11 @@ export function GameChrome({
           <MapPinIcon /> Map
         </button>
         <button className="nav-tab" data-tour="phone" onClick={() => onAction("phone")}>
-          <PhoneIcon /> Phone
+          <span style={{ position: "relative", display: "inline-flex" }}>
+            <PhoneIcon />
+            {values?.phoneBadge && <span className="pin-dot" style={{ top: -2, right: -4 }} />}
+          </span>
+          Phone
         </button>
         <button className="nav-tab" onClick={() => onAction("shop")}>
           <StoreIcon /> Shop

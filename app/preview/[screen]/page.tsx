@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Creator, type CreatorStep } from "@/components/Creator";
-import { GameShell, type Flow } from "@/components/GameShell";
+import type { Flow } from "@/components/GameShell";
+import { PreviewHome } from "@/components/preview/PreviewHome";
 import { GuestMap } from "@/components/GuestMap";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -12,6 +13,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
 //   /preview/home             a player who has finished the first session
 //   /preview/home?flow=pwa    open one step of the first session (welcome, tour, party, partyDone, leaderboard, invitePrompt, pwa)
+//   /preview/home?city=off    the home screen before migration 0004 (city screens say "coming soon")
 //   add &time=day or &time=night to pin the map
 
 const SAMPLE: Player = {
@@ -35,10 +37,6 @@ const SAMPLE: Player = {
   music_muted: false,
 };
 
-async function noop() {
-  "use server";
-}
-
 export default async function Preview({
   params,
   searchParams,
@@ -48,7 +46,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow } = await searchParams;
+  const { time, step, state, flow, city } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -90,26 +88,15 @@ export default async function Preview({
         ? { ...SAMPLE, onboarding_step: "home_done", tutorial_state: "pending", first_party_at: null, clout: 0, bank_cash: 5300, energy: 100, confidence: 40 }
         : SAMPLE;
       return (
-        <GameShell
+        <PreviewHome
           player={player}
           daytimeOverride={daytimeOverride}
-          previewFlow={flow as Flow | undefined}
+          flow={flow as Flow | undefined}
+          cityOff={city === "off"}
           clique={[
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },
           ]}
-          actions={{
-            setTutorialState: noop,
-            finishHandoff: noop,
-            setMusicMuted: noop,
-            attendFirstParty: async () => {
-              "use server";
-              return {
-                ok: true as const,
-                player: { bank_cash: 5450, clout: 100, energy: 80, mood: 60, confidence: 55, onboarding_step: "party_done" as const, first_party_at: new Date().toISOString() },
-              };
-            },
-          }}
         />
       );
     }

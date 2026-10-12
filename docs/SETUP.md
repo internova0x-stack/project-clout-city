@@ -27,6 +27,14 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    button says Google isn't switched on yet and email keeps working.
 8. **Realtime (v0.2)**: the "people online" pill uses Supabase Realtime presence, which is on by
    default. Nothing to set up.
+9. **The city (v0.3)**: run `0004_the_city.sql`. Until it runs, the game still opens and the
+   city screens show "Coming soon". The economy content (places, prices, Shop) lives in
+   `game_settings` row `city`; regenerate it from `lib/city.ts` with
+   `node --experimental-strip-types scripts/gen-city-seed.ts` in a new migration when it changes.
+10. **Time travel (staging only)**: to test a week of play, use a separate staging project and run
+    `update game_settings set value = '{"tools": true, "clockOffsetSeconds": 0}' where key = 'dev';`
+    A purple "⏩" pill then moves the game clock for everyone on that project. Never switch it on
+    in production.
 
 > Supabase's built-in email sender is rate-limited (a few emails an hour) and meant for
 > testing. Before sharing the link widely, add an SMTP provider under

@@ -6,7 +6,7 @@ import {
   Scene, SpotLight, WebGLRenderer,
 } from "three";
 import type { Look } from "@/lib/look";
-import { getStyle } from "@/lib/styles";
+import { getStyle, type Outfit } from "@/lib/styles";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 
 /**
@@ -18,11 +18,14 @@ export default function Avatar3D({
   framing = "full",
   interactive = true,
   label,
+  outfit,
 }: {
   look: Look;
   framing?: "full" | "room";
   interactive?: boolean;
   label?: string;
+  /** Worn Shop items over the starting style's outfit. */
+  outfit?: Outfit;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{ scene: Scene; parts: AvatarParts | null; spin: number } | null>(null);
@@ -136,7 +139,7 @@ export default function Avatar3D({
   useEffect(() => {
     const s = sceneRef.current;
     if (!s) return;
-    const parts = buildAvatar(look, { pedestal: framing === "full" });
+    const parts = buildAvatar(look, { pedestal: framing === "full", outfit });
     if (s.parts) {
       parts.head.rotation.y = s.parts.head.rotation.y;
       s.scene.remove(s.parts.root);
@@ -144,7 +147,7 @@ export default function Avatar3D({
     }
     s.scene.add(parts.root);
     s.parts = parts;
-  }, [look.style, look.body, look.skin, look.hair, look.hairColor, look.eyes, look.glasses, look.covering, framing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [look.style, look.body, look.skin, look.hair, look.hairColor, look.eyes, look.glasses, look.covering, framing, outfit && JSON.stringify(outfit)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Drag to spin ----
   const dragX = useRef<number | null>(null);

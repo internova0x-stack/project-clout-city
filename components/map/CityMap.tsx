@@ -7,6 +7,7 @@ import boroughData from "@/lib/map/boroughs.geo.json";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { buildMapStyle, type MapTheme } from "@/lib/map/style";
+import { startVehicles } from "./vehicles";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -30,6 +31,8 @@ export interface CityMapProps {
   onLockedTap?: (boroughName: string) => void;
   /** Hide the map's own credits control when the screen shows them elsewhere. */
   attributionControl?: boolean;
+  /** Moving cars on the streets when zoomed in (v0.3). */
+  vehicles?: boolean;
 }
 
 const MIN_ZOOM = 9.5;
@@ -44,7 +47,7 @@ const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -111,6 +114,12 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ---- Moving vehicles when zoomed in ----
+  useEffect(() => {
+    if (!map || !vehicles) return;
+    return startVehicles(map);
+  }, [map, vehicles]);
 
   // ---- Day/night and lock changes restyle in place (2 s crossfade) ----
   useEffect(() => {

@@ -53,6 +53,8 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
     sources: {
       osm: { type: "vector", url: TILE_SOURCE_URL, attribution: MAP_ATTRIBUTION },
       boroughs: { type: "geojson", data: boroughs },
+      // Moving cars, fed by components/map/vehicles.ts when zoomed in.
+      vehicles: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
     },
     layers: [
       { id: "land", type: "background", paint: { "background-color": p.land } },
@@ -155,6 +157,26 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         filter: ["==", ["get", "id"], "queens"],
         paint: { "line-color": p.queensEdge, "line-width": 2, "line-blur": 1 },
       },
+      ...(night
+        ? [
+            {
+              id: "vehicle-glow", type: "circle", source: "vehicles", minzoom: 15,
+              paint: { "circle-color": "#FFE9A8", "circle-radius": width(4, 6, 12), "circle-blur": 1, "circle-opacity": 0.45 },
+            },
+            {
+              id: "vehicles", type: "circle", source: "vehicles", minzoom: 15,
+              paint: { "circle-color": "#FFF8E1", "circle-radius": width(1.5, 2.2, 4), "circle-stroke-width": 0 },
+            },
+          ]
+        : [
+            {
+              id: "vehicles", type: "circle", source: "vehicles", minzoom: 15,
+              paint: {
+                "circle-color": ["get", "color"], "circle-radius": width(2, 3, 6),
+                "circle-stroke-color": "#FFFFFF", "circle-stroke-width": 1,
+              },
+            },
+          ]),
       {
         id: "street-names", type: "symbol", source: "osm", "source-layer": "transportation_name", minzoom: 15,
         layout: {

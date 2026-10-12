@@ -10,7 +10,7 @@ import {
   type BufferGeometry, type Material,
 } from "three";
 import type { Look } from "@/lib/look";
-import { getStyle } from "@/lib/styles";
+import { getStyle, type Outfit } from "@/lib/styles";
 
 export interface AvatarParts {
   root: Group;
@@ -45,9 +45,9 @@ function shade(hex: string, f: number): string {
   return `#${c.getHexString()}`;
 }
 
-export function buildAvatar(look: Look, opts: { pedestal?: boolean } = {}): AvatarParts {
+export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Outfit } = {}): AvatarParts {
   const style = getStyle(look.style);
-  const { outfit } = style;
+  const outfit = opts.outfit ?? style.outfit;
   const b = BUILDS[look.body];
   const geometries: BufferGeometry[] = [];
   const materials: Material[] = [];
