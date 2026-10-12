@@ -65,7 +65,7 @@ const STEP_ERRORS: Record<string, string> = {
   unknown_trait: "That trait isn't on the menu.",
   traits_first: "Pick your traits first.",
   lottery_first: "Roll the dice first.",
-  cant_afford: "That place would leave you too broke for this week. Pick another.",
+  cant_afford: "That place would leave you too broke for this month. Pick another.",
   unknown_home: "That apartment just got rented. Pick another.",
 };
 

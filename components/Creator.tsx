@@ -441,7 +441,7 @@ function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorA
                   <span className="subtext" style={{ display: "block" }}>{h.blurb}</span>
                   <span className="meta" style={{ display: "block", marginTop: 4 }}>
                     Rent <strong className={ok ? "" : "price-bad"}>{formatCash(h.rent)}</strong>/mo
-                    {!ok && " · Leaves too little for this week"}
+                    {!ok && " · Leaves too little for this month"}
                   </span>
                 </span>
               </span>

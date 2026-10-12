@@ -34,7 +34,7 @@ export function ShopSheet({
             ))}
           </div>
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
-          {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% a week in insurance. Rentals bill weekly.</p>}
+          {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a month in insurance. Rentals bill weekly.</p>}
           <div className="item-grid">
             {items.map((item) => {
               const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
@@ -170,7 +170,7 @@ export function PossessionsSheet({
               <>
                 <p className="body" style={{ margin: 0 }}>
                   Net worth drops by {formatCash(detail.value - sellPrice(detail.value))}. The clout you earned stays; buying it back pays no clout.
-                  {item.category === "houses" && " Rent starts again next week."}
+                  {item.category === "houses" && " Rent starts again next month."}
                 </p>
                 <button className="btn btn-destructive" disabled={busy !== null} onClick={async () => { if (await onSell(detail.id)) close(); }}>
                   {busy ? "…" : `Sell for ${formatCash(sellPrice(detail.value))}`}
@@ -242,7 +242,7 @@ export function LookSheet({
 }
 
 // ---------------------------------------------------------------------------
-// Bills: weekly rent and phone, car rental or insurance. Protected from stories.
+// Bills: monthly rent, phone and car insurance; weekly car rental. Protected from stories.
 // ---------------------------------------------------------------------------
 const BILL_LABEL: Record<Bill["kind"], string> = { rent: "🏠 Rent", phone: "📱 Phone", car_rental: "🚗 Car rental", car_insurance: "🛡️ Car insurance" };
 
@@ -258,7 +258,7 @@ export function BillsSheet({
       <div className="stack-16">
         <SheetTitle right={due.length ? `${formatCash(due.reduce((a, b) => a + b.amount, 0))} due` : "All paid"}>Bills</SheetTitle>
         {due.length === 0 && (
-          <div className="card"><p className="body" style={{ margin: 0 }}>Nothing due. Savor it; in New York this feeling lasts about a week.</p></div>
+          <div className="card"><p className="body" style={{ margin: 0 }}>Nothing due. Savor it; in New York this feeling lasts about a month.</p></div>
         )}
         {due.map((b) => {
           const late = daysBetween(b.due_date, today);

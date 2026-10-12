@@ -433,9 +433,9 @@ Gigs are rarer, bigger-paying jobs, and the main way to afford upgrades like a c
 
 | Tier | Example | Confidence needed | Offered | Pay (vs. one shift) | Energy (vs. one shift) | Wait before payout |
 | --- | --- | --- | --- | --- | --- | --- |
-| Side gig | "Be a professional crowd at a gallery opening" | None | Most days | 2 to 3× | 1.5× | 1 hour |
-| Pro gig | "Run a social media campaign for a $14 artisanal ice cube startup" | 50+ | About every other day | 4 to 6× | 2× | 2 hours |
-| Big break | "Write a speech for a councilmember candidate" | 80+ | Once or twice a week | 10 to 15× | 3× | 4 hours |
+| Side gig | "Be a professional crowd at a gallery opening" | None | Most days | 3 to 5× | 1.5× | 1 hour |
+| Pro gig | "Run a social media campaign for a $14 artisanal ice cube startup" | 50+ | About every other day | 8 to 10× | 2× | 2 hours |
+| Big break | "Write a speech for a councilmember candidate" | 80+ | Once or twice a week | 15 to 20× | 3× | 4 hours |
 
 **Rules**
 
@@ -454,6 +454,9 @@ Gigs are rarer, bigger-paying jobs, and the main way to afford upgrades like a c
 - **Watch in analytics:** median bank balance by days played, and days until a player's first car. If either moves well ahead of the targets, lower gig multipliers or offer rates first.
 
 ### Missed rent
+
+**Update (Oct 12, 2026):** rent, the phone bill and car insurance are billed **monthly**, on the same day each month as the move-in (or purchase). Car rentals bill weekly. Gig pay was raised (table above) so 1 to 2 gigs cover a month's rent on the cheapest home.
+
 
 When rent is due and the bank balance can't cover it, the player gets a grace period (default 3 days) with a pin on Bills. After that, Mood drops. If rent is still unpaid after 7 days, the player moves to the cheapest Queens home: the new rent starts, and no possessions are lost. Both periods are configurable.
 

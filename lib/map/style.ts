@@ -157,26 +157,20 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         filter: ["==", ["get", "id"], "queens"],
         paint: { "line-color": p.queensEdge, "line-width": 2, "line-blur": 1 },
       },
-      ...(night
-        ? [
-            {
-              id: "vehicle-glow", type: "circle", source: "vehicles", minzoom: 15,
-              paint: { "circle-color": "#FFE9A8", "circle-radius": width(4, 6, 12), "circle-blur": 1, "circle-opacity": 0.45 },
-            },
-            {
-              id: "vehicles", type: "circle", source: "vehicles", minzoom: 15,
-              paint: { "circle-color": "#FFF8E1", "circle-radius": width(1.5, 2.2, 4), "circle-stroke-width": 0 },
-            },
-          ]
-        : [
-            {
-              id: "vehicles", type: "circle", source: "vehicles", minzoom: 15,
-              paint: {
-                "circle-color": ["get", "color"], "circle-radius": width(2, 3, 6),
-                "circle-stroke-color": "#FFFFFF", "circle-stroke-width": 1,
-              },
-            },
-          ]),
+      {
+        // Top-down cars, SUVs, buses and motorcycles (sprites from components/map/vehicleIcons.ts).
+        id: "vehicles", type: "symbol", source: "vehicles", minzoom: 15,
+        layout: {
+          "icon-image": ["concat", "veh-", ["get", "kind"], "-", ["to-string", ["get", "color"]], night ? "-n" : "-d"],
+          "icon-rotate": ["get", "bearing"],
+          "icon-rotation-alignment": "map",
+          "icon-pitch-alignment": "map",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          // Roughly twice life size, so they read on a phone.
+          "icon-size": ["interpolate", ["exponential", 2], ["zoom"], 15, 0.4, 17, 0.9, 19, 3],
+        },
+      },
       {
         id: "street-names", type: "symbol", source: "osm", "source-layer": "transportation_name", minzoom: 15,
         layout: {

@@ -29,10 +29,10 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     },
     today,
     tasks,
-    gigs: [gig(101, "side", 0, 300, 38, 60, 0), gig(102, "side", 3, 270, 38, 60, 0), gig(103, "pro", 0, 600, 50, 120, 50), gig(104, "big", 1, 1500, 75, 240, 80)],
+    gigs: [gig(101, "side", 0, 480, 38, 60, 0), gig(102, "side", 3, 420, 38, 60, 0), gig(103, "pro", 0, 1080, 50, 120, 50), gig(104, "big", 1, 2100, 75, 240, 80)],
     bills: [
       { id: 201, kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: today, status: "due", paid_at: null },
-      { id: 200, kind: "rent", amount: 2100, due_date: addDays(today, -7), status: "paid", paid_at: new Date().toISOString() },
+      { id: 200, kind: "rent", amount: 2100, due_date: addDays(today, -27), status: "paid", paid_at: new Date().toISOString() },
     ],
     items: [{ id: 301, sku: "fit-bucket-hat", category: "fashion", value: 55, acquired: "bought", equipped: true }],
     visitsToday: { "flushing-meadows": 1 },
@@ -148,7 +148,7 @@ export function createSimApi(initial: CityState): CityApi {
       s.items = s.items.filter((i) => i.id !== itemId);
       p().bank_cash += amount;
       if (it.category === "cars") { p().car_sku = null; p().car_mode = null; }
-      if (it.category === "houses") { p().house_sku = null; p().next_rent_due = addDays(s.today, 7); }
+      if (it.category === "houses") { p().house_sku = null; p().next_rent_due = addDays(s.today, 30); }
       return ok({ cash: amount });
     },
     equipItem(itemId, on) {

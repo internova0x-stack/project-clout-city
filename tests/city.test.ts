@@ -1,16 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import {
   CITY_ECONOMY, CLUB_EVENTS, PLACES, SHOP_ITEMS, HOME_LOCATIONS,
   citySeed, eventOpen, purchaseClout, realMinutesUntilOpen, sellPrice, visitClout,
 } from "../lib/city.ts";
 import { ECONOMY } from "../lib/economy.ts";
 
-const sql = readFileSync(new URL("../supabase/migrations/0004_the_city.sql", import.meta.url), "utf8");
+// The newest migration that writes the 'city' seed must match lib/city.ts.
+const migrations = readdirSync(new URL("../supabase/migrations/", import.meta.url)).filter((f) => f.endsWith(".sql")).sort();
+const seedSql = migrations
+  .map((f) => readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), "utf8"))
+  .filter((t) => /'city'/.test(t) && /\{"economy"/.test(t))
+  .at(-1)!;
 
-test("database city seed matches lib/city.ts (regenerate with scripts/gen-city-seed.ts)", () => {
-  const m = sql.match(/\('city', '((?:[^']|'')*)'::jsonb\)/);
+test("latest database city seed matches lib/city.ts (regenerate with scripts/gen-city-seed.ts)", () => {
+  const m = seedSql.match(/'(\{"economy"(?:[^']|'')*)'::jsonb/);
   assert.ok(m, "city seed");
   assert.deepEqual(JSON.parse(m[1].replaceAll("''", "'")), JSON.parse(JSON.stringify(citySeed())));
 });
@@ -77,4 +82,12 @@ test("the preview simulator follows the same clout and resale rules", async () =
   const tee = buy.ok ? buy.state.items.find((i) => i.sku === "fit-varsity-tee")! : null;
   const sold = await api.sellItem(tee!.id);
   assert.ok(sold.ok && sold.gain?.cash === 39 && netWorth(sold.state) > 0);
+});
+
+test("1 to 2 gigs cover a month's rent on the cheapest home", () => {
+  const cheapest = Math.min(...ECONOMY.homes.map((h) => h.rent));
+  const { shiftRate, gigs } = CITY_ECONOMY;
+  assert.ok(2 * gigs.pro.payMin * shiftRate >= cheapest * 0.9, "two pro gigs");
+  assert.ok(gigs.big.payMax * shiftRate >= cheapest, "one big break");
+  assert.equal(CITY_ECONOMY.bills.every, "1 month");
 });

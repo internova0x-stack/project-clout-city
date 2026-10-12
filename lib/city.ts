@@ -22,11 +22,16 @@ export const CITY_ECONOMY = {
   sellRate: 0.6,
   /** Each purchase's clout is this fraction of the previous one's (diminishing returns). */
   purchaseCloutDecay: 0.85,
-  bills: { periodDays: 7, phone: 85, graceDays: 3, moodDropPerDay: 8, evictAfterDays: 7, carInsuranceRate: 0.02 },
+  /**
+   * Rent, the phone bill and car insurance bill monthly (same day each month, as Postgres
+   * intervals); car rentals bill weekly. Insurance is a share of the car's price per month.
+   */
+  bills: { every: "1 month", carRentalDays: 7, phone: 85, graceDays: 3, moodDropPerDay: 8, evictAfterDays: 7, carInsuranceRate: 0.02 },
   gigs: {
-    side: { confidence: 0, chance: 0.9, payMin: 2, payMax: 3, energy: 1.5, waitMinutes: 60 },
-    pro: { confidence: 50, chance: 0.5, payMin: 4, payMax: 6, energy: 2, waitMinutes: 120 },
-    big: { confidence: 80, chance: 0.22, payMin: 10, payMax: 15, energy: 3, waitMinutes: 240 },
+    // Pay is a multiple of shiftRate. Tuned so 1 to 2 gigs cover a month's rent on the cheapest home ($2,100).
+    side: { confidence: 0, chance: 0.9, payMin: 3, payMax: 5, energy: 1.5, waitMinutes: 60 },
+    pro: { confidence: 50, chance: 0.5, payMin: 8, payMax: 10, energy: 2, waitMinutes: 120 },
+    big: { confidence: 80, chance: 0.22, payMin: 15, payMax: 20, energy: 3, waitMinutes: 240 },
   },
   shiftEnergy: 25,
 } as const;
