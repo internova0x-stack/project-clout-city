@@ -11,6 +11,7 @@ import {
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
 import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, track } from "./chatActions";
+import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +20,8 @@ export const metadata = { title: "Home · Clout City" };
 export default async function HomePage() {
   const { player } = await requirePlayer();
   const supabase = await getServerSupabase();
-  const [clique, city, story, catalog, chat] = await Promise.all([
-    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(),
+  const [clique, city, story, catalog, chat, dating] = await Promise.all([
+    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(),
   ]);
   // Migration 0010 switches on chat; a banned account sees only a notice.
   const chatOn = chat.ok;
@@ -59,6 +60,11 @@ export default async function HomePage() {
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
       chat={chatOn ? { list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard } : undefined}
       track={chatOn ? track : undefined}
+      // Migration 0011 switches on crushes and date nights.
+      dating={chatOn && dating.ok ? {
+        inbox: datingInbox, crushStatus, crush: crushToggle, matchSeen, candidates: dateCandidates,
+        invite: dateInvite, respond: dateRespond, cancel: dateCancel,
+      } : undefined}
     />
   );
 }

@@ -26,11 +26,13 @@ components live in `app/globals.css`.
 - `npm run typecheck`, `npm test` (Node's built-in test runner, `tests/*.test.ts`),
   `npm run build`.
 - `npm run test:db`: runs every migration on a throwaway local Postgres (needs the
-  Postgres 16 binaries) and the SQL scenario tests in `supabase/tests/`.
+  Postgres 16 binaries) and the SQL scenario tests in `supabase/tests/`
+  (`ONLY=$PWD/supabase/tests/dating.test.sql npm run test:db` runs one).
 - `/preview/creator?step=0-3` and `/preview/home?state=new` walk the creator and the
   first session with sample data (development only). `/preview/home` runs the city on an
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
-  `?story=3` starts the Sarah Bird story on Day 3. `/preview/studio` shows the Story Studio.
+  `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight` starts crushes and
+  date nights in that state. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 
 ## Rules for this codebase

@@ -34,6 +34,8 @@ export interface PlayerCard {
   joined: string;
   blocked: boolean;
   isMe: boolean;
+  /** v0.5 (migration 0011): my side of a crush on this player; absent before the migration. */
+  crush?: import("./dating.ts").CrushStatus | null;
 }
 
 export type ReportReason = "harassment" | "spam" | "inappropriate" | "other";

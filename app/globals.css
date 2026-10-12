@@ -699,3 +699,31 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .studio-line.flagged { background:#FDE2E4; border-radius:6px; padding:2px 6px; margin:0 -6px; }
 .studio-tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
 .studio-tile { display:flex; flex-direction:column; gap:4px; }
+
+/* Crushes and date nights (C40, C41) */
+.crush-wrap { display:inline-flex; align-items:center; gap:8px; flex:none; }
+.crush-btn { color:var(--neon-600); background:#fff; border:1px solid var(--neon-tint); }
+.crush-btn.on { color:#fff; background:var(--neon-500); border-color:var(--neon-500); box-shadow:0 0 12px rgba(255,46,136,.35); }
+.chat-head .crush-btn { width:36px; height:36px; }
+.matched-tag { display:inline-flex; align-items:center; height:18px; margin-left:6px; padding:0 7px; border-radius:var(--r-pill); background:var(--neon-tint); color:var(--neon-text);
+  font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; vertical-align:middle; }
+.date-avatar { flex:none; border-radius:50%; background:var(--night-900); border:2px solid var(--neon-500); display:grid; place-items:center; transition:filter .2s, opacity .2s; }
+.date-avatar.dim { filter:grayscale(1); opacity:.45; border-color:var(--divider, #DDD5C8); }
+.mutual-card { padding:28px 20px 20px; }
+.mutual-pair { display:flex; align-items:center; justify-content:center; gap:4px; }
+.mutual-pair .date-avatar { border-width:3px; box-shadow:0 0 18px rgba(255,46,136,.45); }
+.mutual-heart { font-size:26px; margin:0 -6px; z-index:1; animation:heart-beat 1.4s ease-in-out infinite; }
+@keyframes heart-beat { 0%,100% { transform:scale(1); } 15% { transform:scale(1.18); } 30% { transform:scale(1); } }
+@media (prefers-reduced-motion: reduce) { .mutual-heart { animation:none; } }
+.date-invite { border:1px solid var(--neon-tint); }
+.date-status { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--r-lg); background:var(--surface-card); }
+.date-status.done { background:var(--neon-tint); }
+.date-pair { display:flex; flex:none; }
+.date-pair .date-avatar + .date-avatar { margin-left:-8px; }
+.date-bonus { flex:none; font-size:13px; font-weight:700; color:var(--neon-text); font-variant-numeric:tabular-nums; }
+.date-btn { margin-top:8px; }
+.dating-prompt { background:linear-gradient(90deg,#E0186F,#8E3BD9); box-shadow:var(--elev-3), 0 6px 18px rgba(255,46,136,.3); }
+.dating-prompt .story-prompt-main { color:#fff; }
+.crush-invite-quote { margin:10px 0 0; padding:12px 14px; border-radius:var(--r-lg); background:var(--neon-tint); color:var(--neon-text); font-size:15px; line-height:21px; font-weight:600; }
+.tabular { font-variant-numeric:tabular-nums; }
+.one-line { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

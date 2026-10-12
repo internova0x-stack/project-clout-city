@@ -2,6 +2,7 @@
 
 import type { ChatMessage, ChatResult, ChatStatus, ChatSummary, ChatThread, PlayerCard, ReportReason } from "@/lib/chat";
 import type { StudioMetrics, StudioReport } from "@/lib/studio";
+import { previewCrushStatus, previewDatingBlock } from "./datingActions";
 
 // Development previews only: chat, the report queue and metrics in memory, following
 // the rules of supabase/migrations/0010. Refused in production builds.
@@ -67,8 +68,10 @@ export async function previewChatSend(to: string, body: string): Promise<ChatRes
   return ok({ left: LIMIT - sentToday() });
 }
 export async function previewChatBlock(id: string, on: boolean) {
-  if (on) state.blocks.add(id);
-  else state.blocks.delete(id);
+  if (on) {
+    state.blocks.add(id);
+    await previewDatingBlock(id);
+  } else state.blocks.delete(id);
   return ok(null);
 }
 export async function previewChatReport(id: string, messageId: number | null, reason: ReportReason, note: string) {
@@ -83,7 +86,8 @@ export async function previewChatReport(id: string, messageId: number | null, re
 }
 export async function previewPlayerCard(id: string) {
   const p = PEOPLE[id];
-  return ok<PlayerCard | null>(p ? { id, name: p.name, style: p.style, clout: p.clout, homeId: p.homeId, badges: 2, joined: t(60 * 24 * 20), blocked: state.blocks.has(id), isMe: false } : null);
+  const crush = p ? await previewCrushStatus(id) : null;
+  return ok<PlayerCard | null>(p ? { id, name: p.name, style: p.style, clout: p.clout, homeId: p.homeId, badges: 2, joined: t(60 * 24 * 20), blocked: state.blocks.has(id), isMe: false, crush: crush?.ok ? crush.data : null } : null);
 }
 /** The leaderboard with ids, so rows open player cards. */
 export async function previewLeaderboard(myClout: number) {

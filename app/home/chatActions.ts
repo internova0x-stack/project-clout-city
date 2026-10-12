@@ -37,7 +37,7 @@ export async function playerCard(playerId: string) {
 }
 
 /** Analytics for the success metrics (one per player per day per name). Never fails the game. */
-export async function track(name: "session" | "invite_shared" | "beat_shared" | "postcard_shared") {
+export async function track(name: "session" | "invite_shared" | "beat_shared" | "postcard_shared" | "crush_invite_shared") {
   const supabase = await getServerSupabase();
   if (!supabase) return;
   await supabase.rpc("track", { p_name: name });

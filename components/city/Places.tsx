@@ -15,6 +15,8 @@ import { PlaceArt } from "./PlaceArt";
 import { placeStory, type StoryFeed } from "@/lib/storyFeed";
 import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
+import { DateStatusRow } from "../dating/Dating";
+import { canDateAt, type DateNight } from "@/lib/dating";
 import type { StoreProduct } from "@/lib/store";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 
@@ -36,6 +38,13 @@ export interface PlaceHandlers {
   money?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
   /** Shopping places open the Shop on their category. */
   onOpenShop?: (category: ShopCategory) => void;
+  /** v0.5 date nights (C41): "Make it a date" on dining places and club events, and tonight's status. */
+  dating?: {
+    me: string;
+    dates: DateNight[];
+    bonus: { mood: number; clout: number };
+    onMakeDate: (spot: { kind: "place" | "event"; target: string; price: number }) => void;
+  };
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -100,6 +109,11 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {!open && !state.attendedToday.includes(ev.id) && <span className="meta">Doors open in {wait} min</span>}
               {open && !av.ok && <span className="meta reason">{av.reason}</span>}
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
+              {handlers.dating && !compact && (
+                <button className="btn btn-secondary btn-sm date-btn" onClick={() => handlers.dating!.onMakeDate({ kind: "event", target: ev.id, price: ev.entry })}>
+                  🌙 Make it a date
+                </button>
+              )}
             </div>
             <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
               {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
@@ -162,7 +176,18 @@ export function LocationSheet({
             <span className="lola-avatar" aria-hidden="true">💋</span>
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
+          {handlers.dating?.dates.filter((d) => d.placeId === place.id).map((d) => (
+            <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
+          ))}
           <ActionList place={place} state={state} handlers={handlers} />
+          {handlers.dating && canDateAt(place) && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => handlers.dating!.onMakeDate({ kind: "place", target: place.id, price: place.actions.find((a) => a.kind === "eat")?.price ?? 0 })}
+            >
+              🌙 Make it a date
+            </button>
+          )}
           {place.opensShop && handlers.onOpenShop && (
             <button className="btn btn-secondary" onClick={() => handlers.onOpenShop!(place.opensShop!)}>
               🛍️ Open the Shop · {SHOP_CATEGORIES.find((c) => c.id === place.opensShop)?.label}

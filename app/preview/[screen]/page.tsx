@@ -29,6 +29,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?mood=natural   the plain room lighting, for comparison
 //   /preview/home?dev=1          show the staging time-travel pill
 //   /preview/home?tasks=done     all five daily tasks done (the HUD's finished state)
+//   /preview/home?dating=match   crushes and date nights: match (an unseen "It's mutual"), invite (a date invite waiting), tonight (a date in progress)
 //   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
 //   /preview/studio            the Story Studio on an in-memory copy of content/stories (&live=3: the pilot is on Day 3)
 //   /preview/art             every location illustration, day and night
@@ -65,7 +66,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -116,6 +117,7 @@ export default async function Preview({
           devTools={dev === "1"}
           storyOff={story === "off"}
           tasksDone={tasks === "done"}
+          datingPreset={dating}
           storyDay={story && /^\d+$/.test(story) ? Number(story) : undefined}
           clique={[
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },

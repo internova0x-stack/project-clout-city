@@ -9,6 +9,11 @@ import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
 import type { StoreApi, StoreProduct } from "@/lib/store";
 import { placeById } from "@/lib/city";
 import type { ChatApi } from "@/lib/chat";
+import type { DatingApi } from "@/lib/dating";
+import {
+  previewCrush, previewCrushStatus, previewDateCancel, previewDateCandidates, previewDateInvite, previewDateRespond, previewDateWent, previewDatingInbox,
+  previewDatingReset, previewMatchSeen,
+} from "@/app/preview/datingActions";
 import {
   previewChatBlock, previewChatList, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
 } from "@/app/preview/chatActions";
@@ -19,7 +24,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -31,6 +36,8 @@ export function PreviewHome({
   storyDay?: number;
   /** All five daily tasks already done (to see the HUD's finished state). */
   tasksDone?: boolean;
+  /** Start crushes and date nights in a set state: "match", "invite" or "tonight". */
+  datingPreset?: string;
 }) {
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
@@ -104,9 +111,15 @@ export function PreviewHome({
       if (r.ok) await previewStoreAttended(eventId);
       return r;
     },
+    async attendEvent(eventId: string): Promise<CityResult> {
+      const r = await sim.attendEvent(eventId);
+      if (r.ok) await previewDateWent("event", eventId);
+      return r;
+    },
     async doAction(placeId: string, actionId: string): Promise<CityResult> {
       const r = await sim.doAction(placeId, actionId);
       if (!r.ok) return r;
+      await previewDateWent("place", placeId);
       if (placeById(placeId)?.postcard) await previewStoreVisited(placeId);
       const t = await previewStoryTask("", { place: placeId, action: actionId });
       if (!t.ok || !t.clout) return r;
@@ -121,6 +134,23 @@ export function PreviewHome({
     list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
     block: previewChatBlock, report: previewChatReport, card: previewPlayerCard,
   }), []);
+  // Crushes and date nights in memory; a date's bonus clout is mirrored into the sim's player.
+  const paid = useRef(new Set<number>());
+  const dating = useMemo<DatingApi>(() => {
+    // The preset is applied on the first read (server functions can't run during render).
+    let started = false;
+    const ready = async () => { if (!started) { started = true; await previewDatingReset(datingPreset); } };
+    return {
+      async inbox() {
+        await ready();
+        const r = await previewDatingInbox();
+        if (r.ok) for (const d of r.data.dates) if (d.paid && !paid.current.has(d.id)) { paid.current.add(d.id); sim.storyClout(r.data.bonus.clout); }
+        return r;
+      },
+      crushStatus: previewCrushStatus, crush: previewCrush, matchSeen: previewMatchSeen, candidates: previewDateCandidates,
+      invite: previewDateInvite, respond: previewDateRespond, cancel: previewDateCancel,
+    };
+  }, [datingPreset, sim]);
   const noop = async () => {};
   return (
     <GameShell
@@ -134,6 +164,7 @@ export function PreviewHome({
       storyApi={cityOff || storyOff ? undefined : story}
       storeApi={cityOff || storyOff ? undefined : storeApi}
       chat={cityOff ? undefined : chat}
+      dating={cityOff ? undefined : dating}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,

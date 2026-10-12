@@ -99,6 +99,13 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    admins as stories), and the analytics they read. The daily limit, the mute length and the
    filtered words live in `game_settings` row `chat`; add words there, one lowercase word each.
 
+9. Run `supabase/migrations/0011_dating.sql`. It switches on crushes and date nights
+   (Clarifications section 14): a heart on clique members' profile cards and on two-way chats
+   (3 crushes each, revealed only when mutual), "Make it a date" on restaurants and club nights,
+   and a **Date nights** row at the top of Messages. When both players have gone, each gets
+   +10 Mood and +25 clout, once a day. Blocking someone cancels crushes and dates between you.
+   The limits and the bonus live in `game_settings` row `dating`.
+
 **Adding a party** (an exclusive event) in the SQL Editor; times are New York time:
 
 ```sql

@@ -13,4 +13,4 @@ if [ "$(id -u)" = "0" ]; then RUN=(runuser -u postgres --); chown postgres "$DIR
 PSQL=(psql -h "$DIR" -p "$PORT" -U postgres -d postgres -v ON_ERROR_STOP=1 -q)
 "${PSQL[@]}" -f "$ROOT/supabase/tests/supabase-stub.sql"
 for f in "$ROOT"/supabase/migrations/*.sql; do echo "migrate: $(basename "$f")"; "${PSQL[@]}" -f "$f" >/dev/null; done
-for t in "$ROOT"/supabase/tests/*.test.sql; do echo "test: $(basename "$t")"; "${PSQL[@]}" -f "$t"; done
+for t in ${ONLY:-"$ROOT"/supabase/tests/*.test.sql}; do echo "test: $(basename "$t")"; "${PSQL[@]}" -f "$t"; done

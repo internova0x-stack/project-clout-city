@@ -7,7 +7,7 @@ import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { LedgerList } from "../game/Sheets";
 import { NewsApp, type NewsHandlers } from "../story/News";
-import { MessagesApp } from "../chat/Messages";
+import { MessagesApp, type MessagesDating } from "../chat/Messages";
 import type { ChatApi } from "@/lib/chat";
 import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
@@ -33,7 +33,7 @@ const TIER_TAG: Record<GigOffer["tier"], { label: string; cls: string }> = {
 /** C29: the Phone, with the Gigs, Bank and Settings apps (News and Messages arrive later). */
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating,
 }: {
   open: boolean;
   onClose: () => void;
@@ -53,6 +53,8 @@ export function PhoneModal({
   chatWith?: { id: string; name: string; style: string } | null;
   chatUnread?: number;
   onChatUnread?: (n: number) => void;
+  /** v0.5 crushes and date nights: the Messages app shows tonight's dates and the crush button. */
+  dating?: MessagesDating;
   onToast?: (text: string) => void;
 }) {
   const [app, setApp] = useState<App | null>(initialApp ?? null);
@@ -88,7 +90,7 @@ export function PhoneModal({
                       {a.emoji}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
-                      {a.id === "messages" && chatUnread > 0 && <span className="count-badge">{chatUnread}</span>}
+                      {a.id === "messages" && chatUnread + (dating?.alerts ?? 0) > 0 && <span className="count-badge">{chatUnread + (dating?.alerts ?? 0)}</span>}
                     </span>
                     <span>{a.label}</span>
                   </button>
@@ -117,7 +119,7 @@ export function PhoneModal({
               )}
               {app === "news" && (news ? <NewsApp feed={story ?? null} handlers={news} focusBeat={focusBeat} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "messages" && (chat
-                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} />
+                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}
             </div>
           )}

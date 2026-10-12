@@ -3,18 +3,33 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSummary, type ChatThread, type ReportReason } from "@/lib/chat";
 import { getStyle, type StyleId } from "@/lib/styles";
+import type { CrushStatus, DatingApi } from "@/lib/dating";
+import { CrushButton } from "../dating/Dating";
+
+/** v0.5 crushes and date nights inside Messages (C40). */
+export interface MessagesDating {
+  api: DatingApi;
+  /** Unseen reveals plus unanswered date invites. */
+  alerts: number;
+  /** Players I'm matched with, for the "Matched" tag. */
+  matched: string[];
+  onOpenDates: () => void;
+  /** A crush changed (it may have just become mutual). */
+  onCrushChange: () => void;
+}
 
 // C35: the Messages app in the Phone. 10 messages a day, a word filter on the
 // server, Block and Report from each thread's ⋯ menu, and Report on a long press.
 
 type Overlay = { kind: "menu" } | { kind: "block" } | { kind: "report"; messageId: number | null } | null;
 
-export function MessagesApp({ api, openWith, onToast, onUnread }: {
+export function MessagesApp({ api, openWith, onToast, onUnread, dating }: {
   api: ChatApi;
   /** Open (or start) a thread with this player, e.g. from their profile card. */
   openWith?: { id: string; name: string; style: string } | null;
   onToast: (text: string) => void;
   onUnread?: (n: number) => void;
+  dating?: MessagesDating;
 }) {
   const [list, setList] = useState<ChatSummary[] | null>(null);
   const [status, setStatus] = useState<ChatStatus | null>(null);
@@ -25,6 +40,8 @@ export function MessagesApp({ api, openWith, onToast, onUnread }: {
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [reason, setReason] = useState<ReportReason>("harassment");
   const [note, setNote] = useState("");
+  const [crush, setCrush] = useState<CrushStatus | null>(null);
+  const [crushBusy, setCrushBusy] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
   const press = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -52,6 +69,26 @@ export function MessagesApp({ api, openWith, onToast, onUnread }: {
     return () => clearInterval(t);
   }, [open, loadThread]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: "end" }); }, [thread?.messages.length]);
+  // The crush button shows once the chat is two-way (or they're in the clique); re-check as replies arrive.
+  const theirs = thread?.messages.filter((m) => !m.mine).length ?? 0;
+  const mine = thread?.messages.filter((m) => m.mine).length ?? 0;
+  const twoWay = theirs > 0 && mine > 0;
+  const datingApi = dating?.api;
+  useEffect(() => {
+    setCrush(null);
+    if (!open || !datingApi) return;
+    void datingApi.crushStatus(open.id).then((r) => r.ok && setCrush(r.data));
+  }, [open, datingApi, twoWay]);
+  const toggleCrush = async (on: boolean) => {
+    if (!open || !dating) return;
+    setCrushBusy(true);
+    const r = await dating.api.crush(open.id, on);
+    setCrushBusy(false);
+    if (!r.ok) return onToast(r.error);
+    setCrush(r.data);
+    onToast(!on ? "Crush taken back. Nobody ever knew." : r.data.matched ? "It's mutual 👀" : "Crush saved. They'll only find out if it's mutual.");
+    dating.onCrushChange();
+  };
 
   const send = async () => {
     if (!open || !draft.trim() || busy) return;
@@ -94,6 +131,16 @@ export function MessagesApp({ api, openWith, onToast, onUnread }: {
     return (
       <div className="stack-12">
         {status && <span className="chat-left">{muted ? "Chat is paused for you" : `${left} of ${status.limit} left today`}</span>}
+        {dating && (
+          <button className="chat-row date-row" onClick={dating.onOpenDates}>
+            <span className="chat-avatar" aria-hidden="true">🌙</span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="title" style={{ display: "block" }}>Date nights</span>
+              <span className="subtext chat-last">{dating.alerts > 0 ? "Something's waiting for you" : "Crushes, matches and tonight's plans"}</span>
+            </span>
+            <span className="chat-meta">{dating.alerts > 0 && <span className="count-badge">{dating.alerts}</span>}</span>
+          </button>
+        )}
         {list === null && <p className="meta">Loading…</p>}
         {list?.length === 0 && (
           <div className="card stack-4">
@@ -105,7 +152,9 @@ export function MessagesApp({ api, openWith, onToast, onUnread }: {
           <button key={c.with} className="chat-row" onClick={() => setOpen({ id: c.with, name: c.name, style: c.style })}>
             <span className="chat-avatar" aria-hidden="true">{getStyle(c.style as StyleId).emoji}</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-              <span className="title" style={{ display: "block" }}>{c.name}</span>
+              <span className="title" style={{ display: "block" }}>
+                {c.name}{dating?.matched.includes(c.with) && !c.blocked && <span className="tag matched-tag">Matched</span>}
+              </span>
               <span className="subtext chat-last">{c.blocked ? "Blocked" : `${c.lastMine ? "You: " : ""}${c.last ?? ""}`}</span>
             </span>
             <span className="chat-meta">
@@ -122,9 +171,11 @@ export function MessagesApp({ api, openWith, onToast, onUnread }: {
     <div className="chat-thread">
       <div className="chat-head">
         <button className="phone-back" onClick={() => { setOpen(null); setThread(null); void loadList(); }}>‹ Messages</button>
-        <span className="title" style={{ flex: 1, textAlign: "center", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {getStyle(open.style as StyleId).emoji} {open.name}
+        <span style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+          <span className="title one-line" style={{ display: "block" }}>{getStyle(open.style as StyleId).emoji} {open.name}</span>
+          {crush?.matched && <span className="tag matched-tag" style={{ margin: 0 }}>💗 Matched</span>}
         </span>
+        {crush && !thread?.blocked && <CrushButton status={crush} busy={crushBusy} onToggle={(on) => void toggleCrush(on)} showCount={false} />}
         <button className="icon-round chat-more" aria-label="More" onClick={() => setOverlay({ kind: "menu" })}>⋯</button>
       </div>
 

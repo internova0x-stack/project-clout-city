@@ -23,6 +23,8 @@ import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Comme
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
+import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
+import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import type { ShopCategory } from "@/lib/city";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
@@ -53,7 +55,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "places" | "bills" | "look" | "shop" | "possessions" | "collection" | null;
+type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "possessions" | "collection" | "dates" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
@@ -91,6 +93,7 @@ export function GameShell({
   chat,
   track,
   leaderboardRows,
+  dating,
   roomMood = "dream",
 }: {
   player: Player;
@@ -108,7 +111,9 @@ export function GameShell({
   /** v0.5 chat (migration 0010): Messages in the Phone, player cards from the leaderboard. */
   chat?: ChatApi;
   /** v0.5 analytics: one event per name per day (sessions for day-1 return, invites shared). */
-  track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared") => void;
+  track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared" | "crush_invite_shared") => void;
+  /** v0.5 crushes and date nights (migration 0011). */
+  dating?: DatingApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -152,6 +157,31 @@ export function GameShell({
   const [chatWith, setChatWith] = useState<{ id: string; name: string; style: string } | null>(null);
   const [chatUnread, setChatUnread] = useState(0);
   const [cardId, setCardId] = useState<string | null>(null);
+  const [inbox, setInbox] = useState<DatingInbox | null>(null);
+  const [dateSpot, setDateSpot] = useState<{ kind: "place" | "event"; target: string; price: number } | null>(null);
+  const [datingDismissed, setDatingDismissed] = useState<string | null>(null);
+  const [datingBusy, setDatingBusy] = useState(false);
+  /** Re-reads the dating inbox; a date that just paid out gets its own toast. */
+  const loadInbox = useCallback(async () => {
+    if (!dating) return;
+    const r = await dating.inbox();
+    if (!r.ok) return;
+    setInbox((prev) => {
+      const paid = r.data.dates.find((d) => d.paid && prev?.dates.some((p) => p.id === d.id && !p.paid));
+      if (paid) {
+        setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
+        setToast(`Date night with ${paid.with.name}. You both pulled up. 💗`);
+        setMe((m) => ({ ...m, clout: m.clout + r.data.bonus.clout, mood: Math.min(100, m.mood + r.data.bonus.mood) }));
+      }
+      return r.data;
+    });
+  }, [dating]);
+  useEffect(() => {
+    if (!dating) return;
+    void loadInbox();
+    const t = setInterval(() => void loadInbox(), 60_000);
+    return () => clearInterval(t);
+  }, [dating, loadInbox]);
   // A session a day counts toward day-1 return; unread messages badge the Phone.
   useEffect(() => { track?.("session"); }, [track]);
   useEffect(() => {
@@ -249,6 +279,8 @@ export function GameShell({
   const cityThenStory = async (key: string, call: () => Promise<CityResult>) => {
     const ok = await run(key, call);
     if (ok && storyApi) await storyApi.refresh(offset).then((r) => r.ok && setFeed(r.feed));
+    // A visit or an event can complete a date night.
+    if (ok && inbox?.dates.some((d) => !d.paid && d.status !== "declined")) void loadInbox();
   };
   const openNews = (beat?: string | null) => {
     setPanel(null);
@@ -340,6 +372,7 @@ export function GameShell({
     busy,
     money: catalog ? { products, nowMs: gameNow, h: money } : undefined,
     onOpenShop: openShop,
+    dating: dating && inbox ? { me: me.starting_style, dates: inbox.dates.filter((d) => d.status !== "declined"), bonus: inbox.bonus, onMakeDate: setDateSpot } : undefined,
     onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
@@ -530,7 +563,22 @@ export function GameShell({
   );
   const onLockedTap = useCallback((name: string) => setSoon({ key: "place", title: `${name} is locked` }), []);
 
-  const showPrompt = storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed);
+  const datingKey = inbox ? `${inbox.matches.filter((m) => !m.seen).map((m) => m.id).join()}|${inbox.dates.filter((d) => !d.mine && d.status === "pending").map((d) => d.id).join()}` : "";
+  const showDating = !!dating && datingAlerts(inbox) > 0 && datingDismissed !== datingKey && flow === "none" && !arranging && tab === "home" && !inside;
+  const showPrompt = showDating || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
+  const openChatWith = (p: DatePerson) => {
+    setPanel(null);
+    setChatWith({ id: p.id, name: p.name, style: p.style });
+    setPhone({ open: true, app: "messages" });
+  };
+  const datingRun = async (call: () => Promise<{ ok: boolean; error?: string }>, done?: string) => {
+    setDatingBusy(true);
+    const r = await call();
+    setDatingBusy(false);
+    if (!r.ok) setToast(r.error ?? "Cupid glitched. Try again.");
+    else if (done) setToast(done);
+    await loadInbox();
+  };
 
   return (
     <main className={`game${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
@@ -574,7 +622,10 @@ export function GameShell({
             mood={roomMood}
             onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
           />
-          {storyOn && flow === "none" && !arranging && (
+          {showDating && inbox && (
+            <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
+          )}
+          {storyOn && flow === "none" && !arranging && !showDating && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
           <button
@@ -626,7 +677,7 @@ export function GameShell({
           online,
           eventsBadge: !partyDone,
           billsBadge: !!city && dueBills(city).length > 0,
-          phoneBadge: payoutReady || chatUnread > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
+          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <GainToast gain={gain} message={toast} onDone={clearGain} />
@@ -679,6 +730,8 @@ export function GameShell({
           playerId={cardId}
           api={chat}
           onClose={() => setCardId(null)}
+          dating={dating ? { api: dating, onCrushChange: () => void loadInbox() } : undefined}
+          onToast={setToast}
           onMessage={(p) => {
             setCardId(null);
             setPanel(null);
@@ -776,6 +829,13 @@ export function GameShell({
         chatWith={chatWith}
         chatUnread={chatUnread}
         onChatUnread={setChatUnread}
+        dating={dating ? {
+          api: dating,
+          alerts: datingAlerts(inbox),
+          matched: inbox?.matches.map((m) => m.id) ?? [],
+          onOpenDates: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("dates"); },
+          onCrushChange: () => void loadInbox(),
+        } : undefined}
         onToast={setToast}
         story={storyOn ? feed : null}
         news={storyOn ? news : undefined}
@@ -801,6 +861,40 @@ export function GameShell({
         inviteCode={me.invite_code}
         clique={clique}
       />
+      {dating && (
+        <>
+          <DatingSheet
+            open={panel === "dates"}
+            onClose={() => setPanel(null)}
+            inbox={inbox}
+            me={me.starting_style}
+            busy={datingBusy}
+            onSeen={(id) => {
+              setInbox((i) => (i ? { ...i, matches: i.matches.map((m) => (m.id === id ? { ...m, seen: true } : m)) } : i));
+              void dating.matchSeen(id);
+            }}
+            onPlan={() => { setPanel("places"); setToast("Pick a restaurant or a club night, then tap “Make it a date”."); }}
+            onSayHi={openChatWith}
+            onAnswer={(id, yes) => void datingRun(() => dating.respond(id, yes), yes ? "You're in. Go whenever you're on tonight." : "No worries. Maybe another night.")}
+            onCancel={(id) => void datingRun(() => dating.cancel(id), "Date called off.")}
+            onCrushInvite={() => setPanel("crushInvite")}
+          />
+          <DateSheet
+            spot={dateSpot}
+            api={dating}
+            onClose={() => setDateSpot(null)}
+            onSent={(text) => { setDateSpot(null); setToast(text); void loadInbox(); }}
+          />
+          <InviteSheet
+            open={panel === "crushInvite"}
+            onClose={() => setPanel("dates")}
+            inviteCode={me.invite_code}
+            clique={clique}
+            crush
+            onShared={() => track?.("crush_invite_shared")}
+          />
+        </>
+      )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />
       <Sheet open={panel === "profile"} onClose={() => setPanel(null)} label="Your profile">
         <div className="stack-16">
