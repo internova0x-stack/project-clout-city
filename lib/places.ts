@@ -3,7 +3,7 @@
 
 import type { LatLng } from "./map/geo";
 
-export type PlaceCategory = "food" | "nightlife" | "parks" | "places" | "home";
+export type PlaceCategory = "food" | "nightlife" | "parks" | "places" | "home" | "monument" | "shopping";
 
 export interface PlacePin {
   id: string;

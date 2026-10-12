@@ -20,6 +20,8 @@ import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type Stor
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
+import { CollectionSheet, type MoneyHandlers } from "./city/Money";
+import type { ShopCategory } from "@/lib/city";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
@@ -49,7 +51,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "places" | "bills" | "look" | "shop" | "possessions" | null;
+type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "places" | "bills" | "look" | "shop" | "possessions" | "collection" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
@@ -135,6 +137,7 @@ export function GameShell({
   const [catalog, setCatalog] = useState<StoreProduct[] | null>(initialCatalog);
   /** A side story paid for at Stripe, waiting for the webhook to unlock it. */
   const [unlocking, setUnlocking] = useState<string | null>(null);
+  const [shopCategory, setShopCategory] = useState<ShopCategory>("fashion");
   const gameNow = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
 
   const look = normalizeLook(me.look, me.starting_style);
@@ -243,22 +246,27 @@ export function GameShell({
     window.history.replaceState(null, "", url.toString());
     if (back.state === "cancelled") return setToast("Checkout cancelled. Nothing was charged.");
     setUnlocking(back.sku);
-    openNews(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    if (!unlocking || !storeApi || !storyApi) return;
+    if (!unlocking || !storeApi) return;
     const started = Date.now();
     let stop = false;
     const check = async () => {
-      const [c, f] = await Promise.all([storeApi.catalog(), storyApi.refresh(offset)]);
+      const [c, f] = await Promise.all([storeApi.catalog(), storyApi?.refresh(offset)]);
       if (stop) return;
       if (c) setCatalog(c);
-      if (f.ok) setFeed(f.feed);
+      if (f?.ok) setFeed(f.feed);
       const p = c?.find((x) => x.sku === unlocking);
       if (p?.owned) {
         setUnlocking(null);
-        setToast(`🔓 Unlocked: ${p.name}`);
+        setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : `🔓 Unlocked: ${p.name}`);
+        // Show it where it lives; collector pieces and tickets also change clout and Possessions.
+        if (p.type === "side_arc") openNews(null);
+        if (p.type === "postcard") setPanel("collection");
+        if (p.type === "collector_item") setPanel("possessions");
+        if (p.type === "exclusive_event") setPanel("events");
+        if (cityApi && (p.type === "collector_item" || p.type === "exclusive_event")) void cityApi.refresh().then((r) => r.ok && applyCity(r));
       } else if (Date.now() - started > 90_000) {
         setUnlocking(null);
         setToast("Payment received. Unlocking can take a minute; it will appear on its own.");
@@ -267,6 +275,7 @@ export function GameShell({
     void check();
     const t = setInterval(() => void check(), 2500);
     return () => { stop = true; clearInterval(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlocking, storeApi, storyApi, offset]);
   const buy = async (sku: string) => {
     if (!storeApi) return setToast("Purchases aren't switched on yet. Nothing was charged.");
@@ -285,8 +294,28 @@ export function GameShell({
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [cityApi, applyCity]);
 
+  const money: MoneyHandlers = {
+    busy,
+    buy: (sku) => void buy(sku),
+    attend: (id) => {
+      if (!cityApi?.attendExclusiveEvent) return;
+      void run(`party:${id}`, () => cityApi.attendExclusiveEvent!(id)).then(async (ok) => {
+        const c = ok && storeApi ? await storeApi.catalog() : null;
+        if (c) setCatalog(c);
+      });
+    },
+  };
+  const products = (catalog ?? []).map((p) => (p.sku === unlocking ? { ...p, pending: true } : p));
+  const openShop = (category: ShopCategory) => {
+    setPlace(null);
+    setInside(null);
+    setShopCategory(category);
+    setPanel("shop");
+  };
   const handlers: PlaceHandlers = {
     busy,
+    money: catalog ? { products, nowMs: gameNow, h: money } : undefined,
+    onOpenShop: openShop,
     onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
@@ -332,7 +361,13 @@ export function GameShell({
   /** A tap on something in a place's room: run its action, or the event that's on. */
   const useInPlace = (p: Place, it: RoomItem) => {
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
+    if (it.use?.kind === "shop") return openShop(it.use.category);
     if (it.use?.kind !== "events") return;
+    // The lounge's guest list: a party you have a ticket for, if its doors are open; otherwise the Events list.
+    const party = products.find((x) => x.event?.placeId === p.id && x.owned && !x.event.attended
+      && gameNow >= Date.parse(x.event.startsAt) && gameNow < Date.parse(x.event.endsAt));
+    if (party) return money.attend(party.event!.id);
+    if (products.some((x) => x.event?.placeId === p.id)) return setPanel("events");
     const minutes = cityMinutes(gameNow, GAME_CONFIG.cityClock);
     const events = CLUB_EVENTS.filter((e) => e.placeId === p.id);
     const live = events.find((e) => eventOpen(e, minutes) && !city?.attendedToday.includes(e.id));
@@ -640,6 +675,7 @@ export function GameShell({
         city={cityOn ? city : null}
         busy={busy}
         onAttend={(id) => handlers.onAttendEvent(id)}
+        exclusive={catalog ? { products, nowMs: gameNow, h: money } : undefined}
       />
       {city && cityApi && (
         <>
@@ -653,8 +689,32 @@ export function GameShell({
             onGoInside={(p) => { setPlace(null); setInside(p); }}
           />
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />
-          <ShopSheet open={panel === "shop"} onClose={() => setPanel(null)} state={city} story={storyOn ? feed : null} busy={busy} onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))} />
-          <PossessionsSheet open={panel === "possessions"} onClose={() => setPanel(null)} state={city} style={me.starting_style} busy={busy} onSell={(id) => run(`sell:${id}`, () => cityApi.sellItem(id))} />
+          <ShopSheet
+            open={panel === "shop"}
+            onClose={() => setPanel(null)}
+            state={city}
+            story={storyOn ? feed : null}
+            busy={busy}
+            initialCategory={shopCategory}
+            onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))}
+            realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
+          />
+          <PossessionsSheet
+            open={panel === "possessions"}
+            onClose={() => setPanel(null)}
+            state={city}
+            style={me.starting_style}
+            busy={busy}
+            onSell={(id) => run(`sell:${id}`, () => cityApi.sellItem(id))}
+            onOpenCollection={catalog ? () => setPanel("collection") : undefined}
+          />
+          <CollectionSheet
+            open={panel === "collection"}
+            onClose={() => setPanel(null)}
+            products={products}
+            h={money}
+            badge={!!feed?.badges.some((b) => b.id === "postcard-collector")}
+          />
           <LookSheet
             open={panel === "look"}
             onClose={() => setPanel(null)}
@@ -722,6 +782,16 @@ export function GameShell({
                 );
               })}
             </div>
+          )}
+          {catalog && (
+            <button className="list-row" onClick={() => setPanel("collection")}>
+              <span style={{ fontSize: 24 }} aria-hidden="true">💌</span>
+              <span style={{ flex: 1, textAlign: "left" }}>
+                <span className="title" style={{ display: "block" }}>Postcard Collection</span>
+                <span className="meta">{products.filter((p) => p.type === "postcard" && p.owned).length} of {products.filter((p) => p.type === "postcard").length} collected</span>
+              </span>
+              <span className="meta">›</span>
+            </button>
           )}
           <div className="card stack-8">
             <p className="overline" style={{ margin: 0 }}>Starter wardrobe</p>

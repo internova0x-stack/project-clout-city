@@ -32,6 +32,9 @@ export async function refreshCity() {
 export async function doCityAction(placeId: string, actionId: string) {
   return run("do_action", { p_place: placeId, p_action: actionId }, asGain);
 }
+export async function attendExclusiveEvent(eventId: string) {
+  return run("attend_exclusive_event", { p_event: eventId }, asGain);
+}
 export async function attendClubEvent(eventId: string) {
   return run("attend_event", { p_event: eventId }, asGain);
 }

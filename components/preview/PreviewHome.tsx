@@ -6,8 +6,10 @@ import { createSimApi, sampleCityState } from "@/lib/citySim";
 import type { CityResult } from "@/lib/cityState";
 import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
+import type { StoreApi, StoreProduct } from "@/lib/store";
+import { placeById } from "@/lib/city";
 import {
-  previewCheckout, previewStoreCatalog, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
+  previewCheckout, previewStoreAttended, previewStoreCatalog, previewStoreVisited, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
 } from "@/app/preview/storyActions";
 
 // Development previews only: the home screen with an in-memory city and story
@@ -70,12 +72,38 @@ export function PreviewHome({
     };
   }, [sim, storyDay]);
 
+  // The pretend webhook's grants land in the sim's player, once each.
+  const catalogRef = useRef<StoreProduct[] | null>(null);
+  const granted = useRef(new Set<string>());
+  const storeApi = useMemo<StoreApi>(() => ({
+    async catalog() {
+      const c = await previewStoreCatalog();
+      catalogRef.current = c;
+      for (const p of c ?? []) {
+        if (!p.owned || granted.current.has(p.sku)) continue;
+        granted.current.add(p.sku);
+        if (p.type === "collector_item") sim.grantCollector(p.sku);
+        if (p.type === "exclusive_event" && p.event) sim.grantTicket(p.event.clout);
+      }
+      return c;
+    },
+    checkout: (sku) => previewCheckout(sku, window.location.pathname + window.location.search),
+  }), [sim]);
+
   // City actions can finish story tasks (as do_action does in SQL).
   const api = useMemo(() => ({
     ...sim,
+    async attendExclusiveEvent(eventId: string): Promise<CityResult> {
+      const ev = catalogRef.current?.find((p) => p.event?.id === eventId)?.event;
+      if (!ev) return { ok: false, error: "That event doesn't exist." };
+      const r = await sim.partyEvent(ev);
+      if (r.ok) await previewStoreAttended(eventId);
+      return r;
+    },
     async doAction(placeId: string, actionId: string): Promise<CityResult> {
       const r = await sim.doAction(placeId, actionId);
       if (!r.ok) return r;
+      if (placeById(placeId)?.postcard) await previewStoreVisited(placeId);
       const t = await previewStoryTask("", { place: placeId, action: actionId });
       if (!t.ok || !t.clout) return r;
       feedRef.current = t.feed;
@@ -96,10 +124,7 @@ export function PreviewHome({
       city={cityOff ? null : city}
       cityApi={cityOff ? undefined : api}
       storyApi={cityOff || storyOff ? undefined : story}
-      storeApi={cityOff || storyOff ? undefined : {
-        catalog: previewStoreCatalog,
-        checkout: (sku) => previewCheckout(sku, window.location.pathname + window.location.search),
-      }}
+      storeApi={cityOff || storyOff ? undefined : storeApi}
       actions={{
         setTutorialState: noop,
         finishHandoff: noop,

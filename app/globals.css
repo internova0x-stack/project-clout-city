@@ -630,3 +630,28 @@ textarea.studio-input { resize:vertical; font-family:ui-monospace, SFMono-Regula
 .studio-effect { display:flex; flex-direction:column; padding:8px 10px; border-radius:var(--r-sm); background:rgba(20,17,26,.04); }
 .studio-code { margin:0; padding:12px; border-radius:var(--r-sm); background:var(--night-900); color:#F4F1EA; font-size:12.5px; white-space:pre-wrap; word-break:break-word; }
 .studio .stack-8 > span, .studio .stack-12 > span, .studio .stack-16 > span { display:block; }
+
+/* Real-money products (v0.5): exclusive events (C26), postcards and the Collection (C39) */
+.exclusive-card { background:var(--g-night-reveal); color:var(--text-on-dark); border-radius:var(--r-lg); padding:16px;
+  box-shadow:0 0 0 1px rgba(225,188,133,.45), 0 0 24px rgba(255,46,136,.22); }
+.exclusive-card > span:not(.owned-chip) { display:block; }
+.exclusive-card .owned-chip { background:rgba(255,255,255,.12); color:#fff; }
+.tag.on-list { background:rgba(64,181,137,.22); color:#8BE6B0; }
+.item-card.collector { box-shadow:inset 0 0 0 1px var(--gold-300); }
+.postcard { position:relative; aspect-ratio:3 / 2; border-radius:10px; overflow:hidden; background:#FBF4E6; padding:5px;
+  box-shadow:0 1px 0 rgba(0,0,0,.05), 0 6px 14px rgba(20,17,26,.12); }
+.postcard.owned { box-shadow:0 0 0 1px var(--gold-300), 0 6px 14px rgba(20,17,26,.12); }
+.postcard-art { position:absolute; inset:5px; border-radius:6px; overflow:hidden; }
+.postcard-art .place-art { width:100%; height:100%; object-fit:cover; display:block; }
+.postcard-greeting { position:absolute; left:8px; bottom:7px; font-family:var(--font-label); font-weight:700; font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--gold-300); background:var(--night-900); padding:2px 6px; border-radius:4px; }
+.postcard.locked .postcard-art { filter:grayscale(1) brightness(.55) contrast(.9); }
+.postcard.unvisited { background:transparent; box-shadow:inset 0 0 0 2px var(--divider); }
+.postcard.unvisited .postcard-art { opacity:.18; filter:grayscale(1); }
+.postcard.unvisited .postcard-greeting { display:none; }
+.postcard-lock { position:absolute; inset:0; display:grid; place-items:center; font-size:22px; }
+.postcard-offer { display:flex; align-items:center; gap:12px; padding:12px; border-radius:var(--r-md); background:var(--surface-card);
+  box-shadow:inset 0 0 0 1px var(--gold-300); }
+.postcard-offer .postcard-greeting { display:none; }
+.collection-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+.achievement-row { display:flex; align-items:center; gap:12px; padding:12px; border-radius:var(--r-md); background:var(--surface-card); }

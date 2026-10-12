@@ -434,6 +434,163 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    case "unisphere": {
+      const pool: BoxSpec = { ...isle, color: night ? "#7FA0C8" : "#CFE6F2" };
+      const plinth: BoxSpec = { x: -1.2, y: -1.2, z: 0, w: 2.4, d: 2.4, h: 1.2, color: "#E8E2EE" };
+      const [gx, gy] = iso(0, 0, 6.5);
+      const steel = night ? "#D8E0F0" : "#8FA4B8";
+      return (
+        <>
+          <Box b={pool} night={night} />
+          {(() => {
+            const [fx, fy] = iso(0, 0, 0);
+            return <ellipse cx={fx} cy={fy} rx={5 * S} ry={2.5 * S} fill={night ? "#3E6FA0" : "#9ED8F7"} opacity={0.8} />;
+          })()}
+          {[-3, -1, 1, 3].map((x) => {
+            const [px, py] = iso(x, 3.5, 0);
+            return <rect key={x} x={px - 0.6} y={py - 10} width={1.2} height={10} fill="#FFFFFF" opacity={0.8} />;
+          })}
+          <Box b={plinth} night={night} />
+          <circle cx={gx} cy={gy} r={34} fill={night ? "rgba(216,224,240,.12)" : "rgba(143,164,184,.15)"} stroke={steel} strokeWidth={2.6} />
+          {[10, 22].map((ry) => <ellipse key={ry} cx={gx} cy={gy} rx={34} ry={ry} fill="none" stroke={steel} strokeWidth={1.4} />)}
+          {[12, 24].map((rx) => <ellipse key={rx} cx={gx} cy={gy} rx={rx} ry={34} fill="none" stroke={steel} strokeWidth={1.4} />)}
+          <path d={`M${gx - 20} ${gy - 12} q8 -6 16 -2 q6 4 14 -2`} fill="none" stroke={night ? "#E9D8FF" : "#5C7A96"} strokeWidth={3} strokeLinecap="round" />
+          <ellipse cx={gx} cy={gy} rx={40} ry={9} fill="none" stroke={steel} strokeWidth={2} transform={`rotate(-22 ${gx} ${gy})`} />
+          <line x1={gx} y1={gy + 34} x2={gx} y2={iso(0, 0, 1.2)[1]} stroke={steel} strokeWidth={2.4} />
+          <Tree x={-5.2} y={3.6} night={night} />
+          <Tree x={5} y={-4.6} night={night} size={0.9} />
+          <Lantern x={4.6} y={4.6} night={night} />
+        </>
+      );
+    }
+    case "gantry-plaza": {
+      const quay: BoxSpec = { x: -6, y: -6, z: -1, w: 12, d: 7, h: 1, color: night ? "#B8A8D8" : "#E8DCCF" };
+      const river: BoxSpec = { x: -6, y: 1, z: -1.4, w: 12, d: 5, h: 1, color: night ? "#4F6FA8" : "#A9D8F2" };
+      const steel = mixHex(a, night ? "#3B2F72" : "#8E7CC8", 0.2);
+      const gantry = (x: number) => {
+        const legs = [iso(x, -0.5, 0), iso(x, 1.5, 0)];
+        const top = iso(x, 0.5, 6.5);
+        return (
+          <g key={x} stroke={steel} strokeWidth={3} strokeLinecap="round">
+            <line x1={legs[0][0]} y1={legs[0][1]} x2={top[0]} y2={top[1]} />
+            <line x1={legs[1][0]} y1={legs[1][1]} x2={top[0]} y2={top[1]} />
+            <line x1={top[0] - 16} y1={top[1] - 2} x2={top[0] + 18} y2={top[1] + 8} strokeWidth={4} />
+            <line x1={(legs[0][0] + top[0]) / 2} y1={(legs[0][1] + top[1]) / 2} x2={(legs[1][0] + top[0]) / 2} y2={(legs[1][1] + top[1]) / 2} strokeWidth={1.6} />
+          </g>
+        );
+      };
+      return (
+        <>
+          <Box b={river} night={night} />
+          <Box b={quay} night={night} />
+          {[-5, -3.2, -1.4].map((y, i) => (
+            <Box key={y} b={{ x: 3.8, y, z: 0, w: 1.6, d: 1.4, h: [5, 7.5, 4][i], color: mixHex(c, "#C9D2E8", 0.55) }} night={night} />
+          ))}
+          {gantry(-3.5)}
+          {gantry(0.5)}
+          <OnRight b={quay} u={0.2} v={1.01} uw={6.6} vh={0.05} fill={b} />
+          <Lantern x={-5} y={0.5} night={night} />
+          <Lantern x={2.5} y={0.5} night={night} />
+          {(() => {
+            const [px, py] = iso(-1.5, 0.2, 0);
+            return <rect x={px - 9} y={py - 4} width={18} height={2.4} rx={1} fill={mixHex("#5C4A3A", "#000", 0.1)} />;
+          })()}
+        </>
+      );
+    }
+    case "low-light-lounge": {
+      const hall: BoxSpec = { x: -5, y: -4.5, z: 0, w: 8.5, d: 6.5, h: 4.4, color: mixHex(b, "#7A2E3A", 0.25) };
+      return (
+        <>
+          {base}
+          <Box b={hall} night={night}>
+            {[0, 1, 2].map((i) => <OnLeft key={i} b={hall} u={0.6 + i * 2.6} v={0.9} uw={1.8} vh={2} fill={night ? "#FFD08A" : mixHex(a, "#3A2430", 0.5)} opacity={0.95} />)}
+            <OnLeft b={hall} u={0} v={3.1} uw={8.5} vh={0.35} fill={a} />
+            <OnRight b={hall} u={2} v={0} uw={1.8} vh={2.8} fill="#2A1E2E" />
+            <SignLeft b={hall} text="Low Light" color="#2A1E2E" ink="#E8C79A" v={3.5} night={night} />
+          </Box>
+          {/* the velvet rope */}
+          {(() => {
+            const p1 = iso(-1, 3.4, 0);
+            const p2 = iso(2.5, 3.4, 0);
+            return (
+              <g>
+                {[p1, p2].map((p, i) => <rect key={i} x={p[0] - 1} y={p[1] - 10} width={2} height={10} fill="#E8C79A" />)}
+                <path d={`M${p1[0]} ${p1[1] - 8} Q${(p1[0] + p2[0]) / 2} ${(p1[1] + p2[1]) / 2 - 2} ${p2[0]} ${p2[1] - 8}`} fill="none" stroke="#B4232F" strokeWidth={2.4} />
+              </g>
+            );
+          })()}
+          <Lantern x={4.6} y={3.5} night={night} />
+          <Tree x={-5.5} y={4} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "thread-count": {
+      const shop: BoxSpec = { x: -5, y: -4.5, z: 0, w: 8.5, d: 6.5, h: 5, color: mixHex(b, "#E8DCCF", 0.2) };
+      const awning: BoxSpec = { x: -5, y: 2, z: 2.9, w: 8.5, d: 1.2, h: 0.25, color: a };
+      return (
+        <>
+          {base}
+          <Box b={shop} night={night}>
+            <OnLeft b={shop} u={0.6} v={0} uw={5.2} vh={2.8} fill={night ? lit : "#DDEFF6"} opacity={0.9} />
+            <OnLeft b={shop} u={6.4} v={0} uw={1.6} vh={2.8} fill={mixHex(c, "#000", 0.1)} />
+            {windowsRight(shop, 1, 3, lit, glassDark, night)}
+            <SignLeft b={shop} text="Thread Count" color="#2A2530" ink={a} v={3.6} night={night} />
+            {/* mannequins in the window */}
+            {[1.4, 3.2, 5].map((u, i) => {
+              const [px, py] = iso(shop.x + u, shop.y + shop.d + 0.03, 0.2);
+              return (
+                <g key={u}>
+                  <circle cx={px} cy={py - 15} r={2.2} fill="#F4EDE6" />
+                  <path d={`M${px - 4} ${py - 12} h8 l2 9 h-12z`} fill={["#E0457B", "#2A2530", "#6C8CFF"][i]} />
+                </g>
+              );
+            })}
+          </Box>
+          <Box b={awning} night={night}>
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <OnLeft key={i} b={awning} u={i * 1.06} v={0} uw={0.53} vh={0.25} fill="#FFFFFF" opacity={0.85} />)}
+          </Box>
+          <Lantern x={4.6} y={4.2} night={night} />
+          <Tree x={-5.5} y={4.2} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "boulevard-motors": {
+      const show: BoxSpec = { x: -5.5, y: -4.5, z: 0, w: 9, d: 5.5, h: 4.2, color: "#E6E8EC" };
+      const roof: BoxSpec = { x: -5.8, y: -4.8, z: 4.2, w: 9.6, d: 6.1, h: 0.4, color: a };
+      const carAt = (x: number, y: number, col: string) => {
+        const [px, py] = iso(x, y, 0);
+        return (
+          <g key={`${x}-${y}`}>
+            <path d={`M${px - 11} ${py - 3} l3 -5 h6 l4 -4 h6 l4 4 h3 l1 5 z`} fill={col} />
+            <path d={`M${px - 2} ${py - 8} l3 -3 h5 l3 3 z`} fill={night ? "#FFE2A8" : "#DDEFF6"} />
+            <circle cx={px - 6} cy={py - 2} r={2.2} fill="#1F1B26" />
+            <circle cx={px + 8} cy={py - 2} r={2.2} fill="#1F1B26" />
+          </g>
+        );
+      };
+      return (
+        <>
+          {base}
+          <Box b={show} night={night}>
+            <OnLeft b={show} u={0.4} v={0.2} uw={8.2} vh={2.2} fill={night ? lit : "#CFE6F2"} opacity={0.75} />
+            <SignLeft b={show} text="Boulevard Motors" color={a} ink="#FFFFFF" v={2.5} night={night} />
+          </Box>
+          <Box b={roof} night={night} />
+          {carAt(-2.5, 2.8, "#D93A2F")}
+          {carAt(1.8, 3.2, "#2F5DA8")}
+          {[[-5, 4.6, "#FF2E88"], [-4.4, 4.9, "#FFC21A"], [4.6, 4, "#6C8CFF"]].map(([x, y, col]) => {
+            const [px, py] = iso(x as number, y as number, 0);
+            return (
+              <g key={`${x}`}>
+                <line x1={px} y1={py} x2={px} y2={py - 22} stroke="#8E7CC8" strokeWidth={0.8} />
+                <ellipse cx={px} cy={py - 25} rx={3.4} ry={4.2} fill={col as string} />
+              </g>
+            );
+          })}
+        </>
+      );
+    }
     case "skybridge-tower":
     default: {
       const t1: BoxSpec = { x: -5.5, y: -4, z: 0, w: 4.2, d: 5, h: 8.5, color: mixHex(a, "#C9D2E8", 0.5) };

@@ -26,8 +26,8 @@ select 1 from public.dev_story_start('sarah-bird', public.ny_today() - 4); -- Da
 
 -- ---- The catalog, and a pending purchase ----
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000040', false);
-select pg_temp.assert(jsonb_array_length(public.store_catalog()) = 3, 'three side stories for sale');
-select pg_temp.assert((select bool_and(not (p ->> 'owned')::boolean and (p ->> 'priceCents')::int = 299) from jsonb_array_elements(public.store_catalog()) p), '$2.99, not owned');
+select pg_temp.assert((select count(*) = 3 from jsonb_array_elements(public.store_catalog()) p where p ->> 'type' = 'side_arc'), 'three side stories for sale');
+select pg_temp.assert((select bool_and(not (p ->> 'owned')::boolean and (p ->> 'priceCents')::int = 299) from jsonb_array_elements(public.store_catalog()) p where p ->> 'type' = 'side_arc'), '$2.99, not owned');
 select public.start_purchase('side_sarah_bird_momager_files', 'cs_test_1');
 select pg_temp.assert((select (p ->> 'pending')::boolean from jsonb_array_elements(public.store_catalog()) p where p ->> 'sku' = 'side_sarah_bird_momager_files'), 'pending after checkout starts');
 select pg_temp.assert((select not (p ->> 'owned')::boolean from jsonb_array_elements(public.store_catalog()) p where p ->> 'sku' = 'side_sarah_bird_momager_files'), 'pending grants nothing');

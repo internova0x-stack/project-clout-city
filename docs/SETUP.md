@@ -88,6 +88,24 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    the webhook lands, then the chapters open. Refund the payment in Stripe (**Payments → Refund**,
    full amount) and the side story locks again.
 
+7. Run `supabase/migrations/0009_money_wave3.sql`. It adds location wave 3 (two monuments, the
+   lounge, the boutique and the dealership) and the other three products: monument postcards
+   ($0.99, after a visit), two collector fashion pieces ($4.99 and $3.99) and two exclusive
+   parties at the lounge, this coming Friday and Saturday, 10 PM to 2 AM New York time.
+
+**Adding a party** (an exclusive event) in the SQL Editor; times are New York time:
+
+```sql
+insert into store_products (sku, product_type, name, price_cents, place_id)
+values ('event-my-party', 'exclusive_event', 'My party', 499, 'low-light-lounge');
+insert into exclusive_events (id, sku, place_id, name, host, blurb, starts_at, ends_at, clout, energy, mood, confidence)
+values ('my-party', 'event-my-party', 'low-light-lounge', 'My party', 'Host name', 'One funny line about it.',
+        '2026-11-06 22:00 America/New_York', '2026-11-07 02:00 America/New_York', 100, 20, 10, 10);
+```
+
+The ticket pays the clout (with diminishing returns); going to the party raises Mood and
+Confidence. Ended parties leave the Events list on their own.
+
 Prices are config: `store_products.price_cents` (shown and charged). To charge a Price you
 created in Stripe instead, set `store_products.stripe_price_id`. Don't change a price on a story
 players are following. Before going live: check **Stripe Tax** settings for digital goods.

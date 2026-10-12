@@ -91,3 +91,24 @@ test("1 to 2 gigs cover a month's rent on the cheapest home", () => {
   assert.ok(gigs.big.payMax * shiftRate >= cheapest, "one big break");
   assert.equal(CITY_ECONOMY.bills.every, "1 month");
 });
+
+import { collectorValue } from "../lib/city.ts";
+
+test("collector pieces: real cash only, never sold, valued at 1.5x the priciest item", async () => {
+  assert.equal(collectorValue("fashion"), 630);
+  for (const i of SHOP_ITEMS.filter((x) => x.collector)) assert.equal(i.price, 0, `${i.sku} has no virtual price`);
+  const sim = createSimApi(sampleCityState());
+  const r = await sim.buyItem("col-faux-chinchilla", "buy");
+  assert.equal(r.ok, false, "virtual cash can't buy it");
+  sim.grantCollector("col-faux-chinchilla");
+  const s = await sim.refresh();
+  assert.ok(s.ok);
+  const piece = s.state.items.find((i) => i.sku === "col-faux-chinchilla")!;
+  assert.equal(piece.value, 630);
+  assert.equal((await sim.sellItem(piece.id)).ok, false, "can't be sold");
+});
+
+test("every monument has a postcard and every shopping place opens a Shop category", () => {
+  for (const p of PLACES.filter((x) => x.category === "monument")) assert.ok(p.postcard, p.id);
+  for (const p of PLACES.filter((x) => x.category === "shopping")) assert.ok(p.opensShop, p.id);
+});

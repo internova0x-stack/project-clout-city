@@ -8,6 +8,14 @@ import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
+import { formatPrice, type StoreProduct } from "@/lib/store";
+
+/** Real-money purchases from inside a sheet: the catalog row, and Stripe Checkout. */
+export interface RealMoney {
+  product: (sku: string) => StoreProduct | undefined;
+  buy: (sku: string) => void;
+  busy: string | null;
+}
 
 type Busy = string | null;
 
@@ -15,14 +23,29 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, story = null,
-}: { open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>; story?: StoryFeed | null }) {
-  const [cat, setCat] = useState<ShopCategory>("fashion");
+  open, onClose, state, busy, onBuy, story = null, realMoney, initialCategory = "fashion",
+}: {
+  open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
+  story?: StoryFeed | null;
+  /** Collector pieces are sold for real cash only (Stripe); without it they stay hidden. */
+  realMoney?: RealMoney;
+  /** The boutique and the dealership open the Shop on their category. */
+  initialCategory?: ShopCategory;
+}) {
+  const [cat, setCat] = useState<ShopCategory>(initialCategory);
+  const [lastInitial, setLastInitial] = useState(initialCategory);
+  if (initialCategory !== lastInitial) {
+    setLastInitial(initialCategory);
+    setCat(initialCategory);
+  }
   const [confirm, setConfirm] = useState<{ item: ShopItem; mode: "buy" | "rent" } | null>(null);
   const owned = ownedSkus(state);
   const { player } = state;
   // Story-only items (e.g. the "Forever Our Bird" hoodie) show only while a story has them on sale.
-  const items = SHOP_ITEMS.filter((i) => i.category === cat && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku)));
+  // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up).
+  const items = SHOP_ITEMS.filter((i) => i.category === cat
+    && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku))
+    && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku)));
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
@@ -41,6 +64,30 @@ export function ShopSheet({
             {items.map((item) => {
               const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
               const short = player.bank_cash < item.price;
+              if (item.collector) {
+                const p = realMoney?.product(item.sku);
+                return (
+                  <div key={item.sku} className="item-card collector">
+                    <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <IconTile emoji={item.emoji} />
+                      <span className="tag tag-gold">✨ Real cash</span>
+                    </div>
+                    <span className="title" style={{ display: "block" }}>{item.name}</span>
+                    <span className="subtext clamp-2">{item.blurb}</span>
+                    <Stars rating={item.rating} />
+                    <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)} · worth {formatCash(p?.value ?? 0)}</span>
+                    {isOwned || p?.owned ? (
+                      <span className="owned-chip">Owned</span>
+                    ) : p?.pending || realMoney?.busy === `buy:${item.sku}` ? (
+                      <button className="btn btn-taxi btn-sm" disabled>{p?.pending ? "Unlocking…" : "Opening checkout…"}</button>
+                    ) : (
+                      <button className="btn btn-taxi btn-sm" disabled={!p || busy !== null} onClick={() => realMoney?.buy(item.sku)}>
+                        {p ? formatPrice(p.priceCents, p.currency) : "Unavailable"}
+                      </button>
+                    )}
+                  </div>
+                );
+              }
               return (
                 <div key={item.sku} className="item-card">
                   <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -108,8 +155,12 @@ export function ShopSheet({
 // Possessions (C25): bank cash, then items by category; sell at 60%.
 // ---------------------------------------------------------------------------
 export function PossessionsSheet({
-  open, onClose, state, style, busy, onSell,
-}: { open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean> }) {
+  open, onClose, state, style, busy, onSell, onOpenCollection,
+}: {
+  open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean>;
+  /** Postcards live in the Collection, not here (they don't count toward net worth). */
+  onOpenCollection?: () => void;
+}) {
   const [detail, setDetail] = useState<PlayerItem | null>(null);
   const [confirming, setConfirming] = useState(false);
   const total = netWorth(state);
@@ -140,7 +191,7 @@ export function PossessionsSheet({
                       <IconTile emoji={it?.emoji ?? "📦"} size={40} />
                       <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                         <span className="title" style={{ display: "block" }}>{it?.name ?? i.sku}</span>
-                        <span className="meta">{i.acquired === "earned" ? "Earned" : "Bought"}{i.equipped ? " · Wearing" : ""}</span>
+                        <span className="meta">{i.acquired === "earned" ? "Earned" : i.acquired === "collector" ? "✨ Collector" : "Bought"}{i.equipped ? " · Wearing" : ""}</span>
                       </span>
                       <span className="body-strong tabular">{formatCash(i.value)}</span>
                     </button>
@@ -159,6 +210,16 @@ export function PossessionsSheet({
               </div>
             );
           })}
+          {onOpenCollection && (
+            <button className="list-row" onClick={onOpenCollection}>
+              <IconTile emoji="💌" size={40} />
+              <span style={{ flex: 1, textAlign: "left" }}>
+                <span className="title" style={{ display: "block" }}>Postcard Collection</span>
+                <span className="meta">Not part of net worth</span>
+              </span>
+              <span className="meta">›</span>
+            </button>
+          )}
         </div>
       </Sheet>
       <Sheet open={open && !!detail} onClose={close} label={item?.name ?? "Item"}>
@@ -184,9 +245,15 @@ export function PossessionsSheet({
                 <p className="subtext" style={{ margin: 0 }}>{item.blurb}</p>
                 <div className="card stack-8">
                   <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Value</span><span className="body-strong">{formatCash(detail.value)}</span></div>
-                  <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Sells for (60%)</span><span className="body-strong">{formatCash(sellPrice(detail.value))}</span></div>
+                  {detail.acquired !== "collector" && (
+                    <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Sells for (60%)</span><span className="body-strong">{formatCash(sellPrice(detail.value))}</span></div>
+                  )}
                 </div>
-                <button className="btn btn-destructive" onClick={() => setConfirming(true)}>Sell for {formatCash(sellPrice(detail.value))}</button>
+                {detail.acquired === "collector" ? (
+                  <p className="meta" style={{ margin: 0 }}>✨ A collector piece, bought with real cash. It can&apos;t be sold for virtual cash.</p>
+                ) : (
+                  <button className="btn btn-destructive" onClick={() => setConfirming(true)}>Sell for {formatCash(sellPrice(detail.value))}</button>
+                )}
               </>
             )}
           </div>

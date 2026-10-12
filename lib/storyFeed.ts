@@ -3,6 +3,7 @@
 // before a reveal, unreleased beats or locked side-arc text. Safe to import anywhere.
 
 import type { Phase, StoryEffect, StoryEvent, StoryTask } from "./stories.ts";
+import { POSTCARD_BADGE } from "./store.ts";
 
 export interface FeedBeat {
   id: string;
@@ -108,6 +109,7 @@ export function unseenBeats(feed: StoryFeed | null): number {
 }
 
 export function badgeInfo(feed: StoryFeed | null, id: string) {
+  if (id === POSTCARD_BADGE.id) return POSTCARD_BADGE;
   for (const a of feed?.arcs ?? []) {
     const b = a.badges?.find((x) => x.id === id);
     if (b) return b;

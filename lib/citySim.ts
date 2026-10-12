@@ -3,7 +3,8 @@
 // a database. It follows the same rules as supabase/migrations/0004 in simplified
 // form; the SQL is the source of truth.
 
-import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, PLACES, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
+import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
+import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { activeGig, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
@@ -52,7 +53,14 @@ function addDays(day: string, n: number): string {
 }
 
 /** The sim plus what the preview's story world needs (free story events change Energy and Clout). */
-export type SimApi = CityApi & { storyEvent(ev: StoryEvent): Promise<CityResult>; storyClout(n: number): void };
+export type SimApi = CityApi & {
+  storyEvent(ev: StoryEvent): Promise<CityResult>;
+  storyClout(n: number): void;
+  /** What the preview's pretend Stripe webhook grants. */
+  grantCollector(sku: string): void;
+  grantTicket(clout: number): void;
+  partyEvent(ev: ExclusiveEvent): Promise<CityResult>;
+};
 
 /** `story` returns the preview's current story feed, so prices, closures and unlocks follow the World State. */
 export function createSimApi(initial: CityState, story: () => StoryFeed | null = () => null): SimApi {
@@ -146,6 +154,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     buyItem(sku, mode) {
       const item = itemBySku(sku);
       if (!item || (item.storyOnly && !storyItemOpen(story(), sku).open)) return fail("That isn't in stock.");
+      if (item.collector) return fail("That piece is real cash only.");
       if (s.items.some((i) => i.sku === sku)) return fail("You already own that. Calm down.");
       const price = mode === "rent" ? item.rentPerWeek ?? 0 : item.price;
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
@@ -164,6 +173,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     sellItem(itemId) {
       const it = s.items.find((i) => i.id === itemId);
       if (!it) return fail("You don't own that.");
+      if (it.acquired === "collector") return fail("Collector pieces can't be sold.");
       const amount = sellPrice(it.value);
       s.items = s.items.filter((i) => i.id !== itemId);
       p().bank_cash += amount;
@@ -194,6 +204,26 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     },
     storyClout(n) {
       p().clout += n;
+    },
+    grantCollector(sku) {
+      const item = itemBySku(sku);
+      if (!item || s.items.some((i) => i.sku === sku)) return;
+      s.items.push({ id: nextId++, sku, category: item.category, value: collectorValue(item.category), acquired: "collector", equipped: false });
+      p().clout += purchaseClout(item.clout, p().purchases_count);
+      p().purchases_count += 1;
+    },
+    grantTicket(clout) {
+      p().clout += purchaseClout(clout, p().purchases_count);
+      p().purchases_count += 1;
+    },
+    partyEvent(ev) {
+      if (s.attendedToday.includes(ev.id)) return fail("You already went tonight. Twice would be desperate.");
+      if (p().energy < ev.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
+      s.attendedToday.push(ev.id);
+      p().energy -= ev.energy;
+      p().mood = Math.min(100, p().mood + ev.mood);
+      p().confidence = Math.min(100, p().confidence + ev.confidence);
+      return ok({ energy: -ev.energy, mood: ev.mood, confidence: ev.confidence });
     },
     storyEvent(ev) {
       if (s.attendedToday.includes(ev.id)) return fail("You were already there. Everyone saw you. It's fine.");

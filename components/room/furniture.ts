@@ -280,6 +280,48 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       for (let r = 0; r < 4; r++) for (let i = 0; i < 6; i++) cyl(0.04, 0.04, 0.16, cans[(i + r) % 4], -w / 2 + 0.2 + i * 0.2, 0.2 + r * 0.42, 0.1, 6);
       return { group: g };
     }
+    case "piano": {
+      box(w, 0.75, 0.6, BLACK, 0, 0.22, -0.35);
+      const lid = box(w, 0.04, d - 0.1, k.mat(BLACK, { roughness: 0.25, metalness: 0.2 }), 0, 0.97, 0.05);
+      lid.rotation.x = -0.12;
+      box(w - 0.2, 0.05, 0.2, "#F4F1EA", 0, 0.8, 0.0);
+      for (let i = 0; i < 9; i++) box(0.05, 0.03, 0.12, BLACK, -w / 2 + 0.2 + i * 0.14, 0.84, -0.02);
+      for (const sx of [-1, 1]) cyl(0.05, 0.05, 0.22, BLACK, sx * (w / 2 - 0.15), 0, -0.35, 6);
+      cyl(0.05, 0.05, 0.22, BLACK, 0, 0, 0.5, 6);
+      box(0.7, 0.45, 0.35, BLACK, 0, 0, 0.62);
+      return { group: g };
+    }
+    case "clothesRack": {
+      for (const sx of [-1, 1]) cyl(0.02, 0.02, 1.5, METAL, sx * (w / 2 - 0.05), 0, 0, 6);
+      const bar = cyl(0.02, 0.02, w - 0.1, METAL, 0, 1.45, 0, 6);
+      bar.rotation.z = Math.PI / 2;
+      bar.position.y = 1.45;
+      box(w, 0.04, 0.4, METAL, 0, 0, 0);
+      const cloth = ["#E0457B", "#F4F1EA", "#2A2530", "#6C8CFF", "#F2B705", "#40B589", "#C27C4E"];
+      for (let i = 0; i < 7; i++) box(0.05, 0.75 - (i % 3) * 0.1, 0.38, cloth[(i + (color ? 2 : 0)) % cloth.length], -w / 2 + 0.25 + i * 0.18, 0.65 + (i % 3) * 0.1, 0);
+      return { group: g };
+    }
+    case "mirror": {
+      box(w, 0.06, d, WOOD_DARK);
+      const frame = box(w - 0.1, 1.8, 0.06, "#E8C79A", 0, 0.06, 0);
+      frame.position.z = -0.05;
+      box(w - 0.24, 1.62, 0.02, k.mat("#DDEFF6", { roughness: 0.05, metalness: 0.6, emissive: "#DDEFF6", emissiveIntensity: opts.night ? 0.25 : 0.1 }), 0, 0.15, 0.0);
+      return { group: g };
+    }
+    case "displayTable": {
+      box(w, 0.06, d, "#F4F1EA", 0, 0.8);
+      box(w - 0.2, 0.8, d - 0.2, "#E8DCCF");
+      const folded = ["#E0457B", "#2A2530", "#6C8CFF", "#F4F1EA"];
+      for (let i = 0; i < 4; i++) box(0.24, 0.08 + (i % 2) * 0.04, 0.3, folded[i], -0.4 + i * 0.27, 0.86, 0);
+      return { group: g };
+    }
+    case "storeCounter": {
+      box(w, 1.0, d, "#2A2530");
+      box(w + 0.04, 0.04, d + 0.04, "#E0457B", 0, 1.0);
+      box(0.35, 0.25, 0.3, BLACK, 0.5, 1.04, 0);
+      box(0.4, 0.2, 0.3, "#F4EDE6", -0.5, 1.04, 0);
+      return { group: g };
+    }
     case "cat": {
       const fur = "#E8A44A";
       const bodyM = new Mesh(k.geo(new SphereGeometry(0.13, 7, 5)), k.mat(fur));

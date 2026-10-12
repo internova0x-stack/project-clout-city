@@ -1,5 +1,7 @@
 "use client";
 
+import { ExclusiveEventCard, type MoneyHandlers } from "../city/Money";
+import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
@@ -136,10 +138,12 @@ function Goal({ emoji, title, line, done }: { emoji: string; title: string; line
 
 /** Events (C26): the first-task party until it's done, then club events with real-minute countdowns. */
 export function EventsSheet({
-  open, onClose, partyDone, onOpenParty, city, busy, onAttend,
+  open, onClose, partyDone, onOpenParty, city, busy, onAttend, exclusive,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void;
   city: CityState | null; busy: string | null; onAttend: (eventId: string) => void;
+  /** v0.5 exclusive events (real cash), promoted first (Clarifications 9). */
+  exclusive?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
 }) {
   const now = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
@@ -154,6 +158,9 @@ export function EventsSheet({
             <span className="subtext" style={{ display: "block" }}>Velvet Static, Long Island City</span>
           </button>
         )}
+        {city && exclusive?.products.filter((p) => p.event).map((p) => (
+          <ExclusiveEventCard key={p.sku} p={p} nowMs={exclusive.nowMs} h={exclusive.h} />
+        ))}
         {city ? (
           CLUB_EVENTS.map((ev) => {
             const isOpen = eventOpen(ev, minutes);

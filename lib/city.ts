@@ -39,7 +39,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -68,7 +68,7 @@ export interface Place {
   id: string;
   name: string;
   emoji: string;
-  category: "food" | "nightlife" | "parks" | "places" | "home";
+  category: "food" | "nightlife" | "parks" | "places" | "home" | "monument" | "shopping";
   neighborhood: string;
   at: LatLng;
   depth: PlaceDepth;
@@ -82,6 +82,10 @@ export interface Place {
   actions: PlaceAction[];
   /** Story places (location wave 2) appear on the map only once their arc has started. */
   story?: string;
+  /** Shopping places open this Shop category; they don't sell anything themselves (Clarifications 4). */
+  opensShop?: ShopCategory;
+  /** Monuments: the real-money postcard offered on the card after a visit (Clarifications 6). */
+  postcard?: string;
 }
 
 export const PLACES: Place[] = [
@@ -196,6 +200,52 @@ export const PLACES: Place[] = [
       { id: "workout", kind: "visit", label: "Buy a day pass and lift", price: 15, energy: 20, confidence: 6, mood: 3, blurb: "You lifted. You were seen lifting. Both count." },
     ],
   },
+  // ---- Location wave 3 (Milestones v0.5): two monuments, a lounge, the boutique and the dealership ----
+  {
+    id: "unisphere", name: "The Unisphere", emoji: "🌐", category: "monument", neighborhood: "Flushing Meadows",
+    at: [40.7466, -73.8448], depth: "scene", palette: ["#8FA4B8", "#9ED8F7", "#2F4F6B"], postcard: "postcard-unisphere",
+    tags: ["monument", "park"],
+    lore: "A twelve-story steel globe from a World's Fair that promised flying cars. The cars never came, but the globe stayed, and it photographs better than you do.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Pose with the globe", energy: 5, mood: 6, clout: 20, blurb: "Hold up the world for a photo. Everyone does. Do it anyway." },
+    ],
+  },
+  {
+    id: "gantry-plaza", name: "Gantry Plaza", emoji: "🏗️", category: "monument", neighborhood: "Long Island City",
+    at: [40.7454, -73.9584], depth: "scene", palette: ["#3A3540", "#F2A900", "#6C8CFF"], postcard: "postcard-gantry-plaza",
+    tags: ["monument", "waterfront"],
+    lore: "Old rail gantries standing guard over the East River like retired bouncers. The best skyline view in Queens, if you can find a spot between the engagement shoots.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Catch the skyline at the gantries", energy: 5, mood: 8, clout: 20, blurb: "Golden hour, river breeze, three proposals in progress behind you." },
+    ],
+  },
+  {
+    id: "low-light-lounge", name: "Low Light Lounge", emoji: "🥃", category: "nightlife", neighborhood: "Astoria",
+    at: [40.7612, -73.9175], depth: "full", template: "lounge", palette: ["#B8743A", "#2A1E2E", "#E8C79A"],
+    tags: ["lounge", "nightlife", "exclusive_venue"],
+    lore: "Velvet booths, jazz on vinyl and a guest list longer than the drinks menu. Celebrities come here to be left alone, loudly.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Order something brown and expensive", price: 45, energy: 10, mood: 8, confidence: 3, blurb: "Swirl it. Sniff it. Pretend you can taste the oak." },
+    ],
+  },
+  {
+    id: "thread-count", name: "Thread Count Boutique", emoji: "👗", category: "shopping", neighborhood: "Astoria",
+    at: [40.7651, -73.9204], depth: "full", template: "store", palette: ["#E0457B", "#F4EDE6", "#2A2530"], opensShop: "fashion",
+    tags: ["boutique", "shopping", "fashion"],
+    lore: "Racks curated by a woman who once styled a backup dancer for a famous person. The mirrors are flattering on purpose, and so is the lighting.",
+    actions: [
+      { id: "browse", kind: "visit", label: "Try on things you can't afford", energy: 5, mood: 6, blurb: "The fitting room selfie is free. The jacket is not." },
+    ],
+  },
+  {
+    id: "boulevard-motors", name: "Boulevard Motors", emoji: "🚘", category: "shopping", neighborhood: "Long Island City",
+    at: [40.7503, -73.9372], depth: "scene", palette: ["#D93A2F", "#E6E8EC", "#1F1B26"], opensShop: "cars",
+    tags: ["dealership", "shopping", "cars"],
+    lore: "Balloons, a man in a shiny suit and cars that are all \"basically new.\" Test drives are free; the handshake will cost you.",
+    actions: [
+      { id: "browse", kind: "visit", label: "Take a test drive around the block", energy: 5, mood: 5, confidence: 3, blurb: "Windows down, music up, salesman sweating in the passenger seat." },
+    ],
+  },
 ];
 
 export const HOME_PLACE_ID = "home";
@@ -274,6 +324,12 @@ export interface ShopItem {
   neighborhood?: string;
   /** Only sold while a story effect opens it (World State availability "open" by sku). */
   storyOnly?: boolean;
+  /**
+   * Real-cash collector piece (Clarifications 5 and 6): bought only through Stripe, priced in
+   * store_products, never for virtual cash and never sold. Its Possessions value is
+   * collectorValue() and `price` stays 0.
+   */
+  collector?: boolean;
 }
 
 export const SHOP_CATEGORIES: { id: ShopCategory; label: string; emoji: string }[] = [
@@ -293,6 +349,8 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "fit-mini-skirt", category: "fashion", name: "Pleated mini skirt", emoji: "👗", price: 120, clout: 16, rating: 3, blurb: "Brunch-approved. Weather-ignored.", wear: { slot: "bottom", kind: "skirt", color: "#6B2BD9" } },
   { sku: "fit-chunky-sneakers", category: "fashion", name: "Chunky dad sneakers", emoji: "👟", price: 210, clout: 28, rating: 4, blurb: "Ugly on purpose. Expensive on purpose.", wear: { slot: "shoes", color: "#ECE6DC" } },
   { sku: "forever-our-bird-hoodie", category: "fashion", name: "\"Forever Our Bird\" hoodie", emoji: "🕊️", price: 85, clout: 12, rating: 2, storyOnly: true, blurb: "Loretta's grief merch, $85, \"for healing.\" Limited time, unlimited questions.", wear: { slot: "top", kind: "hoodie", color: "#F4F1EA", accent: "#6C8CFF" } },
+  { sku: "col-faux-chinchilla", category: "fashion", name: "Faux chinchilla coat", emoji: "🧥", price: 0, clout: 80, rating: 4, collector: true, blurb: "No chinchillas were harmed. Several egos were.", wear: { slot: "top", kind: "blazer", color: "#D9D2C5", accent: "#A89F92" } },
+  { sku: "col-holo-boots", category: "fashion", name: "Holographic platform boots", emoji: "👢", price: 0, clout: 70, rating: 4, collector: true, blurb: "Six inches taller and visible from space.", wear: { slot: "shoes", color: "#B8C6FF" } },
   { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 55, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
   // Cars
   { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 14000, clout: 120, rating: 2, rentPerWeek: 350, blurb: "Previously loved. Heavily. It still gets you to the club." },
@@ -350,6 +408,11 @@ export function realMinutesUntilOpen(ev: ClubEvent, cityMinutes: number, realHou
 }
 
 /** The seed the database stores (game_settings 'city'); generated into the migration. */
+/** A collector piece's value in Possessions: 1.5× the priciest virtual-cash item in its category (Clarifications 5). */
+export function collectorValue(category: ShopCategory): number {
+  return Math.round(1.5 * Math.max(...SHOP_ITEMS.filter((i) => i.category === category && !i.collector).map((i) => i.price)));
+}
+
 export function citySeed() {
   return {
     economy: CITY_ECONOMY,
@@ -362,7 +425,10 @@ export function citySeed() {
     })),
     events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood })),
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
-    shop: SHOP_ITEMS.map((i) => ({ sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null, storyOnly: i.storyOnly ?? false })),
+    shop: SHOP_ITEMS.map((i) => ({
+      sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null,
+      storyOnly: i.storyOnly ?? false, collector: i.collector ?? false,
+    })),
     homeLocations: HOME_LOCATIONS,
   };
 }

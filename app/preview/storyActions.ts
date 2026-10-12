@@ -5,6 +5,7 @@ import { buildFeed, castVote, claimRewards, emptyStoryState, type PlayerStorySta
 import type { StoryResult } from "@/lib/storyFeed";
 import type { CheckoutResult, StoreProduct } from "@/lib/store";
 import { addDaysISO, predictionWindow } from "@/lib/stories";
+import { PLACES, SHOP_ITEMS, collectorValue } from "@/lib/city";
 
 // Development previews only: the story world in memory on the dev server, so the
 // News app can be tried without a database. Refused in production builds.
@@ -85,14 +86,49 @@ export async function previewStoryHoursTo(day: number, time = "12:00") {
 // ---- Payments, simulated: no Stripe. "Checkout" returns straight to the game, and a
 // pretend webhook unlocks the side story a few seconds later, like the real one.
 const pending = new Set<string>();
+const visited = new Set<string>();
+const attended = new Set<string>();
+// Two parties at the lounge: one on now, one tomorrow night (real parties are dated rows in exclusive_events).
+const hour = 3_600_000;
+const PARTIES = () => {
+  const now = nowMs();
+  const tomorrow10pm = new Date(now + 24 * hour);
+  tomorrow10pm.setHours(22, 0, 0, 0);
+  return [
+    { sku: "event-jada-sol-listening", price: 499, id: "jada-sol-listening", name: "Jada Sol's listening party", host: "Jada Sol",
+      blurb: "The pop star plays her new album to forty people and one very nervous publicist. Phones in a velvet bag at the door.",
+      startsAt: new Date(now - hour).toISOString(), endsAt: new Date(now + 3 * hour).toISOString(), clout: 120, mood: 12, confidence: 15 },
+    { sku: "event-dex-monroe-afterparty", price: 299, id: "dex-monroe-afterparty", name: "Dex Monroe's sneaker-drop afterparty", host: "Dex Monroe",
+      blurb: "The sneaker king celebrates a shoe nobody can buy. You can't buy it either, but you can stand next to it.",
+      startsAt: tomorrow10pm.toISOString(), endsAt: new Date(tomorrow10pm.getTime() + 4 * hour).toISOString(), clout: 80, mood: 10, confidence: 10 },
+  ];
+};
 export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
   if (process.env.NODE_ENV === "production") return null;
-  return loadArcs()
-    .filter((a) => a.type === "side" && a.sku)
-    .map((a) => ({
-      sku: a.sku!, type: "side_arc" as const, name: a.title, priceCents: 299, currency: "usd", parent: a.parent_arc_id ?? null,
-      owned: store.st.skus.includes(a.sku!), pending: pending.has(a.sku!),
-    }));
+  const owned = (sku: string) => store.st.skus.includes(sku);
+  const base = (sku: string) => ({ sku, currency: "usd", parent: null, owned: owned(sku), pending: pending.has(sku) });
+  return [
+    ...loadArcs()
+      .filter((a) => a.type === "side" && a.sku)
+      .map((a) => ({ ...base(a.sku!), type: "side_arc" as const, name: a.title, priceCents: 299, parent: a.parent_arc_id ?? null })),
+    ...PLACES.filter((p) => p.postcard).map((p) => ({
+      ...base(p.postcard!), type: "postcard" as const, name: `Postcard: ${p.name}`, priceCents: 99, placeId: p.id, visited: visited.has(p.id),
+    })),
+    ...SHOP_ITEMS.filter((i) => i.collector).map((i) => ({
+      ...base(i.sku), type: "collector_item" as const, name: i.name, priceCents: i.sku === "col-faux-chinchilla" ? 499 : 399, value: collectorValue(i.category),
+    })),
+    ...PARTIES().map((e) => ({
+      ...base(e.sku), type: "exclusive_event" as const, name: e.name, priceCents: e.price, placeId: "low-light-lounge",
+      event: { id: e.id, placeId: "low-light-lounge", name: e.name, host: e.host, blurb: e.blurb, startsAt: e.startsAt, endsAt: e.endsAt,
+               clout: e.clout, energy: 20, mood: e.mood, confidence: e.confidence, attended: attended.has(e.id) },
+    })),
+  ];
+}
+export async function previewStoreVisited(placeId: string) {
+  visited.add(placeId);
+}
+export async function previewStoreAttended(eventId: string) {
+  attended.add(eventId);
 }
 export async function previewCheckout(sku: string, returnTo: string): Promise<CheckoutResult> {
   if (process.env.NODE_ENV === "production") return { ok: false, error: "Previews are off in production." };

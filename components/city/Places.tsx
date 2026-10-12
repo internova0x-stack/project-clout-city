@@ -14,8 +14,13 @@ import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
 import { placeStory, type StoryFeed } from "@/lib/storyFeed";
 import { ReasonBanner } from "../story/StoryBits";
+import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
+import type { StoreProduct } from "@/lib/store";
+import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 
-const CATEGORY_LABEL: Record<Place["category"], string> = { food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home" };
+const CATEGORY_LABEL: Record<Place["category"], string> = {
+  food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home", monument: "Monument", shopping: "Shopping",
+};
 
 export interface PlaceHandlers {
   busy: string | null;
@@ -27,6 +32,10 @@ export interface PlaceHandlers {
   onAttendStoryEvent?: (eventId: string) => void;
   /** An overheard line for this place (NPC chatter). */
   chatter?: (place: Place) => { who: string; line: string } | null;
+  /** v0.5 real-money products shown on cards: postcards at monuments, exclusive events at their venue. */
+  money?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
+  /** Shopping places open the Shop on their category. */
+  onOpenShop?: (category: ShopCategory) => void;
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -154,6 +163,19 @@ export function LocationSheet({
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
           <ActionList place={place} state={state} handlers={handlers} />
+          {place.opensShop && handlers.onOpenShop && (
+            <button className="btn btn-secondary" onClick={() => handlers.onOpenShop!(place.opensShop!)}>
+              🛍️ Open the Shop · {SHOP_CATEGORIES.find((c) => c.id === place.opensShop)?.label}
+            </button>
+          )}
+          {(() => {
+            // C39: the postcard is offered right after a visit (any visit today); the Collection keeps it after that.
+            const pc = place.postcard ? handlers.money?.products.find((p) => p.sku === place.postcard) : undefined;
+            return pc && (state.visitsToday[place.id] ?? 0) > 0 ? <PostcardOffer p={pc} h={handlers.money!.h} /> : null;
+          })()}
+          {handlers.money?.products.filter((p) => p.event?.placeId === place.id).map((p) => (
+            <ExclusiveEventCard key={p.sku} p={p} nowMs={handlers.money!.nowMs} h={handlers.money!.h} compact />
+          ))}
           {(() => {
             const c = handlers.chatter?.(place);
             return c ? (

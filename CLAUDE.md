@@ -2,7 +2,7 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.4 "Stories"** (in progress on the branch with v0.2 and v0.3; v0.1 "Tap In" is live) (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.5 "Money and Social"** (in progress on the branch with v0.2 to v0.4; v0.1 "Tap In" is live) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/01-game-concept-note.md`: the big picture.

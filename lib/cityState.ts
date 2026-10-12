@@ -59,7 +59,7 @@ export interface PlayerItem {
   sku: string;
   category: ShopItem["category"];
   value: number;
-  acquired: "bought" | "earned";
+  acquired: "bought" | "earned" | "collector";
   equipped: boolean;
 }
 
@@ -106,6 +106,8 @@ export interface CityApi {
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
+  /** v0.5: an exclusive event the player has a ticket for (Mood and Confidence; clout came with the ticket). */
+  attendExclusiveEvent?(eventId: string): Promise<CityResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -126,6 +128,9 @@ const ERRORS: Record<string, string> = {
   already_renting: "You're already renting a car.",
   not_rentable: "That can't be rented.",
   not_wearable: "You can't wear that. You could try, but no.",
+  real_money_only: "That piece is real cash only.",
+  not_sellable: "Collector pieces can't be sold.",
+  not_on_list: "You're not on the list. The door person checked twice.",
   dev_tools_off: "Time travel is switched off here.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",

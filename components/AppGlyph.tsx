@@ -5,7 +5,8 @@
 export type GlyphName =
   | "news" | "chat" | "cash" | "briefcase" | "gear"
   | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
-  | "wave" | "church" | "dumbbell" | "condo" | "diner";
+  | "wave" | "church" | "dumbbell" | "condo" | "diner"
+  | "globe" | "gantry" | "tumbler" | "hanger" | "car";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -27,6 +28,11 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   dumbbell: ["#A0A8B8", "#3B4252"],
   condo: ["#B8C6FF", "#6B4FD8"],
   diner: ["#FF9AA2", "#D7263D"],
+  globe: ["#A8C8E8", "#3E6FA0"],
+  gantry: ["#FFB86B", "#5B4A8A"],
+  tumbler: ["#E8B27A", "#7A2E3A"],
+  hanger: ["#FF9AC8", "#B5246A"],
+  car: ["#FF8A7A", "#B4232F"],
 };
 
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
@@ -44,9 +50,16 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "rockaway-diner": "diner",
   "radiant-harbor": "church",
   "pressed-iron-gym": "dumbbell",
+  unisphere: "globe",
+  "gantry-plaza": "gantry",
+  "low-light-lounge": "tumbler",
+  "thread-count": "hanger",
+  "boulevard-motors": "car",
   home: "house",
 };
-const CATEGORY_GLYPHS: Record<string, GlyphName> = { food: "cutlery", nightlife: "cocktail", parks: "tree", places: "tower", home: "house" };
+const CATEGORY_GLYPHS: Record<string, GlyphName> = {
+  food: "cutlery", nightlife: "cocktail", parks: "tree", places: "tower", home: "house", monument: "globe", shopping: "hanger",
+};
 
 export function glyphFor(place: { id: string; category: string }): GlyphName {
   return PLACE_GLYPHS[place.id] ?? CATEGORY_GLYPHS[place.category] ?? "tower";
@@ -208,6 +221,45 @@ const PATHS: Record<GlyphName, React.ReactNode> = {
       <rect x="13" y="9.3" width="5.5" height="3.4" rx="1" fill={SOFT} />
       <rect x="2" y="16" width="20" height="2.4" rx="1.2" fill={SOFT} />
       <rect x="6" y="3.5" width="12" height="2.6" rx="1.3" fill="#fff" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="10" r="7" fill="#fff" />
+      <path d="M5 10h14M12 3c2.2 2 3.2 4.4 3.2 7s-1 5-3.2 7c-2.2-2-3.2-4.4-3.2-7s1-5 3.2-7z" fill="none" stroke={SOFT} strokeWidth={1.3} />
+      <ellipse cx="12" cy="10" rx="9.5" ry="3" fill="none" stroke="#fff" strokeWidth={1.2} transform="rotate(-20 12 10)" />
+      <rect x="11.2" y="16.5" width="1.6" height="3.5" fill="#fff" />
+      <rect x="7.5" y="19.5" width="9" height="2" rx="1" fill={SOFT} />
+    </>
+  ),
+  gantry: (
+    <>
+      <path d="M4 21V7h3v14zM14 21V5h3v16z" fill="#fff" />
+      <path d="M3 6h16v2.4H3zM13 4h9v2.4h-9z" fill="#fff" />
+      <path d="M7 10l7 4M7 14l7-4M7 18l7-4" stroke={SOFT} strokeWidth={1.3} />
+      <rect x="2" y="20" width="20" height="2" rx="1" fill={SOFT} />
+    </>
+  ),
+  tumbler: (
+    <>
+      <path d="M5.5 5h13l-1.6 14.2a2 2 0 0 1-2 1.8H9.1a2 2 0 0 1-2-1.8z" fill="#fff" />
+      <path d="M7.4 12h9.2l-.8 7H8.2z" fill={SOFT} />
+      <rect x="9" y="9" width="4" height="4" rx="1" transform="rotate(12 11 11)" fill="#fff" stroke={SOFT} strokeWidth={0.8} />
+    </>
+  ),
+  hanger: (
+    <>
+      <path d="M12 4.2a2.2 2.2 0 1 1 2.2 2.2c-.9 0-1.5.6-1.5 1.4v1" fill="none" stroke="#fff" strokeWidth={1.8} strokeLinecap="round" />
+      <path d="M12.7 8.6 21 15.4a1.5 1.5 0 0 1-1 2.6H4a1.5 1.5 0 0 1-1-2.6z" fill="#fff" />
+      <path d="M5.5 16h13" stroke={SOFT} strokeWidth={1.4} strokeLinecap="round" />
+    </>
+  ),
+  car: (
+    <>
+      <path d="M3 15v-3l2.2-4.6A2 2 0 0 1 7 6.3h10a2 2 0 0 1 1.8 1.1L21 12v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" fill="#fff" />
+      <path d="M6.5 11.5 7.8 8.4h8.4l1.3 3.1z" fill={SOFT} />
+      <circle cx="7" cy="16.5" r="2.2" fill="#fff" stroke={SOFT} strokeWidth={1.4} />
+      <circle cx="17" cy="16.5" r="2.2" fill="#fff" stroke={SOFT} strokeWidth={1.4} />
     </>
   ),
 };

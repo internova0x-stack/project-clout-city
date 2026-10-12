@@ -1,0 +1,110 @@
+-- Scenario test for migration 0009 (postcards, collector fashion, exclusive events).
+-- Runs in a transaction and rolls back. Run with scripts/test-db.sh.
+\set ON_ERROR_STOP on
+\pset tuples_only on
+begin;
+create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
+begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
+create function pg_temp.product(p_sku text) returns jsonb language sql as $$
+  select p from jsonb_array_elements(public.store_catalog()) p where p ->> 'sku' = p_sku $$;
+-- Move the game clock to a moment (staging time travel).
+create function pg_temp.at(p_ts timestamptz) returns void language plpgsql security definer as $$
+begin
+  update public.game_settings set value = jsonb_build_object('tools', true, 'clockOffsetSeconds', floor(extract(epoch from (p_ts - now())))::bigint) where key = 'dev';
+end $$;
+
+insert into auth.users (id) values ('00000000-0000-0000-0000-000000000050');
+update public.game_settings set value = '{"tools": true, "clockOffsetSeconds": 0}' where key = 'dev';
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000050', false);
+select 1 from public.create_player('Max', 'bodega_drip', '{}', null, true);
+select 1 from public.set_traits(array['loud', 'hustler']);
+select 1 from public.roll_birth_lottery();
+select 1 from public.move_in('astoria_studio');
+reset role;
+update public.players set bank_cash = 5000, energy = 100, mood = 50, confidence = 50, clout = 500 where display_name = 'Max';
+set role authenticated;
+
+-- ---- The catalog ----
+select pg_temp.assert(jsonb_array_length(public.store_catalog()) = 9, 'side stories, postcards, collector pieces and two parties');
+select pg_temp.assert((pg_temp.product('col-faux-chinchilla') ->> 'value')::int = 630, 'collector value is 1.5x the priciest fashion item');
+select pg_temp.assert((pg_temp.product('postcard-unisphere') ->> 'visited')::boolean is false, 'not visited yet');
+select pg_temp.assert(pg_temp.product('event-jada-sol-listening') #>> '{event,host}' = 'Jada Sol', 'party details');
+
+-- ---- Real money only, and never sold ----
+do $$ begin
+  begin perform public.buy_item('col-faux-chinchilla'); raise exception 'FAIL: bought with virtual cash';
+  exception when sqlstate '22023' then null; end;
+  begin perform public.start_purchase('postcard-unisphere', 'cs_pc_early'); raise exception 'FAIL: postcard before visiting';
+  exception when sqlstate '22023' then null; end;
+end $$;
+
+-- ---- Postcards: visit first, no clout, the set earns a badge ----
+select 1 from public.do_action('unisphere', 'visit');
+select 1 from public.do_action('gantry-plaza', 'visit');
+select pg_temp.assert((pg_temp.product('postcard-unisphere') ->> 'visited')::boolean, 'visited now');
+select public.start_purchase('postcard-unisphere', 'cs_pc_1');
+reset role;
+create temp table c0 as select clout from public.players where display_name = 'Max';
+grant select on c0 to public;
+select pg_temp.assert(public.payment_grant('evt_pc_1', 'cs_pc_1', 'pi_pc_1', '00000000-0000-0000-0000-000000000050', 'postcard-unisphere', 99, 'usd') = 'granted', 'postcard granted');
+select pg_temp.assert((select clout from public.players where display_name = 'Max') = (select clout from c0), 'postcards pay no clout');
+select pg_temp.assert(not exists (select 1 from public.player_badges where badge_id = 'postcard-collector'), 'no badge with half the set');
+select public.payment_grant('evt_pc_2', 'cs_pc_2', 'pi_pc_2', '00000000-0000-0000-0000-000000000050', 'postcard-gantry-plaza', 99, 'usd');
+select pg_temp.assert(exists (select 1 from public.player_badges where badge_id = 'postcard-collector'), 'the full set earns the badge');
+select pg_temp.assert(public.payment_refund('evt_pc_r', 'pi_pc_2') = 'revoked', 'postcard refund');
+select pg_temp.assert(not exists (select 1 from public.player_badges where badge_id = 'postcard-collector'), 'refund removes the set badge');
+select pg_temp.assert(not public.has_entitlement('00000000-0000-0000-0000-000000000050', 'postcard-gantry-plaza'), 'refunded postcard leaves the Collection');
+
+-- ---- Collector fashion: Possessions at its value, clout with diminishing returns, refund takes both back ----
+create temp table c1 as select clout, purchases_count from public.players where display_name = 'Max';
+grant select on c1 to public;
+select pg_temp.assert(public.payment_grant('evt_col_1', 'cs_col_1', 'pi_col_1', '00000000-0000-0000-0000-000000000050', 'col-faux-chinchilla', 499, 'usd') = 'granted', 'collector granted');
+select pg_temp.assert(public.payment_grant('evt_col_1b', 'cs_col_1', 'pi_col_1', '00000000-0000-0000-0000-000000000050', 'col-faux-chinchilla', 499, 'usd') = 'granted', 'second delivery');
+select pg_temp.assert((select count(*) = 1 and min(value) = 630 and min(acquired) = 'collector' from public.player_items where sku = 'col-faux-chinchilla'), 'one piece in Possessions at 630');
+select pg_temp.assert((select clout - (select clout from c1) = round(80 * power(0.85, (select purchases_count from c1)))
+                         from public.players where display_name = 'Max'), 'clout with diminishing returns, once');
+select pg_temp.assert((select purchases_count = (select purchases_count from c1) + 1 from public.players where display_name = 'Max'), 'counts as one purchase');
+set role authenticated;
+do $$ begin
+  begin perform public.sell_item((select id from public.player_items where sku = 'col-faux-chinchilla')); raise exception 'FAIL: collector sold';
+  exception when sqlstate '22023' then null; end;
+end $$;
+select 1 from public.equip_item((select id from public.player_items where sku = 'col-faux-chinchilla'), true);
+reset role;
+select pg_temp.assert(public.payment_refund('evt_col_r', 'pi_col_1') = 'revoked', 'collector refund');
+select pg_temp.assert(not exists (select 1 from public.player_items where sku = 'col-faux-chinchilla'), 'out of Possessions and the wardrobe');
+select pg_temp.assert((select clout = (select clout from c1) from public.players where display_name = 'Max'), 'exactly the clout it paid comes back');
+
+-- ---- Exclusive events: ticket, then the party ----
+create temp table c2 as select clout, mood, confidence from public.players where display_name = 'Max';
+grant select on c2 to public;
+select pg_temp.assert(public.payment_grant('evt_ev_1', 'cs_ev_1', 'pi_ev_1', '00000000-0000-0000-0000-000000000050', 'event-jada-sol-listening', 499, 'usd') = 'granted', 'ticket granted');
+select pg_temp.assert((select clout > (select clout from c2) from public.players where display_name = 'Max'), 'the ticket pays clout');
+set role authenticated;
+do $$ begin
+  begin perform public.attend_exclusive_event('jada-sol-listening'); raise exception 'FAIL: in before the doors open';
+  exception when sqlstate '22023' then null; end;
+  begin perform public.attend_exclusive_event('dex-monroe-afterparty'); raise exception 'FAIL: in without a ticket';
+  exception when sqlstate '22023' then null; end;
+end $$;
+select pg_temp.at((select starts_at + interval '1 hour' from public.exclusive_events where id = 'jada-sol-listening'));
+select 1 from public.attend_exclusive_event('jada-sol-listening');
+select pg_temp.assert((select mood > (select mood from c2) and confidence > (select confidence from c2) from public.players where display_name = 'Max'), 'the party lifts Mood and Confidence');
+do $$ begin
+  begin perform public.attend_exclusive_event('jada-sol-listening'); raise exception 'FAIL: twice';
+  exception when sqlstate '22023' then null; end;
+end $$;
+-- After the party ends it leaves the catalog, and can't be bought.
+select pg_temp.at((select ends_at + interval '1 minute' from public.exclusive_events where id = 'jada-sol-listening'));
+select pg_temp.assert(pg_temp.product('event-jada-sol-listening') is null, 'ended parties leave the list');
+do $$ begin
+  begin perform public.start_purchase('event-jada-sol-listening', 'cs_ev_late'); raise exception 'FAIL: bought after it ended';
+  exception when sqlstate '22023' then null; end;
+end $$;
+reset role;
+select pg_temp.assert(public.payment_refund('evt_ev_r', 'pi_ev_1') = 'revoked', 'ticket refund');
+select pg_temp.assert((select clout = (select clout from c2) from public.players where display_name = 'Max'), 'ticket clout taken back');
+
+select 'MONEY CHECKS PASSED' as result;
+rollback;

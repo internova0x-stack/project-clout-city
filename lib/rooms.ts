@@ -9,8 +9,10 @@ export type FurnitureKind =
   // home
   | "bed" | "sofa" | "armchair" | "coffeeTable" | "tvStand" | "rug" | "plant" | "floorLamp" | "kitchen"
   | "fridge" | "diningTable" | "chair" | "wardrobe" | "desk" | "bookshelf"
-  // club
-  | "bar" | "barStool" | "djBooth" | "speaker" | "danceFloor" | "booth"
+  // club and lounge
+  | "bar" | "barStool" | "djBooth" | "speaker" | "danceFloor" | "booth" | "piano"
+  // boutique
+  | "clothesRack" | "mirror" | "displayTable" | "storeCounter"
   // café
   | "cafeCounter" | "cafeTable" | "pastryCase"
   // deli
@@ -21,7 +23,9 @@ export type ItemUse =
   | { kind: "events" }
   | { kind: "sit" }
   | { kind: "sleep" }
-  | { kind: "look" };
+  | { kind: "look" }
+  /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
+  | { kind: "shop"; category: "fashion" | "cars" | "houses" | "luxury" | "makeup" };
 
 export interface RoomItem {
   id: string;
@@ -85,6 +89,11 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   shelf: { w: 2.0, d: 0.5, label: "Shelf" },
   drinksFridge: { w: 1.4, d: 0.7, label: "Drinks" },
   cat: { w: 0.5, d: 0.3, label: "The cat" },
+  piano: { w: 1.5, d: 1.4, label: "Piano" },
+  clothesRack: { w: 1.6, d: 0.5, label: "Rack" },
+  mirror: { w: 0.9, d: 0.3, label: "Mirror" },
+  displayTable: { w: 1.2, d: 0.8, label: "Display" },
+  storeCounter: { w: 2.0, d: 0.7, label: "Counter" },
 };
 
 // ---------------------------------------------------------------------------
@@ -137,7 +146,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter", RoomTemplate> = {
+export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store", RoomTemplate> = {
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -185,6 +194,42 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter", RoomTemplate> 
     ],
     spawn: [0, 2.0],
     npcs: [{ x: -1.0, z: -2.65, facing: 0 }, { x: 0.6, z: 0.9, facing: -2.6 }],
+  },
+  // Wave 3 (v0.5): a warm, low-lit lounge and a bright boutique.
+  lounge: {
+    id: "lounge", w: 7.6, d: 6.6, wall: "#3A2430", wallAccent: "#B8743A", floor: "#5A3E2B", floorKind: "wood", dark: true,
+    items: [
+      { id: "bar", kind: "bar", x: -1.8, z: -2.7, rot: 0, use: { kind: "action", actionId: "visit" }, label: "Order a drink" },
+      { id: "stool-1", kind: "barStool", x: -2.8, z: -1.9, rot: 0 },
+      { id: "stool-2", kind: "barStool", x: -1.8, z: -1.9, rot: 0 },
+      { id: "piano", kind: "piano", x: 2.6, z: -2.3, rot: 0 },
+      { id: "booth-1", kind: "booth", x: -3.2, z: 1.2, rot: 1, color: "#7A2E3A" },
+      { id: "sofa", kind: "sofa", x: 1.6, z: 2.4, rot: 2, color: "#7A2E3A" },
+      { id: "table", kind: "coffeeTable", x: 1.6, z: 1.3, rot: 0 },
+      { id: "chair", kind: "armchair", x: 3.1, z: 0.5, rot: 3, color: "#B8743A" },
+      { id: "rope", kind: "rug", x: 0.2, z: 0.2, rot: 0, use: { kind: "events" }, label: "Guest list" },
+      { id: "lamp", kind: "floorLamp", x: 3.4, z: 2.8, rot: 0 },
+      { id: "plant", kind: "plant", x: -3.45, z: -0.9, rot: 0 },
+    ],
+    spawn: [-0.6, 2.6],
+    npcs: [
+      { x: -2.8, z: -1.9, facing: 3.14, seated: true }, { x: 2.6, z: -1.3, facing: 3.14 }, { x: 1.2, z: 2.4, facing: 3.14, seated: true },
+      { x: -1.8, z: -3.15, facing: 0 },
+    ],
+  },
+  store: {
+    id: "store", w: 7.0, d: 6.0, wall: "#F4EDE6", wallAccent: "#E0457B", floor: "#E6DCD0", floorKind: "wood", window: true,
+    items: [
+      { id: "rack-1", kind: "clothesRack", x: -2.2, z: -2.4, rot: 0, use: { kind: "shop", category: "fashion" }, label: "Browse the racks" },
+      { id: "rack-2", kind: "clothesRack", x: 1.2, z: -2.4, rot: 0 },
+      { id: "rack-3", kind: "clothesRack", x: -2.9, z: 0.6, rot: 1 },
+      { id: "display", kind: "displayTable", x: 0.0, z: 0.2, rot: 0, use: { kind: "action", actionId: "browse" }, label: "Try things on" },
+      { id: "mirror", kind: "mirror", x: 3.2, z: -0.4, rot: 3 },
+      { id: "counter", kind: "storeCounter", x: 2.2, z: 2.1, rot: 2 },
+      { id: "plant", kind: "plant", x: 3.0, z: -2.5, rot: 0 },
+    ],
+    spawn: [-0.8, 2.3],
+    npcs: [{ x: 2.2, z: 2.6, facing: 3.14 }, { x: 1.2, z: -1.6, facing: 3.14 }],
   },
 };
 
