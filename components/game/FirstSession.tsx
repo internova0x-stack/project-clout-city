@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { cliqueProgress } from "@/lib/invite";
 import { getStyle } from "@/lib/styles";
+import { INSTALL_GUIDES, PLATFORM_DEFAULT, detectInstallGuide, type InstallGuideId, type Platform } from "@/lib/install";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { Sheet } from "../Sheet";
 
@@ -161,8 +162,9 @@ export function InvitePrompt({
 }
 
 // ---------------------------------------------------------------------------
-// Step 13: add to home screen. Android uses the browser's install prompt;
-// iOS gets the Share -> Add to Home Screen instructions (C17).
+// Step 13: add to home screen (C17). Numbered steps for the player's own browser,
+// with tabs for other devices; where the browser offers its install prompt
+// (Chrome and Edge), "Install now" opens it in one tap.
 // ---------------------------------------------------------------------------
 interface InstallEvent extends Event { prompt: () => Promise<void> }
 
@@ -171,8 +173,18 @@ export function isStandalone(): boolean {
 }
 
 export function PwaPrompt({ onDone }: { onDone: () => void }) {
-  const [ios] = useState(() => /iphone|ipad|ipod/i.test(navigator.userAgent));
-  const installEvent = (window as unknown as { __ccInstall?: InstallEvent }).__ccInstall;
+  // Browser details are read after mount, so the prompt also renders safely on the server.
+  const [detected, setDetected] = useState<InstallGuideId>("ios-safari");
+  const [guideId, setGuideId] = useState<InstallGuideId>("ios-safari");
+  const [installEvent, setInstallEvent] = useState<InstallEvent | undefined>(undefined);
+  useEffect(() => {
+    const id = detectInstallGuide(navigator.userAgent);
+    setDetected(id);
+    setGuideId(id);
+    setInstallEvent((window as unknown as { __ccInstall?: InstallEvent }).__ccInstall);
+  }, []);
+  const guide = INSTALL_GUIDES[guideId];
+  const canOneTap = !!installEvent && guide.platform !== "iphone" && guideId === detected;
 
   return (
     <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Add Clout City to your home screen">
@@ -183,35 +195,56 @@ export function PwaPrompt({ onDone }: { onDone: () => void }) {
           <img src="/icons/icon-192.png" alt="" width={40} height={40} style={{ borderRadius: 10, flex: "none" }} />
           <div>
             <p style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Put Clout City on your home screen</p>
-            <p className="subtext" style={{ margin: "2px 0 0" }}>So you never miss a party, a deal, or a chance to be seen.</p>
+            <p className="subtext" style={{ margin: "2px 0 0" }}>So you never miss a party, a deal, or a chance to be seen. No app store needed.</p>
           </div>
         </div>
-        {ios ? (
-          <ol className="install-steps">
-            <li><span className="n">1</span><span><strong>Tap Share ⎋</strong><span className="meta" style={{ display: "block" }}>The square with the arrow, at the bottom of Safari.</span></span></li>
-            <li><span className="n">2</span><span><strong>Add to Home Screen ⊞</strong><span className="meta" style={{ display: "block" }}>Yes, it&apos;s two taps. Fame takes effort.</span></span></li>
-          </ol>
-        ) : null}
+
+        <div className="segmented install-tabs" role="group" aria-label="Your device">
+          {(["iphone", "android", "computer"] as Platform[]).map((p) => (
+            <button
+              key={p}
+              aria-pressed={guide.platform === p}
+              onClick={() => setGuideId(INSTALL_GUIDES[detected].platform === p ? detected : PLATFORM_DEFAULT[p])}
+            >
+              {p === "iphone" ? "iPhone" : p === "android" ? "Android" : "Computer"}
+            </button>
+          ))}
+        </div>
+
+        <p className="overline" style={{ margin: "14px 0 0" }}>
+          {guideId === detected ? `In ${guide.browser}` : `On ${guide.platform === "iphone" ? "iPhone" : guide.platform === "android" ? "Android" : "a computer"}, in ${guide.browser}`}
+        </p>
+        <ol className="install-steps">
+          {guide.steps.map((step, i) => (
+            <li key={step.title}>
+              <span className="n">{i + 1}</span>
+              <span>
+                <strong>{step.title}</strong>
+                {step.glyph && <span className="install-glyph" aria-hidden="true">{step.glyph}</span>}
+                <span className="meta" style={{ display: "block", marginTop: 2 }}>{step.help}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        {guide.note && <p className="meta install-note">{guide.note}</p>}
+
         <div className="row" style={{ gap: 8, marginTop: 16 }}>
-          {!ios && installEvent ? (
+          {canOneTap ? (
             <button
               className="btn btn-taxi"
               style={{ flex: 1 }}
               onClick={async () => {
-                await installEvent.prompt().catch(() => undefined);
+                await installEvent!.prompt().catch(() => undefined);
                 onDone();
               }}
             >
-              Add to home screen
+              Install now
             </button>
           ) : (
-            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone}>{ios ? "I installed it" : "Got it"}</button>
+            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone}>I installed it</button>
           )}
           <button className="btn btn-ghost" style={{ flex: 1 }} onClick={onDone}>Not now</button>
         </div>
-        {!ios && !installEvent && (
-          <p className="meta" style={{ margin: "8px 0 0" }}>Open your browser menu and choose &quot;Add to Home screen&quot; or &quot;Install app&quot;.</p>
-        )}
       </div>
     </div>
   );

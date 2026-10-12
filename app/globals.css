@@ -421,3 +421,9 @@ a { color:inherit; }
   box-shadow:var(--elev-3), 0 6px 16px var(--primary-glow); }
 .btn-taxi:disabled { background:linear-gradient(180deg, rgba(250,45,72,.4), rgba(212,24,52,.4)); color:rgba(255,255,255,.75); text-shadow:none; box-shadow:none; }
 .step-progress span.on { background:var(--primary-top); }
+.install-tabs { margin-top:14px; height:40px; }
+.install-tabs button { font-size:14px; }
+.install-steps li { align-items:flex-start; }
+.install-steps .n { flex:none; width:22px; height:22px; border-radius:50%; background:var(--night-900); color:#fff; font-size:12px; font-weight:700; display:grid; place-items:center; margin-top:1px; }
+.install-glyph { display:inline-block; margin-left:6px; min-width:22px; padding:0 5px; border-radius:6px; background:rgba(23,20,28,.07); text-align:center; font-weight:600; }
+.install-note { margin:10px 0 0; padding:8px 10px; border-radius:10px; background:rgba(255,194,26,.16); color:var(--text-1); }

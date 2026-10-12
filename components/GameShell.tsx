@@ -33,7 +33,7 @@ export interface GameActions {
 }
 
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
-type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
+export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
 type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | null;
 
@@ -53,19 +53,22 @@ export function GameShell({
   clique,
   actions,
   daytimeOverride,
+  previewFlow,
 }: {
   player: Player;
   clique: CliqueMember[];
   actions: GameActions;
   /** Development previews only: pin the map to day or night. */
   daytimeOverride?: boolean;
+  /** Development previews only: open a step of the first session directly. */
+  previewFlow?: Flow;
 }) {
   const clock = useCityClock();
   const daytime = daytimeOverride ?? clock.daytime;
   const [tab, setTab] = useState<Tab>("home");
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
-  const [flow, setFlow] = useState<Flow>(() => initialFlow(player));
+  const [flow, setFlow] = useState<Flow>(() => previewFlow ?? initialFlow(player));
   const [tourStep, setTourStep] = useState(0);
   const [me, setMe] = useState(player);
   const [partyBusy, setPartyBusy] = useState(false);

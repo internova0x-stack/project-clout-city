@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Bungee, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 // The three typefaces from the Design System Guide (section 4), downloaded at
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${bungee.variable} ${barlow.variable} ${inter.variable}`} suppressHydrationWarning>
       <body>
-        <script dangerouslySetInnerHTML={{ __html: NO_BLUR_SCRIPT }} />
+        <Script id="cc-boot" strategy="beforeInteractive">{NO_BLUR_SCRIPT}</Script>
         {children}
       </body>
     </html>

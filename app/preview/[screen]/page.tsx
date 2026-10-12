@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Creator, type CreatorStep } from "@/components/Creator";
-import { GameShell } from "@/components/GameShell";
+import { GameShell, type Flow } from "@/components/GameShell";
 import { GuestMap } from "@/components/GuestMap";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -11,6 +11,7 @@ import type { Player } from "@/lib/player";
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
 //   /preview/home             a player who has finished the first session
+//   /preview/home?flow=pwa    open one step of the first session (welcome, tour, party, partyDone, leaderboard, invitePrompt, pwa)
 //   add &time=day or &time=night to pin the map
 
 const SAMPLE: Player = {
@@ -47,7 +48,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state } = await searchParams;
+  const { time, step, state, flow } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -92,6 +93,7 @@ export default async function Preview({
         <GameShell
           player={player}
           daytimeOverride={daytimeOverride}
+          previewFlow={flow as Flow | undefined}
           clique={[
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },
