@@ -290,3 +290,30 @@ a { color:inherit; }
 .map-root .maplibregl-ctrl-bottom-right { bottom:calc(140px + var(--safe-bottom)); right:8px; }
 .map-root .maplibregl-ctrl-attrib { font-size:10px; }
 .map-root .maplibregl-ctrl-attrib.maplibregl-compact { background:rgba(255,250,240,.7); }
+
+/* ---------- Guest screen (after the SF Life reference, in dark glass) ---------- */
+.guest-top { position:absolute; z-index:20; top:calc(10px + var(--safe-top)); left:0; right:0; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+.guest-top > * { pointer-events:auto; }
+.guest-bar { width:calc(100% - 24px); max-width:560px; height:56px; border-radius:var(--r-pill); display:flex; align-items:center; gap:6px; padding:0 6px 0 14px; box-shadow:var(--elev-2); }
+.guest-logo { height:34px; width:auto; }
+.guest-bar-btn { width:auto; height:40px; padding:0 16px; font-size:15px; border-radius:var(--r-pill); }
+.btn.guest-login, .btn.on-dark-secondary { background:rgba(255,246,224,.1); border:var(--glass-border); color:var(--text-on-dark); }
+.guest-pills { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; padding:0 12px; max-width:600px; }
+.guest-pills .pill-status { box-shadow:var(--elev-2); }
+.dot-green { width:8px; height:8px; border-radius:50%; background:var(--green-500); box-shadow:0 0 6px rgba(64,181,137,.8); }
+.guest-chips { width:100%; max-width:600px; margin:0; padding:2px 12px 6px; }
+.chip.chip-map { height:36px; background:var(--glass-dark); color:var(--text-on-dark); box-shadow:var(--elev-2); }
+.no-blur .chip.chip-map { background:rgba(20,17,26,.92); }
+.chip.chip-map[aria-pressed="true"] { background:var(--night-900); border-color:var(--taxi-400); color:var(--taxi-400); }
+.guest-bottom { position:absolute; z-index:20; left:12px; right:12px; bottom:calc(12px + var(--safe-bottom)); display:flex; flex-direction:column; gap:8px; max-width:420px; }
+.guest-card { border-radius:var(--r-lg); padding:16px; box-shadow:var(--elev-3); color:var(--text-on-dark); animation:rise-in .4s ease-out; }
+.guest-foot { margin:12px 0 0; text-align:center; color:rgba(255,246,224,.55); }
+.guest-foot a { color:inherit; }
+
+/* Live ticker (C22) */
+.ticker { height:32px; border-radius:var(--r-pill); display:flex; align-items:center; gap:8px; padding:0 12px 0 7px; box-shadow:var(--elev-2); overflow:hidden; }
+.badge-live { flex:none; height:18px; padding:0 8px; border-radius:var(--r-pill); background:var(--neon-600); color:#fff; font-size:10px; font-weight:700; line-height:18px; text-transform:uppercase; letter-spacing:.06em; animation:live-glow 1.6s ease-in-out infinite; }
+@keyframes live-glow { 0%,100% { box-shadow:0 0 0 0 rgba(255,46,136,.0); } 50% { box-shadow:0 0 10px 2px rgba(255,46,136,.6); } }
+.ticker-text { flex:1; min-width:0; font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; animation:ticker-in .25s ease-in-out; }
+.ticker-time { flex:none; color:rgba(255,246,224,.55); }
+@keyframes ticker-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }

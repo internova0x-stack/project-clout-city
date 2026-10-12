@@ -14,7 +14,7 @@ New players land on the map as guests and are only asked to sign up once they in
 
 | # | Step | Type | What the player sees | How it works |
 | --- | --- | --- | --- | --- |
-| 1 | Guest map | Screen | The 2D night map of Queens with the HUD, places and "Locked: Coming soon" boroughs | Players can pan and zoom freely. The first tap on anything interactive (a place, an icon, the Shop) opens sign-up and starts the music |
+| 1 | Guest map | Screen | The 2D street map of Queens, opening at street level on the Long Island City waterfront, with places and "Locked: Coming soon" boroughs. Guests see a slim brand bar (logo, Sign up, Log in), live city pills with real numbers, map filter chips, the live ticker and a sign-up card; the full game HUD appears after sign-up (updated Oct 12, 2026, following the SF Life reference) | Players can pan, zoom and filter freely. The first tap on a place or a locked borough opens sign-up and starts the music |
 | 2 | Sign-up / log-in | Screen (modal) | Sign-up and log-in options over the map (email or Google); players confirm they're 18 or older | Completing it goes straight to character creation |
 | 3a | Look | Screen | The avatar on stage, with name, body, hair, face, glasses and covering options, plus a row of eight starting styles | Every selection renders on the avatar instantly. The chosen style sets the starter outfit |
 | 3b | Traits | Screen | Two-column trait cards | The player picks 2. "Continue" stays disabled until 2 are chosen, and the header copy flips to a success line. In P1, traits are flavor only, with no gameplay effect |

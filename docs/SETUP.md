@@ -5,7 +5,9 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
 ## 1. Supabase project
 
 1. Create a project at supabase.com (pick the US East region, close to New York players).
-2. **SQL Editor → New query**: paste all of `supabase/migrations/0001_players_and_invites.sql` and run it.
+2. **SQL Editor → New query**: run each file in `supabase/migrations/` in number order
+   (`0001_…`, then `0002_…`, and so on), one query per file. Each file runs once; when a new
+   version adds a file, run just that one.
 3. **Authentication → Sign In / Providers → Email**: keep Email enabled. Magic links
    confirm the address by themselves, so no extra confirmation step is needed.
 4. **Authentication → URL Configuration**:

@@ -28,6 +28,8 @@ export interface CityMapProps {
   daytime?: boolean;
   onPinTap?: (pin: PlacePin) => void;
   onLockedTap?: (boroughName: string) => void;
+  /** Hide the map's own credits control when the screen shows them elsewhere. */
+  attributionControl?: boolean;
 }
 
 const MIN_ZOOM = 9.5;
@@ -42,7 +44,7 @@ const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -84,7 +86,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
           maxBounds: NYC_BOUNDS,
           dragRotate: false,
           pitchWithRotate: false,
-          attributionControl: { compact: true },
+          attributionControl: attributionControl ? { compact: true } : false,
           fadeDuration: 150,
         });
         instance.touchZoomRotate.disableRotation();
@@ -95,6 +97,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         // Start with the credits collapsed to the small (i) button.
         instance.once("load", () => hostRef.current?.querySelector(".maplibregl-compact-show")?.classList.remove("maplibregl-compact-show"));
         mapRef.current = instance;
+        if (process.env.NODE_ENV !== "production") (window as unknown as { __cityMap?: MapLibreMap }).__cityMap = instance;
         setMap(instance);
       } catch (err) {
         console.error("map failed to start", err);
