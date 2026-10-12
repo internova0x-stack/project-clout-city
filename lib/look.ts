@@ -71,10 +71,10 @@ export type LookChoices = Omit<Look, "style">;
 export const DEFAULT_LOOK: Look = {
   style: "bodega_drip",
   body: "straight",
-  skin: SKIN_TONES[3],
+  skin: SKIN_TONES[1],
   hair: "short",
-  hairColor: HAIR_COLORS[0],
-  eyes: EYE_COLORS[0],
+  hairColor: HAIR_COLORS[1],
+  eyes: EYE_COLORS[1],
   glasses: "none",
   covering: "none",
 };
@@ -112,15 +112,61 @@ export function lookChoices(look: Look): LookChoices {
   return choices;
 }
 
+// ---------------------------------------------------------------------------
+// Shuffle weights. Random looks (the shuffle button and, later, city NPCs) follow
+// New York's mix with white-presenting avatars as the majority, as the product
+// owner asked; hair and eye colors follow the skin tone. Players can still pick
+// any combination themselves.
+// ---------------------------------------------------------------------------
+
+/** Weight per SKIN_TONES entry, lightest first. The two lightest tones sum to 52%. */
+export const SKIN_WEIGHTS = [0.28, 0.24, 0.13, 0.11, 0.07, 0.07, 0.06, 0.04] as const;
+
+type Group = "light" | "tan" | "deep";
+const groupOf = (skinIndex: number): Group => (skinIndex <= 1 ? "light" : skinIndex <= 3 ? "tan" : "deep");
+
+/** Weights per HAIR_COLORS entry: black, dark brown, brown, auburn, blonde, platinum, gray, pink. */
+const HAIR_COLOR_WEIGHTS: Record<Group, number[]> = {
+  light: [0.08, 0.3, 0.27, 0.08, 0.2, 0.03, 0.02, 0.02],
+  tan: [0.5, 0.33, 0.1, 0.02, 0.0, 0.02, 0.01, 0.02],
+  deep: [0.74, 0.17, 0.02, 0.02, 0.0, 0.02, 0.0, 0.03],
+};
+
+/** Weights per EYE_COLORS entry: dark brown, brown, hazel, green, blue, gray. */
+const EYE_WEIGHTS: Record<Group, number[]> = {
+  light: [0.18, 0.25, 0.15, 0.12, 0.24, 0.06],
+  tan: [0.6, 0.3, 0.08, 0.02, 0, 0],
+  deep: [0.75, 0.23, 0.02, 0, 0, 0],
+};
+
+/** Weights per HAIRS entry: short, buzz, long, ponytail, bun, braids, curls, locs, bald. */
+const HAIR_WEIGHTS: Record<Group, number[]> = {
+  light: [0.24, 0.1, 0.24, 0.13, 0.12, 0.03, 0.06, 0.02, 0.06],
+  tan: [0.22, 0.12, 0.24, 0.12, 0.1, 0.06, 0.08, 0.02, 0.04],
+  deep: [0.12, 0.14, 0.1, 0.06, 0.08, 0.2, 0.12, 0.14, 0.04],
+};
+
+export function weightedIndex(weights: readonly number[], r: number): number {
+  const total = weights.reduce((a, b) => a + b, 0);
+  let x = r * total;
+  for (let i = 0; i < weights.length; i++) {
+    x -= weights[i];
+    if (x < 0) return i;
+  }
+  return weights.length - 1;
+}
+
 export function randomLook(rand: () => number = Math.random, styles: readonly StyleId[]): Look {
   const pick = <T>(list: readonly T[]) => list[Math.floor(rand() * list.length)];
+  const skinIndex = weightedIndex(SKIN_WEIGHTS, rand());
+  const g = groupOf(skinIndex);
   return {
     style: pick(styles),
     body: pick(BODIES).id,
-    skin: pick(SKIN_TONES),
-    hair: pick(HAIRS).id,
-    hairColor: pick(HAIR_COLORS),
-    eyes: pick(EYE_COLORS),
+    skin: SKIN_TONES[skinIndex],
+    hair: HAIRS[weightedIndex(HAIR_WEIGHTS[g], rand())].id,
+    hairColor: HAIR_COLORS[weightedIndex(HAIR_COLOR_WEIGHTS[g], rand())],
+    eyes: EYE_COLORS[weightedIndex(EYE_WEIGHTS[g], rand())],
     glasses: rand() < 0.6 ? "none" : pick(GLASSES).id,
     covering: rand() < 0.75 ? "none" : pick(COVERINGS).id,
   };

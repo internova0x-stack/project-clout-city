@@ -30,3 +30,20 @@ test("shuffle always produces a valid look", () => {
     assert.equal(isValidLook(lookChoices(l), l.style), true);
   }
 });
+
+test("shuffled looks follow the city mix: white-presenting tones are the majority", async () => {
+  const { SKIN_TONES, SKIN_WEIGHTS, HAIRS, HAIR_COLORS, EYE_COLORS } = await import("../lib/look.ts");
+  assert.equal(SKIN_WEIGHTS.length, SKIN_TONES.length);
+  let seed = 7;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  let light = 0;
+  const n = 20000;
+  for (let i = 0; i < n; i++) {
+    const l = randomLook(rand, STYLE_IDS);
+    if (l.skin === SKIN_TONES[0] || l.skin === SKIN_TONES[1]) light++;
+  }
+  assert.ok(light / n > 0.5 && light / n < 0.56, `light share ${light / n}`);
+  assert.equal(HAIRS.length, 9);
+  assert.equal(HAIR_COLORS.length, 8);
+  assert.equal(EYE_COLORS.length, 6);
+});

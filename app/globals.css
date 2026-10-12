@@ -427,3 +427,15 @@ a { color:inherit; }
 .install-steps .n { flex:none; width:22px; height:22px; border-radius:50%; background:var(--night-900); color:#fff; font-size:12px; font-weight:700; display:grid; place-items:center; margin-top:1px; }
 .install-glyph { display:inline-block; margin-left:6px; min-width:22px; padding:0 5px; border-radius:6px; background:rgba(23,20,28,.07); text-align:center; font-weight:600; }
 .install-note { margin:10px 0 0; padding:8px 10px; border-radius:10px; background:rgba(255,194,26,.16); color:var(--text-1); }
+
+/* ---------- Headings in SF Pro (Oct 12, 2026) ----------
+   Titles use Apple's system font: SF Pro on iPhone, iPad and Mac. Apple's license
+   doesn't allow shipping the font file, so other devices fall back to Inter Bold. */
+:root { --font-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", var(--ff-inter), "Inter", system-ui, sans-serif; }
+.display-xl, .display-lg, .display-md, .display-sm, .legal h1 { font-weight:700; letter-spacing:-0.015em; }
+.display-xl { font-size:32px; line-height:36px; }
+.display-lg { font-size:26px; line-height:30px; }
+.display-md { font-size:21px; line-height:26px; }
+.display-sm { font-size:17px; line-height:22px; }
+/* Sheets take focus when they open for screen readers; no outline on the panel itself. */
+.sheet:focus, .sheet:focus-visible { outline:none; }
