@@ -38,7 +38,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     visitsToday: { "flushing-meadows": 1 },
     attendedToday: [],
     clockOffsetSeconds: 0,
-    devTools: true,
+    devTools: false,
     homeLayout: null,
   };
 }

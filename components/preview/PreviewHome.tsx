@@ -8,14 +8,19 @@ import type { CliqueMember, Player } from "@/lib/player";
 // Development previews only: the home screen with an in-memory city, so every
 // v0.3 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, artStyle,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
-  roomMood?: "natural" | "dream"; artStyle?: "flat" | "mv";
+  roomMood?: "natural" | "dream";
+  /** Show the staging time-travel pill (off unless asked for). */
+  devTools?: boolean;
 }) {
   const city = useMemo(
-    () => sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id }),
-    [player],
+    () => ({
+      ...sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id }),
+      devTools,
+    }),
+    [player, devTools],
   );
   const api = useMemo(() => createSimApi(city), [city]);
   const noop = async () => {};
@@ -26,7 +31,6 @@ export function PreviewHome({
       daytimeOverride={daytimeOverride}
       previewFlow={flow}
       roomMood={roomMood}
-      artStyle={artStyle}
       city={cityOff ? null : city}
       cityApi={cityOff ? undefined : api}
       actions={{

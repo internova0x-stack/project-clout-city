@@ -12,7 +12,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
-import { PlaceArtMV } from "./PlaceArtMV";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = { food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home" };
 
@@ -87,7 +86,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
 
 /** C37: the location card, opened from a pin or the Places list. */
 export function LocationSheet({
-  place, state, daytime, handlers, onClose, onGoInside, from, artStyle = "flat",
+  place, state, daytime, handlers, onClose, onGoInside, from,
 }: {
   place: Place | null;
   state: CityState;
@@ -96,14 +95,12 @@ export function LocationSheet({
   onClose: () => void;
   onGoInside: (p: Place) => void;
   from: LatLng;
-  /** "mv" previews the Monument Valley-style illustrations (not yet the default). */
-  artStyle?: "flat" | "mv";
 }) {
   return (
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
         <div className="stack-16">
-          {artStyle === "mv" ? <PlaceArtMV place={place} daytime={daytime} /> : <PlaceArt place={place} daytime={daytime} />}
+          <PlaceArt place={place} daytime={daytime} />
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>
             {place.tier && <span className="tag tag-neutral">{place.tier} dining</span>}

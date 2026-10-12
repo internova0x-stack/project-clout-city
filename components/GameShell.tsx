@@ -66,8 +66,7 @@ export function GameShell({
   previewFlow,
   city: initialCity = null,
   cityApi,
-  roomMood = "natural",
-  artStyle = "flat",
+  roomMood = "dream",
 }: {
   player: Player;
   clique: CliqueMember[];
@@ -75,9 +74,8 @@ export function GameShell({
   /** v0.3 city state; null until migration 0004 is applied (the city screens then say "coming soon"). */
   city?: CityState | null;
   cityApi?: CityApi;
-  /** Development previews only: try the Monument Valley-style rooms and illustrations. */
+  /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
   roomMood?: "natural" | "dream";
-  artStyle?: "flat" | "mv";
   /** Development previews only: pin the map to day or night. */
   daytimeOverride?: boolean;
   /** Development previews only: open a step of the first session directly. */
@@ -450,7 +448,6 @@ export function GameShell({
             daytime={daytime}
             handlers={handlers}
             from={home}
-            artStyle={artStyle}
             onClose={() => setPlace(null)}
             onGoInside={(p) => { setPlace(null); setInside(p); }}
           />

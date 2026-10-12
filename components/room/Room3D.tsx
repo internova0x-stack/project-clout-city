@@ -56,14 +56,15 @@ export interface Room3DProps {
   /** Lets the screen hide overlapping chrome while furniture is being arranged. */
   onEditingChange?: (editing: boolean) => void;
   /**
-   * "dream" is the Monument Valley-inspired treatment under review (preview only):
+   * "dream" (the default, approved Oct 12, 2026) is the Monument Valley-inspired look:
    * gradient walls, warm-lit and lavender-shaded faces, soft shadows, haze and motes.
+   * "natural" keeps the plain lighting for side-by-side previews.
    */
   mood?: "natural" | "dream";
 }
 
 export default function Room3D(props: Room3DProps) {
-  const { template, layout, look, outfit, daytime, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "natural" } = props;
+  const { template, layout, look, outfit, daytime, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "dream" } = props;
   const dream = mood === "dream";
   const hostRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
