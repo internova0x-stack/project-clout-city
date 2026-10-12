@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Creator, type CreatorStep } from "@/components/Creator";
 import type { Flow } from "@/components/GameShell";
 import { PreviewHome } from "@/components/preview/PreviewHome";
+import { PreviewArt } from "@/components/preview/PreviewArt";
 import { PreviewRoom } from "@/components/preview/PreviewRoom";
 import { GuestMap } from "@/components/GuestMap";
 import { normalizeLook } from "@/lib/look";
@@ -15,6 +16,8 @@ import type { Player } from "@/lib/player";
 //   /preview/home             a player who has finished the first session
 //   /preview/home?flow=pwa    open one step of the first session (welcome, tour, party, partyDone, leaderboard, invitePrompt, pwa)
 //   /preview/home?city=off    the home screen before migration 0004 (city screens say "coming soon")
+//   /preview/home?mood=dream&art=mv   Monument Valley-style rooms and illustrations (under review)
+//   /preview/art             every location illustration, current and Monument Valley style, day and night
 //   /preview/room?room=cafe|club|counter|astoria_studio&mood=dream&time=night   one 3D room on its own
 //   add &time=day or &time=night to pin the map
 
@@ -48,7 +51,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood } = await searchParams;
+  const { time, step, state, flow, city, room, mood, art } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -95,6 +98,8 @@ export default async function Preview({
           daytimeOverride={daytimeOverride}
           flow={flow as Flow | undefined}
           cityOff={city === "off"}
+          roomMood={mood === "dream" ? "dream" : "natural"}
+          artStyle={art === "mv" ? "mv" : "flat"}
           clique={[
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },
@@ -102,6 +107,8 @@ export default async function Preview({
         />
       );
     }
+    case "art":
+      return <PreviewArt />;
     case "room":
       return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "dream" ? "dream" : "natural"} />;
     default:

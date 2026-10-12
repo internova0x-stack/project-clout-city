@@ -66,6 +66,8 @@ export function GameShell({
   previewFlow,
   city: initialCity = null,
   cityApi,
+  roomMood = "natural",
+  artStyle = "flat",
 }: {
   player: Player;
   clique: CliqueMember[];
@@ -73,6 +75,9 @@ export function GameShell({
   /** v0.3 city state; null until migration 0004 is applied (the city screens then say "coming soon"). */
   city?: CityState | null;
   cityApi?: CityApi;
+  /** Development previews only: try the Monument Valley-style rooms and illustrations. */
+  roomMood?: "natural" | "dream";
+  artStyle?: "flat" | "mv";
   /** Development previews only: pin the map to day or night. */
   daytimeOverride?: boolean;
   /** Development previews only: open a step of the first session directly. */
@@ -318,6 +323,7 @@ export function GameShell({
               sign={inside.name}
               label={`${me.display_name} inside ${inside.name}`}
               insetBottom={170}
+              mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
             />
           }
@@ -335,6 +341,7 @@ export function GameShell({
             insetBottom={170}
             onUse={(it) => { if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile"); }}
             onEditingChange={setArranging}
+            mood={roomMood}
             onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
           />
           <button
@@ -443,6 +450,7 @@ export function GameShell({
             daytime={daytime}
             handlers={handlers}
             from={home}
+            artStyle={artStyle}
             onClose={() => setPlace(null)}
             onGoInside={(p) => { setPlace(null); setInside(p); }}
           />

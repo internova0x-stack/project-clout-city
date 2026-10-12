@@ -129,14 +129,14 @@ export default function Room3D(props: Room3DProps) {
     // Night indoors reads as warm lamplight, not darkness; the club adds colored stage lights.
     if (dream) {
       // Monument Valley-style: warm peach key light on the faces it hits, cool lavender in the shade.
-      scene.add(new HemisphereLight(night ? 0xffc9d6 : 0xffe6d6, night ? 0x5a4a9a : 0x9c8cd9, template.dark ? 1.3 : night ? 1.2 : 1.35));
+      scene.add(new HemisphereLight(night ? 0xffd6dc : 0xfff1e6, night ? 0x5a4a9a : 0xa498d6, template.dark ? 1.3 : night ? 1.2 : 1.35));
       scene.add(new AmbientLight(night ? 0xd8c4ff : 0xfff0ea, 0.25));
     } else {
       scene.add(new HemisphereLight(night ? 0xffe2c4 : 0xfff6e0, night ? 0x4a3050 : 0x8a7a6a, template.dark ? 1.05 : night ? 0.85 : 1.1));
       scene.add(new AmbientLight(night ? 0xffd9b8 : 0xffffff, template.dark ? 0.5 : night ? 0.35 : 0.25));
     }
     const sun = dream
-      ? new DirectionalLight(night ? 0xffb8a0 : 0xffd2b0, template.dark ? 0.9 : night ? 1.0 : 1.5)
+      ? new DirectionalLight(night ? 0xffc4a8 : 0xffdfc4, template.dark ? 0.9 : night ? 1.0 : 1.5)
       : new DirectionalLight(night ? 0xffd2a8 : 0xfff1d6, template.dark ? 0.9 : night ? 0.85 : 1.6);
     sun.position.set(4, 7, 5);
     sun.castShadow = true;
