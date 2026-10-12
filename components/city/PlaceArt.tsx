@@ -296,6 +296,144 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    case "skyline-pier": {
+      const tower: BoxSpec = { x: -3.5, y: -5, z: 0, w: 6, d: 6, h: 8, color: mixHex(a, "#C9D2E8", 0.55) };
+      const lobby: BoxSpec = { x: -4.5, y: 1, z: 0, w: 8, d: 2.2, h: 2.4, color: "#F2E6D8" };
+      return (
+        <>
+          {base}
+          <Box b={tower} night={night}>
+            {[0, 1, 2, 3, 4].map((i) => <OnRight key={i} b={tower} u={0.4} v={2.8 + i} uw={5.2} vh={0.55} fill={night && i % 3 !== 1 ? lit : glassDark} opacity={0.85} />)}
+          </Box>
+          <Box b={lobby} night={night}>
+            <OnLeft b={lobby} u={0.6} v={0} uw={4.4} vh={1.9} fill={night ? lit : glassDark} opacity={0.9} />
+            <OnLeft b={lobby} u={5.4} v={0} uw={1.8} vh={2} fill={mixHex(c, "#3A3540", 0.2)} />
+          </Box>
+          {/* the canopy over the door, where Ray keeps his book */}
+          <Box b={{ x: 0.6, y: 3.2, z: 2, w: 3, d: 1.6, h: 0.3, color: a }} night={night} />
+          <Lantern x={-4.5} y={4.6} night={night} />
+          <Tree x={5} y={-2} night={night} size={0.9} />
+        </>
+      );
+    }
+    case "hunters-pier": {
+      const water: BoxSpec = { ...isle, color: night ? "#4F6FA8" : "#A9D8F2" };
+      const deck: BoxSpec = { x: -2, y: -6, z: 0, w: 4, d: 12, h: 0.6, color: "#C9A27E" };
+      const head: BoxSpec = { x: -4.5, y: 1, z: 0, w: 9, d: 4, h: 0.6, color: "#C9A27E" };
+      return (
+        <>
+          <Box b={water} night={night} />
+          {[-4, 0, 4].map((y) => {
+            const [px, py] = iso(4, y, 0);
+            return <path key={y} d={`M${px - 10} ${py} q5 -3 10 0 t10 0`} stroke="#FFFFFF" strokeWidth={1.2} fill="none" opacity={0.6} />;
+          })}
+          <Box b={deck} night={night} />
+          <Box b={head} night={night}>
+            {Array.from({ length: 10 }).map((_, i) => <OnLeft key={i} b={head} u={i * 0.9 + 0.2} v={0.6} uw={0.12} vh={1.2} fill={night ? "#E9D8FF" : "#5C4A3A"} />)}
+            <OnLeft b={head} u={0} v={1.7} uw={9} vh={0.15} fill={night ? "#E9D8FF" : "#5C4A3A"} />
+          </Box>
+          {(() => {
+            const [px, py] = iso(-0.5, 2.5, 0.6);
+            return <rect x={px - 9} y={py - 4} width={18} height={2.4} rx={1} fill={mixHex(c, "#3A2A20", 0.3)} />;
+          })()}
+          {/* the skyline across the river */}
+          {[[-6, -6, 4.5], [-4.2, -6.5, 6.5], [-2.4, -6.2, 4]].map(([x, y, h]) => (
+            <Box key={x} b={{ x, y, z: 0, w: 1.6, d: 1.4, h, color: mixHex(a, "#C9D2E8", 0.5) }} night={night} />
+          ))}
+          <Lantern x={-4} y={4.6} z={0.6} night={night} />
+          <Lantern x={4} y={4.6} z={0.6} night={night} />
+        </>
+      );
+    }
+    case "rockaway-diner": {
+      const diner: BoxSpec = { x: -5.5, y: -3.5, z: 0, w: 10, d: 5.5, h: 3.8, color: "#E8EAF0" };
+      const roof: BoxSpec = { x: -5.8, y: -3.8, z: 3.8, w: 10.6, d: 6.1, h: 0.5, color: a };
+      return (
+        <>
+          {base}
+          <Box b={diner} night={night}>
+            <OnLeft b={diner} u={0} v={0.3} uw={10} vh={0.4} fill={a} />
+            {[0, 1, 2, 3].map((i) => <OnLeft key={i} b={diner} u={0.6 + i * 2.3} v={1.1} uw={1.9} vh={1.7} fill={night ? lit : glassDark} opacity={0.9} />)}
+            <OnRight b={diner} u={1.5} v={0} uw={1.8} vh={2.8} fill={mixHex(c, "#E8EAF0", 0.2)} />
+            <OnLeft b={diner} u={0} v={3} uw={10} vh={0.25} fill="#B8C2D6" />
+          </Box>
+          <Box b={roof} night={night} />
+          {(() => {
+            const [px, py] = iso(-0.5, -1, 5.5);
+            return (
+              <g>
+                <rect x={px - 0.8} y={py} width={1.6} height={8} fill="#B8C2D6" />
+                <rect x={px - 17} y={py - 9} width={34} height={10} rx={5} fill={night ? "#FF6F7A" : a} />
+                {night && <rect x={px - 17} y={py - 9} width={34} height={10} rx={5} fill="#FF6F7A" opacity={0.5} filter="url(#mv-blur)" />}
+                <text x={px} y={py - 1.8} fontSize={6} fontWeight={800} fill="#FFF6EE" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif">DINER</text>
+              </g>
+            );
+          })()}
+          <Lantern x={5} y={4} night={night} />
+          <Tree x={-5.5} y={4} night={night} size={0.85} />
+        </>
+      );
+    }
+    case "radiant-harbor": {
+      const nave: BoxSpec = { x: -5, y: -3, z: 0, w: 7, d: 6, h: 4.5, color: mixHex(b, "#FFFFFF", 0.3) };
+      const steeple: BoxSpec = { x: 2, y: -2, z: 0, w: 2.6, d: 2.6, h: 8, color: mixHex(b, "#FFFFFF", 0.4) };
+      const t = tone(mixHex(a, "#B9785A", 0.3), night);
+      // A gable roof along x over the nave.
+      const r = (x: number, y: number, z: number) => iso(x, y, z);
+      const ridge = 4.5 + 2.6;
+      return (
+        <>
+          {base}
+          <Box b={nave} night={night}>
+            {[0, 1, 2].map((i) => <OnLeft key={i} b={nave} u={0.8 + i * 2.2} v={1.2} uw={1} vh={2.2} fill={night ? lit : mixHex(a, "#9FB6D8", 0.4)} opacity={0.9} />)}
+          </Box>
+          <polygon points={pts([r(-5, 3, 4.5), r(2, 3, 4.5), r(2, 0, ridge), r(-5, 0, ridge)])} fill={t.cool} />
+          <polygon points={pts([r(2, -3, 4.5), r(2, 3, 4.5), r(2, 0, ridge)])} fill={t.warm} />
+          <Box b={steeple} night={night}>
+            <OnRight b={steeple} u={0.7} v={0} uw={1.2} vh={2.2} fill={mixHex(c, "#3A2A20", 0.2)} />
+            <OnRight b={steeple} u={0.75} v={5.2} uw={1.1} vh={1.4} fill={night ? lit : a} />
+          </Box>
+          {(() => {
+            const top = iso(3.3, -0.7, 8);
+            const apex: P = [top[0], top[1] - 24];
+            return (
+              <g>
+                <polygon points={pts([iso(2, 0.6, 8), iso(4.6, 0.6, 8), apex])} fill={t.cool} />
+                <polygon points={pts([iso(4.6, -2, 8), iso(4.6, 0.6, 8), apex])} fill={t.warm} />
+                <rect x={apex[0] - 0.7} y={apex[1] - 9} width={1.4} height={9} fill={a} />
+                <rect x={apex[0] - 3} y={apex[1] - 6.5} width={6} height={1.4} fill={a} />
+              </g>
+            );
+          })()}
+          <Lantern x={-4} y={4.6} night={night} />
+          <Tree x={5.2} y={4} night={night} />
+        </>
+      );
+    }
+    case "pressed-iron-gym": {
+      const gym: BoxSpec = { x: -5.5, y: -4.5, z: 0, w: 10, d: 7, h: 5, color: mixHex("#B5654A", c, 0.15) };
+      return (
+        <>
+          {base}
+          <Box b={gym} night={night}>
+            {[0, 1, 2].map((i) => <OnLeft key={i} b={gym} u={0.5 + i * 3.2} v={0.6} uw={2.6} vh={2.6} fill={night ? lit : glassDark} opacity={0.9} />)}
+            {windowsRight(gym, 1, 3, lit, glassDark, night)}
+            <SignLeft b={gym} text="Pressed Iron" color="#1F1B26" ink={a} v={3.4} night={night} />
+          </Box>
+          {(() => {
+            const [px, py] = iso(1, 4.2, 0);
+            return (
+              <g fill={night ? "#E9D8FF" : "#3B4252"}>
+                <rect x={px - 7} y={py - 3.6} width={14} height={1.4} rx={0.6} />
+                <rect x={px - 9} y={py - 6.5} width={3} height={7} rx={1} />
+                <rect x={px + 6} y={py - 6.5} width={3} height={7} rx={1} />
+              </g>
+            );
+          })()}
+          <Lantern x={5} y={3.5} night={night} />
+        </>
+      );
+    }
     case "skybridge-tower":
     default: {
       const t1: BoxSpec = { x: -5.5, y: -4, z: 0, w: 4.2, d: 5, h: 8.5, color: mixHex(a, "#C9D2E8", 0.5) };

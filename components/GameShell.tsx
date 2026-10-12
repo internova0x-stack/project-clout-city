@@ -10,17 +10,20 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle } from "@/lib/styles";
-import { CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
+import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
 import { activeGig, dueBills, equippedItems, gigReady, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
+import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
+import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
-import { PhoneModal } from "./city/Phone";
-import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, type PlaceHandlers } from "./city/Places";
+import { PhoneModal, type App } from "./city/Phone";
+import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
+import { StoryPrompt } from "./story/StoryBits";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
@@ -48,6 +51,16 @@ export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leader
 type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "places" | "bills" | "look" | "shop" | "possessions" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
+const STORY_DISMISSED_KEY = "cc_story_dismissed";
+
+/** Who's talking in a place (chatter templates are written per role). */
+function npcRole(p: Place): { who: string; role: string } {
+  if (p.template === "club") return { who: "The bartender", role: "bartender" };
+  if (p.template === "cafe") return { who: "The barista", role: "barista" };
+  if (p.template === "counter") return { who: "The clerk", role: "clerk" };
+  if (p.category === "home" || p.tags.includes("luxury")) return { who: "The doorman", role: "doorman" };
+  return { who: "Your driver", role: "driver" };
+}
 
 function initialFlow(p: Player): Flow {
   if (p.onboarding_step === "party_done") return "leaderboard"; // resume the hand-off
@@ -66,6 +79,8 @@ export function GameShell({
   previewFlow,
   city: initialCity = null,
   cityApi,
+  story: initialStory = null,
+  storyApi,
   roomMood = "dream",
 }: {
   player: Player;
@@ -74,6 +89,9 @@ export function GameShell({
   /** v0.3 city state; null until migration 0004 is applied (the city screens then say "coming soon"). */
   city?: CityState | null;
   cityApi?: CityApi;
+  /** v0.4 story feed (World State); null until migration 0007 is applied (the News app then says "soon"). */
+  story?: StoryFeed | null;
+  storyApi?: StoryApi;
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
   roomMood?: "natural" | "dream";
   /** Development previews only: pin the map to day or night. */
@@ -105,7 +123,9 @@ export function GameShell({
   const [toast, setToast] = useState<string | null>(null);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
-  const [phone, setPhone] = useState<{ open: boolean; app: "gigs" | null }>({ open: false, app: null });
+  const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null }>({ open: false, app: null });
+  const [feed, setFeed] = useState<StoryFeed | null>(initialStory);
+  const [dismissed, setDismissed] = useState<string[]>([]);
   const gameNow = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
 
   const look = normalizeLook(me.look, me.starting_style);
@@ -114,7 +134,8 @@ export function GameShell({
   const outfit = worn.length ? outfitWith(style.outfit, worn) : undefined;
   const home = homeLocation(me.home_id);
   const cityOn = !!(city && cityApi);
-  const cityPins = useMemo(() => CITY_PINS(home), [home]);
+  const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);
+  const storyOn = !!(feed && storyApi);
 
   // ---- City actions: one at a time; the server's answer replaces local state ----
   const applyCity = useCallback((r: CityResult): boolean => {
@@ -142,6 +163,64 @@ export function GameShell({
     },
     [applyCity],
   );
+  // ---- Story actions: the server answers with the player's fresh story feed ----
+  const applyStory = useCallback((r: StoryResult): boolean => {
+    if (!r.ok) {
+      setToast(r.error);
+      return false;
+    }
+    setFeed(r.feed);
+    if (r.clout) {
+      setMe((m) => ({ ...m, clout: m.clout + r.clout! }));
+      setGain({ clout: r.clout });
+    }
+    if (r.message) setToast(r.message);
+    return true;
+  }, []);
+  const runStory = useCallback(
+    async (key: string, call: () => Promise<StoryResult>): Promise<boolean> => {
+      setBusy(key);
+      try {
+        return applyStory(await call());
+      } catch {
+        setToast("The newsroom glitched. Try again.");
+        return false;
+      } finally {
+        setBusy(null);
+      }
+    },
+    [applyStory],
+  );
+  const offset = city?.clockOffsetSeconds ?? 0;
+  // The story follows the New York calendar (and the staging clock), so re-read it when either moves.
+  useEffect(() => {
+    if (!storyApi) return;
+    void storyApi.refresh(offset).then((r) => r.ok && applyStory(r));
+    const onVis = () => { if (document.visibilityState === "visible") void storyApi.refresh(offset).then((r) => r.ok && applyStory(r)); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [storyApi, offset, applyStory]);
+  useEffect(() => {
+    try { setDismissed(JSON.parse(localStorage.getItem(STORY_DISMISSED_KEY) ?? "[]")); } catch { /* fine */ }
+  }, []);
+  const dismissStory = (key: string) => {
+    setDismissed((d) => {
+      const next = [...d, key].slice(-40);
+      try { localStorage.setItem(STORY_DISMISSED_KEY, JSON.stringify(next)); } catch { /* fine */ }
+      return next;
+    });
+  };
+  /** City actions can finish story tasks; the server already counted them, so just re-read the feed. */
+  const cityThenStory = async (key: string, call: () => Promise<CityResult>) => {
+    const ok = await run(key, call);
+    if (ok && storyApi) await storyApi.refresh(offset).then((r) => r.ok && setFeed(r.feed));
+  };
+  const openNews = (beat?: string | null) => {
+    setPanel(null);
+    setPlace(null);
+    setPhone({ open: true, app: "news", beat: beat ?? null });
+  };
+
   // Pick up the daily tick (tasks, bills) when the player comes back to the tab.
   useEffect(() => {
     if (!cityApi) return;
@@ -152,9 +231,34 @@ export function GameShell({
 
   const handlers: PlaceHandlers = {
     busy,
-    onAction: (pl, a) => cityApi && void run(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
-    onAttendEvent: (id) => cityApi && void run(`event:${id}`, () => cityApi.attendEvent(id)),
+    onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
+    onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
+    story: storyOn ? feed : null,
+    onAttendStoryEvent: storyApi
+      ? (id) => void runStory(`story:${id}`, () => storyApi.attendEvent(id)).then((ok) => ok && cityApi && cityApi.refresh().then((r) => r.ok && applyCity(r)))
+      : undefined,
+    chatter: (p) => {
+      const { who, role } = npcRole(p);
+      // The story's current phase first, everyday gossip otherwise; a new line every ten minutes.
+      return { who, line: chatterLine(feed, role, GENERIC_CHATTER, Math.floor(gameNow / 600_000) + p.id.length) };
+    },
+  };
+  const news = storyApi
+    ? {
+        busy,
+        vote: (pid: string, o: string) => void runStory(`vote:${pid}`, () => storyApi.vote(pid, o)),
+        shadowGuess: (pid: string, o: string) => void runStory(`shadow:${pid}`, () => storyApi.shadowGuess(pid, o)),
+        markSeen: (id: string) => void storyApi.markSeen(id).then((r) => r.ok && setFeed(r.feed)),
+        completeTask: (id: string) => void runStory(`task:${id}`, () => storyApi.completeTask(id)),
+        onUnlock: (_arc: FeedArc) => setToast("Side stories can't be bought yet. Nothing was charged."),
+      }
+    : undefined;
+  /** A tap on a story task: go where it happens, or open the story for share and evidence tasks. */
+  const onStoryTask = (t: StoryFeed["tasks"][number]) => {
+    const where = t.do.place ?? feed?.events.find((e) => e.id === t.do.event)?.place;
+    if (where) return openPlace(where);
+    openNews(mainArc(feed)?.beats.at(-1)?.id);
   };
   const openPlace = (id: string) => {
     const p = placeById(id);
@@ -304,8 +408,10 @@ export function GameShell({
   );
   const onLockedTap = useCallback((name: string) => setSoon({ key: "place", title: `${name} is locked` }), []);
 
+  const showPrompt = storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed);
+
   return (
-    <main className={`game${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}`}>
+    <main className={`game${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
       {inside && city ? (
         <InteriorScene
           place={inside}
@@ -323,6 +429,10 @@ export function GameShell({
               insetBottom={170}
               mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
+              onNpcTap={() => {
+                const { who, role } = npcRole(inside);
+                setToast(`${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
+              }}
             />
           }
         />
@@ -342,6 +452,9 @@ export function GameShell({
             mood={roomMood}
             onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
           />
+          {storyOn && flow === "none" && !arranging && (
+            <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
+          )}
           <button
             className="glass-hud profile-chip"
             onClick={() => setPanel("profile")}
@@ -391,12 +504,30 @@ export function GameShell({
           online,
           eventsBadge: !partyDone,
           billsBadge: !!city && dueBills(city).length > 0,
-          phoneBadge: payoutReady,
+          phoneBadge: payoutReady || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <GainToast gain={gain} message={toast} onDone={clearGain} />
       {city?.devTools && cityApi && (
-        <DevClock offsetSeconds={city.clockOffsetSeconds} busy={busy !== null} onSet={(h) => void run("dev", () => cityApi.setClockOffset(h))} />
+        <DevClock
+          offsetSeconds={city.clockOffsetSeconds}
+          busy={busy !== null}
+          onSet={(h) => void run("dev", () => cityApi.setClockOffset(h))}
+          story={storyApi?.devStart && storyApi.devEntitle ? (() => {
+            const arc = feed?.arcs.find((a) => a.id === "sarah-bird");
+            const sku = feed?.arcs.find((a) => a.type === "side")?.sku ?? "side_sarah_bird_plus_one";
+            return {
+              day: arc ? arc.day : null,
+              lastDay: arc?.lastDay ?? 10,
+              sideArcs: !!feed?.arcs.some((a) => a.type === "side" && a.entitled),
+              onStart: (d: number | null) => void runStory("dev", () => storyApi.devStart!(d)),
+              onSideArcs: (on: boolean) => void (async () => {
+                for (const a of feed?.arcs.filter((x) => x.type === "side" && x.sku) ?? [{ sku } as FeedArc]) await storyApi.devEntitle!(a.sku!, on);
+                await runStory("dev", () => storyApi.refresh(offset));
+              })(),
+            };
+          })() : undefined}
+        />
       )}
 
       {/* ---- Guided first session ---- */}
@@ -430,7 +561,17 @@ export function GameShell({
       {flow === "pwa" && <PwaPrompt onDone={endHandoff} />}
 
       {/* ---- Panels ---- */}
-      <TasksSheet open={panel === "tasks"} onClose={() => setPanel(null)} partyDone={partyDone} onOpenParty={openParty} cliqueCount={clique.length} city={cityOn ? city : null} onOpenPlace={openPlace} />
+      <TasksSheet
+        open={panel === "tasks"}
+        onClose={() => setPanel(null)}
+        partyDone={partyDone}
+        onOpenParty={openParty}
+        cliqueCount={clique.length}
+        city={cityOn ? city : null}
+        onOpenPlace={openPlace}
+        story={storyOn ? feed : null}
+        onStoryTask={onStoryTask}
+      />
       <EventsSheet
         open={panel === "events"}
         onClose={() => setPanel(null)}
@@ -451,8 +592,8 @@ export function GameShell({
             onClose={() => setPlace(null)}
             onGoInside={(p) => { setPlace(null); setInside(p); }}
           />
-          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} onPick={(p) => openPlace(p.id)} />
-          <ShopSheet open={panel === "shop"} onClose={() => setPanel(null)} state={city} busy={busy} onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))} />
+          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />
+          <ShopSheet open={panel === "shop"} onClose={() => setPanel(null)} state={city} story={storyOn ? feed : null} busy={busy} onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))} />
           <PossessionsSheet open={panel === "possessions"} onClose={() => setPanel(null)} state={city} style={me.starting_style} busy={busy} onSell={(id) => run(`sell:${id}`, () => cityApi.sellItem(id))} />
           <LookSheet
             open={panel === "look"}
@@ -468,6 +609,9 @@ export function GameShell({
       <PhoneModal
         open={phone.open}
         initialApp={phone.app}
+        focusBeat={phone.beat}
+        story={storyOn ? feed : null}
+        news={storyOn ? news : undefined}
         onClose={() => setPhone({ open: false, app: null })}
         time={clock.time}
         state={cityOn ? city : null}
@@ -502,6 +646,23 @@ export function GameShell({
               <span className="meta" style={{ display: "block" }}>{style.emoji} <span style={{ color: "var(--text-2)" }}>{style.label}</span> · Queens</span>
             </span>
           </div>
+          {(feed?.badges.length ?? 0) > 0 && (
+            <div className="card stack-8">
+              <p className="overline" style={{ margin: 0 }}>Badges</p>
+              {feed!.badges.map((b) => {
+                const info = badgeInfo(feed, b.id);
+                return (
+                  <div key={b.id} className="row" style={{ gap: 10 }}>
+                    <span style={{ fontSize: 24 }} aria-hidden="true">{info?.emoji ?? "🏅"}</span>
+                    <span style={{ minWidth: 0 }}>
+                      <span className="title" style={{ display: "block" }}>{info?.name ?? b.id}</span>
+                      {info?.line && <span className="meta" style={{ display: "block" }}>{info.line}</span>}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <div className="card stack-8">
             <p className="overline" style={{ margin: 0 }}>Starter wardrobe</p>
             <div className="row" style={{ flexWrap: "wrap", gap: 6 }}>
@@ -517,8 +678,18 @@ export function GameShell({
   );
 }
 
-/** v0.3 pins: every built place plus the player's home. */
-const CITY_PINS = (home: readonly [number, number]): PlacePin[] => [
-  ...PLACES,
+/** v0.3 pins: every built place plus the player's home. Story places appear once their story starts. */
+const CITY_PINS = (home: readonly [number, number], feed: StoryFeed | null): PlacePin[] => [
+  ...visiblePlaces(feed),
   { id: "home", name: "Home", emoji: "🏠", category: "home", neighborhood: "Your place", at: home, tags: ["home"] },
 ];
+
+/** Mirrors StoryPrompt's own visibility rule, so the HUD can make room for it. */
+function promptVisible(feed: StoryFeed | null, dismissed: string[]): boolean {
+  const arc = mainArc(feed);
+  const latest = arc?.beats.at(-1);
+  if (!arc || !latest) return false;
+  const vote = arc.predictions.find((p) => p.state === "open" && !p.myVote && new Date(p.closesAt).toDateString() === new Date().toDateString());
+  const key = vote ? `vote:${vote.id}` : `beat:${latest.id}`;
+  return !dismissed.includes(key) && (arc.beats.some((b) => !b.seen) || !!vote);
+}

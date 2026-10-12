@@ -6,14 +6,16 @@ import { activeGig, gigAvailability, gigReady, type CityState, type GigOffer } f
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { LedgerList } from "../game/Sheets";
+import { NewsApp, type NewsHandlers } from "../story/News";
+import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-type App = "gigs" | "bank" | "settings" | "news" | "messages";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
-  { id: "news", label: "News", emoji: "📰", tile: "news", soon: true },
+  { id: "news", label: "News", emoji: "📰", tile: "news" },
   { id: "messages", label: "Messages", emoji: "💬", tile: "chat", soon: true },
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
   { id: "gigs", label: "Gigs", emoji: "💼", tile: "briefcase" },
@@ -28,7 +30,7 @@ const TIER_TAG: Record<GigOffer["tier"], { label: string; cls: string }> = {
 
 /** C29: the Phone, with the Gigs, Bank and Settings apps (News and Messages arrive later). */
 export function PhoneModal({
-  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp,
+  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat,
 }: {
   open: boolean;
   onClose: () => void;
@@ -40,6 +42,9 @@ export function PhoneModal({
   muted: boolean;
   onToggleSound: () => void;
   initialApp?: App | null;
+  story?: StoryFeed | null;
+  news?: NewsHandlers;
+  focusBeat?: string | null;
 }) {
   const [app, setApp] = useState<App | null>(initialApp ?? null);
   const [lastInitial, setLastInitial] = useState(initialApp);
@@ -73,6 +78,7 @@ export function PhoneModal({
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
+                      {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
                     </span>
                     <span>{a.label}</span>
                   </button>
@@ -99,7 +105,7 @@ export function PhoneModal({
                   <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
                 </div>
               )}
-              {app === "news" && <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />}
+              {app === "news" && (news ? <NewsApp feed={story ?? null} handlers={news} focusBeat={focusBeat} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "messages" && <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />}
             </div>
           )}

@@ -8,6 +8,7 @@ import { GAME_CONFIG } from "@/lib/config";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { EffectChips, useGameNow } from "../city/Common";
+import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
 
 const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to" };
@@ -27,10 +28,11 @@ function resetTimeLocal(): string {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
+  story?: StoryFeed | null; onStoryTask?: (task: StoryFeed["tasks"][number]) => void;
 }) {
   const [tab, setTab] = useState<"daily" | "goals">("daily");
   const { cliqueSize } = ECONOMY.invites;
@@ -52,6 +54,20 @@ export function TasksSheet({
                 <span className="title" style={{ display: "block" }}>You&apos;ve been invited to a party</span>
                 <span className="subtext" style={{ display: "block" }}>First task. Pull up to Velvet Static in Long Island City.</span>
               </div>
+            )}
+            {(story?.tasks ?? []).length > 0 && (
+              <>
+                <p className="overline" style={{ margin: "4px 0 0" }}>📰 Story · today only</p>
+                {story!.tasks.map((t) => (
+                  <div key={t.id} className="select-card multi" aria-pressed={t.done} role="button" tabIndex={0}
+                    style={{ cursor: t.done ? "default" : "pointer" }} onClick={t.done ? undefined : () => onStoryTask?.(t)}>
+                    <span className="select-emoji" aria-hidden="true">🔍</span>
+                    <span className="title" style={{ display: "block" }}>{t.label}</span>
+                    <span className="subtext" style={{ display: "block" }}>{t.done ? "Done. Lola noticed." : `+${t.clout} clout`}</span>
+                    {t.done && <span className="select-check" aria-hidden="true">✓</span>}
+                  </div>
+                ))}
+              </>
             )}
             {city ? (
               <>

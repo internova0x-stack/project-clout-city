@@ -4,7 +4,8 @@
 
 export type GlyphName =
   | "news" | "chat" | "cash" | "briefcase" | "gear"
-  | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house";
+  | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
+  | "wave" | "church" | "dumbbell" | "condo" | "diner";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -21,6 +22,11 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   tower: ["#9DB2FF", "#4B5BD7"],
   bike: ["#8FD3FF", "#3778E8"],
   house: ["#8F7CC8", "#3A2C5E"],
+  wave: ["#7FE3F0", "#1E88B8"],
+  church: ["#F7D9A8", "#B9785A"],
+  dumbbell: ["#A0A8B8", "#3B4252"],
+  condo: ["#B8C6FF", "#6B4FD8"],
+  diner: ["#FF9AA2", "#D7263D"],
 };
 
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
@@ -33,6 +39,11 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "flushing-meadows": "tree",
   "pedal-pushers": "bike",
   "skybridge-tower": "tower",
+  "skyline-pier": "condo",
+  "hunters-pier": "wave",
+  "rockaway-diner": "diner",
+  "radiant-harbor": "church",
+  "pressed-iron-gym": "dumbbell",
   home: "house",
 };
 const CATEGORY_GLYPHS: Record<string, GlyphName> = { food: "cutlery", nightlife: "cocktail", parks: "tree", places: "tower", home: "house" };
@@ -153,6 +164,50 @@ const PATHS: Record<GlyphName, React.ReactNode> = {
       <rect x="10" y="14" width="4" height="6.5" rx="1" fill={SOFT} />
       <rect x="7" y="11.5" width="2.6" height="2.6" rx=".5" fill={SOFT} />
       <rect x="14.4" y="11.5" width="2.6" height="2.6" rx=".5" fill={SOFT} />
+    </>
+  ),
+  wave: (
+    <>
+      <path d="M3 11.5c2 0 2.5-2 4.5-2s2.5 2 4.5 2 2.5-2 4.5-2 2.5 2 4.5 2V15c-2 0-2.5-2-4.5-2s-2.5 2-4.5 2-2.5-2-4.5-2S5 15 3 15z" fill="#fff" />
+      <path d="M3 17c2 0 2.5-2 4.5-2s2.5 2 4.5 2 2.5-2 4.5-2 2.5 2 4.5 2v3H3z" fill={SOFT} />
+      <rect x="15.5" y="3.5" width="1.6" height="6" rx=".6" fill="#fff" />
+      <path d="M13 5.5h6.6v1.6H13z" fill={SOFT} />
+    </>
+  ),
+  church: (
+    <>
+      <path d="M4 21v-8l8-5.5 8 5.5v8z" fill="#fff" />
+      <path d="M10 9.4V6l2-2 2 2v3.4l-2-1.4z" fill={SOFT} />
+      <rect x="11.3" y="1.6" width="1.4" height="3.6" rx=".5" fill="#fff" />
+      <rect x="10.3" y="2.5" width="3.4" height="1.2" rx=".5" fill="#fff" />
+      <path d="M10 21v-4a2 2 0 0 1 4 0v4z" fill={SOFT} />
+      <circle cx="12" cy="12.3" r="1.5" fill={SOFT} />
+    </>
+  ),
+  dumbbell: (
+    <>
+      <rect x="7" y="10.8" width="10" height="2.4" rx="1" fill={SOFT} />
+      <rect x="4" y="6.5" width="3.6" height="11" rx="1.4" fill="#fff" />
+      <rect x="16.4" y="6.5" width="3.6" height="11" rx="1.4" fill="#fff" />
+      <rect x="1.8" y="9" width="2.6" height="6" rx="1" fill={SOFT} />
+      <rect x="19.6" y="9" width="2.6" height="6" rx="1" fill={SOFT} />
+    </>
+  ),
+  condo: (
+    <>
+      <path d="M4 21V8l6-3v16z" fill={SOFT} />
+      <path d="M9 21V4.5L15 2l5 2.5V21z" fill="#fff" />
+      {[6, 9.5, 13].map((y) => <rect key={y} x="11" y={y} width="7" height="1.6" rx=".6" fill={SOFT} />)}
+      <path d="M2 21h20v1.2H2z" fill="#fff" />
+    </>
+  ),
+  diner: (
+    <>
+      <rect x="3" y="7" width="18" height="10" rx="3" fill="#fff" />
+      <rect x="5.5" y="9.3" width="5.5" height="3.4" rx="1" fill={SOFT} />
+      <rect x="13" y="9.3" width="5.5" height="3.4" rx="1" fill={SOFT} />
+      <rect x="2" y="16" width="20" height="2.4" rx="1.2" fill={SOFT} />
+      <rect x="6" y="3.5" width="12" height="2.6" rx="1.3" fill="#fff" />
     </>
   ),
 };

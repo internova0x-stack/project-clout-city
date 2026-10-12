@@ -12,6 +12,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
+import { placeStory, type StoryFeed } from "@/lib/storyFeed";
+import { ReasonBanner } from "../story/StoryBits";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = { food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home" };
 
@@ -20,6 +22,11 @@ export interface PlaceHandlers {
   onAction: (placeId: string, actionId: string) => void;
   onAttendEvent: (eventId: string) => void;
   onOpenGigs: () => void;
+  /** The story world (v0.4): closures, prices, story events and tasks. */
+  story?: StoryFeed | null;
+  onAttendStoryEvent?: (eventId: string) => void;
+  /** An overheard line for this place (NPC chatter). */
+  chatter?: (place: Place) => { who: string; line: string } | null;
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -28,12 +35,21 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
   const events = CLUB_EVENTS.filter((e) => e.placeId === place.id);
   const { mood, confidence } = state.player;
+  const world = placeStory(handlers.story ?? null, place);
+  const storyTasks = (handlers.story?.tasks ?? []).filter((t) => t.do.place === place.id && !t.done);
   return (
     <div className="stack-8">
-      {place.actions.map((a) => {
-        const av = actionAvailability(place.id, a, state);
+      {place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => {
+        const base = actionAvailability(place.id, { ...a, price: Math.round((a.price ?? 0) * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1)) }, state);
+        // Story closures win; restrictions allow only listed actions (World State stacking rules).
+        const av = world.closed ? { ok: false as const, reason: world.closed.reason }
+          : world.restricted && !world.restricted.allow.includes(a.id) ? { ok: false as const, reason: world.restricted.reason }
+          : base;
+        const paid = Math.round((a.price ?? 0) * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1));
+        const task = storyTasks.find((t) => t.do.action === a.id);
         const usedToday = (state.visitsToday[place.id] ?? 0) > 0;
-        const clout = (a.kind === "visit" || a.kind === "eat") && !usedToday ? visitClout(a.price ?? 0, mood, confidence) : null;
+        // Clout always comes from the base price, never a story-raised one.
+        const clout = a.clout ?? ((a.kind === "visit" || a.kind === "eat") && !usedToday ? visitClout(a.price ?? 0, mood, confidence) : null);
         const key = `${place.id}:${a.id}`;
         const spends = (a.price ?? 0) > 0;
         return (
@@ -44,8 +60,10 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {a.kind === "gigs" ? (
                 <span className="meta">Today&apos;s offers, in your Phone</span>
               ) : (
-                <EffectChips price={a.price} pay={a.pay} energy={a.energy} clout={clout} mood={usedToday ? 0 : a.mood} confidence={usedToday ? 0 : a.confidence} />
+                <EffectChips price={paid || undefined} pay={a.pay} energy={a.energy} clout={clout} mood={usedToday ? 0 : a.mood} confidence={usedToday ? 0 : a.confidence} />
               )}
+              {paid !== (a.price ?? 0) && <span className="meta">Usually {formatCash(a.price ?? 0)} · {world.price?.reason}</span>}
+              {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
               {!av.ok && <span className="meta reason">{av.reason}</span>}
               {av.ok && av.note && <span className="meta">{av.note}</span>}
             </div>
@@ -54,7 +72,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               disabled={!av.ok || handlers.busy !== null}
               onClick={() => (a.kind === "gigs" ? handlers.onOpenGigs() : handlers.onAction(place.id, a.id))}
             >
-              {handlers.busy === key ? "…" : a.kind === "gigs" ? "Open" : spends ? formatCash(a.price!) : a.kind === "shift" ? "Work" : "Go"}
+              {handlers.busy === key ? "…" : a.kind === "gigs" ? "Open" : spends ? formatCash(paid) : a.kind === "shift" ? "Work" : "Go"}
             </button>
           </div>
         );
@@ -80,6 +98,26 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
           </div>
         );
       })}
+      {world.events.map((ev) => {
+        const went = state.attendedToday.includes(ev.id);
+        const task = (handlers.story?.tasks ?? []).find((t) => t.do.event === ev.id && !t.done);
+        return (
+          <div key={ev.id} className="action-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <span className="tag tag-event" style={{ marginBottom: 4 }}>📰 Story event{ev.cancelled ? " · Cancelled" : ev.attendable ? " · Today" : " · Announced"}</span>
+              <span className="title" style={{ display: "block", textDecoration: ev.cancelled ? "line-through" : undefined }}>{ev.name}</span>
+              {!compact && <span className="subtext" style={{ display: "block" }}>{ev.cancelled ? "Cancelled: police activity." : ev.blurb}</span>}
+              {ev.attendable && !ev.cancelled && <EffectChips energy={ev.energy} clout={ev.clout} mood={ev.mood} />}
+              {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
+            </div>
+            {ev.attendable && !ev.cancelled && (
+              <button className="btn btn-taxi btn-sm" disabled={went || handlers.busy !== null || !handlers.onAttendStoryEvent} onClick={() => handlers.onAttendStoryEvent?.(ev.id)}>
+                {handlers.busy === `story:${ev.id}` ? "…" : went ? "Went" : "Free"}
+              </button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -101,6 +139,7 @@ export function LocationSheet({
       {place && (
         <div className="stack-16">
           <PlaceArt place={place} daytime={daytime} />
+          <StoryBanners place={place} story={handlers.story ?? null} />
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>
             {place.tier && <span className="tag tag-neutral">{place.tier} dining</span>}
@@ -115,12 +154,34 @@ export function LocationSheet({
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
           <ActionList place={place} state={state} handlers={handlers} />
+          {(() => {
+            const c = handlers.chatter?.(place);
+            return c ? (
+              <div className="chatter-row">
+                <span aria-hidden="true">💬</span>
+                <span className="body" style={{ margin: 0 }}><span className="meta" style={{ display: "block" }}>Overheard · {c.who}</span>&ldquo;{c.line}&rdquo;</span>
+              </div>
+            ) : null;
+          })()}
           {place.depth === "full" && (
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
         </div>
       )}
     </Sheet>
+  );
+}
+
+function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null }) {
+  const w = placeStory(story, place);
+  if (!w.closed && !w.restricted && !w.price && !w.notes.length) return null;
+  return (
+    <div className="stack-4">
+      {w.closed && <ReasonBanner kind="closed" text={w.closed.reason} />}
+      {w.restricted && <ReasonBanner kind="closed" text={w.restricted.reason} />}
+      {w.price && <ReasonBanner kind="price" text={`${w.price.appliesTo === "visit_price" ? "Visits" : "Prices"} +${Math.round((w.price.multiplier - 1) * 100)}%: ${w.price.reason.charAt(0).toLowerCase()}${w.price.reason.slice(1)}`} />}
+      {w.notes.map((n) => <ReasonBanner key={n} kind="info" text={n} />)}
+    </div>
   );
 }
 
@@ -158,14 +219,14 @@ export function InteriorScene({
 
 /** Every open place, nearest first, with what it costs or pays. */
 export function PlacesSheet({
-  open, onClose, from, onPick, state,
-}: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null }) {
-  const rows = PLACES.map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
+  open, onClose, from, onPick, state, story = null,
+}: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null }) {
+  const rows = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
   return (
     <Sheet open={open} onClose={onClose} label="Places">
       <div className="stack-16">
         <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Places</h2>
-        <p className="subtext" style={{ margin: 0 }}>Queens, wave 1. More of the city opens soon.</p>
+        <p className="subtext" style={{ margin: 0 }}>Queens and Long Island City. More of the city opens soon.</p>
         <div>
           {rows.map(({ p, d }) => {
             const price = Math.min(...p.actions.map((a) => a.price ?? Infinity));
@@ -192,4 +253,9 @@ export function PlacesSheet({
 
 export function homeLocation(homeId: string | null): LatLng {
   return (homeId && HOME_LOCATIONS[homeId]) || HOME_LOCATIONS.astoria_studio;
+}
+
+/** Story places (location wave 2) appear once their arc has started. */
+export function visiblePlaces(story: StoryFeed | null): Place[] {
+  return PLACES.filter((p) => !p.story || (story?.startedArcs ?? []).includes(p.story));
 }

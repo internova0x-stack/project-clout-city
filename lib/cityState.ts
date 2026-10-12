@@ -129,9 +129,14 @@ const ERRORS: Record<string, string> = {
   dev_tools_off: "Time travel is switched off here.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
+  event_cancelled: "That one's cancelled. The whole city's talking about why.",
+  unknown_item: "That isn't in stock.",
 };
 
 export function cityError(message: string | undefined): string {
+  // Story closures carry their reason (World State): "place_closed: Crime scene. Pier closed."
+  const story = message?.match(/place_(?:closed|restricted): (.+)/);
+  if (story) return story[1].trim();
   if (message) for (const code of Object.keys(ERRORS)) if (message.includes(code)) return ERRORS[code];
   return "The city glitched. Try again.";
 }

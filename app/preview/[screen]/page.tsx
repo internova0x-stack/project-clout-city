@@ -18,6 +18,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?city=off    the home screen before migration 0004 (city screens say "coming soon")
 //   /preview/home?mood=natural   the plain room lighting, for comparison
 //   /preview/home?dev=1          show the staging time-travel pill
+//   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
 //   /preview/art             every location illustration, day and night
 //   /preview/room?room=cafe|club|counter|astoria_studio&time=night   one 3D room on its own (&mood=natural to compare)
 //   add &time=day or &time=night to pin the map
@@ -52,7 +53,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -101,6 +102,8 @@ export default async function Preview({
           cityOff={city === "off"}
           roomMood={mood === "natural" ? "natural" : "dream"}
           devTools={dev === "1"}
+          storyOff={story === "off"}
+          storyDay={story && /^\d+$/.test(story) ? Number(story) : undefined}
           clique={[
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },

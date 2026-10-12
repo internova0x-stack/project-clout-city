@@ -6,6 +6,8 @@
 import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, PLACES, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { activeGig, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
+import type { StoryEvent } from "./stories.ts";
 
 const CLOCK = { realHoursPerCityDay: 2, dayStartsAt: 6, nightStartsAt: 19 };
 
@@ -49,7 +51,11 @@ function addDays(day: string, n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function createSimApi(initial: CityState): CityApi {
+/** The sim plus what the preview's story world needs (free story events change Energy and Clout). */
+export type SimApi = CityApi & { storyEvent(ev: StoryEvent): Promise<CityResult>; storyClout(n: number): void };
+
+/** `story` returns the preview's current story feed, so prices, closures and unlocks follow the World State. */
+export function createSimApi(initial: CityState, story: () => StoryFeed | null = () => null): SimApi {
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
@@ -70,14 +76,23 @@ export function createSimApi(initial: CityState): CityApi {
   return {
     refresh: () => ok(),
     doAction(placeId, actionId) {
-      const a = PLACES.find((x) => x.id === placeId)?.actions.find((x) => x.id === actionId);
-      if (!a) return fail("That isn't something you can do here.");
-      const price = a.price ?? 0;
+      const place = PLACES.find((x) => x.id === placeId);
+      const a = place?.actions.find((x) => x.id === actionId);
+      if (!place || !a) return fail("That isn't something you can do here.");
+      const feed = story();
+      const world = placeStory(feed, place);
+      if (place.story && !(feed?.startedArcs ?? []).includes(place.story)) return fail("That isn't something you can do here.");
+      if (a.storyUnlock && !world.unlocked.includes(a.id)) return fail("That isn't something you can do here.");
+      if (world.closed) return fail(world.closed.reason);
+      if (world.restricted && !world.restricted.allow.includes(a.id)) return fail(world.restricted.reason);
+      const base = a.price ?? 0;
+      const price = Math.round(base * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1));
       if (a.energy > 0 && p().energy < a.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
       const first = !s.visitsToday[placeId];
       s.visitsToday[placeId] = (s.visitsToday[placeId] ?? 0) + 1;
-      const clout = first && (a.kind === "visit" || a.kind === "eat") ? visitClout(price, p().mood, p().confidence) : 0;
+      // Clout comes from the base price (or the action's fixed clout), never a story-raised price.
+      const clout = !first ? 0 : a.clout ?? (a.kind === "visit" || a.kind === "eat" ? visitClout(base, p().mood, p().confidence) : 0);
       const mood = first ? a.mood ?? 0 : 0;
       const confidence = first ? a.confidence ?? 0 : 0;
       p().bank_cash += (a.pay ?? 0) - price;
@@ -91,19 +106,23 @@ export function createSimApi(initial: CityState): CityApi {
     attendEvent(eventId) {
       const ev = CLUB_EVENTS.find((e) => e.id === eventId);
       if (!ev) return fail("That event doesn't exist.");
+      const club = PLACES.find((x) => x.id === ev.placeId);
+      const world = club ? placeStory(story(), club) : null;
+      if (world?.closed) return fail(world.closed.reason);
+      const entry = Math.round(ev.entry * (world?.price?.appliesTo === "event_entry" ? world.price.multiplier : 1));
       if (!eventOpen(ev, cityMinutes(now(), CLOCK))) return fail("Doors aren't open yet. The bouncer is pretending not to see you.");
       if (s.attendedToday.includes(eventId)) return fail("You already went tonight. Twice would be desperate.");
       if (p().energy < CITY_ECONOMY.energy.eventCost) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
-      if (p().bank_cash < ev.entry) return fail("Your card got declined. Loudly.");
+      if (p().bank_cash < entry) return fail("Your card got declined. Loudly.");
       s.attendedToday.push(eventId);
       const clout = Math.round(ev.clout * (0.7 + (0.3 * p().mood) / 100 + (0.3 * p().confidence) / 100));
-      p().bank_cash -= ev.entry;
+      p().bank_cash -= entry;
       p().energy -= CITY_ECONOMY.energy.eventCost;
       p().clout += clout;
       p().mood = Math.min(100, p().mood + ev.mood);
       p().confidence = Math.min(100, p().confidence + ev.confidence);
       const taskCash = completeTask(ev.placeId, ev.id);
-      return ok({ cash: -ev.entry + taskCash, clout, energy: -CITY_ECONOMY.energy.eventCost, mood: ev.mood, confidence: ev.confidence, taskCash });
+      return ok({ cash: -entry + taskCash, clout, energy: -CITY_ECONOMY.energy.eventCost, mood: ev.mood, confidence: ev.confidence, taskCash });
     },
     acceptGig(offerId) {
       const g = s.gigs.find((x) => x.id === offerId);
@@ -126,7 +145,7 @@ export function createSimApi(initial: CityState): CityApi {
     },
     buyItem(sku, mode) {
       const item = itemBySku(sku);
-      if (!item) return fail("That isn't in stock.");
+      if (!item || (item.storyOnly && !storyItemOpen(story(), sku).open)) return fail("That isn't in stock.");
       if (s.items.some((i) => i.sku === sku)) return fail("You already own that. Calm down.");
       const price = mode === "rent" ? item.rentPerWeek ?? 0 : item.price;
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
@@ -172,6 +191,19 @@ export function createSimApi(initial: CityState): CityApi {
     saveHomeLayout(layout) {
       s.homeLayout = layout;
       return ok();
+    },
+    storyClout(n) {
+      p().clout += n;
+    },
+    storyEvent(ev) {
+      if (s.attendedToday.includes(ev.id)) return fail("You were already there. Everyone saw you. It's fine.");
+      if (p().energy < (ev.energy ?? 0)) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
+      s.attendedToday.push(ev.id);
+      const clout = Math.round((ev.clout ?? 0) * (0.7 + (0.3 * p().mood) / 100 + (0.3 * p().confidence) / 100));
+      p().energy -= ev.energy ?? 0;
+      p().clout += clout;
+      p().mood = Math.min(100, p().mood + (ev.mood ?? 0));
+      return ok({ clout, energy: -(ev.energy ?? 0), mood: ev.mood ?? 0 });
     },
     setClockOffset(hours) {
       s.clockOffsetSeconds = Math.round(hours * 3600);

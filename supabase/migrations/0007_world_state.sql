@@ -486,7 +486,7 @@ begin
     select coalesce(jsonb_agg(
              jsonb_strip_nulls(jsonb_build_object(
                'id', p.pred ->> 'id', 'beatId', p.beat_id, 'question', p.pred ->> 'question', 'options', p.pred -> 'options',
-               'reward', p.pred -> 'reward', 'closesAt', p.closes_at, 'revealsAt', p.reveals_at,
+               'reward', p.pred -> 'reward', 'closesAt', p.closes_at, 'revealsAt', p.reveals_at, 'revealBeat', p.pred ->> 'reveal_beat',
                'state', case when now_t <= p.closes_at then 'open'
                              when p.reveals_at is null or now_t < p.reveals_at then 'closed' else 'revealed' end,
                'myVote', v.option_id,

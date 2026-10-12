@@ -14,7 +14,7 @@ async function run(fn: string, args: Record<string, unknown>, toGain?: (data: un
   if (fn) {
     const { data, error } = await supabase.rpc(fn, args);
     if (error) {
-      if (!/^[a-z_]+$/.test(error.message)) console.error(`${fn} failed`, error);
+      if (!/^[a-z_]+(:|$)/.test(error.message)) console.error(`${fn} failed`, error);
       return { ok: false, error: cityError(error.message) };
     }
     gain = toGain?.(data);

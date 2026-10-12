@@ -1,19 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState } from "@/lib/citySim";
+import type { CityResult } from "@/lib/cityState";
 import type { CliqueMember, Player } from "@/lib/player";
+import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
+import {
+  previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
+} from "@/app/preview/storyActions";
 
-// Development previews only: the home screen with an in-memory city, so every
-// v0.3 screen can be tried without a database. Nothing is saved.
+// Development previews only: the home screen with an in-memory city and story
+// world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
   /** Show the staging time-travel pill (off unless asked for). */
   devTools?: boolean;
+  /** Hide the story world (as before migration 0007). */
+  storyOff?: boolean;
+  /** Start the pilot so today is this story day (the first refresh does it). */
+  storyDay?: number;
 }) {
   const city = useMemo(
     () => ({
@@ -22,7 +31,60 @@ export function PreviewHome({
     }),
     [player, devTools],
   );
-  const api = useMemo(() => createSimApi(city), [city]);
+  const feedRef = useRef<StoryFeed | null>(null);
+  const sim = useMemo(() => createSimApi(city, () => feedRef.current), [city]);
+
+  // The story store lives on the dev server; clout it pays is mirrored into the sim's player.
+  const story = useMemo<StoryApi>(() => {
+    const keep = async (p: Promise<StoryResult>, simCounted = 0): Promise<StoryResult> => {
+      const r = await p;
+      if (r.ok) {
+        feedRef.current = r.feed;
+        if (r.clout && r.clout > simCounted) sim.storyClout(r.clout - simCounted);
+      }
+      return r;
+    };
+    let preset = storyDay;
+    return {
+      async refresh(offset) {
+        const r = await keep(previewStoryRefresh(offset));
+        if (preset === undefined || !r.ok) return r;
+        const day = preset;
+        preset = undefined;
+        return keep(previewStoryDevStart(day));
+      },
+      vote: (pid, o) => keep(previewStoryVote(pid, o)),
+      shadowGuess: (pid, o) => keep(previewStoryShadow(pid, o)),
+      markSeen: (id) => keep(previewStorySeen(id)),
+      completeTask: (id) => keep(previewStoryTask(id)),
+      async attendEvent(id) {
+        const ev = feedRef.current?.events.find((e) => e.id === id);
+        if (!ev || ev.cancelled) return { ok: false, error: "That event isn't happening anymore." };
+        const r = await sim.storyEvent(ev);
+        if (!r.ok) return r;
+        const t = await keep(previewStoryTask("", { event: id }));
+        return t.ok ? { ...t, clout: (r.gain?.clout ?? 0) + (t.clout ?? 0) } : t;
+      },
+      devStart: (day) => keep(previewStoryDevStart(day)),
+      devEntitle: (sku, on) => keep(previewStoryEntitle(sku, on)),
+    };
+  }, [sim, storyDay]);
+
+  // City actions can finish story tasks (as do_action does in SQL).
+  const api = useMemo(() => ({
+    ...sim,
+    async doAction(placeId: string, actionId: string): Promise<CityResult> {
+      const r = await sim.doAction(placeId, actionId);
+      if (!r.ok) return r;
+      const t = await previewStoryTask("", { place: placeId, action: actionId });
+      if (!t.ok || !t.clout) return r;
+      feedRef.current = t.feed;
+      sim.storyClout(t.clout);
+      const fresh = await sim.refresh();
+      return fresh.ok ? { ...fresh, gain: { ...r.gain, clout: (r.gain?.clout ?? 0) + t.clout } } : r;
+    },
+  }), [sim]);
+
   const noop = async () => {};
   return (
     <GameShell
@@ -33,6 +95,7 @@ export function PreviewHome({
       roomMood={roomMood}
       city={cityOff ? null : city}
       cityApi={cityOff ? undefined : api}
+      storyApi={cityOff || storyOff ? undefined : story}
       actions={{
         setTutorialState: noop,
         finishHandoff: noop,

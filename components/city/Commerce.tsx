@@ -7,6 +7,7 @@ import { formatCash } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars } from "./Common";
+import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 
 type Busy = string | null;
 
@@ -14,13 +15,14 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy,
-}: { open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean> }) {
+  open, onClose, state, busy, onBuy, story = null,
+}: { open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>; story?: StoryFeed | null }) {
   const [cat, setCat] = useState<ShopCategory>("fashion");
   const [confirm, setConfirm] = useState<{ item: ShopItem; mode: "buy" | "rent" } | null>(null);
   const owned = ownedSkus(state);
   const { player } = state;
-  const items = SHOP_ITEMS.filter((i) => i.category === cat);
+  // Story-only items (e.g. the "Forever Our Bird" hoodie) show only while a story has them on sale.
+  const items = SHOP_ITEMS.filter((i) => i.category === cat && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku)));
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
@@ -43,7 +45,7 @@ export function ShopSheet({
                 <div key={item.sku} className="item-card">
                   <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                     <IconTile emoji={item.emoji} />
-                    <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>
+                    {item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
                   </div>
                   <span className="title" style={{ display: "block" }}>{item.name}</span>
                   <span className="subtext clamp-2">{item.blurb}</span>

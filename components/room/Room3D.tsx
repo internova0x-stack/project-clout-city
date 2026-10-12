@@ -48,6 +48,8 @@ export interface Room3DProps {
   sign?: string;
   editable?: boolean;
   onUse?: (item: RoomItem) => void;
+  /** A tap on one of the room's regulars (by index in template.npcs), e.g. for chatter. */
+  onNpcTap?: (index: number) => void;
   onSaveLayout?: (layout: LayoutEntry[]) => Promise<boolean>;
   label: string;
   /** Screen space kept clear for the HUD (top) and panels (bottom), in px. */
@@ -303,6 +305,15 @@ export default function Room3D(props: Room3DProps) {
       }
       return null;
     };
+    const hitNpc = (cx: number, cy: number): number => {
+      if (!propsRef.current.onNpcTap) return -1;
+      const r = renderer.domElement.getBoundingClientRect();
+      ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(npcs.map((n) => n.rig), true)[0];
+      if (!hit) return -1;
+      return npcs.findIndex((n) => { let o: Object3D | null = hit.object; while (o) { if (o === n.rig) return true; o = o.parent; } return false; });
+    };
     let down: { x: number; y: number; drag: RoomItem | null; moved: boolean } | null = null;
     const onDown = (e: PointerEvent) => {
       const { editing: ed, selected: sel } = editRef.current;
@@ -341,6 +352,13 @@ export default function Room3D(props: Room3DProps) {
         return;
       }
       if (it?.use) return goUse(it);
+      const npc = hitNpc(e.clientX, e.clientY);
+      if (npc >= 0) {
+        const n = npcs[npc];
+        if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
+        propsRef.current.onNpcTap?.(npc);
+        return;
+      }
       const p = hitFloor(e.clientX, e.clientY);
       if (p) walkTo([p.x, p.z], null);
     };
