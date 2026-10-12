@@ -134,7 +134,7 @@ export function LeaderboardSheet({
                 tabIndex={r.id && onOpenPlayer && !r.is_me ? 0 : undefined}
                 onClick={() => r.id && !r.is_me && onOpenPlayer?.(r.id)}
               >
-                <span className="meta" style={{ width: 28 }}>{r.rank}</span>
+                <span className="meta lb-rank">{r.rank}</span>
                 <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
                 <span className="title" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {r.display_name}{r.is_me ? " (you)" : ""}
