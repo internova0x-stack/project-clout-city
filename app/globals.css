@@ -281,3 +281,12 @@ a { color:inherit; }
 .option-chips { display:flex; flex-wrap:wrap; gap:8px; }
 .option-chips .chip { height:34px; padding:0 12px; }
 .creator-label { margin:0; font-size:13px; line-height:18px; font-weight:600; color:var(--text-2); }
+
+/* ---------- Street map (MapLibre) ---------- */
+.map-canvas { background:var(--map-land); }
+.map-canvas .maplibregl-canvas { outline:none; }
+.map-cluster { width:32px; height:32px; border-radius:50%; background:var(--night-900); color:var(--text-on-dark); border:2px solid var(--taxi-400);
+  display:grid; place-items:center; font-size:16px; box-shadow:var(--elev-2); }
+.map-root .maplibregl-ctrl-bottom-right { bottom:calc(140px + var(--safe-bottom)); right:8px; }
+.map-root .maplibregl-ctrl-attrib { font-size:10px; }
+.map-root .maplibregl-ctrl-attrib.maplibregl-compact { background:rgba(255,250,240,.7); }

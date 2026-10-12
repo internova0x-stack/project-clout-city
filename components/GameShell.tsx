@@ -23,12 +23,17 @@ export function GameShell({
   player,
   clique,
   firstVisit = false,
+  daytimeOverride,
 }: {
   player: Player;
   clique: CliqueMember[];
   firstVisit?: boolean;
+  /** Development previews only: pin the map to day or night. */
+  daytimeOverride?: boolean;
 }) {
-  const { time, daytime } = useCityClock();
+  const clock = useCityClock();
+  const time = clock.time;
+  const daytime = daytimeOverride ?? clock.daytime;
   const [tab, setTab] = useState<Tab>("home");
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);

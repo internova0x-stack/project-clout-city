@@ -55,11 +55,11 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean } = {}): Avat
       color: new Color(color),
       roughness: o.roughness ?? 0.72,
       metalness: o.metalness ?? 0,
-      emissive: o.emissive ? new Color(o.emissive) : undefined,
       transparent: o.opacity !== undefined,
       opacity: o.opacity ?? 1,
-      side: o.side,
     });
+    if (o.emissive) m.emissive = new Color(o.emissive);
+    if (o.side !== undefined) m.side = o.side;
     materials.push(m);
     return m;
   };

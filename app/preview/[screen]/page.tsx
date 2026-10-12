@@ -16,9 +16,17 @@ const SAMPLE: Player = {
   created_at: new Date(0).toISOString(),
 };
 
-export default async function Preview({ params }: { params: Promise<{ screen: string }> }) {
+export default async function Preview({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ screen: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
+  const { time } = await searchParams;
+  const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
   switch (screen) {
     case "guest":
       return <GuestMap invited={false} authError={false} />;
@@ -37,6 +45,7 @@ export default async function Preview({ params }: { params: Promise<{ screen: st
         <GameShell
           player={SAMPLE}
           firstVisit
+          daytimeOverride={daytimeOverride}
           clique={[
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },
