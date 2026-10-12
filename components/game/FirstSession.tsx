@@ -111,8 +111,8 @@ export function LeaderboardSheet({
 
   return (
     <Sheet open={open} onClose={onClose} label="Leaderboard" tall>
-      <div className="stack-16">
-        <div className="stack-4" style={{ paddingRight: 44 }}>
+      <div className="lb-sheet">
+        <div className="stack-8" style={{ paddingRight: 44 }}>
           <h2 className="display-lg" style={{ margin: 0 }}>Leaderboard</h2>
           <p className="subtext" style={{ margin: 0 }}>In this city, clout is the only ranking that counts. Here&apos;s where you stand. Don&apos;t look too long.</p>
         </div>
@@ -120,29 +120,28 @@ export function LeaderboardSheet({
           <button aria-pressed={scope === "queens"} onClick={() => setScope("queens")}>Queens</button>
           <button aria-pressed={scope === "clique"} onClick={() => setScope("clique")}>Clique</button>
         </div>
-        <div className="card stack-8">
-          <p className="overline" style={{ margin: 0 }}>{scope === "queens" ? "Queens leaderboard" : "Your clique"}</p>
-          <p className="display-md" style={{ margin: 0 }}>{me?.rank ? `You're #${me.rank.toLocaleString()}` : "Calculating your fame…"}</p>
-          <div className="stack-4">
-            {rows === null && <p className="meta" style={{ margin: 0 }}>Counting heads…</p>}
-            {rows?.length === 0 && <p className="meta" style={{ margin: 0 }}>Nobody here yet. Invite your clique to fill the board.</p>}
-            {rows?.map((r) => (
-              <div
-                key={`${r.rank}-${r.display_name}`}
-                className={`lb-row${r.is_me ? " me" : ""}${r.id && onOpenPlayer && !r.is_me ? " tappable" : ""}`}
-                role={r.id && onOpenPlayer && !r.is_me ? "button" : undefined}
-                tabIndex={r.id && onOpenPlayer && !r.is_me ? 0 : undefined}
-                onClick={() => r.id && !r.is_me && onOpenPlayer?.(r.id)}
-              >
-                <span className="meta lb-rank">{r.rank}</span>
-                <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
-                <span className="title" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {r.display_name}{r.is_me ? " (you)" : ""}
-                </span>
-                <span className="hud-number" style={{ color: "var(--taxi-500)" }}>{Number(r.clout).toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
+        <div className="card lb-summary">
+          <span className="overline">{scope === "queens" ? "Queens leaderboard" : "Your clique"}</span>
+          <span className="display-md">{me?.rank ? `You're #${me.rank.toLocaleString()}` : "Calculating your fame…"}</span>
+          {me?.total ? <span className="meta">of {me.total.toLocaleString()} {me.total === 1 ? "player" : "players"}{onOpenPlayer ? " · tap a player to see their card" : ""}</span> : null}
+        </div>
+        <div className="card lb-list">
+          {rows === null && <p className="meta" style={{ margin: 0 }}>Counting heads…</p>}
+          {rows?.length === 0 && <p className="meta" style={{ margin: 0 }}>Nobody here yet. Invite your clique to fill the board.</p>}
+          {rows?.map((r) => (
+            <div
+              key={`${r.rank}-${r.display_name}`}
+              className={`lb-row${r.is_me ? " me" : ""}${r.id && onOpenPlayer && !r.is_me ? " tappable" : ""}`}
+              role={r.id && onOpenPlayer && !r.is_me ? "button" : undefined}
+              tabIndex={r.id && onOpenPlayer && !r.is_me ? 0 : undefined}
+              onClick={() => r.id && !r.is_me && onOpenPlayer?.(r.id)}
+            >
+              <span className="meta lb-rank">{r.rank}</span>
+              <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
+              <span className="title lb-name">{r.display_name}{r.is_me ? " (you)" : ""}</span>
+              <span className="hud-number lb-clout">🔥 {Number(r.clout).toLocaleString()}</span>
+            </div>
+          ))}
         </div>
         <p className="subtext" style={{ margin: 0 }}>
           Clout comes from tasks, being seen in the right places, and friends who join through your link. It&apos;s a ranking only, for now.

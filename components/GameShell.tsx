@@ -582,7 +582,7 @@ export function GameShell({
             onClick={() => setPanel("profile")}
             aria-label="Your profile"
           >
-            <span className="lb-avatar" style={{ border: "2px solid var(--taxi-400)", background: "var(--night-700)" }}>{style.emoji}</span>
+            <span className="lb-avatar" style={{ width: 32, height: 32, fontSize: 15, border: "2px solid var(--taxi-400)", background: "var(--night-700)" }}>{style.emoji}</span>
             <span style={{ textAlign: "left", minWidth: 0 }}>
               <span className="display-sm" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{me.display_name}</span>
               <span className="meta" style={{ display: "block" }}>

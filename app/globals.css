@@ -366,10 +366,18 @@ a { color:inherit; }
 .segmented { display:flex; height:44px; padding:4px; border-radius:14px; background:var(--chip-off); }
 .segmented button { flex:1; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out; }
 .segmented button[aria-pressed="true"] { background:#fff; color:var(--text-1); box-shadow:var(--elev-1); }
-.lb-row { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:14px; }
-.lb-rank { width:18px; flex:none; text-align:right; font-variant-numeric:tabular-nums; }
+.lb-sheet { display:flex; flex-direction:column; gap:20px; padding-bottom:12px; }
+.lb-summary { display:flex; flex-direction:column; gap:4px; }
+.lb-list { display:flex; flex-direction:column; padding:6px; }
+.lb-row { display:flex; align-items:center; gap:10px; padding:10px 10px; position:relative; }
+.lb-row + .lb-row::before { content:""; position:absolute; top:0; left:40px; right:10px; height:1px; background:var(--divider); }
+.lb-row.me { border-radius:12px; }
+.lb-row.me::before, .lb-row.me + .lb-row::before { display:none; }
+.lb-rank { width:20px; flex:none; text-align:right; font-variant-numeric:tabular-nums; }
+.lb-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lb-clout { color:var(--taxi-500); flex:none; }
 .lb-row.me { background:var(--taxi-tint); }
-.lb-avatar { width:32px; height:32px; border-radius:50%; background:var(--night-900); display:grid; place-items:center; font-size:15px; flex:none; }
+.lb-avatar { width:36px; height:36px; border-radius:50%; background:var(--night-900); display:grid; place-items:center; font-size:17px; flex:none; }
 .ledger-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--divider); }
 .money-pos { color:var(--green-text); } .money-neg { color:var(--text-1); }
 .pill-online { position:relative; }
