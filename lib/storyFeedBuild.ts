@@ -1,6 +1,7 @@
 // Builds a player's story feed from content in TypeScript, mirroring story_feed()
-// in supabase/migrations/0007. Used by development previews and tests, never by
-// the live game (which asks the database). Server/scripts only: it reads arcs.
+// in supabase/migrations/0007. Used by development previews, tests and the Story
+// Studio's player preview (admins only), never by the live game, which asks the
+// database. It takes arcs as input and never loads story files itself.
 
 import {
   activeChatter, activeEffects, lastDay, nyTime, predictionWindow, storyDay, type Arc,

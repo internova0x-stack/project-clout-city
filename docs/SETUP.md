@@ -1,4 +1,4 @@
-# Setting up Clout City (v0.1)
+# Setting up Clout City
 
 About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel account.
 
@@ -33,8 +33,16 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    `node --experimental-strip-types scripts/gen-city-seed.ts` in a new migration when it changes.
 10. **Time travel (staging only)**: to test a week of play, use a separate staging project and run
     `update game_settings set value = '{"tools": true, "clockOffsetSeconds": 0}' where key = 'dev';`
-    A purple "⏩" pill then moves the game clock for everyone on that project. Never switch it on
-    in production.
+    A red-pink "⏩" pill then moves the game clock for everyone on that project, and (from v0.4)
+    can start the Sarah Bird story on any day and unlock the side stories for your account.
+    Never switch it on in production.
+11. **Stories (v0.4)**: run `0007_world_state.sql`. It adds the World State tables, the News app's
+    functions and Sarah Bird with her three side stories (approved, not scheduled). Then make
+    yourself a story admin so you can use the Story Studio at `/studio`:
+    `insert into story_admins (user_id) select id from auth.users where email = 'you@example.com';`
+    The Studio's email and Google sign-in come back through `/auth/callback?next=/studio`, which the
+    redirect URLs in step 1 already cover. How to add, approve, schedule and pause stories:
+    `docs/STORIES.md`.
 
 > Supabase's built-in email sender is rate-limited (a few emails an hour) and meant for
 > testing. Before sharing the link widely, add an SMTP provider under

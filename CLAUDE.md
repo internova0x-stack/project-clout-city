@@ -2,7 +2,7 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.3 "The City"** (in progress on the branch with v0.2 "First Party"; v0.1 "Tap In" is live) (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.4 "Stories"** (in progress on the branch with v0.2 and v0.3; v0.1 "Tap In" is live) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/01-game-concept-note.md`: the big picture.
@@ -12,6 +12,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 - `docs/07-milestones-and-versions.md`: what ships in which version. Build only the
   current version's "In scope" list; anything else gets a "Coming soon" card.
 - `docs/SETUP.md`: Supabase, email template and Vercel setup.
+- `docs/STORIES.md`: adding, approving, scheduling and pausing stories in the Story Studio (`/studio`).
 
 ## Stack
 Next.js 16 (App Router, `proxy.ts` instead of middleware), React 19, Supabase
@@ -28,7 +29,9 @@ components live in `app/globals.css`.
   Postgres 16 binaries) and the SQL scenario tests in `supabase/tests/`.
 - `/preview/creator?step=0-3` and `/preview/home?state=new` walk the creator and the
   first session with sample data (development only). `/preview/home` runs the city on an
-  in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004.
+  in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
+  `?story=3` starts the Sarah Bird story on Day 3. `/preview/studio` shows the Story Studio.
+- `npm run validate:stories`: checks every file in `content/stories/`.
 
 ## Rules for this codebase
 - Player data is permanent from day one: change the schema only with a new file in
@@ -46,4 +49,6 @@ components live in `app/globals.css`.
 - Gold (`--gold-*`, `--g-gold`) is only for real-money products, the logo and the tagline.
 - No real brand names; businesses are invented. Copy is satirical and never
   promises features that aren't built.
+- Story content lives in `content/stories/*.json` and is read only on the server or by the
+  Studio (answers must never reach a player's bundle); players get `story_feed()`.
 - Modules imported by tests use explicit `.ts` extensions for their own imports.

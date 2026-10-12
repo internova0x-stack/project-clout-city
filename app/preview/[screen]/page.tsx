@@ -5,6 +5,12 @@ import { PreviewHome } from "@/components/preview/PreviewHome";
 import { PreviewArt } from "@/components/preview/PreviewArt";
 import { PreviewRoom } from "@/components/preview/PreviewRoom";
 import { GuestMap } from "@/components/GuestMap";
+import { Studio } from "@/components/studio/Studio";
+import type { StudioArc } from "@/lib/studio";
+import {
+  previewStudioBeatStatus, previewStudioContent, previewStudioList, previewStudioReview, previewStudioSchedule, previewStudioSetDay,
+  previewStudioStatus, previewStudioUpload,
+} from "../studioActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
 
@@ -19,6 +25,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?mood=natural   the plain room lighting, for comparison
 //   /preview/home?dev=1          show the staging time-travel pill
 //   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
+//   /preview/studio            the Story Studio on an in-memory copy of content/stories (&live=3: the pilot is on Day 3)
 //   /preview/art             every location illustration, day and night
 //   /preview/room?room=cafe|club|counter|astoria_studio&time=night   one 3D room on its own (&mood=natural to compare)
 //   add &time=day or &time=night to pin the map
@@ -53,7 +60,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -108,6 +115,20 @@ export default async function Preview({
             { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },
           ]}
+        />
+      );
+    }
+    case "studio": {
+      const r = live && /^\d+$/.test(live) ? await previewStudioSetDay("sarah-bird", Number(live)) : await previewStudioList();
+      return (
+        <Studio
+          preview
+          who="preview"
+          initial={r.ok ? r.arcs : ([] as StudioArc[])}
+          api={{
+            upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
+            beatStatus: previewStudioBeatStatus, content: previewStudioContent,
+          }}
         />
       );
     }
