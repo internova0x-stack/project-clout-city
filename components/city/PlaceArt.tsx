@@ -592,63 +592,102 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
       );
     }
     case "st-johnsons": {
-      // Red brick hall with a white chapel cupola, stone steps and a lawn.
+      // A campus around a lawn: the red brick chapel hall with its cupola, a dorm and the library.
       const lawn: BoxSpec = { ...isle, color: night ? "#5E8F6A" : "#BFE3B4" };
-      const hall: BoxSpec = { x: -5, y: -4.5, z: 0, w: 8, d: 5.5, h: 4.6, color: mixHex(a, "#8A3A2E", 0.35) };
-      const trim: BoxSpec = { x: -5.2, y: -4.7, z: 4.6, w: 8.4, d: 5.9, h: 0.35, color: "#F2E6D8" };
-      const drum: BoxSpec = { x: -2.1, y: -2.8, z: 4.95, w: 2.2, d: 2.2, h: 1.6, color: "#F4EEE4" };
-      const steps: BoxSpec = { x: -2.6, y: 1, z: 0, w: 3.2, d: 1.2, h: 0.45, color: "#E8E2D6" };
-      const [sx, sy] = iso(-1, -1.7, 6.55);
+      const brick = mixHex(a, "#8A3A2E", 0.35);
+      const hall: BoxSpec = { x: -5.6, y: -5.6, z: 0, w: 4.6, d: 4, h: 4.4, color: brick };
+      const trim: BoxSpec = { x: -5.75, y: -5.75, z: 4.4, w: 4.9, d: 4.3, h: 0.3, color: "#F2E6D8" };
+      const drum: BoxSpec = { x: -4.2, y: -4.5, z: 4.7, w: 1.8, d: 1.8, h: 1.4, color: "#F4EEE4" };
+      const dorm: BoxSpec = { x: 0.6, y: -5.6, z: 0, w: 4.8, d: 3, h: 3.4, color: mixHex(brick, "#C9A08A", 0.25) };
+      const library: BoxSpec = { x: -5.6, y: 0.8, z: 0, w: 3, d: 4.6, h: 2.8, color: mixHex(b, "#D9C4A0", 0.3) };
+      const steps: BoxSpec = { x: -4.2, y: -1.6, z: 0, w: 1.8, d: 0.9, h: 0.35, color: "#E8E2D6" };
+      const path1: BoxSpec = { x: -2.4, y: -1, z: 0, w: 1.2, d: 6.8, h: 0.05, color: night ? "#B8A8D8" : "#EADFCC" };
+      const path2: BoxSpec = { x: -2.4, y: 1.4, z: 0, w: 8, d: 1.2, h: 0.05, color: night ? "#B8A8D8" : "#EADFCC" };
+      const [sx, sy] = iso(-3.3, -3.6, 6.1);
+      const win = night ? lit : "#F4EEE4";
       return (
         <>
           <Box b={lawn} night={night} />
+          <Box b={path1} night={night} />
+          <Box b={path2} night={night} />
           <Box b={hall} night={night}>
-            {[0, 1, 2, 3].map((i) => <OnLeft key={`a${i}`} b={hall} u={0.6 + i * 1.9} v={2.4} uw={1} vh={1.3} fill={night ? lit : "#F4EEE4"} opacity={0.95} />)}
-            {[0, 3].map((i) => <OnLeft key={`b${i}`} b={hall} u={0.6 + i * 1.9} v={0.5} uw={1} vh={1.3} fill={night ? lit : "#F4EEE4"} opacity={0.95} />)}
-            <OnLeft b={hall} u={2.75} v={0} uw={1.9} vh={2.1} fill={mixHex(c, "#000", 0.1)} />
+            {[0, 1, 2].map((i) => <OnLeft key={`a${i}`} b={hall} u={0.5 + i * 1.45} v={2.4} uw={0.8} vh={1.3} fill={win} opacity={0.95} />)}
+            <OnLeft b={hall} u={1.75} v={0} uw={1.1} vh={1.9} fill={mixHex(c, "#000", 0.1)} />
             {windowsRight(hall, 2, 3, lit, mixHex(a, "#2A2530", 0.55), night)}
           </Box>
           <Box b={trim} night={night} />
           <Box b={drum} night={night}>
-            {[0, 1].map((i) => <OnLeft key={i} b={drum} u={0.35 + i * 0.95} v={0.35} uw={0.5} vh={0.9} fill={night ? lit : mixHex(c, "#9FB6D8", 0.4)} />)}
+            {[0, 1].map((i) => <OnLeft key={i} b={drum} u={0.3 + i * 0.75} v={0.3} uw={0.4} vh={0.8} fill={night ? lit : mixHex(c, "#9FB6D8", 0.4)} />)}
           </Box>
-          <polygon points={`${sx - 13},${sy + 4} ${sx},${sy - 22} ${sx + 13},${sy + 4}`} fill={night ? "#C9D2E8" : "#5C7A96"} />
-          <line x1={sx} y1={sy - 22} x2={sx} y2={sy - 31} stroke={night ? "#FFE2A8" : "#F2B705"} strokeWidth={1.6} />
+          <polygon points={`${sx - 11},${sy + 4} ${sx},${sy - 20} ${sx + 11},${sy + 4}`} fill={night ? "#C9D2E8" : "#5C7A96"} />
+          <line x1={sx} y1={sy - 20} x2={sx} y2={sy - 28} stroke={night ? "#FFE2A8" : "#F2B705"} strokeWidth={1.6} />
           <Box b={steps} night={night} />
-          <Tree x={-5.2} y={3.8} night={night} />
-          <Tree x={4.6} y={-4.8} night={night} size={0.9} />
-          <Tree x={4.8} y={3.6} night={night} size={0.8} />
-          <Lantern x={1.6} y={3} night={night} />
+          <Box b={dorm} night={night}>
+            {windowsLeft(dorm, 2, 4, lit, mixHex(a, "#2A2530", 0.5), night)}
+            {windowsRight(dorm, 2, 2, lit, mixHex(a, "#2A2530", 0.5), night)}
+          </Box>
+          <Box b={library} night={night}>
+            {[0, 1, 2].map((i) => <OnRight key={i} b={library} u={0.5 + i * 1.4} v={0.6} uw={0.7} vh={1.6} fill={night ? lit : mixHex(c, "#9FB6D8", 0.45)} opacity={0.95} />)}
+            <OnLeft b={library} u={0} v={2.3} uw={3} vh={0.3} fill="#F2E6D8" />
+          </Box>
+          <Tree x={2.2} y={-0.6} night={night} size={0.9} />
+          <Tree x={4.6} y={4.2} night={night} />
+          <Tree x={-0.4} y={4.6} night={night} size={0.85} />
+          <Tree x={3.4} y={2.9} night={night} size={0.75} />
+          <Lantern x={-1} y={0.2} night={night} />
+          <Lantern x={1.2} y={3} night={night} />
         </>
       );
     }
     case "queensborough-u": {
-      // A columned library hall on a quad, with a path and lamp posts.
+      // A campus quad: the columned library, a glass science block, a clock tower and the student union.
       const quad: BoxSpec = { ...isle, color: night ? "#5E8F6A" : "#C6E8BC" };
-      const plinth: BoxSpec = { x: -5, y: -4.8, z: 0, w: 8.2, d: 5, h: 0.7, color: "#E8E2D6" };
-      const hall: BoxSpec = { x: -4.6, y: -4.6, z: 0.7, w: 7.4, d: 3.4, h: 3.8, color: mixHex(b, "#F4EEE4", 0.4) };
-      const roof: BoxSpec = { x: -4.9, y: -4.9, z: 4.5, w: 8, d: 4, h: 0.5, color: "#F4EEE4" };
-      const path: BoxSpec = { x: -1.6, y: 0.2, z: 0, w: 1.8, d: 5.8, h: 0.06, color: night ? "#B8A8D8" : "#EADFCC" };
-      const [p0, p1] = [iso(-4.9, -0.9, 5), iso(3.1, -0.9, 5)];
-      const peak = iso(-0.9, -0.9, 7);
+      const plinth: BoxSpec = { x: -5.4, y: -5.6, z: 0, w: 6.2, d: 4, h: 0.6, color: "#E8E2D6" };
+      const hall: BoxSpec = { x: -5.1, y: -5.4, z: 0.6, w: 5.6, d: 2.6, h: 3.3, color: mixHex(b, "#F4EEE4", 0.4) };
+      const roof: BoxSpec = { x: -5.3, y: -5.6, z: 3.9, w: 6, d: 3.6, h: 0.45, color: "#F4EEE4" };
+      const glass: BoxSpec = { x: 1.5, y: -5.6, z: 0, w: 4, d: 3.6, h: 6, color: mixHex(a, "#9FC4E8", 0.45) };
+      const tower: BoxSpec = { x: -5.6, y: -0.8, z: 0, w: 1.6, d: 1.6, h: 6.4, color: mixHex(c, "#B88A6A", 0.55) };
+      const union: BoxSpec = { x: -5.6, y: 1.6, z: 0, w: 3.4, d: 3.6, h: 2.6, color: mixHex(a, "#E8E2D0", 0.55) };
+      const path: BoxSpec = { x: -1.8, y: -1.4, z: 0, w: 1.4, d: 7.2, h: 0.05, color: night ? "#B8A8D8" : "#EADFCC" };
+      const path2: BoxSpec = { x: -1.8, y: 1.6, z: 0, w: 7.6, d: 1.2, h: 0.05, color: night ? "#B8A8D8" : "#EADFCC" };
+      const front = roof.y + roof.d;
+      const [p0, p1, peak] = [iso(-5.3, front, 4.35), iso(0.7, front, 4.35), iso(-2.3, front, 5.9)];
+      const tt = [iso(-5.6, -0.8, 6.4), iso(-4, -0.8, 6.4), iso(-4, 0.8, 6.4), iso(-5.6, 0.8, 6.4)];
+      const apex = iso(-4.8, 0, 8.4);
+      const [cx, cy] = iso(-4.8, 0.82, 5.2);
       return (
         <>
           <Box b={quad} night={night} />
           <Box b={path} night={night} />
+          <Box b={path2} night={night} />
           <Box b={plinth} night={night} />
           <Box b={hall} night={night}>
-            {[0, 1, 2].map((i) => <OnLeft key={i} b={hall} u={1.2 + i * 2.1} v={0.6} uw={1} vh={2.2} fill={night ? lit : mixHex(a, "#2A2530", 0.45)} opacity={0.9} />)}
+            {[0, 1, 2].map((i) => <OnLeft key={i} b={hall} u={0.9 + i * 1.6} v={0.5} uw={0.8} vh={1.9} fill={night ? lit : mixHex(a, "#2A2530", 0.45)} opacity={0.9} />)}
           </Box>
-          {[-4.3, -2.6, -0.9, 0.8, 2.5].map((x) => <Box key={x} b={{ x, y: -0.9, z: 0.7, w: 0.5, d: 0.5, h: 3.8, color: "#FBF7F0" }} night={night} />)}
+          {[-4.9, -3.6, -2.3, -1, 0.3].map((x) => <Box key={x} b={{ x, y: front - 0.5, z: 0.6, w: 0.4, d: 0.4, h: 3.3, color: "#FBF7F0" }} night={night} />)}
           <Box b={roof} night={night} />
           <polygon points={`${p0[0]},${p0[1]} ${peak[0]},${peak[1]} ${p1[0]},${p1[1]}`} fill={night ? "#D8D0E8" : "#FBF7F0"} />
-          <polygon points={`${p0[0] + 12},${p0[1] - 1} ${peak[0]},${peak[1] + 6} ${p1[0] - 12},${p1[1] - 1}`} fill={mixHex(a, "#FFFFFF", 0.35)} opacity={0.6} />
-          <SignLeft b={plinth} text="Queensborough" color={a} ink="#FFFFFF" v={-0.45} night={night} />
-          <Tree x={-5.4} y={2.6} night={night} />
-          <Tree x={3.6} y={4.2} night={night} size={0.9} />
-          <Tree x={4.8} y={-0.4} night={night} size={0.8} />
-          <Lantern x={-2.4} y={4.4} night={night} />
-          <Lantern x={0.8} y={4.4} night={night} />
+          <polygon points={`${p0[0] + 10},${p0[1] - 1} ${peak[0]},${peak[1] + 5} ${p1[0] - 10},${p1[1] - 1}`} fill={mixHex(a, "#FFFFFF", 0.35)} opacity={0.6} />
+          <Box b={tower} night={night} />
+          <polygon points={pts([tt[1], tt[2], apex])} fill={tone("#5C7A96", night).warm} />
+          <polygon points={pts([tt[2], tt[3], apex])} fill={tone("#5C7A96", night).cool} />
+          <ellipse cx={cx} cy={cy} rx={5.5} ry={6.2} fill="#FBF7F0" stroke={mixHex(c, "#000", 0.2)} strokeWidth={0.8} />
+          <line x1={cx} y1={cy} x2={cx} y2={cy - 4} stroke="#2A2530" strokeWidth={0.9} />
+          <line x1={cx} y1={cy} x2={cx + 3} y2={cy + 1} stroke="#2A2530" strokeWidth={0.9} />
+          <Box b={glass} night={night}>
+            {windowsLeft(glass, 4, 4, lit, mixHex(a, "#2A3A5C", 0.4), night)}
+            {windowsRight(glass, 4, 3, lit, mixHex(a, "#2A3A5C", 0.4), night)}
+          </Box>
+          <Box b={union} night={night}>
+            {[0, 1].map((i) => <OnRight key={i} b={union} u={0.5 + i * 1.6} v={0.5} uw={1.1} vh={1.4} fill={night ? lit : mixHex(a, "#9FB6D8", 0.4)} opacity={0.95} />)}
+            <OnLeft b={union} u={0} v={2.05} uw={3.4} vh={0.35} fill={a} />
+          </Box>
+          <SignLeft b={plinth} text="Library" color={a} ink="#FFFFFF" v={-0.45} night={night} />
+          <Tree x={2.4} y={0.2} night={night} size={0.85} />
+          <Tree x={4.8} y={4.4} night={night} />
+          <Tree x={0.4} y={4.6} night={night} size={0.8} />
+          <Lantern x={3.6} y={0.6} night={night} />
+          <Lantern x={3.4} y={3.2} night={night} />
         </>
       );
     }
