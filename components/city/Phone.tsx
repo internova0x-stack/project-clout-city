@@ -13,13 +13,15 @@ import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
   { id: "news", label: "News", emoji: "📰", tile: "news" },
   { id: "messages", label: "Messages", emoji: "💬", tile: "chat", soon: true },
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
+  // v0.7: the Collection's front door (owner, Oct 13). It opens the Collection sheet over the game.
+  { id: "collection", label: "Collection", emoji: "💌", tile: "book" },
   { id: "gigs", label: "Gigs", emoji: "💼", tile: "briefcase" },
   { id: "settings", label: "Settings", emoji: "⚙️", tile: "gear" },
 ];
@@ -36,7 +38,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection,
 }: {
   open: boolean;
   onClose: () => void;
@@ -63,6 +65,8 @@ export function PhoneModal({
   /** Crew outings: a "Crew plans" row in Messages. */
   crew?: { alerts: number; onOpen: () => void };
   onToast?: (text: string) => void;
+  /** v0.7: the Collection app closes the phone and opens the Collection; without it the app is hidden. */
+  onOpenCollection?: () => void;
 }) {
   const [app, setApp] = useState<App | null>(initialApp ?? null);
   const [lastInitial, setLastInitial] = useState(initialApp);
@@ -91,8 +95,8 @@ export function PhoneModal({
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
               <div className="phone-grid">
-                {APPS.map((a) => (
-                  <button key={a.id} className="phone-app" onClick={() => setApp(a.id)}>
+                {APPS.filter((a) => a.id !== "collection" || onOpenCollection).map((a) => (
+                  <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}

@@ -20,7 +20,7 @@ import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type Stor
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import { regularAt, regularLine } from "@/lib/cast";
-import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
+import { formatPrice, liveParty, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
@@ -558,7 +558,7 @@ export function GameShell({
     const party = products.find((x) => x.event?.placeId === p.id && x.owned && !x.event.attended
       && gameNow >= Date.parse(x.event.startsAt) && gameNow < Date.parse(x.event.endsAt));
     if (party) return money.attend(party.event!.id);
-    if (products.some((x) => x.event?.placeId === p.id)) return setPanel("events");
+    if (products.some((x) => x.event?.placeId === p.id && liveParty(x, gameNow))) return setPanel("events");
     const minutes = cityMinutes(gameNow, GAME_CONFIG.cityClock);
     const events = CLUB_EVENTS.filter((e) => e.placeId === p.id);
     const live = events.find((e) => eventOpen(e, minutes) && !city?.attendedToday.includes(e.id));
@@ -960,6 +960,7 @@ export function GameShell({
             h={money}
             badge={!!feed?.badges.some((b) => b.id === "postcard-collector")}
             huntCards={huntState?.cards}
+            handle={me.display_name}
           />
           <LookRoom
             open={panel === "look" || !!tryOn}
@@ -1005,6 +1006,7 @@ export function GameShell({
           onCrushChange: () => void loadInbox(),
         } : undefined}
         crew={crew ? { alerts: crewAlerts(crewInbox), onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("crew"); } } : undefined}
+        onOpenCollection={catalog ? () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("collection"); } : undefined}
         onToast={setToast}
         story={storyOn ? feed : null}
         news={storyOn ? news : undefined}

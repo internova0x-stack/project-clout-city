@@ -95,9 +95,10 @@ do $$ begin
   begin perform public.attend_exclusive_event('jada-sol-listening'); raise exception 'FAIL: twice';
   exception when sqlstate '22023' then null; end;
 end $$;
--- After the party ends it leaves the catalog, and can't be bought.
+-- After the party ends it can't be bought; ticket holders keep it as an event card (0022).
 select pg_temp.at((select ends_at + interval '1 minute' from public.exclusive_events where id = 'jada-sol-listening'));
-select pg_temp.assert(pg_temp.product('event-jada-sol-listening') is null, 'ended parties leave the list');
+select pg_temp.assert((pg_temp.product('event-jada-sol-listening') #>> '{event,attended}')::boolean, 'ended party stays for its ticket holder');
+select pg_temp.assert(pg_temp.product('event-dex-monroe-afterparty') is not null, 'parties still on are listed');
 do $$ begin
   begin perform public.start_purchase('event-jada-sol-listening', 'cs_ev_late'); raise exception 'FAIL: bought after it ended';
   exception when sqlstate '22023' then null; end;
@@ -105,6 +106,9 @@ end $$;
 reset role;
 select pg_temp.assert(public.payment_refund('evt_ev_r', 'pi_ev_1') = 'revoked', 'ticket refund');
 select pg_temp.assert((select clout = (select clout from c2) from public.players where display_name = 'Max'), 'ticket clout taken back');
+set role authenticated;
+select pg_temp.assert(pg_temp.product('event-jada-sol-listening') is null, 'a refunded ended party leaves the list');
+reset role;
 
 select 'MONEY CHECKS PASSED' as result;
 rollback;
