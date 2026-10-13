@@ -828,6 +828,30 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
   color:var(--text-1); font-size:15px; line-height:1.35; box-shadow:var(--elev-1, 0 1px 3px rgba(20,17,26,.12)); animation:rise-in .18s ease-out; }
 /* A small pointer up to the regular's tag on the picture. */
 .regular-bubble::before { content:""; position:absolute; left:18px; top:-7px; width:14px; height:14px; background:#fff; transform:rotate(45deg); border-radius:2px; }
+/* v0.6 treasure hunts: a clue or question in the regular's bubble (taxi yellow: hunts, never gold). */
+.hunt-bubble { background:var(--taxi-tint); box-shadow:inset 0 0 0 1.5px var(--taxi-400); }
+.hunt-bubble::before { background:var(--taxi-tint); }
+.hunt-bubble.found { background:var(--green-tint); box-shadow:inset 0 0 0 1.5px var(--green-500); }
+.hunt-bubble.found::before { background:var(--green-tint); }
+.hunt-choices { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.hunt-choices .btn { min-height:44px; height:auto; padding:8px 10px; white-space:normal; line-height:1.2; }
+.hunt-note { margin-top:8px; color:var(--text-2); }
+.hunt-step { display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:start; }
+.hunt-step .stack-4 > span { display:block; }
+.hunt-read { padding-left:10px; border-left:3px solid var(--taxi-400); }
+.hunt-read > span { display:block; }
+.list-row.selected { background:var(--taxi-tint); border-radius:var(--r-xs); }
+.hunt-dot { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:800;
+  background:var(--chip-off); color:var(--text-2); }
+.hunt-dot.done { background:var(--green-500); color:#fff; }
+.hunt-dot.now { background:var(--taxi-400); color:var(--text-1); }
+.hunt-card { display:grid; grid-template-columns:52px 1fr; gap:14px; align-items:center; }
+.hunt-card.top { align-items:start; }
+.hunt-card-text { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.hunt-card-text > * { margin:0; line-height:1.25; }
+.hunt-lore { margin-top:4px !important; font-size:14px; line-height:1.45 !important; color:var(--text-2); }
+.hunt-card-art { width:52px; height:52px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:28px;
+  background:var(--g-night-reveal); box-shadow:inset 0 0 0 2px var(--taxi-400); }
 .studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }
 
 /* ---------- v0.6 City News: ticker headline, home card, news cards ---------- */

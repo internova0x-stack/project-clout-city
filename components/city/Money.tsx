@@ -2,6 +2,8 @@
 
 import { placeById } from "@/lib/city";
 import { formatPrice, partyState, POSTCARD_BADGE, type StoreProduct } from "@/lib/store";
+import { HuntCardRow } from "../hunt/Hunt";
+import type { HuntCard } from "@/lib/hunts";
 import { Sheet } from "../Sheet";
 import { EffectChips, SheetTitle } from "./Common";
 import { PlaceArt } from "./PlaceArt";
@@ -96,8 +98,10 @@ export function PostcardOffer({ p, h }: { p: StoreProduct; h: MoneyHandlers }) {
 }
 
 /** C39: the Collection screen: owned postcards, visited-but-not-owned silhouettes, and the rest. */
-export function CollectionSheet({ open, onClose, products, h, badge }: {
+export function CollectionSheet({ open, onClose, products, h, badge, huntCards = [] }: {
   open: boolean; onClose: () => void; products: StoreProduct[]; h: MoneyHandlers; badge: boolean;
+  /** v0.6 hunt cards: earned, free, no net-worth value and not for sale. */
+  huntCards?: HuntCard[];
 }) {
   const cards = products.filter((p) => p.type === "postcard");
   const owned = cards.filter((p) => p.owned).length;
@@ -147,6 +151,12 @@ export function CollectionSheet({ open, onClose, products, h, badge }: {
             );
           })}
         </div>
+        {huntCards.length > 0 && (
+          <div className="stack-8">
+            <p className="overline" style={{ margin: 0 }}>🗺️ Hunt cards · earned</p>
+            {huntCards.map((c) => <HuntCardRow key={c.huntId} c={c} />)}
+          </div>
+        )}
       </div>
     </Sheet>
   );
