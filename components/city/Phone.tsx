@@ -6,6 +6,8 @@ import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
+import { TeaApp } from "./Gossip";
+import type { GossipState, TeaCard } from "@/lib/gossip";
 import { BankView } from "../game/Sheets";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
 import { MessagesApp, type MessagesDating } from "../chat/Messages";
@@ -14,12 +16,14 @@ import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
   { id: "news", label: "News", emoji: "📰", tile: "news" },
   { id: "messages", label: "Messages", emoji: "💬", tile: "chat", soon: true },
+  // v0.10 neighborhood gossip (migration 0035); hidden until it runs.
+  { id: "tea", label: "Tea", emoji: "🍵", tile: "tree" },
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
   // v0.7: the Collection's front door (owner, Oct 13). It opens the Collection sheet over the game.
   { id: "collection", label: "Collection", emoji: "💌", tile: "book" },
@@ -39,7 +43,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "",
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea,
 }: {
   open: boolean;
   onClose: () => void;
@@ -72,6 +76,8 @@ export function PhoneModal({
   onOpenCollection?: () => void;
   /** The player's @handle, on the Bank's virtual card. */
   handle?: string;
+  /** v0.10 gossip: the Tea app; without it the app is hidden. */
+  tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
   const [app, setApp] = useState<App | null>(initialApp ?? null);
   const [lastInitial, setLastInitial] = useState(initialApp);
@@ -111,11 +117,12 @@ export function PhoneModal({
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
               <div className="phone-grid">
-                {APPS.filter((a) => a.id !== "collection" || onOpenCollection).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea)).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
+                      {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
                       {a.id === "messages" && chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0) > 0 && <span className="count-badge">{chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0)}</span>}
                     </span>
@@ -126,9 +133,10 @@ export function PhoneModal({
             </div>
           ) : (
             <div className="phone-app-screen">
-              <button className="phone-back" onClick={() => setApp(null)}><ChevronLeftIcon size={20} /> Home</button>
-              {/* News draws its own header (with the Archive button on the right). */}
-              {app !== "news" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
+              {/* Tea draws its own back button (a story goes back to the list first). */}
+              {app !== "tea" && <button className="phone-back" onClick={() => setApp(null)}><ChevronLeftIcon size={20} /> Home</button>}
+              {/* News and Tea draw their own headers. */}
+              {app !== "news" && app !== "tea" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
@@ -150,6 +158,7 @@ export function PhoneModal({
                 </div>
               )}
               {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.draws} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
+              {app === "tea" && tea && <TeaApp stories={tea.state.stories} cards={tea.state.cards} busy={tea.busy} onHome={() => setApp(null)} onShare={tea.onShare} onOpenCard={tea.onOpenCard} />}
               {app === "messages" && (chat
                 ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}

@@ -4,6 +4,8 @@ import { doorsLine, eventTimeLine, localDate } from "@/lib/localTime";
 import { useState } from "react";
 import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { formatPrice, partyState, POSTCARD_BADGE, POSTCARD_NOTES, serialLabel, type StoreProduct } from "@/lib/store";
+import { TeaMini } from "./Gossip";
+import type { TeaCard } from "@/lib/gossip";
 import { onList, plusOnesFor, type PartyInbox } from "@/lib/party";
 import type { HuntCard } from "@/lib/hunts";
 import { Sheet } from "../Sheet";
@@ -139,15 +141,18 @@ export function PostcardOffer({ p, h }: { p: StoreProduct; h: MoneyHandlers }) {
   );
 }
 
-type Tab = "postcards" | "hunts" | "events";
+type Tab = "postcards" | "hunts" | "events" | "tea";
 type Picked = { kind: "postcard"; p: StoreProduct } | { kind: "event"; p: StoreProduct } | { kind: "hunt"; c: HuntCard };
 
 /**
  * C39, redesigned in v0.7 (#40): tabs for postcards, hunt cards and event cards, a progress bar per
  * set, and real art in every state. Tap an owned card to flip it.
  */
-export function CollectionSheet({ open, onClose, products, h, badge, huntCards = [], handle = "" }: {
+export function CollectionSheet({ open, onClose, products, h, badge, huntCards = [], teaCards, onOpenTea, handle = "" }: {
   open: boolean; onClose: () => void; products: StoreProduct[]; h: MoneyHandlers; badge: boolean;
+  /** v0.10 Tea cards (migration 0035): Lola's write-ups of finished gossip stories; the tab shows once it runs. */
+  teaCards?: TeaCard[];
+  onOpenTea?: (c: TeaCard) => void;
   /** v0.6 hunt cards: earned, free, no net-worth value and not for sale. */
   huntCards?: HuntCard[];
   /** The player's @handle, written on the back of their postcards. */
@@ -185,7 +190,22 @@ export function CollectionSheet({ open, onClose, products, h, badge, huntCards =
             <button role="tab" className="chip" aria-selected={tab === "postcards"} aria-pressed={tab === "postcards"} onClick={() => setTab("postcards")}>💌 Postcards <i>{owned}/{cards.length}</i></button>
             <button role="tab" className="chip" aria-selected={tab === "hunts"} aria-pressed={tab === "hunts"} onClick={() => setTab("hunts")}>🗺️ Hunts <i>{huntCards.length}</i></button>
             <button role="tab" className="chip" aria-selected={tab === "events"} aria-pressed={tab === "events"} onClick={() => setTab("events")}>🎟️ Events <i>{events.length}</i></button>
+            {teaCards && <button role="tab" className="chip" aria-selected={tab === "tea"} aria-pressed={tab === "tea"} onClick={() => setTab("tea")}>🍵 Tea <i>{teaCards.length}</i></button>}
           </div>
+
+          {tab === "tea" && teaCards && (
+            <>
+              <SetProgress title="Spills the Tea" done={Math.min(teaCards.length, CITY_ECONOMY.gossip.badgeAfter)} total={CITY_ECONOMY.gossip.badgeAfter}
+                line={teaCards.length >= CITY_ECONOMY.gossip.badgeAfter ? "☕ Badge earned. Every story you finish adds a card." : `${teaCards.length} of ${CITY_ECONOMY.gossip.badgeAfter} stories · finish ${CITY_ECONOMY.gossip.badgeAfter} for the ☕ badge`} />
+              {teaCards.length ? (
+                <div className="tea-grid">
+                  {teaCards.map((c) => <TeaMini key={c.storyId} c={c} onOpen={() => onOpenTea?.(c)} />)}
+                </div>
+              ) : (
+                <p className="meta" style={{ margin: 0 }}>Collect all five pieces of a gossip story (Phone → Tea) and Lola&apos;s write-up lands here.</p>
+              )}
+            </>
+          )}
 
           {tab === "postcards" && (
             <>

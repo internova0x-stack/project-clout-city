@@ -64,3 +64,13 @@ test("city-clock windows wrap past midnight", () => {
   w.stories[0].pieces[0].hours = [5, 5];
   assert.ok(problems(w).some((p) => /hours/.test(p)));
 });
+
+test("hints say how, what kind of place, where and when, never the place", async () => {
+  const { hintLine, quietLine } = await import("../lib/gossip.ts");
+  const miss = { n: 2, found: false as const, source: "overheard" as const, hours: [21, 3] as [number, number], place: null, kind: "club", area: "Long Island City" };
+  assert.equal(hintLine(miss), "Overheard at a club in Long Island City · 9 PM to 3 AM (city time)");
+  assert.equal(hintLine({ ...miss, source: "regular", hours: null, kind: "games", area: "Astoria" }), "The regular at a gaming arena in Astoria");
+  assert.equal(hintLine({ ...miss, hours: null, place: "two-bros-pizza" }, "Two Bros Who Fight Pizza"), "Overheard at Two Bros Who Fight Pizza");
+  assert.match(quietLine([21, 3], 0), /9 PM to 3 AM/);
+  assert.ok(quietLine(null, 1).length > 10);
+});

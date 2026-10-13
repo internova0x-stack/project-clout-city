@@ -114,3 +114,84 @@ export function answerWords(answerKey: Record<string, unknown> | undefined): str
     .map(([, v]) => (v as string).replace(/[-_]+/g, " ").trim())
     .filter((w) => w.length >= 3);
 }
+
+// ---------------------------------------------------------------------------
+// In the game (migration 0035): what a player sees and can do.
+// ---------------------------------------------------------------------------
+
+/** A piece as a player sees it: in full once found, otherwise a hint. */
+export type GossipPieceView =
+  | { n: number; found: true; text: string; place: string; source: GossipPiece["source"]; via: "overheard" | "regular" | "crew"; shared: boolean }
+  | { n: number; found: false; source: GossipPiece["source"]; hours: [number, number] | null; place: string | null; kind: string | null; area: string | null };
+
+export interface GossipStoryView {
+  id: string;
+  week: string;
+  /** The last day it can be found (New York). */
+  endsOn: string;
+  title: string;
+  topic: GossipTopic;
+  emoji: string;
+  teaser: string;
+  done: boolean;
+  pieces: GossipPieceView[];
+}
+
+export interface TeaCard { storyId: string; week: string; title: string; emoji: string; topic: GossipTopic; headline: string; body: string; earnedAt: string }
+
+export interface GossipState { stories: GossipStoryView[]; cards: TeaCard[] }
+
+/** What Listen in (or a regular) turned up. `later`: more is said here at these city-clock hours. */
+export interface GossipFind {
+  found: { story: string; title: string; piece: number; text: string; count: number }[];
+  later: [number, number] | null;
+  finished: string[];
+}
+
+export type GossipResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+export interface GossipApi {
+  state(): Promise<GossipState | null>;
+  find(placeId: string, via: "overheard" | "regular"): Promise<GossipResult<GossipFind>>;
+  share(storyId: string, piece: number): Promise<GossipResult<number>>;
+}
+
+export const TEA_BADGE = "tea-spiller";
+
+/** The kind of place for a hint, from its first tag: "a café", "a bodega", "a club". */
+const KIND: Record<string, string> = {
+  club: "a club", cafe: "a café", bodega: "a bodega", rooftop: "a rooftop", park: "a park", delivery_hub: "a delivery hub",
+  office: "an office", lounge: "a lounge", boutique: "a boutique", dealership: "a car dealer", university: "a campus",
+  college: "a college", pizza: "a pizza place", diner: "a diner", supermarket: "a supermarket", library: "a library",
+  police: "a police station", firehouse: "a firehouse", chapel: "a chapel", gym: "a gym", subway: "a subway station",
+  cinema: "a cinema", games: "a gaming arena", monument: "a landmark", lotto: "a lotto shop",
+};
+export const kindLine = (kind: string | null) => (kind && KIND[kind]) || "somewhere";
+
+/** "Overheard at a club in Long Island City · 9 PM to 3 AM (city time)". */
+export function hintLine(p: Extract<GossipPieceView, { found: false }>, placeName?: string): string {
+  const where = placeName ?? `${kindLine(p.kind)}${p.area ? ` in ${p.area}` : ""}`;
+  const how = p.source === "regular" ? `The regular at ${where}` : `Overheard at ${where}`;
+  const when = windowLine(p.hours ?? undefined);
+  return when ? `${how} · ${when}` : how;
+}
+
+export const foundCount = (s: GossipStoryView) => s.pieces.filter((p) => p.found).length;
+
+const ERRORS: Record<string, string> = {
+  gossip_not_here: "You have to be there to hear it.",
+  gossip_over: "That story's gone quiet. Old news.",
+  gossip_not_found: "You can only share what you've heard.",
+  gossip_shared: "Already shared with your crew. They know.",
+};
+export function gossipError(message: string | undefined): string {
+  if (message) for (const code of Object.keys(ERRORS)) if (message.includes(code)) return ERRORS[code];
+  return "The grapevine glitched. Try again.";
+}
+
+/** A Listen-in line when nothing new turns up. */
+export function quietLine(later: [number, number] | null, n: number): string {
+  if (later) return `People here talk more ${windowLine(later)?.replace(" (city time)", "")}. Come back then.`;
+  const lines = ["Nothing juicy. Someone's describing a sandwich in great detail.", "Just a man on speakerphone. About his fantasy league.", "All quiet. Suspiciously quiet."];
+  return lines[Math.abs(n) % lines.length];
+}

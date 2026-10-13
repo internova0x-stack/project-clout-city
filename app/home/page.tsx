@@ -14,6 +14,7 @@ import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, play
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
 import { syncGossipWeeks } from "@/lib/gossipImport";
+import { gossipFind, gossipShare, gossipState } from "./gossipActions";
 import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } from "./partyActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
@@ -79,6 +80,8 @@ export default async function HomePage() {
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).
       hunt={city ? { state: huntState, join: huntJoin, talk: huntTalk, answer: huntAnswer } : undefined}
+      // Migration 0035 switches on gossip (gossip_state returns null before it runs).
+      gossip={city ? { state: gossipState, find: gossipFind, share: gossipShare } : undefined}
       // Migration 0013 switches on crew outings.
       crew={city && crew.ok ? { inbox: crewInbox, members: crewMembers, create: crewCreate, respond: crewRespond } : undefined}
       // Migration 0029 switches on party keepsakes (plus-ones, "Spotted at", the gossip setting).

@@ -10,7 +10,7 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
@@ -26,6 +26,8 @@ import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
 import { KitchenSheet, RestSheet } from "./city/Rest";
 import { LottoSheet } from "./city/Lotto";
+import { TeaRevealSheet } from "./city/Gossip";
+import { TEA_BADGE, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
 import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
 import { formatMiles, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
@@ -121,6 +123,7 @@ export function GameShell({
   partyInbox: initialPartyInbox = null,
   cityNews,
   hunt,
+  gossip,
   roomMood = "dream",
 }: {
   player: Player;
@@ -150,6 +153,8 @@ export function GameShell({
   cityNews?: () => Promise<NewsItem[]>;
   /** v0.6 treasure hunts (migration 0018); without it there's no Hunt tab. */
   hunt?: HuntApi;
+  /** v0.10 neighborhood gossip (migration 0035): Listen in, regulars' pieces, the Tea app and Tea cards. */
+  gossip?: GossipApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -275,6 +280,16 @@ export function GameShell({
       resync.current();
     }
   }, [crew, player.id]);
+  // ---- v0.10 neighborhood gossip: null until migration 0035 runs (no Tea app, no Listen in) ----
+  const [teaState, setTeaState] = useState<GossipState | null>(null);
+  const [teaCard, setTeaCard] = useState<{ card: TeaCard; fresh: boolean } | null>(null);
+  const loadTea = useCallback(async () => {
+    if (!gossip) return null;
+    const st = await gossip.state();
+    if (st) setTeaState(st);
+    return st;
+  }, [gossip]);
+  useEffect(() => { void loadTea(); }, [loadTea]);
   // ---- v0.9 party keepsakes: plus-ones sent and received, and "Spotted at" mentions ----
   const [partyIn, setPartyIn] = useState<PartyInbox | null>(initialPartyInbox);
   const [mentions, setMentions] = useState<PartyMention[]>([]);
@@ -564,6 +579,43 @@ export function GameShell({
     setShopCategory(category);
     setPanel("shop");
   };
+  // v0.10 gossip. Finding the fifth piece shows Lola's Tea card and refreshes clout and Mood.
+  const gossipOn = !!(gossip && teaState && travelOn);
+  const afterFind = useCallback(async (f: GossipFind) => {
+    if (!f.found.length) return;
+    const st = await loadTea();
+    if (f.finished.length) {
+      const card = st?.cards.find((c) => c.storyId === f.finished[0]);
+      if (card) setTeaCard({ card, fresh: true });
+      if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r));
+    }
+  }, [loadTea, cityApi, applyCity]);
+  const pieceNote = (x: GossipFind["found"][number]) => `Piece ${x.count} of ${CITY_ECONOMY.gossip.pieces} · ${x.title}`;
+  const listenIn = async (placeId: string) => {
+    if (!gossip) return;
+    setBusy(`listen:${placeId}`);
+    const r = await gossip.find(placeId, "overheard").finally(() => setBusy(null));
+    if (!r.ok) return setToast(r.error);
+    if (!r.data.found.length) return setToast(`👂 ${quietLine(r.data.later, Date.now())}`);
+    const x = r.data.found[0];
+    setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""} · saved to Tea`);
+    await afterFind(r.data);
+  };
+  const hearRegular = async (placeId: string): Promise<{ text: string; note: string } | null> => {
+    if (!gossip) return null;
+    const r = await gossip.find(placeId, "regular");
+    if (!r.ok || !r.data.found.length) return null;
+    void afterFind(r.data);
+    return { text: r.data.found[0].text, note: `🍵 ${pieceNote(r.data.found[0])} · saved to Tea` };
+  };
+  const shareTea = async (storyId: string, piece: number) => {
+    if (!gossip) return;
+    setBusy(`share:${storyId}:${piece}`);
+    const r = await gossip.share(storyId, piece).finally(() => setBusy(null));
+    if (!r.ok) return setToast(r.error);
+    setToast(r.data ? `🍵 Shared with ${r.data} in your crew. Now they know.` : "Shared. Nobody in your crew needed it yet.");
+    void loadTea();
+  };
   const handlers: PlaceHandlers = {
     busy,
     travel: travelOn ? {
@@ -580,6 +632,7 @@ export function GameShell({
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, () => cityApi.buyGroceries!(pl, b)) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
+    gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, () => cityApi.barDrink!(id)) : undefined,
     story: storyOn ? feed : null,
     onAttendStoryEvent: storyApi
@@ -862,10 +915,12 @@ export function GameShell({
               insetBottom={170}
               mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
-              onNpcTap={() => {
+              onNpcTap={() => void (async () => {
                 const { who, role } = npcRole(inside);
-                setToast(`${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
-              }}
+                // v0.10: the regular may tell you a piece of gossip first.
+                const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
+                setToast(tea ? `${who}: “${tea.text}” ${tea.note}` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
+              })()}
             />
           }
         />
@@ -1127,6 +1182,8 @@ export function GameShell({
             h={money}
             badge={!!feed?.badges.some((b) => b.id === "postcard-collector")}
             huntCards={huntState?.cards}
+            teaCards={teaState ? teaState.cards : undefined}
+            onOpenTea={(c) => setTeaCard({ card: c, fresh: false })}
             handle={me.display_name}
           />
           <LookRoom
@@ -1156,6 +1213,7 @@ export function GameShell({
           <BillsSheet open={panel === "bills"} onClose={() => setPanel(null)} state={city} busy={busy} onPay={(id) => void run(`bill:${id}`, () => cityApi.payBill(id))} />
         </>
       )}
+      <TeaRevealSheet card={teaCard?.card ?? null} fresh={!!teaCard?.fresh} finished={teaState?.cards.length ?? 0} onClose={() => setTeaCard(null)} />
       <PhoneModal
         open={phone.open}
         initialApp={phone.app}
@@ -1174,6 +1232,12 @@ export function GameShell({
         } : undefined}
         crew={crew ? { alerts: crewAlerts(crewInbox), onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("crew"); } } : undefined}
         handle={me.display_name}
+        tea={gossipOn && teaState ? {
+          state: teaState, busy: busy !== null,
+          onShare: crew ? (sid, n) => void shareTea(sid, n) : undefined,
+          // The card opens over the game, so the Phone steps aside first.
+          onOpenCard: (c) => { setPhone({ open: false, app: null }); setTeaCard({ card: c, fresh: false }); },
+        } : undefined}
         onOpenCollection={catalog ? () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("collection"); } : undefined}
         onToast={setToast}
         story={storyOn ? feed : null}
@@ -1315,7 +1379,7 @@ export function GameShell({
         rank={myCard?.rank ?? null}
         netWorth={city ? netWorth(city) : me.bank_cash}
         badges={(feed?.badges ?? []).map((b) => {
-          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : null);
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : null);
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
         })}
         collections={{
