@@ -34,7 +34,7 @@ interface Build {
 }
 
 const BUILDS: Record<Look["body"], Build> = {
-  straight: { shoulder: 0.2, chest: 0.168, waist: 0.145, hip: 0.148, thigh: 0.075, calf: 0.052, arm: 0.047, forearm: 0.038 },
+  straight: { shoulder: 0.212, chest: 0.168, waist: 0.145, hip: 0.148, thigh: 0.075, calf: 0.052, arm: 0.047, forearm: 0.038 },
   curvy: { shoulder: 0.165, chest: 0.18, waist: 0.112, hip: 0.188, thigh: 0.086, calf: 0.053, arm: 0.04, forearm: 0.033 },
 };
 
@@ -54,6 +54,8 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const style = getStyle(look.style);
   const outfit = opts.outfit ?? style.outfit;
   const b = BUILDS[look.body];
+  // Presenting as (cosmetic only): "curvy" is Female, "straight" is Male.
+  const fem = look.body === "curvy";
   const geometries: BufferGeometry[] = [];
   const materials: Material[] = [];
 
@@ -104,6 +106,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const skin = mat(look.skin, { roughness: 0.55 });
   const skinShade = mat(shade(look.skin, -0.12), { roughness: 0.55 });
   const lips = mat(shade(new Color(look.skin).lerp(new Color("#B0465A"), 0.45).getStyle(), -0.05), { roughness: 0.45 });
+  const lipsFem = mat(shade(new Color(look.skin).lerp(new Color("#C2384F"), 0.6).getStyle(), -0.02), { roughness: 0.35 });
   const top = mat(outfit.topColor);
   const accent = mat(outfit.topAccent);
   const bottom = mat(outfit.bottomColor);
@@ -217,6 +220,15 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const topStart = outfit.top === "crop" ? 1.19 : outfit.top === "tee" || outfit.top === "hoodie" ? 1.0 : 1.02;
   const shirtMat = outfit.top === "vest" ? accent : top;
   upper.add(lathe(topStart, 1.5, shirtGrow, shirtMat));
+  if (fem) {
+    // A bust under whatever top is on, so Female reads from the front and the side.
+    for (const sx of [-1, 1]) {
+      const r = 0.064 * (shirtGrow > 1.1 ? 1.06 : 1);
+      const bust = mesh(geo(new SphereGeometry(r, 12, 10)), shirtMat, sx * 0.046, 1.262, frontZ(1.262, shirtGrow) - r * 0.78);
+      bust.scale.set(1.1, 0.82, 0.62);
+      upper.add(bust);
+    }
+  }
   switch (outfit.top) {
     case "puffer":
       for (const y of [1.08, 1.2, 1.32]) {
@@ -288,7 +300,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   }
 
   // ---- Neck and head ----
-  upper.add(mesh(geo(new CylinderGeometry(0.052, 0.058, 0.16, 7)), skin, 0, 1.53, 0));
+  upper.add(mesh(geo(new CylinderGeometry(fem ? 0.045 : 0.06, fem ? 0.05 : 0.066, 0.16, 7)), skin, 0, 1.53, 0));
   const head = new Group();
   head.position.set(0, HEAD_Y, 0.005);
   head.scale.setScalar(HEAD_SCALE);
@@ -301,7 +313,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     const y = pos.getY(i);
     if (y < 0) {
       const t = -y / 0.19;
-      const k = 1 - 0.3 * t * t;
+      const k = 1 - (fem ? 0.36 : 0.2) * t * t;
       pos.setX(i, pos.getX(i) * k);
       pos.setZ(i, pos.getZ(i) * (1 - 0.12 * t * t) + 0.02 * t);
     }
@@ -332,20 +344,34 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     eye.add(mesh(geo(new CircleGeometry(0.02, 20)), iris, 0, -0.002, 0.0185));
     eye.add(mesh(geo(new CircleGeometry(0.0095, 16)), pupil, 0, -0.002, 0.0192));
     eye.add(mesh(geo(new CircleGeometry(0.005, 10)), shine, 0.007, 0.006, 0.02));
+    if (fem) {
+      // Lashes: a dark upper lid line that flicks out at the corner.
+      const lash = mesh(geo(new CapsuleGeometry(0.0045, 0.05, 2, 6)), pupil, 0, 0.026, 0.016);
+      lash.rotation.z = Math.PI / 2 - s * 0.18;
+      eye.add(lash);
+      const flick = mesh(geo(new CapsuleGeometry(0.003, 0.014, 2, 4)), pupil, s * 0.034, 0.03, 0.012);
+      flick.rotation.z = -s * 0.9;
+      eye.add(flick);
+    }
     head.add(eye);
     eyes.push(eye);
-    const brow = mesh(geo(new CapsuleGeometry(0.007, 0.042, 2, 6)), mat(shade(look.hairColor, -0.1)), s * 0.066, 0.05, 0.168);
-    brow.rotation.z = Math.PI / 2 + s * 0.12;
+    const brow = mesh(geo(new CapsuleGeometry(fem ? 0.0045 : 0.0095, 0.042, 2, 6)), mat(shade(look.hairColor, -0.1)), s * 0.066, fem ? 0.055 : 0.047, 0.168);
+    brow.rotation.z = Math.PI / 2 + s * (fem ? 0.28 : 0.06);
     brow.rotation.y = s * 0.22;
     head.add(brow);
   }
   const nose = mesh(geo(new SphereGeometry(0.02, 6, 4)), skinShade, 0, -0.045, 0.188);
   nose.scale.set(0.9, 1, 1.05);
   head.add(nose);
-  const mouth = mesh(geo(new TorusGeometry(0.025, 0.008, 5, 8, Math.PI)), lips, 0, -0.088, 0.168);
+  const mouth = mesh(geo(new TorusGeometry(0.025, fem ? 0.011 : 0.008, 5, 8, Math.PI)), fem ? lipsFem : lips, 0, -0.088, 0.168);
   mouth.rotation.z = Math.PI;
-  mouth.scale.set(1, 0.55, 1);
+  mouth.scale.set(1, fem ? 0.7 : 0.55, 1);
   head.add(mouth);
+  if (fem) {
+    const upperLip = mesh(geo(new CapsuleGeometry(0.008, 0.03, 2, 6)), lipsFem, 0, -0.082, 0.17);
+    upperLip.rotation.z = Math.PI / 2;
+    head.add(upperLip);
+  }
 
   // ---- Hair (hidden under full coverings) ----
   const covering = look.covering;

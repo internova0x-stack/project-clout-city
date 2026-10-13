@@ -155,6 +155,14 @@ function LookStep({
 
   const style = getStyle(look.style);
   const set = <K extends keyof Look>(key: K, value: Look[K]) => setLook((l) => ({ ...l, [key]: value }));
+  // Switching presentation also swaps the default hair (short <-> long), so the change is
+  // visible at once; any other hair the player picked stays.
+  const setPresenting = (body: Look["body"]) =>
+    setLook((l) => ({
+      ...l,
+      body,
+      hair: body === "curvy" && (l.hair === "short" || l.hair === "buzz") ? "long" : body === "straight" && l.hair === "long" ? "short" : l.hair,
+    }));
   const localError = touched ? nameError(name) : null;
   const nameMessage = error?.field === "name" ? error.text : localError ?? (taken ? "That username's taken. Somebody got there first." : null);
   const canSubmit = !nameError(name) && !taken && adult && !pending;
@@ -229,7 +237,7 @@ function LookStep({
         <p className="overline" style={{ margin: 0 }}>Presenting as</p>
         <div className="binary" role="group" aria-label="Presenting as">
           {BODIES.map((o) => (
-            <button key={o.id} aria-pressed={look.body === o.id} onClick={() => set("body", o.id)}>{o.label}</button>
+            <button key={o.id} aria-pressed={look.body === o.id} onClick={() => setPresenting(o.id)}>{o.label}</button>
           ))}
         </div>
       </div>
