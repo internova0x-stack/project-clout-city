@@ -46,6 +46,8 @@ import { handle } from "@/lib/validation";
 import { LocateIcon } from "./icons";
 import { InviteSheet } from "./InviteSheet";
 import { CityMap, type MapApi } from "./map/CityMap";
+import { BoroughSheet } from "./map/BoroughSheet";
+import type { BoroughId } from "@/lib/map/boroughs";
 import { Sheet } from "./Sheet";
 import { useCityClock } from "./useCityClock";
 import { usePlayersOnline } from "./usePresence";
@@ -678,7 +680,8 @@ export function GameShell({
     },
     [cityOn],
   );
-  const onLockedTap = useCallback((name: string) => setSoon({ key: "place", title: `${name} is locked` }), []);
+  const [lockedBorough, setLockedBorough] = useState<BoroughId | null>(null);
+  const onLockedTap = useCallback((_name: string, id: BoroughId) => setLockedBorough(id), []);
 
   const datingKey = inbox ? `${inbox.matches.filter((m) => !m.seen).map((m) => m.id).join()}|${inbox.dates.filter((d) => !d.mine && d.status === "pending").map((d) => d.id).join()}` : "";
   const showDating = !!dating && datingAlerts(inbox) > 0 && datingDismissed !== datingKey && flow === "none" && !arranging && tab === "home" && !inside;
@@ -879,6 +882,7 @@ export function GameShell({
       {flow === "pwa" && <PwaPrompt onDone={endHandoff} />}
 
       {/* ---- Panels ---- */}
+      <BoroughSheet id={lockedBorough} onClose={() => setLockedBorough(null)} />
       <TasksSheet
         open={panel === "tasks"}
         onClose={() => setPanel(null)}

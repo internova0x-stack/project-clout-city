@@ -49,6 +49,9 @@ const MAJOR = ["primary", "secondary", "tertiary", "trunk"];
 const width = (z12: number, z15: number, z18: number) =>
   ["interpolate", ["exponential", 1.6], ["zoom"], 12, z12, 15, z15, 18, z18] as unknown as number;
 
+/** The dashed outline on locked boroughs (and the borough sheet's mini-map). */
+export const LOCKED_RED = "#E5283F";
+
 export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollection): StyleSpecification {
   const p = PALETTES[theme];
   const night = theme === "night";
@@ -185,21 +188,17 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
           "line-width": roadWidth([[13, 2], [14, 6.5]], TWO_LANE_M * 1.6),
         },
       },
-      // Locked boroughs: dimmed, with a hazard-striped edge (C19).
+      // Locked boroughs: dimmed under a dashed red outline (v0.7, #7). Hazard stripes are only for closures.
       {
         id: "borough-locked", type: "fill", source: "boroughs",
         filter: ["==", ["get", "locked"], true],
         paint: { "fill-color": p.locked },
       },
       {
-        id: "borough-hazard-yellow", type: "line", source: "boroughs",
+        id: "borough-locked-edge", type: "line", source: "boroughs",
         filter: ["==", ["get", "locked"], true],
-        paint: { "line-color": "#FFC21A", "line-width": 5, "line-opacity": 0.9 },
-      },
-      {
-        id: "borough-hazard-black", type: "line", source: "boroughs",
-        filter: ["==", ["get", "locked"], true],
-        paint: { "line-color": "#14111A", "line-width": 5, "line-dasharray": [1, 1], "line-opacity": 0.9 },
+        layout: { "line-join": "round" },
+        paint: { "line-color": LOCKED_RED, "line-width": 2.5, "line-dasharray": [3, 2], "line-opacity": 0.95 },
       },
       {
         id: "queens-edge", type: "line", source: "boroughs",
