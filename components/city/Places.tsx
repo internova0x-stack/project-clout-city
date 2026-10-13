@@ -21,7 +21,7 @@ import type { StoreProduct } from "@/lib/store";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = {
-  food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home", monument: "Monument", shopping: "Shopping",
+  food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home", monument: "Monument", shopping: "Shopping", campus: "University",
 };
 
 export interface PlaceHandlers {
@@ -102,7 +102,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
         return (
           <div key={ev.id} className="action-row">
             <div style={{ minWidth: 0, flex: 1 }}>
-              <span className="tag tag-event" style={{ marginBottom: 4 }}>🍸 Club event{open ? " · Happening now" : ""}</span>
+              <span className="tag tag-event" style={{ marginBottom: 4 }}>{place.category === "campus" ? "🎓 Campus event" : "🍸 Club event"}{open ? " · Happening now" : ""}</span>
               <span className="title" style={{ display: "block" }}>{ev.name}</span>
               {!compact && <span className="subtext" style={{ display: "block" }}>{ev.blurb}</span>}
               <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} />

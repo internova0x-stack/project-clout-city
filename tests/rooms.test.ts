@@ -24,7 +24,7 @@ test("every usable item can be walked to from the door", () => {
 });
 
 test("room hotspots point at real place actions", () => {
-  const byTemplate = { club: "velvet-static", cafe: "grind-and-gossip", counter: "lucky-seven-deli", lounge: "low-light-lounge", store: "thread-count" } as const;
+  const byTemplate = { club: "velvet-static", cafe: "grind-and-gossip", counter: "lucky-seven-deli", lounge: "low-light-lounge", store: "thread-count", campus: "st-johnsons" } as const;
   for (const [tpl, placeId] of Object.entries(byTemplate)) {
     const place = PLACES.find((p) => p.id === placeId)!;
     for (const i of PLACE_TEMPLATES[tpl as keyof typeof byTemplate].items) {

@@ -33,8 +33,8 @@ The 34 locations in Clarifications section 4 remain the P1 target, but they arri
 | --- | --- | --- | --- |
 | 1 | v0.3 | **Full:** apartment (the three starter homes share it), club, café (medium dining and the barista job), bodega (budget dining). **Scene cards:** rooftop restaurant (luxury dining), Flushing Meadows Corona Park, delivery-rider hub, office tower (gigs board) | 4: apartment, club, diner or café, counter shop |
 | 2 | v0.4 | Sarah Bird's story places as scene cards: Skyline Pier Residences, Hunter's Pier, Rockaway Diner, Radiant Harbor Church, Pressed Iron Gym | None |
-| 3 | v0.5 | Two monuments (for postcards), a lounge, the fashion boutique, the car dealership | Fine dining (for the lounge), store |
-| 4 | v1.0 or after launch | The other two monuments, the parody universities, civic places, the remaining parks and food spots, the retail store, map-flavor labels | Office, campus |
+| 3 | v0.5 | Two monuments (for postcards), a lounge, the fashion boutique, the car dealership, and the two parody universities (St. Johnsons University and Queensborough University, brought forward from wave 4 on Oct 13, 2026) | Fine dining (for the lounge), store, campus |
+| 4 | v1.0 or after launch | The other two monuments, civic places, the remaining parks and food spots, the retail store, map-flavor labels | Office |
 
 **Rollout rules**
 

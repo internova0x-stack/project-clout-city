@@ -591,6 +591,67 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    case "st-johnsons": {
+      // Red brick hall with a white chapel cupola, stone steps and a lawn.
+      const lawn: BoxSpec = { ...isle, color: night ? "#5E8F6A" : "#BFE3B4" };
+      const hall: BoxSpec = { x: -5, y: -4.5, z: 0, w: 8, d: 5.5, h: 4.6, color: mixHex(a, "#8A3A2E", 0.35) };
+      const trim: BoxSpec = { x: -5.2, y: -4.7, z: 4.6, w: 8.4, d: 5.9, h: 0.35, color: "#F2E6D8" };
+      const drum: BoxSpec = { x: -2.1, y: -2.8, z: 4.95, w: 2.2, d: 2.2, h: 1.6, color: "#F4EEE4" };
+      const steps: BoxSpec = { x: -2.6, y: 1, z: 0, w: 3.2, d: 1.2, h: 0.45, color: "#E8E2D6" };
+      const [sx, sy] = iso(-1, -1.7, 6.55);
+      return (
+        <>
+          <Box b={lawn} night={night} />
+          <Box b={hall} night={night}>
+            {[0, 1, 2, 3].map((i) => <OnLeft key={`a${i}`} b={hall} u={0.6 + i * 1.9} v={2.4} uw={1} vh={1.3} fill={night ? lit : "#F4EEE4"} opacity={0.95} />)}
+            {[0, 3].map((i) => <OnLeft key={`b${i}`} b={hall} u={0.6 + i * 1.9} v={0.5} uw={1} vh={1.3} fill={night ? lit : "#F4EEE4"} opacity={0.95} />)}
+            <OnLeft b={hall} u={2.75} v={0} uw={1.9} vh={2.1} fill={mixHex(c, "#000", 0.1)} />
+            {windowsRight(hall, 2, 3, lit, mixHex(a, "#2A2530", 0.55), night)}
+          </Box>
+          <Box b={trim} night={night} />
+          <Box b={drum} night={night}>
+            {[0, 1].map((i) => <OnLeft key={i} b={drum} u={0.35 + i * 0.95} v={0.35} uw={0.5} vh={0.9} fill={night ? lit : mixHex(c, "#9FB6D8", 0.4)} />)}
+          </Box>
+          <polygon points={`${sx - 13},${sy + 4} ${sx},${sy - 22} ${sx + 13},${sy + 4}`} fill={night ? "#C9D2E8" : "#5C7A96"} />
+          <line x1={sx} y1={sy - 22} x2={sx} y2={sy - 31} stroke={night ? "#FFE2A8" : "#F2B705"} strokeWidth={1.6} />
+          <Box b={steps} night={night} />
+          <Tree x={-5.2} y={3.8} night={night} />
+          <Tree x={4.6} y={-4.8} night={night} size={0.9} />
+          <Tree x={4.8} y={3.6} night={night} size={0.8} />
+          <Lantern x={1.6} y={3} night={night} />
+        </>
+      );
+    }
+    case "queensborough-u": {
+      // A columned library hall on a quad, with a path and lamp posts.
+      const quad: BoxSpec = { ...isle, color: night ? "#5E8F6A" : "#C6E8BC" };
+      const plinth: BoxSpec = { x: -5, y: -4.8, z: 0, w: 8.2, d: 5, h: 0.7, color: "#E8E2D6" };
+      const hall: BoxSpec = { x: -4.6, y: -4.6, z: 0.7, w: 7.4, d: 3.4, h: 3.8, color: mixHex(b, "#F4EEE4", 0.4) };
+      const roof: BoxSpec = { x: -4.9, y: -4.9, z: 4.5, w: 8, d: 4, h: 0.5, color: "#F4EEE4" };
+      const path: BoxSpec = { x: -1.6, y: 0.2, z: 0, w: 1.8, d: 5.8, h: 0.06, color: night ? "#B8A8D8" : "#EADFCC" };
+      const [p0, p1] = [iso(-4.9, -0.9, 5), iso(3.1, -0.9, 5)];
+      const peak = iso(-0.9, -0.9, 7);
+      return (
+        <>
+          <Box b={quad} night={night} />
+          <Box b={path} night={night} />
+          <Box b={plinth} night={night} />
+          <Box b={hall} night={night}>
+            {[0, 1, 2].map((i) => <OnLeft key={i} b={hall} u={1.2 + i * 2.1} v={0.6} uw={1} vh={2.2} fill={night ? lit : mixHex(a, "#2A2530", 0.45)} opacity={0.9} />)}
+          </Box>
+          {[-4.3, -2.6, -0.9, 0.8, 2.5].map((x) => <Box key={x} b={{ x, y: -0.9, z: 0.7, w: 0.5, d: 0.5, h: 3.8, color: "#FBF7F0" }} night={night} />)}
+          <Box b={roof} night={night} />
+          <polygon points={`${p0[0]},${p0[1]} ${peak[0]},${peak[1]} ${p1[0]},${p1[1]}`} fill={night ? "#D8D0E8" : "#FBF7F0"} />
+          <polygon points={`${p0[0] + 12},${p0[1] - 1} ${peak[0]},${peak[1] + 6} ${p1[0] - 12},${p1[1] - 1}`} fill={mixHex(a, "#FFFFFF", 0.35)} opacity={0.6} />
+          <SignLeft b={plinth} text="Queensborough" color={a} ink="#FFFFFF" v={-0.45} night={night} />
+          <Tree x={-5.4} y={2.6} night={night} />
+          <Tree x={3.6} y={4.2} night={night} size={0.9} />
+          <Tree x={4.8} y={-0.4} night={night} size={0.8} />
+          <Lantern x={-2.4} y={4.4} night={night} />
+          <Lantern x={0.8} y={4.4} night={night} />
+        </>
+      );
+    }
     case "skybridge-tower":
     default: {
       const t1: BoxSpec = { x: -5.5, y: -4, z: 0, w: 4.2, d: 5, h: 8.5, color: mixHex(a, "#C9D2E8", 0.5) };

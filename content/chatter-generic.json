@@ -20,5 +20,12 @@
   "clerk": [
     "The cat says hi. The cat does not actually say hi.",
     "Chopped cheese is on the grill. It's always on the grill."
+  ],
+  "professor": [
+    "Office hours are Tuesdays. Nobody has ever come. I bring snacks anyway.",
+    "This will be on the exam. Everything is on the exam. Life is the exam.",
+    "Please stop filming the lecture for your story. Or at least tag the department.",
+    "Your phone is not a calculator. Well, it is. But not in my class.",
+    "Fun fact: the library has books. Real ones. You can touch them."
   ]
 }

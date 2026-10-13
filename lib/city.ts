@@ -39,7 +39,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "campus";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -68,7 +68,7 @@ export interface Place {
   id: string;
   name: string;
   emoji: string;
-  category: "food" | "nightlife" | "parks" | "places" | "home" | "monument" | "shopping";
+  category: "food" | "nightlife" | "parks" | "places" | "home" | "monument" | "shopping" | "campus";
   neighborhood: string;
   at: LatLng;
   depth: PlaceDepth;
@@ -246,6 +246,25 @@ export const PLACES: Place[] = [
       { id: "browse", kind: "visit", label: "Take a test drive around the block", energy: 5, mood: 5, confidence: 3, blurb: "Windows down, music up, salesman sweating in the passenger seat." },
     ],
   },
+  // ---- The parody universities (brought forward from location wave 4): invented campuses, no real names ----
+  {
+    id: "st-johnsons", name: "St. Johnsons University", emoji: "🎓", category: "campus", neighborhood: "Jamaica",
+    at: [40.7224, -73.7949], depth: "full", template: "campus", palette: ["#C8102E", "#F2E6D8", "#1F2A44"],
+    tags: ["university", "campus"],
+    lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the student body is here on a scholarship; the other half is here on a parking permit.",
+    actions: [
+      { id: "lecture", kind: "visit", label: "Sit in on a lecture", energy: 15, confidence: 6, clout: 15, blurb: "Intro to Marketing. You take notes on the professor's outfit." },
+    ],
+  },
+  {
+    id: "queensborough-u", name: "Queensborough University", emoji: "🏛️", category: "campus", neighborhood: "Flushing",
+    at: [40.7366, -73.8170], depth: "full", template: "campus", palette: ["#3B6FB6", "#E8E2D0", "#2A2530"],
+    tags: ["university", "campus"],
+    lore: "A leafy quad, a library open until 2 AM and forty languages overheard on the walk to class. Tuition is reasonable, which here counts as a personality.",
+    actions: [
+      { id: "lecture", kind: "visit", label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
+    ],
+  },
 ];
 
 export const HOME_PLACE_ID = "home";
@@ -277,6 +296,9 @@ export interface ClubEvent {
 export const CLUB_EVENTS: ClubEvent[] = [
   { id: "neon-nights", name: "Neon Nights", placeId: "velvet-static", startHour: 22, hours: 5, entry: 80, clout: 60, confidence: 8, mood: 6, blurb: "Glow sticks, bad decisions, excellent lighting." },
   { id: "golden-hour", name: "Golden Hour Day Party", placeId: "velvet-static", startHour: 15, hours: 4, entry: 50, clout: 40, confidence: 6, mood: 8, blurb: "A day party for people who can't commit to a night." },
+  // Campus events at the two universities.
+  { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 15, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },
+  { id: "quad-open-mic", name: "Open Mic on the Quad", placeId: "queensborough-u", startHour: 19, hours: 3, entry: 10, clout: 30, confidence: 8, mood: 6, blurb: "Slam poetry, one ukulele and a guy who only does impressions of his roommate." },
 ];
 
 // ---------------------------------------------------------------------------

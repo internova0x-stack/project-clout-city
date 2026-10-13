@@ -65,6 +65,7 @@ function npcRole(p: Place): { who: string; role: string } {
   if (p.template === "club") return { who: "The bartender", role: "bartender" };
   if (p.template === "cafe") return { who: "The barista", role: "barista" };
   if (p.template === "counter") return { who: "The clerk", role: "clerk" };
+  if (p.template === "campus") return { who: "A professor", role: "professor" };
   if (p.category === "home" || p.tags.includes("luxury")) return { who: "The doorman", role: "doorman" };
   return { who: "Your driver", role: "driver" };
 }
@@ -431,6 +432,7 @@ export function GameShell({
     const live = events.find((e) => eventOpen(e, minutes) && !city?.attendedToday.includes(e.id));
     if (live) return handlers.onAttendEvent(live.id);
     const next = events.filter((e) => !eventOpen(e, minutes)).sort((a, b) => realMinutesUntilOpen(a, minutes) - realMinutesUntilOpen(b, minutes))[0];
+    if (p.category === "campus") return setToast(next ? `Nothing on yet. ${next.name} starts in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went today. The board says \"See you next semester.\"");
     setToast(next ? `Dancing solo. ${next.name} opens in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went tonight. Dancing anyway.");
   };
   const clearGain = useCallback(() => { setGain(null); setToast(null); }, []);

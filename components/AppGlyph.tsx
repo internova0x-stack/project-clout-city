@@ -6,7 +6,7 @@ export type GlyphName =
   | "news" | "chat" | "cash" | "briefcase" | "gear"
   | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
   | "wave" | "church" | "dumbbell" | "condo" | "diner"
-  | "globe" | "gantry" | "tumbler" | "hanger" | "car";
+  | "globe" | "gantry" | "tumbler" | "hanger" | "car" | "cap" | "columns";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -33,6 +33,8 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   tumbler: ["#E8B27A", "#7A2E3A"],
   hanger: ["#FF9AC8", "#B5246A"],
   car: ["#FF8A7A", "#B4232F"],
+  cap: ["#FF8A8A", "#9E1B32"],
+  columns: ["#9CC0F0", "#2F5DA8"],
 };
 
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
@@ -55,10 +57,12 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "low-light-lounge": "tumbler",
   "thread-count": "hanger",
   "boulevard-motors": "car",
+  "st-johnsons": "cap",
+  "queensborough-u": "columns",
   home: "house",
 };
 const CATEGORY_GLYPHS: Record<string, GlyphName> = {
-  food: "cutlery", nightlife: "cocktail", parks: "tree", places: "tower", home: "house", monument: "globe", shopping: "hanger",
+  food: "cutlery", nightlife: "cocktail", parks: "tree", places: "tower", home: "house", monument: "globe", shopping: "hanger", campus: "columns",
 };
 
 export function glyphFor(place: { id: string; category: string }): GlyphName {
@@ -76,6 +80,25 @@ export function Glyph({ name, size = 24 }: { name: GlyphName; size?: number }) {
 }
 
 const PATHS: Record<GlyphName, React.ReactNode> = {
+  // A graduation cap: the board, the crown and the tassel.
+  cap: (
+    <>
+      <path d="M7 12.5v3.6c0 1.6 2.3 3 5 3s5-1.4 5-3v-3.6l-5 2.3z" fill={SOFT} />
+      <path d="M12 4.5 22 9l-10 4.6L2 9z" fill="#fff" />
+      <path d="M19.2 10.3v5.2" stroke="#fff" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="19.2" cy="16.3" r="1.3" fill="#fff" />
+    </>
+  ),
+  // A columned hall: pediment, four columns and the steps.
+  columns: (
+    <>
+      <path d="M12 3.5 21 8H3z" fill="#fff" />
+      <rect x="3.5" y="8.6" width="17" height="1.6" rx=".5" fill={SOFT} />
+      {[5.2, 9.2, 13.2, 17.2].map((x) => <rect key={x} x={x} y="10.6" width="1.6" height="6.6" rx=".6" fill="#fff" />)}
+      <rect x="3" y="17.6" width="18" height="1.6" rx=".5" fill={SOFT} />
+      <rect x="2" y="19.4" width="20" height="1.6" rx=".5" fill="#fff" />
+    </>
+  ),
   news: (
     <>
       <rect x="3" y="4.5" width="15" height="15" rx="2.5" fill="#fff" />

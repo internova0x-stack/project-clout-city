@@ -322,6 +322,40 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(0.4, 0.2, 0.3, "#F4EDE6", -0.5, 1.04, 0);
       return { group: g };
     }
+    case "lectureDesk": {
+      // A bench and a writing surface for two, with notebooks; faces +z (the board is behind at rot 2).
+      box(w, 0.05, 0.45, WOOD, 0, 0.72, 0.15);
+      box(w - 0.1, 0.7, 0.04, WOOD_DARK, 0, 0, 0.36);
+      box(w, 0.05, 0.3, WOOD, 0, 0.44, -0.22);
+      for (const sx of [-1, 1]) {
+        box(0.05, 0.72, 0.05, METAL, sx * (w / 2 - 0.08), 0, 0.15);
+        box(0.05, 0.44, 0.05, METAL, sx * (w / 2 - 0.08), 0, -0.22);
+      }
+      box(0.3, 0.02, 0.22, "#F4F1EA", -0.4, 0.77, 0.15);
+      box(0.24, 0.02, 0.32, color ?? "#2F5DA8", 0.35, 0.77, 0.12);
+      return { group: g, seatY: 0.46 };
+    }
+    case "lectern": {
+      box(w, 0.06, d, WOOD_DARK);
+      box(w - 0.2, 1.0, d - 0.2, WOOD, 0, 0.06, 0);
+      const top = box(w, 0.06, d, WOOD_DARK, 0, 1.06, 0);
+      top.rotation.x = 0.25;
+      cyl(0.015, 0.015, 0.3, METAL, 0.18, 1.1, -0.1, 5);
+      return { group: g };
+    }
+    case "chalkboard": {
+      box(w, 1.4, 0.06, "#7A5A3A", 0, 0.8, 0);
+      box(w - 0.16, 1.24, 0.03, k.mat("#2F4A3A", { roughness: 0.95 }), 0, 0.88, 0.03);
+      box(w, 0.06, 0.16, "#7A5A3A", 0, 0.78, 0.06);
+      // chalk scribbles: a formula, a diagram and an underlined word
+      box(1.0, 0.03, 0.01, "#F4F1EA", -0.8, 1.8, 0.05);
+      box(0.7, 0.03, 0.01, "#F4F1EA", -0.95, 1.6, 0.05);
+      box(0.9, 0.03, 0.01, "#F4F1EA", -0.85, 1.4, 0.05);
+      box(0.5, 0.5, 0.01, k.mat("#F4F1EA", { opacity: 0.35 }), 0.6, 1.25, 0.05);
+      box(0.6, 0.03, 0.01, "#F2B705", 0.9, 1.85, 0.05);
+      for (const sx of [-1, 1]) box(0.08, 0.8, 0.08, "#7A5A3A", sx * (w / 2 - 0.2), 0, 0);
+      return { group: g };
+    }
     case "cat": {
       const fur = "#E8A44A";
       const bodyM = new Mesh(k.geo(new SphereGeometry(0.13, 7, 5)), k.mat(fur));

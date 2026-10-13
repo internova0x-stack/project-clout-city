@@ -106,6 +106,10 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    +10 Mood and +25 clout, once a day. Blocking someone cancels crushes and dates between you.
    The limits and the bonus live in `game_settings` row `dating`.
 
+10. Run `supabase/migrations/0012_universities.sql`. It adds the two parody universities,
+   St. Johnsons University (Jamaica) and Queensborough University (Flushing): a free lecture
+   (Energy for Confidence and 15 clout, once a day) and a campus event at each.
+
 **Adding a party** (an exclusive event) in the SQL Editor; times are New York time:
 
 ```sql

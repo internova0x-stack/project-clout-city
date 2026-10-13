@@ -16,7 +16,9 @@ export type FurnitureKind =
   // café
   | "cafeCounter" | "cafeTable" | "pastryCase"
   // deli
-  | "deliCounter" | "shelf" | "drinksFridge" | "cat";
+  | "deliCounter" | "shelf" | "drinksFridge" | "cat"
+  // lecture hall
+  | "lectureDesk" | "lectern" | "chalkboard";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -94,6 +96,9 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   mirror: { w: 0.9, d: 0.3, label: "Mirror" },
   displayTable: { w: 1.2, d: 0.8, label: "Display" },
   storeCounter: { w: 2.0, d: 0.7, label: "Counter" },
+  lectureDesk: { w: 1.6, d: 0.8, label: "Desk" },
+  lectern: { w: 0.7, d: 0.6, label: "Lectern" },
+  chalkboard: { w: 3.2, d: 0.3, label: "Chalkboard" },
 };
 
 // ---------------------------------------------------------------------------
@@ -146,7 +151,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store", RoomTemplate> = {
+export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus", RoomTemplate> = {
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -230,6 +235,29 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "s
     ],
     spawn: [-0.8, 2.3],
     npcs: [{ x: 2.2, z: 2.6, facing: 3.14 }, { x: 1.2, z: -1.6, facing: 3.14 }],
+  },
+  // The parody universities: a lecture hall with rows of desks facing the board.
+  campus: {
+    id: "campus", w: 8.0, d: 7.0, wall: "#EDE4D3", wallAccent: "#7A5A3A", floor: "#B08A5E", floorKind: "wood", window: true,
+    items: [
+      { id: "board", kind: "chalkboard", x: -0.4, z: -3.3, rot: 0, use: { kind: "events" }, label: "Campus events" },
+      { id: "lectern", kind: "lectern", x: 2.0, z: -2.3, rot: 0 },
+      { id: "desk-1", kind: "lectureDesk", x: -2.5, z: -0.6, rot: 2, use: { kind: "action", actionId: "lecture" }, label: "Take notes" },
+      { id: "desk-2", kind: "lectureDesk", x: 0.0, z: -0.6, rot: 2 },
+      { id: "desk-3", kind: "lectureDesk", x: 2.5, z: -0.6, rot: 2 },
+      { id: "desk-4", kind: "lectureDesk", x: -2.5, z: 0.9, rot: 2 },
+      { id: "desk-5", kind: "lectureDesk", x: 0.0, z: 0.9, rot: 2, use: { kind: "action", actionId: "lecture" }, label: "Take notes" },
+      { id: "desk-6", kind: "lectureDesk", x: 2.5, z: 0.9, rot: 2 },
+      { id: "shelf-1", kind: "bookshelf", x: -3.75, z: 2.4, rot: 1 },
+      { id: "plant-1", kind: "plant", x: 3.6, z: -3.1, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 3.6, z: 3.1, rot: 0 },
+    ],
+    spawn: [0.6, 2.8],
+    npcs: [
+      { x: 2.0, z: -2.85, facing: 0 },
+      { x: 0.3, z: -0.3, facing: 3.14, seated: true }, { x: 2.2, z: -0.3, facing: 3.14, seated: true },
+      { x: -2.2, z: 1.2, facing: 3.14, seated: true }, { x: 2.8, z: 1.2, facing: 3.14, seated: true },
+    ],
   },
 };
 
