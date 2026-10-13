@@ -49,7 +49,7 @@ test("the phone bill agrees between v0.2 and v0.3 settings", () => {
   assert.equal(CITY_ECONOMY.bills.phone, ECONOMY.phoneBill);
 });
 
-import { actionAvailability, billStatusLine, netWorth } from "../lib/cityState.ts";
+import { actionAvailability, billStatusLine, netWorth, upcomingBills } from "../lib/cityState.ts";
 import { createSimApi, sampleCityState } from "../lib/citySim.ts";
 
 test("availability explains why an action is off", () => {
@@ -111,4 +111,15 @@ test("collector pieces: real cash only, never sold, valued at 1.5x the priciest 
 test("every monument has a postcard and every shopping place opens a Shop category", () => {
   for (const p of PLACES.filter((x) => x.category === "monument")) assert.ok(p.postcard, p.id);
   for (const p of PLACES.filter((x) => x.category === "shopping")) assert.ok(p.opensShop, p.id);
+});
+
+test("upcoming bills show each amount and date, including the phone bill (#22)", () => {
+  const s = sampleCityState({ home_id: "astoria_studio", next_rent_due: "2026-10-20", next_phone_due: "2026-10-16", car_sku: "car-hatchback", car_mode: "rented", next_car_due: "2026-10-18" });
+  assert.deepEqual(upcomingBills(s), [
+    { kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: "2026-10-16" },
+    { kind: "car_rental", amount: 350, due_date: "2026-10-18" },
+    { kind: "rent", amount: 2100, due_date: "2026-10-20" },
+  ]);
+  const owner = sampleCityState({ house_sku: "house-x", next_phone_due: "2026-10-16", car_sku: "car-hatchback", car_mode: "owned", next_car_due: "2026-10-30" });
+  assert.deepEqual(upcomingBills(owner).map((b) => [b.kind, b.amount]), [["phone", 85], ["car_insurance", 280]]);
 });
