@@ -8,6 +8,7 @@ import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, travelQuote } from "./travel.ts";
 import { activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { isLottoPlace, lottoGame, prizeFor } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 
@@ -46,6 +47,10 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     homeLayout: null,
     restToday: { nap: 0, sit: 0 },
     actionsToday: ["flushing-meadows:hangout"],
+    lotto: {
+      freeUsed: 0, freeToday: 2, bought: 0, beginnerUntil: new Date(Date.now() + 4 * 86_400_000).toISOString(),
+      week: { start: addDays(today, -1), pool: 7340, entries: 9 }, unscratched: [],
+    },
   };
 }
 
@@ -65,6 +70,8 @@ export type SimApi = CityApi & {
   grantCollector(sku: string): void;
   grantTicket(clout: number): void;
   partyEvent(ev: ExclusiveEvent): Promise<CityResult>;
+  /** Previews only (?lotto=win|big|lose): the next cards' prizes, as multiples of the card. */
+  lottoNext(times: number[]): void;
 };
 
 /** `story` returns the preview's current story feed, so prices, closures and unlocks follow the World State. */
@@ -86,8 +93,48 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     return paid;
   };
 
+  // Lucky Star in memory. The real draw is the server's (migration 0032); here it's Math.random,
+  // or the preview's queued results.
+  const lottoCards = new Map<number, { game: string; prize: number }>();
+  let lottoQueue: number[] = [];
+
   return {
     refresh: () => ok(),
+    lottoNext(times) { lottoQueue = [...times]; },
+    buyLottoCard(placeId, gameId, free) {
+      const place = PLACES.find((x) => x.id === placeId);
+      const game = lottoGame(gameId);
+      const l = s.lotto;
+      if (!place || !isLottoPlace(place.tags) || !l) return fail("That isn't something you can do here.");
+      if (!game) return fail("Benny's never heard of that one.");
+      if ((p().at_place ?? null) !== placeId) return fail("You're not at Lucky Star. The cards don't travel.");
+      if (free) {
+        if (gameId !== CITY_ECONOMY.lotto.freeGame) return fail("The free card is the Corner Store Classic.");
+        if (l.freeUsed >= l.freeToday) return fail("Free cards are used up today. New ones at midnight.");
+        l.freeUsed += 1;
+      } else {
+        if (l.bought >= CITY_ECONOMY.lotto.buyPerDay) return fail(`That's ${CITY_ECONOMY.lotto.buyPerDay} cards today. Benny cuts everyone off. New cards at midnight.`);
+        if (p().bank_cash < game.price) return fail("Not enough cash for this card.");
+        l.bought += 1;
+        p().bank_cash -= game.price;
+        l.week.pool = Math.floor(l.week.pool + game.price * CITY_ECONOMY.lotto.jackpot.cut);
+      }
+      l.week.entries += 1;
+      const queued = lottoQueue.shift();
+      const prize = queued !== undefined ? queued * game.price : prizeFor(game.price, Math.floor(Math.random() * 100_000));
+      const id = nextId++;
+      lottoCards.set(id, { game: gameId, prize });
+      l.unscratched.push({ id, game: gameId });
+      return Promise.resolve({ ok: true, state: structuredClone(s), card: { id, game: gameId } });
+    },
+    scratchLottoCard(cardId) {
+      const c = lottoCards.get(cardId);
+      if (!c || !s.lotto) return fail("That card isn't yours to scratch.");
+      lottoCards.delete(cardId);
+      s.lotto.unscratched = s.lotto.unscratched.filter((x) => x.id !== cardId);
+      p().bank_cash += c.prize;
+      return Promise.resolve({ ok: true, state: structuredClone(s), card: { id: cardId, game: c.game, prize: c.prize } });
+    },
     travel(placeId, mode) {
       const dest = placeId === "home" ? null : placeId;
       if ((p().at_place ?? null) === dest) return ok();

@@ -6,6 +6,7 @@
 
 import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
 import { ECONOMY } from "./economy.ts";
+import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
 
 export interface CityPlayer {
   id: string;
@@ -94,6 +95,8 @@ export interface CityState {
   npcLines?: Record<string, string[]>;
   /** v0.8 rest at home (migration 0026): naps and sits used today. Missing until 0026 runs. */
   restToday?: { nap: number; sit: number };
+  /** v0.10 Lucky Star Lotto (migration 0032): today's cards and the week's jackpot. Missing until 0032 runs. */
+  lotto?: LottoState;
 }
 
 /** What changed after an action, for the reward toast. */
@@ -106,7 +109,7 @@ export interface Gain {
   taskCash?: number;
 }
 
-export type CityResult = { ok: true; state: CityState; gain?: Gain } | { ok: false; error: string };
+export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard } | { ok: false; error: string };
 
 /** Everything the city screens can ask the server to do. */
 export interface CityApi {
@@ -130,6 +133,10 @@ export interface CityApi {
   buyGroceries?(placeId: string, bundleId: string): Promise<CityResult>;
   /** v0.8 cook a meal at home from the fridge. */
   cook?(): Promise<CityResult>;
+  /** v0.10 Lucky Star Lotto (migration 0032): buy a card (the server draws its prize), then scratch it
+      (the server reveals and pays it). The answer's `card` carries the id, then the prize. */
+  buyLottoCard?(placeId: string, gameId: string, free: boolean): Promise<CityResult>;
+  scratchLottoCard?(cardId: number): Promise<CityResult>;
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
@@ -183,6 +190,8 @@ export function cityError(message: string | undefined): string {
   // Story closures carry their reason (World State): "place_closed: Crime scene. Pier closed."
   const story = message?.match(/place_(?:closed|restricted): (.+)/);
   if (story) return story[1].trim();
+  const lotto = lottoError(message);
+  if (lotto) return lotto;
   if (message) for (const code of Object.keys(ERRORS)) if (message.includes(code)) return ERRORS[code];
   return "The city glitched. Try again.";
 }

@@ -2,15 +2,17 @@
 
 import { cityError, type CityResult, type Gain } from "@/lib/cityState";
 import { loadCityState } from "@/lib/cityServer";
+import type { LottoCard } from "@/lib/lotto";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind every city screen. Each calls one security-definer SQL
 // function (which checks and applies the rules), then returns the fresh state.
 
-async function run(fn: string, args: Record<string, unknown>, toGain?: (data: unknown) => Gain | undefined): Promise<CityResult> {
+async function run(fn: string, args: Record<string, unknown>, toGain?: (data: unknown) => Gain | undefined, toCard?: (data: unknown) => LottoCard): Promise<CityResult> {
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   let gain: Gain | undefined;
+  let card: LottoCard | undefined;
   if (fn) {
     const { data, error } = await supabase.rpc(fn, args);
     if (error) {
@@ -18,10 +20,11 @@ async function run(fn: string, args: Record<string, unknown>, toGain?: (data: un
       return { ok: false, error: cityError(error.message) };
     }
     gain = toGain?.(data);
+    card = toCard?.(data);
   }
   const state = await loadCityState(supabase);
   if (!state) return { ok: false, error: "The city isn't open on this server yet." };
-  return { ok: true, state, gain };
+  return { ok: true, state, gain, card };
 }
 
 const asGain = (d: unknown) => d as Gain;
@@ -79,6 +82,18 @@ export async function buyGroceries(placeId: string, bundleId: string) {
 }
 export async function cook() {
   return run("cook", {}, (d) => ({ energy: (d as { energy?: number }).energy ?? 0 }));
+}
+// v0.10 Lucky Star Lotto (migration 0032). The browser names a game; the server sets the price,
+// checks the limits, draws the prize and, when the card is scratched, reveals and pays it.
+const asCard = (d: unknown) => {
+  const r = d as { id: number; game: string; prize?: number };
+  return { id: Number(r.id), game: r.game, prize: r.prize };
+};
+export async function buyLottoCard(placeId: string, gameId: string, free: boolean) {
+  return run("buy_lotto_card", { p_place: placeId, p_game: gameId, p_free: free }, undefined, asCard);
+}
+export async function scratchLottoCard(cardId: number) {
+  return run("scratch_lotto_card", { p_card: cardId }, undefined, asCard);
 }
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });

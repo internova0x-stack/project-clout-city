@@ -25,6 +25,8 @@ import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
 import { KitchenSheet, RestSheet } from "./city/Rest";
+import { LottoSheet } from "./city/Lotto";
+import type { LottoCard } from "@/lib/lotto";
 import { formatMiles, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
@@ -333,6 +335,9 @@ export function GameShell({
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);
   const [kitchenOpen, setKitchenOpen] = useState(false);
+  // v0.10 Lucky Star Lotto (migration 0032): lotto state is missing until it runs.
+  const lottoOn = !!(travelOn && city?.lotto && cityApi?.buyLottoCard && cityApi.scratchLottoCard);
+  const [lottoAt, setLottoAt] = useState<string | null>(null);
   // The nearest supermarket, for "Go shopping" from an empty fridge.
   const grocer = useMemo(() => PLACES.filter((p) => isSupermarket(p.tags)).sort((a, b) => milesBetween(myPos, a.at) - milesBetween(myPos, b.at))[0], [myPos]);
   const cityOn = !!(city && cityApi);
@@ -373,6 +378,21 @@ export function GameShell({
     },
     [applyCity],
   );
+  // The lotto's answers carry the card (its id, then its prize); the card itself shows the result.
+  const lottoCall = useCallback(async (key: string, call: () => Promise<CityResult>): Promise<LottoCard | null> => {
+    setBusy(key);
+    try {
+      const r = await call();
+      if (!r.ok) { setToast(r.error); return null; }
+      applyCity({ ...r, gain: undefined });
+      return r.card ?? null;
+    } catch {
+      setToast("The city glitched. Try again.");
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  }, [applyCity]);
   useEffect(() => {
     resync.current = () => { if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r)); };
   }, [cityApi, applyCity]);
@@ -559,6 +579,7 @@ export function GameShell({
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, () => cityApi.buyGroceries!(pl, b)) : undefined,
+    onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, () => cityApi.barDrink!(id)) : undefined,
     story: storyOn ? feed : null,
     onAttendStoryEvent: storyApi
@@ -628,6 +649,7 @@ export function GameShell({
   };
   /** A tap on something in a place's room: run its action, or the event that's on. */
   const useInPlace = (p: Place, it: RoomItem) => {
+    if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "shop") return openShop(it.use.category);
     if (it.use?.kind !== "events") return;
@@ -1064,6 +1086,15 @@ export function GameShell({
             onCook={() => run("cook", () => cityApi!.cook!())}
             onGoHome={() => { setKitchenOpen(false); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
             onGoShopping={() => { if (!grocer) return; setKitchenOpen(false); setTravelPlan({ from: myPos, to: grocer.at, fromName: myPosName, toName: grocer.name, toId: grocer.id }); }}
+          />
+          <LottoSheet
+            open={lottoAt !== null && lottoOn}
+            state={city}
+            placeId={lottoAt ?? ""}
+            busy={busy !== null}
+            onClose={() => setLottoAt(null)}
+            onBuy={(pl, g, free) => lottoCall("lotto:buy", () => cityApi!.buyLottoCard!(pl, g, free))}
+            onScratch={(id) => lottoCall("lotto:scratch", () => cityApi!.scratchLottoCard!(id))}
           />
           <TravelSheet plan={travelPlan} state={city} busy={busy !== null} onClose={() => setTravelPlan(null)} onGo={(m) => void goTravel(m)} />
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />

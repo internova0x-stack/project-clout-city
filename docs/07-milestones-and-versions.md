@@ -186,6 +186,16 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 **In scope** (formerly v0.5): exclusive event keepsakes (event card, profile badge, plus-one, personal news mention, opt-out) with the ticket's clout kept and attending's stats in line with club events (#19); monuments as full locations with a shared 3D landmark plaza, NPCs and 4 to 6 activities (#32).
 
+## v0.10 "Tickets and Tea" (about 1 week, before launch)
+
+**In scope** (owner, Oct 13; docs/08-new-features-spec.md sections 7 and 8): Lucky Star Lotto in Flushing with five scratch-card games, a full 3D shop and a weekly jackpot; neighborhood gossip with Listen in, the Tea app, Tea cards in the Collection and crew sharing.
+
+1. **Built:** Lucky Star Lotto: the place, Benny, the 3D shop, the card wheel, scratch cards drawn and paid by the server, the Bank's entries (migration 0032).
+2. The weekly jackpot draw, Lola's News card and the Jackpot badge.
+3. Gossip: the week file, its checks and Studio approval.
+4. Gossip in the game: Listen in, regular lines, the Tea app, the Collection tab, rewards and crew sharing.
+5. The first gossip week and doc updates.
+
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 
 The finished P1: real art in place, outside reviews done, then a soft launch followed by the Sarah Bird pilot.

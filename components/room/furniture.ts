@@ -459,6 +459,66 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       }
       return { group: g };
     }
+    // ---- v0.10 Lucky Star Lotto ----
+    case "lottoCounter": {
+      // A glass-front counter: ticket stacks in the five game colors under the glass, a register and
+      // the ticket terminal on top.
+      box(w, 1.0, d, "#2A2140");
+      box(w + 0.04, 0.04, d + 0.04, "#FF2E88", 0, 1.0);
+      box(w - 0.2, 0.55, 0.02, k.mat("#DDEFF6", { opacity: 0.35, roughness: 0.1 }), 0, 0.3, d / 2 + 0.01);
+      const games = ["#40B589", "#3E8EDE", "#FF2E88", "#7A4FD6", "#FFF6E0"];
+      games.forEach((c, i) => box(0.3, 0.08 + (i % 2) * 0.05, 0.2, c, -w / 2 + 0.4 + i * 0.42, 0.42, d / 2 - 0.14));
+      box(0.45, 0.28, 0.35, BLACK, 0.8, 1.04, -0.1);
+      box(0.4, 0.04, 0.2, "#7FE0A8", 0.8, 1.32, -0.05);
+      const screen = box(0.36, 0.3, 0.04, glow("#7FE0A8", 0.9), -0.7, 1.12, -0.15);
+      screen.rotation.x = -0.25;
+      box(0.12, 0.12, 0.12, METAL, -0.7, 1.04, -0.15);
+      return { group: g };
+    }
+    case "cardRack": {
+      // Five rows of scratch cards on a back panel, one color per game.
+      box(w, 1.9, 0.08, "#1F1B26", 0, 0, -d / 2 + 0.04);
+      const games = ["#40B589", "#3E8EDE", "#FF2E88", "#7A4FD6", "#FFF6E0"];
+      games.forEach((c, r) => {
+        box(w - 0.1, 0.03, 0.18, METAL, 0, 0.5 + r * 0.28, -d / 2 + 0.17);
+        for (let i = 0; i < 5; i++) box(0.2, 0.24, 0.02, c, -w / 2 + 0.2 + i * 0.25, 0.53 + r * 0.28, -d / 2 + 0.12);
+      });
+      return { group: g };
+    }
+    case "starSign": {
+      // The neon star on the back wall. It flickers, like it should.
+      const pink = k.mat("#FF2E88", { emissive: "#FF2E88", emissiveIntensity: opts.night ? 1.6 : 0.9 });
+      const star = new Mesh(k.geo(new ConeGeometry(0.28, 0.08, 5)), pink);
+      star.rotation.x = Math.PI / 2;
+      star.position.set(0, 2.25, 0);
+      g.add(star);
+      // A neon tube ring around it; the shop's name is already painted on the wall above the counter.
+      const ring = new Mesh(k.geo(new TorusGeometry(0.42, 0.025, 6, 24)), pink);
+      ring.position.set(0, 2.25, 0);
+      g.add(ring);
+      return { group: g, tick: (t) => { pink.emissiveIntensity = (opts.night ? 1.6 : 0.9) * (Math.sin(t * 13) > 0.97 ? 0.3 : 1); } };
+    }
+    case "lottoBoard": {
+      // The published odds, painted on the wall: the same table as every card's back.
+      let boardMat: Material = k.mat("#FFF6E0");
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 360; c.height = 256;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#FFF6E0"; x.fillRect(0, 0, c.width, c.height);
+          x.fillStyle = "#14111A"; x.font = "800 30px system-ui, sans-serif"; x.textAlign = "center";
+          x.fillText("THE ODDS", c.width / 2, 40);
+          x.font = "600 21px system-ui, sans-serif";
+          const rows = [["Card back", "1 in 5"], ["2×", "1 in 10"], ["5×", "1 in 40"], ["20×", "1 in 400"], ["100×", "1 in 5,000"], ["1,000×", "1 in 100,000"]];
+          rows.forEach(([a, b], i) => { x.textAlign = "left"; x.fillText(a, 30, 80 + i * 30); x.textAlign = "right"; x.fillText(b, c.width - 30, 80 + i * 30); });
+          boardMat = k.mat("#ffffff", { map: new CanvasTexture(c) });
+        }
+      }
+      box(w + 0.08, 1.3, 0.04, "#7A4FD6", 0, 0.95, -0.02);
+      box(w, 1.22, 0.04, boardMat, 0, 0.99, 0.01);
+      return { group: g };
+    }
     case "railing": {
       box(w, 0.05, 0.05, METAL, 0, 0.95, 0);
       box(w, 0.04, 0.04, METAL, 0, 0.5, 0);

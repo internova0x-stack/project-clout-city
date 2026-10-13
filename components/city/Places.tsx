@@ -23,6 +23,7 @@ import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
+import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = {
   food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home", monument: "Monument", shopping: "Shopping", campus: "University",
@@ -35,6 +36,8 @@ export interface PlaceHandlers {
   onOpenGigs: () => void;
   /** v0.8 a drink at the bar (clubs and the lounge, migration 0026). */
   onBarDrink?: (placeId: string) => void;
+  /** v0.10 Lucky Star Lotto's counter (migration 0032). */
+  onOpenLotto?: (placeId: string) => void;
   /** v0.8 grocery bundles at supermarkets (migration 0027). */
   onBuyGroceries?: (placeId: string, bundleId: string) => void;
   /** The story world (v0.4): closures, prices, story events and tasks. */
@@ -117,6 +120,26 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
           </div>
         );
       })}
+      {handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed && (() => {
+        const l = state.lotto;
+        const free = l.freeToday - l.freeUsed;
+        return (
+          <div className="action-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <span className="title" style={{ display: "block" }}>🌟 Scratch cards</span>
+              {!compact && <span className="subtext" style={{ display: "block" }}>Five games, {formatCash(LOTTO_GAMES[0].price)} to {formatCash(LOTTO_GAMES[LOTTO_GAMES.length - 1].price)}. Top prize {formatCash(topPrize(LOTTO_GAMES[LOTTO_GAMES.length - 1]))}.</span>}
+              <span className="fx-row">
+                {free > 0 && <span className="fx fx-pay">🎟️ {free} free today</span>}
+                <span className="fx">{l.bought} of {CITY_ECONOMY.lotto.buyPerDay} bought</span>
+                {l.unscratched.length > 0 && <span className="fx fx-clout">{l.unscratched.length} to scratch</span>}
+              </span>
+            </div>
+            {away ? <span className="lock-chip">On arrival</span> : (
+              <button className="btn btn-taxi btn-sm" disabled={handlers.busy !== null} onClick={() => handlers.onOpenLotto!(place.id)}>Play</button>
+            )}
+          </div>
+        );
+      })()}
       {handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
         const av = groceryAvailability(b, state);
         const room = CITY_ECONOMY.groceries.fridgeMax - (state.player.fridge_meals ?? 0);

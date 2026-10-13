@@ -20,7 +20,9 @@ export type FurnitureKind =
   // lecture hall
   | "lectureDesk" | "lectern" | "chalkboard"
   // v0.9 monument plazas
-  | "globe" | "gantry" | "bench" | "foodCart" | "lamppost" | "tree" | "railing";
+  | "globe" | "gantry" | "bench" | "foodCart" | "lamppost" | "tree" | "railing"
+  // v0.10 Lucky Star Lotto
+  | "lottoCounter" | "cardRack" | "starSign" | "lottoBoard";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -30,6 +32,8 @@ export type ItemUse =
   | { kind: "look" }
   /** v0.8 the kitchen: the fridge's contents and Cook a meal. */
   | { kind: "cook" }
+  /** v0.10 the lotto counter: the scratch-card games. */
+  | { kind: "lotto" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
   | { kind: "shop"; category: "fashion" | "cars" | "houses" | "luxury" | "makeup" };
 
@@ -112,6 +116,10 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   lamppost: { w: 0.3, d: 0.3, label: "Lamp" },
   tree: { w: 0.8, d: 0.8, label: "Tree" },
   railing: { w: 8.0, d: 0.2, label: "Railing" },
+  lottoCounter: { w: 2.6, d: 0.8, label: "Counter" },
+  cardRack: { w: 1.4, d: 0.35, label: "Scratch cards" },
+  starSign: { w: 1.6, d: 0.2, label: "Sign" },
+  lottoBoard: { w: 1.8, d: 0.2, label: "Odds board" },
 };
 
 // ---------------------------------------------------------------------------
@@ -164,7 +172,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries", RoomTemplate> = {
+export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto", RoomTemplate> = {
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -271,6 +279,23 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "s
       { x: 0.3, z: -0.3, facing: 3.14, seated: true }, { x: 2.2, z: -0.3, facing: 3.14, seated: true },
       { x: -2.2, z: 1.2, facing: 3.14, seated: true }, { x: 2.8, z: 1.2, facing: 3.14, seated: true },
     ],
+  },
+  // v0.10 Lucky Star Lotto: a narrow neon shop. The counter (Benny behind it) opens the games; the
+  // rack and the odds board open them too, so any tap near the cards works.
+  lotto: {
+    id: "lotto", w: 6.4, d: 5.6, wall: "#2A2140", wallAccent: "#FF2E88", floor: "#3A3150", floorKind: "checker", dark: true, window: true,
+    items: [
+      { id: "counter", kind: "lottoCounter", x: -0.6, z: -1.9, rot: 0, use: { kind: "lotto" }, label: "Scratch cards" },
+      { id: "sign", kind: "starSign", x: -2.3, z: -2.7, rot: 0 },
+      { id: "rack", kind: "cardRack", x: 2.3, z: -2.6, rot: 0, use: { kind: "lotto" }, label: "Pick a game" },
+      { id: "board", kind: "lottoBoard", x: -3.1, z: 0.0, rot: 1, use: { kind: "lotto" }, label: "The odds" },
+      { id: "stool", kind: "barStool", x: 0.7, z: -1.1, rot: 0 },
+      { id: "stool-2", kind: "barStool", x: -1.9, z: -1.1, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 2.8, z: 2.3, rot: 0 },
+      { id: "plant", kind: "plant", x: -2.9, z: 2.3, rot: 0 },
+    ],
+    spawn: [0.2, 1.9],
+    npcs: [{ x: -0.6, z: -2.4, facing: 0 }, { x: 1.4, z: 0.4, facing: 2.4 }],
   },
   // ---- v0.9 monument plazas (#32): one shared outdoor plaza, each with its own landmark ----
   unisphere: {

@@ -202,7 +202,23 @@ The caps keep meals as the main source of Energy, so dining stays worth visiting
 - **Balance:** cooking is the budget option, dining is the social and clout option, and venue snacks are the convenience option. Prices are tuned so all three stay worth using.
 - **Built (v0.8 step 3, owner Oct 13):** Steinway Fresh Mart sells a Snack run (C$12, 2 meals) and Meal prep for the week (C$35, 7 meals), only when you're there. The fridge holds 10 meals (players.fridge_meals); a bundle that doesn't fit isn't sold. The Kitchen at home shows the fridge and Cook a meal: one meal for +25 Energy, a 6-second countdown with Skip, no clout, refused at full Energy; an empty fridge offers "Go shopping" (migration 0027, `buy_groceries()` and `cook()`). Groceries are in the Bank as "Groceries · Meal prep for the week".
 
-## 7. Later features
+## 7. Lucky Star Lotto (v0.10)
+
+A scratch-card shop in Flushing, outside Astoria on purpose: players travel there at normal travel costs. The owner, **Benny Fortuna**, has never bought a ticket (the deli already has a Sal).
+
+- **Five games** (owner, Oct 13): Corner Store Classic C$5, Bodega Cat Bonanza C$10, Rent's Due C$20, Penthouse Dreams C$50 and Main Character C$100. Each top prize is 1,000 times the card: C$5,000 up to C$100,000.
+- **One fixed prize table** for every game, in multiples of the card: the card back 1 in 5, 2× 1 in 10, 5× 1 in 40, 20× 1 in 400, 100× 1 in 5,000, 1,000× 1 in 100,000. Any prize 1 in 3.05; a card pays back 60.5% on average and 10% of every bought card goes to the weekly jackpot, so the lotto is a C$ sink. A big prize (100× or more) is about 1 card in 4,760: a player scratching about two cards a day has about a 1.3% chance a month.
+- **Limits:** one free card a day (the C$5 game), a second one through a player's first 7 days ("Beginner's luck", shown openly), and 5 bought cards a day across all games. Everything resets at midnight in New York.
+- **The counter:** a card wheel you spin to pick a game, the odds one tap away, then one card to scratch with a finger (or "Scratch it all"). One prize window, never three matching symbols, so there are no fake near-misses.
+- **Can't be rigged from the browser.** The browser only names a game. The server checks the place, the limits and the cash, draws the prize from Postgres's cryptographic random source when the card is bought, and keeps it where players can't read it; scratching asks the server to reveal and pay it, once per card (ledger `lotto_card` and `lotto_prize`).
+- **Real money never touches it:** cards cost C$, prizes are C$, and C$ can't be bought. Winnings go to the bank and count toward net worth. No gold in the lotto's look.
+- **Built (v0.10 step 1, owner Oct 13):** migration 0032 (`buy_lotto_card()`, `scratch_lotto_card()`, `lotto_state()`), the 3D shop, the counter and the scratch card. **Step 2:** the weekly jackpot (every card is an entry, drawn Sunday at midnight in New York), Lola's News card (players who opted out of the gossip are "a lucky Astorian") and a 🌟 Jackpot badge.
+
+## 8. Neighborhood gossip (v0.10)
+
+Five-piece gossip stories about the invented cast, Astoria's regulars and invented city politics, found at places ("Listen in", free) or from a regular's line, collected in a 🍵 Tea app on the Phone and finished as Lola's write-up in a Tea tab in the Collection. A completion pays a little clout and Mood (ledger, once); five earn a badge. Pieces can be shared with the crew once each, and a shared piece counts as found for them (owner, Oct 13). 3 to 5 stories a week, drafted with the hunt and the news (`content/gossip/`, checked by `validate:content`, approved in the Studio); unfinished stories archive after two weeks. Never about real players or real people, and never a live story's answer (the Studio's story-safety check, as for hunts).
+
+## 9. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

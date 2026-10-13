@@ -2,11 +2,11 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.6 "Astoria and the News"** (v0.1 to v0.5.1 are live; then v0.7 to v0.9 from testing) (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.10 "Tickets and Tea"** (v0.1 to v0.9 are done; v1.0 "Launch" is next) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
-- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries. **Wins over the older docs** for those features.
+- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto and neighborhood gossip. **Wins over the older docs** for those features.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
 - `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt + news), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
@@ -38,7 +38,7 @@ components live in `app/globals.css`.
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
-  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt. `/preview/studio` shows the Story Studio.
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt and news week file in `content/` (the Studio's rules).
 
@@ -63,6 +63,9 @@ components live in `app/globals.css`.
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never
   promises features that aren't built.
+- Lucky Star Lotto: the server draws every card's prize at purchase and pays it on scratch
+  (`buy_lotto_card`/`scratch_lotto_card`, migration 0032); the browser only names a game. Never send
+  a result, price or limit from the client, and real money never touches the lotto.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
   Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the
   same: `content/hunts/*.json` carries answers; players get `hunt_state()`.
