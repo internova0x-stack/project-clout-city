@@ -10,7 +10,7 @@ import {
   type BufferGeometry, type Material,
 } from "three";
 import type { Look } from "@/lib/look";
-import { getStyle, type Outfit } from "@/lib/styles";
+import { getStyle, styleOutfit, type Outfit } from "@/lib/styles";
 
 export interface AvatarParts {
   root: Group;
@@ -52,7 +52,7 @@ function shade(hex: string, f: number): string {
 
 export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Outfit } = {}): AvatarParts {
   const style = getStyle(look.style);
-  const outfit = opts.outfit ?? style.outfit;
+  const outfit = opts.outfit ?? styleOutfit(style, look.body);
   const b = BUILDS[look.body];
   // Presenting as (cosmetic only): "curvy" is Female, "straight" is Male.
   const fem = look.body === "curvy";
@@ -223,7 +223,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   if (fem) {
     // A bust under whatever top is on, so Female reads from the front and the side.
     for (const sx of [-1, 1]) {
-      const r = 0.064 * (shirtGrow > 1.1 ? 1.06 : 1);
+      const r = 0.056 * (shirtGrow > 1.1 ? 1.08 : 1);
       const bust = mesh(geo(new SphereGeometry(r, 12, 10)), shirtMat, sx * 0.046, 1.262, frontZ(1.262, shirtGrow) - r * 0.78);
       bust.scale.set(1.1, 0.82, 0.62);
       upper.add(bust);

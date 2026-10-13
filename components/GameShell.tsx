@@ -9,7 +9,7 @@ import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { getStyle } from "@/lib/styles";
+import { getStyle, styleOutfit } from "@/lib/styles";
 import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -239,7 +239,7 @@ export function GameShell({
   const look = normalizeLook(me.look, me.starting_style);
   const style = getStyle(look.style);
   const worn = city ? equippedItems(city) : [];
-  const outfit = worn.length ? outfitWith(style.outfit, worn) : undefined;
+  const outfit = worn.length ? outfitWith(styleOutfit(style, look.body), worn) : undefined;
   const home = homeLocation(me.home_id);
   const cityOn = !!(city && cityApi);
   const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);

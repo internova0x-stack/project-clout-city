@@ -33,7 +33,10 @@ export interface StartingStyle {
   emoji: string;
   blurb: string;
   starterItems: string[];
+  /** The shared cut; male and female change colors (and a few pieces) on top of it. */
   outfit: Outfit;
+  male?: Partial<Outfit>;
+  female?: Partial<Outfit>;
 }
 
 export const STARTING_STYLES: StartingStyle[] = [
@@ -48,6 +51,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA",
       accessory: "cap", accessoryColor: "#1F1B26",
     },
+    female: { topColor: "#E0457B", topAccent: "#1F1B26", bottomColor: "#26232D", accessoryColor: "#F4F1EA" },
   },
   {
     id: "thrift_store_icon",
@@ -60,6 +64,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#4C6A92", shoeColor: "#3A2418",
       accessory: "tote", accessoryColor: "#E9DFC9",
     },
+    female: { topColor: "#8DB38A", topAccent: "#F2E4C9", bottomColor: "#B0603F", accessoryColor: "#F6E7B8" },
   },
   {
     id: "midtown_finance",
@@ -72,6 +77,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#C2AE86", shoeColor: "#5A3420",
       accessory: "none", accessoryColor: "#000000",
     },
+    female: { topColor: "#7A2E3B", topAccent: "#F1D6C8", bottom: "skirt", bottomColor: "#3A3742", shoeColor: "#1F1B26" },
   },
   {
     id: "night_owl_goth",
@@ -84,6 +90,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "skirt", bottomColor: "#14111A", shoeColor: "#0E0C12",
       accessory: "choker", accessoryColor: "#C9C3CF",
     },
+    male: { topAccent: "#3E5C76", bottom: "pants", bottomColor: "#2A2733", accessory: "none" },
   },
   {
     id: "pilates_princess",
@@ -96,6 +103,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "leggings", bottomColor: "#E9A3B6", shoeColor: "#FFFFFF",
       accessory: "mat", accessoryColor: "#9FD8C4",
     },
+    male: { top: "tee", topColor: "#A7D8C9", topAccent: "#FFFFFF", bottom: "shorts", bottomColor: "#3F5A66", accessoryColor: "#F2B8C6" },
   },
   {
     id: "startup_founder",
@@ -108,6 +116,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "pants", bottomColor: "#1F1B26", shoeColor: "#ECE6DC",
       accessory: "lanyard", accessoryColor: "#40B589",
     },
+    female: { topColor: "#C9B8E8", topAccent: "#2A2530", bottom: "leggings", bottomColor: "#2E2A38", shoeColor: "#FFFFFF" },
   },
   {
     id: "influencer_soft_glam",
@@ -120,6 +129,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "skirt", bottomColor: "#C9A98A", shoeColor: "#6E5240",
       accessory: "phone", accessoryColor: "#FFB3D1",
     },
+    male: { topColor: "#D8C3A5", topAccent: "#F4EEE6", bottom: "pants", bottomColor: "#F1E6D4", shoeColor: "#8A6A52", accessoryColor: "#C9C3CF" },
   },
   {
     id: "arcade_nerd",
@@ -132,6 +142,7 @@ export const STARTING_STYLES: StartingStyle[] = [
       bottom: "shorts", bottomColor: "#4F5A3A", shoeColor: "#D93A2F",
       accessory: "headphones", accessoryColor: "#14111A",
     },
+    female: { topColor: "#FF7AA8", topAccent: "#FFC21A", bottomColor: "#2B3A67", shoeColor: "#FFFFFF", accessoryColor: "#6B4FD8" },
   },
 ];
 
@@ -143,4 +154,9 @@ export function getStyle(id: string | null | undefined): StartingStyle {
 
 export function isStyleId(id: unknown): id is StyleId {
   return typeof id === "string" && (STYLE_IDS as string[]).includes(id);
+}
+
+/** The starter outfit for a style as worn by a presentation ("curvy" is Female). */
+export function styleOutfit(style: StartingStyle, body: "straight" | "curvy"): Outfit {
+  return { ...style.outfit, ...(body === "curvy" ? style.female : style.male) };
 }
