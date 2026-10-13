@@ -11,8 +11,19 @@ const seed = (key: string) => {
   return JSON.parse(m[1]);
 };
 
+// The newest migration that writes the 'economy' setting (0003 seeded it; 0028 made bills weekly).
+const latestEconomy = () => {
+  const dir = new URL("../supabase/migrations/", import.meta.url);
+  for (const f of readdirSync(dir).filter((x) => x.endsWith(".sql")).sort().reverse()) {
+    const text = readFileSync(new URL(f, dir), "utf8");
+    const m = text.match(/set value = '(\{[^']*)'::jsonb, updated_at = now\(\) where key = 'economy'/) ?? text.match(/\('economy', '([\s\S]*?)'::jsonb\)/);
+    if (m) return JSON.parse(m[1]);
+  }
+  assert.fail("no economy seed");
+};
+
 test("database economy seed matches lib/economy.ts", () => {
-  const db = seed("economy");
+  const db = latestEconomy();
   const { homes, ...rest } = ECONOMY;
   const { homes: dbHomes, ...dbRest } = db;
   assert.deepEqual(dbRest, rest);
@@ -28,10 +39,9 @@ test("the minimum roll always covers the cheapest home, the phone bill and the p
   assert.equal(canAfford(cheapest, ECONOMY.birthLottery.min), true);
 });
 
-test("the priciest home is out of reach on a low roll, so the rule matters", () => {
-  const priciest = [...ECONOMY.homes].sort((a, b) => b.rent - a.rent)[0];
-  assert.equal(canAfford(priciest, ECONOMY.birthLottery.min), false);
-  assert.equal(canAfford(priciest, ECONOMY.birthLottery.max), true);
+test("with weekly rent (v0.8), even the lowest roll covers a first week anywhere", () => {
+  for (const h of ECONOMY.homes) assert.equal(canAfford(h, ECONOMY.birthLottery.min), true, h.id);
+  assert.equal(canAfford(ECONOMY.homes[2], 1000), false, "the rule still guards a broke player");
 });
 
 test("the first party is net positive and the lottery lines cover the range", () => {

@@ -64,11 +64,11 @@ test("availability explains why an action is off", () => {
 });
 
 test("rent lines walk through grace, Mood drop and moving out", () => {
-  const bill = { id: 1, kind: "rent" as const, amount: 2100, due_date: "2026-10-01", status: "due" as const, paid_at: null };
+  const bill = { id: 1, kind: "rent" as const, amount: 600, due_date: "2026-10-01", status: "due" as const, paid_at: null };
   assert.equal(billStatusLine(bill, "2026-09-29"), "Due in 2 days");
   assert.equal(billStatusLine(bill, "2026-10-01"), "Due today");
   assert.match(billStatusLine(bill, "2026-10-03"), /Grace period/);
-  assert.match(billStatusLine(bill, "2026-10-05"), /move out in 3 days/);
+  assert.match(billStatusLine(bill, "2026-10-04"), /Mood is dropping; you move out in 3 days/);
 });
 
 test("the preview simulator follows the same clout and resale rules", async () => {
@@ -87,12 +87,17 @@ test("the preview simulator follows the same clout and resale rules", async () =
   assert.ok(sold.ok && sold.gain?.cash === 39 && netWorth(sold.state) > 0);
 });
 
-test("1 to 2 gigs cover a month's rent on the cheapest home", () => {
-  const cheapest = Math.min(...ECONOMY.homes.map((h) => h.rent));
-  const { shiftRate, gigs } = CITY_ECONOMY;
-  assert.ok(2 * gigs.pro.payMin * shiftRate >= cheapest * 0.9, "two pro gigs");
-  assert.ok(gigs.big.payMax * shiftRate >= cheapest, "one big break");
-  assert.equal(CITY_ECONOMY.bills.every, "1 month");
+test("weekly bills (v0.8): a side gig is about a week in the studio, a big break a week in the high-rise", () => {
+  const rents = ECONOMY.homes.map((h) => h.rent).sort((a, b) => a - b);
+  const { shiftRate, gigs, bills, dailyTasks } = CITY_ECONOMY;
+  assert.equal(bills.every, "7 days");
+  assert.ok(gigs.side.payMax * shiftRate >= rents[0], "a good side gig covers the studio");
+  assert.ok(gigs.pro.payMin * shiftRate >= rents[1], "a pro gig covers the 1BR");
+  assert.ok(gigs.big.payMin * shiftRate >= rents[2], "a big break covers the high-rise");
+  // A light week (3 days of tasks and one shift each) covers the studio, the phone and cheap meals.
+  const lightWeek = 3 * (dailyTasks.count * (dailyTasks.rewardMin + dailyTasks.rewardMax) / 2 + dailyTasks.bonus + shiftRate) - 3 * 2 * 7;
+  assert.ok(lightWeek > rents[0] + bills.phone, `light week ${lightWeek}`);
+  assert.ok(bills.evictAfterDays < 7, "the move happens before next week's rent");
 });
 
 import { collectorValue } from "../lib/city.ts";
@@ -121,16 +126,16 @@ test("upcoming bills show each amount and date, including the phone bill (#22)",
   assert.deepEqual(upcomingBills(s), [
     { kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: "2026-10-16" },
     { kind: "car_rental", amount: 350, due_date: "2026-10-18" },
-    { kind: "rent", amount: 2100, due_date: "2026-10-20" },
+    { kind: "rent", amount: 600, due_date: "2026-10-20" },
   ]);
   const owner = sampleCityState({ house_sku: "house-x", next_phone_due: "2026-10-16", car_sku: "car-hatchback", car_mode: "owned", next_car_due: "2026-10-30" });
-  assert.deepEqual(upcomingBills(owner).map((b) => [b.kind, b.amount]), [["phone", 85], ["car_insurance", 280]]);
+  assert.deepEqual(upcomingBills(owner).map((b) => [b.kind, b.amount]), [["phone", 25], ["car_insurance", 70]]);
 });
 
 test("a coming bill's bar fills as its due date nears", () => {
   const today = "2026-10-13";
-  assert.equal(billProgress({ kind: "phone", amount: 85, due_date: "2026-11-12" }, today), 0);
-  assert.equal(billProgress({ kind: "rent", amount: 2100, due_date: "2026-10-28" }, today), 0.5);
+  assert.equal(billProgress({ kind: "phone", amount: 25, due_date: "2026-10-20" }, today), 0);
+  assert.equal(billProgress({ kind: "rent", amount: 600, due_date: "2026-10-16" }, today), 4 / 7);
   assert.equal(billProgress({ kind: "car_rental", amount: 350, due_date: "2026-10-13" }, today), 1);
 });
 

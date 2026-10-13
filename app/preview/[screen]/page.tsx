@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ECONOMY } from "@/lib/economy";
 import { Creator, type CreatorStep } from "@/components/Creator";
 import type { Flow } from "@/components/GameShell";
 import { PreviewHome } from "@/components/preview/PreviewHome";
@@ -86,7 +87,7 @@ export default async function Preview({
           initialLook={s > 0 ? normalizeLook(SAMPLE.look, SAMPLE.starting_style) : undefined}
           initialName={s > 0 ? SAMPLE.display_name : undefined}
           initialTraits={s > 1 ? SAMPLE.traits : []}
-          initialCash={s > 2 ? 6400 : null}
+          initialCash={s > 2 ? 4400 : null}
           actions={{
             createPlayer: async () => {
               "use server";
@@ -98,7 +99,7 @@ export default async function Preview({
             },
             rollBirthLottery: async () => {
               "use server";
-              return { ok: true as const, cash: 6000 + 100 * Math.floor(Math.random() * 41) };
+              return { ok: true as const, cash: ECONOMY.birthLottery.min + ECONOMY.birthLottery.step * Math.floor(Math.random() * ((ECONOMY.birthLottery.max - ECONOMY.birthLottery.min) / ECONOMY.birthLottery.step + 1)) };
             },
             moveIn: async () => {
               "use server";

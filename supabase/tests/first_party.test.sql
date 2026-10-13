@@ -56,21 +56,21 @@ select onboarding_step from public.set_traits(array['loud', 'hustler']);
 select public.roll_birth_lottery() as roll1 \gset
 select public.roll_birth_lottery() as roll2 \gset
 select pg_temp.assert(:roll1 = :roll2, 'lottery rolled twice');
-select pg_temp.assert(:roll1 between 6000 and 10000 and :roll1 % 100 = 0, 'lottery out of range');
+select pg_temp.assert(:roll1 between (public.economy() -> 'birthLottery' ->> 'min')::int and (public.economy() -> 'birthLottery' ->> 'max')::int and :roll1 % 100 = 0, 'lottery out of range');
 select home_id, bank_cash, onboarding_step from public.move_in('astoria_studio');
 select bank_cash, clout, confidence, energy, onboarding_step from public.attend_first_party(true);
 select bank_cash as bank_after, clout as clout_after from public.attend_first_party(false) \gset
-select pg_temp.assert(:bank_after = :roll1 - 2100 - 150 + 300, 'bank after party');
+select pg_temp.assert(:bank_after = :roll1 - 600 - 150 + 300, 'bank after party (weekly studio rent, v0.8)');
 select pg_temp.assert(:clout_after = 750 + 100, 'clout after party');
 select * from public.leaderboard('queens', 10);
 select * from public.my_rank('clique');
 select public.finish_handoff();
 select onboarding_step from public.players;
 
--- LIC high-rise is refused when the roll can't cover rent + phone + party.
+-- LIC high-rise is refused when the cash can't cover a week's rent + phone + party.
 reset role;
-update public.players set bank_cash = 6000 where display_name = 'Bea';
-update public.players set traits = array['loud','hustler'], birth_cash = 6000, onboarding_step = 'lottery_done' where display_name = 'Bea';
+update public.players set bank_cash = 1700 where display_name = 'Bea';
+update public.players set traits = array['loud','hustler'], birth_cash = 1700, onboarding_step = 'lottery_done' where display_name = 'Bea';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
 do $$ begin

@@ -83,7 +83,7 @@ export function sampleLedger(now = Date.now()): LedgerEntry[] {
     { id: 6, amount: 1080, kind: "gig", ref: "4", at: at(26), gig: "Manage socials for a dog with 40k followers" },
     { id: 5, amount: -7, kind: "eat", ref: "lucky-seven-deli:2026-10-12:1", at: at(28) },
     { id: 4, amount: 120, kind: "shift", ref: "grind-and-gossip:2026-10-11:1", at: at(50) },
-    { id: 3, amount: -2100, kind: "rent", ref: "first_rent", at: at(72) },
+    { id: 3, amount: -600, kind: "rent", ref: "first_rent", at: at(72) },
     { id: 2, amount: 7400, kind: "birth_lottery", ref: "birth", at: at(73) },
   ];
 }
