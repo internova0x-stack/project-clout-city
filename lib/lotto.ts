@@ -23,10 +23,18 @@ export interface LottoState {
   week: { start: string; pool: number; entries: number };
   /** Cards bought but not scratched yet (a closed tab, a lost connection): scratch them any time. */
   unscratched: { id: number; game: string }[];
+  /** The last three jackpot draws, newest first (migration 0033; missing before it runs). */
+  draws?: LottoDraw[];
 }
+
+/** A finished week's jackpot. `winner` is null when they keep out of the gossip (never for "mine"). */
+export interface LottoDraw { week: string; pool: number; entries: number; drawnAt: string; mine: boolean; winner: string | null }
 
 /** A card as the server hands it over: no prize until it's scratched. */
 export interface LottoCard { id: number; game: string; prize?: number }
+
+/** The badge for winning a weekly jackpot (migration 0033). */
+export const LOTTO_BADGE = "lotto-jackpot";
 
 export const LOTTO_GAMES: readonly LottoGame[] = CITY_ECONOMY.lotto.games;
 export const lottoGame = (id: string): LottoGame | undefined => LOTTO_GAMES.find((g) => g.id === id);
@@ -111,6 +119,19 @@ export function bennyLine(prize: number, price: number, n: number): string {
   if (prize > price) return pick(won);
   if (prize === price) return pick(back);
   return pick(lost);
+}
+
+/** Lola's line for the News card. Satire about the shop, never about the winner. */
+export function jackpotLine(d: LottoDraw, name: string): string {
+  const pot = `C$${d.pool.toLocaleString("en-US")}`;
+  const entries = d.entries.toLocaleString("en-US");
+  if (d.mine) return `It's you. You won last week's ${pot} jackpot at Lucky Star, out of ${entries} cards. Benny is pretending he isn't jealous. He is.`;
+  const who = d.winner ? name : "A lucky Astorian";
+  const lines = [
+    `${who} walked into Lucky Star and walked out with the ${pot} jackpot. ${entries} cards were in the drum. Benny says he's happy for them, through his teeth.`,
+    `Last week's ${pot} Lucky Star jackpot goes to ${d.winner ? name : "a lucky Astorian"}, out of ${entries} cards. Benny, who has never bought a ticket, calls it "fine".`,
+  ];
+  return lines[Number(d.week.replaceAll("-", "")) % lines.length];
 }
 
 const ERRORS: Record<string, string> = {

@@ -51,14 +51,17 @@ export function PreviewHome({
   partyPreset?: string;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
   huntPreset?: string;
-  /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"); otherwise random. */
+  /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (last week's draw was mine). */
   lottoPreset?: string;
 }) {
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
+    // ?lotto=jackpot: last week's draw was mine.
+    const won = s.lotto?.draws?.[0];
+    if (lottoPreset === "jackpot" && won) Object.assign(won, { mine: true, winner: player.display_name });
     return { ...s, devTools };
-  }, [player, devTools, tasksDone]);
+  }, [player, devTools, tasksDone, lottoPreset]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => {
     const api = createSimApi(city, () => feedRef.current);

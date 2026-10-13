@@ -50,6 +50,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     lotto: {
       freeUsed: 0, freeToday: 2, bought: 0, beginnerUntil: new Date(Date.now() + 4 * 86_400_000).toISOString(),
       week: { start: addDays(today, -1), pool: 7340, entries: 9 }, unscratched: [],
+      draws: [{ week: addDays(today, -8), pool: 6120, entries: 1840, drawnAt: new Date(Date.now() - 86_400_000).toISOString(), mine: false, winner: "dana.vibes" }],
     },
   };
 }
@@ -72,6 +73,7 @@ export type SimApi = CityApi & {
   partyEvent(ev: ExclusiveEvent): Promise<CityResult>;
   /** Previews only (?lotto=win|big|lose): the next cards' prizes, as multiples of the card. */
   lottoNext(times: number[]): void;
+
 };
 
 /** `story` returns the preview's current story feed, so prices, closures and unlocks follow the World State. */
@@ -101,6 +103,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
   return {
     refresh: () => ok(),
     lottoNext(times) { lottoQueue = [...times]; },
+
     buyLottoCard(placeId, gameId, free) {
       const place = PLACES.find((x) => x.id === placeId);
       const game = lottoGame(gameId);
