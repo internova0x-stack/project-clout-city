@@ -86,3 +86,8 @@ City News is light gossip about the cast, Lola's weekly dating column and the Mo
 4. Re-uploading a file keeps unchanged approved items approved; edited items go back to review.
 
 News never changes prices, places or rewards.
+
+## Treasure hunts (Hunts tab)
+
+Weekly hunts are uploaded, skimmed, read in full and approved in the **Hunts** tab. The whole
+how-to, including the week file format, is in `docs/HUNTS.md`.

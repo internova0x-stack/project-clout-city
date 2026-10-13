@@ -1,9 +1,10 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { validateNewsWeek } from "@/lib/news";
+import { storyPlaceIds, validateHunt } from "@/lib/hunts";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -92,7 +93,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("news") ? "Run migration 0017 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? "Run migration 0018 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -131,6 +132,38 @@ export async function studioNewsStatus(id: string, status: NewsAdminItem["status
 }
 export async function studioNewsReschedule(id: string, day: string) {
   const r = await admin<unknown>("admin_news_reschedule", { p_id: id, p_day: day });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+// ---- Treasure hunts (migration 0018) ----
+export async function studioHuntList() {
+  return admin<HuntAdmin[]>("admin_hunt_list");
+}
+export async function studioHuntUpload(json: string): Promise<Admin<null> & { problems?: string[] }> {
+  let raw: unknown;
+  try { raw = JSON.parse(json); } catch { return { ok: false, error: "That isn't valid JSON." }; }
+  const week = (raw as { week?: unknown } | null)?.week;
+  // Story safety: places touched by any approved, scheduled story that runs during the hunt's week.
+  const storyPlaces: string[] = [];
+  const arcs = await admin<{ id: string; status: string; review: string; startAt: string | null; lastDay: number }[]>("admin_story_list");
+  if (arcs.ok && typeof week === "string") {
+    const end = new Date(`${week}T12:00:00Z`);
+    end.setUTCDate(end.getUTCDate() + 6);
+    for (const a of arcs.data) {
+      if (!a.startAt || a.status !== "active" || a.review !== "approved") continue;
+      const last = new Date(`${a.startAt}T12:00:00Z`);
+      last.setUTCDate(last.getUTCDate() + Math.max(0, a.lastDay - 1));
+      if (a.startAt > end.toISOString().slice(0, 10) || last.toISOString().slice(0, 10) < week) continue;
+      const full = await admin<Arc>("admin_story_get", { p_arc: a.id });
+      if (full.ok && full.data) storyPlaces.push(...storyPlaceIds(full.data as unknown as Parameters<typeof storyPlaceIds>[0]));
+    }
+  }
+  const checked = validateHunt(raw, { storyPlaces });
+  if (!checked.ok) return { ok: false, error: "The hunt didn't pass its checks.", problems: checked.problems };
+  const r = await admin<unknown>("admin_hunt_upsert", { p_data: checked.hunt });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+export async function studioHuntStatus(id: string, status: HuntAdmin["status"]) {
+  const r = await admin<unknown>("admin_hunt_status", { p_id: id, p_status: status });
   return r.ok ? { ok: true as const, data: null } : r;
 }
 export async function studioMetrics() {

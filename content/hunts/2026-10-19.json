@@ -1,0 +1,206 @@
+{
+  "week": "2026-10-19",
+  "id": "auntie-vee",
+  "theme": "Auntie Vee's Storage Unit",
+  "intro": "Auntie Vee spent forty years collecting Astoria's strangest treasures, then retired to Florida and auctioned her storage unit for C$40. The eight best pieces weren't in it. She left them with friends around the neighborhood, each one behind a clue. Start with Sal at the deli.",
+  "places": ["ditmars-deli", "ditmars-library", "engine-7", "hell-gate-park", "grind-and-gossip"],
+  "chatter": [
+    "You're after Vee's {treasure}? Half of Astoria is. The other half is pretending not to be.",
+    "Vee never threw anything out. Not a receipt, not a grudge, definitely not {treasure}.",
+    "Somebody said {treasure} turned up on a curb in Ditmars. Somebody also said the N train is on time."
+  ],
+  "tracks": {
+    "bodega_drip": {
+      "treasure": "The Ditmars Ones",
+      "emoji": "👟",
+      "lore": "High-tops stitched in 1994 by a cobbler on Ditmars Boulevard. Twelve pairs, ever. This is pair #1, still box-fresh, still the cleanest thing in Queens.",
+      "steps": [
+        { "say": "Vee bought a buttered roll here every day for thirty years. She left you a note: 'The shoes are where the quiet people keep the stories.' Also, she owes me four dollars." },
+        {
+          "say": "Vee's note, yes. She made me promise to ask you something first. Quietly.",
+          "question": { "q": "Which Astoria spot shows movies with popcorn?", "choices": ["Respawn Arena", "Reel Queens Cinema", "Hellgate Hall", "Two Bros Who Fight Pizza"], "answer": 1 },
+          "then": "Correct. Vee lent the shoebox to the firehouse for their charity drive. Ask the captain, and wipe your feet."
+        },
+        { "say": "The shoebox? Hydrant sat on it for a month. Gus took it off our hands. Said he knew where it belonged. Same bench, every day, under the big bridge." },
+        {
+          "say": "Vee and I danced under that bridge in '87. She said only somebody who knows the neighborhood gets the box.",
+          "question": { "q": "What's the name of the firehouse dog?", "choices": ["Sparky", "Also Sal", "Hydrant", "Ladder"], "answer": 2 },
+          "then": "That's the one. I gave the box to Jojo at the café. Vee's old table. The password is the name of the shoes."
+        },
+        {
+          "say": "Vee's box has been under my counter all week, babe. I'm not handing it over without the password.",
+          "question": { "q": "What's the password?", "choices": ["The Hell Gate Highs", "Steinway Steps", "Bodega Kings", "The Ditmars Ones"], "answer": 3 },
+          "then": "The Ditmars Ones. Pair #1. Don't you dare wear them in the rain."
+        }
+      ]
+    },
+    "thrift_store_icon": {
+      "treasure": "The Hellgate 35",
+      "emoji": "📷",
+      "lore": "A 1971 film camera with a cracked leather strap and one undeveloped roll still inside. Nobody knows what's on it. Vee said that was the point.",
+      "steps": [
+        { "say": "The camera? Vee took a picture of my cat every Tuesday for ten years. Her note says: 'Ask the man who shushes people. He's got the negatives.'" },
+        {
+          "say": "I do shush people. It's in the job description, page one. Vee left you a question.",
+          "question": { "q": "What's the name of the cat at Ditmars Deli & Dreams?", "choices": ["Also Sal", "Mr. Whiskers", "Hydrant", "Chopped Cheese"], "answer": 0 },
+          "then": "Right. The camera went to the firehouse. Vee thought the captain should finally learn to take a photo that isn't blurry."
+        },
+        { "say": "I tried. Every picture was of my thumb. Gave the camera to Gus at the park; he said he'd 'shoot the bridge.' Shoot it with the camera, I hope." },
+        {
+          "say": "Took one picture of the bridge. Then I remembered there's a roll inside that isn't mine. Vee would want you to answer this first.",
+          "question": { "q": "Which number is the Astoria police precinct?", "choices": ["114½", "7", "30", "718"], "answer": 0 },
+          "then": "Good. Jojo's got the camera now. Vee's old table at the café. Password's the camera's name."
+        },
+        {
+          "say": "It's been sitting next to the oat milk. Very aesthetic. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Ditmars Brownie", "The Hellgate 35", "The Steinway Snap", "The Queens Polaroid"], "answer": 1 },
+          "then": "The Hellgate 35, one roll left. Develop it somewhere nice. Or don't. Mystery is a look."
+        }
+      ]
+    },
+    "midtown_finance": {
+      "treasure": "The Lucky Ticker",
+      "emoji": "📈",
+      "lore": "A strip of 1929 ticker tape from the one day Vee's grandpa's stock went up. He framed it. The stock went down the next morning and never came back. The frame held its value.",
+      "steps": [
+        { "say": "Vee's grandpa sold insurance out of this exact spot before it was a deli. Her note says: 'The ticker's filed under F, for Fortune. Ask the librarian.'" },
+        {
+          "say": "Filed under F. Then misfiled under P, for Penwright, because I was curious. Vee asked me to check your numbers first.",
+          "question": { "q": "What number is the Astoria firehouse?", "choices": ["Engine 1", "Engine 114", "Engine 7", "Engine 30"], "answer": 2 },
+          "then": "Correct. I lent the frame to the firehouse for their fundraiser auction. Nobody bid. Go see the captain."
+        },
+        { "say": "Nobody bid. Not even the chief, and he collects old paper. Gus said he'd 'hold it for the market to recover.' He's on his bench at the park." },
+        {
+          "say": "Market's been down since '29, kid. I'm a patient investor. Answer me this and we'll talk.",
+          "question": { "q": "Where in Astoria can you pick up a gig from the board?", "choices": ["Steinway Fresh Mart", "Triborough Works", "Harmony Community Chapel", "Rep Count Fitness"], "answer": 1 },
+          "then": "Smart money. Jojo's holding it at the café, Vee's old table. Password's what Vee called it."
+        },
+        {
+          "say": "It's in the tip jar for safekeeping. Ironic, I know. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Golden Bull", "The Bear Market", "The Lucky Ticker", "The Penny Stock"], "answer": 2 },
+          "then": "The Lucky Ticker. Up one day, framed forever. Very on-brand for you."
+        }
+      ]
+    },
+    "night_owl_goth": {
+      "treasure": "The Lamp of Hell Gate",
+      "emoji": "🏮",
+      "lore": "A black iron lantern from the old river lighthouse. It still smells of candle smoke, and some nights it lights itself. Vee kept it in the hallway, 'for guests.'",
+      "steps": [
+        { "say": "That lantern gave me the creeps, and I work nights. Vee's note: 'It sleeps among the books, where the lights go out at closing time.'" },
+        {
+          "say": "It sat in our reading room for a week. Three patrons fainted. One left a five-star review. Answer Vee's question first.",
+          "question": { "q": "Which Astoria place is a quiet chapel?", "choices": ["Harmony Community Chapel", "Radiant Harbor Church", "Hellgate Hall", "The Neon Spoon"], "answer": 0 },
+          "then": "Yes. The firehouse came to check on the smoke smell and took the lantern 'as a precaution.' Ask the captain."
+        },
+        { "say": "It lit itself in the truck. We don't talk about it. Gus took it. He says it reminds him of the old lighthouse. He's at the park, under the bridge." },
+        {
+          "say": "That lantern hung on the river when I was a boy. It's seen things. Tell me something you've seen.",
+          "question": { "q": "What does the pool at Hell Gate Park have strong opinions about?", "choices": ["Sunscreen", "Swim caps", "Cannonballs", "Goggles"], "answer": 1 },
+          "then": "Swim caps. Never forget it. Jojo has the lantern at the café now, Vee's old table. The password is its name."
+        },
+        {
+          "say": "It's been flickering behind the espresso machine all week. Customers love it. I don't. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Ditmars Candle", "The River Ghost", "The Midnight Lamp", "The Lamp of Hell Gate"], "answer": 3 },
+          "then": "The Lamp of Hell Gate. Keep it away from curtains. And mirrors. And me."
+        }
+      ]
+    },
+    "pilates_princess": {
+      "treasure": "The Steinway Mat",
+      "emoji": "🧘",
+      "lore": "Hand-stitched in Astoria's first studio in 1962. It's rumored to fix your posture on its own. Vee did her stretches on it every morning until she was 81.",
+      "steps": [
+        { "say": "Vee stretched on that mat right in front of my counter every morning. Customers stepped over her. Her note says: 'Look where people sit still for hours.'" },
+        {
+          "say": "People do sit still here. Mostly asleep. Vee left the mat with me, and a question for you.",
+          "question": { "q": "Which Astoria place is a supermarket?", "choices": ["Rep Count Fitness", "Harmony Community Chapel", "Steinway Fresh Mart", "Two Bros Who Fight Pizza"], "answer": 2 },
+          "then": "Right. The firefighters borrowed the mat for their stretching. They need it. Go see the captain."
+        },
+        { "say": "We stretched on it once and everyone pulled something. Gus has it now. He does tai chi on it by the river every morning. You know the park." },
+        {
+          "say": "Best posture I've had since 1987. Vee would only give it to someone who pays attention.",
+          "question": { "q": "What does Sal keep open all night?", "choices": ["A pizza place", "A firehouse", "A deli", "A library"], "answer": 2 },
+          "then": "Paying attention, good. Jojo's got the mat rolled up at the café, Vee's old table. Password's the mat's name."
+        },
+        {
+          "say": "It's under the window. Three customers have already done downward dog on it. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Steinway Mat", "The Astoria Reformer", "The Queens Stretch", "The Ditmars Pose"], "answer": 0 },
+          "then": "The Steinway Mat. Stand up straight. I can tell when you don't."
+        }
+      ]
+    },
+    "startup_founder": {
+      "treasure": "The Napkin",
+      "emoji": "🧻",
+      "lore": "The napkin Skyler Beta sketched her very first app on, at a diner in Astoria. Vee picked it up off the floor and kept it. The app didn't work either, but the napkin is a classic.",
+      "steps": [
+        { "say": "Vee collected napkins like other people collect stamps. Her note says: 'The famous one is pressed inside a book. Ask the man who knows where every book is.'" },
+        {
+          "say": "Pressed inside a book on product management. It's the most useful thing in that book. Vee wants you to answer this first.",
+          "question": { "q": "Which Astoria diner has a neon name?", "choices": ["Rockaway Diner", "The Neon Spoon", "Up on Thirty", "Lucky Seven Deli"], "answer": 1 },
+          "then": "Correct. A firefighter borrowed the book to 'learn agile.' The napkin went with it. Ask the captain."
+        },
+        { "say": "We tried agile. The fire didn't wait for the sprint review. Gus took the napkin; he said he'd 'pivot it' into a bookmark. He's at the park." },
+        {
+          "say": "Skyler Beta sat on this bench once and called it 'a third space.' It's a bench. Answer me this.",
+          "question": { "q": "What's the Astoria subway stop called?", "choices": ["Ditmars Terminal", "Queens Junction", "Steinway Square", "Astoria Blvd station"], "answer": 3 },
+          "then": "Good. Jojo's got the napkin at the café, Vee's old table. Password is what everybody calls it."
+        },
+        {
+          "say": "It's laminated now. Chad Kensington tried to buy it for C$0 and 'equity.' Password?",
+          "question": { "q": "What's the password?", "choices": ["The Pitch Deck", "The Napkin", "The Prototype", "The Whiteboard"], "answer": 1 },
+          "then": "The Napkin. Ten apps, three pivots, one napkin. Frame it."
+        }
+      ]
+    },
+    "influencer_soft_glam": {
+      "treasure": "The Starlet Mirror",
+      "emoji": "🪞",
+      "lore": "A vanity mirror from a 1920s Astoria film lot. Everyone looks good in it, allegedly. Vee said it once made a parking ticket officer smile.",
+      "steps": [
+        { "say": "Vee did her lipstick in that mirror before every trip to the deli. Every trip. Her note says: 'The mirror's being looked after by someone who hates selfies.'" },
+        {
+          "say": "I do hate selfies. Especially in the reading room. Vee asked me to ask you something before I tell you more.",
+          "question": { "q": "What's the name of the Astoria rooftop restaurant?", "choices": ["Altitude 718 Rooftop", "Up on Thirty", "Velvet Static", "The Neon Spoon"], "answer": 1 },
+          "then": "Yes. I lent the mirror to the firehouse for their calendar shoot. Go see the captain."
+        },
+        { "say": "Best calendar we ever made. Everyone looked like a movie star. Gus took the mirror for his bench. He says it 'catches the light off the river.'" },
+        {
+          "say": "Looked in it once. Saw myself at twenty-five. Then I put it down. Vee wants to know you've been around.",
+          "question": { "q": "Which Astoria place is a free library?", "choices": ["Ditmars Free Library", "Astoria Community College", "Queensborough University", "Triborough Works"], "answer": 0 },
+          "then": "Good. Jojo's got the mirror at the café now, Vee's old table. The password's the mirror's name."
+        },
+        {
+          "say": "My skin has never looked better. I'm sad to see it go. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Golden Frame", "The Silver Screen", "The Starlet Mirror", "The Soft Glow"], "answer": 2 },
+          "then": "The Starlet Mirror. Ring lights could never. Go be gorgeous."
+        }
+      ]
+    },
+    "arcade_nerd": {
+      "treasure": "Cabinet Zero",
+      "emoji": "🕹️",
+      "lore": "The chip for an arcade game that never shipped. The high score is still set to VEE. Nobody has beaten it, mostly because nobody has a machine that can run it.",
+      "steps": [
+        { "say": "Vee played arcade games here in the '80s, back when it was a candy store. Her note says: 'The chip's hidden in a manual. Ask the man who lends manuals.'" },
+        {
+          "say": "It was taped inside a 1983 programming manual. Overdue since 1984. Vee wants a quick check first.",
+          "question": { "q": "Where in Astoria do players go for gaming matches?", "choices": ["Respawn Arena", "Hellgate Hall", "Reel Queens Cinema", "Rep Count Fitness"], "answer": 0 },
+          "then": "Correct. The firehouse borrowed the manual to fix their radio. Ask the captain."
+        },
+        { "say": "The radio now plays chiptune. We can't turn it off. Gus took the chip; he said his grandson would know what to do. He's on his bench at the park." },
+        {
+          "say": "My grandson said it's 'legendary.' Then he asked me for money. Answer me this and it's yours.",
+          "question": { "q": "What's the name of the club in Astoria?", "choices": ["Velvet Static", "Low Light Lounge", "Hellgate Hall", "Triborough Works"], "answer": 2 },
+          "then": "That's right. Jojo has the chip at the café, Vee's old table. Password's the cabinet's name."
+        },
+        {
+          "say": "I almost used it as a coaster. Pixel from the arena came by twice asking about it. Password?",
+          "question": { "q": "What's the password?", "choices": ["Player One", "Cabinet Zero", "Game Over", "Insert Coin"], "answer": 1 },
+          "then": "Cabinet Zero. High score: VEE. Good luck, it's been unbeaten since 1985."
+        }
+      ]
+    }
+  }
+}

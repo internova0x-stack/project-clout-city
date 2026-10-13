@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { placeById } from "@/lib/city";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type CastLine, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type CastLine, type HuntAdmin, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
-import { REGULARS } from "@/lib/cast";
+import { REGULARS, regularAt } from "@/lib/cast";
+import { getStyle, STYLE_IDS, type StyleId } from "@/lib/styles";
 import { NEWS_KIND_LABEL } from "@/lib/news";
 
 // The Story Studio (/studio): a separate admin page, outside the game. Upload a
@@ -23,7 +24,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -62,6 +63,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
           {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
           {api.newsList && <button aria-pressed={tab === "news"} onClick={() => setTab("news")}>News</button>}
+          {api.huntList && <button aria-pressed={tab === "hunts"} onClick={() => setTab("hunts")}>Hunts</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Metrics</button>}
         </div>
@@ -70,6 +72,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
       {tab === "metrics" && <Metrics api={api} />}
       {tab === "cast" && <CastTab api={api} />}
       {tab === "news" && <NewsTab api={api} />}
+      {tab === "hunts" && <HuntsTab api={api} />}
 
       {tab === "stories" && note && (
         <div className={`studio-note ${note.kind}`} role="status">
@@ -660,6 +663,135 @@ function NewsTab({ api }: { api: StudioApi }) {
           ))}
         </div>
       ))}
+    </section>
+  );
+}
+
+/**
+ * v0.6 treasure hunts: upload a week (checked first), skim all eight tracks, read one in full
+ * (answers marked), then approve. Pause hides a hunt at once; players keep their progress.
+ */
+function HuntsTab({ api }: { api: StudioApi }) {
+  const [rows, setRows] = useState<HuntAdmin[] | null>(null);
+  const [error, setError] = useState<{ text: string; problems?: string[] } | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [json, setJson] = useState("");
+  const [open, setOpen] = useState<Record<string, StyleId>>({});
+  const load = useCallback(async () => {
+    const r = await api.huntList!();
+    if (r.ok) setRows(r.data); else setError({ text: r.error });
+  }, [api]);
+  useEffect(() => { void load(); }, [load]);
+  const go = async (call: () => Promise<{ ok: boolean; error?: string; problems?: string[] }>, done?: string) => {
+    setBusy(true); setError(null); setOk(null);
+    const r = await call();
+    setBusy(false);
+    if (!r.ok) return setError({ text: r.error ?? "Something went wrong.", problems: r.problems });
+    if (done) setOk(done);
+    void load();
+  };
+  const upload = () => go(async () => {
+    const r = await api.huntUpload!(json);
+    if (r.ok) setJson("");
+    return r.ok ? { ok: true } : { ok: false, error: r.error, problems: r.problems };
+  }, "Hunt checked and saved. Skim the tracks, read one in full, then approve it.");
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  return (
+    <section className="stack-12">
+      <section className="studio-card stack-8">
+        <span className="title">Upload a hunt</span>
+        <p className="meta" style={{ margin: 0 }}>
+          Paste a hunt file from <code>content/hunts/</code> (or choose it). It&apos;s checked first: a Monday week, real places with a regular,
+          none touched by a story that week, at least one free or cheap step, all eight tracks, exactly one right answer per question.
+          It runs Monday to Sunday once approved; re-uploading it unchanged keeps it approved.
+        </p>
+        <input type="file" accept="application/json,.json" className="studio-input" aria-label="Hunt file"
+          onChange={async (e) => { const f = e.target.files?.[0]; if (f) setJson(await f.text()); }} />
+        <textarea className="studio-input" rows={4} value={json} onChange={(e) => setJson(e.target.value)} placeholder={'{ "week": "2026-10-26", "id": "…", "tracks": { … } }'} />
+        <div className="row" style={{ gap: 8 }}>
+          <button className="btn btn-taxi btn-sm" disabled={busy || !json.trim()} onClick={() => void upload()}>Check and save</button>
+        </div>
+      </section>
+      {ok && <div className="studio-note ok" role="status"><span className="body-strong">{ok}</span></div>}
+      {error && (
+        <div className="studio-note error" role="alert">
+          <span className="body-strong">{error.text}</span>
+          {error.problems && <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>{error.problems.map((p) => <li key={p} className="meta">{p}</li>)}</ul>}
+        </div>
+      )}
+      {rows === null && !error && <p className="meta">Loading…</p>}
+      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No hunts yet. Upload next week&apos;s file by Sunday.</p></section>}
+      {rows?.map((h) => {
+        const end = new Date(`${h.week}T12:00:00Z`); end.setUTCDate(end.getUTCDate() + 6);
+        const live = today >= h.week && today <= end.toISOString().slice(0, 10);
+        const style = open[h.id] ?? STYLE_IDS[0];
+        const t = h.data.tracks[style];
+        const max = Math.max(1, ...h.atStep);
+        return (
+          <article key={h.id} className="studio-card stack-12">
+            <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+              <div>
+                <span className="meta">Week of {new Date(`${h.week}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}{live ? " · running now" : h.week > today ? " · upcoming" : " · ended"}</span>
+                <span className="title" style={{ display: "block" }}>🗺️ {h.data.theme}</span>
+              </div>
+              <span className={`tag studio-review ${h.status === "approved" ? "approved" : h.status === "paused" ? "declined" : "draft"}`}>{h.status === "review" ? "needs review" : h.status}</span>
+            </div>
+            <p className="body" style={{ margin: 0 }}>{h.data.intro}</p>
+            <p className="meta" style={{ margin: 0 }}>Route: {h.data.places.map((id, i) => `${i + 1}. ${placeById(id)?.name ?? id} (${regularAt(id)?.name ?? "?"})`).join(" → ")}</p>
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              {h.status !== "approved" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "approved"), "Approved. It runs Monday to Sunday of its week.")}>Approve</button>}
+              {h.status === "approved" && <button className="btn btn-destructive btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "paused"), "Paused. Players no longer see it; their progress is kept.")}>Pause</button>}
+              {h.status !== "review" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "review"))}>Back to review</button>}
+            </div>
+            {h.joined > 0 && (
+              <div className="stack-4">
+                <span className="meta">{h.joined} joined · {h.completed} found it ({Math.round((100 * h.completed) / h.joined)}%) · still on each step:</span>
+                {h.atStep.map((n, i) => (
+                  <div key={i} className="row" style={{ gap: 8 }}>
+                    <span className="meta" style={{ width: 52 }}>Step {i + 1}</span>
+                    <span className="gig-progress" style={{ flex: 1 }}><span style={{ width: `${(100 * n) / max}%` }} /></span>
+                    <span className="meta" style={{ width: 36, textAlign: "right" }}>{n}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="stack-4">
+              <span className="overline">Skim the eight tracks</span>
+              {STYLE_IDS.map((sid) => {
+                const x = h.data.tracks[sid];
+                const fin = x.steps[x.steps.length - 1].question!;
+                return (
+                  <button key={sid} className={`list-row${sid === style ? " selected" : ""}`} style={{ textAlign: "left" }} onClick={() => setOpen({ ...open, [h.id]: sid })}>
+                    <span aria-hidden="true">{x.emoji}</span>
+                    <span style={{ flex: 1 }}>
+                      <span className="body-strong" style={{ display: "block" }}>{x.treasure} <span className="meta">· {getStyle(sid).label}</span></span>
+                      <span className="meta">Finale: {fin.q} → {fin.choices[fin.answer]}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="stack-8">
+              <span className="overline">Read in full: {getStyle(style).label}</span>
+              <p className="body" style={{ margin: 0 }}><b>{t.emoji} {t.treasure}.</b> {t.lore}</p>
+              {t.steps.map((st, i) => (
+                <div key={i} className="stack-4 hunt-read">
+                  <span className="meta">Step {i + 1} · {regularAt(h.data.places[i])?.name} at {placeById(h.data.places[i])?.name}</span>
+                  <span className="body">&ldquo;{st.say}&rdquo;</span>
+                  {st.question && (
+                    <>
+                      <span className="body-strong">Q: {st.question.q}</span>
+                      <span className="meta">{st.question.choices.map((c, j) => (j === st.question!.answer ? `✓ ${c}` : c)).join(" · ")}</span>
+                      <span className="body">&ldquo;{st.then}&rdquo;</span>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 }

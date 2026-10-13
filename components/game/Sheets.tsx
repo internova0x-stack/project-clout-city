@@ -12,6 +12,8 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { EffectChips, useGameNow } from "../city/Common";
 import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
+import { HuntTab } from "../hunt/Hunt";
+import type { HuntState } from "@/lib/hunts";
 
 const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to" };
 
@@ -30,13 +32,17 @@ function resetTimeLocal(): string {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
   story?: StoryFeed | null; onStoryTask?: (task: StoryFeed["tasks"][number]) => void;
+  /** v0.6 treasure hunts (migration 0018): the Hunt tab. */
+  hunt?: { state: HuntState; style: string; busy: boolean; onJoin: () => void };
+  tab?: "daily" | "goals" | "hunt";
 }) {
-  const [tab, setTab] = useState<"daily" | "goals">("daily");
+  const [tab, setTab] = useState<"daily" | "goals" | "hunt">(initialTab ?? "daily");
+  useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
   const { cliqueSize } = ECONOMY.invites;
   const tasks = city?.tasks ?? [];
   const done = tasks.filter((t) => t.done_at).length;
@@ -47,8 +53,11 @@ export function TasksSheet({
         <div className="segmented" role="group" aria-label="Tasks">
           <button aria-pressed={tab === "daily"} onClick={() => setTab("daily")}>Daily</button>
           <button aria-pressed={tab === "goals"} onClick={() => setTab("goals")}>Goals</button>
+          {hunt && <button aria-pressed={tab === "hunt"} onClick={() => setTab("hunt")}>Hunt{hunt.state.hunt && !hunt.state.hunt.completedAt ? " 🗺️" : ""}</button>}
         </div>
-        {tab === "daily" ? (
+        {tab === "hunt" && hunt ? (
+          <HuntTab state={hunt.state} style={hunt.style} busy={hunt.busy} onJoin={hunt.onJoin} onOpenPlace={onOpenPlace} />
+        ) : tab === "daily" ? (
           <div className="stack-12">
             {!partyDone && (
               <div className="select-card" style={{ cursor: "pointer" }} onClick={onOpenParty} role="button" tabIndex={0}>

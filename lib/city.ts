@@ -34,6 +34,11 @@ export const CITY_ECONOMY = {
     big: { confidence: 80, chance: 0.22, payMin: 15, payMax: 20, energy: 3, waitMinutes: 240 },
   },
   shiftEnergy: 25,
+  /**
+   * Treasure hunts (v0.6): cash about a pro gig (8 to 10 shifts), clout about 15 to 20% of an
+   * active player's week, a wrong answer waits 10 minutes, a badge after four hunts.
+   */
+  hunt: { cash: 1080, clout: 250, retryMinutes: 10, badgeAfter: 4 },
 } as const;
 
 // ---------------------------------------------------------------------------

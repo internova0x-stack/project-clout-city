@@ -4,6 +4,7 @@
 
 import type { Arc, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
+import type { HuntFile } from "./hunts.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -90,6 +91,22 @@ export interface StudioApi {
   newsUpload?(json: string): Promise<Admin<number> & { problems?: string[] }>;
   newsStatus?(id: string, status: NewsAdminItem["status"]): Promise<Admin<null>>;
   newsReschedule?(id: string, day: string): Promise<Admin<null>>;
+  /** v0.6 treasure hunts (migration 0018). Uploads are checked with lib/hunts.ts first. */
+  huntList?(): Promise<Admin<HuntAdmin[]>>;
+  huntUpload?(json: string): Promise<Admin<null> & { problems?: string[] }>;
+  huntStatus?(id: string, status: HuntAdmin["status"]): Promise<Admin<null>>;
+}
+
+/** A hunt as the Studio sees it: the whole file (answers included), its status and how it's going. */
+export interface HuntAdmin {
+  id: string;
+  week: string;
+  status: "review" | "approved" | "paused";
+  data: HuntFile;
+  joined: number;
+  completed: number;
+  /** Players still on each step (index 0 is step 1): where they get stuck. */
+  atStep: number[];
 }
 
 export interface NewsAdminItem extends NewsItem {
@@ -124,6 +141,9 @@ const ERRORS: Record<string, string> = {
   unknown_line: "That line is gone.",
   unknown_news: "That news item is gone.",
   bad_news: "That isn't a news week.",
+  unknown_hunt: "That hunt is gone.",
+  bad_hunt: "That isn't a hunt file.",
+  hunts_week_key: "Another hunt already has that week. Pause it or give this one the same id to replace it.",
 };
 
 export function studioError(message: string | undefined): string {

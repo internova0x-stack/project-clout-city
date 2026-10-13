@@ -7,6 +7,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
 - `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries. **Wins over the older docs** for those features.
+- `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
 - `docs/01-game-concept-note.md`: the big picture.
 - `docs/02-clarifications-and-updates-v2.md`: game rules and P1 scope. **Wins on rules.**
@@ -35,7 +36,8 @@ components live in `app/globals.css`.
   first session with sample data (development only). `/preview/home` runs the city on an
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
-  date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings. `/preview/studio` shows the Story Studio.
+  date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 
 ## Rules for this codebase
@@ -60,5 +62,6 @@ components live in `app/globals.css`.
 - No real brand names; businesses are invented. Copy is satirical and never
   promises features that aren't built.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
-  Studio (answers must never reach a player's bundle); players get `story_feed()`.
+  Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the
+  same: `content/hunts/*.json` carries answers; players get `hunt_state()`.
 - Modules imported by tests use explicit `.ts` extensions for their own imports.

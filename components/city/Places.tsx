@@ -13,6 +13,7 @@ import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
 import type { Regular } from "@/lib/cast";
+import type { HuntResult } from "@/lib/hunts";
 import { placeStory, type StoryFeed } from "@/lib/storyFeed";
 import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
@@ -52,6 +53,8 @@ export interface PlaceHandlers {
   };
   /** Crew outings: "Bring the crew" on any place with a crew activity, and tonight's progress. */
   crew?: { outings: CrewOuting[]; onBring: (place: Place) => void };
+  /** v0.6 treasure hunts (joined, unfinished): talking to a regular may be the next clue or question. */
+  hunt?: { talk: (placeId: string) => Promise<HuntResult>; answer: (choice: number) => Promise<HuntResult> };
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -153,23 +156,68 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
 }
 
 /** v0.6: the regular stands on the illustration with a speech-bubble label; each tap says the
- * next line, in a bubble just below the picture so the place stays visible. */
-function PlaceArtWithRegular({ place, daytime, talk }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"] }) {
+ * next line, in a bubble just below the picture so the place stays visible. For a player on a
+ * treasure hunt, the first tap asks the regular about it: at the right place that's the clue,
+ * and sometimes a question to answer right there in the bubble. */
+type HuntLine = { say: string; question?: { q: string; choices: string[] }; note?: string; tone?: "hint" | "found" };
+
+function PlaceArtWithRegular({ place, daytime, talk, hunt }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"] }) {
   const [n, setN] = useState(-1);
+  const [huntLine, setHuntLine] = useState<HuntLine | null>(null);
+  const [asking, setAsking] = useState(false);
   const first = talk?.(place, 0) ?? null;
   const said = first && n >= 0 ? talk!(place, n) : null;
+  const firstName = first?.regular.name.split(" ")[0] ?? "";
+  const onTap = async () => {
+    // Ask about the hunt on the first tap, and again after a "stop in first" hint.
+    if (!hunt || (n >= 0 && huntLine?.tone !== "hint") || (huntLine && huntLine.tone !== "hint")) { setHuntLine(null); setN((x) => x + 1); return; }
+    setAsking(true);
+    const r = await hunt.talk(place.id);
+    setAsking(false);
+    if (r.ok && r.line) { setN(-1); return setHuntLine(r.line); }
+    if (!r.ok && r.code === "visit_first") {
+      return setHuntLine({ say: `${firstName} has something for your hunt.`, note: "Do something here first, then ask again.", tone: "hint" });
+    }
+    setN(0);
+  };
+  const onAnswer = async (i: number) => {
+    if (!hunt || !huntLine?.question) return;
+    setAsking(true);
+    const r = await hunt.answer(i);
+    setAsking(false);
+    if (!r.ok) return setHuntLine({ ...huntLine, note: r.error });
+    if (!r.correct) return setHuntLine({ ...huntLine, note: "Not quite. They'll ask again in 10 minutes." });
+    setHuntLine({ say: r.line?.say ?? "That's it.", tone: r.reward ? "found" : undefined, note: r.reward ? "🗺️ Treasure found! It's in your Collection." : undefined });
+  };
   return (
     <div className="stack-8">
       <div className="place-art-wrap">
         <PlaceArt place={place} daytime={daytime} />
         {first && (
-          <button className="regular-tag" onClick={() => setN((x) => x + 1)} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
+          <button className="regular-tag" onClick={() => void onTap()} disabled={asking} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
             <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
-            <span>{n < 0 ? `💬 ${first.regular.name.split(" ")[0]}` : "Tap for more"}</span>
+            <span>{asking ? "…" : n < 0 && !huntLine ? `💬 ${firstName}` : "Tap for more"}</span>
           </button>
         )}
       </div>
-      {said && (
+      {huntLine && (
+        <div className={`regular-bubble hunt-bubble${huntLine.tone === "found" ? " found" : ""}`} role="status">
+          <span className="meta" style={{ display: "block" }}>🗺️ {first!.regular.name} · {first!.regular.title}</span>
+          {huntLine.tone === "hint" ? huntLine.say : <>&ldquo;{huntLine.say}&rdquo;</>}
+          {huntLine.question && (
+            <div className="stack-8" style={{ marginTop: 10 }}>
+              <span className="title" style={{ display: "block" }}>{huntLine.question.q}</span>
+              <div className="hunt-choices">
+                {huntLine.question.choices.map((c, i) => (
+                  <button key={c} className="btn btn-secondary btn-sm" disabled={asking} onClick={() => void onAnswer(i)}>{c}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          {huntLine.note && <span className="meta hunt-note" style={{ display: "block" }}>{huntLine.note}</span>}
+        </div>
+      )}
+      {said && !huntLine && (
         <div className="regular-bubble" role="status">
           <span className="meta" style={{ display: "block" }}>{first!.regular.name} · {first!.regular.title}</span>
           &ldquo;{said.line}&rdquo;
@@ -195,7 +243,7 @@ export function LocationSheet({
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
         <div className="stack-16">
-          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} />
+          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} />
           <StoryBanners place={place} story={handlers.story ?? null} />
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>

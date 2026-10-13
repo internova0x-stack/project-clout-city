@@ -36,6 +36,7 @@ import { PhoneModal, type App } from "./city/Phone";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
 import { newsGossip, splitNews, type NewsItem } from "@/lib/news";
+import type { HuntApi, HuntState } from "@/lib/hunts";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
@@ -103,6 +104,7 @@ export function GameShell({
   dating,
   crew,
   cityNews,
+  hunt,
   roomMood = "dream",
 }: {
   player: Player;
@@ -127,6 +129,8 @@ export function GameShell({
   crew?: CrewApi;
   /** v0.6 City News: published items (news_feed(), migration 0017). */
   cityNews?: () => Promise<NewsItem[]>;
+  /** v0.6 treasure hunts (migration 0018); without it there's no Hunt tab. */
+  hunt?: HuntApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -178,6 +182,13 @@ export function GameShell({
       } catch { /* private mode: skip the card */ }
     });
   }, [cityNews]);
+  // v0.6 treasure hunts: null until hunt_state() answers (no migration, no Hunt tab).
+  const [huntState, setHuntState] = useState<HuntState | null>(null);
+  useEffect(() => {
+    if (!hunt) return;
+    void hunt.state().then((r) => r.ok && setHuntState(r.state));
+  }, [hunt]);
+  const huntOn = !!huntState?.hunt?.joined && !huntState.hunt.completedAt;
   const [feed, setFeed] = useState<StoryFeed | null>(initialStory);
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [catalog, setCatalog] = useState<StoreProduct[] | null>(initialCatalog);
@@ -464,9 +475,27 @@ export function GameShell({
       if (!r) return null;
       const story = feed?.chatter?.find((t) => t.lines)?.lines ?? null;
       // Studio lines first, then this week's city news as gossip.
-      const live = { [r.id]: [...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1)] };
+      const live = { [r.id]: [...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
       return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: CAST_LINES }) };
     },
+    hunt: hunt && huntOn ? {
+      talk: async (placeId) => {
+        const r = await hunt.talk(placeId);
+        if (r.ok) setHuntState(r.state);
+        return r;
+      },
+      answer: async (choice) => {
+        const r = await hunt.answer(choice);
+        if (!r.ok) return r;
+        setHuntState(r.state);
+        if (r.reward) {
+          setGain({ cash: r.reward.cash, clout: r.reward.clout });
+          setToast(r.reward.badge ? "🏅 Treasure Hunter badge! Four hunts, four treasures." : `🗺️ Found it: ${r.state.cards[0]?.treasure ?? "the treasure"}. It's in your Collection.`);
+          if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+        }
+        return r;
+      },
+    } : undefined,
     chatter: (p) => {
       const { who, role } = npcRole(p);
       // The story's current phase first, everyday gossip otherwise; a new line every ten minutes.
@@ -860,6 +889,16 @@ export function GameShell({
         onOpenPlace={openPlace}
         story={storyOn ? feed : null}
         onStoryTask={onStoryTask}
+        hunt={hunt && huntState ? {
+          state: huntState, style: me.starting_style, busy: busy === "hunt",
+          onJoin: () => {
+            setBusy("hunt");
+            void hunt.join().then((r) => {
+              setBusy(null);
+              if (r.ok) setHuntState(r.state); else setToast(r.error);
+            });
+          },
+        } : undefined}
       />
       <EventsSheet
         open={panel === "events"}
@@ -910,6 +949,7 @@ export function GameShell({
             products={products}
             h={money}
             badge={!!feed?.badges.some((b) => b.id === "postcard-collector")}
+            huntCards={huntState?.cards}
           />
           <LookSheet
             open={panel === "look"}

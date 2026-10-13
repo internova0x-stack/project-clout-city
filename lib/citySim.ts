@@ -56,6 +56,8 @@ function addDays(day: string, n: number): string {
 export type SimApi = CityApi & {
   storyEvent(ev: StoryEvent): Promise<CityResult>;
   storyClout(n: number): void;
+  /** A treasure hunt's finale pays cash and clout (the preview's hunt runs on the dev server). */
+  huntReward(cash: number, clout: number): void;
   /** What the preview's pretend Stripe webhook grants. */
   grantCollector(sku: string): void;
   grantTicket(clout: number): void;
@@ -204,6 +206,10 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     },
     storyClout(n) {
       p().clout += n;
+    },
+    huntReward(cash, clout) {
+      p().bank_cash += cash;
+      p().clout += clout;
     },
     grantCollector(sku) {
       const item = itemBySku(sku);

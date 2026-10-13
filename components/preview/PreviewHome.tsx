@@ -12,6 +12,8 @@ import { CLUB_EVENTS, placeById } from "@/lib/city";
 import type { ChatApi } from "@/lib/chat";
 import type { DatingApi } from "@/lib/dating";
 import type { CrewApi } from "@/lib/crew";
+import type { HuntApi } from "@/lib/hunts";
+import { previewHuntAnswer, previewHuntJoin, previewHuntSetup, previewHuntState, previewHuntTalk } from "@/app/preview/huntActions";
 import { previewCrewCreate, previewCrewInbox, previewCrewMembers, previewCrewReset, previewCrewRespond, previewCrewWent } from "@/app/preview/crewActions";
 import {
   previewCrush, previewCrushStatus, previewDateCancel, previewDateCandidates, previewDateInvite, previewDateRespond, previewDateWent, previewDatingInbox,
@@ -27,7 +29,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, huntPreset = "new",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -43,6 +45,8 @@ export function PreviewHome({
   datingPreset?: string;
   /** Start crew outings in a set state: "invite", "tonight", "full" or "empty". */
   crewPreset?: string;
+  /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
+  huntPreset?: string;
 }) {
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
@@ -172,6 +176,26 @@ export function PreviewHome({
       members: previewCrewMembers, create: previewCrewCreate, respond: previewCrewRespond,
     };
   }, [crewPreset, sim]);
+  // The hunt runs on the dev server (answers stay there); visits come from the sim's own day.
+  const huntApi = useMemo<HuntApi>(() => {
+    let started = false;
+    return {
+      async state() {
+        if (!started) { started = true; return previewHuntSetup(huntPreset, player.starting_style); }
+        return previewHuntState();
+      },
+      join: () => previewHuntJoin(player.starting_style),
+      async talk(placeId) {
+        const s = await sim.refresh();
+        return previewHuntTalk(placeId, s.ok && (s.state.visitsToday[placeId] ?? 0) > 0);
+      },
+      async answer(choice) {
+        const r = await previewHuntAnswer(choice);
+        if (r.ok && r.reward) sim.huntReward(r.reward.cash, r.reward.clout);
+        return r;
+      },
+    };
+  }, [huntPreset, player.starting_style, sim]);
   const noop = async () => {};
   return (
     <GameShell
@@ -188,6 +212,7 @@ export function PreviewHome({
       dating={cityOff ? undefined : dating}
       crew={cityOff ? undefined : crewApi}
       cityNews={cityOff ? undefined : previewNews}
+      hunt={cityOff ? undefined : huntApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,
