@@ -23,9 +23,11 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, story = null, realMoney, initialCategory = "fashion",
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion",
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
+  /** #15: owned clothes can be put on straight from the Shop. */
+  onEquip?: (itemId: number, on: boolean) => void;
   story?: StoryFeed | null;
   /** Collector pieces are sold for real cash only (Stripe); without it they stay hidden. */
   realMoney?: RealMoney;
@@ -41,9 +43,20 @@ export function ShopSheet({
   const [confirm, setConfirm] = useState<{ item: ShopItem; mode: "buy" | "rent" } | null>(null);
   const owned = ownedSkus(state);
   const { player } = state;
+  // Owned clothes get a Wear button instead of a bare "Owned" (#15).
+  const wearControl = (sku: string) => {
+    const mine = state.items.find((i) => i.sku === sku && i.category === "fashion");
+    if (!mine || !onEquip || !itemBySku(sku)?.wear) return null;
+    return (
+      <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
+        {mine.equipped ? "Wearing ✓" : "Wear"}
+      </button>
+    );
+  };
   // Story-only items (e.g. the "Forever Our Bird" hoodie) show only while a story has them on sale.
   // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up).
   const items = SHOP_ITEMS.filter((i) => i.category === cat
+    && (i.category !== "fashion" || !!i.wear) // clothing that can't be worn isn't sold (#15)
     && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku))
     && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku)));
   return (
@@ -77,7 +90,7 @@ export function ShopSheet({
                     <Stars rating={item.rating} />
                     <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)} · worth {formatCash(p?.value ?? 0)}</span>
                     {isOwned || p?.owned ? (
-                      <span className="owned-chip">Owned</span>
+                      wearControl(item.sku) ?? <span className="owned-chip">Owned</span>
                     ) : p?.pending || realMoney?.busy === `buy:${item.sku}` ? (
                       <button className="btn btn-taxi btn-sm" disabled>{p?.pending ? "Unlocking…" : "Opening checkout…"}</button>
                     ) : (
@@ -99,9 +112,9 @@ export function ShopSheet({
                   <Stars rating={item.rating} />
                   <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
                   {isOwned ? (
-                    <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
+                    wearControl(item.sku) ?? <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
                   ) : (
-                    <div className="stack-4">
+                    <div className="buy-rent">
                       <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
                         {formatCash(item.price)}
                       </button>
@@ -155,9 +168,11 @@ export function ShopSheet({
 // Possessions (C25): bank cash, then items by category; sell at 60%.
 // ---------------------------------------------------------------------------
 export function PossessionsSheet({
-  open, onClose, state, style, busy, onSell, onOpenCollection,
+  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection,
 }: {
   open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean>;
+  /** #15: owned clothes can be put on from their detail. */
+  onEquip?: (itemId: number, on: boolean) => void;
   /** Postcards live in the Collection, not here (they don't count toward net worth). */
   onOpenCollection?: () => void;
 }) {
@@ -249,6 +264,15 @@ export function PossessionsSheet({
                     <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Sells for (60%)</span><span className="body-strong">{formatCash(sellPrice(detail.value))}</span></div>
                   )}
                 </div>
+                {(() => {
+                  const live = state.items.find((i) => i.id === detail.id);
+                  if (!live || !onEquip || !item.wear) return null;
+                  return (
+                    <button className={`btn ${live.equipped ? "btn-secondary" : "btn-taxi"}`} disabled={busy !== null} onClick={() => onEquip(live.id, !live.equipped)}>
+                      {live.equipped ? "Take it off" : "Wear it"}
+                    </button>
+                  );
+                })()}
                 {detail.acquired === "collector" ? (
                   <p className="meta" style={{ margin: 0 }}>✨ A collector piece, bought with real cash. It can&apos;t be sold for virtual cash.</p>
                 ) : (
