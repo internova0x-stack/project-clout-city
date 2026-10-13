@@ -200,6 +200,7 @@ The caps keep meals as the main source of Energy, so dining stays worth visiting
 - **Cook a meal** at home: takes a short personal timer, uses one meal from the fridge, and restores Energy. Per meal it's cheaper than eating out, but it pays no clout and isn't capped beyond what's in the fridge.
 - **Groceries are consumables:** they don't appear on the Net Worth screen and can't be sold. No spoilage in P1.
 - **Balance:** cooking is the budget option, dining is the social and clout option, and venue snacks are the convenience option. Prices are tuned so all three stay worth using.
+- **Built (v0.8 step 3, owner Oct 13):** Steinway Fresh Mart sells a Snack run (C$12, 2 meals) and Meal prep for the week (C$35, 7 meals), only when you're there. The fridge holds 10 meals (players.fridge_meals); a bundle that doesn't fit isn't sold. The Kitchen at home shows the fridge and Cook a meal: one meal for +25 Energy, a 6-second countdown with Skip, no clout, refused at full Energy; an empty fridge offers "Go shopping" (migration 0027, `buy_groceries()` and `cook()`). Groceries are in the Bank as "Groceries · Meal prep for the week".
 
 ## 7. Later features
 

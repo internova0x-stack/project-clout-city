@@ -52,3 +52,35 @@ test("rest is home only and capped; the bar sells Energy at clubs and the lounge
   assert.equal(drink.ok && drink.state.player.clout, sit.ok && sit.state.player.clout, "no clout");
   assert.equal((await api.barDrink!("lucky-seven-deli")).ok, false, "no bar at the deli");
 });
+
+test("groceries fill the fridge at the supermarket; cooking at home empties it (v0.8 step 3)", async () => {
+  const { createSimApi, sampleCityState } = await import("../lib/citySim.ts");
+  const { cookAvailability, groceryAvailability, isSupermarket } = await import("../lib/cityState.ts");
+  const { CITY_ECONOMY, PLACES } = await import("../lib/city.ts");
+  const g = CITY_ECONOMY.groceries;
+  // Cooking is the budget option: cheaper per Energy than any meal out.
+  const perEnergy = Math.min(...g.bundles.map((b) => b.price / b.meals)) / g.cook.energy;
+  const cheapestOut = Math.min(...PLACES.flatMap((p) => p.actions).filter((a) => a.kind === "eat" && (a.price ?? 0) > 0 && a.energy < 0).map((a) => a.price! / -a.energy));
+  assert.ok(perEnergy < cheapestOut, `cooking ${perEnergy.toFixed(2)} vs eating out ${cheapestOut.toFixed(2)} per Energy`);
+  assert.deepEqual(PLACES.filter((p) => isSupermarket(p.tags)).map((p) => p.id), ["steinway-fresh"]);
+
+  const api = createSimApi(sampleCityState({ energy: 40, fridge_meals: 0 }));
+  const prep = g.bundles.find((b) => b.id === "meal-prep")!;
+  const empty = await api.cook!();
+  assert.ok(!empty.ok && /fridge is empty/.test(empty.error));
+  assert.equal((await api.buyGroceries!("steinway-fresh", "meal-prep")).ok, false, "be there first");
+  await api.travel!("steinway-fresh", "taxi");
+  const bought = await api.buyGroceries!("steinway-fresh", "meal-prep");
+  assert.ok(bought.ok && bought.gain?.cash === -prep.price && bought.state.player.fridge_meals === 7);
+  assert.ok((await api.buyGroceries!("steinway-fresh", "snack-run")).ok);
+  const full = await api.buyGroceries!("steinway-fresh", "snack-run");
+  assert.ok(!full.ok && /fridge is full/.test(full.error));
+  assert.deepEqual(groceryAvailability(g.bundles[0], { ...bought.state, player: { ...bought.state.player, fridge_meals: 9 } }), { ok: false, reason: "Your fridge only has room for 1 more" });
+  const away = await api.cook!();
+  assert.ok(!away.ok && /Go home first/.test(away.error));
+  const home = await api.travel!("home", "taxi");
+  assert.ok(home.ok && cookAvailability(home.state).ok);
+  const meal = await api.cook!();
+  assert.ok(meal.ok && meal.gain?.energy === g.cook.energy && meal.state.player.fridge_meals === 8);
+  assert.equal(meal.ok && meal.state.items.length, home.ok && home.state.items.length, "groceries are not possessions");
+});

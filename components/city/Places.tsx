@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { actionAvailability, barDrinkAvailability, eventAvailability, hasBar, type CityState } from "@/lib/cityState";
+import { actionAvailability, barDrinkAvailability, eventAvailability, groceryAvailability, hasBar, isSupermarket, type CityState } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
@@ -35,6 +35,8 @@ export interface PlaceHandlers {
   onOpenGigs: () => void;
   /** v0.8 a drink at the bar (clubs and the lounge, migration 0026). */
   onBarDrink?: (placeId: string) => void;
+  /** v0.8 grocery bundles at supermarkets (migration 0027). */
+  onBuyGroceries?: (placeId: string, bundleId: string) => void;
   /** The story world (v0.4): closures, prices, story events and tasks. */
   story?: StoryFeed | null;
   onAttendStoryEvent?: (eventId: string) => void;
@@ -110,6 +112,31 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
                 onClick={() => (a.kind === "gigs" ? handlers.onOpenGigs() : handlers.onAction(place.id, a.id))}
               >
                 {handlers.busy === key ? "…" : a.kind === "gigs" ? "Open" : spends ? formatCash(paid) : a.kind === "shift" ? "Work" : "Go"}
+              </button>
+            )}
+          </div>
+        );
+      })}
+      {handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
+        const av = groceryAvailability(b, state);
+        const room = CITY_ECONOMY.groceries.fridgeMax - (state.player.fridge_meals ?? 0);
+        return (
+          <div key={b.id} className="action-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <span className="title" style={{ display: "block" }}>{b.emoji} {b.label}</span>
+              {!compact && <span className="subtext" style={{ display: "block" }}>{b.blurb}</span>}
+              <span className="fx-row">
+                <span className="fx fx-cost">−{formatCash(b.price)}</span>
+                <span className="fx">🧊 +{b.meals} meals</span>
+              </span>
+              <span className="meta" style={{ display: "block" }}>
+                {formatCash(Math.round(b.price / b.meals))} a meal{av.ok ? ` · room for ${room} more in your fridge` : ""}
+              </span>
+              {!av.ok && <span className="meta reason" style={{ display: "block" }}>{av.reason}</span>}
+            </div>
+            {away ? <span className="lock-chip">On arrival</span> : (
+              <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onBuyGroceries!(place.id, b.id)}>
+                {handlers.busy === `groceries:${b.id}` ? "…" : formatCash(b.price)}
               </button>
             )}
           </div>

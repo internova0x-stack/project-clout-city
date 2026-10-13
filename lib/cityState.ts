@@ -25,6 +25,8 @@ export interface CityPlayer {
   purchases_count: number;
   /** v0.8 (migration 0025): where the player is, a place id; null (or missing) is home. */
   at_place?: string | null;
+  /** v0.8 (migration 0027): meals in the fridge; missing until the migration runs. */
+  fridge_meals?: number;
 }
 
 export interface DailyTask {
@@ -121,6 +123,10 @@ export interface CityApi {
   rest?(kind: RestKind): Promise<CityResult>;
   /** v0.8 a drink at a club or lounge bar (migration 0026): Energy for cash, no clout. */
   barDrink?(placeId: string): Promise<CityResult>;
+  /** v0.8 groceries (migration 0027): a bundle at the supermarket you're at, into the fridge. */
+  buyGroceries?(placeId: string, bundleId: string): Promise<CityResult>;
+  /** v0.8 cook a meal at home from the fridge. */
+  cook?(): Promise<CityResult>;
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
@@ -143,10 +149,13 @@ const ERRORS: Record<string, string> = {
   needs_clout: "This client googled you. Come back with more clout.",
   not_here: "You're not there yet. Go there first.",
   too_far_to_walk: "That's too far to walk. Your shoes have filed a complaint.",
-  not_home: "Go home first. Napping on the subway doesn't count.",
+  not_home: "Go home first. Your bed and your kitchen are both there.",
   rested_out: "You've rested enough for today. The couch needs a break from you.",
   bad_rest: "That isn't a way to rest.",
-  full_energy: "You're already at full Energy. The bartender suggests water.",
+  fridge_full: "Your fridge is full. Eat something first, or play fridge Tetris.",
+  fridge_empty: "The fridge is empty. The light still works, though.",
+  unknown_bundle: "That isn't on the shelves.",
+  full_energy: "You're already at full Energy. Save it for later.",
   no_car: "You don't have a car. The Shop has some, and so does the subway.",
   unknown_place: "That place isn't on the map.",
   gig_expired: "That offer expired at midnight.",
@@ -217,6 +226,27 @@ export const hasBar = (tags: string[]) => tags.some((t) => (CITY_ECONOMY.barDrin
 export function barDrinkAvailability(s: CityState): Availability {
   if (s.player.energy >= 100) return { ok: false, reason: "You're already at full Energy" };
   if (s.player.bank_cash < CITY_ECONOMY.barDrink.price) return { ok: false, reason: "Not enough cash" };
+  return { ok: true };
+}
+
+export type GroceryBundle = (typeof CITY_ECONOMY.groceries.bundles)[number];
+
+/** Supermarkets sell grocery bundles. */
+export const isSupermarket = (tags: string[]) => tags.some((t) => (CITY_ECONOMY.groceries.tags as readonly string[]).includes(t));
+
+/** Mirrors buy_groceries: the bundle has to fit in the fridge, then cash. */
+export function groceryAvailability(b: GroceryBundle, s: CityState): Availability {
+  const room = CITY_ECONOMY.groceries.fridgeMax - (s.player.fridge_meals ?? 0);
+  if (b.meals > room) return { ok: false, reason: room ? `Your fridge only has room for ${room} more` : "Your fridge is full" };
+  if (s.player.bank_cash < b.price) return { ok: false, reason: "Not enough cash" };
+  return { ok: true };
+}
+
+/** Mirrors cook(): home only, a meal in the fridge, and room for Energy. */
+export function cookAvailability(s: CityState): Availability {
+  if ((s.player.at_place ?? null) !== null) return { ok: false, reason: "Go home first" };
+  if (!s.player.fridge_meals) return { ok: false, reason: "The fridge is empty" };
+  if (s.player.energy >= 100) return { ok: false, reason: "You're already at full Energy" };
   return { ok: true };
 }
 

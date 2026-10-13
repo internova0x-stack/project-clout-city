@@ -74,6 +74,12 @@ export async function barDrink(placeId: string) {
     return { cash: r.cash ?? 0, energy: r.energy ?? 0 } as Gain;
   });
 }
+export async function buyGroceries(placeId: string, bundleId: string) {
+  return run("buy_groceries", { p_place: placeId, p_bundle: bundleId }, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }));
+}
+export async function cook() {
+  return run("cook", {}, (d) => ({ energy: (d as { energy?: number }).energy ?? 0 }));
+}
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });
 }
