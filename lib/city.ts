@@ -513,7 +513,7 @@ export const PLACES: Place[] = [
   // v0.10 (spec section 7): the lotto shop, outside Astoria on purpose; you travel to play.
   {
     id: "lucky-star", name: "Lucky Star Lotto", emoji: "🌟", category: "places", neighborhood: "Flushing",
-    at: [40.7593, -73.8301], depth: "full", template: "lotto", palette: ["#7A4FD6", "#FF2E88", "#14111A"],
+    at: [40.7593, -73.8301], depth: "full", template: "lotto", palette: ["#FFD84D", "#FF2E88", "#2A2530"],
     tags: ["lotto", "flushing"],
     lore: "A narrow shop on a loud Flushing corner: a neon star, a rack of scratch cards and Benny, who has never once bought a ticket. Odds are printed on every card, which Benny calls \"the boring part\".",
     actions: [
