@@ -5,7 +5,7 @@
 
 import {
   BoxGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Group, Mesh,
-  MeshStandardMaterial, SphereGeometry, type BufferGeometry, type Material, type Object3D,
+  MeshStandardMaterial, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import { FURNITURE, type RoomItem } from "@/lib/rooms";
 
@@ -354,6 +354,98 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(0.5, 0.5, 0.01, k.mat("#F4F1EA", { opacity: 0.35 }), 0.6, 1.25, 0.05);
       box(0.6, 0.03, 0.01, "#F2B705", 0.9, 1.85, 0.05);
       for (const sx of [-1, 1]) box(0.08, 0.8, 0.08, "#7A5A3A", sx * (w / 2 - 0.2), 0, 0);
+      return { group: g };
+    }
+    // ---- v0.9 monument plazas: landmarks and park furniture ----
+    case "globe": {
+      // The Unisphere: a steel globe of meridians and rings on a tripod, in a round fountain pool.
+      cyl(w / 2, w / 2, 0.18, "#C9C2B6");
+      cyl(w / 2 - 0.12, w / 2 - 0.12, 0.2, k.mat("#7FC8E8", { emissive: "#7FC8E8", emissiveIntensity: opts.night ? 0.35 : 0.12, roughness: 0.2 }), 0, 0.01);
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2;
+        const leg = cyl(0.05, 0.08, 1.0, METAL, Math.cos(a) * 0.18, 0.15, Math.sin(a) * 0.18, 6);
+        leg.rotation.z = Math.cos(a) * 0.12;
+        leg.rotation.x = -Math.sin(a) * 0.12;
+      }
+      const steel = k.mat("#AEB8C4", { metalness: 0.5, roughness: 0.35 });
+      const globe = new Group();
+      globe.position.set(0, 2.15, 0);
+      for (let i = 0; i < 6; i++) {
+        const meridian = new Mesh(k.geo(new TorusGeometry(1.0, 0.025, 4, 32)), steel);
+        meridian.rotation.y = (i / 6) * Math.PI;
+        globe.add(meridian);
+      }
+      for (const y of [-0.7, -0.35, 0, 0.35, 0.7]) {
+        const r = Math.sqrt(1 - y * y);
+        const ring = new Mesh(k.geo(new TorusGeometry(r, 0.025, 4, 32)), steel);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = y;
+        globe.add(ring);
+      }
+      // Continents: a few flat plates hugging the frame.
+      for (const [lat, lon, sz] of [[0.35, 0.4, 0.5], [-0.2, 1.4, 0.4], [0.5, 2.6, 0.6], [-0.4, 3.9, 0.35], [0.1, 5.1, 0.45]] as const) {
+        const p = new Mesh(k.geo(new BoxGeometry(sz, sz * 0.7, 0.03)), k.mat("#8FA4B8", { metalness: 0.4 }));
+        const cl = Math.cos(lat);
+        p.position.set(Math.cos(lon) * cl * 0.98, Math.sin(lat) * 0.98, Math.sin(lon) * cl * 0.98);
+        p.lookAt(0, 0, 0);
+        globe.add(p);
+      }
+      globe.rotation.z = 0.41;
+      g.add(globe);
+      return { group: g, tick: (t) => { globe.rotation.y = t * 0.08; } };
+    }
+    case "gantry": {
+      // Two old rail gantries with the "LONG ISLAND" sign across the top.
+      const iron = "#3A3540";
+      for (const sx of [-1, 1]) {
+        const x = sx * 1.05;
+        for (const sz of [-1, 1]) box(0.12, 2.9, 0.12, iron, x + sz * 0.35, 0, -0.25);
+        box(0.9, 0.14, 0.14, iron, x, 2.9, -0.25);
+        for (let y = 0.6; y < 2.8; y += 0.55) box(0.82, 0.05, 0.05, iron, x, y, -0.25);
+        box(0.12, 0.6, 1.0, iron, x, 0, 0.2);
+      }
+      const sign = box(2.9, 0.42, 0.06, k.mat("#F2A900", { emissive: "#F2A900", emissiveIntensity: opts.night ? 0.8 : 0.15 }), 0, 3.05, -0.25);
+      sign.castShadow = true;
+      return { group: g };
+    }
+    case "bench": {
+      box(w, 0.06, 0.4, WOOD, 0, 0.42, 0);
+      box(w, 0.35, 0.06, WOOD, 0, 0.5, -0.18);
+      for (const sx of [-1, 1]) box(0.06, 0.42, 0.42, BLACK, sx * (w / 2 - 0.1), 0, 0);
+      return { group: g, seatY: 0.48 };
+    }
+    case "foodCart": {
+      box(w, 0.75, d, "#F4F1EA", 0, 0.2);
+      box(w, 0.06, d, color ?? "#E0457B", 0, 0.95);
+      for (const sx of [-1, 1]) cyl(0.18, 0.18, 0.06, BLACK, sx * (w / 2 - 0.25), 0.02, d / 2 + 0.02, 10).rotation.x = Math.PI / 2;
+      cyl(0.02, 0.02, 0.9, METAL, 0, 0.95);
+      const umbrella = new Mesh(k.geo(new ConeGeometry(0.75, 0.35, 8)), k.mat(color ?? "#E0457B"));
+      umbrella.position.set(0, 2.0, 0);
+      g.add(umbrella);
+      return { group: g };
+    }
+    case "lamppost": {
+      cyl(0.08, 0.1, 0.1, BLACK);
+      cyl(0.035, 0.035, 2.4, BLACK, 0, 0.1);
+      const bulb = new Mesh(k.geo(new SphereGeometry(0.14, 8, 6)), glow("#FFE6B0", 1.1));
+      bulb.position.set(0, 2.6, 0);
+      g.add(bulb);
+      return { group: g };
+    }
+    case "tree": {
+      cyl(0.08, 0.12, 0.9, "#7A5A3A");
+      for (let i = 0; i < 5; i++) {
+        const leaf = new Mesh(k.geo(new DodecahedronGeometry(0.42, 0)), k.mat(i % 2 ? "#2E8B63" : "#40B589"));
+        const a = (i / 5) * Math.PI * 2;
+        leaf.position.set(Math.cos(a) * 0.25, 1.2 + (i % 2) * 0.3, Math.sin(a) * 0.25);
+        g.add(leaf);
+      }
+      return { group: g };
+    }
+    case "railing": {
+      box(w, 0.05, 0.05, METAL, 0, 0.95, 0);
+      box(w, 0.04, 0.04, METAL, 0, 0.5, 0);
+      for (let x = -w / 2; x <= w / 2 + 0.01; x += 0.8) box(0.05, 1.0, 0.05, METAL, x, 0, 0);
       return { group: g };
     }
     case "cat": {

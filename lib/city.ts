@@ -87,7 +87,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "campus";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -251,7 +251,7 @@ export const PLACES: Place[] = [
   // ---- Location wave 3 (Milestones v0.5): two monuments, a lounge, the boutique and the dealership ----
   {
     id: "unisphere", name: "The Unisphere", emoji: "🌐", category: "monument", neighborhood: "Flushing Meadows",
-    at: [40.7466, -73.8448], depth: "scene", palette: ["#8FA4B8", "#9ED8F7", "#2F4F6B"], postcard: "postcard-unisphere",
+    at: [40.7466, -73.8448], depth: "full", template: "unisphere", palette: ["#8FA4B8", "#9ED8F7", "#2F4F6B"], postcard: "postcard-unisphere",
     tags: ["monument", "park"],
     lore: "A twelve-story steel globe from a World's Fair that promised flying cars. The cars never came, but the globe stayed, and it photographs better than you do.",
     actions: [
@@ -260,7 +260,7 @@ export const PLACES: Place[] = [
   },
   {
     id: "gantry-plaza", name: "Gantry Plaza", emoji: "🏗️", category: "monument", neighborhood: "Long Island City",
-    at: [40.7454, -73.9584], depth: "scene", palette: ["#3A3540", "#F2A900", "#6C8CFF"], postcard: "postcard-gantry-plaza",
+    at: [40.7454, -73.9584], depth: "full", template: "gantries", palette: ["#3A3540", "#F2A900", "#6C8CFF"], postcard: "postcard-gantry-plaza",
     tags: ["monument", "waterfront"],
     lore: "Old rail gantries standing guard over the East River like retired bouncers. The best skyline view in Queens, if you can find a spot between the engagement shoots.",
     actions: [

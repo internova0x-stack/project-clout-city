@@ -18,7 +18,9 @@ export type FurnitureKind =
   // deli
   | "deliCounter" | "shelf" | "drinksFridge" | "cat"
   // lecture hall
-  | "lectureDesk" | "lectern" | "chalkboard";
+  | "lectureDesk" | "lectern" | "chalkboard"
+  // v0.9 monument plazas
+  | "globe" | "gantry" | "bench" | "foodCart" | "lamppost" | "tree" | "railing";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -55,6 +57,8 @@ export interface RoomTemplate {
   floorKind: "wood" | "tile" | "concrete" | "checker";
   /** Club lighting: warm night-time interior with colored stage lights, whatever the hour. */
   dark?: boolean;
+  /** v0.9 monument plazas: no walls, a raised island of paving, and a landmark taller than a room. */
+  outdoor?: { height: number; edge: string; water?: boolean };
   window?: boolean;
   items: RoomItem[];
   /** Where the avatar enters. */
@@ -101,6 +105,13 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   lectureDesk: { w: 1.6, d: 0.8, label: "Desk" },
   lectern: { w: 0.7, d: 0.6, label: "Lectern" },
   chalkboard: { w: 3.2, d: 0.3, label: "Chalkboard" },
+  globe: { w: 3.0, d: 3.0, label: "The globe" },
+  gantry: { w: 3.0, d: 1.2, label: "The gantries" },
+  bench: { w: 1.6, d: 0.5, label: "Bench" },
+  foodCart: { w: 1.3, d: 0.7, label: "Food cart" },
+  lamppost: { w: 0.3, d: 0.3, label: "Lamp" },
+  tree: { w: 0.8, d: 0.8, label: "Tree" },
+  railing: { w: 8.0, d: 0.2, label: "Railing" },
 };
 
 // ---------------------------------------------------------------------------
@@ -153,7 +164,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus", RoomTemplate> = {
+export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries", RoomTemplate> = {
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -259,6 +270,48 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "s
       { x: 2.0, z: -2.85, facing: 0 },
       { x: 0.3, z: -0.3, facing: 3.14, seated: true }, { x: 2.2, z: -0.3, facing: 3.14, seated: true },
       { x: -2.2, z: 1.2, facing: 3.14, seated: true }, { x: 2.8, z: 1.2, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- v0.9 monument plazas (#32): one shared outdoor plaza, each with its own landmark ----
+  unisphere: {
+    id: "unisphere", w: 9.0, d: 8.0, wall: "#BFD3E0", wallAccent: "#8FA4B8", floor: "#D9CFC0", floorKind: "tile",
+    outdoor: { height: 3.6, edge: "#7FA36A" },
+    items: [
+      { id: "globe", kind: "globe", x: 0, z: -1.4, rot: 0, use: { kind: "action", actionId: "visit" }, label: "Pose with the globe" },
+      { id: "fountain-edge", kind: "bench", x: -3.2, z: 1.6, rot: 1, color: "#9A6B45", use: { kind: "action", actionId: "people" }, label: "People-watch" },
+      { id: "bench-2", kind: "bench", x: 3.0, z: 2.4, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "cart", kind: "foodCart", x: 3.2, z: -0.4, rot: 3, color: "#E0457B", use: { kind: "action", actionId: "pretzel" }, label: "Pretzel cart" },
+      { id: "tour", kind: "lamppost", x: -1.6, z: 2.6, rot: 0, use: { kind: "action", actionId: "tour" }, label: "Walt's tour" },
+      { id: "coin", kind: "rug", x: 1.4, z: 1.2, rot: 0, color: "#7FC8E8", use: { kind: "action", actionId: "wish" }, label: "Toss a coin" },
+      { id: "lamp-1", kind: "lamppost", x: -3.9, z: -3.4, rot: 0 },
+      { id: "lamp-2", kind: "lamppost", x: 3.9, z: -3.4, rot: 0 },
+      { id: "tree-1", kind: "tree", x: -3.6, z: -1.2, rot: 0 },
+      { id: "tree-2", kind: "tree", x: 3.8, z: 3.3, rot: 0 },
+    ],
+    spawn: [0.4, 3.2],
+    npcs: [
+      { x: -1.6, z: 2.1, facing: 3.14 },
+      { x: 2.4, z: -0.4, facing: 1.57 }, { x: -2.2, z: -0.2, facing: 0.6 }, { x: 0.8, z: 0.9, facing: 2.6 },
+    ],
+  },
+  gantries: {
+    id: "gantries", w: 9.0, d: 7.0, wall: "#BFD3E0", wallAccent: "#3A3540", floor: "#CFC6B8", floorKind: "concrete",
+    outdoor: { height: 3.6, edge: "#5B87B5", water: true },
+    items: [
+      { id: "gantries", kind: "gantry", x: -1.2, z: -2.6, rot: 0, use: { kind: "action", actionId: "visit" }, label: "Catch the skyline" },
+      { id: "rail", kind: "railing", x: 0, z: -3.35, rot: 0 },
+      { id: "shoot", kind: "rug", x: 2.6, z: -1.6, rot: 0, color: "#F2A900", use: { kind: "action", actionId: "photoshoot" }, label: "Golden hour shoot" },
+      { id: "lawn", kind: "rug", x: -2.6, z: 1.4, rot: 0, color: "#40B589", use: { kind: "action", actionId: "picnic" }, label: "Picnic on the lawn" },
+      { id: "bench-1", kind: "bench", x: 1.4, z: 1.0, rot: 2, use: { kind: "action", actionId: "ferries" }, label: "Watch the ferries" },
+      { id: "cart", kind: "foodCart", x: 3.4, z: 2.0, rot: 3, color: "#6C8CFF", use: { kind: "action", actionId: "picnic" }, label: "Snacks" },
+      { id: "run", kind: "lamppost", x: -0.2, z: 2.6, rot: 0, use: { kind: "action", actionId: "run" }, label: "Run the river path" },
+      { id: "lamp-2", kind: "lamppost", x: 3.9, z: -3.0, rot: 0 },
+      { id: "tree-1", kind: "tree", x: -3.8, z: -0.6, rot: 0 },
+    ],
+    spawn: [0.4, 2.6],
+    npcs: [
+      { x: 2.2, z: -2.4, facing: 3.14 }, { x: 3.0, z: -2.2, facing: 3.14 },
+      { x: -2.4, z: 1.2, facing: 0.8, seated: true }, { x: -0.6, z: -2.0, facing: 3.14 },
     ],
   },
 };
