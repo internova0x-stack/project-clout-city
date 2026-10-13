@@ -47,6 +47,21 @@ export const CITY_ECONOMY = {
   },
   barDrink: { price: 28, energy: 20, tags: ["club", "lounge"] },
   /**
+   * Groceries and home cooking (v0.8, owner Oct 13): the budget option. Bundles are bought at a
+   * supermarket (you have to be there) and fill the fridge, up to fridgeMax meals; a bundle that
+   * doesn't fit can't be bought. Cooking at home uses one meal for Energy on a short personal
+   * timer: no clout, no cap beyond the fridge. Groceries aren't possessions (no Net Worth, no resale).
+   */
+  groceries: {
+    fridgeMax: 10,
+    cook: { energy: 25, seconds: 6 },
+    tags: ["supermarket"],
+    bundles: [
+      { id: "snack-run", emoji: "🥪", label: "Snack run", price: 12, meals: 2, blurb: "Chips, hummus, one sad apple. Technically two meals." },
+      { id: "meal-prep", emoji: "🥦", label: "Meal prep for the week", price: 35, meals: 7, blurb: "Seven containers, one Sunday, infinite smugness." },
+    ],
+  },
+  /**
    * Travel (v0.8, #4; owner Oct 13): no spending before arriving. Price and Energy come from four
    * distance bands (under 0.5 mi, 0.5 to 2, 2 to 5, over 5), not routes. Walking is free but tiring
    * and isn't offered past 5 miles; the subway is a flat fare; your own car costs nothing to drive.
@@ -335,7 +350,7 @@ export const PLACES: Place[] = [
     id: "steinway-fresh", name: "Steinway Fresh Mart", emoji: "🛒", category: "food", neighborhood: "Astoria",
     at: [40.7628, -73.9160], depth: "scene", palette: ["#40B589", "#FFF6E0", "#2A2530"],
     tags: ["supermarket", "astoria"],
-    lore: "Forty kinds of feta and one working shopping cart. Groceries for cooking at home are coming soon; for now it's the best free air conditioning in Queens.",
+    lore: "Forty kinds of feta and one working shopping cart. Stock the fridge here and cook at home: cheaper than eating out, and nobody photographs it.",
     actions: [
       { id: "browse", kind: "visit", label: "Wander the aisles", energy: 3, mood: 3, blurb: "You came for nothing and you're leaving with nothing. Growth." },
     ],

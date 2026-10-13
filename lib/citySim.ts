@@ -7,7 +7,7 @@ import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collecto
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, travelQuote } from "./travel.ts";
-import { activeGig, gigCloutReq, hasBar, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 
@@ -29,7 +29,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
   return {
     player: {
       id: "preview", bank_cash: 5450, clout: 850, energy: 80, mood: 60, confidence: 55, home_id: "astoria_studio",
-      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 30), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, ...overrides,
+      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 30), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, fridge_meals: 4, ...overrides,
     },
     today,
     tasks,
@@ -106,7 +106,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     rest(kind) {
       const r = CITY_ECONOMY.rest[kind];
       if (!r) return fail("That isn't a way to rest.");
-      if ((p().at_place ?? null) !== null) return fail("Go home first. Napping on the subway doesn't count.");
+      if ((p().at_place ?? null) !== null) return fail("Go home first. Your bed and your kitchen are both there.");
       const used = s.restToday?.[kind] ?? 0;
       if (used >= r.perDay) return fail("You've rested enough for today. The couch needs a break from you.");
       s.restToday = { nap: 0, sit: 0, ...s.restToday, [kind]: used + 1 };
@@ -121,12 +121,33 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       if (!place || !hasBar(place.tags)) return fail("That isn't something you can do here.");
       if ((p().at_place ?? null) !== placeId) return fail("You're not there yet. Go there first.");
       const price = CITY_ECONOMY.barDrink.price;
-      if (p().energy >= 100) return fail("You're already at full Energy. The bartender suggests water.");
+      if (p().energy >= 100) return fail("You're already at full Energy. Save it for later.");
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
       const energy = Math.min(100 - p().energy, CITY_ECONOMY.barDrink.energy);
       p().bank_cash -= price;
       p().energy += energy;
       return ok({ cash: -price, energy });
+    },
+    buyGroceries(placeId, bundleId) {
+      const place = PLACES.find((x) => x.id === placeId);
+      if (!place || !isSupermarket(place.tags)) return fail("That isn't something you can do here.");
+      const b = CITY_ECONOMY.groceries.bundles.find((x) => x.id === bundleId);
+      if (!b) return fail("That isn't on the shelves.");
+      if ((p().at_place ?? null) !== placeId) return fail("You're not there yet. Go there first.");
+      if ((p().fridge_meals ?? 0) + b.meals > CITY_ECONOMY.groceries.fridgeMax) return fail("Your fridge is full. Eat something first, or play fridge Tetris.");
+      if (p().bank_cash < b.price) return fail("Your card got declined. Loudly.");
+      p().bank_cash -= b.price;
+      p().fridge_meals = (p().fridge_meals ?? 0) + b.meals;
+      return ok({ cash: -b.price });
+    },
+    cook() {
+      if ((p().at_place ?? null) !== null) return fail("Go home first. Your bed and your kitchen are both there.");
+      if (!p().fridge_meals) return fail("The fridge is empty. The light still works, though.");
+      if (p().energy >= 100) return fail("You're already at full Energy. Save it for later.");
+      const energy = Math.min(100 - p().energy, CITY_ECONOMY.groceries.cook.energy);
+      p().fridge_meals! -= 1;
+      p().energy += energy;
+      return ok({ energy });
     },
     doAction(placeId, actionId) {
       const place = PLACES.find((x) => x.id === placeId);

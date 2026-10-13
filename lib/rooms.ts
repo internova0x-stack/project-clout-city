@@ -26,6 +26,8 @@ export type ItemUse =
   | { kind: "sit" }
   | { kind: "sleep" }
   | { kind: "look" }
+  /** v0.8 the kitchen: the fridge's contents and Cook a meal. */
+  | { kind: "cook" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
   | { kind: "shop"; category: "fashion" | "cars" | "houses" | "luxury" | "makeup" };
 
@@ -112,7 +114,7 @@ const studioItems = (sx: number): RoomItem[] => [
   { id: "lamp", kind: "floorLamp", x: -0.8 * sx, z: -2.3, rot: 0 },
   { id: "tv", kind: "tvStand", x: 0.3 * sx, z: -2.3, rot: 0 },
   { id: "plant", kind: "plant", x: 1.75 * sx, z: -2.3, rot: 0 },
-  { id: "kitchen", kind: "kitchen", x: 2.35 * sx, z: -0.6, rot: 3 },
+  { id: "kitchen", kind: "kitchen", x: 2.35 * sx, z: -0.6, rot: 3, use: { kind: "cook" }, label: "Kitchen" },
   { id: "rug", kind: "rug", x: 0.3 * sx, z: 0.2, rot: 0, color: "#E0457B" },
   { id: "coffee-table", kind: "coffeeTable", x: 0.3 * sx, z: 0.1, rot: 0 },
   { id: "sofa", kind: "sofa", x: 0.3 * sx, z: 1.4, rot: 2, color: "#FF8A3D", use: sit, label: "Sit" },
@@ -126,7 +128,7 @@ const highriseItems: RoomItem[] = [
   { id: "bookshelf", kind: "bookshelf", x: -0.7, z: -2.65, rot: 0 },
   { id: "tv", kind: "tvStand", x: 1.0, z: -2.6, rot: 0 },
   { id: "plant", kind: "plant", x: 2.3, z: -2.6, rot: 0 },
-  { id: "kitchen", kind: "kitchen", x: 3.35, z: -0.6, rot: 3 },
+  { id: "kitchen", kind: "kitchen", x: 3.35, z: -0.6, rot: 3, use: { kind: "cook" }, label: "Kitchen" },
   { id: "rug", kind: "rug", x: 1.0, z: 0.1, rot: 0, color: "#C2AE86" },
   { id: "coffee-table", kind: "coffeeTable", x: 1.0, z: 0.0, rot: 0 },
   { id: "sofa", kind: "sofa", x: 1.0, z: 1.3, rot: 2, color: "#ECE6DC", use: sit, label: "Sit" },

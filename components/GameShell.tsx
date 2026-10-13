@@ -10,11 +10,11 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
-import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -24,8 +24,8 @@ import { formatPrice, liveParty, readReturn, type StoreApi, type StoreProduct } 
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
-import { RestSheet } from "./city/Rest";
-import { milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
+import { KitchenSheet, RestSheet } from "./city/Rest";
+import { formatMiles, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
@@ -298,6 +298,8 @@ export function GameShell({
   const travelOn = !!(city && cityApi?.travel && city.player.at_place !== undefined);
   // v0.8 rest and bar drinks (migration 0026): restToday is missing until it runs.
   const restOn = !!(city?.restToday && cityApi?.rest);
+  // v0.8 groceries and the kitchen (migration 0027): fridge_meals is missing until it runs.
+  const kitchenOn = !!(travelOn && city?.player.fridge_meals !== undefined && cityApi?.cook);
   const atPlace = travelOn ? city!.player.at_place ?? null : null;
   const atPlaceInfo = atPlace ? placeById(atPlace) : undefined;
   const myPos = atPlaceInfo?.at ?? home;
@@ -305,6 +307,9 @@ export function GameShell({
   const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);
+  const [kitchenOpen, setKitchenOpen] = useState(false);
+  // The nearest supermarket, for "Go shopping" from an empty fridge.
+  const grocer = useMemo(() => PLACES.filter((p) => isSupermarket(p.tags)).sort((a, b) => milesBetween(myPos, a.at) - milesBetween(myPos, b.at))[0], [myPos]);
   const cityOn = !!(city && cityApi);
   const statSuggestions = useMemo(() => {
     if (!cityOn || !city) return undefined;
@@ -509,6 +514,7 @@ export function GameShell({
     onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
+    onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, () => cityApi.buyGroceries!(pl, b)) : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, () => cityApi.barDrink!(id)) : undefined,
     story: storyOn ? feed : null,
     onAttendStoryEvent: storyApi
@@ -809,6 +815,7 @@ export function GameShell({
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
               if (restOn && it.use?.kind === "sleep") setRestKind("nap");
               if (restOn && it.use?.kind === "sit") setRestKind("sit");
+              if (kitchenOn && it.use?.kind === "cook") setKitchenOpen(true);
             }}
             onEditingChange={setArranging}
             mood={roomMood}
@@ -997,6 +1004,16 @@ export function GameShell({
             onClose={() => setRestKind(null)}
             onRest={(k) => run(`rest:${k}`, () => cityApi!.rest!(k))}
             onGoHome={() => { setRestKind(null); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
+          />
+          <KitchenSheet
+            open={kitchenOpen}
+            state={city}
+            busy={busy !== null}
+            store={grocer ? { name: grocer.name, miles: formatMiles(milesBetween(myPos, grocer.at)) } : null}
+            onClose={() => setKitchenOpen(false)}
+            onCook={() => run("cook", () => cityApi!.cook!())}
+            onGoHome={() => { setKitchenOpen(false); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
+            onGoShopping={() => { if (!grocer) return; setKitchenOpen(false); setTravelPlan({ from: myPos, to: grocer.at, fromName: myPosName, toName: grocer.name, toId: grocer.id }); }}
           />
           <TravelSheet plan={travelPlan} state={city} busy={busy !== null} onClose={() => setTravelPlan(null)} onGo={(m) => void goTravel(m)} />
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />

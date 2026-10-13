@@ -1,4 +1,4 @@
-import { CLUB_EVENTS, itemBySku, placeById } from "./city.ts";
+import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById } from "./city.ts";
 
 /**
  * The Bank's history (v0.7, #29): each cash row says where and what. Rows come from
@@ -60,6 +60,11 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     }
     // ref: place:time (migration 0026).
     case "drink": return { emoji: "🍸", title: "Bar", detail: placeById(e.ref.split(":")[0])?.name ?? null };
+    // ref: place:bundle:time (migration 0027).
+    case "groceries": {
+      const bundle = e.ref.split(":")[1];
+      return { emoji: "🛒", title: "Groceries", detail: CITY_ECONOMY.groceries.bundles.find((b) => b.id === bundle)?.label ?? null };
+    }
     default: {
       const bill = BILLS[e.kind];
       if (bill) return { emoji: bill[0], title: bill[1], detail: null };
