@@ -87,6 +87,8 @@ export interface CityState {
   homeLayout: unknown;
   /** Studio-approved lines for the regulars live today (migration 0016): regular id → lines. */
   npcLines?: Record<string, string[]>;
+  /** v0.8 rest at home (migration 0026): naps and sits used today. Missing until 0026 runs. */
+  restToday?: { nap: number; sit: number };
 }
 
 /** What changed after an action, for the reward toast. */
@@ -115,6 +117,10 @@ export interface CityApi {
   travel?(placeId: string, mode: import("./travel.ts").TravelMode): Promise<CityResult>;
   /** v0.7 Your Look (migration 0021): the worn clothes (one per slot) and the free headwear, saved at once. */
   saveLook?(itemIds: number[], covering: string): Promise<CityResult>;
+  /** v0.8 rest at home (migration 0026): a nap or a sit, capped per day. */
+  rest?(kind: RestKind): Promise<CityResult>;
+  /** v0.8 a drink at a club or lounge bar (migration 0026): Energy for cash, no clout. */
+  barDrink?(placeId: string): Promise<CityResult>;
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
@@ -137,6 +143,10 @@ const ERRORS: Record<string, string> = {
   needs_clout: "This client googled you. Come back with more clout.",
   not_here: "You're not there yet. Go there first.",
   too_far_to_walk: "That's too far to walk. Your shoes have filed a complaint.",
+  not_home: "Go home first. Napping on the subway doesn't count.",
+  rested_out: "You've rested enough for today. The couch needs a break from you.",
+  bad_rest: "That isn't a way to rest.",
+  full_energy: "You're already at full Energy. The bartender suggests water.",
   no_car: "You don't have a car. The Shop has some, and so does the subway.",
   unknown_place: "That place isn't on the map.",
   gig_expired: "That offer expired at midnight.",
@@ -186,6 +196,27 @@ export function eventAvailability(ev: ClubEvent, open: boolean, s: CityState): A
   if (!open) return { ok: false, reason: "Doors closed" };
   if (s.player.energy < CITY_ECONOMY.energy.eventCost) return { ok: false, reason: "Not enough Energy" };
   if (s.player.bank_cash < ev.entry) return { ok: false, reason: "Not enough cash" };
+  return { ok: true };
+}
+
+export type RestKind = "nap" | "sit";
+
+/** Mirrors rest(): home only, capped per New York day. */
+export function restAvailability(kind: RestKind, s: CityState): Availability & { used: number; perDay: number } {
+  const r = CITY_ECONOMY.rest[kind];
+  const used = s.restToday?.[kind] ?? 0;
+  const base = { used, perDay: r.perDay };
+  if ((s.player.at_place ?? null) !== null) return { ok: false, reason: "Go home first", ...base };
+  if (used >= r.perDay) return { ok: false, reason: "Rested out for today. Back tomorrow.", ...base };
+  return { ok: true, ...base };
+}
+
+/** Places with a bar that sells drinks (clubs and the lounge). */
+export const hasBar = (tags: string[]) => tags.some((t) => (CITY_ECONOMY.barDrink.tags as readonly string[]).includes(t));
+
+export function barDrinkAvailability(s: CityState): Availability {
+  if (s.player.energy >= 100) return { ok: false, reason: "You're already at full Energy" };
+  if (s.player.bank_cash < CITY_ECONOMY.barDrink.price) return { ok: false, reason: "Not enough cash" };
   return { ok: true };
 }
 

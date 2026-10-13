@@ -1082,3 +1082,12 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .here-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:var(--r-pill); background:#E3F5EC; color:#1F7A52; font-weight:700; font-size:12.5px; }
 .at-chip { position:absolute; z-index:15; left:12px; top:calc(118px + var(--safe-top)); padding:7px 12px; border-radius:var(--r-pill); font-size:13px; font-weight:700; color:var(--text-1); box-shadow:var(--elev-2); }
 .game.has-story-prompt .at-chip { top:calc(190px + var(--safe-top)); }
+
+/* v0.8 rest at home: the nap countdown ring */
+.nap { align-items:center; padding:8px 0 4px; }
+.nap .btn { width:100%; }
+.nap-ring { width:132px; height:132px; display:block; margin:0 auto; }
+.nap-ring circle { fill:none; stroke-width:7; }
+.nap-ring-bg { stroke:#EDE5DA; }
+.nap-ring-fg { stroke:var(--primary-top); stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dashoffset .1s linear; }
+.nap-ring text { font-size:34px; }

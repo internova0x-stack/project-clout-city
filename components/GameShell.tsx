@@ -14,7 +14,7 @@ import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place, ty
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
-import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -24,6 +24,7 @@ import { formatPrice, liveParty, readReturn, type StoreApi, type StoreProduct } 
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
+import { RestSheet } from "./city/Rest";
 import { milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
@@ -294,13 +295,16 @@ export function GameShell({
   const outfit = worn.length ? outfitWith(starterOutfit(style, look.body, look.fit), worn) : undefined;
   const home = homeLocation(me.home_id);
   // v0.8 travel (#4): where the player is. Null is home; without migration 0025 there's no travel.
-  const travelOn = !!(city && cityApi?.travel);
+  const travelOn = !!(city && cityApi?.travel && city.player.at_place !== undefined);
+  // v0.8 rest and bar drinks (migration 0026): restToday is missing until it runs.
+  const restOn = !!(city?.restToday && cityApi?.rest);
   const atPlace = travelOn ? city!.player.at_place ?? null : null;
   const atPlaceInfo = atPlace ? placeById(atPlace) : undefined;
   const myPos = atPlaceInfo?.at ?? home;
   const myPosName = atPlaceInfo?.name ?? "home";
   const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [restKind, setRestKind] = useState<RestKind | null>(null);
   const cityOn = !!(city && cityApi);
   const statSuggestions = useMemo(() => {
     if (!cityOn || !city) return undefined;
@@ -505,6 +509,7 @@ export function GameShell({
     onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
+    onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, () => cityApi.barDrink!(id)) : undefined,
     story: storyOn ? feed : null,
     onAttendStoryEvent: storyApi
       ? (id) => void runStory(`story:${id}`, () => storyApi.attendEvent(id)).then((ok) => ok && cityApi && cityApi.refresh().then((r) => r.ok && applyCity(r)))
@@ -800,7 +805,11 @@ export function GameShell({
             editable={cityOn && flow === "none"}
             label={`${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
-            onUse={(it) => { if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile"); }}
+            onUse={(it) => {
+              if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
+              if (restOn && it.use?.kind === "sleep") setRestKind("nap");
+              if (restOn && it.use?.kind === "sit") setRestKind("sit");
+            }}
             onEditingChange={setArranging}
             mood={roomMood}
             onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
@@ -980,6 +989,14 @@ export function GameShell({
             from={home}
             onClose={() => setPlace(null)}
             onGoInside={(p) => { setPlace(null); setInside(p); }}
+          />
+          <RestSheet
+            kind={restKind}
+            state={city}
+            busy={busy !== null}
+            onClose={() => setRestKind(null)}
+            onRest={(k) => run(`rest:${k}`, () => cityApi!.rest!(k))}
+            onGoHome={() => { setRestKind(null); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
           />
           <TravelSheet plan={travelPlan} state={city} busy={busy !== null} onClose={() => setTravelPlan(null)} onGo={(m) => void goTravel(m)} />
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />

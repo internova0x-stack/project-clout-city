@@ -62,6 +62,18 @@ export async function travel(placeId: string, mode: string) {
 export async function saveLook(itemIds: number[], covering: string) {
   return run("save_look", { p_items: itemIds, p_covering: covering });
 }
+export async function rest(kind: "nap" | "sit") {
+  return run("rest", { p_kind: kind }, (d) => {
+    const r = d as { energy?: number; mood?: number };
+    return { energy: r.energy ?? 0, mood: r.mood ?? 0 } as Gain;
+  });
+}
+export async function barDrink(placeId: string) {
+  return run("bar_drink", { p_place: placeId }, (d) => {
+    const r = d as { cash?: number; energy?: number };
+    return { cash: r.cash ?? 0, energy: r.energy ?? 0 } as Gain;
+  });
+}
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });
 }

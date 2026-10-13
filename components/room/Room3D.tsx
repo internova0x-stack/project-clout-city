@@ -472,6 +472,7 @@ export default function Room3D(props: Room3DProps) {
         me.heading = (it.rot * Math.PI) / 2;
         me.mode = "sit";
         poseSit(me.parts, b?.seatY ?? 0.48);
+        propsRef.current.onUse?.(it);
         return;
       }
       if (it.use.kind === "sleep" && me.parts) {
@@ -480,6 +481,7 @@ export default function Room3D(props: Room3DProps) {
         me.z = it.z + fz * 0.85;
         me.mode = "sleep";
         poseLie(me.parts, b?.seatY ?? 0.5);
+        propsRef.current.onUse?.(it);
         return;
       }
       me.heading = Math.atan2(it.x - me.x, it.z - me.z);
