@@ -55,6 +55,8 @@ export interface PlaceHandlers {
   crew?: { outings: CrewOuting[]; onBring: (place: Place) => void };
   /** v0.6 treasure hunts (joined, unfinished): talking to a regular may be the next clue or question. */
   hunt?: { talk: (placeId: string) => Promise<HuntResult>; answer: (choice: number) => Promise<HuntResult> };
+  /** v0.8 travel (#4): where the player is; away from a place its actions are a preview with "Go there". */
+  travel?: { isHere: (placeId: string) => boolean; onGoThere: (place: Place) => void; from: { at: LatLng; name: string } };
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -65,6 +67,8 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
   const { mood, confidence } = state.player;
   const world = placeStory(handlers.story ?? null, place);
   const storyTasks = (handlers.story?.tasks ?? []).filter((t) => t.do.place === place.id && !t.done);
+  // v0.8: no spending before arriving. Away from the place, every row is a preview.
+  const away = !!handlers.travel && !handlers.travel.isHere(place.id);
   return (
     <div className="stack-8">
       {place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => {
@@ -95,13 +99,17 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {!av.ok && <span className="meta reason">{av.reason}</span>}
               {av.ok && av.note && <span className="meta">{av.note}</span>}
             </div>
-            <button
-              className={"btn btn-taxi btn-sm"}
-              disabled={!av.ok || handlers.busy !== null}
-              onClick={() => (a.kind === "gigs" ? handlers.onOpenGigs() : handlers.onAction(place.id, a.id))}
-            >
-              {handlers.busy === key ? "…" : a.kind === "gigs" ? "Open" : spends ? formatCash(paid) : a.kind === "shift" ? "Work" : "Go"}
-            </button>
+            {away && a.kind !== "gigs" ? (
+              <span className="lock-chip">On arrival</span>
+            ) : (
+              <button
+                className={"btn btn-taxi btn-sm"}
+                disabled={!av.ok || handlers.busy !== null}
+                onClick={() => (a.kind === "gigs" ? handlers.onOpenGigs() : handlers.onAction(place.id, a.id))}
+              >
+                {handlers.busy === key ? "…" : a.kind === "gigs" ? "Open" : spends ? formatCash(paid) : a.kind === "shift" ? "Work" : "Go"}
+              </button>
+            )}
           </div>
         );
       })}
@@ -125,9 +133,11 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
                 </button>
               )}
             </div>
-            <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
-              {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
-            </button>
+            {away ? <span className="lock-chip">On arrival</span> : (
+              <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
+                {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
+              </button>
+            )}
           </div>
         );
       })}
@@ -239,6 +249,8 @@ export function LocationSheet({
   onGoInside: (p: Place) => void;
   from: LatLng;
 }) {
+  // v0.8: without travel (guest map, before migration 0025) every place counts as here.
+  const here = !!place && (!handlers.travel || handlers.travel.isHere(place.id));
   return (
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
@@ -251,8 +263,11 @@ export function LocationSheet({
             {place.tags.some((t) => t.startsWith("job_")) && <span className="tag tag-positive">Hiring</span>}
           </div>
           <div>
+            {here && <span className="here-chip" style={{ marginBottom: 6 }}>📍 You&apos;re here</span>}
             <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>{place.name}</h2>
-            <p className="meta" style={{ margin: "4px 0 0" }}>{place.neighborhood} · {distanceMiles(from, place.at).toFixed(1)} mi from home</p>
+            <p className="meta" style={{ margin: "4px 0 0" }}>
+              {place.neighborhood}{here ? "" : ` · ${distanceMiles(handlers.travel?.from.at ?? from, place.at).toFixed(1)} mi from ${handlers.travel ? "you" : "home"}`}
+            </p>
           </div>
           <div className="lola">
             <span className="lola-avatar" aria-hidden="true">💋</span>
@@ -262,6 +277,12 @@ export function LocationSheet({
             <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
           ))}
           <ActionList place={place} state={state} handlers={handlers} />
+          {!here && (
+            <div className="stack-4">
+              <button className="btn btn-taxi" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
+              <p className="meta" style={{ margin: 0, textAlign: "center" }}>Actions unlock when you arrive.</p>
+            </div>
+          )}
           {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
           {((handlers.dating && canDateAt(place)) || (handlers.crew && crewActivities(place).length > 0)) && (
             <div className="row" style={{ gap: 8 }}>
@@ -302,7 +323,7 @@ export function LocationSheet({
               </div>
             ) : null;
           })()}
-          {place.depth === "full" && (
+          {here && place.depth === "full" && (
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
         </div>

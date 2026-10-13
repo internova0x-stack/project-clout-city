@@ -4,6 +4,21 @@
 \pset tuples_only on
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
+-- v0.8 (migration 0025): actions and events need the player at the place; these helpers put the
+-- player there first, as if they had travelled.
+create function pg_temp.act(p_place text, p_action text) returns jsonb language plpgsql security definer as $h$
+begin update public.players set at_place = p_place where id = auth.uid(); return public.do_action(p_place, p_action); end $h$;
+create function pg_temp.attend(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select x ->> 'placeId' from jsonb_array_elements(public.city() -> 'events') x where x ->> 'id' = p_event)
+   where id = auth.uid();
+  return public.attend_event(p_event);
+end $h$;
+create function pg_temp.attend_x(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select place_id from public.exclusive_events where id = p_event) where id = auth.uid();
+  return public.attend_exclusive_event(p_event);
+end $h$;
 
 create function pg_temp.mult(p_name text) returns numeric language sql security definer as $$
   select public.clout_multiplier(mood, confidence) from public.players where display_name = p_name $$;
@@ -41,7 +56,7 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000030', false);
 select pg_temp.assert(jsonb_array_length(public.story_feed() -> 'arcs') = 0, 'no story before the start date');
 do $$ begin
-  begin perform public.do_action('skyline-pier', 'lobby'); raise exception 'FAIL: story place before start';
+  begin perform pg_temp.act('skyline-pier', 'lobby'); raise exception 'FAIL: story place before start';
   exception when sqlstate '22023' then null; end;
   begin perform public.admin_story_list(); raise exception 'FAIL: non-admin listed stories';
   exception when sqlstate '42501' then null; end;
@@ -78,10 +93,10 @@ select pg_temp.assert(((:'f1'::jsonb) -> 'arcs' -> 0 -> 'beats' -> 0 ->> 'headli
 select pg_temp.assert(((:'f1'::jsonb) #>> '{arcs,1,beats,0,locked}')::boolean and (:'f1'::jsonb) #> '{arcs,1,beats,0,body}' is null, 'side arcs locked without the sku');
 select pg_temp.assert(((:'f1'::jsonb) #>> '{chatter,0,phase}') = 'early', 'chatter early');
 do $$ begin
-  begin perform public.do_action('skyline-pier', 'memorial'); raise exception 'FAIL: memorial before Day 10';
+  begin perform pg_temp.act('skyline-pier', 'memorial'); raise exception 'FAIL: memorial before Day 10';
   exception when sqlstate '22023' then null; end;
 end $$;
-select (public.do_action('skyline-pier', 'lobby') -> 'storyTasks' -> 0 ->> 'clout')::int as flowers \gset
+select (pg_temp.act('skyline-pier', 'lobby') -> 'storyTasks' -> 0 ->> 'clout')::int as flowers \gset
 select pg_temp.assert(:flowers = 20, 'leave flowers pays 20');
 
 -- ---- Day 2: the vigil ----
@@ -97,7 +112,7 @@ end $$;
 select pg_temp.go(3);
 select bank_cash as before_diner from public.players where display_name = 'Ivy' \gset
 select pg_temp.mult('Ivy') as mult_before \gset
-select public.do_action('rockaway-diner', 'eat') as diner \gset
+select pg_temp.act('rockaway-diner', 'eat') as diner \gset
 select pg_temp.assert((select bank_cash from public.players where display_name = 'Ivy') = :before_diner - 21, 'diner costs 14 x 1.5 = 21');
 select pg_temp.assert(((:'diner'::jsonb) ->> 'clout')::int = round((5 + 14 * 0.6) * :mult_before), 'clout from the base price');
 select 1 from public.vote_prediction('P1', 'confront');
@@ -157,14 +172,14 @@ select pg_temp.assert(((:'f9b'::jsonb) #>> '{arcs,0,predictions,1,correct}') = '
 select pg_temp.assert((select count(*) from public.player_badges b join public.players p on p.id = b.player_id where p.display_name = 'Ivy') = 2,
   'Called It and Lola''s Favorite');
 do $$ begin
-  begin perform public.do_action('radiant-harbor', 'visit'); raise exception 'FAIL: church open on Day 9';
+  begin perform pg_temp.act('radiant-harbor', 'visit'); raise exception 'FAIL: church open on Day 9';
   exception when sqlstate '22023' then null; end;
 end $$;
-select 1 from public.do_action('skyline-pier', 'lobby'); -- restriction lifted
+select 1 from pg_temp.act('skyline-pier', 'lobby'); -- restriction lifted
 
 -- ---- Day 10: memorial wall; hoodie gone from the Shop but kept by buyers ----
 select pg_temp.go(10);
-select (public.do_action('skyline-pier', 'memorial') ->> 'clout')::int as memorial \gset
+select (pg_temp.act('skyline-pier', 'memorial') ->> 'clout')::int as memorial \gset
 select pg_temp.assert(:memorial = 10, 'memorial pays 10');
 select pg_temp.assert((select count(*) from public.player_items i join public.players p on p.id = i.player_id
                         where p.display_name = 'Ivy' and i.sku = 'forever-our-bird-hoodie') = 1, 'hoodie kept');

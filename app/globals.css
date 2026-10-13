@@ -1051,3 +1051,34 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .bills-empty-icon { width:56px; height:56px; display:grid; place-items:center; border-radius:18px; background:#E3F5EC; font-size:28px; }
 .phone-status-icons { display:inline-flex; align-items:center; gap:6px; }
 .ledger-row:has(.ledger-emoji) { gap:12px; }
+
+/* ===================== v0.8 step 1: travel ===================== */
+.travel-mode { display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px; border-radius:16px; background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); text-align:left; }
+.travel-mode.on { background:#E3F5EC; box-shadow:inset 0 0 0 2px var(--green-500); }
+.travel-mode:disabled { opacity:.5; }
+.travel-mode-emoji { font-size:26px; width:34px; text-align:center; flex:none; }
+.travel-mode-text { flex:1; min-width:0; }
+.travel-mode-text b { display:block; font-size:15.5px; color:var(--text-1); }
+.travel-mode-text small { font-size:12.5px; color:var(--text-3); }
+.travel-mode-price { font-weight:700; font-size:15px; color:var(--text-1); font-variant-numeric:tabular-nums; }
+.trip { position:fixed; inset:0; z-index:55; pointer-events:none; }
+.trip-route { position:absolute; inset:0; width:100%; height:100%; }
+.trip-route line { stroke:var(--night-900); stroke-width:5; stroke-linecap:round; stroke-dasharray:2 12; opacity:.75; }
+.trip-ride { position:absolute; width:42px; height:42px; margin:-21px 0 0 -21px; display:grid; place-items:center; font-size:22px; border-radius:12px;
+  background:#fff; box-shadow:0 0 0 3px #fff, 0 6px 14px rgba(0,0,0,.3); }
+.trip-ride.taxi { background:var(--taxi-400); }
+.trip-ride.walk, .trip-ride.subway, .trip-ride.car { border-radius:50%; }
+.trip-bar { position:absolute; left:14px; right:14px; top:calc(14px + var(--safe-top)); pointer-events:auto; padding:12px 14px; border-radius:20px;
+  background:rgba(255,255,255,.95); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 8px 24px rgba(0,0,0,.14); }
+.trip-bar b { display:block; font-size:15.5px; color:var(--text-1); }
+.trip-bar small { display:block; margin-top:2px; font-size:12.5px; color:var(--text-3); }
+.trip-progress { display:block; height:6px; margin-top:10px; border-radius:3px; background:#EDE5DA; overflow:hidden; }
+.trip-progress span { display:block; height:100%; background:linear-gradient(90deg, var(--primary-top), #FF8A65); }
+.trip-skip { position:absolute; right:16px; bottom:calc(28px + var(--safe-bottom)); pointer-events:auto; height:46px; padding:0 18px; border-radius:var(--r-pill);
+  background:var(--night-900); color:#fff; font-weight:700; font-size:15px; box-shadow:var(--elev-2); }
+.game.travelling .hud, .game.travelling .under-hud, .game.travelling .side-col, .game.travelling .stats, .game.travelling .me-bubble,
+.game.travelling .nav, .game.travelling .map-locate { display:none; }
+.action-row .lock-chip { flex:none; padding:6px 10px; border-radius:var(--r-pill); background:var(--surface-card); color:var(--text-3); font-size:12px; font-weight:700; white-space:nowrap; }
+.here-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:var(--r-pill); background:#E3F5EC; color:#1F7A52; font-weight:700; font-size:12.5px; }
+.at-chip { position:absolute; z-index:15; left:12px; top:calc(118px + var(--safe-top)); padding:7px 12px; border-radius:var(--r-pill); font-size:13px; font-weight:700; color:var(--text-1); box-shadow:var(--elev-2); }
+.game.has-story-prompt .at-chip { top:calc(190px + var(--safe-top)); }

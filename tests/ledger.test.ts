@@ -11,6 +11,8 @@ test("each row says where and what (#29)", () => {
   assert.equal(describeEntry(row("gig", "4", { gig: "Hold a ring light" })).detail, "Hold a ring light");
   assert.equal(describeEntry(row("bill_phone", "9")).title, "Phone bill");
   assert.equal(describeEntry(row("event_entry", "neon-nights:2026-10-12")).title, "Neon Nights");
+  assert.deepEqual(describeEntry(row("travel", "taxi:hell-gate-park:1760000000000")), { emoji: "🚕", title: "Taxi", detail: "Hell Gate Park" });
+  assert.equal(describeEntry(row("travel", "subway:home:1760000000000")).detail, "Home");
 });
 
 test("unknown refs and kinds still read as words, never ids", () => {

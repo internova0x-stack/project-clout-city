@@ -23,6 +23,8 @@ import { regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
+import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
+import { milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
@@ -291,6 +293,14 @@ export function GameShell({
   const worn = city ? equippedItems(city) : [];
   const outfit = worn.length ? outfitWith(starterOutfit(style, look.body, look.fit), worn) : undefined;
   const home = homeLocation(me.home_id);
+  // v0.8 travel (#4): where the player is. Null is home; without migration 0025 there's no travel.
+  const travelOn = !!(city && cityApi?.travel);
+  const atPlace = travelOn ? city!.player.at_place ?? null : null;
+  const atPlaceInfo = atPlace ? placeById(atPlace) : undefined;
+  const myPos = atPlaceInfo?.at ?? home;
+  const myPosName = atPlaceInfo?.name ?? "home";
+  const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
+  const [trip, setTrip] = useState<Trip | null>(null);
   const cityOn = !!(city && cityApi);
   const statSuggestions = useMemo(() => {
     if (!cityOn || !city) return undefined;
@@ -483,6 +493,11 @@ export function GameShell({
   };
   const handlers: PlaceHandlers = {
     busy,
+    travel: travelOn ? {
+      isHere: (id) => atPlace === id,
+      onGoThere: (p) => { setPlace(null); setInside(null); setTravelPlan({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id }); },
+      from: { at: myPos, name: myPosName },
+    } : undefined,
     money: catalog ? { products, nowMs: gameNow, h: money } : undefined,
     onOpenShop: openShop,
     crew: crew && crewInbox ? { outings: crewInbox.outings.filter((o) => o.myStatus !== "declined"), onBring: (p) => setCrewPlace(p) } : undefined,
@@ -695,13 +710,36 @@ export function GameShell({
 
   const onPinTap = useCallback(
     (pin: PlacePin) => {
-      if (pin.id === "home") return setTab("home");
+      if (pin.id === "home") {
+        if (travelOn && atPlace) return setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" });
+        return setTab("home");
+      }
       const p = cityOn ? placeById(pin.id) : undefined;
       if (p) return setPlace(p);
       setSoon({ key: "place", title: pin.name });
     },
-    [cityOn],
+    [cityOn, travelOn, atPlace, myPos, myPosName, home],
   );
+  /** Go: pay on the server first (arrival is instant there), then show the short trip. */
+  const goTravel = async (mode: TravelMode) => {
+    const plan = travelPlan;
+    if (!plan || !cityApi?.travel) return;
+    const ok = await run("travel", () => cityApi.travel!(plan.toId, mode));
+    if (!ok) return;
+    const q = travelQuote(mode, milesBetween(plan.from, plan.to), !!city?.player.car_sku);
+    setTravelPlan(null);
+    setPlace(null);
+    setTab("map");
+    setTrip({ ...plan, mode, seconds: q.seconds, fare: q.fare });
+  };
+  const endTrip = () => {
+    const t = trip;
+    setTrip(null);
+    if (!t) return;
+    if (t.toId === "home") return setTab("home");
+    const p = placeById(t.toId);
+    if (p) setPlace(p);
+  };
   const [lockedBorough, setLockedBorough] = useState<BoroughId | null>(null);
   const onLockedTap = useCallback((_name: string, id: BoroughId) => setLockedBorough(id), []);
 
@@ -726,7 +764,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
       {inside && city ? (
         <InteriorScene
           place={inside}
@@ -786,7 +824,7 @@ export function GameShell({
             ref={mapRef}
             pins={cityOn ? cityPins : WAVE_1_PINS}
             vehicles={cityOn}
-            player={{ at: cityOn ? home : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
+            player={{ at: cityOn ? myPos : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
             initialCenter={cityOn ? ASTORIA_CENTER : DEFAULT_PLAYER_LOCATION}
             initialZoom={cityOn ? ASTORIA_ZOOM : undefined}
             daytime={daytime}
@@ -796,6 +834,12 @@ export function GameShell({
           <button className="icon-round map-locate glass-hud" onClick={() => mapRef.current?.locatePlayer()} aria-label="Go to my location">
             <LocateIcon size={20} />
           </button>
+          {atPlaceInfo && !trip && (
+            <button className="glass-hud at-chip" onClick={() => setPlace(atPlaceInfo)}>
+              📍 At {atPlaceInfo.name}
+            </button>
+          )}
+          {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} />}
         </>
       )}
 
@@ -937,6 +981,7 @@ export function GameShell({
             onClose={() => setPlace(null)}
             onGoInside={(p) => { setPlace(null); setInside(p); }}
           />
+          <TravelSheet plan={travelPlan} state={city} busy={busy !== null} onClose={() => setTravelPlan(null)} onGo={(m) => void goTravel(m)} />
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />
           <ShopSheet
             open={panel === "shop"}

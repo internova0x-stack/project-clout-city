@@ -36,6 +36,19 @@ export const CITY_ECONOMY = {
   },
   shiftEnergy: 25,
   /**
+   * Travel (v0.8, #4; owner Oct 13): no spending before arriving. Price and Energy come from four
+   * distance bands (under 0.5 mi, 0.5 to 2, 2 to 5, over 5), not routes. Walking is free but tiring
+   * and isn't offered past 5 miles; the subway is a flat fare; your own car costs nothing to drive.
+   * Trips are short (3 to 10 seconds of watching), on the player's own timer, always skippable.
+   */
+  travel: {
+    bandsMiles: [0.5, 2, 5],
+    walk: { energy: [5, 10, 20, null], seconds: [6, 8, 10, null] },
+    subway: { fare: 3, seconds: [5, 6, 7, 8] },
+    taxi: { fare: [8, 16, 28, 45], seconds: [3, 4, 5, 6] },
+    car: { seconds: [3, 4, 5, 6] },
+  },
+  /**
    * Treasure hunts (v0.6): cash about a pro gig (8 to 10 shifts), clout about 15 to 20% of an
    * active player's week, a wrong answer waits 10 minutes, a badge after four hunts.
    */
@@ -599,7 +612,7 @@ export function citySeed() {
   return {
     economy: CITY_ECONOMY,
     places: PLACES.map((p) => ({
-      id: p.id, tags: p.tags, story: p.story ?? null,
+      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at,
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false,

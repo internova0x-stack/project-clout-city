@@ -3,6 +3,21 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
+-- v0.8 (migration 0025): actions and events need the player at the place; these helpers put the
+-- player there first, as if they had travelled.
+create function pg_temp.act(p_place text, p_action text) returns jsonb language plpgsql security definer as $h$
+begin update public.players set at_place = p_place where id = auth.uid(); return public.do_action(p_place, p_action); end $h$;
+create function pg_temp.attend(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select x ->> 'placeId' from jsonb_array_elements(public.city() -> 'events') x where x ->> 'id' = p_event)
+   where id = auth.uid();
+  return public.attend_event(p_event);
+end $h$;
+create function pg_temp.attend_x(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select place_id from public.exclusive_events where id = p_event) where id = auth.uid();
+  return public.attend_exclusive_event(p_event);
+end $h$;
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
 create function pg_temp.as_(n int) returns void language sql as $$
@@ -52,13 +67,13 @@ end $$;
 select 1 from public.crew_outing_create('place', 'lucky-seven-deli', 'eat', array[pg_temp.id(92), pg_temp.id(93), pg_temp.id(94), pg_temp.id(95), pg_temp.id(96)]);
 select pg_temp.assert(jsonb_array_length(public.crew_inbox() -> 'outings' -> 0 -> 'members') = 6, 'host plus five');
 -- Ada goes first: nobody else yet, so no bonus.
-select 1 from public.do_action('lucky-seven-deli', 'eat');
+select 1 from pg_temp.act('lucky-seven-deli', 'eat');
 reset role;
 select pg_temp.assert((select count(*) = 0 from public.ledger where kind like 'crew_%'), 'no bonus alone');
 set role authenticated;
 -- Boz goes without answering: going counts as yes, and both get +10.
 select pg_temp.as_(92);
-select 1 from public.do_action('lucky-seven-deli', 'eat');
+select 1 from pg_temp.act('lucky-seven-deli', 'eat');
 reset role;
 select pg_temp.assert((select count(*) = 2 and sum(amount) = 20 from public.ledger where kind = 'crew_friend'), 'pair bonus both ways');
 set role authenticated;
@@ -68,7 +83,7 @@ select public.crew_respond((public.crew_inbox() -> 'outings' -> 0 ->> 'id')::big
 select pg_temp.assert(jsonb_array_length(public.crew_inbox() -> 'outings') = 0, 'declined is hidden');
 -- Dru, Eve and Fay go.
 do $$ declare n int; begin
-  foreach n in array array[94, 95, 96] loop perform pg_temp.as_(n); perform public.do_action('lucky-seven-deli', 'eat'); end loop;
+  foreach n in array array[94, 95, 96] loop perform pg_temp.as_(n); perform pg_temp.act('lucky-seven-deli', 'eat'); end loop;
 end $$;
 reset role;
 -- Five went: each gets +10 for each of the other four.
@@ -83,7 +98,7 @@ set role authenticated;
 select pg_temp.as_(91);
 select 1 from public.crew_outing_create('place', 'flushing-meadows', 'hangout', array[pg_temp.id(92), pg_temp.id(93), pg_temp.id(94), pg_temp.id(95), pg_temp.id(96)]);
 do $$ declare n int; begin
-  foreach n in array array[91, 92, 93, 94, 95, 96] loop perform pg_temp.as_(n); perform public.do_action('flushing-meadows', 'hangout'); end loop;
+  foreach n in array array[91, 92, 93, 94, 95, 96] loop perform pg_temp.as_(n); perform pg_temp.act('flushing-meadows', 'hangout'); end loop;
 end $$;
 reset role;
 select pg_temp.assert((select count(*) = 6 and bool_and(amount = 100) from public.ledger where kind = 'crew_full'), 'full crew: +100 each');
