@@ -13,7 +13,7 @@ All rules from the other documents still apply: no real brands or people, gold o
 > - **v0.6 "Astoria and the News"** (next, after v0.5.1): the dense Astoria neighborhood (section 5), the recurring cast and NPCs at places (section 4), the News feed (section 3), the Studio's hunt and news review (section 2), and **full** treasure hunts with NPC clues (section 1). The simplified "Ask around" version is skipped.
 > - **v0.8 "Getting Around"** (formerly v0.7): travel, rest at home, venue snacks, and the supermarket, fridge and home cooking (section 6).
 > - **Nothing is replaced or moved:** the new places are added to the ones that exist, focused in Astoria. Places already in Astoria (Grind & Gossip Café, Pedal Pushers Hub, Low Light Lounge, Thread Count Boutique) count toward its 20. The two universities stay where they are; Astoria also gets a community college.
-> - In the game, sports stars play in invented leagues (no real league names).
+> - The sports stars are simply "a basketball star" and "a football star": no league names, real or invented.
 > - Claude doesn't run on its own: the weekly drafts come from a scheduled Claude Code session (a Routine) that uploads to the Studio for approval.
 
 ## 1. Treasure hunts
@@ -121,7 +121,7 @@ A small, recurring cast makes the city feel inhabited and gives the News app, st
 ### The cast
 
 - **Story regulars (already exist):** Lola Lowdown (narrator), Loretta Bird, Ray Delgado, Detective Nia Okafor.
-- **The celebrity world (new, for city news):** eight invented celebrities, one per type: a streamer, a basketball star, a football star, a reality TV star, a pop star, a movie star, a tech founder and an influencer. Each has a one-line personality, a want and a flaw, so their news writes itself. Names are invented and checked so they don't match real people; leagues are invented too.
+- **The celebrity world (new, for city news):** eight invented celebrities, one per type: a streamer, a basketball star, a football star, a reality TV star, a pop star, a movie star, a tech founder and an influencer. Each has a one-line personality, a want and a flaw, so their news writes itself. Names are invented and checked so they don't match real people. The sports stars are just a basketball star and a football star, with no league named.
 - **The wannabes:** a few fake-famous and almost-famous characters (a struggling DJ, a self-declared CEO, a girl who's "basically an influencer"), who are cheap to write and great for satire.
 - Everyone goes into the cast and city bible from the Story Production brief, so they stay consistent across stories, news and hunts.
 
