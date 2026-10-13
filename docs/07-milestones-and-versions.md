@@ -24,9 +24,10 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.4 | Stories | The News app and Sarah Bird, built and tested but not yet started | 1 to 2 weeks | 4 |
 | v0.5 | Money and Social | Real-money purchases, postcards, chat, crushes and date nights | 1 to 2 weeks | 5 |
 | v0.5.1 | Testing fixes | The "fix now" list from testing (docs/testing-feedback.md) | Days | — |
-| v0.6 | Look and Feel | Creator, profile, Your Look dressing room, buttons, locked boroughs, Collection redesign | About 1 week | — |
-| v0.7 | Getting Around | Travel and arrival, venue drinks, Nap and Sit, weekly bills, event times | 1 to 2 weeks | — |
-| v0.8 | Big Nights | Exclusive event keepsakes, monuments as full locations | About 1 week | — |
+| v0.6 | Astoria and the News | A busy Astoria starting neighborhood, the recurring cast and people at places, the News feed, weekly treasure hunts | 2 to 3 weeks | — |
+| v0.7 | Look and Feel | Creator, profile, Your Look dressing room, buttons, locked boroughs, Collection redesign | About 1 week | — |
+| v0.8 | Getting Around | Travel and arrival, venue drinks, Nap and Sit, groceries and home cooking, weekly bills, event times | 1 to 2 weeks | — |
+| v0.9 | Big Nights | Exclusive event keepsakes, monuments as full locations | About 1 week | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -161,15 +162,23 @@ From the Oct 13 testing round. **docs/testing-feedback.md is the source** for th
 
 **You test:** on an iPhone and a low-end Android phone, every listed bug is gone; prices read C$ everywhere except real-money products ($); no sheet gets stuck open; the page never scrolls sideways or up.
 
-## v0.6 "Look and Feel" (about 1 week)
+## v0.6 "Astoria and the News" (2 to 3 weeks)
+
+From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** for these rules.
+
+**In scope:** the dense Astoria starting neighborhood of about 20 places, with wave 1 places moved in and keeping their ids, and new scene cards (section 5); the recurring cast (eight invented celebrities, the wannabes, the story regulars) and NPCs at places with rotating lines tied to story phase and cast news (section 4); the News feed with city news, Lola's weekly dating column and the hunt announcement, headlines in the live ticker and the home-screen card (section 3); weekly treasure hunts in their full form, with a track per starting style, NPC clues, questions, hunt cards, rewards and a badge after four (section 1); and in the Story Studio, hunt and news review, the content calendar, and pause for hunts and news (section 2).
+
+**You test:** a new player lands in Astoria with about 20 places close by; tapping a regular at a place shows a line; News has something new each day and the ticker and home card show the newest headline; joining a hunt, following the NPC clues and answering the questions unlocks the hunt card; nothing about a hunt shows for players who haven't joined; a week of hunts and news can be approved, scheduled and paused in the Studio.
+
+## v0.7 "Look and Feel" (about 1 week)
 
 **In scope** (docs/testing-feedback.md, formerly listed as v0.2): red main buttons with yellow as an accent and outlined-red destructive buttons (#10); locked boroughs with a dashed red outline and a mini-map sheet with a Lola teaser (#7, #8, #11); the creator's name field, Presenting as (cosmetic only), four body types each, free basic headwear first and starter garment choices, and a black starting-cash card (#43 to #46); the avatar-head bubble and full profile with public net worth (#25, #39); the stats panel starting collapsed with a suggested action per stat (#14); Your Look as a dressing room with try-on (#24); the Collection redesign (#40); and the cosmetic and UX items marked for v0.2 in the bug list (#2, #6, #20, #21, #28, #29, #31, #34, #35).
 
-## v0.7 "Getting Around" (1 to 2 weeks)
+## v0.8 "Getting Around" (1 to 2 weeks)
 
-**In scope** (formerly v0.3): no spending before arriving, "Go there" with walk, subway, taxi or own car priced by distance, a skippable trip view and personal timers that never move the shared city clock (#4); a luxury-priced drink or snack at clubs and lounges (#3); Nap and Sit at home, capped per day (#26, #27); weekly rent and bills, re-tuned with starting cash and income (#23); exclusive and one-off event times shown in the player's local time (#18); treasure hunts, simplified: a weekly track per starting style with a hunt card for the Collection, approved in the Story Studio (spec first).
+**In scope** (formerly v0.3): no spending before arriving, "Go there" with walk, subway, taxi or own car priced by distance, a skippable trip view and personal timers that never move the shared city clock (#4); a luxury-priced drink or snack at clubs and lounges (#3); Nap and Sit at home, capped per day (#26, #27); weekly rent and bills, re-tuned with starting cash and income (#23); exclusive and one-off event times shown in the player's local time (#18); the supermarket, fridge and home cooking (docs/08-new-features-spec.md section 6).
 
-## v0.8 "Big Nights" (about 1 week)
+## v0.9 "Big Nights" (about 1 week)
 
 **In scope** (formerly v0.5): exclusive event keepsakes (event card, profile badge, plus-one, personal news mention, opt-out) with the ticket's clout kept and attending's stats in line with club events (#19); monuments as full locations with a shared 3D landmark plaza, NPCs and 4 to 6 activities (#32).
 

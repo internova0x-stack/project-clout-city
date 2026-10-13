@@ -4,7 +4,7 @@ Oct 13, 2026 · @Internovatechnologies
 
 Everything decided while testing the live build, in one place: the rule decisions, the bugs with their fixes, and the design changes by version. Numbers (#1 to #47) match the bug list spreadsheet.
 
-> **Owner answers (Oct 13, 2026).** The build tested was v0.5 (pull request #2 merged v0.2 to v0.5), so the version labels below were remapped: the "fix now" list is **v0.5.1**, and the design changes become **v0.6** (formerly v0.2), **v0.7** (formerly v0.3) and **v0.8** (formerly v0.5). The tables below already include these answers:
+> **Owner answers (Oct 13, 2026).** The build tested was v0.5 (pull request #2 merged v0.2 to v0.5), so the version labels below were remapped: the "fix now" list is **v0.5.1**, and the design changes become **v0.7** (formerly v0.2), **v0.8** (formerly v0.3) and **v0.9** (formerly v0.5). A new **v0.6 "Astoria and the News"** comes first (docs/08-new-features-spec.md); it also carries the treasure hunts, now in their full form. The tables below already include these answers:
 > - **Map (#9):** keep the current day map and night map, both with 3D buildings on a tilted view. #9 is not a bug.
 > - **Exclusive events (#19):** the ticket still pays clout with diminishing returns, plus the new keepsakes.
 > - **Headwear (#46):** basic headwear (cap, fedora, bucket hat, durag) is free in the creator and Your Look; premium hats are sold in the Shop for C$.
@@ -44,7 +44,7 @@ These are final. The bug numbers show where each decision came from.
 | Home and profile | An avatar-head bubble left of the stats panel opens a full profile. The profile shows the avatar, clout, rank and net worth (public), badges, collections, crew, home and recent activity. The stats panel starts collapsed and shows one suggested action per stat when open. | #14, #25, #39 |
 | Locations | Interiors are isometric 3D scenes (as built). Monuments are full locations: a shared landmark plaza scene, NPCs with rotating lines and hunt clues, and 4 to 6 activities. | #32, #33 |
 | Exclusive events | Keepsakes and recognition: an event card, a profile badge, a plus-one and a personal news mention. The ticket still pays clout with diminishing returns (owner, Oct 13); attending's stats match a comparable club event. Attendance is uncapped. | #19, #20 |
-| Treasure hunts | Weekly, one track per starting style, simplified in v0.7 (formerly v0.3), approved in the Story Studio. Needs a short spec (clues, steps, rewards, hunt cards) before v0.7 starts. | Test notes |
+| Treasure hunts | Weekly, one track per starting style, approved in the Story Studio. Built in full (NPC clues) in v0.6; the spec is docs/08-new-features-spec.md. | Test notes |
 | Story Studio | All story and hunt approvals, scheduling and pausing happen there. It must check on the server that the signed-in user is an admin. | Test notes |
 
 ## Fix now: v0.5.1
@@ -73,20 +73,19 @@ Build these with the version they belong to; the decisions above give the rules.
 
 | Version | # | Change |
 | --- | --- | --- |
-| v0.6 | 10 | Red main buttons; yellow as accent only; destructive buttons outlined in red |
-| v0.6 | 7, 11 | Locked boroughs: dashed red outline; tapping opens a mini-map sheet with a Lola teaser and borough-specific copy |
-| v0.6 | 43 to 46 | Creator: name field, Presenting as (cosmetic only), four body types per presentation, free basic headwear first (premium hats in the Shop), garment choices with colors, black starting-cash card |
-| v0.6 | 25, 39 | Avatar-head bubble left of the stats panel, opening the full profile with public net worth |
-| v0.6 | 14 | Stats panel starts collapsed; one suggested action per stat when open (cheapest open place first, never real money); high Confidence points to pro gigs |
-| v0.6 | 24 | Your Look as a dressing room (avatar on stage, items by category, try-on with Save look); "Try it on" in the Shop. Depends on #15 |
-| v0.6 | 40 | Collection redesign: real art in every state, foil, flip and serial number when owned, set progress bars, tabs for postcards, hunt cards and event cards |
-| v0.7 | 4 | Travel: "Go there," transport modes with distance costs, skippable trip view, personal timers |
-| v0.7 | 3, 26, 27 | Venue drinks and snacks; Nap and Sit at home, capped per day |
-| v0.7 | 23 | Weekly rent; re-tune starting cash, rent and income together |
-| v0.7 | Test notes | Treasure hunts, simplified: a weekly track per starting style, clues at places, a hunt card for the Collection, approved and scheduled in the Story Studio (spec to be written first) |
-| v0.7 | 18 | Club events on the city clock; exclusive and one-off events may use real New York time, shown in local time |
-| v0.8 | 19 | Exclusive events: event card, profile badge, plus-one, personal news mention (you, your crew, then a count; others see three random opted-in attendees and a guest list; opt-out in Settings); attending's stats in line with club events; the ticket keeps its clout with diminishing returns; uncapped |
-| v0.8 | 32 | Monuments as full locations: shared landmark plaza scene, NPCs, 4 to 6 activities |
+| v0.7 | 10 | Red main buttons; yellow as accent only; destructive buttons outlined in red |
+| v0.7 | 7, 11 | Locked boroughs: dashed red outline; tapping opens a mini-map sheet with a Lola teaser and borough-specific copy |
+| v0.7 | 43 to 46 | Creator: name field, Presenting as (cosmetic only), four body types per presentation, free basic headwear first (premium hats in the Shop), garment choices with colors, black starting-cash card |
+| v0.7 | 25, 39 | Avatar-head bubble left of the stats panel, opening the full profile with public net worth |
+| v0.7 | 14 | Stats panel starts collapsed; one suggested action per stat when open (cheapest open place first, never real money); high Confidence points to pro gigs |
+| v0.7 | 24 | Your Look as a dressing room (avatar on stage, items by category, try-on with Save look); "Try it on" in the Shop. Depends on #15 |
+| v0.7 | 40 | Collection redesign: real art in every state, foil, flip and serial number when owned, set progress bars, tabs for postcards, hunt cards and event cards |
+| v0.8 | 4 | Travel: "Go there," transport modes with distance costs, skippable trip view, personal timers |
+| v0.8 | 3, 26, 27 | Venue drinks and snacks; Nap and Sit at home, capped per day |
+| v0.8 | 23 | Weekly rent; re-tune starting cash, rent and income together |
+| v0.8 | 18 | Club events on the city clock; exclusive and one-off events may use real New York time, shown in local time |
+| v0.9 | 19 | Exclusive events: event card, profile badge, plus-one, personal news mention (you, your crew, then a count; others see three random opted-in attendees and a guest list; opt-out in Settings); attending's stats in line with club events; the ticket keeps its clout with diminishing returns; uncapped |
+| v0.9 | 32 | Monuments as full locations: shared landmark plaza scene, NPCs, 4 to 6 activities |
 | Docs only | 33 | Docs say interiors are illustrated backdrops; update them to the isometric 3D scenes already built |
 
 ## Also in the build (not covered by testing)
@@ -101,4 +100,4 @@ These shipped in v0.2 to v0.5 and stay as they are: chat with block, report and 
 | 12 | Already done: "Crew" everywhere in the game and the docs |
 | 13 | Won't fix (owner) |
 | 17 | Owner keeps the faux chinchilla coat as real cash |
-| 18 | The build already uses the city clock for club events and real New York time for exclusive parties; only "show in local time" is new (v0.7) |
+| 18 | The build already uses the city clock for club events and real New York time for exclusive parties; only "show in local time" is new (v0.8) |
