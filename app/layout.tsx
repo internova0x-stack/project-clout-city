@@ -40,7 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${bungee.variable} ${barlow.variable} ${inter.variable}`} suppressHydrationWarning>
       <body>
         <Script id="cc-boot" strategy="beforeInteractive">{NO_BLUR_SCRIPT}</Script>
-        {children}
+        {/* On wide screens the game sits in a phone-sized frame (see .device in globals.css). */}
+        <div className="device">{children}</div>
       </body>
     </html>
   );

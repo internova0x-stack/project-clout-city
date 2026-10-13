@@ -759,3 +759,27 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .crew-full-avatars .date-avatar + .date-avatar { margin-left:-10px; }
 .crew-full-text { position:relative; display:flex; flex-direction:column; gap:8px; padding:0 4px; }
 .crew-full-card .btn { position:relative; margin-top:4px; }
+
+/* ---------- Desktop: the game in a phone-sized frame ----------
+   The transform makes .device the containing block for every position:fixed screen
+   (the game, sheets, modals), so they all stay inside the frame. Phones get no frame. */
+.device { min-height:100%; }
+@media (min-width: 600px) and (min-height: 560px) {
+  body { background:radial-gradient(circle at 50% 0%, #2E2440 0%, #14111A 60%) fixed; }
+  .device { position:relative; width:430px; height:min(932px, calc(100dvh - 48px)); min-height:0; margin:24px auto; border-radius:44px;
+    overflow:hidden; transform:translateZ(0); background:var(--night-900);
+    box-shadow:0 0 0 10px #0B0910, 0 0 0 11px rgba(255,255,255,.08), 0 30px 80px rgba(0,0,0,.55); }
+  .device .legal, .device .studio-gate { min-height:100%; height:100%; overflow-y:auto; }
+  /* The Story Studio is a desk tool: full width, no frame. */
+  .device:has(.studio:not(.studio-gate)) { width:auto; height:auto; min-height:100%; margin:0; border-radius:0; overflow:visible; transform:none; box-shadow:none; background:none; }
+}
+
+/* Zoomed out: pins are just their icon, so the whole city shows its places */
+.map-pin.compact { display:flex; flex-direction:column; align-items:center; }
+.map-pin-tile.icon-only { width:28px; height:28px; border-radius:9px; display:grid; place-items:center; box-shadow:0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,.3); }
+
+.guest-card-logo { display:block; height:34px; width:auto; margin:0 0 10px; }
+.map-stack { display:flex; align-items:center; position:relative; }
+.map-stack .map-pin-tile.icon-only { width:26px; height:26px; }
+.map-stack .map-pin-tile + .map-pin-tile { margin-left:-12px; }
+.map-stack-count { position:absolute; top:-8px; right:-10px; min-width:18px; height:18px; padding:0 4px; border-radius:var(--r-pill); background:var(--night-900); color:#fff; font-size:11px; line-height:18px; text-align:center; box-shadow:0 0 0 2px #fff; }

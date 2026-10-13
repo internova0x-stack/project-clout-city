@@ -32,6 +32,13 @@ export function WelcomeModal({ onStart, onSkip }: { onStart: () => void; onSkip:
 
 interface Rect { x: number; y: number; w: number; h: number }
 
+/** The screen the game is drawn in: the phone frame on desktop, the window on phones. */
+function screenBox() {
+  const d = document.querySelector<HTMLElement>(".device");
+  const r = d?.getBoundingClientRect();
+  return r && r.width < window.innerWidth ? { left: r.left, top: r.top, width: r.width, height: r.height } : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+}
+
 export function TourTooltip({ index, onNext }: { index: number; onNext: () => void }) {
   const step = TOUR[index];
   const [rect, setRect] = useState<Rect | null>(null);
@@ -41,9 +48,10 @@ export function TourTooltip({ index, onNext }: { index: number; onNext: () => vo
       const els = [...document.querySelectorAll<HTMLElement>(`[data-tour="${step.target}"]`)];
       if (!els.length) return setRect(null);
       const rs = els.map((e) => e.getBoundingClientRect());
-      const x = Math.min(...rs.map((r) => r.left)) - 6;
-      const y = Math.min(...rs.map((r) => r.top)) - 6;
-      setRect({ x, y, w: Math.max(...rs.map((r) => r.right)) - x + 6, h: Math.max(...rs.map((r) => r.bottom)) - y + 6 });
+      const box = screenBox();
+      const x = Math.min(...rs.map((r) => r.left)) - box.left - 6;
+      const y = Math.min(...rs.map((r) => r.top)) - box.top - 6;
+      setRect({ x, y, w: Math.max(...rs.map((r) => r.right)) - box.left - x + 6, h: Math.max(...rs.map((r) => r.bottom)) - box.top - y + 6 });
     };
     measure();
     window.addEventListener("resize", measure);
@@ -51,11 +59,12 @@ export function TourTooltip({ index, onNext }: { index: number; onNext: () => vo
   }, [step.target]);
 
   const last = index === TOUR.length - 1;
-  const below = rect ? rect.y + rect.h / 2 < window.innerHeight / 2 : true;
+  const box = typeof document === "undefined" ? { width: 390, height: 844 } : screenBox();
+  const below = rect ? rect.y + rect.h / 2 < box.height / 2 : true;
   const cardTop = rect ? (below ? rect.y + rect.h + 14 : undefined) : 120;
-  const cardBottom = rect && !below ? window.innerHeight - rect.y + 14 : undefined;
-  const cx = rect ? rect.x + rect.w / 2 : window.innerWidth / 2;
-  const cardLeft = Math.min(Math.max(12, cx - 150), window.innerWidth - 312);
+  const cardBottom = rect && !below ? box.height - rect.y + 14 : undefined;
+  const cx = rect ? rect.x + rect.w / 2 : box.width / 2;
+  const cardLeft = Math.min(Math.max(12, cx - 150), box.width - 312);
 
   return (
     <div className="tour" role="dialog" aria-modal="true" aria-label={`Tour, step ${index + 1} of ${TOUR.length}`}>
