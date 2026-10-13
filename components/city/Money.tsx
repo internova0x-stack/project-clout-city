@@ -1,5 +1,6 @@
 "use client";
 
+import { doorsLine, eventTimeLine, localDate } from "@/lib/localTime";
 import { useState } from "react";
 import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { formatPrice, partyState, POSTCARD_BADGE, POSTCARD_NOTES, serialLabel, type StoreProduct } from "@/lib/store";
@@ -20,8 +21,6 @@ export interface MoneyHandlers {
   onShared?: () => void;
 }
 
-const when = (iso: string) =>
-  new Date(iso).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "2-digit" });
 
 /** C26: an exclusive event (a celebrity party), sold as a guest-list spot. */
 export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreProduct; nowMs: number; h: MoneyHandlers; compact?: boolean }) {
@@ -38,7 +37,7 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
       <span className="title" style={{ display: "block", color: "#fff" }}>{e.name}</span>
       {!compact && <span className="subtext" style={{ color: "rgba(255,246,224,.78)" }}>{e.blurb}</span>}
       <span className="meta" style={{ color: "rgba(255,246,224,.7)" }}>
-        {where} · {when(e.startsAt)} New York time
+        {where} · {eventTimeLine(e.startsAt)}
       </span>
       <EffectChips energy={e.energy} clout={p.owned ? undefined : e.clout} mood={e.mood} confidence={e.confidence} />
       {p.owned ? (
@@ -50,7 +49,7 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
           </button>
         ) : (
           <span className="meta" style={{ color: "rgba(255,246,224,.85)" }}>
-            {s.minutesToOpen < 24 * 60 ? `Doors open in ${s.minutesToOpen} min` : `Doors open ${when(e.startsAt)}`}
+            {doorsLine(e.startsAt, nowMs)}
           </span>
         )
       ) : p.pending ? (
@@ -106,7 +105,6 @@ export function PostcardOffer({ p, h }: { p: StoreProduct; h: MoneyHandlers }) {
 
 type Tab = "postcards" | "hunts" | "events";
 type Picked = { kind: "postcard"; p: StoreProduct } | { kind: "event"; p: StoreProduct } | { kind: "hunt"; c: HuntCard };
-const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "America/New_York" });
 
 /**
  * C39, redesigned in v0.7 (#40): tabs for postcards, hunt cards and event cards, a progress bar per
@@ -248,7 +246,7 @@ function EventCard({ p }: { p: StoreProduct }) {
       <span className="event-ticket-art">{place && <PlaceArt place={place} daytime={false} />}</span>
       <span className="event-ticket-text">
         <b>{e.name}</b>
-        <small>{place?.name ?? "Queens"} · {shortDate(e.startsAt)}</small>
+        <small>{place?.name ?? "Queens"} · {localDate(e.startsAt)}</small>
         <small>{e.attended ? "✓ You were there" : "🎟️ On the list"}</small>
       </span>
       {p.serial ? <span className="card-serial">{serialLabel(p.serial)}</span> : null}
@@ -270,7 +268,7 @@ function CardDetail({ picked, flipped, onFlip, handle, onBack, onShare }: {
     <span className="card-back">
       <span className="card-back-note">{POSTCARD_NOTES[picked.p.placeId ?? ""] ?? "Wish you were here."}<br /><br />Lola x</span>
       <span className="card-back-stamp" aria-hidden="true">{placeById(picked.p.placeId ?? "")?.emoji ?? "📮"}</span>
-      <span className="card-back-mark" aria-hidden="true">{(placeById(picked.p.placeId ?? "")?.neighborhood ?? "Queens").toUpperCase()}<br />NY{when ? <><br />{shortDate(when).toUpperCase()}</> : null}</span>
+      <span className="card-back-mark" aria-hidden="true">{(placeById(picked.p.placeId ?? "")?.neighborhood ?? "Queens").toUpperCase()}<br />NY{when ? <><br />{localDate(when).toUpperCase()}</> : null}</span>
       <span className="card-back-to">{handle ? `@${handle}` : "You"}, Queens</span>
       {serial ? <span className="card-back-serial">{serialLabel(serial)}</span> : null}
     </span>
@@ -293,7 +291,7 @@ function CardDetail({ picked, flipped, onFlip, handle, onBack, onShare }: {
     <div className="stack-16">
       <div>
         <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>{title}</h2>
-        <p className="meta" style={{ margin: "4px 0 0" }}>{[when ? `Collected ${shortDate(when)}` : null, serial ? serialLabel(serial) : null].filter(Boolean).join(" · ")}</p>
+        <p className="meta" style={{ margin: "4px 0 0" }}>{[when ? `Collected ${localDate(when)}` : null, serial ? serialLabel(serial) : null].filter(Boolean).join(" · ")}</p>
       </div>
       <button className={`flip-card${flipped ? " flipped" : ""}`} onClick={onFlip} aria-label={flipped ? "Show the front" : "Flip the card"}>
         <span className="flip-face front">{front}</span>
