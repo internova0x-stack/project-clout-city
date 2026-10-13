@@ -14,7 +14,7 @@ import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place, ty
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
-import { activeGig, dueBills, equippedItems, gigReady, netWorth, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -292,7 +292,14 @@ export function GameShell({
   const outfit = worn.length ? outfitWith(starterOutfit(style, look.body, look.fit), worn) : undefined;
   const home = homeLocation(me.home_id);
   const cityOn = !!(city && cityApi);
-  const statSuggestions = useMemo(() => (cityOn ? statTips(visiblePlaces(feed), me.bank_cash) : undefined), [cityOn, feed, me.bank_cash]);
+  const statSuggestions = useMemo(() => {
+    if (!cityOn || !city) return undefined;
+    const tips = statTips(visiblePlaces(feed), me.bank_cash);
+    // With the Confidence and clout a pro gig or big break needs, that's the better use of Confidence.
+    const gig = city.gigs.filter((g) => g.tier !== "side" && !g.accepted_at && gigAvailability(g, city).ok).sort((a, b) => b.pay - a.pay)[0];
+    if (gig) tips.confidence = { stat: "confidence", placeId: "gigs", placeName: gig.tier === "big" ? "A big break is open" : "A pro gig is open", emoji: "💼", price: 0, gain: 0, gig: { id: gig.id, pay: gig.pay } };
+    return tips;
+  }, [cityOn, city, feed, me.bank_cash]);
   const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);
   const storyOn = !!(feed && storyApi);
 
@@ -795,7 +802,7 @@ export function GameShell({
       <GameChrome
         me={{ head: <AvatarHead look={look} outfit={outfit} />, rank: myCard?.rank ?? null, onOpen: () => setPanel("profile") }}
         tips={statSuggestions}
-        onTip={openPlace}
+        onTip={(id) => (id === "gigs" ? setPhone({ open: true, app: "gigs" }) : openPlace(id))}
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         time={clock.time}
         tab={tab}

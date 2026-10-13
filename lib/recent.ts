@@ -51,7 +51,11 @@ export function recentWhen(at: string, now: Date = new Date()): string {
 }
 
 export type StatKey = "energy" | "mood" | "confidence";
-export interface StatTip { stat: StatKey; placeId: string; placeName: string; emoji: string; price: number; gain: number }
+export interface StatTip {
+  stat: StatKey; placeId: string; placeName: string; emoji: string; price: number; gain: number;
+  /** v0.7: with enough Confidence and clout, the Confidence row points to an open pro gig or big break instead. */
+  gig?: { id: number; pay: number };
+}
 
 /**
  * The expanded stats panel suggests one place per stat (v0.7 step 3): the cheapest action the

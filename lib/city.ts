@@ -29,9 +29,10 @@ export const CITY_ECONOMY = {
   bills: { every: "1 month", carRentalDays: 7, phone: 85, graceDays: 3, moodDropPerDay: 8, evictAfterDays: 7, carInsuranceRate: 0.02 },
   gigs: {
     // Pay is a multiple of shiftRate. Tuned so 1 to 2 gigs cover a month's rent on the cheapest home ($2,100).
-    side: { confidence: 0, chance: 0.9, payMin: 3, payMax: 5, energy: 1.5, waitMinutes: 60 },
-    pro: { confidence: 50, chance: 0.5, payMin: 8, payMax: 10, energy: 2, waitMinutes: 120 },
-    big: { confidence: 80, chance: 0.22, payMin: 15, payMax: 20, energy: 3, waitMinutes: 240 },
+    // Clout (v0.7, owner Oct 13): pro gigs and big breaks also need a reputation, not just a good mood.
+    side: { confidence: 0, clout: 0, chance: 0.9, payMin: 3, payMax: 5, energy: 1.5, waitMinutes: 60 },
+    pro: { confidence: 50, clout: 500, chance: 0.5, payMin: 8, payMax: 10, energy: 2, waitMinutes: 120 },
+    big: { confidence: 80, clout: 2000, chance: 0.22, payMin: 15, payMax: 20, energy: 3, waitMinutes: 240 },
   },
   shiftEnergy: 25,
   /**

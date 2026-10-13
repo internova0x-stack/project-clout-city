@@ -436,6 +436,8 @@ Gigs are rarer, bigger-paying jobs, and the main way to afford upgrades like a c
 | Pro gig | "Run a social media campaign for a $14 artisanal ice cube startup" | 50+ | About every other day | 8 to 10× | 2× | 2 hours |
 | Big break | "Write a speech for a councilmember candidate" | 80+ | Once or twice a week | 15 to 20× | 3× | 4 hours |
 
+**Clout to get hired (v0.7, owner Oct 13):** pro gigs also need 500 clout and big breaks 2,000 clout, on top of their Confidence. Side gigs need neither. Locked gigs stay visible with what they need ("Needs 500 clout (you have 320)"). Once a player qualifies, the stats panel's Confidence row points to the best open pro gig or big break. The numbers live in game_settings (city.economy.gigs.<tier>.clout).
+
 **Rules**
 
 1. **Offers.** Each player gets their own offers in the Gigs app on the phone. They refresh at New York midnight and expire at the next one. Players also see offers they don't qualify for yet, with the Confidence needed, so there's something to aim for.

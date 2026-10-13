@@ -39,6 +39,8 @@ export interface PlayerCard {
   /** v0.7 (migration 0020): place in the Queens leaderboard, and public recent moments. */
   rank?: number;
   recent?: import("./recent.ts").RecentItem[];
+  /** v0.7 (migration 0024): bank cash plus everything they own, public (owner, Oct 13). */
+  netWorth?: number;
 }
 
 export type ReportReason = "harassment" | "spam" | "inappropriate" | "other";
