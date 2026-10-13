@@ -8,7 +8,7 @@ import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
-import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
+import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, styleOutfit } from "@/lib/styles";
 import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
@@ -704,7 +704,8 @@ export function GameShell({
             pins={cityOn ? cityPins : WAVE_1_PINS}
             vehicles={cityOn}
             player={{ at: cityOn ? home : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
-            initialCenter={cityOn ? home : DEFAULT_PLAYER_LOCATION}
+            initialCenter={cityOn ? ASTORIA_CENTER : DEFAULT_PLAYER_LOCATION}
+            initialZoom={cityOn ? ASTORIA_ZOOM : undefined}
             daytime={daytime}
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}

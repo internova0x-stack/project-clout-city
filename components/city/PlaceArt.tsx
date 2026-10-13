@@ -26,7 +26,7 @@ interface Tone { top: string; warm: string; cool: string }
 function tone(base: string, night: boolean): Tone {
   return night
     ? { top: mixHex(base, "#E9D8FF", 0.25), warm: mixHex(base, "#FF9FA8", 0.18), cool: mixHex(base, "#3B2F72", 0.45) }
-    : { top: mixHex(base, "#FFF6EE", 0.45), warm: mixHex(base, "#FFC3A8", 0.18), cool: mixHex(base, "#8E7CC8", 0.38) };
+    : { top: mixHex(base, "#FFF6EE", 0.4), warm: mixHex(base, "#FFC3A8", 0.12), cool: mixHex(base, "#6E6A9A", 0.28) };
 }
 
 interface BoxSpec { x: number; y: number; z: number; w: number; d: number; h: number; color: string }
@@ -129,17 +129,53 @@ function SignLeft({ b, text, color, ink, v, night }: { b: BoxSpec; text: string;
   );
 }
 
+// Color themes (owner, Oct 13): deep blue gradients, red, yellow, green, purple, brown, grey,
+// off-white and cream, spread across the places so neighbors never look alike. A theme sets
+// the sky, the island and the main building color; the place's palette keeps its accents.
+type ThemeName = "deepBlue" | "red" | "yellow" | "green" | "purple" | "brown" | "grey" | "offWhite" | "cream";
+const THEMES: Record<ThemeName, { main: string; sky: [string, string, string]; isle: string }> = {
+  deepBlue: { main: "#2E4FB8", sky: ["#D6E4FF", "#7FA2EE", "#2F4FA8"], isle: "#C9D8F5" },
+  red: { main: "#D93A2F", sky: ["#FFE6DE", "#FFA898", "#D9584A"], isle: "#F6D2CA" },
+  yellow: { main: "#F2B620", sky: ["#FFF8DC", "#FFE38F", "#F4BE3A"], isle: "#F8E7B4" },
+  green: { main: "#2E9E6A", sky: ["#E2F6E6", "#A6DEB8", "#4FA87A"], isle: "#CDEBD3" },
+  purple: { main: "#6B2BD9", sky: ["#EEE2FF", "#BFA2F2", "#7A4FD0"], isle: "#DCCFF2" },
+  brown: { main: "#8A5A3C", sky: ["#F6E8DA", "#D9B394", "#8E6248"], isle: "#E8D3BF" },
+  grey: { main: "#6B6F7A", sky: ["#F0F1F4", "#C4C8D2", "#7C8291"], isle: "#DADDE3" },
+  offWhite: { main: "#F4F1EA", sky: ["#FFFFFF", "#E9EDF3", "#B9C3D3"], isle: "#EFEDE8" },
+  cream: { main: "#F2E3C4", sky: ["#FFF9EC", "#F4E2BC", "#D8B98A"], isle: "#F3E6CB" },
+};
+const PLACE_THEME: Record<string, ThemeName> = {
+  "velvet-static": "purple", "grind-and-gossip": "brown", "lucky-seven-deli": "green", "altitude-718": "deepBlue",
+  "flushing-meadows": "green", "pedal-pushers": "yellow", "skybridge-tower": "grey", "skyline-pier": "deepBlue",
+  "hunters-pier": "offWhite", "rockaway-diner": "red", "radiant-harbor": "cream", "pressed-iron-gym": "grey",
+  unisphere: "deepBlue", "gantry-plaza": "brown", "low-light-lounge": "purple", "thread-count": "offWhite",
+  "boulevard-motors": "red", "st-johnsons": "red", "queensborough-u": "deepBlue",
+  "ditmars-deli": "green", "two-bros-pizza": "red", "neon-spoon": "deepBlue", "up-on-thirty": "purple",
+  "steinway-fresh": "cream", "hellgate-hall": "red", "triborough-works": "grey", "ditmars-library": "brown",
+  "precinct-114-half": "deepBlue", "engine-7": "red", "astoria-cc": "green", "harmony-chapel": "offWhite",
+  "hell-gate-park": "green", "rep-count": "yellow", "astoria-blvd-station": "yellow", "reel-queens": "purple",
+  "respawn-arena": "deepBlue",
+};
+function themeOf(place: Place) {
+  return THEMES[PLACE_THEME[place.id] ?? "cream"];
+}
+/** The place with its theme's main color leading the palette, for the illustration only. */
+function themed(place: Place): Place {
+  const t = themeOf(place);
+  return { ...place, palette: [t.main, place.palette[1], place.palette[2]] };
+}
+
 function sky(place: Place, night: boolean): [string, string, string] {
-  const [a, b] = place.palette;
-  return night
-    ? [mixHex(b, "#1B1640", 0.7), mixHex(a, "#2E2A5C", 0.6), mixHex(a, "#8E5AA8", 0.55)]
-    : [mixHex(b, "#FFF6EE", 0.78), mixHex(a, "#FCE6DA", 0.72), mixHex(a, "#C9B6E8", 0.6)];
+  const [a, b, c] = themeOf(place).sky;
+  // Night keeps the theme's hue, deep and dusky.
+  return night ? [mixHex(a, "#0E0B24", 0.86), mixHex(b, "#1B1640", 0.62), mixHex(c, "#2E2A5C", 0.42)] : [a, b, c];
 }
 
 /** Each place as a floating island scene. */
 function Scene({ place, night }: { place: Place; night: boolean }) {
   const [a, b, c] = place.palette;
-  const isle: BoxSpec = { x: -6, y: -6, z: -1, w: 12, d: 12, h: 1, color: night ? "#B8A8D8" : "#F2D6CF" };
+  const isleTone = themeOf(place).isle;
+  const isle: BoxSpec = { x: -6, y: -6, z: -1, w: 12, d: 12, h: 1, color: night ? mixHex(isleTone, "#3B2F72", 0.45) : isleTone };
   const lit = "#FFE2A8";
   const glassDark = night ? "#2A2350" : "#9FB6D8";
   const base = <Box b={isle} night={night} />;
@@ -691,6 +727,271 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    // ---- v0.6 Astoria ----
+    case "ditmars-deli": {
+      const shop: BoxSpec = { x: -5, y: -4, z: 0, w: 8, d: 6, h: 4.6, color: "#EDE6D6" };
+      const upper: BoxSpec = { x: -5, y: -4, z: 4.6, w: 8, d: 6, h: 3, color: mixHex("#B86A4A", c, 0.1) };
+      return (
+        <>
+          {base}
+          <Box b={shop} night={night}>
+            <OnLeft b={shop} u={0.5} v={0} uw={4.8} vh={2.6} fill={night ? lit : glassDark} opacity={0.9} />
+            <OnLeft b={shop} u={5.7} v={0} uw={1.7} vh={2.6} fill={mixHex(a, "#1F1B26", 0.4)} />
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <OnLeft key={i} b={shop} u={i} v={2.75} uw={0.5} vh={0.8} fill={i % 2 ? "#FFF6EE" : a} />)}
+            <SignLeft b={shop} text="Deli & Dreams" color={a} ink="#FFFFFF" v={3.5} night={night} />
+          </Box>
+          <Box b={upper} night={night}>{windowsLeft(upper, 1, 3, lit, glassDark, night)}{windowsRight(upper, 1, 2, lit, glassDark, night)}</Box>
+          {(() => { const [px, py] = iso(1.8, 3.2, 0); return (<g><ellipse cx={px} cy={py - 3} rx={3.6} ry={2.2} fill="#3A3540" /><circle cx={px + 3.2} cy={py - 5.6} r={2.2} fill="#3A3540" /><polygon points={`${px + 1.8},${py - 7.4} ${px + 2.5},${py - 9.6} ${px + 3.4},${py - 7.4}`} fill="#3A3540" /></g>); })()}
+          <Lantern x={4.5} y={3.5} night={night} />
+        </>
+      );
+    }
+    case "two-bros-pizza": {
+      const shop: BoxSpec = { x: -4.5, y: -4, z: 0, w: 7, d: 6, h: 5, color: mixHex(b, "#F4D9B0", 0.3) };
+      return (
+        <>
+          {base}
+          <Box b={shop} night={night}>
+            <OnLeft b={shop} u={0.5} v={0} uw={4} vh={2.6} fill={night ? lit : glassDark} opacity={0.9} />
+            <OnLeft b={shop} u={4.9} v={0} uw={1.6} vh={2.6} fill={c} />
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => <OnLeft key={i} b={shop} u={i} v={2.75} uw={0.5} vh={0.8} fill={i % 2 ? "#FFFFFF" : a} />)}
+            <SignLeft b={shop} text="Two Bros Pizza" color="#2E9E6A" ink="#FFFFFF" v={3.6} night={night} />
+          </Box>
+          {(() => { const [px, py] = iso(3.6, 2.6, 0); return (<g><circle cx={px} cy={py - 12} r={7} fill="#FFC76B" /><circle cx={px} cy={py - 12} r={5.4} fill="#F2A33A" />{[[-2, -1], [2, 1], [0, 3]].map(([dx, dy]) => <circle key={`${dx}${dy}`} cx={px + dx} cy={py - 12 + dy} r={1.2} fill={a} />)}<rect x={px - 0.6} y={py - 5} width={1.2} height={5} fill="#3A3540" /></g>); })()}
+          <Tree x={-5} y={4} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "neon-spoon": {
+      const diner: BoxSpec = { x: -6, y: -3, z: 0, w: 10, d: 5, h: 3.8, color: mixHex("#DCE3EA", a, 0.15) };
+      return (
+        <>
+          {base}
+          <Box b={diner} night={night}>
+            {[0, 1, 2, 3, 4].map((i) => <OnLeft key={i} b={diner} u={0.4 + i * 1.9} v={1} uw={1.5} vh={1.8} fill={night ? lit : glassDark} opacity={0.9} />)}
+            <OnLeft b={diner} u={0} v={0.4} uw={10} vh={0.35} fill={a} />
+            <OnLeft b={diner} u={0} v={3.0} uw={10} vh={0.35} fill={a} />
+          </Box>
+          {(() => { const [px, py] = iso(-1, 2, 3.8); return (<g><rect x={px - 18} y={py - 13} width={36} height={10} rx={5} fill={c} /><text x={px} y={py - 5.6} fontSize={6} fontWeight={800} fill={night ? "#7FF3FF" : a} textAnchor="middle" fontFamily="system-ui, sans-serif">NEON SPOON</text></g>); })()}
+          <Lantern x={5} y={3.5} night={night} />
+          <Tree x={-5.5} y={4.5} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "up-on-thirty": {
+      const bldg: BoxSpec = { x: -4, y: -4, z: 0, w: 7, d: 6, h: 6.5, color: mixHex("#E8C9A8", b, 0.3) };
+      const deck: BoxSpec = { x: -4.4, y: -4.4, z: 6.5, w: 7.8, d: 6.8, h: 0.5, color: "#F4EDE6" };
+      return (
+        <>
+          {base}
+          <Box b={bldg} night={night}>{windowsLeft(bldg, 3, 3, lit, glassDark, night)}{windowsRight(bldg, 3, 2, lit, glassDark, night)}</Box>
+          <Box b={deck} night={night} />
+          {Array.from({ length: 10 }).map((_, i) => { const [px, py] = iso(-4 + i * 0.8, 2.3, 8.6 - Math.sin((i / 9) * Math.PI) * 0.6); return <circle key={i} cx={px} cy={py} r={1.1} fill={night ? lit : "#FFE9B8"} />; })}
+          {[-2, 1].map((x) => { const [px, py] = iso(x, 0, 7); return (<g key={x}><rect x={px - 3} y={py - 5} width={6} height={1.2} rx={0.6} fill={c} /><rect x={px - 0.4} y={py - 4} width={0.8} height={4} fill={c} /><circle cx={px} cy={py - 6.5} r={1.2} fill={a} /></g>); })}
+          <Tree x={4.6} y={3.8} night={night} size={0.9} />
+        </>
+      );
+    }
+    case "steinway-fresh": {
+      const mart: BoxSpec = { x: -6, y: -4, z: 0, w: 11, d: 6, h: 4.2, color: "#F2EEE4" };
+      return (
+        <>
+          {base}
+          <Box b={mart} night={night}>
+            <OnLeft b={mart} u={0.6} v={0} uw={7.4} vh={2.6} fill={night ? lit : glassDark} opacity={0.85} />
+            <OnLeft b={mart} u={8.4} v={0} uw={2} vh={2.6} fill={mixHex(a, "#1F1B26", 0.3)} />
+            <SignLeft b={mart} text="Fresh Mart" color={a} ink="#FFFFFF" v={2.8} night={night} />
+          </Box>
+          {[[-3.5, 3.6, "#E5484D"], [-1.5, 3.6, "#FFC21A"], [0.5, 3.6, "#5CC28F"]].map(([x, y, col]) => { const [px, py] = iso(x as number, y as number, 0); return (<g key={String(x)}><rect x={px - 4} y={py - 4} width={8} height={4} fill="#B8743A" /><circle cx={px - 1.8} cy={py - 5} r={1.6} fill={col as string} /><circle cx={px + 1.6} cy={py - 5} r={1.6} fill={col as string} /></g>); })}
+          {(() => { const [px, py] = iso(3.6, 3.4, 0); return (<g stroke={night ? "#E9D8FF" : "#3A3540"} strokeWidth={1} fill="none"><path d={`M${px - 5} ${py - 9} h2 l2 6 h6 l1.5 -4.5 h-8.5`} /><circle cx={px - 0.5} cy={py - 1.5} r={1} /><circle cx={px + 4} cy={py - 1.5} r={1} /></g>); })()}
+        </>
+      );
+    }
+    case "hellgate-hall": {
+      const hall: BoxSpec = { x: -5.5, y: -4.5, z: 0, w: 9.5, d: 7, h: 4.8, color: mixHex(c, b, 0.35) };
+      const track: BoxSpec = { x: -6, y: 3.2, z: 6.2, w: 12, d: 1.2, h: 0.6, color: "#6B6570" };
+      return (
+        <>
+          {base}
+          <Box b={hall} night={night}>
+            <OnLeft b={hall} u={3.6} v={0} uw={2.2} vh={2.4} fill={night ? a : "#3A2550"} />
+            <OnRight b={hall} u={0.8} v={3.4} uw={5.4} vh={0.35} fill={a} />
+            <SignLeft b={hall} text="Hellgate Hall" color="#14111A" ink={a} v={3.0} night={night} />
+          </Box>
+          {[-4.5, 4.5].map((x) => { const [px, py] = iso(x, 3.8, 0); const [, ty] = iso(x, 3.8, 6.2); return <rect key={x} x={px - 1} y={ty} width={2} height={py - ty} fill="#5A5460" />; })}
+          <Box b={track} night={night} />
+          {(() => { const car: BoxSpec = { x: -2.5, y: 3.2, z: 6.8, w: 5, d: 1.2, h: 1.4, color: "#C9D2E8" }; return <Box b={car} night={night}>{[0, 1, 2].map((i) => <OnLeft key={i} b={car} u={0.4 + i * 1.6} v={0.4} uw={1.1} vh={0.7} fill={night ? lit : glassDark} />)}</Box>; })()}
+          {night && [[-2, 0], [2, 1]].map(([x, y]) => { const [px, py] = iso(x, y, 4.8); return <circle key={x} cx={px} cy={py - 10} r={10} fill={a} opacity={0.25} filter="url(#mv-blur)" />; })}
+        </>
+      );
+    }
+    case "triborough-works": {
+      const t: BoxSpec = { x: -4, y: -4, z: 0, w: 7, d: 6, h: 9, color: mixHex(a, "#E6E8EC", 0.55) };
+      return (
+        <>
+          {base}
+          <Box b={t} night={night}>
+            {windowsRight(t, 5, 3, lit, glassDark, night)}
+            {windowsLeft(t, 5, 3, lit, glassDark, night)}
+            <SignLeft b={t} text="Triborough Works" color={c} ink="#FFFFFF" v={0.3} night={night} />
+          </Box>
+          {(() => { const [px, py] = iso(-0.5, 1, 9); return <rect x={px - 0.6} y={py - 10} width={1.2} height={10} fill={c} />; })()}
+          <Tree x={4.5} y={3.5} night={night} size={0.9} />
+          <Lantern x={-5} y={4} night={night} />
+        </>
+      );
+    }
+    case "ditmars-library": {
+      const hall: BoxSpec = { x: -5.5, y: -4, z: 0, w: 10, d: 6, h: 4.6, color: mixHex(b, "#E8D6BE", 0.3) };
+      const roof: BoxSpec = { x: -5.8, y: -4.3, z: 4.6, w: 10.6, d: 6.6, h: 0.6, color: mixHex(a, "#F2E6D8", 0.4) };
+      return (
+        <>
+          {base}
+          <Box b={hall} night={night}>
+            {[0, 1, 2, 3, 4].map((i) => <OnLeft key={i} b={hall} u={0.6 + i * 1.95} v={0.6} uw={0.6} vh={3.4} fill="#FFF6EE" opacity={0.9} />)}
+            {[0, 1, 2, 3].map((i) => <OnLeft key={`w${i}`} b={hall} u={1.4 + i * 1.95} v={1} uw={0.9} vh={2.4} fill={night ? lit : glassDark} />)}
+          </Box>
+          <Box b={roof} night={night} />
+          {(() => { const [px, py] = iso(-1, 2, 5.2); return <polygon points={`${px - 26},${py} ${px + 26},${py} ${px},${py - 12}`} fill={mixHex(a, "#F2E6D8", 0.3)} />; })()}
+          <Tree x={5} y={3.8} night={night} />
+          <Tree x={-5.6} y={4.2} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "precinct-114-half": {
+      const st: BoxSpec = { x: -5, y: -4, z: 0, w: 9, d: 6, h: 5.4, color: mixHex("#C9B8A8", b, 0.4) };
+      return (
+        <>
+          {base}
+          <Box b={st} night={night}>
+            {windowsLeft(st, 2, 4, lit, glassDark, night)}
+            <OnLeft b={st} u={3.6} v={0} uw={1.8} vh={2.2} fill={a} />
+            <SignLeft b={st} text="114½ Precinct" color={a} ink="#FFFFFF" v={3.9} night={night} />
+          </Box>
+          {[-2.8, 3.6].map((x) => { const [px, py] = iso(x, 3.6, 0); return (<g key={x}><rect x={px - 0.5} y={py - 11} width={1} height={11} fill="#3A3540" /><circle cx={px} cy={py - 12.5} r={2} fill={night ? "#9FC2FF" : "#2F5FB3"} />{night && <circle cx={px} cy={py - 12.5} r={7} fill="url(#mv-glow)" />}</g>); })}
+          {(() => { const [px, py] = iso(0.6, 4.3, 0); return (<g><rect x={px - 7} y={py - 5} width={14} height={4} rx={1.5} fill="#F4F1EA" /><rect x={px - 4} y={py - 7.4} width={8} height={2.6} rx={1} fill={a} /><circle cx={px - 4} cy={py - 0.8} r={1.4} fill="#14111A" /><circle cx={px + 4} cy={py - 0.8} r={1.4} fill="#14111A" /></g>); })()}
+        </>
+      );
+    }
+    case "engine-7": {
+      const house: BoxSpec = { x: -5, y: -4, z: 0, w: 8.5, d: 6, h: 6, color: mixHex(a, "#B86A4A", 0.4) };
+      return (
+        <>
+          {base}
+          <Box b={house} night={night}>
+            {[0, 1].map((i) => <OnLeft key={i} b={house} u={0.6 + i * 4} v={0} uw={3.4} vh={3.4} fill={a} />)}
+            {[0, 1].map((i) => [0, 1, 2].map((r) => <OnLeft key={`${i}${r}`} b={house} u={0.8 + i * 4} v={0.4 + r * 1} uw={3} vh={0.5} fill={night ? lit : glassDark} opacity={0.75} />))}
+            <SignLeft b={house} text="Engine 7" color="#F4E3C8" ink={c} v={4.3} night={night} />
+          </Box>
+          {(() => { const [px, py] = iso(1.8, 3.8, 0); return (<g><ellipse cx={px} cy={py - 3} rx={3.6} ry={2.2} fill="#FFFFFF" /><circle cx={px + 3.2} cy={py - 5.4} r={2.1} fill="#FFFFFF" />{[[-1.5, -3], [1, -2.2], [3.6, -5.8]].map(([dx, dy]) => <circle key={`${dx}`} cx={px + dx} cy={py + dy} r={0.6} fill="#14111A" />)}</g>); })()}
+          <Lantern x={4.6} y={3.6} night={night} />
+        </>
+      );
+    }
+    case "astoria-cc": {
+      const a1: BoxSpec = { x: -6, y: -4, z: 0, w: 7, d: 5.5, h: 4.4, color: mixHex(b, "#D9C9B0", 0.3) };
+      const a2: BoxSpec = { x: 1.6, y: -4, z: 0, w: 4.4, d: 5.5, h: 6, color: mixHex(a, "#E8E2D0", 0.55) };
+      return (
+        <>
+          {base}
+          <Box b={a1} night={night}>{windowsLeft(a1, 2, 4, lit, glassDark, night)}<SignLeft b={a1} text="Community College" color={a} ink="#FFFFFF" v={3.3} night={night} /></Box>
+          <Box b={a2} night={night}>{windowsLeft(a2, 3, 2, lit, glassDark, night)}{windowsRight(a2, 3, 3, lit, glassDark, night)}</Box>
+          {(() => { const [px, py] = iso(-2, 3.6, 0); return (<g><rect x={px - 0.5} y={py - 16} width={1} height={16} fill="#3A3540" /><rect x={px + 0.5} y={py - 16} width={7} height={4.5} fill={a} /></g>); })()}
+          <Tree x={4.6} y={3.8} night={night} />
+        </>
+      );
+    }
+    case "harmony-chapel": {
+      const nave: BoxSpec = { x: -4, y: -3.5, z: 0, w: 7, d: 5, h: 4, color: mixHex(a, "#F4EDE6", 0.5) };
+      const tower: BoxSpec = { x: -4, y: -3.5, z: 0, w: 2.4, d: 2.4, h: 7.4, color: mixHex(a, "#F4EDE6", 0.4) };
+      return (
+        <>
+          {base}
+          <Box b={nave} night={night}>
+            {[0, 1, 2].map((i) => <OnLeft key={i} b={nave} u={1 + i * 2} v={1.2} uw={0.9} vh={2} fill={["#E5484D", "#6C8CFF", "#FFC21A"][i]} opacity={night ? 1 : 0.8} />)}
+          </Box>
+          {(() => { const [px, py] = iso(-0.5, 1, 4); return <polygon points={`${px - 22},${py} ${px + 22},${py} ${px},${py - 10}`} fill={mixHex(c, "#F4EDE6", 0.55)} />; })()}
+          <Box b={tower} night={night}><OnRight b={tower} u={0.7} v={5} uw={1} vh={1.4} fill={night ? lit : glassDark} /></Box>
+          {(() => { const [px, py] = iso(-2.8, -2.3, 7.4); return <polygon points={`${px - 7},${py} ${px + 7},${py} ${px},${py - 11}`} fill={mixHex(c, "#F4EDE6", 0.5)} />; })()}
+          <Tree x={4.5} y={3.5} night={night} />
+          <Lantern x={-5} y={4.5} night={night} />
+        </>
+      );
+    }
+    case "hell-gate-park": {
+      const grass: BoxSpec = { ...isle, color: night ? "#5E8F86" : "#A8E0B8" };
+      return (
+        <>
+          <Box b={grass} night={night} />
+          {(() => { const [l, ly] = iso(-6, -3, 0); const [r, ry] = iso(6, -3, 0); const [mx, my] = iso(0, -3, 7); return (<g fill="none" stroke={night ? "#E8A0A0" : "#C9584A"} strokeWidth={2.4}><path d={`M${l} ${ly - 18} Q${mx} ${my - 4} ${r} ${ry - 18}`} />{[-4, -2, 0, 2, 4].map((x) => { const [px, py] = iso(x, -3, 0); return <line key={x} x1={px} y1={py - 14} x2={px} y2={py - 7} strokeWidth={1} />; })}<line x1={l} y1={ly - 8} x2={r} y2={ry - 8} strokeWidth={2.8} /></g>); })()}
+          {(() => { const [fx, fy] = iso(0, 2.5, 0); return <ellipse cx={fx} cy={fy} rx={4 * S} ry={1.6 * S} fill={night ? "#3E6FA0" : "#9ED8F7"} opacity={0.9} />; })()}
+          <Tree x={-5} y={4} night={night} />
+          <Tree x={4.8} y={4.2} night={night} size={1.1} />
+          <Tree x={5.2} y={0} night={night} size={0.8} />
+          <Lantern x={-2} y={5.4} night={night} />
+        </>
+      );
+    }
+    case "rep-count": {
+      const gym: BoxSpec = { x: -5.5, y: -4, z: 0, w: 10, d: 6, h: 4.6, color: mixHex(c, "#3A3540", 0.2) };
+      return (
+        <>
+          {base}
+          <Box b={gym} night={night}>
+            <OnLeft b={gym} u={0.6} v={0.3} uw={8.8} vh={2.6} fill={night ? mixHex(a, lit, 0.4) : glassDark} opacity={0.9} />
+            <SignLeft b={gym} text="Rep Count" color={a} ink="#FFFFFF" v={3.1} night={night} />
+          </Box>
+          {(() => { const [px, py] = iso(1.5, 3.8, 0); return (<g><rect x={px - 7} y={py - 4.6} width={14} height={1.2} rx={0.6} fill="#3A3540" />{[-7.5, 5.5].map((dx) => <rect key={dx} x={px + dx} y={py - 7} width={2} height={6} rx={0.6} fill={a} />)}</g>); })()}
+          <Lantern x={-5} y={4.2} night={night} />
+        </>
+      );
+    }
+    case "astoria-blvd-station": {
+      const deck: BoxSpec = { x: -6, y: -1.5, z: 4.5, w: 12, d: 3, h: 0.6, color: "#8E8A96" };
+      const shelter: BoxSpec = { x: -2, y: -1.4, z: 5.1, w: 4, d: 2.8, h: 2, color: mixHex(a, "#E6E8EC", 0.6) };
+      return (
+        <>
+          {base}
+          {[-5, -1, 3].map((x) => { const [px, py] = iso(x, 0, 0); const [, ty] = iso(x, 0, 4.5); return <rect key={x} x={px - 1.2} y={ty} width={2.4} height={py - ty} fill="#6B6570" />; })}
+          <Box b={deck} night={night} />
+          <Box b={shelter} night={night}><OnLeft b={shelter} u={0.4} v={0.4} uw={3.2} vh={1.2} fill={night ? lit : glassDark} opacity={0.8} /></Box>
+          {(() => { const [px, py] = iso(-4.5, 1.5, 5.1); return (<g><rect x={px - 0.5} y={py - 10} width={1} height={10} fill="#3A3540" /><circle cx={px} cy={py - 11.5} r={3} fill={a} /><text x={px} y={py - 9.8} fontSize={4} fontWeight={800} fill="#14111A" textAnchor="middle" fontFamily="system-ui, sans-serif">N</text></g>); })()}
+          <Tree x={4.6} y={4.2} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "reel-queens": {
+      const hall: BoxSpec = { x: -5, y: -4, z: 0, w: 9, d: 6, h: 5.6, color: mixHex(a, "#7A1F3B", 0.45) };
+      return (
+        <>
+          {base}
+          <Box b={hall} night={night}>
+            <OnLeft b={hall} u={2.6} v={0} uw={3.8} vh={2.3} fill={night ? lit : glassDark} opacity={0.9} />
+            <OnLeft b={hall} u={0.4} v={2.6} uw={8.2} vh={1.5} fill={b} />
+            <SignLeft b={hall} text="Now Showing" color={c} ink={b} v={2.7} night={night} />
+            {Array.from({ length: 9 }).map((_, i) => <OnLeft key={i} b={hall} u={0.6 + i * 0.95} v={4.3} uw={0.3} vh={0.3} fill={night ? lit : "#FFE9B8"} />)}
+          </Box>
+          {(() => { const [px, py] = iso(4, -1, 5.6); return (<g><rect x={px - 2.6} y={py - 18} width={5.2} height={18} fill={a} />{["R", "E", "E", "L"].map((ch, i) => <text key={i} x={px} y={py - 14 + i * 4.2} fontSize={4} fontWeight={800} fill="#FFF6EE" textAnchor="middle" fontFamily="system-ui, sans-serif">{ch}</text>)}</g>); })()}
+          <Lantern x={-5} y={4.4} night={night} />
+        </>
+      );
+    }
+    case "respawn-arena": {
+      const arena: BoxSpec = { x: -5.5, y: -4.5, z: 0, w: 10, d: 7, h: 4.4, color: mixHex(c, a, 0.35) };
+      return (
+        <>
+          {base}
+          <Box b={arena} night={night}>
+            <OnLeft b={arena} u={0.5} v={1.2} uw={9} vh={0.5} fill={b} />
+            <OnLeft b={arena} u={3.8} v={0} uw={2.4} vh={2.2} fill={night ? b : "#2A2350"} />
+            <SignLeft b={arena} text="Respawn Arena" color="#14111A" ink={b} v={2.4} night={night} />
+            <OnRight b={arena} u={0.6} v={1} uw={5.8} vh={2.2} fill={night ? mixHex(a, lit, 0.3) : glassDark} opacity={0.85} />
+          </Box>
+          {(() => { const [px, py] = iso(-0.5, 0, 4.4); return (<g><rect x={px - 9} y={py - 10} width={18} height={9} rx={4.5} fill={b} /><circle cx={px - 4.5} cy={py - 5.5} r={1.4} fill={c} /><circle cx={px + 4} cy={py - 6.5} r={1} fill={c} /><circle cx={px + 5.6} cy={py - 4.8} r={1} fill={c} />{night && <circle cx={px} cy={py - 6} r={14} fill={b} opacity={0.25} filter="url(#mv-blur)" />}</g>); })()}
+          <Lantern x={5} y={4} night={night} />
+        </>
+      );
+    }
     case "skybridge-tower":
     default: {
       const t1: BoxSpec = { x: -5.5, y: -4, z: 0, w: 4.2, d: 5, h: 8.5, color: mixHex(a, "#C9D2E8", 0.5) };
@@ -749,7 +1050,7 @@ export function PlaceArt({ place, daytime }: { place: Place; daytime: boolean })
       ))}
       {/* the island's reflection on the haze below */}
       <ellipse cx={160} cy={172} rx={120} ry={10} fill={night ? "#0E0B24" : "#8E7CC8"} opacity={0.18} />
-      <Scene place={place} night={night} />
+      <Scene place={themed(place)} night={night} />
     </svg>
   );
 }

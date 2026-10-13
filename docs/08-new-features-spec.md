@@ -142,7 +142,7 @@ A small, recurring cast makes the city feel inhabited and gives the News app, st
 
 **Version:** v0.6, added to the places that exist (nothing is moved or removed).
 
-Every player starts in one neighborhood with about 20 places close together, so the city feels busy from the first minute and short trips are cheap. Astoria is the starting neighborhood.
+Every player starts in one neighborhood with about 20 places close together (22 with the cinema and games arena the owner added on Oct 13), so the city feels busy from the first minute and short trips are cheap. Astoria is the starting neighborhood.
 
 ### The 20 places
 
@@ -154,6 +154,7 @@ Every player starts in one neighborhood with about 20 places close together, so 
 | Work | Delivery-rider hub, retail store, office tower (gigs board) | Scene cards |
 | City | Library, police precinct, firehouse, community college, a generic place of worship | Scene cards |
 | Outdoors | A park, a gym | Scene cards |
+| Entertainment | A cinema (also a date spot), a games arena | Scene cards |
 | Getting around | A subway station | Map label and lore |
 
 **Notes:**
