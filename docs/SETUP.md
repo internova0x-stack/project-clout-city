@@ -18,7 +18,9 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    set the subject to `Your Clout City sign-in link` and paste the body from
    `supabase/email-templates/magic-link.html`. This template's link works even when the
    email is opened on a different phone or computer, and it includes a 6-digit code
-   players can type into the game instead.
+   players can type into the game instead. The link opens a page with a **Continue** button
+   and signs in only when it's tapped, so email security scanners that open links first can't
+   use up the one-time link (the "link expired" problem).
 6. **Project Settings → API**: copy the Project URL and the `anon` public key.
 7. **Google sign-in (v0.2, optional)**: **Authentication → Sign In / Providers → Google**.
    Turn it on and paste a Google OAuth client ID and secret (create them in Google Cloud
