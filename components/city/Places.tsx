@@ -36,6 +36,12 @@ export interface PlaceHandlers {
   onOpenGigs: () => void;
   /** v0.8 a drink at the bar (clubs and the lounge, migration 0026). */
   onBarDrink?: (placeId: string) => void;
+  /** v0.10 neighborhood gossip (migration 0035): Listen in here, and pieces a regular tells. */
+  gossip?: {
+    listen: (placeId: string) => void;
+    /** Ask the regular: a piece of gossip they tell, or null for their usual line. */
+    hear: (placeId: string) => Promise<{ text: string; note: string } | null>;
+  };
   /** v0.10 Lucky Star Lotto's counter (migration 0032). */
   onOpenLotto?: (placeId: string) => void;
   /** v0.8 grocery bundles at supermarkets (migration 0027). */
@@ -120,6 +126,20 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
           </div>
         );
       })}
+      {handlers.gossip && !world.closed && (
+        <div className="action-row">
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span className="title" style={{ display: "block" }}>👂 Listen in</span>
+            {!compact && <span className="subtext" style={{ display: "block" }}>Eavesdropping is free. Getting caught is not.</span>}
+            <span className="fx-row"><span className="fx fx-pay">Free</span><span className="fx">🍵 Gossip for the Tea app</span></span>
+          </div>
+          {away ? <span className="lock-chip">On arrival</span> : (
+            <button className="btn btn-green btn-sm" disabled={handlers.busy !== null} onClick={() => handlers.gossip!.listen(place.id)}>
+              {handlers.busy === `listen:${place.id}` ? "…" : "Listen"}
+            </button>
+          )}
+        </div>
+      )}
       {handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed && (() => {
         const l = state.lotto;
         const free = l.freeToday - l.freeUsed;
@@ -243,16 +263,33 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
  * and sometimes a question to answer right there in the bubble. */
 type HuntLine = { say: string; question?: { q: string; choices: string[] }; note?: string; tone?: "hint" | "found" };
 
-function PlaceArtWithRegular({ place, daytime, talk, hunt }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"] }) {
+function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"] }) {
   const [n, setN] = useState(-1);
   const [huntLine, setHuntLine] = useState<HuntLine | null>(null);
+  const [tea, setTea] = useState<{ text: string; note: string } | null>(null);
+  // v0.10: after the hunt (it comes first), the regular's first line may be a piece of gossip.
+  const askGossip = async (): Promise<boolean> => {
+    if (!gossip) return false;
+    setAsking(true);
+    const g = await gossip.hear(place.id);
+    setAsking(false);
+    if (g) { setTea(g); setN(-1); return true; }
+    return false;
+  };
   const [asking, setAsking] = useState(false);
   const first = talk?.(place, 0) ?? null;
   const said = first && n >= 0 ? talk!(place, n) : null;
   const firstName = first?.regular.name.split(" ")[0] ?? "";
   const onTap = async () => {
+    const fresh = n < 0 && !huntLine && !tea;
     // Ask about the hunt on the first tap, and again after a "stop in first" hint.
-    if (!hunt || (n >= 0 && huntLine?.tone !== "hint") || (huntLine && huntLine.tone !== "hint")) { setHuntLine(null); setN((x) => x + 1); return; }
+    if (!hunt || (n >= 0 && huntLine?.tone !== "hint") || (huntLine && huntLine.tone !== "hint")) {
+      setHuntLine(null);
+      if (fresh && (await askGossip())) return;
+      setTea(null);
+      setN((x) => x + 1);
+      return;
+    }
     setAsking(true);
     const r = await hunt.talk(place.id);
     setAsking(false);
@@ -260,6 +297,7 @@ function PlaceArtWithRegular({ place, daytime, talk, hunt }: { place: Place; day
     if (!r.ok && r.code === "visit_first") {
       return setHuntLine({ say: `${firstName} has something for your hunt.`, note: "Do something here first, then ask again.", tone: "hint" });
     }
+    if (fresh && (await askGossip())) return;
     setN(0);
   };
   const onAnswer = async (i: number) => {
@@ -278,7 +316,7 @@ function PlaceArtWithRegular({ place, daytime, talk, hunt }: { place: Place; day
         {first && (
           <button className="regular-tag" onClick={() => void onTap()} disabled={asking} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
             <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
-            <span>{asking ? "…" : n < 0 && !huntLine ? `💬 ${firstName}` : "Tap for more"}</span>
+            <span>{asking ? "…" : n < 0 && !huntLine && !tea ? `💬 ${firstName}` : "Tap for more"}</span>
           </button>
         )}
       </div>
@@ -299,7 +337,14 @@ function PlaceArtWithRegular({ place, daytime, talk, hunt }: { place: Place; day
           {huntLine.note && <span className="meta hunt-note" style={{ display: "block" }}>{huntLine.note}</span>}
         </div>
       )}
-      {said && !huntLine && (
+      {tea && !huntLine && (
+        <div className="regular-bubble tea-bubble" role="status">
+          <span className="meta" style={{ display: "block" }}>🍵 {first!.regular.name} · {first!.regular.title}</span>
+          &ldquo;{tea.text}&rdquo;
+          <span className="meta hunt-note" style={{ display: "block" }}>{tea.note}</span>
+        </div>
+      )}
+      {said && !huntLine && !tea && (
         <div className="regular-bubble" role="status">
           <span className="meta" style={{ display: "block" }}>{first!.regular.name} · {first!.regular.title}</span>
           &ldquo;{said.line}&rdquo;
@@ -327,7 +372,7 @@ export function LocationSheet({
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
         <div className="stack-16">
-          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} />
+          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} />
           <StoryBanners place={place} story={handlers.story ?? null} />
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>

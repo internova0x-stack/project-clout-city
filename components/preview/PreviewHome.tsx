@@ -1,6 +1,8 @@
 "use client";
 
 import type { PartyApi } from "@/lib/party";
+import type { GossipApi } from "@/lib/gossip";
+import { previewGossipFind, previewGossipReset, previewGossipShare, previewGossipState } from "@/app/preview/gossipActions";
 import { previewNews } from "@/app/preview/newsActions";
 import { useCallback, useMemo, useRef } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
@@ -31,7 +33,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -53,6 +55,8 @@ export function PreviewHome({
   huntPreset?: string;
   /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (last week's draw was mine). */
   lottoPreset?: string;
+  /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
+  gossipPreset?: string;
 }) {
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
@@ -194,6 +198,13 @@ export function PreviewHome({
       members: previewCrewMembers, create: previewCrewCreate, respond: previewCrewRespond,
     };
   }, [crewPreset, sim]);
+  // v0.10 gossip in memory on the dev server (the preview sim trusts the place it's given).
+  const gossipReady = useRef<Promise<void> | null>(null);
+  const gossipApi = useMemo<GossipApi>(() => ({
+    async state() { await (gossipReady.current ??= previewGossipReset(gossipPreset)); return previewGossipState(); },
+    find: previewGossipFind,
+    share: previewGossipShare,
+  }), [gossipPreset]);
   // v0.9 party keepsakes in memory (?party=invite|sent).
   const partyApi = useMemo<PartyApi>(() => ({
     async inbox() { await partyReset(); return previewPartyInbox(); },
@@ -237,6 +248,7 @@ export function PreviewHome({
       party={cityOff || storyOff ? undefined : partyApi}
       cityNews={cityOff ? undefined : previewNews}
       hunt={cityOff ? undefined : huntApi}
+      gossip={cityOff ? undefined : gossipApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,

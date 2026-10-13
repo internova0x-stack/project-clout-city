@@ -1240,3 +1240,40 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .jackpot-news { padding:20px; gap:12px; }
 .jackpot-news .title { margin-top:2px !important; }
 .jackpot-news .body { font-size:15.5px; line-height:1.6; }
+
+/* ===================== v0.10 Neighborhood gossip =====================
+   The Tea app on the Phone, a story's pieces, Lola's Tea card and the Collection's Tea tab. A fresh
+   matcha-to-peach gradient for tea; never gold (gold is real money). Owner, Oct 13: room above the
+   title, a full-size back button, generous line spacing on the card. */
+:root { --g-tea:linear-gradient(135deg, #E7F6D9 0%, #CFEFC2 45%, #F8E3B5 100%); --tea-text:#2E6B2E; --tea-tint:#E3F3DA; }
+.tea-app { display:flex; flex-direction:column; }
+.tea-title { margin:10px 0 0; }
+.tea-tabs { margin:14px 0 14px; }
+.tea-story { display:flex; flex-direction:column; gap:6px; width:100%; text-align:left; padding:14px 16px; border-radius:var(--r-lg); background:var(--surface-raised); box-shadow:var(--elev-1); }
+.tea-story:active { transform:scale(.99); }
+.tea-story-title { margin:4px 0 0; }
+.tea-tag { background:var(--tea-tint); color:var(--tea-text); }
+.tea-progress { display:flex; gap:5px; margin-top:6px; }
+.tea-progress i { flex:1; height:6px; border-radius:3px; background:var(--chip-off); }
+.tea-progress i.on { background:linear-gradient(90deg, #7CC86B, #B8DE6F); }
+.tea-piece { padding:12px 14px; border-radius:var(--r-md); background:var(--surface-raised); box-shadow:var(--elev-1); }
+.tea-piece .body { line-height:1.55; }
+.tea-piece-src { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--text-3); }
+.tea-share { flex:none; padding:4px 10px; border-radius:var(--r-pill); background:var(--neon-tint); color:var(--neon-text); font-size:12.5px; font-weight:600; }
+.tea-share:disabled { opacity:.5; }
+.tea-piece.missing { position:relative; overflow:hidden; background:var(--surface-card); box-shadow:none; min-height:84px; }
+.tea-blur { margin:0; filter:blur(5px); color:var(--text-2); user-select:none; -webkit-user-select:none; }
+.tea-hint { position:absolute; left:12px; right:12px; bottom:12px; padding:7px 10px; border-radius:10px; background:rgba(251,248,242,.92); font-size:13px; line-height:1.35; font-weight:600; color:var(--text-1); }
+.tea-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tea-mini { display:flex; flex-direction:column; gap:8px; min-height:112px; padding:14px; border-radius:var(--r-md); background:var(--g-tea); text-align:left; box-shadow:0 4px 12px rgba(60,110,40,.15); }
+.tea-mini b { font-family:var(--font-display); font-size:14.5px; line-height:1.35; font-weight:700; color:var(--text-1); }
+.tea-card { position:relative; overflow:hidden; display:flex; flex-direction:column; gap:10px; padding:20px 20px 22px; border-radius:22px; background:var(--g-tea); box-shadow:0 12px 28px rgba(60,110,40,.22); }
+.tea-card::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(80% 60% at 10% 0%, rgba(255,255,255,.6), transparent 60%); }
+.tea-card > * { position:relative; }
+.tea-card-tag { align-self:flex-start; background:rgba(255,255,255,.7); color:var(--tea-text); }
+.tea-card-headline { margin:4px 0 0; font-family:var(--font-display); font-size:21px; line-height:1.25; font-weight:800; letter-spacing:-.015em; color:var(--text-1); }
+.tea-card-body { margin:0; font-size:15px; line-height:1.65; color:#2A3324; }
+.tea-card-foot { margin-top:2px; color:#4A5A40; }
+.tea-reveal { padding-top:8px; }
+.regular-bubble.tea-bubble { background:var(--tea-tint); }
+.tea-app .phone-back { height:44px; font-size:17px; padding-right:12px; align-self:flex-start; }

@@ -38,7 +38,7 @@ components live in `app/globals.css`.
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
-  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes last week's jackpot yours. `/preview/studio` shows the Story Studio.
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes last week's jackpot yours; `?gossip=new|some|almost|done` starts the Tea app in that state. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
 
