@@ -129,11 +129,14 @@ export function DateStatusRow({ me, date, bonus, onCancel }: {
 }
 
 /** C41 sending: pick a crush or a friend for this spot tonight. */
-export function DateSheet({ spot, api, onClose, onSent }: {
+export function DateSheet({ spot, api, onClose, onSent, onInviteFriend, onCrushInvite }: {
   spot: { kind: "place" | "event"; target: string; price: number } | null;
   api: DatingApi;
   onClose: () => void;
   onSent: (text: string) => void;
+  /** #5: with nobody to ask, the sheet offers these instead of a dead end. */
+  onInviteFriend: () => void;
+  onCrushInvite: () => void;
 }) {
   const [people, setPeople] = useState<DateCandidate[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -166,9 +169,27 @@ export function DateSheet({ spot, api, onClose, onSent }: {
         {error && <p className="meta" role="alert" style={{ margin: 0, color: "var(--red-600, #C8323A)" }}>{error}</p>}
         {people === null && <p className="meta">Checking who&apos;s free…</p>}
         {people?.length === 0 && (
-          <div className="card stack-4">
-            <p className="overline" style={{ margin: 0 }}>Nobody to ask yet</p>
-            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with.</p>
+          <div className="stack-8">
+            <div className="card stack-4">
+              <p className="overline" style={{ margin: 0 }}>Nobody to ask yet</p>
+              <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with. Bring someone in.</p>
+            </div>
+            <button className="list-row" onClick={onInviteFriend}>
+              <span style={{ fontSize: 24 }} aria-hidden="true">👋</span>
+              <span style={{ flex: 1, textAlign: "left" }}>
+                <span className="title" style={{ display: "block" }}>Invite a friend</span>
+                <span className="meta">They join your crew, and then you can ask them out.</span>
+              </span>
+              <ChevronRightIcon size={16} />
+            </button>
+            <button className="list-row" onClick={onCrushInvite}>
+              <span style={{ fontSize: 24 }} aria-hidden="true">💌</span>
+              <span style={{ flex: 1, textAlign: "left" }}>
+                <span className="title" style={{ display: "block" }}>Send a crush invite</span>
+                <span className="meta">Your crush isn&apos;t in Clout City yet? Invite them. Same rewards as any invite.</span>
+              </span>
+              <ChevronRightIcon size={16} />
+            </button>
           </div>
         )}
         <div className="stack-8">
