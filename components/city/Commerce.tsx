@@ -23,7 +23,7 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion",
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn,
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
   /** #15: owned clothes can be put on straight from the Shop. */
@@ -33,6 +33,8 @@ export function ShopSheet({
   realMoney?: RealMoney;
   /** The boutique and the dealership open the Shop on their category. */
   initialCategory?: ShopCategory;
+  /** v0.7 step 4: every clothing piece can be tried on before buying (#24). */
+  onTryOn?: (item: ShopItem) => void;
 }) {
   const [cat, setCat] = useState<ShopCategory>(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
@@ -115,6 +117,9 @@ export function ShopSheet({
                     wearControl(item.sku) ?? <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
                   ) : (
                     <div className="buy-rent">
+                      {onTryOn && item.wear && (
+                        <button className="btn btn-secondary btn-sm" onClick={() => onTryOn(item)}>Try it on</button>
+                      )}
                       <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
                         {formatCash(item.price)}
                       </button>
@@ -284,53 +289,6 @@ export function NetWorthSheet({
         )}
       </Sheet>
     </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Your Look: wear owned fashion over the starting style, one item per slot.
-// ---------------------------------------------------------------------------
-const SLOT_LABEL = { top: "Top", bottom: "Bottom", shoes: "Shoes", accessory: "Accessory" } as const;
-
-export function LookSheet({
-  open, onClose, state, busy, onEquip, onShop,
-}: { open: boolean; onClose: () => void; state: CityState; busy: Busy; onEquip: (itemId: number, on: boolean) => void; onShop: () => void }) {
-  const fashion = state.items.filter((i) => i.category === "fashion");
-  return (
-    <Sheet open={open} onClose={onClose} label="Your look">
-      <div className="stack-16">
-        <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Your look</h2>
-        <p className="subtext" style={{ margin: 0 }}>Wear what you own. Anything you don&apos;t wear falls back to your starting style.</p>
-        {fashion.length === 0 ? (
-          <div className="card stack-8">
-            <p className="body" style={{ margin: 0 }}>Your closet is just your starter outfit. Iconic, but finite.</p>
-            <button className="btn btn-secondary" onClick={onShop}>Browse fashion</button>
-          </div>
-        ) : (
-          (["top", "bottom", "shoes", "accessory"] as const).map((slot) => {
-            const rows = fashion.filter((i) => itemBySku(i.sku)?.wear?.slot === slot);
-            if (!rows.length) return null;
-            return (
-              <div key={slot}>
-                <p className="overline" style={{ margin: "0 0 4px" }}>{SLOT_LABEL[slot]}</p>
-                {rows.map((i) => {
-                  const it = itemBySku(i.sku)!;
-                  return (
-                    <div key={i.id} className="list-row static">
-                      <span className="swatch" style={{ background: it.wear!.color, width: 32, height: 32 }} aria-hidden="true" />
-                      <span style={{ flex: 1, minWidth: 0 }}><span className="title">{it.name}</span></span>
-                      <button className={`chip${i.equipped ? "" : ""}`} aria-pressed={i.equipped} disabled={busy !== null} onClick={() => onEquip(i.id, !i.equipped)}>
-                        {i.equipped ? "Wearing" : "Wear"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })
-        )}
-      </div>
-    </Sheet>
   );
 }
 

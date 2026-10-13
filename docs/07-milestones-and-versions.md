@@ -172,7 +172,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 ## v0.7 "Look and Feel" (about 1 week)
 
-**In scope** (docs/testing-feedback.md, formerly listed as v0.2): red main buttons with yellow as an accent and outlined-red destructive buttons (#10); locked boroughs with a dashed red outline and a mini-map sheet with a Lola teaser (#7, #8, #11); the creator's name field, Presenting as (cosmetic only), four body types each, free basic headwear first and starter garment choices, and a Monzo-style starting-cash card (#43 to #46); the avatar-head bubble and full profile with public net worth (#25, #39); the stats panel starting collapsed with a suggested action per stat (#14); Your Look as a dressing room with try-on (#24); the Collection redesign (#40); and the cosmetic and UX items marked for v0.2 in the bug list (#2, #6, #20, #21, #28, #29, #31, #34, #35).
+**In scope** (docs/testing-feedback.md, formerly listed as v0.2): red main buttons with yellow as an accent and outlined-red destructive buttons (#10); locked boroughs with a dashed red outline and a mini-map sheet with a Lola teaser (#7, #8, #11); the creator's name field, Presenting as (cosmetic only), four body types each, free basic headwear first and starter garment choices, and a Monument Valley starting-cash card (#43 to #46); the avatar-head bubble and full profile with public net worth (#25, #39); the stats panel starting collapsed with a suggested action per stat (#14); Your Look as a dressing room with try-on (#24); the Collection redesign (#40); and the cosmetic and UX items marked for v0.2 in the bug list (#2, #6, #20, #21, #28, #29, #31, #34, #35).
 
 ## v0.8 "Getting Around" (1 to 2 weeks)
 

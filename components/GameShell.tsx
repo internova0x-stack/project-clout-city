@@ -10,7 +10,7 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
+import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
@@ -21,7 +21,8 @@ import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import { regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
-import { BillsSheet, LookSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
+import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
+import { LookRoom } from "./city/LookRoom";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
@@ -152,6 +153,8 @@ export function GameShell({
   const [tab, setTab] = useState<Tab>("home");
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
+  // v0.7 step 4: a Shop piece being tried on in Your Look.
+  const [tryOn, setTryOn] = useState<ShopItem | null>(null);
   const [flow, setFlow] = useState<Flow>(() => previewFlow ?? initialFlow(player));
   const [tourStep, setTourStep] = useState(0);
   const [me, setMe] = useState(player);
@@ -937,6 +940,7 @@ export function GameShell({
             initialCategory={shopCategory}
             onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))}
             onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
+            onTryOn={setTryOn}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
           <NetWorthSheet
@@ -957,13 +961,29 @@ export function GameShell({
             badge={!!feed?.badges.some((b) => b.id === "postcard-collector")}
             huntCards={huntState?.cards}
           />
-          <LookSheet
-            open={panel === "look"}
-            onClose={() => setPanel(null)}
+          <LookRoom
+            open={panel === "look" || !!tryOn}
+            onClose={() => (tryOn ? setTryOn(null) : setPanel(null))}
+            look={look}
+            base={starterOutfit(style, look.body, look.fit)}
             state={city}
-            busy={busy}
-            onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
-            onShop={() => setPanel("shop")}
+            busy={busy !== null}
+            trying={tryOn}
+            onSave={async (ids, covering) => {
+              if (!cityApi.saveLook) return false;
+              const ok = await run("look", () => cityApi.saveLook!(ids, covering));
+              // Headwear lives on the player's look; saving also fills in the build (migration 0021).
+              if (ok) setMe((m) => ({ ...m, look: { ...m.look, covering, build: look.build } }));
+              return ok;
+            }}
+            onBuy={(sku) => run(`buy:${sku}`, async () => {
+              // Buying from a try-on puts the piece on straight away.
+              const r = await cityApi.buyItem(sku, "buy");
+              const it = r.ok ? r.state.items.find((i) => i.sku === sku) : undefined;
+              if (!r.ok || !it) return r;
+              const e = await cityApi.equipItem(it.id, true);
+              return e.ok ? { ...e, gain: r.gain } : e;
+            })}
           />
           <BillsSheet open={panel === "bills"} onClose={() => setPanel(null)} state={city} busy={busy} onPay={(id) => void run(`bill:${id}`, () => cityApi.payBill(id))} />
         </>

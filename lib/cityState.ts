@@ -109,6 +109,8 @@ export interface CityApi {
   buyItem(sku: string, mode: "buy" | "rent"): Promise<CityResult>;
   sellItem(itemId: number): Promise<CityResult>;
   equipItem(itemId: number, on: boolean): Promise<CityResult>;
+  /** v0.7 Your Look (migration 0021): the worn clothes (one per slot) and the free headwear, saved at once. */
+  saveLook?(itemIds: number[], covering: string): Promise<CityResult>;
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
@@ -120,6 +122,8 @@ export interface CityApi {
 // Error codes raised by the SQL functions, in the game's voice.
 // ---------------------------------------------------------------------------
 const ERRORS: Record<string, string> = {
+  one_per_slot: "One top, one bottom, one pair of shoes. You're not a closet.",
+  bad_covering: "That hat isn't in the city yet.",
   no_energy: "Not enough Energy. Eat something, or sleep it off until tomorrow.",
   cant_afford: "Your card got declined. Loudly.",
   doors_closed: "Doors aren't open yet. The bouncer is pretending not to see you.",
