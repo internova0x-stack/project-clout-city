@@ -253,9 +253,14 @@ export const PLACES: Place[] = [
     id: "unisphere", name: "The Unisphere", emoji: "🌐", category: "monument", neighborhood: "Flushing Meadows",
     at: [40.7466, -73.8448], depth: "full", template: "unisphere", palette: ["#8FA4B8", "#9ED8F7", "#2F4F6B"], postcard: "postcard-unisphere",
     tags: ["monument", "park"],
-    lore: "A twelve-story steel globe from a World's Fair that promised flying cars. The cars never came, but the globe stayed, and it photographs better than you do.",
+    lore: "A twelve-story steel globe from a World's Fair that promised flying cars. The cars never came, but the globe stayed, and so did Walt, who gives tours whether you asked or not.",
     actions: [
       { id: "visit", kind: "visit", label: "Pose with the globe", energy: 5, mood: 6, clout: 20, blurb: "Hold up the world for a photo. Everyone does. Do it anyway." },
+      // v0.9 (#32; owner Oct 13): the plaza's activities.
+      { id: "tour", kind: "hangout", label: "Take Walt's tour", price: 15, energy: 8, confidence: 5, blurb: "Forty minutes, three World's Fairs, one ex-wife. You'll know things now." },
+      { id: "wish", kind: "hangout", label: "Toss a coin in the fountain", price: 1, energy: 0, mood: 4, blurb: "Wish for clout. The fountain has heard it before." },
+      { id: "pretzel", kind: "eat", label: "Pretzel from the cart", price: 5, energy: -12, blurb: "Salt crystals the size of dice. Worth every one." },
+      { id: "people", kind: "hangout", label: "People-watch on a bench", energy: 3, mood: 6, blurb: "Tourists, joggers, a man walking a cat. Free entertainment." },
     ],
   },
   {
@@ -265,6 +270,11 @@ export const PLACES: Place[] = [
     lore: "Old rail gantries standing guard over the East River like retired bouncers. The best skyline view in Queens, if you can find a spot between the engagement shoots.",
     actions: [
       { id: "visit", kind: "visit", label: "Catch the skyline at the gantries", energy: 5, mood: 8, clout: 20, blurb: "Golden hour, river breeze, three proposals in progress behind you." },
+      // v0.9 (#32; owner Oct 13): the plaza's activities.
+      { id: "photoshoot", kind: "hangout", label: "Golden hour photoshoot", energy: 10, confidence: 6, blurb: "Squint at the sun like it owes you money. Inez says that's your angle." },
+      { id: "picnic", kind: "eat", label: "Picnic on the lawn", price: 12, energy: -20, blurb: "A blanket, a baguette and a view that costs nothing. The baguette cost something." },
+      { id: "ferries", kind: "hangout", label: "Watch the ferries", energy: 2, mood: 7, blurb: "Boats go by. You do nothing. It's the most productive you've felt all week." },
+      { id: "run", kind: "hangout", label: "Run the river path", energy: 15, mood: 4, confidence: 5, blurb: "Two miles, one skyline, zero breath left. You look great, though." },
     ],
   },
   {
