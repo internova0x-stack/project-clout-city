@@ -525,7 +525,7 @@ a { color:inherit; }
 .interior-back { position:absolute; z-index:16; top:calc(72px + var(--safe-top)); left:12px; }
 .interior-panel { position:absolute; z-index:16; left:12px; right:12px; bottom:calc(88px + var(--safe-bottom)); max-height:44dvh; overflow-y:auto;
   background:var(--glass-solid); color:var(--text-1); border-radius:var(--r-xl); padding:14px; box-shadow:var(--elev-3); max-width:520px; margin:0 auto; }
-.game.inside .stats, .game.inside .under-hud, .game.inside .side-col { display:none; }
+.game.inside .stats, .game.inside .under-hud, .game.inside .side-col, .game.inside .me-bubble { display:none; }
 
 /* Phone (C29) */
 .phone-wrap { z-index:60; }

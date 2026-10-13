@@ -359,8 +359,9 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
     // ---- v0.9 monument plazas: landmarks and park furniture ----
     case "globe": {
       // The Unisphere: a steel globe of meridians and rings on a tripod, in a round fountain pool.
-      cyl(w / 2, w / 2, 0.18, "#C9C2B6");
-      cyl(w / 2 - 0.12, w / 2 - 0.12, 0.2, k.mat("#7FC8E8", { emissive: "#7FC8E8", emissiveIntensity: opts.night ? 0.35 : 0.12, roughness: 0.2 }), 0, 0.01);
+      // Modeled at a 3 m footprint and scaled to the plaza's.
+      cyl(1.5, 1.5, 0.18, "#C9C2B6");
+      cyl(1.38, 1.38, 0.2, k.mat("#7FC8E8", { emissive: "#7FC8E8", emissiveIntensity: opts.night ? 0.35 : 0.12, roughness: 0.2 }), 0, 0.01);
       for (let i = 0; i < 3; i++) {
         const a = (i / 3) * Math.PI * 2;
         const leg = cyl(0.05, 0.08, 1.0, METAL, Math.cos(a) * 0.18, 0.15, Math.sin(a) * 0.18, 6);
@@ -392,6 +393,7 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       }
       globe.rotation.z = 0.41;
       g.add(globe);
+      g.scale.setScalar(w / 3);
       return { group: g, tick: (t) => { globe.rotation.y = t * 0.08; } };
     }
     case "gantry": {
@@ -406,6 +408,7 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       }
       const sign = box(2.9, 0.42, 0.06, k.mat("#F2A900", { emissive: "#F2A900", emissiveIntensity: opts.night ? 0.8 : 0.15 }), 0, 3.05, -0.25);
       sign.castShadow = true;
+      g.scale.setScalar(w / 3);
       return { group: g };
     }
     case "bench": {
