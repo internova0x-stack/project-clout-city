@@ -106,7 +106,11 @@ const PARTIES = () => {
 export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
   if (process.env.NODE_ENV === "production") return null;
   const owned = (sku: string) => store.st.skus.includes(sku);
-  const base = (sku: string) => ({ sku, currency: "usd", parent: null, owned: owned(sku), pending: pending.has(sku) });
+  // Owned copies get a sample serial (migration 0022 numbers them in collection order).
+  const base = (sku: string) => ({
+    sku, currency: "usd", parent: null, owned: owned(sku), pending: pending.has(sku),
+    serial: owned(sku) ? 41 + store.st.skus.indexOf(sku) : null, ownedAt: owned(sku) ? new Date().toISOString() : null,
+  });
   return [
     ...loadArcs()
       .filter((a) => a.type === "side" && a.sku)

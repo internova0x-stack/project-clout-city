@@ -1,6 +1,7 @@
 "use client";
 
 import { ExclusiveEventCard, type MoneyHandlers } from "../city/Money";
+import { liveParty } from "@/lib/store";
 import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen } from "@/lib/city";
@@ -167,7 +168,7 @@ export function EventsSheet({
             <span className="subtext" style={{ display: "block" }}>Velvet Static, Long Island City</span>
           </button>
         )}
-        {city && exclusive?.products.filter((p) => p.event).map((p) => (
+        {city && exclusive?.products.filter((p) => liveParty(p, exclusive.nowMs)).map((p) => (
           <ExclusiveEventCard key={p.sku} p={p} nowMs={exclusive.nowMs} h={exclusive.h} />
         ))}
         {city ? (

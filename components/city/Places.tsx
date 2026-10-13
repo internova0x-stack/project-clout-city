@@ -21,7 +21,7 @@ import { DateStatusRow } from "../dating/Dating";
 import { canDateAt, type DateNight } from "@/lib/dating";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
-import type { StoreProduct } from "@/lib/store";
+import { liveParty, type StoreProduct } from "@/lib/store";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = {
@@ -290,7 +290,7 @@ export function LocationSheet({
             const pc = place.postcard ? handlers.money?.products.find((p) => p.sku === place.postcard) : undefined;
             return pc && (state.visitsToday[place.id] ?? 0) > 0 ? <PostcardOffer p={pc} h={handlers.money!.h} /> : null;
           })()}
-          {handlers.money?.products.filter((p) => p.event?.placeId === place.id).map((p) => (
+          {handlers.money?.products.filter((p) => p.event?.placeId === place.id && liveParty(p, handlers.money!.nowMs)).map((p) => (
             <ExclusiveEventCard key={p.sku} p={p} nowMs={handlers.money!.nowMs} h={handlers.money!.h} compact />
           ))}
           {(() => {

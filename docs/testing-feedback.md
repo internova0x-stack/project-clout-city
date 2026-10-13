@@ -79,7 +79,7 @@ Build these with the version they belong to; the decisions above give the rules.
 | v0.7 | 25, 39 | Avatar-head bubble left of the stats panel, opening the full profile with public net worth |
 | v0.7 | 14 | Stats panel starts collapsed; one suggested action per stat when open (cheapest open place first, never real money); high Confidence points to pro gigs |
 | v0.7 | 24 | Your Look as a dressing room (avatar on stage, items by category, try-on with Save look); "Try it on" in the Shop. Your Look shows only what you own, your starter pieces and the free headwear; Shop pieces stay in the Shop (owner, Oct 13). Depends on #15 |
-| v0.7 | 40 | Collection redesign: real art in every state, foil, flip and serial number when owned, set progress bars, tabs for postcards, hunt cards and event cards |
+| v0.7 | 40 | Collection redesign: real art in every state, foil, flip and serial number when owned, set progress bars, tabs for postcards, hunt cards and event cards. "Collect the postcard" shows a dulled preview of the actual card. Serial numbers count copies in the order players collected them ("No. 0042" is the 42nd), and an Events tab keeps exclusive party tickets after the party ends (owner, Oct 13). The Collection also gets its own app on the phone home screen (owner, Oct 13) |
 | v0.8 | 4 | Travel: "Go there," transport modes with distance costs, skippable trip view, personal timers |
 | v0.8 | 3, 26, 27 | Venue drinks and snacks; Nap and Sit at home, capped per day |
 | v0.8 | 23 | Weekly rent; re-tune starting cash, rent and income together |

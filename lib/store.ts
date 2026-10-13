@@ -18,6 +18,9 @@ export interface StoreProduct {
   value?: number | null;
   /** Exclusive events: the party itself. */
   event?: ExclusiveEvent | null;
+  /** v0.7 (migration 0022): owned copies are numbered in the order players collected them. */
+  serial?: number | null;
+  ownedAt?: string | null;
 }
 
 export interface ExclusiveEvent {
@@ -44,6 +47,18 @@ export function partyState(e: ExclusiveEvent, nowMs: number): { open: boolean; m
   const end = Date.parse(e.endsAt);
   return { open: nowMs >= start && nowMs < end, minutesToOpen: Math.max(0, Math.ceil((start - nowMs) / 60_000)), over: nowMs >= end };
 }
+
+/** Parties that have ended stay in the catalog only as the ticket holder's event card (0022). */
+export const liveParty = (p: StoreProduct, nowMs: number) => !!p.event && !partyState(p.event, nowMs).over;
+
+/** "No. 0042": the copy's number, four digits until the 10,000th. */
+export const serialLabel = (n: number) => `No. ${String(n).padStart(4, "0")}`;
+
+/** Lola's note on the back of each postcard (C39, v0.7 Collection). Keyed by place id. */
+export const POSTCARD_NOTES: Record<string, string> = {
+  unisphere: "Wish you were here. Actually, glad you're not: more globe for me.",
+  "gantry-plaza": "The skyline posed for me. Manhattan never calls back, but it does look good from here.",
+};
 
 export type CheckoutResult = { ok: true; url: string } | { ok: false; error: string };
 
