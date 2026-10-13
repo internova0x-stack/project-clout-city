@@ -701,7 +701,7 @@ export function citySeed() {
   return {
     economy: CITY_ECONOMY,
     places: PLACES.map((p) => ({
-      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at,
+      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood,
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false,
