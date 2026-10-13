@@ -1,12 +1,14 @@
 "use server";
 
+import { checkGossipFiles } from "@/lib/gossipImport";
+
 // Development previews only: this week's treasure hunt from the first file in content/hunts/,
 // moved to the current week and run with the same engine as the database (lib/hunts.ts). It
 // runs here on the server so answers never reach the browser. Nothing is saved.
 import FILE from "@/content/hunts/2026-10-19.json";
 import { CITY_ECONOMY } from "@/lib/city";
 import { huntAnswer, huntCard, huntTalk, huntView, validateHunt, type HuntCard, type HuntFile, type HuntProgress, type HuntResult, type HuntState } from "@/lib/hunts";
-import type { Admin, ContentDraft, HuntAdmin } from "@/lib/studio";
+import type { Admin, ContentDraft, HuntAdmin, GossipAdmin, GossipFileCheck } from "@/lib/studio";
 import { readContentDrafts } from "@/lib/contentDrafts";
 import type { StyleId } from "@/lib/styles";
 
@@ -124,4 +126,31 @@ export async function previewHuntStatus(id: string, status: HuntAdmin["status"],
 export async function previewDrafts(): Promise<Admin<ContentDraft[]>> {
   if (off()) return { ok: false, error: "Previews are off in production." };
   return { ok: true, data: await readContentDrafts() };
+}
+
+// ---- The Studio's Gossip tab in preview: the real files from content/gossip (nothing is saved) ----
+const gossipStatus = new Map<string, { status: GossipAdmin["status"]; note: string | null }>();
+export async function previewGossipList(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>> {
+  if (off()) return { ok: false, error: "Previews are off in production." };
+  const { checks, weeks } = await checkGossipFiles();
+  return {
+    ok: true,
+    data: {
+      files: checks,
+      weeks: weeks.map(({ week, data }) => {
+        const st = gossipStatus.get(week) ?? { status: "approved" as const, note: null };
+        const stories = (data as GossipAdmin["data"]).stories;
+        return {
+          week, status: st.status, note: st.note, data: data as GossipAdmin["data"],
+          started: Object.fromEntries(stories.map((s, i) => [s.id, [214, 96, 41][i % 3]])),
+          finished: Object.fromEntries(stories.map((s, i) => [s.id, [38, 12, 3][i % 3]])),
+        };
+      }).sort((a, b) => b.week.localeCompare(a.week)),
+    },
+  };
+}
+export async function previewGossipStatus(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>> {
+  if (off()) return { ok: false, error: "Previews are off in production." };
+  gossipStatus.set(week, { status, note: status === "review" ? note?.trim() || null : null });
+  return { ok: true, data: null };
 }

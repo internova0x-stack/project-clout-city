@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { placeById } from "@/lib/city";
+import { CITY_ECONOMY, placeById } from "@/lib/city";
+import { TOPIC_LABEL, windowLine } from "@/lib/gossip";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type CastLine, type ContentDraft, type HuntAdmin, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type CastLine, type ContentDraft, type GossipAdmin, type GossipFileCheck, type HuntAdmin, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
@@ -24,7 +25,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts" | "calendar">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -65,6 +66,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {api.huntList && api.newsList && <button aria-pressed={tab === "calendar"} onClick={() => setTab("calendar")}>Calendar</button>}
           {api.newsList && <button aria-pressed={tab === "news"} onClick={() => setTab("news")}>News</button>}
           {api.huntList && <button aria-pressed={tab === "hunts"} onClick={() => setTab("hunts")}>Hunts</button>}
+          {api.gossipList && <button aria-pressed={tab === "gossip"} onClick={() => setTab("gossip")}>Gossip</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Metrics</button>}
         </div>
@@ -74,6 +76,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
       {tab === "cast" && <CastTab api={api} />}
       {tab === "news" && <NewsTab api={api} />}
       {tab === "hunts" && <HuntsTab api={api} />}
+      {tab === "gossip" && <GossipTab api={api} />}
       {tab === "calendar" && <CalendarTab api={api} arcs={arcs} onOpen={setTab} />}
 
       {tab === "stories" && note && (
@@ -673,6 +676,120 @@ function NewsTab({ api }: { api: StudioApi }) {
  * v0.6 treasure hunts: upload a week (checked first), skim all eight tracks, read one in full
  * (answers marked), then approve. Pause hides a hunt at once; players keep their progress.
  */
+/**
+ * v0.10 gossip (migration 0034): automatic. Week files in content/gossip go live on their Monday
+ * without anyone approving them; this tab is the back office view: every week in full, the file
+ * checks, who's playing, and Pause or Hold with a note when something needs a change.
+ */
+function GossipTab({ api }: { api: StudioApi }) {
+  const [rows, setRows] = useState<GossipAdmin[] | null>(null);
+  const [files, setFiles] = useState<GossipFileCheck[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [open, setOpen] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    const r = await api.gossipList!();
+    if (r.ok) { setRows(r.data.weeks); setFiles(r.data.files); } else setError(r.error);
+  }, [api]);
+  useEffect(() => { void load(); }, [load]);
+  const go = async (call: () => Promise<{ ok: boolean; error?: string }>, done: string) => {
+    setBusy(true); setError(null); setOk(null);
+    const r = await call();
+    setBusy(false);
+    if (!r.ok) return setError(r.error ?? "Something went wrong.");
+    setOk(done);
+    void load();
+  };
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const shortDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const plus = (d: string, n: number) => { const x = new Date(`${d}T12:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+  const failing = files.filter((f) => !f.ok);
+  return (
+    <section className="stack-12">
+      <section className="studio-card stack-8">
+        <span className="title">Gossip runs itself</span>
+        <p className="meta" style={{ margin: 0 }}>
+          Each week file in <code>content/gossip/</code> goes live on its Monday and stays findable for {CITY_ECONOMY.gossip.liveDays} days. You don&apos;t need to
+          approve anything. Read it here; <b>Pause</b> hides a week at once, and <b>Hold</b> keeps it off until the file is fixed (your note goes to the writer).
+          Files that fail the checks never go live.
+        </p>
+      </section>
+      {ok && <div className="studio-note ok" role="status"><span className="body-strong">{ok}</span></div>}
+      {error && <div className="studio-note error" role="alert"><span className="body-strong">{error}</span></div>}
+      {failing.map((f) => (
+        <div key={f.file} className="studio-note error" role="alert">
+          <span className="body-strong">{f.file} won&apos;t go live until it passes its checks:</span>
+          <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>{f.problems.map((p) => <li key={p} className="meta">{p}</li>)}</ul>
+        </div>
+      ))}
+      {rows === null && !error && <p className="meta">Loading…</p>}
+      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No gossip weeks yet. The weekly drafting routine adds a file to content/gossip.</p></section>}
+      {rows?.map((w) => {
+        const ends = plus(w.week, CITY_ECONOMY.gossip.liveDays - 1);
+        const state = w.status === "paused" ? "Paused" : w.status === "review" ? "Held" : today < w.week ? `Goes live ${shortDay(w.week)}` : today <= ends ? "Live now" : "Ended";
+        const cls = w.status === "approved" ? (today <= ends ? "approved" : "draft") : w.status === "paused" ? "declined" : "draft";
+        return (
+          <article key={w.week} className="studio-card stack-12">
+            <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+              <div>
+                <span className="meta">Week of {shortDay(w.week)} · findable until {shortDay(ends)}</span>
+                <span className="title" style={{ display: "block" }}>🍵 {w.data.stories.length} stories</span>
+              </div>
+              <span className={`tag studio-review ${cls}`}>{state}</span>
+            </div>
+            {w.status === "review" && w.note && <div className="studio-note error" role="status"><span><span className="body-strong">Held: </span>{w.note}</span></div>}
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              {w.status !== "approved" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void go(() => api.gossipStatus!(w.week, "approved"), "Back on. It runs on its dates.")}>Let it run</button>}
+              {w.status !== "paused" && <button className="btn btn-destructive btn-sm" disabled={busy} onClick={() => void go(() => api.gossipStatus!(w.week, "paused"), "Paused. Players no longer see its stories; what they found is kept.")}>Pause</button>}
+            </div>
+            {w.status === "approved" && (
+              <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                <input className="studio-input" style={{ flex: "1 1 240px" }} placeholder="Hold with a note: what should change?" value={notes[w.week] ?? ""}
+                  onChange={(e) => setNotes({ ...notes, [w.week]: e.target.value })} aria-label="Note for the writer" />
+                <button className="btn btn-secondary btn-sm" disabled={busy || !(notes[w.week] ?? "").trim()}
+                  onClick={() => void go(() => api.gossipStatus!(w.week, "review", notes[w.week]), "Held with your note. It goes live again once the file changes.").then(() => setNotes({ ...notes, [w.week]: "" }))}>Hold</button>
+              </div>
+            )}
+            {w.data.stories.map((s) => {
+              const key = `${w.week}:${s.id}`;
+              return (
+                <div key={s.id} className="stack-8 hunt-read">
+                  <button className="list-row" style={{ textAlign: "left" }} onClick={() => setOpen(open === key ? null : key)} aria-expanded={open === key}>
+                    <span aria-hidden="true">{s.emoji}</span>
+                    <span style={{ flex: 1 }}>
+                      <span className="body-strong" style={{ display: "block" }}>{s.title} <span className="meta">· {TOPIC_LABEL[s.topic]}</span></span>
+                      <span className="meta">{w.started[s.id] ?? 0} started · {w.finished[s.id] ?? 0} finished · {open === key ? "hide" : "read it all"}</span>
+                    </span>
+                  </button>
+                  {open === key && (
+                    <>
+                      <p className="body" style={{ margin: 0 }}><i>{s.teaser}</i></p>
+                      {s.pieces.map((p, i) => (
+                        <div key={i} className="stack-4">
+                          <span className="meta" style={{ display: "block" }}>
+                            Piece {i + 1} · {p.source === "regular" ? `${regularAt(p.place)?.name ?? "the regular"} at ` : "Listen in at "}{placeById(p.place)?.name ?? p.place}
+                            {p.hours ? ` · ${windowLine(p.hours)}` : ""}
+                          </span>
+                          <span className="body" style={{ display: "block" }}>{p.text}</span>
+                        </div>
+                      ))}
+                      <span className="overline" style={{ display: "block", marginTop: 4 }}>Lola&apos;s Tea card</span>
+                      <span className="body-strong" style={{ display: "block" }}>{s.tea.headline}</span>
+                      <span className="body" style={{ display: "block" }}>{s.tea.body}</span>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </article>
+        );
+      })}
+    </section>
+  );
+}
+
 function HuntsTab({ api }: { api: StudioApi }) {
   const [rows, setRows] = useState<HuntAdmin[] | null>(null);
   const [error, setError] = useState<{ text: string; problems?: string[] } | null>(null);
@@ -822,8 +939,9 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
  * 2, "see the hunt and news calendar"). Week files committed to content/ (by the weekly drafting
  * routine) load with one tap; they still wait for approval in the Hunts and News tabs.
  */
-function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[]; onOpen: (t: "hunts" | "news") => void }) {
+function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[]; onOpen: (t: "hunts" | "news" | "gossip") => void }) {
   const [hunts, setHunts] = useState<HuntAdmin[] | null>(null);
+  const [gossip, setGossip] = useState<GossipAdmin[]>([]);
   const [news, setNews] = useState<NewsAdminItem[] | null>(null);
   const [drafts, setDrafts] = useState<ContentDraft[]>([]);
   const [error, setError] = useState<{ text: string; problems?: string[] } | null>(null);
@@ -834,6 +952,7 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
     if (h.ok) setHunts(h.data); else setError({ text: h.error });
     if (n.ok) setNews(n.data); else setError({ text: n.error });
     if (d.ok) setDrafts(d.data);
+    if (api.gossipList) { const g = await api.gossipList(); if (g.ok) setGossip(g.data.weeks); }
   }, [api]);
   useEffect(() => { void load(); }, [load]);
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
@@ -901,6 +1020,21 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
                 )}
               </span>
             </div>
+            {api.gossipList && (() => {
+              const g = gossip.find((x) => x.week === w);
+              return (
+                <div className="calendar-row">
+                  <span className="overline">Gossip</span>
+                  <span className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                    {g ? (
+                      <button className="chip" onClick={() => onOpen("gossip")}>🍵 {g.data.stories.length} stories · {g.status === "approved" ? "goes live on its own" : g.status === "review" ? "held" : "paused"}</button>
+                    ) : (
+                      <span className={soon ? "meta reason" : "meta"}>{soon ? "⚠️ No gossip yet" : "No gossip yet"}</span>
+                    )}
+                  </span>
+                </div>
+              );
+            })()}
             <div className="calendar-row">
               <span className="overline">News</span>
               <span className="stack-8">

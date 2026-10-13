@@ -1,17 +1,21 @@
 # Weekly content: the drafting routine
 
-Every week needs a treasure hunt and a week of City News (docs/08-new-features-spec.md sections 1
-and 3). Claude doesn't run on its own inside the game: a **scheduled Claude Code session** (a
-Routine) drafts the next week and opens a pull request. You approve everything in the Studio.
+Every week needs a treasure hunt, a week of City News and a week of neighborhood gossip
+(docs/08-new-features-spec.md sections 1, 3 and 8). Claude doesn't run on its own inside the game: a
+**scheduled Claude Code session** (a Routine) drafts the next week and opens a pull request. You
+approve the hunt and news in the Studio. **Gossip is automatic** (owner, Oct 13): once its file is
+merged it goes live on its Monday by itself; the Studio's **Gossip** tab shows it in full, and you
+can Pause it or Hold it with a note.
 
 ## The weekly loop
 
 | When (New York) | Who | What |
 | --- | --- | --- |
-| Thursday morning | The Routine | Drafts `content/hunts/<Monday>.json` and `content/news/<Monday>.json` for the coming Monday's week, runs the checks, opens a pull request "Content: week of …" |
+| Thursday morning | The Routine | Drafts `content/hunts/<Monday>.json`, `content/news/<Monday>.json` and `content/gossip/<Monday>.json` for the coming Monday's week, runs the checks, opens a pull request "Content: week of …" |
 | Thursday to Saturday | You | Read the pull request (its description lists the theme, the eight treasures and every headline). Ask for changes in a comment or edit the files, then merge |
 | After the deploy | You | Studio → **Calendar**: press **Load** on the week's hunt and news. Then **Hunts**: skim the eight tracks, read one in full, Approve (or Send back with a note). **News**: Approve all |
-| Monday 00:00 | The game | The hunt starts and the news publishes day by day |
+| After the deploy | The game | Stores the gossip week by itself (within 10 minutes of the next visit). Nothing to approve: read it in the Studio's **Gossip** tab if you like, and Pause or Hold it if something's off |
+| Monday 00:00 | The game | The hunt starts, the news publishes day by day, and the week's gossip stories become findable for 14 days |
 
 If a week is missing on Friday, the Calendar shows "⚠️ No hunt yet" for this week and next.
 Nothing breaks without a hunt: the Hunt tab says a new one starts Monday.
@@ -29,11 +33,13 @@ This is the prompt the Routine runs each Thursday (kept here so it can be read a
 Draft next week's Clout City content (repository internova0x-stack/project-clout-city; clone it if
 it isn't in your working directory). Work from the main branch.
 
-1. Find the week: the Monday after today, New York time (YYYY-MM-DD). If content/hunts/<Monday>.json
-   and content/news/<Monday>.json both exist on main already, stop and say so.
-2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3
-   and 4), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they stand),
-   and the last three weeks in content/hunts/ and content/news/ so nothing repeats.
+1. Find the week: the Monday after today, New York time (YYYY-MM-DD). If content/hunts/<Monday>.json,
+   content/news/<Monday>.json and content/gossip/<Monday>.json all exist on main already, stop and
+   say so (write only the missing ones otherwise).
+2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
+   4 and 8), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they
+   stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
+   content/news/ and content/gossip/ so nothing repeats.
 3. Write content/hunts/<Monday>.json: a hunt players will talk about.
    - Make it an event, not an errand: real stakes (a rival crew racing you, a celebrity's stolen
      prize, a mystery with a deadline), a cast member or two caught up in it, and a finale that
@@ -48,10 +54,17 @@ it isn't in your working directory). Work from the main branch.
    - exactly one Lola column ("column"),
    - city news about the invented cast only (lib/cast.ts ids in "cast"): light, satirical, no real
      people, brands, politics, tragedies or crime, nothing that changes prices or places.
-5. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
-6. Commit only those two files on a new branch content/week-<Monday>, push it, and open a pull
+5. Write content/gossip/<Monday>.json: 3 to 5 gossip stories (one about the celebrity cast, one about
+   Astoria's regulars, one about invented City Hall business is a good mix), each exactly five
+   pieces at five different places that build to a reveal, plus Lola's write-up ("tea"). Use
+   "regular" only where lib/cast.ts has one; give a few pieces a city-clock window ("hours") so
+   timing matters. Only invented people; never real players, people, brands or politics; no story
+   places and nothing about a running story. New story ids every week.
+6. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
+7. Commit only those three files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
-   in two sentences, the route (place and regular per step), the eight treasures, and every news
-   headline by day. End with: "Merge, then load both files in the Studio Calendar and approve them
-   by Sunday." Don't change any code, and don't merge.
+   in two sentences, the route (place and regular per step), the eight treasures, every news
+   headline by day, and each gossip story's title and Tea headline. End with: "Merge, then load the
+   hunt and news in the Studio Calendar and approve them by Sunday. The gossip goes live by itself."
+   Don't change any code, and don't merge.
 ```

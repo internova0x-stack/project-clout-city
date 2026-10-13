@@ -8,7 +8,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
 - `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto and neighborhood gossip. **Wins over the older docs** for those features.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
-- `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt + news), the Studio Calendar and the approval loop.
+- `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt, news and gossip), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
 - `docs/01-game-concept-note.md`: the big picture.
 - `docs/02-clarifications-and-updates-v2.md`: game rules and P1 scope. **Wins on rules.**
@@ -40,7 +40,7 @@ components live in `app/globals.css`.
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
   `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes last week's jackpot yours. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
-- `npm run validate:content`: checks every hunt and news week file in `content/` (the Studio's rules).
+- `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
 
 ## Rules for this codebase
 - Player data is permanent from day one: change the schema only with a new file in
@@ -68,5 +68,6 @@ components live in `app/globals.css`.
   a result, price or limit from the client, and real money never touches the lotto.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
   Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the
-  same: `content/hunts/*.json` carries answers; players get `hunt_state()`.
+  same: `content/hunts/*.json` carries answers; players get `hunt_state()`. Gossip too: `content/gossip/*.json`
+  holds every piece and goes live on its own (`lib/gossipImport.ts`); players get only what they've found.
 - Modules imported by tests use explicit `.ts` extensions for their own imports.

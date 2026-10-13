@@ -2,6 +2,7 @@
 // the admin_* SQL functions (supabase/migrations/0007); one approval puts a story
 // on the schedule (product owner, Oct 12, 2026).
 
+import type { GossipWeek } from "./gossip.ts";
 import type { Arc, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
@@ -98,7 +99,25 @@ export interface StudioApi {
   huntStatus?(id: string, status: HuntAdmin["status"], note?: string): Promise<Admin<null>>;
   /** Week files in the repo (content/hunts, content/news), for the calendar's one-tap load. */
   drafts?(): Promise<Admin<ContentDraft[]>>;
+  /** v0.10 gossip (migration 0034): weeks go live on their own; the Studio reads, pauses or holds them. */
+  gossipList?(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>>;
+  gossipStatus?(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>>;
 }
+
+/** A gossip week as the Studio sees it. "approved" is live from its Monday (the default). */
+export interface GossipAdmin {
+  week: string;
+  status: "review" | "approved" | "paused";
+  data: GossipWeek;
+  /** Why it's held (sent back with a note). */
+  note?: string | null;
+  /** Players who found at least one piece, and who finished, per story id. */
+  started: Record<string, number>;
+  finished: Record<string, number>;
+}
+
+/** A week file in content/gossip and whether it passes the checks (files that fail don't go live). */
+export interface GossipFileCheck { week: string; file: string; ok: boolean; problems: string[]; stories: number }
 
 /** A week file committed to content/ (by the weekly drafting routine or by hand). */
 export interface ContentDraft {

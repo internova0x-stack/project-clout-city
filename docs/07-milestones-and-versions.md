@@ -192,7 +192,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 1. **Built:** Lucky Star Lotto: the place, Benny, the 3D shop, the card wheel, scratch cards drawn and paid by the server, the Bank's entries (migration 0032).
 2. **Built:** the weekly jackpot draw, Lola's News card and the Jackpot badge (migration 0033).
-3. Gossip: the week file, its checks and Studio approval.
+3. **Built:** gossip's week file and its checks, published automatically (no approval), with the Studio's Gossip tab to read, pause or hold each week (migration 0034); the first week's three stories.
 4. Gossip in the game: Listen in, regular lines, the Tea app, the Collection tab, rewards and crew sharing.
 5. The first gossip week and doc updates.
 

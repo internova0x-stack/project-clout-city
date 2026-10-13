@@ -29,6 +29,12 @@ For City News. Each has a personality, a want and a flaw, so their news writes i
 - **Chad Kensington, CEO**: CEO of "a stealth startup", which is a domain name.
 - **Tiff**: "Basically an influencer": 312 followers, mostly bots, posts like she has millions.
 
+## City Hall (for gossip)
+
+Invented and satirical, never a real politician, party or issue (docs/08-new-features-spec.md section 8).
+
+- **Councilmember Barb Tillwater**: Astoria's councilmember. Means well, types fast, proofreads never. Loves a ribbon cutting and a slice.
+
 ## Regulars at places
 
 Tap a regular on a place card to hear a line; each tap says the next one. While a story runs, every other line comes from the story’s chatter for the regular’s role, so the city talks about it. Lines approved in the Story Studio’s **Cast** tab (personal updates and cast news, for a week or for every week) join the everyday ones below, updates first.
