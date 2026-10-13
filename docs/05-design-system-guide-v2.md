@@ -15,6 +15,14 @@ This is the clean builder spec for Clout City's UI: give this version to Claude 
 > 8. **Monument Valley-inspired light (rooms and location art):** 3D rooms use soft directional light (warm peach on lit faces, lavender in shade), gentle vertical gradients on walls, light shadows, a faint haze and drifting motes, over a gradient derived from each room's own interior colors. Location illustrations (C37) are isometric vector islands in the same style, drawn from each place's palette, with day and night versions. Natural materials keep their colors; the gradients only add warmth.
 > 9. **Real-money buttons:** buy buttons for real-money products ("Unlock for $2.99" and later purchases) use the same red-pink primary as every other button. Gold stays as the real-money accent on the card (the "Real cash" tag and border), not on the button. The New Story prompt (C6) uses a light blue-to-green gradient.
 
+> **Updates (Oct 13, 2026), from testing (docs/testing-feedback.md wins over this guide):**
+> 10. **Currency:** every virtual amount is written C$ (Clout Dollars); real money is always $.
+> 11. **Buttons:** all main buttons are red (update 1), including real-money ones; yellow is an accent only (clout flame, active nav tab, progress, avatar rings, stars). Wherever a component below says "primary-taxi", read the red primary. Destructive buttons (sell, block, report) are outlined in red.
+> 12. **Locked boroughs:** a dashed red outline over a dimmed fill; tapping opens a sheet with a small borough map and a Lola teaser. The hazard stripe is only for closures and "Coming soon" bars. The map keeps its day and night styles with 3D buildings.
+> 13. **Names:** the owned-items screen is "Net Worth"; the friend group is the "Crew".
+> 14. **Interiors:** walkable isometric 3D rooms (update 7) everywhere this guide says 2.5D backdrops.
+> 15. **Home and profile (v0.6):** an avatar-head bubble (about 56 pt, yellow ring) left of the stats panel opens the full profile; the floating name card goes. The stats panel starts collapsed. The starting-cash card is a black gradient with the amount in large white type.
+
 It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
 
 Sizes were converted from 499 px reference screenshots to iPhone points (1 pt ≈ 1.28 px, 390 pt viewport); treat them as ±2 pt.
@@ -162,7 +170,7 @@ Three families: a chunky NYC-signage display face for names, titles and reveals;
 | Token | Family / weight | Size / line height | Color | Example |
 | --- | --- | --- | --- | --- |
 | display-xl | Bungee | 30 / 34 | text-on-dark | Birth lottery reveal, story reveal |
-| display-lg | Bungee | 24 / 28 | text-primary | Sheet titles: "Shop," "Possessions," "Leaderboard" |
+| display-lg | Bungee | 24 / 28 | text-primary | Sheet titles: "Shop," "Net Worth," "Leaderboard" |
 | display-md | Bungee | 20 / 24 | text-primary | Player name in profile, beat headlines |
 | display-sm | Bungee | 16 / 20 | text-primary or text-on-dark | Creator step titles: "Look," "Traits," "Birth lottery," "Home" |
 | title | Inter 600 | 16 / 22 | text-primary | Card titles |
@@ -245,7 +253,7 @@ One floating glass-dark capsule, 12 pt below the browser bar, 12 pt side margins
 | Left | Daily Tasks | Outline checkmark icon + "0/5" in hud-number, text-on-dark | Opens Tasks on the Daily tab |
 | Left | Sound | 32 pt icon button: outline speaker, or speaker with slash when muted | Toggles mute |
 | Right | Clout | Outline flame icon + number, both taxi-400, hud-number | Opens the leaderboard |
-| Right | Net Worth | 32 pt icon button with an outline diamond in text-on-dark. No figure. An 8 pt neon-600 pin on first play and whenever net worth changes | Opens Possessions |
+| Right | Net Worth | 32 pt icon button with an outline diamond in text-on-dark. No figure. An 8 pt neon-600 pin on first play and whenever net worth changes | Opens Net Worth |
 | Right | Bank balance | "$6,000" in hud-number, text-on-dark, tabular | Opens transaction history |
 
 The left and right clusters are separated by flexible space; icon buttons sit on rgba(255,246,224,0.10) circles. Over bright interiors, the HUD switches to glass-light with night-900 text (clout stays taxi-500).
@@ -419,7 +427,7 @@ The game uses a flat, stylized night map of Queens, generated from street geomet
 - Leads with a LIVE badge (neon-600, pulsing neon-500 glow, white 10 pt 700 uppercase, 18 pt tall), then "📍 @user checked into…" in 12 pt 500 with an ellipsis, and the timestamp in meta at the right.
 - Rotates every 4 seconds with a vertical slide.
 
-## 9. Components: Shop, Possessions, events and leaderboard
+## 9. Components: Shop, Net Worth, events and leaderboard
 
 These are the screens where players spend, own and compare; real-cash items are always visually separate from virtual-cash ones.
 
@@ -445,11 +453,11 @@ These are the screens where players spend, own and compare; real-cash items are 
 
 The Traits header swaps its helper from "Pick 2 more." (tertiary) to "Locked in. Very on-brand." (green-text 600) when the quota is met.
 
-### C25. Possessions sheet
+### C25. Net Worth sheet
 
 Opened from the diamond in the HUD.
 
-- Header: display-lg "Possessions" with the net worth total on the right (body-strong, tabular).
+- Header: display-lg "Net Worth" with the net worth total on the right (body-strong, tabular).
 - First row: 💵 Bank cash and its amount.
 - Then items grouped by Shop category (overline headers), each row: 40 pt icon tile, title, value on the right in tabular figures, and a meta line for how it was acquired ("Bought," "Earned," "✨ Collector").
 - Tapping a row opens a detail sheet with a **destructive** "Sell for $X" button (60% of value) and a confirmation sheet: "Sell your \[item\] for $X? Net worth drops by $Y."
@@ -561,7 +569,7 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 
 ### C38. Interior scene
 
-- A full-screen illustrated 2.5D backdrop from one of 8 templates (apartment, counter shop, diner or café, fine dining, club, store, office, campus), recolored per location with its own sign and props.
+- A walkable isometric 3D room (update 14) from one of 8 templates (apartment, counter shop, diner or café, fine dining, club, store, office, campus), recolored per location with its own sign and props.
 - The 3D avatar stands on a marked spot in the scene with its idle animation; a night lighting variant applies when the city clock is at night.
 - The location's actions sit in a bottom sheet; the HUD stays visible, and a back button returns to the map.
 - Template slots are designed so fully 3D rooms can replace the backdrops later without changing the actions or data.
@@ -570,7 +578,7 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 
 - **Postcard:** a 3:2 original illustration of the monument in a vintage postcard frame, with "Greetings from Queens" in the tagline style. Owned postcards carry the 1 pt gold-300 real-money stroke.
 - **Offer on the monument card:** shown once, right after a visit: a row under the actions with a locked postcard thumbnail, "Collect the postcard," and a premium-gold "$0.99" button. The visit's clout is shown separately, so it's clear the clout comes from visiting.
-- **Collection screen:** opened from the profile (C28) and from a link at the foot of the Possessions sheet. A 2-column grid: owned postcards in full color with a share button; visited but not owned as locked silhouettes with their price and a premium-gold button; unvisited as outlined cards reading "Visit to unlock."
+- **Collection screen:** opened from the profile (C28) and from a link at the foot of the Net Worth sheet. A 2-column grid: owned postcards in full color with a share button; visited but not owned as locked silhouettes with their price and a premium-gold button; unvisited as outlined cards reading "Visit to unlock."
 - Completing the set awards an achievement badge (C12).
 
 ### C40. Crush button and "It's mutual" card
@@ -639,7 +647,7 @@ After "Move in": the welcome modal, five tutorial tooltips (C15), the first-task
 
 ### Interaction patterns
 
-- **Sheet over world:** tapping Shop, a place, an event, Possessions or the profile opens a bottom sheet; the HUD stays live above it.
+- **Sheet over world:** tapping Shop, a place, an event, Net Worth or the profile opens a bottom sheet; the HUD stays live above it.
 - **Modal device:** the Phone opens as a framed device over the dimmed world, closed by the pill button.
 - **Contextual prompts:** dismissible cards (story prompt, PWA install) float under the HUD with a small ✕.
 - **Selection feedback:** selected state changes fill and adds a check or badge; helper copy confirms with a joke.
@@ -733,7 +741,7 @@ Every P1 feature in Clarifications & Updates (v2) maps to the components above.
 | Tutorial | C15 tooltip | One at a time, "2 of 5" counter |
 | HUD | C1 | Clout in taxi-400; net worth icon only |
 | Clout Score → leaderboard | C27 | Opens from the flame |
-| Net Worth → Possessions | C25 | Selling at 60%, with confirmation |
+| Net Worth → Net Worth | C25 | Selling at 60%, with confirmation |
 | Bank balance → transactions | C13 sheet with rows | Also the Bank app in the Phone |
 | Daily Tasks and Goals | C9 "Daily / Goals," C24 multi-select cards | Done = night card with green check; bonus = reveal card |
 | Side icons | C3 | Fixed; badges for events and bills |

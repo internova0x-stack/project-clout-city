@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GUEST_START, WAVE_1_PINS, type PlacePin } from "@/lib/places";
+import { GUEST_START, type PlacePin } from "@/lib/places";
+import { PLACES } from "@/lib/city";
 import { music, readLocalMuted } from "@/lib/music";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { CityMap } from "./map/CityMap";
@@ -15,8 +16,14 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "nightlife", label: "🍸 Nightlife" },
   { id: "food", label: "🍔 Food" },
   { id: "parks", label: "🌳 Parks" },
+  { id: "campus", label: "🎓 Campus" },
+  { id: "monument", label: "🗽 Sights" },
+  { id: "shopping", label: "🛍️ Shops" },
   { id: "places", label: "🏢 Places" },
 ];
+
+/** Every place a guest can see (story places appear once their story starts, after sign-up). */
+const GUEST_PINS: PlacePin[] = PLACES.filter((p) => !p.story);
 
 interface Arrival { display_name: string; arrived_at: string }
 
@@ -59,7 +66,7 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
     return () => clearInterval(t);
   }, [arrivals.length]);
 
-  const pins = useMemo(() => (filter === "all" ? WAVE_1_PINS : WAVE_1_PINS.filter((p) => p.category === filter)), [filter]);
+  const pins = useMemo(() => (filter === "all" ? GUEST_PINS : GUEST_PINS.filter((p) => p.category === filter)), [filter]);
   // The first tap on anything interactive opens sign-up and starts the music.
   const startMusic = () => {
     music().setMuted(readLocalMuted());
@@ -81,24 +88,17 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
         onPinTap={signUp}
         onLockedTap={signUp}
         attributionControl={false}
+        fitPins={{ top: 150, bottom: 300 }}
       />
 
       <div className="guest-top">
-        <header className="guest-bar glass-hud">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/clout-city-logo-dark-simple.png" alt="Clout City NYC" width={649} height={299} className="guest-logo" />
-          <span className="spacer" />
-          <button className="btn btn-taxi guest-bar-btn" onClick={signUp}>Sign up</button>
-          <button className="btn btn-secondary guest-bar-btn guest-login" onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
-        </header>
-
         <div className="guest-pills" aria-label="Queens right now">
-          <span className="pill-status glass-hud">📍 {GUEST_START.label} · {GUEST_START.tagline}</span>
+          <span className="pill-status glass-hud">📍 Queens, New York</span>
           {time && <span className="pill-status glass-hud">{daytime ? "☀️" : "🌙"} {time} · {daytime ? "day" : "night"} in Queens</span>}
           {residents !== null && residents > 0 && (
             <span className="pill-status glass-hud"><span className="dot-green" aria-hidden="true" /> {residents.toLocaleString()} {residents === 1 ? "resident" : "residents"} in Queens</span>
           )}
-          <span className="pill-status glass-hud">🗺️ {WAVE_1_PINS.length} spots on the map</span>
+          <span className="pill-status glass-hud">🗺️ {GUEST_PINS.length} spots on the map</span>
         </div>
 
         <div className="chip-row guest-chips" role="group" aria-label="Filter the map">
@@ -119,6 +119,8 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
           </div>
         )}
         <section className="guest-card glass-hud" aria-label="Join Clout City">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/clout-city-logo-dark-simple.png" alt="Clout City NYC" width={649} height={299} className="guest-card-logo" />
           <p className="body-strong" style={{ margin: 0 }}>
             Become the main character.{" "}
             <span style={{ fontWeight: 400, color: "var(--text-3)" }}>Free in your browser.</span>

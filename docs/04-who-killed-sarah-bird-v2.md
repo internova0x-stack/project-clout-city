@@ -238,7 +238,7 @@ The arc touches 4 Queens places, 2 events, 3 price or availability effects and 6
 | Item | Days | Effect |
 | --- | --- | --- |
 | Rockaway Diner visits | 3 to 6 | +50% visit price ("Sarah's booth" crowds). Clout reward stays based on the base price |
-| "Forever Our Bird" hoodie | 6 to 9 | Added to the Shop (Fashion) at $85 in-game; removed on Day 10. Buyers keep it in Possessions at purchase price, and normal diminishing-returns clout applies |
+| "Forever Our Bird" hoodie | 6 to 9 | Added to the Shop (Fashion) at C$85; removed on Day 10. Buyers keep it in Net Worth at purchase price, and normal diminishing-returns clout applies |
 | Skyline Pier and Radiant Harbor | 1 to 8; 9 | Closures with a reason banner ("Police activity: lobby only"; "Closed: police activity") |
 
 ### Story tasks (each can count toward Daily Tasks)

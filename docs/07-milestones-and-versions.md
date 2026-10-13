@@ -20,9 +20,13 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | --- | --- | --- | --- | --- |
 | v0.1 | Tap In | Browse Queens, sign up, make a character, see their home, invite friends | 24 hours | Parts of 1 and 2 |
 | v0.2 | First Party | The tutorial, the first party, clout, the leaderboard, invite rewards | About 1 week | Rest of 1 and 2 |
-| v0.3 | The City | The first 8 locations, dining and Energy, jobs and gigs, the Shop, Possessions, bills | 1.5 to 2 weeks | 3 |
+| v0.3 | The City | The first 8 locations, dining and Energy, jobs and gigs, the Shop, Net Worth (then called Possessions), bills | 1.5 to 2 weeks | 3 |
 | v0.4 | Stories | The News app and Sarah Bird, built and tested but not yet started | 1 to 2 weeks | 4 |
 | v0.5 | Money and Social | Real-money purchases, postcards, chat, crushes and date nights | 1 to 2 weeks | 5 |
+| v0.5.1 | Testing fixes | The "fix now" list from testing (docs/testing-feedback.md) | Days | — |
+| v0.6 | Look and Feel | Creator, profile, Your Look dressing room, buttons, locked boroughs, Collection redesign | About 1 week | — |
+| v0.7 | Getting Around | Travel and arrival, venue drinks, Nap and Sit, weekly bills, event times | 1 to 2 weeks | — |
+| v0.8 | Big Nights | Exclusive event keepsakes, monuments as full locations | About 1 week | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -116,7 +120,7 @@ Queens becomes a place to live: the full daily loop of earning, eating, spending
 - Energy, Mood and Confidence rules, including the daily top-up and Confidence drift (Clarifications section 13).
 - Dining in three tiers; job shifts; gigs in three tiers through the Gigs app.
 - Daily tasks paying cash, place cooldowns, and club events.
-- The Shop (five categories), Possessions with 60% selling, bills, and the missed-rent rules.
+- The Shop (five categories), Net Worth (then called Possessions) with 60% selling, bills, and the missed-rent rules.
 - The two clocks: the city clock for day and night, and the New York calendar for resets and bills.
 
 **You test:** a week of play using the time-travel tool. Rent is affordable from shifts and tasks but not everything is; a big break feels like a real step up; no daily task is ever impossible. Tune the economy with the gigs spreadsheet before moving on.
@@ -148,6 +152,26 @@ Real-money purchases and player-to-player chat, all in Stripe test mode until v1
 - Analytics for the success metrics: first task, invites, day-1 return, beat opens, predictions and purchases.
 
 **You test:** every product's test purchase unlocks it, a replayed payment doesn't duplicate it, and a refund removes it (and its clout). A report sent from chat appears in the admin queue. A mutual crush shows the "It's mutual" card to both players, a one-sided crush shows nothing, and a date night pays its bonus only after both players have gone.
+
+## v0.5.1 "Testing fixes" (days)
+
+From the Oct 13 testing round. **docs/testing-feedback.md is the source** for the bug numbers, fixes and decisions; it wins over older text in these docs.
+
+**In scope:** bugs #1, #5, #12 (done), #15, #16, #22, #30, #36, #37, #38, #41, #42, #43 and #47 (done on the work branch), shipped in pull requests grouped by cause.
+
+**You test:** on an iPhone and a low-end Android phone, every listed bug is gone; prices read C$ everywhere except real-money products ($); no sheet gets stuck open; the page never scrolls sideways or up.
+
+## v0.6 "Look and Feel" (about 1 week)
+
+**In scope** (docs/testing-feedback.md, formerly listed as v0.2): red main buttons with yellow as an accent and outlined-red destructive buttons (#10); locked boroughs with a dashed red outline and a mini-map sheet with a Lola teaser (#7, #8, #11); the creator's name field, Presenting as (cosmetic only), four body types each, free basic headwear first and starter garment choices, and a black starting-cash card (#43 to #46); the avatar-head bubble and full profile with public net worth (#25, #39); the stats panel starting collapsed with a suggested action per stat (#14); Your Look as a dressing room with try-on (#24); the Collection redesign (#40); and the cosmetic and UX items marked for v0.2 in the bug list (#2, #6, #20, #21, #28, #29, #31, #34, #35).
+
+## v0.7 "Getting Around" (1 to 2 weeks)
+
+**In scope** (formerly v0.3): no spending before arriving, "Go there" with walk, subway, taxi or own car priced by distance, a skippable trip view and personal timers that never move the shared city clock (#4); a luxury-priced drink or snack at clubs and lounges (#3); Nap and Sit at home, capped per day (#26, #27); weekly rent and bills, re-tuned with starting cash and income (#23); exclusive and one-off event times shown in the player's local time (#18); treasure hunts, simplified: a weekly track per starting style with a hunt card for the Collection, approved in the Story Studio (spec first).
+
+## v0.8 "Big Nights" (about 1 week)
+
+**In scope** (formerly v0.5): exclusive event keepsakes (event card, profile badge, plus-one, personal news mention, opt-out) with the ticket's clout kept and attending's stats in line with club events (#19); monuments as full locations with a shared 3D landmark plaza, NPCs and 4 to 6 activities (#32).
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 

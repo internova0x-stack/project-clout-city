@@ -36,21 +36,27 @@ export interface CityMapProps {
   initialPitch?: number;
   /** Moving cars on the streets when zoomed in (v0.3). */
   vehicles?: boolean;
+  /** Open framed on every pin (the guest screen), leaving room for the screen's top and bottom panels. */
+  fitPins?: { top: number; bottom: number };
 }
 
-const MIN_ZOOM = 9.5;
+const MIN_ZOOM = 9;
 const MAX_ZOOM = 19;
 const PIN_HEIGHT_PX = 30;
-const NYC_BOUNDS: [[number, number], [number, number]] = [[-74.4, 40.42], [-73.55, 41.0]];
+// Wide enough that, tilted and zoomed out, the whole city fits (MapLibre won't zoom out past the bounds).
+const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8, 41.4]];
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 const pinWidth = (pin: PlacePin) => Math.min(180, 34 + pin.name.length * 6.6);
+/** Below this zoom, pins show just their icon so every place stays visible across the city. */
+const COMPACT_ZOOM = 13;
+const ICON_PX = 30;
 const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45 },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -106,6 +112,13 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         instance.on("error", (e) => console.warn("map:", e.error?.message ?? e));
         // Start with the credits collapsed to the small (i) button.
         instance.once("load", () => hostRef.current?.querySelector(".maplibregl-compact-show")?.classList.remove("maplibregl-compact-show"));
+        if (fitPins && pins.length > 1) {
+          const lats = pins.map((p) => p.at[0]);
+          const lngs = pins.map((p) => p.at[1]);
+          instance.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], {
+            padding: { top: fitPins.top, bottom: fitPins.bottom, left: 36, right: 36 }, maxZoom: 13.5, duration: 0, pitch: initialPitch,
+          });
+        }
         mapRef.current = instance;
         if (process.env.NODE_ENV !== "production") (window as unknown as { __cityMap?: MapLibreMap }).__cityMap = instance;
         setMap(instance);
@@ -169,10 +182,13 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   const placed = useMemo<Placed[]>(() => {
     if (!map) return [];
     const out: (Placed & { spots: { x: number; y: number; w: number }[] })[] = [];
+    const compact = map.getZoom() < COMPACT_ZOOM;
     for (const pin of pins) {
       const s = project(pin.at);
-      const w = pinWidth(pin);
-      const hit = out.find((c) => c.spots.some((o) => Math.abs(o.x - s.x) < (o.w + w) / 2 + 4 && Math.abs(o.y - s.y) < PIN_HEIGHT_PX));
+      const w = compact ? ICON_PX : pinWidth(pin);
+      // Zoomed out, icons may overlap a little before they group, so more places stay visible.
+      const near = compact ? 18 : (w: number, ow: number) => (ow + w) / 2 + 4;
+      const hit = out.find((c) => c.spots.some((o) => Math.abs(o.x - s.x) < (typeof near === "number" ? near : near(w, o.w)) && Math.abs(o.y - s.y) < (compact ? 18 : PIN_HEIGHT_PX)));
       if (hit) {
         hit.pins.push(pin);
         hit.spots.push({ x: s.x, y: s.y, w });
@@ -227,11 +243,31 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                   }}
                   aria-label={`${c.pins.length} places. Tap to zoom in.`}
                 >
-                  <span className="map-cluster hud-number">{c.pins.length}</span>
+                  <span className="map-stack" aria-hidden="true">
+                    {c.pins.slice(0, 3).map((p, i) => (
+                      <span key={p.id} className="map-pin-tile icon-only" style={{ background: tileBackground(glyphFor(p)), zIndex: 3 - i }}><Glyph name={glyphFor(p)} size={14} /></span>
+                    ))}
+                    <span className="map-stack-count hud-number">{c.pins.length}</span>
+                  </span>
                 </button>
               );
             }
             const pin = c.pins[0];
+            if (map.getZoom() < COMPACT_ZOOM) {
+              return (
+                <button
+                  key={pin.id}
+                  className="map-pin compact"
+                  style={{ transform: `translate(${c.x}px, ${c.y}px) translate(-50%, calc(-100% + 3px))` }}
+                  onClick={() => onPinTap?.(pin)}
+                  aria-label={`${pin.name}, ${pin.neighborhood}`}
+                >
+                  <span className="map-pin-tile icon-only" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={16} /></span>
+                  <span className="map-pin-stem" />
+                  <span className="map-pin-dot" />
+                </button>
+              );
+            }
             return (
               <button
                 key={pin.id}
