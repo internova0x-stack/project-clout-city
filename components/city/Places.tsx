@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { actionAvailability, eventAvailability, type CityState } from "@/lib/cityState";
+import { actionAvailability, barDrinkAvailability, eventAvailability, hasBar, type CityState } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
@@ -33,6 +33,8 @@ export interface PlaceHandlers {
   onAction: (placeId: string, actionId: string) => void;
   onAttendEvent: (eventId: string) => void;
   onOpenGigs: () => void;
+  /** v0.8 a drink at the bar (clubs and the lounge, migration 0026). */
+  onBarDrink?: (placeId: string) => void;
   /** The story world (v0.4): closures, prices, story events and tasks. */
   story?: StoryFeed | null;
   onAttendStoryEvent?: (eventId: string) => void;
@@ -113,6 +115,26 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
           </div>
         );
       })}
+      {handlers.onBarDrink && hasBar(place.tags) && !world.closed && (() => {
+        const av = barDrinkAvailability(state);
+        const { price, energy } = CITY_ECONOMY.barDrink;
+        return (
+          <div className="action-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <span className="title" style={{ display: "block" }}>🍸 A drink at the bar</span>
+              {!compact && <span className="subtext" style={{ display: "block" }}>Overpriced, ice-heavy, and it works. Nobody posts a bar receipt.</span>}
+              <EffectChips price={price} energy={-energy} />
+              <span className="meta" style={{ display: "block" }}>No clout · as many as you can afford</span>
+              {!av.ok && <span className="meta reason" style={{ display: "block" }}>{av.reason}</span>}
+            </div>
+            {away ? <span className="lock-chip">On arrival</span> : (
+              <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onBarDrink!(place.id)}>
+                {handlers.busy === `drink:${place.id}` ? "…" : formatCash(price)}
+              </button>
+            )}
+          </div>
+        );
+      })()}
       {events.map((ev) => {
         const open = eventOpen(ev, minutes);
         const av = eventAvailability(ev, open, state);

@@ -58,6 +58,8 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
       const to = dest === "home" ? "Home" : placeById(dest)?.name ?? null;
       return mode === "taxi" ? { emoji: "🚕", title: "Taxi", detail: to } : { emoji: "🚇", title: "Subway", detail: to };
     }
+    // ref: place:time (migration 0026).
+    case "drink": return { emoji: "🍸", title: "Bar", detail: placeById(e.ref.split(":")[0])?.name ?? null };
     default: {
       const bill = BILLS[e.kind];
       if (bill) return { emoji: bill[0], title: bill[1], detail: null };

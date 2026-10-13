@@ -36,6 +36,17 @@ export const CITY_ECONOMY = {
   },
   shiftEnergy: 25,
   /**
+   * Rest at home and drinks at venues (v0.8, #3, #26, #27; owner Oct 13). Caps keep meals the main
+   * source of Energy: a nap is +30 twice a day (an 8-second nap on the player's own timer), sitting
+   * +10 Energy and +6 Mood three times a day; both only at home. A drink at a club or lounge bar is
+   * the pricey, convenient option: C$28 for +20 Energy, no clout, no cap.
+   */
+  rest: {
+    nap: { energy: 30, mood: 0, perDay: 2, seconds: 8 },
+    sit: { energy: 10, mood: 6, perDay: 3, seconds: 0 },
+  },
+  barDrink: { price: 28, energy: 20, tags: ["club", "lounge"] },
+  /**
    * Travel (v0.8, #4; owner Oct 13): no spending before arriving. Price and Energy come from four
    * distance bands (under 0.5 mi, 0.5 to 2, 2 to 5, over 5), not routes. Walking is free but tiring
    * and isn't offered past 5 miles; the subway is a flat fare; your own car costs nothing to drive.
