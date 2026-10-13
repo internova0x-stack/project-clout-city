@@ -196,28 +196,28 @@ function LookStep({
   return (
     <StepSheet
       cta={
-        <button className="btn btn-taxi" onClick={submit} disabled={!canSubmit && touched}>
+        <button className="btn btn-taxi" onClick={submit} disabled={!cleanName(name) || (!canSubmit && touched)}>
           {pending ? "Claiming…" : "Claim my name ›"}
         </button>
       }
     >
       <div className="stack-8">
-        <label className="overline" htmlFor="name">Name</label>
-        <div className={`field${nameMessage ? " error" : ""}`}>
+        <label className="title" htmlFor="name" style={{ margin: 0 }}>Pick your name</label>
+        <div className={`field field-outline${nameMessage ? " error" : ""}`}>
           <input
             id="name"
             value={name}
             maxLength={24}
             autoComplete="nickname"
             autoCapitalize="words"
-            placeholder="Main character"
+            placeholder="Type a name"
             onChange={(e) => {
               setName(e.target.value);
               if (error?.field === "name") setError(null);
             }}
             onBlur={() => setTouched(true)}
           />
-          <span className="hint">your name in the city</span>
+          <span className="hint">{name ? `${name.length}/24` : "how the city knows you"}</span>
         </div>
         {nameMessage && <p className="error-text" role="alert" style={{ margin: 0 }}>{nameMessage}</p>}
       </div>
