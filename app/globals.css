@@ -478,8 +478,8 @@ a { color:inherit; }
 .tag-pro { background:var(--taxi-tint); color:#7A5600; }
 
 /* Effect chips (C37) */
-.fx-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
-.fx { display:inline-flex; align-items:center; height:22px; padding:0 8px; border-radius:var(--r-pill); background:var(--chip-off); font-size:12px; font-weight:600; color:var(--text-1); font-variant-numeric:tabular-nums; }
+.fx-row { display:flex; flex-wrap:wrap; gap:6px 8px; margin-top:8px; }
+.fx { display:inline-flex; align-items:center; gap:2px; height:26px; padding:0 10px; white-space:nowrap; line-height:1; border-radius:var(--r-pill); background:var(--chip-off); font-size:13px; font-weight:600; color:var(--text-1); font-variant-numeric:tabular-nums; }
 .fx-cost { background:#fff; box-shadow:inset 0 0 0 1px var(--divider); }
 .fx-pay { background:var(--green-tint); color:#1F6B4A; }
 .fx-clout { background:var(--taxi-tint); color:#7A5600; }
@@ -663,7 +663,8 @@ textarea.studio-input { resize:vertical; font-family:ui-monospace, SFMono-Regula
 /* Real-money products (v0.5): exclusive events (C26), postcards and the Collection (C39) */
 .exclusive-card { background:var(--g-night-reveal); color:var(--text-on-dark); border-radius:var(--r-lg); padding:16px;
   box-shadow:0 0 0 1px rgba(225,188,133,.45), 0 0 24px rgba(255,46,136,.22); }
-.exclusive-card > span:not(.owned-chip) { display:block; }
+.exclusive-card > span:not(.owned-chip):not(.fx-row) { display:block; }
+.exclusive-card > .fx-row, .studio .stack-8 > .fx-row { display:flex; }
 .exclusive-card .owned-chip { background:rgba(255,255,255,.12); color:#fff; }
 .tag.on-list { background:rgba(64,181,137,.22); color:#8BE6B0; }
 .item-card.collector { box-shadow:inset 0 0 0 1px var(--gold-300); }
