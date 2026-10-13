@@ -9,9 +9,9 @@ import { previewCrushStatus, previewDatingBlock } from "./datingActions";
 
 const ME = "preview";
 const PEOPLE: Record<string, { name: string; style: string; clout: number; homeId: string }> = {
-  "p-tasha": { name: "Tasha B", style: "pilates_princess", clout: 2140, homeId: "lic_highrise" },
+  "p-tasha": { name: "tasha.b", style: "pilates_princess", clout: 2140, homeId: "lic_highrise" },
   "p-marco": { name: "Marco", style: "midtown_finance", clout: 1720, homeId: "jackson_heights_1br" },
-  "p-dee": { name: "Dee Rivera", style: "thrift_store_icon", clout: 1310, homeId: "astoria_studio" },
+  "p-dee": { name: "dee_rivera", style: "thrift_store_icon", clout: 1310, homeId: "astoria_studio" },
   "p-kenji": { name: "Kenji", style: "startup_founder", clout: 990, homeId: "lic_highrise" },
 };
 const WORDS = ["fuck", "shit", "bitch"];
@@ -92,7 +92,7 @@ export async function previewPlayerCard(id: string) {
 /** The leaderboard with ids, so rows open player cards. */
 export async function previewLeaderboard(myClout: number) {
   const rows = [...Object.entries(PEOPLE).map(([id, p]) => ({ id, display_name: p.name, starting_style: p.style, clout: p.clout, is_me: false })),
-    { id: ME, display_name: "Big Sal", starting_style: "arcade_nerd", clout: myClout, is_me: true }]
+    { id: ME, display_name: "bigsal", starting_style: "arcade_nerd", clout: myClout, is_me: true }]
     .sort((a, b) => b.clout - a.clout);
   return rows.map((r, i) => ({ ...r, rank: i + 1 }));
 }

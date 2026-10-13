@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ECONOMY, formatCash } from "@/lib/economy";
+import { ECONOMY, formatCashShort, formatShort } from "@/lib/economy";
 import type { ComingSoonKey } from "../ComingSoon";
 import {
   BuildingIcon, ChampagneIcon, ChecklistIcon, ChevronDownIcon, ChevronUpIcon, DiamondIcon,
@@ -74,14 +74,14 @@ export function GameChrome({
         <div className="hud-cluster">
           <button className="hud-btn hud-clout" data-tour="clout" onClick={() => onAction(values ? "leaderboard" : "clout")} aria-label="Clout score">
             <FlameFilled size={20} />
-            <span className="hud-number">{values ? values.clout.toLocaleString() : "—"}</span>
+            <span className="hud-number">{values ? formatShort(values.clout) : "—"}</span>
           </button>
           <button className="hud-icon-btn" data-tour="money" onClick={() => onAction("networth")} aria-label="Net worth">
             <span className="circle"><DiamondIcon size={18} /></span>
             {netWorthPin && <span className="pin-dot" />}
           </button>
           <button className="hud-btn" data-tour="money" onClick={() => onAction("bank")} aria-label="Bank balance">
-            <span className="hud-number">{values ? formatCash(values.bank) : "$—"}</span>
+            <span className="hud-number">{values ? formatCashShort(values.bank) : "C$—"}</span>
           </button>
         </div>
       </header>

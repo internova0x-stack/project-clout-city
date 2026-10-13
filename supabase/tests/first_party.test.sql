@@ -19,7 +19,7 @@ end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
 select 1 from public.create_player('Bea', 'arcade_nerd', '{}', :'a_code', true);
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000c', false);
-select 1 from public.create_player('Cy', 'arcade_nerd', '{}', :'a_code', true);
+select 1 from public.create_player('Cyd', 'arcade_nerd', '{}', :'a_code', true);
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000d', false);
 select 1 from public.create_player('Dee', 'arcade_nerd', '{}', :'a_code', true);
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000e', false);

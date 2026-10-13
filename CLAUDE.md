@@ -2,10 +2,11 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.5.1 "Testing fixes"** (v0.1 to v0.5 are live; then v0.6 to v0.8 from testing) (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.5.1 "Testing fixes"** (v0.1 to v0.5 are live; next v0.6 "Astoria and the News", then v0.7 to v0.9 from testing) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
+- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries. **Wins over the older docs** for those features.
 - `docs/01-game-concept-note.md`: the big picture.
 - `docs/02-clarifications-and-updates-v2.md`: game rules and P1 scope. **Wins on rules.**
 - `docs/03-world-state-layer-brief-v2.md`: story engine. **Wins on the World State layer.**

@@ -14,14 +14,14 @@ set role authenticated;
 do $$
 declare n text; i int := 91;
 begin
-  foreach n in array array['Ada', 'Bo', 'Cal', 'Dru', 'Eve', 'Fay', 'Gil', 'Hux'] loop
+  foreach n in array array['Ada', 'Boz', 'Cal', 'Dru', 'Eve', 'Fay', 'Gil', 'Hux'] loop
     perform pg_temp.as_(i);
     perform public.create_player(n, 'bodega_drip', '{}', null, true);
     perform public.set_traits(array['loud', 'hustler']); perform public.roll_birth_lottery(); perform public.move_in('astoria_studio');
     i := i + 1;
   end loop;
 end $$;
--- Ada invited Bo, Cal, Dru, Eve, Fay and Hux (six in her crew). Gil is a stranger.
+-- Ada invited Boz, Cal, Dru, Eve, Fay and Hux (six in her crew). Gil is a stranger.
 reset role;
 insert into public.invites (inviter_id, invitee_id, invite_code)
 select pg_temp.id(91), pg_temp.id(n), 'TEST' from unnest(array[92, 93, 94, 95, 96, 98]) n;
@@ -56,7 +56,7 @@ select 1 from public.do_action('lucky-seven-deli', 'eat');
 reset role;
 select pg_temp.assert((select count(*) = 0 from public.ledger where kind like 'crew_%'), 'no bonus alone');
 set role authenticated;
--- Bo goes without answering: going counts as yes, and both get +10.
+-- Boz goes without answering: going counts as yes, and both get +10.
 select pg_temp.as_(92);
 select 1 from public.do_action('lucky-seven-deli', 'eat');
 reset role;

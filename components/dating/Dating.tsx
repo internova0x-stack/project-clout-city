@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { placeById } from "@/lib/city";
+import { formatCash } from "@/lib/economy";
 import { dateSpotName, type CrushStatus, type DateCandidate, type DateNight, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { ChevronRightIcon, CloseIcon } from "../icons";
 import { Sheet } from "../Sheet";
+import { handle } from "@/lib/validation";
 
 // Crushes and date nights (Clarifications section 14, Design Guide C40 and C41).
 // Copy stays gender-neutral everywhere; nothing one-sided is ever shown.
@@ -78,7 +80,7 @@ export function DateInviteCard({ date, busy, onAnswer }: { date: DateNight; busy
           <span className="overline" style={{ display: "block", color: "var(--neon-text)" }}>{date.matched ? "Date night · Matched" : "Date night"}</span>
           <span className="title" style={{ display: "block" }}>{date.with.name} wants to meet at {where}</span>
           <span className="meta" style={{ display: "block" }}>
-            {place && date.kind === "event" ? `${place.name} · ` : ""}You each pay your own way · <span className="tabular">${date.price}</span>
+            {place && date.kind === "event" ? `${place.name} · ` : ""}You each pay your own way · <span className="tabular">{formatCash(date.price)}</span>
           </span>
           <span className="meta" style={{ display: "block" }}>Expires at midnight</span>
         </span>
@@ -158,7 +160,7 @@ export function DateSheet({ spot, api, onClose, onSent }: {
         <div className="stack-4">
           <h2 className="display-md" style={{ margin: 0 }}>Make it a date</h2>
           <p className="subtext" style={{ margin: 0 }}>
-            {where} tonight · <span className="tabular">${spot.price}</span> each. Go whenever you&apos;re on; once you both have, you both get a little glow.
+            {where} tonight · <span className="tabular">{formatCash(spot.price)}</span> each. Go whenever you&apos;re on; once you both have, you both get a little glow.
           </p>
         </div>
         {error && <p className="meta" role="alert" style={{ margin: 0, color: "var(--red-600, #C8323A)" }}>{error}</p>}
@@ -174,7 +176,7 @@ export function DateSheet({ spot, api, onClose, onSent }: {
             <button key={p.id} className="list-row" disabled={busy !== null} onClick={() => void ask(p)}>
               <Avatar style={p.style} size={40} />
               <span style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
-                <span className="title" style={{ display: "block" }}>{p.name}</span>
+                <span className="title" style={{ display: "block" }}>{handle(p.name)}</span>
                 <span className="meta">{p.matched ? "💗 Matched" : p.crush ? "Your crush" : "Friend"}</span>
               </span>
               <span className="meta">{busy === p.id ? "Sending…" : "Ask"}</span>
@@ -262,7 +264,7 @@ export function DatingSheet({ open, onClose, inbox, me, busy, onSeen, onPlan, on
                 {inbox!.matches.map((m) => (
                   <button key={m.id} className="list-row" onClick={() => onSayHi(m)}>
                     <Avatar style={m.style} size={36} />
-                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{m.name}</span>
+                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{handle(m.name)}</span>
                     <span className="tag matched-tag">Matched</span>
                   </button>
                 ))}

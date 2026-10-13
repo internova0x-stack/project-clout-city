@@ -5,6 +5,7 @@ import { REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSumma
 import { getStyle, type StyleId } from "@/lib/styles";
 import type { CrushStatus, DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
+import { handle } from "@/lib/validation";
 
 /** v0.5 crushes and date nights inside Messages (C40). */
 export interface MessagesDating {
@@ -164,7 +165,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
             <span className="chat-avatar" aria-hidden="true">{getStyle(c.style as StyleId).emoji}</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
               <span className="title" style={{ display: "block" }}>
-                {c.name}{dating?.matched.includes(c.with) && !c.blocked && <span className="tag matched-tag">Matched</span>}
+                {handle(c.name)}{dating?.matched.includes(c.with) && !c.blocked && <span className="tag matched-tag">Matched</span>}
               </span>
               <span className="subtext chat-last">{c.blocked ? "Blocked" : `${c.lastMine ? "You: " : ""}${c.last ?? ""}`}</span>
             </span>
@@ -183,7 +184,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
       <div className="chat-head">
         <button className="phone-back" onClick={() => { setOpen(null); setThread(null); void loadList(); }}>‹ Messages</button>
         <span style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
-          <span className="title one-line" style={{ display: "block" }}>{getStyle(open.style as StyleId).emoji} {open.name}</span>
+          <span className="title one-line" style={{ display: "block" }}>{getStyle(open.style as StyleId).emoji} {handle(open.name)}</span>
           {crush?.matched && <span className="tag matched-tag" style={{ margin: 0 }}>💗 Matched</span>}
         </span>
         {crush && !thread?.blocked && <CrushButton status={crush} busy={crushBusy} onToggle={(on) => void toggleCrush(on)} showCount={false} />}
@@ -233,7 +234,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
           <div className="phone-sheet stack-12" onClick={(e) => e.stopPropagation()}>
             {overlay.kind === "menu" && (
               <>
-                <span className="title">{open.name}</span>
+                <span className="title">{handle(open.name)}</span>
                 <button className="btn btn-destructive" onClick={() => setOverlay({ kind: "block" })}>Block</button>
                 <button className="btn btn-destructive" onClick={() => setOverlay({ kind: "report", messageId: null })}>Report</button>
                 <button className="btn btn-ghost" onClick={() => setOverlay(null)}>Cancel</button>

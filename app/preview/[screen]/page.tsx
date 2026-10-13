@@ -39,7 +39,7 @@ import type { Player } from "@/lib/player";
 
 const SAMPLE: Player = {
   id: "00000000-0000-0000-0000-000000000000",
-  display_name: "Big Sal",
+  display_name: "bigsal",
   starting_style: "arcade_nerd",
   look: { body: "curvy", skin: "#8D5524", hair: "braids", hairColor: "#14100E", eyes: "#3B2314", glasses: "round", covering: "none" },
   invite_code: "Q7MZ4K",
@@ -122,7 +122,7 @@ export default async function Preview({
           crewPreset={crew}
           storyDay={story && /^\d+$/.test(story) ? Number(story) : undefined}
           clique={[
-            { display_name: "Tasha B", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
+            { display_name: "tasha.b", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },
           ]}
         />

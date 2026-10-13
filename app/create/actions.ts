@@ -47,8 +47,11 @@ export async function createPlayer(input: {
   });
 
   if (error) {
+    if (error.message.includes("name_format")) {
+      return { ok: false, error: "Letters, numbers, _ and . only, 3 to 20 of them.", field: "name" };
+    }
     if (error.message.includes("name_taken") || error.code === "23505") {
-      return { ok: false, error: "That name's taken. Somebody got there first.", field: "name" };
+      return { ok: false, error: "That username's taken. Somebody got there first.", field: "name" };
     }
     console.error("create_player failed", error);
     return { ok: false, error: "The city glitched. Try again in a second." };

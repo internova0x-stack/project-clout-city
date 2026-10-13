@@ -7,6 +7,7 @@ import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
 import type { DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
+import { handle } from "@/lib/validation";
 
 /** C28: another player's profile card, opened from the leaderboard, with "Message". */
 export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onToast }: {
@@ -46,7 +47,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
           <div className="row" style={{ gap: 12 }}>
             <span className="chat-avatar" style={{ width: 56, height: 56, fontSize: 26, border: "3px solid var(--taxi-400)" }} aria-hidden="true">{style?.emoji}</span>
             <span style={{ minWidth: 0 }}>
-              <span className="display-md" style={{ display: "block" }}>{card.name}</span>
+              <span className="display-md" style={{ display: "block" }}>{handle(card.name)}</span>
               <span className="meta" style={{ display: "block" }}>{style?.label} · {hood}</span>
             </span>
           </div>

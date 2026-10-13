@@ -35,19 +35,45 @@ export function Sheet({
     return () => clearTimeout(t);
   }, [open]);
 
+  // Parents often pass a fresh onClose on every render (the guest map re-renders every few
+  // seconds), so it lives in a ref: focus moves only when the sheet opens or closes, never
+  // mid-typing, or the phone keyboard would drop (bug #1).
+  const closeRef = useRef({ onClose, dismissible });
+  useEffect(() => {
+    closeRef.current = { onClose, dismissible };
+  });
+
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
-    ref.current?.focus();
+    ref.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && dismissible) onClose();
+      if (e.key === "Escape" && closeRef.current.dismissible) closeRef.current.onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
-      prev?.focus?.();
+      prev?.focus?.({ preventScroll: true });
     };
-  }, [open, onClose, dismissible]);
+  }, [open]);
+
+  // Sit on top of the on-screen keyboard instead of being pushed around by it: the sheet's
+  // bottom follows the visible viewport, which shrinks when the keyboard opens.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!open || !vv) return;
+    const place = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      ref.current?.style.setProperty("--kb", `${Math.round(kb)}px`);
+    };
+    place();
+    vv.addEventListener("resize", place);
+    vv.addEventListener("scroll", place);
+    return () => {
+      vv.removeEventListener("resize", place);
+      vv.removeEventListener("scroll", place);
+    };
+  }, [open]);
 
   if (!rendered) return null;
   const closing = !open;

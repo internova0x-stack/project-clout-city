@@ -7,6 +7,7 @@ import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
 import { nextWeekday, weekdayOf, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
+import { handle } from "@/lib/validation";
 
 // The Story Studio (/studio): a separate admin page, outside the game. Upload a
 // story, approve or decline it (one approval), schedule its Day 1, pause or
@@ -413,7 +414,7 @@ function Reports({ api }: { api: StudioApi }) {
       {rows?.map((r) => (
         <article key={r.id} className="studio-card stack-8">
           <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-            <span className="title">{REASON[r.reason]}: {r.reporter.name} reported {r.reported.name}</span>
+            <span className="title">{REASON[r.reason]}: {handle(r.reporter.name)} reported {handle(r.reported.name)}</span>
             <span className={`tag studio-review ${r.status === "open" ? "draft" : r.status === "dismissed" ? "approved" : "declined"}`}>{r.status}</span>
           </div>
           <span className="meta">

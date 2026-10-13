@@ -8,6 +8,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { CityMap } from "./map/CityMap";
 import { SignUpSheet, type AuthMode } from "./SignUpSheet";
 import { useCityClock } from "./useCityClock";
+import { handle } from "@/lib/validation";
 
 type Filter = "all" | PlacePin["category"];
 
@@ -114,7 +115,7 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
         {arrival && (
           <div className="ticker glass-hud" role="status" aria-live="polite">
             <span className="badge-live">Live</span>
-            <span className="ticker-text" key={tick}>📍 <strong>@{arrival.display_name}</strong> just moved to Queens</span>
+            <span className="ticker-text" key={tick}>📍 <strong>{handle(arrival.display_name)}</strong> just moved to Queens</span>
             <span className="meta ticker-time">{timeAgo(arrival.arrived_at)}</span>
           </div>
         )}

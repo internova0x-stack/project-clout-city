@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { placeById, type Place } from "@/lib/city";
+import { formatCash } from "@/lib/economy";
 import { CREW, activityLabel, crewActivities, crewProgress, type CrewActivity, type CrewApi, type CrewInbox, type CrewOuting, type CrewPerson } from "@/lib/crew";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { ChevronRightIcon, CloseIcon } from "../icons";
 import { Sheet } from "../Sheet";
+import { handle } from "@/lib/validation";
 
 // Crew outings: one tap on a place card invites the crew to the same activity tonight.
 // Everyone who goes gets +10 clout for each friend who also goes; when the host and all
@@ -83,14 +85,14 @@ export function CrewSheet({ place, api, onClose, onSent, onInviteFriends }: {
                 <div className="chip-row" role="group" aria-label="Activity" style={{ flexWrap: "wrap" }}>
                   {activities.map((a) => (
                     <button key={a.id} className="chip" aria-pressed={activity?.id === a.id} onClick={() => setActivity(a)}>
-                      {a.label}{a.price > 0 ? ` · $${a.price}` : ""}
+                      {a.label}{a.price > 0 ? ` · ${formatCash(a.price)}` : ""}
                     </button>
                   ))}
                 </div>
               </div>
             )}
             {activities.length === 1 && activity && (
-              <p className="body" style={{ margin: 0 }}>{activity.label}{activity.price > 0 ? ` · $${activity.price} each` : " · free"}</p>
+              <p className="body" style={{ margin: 0 }}>{activity.label}{activity.price > 0 ? ` · ${formatCash(activity.price)} each` : " · free"}</p>
             )}
             <div className="stack-4">
               <p className="overline" style={{ margin: 0 }}>Who · {picked.length} of {Math.min(people.length, CREW.maxInvites)}</p>
@@ -100,7 +102,7 @@ export function CrewSheet({ place, api, onClose, onSent, onInviteFriends }: {
                   <button key={p.id} className="list-row crew-pick" aria-pressed={on} onClick={() => toggle(p.id)}
                     disabled={!on && picked.length >= CREW.maxInvites}>
                     <Avatar style={p.style} />
-                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{p.name}</span>
+                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{handle(p.name)}</span>
                     <span className={`crew-check${on ? " on" : ""}`} aria-hidden="true">✓</span>
                   </button>
                 );
@@ -131,9 +133,9 @@ export function CrewInviteCard({ outing, busy, onAnswer }: { outing: CrewOuting;
         <Avatar style={outing.host.style} size={48} />
         <span style={{ flex: 1, minWidth: 0 }}>
           <span className="overline" style={{ display: "block", color: "var(--neon-text)" }}>Crew plans</span>
-          <span className="title" style={{ display: "block" }}>{outing.host.name} wants the crew at {place?.name ?? outing.placeId}</span>
+          <span className="title" style={{ display: "block" }}>{handle(outing.host.name)} wants the crew at {place?.name ?? outing.placeId}</span>
           <span className="meta" style={{ display: "block" }}>
-            {activityLabel(place, outing.kind, outing.activity)} · {outing.price > 0 ? <><span className="tabular">${outing.price}</span> · you pay your own way</> : "free"}
+            {activityLabel(place, outing.kind, outing.activity)} · {outing.price > 0 ? <><span className="tabular">{formatCash(outing.price)}</span> · you pay your own way</> : "free"}
           </span>
           <span className="meta" style={{ display: "block" }}>Expires at midnight · {went} of {total} went</span>
         </span>
@@ -210,7 +212,7 @@ export function CrewPrompt({ inbox, onOpen, onDismiss }: { inbox: CrewInbox; onO
         <span className="story-prompt-tile" aria-hidden="true">👯</span>
         <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
           <span className="overline" style={{ display: "block", color: "rgba(20,17,26,.7)" }}>Crew plans</span>
-          <span className="title one-line" style={{ display: "block", color: "var(--night-900)" }}>{invite.host.name}: {place?.name ?? "tonight"}</span>
+          <span className="title one-line" style={{ display: "block", color: "var(--night-900)" }}>{handle(invite.host.name)}: {place?.name ?? "tonight"}</span>
         </span>
         <ChevronRightIcon size={18} />
       </button>

@@ -8,11 +8,11 @@ import { placeById } from "@/lib/city";
 
 // The preview player (SAMPLE in app/preview/[screen]/page.tsx), so the game can tell "you" apart.
 const ME = "00000000-0000-0000-0000-000000000000";
-const ME_P: CrewPerson = { id: ME, name: "Big Sal", style: "arcade_nerd" };
+const ME_P: CrewPerson = { id: ME, name: "bigsal", style: "arcade_nerd" };
 const PEOPLE: CrewPerson[] = [
-  { id: "p-tasha", name: "Tasha B", style: "pilates_princess" },
+  { id: "p-tasha", name: "tasha.b", style: "pilates_princess" },
   { id: "p-marco", name: "Marco", style: "midtown_finance" },
-  { id: "p-dee", name: "Dee Rivera", style: "thrift_store_icon" },
+  { id: "p-dee", name: "dee_rivera", style: "thrift_store_icon" },
   { id: "p-kenji", name: "Kenji", style: "startup_founder" },
   { id: "p-rae", name: "Rae", style: "night_owl_goth" },
 ];

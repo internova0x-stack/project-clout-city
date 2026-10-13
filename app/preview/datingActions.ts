@@ -9,9 +9,9 @@ import { CLUB_EVENTS, PLACES } from "@/lib/city";
 
 const ME = "preview";
 const PEOPLE: Record<string, { name: string; style: string }> = {
-  "p-tasha": { name: "Tasha B", style: "pilates_princess" },
+  "p-tasha": { name: "tasha.b", style: "pilates_princess" },
   "p-marco": { name: "Marco", style: "midtown_finance" },
-  "p-dee": { name: "Dee Rivera", style: "thrift_store_icon" },
+  "p-dee": { name: "dee_rivera", style: "thrift_store_icon" },
   "p-kenji": { name: "Kenji", style: "startup_founder" },
 };
 const CONNECTED = new Set(["p-tasha", "p-marco", "p-dee"]);

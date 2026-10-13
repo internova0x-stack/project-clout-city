@@ -21,7 +21,7 @@ This is the clean builder spec for Clout City's UI: give this version to Claude 
 > 12. **Locked boroughs:** a dashed red outline over a dimmed fill; tapping opens a sheet with a small borough map and a Lola teaser. The hazard stripe is only for closures and "Coming soon" bars. The map keeps its day and night styles with 3D buildings.
 > 13. **Names:** the owned-items screen is "Net Worth"; the friend group is the "Crew".
 > 14. **Interiors:** walkable isometric 3D rooms (update 7) everywhere this guide says 2.5D backdrops.
-> 15. **Home and profile (v0.6):** an avatar-head bubble (about 56 pt, yellow ring) left of the stats panel opens the full profile; the floating name card goes. The stats panel starts collapsed. The starting-cash card is a black gradient with the amount in large white type.
+> 15. **Home and profile (v0.7):** an avatar-head bubble (about 56 pt, yellow ring) left of the stats panel opens the full profile; the floating name card goes. The stats panel starts collapsed. The starting-cash card is a black gradient with the amount in large white type.
 
 It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
 

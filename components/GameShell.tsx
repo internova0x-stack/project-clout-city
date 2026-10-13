@@ -9,7 +9,7 @@ import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { getStyle } from "@/lib/styles";
+import { getStyle, styleOutfit } from "@/lib/styles";
 import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -38,6 +38,7 @@ import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, i
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
 import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
+import { handle } from "@/lib/validation";
 import { LocateIcon } from "./icons";
 import { InviteSheet } from "./InviteSheet";
 import { CityMap, type MapApi } from "./map/CityMap";
@@ -238,7 +239,7 @@ export function GameShell({
   const look = normalizeLook(me.look, me.starting_style);
   const style = getStyle(look.style);
   const worn = city ? equippedItems(city) : [];
-  const outfit = worn.length ? outfitWith(style.outfit, worn) : undefined;
+  const outfit = worn.length ? outfitWith(styleOutfit(style, look.body), worn) : undefined;
   const home = homeLocation(me.home_id);
   const cityOn = !!(city && cityApi);
   const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);
@@ -689,7 +690,7 @@ export function GameShell({
           >
             <span className="lb-avatar" style={{ width: 32, height: 32, fontSize: 15, border: "2px solid var(--taxi-400)", background: "var(--night-700)" }}>{style.emoji}</span>
             <span style={{ textAlign: "left", minWidth: 0 }}>
-              <span className="display-sm" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{me.display_name}</span>
+              <span className="display-sm" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{handle(me.display_name)}</span>
               <span className="meta" style={{ display: "block" }}>
                 {style.label} · {city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.neighborhood ?? "Queens"}
               </span>
@@ -984,7 +985,7 @@ export function GameShell({
               {style.emoji}
             </span>
             <span>
-              <span className="display-md" style={{ display: "block" }}>{me.display_name}</span>
+              <span className="display-md" style={{ display: "block" }}>{handle(me.display_name)}</span>
               <span className="meta" style={{ display: "block" }}>{style.emoji} <span style={{ color: "var(--text-2)" }}>{style.label}</span> · Queens</span>
             </span>
           </div>

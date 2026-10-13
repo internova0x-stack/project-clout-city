@@ -1,19 +1,27 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cleanName, nameError } from "../lib/validation.ts";
+import { cleanName, handle, nameError } from "../lib/validation.ts";
 
-test("collapses whitespace", () => {
-  assert.equal(cleanName("  Big   Sal "), "Big Sal");
+test("trims and drops a leading @", () => {
+  assert.equal(cleanName("  @big_sal "), "big_sal");
 });
 
-test("accepts ordinary names", () => {
-  for (const n of ["Big Sal", "j.lo_2", "O'Neil", "Ana-Maria"]) assert.equal(nameError(n), null, n);
+test("accepts usernames", () => {
+  for (const n of ["bigsal", "j.lo_2", "@Big_Sal", "x.y.z"]) assert.equal(nameError(n), null, n);
 });
 
-test("rejects empty, short, long and odd names", () => {
+test("rejects empty, short, long, spaced and odd usernames", () => {
   assert.ok(nameError(""));
-  assert.ok(nameError("a"));
+  assert.ok(nameError("ab"));
   assert.ok(nameError("x".repeat(21)));
+  assert.match(nameError("Big Sal")!, /No spaces/);
+  assert.ok(nameError("O'Neil"));
   assert.ok(nameError("<script>"));
   assert.ok(nameError("emoji🔥"));
+});
+
+test("usernames show as @handles; older names with spaces show as they are", () => {
+  assert.equal(handle("bigsal"), "@bigsal");
+  assert.equal(handle("Big Sal"), "Big Sal");
+  assert.equal(handle(""), "");
 });

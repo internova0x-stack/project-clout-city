@@ -7,6 +7,7 @@ import { getStyle } from "@/lib/styles";
 import { INSTALL_GUIDES, PLATFORM_DEFAULT, detectInstallGuide, type InstallGuideId, type Platform } from "@/lib/install";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { Sheet } from "../Sheet";
+import { handle } from "@/lib/validation";
 
 // The first session after creation (Clarifications section 1, steps 10 to 14):
 // the party, its completion card, the leaderboard, the invite prompt and the
@@ -138,7 +139,7 @@ export function LeaderboardSheet({
             >
               <span className="meta lb-rank">{r.rank}</span>
               <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
-              <span className="title lb-name">{r.display_name}{r.is_me ? " (you)" : ""}</span>
+              <span className="title lb-name">{handle(r.display_name)}{r.is_me ? " (you)" : ""}</span>
               <span className="hud-number lb-clout">🔥 {Number(r.clout).toLocaleString()}</span>
             </div>
           ))}
