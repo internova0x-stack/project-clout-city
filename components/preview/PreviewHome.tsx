@@ -1,5 +1,6 @@
 "use client";
 
+import { previewNews } from "@/app/preview/newsActions";
 import { useMemo, useRef } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState } from "@/lib/citySim";
@@ -186,6 +187,7 @@ export function PreviewHome({
       chat={cityOff ? undefined : chat}
       dating={cityOff ? undefined : dating}
       crew={cityOff ? undefined : crewApi}
+      cityNews={cityOff ? undefined : previewNews}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,

@@ -5,7 +5,7 @@ import type { Admin, CastLine } from "@/lib/studio";
 
 let lines: CastLine[] = [
   { id: 2, npc: "sal", line: "I'm dating again. Don't tell Also Sal.", kind: "update", weekOf: null, status: "review", at: new Date().toISOString() },
-  { id: 1, npc: "jojo", line: "KaosKyle got banned again. Third time this month. I'm selling a latte named after it.", kind: "line", weekOf: null, status: "approved", at: new Date().toISOString() },
+  { id: 1, npc: "jojo", line: "Chase Clout got banned again. Third time this month. I'm selling a latte named after it.", kind: "line", weekOf: null, status: "approved", at: new Date().toISOString() },
 ];
 let next = 3;
 const off = process.env.NODE_ENV === "production";

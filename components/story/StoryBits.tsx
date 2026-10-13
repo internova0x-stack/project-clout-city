@@ -1,5 +1,6 @@
 "use client";
 
+import type { NewsItem } from "@/lib/news";
 import { mainArc, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronRightIcon, CloseIcon } from "../icons";
 
@@ -40,6 +41,23 @@ export function StoryPrompt({ feed, dismissed, onOpen, onDismiss }: {
         <ChevronRightIcon size={18} />
       </button>
       <button className="story-prompt-close" onClick={() => onDismiss(key)} aria-label="Dismiss"><CloseIcon size={14} /></button>
+    </div>
+  );
+}
+
+/** v0.6: the newest City News headline on the home screen (C6 layout), at most once per session. */
+export function NewsPrompt({ item, onOpen, onDismiss }: { item: NewsItem; onOpen: () => void; onDismiss: () => void }) {
+  return (
+    <div className="story-prompt news-prompt" role="status">
+      <button className="story-prompt-main" onClick={onOpen}>
+        <span className="story-prompt-tile" aria-hidden="true">{item.kind === "column" ? "💌" : "📰"}</span>
+        <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+          <span className="overline" style={{ display: "block", color: "rgba(20,17,26,.7)" }}>{item.kind === "column" ? "Ask Lola" : "City news"}</span>
+          <span className="title" style={{ display: "block", color: "var(--night-900)" }}>{item.headline}</span>
+        </span>
+        <ChevronRightIcon size={18} />
+      </button>
+      <button className="story-prompt-close" onClick={onDismiss} aria-label="Dismiss"><CloseIcon size={14} /></button>
     </div>
   );
 }

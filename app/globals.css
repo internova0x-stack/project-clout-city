@@ -824,6 +824,15 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
   border-radius:var(--r-pill); background:rgba(255,255,255,.92); color:var(--text-1); font-size:14px; font-weight:700; box-shadow:var(--elev-2); }
 .regular-tag::before { content:""; position:absolute; inset:-5px; border-radius:inherit; }
 .regular-face { width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:var(--chip-off); font-size:16px; }
-.regular-bubble { position:absolute; left:10px; right:10px; bottom:52px; padding:10px 12px; border-radius:16px 16px 16px 4px; background:#fff;
-  color:var(--text-1); font-size:15px; line-height:1.35; box-shadow:var(--elev-2); animation:rise-in .18s ease-out; }
+.regular-bubble { position:relative; margin-left:6px; padding:10px 12px; border-radius:4px 16px 16px 16px; background:#fff;
+  color:var(--text-1); font-size:15px; line-height:1.35; box-shadow:var(--elev-1, 0 1px 3px rgba(20,17,26,.12)); animation:rise-in .18s ease-out; }
+/* A small pointer up to the regular's tag on the picture. */
+.regular-bubble::before { content:""; position:absolute; left:18px; top:-7px; width:14px; height:14px; background:#fff; transform:rotate(45deg); border-radius:2px; }
 .studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }
+
+/* ---------- v0.6 City News: ticker headline, home card, news cards ---------- */
+.news-ticker { min-width:0; flex:1 1 auto; max-width:calc(100% - 150px); animation:rise-in .25s ease-out; }
+.news-ticker-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.news-prompt { background:linear-gradient(135deg, #FFF6E0 0%, #FFD9C2 100%); }
+.news-card.news-column { background:linear-gradient(160deg, #FFF0F6 0%, #FFFFFF 70%); }
+.news-card.focus { box-shadow:0 0 0 2px var(--taxi-400); }

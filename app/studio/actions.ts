@@ -1,8 +1,9 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type CastLine, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
+import { validateNewsWeek } from "@/lib/news";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -91,7 +92,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("news") ? "Run migration 0017 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -111,6 +112,25 @@ export async function studioCastAdd(npc: string, line: string, kind: "line" | "u
 }
 export async function studioCastStatus(id: number, status: CastLine["status"]) {
   const r = await admin<unknown>("admin_npc_line_status", { p_id: id, p_status: status });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+// ---- City News (migration 0017) ----
+export async function studioNewsList() {
+  return admin<NewsAdminItem[]>("admin_news_list");
+}
+export async function studioNewsUpload(json: string): Promise<Admin<number> & { problems?: string[] }> {
+  let raw: unknown;
+  try { raw = JSON.parse(json); } catch { return { ok: false, error: "That isn't valid JSON." }; }
+  const checked = validateNewsWeek(raw);
+  if (!checked.ok) return { ok: false, error: "The week didn't pass its checks.", problems: checked.problems };
+  return admin<number>("admin_news_upsert", { p_items: checked.items });
+}
+export async function studioNewsStatus(id: string, status: NewsAdminItem["status"]) {
+  const r = await admin<unknown>("admin_news_status", { p_id: id, p_status: status });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+export async function studioNewsReschedule(id: string, day: string) {
+  const r = await admin<unknown>("admin_news_reschedule", { p_id: id, p_day: day });
   return r.ok ? { ok: true as const, data: null } : r;
 }
 export async function studioMetrics() {

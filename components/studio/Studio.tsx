@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { placeById } from "@/lib/city";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type CastLine, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type CastLine, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
 import { REGULARS } from "@/lib/cast";
+import { NEWS_KIND_LABEL } from "@/lib/news";
 
 // The Story Studio (/studio): a separate admin page, outside the game. Upload a
 // story, approve or decline it (one approval), schedule its Day 1, pause or
@@ -22,7 +23,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -56,10 +57,11 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         </div>
       </header>
 
-      {(api.reports || api.metrics || api.castLines) && (
+      {(api.reports || api.metrics || api.castLines || api.newsList) && (
         <div className="segmented studio-tabs" role="group" aria-label="Studio">
           <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
           {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
+          {api.newsList && <button aria-pressed={tab === "news"} onClick={() => setTab("news")}>News</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Metrics</button>}
         </div>
@@ -67,6 +69,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
       {tab === "reports" && <Reports api={api} />}
       {tab === "metrics" && <Metrics api={api} />}
       {tab === "cast" && <CastTab api={api} />}
+      {tab === "news" && <NewsTab api={api} />}
 
       {tab === "stories" && note && (
         <div className={`studio-note ${note.kind}`} role="status">
@@ -568,6 +571,94 @@ function CastTab({ api }: { api: StudioApi }) {
             {l.status !== "review" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void set(l.id, "review")}>Back to review</button>}
           </div>
         </article>
+      ))}
+    </section>
+  );
+}
+
+/** v0.6 City News: upload a week, approve it (or single items), pause, move to another day. */
+function NewsTab({ api }: { api: StudioApi }) {
+  const [rows, setRows] = useState<NewsAdminItem[] | null>(null);
+  const [error, setError] = useState<{ text: string; problems?: string[] } | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [json, setJson] = useState("");
+  const load = useCallback(async () => {
+    const r = await api.newsList!();
+    if (r.ok) { setRows(r.data); } else setError({ text: r.error });
+  }, [api]);
+  useEffect(() => { void load(); }, [load]);
+  const go = async (call: () => Promise<{ ok: boolean; error?: string; problems?: string[] }>, done?: string) => {
+    setBusy(true); setError(null); setOk(null);
+    const r = await call();
+    setBusy(false);
+    if (!r.ok) return setError({ text: r.error ?? "Something went wrong.", problems: r.problems });
+    if (done) setOk(done);
+    void load();
+  };
+  const upload = () => go(async () => {
+    const r = await api.newsUpload!(json);
+    if (r.ok) setJson("");
+    return r.ok ? { ok: true } : { ok: false, error: r.error, problems: r.problems };
+  }, "Week checked and saved. New and changed items wait for approval below.");
+  const pending = rows?.filter((r) => r.status === "review") ?? [];
+  const approveAll = () => go(async () => {
+    for (const r of pending) { const x = await api.newsStatus!(r.id, "approved"); if (!x.ok) return x; }
+    return { ok: true };
+  }, `Approved ${pending.length} item${pending.length === 1 ? "" : "s"}.`);
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const days = [...new Set((rows ?? []).map((r) => r.day))];
+  return (
+    <section className="stack-12">
+      <section className="studio-card stack-8">
+        <span className="title">Upload a week</span>
+        <p className="meta" style={{ margin: 0 }}>
+          Paste a week file from <code>content/news/</code> (or choose it). It&apos;s checked first: a Monday week, known cast, one Lola column, hunts on Mondays.
+          Items publish on their day once approved; re-uploading an unchanged item keeps it approved.
+        </p>
+        <input type="file" accept="application/json,.json" className="studio-input" aria-label="Week file"
+          onChange={async (e) => { const f = e.target.files?.[0]; if (f) setJson(await f.text()); }} />
+        <textarea className="studio-input" rows={4} value={json} onChange={(e) => setJson(e.target.value)} placeholder={'{ "week": "2026-10-19", "items": [ … ] }'} />
+        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+          <button className="btn btn-taxi btn-sm" disabled={busy || !json.trim()} onClick={() => void upload()}>Check and save</button>
+          {pending.length > 0 && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void approveAll()}>Approve all {pending.length} waiting</button>}
+        </div>
+      </section>
+      {ok && <div className="studio-note ok" role="status"><span className="body-strong">{ok}</span></div>}
+      {error && (
+        <div className="studio-note error" role="alert">
+          <span className="body-strong">{error.text}</span>
+          {error.problems && <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>{error.problems.map((p) => <li key={p} className="meta">{p}</li>)}</ul>}
+        </div>
+      )}
+      {rows === null && !error && <p className="meta">Loading…</p>}
+      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No news yet. Upload this week&apos;s file to start the feed.</p></section>}
+      {days.map((day) => (
+        <div key={day} className="stack-8">
+          <p className="overline" style={{ margin: "6px 0 0" }}>
+            {new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}
+            {day === today ? " · today" : day < today ? " · published" : ""}
+          </p>
+          {rows!.filter((r) => r.day === day).map((r) => (
+            <article key={r.id} className="studio-card stack-4">
+              <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                <span className="meta">{NEWS_KIND_LABEL[r.kind]} · {r.id}</span>
+                <span className={`tag studio-review ${r.status === "approved" ? "approved" : r.status === "paused" ? "declined" : "draft"}`}>{r.status === "review" ? "needs review" : r.status}</span>
+              </div>
+              <span className="title" style={{ display: "block" }}>{r.headline}</span>
+              <p className="body">{r.body}</p>
+              <div className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                {r.status !== "approved" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void go(() => api.newsStatus!(r.id, "approved"))}>Approve</button>}
+                {r.status === "approved" && <button className="btn btn-destructive btn-sm" disabled={busy} onClick={() => void go(() => api.newsStatus!(r.id, "paused"))}>Pause</button>}
+                {r.status !== "review" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void go(() => api.newsStatus!(r.id, "review"))}>Back to review</button>}
+                <label className="meta row" style={{ gap: 6 }}>Move to
+                  <input type="date" className="studio-input" style={{ width: "auto" }} value={r.day} disabled={busy}
+                    onChange={(e) => e.target.value && void go(() => api.newsReschedule!(r.id, e.target.value))} />
+                </label>
+              </div>
+            </article>
+          ))}
+        </div>
       ))}
     </section>
   );
