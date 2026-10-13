@@ -817,3 +817,13 @@ html:has(.game, .creator-sheet), html:has(.game, .creator-sheet) body { height:1
 body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .game, .phone-overlay, .phone-sheet { overflow-x:hidden; }
 .device { overflow-x:clip; }
+
+/* ---------- v0.6 regulars: a speech-bubble label on the place illustration ---------- */
+.place-art-wrap { position:relative; }
+.regular-tag { position:absolute; left:10px; bottom:10px; display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px 0 4px;
+  border-radius:var(--r-pill); background:rgba(255,255,255,.92); color:var(--text-1); font-size:14px; font-weight:700; box-shadow:var(--elev-2); }
+.regular-tag::before { content:""; position:absolute; inset:-5px; border-radius:inherit; }
+.regular-face { width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:var(--chip-off); font-size:16px; }
+.regular-bubble { position:absolute; left:10px; right:10px; bottom:52px; padding:10px 12px; border-radius:16px 16px 16px 4px; background:#fff;
+  color:var(--text-1); font-size:15px; line-height:1.35; box-shadow:var(--elev-2); animation:rise-in .18s ease-out; }
+.studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }

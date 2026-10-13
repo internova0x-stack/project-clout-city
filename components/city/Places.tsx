@@ -12,6 +12,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
+import type { Regular } from "@/lib/cast";
 import { placeStory, type StoryFeed } from "@/lib/storyFeed";
 import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
@@ -36,6 +37,8 @@ export interface PlaceHandlers {
   onAttendStoryEvent?: (eventId: string) => void;
   /** An overheard line for this place (NPC chatter). */
   chatter?: (place: Place) => { who: string; line: string } | null;
+  /** v0.6: the regular who's always here, and what they say on tap number n (lib/cast.ts). */
+  regular?: (place: Place, n: number) => { regular: Regular; line: string } | null;
   /** v0.5 real-money products shown on cards: postcards at monuments, exclusive events at their venue. */
   money?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
   /** Shopping places open the Shop on their category. */
@@ -149,6 +152,28 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
   );
 }
 
+/** v0.6: the regular stands on the illustration with a speech-bubble label; each tap says the next line. */
+function RegularTag({ place, talk }: { place: Place; talk: NonNullable<PlaceHandlers["regular"]> }) {
+  const [n, setN] = useState(-1);
+  const first = talk(place, 0);
+  if (!first) return null;
+  const said = n >= 0 ? talk(place, n) : null;
+  return (
+    <>
+      {said && (
+        <div className="regular-bubble" role="status">
+          <span className="meta" style={{ display: "block" }}>{first.regular.name} · {first.regular.title}</span>
+          &ldquo;{said.line}&rdquo;
+        </div>
+      )}
+      <button className="regular-tag" onClick={() => setN((x) => x + 1)} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
+        <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
+        <span>{n < 0 ? `💬 ${first.regular.name.split(" ")[0]}` : "Tap for more"}</span>
+      </button>
+    </>
+  );
+}
+
 /** C37: the location card, opened from a pin or the Places list. */
 export function LocationSheet({
   place, state, daytime, handlers, onClose, onGoInside, from,
@@ -165,7 +190,10 @@ export function LocationSheet({
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
         <div className="stack-16">
-          <PlaceArt place={place} daytime={daytime} />
+          <div className="place-art-wrap">
+            <PlaceArt place={place} daytime={daytime} />
+            {handlers.regular && <RegularTag key={place.id} place={place} talk={handlers.regular} />}
+          </div>
           <StoryBanners place={place} story={handlers.story ?? null} />
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>
@@ -216,7 +244,7 @@ export function LocationSheet({
             <ExclusiveEventCard key={p.sku} p={p} nowMs={handlers.money!.nowMs} h={handlers.money!.h} compact />
           ))}
           {(() => {
-            const c = handlers.chatter?.(place);
+            const c = handlers.regular?.(place, 0) ? null : handlers.chatter?.(place);
             return c ? (
               <div className="chatter-row">
                 <span aria-hidden="true">💬</span>

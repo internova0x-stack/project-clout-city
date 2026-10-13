@@ -4,10 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { placeById } from "@/lib/city";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type CastLine, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
+import { REGULARS } from "@/lib/cast";
 
 // The Story Studio (/studio): a separate admin page, outside the game. Upload a
 // story, approve or decline it (one approval), schedule its Day 1, pause or
@@ -21,7 +22,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "metrics">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -55,15 +56,17 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         </div>
       </header>
 
-      {(api.reports || api.metrics) && (
+      {(api.reports || api.metrics || api.castLines) && (
         <div className="segmented studio-tabs" role="group" aria-label="Studio">
           <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
           {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
+          {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Metrics</button>}
         </div>
       )}
       {tab === "reports" && <Reports api={api} />}
       {tab === "metrics" && <Metrics api={api} />}
+      {tab === "cast" && <CastTab api={api} />}
 
       {tab === "stories" && note && (
         <div className={`studio-note ${note.kind}`} role="status">
@@ -492,6 +495,80 @@ function Metrics({ api }: { api: StudioApi }) {
           );
         })}
       </div>
+    </section>
+  );
+}
+
+/** v0.6: the regulars' lines. New lines wait for approval; approved ones go live at once, paused ones vanish. */
+function CastTab({ api }: { api: StudioApi }) {
+  const [rows, setRows] = useState<CastLine[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [npc, setNpc] = useState(REGULARS[0].id);
+  const [text, setText] = useState("");
+  const [kind, setKind] = useState<"line" | "update">("line");
+  const [week, setWeek] = useState("");
+  const load = useCallback(async () => {
+    const r = await api.castLines!();
+    if (r.ok) { setRows(r.data); setError(null); } else setError(r.error);
+  }, [api]);
+  useEffect(() => { void load(); }, [load]);
+  const monday = (d: string) => !d || new Date(`${d}T12:00:00`).getDay() === 1;
+  const add = async () => {
+    if (!monday(week)) return setError("A week starts on a Monday. Pick a Monday, or leave it empty for every week.");
+    setBusy(true);
+    const r = await api.castAdd!(npc, text, kind, week || null);
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    setText("");
+    void load();
+  };
+  const set = async (id: number, status: CastLine["status"]) => {
+    setBusy(true);
+    const r = await api.castStatus!(id, status);
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    void load();
+  };
+  const name = (id: string) => REGULARS.find((r) => r.id === id)?.name ?? id;
+  return (
+    <section className="stack-12">
+      <section className="studio-card stack-8">
+        <span className="title">Add a line</span>
+        <p className="meta" style={{ margin: 0 }}>
+          Regulars say their everyday lines (in the app) plus anything approved here. Use a week for personal updates and cast news;
+          leave it empty for a line that runs every week. New lines wait for approval.
+        </p>
+        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+          <select className="studio-input" value={npc} onChange={(e) => setNpc(e.target.value)} aria-label="Regular">
+            {REGULARS.map((r) => <option key={r.id} value={r.id}>{r.name} ({r.title})</option>)}
+          </select>
+          <select className="studio-input" value={kind} onChange={(e) => setKind(e.target.value as "line" | "update")} aria-label="Kind">
+            <option value="line">Line</option>
+            <option value="update">Personal update</option>
+          </select>
+          <input className="studio-input" type="date" value={week} onChange={(e) => setWeek(e.target.value)} aria-label="Week of (a Monday)" />
+        </div>
+        <textarea className="studio-input" rows={2} maxLength={240} value={text} onChange={(e) => setText(e.target.value)} placeholder="Did you hear the streamer got banned again?" />
+        <div><button className="btn btn-taxi btn-sm" disabled={busy || text.trim().length < 3} onClick={() => void add()}>Send for review</button></div>
+      </section>
+      {error && <div className="studio-note error"><span className="body-strong">{error}</span></div>}
+      {rows === null && !error && <p className="meta">Loading…</p>}
+      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No Studio lines yet. Regulars are running on their everyday lines.</p></section>}
+      {rows?.map((l) => (
+        <article key={l.id} className="studio-card stack-4">
+          <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+            <span className="title">{name(l.npc)}{l.kind === "update" ? " · update" : ""}{l.weekOf ? ` · week of ${l.weekOf}` : " · every week"}</span>
+            <span className={`tag studio-review ${l.status === "approved" ? "approved" : l.status === "paused" ? "declined" : "draft"}`}>{l.status === "review" ? "needs review" : l.status}</span>
+          </div>
+          <span className="body">&ldquo;{l.line}&rdquo;</span>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            {l.status !== "approved" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void set(l.id, "approved")}>Approve</button>}
+            {l.status === "approved" && <button className="btn btn-destructive btn-sm" disabled={busy} onClick={() => void set(l.id, "paused")}>Pause</button>}
+            {l.status !== "review" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void set(l.id, "review")}>Back to review</button>}
+          </div>
+        </article>
+      ))}
     </section>
   );
 }

@@ -3,7 +3,7 @@ import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
 import {
-  studioBeatStatus, studioContent, studioMetrics, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
+  studioBeatStatus, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioMetrics, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +35,7 @@ export default async function StudioPage() {
       api={{
         upload: studioUpload, review: studioReview, schedule: studioSchedule, status: studioStatus, beatStatus: studioBeatStatus, content: studioContent,
         reports: studioReports, reportAction: studioReportAction, metrics: studioMetrics,
+        castLines: studioCastLines, castAdd: studioCastAdd, castStatus: studioCastStatus,
       }}
     />
   );

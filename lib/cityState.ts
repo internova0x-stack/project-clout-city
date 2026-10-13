@@ -83,6 +83,8 @@ export interface CityState {
   devTools: boolean;
   /** Saved furniture positions at home (lib/rooms.ts LayoutEntry[]), or null for the default. */
   homeLayout: unknown;
+  /** Studio-approved lines for the regulars live today (migration 0016): regular id → lines. */
+  npcLines?: Record<string, string[]>;
 }
 
 /** What changed after an action, for the reward toast. */

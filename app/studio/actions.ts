@@ -1,7 +1,7 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type CastLine, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -91,7 +91,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? "Run migration 0010 first." : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -99,6 +99,18 @@ export async function studioReports(status: "open" | "all") {
 }
 export async function studioReportAction(id: number, action: "dismiss" | "warn" | "mute" | "ban") {
   const r = await admin<unknown>("admin_report_action", { p_report: id, p_action: action });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+// ---- Regulars' lines (migration 0016) ----
+export async function studioCastLines() {
+  return admin<CastLine[]>("admin_npc_lines");
+}
+export async function studioCastAdd(npc: string, line: string, kind: "line" | "update", weekOf: string | null) {
+  const r = await admin<unknown>("admin_npc_line_add", { p_npc: npc, p_line: line, p_kind: kind, p_week: weekOf });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+export async function studioCastStatus(id: number, status: CastLine["status"]) {
+  const r = await admin<unknown>("admin_npc_line_status", { p_id: id, p_status: status });
   return r.ok ? { ok: true as const, data: null } : r;
 }
 export async function studioMetrics() {
