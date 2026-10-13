@@ -1,16 +1,30 @@
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getServerSupabase } from "./supabase/server";
-import type { Look, StyleId } from "./styles";
+import type { StyleId } from "./styles";
+
+export type OnboardingStep = "look_done" | "traits_done" | "lottery_done" | "home_done" | "party_done" | "handoff_done";
 
 export interface Player {
   id: string;
   display_name: string;
   starting_style: StyleId;
-  look: Partial<Look>;
+  /** Free Look choices; read through normalizeLook(). */
+  look: Record<string, unknown>;
   invite_code: string;
-  onboarding_step: string;
+  onboarding_step: OnboardingStep;
   created_at: string;
+  traits: string[] | null;
+  birth_cash: number | null;
+  home_id: string | null;
+  bank_cash: number;
+  clout: number;
+  energy: number;
+  mood: number;
+  confidence: number;
+  tutorial_state: "pending" | "done" | "skipped";
+  first_party_at: string | null;
+  music_muted: boolean;
 }
 
 export interface CliqueMember {
@@ -24,6 +38,14 @@ export interface Session {
   player: Player | null;
 }
 
+const PLAYER_COLUMNS =
+  "id, display_name, starting_style, look, invite_code, onboarding_step, created_at, traits, birth_cash, home_id, bank_cash, clout, energy, mood, confidence, tutorial_state, first_party_at, music_muted";
+
+/** Character creation is finished once the player has moved into a home. */
+export function creationDone(p: Pick<Player, "home_id">): boolean {
+  return p.home_id !== null;
+}
+
 /** The signed-in user and their player row, if any. Never throws. */
 export async function getSession(): Promise<Session> {
   const supabase = await getServerSupabase();
@@ -31,11 +53,7 @@ export async function getSession(): Promise<Session> {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
   if (!user) return { user: null, player: null };
-  const { data: player } = await supabase
-    .from("players")
-    .select("id, display_name, starting_style, look, invite_code, onboarding_step, created_at")
-    .eq("id", user.id)
-    .maybeSingle<Player>();
+  const { data: player } = await supabase.from("players").select(PLAYER_COLUMNS).eq("id", user.id).maybeSingle<Player>();
   return { user, player: player ?? null };
 }
 
@@ -51,6 +69,6 @@ export async function getClique(): Promise<CliqueMember[]> {
 export async function requirePlayer(): Promise<{ user: User; player: Player }> {
   const { user, player } = await getSession();
   if (!user) redirect("/");
-  if (!player) redirect("/create");
+  if (!player || !creationDone(player)) redirect("/create");
   return { user, player };
 }

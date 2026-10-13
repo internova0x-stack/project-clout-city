@@ -1,0 +1,39 @@
+{
+  "id": "sarah-bird-night-book",
+  "title": "Ray's Night Book",
+  "type": "side",
+  "kind": "insider",
+  "parent_arc_id": "sarah-bird",
+  "tier": "premium",
+  "sku": "side_sarah_bird_night_book",
+  "status": "active",
+  "teaser": "Twenty years at the front desk. One tenant asked him to write everything down.",
+  "emoji": "📒",
+  "beats": [
+    { "id": "nb-1", "day": 1, "status": "active", "effects": [], "news": [{
+      "headline": "Twenty Years, One Book",
+      "body": "Ray's rules for doormen, and why Sarah was the only tenant who knew his kids' names. Last month, she asked him to log every visitor.",
+      "hook": "\"Everyone, Ray. Even the ones I love.\""
+    }] },
+    { "id": "nb-2", "day": 3, "status": "active", "effects": [], "news": [{
+      "headline": "Tuesdays, Service Door",
+      "body": "Theo came every Tuesday through the service door, and Ray covered for them. Jett once offered Ray $500 for the Tuesday log. Ray refused.",
+      "hook": "The next Tuesday, the service camera was \"broken.\""
+    }] },
+    { "id": "nb-3", "day": 5, "status": "active", "effects": [], "news": [{
+      "headline": "Loretta's Spare Key",
+      "body": "Loretta came alone twice last month, late at night, and left with a box of papers. Ray wrote down the time both times.",
+      "hook": "Ray saw the top folder's label: \"BENEFICIARY.\""
+    }] },
+    { "id": "nb-4", "day": 7, "status": "active", "effects": [], "news": [{
+      "headline": "The Man in the Gray Suit",
+      "body": "A week before she died, a man in a gray suit with a briefcase visited Sarah for an hour. The Sunday regulars are logged as usual: Loretta at 11, Pastor V. at 11 sharp.",
+      "hook": "\"I told the police everything. Except one thing.\""
+    }] },
+    { "id": "nb-5", "day": 9, "status": "active", "effects": [], "news": [{
+      "headline": "The One Thing",
+      "body": "Ray never told police he'd let Theo in on Sunday, which is why Theo looked so guilty. The man in the gray suit was her accountant, and after he left, Sarah sat in the lobby and cried, the first time Ray had ever seen it.",
+      "hook": "Sarah had told him: \"If anything happens, give the book to someone who doesn't come to Sunday brunch.\" Tonight's new entry: the penthouse has a new tenant."
+    }] }
+  ]
+}

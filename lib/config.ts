@@ -29,4 +29,7 @@ export const GAME_CONFIG = {
     cookieName: "cc_invite",
     cookieMaxAgeDays: 30,
   },
+
+  /** Set for an hour when someone confirms 18+ and then signs in with Google. */
+  ageCookieName: "cc_age_ok",
 } as const;

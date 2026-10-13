@@ -3,15 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/copy-map-worker.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-map-worker.mjs",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\""
+    "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\"",
+    "test:db": "bash scripts/test-db.sh",
+    "validate:stories": "node --experimental-strip-types --no-warnings scripts/validate-stories.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.115.0",
+    "maplibre-gl": "6.14.0",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",

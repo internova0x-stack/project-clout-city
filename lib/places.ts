@@ -3,7 +3,7 @@
 
 import type { LatLng } from "./map/geo";
 
-export type PlaceCategory = "food" | "nightlife" | "parks" | "places";
+export type PlaceCategory = "food" | "nightlife" | "parks" | "places" | "home" | "monument" | "shopping" | "campus";
 
 export interface PlacePin {
   id: string;
@@ -78,3 +78,9 @@ export const DEFAULT_PLAYER_LOCATION: LatLng = [40.7745, -73.9050];
 
 /** The camera's starting view: Queens, framed. */
 export const QUEENS_CENTER: LatLng = [40.718, -73.838];
+
+/**
+ * Where guests land: the Long Island City waterfront, Queens' going-out spot
+ * (rooftop bars, the club strip and the skyline view). Street-level zoom.
+ */
+export const GUEST_START = { at: [40.7455, -73.9474] as LatLng, zoom: 13.65, label: "Long Island City", tagline: "Where Queens goes out" };

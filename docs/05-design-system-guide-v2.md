@@ -2,7 +2,20 @@
 
 Oct 11, 2026 · @Internovatechnologies
 
-This is the clean builder spec for Clout City's UI: give this version to Claude Code. It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
+This is the clean builder spec for Clout City's UI: give this version to Claude Code.
+
+> **Updates (Oct 12, 2026), decided by the product owner; these win over the sections below:**
+> 1. **Primary button color:** the one loud button uses an Apple Music red gradient (#FA2D48 to #D41834) with a white label, instead of taxi yellow. Taxi yellow remains the clout color and an accent.
+> 2. **In-world chrome:** the HUD, nav bar, side column, stats panel, pills, map pins and guest screen use near-white frosted glass with dark text (iOS-style, after the Lagos Life reference) instead of dark glass. The active nav tab is a night-900 pill with white text. Dark glass remains for the avatar stage and reveal cards.
+> 3. **Avatars:** low-poly, flat-shaded figures with natural proportions (head about a sixth of the height), after the Lagos Life reference, instead of the chibi style in section 11.
+> 4. **Headings:** display styles (sheet titles, names, reveals) use SF Pro Bold through the system font stack (-apple-system), falling back to Inter Bold on Android and Windows, instead of Bungee. Apple's license doesn't allow shipping SF Pro itself. Barlow Condensed stays for numbers and labels.
+> 5. **Avatar mix:** shuffled and default looks are weighted to New York's mix with white-presenting avatars as the majority (lib/look.ts); players can still choose any look.
+> 6. **Spending buttons:** buttons that spend or pay cash (Shop, places, events, bills, gigs, Move in) use the same red-pink primary, not primary-green. Green stays for positive amounts and success states.
+> 7. **Map and rooms in 3D:** the map shows 3D buildings on a tilted view, and homes and interiors are walkable low-poly 3D rooms (tap to walk, tap objects to use them, arrange furniture at home), after the Lagos Life reference. This replaces the 2.5D backdrops in C38.
+> 8. **Monument Valley-inspired light (rooms and location art):** 3D rooms use soft directional light (warm peach on lit faces, lavender in shade), gentle vertical gradients on walls, light shadows, a faint haze and drifting motes, over a gradient derived from each room's own interior colors. Location illustrations (C37) are isometric vector islands in the same style, drawn from each place's palette, with day and night versions. Natural materials keep their colors; the gradients only add warmth.
+> 9. **Real-money buttons:** buy buttons for real-money products ("Unlock for $2.99" and later purchases) use the same red-pink primary as every other button. Gold stays as the real-money accent on the card (the "Real cash" tag and border), not on the button. The New Story prompt (C6) uses a light blue-to-green gradient.
+
+It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
 
 Sizes were converted from 499 px reference screenshots to iPhone points (1 pt ≈ 1.28 px, 390 pt viewport); treat them as ±2 pt.
 
@@ -16,7 +29,7 @@ Seven principles carry every screen.
 4. **One loud button per screen.** A single colored primary (taxi yellow, green or night) plus quiet secondaries.
 5. **Gold means real money.** Gold appears only on real-cash products (section 3), so players can always tell real money from virtual cash at a glance.
 6. **Delight through emoji, gradients and wit.** Emoji replace many icons, gradient banners mark special moments, and the copy is funny.
-7. **Characters are the hero.** Avatars are rendered in soft, high-fidelity 3D on a stage, so the effort goes where players form attachment. The map is 2D, and stays 2D.
+7. **Characters are the hero.** Avatars are rendered in soft, high-fidelity 3D on a stage, so the effort goes where players form attachment. The map is a stylized night map with 3D buildings on a tilted view (update 7).
 
 ## 2. Brand layer
 
@@ -241,7 +254,7 @@ The left and right clusters are separated by flexible space; icon buttons sit on
 
 Below the HUD at the left, 12 pt apart:
 
-- **Invite your Clique:** pill-glass (32 pt) with label-chip text and an 8 pt neon-600 pin on first play.
+- **Invite your Crew:** pill-glass (32 pt) with label-chip text and an 8 pt neon-600 pin on first play.
 - **Players online:** pill-status (28 pt) with an 8 pt green-500 dot and "N people online" in meta, text-on-dark. Hidden below the configured threshold (starts at 1).
 
 ### C3. Side icon column (fixed)
@@ -287,7 +300,7 @@ These components are reused across every screen; each lists its anatomy, size, c
 
 | Variant | Height | Padding | Fill | Text | Example |
 | --- | --- | --- | --- | --- | --- |
-| pill-glass | 32 pt | 6 / 12 pt | glass-dark (glass-light over bright interiors) | label-chip | "Invite your Clique" |
+| pill-glass | 32 pt | 6 / 12 pt | glass-dark (glass-light over bright interiors) | label-chip | "Invite your Crew" |
 | pill-solid | 36 pt | 8 / 16 pt | glass-solid | body-strong | "Loading map… 90%" |
 | pill-status | 28 pt | 4 / 10 pt | glass-dark | meta + 8 pt status dot | "● 12 people online," "7 of 10 left today" |
 | pill-handle | 22 pt | 2 / 8 pt | night-900 at 85%, no stroke | text-on-dark 12 pt 600 | "@bigssg" |
@@ -376,7 +389,7 @@ Shown whenever a story changes a price or closes something.
 
 ## 8. Components: the 2D map
 
-The game uses a flat, stylized night map of Queens, generated from street geometry and drawn in the map colors from section 3. There is no 3D map; the map stays 2D as more boroughs are added.
+The game uses a flat, stylized night map of Queens, generated from street geometry and drawn in the map colors from section 3. Buildings are extruded in 3D on a tilted view (update 7, kept by the product owner's decision on Oct 12, 2026); new boroughs use the same style.
 
 ### C19. Base map
 
@@ -451,7 +464,7 @@ Opened from the diamond in the HUD.
 | Exclusive event | night-reveal gradient card with a neon glow, ✨ real-cash tag | **premium-gold** button |
 
 - **Countdown:** before doors open, the action button is disabled and a meta line shows real minutes: "Doors open in 25 min."
-- The first-task party is always "Happening now" with "Bring the clique" (primary-taxi) and "Pull up solo" (secondary).
+- The first-task party is always "Happening now" with "Bring the crew" (primary-taxi) and "Pull up solo" (secondary).
 - A cancelled event shows the reason banner and no button.
 
 ### C27. Leaderboard (comparison table)
@@ -459,7 +472,7 @@ Opened from the diamond in the HUD.
 - Container: surface-card, radius-lg, 16 pt padding.
 - Header: overline label ("QUEENS LEADERBOARD") and the player's rank in display-md ("You're #4,212").
 - Rows: rank in meta, 32 pt avatar, name in title style, clout on the right in hud-number (taxi-500 on light). The player's own row is highlighted in taxi-tint.
-- A segmented toggle switches between "Queens" and "Clique."
+- A segmented toggle switches between "Queens" and "Crew."
 - Footnote in subtext explaining how clout is earned.
 
 ### C28. Profile header
@@ -562,7 +575,7 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 
 ### C40. Crush button and "It's mutual" card
 
-- **Crush button:** a 36 pt icon-round with an outline heart on clique members' profiles and on chat threads with a two-way conversation. Tapped, it fills neon-500 and shows a toast: "Crush saved. They'll only find out if it's mutual." A meta line shows the count: "2 of 3 crushes."
+- **Crush button:** a 36 pt icon-round with an outline heart on crew members' profiles and on chat threads with a two-way conversation. Tapped, it fills neon-500 and shows a toast: "Crush saved. They'll only find out if it's mutual." A meta line shows the count: "2 of 3 crushes."
 - It never appears on anyone the player isn't connected to, and never shows whether someone has crushed on you.
 - **"It's mutual" card:** a night-reveal card (radius-lg) with both avatars, "It's mutual 👀" in display-md, and two buttons: primary-taxi "Plan a date night" and secondary "Say hi" (opens the chat). The chat thread then shows a small neon-tint "Matched" tag.
 - Delivered in-app only: a Phone badge and a home-screen card (C6 style).
@@ -573,6 +586,14 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 - **Receiving:** a card with the sender's avatar, the place, its price in tabular figures, and "Expires at midnight" in meta; primary-green "I'm in" and ghost "Not tonight."
 - **Status:** a small two-avatar row on the place card: grey when only one has gone, both lit when both have. The bonus (🙂 Mood and 🔥 clout) shows when both have gone.
 - Copy stays gender-neutral: "Your date is pulling up to Club Phoenix tonight."
+
+### C42. Bring the crew
+
+- **Button:** a secondary button with 👯 "Bring the crew", in a row with "Make it a date" under a place's actions (neon-500 outline), once per place.
+- **Sheet:** title, the place and "tonight, until midnight"; activity chips when the place has more than one; crew rows with avatars and neon checkboxes (up to 5); a light-blue bonus card; primary "Send to N friends". Empty crew: an empty-state card, primary "Invite friends", ghost "Go solo for now".
+- **Receiving:** a "Crew plans" home card (warm yellow-to-orange gradient, C6 layout) and an invite card with the host's avatar, the place, the activity and price, "Expires at midnight · N of M went", ghost "Not tonight" and green "I'm in".
+- **Progress:** on the place card, overlapping avatars (grey until each goes), "N of M", a neon progress bar and the bonus line.
+- **Full crew:** a light reveal card: white into a pale blue and lavender gradient with soft orbs, on a frosted pale-blue backdrop, the six avatars with white rings, "Full crew 🎉", clout and Mood pills, primary "Nice".
 
 ## 11. Iconography, emoji and 3D characters
 
@@ -601,7 +622,7 @@ Three visual languages, on purpose: thin outline icons for navigation, native em
 
 ### Map
 
-The map is 2D only (section 8). 3D is used for avatars, and later for interiors, never for the map.
+3D is used for avatars, interiors and the map's buildings (section 8 and update 7).
 
 ## 12. Patterns, flows and voice
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { GAME_CONFIG } from "@/lib/config";
+import { CRUSH_INVITE_TEXT } from "@/lib/dating";
 import { cliqueProgress, inviteUrl } from "@/lib/invite";
 import type { CliqueMember } from "@/lib/player";
 import { getStyle } from "@/lib/styles";
@@ -15,11 +16,17 @@ export function InviteSheet({
   onClose,
   inviteCode,
   clique,
+  crush = false,
+  onShared,
 }: {
   open: boolean;
   onClose: () => void;
   inviteCode: string;
   clique: CliqueMember[];
+  /** The crush invite (Clarifications 14.2): the same link and rewards, with a playful, open message. */
+  crush?: boolean;
+  /** Analytics: the link was shared or copied. */
+  onShared?: () => void;
 }) {
   const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL ?? "");
   const [copied, setCopied] = useState(false);
@@ -35,6 +42,7 @@ export function InviteSheet({
     try {
       await navigator.clipboard.writeText(link);
       setCopied(true);
+      onShared?.();
       setTimeout(() => setCopied(false), 1800);
     } catch {
       setCopied(false);
@@ -42,10 +50,11 @@ export function InviteSheet({
   }
 
   async function share() {
-    const text = "I'm on Clout City: New York's only ranking that counts. Claim your name before the city opens.";
+    const text = crush ? CRUSH_INVITE_TEXT : "I'm on Clout City: New York's only ranking that counts. Claim your name before the city opens.";
     if (navigator.share) {
       try {
         await navigator.share({ title: "Clout City NYC", text, url: link });
+        onShared?.();
         return;
       } catch {
         // Cancelled share sheets are fine; fall through to nothing.
@@ -56,13 +65,19 @@ export function InviteSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} label="Invite your Clique" tall>
+    <Sheet open={open} onClose={onClose} label={crush ? "Crush invite" : "Invite your Crew"} tall>
       <div className="stack-24">
-        <div className="stack-4" style={{ paddingRight: 40 }}>
-          <h2 className="display-lg" style={{ margin: 0 }}>Invite your Clique</h2>
+        <div className="stack-4" style={{ paddingRight: 44 }}>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2 className="display-lg" style={{ margin: 0 }}>{crush ? "Crush invite 💌" : "Invite your Crew"}</h2>
+            <span className="body-strong" style={{ whiteSpace: "nowrap" }}>{progress.shown} of {size}</span>
+          </div>
           <p className="subtext" style={{ margin: "4px 0 0" }}>
-            Main characters need a supporting cast. Send your link; everyone who signs up through it joins your clique.
+            {crush
+              ? "Your crush isn't in the city yet? Send them this. It comes from you, by name, and pays the same as any invite."
+              : "Main characters need a supporting cast. Send your link; everyone who signs up through it joins your crew."}
           </p>
+          {crush && <p className="crush-invite-quote">&ldquo;{CRUSH_INVITE_TEXT}&rdquo;</p>}
         </div>
 
         <div className="card stack-12">
@@ -71,7 +86,7 @@ export function InviteSheet({
             <span className="body-strong" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {link.replace(/^https?:\/\//, "")}
             </span>
-            <button className="icon-round" style={{ width: 32, height: 32 }} onClick={copy} aria-label="Copy invite link">
+            <button className="icon-round" onClick={copy} aria-label="Copy invite link">
               <CopyIcon size={16} />
             </button>
           </div>
@@ -82,21 +97,18 @@ export function InviteSheet({
         </div>
 
         <div className="stack-8">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <span className="title">Your clique</span>
-            <span className="hud-number" style={{ color: "var(--text-1)" }}>{progress.shown} of {size}</span>
-          </div>
+          <span className="title">Your crew</span>
           <div style={{ height: 8, borderRadius: 999, background: "var(--chip-off)", overflow: "hidden" }} role="progressbar" aria-valuemin={0} aria-valuemax={size} aria-valuenow={progress.shown}>
             <div style={{ width: `${progress.ratio * 100}%`, height: "100%", background: "var(--taxi-400)", borderRadius: 999, transition: "width .4s ease-out" }} />
           </div>
-          <p className="meta" style={{ margin: 0 }}>Rewards unlock when the city opens.</p>
+          <p className="meta" style={{ margin: "4px 0 0" }}>Rewards unlock when the city opens.</p>
         </div>
 
         <div className="stack-8">
           {clique.length === 0 ? (
             <div className="card center">
               <p className="title" style={{ margin: 0 }}>Nobody yet</p>
-              <p className="subtext" style={{ margin: "4px 0 0" }}>A clique of one is just a mood. Send that link.</p>
+              <p className="subtext" style={{ margin: "4px 0 0" }}>A crew of one is just a mood. Send that link.</p>
             </div>
           ) : (
             clique.map((m) => {

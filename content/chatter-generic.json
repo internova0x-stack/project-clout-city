@@ -1,0 +1,31 @@
+{
+  "bartender": [
+    "Rough day? Same. That'll be fourteen dollars.",
+    "Somebody tried to pay with exposure again. Tonight. In this economy.",
+    "If you're here to be seen, the lighting's better by the DJ."
+  ],
+  "barista": [
+    "Your name's on the cup. Spelled wrong, for authenticity.",
+    "Oat, almond, or the gossip? The gossip's free with any large.",
+    "We're out of everything except attitude and espresso."
+  ],
+  "doorman": [
+    "Package for you. Probably. Everybody's got a package.",
+    "Nice day. Not a lot happening. Which in Queens means something's about to."
+  ],
+  "driver": [
+    "Traffic on the BQE is a lifestyle, not a condition.",
+    "You want the music on or you want to talk? Either way I'm talking."
+  ],
+  "clerk": [
+    "The cat says hi. The cat does not actually say hi.",
+    "Chopped cheese is on the grill. It's always on the grill."
+  ],
+  "professor": [
+    "Office hours are Tuesdays. Nobody has ever come. I bring snacks anyway.",
+    "This will be on the exam. Everything is on the exam. Life is the exam.",
+    "Please stop filming the lecture for your story. Or at least tag the department.",
+    "Your phone is not a calculator. Well, it is. But not in my class.",
+    "Fun fact: the library has books. Real ones. You can touch them."
+  ]
+}

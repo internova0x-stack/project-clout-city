@@ -3,7 +3,8 @@
 import { cookies } from "next/headers";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
-import { isSkinTone, isStyleId } from "@/lib/styles";
+import { isValidLook, normalizeLook, lookChoices } from "@/lib/look";
+import { isStyleId } from "@/lib/styles";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { cleanName, nameError } from "@/lib/validation";
 
@@ -12,7 +13,7 @@ export type CreateResult = { ok: true } | { ok: false; error: string; field?: "n
 export async function createPlayer(input: {
   name: string;
   style: string;
-  skin: string;
+  look: unknown;
   ageConfirmed?: boolean;
 }): Promise<CreateResult> {
   const supabase = await getServerSupabase();
@@ -25,13 +26,14 @@ export async function createPlayer(input: {
   const problem = nameError(input.name);
   if (problem) return { ok: false, error: problem, field: "name" };
   if (!isStyleId(input.style)) return { ok: false, error: "Pick a starting style." };
-  if (!isSkinTone(input.skin)) return { ok: false, error: "Pick a skin tone." };
+  if (!isValidLook(input.look, input.style)) return { ok: false, error: "Something's off with your look. Try picking again." };
 
   const meta = user.user_metadata ?? {};
-  const ageConfirmed = meta.age_confirmed === true || input.ageConfirmed === true;
+  const cookieStore = await cookies();
+  const ageConfirmed =
+    meta.age_confirmed === true || input.ageConfirmed === true || cookieStore.get(GAME_CONFIG.ageCookieName)?.value === "1";
   if (!ageConfirmed) return { ok: false, error: "Clout City is 18+. Confirm your age to continue.", field: "age" };
 
-  const cookieStore = await cookies();
   const invite =
     normalizeInviteCode(typeof meta.invite_code === "string" ? meta.invite_code : null) ??
     normalizeInviteCode(cookieStore.get(GAME_CONFIG.invite.cookieName)?.value);
@@ -39,7 +41,7 @@ export async function createPlayer(input: {
   const { error } = await supabase.rpc("create_player", {
     p_display_name: cleanName(input.name),
     p_starting_style: input.style,
-    p_look: { skin: input.skin },
+    p_look: lookChoices(normalizeLook(input.look, input.style)),
     p_invite_code: invite,
     p_age_confirmed: true,
   });
@@ -54,4 +56,40 @@ export async function createPlayer(input: {
 
   cookieStore.delete(GAME_CONFIG.invite.cookieName);
   return { ok: true };
+}
+
+type StepResult = { ok: true } | { ok: false; error: string };
+
+const STEP_ERRORS: Record<string, string> = {
+  pick_two: "Pick exactly two. Commitment issues are a trait, but not one of these.",
+  unknown_trait: "That trait isn't on the menu.",
+  traits_first: "Pick your traits first.",
+  lottery_first: "Roll the dice first.",
+  cant_afford: "That place would leave you too broke for this month. Pick another.",
+  unknown_home: "That apartment just got rented. Pick another.",
+};
+
+async function callStep(fn: string, args?: Record<string, unknown>): Promise<{ data: unknown; error: string | null }> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { data: null, error: "Accounts aren't switched on yet." };
+  const { data, error } = await supabase.rpc(fn, args);
+  if (!error) return { data, error: null };
+  const key = Object.keys(STEP_ERRORS).find((k) => error.message.includes(k));
+  if (!key) console.error(`${fn} failed`, error);
+  return { data: null, error: key ? STEP_ERRORS[key] : "The city glitched. Try again in a second." };
+}
+
+export async function saveTraits(traits: string[]): Promise<StepResult> {
+  const { error } = await callStep("set_traits", { p_traits: traits });
+  return error ? { ok: false, error } : { ok: true };
+}
+
+export async function rollBirthLottery(): Promise<{ ok: true; cash: number } | { ok: false; error: string }> {
+  const { data, error } = await callStep("roll_birth_lottery");
+  return error ? { ok: false, error } : { ok: true, cash: Number(data) };
+}
+
+export async function moveIn(homeId: string): Promise<StepResult> {
+  const { error } = await callStep("move_in", { p_home: homeId });
+  return error ? { ok: false, error } : { ok: true };
 }

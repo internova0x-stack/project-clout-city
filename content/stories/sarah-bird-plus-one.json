@@ -1,0 +1,39 @@
+{
+  "id": "sarah-bird-plus-one",
+  "title": "Jett: The Plus-One",
+  "type": "side",
+  "kind": "perspective",
+  "parent_arc_id": "sarah-bird",
+  "tier": "premium",
+  "sku": "side_sarah_bird_plus_one",
+  "status": "active",
+  "teaser": "He was in every photo. He was never in the caption.",
+  "emoji": "👟",
+  "beats": [
+    { "id": "po-1", "day": 1, "status": "active", "effects": [], "news": [{
+      "headline": "Always the Accessory",
+      "body": "Jett on life as the blur behind her selfies, and on Loretta's nickname for him: \"the accessory.\" He swears he was building something. Then he admits he'd bought an engagement ring.",
+      "hook": "He paid for it with Sarah's card."
+    }] },
+    { "id": "po-2", "day": 3, "status": "active", "effects": [], "news": [{
+      "headline": "I Knew About Theo",
+      "body": "Jett knew about the affair for three weeks and said nothing, because Theo had lent him $15K. Best friends, worse bookkeeping.",
+      "hook": "His unsent Saturday-night text to Theo: \"After tomorrow we settle everything.\""
+    }] },
+    { "id": "po-3", "day": 5, "status": "active", "effects": [], "news": [{
+      "headline": "The $40K",
+      "body": "Jett calls the transfers \"loans\" for a sneaker drop. Sarah found out the Thursday before she died and told him, \"I'm not mad. I'm done.\"",
+      "hook": "She let him keep the money. So why did he go to her garage on Sunday?"
+    }] },
+    { "id": "po-4", "day": 7, "status": "active", "effects": [], "news": [{
+      "headline": "Twenty Minutes in the Garage",
+      "body": "He went to grab $40K of sneakers from his car before she could claim them, then sat in the garage for twenty minutes deciding whether to go up and propose anyway.",
+      "hook": "His phone rings. It's Detective Okafor."
+    }] },
+    { "id": "po-5", "day": 9, "status": "active", "effects": [], "news": [{
+      "headline": "The Speech I Didn't Give",
+      "body": "His proposal speech, read aloud. He admits he loved the life more than he loved her. The proposal, it turns out, was Loretta's idea.",
+      "hook": "He gives Loretta the ring to return. She doesn't."
+    }] }
+  ]
+}

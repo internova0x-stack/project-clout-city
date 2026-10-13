@@ -15,9 +15,24 @@ function readInviteCookie(): string | null {
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+export type AuthMode = "signup" | "login";
+
 // Sign-up and log-in in one: email magic link (no password) plus the 18+
 // confirmation (Clarifications sections 1 and 13; Milestones v0.1).
-export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose: () => void; invited?: boolean }) {
+export function SignUpSheet({
+  open,
+  onClose,
+  invited,
+  mode = "signup",
+  onSwitchMode,
+}: {
+  open: boolean;
+  onClose: () => void;
+  invited?: boolean;
+  mode?: AuthMode;
+  onSwitchMode?: (mode: AuthMode) => void;
+}) {
+  const login = mode === "login";
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [adult, setAdult] = useState(false);
@@ -26,7 +41,7 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
 
-  const canSend = EMAIL.test(email.trim()) && adult && !busy;
+  const canSend = EMAIL.test(email.trim()) && (login || adult) && !busy;
 
   async function send() {
     setError(null);
@@ -40,7 +55,8 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
       email: email.trim(),
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        shouldCreateUser: true,
+        // Log in never creates an account, so the 18+ confirmation is always given at sign-up.
+        shouldCreateUser: !login,
         // Kept on the account, so the invite and age confirmation survive even
         // if the email is opened on another device.
         data: { age_confirmed: true, invite_code: readInviteCookie() },
@@ -48,10 +64,34 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
     });
     setBusy(false);
     if (err) {
-      setError(err.status === 429 ? "Easy, tiger. Wait a minute before asking for another link." : "That didn't send. Check the address and try again.");
+      const noAccount = login && /signups? not allowed|not found|user/i.test(err.message);
+      setError(
+        err.status === 429
+          ? "Easy, tiger. Wait a minute before asking for another link."
+          : noAccount
+            ? "No account with that email yet. Sign up instead?"
+            : "That didn't send. Check the address and try again.",
+      );
       return;
     }
     setStage("sent");
+  }
+
+  async function google() {
+    setError(null);
+    const supabase = getBrowserSupabase();
+    if (!supabase) return setError("Accounts aren't switched on yet. Check back very soon.");
+    // OAuth can't carry metadata, so the 18+ confirmation rides along in a short-lived cookie.
+    if (!login) document.cookie = `${GAME_CONFIG.ageCookieName}=1; path=/; max-age=3600; samesite=lax`;
+    setBusy(true);
+    const { error: err } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (err) {
+      setBusy(false);
+      setError(/provider is not enabled|unsupported provider/i.test(err.message) ? "Google sign-in isn't switched on yet. Use email for now." : "Google didn't answer. Try email instead.");
+    }
   }
 
   async function verifyCode() {
@@ -71,7 +111,7 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
   }
 
   return (
-    <Sheet open={open} onClose={onClose} label="Sign up or log in">
+    <Sheet open={open} onClose={onClose} label={login ? "Log in" : "Sign up"}>
       {stage === "form" ? (
         <form
           className="stack-16"
@@ -81,10 +121,12 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
           }}
         >
           <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
-            <p className="overline">{invited ? "You've been invited" : "Early access"}</p>
-            <h2 className="display-lg" style={{ margin: 0 }}>Claim your spot in Queens</h2>
+            <p className="overline">{login ? "Welcome back" : invited ? "You've been invited" : "Early access"}</p>
+            <h2 className="display-lg" style={{ margin: 0 }}>{login ? "Back to Queens" : "Claim your spot in Queens"}</h2>
             <p className="subtext" style={{ margin: "4px 0 0" }}>
-              Sign up or log in with your email. We&apos;ll send a magic link: no password, no velvet rope.
+              {login
+                ? "Enter your email and we'll send a magic link. The city kept your spot warm. Mostly."
+                : "Sign up with your email. We'll send a magic link: no password, no velvet rope."}
             </p>
           </div>
 
@@ -103,6 +145,7 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
             />
           </label>
 
+          {!login && (
           <label className="check-row">
             <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
             <span>
@@ -111,13 +154,22 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
               <a href="/privacy" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>Privacy Policy</a>.
             </span>
           </label>
+          )}
 
           {error && <p className="error-text" role="alert">{error}</p>}
 
           <button type="submit" className="btn btn-taxi" disabled={!canSend}>
             {busy ? "Sending…" : "Send my magic link ›"}
           </button>
-          <p className="meta center" style={{ margin: 0 }}>Already have an account? Same button. Same link. Same you.</p>
+          <div className="or-divider"><span>or</span></div>
+          <button type="button" className="btn btn-secondary" disabled={busy || (!login && !adult)} onClick={google}>
+            <GoogleMark /> Continue with Google
+          </button>
+          {onSwitchMode && (
+            <button type="button" className="btn btn-ghost" onClick={() => { setError(null); onSwitchMode(login ? "signup" : "login"); }}>
+              {login ? "New here? Sign up free" : "Already have an account? Log in"}
+            </button>
+          )}
         </form>
       ) : (
         <div className="stack-16">
@@ -164,5 +216,16 @@ export function SignUpSheet({ open, onClose, invited }: { open: boolean; onClose
         </div>
       )}
     </Sheet>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
   );
 }
