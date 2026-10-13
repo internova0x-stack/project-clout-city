@@ -14,14 +14,14 @@ export interface Celebrity {
 }
 
 export const CELEBRITIES: Celebrity[] = [
-  { id: "kaoskyle", name: "Kyle \"KaosKyle\" Brandt", type: "streamer", personality: "Loud, streams for 14 hours, catchphrase \"chat, chat, CHAT\"", wants: "A record million live viewers", flaw: "Gets banned about every other week" },
-  { id: "deep-range", name: "Darnell \"Deep Range\" Okoye", type: "basketball star", personality: "Smooth, shoots from the logo, owns 400 pairs of sneakers", wants: "A championship ring", flaw: "Late to everything, games included" },
-  { id: "tre-castellano", name: "Tre Castellano", type: "football star", personality: "Gentle giant, nonstop family man", wants: "To be taken seriously as an actor", flaw: "His acting" },
-  { id: "brielle-vance", name: "Brielle Vance", type: "reality TV star", personality: "Lives for the confessional booth, a born villain", wants: "Her own spin-off", flaw: "Can't keep a secret, or a friend" },
-  { id: "sola", name: "Sola", type: "pop star", personality: "Mysterious, one name, drops albums at 3 AM", wants: "The Golden Mic trophy", flaw: "Feuds with every producer she's worked with" },
-  { id: "grant-whitmore", name: "Grant Whitmore", type: "movie star", personality: "Square-jawed, does his own stunts", wants: "To be cast as a superhero", flaw: "Ages one year every two years" },
-  { id: "priya-halvorsen", name: "Priya Halvorsen", type: "tech founder", personality: "Hoodie, ten apps, three pivots a year", wants: "To build the everything app", flaw: "None of the apps work" },
-  { id: "mia-marchetti", name: "Mia Marchetti", type: "influencer", personality: "Pastel everything, link in bio", wants: "A brand deal with a car company", flaw: "Every apology video goes viral" },
+  { id: "chase-clout", name: "Chase Clout", type: "streamer", personality: "Loud, streams for 14 hours, catchphrase \"chat, chat, CHAT\"", wants: "A record million live viewers", flaw: "Gets banned about every other week" },
+  { id: "dunk-daniels", name: "Dunk Daniels", type: "basketball star", personality: "Smooth, shoots from the logo, owns 400 pairs of sneakers", wants: "A championship ring", flaw: "Late to everything, games included" },
+  { id: "brick-tackleton", name: "Brick Tackleton", type: "football star", personality: "Gentle giant, nonstop family man", wants: "To be taken seriously as an actor", flaw: "His acting" },
+  { id: "chardonnay-shade", name: "Chardonnay Shade", type: "reality TV star", personality: "Lives for the confessional booth, a born villain", wants: "Her own spin-off", flaw: "Can't keep a secret, or a friend" },
+  { id: "lunaria", name: "Lunaria", type: "pop star", personality: "Mysterious, one name, drops albums at 3 AM", wants: "The Golden Mic trophy", flaw: "Feuds with every producer she's worked with" },
+  { id: "brock-squarejaw", name: "Brock Squarejaw", type: "movie star", personality: "Square-jawed, does his own stunts", wants: "To be cast as a superhero", flaw: "Ages one year every two years" },
+  { id: "skyler-beta", name: "Skyler Beta", type: "tech founder", personality: "Hoodie, ten apps, three pivots a year", wants: "To build the everything app", flaw: "None of the apps work" },
+  { id: "peyton-pastel", name: "Peyton Pastel", type: "influencer", personality: "Pastel everything, link in bio", wants: "A brand deal with a car company", flaw: "Every apology video goes viral" },
 ];
 
 export interface Wannabe { id: string; name: string; bit: string }
