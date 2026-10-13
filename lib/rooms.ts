@@ -61,6 +61,8 @@ export interface RoomTemplate {
   floorKind: "wood" | "tile" | "concrete" | "checker";
   /** Club lighting: warm night-time interior with colored stage lights, whatever the hour. */
   dark?: boolean;
+  /** Daytime lighting whatever the hour (owner, Oct 13: the lotto stays bright). */
+  alwaysLit?: boolean;
   /** v0.9 monument plazas: no walls, a raised island of paving, and a landmark taller than a room. */
   outdoor?: { height: number; edge: string; water?: boolean; view: [number, number] };
   window?: boolean;
@@ -283,7 +285,7 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "s
   // v0.10 Lucky Star Lotto: a narrow, sunny yellow shop (owner, Oct 13). The counter (Benny behind it) opens the games; the
   // rack and the odds board open them too, so any tap near the cards works.
   lotto: {
-    id: "lotto", w: 6.4, d: 5.6, wall: "#FFD84D", wallAccent: "#F2A900", floor: "#F5C542", floorKind: "checker", window: true,
+    id: "lotto", w: 6.4, d: 5.6, wall: "#FFD84D", wallAccent: "#F2A900", floor: "#F5C542", floorKind: "checker", window: true, alwaysLit: true,
     items: [
       { id: "counter", kind: "lottoCounter", x: -0.6, z: -1.9, rot: 0, use: { kind: "lotto" }, label: "Scratch cards" },
       { id: "sign", kind: "starSign", x: -2.3, z: -2.7, rot: 0 },

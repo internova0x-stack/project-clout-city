@@ -66,7 +66,9 @@ export interface Room3DProps {
 }
 
 export default function Room3D(props: Room3DProps) {
-  const { template, layout, look, outfit, daytime, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "dream" } = props;
+  const { template, layout, look, outfit, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "dream" } = props;
+  // Some shops keep their daytime lights on all night (the lotto's bright yellow room).
+  const daytime = props.daytime || !!template.alwaysLit;
   const dream = mood === "dream";
   const hostRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -841,7 +843,7 @@ function gradientWallMaterial(t: RoomTemplate, night: boolean): MeshStandardMate
  * walls, accent and floor), so each place's sky is an offshoot of its inside.
  */
 export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: string; haze: string } {
-  const night = !daytime || !!t.dark;
+  const night = !(daytime || t.alwaysLit) || !!t.dark;
   const hsl = (hex: string) => { const o = { h: 0, s: 0, l: 0 }; new Color(hex).getHSL(o, SRGBColorSpace); return o; };
   const wall = hsl(t.wall);
   const accent = hsl(t.wallAccent);
