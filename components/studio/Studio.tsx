@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { placeById } from "@/lib/city";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type CastLine, type HuntAdmin, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type CastLine, type ContentDraft, type HuntAdmin, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
@@ -24,7 +24,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts" | "calendar">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -62,6 +62,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         <div className="segmented studio-tabs" role="group" aria-label="Studio">
           <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
           {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
+          {api.huntList && api.newsList && <button aria-pressed={tab === "calendar"} onClick={() => setTab("calendar")}>Calendar</button>}
           {api.newsList && <button aria-pressed={tab === "news"} onClick={() => setTab("news")}>News</button>}
           {api.huntList && <button aria-pressed={tab === "hunts"} onClick={() => setTab("hunts")}>Hunts</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
@@ -73,6 +74,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
       {tab === "cast" && <CastTab api={api} />}
       {tab === "news" && <NewsTab api={api} />}
       {tab === "hunts" && <HuntsTab api={api} />}
+      {tab === "calendar" && <CalendarTab api={api} arcs={arcs} onOpen={setTab} />}
 
       {tab === "stories" && note && (
         <div className={`studio-note ${note.kind}`} role="status">
@@ -678,6 +680,7 @@ function HuntsTab({ api }: { api: StudioApi }) {
   const [busy, setBusy] = useState(false);
   const [json, setJson] = useState("");
   const [open, setOpen] = useState<Record<string, StyleId>>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const load = useCallback(async () => {
     const r = await api.huntList!();
     if (r.ok) setRows(r.data); else setError({ text: r.error });
@@ -744,6 +747,15 @@ function HuntsTab({ api }: { api: StudioApi }) {
               {h.status === "approved" && <button className="btn btn-destructive btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "paused"), "Paused. Players no longer see it; their progress is kept.")}>Pause</button>}
               {h.status !== "review" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "review"))}>Back to review</button>}
             </div>
+            {h.status === "review" && h.note && <div className="studio-note error" role="status"><span><span className="body-strong">Sent back: </span>{h.note}</span></div>}
+            {h.status !== "approved" && (
+              <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                <input className="studio-input" style={{ flex: "1 1 240px" }} placeholder="Send back with a note: what should change?" value={notes[h.id] ?? ""}
+                  onChange={(e) => setNotes({ ...notes, [h.id]: e.target.value })} aria-label="Note for the writer" />
+                <button className="btn btn-secondary btn-sm" disabled={busy || !(notes[h.id] ?? "").trim()}
+                  onClick={() => void go(() => api.huntStatus!(h.id, "review", notes[h.id]), "Sent back with your note. Re-upload the fixed file to review it again.").then(() => setNotes({ ...notes, [h.id]: "" }))}>Send back</button>
+              </div>
+            )}
             {h.joined > 0 && (
               <div className="stack-4">
                 <span className="meta">{h.joined} joined · {h.completed} found it ({Math.round((100 * h.completed) / h.joined)}%) · still on each step:</span>
@@ -788,6 +800,128 @@ function HuntsTab({ api }: { api: StudioApi }) {
                   )}
                 </div>
               ))}
+            </div>
+          </article>
+        );
+      })}
+    </section>
+  );
+}
+
+/** Keys sorted, so a file and the database's copy of it compare equal. */
+function stable(v: unknown): string {
+  if (Array.isArray(v)) return `[${v.map(stable).join(",")}]`;
+  if (v && typeof v === "object") return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stable((v as Record<string, unknown>)[k])}`).join(",")}}`;
+  return JSON.stringify(v);
+}
+
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+/**
+ * v0.6 content calendar: week by week, the stories running, the hunt and the news (spec section
+ * 2, "see the hunt and news calendar"). Week files committed to content/ (by the weekly drafting
+ * routine) load with one tap; they still wait for approval in the Hunts and News tabs.
+ */
+function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[]; onOpen: (t: "hunts" | "news") => void }) {
+  const [hunts, setHunts] = useState<HuntAdmin[] | null>(null);
+  const [news, setNews] = useState<NewsAdminItem[] | null>(null);
+  const [drafts, setDrafts] = useState<ContentDraft[]>([]);
+  const [error, setError] = useState<{ text: string; problems?: string[] } | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(async () => {
+    const [h, n, d] = await Promise.all([api.huntList!(), api.newsList!(), api.drafts ? api.drafts() : Promise.resolve({ ok: true as const, data: [] })]);
+    if (h.ok) setHunts(h.data); else setError({ text: h.error });
+    if (n.ok) setNews(n.data); else setError({ text: n.error });
+    if (d.ok) setDrafts(d.data);
+  }, [api]);
+  useEffect(() => { void load(); }, [load]);
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const monday = addDaysISO(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
+  const weeks = [...new Set([
+    ...Array.from({ length: 6 }, (_, i) => addDaysISO(monday, 7 * (i - 1))),
+    ...drafts.map((d) => d.week).filter((w) => w >= monday),
+  ])].sort();
+  const loadDraft = async (d: ContentDraft) => {
+    setBusy(true); setError(null); setOk(null);
+    const r = d.kind === "hunt" ? await api.huntUpload!(d.json) : await api.newsUpload!(d.json);
+    setBusy(false);
+    if (!r.ok) return setError({ text: `${d.file}: ${r.error}`, problems: r.problems });
+    setOk(`Loaded ${d.file}. It waits for your approval in the ${d.kind === "hunt" ? "Hunts" : "News"} tab.`);
+    void load();
+  };
+  const huntDraftLoaded = (d: ContentDraft, h?: HuntAdmin) => {
+    try { return !!h && stable(h.data) === stable(JSON.parse(d.json)); } catch { return false; }
+  };
+  const newsDraftLoaded = (d: ContentDraft) => {
+    try {
+      const ids = ((JSON.parse(d.json) as { items?: { id: string }[] }).items ?? []).map((i) => i.id);
+      return ids.length > 0 && ids.every((id) => news?.some((n) => n.id === id));
+    } catch { return false; }
+  };
+  return (
+    <section className="stack-12">
+      <p className="meta" style={{ margin: 0 }}>
+        Each week: the stories running, the hunt (Monday to Sunday) and the news by day. Files the weekly drafting routine commits to
+        <code> content/</code> show a Load button once merged; loading only uploads them, and they still wait for your approval.
+      </p>
+      {ok && <div className="studio-note ok" role="status"><span className="body-strong">{ok}</span></div>}
+      {error && (
+        <div className="studio-note error" role="alert">
+          <span className="body-strong">{error.text}</span>
+          {error.problems && <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>{error.problems.map((p) => <li key={p} className="meta">{p}</li>)}</ul>}
+        </div>
+      )}
+      {(hunts === null || news === null) && !error && <p className="meta">Loading…</p>}
+      {hunts && news && weeks.map((w) => {
+        const end = addDaysISO(w, 6);
+        const hunt = hunts.find((h) => h.week === w);
+        const huntDraft = drafts.find((d) => d.kind === "hunt" && d.week === w);
+        const newsDraft = drafts.find((d) => d.kind === "news" && d.week === w);
+        const stories = arcs.filter((a) => a.startAt && a.status === "active" && a.startAt <= end && addDaysISO(a.startAt, Math.max(0, a.lastDay - 1)) >= w);
+        const when = w === monday ? " · this week" : w === addDaysISO(monday, 7) ? " · next week" : w < monday ? " · last week" : "";
+        const soon = w === monday || w === addDaysISO(monday, 7);
+        return (
+          <article key={w} className={`studio-card stack-8${w < monday ? " calendar-past" : ""}`}>
+            <span className="title">Week of {fmtDate(w)}{when}</span>
+            <div className="calendar-row">
+              <span className="overline">Story</span>
+              <span className="body">{stories.length ? stories.map((a) => `${a.title}${a.review !== "approved" ? " (not approved)" : ""}`).join(" · ") : <span className="meta">No story running</span>}</span>
+            </div>
+            <div className="calendar-row">
+              <span className="overline">Hunt</span>
+              <span className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                {hunt ? (
+                  <button className="chip" onClick={() => onOpen("hunts")}>🗺️ {hunt.data.theme} · {hunt.status === "review" ? "needs review" : hunt.status}{hunt.joined ? ` · ${hunt.joined} joined` : ""}</button>
+                ) : (
+                  <span className={soon ? "meta reason" : "meta"}>{soon ? "⚠️ No hunt yet" : "No hunt yet"}</span>
+                )}
+                {huntDraft && !huntDraftLoaded(huntDraft, hunt) && w >= monday && (
+                  <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void loadDraft(huntDraft)}>Load hunt: {huntDraft.label}</button>
+                )}
+              </span>
+            </div>
+            <div className="calendar-row">
+              <span className="overline">News</span>
+              <span className="stack-8">
+                <span className="calendar-days">
+                  {DAYS.map((d, i) => {
+                    const items = news.filter((n) => n.day === addDaysISO(w, i));
+                    const waiting = items.filter((n) => n.status === "review").length;
+                    const live = items.filter((n) => n.status === "approved").length;
+                    return (
+                      <button key={d} className={`calendar-day${waiting ? " waiting" : live ? " live" : ""}`} onClick={() => onOpen("news")}
+                        title={items.map((n) => `${n.headline} (${n.status})`).join("\n") || "Nothing scheduled"}>
+                        <span className="meta">{d}</span>
+                        <span className="body-strong">{items.length || "–"}</span>
+                      </button>
+                    );
+                  })}
+                </span>
+                {newsDraft && !newsDraftLoaded(newsDraft) && w >= monday && (
+                  <button className="btn btn-taxi btn-sm" style={{ alignSelf: "start" }} disabled={busy} onClick={() => void loadDraft(newsDraft)}>Load news: {newsDraft.label}</button>
+                )}
+              </span>
             </div>
           </article>
         );

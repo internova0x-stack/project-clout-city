@@ -82,3 +82,12 @@ test("a full run: clues in order, visits required, wrong answers wait, the final
   assert.match(done.chatter[0], /The Ditmars Ones/);
   assert.deepEqual(huntTalk(hunt, p, "ditmars-deli", true), { ok: false, code: "not_here" });
 });
+
+test("every hunt week has a Monday announcement in that week's City News", () => {
+  const newsDir = new URL("../content/news/", import.meta.url);
+  for (const f of files) {
+    const h = load(f);
+    const news = JSON.parse(readFileSync(new URL(`${h.week}.json`, newsDir), "utf8")) as { items: { kind: string; day: string }[] };
+    assert.ok(news.items.some((i) => i.kind === "hunt" && i.day === "Mon"), `${f}: add a Monday "hunt" item to content/news/${h.week}.json`);
+  }
+});

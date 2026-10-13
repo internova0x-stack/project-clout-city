@@ -39,13 +39,18 @@ places touched by any story running that week.
 
 ## Approving (Story Studio → Hunts)
 
-1. **By Sunday:** choose or paste the file, then *Check and save*. It waits in review.
+1. **By Sunday:** load it from the **Calendar** (once the file is merged) or choose or paste it here,
+   then *Check and save*. It waits in review. The weekly drafting routine writes these files
+   (`docs/WEEKLY-CONTENT.md`).
 2. Skim the eight tracks (treasure and finale answer), then pick one to read in full, with the
    answers marked.
-3. **Approve.** It goes live on its Monday. **Pause** hides it at once (players keep their progress);
-   **Back to review** parks it. Re-uploading it unchanged keeps it approved; any edit sends it back
-   to review.
-4. Each hunt shows joins, finds and how many players are still on each step, so next week can be
+3. **Approve**, or **Send back** with a note for the writer. It goes live on its Monday. **Pause**
+   hides it at once (players keep their progress); **Back to review** parks it. Re-uploading it
+   unchanged keeps it approved; any edit sends it back to review.
+4. **Replacing a week's hunt:** upload a different hunt for the same week and it replaces the old
+   one, as long as nobody has joined it (migration 0019). Once players have joined, a hunt can't be
+   changed or replaced; pause it, or put the new one in next week.
+5. Each hunt shows joins, finds and how many players are still on each step, so next week can be
    easier or harder.
 
 ## Preview

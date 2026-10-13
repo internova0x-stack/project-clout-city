@@ -8,6 +8,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
 - `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries. **Wins over the older docs** for those features.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
+- `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt + news), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
 - `docs/01-game-concept-note.md`: the big picture.
 - `docs/02-clarifications-and-updates-v2.md`: game rules and P1 scope. **Wins on rules.**
@@ -39,6 +40,7 @@ components live in `app/globals.css`.
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
   `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
+- `npm run validate:content`: checks every hunt and news week file in `content/` (the Studio's rules).
 
 ## Rules for this codebase
 - Player data is permanent from day one: change the schema only with a new file in

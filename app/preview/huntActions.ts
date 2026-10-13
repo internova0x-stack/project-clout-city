@@ -6,7 +6,8 @@
 import FILE from "@/content/hunts/2026-10-19.json";
 import { CITY_ECONOMY } from "@/lib/city";
 import { huntAnswer, huntCard, huntTalk, huntView, validateHunt, type HuntCard, type HuntFile, type HuntProgress, type HuntResult, type HuntState } from "@/lib/hunts";
-import type { Admin, HuntAdmin } from "@/lib/studio";
+import type { Admin, ContentDraft, HuntAdmin } from "@/lib/studio";
+import { readContentDrafts } from "@/lib/contentDrafts";
 import type { StyleId } from "@/lib/styles";
 
 const off = () => process.env.NODE_ENV === "production";
@@ -101,15 +102,26 @@ export async function previewHuntUpload(json: string): Promise<Admin<null> & { p
   const r = validateHunt(raw);
   if (!r.ok) return { ok: false, error: "The hunt didn't pass its checks.", problems: r.problems };
   const list = seed();
+  // Like migration 0019: a new hunt replaces an unused one for the same week.
+  const other = list.find((x) => x.week === r.hunt.week && x.id !== r.hunt.id);
+  if (other?.joined) return { ok: false, error: "Players have already joined this week's hunt, so it can't be replaced. Pause it, or use next week." };
+  if (other) list.splice(list.indexOf(other), 1);
   const i = list.findIndex((x) => x.id === r.hunt.id);
   const row: HuntAdmin = { id: r.hunt.id, week: r.hunt.week, status: "review", data: r.hunt, joined: 0, completed: 0, atStep: r.hunt.places.map(() => 0) };
   if (i >= 0) list[i] = { ...row, joined: list[i].joined, completed: list[i].completed, atStep: list[i].atStep }; else list.push(row);
   return { ok: true, data: null };
 }
-export async function previewHuntStatus(id: string, status: HuntAdmin["status"]): Promise<Admin<null>> {
+export async function previewHuntStatus(id: string, status: HuntAdmin["status"], note?: string): Promise<Admin<null>> {
   if (off()) return { ok: false, error: "Previews are off in production." };
   const row = seed().find((x) => x.id === id);
   if (!row) return { ok: false, error: "That hunt is gone." };
   row.status = status;
+  row.note = status === "review" ? note?.trim() || null : status === "approved" ? null : row.note;
   return { ok: true, data: null };
+}
+
+/** The Studio calendar's week files (the real ones from content/; nothing is saved). */
+export async function previewDrafts(): Promise<Admin<ContentDraft[]>> {
+  if (off()) return { ok: false, error: "Previews are off in production." };
+  return { ok: true, data: await readContentDrafts() };
 }
