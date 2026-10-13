@@ -176,6 +176,8 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 ## v0.8 "Getting Around" (1 to 2 weeks)
 
+**Done** (pull requests #18 to #22, Oct 13): travel and arrival, bar drinks, Nap and Sit, groceries and cooking, weekly bills with a lower birth lottery, and local event times. Migrations 0025 to 0028.
+
 **In scope** (formerly v0.3): no spending before arriving, "Go there" with walk, subway, taxi or own car priced by distance, a skippable trip view and personal timers that never move the shared city clock (#4); a luxury-priced drink or snack at clubs and lounges (#3); Nap and Sit at home, capped per day (#26, #27); weekly rent and bills, re-tuned with starting cash and income (#23); exclusive and one-off event times shown in the player's local time (#18); the supermarket, fridge and home cooking (docs/08-new-features-spec.md section 6).
 
 ## v0.9 "Big Nights" (about 1 week)
