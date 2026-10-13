@@ -6,7 +6,7 @@ import { activeGig, gigAvailability, gigReady, type CityState, type GigOffer } f
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { LedgerList } from "../game/Sheets";
-import { NewsApp, type NewsHandlers } from "../story/News";
+import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
 import { MessagesApp, type MessagesDating } from "../chat/Messages";
 import type { ChatApi } from "@/lib/chat";
 import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
@@ -31,8 +31,11 @@ const TIER_TAG: Record<GigOffer["tier"], { label: string; cls: string }> = {
 };
 
 /** C29: the Phone, with the Gigs, Bank and Settings apps (News and Messages arrive later). */
+const noop = () => {};
+const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, markSeen: noop, completeTask: noop, onUnlock: noop };
+
 export function PhoneModal({
-  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat,
+  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew,
 }: {
   open: boolean;
@@ -48,6 +51,8 @@ export function PhoneModal({
   story?: StoryFeed | null;
   news?: NewsHandlers;
   focusBeat?: string | null;
+  /** v0.6 City News: published items and today's date (New York). */
+  cityNews?: CityNews;
   /** v0.5 chat (migration 0010); without it Messages says it opens soon. */
   chat?: ChatApi;
   chatWith?: { id: string; name: string; style: string } | null;
@@ -119,7 +124,7 @@ export function PhoneModal({
                   <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
                 </div>
               )}
-              {app === "news" && (news ? <NewsApp feed={story ?? null} handlers={news} focusBeat={focusBeat} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
+              {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "messages" && (chat
                 ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}

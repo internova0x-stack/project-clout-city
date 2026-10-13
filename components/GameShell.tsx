@@ -34,7 +34,8 @@ import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
-import { StoryPrompt } from "./story/StoryBits";
+import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
+import { newsGossip, splitNews, type NewsItem } from "@/lib/news";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
@@ -101,6 +102,7 @@ export function GameShell({
   leaderboardRows,
   dating,
   crew,
+  cityNews,
   roomMood = "dream",
 }: {
   player: Player;
@@ -123,6 +125,8 @@ export function GameShell({
   dating?: DatingApi;
   /** Crew outings (migration 0013). */
   crew?: CrewApi;
+  /** v0.6 City News: published items (news_feed(), migration 0017). */
+  cityNews?: () => Promise<NewsItem[]>;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -156,7 +160,24 @@ export function GameShell({
   const [toast, setToast] = useState<string | null>(null);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
-  const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null }>({ open: false, app: null });
+  const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null; item?: string | null }>({ open: false, app: null });
+  // v0.6 City News: loaded once; the newest headline rides the ticker and, once per session, a home card.
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [newsCard, setNewsCard] = useState<string | null>(null);
+  useEffect(() => {
+    if (!cityNews) return;
+    void cityNews().then((items) => {
+      setNewsItems(items);
+      const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+      const latest = splitNews(items, today).recent[0];
+      try {
+        if (latest && sessionStorage.getItem("cc_news_card") !== "shown") {
+          sessionStorage.setItem("cc_news_card", "shown");
+          setNewsCard(latest.id);
+        }
+      } catch { /* private mode: skip the card */ }
+    });
+  }, [cityNews]);
   const [feed, setFeed] = useState<StoryFeed | null>(initialStory);
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [catalog, setCatalog] = useState<StoreProduct[] | null>(initialCatalog);
@@ -331,6 +352,14 @@ export function GameShell({
     if (ok && inbox?.dates.some((d) => !d.paid && d.status !== "declined")) void loadInbox();
     if (ok && crewInbox?.outings.length) void loadCrew();
   };
+  const newsToday = city?.today ?? new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const latestNews = splitNews(newsItems, newsToday).recent[0] ?? null;
+  const openCityNews = (id: string) => {
+    setPanel(null);
+    setPlace(null);
+    setNewsCard(null);
+    setPhone({ open: true, app: "news", beat: null, item: id });
+  };
   const openNews = (beat?: string | null) => {
     setPanel(null);
     setPlace(null);
@@ -434,7 +463,9 @@ export function GameShell({
       const r = regularAt(p.id);
       if (!r) return null;
       const story = feed?.chatter?.find((t) => t.lines)?.lines ?? null;
-      return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live: city?.npcLines, evergreen: CAST_LINES }) };
+      // Studio lines first, then this week's city news as gossip.
+      const live = { [r.id]: [...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1)] };
+      return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: CAST_LINES }) };
     },
     chatter: (p) => {
       const { who, role } = npcRole(p);
@@ -691,6 +722,9 @@ export function GameShell({
           {storyOn && flow === "none" && !arranging && !showDating && !showCrew && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
+          {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !(storyOn && promptVisible(feed, dismissed)) && (
+            <NewsPrompt item={latestNews} onOpen={() => openCityNews(latestNews.id)} onDismiss={() => setNewsCard(null)} />
+          )}
           <button
             className="glass-hud profile-chip"
             onClick={() => setPanel("profile")}
@@ -725,6 +759,7 @@ export function GameShell({
       )}
 
       <GameChrome
+        headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         time={clock.time}
         tab={tab}
         onAction={onAction}
@@ -891,6 +926,7 @@ export function GameShell({
         open={phone.open}
         initialApp={phone.app}
         focusBeat={phone.beat}
+        cityNews={cityNews ? { items: newsItems, today: newsToday, focus: phone.item ?? null } : undefined}
         chat={chat}
         chatWith={chatWith}
         chatUnread={chatUnread}

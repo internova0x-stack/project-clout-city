@@ -1,0 +1,60 @@
+{
+  "week": "2026-10-12",
+  "items": [
+    {
+      "id": "kaoskyle-banned-comeback", "kind": "city", "day": "Mon", "cast": ["kaoskyle"],
+      "headline": "KaosKyle banned again, 41 minutes into a \"comeback stream\"",
+      "body": "Chat says it was the third \"chat, chat, CHAT\" in a row that did it. His mom says he's \"taking a break.\" His sponsors say nothing, loudly."
+    },
+    {
+      "id": "deep-range-late-retirement", "kind": "city", "day": "Tue", "cast": ["deep-range"],
+      "headline": "Deep Range late to his own jersey retirement",
+      "body": "The ceremony started without him. He arrived in time for dessert and got a standing ovation, mostly for the dessert."
+    },
+    {
+      "id": "brielle-velvet-static", "kind": "city", "day": "Tue", "cast": ["brielle-vance", "mags"],
+      "headline": "Brielle Vance throws a drink at Velvet Static, then orders another",
+      "body": "Witnesses describe it as \"an emotional pinot.\" Her spin-off pitch deck reportedly includes the receipt. Mags the bartender declined to comment, then commented."
+    },
+    {
+      "id": "ask-lola-after-midnight", "kind": "column", "day": "Wed",
+      "headline": "Ask Lola: \"He only texts me after midnight\"",
+      "body": "\"Hon, that's not a situationship, that's a night shift. A man who wants to see you can find you at 2 PM. Put the phone on Do Not Disturb, wear the good jacket to brunch, and let him wonder.\" Lola Lowdown"
+    },
+    {
+      "id": "sola-3am-album", "kind": "city", "day": "Wed", "cast": ["sola"],
+      "headline": "Sola drops a surprise album at 3 AM; three producers post \"no comment\"",
+      "body": "Track 7 is just the word \"no,\" sung for four minutes. Critics are calling it her best work. The producers are calling their lawyers."
+    },
+    {
+      "id": "grant-cereal-hero", "kind": "city", "day": "Thu", "cast": ["grant-whitmore"],
+      "headline": "Grant Whitmore cast as a superhero (in a cereal commercial)",
+      "body": "He did his own stunts. The stunt was eating the cereal. His agent calls it \"a stepping stone.\" The cereal calls it a good week."
+    },
+    {
+      "id": "priya-eleventh-app", "kind": "city", "day": "Thu", "cast": ["priya-halvorsen"],
+      "headline": "Priya Halvorsen launches her eleventh app",
+      "body": "It tells you which of her other apps are working. It is down. A spokesperson says the outage is \"a feature, for focus.\""
+    },
+    {
+      "id": "mia-apology-viral", "kind": "city", "day": "Fri", "cast": ["mia-marchetti"],
+      "headline": "Mia Marchetti's apology video goes viral; the original controversy is still unclear",
+      "body": "Four million views and counting. Commenters agree she's \"so sorry.\" Nobody agrees about what. Her pastel ring light got its own fan account."
+    },
+    {
+      "id": "tre-lighthouse-role", "kind": "city", "day": "Fri", "cast": ["tre-castellano"],
+      "headline": "Tre Castellano lands a dramatic role; early reviews call his crying \"structurally sound\"",
+      "body": "The film is about a lighthouse keeper. Tre says he \"became the lighthouse.\" His teammates say he's been standing very still in the locker room."
+    },
+    {
+      "id": "dj-polaroid-sold-out", "kind": "city", "day": "Sat", "cast": ["dj-polaroid", "rocco"],
+      "headline": "DJ Polaroid plays to a sold-out crowd of nine",
+      "body": "Hellgate Hall confirms all nine were DJ Polaroid's cousins. \"It still counts,\" says DJ Polaroid. Rocco the bouncer says he checked everyone's ID, \"for the vibe.\""
+    },
+    {
+      "id": "chad-raises-zero", "kind": "city", "day": "Sun", "cast": ["chad-kensington", "jojo"],
+      "headline": "Chad Kensington, CEO, closes a C$0 \"pre-seed\" round",
+      "body": "He calls it \"pre-pre-seed.\" Investors call it \"a guy at Grind & Gossip.\" Jojo the barista says he has been nursing the same latte since Tuesday."
+    }
+  ]
+}

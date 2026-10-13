@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { NEWS_KIND_LABEL, splitNews, type NewsItem } from "@/lib/news";
 import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
 
 // The News app (C30 to C34): today's story, side stories, the archive, predictions
@@ -19,8 +20,12 @@ export interface NewsHandlers {
   onShared?: () => void;
 }
 
-export function NewsApp({ feed, handlers, focusBeat }: { feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null }) {
-  const [tab, setTab] = useState<"today" | "archive">("today");
+/** v0.6 City News handed to the News app. */
+export interface CityNews { items: NewsItem[]; today: string; focus?: string | null }
+
+export function NewsApp({ feed, handlers, focusBeat, city }: { feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews }) {
+  const storyLive = (feed?.arcs ?? []).some((a) => a.type === "main" && !a.finished);
+  const [tab, setTab] = useState<"today" | "city" | "archive">(city?.focus || (!storyLive && city?.items.length) ? "city" : "today");
   const [reading, setReading] = useState<string | null>(null);
   const live = (feed?.arcs ?? []).filter((a) => a.type === "main" && !a.finished);
   const archive = (feed?.arcs ?? []).filter((a) => a.type === "main" && a.finished);
@@ -39,16 +44,28 @@ export function NewsApp({ feed, handlers, focusBeat }: { feed: StoryFeed | null;
     if (focusBeat) document.getElementById(`beat-${focusBeat}`)?.scrollIntoView({ block: "start" });
   }, [focusBeat]);
 
-  if (!feed) return <Quiet text="The newsroom is still setting up. Stories arrive with the next update of the city." />;
+  const cityNews = city ? splitNews(city.items, city.today) : { recent: [], archive: [] };
+  if (!feed && !city) return <Quiet text="The newsroom is still setting up. Stories arrive with the next update of the city." />;
 
   const readingArc = archive.find((a) => a.id === reading);
   return (
     <div className="stack-12">
       <div className="segmented" role="group" aria-label="News">
-        <button aria-pressed={tab === "today"} onClick={() => { setTab("today"); setReading(null); }}>Today</button>
+        <button aria-pressed={tab === "today"} onClick={() => { setTab("today"); setReading(null); }}>Story</button>
+        {city && <button aria-pressed={tab === "city"} onClick={() => { setTab("city"); setReading(null); }}>City</button>}
         <button aria-pressed={tab === "archive"} onClick={() => setTab("archive")}>Archive</button>
       </div>
-      {tab === "today" ? (
+      {tab === "city" ? (
+        cityNews.recent.length === 0 ? (
+          <Quiet text="Slow news week. Even the celebrities are napping. Check back tomorrow." />
+        ) : (
+          <div className="stack-12">
+            {cityNews.recent.map((i) => <CityNewsCard key={i.id} item={i} today={city!.today} focus={city!.focus === i.id} />)}
+          </div>
+        )
+      ) : !feed ? (
+        <Quiet text="No story running right now. Lola's sharpening her pencils. The next one starts on a Sunday." />
+      ) : tab === "today" ? (
         live.length === 0 ? (
           <Quiet text="No story running right now. Lola's sharpening her pencils. The next one starts on a Sunday." />
         ) : (
@@ -74,10 +91,18 @@ export function NewsApp({ feed, handlers, focusBeat }: { feed: StoryFeed | null;
           ))}
           <SideArcs arcs={sides(readingArc.id)} feed={feed} handlers={handlers} />
         </div>
-      ) : archive.length === 0 ? (
-        <Quiet text="Nothing in the archive yet. Finished stories land here, reveals and all." />
+      ) : archive.length === 0 && cityNews.archive.length === 0 ? (
+        <Quiet text="Nothing in the archive yet. Finished stories and last week's city news land here." />
       ) : (
-        archive.map((a) => (
+        <>
+        {cityNews.archive.length > 0 && (
+          <div className="stack-8">
+            <p className="overline" style={{ margin: 0 }}>City news</p>
+            {cityNews.archive.slice(0, 30).map((i) => <CityNewsCard key={i.id} item={i} today={city!.today} />)}
+          </div>
+        )}
+        {archive.length > 0 && <p className="overline" style={{ margin: "8px 0 0" }}>Stories</p>}
+        {archive.map((a) => (
           <button key={a.id} className="list-row" onClick={() => setReading(a.id)}>
             <span className="icon-tile" style={{ width: 40, height: 40, fontSize: 20 }} aria-hidden="true">{a.emoji ?? "📰"}</span>
             <span style={{ flex: 1, textAlign: "left" }}>
@@ -85,9 +110,28 @@ export function NewsApp({ feed, handlers, focusBeat }: { feed: StoryFeed | null;
               <span className="meta">{a.lastDay} beats · {a.predictions.length} predictions</span>
             </span>
           </button>
-        ))
+        ))}
+        </>
       )}
     </div>
+  );
+}
+
+/** One City News item: Lola's byline, the kind, the day and the full text. */
+function CityNewsCard({ item, today, focus = false }: { item: NewsItem; today: string; focus?: boolean }) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => { if (focus) ref.current?.scrollIntoView({ block: "start" }); }, [focus]);
+  const when = item.day === today ? "Today" : new Date(`${item.day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  return (
+    <article ref={ref} className={`card stack-8 news-card news-${item.kind}${focus ? " focus" : ""}`} id={`news-${item.id}`}>
+      <div className="row" style={{ justifyContent: "space-between", gap: 8 }}>
+        <span className={`tag ${item.kind === "column" ? "tag-event" : "tag-neutral"}`}>{NEWS_KIND_LABEL[item.kind]}</span>
+        <span className="meta">{when}</span>
+      </div>
+      <h3 className="title" style={{ margin: 0, fontSize: 18, lineHeight: 1.25 }}>{item.headline}</h3>
+      <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{item.body}</p>
+      <Byline />
+    </article>
   );
 }
 

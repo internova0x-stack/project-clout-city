@@ -827,3 +827,10 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .regular-bubble { position:absolute; left:10px; right:10px; bottom:52px; padding:10px 12px; border-radius:16px 16px 16px 4px; background:#fff;
   color:var(--text-1); font-size:15px; line-height:1.35; box-shadow:var(--elev-2); animation:rise-in .18s ease-out; }
 .studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }
+
+/* ---------- v0.6 City News: ticker headline, home card, news cards ---------- */
+.news-ticker { min-width:0; flex:1 1 auto; max-width:calc(100% - 150px); animation:rise-in .25s ease-out; }
+.news-ticker-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.news-prompt { background:linear-gradient(135deg, #FFF6E0 0%, #FFD9C2 100%); }
+.news-card.news-column { background:linear-gradient(160deg, #FFF0F6 0%, #FFFFFF 70%); }
+.news-card.focus { box-shadow:0 0 0 2px var(--taxi-400); }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ECONOMY, formatCashShort, formatShort } from "@/lib/economy";
 import type { ComingSoonKey } from "../ComingSoon";
 import {
@@ -39,6 +39,7 @@ export function GameChrome({
   netWorthPin = false,
   values,
   onToggleSound,
+  headline = null,
 }: {
   time: string;
   tab: Tab;
@@ -48,8 +49,19 @@ export function GameChrome({
   /** Live economy values; omitted for screens that don't have them yet. */
   values?: ChromeValues;
   onToggleSound?: () => void;
+  /** v0.6 City News: the newest headline, alternating with live activity in the ticker (C22). */
+  headline?: { text: string; onOpen: () => void } | null;
 }) {
   const [statsOpen, setStatsOpen] = useState(true);
+  // The ticker swaps between the headline and who's online every five seconds.
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!headline) return;
+    const t = setInterval(() => setTick((n) => n + 1), 5000);
+    return () => clearInterval(t);
+  }, [headline]);
+  const online = values?.online != null && values.online >= ECONOMY.playersOnlineThreshold;
+  const showHeadline = !!headline && (!online || tick % 2 === 0);
 
   return (
     <>
@@ -91,9 +103,13 @@ export function GameChrome({
           Invite your Crew
           {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
         </button>
-        {values?.online != null && values.online >= ECONOMY.playersOnlineThreshold && (
-          <span className="pill-status glass-hud" role="status">
-            <span className="dot-green" aria-hidden="true" /> {values.online.toLocaleString()} {values.online === 1 ? "person" : "people"} online
+        {showHeadline ? (
+          <button className="pill-status glass-hud news-ticker" onClick={headline!.onOpen} key={`h${tick}`}>
+            <span aria-hidden="true">📰</span> <span className="news-ticker-text">{headline!.text}</span>
+          </button>
+        ) : online && (
+          <span className="pill-status glass-hud" role="status" key={`o${tick}`}>
+            <span className="dot-green" aria-hidden="true" /> {values!.online!.toLocaleString()} {values!.online === 1 ? "person" : "people"} online
           </span>
         )}
       </div>
