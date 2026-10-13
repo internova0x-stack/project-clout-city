@@ -536,12 +536,12 @@ export const SHOP_ITEMS: ShopItem[] = [
   // Cars
   { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 14000, clout: 120, rating: 2, rentPerWeek: 350, blurb: "Previously loved. Heavily. It still gets you to the club." },
   { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 52000, clout: 300, rating: 4, rentPerWeek: 900, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
-  { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "⚡", price: 78000, clout: 420, rating: 4, rentPerWeek: 1300, blurb: "Silent, fast and smug. Like a startup founder." },
+  { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 78000, clout: 420, rating: 4, rentPerWeek: 1300, blurb: "Silent, fast and smug. Like a startup founder." },
   // Houses
   { sku: "house-astoria-townhouse", category: "houses", name: "Astoria townhouse", emoji: "🏡", price: 180000, clout: 900, rating: 3, neighborhood: "Astoria", blurb: "A stoop of your own. Neighbors will judge your plants." },
   { sku: "house-lic-penthouse", category: "houses", name: "LIC penthouse", emoji: "🌆", price: 650000, clout: 2400, rating: 4, neighborhood: "Long Island City", blurb: "Floor-to-ceiling windows, so the city can watch you thrive." },
   // Luxury
-  { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "📿", price: 900, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },
+  { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "⛓️", price: 900, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },
   { sku: "lux-diamond-studs", category: "luxury", name: "Diamond-ish studs", emoji: "💎", price: 2400, clout: 140, rating: 4, blurb: "They sparkle. That's the whole personality." },
   { sku: "lux-designer-watch", category: "luxury", name: "Designer watch", emoji: "⌚", price: 6800, clout: 260, rating: 4, blurb: "Tells the time and tells everyone you're doing fine." },
   // Makeup

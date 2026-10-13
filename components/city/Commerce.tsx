@@ -84,7 +84,7 @@ export function ShopSheet({
                 return (
                   <div key={item.sku} className="item-card collector">
                     <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <IconTile emoji={item.emoji} />
+                      <IconTile emoji={item.emoji} item={item} />
                       <span className="tag tag-gold">✨ Real cash</span>
                     </div>
                     <span className="title" style={{ display: "block" }}>{item.name}</span>
@@ -106,7 +106,7 @@ export function ShopSheet({
               return (
                 <div key={item.sku} className="item-card">
                   <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <IconTile emoji={item.emoji} />
+                    <IconTile emoji={item.emoji} item={item} />
                     {item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
                   </div>
                   <span className="title" style={{ display: "block" }}>{item.name}</span>
@@ -142,7 +142,7 @@ export function ShopSheet({
           const after = player.bank_cash - price;
           return (
             <div className="stack-16">
-              <IconTile emoji={confirm.item.emoji} />
+              <IconTile emoji={confirm.item.emoji} item={confirm.item} />
               <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>
                 {confirm.mode === "rent" ? `Rent the ${confirm.item.name.toLowerCase()}?` : `Buy the ${confirm.item.name.toLowerCase()}?`}
               </h2>
@@ -208,7 +208,7 @@ export function NetWorthSheet({
                   const it = itemBySku(i.sku);
                   return (
                     <button key={i.id} className="list-row" onClick={() => setDetail(i)}>
-                      <IconTile emoji={it?.emoji ?? "📦"} size={40} />
+                      <IconTile emoji={it?.emoji ?? "📦"} size={40} item={it} />
                       <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                         <span className="title" style={{ display: "block" }}>{it?.name ?? i.sku}</span>
                         <span className="meta">{i.acquired === "earned" ? "Earned" : i.acquired === "collector" ? "✨ Collector" : "Bought"}{i.equipped ? " · Wearing" : ""}</span>
@@ -245,7 +245,7 @@ export function NetWorthSheet({
       <Sheet open={open && !!detail} onClose={close} label={item?.name ?? "Item"}>
         {detail && item && (
           <div className="stack-16">
-            <IconTile emoji={item.emoji} />
+            <IconTile emoji={item.emoji} item={item} />
             <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>
               {confirming ? `Sell your ${item.name.toLowerCase()} for ${formatCash(sellPrice(detail.value))}?` : item.name}
             </h2>
@@ -310,7 +310,15 @@ export function BillsSheet({
       <div className="stack-16">
         <SheetTitle right={due.length ? `${formatCash(due.reduce((a, b) => a + b.amount, 0))} due` : "All paid"}>Bills</SheetTitle>
         {due.length === 0 && (
-          <div className="card"><p className="body" style={{ margin: 0 }}>Nothing due. Savor it; in New York this feeling lasts about a month.</p></div>
+          // #21: a real empty state: what's settled, and what's next.
+          <div className="bills-empty" role="status">
+            <span className="bills-empty-icon" aria-hidden="true">✅</span>
+            <span className="title">All paid up</span>
+            <span className="subtext">&ldquo;Nothing due. Savor it, babe; in New York this feeling lasts about a month.&rdquo; Lola</span>
+            {upcoming[0] && (
+              <span className="meta">Next: {BILL_LABEL[upcoming[0].kind]} · {formatCash(upcoming[0].amount)} on {billDate(upcoming[0].due_date)}</span>
+            )}
+          </div>
         )}
         {due.map((b) => {
           const late = daysBetween(b.due_date, today);

@@ -75,11 +75,12 @@ Build these with the version they belong to; the decisions above give the rules.
 | --- | --- | --- |
 | v0.7 | 10 | Red main buttons; yellow as accent only; destructive buttons outlined in red |
 | v0.7 | 7, 11 | Locked boroughs: dashed red outline; tapping opens a mini-map sheet with a Lola teaser and borough-specific copy |
-| v0.7 | 43 to 46 | Creator: name field, Presenting as (cosmetic only), four body types per presentation, free basic headwear first (premium hats in the Shop), garment choices with colors, a Monzo-style starting-cash card |
+| v0.7 | 43 to 46 | Creator: name field, Presenting as (cosmetic only), four body types per presentation, free basic headwear first (premium hats in the Shop), garment choices with colors, a Monument Valley starting-cash card (owner, Oct 13; replaced the Monzo-style card) |
 | v0.7 | 25, 39 | Avatar-head bubble left of the stats panel, opening the full profile with public net worth |
 | v0.7 | 14 | Stats panel starts collapsed; one suggested action per stat when open (cheapest open place first, never real money); high Confidence points to pro gigs |
 | v0.7 | 24 | Your Look as a dressing room (avatar on stage, items by category, try-on with Save look); "Try it on" in the Shop. Your Look shows only what you own, your starter pieces and the free headwear; Shop pieces stay in the Shop (owner, Oct 13). Depends on #15 |
 | v0.7 | 40 | Collection redesign: real art in every state, foil, flip and serial number when owned, set progress bars, tabs for postcards, hunt cards and event cards. "Collect the postcard" shows a dulled preview of the actual card. Serial numbers count copies in the order players collected them ("No. 0042" is the 42nd), and an Events tab keeps exclusive party tickets after the party ends (owner, Oct 13). The Collection also gets its own app on the phone home screen (owner, Oct 13) |
+| v0.7 | 6, 20, 21, 28, 29, 31, 34, 35 | Bug fixes: every place card shows its art with the title clear of the close button (#6, live since v0.6); no event copy promises a crowd size (#20); Bills has a real empty state with the next bill (#21); the Bank opens on the virtual dusk card with the balance and this week's in and out (#28); every transaction says where and what (#29); clothes show their own garment shape and color, and the gold chain and electric coupe get the right icons (#31); the phone's status bar uses drawn signal and battery icons (#34). The phone home screen keeps its current layout (#35, owner, Oct 13) |
 | v0.8 | 4 | Travel: "Go there," transport modes with distance costs, skippable trip view, personal timers |
 | v0.8 | 3, 26, 27 | Venue drinks and snacks; Nap and Sit at home, capped per day |
 | v0.8 | 23 | Weekly rent; re-tune starting cash, rent and income together |

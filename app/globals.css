@@ -1039,3 +1039,15 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .collection-tabs .chip { justify-content:center; padding:0 8px; font-size:13px; white-space:nowrap; min-width:0; }
 .event-ticket .card-serial { top:auto; bottom:8px; }
 .collection-tabs .chip { font-size:12.5px; padding:0 6px; gap:4px; }
+
+/* ===================== v0.7 step 6: Bank card, Bills, transactions ===================== */
+.cash-card-balance { position:absolute; left:20px; top:44px; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-weight:500; font-size:30px; letter-spacing:-.01em; color:#7A2F33; font-variant-numeric:tabular-nums; }
+.bank-week { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.bank-week span { padding:10px 12px; border-radius:14px; background:#fff; box-shadow:inset 0 0 0 1px var(--divider); font-size:12.5px; color:var(--text-3); }
+.bank-week b { display:block; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+.ledger-row .ledger-emoji { width:34px; height:34px; flex:none; display:grid; place-items:center; border-radius:10px; background:var(--surface-card); font-size:17px; }
+.bills-empty { display:flex; flex-direction:column; align-items:center; gap:8px; padding:22px 16px; border-radius:var(--r-lg); background:#fff; box-shadow:inset 0 0 0 1px var(--divider); text-align:center; }
+.bills-empty-icon { width:56px; height:56px; display:grid; place-items:center; border-radius:18px; background:#E3F5EC; font-size:28px; }
+.phone-status-icons { display:inline-flex; align-items:center; gap:6px; }
+.ledger-row:has(.ledger-emoji) { gap:12px; }
