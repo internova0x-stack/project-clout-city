@@ -29,14 +29,14 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
   return {
     player: {
       id: "preview", bank_cash: 5450, clout: 850, energy: 80, mood: 60, confidence: 55, home_id: "astoria_studio",
-      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 30), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, fridge_meals: 4, ...overrides,
+      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 5), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, fridge_meals: 4, ...overrides,
     },
     today,
     tasks,
     gigs: [gig(101, "side", 0, 480, 38, 60, 0), gig(102, "side", 3, 420, 38, 60, 0), gig(103, "pro", 0, 1080, 50, 120, 50), gig(104, "big", 1, 2100, 75, 240, 80)],
     bills: [
       { id: 201, kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: today, status: "due", paid_at: null },
-      { id: 200, kind: "rent", amount: 2100, due_date: addDays(today, -27), status: "paid", paid_at: new Date().toISOString() },
+      { id: 200, kind: "rent", amount: 600, due_date: addDays(today, -4), status: "paid", paid_at: new Date().toISOString() },
     ],
     items: [{ id: 301, sku: "fit-bucket-hat", category: "fashion", value: 55, acquired: "bought", equipped: true }],
     visitsToday: { "flushing-meadows": 1 },

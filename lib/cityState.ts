@@ -288,9 +288,15 @@ export function upcomingBills(s: CityState): UpcomingBill[] {
   return out.sort((a, b) => a.due_date.localeCompare(b.due_date));
 }
 
+/** Days between bills ("7 days" in config since v0.8; "1 month" reads as 30). */
+export function billPeriodDays(): number {
+  const [n, unit] = CITY_ECONOMY.bills.every.split(" ");
+  return Number(n) * (unit.startsWith("month") ? 30 : unit.startsWith("week") ? 7 : 1);
+}
+
 /** How far through its billing period a coming bill is, 0 (just paid) to 1 (due today). */
 export function billProgress(b: UpcomingBill, today: string): number {
-  const period = b.kind === "car_rental" ? CITY_ECONOMY.bills.carRentalDays : 30;
+  const period = b.kind === "car_rental" ? CITY_ECONOMY.bills.carRentalDays : billPeriodDays();
   const left = daysBetween(today, b.due_date);
   return Math.min(1, Math.max(0, 1 - left / period));
 }

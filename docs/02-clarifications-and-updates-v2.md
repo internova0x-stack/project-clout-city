@@ -18,7 +18,7 @@ New players land on the map as guests and are only asked to sign up once they in
 | 2 | Sign-up / log-in | Screen (modal) | Sign-up and log-in options over the map (email or Google); players confirm they're 18 or older | Completing it goes straight to character creation |
 | 3a | Look | Screen | The avatar on stage, with name, body, hair, face, glasses and covering options, plus a row of eight starting styles | Every selection renders on the avatar instantly. The chosen style sets the starter outfit |
 | 3b | Traits | Screen | Two-column trait cards | The player picks 2. "Continue" stays disabled until 2 are chosen, and the header copy flips to a success line. In P1, traits are flavor only, with no gameplay effect |
-| 3c | Birth lottery | Screen | A dice tile and a "Roll the dice" button, then a reveal card | Rolled once per account. Rolls starting cash between $6,000 and $10,000 |
+| 3c | Birth lottery | Screen | A dice tile and a "Roll the dice" button, then a reveal card | Rolled once per account. Rolls starting cash between $3,000 and $6,000 (v0.8; was $6,000 to $10,000) |
 | 3d | Home | Screen | Queens apartments, each with its rent | Single choice. Homes whose first rent would leave less than the phone bill plus the party's entry price are disabled. "Move in" pays the first rent and drops the player onto the home map |
 | 4 | Welcome | Screen (modal) | The welcome message | "Let's go" starts the tooltips. "Skip tour" goes straight to the home map, with the first task waiting in Tasks |
 | 5 | Tutorial 1: Clout Score | Tooltip | A tooltip on the flame | The rest of the screen dims. "Next" advances |
@@ -75,7 +75,7 @@ Test the teasing button labels ("bold of you," "lonely, but okay") first; they a
 - **Skipping.** Players can skip the tutorial. The first task then waits for them in Tasks.
 - **Cancelled share sheet.** Cancelling the share sheet at step 10 doesn't stop the player from attending the party, and attending still completes the task.
 - **No rivals in P1.** The rival intro is removed from character creation.
-- **Starting cash rule.** The minimum lottery roll ($6,000) always covers the cheapest home's first rent, the phone bill and the party's entry price.
+- **Starting cash rule.** The minimum lottery roll ($3,000 since v0.8) always covers the cheapest home's first rent, the phone bill and the party's entry price.
 
 ## 2. Home screen and HUD
 
@@ -456,10 +456,10 @@ Gigs are rarer, bigger-paying jobs, and the main way to afford upgrades like a c
 
 ### Missed rent
 
-**Update (Oct 13, 2026, replacing the Oct 12 monthly billing):** rent and **all bills are weekly** (rent, phone, car insurance and car rental), re-tuned with starting cash and income in v0.8. Until v0.8 ships, the build still bills monthly (Oct 12 rule): Gig pay was raised (table above) so 1 to 2 gigs cover a month's rent on the cheapest home.
+**Update (Oct 13, 2026, replacing the Oct 12 monthly billing; built in v0.8 step 4, migration 0028):** rent and **all bills are weekly**, every 7 days from the day each starts. Rent is C$600 (Astoria studio), C$900 (Jackson Heights 1BR) and C$1,600 (LIC high-rise) a week; the phone is C$25 a week; car insurance is 0.5% of the car's price a week; car rentals were already weekly. The birth lottery is C$3,000 to C$6,000, so even the lowest roll covers a first week in any home. Gig pay is unchanged: a side gig is about a week in the studio, a pro gig a week in the 1BR, a big break a week in the high-rise. Existing players keep their next due dates and are billed weekly from then on.
 
 
-When rent is due and the bank balance can't cover it, the player gets a grace period (default 3 days) with a pin on Bills. After that, Mood drops. If rent is still unpaid after 7 days, the player moves to the cheapest Queens home: the new rent starts, and no possessions are lost. Both periods are configurable.
+When rent is due and the bank balance can't cover it, the player gets a grace period (2 days since v0.8) with a pin on Bills. After that, Mood drops. If rent is still unpaid after 6 days (before the next week's rent), the player moves to the cheapest Queens home: the new rent starts, and no possessions are lost. Both periods are configurable.
 
 ### Clout in P1
 

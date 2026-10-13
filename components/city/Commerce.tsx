@@ -74,7 +74,7 @@ export function ShopSheet({
             ))}
           </div>
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
-          {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a month in insurance. Rentals bill weekly.</p>}
+          {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
           <div className="item-grid">
             {items.map((item) => {
               const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
@@ -314,7 +314,7 @@ export function BillsSheet({
           <div className="bills-empty" role="status">
             <span className="bills-empty-icon" aria-hidden="true">✅</span>
             <span className="title">All paid up</span>
-            <span className="subtext">&ldquo;Nothing due. Savor it, babe; in New York this feeling lasts about a month.&rdquo; Lola</span>
+            <span className="subtext">&ldquo;Nothing due. Savor it, babe; in New York this feeling lasts about a week.&rdquo; Lola</span>
             {upcoming[0] && (
               <span className="meta">Next: {BILL_LABEL[upcoming[0].kind]} · {formatCash(upcoming[0].amount)} on {billDate(upcoming[0].due_date)}</span>
             )}
@@ -352,6 +352,13 @@ export function BillsSheet({
                 </span>
               </div>
             ))}
+          </div>
+        )}
+        {upcoming.length > 0 && (
+          // v0.8 (#23): everything bills weekly, so one number says what a week of living costs.
+          <div className="bills-week">
+            <b>{formatCash(upcoming.reduce((a, b) => a + b.amount, 0))} a week</b>
+            <span className="meta">{upcoming.map((b) => BILL_LABEL[b.kind].split(" ").slice(1).join(" ").toLowerCase()).join(", ")}. A side gig or two covers it.</span>
           </div>
         )}
         <p className="meta" style={{ margin: 0 }}>

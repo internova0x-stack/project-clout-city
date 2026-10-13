@@ -23,12 +23,15 @@ export const CITY_ECONOMY = {
   /** Each purchase's clout is this fraction of the previous one's (diminishing returns). */
   purchaseCloutDecay: 0.85,
   /**
-   * Rent, the phone bill and car insurance bill monthly (same day each month, as Postgres
-   * intervals); car rentals bill weekly. Insurance is a share of the car's price per month.
+   * Everything bills weekly (v0.8, #23; owner Oct 13): rent, the phone bill, car insurance and car
+   * rentals, every 7 days from the day they start. Insurance is a share of the car's price per week.
+   * Missed rent: 2 days' grace, then Mood drops daily, then a move to the cheapest home after 6 days
+   * (before the next week's rent arrives).
    */
-  bills: { every: "1 month", carRentalDays: 7, phone: 85, graceDays: 3, moodDropPerDay: 8, evictAfterDays: 7, carInsuranceRate: 0.02 },
+  bills: { every: "7 days", carRentalDays: 7, phone: 25, graceDays: 2, moodDropPerDay: 8, evictAfterDays: 6, carInsuranceRate: 0.005 },
   gigs: {
-    // Pay is a multiple of shiftRate. Tuned so 1 to 2 gigs cover a month's rent on the cheapest home ($2,100).
+    // Pay is a multiple of shiftRate. With weekly rent (v0.8): a side gig is about a week in the studio
+    // (C$600), a pro gig a week in the 1BR, a big break a week in the high-rise.
     // Clout (v0.7, owner Oct 13): pro gigs and big breaks also need a reputation, not just a good mood.
     side: { confidence: 0, clout: 0, chance: 0.9, payMin: 3, payMax: 5, energy: 1.5, waitMinutes: 60 },
     pro: { confidence: 50, clout: 500, chance: 0.5, payMin: 8, payMax: 10, energy: 2, waitMinutes: 120 },
@@ -440,7 +443,7 @@ export const PLACES: Place[] = [
     id: "astoria-blvd-station", name: "Astoria Blvd station", emoji: "🚇", category: "places", neighborhood: "Astoria",
     at: [40.7702, -73.9180], depth: "scene", palette: ["#FFC21A", "#E6E8EC", "#1F1B26"],
     tags: ["subway", "transit", "free", "astoria"],
-    lore: "An elevated platform with a view of everyone's laundry. The train is always \"two stops away.\" Rides across the city arrive with travel, coming soon.",
+    lore: "An elevated platform with a view of everyone's laundry. The train is always \"two stops away.\" Pick the subway in \"Go there\" and it gets you anywhere for C$3, eventually.",
     actions: [
       { id: "platform", kind: "visit", label: "People-watch on the platform", energy: 2, mood: 2, blurb: "A man is eating a full rotisserie chicken. Respect." },
     ],

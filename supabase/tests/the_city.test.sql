@@ -43,7 +43,7 @@ set role authenticated;
 -- Day 0: syncing makes five daily tasks and starts the weekly bills.
 select 1 from public.sync_player();
 select pg_temp.assert((select count(*) from public.daily_tasks) = 5, 'five daily tasks');
-select pg_temp.assert((select next_rent_due = (public.ny_today() + interval '1 month')::date from public.players where display_name = 'Gus'), 'rent due in a month');
+select pg_temp.assert((select next_rent_due = public.ny_today() + 7 from public.players where display_name = 'Gus'), 'rent due in a week (v0.8)');
 select next_rent_due - public.ny_today() as rent_in from public.players where display_name = 'Gus' \gset
 
 -- Eating: clout once a day per place, by price; Energy restored; cash every time.
@@ -150,38 +150,34 @@ end $$;
 select 1 from public.buy_item('car-hatchback', 'rent');
 select pg_temp.assert((select car_mode = 'rented' from public.players where display_name = 'Gus'), 'renting a car');
 
--- One week later: only the weekly car rental is due.
-select 1 from public.dev_set_clock_offset(7 * 24);
-select 1 from public.sync_player();
-select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'car_rental'), 'car rental due weekly');
-select pg_temp.assert((select count(*) = 0 from public.bills where kind in ('rent', 'phone')), 'no rent or phone bill after a week');
-
--- A month in: rent and the phone bill come due; pay the phone, skip rent.
+-- A week in (v0.8, everything weekly): rent, the phone bill and the car rental come due.
 select 1 from public.dev_set_clock_offset(:rent_in * 24);
 select 1 from public.sync_player();
-select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'rent' and amount = 3200), 'monthly rent due');
+select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'car_rental'), 'car rental due weekly');
+select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'rent' and amount = 900), 'weekly rent due');
+select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'phone' and amount = 25), 'weekly phone bill');
 select id as phone_bill from public.bills where kind = 'phone' \gset
 select 1 from public.pay_bill(:phone_bill);
 select 1 from public.pay_bill(:phone_bill);
 select pg_temp.assert((select count(*) = 1 from public.ledger where kind = 'bill_phone'), 'phone paid once');
-select pg_temp.assert((select next_rent_due = (public.ny_today() + interval '1 month')::date from public.players where display_name = 'Gus'), 'next rent a month later');
+select pg_temp.assert((select next_rent_due = public.ny_today() + 7 from public.players where display_name = 'Gus'), 'next rent a week later');
 select mood as mood_due from public.players where display_name = 'Gus' \gset
 
--- Within the grace period: no penalty. Four days late: Mood drops once.
-select 1 from public.dev_set_clock_offset((:rent_in + 3) * 24);
+-- Within the grace period (2 days): no penalty. Three days late: Mood drops once.
+select 1 from public.dev_set_clock_offset((:rent_in + 2) * 24);
 select 1 from public.sync_player();
 select pg_temp.assert((select mood = :mood_due from public.players where display_name = 'Gus'), 'no penalty in grace');
-select 1 from public.dev_set_clock_offset((:rent_in + 4) * 24);
+select 1 from public.dev_set_clock_offset((:rent_in + 3) * 24);
 select 1 from public.sync_player();
 select 1 from public.sync_player();
 select pg_temp.assert((select mood = :mood_due - 8 from public.players where display_name = 'Gus'), 'mood drops 8 after grace');
 
--- A week late: moved to the cheapest home, old rent forgiven, a new rent bill.
-select 1 from public.dev_set_clock_offset((:rent_in + 7) * 24);
+-- Six days late (before next week's rent): moved to the cheapest home, old rent forgiven, a new rent bill.
+select 1 from public.dev_set_clock_offset((:rent_in + 6) * 24);
 select 1 from public.sync_player();
 select pg_temp.assert((select home_id = 'astoria_studio' from public.players where display_name = 'Gus'), 'evicted to cheapest home');
-select pg_temp.assert((select count(*) = 1 from public.bills where kind = 'rent' and status = 'due' and amount = 2100), 'new rent bill');
-select pg_temp.assert((select next_rent_due = (public.ny_today() + interval '1 month')::date from public.players where display_name = 'Gus'), 'new rent monthly');
+select pg_temp.assert((select count(*) = 1 from public.bills where kind = 'rent' and status = 'due' and amount = 600), 'new rent bill');
+select pg_temp.assert((select next_rent_due = public.ny_today() + 7 from public.players where display_name = 'Gus'), 'new rent weekly');
 
 -- Clout never moved without a ledger row.
 reset role;

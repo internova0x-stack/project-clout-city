@@ -1100,3 +1100,8 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .fridge-meter { display:flex; gap:4px; margin-top:6px; }
 .fridge-meter i { flex:1; max-width:18px; height:8px; border-radius:4px; background:var(--chip-off); }
 .fridge-meter i.on { background:var(--green-500); }
+
+/* v0.8 Bills: what a week of living costs */
+.bills-week { padding:12px 14px; border-radius:18px; background:var(--surface-raised); }
+.bills-week b { display:block; font-size:16px; color:var(--text-1); }
+.bills-week .meta { display:block; margin-top:2px; }
