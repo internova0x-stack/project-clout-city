@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CITY_ECONOMY, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type ShopCategory, type ShopItem } from "@/lib/city";
-import { billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem } from "@/lib/cityState";
+import { billProgress, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
@@ -349,12 +349,17 @@ export function BillsSheet({
           <div>
             <p className="overline" style={{ margin: "0 0 4px" }}>Coming up</p>
             {upcoming.map((b) => (
-              <div key={b.kind} className="ledger-row">
-                <span>
+              <div key={b.kind} className="ledger-row bill-upcoming">
+                <span style={{ flex: 1, minWidth: 0 }}>
                   <span className="title" style={{ display: "block", fontSize: 15 }}>{BILL_LABEL[b.kind]}</span>
                   <span className="meta">{billDate(b.due_date)} · {billStatusLine({ ...b, id: 0, status: "due", paid_at: null }, today)}</span>
                 </span>
                 <span className="body-strong tabular">{formatCash(b.amount)}</span>
+                {/* Fills as the due date gets closer: how much of this bill's period has gone by. */}
+                <span className="gig-progress bill-progress" role="progressbar" aria-label={`${BILL_LABEL[b.kind]}: how soon it's due`}
+                  aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(billProgress(b, today) * 100)}>
+                  <span style={{ width: `${Math.round(billProgress(b, today) * 100)}%` }} />
+                </span>
               </div>
             ))}
           </div>

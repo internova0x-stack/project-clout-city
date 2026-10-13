@@ -207,6 +207,13 @@ export function upcomingBills(s: CityState): UpcomingBill[] {
   return out.sort((a, b) => a.due_date.localeCompare(b.due_date));
 }
 
+/** How far through its billing period a coming bill is, 0 (just paid) to 1 (due today). */
+export function billProgress(b: UpcomingBill, today: string): number {
+  const period = b.kind === "car_rental" ? CITY_ECONOMY.bills.carRentalDays : 30;
+  const left = daysBetween(today, b.due_date);
+  return Math.min(1, Math.max(0, 1 - left / period));
+}
+
 export function dueBills(s: CityState): Bill[] {
   return s.bills.filter((b) => b.status === "due").sort((a, b) => a.due_date.localeCompare(b.due_date));
 }
