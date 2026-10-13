@@ -847,6 +847,7 @@ export function GameShell({
             busy={busy}
             initialCategory={shopCategory}
             onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))}
+            onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
           <PossessionsSheet
@@ -856,6 +857,7 @@ export function GameShell({
             style={me.starting_style}
             busy={busy}
             onSell={(id) => run(`sell:${id}`, () => cityApi.sellItem(id))}
+            onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
             onOpenCollection={catalog ? () => setPanel("collection") : undefined}
           />
           <CollectionSheet

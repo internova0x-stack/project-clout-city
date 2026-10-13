@@ -501,6 +501,10 @@ a { color:inherit; }
 .item-card { display:flex; flex-direction:column; gap:6px; background:var(--surface-card); border-radius:var(--r-lg); padding:14px; min-width:0; }
 .item-card .btn-sm { width:100%; margin-top:auto; }
 .item-card .tag { align-self:flex-start; }
+/* #37: Buy and Rent sit 8 pt apart, with Rent visibly secondary. */
+.item-card .buy-rent { display:flex; flex-direction:column; gap:8px; margin-top:auto; }
+.item-card .buy-rent .btn-sm { margin-top:0; white-space:nowrap; }
+.item-card .buy-rent .btn-secondary { font-size:14px; padding-left:8px; padding-right:8px; }
 .owned-chip { display:flex; align-items:center; justify-content:center; height:40px; border-radius:var(--r-sm); background:var(--chip-off); color:var(--text-2); font-weight:600; font-size:14px; margin-top:auto; }
 @media (max-width:340px) { .item-grid { grid-template-columns:1fr; } }
 

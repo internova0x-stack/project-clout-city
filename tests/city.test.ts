@@ -130,3 +130,7 @@ test("a coming bill's bar fills as its due date nears", () => {
   assert.equal(billProgress({ kind: "rent", amount: 2100, due_date: "2026-10-28" }, today), 0.5);
   assert.equal(billProgress({ kind: "car_rental", amount: 350, due_date: "2026-10-13" }, today), 1);
 });
+
+test("every piece of clothing in the Shop can be worn, real-cash pieces included (#15)", () => {
+  for (const i of SHOP_ITEMS.filter((x) => x.category === "fashion")) assert.ok(i.wear, i.sku);
+});
