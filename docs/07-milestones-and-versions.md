@@ -202,9 +202,9 @@ The finished P1: real art in place, outside reviews done, then a soft launch fol
 
 **In scope**
 
-- Real art swapped in for everything released so far: the 3D avatar and outfits, location illustrations, interiors, postcards, the logo and icon. Location wave 4 ships here or as post-launch content drops.
+- Real art swapped in for everything released so far: location illustrations, postcards, the logo and icon, and card art. All art is AI-generated (owner, Oct 13), from one style test approved first; the 3D avatar, outfits and rooms stay code-built for low-end phones. Location wave 4 ships here or as post-launch content drops.
 - Performance work for low-end Android.
-- The security review and its fixes; lawyer-reviewed terms, privacy policy and 18+ wording; monument name checks; Stripe Tax settings.
+- The security review and its fixes; lawyer-reviewed terms, privacy policy and 18+ wording (including the lotto as simulated gambling); Stripe Tax settings. Monument names are decided (owner, Oct 13): the real landmark names stay (The Unisphere, Gantry Plaza).
 - Stripe live mode, confirmed with one real $0.99 purchase and refund.
 - Every acceptance test in the Story Production and Payments Brief, and the full Sarah Bird dry run.
 
