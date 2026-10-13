@@ -33,7 +33,7 @@ components live in `app/globals.css`.
 - `/preview/creator?step=0-3` and `/preview/home?state=new` walk the creator and the
   first session with sample data (development only). `/preview/home` runs the city on an
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
-  `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight` starts crushes and
+  `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 

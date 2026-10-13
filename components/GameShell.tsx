@@ -940,6 +940,8 @@ export function GameShell({
             api={dating}
             onClose={() => setDateSpot(null)}
             onSent={(text) => { setDateSpot(null); setToast(text); void loadInbox(); }}
+            onInviteFriend={() => { setDateSpot(null); setPlace(null); setPanel("invite"); }}
+            onCrushInvite={() => { setDateSpot(null); setPlace(null); setPanel("crushInvite"); }}
           />
           <InviteSheet
             open={panel === "crushInvite"}

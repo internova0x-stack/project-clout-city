@@ -39,6 +39,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
       confidence: player.confidence,
       home_id: player.home_id,
       next_rent_due: player.next_rent_due,
+      next_phone_due: player.next_phone_due ?? null,
+      next_car_due: player.next_car_due ?? null,
       house_sku: player.house_sku,
       car_sku: player.car_sku,
       car_mode: player.car_mode,

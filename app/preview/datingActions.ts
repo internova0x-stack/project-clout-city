@@ -44,9 +44,12 @@ function settle(d: Row) {
   if (d.status === "accepted" && d.hostWent && d.guestWent) d.paid = true;
 }
 
-/** ?dating=match starts with an unseen "It's mutual"; ?dating=invite with a date invite waiting; ?dating=tonight with one in progress. */
+/** ?dating=alone has nobody to ask; ?dating=match starts with an unseen "It's mutual"; ?dating=invite with a date invite waiting; ?dating=tonight with one in progress. */
+let alone = false;
 export async function previewDatingReset(preset: string | undefined) {
   s = fresh();
+  // ?dating=alone: no crew and no chats yet, so "Make it a date" has nobody to ask (#5).
+  alone = preset === "alone";
   if (preset === "match" || preset === "tonight") s.crushes.add(ME + ">p-tasha");
   if (preset === "invite") s.dates.push({ id: s.nextId++, host: "p-marco", guest: ME, kind: "place", target: "altitude-718", status: "pending", hostWent: true, guestWent: false, paid: false });
   if (preset === "tonight") {
@@ -92,6 +95,7 @@ export async function previewMatchSeen(id: string) {
   return ok(null);
 }
 export async function previewDateCandidates() {
+  if (alone) return ok<DateCandidate[]>([]);
   const list: DateCandidate[] = [...CONNECTED].map((id) => ({ id, ...PEOPLE[id], matched: matched(id), crush: has(ME, id) }));
   return ok(list.sort((a, b) => Number(b.matched) - Number(a.matched) || a.name.localeCompare(b.name)));
 }

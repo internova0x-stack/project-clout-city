@@ -28,7 +28,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
   return {
     player: {
       id: "preview", bank_cash: 5450, clout: 850, energy: 80, mood: 60, confidence: 55, home_id: "astoria_studio",
-      next_rent_due: addDays(today, 3), house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, ...overrides,
+      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 30), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, ...overrides,
     },
     today,
     tasks,
@@ -166,7 +166,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
         p().clout += clout;
         s.items.push({ id: nextId++, sku, category: item.category, value: item.price, acquired: "bought", equipped: false });
       }
-      if (item.category === "cars") { p().car_sku = sku; p().car_mode = mode === "rent" ? "rented" : "owned"; }
+      if (item.category === "cars") { p().car_sku = sku; p().car_mode = mode === "rent" ? "rented" : "owned"; p().next_car_due = addDays(s.today, mode === "rent" ? 7 : 30); }
       if (item.category === "houses") { p().house_sku = sku; p().next_rent_due = null; }
       return ok({ cash: -price, clout });
     },
@@ -177,7 +177,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const amount = sellPrice(it.value);
       s.items = s.items.filter((i) => i.id !== itemId);
       p().bank_cash += amount;
-      if (it.category === "cars") { p().car_sku = null; p().car_mode = null; }
+      if (it.category === "cars") { p().car_sku = null; p().car_mode = null; p().next_car_due = null; }
       if (it.category === "houses") { p().house_sku = null; p().next_rent_due = addDays(s.today, 30); }
       return ok({ cash: amount });
     },

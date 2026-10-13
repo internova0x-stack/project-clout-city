@@ -129,11 +129,14 @@ export function DateStatusRow({ me, date, bonus, onCancel }: {
 }
 
 /** C41 sending: pick a crush or a friend for this spot tonight. */
-export function DateSheet({ spot, api, onClose, onSent }: {
+export function DateSheet({ spot, api, onClose, onSent, onInviteFriend, onCrushInvite }: {
   spot: { kind: "place" | "event"; target: string; price: number } | null;
   api: DatingApi;
   onClose: () => void;
   onSent: (text: string) => void;
+  /** #5: with nobody to ask, the sheet offers these instead of a dead end. */
+  onInviteFriend: () => void;
+  onCrushInvite: () => void;
 }) {
   const [people, setPeople] = useState<DateCandidate[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -168,7 +171,7 @@ export function DateSheet({ spot, api, onClose, onSent }: {
         {people?.length === 0 && (
           <div className="card stack-4">
             <p className="overline" style={{ margin: 0 }}>Nobody to ask yet</p>
-            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with.</p>
+            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with. Invite a friend to your crew, or send your crush an invite to Clout City.</p>
           </div>
         )}
         <div className="stack-8">
@@ -183,6 +186,12 @@ export function DateSheet({ spot, api, onClose, onSent }: {
             </button>
           ))}
         </div>
+        {people?.length === 0 && (
+          <div className="sheet-cta stack-8">
+            <button className="btn btn-taxi" onClick={onInviteFriend}>Invite a friend</button>
+            <button className="btn btn-secondary" onClick={onCrushInvite}>💌 Send a crush invite</button>
+          </div>
+        )}
       </div>
     </Sheet>
   );

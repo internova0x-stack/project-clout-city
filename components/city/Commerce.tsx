@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CITY_ECONOMY, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type ShopCategory, type ShopItem } from "@/lib/city";
-import { billStatusLine, daysBetween, dueBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem } from "@/lib/cityState";
+import { billProgress, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
@@ -311,8 +311,9 @@ export function LookSheet({
 }
 
 // ---------------------------------------------------------------------------
-// Bills: monthly rent, phone and car insurance; weekly car rental. Protected from stories.
+// Bills: what's due now and what's coming up, each with its amount and date (#22).
 // ---------------------------------------------------------------------------
+const billDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 const BILL_LABEL: Record<Bill["kind"], string> = { rent: "🏠 Rent", phone: "📱 Phone", car_rental: "🚗 Car rental", car_insurance: "🛡️ Car insurance" };
 
 export function BillsSheet({
@@ -321,7 +322,7 @@ export function BillsSheet({
   const due = dueBills(state);
   const paid = state.bills.filter((b) => b.status !== "due").slice(0, 8);
   const { player, today } = state;
-  const nextRent = player.next_rent_due;
+  const upcoming = upcomingBills(state);
   return (
     <Sheet open={open} onClose={onClose} label="Bills">
       <div className="stack-16">
@@ -336,7 +337,7 @@ export function BillsSheet({
             <div key={b.id} className={`bill-card${late > CITY_ECONOMY.bills.graceDays && b.kind === "rent" ? " overdue" : late > 0 ? " late" : ""}`}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <span className="title" style={{ display: "block" }}>{BILL_LABEL[b.kind]}</span>
-                <span className="meta">{billStatusLine(b, today)}</span>
+                <span className="meta">{formatCash(b.amount)} · {billDate(b.due_date)} · {billStatusLine(b, today)}</span>
               </div>
               <button className="btn btn-taxi btn-sm" disabled={short || busy !== null} onClick={() => onPay(b.id)}>
                 {busy === `bill:${b.id}` ? "…" : `Pay ${formatCash(b.amount)}`}
@@ -344,9 +345,28 @@ export function BillsSheet({
             </div>
           );
         })}
+        {upcoming.length > 0 && (
+          <div>
+            <p className="overline" style={{ margin: "0 0 4px" }}>Coming up</p>
+            {upcoming.map((b) => (
+              <div key={b.kind} className="ledger-row bill-upcoming">
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="title" style={{ display: "block", fontSize: 15 }}>{BILL_LABEL[b.kind]}</span>
+                  <span className="meta">{billDate(b.due_date)} · {billStatusLine({ ...b, id: 0, status: "due", paid_at: null }, today)}</span>
+                </span>
+                <span className="body-strong tabular">{formatCash(b.amount)}</span>
+                {/* Fills as the due date gets closer: how much of this bill's period has gone by. */}
+                <span className="gig-progress bill-progress" role="progressbar" aria-label={`${BILL_LABEL[b.kind]}: how soon it's due`}
+                  aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(billProgress(b, today) * 100)}>
+                  <span style={{ width: `${Math.round(billProgress(b, today) * 100)}%` }} />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         <p className="meta" style={{ margin: 0 }}>
-          {player.house_sku ? "You own your home: no rent." : nextRent ? `Next rent bill: ${new Date(`${nextRent}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}.` : ""}
-          {" "}Miss rent and you get {CITY_ECONOMY.bills.graceDays} days of grace, then Mood drops daily; after {CITY_ECONOMY.bills.evictAfterDays} days you move to the cheapest studio.
+          {player.house_sku ? "You own your home: no rent. " : ""}
+          Miss rent and you get {CITY_ECONOMY.bills.graceDays} days of grace, then Mood drops daily; after {CITY_ECONOMY.bills.evictAfterDays} days you move to the cheapest studio.
         </p>
         {paid.length > 0 && (
           <div>

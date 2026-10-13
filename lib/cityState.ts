@@ -5,6 +5,7 @@
 // Dependency-free so tests can import it.
 
 import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
+import { ECONOMY } from "./economy.ts";
 
 export interface CityPlayer {
   id: string;
@@ -15,6 +16,9 @@ export interface CityPlayer {
   confidence: number;
   home_id: string | null;
   next_rent_due: string | null;
+  /** When the next phone and car bills are issued (sync_player); missing in older rows. */
+  next_phone_due?: string | null;
+  next_car_due?: string | null;
   house_sku: string | null;
   car_sku: string | null;
   car_mode: "owned" | "rented" | null;
@@ -183,6 +187,31 @@ export function activeGig(s: CityState): GigOffer | undefined {
 
 export function gigReady(g: GigOffer, nowMs: number): boolean {
   return !!g.ready_at && new Date(g.ready_at).getTime() <= nowMs;
+}
+
+export interface UpcomingBill { kind: Bill["kind"]; amount: number; due_date: string }
+
+/** The next bill of each kind that isn't issued yet, with its amount and date (#22), soonest first. */
+export function upcomingBills(s: CityState): UpcomingBill[] {
+  const p = s.player;
+  const out: UpcomingBill[] = [];
+  const rent = ECONOMY.homes.find((h) => h.id === p.home_id)?.rent;
+  if (!p.house_sku && p.next_rent_due && rent) out.push({ kind: "rent", amount: rent, due_date: p.next_rent_due });
+  if (p.next_phone_due) out.push({ kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: p.next_phone_due });
+  const car = p.car_sku ? itemBySku(p.car_sku) : undefined;
+  if (car && p.next_car_due) {
+    out.push(p.car_mode === "rented"
+      ? { kind: "car_rental", amount: car.rentPerWeek ?? 0, due_date: p.next_car_due }
+      : { kind: "car_insurance", amount: Math.ceil(car.price * CITY_ECONOMY.bills.carInsuranceRate), due_date: p.next_car_due });
+  }
+  return out.sort((a, b) => a.due_date.localeCompare(b.due_date));
+}
+
+/** How far through its billing period a coming bill is, 0 (just paid) to 1 (due today). */
+export function billProgress(b: UpcomingBill, today: string): number {
+  const period = b.kind === "car_rental" ? CITY_ECONOMY.bills.carRentalDays : 30;
+  const left = daysBetween(today, b.due_date);
+  return Math.min(1, Math.max(0, 1 - left / period));
 }
 
 export function dueBills(s: CityState): Bill[] {
