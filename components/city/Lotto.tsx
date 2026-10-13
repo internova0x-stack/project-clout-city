@@ -4,10 +4,11 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from "re
 import { CITY_ECONOMY } from "@/lib/city";
 import type { CityState } from "@/lib/cityState";
 import {
-  LOTTO_GAMES, bennyLine, buyCardAvailability, freeCardAvailability, lottoGame, lottoOdds, oneInLine, prizeTable, topPrize,
+  LOTTO_GAMES, bennyLine, jackpotLine, type LottoDraw, buyCardAvailability, freeCardAvailability, lottoGame, lottoOdds, oneInLine, prizeTable, topPrize,
   type LottoCard, type LottoGame, type LottoState,
 } from "@/lib/lotto";
-import { localDate } from "@/lib/localTime";
+import { localDate, nextNyMonday, nyMidnightLine } from "@/lib/localTime";
+import { handle } from "@/lib/validation";
 import { Sheet } from "../Sheet";
 import { formatCash } from "@/lib/economy";
 
@@ -64,6 +65,7 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
               <button className="btn btn-night btn-sm" onClick={() => setCard({ id: resume.id, game: resume.game })}>Scratch</button>
             </div>
           )}
+          <JackpotStrip lotto={lotto} nowMs={Date.now() + state.clockOffsetSeconds * 1000} />
           {lotto.beginnerUntil && (
             <div className="reason-banner info">🍀 <span><b>Beginner&apos;s luck:</b> an extra free card every day until {localDate(lotto.beginnerUntil)}.</span></div>
           )}
@@ -72,6 +74,41 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
         </div>
       )}
     </Sheet>
+  );
+}
+
+/** This week's jackpot: the pot so far, when it's drawn, my entries and last week's winner. */
+function JackpotStrip({ lotto, nowMs }: { lotto: LottoState; nowMs: number }) {
+  const when = nyMidnightLine(nextNyMonday(nowMs)).replace(/^Monday at midnight$/, "Sunday at midnight");
+  const last = lotto.draws?.[0];
+  return (
+    <div className="lotto-jackpot">
+      <span className="lotto-jackpot-star" aria-hidden="true">🌟</span>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <span className="lotto-jackpot-label">This week&apos;s jackpot</span>
+        <span className="lotto-jackpot-amount">{formatCash(lotto.week.pool)}</span>
+        <span className="lotto-jackpot-meta">
+          Drawn {when}{sameNy(when) ? " (New York)" : ""} · you have {lotto.week.entries} {lotto.week.entries === 1 ? "entry" : "entries"}
+        </span>
+        {last && (
+          <span className="lotto-jackpot-meta">
+            Last draw: {formatCash(last.pool)} to {last.mine ? "you 🎉" : last.winner ? handle(last.winner) : "a lucky Astorian"}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+const sameNy = (line: string) => line.endsWith("at midnight");
+
+/** Lola's jackpot card in the News (City tab). */
+export function JackpotNewsCard({ d }: { d: LottoDraw }) {
+  return (
+    <div className={`card stack-4 jackpot-news${d.mine ? " mine" : ""}`}>
+      <span className="tag tag-event" style={{ alignSelf: "flex-start" }}>🌟 Jackpot · Lola Lowdown</span>
+      <p className="display-sm" style={{ margin: 0 }}>{formatCash(d.pool)} at Lucky Star</p>
+      <p className="body" style={{ margin: 0 }}>{jackpotLine(d, handle(d.winner))}</p>
+    </div>
   );
 }
 
@@ -232,6 +269,7 @@ function OddsView({ game, onBack }: { game: LottoGame; onBack: () => void }) {
         <li>Any prize: {oneInLine(Number(odds.anyOneIn.toFixed(2)))}.</li>
         <li>On average a card pays back {Math.round(odds.payback * 1000) / 10}% of its price. The shop always wins; that&apos;s the point of a shop.</li>
         <li>Every game uses the same table: prizes are multiples of the card.</li>
+        <li>Every card, free or bought, is one entry in the weekly jackpot. It starts at {formatCash(CITY_ECONOMY.lotto.jackpot.seed)}, and {Math.round(CITY_ECONOMY.lotto.jackpot.cut * 100)}% of every bought card goes into it.</li>
         <li>The server draws each card&apos;s prize the moment you buy it. Scratching only uncovers it.</li>
         <li>No real money: cards cost C$, prizes are C$, and C$ can&apos;t be bought.</li>
       </ul>

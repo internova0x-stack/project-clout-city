@@ -66,3 +66,13 @@ test("the preview sim pays exactly what the card says, once", async () => {
   assert.equal((await sim.scratchLottoCard!(a.ok ? a.card!.id : 0)).ok, false, "one scratch per card");
   assert.equal((await sim.buyLottoCard!("lucky-star", "main-character", true)).ok, false, "the free card is the C$5 game");
 });
+
+test("Lola's jackpot card names the winner only when they allow it", async () => {
+  const { jackpotLine } = await import("../lib/lotto.ts");
+  const base = { week: "2026-10-05", pool: 6120, entries: 1840, drawnAt: "2026-10-12T04:00:00Z", mine: false };
+  assert.match(jackpotLine({ ...base, winner: "dana.vibes" }, "@dana.vibes"), /@dana\.vibes/);
+  const hidden = jackpotLine({ ...base, winner: null }, "@nobody");
+  assert.ok(!hidden.includes("@nobody") && /lucky Astorian/i.test(hidden), hidden);
+  assert.match(jackpotLine({ ...base, mine: true, winner: "me" }, "@me"), /^It's you/);
+  assert.match(jackpotLine({ ...base, winner: null }, ""), /C\$6,120/);
+});

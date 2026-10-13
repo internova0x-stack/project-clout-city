@@ -191,7 +191,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 **In scope** (owner, Oct 13; docs/08-new-features-spec.md sections 7 and 8): Lucky Star Lotto in Flushing with five scratch-card games, a full 3D shop and a weekly jackpot; neighborhood gossip with Listen in, the Tea app, Tea cards in the Collection and crew sharing.
 
 1. **Built:** Lucky Star Lotto: the place, Benny, the 3D shop, the card wheel, scratch cards drawn and paid by the server, the Bank's entries (migration 0032).
-2. The weekly jackpot draw, Lola's News card and the Jackpot badge.
+2. **Built:** the weekly jackpot draw, Lola's News card and the Jackpot badge (migration 0033).
 3. Gossip: the week file, its checks and Studio approval.
 4. Gossip in the game: Listen in, regular lines, the Tea app, the Collection tab, rewards and crew sharing.
 5. The first gossip week and doc updates.

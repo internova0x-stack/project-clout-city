@@ -26,7 +26,7 @@ import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
 import { KitchenSheet, RestSheet } from "./city/Rest";
 import { LottoSheet } from "./city/Lotto";
-import type { LottoCard } from "@/lib/lotto";
+import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
 import { formatMiles, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
@@ -1315,7 +1315,7 @@ export function GameShell({
         rank={myCard?.rank ?? null}
         netWorth={city ? netWorth(city) : me.bank_cash}
         badges={(feed?.badges ?? []).map((b) => {
-          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : null);
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : null);
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
         })}
         collections={{

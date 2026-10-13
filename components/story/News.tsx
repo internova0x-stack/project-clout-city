@@ -2,6 +2,8 @@
 
 import type { PartyMention } from "@/lib/party";
 import { SpottedCard } from "../city/Party";
+import { JackpotNewsCard } from "../city/Lotto";
+import type { LottoDraw } from "@/lib/lotto";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NEWS_KIND_LABEL, splitNews, type NewsItem } from "@/lib/news";
 import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
@@ -25,10 +27,12 @@ export interface NewsHandlers {
 /** v0.6 City News handed to the News app. */
 export interface CityNews { items: NewsItem[]; today: string; focus?: string | null }
 
-export function NewsApp({ feed, handlers, focusBeat, city, spotted = [] }: {
+export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [] }: {
   feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews;
   /** v0.9: "Spotted at" lines from parties the player went to (empty when they opted out). */
   spotted?: PartyMention[];
+  /** v0.10 (migration 0033): Lucky Star's last jackpot draws, for Lola's card in the City tab. */
+  jackpots?: LottoDraw[];
 }) {
   const storyLive = (feed?.arcs ?? []).some((a) => a.type === "main" && !a.finished);
   // Story and City are the feed's two tabs; the Archive opens from the header.
@@ -72,10 +76,11 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [] }: {
         </div>
       )}
       {tab === "city" ? (
-        cityNews.recent.length === 0 && spotted.length === 0 ? (
+        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 ? (
           <Quiet text="Slow news week. Even the celebrities are napping. Check back tomorrow." />
         ) : (
           <div className="stack-12">
+            {jackpots.slice(0, 1).map((d) => <JackpotNewsCard key={d.week} d={d} />)}
             {spotted.map((m) => <SpottedCard key={m.eventId} m={m} />)}
             {cityNews.recent.map((i) => <CityNewsCard key={i.id} item={i} today={city!.today} focus={city!.focus === i.id} />)}
           </div>

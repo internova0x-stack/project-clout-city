@@ -13,6 +13,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   }
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
+  // Migration 0033: draw any finished week's lotto jackpot (once; a no-op otherwise or before it runs).
+  await supabase.rpc("lotto_settle");
   const day = today as string;
   const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto] = await Promise.all([
     supabase.from("daily_tasks").select("id, slot, kind, place_id, action_id, reward, done_at").eq("ny_date", day).order("slot"),

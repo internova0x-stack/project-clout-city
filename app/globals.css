@@ -1213,3 +1213,11 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .lotto-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .lotto-details summary { cursor:pointer; font-size:14px; font-weight:600; color:var(--text-2); }
 .lotto-details .lotto-odds { margin-top:8px; }
+/* v0.10 step 2: the weekly jackpot, at the counter and in the News. */
+.lotto-jackpot { display:flex; gap:12px; align-items:center; padding:14px 16px; border-radius:var(--r-lg); background:var(--g-night-reveal); color:var(--text-on-dark); box-shadow:var(--elev-2); }
+.lotto-jackpot-star { font-size:30px; flex:none; }
+.lotto-jackpot-label { display:block; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,246,224,.7); }
+.lotto-jackpot-amount { display:block; margin:2px 0; font-family:var(--font-display); font-size:28px; line-height:1.1; font-weight:800; letter-spacing:-.02em; color:var(--taxi-400); font-variant-numeric:tabular-nums; }
+.lotto-jackpot-meta { display:block; font-size:13px; line-height:1.4; color:rgba(255,246,224,.82); }
+.jackpot-news { border-left:3px solid var(--taxi-400); }
+.jackpot-news.mine { background:var(--taxi-tint); }
