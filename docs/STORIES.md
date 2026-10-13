@@ -75,3 +75,14 @@ Regulars at places (Sal at the deli, Jojo at the café and the rest; see `docs/C
 1. Pick the regular, choose **Line** or **Personal update**, and optionally a week (a Monday). Lines with a week show only that week, New York time; lines without one show every week.
 2. **Send for review**, then **Approve** to put it live. **Pause** takes it down at once; **Back to review** parks it.
 3. Approved updates are said first. While a story runs, every other line comes from the story's chatter instead.
+
+## City News (News tab)
+
+City News is light gossip about the cast, Lola's weekly dating column and the Monday hunt announcement. It sits in the phone's News app under the **City** tab, next to the story, and the day's top headline runs in the HUD ticker. A week is one file, `content/news/<Monday>.json` (see `content/news/2026-10-12.json`).
+
+1. In the Studio's **News** tab, choose the file or paste it, then **Check and save**. It's checked first: the week starts on a Monday, every cast id is known, there's exactly one Lola column, and hunt items fall on Mondays.
+2. Items wait in review. **Approve** them one by one or **Approve all**. Each publishes on its day, New York time, and stays in the feed for 60 days.
+3. **Pause** takes an item down at once; **Back to review** parks it; **Move to** changes its day.
+4. Re-uploading a file keeps unchanged approved items approved; edited items go back to review.
+
+News never changes prices, places or rewards.

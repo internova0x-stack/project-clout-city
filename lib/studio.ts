@@ -3,6 +3,7 @@
 // on the schedule (product owner, Oct 12, 2026).
 
 import type { Arc, Status } from "./stories.ts";
+import type { NewsItem } from "./news.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -84,6 +85,15 @@ export interface StudioApi {
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;
   castStatus?(id: number, status: CastLine["status"]): Promise<Admin<null>>;
+  /** v0.6 City News (migration 0017). Uploads are checked with lib/news.ts first. */
+  newsList?(): Promise<Admin<NewsAdminItem[]>>;
+  newsUpload?(json: string): Promise<Admin<number> & { problems?: string[] }>;
+  newsStatus?(id: string, status: NewsAdminItem["status"]): Promise<Admin<null>>;
+  newsReschedule?(id: string, day: string): Promise<Admin<null>>;
+}
+
+export interface NewsAdminItem extends NewsItem {
+  status: "review" | "approved" | "paused";
 }
 
 export interface CastLine {
@@ -112,6 +122,8 @@ const ERRORS: Record<string, string> = {
   bad_decision: "Unknown decision.",
   unknown_report: "That report is gone.",
   unknown_line: "That line is gone.",
+  unknown_news: "That news item is gone.",
+  bad_news: "That isn't a news week.",
 };
 
 export function studioError(message: string | undefined): string {

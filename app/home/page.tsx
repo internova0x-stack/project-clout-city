@@ -12,6 +12,7 @@ import {
 import { loadCatalog, startCheckout } from "./storeActions";
 import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, track } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
+import { loadNews } from "./newsActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
 export const dynamic = "force-dynamic";
@@ -61,6 +62,8 @@ export default async function HomePage() {
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
       chat={chatOn ? { list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard } : undefined}
       track={chatOn ? track : undefined}
+      // Migration 0017 switches on City News (an empty feed hides it).
+      cityNews={loadNews}
       // Migration 0013 switches on crew outings.
       crew={city && crew.ok ? { inbox: crewInbox, members: crewMembers, create: crewCreate, respond: crewRespond } : undefined}
       // Migration 0011 switches on crushes and date nights.

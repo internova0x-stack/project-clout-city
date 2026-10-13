@@ -16,6 +16,7 @@ import {
   previewPlayerCard, previewStudioMetrics, previewStudioReportAction, previewStudioReports,
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
+import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
 
@@ -141,6 +142,7 @@ export default async function Preview({
             beatStatus: previewStudioBeatStatus, content: previewStudioContent,
             reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
+            newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
           }}
         />
       );
