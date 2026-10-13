@@ -3,9 +3,10 @@
 // a database. It follows the same rules as supabase/migrations/0004 in simplified
 // form; the SQL is the source of truth.
 
-import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
+import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
+import { milesBetween, travelQuote } from "./travel.ts";
 import { activeGig, gigCloutReq, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
@@ -85,10 +86,27 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
 
   return {
     refresh: () => ok(),
+    travel(placeId, mode) {
+      const dest = placeId === "home" ? null : placeId;
+      if ((p().at_place ?? null) === dest) return ok();
+      const point = (id: string | null) => (id ? PLACES.find((x) => x.id === id)?.at : HOME_LOCATIONS[p().home_id ?? "astoria_studio"]);
+      const from = point(p().at_place ?? null);
+      const to = point(dest);
+      if (!from || !to) return fail("That place isn't on the map.");
+      const q = travelQuote(mode, milesBetween(from, to), !!p().car_sku);
+      if (q.unavailable) return fail(mode === "walk" ? "That's too far to walk. Your shoes have filed a complaint." : "You don't have a car. The Shop has some, and so does the subway.");
+      if (p().energy < q.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
+      if (p().bank_cash < q.fare) return fail("Your card got declined. Loudly.");
+      p().bank_cash -= q.fare;
+      p().energy -= q.energy;
+      p().at_place = dest;
+      return ok({ cash: -q.fare, energy: -q.energy });
+    },
     doAction(placeId, actionId) {
       const place = PLACES.find((x) => x.id === placeId);
       const a = place?.actions.find((x) => x.id === actionId);
       if (!place || !a) return fail("That isn't something you can do here.");
+      if ((p().at_place ?? null) !== placeId) return fail("You're not there yet. Go there first.");
       const feed = story();
       const world = placeStory(feed, place);
       if (place.story && !(feed?.startedArcs ?? []).includes(place.story)) return fail("That isn't something you can do here.");
@@ -116,6 +134,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     attendEvent(eventId) {
       const ev = CLUB_EVENTS.find((e) => e.id === eventId);
       if (!ev) return fail("That event doesn't exist.");
+      if ((p().at_place ?? null) !== ev.placeId) return fail("You're not there yet. Go there first.");
       const club = PLACES.find((x) => x.id === ev.placeId);
       const world = club ? placeStory(story(), club) : null;
       if (world?.closed) return fail(world.closed.reason);
@@ -231,6 +250,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       p().purchases_count += 1;
     },
     partyEvent(ev) {
+      if ((p().at_place ?? null) !== ev.placeId) return fail("You're not there yet. Go there first.");
       if (s.attendedToday.includes(ev.id)) return fail("You already went tonight. Twice would be desperate.");
       if (p().energy < ev.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
       s.attendedToday.push(ev.id);

@@ -3,6 +3,21 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
+-- v0.8 (migration 0025): actions and events need the player at the place; these helpers put the
+-- player there first, as if they had travelled.
+create function pg_temp.act(p_place text, p_action text) returns jsonb language plpgsql security definer as $h$
+begin update public.players set at_place = p_place where id = auth.uid(); return public.do_action(p_place, p_action); end $h$;
+create function pg_temp.attend(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select x ->> 'placeId' from jsonb_array_elements(public.city() -> 'events') x where x ->> 'id' = p_event)
+   where id = auth.uid();
+  return public.attend_event(p_event);
+end $h$;
+create function pg_temp.attend_x(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select place_id from public.exclusive_events where id = p_event) where id = auth.uid();
+  return public.attend_exclusive_event(p_event);
+end $h$;
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
 create function pg_temp.product(p_sku text) returns jsonb language sql as $$
@@ -40,8 +55,8 @@ do $$ begin
 end $$;
 
 -- ---- Postcards: visit first, no clout, the set earns a badge ----
-select 1 from public.do_action('unisphere', 'visit');
-select 1 from public.do_action('gantry-plaza', 'visit');
+select 1 from pg_temp.act('unisphere', 'visit');
+select 1 from pg_temp.act('gantry-plaza', 'visit');
 select pg_temp.assert((pg_temp.product('postcard-unisphere') ->> 'visited')::boolean, 'visited now');
 select public.start_purchase('postcard-unisphere', 'cs_pc_1');
 reset role;
@@ -83,16 +98,16 @@ select pg_temp.assert(public.payment_grant('evt_ev_1', 'cs_ev_1', 'pi_ev_1', '00
 select pg_temp.assert((select clout > (select clout from c2) from public.players where display_name = 'Max'), 'the ticket pays clout');
 set role authenticated;
 do $$ begin
-  begin perform public.attend_exclusive_event('jada-sol-listening'); raise exception 'FAIL: in before the doors open';
+  begin perform pg_temp.attend_x('jada-sol-listening'); raise exception 'FAIL: in before the doors open';
   exception when sqlstate '22023' then null; end;
-  begin perform public.attend_exclusive_event('dex-monroe-afterparty'); raise exception 'FAIL: in without a ticket';
+  begin perform pg_temp.attend_x('dex-monroe-afterparty'); raise exception 'FAIL: in without a ticket';
   exception when sqlstate '22023' then null; end;
 end $$;
 select pg_temp.at((select starts_at + interval '1 hour' from public.exclusive_events where id = 'jada-sol-listening'));
-select 1 from public.attend_exclusive_event('jada-sol-listening');
+select 1 from pg_temp.attend_x('jada-sol-listening');
 select pg_temp.assert((select mood > (select mood from c2) and confidence > (select confidence from c2) from public.players where display_name = 'Max'), 'the party lifts Mood and Confidence');
 do $$ begin
-  begin perform public.attend_exclusive_event('jada-sol-listening'); raise exception 'FAIL: twice';
+  begin perform pg_temp.attend_x('jada-sol-listening'); raise exception 'FAIL: twice';
   exception when sqlstate '22023' then null; end;
 end $$;
 -- After the party ends it can't be bought; ticket holders keep it as an event card (0022).

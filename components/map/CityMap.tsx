@@ -20,6 +20,10 @@ export interface MapApi {
   moveCamera(at: LatLng, zoom?: number): void;
   locatePlayer(): void;
   setBoroughLock(id: BoroughId, locked: boolean): void;
+  /** v0.8 trips: frame both ends from helicopter height (never street level). */
+  frameTrip(from: LatLng, to: LatLng): void;
+  /** Screen position of a point on the map, for overlays such as the moving taxi. */
+  project(at: LatLng): { x: number; y: number } | null;
 }
 
 export interface CityMapProps {
@@ -41,7 +45,9 @@ export interface CityMapProps {
 }
 
 const MIN_ZOOM = 9;
-const MAX_ZOOM = 19;
+// v0.8 (owner, Oct 13): the camera stays at helicopter height. Close zooms render at low quality.
+const MAX_ZOOM = 17;
+const HELICOPTER_ZOOM = 15.5;
 const PIN_HEIGHT_PX = 30;
 // Wide enough that, tilted and zoomed out, the whole city fits (MapLibre won't zoom out past the bounds).
 const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8, 41.4]];
@@ -157,7 +163,19 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       locatePlayer() {
         const m = mapRef.current;
         if (!player || !m) return;
-        m.easeTo({ center: lngLat(player.at), zoom: Math.max(m.getZoom(), 16), duration: 700 });
+        m.easeTo({ center: lngLat(player.at), zoom: HELICOPTER_ZOOM, duration: 700 });
+      },
+      frameTrip(from, to) {
+        const m = mapRef.current;
+        if (!m) return;
+        const [w, s2, e, n] = [Math.min(from[1], to[1]), Math.min(from[0], to[0]), Math.max(from[1], to[1]), Math.max(from[0], to[0])];
+        m.fitBounds([[w, s2], [e, n]], { padding: { top: 150, bottom: 140, left: 60, right: 60 }, maxZoom: HELICOPTER_ZOOM, pitch: 45, duration: 700 });
+      },
+      project(at) {
+        const m = mapRef.current;
+        if (!m) return null;
+        const pt = m.project(lngLat(at));
+        return { x: pt.x, y: pt.y };
       },
       setBoroughLock(id, isLocked) {
         setLocked((prev) => {

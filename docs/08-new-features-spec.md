@@ -178,6 +178,7 @@ Every player starts in one neighborhood with about 20 places close together (22 
 - **Choose how to get there:** walk (free, slow, more Energy), subway (cheap), taxi (fast, pricier) or the player's own car (fast, no fares). Costs come from simple distance bands, not routes.
 - **Watch the trip** from above as the taxi, bus or train moves across the map. Skipping is always free.
 - **Time is personal.** The trip, napping and other timed actions use a short personal timer and never move the shared city clock.
+- **Built (v0.8 step 1, owner Oct 13):** the player is at home or at one place (players.at_place). Place actions and events only work there (migration 0025 checks every visit and attendance). Getting there, by distance band (under 0.5 / 0.5 to 2 / 2 to 5 / over 5 mi): walk free for 5/10/20 Energy (not offered past 5 mi), subway C$3 flat, taxi C$8/16/28/45, own car free. Arrival is instant on the server; the client shows a 3 to 10 second trip from helicopter height (never street level), always skippable. Fares are in the Bank as "Taxi · Hell Gate Park".
 
 ### Rest and food
 

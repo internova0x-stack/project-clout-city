@@ -3,6 +3,21 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
+-- v0.8 (migration 0025): actions and events need the player at the place; these helpers put the
+-- player there first, as if they had travelled.
+create function pg_temp.act(p_place text, p_action text) returns jsonb language plpgsql security definer as $h$
+begin update public.players set at_place = p_place where id = auth.uid(); return public.do_action(p_place, p_action); end $h$;
+create function pg_temp.attend(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select x ->> 'placeId' from jsonb_array_elements(public.city() -> 'events') x where x ->> 'id' = p_event)
+   where id = auth.uid();
+  return public.attend_event(p_event);
+end $h$;
+create function pg_temp.attend_x(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select place_id from public.exclusive_events where id = p_event) where id = auth.uid();
+  return public.attend_exclusive_event(p_event);
+end $h$;
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
 create function pg_temp.as_(p text) returns void language sql as $$ select set_config('request.jwt.claim.sub', p, false) $$;
@@ -102,7 +117,7 @@ select pg_temp.assert((public.dating_inbox() -> 'dates' -> 0 ->> 'price')::int =
 select pg_temp.as_('00000000-0000-0000-0000-000000000072');
 select pg_temp.assert(not (public.dating_inbox() -> 'dates' -> 0 ->> 'mine')::boolean, 'guest sees the invite');
 -- Eli goes first (before answering), then says yes.
-select 1 from public.do_action('lucky-seven-deli', 'eat');
+select 1 from pg_temp.act('lucky-seven-deli', 'eat');
 select public.date_respond((public.dating_inbox() -> 'dates' -> 0 ->> 'id')::bigint, true);
 select pg_temp.assert((public.dating_inbox() -> 'dates' -> 0 ->> 'iWent')::boolean, 'going before answering counts');
 select pg_temp.assert(not (public.dating_inbox() -> 'dates' -> 0 ->> 'paid')::boolean, 'no bonus while one has gone');
@@ -113,7 +128,7 @@ update public.players set mood = 50 where id in ('00000000-0000-0000-0000-000000
 update before_date set mood = 50;
 set role authenticated;
 select pg_temp.as_('00000000-0000-0000-0000-000000000071');
-select 1 from public.do_action('lucky-seven-deli', 'eat');
+select 1 from pg_temp.act('lucky-seven-deli', 'eat');
 select pg_temp.assert((public.dating_inbox() -> 'dates' -> 0 ->> 'paid')::boolean, 'bonus once both went');
 reset role;
 -- The visit pays its own clout; the date adds exactly +25 clout and +10 Mood on top, once each.
@@ -128,9 +143,9 @@ select pg_temp.as_('00000000-0000-0000-0000-000000000071');
 select 1 from public.date_invite('00000000-0000-0000-0000-000000000073', 'place', 'grind-and-gossip');
 select pg_temp.as_('00000000-0000-0000-0000-000000000073');
 select public.date_respond((select (d ->> 'id')::bigint from jsonb_array_elements(public.dating_inbox() -> 'dates') d limit 1), true);
-select 1 from public.do_action('grind-and-gossip', 'eat');
+select 1 from pg_temp.act('grind-and-gossip', 'eat');
 select pg_temp.as_('00000000-0000-0000-0000-000000000071');
-select 1 from public.do_action('grind-and-gossip', 'eat');
+select 1 from pg_temp.act('grind-and-gossip', 'eat');
 reset role;
 select pg_temp.assert((select count(*) = 1 from public.ledger where kind = 'date_night' and player_id = '00000000-0000-0000-0000-000000000071'), 'Dex paid once today');
 select pg_temp.assert((select count(*) = 1 from public.ledger where kind = 'date_night' and player_id = '00000000-0000-0000-0000-000000000073'), 'Fen gets theirs');

@@ -52,6 +52,12 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     case "car_rental": return { emoji: "🚗", title: "Car rental", detail: itemBySku(first)?.name ?? null };
     case "sale": return { emoji: "🏷️", title: "Sold an item", detail: null };
     case "hunt": return { emoji: "🗺️", title: "Treasure hunt", detail: e.theme ?? null };
+    case "travel": {
+      // ref: mode:place:time (migration 0025).
+      const [mode, dest] = e.ref.split(":");
+      const to = dest === "home" ? "Home" : placeById(dest)?.name ?? null;
+      return mode === "taxi" ? { emoji: "🚕", title: "Taxi", detail: to } : { emoji: "🚇", title: "Subway", detail: to };
+    }
     default: {
       const bill = BILLS[e.kind];
       if (bill) return { emoji: bill[0], title: bill[1], detail: null };

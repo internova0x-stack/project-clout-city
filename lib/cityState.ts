@@ -23,6 +23,8 @@ export interface CityPlayer {
   car_sku: string | null;
   car_mode: "owned" | "rented" | null;
   purchases_count: number;
+  /** v0.8 (migration 0025): where the player is, a place id; null (or missing) is home. */
+  at_place?: string | null;
 }
 
 export interface DailyTask {
@@ -109,6 +111,8 @@ export interface CityApi {
   buyItem(sku: string, mode: "buy" | "rent"): Promise<CityResult>;
   sellItem(itemId: number): Promise<CityResult>;
   equipItem(itemId: number, on: boolean): Promise<CityResult>;
+  /** v0.8 travel (migration 0025): go to a place (or "home") by walk, subway, taxi or car. */
+  travel?(placeId: string, mode: import("./travel.ts").TravelMode): Promise<CityResult>;
   /** v0.7 Your Look (migration 0021): the worn clothes (one per slot) and the free headwear, saved at once. */
   saveLook?(itemIds: number[], covering: string): Promise<CityResult>;
   payBill(billId: number): Promise<CityResult>;
@@ -131,6 +135,10 @@ const ERRORS: Record<string, string> = {
   gig_active: "Finish your current gig first.",
   needs_confidence: "This client wants more Confidence than you've got right now.",
   needs_clout: "This client googled you. Come back with more clout.",
+  not_here: "You're not there yet. Go there first.",
+  too_far_to_walk: "That's too far to walk. Your shoes have filed a complaint.",
+  no_car: "You don't have a car. The Shop has some, and so does the subway.",
+  unknown_place: "That place isn't on the map.",
   gig_expired: "That offer expired at midnight.",
   not_ready: "Not done yet. Good work takes time; so does mediocre work.",
   already_owned: "You already own that. Calm down.",

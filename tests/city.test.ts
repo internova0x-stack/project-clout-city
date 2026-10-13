@@ -73,6 +73,9 @@ test("rent lines walk through grace, Mood drop and moving out", () => {
 
 test("the preview simulator follows the same clout and resale rules", async () => {
   const api = createSimApi(sampleCityState({ mood: 50, confidence: 50, purchases_count: 0 }));
+  assert.equal((await api.doAction("lucky-seven-deli", "eat")).ok, false, "v0.8: no spending before arriving");
+  const ride = await api.travel!("lucky-seven-deli", "subway");
+  assert.ok(ride.ok && ride.gain?.cash === -3, "the subway is C$3");
   const meal = await api.doAction("lucky-seven-deli", "eat");
   assert.ok(meal.ok && meal.gain?.clout === 9);
   const again = await api.doAction("lucky-seven-deli", "eat");

@@ -4,6 +4,21 @@
 \pset tuples_only on
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
+-- v0.8 (migration 0025): actions and events need the player at the place; these helpers put the
+-- player there first, as if they had travelled.
+create function pg_temp.act(p_place text, p_action text) returns jsonb language plpgsql security definer as $h$
+begin update public.players set at_place = p_place where id = auth.uid(); return public.do_action(p_place, p_action); end $h$;
+create function pg_temp.attend(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select x ->> 'placeId' from jsonb_array_elements(public.city() -> 'events') x where x ->> 'id' = p_event)
+   where id = auth.uid();
+  return public.attend_event(p_event);
+end $h$;
+create function pg_temp.attend_x(p_event text) returns jsonb language plpgsql security definer as $h$
+begin
+  update public.players set at_place = (select place_id from public.exclusive_events where id = p_event) where id = auth.uid();
+  return public.attend_exclusive_event(p_event);
+end $h$;
 
 insert into auth.users (id) values ('00000000-0000-0000-0000-000000000010');
 set role authenticated;
@@ -32,18 +47,18 @@ select pg_temp.assert((select next_rent_due = (public.ny_today() + interval '1 m
 select next_rent_due - public.ny_today() as rent_in from public.players where display_name = 'Gus' \gset
 
 -- Eating: clout once a day per place, by price; Energy restored; cash every time.
-select (public.do_action('lucky-seven-deli', 'eat') ->> 'clout')::int as eat1 \gset
+select (pg_temp.act('lucky-seven-deli', 'eat') ->> 'clout')::int as eat1 \gset
 select pg_temp.assert(:eat1 = 9, 'deli clout (5 + 7*0.6) * 1.0 = 9');
-select (public.do_action('lucky-seven-deli', 'eat') ->> 'clout')::int as eat2 \gset
+select (pg_temp.act('lucky-seven-deli', 'eat') ->> 'clout')::int as eat2 \gset
 select pg_temp.assert(:eat2 = 0, 'second meal pays no clout');
 
 -- A club visit: clout, Mood and Confidence once, Energy spent.
-select (public.do_action('velvet-static', 'visit') ->> 'clout')::int as club \gset
+select (pg_temp.act('velvet-static', 'visit') ->> 'clout')::int as club \gset
 select pg_temp.assert(:club = 41, 'club clout (5 + 60*0.6) * 1.0 = 41');
 select pg_temp.assert((select mood = 56 and confidence = 54 and energy = 85 from public.players where display_name = 'Gus'), 'club stats');
 
 -- A shift pays the job rate and costs Energy.
-select (public.do_action('grind-and-gossip', 'shift') ->> 'clout')::int as shift_clout \gset
+select (pg_temp.act('grind-and-gossip', 'shift') ->> 'clout')::int as shift_clout \gset
 select pg_temp.assert(:shift_clout = 0, 'shifts pay no clout');
 select pg_temp.assert((select energy = 60 from public.players where display_name = 'Gus'), 'shift energy');
 
@@ -52,13 +67,13 @@ reset role;
 update public.players set energy = 10 where display_name = 'Gus';
 set role authenticated;
 do $$ begin
-  begin perform public.do_action('velvet-static', 'visit'); raise exception 'FAIL: visit at low energy';
+  begin perform pg_temp.act('velvet-static', 'visit'); raise exception 'FAIL: visit at low energy';
   exception when sqlstate '22023' then null; end;
 end $$;
-select 1 from public.do_action('altitude-718', 'eat');
+select 1 from pg_temp.act('altitude-718', 'eat');
 select pg_temp.assert((select energy = 65 from public.players where display_name = 'Gus'), 'meal restores energy');
 do $$ begin
-  begin perform public.do_action('nowhere', 'visit'); raise exception 'FAIL: unknown place';
+  begin perform pg_temp.act('nowhere', 'visit'); raise exception 'FAIL: unknown place';
   exception when sqlstate '22023' then null; end;
 end $$;
 
@@ -101,13 +116,13 @@ update public.players set energy = 100 where display_name = 'Gus';
 set role authenticated;
 select pg_temp.assert(public.city_minutes() between 23 * 60 and 23 * 60 + 2, 'clock at 23:00');
 do $$ begin
-  begin perform public.attend_event('golden-hour'); raise exception 'FAIL: closed event attended';
+  begin perform pg_temp.attend('golden-hour'); raise exception 'FAIL: closed event attended';
   exception when sqlstate '22023' then null; end;
 end $$;
-select (public.attend_event('neon-nights') ->> 'clout')::int as went \gset
+select (pg_temp.attend('neon-nights') ->> 'clout')::int as went \gset
 select pg_temp.assert(:went = 62, 'event clout 60 * (0.7 + 0.3*0.56 + 0.3*0.54) = 62');
 do $$ begin
-  begin perform public.attend_event('neon-nights'); raise exception 'FAIL: event attended twice';
+  begin perform pg_temp.attend('neon-nights'); raise exception 'FAIL: event attended twice';
   exception when sqlstate '22023' then null; end;
 end $$;
 
