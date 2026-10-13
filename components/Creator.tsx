@@ -6,10 +6,10 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
 import { ECONOMY, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
 import {
-  BODIES, COVERINGS, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, SKIN_TONES,
-  lookChoices, randomLook, type Look, type LookChoices,
+  BODIES, BUILDS, DEFAULT_BUILD, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, HEADWEAR_CULTURAL, SKIN_TONES,
+  lookChoices, randomLook, type BuildId, type Look, type LookChoices,
 } from "@/lib/look";
-import { STARTING_STYLES, STYLE_IDS, getStyle } from "@/lib/styles";
+import { BOTTOM_LABEL, STARTING_STYLES, STYLE_FITS, STYLE_IDS, TOP_LABEL, defaultFit, getStyle, type BottomKind, type Fit, type TopKind } from "@/lib/styles";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { cleanName, nameError } from "@/lib/validation";
 import { ChevronLeftIcon, ShuffleIcon } from "./icons";
@@ -40,6 +40,7 @@ export function Creator({
   initialLook,
   initialTraits,
   initialCash,
+  initialName,
 }: {
   needsAgeConfirm: boolean;
   actions: CreatorActions;
@@ -47,8 +48,11 @@ export function Creator({
   initialLook?: Look;
   initialTraits?: string[] | null;
   initialCash?: number | null;
+  /** The claimed username (for the starting-cash card when resuming). */
+  initialName?: string | null;
 }) {
   const router = useRouter();
+  const [handleName, setHandleName] = useState(initialName ?? "");
   const [step, setStep] = useState<CreatorStep>(initialStep);
   const [furthest, setFurthest] = useState<CreatorStep>(initialStep);
   const [look, setLook] = useState<Look>(initialLook ?? DEFAULT_LOOK);
@@ -101,11 +105,11 @@ export function Creator({
             needsAgeConfirm={needsAgeConfirm}
             locked={lookLocked}
             onSubmit={actions.createPlayer}
-            onDone={() => advance(1)}
+            onDone={(name) => { setHandleName(name); advance(1); }}
           />
         )}
         {step === 1 && <TraitsStep traits={traits} setTraits={setTraits} onSave={actions.saveTraits} onDone={() => advance(2)} />}
-        {step === 2 && <LotteryStep cash={cash} onRoll={actions.rollBirthLottery} onRolled={setCash} onDone={() => advance(3)} />}
+        {step === 2 && <LotteryStep cash={cash} handle={handleName} onRoll={actions.rollBirthLottery} onRolled={setCash} onDone={() => advance(3)} />}
         {step === 3 && (
           <HomeStep
             cash={cash ?? 0}
@@ -144,7 +148,7 @@ function LookStep({
   needsAgeConfirm: boolean;
   locked: boolean;
   onSubmit: CreatorActions["createPlayer"];
-  onDone: () => void;
+  onDone: (name: string) => void;
 }) {
   const [name, setName] = useState("");
   const [adult, setAdult] = useState(!needsAgeConfirm);
@@ -161,6 +165,8 @@ function LookStep({
     setLook((l) => ({
       ...l,
       body,
+      // Athletic exists for both; Slim/Broad and Petite/Curvy swap to the other presentation's default.
+      build: BUILDS[body].some((b) => b.id === l.build) ? l.build : DEFAULT_BUILD[body],
       hair: body === "curvy" && (l.hair === "short" || l.hair === "buzz") ? "long" : body === "straight" && l.hair === "long" ? "short" : l.hair,
     }));
   const localError = touched ? nameError(name) : null;
@@ -181,7 +187,7 @@ function LookStep({
 
   if (locked) {
     return (
-      <StepSheet cta={<button className="btn btn-taxi" onClick={onDone}>Continue ›</button>}>
+      <StepSheet cta={<button className="btn btn-taxi" onClick={() => onDone("")}>Continue ›</button>}>
         <div className="card stack-4">
           <p className="title" style={{ margin: 0 }}>Your look is locked in.</p>
           <p className="subtext" style={{ margin: 0 }}>You can change outfits in Your Look once the Shop opens. Your face, though, is forever. Like a tattoo.</p>
@@ -196,7 +202,7 @@ function LookStep({
     if (!canSubmit) return;
     startTransition(async () => {
       const result = await onSubmit({ name, style: look.style, look: lookChoices(look), ageConfirmed: adult });
-      if (result.ok) onDone();
+      if (result.ok) onDone(cleanName(name));
       else setError({ text: result.error, field: result.field });
     });
   };
@@ -243,21 +249,47 @@ function LookStep({
       </div>
 
       <div className="stack-8">
+        <p className="overline" style={{ margin: 0 }}>Body type</p>
+        <div className="build-tiles" role="radiogroup" aria-label="Body type">
+          {BUILDS[look.body].map((o) => (
+            <button key={o.id} role="radio" aria-checked={look.build === o.id} className="build-tile" onClick={() => set("build", o.id)}>
+              <BodySilhouette build={o.id} fem={look.body === "curvy"} />
+              <span>{o.label}</span>
+              {look.build === o.id && <span className="build-tick" aria-hidden="true">✓</span>}
+            </button>
+          ))}
+        </div>
+        <p className="meta" style={{ margin: 0 }}>Every outfit fits every body. Purely how you look; it never changes the game.</p>
+      </div>
+
+      <div className="stack-8">
         <p className="overline" style={{ margin: 0 }}>Starting style</p>
         <div className="chip-row" role="group" aria-label="Starting style" style={{ margin: "0 -20px", padding: "2px 20px" }}>
           {STARTING_STYLES.map((s) => (
-            <button key={s.id} className="chip" aria-pressed={look.style === s.id} onClick={() => set("style", s.id)}>
+            <button key={s.id} className="chip" aria-pressed={look.style === s.id} onClick={() => setLook((l) => ({ ...l, style: s.id, fit: null }))}>
               <span aria-hidden="true">{s.emoji}</span> {s.label}
             </button>
           ))}
         </div>
-        <div className="card stack-8" style={{ animation: "rise-in .2s ease-out" }} key={style.id}>
-          <p className="subtext" style={{ margin: 0 }}><strong style={{ color: "var(--text-1)" }}>{style.label}.</strong> {style.blurb}</p>
-          <div className="row" style={{ flexWrap: "wrap", gap: 6 }}>
-            {style.starterItems.map((i) => <span key={i} className="tag tag-neutral">{i}</span>)}
-          </div>
-          <p className="meta" style={{ margin: 0 }}>Starter items only. No stats, no bonuses, all vibes.</p>
+        <p className="subtext" style={{ margin: 0 }} key={style.id}><strong style={{ color: "var(--text-1)" }}>{style.label}.</strong> {style.blurb}</p>
+      </div>
+
+      <OutfitPicker look={look} onChange={(fit) => set("fit", fit)} />
+
+      <div className="stack-8">
+        <p className="overline" style={{ margin: 0 }}>Headwear · all free</p>
+        <div className="option-chips" role="group" aria-label="Headwear">
+          {HEADWEAR_BASIC.map((o) => (
+            <button key={o.id} className="chip" aria-pressed={look.covering === o.id} onClick={() => set("covering", o.id)}>{HAT_EMOJI[o.id] ?? ""}{o.label}</button>
+          ))}
         </div>
+        <p className="creator-label">Cultural and religious</p>
+        <div className="option-chips" role="group" aria-label="Cultural and religious coverings">
+          {HEADWEAR_CULTURAL.map((o) => (
+            <button key={o.id} className="chip" aria-pressed={look.covering === o.id} onClick={() => set("covering", o.id)}>{o.label}</button>
+          ))}
+        </div>
+        <p className="meta" style={{ margin: 0 }}>Premium hats live in the Shop.</p>
       </div>
 
       <OptionGroup label="Hair" options={HAIRS} value={look.hair} onPick={(v) => set("hair", v)} />
@@ -265,8 +297,7 @@ function LookStep({
       <Swatches label="Hair color" colors={HAIR_COLORS} value={look.hairColor} onPick={(v) => set("hairColor", v)} />
       <Swatches label="Eyes" colors={EYE_COLORS} value={look.eyes} onPick={(v) => set("eyes", v)} />
       <OptionGroup label="Glasses" options={GLASSES} value={look.glasses} onPick={(v) => set("glasses", v)} />
-      <OptionGroup label="Covering" options={COVERINGS} value={look.covering} onPick={(v) => set("covering", v)} />
-      <p className="meta" style={{ margin: 0 }}>Hair, glasses and coverings are free for everyone, forever. The Shop will never sell them.</p>
+      <p className="meta" style={{ margin: 0 }}>Body, hair, glasses and headwear are free for everyone, forever. The Shop will never sell them.</p>
 
       {needsAgeConfirm && (
         <label className="check-row">
@@ -345,8 +376,8 @@ function TraitsStep({
 // Step 3: Birth lottery (rolled once per account)
 // ---------------------------------------------------------------------------
 function LotteryStep({
-  cash, onRoll, onRolled, onDone,
-}: { cash: number | null; onRoll: CreatorActions["rollBirthLottery"]; onRolled: (n: number) => void; onDone: () => void }) {
+  cash, handle, onRoll, onRolled, onDone,
+}: { cash: number | null; handle: string; onRoll: CreatorActions["rollBirthLottery"]; onRolled: (n: number) => void; onDone: () => void }) {
   const [rolling, setRolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { min, max } = ECONOMY.birthLottery;
@@ -385,11 +416,7 @@ function LotteryStep({
           <p className="meta" style={{ margin: 0 }}>🔒 Rolled once per account. No rerolls, no refunds, no therapy.</p>
         </div>
       ) : (
-        <div className="reveal-card" role="status">
-          <span className="tag tag-positive">Starting cash</span>
-          <p className="display-xl" style={{ margin: "12px 0 6px" }}>{formatCash(cash)}</p>
-          <p className="body" style={{ margin: 0, color: "rgba(255,246,224,.8)" }}>{lotteryLine(cash)}</p>
-        </div>
+        <CashCard cash={cash} handle={handle} />
       )}
       {error && <p className="error-text" role="alert">{error}</p>}
     </StepSheet>
@@ -464,6 +491,140 @@ function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorA
       <p className="meta" style={{ margin: 0 }}>Moving in pays your first rent. Your phone bill comes later. The landlord never forgets.</p>
       {error && <p className="error-text" role="alert">{error}</p>}
     </StepSheet>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// v0.7 creator pieces: body-type silhouettes, the starter outfit picker, the starting-cash card
+// ---------------------------------------------------------------------------
+const HAT_EMOJI: Partial<Record<Look["covering"], string>> = { cap: "🧢 ", fedora: "🎩 ", bucket: "👒 " };
+
+/** Half-widths at the shoulder, chest, waist and hip (and thigh), plus height, per body type. */
+const SILHOUETTE: Record<"m" | "f", Record<string, { sh: number; ch: number; wa: number; hi: number; th: number; h: number; bust?: number; belly?: number }>> = {
+  m: {
+    slim: { sh: 8.5, ch: 7, wa: 6, hi: 7, th: 5.5, h: 1.02 },
+    athletic: { sh: 15, ch: 13, wa: 8.5, hi: 9.5, th: 8, h: 1 },
+    broad: { sh: 18.5, ch: 17.5, wa: 15, hi: 14, th: 11, h: 0.97 },
+    plus: { sh: 14, ch: 15, wa: 14, hi: 15, th: 12, h: 0.95, belly: 6 },
+  },
+  f: {
+    petite: { sh: 8, ch: 7, wa: 5.5, hi: 8, th: 5.5, h: 0.78, bust: 0.5 },
+    athletic: { sh: 12, ch: 10.5, wa: 8, hi: 10.5, th: 8, h: 0.98, bust: 1 },
+    curvy: { sh: 11, ch: 11, wa: 6.5, hi: 17, th: 10.5, h: 0.95, bust: 4 },
+    plus: { sh: 14, ch: 15, wa: 14.5, hi: 18, th: 12.5, h: 0.94, bust: 3.5, belly: 4 },
+  },
+};
+
+function BodySilhouette({ build, fem }: { build: BuildId; fem: boolean }) {
+  const p = SILHOUETTE[fem ? "f" : "m"][build] ?? SILHOUETTE.m.athletic;
+  const cx = 30, top = 100 - 88 * p.h, y = (t: number) => top + (100 - top) * t;
+  const L = (w: number) => cx - w, R = (w: number) => cx + w;
+  const bust = p.bust ?? 0, belly = p.belly ?? 0;
+  const torso = `M${L(4)},${y(0.15)} C${L(p.sh)},${y(0.16)} ${L(p.sh)},${y(0.18)} ${L(p.sh)},${y(0.21)}
+    C${L(p.ch + bust)},${y(0.3)} ${L(p.wa + belly)},${y(0.4)} ${L(p.wa + belly)},${y(0.46)}
+    C${L(p.hi)},${y(0.53)} ${L(p.hi)},${y(0.56)} ${L(p.hi)},${y(0.6)}
+    L${L(p.th)},${y(0.99)} L${cx - 1.5},${y(0.99)} L${cx},${y(0.66)} L${cx + 1.5},${y(0.99)} L${R(p.th)},${y(0.99)}
+    L${R(p.hi)},${y(0.6)} C${R(p.hi)},${y(0.56)} ${R(p.hi)},${y(0.53)} ${R(p.wa + belly)},${y(0.46)}
+    C${R(p.wa + belly)},${y(0.4)} ${R(p.ch + bust)},${y(0.3)} ${R(p.sh)},${y(0.21)} C${R(p.sh)},${y(0.18)} ${R(p.sh)},${y(0.16)} ${R(4)},${y(0.15)} Z`;
+  const arm = (d: number) => `M${cx + d * p.sh},${y(0.2)} L${cx + d * (p.sh + 3.5)},${y(0.52)} L${cx + d * (p.sh + 0.8)},${y(0.53)} L${cx + d * (p.sh - 1.5)},${y(0.27)} Z`;
+  return (
+    <svg viewBox="0 0 60 100" width="44" height="72" aria-hidden="true">
+      <circle cx={cx} cy={y(0.07)} r={7.2 * (0.9 + 0.1 * p.h)} />
+      <path d={torso} /><path d={arm(-1)} /><path d={arm(1)} />
+    </svg>
+  );
+}
+
+const GARMENT: Record<TopKind | BottomKind, ReactNode> = {
+  puffer: <><path d="M14 10 L24 6 L36 6 L46 10 L52 34 L44 36 L42 22 L42 50 L18 50 L18 22 L16 36 L8 34 Z" /><path d="M18 20 H42 M18 30 H42 M18 40 H42" stroke="#fff" strokeWidth="2.4" fill="none" opacity=".55" /></>,
+  hoodie: <><path d="M22 6 Q30 0 38 6 L46 10 L52 34 L44 36 L42 22 L42 50 L18 50 L18 22 L16 36 L8 34 L14 10 Z" /><path d="M24 7 Q30 16 36 7" stroke="#fff" strokeWidth="2.2" fill="none" opacity=".6" /></>,
+  zip: <><path d="M14 10 L24 6 L36 6 L46 10 L52 34 L44 36 L42 22 L42 50 L18 50 L18 22 L16 36 L8 34 Z" /><path d="M30 8 V50" stroke="#fff" strokeWidth="2" opacity=".7" /></>,
+  cardigan: <><path d="M14 10 L24 6 L30 14 L36 6 L46 10 L52 36 L44 38 L42 22 L42 50 L18 50 L18 22 L16 38 L8 36 Z" /><circle cx="30" cy="24" r="1.6" fill="#fff" opacity=".7" /><circle cx="30" cy="34" r="1.6" fill="#fff" opacity=".7" /></>,
+  vest: <><path d="M20 6 L30 22 L40 6 L44 12 L42 50 L18 50 L16 12 Z" /></>,
+  crop: <><path d="M16 12 L24 8 L36 8 L44 12 L48 26 L42 27 L41 20 L41 32 L19 32 L19 20 L18 27 L12 26 Z" /></>,
+  blazer: <><path d="M14 10 L24 6 L30 26 L36 6 L46 10 L52 36 L44 38 L42 22 L42 50 L18 50 L18 22 L16 38 L8 36 Z" /><path d="M24 6 L30 26 L36 6" stroke="#fff" strokeWidth="2" fill="none" opacity=".5" /></>,
+  tee: <><path d="M14 10 L24 6 L36 6 L46 10 L52 20 L44 24 L42 20 L42 50 L18 50 L18 20 L16 24 L8 20 Z" /></>,
+  pants: <path d="M18 4 H42 L44 52 H33 L30 18 L27 52 H16 Z" />,
+  shorts: <path d="M18 10 H42 L45 38 H33 L30 22 L27 38 H15 Z" />,
+  skirt: <path d="M21 10 H39 L48 44 H12 Z" />,
+  leggings: <path d="M20 4 H40 L39 52 H32 L30 16 L28 52 H21 Z" />,
+};
+
+/** The starter outfit (v0.7, #45): three tops and bottoms per style, six colors each, plus shoes. */
+function OutfitPicker({ look, onChange }: { look: Look; onChange: (fit: Fit) => void }) {
+  const style = getStyle(look.style);
+  const o = STYLE_FITS[style.id];
+  const fit = look.fit ?? defaultFit(style, look.body);
+  const pick = (patch: Partial<Fit>) => onChange({ ...fit, ...patch });
+  const piece = (kinds: (TopKind | BottomKind)[], value: string, color: string, label: (k: TopKind | BottomKind) => string, on: (k: TopKind | BottomKind) => void) => (
+    <div className="garment-row" role="radiogroup">
+      {kinds.map((k) => (
+        <button key={k} role="radio" aria-checked={value === k} className="garment" onClick={() => on(k)}>
+          <svg viewBox="0 0 60 56" width="40" height="38" fill={value === k ? color : "#C9C0B5"} aria-hidden="true">{GARMENT[k]}</svg>
+          <span>{label(k)}</span>
+        </button>
+      ))}
+    </div>
+  );
+  return (
+    <div className="stack-8">
+      <p className="overline" style={{ margin: 0 }}>Your starter outfit · free</p>
+      <div className="outfit-panel stack-8">
+        <span className="outfit-label">Top</span>
+        {piece(o.tops, fit.top, fit.topColor, (k) => TOP_LABEL[k as TopKind], (k) => pick({ top: k as TopKind }))}
+        <OutfitSwatches label="Top color" colors={o.topColors} value={fit.topColor} onPick={(c) => pick({ topColor: c })} />
+      </div>
+      <div className="outfit-panel stack-8">
+        <span className="outfit-label">Bottom</span>
+        {piece(o.bottoms, fit.bottom, fit.bottomColor, (k) => BOTTOM_LABEL[k as BottomKind], (k) => pick({ bottom: k as BottomKind }))}
+        <OutfitSwatches label="Bottom color" colors={o.bottomColors} value={fit.bottomColor} onPick={(c) => pick({ bottomColor: c })} />
+      </div>
+      <div className="outfit-panel stack-8">
+        <span className="outfit-label">Shoes</span>
+        <OutfitSwatches label="Shoe color" colors={o.shoeColors} value={fit.shoeColor} onPick={(c) => pick({ shoeColor: c })} />
+      </div>
+    </div>
+  );
+}
+
+function OutfitSwatches({ label, colors, value, onPick }: { label: string; colors: string[]; value: string; onPick: (c: string) => void }) {
+  return (
+    <div className="swatches outfit-swatches" role="group" aria-label={label}>
+      {colors.map((c, i) => (
+        <button key={c} className="swatch" style={{ background: c }} aria-pressed={value === c} aria-label={`${label} ${i + 1}`} onClick={() => onPick(c)} />
+      ))}
+    </div>
+  );
+}
+
+/** The birth lottery's reveal (v0.7, #46): a bright virtual card, after the best banking apps. */
+function CashCard({ cash, handle }: { cash: number; handle: string }) {
+  const { min, max } = ECONOMY.birthLottery;
+  const luckier = Math.round(Math.min(99, Math.max(1, ((cash - min) / Math.max(1, max - min)) * 100)));
+  let h = 0;
+  for (const ch of handle || "clout") h = (h * 31 + ch.charCodeAt(0)) % 10000;
+  return (
+    <div className="cash-reveal" role="status">
+      <p className="cash-kicker">Your starting balance</p>
+      <p className="cash-amount">{formatCash(cash)}</p>
+      <span className="cash-luck">🎉 Luckier than {luckier}% of new arrivals</span>
+      <div className="cash-card-wrap" aria-hidden="true">
+        {["#FFC21A", "#40B589", "#7C4DFF", "#FF8A65", "#FFC21A", "#40B589", "#7C4DFF"].map((c, i) => (
+          <span key={i} className={`confetti c${i}`} style={{ background: c }} />
+        ))}
+        <div className="cash-card">
+          <span className="cash-card-mark">CLOUT CITY</span>
+          <svg className="cash-card-wave" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+            <path d="M8 6a8 8 0 0 1 0 12M12 4a12 12 0 0 1 0 16M4 8.5a4 4 0 0 1 0 7" />
+          </svg>
+          <span className="cash-card-chip" />
+          <span className="cash-card-num">•••• {String(h).padStart(4, "0")}</span>
+          <span className="cash-card-who">{handle ? `@${handle}` : "New arrival"}</span>
+          <span className="cash-card-tag">VIRTUAL · C$</span>
+        </div>
+      </div>
+      <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{lotteryLine(cash)}</p>
+    </div>
   );
 }
 

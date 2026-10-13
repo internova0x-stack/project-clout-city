@@ -84,6 +84,7 @@ export default async function Preview({
           needsAgeConfirm={false}
           initialStep={s}
           initialLook={s > 0 ? normalizeLook(SAMPLE.look, SAMPLE.starting_style) : undefined}
+          initialName={s > 0 ? SAMPLE.display_name : undefined}
           initialTraits={s > 1 ? SAMPLE.traits : []}
           initialCash={s > 2 ? 6400 : null}
           actions={{

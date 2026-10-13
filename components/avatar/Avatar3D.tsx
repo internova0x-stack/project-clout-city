@@ -147,7 +147,7 @@ export default function Avatar3D({
     }
     s.scene.add(parts.root);
     s.parts = parts;
-  }, [look.style, look.body, look.skin, look.hair, look.hairColor, look.eyes, look.glasses, look.covering, framing, outfit && JSON.stringify(outfit)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [look.style, look.body, look.build, look.skin, look.hair, look.hairColor, look.eyes, look.glasses, look.covering, look.fit && JSON.stringify(look.fit), framing, outfit && JSON.stringify(outfit)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Drag to spin ----
   const dragX = useRef<number | null>(null);

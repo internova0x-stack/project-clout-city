@@ -160,3 +160,101 @@ export function isStyleId(id: unknown): id is StyleId {
 export function styleOutfit(style: StartingStyle, body: "straight" | "curvy"): Outfit {
   return { ...style.outfit, ...(body === "curvy" ? style.female : style.male) };
 }
+
+// ---------------------------------------------------------------------------
+// Starter outfit choices (v0.7, #45): three tops and three bottoms per style, from the pieces
+// the 3D avatar can wear, with six colors each. Both presentations' defaults are in every list.
+// ---------------------------------------------------------------------------
+
+/** The player's starter outfit pick (stored in players.look.fit). */
+export interface Fit {
+  top: TopKind;
+  topColor: string;
+  bottom: BottomKind;
+  bottomColor: string;
+  shoeColor: string;
+}
+
+export interface StyleFits {
+  tops: TopKind[];
+  bottoms: BottomKind[];
+  topColors: string[];
+  bottomColors: string[];
+  shoeColors: string[];
+}
+
+export const TOP_LABEL: Record<TopKind, string> = {
+  puffer: "Puffer", cardigan: "Cardigan", vest: "Sweater vest", hoodie: "Hoodie", crop: "Crop top", zip: "Zip-up", blazer: "Blazer", tee: "Tee",
+};
+export const BOTTOM_LABEL: Record<BottomKind, string> = { pants: "Pants", skirt: "Skirt", shorts: "Shorts", leggings: "Leggings" };
+
+export const STYLE_FITS: Record<StyleId, StyleFits> = {
+  bodega_drip: {
+    tops: ["puffer", "hoodie", "zip"], bottoms: ["pants", "shorts", "leggings"],
+    topColors: ["#E8692E", "#E0457B", "#2F6FDB", "#26232D", "#F4F1EA", "#5B8C3A"],
+    bottomColors: ["#5B5A4A", "#26232D", "#3D5A80", "#8A7A62", "#C9C3B8", "#7A2E3B"],
+    shoeColors: ["#F4F1EA", "#26232D", "#E8692E", "#2F6FDB", "#C9A227", "#9A9A9A"],
+  },
+  thrift_store_icon: {
+    tops: ["cardigan", "tee", "vest"], bottoms: ["pants", "skirt", "shorts"],
+    topColors: ["#D9A43A", "#8DB38A", "#B0603F", "#7A3E2B", "#E9DFC9", "#4C6A92"],
+    bottomColors: ["#4C6A92", "#B0603F", "#5B5A4A", "#3A2418", "#C9B8A0", "#7A2E3B"],
+    shoeColors: ["#3A2418", "#F4F1EA", "#7A2E3B", "#26232D", "#D9A43A", "#8A7A62"],
+  },
+  midtown_finance: {
+    tops: ["vest", "blazer", "zip"], bottoms: ["pants", "skirt", "shorts"],
+    topColors: ["#23314F", "#7A2E3B", "#3A3742", "#8A8794", "#F1E6D4", "#2F5D50"],
+    bottomColors: ["#C2AE86", "#3A3742", "#23314F", "#1F1B26", "#8A8794", "#5B5A4A"],
+    shoeColors: ["#5A3420", "#1F1B26", "#8A6A52", "#ECE6DC", "#7A2E3B", "#3A3742"],
+  },
+  night_owl_goth: {
+    tops: ["hoodie", "crop", "blazer"], bottoms: ["skirt", "pants", "leggings"],
+    topColors: ["#1A161F", "#6E2B5E", "#3E5C76", "#2A2733", "#7A2E3B", "#C9C3CF"],
+    bottomColors: ["#14111A", "#2A2733", "#6E2B5E", "#3E5C76", "#4A4452", "#7A2E3B"],
+    shoeColors: ["#0E0C12", "#2A2733", "#6E2B5E", "#C9C3CF", "#7A2E3B", "#3E5C76"],
+  },
+  pilates_princess: {
+    tops: ["crop", "tee", "zip"], bottoms: ["leggings", "shorts", "skirt"],
+    topColors: ["#F2B8C6", "#A7D8C9", "#FFFFFF", "#C9B8E8", "#F6E7B8", "#9FD8C4"],
+    bottomColors: ["#E9A3B6", "#3F5A66", "#F2E4C9", "#C9B8E8", "#26232D", "#9FD8C4"],
+    shoeColors: ["#FFFFFF", "#F2B8C6", "#26232D", "#9FD8C4", "#C9B8E8", "#F6E7B8"],
+  },
+  startup_founder: {
+    tops: ["zip", "hoodie", "tee"], bottoms: ["pants", "leggings", "shorts"],
+    topColors: ["#8A8794", "#C9B8E8", "#26232D", "#2F6FDB", "#40B589", "#ECE6DC"],
+    bottomColors: ["#1F1B26", "#2E2A38", "#8A8794", "#3D5A80", "#C2AE86", "#5B5A4A"],
+    shoeColors: ["#ECE6DC", "#FFFFFF", "#1F1B26", "#40B589", "#2F6FDB", "#8A8794"],
+  },
+  influencer_soft_glam: {
+    tops: ["blazer", "crop", "cardigan"], bottoms: ["skirt", "pants", "leggings"],
+    topColors: ["#F1E6D4", "#D8C3A5", "#FFB3D1", "#C9B8E8", "#F2B8C6", "#FFFFFF"],
+    bottomColors: ["#C9A98A", "#F1E6D4", "#FFB3D1", "#26232D", "#D7B9A0", "#C9B8E8"],
+    shoeColors: ["#6E5240", "#8A6A52", "#FFFFFF", "#FFB3D1", "#26232D", "#D7B9A0"],
+  },
+  arcade_nerd: {
+    tops: ["tee", "hoodie", "zip"], bottoms: ["shorts", "pants", "leggings"],
+    topColors: ["#6B4FD8", "#FF7AA8", "#40B589", "#26232D", "#FFC21A", "#2F6FDB"],
+    bottomColors: ["#4F5A3A", "#2B3A67", "#26232D", "#8A7A62", "#6B4FD8", "#C9C3B8"],
+    shoeColors: ["#D93A2F", "#FFFFFF", "#26232D", "#6B4FD8", "#FFC21A", "#40B589"],
+  },
+};
+
+/** A stored fit is valid only if every piece and color is on its style's lists. */
+export function isValidFit(style: StyleId, fit: unknown): fit is Fit {
+  const f = fit as Partial<Fit> | null;
+  const o = STYLE_FITS[style];
+  return !!f && typeof f === "object" && o.tops.includes(f.top as TopKind) && o.bottoms.includes(f.bottom as BottomKind)
+    && o.topColors.includes(f.topColor ?? "") && o.bottomColors.includes(f.bottomColor ?? "") && o.shoeColors.includes(f.shoeColor ?? "");
+}
+
+/** The fit a style starts with for a presentation. */
+export function defaultFit(style: StartingStyle, body: "straight" | "curvy"): Fit {
+  const o = styleOutfit(style, body);
+  return { top: o.top, topColor: o.topColor, bottom: o.bottom, bottomColor: o.bottomColor, shoeColor: o.shoeColor };
+}
+
+/** The outfit to draw: the style's (accent and accessory) with the player's fit on top. */
+export function starterOutfit(style: StartingStyle, body: "straight" | "curvy", fit?: Fit | null): Outfit {
+  const o = styleOutfit(style, body);
+  return fit ? { ...o, ...fit } : o;
+}
