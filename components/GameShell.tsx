@@ -19,7 +19,7 @@ import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
-import { BillsSheet, LookSheet, PossessionsSheet, ShopSheet } from "./city/Commerce";
+import { BillsSheet, LookSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
@@ -58,7 +58,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "possessions" | "collection" | "dates" | "crew" | null;
+type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
@@ -363,10 +363,10 @@ export function GameShell({
       if (p?.owned) {
         setUnlocking(null);
         setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : `🔓 Unlocked: ${p.name}`);
-        // Show it where it lives; collector pieces and tickets also change clout and Possessions.
+        // Show it where it lives; collector pieces and tickets also change clout and Net Worth.
         if (p.type === "side_arc") openNews(null);
         if (p.type === "postcard") setPanel("collection");
-        if (p.type === "collector_item") setPanel("possessions");
+        if (p.type === "collector_item") setPanel("networth");
         if (p.type === "exclusive_event") setPanel("events");
         if (cityApi && (p.type === "collector_item" || p.type === "exclusive_event")) void cityApi.refresh().then((r) => r.ok && applyCity(r));
       } else if (Date.now() - started > 90_000) {
@@ -592,7 +592,7 @@ export function GameShell({
         if (a === "bills") return setPanel("bills");
         if (a === "look") return setPanel("look");
         if (a === "shop") return setPanel("shop");
-        if (a === "networth") return setPanel("possessions");
+        if (a === "networth") return setPanel("networth");
         if (a === "phone") return setPhone({ open: true, app: null });
       }
       setSoon({ key: a });
@@ -850,8 +850,8 @@ export function GameShell({
             onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
-          <PossessionsSheet
-            open={panel === "possessions"}
+          <NetWorthSheet
+            open={panel === "networth"}
             onClose={() => setPanel(null)}
             state={city}
             style={me.starting_style}

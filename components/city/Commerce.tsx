@@ -165,9 +165,9 @@ export function ShopSheet({
 }
 
 // ---------------------------------------------------------------------------
-// Possessions (C25): bank cash, then items by category; sell at 60%.
+// Net Worth (C25, renamed from Possessions in #30): bank cash, then items by category; sell at 60%.
 // ---------------------------------------------------------------------------
-export function PossessionsSheet({
+export function NetWorthSheet({
   open, onClose, state, style, busy, onSell, onEquip, onOpenCollection,
 }: {
   open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean>;
@@ -184,9 +184,9 @@ export function PossessionsSheet({
   const item = detail ? itemBySku(detail.sku) : undefined;
   return (
     <>
-      <Sheet open={open && !detail} onClose={onClose} label="Possessions" tall>
+      <Sheet open={open && !detail} onClose={onClose} label="Net Worth" tall>
         <div className="stack-16">
-          <SheetTitle right={formatCash(total)}>Possessions</SheetTitle>
+          <SheetTitle right={formatCash(total)}>Net Worth</SheetTitle>
           <div className="list-row static">
             <IconTile emoji="💵" size={40} />
             <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Bank cash</span></span>

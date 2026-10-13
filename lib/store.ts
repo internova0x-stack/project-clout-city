@@ -14,7 +14,7 @@ export interface StoreProduct {
   /** Postcards: the monument it belongs to, and whether the player has visited it (needed to buy). */
   placeId?: string | null;
   visited?: boolean | null;
-  /** Collector pieces: their value in Possessions. */
+  /** Collector pieces: their value in Net Worth. */
   value?: number | null;
   /** Exclusive events: the party itself. */
   event?: ExclusiveEvent | null;
