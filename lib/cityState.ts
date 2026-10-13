@@ -130,6 +130,7 @@ const ERRORS: Record<string, string> = {
   already_attended: "You already went tonight. Twice would be desperate.",
   gig_active: "Finish your current gig first.",
   needs_confidence: "This client wants more Confidence than you've got right now.",
+  needs_clout: "This client googled you. Come back with more clout.",
   gig_expired: "That offer expired at midnight.",
   not_ready: "Not done yet. Good work takes time; so does mediocre work.",
   already_owned: "You already own that. Calm down.",
@@ -180,7 +181,12 @@ export function eventAvailability(ev: ClubEvent, open: boolean, s: CityState): A
   return { ok: true };
 }
 
+/** Clout a gig tier needs (v0.7): pro gigs 500, big breaks 2,000 (CITY_ECONOMY.gigs). */
+export const gigCloutReq = (tier: GigOffer["tier"]) => CITY_ECONOMY.gigs[tier].clout;
+
 export function gigAvailability(g: GigOffer, s: CityState): Availability {
+  const clout = gigCloutReq(g.tier);
+  if (s.player.clout < clout) return { ok: false, reason: `Needs ${clout.toLocaleString()} clout (you have ${s.player.clout.toLocaleString()})` };
   if (s.player.confidence < g.confidence_req) return { ok: false, reason: `Needs Confidence ${g.confidence_req} (you have ${s.player.confidence})` };
   if (activeGig(s)) return { ok: false, reason: "Finish your current gig first" };
   if (s.player.energy < g.energy) return { ok: false, reason: "Not enough Energy" };

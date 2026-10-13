@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GIG_TITLES } from "@/lib/city";
-import { activeGig, gigAvailability, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
+import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { BankView } from "../game/Sheets";
@@ -190,7 +190,7 @@ function GigsApp({ state, now, busy, onAccept, onCollect }: { state: CityState; 
       {offers.length === 0 && !active && <p className="subtext">No offers left today. New ones land after midnight.</p>}
       {offers.map((g) => {
         const av = gigAvailability(g, state);
-        const locked = state.player.confidence < g.confidence_req;
+        const locked = state.player.confidence < g.confidence_req || state.player.clout < gigCloutReq(g.tier);
         return (
           <div key={g.id} className={`gig-card${locked ? " locked" : ""}`}>
             <span className={`tag ${TIER_TAG[g.tier].cls}`}>{locked ? "🔒 " : ""}{TIER_TAG[g.tier].label}</span>

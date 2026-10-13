@@ -6,7 +6,7 @@
 import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
-import { activeGig, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { activeGig, gigCloutReq, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 
@@ -138,6 +138,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const g = s.gigs.find((x) => x.id === offerId);
       if (!g) return fail("That offer expired at midnight.");
       if (activeGig(s)) return fail("Finish your current gig first.");
+      if (p().clout < gigCloutReq(g.tier)) return fail("This client googled you. Come back with more clout.");
       if (p().confidence < g.confidence_req) return fail("This client wants more Confidence than you've got right now.");
       if (p().energy < g.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
       p().energy -= g.energy;

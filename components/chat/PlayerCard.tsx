@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ChatApi, PlayerCard } from "@/lib/chat";
-import { ECONOMY } from "@/lib/economy";
+import { ECONOMY, formatCash, formatShort } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
 import type { DatingApi } from "@/lib/dating";
@@ -52,15 +52,14 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
               <span className="meta" style={{ display: "block" }}>{style?.label} · {hood}</span>
             </span>
           </div>
-          <div className="card row" style={{ justifyContent: "space-around" }}>
-            <span style={{ textAlign: "center" }}><span className="hud-number" style={{ display: "block" }}>🔥 {card.clout.toLocaleString()}</span><span className="meta">Clout</span></span>
-            {card.rank != null && <span style={{ textAlign: "center" }}><span className="hud-number" style={{ display: "block" }}>#{card.rank.toLocaleString()}</span><span className="meta">In Queens</span></span>}
-            <span style={{ textAlign: "center" }}><span className="hud-number" style={{ display: "block" }}>🏅 {card.badges}</span><span className="meta">Badges</span></span>
-            <span style={{ textAlign: "center" }}>
-              <span className="hud-number" style={{ display: "block" }}>{new Date(card.joined).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>
-              <span className="meta">In the city since</span>
-            </span>
+          <div className="profile-kpis">
+            <span className="profile-kpi"><b>🔥 {formatShort(card.clout)}</b><span>Clout</span></span>
+            <span className="profile-kpi"><b>{card.rank != null ? `#${card.rank.toLocaleString()}` : "—"}</b><span>In Queens</span></span>
+            <span className="profile-kpi"><b>{card.netWorth != null ? formatCash(card.netWorth) : "—"}</b><span>Net worth</span></span>
           </div>
+          <p className="meta" style={{ margin: 0 }}>
+            🏅 {card.badges} {card.badges === 1 ? "badge" : "badges"} · In the city since {new Date(card.joined).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+          </p>
           {card.recent && card.recent.some((r) => recentLine(r)) && (
             <div className="stack-4">
               <p className="overline" style={{ margin: 0 }}>Recently</p>
