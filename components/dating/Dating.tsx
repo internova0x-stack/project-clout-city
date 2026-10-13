@@ -169,27 +169,9 @@ export function DateSheet({ spot, api, onClose, onSent, onInviteFriend, onCrushI
         {error && <p className="meta" role="alert" style={{ margin: 0, color: "var(--red-600, #C8323A)" }}>{error}</p>}
         {people === null && <p className="meta">Checking who&apos;s free…</p>}
         {people?.length === 0 && (
-          <div className="stack-8">
-            <div className="card stack-4">
-              <p className="overline" style={{ margin: 0 }}>Nobody to ask yet</p>
-              <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with. Bring someone in.</p>
-            </div>
-            <button className="list-row" onClick={onInviteFriend}>
-              <span style={{ fontSize: 24 }} aria-hidden="true">👋</span>
-              <span style={{ flex: 1, textAlign: "left" }}>
-                <span className="title" style={{ display: "block" }}>Invite a friend</span>
-                <span className="meta">They join your crew, and then you can ask them out.</span>
-              </span>
-              <ChevronRightIcon size={16} />
-            </button>
-            <button className="list-row" onClick={onCrushInvite}>
-              <span style={{ fontSize: 24 }} aria-hidden="true">💌</span>
-              <span style={{ flex: 1, textAlign: "left" }}>
-                <span className="title" style={{ display: "block" }}>Send a crush invite</span>
-                <span className="meta">Your crush isn&apos;t in Clout City yet? Invite them. Same rewards as any invite.</span>
-              </span>
-              <ChevronRightIcon size={16} />
-            </button>
+          <div className="card stack-4">
+            <p className="overline" style={{ margin: 0 }}>Nobody to ask yet</p>
+            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with. Invite a friend to your crew, or send your crush an invite to Clout City.</p>
           </div>
         )}
         <div className="stack-8">
@@ -204,6 +186,12 @@ export function DateSheet({ spot, api, onClose, onSent, onInviteFriend, onCrushI
             </button>
           ))}
         </div>
+        {people?.length === 0 && (
+          <div className="sheet-cta stack-8">
+            <button className="btn btn-taxi" onClick={onInviteFriend}>Invite a friend</button>
+            <button className="btn btn-secondary" onClick={onCrushInvite}>💌 Send a crush invite</button>
+          </div>
+        )}
       </div>
     </Sheet>
   );
