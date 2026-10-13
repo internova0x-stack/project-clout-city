@@ -107,7 +107,8 @@ export function PhoneModal({
           ) : (
             <div className="phone-app-screen">
               <button className="phone-back" onClick={() => setApp(null)}><ChevronLeftIcon size={20} /> Home</button>
-              <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>
+              {/* News draws its own header (with the Archive button on the right). */}
+              {app !== "news" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
               {app === "bank" && (
                 <div className="stack-12">

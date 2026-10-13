@@ -152,25 +152,30 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
   );
 }
 
-/** v0.6: the regular stands on the illustration with a speech-bubble label; each tap says the next line. */
-function RegularTag({ place, talk }: { place: Place; talk: NonNullable<PlaceHandlers["regular"]> }) {
+/** v0.6: the regular stands on the illustration with a speech-bubble label; each tap says the
+ * next line, in a bubble just below the picture so the place stays visible. */
+function PlaceArtWithRegular({ place, daytime, talk }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"] }) {
   const [n, setN] = useState(-1);
-  const first = talk(place, 0);
-  if (!first) return null;
-  const said = n >= 0 ? talk(place, n) : null;
+  const first = talk?.(place, 0) ?? null;
+  const said = first && n >= 0 ? talk!(place, n) : null;
   return (
-    <>
+    <div className="stack-8">
+      <div className="place-art-wrap">
+        <PlaceArt place={place} daytime={daytime} />
+        {first && (
+          <button className="regular-tag" onClick={() => setN((x) => x + 1)} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
+            <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
+            <span>{n < 0 ? `💬 ${first.regular.name.split(" ")[0]}` : "Tap for more"}</span>
+          </button>
+        )}
+      </div>
       {said && (
         <div className="regular-bubble" role="status">
-          <span className="meta" style={{ display: "block" }}>{first.regular.name} · {first.regular.title}</span>
+          <span className="meta" style={{ display: "block" }}>{first!.regular.name} · {first!.regular.title}</span>
           &ldquo;{said.line}&rdquo;
         </div>
       )}
-      <button className="regular-tag" onClick={() => setN((x) => x + 1)} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
-        <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
-        <span>{n < 0 ? `💬 ${first.regular.name.split(" ")[0]}` : "Tap for more"}</span>
-      </button>
-    </>
+    </div>
   );
 }
 
@@ -190,10 +195,7 @@ export function LocationSheet({
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
         <div className="stack-16">
-          <div className="place-art-wrap">
-            <PlaceArt place={place} daytime={daytime} />
-            {handlers.regular && <RegularTag key={place.id} place={place} talk={handlers.regular} />}
-          </div>
+          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} />
           <StoryBanners place={place} story={handlers.story ?? null} />
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>

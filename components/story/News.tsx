@@ -25,7 +25,10 @@ export interface CityNews { items: NewsItem[]; today: string; focus?: string | n
 
 export function NewsApp({ feed, handlers, focusBeat, city }: { feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews }) {
   const storyLive = (feed?.arcs ?? []).some((a) => a.type === "main" && !a.finished);
-  const [tab, setTab] = useState<"today" | "city" | "archive">(city?.focus || (!storyLive && city?.items.length) ? "city" : "today");
+  // Story and City are the feed's two tabs; the Archive opens from the header.
+  const [feedTab, setFeedTab] = useState<"today" | "city">(city?.focus || (!storyLive && city?.items.length) ? "city" : "today");
+  const [inArchive, setInArchive] = useState(false);
+  const tab = inArchive ? "archive" : feedTab;
   const [reading, setReading] = useState<string | null>(null);
   const live = (feed?.arcs ?? []).filter((a) => a.type === "main" && !a.finished);
   const archive = (feed?.arcs ?? []).filter((a) => a.type === "main" && a.finished);
@@ -50,11 +53,18 @@ export function NewsApp({ feed, handlers, focusBeat, city }: { feed: StoryFeed |
   const readingArc = archive.find((a) => a.id === reading);
   return (
     <div className="stack-12">
-      <div className="segmented" role="group" aria-label="News">
-        <button aria-pressed={tab === "today"} onClick={() => { setTab("today"); setReading(null); }}>Story</button>
-        {city && <button aria-pressed={tab === "city"} onClick={() => { setTab("city"); setReading(null); }}>City</button>}
-        <button aria-pressed={tab === "archive"} onClick={() => setTab("archive")}>Archive</button>
+      <div className="row news-header" style={{ justifyContent: "space-between", alignItems: "center" }}>
+        <h2 className="display-lg" style={{ margin: "4px 0 0" }}>{inArchive ? "Archive" : "News"}</h2>
+        <button className="chip" aria-pressed={inArchive} onClick={() => { setInArchive((x) => !x); setReading(null); }}>
+          {inArchive ? "‹ Back to news" : "🗂️ Archive"}
+        </button>
       </div>
+      {!inArchive && city && (
+        <div className="segmented" role="group" aria-label="News feed">
+          <button aria-pressed={feedTab === "today"} onClick={() => setFeedTab("today")}>Story</button>
+          <button aria-pressed={feedTab === "city"} onClick={() => setFeedTab("city")}>City</button>
+        </div>
+      )}
       {tab === "city" ? (
         cityNews.recent.length === 0 ? (
           <Quiet text="Slow news week. Even the celebrities are napping. Check back tomorrow." />
