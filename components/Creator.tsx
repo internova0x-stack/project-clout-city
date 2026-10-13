@@ -68,11 +68,11 @@ export function Creator({
   const canGoBack = step > 1 || (step === 1 && !lookLocked);
 
   return (
-    <main style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: "var(--night-900)" }}>
+    <main style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: "#FFE3CC" }}>
       <section className="stage" style={{ flex: step === 0 ? "1 1 44%" : "1 1 40%", minHeight: 240 }}>
         <div className="row" style={{ position: "absolute", zIndex: 2, top: "calc(12px + var(--safe-top))", left: 16, right: 16, alignItems: "flex-start" }}>
           <button
-            className="icon-round dark"
+            className="icon-round"
             aria-label="Back"
             disabled={!canGoBack}
             style={{ opacity: canGoBack ? 1 : 0 }}
@@ -81,13 +81,13 @@ export function Creator({
             <ChevronLeftIcon size={18} />
           </button>
           <div className="spacer center">
-            <h1 className="display-sm" style={{ margin: 0, color: "var(--text-on-dark)" }}>{STEPS[step]}</h1>
+            <h1 className="display-sm" style={{ margin: 0, color: "var(--text-1)" }}>{STEPS[step]}</h1>
             <div className="step-progress" role="img" aria-label={`Step ${step + 1} of ${STEPS.length}`}>
               {STEPS.map((s, i) => <span key={s} className={i <= step ? "on" : undefined} />)}
             </div>
           </div>
           {step === 0 ? (
-            <button className="icon-round dark" onClick={() => setLook(randomLook(Math.random, STYLE_IDS))} aria-label="Shuffle look">
+            <button className="icon-round" onClick={() => setLook(randomLook(Math.random, STYLE_IDS))} aria-label="Shuffle look">
               <ShuffleIcon size={18} />
             </button>
           ) : (
@@ -597,31 +597,39 @@ function OutfitSwatches({ label, colors, value, onPick }: { label: string; color
   );
 }
 
-/** The birth lottery's reveal (v0.7, #46): a bright virtual card, after the best banking apps. */
+/** Isometric block for the lottery card: top, left and right faces (Monument Valley style). */
+function Block({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
+  const dy = w / 2;
+  return (
+    <>
+      <polygon points={`${x},${y} ${x + w},${y + dy} ${x},${y + 2 * dy} ${x - w},${y + dy}`} fill="#FBE3DA" />
+      <polygon points={`${x - w},${y + dy} ${x},${y + 2 * dy} ${x},${y + 2 * dy + h} ${x - w},${y + dy + h}`} fill="#F2A99A" />
+      <polygon points={`${x},${y + 2 * dy} ${x + w},${y + dy} ${x + w},${y + dy + h} ${x},${y + 2 * dy + h}`} fill="#D9584A" />
+    </>
+  );
+}
+
+/** The birth lottery's reveal (v0.7, #46): a quiet Monument Valley card at dusk (owner, Oct 13). */
 function CashCard({ cash, handle }: { cash: number; handle: string }) {
   const { min, max } = ECONOMY.birthLottery;
   const luckier = Math.round(Math.min(99, Math.max(1, ((cash - min) / Math.max(1, max - min)) * 100)));
-  let h = 0;
-  for (const ch of handle || "clout") h = (h * 31 + ch.charCodeAt(0)) % 10000;
   return (
     <div className="cash-reveal" role="status">
       <p className="cash-kicker">Your starting balance</p>
       <p className="cash-amount">{formatCash(cash)}</p>
-      <span className="cash-luck">🎉 Luckier than {luckier}% of new arrivals</span>
-      <div className="cash-card-wrap" aria-hidden="true">
-        {["#FFC21A", "#40B589", "#7C4DFF", "#FF8A65", "#FFC21A", "#40B589", "#7C4DFF"].map((c, i) => (
-          <span key={i} className={`confetti c${i}`} style={{ background: c }} />
-        ))}
-        <div className="cash-card">
-          <span className="cash-card-mark">CLOUT CITY</span>
-          <svg className="cash-card-wave" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
-            <path d="M8 6a8 8 0 0 1 0 12M12 4a12 12 0 0 1 0 16M4 8.5a4 4 0 0 1 0 7" />
-          </svg>
-          <span className="cash-card-chip" />
-          <span className="cash-card-num">•••• {String(h).padStart(4, "0")}</span>
-          <span className="cash-card-who">{handle ? `@${handle}` : "New arrival"}</span>
-          <span className="cash-card-tag">VIRTUAL · C$</span>
-        </div>
+      <p className="cash-luck">Luckier than {luckier}% of new arrivals</p>
+      <div className="cash-card" aria-hidden="true">
+        <svg className="cash-card-scene" viewBox="0 0 320 200" preserveAspectRatio="xMidYMax slice">
+          <circle cx="246" cy="62" r="26" fill="#FFF6EC" opacity=".9" />
+          <Block x={222} y={112} w={46} h={60} />
+          <Block x={268} y={120} w={30} h={34} />
+          <Block x={190} y={150} w={26} h={22} />
+          <rect x="219" y="96" width="6" height="18" fill="#F2A99A" />
+          <polygon points="216,96 222,90 228,96" fill="#D9584A" />
+        </svg>
+        <span className="cash-card-mark">CLOUT CITY</span>
+        <span className="cash-card-tag">C$ · VIRTUAL</span>
+        <span className="cash-card-who">{handle ? `@${handle}` : "New arrival"}</span>
       </div>
       <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{lotteryLine(cash)}</p>
     </div>

@@ -21,7 +21,7 @@
   --g-gold:linear-gradient(180deg,#FEF3C0 0%,#E1BC85 35%,#AD8759 70%,#7E5932 100%);
   --g-neon:linear-gradient(90deg,#FFC21A,#FF6A3D,#FF2E88);
   --g-story:linear-gradient(100deg,#9FDCFF 0%,#8EE6D8 55%,#7FE0A8 100%);
-  --g-stage:linear-gradient(180deg,#1B1622,#2E2236);
+  --g-stage:radial-gradient(120% 90% at 50% 12%,#FFF4E6 0%,#FFE3CC 55%,#FFD3B5 100%); /* light, Monument Valley dusk (owner, Oct 13) */
   --g-hazard:repeating-linear-gradient(45deg,#FFC21A 0 8px,#14111A 8px 16px);
   --g-night-reveal:radial-gradient(circle at 100% 0%,rgba(255,46,136,.30),transparent 55%),radial-gradient(circle at 0% 100%,rgba(255,194,26,.20),transparent 55%),#14111A;
 
@@ -288,7 +288,7 @@ a { color:inherit; }
 
 /* ---------- Creator (C9 binary pills, C10 option chips, C14 step progress) ---------- */
 .step-progress { display:flex; justify-content:center; gap:6px; margin-top:6px; }
-.step-progress span { width:24px; height:5px; border-radius:var(--r-pill); background:rgba(255,246,224,.22); }
+.step-progress span { width:24px; height:5px; border-radius:var(--r-pill); background:rgba(23,20,28,.14); }
 .step-progress span.on { background:var(--taxi-400); }
 .binary { display:flex; gap:8px; }
 .binary button { flex:1; height:40px; border-radius:var(--r-pill); background:var(--chip-off); color:var(--text-1); font-size:15px; font-weight:600; transition:background .2s ease-out, color .2s ease-out; }
@@ -397,7 +397,6 @@ a { color:inherit; }
 .install-steps { list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:12px; }
 .install-steps li { display:flex; gap:10px; font-size:14px; }
 .install-steps .n { color:var(--taxi-500); font-weight:600; font-size:15px; width:14px; }
-.profile-chip { position:absolute; z-index:16; left:50%; transform:translateX(-50%); top:calc(124px + var(--safe-top)); display:flex; align-items:center; gap:10px; padding:6px 14px 6px 6px; border-radius:999px; box-shadow:var(--elev-2); max-width:62%; }
 .or-divider { display:flex; align-items:center; gap:10px; color:var(--text-3); font-size:12px; }
 .or-divider::before, .or-divider::after { content:""; flex:1; height:1px; background:var(--divider); }
 .select-card.single[aria-checked="true"] { padding-top:36px; }
@@ -437,7 +436,6 @@ a { color:inherit; }
 .guest-card.glass-hud .guest-foot { color:var(--text-3); }
 .glass-hud .btn.guest-login, .guest-card.glass-hud .btn.on-dark-secondary { background:#fff; border:1px solid #E2DBD0; color:var(--night-900); }
 .ticker.glass-hud .ticker-time { color:var(--text-3); }
-.profile-chip.glass-hud .display-sm { color:var(--text-1); }
 
 /* ---------- Primary action color (Oct 12, 2026): Apple Music red ----------
    The loud button is now a red-pink gradient after the Apple Music icon, with a white
@@ -576,7 +574,7 @@ a { color:inherit; }
 .room-edit-bar .chip { height:32px; padding:0 12px; font-size:13px; }
 .interior-head { display:flex; width:100%; justify-content:space-between; align-items:baseline; gap:8px; color:var(--text-1); }
 .interior-panel:not(.open) { padding:12px 14px; }
-.game.arranging .profile-chip, .game.arranging .under-hud, .game.arranging .dev-clock, .game.arranging .stats, .game.arranging .side-col, .game.arranging .room-chips { display:none; }
+.game.arranging .under-hud, .game.arranging .dev-clock, .game.arranging .stats, .game.arranging .side-col, .game.arranging .room-chips { display:none; }
 .game.arranging .room-edit { left:12px; }
 .game.arranging .room-edit-bar { max-width:none; }
 
@@ -622,7 +620,6 @@ a { color:inherit; }
 .chatter-row { display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:var(--r-lg); background:var(--surface-card); }
 .chatter-bubble { position:absolute; z-index:30; left:50%; transform:translateX(-50%); top:calc(124px + var(--safe-top)); max-width:min(340px, calc(100% - 32px));
   padding:12px 14px; border-radius:18px; background:#fff; color:var(--text-1); box-shadow:var(--elev-3); font-size:14px; line-height:19px; animation:rise-in .25s ease-out; }
-.game.has-story-prompt .profile-chip { top:calc(196px + var(--safe-top)); }
 .game.has-story-prompt .dev-clock { top:calc(262px + var(--safe-top)); }
 .count-badge { position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 5px; border-radius:var(--r-pill); background:var(--neon-600); color:#fff;
   font-size:11px; font-weight:700; display:grid; place-items:center; box-shadow:0 0 0 2px #fff; }
@@ -898,24 +895,60 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .cash-kicker { margin:0; font-family:var(--font-label); font-weight:700; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-3); }
 .cash-amount { margin:0; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", system-ui, "Segoe UI", Roboto, sans-serif;
   font-weight:500; font-size:48px; line-height:1.05; letter-spacing:-.02em; color:var(--text-1); font-variant-numeric:tabular-nums; animation:rise-in .35s ease-out; }
-.cash-luck { display:inline-flex; gap:6px; align-items:center; padding:6px 12px; border-radius:var(--r-pill); background:#E8F7EF; color:#1F7A52; font-weight:700; font-size:13px; }
-.cash-card-wrap { position:relative; width:min(100%, 318px); aspect-ratio:1.59; margin:18px auto 14px; }
-.cash-card { position:absolute; inset:0; border-radius:22px; overflow:hidden; color:#fff; text-align:left; transform:rotate(-4deg);
-  background:radial-gradient(120% 140% at 0% 0%, #FF8A65 0%, #FA2D48 42%, #C2185B 75%, #6A1B9A 100%);
-  box-shadow:0 22px 40px rgba(194,24,91,.35), 0 4px 10px rgba(0,0,0,.12); animation:card-in .7s cubic-bezier(.2,.9,.3,1.2) both; }
-.cash-card::before { content:""; position:absolute; width:82%; aspect-ratio:1; border-radius:50%; right:-28%; top:-60%; background:rgba(255,255,255,.14); }
-.cash-card::after { content:""; position:absolute; width:62%; aspect-ratio:1; border-radius:50%; left:-22%; bottom:-66%; background:rgba(255,255,255,.1); }
-.cash-card-mark { position:absolute; left:20px; top:18px; font-family:var(--font-display); font-size:17px; letter-spacing:.02em; }
-.cash-card-wave { position:absolute; right:20px; top:18px; opacity:.9; }
-.cash-card-chip { position:absolute; left:20px; top:62px; width:40px; height:30px; border-radius:7px; background:linear-gradient(135deg, #FFE7EC, #F3B6C5); }
-.cash-card-num { position:absolute; left:20px; bottom:44px; font-size:15px; font-weight:600; letter-spacing:.22em; opacity:.92; }
-.cash-card-who { position:absolute; left:20px; bottom:18px; font-size:14px; font-weight:600; }
-.cash-card-tag { position:absolute; right:18px; bottom:16px; font-size:11px; font-weight:800; letter-spacing:.08em; padding:5px 9px; border-radius:var(--r-pill); background:rgba(255,255,255,.22); }
-.confetti { position:absolute; width:9px; height:9px; border-radius:2px; animation:confetti-pop .9s ease-out both; }
-.confetti.c0 { left:8%; top:-6%; transform:rotate(20deg); } .confetti.c1 { left:92%; top:-8%; transform:rotate(-15deg); animation-delay:.05s; }
-.confetti.c2 { left:-3%; top:55%; transform:rotate(30deg); animation-delay:.1s; } .confetti.c3 { left:100%; top:70%; transform:rotate(45deg); animation-delay:.15s; }
-.confetti.c4 { left:46%; top:-12%; transform:rotate(10deg); animation-delay:.2s; } .confetti.c5 { left:78%; top:104%; transform:rotate(-30deg); animation-delay:.12s; }
-.confetti.c6 { left:18%; top:104%; transform:rotate(60deg); animation-delay:.08s; }
-@keyframes card-in { from { opacity:0; transform:translateY(30px) rotate(6deg) scale(.9); } to { opacity:1; transform:rotate(-4deg); } }
-@keyframes confetti-pop { from { opacity:0; translate:0 18px; } 60% { opacity:1; } to { opacity:1; translate:0 0; } }
-@media (prefers-reduced-motion: reduce) { .cash-card, .confetti, .cash-amount { animation:none; } }
+.cash-luck { margin:0; font-size:14px; color:var(--text-3); }
+/* Monument Valley card at dusk: a pastel sky, a pale sun, stepped blocks; quiet ink type (owner, Oct 13). */
+.cash-card { position:relative; width:min(100%, 318px); aspect-ratio:1.59; margin:18px auto 14px; border-radius:24px; overflow:hidden; text-align:left;
+  background:linear-gradient(160deg, #FFF1E8 0%, #FFC9B9 55%, #E88A8F 100%); box-shadow:0 18px 36px rgba(120,80,90,.18);
+  animation:card-in .6s cubic-bezier(.2,.9,.3,1.05) both; }
+.cash-card-scene { position:absolute; inset:0; width:100%; height:100%; }
+.cash-card-mark { position:absolute; left:20px; top:18px; font-size:11px; font-weight:600; letter-spacing:.32em; color:#7A2F33; }
+.cash-card-tag { position:absolute; left:20px; bottom:40px; font-size:10.5px; font-weight:500; letter-spacing:.2em; color:#7A2F33; opacity:.7; }
+.cash-card-who { position:absolute; left:20px; bottom:18px; font-size:14px; font-weight:500; color:#7A2F33; }
+@keyframes card-in { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .cash-card, .cash-amount { animation:none; } }
+
+/* ===================== v0.7 step 3: avatar bubble, stats with suggestions, profile ===================== */
+.me-bubble { position:absolute; z-index:16; left:12px; bottom:calc(88px + var(--safe-bottom)); width:60px; height:60px; padding:0; border-radius:50%;
+  background:#FFE7D2; box-shadow:0 0 0 3px #fff, 0 6px 16px rgba(23,20,28,.22); }
+.me-bubble-head { display:block; width:100%; height:100%; border-radius:50%; overflow:hidden; }
+.me-bubble-rank { position:absolute; left:50%; bottom:-8px; transform:translateX(-50%); padding:1px 7px; border-radius:var(--r-pill);
+  background:var(--night-900); color:#fff; font-size:10.5px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.stats.collapsed.with-bubble { left:84px; bottom:calc(98px + var(--safe-bottom)); }
+.stats.with-tips { width:calc(100% - 96px); max-width:340px; padding:14px; }
+.stats.with-tips .stats-toggle { top:6px; right:6px; }
+.stat-block + .stat-block { margin-top:12px; }
+.stats.with-tips .stat-row .label { display:flex; font-size:15px; font-weight:700; }
+.stats.with-tips .stat-block:first-of-type .stat-row .label { padding-right:36px; }
+.stat-value { margin-left:auto; color:var(--text-2); font-weight:600; font-variant-numeric:tabular-nums; }
+.stat-tip { display:flex; align-items:center; gap:10px; width:100%; min-height:48px; margin-top:8px; padding:6px 6px 6px 12px; border-radius:14px;
+  background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider), 0 2px 6px rgba(16,24,40,.06); text-align:left; font-size:13px; color:var(--text-2); line-height:1.25; }
+.stat-tip b { display:block; color:var(--text-1); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.stat-tip-emoji { font-size:18px; flex:none; }
+.stat-tip-text { min-width:0; flex:1; }
+.stat-tip-go { flex:none; height:36px; padding:0 14px; border-radius:11px; display:inline-flex; align-items:center;
+  background:linear-gradient(180deg, var(--primary-top), var(--primary-bottom)); color:#fff; font-weight:700; font-size:14px; }
+.game.arranging .me-bubble { display:none; }
+.sheet.hero .sheet-grip { position:absolute; left:0; right:0; top:0; z-index:4; }
+.sheet.hero .sheet-body { padding-top:0; }
+.sheet.hero .sheet-close { background:rgba(255,255,255,.88); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+/* The profile's picture runs edge to edge; its top corners are the sheet's own (owner, Oct 13). */
+.profile-hero { position:relative; height:300px; margin:0 -20px; border-radius:var(--r-xl) var(--r-xl) 0 0; overflow:hidden;
+  background:var(--g-stage); }
+.profile-hero .avatar-canvas { top:24px; }
+.profile-hero::after { content:""; position:absolute; left:0; right:0; bottom:0; height:44px; pointer-events:none;
+  background:linear-gradient(180deg, transparent, var(--surface-sheet)); }
+.profile-name { margin:-8px 0 0; text-align:center; position:relative; z-index:1; }
+.profile-sub { margin:2px 0 0; text-align:center; color:var(--text-2); }
+.profile-kpis { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+.profile-kpi { background:#fff; border-radius:16px; padding:10px 6px; text-align:center; box-shadow:inset 0 0 0 1px var(--divider); }
+.profile-kpi b { display:block; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-weight:600; font-size:18px; color:var(--text-1); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.profile-kpi span { font-size:12px; color:var(--text-3); }
+.profile-badges { display:flex; flex-wrap:wrap; gap:8px; }
+.profile-badge { width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:22px; background:#FFF1E8; box-shadow:inset 0 0 0 1.5px #F2A99A; }
+.profile-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.profile-tile { background:#fff; border-radius:16px; padding:10px 12px; box-shadow:inset 0 0 0 1px var(--divider); font-size:13px; color:var(--text-2); text-align:left; min-width:0; }
+.profile-tile b { display:block; color:var(--text-1); font-size:14px; }
+.profile-recent { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--divider); font-size:14px; color:var(--text-1); }
+.profile-recent:last-child { border-bottom:0; }
+.profile-recent span:last-child { margin-left:auto; color:var(--text-3); font-size:12px; white-space:nowrap; }

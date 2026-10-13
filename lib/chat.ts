@@ -36,6 +36,9 @@ export interface PlayerCard {
   isMe: boolean;
   /** v0.5 (migration 0011): my side of a crush on this player; absent before the migration. */
   crush?: import("./dating.ts").CrushStatus | null;
+  /** v0.7 (migration 0020): place in the Queens leaderboard, and public recent moments. */
+  rank?: number;
+  recent?: import("./recent.ts").RecentItem[];
 }
 
 export type ReportReason = "harassment" | "spam" | "inappropriate" | "other";

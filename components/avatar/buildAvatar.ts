@@ -144,10 +144,10 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const body = new Group();
   root.add(body);
 
-  // ---- Stage: pedestal with a neon rim, and a soft contact shadow ----
+  // ---- Stage: a pale stone pedestal with a coral rim (Monument Valley dusk), and a soft contact shadow ----
   if (opts.pedestal ?? true) {
-    root.add(mesh(geo(new CylinderGeometry(0.95, 1.02, 0.14, 22)), mat("#16121C", { roughness: 0.4 }), 0, -0.07, 0));
-    const rim = mesh(geo(new TorusGeometry(0.96, 0.016, 5, 29)), mat("#FF2E88", { emissive: "#FF2E88", roughness: 0.3 }));
+    root.add(mesh(geo(new CylinderGeometry(0.95, 1.02, 0.14, 22)), mat("#F4D2C0", { roughness: 0.85 }), 0, -0.07, 0));
+    const rim = mesh(geo(new TorusGeometry(0.96, 0.016, 5, 29)), mat("#E8877F", { roughness: 0.6 }));
     rim.rotation.x = Math.PI / 2;
     root.add(rim);
   }
