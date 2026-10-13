@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { placeById } from "@/lib/city";
+import { formatCash } from "@/lib/economy";
 import { dateSpotName, type CrushStatus, type DateCandidate, type DateNight, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { ChevronRightIcon, CloseIcon } from "../icons";
@@ -78,7 +79,7 @@ export function DateInviteCard({ date, busy, onAnswer }: { date: DateNight; busy
           <span className="overline" style={{ display: "block", color: "var(--neon-text)" }}>{date.matched ? "Date night · Matched" : "Date night"}</span>
           <span className="title" style={{ display: "block" }}>{date.with.name} wants to meet at {where}</span>
           <span className="meta" style={{ display: "block" }}>
-            {place && date.kind === "event" ? `${place.name} · ` : ""}You each pay your own way · <span className="tabular">${date.price}</span>
+            {place && date.kind === "event" ? `${place.name} · ` : ""}You each pay your own way · <span className="tabular">{formatCash(date.price)}</span>
           </span>
           <span className="meta" style={{ display: "block" }}>Expires at midnight</span>
         </span>
@@ -158,7 +159,7 @@ export function DateSheet({ spot, api, onClose, onSent }: {
         <div className="stack-4">
           <h2 className="display-md" style={{ margin: 0 }}>Make it a date</h2>
           <p className="subtext" style={{ margin: 0 }}>
-            {where} tonight · <span className="tabular">${spot.price}</span> each. Go whenever you&apos;re on; once you both have, you both get a little glow.
+            {where} tonight · <span className="tabular">{formatCash(spot.price)}</span> each. Go whenever you&apos;re on; once you both have, you both get a little glow.
           </p>
         </div>
         {error && <p className="meta" role="alert" style={{ margin: 0, color: "var(--red-600, #C8323A)" }}>{error}</p>}

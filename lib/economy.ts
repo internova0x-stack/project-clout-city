@@ -59,7 +59,20 @@ export function canAfford(home: Home, cash: number, e: Economy = ECONOMY): boole
 }
 
 export function formatCash(n: number): string {
-  return `$${Math.round(n).toLocaleString("en-US")}`;
+  return `C$${Math.round(n).toLocaleString("en-US")}`;
+}
+
+/** Short number for tight spots like the HUD: 9,999, then 12.5K, then 1.25M. */
+export function formatShort(n: number): string {
+  const a = Math.abs(n);
+  if (a < 10_000) return Math.round(n).toLocaleString("en-US");
+  const [v, unit] = a < 999_500 ? [n / 1_000, "K"] : [n / 1_000_000, "M"];
+  return `${Number(v.toFixed(Math.abs(v) < 10 ? 2 : Math.abs(v) < 100 ? 1 : 0))}${unit}`;
+}
+
+/** Cash in the HUD: C$9,999, then C$12.5K, then C$1.25M (never wider than 7 characters). */
+export function formatCashShort(n: number): string {
+  return `C$${formatShort(n)}`;
 }
 
 /** Witty line for the birth lottery reveal, by how lucky the roll was. */

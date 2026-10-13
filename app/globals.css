@@ -184,6 +184,12 @@ a { color:inherit; }
 .hud { position:absolute; z-index:20; top:calc(12px + var(--safe-top)); left:12px; right:12px; height:48px; border-radius:var(--r-pill);
   display:flex; align-items:center; justify-content:space-between; padding:0 6px 0 14px; box-shadow:var(--elev-2); }
 .hud-cluster { display:flex; align-items:center; gap:4px; }
+/* The HUD scales with its own width so C$ amounts fit down to 320px phones. */
+.hud { container-type:inline-size; }
+.hud .hud-number { font-size:clamp(12px, 4.4cqi, 18px); }
+.hud .hud-icon-btn { width:clamp(30px, 11.2cqi, 44px); }
+.hud .hud-btn { min-width:clamp(32px, 12cqi, 44px); padding:0 clamp(2px, 1.6cqi, 6px); }
+.hud .hud-cluster { gap:clamp(0px, 1.1cqi, 4px); }
 .hud-time { white-space:nowrap; }
 .hud-time + .hud-btn { padding-left:4px; margin-left:2px; }
 .hud-ampm { font-size:12px; margin-left:2px; letter-spacing:.02em; }
@@ -194,7 +200,7 @@ a { color:inherit; }
 .hud-icon-btn > span.circle { width:32px; height:32px; border-radius:50%; background:rgba(255,246,224,.10); display:inline-flex; align-items:center; justify-content:center; }
 .hud-clout { color:var(--taxi-400); }
 .hud .pin-dot { top:6px; right:6px; }
-@media (max-width:360px) { .hud-time { min-width:0; } .hud .hud-number { font-size:16px; } .hud-ampm { font-size:10px; } .hud-btn { padding:0 4px; } .hud { padding-left:10px; } }
+@media (max-width:360px) { .hud-time { min-width:0; } .hud-ampm { font-size:10px; } .hud { padding-left:10px; } }
 
 /* Under-HUD pills (C2) */
 .under-hud { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); left:12px; display:flex; flex-direction:column; align-items:flex-start; gap:12px; }

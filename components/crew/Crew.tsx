@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { placeById, type Place } from "@/lib/city";
+import { formatCash } from "@/lib/economy";
 import { CREW, activityLabel, crewActivities, crewProgress, type CrewActivity, type CrewApi, type CrewInbox, type CrewOuting, type CrewPerson } from "@/lib/crew";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { ChevronRightIcon, CloseIcon } from "../icons";
@@ -83,14 +84,14 @@ export function CrewSheet({ place, api, onClose, onSent, onInviteFriends }: {
                 <div className="chip-row" role="group" aria-label="Activity" style={{ flexWrap: "wrap" }}>
                   {activities.map((a) => (
                     <button key={a.id} className="chip" aria-pressed={activity?.id === a.id} onClick={() => setActivity(a)}>
-                      {a.label}{a.price > 0 ? ` · $${a.price}` : ""}
+                      {a.label}{a.price > 0 ? ` · ${formatCash(a.price)}` : ""}
                     </button>
                   ))}
                 </div>
               </div>
             )}
             {activities.length === 1 && activity && (
-              <p className="body" style={{ margin: 0 }}>{activity.label}{activity.price > 0 ? ` · $${activity.price} each` : " · free"}</p>
+              <p className="body" style={{ margin: 0 }}>{activity.label}{activity.price > 0 ? ` · ${formatCash(activity.price)} each` : " · free"}</p>
             )}
             <div className="stack-4">
               <p className="overline" style={{ margin: 0 }}>Who · {picked.length} of {Math.min(people.length, CREW.maxInvites)}</p>
@@ -133,7 +134,7 @@ export function CrewInviteCard({ outing, busy, onAnswer }: { outing: CrewOuting;
           <span className="overline" style={{ display: "block", color: "var(--neon-text)" }}>Crew plans</span>
           <span className="title" style={{ display: "block" }}>{outing.host.name} wants the crew at {place?.name ?? outing.placeId}</span>
           <span className="meta" style={{ display: "block" }}>
-            {activityLabel(place, outing.kind, outing.activity)} · {outing.price > 0 ? <><span className="tabular">${outing.price}</span> · you pay your own way</> : "free"}
+            {activityLabel(place, outing.kind, outing.activity)} · {outing.price > 0 ? <><span className="tabular">{formatCash(outing.price)}</span> · you pay your own way</> : "free"}
           </span>
           <span className="meta" style={{ display: "block" }}>Expires at midnight · {went} of {total} went</span>
         </span>
