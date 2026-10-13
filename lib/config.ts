@@ -20,7 +20,7 @@ export const GAME_CONFIG = {
   },
 
   profile: {
-    nameMinLength: 2,
+    nameMinLength: 3,
     nameMaxLength: 20,
   },
 

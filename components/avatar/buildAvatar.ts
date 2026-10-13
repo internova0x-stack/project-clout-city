@@ -35,7 +35,7 @@ interface Build {
 
 const BUILDS: Record<Look["body"], Build> = {
   straight: { shoulder: 0.2, chest: 0.168, waist: 0.145, hip: 0.148, thigh: 0.075, calf: 0.052, arm: 0.047, forearm: 0.038 },
-  curvy: { shoulder: 0.185, chest: 0.172, waist: 0.125, hip: 0.172, thigh: 0.083, calf: 0.054, arm: 0.044, forearm: 0.036 },
+  curvy: { shoulder: 0.165, chest: 0.18, waist: 0.112, hip: 0.188, thigh: 0.086, calf: 0.053, arm: 0.04, forearm: 0.033 },
 };
 
 const TORSO_DEPTH = 0.68;

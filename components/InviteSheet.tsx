@@ -8,6 +8,7 @@ import type { CliqueMember } from "@/lib/player";
 import { getStyle } from "@/lib/styles";
 import { CopyIcon, ShareIcon } from "./icons";
 import { Sheet } from "./Sheet";
+import { handle } from "@/lib/validation";
 
 // The invite screen (Clarifications section 7; Milestones v0.1): a personal
 // link, a share button and the clique count. Rewards switch on in v0.2.
@@ -119,7 +120,7 @@ export function InviteSheet({
                     {s.emoji}
                   </span>
                   <span className="stack-4" style={{ flex: 1, minWidth: 0 }}>
-                    <span className="title" style={{ display: "block" }}>{m.display_name}</span>
+                    <span className="title" style={{ display: "block" }}>{handle(m.display_name)}</span>
                     <span className="subtext" style={{ display: "block" }}>{s.label}</span>
                   </span>
                   <span className="tag tag-positive">Joined</span>

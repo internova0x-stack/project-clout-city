@@ -7,6 +7,7 @@ import { dateSpotName, type CrushStatus, type DateCandidate, type DateNight, typ
 import { getStyle, type StyleId } from "@/lib/styles";
 import { ChevronRightIcon, CloseIcon } from "../icons";
 import { Sheet } from "../Sheet";
+import { handle } from "@/lib/validation";
 
 // Crushes and date nights (Clarifications section 14, Design Guide C40 and C41).
 // Copy stays gender-neutral everywhere; nothing one-sided is ever shown.
@@ -175,7 +176,7 @@ export function DateSheet({ spot, api, onClose, onSent }: {
             <button key={p.id} className="list-row" disabled={busy !== null} onClick={() => void ask(p)}>
               <Avatar style={p.style} size={40} />
               <span style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
-                <span className="title" style={{ display: "block" }}>{p.name}</span>
+                <span className="title" style={{ display: "block" }}>{handle(p.name)}</span>
                 <span className="meta">{p.matched ? "💗 Matched" : p.crush ? "Your crush" : "Friend"}</span>
               </span>
               <span className="meta">{busy === p.id ? "Sending…" : "Ask"}</span>
@@ -263,7 +264,7 @@ export function DatingSheet({ open, onClose, inbox, me, busy, onSeen, onPlan, on
                 {inbox!.matches.map((m) => (
                   <button key={m.id} className="list-row" onClick={() => onSayHi(m)}>
                     <Avatar style={m.style} size={36} />
-                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{m.name}</span>
+                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{handle(m.name)}</span>
                     <span className="tag matched-tag">Matched</span>
                   </button>
                 ))}

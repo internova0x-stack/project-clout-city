@@ -7,6 +7,7 @@ import { CREW, activityLabel, crewActivities, crewProgress, type CrewActivity, t
 import { getStyle, type StyleId } from "@/lib/styles";
 import { ChevronRightIcon, CloseIcon } from "../icons";
 import { Sheet } from "../Sheet";
+import { handle } from "@/lib/validation";
 
 // Crew outings: one tap on a place card invites the crew to the same activity tonight.
 // Everyone who goes gets +10 clout for each friend who also goes; when the host and all
@@ -101,7 +102,7 @@ export function CrewSheet({ place, api, onClose, onSent, onInviteFriends }: {
                   <button key={p.id} className="list-row crew-pick" aria-pressed={on} onClick={() => toggle(p.id)}
                     disabled={!on && picked.length >= CREW.maxInvites}>
                     <Avatar style={p.style} />
-                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{p.name}</span>
+                    <span className="title" style={{ flex: 1, textAlign: "left" }}>{handle(p.name)}</span>
                     <span className={`crew-check${on ? " on" : ""}`} aria-hidden="true">✓</span>
                   </button>
                 );
@@ -132,7 +133,7 @@ export function CrewInviteCard({ outing, busy, onAnswer }: { outing: CrewOuting;
         <Avatar style={outing.host.style} size={48} />
         <span style={{ flex: 1, minWidth: 0 }}>
           <span className="overline" style={{ display: "block", color: "var(--neon-text)" }}>Crew plans</span>
-          <span className="title" style={{ display: "block" }}>{outing.host.name} wants the crew at {place?.name ?? outing.placeId}</span>
+          <span className="title" style={{ display: "block" }}>{handle(outing.host.name)} wants the crew at {place?.name ?? outing.placeId}</span>
           <span className="meta" style={{ display: "block" }}>
             {activityLabel(place, outing.kind, outing.activity)} · {outing.price > 0 ? <><span className="tabular">{formatCash(outing.price)}</span> · you pay your own way</> : "free"}
           </span>
@@ -211,7 +212,7 @@ export function CrewPrompt({ inbox, onOpen, onDismiss }: { inbox: CrewInbox; onO
         <span className="story-prompt-tile" aria-hidden="true">👯</span>
         <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
           <span className="overline" style={{ display: "block", color: "rgba(20,17,26,.7)" }}>Crew plans</span>
-          <span className="title one-line" style={{ display: "block", color: "var(--night-900)" }}>{invite.host.name}: {place?.name ?? "tonight"}</span>
+          <span className="title one-line" style={{ display: "block", color: "var(--night-900)" }}>{handle(invite.host.name)}: {place?.name ?? "tonight"}</span>
         </span>
         <ChevronRightIcon size={18} />
       </button>

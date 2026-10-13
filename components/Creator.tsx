@@ -156,7 +156,7 @@ function LookStep({
   const style = getStyle(look.style);
   const set = <K extends keyof Look>(key: K, value: Look[K]) => setLook((l) => ({ ...l, [key]: value }));
   const localError = touched ? nameError(name) : null;
-  const nameMessage = error?.field === "name" ? error.text : localError ?? (taken ? "That name's taken. Somebody got there first." : null);
+  const nameMessage = error?.field === "name" ? error.text : localError ?? (taken ? "That username's taken. Somebody got there first." : null);
   const canSubmit = !nameError(name) && !taken && adult && !pending;
 
   useEffect(() => {
@@ -197,34 +197,37 @@ function LookStep({
     <StepSheet
       cta={
         <button className="btn btn-taxi" onClick={submit} disabled={!cleanName(name) || (!canSubmit && touched)}>
-          {pending ? "Claiming…" : "Claim my name ›"}
+          {pending ? "Claiming…" : "Claim my username ›"}
         </button>
       }
     >
       <div className="stack-8">
-        <label className="title" htmlFor="name" style={{ margin: 0 }}>Pick your name</label>
+        <label className="title" htmlFor="name" style={{ margin: 0 }}>Pick your username</label>
         <div className={`field field-outline${nameMessage ? " error" : ""}`}>
+          <span className="field-at" aria-hidden="true">@</span>
           <input
             id="name"
             value={name}
-            maxLength={24}
-            autoComplete="nickname"
-            autoCapitalize="words"
-            placeholder="Type a name"
+            maxLength={21}
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="yourname"
             onChange={(e) => {
               setName(e.target.value);
               if (error?.field === "name") setError(null);
             }}
             onBlur={() => setTouched(true)}
           />
-          <span className="hint">{name ? `${name.length}/24` : "how the city knows you"}</span>
+          <span className="hint">{name ? `${cleanName(name).length}/20` : "how the city knows you"}</span>
         </div>
         {nameMessage && <p className="error-text" role="alert" style={{ margin: 0 }}>{nameMessage}</p>}
       </div>
 
       <div className="stack-8">
-        <p className="overline" style={{ margin: 0 }}>Body</p>
-        <div className="binary" role="group" aria-label="Body">
+        <p className="overline" style={{ margin: 0 }}>Presenting as</p>
+        <div className="binary" role="group" aria-label="Presenting as">
           {BODIES.map((o) => (
             <button key={o.id} aria-pressed={look.body === o.id} onClick={() => set("body", o.id)}>{o.label}</button>
           ))}

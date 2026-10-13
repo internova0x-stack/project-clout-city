@@ -11,9 +11,12 @@ export type HairId = "short" | "buzz" | "long" | "ponytail" | "bun" | "braids" |
 export type GlassesId = "none" | "round" | "square" | "shades";
 export type CoveringId = "none" | "hijab" | "turban" | "headwrap" | "durag" | "kippah";
 
+// "Presenting as" (Clarifications section 16): cosmetic only. It picks the avatar's build,
+// is never shown as a label and is never used by dating, crews or rankings. The stored ids
+// predate the rename and stay as they are. Four body types each arrive in v0.7.
 export const BODIES: Option<BodyId>[] = [
-  { id: "straight", label: "Straight" },
-  { id: "curvy", label: "Curvy" },
+  { id: "straight", label: "Male" },
+  { id: "curvy", label: "Female" },
 ];
 
 export const HAIRS: Option<HairId>[] = [
