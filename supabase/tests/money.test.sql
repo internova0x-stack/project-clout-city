@@ -104,8 +104,14 @@ do $$ begin
   exception when sqlstate '22023' then null; end;
 end $$;
 select pg_temp.at((select starts_at + interval '1 hour' from public.exclusive_events where id = 'jada-sol-listening'));
+-- Measure from the moment before going in: moving the clock applies the daily Confidence drift.
+select 1 from public.sync_player();
+reset role;
+create temp table c3 as select mood, confidence from public.players where display_name = 'Max';
+grant select on c3 to public;
+set role authenticated;
 select 1 from pg_temp.attend_x('jada-sol-listening');
-select pg_temp.assert((select mood > (select mood from c2) and confidence > (select confidence from c2) from public.players where display_name = 'Max'), 'the party lifts Mood and Confidence');
+select pg_temp.assert((select mood = least(100, (select mood from c3) + 8) and confidence = least(100, (select confidence from c3) + 8) from public.players where display_name = 'Max'), 'the party lifts Mood and Confidence (+8 each, v0.9)');
 do $$ begin
   begin perform pg_temp.attend_x('jada-sol-listening'); raise exception 'FAIL: twice';
   exception when sqlstate '22023' then null; end;

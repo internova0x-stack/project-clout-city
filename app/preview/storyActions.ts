@@ -4,6 +4,7 @@ import { loadArcs } from "@/lib/storyContent";
 import { buildFeed, castVote, claimRewards, emptyStoryState, type PlayerStoryState, type VoteCounts } from "@/lib/storyFeedBuild";
 import type { StoryResult } from "@/lib/storyFeed";
 import type { CheckoutResult, StoreProduct } from "@/lib/store";
+import type { PartyInbox, PartyMention, PartyResult, PlusOne } from "@/lib/party";
 import { addDaysISO, predictionWindow } from "@/lib/stories";
 import { PLACES, SHOP_ITEMS, collectorValue } from "@/lib/city";
 
@@ -97,10 +98,10 @@ const PARTIES = () => {
   return [
     { sku: "event-jada-sol-listening", price: 499, id: "jada-sol-listening", name: "Jada Sol's listening party", host: "Jada Sol",
       blurb: "The pop star plays her new album for a guest list that keeps growing and one very nervous publicist. Phones in a velvet bag at the door.",
-      startsAt: new Date(now - hour).toISOString(), endsAt: new Date(now + 3 * hour).toISOString(), clout: 120, mood: 12, confidence: 15 },
+      startsAt: new Date(now - hour).toISOString(), endsAt: new Date(now + 3 * hour).toISOString(), clout: 120, mood: 8, confidence: 8 },
     { sku: "event-dex-monroe-afterparty", price: 299, id: "dex-monroe-afterparty", name: "Dex Monroe's sneaker-drop afterparty", host: "Dex Monroe",
       blurb: "The sneaker king celebrates a shoe nobody can buy. You can't buy it either, but you can stand next to it.",
-      startsAt: tomorrow10pm.toISOString(), endsAt: new Date(tomorrow10pm.getTime() + 4 * hour).toISOString(), clout: 80, mood: 10, confidence: 10 },
+      startsAt: tomorrow10pm.toISOString(), endsAt: new Date(tomorrow10pm.getTime() + 4 * hour).toISOString(), clout: 80, mood: 8, confidence: 8 },
   ];
 };
 export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
@@ -124,7 +125,8 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
     ...PARTIES().map((e) => ({
       ...base(e.sku), type: "exclusive_event" as const, name: e.name, priceCents: e.price, placeId: "low-light-lounge",
       event: { id: e.id, placeId: "low-light-lounge", name: e.name, host: e.host, blurb: e.blurb, startsAt: e.startsAt, endsAt: e.endsAt,
-               clout: e.clout, energy: 20, mood: e.mood, confidence: e.confidence, attended: attended.has(e.id) },
+               clout: e.clout, energy: 20, mood: e.mood, confidence: e.confidence, attended: attended.has(e.id),
+               plusOneOf: party.plusOnes.find((x) => x.eventId === e.id && !x.mine && x.status === "in")?.host.name ?? null },
     })),
   ];
 }
@@ -133,6 +135,69 @@ export async function previewStoreVisited(placeId: string) {
 }
 export async function previewStoreAttended(eventId: string) {
   attended.add(eventId);
+  // v0.9: the party's badge (migration 0029 awards it in attend_exclusive_event).
+  if (!store.st.badges.some((b) => b.id === `party:${eventId}`)) store.st.badges.push({ id: `party:${eventId}`, arc: "party", earnedAt: new Date().toISOString() });
+}
+
+// ---- v0.9 party keepsakes, simulated (migration 0029): plus-ones, mentions and the gossip setting.
+const ME = { id: "00000000-0000-0000-0000-000000000000", name: "bigsal", style: "arcade_nerd" };
+const party: PartyInbox = { plusOnes: [], newsOptOut: false };
+/** ?party=invite: Dana asks you to be her plus-one at tomorrow's afterparty. ?party=sent: you have
+    a Jada ticket and Marco is coming as your plus-one. ?party=ticket: a Jada ticket, no plus-one yet. */
+export async function previewPartyReset(preset?: string) {
+  party.plusOnes = [];
+  party.newsOptOut = false;
+  const [jada, dex] = PARTIES();
+  const ev = (e: typeof jada) => ({ eventId: e.id, eventName: e.name, placeId: "low-light-lounge", startsAt: e.startsAt, endsAt: e.endsAt });
+  if (preset === "invite") {
+    party.plusOnes.push({ ...ev(dex), mine: false, status: "invited", host: { id: "p-dana", name: "dana.vibes", style: "pilates_princess" }, guest: ME });
+  }
+  if (preset === "sent" || preset === "ticket") {
+    if (!store.st.skus.includes(jada.sku)) store.st.skus.push(jada.sku);
+  }
+  if (preset === "sent") {
+    party.plusOnes.push({ ...ev(jada), mine: true, status: "in", host: ME, guest: { id: "p-marco", name: "Marco", style: "midtown_finance" } });
+  }
+}
+export async function previewPartyInbox(): Promise<PartyInbox | null> {
+  if (process.env.NODE_ENV === "production") return null;
+  return structuredClone(party);
+}
+export async function previewPartyInvite(eventId: string, guestId: string): Promise<PartyResult> {
+  const e = PARTIES().find((x) => x.id === eventId);
+  if (!e || !store.st.skus.includes(e.sku)) return { ok: false, error: "You need a ticket to bring someone." };
+  if (party.plusOnes.some((x) => x.eventId === eventId && x.mine && x.status !== "declined")) return { ok: false, error: "You already have a plus-one. One per ticket; the bouncer counts." };
+  const people: Record<string, { name: string; style: string }> = {
+    "p-tasha": { name: "tasha.b", style: "pilates_princess" }, "p-marco": { name: "Marco", style: "midtown_finance" },
+    "p-dee": { name: "dee_rivera", style: "thrift_store_icon" }, "p-kenji": { name: "Kenji", style: "startup_founder" }, "p-rae": { name: "Rae", style: "night_owl_goth" },
+  };
+  const g = people[guestId];
+  if (!g) return { ok: false, error: "Plus-ones come from your crew. Invite them to the game first." };
+  party.plusOnes = party.plusOnes.filter((x) => !(x.eventId === eventId && x.mine));
+  // In the preview, friends say yes after a moment.
+  const row: PlusOne = { eventId, eventName: e.name, placeId: "low-light-lounge", startsAt: e.startsAt, endsAt: e.endsAt, mine: true, status: "invited", host: ME, guest: { id: guestId, ...g } };
+  party.plusOnes.push(row);
+  setTimeout(() => { row.status = "in"; }, 5000);
+  return { ok: true };
+}
+export async function previewPartyRespond(eventId: string, yes: boolean): Promise<PartyResult> {
+  const row = party.plusOnes.find((x) => x.eventId === eventId && !x.mine && x.status === "invited");
+  if (!row) return { ok: false, error: "That invite isn't waiting anymore." };
+  row.status = yes ? "in" : "declined";
+  return { ok: true };
+}
+export async function previewPartyMentions(): Promise<PartyMention[] | null> {
+  if (process.env.NODE_ENV === "production") return null;
+  if (party.newsOptOut) return [];
+  return PARTIES().filter((e) => attended.has(e.id)).map((e) => {
+    const plus = party.plusOnes.find((x) => x.eventId === e.id && x.status === "in");
+    const friend = plus ? (plus.mine ? plus.guest.name : plus.host.name) : null;
+    return { eventId: e.id, eventName: e.name, placeId: "low-light-lounge", endsAt: e.endsAt, total: 15, names: friend ? [friend, "tasha.b"] : ["tasha.b"] };
+  });
+}
+export async function previewSetNewsOptOut(out: boolean): Promise<PartyResult> {
+  party.newsOptOut = out;
+  return { ok: true };
 }
 export async function previewCheckout(sku: string, returnTo: string): Promise<CheckoutResult> {
   if (process.env.NODE_ENV === "production") return { ok: false, error: "Previews are off in production." };

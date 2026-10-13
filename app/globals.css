@@ -1119,3 +1119,19 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .bills-week { padding:12px 14px; border-radius:18px; background:var(--surface-raised); }
 .bills-week b { display:block; font-size:16px; color:var(--text-1); }
 .bills-week .meta { display:block; margin-top:2px; }
+.xc-secondary { background:rgba(255,246,224,.1); color:#FFF6E0; box-shadow:inset 0 0 0 1.5px rgba(255,246,224,.3); }
+.xc-note { font-size:13px; color:rgba(255,246,224,.65); text-align:center; }
+.xc-plus { display:block; padding:10px 14px; border-radius:14px; background:rgba(64,181,137,.16); color:#8BE6B0; font-size:14px; font-weight:600; text-align:center; }
+.xc-invite { display:block; font-size:14.5px; line-height:1.4; color:rgba(255,246,224,.92); }
+
+/* v0.9 party keepsakes */
+.party-prompt { background:var(--g-night-reveal); }
+.keepsakes { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.keepsake { display:flex; flex-direction:column; gap:4px; padding:14px; border-radius:18px; background:var(--surface-raised); text-align:left; border:0; font:inherit; color:var(--text-1); }
+.keepsake small { color:var(--text-3); font-size:12.5px; line-height:1.35; }
+.keepsake-card { background:var(--g-night-reveal); color:#FFF6E0; cursor:pointer; }
+.keepsake-card small { color:rgba(255,246,224,.75); }
+.keepsake-art { display:block; height:54px; margin:-4px -4px 6px; border-radius:12px; overflow:hidden; }
+.keepsake-emoji { font-size:28px; }
+.keepsake-news { padding:14px; border-radius:18px; background:var(--surface-raised); }
+.spotted-card { border-left:3px solid var(--neon-500); }

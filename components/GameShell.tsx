@@ -20,7 +20,7 @@ import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type Stor
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import { regularAt, regularLine } from "@/lib/cast";
-import { formatPrice, liveParty, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
+import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
@@ -33,6 +33,8 @@ import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from 
 import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
 import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew";
+import { KeepsakeSheet, PartyPrompt, PlusOneSheet } from "./city/Party";
+import { onList, partyBadge, type PartyApi, type PartyInbox, type PartyMention } from "@/lib/party";
 import type { ShopCategory } from "@/lib/city";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
@@ -40,7 +42,7 @@ import { PhoneModal, type App } from "./city/Phone";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
 import { newsGossip, splitNews, type NewsItem } from "@/lib/news";
-import type { HuntApi, HuntState } from "@/lib/hunts";
+import { HUNT_BADGE, type HuntApi, type HuntState } from "@/lib/hunts";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
@@ -113,6 +115,8 @@ export function GameShell({
   leaderboardRows,
   dating,
   crew,
+  party,
+  partyInbox: initialPartyInbox = null,
   cityNews,
   hunt,
   roomMood = "dream",
@@ -137,6 +141,9 @@ export function GameShell({
   dating?: DatingApi;
   /** Crew outings (migration 0013). */
   crew?: CrewApi;
+  /** v0.9 party keepsakes (migration 0029): plus-ones, "Spotted at" and the gossip setting. */
+  party?: PartyApi;
+  partyInbox?: PartyInbox | null;
   /** v0.6 City News: published items (news_feed(), migration 0017). */
   cityNews?: () => Promise<NewsItem[]>;
   /** v0.6 treasure hunts (migration 0018); without it there's no Hunt tab. */
@@ -266,6 +273,24 @@ export function GameShell({
       resync.current();
     }
   }, [crew, player.id]);
+  // ---- v0.9 party keepsakes: plus-ones sent and received, and "Spotted at" mentions ----
+  const [partyIn, setPartyIn] = useState<PartyInbox | null>(initialPartyInbox);
+  const [mentions, setMentions] = useState<PartyMention[]>([]);
+  const [plusOneFor, setPlusOneFor] = useState<ExclusiveEvent | null>(null);
+  const [keepsake, setKeepsake] = useState<ExclusiveEvent | null>(null);
+  const [partyDismissed, setPartyDismissed] = useState<string | null>(null);
+  const loadParty = useCallback(async () => {
+    if (!party) return;
+    const [i, m] = await Promise.all([party.inbox(), party.mentions()]);
+    if (i) setPartyIn(i);
+    if (m) setMentions(m);
+  }, [party]);
+  useEffect(() => {
+    if (!party) return;
+    void loadParty();
+    const t = setInterval(() => void loadParty(), 60_000);
+    return () => clearInterval(t);
+  }, [party, loadParty]);
   useEffect(() => {
     if (!crew) return;
     void loadCrew();
@@ -490,8 +515,27 @@ export function GameShell({
       void run(`party:${id}`, () => cityApi.attendExclusiveEvent!(id)).then(async (ok) => {
         const c = ok && storeApi ? await storeApi.catalog() : null;
         if (c) setCatalog(c);
+        // v0.9: what you keep from the night.
+        const ev = (c ?? catalog ?? []).find((p) => p.event?.id === id)?.event;
+        if (ok && ev && party) {
+          await loadParty();
+          setKeepsake(ev);
+        }
       });
     },
+    party: party ? {
+      inbox: partyIn,
+      bring: (eventId) => setPlusOneFor(products.find((p) => p.event?.id === eventId)?.event ?? null),
+      respond: (eventId, yes) => void (async () => {
+        setBusy(`plus1:${eventId}`);
+        const r = await party.respond(eventId, yes);
+        setBusy(null);
+        const host = partyIn?.plusOnes.find((x) => x.eventId === eventId && !x.mine)?.host.name;
+        setToast(!r.ok ? r.error : yes ? `You're on the list${host ? ` with ${handle(host)}` : ""}. Dress accordingly.` : "No worries. They'll find someone.");
+        await loadParty();
+        if (r.ok && yes && storeApi) { const c = await storeApi.catalog(); if (c) setCatalog(c); }
+      })(),
+    } : undefined,
   };
   const products = (catalog ?? []).map((p) => (p.sku === unlocking ? { ...p, pending: true } : p));
   const openShop = (category: ShopCategory) => {
@@ -588,7 +632,7 @@ export function GameShell({
     if (it.use?.kind === "shop") return openShop(it.use.category);
     if (it.use?.kind !== "events") return;
     // The lounge's guest list: a party you have a ticket for, if its doors are open; otherwise the Events list.
-    const party = products.find((x) => x.event?.placeId === p.id && x.owned && !x.event.attended
+    const party = products.find((x) => x.event?.placeId === p.id && onList(x) && !x.event.attended
       && gameNow >= Date.parse(x.event.startsAt) && gameNow < Date.parse(x.event.endsAt));
     if (party) return money.attend(party.event!.id);
     if (products.some((x) => x.event?.placeId === p.id && liveParty(x, gameNow))) return setPanel("events");
@@ -759,7 +803,10 @@ export function GameShell({
   const crewKey = crewInbox ? crewInbox.outings.filter((o) => !o.mine && o.myStatus === "invited").map((o) => o.id).join() : "";
   // One home card at a time: dates first, then crew plans, then the story.
   const showCrew = !showDating && !!crew && crewAlerts(crewInbox) > 0 && crewDismissed !== crewKey && flow === "none" && !arranging && tab === "home" && !inside;
-  const showPrompt = showDating || showCrew || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
+  const partyInvite = (partyIn?.plusOnes ?? []).find((x) => !x.mine && x.status === "invited");
+  const partyKey = partyInvite ? `${partyInvite.eventId}:${partyInvite.host.id}` : "";
+  const showParty = !showDating && !showCrew && !!partyInvite && partyDismissed !== partyKey && flow === "none" && !arranging && tab === "home" && !inside;
+  const showPrompt = showDating || showCrew || showParty || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
   const openChatWith = (p: DatePerson) => {
     setPanel(null);
     setChatWith({ id: p.id, name: p.name, style: p.style });
@@ -827,10 +874,13 @@ export function GameShell({
           {showCrew && crewInbox && (
             <CrewPrompt inbox={crewInbox} onOpen={() => setPanel("crew")} onDismiss={() => setCrewDismissed(crewKey)} />
           )}
-          {storyOn && flow === "none" && !arranging && !showDating && !showCrew && (
+          {showParty && partyInvite && (
+            <PartyPrompt invite={partyInvite} onOpen={() => setPanel("events")} onDismiss={() => setPartyDismissed(partyKey)} />
+          )}
+          {storyOn && flow === "none" && !arranging && !showDating && !showCrew && !showParty && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
-          {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !(storyOn && promptVisible(feed, dismissed)) && (
+          {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !(storyOn && promptVisible(feed, dismissed)) && (
             <NewsPrompt item={latestNews} onOpen={() => openCityNews(latestNews.id)} onDismiss={() => setNewsCard(null)} />
           )}
         </div>
@@ -1105,6 +1155,18 @@ export function GameShell({
         onCollect={(id) => cityApi && void run(`gig:${id}`, () => cityApi.collectGig(id))}
         muted={muted}
         onToggleSound={toggleSound}
+        gossip={party && partyIn ? {
+          optedOut: partyIn.newsOptOut,
+          spotted: partyIn.newsOptOut ? [] : mentions,
+          onToggle: () => void (async () => {
+            const next = !partyIn.newsOptOut;
+            setPartyIn({ ...partyIn, newsOptOut: next });
+            const r = await party.setNewsOptOut(next);
+            if (!r.ok) { setPartyIn({ ...partyIn }); setToast(r.error); return; }
+            setToast(next ? "You're out of the gossip. Lola is devastated." : "Back in the gossip. Lola noticed.");
+            await loadParty();
+          })(),
+        } : undefined}
       />
       <BankSheet open={panel === "bank"} onClose={() => setPanel(null)} bank={me.bank_cash} handle={me.display_name} />
       <InviteSheet
@@ -1181,6 +1243,35 @@ export function GameShell({
           {crewFull && <CrewFullCard outing={crewFull} onClose={() => setCrewFull(null)} />}
         </>
       )}
+      {party && (
+        <>
+          <PlusOneSheet
+            event={plusOneFor}
+            crew={crew}
+            taken={(partyIn?.plusOnes ?? []).filter((x) => x.mine && x.eventId === plusOneFor?.id && x.status === "declined").map((x) => x.guest.id)}
+            busy={busy === "plus1"}
+            onClose={() => setPlusOneFor(null)}
+            onSend={(guest) => void (async () => {
+              if (!plusOneFor) return;
+              setBusy("plus1");
+              const r = await party.invite(plusOneFor.id, guest.id);
+              setBusy(null);
+              setToast(r.ok ? `Invite sent to ${handle(guest.name)}. They'll see it on their home screen.` : r.error);
+              if (r.ok) setPlusOneFor(null);
+              await loadParty();
+            })()}
+            onInviteFriends={() => { setPlusOneFor(null); setPanel("invite"); }}
+          />
+          <KeepsakeSheet
+            event={keepsake}
+            plusOneOf={keepsake?.plusOneOf}
+            mention={mentions.find((m) => m.eventId === keepsake?.id) ?? null}
+            optedOut={!!partyIn?.newsOptOut}
+            onClose={() => setKeepsake(null)}
+            onOpenCollection={catalog ? () => { setKeepsake(null); setPanel("collection"); } : undefined}
+          />
+        </>
+      )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />
       <ProfileSheet
         open={panel === "profile"}
@@ -1192,7 +1283,10 @@ export function GameShell({
         clout={me.clout}
         rank={myCard?.rank ?? null}
         netWorth={city ? netWorth(city) : me.bank_cash}
-        badges={(feed?.badges ?? []).map((b) => { const info = badgeInfo(feed, b.id); return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id }; })}
+        badges={(feed?.badges ?? []).map((b) => {
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : null);
+          return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
+        })}
         collections={{
           postcards: catalog ? { owned: products.filter((p) => p.type === "postcard" && p.owned).length, total: products.filter((p) => p.type === "postcard").length } : null,
           huntCards: huntState?.cards.length ?? 0,

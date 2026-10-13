@@ -15,7 +15,7 @@ import { handle } from "@/lib/validation";
 
 const emoji = (style: string) => getStyle(style as StyleId).emoji;
 
-function Avatar({ style, lit = true, size = 36 }: { style: string; lit?: boolean; size?: number }) {
+export function Avatar({ style, lit = true, size = 36 }: { style: string; lit?: boolean; size?: number }) {
   return <span className={`date-avatar${lit ? "" : " dim"}`} style={{ width: size, height: size, fontSize: size * 0.48 }} aria-hidden="true">{emoji(style)}</span>;
 }
 

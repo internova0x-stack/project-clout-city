@@ -1,7 +1,8 @@
 "use client";
 
+import type { PartyApi } from "@/lib/party";
 import { previewNews } from "@/app/preview/newsActions";
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState } from "@/lib/citySim";
 import type { CityResult } from "@/lib/cityState";
@@ -23,13 +24,14 @@ import {
   previewChatBlock, previewChatList, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
 } from "@/app/preview/chatActions";
 import {
+  previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
   previewCheckout, previewStoreAttended, previewStoreCatalog, previewStoreVisited, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
 } from "@/app/preview/storyActions";
 
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, huntPreset = "new",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -45,6 +47,8 @@ export function PreviewHome({
   datingPreset?: string;
   /** Start crew outings in a set state: "invite", "tonight", "full" or "empty". */
   crewPreset?: string;
+  /** v0.9 plus-ones: "invite" (someone asked you) or "sent" (you have a ticket and a plus-one). */
+  partyPreset?: string;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
   huntPreset?: string;
 }) {
@@ -94,9 +98,13 @@ export function PreviewHome({
 
   // The pretend webhook's grants land in the sim's player, once each.
   const catalogRef = useRef<StoreProduct[] | null>(null);
+  // The ?party preset applies once per page load, before the first catalog or inbox read.
+  const partyReady = useRef<Promise<void> | null>(null);
+  const partyReset = useCallback(() => (partyReady.current ??= previewPartyReset(partyPreset)), [partyPreset]);
   const granted = useRef(new Set<string>());
   const storeApi = useMemo<StoreApi>(() => ({
     async catalog() {
+      await partyReset(); // ?party=ticket|sent hand out a ticket first
       const c = await previewStoreCatalog();
       catalogRef.current = c;
       for (const p of c ?? []) {
@@ -108,7 +116,7 @@ export function PreviewHome({
       return c;
     },
     checkout: (sku) => previewCheckout(sku, window.location.pathname + window.location.search),
-  }), [sim]);
+  }), [sim, partyReset]);
 
   // City actions can finish story tasks (as do_action does in SQL).
   const api = useMemo(() => ({
@@ -176,6 +184,11 @@ export function PreviewHome({
       members: previewCrewMembers, create: previewCrewCreate, respond: previewCrewRespond,
     };
   }, [crewPreset, sim]);
+  // v0.9 party keepsakes in memory (?party=invite|sent).
+  const partyApi = useMemo<PartyApi>(() => ({
+    async inbox() { await partyReset(); return previewPartyInbox(); },
+    invite: previewPartyInvite, respond: previewPartyRespond, mentions: previewPartyMentions, setNewsOptOut: previewSetNewsOptOut,
+  }), [partyReset]);
   // The hunt runs on the dev server (answers stay there); visits come from the sim's own day.
   const huntApi = useMemo<HuntApi>(() => {
     let started = false;
@@ -211,6 +224,7 @@ export function PreviewHome({
       chat={cityOff ? undefined : chat}
       dating={cityOff ? undefined : dating}
       crew={cityOff ? undefined : crewApi}
+      party={cityOff || storyOff ? undefined : partyApi}
       cityNews={cityOff ? undefined : previewNews}
       hunt={cityOff ? undefined : huntApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
