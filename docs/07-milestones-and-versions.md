@@ -182,7 +182,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 ## v0.9 "Big Nights" (about 1 week)
 
-**Step 1 built** (Oct 13): exclusive event keepsakes: plus-ones from the crew, a badge per party, "Spotted at" News lines with an opt-out, and club-level stats (migration 0029). Next: monuments as full locations (#32).
+**Step 1 built** (Oct 13): exclusive event keepsakes: plus-ones from the crew, a badge per party, "Spotted at" News lines with an opt-out, and club-level stats (migration 0029). **Step 2 built** (Oct 13): monuments as full outdoor plazas with five activities each, Inez at Gantry Plaza, and per-activity Mood and Confidence (migrations 0030 and 0031). v0.9 is complete.
 
 **In scope** (formerly v0.5): exclusive event keepsakes (event card, profile badge, plus-one, personal news mention, opt-out) with the ticket's clout kept and attending's stats in line with club events (#19); monuments as full locations with a shared 3D landmark plaza, NPCs and 4 to 6 activities (#32).
 

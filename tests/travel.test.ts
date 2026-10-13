@@ -84,3 +84,17 @@ test("groceries fill the fridge at the supermarket; cooking at home empties it (
   assert.ok(meal.ok && meal.gain?.energy === g.cook.energy && meal.state.player.fridge_meals === 8);
   assert.equal(meal.ok && meal.state.items.length, home.ok && home.state.items.length, "groceries are not possessions");
 });
+
+test("monument plazas: each activity's boost once a day, clout once per place (v0.9, option A)", async () => {
+  const { createSimApi, sampleCityState } = await import("../lib/citySim.ts");
+  const { PLACES } = await import("../lib/city.ts");
+  for (const id of ["unisphere", "gantry-plaza"]) assert.equal(PLACES.find((p) => p.id === id)?.actions.length, 5, `${id} has five activities`);
+  const api = createSimApi(sampleCityState({ energy: 90, mood: 40, confidence: 40 }));
+  await api.travel!("unisphere", "taxi");
+  const pose = await api.doAction("unisphere", "visit");
+  assert.ok(pose.ok && pose.gain?.clout === 20 && pose.gain?.mood === 6);
+  const tour = await api.doAction("unisphere", "tour");
+  assert.ok(tour.ok && tour.gain?.confidence === 5 && tour.gain?.clout === 0, "a second activity still lifts its stat, no clout");
+  const again = await api.doAction("unisphere", "tour");
+  assert.ok(again.ok && again.gain?.confidence === 0, "the same activity twice: no second boost");
+});

@@ -183,8 +183,22 @@ export default function Room3D(props: Room3DProps) {
     skirtB.position.set(0, 0.06, -template.d / 2 + 0.015);
     const skirtL = new Mesh(kit.geo(new BoxGeometry(0.03, 0.12, template.d)), trimMat);
     skirtL.position.set(-template.w / 2 + 0.015, 0.06, 0);
-    room.add(back, left, skirtB, skirtL);
-    if (template.window) {
+    if (template.outdoor) {
+      // v0.9 monument plazas: no walls. The paving is a raised island over grass (or the river).
+      const base = new Mesh(kit.geo(new BoxGeometry(template.w + 0.3, 0.5, template.d + 0.3)), kit.mat(template.wallAccent, { roughness: 0.9 }));
+      base.position.set(0, -0.26, 0);
+      base.receiveShadow = true;
+      const rim = new Mesh(kit.geo(new BoxGeometry(template.w + 1.6, 0.35, template.d + 1.6)), kit.mat(template.outdoor.edge, { roughness: 1 }));
+      rim.position.set(0, -0.55, 0);
+      rim.receiveShadow = true;
+      room.add(base, rim);
+      if (template.outdoor.water) {
+        const river = new Mesh(kit.geo(new BoxGeometry(template.w + 8, 0.1, 6)), kit.mat("#5B87B5", { roughness: 0.25, metalness: 0.2 }));
+        river.position.set(0, -0.6, -template.d / 2 - 3.6);
+        room.add(river);
+      }
+    } else room.add(back, left, skirtB, skirtL);
+    if (template.window && !template.outdoor) {
       const winTex = windowTexture(night);
       const win = new Mesh(kit.geo(new PlaneGeometry(1.8, 1.2)), kit.mat("#ffffff", { map: winTex, emissive: "#ffffff", emissiveIntensity: night ? 0.55 : 0.85 }));
       (win.material as MeshStandardMaterial).emissiveMap = winTex;
@@ -194,7 +208,7 @@ export default function Room3D(props: Room3DProps) {
       frame.position.set(-template.w / 2 + 0.005, 1.55, -template.d / 4);
       room.add(frame, win);
     }
-    if (sign) {
+    if (sign && !template.outdoor) {
       const signTex = signTexture(sign, template);
       const board = new Mesh(kit.geo(new PlaneGeometry(2.6, 0.65)), kit.mat("#ffffff", { map: signTex, emissive: "#ffffff", emissiveIntensity: template.dark ? 1.1 : 0.35 }));
       (board.material as MeshStandardMaterial).emissiveMap = signTex;
@@ -252,6 +266,9 @@ export default function Room3D(props: Room3DProps) {
     camera.position.copy(dir.clone().multiplyScalar(30));
     camera.lookAt(0, 0, 0);
     camera.updateMatrixWorld();
+    // Outdoor plazas start the camera over the player.
+    const camTarget = new Vector3(template.outdoor ? template.spawn[0] : 0, 0, template.outdoor ? template.spawn[1] : 0);
+    if (template.outdoor) { camera.position.copy(camTarget).addScaledVector(dir, 30); camera.updateMatrixWorld(); }
     const fit = () => {
       const w = host.clientWidth || 1;
       const h = host.clientHeight || 1;
@@ -259,7 +276,9 @@ export default function Room3D(props: Room3DProps) {
       const right = new Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
       const up = new Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
       let minU = Infinity, maxU = -Infinity, minV = Infinity, maxV = -Infinity;
-      for (const x of [-template.w / 2, template.w / 2]) for (const z of [-template.d / 2, template.d / 2]) for (const y of [0, WALL_H]) {
+      // Outdoor plazas are bigger than the screen: frame a window around the player, not the whole square.
+      const [vw, vd] = template.outdoor?.view ?? [template.w, template.d];
+      for (const x of [-vw / 2, vw / 2]) for (const z of [-vd / 2, vd / 2]) for (const y of [0, template.outdoor?.height ?? WALL_H]) {
         const p = new Vector3(x, y, z);
         const u = p.dot(right);
         const v = p.dot(up);
@@ -406,11 +425,23 @@ export default function Room3D(props: Room3DProps) {
         (ring.material as MeshStandardMaterial).color.set("#FFFFFF");
         (ring.material as MeshStandardMaterial).emissive.set("#FFC21A");
       } else ring.visible = false;
-      // Tap chips above usable things.
+      // Outdoor plazas: the camera glides after the player, kept over the paving.
+      if (template.outdoor) {
+        const [vw, vd] = template.outdoor.view;
+        const cx = Math.max(-(template.w - vw) / 2, Math.min((template.w - vw) / 2, me.x));
+        const cz = Math.max(-(template.d - vd) / 2, Math.min((template.d - vd) / 2, me.z));
+        const k = reduceMotion ? 1 : Math.min(1, dt * 3);
+        camTarget.x += (cx - camTarget.x) * k;
+        camTarget.z += (cz - camTarget.z) * k;
+        camera.position.copy(camTarget).addScaledVector(dir, 30);
+        camera.updateMatrixWorld();
+      }
+      // Tap chips above usable things (hidden while they're off screen).
       for (const it of itemsRef.current) {
         const el = chipsRef.current.get(it.id);
         if (!el) continue;
         proj.set(it.x, chipHeight(it), it.z).project(camera);
+        el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
       renderer.render(scene, camera);

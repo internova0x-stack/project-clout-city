@@ -18,7 +18,9 @@ export type FurnitureKind =
   // deli
   | "deliCounter" | "shelf" | "drinksFridge" | "cat"
   // lecture hall
-  | "lectureDesk" | "lectern" | "chalkboard";
+  | "lectureDesk" | "lectern" | "chalkboard"
+  // v0.9 monument plazas
+  | "globe" | "gantry" | "bench" | "foodCart" | "lamppost" | "tree" | "railing";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -55,6 +57,8 @@ export interface RoomTemplate {
   floorKind: "wood" | "tile" | "concrete" | "checker";
   /** Club lighting: warm night-time interior with colored stage lights, whatever the hour. */
   dark?: boolean;
+  /** v0.9 monument plazas: no walls, a raised island of paving, and a landmark taller than a room. */
+  outdoor?: { height: number; edge: string; water?: boolean; view: [number, number] };
   window?: boolean;
   items: RoomItem[];
   /** Where the avatar enters. */
@@ -101,6 +105,13 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   lectureDesk: { w: 1.6, d: 0.8, label: "Desk" },
   lectern: { w: 0.7, d: 0.6, label: "Lectern" },
   chalkboard: { w: 3.2, d: 0.3, label: "Chalkboard" },
+  globe: { w: 5.0, d: 5.0, label: "The globe" },
+  gantry: { w: 4.5, d: 1.8, label: "The gantries" },
+  bench: { w: 1.6, d: 0.5, label: "Bench" },
+  foodCart: { w: 1.3, d: 0.7, label: "Food cart" },
+  lamppost: { w: 0.3, d: 0.3, label: "Lamp" },
+  tree: { w: 0.8, d: 0.8, label: "Tree" },
+  railing: { w: 8.0, d: 0.2, label: "Railing" },
 };
 
 // ---------------------------------------------------------------------------
@@ -153,7 +164,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus", RoomTemplate> = {
+export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries", RoomTemplate> = {
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -259,6 +270,66 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "s
       { x: 2.0, z: -2.85, facing: 0 },
       { x: 0.3, z: -0.3, facing: 3.14, seated: true }, { x: 2.2, z: -0.3, facing: 3.14, seated: true },
       { x: -2.2, z: 1.2, facing: 3.14, seated: true }, { x: 2.8, z: 1.2, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- v0.9 monument plazas (#32): one shared outdoor plaza, each with its own landmark ----
+  unisphere: {
+    id: "unisphere", w: 18.0, d: 16.0, wall: "#BFD3E0", wallAccent: "#8FA4B8", floor: "#D9CFC0", floorKind: "tile",
+    // Plazas are several times an apartment's floor (owner, Oct 13); the camera follows the player.
+    outdoor: { height: 5.5, edge: "#7FA36A", view: [10, 9] },
+    items: [
+      { id: "globe", kind: "globe", x: 0, z: -3.5, rot: 0, use: { kind: "action", actionId: "visit" }, label: "Pose with the globe" },
+      { id: "coin", kind: "rug", x: 2.8, z: 0.6, rot: 0, color: "#7FC8E8", use: { kind: "action", actionId: "wish" }, label: "Toss a coin" },
+      { id: "tour", kind: "lamppost", x: -4.0, z: 0.8, rot: 0, use: { kind: "action", actionId: "tour" }, label: "Walt's tour" },
+      { id: "cart", kind: "foodCart", x: 6.0, z: -2.6, rot: 3, color: "#E0457B", use: { kind: "action", actionId: "pretzel" }, label: "Pretzel cart" },
+      { id: "bench-1", kind: "bench", x: -6.6, z: 3.0, rot: 1, use: { kind: "action", actionId: "people" }, label: "People-watch" },
+      { id: "bench-2", kind: "bench", x: 5.4, z: 4.2, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "bench-3", kind: "bench", x: -1.8, z: 6.2, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "lamp-1", kind: "lamppost", x: -5.2, z: -6.6, rot: 0 },
+      { id: "lamp-2", kind: "lamppost", x: 5.2, z: -6.6, rot: 0 },
+      { id: "lamp-3", kind: "lamppost", x: 3.8, z: 3.4, rot: 0 },
+      { id: "tree-1", kind: "tree", x: -7.6, z: -6.4, rot: 0 },
+      { id: "tree-2", kind: "tree", x: 7.6, z: -6.6, rot: 0 },
+      { id: "tree-3", kind: "tree", x: -7.6, z: 6.6, rot: 0 },
+      { id: "tree-4", kind: "tree", x: 7.6, z: 6.6, rot: 0 },
+      { id: "tree-5", kind: "tree", x: 1.8, z: 7.0, rot: 0 },
+      { id: "bed-1", kind: "plant", x: -7.7, z: -1.0, rot: 0 },
+      { id: "bed-2", kind: "plant", x: 7.7, z: 1.2, rot: 0 },
+    ],
+    spawn: [0.4, 5.0],
+    npcs: [
+      { x: -4.0, z: 0.2, facing: 3.14 }, { x: 5.2, z: -2.6, facing: 1.57 }, { x: -2.6, z: -0.4, facing: 0.6 },
+      { x: 1.4, z: 1.6, facing: 2.6 }, { x: 6.4, z: 2.0, facing: 4.2 }, { x: -6.0, z: -3.4, facing: 0.9 },
+      { x: 3.2, z: -0.4, facing: 3.6 },
+    ],
+  },
+  gantries: {
+    id: "gantries", w: 18.0, d: 14.0, wall: "#BFD3E0", wallAccent: "#3A3540", floor: "#CFC6B8", floorKind: "concrete",
+    outdoor: { height: 5.5, edge: "#5B87B5", water: true, view: [10, 9] },
+    items: [
+      { id: "gantries", kind: "gantry", x: -2.0, z: -5.0, rot: 0, use: { kind: "action", actionId: "visit" }, label: "Catch the skyline" },
+      { id: "rail-1", kind: "railing", x: -4.5, z: -6.8, rot: 0 },
+      { id: "rail-2", kind: "railing", x: 4.5, z: -6.8, rot: 0 },
+      { id: "shoot", kind: "rug", x: 4.6, z: -4.2, rot: 0, color: "#F2A900", use: { kind: "action", actionId: "photoshoot" }, label: "Golden hour shoot" },
+      { id: "lawn", kind: "rug", x: -5.6, z: 2.0, rot: 0, color: "#40B589", use: { kind: "action", actionId: "picnic" }, label: "Picnic on the lawn" },
+      { id: "lawn-2", kind: "rug", x: -5.6, z: 4.2, rot: 0, color: "#40B589" },
+      { id: "bench-1", kind: "bench", x: 2.0, z: 1.4, rot: 2, use: { kind: "action", actionId: "ferries" }, label: "Watch the ferries" },
+      { id: "bench-2", kind: "bench", x: 6.6, z: -1.6, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "bench-3", kind: "bench", x: -1.4, z: 4.6, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "cart", kind: "foodCart", x: 6.6, z: 3.6, rot: 3, color: "#6C8CFF" },
+      { id: "run", kind: "lamppost", x: -0.4, z: 0.4, rot: 0, use: { kind: "action", actionId: "run" }, label: "Run the river path" },
+      { id: "lamp-1", kind: "lamppost", x: -7.6, z: -5.6, rot: 0 },
+      { id: "lamp-2", kind: "lamppost", x: 7.6, z: -5.6, rot: 0 },
+      { id: "lamp-3", kind: "lamppost", x: 3.2, z: 5.8, rot: 0 },
+      { id: "tree-1", kind: "tree", x: -7.8, z: -1.4, rot: 0 },
+      { id: "tree-2", kind: "tree", x: 7.8, z: 6.0, rot: 0 },
+      { id: "tree-3", kind: "tree", x: -7.8, z: 6.0, rot: 0 },
+    ],
+    spawn: [0.4, 4.4],
+    npcs: [
+      { x: 3.6, z: -5.6, facing: 3.14 }, { x: 4.6, z: -5.4, facing: 3.14 }, { x: -5.0, z: 1.8, facing: 0.8, seated: true },
+      { x: -1.2, z: -3.6, facing: 3.14 }, { x: 5.4, z: 2.4, facing: 4.2 }, { x: 0.6, z: 3.0, facing: 1.2 },
+      { x: -3.6, z: -1.6, facing: 2.2 },
     ],
   },
 };

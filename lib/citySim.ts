@@ -45,6 +45,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     devTools: false,
     homeLayout: null,
     restToday: { nap: 0, sit: 0 },
+    actionsToday: ["flushing-meadows:hangout"],
   };
 }
 
@@ -166,10 +167,14 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
       const first = !s.visitsToday[placeId];
       s.visitsToday[placeId] = (s.visitsToday[placeId] ?? 0) + 1;
+      // v0.9 (0031): Mood and Confidence once a day per activity.
+      const key = `${placeId}:${actionId}`;
+      const firstAction = !(s.actionsToday ?? []).includes(key);
+      s.actionsToday = [...(s.actionsToday ?? []), key];
       // Clout comes from the base price (or the action's fixed clout), never a story-raised price.
       const clout = !first ? 0 : a.clout ?? (a.kind === "visit" || a.kind === "eat" ? visitClout(base, p().mood, p().confidence) : 0);
-      const mood = first ? a.mood ?? 0 : 0;
-      const confidence = first ? a.confidence ?? 0 : 0;
+      const mood = firstAction ? a.mood ?? 0 : 0;
+      const confidence = firstAction ? a.confidence ?? 0 : 0;
       p().bank_cash += (a.pay ?? 0) - price;
       p().energy = Math.min(100, Math.max(0, p().energy - a.energy));
       p().clout += clout;

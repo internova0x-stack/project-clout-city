@@ -81,6 +81,9 @@ export interface CityState {
   items: PlayerItem[];
   /** Uses per place today. */
   visitsToday: Record<string, number>;
+  /** v0.9 (migration 0031): activities used today, "place:action". Mood and Confidence come once a day
+      per activity; missing before the migration, when they came once a day per place. */
+  actionsToday?: string[];
   attendedToday: string[];
   /** Staging time travel: added to the real clock everywhere. */
   clockOffsetSeconds: number;
@@ -189,6 +192,11 @@ export function cityError(message: string | undefined): string {
 // ---------------------------------------------------------------------------
 export type Availability = { ok: true; note?: string } | { ok: false; reason: string };
 
+/** Mood and Confidence already collected today: per activity (0031), or per place before it. */
+export function boostUsed(placeId: string, actionId: string, s: CityState): boolean {
+  return s.actionsToday ? s.actionsToday.includes(`${placeId}:${actionId}`) : (s.visitsToday[placeId] ?? 0) > 0;
+}
+
 /** Mirrors do_action: Energy first (meals always work), then cash. Repeat visits are allowed but pay no clout. */
 export function actionAvailability(placeId: string, action: PlaceAction, s: CityState): Availability {
   if (action.kind === "gigs") return { ok: true };
@@ -196,7 +204,7 @@ export function actionAvailability(placeId: string, action: PlaceAction, s: City
   if ((action.price ?? 0) > s.player.bank_cash) return { ok: false, reason: "Not enough cash" };
   const usedToday = (s.visitsToday[placeId] ?? 0) > 0;
   if (usedToday && (action.kind === "visit" || action.kind === "eat")) return { ok: true, note: "Clout again tomorrow" };
-  if (usedToday && (action.mood || action.confidence)) return { ok: true, note: "Mood boost again tomorrow" };
+  if (boostUsed(placeId, action.id, s) && (action.mood || action.confidence)) return { ok: true, note: "Mood boost again tomorrow" };
   return { ok: true };
 }
 
