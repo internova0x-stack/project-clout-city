@@ -17,6 +17,8 @@ import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
 import { DateStatusRow } from "../dating/Dating";
 import { canDateAt, type DateNight } from "@/lib/dating";
+import { crewActivities, type CrewOuting } from "@/lib/crew";
+import { CrewProgress } from "../crew/Crew";
 import type { StoreProduct } from "@/lib/store";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 
@@ -45,6 +47,8 @@ export interface PlaceHandlers {
     bonus: { mood: number; clout: number };
     onMakeDate: (spot: { kind: "place" | "event"; target: string; price: number }) => void;
   };
+  /** Crew outings: "Bring the crew" on any place with a crew activity, and tonight's progress. */
+  crew?: { outings: CrewOuting[]; onBring: (place: Place) => void };
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -180,13 +184,23 @@ export function LocationSheet({
             <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
           ))}
           <ActionList place={place} state={state} handlers={handlers} />
-          {handlers.dating && canDateAt(place) && (
-            <button
-              className="btn btn-secondary"
-              onClick={() => handlers.dating!.onMakeDate({ kind: "place", target: place.id, price: place.actions.find((a) => a.kind === "eat")?.price ?? 0 })}
-            >
-              🌙 Make it a date
-            </button>
+          {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
+          {((handlers.dating && canDateAt(place)) || (handlers.crew && crewActivities(place).length > 0)) && (
+            <div className="row" style={{ gap: 8 }}>
+              {handlers.dating && canDateAt(place) && (
+                <button
+                  className="btn btn-secondary social-btn"
+                  onClick={() => handlers.dating!.onMakeDate({ kind: "place", target: place.id, price: place.actions.find((a) => a.kind === "eat")?.price ?? 0 })}
+                >
+                  🌙 Make it a date
+                </button>
+              )}
+              {handlers.crew && crewActivities(place).length > 0 && (
+                <button className="btn btn-secondary social-btn crew-btn" onClick={() => handlers.crew!.onBring(place)}>
+                  👯 Bring the crew
+                </button>
+              )}
+            </div>
           )}
           {place.opensShop && handlers.onOpenShop && (
             <button className="btn btn-secondary" onClick={() => handlers.onOpenShop!(place.opensShop!)}>

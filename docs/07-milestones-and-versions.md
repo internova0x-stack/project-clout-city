@@ -45,7 +45,7 @@ The 34 locations in Clarifications section 4 remain the P1 target, but they arri
 
 ## v0.1 "Tap In" (24 hours)
 
-An early-access teaser: claim your name, see your character at home, and recruit your clique before the city opens. Share it with a small group, framed honestly as early access, not a finished game.
+An early-access teaser: claim your name, see your character at home, and recruit your crew before the city opens. Share it with a small group, framed honestly as early access, not a finished game.
 
 ### In scope
 
@@ -57,7 +57,7 @@ An early-access teaser: claim your name, see your character at home, and recruit
 | Mini creator | Pick a name and one of the eight starting styles; the 3D character updates instantly | Clarifications 1 (Look step only) |
 | Home screen | The HUD, side icon column, stats panel and nav bar in place. Home and Map work; every other icon and tab opens a witty "Coming soon" card. Money and clout show "—" until v0.2. | Clarifications 2; Design Guide C1 to C5 |
 | 3D character at home | A ready-made 3D character (a free CC0 model or a purchased one) standing in one illustrated apartment backdrop, with an idle animation | Design Guide C38 and section 11 |
-| Invite screen | "Invite your Clique" opens a personal link with a share button and a count of friends who've joined ("2 of 5"), with "Rewards unlock when the city opens" | Clarifications 7 |
+| Invite screen | "Invite your Crew" opens a personal link with a share button and a count of friends who've joined ("2 of 5"), with "Rewards unlock when the city opens" | Clarifications 7 |
 | Legal pages | Basic terms of service and privacy policy, marked for lawyer review before v1.0 | Build Guide |
 
 ### Not in v0.1
@@ -83,7 +83,7 @@ Review each block's pull request on your phone before the next one starts. If a 
 - [ ] A link opened in a fresh browser lands on the map, with no sign-up wall.
 - [ ] Tapping anything opens sign-up; the 18+ box must be ticked to continue.
 - [ ] The magic-link email arrives, and signing in works on phone and computer.
-- [ ] A friend signing up through your invite link shows up in your clique count.
+- [ ] A friend signing up through your invite link shows up in your crew count.
 - [ ] Choosing a style changes the character instantly.
 - [ ] Every unbuilt icon and tab shows "Coming soon"; nothing is broken or blank.
 - [ ] It runs smoothly on a low-end Android phone.
@@ -96,12 +96,12 @@ The complete first session from Clarifications section 1: a new player goes from
 
 - The rest of the creator: Traits, the Birth lottery ($6,000 to $10,000) and the Home step, with the three starter apartments.
 - The welcome screen and the five tutorial tooltips.
-- The first-task party, with "Bring the clique" and "Pull up solo," the completion card, cash and clout.
-- Real clout, bank balance and net worth in the HUD; the leaderboard (Queens and Clique).
+- The first-task party, with "Bring the crew" and "Pull up solo," the completion card, cash and clout.
+- Real clout, bank balance and net worth in the HUD; the leaderboard (Queens and Crew).
 - **Invite rewards:** clout per friend who signs up, and the five-friend bonus, **paid retroactively** for everyone invited during v0.1.
 - Google sign-in, the invite prompt after the party, the install (PWA) prompt, background music with mute, and the players-online pill.
 
-**Players from v0.1:** on their next visit they complete the Traits, Birth lottery and Home steps, then get the tutorial. Their name, style and clique carry over.
+**Players from v0.1:** on their next visit they complete the Traits, Birth lottery and Home steps, then get the tutorial. Their name, style and crew carry over.
 
 **You test:** a friend with no help goes from the link through the creator, tutorial and party to the leaderboard; v0.1 players are upgraded without losing anything; invite clout appears correctly.
 
@@ -144,7 +144,7 @@ Real-money purchases and player-to-player chat, all in Stripe test mode until v1
 - One Stripe Checkout flow for all four products: exclusive events, collector fashion items, Sarah Bird's three side arcs, and monument postcards (Story Production and Payments Brief).
 - Entitlements by SKU, refunds with clout clawback, and the Collection screen for postcards.
 - Exclusive events in the Events list, and location wave 3: two monuments, a lounge, the fashion boutique and the car dealership.
-- Chat in the Messages app: 10 messages a day, the word filter, block, report, and the admin review queue. Then crushes (mutual only), crush invites and date nights on top of it (Clarifications section 14).
+- Chat in the Messages app: 10 messages a day, the word filter, block, report, and the admin review queue. Then crushes (mutual only), crush invites and date nights on top of it (Clarifications section 14), and crew outings: "Bring the crew" on any place, with bonuses when friends go too (Clarifications section 15).
 - Analytics for the success metrics: first task, invites, day-1 return, beat opens, predictions and purchases.
 
 **You test:** every product's test purchase unlocks it, a replayed payment doesn't duplicate it, and a refund removes it (and its clout). A report sent from chat appears in the admin queue. A mutual crush shows the "It's mutual" card to both players, a one-sided crush shows nothing, and a date night pays its bonus only after both players have gone.

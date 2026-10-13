@@ -65,17 +65,17 @@ export function InviteSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} label={crush ? "Crush invite" : "Invite your Clique"} tall>
+    <Sheet open={open} onClose={onClose} label={crush ? "Crush invite" : "Invite your Crew"} tall>
       <div className="stack-24">
         <div className="stack-4" style={{ paddingRight: 44 }}>
           <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <h2 className="display-lg" style={{ margin: 0 }}>{crush ? "Crush invite 💌" : "Invite your Clique"}</h2>
+            <h2 className="display-lg" style={{ margin: 0 }}>{crush ? "Crush invite 💌" : "Invite your Crew"}</h2>
             <span className="body-strong" style={{ whiteSpace: "nowrap" }}>{progress.shown} of {size}</span>
           </div>
           <p className="subtext" style={{ margin: "4px 0 0" }}>
             {crush
               ? "Your crush isn't in the city yet? Send them this. It comes from you, by name, and pays the same as any invite."
-              : "Main characters need a supporting cast. Send your link; everyone who signs up through it joins your clique."}
+              : "Main characters need a supporting cast. Send your link; everyone who signs up through it joins your crew."}
           </p>
           {crush && <p className="crush-invite-quote">&ldquo;{CRUSH_INVITE_TEXT}&rdquo;</p>}
         </div>
@@ -97,7 +97,7 @@ export function InviteSheet({
         </div>
 
         <div className="stack-8">
-          <span className="title">Your clique</span>
+          <span className="title">Your crew</span>
           <div style={{ height: 8, borderRadius: 999, background: "var(--chip-off)", overflow: "hidden" }} role="progressbar" aria-valuemin={0} aria-valuemax={size} aria-valuenow={progress.shown}>
             <div style={{ width: `${progress.ratio * 100}%`, height: "100%", background: "var(--taxi-400)", borderRadius: 999, transition: "width .4s ease-out" }} />
           </div>
@@ -108,7 +108,7 @@ export function InviteSheet({
           {clique.length === 0 ? (
             <div className="card center">
               <p className="title" style={{ margin: 0 }}>Nobody yet</p>
-              <p className="subtext" style={{ margin: "4px 0 0" }}>A clique of one is just a mood. Send that link.</p>
+              <p className="subtext" style={{ margin: "4px 0 0" }}>A crew of one is just a mood. Send that link.</p>
             </div>
           ) : (
             clique.map((m) => {

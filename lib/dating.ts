@@ -52,7 +52,7 @@ export interface DatingApi {
 
 const ERRORS: Record<string, string> = {
   crush_limit: `That's ${DATING.maxCrushes} crushes. Take one back to make room.`,
-  not_connected: "You two need to know each other first: a clique member or a real chat.",
+  not_connected: "You two need to know each other first: a crew member or a real chat.",
   blocked: "That's not happening.",
   not_a_date_spot: "Pick a place with food or a club night.",
   date_exists: "You two already have a date tonight.",

@@ -166,7 +166,7 @@ export function DateSheet({ spot, api, onClose, onSent }: {
         {people?.length === 0 && (
           <div className="card stack-4">
             <p className="overline" style={{ margin: 0 }}>Nobody to ask yet</p>
-            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your clique, or someone you&apos;ve actually chatted with.</p>
+            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Dates are for people you know: your crew, or someone you&apos;ve actually chatted with.</p>
           </div>
         )}
         <div className="stack-8">

@@ -34,7 +34,7 @@ Six pillars decide every trade-off.
 2. **Satire with real mechanics.** Funny on the surface (a gossip narrator, petty stakes treated as world-ending), with real choices about money, rent and status underneath.
 3. **Clout is the scoreboard.** Every system feeds it: tasks, places, events, possessions, invites and correct guesses.
 4. **Short sessions, daily return.** A beat is a 10-second read; daily tasks fit a coffee break; something new waits every day.
-5. **Friends are an advantage.** Inviting a clique earns clout and a big bonus at five, but solo play still progresses fully.
+5. **Friends are an advantage.** Inviting a crew earns clout and a big bonus at five, but solo play still progresses fully.
 6. **Real money is always marked, never a shortcut.** Gold means real money. It can't buy virtual cash, and story purchases never help you guess.
 
 ### What it is not
@@ -66,7 +66,7 @@ The game works at three timescales: a first session that delivers a win fast, a 
 2. Tap anything and sign up.
 3. Create a character in four steps: **Look** (pick one of eight starting styles, from Bodega Drip to Startup Founder), **Traits** (pick two, flavor only), **Birth lottery** (roll starting cash between $6,000 and $10,000), **Home** (choose a Queens apartment and move in).
 4. A satirical welcome and a five-tooltip tour of clout, money, the map, the phone and events.
-5. **First task:** you've been invited to a party. Go solo or bring the clique; either way you're seen, earn cash and clout, and land on the leaderboard.
+5. **First task:** you've been invited to a party. Go solo or bring the crew; either way you're seen, earn cash and clout, and land on the leaderboard.
 6. Invite friends, add the game to your home screen, and meet the city's current story.
 
 ### Daily session (5 to 15 minutes)
@@ -80,7 +80,7 @@ The game works at three timescales: a first session that delivers a win fast, a 
 
 - Build clout and net worth: better apartment, a car, luxury and collector pieces.
 - Follow each weekly story to its finale, call the twists and collect badges.
-- Grow a clique of five for the big bonus, and collect the monument postcards.
+- Grow a crew of five for the big bonus, and collect the monument postcards.
 - Later: unlock new boroughs, and the career and progression systems in the roadmap (section 11).
 
 ## 6. Systems at a glance
@@ -99,7 +99,7 @@ Every P1 system, what it does and which spec owns it.
 | Shop | Fashion, Cars, Houses, Luxury, Makeup; rare collector items | Clarifications |
 | Bills | Rent and phone to start; car bills once you rent or buy a car | Clarifications |
 | Stories | Shared daily beats, predictions, world effects, paid side arcs | World State, Quality, Production briefs |
-| Clique and invites | Clout per friend who signs up; big bonus at five | Clarifications |
+| Crew and invites | Clout per friend who signs up; big bonus at five | Clarifications |
 | Chat | 10 messages a day, filter, block, report, admin queue | Clarifications |
 | UI and look | Every screen and component | Design Guide |
 
@@ -118,9 +118,9 @@ Stories are the main reason to come back every day: serialized, satirical and sh
 
 Growth comes from friends and from shared story moments.
 
-- **The clique:** inviting is optional but rewarded. Each friend who signs up pays clout to the inviter, and a full clique of five earns a big bonus. Players can bring the clique to the first party, and the main invite prompt follows that first win.
+- **The crew:** inviting is optional but rewarded. Each friend who signs up pays clout to the inviter, and a full crew of five earns a big bonus. Players can bring the crew to the first party, and the main invite prompt follows that first win.
 - **Shared talk:** live poll results and the reveal card ("You picked Jett. So did 61% of Queens.") give players something to screenshot and argue about. Every beat has a Share button.
-- **The leaderboard:** clout ranking for Queens and the player's clique.
+- **The leaderboard:** clout ranking for Queens and the player's crew.
 - **Chat:** player-to-player messages, 10 a day, with a word filter, block, report and an admin review queue.
 - **Crushes and date nights:** a light romance layer between players who already know each other. Crushes are revealed only when mutual, and a crush invite turns a crush into an invite. Date nights send two players to the same dining place or club event for a shared bonus. No real photos, no stranger matching.
 - **Install:** an add-to-home-screen prompt in the first session, so the game lives on the phone like an app.
@@ -151,12 +151,12 @@ Three headline metrics decide whether P1 works; the rest explain why.
 **Headline**
 
 - First task completed.
-- Clique invite sent.
+- Crew invite sent.
 - Day-1 return of 35 to 40% (stretch goal: 50%).
 
 **Story health:** beat opens, prediction participation, side-arc purchases and return rate during an arc.
 
-**Supporting:** exclusive-event and collector purchases, chat use against the daily cap, install rate, and how many players reach a full clique of five.
+**Supporting:** exclusive-event and collector purchases, chat use against the daily cap, install rate, and how many players reach a full crew of five.
 
 ## 11. Roadmap
 
@@ -169,7 +169,7 @@ P1 is defined in Clarifications section 8. Everything below is **after P1** and 
 | City | Brooklyn, Manhattan, the Bronx and Staten Island, each with its own rent level and vibe, unlocked at clout thresholds (on the same stylized map, with its 3D buildings); fully 3D interiors; monuments and postcards in other boroughs; real university names with each university's permission |
 | City life | Random city events, rush hour, mild crime, weather and seasons, transit costs |
 | Home | Decorating apartments with decor slots and a home score |
-| Social | Crews, home visits, group hangouts, speed dating, compliment polls, an avatar-only fit-check feed, roommates splitting rent, daily friend boosts, outfit and home voting, rivals, gifting |
+| Social | Home visits, speed dating, compliment polls, an avatar-only fit-check feed, roommates splitting rent, daily friend boosts, outfit and home voting, rivals, gifting |
 | Growth | Shareable story and milestone cards, deep-link landing pages, tiered referral rewards, streaks, notifications |
 | Stories | City headlines in the News app beyond stories, an insider pass, bundles |
 | Money | A seasonal pass, purchases at places, a marketplace |

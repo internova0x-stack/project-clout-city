@@ -8,7 +8,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 - `docs/01-game-concept-note.md`: the big picture.
 - `docs/02-clarifications-and-updates-v2.md`: game rules and P1 scope. **Wins on rules.**
 - `docs/03-world-state-layer-brief-v2.md`: story engine. **Wins on the World State layer.**
-- `docs/05-design-system-guide-v2.md`: UI tokens and components C1 to C39.
+- `docs/05-design-system-guide-v2.md`: UI tokens and components C1 to C42.
 - `docs/07-milestones-and-versions.md`: what ships in which version. Build only the
   current version's "In scope" list; anything else gets a "Coming soon" card.
 - `docs/SETUP.md`: Supabase, email template and Vercel setup.
@@ -32,7 +32,7 @@ components live in `app/globals.css`.
   first session with sample data (development only). `/preview/home` runs the city on an
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight` starts crushes and
-  date nights in that state. `/preview/studio` shows the Story Studio.
+  date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 
 ## Rules for this codebase
@@ -52,6 +52,8 @@ components live in `app/globals.css`.
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.
+- Players see "Crew" for their invited friends; code, types and database tables still say `clique`
+  (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never
   promises features that aren't built.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the

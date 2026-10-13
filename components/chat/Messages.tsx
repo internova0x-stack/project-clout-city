@@ -23,13 +23,14 @@ export interface MessagesDating {
 
 type Overlay = { kind: "menu" } | { kind: "block" } | { kind: "report"; messageId: number | null } | null;
 
-export function MessagesApp({ api, openWith, onToast, onUnread, dating }: {
+export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: {
   api: ChatApi;
   /** Open (or start) a thread with this player, e.g. from their profile card. */
   openWith?: { id: string; name: string; style: string } | null;
   onToast: (text: string) => void;
   onUnread?: (n: number) => void;
   dating?: MessagesDating;
+  crew?: { alerts: number; onOpen: () => void };
 }) {
   const [list, setList] = useState<ChatSummary[] | null>(null);
   const [status, setStatus] = useState<ChatStatus | null>(null);
@@ -69,7 +70,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating }: {
     return () => clearInterval(t);
   }, [open, loadThread]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: "end" }); }, [thread?.messages.length]);
-  // The crush button shows once the chat is two-way (or they're in the clique); re-check as replies arrive.
+  // The crush button shows once the chat is two-way (or they're in the crew); re-check as replies arrive.
   const theirs = thread?.messages.filter((m) => !m.mine).length ?? 0;
   const mine = thread?.messages.filter((m) => m.mine).length ?? 0;
   const twoWay = theirs > 0 && mine > 0;
@@ -131,6 +132,16 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating }: {
     return (
       <div className="stack-12">
         {status && <span className="chat-left">{muted ? "Chat is paused for you" : `${left} of ${status.limit} left today`}</span>}
+        {crew && (
+          <button className="chat-row date-row" onClick={crew.onOpen}>
+            <span className="chat-avatar" aria-hidden="true">👯</span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="title" style={{ display: "block" }}>Crew plans</span>
+              <span className="subtext chat-last">{crew.alerts > 0 ? "Your crew wants you out tonight" : "Tonight's outings with your crew"}</span>
+            </span>
+            <span className="chat-meta">{crew.alerts > 0 && <span className="count-badge">{crew.alerts}</span>}</span>
+          </button>
+        )}
         {dating && (
           <button className="chat-row date-row" onClick={dating.onOpenDates}>
             <span className="chat-avatar" aria-hidden="true">🌙</span>

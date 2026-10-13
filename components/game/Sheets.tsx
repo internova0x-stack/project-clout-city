@@ -107,7 +107,7 @@ export function TasksSheet({
           <div className="stack-12">
             <div className="select-card multi" aria-pressed={cliqueCount >= cliqueSize}>
               <span className="select-emoji" aria-hidden="true">👯</span>
-              <span className="title" style={{ display: "block" }}>Build a clique of {cliqueSize}</span>
+              <span className="title" style={{ display: "block" }}>Build a crew of {cliqueSize}</span>
               <span className="subtext" style={{ display: "block" }}>{Math.min(cliqueCount, cliqueSize)} of {cliqueSize} friends joined through your link.</span>
             </div>
             {city && (

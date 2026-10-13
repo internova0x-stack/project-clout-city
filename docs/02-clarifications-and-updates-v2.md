@@ -26,11 +26,11 @@ New players land on the map as guests and are only asked to sign up once they in
 | 7 | Tutorial 3: Map | Tooltip | A tooltip on the Map tab | "Next" advances |
 | 8 | Tutorial 4: Phone | Tooltip | A tooltip on the Phone tab | "Next" advances |
 | 9 | Tutorial 5: Events | Tooltip | A tooltip on the champagne icon | No "Next" button. Tapping the Events icon ends the tutorial and starts the first task |
-| 10 | First task: the party | Task | The event screen with the virtual-cash entry price and two buttons: "Bring the clique" and "Pull up solo" | Inviting is optional. Attending completes the task: cash and clout are awarded, Confidence rises and Energy drops. A completion card follows |
+| 10 | First task: the party | Task | The event screen with the virtual-cash entry price and two buttons: "Bring the crew" and "Pull up solo" | Inviting is optional. Attending completes the task: cash and clout are awarded, Confidence rises and Energy drops. A completion card follows |
 | 11 | Leaderboard | Screen | The clout leaderboard with the player's rank | Opens automatically after the completion card. "Climb the ladder" continues |
-| 12 | Invite prompt | Screen (modal) | The invite pitch and the five-friend bonus | "Recruit the clique" opens the invite screen. If the player already invited during the party, show "Invite more friends" with the progress bar instead |
+| 12 | Invite prompt | Screen (modal) | The invite pitch and the five-friend bonus | "Recruit the crew" opens the invite screen. If the player already invited during the party, show "Invite more friends" with the progress bar instead |
 | 13 | PWA prompt | Screen (modal) | The add-to-home-screen pitch | Android uses the browser's install prompt. iOS shows the manual Share → Add to Home Screen instruction |
-| 14 | Hand-off | Screen | The home map, with Daily Tasks showing 0/5 | The first-play pins on Net Worth and Invite your Clique appear now. A home-screen prompt then introduces the current story ("Queens has a whodunit. Think you can crack it?") and links straight to its latest beat in the News app |
+| 14 | Hand-off | Screen | The home map, with Daily Tasks showing 0/5 | The first-play pins on Net Worth and Invite your Crew appear now. A home-screen prompt then introduces the current story ("Queens has a whodunit. Think you can crack it?") and links straight to its latest beat in the News app |
 
 **Tooltip rules:** one tooltip at a time, the rest of the screen dimmed, and the tutorial step shown (e.g. "2 of 5"). Tooltips 1 to 4 advance with "Next"; tooltip 5 advances only by tapping its target.
 
@@ -52,11 +52,11 @@ The tone leans satirical and playful so first play feels delightful.
 
 **Tooltip 5: Events:** Breaking news: somebody invited you to a party. We're as surprised as you are. Tap to RSVP.
 
-**First task: the party:** Buttons: \[Bring the clique\] · \[Pull up solo\]. Completion card: "You were seen. Nobody knows who you are, but they saw you. That's a start. +$X · +X clout."
+**First task: the party:** Buttons: \[Bring the crew\] · \[Pull up solo\]. Completion card: "You were seen. Nobody knows who you are, but they saw you. That's a start. +$X · +X clout."
 
 **Leaderboard:** In this city, clout is the only ranking that counts. Here's where you stand. Don't look too long. \[Climb the ladder\]
 
-**Invite prompt:** Main characters need a supporting cast. Every friend who joins boosts your clout, and a full clique of five earns a big bonus. \[Recruit the clique\] · Later (lonely, but okay)
+**Invite prompt:** Main characters need a supporting cast. Every friend who joins boosts your clout, and a full crew of five earns a big bonus. \[Recruit the crew\] · Later (lonely, but okay)
 
 **PWA prompt:** Put Clout City on your home screen so you never miss a party, a deal, or a chance to be seen. \[Add to home screen\] · Not now. iOS version: "Tap Share, then Add to Home Screen. Yes, it's two taps. Fame takes effort."
 
@@ -98,7 +98,7 @@ The top bar is always visible, the side icons are fixed like TikTok's, and only 
 
 | Element | Icon | Shows | On tap |
 | --- | --- | --- | --- |
-| Invite your Clique | Text pill | Prompt to invite friends | Opens the invite screen (section 7) |
+| Invite your Crew | Text pill | Prompt to invite friends | Opens the invite screen (section 7) |
 | Players Online | Green dot + "N people online" | Live count of active players; hidden below a configurable threshold, which starts at 1 | None |
 
 ### Right-side column (fixed, no collapse)
@@ -115,7 +115,7 @@ The top bar is always visible, the side icons are fixed like TikTok's, and only 
 
 **Bottom navigation:** Home (house), Map (location pin), Phone (phone outline), Shop (storefront).
 
-**Notification pins:** Net Worth and Invite your Clique each show a pin on first play. Net Worth also shows one whenever it changes, since the HUD shows no figure for it.
+**Notification pins:** Net Worth and Invite your Crew each show a pin on first play. Net Worth also shows one whenever it changes, since the HUD shows no figure for it.
 
 **Icon choices:** Places uses a building (the pin belongs to Map), Events a champagne glass, Bills a receipt (to stay apart from the money figures), and Tasks/Goals a checklist (a trophy would imply the leaderboard).
 
@@ -261,12 +261,12 @@ P1 has three event types and four real-money products, all bought through one St
 - Prices live in Stripe and config, not in code.
 - Only these products use gold in the UI.
 
-## 7. Invite clique flow
+## 7. Invite crew flow
 
-Inviting earns clout per invite plus a major bonus when the clique reaches five.
+Inviting earns clout per invite plus a major bonus when the crew reaches five.
 
-1. **Button.** "Invite your Clique" sits upper left with a notification pin on first play.
-2. **Invite screen.** The invite interface at the top, clique members' profiles below it, and a progress bar toward the five-member bonus.
+1. **Button.** "Invite your Crew" sits upper left with a notification pin on first play.
+2. **Invite screen.** The invite interface at the top, crew members' profiles below it, and a progress bar toward the five-member bonus.
 3. **Rewards.** A set clout amount per invite, paid when the invited friend signs up, and a major bonus when the fifth member signs up.
 4. **Payout timing.** Per-invite clout pays out when the invited friend signs up, which stops players spamming invites for clout. Inviting is optional in the first task. A crush invite (section 14) is a variant of the same invite, with the same rewards.
 
@@ -277,7 +277,7 @@ Inviting earns clout per invite plus a major bonus when the clique reaches five.
 ### Success metrics
 
 - First task completed.
-- Clique invite sent.
+- Crew invite sent.
 - Day-1 return: 35 to 40% (stretch goal: 50%). For reference, the median mobile game sits around 22% and the top 10% around 40%.
 
 ### P1 scope (current build)
@@ -467,7 +467,7 @@ Clout is a ranking only: it drives the leaderboard and doesn't gate places, even
 
 A light romance layer between players who already know each other. It uses no real photos, no stranger matching, and no data about anyone's sex or orientation.
 
-1. **Crushes (mutual only).** Players can mark someone they're connected to as a crush: a clique member, or someone they've had at least one two-way chat with. Each player can have up to 3 active crushes. Nothing is revealed unless it's mutual; then both get an "It's mutual" card and a "Matched" label on their chat. Crushes that aren't mutual stay secret forever. Marking a crush pays no clout.
+1. **Crushes (mutual only).** Players can mark someone they're connected to as a crush: a crew member, or someone they've had at least one two-way chat with. Each player can have up to 3 active crushes. Nothing is revealed unless it's mutual; then both get an "It's mutual" card and a "Matched" label on their chat. Crushes that aren't mutual stay secret forever. Marking a crush pays no clout.
 2. **Crush invites.** A variant of the normal invite with a playful, open message: "I've got a crush on someone in Clout City. Join and find out if it's you." It pays the normal invite clout (section 7). It's never anonymous, and the game never messages anyone directly.
 3. **Date nights.** Invite a crush or a friend to a dining place or a club event, never an exclusive event. The invite lasts until New York midnight; each person goes whenever they're on and pays their own way. Once both have gone, both get a Mood boost and a small clout bonus, separate from the visit's own clout, at most once per day per player.
 4. **Safety.** Blocking cancels everything: a blocked player can't crush on, invite or see the date nights of the player who blocked them. Reports work as in chat (section 10). No "secret admirer" teasers.
@@ -476,6 +476,18 @@ A light romance layer between players who already know each other. It uses no re
 7. **Romance in the stories.** The second story is a dating comedy, and Lola Lowdown's dating advice column runs in the News app as a recurring mini arc (3 to 4 beats, no predictions).
 
 **After P1:** speed dating, compliment polls and an avatar-only fit-check feed, once there are enough players. Swiping and real-photo feeds aren't planned.
+
+
+## 15. Crew outings
+
+Added Oct 13, 2026 by the product owner (brought forward from the "group hangouts" idea in the roadmap). The friend group players invite is called the **Crew** everywhere in the game (it was "Clique" before; code and database tables still say clique).
+
+1. **Bring the crew.** Every place card with a crew activity has a "Bring the crew" button next to "Make it a date". It opens a sheet to pick the activity and up to 5 crew members (all ticked by default), with the bonus shown. One tap sends it. With no crew yet, the same button leads to the invite screen.
+2. **Activities.** Visits, meals, hangouts, lectures, and club or campus events: things paid in virtual cash or free. Never exclusive (real-money) events, shifts, the gigs board or story-only actions.
+3. **Timing.** Like date nights, it lasts until New York midnight; each person goes whenever they're on and pays their own way. Going counts as saying yes.
+4. **Bonuses.** Everyone who goes gets +10 clout for each friend who also goes (each pair of friends once per day, across outings). When the host and all 5 friends go, everyone gets +100 clout and +10 Mood (once per day per player). Tunable in `game_settings` row `crew`.
+5. **Limits and safety.** Up to 3 outings a day per host. Blocking someone takes them out of your outings and your crew.
+6. **Notifications** are in-app only: a "Crew plans" home-screen card (after any date card, before the story card), the Phone badge, and a "Crew plans" row in Messages. A full crew gets a light, Monument Valley-style "Full crew" reveal.
 
 ## Open questions
 

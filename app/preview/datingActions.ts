@@ -78,7 +78,7 @@ export async function previewCrushStatus(id: string) {
 }
 export async function previewCrush(id: string, on: boolean) {
   if (on) {
-    if (!CONNECTED.has(id)) return fail("You two need to know each other first: a clique member or a real chat.");
+    if (!CONNECTED.has(id)) return fail("You two need to know each other first: a crew member or a real chat.");
     if (!has(ME, id) && mine() >= DATING.maxCrushes) return fail(`That's ${DATING.maxCrushes} crushes. Take one back to make room.`);
     s.crushes.add(`${ME}>${id}`);
   } else {
@@ -96,7 +96,7 @@ export async function previewDateCandidates() {
   return ok(list.sort((a, b) => Number(b.matched) - Number(a.matched) || a.name.localeCompare(b.name)));
 }
 export async function previewDateInvite(withId: string, kind: "place" | "event", target: string) {
-  if (!CONNECTED.has(withId)) return fail("You two need to know each other first: a clique member or a real chat.");
+  if (!CONNECTED.has(withId)) return fail("You two need to know each other first: a crew member or a real chat.");
   if (!spot(kind, target)) return fail("Pick a place with food or a club night.");
   const live = (d: Row) => d.status === "pending" || d.status === "accepted";
   if (s.dates.some((d) => live(d) && [d.host, d.guest].includes(withId))) return fail("You two already have a date tonight.");

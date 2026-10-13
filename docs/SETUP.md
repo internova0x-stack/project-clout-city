@@ -100,7 +100,7 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    filtered words live in `game_settings` row `chat`; add words there, one lowercase word each.
 
 9. Run `supabase/migrations/0011_dating.sql`. It switches on crushes and date nights
-   (Clarifications section 14): a heart on clique members' profile cards and on two-way chats
+   (Clarifications section 14): a heart on crew members' profile cards and on two-way chats
    (3 crushes each, revealed only when mutual), "Make it a date" on restaurants and club nights,
    and a **Date nights** row at the top of Messages. When both players have gone, each gets
    +10 Mood and +25 clout, once a day. Blocking someone cancels crushes and dates between you.
@@ -109,6 +109,10 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 10. Run `supabase/migrations/0012_universities.sql`. It adds the two parody universities,
    St. Johnsons University (Jamaica) and Queensborough University (Flushing): a free lecture
    (Energy for Confidence and 15 clout, once a day) and a campus event at each.
+
+11. Run `supabase/migrations/0013_crew_outings.sql`. It switches on crew outings: "Bring the crew"
+    on place cards, Crew plans in Messages, +10 clout per friend who goes too and +100 clout and
+    +10 Mood when the whole crew (host + 5) goes. Tunable in `game_settings` row `crew`.
 
 **Adding a party** (an exclusive event) in the SQL Editor; times are New York time:
 
@@ -140,7 +144,7 @@ npm run dev                  # http://localhost:3000
 - [ ] A link opened in a fresh browser lands on the map, with no sign-up wall.
 - [ ] Tapping anything opens sign-up; the 18+ box must be ticked to continue.
 - [ ] The magic-link email arrives, and signing in works on phone and computer.
-- [ ] A friend signing up through your invite link shows up in your clique count.
+- [ ] A friend signing up through your invite link shows up in your crew count.
 - [ ] Choosing a style changes the character instantly.
 - [ ] Every unbuilt icon and tab shows "Coming soon"; nothing is broken or blank.
 - [ ] It runs smoothly on a low-end Android phone.

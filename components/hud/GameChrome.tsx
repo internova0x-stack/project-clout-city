@@ -88,7 +88,7 @@ export function GameChrome({
 
       <div className="under-hud">
         <button className="pill-glass glass-hud" style={{ position: "relative" }} onClick={() => onAction("invite")}>
-          Invite your Clique
+          Invite your Crew
           {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
         </button>
         {values?.online != null && values.online >= ECONOMY.playersOnlineThreshold && (

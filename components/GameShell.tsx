@@ -25,6 +25,8 @@ import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
 import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
 import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
+import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
+import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew";
 import type { ShopCategory } from "@/lib/city";
 import { GainToast, useGameNow } from "./city/Common";
 import { DevClock } from "./city/DevClock";
@@ -55,7 +57,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "possessions" | "collection" | "dates" | null;
+type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "possessions" | "collection" | "dates" | "crew" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
@@ -95,6 +97,7 @@ export function GameShell({
   track,
   leaderboardRows,
   dating,
+  crew,
   roomMood = "dream",
 }: {
   player: Player;
@@ -115,6 +118,8 @@ export function GameShell({
   track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared" | "crush_invite_shared") => void;
   /** v0.5 crushes and date nights (migration 0011). */
   dating?: DatingApi;
+  /** Crew outings (migration 0013). */
+  crew?: CrewApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -163,20 +168,56 @@ export function GameShell({
   const [datingDismissed, setDatingDismissed] = useState<string | null>(null);
   const [datingBusy, setDatingBusy] = useState(false);
   /** Re-reads the dating inbox; a date that just paid out gets its own toast. */
+  /** Re-reads the player from the server (bonuses paid by someone else's visit). Set once the city API is ready. */
+  const resync = useRef<() => void>(() => {});
+  const inboxRef = useRef<DatingInbox | null>(null);
   const loadInbox = useCallback(async () => {
     if (!dating) return;
     const r = await dating.inbox();
     if (!r.ok) return;
-    setInbox((prev) => {
-      const paid = r.data.dates.find((d) => d.paid && prev?.dates.some((p) => p.id === d.id && !p.paid));
-      if (paid) {
-        setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
-        setToast(`Date night with ${paid.with.name}. You both pulled up. 💗`);
-        setMe((m) => ({ ...m, clout: m.clout + r.data.bonus.clout, mood: Math.min(100, m.mood + r.data.bonus.mood) }));
-      }
-      return r.data;
-    });
+    const prev = inboxRef.current;
+    inboxRef.current = r.data;
+    setInbox(r.data);
+    const paid = r.data.dates.find((d) => d.paid && prev?.dates.some((p) => p.id === d.id && !p.paid));
+    if (paid) {
+      setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
+      setToast(`Date night with ${paid.with.name}. You both pulled up. 💗`);
+      resync.current();
+    }
   }, [dating]);
+  // ---- Crew outings: the inbox, and what changed since the last look ----
+  const [crewInbox, setCrewInbox] = useState<CrewInbox | null>(null);
+  const crewRef = useRef<CrewInbox | null>(null);
+  const [crewPlace, setCrewPlace] = useState<Place | null>(null);
+  const [crewFull, setCrewFull] = useState<CrewOuting | null>(null);
+  const [crewDismissed, setCrewDismissed] = useState<string | null>(null);
+  const [crewBusy, setCrewBusy] = useState(false);
+  const loadCrew = useCallback(async () => {
+    if (!crew) return;
+    const r = await crew.inbox();
+    if (!r.ok) return;
+    const prev = crewRef.current;
+    crewRef.current = r.data;
+    setCrewInbox(r.data);
+    if (!prev) return;
+    const gained = r.data.clout - prev.clout;
+    const full = r.data.outings.find((o) => o.full && o.iWent && prev.outings.some((p) => p.id === o.id && !p.full));
+    if (full) setCrewFull(full);
+    if (gained > 0) {
+      // Friends who arrived since the last look (not you: your own visit has its own toast).
+      const arrived = r.data.outings.flatMap((o) => o.members.filter((m) => m.went && m.id !== player.id
+        && prev.outings.find((p) => p.id === o.id)?.members.some((pm) => pm.id === m.id && !pm.went)));
+      setGain({ clout: gained });
+      if (!full) setToast(arrived.length ? `${arrived.map((m) => m.name).join(", ")} pulled up. Crew bonus!` : "Crew bonus!");
+      resync.current();
+    }
+  }, [crew, player.id]);
+  useEffect(() => {
+    if (!crew) return;
+    void loadCrew();
+    const t = setInterval(() => void loadCrew(), 60_000);
+    return () => clearInterval(t);
+  }, [crew, loadCrew]);
   useEffect(() => {
     if (!dating) return;
     void loadInbox();
@@ -229,6 +270,9 @@ export function GameShell({
     },
     [applyCity],
   );
+  useEffect(() => {
+    resync.current = () => { if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r)); };
+  }, [cityApi, applyCity]);
   // ---- Story actions: the server answers with the player's fresh story feed ----
   const applyStory = useCallback((r: StoryResult): boolean => {
     if (!r.ok) {
@@ -282,6 +326,7 @@ export function GameShell({
     if (ok && storyApi) await storyApi.refresh(offset).then((r) => r.ok && setFeed(r.feed));
     // A visit or an event can complete a date night.
     if (ok && inbox?.dates.some((d) => !d.paid && d.status !== "declined")) void loadInbox();
+    if (ok && crewInbox?.outings.length) void loadCrew();
   };
   const openNews = (beat?: string | null) => {
     setPanel(null);
@@ -373,6 +418,7 @@ export function GameShell({
     busy,
     money: catalog ? { products, nowMs: gameNow, h: money } : undefined,
     onOpenShop: openShop,
+    crew: crew && crewInbox ? { outings: crewInbox.outings.filter((o) => o.myStatus !== "declined"), onBring: (p) => setCrewPlace(p) } : undefined,
     dating: dating && inbox ? { me: me.starting_style, dates: inbox.dates.filter((d) => d.status !== "declined"), bonus: inbox.bonus, onMakeDate: setDateSpot } : undefined,
     onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
@@ -567,7 +613,10 @@ export function GameShell({
 
   const datingKey = inbox ? `${inbox.matches.filter((m) => !m.seen).map((m) => m.id).join()}|${inbox.dates.filter((d) => !d.mine && d.status === "pending").map((d) => d.id).join()}` : "";
   const showDating = !!dating && datingAlerts(inbox) > 0 && datingDismissed !== datingKey && flow === "none" && !arranging && tab === "home" && !inside;
-  const showPrompt = showDating || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
+  const crewKey = crewInbox ? crewInbox.outings.filter((o) => !o.mine && o.myStatus === "invited").map((o) => o.id).join() : "";
+  // One home card at a time: dates first, then crew plans, then the story.
+  const showCrew = !showDating && !!crew && crewAlerts(crewInbox) > 0 && crewDismissed !== crewKey && flow === "none" && !arranging && tab === "home" && !inside;
+  const showPrompt = showDating || showCrew || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
   const openChatWith = (p: DatePerson) => {
     setPanel(null);
     setChatWith({ id: p.id, name: p.name, style: p.style });
@@ -627,7 +676,10 @@ export function GameShell({
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
           )}
-          {storyOn && flow === "none" && !arranging && !showDating && (
+          {showCrew && crewInbox && (
+            <CrewPrompt inbox={crewInbox} onOpen={() => setPanel("crew")} onDismiss={() => setCrewDismissed(crewKey)} />
+          )}
+          {storyOn && flow === "none" && !arranging && !showDating && !showCrew && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
           <button
@@ -679,7 +731,7 @@ export function GameShell({
           online,
           eventsBadge: !partyDone,
           billsBadge: !!city && dueBills(city).length > 0,
-          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
+          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <GainToast gain={gain} message={toast} onDone={clearGain} />
@@ -838,6 +890,7 @@ export function GameShell({
           onOpenDates: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("dates"); },
           onCrushChange: () => void loadInbox(),
         } : undefined}
+        crew={crew ? { alerts: crewAlerts(crewInbox), onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("crew"); } } : undefined}
         onToast={setToast}
         story={storyOn ? feed : null}
         news={storyOn ? news : undefined}
@@ -895,6 +948,32 @@ export function GameShell({
             crush
             onShared={() => track?.("crush_invite_shared")}
           />
+        </>
+      )}
+      {crew && (
+        <>
+          <CrewSheet
+            place={crewPlace}
+            api={crew}
+            onClose={() => setCrewPlace(null)}
+            onSent={(text) => { setCrewPlace(null); setToast(text); void loadCrew(); }}
+            onInviteFriends={() => { setCrewPlace(null); setPlace(null); setPanel("invite"); }}
+          />
+          <CrewPlansSheet
+            open={panel === "crew"}
+            onClose={() => setPanel(null)}
+            inbox={crewInbox}
+            busy={crewBusy}
+            onAnswer={(id, yes) => void (async () => {
+              setCrewBusy(true);
+              const r = await crew.respond(id, yes);
+              setCrewBusy(false);
+              setToast(!r.ok ? r.error : yes ? "You're in. Go whenever you're on tonight." : "No worries. Maybe next time.");
+              await loadCrew();
+            })()}
+            onOpenPlace={(id) => openPlace(id)}
+          />
+          {crewFull && <CrewFullCard outing={crewFull} onClose={() => setCrewFull(null)} />}
         </>
       )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />

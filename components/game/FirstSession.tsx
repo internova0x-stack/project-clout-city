@@ -41,7 +41,7 @@ export function PartySheet({
           </div>
         </div>
         {error && <p className="error-text" role="alert">{error}</p>}
-        <button className="btn btn-taxi" disabled={busy} onClick={() => onAttend(true)}>Bring the clique</button>
+        <button className="btn btn-taxi" disabled={busy} onClick={() => onAttend(true)}>Bring the crew</button>
         <button className="btn btn-secondary" disabled={busy} onClick={() => onAttend(false)}>Pull up solo</button>
         <p className="meta center" style={{ margin: 0 }}>Entry is paid in virtual cash. Inviting is optional; showing up is the task.</p>
       </div>
@@ -70,7 +70,7 @@ export function PartyDoneCard({ onContinue }: { onContinue: () => void }) {
 
 interface Row { id?: string; rank: number; display_name: string; starting_style: string; clout: number; is_me: boolean }
 
-/** C27: the clout leaderboard, Queens or Clique. */
+/** C27: the clout leaderboard, Queens or Crew. */
 export function LeaderboardSheet({
   open, onClose, cta, myClout, onOpenPlayer, fetchRows,
 }: {
@@ -118,16 +118,16 @@ export function LeaderboardSheet({
         </div>
         <div className="segmented" role="group" aria-label="Leaderboard scope">
           <button aria-pressed={scope === "queens"} onClick={() => setScope("queens")}>Queens</button>
-          <button aria-pressed={scope === "clique"} onClick={() => setScope("clique")}>Clique</button>
+          <button aria-pressed={scope === "clique"} onClick={() => setScope("clique")}>Crew</button>
         </div>
         <div className="card lb-summary">
-          <span className="overline">{scope === "queens" ? "Queens leaderboard" : "Your clique"}</span>
+          <span className="overline">{scope === "queens" ? "Queens leaderboard" : "Your crew"}</span>
           <span className="display-md">{me?.rank ? `You're #${me.rank.toLocaleString()}` : "Calculating your fame…"}</span>
           {me?.total ? <span className="meta">of {me.total.toLocaleString()} {me.total === 1 ? "player" : "players"}{onOpenPlayer ? " · tap a player to see their card" : ""}</span> : null}
         </div>
         <div className="card lb-list">
           {rows === null && <p className="meta" style={{ margin: 0 }}>Counting heads…</p>}
-          {rows?.length === 0 && <p className="meta" style={{ margin: 0 }}>Nobody here yet. Invite your clique to fill the board.</p>}
+          {rows?.length === 0 && <p className="meta" style={{ margin: 0 }}>Nobody here yet. Invite your crew to fill the board.</p>}
           {rows?.map((r) => (
             <div
               key={`${r.rank}-${r.display_name}`}
@@ -159,18 +159,18 @@ export function InvitePrompt({
   const { cliqueSize, cloutPerInvite, cliqueBonus } = ECONOMY.invites;
   const p = cliqueProgress(cliqueCount, cliqueSize);
   return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Invite your clique">
+    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Invite your crew">
       <div className="scrim" />
       <div className="modal-card modal-light stack-12">
-        <p className="display-md" style={{ margin: 0 }}>{invitedDuringParty ? "Invite more friends" : "Recruit your clique"}</p>
+        <p className="display-md" style={{ margin: 0 }}>{invitedDuringParty ? "Invite more friends" : "Recruit your crew"}</p>
         <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>
-          Main characters need a supporting cast. Every friend who joins boosts your clout (+{cloutPerInvite}), and a full clique of {cliqueSize} earns
+          Main characters need a supporting cast. Every friend who joins boosts your clout (+{cloutPerInvite}), and a full crew of {cliqueSize} earns
           a big bonus (+{cliqueBonus}).
         </p>
         {invitedDuringParty && (
           <div className="stack-4">
             <div className="row" style={{ justifyContent: "space-between" }}>
-              <span className="meta">Your clique</span>
+              <span className="meta">Your crew</span>
               <span className="body-strong">{p.shown} of {cliqueSize}</span>
             </div>
             <div style={{ height: 8, borderRadius: 999, background: "var(--chip-off)" }}>
@@ -178,7 +178,7 @@ export function InvitePrompt({
             </div>
           </div>
         )}
-        <button className="btn btn-taxi" onClick={onRecruit}>{invitedDuringParty ? "Invite more friends" : "Recruit the clique"}</button>
+        <button className="btn btn-taxi" onClick={onRecruit}>{invitedDuringParty ? "Invite more friends" : "Recruit the crew"}</button>
         <button className="btn btn-ghost" onClick={onLater}>Later (lonely, but okay)</button>
       </div>
     </div>

@@ -21,7 +21,7 @@ export default function Terms() {
       <p>Clout City is for adults only. By creating an account you confirm you are at least 18 years old. We close accounts we believe belong to someone under 18.</p>
 
       <h2>3. Early access</h2>
-      <p>The game is in early access. Features may change, be paused or be removed, and things may break. We will try to keep your account, name, character and clique as the game grows, but early access is provided &quot;as is&quot;.</p>
+      <p>The game is in early access. Features may change, be paused or be removed, and things may break. We will try to keep your account, name, character and crew as the game grows, but early access is provided &quot;as is&quot;.</p>
 
       <h2>4. Your account</h2>
       <p>You sign in with a link or code sent to your email. Keep access to that email secure; anyone who can read it can sign in as you. One account per person.</p>

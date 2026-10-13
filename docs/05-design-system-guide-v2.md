@@ -254,7 +254,7 @@ The left and right clusters are separated by flexible space; icon buttons sit on
 
 Below the HUD at the left, 12 pt apart:
 
-- **Invite your Clique:** pill-glass (32 pt) with label-chip text and an 8 pt neon-600 pin on first play.
+- **Invite your Crew:** pill-glass (32 pt) with label-chip text and an 8 pt neon-600 pin on first play.
 - **Players online:** pill-status (28 pt) with an 8 pt green-500 dot and "N people online" in meta, text-on-dark. Hidden below the configured threshold (starts at 1).
 
 ### C3. Side icon column (fixed)
@@ -300,7 +300,7 @@ These components are reused across every screen; each lists its anatomy, size, c
 
 | Variant | Height | Padding | Fill | Text | Example |
 | --- | --- | --- | --- | --- | --- |
-| pill-glass | 32 pt | 6 / 12 pt | glass-dark (glass-light over bright interiors) | label-chip | "Invite your Clique" |
+| pill-glass | 32 pt | 6 / 12 pt | glass-dark (glass-light over bright interiors) | label-chip | "Invite your Crew" |
 | pill-solid | 36 pt | 8 / 16 pt | glass-solid | body-strong | "Loading map… 90%" |
 | pill-status | 28 pt | 4 / 10 pt | glass-dark | meta + 8 pt status dot | "● 12 people online," "7 of 10 left today" |
 | pill-handle | 22 pt | 2 / 8 pt | night-900 at 85%, no stroke | text-on-dark 12 pt 600 | "@bigssg" |
@@ -464,7 +464,7 @@ Opened from the diamond in the HUD.
 | Exclusive event | night-reveal gradient card with a neon glow, ✨ real-cash tag | **premium-gold** button |
 
 - **Countdown:** before doors open, the action button is disabled and a meta line shows real minutes: "Doors open in 25 min."
-- The first-task party is always "Happening now" with "Bring the clique" (primary-taxi) and "Pull up solo" (secondary).
+- The first-task party is always "Happening now" with "Bring the crew" (primary-taxi) and "Pull up solo" (secondary).
 - A cancelled event shows the reason banner and no button.
 
 ### C27. Leaderboard (comparison table)
@@ -472,7 +472,7 @@ Opened from the diamond in the HUD.
 - Container: surface-card, radius-lg, 16 pt padding.
 - Header: overline label ("QUEENS LEADERBOARD") and the player's rank in display-md ("You're #4,212").
 - Rows: rank in meta, 32 pt avatar, name in title style, clout on the right in hud-number (taxi-500 on light). The player's own row is highlighted in taxi-tint.
-- A segmented toggle switches between "Queens" and "Clique."
+- A segmented toggle switches between "Queens" and "Crew."
 - Footnote in subtext explaining how clout is earned.
 
 ### C28. Profile header
@@ -575,7 +575,7 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 
 ### C40. Crush button and "It's mutual" card
 
-- **Crush button:** a 36 pt icon-round with an outline heart on clique members' profiles and on chat threads with a two-way conversation. Tapped, it fills neon-500 and shows a toast: "Crush saved. They'll only find out if it's mutual." A meta line shows the count: "2 of 3 crushes."
+- **Crush button:** a 36 pt icon-round with an outline heart on crew members' profiles and on chat threads with a two-way conversation. Tapped, it fills neon-500 and shows a toast: "Crush saved. They'll only find out if it's mutual." A meta line shows the count: "2 of 3 crushes."
 - It never appears on anyone the player isn't connected to, and never shows whether someone has crushed on you.
 - **"It's mutual" card:** a night-reveal card (radius-lg) with both avatars, "It's mutual 👀" in display-md, and two buttons: primary-taxi "Plan a date night" and secondary "Say hi" (opens the chat). The chat thread then shows a small neon-tint "Matched" tag.
 - Delivered in-app only: a Phone badge and a home-screen card (C6 style).
@@ -586,6 +586,14 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 - **Receiving:** a card with the sender's avatar, the place, its price in tabular figures, and "Expires at midnight" in meta; primary-green "I'm in" and ghost "Not tonight."
 - **Status:** a small two-avatar row on the place card: grey when only one has gone, both lit when both have. The bonus (🙂 Mood and 🔥 clout) shows when both have gone.
 - Copy stays gender-neutral: "Your date is pulling up to Club Phoenix tonight."
+
+### C42. Bring the crew
+
+- **Button:** a secondary button with 👯 "Bring the crew", in a row with "Make it a date" under a place's actions (neon-500 outline), once per place.
+- **Sheet:** title, the place and "tonight, until midnight"; activity chips when the place has more than one; crew rows with avatars and neon checkboxes (up to 5); a light-blue bonus card; primary "Send to N friends". Empty crew: an empty-state card, primary "Invite friends", ghost "Go solo for now".
+- **Receiving:** a "Crew plans" home card (warm yellow-to-orange gradient, C6 layout) and an invite card with the host's avatar, the place, the activity and price, "Expires at midnight · N of M went", ghost "Not tonight" and green "I'm in".
+- **Progress:** on the place card, overlapping avatars (grey until each goes), "N of M", a neon progress bar and the bonus line.
+- **Full crew:** a light reveal card: white into a pale blue and lavender gradient with soft orbs, on a frosted pale-blue backdrop, the six avatars with white rings, "Full crew 🎉", clout and Mood pills, primary "Nice".
 
 ## 11. Iconography, emoji and 3D characters
 
