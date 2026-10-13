@@ -13,7 +13,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
-  const [tasks, gigs, bills, items, visits, attended, dev, layout] = await Promise.all([
+  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc] = await Promise.all([
     supabase.from("daily_tasks").select("id, slot, kind, place_id, action_id, reward, done_at").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
@@ -27,6 +27,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     supabase.from("game_settings").select("value").eq("key", "dev").maybeSingle(),
     // Migration 0006; missing until it runs, which just means the default layout.
     supabase.from("players").select("home_layout").eq("id", player.id).maybeSingle(),
+    // Migration 0016; missing until it runs, which just means the evergreen lines.
+    supabase.rpc("npc_lines_live"),
   ]);
   const devValue = (dev.data?.value ?? {}) as { tools?: boolean; clockOffsetSeconds?: number };
   return {
@@ -56,5 +58,6 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     clockOffsetSeconds: Number(devValue.clockOffsetSeconds ?? 0),
     devTools: devValue.tools === true,
     homeLayout: layout.error ? null : (layout.data as { home_layout: unknown } | null)?.home_layout ?? null,
+    npcLines: npc.error ? {} : ((npc.data ?? {}) as Record<string, string[]>),
   };
 }

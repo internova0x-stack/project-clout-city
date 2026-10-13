@@ -18,6 +18,8 @@ import { activeGig, dueBills, equippedItems, gigReady, tasksDone, type CityApi, 
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
+import CAST_LINES from "@/content/cast-lines.json";
+import { regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, readReturn, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, LookSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
@@ -428,6 +430,12 @@ export function GameShell({
     onAttendStoryEvent: storyApi
       ? (id) => void runStory(`story:${id}`, () => storyApi.attendEvent(id)).then((ok) => ok && cityApi && cityApi.refresh().then((r) => r.ok && applyCity(r)))
       : undefined,
+    regular: (p, n) => {
+      const r = regularAt(p.id);
+      if (!r) return null;
+      const story = feed?.chatter?.find((t) => t.lines)?.lines ?? null;
+      return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live: city?.npcLines, evergreen: CAST_LINES }) };
+    },
     chatter: (p) => {
       const { who, role } = npcRole(p);
       // The story's current phase first, everyday gossip otherwise; a new line every ten minutes.

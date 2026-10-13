@@ -7,6 +7,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
 - `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries. **Wins over the older docs** for those features.
+- `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
 - `docs/01-game-concept-note.md`: the big picture.
 - `docs/02-clarifications-and-updates-v2.md`: game rules and P1 scope. **Wins on rules.**
 - `docs/03-world-state-layer-brief-v2.md`: story engine. **Wins on the World State layer.**

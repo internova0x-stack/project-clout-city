@@ -67,3 +67,11 @@ The Studio has two more tabs for the same admins:
   **Warn**, **Mute from chat** (7 days by default) or **Ban** (the account can't play).
 - **Metrics:** the success metrics: day-1 return against the 35 to 40% goal, first task done,
   invites sent, story readers and predictions, purchases by product (test mode) and chat activity.
+
+## The cast's lines (Cast tab)
+
+Regulars at places (Sal at the deli, Jojo at the café and the rest; see `docs/CAST.md`) say their everyday lines from `content/cast-lines.json`. In the Studio's **Cast** tab you add more, with no deploy:
+
+1. Pick the regular, choose **Line** or **Personal update**, and optionally a week (a Monday). Lines with a week show only that week, New York time; lines without one show every week.
+2. **Send for review**, then **Approve** to put it live. **Pause** takes it down at once; **Back to review** parks it.
+3. Approved updates are said first. While a story runs, every other line comes from the story's chatter instead.

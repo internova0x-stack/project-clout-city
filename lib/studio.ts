@@ -80,6 +80,21 @@ export interface StudioApi {
   reports?(status: "open" | "all"): Promise<Admin<StudioReport[]>>;
   reportAction?(id: number, action: "dismiss" | "warn" | "mute" | "ban"): Promise<Admin<null>>;
   metrics?(): Promise<Admin<StudioMetrics>>;
+  /** v0.6 regulars' lines (migration 0016). */
+  castLines?(): Promise<Admin<CastLine[]>>;
+  castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;
+  castStatus?(id: number, status: CastLine["status"]): Promise<Admin<null>>;
+}
+
+export interface CastLine {
+  id: number;
+  npc: string;
+  line: string;
+  kind: "line" | "update";
+  /** Monday of the week it shows (YYYY-MM-DD), or null for every week. */
+  weekOf: string | null;
+  status: "review" | "approved" | "paused";
+  at: string;
 }
 
 const ERRORS: Record<string, string> = {
@@ -96,6 +111,7 @@ const ERRORS: Record<string, string> = {
   bad_status: "Unknown status.",
   bad_decision: "Unknown decision.",
   unknown_report: "That report is gone.",
+  unknown_line: "That line is gone.",
 };
 
 export function studioError(message: string | undefined): string {
