@@ -167,7 +167,7 @@ From the Oct 13 testing round. **docs/testing-feedback.md is the source** for th
 
 ## v0.7 "Getting Around" (1 to 2 weeks)
 
-**In scope** (formerly v0.3): no spending before arriving, "Go there" with walk, subway, taxi or own car priced by distance, a skippable trip view and personal timers that never move the shared city clock (#4); a luxury-priced drink or snack at clubs and lounges (#3); Nap and Sit at home, capped per day (#26, #27); weekly rent and bills, re-tuned with starting cash and income (#23); exclusive and one-off event times shown in the player's local time (#18).
+**In scope** (formerly v0.3): no spending before arriving, "Go there" with walk, subway, taxi or own car priced by distance, a skippable trip view and personal timers that never move the shared city clock (#4); a luxury-priced drink or snack at clubs and lounges (#3); Nap and Sit at home, capped per day (#26, #27); weekly rent and bills, re-tuned with starting cash and income (#23); exclusive and one-off event times shown in the player's local time (#18); treasure hunts, simplified: a weekly track per starting style with a hunt card for the Collection, approved in the Story Studio (spec first).
 
 ## v0.8 "Big Nights" (about 1 week)
 

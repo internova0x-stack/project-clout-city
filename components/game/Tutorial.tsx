@@ -49,13 +49,28 @@ export function TourTooltip({ index, onNext }: { index: number; onNext: () => vo
       if (!els.length) return setRect(null);
       const rs = els.map((e) => e.getBoundingClientRect());
       const box = screenBox();
-      const x = Math.min(...rs.map((r) => r.left)) - box.left - 6;
-      const y = Math.min(...rs.map((r) => r.top)) - box.top - 6;
+      // Keep the ring inside the screen even for targets touching the top edge.
+      const x = Math.max(2, Math.min(...rs.map((r) => r.left)) - box.left - 6);
+      const y = Math.max(2, Math.min(...rs.map((r) => r.top)) - box.top - 6);
       setRect({ x, y, w: Math.max(...rs.map((r) => r.right)) - box.left - x + 6, h: Math.max(...rs.map((r) => r.bottom)) - box.top - y + 6 });
     };
+    // Measure now, after the layout settles, and whenever the visible screen changes (#41).
     measure();
+    const raf = requestAnimationFrame(measure);
+    const late = setTimeout(measure, 350);
+    const vv = window.visualViewport;
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    vv?.addEventListener("resize", measure);
+    vv?.addEventListener("scroll", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(late);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+      vv?.removeEventListener("resize", measure);
+      vv?.removeEventListener("scroll", measure);
+    };
   }, [step.target]);
 
   const last = index === TOUR.length - 1;

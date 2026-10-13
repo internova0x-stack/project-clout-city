@@ -22,7 +22,8 @@ export function Sheet({
   dismissible?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ startY: number; dy: number } | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ startY: number; dy: number; active: boolean; id: number } | null>(null);
   // Stay mounted while the closing animation plays.
   const [rendered, setRendered] = useState(open);
   const lastChildren = useRef<ReactNode>(children);
@@ -51,22 +52,32 @@ export function Sheet({
   if (!rendered) return null;
   const closing = !open;
 
+  // Drag down to dismiss: from the handle, or from anywhere while the content is scrolled
+  // to the top. Taps on buttons and fields never start a drag; the sheet only takes over
+  // the pointer once it has really moved down, so every button inside still gets its tap.
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!dismissible) return;
-    drag.current = { startY: e.clientY, dy: 0 };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    if (!dismissible || e.button > 0) return;
+    if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable], .no-sheet-drag")) return;
+    if ((bodyRef.current?.scrollTop ?? 0) > 0 && !(e.target as HTMLElement).closest(".sheet-grip")) return;
+    drag.current = { startY: e.clientY, dy: 0, active: false, id: e.pointerId };
   };
   const onPointerMove = (e: React.PointerEvent) => {
-    if (!drag.current || !ref.current) return;
-    drag.current.dy = Math.max(0, e.clientY - drag.current.startY);
-    ref.current.style.transform = `translateY(${drag.current.dy}px)`;
+    const d = drag.current;
+    if (!d || !ref.current || e.pointerId !== d.id) return;
+    d.dy = Math.max(0, e.clientY - d.startY);
+    if (!d.active) {
+      if (d.dy < 10) return;
+      d.active = true;
+      ref.current.setPointerCapture(e.pointerId);
+    }
+    ref.current.style.transform = `translateY(${d.dy}px)`;
   };
   const onPointerUp = () => {
-    if (!drag.current || !ref.current) return;
-    const { dy } = drag.current;
+    const d = drag.current;
     drag.current = null;
+    if (!d?.active || !ref.current) return;
     ref.current.style.transform = "";
-    if (dy > 80) onClose();
+    if (d.dy > 80) onClose();
   };
 
   return (
@@ -79,14 +90,12 @@ export function Sheet({
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       >
-        <div
-          style={{ padding: "0 0 4px", touchAction: "none", cursor: dismissible ? "grab" : "default" }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-        >
+        <div className="sheet-grip" style={{ cursor: dismissible ? "grab" : "default" }}>
           <div className="sheet-handle" />
         </div>
         {dismissible && (
@@ -94,7 +103,7 @@ export function Sheet({
             <CloseIcon size={18} />
           </button>
         )}
-        <div className="sheet-body">{open ? children : lastChildren.current}</div>
+        <div ref={bodyRef} className="sheet-body">{open ? children : lastChildren.current}</div>
       </div>
     </>
   );

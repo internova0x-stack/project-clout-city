@@ -44,7 +44,7 @@ These are final. The bug numbers show where each decision came from.
 | Home and profile | An avatar-head bubble left of the stats panel opens a full profile. The profile shows the avatar, clout, rank and net worth (public), badges, collections, crew, home and recent activity. The stats panel starts collapsed and shows one suggested action per stat when open. | #14, #25, #39 |
 | Locations | Interiors are isometric 3D scenes (as built). Monuments are full locations: a shared landmark plaza scene, NPCs with rotating lines and hunt clues, and 4 to 6 activities. | #32, #33 |
 | Exclusive events | Keepsakes and recognition: an event card, a profile badge, a plus-one and a personal news mention. The ticket still pays clout with diminishing returns (owner, Oct 13); attending's stats match a comparable club event. Attendance is uncapped. | #19, #20 |
-| Treasure hunts | Weekly, one track per starting style, simplified in v0.3, approved in the Story Studio. | Test notes |
+| Treasure hunts | Weekly, one track per starting style, simplified in v0.7 (formerly v0.3), approved in the Story Studio. Needs a short spec (clues, steps, rewards, hunt cards) before v0.7 starts. | Test notes |
 | Story Studio | All story and hunt approvals, scheduling and pausing happen there. It must check on the server that the signed-in user is an admin. | Test notes |
 
 ## Fix now: v0.5.1
@@ -83,6 +83,7 @@ Build these with the version they belong to; the decisions above give the rules.
 | v0.7 | 4 | Travel: "Go there," transport modes with distance costs, skippable trip view, personal timers |
 | v0.7 | 3, 26, 27 | Venue drinks and snacks; Nap and Sit at home, capped per day |
 | v0.7 | 23 | Weekly rent; re-tune starting cash, rent and income together |
+| v0.7 | Test notes | Treasure hunts, simplified: a weekly track per starting style, clues at places, a hunt card for the Collection, approved and scheduled in the Story Studio (spec to be written first) |
 | v0.7 | 18 | Club events on the city clock; exclusive and one-off events may use real New York time, shown in local time |
 | v0.8 | 19 | Exclusive events: event card, profile badge, plus-one, personal news mention (you, your crew, then a count; others see three random opted-in attendees and a guest list; opt-out in Settings); attending's stats in line with club events; the ticket keeps its clout with diminishing returns; uncapped |
 | v0.8 | 32 | Monuments as full locations: shared landmark plaza scene, NPCs, 4 to 6 activities |

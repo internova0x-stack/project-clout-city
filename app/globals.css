@@ -783,3 +783,18 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .map-stack .map-pin-tile.icon-only { width:26px; height:26px; }
 .map-stack .map-pin-tile + .map-pin-tile { margin-left:-12px; }
 .map-stack-count { position:absolute; top:-8px; right:-10px; min-width:18px; height:18px; padding:0 4px; border-radius:var(--r-pill); background:var(--night-900); color:#fff; font-size:11px; line-height:18px; text-align:center; box-shadow:0 0 0 2px #fff; }
+
+/* ---------- v0.5.1 fixes: #36 close buttons, #38/#42 page scroll, #41 tutorial ---------- */
+/* #36: the close button always sits on top of the sheet's content (illustrations, the iOS
+   scroll layer) with a 44 pt tap area; the grip above the content is a drag zone. */
+.sheet-close { z-index:5; }
+.sheet-close::before { content:""; position:absolute; inset:-4px; border-radius:50%; }
+.icon-round.sheet-close { width:40px; height:40px; }
+.sheet-body { position:relative; z-index:0; }
+.sheet-grip { padding:0 0 10px; touch-action:none; flex:none; }
+/* #38, #42: game screens are locked to the visible screen; the page underneath can't scroll
+   up or sideways. Text pages (terms, privacy, the Studio) still scroll normally. */
+html:has(.game, .creator-sheet), html:has(.game, .creator-sheet) body { height:100%; overflow:hidden; overscroll-behavior:none; }
+body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
+.game, .phone-overlay, .phone-sheet { overflow-x:hidden; }
+.device { overflow-x:clip; }
