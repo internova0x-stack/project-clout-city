@@ -4,7 +4,7 @@ import { getClique, requirePlayer } from "@/lib/player";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { attendFirstParty, finishHandoff, setMusicMuted, setTutorialState } from "./actions";
 import {
-  acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, payBill, refreshCity, saveHomeLayout, sellItem, setClockOffset,
+  acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, payBill, saveLook, refreshCity, saveHomeLayout, sellItem, setClockOffset,
 } from "./cityActions";
 import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
@@ -45,6 +45,7 @@ export default async function HomePage() {
         buyItem,
         sellItem,
         equipItem,
+        saveLook,
         payBill,
         setClockOffset,
         saveHomeLayout,

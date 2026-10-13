@@ -53,6 +53,9 @@ export async function sellItem(itemId: number) {
 export async function equipItem(itemId: number, on: boolean) {
   return run("equip_item", { p_item: itemId, p_on: on });
 }
+export async function saveLook(itemIds: number[], covering: string) {
+  return run("save_look", { p_items: itemIds, p_covering: covering });
+}
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });
 }

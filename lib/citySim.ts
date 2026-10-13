@@ -191,6 +191,13 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       it.equipped = on;
       return ok();
     },
+    saveLook(itemIds) {
+      const slots = itemIds.map((id) => itemBySku(s.items.find((i) => i.id === id)?.sku ?? "")?.wear?.slot);
+      if (slots.some((x) => !x)) return fail("You can't wear that. You could try, but no.");
+      if (new Set(slots).size !== slots.length) return fail("One top, one bottom, one pair of shoes. You're not a closet.");
+      for (const i of s.items) if (i.category === "fashion") i.equipped = itemIds.includes(i.id);
+      return ok();
+    },
     payBill(billId) {
       const b = s.bills.find((x) => x.id === billId);
       if (!b || b.status !== "due") return ok();

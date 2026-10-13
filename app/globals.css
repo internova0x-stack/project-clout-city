@@ -952,3 +952,30 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .profile-recent { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--divider); font-size:14px; color:var(--text-1); }
 .profile-recent:last-child { border-bottom:0; }
 .profile-recent span:last-child { margin-left:auto; color:var(--text-3); font-size:12px; white-space:nowrap; }
+
+/* ===================== v0.7 step 4: Your Look dressing room ===================== */
+.look-room { position:fixed; inset:0; z-index:60; display:flex; flex-direction:column; max-width:520px; margin:0 auto; background:var(--surface-sheet); animation:fade-in .2s ease-out; }
+.look-stage { position:relative; flex:1 1 46%; min-height:260px; background:var(--g-stage); overflow:hidden; }
+.look-stage .avatar-canvas { top:64px; }
+.look-room.trying .look-stage { flex-basis:68%; }
+.look-room.trying .look-panel { flex-basis:32%; }
+.look-top { position:absolute; z-index:2; left:16px; right:16px; top:calc(12px + var(--safe-top)); display:flex; align-items:center; justify-content:space-between; }
+.look-banner { position:absolute; z-index:2; left:50%; top:calc(60px + var(--safe-top)); transform:translateX(-50%); padding:7px 14px; border-radius:var(--r-pill);
+  background:var(--night-900); color:#fff; font-size:13px; font-weight:600; white-space:nowrap; box-shadow:var(--elev-2); }
+.look-panel { position:relative; z-index:1; margin-top:-20px; flex:1 1 54%; min-height:0; overflow-y:auto; padding:18px 16px 12px;
+  background:var(--surface-sheet); border-radius:var(--r-xl) var(--r-xl) 0 0; display:flex; flex-direction:column; gap:14px; }
+.look-panel .chip-row { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+.look-panel .chip[aria-pressed="true"] { background:#E3F5EC; color:#1F7A52; box-shadow:inset 0 0 0 1.5px var(--green-500); }
+.look-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; padding-top:6px; }
+.look-tile { position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 6px 9px; border-radius:16px; background:#fff;
+  box-shadow:inset 0 0 0 1px var(--divider); text-align:center; min-width:0; }
+.look-tile b { font-size:12.5px; line-height:1.2; color:var(--text-1); overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.look-tile small { font-size:11px; color:var(--text-3); }
+.look-tile.on { background:#E3F5EC; box-shadow:inset 0 0 0 2px var(--green-500); }
+.look-tile.trying { background:#fff; box-shadow:inset 0 0 0 2px var(--night-900); }
+.look-icon { display:grid; place-items:center; width:44px; height:44px; margin-bottom:4px; border-radius:12px; background:#F6F1EA; font-size:22px; }
+.look-icon.big { width:52px; height:52px; flex:none; }
+.look-check { position:absolute; top:6px; right:6px; width:18px; height:18px; border-radius:50%; background:var(--green-500); color:#fff; font-size:11px; font-weight:800; line-height:18px; }
+.look-trying { position:absolute; top:-8px; left:50%; transform:translateX(-50%); padding:2px 7px; border-radius:var(--r-pill); background:var(--night-900); color:#fff; font-size:10px; font-weight:800; }
+.look-bar { display:flex; gap:10px; padding:10px 16px calc(14px + var(--safe-bottom)); background:var(--surface-sheet); }
+.look-bar .btn-secondary { flex:1; } .look-bar .btn-taxi { flex:1.6; }
