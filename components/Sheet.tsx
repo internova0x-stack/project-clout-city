@@ -13,6 +13,7 @@ export function Sheet({
   children,
   tall = false,
   dismissible = true,
+  hero = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -20,6 +21,8 @@ export function Sheet({
   children: ReactNode;
   tall?: boolean;
   dismissible?: boolean;
+  /** The body starts at the very top so a full-bleed picture can sit under the handle and close button. */
+  hero?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -111,7 +114,7 @@ export function Sheet({
       <div className={`scrim${closing ? " closing" : ""}`} onClick={dismissible && !closing ? onClose : undefined} aria-hidden="true" />
       <div
         ref={ref}
-        className={`sheet${tall ? " tall" : ""}${closing ? " closing" : ""}`}
+        className={`sheet${tall ? " tall" : ""}${hero ? " hero" : ""}${closing ? " closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={label}

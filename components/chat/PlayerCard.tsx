@@ -8,6 +8,7 @@ import { Sheet } from "../Sheet";
 import type { DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
 import { handle } from "@/lib/validation";
+import { recentLine, recentWhen } from "@/lib/recent";
 
 /** C28: another player's profile card, opened from the leaderboard, with "Message". */
 export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onToast }: {
@@ -53,12 +54,28 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
           </div>
           <div className="card row" style={{ justifyContent: "space-around" }}>
             <span style={{ textAlign: "center" }}><span className="hud-number" style={{ display: "block" }}>🔥 {card.clout.toLocaleString()}</span><span className="meta">Clout</span></span>
+            {card.rank != null && <span style={{ textAlign: "center" }}><span className="hud-number" style={{ display: "block" }}>#{card.rank.toLocaleString()}</span><span className="meta">In Queens</span></span>}
             <span style={{ textAlign: "center" }}><span className="hud-number" style={{ display: "block" }}>🏅 {card.badges}</span><span className="meta">Badges</span></span>
             <span style={{ textAlign: "center" }}>
               <span className="hud-number" style={{ display: "block" }}>{new Date(card.joined).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>
               <span className="meta">In the city since</span>
             </span>
           </div>
+          {card.recent && card.recent.some((r) => recentLine(r)) && (
+            <div className="stack-4">
+              <p className="overline" style={{ margin: 0 }}>Recently</p>
+              <div>
+                {card.recent.map((r) => {
+                  const line = recentLine(r);
+                  return line && (
+                    <div key={`${r.kind}:${r.ref}`} className="profile-recent">
+                      <span aria-hidden="true">{line.emoji}</span><span>{line.text}</span><span>{recentWhen(r.at)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {dating && card.crush && !card.blocked && (card.crush.eligible || card.crush.crushed) && (
             <p className="meta" style={{ margin: 0 }}>
               {card.crush.matched ? `💗 Matched with ${card.name}` : card.crush.crushed ? "Crush saved" : "Tap the heart to mark a crush"} · {card.crush.count} of {card.crush.max} crushes. They only find out if it&apos;s mutual.

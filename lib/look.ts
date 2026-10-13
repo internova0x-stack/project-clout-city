@@ -2,14 +2,17 @@
 // Guide section 12): body, skin, hair, hair color, eyes, glasses and coverings.
 // None of these are ever sold in the Shop. The starting style only sets the outfit.
 
-import { isStyleId, type StyleId } from "./styles.ts";
+import { getStyle, isStyleId, isValidFit, styleOutfit, type Fit, type StyleId } from "./styles.ts";
 
 export interface Option<T extends string> { id: T; label: string }
 
 export type BodyId = "straight" | "curvy";
 export type HairId = "short" | "buzz" | "long" | "ponytail" | "bun" | "braids" | "curls" | "locs" | "bald";
 export type GlassesId = "none" | "round" | "square" | "shades";
-export type CoveringId = "none" | "hijab" | "turban" | "headwrap" | "durag" | "kippah";
+/** Headwear (stored as `covering` for older rows): free basics first, then cultural and religious coverings (v0.7, #46). */
+export type CoveringId = "none" | "cap" | "fedora" | "bucket" | "durag" | "hijab" | "turban" | "headwrap" | "kippah";
+/** Body types (v0.7, #44): four per presentation. Cosmetic only, like Presenting as. */
+export type BuildId = "slim" | "athletic" | "broad" | "plus" | "petite" | "curvy";
 
 // "Presenting as" (Clarifications section 16): cosmetic only. It picks the avatar's build,
 // is never shown as a label and is never used by dating, crews or rankings. The stored ids
@@ -18,6 +21,13 @@ export const BODIES: Option<BodyId>[] = [
   { id: "straight", label: "Male" },
   { id: "curvy", label: "Female" },
 ];
+
+export const BUILDS: Record<BodyId, Option<BuildId>[]> = {
+  straight: [{ id: "slim", label: "Slim" }, { id: "athletic", label: "Athletic" }, { id: "broad", label: "Broad" }, { id: "plus", label: "Plus" }],
+  curvy: [{ id: "petite", label: "Petite" }, { id: "athletic", label: "Athletic" }, { id: "curvy", label: "Curvy" }, { id: "plus", label: "Plus" }],
+};
+/** The build each presentation had before body types existed (so older avatars don't change). */
+export const DEFAULT_BUILD: Record<BodyId, BuildId> = { straight: "athletic", curvy: "curvy" };
 
 export const HAIRS: Option<HairId>[] = [
   { id: "short", label: "Short" },
@@ -38,14 +48,22 @@ export const GLASSES: Option<GlassesId>[] = [
   { id: "shades", label: "Shades" },
 ];
 
-export const COVERINGS: Option<CoveringId>[] = [
+/** Free basic headwear, listed first (premium hats are sold in the Shop). */
+export const HEADWEAR_BASIC: Option<CoveringId>[] = [
   { id: "none", label: "None" },
+  { id: "cap", label: "Cap" },
+  { id: "fedora", label: "Fedora" },
+  { id: "bucket", label: "Bucket hat" },
+  { id: "durag", label: "Durag" },
+];
+/** Cultural and religious coverings, after the basics. */
+export const HEADWEAR_CULTURAL: Option<CoveringId>[] = [
   { id: "hijab", label: "Hijab" },
   { id: "turban", label: "Turban" },
   { id: "headwrap", label: "Headwrap" },
-  { id: "durag", label: "Durag" },
   { id: "kippah", label: "Kippah" },
 ];
+export const COVERINGS: Option<CoveringId>[] = [...HEADWEAR_BASIC, ...HEADWEAR_CULTURAL];
 
 export const SKIN_TONES = [
   "#FFDFC4", "#F0C8A0", "#E0AC69", "#C68642", "#A0673C", "#8D5524", "#6B3E1F", "#4A2A16",
@@ -60,12 +78,15 @@ export const EYE_COLORS = ["#3B2314", "#6B4423", "#8E7340", "#4F7A4A", "#4A79A8"
 export interface Look {
   style: StyleId;
   body: BodyId;
+  build: BuildId;
   skin: string;
   hair: HairId;
   hairColor: string;
   eyes: string;
   glasses: GlassesId;
   covering: CoveringId;
+  /** The starter outfit pick; null wears the style's own outfit. */
+  fit: Fit | null;
 }
 
 /** The free choices stored in players.look (the style has its own column). */
@@ -74,12 +95,14 @@ export type LookChoices = Omit<Look, "style">;
 export const DEFAULT_LOOK: Look = {
   style: "bodega_drip",
   body: "straight",
+  build: "athletic",
   skin: SKIN_TONES[1],
   hair: "short",
   hairColor: HAIR_COLORS[1],
   eyes: EYE_COLORS[1],
   glasses: "none",
-  covering: "none",
+  covering: "cap",
+  fit: null,
 };
 
 const has = <T extends string>(list: readonly (Option<T> | T)[], v: unknown): v is T =>
@@ -88,15 +111,24 @@ const has = <T extends string>(list: readonly (Option<T> | T)[], v: unknown): v 
 /** Fills gaps and drops anything unknown, so old or tampered rows still render. */
 export function normalizeLook(raw: unknown, style: unknown): Look {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const st = isStyleId(style) ? style : DEFAULT_LOOK.style;
+  const body = has(BODIES, r.body) ? r.body : DEFAULT_LOOK.body;
+  // Rows from before v0.7 have no build: keep their shape. Bodega Drip's cap used to be part of
+  // the outfit; it's headwear now, so those players keep wearing it.
+  const legacy = r.build === undefined;
+  let covering: CoveringId = has(COVERINGS, r.covering) ? r.covering : "none";
+  if (legacy && covering === "none" && styleOutfit(getStyle(st), body).accessory === "cap") covering = "cap";
   return {
-    style: isStyleId(style) ? style : DEFAULT_LOOK.style,
-    body: has(BODIES, r.body) ? r.body : DEFAULT_LOOK.body,
+    style: st,
+    body,
+    build: has(BUILDS[body], r.build) ? r.build : DEFAULT_BUILD[body],
     skin: has(SKIN_TONES, r.skin) ? r.skin : DEFAULT_LOOK.skin,
     hair: has(HAIRS, r.hair) ? r.hair : DEFAULT_LOOK.hair,
     hairColor: has(HAIR_COLORS, r.hairColor) ? r.hairColor : DEFAULT_LOOK.hairColor,
     eyes: has(EYE_COLORS, r.eyes) ? r.eyes : DEFAULT_LOOK.eyes,
     glasses: has(GLASSES, r.glasses) ? r.glasses : DEFAULT_LOOK.glasses,
-    covering: has(COVERINGS, r.covering) ? r.covering : DEFAULT_LOOK.covering,
+    covering,
+    fit: isValidFit(st, r.fit) ? r.fit : null,
   };
 }
 
@@ -106,7 +138,9 @@ export function isValidLook(raw: unknown, style: unknown): boolean {
   if (!r || !isStyleId(style)) return false;
   return (
     has(BODIES, r.body) && has(SKIN_TONES, r.skin) && has(HAIRS, r.hair) && has(HAIR_COLORS, r.hairColor) &&
-    has(EYE_COLORS, r.eyes) && has(GLASSES, r.glasses) && has(COVERINGS, r.covering)
+    has(EYE_COLORS, r.eyes) && has(GLASSES, r.glasses) && has(COVERINGS, r.covering) &&
+    (r.build === undefined || has(BUILDS[r.body as BodyId], r.build)) &&
+    (r.fit === undefined || r.fit === null || isValidFit(style, r.fit))
   );
 }
 
@@ -163,14 +197,17 @@ export function randomLook(rand: () => number = Math.random, styles: readonly St
   const pick = <T>(list: readonly T[]) => list[Math.floor(rand() * list.length)];
   const skinIndex = weightedIndex(SKIN_WEIGHTS, rand());
   const g = groupOf(skinIndex);
+  const body = pick(BODIES).id;
   return {
     style: pick(styles),
-    body: pick(BODIES).id,
+    body,
+    build: pick(BUILDS[body]).id,
     skin: SKIN_TONES[skinIndex],
     hair: HAIRS[weightedIndex(HAIR_WEIGHTS[g], rand())].id,
     hairColor: HAIR_COLORS[weightedIndex(HAIR_COLOR_WEIGHTS[g], rand())],
     eyes: EYE_COLORS[weightedIndex(EYE_WEIGHTS[g], rand())],
     glasses: rand() < 0.6 ? "none" : pick(GLASSES).id,
-    covering: rand() < 0.75 ? "none" : pick(COVERINGS).id,
+    covering: rand() < 0.6 ? "none" : pick(COVERINGS).id,
+    fit: null,
   };
 }

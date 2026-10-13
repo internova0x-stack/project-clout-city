@@ -1,5 +1,6 @@
 "use server";
 
+import type { RecentItem } from "@/lib/recent";
 import type { ChatMessage, ChatResult, ChatStatus, ChatSummary, ChatThread, PlayerCard, ReportReason } from "@/lib/chat";
 import type { StudioMetrics, StudioReport } from "@/lib/studio";
 import { previewCrushStatus, previewDatingBlock } from "./datingActions";
@@ -84,10 +85,23 @@ export async function previewChatReport(id: string, messageId: number | null, re
   });
   return ok(null);
 }
+/** Sample "Recently" rows (migration 0020's shape); the day in each ref doesn't matter here. */
+const recentFor = (seed: number): RecentItem[] => [
+  { kind: "event" as const, ref: "neon-nights:d", at: t(120 + seed * 7) },
+  { kind: "hunt" as const, ref: "auntie-vee", at: t(60 * 26 + seed), theme: "Auntie Vee's Storage Unit" },
+  { kind: "purchase" as const, ref: "fit-satin-bomber", at: t(60 * 50 + seed) },
+  { kind: "visit" as const, ref: "hell-gate-park:d", at: t(60 * 70 + seed) },
+].slice(seed % 2);
+/** The preview home's own player (app/preview/[screen]/page.tsx). */
+const PREVIEW_PLAYER = "00000000-0000-0000-0000-000000000000";
 export async function previewPlayerCard(id: string) {
+  if (id === PREVIEW_PLAYER) {
+    return ok<PlayerCard | null>({ id, name: "bigsal", style: "arcade_nerd", clout: 850, homeId: "astoria_studio", badges: 3, joined: t(60 * 24 * 3), blocked: false, isMe: true, rank: 128, recent: recentFor(0) });
+  }
   const p = PEOPLE[id];
   const crush = p ? await previewCrushStatus(id) : null;
-  return ok<PlayerCard | null>(p ? { id, name: p.name, style: p.style, clout: p.clout, homeId: p.homeId, badges: 2, joined: t(60 * 24 * 20), blocked: state.blocks.has(id), isMe: false, crush: crush?.ok ? crush.data : null } : null);
+  const rank = Object.values(PEOPLE).filter((o) => o.clout > (p?.clout ?? 0)).length + 1;
+  return ok<PlayerCard | null>(p ? { id, name: p.name, style: p.style, clout: p.clout, homeId: p.homeId, badges: 2, joined: t(60 * 24 * 20), blocked: state.blocks.has(id), isMe: false, crush: crush?.ok ? crush.data : null, rank, recent: recentFor(p.clout) } : null);
 }
 /** The leaderboard with ids, so rows open player cards. */
 export async function previewLeaderboard(myClout: number) {

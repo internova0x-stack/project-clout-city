@@ -10,7 +10,7 @@ import {
   type BufferGeometry, type Material,
 } from "three";
 import type { Look } from "@/lib/look";
-import { getStyle, styleOutfit, type Outfit } from "@/lib/styles";
+import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
 
 export interface AvatarParts {
   root: Group;
@@ -38,6 +38,30 @@ const BUILDS: Record<Look["body"], Build> = {
   curvy: { shoulder: 0.165, chest: 0.18, waist: 0.112, hip: 0.188, thigh: 0.086, calf: 0.053, arm: 0.04, forearm: 0.033 },
 };
 
+/**
+ * Body types (v0.7): each scales the presentation's base build. Athletic (Male) and Curvy
+ * (Female) are the builds every avatar had before, so older avatars look the same.
+ */
+type Mods = Partial<Record<keyof Build, number>> & { height?: number };
+const BUILD_MODS: Record<Look["build"], Mods> = {
+  athletic: {},
+  slim: { shoulder: 0.86, chest: 0.84, waist: 0.84, hip: 0.88, thigh: 0.82, calf: 0.88, arm: 0.84, forearm: 0.88, height: 1.01 },
+  broad: { shoulder: 1.14, chest: 1.16, waist: 1.18, hip: 1.1, thigh: 1.16, calf: 1.12, arm: 1.2, forearm: 1.14 },
+  plus: { shoulder: 1.06, chest: 1.2, waist: 1.42, hip: 1.26, thigh: 1.26, calf: 1.16, arm: 1.22, forearm: 1.16, height: 0.99 },
+  petite: { shoulder: 0.92, chest: 0.9, waist: 0.9, hip: 0.9, thigh: 0.88, calf: 0.9, arm: 0.88, forearm: 0.9, height: 0.93 },
+  curvy: {},
+};
+/** Female Athletic: squarer shoulders and a straighter waist than Curvy. */
+const FEMALE_ATHLETIC: Mods = { shoulder: 1.08, chest: 0.95, waist: 1.08, hip: 0.92, thigh: 0.97, arm: 1.1, forearm: 1.06 };
+
+function buildFor(look: Look): { b: Build; height: number } {
+  const base = BUILDS[look.body];
+  const mods = look.body === "curvy" && look.build === "athletic" ? FEMALE_ATHLETIC : BUILD_MODS[look.build] ?? {};
+  const b = { ...base };
+  for (const k of Object.keys(base) as (keyof Build)[]) b[k] = base[k] * (mods[k] ?? 1);
+  return { b, height: mods.height ?? 1 };
+}
+
 const TORSO_DEPTH = 0.68;
 // A head about a sixth of the body height: natural proportions rather than chibi.
 const HEAD_Y = 1.705;
@@ -52,8 +76,8 @@ function shade(hex: string, f: number): string {
 
 export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Outfit } = {}): AvatarParts {
   const style = getStyle(look.style);
-  const outfit = opts.outfit ?? styleOutfit(style, look.body);
-  const b = BUILDS[look.body];
+  const outfit = opts.outfit ?? starterOutfit(style, look.body, look.fit);
+  const { b, height } = buildFor(look);
   // Presenting as (cosmetic only): "curvy" is Female, "straight" is Male.
   const fem = look.body === "curvy";
   const geometries: BufferGeometry[] = [];
@@ -120,10 +144,10 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const body = new Group();
   root.add(body);
 
-  // ---- Stage: pedestal with a neon rim, and a soft contact shadow ----
+  // ---- Stage: a pale stone pedestal with a coral rim (Monument Valley dusk), and a soft contact shadow ----
   if (opts.pedestal ?? true) {
-    root.add(mesh(geo(new CylinderGeometry(0.95, 1.02, 0.14, 22)), mat("#16121C", { roughness: 0.4 }), 0, -0.07, 0));
-    const rim = mesh(geo(new TorusGeometry(0.96, 0.016, 5, 29)), mat("#FF2E88", { emissive: "#FF2E88", roughness: 0.3 }));
+    root.add(mesh(geo(new CylinderGeometry(0.95, 1.02, 0.14, 22)), mat("#F4D2C0", { roughness: 0.85 }), 0, -0.07, 0));
+    const rim = mesh(geo(new TorusGeometry(0.96, 0.016, 5, 29)), mat("#E8877F", { roughness: 0.6 }));
     rim.rotation.x = Math.PI / 2;
     root.add(rim);
   }
@@ -373,6 +397,10 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     head.add(upperLip);
   }
 
+  // Hats take the old cap color for Bodega Drip, otherwise the outfit's accent.
+  const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
+  const hat = mat(hatColor, { roughness: 0.6 });
+
   // ---- Hair (hidden under full coverings) ----
   const covering = look.covering;
   const hairHidden = covering === "hijab" || covering === "turban" || covering === "headwrap" || covering === "durag";
@@ -488,6 +516,35 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       head.add(k);
       break;
     }
+    // Free basic headwear (v0.7): in the outfit's accent color, or the old cap color for Bodega Drip.
+    case "cap": {
+      const crown = mesh(geo(new SphereGeometry(0.212, 14, 5, 0, Math.PI * 2, 0, Math.PI * 0.46)), hat, 0, 0.04, -0.01);
+      crown.scale.set(0.95, 1.08, 1.04);
+      crown.rotation.x = -0.12;
+      const brim = mesh(geo(new CylinderGeometry(0.13, 0.13, 0.012, 11)), hat, 0, 0.085, 0.19);
+      brim.scale.set(1, 1, 0.8);
+      brim.rotation.x = 0.16;
+      head.add(crown, brim);
+      break;
+    }
+    case "fedora": {
+      const brim = mesh(geo(new CylinderGeometry(0.3, 0.3, 0.014, 18)), hat, 0, 0.12, -0.01);
+      brim.rotation.x = -0.06;
+      const crown = mesh(geo(new CylinderGeometry(0.15, 0.19, 0.16, 14)), hat, 0, 0.2, -0.015);
+      crown.scale.set(1, 1, 0.92);
+      const dent = mesh(geo(new BoxGeometry(0.03, 0.02, 0.2)), mat(shade(hatColor, -0.25)), 0, 0.282, -0.015);
+      const band = mesh(geo(new CylinderGeometry(0.192, 0.194, 0.035, 14)), mat(shade(hatColor, -0.45)), 0, 0.14, -0.015);
+      band.scale.set(1, 1, 0.92);
+      head.add(brim, crown, dent, band);
+      break;
+    }
+    case "bucket": {
+      const crown = mesh(geo(new CylinderGeometry(0.16, 0.205, 0.15, 14)), hat, 0, 0.16, -0.01);
+      const top = mesh(geo(new SphereGeometry(0.16, 14, 4, 0, Math.PI * 2, 0, Math.PI * 0.18)), hat, 0, 0.21, -0.01);
+      const brim = mesh(geo(new CylinderGeometry(0.21, 0.28, 0.06, 16, 1, true)), mat(hatColor, { side: DoubleSide }), 0, 0.065, -0.01);
+      head.add(crown, top, brim);
+      break;
+    }
     case "none":
       break;
   }
@@ -517,15 +574,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   // ---- Starter accessories ----
   switch (outfit.accessory) {
     case "cap":
-      if (covering === "none") {
-        const crown = mesh(geo(new SphereGeometry(0.212, 14, 5, 0, Math.PI * 2, 0, Math.PI * 0.46)), acc, 0, 0.04, -0.01);
-        crown.scale.set(0.95, 1.08, 1.04);
-        crown.rotation.x = -0.12;
-        const brim = mesh(geo(new CylinderGeometry(0.13, 0.13, 0.012, 11)), acc, 0, 0.085, 0.19);
-        brim.scale.set(1, 1, 0.8);
-        brim.rotation.x = 0.16;
-        head.add(crown, brim);
-      }
+      // Since v0.7 the cap is headwear (look.covering), drawn above.
       break;
     case "headphones": {
       head.add(mesh(geo(new TorusGeometry(0.215, 0.014, 5, 14, Math.PI)), acc, 0, 0.02, -0.01));
@@ -565,6 +614,9 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     case "none":
       break;
   }
+
+  // Body types change height a little (Petite is shortest).
+  if (height !== 1) body.scale.setScalar(height);
 
   return {
     root,

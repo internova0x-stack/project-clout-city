@@ -47,3 +47,27 @@ test("shuffled looks follow the city mix: white-presenting tones are the majorit
   assert.equal(HAIR_COLORS.length, 8);
   assert.equal(EYE_COLORS.length, 6);
 });
+
+test("v0.7: body types per presentation; older rows keep their shape and Bodega Drip keeps its cap", () => {
+  const male = normalizeLook({ body: "straight", covering: "none" }, "bodega_drip");
+  assert.equal(male.build, "athletic");
+  assert.equal(male.covering, "cap", "the old outfit cap becomes headwear");
+  const female = normalizeLook({ body: "curvy", covering: "none" }, "arcade_nerd");
+  assert.equal(female.build, "curvy");
+  assert.equal(female.covering, "none");
+  // A v0.7 row that chose no headwear stays bare, even for Bodega Drip.
+  assert.equal(normalizeLook({ body: "straight", build: "slim", covering: "none" }, "bodega_drip").covering, "none");
+  // Builds belong to their presentation.
+  assert.equal(normalizeLook({ body: "straight", build: "petite" }, "arcade_nerd").build, "athletic");
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), build: "curvy" }, "bodega_drip"), false);
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), covering: "fedora" }, "bodega_drip"), true);
+});
+
+test("v0.7: a starter fit must use its style's garments and colors", () => {
+  const fit = { top: "hoodie", topColor: "#2F6FDB", bottom: "shorts", bottomColor: "#26232D", shoeColor: "#E8692E" };
+  assert.deepEqual(normalizeLook({ fit }, "bodega_drip").fit, fit);
+  assert.equal(normalizeLook({ fit: { ...fit, top: "blazer" } }, "bodega_drip").fit, null, "not a Bodega Drip top");
+  assert.equal(normalizeLook({ fit: { ...fit, topColor: "#123456" } }, "bodega_drip").fit, null);
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit }, "bodega_drip"), true);
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit: { ...fit, bottom: "gown" } }, "bodega_drip"), false);
+});

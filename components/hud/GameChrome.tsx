@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ECONOMY, formatCashShort, formatShort } from "@/lib/economy";
+import { useEffect, useState, type ReactNode } from "react";
+import { ECONOMY, formatCash, formatCashShort, formatShort } from "@/lib/economy";
+import type { StatKey, StatTip } from "@/lib/recent";
 import type { ComingSoonKey } from "../ComingSoon";
 import {
   BuildingIcon, ChampagneIcon, ChecklistIcon, ChevronDownIcon, ChevronUpIcon, DiamondIcon,
@@ -23,6 +24,7 @@ export interface ChromeValues {
   phoneBadge?: boolean;
 }
 
+const STAT_EMOJI: Record<StatKey, string> = { energy: "⚡", mood: "🙂", confidence: "💪" };
 const statLevel = (v: number) => (v >= 60 ? "good" : v >= 30 ? "mid" : "low");
 export type Tab = "home" | "map";
 
@@ -40,6 +42,9 @@ export function GameChrome({
   values,
   onToggleSound,
   headline = null,
+  me,
+  tips,
+  onTip,
 }: {
   time: string;
   tab: Tab;
@@ -51,8 +56,14 @@ export function GameChrome({
   onToggleSound?: () => void;
   /** v0.6 City News: the newest headline, alternating with live activity in the ticker (C22). */
   headline?: { text: string; onOpen: () => void } | null;
+  /** v0.7 step 3: the avatar-head bubble beside the collapsed stats; it opens the profile. */
+  me?: { head: ReactNode; rank?: number | null; onOpen: () => void };
+  /** v0.7 step 3: one place per stat in the expanded panel, each a button. */
+  tips?: Record<StatKey, StatTip | null>;
+  onTip?: (placeId: string) => void;
 }) {
-  const [statsOpen, setStatsOpen] = useState(true);
+  // Stats start collapsed (v0.7, owner Oct 13); the bubble and three mini bars stay in view.
+  const [statsOpen, setStatsOpen] = useState(false);
   // The ticker swaps between the headline and who's online every five seconds.
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -128,7 +139,13 @@ export function GameChrome({
         <button className="side-btn" onClick={() => onAction("look")} aria-label="Your look"><PersonIcon /></button>
       </nav>
 
-      <section className={`stats glass-hud${statsOpen ? "" : " collapsed"}`} aria-label="Energy, mood and confidence">
+      {me && !statsOpen && (
+        <button className="me-bubble" onClick={me.onOpen} aria-label="Your profile">
+          <span className="me-bubble-head">{me.head}</span>
+          {me.rank != null && <span className="me-bubble-rank">#{me.rank.toLocaleString()}</span>}
+        </button>
+      )}
+      <section className={`stats glass-hud${statsOpen ? "" : " collapsed"}${me ? " with-bubble" : ""}${statsOpen && tips ? " with-tips" : ""}`} aria-label="Energy, mood and confidence">
         {statsOpen ? (
           <>
             <button className="stats-toggle" onClick={() => setStatsOpen(false)} aria-label="Collapse stats">
@@ -137,12 +154,25 @@ export function GameChrome({
             {(["energy", "mood", "confidence"] as const).map((k) => {
               const label = k[0].toUpperCase() + k.slice(1);
               const v = values?.stats[k];
+              const tip = tips?.[k];
               return (
-                <div key={k} className="stat-row" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={v}>
-                  <span className="label">{label}</span>
-                  <span className="stat-track" style={{ display: "block" }}>
-                    {v !== undefined && <span className={`stat-fill ${statLevel(v)}`} style={{ display: "block", width: `${v}%` }} />}
-                  </span>
+                <div key={k} className="stat-block">
+                  <div className="stat-row" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={v}>
+                    <span className="label">{STAT_EMOJI[k]} {label}{tips && v !== undefined && <span className="stat-value">{v}</span>}</span>
+                    <span className="stat-track" style={{ display: "block" }}>
+                      {v !== undefined && <span className={`stat-fill ${statLevel(v)}`} style={{ display: "block", width: `${v}%` }} />}
+                    </span>
+                  </div>
+                  {tip && onTip && (
+                    <button className="stat-tip" onClick={() => onTip(tip.placeId)}>
+                      <span className="stat-tip-emoji" aria-hidden="true">{tip.emoji}</span>
+                      <span className="stat-tip-text">
+                        <b>{tip.placeName}</b>
+                        {tip.price > 0 ? formatCash(tip.price) : "Free"} · +{tip.gain} {label}
+                      </span>
+                      <span className="stat-tip-go">Go</span>
+                    </button>
+                  )}
                 </div>
               );
             })}

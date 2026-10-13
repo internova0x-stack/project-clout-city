@@ -29,7 +29,7 @@ export interface CityMapProps {
   initialZoom?: number;
   daytime?: boolean;
   onPinTap?: (pin: PlacePin) => void;
-  onLockedTap?: (boroughName: string) => void;
+  onLockedTap?: (boroughName: string, id: BoroughId) => void;
   /** Hide the map's own credits control when the screen shows them elsewhere. */
   attributionControl?: boolean;
   /** Camera tilt in degrees (0 = straight down). */
@@ -220,10 +220,10 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 key={b.id}
                 className="map-lock glass-hud"
                 style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -50%)` }}
-                onClick={() => onLockedTap?.(b.name)}
+                onClick={() => onLockedTap?.(b.name, b.id)}
                 aria-label={`${b.name}: Locked, coming soon`}
               >
-                <span aria-hidden="true">🔒</span> {b.name} <span className="meta">Locked: Coming soon</span>
+                <span aria-hidden="true">🔒</span> {b.name}
               </button>
             );
           })}

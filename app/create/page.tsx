@@ -25,6 +25,7 @@ export default async function CreatePage() {
       initialLook={player ? normalizeLook(player.look, player.starting_style) : undefined}
       initialTraits={player?.traits}
       initialCash={player?.birth_cash}
+      initialName={player?.display_name}
     />
   );
 }

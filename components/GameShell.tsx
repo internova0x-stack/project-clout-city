@@ -9,12 +9,12 @@ import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { getStyle, styleOutfit } from "@/lib/styles";
+import { getStyle, starterOutfit } from "@/lib/styles";
 import { CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
-import { activeGig, dueBills, equippedItems, gigReady, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { activeGig, dueBills, equippedItems, gigReady, netWorth, tasksDone, type CityApi, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -44,13 +44,19 @@ import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { LocateIcon } from "./icons";
+import { ProfileSheet } from "./game/ProfileSheet";
+import { statTips } from "@/lib/recent";
+import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
 import { CityMap, type MapApi } from "./map/CityMap";
+import { BoroughSheet } from "./map/BoroughSheet";
+import type { BoroughId } from "@/lib/map/boroughs";
 import { Sheet } from "./Sheet";
 import { useCityClock } from "./useCityClock";
 import { usePlayersOnline } from "./usePresence";
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
+const AvatarHead = dynamic(() => import("./avatar/AvatarHead"), { ssr: false });
 
 export interface GameActions {
   setTutorialState: (state: "done" | "skipped") => Promise<void>;
@@ -183,6 +189,13 @@ export function GameShell({
     });
   }, [cityNews]);
   // v0.6 treasure hunts: null until hunt_state() answers (no migration, no Hunt tab).
+  // v0.7 step 3: my own public card, for the bubble's rank and the profile's "Recently".
+  const [myCard, setMyCard] = useState<PlayerCard | null>(null);
+  const profileOpen = panel === "profile";
+  useEffect(() => {
+    if (!chat) return;
+    void chat.card(me.id).then((r) => r.ok && r.data && setMyCard(r.data));
+  }, [chat, me.id, profileOpen]);
   const [huntState, setHuntState] = useState<HuntState | null>(null);
   useEffect(() => {
     if (!hunt) return;
@@ -273,9 +286,10 @@ export function GameShell({
   const look = normalizeLook(me.look, me.starting_style);
   const style = getStyle(look.style);
   const worn = city ? equippedItems(city) : [];
-  const outfit = worn.length ? outfitWith(styleOutfit(style, look.body), worn) : undefined;
+  const outfit = worn.length ? outfitWith(starterOutfit(style, look.body, look.fit), worn) : undefined;
   const home = homeLocation(me.home_id);
   const cityOn = !!(city && cityApi);
+  const statSuggestions = useMemo(() => (cityOn ? statTips(visiblePlaces(feed), me.bank_cash) : undefined), [cityOn, feed, me.bank_cash]);
   const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);
   const storyOn = !!(feed && storyApi);
 
@@ -678,7 +692,8 @@ export function GameShell({
     },
     [cityOn],
   );
-  const onLockedTap = useCallback((name: string) => setSoon({ key: "place", title: `${name} is locked` }), []);
+  const [lockedBorough, setLockedBorough] = useState<BoroughId | null>(null);
+  const onLockedTap = useCallback((_name: string, id: BoroughId) => setLockedBorough(id), []);
 
   const datingKey = inbox ? `${inbox.matches.filter((m) => !m.seen).map((m) => m.id).join()}|${inbox.dates.filter((d) => !d.mine && d.status === "pending").map((d) => d.id).join()}` : "";
   const showDating = !!dating && datingAlerts(inbox) > 0 && datingDismissed !== datingKey && flow === "none" && !arranging && tab === "home" && !inside;
@@ -754,19 +769,6 @@ export function GameShell({
           {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !(storyOn && promptVisible(feed, dismissed)) && (
             <NewsPrompt item={latestNews} onOpen={() => openCityNews(latestNews.id)} onDismiss={() => setNewsCard(null)} />
           )}
-          <button
-            className="glass-hud profile-chip"
-            onClick={() => setPanel("profile")}
-            aria-label="Your profile"
-          >
-            <span className="lb-avatar" style={{ width: 32, height: 32, fontSize: 15, border: "2px solid var(--taxi-400)", background: "var(--night-700)" }}>{style.emoji}</span>
-            <span style={{ textAlign: "left", minWidth: 0 }}>
-              <span className="display-sm" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{handle(me.display_name)}</span>
-              <span className="meta" style={{ display: "block" }}>
-                {style.label} · {city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.neighborhood ?? "Queens"}
-              </span>
-            </span>
-          </button>
         </div>
       ) : (
         <>
@@ -788,6 +790,9 @@ export function GameShell({
       )}
 
       <GameChrome
+        me={{ head: <AvatarHead look={look} outfit={outfit} />, rank: myCard?.rank ?? null, onOpen: () => setPanel("profile") }}
+        tips={statSuggestions}
+        onTip={openPlace}
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         time={clock.time}
         tab={tab}
@@ -879,6 +884,7 @@ export function GameShell({
       {flow === "pwa" && <PwaPrompt onDone={endHandoff} />}
 
       {/* ---- Panels ---- */}
+      <BoroughSheet id={lockedBorough} onClose={() => setLockedBorough(null)} />
       <TasksSheet
         open={panel === "tasks"}
         onClose={() => setPanel(null)}
@@ -1067,55 +1073,27 @@ export function GameShell({
         </>
       )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />
-      <Sheet open={panel === "profile"} onClose={() => setPanel(null)} label="Your profile">
-        <div className="stack-16">
-          <div className="row" style={{ gap: 12 }}>
-            <span style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--night-900)", border: "3px solid var(--taxi-400)", display: "grid", placeItems: "center", fontSize: 26 }} aria-hidden="true">
-              {style.emoji}
-            </span>
-            <span>
-              <span className="display-md" style={{ display: "block" }}>{handle(me.display_name)}</span>
-              <span className="meta" style={{ display: "block" }}>{style.emoji} <span style={{ color: "var(--text-2)" }}>{style.label}</span> · Queens</span>
-            </span>
-          </div>
-          {(feed?.badges.length ?? 0) > 0 && (
-            <div className="card stack-8">
-              <p className="overline" style={{ margin: 0 }}>Badges</p>
-              {feed!.badges.map((b) => {
-                const info = badgeInfo(feed, b.id);
-                return (
-                  <div key={b.id} className="row" style={{ gap: 10 }}>
-                    <span style={{ fontSize: 24 }} aria-hidden="true">{info?.emoji ?? "🏅"}</span>
-                    <span style={{ minWidth: 0 }}>
-                      <span className="title" style={{ display: "block" }}>{info?.name ?? b.id}</span>
-                      {info?.line && <span className="meta" style={{ display: "block" }}>{info.line}</span>}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {catalog && (
-            <button className="list-row" onClick={() => setPanel("collection")}>
-              <span style={{ fontSize: 24 }} aria-hidden="true">💌</span>
-              <span style={{ flex: 1, textAlign: "left" }}>
-                <span className="title" style={{ display: "block" }}>Postcard Collection</span>
-                <span className="meta">{products.filter((p) => p.type === "postcard" && p.owned).length} of {products.filter((p) => p.type === "postcard").length} collected</span>
-              </span>
-              <span className="meta">›</span>
-            </button>
-          )}
-          <div className="card stack-8">
-            <p className="overline" style={{ margin: 0 }}>Starter wardrobe</p>
-            <div className="row" style={{ flexWrap: "wrap", gap: 6 }}>
-              {style.starterItems.map((i) => <span key={i} className="tag tag-neutral">{i}</span>)}
-            </div>
-          </div>
-          <form action="/auth/signout" method="post">
-            <button className="btn btn-secondary" type="submit">Log out</button>
-          </form>
-        </div>
-      </Sheet>
+      <ProfileSheet
+        open={panel === "profile"}
+        onClose={() => setPanel(null)}
+        look={look}
+        outfit={outfit}
+        name={handle(me.display_name)}
+        subtitle={`${style.emoji} ${style.label} · ${city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.name ?? "Queens"}`}
+        clout={me.clout}
+        rank={myCard?.rank ?? null}
+        netWorth={city ? netWorth(city) : me.bank_cash}
+        badges={(feed?.badges ?? []).map((b) => { const info = badgeInfo(feed, b.id); return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id }; })}
+        collections={{
+          postcards: catalog ? { owned: products.filter((p) => p.type === "postcard" && p.owned).length, total: products.filter((p) => p.type === "postcard").length } : null,
+          huntCards: huntState?.cards.length ?? 0,
+        }}
+        crew={clique.map((c) => c.display_name)}
+        recent={myCard?.recent}
+        onOpenCollection={catalog ? () => setPanel("collection") : undefined}
+        onOpenNetWorth={city ? () => setPanel("networth") : undefined}
+        onOpenLeaderboard={() => setPanel("leaderboard")}
+      />
     </main>
   );
 }
