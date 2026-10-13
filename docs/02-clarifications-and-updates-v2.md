@@ -418,7 +418,8 @@ Clout City is 18+. Sign-up (email or Google) asks players to confirm they're 18 
 1. **Spending Energy.** Place visits, events and job shifts cost Energy (amounts in config). Dining visits restore it instead.
 2. **Restoring Energy.** Meals at dining places (section 4), plus a small top-up at each New York midnight, so a broke player is never stuck.
 3. **At zero.** Players can still read stories, vote, chat, shop and pay bills, but can't visit places, attend events or work until they eat or the daily top-up arrives.
-4. **Mood and Confidence** scale clout gains: higher levels multiply the clout from visits, events and tasks (multipliers in config). Events move them; the first party, for example, raises Confidence. Confidence also drifts down a little each New York day unless events and visits keep it up, so staying highly confident takes upkeep.
+4. **Once a day (v0.9, owner Oct 13).** Clout comes from the first visit or meal at a place each New York day; each activity's own Mood and Confidence come once a day per activity, so a place with several activities rewards trying them all.
+5. **Mood and Confidence** scale clout gains: higher levels multiply the clout from visits, events and tasks (multipliers in config). Events move them; the first party, for example, raises Confidence. Confidence also drifts down a little each New York day unless events and visits keep it up, so staying highly confident takes upkeep.
 
 ### Income
 

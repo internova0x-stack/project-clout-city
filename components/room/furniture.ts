@@ -406,7 +406,21 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
         for (let y = 0.6; y < 2.8; y += 0.55) box(0.82, 0.05, 0.05, iron, x, y, -0.25);
         box(0.12, 0.6, 1.0, iron, x, 0, 0.2);
       }
-      const sign = box(2.9, 0.42, 0.06, k.mat("#F2A900", { emissive: "#F2A900", emissiveIntensity: opts.night ? 0.8 : 0.15 }), 0, 3.05, -0.25);
+      // The sign's lettering, painted on a canvas (in the browser; tests have no canvas).
+      let signMat: Material = k.mat("#F2A900", { emissive: "#F2A900", emissiveIntensity: opts.night ? 0.8 : 0.15 });
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 74;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#F2A900"; x.fillRect(0, 0, c.width, c.height);
+          x.fillStyle = "#2A2530"; x.font = "800 50px system-ui, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
+          x.fillText("LONG ISLAND", c.width / 2, c.height / 2 + 2);
+          const tex = new CanvasTexture(c);
+          signMat = k.mat("#ffffff", { map: tex, emissive: opts.night ? "#F2A900" : undefined, emissiveIntensity: 0.25 });
+        }
+      }
+      const sign = box(2.9, 0.42, 0.06, signMat, 0, 3.05, -0.25);
       sign.castShadow = true;
       g.scale.setScalar(w / 3);
       return { group: g };

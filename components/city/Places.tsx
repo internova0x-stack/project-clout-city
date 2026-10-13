@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { actionAvailability, barDrinkAvailability, eventAvailability, groceryAvailability, hasBar, isSupermarket, type CityState } from "@/lib/cityState";
+import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, type CityState } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
@@ -96,7 +96,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {a.kind === "gigs" ? (
                 <span className="meta">Today&apos;s offers, in your Phone</span>
               ) : (
-                <EffectChips price={paid || undefined} pay={a.pay} energy={a.energy} clout={clout} mood={usedToday ? 0 : a.mood} confidence={usedToday ? 0 : a.confidence} />
+                <EffectChips price={paid || undefined} pay={a.pay} energy={a.energy} clout={clout} mood={boostUsed(place.id, a.id, state) ? 0 : a.mood} confidence={boostUsed(place.id, a.id, state) ? 0 : a.confidence} />
               )}
               {paid !== (a.price ?? 0) && <span className="meta">Usually {formatCash(a.price ?? 0)} · {world.price?.reason}</span>}
               {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
