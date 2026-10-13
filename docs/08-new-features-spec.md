@@ -12,7 +12,7 @@ All rules from the other documents still apply: no real brands or people, gold o
 >
 > - **v0.6 "Astoria and the News"** (next, after v0.5.1): the dense Astoria neighborhood (section 5), the recurring cast and NPCs at places (section 4), the News feed (section 3), the Studio's hunt and news review (section 2), and **full** treasure hunts with NPC clues (section 1). The simplified "Ask around" version is skipped.
 > - **v0.8 "Getting Around"** (formerly v0.7): travel, rest at home, venue snacks, and the supermarket, fridge and home cooking (section 6).
-> - The two universities stay where they are (a short trip away); Astoria also gets a community college.
+> - **Nothing is replaced or moved:** the new places are added to the ones that exist, focused in Astoria. Places already in Astoria (Grind & Gossip Café, Pedal Pushers Hub, Low Light Lounge, Thread Count Boutique) count toward its 20. The two universities stay where they are; Astoria also gets a community college.
 > - In the game, sports stars play in invented leagues (no real league names).
 > - Claude doesn't run on its own: the weekly drafts come from a scheduled Claude Code session (a Routine) that uploads to the Studio for approval.
 
@@ -140,7 +140,7 @@ A small, recurring cast makes the city feel inhabited and gives the News app, st
 
 ## 5. A dense starting neighborhood
 
-**Version:** v0.6, replacing location wave 1 as the starting area.
+**Version:** v0.6, added to the places that exist (nothing is moved or removed).
 
 Every player starts in one neighborhood with about 20 places close together, so the city feels busy from the first minute and short trips are cheap. Astoria is the starting neighborhood.
 
@@ -159,7 +159,7 @@ Every player starts in one neighborhood with about 20 places close together, so 
 **Notes:**
 
 - **Mostly scene cards.** Only 4 places need full interiors (apartment, café, bodega, club), the same templates as the current wave 1. The rest need one illustration each, about 20 in total.
-- **Existing places move, not vanish.** Wave 1 places that fit a slot (the club, the deli as the bodega, the café, the rooftop, the rider hub, the gigs tower, the lounge, the boutique as the retail store) move into Astoria and keep their ids, so player data is untouched.
+- **Added, not moved.** Every existing place stays where it is. Places already in Astoria fill their slots (Grind & Gossip Café is the café, Pedal Pushers Hub the rider hub, Low Light Lounge the lounge, Thread Count Boutique the retail store); the rest of the 20 are new places in Astoria.
 - **A community college:** the game is 18+. St. Johnsons University and Queensborough University stay where they are, a short trip away.
 - **The place of worship is generic and kept apart from the story:** the first story's killer runs Radiant Harbor Church, so this one has a different name and no link to it.
 - **The gym is new too:** Pressed Iron Gym belongs to the Sarah Bird story, so the neighborhood gym has its own name.
