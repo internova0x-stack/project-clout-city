@@ -1,0 +1,59 @@
+{
+  "week": "2026-10-19",
+  "stories": [
+    {
+      "id": "lunaria-leak",
+      "title": "Who leaked Lunaria's 3 AM album?",
+      "topic": "celebrity",
+      "emoji": "🎤",
+      "teaser": "Lunaria's unreleased album hit the internet a week early. Her team says \"theft\". Astoria says something else.",
+      "pieces": [
+        { "text": "Jojo swears a woman in giant sunglasses sat in the corner for six hours, ordered one oat milk and kept whispering \"the bridge needs more bridge\".", "place": "grind-and-gossip", "source": "regular" },
+        { "text": "At the bar: \"Her producer says the laptop never left the studio. The studio has a doggy door. Draw your own conclusions.\"", "place": "velvet-static", "source": "overheard", "hours": [21, 3] },
+        { "text": "Someone printed all twelve lyric sheets at the library and left them in the copier tray, with a sticky note: \"ignore these, they're nothing\".", "place": "ditmars-library", "source": "overheard" },
+        { "text": "Pixel says the leak's file names are \"lunaria_FINAL_final_LEAK_THIS_v3\". Pixel does not believe in coincidences.", "place": "respawn-arena", "source": "regular" },
+        { "text": "Two commuters on the platform: \"Her streams tripled overnight. If somebody stole it, they did her the biggest favor of her career.\"", "place": "astoria-blvd-station", "source": "overheard", "hours": [6, 11] }
+      ],
+      "tea": {
+        "headline": "Lunaria leaked Lunaria, and the Golden Mic committee is listening",
+        "body": "Darlings, the call is coming from inside the hoodie. The sunglasses at the café, the lyric sheets in the library copier, a file literally named LEAK_THIS: our girl leaked her own album for buzz and it worked. Streams tripled, her producer is \"furious\" (on a yacht), and the Golden Mic people suddenly have her number. The only real victim is the copier, which has not recovered. Lola, out."
+      }
+    },
+    {
+      "id": "sal-benny-feud",
+      "title": "Sal vs. Benny: the chopped cheese feud",
+      "topic": "regulars",
+      "emoji": "🥪",
+      "teaser": "The deli guy and the lotto guy haven't spoken in twenty years. Nobody remembers why. Somebody does.",
+      "pieces": [
+        { "text": "Sal, slicing faster than he needs to: \"Benny? Never heard of him. Tell him I said that. Tell him exactly that.\"", "place": "ditmars-deli", "source": "regular" },
+        { "text": "Benny, not looking up from the counter: \"Twenty years and he still puts the onions on top. That's all I'll say. That's not all I'll say.\"", "place": "lucky-star", "source": "regular" },
+        { "text": "Gus, from his bench: \"1987. Block party. One grill, two men, one recipe. I was there. I had a hot dog.\"", "place": "hell-gate-park", "source": "regular" },
+        { "text": "A firefighter laughing at the sink: \"Every Thanksgiving they both bring a chopped cheese to the firehouse and make us vote. Every year it's a tie. We make sure.\"", "place": "engine-7", "source": "overheard" },
+        { "text": "Two regulars over pancakes: \"You know they're cousins, right? Same grandmother. Same recipe card. She wrote it in pencil.\"", "place": "neon-spoon", "source": "overheard", "hours": [6, 12] }
+      ],
+      "tea": {
+        "headline": "The great chopped cheese feud is a family recipe with two copies",
+        "body": "Twenty years of silence, one block party in 1987 and a grandmother's recipe card written in pencil, which means both men erased a little and added their own. Sal and Benny are cousins. The feud is the family tradition now, refereed every Thanksgiving by the firefighters of Engine 7, who have quietly declared a tie for twenty straight years to keep the peace and the sandwiches coming. Lola's verdict: onions on top. Don't tell Benny."
+      }
+    },
+    {
+      "id": "pizza-zoning",
+      "title": "The Great Pizza Zoning War",
+      "topic": "city-hall",
+      "emoji": "🍕",
+      "teaser": "Councilmember Barb Tillwater wants \"one slice per block\". Two Bros Who Fight Pizza want her recalled. Both of them.",
+      "pieces": [
+        { "text": "Behind the counter, both brothers at once: \"ONE slice per BLOCK? We're two guys! We sell two slices! It's in the NAME!\"", "place": "two-bros-pizza", "source": "overheard" },
+        { "text": "Sgt. Bev, not looking up: \"Forty-two noise complaints about the zoning meeting. Thirty-nine were the brothers. Three were the brothers' mother.\"", "place": "precinct-114-half", "source": "regular" },
+        { "text": "A city intern on a coworking couch, whispering into a phone: \"I typed the bill. I might have typed it wrong. How wrong is 'block' versus 'block party'?\"", "place": "triborough-works", "source": "overheard", "hours": [9, 17] },
+        { "text": "Mr. Penwright, lowering his voice: \"The councilmember checked out a book on pizza law. It's a cookbook. She returned it with sauce on page forty.\"", "place": "ditmars-library", "source": "regular" },
+        { "text": "At a rooftop table: \"Tillwater just ordered six slices for herself. Six. In public. That's not policy, that's a confession.\"", "place": "up-on-thirty", "source": "overheard", "hours": [18, 23] }
+      ],
+      "tea": {
+        "headline": "\"One slice per block\" was a typo, and the Councilmember is hungry",
+        "body": "Astoria nearly lost its pizza to a typo. Councilmember Barb Tillwater's bill was meant to fund \"one slice per block party\", a free slice at every street fair, until an intern dropped a word and the 114½ Precinct got forty-two noise complaints, mostly from two brothers and their mother. The fix goes to a vote Thursday. Tillwater was last seen eating six slices on a rooftop, which Lola is calling research. The brothers are still yelling. That part was never a typo."
+      }
+    }
+  ]
+}

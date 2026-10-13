@@ -13,6 +13,7 @@ import { loadCatalog, startCheckout } from "./storeActions";
 import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, track } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
+import { syncGossipWeeks } from "@/lib/gossipImport";
 import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } from "./partyActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
@@ -24,6 +25,8 @@ export const metadata = { title: "Home · Clout City" };
 export default async function HomePage() {
   const { player } = await requirePlayer();
   const supabase = await getServerSupabase();
+  // Gossip weeks go live on their own: store the repo's week files (at most every 10 minutes).
+  await syncGossipWeeks().catch(() => []);
   const [clique, city, story, catalog, chat, dating, crew, party] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(),
   ]);

@@ -1,10 +1,12 @@
-// Checks every week file in content/hunts/ and content/news/ with the same rules the Studio uses
-// (lib/hunts.ts, lib/news.ts), plus: each hunt week has a Monday hunt announcement in its news.
+// Checks every week file in content/hunts/, content/news/ and content/gossip/ with the same rules the
+// Studio uses (lib/hunts.ts, lib/news.ts, lib/gossip.ts), plus: each hunt week has a Monday hunt
+// announcement in its news, and no gossip story id repeats across weeks.
 // The weekly drafting routine runs this before opening its pull request (docs/WEEKLY-CONTENT.md).
 // Usage: npm run validate:content
 import { readdirSync, readFileSync } from "node:fs";
 import { validateHunt } from "../lib/hunts.ts";
 import { validateNewsWeek } from "../lib/news.ts";
+import { validateGossipWeek } from "../lib/gossip.ts";
 
 const root = new URL("../content/", import.meta.url);
 const list = (dir: string) => readdirSync(new URL(dir, root)).filter((f) => f.endsWith(".json")).sort();
@@ -34,5 +36,16 @@ for (const f of list("hunts/")) {
     continue;
   }
   console.log(`✓ content/hunts/${f} (${r.hunt.theme})`);
+}
+const gossipIds = new Map<string, string>();
+for (const f of list("gossip/")) {
+  const raw = JSON.parse(readFileSync(new URL(`gossip/${f}`, root), "utf8"));
+  const r = validateGossipWeek(raw);
+  if (!r.ok) { fail(`content/gossip/${f}`, r.problems); continue; }
+  if (f !== `${raw.week}.json`) { fail(`content/gossip/${f}`, [`name the file after its week: ${raw.week}.json`]); continue; }
+  const dup = r.week.stories.filter((s) => gossipIds.has(s.id)).map((s) => `stories: "${s.id}" was already used in ${gossipIds.get(s.id)}`);
+  if (dup.length) { fail(`content/gossip/${f}`, dup); continue; }
+  for (const s of r.week.stories) gossipIds.set(s.id, f);
+  console.log(`✓ content/gossip/${f} (${r.week.stories.length} stories)`);
 }
 if (failed) process.exit(1);

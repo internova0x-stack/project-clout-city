@@ -92,6 +92,12 @@ export const CITY_ECONOMY = {
    * all games; all reset at midnight in New York. The server draws every result when the card is bought
    * (migration 0032), and real money never touches any of it.
    */
+  /**
+   * Neighborhood gossip (v0.10, spec section 8; owner Oct 13). 3 to 5 stories a week of exactly five
+   * pieces; finishing one pays a little clout and Mood (once, ledger 'gossip'), and five finished earn
+   * a badge. Stories stay findable for two weeks from their Monday; finished Tea cards are kept.
+   */
+  gossip: { pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5 },
   lotto: {
     tags: ["lotto"],
     freeGame: "corner-store",
@@ -695,7 +701,7 @@ export function citySeed() {
   return {
     economy: CITY_ECONOMY,
     places: PLACES.map((p) => ({
-      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at,
+      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood,
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false,

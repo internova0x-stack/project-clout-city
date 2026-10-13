@@ -101,14 +101,19 @@ function JackpotStrip({ lotto, nowMs }: { lotto: LottoState; nowMs: number }) {
 }
 const sameNy = (line: string) => line.endsWith("at midnight");
 
-/** Lola's jackpot card in the News (City tab). */
+/** Lola's jackpot card in the News (City tab), laid out like the other city news cards. */
 export function JackpotNewsCard({ d }: { d: LottoDraw }) {
+  const when = new Date(d.drawnAt).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   return (
-    <div className={`card stack-4 jackpot-news${d.mine ? " mine" : ""}`}>
-      <span className="tag tag-event" style={{ alignSelf: "flex-start" }}>🌟 Jackpot · Lola Lowdown</span>
-      <p className="display-sm" style={{ margin: 0 }}>{formatCash(d.pool)} at Lucky Star</p>
-      <p className="body" style={{ margin: 0 }}>{jackpotLine(d, handle(d.winner))}</p>
-    </div>
+    <article className={`card stack-8 news-card jackpot-news${d.mine ? " mine" : ""}`}>
+      <div className="row" style={{ justifyContent: "space-between", gap: 8 }}>
+        <span className="tag jackpot-tag">🌟 Lucky Star jackpot</span>
+        <span className="meta">{when}</span>
+      </div>
+      <h3 className="title" style={{ margin: 0, fontSize: 18, lineHeight: 1.25 }}>{d.mine ? `You won ${formatCash(d.pool)}` : `${formatCash(d.pool)} jackpot drawn`}</h3>
+      <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{jackpotLine(d, handle(d.winner))}</p>
+      <p className="meta" style={{ margin: 0 }}>Lola Lowdown</p>
+    </article>
   );
 }
 

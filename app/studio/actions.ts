@@ -1,11 +1,12 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type GossipAdmin, type GossipFileCheck, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
 import { readContentDrafts } from "@/lib/contentDrafts";
+import { checkGossipFiles, syncGossipWeeks } from "@/lib/gossipImport";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -94,7 +95,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -168,6 +169,21 @@ export async function studioHuntStatus(id: string, status: HuntAdmin["status"], 
   const r = await admin<unknown>("admin_hunt_status", note ? { p_id: id, p_status: status, p_note: note } : { p_id: id, p_status: status });
   return r.ok ? { ok: true as const, data: null } : r;
 }
+// ---- Gossip (migration 0034): automatic. Week files in the repo go live on their own; the Studio
+// shows each week in full, its file checks, and lets the owner pause it or hold it with a note. ----
+export async function studioGossipList(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>> {
+  // Admins only (the list checks), then load the repo's files now rather than waiting for the game.
+  const first = await admin<GossipAdmin[]>("admin_gossip_list");
+  if (!first.ok) return first;
+  await syncGossipWeeks({ force: true });
+  const [{ checks }, r] = await Promise.all([checkGossipFiles(), admin<GossipAdmin[]>("admin_gossip_list")]);
+  return r.ok ? { ok: true, data: { weeks: r.data, files: checks } } : r;
+}
+export async function studioGossipStatus(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>> {
+  const r = await admin<unknown>("admin_gossip_status", { p_week: week, p_status: status, p_note: note ?? null });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+
 // ---- Calendar: week files in the repo (admins only: hunt files carry answers) ----
 export async function studioDrafts(): Promise<Admin<ContentDraft[]>> {
   const gate = await admin<boolean>("is_story_admin");

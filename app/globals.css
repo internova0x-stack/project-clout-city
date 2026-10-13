@@ -1214,10 +1214,29 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .lotto-details summary { cursor:pointer; font-size:14px; font-weight:600; color:var(--text-2); }
 .lotto-details .lotto-odds { margin-top:8px; }
 /* v0.10 step 2: the weekly jackpot, at the counter and in the News. */
-.lotto-jackpot { display:flex; gap:12px; align-items:center; padding:14px 16px; border-radius:var(--r-lg); background:var(--g-night-reveal); color:var(--text-on-dark); box-shadow:var(--elev-2); }
-.lotto-jackpot-star { font-size:30px; flex:none; }
-.lotto-jackpot-label { display:block; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,246,224,.7); }
-.lotto-jackpot-amount { display:block; margin:2px 0; font-family:var(--font-display); font-size:28px; line-height:1.1; font-weight:800; letter-spacing:-.02em; color:var(--taxi-400); font-variant-numeric:tabular-nums; }
-.lotto-jackpot-meta { display:block; font-size:13px; line-height:1.4; color:rgba(255,246,224,.82); }
-.jackpot-news { border-left:3px solid var(--taxi-400); }
-.jackpot-news.mine { background:var(--taxi-tint); }
+/* Owner, Oct 13: a warm yellow-to-orange gradient with a soft sheen, dark text for contrast. Not gold
+   (gold is only for real money): these are the taxi yellow and the neon gradient's orange. */
+.lotto-jackpot { position:relative; overflow:hidden; display:flex; gap:14px; align-items:center; padding:16px 18px; border-radius:var(--r-lg);
+  background:linear-gradient(135deg, #FFE45C 0%, #FFC21A 38%, #FF9A2E 72%, #FF6A3D 100%); color:var(--night-900);
+  box-shadow:0 10px 24px rgba(255,106,61,.32), inset 0 1px 0 rgba(255,255,255,.55); }
+.lotto-jackpot::before { content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(90% 70% at 15% 0%, rgba(255,255,255,.55), transparent 60%), radial-gradient(60% 60% at 100% 100%, rgba(255,46,136,.22), transparent 70%); }
+.lotto-jackpot::after { content:""; position:absolute; top:-50%; bottom:-50%; width:40%; left:-60%; pointer-events:none; transform:rotate(18deg);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation:jackpot-shine 4.5s ease-in-out infinite; }
+@keyframes jackpot-shine { 0%, 55% { left:-60%; } 100% { left:130%; } }
+@media (prefers-reduced-motion: reduce) { .lotto-jackpot::after { animation:none; display:none; } }
+.lotto-jackpot > * { position:relative; }
+.lotto-jackpot-star { font-size:34px; flex:none; filter:drop-shadow(0 3px 6px rgba(160,60,0,.35)); }
+.lotto-jackpot-label { display:block; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(42,26,10,.72); }
+.lotto-jackpot-amount { display:block; margin:2px 0 4px; font-family:var(--font-display); font-size:32px; line-height:1.05; font-weight:800; letter-spacing:-.025em;
+  color:var(--night-900); font-variant-numeric:tabular-nums; text-shadow:0 1px 0 rgba(255,255,255,.4); }
+.lotto-jackpot-meta { display:block; font-size:13.5px; line-height:1.45; font-weight:500; color:rgba(30,20,10,.82); }
+.lotto-jackpot-meta + .lotto-jackpot-meta { margin-top:2px; }
+/* In the News: the same warmth, lighter, with the city news cards' spacing. */
+.jackpot-news { background:linear-gradient(135deg, #FFF6D6 0%, #FFE9C2 60%, #FFDCC4 100%); box-shadow:inset 3px 0 0 #FF9A2E; }
+.jackpot-news.mine { background:linear-gradient(135deg, #FFEB8A 0%, #FFC94D 55%, #FFA65C 100%); }
+.jackpot-news.mine .body { color:var(--text-1) !important; }
+.jackpot-tag { background:linear-gradient(90deg, #FFC21A, #FF8A3D); color:var(--night-900); font-weight:700; }
+.jackpot-news { padding:20px; gap:12px; }
+.jackpot-news .title { margin-top:2px !important; }
+.jackpot-news .body { font-size:15.5px; line-height:1.6; }
