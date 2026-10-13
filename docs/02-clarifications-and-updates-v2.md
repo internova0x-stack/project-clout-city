@@ -67,7 +67,7 @@ Test the teasing button labels ("bold of you," "lonely, but okay") first; they a
 1. **Mobile-first.** Optimize every step above for mobile screens first.
 2. **Fix customization rendering.** Selecting a hairstyle or feature currently doesn't update the character.
 3. **Starting styles.** Eight styles, shown as a row of chips in the Look step: Bodega Drip, Thrift Store Icon, Midtown Finance, Night Owl Goth, Pilates Princess, Startup Founder, Influencer Soft Glam and Arcade Nerd. Each sets 3 to 4 cheap starter items and gives no stats or bonuses. Hair, braids, wigs, glasses and cultural or religious coverings (such as the hijab) are free Look options for every style and are never sold in the Shop.
-4. **Starter wardrobe.** Only the chosen style's starter items. Luxury pieces such as chinchilla coats are bought in the Shop with virtual cash; a few rare collector items cost real cash (section 6).
+4. **Starter wardrobe.** Only the chosen style's starter items. Luxury pieces are bought in the Shop with virtual cash; a few rare collector items cost real cash (section 6), including the faux chinchilla coat (owner, Oct 13, 2026).
 5. **Home layout.** Only the stats panel (Energy, Mood, Confidence) collapses. The top HUD is persistent and the side icons are fixed (section 2).
 
 ### Decisions
@@ -89,7 +89,7 @@ The top bar is always visible, the side icons are fixed like TikTok's, and only 
 | Left | Daily Tasks | Checkmark + "0/5" | Today's tasks completed out of the total | Opens Tasks on the Daily tab |
 | Left | Sound | Speaker / speaker with slash | Background music on or off | Toggles mute; the choice is remembered per player |
 | Right | Clout Score | Flame + number | The player's social standing | Opens the clout leaderboard |
-| Right | Net Worth | Diamond icon only, no figure | — | Opens Possessions (section 5) |
+| Right | Net Worth | Diamond icon only, no figure | — | Opens Net Worth (section 5) |
 | Right | Bank Balance | Text, e.g. "$6,000" | Cash available to spend | Opens transaction history |
 
 **Color rule:** the flame and the diamond are not gold. Gold is reserved for real-cash items (see the Design System Guide).
@@ -146,7 +146,7 @@ P1 has one 2D night map, every player starts in Queens, and other boroughs show 
    - The cost of a visit sets its clout reward, so pricier places give more clout.
    - Place visits are exempt from the diminishing-returns rule (section 5).
    - Each place gives clout once per real New York day (configurable).
-6. **Dining places.** Food spots are places on the map, in three tiers, and eating is how players restore Energy. They follow the normal place rules: the visit price is the meal, and the first visit each day pays clout by price. Every visit restores Energy, with no cooldown, so players can eat as often as they can pay. Food gives nothing to Possessions or net worth.
+6. **Dining places.** Food spots are places on the map, in three tiers, and eating is how players restore Energy. They follow the normal place rules: the visit price is the meal, and the first visit each day pays clout by price. Every visit restores Energy, with no cooldown, so players can eat as often as they can pay. Food gives nothing to Net Worth or net worth.
    - **Budget:** bodegas, food carts, pizza-slice counters. Cheap, a small Energy boost, little clout.
    - **Medium:** diners and cafés. Mid-priced, a medium Energy boost.
    - **Luxury:** rooftop restaurants and chef's-counter dining. Expensive, a large Energy boost and the most clout, because being seen there is the point.
@@ -169,7 +169,7 @@ Tapping any location on the map opens its location card: an illustration, a few 
 | Scene card | The card with an illustration, lore and 1 to 2 actions; no interior | Civic places, parks, monuments, story places |
 | Map flavor | A label and lore; no actions | Subway stations, the airport |
 
-**Interiors** use 8 shared templates (apartment, counter shop, diner or café, fine dining, club, store, office, campus), reused with different colors, signs and props. In P1 they are illustrated 2.5D backdrops with the 3D avatar placed in them; fully 3D rooms can replace them later through the same template slots.
+**Interiors** use 8 shared templates (apartment, counter shop, diner or café, fine dining, club, store, office, campus), reused with different colors, signs and props. In the build they are walkable isometric 3D rooms (Design Guide update 7); the original plan was illustrated 2.5D backdrops with the 3D avatar placed in them; fully 3D rooms can replace them later through the same template slots.
 
 **P1 locations: 34 visitable, plus map flavor**
 
@@ -201,20 +201,20 @@ Tapping any location on the map opens its location card: an illustration, a few 
 
 ## 5. Shop, possessions, selling, bills and economy
 
-The Shop sells items through categorized item listings, everything a player owns appears in Possessions, and Possessions always adds up to net worth.
+The Shop sells items through categorized item listings, everything a player owns appears in Net Worth, and Net Worth always adds up to net worth.
 
 1. **Shop structure.** The Shop opens on categories that lead into item listings. Use "item listings" for the Shop, and keep the word "inventory" out of the build.
 2. **Categories.** Fashion/Clothing, Cars, Houses, Luxury (jewelry etc.) and Makeup.
 3. **No gifts for now.** No gifting between players.
-4. **Possessions.** Net Worth opens Possessions: the bank cash plus every item the player owns, each with its value. The total equals net worth. Monument postcards live in a separate Collection, not in Possessions, and don't count toward net worth.
+4. **Net Worth.** Net Worth opens Net Worth: the bank cash plus every item the player owns, each with its value. The total equals net worth. Monument postcards live in a separate Collection, not in Net Worth, and don't count toward net worth.
 
-   | Item kind | Value in Possessions |
+   | Item kind | Value in Net Worth |
    | --- | --- |
    | Bought with virtual cash | Purchase price |
    | Real-cash collector item | 1.5× the most expensive virtual-cash item in the same Shop category |
    | Earned (rewards, story items) | The price of the closest comparable Shop item, or a small fixed amount (set in config) when nothing compares, so selling rewards never becomes a money-maker |
    | Starter items from character creation | $0 |
-5. **Selling.** Items can be sold from Possessions for 60% of the item's value (configurable).
+5. **Selling.** Items can be sold from Net Worth for 60% of the item's value (configurable).
    - The sale adds the sell price to the bank and removes the item, so net worth drops by the difference.
    - Real-cash collector items can't be sold, because selling them would turn real money into virtual cash. Starter items can't be sold.
    - Clout already earned from a purchase stays. Buying back an item the player sold earns no clout.
@@ -251,13 +251,13 @@ P1 has three event types and four real-money products, all bought through one St
 | Collector fashion items (a few rare pieces) | Not promoted; discovered while browsing the Shop | Diminishing returns (section 5) |
 | Monument postcards ($0.99 each) | Offered only on the monument's card, once right after a visit; then shown in the Collection as a locked silhouette with its price | None |
 
-**Postcard rules:** a postcard can be bought only after visiting its monument. Players earn clout from the visit, not the postcard. Postcards live in a separate Collection (not Possessions, so they don't affect net worth), each has a share button, and completing the set earns a badge. A refund removes the postcard.
+**Postcard rules:** a postcard can be bought only after visiting its monument. Players earn clout from the visit, not the postcard. Postcards live in a separate Collection (not Net Worth, so they don't affect net worth), each has a share button, and completing the set earns a badge. A refund removes the postcard.
 
 **Payment rules (all four products)**
 
 - Hosted Stripe Checkout, one-time payments, purchases attached to the player's account.
 - Only the Stripe webhook grants access. It is idempotent, and `hasEntitlement(player, sku)` is the single gate.
-- A refund (`charge.refunded`) revokes the entitlement automatically. It also takes back the exact clout that purchase awarded at the time (stopping at zero, with no recalculation of other purchases), removes a refunded collector item from Possessions and the wardrobe, and removes a refunded event's guest-list access
+- A refund (`charge.refunded`) revokes the entitlement automatically. It also takes back the exact clout that purchase awarded at the time (stopping at zero, with no recalculation of other purchases), removes a refunded collector item from Net Worth and the wardrobe, and removes a refunded event's guest-list access
 - Prices live in Stripe and config, not in code.
 - Only these products use gold in the UI.
 
@@ -286,7 +286,7 @@ Inviting earns clout per invite plus a major bonus when the crew reaches five.
 - The welcome screen and 5-step tooltip tutorial into the first task.
 - The 2D night map of Queens, with apartments, places to visit, place cooldowns, locked boroughs, moving vehicles, and 34 visitable locations with cards and 8 illustrated interior templates (section 4).
 - The clout leaderboard (opened from Clout Score).
-- The categorized Shop, Possessions and selling.
+- The categorized Shop, Net Worth and selling.
 - Bills (rent and phone to start), with the missed-rent rules, job shifts at a few Queens job places, and gigs (section 13).
 - The invite flow and the PWA prompt.
 - Club events, free story events and exclusive events.
@@ -344,7 +344,7 @@ Serialized, satirical stories are the main reason to come back every day. P1 shi
 - **Daily Tasks:** story tasks can count toward the day's tasks.
 - **Clout:** correct guesses and story tasks earn clout. Paid side arcs add none and give no edge in guessing; they only add richer story.
 - **Places and events:** a story can change a place or event, e.g. a gala gets cancelled or a building is closed for police activity, always with a reason banner.
-- **Shop:** a story can add a time-limited item (e.g. the "Forever Our Bird" hoodie). Buyers keep it in Possessions after it is removed.
+- **Shop:** a story can add a time-limited item (e.g. the "Forever Our Bird" hoodie). Buyers keep it in Net Worth after it is removed.
 
 ### Decisions
 
@@ -454,7 +454,7 @@ Gigs are rarer, bigger-paying jobs, and the main way to afford upgrades like a c
 
 ### Missed rent
 
-**Update (Oct 12, 2026):** rent, the phone bill and car insurance are billed **monthly**, on the same day each month as the move-in (or purchase). Car rentals bill weekly. Gig pay was raised (table above) so 1 to 2 gigs cover a month's rent on the cheapest home.
+**Update (Oct 13, 2026, replacing the Oct 12 monthly billing):** rent and **all bills are weekly** (rent, phone, car insurance and car rental), re-tuned with starting cash and income in v0.7. Until v0.7 ships, the build still bills monthly (Oct 12 rule): Gig pay was raised (table above) so 1 to 2 gigs cover a month's rent on the cheapest home.
 
 
 When rent is due and the bank balance can't cover it, the player gets a grace period (default 3 days) with a pin on Bills. After that, Mood drops. If rent is still unpaid after 7 days, the player moves to the cheapest Queens home: the new rent starts, and no possessions are lost. Both periods are configurable.
@@ -492,3 +492,23 @@ Added Oct 13, 2026 by the product owner (brought forward from the "group hangout
 ## Open questions
 
 None. Every design question is resolved; the remaining work is setting Shop catalog prices, which the item-value rules in section 5 then follow.
+
+## 16. Decisions from testing (Oct 13, 2026)
+
+The full list, with bug numbers and versions, is in `docs/testing-feedback.md`, which wins over older text in this document. In short:
+
+1. **Currency.** Virtual cash is **Clout Dollars**, always written **C$**. Real money is always written **$**. C$ can never be bought with real money.
+2. **Buttons.** Main buttons are red, including real-money ones (on a card with a gold border and the ✨ REAL CASH tag; Stripe checkout is the second check). Yellow is only an accent (the clout flame, the active nav tab, progress, avatar rings, stars). Destructive buttons (sell, block, report) are outlined in red. Gold appears only on the logo, the tagline, real-cash card borders and the REAL CASH tag.
+3. **Names.** "Crew" everywhere (section 15). The owned-items screen is **Net Worth**; "inventory" stays out.
+4. **Map.** The day map and night map with 3D buildings, as built. Locked boroughs get a dashed red outline over a dimmed fill; tapping one opens a sheet with a small map of the borough and a one-line Lola Lowdown teaser. The hazard stripe is only for closures and "Coming soon" bars.
+5. **Arriving and travel (v0.7).** No spending before arriving: a location card previews its actions under a main "Go there" button, and actions unlock on arrival. Travel costs time, money and Energy by distance band (walk, subway, taxi or own car), with a trip view that's always free to skip. Timed actions use a personal timer that never moves the shared city clock. This replaces "you tap to travel, no transit sim" in the concept note.
+6. **Food and Energy (v0.7).** Clubs and lounges sell a luxury-priced drink or snack (medium Energy, no clout). At home, Nap restores Energy over a short timer and Sit restores Energy and Mood, both capped per day.
+7. **Event times.** Club events follow the city clock. Exclusive events and special one-offs may use real New York time, shown in each player's local time.
+8. **Bills.** Weekly (see Missed rent). Bills show each upcoming bill's amount and due date, including the phone bill from the start.
+9. **Shop.** Clothing without a wearable 3D version isn't sold; every clothing item has "Try it on"; cars and homes ask for confirmation before charging. Basic headwear (cap, fedora, bucket hat, durag) is free in the creator and Your Look; premium hats are sold for C$. The faux chinchilla coat stays a real-cash collector piece.
+10. **Creator (v0.6).** A clear "Pick your name" field. Presenting as Male or Female, **cosmetic only**: it picks the avatar base model and fits, is never shown as a label and is never used by dating, crews or rankings; copy stays gender-neutral. Four body types each (male: Slim, Athletic, Broad, Plus; female: Petite, Athletic, Curvy, Plus) via blend shapes; all clothing fits both. Free headwear listed before cultural and religious coverings. Starter outfit garment choices with colors. A black starting-cash card.
+11. **Home and profile (v0.6).** An avatar-head bubble left of the stats panel opens a full profile: avatar, clout, rank and net worth (public), badges, collections, crew, home and recent activity. The stats panel starts collapsed and suggests one action per stat when open (cheapest open place first, never real money).
+12. **Locations.** Interiors are isometric 3D scenes. Monuments become full locations in v0.8: a shared landmark plaza scene, NPCs with rotating lines and hunt clues, and 4 to 6 activities.
+13. **Exclusive events (v0.8).** Value is keepsakes and recognition: an event card, a profile badge, a plus-one and a personal news mention. The ticket still pays clout with diminishing returns; attending's stats match a comparable club event. Attendance is uncapped.
+14. **Treasure hunts.** Weekly, one track per starting style, approved in the Story Studio (version to be set).
+15. **Story Studio.** All story and hunt approvals, scheduling and pausing happen there; the server checks that the signed-in user is an admin (as built).

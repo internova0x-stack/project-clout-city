@@ -39,7 +39,7 @@ Six pillars decide every trade-off.
 
 ### What it is not
 
-- **Not a full simulation.** No open-world 3D city (the map is a stylized night map with 3D buildings on a tilted view; you tap to travel, you don't walk the streets), no transit sim, no separate Hunger stat (eating refills Energy instead), no real-time multiplayer.
+- **Not a full simulation.** No open-world 3D city (the map is a stylized night map with 3D buildings on a tilted view; you don't walk the streets; travel between places costs time, money and Energy by distance and transport mode, Clarifications section 16), no separate Hunger stat (eating refills Energy instead), no real-time multiplayer.
 - **Not pay-to-skip.** Virtual cash can't be bought, and side arcs give no clout or guessing edge. Exclusive events and collector items add clout only with diminishing returns.
 - **Not a stranger-chat app.** Chat is capped at 10 messages a day, filtered, with block, report and an admin review queue.
 - **Not real people or brands.** Every character, business and brand is invented; real landmarks appear only when their names aren't trademarked.
@@ -91,7 +91,7 @@ Every P1 system, what it does and which spec owns it.
 | --- | --- | --- |
 | Clout | The player's social standing (flame in the HUD); feeds the leaderboard (a ranking only in P1) | Clarifications |
 | Bank balance | Virtual cash for rent, the Shop, club events and visits; earned from daily tasks, job shifts, gigs and events; never bought with real money | Clarifications |
-| Net worth and Possessions | Bank cash plus every item at its value (diamond in the HUD); items sell for 60% | Clarifications |
+| Net Worth | Bank cash plus every item at its value (diamond in the HUD); items sell for 60% | Clarifications |
 | Stats | Energy, Mood and Confidence; events move them; visits, events and job shifts spend Energy, and meals at dining places restore it | Clarifications |
 | Daily tasks and goals | Five tasks a day with a completion bonus; long-term goals | Clarifications |
 | Places | Visits cost cash and pay clout by price, once a day per place; budget, medium and luxury dining places also restore Energy on every visit; 34 locations, each with a card, lore and actions | Clarifications |
@@ -167,7 +167,7 @@ P1 is defined in Clarifications section 8. Everything below is **after P1** and 
 | Progression | Clout levels and titles (Nobody → Local → Scene Regular → Known → Famous → Icon), an Icon milestone moment and a prestige option so the top isn't a dead end |
 | Careers | Fame paths with their own verbs: influencer, streamer, artist or DJ, founder or hustler |
 | City | Brooklyn, Manhattan, the Bronx and Staten Island, each with its own rent level and vibe, unlocked at clout thresholds (on the same stylized map, with its 3D buildings); fully 3D interiors; monuments and postcards in other boroughs; real university names with each university's permission |
-| City life | Random city events, rush hour, mild crime, weather and seasons, transit costs |
+| City life | Random city events, rush hour, mild crime, weather and seasons |
 | Home | Decorating apartments with decor slots and a home score |
 | Social | Home visits, speed dating, compliment polls, an avatar-only fit-check feed, roommates splitting rent, daily friend boosts, outfit and home voting, rivals, gifting |
 | Growth | Shareable story and milestone cards, deep-link landing pages, tiered referral rewards, streaks, notifications |
@@ -184,7 +184,7 @@ Every open decision from the specs is now made. Each is written into the documen
 | Minimum age | 18+, confirmed at sign-up | Clarifications sections 1 and 13 |
 | How players earn cash | Daily tasks pay cash plus a completion bonus; job shifts at a few Queens job places (barista, delivery rider, retail) trade Energy for cash; gigs in three tiers (side gig, pro gig, big break) pay 2 to 15 times a shift, with the bigger ones offered rarely and gated by Confidence; events pay as specified | Clarifications sections 3 and 13 |
 | What the stats do | Visits, events and shifts spend Energy; meals restore it, plus a small top-up each New York midnight; at zero, players can read, vote, chat, shop and pay bills, but not visit, attend or work; Mood and Confidence scale clout gains | Clarifications section 13 |
-| Missed rent | A 3-day grace period, then a Mood drop; after 7 days, a move to the cheapest Queens home, keeping all possessions | Clarifications section 13 |
+| Missed rent | A 3-day grace period, then a Mood drop; after 7 days, a move to the cheapest Queens home, keeping everything they own | Clarifications section 13 |
 | What clout unlocks in P1 | Nothing beyond rank: it's a ranking only | Clarifications section 13 |
 | Borough unlocks (after P1) | Clout thresholds tied to clout levels | Roadmap (section 11) |
 | Stack and sign-up | Next.js, Supabase, Stripe and Vercel; email and Google sign-up | World State Brief section 1; Clarifications section 1 |
