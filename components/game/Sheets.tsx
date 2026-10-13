@@ -10,6 +10,8 @@ import { eventAvailability, eventById, type CityState, type DailyTask } from "@/
 import { GAME_CONFIG } from "@/lib/config";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { describeEntry, sampleLedger, type LedgerEntry } from "@/lib/ledger";
+import { CloutCard } from "../city/CloutCard";
 import { EffectChips, useGameNow } from "../city/Common";
 import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
@@ -210,73 +212,79 @@ export function EventsSheet({
   );
 }
 
-interface LedgerRow { id: number; currency: "cash" | "clout"; amount: number; kind: string; created_at: string }
-
-const LABELS: Record<string, string> = {
-  birth_lottery: "🎲 Birth lottery",
-  rent: "🏠 First month's rent",
-  party_entry: "🍸 Party entry",
-  party_reward: "🍾 Party: you were seen",
-  visit: "🍸 Night out",
-  eat: "🍽️ Meal",
-  shift: "💼 Shift pay",
-  gig: "💼 Gig payout",
-  event_entry: "🎟️ Club event",
-  daily_task: "✅ Daily task",
-  daily_bonus: "🏆 All five tasks",
-  purchase: "🛍️ Shop",
-  car_rental: "🚗 Car rental",
-  sale: "🏷️ Sold an item",
-  bill_rent: "🏠 Rent",
-  bill_phone: "📱 Phone bill",
-  bill_car_rental: "🚗 Car rental",
-  bill_car_insurance: "🛡️ Car insurance",
-};
-
-/** Cash history from the ledger (used by the Bank sheet and the Phone's Bank app). */
-export function LedgerList({ refreshKey }: { refreshKey: unknown }) {
-  const [rows, setRows] = useState<LedgerRow[] | null>(null);
+/** Loads the cash history: ledger_feed() (0023) names each row; before it, the bare ledger. */
+function useLedger(refreshKey: unknown): LedgerEntry[] | null {
+  const [rows, setRows] = useState<LedgerEntry[] | null>(null);
   useEffect(() => {
+    // /preview runs without a player: sample rows there (development only).
+    if (process.env.NODE_ENV !== "production" && window.location.pathname.startsWith("/preview")) return setRows(sampleLedger());
     const supabase = getBrowserSupabase();
     if (!supabase) return setRows([]);
-    supabase
-      .from("ledger")
-      .select("id, currency, amount, kind, created_at")
-      .eq("currency", "cash")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data }) => setRows((data as LedgerRow[]) ?? []));
+    void (async () => {
+      const feed = await supabase.rpc("ledger_feed", { p_limit: 50 });
+      if (!feed.error) return setRows((feed.data as LedgerEntry[]) ?? []);
+      const { data } = await supabase.from("ledger").select("id, amount, kind, ref, created_at").eq("currency", "cash")
+        .order("created_at", { ascending: false }).limit(50);
+      setRows(((data ?? []) as { id: number; amount: number; kind: string; ref: string; created_at: string }[]).map((r) => ({ ...r, at: r.created_at })));
+    })();
   }, [refreshKey]);
+  return rows;
+}
+
+/** Cash history (#29): each row says where and what. */
+export function LedgerList({ rows }: { rows: LedgerEntry[] | null }) {
   return (
     <div>
       {rows === null && <p className="meta">Loading…</p>}
-      {rows?.length === 0 && <p className="meta">No transactions to show here.</p>}
-      {rows?.map((r) => (
-        <div key={r.id} className="ledger-row">
-          <span>
-            <span className="title" style={{ display: "block", fontSize: 15 }}>{LABELS[r.kind] ?? r.kind}</span>
-            <span className="meta">{new Date(r.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-          </span>
-          <span className={`body-strong ${r.amount > 0 ? "money-pos" : "money-neg"}`}>
-            {r.amount > 0 ? "+" : "−"}{formatCash(Math.abs(r.amount))}
-          </span>
-        </div>
-      ))}
+      {rows?.length === 0 && <p className="meta">No transactions yet. Spend something; it&apos;s good for the economy.</p>}
+      {rows?.map((r) => {
+        const d = describeEntry(r);
+        return (
+          <div key={r.id} className="ledger-row">
+            <span className="ledger-emoji" aria-hidden="true">{d.emoji}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="title" style={{ display: "block", fontSize: 15 }}>{d.title}</span>
+              <span className="meta" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {[d.detail, new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })].filter(Boolean).join(" · ")}
+              </span>
+            </span>
+            <span className={`body-strong ${r.amount > 0 ? "money-pos" : "money-neg"}`}>
+              {r.amount > 0 ? "+" : "−"}{formatCash(Math.abs(r.amount))}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** The Bank (#28): the virtual card with the balance, this week's in and out, then the history. */
+export function BankView({ balance, handle }: { balance: number; handle: string }) {
+  const rows = useLedger(balance);
+  const weekAgo = Date.now() - 7 * 24 * 3_600_000;
+  const week = (rows ?? []).filter((r) => Date.parse(r.at) >= weekAgo);
+  const cashIn = week.filter((r) => r.amount > 0).reduce((a, r) => a + r.amount, 0);
+  const cashOut = week.filter((r) => r.amount < 0).reduce((a, r) => a - r.amount, 0);
+  return (
+    <div className="stack-16">
+      <CloutCard handle={handle} balance={formatCash(balance)} />
+      <div className="bank-week">
+        <span><b className="money-pos">+{formatCash(cashIn)}</b>In this week</span>
+        <span><b className="money-neg">−{formatCash(cashOut)}</b>Out this week</span>
+      </div>
+      <p className="subtext" style={{ margin: 0 }}>Virtual cash only. It can never be bought with real money.</p>
+      <LedgerList rows={rows} />
     </div>
   );
 }
 
 /** Bank balance → transaction history. */
-export function BankSheet({ open, onClose, bank }: { open: boolean; onClose: () => void; bank: number }) {
+export function BankSheet({ open, onClose, bank, handle = "" }: { open: boolean; onClose: () => void; bank: number; handle?: string }) {
   return (
     <Sheet open={open} onClose={onClose} label="Bank">
       <div className="stack-16">
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline", paddingRight: 44 }}>
-          <h2 className="display-lg" style={{ margin: 0 }}>Bank</h2>
-          <span className="body-strong">{formatCash(bank)}</span>
-        </div>
-        <p className="subtext" style={{ margin: 0 }}>Virtual cash only. It can never be bought with real money.</p>
-        {open && <LedgerList refreshKey={bank} />}
+        <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Bank</h2>
+        {open && <BankView balance={bank} handle={handle} />}
       </div>
     </Sheet>
   );

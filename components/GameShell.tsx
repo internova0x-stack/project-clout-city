@@ -1006,6 +1006,7 @@ export function GameShell({
           onCrushChange: () => void loadInbox(),
         } : undefined}
         crew={crew ? { alerts: crewAlerts(crewInbox), onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("crew"); } } : undefined}
+        handle={me.display_name}
         onOpenCollection={catalog ? () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("collection"); } : undefined}
         onToast={setToast}
         story={storyOn ? feed : null}
@@ -1019,7 +1020,7 @@ export function GameShell({
         muted={muted}
         onToggleSound={toggleSound}
       />
-      <BankSheet open={panel === "bank"} onClose={() => setPanel(null)} bank={me.bank_cash} />
+      <BankSheet open={panel === "bank"} onClose={() => setPanel(null)} bank={me.bank_cash} handle={me.display_name} />
       <InviteSheet
         open={panel === "invite"}
         onClose={() => {

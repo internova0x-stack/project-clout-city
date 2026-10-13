@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ShopItem } from "@/lib/city";
+import { GARMENT } from "../avatar/garments";
 import { formatCash } from "@/lib/economy";
 import type { Gain } from "@/lib/cityState";
 
@@ -48,10 +50,17 @@ export function GainToast({ gain, message, onDone }: { gain: Gain | null; messag
 }
 
 /** 52 pt white icon tile (C23). */
-export function IconTile({ emoji, size = 52 }: { emoji: string; size?: number }) {
+/**
+ * An item's tile. Clothes draw their own garment shape in their own color, so two jackets never
+ * share one emoji (#31); everything else uses its emoji.
+ */
+export function IconTile({ emoji, size = 52, item }: { emoji: string; size?: number; item?: ShopItem }) {
+  const kind = item?.wear?.kind as keyof typeof GARMENT | undefined;
   return (
     <span className="icon-tile" style={{ width: size, height: size, fontSize: size * 0.5 }} aria-hidden="true">
-      {emoji}
+      {kind && GARMENT[kind] ? (
+        <svg viewBox="0 0 60 56" width={size * 0.7} height={size * 0.66} fill={item!.wear!.color} stroke="rgba(0,0,0,.25)" strokeWidth="1">{GARMENT[kind]}</svg>
+      ) : emoji}
     </span>
   );
 }

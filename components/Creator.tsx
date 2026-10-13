@@ -10,6 +10,7 @@ import {
   lookChoices, randomLook, type BuildId, type Look, type LookChoices,
 } from "@/lib/look";
 import { GARMENT } from "./avatar/garments";
+import { CloutCard } from "./city/CloutCard";
 import { BOTTOM_LABEL, STARTING_STYLES, STYLE_FITS, STYLE_IDS, TOP_LABEL, defaultFit, getStyle, type BottomKind, type Fit, type TopKind } from "@/lib/styles";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { cleanName, nameError } from "@/lib/validation";
@@ -584,18 +585,6 @@ function OutfitSwatches({ label, colors, value, onPick }: { label: string; color
   );
 }
 
-/** Isometric block for the lottery card: top, left and right faces (Monument Valley style). */
-function Block({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
-  const dy = w / 2;
-  return (
-    <>
-      <polygon points={`${x},${y} ${x + w},${y + dy} ${x},${y + 2 * dy} ${x - w},${y + dy}`} fill="#FBE3DA" />
-      <polygon points={`${x - w},${y + dy} ${x},${y + 2 * dy} ${x},${y + 2 * dy + h} ${x - w},${y + dy + h}`} fill="#F2A99A" />
-      <polygon points={`${x},${y + 2 * dy} ${x + w},${y + dy} ${x + w},${y + dy + h} ${x},${y + 2 * dy + h}`} fill="#D9584A" />
-    </>
-  );
-}
-
 /** The birth lottery's reveal (v0.7, #46): a quiet Monument Valley card at dusk (owner, Oct 13). */
 function CashCard({ cash, handle }: { cash: number; handle: string }) {
   const { min, max } = ECONOMY.birthLottery;
@@ -605,19 +594,7 @@ function CashCard({ cash, handle }: { cash: number; handle: string }) {
       <p className="cash-kicker">Your starting balance</p>
       <p className="cash-amount">{formatCash(cash)}</p>
       <p className="cash-luck">Luckier than {luckier}% of new arrivals</p>
-      <div className="cash-card" aria-hidden="true">
-        <svg className="cash-card-scene" viewBox="0 0 320 200" preserveAspectRatio="xMidYMax slice">
-          <circle cx="246" cy="62" r="26" fill="#FFF6EC" opacity=".9" />
-          <Block x={222} y={112} w={46} h={60} />
-          <Block x={268} y={120} w={30} h={34} />
-          <Block x={190} y={150} w={26} h={22} />
-          <rect x="219" y="96" width="6" height="18" fill="#F2A99A" />
-          <polygon points="216,96 222,90 228,96" fill="#D9584A" />
-        </svg>
-        <span className="cash-card-mark">CLOUT CITY</span>
-        <span className="cash-card-tag">C$ · VIRTUAL</span>
-        <span className="cash-card-who">{handle ? `@${handle}` : "New arrival"}</span>
-      </div>
+      <CloutCard handle={handle} />
       <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{lotteryLine(cash)}</p>
     </div>
   );

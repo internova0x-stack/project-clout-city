@@ -5,7 +5,7 @@ import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
-import { LedgerList } from "../game/Sheets";
+import { BankView } from "../game/Sheets";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
 import { MessagesApp, type MessagesDating } from "../chat/Messages";
 import type { ChatApi } from "@/lib/chat";
@@ -38,7 +38,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "",
 }: {
   open: boolean;
   onClose: () => void;
@@ -67,6 +67,8 @@ export function PhoneModal({
   onToast?: (text: string) => void;
   /** v0.7: the Collection app closes the phone and opens the Collection; without it the app is hidden. */
   onOpenCollection?: () => void;
+  /** The player's @handle, on the Bank's virtual card. */
+  handle?: string;
 }) {
   const [app, setApp] = useState<App | null>(initialApp ?? null);
   const [lastInitial, setLastInitial] = useState(initialApp);
@@ -88,7 +90,18 @@ export function PhoneModal({
           <div className={`phone-status${app ? " light" : ""}`}>
             <span>{time}</span>
             <span className="phone-pill" aria-hidden="true" />
-            <span aria-hidden="true">▂▄▆ 🔋</span>
+            <span className="phone-status-icons" aria-hidden="true">
+              {/* #34: drawn icons, so they don't stretch or turn sideways like emoji did. */}
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
+                <rect x="0" y="8" width="3" height="4" rx="1" /><rect x="5" y="5.5" width="3" height="6.5" rx="1" />
+                <rect x="10" y="3" width="3" height="9" rx="1" /><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4" />
+              </svg>
+              <svg width="26" height="12" viewBox="0 0 26 12">
+                <rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".5" />
+                <rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor" />
+                <rect x="23.5" y="4" width="1.8" height="4" rx=".9" fill="currentColor" opacity=".5" />
+              </svg>
+            </span>
           </div>
           {app === null ? (
             <div className="phone-home">
@@ -114,12 +127,7 @@ export function PhoneModal({
               {/* News draws its own header (with the Archive button on the right). */}
               {app !== "news" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
-              {app === "bank" && (
-                <div className="stack-12">
-                  {state && <div className="card"><span className="meta">Balance</span><span className="display-md" style={{ display: "block" }}>{formatCash(state.player.bank_cash)}</span></div>}
-                  <LedgerList refreshKey={state?.player.bank_cash} />
-                </div>
-              )}
+              {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
                 <div className="stack-12">
                   <div className="list-row static">
