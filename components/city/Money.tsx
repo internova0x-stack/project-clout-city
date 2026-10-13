@@ -29,36 +29,40 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
   const where = placeById(e.placeId)?.name ?? "";
   const buying = h.busy === `buy:${p.sku}`;
   return (
-    <div className="exclusive-card stack-8">
-      <div className="row" style={{ justifyContent: "space-between", gap: 8 }}>
+    <div className={`exclusive-card${compact ? " compact" : ""}`}>
+      <div className="xc-top">
         <span className="tag tag-gold">✨ Exclusive{s.open ? " · Happening now" : ""}</span>
-        {p.owned && <span className="tag on-list">On the list</span>}
+        {p.owned && <span className="tag on-list">🎟️ On the list</span>}
       </div>
-      <span className="title" style={{ display: "block", color: "#fff" }}>{e.name}</span>
-      {!compact && <span className="subtext" style={{ color: "rgba(255,246,224,.78)" }}>{e.blurb}</span>}
-      <span className="meta" style={{ color: "rgba(255,246,224,.7)" }}>
-        {where} · {eventTimeLine(e.startsAt)}
-      </span>
+      <div className="xc-head">
+        <h3 className="xc-title">{e.name}</h3>
+        {!compact && <p className="xc-blurb">{e.blurb}</p>}
+      </div>
+      {/* Where and when, set apart so the time reads at a glance (v0.9: the card felt cramped). */}
+      <dl className="xc-info">
+        <div><dt aria-label="Where">📍</dt><dd>{where}</dd></div>
+        <div><dt aria-label="When">🕘</dt><dd>{eventTimeLine(e.startsAt)}</dd></div>
+      </dl>
       <EffectChips energy={e.energy} clout={p.owned ? undefined : e.clout} mood={e.mood} confidence={e.confidence} />
-      {p.owned ? (
-        e.attended ? (
-          <span className="owned-chip">You were there. Everyone saw.</span>
-        ) : s.open ? (
-          <button className="btn btn-taxi btn-sm" disabled={h.busy !== null} onClick={() => h.attend(e.id)}>
-            {h.busy === `party:${e.id}` ? "…" : "Pull up"}
-          </button>
+      <div className="xc-actions">
+        {p.owned ? (
+          e.attended ? (
+            <span className="owned-chip">You were there. Everyone saw.</span>
+          ) : s.open ? (
+            <button className="btn btn-taxi" disabled={h.busy !== null} onClick={() => h.attend(e.id)}>
+              {h.busy === `party:${e.id}` ? "…" : "Pull up"}
+            </button>
+          ) : (
+            <span className="xc-doors">{doorsLine(e.startsAt, nowMs)}</span>
+          )
+        ) : p.pending ? (
+          <button className="btn btn-taxi" disabled>Unlocking… payment received</button>
         ) : (
-          <span className="meta" style={{ color: "rgba(255,246,224,.85)" }}>
-            {doorsLine(e.startsAt, nowMs)}
-          </span>
-        )
-      ) : p.pending ? (
-        <button className="btn btn-taxi btn-sm" disabled>Unlocking… payment received</button>
-      ) : (
-        <button className="btn btn-taxi btn-sm" disabled={h.busy !== null} onClick={() => h.buy(p.sku)}>
-          {buying ? "Opening checkout…" : `Get on the list · ${formatPrice(p.priceCents, p.currency)}`}
-        </button>
-      )}
+          <button className="btn btn-taxi" disabled={h.busy !== null} onClick={() => h.buy(p.sku)}>
+            {buying ? "Opening checkout…" : `Get on the list · ${formatPrice(p.priceCents, p.currency)}`}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

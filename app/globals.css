@@ -660,8 +660,22 @@ textarea.studio-input { resize:vertical; font-family:ui-monospace, SFMono-Regula
 /* Real-money products (v0.5): exclusive events (C26), postcards and the Collection (C39) */
 .exclusive-card { background:var(--g-night-reveal); color:var(--text-on-dark); border-radius:var(--r-lg); padding:16px;
   box-shadow:0 0 0 1px rgba(225,188,133,.45), 0 0 24px rgba(255,46,136,.22); }
-.exclusive-card > span:not(.owned-chip):not(.fx-row) { display:block; }
-.exclusive-card > .fx-row, .studio .stack-8 > .fx-row { display:flex; }
+.studio .stack-8 > .fx-row { display:flex; }
+/* v0.9: room to breathe. Top tags, the party, where and when apart, effects, then one full-width action. */
+.exclusive-card { display:flex; flex-direction:column; gap:14px; padding:20px; }
+.exclusive-card.compact { gap:12px; padding:16px; }
+.xc-top { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+.xc-head { display:flex; flex-direction:column; gap:6px; }
+.xc-title { margin:0; font-size:20px; line-height:1.2; font-weight:800; color:#fff; }
+.xc-blurb { margin:0; font-size:14.5px; line-height:1.45; color:rgba(255,246,224,.78); }
+.xc-info { margin:0; padding:12px 0; display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,246,224,.14); border-bottom:1px solid rgba(255,246,224,.14); }
+.xc-info > div { display:flex; gap:10px; align-items:baseline; }
+.xc-info dt { margin:0; width:20px; flex-shrink:0; text-align:center; }
+.xc-info dd { margin:0; font-size:14px; line-height:1.4; color:rgba(255,246,224,.88); }
+.exclusive-card > .fx-row { display:flex; }
+.xc-actions { display:flex; flex-direction:column; gap:10px; }
+.xc-actions .btn { width:100%; }
+.xc-doors { display:block; padding:12px 14px; border-radius:14px; background:rgba(255,246,224,.08); color:rgba(255,246,224,.9); font-size:14px; text-align:center; }
 .exclusive-card .owned-chip { background:rgba(255,255,255,.12); color:#fff; }
 .tag.on-list { background:rgba(64,181,137,.22); color:#8BE6B0; }
 .item-card.collector { box-shadow:inset 0 0 0 1px var(--gold-300); }
