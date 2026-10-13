@@ -45,12 +45,12 @@ export function HuntTab({ state, style, busy, onJoin, onOpenPlace }: {
         </div>
       ) : (
         <>
-          <div className="card stack-8">
+          <div className="card stack-12">
             <div className="hunt-card">
               <span className="hunt-card-art" aria-hidden="true">{h.track!.emoji}</span>
-              <div>
-                <p className="overline" style={{ margin: 0 }}>{h.theme} · until {dayName(h.endsOn)}</p>
-                <span className="title" style={{ display: "block" }}>{h.track!.treasure}</span>
+              <div className="hunt-card-text">
+                <span className="overline">{h.theme} · until {dayName(h.endsOn)}</span>
+                <span className="title">{h.track!.treasure}</span>
                 <span className="meta">{h.completedAt ? "Found!" : `Step ${Math.min(h.step + 1, h.track!.steps)} of ${h.track!.steps}`}</span>
               </div>
             </div>
@@ -103,12 +103,12 @@ export function HuntTab({ state, style, busy, onJoin, onOpenPlace }: {
 
 export function HuntCardRow({ c }: { c: HuntState["cards"][number] }) {
   return (
-    <div className="card hunt-card">
+    <div className="card hunt-card top">
       <span className="hunt-card-art" aria-hidden="true">{c.emoji}</span>
-      <div>
-        <span className="title" style={{ display: "block" }}>{c.treasure}</span>
-        <span className="meta" style={{ display: "block" }}>{c.theme} · earned</span>
-        <span className="body" style={{ display: "block", color: "var(--text-2)" }}>{c.lore}</span>
+      <div className="hunt-card-text">
+        <span className="title">{c.treasure}</span>
+        <span className="meta">{c.theme} · earned</span>
+        <span className="hunt-lore">{c.lore}</span>
       </div>
     </div>
   );

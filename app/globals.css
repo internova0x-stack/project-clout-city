@@ -845,7 +845,11 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
   background:var(--chip-off); color:var(--text-2); }
 .hunt-dot.done { background:var(--green-500); color:#fff; }
 .hunt-dot.now { background:var(--taxi-400); color:var(--text-1); }
-.hunt-card { display:grid; grid-template-columns:52px 1fr; gap:12px; align-items:center; }
+.hunt-card { display:grid; grid-template-columns:52px 1fr; gap:14px; align-items:center; }
+.hunt-card.top { align-items:start; }
+.hunt-card-text { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.hunt-card-text > * { margin:0; line-height:1.25; }
+.hunt-lore { margin-top:4px !important; font-size:14px; line-height:1.45 !important; color:var(--text-2); }
 .hunt-card-art { width:52px; height:52px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:28px;
   background:var(--g-night-reveal); box-shadow:inset 0 0 0 2px var(--taxi-400); }
 .studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }
