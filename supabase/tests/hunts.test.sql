@@ -90,18 +90,19 @@ select pg_temp.assert(public.hunt_state() -> 'cards' -> 0 ->> 'treasure' = 'Cabi
 select pg_temp.assert(jsonb_array_length(public.hunt_state() -> 'hunt' -> 'heard') = 4, 'all four lines kept');
 select pg_temp.assert(pg_temp.raises($$select public.hunt_answer(0)$$, 'not_here'), 'no second payout');
 reset role;
-select pg_temp.assert((select bank_cash = 1000 - 6 + 1080 and clout >= 250 from public.players where id = '00000000-0000-0000-0000-000000000082'), 'paid once');
+select pg_temp.assert((select sum(amount) filter (where currency = 'cash') = 1080 and sum(amount) filter (where currency = 'clout') = 250
+                         from public.ledger where player_id = '00000000-0000-0000-0000-000000000082' and kind = 'hunt'), 'paid once (daily tasks may pay too, so check the hunt rows)');
 select pg_temp.assert((select count(*) = 2 from public.ledger where player_id = '00000000-0000-0000-0000-000000000082' and kind = 'hunt'), 'one cash and one clout ledger row');
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = '00000000-0000-0000-0000-000000000082' and badge_id = 'treasure-hunter'), 'badge');
 
--- Studio: stats; unchanged re-upload stays approved, an edit goes back to review; pause hides.
+-- Studio: stats; unchanged re-upload stays approved, edits are refused once joined; pause hides.
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000081', false);
 select pg_temp.assert(public.admin_hunt_list() -> 0 ->> 'joined' = '1' and public.admin_hunt_list() -> 0 ->> 'completed' = '1', 'joins and finishes counted');
 select public.admin_hunt_upsert((select data from h));
 select pg_temp.assert(public.admin_hunt_list() -> 0 ->> 'status' = 'approved', 'unchanged stays approved');
-select public.admin_hunt_upsert((select jsonb_set(data, '{theme}', '"Edited"') from h));
-select pg_temp.assert(public.admin_hunt_list() -> 0 ->> 'status' = 'review', 'edited goes to review');
+-- Since migration 0019 a hunt players have joined can't be edited (their steps would break).
+select pg_temp.assert(pg_temp.raises($$select public.admin_hunt_upsert((select jsonb_set(data, '{theme}', '"Edited"') from h))$$, 'hunt_in_play'), 'no edits once joined');
 select public.admin_hunt_status('test-hunt', 'paused');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000082', false);
 select pg_temp.assert(public.hunt_state() -> 'hunt' = 'null'::jsonb and (public.hunt_state() ->> 'completed')::int = 4, 'paused hides the hunt; cards stay');

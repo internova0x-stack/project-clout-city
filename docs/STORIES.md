@@ -91,3 +91,9 @@ News never changes prices, places or rewards.
 
 Weekly hunts are uploaded, skimmed, read in full and approved in the **Hunts** tab. The whole
 how-to, including the week file format, is in `docs/HUNTS.md`.
+
+## The Calendar tab
+
+Week by week: the stories running, the hunt and the news for each day (green: approved, yellow:
+waiting). Week files merged into `content/` show a **Load** button; loading uploads them, and they
+still wait for approval. The weekly loop is in `docs/WEEKLY-CONTENT.md`.

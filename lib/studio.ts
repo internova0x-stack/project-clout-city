@@ -94,7 +94,21 @@ export interface StudioApi {
   /** v0.6 treasure hunts (migration 0018). Uploads are checked with lib/hunts.ts first. */
   huntList?(): Promise<Admin<HuntAdmin[]>>;
   huntUpload?(json: string): Promise<Admin<null> & { problems?: string[] }>;
-  huntStatus?(id: string, status: HuntAdmin["status"]): Promise<Admin<null>>;
+  /** A note goes with "back to review" (migration 0019). */
+  huntStatus?(id: string, status: HuntAdmin["status"], note?: string): Promise<Admin<null>>;
+  /** Week files in the repo (content/hunts, content/news), for the calendar's one-tap load. */
+  drafts?(): Promise<Admin<ContentDraft[]>>;
+}
+
+/** A week file committed to content/ (by the weekly drafting routine or by hand). */
+export interface ContentDraft {
+  kind: "hunt" | "news";
+  /** The Monday it's for. */
+  week: string;
+  file: string;
+  json: string;
+  /** What it is: the hunt's theme, or how many news items. */
+  label: string;
 }
 
 /** A hunt as the Studio sees it: the whole file (answers included), its status and how it's going. */
@@ -103,6 +117,8 @@ export interface HuntAdmin {
   week: string;
   status: "review" | "approved" | "paused";
   data: HuntFile;
+  /** Why it was sent back to review (migration 0019). */
+  note?: string | null;
   joined: number;
   completed: number;
   /** Players still on each step (index 0 is step 1): where they get stuck. */
@@ -143,7 +159,9 @@ const ERRORS: Record<string, string> = {
   bad_news: "That isn't a news week.",
   unknown_hunt: "That hunt is gone.",
   bad_hunt: "That isn't a hunt file.",
-  hunts_week_key: "Another hunt already has that week. Pause it or give this one the same id to replace it.",
+  hunts_week_key: "Another hunt already has that week. Run migration 0019 to let a new hunt replace one nobody has joined.",
+  week_in_play: "Players have already joined this week's hunt, so it can't be replaced. Pause it, or use next week.",
+  hunt_in_play: "Players have already joined this hunt, so it can't be changed. Pause it, or write next week's.",
 };
 
 export function studioError(message: string | undefined): string {

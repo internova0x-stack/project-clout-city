@@ -1,10 +1,11 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
+import { readContentDrafts } from "@/lib/contentDrafts";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -93,7 +94,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? "Run migration 0018 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -162,9 +163,17 @@ export async function studioHuntUpload(json: string): Promise<Admin<null> & { pr
   const r = await admin<unknown>("admin_hunt_upsert", { p_data: checked.hunt });
   return r.ok ? { ok: true as const, data: null } : r;
 }
-export async function studioHuntStatus(id: string, status: HuntAdmin["status"]) {
-  const r = await admin<unknown>("admin_hunt_status", { p_id: id, p_status: status });
+export async function studioHuntStatus(id: string, status: HuntAdmin["status"], note?: string) {
+  // Without a note this works before migration 0019 too.
+  const r = await admin<unknown>("admin_hunt_status", note ? { p_id: id, p_status: status, p_note: note } : { p_id: id, p_status: status });
   return r.ok ? { ok: true as const, data: null } : r;
+}
+// ---- Calendar: week files in the repo (admins only: hunt files carry answers) ----
+export async function studioDrafts(): Promise<Admin<ContentDraft[]>> {
+  const gate = await admin<boolean>("is_story_admin");
+  if (!gate.ok) return gate;
+  if (!gate.data) return { ok: false, error: "This account isn't a story admin." };
+  return { ok: true, data: await readContentDrafts() };
 }
 export async function studioMetrics() {
   return admin<StudioMetrics>("admin_metrics");

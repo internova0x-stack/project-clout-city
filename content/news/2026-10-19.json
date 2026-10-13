@@ -1,0 +1,60 @@
+{
+  "week": "2026-10-19",
+  "items": [
+    {
+      "id": "hunt-auntie-vee-storage", "kind": "hunt", "day": "Mon",
+      "headline": "Auntie Vee's storage unit sells for C$40; the good stuff is missing",
+      "body": "Astoria's most legendary collector retired to Florida and left eight treasures with friends around the neighborhood. Sal at the deli says he knows where to start. Join from Tasks, then Hunt. It ends Sunday at midnight."
+    },
+    {
+      "id": "chase-clout-touches-grass", "kind": "city", "day": "Mon", "cast": ["chase-clout", "gus"],
+      "headline": "Chase Clout streams himself \"touching grass\" for nine hours at Hell Gate Park",
+      "body": "Peak viewers: 41,000. Grass touched: one patch, repeatedly. Gus, who has sat on the same bench since 1987, appeared in frame for six of the nine hours and is now trending."
+    },
+    {
+      "id": "peyton-pastel-pumpkin", "kind": "city", "day": "Tue", "cast": ["peyton-pastel"],
+      "headline": "Peyton Pastel unveils a pastel pumpkin spice line; pumpkins demand an apology",
+      "body": "The latte is lavender, the muffin is mint and the candle smells like \"an autumn you can trust.\" Her apology video is reportedly already filmed, just in case."
+    },
+    {
+      "id": "dunk-daniels-early", "kind": "city", "day": "Tue", "cast": ["dunk-daniels"],
+      "headline": "Dunk Daniels arrives early to practice; teammates call security",
+      "body": "Witnesses say he was \"just standing there, on time, like a stranger.\" Sources close to the team believe his watch was set to the wrong time zone. It will not happen again."
+    },
+    {
+      "id": "ask-lola-ex-at-the-party", "kind": "column", "day": "Wed",
+      "headline": "Ask Lola: \"My ex will be at the party. Do I still go?\"",
+      "body": "\"Babe, you go, you arrive forty minutes late, and you leave before the good song. Wear the outfit that makes the bouncer say 'oh.' You are not attending a party. You are attending a reminder.\" Lola Lowdown"
+    },
+    {
+      "id": "skyler-hunt-app", "kind": "city", "day": "Wed", "cast": ["skyler-beta"],
+      "headline": "Skyler Beta launches an app to win treasure hunts; it sends everyone to the same bodega",
+      "body": "Sal reports a 400% rise in chopped cheese sales and zero treasure found. Skyler calls it \"a successful beta of the bodega vertical.\""
+    },
+    {
+      "id": "chardonnay-spinoff-pilot", "kind": "city", "day": "Thu", "cast": ["chardonnay-shade"],
+      "headline": "Chardonnay Shade's spin-off pilot is 44 minutes of her ordering at Neon Spoon",
+      "body": "Test audiences called it \"tense\" and \"somehow about all of us.\" Network executives have ordered six more episodes and a second diner."
+    },
+    {
+      "id": "brock-subway-stunt", "kind": "city", "day": "Thu", "cast": ["brock-squarejaw"],
+      "headline": "Brock Squarejaw does his own stunt on the N train: standing without holding the pole",
+      "body": "He lasted two stops. Commuters gave him a polite round of applause and one seat, which he refused \"for the character.\""
+    },
+    {
+      "id": "lunaria-hellgate-secret-show", "kind": "city", "day": "Fri", "cast": ["lunaria", "rocco"],
+      "headline": "Lunaria plays a secret show at Hellgate Hall; nobody can prove it happened",
+      "body": "Everyone who was there swears it changed their life. Nobody took a single photo. Rocco the bouncer confirms only that \"the vibes were real\" and that he will not be taking questions."
+    },
+    {
+      "id": "tiff-brand-deal", "kind": "city", "day": "Sat", "cast": ["tiff"],
+      "headline": "Tiff lands her first brand deal: a single free coffee",
+      "body": "The coffee was from Grind & Gossip. The deal was Jojo saying \"fine, take it.\" Tiff has posted about it eleven times and calls herself \"in partnership.\""
+    },
+    {
+      "id": "brick-tackleton-cooking-show", "kind": "city", "day": "Sun", "cast": ["brick-tackleton"],
+      "headline": "Brick Tackleton's cooking show premieres; every dish is a protein shake",
+      "body": "Episode one: breakfast (a shake). Episode two: dinner (a warmer shake). Critics praise his knife work, which was used only to open the shake."
+    }
+  ]
+}
