@@ -348,7 +348,7 @@ export interface ShopItem {
   storyOnly?: boolean;
   /**
    * Real-cash collector piece (Clarifications 5 and 6): bought only through Stripe, priced in
-   * store_products, never for virtual cash and never sold. Its Possessions value is
+   * store_products, never for virtual cash and never sold. Its Net Worth value is
    * collectorValue() and `price` stays 0.
    */
   collector?: boolean;
@@ -430,7 +430,7 @@ export function realMinutesUntilOpen(ev: ClubEvent, cityMinutes: number, realHou
 }
 
 /** The seed the database stores (game_settings 'city'); generated into the migration. */
-/** A collector piece's value in Possessions: 1.5× the priciest virtual-cash item in its category (Clarifications 5). */
+/** A collector piece's value in Net Worth: 1.5× the priciest virtual-cash item in its category (Clarifications 5). */
 export function collectorValue(category: ShopCategory): number {
   return Math.round(1.5 * Math.max(...SHOP_ITEMS.filter((i) => i.category === category && !i.collector).map((i) => i.price)));
 }

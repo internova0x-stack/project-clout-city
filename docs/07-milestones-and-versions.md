@@ -158,7 +158,7 @@ Real-money purchases and player-to-player chat, all in Stripe test mode until v1
 
 From the Oct 13 testing round. **docs/testing-feedback.md is the source** for the bug numbers, fixes and decisions; it wins over older text in these docs.
 
-**In scope:** bugs #1, #5, #12 (done), #15, #16, #22, #30, #36, #37, #38, #41, #42, #43 and #47 (done on the work branch), shipped in pull requests grouped by cause.
+**In scope:** bugs #1, #5, #12, #15, #16, #22, #30, #36, #37, #38, #41, #42, #43 and #47, shipped in pull requests grouped by cause. **Done** (pull requests #3 to #7, Oct 13), plus usernames, the Presenting as toggle, per-presentation starter outfits and bill progress bars added by the owner along the way.
 
 **You test:** on an iPhone and a low-end Android phone, every listed bug is gone; prices read C$ everywhere except real-money products ($); no sheet gets stuck open; the page never scrolls sideways or up.
 
