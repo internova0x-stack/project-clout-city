@@ -56,6 +56,7 @@ export const REGULARS: Regular[] = [
   { id: "walt", name: "Walt", title: "the tour guide", placeId: "unisphere", emoji: "🧢", role: "driver" },
   { id: "gus", name: "Gus", title: "same bench, every day", placeId: "hell-gate-park", emoji: "👴", role: "driver" },
   { id: "inez", name: "Inez", title: "the wedding photographer", placeId: "gantry-plaza", emoji: "📸", role: "driver" },
+  { id: "benny", name: "Benny Fortuna", title: "the owner, never bought a ticket", placeId: "lucky-star", emoji: "🧑‍🦳", role: "clerk" },
 ];
 
 export function regularAt(placeId: string): Regular | undefined {

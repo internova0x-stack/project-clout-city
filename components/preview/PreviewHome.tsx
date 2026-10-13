@@ -31,7 +31,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -51,6 +51,8 @@ export function PreviewHome({
   partyPreset?: string;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
   huntPreset?: string;
+  /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"); otherwise random. */
+  lottoPreset?: string;
 }) {
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
@@ -58,7 +60,12 @@ export function PreviewHome({
     return { ...s, devTools };
   }, [player, devTools, tasksDone]);
   const feedRef = useRef<StoryFeed | null>(null);
-  const sim = useMemo(() => createSimApi(city, () => feedRef.current), [city]);
+  const sim = useMemo(() => {
+    const api = createSimApi(city, () => feedRef.current);
+    const queue: Record<string, number[]> = { win: [5, 0, 2], big: [100, 0], back: [1, 0], lose: [0, 5] };
+    if (lottoPreset && queue[lottoPreset]) api.lottoNext(queue[lottoPreset]);
+    return api;
+  }, [city, lottoPreset]);
 
   // The story store lives on the dev server; clout it pays is mirrored into the sim's player.
   const story = useMemo<StoryApi>(() => {

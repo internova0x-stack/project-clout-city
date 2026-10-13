@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Bill, CityPlayer, CityState, DailyTask, GigOffer, PlayerItem } from "./cityState";
+import type { LottoState } from "./lotto";
 
 // Loads the signed-in player's city state. Runs the lazy daily tick first
 // (sync_player), so bills, tasks and gig offers are current. Returns null when
@@ -13,7 +14,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
-  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses] = await Promise.all([
+  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto] = await Promise.all([
     supabase.from("daily_tasks").select("id, slot, kind, place_id, action_id, reward, done_at").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
@@ -33,6 +34,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     supabase.from("player_rest").select("kind, uses").eq("ny_date", day),
     // Migration 0031; missing until it runs, when boosts are once a day per place.
     supabase.from("action_uses").select("place_id, action_id").eq("ny_date", day),
+    // Migration 0032; missing until it runs, which keeps Lucky Star's counter closed.
+    supabase.rpc("lotto_state"),
   ]);
   const devValue = (dev.data?.value ?? {}) as { tools?: boolean; clockOffsetSeconds?: number };
   return {
@@ -68,6 +71,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     homeLayout: layout.error ? null : (layout.data as { home_layout: unknown } | null)?.home_layout ?? null,
     npcLines: npc.error ? {} : ((npc.data ?? {}) as Record<string, string[]>),
     actionsToday: uses.error ? undefined : ((uses.data ?? []) as { place_id: string; action_id: string }[]).map((u) => `${u.place_id}:${u.action_id}`),
+    lotto: lotto.error || !lotto.data ? undefined : (lotto.data as LottoState),
     restToday: rest.error ? undefined : Object.assign({ nap: 0, sit: 0 }, Object.fromEntries(((rest.data ?? []) as { kind: string; uses: number }[]).map((r) => [r.kind, r.uses]))),
   };
 }

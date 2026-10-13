@@ -1137,3 +1137,79 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .spotted-card { border-left:3px solid var(--neon-500); }
 /* v0.9: with a place's action list open, the floating labels behind it step aside. */
 .game.inside:has(.interior-panel.open) .room-chips { visibility:hidden; }
+
+/* ===================== v0.10 Lucky Star Lotto =====================
+   The counter's card wheel (a drum of the five games), the tickets and the scratch card. Ticket
+   colors come from each game (CITY_ECONOMY.lotto.games); nothing here is gold (gold is real money). */
+.lw { position:relative; height:232px; margin:0 -16px; outline:none; }
+.lw:focus-visible .lw-stage { box-shadow:inset 0 0 0 2px var(--neon-500); border-radius:var(--r-lg); }
+.lw-stage { position:absolute; inset:0 0 22px; perspective:900px; touch-action:pan-y; cursor:grab; overflow:hidden; user-select:none; -webkit-user-select:none; }
+.lw-stage.dragging { cursor:grabbing; }
+.lw-drum { position:absolute; left:50%; top:8px; width:148px; height:196px; margin-left:-74px; transform-style:preserve-3d;
+  transform:translateZ(-160px) rotateY(var(--lw-angle)); transition:transform .5s cubic-bezier(.2,.85,.25,1); }
+.lw-stage.dragging .lw-drum { transition:none; }
+.lw-slot { position:absolute; inset:0; transform:rotateY(var(--lw-at)) translateZ(160px); backface-visibility:hidden; -webkit-backface-visibility:hidden; transition:opacity .3s ease-out; }
+.lw-slot.front .ticket { box-shadow:0 14px 30px rgba(20,17,26,.28), inset 0 0 0 1px rgba(255,255,255,.22); }
+.lw-arrow { position:absolute; top:calc(50% - 32px); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:24px; line-height:1;
+  background:var(--glass-solid); color:var(--text-1); box-shadow:var(--elev-2); z-index:2; }
+.lw-arrow.left { left:14px; } .lw-arrow.right { right:14px; }
+.lw-dots { position:absolute; left:0; right:0; bottom:4px; display:flex; justify-content:center; gap:6px; }
+.lw-dots i { width:6px; height:6px; border-radius:50%; background:var(--divider); transition:width .25s ease-out, background .25s ease-out; }
+.lw-dots i.on { width:18px; border-radius:3px; background:var(--night-900); }
+
+.ticket { position:relative; width:100%; height:100%; display:flex; flex-direction:column; padding:14px; border-radius:16px; overflow:hidden; color:#fff;
+  background:var(--ticket); background:linear-gradient(160deg, color-mix(in srgb, var(--ticket) 88%, #fff), color-mix(in srgb, var(--ticket) 78%, #000));
+  box-shadow:0 8px 20px rgba(20,17,26,.18), inset 0 0 0 1px rgba(255,255,255,.18); }
+.ticket::after { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(120% 60% at 20% 0%, rgba(255,255,255,.28), transparent 60%); }
+.ticket.dark { background:linear-gradient(160deg, #2A2530, #14111A); box-shadow:0 8px 20px rgba(20,17,26,.25), inset 0 0 0 1.5px var(--neon-500); }
+.ticket.dark .ticket-name { color:#FF8CC2; }
+.ticket-mark { font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; opacity:.85; }
+.ticket-name { margin-top:6px; font-family:var(--font-display); font-size:19px; line-height:1.1; font-weight:800; letter-spacing:-.015em; }
+.ticket-foil { margin-top:auto; height:32px; border-radius:8px; background:repeating-linear-gradient(135deg, #DCDFE6 0 6px, #C6CAD2 6px 12px); box-shadow:inset 0 1px 2px rgba(0,0,0,.15); }
+.ticket-foot { display:flex; justify-content:space-between; align-items:flex-end; gap:6px; margin-top:10px; font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+.ticket-foot b { display:block; margin-top:1px; font-family:var(--font-display); font-size:15px; font-weight:800; letter-spacing:-.01em; text-transform:none; font-variant-numeric:tabular-nums; }
+.ticket-price { flex:none; padding:4px 9px; border-radius:var(--r-pill); background:rgba(255,255,255,.22); font-size:13px; font-weight:700; letter-spacing:0; text-transform:none; font-variant-numeric:tabular-nums; }
+
+.lotto-panel { padding:16px; border-radius:var(--r-lg); background:var(--surface-raised); box-shadow:var(--elev-1); }
+.lotto-panel .btn { width:100%; }
+.lotto-odds-link { border:0; cursor:pointer; background:var(--night-900); color:var(--text-on-dark); }
+.lotto-resume { padding-right:6px; }
+.lotto-resume .btn-sm { height:32px; min-width:0; padding:0 12px; font-size:14px; }
+.lotto-odds { width:100%; border-collapse:collapse; font-size:15px; font-variant-numeric:tabular-nums; }
+.lotto-odds th { text-align:left; padding:0 0 6px; font-size:12px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:.08em; }
+.lotto-odds th:last-child, .lotto-odds td:last-child { text-align:right; }
+.lotto-odds td { padding:10px 0; border-top:1px solid var(--divider); font-weight:600; }
+.lotto-odds td small { margin-left:6px; font-size:12px; font-weight:500; color:var(--text-3); }
+.lotto-odds td:last-child { color:var(--text-2); font-weight:500; }
+.lotto-odds tr.top td:first-child { color:var(--neon-text); }
+.lotto-odds tr.hit td { background:var(--green-tint); }
+.lotto-odds tr.hit td:first-child { padding-left:8px; border-radius:8px 0 0 8px; }
+.lotto-odds tr.hit td:last-child { padding-right:8px; border-radius:0 8px 8px 0; }
+.lotto-facts { margin:0; padding-left:18px; font-size:14px; line-height:1.5; color:var(--text-2); }
+.lotto-facts li + li { margin-top:4px; }
+
+.scratch-card { position:relative; padding:18px; border-radius:22px; overflow:hidden; color:#fff;
+  background:var(--ticket); background:linear-gradient(160deg, color-mix(in srgb, var(--ticket) 88%, #fff), color-mix(in srgb, var(--ticket) 75%, #000));
+  box-shadow:0 14px 30px rgba(20,17,26,.22), inset 0 0 0 1px rgba(255,255,255,.18); }
+.scratch-card.dark { background:linear-gradient(160deg, #2A2530, #14111A); box-shadow:0 14px 30px rgba(20,17,26,.3), inset 0 0 0 1.5px var(--neon-500); }
+.scratch-card.dark .scratch-name { color:#FF8CC2; }
+.scratch-card.jackpot { animation:lotto-glow 1.4s ease-in-out infinite alternate; }
+@keyframes lotto-glow { from { box-shadow:0 14px 30px rgba(20,17,26,.22), 0 0 0 0 rgba(255,46,136,0); } to { box-shadow:0 14px 30px rgba(20,17,26,.22), 0 0 0 8px rgba(255,46,136,.35); } }
+@media (prefers-reduced-motion: reduce) { .scratch-card.jackpot { animation:none; } .lw-drum { transition:none; } }
+.scratch-head { display:flex; justify-content:space-between; align-items:center; }
+.scratch-name { margin:6px 0 0; font-family:var(--font-display); font-size:26px; line-height:1.1; font-weight:800; letter-spacing:-.02em; }
+.scratch-hint { margin:4px 0 0; font-size:13px; line-height:1.35; opacity:.85; }
+.scratch-window { position:relative; height:148px; margin-top:14px; border-radius:16px; overflow:hidden; background:#FFFDF8; box-shadow:inset 0 2px 6px rgba(0,0,0,.12); }
+.scratch-result { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; text-align:center; color:var(--text-1); }
+.scratch-amount { font-family:var(--font-display); font-size:42px; line-height:1; font-weight:800; letter-spacing:-.025em; color:var(--green-text); font-variant-numeric:tabular-nums; }
+.scratch-amount.none { font-size:30px; color:var(--text-2); }
+.scratch-sub { font-size:13px; font-weight:600; color:var(--text-3); }
+.scratch-wait { font-size:15px; color:var(--text-3); }
+.scratch-foil { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; }
+.lotto-result { text-align:center; }
+.lotto-result-amount { margin:0 0 2px; font-family:var(--font-display); font-size:30px; line-height:1.15; font-weight:800; letter-spacing:-.02em; color:var(--text-1); font-variant-numeric:tabular-nums; }
+.lotto-result.won .lotto-result-amount { color:var(--green-text); }
+.lotto-benny { margin:10px 0 0; padding:10px 12px; border-radius:var(--r-md); background:var(--surface-card); font-size:14px; line-height:1.4; color:var(--text-2); text-align:left; }
+.lotto-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.lotto-details summary { cursor:pointer; font-size:14px; font-weight:600; color:var(--text-2); }
+.lotto-details .lotto-odds { margin-top:8px; }

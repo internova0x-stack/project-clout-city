@@ -82,12 +82,46 @@ export const CITY_ECONOMY = {
    * active player's week, a wrong answer waits 10 minutes, a badge after four hunts.
    */
   hunt: { cash: 1080, clout: 250, retryMinutes: 10, badgeAfter: 4 },
+  /**
+   * Lucky Star Lotto (v0.10, spec section 7; owner Oct 13). Five scratch-card games; each top prize is
+   * 1,000 times the card. Every game shares one fixed prize table, in multiples of the card's price and
+   * chances per 100,000 cards: about 1 card in 3 wins, the average card pays back 60.5% of its price
+   * and 10% of every bought card feeds the weekly jackpot, so the lotto takes out more C$ than it pays.
+   * A prize of 100 times the card or more is a big prize (about 1 card in 4,760). One free card a day
+   * (always the C$5 game), a second one through a player's first 7 days, and 5 bought cards a day across
+   * all games; all reset at midnight in New York. The server draws every result when the card is bought
+   * (migration 0032), and real money never touches any of it.
+   */
+  lotto: {
+    tags: ["lotto"],
+    freeGame: "corner-store",
+    freePerDay: 1,
+    beginner: { days: 7, extraPerDay: 1 },
+    buyPerDay: 5,
+    jackpot: { seed: 5000, cut: 0.1 },
+    prizes: [
+      { times: 1, per100k: 20000 },
+      { times: 2, per100k: 10000 },
+      { times: 5, per100k: 2500 },
+      { times: 20, per100k: 250 },
+      { times: 100, per100k: 20 },
+      { times: 1000, per100k: 1 },
+    ],
+    bigFrom: 100,
+    games: [
+      { id: "corner-store", name: "Corner Store Classic", price: 5, color: "#40B589", blurb: "The one your uncle buys with exact change." },
+      { id: "bodega-cat", name: "Bodega Cat Bonanza", price: 10, color: "#3E8EDE", blurb: "The cat picked the numbers. The cat has never been wrong." },
+      { id: "rents-due", name: "Rent's Due", price: 20, color: "#FF2E88", blurb: "Financial planning, but make it shiny." },
+      { id: "penthouse-dreams", name: "Penthouse Dreams", price: 50, color: "#7A4FD6", blurb: "Scratch here to see the view. The view is the counter." },
+      { id: "main-character", name: "Main Character", price: 100, color: "#2A2530", blurb: "For people who are sure the plot is about them." },
+    ],
+  },
 } as const;
 
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -474,6 +508,16 @@ export const PLACES: Place[] = [
     lore: "Rows of glowing rigs, a stage for tournaments and an energy-drink fridge that hums like a jet engine. Arcade Nerds call it home; everyone else calls it loud.",
     actions: [
       { id: "match", kind: "visit", label: "Play a ranked match", price: 10, energy: 15, confidence: 5, clout: 12, blurb: "You lose to a twelve-year-old. You win the rematch. Character arc." },
+    ],
+  },
+  // v0.10 (spec section 7): the lotto shop, outside Astoria on purpose; you travel to play.
+  {
+    id: "lucky-star", name: "Lucky Star Lotto", emoji: "🌟", category: "places", neighborhood: "Flushing",
+    at: [40.7593, -73.8301], depth: "full", template: "lotto", palette: ["#7A4FD6", "#FF2E88", "#14111A"],
+    tags: ["lotto", "flushing"],
+    lore: "A narrow shop on a loud Flushing corner: a neon star, a rack of scratch cards and Benny, who has never once bought a ticket. Odds are printed on every card, which Benny calls \"the boring part\".",
+    actions: [
+      { id: "chat", kind: "visit", label: "Shoot the breeze with Benny", energy: 2, mood: 3, blurb: "He tells you his system. The system is not buying tickets." },
     ],
   },
 ];
