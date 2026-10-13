@@ -1,5 +1,6 @@
 "use client";
 
+import type { PartyMention } from "@/lib/party";
 import { useState } from "react";
 import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
@@ -37,7 +38,7 @@ const noop = () => {};
 const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, markSeen: noop, completeTask: noop, onUnlock: noop };
 
 export function PhoneModal({
-  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, initialApp, story, news, focusBeat, cityNews,
+  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "",
 }: {
   open: boolean;
@@ -49,6 +50,8 @@ export function PhoneModal({
   onCollect: (id: number) => void;
   muted: boolean;
   onToggleSound: () => void;
+  /** v0.9 (migration 0029): "Keep me out of the gossip", and the player's "Spotted at" lines. */
+  gossip?: { optedOut: boolean; spotted: PartyMention[]; onToggle: () => void };
   initialApp?: App | null;
   story?: StoryFeed | null;
   news?: NewsHandlers;
@@ -134,10 +137,19 @@ export function PhoneModal({
                     <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Lo-fi city loop</span></span>
                     <button className="chip" aria-pressed={!muted} onClick={onToggleSound}>{muted ? "Off" : "On"}</button>
                   </div>
+                  {gossip && (
+                    <div className="list-row static">
+                      <span style={{ flex: 1 }}>
+                        <span className="title" style={{ display: "block" }}>Keep me out of the gossip</span>
+                        <span className="meta">Your name stays out of Lola&apos;s &ldquo;Spotted at&rdquo; party lines</span>
+                      </span>
+                      <button className="chip" aria-pressed={gossip.optedOut} onClick={gossip.onToggle}>{gossip.optedOut ? "On" : "Off"}</button>
+                    </div>
+                  )}
                   <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
                 </div>
               )}
-              {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
+              {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "messages" && (chat
                 ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}

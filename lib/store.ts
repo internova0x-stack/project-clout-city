@@ -36,6 +36,8 @@ export interface ExclusiveEvent {
   mood: number;
   confidence: number;
   attended: boolean;
+  /** v0.9 (migration 0029): on the list as this player's plus-one, without a ticket of your own. */
+  plusOneOf?: string | null;
 }
 
 /** Badge for owning every postcard (Clarifications 6). */

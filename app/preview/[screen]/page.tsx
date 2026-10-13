@@ -34,6 +34,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?dev=1          show the staging time-travel pill
 //   /preview/home?tasks=done     all five daily tasks done (the HUD's finished state)
 //   /preview/home?hunt=joined   treasure hunt: new (not joined), joined, question (step 2 asked), wrong (waiting), finale (last step), done (found, badge)
+//   /preview/home?party=invite   party plus-ones: invite (dana.vibes asks you), sent (you have a Jada ticket, Marco is your plus-one), ticket (a ticket, no plus-one yet)
 //   /preview/home?crew=invite   crew outings: invite (Marco asks you out), tonight (you're hosting), full (your visit completes it), empty (no crew)
 //   /preview/home?dating=match   crushes and date nights: match (an unseen "It's mutual"), invite (a date invite waiting), tonight (a date in progress), alone (nobody to ask yet)
 //   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
@@ -72,7 +73,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, hunt } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -126,6 +127,7 @@ export default async function Preview({
           tasksDone={tasks === "done"}
           datingPreset={dating}
           crewPreset={crew}
+          partyPreset={party}
           huntPreset={hunt}
           storyDay={story && /^\d+$/.test(story) ? Number(story) : undefined}
           clique={[

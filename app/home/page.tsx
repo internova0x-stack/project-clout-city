@@ -13,6 +13,7 @@ import { loadCatalog, startCheckout } from "./storeActions";
 import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, track } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
+import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } from "./partyActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
@@ -23,8 +24,8 @@ export const metadata = { title: "Home · Clout City" };
 export default async function HomePage() {
   const { player } = await requirePlayer();
   const supabase = await getServerSupabase();
-  const [clique, city, story, catalog, chat, dating, crew] = await Promise.all([
-    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(),
+  const [clique, city, story, catalog, chat, dating, crew, party] = await Promise.all([
+    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(),
   ]);
   // Migration 0010 switches on chat; a banned account sees only a notice.
   const chatOn = chat.ok;
@@ -75,6 +76,9 @@ export default async function HomePage() {
       hunt={city ? { state: huntState, join: huntJoin, talk: huntTalk, answer: huntAnswer } : undefined}
       // Migration 0013 switches on crew outings.
       crew={city && crew.ok ? { inbox: crewInbox, members: crewMembers, create: crewCreate, respond: crewRespond } : undefined}
+      // Migration 0029 switches on party keepsakes (plus-ones, "Spotted at", the gossip setting).
+      party={city && catalog && party ? { inbox: partyInbox, invite: partyInvite, respond: partyRespond, mentions: partyMentions, setNewsOptOut } : undefined}
+      partyInbox={party}
       // Migration 0011 switches on crushes and date nights.
       dating={chatOn && dating.ok ? {
         inbox: datingInbox, crushStatus, crush: crushToggle, matchSeen, candidates: dateCandidates,

@@ -4,6 +4,7 @@ import { doorsLine, eventTimeLine, localDate } from "@/lib/localTime";
 import { useState } from "react";
 import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { formatPrice, partyState, POSTCARD_BADGE, POSTCARD_NOTES, serialLabel, type StoreProduct } from "@/lib/store";
+import { onList, plusOnesFor, type PartyInbox } from "@/lib/party";
 import type { HuntCard } from "@/lib/hunts";
 import { Sheet } from "../Sheet";
 import { EffectChips, SheetTitle } from "./Common";
@@ -19,6 +20,12 @@ export interface MoneyHandlers {
   attend: (eventId: string) => void;
   /** Analytics: a postcard was shared. */
   onShared?: () => void;
+  /** v0.9 keepsakes (migration 0029): plus-ones, sent and received. */
+  party?: {
+    inbox: PartyInbox | null;
+    bring: (eventId: string) => void;
+    respond: (eventId: string, yes: boolean) => void;
+  };
 }
 
 
@@ -28,11 +35,15 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
   const s = partyState(e, nowMs);
   const where = placeById(e.placeId)?.name ?? "";
   const buying = h.busy === `buy:${p.sku}`;
+  const listed = onList(p);
+  const { sent, received } = plusOnesFor(e.id, h.party?.inbox ?? null);
+  const canBring = !!h.party && p.owned && !s.over && !e.attended;
   return (
     <div className={`exclusive-card${compact ? " compact" : ""}`}>
       <div className="xc-top">
         <span className="tag tag-gold">✨ Exclusive{s.open ? " · Happening now" : ""}</span>
         {p.owned && <span className="tag on-list">🎟️ On the list</span>}
+        {!p.owned && e.plusOneOf && <span className="tag on-list">🎟️ +1 with {e.plusOneOf}</span>}
       </div>
       <div className="xc-head">
         <h3 className="xc-title">{e.name}</h3>
@@ -43,9 +54,18 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
         <div><dt aria-label="Where">📍</dt><dd>{where}</dd></div>
         <div><dt aria-label="When">🕘</dt><dd>{eventTimeLine(e.startsAt)}</dd></div>
       </dl>
-      <EffectChips energy={e.energy} clout={p.owned ? undefined : e.clout} mood={e.mood} confidence={e.confidence} />
+      <EffectChips energy={e.energy} clout={listed ? undefined : e.clout} mood={e.mood} confidence={e.confidence} />
       <div className="xc-actions">
-        {p.owned ? (
+        {received && !listed && !s.over ? (
+          // Someone from your crew wants you as their plus-one.
+          <>
+            <span className="xc-invite">🎟️ <b>{received.host.name}</b> wants you as their plus-one. Free, on their ticket.</span>
+            <button className="btn btn-taxi" disabled={h.busy !== null} onClick={() => h.party!.respond(e.id, true)}>
+              {h.busy === `plus1:${e.id}` ? "…" : "I'm in"}
+            </button>
+            <button className="btn xc-secondary" disabled={h.busy !== null} onClick={() => h.party!.respond(e.id, false)}>Can&apos;t make it</button>
+          </>
+        ) : listed ? (
           e.attended ? (
             <span className="owned-chip">You were there. Everyone saw.</span>
           ) : s.open ? (
@@ -62,6 +82,18 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
             {buying ? "Opening checkout…" : `Get on the list · ${formatPrice(p.priceCents, p.currency)}`}
           </button>
         )}
+        {canBring && (sent && sent.status !== "declined" ? (
+          <span className="xc-plus">
+            {sent.status === "in" ? `➕ ${sent.guest.name} is your plus-one` : `➕ Waiting on ${sent.guest.name}`}
+          </span>
+        ) : (
+          <>
+            <button className="btn xc-secondary" disabled={h.busy !== null} onClick={() => h.party!.bring(e.id)}>
+              ➕ {sent?.status === "declined" ? `${sent.guest.name} can't make it · ask someone else` : "Bring a plus-one"}
+            </button>
+            {!compact && !sent && <span className="xc-note">One guest from your crew, free. They get their own event card.</span>}
+          </>
+        ))}
       </div>
     </div>
   );
@@ -126,7 +158,7 @@ export function CollectionSheet({ open, onClose, products, h, badge, huntCards =
   const [flipped, setFlipped] = useState(false);
   const cards = products.filter((p) => p.type === "postcard");
   const owned = cards.filter((p) => p.owned).length;
-  const events = products.filter((p) => p.type === "exclusive_event" && p.owned && p.event);
+  const events = products.filter((p) => p.type === "exclusive_event" && onList(p) && p.event);
   const { badgeAfter } = CITY_ECONOMY.hunt;
   const pick = (x: Picked) => { setPicked(x); setFlipped(false); };
   const share = async (p: StoreProduct) => {
@@ -251,7 +283,7 @@ function EventCard({ p }: { p: StoreProduct }) {
       <span className="event-ticket-text">
         <b>{e.name}</b>
         <small>{place?.name ?? "Queens"} · {localDate(e.startsAt)}</small>
-        <small>{e.attended ? "✓ You were there" : "🎟️ On the list"}</small>
+        <small>{e.attended ? "✓ You were there" : "🎟️ On the list"}{e.plusOneOf ? ` · +1 with ${e.plusOneOf}` : ""}</small>
       </span>
       {p.serial ? <span className="card-serial">{serialLabel(p.serial)}</span> : null}
     </span>
@@ -280,7 +312,7 @@ function CardDetail({ picked, flipped, onFlip, handle, onBack, onShare }: {
     <span className="card-back">
       <span className="card-back-note">{picked.p.event!.blurb}<br /><br />Hosted by {picked.p.event!.host}</span>
       <span className="card-back-stamp" aria-hidden="true">🎟️</span>
-      <span className="card-back-to">{picked.p.event!.attended ? "Admitted" : "On the list"}: {handle ? `@${handle}` : "you"}</span>
+      <span className="card-back-to">{picked.p.event!.attended ? "Admitted" : "On the list"}: {handle ? `@${handle}` : "you"}{picked.p.event!.plusOneOf ? ` (+1 with ${picked.p.event!.plusOneOf})` : ""}</span>
       {serial ? <span className="card-back-serial">Ticket {serialLabel(serial)}</span> : null}
     </span>
   ) : (
