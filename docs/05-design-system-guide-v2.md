@@ -22,6 +22,7 @@ This is the clean builder spec for Clout City's UI: give this version to Claude 
 > 13. **Names:** the owned-items screen is "Net Worth"; the friend group is the "Crew".
 > 14. **Interiors:** walkable isometric 3D rooms (update 7) everywhere this guide says 2.5D backdrops.
 > 15. **Home and profile (v0.7):** an avatar-head bubble (about 56 pt, yellow ring) left of the stats panel opens the full profile; the floating name card goes. The stats panel starts collapsed. The starting-cash card is a black gradient with the amount in large white type.
+> 16. **Location colour themes (owner, Oct 13):** each location illustration has its own theme: deep blue gradient, red, yellow, green, purple, brown, grey, off-white or cream. The theme sets the sky gradient, the island tint and the main building colour, and neighbouring places never share one (`PLACE_THEME` in `components/city/PlaceArt.tsx`). Shaded faces lean less lavender so the colours stay true.
 
 It keeps the reference games' structure (frosted pills over a living world, bottom sheets for reading and deciding, one loud button per screen) in Clout City's own brand: New York at night, taxi yellow, neon magenta, and gold reserved for real money. Game rules come from Clarifications & Updates (v2); where this guide and that document disagree on behavior, Clarifications wins.
 

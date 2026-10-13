@@ -6,7 +6,8 @@ export type GlyphName =
   | "news" | "chat" | "cash" | "briefcase" | "gear"
   | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
   | "wave" | "church" | "dumbbell" | "condo" | "diner"
-  | "globe" | "gantry" | "tumbler" | "hanger" | "car" | "cap" | "columns";
+  | "globe" | "gantry" | "tumbler" | "hanger" | "car" | "cap" | "columns"
+  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -35,6 +36,14 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   car: ["#FF8A7A", "#B4232F"],
   cap: ["#FF8A8A", "#9E1B32"],
   columns: ["#9CC0F0", "#2F5DA8"],
+  pizza: ["#FFC76B", "#E5484D"],
+  cart: ["#8BE6B8", "#1F9A6A"],
+  book: ["#F2C48A", "#9A5A2E"],
+  shield: ["#8FB2FF", "#2440A8"],
+  firetruck: ["#FF8A7A", "#C21F2B"],
+  film: ["#FF7AB6", "#7A1F6B"],
+  gamepad: ["#B8A2FF", "#4B2FB8"],
+  train: ["#FFD966", "#E08A12"],
 };
 
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
@@ -59,6 +68,23 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "boulevard-motors": "car",
   "st-johnsons": "cap",
   "queensborough-u": "columns",
+  "ditmars-deli": "sandwich",
+  "two-bros-pizza": "pizza",
+  "neon-spoon": "diner",
+  "up-on-thirty": "cutlery",
+  "steinway-fresh": "cart",
+  "hellgate-hall": "cocktail",
+  "triborough-works": "tower",
+  "ditmars-library": "book",
+  "precinct-114-half": "shield",
+  "engine-7": "firetruck",
+  "astoria-cc": "cap",
+  "harmony-chapel": "church",
+  "hell-gate-park": "tree",
+  "rep-count": "dumbbell",
+  "astoria-blvd-station": "train",
+  "reel-queens": "film",
+  "respawn-arena": "gamepad",
   home: "house",
 };
 const CATEGORY_GLYPHS: Record<string, GlyphName> = {
@@ -80,6 +106,78 @@ export function Glyph({ name, size = 24 }: { name: GlyphName; size?: number }) {
 }
 
 const PATHS: Record<GlyphName, React.ReactNode> = {
+  // A slice: crust along the top, cheese and two pepperoni.
+  pizza: (
+    <>
+      <path d="M3.5 6.5C9 3 15 3 20.5 6.5L12 21z" fill="#fff" />
+      <path d="M3.5 6.5C9 3 15 3 20.5 6.5l-1 1.9C14.6 5.5 9.4 5.5 4.5 8.4z" fill={SOFT} />
+      <circle cx="10" cy="10.5" r="1.6" fill={SOFT} />
+      <circle cx="13.6" cy="13.8" r="1.3" fill={SOFT} />
+    </>
+  ),
+  // A shopping cart.
+  cart: (
+    <>
+      <path d="M2.5 4h2.6l2.3 10.5h10.8l2.3-7.5H6.4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M7 8h12.5l-1.7 5.2H8.1z" fill={SOFT} />
+      <circle cx="9" cy="18.5" r="1.7" fill="#fff" />
+      <circle cx="17" cy="18.5" r="1.7" fill="#fff" />
+    </>
+  ),
+  // An open book.
+  book: (
+    <>
+      <path d="M12 6.5C9.5 4.8 6.5 4.5 3 5v13c3.5-.5 6.5-.2 9 1.5z" fill="#fff" />
+      <path d="M12 6.5c2.5-1.7 5.5-2 9-1.5v13c-3.5-.5-6.5-.2-9 1.5z" fill={SOFT} />
+      <path d="M12 6.5v13" stroke="#fff" strokeWidth="1.2" />
+    </>
+  ),
+  // A badge shield with a star.
+  shield: (
+    <>
+      <path d="M12 2.5 20 5.5v5.8c0 4.8-3.3 8.4-8 10.2-4.7-1.8-8-5.4-8-10.2V5.5z" fill="#fff" />
+      <path d="m12 7.6 1.3 2.7 3 .4-2.2 2.1.5 3-2.6-1.4-2.6 1.4.5-3-2.2-2.1 3-.4z" fill={SOFT} />
+    </>
+  ),
+  // A fire truck with a ladder.
+  firetruck: (
+    <>
+      <path d="M2.5 9.5h11v7h-11z" fill="#fff" />
+      <path d="M13.5 11.5h4l3 3v2h-7z" fill="#fff" />
+      <path d="M3 7.5 14 4.5" stroke={SOFT} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M15 12.3h2.3l1.6 1.7H15z" fill={SOFT} />
+      <circle cx="6.5" cy="17.5" r="2" fill={SOFT} stroke="#fff" strokeWidth="1.2" />
+      <circle cx="16.5" cy="17.5" r="2" fill={SOFT} stroke="#fff" strokeWidth="1.2" />
+    </>
+  ),
+  // A clapperboard.
+  film: (
+    <>
+      <rect x="3" y="9.5" width="18" height="10.5" rx="2" fill="#fff" />
+      <path d="M3 9.5 20 5.2l.6 2.2L3.6 11.7z" fill={SOFT} />
+      <path d="m7 8.4 1.8 2.6M11.4 7.3l1.8 2.6M15.8 6.2l1.8 2.6" stroke="#fff" strokeWidth="1.2" />
+      <path d="m10.5 12.5 4.5 2.6-4.5 2.6z" fill={SOFT} />
+    </>
+  ),
+  // A game controller.
+  gamepad: (
+    <>
+      <path d="M7 7.5h10a5 5 0 0 1 4.8 6.4l-.9 3.2a2.4 2.4 0 0 1-4 1.1L14.6 16H9.4l-2.3 2.2a2.4 2.4 0 0 1-4-1.1l-.9-3.2A5 5 0 0 1 7 7.5z" fill="#fff" />
+      <path d="M7.5 10.2v3.6M5.7 12h3.6" stroke={SOFT} strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="16" cy="10.8" r="1.1" fill={SOFT} />
+      <circle cx="17.8" cy="12.9" r="1.1" fill={SOFT} />
+    </>
+  ),
+  // A subway car on rails.
+  train: (
+    <>
+      <rect x="5" y="3.5" width="14" height="14" rx="3.5" fill="#fff" />
+      <rect x="7" y="6" width="10" height="5" rx="1.2" fill={SOFT} />
+      <circle cx="8.6" cy="14.2" r="1.2" fill={SOFT} />
+      <circle cx="15.4" cy="14.2" r="1.2" fill={SOFT} />
+      <path d="m7.5 18-2 3M16.5 18l2 3M6.5 20h11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
+    </>
+  ),
   // A graduation cap: the board, the crown and the tassel.
   cap: (
     <>

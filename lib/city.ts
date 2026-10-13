@@ -264,6 +264,159 @@ export const PLACES: Place[] = [
     actions: [
       { id: "lecture", kind: "visit", label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
     ],
+  },  // ---- v0.6: the Astoria neighborhood (docs/08-new-features-spec.md section 5). Invented names. ----
+  {
+    id: "ditmars-deli", name: "Ditmars Deli & Dreams", emoji: "🥪", category: "food", neighborhood: "Astoria", tier: "Budget",
+    at: [40.7748, -73.9128], depth: "full", template: "counter", palette: ["#2E9E6A", "#F4E3C8", "#1F1B26"],
+    tags: ["bodega", "dining_budget", "astoria"],
+    lore: "Open all night, run by a man named Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 6, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
+    ],
+  },
+  {
+    id: "two-bros-pizza", name: "Two Bros Who Fight Pizza", emoji: "🍕", category: "food", neighborhood: "Astoria", tier: "Budget",
+    at: [40.7668, -73.9208], depth: "scene", palette: ["#D93A2F", "#FFF1D6", "#2A2530"],
+    tags: ["pizza", "dining_budget", "astoria"],
+    lore: "Two brothers, one oven and a feud about anchovies that has lasted eleven years. The slices are great. The yelling is free.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Grab a slice", price: 4, energy: -12, blurb: "Fold it like a local. Burn the roof of your mouth like a local." },
+    ],
+  },
+  {
+    id: "neon-spoon", name: "The Neon Spoon", emoji: "🍳", category: "food", neighborhood: "Astoria", tier: "Medium",
+    at: [40.7695, -73.9265], depth: "scene", palette: ["#3BB8C9", "#FFE7C2", "#2A2530"],
+    tags: ["diner", "dining_medium", "astoria"],
+    lore: "A chrome diner with a menu the size of a novel. Breakfast is served all day; regret is served after 2 AM.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Pancakes in a booth", price: 16, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
+    ],
+  },
+  {
+    id: "up-on-thirty", name: "Up on Thirty", emoji: "🥂", category: "food", neighborhood: "Astoria", tier: "Luxury",
+    at: [40.7672, -73.9238], depth: "scene", palette: ["#C9A0FF", "#F4EDE6", "#1F1B26"],
+    tags: ["rooftop", "dining_luxury", "astoria"],
+    lore: "A rooftop above 30th Avenue with string lights, small plates and big opinions. The view is Manhattan; the vibe is \"I'm not from Manhattan, on purpose.\"",
+    actions: [
+      { id: "eat", kind: "eat", label: "Small plates, big view", price: 70, energy: -50, blurb: "Order the octopus. Photograph the octopus. Eventually, eat the octopus." },
+    ],
+  },
+  {
+    id: "steinway-fresh", name: "Steinway Fresh Mart", emoji: "🛒", category: "food", neighborhood: "Astoria",
+    at: [40.7628, -73.9160], depth: "scene", palette: ["#40B589", "#FFF6E0", "#2A2530"],
+    tags: ["supermarket", "astoria"],
+    lore: "Forty kinds of feta and one working shopping cart. Groceries for cooking at home are coming soon; for now it's the best free air conditioning in Queens.",
+    actions: [
+      { id: "browse", kind: "visit", label: "Wander the aisles", energy: 3, mood: 3, blurb: "You came for nothing and you're leaving with nothing. Growth." },
+    ],
+  },
+  {
+    id: "hellgate-hall", name: "Hellgate Hall", emoji: "🎧", category: "nightlife", neighborhood: "Astoria",
+    at: [40.7737, -73.9178], depth: "full", template: "club", palette: ["#FF5A36", "#3A1E6B", "#14111A"],
+    tags: ["club", "nightlife", "astoria"],
+    lore: "An old warehouse by the tracks with a sound system that registers on seismographs. The DJ booth is a converted subway car. Nobody knows how it got inside.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Dance under the train tracks", price: 50, energy: 15, mood: 6, confidence: 4, blurb: "Every time the N train passes, the whole room cheers." },
+    ],
+  },
+  {
+    id: "triborough-works", name: "Triborough Works", emoji: "🏢", category: "places", neighborhood: "Astoria",
+    at: [40.7660, -73.9252], depth: "scene", palette: ["#6C8CFF", "#E6E8EC", "#1F1B26"],
+    tags: ["office", "coworking", "gigs_board", "astoria"],
+    lore: "Coworking for people who are \"between rounds.\" Free kombucha, a ping-pong table nobody uses and a gigs board that actually pays.",
+    actions: [
+      { id: "gigs", kind: "gigs", label: "Check the gigs board", energy: 0, blurb: "Side gigs pin up here every morning. Some of them are even legal-sounding." },
+    ],
+  },
+  {
+    id: "ditmars-library", name: "Ditmars Free Library", emoji: "📚", category: "places", neighborhood: "Astoria",
+    at: [40.7735, -73.9098], depth: "scene", palette: ["#B8743A", "#F2E6D8", "#2A2530"],
+    tags: ["library", "free", "astoria"],
+    lore: "Quiet, free and full of people pretending to read while charging their phones. The librarian has heard every excuse for a late book. Yours isn't new.",
+    actions: [
+      { id: "study", kind: "visit", label: "Study in the quiet room", energy: 10, confidence: 5, blurb: "Fifty minutes of focus, ten minutes of looking at strangers' book choices." },
+    ],
+  },
+  {
+    id: "precinct-114-half", name: "The 114½ Precinct", emoji: "🚓", category: "places", neighborhood: "Astoria",
+    at: [40.7690, -73.9228], depth: "scene", palette: ["#2F5FB3", "#E6E8EC", "#14111A"],
+    tags: ["police", "free", "astoria"],
+    lore: "The neighborhood's busiest desk sergeant has a coffee mug that says \"World's Okayest Cop.\" Most reports here are about parking. All of them are passionate.",
+    actions: [
+      { id: "report", kind: "visit", label: "Report a \"stolen\" parking spot", energy: 3, mood: 3, blurb: "They write it down. They will not do anything. You feel heard." },
+    ],
+  },
+  {
+    id: "engine-7", name: "Engine 7 Firehouse", emoji: "🚒", category: "places", neighborhood: "Astoria",
+    at: [40.7720, -73.9205], depth: "scene", palette: ["#D93A2F", "#F4E3C8", "#1F1B26"],
+    tags: ["firehouse", "free", "astoria"],
+    lore: "Big red doors, bigger hearts and a dalmatian named Hydrant who has never once been on time for anything.",
+    actions: [
+      { id: "pet-dog", kind: "visit", label: "Pet the firehouse dog", energy: 2, mood: 6, blurb: "Hydrant leans into it. Best part of your week, statistically." },
+    ],
+  },
+  {
+    id: "astoria-cc", name: "Astoria Community College", emoji: "🏫", category: "campus", neighborhood: "Astoria",
+    at: [40.7600, -73.9232], depth: "scene", palette: ["#2E9E6A", "#E8E2D0", "#2A2530"],
+    tags: ["college", "campus", "astoria"],
+    lore: "Night classes for people with day jobs and big plans. The parking lot has more ambition per square foot than most startups.",
+    actions: [
+      { id: "night-class", kind: "visit", label: "Take a night class", price: 20, energy: 15, confidence: 6, clout: 10, blurb: "Public Speaking 101. You speak publicly. Nobody dies." },
+    ],
+  },
+  {
+    id: "harmony-chapel", name: "Harmony Community Chapel", emoji: "🕊️", category: "places", neighborhood: "Astoria",
+    at: [40.7652, -73.9130], depth: "scene", palette: ["#E8C79A", "#F4EDE6", "#3A2C5E"],
+    tags: ["chapel", "quiet", "free", "astoria"],
+    lore: "A small, open-door chapel with stained glass and a bulletin board covered in bake sales. Everyone's welcome; the folding chairs are not comfortable.",
+    actions: [
+      { id: "quiet", kind: "visit", label: "Sit for a quiet moment", energy: 2, mood: 7, blurb: "Ten minutes without your phone. It feels illegal. It's not." },
+    ],
+  },
+  {
+    id: "hell-gate-park", name: "Hell Gate Park", emoji: "🌳", category: "parks", neighborhood: "Astoria",
+    at: [40.7790, -73.9232], depth: "scene", palette: ["#5CC28F", "#F4E3C8", "#2A2530"],
+    tags: ["park", "outdoors", "free", "astoria"],
+    lore: "Riverside lawns under a giant bridge, a running track and a public pool with very strong opinions about swim caps.",
+    actions: [
+      { id: "hangout", kind: "hangout", label: "Hang out by the river", energy: 5, mood: 12, blurb: "Watch the bridge, the joggers and one guy doing tai chi like it's a competition." },
+    ],
+  },
+  {
+    id: "rep-count", name: "Rep Count Fitness", emoji: "🏋️", category: "places", neighborhood: "Astoria",
+    at: [40.7640, -73.9146], depth: "scene", palette: ["#FF8A3D", "#E6E8EC", "#1F1B26"],
+    tags: ["gym", "astoria"],
+    lore: "Neon lights, loud music and mirrors on every wall, so you can watch yourself almost do a pull-up. Nobody here is related to any other gym, thank you for asking.",
+    actions: [
+      { id: "workout", kind: "visit", label: "Work out", price: 12, energy: 20, confidence: 6, mood: 2, blurb: "Leg day. You'll feel it on the stairs to your walk-up." },
+    ],
+  },
+  {
+    id: "astoria-blvd-station", name: "Astoria Blvd station", emoji: "🚇", category: "places", neighborhood: "Astoria",
+    at: [40.7702, -73.9180], depth: "scene", palette: ["#FFC21A", "#E6E8EC", "#1F1B26"],
+    tags: ["subway", "transit", "free", "astoria"],
+    lore: "An elevated platform with a view of everyone's laundry. The train is always \"two stops away.\" Rides across the city arrive with travel, coming soon.",
+    actions: [
+      { id: "platform", kind: "visit", label: "People-watch on the platform", energy: 2, mood: 2, blurb: "A man is eating a full rotisserie chicken. Respect." },
+    ],
+  },
+  {
+    id: "reel-queens", name: "Reel Queens Cinema", emoji: "🎬", category: "places", neighborhood: "Astoria",
+    at: [40.7605, -73.9196], depth: "scene", palette: ["#E0186F", "#FFE7C2", "#14111A"],
+    tags: ["cinema", "date_spot", "astoria"],
+    lore: "A restored single-screen movie palace with velvet seats and a popcorn machine older than your parents. Perfect for dates; the dark hides nervous faces.",
+    actions: [
+      { id: "movie", kind: "eat", label: "Movie and popcorn", price: 15, energy: -10, mood: 8, blurb: "Butter on the popcorn, butter on the seat, butter somehow on your phone." },
+    ],
+  },
+  {
+    id: "respawn-arena", name: "Respawn Arena", emoji: "🎮", category: "places", neighborhood: "Astoria",
+    at: [40.7708, -73.9105], depth: "scene", palette: ["#6B4FD8", "#9FD8C4", "#14111A"],
+    tags: ["games", "arena", "astoria"],
+    lore: "Rows of glowing rigs, a stage for tournaments and an energy-drink fridge that hums like a jet engine. Arcade Nerds call it home; everyone else calls it loud.",
+    actions: [
+      { id: "match", kind: "visit", label: "Play a ranked match", price: 10, energy: 15, confidence: 5, clout: 12, blurb: "You lose to a twelve-year-old. You win the rematch. Character arc." },
+    ],
   },
 ];
 
@@ -295,6 +448,7 @@ export interface ClubEvent {
 
 export const CLUB_EVENTS: ClubEvent[] = [
   { id: "neon-nights", name: "Neon Nights", placeId: "velvet-static", startHour: 22, hours: 5, entry: 80, clout: 60, confidence: 8, mood: 6, blurb: "Glow sticks, bad decisions, excellent lighting." },
+  { id: "bass-bath", name: "Bass Bath", placeId: "hellgate-hall", startHour: 21, hours: 5, entry: 70, clout: 50, confidence: 7, mood: 7, blurb: "Bass so heavy the train schedule adjusts around it." },
   { id: "golden-hour", name: "Golden Hour Day Party", placeId: "velvet-static", startHour: 15, hours: 4, entry: 50, clout: 40, confidence: 6, mood: 8, blurb: "A day party for people who can't commit to a night." },
   // Campus events at the two universities.
   { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 15, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },

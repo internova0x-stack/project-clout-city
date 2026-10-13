@@ -76,6 +76,10 @@ export const WAVE_1_PINS: PlacePin[] = [
 /** Until homes ship in v0.2, every player "lives" in Astoria. */
 export const DEFAULT_PLAYER_LOCATION: LatLng = [40.7745, -73.9050];
 
+/** v0.6: every player's map opens on the Astoria neighborhood (30th Ave, Steinway St, Ditmars Blvd). */
+export const ASTORIA_CENTER: LatLng = [40.7690, -73.9185];
+export const ASTORIA_ZOOM = 13.9;
+
 /** The camera's starting view: Queens, framed. */
 export const QUEENS_CENTER: LatLng = [40.718, -73.838];
 
