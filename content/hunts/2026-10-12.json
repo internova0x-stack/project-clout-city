@@ -1,0 +1,208 @@
+{
+  "week": "2026-10-12",
+  "id": "chardonnay-clutch",
+  "theme": "Chardonnay's Lost Clutch",
+  "intro": "Saturday night, Chardonnay Shade slipped out the back of Velvet Static with a mystery date in a hoodie, climbed into a car and climbed out on Ditmars without her clutch. By sunrise the eight things inside were all over Astoria, and every one of them points at a different celebrity. She wants them back before anybody works out who was in that back seat. Start with Sal at the deli: the driver came in at 4 AM, shaking.",
+  "places": ["ditmars-deli", "ditmars-library", "precinct-114-half", "respawn-arena", "velvet-static"],
+  "chatter": [
+    "Sneakerheads say {treasure} is worth more than a pair of The Ditmars Ones. Who it belongs to is worth more than both.",
+    "Chardonnay says there was no car, no date and no {treasure}. Chardonnay also can't keep a secret.",
+    "You're after {treasure}? Careful. Whoever was in that back seat wants it back too.",
+    "Three people told me who was in that car. Three different names. Maybe {treasure} settles it.",
+    "The back window rolled down for one second on Saturday. One second. Astoria hasn't slept since."
+  ],
+  "tracks": {
+    "bodega_drip": {
+      "treasure": "The Size-15 High-Top",
+      "emoji": "👟",
+      "lore": "One custom high-top, size 15, found on the floor of the back seat. Chardonnay wears a 7. Somebody in this city owns 400 pairs of sneakers and is currently, allegedly, missing one.",
+      "steps": [
+        { "say": "Driver walks in at 4 AM holding one giant sneaker like it's a bomb. Says 'I never saw nothing,' buys a chopped cheese, leaves the shoe. Size 15! I gave it to the quietest man in Astoria. He keeps things shut. Books, mostly." },
+        {
+          "say": "Shh. Yes, the shoe. It's been in the returns bin, and it is the loudest thing in this library. Before I say where it went, a question about your friend Sal.",
+          "question": { "q": "What's the name of the cat at Ditmars Deli & Dreams?", "choices": ["Hydrant", "Also Sal", "Chopped Cheese", "Big Sal"], "answer": 1 },
+          "then": "Also Sal. Correct. I did the proper thing and walked the shoe to the precinct's lost and found. The desk sergeant has a mug you'll want to read."
+        },
+        { "say": "Logged it, hon: 'one sneaker, enormous, smells like money.' Then the manager from the arena down the street, headset and all, said the stitching was 'too legendary for a shelf' and took it for 'authentication.' Go see Pixel. Bring a sense of humor." },
+        {
+          "say": "Authentic. Hand-stitched. There's a name on the tongue, and I covered it with tape because I'm a professional. Answer me this and I'll tell you who's got it now.",
+          "question": { "q": "Which Astoria pizza place has an eleven-year feud about anchovies?", "choices": ["The Neon Spoon", "Lucky Seven Deli", "Two Bros Who Fight Pizza", "Up on Thirty"], "answer": 2 },
+          "then": "Two Bros, yep. Chardonnay's people called and said bring it back to where Saturday started. Mags has it behind the bar at the warehouse club in Long Island City. Password's what the internet is calling it."
+        },
+        {
+          "say": "It's under the bar, next to the limes. Three men in hoodies have asked about it tonight. One of them was very tall and very late. Password, babe?",
+          "question": { "q": "What's the password?", "choices": ["The Ditmars Ones", "The Back-Seat Boot", "The Size-15 High-Top", "The Lucky Lace"], "answer": 2 },
+          "then": "The Size-15 High-Top. Don't peel the tape off the tongue. Okay, peel it a little. Then tell me if it says what I think it says."
+        }
+      ]
+    },
+    "thrift_store_icon": {
+      "treasure": "The Blurry Polaroid",
+      "emoji": "📷",
+      "lore": "One instant photo from the back seat: Chardonnay, mid-laugh, and next to her a person in a gray hoodie who is, unhelpfully, a blur. Experts disagree on who it is. The experts are Jojo and two guys at the deli.",
+      "steps": [
+        { "say": "Driver comes in at 4 AM, slaps a Polaroid on my counter. 'Found it in the back.' I look. Chardonnay Shade, laughing. Next to her, a blur in a hoodie. I gave it to the man who shushes people. He's good with old paper and better with secrets." },
+        {
+          "say": "I held it to the reading lamp for an hour. Still a blur. A very confident blur. Answer this before I tell you more.",
+          "question": { "q": "What's the name of the Engine 7 firehouse dog?", "choices": ["Sparky", "Hydrant", "Ladder", "Also Sal"], "answer": 1 },
+          "then": "Hydrant. Good. I filed the photo with the precinct's lost and found, as one does. Ask the desk sergeant. Admire the mug."
+        },
+        { "say": "Logged as 'one photo, one celebrity, one mystery.' Then Pixel from the arena said he could 'enhance' it on the big screen. Took it Tuesday. You know the place: glowing rigs, loud fridge, twelve-year-olds winning." },
+        {
+          "say": "I enhanced it. Now it's a bigger blur. But there's a ring in the corner of the frame, and that's all I'm saying. Quick one first.",
+          "question": { "q": "Which Astoria club has a DJ booth made from a subway car?", "choices": ["Velvet Static", "Low Light Lounge", "Hellgate Hall", "Respawn Arena"], "answer": 2 },
+          "then": "Hellgate Hall. Correct. Mags asked for the photo back for Chardonnay. She's behind the bar at the warehouse club in Long Island City, where it all started. Password's the photo's name."
+        },
+        {
+          "say": "I've stared at this blur all week. I know that hoodie. I've served that hoodie. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Grainy Selfie", "The Blurry Polaroid", "The Back-Seat Snap", "The Lost Negative"], "answer": 1 },
+          "then": "The Blurry Polaroid. Keep it out of the sun. And if the blur ever comes into focus, you call me first. Not Chardonnay. Me."
+        }
+      ]
+    },
+    "midtown_finance": {
+      "treasure": "The Receipt for Two",
+      "emoji": "🧾",
+      "lore": "A dinner receipt from the rooftop above 30th Avenue: two octopus, one dessert, two spoons and a 40% tip. Chardonnay has never tipped 40% in her life. Somebody else paid, and they signed it.",
+      "steps": [
+        { "say": "Driver leaves a receipt on my counter at 4 AM. Two octopus, one dessert, two spoons, rooftop over 30th Avenue, forty percent tip. Nobody in this neighborhood tips forty percent. I gave it to the librarian. He called it 'evidence of literacy.'" },
+        {
+          "say": "The signature is illegible, which is itself a clue. Wealthy people never learned cursive. Let's check your bearings first.",
+          "question": { "q": "Which Astoria restaurant sits on a rooftop above 30th Avenue?", "choices": ["Altitude 718 Rooftop", "Up on Thirty", "The Neon Spoon", "Grind & Gossip Café"], "answer": 1 },
+          "then": "Up on Thirty, as the receipt says. I turned it in at the precinct's lost and found. Proper procedure. Read the sergeant's mug while you're there; it's on the test."
+        },
+        { "say": "Logged: 'one receipt, suspicious generosity.' Then a guy in a headset from the arena down the street said the card on it was his 'tournament sponsor.' Took it to 'verify the account.' Go see Pixel. Did you read my mug? You should read my mug." },
+        {
+          "say": "Not our sponsor. Our sponsor tips zero. But I know whose card it is now, and I'm not legally allowed to look this happy about it. You read the mug?",
+          "question": { "q": "What does the desk sergeant's mug at the 114½ Precinct say?", "choices": ["World's Best Cop", "World's Okayest Cop", "Ask Me About Parking", "Queens' Finest"], "answer": 1 },
+          "then": "Okayest. Iconic. Mags has the receipt now, behind the bar at the warehouse club in Long Island City where Saturday started. Password's what everybody's calling it."
+        },
+        {
+          "say": "Chardonnay wants this receipt shredded. I want it framed. You get to decide. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Receipt for Two", "The Tab of Shame", "The Dinner Bill", "The Tip Jar Leak"], "answer": 0 },
+          "then": "The Receipt for Two. Read the signature with your head tilted. Then tell me it's not who I think it is. Actually, don't. I'm pitching it as a spin-off."
+        }
+      ]
+    },
+    "night_owl_goth": {
+      "treasure": "The Smudged Guest List",
+      "emoji": "🖤",
+      "lore": "Velvet Static's VIP list from Saturday, folded into the clutch. One name is scribbled out in black lipstick. Hold it up to a candle and you can almost read the first letter. Almost.",
+      "steps": [
+        { "say": "Driver comes in at 4 AM with a folded list. VIP names, one blacked out in lipstick. He says 'I didn't read it' like a man who read it. I gave it to the librarian. If anyone can read a smudge, it's him." },
+        {
+          "say": "I tried a candle. I tried a magnifier. I tried asking it nicely. The smudge holds. Answer this, quietly.",
+          "question": { "q": "Which Astoria place is a restored single-screen movie palace?", "choices": ["Reel Queens Cinema", "Hellgate Hall", "Harmony Community Chapel", "The Neon Spoon"], "answer": 0 },
+          "then": "Reel Queens. Correct. I handed the list in at the precinct's lost and found. The desk sergeant can't read lipstick either, but she tried for an hour."
+        },
+        { "say": "Logged: 'one guest list, one name nobody's supposed to know.' Then Pixel from the arena said his blacklight would read it. He's down the street, with the glowing rigs. Take him the gossip, he'll take your time." },
+        {
+          "say": "Blacklight worked. One letter. I'm not saying which letter. Okay, it's a consonant. Prove you know your nights out.",
+          "question": { "q": "Which Astoria lounge has velvet booths and jazz on vinyl?", "choices": ["Low Light Lounge", "Hellgate Hall", "Velvet Static", "Up on Thirty"], "answer": 0 },
+          "then": "Low Light. Right. Mags wants the list back where it came from: behind the bar at the warehouse club in Long Island City. Password's what we're calling it."
+        },
+        {
+          "say": "That's my handwriting on the list, by the way. I know every name on it. Including the smudge. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Black Lipstick", "The Velvet Rope", "The VIP Mystery", "The Smudged Guest List"], "answer": 3 },
+          "then": "The Smudged Guest List. Keep it in the dark. The name only shows up under the right light, and so does the person."
+        }
+      ]
+    },
+    "pilates_princess": {
+      "treasure": "The Monogrammed Scrunchie",
+      "emoji": "🎀",
+      "lore": "Lavender silk, monogrammed with a single 'L.' Chardonnay doesn't wear lavender, and nothing she owns starts with L. One pop star's fan account has posted about it 140 times.",
+      "steps": [
+        { "say": "Driver comes in at 4 AM holding a scrunchie. Lavender, silk, a little 'L' stitched on. Not Chardonnay's. Chardonnay wears a claw clip, everybody knows that. I gave it to the librarian. He keeps things tidy. Tidier than me." },
+        {
+          "say": "It has been on my desk all week, and I've never had better posture. Coincidence. Answer this, please, sitting up straight.",
+          "question": { "q": "Which Astoria gym has neon lights and mirrors on every wall?", "choices": ["Thread Count Boutique", "Rep Count Fitness", "Respawn Arena", "Triborough Works"], "answer": 1 },
+          "then": "Rep Count. Correct. I took the scrunchie to the precinct's lost and found. The desk sergeant logs everything, even hair accessories."
+        },
+        { "say": "Logged: 'one scrunchie, lavender, initial L, very suspicious.' Then Pixel from the arena down the street took it. Said his pro players need 'focus accessories.' Go get it before somebody games in it." },
+        {
+          "say": "Nobody gamed in it. Okay, one guy. He won. Coincidence. Before I tell you who's got it, one about the neighborhood.",
+          "question": { "q": "Which Astoria supermarket sells forty kinds of feta?", "choices": ["Ditmars Deli & Dreams", "Steinway Fresh Mart", "Lucky Seven Deli", "Thread Count Boutique"], "answer": 1 },
+          "then": "Steinway Fresh. Right. Mags took it back for Chardonnay. Behind the bar at the warehouse club in Long Island City, where Saturday began. Password's the scrunchie's name."
+        },
+        {
+          "say": "I know exactly whose this is. She sat in my booth for an hour and said one word. Password, babe?",
+          "question": { "q": "What's the password?", "choices": ["The Lavender Loop", "The Monogrammed Scrunchie", "The Silk Secret", "The L Word"], "answer": 1 },
+          "then": "The Monogrammed Scrunchie. Wear it high. Wear it proud. And if anybody asks what the L stands for, say 'lunges.'"
+        }
+      ]
+    },
+    "startup_founder": {
+      "treasure": "The Burner Phone",
+      "emoji": "📱",
+      "lore": "A cheap flip phone with exactly one contact, saved as 'DO NOT ANSWER,' and 47 missed calls from it. The battery is at 3%. Half of Astoria wants to charge it. The other half is scared to.",
+      "steps": [
+        { "say": "Driver comes in at 4 AM with a flip phone buzzing in his hand. 'DO NOT ANSWER' calling. He didn't answer. I didn't answer. I gave it to the librarian, because his building has the strictest no-phones rule in Queens." },
+        {
+          "say": "It buzzed in the quiet room eleven times. I have never shushed an object before. Answer this before it buzzes again.",
+          "question": { "q": "Which Astoria diner is chrome and serves breakfast all day?", "choices": ["Up on Thirty", "The Neon Spoon", "Grind & Gossip Café", "Two Bros Who Fight Pizza"], "answer": 1 },
+          "then": "The Neon Spoon. Correct. I turned it in at the precinct's lost and found. If anyone can ignore a ringing phone, it's a desk sergeant."
+        },
+        { "say": "Logged: 'one burner, 47 missed calls, one contact, zero chill.' Then Pixel from the arena said he had the right charger. Took it Tuesday. Down the street, the place with the jet-engine fridge. Ask him. Don't answer the phone." },
+        {
+          "say": "I charged it to 4%. It rang. Contact: DO NOT ANSWER. I didn't. I'm not an idiot. I'm a manager. One question first.",
+          "question": { "q": "Which Astoria coworking space has a ping-pong table nobody uses?", "choices": ["Triborough Works", "Skybridge Tower", "Grind & Gossip Café", "Ditmars Free Library"], "answer": 0 },
+          "then": "Triborough Works, yep. Mags took the phone for Chardonnay. Behind the bar at the warehouse club in Long Island City, where it all started. Password's what it is."
+        },
+        {
+          "say": "It rang during last call. The whole bar went quiet. I almost picked up. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Flip Phone", "The Burner Phone", "The Missed Call", "The Secret Line"], "answer": 1 },
+          "then": "The Burner Phone. It's yours. If it rings, you didn't get it from me. And if you answer it, I want to know who's on the other end."
+        }
+      ]
+    },
+    "influencer_soft_glam": {
+      "treasure": "The Velvet Ring Box",
+      "emoji": "💍",
+      "lore": "A tiny velvet ring box, still shut, with a sticky note on the lid that says 'Not yet.' Chardonnay swears it's earrings. Chardonnay has never kept a secret in her life, so nobody believes her.",
+      "steps": [
+        { "say": "Driver comes in at 4 AM, puts a little velvet box on my counter and backs away from it. Sticky note: 'Not yet.' I did not open it. I'm a deli man, not an animal. I gave it to the librarian. He knows how to keep a lid on things." },
+        {
+          "say": "It sat on my desk. I did not open it either. I have also never wanted to open anything more. The lost and found is next; who runs it?",
+          "question": { "q": "Who is the desk sergeant at the 114½ Precinct?", "choices": ["Captain Rosa Díaz-Moore", "Sgt. Bev Kowalski", "Mags", "Jojo"], "answer": 1 },
+          "then": "Sgt. Bev. Correct. I handed the box in to her myself. She said 'oh, honey' and put it in the drawer. Go see her."
+        },
+        { "say": "Logged: 'one ring box, closed, sticky note, oh honey.' Then Pixel from the arena down the street took it. Said he'd 'keep it safe.' He's got a big glass case for trophies. I worry about that man." },
+        {
+          "say": "Put it in the trophy case, next to the Friday tournament cup. Both shiny, both nobody's yet. Who takes the photos at the gantries?",
+          "question": { "q": "Who is the wedding photographer at Gantry Plaza?", "choices": ["Mags", "Inez", "Tiff", "Walt"], "answer": 1 },
+          "then": "Inez. She says nobody's booked her for a celebrity wedding. Yet. Mags took the box for Chardonnay, behind the bar at the warehouse club in Long Island City. Password's what it is."
+        },
+        {
+          "say": "I held it up to the light. The box is empty or it's not, and I'll never tell. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Secret Sparkle", "The Engagement Clutch", "The Velvet Ring Box", "The Not-Yet Note"], "answer": 2 },
+          "then": "The Velvet Ring Box. Keep the note on. 'Not yet' means somebody's planning something, and I need to be invited."
+        }
+      ]
+    },
+    "arcade_nerd": {
+      "treasure": "The Paused Handheld",
+      "emoji": "🎮",
+      "lore": "A handheld console paused on level 99, with the save file named 'CC_CHAT.' Somebody in that back seat was gaming during a date, and one very loud streamer went offline for 47 minutes that night.",
+      "steps": [
+        { "say": "Driver comes in at 4 AM holding a handheld game, still paused, still glowing. 'Somebody left it running in the back.' Level 99! I gave it to the librarian. He's been lending out game manuals since before you were born." },
+        {
+          "say": "I have not unpaused it. Some things you don't touch: first editions and somebody else's level 99. Answer me this first.",
+          "question": { "q": "What's the name of the Astoria firehouse?", "choices": ["Engine 114", "Engine 7 Firehouse", "Hydrant House", "Ladder 30"], "answer": 1 },
+          "then": "Engine 7. Correct. I took the handheld to the precinct's lost and found, where it beeped through the whole shift."
+        },
+        { "say": "Logged: 'one game, paused, will not stop beeping.' Then Pixel from the arena down the street ran in and said 'that's a level 99 save, do NOT touch it.' He took it. Ask him what the save file's called." },
+        {
+          "say": "Save file: CC_CHAT. Draw your own conclusions. I've drawn mine and I need to sit down. Quick one about another Queens legend.",
+          "question": { "q": "Who's the owner at Lucky Star Lotto who has never bought a ticket?", "choices": ["Benny Fortuna", "Walt", "Gus", "Sal"], "answer": 0 },
+          "then": "Benny. Never bought one. Respect. Mags took the handheld back for Chardonnay, behind the bar at the warehouse club in Long Island City. Password's the treasure's name."
+        },
+        {
+          "say": "It's been paused under my bar for days. Somebody keeps calling and asking me not to unpause it. Password?",
+          "question": { "q": "What's the password?", "choices": ["The Level 99 Save", "The Back-Seat Boss", "The Paused Handheld", "Game Over"], "answer": 2 },
+          "then": "The Paused Handheld. Don't unpause it. Or do, and find out what happens at level 100. Chat, chat, CHAT is going to want to know."
+        }
+      ]
+    }
+  }
+}
