@@ -863,7 +863,9 @@ export default function Room3D(props: Room3DProps) {
                       onPointerCancel={stopHold}
                       onKeyDown={(e) => { if (sel && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nudge(k); } }}
                     >
-                      {ARROWS[k].glyph}
+                      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style={{ transform: `rotate(${ARROWS[k].turn}deg)` }}>
+                        <path d="M12 20V5M5.5 11.5 12 5l6.5 6.5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </button>
                   ))}
                 </div>
@@ -896,10 +898,11 @@ export default function Room3D(props: Room3DProps) {
 const FLOOR_DIRS: [number, number][] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 /** The arranging arrows, clockwise from up (the order floorStep expects). */
 const ARROWS = [
-  { name: "up", glyph: "↑" },
-  { name: "right", glyph: "→" },
-  { name: "down", glyph: "↓" },
-  { name: "left", glyph: "←" },
+  // One drawn arrow turned four ways (#16, owner Oct 14): text arrows came out in different sizes and greys on iPhone.
+  { name: "up", turn: 0 },
+  { name: "right", turn: 90 },
+  { name: "down", turn: 180 },
+  { name: "left", turn: 270 },
 ] as const;
 /** The order the arrows sit in the bar (owner, Oct 14): up, right, left, down. */
 const ARROW_ORDER = [0, 1, 3, 2];

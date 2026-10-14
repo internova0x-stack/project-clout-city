@@ -546,7 +546,7 @@ export function InteriorScene({
       <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
         <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="display-sm">{place.emoji} {place.name}</span>
-          <span className="meta">{open ? "Hide" : "All actions"}</span>
+          <span className="panel-toggle">{open ? "Hide" : "All actions"}</span>
         </button>
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />

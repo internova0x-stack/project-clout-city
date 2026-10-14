@@ -74,14 +74,14 @@ export function HuntTab({ state, style, busy, onJoin, onOpenPlace }: {
               return (
                 <div className="hunt-step">
                   <span className="hunt-dot now" aria-hidden="true">{h.step + 1}</span>
-                  <div className="stack-8">
+                  <div className="hunt-step-body">
                     <span className="body">
                       {asked && h.question
                         ? h.question.retryAt ? "Wrong answer. They'll ask again in a few minutes." : "They asked you a question. Go back and answer it."
                         : h.step === 0 ? `Start with ${who(h.firstPlace)}. Stop in, then tap ${regularAt(h.firstPlace)?.name.split(" ")[0] ?? "them"}.`
                         : "Follow the last clue. Stop in at the place, then tap the regular there."}
                     </span>
-                    {placeId && <button className="btn btn-secondary btn-sm" style={{ alignSelf: "start" }} onClick={() => onOpenPlace(placeId)}>Open {placeById(placeId)?.name}</button>}
+                    {placeId && <button className="btn btn-secondary btn-sm hunt-open" onClick={() => onOpenPlace(placeId)}>📍 {placeById(placeId)?.name}</button>}
                   </div>
                 </div>
               );

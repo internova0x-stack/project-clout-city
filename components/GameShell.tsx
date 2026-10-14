@@ -55,7 +55,6 @@ import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
 import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
-import { LocateIcon } from "./icons";
 import { ProfileSheet } from "./game/ProfileSheet";
 import { statTips } from "@/lib/recent";
 import type { PlayerCard } from "@/lib/chat";
@@ -1106,6 +1105,7 @@ export function GameShell({
         <>
           <CityMap
             ref={mapRef}
+            rightInset={72}
             pins={cityOn ? cityPins : WAVE_1_PINS}
             vehicles={cityOn}
             player={{ at: cityOn ? myPos : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
@@ -1115,14 +1115,6 @@ export function GameShell({
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}
           />
-          <button className="icon-round map-locate glass-hud" onClick={() => mapRef.current?.locatePlayer()} aria-label="Go to my location">
-            <LocateIcon size={20} />
-          </button>
-          {atPlaceInfo && !trip && (
-            <button className="glass-hud at-chip" onClick={() => setPlace(atPlaceInfo)}>
-              📍 At {atPlaceInfo.name}
-            </button>
-          )}
           {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} />}
         </>
       )}
@@ -1132,6 +1124,8 @@ export function GameShell({
         tips={statSuggestions}
         onTip={(id) => (id === "gigs" ? setPhone({ open: true, app: "gigs" }) : openPlace(id))}
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
+        onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
+        atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
         time={clock.time}
         tab={tab}
         onAction={onAction}
