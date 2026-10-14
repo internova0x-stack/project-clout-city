@@ -525,7 +525,8 @@ export function LocationSheet({
                   🌙 Make it a date
                 </button>
               )}
-              {handlers.crew && crewActivities(place).length > 0 && (
+              {/* #19: no crew outing where the bouncer would turn you away. */}
+              {handlers.crew && crewActivities(place).length > 0 && (place.club?.doorClout ?? 0) <= state.player.clout && (
                 <button className="btn btn-secondary social-btn crew-btn" onClick={() => handlers.crew!.onBring(place)}>
                   👯 Bring the crew
                 </button>
