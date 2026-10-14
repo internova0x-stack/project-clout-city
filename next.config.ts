@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // its safety check). Server only: none of these reach a browser.
   outputFileTracingIncludes: {
     "/studio": ["./content/hunts/*.json", "./content/news/*.json", "./content/gossip/*.json", "./content/stories/*.json"],
-    "/home": ["./content/gossip/*.json", "./content/stories/*.json"],
+    "/home": ["./content/gossip/*.json", "./content/stories/*.json", "./content/hunts/*.json", "./content/news/*.json"],
   },
 };
 

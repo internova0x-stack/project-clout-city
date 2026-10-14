@@ -17,7 +17,8 @@ test("every hunt file in content/hunts/ is valid and named after its Monday", ()
   }
 });
 
-const hunt = load(files[0]);
+// The worked example (the Auntie Vee hunt); every file is still checked below.
+const hunt = load("2026-10-19.json");
 const problems = (f: unknown, o = {}) => { const r = validateHunt(f, o); return r.ok ? "" : r.problems.join("\n"); };
 const clone = () => structuredClone(hunt);
 

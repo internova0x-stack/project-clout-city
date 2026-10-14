@@ -1,3 +1,5 @@
+import { CLUB_EVENTS } from "./city.ts";
+
 // Walkable 3D rooms (Design guide update 7, replacing the 2.5D backdrops in C38):
 // room sizes, furniture layouts, what each piece of furniture does when tapped,
 // and the walking grid. Pure data and math so it can be unit tested; the three.js
@@ -34,6 +36,8 @@ export type ItemUse =
   | { kind: "cook" }
   /** v0.10 the lotto counter: the scratch-card games. */
   | { kind: "lotto" }
+  /** v0.11 the gigs board (offices): opens today's gigs in the Phone. */
+  | { kind: "gigs" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
   | { kind: "shop"; category: "fashion" | "cars" | "houses" | "luxury" | "makeup" };
 
@@ -174,7 +178,14 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto", RoomTemplate> = {
+export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza";
+
+// v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
+// actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
+// gigs board and the delivery hub alike.
+const MAIN = (n: number): ItemUse => ({ kind: "action", actionId: `*${n}` });
+
+export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -359,7 +370,130 @@ export const PLACE_TEMPLATES: Record<"club" | "cafe" | "counter" | "lounge" | "s
       { x: -3.6, z: -1.6, facing: 2.2 },
     ],
   },
+  // ---- v0.11 shared templates: recolored per place, with its own sign and actions ----
+  office: {
+    id: "office", w: 7.2, d: 6.2, wall: "#E9EEF2", wallAccent: "#5B7FA6", floor: "#C9C3B8", floorKind: "concrete", window: true,
+    items: [
+      { id: "reception", kind: "storeCounter", x: -1.6, z: -2.4, rot: 0, use: MAIN(0), label: "*" },
+      { id: "desk-1", kind: "desk", x: 1.6, z: -2.5, rot: 0 },
+      { id: "chair-1", kind: "chair", x: 1.6, z: -1.75, rot: 2 },
+      { id: "desk-2", kind: "desk", x: 1.9, z: 0.4, rot: 3, use: MAIN(1), label: "*" },
+      { id: "chair-2", kind: "chair", x: 1.1, z: 0.4, rot: 1 },
+      { id: "desk-3", kind: "desk", x: -2.0, z: 0.6, rot: 1 },
+      { id: "chair-3", kind: "chair", x: -1.2, z: 0.6, rot: 3 },
+      { id: "shelf", kind: "bookshelf", x: -3.35, z: -1.4, rot: 1 },
+      { id: "plant-1", kind: "plant", x: 3.2, z: -2.6, rot: 0 },
+      { id: "plant-2", kind: "plant", x: -3.2, z: 2.6, rot: 0 },
+      { id: "sofa", kind: "sofa", x: 2.1, z: 2.5, rot: 2, color: "#5B7FA6", use: { kind: "sit" }, label: "Sit" },
+    ],
+    spawn: [-0.4, 2.5],
+    npcs: [{ x: -1.6, z: -2.95, facing: 0 }, { x: 1.6, z: -1.75, facing: 3.14, seated: true }, { x: -1.2, z: 0.6, facing: -1.57, seated: true }],
+  },
+  // Civic places (library, precinct, firehouse, chapel, lobbies, cinema): a front desk and rows of benches.
+  civic: {
+    id: "civic", w: 7.6, d: 6.6, wall: "#EFE7D8", wallAccent: "#7A6A55", floor: "#B39C7C", floorKind: "wood", window: true,
+    items: [
+      { id: "desk", kind: "storeCounter", x: 0.0, z: -2.6, rot: 0, use: MAIN(0), label: "*" },
+      { id: "shelf-1", kind: "bookshelf", x: -2.6, z: -3.05, rot: 0 },
+      { id: "shelf-2", kind: "bookshelf", x: 2.6, z: -3.05, rot: 0 },
+      { id: "bench-1", kind: "bench", x: -1.6, z: -0.6, rot: 2, use: MAIN(1), label: "*" },
+      { id: "bench-2", kind: "bench", x: 1.6, z: -0.6, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "bench-3", kind: "bench", x: -1.6, z: 0.9, rot: 2 },
+      { id: "bench-4", kind: "bench", x: 1.6, z: 0.9, rot: 2 },
+      { id: "plant-1", kind: "plant", x: -3.5, z: 2.9, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 3.5, z: 2.9, rot: 0 },
+      { id: "lamp", kind: "floorLamp", x: 3.5, z: -1.4, rot: 0 },
+    ],
+    spawn: [0.0, 2.7],
+    npcs: [{ x: 0.0, z: -3.1, facing: 0 }, { x: -1.6, z: 0.95, facing: 3.14, seated: true }, { x: 2.4, z: 2.0, facing: 2.4 }],
+  },
+  // Gyms: mats, mirrors along the back and a bench to rest on.
+  gym: {
+    id: "gym", w: 7.2, d: 6.2, wall: "#E4E6EA", wallAccent: "#D93A2F", floor: "#3A3A42", floorKind: "concrete", window: true,
+    items: [
+      { id: "mat-1", kind: "rug", x: -1.5, z: -0.9, rot: 0, color: "#D93A2F", use: MAIN(0), label: "*" },
+      { id: "mat-2", kind: "rug", x: 1.5, z: -0.9, rot: 0, color: "#2E2E36" },
+      { id: "mirror-1", kind: "mirror", x: -1.6, z: -2.9, rot: 0 },
+      { id: "mirror-2", kind: "mirror", x: 0.0, z: -2.9, rot: 0 },
+      { id: "mirror-3", kind: "mirror", x: 1.6, z: -2.9, rot: 0 },
+      { id: "bench", kind: "bench", x: -2.4, z: 1.6, rot: 1, use: { kind: "sit" }, label: "Catch your breath" },
+      { id: "speaker", kind: "speaker", x: 3.1, z: -2.6, rot: 0 },
+      { id: "counter", kind: "storeCounter", x: 2.2, z: 2.3, rot: 2, use: MAIN(1), label: "*" },
+      { id: "plant", kind: "plant", x: -3.2, z: -2.7, rot: 0 },
+    ],
+    spawn: [0.0, 2.5],
+    npcs: [{ x: -1.2, z: -1.2, facing: 3.14 }, { x: 1.6, z: -0.6, facing: 0.6 }, { x: 2.2, z: 2.8, facing: 3.14 }],
+  },
+  // Parks and piers: a plaza with trees, benches and a cart (smaller than the monument plazas).
+  plaza: {
+    id: "plaza", w: 14.0, d: 12.0, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#D4CBB8", floorKind: "tile",
+    outdoor: { height: 4.5, edge: "#7FA36A", view: [10, 9] },
+    items: [
+      { id: "lawn", kind: "rug", x: -3.0, z: -1.6, rot: 0, color: "#7CC86B", use: MAIN(0), label: "*" },
+      { id: "lawn-2", kind: "rug", x: -3.0, z: 0.2, rot: 0, color: "#7CC86B" },
+      { id: "bench-1", kind: "bench", x: 2.4, z: -2.6, rot: 2, use: MAIN(1), label: "*" },
+      { id: "bench-2", kind: "bench", x: 3.6, z: 1.6, rot: 3, use: { kind: "sit" }, label: "Sit" },
+      { id: "cart", kind: "foodCart", x: -4.6, z: 3.4, rot: 1, color: "#F2A900" },
+      { id: "lamp-1", kind: "lamppost", x: -1.0, z: -4.6, rot: 0 },
+      { id: "lamp-2", kind: "lamppost", x: 5.2, z: -0.6, rot: 0 },
+      { id: "tree-1", kind: "tree", x: -6.0, z: -5.0, rot: 0 },
+      { id: "tree-2", kind: "tree", x: 6.0, z: -5.0, rot: 0 },
+      { id: "tree-3", kind: "tree", x: 6.0, z: 4.6, rot: 0 },
+      { id: "tree-4", kind: "tree", x: 0.6, z: -5.2, rot: 0 },
+      { id: "bed-1", kind: "plant", x: -6.2, z: 1.0, rot: 0 },
+    ],
+    spawn: [0.4, 4.4],
+    npcs: [{ x: -2.4, z: -1.0, facing: 0.8, seated: true }, { x: 2.4, z: -2.0, facing: 3.14 }, { x: 4.4, z: -2.6, facing: 2.2 }, { x: -1.0, z: 1.8, facing: 1.2 }],
+  },
 };
+
+/** The bits of a place a room needs (lib/city.ts Place). */
+export interface RoomPlace {
+  id: string;
+  template?: string;
+  depth?: string;
+  palette?: string[];
+  opensShop?: string;
+  actions: { id: string; label: string; kind: string }[];
+}
+
+/**
+ * v0.11: the room for a place, or null (a subway station: map label and lore). Shared templates take
+ * the place's own actions: placeholders ("*0", "*1") and any action id the place doesn't have are
+ * given its actions in order, labelled with their names; items left over just sit there. Events,
+ * the gigs board and Shop racks follow the place. Places that used to be scene cards are recolored
+ * with their palette.
+ */
+export function placeRoom(place: RoomPlace & { tags?: string[] }): RoomTemplate | null {
+  // Club nights, campus events and exclusive parties are held here; elsewhere the dance floor is just a floor.
+  const hasEvents = CLUB_EVENTS.some((e) => e.placeId === place.id) || !!place.tags?.includes("exclusive_venue");
+  const base = place.template && place.template !== "apartment" ? PLACE_TEMPLATES[place.template as PlaceTemplateId] : undefined;
+  if (!base) return null;
+  const ids = new Set(place.actions.map((a) => a.id));
+  const free = place.actions.filter((a) => !base.items.some((i) => i.use?.kind === "action" && i.use.actionId === a.id));
+  const take = (n?: number) => {
+    const a = n !== undefined && free[n] && !used.has(free[n].id) ? free[n] : free.find((x) => !used.has(x.id));
+    if (a) used.add(a.id);
+    return a;
+  };
+  const used = new Set<string>();
+  const items = base.items.map((it): RoomItem => {
+    const u = it.use;
+    if (u?.kind === "action" && !ids.has(u.actionId)) {
+      const want = u.actionId.startsWith("*") ? Number(u.actionId.slice(1)) : undefined;
+      const a = take(want);
+      if (!a) return { ...it, use: undefined, label: undefined };
+      return { ...it, use: a.kind === "gigs" ? { kind: "gigs" } : { kind: "action", actionId: a.id }, label: a.label };
+    }
+    if (u?.kind === "events" && !hasEvents) return { ...it, use: undefined, label: undefined };
+    // A shared room in a place that used to be a scene card: its actions keep the place's own names.
+    if (u?.kind === "action" && place.depth === "scene") return { ...it, label: place.actions.find((a) => a.id === u.actionId)?.label ?? it.label };
+    if (u?.kind === "shop" && place.opensShop && place.opensShop !== u.category) return { ...it, use: { kind: "shop", category: place.opensShop as Extract<ItemUse, { kind: "shop" }>["category"] } };
+    return it;
+  });
+  const accent = place.depth === "scene" && place.palette?.[0];
+  return { ...base, id: `${base.id}:${place.id}`, items, ...(accent ? { wallAccent: accent } : {}) };
+}
 
 // ---------------------------------------------------------------------------
 // Layout and geometry helpers

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { PLACES } from "../lib/city.ts";
 import { ECONOMY } from "../lib/economy.ts";
 import {
-  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, findPath, makeGrid, placementOk, toLayout, useSpot, type RoomTemplate,
+  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
 } from "../lib/rooms.ts";
 
 const all: RoomTemplate[] = [...Object.values(HOME_TEMPLATES), ...Object.values(PLACE_TEMPLATES)];
@@ -30,6 +30,22 @@ test("room hotspots point at real place actions", () => {
     for (const i of PLACE_TEMPLATES[tpl as keyof typeof byTemplate].items) {
       if (i.use?.kind === "action") assert.ok(place.actions.some((a) => a.id === (i.use as { actionId: string }).actionId), `${tpl}/${i.id}`);
     }
+  }
+});
+
+test("v0.11: every place but subway stations can be entered, and its room uses its own actions", () => {
+  for (const p of PLACES) {
+    const room = placeRoom(p);
+    if (p.tags.includes("subway")) { assert.equal(room, null, `${p.id}: subway stations stay a map label`); continue; }
+    assert.ok(room, `${p.id} has a room`);
+    const uses = room!.items.filter((i) => i.use?.kind === "action" || i.use?.kind === "gigs");
+    for (const i of uses) {
+      assert.ok(i.label && !i.label.includes("*"), `${p.id}/${i.id} is labelled`);
+      if (i.use!.kind === "action") assert.ok(p.actions.some((a) => a.id === (i.use as { actionId: string }).actionId), `${p.id}/${i.id} is a real action`);
+    }
+    // Something in the room does the place's main thing (rooms built for one place keep their own hotspots).
+    const main = p.actions[0];
+    assert.ok(uses.some((i) => (i.use!.kind === "gigs" && main.kind === "gigs") || (i.use as { actionId?: string }).actionId === main.id) || p.depth === "full", `${p.id}: ${main.id} is in the room`);
   }
 });
 

@@ -215,9 +215,12 @@ a { color:inherit; }
 .under-hud { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); left:12px; display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
 
 /* Side column (C3) */
-.side-col { position:absolute; z-index:15; right:12px; top:50%; transform:translateY(-60%); display:flex; flex-direction:column; gap:8px; padding:6px; border-radius:var(--r-pill); box-shadow:var(--elev-2); }
-.side-btn { position:relative; width:44px; height:44px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:var(--text-on-dark); }
-.side-btn:active { background:rgba(255,246,224,.1); }
+/* v0.11 (owner, Oct 14): just above the bottom bar, TikTok-style: separate round buttons with labels. */
+.side-col { position:absolute; z-index:15; right:10px; bottom:calc(90px + var(--safe-bottom)); display:flex; flex-direction:column; align-items:center; gap:8px; }
+.side-btn { position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--text-1); }
+.side-ico { position:relative; width:42px; height:42px; border-radius:50%; display:grid; place-items:center; box-shadow:var(--elev-2); transition:transform .12s ease; }
+.side-btn:active .side-ico { transform:scale(.92); }
+.side-lbl { font-size:10.5px; font-weight:700; line-height:1; letter-spacing:.01em; color:var(--text-1); text-shadow:0 0 3px rgba(255,255,255,.95), 0 0 8px rgba(255,255,255,.8); }
 
 /* Stats panel (C4) */
 .stats { position:absolute; z-index:15; left:12px; bottom:calc(88px + var(--safe-bottom)); width:150px; border-radius:var(--r-lg); padding:12px; box-shadow:var(--elev-2); }
@@ -256,7 +259,8 @@ a { color:inherit; }
 .player-marker { position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; border:3px solid var(--taxi-400); background:var(--night-700);
   display:grid; place-items:center; font-size:14px; box-shadow:0 0 0 0 rgba(255,194,26,.6); animation:marker-pulse 2s ease-out infinite; }
 @keyframes marker-pulse { 0% { box-shadow:0 0 0 0 rgba(255,194,26,.55); } 100% { box-shadow:0 0 0 16px rgba(255,194,26,0); } }
-.map-locate { position:absolute; z-index:16; right:12px; bottom:calc(92px + var(--safe-bottom)); width:44px; height:44px; }
+/* v0.11: the side buttons sit above the bottom bar on the right, so these move to the left, above the stats. */
+.map-locate { position:absolute; z-index:16; left:12px; bottom:calc(160px + var(--safe-bottom)); width:44px; height:44px; }
 .map-zoom-hint { position:absolute; z-index:14; left:50%; transform:translateX(-50%); bottom:calc(92px + var(--safe-bottom)); }
 
 /* ---------- Stage (avatar creator) ---------- */
@@ -306,7 +310,7 @@ a { color:inherit; }
 .map-canvas .maplibregl-canvas { outline:none; }
 .map-cluster { width:32px; height:32px; border-radius:50%; background:var(--night-900); color:var(--text-on-dark); border:2px solid var(--taxi-400);
   display:grid; place-items:center; font-size:16px; box-shadow:var(--elev-2); }
-.map-root .maplibregl-ctrl-bottom-right { bottom:calc(140px + var(--safe-bottom)); right:8px; }
+.map-root .maplibregl-ctrl-bottom-right { bottom:calc(212px + var(--safe-bottom)); right:auto; left:8px; }
 .map-root .maplibregl-ctrl-attrib { font-size:10px; }
 .map-root .maplibregl-ctrl-attrib.maplibregl-compact { background:rgba(255,250,240,.7); }
 
@@ -420,8 +424,6 @@ a { color:inherit; }
 .hud.glass-hud .hud-clout .hud-number { color:var(--text-1); }
 .hud.glass-hud .pin-dot, .glass-hud .pin-dot { box-shadow:0 0 0 2px #fff; }
 .pill-glass.glass-hud, .pill-status.glass-hud { color:var(--text-1); }
-.side-col.glass-hud .side-btn { color:var(--text-1); }
-.side-col.glass-hud .side-btn:active { background:rgba(23,20,28,.06); }
 .stats.glass-hud .stat-row .label { color:var(--text-1); }
 .stats.glass-hud .stat-track { background:rgba(23,20,28,.1); }
 .stats.glass-hud .stats-toggle { color:var(--text-2); }
@@ -592,21 +594,14 @@ a { color:inherit; }
 .room-chip { position:absolute; left:0; top:0; pointer-events:auto; height:30px; padding:0 12px; border-radius:var(--r-pill);
   font-size:13px; font-weight:600; white-space:nowrap; box-shadow:var(--elev-2); }
 .room-chip::after { content:""; position:absolute; left:50%; bottom:-5px; width:8px; height:8px; transform:translateX(-50%) rotate(45deg); background:inherit; }
-/* v0.11: the apartment's folded "Things to do" list. */
-.room-menu { display:flex; flex-direction:column; min-width:168px; border-radius:var(--r-lg); box-shadow:var(--elev-2); overflow:hidden; }
-.room-menu.open { background:var(--surface-raised); -webkit-backdrop-filter:none; backdrop-filter:none; }
-.room-menu-head { display:flex; align-items:center; justify-content:space-between; gap:10px; height:40px; padding:0 14px; font-size:14px; font-weight:600; color:var(--text-1); }
-.room-menu-chev { font-size:18px; line-height:1; transform:translateY(-3px); transition:transform .2s ease; }
-.room-menu.open .room-menu-chev { transform:rotate(180deg) translateY(-1px); }
-.room-menu-item { display:flex; align-items:center; justify-content:space-between; gap:10px; height:42px; padding:0 14px; border-top:1px solid var(--divider);
-  font-size:15px; font-weight:600; color:var(--text-1); text-align:left; }
-.room-menu-item span { color:var(--text-3); font-size:18px; }
 /* v0.11: a speech bubble over people you can talk to. */
 .npc-bubble { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:30px; height:26px; border-radius:13px 13px 13px 4px;
   background:#fff; box-shadow:var(--elev-2); font-size:14px; line-height:1; }
 .npc-bubble:active { transform-origin:bottom left; scale:.92; }
 @media (prefers-reduced-motion: no-preference) { .npc-bubble span { animation:npc-bob 2.4s ease-in-out infinite; } }
 @keyframes npc-bob { 50% { transform:translateY(-2px); } }
+.room-exit { font-weight:700; }
+.room-exit::after { top:-5px; bottom:auto; }
 .room-edit { position:absolute; z-index:16; right:12px; }
 .room-edit-bar { display:flex; flex-direction:column; gap:8px; padding:10px 12px; border-radius:var(--r-lg); max-width:min(320px, calc(100vw - 24px)); box-shadow:var(--elev-2); }
 .room-edit-bar .chip { height:32px; padding:0 12px; font-size:13px; }

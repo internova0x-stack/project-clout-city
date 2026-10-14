@@ -7,6 +7,7 @@ import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
 import { readContentDrafts } from "@/lib/contentDrafts";
 import { checkGossipFiles, syncGossipWeeks } from "@/lib/gossipImport";
+import { syncWeeklyContent } from "@/lib/contentImport";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -119,6 +120,10 @@ export async function studioCastStatus(id: number, status: CastLine["status"]) {
 }
 // ---- City News (migration 0017) ----
 export async function studioNewsList() {
+  // Test phase: the repo's news and hunts publish themselves; load them now (admins only, the list checks).
+  const first = await admin<NewsAdminItem[]>("admin_news_list");
+  if (!first.ok) return first;
+  await syncWeeklyContent({ force: true }).catch(() => []);
   return admin<NewsAdminItem[]>("admin_news_list");
 }
 export async function studioNewsUpload(json: string): Promise<Admin<number> & { problems?: string[] }> {
@@ -138,6 +143,9 @@ export async function studioNewsReschedule(id: string, day: string) {
 }
 // ---- Treasure hunts (migration 0018) ----
 export async function studioHuntList() {
+  const first = await admin<HuntAdmin[]>("admin_hunt_list");
+  if (!first.ok) return first;
+  await syncWeeklyContent({ force: true }).catch(() => []);
   return admin<HuntAdmin[]>("admin_hunt_list");
 }
 export async function studioHuntUpload(json: string): Promise<Admin<null> & { problems?: string[] }> {

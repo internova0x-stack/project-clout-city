@@ -13,7 +13,7 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_TEMPLATES, PLACE_TEMPLATES, type RoomItem } from "@/lib/rooms";
+import { HOME_TEMPLATES, PLACE_TEMPLATES, placeRoom, type RoomItem } from "@/lib/rooms";
 import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
@@ -86,6 +86,21 @@ const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
 /** Who's talking in a place (chatter templates are written per role). */
 function npcRole(p: Place): { who: string; role: string } {
+  // v0.11 shared rooms: who's there depends on the kind of place.
+  const tag = (t: string) => p.tags.includes(t);
+  if (tag("games")) return { who: "A gamer", role: "regular" };
+  if (tag("cinema")) return { who: "The usher", role: "clerk" };
+  if (tag("police")) return { who: "The desk sergeant", role: "clerk" };
+  if (tag("firehouse")) return { who: "A firefighter", role: "regular" };
+  if (tag("library")) return { who: "The librarian", role: "clerk" };
+  if (tag("chapel") || tag("church")) return { who: "The caretaker", role: "regular" };
+  if (tag("gym")) return { who: "A trainer", role: "regular" };
+  if (tag("park")) return { who: "A dog walker", role: "regular" };
+  if (tag("office") || tag("delivery_hub")) return { who: "A coworker", role: "regular" };
+  if (tag("dealership")) return { who: "A salesperson", role: "clerk" };
+  if (tag("supermarket")) return { who: "The cashier", role: "clerk" };
+  if (tag("rooftop")) return { who: "The host", role: "bartender" };
+  if (tag("diner") || tag("pizza")) return { who: "The server", role: "barista" };
   if (p.template === "club") return { who: "The bartender", role: "bartender" };
   if (p.template === "cafe") return { who: "The barista", role: "barista" };
   if (p.template === "counter") return { who: "The clerk", role: "clerk" };
@@ -722,9 +737,15 @@ export function GameShell({
     mapRef.current?.moveCamera(p.at, 15.5);
   };
   /** A tap on something in a place's room: run its action, or the event that's on. */
+  // v0.11: every place but subway stations has a room (shared templates take the place's own actions).
+  const insideRoom = useMemo(
+    () => (inside ? placeRoom(inside) : null),
+    [inside],
+  );
   const useInPlace = (p: Place, it: RoomItem) => {
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
+    if (it.use?.kind === "gigs") return handlers.onOpenGigs();
     if (it.use?.kind === "shop") return openShop(it.use.category);
     if (it.use?.kind !== "events") return;
     // The lounge's guest list: a party you have a ticket for, if its doors are open; otherwise the Events list.
@@ -937,11 +958,13 @@ export function GameShell({
           onBack={() => setInside(null)}
           room={
             <Room3D
-              template={PLACE_TEMPLATES[inside.template && inside.template !== "apartment" ? inside.template : "cafe"]}
+              template={insideRoom ?? PLACE_TEMPLATES.cafe}
               look={look}
               outfit={outfit}
               daytime={daytime}
               sign={inside.name}
+              rotatable
+              onExit={() => setInside(null)}
               label={`${me.display_name} inside ${inside.name}`}
               insetBottom={170}
               mood={roomMood}
@@ -967,7 +990,7 @@ export function GameShell({
             daytime={daytime}
             editable={cityOn && flow === "none"}
             rotatable={flow === "none"}
-            actionsMenu={cityOn && flow === "none"}
+            onExit={flow === "none" ? () => setTab("map") : undefined}
             label={`${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {

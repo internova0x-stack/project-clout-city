@@ -127,21 +127,13 @@ export function GameChrome({
         )}
       </div>
 
-      <nav className="side-col glass-hud" aria-label="Quick actions">
-        <button className="side-btn" onClick={() => onAction("tasks")} aria-label={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"}>
-          <ChecklistIcon />
-          {values?.tasksBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}
-        </button>
-        <button className="side-btn" data-tour="events" onClick={() => onAction("events")} aria-label="Events">
-          <ChampagneIcon />
-          {values?.eventsBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}
-        </button>
-        <button className="side-btn" onClick={() => onAction("places")} aria-label="Places"><BuildingIcon /></button>
-        <button className="side-btn" onClick={() => onAction("bills")} aria-label="Bills">
-          <ReceiptIcon />
-          {values?.billsBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}
-        </button>
-        <button className="side-btn" onClick={() => onAction("look")} aria-label="Your look"><PersonIcon /></button>
+      {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
+      <nav className="side-col" aria-label="Quick actions">
+        <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
+        <SideBtn label="Events" aria="Events" dot={values?.eventsBadge} tour="events" onClick={() => onAction("events")}><ChampagneIcon /></SideBtn>
+        <SideBtn label="Places" aria="Places" onClick={() => onAction("places")}><BuildingIcon /></SideBtn>
+        <SideBtn label="Bills" aria="Bills" dot={values?.billsBadge} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>
+        <SideBtn label="Look" aria="Your look" onClick={() => onAction("look")}><PersonIcon /></SideBtn>
       </nav>
 
       {me && !statsOpen && (
@@ -255,5 +247,17 @@ function FlameFilled({ size = 20 }: { size?: number }) {
       <path d="M12 2.5c.6 2.7 2.2 4.9 4.2 6.6 2.1 1.8 3.3 3.8 3.3 6.1a7.5 7.5 0 1 1-15 0c0-1.5.5-2.9 1.4-3.9.3 1.6 1.4 2.7 2.8 2.7A2.6 2.6 0 0 0 11.3 11c0-1.2-.4-1.9-.9-2.9-1-2-.2-3.9 1.6-5.6z" fill="url(#hud-flame)" />
       <path d="M12.2 13.2c1.6 1.3 2.6 2.5 2.6 4a2.8 2.8 0 0 1-5.6 0c0-1.3.9-2.6 3-4z" fill="#FFF1C2" opacity={0.9} />
     </svg>
+  );
+}
+
+function SideBtn({ label, aria, dot, tour, onClick, children }: { label: string; aria: string; dot?: boolean; tour?: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button className="side-btn" data-tour={tour} onClick={onClick} aria-label={aria}>
+      <span className="side-ico glass-hud">
+        {children}
+        {dot && <span className="pin-dot" style={{ top: 2, right: 2 }} />}
+      </span>
+      <span className="side-lbl" aria-hidden="true">{label}</span>
+    </button>
   );
 }
