@@ -9,7 +9,7 @@ import {
 import { randomLook, type Look } from "@/lib/look";
 import type { CrowdMember } from "@/lib/partyRoom";
 import {
-  FACING, FURNITURE, applyLayout, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
+  FACING, FURNITURE, GRID, applyLayout, clampItem, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
   type LayoutEntry, type RoomItem, type RoomTemplate,
 } from "@/lib/rooms";
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
@@ -19,7 +19,7 @@ import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furnit
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
 // player's avatar, which walks where you tap, sits on seats, naps on the bed and
 // walks up to counters to use them (tap the label over a thing). At home, tapping a
-// piece of furniture selects it to drag and rotate; the layout is saved per player.
+// piece of furniture selects it, and arrows around it move it (rotate in the bar); the layout is saved per player.
 // Every room turns with a sideways slide and zooms with a pinch (v0.11, owner Oct 14).
 
 const WALL_H = 2.7;
@@ -115,6 +115,8 @@ export default function Room3D(props: Room3DProps) {
   const savedRef = useRef<RoomItem[]>(items);
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
   const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void } | null>(null);
+  // Owner, Oct 14: arranging moves the selected piece with arrows around it, not drag and drop.
+  const arrowsRef = useRef<Map<number, HTMLButtonElement>>(new Map());
 
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
@@ -443,13 +445,13 @@ export default function Room3D(props: Room3DProps) {
       if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
       propsRef.current.onNpcTap(i);
     };
-    let down: { x: number; y: number; drag: RoomItem | null; moved: boolean; sliding?: boolean } | null = null;
+    let down: { x: number; y: number; moved: boolean; sliding?: boolean } | null = null;
     // Sliding (owner, Oct 14): a sideways drag turns the room with the finger, then it settles on the
     // nearest quarter turn (a quick flick of a quarter's third is enough to go on to the next one).
     let slide = 0;
     const slideAngle = (dx: number) => (-dx / Math.max(240, host.clientWidth * 0.8)) * (Math.PI / 2);
-    const canSlide = (d: { drag: RoomItem | null }) => !!propsRef.current.rotatable && !editRef.current.editing && !d.drag;
-    const swipeTurn = (d: { x: number; y: number; drag: RoomItem | null; sliding?: boolean }, e: PointerEvent) => {
+    const canSlide = () => !!propsRef.current.rotatable;
+    const swipeTurn = (d: { x: number; y: number; sliding?: boolean }, e: PointerEvent) => {
       if (!d.sliding) return;
       const quarters = slideAngle(e.clientX - d.x) / (Math.PI / 2);
       const step = Math.abs(quarters) < 0.33 ? 0 : Math.sign(quarters) * Math.max(1, Math.round(Math.abs(quarters)));
@@ -475,9 +477,7 @@ export default function Room3D(props: Room3DProps) {
         return;
       }
       if (touches.size > 2) return;
-      const { editing: ed, selected: sel } = editRef.current;
-      const it = ed ? hitItem(e.clientX, e.clientY) : null;
-      down = { x: e.clientX, y: e.clientY, drag: ed && it && it.id === sel ? it : null, moved: false };
+      down = { x: e.clientX, y: e.clientY, moved: false };
       try { renderer.domElement.setPointerCapture(e.pointerId); } catch { /* a pointer the browser no longer tracks */ }
     };
     const onMove = (e: PointerEvent) => {
@@ -486,14 +486,8 @@ export default function Room3D(props: Room3DProps) {
       if (!down) return;
       if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
       const dx = e.clientX - down.x;
-      if (!down.sliding && down.moved && canSlide(down) && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(e.clientY - down.y) * 1.5) down.sliding = true;
+      if (!down.sliding && down.moved && canSlide() && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(e.clientY - down.y) * 1.5) down.sliding = true;
       if (down.sliding) { slide = slideAngle(dx); return; }
-      if (down.drag && down.moved) {
-        const p = hitFloor(e.clientX, e.clientY);
-        if (!p) return;
-        const next = itemsRef.current.map((i) => (i.id === down!.drag!.id ? { ...i, x: snap(p.x), z: snap(p.z) } : i));
-        setItems(next);
-      }
     };
     const onUp = (e: PointerEvent) => {
       touches.delete(e.pointerId);
@@ -501,16 +495,6 @@ export default function Room3D(props: Room3DProps) {
       const d = down;
       down = null;
       if (!d) return;
-      if (d.drag) {
-        if (d.moved) {
-          const moved = itemsRef.current.find((i) => i.id === d.drag!.id)!;
-          if (!placementOk(template, itemsRef.current, moved)) {
-            setItems((cur) => cur.map((i) => (i.id === d.drag!.id ? d.drag! : i)));
-            setNote("That spot's taken. Try somewhere else.");
-          }
-        }
-        return;
-      }
       if (d.moved) return swipeTurn(d, e);
       const it = hitItem(e.clientX, e.clientY);
       if (editRef.current.editing) {
@@ -602,6 +586,21 @@ export default function Room3D(props: Room3DProps) {
         proj.set(it.x, chipHeight(it), it.z).project(camera);
         el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
+      }
+      // Arranging: the arrows in the bar turn to match the floor direction each one moves the piece.
+      if (arrowsRef.current.size) {
+        const { selected: sel2 } = editRef.current;
+        const it = sel2 ? itemsRef.current.find((i) => i.id === sel2) : undefined;
+        const ox = it?.x ?? 0, oz = it?.z ?? 0;
+        proj.set(ox, 0, oz).project(camera);
+        const W = host.clientWidth, H = host.clientHeight;
+        const cx = proj.x * W, cy = -proj.y * H;
+        ARROW_DIRS.forEach(([ax, az], k) => {
+          const el = arrowsRef.current.get(k);
+          if (!el) return;
+          proj.set(ox + ax, 0, oz + az).project(camera);
+          el.style.setProperty("--arrow-turn", `${Math.atan2(-proj.y * H - cy, proj.x * W - cx)}rad`);
+        });
       }
       // v0.11 party floors: a name tag over each person at the party.
       for (const c of crowdRef.current) {
@@ -769,6 +768,27 @@ export default function Room3D(props: Room3DProps) {
   const sel = items.find((i) => i.id === selected);
 
   const tapChip = (it: RoomItem) => actionsRef.current?.goUse(it);
+  // Move the selected piece a grid step; clamped to the room. Overlaps are allowed on the way (the
+  // ring turns red and Save waits) so a piece can pass another to reach a free spot.
+  const nudge = (k: number) => {
+    const [ax, az] = ARROW_DIRS[k];
+    setNote(null);
+    setItems((cur) => cur.map((i) => (i.id === editRef.current.selected ? clampItem(template, { ...i, x: snap(i.x + ax * GRID), z: snap(i.z + az * GRID) }) : i)));
+  };
+  // Hold an arrow to keep moving.
+  const holdRef = useRef<{ t: ReturnType<typeof setTimeout> | null; i: ReturnType<typeof setInterval> | null }>({ t: null, i: null });
+  const stopHold = () => {
+    if (holdRef.current.t) clearTimeout(holdRef.current.t);
+    if (holdRef.current.i) clearInterval(holdRef.current.i);
+    holdRef.current = { t: null, i: null };
+  };
+  const startHold = (k: number) => {
+    stopHold();
+    nudge(k);
+    holdRef.current.t = setTimeout(() => { holdRef.current.i = setInterval(() => nudge(k), 90); }, 350);
+  };
+  useEffect(() => stopHold, []);
+  const spotTaken = !!sel && !placementOk(template, items, sel);
 
   return (
     <div className="room3d layer" style={{ background: derivedBackdrop(template, daytime).css }}>
@@ -826,7 +846,25 @@ export default function Room3D(props: Room3DProps) {
         <div className="room-edit" style={{ top: `calc(${insetTop - 48}px + var(--safe-top))` }}>
           {editing ? (
             <div className="room-edit-bar glass-hud" role="group" aria-label="Arrange furniture">
-              <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (sel ? `Drag the ${FURNITURE[sel.kind].label.toLowerCase()} to move it` : "Tap a piece of furniture")}</span>
+              <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece of furniture")}</span>
+              <div className="row room-arrows" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
+                {ARROW_DIRS.map((_, k) => (
+                  <button
+                    key={k}
+                    ref={(el) => { if (el) arrowsRef.current.set(k, el); else arrowsRef.current.delete(k); }}
+                    className="room-arrow"
+                    disabled={!sel}
+                    aria-label={`Move ${ARROW_NAMES[k]}`}
+                    onPointerDown={(e) => { e.preventDefault(); if (sel) startHold(k); }}
+                    onPointerUp={stopHold}
+                    onPointerLeave={stopHold}
+                    onPointerCancel={stopHold}
+                    onKeyDown={(e) => { if (sel && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nudge(k); } }}
+                  >
+                    <span aria-hidden="true">➜</span>
+                  </button>
+                ))}
+              </div>
               <div className="row" style={{ gap: 6 }}>
                 <button className="chip" disabled={!sel} onClick={() => sel && setItems((cur) => cur.map((i) => (i.id === sel.id ? { ...i, rot: (i.rot + 1) % 4 } : i)))}>↻ Rotate</button>
                 <button className="chip" onClick={() => { setItems(savedRef.current); setEditing(false); setSelected(null); setNote(null); }}>Cancel</button>
@@ -851,6 +889,10 @@ export default function Room3D(props: Room3DProps) {
     </div>
   );
 }
+
+/** The floor directions the arranging arrows move a piece: back, right, front, left (one grid step a tap). */
+const ARROW_DIRS: [number, number][] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const ARROW_NAMES = ["back", "right", "forward", "left"];
 
 // ---------------------------------------------------------------------------
 // Animation and poses
