@@ -267,10 +267,13 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 | Entering every location | Every location can be entered. Each uses one of the shared interior templates, recolored, with its own sign and props; new templates (office, civic building, outdoor plaza) cover all places. **Exception (owner, Oct 14): subway stations** stay a map label and lore (section 5) |
 
 **Built (v0.11 step 2, Oct 14):**
-- **Folded actions.** A place card shows "Things to do here · N" with what's there in one line and today's tasks as checkboxes; one tap opens the full list. Inside a room the panel stays folded as before. At home a **Things to do** list (Nap, Kitchen, Sit, Your look) folds under Turn and Arrange.
+- **Folded actions.** A place card shows "Things to do here · N" with what's there in one line and today's tasks as checkboxes; one tap opens the full list. Inside a room the panel stays folded as before. (The home list that was here is gone: owner, Oct 14.)
 - **Task checkboxes.** Every daily task at a place is a checkbox on its card and in the room panel, and on the matching action row; it ticks (and strikes through) when done.
 - **Task dot.** The task icon in the side column shows a dot at the first open of each New York day, cleared when tapped.
-- **Turning the apartment.** ↻ Turn, or a sideways swipe, turns the view a quarter at a time; the two walls nearest the camera are always cut away.
+- **Turning and zooming (owner, Oct 14: every room, no buttons).** Slide sideways and the room turns with your finger, settling on the nearest quarter turn; pinch (or the trackpad / mouse wheel) zooms in up to 2.6×, centered on you. The two walls nearest the camera are always cut away, and a place's sign hangs on both its back and front walls so one is always in view.
+- **A front door (owner, Oct 14).** Every room has a front door by the spot you come in, with a doormat and a **🚪 Go out** label: tap it and you walk out (to the map from home, back to the map from a place).
+- **Arranging by tapping (owner, Oct 14).** No Arrange or Turn buttons and no home "Things to do" list: tap a piece of furniture and it's selected with Rotate, Cancel and Save, drag it to move it. The labels over things (Sit, Nap, Kitchen, Your look) are how you use them.
+- **Side buttons (owner, Oct 14).** Tasks, Events, Places, Bills and Look sit just above the bottom bar on the right, TikTok-style: separate round buttons with a label under each. The map's locate button and credits move to the left.
 - **Speech bubbles.** Everyone you can talk to in a room has a 💬 over their head; tapping it talks to them.
 
 ## 12. Later features

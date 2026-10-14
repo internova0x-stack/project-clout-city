@@ -942,6 +942,8 @@ export function GameShell({
               outfit={outfit}
               daytime={daytime}
               sign={inside.name}
+              rotatable
+              onExit={() => setInside(null)}
               label={`${me.display_name} inside ${inside.name}`}
               insetBottom={170}
               mood={roomMood}
@@ -967,7 +969,7 @@ export function GameShell({
             daytime={daytime}
             editable={cityOn && flow === "none"}
             rotatable={flow === "none"}
-            actionsMenu={cityOn && flow === "none"}
+            onExit={flow === "none" ? () => setTab("map") : undefined}
             label={`${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
