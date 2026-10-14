@@ -15,8 +15,11 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    - **Redirect URLs**: add `https://cloutcity.vercel.app/**`, `https://*-your-team.vercel.app/**`
      (Vercel previews) and `http://localhost:3000/**`.
 5. **Authentication → Email Templates**: for both **Magic Link** and **Confirm signup**,
-   set the subject to `Your Clout City sign-in link` and paste the body from
-   `supabase/email-templates/magic-link.html`. This template's link works even when the
+   set the subject to `Your Clout City code: {{ .Token }}` and paste the body from
+   `supabase/email-templates/magic-link.html` (into **both** templates: new players get "Confirm
+   signup", returning players get "Magic Link"). Supabase's default templates contain only a link
+   and **no code**, so the installed app can't sign anyone in until this is pasted. The code comes
+   first in the email (v0.11). This template's link works even when the
    email is opened on a different phone or computer, and it includes a 6-digit code
    players can type into the game instead. The link opens a page with a **Continue** button
    and signs in only when it's tapped, so email security scanners that open links first can't
