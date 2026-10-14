@@ -114,9 +114,7 @@ export default function Room3D(props: Room3DProps) {
   editRef.current = { editing, selected };
   const savedRef = useRef<RoomItem[]>(items);
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
-  const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void } | null>(null);
-  // Owner, Oct 14: arranging moves the selected piece with arrows around it, not drag and drop.
-  const arrowsRef = useRef<Map<number, HTMLButtonElement>>(new Map());
+  const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number] } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
@@ -587,21 +585,6 @@ export default function Room3D(props: Room3DProps) {
         el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
-      // Arranging: the arrows in the bar turn to match the floor direction each one moves the piece.
-      if (arrowsRef.current.size) {
-        const { selected: sel2 } = editRef.current;
-        const it = sel2 ? itemsRef.current.find((i) => i.id === sel2) : undefined;
-        const ox = it?.x ?? 0, oz = it?.z ?? 0;
-        proj.set(ox, 0, oz).project(camera);
-        const W = host.clientWidth, H = host.clientHeight;
-        const cx = proj.x * W, cy = -proj.y * H;
-        ARROW_DIRS.forEach(([ax, az], k) => {
-          const el = arrowsRef.current.get(k);
-          if (!el) return;
-          proj.set(ox + ax, 0, oz + az).project(camera);
-          el.style.setProperty("--arrow-turn", `${Math.atan2(-proj.y * H - cy, proj.x * W - cx)}rad`);
-        });
-      }
       // v0.11 party floors: a name tag over each person at the party.
       for (const c of crowdRef.current) {
         const el = crowdTagsRef.current.get(c.member.key);
@@ -648,7 +631,22 @@ export default function Room3D(props: Room3DProps) {
       }
     }
 
-    actionsRef.current = { goUse, talk };
+    // Arranging arrows (owner, Oct 14: plain up, right, down, left): each screen direction moves the
+    // piece along the floor direction that looks closest to it from where the camera is now.
+    const floorStep = (screen: number): [number, number] => {
+      const o = new Vector3(0, 0, 0).project(camera);
+      const W = host.clientWidth, H = host.clientHeight;
+      const ang = FLOOR_DIRS.map(([ax, az]) => {
+        const p = new Vector3(ax, 0, az).project(camera);
+        return Math.atan2(-(p.y - o.y) * H, (p.x - o.x) * W); // screen angle, y down
+      });
+      // Sort the floor directions clockwise starting from straight up: up, right, down, left. Each
+      // arrow gets one, so the four arrows always cover the four directions.
+      const fromUp = (x: number) => ((x + Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI + Math.PI / 4) % (2 * Math.PI);
+      const order = [0, 1, 2, 3].sort((i, j) => fromUp(ang[i]) - fromUp(ang[j]));
+      return FLOOR_DIRS[order[screen]];
+    };
+    actionsRef.current = { goUse, talk, floorStep };
 
     function walkTo(goal: [number, number], use: RoomItem | null) {
       const grid = makeGrid(template, itemsRef.current);
@@ -771,7 +769,9 @@ export default function Room3D(props: Room3DProps) {
   // Move the selected piece a grid step; clamped to the room. Overlaps are allowed on the way (the
   // ring turns red and Save waits) so a piece can pass another to reach a free spot.
   const nudge = (k: number) => {
-    const [ax, az] = ARROW_DIRS[k];
+    const step = actionsRef.current?.floorStep(k);
+    if (!step) return;
+    const [ax, az] = step;
     setNote(null);
     setItems((cur) => cur.map((i) => (i.id === editRef.current.selected ? clampItem(template, { ...i, x: snap(i.x + ax * GRID), z: snap(i.z + az * GRID) }) : i)));
   };
@@ -847,21 +847,20 @@ export default function Room3D(props: Room3DProps) {
           {editing ? (
             <div className="room-edit-bar glass-hud" role="group" aria-label="Arrange furniture">
               <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece of furniture")}</span>
-              <div className="row room-arrows" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
-                {ARROW_DIRS.map((_, k) => (
+              <div className="room-arrows" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
+                {ARROWS.map((a, k) => (
                   <button
-                    key={k}
-                    ref={(el) => { if (el) arrowsRef.current.set(k, el); else arrowsRef.current.delete(k); }}
-                    className="room-arrow"
+                    key={a.name}
+                    className={`room-arrow ${a.name}`}
                     disabled={!sel}
-                    aria-label={`Move ${ARROW_NAMES[k]}`}
+                    aria-label={`Move ${a.name}`}
                     onPointerDown={(e) => { e.preventDefault(); if (sel) startHold(k); }}
                     onPointerUp={stopHold}
                     onPointerLeave={stopHold}
                     onPointerCancel={stopHold}
                     onKeyDown={(e) => { if (sel && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nudge(k); } }}
                   >
-                    <span aria-hidden="true">➜</span>
+                    <span aria-hidden="true">{a.glyph}</span>
                   </button>
                 ))}
               </div>
@@ -890,9 +889,15 @@ export default function Room3D(props: Room3DProps) {
   );
 }
 
-/** The floor directions the arranging arrows move a piece: back, right, front, left (one grid step a tap). */
-const ARROW_DIRS: [number, number][] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-const ARROW_NAMES = ["back", "right", "forward", "left"];
+/** The four floor directions a piece can move (one grid step a tap), in turn round the room. */
+const FLOOR_DIRS: [number, number][] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+/** The arranging arrows, clockwise from up (the order floorStep expects). */
+const ARROWS = [
+  { name: "up", glyph: "↑" },
+  { name: "right", glyph: "→" },
+  { name: "down", glyph: "↓" },
+  { name: "left", glyph: "←" },
+] as const;
 
 // ---------------------------------------------------------------------------
 // Animation and poses
