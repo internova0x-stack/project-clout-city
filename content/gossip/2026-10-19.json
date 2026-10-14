@@ -9,7 +9,7 @@
       "teaser": "Lunaria's unreleased album hit the internet a week early. Her team says \"theft\". Astoria says something else.",
       "pieces": [
         { "text": "Jojo swears a woman in giant sunglasses sat in the corner for six hours, ordered one oat milk and kept whispering \"the bridge needs more bridge\".", "place": "grind-and-gossip", "source": "regular" },
-        { "text": "At the bar: \"Her producer says the laptop never left the studio. The studio has a doggy door. Draw your own conclusions.\"", "place": "velvet-static", "source": "overheard", "hours": [21, 3] },
+        { "text": "In the restroom line, fixing her lashes: \"Her producer says the laptop never left the studio. The studio has a doggy door. And the producer has a dog that loves attention.\"", "place": "velvet-static", "source": "restroom", "hours": [21, 3] },
         { "text": "Someone printed all twelve lyric sheets at the library and left them in the copier tray, with a sticky note: \"ignore these, they're nothing\".", "place": "ditmars-library", "source": "overheard" },
         { "text": "Pixel says the leak's file names are \"lunaria_FINAL_final_LEAK_THIS_v3\". Pixel does not believe in coincidences.", "place": "respawn-arena", "source": "regular" },
         { "text": "Two commuters on the platform: \"Her streams tripled overnight. If somebody stole it, they did her the biggest favor of her career.\"", "place": "astoria-blvd-station", "source": "overheard", "hours": [6, 11] }
@@ -29,7 +29,7 @@
         { "text": "Sal, slicing faster than he needs to: \"Benny? Never heard of him. Tell him I said that. Tell him exactly that.\"", "place": "ditmars-deli", "source": "regular" },
         { "text": "Benny, not looking up from the counter: \"Twenty years and he still puts the onions on top. That's all I'll say. That's not all I'll say.\"", "place": "lucky-star", "source": "regular" },
         { "text": "Gus, from his bench: \"1987. Block party. One grill, two men, one recipe. I was there. I had a hot dog.\"", "place": "hell-gate-park", "source": "regular" },
-        { "text": "A firefighter laughing at the sink: \"Every Thanksgiving they both bring a chopped cheese to the firehouse and make us vote. Every year it's a tie. We make sure.\"", "place": "engine-7", "source": "overheard" },
+        { "text": "Two off-duty firefighters at the Hellgate Hall mirrors: \"Every Thanksgiving they bring us both sandwiches and make us vote. Every year it's a tie. We make sure.\"", "place": "hellgate-hall", "source": "restroom" },
         { "text": "Two regulars over pancakes: \"You know they're cousins, right? Same grandmother. Same recipe card. She wrote it in pencil.\"", "place": "neon-spoon", "source": "overheard", "hours": [6, 12] }
       ],
       "tea": {

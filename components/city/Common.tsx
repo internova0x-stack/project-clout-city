@@ -29,7 +29,8 @@ export function GainToast({ gain, message, onDone }: { gain: Gain | null; messag
   useEffect(() => {
     if (!gain && !message) return;
     setKey((k) => k + 1);
-    const t = setTimeout(onDone, 2600);
+    // Owner, Oct 14: long enough to read (about 4.5 s; the fade starts at 4 s, see .gain-toast).
+    const t = setTimeout(onDone, 4500);
     return () => clearTimeout(t);
   }, [gain, message, onDone]);
   if (!gain && !message) return null;

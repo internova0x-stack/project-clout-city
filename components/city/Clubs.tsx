@@ -13,9 +13,9 @@ export function clubLines(place: Place, clout: number): string[] {
   const { doorClout, vip } = clubDoor(place);
   const lines: string[] = [];
   if (doorClout) lines.push(clout >= doorClout ? `🕶️ The bouncer knows your name (${doorClout.toLocaleString("en-US")} clout at the door)` : `🔒 ${doorClout.toLocaleString("en-US")} clout at the door · you have ${clout.toLocaleString("en-US")}`);
-  lines.push(vip
-    ? `🚻 Restroom downstairs · 🥂 VIP upstairs: ${clout >= vip.freeClout ? "you're on the list" : `free from ${vip.freeClout.toLocaleString("en-US")} clout, or ${formatCash(vip.cover)} for the night`}`
-    : "🚻 Restroom downstairs, where the real gossip is");
+  // Owner, Oct 14: one line each, not crammed together.
+  lines.push("🚻 Restroom downstairs, where the real gossip is");
+  if (vip) lines.push(`🥂 VIP upstairs: ${clout >= vip.freeClout ? "you're on the list" : `free from ${vip.freeClout.toLocaleString("en-US")} clout, or ${formatCash(vip.cover)} for the night`}`);
   return lines;
 }
 
