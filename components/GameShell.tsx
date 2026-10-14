@@ -81,6 +81,7 @@ export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leader
 type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
+const TASKS_SEEN_KEY = "cc-tasks-seen";
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
 /** Who's talking in a place (chatter templates are written per role). */
@@ -755,6 +756,16 @@ export function GameShell({
       setPinsSeen({ invite: false, networth: false });
     }
   }, [handedOff]);
+  // v0.11 (spec section 11): a dot on the task icon at the first open of each New York day, until tapped.
+  const [tasksSeenDay, setTasksSeenDay] = useState<string | null>("");
+  useEffect(() => {
+    try { setTasksSeenDay(localStorage.getItem(TASKS_SEEN_KEY)); } catch { setTasksSeenDay(null); }
+  }, []);
+  const markTasksSeen = useCallback(() => {
+    if (!city?.today) return;
+    setTasksSeenDay(city.today);
+    try { localStorage.setItem(TASKS_SEEN_KEY, city.today); } catch { /* fine */ }
+  }, [city?.today]);
   const markPin = (k: "invite" | "networth") => {
     setPinsSeen((p) => {
       const next = { ...p, [k]: true };
@@ -833,7 +844,7 @@ export function GameShell({
       }
       if (a === "leaderboard") return setPanel("leaderboard");
       if (a === "bank") return setPanel("bank");
-      if (a === "tasks" || a === "daily") return setPanel("tasks");
+      if (a === "tasks" || a === "daily") { markTasksSeen(); return setPanel("tasks"); }
       if (a === "events") {
         if (flow === "tour") {
           // Tooltip 5 ends the tour by tapping its target, and starts the first task.
@@ -855,7 +866,7 @@ export function GameShell({
       setSoon({ key: a });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flow, cityOn],
+    [flow, cityOn, markTasksSeen],
   );
 
   const onPinTap = useCallback(
@@ -955,6 +966,8 @@ export function GameShell({
             outfit={outfit}
             daytime={daytime}
             editable={cityOn && flow === "none"}
+            rotatable={flow === "none"}
+            actionsMenu={cityOn && flow === "none"}
             label={`${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
@@ -1029,6 +1042,7 @@ export function GameShell({
           online,
           eventsBadge: !partyDone,
           billsBadge: !!city && dueBills(city).length > 0,
+          tasksBadge: !!city && city.tasks.length > 0 && tasksSeenDay !== "" && tasksSeenDay !== city.today && handedOff,
           phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />

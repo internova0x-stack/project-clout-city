@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, type CityState } from "@/lib/cityState";
+import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
-import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
@@ -97,10 +97,12 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
         const clout = a.clout ?? ((a.kind === "visit" || a.kind === "eat") && !usedToday ? visitClout(a.price ?? 0, mood, confidence) : null);
         const key = `${place.id}:${a.id}`;
         const spends = (a.price ?? 0) > 0;
+        const daily = tasksAt(state, place.id).find((t) => t.action_id === a.id);
         return (
           <div key={a.id} className="action-row">
             <div style={{ minWidth: 0, flex: 1 }}>
               <span className="title" style={{ display: "block" }}>{a.label}</span>
+              {daily && <TaskTick t={daily} />}
               {!compact && <span className="subtext" style={{ display: "block" }}>{a.blurb}</span>}
               {a.kind === "gigs" ? (
                 <span className="meta">Today&apos;s offers, in your Phone</span>
@@ -130,6 +132,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
         <div className="action-row">
           <div style={{ minWidth: 0, flex: 1 }}>
             <span className="title" style={{ display: "block" }}>👂 Listen in</span>
+            {tasksAt(state, place.id).filter((t) => t.action_id === "gossip-overheard").map((t) => <TaskTick key={t.id} t={t} />)}
             {!compact && <span className="subtext" style={{ display: "block" }}>Eavesdropping is free. Getting caught is not.</span>}
             <span className="fx-row"><span className="fx fx-pay">Free</span><span className="fx">🍵 Gossip for the Tea app</span></span>
           </div>
@@ -214,6 +217,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
             <div style={{ minWidth: 0, flex: 1 }}>
               <span className="tag tag-event" style={{ marginBottom: 4 }}>{place.category === "campus" ? "🎓 Campus event" : "🍸 Club event"}{open ? " · Happening now" : ""}</span>
               <span className="title" style={{ display: "block" }}>{ev.name}</span>
+              {tasksAt(state, place.id).filter((t) => t.kind === "event" && t.action_id === ev.id).map((t) => <TaskTick key={t.id} t={t} />)}
               {!compact && <span className="subtext" style={{ display: "block" }}>{ev.blurb}</span>}
               <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} />
               {!open && !state.attendedToday.includes(ev.id) && <span className="meta">Doors open in {wait} min</span>}
@@ -254,6 +258,65 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
         );
       })}
     </div>
+  );
+}
+
+/** v0.11 (spec section 11): a daily task done here, as a checkbox that ticks when it's done. */
+function TaskTick({ t }: { t: DailyTask }) {
+  return (
+    <span className={`task-tick${t.done_at ? " done" : ""}`}>
+      <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
+      <span>{t.done_at ? "Daily task done" : `Daily task · pays ${formatCash(t.reward)}`}</span>
+      <span className="sr-only">{t.done_at ? ", ticked" : ", not done yet"}</span>
+    </span>
+  );
+}
+
+/** Every daily task at this place, ticked when done: shown even while the actions are folded away. */
+export function PlaceTasks({ place, state }: { place: Place; state: CityState }) {
+  const tasks = tasksAt(state, place.id);
+  if (!tasks.length) return null;
+  return (
+    <ul className="place-tasks" aria-label="Daily tasks here">
+      {tasks.map((t) => (
+        <li key={t.id} className={t.done_at ? "done" : ""}>
+          <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
+          <span className="place-task-title">{taskTitle(t)}</span>
+          <span className="meta">{t.done_at ? "Done" : formatCash(t.reward)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * v0.11 (spec section 11): a place's actions start folded away (the card stays short), with what's
+ * here in one line and today's tasks ticked; one tap opens the full list.
+ */
+function ActionsSection({ place, state, handlers }: { place: Place; state: CityState; handlers: PlaceHandlers }) {
+  const [open, setOpen] = useState(false);
+  const world = placeStory(handlers.story ?? null, place);
+  const names = [
+    ...place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => a.label),
+    ...(handlers.gossip && !world.closed ? ["Listen in"] : []),
+    ...(handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed ? ["Scratch cards"] : []),
+    ...(handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed ? ["Groceries"] : []),
+    ...(handlers.onBarDrink && hasBar(place.tags) && !world.closed ? ["A drink"] : []),
+    ...CLUB_EVENTS.filter((e) => e.placeId === place.id).map((e) => e.name),
+    ...world.events.map((e) => e.name),
+  ];
+  return (
+    <section className={`actions-fold${open ? " open" : ""}`} aria-label={`Things to do at ${place.name}`}>
+      <button className="actions-fold-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <span style={{ minWidth: 0, flex: 1, textAlign: "left" }}>
+          <span className="title" style={{ display: "block" }}>Things to do here · {names.length}</span>
+          {!open && <span className="meta actions-fold-sum">{names.join(" · ")}</span>}
+        </span>
+        <ChevronDownIcon size={20} className="actions-fold-chev" />
+      </button>
+      {!open && <PlaceTasks place={place} state={state} />}
+      {open && <ActionList place={place} state={state} handlers={handlers} />}
+    </section>
   );
 }
 
@@ -394,7 +457,7 @@ export function LocationSheet({
           {handlers.dating?.dates.filter((d) => d.placeId === place.id).map((d) => (
             <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
           ))}
-          <ActionList place={place} state={state} handlers={handlers} />
+          <ActionsSection place={place} state={state} handlers={handlers} />
           {!here && (
             <div className="stack-4">
               <button className="btn btn-taxi" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
@@ -488,7 +551,10 @@ export function InteriorScene({
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
         ) : (
-          <p className="meta" style={{ margin: "4px 0 0" }}>Tap the floor to walk. Tap a label to use it.</p>
+          <>
+            <p className="meta" style={{ margin: "4px 0 0" }}>Tap the floor to walk. Tap a label to use it, or 💬 to talk.</p>
+            <PlaceTasks place={place} state={state} />
+          </>
         )}
       </section>
     </div>

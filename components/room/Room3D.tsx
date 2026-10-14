@@ -58,6 +58,13 @@ export interface Room3DProps {
   /** Lets the screen hide overlapping chrome while furniture is being arranged. */
   onEditingChange?: (editing: boolean) => void;
   /**
+   * v0.11 (spec section 11): the view turns in 90° steps, with the ↻ button or a sideways swipe
+   * (the apartment). The two walls nearest the camera are cut away, whichever way it faces.
+   */
+  rotatable?: boolean;
+  /** v0.11: a folded "Things to do" list of everything usable in the room (the apartment). */
+  actionsMenu?: boolean;
+  /**
    * "dream" (the default, approved Oct 12, 2026) is the Monument Valley-inspired look:
    * gradient walls, warm-lit and lavender-shaded faces, soft shadows, haze and motes.
    * "natural" keeps the plain lighting for side-by-side previews.
@@ -72,6 +79,7 @@ export default function Room3D(props: Room3DProps) {
   const dream = mood === "dream";
   const hostRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const bubblesRef = useRef<Map<number, HTMLButtonElement>>(new Map());
   const propsRef = useRef(props);
   propsRef.current = props;
   const [failed, setFailed] = useState(false);
@@ -80,13 +88,19 @@ export default function Room3D(props: Room3DProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  // Quarter turns of the view; it keeps counting (not mod 4) so each turn eases the short way round.
+  const [turn, setTurn] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const turnRef = useRef(turn);
+  turnRef.current = turn;
+  useEffect(() => setTurn(0), [template.id]);
   const itemsRef = useRef(items);
   itemsRef.current = items;
   const editRef = useRef({ editing, selected });
   editRef.current = { editing, selected };
   const savedRef = useRef<RoomItem[]>(items);
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
-  const actionsRef = useRef<{ goUse: (it: RoomItem) => void } | null>(null);
+  const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
@@ -185,6 +199,23 @@ export default function Room3D(props: Room3DProps) {
     skirtB.position.set(0, 0.06, -template.d / 2 + 0.015);
     const skirtL = new Mesh(kit.geo(new BoxGeometry(0.03, 0.12, template.d)), trimMat);
     skirtL.position.set(-template.w / 2 + 0.015, 0.06, 0);
+    // Rotatable rooms get all four walls; only the two away from the camera show (see aim()).
+    const walls = { xNeg: new Group(), xPos: new Group(), zNeg: new Group(), zPos: new Group() };
+    if (props.rotatable && !template.outdoor) {
+      const front = new Mesh(kit.geo(new BoxGeometry(template.w + 0.12, WALL_H, 0.12)), wallMat);
+      front.position.set(0.06, WALL_H / 2, template.d / 2 + 0.06);
+      front.receiveShadow = true;
+      const right = new Mesh(kit.geo(new BoxGeometry(0.12, WALL_H, template.d)), wallMat);
+      right.position.set(template.w / 2 + 0.06, WALL_H / 2, 0);
+      right.receiveShadow = true;
+      const skirtF = new Mesh(kit.geo(new BoxGeometry(template.w, 0.12, 0.03)), trimMat);
+      skirtF.position.set(0, 0.06, template.d / 2 - 0.015);
+      const skirtR = new Mesh(kit.geo(new BoxGeometry(0.03, 0.12, template.d)), trimMat);
+      skirtR.position.set(template.w / 2 - 0.015, 0.06, 0);
+      walls.zPos.add(front, skirtF);
+      walls.xPos.add(right, skirtR);
+      walls.xPos.visible = walls.zPos.visible = false;
+    }
     if (template.outdoor) {
       // v0.9 monument plazas: no walls. The paving is a raised island over grass (or the river).
       const base = new Mesh(kit.geo(new BoxGeometry(template.w + 0.3, 0.5, template.d + 0.3)), kit.mat(template.wallAccent, { roughness: 0.9 }));
@@ -199,7 +230,11 @@ export default function Room3D(props: Room3DProps) {
         river.position.set(0, -0.6, -template.d / 2 - 3.6);
         room.add(river);
       }
-    } else room.add(back, left, skirtB, skirtL);
+    } else {
+      walls.zNeg.add(back, skirtB);
+      walls.xNeg.add(left, skirtL);
+      room.add(walls.xNeg, walls.xPos, walls.zNeg, walls.zPos);
+    }
     if (template.window && !template.outdoor) {
       const winTex = windowTexture(night);
       const win = new Mesh(kit.geo(new PlaneGeometry(1.8, 1.2)), kit.mat("#ffffff", { map: winTex, emissive: "#ffffff", emissiveIntensity: night ? 0.55 : 0.85 }));
@@ -208,14 +243,14 @@ export default function Room3D(props: Room3DProps) {
       win.rotation.y = Math.PI / 2;
       const frame = new Mesh(kit.geo(new BoxGeometry(0.05, 1.32, 1.92)), kit.mat("#F4F1EA"));
       frame.position.set(-template.w / 2 + 0.005, 1.55, -template.d / 4);
-      room.add(frame, win);
+      (template.outdoor ? room : walls.xNeg).add(frame, win);
     }
     if (sign && !template.outdoor) {
       const signTex = signTexture(sign, template);
       const board = new Mesh(kit.geo(new PlaneGeometry(2.6, 0.65)), kit.mat("#ffffff", { map: signTex, emissive: "#ffffff", emissiveIntensity: template.dark ? 1.1 : 0.35 }));
       (board.material as MeshStandardMaterial).emissiveMap = signTex;
       board.position.set(template.dark ? 0 : 0.8, 2.15, -template.d / 2 + 0.01);
-      room.add(board);
+      walls.zNeg.add(board);
     }
     scene.add(room);
     // Dream mood: haze toward the sky color, and a few slow motes of light.
@@ -264,10 +299,13 @@ export default function Room3D(props: Room3DProps) {
 
     // Isometric orthographic camera, fitted to the room inside the free screen area.
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
-    const dir = new Vector3(1, 1.15, 1.35).normalize();
+    const baseDir = new Vector3(1, 1.15, 1.35).normalize();
+    const dir = baseDir.clone();
     camera.position.copy(dir.clone().multiplyScalar(30));
     camera.lookAt(0, 0, 0);
     camera.updateMatrixWorld();
+    const yAxis = new Vector3(0, 1, 0);
+    let angle = 0;
     // Outdoor plazas start the camera over the player.
     const camTarget = new Vector3(template.outdoor ? template.spawn[0] : 0, 0, template.outdoor ? template.spawn[1] : 0);
     if (template.outdoor) { camera.position.copy(camTarget).addScaledVector(dir, 30); camera.updateMatrixWorld(); }
@@ -299,6 +337,20 @@ export default function Room3D(props: Room3DProps) {
       camera.updateProjectionMatrix();
     };
     fit();
+    // v0.11 rotatable rooms: point the camera `a` radians round the room and show the far walls.
+    const aim = (a: number) => {
+      angle = a;
+      dir.copy(baseDir).applyAxisAngle(yAxis, a);
+      camera.position.copy(camTarget).addScaledVector(dir, 30);
+      camera.lookAt(camTarget);
+      camera.updateMatrixWorld();
+      walls.xNeg.visible = dir.x > -0.2;
+      walls.xPos.visible = dir.x < 0.2;
+      walls.zNeg.visible = dir.z > -0.2;
+      walls.zPos.visible = dir.z < 0.2;
+      if (!props.rotatable) walls.xPos.visible = walls.zPos.visible = false;
+      fit();
+    };
     const ro = new ResizeObserver(fit);
     ro.observe(host);
 
@@ -335,7 +387,19 @@ export default function Room3D(props: Room3DProps) {
       if (!hit) return -1;
       return npcs.findIndex((n) => { let o: Object3D | null = hit.object; while (o) { if (o === n.rig) return true; o = o.parent; } return false; });
     };
+    const talk = (i: number) => {
+      const n = npcs[i];
+      if (!n || !propsRef.current.onNpcTap) return;
+      if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
+      propsRef.current.onNpcTap(i);
+    };
     let down: { x: number; y: number; drag: RoomItem | null; moved: boolean } | null = null;
+    const swipeTurn = (d: { x: number; y: number }, e: PointerEvent) => {
+      const dx = e.clientX - d.x;
+      const dy = e.clientY - d.y;
+      if (!propsRef.current.rotatable || editRef.current.editing || Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      setTurn((t) => t + (dx > 0 ? -1 : 1));
+    };
     const onDown = (e: PointerEvent) => {
       const { editing: ed, selected: sel } = editRef.current;
       const it = ed ? hitItem(e.clientX, e.clientY) : null;
@@ -366,7 +430,7 @@ export default function Room3D(props: Room3DProps) {
         }
         return;
       }
-      if (d.moved) return;
+      if (d.moved) return swipeTurn(d, e);
       const it = hitItem(e.clientX, e.clientY);
       if (editRef.current.editing) {
         setSelected(it && FURNITURE[it.kind].movable ? it.id : null);
@@ -374,12 +438,7 @@ export default function Room3D(props: Room3DProps) {
       }
       if (it?.use) return goUse(it);
       const npc = hitNpc(e.clientX, e.clientY);
-      if (npc >= 0) {
-        const n = npcs[npc];
-        if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
-        propsRef.current.onNpcTap?.(npc);
-        return;
-      }
+      if (npc >= 0) return talk(npc);
       const p = hitFloor(e.clientX, e.clientY);
       if (p) walkTo([p.x, p.z], null);
     };
@@ -427,6 +486,9 @@ export default function Room3D(props: Room3DProps) {
         (ring.material as MeshStandardMaterial).color.set("#FFFFFF");
         (ring.material as MeshStandardMaterial).emissive.set("#FFC21A");
       } else ring.visible = false;
+      // Rotatable rooms: ease toward the chosen quarter turn.
+      const goal = turnRef.current * (Math.PI / 2);
+      if (Math.abs(goal - angle) > 1e-3) aim(reduceMotion ? goal : angle + (goal - angle) * Math.min(1, dt * 9));
       // Outdoor plazas: the camera glides after the player, kept over the paving.
       if (template.outdoor) {
         const [vw, vd] = template.outdoor.view;
@@ -446,6 +508,14 @@ export default function Room3D(props: Room3DProps) {
         el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
+      // v0.11: a speech bubble over everyone you can talk to.
+      npcs.forEach((n, i) => {
+        const el = bubblesRef.current.get(i);
+        if (!el) return;
+        proj.set(n.x, n.mode === "sit" ? 1.55 : 2.05, n.z).project(camera);
+        el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
+        el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(6px, -100%)`;
+      });
       renderer.render(scene, camera);
       if (!document.hidden) raf = requestAnimationFrame(frame);
     };
@@ -476,7 +546,7 @@ export default function Room3D(props: Room3DProps) {
       }
     }
 
-    actionsRef.current = { goUse };
+    actionsRef.current = { goUse, talk };
 
     function walkTo(goal: [number, number], use: RoomItem | null) {
       const grid = makeGrid(template, itemsRef.current);
@@ -566,6 +636,8 @@ export default function Room3D(props: Room3DProps) {
   }, [items]);
 
   const usable = editing ? [] : items.filter((i) => i.use && i.label);
+  // The folded list names each thing once (two chairs are one "Sit").
+  const menuItems = usable.filter((it, i) => usable.findIndex((x) => x.label === it.label) === i);
   const sel = items.find((i) => i.id === selected);
 
   const tapChip = (it: RoomItem) => actionsRef.current?.goUse(it);
@@ -576,6 +648,21 @@ export default function Room3D(props: Room3DProps) {
       {failed && (
         <div className="layer" style={{ display: "grid", placeItems: "center", padding: 32, textAlign: "center" }}>
           <p className="subtext" style={{ color: "rgba(255,246,224,.7)" }}>This room needs WebGL, which this browser has switched off.</p>
+        </div>
+      )}
+      {props.onNpcTap && !editing && (
+        <div className="room-chips" aria-label="People you can talk to">
+          {(template.npcs ?? []).map((_, i) => (
+            <button
+              key={i}
+              ref={(el) => { if (el) bubblesRef.current.set(i, el); else bubblesRef.current.delete(i); }}
+              className="npc-bubble"
+              onClick={() => actionsRef.current?.talk(i)}
+              aria-label="Talk"
+            >
+              <span aria-hidden="true">💬</span>
+            </button>
+          ))}
         </div>
       )}
       <div className="room-chips" aria-label="Things you can use">
@@ -614,8 +701,31 @@ export default function Room3D(props: Room3DProps) {
               </div>
             </div>
           ) : (
-            <button className="pill-glass glass-hud" onClick={() => { setEditing(true); setNote(null); }}>🛋️ Arrange</button>
+            <div className="stack-8" style={{ alignItems: "flex-end" }}>
+              <div className="row" style={{ gap: 8 }}>
+                {props.rotatable && <button className="pill-glass glass-hud" onClick={() => setTurn((t) => t + 1)} aria-label="Turn the room">↻ Turn</button>}
+                <button className="pill-glass glass-hud" onClick={() => { setEditing(true); setNote(null); setMenuOpen(false); }}>🛋️ Arrange</button>
+              </div>
+              {props.actionsMenu && menuItems.length > 0 && (
+                <div className={`room-menu glass-hud${menuOpen ? " open" : ""}`}>
+                  <button className="room-menu-head" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen}>
+                    <span>Things to do · {menuItems.length}</span>
+                    <span aria-hidden="true" className="room-menu-chev">⌄</span>
+                  </button>
+                  {menuOpen && menuItems.map((it) => (
+                    <button key={it.id} className="room-menu-item" onClick={() => { setMenuOpen(false); tapChip(it); }}>
+                      {it.label}<span aria-hidden="true">›</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
+        </div>
+      )}
+      {!editable && props.rotatable && (
+        <div className="room-edit" style={{ top: `calc(${insetTop - 48}px + var(--safe-top))` }}>
+          <button className="pill-glass glass-hud" onClick={() => setTurn((t) => t + 1)} aria-label="Turn the room">↻ Turn</button>
         </div>
       )}
     </div>

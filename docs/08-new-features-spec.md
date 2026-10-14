@@ -266,6 +266,13 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 | NPC chat bubbles | Any NPC you can talk to has a small speech-bubble icon over their head |
 | Entering every location | Every location can be entered. Each uses one of the shared interior templates, recolored, with its own sign and props; new templates (office, civic building, outdoor plaza) cover all places. **Exception (owner, Oct 14): subway stations** stay a map label and lore (section 5) |
 
+**Built (v0.11 step 2, Oct 14):**
+- **Folded actions.** A place card shows "Things to do here · N" with what's there in one line and today's tasks as checkboxes; one tap opens the full list. Inside a room the panel stays folded as before. At home a **Things to do** list (Nap, Kitchen, Sit, Your look) folds under Turn and Arrange.
+- **Task checkboxes.** Every daily task at a place is a checkbox on its card and in the room panel, and on the matching action row; it ticks (and strikes through) when done.
+- **Task dot.** The task icon in the side column shows a dot at the first open of each New York day, cleared when tapped.
+- **Turning the apartment.** ↻ Turn, or a sideways swipe, turns the view a quarter at a time; the two walls nearest the camera are always cut away.
+- **Speech bubbles.** Everyone you can talk to in a room has a 💬 over their head; tapping it talks to them.
+
 ## 12. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.

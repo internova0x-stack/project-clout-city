@@ -6,7 +6,7 @@ import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { eventAvailability, eventById, type CityState, type DailyTask } from "@/lib/cityState";
+import { eventAvailability, eventById, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { getBrowserSupabase } from "@/lib/supabase/client";
@@ -16,17 +16,7 @@ import { EffectChips, useGameNow } from "../city/Common";
 import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
 import { HuntTab } from "../hunt/Hunt";
-import { leadAction } from "@/lib/gossip";
 import type { HuntState } from "@/lib/hunts";
-
-const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at" };
-
-function taskTitle(t: DailyTask): string {
-  if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
-  // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
-  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : "overheard", hours: null });
-  return `${TASK_VERB[t.kind]} ${placeById(t.place_id)?.name ?? "a place"}`;
-}
 
 /** Midnight New York time, shown in the player's own time zone. */
 function resetTimeLocal(): string {
