@@ -307,6 +307,8 @@ Owner, Oct 14: walled rooms with many items; walls between rooms at waist height
 - **A bought house is your home.** Buying the Astoria townhouse or the LIC penthouse moves you in (rent already stops).
 - **New pieces:** bathtub, toilet, sink with mirror, kitchen island, nightstand.
 - Walking goes through doorways, never through walls; arranged furniture can't be pushed into a wall. Each home's pieces have their own ids, so a layout arranged in one home doesn't carry into another.
+- **Fif's Furniture** (owner, Oct 14; migration 0044): a showroom in Long Island City on the map, and a **Home** tab in the Phone's Shop. Pieces are shelved by room (living, bedroom, dining, decor), most in a few colors (one sku per color), and pay a little clout like clothes. **Try it at home** drops the piece into your home to arrange before buying; buying keeps it where it stands. Bought pieces you haven't placed wait in **📦 Storage** at home: tap one to place it, and **Put away** sends it back. Placed pieces are saved in the home layout under `item:<id>`; a spot that doesn't fit (another home, a wall) sends the piece back to storage. Bought seats and beds work like the home's own (Sit, Nap).
+- **The Jackson Heights 1BR** comes a little bigger (7.7 × 6.6 m) and nearly empty (bed, kitchen, wardrobe, one chair) so players furnish it themselves. The studio, the high-rise and the houses stay furnished.
 - **Clubs and lounges** (next step): one open floor; stairs down to the restrooms, where Listen in is juicier; stairs up to a VIP floor for medium and exclusive clubs.
 
 ## 14. Later features

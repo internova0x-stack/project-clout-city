@@ -45,7 +45,7 @@ export type ItemUse =
   /** v0.11 the gigs board (offices): opens today's gigs in the Phone. */
   | { kind: "gigs" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
-  | { kind: "shop"; category: "fashion" | "cars" | "houses" | "luxury" | "makeup" };
+  | { kind: "shop"; category: "fashion" | "home" | "cars" | "houses" | "luxury" | "makeup"; section?: string };
 
 export interface RoomItem {
   id: string;
@@ -121,7 +121,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   shelf: { w: 2.0, d: 0.5, label: "Shelf" },
   drinksFridge: { w: 1.4, d: 0.7, label: "Drinks" },
   cat: { w: 0.5, d: 0.3, label: "The cat" },
-  piano: { w: 1.5, d: 1.4, label: "Piano" },
+  piano: { w: 1.5, d: 1.4, label: "Piano", movable: true },
   clothesRack: { w: 1.6, d: 0.5, label: "Rack" },
   mirror: { w: 0.9, d: 0.3, label: "Mirror" },
   displayTable: { w: 1.2, d: 0.8, label: "Display" },
@@ -144,7 +144,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   bathtub: { w: 1.6, d: 0.8, label: "Bathtub" },
   toilet: { w: 0.5, d: 0.7, label: "Toilet" },
   bathSink: { w: 0.7, d: 0.5, label: "Sink" },
-  kitchenIsland: { w: 1.8, d: 0.9, label: "Kitchen island" },
+  kitchenIsland: { w: 1.8, d: 0.9, label: "Kitchen island", movable: true },
   nightstand: { w: 0.5, d: 0.45, label: "Nightstand", movable: true },
 };
 
@@ -176,33 +176,24 @@ const piece = (prefix: string) => (id: string, kind: FurnitureKind, x: number, z
   ({ id: `${prefix}-${id}`, kind, x, z, rot, ...extra });
 
 // Jackson Heights 1BR (mid rent): two rooms, a bedroom and a living room with a kitchen nook. Room counts
-// follow the price (owner, Oct 14): the cheap studio is one room; dearer homes have more.
+// follow the price (owner, Oct 14): the cheap studio is one room; dearer homes have more. It comes a little
+// bigger and nearly empty (bed, kitchen, wardrobe, one chair) so players furnish it from Fif's Furniture.
 const jh = piece("1br");
 const jacksonHeights: RoomTemplate = {
-  id: "jackson_heights_1br", w: 7.0, d: 6.0, wall: "#D7E4E0", wallAccent: "#A9C2BB", floor: "#8E6242", floorKind: "wood", window: true,
+  id: "jackson_heights_1br", w: 7.7, d: 6.6, wall: "#D7E4E0", wallAccent: "#A9C2BB", floor: "#8E6242", floorKind: "wood", window: true,
   rooms: [
-    room("Living", -3.5, -0.2, 3.5, 3.0, "#8E6242"),
-    room("Kitchen", 0.8, -3.0, 3.5, -0.2, "#E6E1D8", "tile"),
-    room("Bedroom", -3.5, -3.0, 0.8, -0.2, "#7E5638"),
+    room("Living", -3.85, -0.2, 3.85, 3.3, "#8E6242"),
+    room("Kitchen", 0.9, -3.3, 3.85, -0.2, "#E6E1D8", "tile"),
+    room("Bedroom", -3.85, -3.3, 0.9, -0.2, "#7E5638"),
   ],
-  walls: [[-3.5, -0.2, -2.6, -0.2], [-1.6, -0.2, 0.8, -0.2], [0.8, -3.0, 0.8, -0.2]],
+  walls: [[-3.85, -0.2, -2.8, -0.2], [-1.8, -0.2, 0.9, -0.2], [0.9, -3.3, 0.9, -0.2]],
   items: [
-    jh("bed", "bed", -2.0, -1.9, 0, { color: "#6C8CFF", use: { kind: "sleep" }, label: "Nap" }),
-    jh("nightstand", "nightstand", -0.7, -2.7),
-    jh("wardrobe", "wardrobe", 0.4, -1.6, 3, { use: { kind: "look" }, label: "Your look" }),
-    jh("lamp", "floorLamp", -3.2, -2.7),
-    jh("kitchen", "kitchen", 2.2, -2.6, 0, { use: { kind: "cook" }, label: "Kitchen" }),
-    jh("dining", "diningTable", 2.3, -1.0),
-    jh("chair", "chair", 1.35, -1.0, 1, { use: sit, label: "Sit" }),
-    jh("tv", "tvStand", -0.6, 0.3),
-    jh("rug", "rug", -0.6, 1.4, 0, { color: "#E0457B" }),
-    jh("coffee-table", "coffeeTable", -0.6, 1.4),
-    jh("sofa", "sofa", -0.6, 2.45, 2, { color: "#FF8A3D", use: sit, label: "Sit" }),
-    jh("armchair", "armchair", -2.6, 1.4, 1, { color: "#40B589", use: sit, label: "Sit" }),
-    jh("plant", "plant", -3.15, 0.2),
-    jh("bookshelf", "bookshelf", -3.3, 1.3, 1),
+    jh("bed", "bed", -2.2, -2.15, 0, { color: "#6C8CFF", use: { kind: "sleep" }, label: "Nap" }),
+    jh("wardrobe", "wardrobe", 0.5, -1.8, 3, { use: { kind: "look" }, label: "Your look" }),
+    jh("kitchen", "kitchen", 2.4, -2.95, 0, { use: { kind: "cook" }, label: "Kitchen" }),
+    jh("chair", "chair", 2.4, -1.3, 2, { use: sit, label: "Sit" }),
   ],
-  spawn: [0.9, 2.5],
+  spawn: [0.9, 2.7],
 };
 
 // LIC high-rise: open living and kitchen; a bedroom and a bathroom behind.
@@ -340,7 +331,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
+export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -431,6 +422,31 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     ],
     spawn: [-0.8, 2.3],
     npcs: [{ x: 2.2, z: 2.6, facing: 3.14 }, { x: 1.2, z: -1.6, facing: 3.14 }],
+  },
+  // #19 Fif's Furniture: little rooms on the shop floor; each opens the Shop's Home tab on that room.
+  showroom: {
+    id: "showroom", w: 10.0, d: 7.5, wall: "#F3EBDD", wallAccent: "#FFC21A", floor: "#D9C7A8", floorKind: "wood", window: true,
+    items: [
+      { id: "rug-1", kind: "rug", x: -3.0, z: -2.2, rot: 0, color: "#40B589" },
+      { id: "sofa", kind: "sofa", x: -3.0, z: -3.05, rot: 0, color: "#6C8CFF", use: { kind: "shop", category: "home", section: "living" }, label: "Browse living" },
+      { id: "coffee-table", kind: "coffeeTable", x: -3.0, z: -1.9, rot: 0 },
+      { id: "lamp", kind: "floorLamp", x: -4.6, z: -3.4, rot: 0 },
+      { id: "bed", kind: "bed", x: 0.6, z: -2.55, rot: 0, color: "#F2B8C6", use: { kind: "shop", category: "home", section: "bedroom" }, label: "Browse bedroom" },
+      { id: "nightstand", kind: "nightstand", x: 1.85, z: -3.3, rot: 0 },
+      { id: "rug-2", kind: "rug", x: 3.6, z: -2.3, rot: 0, color: "#FFC21A" },
+      { id: "dining", kind: "diningTable", x: 3.6, z: -2.3, rot: 0, use: { kind: "shop", category: "home", section: "dining" }, label: "Browse dining" },
+      { id: "chair-1", kind: "chair", x: 3.6, z: -3.0, rot: 0 },
+      { id: "chair-2", kind: "chair", x: 3.6, z: -1.6, rot: 2 },
+      { id: "armchair-1", kind: "armchair", x: -4.4, z: 0.6, rot: 1, color: "#FF8A3D", use: { kind: "action", actionId: "browse" }, label: "Sit on everything" },
+      { id: "armchair-2", kind: "armchair", x: -4.4, z: 1.8, rot: 1, color: "#B0135A" },
+      { id: "bookshelf", kind: "bookshelf", x: -1.4, z: 0.4, rot: 0 },
+      { id: "plant-1", kind: "plant", x: 4.3, z: 1.4, rot: 0, use: { kind: "shop", category: "home", section: "decor" }, label: "Browse decor" },
+      { id: "plant-2", kind: "plant", x: 4.3, z: 0.7, rot: 0 },
+      { id: "display", kind: "desk", x: 0.4, z: 0.4, rot: 0 },
+      { id: "counter", kind: "storeCounter", x: 2.8, z: 2.6, rot: 2 },
+    ],
+    spawn: [-0.6, 2.9],
+    npcs: [{ x: 2.8, z: 3.15, facing: 3.14 }, { x: -2.4, z: -1.0, facing: 3.14 }],
   },
   // The parody universities: a lecture hall with rows of desks facing the board.
   campus: {
@@ -741,21 +757,60 @@ export function placementOk(t: RoomTemplate, items: RoomItem[], moved: RoomItem)
   return items.every((o) => o.id === moved.id || FURNITURE[o.kind].walkable || !overlaps(o, moved));
 }
 
-/** Applies a saved home layout to a template; unknown ids and bad numbers are ignored. */
-export function applyLayout(t: RoomTemplate, raw: unknown): RoomItem[] {
+/** #19 Fif's Furniture: a piece the player bought (a player_items row), placed through the home layout. */
+export interface OwnedPiece { id: string; kind: FurnitureKind; color?: string; name: string; emoji: string }
+/** The layout id of a bought piece. */
+export const ownedId = (itemId: number) => `item:${itemId}`;
+export const isOwnedId = (id: string) => id.startsWith("item:");
+/** Bought seats and beds work like the home's own. */
+const OWNED_USE: Partial<Record<FurnitureKind, Pick<RoomItem, "use" | "label">>> = {
+  sofa: { use: { kind: "sit" }, label: "Sit" }, armchair: { use: { kind: "sit" }, label: "Sit" },
+  chair: { use: { kind: "sit" }, label: "Sit" }, bed: { use: { kind: "sleep" }, label: "Nap" },
+};
+export function ownedItem(p: OwnedPiece, x: number, z: number, rot: number): RoomItem {
+  return { id: p.id, kind: p.kind, x, z, rot: ((rot % 4) + 4) % 4, color: p.color, name: p.name, ...OWNED_USE[p.kind] };
+}
+
+/**
+ * Applies a saved home layout to a template; unknown ids and bad numbers are ignored. Bought pieces
+ * (#19) appear where the layout puts them; any without a spot, or whose spot no longer fits (another
+ * home, a wall), stay in storage.
+ */
+export function applyLayout(t: RoomTemplate, raw: unknown, owned: OwnedPiece[] = []): RoomItem[] {
   const entries = Array.isArray(raw) ? (raw as Partial<LayoutEntry>[]) : [];
+  const valid = (e: Partial<LayoutEntry> | undefined): e is LayoutEntry =>
+    !!e && Number.isFinite(e.x) && Number.isFinite(e.z) && Number.isInteger(e.rot);
   const byId = new Map(entries.filter((e) => e && typeof e.id === "string").map((e) => [e.id as string, e]));
   const out: RoomItem[] = [];
   for (const item of t.items) {
     const e = byId.get(item.id);
     let next = item;
-    if (e && Number.isFinite(e.x) && Number.isFinite(e.z) && Number.isInteger(e.rot) && FURNITURE[item.kind].movable) {
-      next = clampItem(t, { ...item, x: e.x as number, z: e.z as number, rot: (((e.rot as number) % 4) + 4) % 4 });
+    if (valid(e) && FURNITURE[item.kind].movable) {
+      next = clampItem(t, { ...item, x: e.x, z: e.z, rot: ((e.rot % 4) + 4) % 4 });
       if (!placementOk(t, [...out, ...t.items.filter((o) => o.id !== item.id)], next)) next = item;
     }
     out.push(next);
   }
+  for (const p of owned) {
+    const e = byId.get(p.id);
+    if (!valid(e)) continue;
+    const next = ownedItem(p, e.x, e.z, e.rot);
+    const c = clampItem(t, next);
+    if (c.x === next.x && c.z === next.z && placementOk(t, out, next)) out.push(next);
+  }
   return out;
+}
+
+/** The first free spot for a piece taken out of storage, searching outward from the middle of the room. */
+export function freeSpot(t: RoomTemplate, items: RoomItem[], piece: RoomItem): RoomItem | null {
+  for (let ring = 0; ring < 40; ring++) {
+    for (let dx = -ring; dx <= ring; dx++) for (let dz = -ring; dz <= ring; dz++) {
+      if (Math.max(Math.abs(dx), Math.abs(dz)) !== ring) continue;
+      const cand = { ...piece, x: snap(dx * GRID), z: snap(dz * GRID) };
+      if (placementOk(t, items, cand)) return cand;
+    }
+  }
+  return null;
 }
 
 export function toLayout(items: RoomItem[]): LayoutEntry[] {

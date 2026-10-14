@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { PLACES, SHOP_ITEMS } from "../lib/city.ts";
 import { ECONOMY } from "../lib/economy.ts";
 import {
-  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, homeTemplate, roomAt, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
+  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, ownedId, ownedItem, roomAt, type OwnedPiece, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
 } from "../lib/rooms.ts";
 
 const all: RoomTemplate[] = [...Object.values(HOME_TEMPLATES), ...Object.values(PLACE_TEMPLATES)];
@@ -72,4 +72,30 @@ test("saved layouts round-trip, and bad entries are ignored", () => {
   const onTop = applyLayout(t, [{ id: "plant", x: -1.85, z: -1.5, rot: 0 }]); // onto the bed
   assert.equal(onTop.find((i) => i.id === "plant")!.x, 1.75);
   assert.ok(Object.values(FURNITURE).every((f) => f.w > 0 && f.d > 0));
+});
+
+test("#19 Fif's Furniture: bought pieces are placed by the layout, the rest wait in storage", () => {
+  const t = HOME_TEMPLATES.jackson_heights_1br;
+  const sofa: OwnedPiece = { id: ownedId(7), kind: "sofa", color: "#6C8CFF", name: "Three-seat sofa", emoji: "🛋️" };
+  const plant: OwnedPiece = { id: ownedId(8), kind: "plant", name: "Monstera", emoji: "🪴" };
+  const placed = applyLayout(t, [{ id: "item:7", x: -0.5, z: 2.0, rot: 2 }], [sofa, plant]);
+  const s = placed.find((i) => i.id === "item:7");
+  assert.ok(s && s.use?.kind === "sit" && s.color === "#6C8CFF", "the sofa is placed and can be sat on");
+  assert.ok(!placed.some((i) => i.id === "item:8"), "the plant has no spot: it's in storage");
+  // A spot inside a wall (or another home's spot that no longer fits) sends the piece back to storage.
+  assert.ok(!applyLayout(t, [{ id: "item:7", x: -0.5, z: -0.2, rot: 0 }], [sofa]).some((i) => i.id === "item:7"));
+  // Taking a piece out of storage finds a free spot; saving keeps it.
+  const spot = freeSpot(t, placed, ownedItem(plant, 0, 0, 0));
+  assert.ok(spot && placementOk(t, placed, spot));
+  assert.ok(toLayout([...placed, spot!]).some((e) => e.id === "item:8"));
+});
+
+test("#19 every Home item is a real piece, and Fif's showroom opens the Home tab", () => {
+  const home = SHOP_ITEMS.filter((i) => i.category === "home");
+  assert.ok(home.length >= 20);
+  for (const i of home) assert.ok(i.furniture && FURNITURE[i.furniture.kind as keyof typeof FURNITURE]?.movable, i.sku);
+  const fifs = PLACES.find((p) => p.id === "fifs-furniture")!;
+  const room = placeRoom(fifs)!;
+  const browse = room.items.filter((i) => i.use?.kind === "shop");
+  assert.ok(browse.length >= 3 && browse.every((i) => i.use?.kind === "shop" && i.use.category === "home"));
 });
