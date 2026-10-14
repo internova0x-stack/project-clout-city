@@ -7,6 +7,13 @@ approve the hunt and news in the Studio. **Gossip is automatic** (owner, Oct 13)
 merged it goes live on its Monday by itself; the Studio's **Gossip** tab shows it in full, and you
 can Pause it or Hold it with a note.
 
+> **Test phase (owner, Oct 14): news and hunts are automatic too.** No approval this round: once a
+> news or hunt week file is merged, the game stores it approved by itself (within 10 minutes of the
+> next visit, or at once when you open the Studio's News or Hunts tab; migration 0037,
+> `lib/contentImport.ts`). Everything still shows in the Studio, where you can Pause an item or a
+> hunt (a pause holds even when the file is stored again). The Load and Approve steps below are
+> only needed after the test phase.
+
 ## The weekly loop
 
 | When (New York) | Who | What |
