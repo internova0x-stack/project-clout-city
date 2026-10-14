@@ -12,6 +12,10 @@ export interface Home {
   rent: number;
   blurb: string;
   emoji: string;
+  /** Moving up (#19, owner Oct 14): clout needed to move in later, from the Apartments app. */
+  moveClout?: number;
+  /** False for homes you can only move up to, never pick at sign-up. */
+  signup?: boolean;
 }
 
 export interface Trait { id: string; emoji: string; name: string; blurb: string }
@@ -24,6 +28,8 @@ export interface Economy {
   startingStats: { energy: number; mood: number; confidence: number };
   playersOnlineThreshold: number;
   homes: Home[];
+  /** Moving later costs the first week's rent plus a broker fee of this many weeks' rent. */
+  moving: { brokerWeeks: number };
 }
 
 export const ECONOMY: Economy = {
@@ -36,9 +42,19 @@ export const ECONOMY: Economy = {
   homes: [
     { id: "astoria_studio", name: "Astoria studio walk-up", neighborhood: "Astoria", rent: 1750, emoji: "🪜", blurb: "Fourth floor, no elevator. Free leg day, every day." },
     { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 2600, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
-    { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 4500, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal." },
+    { id: "sunnyside_gardens", name: "Sunnyside Gardens 1BR", neighborhood: "Sunnyside", rent: 3200, emoji: "🌿", blurb: "A garden you share with forty neighbors and one very territorial cat.", moveClout: 1000, signup: false },
+    { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 4500, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal.", moveClout: 3000 },
   ],
+  moving: { brokerWeeks: 1 },
 };
+
+/** Homes offered at sign-up (moving-up homes come later, from the Apartments app). */
+export const SIGNUP_HOMES = ECONOMY.homes.filter((h) => h.signup !== false);
+
+/** What moving into a home costs now: the first week's rent plus the broker fee. */
+export function moveCost(home: Home, e: Economy = ECONOMY): number {
+  return home.rent * (1 + e.moving.brokerWeeks);
+}
 
 export const TRAITS: Trait[] = [
   { id: "main_character", emoji: "🎬", name: "Main Character Energy", blurb: "Narrates own life in the third person." },

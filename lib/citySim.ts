@@ -4,10 +4,11 @@
 // form; the SQL is the source of truth.
 
 import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
+import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
-import { OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { HOME_NEEDS_CLOUT, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
@@ -31,7 +32,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
   return {
     player: {
       id: "preview", bank_cash: 5450, clout: 850, energy: 80, mood: 60, confidence: 55, home_id: "astoria_studio",
-      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 5), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, fridge_meals: 4, ...overrides,
+      next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 5), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, fridge_meals: 4, moved_up: false, ...overrides,
     },
     today,
     tasks,
@@ -366,6 +367,23 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     saveHomeLayout(layout) {
       s.homeLayout = layout;
       return ok();
+    },
+    moveHome(homeId) {
+      // Migration 0045's move_home: first week's rent plus the broker fee, the home's clout, no rent owed.
+      const home = ECONOMY.homes.find((h) => h.id === homeId);
+      if (!home) return fail("That listing was a scam. Classic.");
+      if (p().house_sku) return fail("You own a house. Landlords are a thing of your past.");
+      if (p().home_id === homeId) return fail("You already live there. Unpack first.");
+      if (s.bills.some((b) => b.kind === "rent" && b.status === "due")) return fail("Pay this week's rent before you move. Landlords talk.");
+      if (p().clout < (home.moveClout ?? 0)) return fail(HOME_NEEDS_CLOUT);
+      const cost = moveCost(home);
+      if (p().bank_cash < cost) return fail("Your card got declined. Loudly.");
+      const before = ECONOMY.homes.find((h) => h.id === p().home_id)?.rent ?? 0;
+      p().bank_cash -= cost;
+      p().home_id = homeId;
+      p().next_rent_due = addDays(s.today, 7);
+      p().moved_up = !!p().moved_up || home.rent > before;
+      return ok({ cash: -cost });
     },
     storyClout(n) {
       p().clout += n;

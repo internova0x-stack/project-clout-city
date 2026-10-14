@@ -58,6 +58,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
       at_place: "at_place" in player ? player.at_place ?? null : undefined,
       // Migration 0027; undefined before it runs, which hides groceries and the kitchen.
       fridge_meals: "fridge_meals" in player ? Number(player.fridge_meals ?? 0) : undefined,
+      // Migration 0045; undefined before it runs, which hides the Apartments app.
+      moved_up: "moved_up" in player ? !!player.moved_up : undefined,
     },
     today: day,
     tasks: (tasks.data ?? []) as DailyTask[],

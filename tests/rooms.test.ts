@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PLACES, SHOP_ITEMS } from "../lib/city.ts";
-import { ECONOMY } from "../lib/economy.ts";
+import { ECONOMY, SIGNUP_HOMES, moveCost } from "../lib/economy.ts";
 import {
-  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, ownedId, ownedItem, roomAt, type OwnedPiece, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
+  FURNITURE, HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, ownedItem, roomAt, type OwnedPiece, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
 } from "../lib/rooms.ts";
 
-const all: RoomTemplate[] = [...Object.values(HOME_TEMPLATES), ...Object.values(PLACE_TEMPLATES)];
+const all: RoomTemplate[] = [...Object.values(HOME_TEMPLATES), ...Object.values(HOME_FLOORS).flatMap((f) => Object.values(f)), ...Object.values(PLACE_TEMPLATES)];
 
 test("every home has a room", () => {
   for (const h of ECONOMY.homes) assert.ok(HOME_TEMPLATES[h.id], h.id);
@@ -98,4 +98,30 @@ test("#19 every Home item is a real piece, and Fif's showroom opens the Home tab
   const room = placeRoom(fifs)!;
   const browse = room.items.filter((i) => i.use?.kind === "shop");
   assert.ok(browse.length >= 3 && browse.every((i) => i.use?.kind === "shop" && i.use.category === "home"));
+});
+
+test("#19 moving up: Sunnyside is a move-up home, moving costs rent plus the broker fee", () => {
+  assert.ok(!SIGNUP_HOMES.some((h) => h.id === "sunnyside_gardens"), "not offered at sign-up");
+  const sunny = ECONOMY.homes.find((h) => h.id === "sunnyside_gardens")!;
+  assert.equal(moveCost(sunny), 6400);
+  assert.equal(sunny.moveClout, 1000);
+  assert.ok(HOME_TEMPLATES.sunnyside_gardens && (HOME_TEMPLATES.sunnyside_gardens.rooms?.length ?? 0) === 3);
+  assert.ok(HOME_FLOORS["house-hunters-point-duplex"]?.[2], "the duplex has an upstairs");
+  for (const [id, floors] of Object.entries(HOME_FLOORS)) {
+    const down = HOME_TEMPLATES[id].items.find((i) => i.use?.kind === "floor");
+    assert.ok(down && down.use?.kind === "floor" && floors[down.use.to], `${id}: stairs go up`);
+    for (const f of Object.values(floors)) assert.ok(f.items.some((i) => i.use?.kind === "floor" && i.use.to === 1), `${f.id}: stairs come down`);
+  }
+});
+
+test("#19 bought pieces remember their floor; saving one floor keeps the other", () => {
+  const up = HOME_FLOORS["house-hunters-point-duplex"][2];
+  const tub: OwnedPiece = { id: ownedId(3), kind: "plant", name: "Monstera", emoji: "🪴" };
+  const layout = [{ id: "item:3", x: 1.6, z: 1.8, rot: 0, f: 2 }];
+  assert.ok(applyLayout(up, layout, [tub], 2).some((i) => i.id === "item:3"), "upstairs it stands");
+  assert.ok(!applyLayout(HOME_TEMPLATES["house-hunters-point-duplex"], layout, [tub], 1).some((i) => i.id === "item:3"), "downstairs it doesn't");
+  assert.ok(placedElsewhere(layout, 1).has("item:3"), "and isn't in storage downstairs");
+  const saved = mergeFloorLayout(layout, [{ id: "dx-sofa", x: -2, z: 2.4, rot: 2 }], 1);
+  assert.ok(saved.some((e) => e.id === "item:3" && e.f === 2) && saved.some((e) => e.id === "dx-sofa"), "saving downstairs keeps the upstairs piece");
+  assert.ok(!mergeFloorLayout(layout, [], 2).some((e) => e.id === "item:3"), "putting it away upstairs removes it");
 });

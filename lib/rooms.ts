@@ -28,7 +28,7 @@ export type FurnitureKind =
   // v0.11 the exclusive venue's second floor
   | "stairs"
   // #19 bigger homes: bathrooms, kitchen islands, bedside tables
-  | "bathtub" | "toilet" | "bathSink" | "kitchenIsland" | "nightstand";
+  | "bathtub" | "toilet" | "bathSink" | "kitchenIsland" | "nightstand" | "hotTub";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -146,6 +146,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   bathSink: { w: 0.7, d: 0.5, label: "Sink" },
   kitchenIsland: { w: 1.8, d: 0.9, label: "Kitchen island", movable: true },
   nightstand: { w: 0.5, d: 0.45, label: "Nightstand", movable: true },
+  hotTub: { w: 1.8, d: 1.8, label: "Hot tub" },
 };
 
 // ---------------------------------------------------------------------------
@@ -315,6 +316,89 @@ const licPenthouse: RoomTemplate = {
   spawn: [0.6, 2.4],
 };
 
+// Sunnyside Gardens (#19 moving up, owner Oct 14): the first home to work towards. Three rooms,
+// nearly empty (bed, wardrobe, kitchen, bathroom, one chair) to furnish from Fif's.
+const sg = piece("sg");
+const sunnysideGardens: RoomTemplate = {
+  id: "sunnyside_gardens", w: 8.4, d: 7.0, wall: "#EDE3D2", wallAccent: "#B7A27F", floor: "#B88A5E", floorKind: "wood", window: true,
+  rooms: [
+    room("Living", -4.2, -0.3, 4.2, 3.5, "#B88A5E"),
+    room("Bedroom", -4.2, -3.5, 1.2, -0.3, "#A07650"),
+    room("Bathroom", 1.2, -3.5, 4.2, -0.3, "#DDE7EA", "tile"),
+  ],
+  walls: [[-4.2, -0.3, -2.9, -0.3], [-1.9, -0.3, 1.9, -0.3], [2.9, -0.3, 4.2, -0.3], [1.2, -3.5, 1.2, -0.3]],
+  items: [
+    sg("bed", "bed", -2.6, -2.4, 0, { color: "#40B589", use: { kind: "sleep" }, label: "Nap" }),
+    sg("wardrobe", "wardrobe", 0.8, -1.8, 3, { use: { kind: "look" }, label: "Your look" }),
+    sg("bathtub", "bathtub", 3.3, -3.0),
+    sg("toilet", "toilet", 1.65, -3.05),
+    sg("sink", "bathSink", 3.75, -1.2, 3),
+    sg("kitchen", "kitchen", 3.75, 1.8, 3, { use: { kind: "cook" }, label: "Kitchen" }),
+    sg("chair", "chair", 2.6, 1.8, 1, { use: sit, label: "Sit" }),
+  ],
+  spawn: [0.0, 3.0],
+};
+
+// Hunters Point duplex penthouse (#19, bought): two floors joined by stairs. Downstairs: a big living
+// room with a piano, dining and a kitchen with an island. Upstairs: bedroom, bathroom, dressing room
+// and a terrace with a hot tub.
+const dx = piece("dx");
+const duplexDown: RoomTemplate = {
+  id: "house-hunters-point-duplex", w: 12.0, d: 8.5, wall: "#E8E6EE", wallAccent: "#B8B4C4", floor: "#D9CBB4", floorKind: "wood", window: true,
+  rooms: [
+    room("Living", -6.0, -4.25, 1.5, 4.25, "#D9CBB4"),
+    room("Kitchen", 1.5, 0.0, 6.0, 4.25, "#ECE8E0", "tile"),
+    room("Dining", 1.5, -4.25, 6.0, 0.0, "#CDB79A"),
+  ],
+  walls: [[1.5, -4.25, 1.5, -2.6], [1.5, -1.4, 1.5, 1.2], [1.5, 2.4, 1.5, 4.25]],
+  items: [
+    dx("piano", "piano", -4.6, -3.0),
+    dx("tv", "tvStand", -2.0, -0.3),
+    dx("rug", "rug", -2.0, 1.2, 0, { color: "#6B4FD8" }),
+    dx("coffee-table", "coffeeTable", -2.0, 1.2),
+    dx("sofa", "sofa", -2.0, 2.4, 2, { color: "#F4F1EA", use: sit, label: "Sit" }),
+    dx("armchair-1", "armchair", -4.2, 1.2, 1, { color: "#C9A227", use: sit, label: "Sit" }),
+    dx("armchair-2", "armchair", 0.2, 1.2, 3, { color: "#C9A227", use: sit, label: "Sit" }),
+    dx("stairs", "stairs", -5.2, 3.2, 2, { use: { kind: "floor", to: 2 }, label: "↑", name: "Upstairs" }),
+    dx("bookshelf", "bookshelf", -2.6, -4.0),
+    dx("plant", "plant", 1.0, -3.8),
+    dx("kitchen", "kitchen", 5.6, 2.2, 3, { use: { kind: "cook" }, label: "Kitchen" }),
+    dx("fridge", "fridge", 5.6, 0.5, 3),
+    dx("island", "kitchenIsland", 3.4, 2.4),
+    dx("dining", "diningTable", 3.8, -2.0),
+    dx("chair-1", "chair", 3.8, -2.75, 0, { use: sit, label: "Sit" }),
+    dx("chair-2", "chair", 3.8, -1.25, 2, { use: sit, label: "Sit" }),
+  ],
+  spawn: [-1.0, 3.6],
+};
+const duplexUp: RoomTemplate = {
+  id: "house-hunters-point-duplex:2", w: 12.0, d: 8.5, wall: "#E8E6EE", wallAccent: "#B8B4C4", floor: "#B9B2A6", floorKind: "tile", window: true,
+  rooms: [
+    room("Bedroom", -6.0, -4.25, 0.0, 0.5, "#C2AA88"),
+    room("Bathroom", 0.0, -4.25, 3.0, 0.5, "#E3ECEF", "tile"),
+    room("Dressing room", 3.0, -4.25, 6.0, 0.5, "#CDB79A"),
+    room("Terrace", -6.0, 0.5, 6.0, 4.25, "#B9B2A6", "tile"),
+  ],
+  walls: [[-6.0, 0.5, -4.4, 0.5], [-3.4, 0.5, 0.9, 0.5], [1.9, 0.5, 3.9, 0.5], [4.9, 0.5, 6.0, 0.5], [0.0, -4.25, 0.0, 0.5], [3.0, -4.25, 3.0, 0.5]],
+  items: [
+    dx("bed", "bed", -3.5, -2.8, 0, { color: "#2A2530", use: { kind: "sleep" }, label: "Nap" }),
+    dx("nightstand", "nightstand", -5.0, -3.7),
+    dx("lamp", "floorLamp", -5.6, -3.8),
+    dx("armchair-3", "armchair", -1.0, -0.6, 2, { color: "#B0135A", use: sit, label: "Sit" }),
+    dx("bathtub", "bathtub", 1.9, -3.7),
+    dx("toilet", "toilet", 0.5, -3.8),
+    dx("sink", "bathSink", 2.5, -1.2, 3),
+    dx("wardrobe", "wardrobe", 4.5, -3.9, 0, { use: { kind: "look" }, label: "Your look" }),
+    dx("plant-2", "plant", 5.5, -3.8),
+    dx("stairs-down", "stairs", -5.2, 3.2, 2, { use: { kind: "floor", to: 1 }, label: "↓", name: "Downstairs" }),
+    dx("hot-tub", "hotTub", 4.0, 2.6),
+    dx("table", "cafeTable", 1.6, 2.6),
+    dx("lounger", "sofa", -0.6, 3.6, 2, { color: "#F4F1EA", use: sit, label: "Sit" }),
+    dx("plant-3", "plant", -2.6, 3.8),
+  ],
+  spawn: [-4.0, 3.0],
+};
+
 export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   astoria_studio: {
     id: "astoria_studio", w: 5.4, d: 5.2, wall: "#E9D8C4", wallAccent: "#C9B49C", floor: "#A8744A", floorKind: "wood", window: true,
@@ -324,6 +408,13 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   lic_highrise: licHighrise,
   "house-astoria-townhouse": astoriaTownhouse,
   "house-lic-penthouse": licPenthouse,
+  sunnyside_gardens: sunnysideGardens,
+  "house-hunters-point-duplex": duplexDown,
+};
+
+/** #19: a home's upper floors (the duplex), by floor number. */
+export const HOME_FLOORS: Record<string, Record<number, RoomTemplate>> = {
+  "house-hunters-point-duplex": { 2: duplexUp },
 };
 
 /** The player's home: a bought house, else the rented home (the studio if unknown). */
@@ -711,7 +802,8 @@ export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number
 // ---------------------------------------------------------------------------
 // Layout and geometry helpers
 // ---------------------------------------------------------------------------
-export interface LayoutEntry { id: string; x: number; z: number; rot: number }
+/** A saved spot; `f` is the floor of a bought piece in a home with stairs (#19, the duplex), 1 when absent. */
+export interface LayoutEntry { id: string; x: number; z: number; rot: number; f?: number }
 
 export function footprint(item: Pick<RoomItem, "kind" | "rot">): { w: number; d: number } {
   const f = FURNITURE[item.kind];
@@ -776,7 +868,7 @@ export function ownedItem(p: OwnedPiece, x: number, z: number, rot: number): Roo
  * (#19) appear where the layout puts them; any without a spot, or whose spot no longer fits (another
  * home, a wall), stay in storage.
  */
-export function applyLayout(t: RoomTemplate, raw: unknown, owned: OwnedPiece[] = []): RoomItem[] {
+export function applyLayout(t: RoomTemplate, raw: unknown, owned: OwnedPiece[] = [], floor = 1): RoomItem[] {
   const entries = Array.isArray(raw) ? (raw as Partial<LayoutEntry>[]) : [];
   const valid = (e: Partial<LayoutEntry> | undefined): e is LayoutEntry =>
     !!e && Number.isFinite(e.x) && Number.isFinite(e.z) && Number.isInteger(e.rot);
@@ -793,7 +885,7 @@ export function applyLayout(t: RoomTemplate, raw: unknown, owned: OwnedPiece[] =
   }
   for (const p of owned) {
     const e = byId.get(p.id);
-    if (!valid(e)) continue;
+    if (!valid(e) || (e.f ?? 1) !== floor) continue;
     const next = ownedItem(p, e.x, e.z, e.rot);
     const c = clampItem(t, next);
     if (c.x === next.x && c.z === next.z && placementOk(t, out, next)) out.push(next);
@@ -813,8 +905,27 @@ export function freeSpot(t: RoomTemplate, items: RoomItem[], piece: RoomItem): R
   return null;
 }
 
-export function toLayout(items: RoomItem[]): LayoutEntry[] {
-  return items.filter((i) => FURNITURE[i.kind].movable).map((i) => ({ id: i.id, x: round(i.x), z: round(i.z), rot: i.rot }));
+export function toLayout(items: RoomItem[], floor = 1): LayoutEntry[] {
+  return items.filter((i) => FURNITURE[i.kind].movable).map((i) => ({
+    id: i.id, x: round(i.x), z: round(i.z), rot: i.rot, ...(floor !== 1 && isOwnedId(i.id) ? { f: floor } : {}),
+  }));
+}
+
+/**
+ * #19 homes with stairs: saving one floor keeps the other floor's entries. Bought pieces placed on
+ * another floor stay there; this floor's own entries are replaced.
+ */
+export function mergeFloorLayout(prev: unknown, next: LayoutEntry[], floor: number): LayoutEntry[] {
+  const ids = new Set(next.map((e) => e.id));
+  const kept = (Array.isArray(prev) ? (prev as LayoutEntry[]) : []).filter((e) =>
+    e && typeof e.id === "string" && !ids.has(e.id) && !(isOwnedId(e.id) && (e.f ?? 1) === floor));
+  return [...kept, ...next];
+}
+
+/** Bought pieces that stand on another floor of the home (so this floor's storage doesn't list them). */
+export function placedElsewhere(raw: unknown, floor: number): Set<string> {
+  return new Set((Array.isArray(raw) ? (raw as LayoutEntry[]) : [])
+    .filter((e) => e && typeof e.id === "string" && isOwnedId(e.id) && (e.f ?? 1) !== floor).map((e) => e.id));
 }
 
 const round = (v: number) => Math.round(v * 100) / 100;
