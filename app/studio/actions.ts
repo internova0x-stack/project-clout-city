@@ -1,7 +1,7 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type GossipAdmin, type GossipFileCheck, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type GossipAdmin, type GossipFileCheck, type SetupCheckRow, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
@@ -9,6 +9,8 @@ import { readContentDrafts } from "@/lib/contentDrafts";
 import { checkGossipFiles, syncGossipWeeks } from "@/lib/gossipImport";
 import { syncWeeklyContent } from "@/lib/contentImport";
 import { getServerSupabase } from "@/lib/supabase/server";
+import { runSetupCheck } from "@/lib/setupCheck";
+import { headers } from "next/headers";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
 // function, which checks story_admins itself, so these never trust the browser.
@@ -201,4 +203,17 @@ export async function studioDrafts(): Promise<Admin<ContentDraft[]>> {
 }
 export async function studioMetrics() {
   return admin<StudioMetrics>("admin_metrics");
+}
+
+// ---- Setup check (owner, Oct 14): admins only; reports what's missing, never a secret ----
+export async function studioSetupCheck(): Promise<Admin<SetupCheckRow[]>> {
+  const gate = await admin<unknown>("admin_story_list");
+  if (!gate.ok) return gate;
+  const h = await headers();
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "") || `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
+  try {
+    return { ok: true, data: await runSetupCheck(origin) };
+  } catch (e) {
+    return { ok: false, error: `The check itself failed: ${e instanceof Error ? e.message : String(e)}` };
+  }
 }

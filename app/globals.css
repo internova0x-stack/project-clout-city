@@ -1345,3 +1345,11 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
   color:var(--text-1); cursor:pointer; touch-action:none; user-select:none; -webkit-user-select:none; }
 .room-arrow:active:not(:disabled) { background:var(--green-tint); }
 .room-arrow:disabled { opacity:.35; }
+/* Studio Setup check (owner, Oct 14). */
+.setup-rows { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.setup-row { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:12px; background:var(--surface-2, rgba(30,26,40,.04)); }
+.setup-row.fail { background:rgba(217,58,47,.08); }
+.setup-row.warn { background:rgba(242,169,0,.10); }
+.setup-text { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.setup-text b { word-break:break-all; }
+.setup-row .meta { word-break:break-word; }
