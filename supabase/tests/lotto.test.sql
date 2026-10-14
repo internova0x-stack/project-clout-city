@@ -42,6 +42,7 @@ select pg_temp.assert(pg_temp.raises($$select public.lotto_prize(100, 0)$$, 'per
 select pg_temp.assert(pg_temp.raises($$select public.buy_lotto_card('lucky-star', 'corner-store', true)$$, 'lotto_not_here'), 'cards need you at the counter');
 select pg_temp.assert(pg_temp.raises($$select public.buy_lotto_card('velvet-static', 'corner-store', true)$$, 'unknown_action'), 'only the lotto sells cards');
 select 1 from public.travel('lucky-star', 'taxi');
+select 1 from public.skip_trip();
 select pg_temp.assert(pg_temp.raises($$select public.buy_lotto_card('lucky-star', 'gold-rush', false)$$, 'lotto_unknown_game'), 'only the five games');
 
 -- Free cards: the C$5 game only; two a day through the first 7 days (beginner's luck).

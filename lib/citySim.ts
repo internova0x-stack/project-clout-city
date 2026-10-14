@@ -18,8 +18,8 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
   const today = new Date().toISOString().slice(0, 10);
   const tasks: DailyTask[] = [
     // v0.11: two of the five send the player along the gossip trail (the preview week's starts).
-    { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 65, done_at: null },
-    { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 50, done_at: null },
+    { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 15, done_at: null },
+    { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 15, done_at: null },
     { id: 3, slot: 3, kind: "hangout", place_id: "flushing-meadows", action_id: "hangout", reward: 55, done_at: new Date().toISOString() },
     { id: 4, slot: 4, kind: "visit", place_id: "velvet-static", action_id: "visit", reward: 90, done_at: null },
     { id: 5, slot: 5, kind: "event", place_id: "velvet-static", action_id: "neon-nights", reward: 80, done_at: null },
@@ -98,7 +98,9 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     const t = s.tasks.find((x) => !x.done_at && x.place_id === placeId && x.action_id === actionId);
     if (!t) return 0;
     t.done_at = new Date(now()).toISOString();
-    let paid = t.reward;
+    // Owner, Oct 14 (migration 0042): gossip tasks pay clout, not cash.
+    let paid = t.kind === "gossip" ? 0 : t.reward;
+    if (t.kind === "gossip") p().clout += CITY_ECONOMY.gossip.taskClout;
     if (s.tasks.every((x) => x.done_at)) paid += CITY_ECONOMY.dailyTasks.bonus;
     p().bank_cash += paid;
     return paid;

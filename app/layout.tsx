@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: "Arrive in New York as a nobody. Chase clout. Tap in, blow up.",
   applicationName: "Clout City",
   appleWebApp: { capable: true, title: "Clout City", statusBarStyle: "black-translucent" },
-  icons: { icon: "/icon.svg", apple: "/icons/apple-touch-icon.png" },
+  icons: { icon: "/icons/favicon-64.png", apple: "/icons/apple-touch-icon.png" },
   openGraph: {
     title: "Clout City NYC",
     description: "Arrive in New York as a nobody. Chase clout. Tap in, blow up.",

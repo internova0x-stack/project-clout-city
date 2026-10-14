@@ -57,10 +57,13 @@ select pg_temp.assert(public.gossip_state() -> 'stories' -> 0 -> 'pieces' -> 1 -
 select pg_temp.at(1, 'ditmars-deli');
 create temp table f1 as select public.gossip_find('ditmars-deli', 'regular') r;
 grant all on f1 to authenticated;
-select pg_temp.assert(jsonb_array_length(r -> 'found') = 1 and (r ->> 'taskCash')::int > 0, 'piece one, and the task paid') from f1;
+-- Owner, Oct 14 (0042): gossip tasks pay clout, not cash.
+select pg_temp.assert(jsonb_array_length(r -> 'found') = 1 and (r ->> 'taskCash')::int = 0, 'piece one, and no cash for information') from f1;
+select pg_temp.assert(exists (select 1 from public.ledger where player_id = auth.uid() and currency = 'clout' and kind = 'daily_task' and amount = 15), 'the task paid 15 clout');
 select pg_temp.assert(public.gossip_state() -> 'stories' -> 0 -> 'pieces' -> 1 ->> 'place' = 'grind-and-gossip', 'Sal points to the café');
 select pg_temp.assert(public.gossip_state() -> 'stories' -> 0 -> 'pieces' -> 2 ->> 'place' is null, 'but not further');
-select pg_temp.assert((public.gossip_find('ditmars-deli', 'regular') ->> 'taskCash')::int = 0, 'the task pays once');
+select 1 from public.gossip_find('ditmars-deli', 'regular');
+select pg_temp.assert((select count(*) from public.ledger where player_id = auth.uid() and kind = 'daily_task') = 1, 'the task pays once');
 reset role;
 select pg_temp.assert((select place from public.gossip_leads('00000000-0000-0000-0000-0000000000f1') where story = 'trail-a') = 'grind-and-gossip', 'the lead moves on');
 
@@ -71,7 +74,7 @@ select pg_temp.as_(1);
 select pg_temp.at(1, 'two-bros-pizza');
 create temp table f2 as select public.gossip_find('two-bros-pizza', 'overheard') r;
 grant all on f2 to authenticated;
-select pg_temp.assert(jsonb_array_length(r -> 'found') = 0 and (r ->> 'taskCash')::int > 0, 'nothing new, but the task still counts') from f2;
+select pg_temp.assert(jsonb_array_length(r -> 'found') = 0 and (select count(*) from public.ledger where player_id = auth.uid() and kind = 'daily_task' and currency = 'clout') = 2, 'nothing new, but the task still counts') from f2;
 reset role;
 
 -- A finished story leaves no lead; with no leads at all, five ordinary tasks.

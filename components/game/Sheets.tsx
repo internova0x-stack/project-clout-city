@@ -6,7 +6,7 @@ import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { eventAvailability, eventById, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
+import { eventAvailability, eventById, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { getBrowserSupabase } from "@/lib/supabase/client";
@@ -94,7 +94,7 @@ export function TasksSheet({
                   >
                     <span className="select-emoji" aria-hidden="true">{t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
                     <span className="title" style={{ display: "block" }}>{taskTitle(t)}</span>
-                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `Pays ${formatCash(t.reward)} · ${t.kind === "gossip" ? "Gossip · " : ""}${placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
+                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `${taskRewardLine(t)} · ${t.kind === "gossip" ? "Gossip · " : ""}${placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
                     {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
                   </div>
                 ))}

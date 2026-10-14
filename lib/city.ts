@@ -122,9 +122,10 @@ export const CITY_ECONOMY = {
    * pieces; finishing one pays a little clout and Mood (once, ledger 'gossip'), and five finished earn
    * a badge. Stories stay findable for two weeks from their Monday; finished Tea cards are kept.
    * v0.11 (owner, Oct 14): stories are a trail (each piece found names where the next one is) and
-   * tasksPerDay of the five daily tasks send the player to their next piece.
+   * tasksPerDay of the five daily tasks send the player to their next piece. Owner, Oct 14: those pay
+   * taskClout clout, not cash ("why reward cash for information?"; migration 0042).
    */
-  gossip: { pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 2 },
+  gossip: { pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 2, taskClout: 15 },
   lotto: {
     tags: ["lotto"],
     freeGame: "corner-store",
