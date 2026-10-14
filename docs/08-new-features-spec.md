@@ -4,7 +4,7 @@ Oct 13, 2026 · @Internovatechnologies
 
 This spec covers the features that came out of testing v0.1 and the follow-up discussion: treasure hunts, the Story Studio, an expanded News app, a recurring cast and NPCs, a denser starting neighborhood, and travel and rest. It sits alongside `docs/testing-feedback.md`, which holds the bug fixes and smaller decisions.
 
-Sections 1 to 6 are decided. Section 7 lists features for after P1; don't build them yet.
+Sections 1 to 8 are decided. Sections 9 to 11 came from the third testing round (spec v3, Oct 14) and are built in v0.11 "Doors Open". Section 12 lists features for after P1; don't build them yet.
 
 All rules from the other documents still apply: no real brands or people, gold only for marking real money, virtual cash written C$, real money never shortens a wait or buys an edge.
 
@@ -15,7 +15,7 @@ All rules from the other documents still apply: no real brands or people, gold o
 > - **Nothing is replaced or moved:** the new places are added to the ones that exist, focused in Astoria. Places already in Astoria (Grind & Gossip Café, Pedal Pushers Hub, Low Light Lounge, Thread Count Boutique) count toward its 20. The two universities stay where they are; Astoria also gets a community college.
 > - Celebrity names are punny type spoofs (Chase Clout, Dunk Daniels, Chardonnay Shade…): they wink at a type, never at one real person (docs/CAST.md).
 > - The sports stars are simply "a basketball star" and "a football star": no league names, real or invented.
-> - Claude doesn't run on its own: the weekly drafts come from a scheduled Claude Code session (a Routine) that uploads to the Studio for approval.
+> - Claude doesn't run on its own: the weekly drafts come from a scheduled Claude Code session (a Routine). Since v0.11 they go live unless the owner edits or vetoes them (section 9).
 
 ## 1. Treasure hunts
 
@@ -52,7 +52,7 @@ A weekly, opt-in hunt that sends players around the city following clues, with o
 
 1. **By Thursday:** a scheduled Claude Code session drafts the theme and all eight tracks (treasure, steps, clues, questions, finale, card lore).
 2. **Validation script:** every place exists and is open all week, none is affected by the live story, at least one step is free or cheap, every question has exactly one correct answer.
-3. **By Sunday:** the owner approves in the Story Studio (skim all eight, read one in full).
+3. **By Sunday:** the tracks wait in the Story Studio for at least 24 hours and go live unless the owner edits or vetoes them (section 9, from v0.11; until then the owner approves).
 4. **Monday at New York midnight:** publish.
 5. **Measure:** joins, completions, and drop-off at each step; make next week easier or harder accordingly.
 
@@ -110,7 +110,7 @@ City news stays light: no real politics, no tragedies or crime (the main stories
 ### Production
 
 - A scheduled Claude Code session drafts a week of city news at a time, alongside the hunts, following the Story Quality Brief's tone and guardrails.
-- The owner skims and approves the week in the Story Studio; items are scheduled for set days.
+- Items wait in the Story Studio and go live on their scheduled days unless the owner edits or vetoes them (section 9, from v0.11; until then the owner approves).
 - Each item is data (headline, two or three sentences, cast members involved, publish day) and goes to the News archive after it runs.
 
 ## 4. Recurring cast and NPCs
@@ -222,14 +222,56 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 
 **Built (v0.10 step 4, migration 0035):** every place card has a free **👂 Listen in** (on arrival) that finds the overheard pieces there; tapping the regular (on the card, or inside the room) tells theirs, after any hunt clue. Pieces with a time window only turn up in it (city clock); outside it Listen in says when to come back. A toast says "🍵 Piece 2 of 5 · …". The **Tea app** on the Phone lists the live stories with five-step progress; a story shows its found pieces in full (who and where; **Share with crew** once each, which counts as found for the crew) and blurred hints for the rest (overheard or a regular, the kind of place and its neighborhood, the window); only the first piece names its place. The fifth piece opens Lola's **Tea card**: +25 clout and +6 Mood once (ledger `gossip`), kept in the Collection's **🍵 Tea** tab; five finished earn the ☕ **Spills the Tea** badge. Players only ever receive the text of pieces they've found. Never about real players or real people, and never a live story's answer (the Studio's story-safety check, as for hunts).
 
-## 9. Later features
+## 9. Content automation: live unless vetoed
+
+**Version:** v0.11. News, gossip and treasure hunts go live on schedule unless the owner edits or vetoes them.
+
+> **Owner answer (Oct 14, 2026): no Claude API for now.** Spec v3 had a scheduled job call the Claude API to generate content. Instead the drafts keep coming from the weekly Claude Code session (docs/WEEKLY-CONTENT.md), which commits the week files; the game loads them on its own. No API key, no generation costs to log.
+
+1. **Drafting:** the weekly Claude Code session drafts a week of city news, the week's gossip stories and the week's eight hunt tracks, following the Story Quality Brief and the cast and city bible.
+2. **Automated checks:** `npm run validate:content` (the Studio's rules): invented names only, no real brands or politics, every place exists and is open, structure (5 gossip pieces, one correct answer per hunt question), nothing that gives away a live story. A file that fails is held, never published.
+3. **Veto window:** passed content waits in the Story Studio for at least 24 hours before its publish time. The owner can edit, veto or approve early. If nothing is done, it goes live on schedule. A file that arrives less than 24 hours ahead waits until it has had its 24 hours.
+4. **Main stories keep one human approval:** a main story's blueprint (who did it, the hidden truth) is approved by the owner before the story is scheduled; its daily beats then follow the veto-window rule.
+5. **Pause anytime:** anything live can still be paused or retired from the Studio.
+6. **News now:** News is live immediately, starting with a drafted week.
+
+## 10. Exclusive events update
+
+**Version:** v0.11 (owner, Oct 14). Replaces the earlier exclusive event details where they differ.
+
+- **Price:** $3.99 (set in `store_products`, never in code).
+- **The event modal lists the benefits:** meet and chat with real people, earn a collectible, get mentioned in City News.
+- **The venue:** a special location with multiple floors, the first multi-floor building in the game.
+- **Who you see:** each player sees 8 to 10 other people at once, for performance and a cozy feel. When there aren't enough players, NPCs fill the gap, clearly marked as NPCs.
+- **Event chat:** a group chat for the people in the room, with no daily message limit inside event rooms during the event. Private messages keep the normal daily cap. The word filter, block and report all apply. (This is the one place strangers can chat; section 12's "stranger chat is ruled out" still holds everywhere else.)
+- **Positive chat suggestions:** the chat offers tappable, positive-only suggestions ("Love the fit 🔥", "First time here?", "Who's on the decks tonight?"), so starting a conversation is easy and the tone stays friendly.
+- **Dropped (owner, Oct 14):** the "Show me more" setting (men, women or everyone). Who you see is never filtered by gender; "Presenting as" stays cosmetic only.
+
+## 11. Interface and sign-in updates
+
+**Version:** v0.11.
+
+| Area | Change |
+| --- | --- |
+| Payments | Connect Stripe in test mode for all real-money products |
+| Google sign-in | "Continue with Google" works in the browser; test it in the installed app (PWA) too |
+| Sign-in in the installed app | Email links open in Safari, not the installed app. The 6-digit email code is the main sign-in in the installed app, so players sign in without leaving it |
+| Actions at places | Collapsed by default and expandable, in the apartment and at every location |
+| Tasks at places | Tasks done at a location show a checkbox that ticks when completed |
+| Daily tasks and gossip | At least 2 of each day's 5 tasks involve gossip, e.g. "Talk to John at the deli" to pick up a piece of his story |
+| Task notification | The task icon in the side column shows a notification dot at the player's first open of each New York day, cleared when tapped |
+| Rotating the apartment | Players can rotate the apartment view in 90° steps, with a button or a swipe |
+| NPC chat bubbles | Any NPC you can talk to has a small speech-bubble icon over their head |
+| Entering every location | Every location can be entered. Each uses one of the shared interior templates, recolored, with its own sign and props; new templates (office, civic building, outdoor plaza) cover all places. **Exception (owner, Oct 14): subway stations** stay a map label and lore (section 5) |
+
+## 12. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
 | Feature | What it is | Why later |
 | --- | --- | --- |
 | Premium penthouse with parties | One multi-floor apartment bought with real cash. Owners can throw a party once a week, announced to players, with RSVPs and a guest limit, attended by players and NPCs | A fifth real-money product, multi-floor interiors, and enough players to fill a party; parties need moderation |
-| Buildings with multiple floors | Going upstairs inside a place | Multiplies interior art; start with the penthouse |
+| Buildings with multiple floors | Going upstairs inside a place | The exclusive event venue (section 10) is the first; more buildings later |
 | Players at the same place | See which real players are at a location, with preset reactions; real chat only with people you're connected to | Needs live presence and enough players; stranger chat is ruled out |
 | Friends at home | Invite your crew to your apartment and chat there | Part of group hangouts on the roadmap |
 | NPC conversations | Back-and-forth talks with choices | Needs a dialogue system and more writing each week |

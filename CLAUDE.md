@@ -2,11 +2,11 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.10 "Tickets and Tea"** (v0.1 to v0.9 are done; v1.0 "Launch" is next) (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.11 "Doors Open"** (v0.1 to v0.10 are done; v1.0 "Launch" is next) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
-- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto and neighborhood gossip. **Wins over the older docs** for those features.
+- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11). **Wins over the older docs** for those features.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
 - `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt, news and gossip), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
