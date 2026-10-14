@@ -202,9 +202,12 @@ export function PreviewHome({
   const gossipReady = useRef<Promise<void> | null>(null);
   const gossipApi = useMemo<GossipApi>(() => ({
     async state() { await (gossipReady.current ??= previewGossipReset(gossipPreset)); return previewGossipState(); },
-    find: previewGossipFind,
+    async find(placeId, via) {
+      const r = await previewGossipFind(placeId, via);
+      return r.ok ? { ok: true, data: { ...r.data, taskCash: sim.gossipTask(placeId, via) } } : r;
+    },
     share: previewGossipShare,
-  }), [gossipPreset]);
+  }), [gossipPreset, sim]);
   // v0.9 party keepsakes in memory (?party=invite|sent).
   const partyApi = useMemo<PartyApi>(() => ({
     async inbox() { await partyReset(); return previewPartyInbox(); },

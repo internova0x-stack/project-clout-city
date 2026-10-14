@@ -96,8 +96,10 @@ export const CITY_ECONOMY = {
    * Neighborhood gossip (v0.10, spec section 8; owner Oct 13). 3 to 5 stories a week of exactly five
    * pieces; finishing one pays a little clout and Mood (once, ledger 'gossip'), and five finished earn
    * a badge. Stories stay findable for two weeks from their Monday; finished Tea cards are kept.
+   * v0.11 (owner, Oct 14): stories are a trail (each piece found names where the next one is) and
+   * tasksPerDay of the five daily tasks send the player to their next piece.
    */
-  gossip: { pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5 },
+  gossip: { pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 2 },
   lotto: {
     tags: ["lotto"],
     freeGame: "corner-store",

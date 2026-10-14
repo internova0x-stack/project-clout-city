@@ -17,8 +17,9 @@ const CLOCK = { realHoursPerCityDay: 2, dayStartsAt: 6, nightStartsAt: 19 };
 export function sampleCityState(overrides: Partial<CityState["player"]> = {}): CityState {
   const today = new Date().toISOString().slice(0, 10);
   const tasks: DailyTask[] = [
-    { id: 1, slot: 1, kind: "eat", place_id: "lucky-seven-deli", action_id: "eat", reward: 45, done_at: null },
-    { id: 2, slot: 2, kind: "shift", place_id: "grind-and-gossip", action_id: "shift", reward: 70, done_at: null },
+    // v0.11: two of the five send the player along the gossip trail (the preview week's starts).
+    { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 65, done_at: null },
+    { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 50, done_at: null },
     { id: 3, slot: 3, kind: "hangout", place_id: "flushing-meadows", action_id: "hangout", reward: 55, done_at: new Date().toISOString() },
     { id: 4, slot: 4, kind: "visit", place_id: "velvet-static", action_id: "visit", reward: 90, done_at: null },
     { id: 5, slot: 5, kind: "event", place_id: "velvet-static", action_id: "neon-nights", reward: 80, done_at: null },
@@ -73,6 +74,8 @@ export type SimApi = CityApi & {
   partyEvent(ev: ExclusiveEvent): Promise<CityResult>;
   /** Previews only (?lotto=win|big|lose): the next cards' prizes, as multiples of the card. */
   lottoNext(times: number[]): void;
+  /** v0.11 gossip tasks: talking or listening in at a place completes its task (the find runs on the dev server). */
+  gossipTask(placeId: string, via: "overheard" | "regular"): number;
 
 };
 
@@ -103,6 +106,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
   return {
     refresh: () => ok(),
     lottoNext(times) { lottoQueue = [...times]; },
+    gossipTask: (placeId, via) => completeTask(placeId, `gossip-${via}`),
 
     buyLottoCard(placeId, gameId, free) {
       const place = PLACES.find((x) => x.id === placeId);

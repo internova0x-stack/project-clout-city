@@ -16,12 +16,15 @@ import { EffectChips, useGameNow } from "../city/Common";
 import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
 import { HuntTab } from "../hunt/Hunt";
+import { leadAction } from "@/lib/gossip";
 import type { HuntState } from "@/lib/hunts";
 
-const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to" };
+const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at" };
 
 function taskTitle(t: DailyTask): string {
   if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
+  // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
+  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : "overheard", hours: null });
   return `${TASK_VERB[t.kind]} ${placeById(t.place_id)?.name ?? "a place"}`;
 }
 
@@ -99,9 +102,9 @@ export function TasksSheet({
                     style={{ cursor: t.done_at ? "default" : "pointer" }}
                     onClick={t.done_at ? undefined : () => onOpenPlace(t.place_id)}
                   >
-                    <span className="select-emoji" aria-hidden="true">{t.kind === "event" ? "🍸" : placeById(t.place_id)?.emoji ?? "📍"}</span>
+                    <span className="select-emoji" aria-hidden="true">{t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
                     <span className="title" style={{ display: "block" }}>{taskTitle(t)}</span>
-                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `Pays ${formatCash(t.reward)} · ${placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
+                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `Pays ${formatCash(t.reward)} · ${t.kind === "gossip" ? "Gossip · " : ""}${placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
                     {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
                   </div>
                 ))}

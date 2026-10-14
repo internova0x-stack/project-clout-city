@@ -55,7 +55,7 @@ export async function previewGossipState(): Promise<GossipState | null> {
         const via = mem.found.get(key(s.id, n));
         if (via) return { n, found: true as const, text: p.text, place: p.place, source: p.source, via, shared: mem.shared.has(key(s.id, n)) };
         const pl = PLACES.find((x) => x.id === p.place);
-        return { n, found: false as const, source: p.source, hours: p.hours ?? null, place: n === 0 ? p.place : null, kind: pl?.tags[0] ?? null, area: pl?.neighborhood ?? null };
+        return { n, found: false as const, source: p.source, hours: p.hours ?? null, place: n === 0 || mem.found.has(key(s.id, n - 1)) ? p.place : null, kind: pl?.tags[0] ?? null, area: pl?.neighborhood ?? null };
       }),
     })),
     cards: w.stories.filter((s) => mem.cards.has(s.id)).map((s) => ({

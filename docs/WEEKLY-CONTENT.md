@@ -59,7 +59,10 @@ it isn't in your working directory). Work from the main branch.
    pieces at five different places that build to a reveal, plus Lola's write-up ("tea"). Use
    "regular" only where lib/cast.ts has one; give a few pieces a city-clock window ("hours") so
    timing matters. Only invented people; never real players, people, brands or politics; no story
-   places and nothing about a running story. New story ids every week.
+   places and nothing about a running story. New story ids every week. Pieces are a trail in order
+   (v0.11): finding piece 1 names piece 2's place, and so on, so order them as a walk around the
+   neighborhood, start each story somewhere easy to find (ideally a regular), and let a piece's
+   text nod at the next person ("Ask Benny, he'll deny it").
 6. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
 7. Commit only those three files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch

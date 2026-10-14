@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { regularAt } from "@/lib/cast";
-import { TOPIC_LABEL, foundCount, hintLine, type GossipStoryView, type TeaCard } from "@/lib/gossip";
+import { TOPIC_LABEL, foundCount, hintLine, leadAction, type GossipStoryView, type TeaCard } from "@/lib/gossip";
 import { ChevronLeftIcon } from "../icons";
 import { Sheet } from "../Sheet";
 
@@ -47,6 +47,7 @@ export function TeaApp({ stories, cards, busy, onHome, onShare, onOpenCard }: {
                   <span className="subtext">{s.teaser}</span>
                   <Progress n={n} />
                   <span className="meta">{n === 0 ? (start ? `Not started · start at ${start}` : "Not started") : n === 4 ? "4 of 5 · one more and Lola spills" : `${n} of 5 pieces`}</span>
+                  {n > 0 && next(s) && <span className="tea-next">Next: {next(s)}</span>}
                 </button>
               );
             })}
@@ -74,6 +75,7 @@ function StoryView({ story, busy, onBack, onShare, onOpenCard }: {
       <h2 className="display-md tea-title">{story.emoji} {story.title}</h2>
       <Progress n={foundCount(story)} />
       <span className="meta" style={{ display: "block", marginTop: 6 }}>{TOPIC_LABEL[story.topic]} · findable until {shortDay(story.endsOn)}</span>
+      {!story.done && next(story) && <span className="tea-next" style={{ marginTop: 10 }}>Next: {next(story)}</span>}
       {story.done && <button className="btn btn-secondary" style={{ width: "100%", marginTop: 12 }} onClick={onOpenCard}>🍵 Read Lola&apos;s Tea card</button>}
       <div className="stack-8" style={{ marginTop: 12 }}>
         {story.pieces.map((p) => p.found ? (
@@ -103,6 +105,12 @@ function Progress({ n }: { n: number }) {
       {Array.from({ length: CITY_ECONOMY.gossip.pieces }, (_, i) => <i key={i} className={i < n ? "on" : ""} />)}
     </span>
   );
+}
+
+/** v0.11 the trail: the next stop in a story, once the player knows where it is. */
+function next(s: GossipStoryView): string | null {
+  const p = s.pieces.find((x) => !x.found && x.place);
+  return p && !p.found && p.place ? leadAction({ place: p.place, source: p.source, hours: p.hours }) : null;
 }
 
 const shortDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });

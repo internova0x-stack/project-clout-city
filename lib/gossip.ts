@@ -146,6 +146,8 @@ export interface GossipFind {
   found: { story: string; title: string; piece: number; text: string; count: number }[];
   later: [number, number] | null;
   finished: string[];
+  /** v0.11 (migration 0036): cash from a gossip daily task completed here, bonus included. */
+  taskCash?: number;
 }
 
 export type GossipResult<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -168,15 +170,63 @@ const KIND: Record<string, string> = {
 };
 export const kindLine = (kind: string | null) => (kind && KIND[kind]) || "somewhere";
 
-/** "Overheard at a club in Long Island City · 9 PM to 3 AM (city time)". */
+/**
+ * "Overheard at a club in Long Island City · 9 PM to 3 AM (city time)". Once the trail names the
+ * place: "Talk to Rosa at Grind & Gossip Café" or "Overheard at Velvet Static · …".
+ */
 export function hintLine(p: Extract<GossipPieceView, { found: false }>, placeName?: string): string {
   const where = placeName ?? `${kindLine(p.kind)}${p.area ? ` in ${p.area}` : ""}`;
-  const how = p.source === "regular" ? `The regular at ${where}` : `Overheard at ${where}`;
+  const who = p.place ? regularAt(p.place)?.name : undefined;
+  const how = p.source === "regular" ? (who && placeName ? `Talk to ${who} at ${where}` : `The regular at ${where}`) : `Overheard at ${where}`;
   const when = windowLine(p.hours ?? undefined);
   return when ? `${how} · ${when}` : how;
 }
 
 export const foundCount = (s: GossipStoryView) => s.pieces.filter((p) => p.found).length;
+
+// ---------------------------------------------------------------------------
+// The trail (v0.11, owner Oct 14): "the city is big, so point players in the right direction;
+// everyone they talk to points them to the next person." Each piece found names where the next one
+// is (gossip_state, migration 0036), and the people a player talks to pass on their next lead.
+// ---------------------------------------------------------------------------
+
+/** Where to go next in a story: its first piece not found whose place the player knows. */
+export interface GossipLead { story: string; title: string; n: number; place: string; source: GossipPiece["source"]; hours: [number, number] | null }
+
+/** The player's next piece in every live story they haven't finished, in the Tea app's order. */
+export function gossipLeads(state: GossipState | null): GossipLead[] {
+  const out: GossipLead[] = [];
+  for (const s of state?.stories ?? []) {
+    if (s.done) continue;
+    const p = s.pieces.find((x): x is Extract<GossipPieceView, { found: false }> => !x.found && !!x.place);
+    if (p) out.push({ story: s.id, title: s.title, n: p.n, place: p.place!, source: p.source, hours: p.hours });
+  }
+  return out;
+}
+
+/** The lead someone at `here` passes on: the first one somewhere else, turning with `seed` so it varies. */
+export function leadFrom(state: GossipState | null, here: string | null, seed = 0): GossipLead | null {
+  const leads = gossipLeads(state).filter((l) => l.place !== here);
+  return leads.length ? leads[Math.abs(seed) % leads.length] : null;
+}
+
+/** "Talk to Rosa at Grind & Gossip Café" or "Listen in at Velvet Static, 9 PM to 3 AM": a task or a pointer. */
+export function leadAction(l: Pick<GossipLead, "place" | "source" | "hours">): string {
+  const place = PLACES.find((x) => x.id === l.place)?.name ?? "somewhere";
+  const who = l.source === "regular" ? regularAt(l.place)?.name : undefined;
+  const when = windowLine(l.hours ?? undefined)?.replace(" (city time)", "");
+  return `${who ? `Talk to ${who} at` : "Listen in at"} ${place}${when ? `, ${when}` : ""}`;
+}
+
+/** What a person says when they point the player on: "Ask Rosa at Grind & Gossip Café about “…”." */
+export function leadLine(l: GossipLead): string {
+  const place = PLACES.find((x) => x.id === l.place)?.name ?? "somewhere";
+  const who = l.source === "regular" ? regularAt(l.place)?.name : undefined;
+  const when = windowLine(l.hours ?? undefined)?.replace(" (city time)", "");
+  return who
+    ? `Want more on “${l.title}”? Ask ${who} at ${place}.`
+    : `People at ${place} won't shut up about “${l.title}”${when ? `, ${when}` : ""}. Go listen.`;
+}
 
 const ERRORS: Record<string, string> = {
   gossip_not_here: "You have to be there to hear it.",

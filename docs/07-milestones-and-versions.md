@@ -205,7 +205,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 1. **Built (Oct 14):** sign-in and payments: the 6-digit code as the main sign-in in the installed app; Google sign-in checked in the installed app; Stripe test mode for every real-money product.
 2. **Interface:** actions at places collapsed and expandable; ticks on tasks done at a place; the task icon's daily dot; rotating the apartment in 90° steps; speech bubbles over NPCs you can talk to.
-3. **Gossip tasks:** at least 2 of each day's 5 tasks involve gossip.
+3. **Built (Oct 14):** gossip tasks and the trail: 2 of each day's 5 tasks send the player to their next gossip piece, and each piece found (and everyone they talk to) points to the next (owner: "everyone they talk to should point them in the right direction"; migration 0036).
 4. **Live unless vetoed:** news and hunts go live after a 24-hour veto window in the Studio, like gossip; News starts live with a drafted week.
 5. **Every place enterable:** office, civic building and outdoor plaza templates; every place but subway stations gets a room.
 6. **Exclusive events update:** $3.99, the benefits in the event modal, a multi-floor venue, 8 to 10 people in the room (NPCs fill in, marked), the event group chat with no daily limit and positive suggestions.

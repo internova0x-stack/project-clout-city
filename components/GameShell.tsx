@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
-import { ECONOMY } from "@/lib/economy";
+import { ECONOMY, formatCash } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
@@ -27,7 +27,7 @@ import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
 import { KitchenSheet, RestSheet } from "./city/Rest";
 import { LottoSheet } from "./city/Lotto";
 import { TeaRevealSheet } from "./city/Gossip";
-import { TEA_BADGE, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
+import { TEA_BADGE, leadAction, leadFrom, leadLine, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
 import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
 import { formatMiles, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
@@ -581,32 +581,52 @@ export function GameShell({
   };
   // v0.10 gossip. Finding the fifth piece shows Lola's Tea card and refreshes clout and Mood.
   const gossipOn = !!(gossip && teaState && travelOn);
-  const afterFind = useCallback(async (f: GossipFind) => {
-    if (!f.found.length) return;
-    const st = await loadTea();
+  // v0.11 (migration 0036): every find may complete a gossip daily task, and each piece found names
+  // where the next one is. Returns the fresh Tea state, so the toast can point the player on.
+  const afterFind = useCallback(async (f: GossipFind): Promise<GossipState | null> => {
+    const st = f.found.length ? await loadTea() : teaState;
     if (f.finished.length) {
       const card = st?.cards.find((c) => c.storyId === f.finished[0]);
       if (card) setTeaCard({ card, fresh: true });
-      if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r));
     }
-  }, [loadTea, cityApi, applyCity]);
+    if ((f.finished.length || f.taskCash) && cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r));
+    return st;
+  }, [loadTea, teaState, cityApi, applyCity]);
   const pieceNote = (x: GossipFind["found"][number]) => `Piece ${x.count} of ${CITY_ECONOMY.gossip.pieces} · ${x.title}`;
+  const taskNote = (f: GossipFind) => (f.taskCash ? ` · ✅ Task done +${formatCash(f.taskCash)}` : "");
+  /** "Next: Talk to Rosa at Grind & Gossip Café" for the story just heard, if it isn't finished. */
+  const nextOf = (st: GossipState | null, storyId: string): string | null => {
+    const s = st?.stories.find((x) => x.id === storyId);
+    const p = s && !s.done ? s.pieces.find((x) => !x.found && x.place) : undefined;
+    return p && !p.found && p.place ? leadAction({ place: p.place, source: p.source, hours: p.hours }) : null;
+  };
+  const nextNote = (st: GossipState | null, storyId: string) => { const n = nextOf(st, storyId); return n ? ` · Next: ${n}` : ""; };
   const listenIn = async (placeId: string) => {
     if (!gossip) return;
     setBusy(`listen:${placeId}`);
     const r = await gossip.find(placeId, "overheard").finally(() => setBusy(null));
     if (!r.ok) return setToast(r.error);
-    if (!r.data.found.length) return setToast(`👂 ${quietLine(r.data.later, Date.now())}`);
+    const st = await afterFind(r.data);
+    if (!r.data.found.length) {
+      // Nothing here: point them on (unless more is said here later).
+      const lead = r.data.later ? null : leadFrom(st, placeId, Date.now() >> 16);
+      return setToast(`👂 ${lead ? `Nothing new here. ${leadLine(lead)}` : quietLine(r.data.later, Date.now())}${taskNote(r.data)}`);
+    }
     const x = r.data.found[0];
-    setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""} · saved to Tea`);
-    await afterFind(r.data);
+    setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""}${nextNote(st, x.story)}${taskNote(r.data)}`);
   };
-  const hearRegular = async (placeId: string): Promise<{ text: string; note: string } | null> => {
+  /** The regular here: a piece of gossip, or else where to go next. Null when there's nothing to pass on. */
+  const hearRegular = async (placeId: string): Promise<{ text: string; note: string; next?: string | null } | null> => {
     if (!gossip) return null;
     const r = await gossip.find(placeId, "regular");
-    if (!r.ok || !r.data.found.length) return null;
-    void afterFind(r.data);
-    return { text: r.data.found[0].text, note: `🍵 ${pieceNote(r.data.found[0])} · saved to Tea` };
+    if (!r.ok) return null;
+    const st = await afterFind(r.data);
+    if (r.data.found.length) {
+      const x = r.data.found[0];
+      return { text: x.text, note: `🍵 ${pieceNote(x)} · saved to Tea${taskNote(r.data)}`, next: nextOf(st, x.story) };
+    }
+    const lead = leadFrom(st, placeId, Date.now() >> 16);
+    return lead ? { text: leadLine(lead), note: `🍵 A lead for your Tea${taskNote(r.data)}` } : r.data.taskCash ? { text: "Nothing new today. Come back when the block starts talking.", note: taskNote(r.data).slice(3) } : null;
   };
   const shareTea = async (storyId: string, piece: number) => {
     if (!gossip) return;
@@ -919,7 +939,9 @@ export function GameShell({
                 const { who, role } = npcRole(inside);
                 // v0.10: the regular may tell you a piece of gossip first.
                 const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
-                setToast(tea ? `${who}: “${tea.text}” ${tea.note}` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
+                // v0.11: everyone else points the player to their next gossip lead, when they have one.
+                const lead = !tea && gossipOn ? leadFrom(teaState, inside.id, Date.now() >> 16) : null;
+                setToast(tea ? `${who}: “${tea.text}” ${tea.note}${tea.next ? ` · Next: ${tea.next}` : ""}` : lead ? `${who}: “${leadLine(lead)}”` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
               })()}
             />
           }
