@@ -53,7 +53,7 @@ function PartyBenefits({ where }: { where: string }) {
           {open ? "Show less ▴" : `+${more} more ▾`}
         </button>
       )}
-      <p className="xc-support">{PARTY_SUPPORT_LINE}</p>
+      <p className="xc-support"><i>{PARTY_SUPPORT_LINE.text}</i> {PARTY_SUPPORT_LINE.emoji}</p>
     </div>
   );
 }
