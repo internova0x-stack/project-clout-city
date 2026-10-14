@@ -35,6 +35,8 @@ update public.players set energy = 50 where display_name = 'rester';
 set role authenticated;
 select pg_temp.assert(pg_temp.raises($$select public.bar_drink('velvet-static')$$, 'not_here'), 'drinks need you there');
 select 1 from public.travel('velvet-static', 'taxi');
+select pg_temp.assert(pg_temp.raises($$select public.bar_drink('velvet-static')$$, 'still_travelling'), 'no drinks mid-trip');
+select 1 from public.skip_trip();
 select pg_temp.assert(pg_temp.raises($$select public.rest('nap')$$, 'not_home'), 'naps are at home');
 create temp table d as select public.bar_drink('velvet-static') as r;
 select pg_temp.assert((select (r ->> 'cash')::int = -60 and (r ->> 'energy')::int = 20 from d), 'C$60 for +20 Energy (v0.11)');
@@ -45,6 +47,7 @@ update public.players set energy = 100 where display_name = 'rester';
 set role authenticated;
 select pg_temp.assert(pg_temp.raises($$select public.bar_drink('velvet-static')$$, 'full_energy'), 'no paying for nothing at full Energy');
 select 1 from public.travel('ditmars-deli', 'taxi');
+select 1 from public.skip_trip();
 select pg_temp.assert(pg_temp.raises($$select public.bar_drink('ditmars-deli')$$, 'unknown_action'), 'no bar at the deli');
 
 rollback;

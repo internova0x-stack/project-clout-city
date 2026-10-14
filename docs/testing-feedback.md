@@ -135,7 +135,9 @@ The owner's notes from testing on an iPhone (Chrome, which uses Apple's WebKit l
 
 **#5 Lotto (migration 0041):** clear free plays ("1 of 2 left today"), instant number matching, daily pots for the small games and weekly pots for the big ones, replacing the weekly jackpot. Details in docs/08-new-features-spec.md section 7.
 
-**Logo (owner, Oct 14):** the sign-in card uses the Studio's wordmark (the neon "Clout City") instead of the gold image. The app icons are unchanged.
+**Logo (owner, Oct 14):** the sign-in card uses the Studio's wordmark (the neon "Clout City") instead of the gold image, and the app icons follow: the home-screen icons say "CLOUT CITY" in the neon gradient on night, and the browser tab shows a neon "CC".
+
+**Follow-ups (owner, Oct 14; migration 0042):** resting, cooking, groceries, the bar and the lotto also wait until a trip is over ("You're still on your way"). Gossip daily tasks (talk to someone, listen in) pay **+15 clout instead of cash**: "Why reward cash for information? Should reward with clout." Task rewards read as rewards ("+C$40", "+15 clout"), never like prices.
 
 | # | Note | Fix |
 | --- | --- | --- |

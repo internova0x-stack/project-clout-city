@@ -24,6 +24,8 @@ select pg_temp.assert(pg_temp.raises($$select public.buy_groceries('steinway-fre
 
 -- At the store: bundles fill the fridge up to 10 meals.
 select 1 from public.travel('steinway-fresh', 'taxi');
+select pg_temp.assert(pg_temp.raises($$select public.buy_groceries('steinway-fresh', 'meal-prep')$$, 'still_travelling'), 'no shopping mid-trip');
+select 1 from public.skip_trip();
 select pg_temp.assert(pg_temp.raises($$select public.buy_groceries('steinway-fresh', 'caviar')$$, 'unknown_bundle'), 'only real bundles');
 create temp table b as select public.buy_groceries('steinway-fresh', 'meal-prep') as r;
 select pg_temp.assert((select (r ->> 'cash')::int = -95 and (r ->> 'meals')::int = 7 from b), 'meal prep: C$95 for 7 meals (v0.11)');
@@ -35,6 +37,7 @@ select pg_temp.assert(pg_temp.raises($$select public.cook()$$, 'not_home'), 'coo
 
 -- Home: a meal for +25 Energy, capped at 100.
 select 1 from public.travel('home', 'taxi');
+select 1 from public.skip_trip();
 create temp table c as select public.cook() as r;
 select pg_temp.assert((select (r ->> 'energy')::int = 25 and (r ->> 'meals')::int = 8 from c), 'cooking: +25 Energy, one meal used');
 reset role;

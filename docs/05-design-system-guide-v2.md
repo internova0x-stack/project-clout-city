@@ -51,7 +51,7 @@ The key art ("Clout City NYC — Tap in. Blow up") sets a night-time, high-energ
 | Element in the key art | Becomes in the UI |
 | --- | --- |
 | Rainy night street, bridge, warm black sky | Dark glass chrome (HUD, nav, pills), the 2D night map, and a night stage behind avatars |
-| Gold beveled "CLOUT CITY" wordmark | The logo asset, and the gold-metal gradient, used only for real-cash products |
+| Neon "CLOUT CITY" wordmark (owner, Oct 14; was the gold beveled asset) | The logo: the app's heavy sans-serif (weight 800: SF Pro on Apple devices, Inter elsewhere), spaced capitals (0.12em), the `--g-neon` gradient, on the sign-in card, the Studio and the app icons. The gold-metal gradient is now only for real-cash products |
 | Black "NYC" badge with gold outline | Night-900 badges and tags with a 1.5 pt cream stroke at 14% |
 | Hazard-stripe banner behind "TAP IN. BLOW UP" | Hazard-stripe accent for announcements, closures, locked boroughs and "Coming soon" |
 | Yellow cabs | Taxi yellow is the primary action color and the clout color |

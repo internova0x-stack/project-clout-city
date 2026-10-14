@@ -369,6 +369,15 @@ export function eventById(id: string): ClubEvent | undefined {
 const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at" };
 
 /** "Eat at Ditmars Deli & Dreams", "Go to Neon Nights", "Talk to Sal at …": a daily task's title. */
+/**
+ * What a daily task pays, as a reward ("+C$40"), never a price. Owner, Oct 14: gossip tasks (talking
+ * to someone, listening in) pay clout, not cash (migration 0042).
+ */
+export function taskRewardLine(t: Pick<DailyTask, "kind" | "reward">): string {
+  return t.kind === "gossip" ? `+${CITY_ECONOMY.gossip.taskClout} clout` : `+${formatCashPlain(t.reward)}`;
+}
+const formatCashPlain = (n: number) => `C$${n.toLocaleString("en-US")}`;
+
 export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id">): string {
   if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.

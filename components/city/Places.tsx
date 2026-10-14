@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
+import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { actionSeconds, OTHER_SECONDS } from "@/lib/actionTime";
 import { formatCash } from "@/lib/economy";
@@ -275,7 +275,7 @@ function TaskTick({ t }: { t: DailyTask }) {
   return (
     <span className={`task-tick${t.done_at ? " done" : ""}`}>
       <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
-      <span>{t.done_at ? "Daily task done" : `Daily task · pays ${formatCash(t.reward)}`}</span>
+      <span>{t.done_at ? "Daily task done" : `Daily task · ${taskRewardLine(t)}`}</span>
       <span className="sr-only">{t.done_at ? ", ticked" : ", not done yet"}</span>
     </span>
   );
@@ -291,7 +291,7 @@ export function PlaceTasks({ place, state }: { place: Place; state: CityState })
         <li key={t.id} className={t.done_at ? "done" : ""}>
           <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
           <span className="place-task-title">{taskTitle(t)}</span>
-          <span className="meta">{t.done_at ? "Done" : formatCash(t.reward)}</span>
+          <span className="meta">{t.done_at ? "Done" : taskRewardLine(t)}</span>
         </li>
       ))}
     </ul>

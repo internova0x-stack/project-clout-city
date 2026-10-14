@@ -55,7 +55,8 @@ components live in `app/globals.css`.
   so rewards pay once and refunds can take back exactly what was given.
 - Game data stores real lat/lng (`lib/map/geo.ts`); the map is swappable behind
   the `MapApi` interface in `components/map/CityMap.tsx`.
-- Gold (`--gold-*`, `--g-gold`) is only for real-money products, the logo and the tagline.
+- Gold (`--gold-*`, `--g-gold`) is only for real-money products. The logo is the neon "Clout City" wordmark
+  (`.studio-mark`, the `--g-neon` gradient) on the sign-in card, the Studio and the app icons (owner, Oct 14).
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.
