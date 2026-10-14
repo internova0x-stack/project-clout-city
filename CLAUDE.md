@@ -6,7 +6,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
-- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11). **Wins over the older docs** for those features.
+- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11), and the modeled avatars and Shop outfits (section 12). **Wins over the older docs** for those features.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
 - `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt, news and gossip), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.

@@ -13,7 +13,8 @@ import {
   type LayoutEntry, type RoomItem, type RoomTemplate,
 } from "@/lib/rooms";
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
-import { buildAvatar, type AvatarParts } from "../avatar/buildAvatar";
+import type { AvatarParts } from "../avatar/buildAvatar";
+import { buildModelAvatar } from "../avatar/modelAvatar";
 import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furniture";
 
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
@@ -328,7 +329,7 @@ export default function Room3D(props: Room3DProps) {
       const a: Actor = { rig: new Group(), parts: null, x: n.x, z: n.z, heading: n.facing, mode: n.seated ? "sit" : "idle", path: [], pending: null, phase: i * 1.7 };
       let seed = (template.id.length * 977 + i * 7919) % 2147483647;
       const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
-      a.parts = buildAvatar(randomLook(rand, STARTING_STYLES.map((s) => s.id)), { pedestal: false });
+      a.parts = buildModelAvatar(randomLook(rand, STARTING_STYLES.map((s) => s.id)), { pedestal: false });
       castShadows(a.parts.root);
       a.rig.add(a.parts.root);
       if (n.seated) poseSit(a.parts, 0.78);
@@ -724,13 +725,21 @@ export default function Room3D(props: Room3DProps) {
   useEffect(() => {
     const w = world.current;
     if (!w) return;
-    const parts = buildAvatar(look, { outfit, pedestal: false });
+    const parts = buildModelAvatar(look, { outfit, pedestal: false });
     castShadows(parts.root);
     const old = w.me.parts;
-    if (old) { w.me.rig.remove(old.root); old.dispose(); }
     w.me.rig.add(parts.root);
     w.me.parts = parts;
     w.me.mode = "idle";
+    // The old outfit stays on screen until the new model has loaded, so a change never blinks.
+    if (old) {
+      parts.root.visible = false;
+      void (parts.ready ?? Promise.resolve()).then(() => {
+        w.me.rig.remove(old.root);
+        old.dispose();
+        parts.root.visible = true;
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookKey, template.id, daytime, sign, mood]);
 
@@ -746,7 +755,7 @@ export default function Room3D(props: Room3DProps) {
       let seed = (member.key.length * 977 + i * 7919 + 13) % 2147483647;
       const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
       const look = !member.npc && member.look ? member.look : randomLook(rand, STARTING_STYLES.map((x) => x.id));
-      const actor: Actor = { rig: new Group(), parts: buildAvatar(look, { pedestal: false }), x: s.x, z: s.z, heading: s.facing, mode: "dance", path: [], pending: null, phase: i * 1.3 };
+      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x: s.x, z: s.z, heading: s.facing, mode: "dance", path: [], pending: null, phase: i * 1.3 };
       castShadows(actor.parts!.root);
       actor.rig.add(actor.parts!.root);
       w.scene.add(actor.rig);
@@ -913,6 +922,12 @@ const ARROW_ORDER = [0, 1, 3, 2];
 // Animation and poses
 // ---------------------------------------------------------------------------
 function stepActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: (it: RoomItem | null) => void) {
+  poseActor(a, dt, t, reduce, onArrive);
+  // The modeled avatar plays its clip, then takes the limb turns set above.
+  a.parts?.update?.(reduce && a.mode !== "walk" ? 0 : dt);
+}
+
+function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: (it: RoomItem | null) => void) {
   const p = a.parts;
   a.rig.position.set(a.x, 0, a.z);
   if (!p) return;
@@ -921,6 +936,7 @@ function stepActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     if (!target) {
       a.mode = "idle";
       resetLimbs(p);
+      p.setMotion?.("idle");
       onArrive?.(a.pending);
       return;
     }
@@ -938,6 +954,12 @@ function stepActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     }
     if (dist > 0.01) a.heading = turnToward(a.heading, Math.atan2(dx, dz), dt * 10);
     a.phase += dt * 9;
+    // The modeled avatar walks with its own clip.
+    if (p.setMotion) {
+      p.setMotion("walk");
+      a.rig.rotation.y = a.heading;
+      return;
+    }
     const s = Math.sin(a.phase);
     p.legs[0].rotation.x = s * 0.55;
     p.legs[1].rotation.x = -s * 0.55;
@@ -971,6 +993,7 @@ function turnToward(cur: number, target: number, k: number) {
 }
 
 function resetLimbs(p: AvatarParts) {
+  p.head.rotation.set(0, 0, 0);
   for (const o of [...p.legs, ...p.knees]) o.rotation.set(0, 0, 0);
   p.arms.forEach((o, i) => o.rotation.set(0, 0, (i === 0 ? -1 : 1) * 0.13));
   p.body.position.y = 0;
@@ -986,7 +1009,7 @@ function standUp(a: Actor) {
 /** Hips on the seat, thighs forward, shins down. */
 function poseSit(p: AvatarParts, seatY: number) {
   resetLimbs(p);
-  p.root.position.set(0, seatY + 0.04 - 0.9, -0.12);
+  p.root.position.set(0, seatY + 0.04 - (p.hipY ?? 0.9), -0.12);
   for (const l of p.legs) l.rotation.x = -Math.PI / 2;
   for (const k of p.knees) k.rotation.x = Math.PI / 2;
   p.arms[0].rotation.x = -0.35;

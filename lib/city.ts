@@ -631,7 +631,9 @@ export interface ShopItem {
   rating: 1 | 2 | 3 | 4;
   blurb: string;
   /** Fashion: which outfit slot it fills and how it renders on the avatar. */
-  wear?: { slot: "top" | "bottom" | "shoes" | "accessory"; kind?: string; color: string; accent?: string };
+  wear?: { slot: "top" | "bottom" | "shoes" | "accessory" | "outfit"; kind?: string; color: string; accent?: string };
+  /** Clout needed to buy it (fantasy outfits); buy_item checks it. */
+  cloutReq?: number;
   /** Cars: weekly rental price, if it can be rented. */
   rentPerWeek?: number;
   /** Houses: replaces the rented home. */
@@ -665,6 +667,18 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "forever-our-bird-hoodie", category: "fashion", name: "\"Forever Our Bird\" hoodie", emoji: "🕊️", price: 185, clout: 12, rating: 2, storyOnly: true, blurb: "Loretta's grief merch, C$185, \"for healing.\" Limited time, unlimited questions.", wear: { slot: "top", kind: "hoodie", color: "#F4F1EA", accent: "#6C8CFF" } },
   { sku: "col-faux-chinchilla", category: "fashion", name: "Faux chinchilla coat", emoji: "🧥", price: 0, clout: 80, rating: 4, collector: true, blurb: "No chinchillas were harmed. Several egos were.", wear: { slot: "top", kind: "blazer", color: "#D9D2C5", accent: "#A89F92" } },
   { sku: "col-holo-boots", category: "fashion", name: "Holographic platform boots", emoji: "👢", price: 0, clout: 70, rating: 4, collector: true, blurb: "Six inches taller and visible from space.", wear: { slot: "shoes", color: "#B8C6FF" } },
+  // Whole outfits (#9, owner Oct 14): city sets for cash; fantasy sets need clout too, "to give players something to work towards".
+  { sku: "set-site-crew", category: "fashion", name: "Site crew hi-vis", emoji: "🦺", price: 240, clout: 14, rating: 2, blurb: "Hard hat, hi-vis, zero construction experience.", wear: { slot: "outfit", kind: "site-crew", color: "#F2A541" } },
+  { sku: "set-st-marks-punk", category: "fashion", name: "St. Marks punk", emoji: "🎸", price: 380, clout: 22, rating: 3, blurb: "Ripped on purpose. Angry on schedule.", wear: { slot: "outfit", kind: "st-marks-punk", color: "#14111A" } },
+  { sku: "set-gala-night", category: "fashion", name: "Gala night", emoji: "🥂", price: 1200, clout: 55, rating: 4, blurb: "For galas you were not technically invited to.", wear: { slot: "outfit", kind: "gala-night", color: "#4E7A3A" } },
+  { sku: "set-ranch-hand", category: "fashion", name: "Ranch hand overalls", emoji: "🤠", price: 290, clout: 16, rating: 2, blurb: "The nearest ranch is a salad place in Astoria.", wear: { slot: "outfit", kind: "ranch-hand", color: "#5B7FA6" } },
+  { sku: "set-rockaway-beach", category: "fashion", name: "Rockaway beach set", emoji: "🩳", price: 160, clout: 10, rating: 2, blurb: "Two trains and a bus to the beach. Worth it.", wear: { slot: "outfit", kind: "rockaway-beach", color: "#B33A3A" } },
+  { sku: "set-adventurer", category: "fashion", name: "Adventurer", emoji: "🧭", price: 600, clout: 30, rating: 3, cloutReq: 1000, blurb: "Has explored every corner of Queens. Most of them twice.", wear: { slot: "outfit", kind: "adventurer", color: "#5E7B3A" } },
+  { sku: "set-tactical", category: "fashion", name: "Tactical gear", emoji: "🪖", price: 1100, clout: 45, rating: 3, cloutReq: 2500, blurb: "Ready for anything, mostly brunch.", wear: { slot: "outfit", kind: "tactical", color: "#3A3F47" } },
+  { sku: "set-witch", category: "fashion", name: "Witch of Ditmars", emoji: "🧙", price: 1800, clout: 60, rating: 4, cloutReq: 5000, blurb: "Hexes on request. Tarot on Thursdays.", wear: { slot: "outfit", kind: "witch", color: "#5B2C8F" } },
+  { sku: "set-ranger", category: "fashion", name: "Hooded ranger", emoji: "🏹", price: 1800, clout: 60, rating: 4, cloutReq: 5000, blurb: "Mysterious. Also cold.", wear: { slot: "outfit", kind: "ranger", color: "#5A3A22" } },
+  { sku: "set-spacefarer", category: "fashion", name: "Spacefarer", emoji: "🚀", price: 4200, clout: 110, rating: 4, cloutReq: 10000, blurb: "First Queens resident in orbit, according to their bio.", wear: { slot: "outfit", kind: "spacefarer", color: "#E8692E" } },
+  { sku: "set-royalty", category: "fashion", name: "Royalty", emoji: "👑", price: 9500, clout: 200, rating: 4, cloutReq: 25000, blurb: "Crown included. Kingdom sold separately.", wear: { slot: "outfit", kind: "royalty", color: "#C9A227" } },
   { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 120, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
   // Cars
   { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 21000, clout: 120, rating: 2, rentPerWeek: 525, blurb: "Previously loved. Heavily. It still gets you to the club." },
@@ -722,9 +736,12 @@ export function realMinutesUntilOpen(ev: ClubEvent, cityMinutes: number, realHou
 }
 
 /** The seed the database stores (game_settings 'city'); generated into the migration. */
-/** A collector piece's value in Net Worth: 1.5× the priciest virtual-cash item in its category (Clarifications 5). */
+/**
+ * A collector piece's value in Net Worth: 1.5× the priciest virtual-cash item in its category (Clarifications 5).
+ * Whole outfits (#9) don't count: a collector piece is one garment, priced against garments.
+ */
 export function collectorValue(category: ShopCategory): number {
-  return Math.round(1.5 * Math.max(...SHOP_ITEMS.filter((i) => i.category === category && !i.collector).map((i) => i.price)));
+  return Math.round(1.5 * Math.max(...SHOP_ITEMS.filter((i) => i.category === category && !i.collector && i.wear?.slot !== "outfit").map((i) => i.price)));
 }
 
 export function citySeed() {
@@ -741,7 +758,7 @@ export function citySeed() {
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
     shop: SHOP_ITEMS.map((i) => ({
       sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null,
-      storyOnly: i.storyOnly ?? false, collector: i.collector ?? false,
+      storyOnly: i.storyOnly ?? false, collector: i.collector ?? false, cloutReq: i.cloutReq ?? 0,
     })),
     homeLocations: HOME_LOCATIONS,
   };

@@ -7,7 +7,7 @@ import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collecto
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
-import { SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
@@ -313,6 +313,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       if (!item || (item.storyOnly && !storyItemOpen(story(), sku).open)) return fail("That isn't in stock.");
       if (item.collector) return fail("That piece is real cash only.");
       if (s.items.some((i) => i.sku === sku)) return fail("You already own that. Calm down.");
+      if (p().clout < (item.cloutReq ?? 0)) return fail(OUTFIT_NEEDS_CLOUT);
       const price = mode === "rent" ? item.rentPerWeek ?? 0 : item.price;
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
       p().bank_cash -= price;
