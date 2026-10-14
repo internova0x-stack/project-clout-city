@@ -1408,3 +1408,6 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .viewing-bar > span { flex:1; }
 .viewing-bar b { display:block; font-size:15px; color:var(--text-1); }
 .viewing-bar small { display:block; font-size:12.5px; color:var(--text-3); }
+.apt-cost { display:block; font-size:14px; color:var(--text-1); }
+.apt-card > .subtext, .apt-card > .meta.locked { display:block; }
+.apt-card .btn { white-space:nowrap; }

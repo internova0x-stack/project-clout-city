@@ -66,12 +66,13 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
               <span className="tag tag-neutral">{rooms} room{rooms > 1 ? "s" : ""}</span>
             </div>
             <span className="subtext">{h.blurb}</span>
-            {block && <span className="meta locked">{block}</span>}
+            {/* The price on its own line, so the button never wraps (owner, Oct 14). */}
+            <span className="apt-cost"><b>{formatCash(cost)}</b> to move in</span>
+            {block ? <span className="meta locked">{block}</span>
+              : short ? <span className="meta locked">{formatCash(cost - p.bank_cash)} short</span> : null}
             <div className="row" style={{ gap: 8 }}>
               <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={() => onLookInside(h.id)}>Look inside</button>
-              <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} style={{ flex: 1 }} disabled={!!block || busy} onClick={() => onMove(h.id)}>
-                Move in · {formatCash(cost)}
-              </button>
+              <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} disabled={!!block || short || busy} onClick={() => onMove(h.id)}>Move in</button>
             </div>
           </div>
         );
