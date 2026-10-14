@@ -28,10 +28,11 @@ export const PALETTES: Record<MapTheme, Palette> = {
     locked: "rgba(60,56,72,.42)", queensEdge: "rgba(242,169,0,.55)",
   },
   night: {
-    // Google Maps-style night: navy land, deep blue water, light grey roads.
-    land: "#1D2C4D", water: "#0E1A33", waterDeep: "#0A1328", park: "#1E3B44", blocks: "#22345A", building: "#2A3D66", buildingTall: "#3A5287",
-    minor: "#8C96AB", minorCasing: "#1A2742", major: "#B3BBCB", majorCasing: "#1A2742",
-    highway: "#D7DCE5", highwayCasing: "#5E6C88", roadGlow: "rgba(0,0,0,0)", rail: "rgba(180,190,210,.45)",
+    // #10 (owner, Oct 14): "earth at night". The dark of a satellite photo (near-black land, black
+    // water), streets in warm sodium amber (brighter on avenues and highways), dark buildings.
+    land: "#06080F", water: "#010309", waterDeep: "rgba(255,190,110,.10)", park: "#070C0C", blocks: "#0A0D17", building: "#141621", buildingTall: "#272436",
+    minor: "#B8732A", minorCasing: "rgba(0,0,0,0)", major: "#FFB347", majorCasing: "rgba(255,140,30,.25)",
+    highway: "#FFE0A3", highwayCasing: "rgba(255,170,60,.35)", roadGlow: "rgba(255,160,50,.30)", rail: "rgba(120,180,255,.35)",
     label: "#B8C6E0", labelHalo: "rgba(14,26,51,.9)", streetLabel: "#C9D1E0",
     locked: "rgba(8,12,24,.62)", queensEdge: "rgba(255,194,26,.5)",
   },
@@ -48,6 +49,16 @@ const MAJOR = ["primary", "secondary", "tertiary", "trunk"];
 /** Line widths in pixels by zoom, so streets thicken as you zoom in like a street map. */
 const width = (z12: number, z15: number, z18: number) =>
   ["interpolate", ["exponential", 1.6], ["zoom"], 12, z12, 15, z15, 18, z18] as unknown as number;
+
+/** A wide, blurred amber line under a class of streets: the night map's city glow. */
+function haze(id: string, classes: string[], w: [number, number, number], alpha: number): StyleSpecification["layers"][number] {
+  const size = ["interpolate", ["exponential", 1.6], ["zoom"], 11, w[0], 14, w[1], 17, w[2]] as unknown as number;
+  return {
+    id, type: "line", source: "osm", "source-layer": "transportation",
+    filter: ["all", ["in", ["get", "class"], ["literal", classes]], NOT_TUNNEL],
+    paint: { "line-color": `rgba(255,150,45,${alpha})`, "line-width": size, "line-blur": size },
+  } as unknown as StyleSpecification["layers"][number];
+}
 
 /** The dashed outline on locked boroughs (and the borough sheet's mini-map). */
 export const LOCKED_RED = "#E5283F";
@@ -98,6 +109,9 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.roadGlow, "line-width": roadWidth([[12, 4], [14, 12]], TWO_LANE_M * 2.2), "line-blur": width(3, 10, 24) },
       },
+      // City haze (night only): every street adds a wide, faint glow, so dense blocks add up to a
+      // bright core, like a city photographed from orbit.
+      ...(night ? [haze("city-haze-minor", ["minor", "service"], [8, 30, 100], 0.07), haze("city-haze-major", ["motorway", ...MAJOR], [16, 60, 200], 0.18)] : []),
       {
         id: "road-minor-casing", type: "line", source: "osm", "source-layer": "transportation", minzoom: 14,
         filter: ["all", ["in", ["get", "class"], ["literal", MINOR]], NOT_TUNNEL],
@@ -114,13 +128,15 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         id: "road-minor", type: "line", source: "osm", "source-layer": "transportation", minzoom: 12,
         filter: ["all", ["in", ["get", "class"], ["literal", MINOR]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.minor, "line-width": roadWidth([[12, 0.4], [14, 2.8]], TWO_LANE_M) },
+        paint: night
+          ? { "line-color": p.minor, "line-width": width(0.3, 1.6, 6), "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.35, 15, 0.45, 17, 0.6] as unknown as number }
+          : { "line-color": p.minor, "line-width": roadWidth([[12, 0.4], [14, 2.8]], TWO_LANE_M) },
       },
       {
         id: "road-major", type: "line", source: "osm", "source-layer": "transportation",
         filter: ["all", ["in", ["get", "class"], ["literal", MAJOR]], NOT_TUNNEL],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": p.major, "line-width": roadWidth([[11, 1], [14, 4.6]], TWO_LANE_M * 1.3) },
+        paint: { "line-color": p.major, "line-width": night ? (["interpolate", ["exponential", 1.6], ["zoom"], 11, 0.8, 15, 3, 18, 12] as unknown as number) : roadWidth([[11, 1], [14, 4.6]], TWO_LANE_M * 1.3) },
       },
       {
         id: "rail", type: "line", source: "osm", "source-layer": "transportation",

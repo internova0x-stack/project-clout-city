@@ -131,7 +131,9 @@ Hunt cash, lotto cards, gossip and real-money prices are unchanged.
 
 ## Testing round, Oct 14 (bug fixes A and B; migration 0040)
 
-The owner's notes from testing on an iPhone (Chrome, which uses Apple's WebKit like every iPhone browser). Night lights (#10), avatars (#9) and bigger floor plans (#19) follow as their own steps.
+The owner's notes from testing on an iPhone (Chrome, which uses Apple's WebKit like every iPhone browser). Avatars (#9) and bigger floor plans (#19) follow as their own steps.
+
+**#10 Night lights (approved from the mockup):** the night map looks like a city photographed from orbit: near-black land and water, streets in warm sodium amber (brighter on avenues and highways, dimmer on side streets), a soft amber haze that builds up where streets are dense, and dark buildings. Only the night map changes (`lib/map/style.ts`).
 
 **#5 Lotto (migration 0041):** clear free plays ("1 of 2 left today"), instant number matching, daily pots for the small games and weekly pots for the big ones, replacing the weekly jackpot. Details in docs/08-new-features-spec.md section 7.
 
