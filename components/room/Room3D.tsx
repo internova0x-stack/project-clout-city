@@ -847,25 +847,27 @@ export default function Room3D(props: Room3DProps) {
           {editing ? (
             <div className="room-edit-bar glass-hud" role="group" aria-label="Arrange furniture">
               <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece of furniture")}</span>
-              <div className="room-arrows" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
-                {ARROWS.map((a, k) => (
-                  <button
-                    key={a.name}
-                    className={`room-arrow ${a.name}`}
-                    disabled={!sel}
-                    aria-label={`Move ${a.name}`}
-                    onPointerDown={(e) => { e.preventDefault(); if (sel) startHold(k); }}
-                    onPointerUp={stopHold}
-                    onPointerLeave={stopHold}
-                    onPointerCancel={stopHold}
-                    onKeyDown={(e) => { if (sel && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nudge(k); } }}
-                  >
-                    <span aria-hidden="true">{a.glyph}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="row" style={{ gap: 6 }}>
-                <button className="chip" disabled={!sel} onClick={() => sel && setItems((cur) => cur.map((i) => (i.id === sel.id ? { ...i, rot: (i.rot + 1) % 4 } : i)))}>↻ Rotate</button>
+              {/* Owner, Oct 14: one row. Rotate and the arrows on the left, Cancel and Save on the right. */}
+              <div className="room-edit-row">
+                <div className="room-edit-tools" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
+                  <button className="chip" disabled={!sel} onClick={() => sel && setItems((cur) => cur.map((i) => (i.id === sel.id ? { ...i, rot: (i.rot + 1) % 4 } : i)))}>↻ Rotate</button>
+                  {ARROW_ORDER.map((k) => (
+                    <button
+                      key={ARROWS[k].name}
+                      className="room-arrow"
+                      disabled={!sel}
+                      aria-label={`Move ${ARROWS[k].name}`}
+                      onPointerDown={(e) => { e.preventDefault(); if (sel) startHold(k); }}
+                      onPointerUp={stopHold}
+                      onPointerLeave={stopHold}
+                      onPointerCancel={stopHold}
+                      onKeyDown={(e) => { if (sel && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nudge(k); } }}
+                    >
+                      {ARROWS[k].glyph}
+                    </button>
+                  ))}
+                </div>
+                <div className="room-edit-tools">
                 <button className="chip" onClick={() => { setItems(savedRef.current); setEditing(false); setSelected(null); setNote(null); }}>Cancel</button>
                 <button
                   className="chip"
@@ -880,6 +882,7 @@ export default function Room3D(props: Room3DProps) {
                 >
                   {saving ? "…" : "Save"}
                 </button>
+                </div>
               </div>
             </div>
           ) : null}
@@ -898,6 +901,8 @@ const ARROWS = [
   { name: "down", glyph: "↓" },
   { name: "left", glyph: "←" },
 ] as const;
+/** The order the arrows sit in the bar (owner, Oct 14): up, right, left, down. */
+const ARROW_ORDER = [0, 1, 3, 2];
 
 // ---------------------------------------------------------------------------
 // Animation and poses
