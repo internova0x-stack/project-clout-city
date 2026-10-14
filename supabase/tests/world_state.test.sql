@@ -113,8 +113,8 @@ select pg_temp.go(3);
 select bank_cash as before_diner from public.players where display_name = 'Ivy' \gset
 select pg_temp.mult('Ivy') as mult_before \gset
 select pg_temp.act('rockaway-diner', 'eat') as diner \gset
-select pg_temp.assert((select bank_cash from public.players where display_name = 'Ivy') = :before_diner - 21, 'diner costs 14 x 1.5 = 21');
-select pg_temp.assert(((:'diner'::jsonb) ->> 'clout')::int = round((5 + 14 * 0.6) * :mult_before), 'clout from the base price');
+select pg_temp.assert((select bank_cash from public.players where display_name = 'Ivy') = :before_diner - 48, 'diner costs 32 x 1.5 = 48');
+select pg_temp.assert(((:'diner'::jsonb) ->> 'clout')::int = round((5 + 32 * 0.25) * :mult_before), 'clout from the base price');
 select 1 from public.vote_prediction('P1', 'confront');
 select pg_temp.assert(((public.story_feed() #> '{arcs,0,predictions,0,results,total}'))::int = 1, 'live results after voting');
 select 1 from public.complete_story_task('story:sarah-bird:share-rumor');

@@ -48,13 +48,13 @@ select next_rent_due - public.ny_today() as rent_in from public.players where di
 
 -- Eating: clout once a day per place, by price; Energy restored; cash every time.
 select (pg_temp.act('lucky-seven-deli', 'eat') ->> 'clout')::int as eat1 \gset
-select pg_temp.assert(:eat1 = 9, 'deli clout (5 + 7*0.6) * 1.0 = 9');
+select pg_temp.assert(:eat1 = 9, 'deli clout (5 + 16*0.25) * 1.0 = 9');
 select (pg_temp.act('lucky-seven-deli', 'eat') ->> 'clout')::int as eat2 \gset
 select pg_temp.assert(:eat2 = 0, 'second meal pays no clout');
 
 -- A club visit: clout, Mood and Confidence once, Energy spent.
 select (pg_temp.act('velvet-static', 'visit') ->> 'clout')::int as club \gset
-select pg_temp.assert(:club = 41, 'club clout (5 + 60*0.6) * 1.0 = 41');
+select pg_temp.assert(:club = 40, 'club clout (5 + 140*0.25) * 1.0 = 40');
 select pg_temp.assert((select mood = 56 and confidence = 54 and energy = 85 from public.players where display_name = 'Gus'), 'club stats');
 
 -- A shift pays the job rate and costs Energy.
@@ -77,10 +77,10 @@ do $$ begin
   exception when sqlstate '22023' then null; end;
 end $$;
 
--- Cash so far: 5000 - 7 - 7 - 60 + 120 - 95, plus whatever daily tasks paid.
+-- Cash so far: 5000 - 16 - 16 - 140 + 120 - 210 (v0.11 prices), plus whatever daily tasks paid.
 select pg_temp.assert(
   (select bank_cash from public.players where display_name = 'Gus')
-    = 5000 - 7 - 7 - 60 + 120 - 95 + coalesce((select sum(amount) from public.ledger l join public.players p on p.id = l.player_id
+    = 5000 - 16 - 16 - 140 + 120 - 210 + coalesce((select sum(amount) from public.ledger l join public.players p on p.id = l.player_id
                                                  where p.display_name = 'Gus' and l.kind in ('daily_task', 'daily_bonus')), 0),
   'cash after actions matches the ledger');
 
@@ -140,7 +140,7 @@ select id as bomber_id from public.player_items where sku = 'fit-satin-bomber' \
 select 1 from public.equip_item(:tee_id, true);
 select 1 from public.equip_item(:bomber_id, true);
 select pg_temp.assert((select count(*) = 1 from public.player_items where equipped), 'one top equipped');
-select pg_temp.assert(public.sell_item(:tee_id) = 39, 'sell at 60%');
+select pg_temp.assert(public.sell_item(:tee_id) = 87, 'sell at 60% (145 * 0.6)');
 select (public.buy_item('fit-varsity-tee') ->> 'clout')::int as tee2 \gset
 select pg_temp.assert(:tee2 = 0, 'buying back pays no clout');
 do $$ begin
@@ -154,8 +154,8 @@ select pg_temp.assert((select car_mode = 'rented' from public.players where disp
 select 1 from public.dev_set_clock_offset(:rent_in * 24);
 select 1 from public.sync_player();
 select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'car_rental'), 'car rental due weekly');
-select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'rent' and amount = 900), 'weekly rent due');
-select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'phone' and amount = 25), 'weekly phone bill');
+select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'rent' and amount = 2600), 'weekly rent due');
+select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'phone' and amount = 60), 'weekly phone bill');
 select id as phone_bill from public.bills where kind = 'phone' \gset
 select 1 from public.pay_bill(:phone_bill);
 select 1 from public.pay_bill(:phone_bill);
@@ -176,7 +176,7 @@ select pg_temp.assert((select mood = :mood_due - 8 from public.players where dis
 select 1 from public.dev_set_clock_offset((:rent_in + 6) * 24);
 select 1 from public.sync_player();
 select pg_temp.assert((select home_id = 'astoria_studio' from public.players where display_name = 'Gus'), 'evicted to cheapest home');
-select pg_temp.assert((select count(*) = 1 from public.bills where kind = 'rent' and status = 'due' and amount = 600), 'new rent bill');
+select pg_temp.assert((select count(*) = 1 from public.bills where kind = 'rent' and status = 'due' and amount = 1750), 'new rent bill');
 select pg_temp.assert((select next_rent_due = public.ny_today() + 7 from public.players where display_name = 'Gus'), 'new rent weekly');
 
 -- Clout never moved without a ledger row.

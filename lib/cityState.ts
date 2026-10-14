@@ -147,12 +147,16 @@ export interface CityApi {
 }
 
 // ---------------------------------------------------------------------------
+/** v0.11 (migration 0039): the shift cap's message, shared with the preview simulator. */
+export const SHIFT_LIMIT = `That's ${CITY_ECONOMY.shiftsPerDay} shifts today, the most a body can take. Try a gig on the board, or come back tomorrow.`;
+
 // Error codes raised by the SQL functions, in the game's voice.
 // ---------------------------------------------------------------------------
 const ERRORS: Record<string, string> = {
   one_per_slot: "One top, one bottom, one pair of shoes. You're not a closet.",
   bad_covering: "That hat isn't in the city yet.",
   no_energy: "Not enough Energy. Eat something, or sleep it off until tomorrow.",
+  shift_limit: SHIFT_LIMIT,
   cant_afford: "Your card got declined. Loudly.",
   doors_closed: "Doors aren't open yet. The bouncer is pretending not to see you.",
   already_attended: "You already went tonight. Twice would be desperate.",

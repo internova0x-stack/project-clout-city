@@ -26,7 +26,7 @@ select pg_temp.assert(pg_temp.raises($$select public.buy_groceries('steinway-fre
 select 1 from public.travel('steinway-fresh', 'taxi');
 select pg_temp.assert(pg_temp.raises($$select public.buy_groceries('steinway-fresh', 'caviar')$$, 'unknown_bundle'), 'only real bundles');
 create temp table b as select public.buy_groceries('steinway-fresh', 'meal-prep') as r;
-select pg_temp.assert((select (r ->> 'cash')::int = -35 and (r ->> 'meals')::int = 7 from b), 'meal prep: C$35 for 7 meals');
+select pg_temp.assert((select (r ->> 'cash')::int = -95 and (r ->> 'meals')::int = 7 from b), 'meal prep: C$95 for 7 meals (v0.11)');
 select pg_temp.assert((public.buy_groceries('steinway-fresh', 'snack-run') ->> 'meals')::int = 9, 'a snack run adds 2');
 select pg_temp.assert(pg_temp.raises($$select public.buy_groceries('steinway-fresh', 'snack-run')$$, 'fridge_full'), 'no buying what does not fit');
 select pg_temp.assert((select count(*) from public.ledger where player_id = auth.uid() and kind = 'groceries') = 2, 'both trips are in the ledger');

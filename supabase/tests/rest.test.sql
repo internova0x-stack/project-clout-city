@@ -37,7 +37,7 @@ select pg_temp.assert(pg_temp.raises($$select public.bar_drink('velvet-static')$
 select 1 from public.travel('velvet-static', 'taxi');
 select pg_temp.assert(pg_temp.raises($$select public.rest('nap')$$, 'not_home'), 'naps are at home');
 create temp table d as select public.bar_drink('velvet-static') as r;
-select pg_temp.assert((select (r ->> 'cash')::int = -28 and (r ->> 'energy')::int = 20 from d), 'C$28 for +20 Energy');
+select pg_temp.assert((select (r ->> 'cash')::int = -60 and (r ->> 'energy')::int = 20 from d), 'C$60 for +20 Energy (v0.11)');
 select pg_temp.assert(exists (select 1 from public.ledger where player_id = auth.uid() and kind = 'drink'), 'the drink is in the ledger');
 select pg_temp.assert(not exists (select 1 from public.ledger where player_id = auth.uid() and kind = 'visit'), 'drinks pay no clout');
 reset role;
