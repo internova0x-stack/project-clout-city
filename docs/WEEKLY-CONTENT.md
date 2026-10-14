@@ -70,6 +70,10 @@ it isn't in your working directory). Work from the main branch.
    (v0.11): finding piece 1 names piece 2's place, and so on, so order them as a walk around the
    neighborhood, start each story somewhere easy to find (ideally a regular), and let a piece's
    text nod at the next person ("Ask Benny, he'll deny it").
+   Restroom pieces (#19 clubs): give one or two stories a "source": "restroom" piece at a club or
+   Low Light Lounge (any place with a restroom floor), the juiciest line in the story; it's only
+   heard downstairs and pays extra clout. Never put a piece at Ultraviolet Society (its door needs
+   2,000 clout).
 6. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
 7. Commit only those three files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch

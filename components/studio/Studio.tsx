@@ -823,7 +823,7 @@ function GossipTab({ api }: { api: StudioApi }) {
                       {s.pieces.map((p, i) => (
                         <div key={i} className="stack-4">
                           <span className="meta" style={{ display: "block" }}>
-                            Piece {i + 1} · {p.source === "regular" ? `${regularAt(p.place)?.name ?? "the regular"} at ` : "Listen in at "}{placeById(p.place)?.name ?? p.place}
+                            Piece {i + 1} · {p.source === "regular" ? `${regularAt(p.place)?.name ?? "the regular"} at ` : p.source === "restroom" ? "🚻 Restroom at " : "Listen in at "}{placeById(p.place)?.name ?? p.place}
                             {p.hours ? ` · ${windowLine(p.hours)}` : ""}
                           </span>
                           <span className="body" style={{ display: "block" }}>{p.text}</span>

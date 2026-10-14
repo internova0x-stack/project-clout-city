@@ -8,7 +8,7 @@ import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
-import { HOME_NEEDS_CLOUT, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { DOOR_CLOUT, HOME_NEEDS_CLOUT, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
@@ -80,7 +80,7 @@ export type SimApi = CityApi & {
   /** Previews only (?lotto=jackpot): the next card's ⭐ wins its pot. */
   lottoPot(): void;
   /** v0.11 gossip tasks: talking or listening in at a place completes its task (the find runs on the dev server). */
-  gossipTask(placeId: string, via: "overheard" | "regular"): number;
+  gossipTask(placeId: string, via: "overheard" | "regular" | "restroom"): number;
 
 };
 
@@ -90,6 +90,14 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
   let nextId = 1000;
   let shiftsToday = 0;
   let tripEnds = 0;
+  // #19 clubs: VIP covers paid and VIP visits, by "place:day".
+  const vipPaid = new Set<string>();
+  const vipSeenOn = new Set<string>();
+  const vipAccess = (placeId: string) => {
+    const vip = clubDoor(PLACES.find((x) => x.id === placeId) ?? {}).vip;
+    if (!vip) return null;
+    return p().clout >= vip.freeClout ? "free" : vipPaid.has(`${placeId}:${s.today}`) ? "paid" : null;
+  };
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
   const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(s), gain });
   const fail = (error: string): Promise<CityResult> => Promise.resolve({ ok: false, error });
@@ -168,6 +176,8 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const from = point(p().at_place ?? null);
       const to = point(dest);
       if (!from || !to) return fail("That place isn't on the map.");
+      const door = dest ? clubDoor(PLACES.find((x) => x.id === dest)!).doorClout : 0;
+      if (p().clout < door) return fail(DOOR_CLOUT);
       const q = travelQuote(mode, milesBetween(from, to), !!p().car_sku);
       if (q.unavailable) return fail(mode === "walk" ? "That's too far to walk. Your shoes have filed a complaint." : "You don't have a car. The Shop has some, and so does the subway.");
       if (p().energy < q.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
@@ -367,6 +377,36 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     saveHomeLayout(layout) {
       s.homeLayout = layout;
       return ok();
+    },
+    enterVip(placeId, pay) {
+      // Migration 0046's enter_vip: free from the club's clout, else the cover once a day.
+      const vip = clubDoor(PLACES.find((x) => x.id === placeId) ?? {}).vip;
+      if (!vip) return fail("This club doesn't have a VIP floor. Everyone here is equally important.");
+      if ((p().at_place ?? null) !== placeId) return fail("You're not there yet. Go there first.");
+      const access = vipAccess(placeId);
+      if (access) return Promise.resolve({ ok: true, state: structuredClone(s), vip: { access } });
+      if (!pay) return Promise.resolve({ ok: true, state: structuredClone(s), vip: { needsCover: vip.cover } });
+      if (p().bank_cash < vip.cover) return fail("Your card got declined. Loudly.");
+      p().bank_cash -= vip.cover;
+      vipPaid.add(`${placeId}:${s.today}`);
+      return Promise.resolve({ ok: true, state: structuredClone(s), gain: { cash: -vip.cover }, vip: { access: "paid" } });
+    },
+    vipSeen(placeId) {
+      const place = PLACES.find((x) => x.id === placeId);
+      const a = place?.actions.find((x) => x.kind === "visit");
+      if (!place || !a || !place.club?.vip) return fail("This club doesn't have a VIP floor. Everyone here is equally important.");
+      if (!vipAccess(placeId)) return fail(VIP_LOCKED);
+      if (vipSeenOn.has(`${placeId}:${s.today}`)) return fail(VIP_ALREADY);
+      if (p().energy < a.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
+      const clout = CITY_ECONOMY.clubs.vipTimes * visitClout(a.price ?? 0, p().mood, p().confidence);
+      const mood = Math.min(100 - p().mood, a.mood ?? 0);
+      const confidence = Math.min(100 - p().confidence, a.confidence ?? 0);
+      vipSeenOn.add(`${placeId}:${s.today}`);
+      p().clout += clout;
+      p().mood += mood;
+      p().confidence += confidence;
+      p().energy -= a.energy;
+      return ok({ clout, mood, confidence, energy: -a.energy });
     },
     moveHome(homeId) {
       // Migration 0045's move_home: first week's rent plus the broker fee, the home's clout, no rent owed.

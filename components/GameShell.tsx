@@ -16,7 +16,7 @@ import { GAME_CONFIG } from "@/lib/config";
 import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
-import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -47,6 +47,7 @@ import { actionSeconds, actionVerb, OTHER_SECONDS } from "@/lib/actionTime";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { ViewingBar } from "./city/Apartments";
+import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
 import { newsGossip, splitNews, type NewsItem } from "@/lib/news";
@@ -217,6 +218,8 @@ export function GameShell({
   // v0.11: which floor of the building (the exclusive venue has a second, the Penthouse Floor).
   const [insideFloor, setInsideFloor] = useState(1);
   useEffect(() => setInsideFloor(1), [inside?.id]);
+  // #19 clubs: the VIP rope, when the cover hasn't been paid tonight.
+  const [vipAsk, setVipAsk] = useState<{ place: Place; cover: number } | null>(null);
   const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null; item?: string | null }>({ open: false, app: null });
   // v0.6 City News: loaded once; the newest headline rides the ticker and, once per session, a home card.
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
@@ -699,19 +702,22 @@ export function GameShell({
     return p && !p.found && p.place ? leadAction({ place: p.place, source: p.source, hours: p.hours }) : null;
   };
   const nextNote = (st: GossipState | null, storyId: string) => { const n = nextOf(st, storyId); return n ? ` · Next: ${n}` : ""; };
-  const listenIn = async (placeId: string) => {
+  const listenIn = async (placeId: string, via: "overheard" | "restroom" = "overheard") => {
     if (!gossip) return;
     setBusy(`listen:${placeId}`);
-    const r = await gossip.find(placeId, "overheard").finally(() => setBusy(null));
+    const r = await gossip.find(placeId, via).finally(() => setBusy(null));
     if (!r.ok) return setToast(r.error);
     const st = await afterFind(r.data);
+    // #19: restroom pieces pay clout and Mood on the spot.
+    const bonus = r.data.bonus?.clout ? ` · 🚻 +${r.data.bonus.clout} clout` : "";
+    if (bonus && cityApi && !r.data.finished.length && !r.data.taskCash) void cityApi.refresh().then((x) => x.ok && applyCity(x));
     if (!r.data.found.length) {
       // Nothing here: point them on (unless more is said here later).
       const lead = r.data.later ? null : leadFrom(st, placeId, Date.now() >> 16);
       return setToast(`👂 ${lead ? `Nothing new here. ${leadLine(lead)}` : quietLine(r.data.later, Date.now())}${taskNote(r.data)}`);
     }
     const x = r.data.found[0];
-    setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""}${nextNote(st, x.story)}${taskNote(r.data)}`);
+    setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""}${bonus}${nextNote(st, x.story)}${taskNote(r.data)}`);
   };
   /** The regular here: a piece of gossip, or else where to go next. Null when there's nothing to pass on. */
   const hearRegular = async (placeId: string): Promise<{ text: string; note: string; next?: string | null } | null> => {
@@ -834,10 +840,23 @@ export function GameShell({
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
     if (it.use?.kind === "floor") {
-      if (it.use.to === 1) return setInsideFloor(1);
+      if (it.use.to <= 1) return setInsideFloor(it.use.to);
+      // #19 clubs: VIP is free from the club's clout, otherwise the cover for tonight (the server decides).
+      if (p.club?.vip && !p.tags.includes("exclusive_venue")) {
+        if (!cityApi?.enterVip) return setToast(VIP_LOCKED);
+        return void (async () => {
+          setBusy(`vip:${p.id}`);
+          const r = await cityApi.enterVip!(p.id, false).finally(() => setBusy(null));
+          if (!r.ok) return setToast(r.error);
+          if (r.vip?.needsCover) return setVipAsk({ place: p, cover: r.vip.needsCover });
+          setInsideFloor(it.use!.kind === "floor" ? it.use!.to : 2);
+        })();
+      }
       if (partyHere) return setInsideFloor(it.use.to);
       return setToast("The Penthouse Floor is guest list only, on party nights. The bouncer has a clipboard and no sense of humor.");
     }
+    if (it.use?.kind === "listen") return gossipOn ? void listenIn(p.id, "restroom") : setToast("Just someone fixing their eyeliner and humming. Come back later.");
+    if (it.use?.kind === "vip") return cityApi?.vipSeen ? void run(`vipseen:${p.id}`, () => cityApi.vipSeen!(p.id)) : undefined;
     if (it.use?.kind === "shop") return openShop(it.use.category, it.use.section);
     if (it.use?.kind !== "events") return;
     // The lounge's guest list: a party you have a ticket for, if its doors are open; otherwise the Events list.
@@ -1052,25 +1071,25 @@ export function GameShell({
           talkNonce={talkNonce}
           room={
             <Room3D
-              template={(insideFloor > 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
+              template={(insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
               crowd={crowd}
               onCrowdTap={(m) => { if (!m.npc && chat) setCardId(m.id); }}
               look={look}
               outfit={outfit}
               daytime={daytime}
-              sign={insideFloor === 2 ? `${inside.name} · Penthouse` : inside.name}
+              sign={insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
               rotatable
               door
-              labels={insideFloor === 2 ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}
+              labels={insideFloor === 2 && inside.tags.includes("exclusive_venue") ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}
               label={`${me.display_name} inside ${inside.name}`}
               insetBottom={170}
               mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
-              npcNames={regularAt(inside.id) ? [regularAt(inside.id)!.name.split(" ")[0]] : undefined}
+              npcNames={insideFloor === 1 && regularAt(inside.id) ? [regularAt(inside.id)!.name.split(" ")[0]] : undefined}
               onNpcTap={(i) => void (async () => {
                 // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
                 // hunt clue first, in the panel below the room.
-                if (i === 0 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
+                if (i === 0 && insideFloor === 1 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
                 const { who, role } = npcRole(inside);
                 // v0.10: the regular may tell you a piece of gossip first.
                 const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
@@ -1082,6 +1101,20 @@ export function GameShell({
           }
         />
         {/* v0.11 the event chat: everyone at the party, no daily limit tonight. */}
+        {vipAsk && (
+          <VipCoverCard
+            place={vipAsk.place}
+            cover={vipAsk.cover}
+            freeClout={clubDoor(vipAsk.place).vip?.freeClout ?? 0}
+            cash={city.player.bank_cash}
+            busy={busy === `vip:${vipAsk.place.id}`}
+            onClose={() => setVipAsk(null)}
+            onPay={() => void run(`vip:${vipAsk.place.id}`, () => cityApi!.enterVip!(vipAsk.place.id, true)).then((ok) => {
+              setVipAsk(null);
+              if (ok) { setInsideFloor(2); setToast("🥂 You're in. Act like you've been here before."); }
+            })}
+          />
+        )}
         {partyHere && room && (
           <button className="pill-glass glass-hud party-pill" onClick={() => setPartyChatOpen(true)}>
             💬 Party chat · {room.count} here{room.messages.length ? ` · ${room.messages.length}` : ""}

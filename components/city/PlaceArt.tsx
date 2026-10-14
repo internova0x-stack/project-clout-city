@@ -154,7 +154,7 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "steinway-fresh": "cream", "hellgate-hall": "red", "triborough-works": "grey", "ditmars-library": "brown",
   "precinct-114-half": "deepBlue", "engine-7": "red", "astoria-cc": "green", "harmony-chapel": "offWhite",
   "hell-gate-park": "green", "rep-count": "yellow", "astoria-blvd-station": "yellow", "reel-queens": "purple",
-  "respawn-arena": "deepBlue",
+  "respawn-arena": "deepBlue", "the-sticky-floor": "green", "discount-disco": "yellow", "ultraviolet-society": "purple",
 };
 function themeOf(place: Place) {
   return THEMES[PLACE_THEME[place.id] ?? "cream"];
@@ -180,6 +180,9 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
   const glassDark = night ? "#2A2350" : "#9FB6D8";
   const base = <Box b={isle} night={night} />;
   switch (place.id) {
+    // #19 the two cheap clubs share the warehouse look, with their own names and colors.
+    case "the-sticky-floor":
+    case "discount-disco":
     case "velvet-static": {
       const hall: BoxSpec = { x: -5, y: -5, z: 0, w: 9, d: 7, h: 5, color: mixHex(c, "#6B2BD9", 0.35) };
       return (
@@ -196,6 +199,23 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
             const [px, py] = iso(-2.5 + i * 1.2, 3.6, 0);
             return <circle key={i} cx={px} cy={py - 4} r={2.2} fill={night ? "#FF9FCB" : "#3A3050"} />;
           })}
+        </>
+      );
+    }
+    // #19 the exclusive club: a glass box on the waterfront, no sign but its name in light.
+    case "ultraviolet-society": {
+      const box: BoxSpec = { x: -5, y: -4.5, z: 0, w: 9, d: 7, h: 5.4, color: mixHex(c, "#E8E0FF", 0.5) };
+      const roof: BoxSpec = { x: -5.4, y: -4.9, z: 5.4, w: 9.8, d: 7.8, h: 0.4, color: "#2A2350" };
+      return (
+        <>
+          {base}
+          <Box b={box} night={night}>
+            {[0, 1, 2, 3].map((i) => <OnLeft key={i} b={box} u={0.4 + i * 2.2} v={0.4} uw={1.9} vh={4.4} fill={night ? "#B48CFF" : glassDark} />)}
+            {[0, 1, 2].map((i) => <OnRight key={i} b={box} u={0.4 + i * 2.2} v={0.4} uw={1.9} vh={4.4} fill={night ? "#8E63E6" : glassDark} />)}
+            <SignLeft b={box} text={place.name} color="#0E0B1F" ink={a} v={4.6} night={night} />
+          </Box>
+          <Box b={roof} night={night} />
+          {night && [[-2, 0], [2, 1]].map(([x, y]) => { const [px, py] = iso(x, y, 5.4); return <circle key={x} cx={px} cy={py - 10} r={12} fill={a} opacity={0.3} filter="url(#mv-blur)" />; })}
         </>
       );
     }

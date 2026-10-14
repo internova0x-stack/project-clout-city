@@ -28,7 +28,9 @@ export type FurnitureKind =
   // v0.11 the exclusive venue's second floor
   | "stairs"
   // #19 bigger homes: bathrooms, kitchen islands, bedside tables
-  | "bathtub" | "toilet" | "bathSink" | "kitchenIsland" | "nightstand" | "hotTub";
+  | "bathtub" | "toilet" | "bathSink" | "kitchenIsland" | "nightstand" | "hotTub"
+  // #19 clubs: the restroom floor
+  | "stall";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -42,6 +44,10 @@ export type ItemUse =
   | { kind: "lotto" }
   /** v0.11 the exclusive venue: stairs to another floor of the building. */
   | { kind: "floor"; to: number }
+  /** #19 clubs: Listen in at the restroom mirrors (juicier gossip, migration 0046). */
+  | { kind: "listen" }
+  /** #19 clubs: "Get seen in VIP", on the VIP floor's bar. */
+  | { kind: "vip" }
   /** v0.11 the gigs board (offices): opens today's gigs in the Phone. */
   | { kind: "gigs" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
@@ -147,6 +153,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   kitchenIsland: { w: 1.8, d: 0.9, label: "Kitchen island", movable: true },
   nightstand: { w: 0.5, d: 0.45, label: "Nightstand", movable: true },
   hotTub: { w: 1.8, d: 1.8, label: "Hot tub" },
+  stall: { w: 1.0, d: 1.2, label: "Stall" },
 };
 
 // ---------------------------------------------------------------------------
@@ -422,7 +429,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -430,6 +437,49 @@ export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" |
 const MAIN = (n: number): ItemUse => ({ kind: "action", actionId: `*${n}` });
 
 export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
+  // ---- #19 clubs (owner, Oct 14): a restroom floor downstairs and a VIP floor upstairs ----
+  // The restroom: sinks and mirrors, stalls and a bench. Listen in at the mirrors, where the gossip is juicier.
+  restroom: {
+    id: "restroom", w: 7.0, d: 5.6, wall: "#2B2440", wallAccent: "#3DDC97", floor: "#D8D4E4", floorKind: "tile", dark: true,
+    items: [
+      { id: "stairs-up", kind: "stairs", x: -2.8, z: 1.8, rot: 2, use: { kind: "floor", to: 1 }, label: "↑", name: "Back up to the club" },
+      { id: "sink-1", kind: "bathSink", x: -1.4, z: -2.5, rot: 0 },
+      { id: "sink-2", kind: "bathSink", x: -0.3, z: -2.5, rot: 0, use: { kind: "listen" }, label: "👂", name: "Listen in at the mirrors" },
+      { id: "sink-3", kind: "bathSink", x: 0.8, z: -2.5, rot: 0 },
+      { id: "stall-1", kind: "stall", x: 2.9, z: -1.0, rot: 3 },
+      { id: "stall-2", kind: "stall", x: 2.9, z: 0.05, rot: 3 },
+      { id: "stall-3", kind: "stall", x: 2.9, z: 1.1, rot: 3 },
+      { id: "bench", kind: "bench", x: -0.2, z: 2.3, rot: 2, use: sit, label: "Sit" },
+      { id: "plant", kind: "plant", x: -3.1, z: -2.4, rot: 0 },
+    ],
+    spawn: [-1.6, 1.0],
+    npcs: [
+      { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
+      { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // VIP: gold booths, a private bar where you get seen, and a piano nobody is allowed to touch.
+  vip: {
+    id: "vip", w: 7.6, d: 6.4, wall: "#1E1730", wallAccent: "#F2A900", floor: "#2A2036", floorKind: "wood", dark: true,
+    items: [
+      { id: "stairs-down", kind: "stairs", x: -3.0, z: 2.2, rot: 2, use: { kind: "floor", to: 1 }, label: "↓", name: "Back down to the club" },
+      { id: "bar", kind: "bar", x: -1.0, z: -2.7, rot: 0, color: "#F2A900", use: { kind: "vip" }, label: "🥂", name: "Get seen in VIP" },
+      { id: "stool-1", kind: "barStool", x: -2.0, z: -1.9, rot: 0 },
+      { id: "stool-2", kind: "barStool", x: -1.0, z: -1.9, rot: 0 },
+      { id: "stool-3", kind: "barStool", x: 0.0, z: -1.9, rot: 0 },
+      { id: "piano", kind: "piano", x: 2.6, z: -2.3, rot: 0 },
+      { id: "booth-1", kind: "booth", x: -3.3, z: -0.4, rot: 1, color: "#F2A900" },
+      { id: "booth-2", kind: "booth", x: 3.3, z: 0.4, rot: 3, color: "#F2A900" },
+      { id: "sofa", kind: "sofa", x: 1.0, z: 2.6, rot: 2, color: "#7A2E3A", use: sit, label: "Sit" },
+      { id: "table", kind: "coffeeTable", x: 1.0, z: 1.5, rot: 0 },
+      { id: "plant", kind: "plant", x: 3.45, z: 2.85, rot: 0 },
+    ],
+    spawn: [-1.8, 1.4],
+    npcs: [
+      { x: -2.0, z: -1.9, facing: 3.14, seated: true }, { x: 0.0, z: -1.9, facing: 3.14, seated: true }, { x: -1.0, z: -3.15, facing: 0 },
+      { x: 2.6, z: -1.3, facing: 3.14 }, { x: 0.6, z: 2.6, facing: 3.14, seated: true },
+    ],
+  },
   club: {
     id: "club", w: 8.0, d: 7.0, wall: "#4A2C5E", wallAccent: "#FF2E88", floor: "#2E2440", floorKind: "concrete", dark: true,
     items: [
@@ -440,12 +490,12 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { id: "dj", kind: "djBooth", x: 2.4, z: -2.9, rot: 0 },
       { id: "speaker-1", kind: "speaker", x: 3.65, z: -2.9, rot: 0 },
       { id: "speaker-2", kind: "speaker", x: 1.15, z: -2.9, rot: 0 },
-      { id: "floor", kind: "danceFloor", x: 1.6, z: 0.2, rot: 0, use: { kind: "events" }, label: "Dance" },
+      { id: "floor", kind: "danceFloor", x: 0.65, z: 0.3, rot: 0, use: { kind: "events" }, label: "Dance" },
       { id: "booth", kind: "booth", x: -3.4, z: 1.4, rot: 1, color: "#6B2BD9" },
     ],
     spawn: [0, 3.0],
     npcs: [
-      { x: 1.0, z: 0.0, facing: 0.6 }, { x: 2.2, z: 0.6, facing: -2.4 }, { x: -2.2, z: -2.1, facing: 3.14, seated: true },
+      { x: 0.2, z: 0.0, facing: 0.6 }, { x: 1.4, z: 0.8, facing: -2.4 }, { x: -2.2, z: -2.1, facing: 3.14, seated: true },
       { x: 2.4, z: -2.2, facing: 0 }, { x: -1.2, z: -2.1, facing: 3.14, seated: true },
     ],
   },
@@ -741,6 +791,11 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
 
 /** v0.11: the exclusive venue's stairs, on the ground floor. */
 const VENUE_STAIRS: RoomItem = { id: "stairs-up", kind: "stairs", x: 0.7, z: -2.4, rot: 0, use: { kind: "floor", to: 2 }, label: "↑", name: "Upstairs" };
+/** #19 clubs: stairs down to the restroom floor (floor 0) and up to VIP (floor 2), by room template. */
+const CLUB_STAIRS: Partial<Record<PlaceTemplateId, { down: [number, number, number]; up?: [number, number, number] }>> = {
+  club: { down: [-3.05, -0.6, 1], up: [3.1, 0.9, 3] },
+  lounge: { down: [-1.7, 2.65, 1] },
+};
 
 /** The bits of a place a room needs (lib/city.ts Place). */
 export interface RoomPlace {
@@ -750,6 +805,8 @@ export interface RoomPlace {
   palette?: string[];
   opensShop?: string;
   actions: { id: string; label: string; kind: string }[];
+  /** #19 clubs: a restroom floor; `vip` adds a VIP floor upstairs. */
+  club?: { vip?: string; doorClout?: number };
 }
 
 /**
@@ -789,14 +846,34 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }): RoomTemplate 
   const accent = place.depth === "scene" && place.palette?.[0];
   // The exclusive venue has a second floor: stairs up from the lounge.
   if (place.tags?.includes("exclusive_venue")) items.push(VENUE_STAIRS);
+  // #19 clubs: stairs down to the restroom, and up to VIP where there is one.
+  const stairs = place.club && CLUB_STAIRS[base.id as PlaceTemplateId];
+  if (stairs) {
+    const [dx, dz, dr] = stairs.down;
+    items.push({ id: "stairs-down", kind: "stairs", x: dx, z: dz, rot: dr, color: "#2B2440", use: { kind: "floor", to: 0 }, label: "↓", name: "Downstairs to the restroom" });
+    if (place.club!.vip && stairs.up) {
+      const [ux, uz, ur] = stairs.up;
+      items.push({ id: "stairs-vip", kind: "stairs", x: ux, z: uz, rot: ur, color: "#F2A900", use: { kind: "floor", to: 2 }, label: "↑", name: "Upstairs to VIP" });
+    }
+  }
   return { ...base, id: `${base.id}:${place.id}`, items, ...(accent ? { wallAccent: accent } : {}) };
 }
 
-/** v0.11: a building's other floors (the exclusive venue's Penthouse Floor), by floor number. */
+/**
+ * A building's other floors, by number: 0 is a club's restroom (#19), 1 the ground floor, 2 the
+ * exclusive venue's Penthouse Floor (v0.11) or a club's VIP floor (#19).
+ */
 export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number): RoomTemplate | null {
-  if (floor <= 1) return placeRoom(place);
-  if (!place.tags?.includes("exclusive_venue") || floor !== 2) return null;
-  return { ...PLACE_TEMPLATES.penthouse, id: `penthouse:${place.id}` };
+  if (floor === 1) return placeRoom(place);
+  if (floor === 0) return place.club ? { ...PLACE_TEMPLATES.restroom, id: `restroom:${place.id}` } : null;
+  if (floor !== 2) return null;
+  if (place.tags?.includes("exclusive_venue")) return { ...PLACE_TEMPLATES.penthouse, id: `penthouse:${place.id}` };
+  return place.club?.vip ? { ...PLACE_TEMPLATES.vip, id: `vip:${place.id}` } : null;
+}
+
+/** #19 clubs: the floors a place has besides the ground floor (0 restroom, 2 upstairs). */
+export function placeFloors(place: RoomPlace & { tags?: string[] }): number[] {
+  return [0, 2].filter((f) => placeFloor(place, f) !== null);
 }
 
 // ---------------------------------------------------------------------------

@@ -18,8 +18,11 @@ export const TOPIC_LABEL: Record<GossipTopic, string> = { celebrity: "Celebrity"
 export interface GossipPiece {
   text: string;
   place: string;
-  /** "overheard": Listen in at the place. "regular": talk to the regular there. */
-  source: "overheard" | "regular";
+  /**
+   * "overheard": Listen in at the place. "regular": talk to the regular there. "restroom" (#19 clubs):
+   * Listen in downstairs in a club's restroom, the juicier kind; finding one pays gossip.restroom.
+   */
+  source: "overheard" | "regular" | "restroom";
   /** City-clock hours [from, to), 0 to 23; wraps past midnight when from > to. Omitted: any time. */
   hours?: [number, number];
 }
@@ -78,8 +81,11 @@ export function validateGossipWeek(raw: unknown, opts: { storyPlaces?: string[];
       const place = PLACES.find((x) => x.id === p?.place);
       if (!place) { problems.push(`${pat}: "${p?.place}" isn't a place in lib/city.ts`); return; }
       if (place.story || story.has(place.id)) problems.push(`${pat}: ${place.name} is part of a story; pick another place`);
-      if (p.source !== "overheard" && p.source !== "regular") problems.push(`${pat}: source is "overheard" or "regular"`);
+      if (p.source !== "overheard" && p.source !== "regular" && p.source !== "restroom") problems.push(`${pat}: source is "overheard", "regular" or "restroom"`);
       if (p.source === "regular" && !regularAt(place.id)) problems.push(`${pat}: ${place.name} has no regular (lib/cast.ts); make it "overheard"`);
+      if (p.source === "restroom" && !place.club) problems.push(`${pat}: ${place.name} has no restroom floor; restroom pieces go at a club or the lounge`);
+      // A piece behind a door rule could be out of a player's reach for weeks; keep gossip where anyone can go.
+      if (place.club?.doorClout) problems.push(`${pat}: ${place.name} turns people away at the door; pick a place anyone can get into`);
       if (p.hours !== undefined) {
         const h = p.hours;
         if (!Array.isArray(h) || h.length !== 2 || !h.every((x) => Number.isInteger(x) && x >= 0 && x <= 23) || h[0] === h[1]) {
@@ -121,7 +127,7 @@ export function answerWords(answerKey: Record<string, unknown> | undefined): str
 
 /** A piece as a player sees it: in full once found, otherwise a hint. */
 export type GossipPieceView =
-  | { n: number; found: true; text: string; place: string; source: GossipPiece["source"]; via: "overheard" | "regular" | "crew"; shared: boolean }
+  | { n: number; found: true; text: string; place: string; source: GossipPiece["source"]; via: GossipVia | "crew"; shared: boolean }
   | { n: number; found: false; source: GossipPiece["source"]; hours: [number, number] | null; place: string | null; kind: string | null; area: string | null };
 
 export interface GossipStoryView {
@@ -141,6 +147,9 @@ export interface TeaCard { storyId: string; week: string; title: string; emoji: 
 
 export interface GossipState { stories: GossipStoryView[]; cards: TeaCard[] }
 
+/** How a piece is found in person: Listen in (on the card or, #19, in a club's restroom) or the regular. */
+export type GossipVia = GossipPiece["source"];
+
 /** What Listen in (or a regular) turned up. `later`: more is said here at these city-clock hours. */
 export interface GossipFind {
   found: { story: string; title: string; piece: number; text: string; count: number }[];
@@ -148,13 +157,15 @@ export interface GossipFind {
   finished: string[];
   /** v0.11 (migration 0036): cash from a gossip daily task completed here, bonus included. */
   taskCash?: number;
+  /** #19 clubs (migration 0046): clout and Mood paid on the spot for restroom pieces. */
+  bonus?: { clout: number; mood: number };
 }
 
 export type GossipResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
 export interface GossipApi {
   state(): Promise<GossipState | null>;
-  find(placeId: string, via: "overheard" | "regular"): Promise<GossipResult<GossipFind>>;
+  find(placeId: string, via: GossipVia): Promise<GossipResult<GossipFind>>;
   share(storyId: string, piece: number): Promise<GossipResult<number>>;
 }
 
@@ -177,7 +188,8 @@ export const kindLine = (kind: string | null) => (kind && KIND[kind]) || "somewh
 export function hintLine(p: Extract<GossipPieceView, { found: false }>, placeName?: string): string {
   const where = placeName ?? `${kindLine(p.kind)}${p.area ? ` in ${p.area}` : ""}`;
   const who = p.place ? regularAt(p.place)?.name : undefined;
-  const how = p.source === "regular" ? (who && placeName ? `Talk to ${who} at ${where}` : `The regular at ${where}`) : `Overheard at ${where}`;
+  const how = p.source === "regular" ? (who && placeName ? `Talk to ${who} at ${where}` : `The regular at ${where}`)
+    : p.source === "restroom" ? `Overheard in the restroom at ${where}` : `Overheard at ${where}`;
   const when = windowLine(p.hours ?? undefined);
   return when ? `${how} · ${when}` : how;
 }
@@ -215,7 +227,7 @@ export function leadAction(l: Pick<GossipLead, "place" | "source" | "hours">): s
   const place = PLACES.find((x) => x.id === l.place)?.name ?? "somewhere";
   const who = l.source === "regular" ? regularAt(l.place)?.name : undefined;
   const when = windowLine(l.hours ?? undefined)?.replace(" (city time)", "");
-  return `${who ? `Talk to ${who} at` : "Listen in at"} ${place}${when ? `, ${when}` : ""}`;
+  return `${who ? `Talk to ${who} at` : l.source === "restroom" ? "Listen in downstairs at" : "Listen in at"} ${place}${when ? `, ${when}` : ""}`;
 }
 
 /** What a person says when they point the player on: "Ask Rosa at Grind & Gossip Café about “…”." */
@@ -225,7 +237,9 @@ export function leadLine(l: GossipLead): string {
   const when = windowLine(l.hours ?? undefined)?.replace(" (city time)", "");
   return who
     ? `Want more on “${l.title}”? Ask ${who} at ${place}.`
-    : `People at ${place} won't shut up about “${l.title}”${when ? `, ${when}` : ""}. Go listen.`;
+    : l.source === "restroom"
+      ? `The restroom at ${place} is where the real talk about “${l.title}” happens${when ? `, ${when}` : ""}. Go wash your hands.`
+      : `People at ${place} won't shut up about “${l.title}”${when ? `, ${when}` : ""}. Go listen.`;
 }
 
 const ERRORS: Record<string, string> = {
@@ -233,6 +247,7 @@ const ERRORS: Record<string, string> = {
   gossip_over: "That story's gone quiet. Old news.",
   gossip_not_found: "You can only share what you've heard.",
   gossip_shared: "Already shared with your crew. They know.",
+  no_restroom: "There's no restroom to lurk in here.",
 };
 export function gossipError(message: string | undefined): string {
   if (message) for (const code of Object.keys(ERRORS)) if (message.includes(code)) return ERRORS[code];

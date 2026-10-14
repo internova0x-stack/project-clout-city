@@ -125,7 +125,21 @@ export const CITY_ECONOMY = {
    * tasksPerDay of the five daily tasks send the player to their next piece. Owner, Oct 14: those pay
    * taskClout clout, not cash ("why reward cash for information?"; migration 0042).
    */
-  gossip: { pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 2, taskClout: 15 },
+  gossip: {
+    pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 2, taskClout: 15,
+    /** #19 clubs (owner, Oct 14: "juicier gossip in the restroom"): a restroom piece pays a story's clout and Mood again, on the spot. */
+    restroom: { clout: 25, mood: 6 },
+  },
+  /**
+   * #19 clubs (owner, Oct 14). Every club and the lounge has a restroom floor downstairs. Medium and
+   * exclusive clubs have a VIP floor upstairs: free from freeClout, otherwise a cover for the New York
+   * day. "Get seen in VIP" pays vipTimes the clout of getting seen downstairs (once a day per club).
+   * The server checks all of it (migration 0046).
+   */
+  clubs: {
+    vip: { medium: { freeClout: 5000, cover: 1500 }, exclusive: { freeClout: 15000, cover: 5000 } },
+    vipTimes: 2,
+  },
   lotto: {
     tags: ["lotto"],
     freeGame: "corner-store",
@@ -204,13 +218,18 @@ export interface Place {
   opensShop?: ShopCategory;
   /** Monuments: the real-money postcard offered on the card after a visit (Clarifications 6). */
   postcard?: string;
+  /**
+   * #19 clubs (owner, Oct 14): a club or lounge with a restroom floor downstairs; `vip` adds a VIP floor
+   * upstairs (CITY_ECONOMY.clubs.vip); `doorClout` is the clout the bouncer wants to let you in at all.
+   */
+  club?: { vip?: "medium" | "exclusive"; doorClout?: number };
 }
 
 export const PLACES: Place[] = [
   {
     id: "velvet-static", name: "Velvet Static", emoji: "🍸", category: "nightlife", neighborhood: "Long Island City",
     at: [40.7465, -73.9455], depth: "full", template: "club", palette: ["#FF2E88", "#6B2BD9", "#14111A"],
-    tags: ["club", "nightlife", "first_party_venue"],
+    tags: ["club", "nightlife", "first_party_venue"], club: { vip: "medium" },
     lore: "A converted warehouse where the bass is louder than your thoughts. The bouncer has rejected three influencers and one actual prince. You got in once. Act like it was nothing.",
     actions: [
       { id: "visit", kind: "visit", label: "Get seen on the dance floor", price: 140, energy: 15, mood: 6, confidence: 4, blurb: "Fake it till you make it: pay the bar man to let you in." },
@@ -350,7 +369,7 @@ export const PLACES: Place[] = [
   {
     id: "low-light-lounge", name: "Low Light Lounge", emoji: "🥃", category: "nightlife", neighborhood: "Astoria",
     at: [40.7612, -73.9175], depth: "full", template: "lounge", palette: ["#B8743A", "#2A1E2E", "#E8C79A"],
-    tags: ["lounge", "nightlife", "exclusive_venue"],
+    tags: ["lounge", "nightlife", "exclusive_venue"], club: {},
     lore: "Velvet booths, jazz on vinyl and a guest list longer than the drinks menu. Celebrities come here to be left alone, loudly.",
     actions: [
       { id: "visit", kind: "visit", label: "Order something brown and expensive", price: 105, energy: 10, mood: 8, confidence: 3, blurb: "Swirl it. Sniff it. Pretend you can taste the oak." },
@@ -450,10 +469,38 @@ export const PLACES: Place[] = [
   {
     id: "hellgate-hall", name: "Hellgate Hall", emoji: "🎧", category: "nightlife", neighborhood: "Astoria",
     at: [40.7737, -73.9178], depth: "full", template: "club", palette: ["#FF5A36", "#3A1E6B", "#14111A"],
-    tags: ["club", "nightlife", "astoria"],
+    tags: ["club", "nightlife", "astoria"], club: { vip: "medium" },
     lore: "An old warehouse by the tracks with a sound system that registers on seismographs. The DJ booth is a converted subway car. Nobody knows how it got inside.",
     actions: [
       { id: "visit", kind: "visit", label: "Dance under the train tracks", price: 115, energy: 15, mood: 6, confidence: 4, blurb: "Every time the N train passes, the whole room cheers." },
+    ],
+  },
+  // #19 clubs (owner, Oct 14): two cheap clubs and one exclusive one. Invented, like everything else.
+  {
+    id: "the-sticky-floor", name: "The Sticky Floor", emoji: "🪩", category: "nightlife", neighborhood: "Jackson Heights",
+    at: [40.7512, -73.8832], depth: "full", template: "club", palette: ["#3DDC97", "#2B2D6B", "#14111A"],
+    tags: ["club", "nightlife"], club: {},
+    lore: "A basement under a phone repair shop with one strobe light and a floor that holds on to your shoes. The DJ takes requests and ignores them. Nobody here is anybody yet, which is the point.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Dance on the sticky floor", price: 40, energy: 15, mood: 6, confidence: 3, blurb: "Your shoes stay. You move. It's a workout, technically." },
+    ],
+  },
+  {
+    id: "discount-disco", name: "Discount Disco", emoji: "💿", category: "nightlife", neighborhood: "Flushing",
+    at: [40.7577, -73.8336], depth: "full", template: "club", palette: ["#FFC21A", "#B0135A", "#14111A"],
+    tags: ["club", "nightlife"], club: {},
+    lore: "A former mattress outlet with a light-up floor that only lights up on one side. Two-for-one everything, including regrets. The disco ball was on clearance and it shows.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Do the hustle, on a budget", price: 60, energy: 15, mood: 6, confidence: 3, blurb: "The bass is secondhand. The moves are all yours." },
+    ],
+  },
+  {
+    id: "ultraviolet-society", name: "Ultraviolet Society", emoji: "💜", category: "nightlife", neighborhood: "Long Island City",
+    at: [40.7402, -73.9593], depth: "full", template: "club", palette: ["#9B5CFF", "#0E0B1F", "#E8E0FF"],
+    tags: ["club", "nightlife", "exclusive_club"], club: { vip: "exclusive", doorClout: 2000 },
+    lore: "A glass box on the waterfront with the skyline as its wallpaper. No sign, no line, no photos at the door. The bouncer checks your clout like it's a passport, and some of the best-known faces in Queens have been sent home.",
+    actions: [
+      { id: "visit", kind: "visit", label: "Get seen by the skyline", price: 350, energy: 15, mood: 8, confidence: 6, blurb: "Everyone's pretending not to look at everyone. Join in." },
     ],
   },
   {
@@ -598,6 +645,10 @@ export const CLUB_EVENTS: ClubEvent[] = [
   { id: "neon-nights", name: "Neon Nights", placeId: "velvet-static", startHour: 22, hours: 5, entry: 185, clout: 60, confidence: 8, mood: 6, blurb: "Glow sticks, bad decisions, excellent lighting." },
   { id: "bass-bath", name: "Bass Bath", placeId: "hellgate-hall", startHour: 21, hours: 5, entry: 160, clout: 50, confidence: 7, mood: 7, blurb: "Bass so heavy the train schedule adjusts around it." },
   { id: "golden-hour", name: "Golden Hour Day Party", placeId: "velvet-static", startHour: 15, hours: 4, entry: 115, clout: 40, confidence: 6, mood: 8, blurb: "A day party for people who can't commit to a night." },
+  // #19 clubs: a night at each new club, priced like its door.
+  { id: "two-dollar-night", name: "Two-Dollar Night", placeId: "the-sticky-floor", startHour: 21, hours: 5, entry: 55, clout: 20, confidence: 5, mood: 8, blurb: "Everything costs two dollars except getting in, leaving, and your dignity." },
+  { id: "clearance-rack-disco", name: "Clearance Rack Disco", placeId: "discount-disco", startHour: 22, hours: 4, entry: 70, clout: 25, confidence: 5, mood: 8, blurb: "Last season's hits at this season's prices. All sales final." },
+  { id: "ultraviolet-afterglow", name: "Afterglow", placeId: "ultraviolet-society", startHour: 23, hours: 4, entry: 450, clout: 140, confidence: 10, mood: 8, blurb: "Black light, white outfits, and a guest list the size of a haiku." },
   // Campus events at the two universities.
   { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 35, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },
   { id: "quad-open-mic", name: "Open Mic on the Quad", placeId: "queensborough-u", startHour: 19, hours: 3, entry: 24, clout: 30, confidence: 8, mood: 6, blurb: "Slam poetry, one ukulele and a guy who only does impressions of his roommate." },
@@ -795,7 +846,7 @@ export function citySeed() {
   return {
     economy: CITY_ECONOMY,
     places: PLACES.map((p) => ({
-      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood,
+      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null,
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false,

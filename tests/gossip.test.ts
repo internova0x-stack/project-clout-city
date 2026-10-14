@@ -106,3 +106,19 @@ test("the trail (v0.11): leads are each story's next known piece, passed on by e
   // The Tea app's hint names the regular once the trail reaches them.
   assert.match(hintLine(state.stories[0].pieces[1] as never, placeById("grind-and-gossip")!.name), new RegExp(`^Talk to ${rosa} at`));
 });
+
+test("#19 restroom pieces: only where there's a restroom, never behind a door rule", () => {
+  const w = week();
+  const i = w.stories[0].pieces.findIndex((p) => p.place === "velvet-static");
+  w.stories[0].pieces[i].source = "restroom";
+  assert.deepEqual(problems(w), [], "a club's restroom is fine");
+  const d = week();
+  d.stories[0].pieces[0].source = "restroom";
+  d.stories[0].pieces[0].place = "grind-and-gossip";
+  assert.ok(problems(d).some((p) => /no restroom floor/.test(p)));
+  const x = week();
+  x.stories[0].pieces[i].place = "ultraviolet-society";
+  assert.ok(problems(x).some((p) => /turns people away at the door/.test(p)));
+  assert.match(hintLine({ n: 1, found: false, source: "restroom", hours: null, place: null, kind: "club", area: "Astoria" }), /^Overheard in the restroom at a club in Astoria/);
+  assert.match(leadAction({ place: "hellgate-hall", source: "restroom", hours: null }), /^Listen in downstairs at Hellgate Hall/);
+});

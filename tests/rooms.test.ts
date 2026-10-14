@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { PLACES, SHOP_ITEMS } from "../lib/city.ts";
 import { ECONOMY, SIGNUP_HOMES, moveCost } from "../lib/economy.ts";
 import {
-  FURNITURE, HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, ownedItem, roomAt, type OwnedPiece, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
+  FURNITURE, HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, placeFloor, placeFloors, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, ownedItem, roomAt, type OwnedPiece, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
 } from "../lib/rooms.ts";
 
 const all: RoomTemplate[] = [...Object.values(HOME_TEMPLATES), ...Object.values(HOME_FLOORS).flatMap((f) => Object.values(f)), ...Object.values(PLACE_TEMPLATES)];
@@ -124,4 +124,24 @@ test("#19 bought pieces remember their floor; saving one floor keeps the other",
   const saved = mergeFloorLayout(layout, [{ id: "dx-sofa", x: -2, z: 2.4, rot: 2 }], 1);
   assert.ok(saved.some((e) => e.id === "item:3" && e.f === 2) && saved.some((e) => e.id === "dx-sofa"), "saving downstairs keeps the upstairs piece");
   assert.ok(!mergeFloorLayout(layout, [], 2).some((e) => e.id === "item:3"), "putting it away upstairs removes it");
+});
+
+test("#19 clubs: restroom and VIP floors, stairs that fit and can be walked to", () => {
+  for (const p of PLACES.filter((x) => placeRoom(x))) {
+    const floors = [1, ...placeFloors(p)].map((f) => [f, placeFloor(p, f)!] as const);
+    if (p.club) {
+      assert.ok(floors.some(([f]) => f === 0), `${p.id} has a restroom`);
+      assert.equal(floors.some(([f]) => f === 2), !!p.club.vip || p.tags.includes("exclusive_venue"), `${p.id} upstairs`);
+    } else assert.ok(!floors.some(([f]) => f === 0), `${p.id} has no restroom`);
+    for (const [f, t] of floors) {
+      for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${p.id} floor ${f}: ${i.id} fits`);
+      const grid = makeGrid(t, t.items);
+      for (const i of t.items.filter((x) => x.use)) assert.ok(findPath(grid, t.spawn, useSpot(i)).length > 0, `${p.id} floor ${f}: ${i.id} reachable`);
+      // Every floor's stairs lead to a floor that exists.
+      for (const i of t.items) if (i.use?.kind === "floor") assert.ok(placeFloor(p, i.use.to), `${p.id} floor ${f}: ${i.id} goes somewhere`);
+    }
+  }
+  const vip = placeFloor(PLACES.find((p) => p.id === "ultraviolet-society")!, 2)!;
+  assert.ok(vip.items.some((i) => i.use?.kind === "vip"), "VIP has Get seen in VIP");
+  assert.ok(PLACE_TEMPLATES.restroom.items.some((i) => i.use?.kind === "listen"), "the restroom has Listen in");
 });

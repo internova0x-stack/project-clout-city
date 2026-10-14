@@ -8,7 +8,7 @@ import { CITY_ECONOMY, PLACES } from "@/lib/city";
 import { regularAt } from "@/lib/cast";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { inWindow, type GossipFind, type GossipResult, type GossipState, type GossipWeek } from "@/lib/gossip";
+import { gossipError, inWindow, type GossipFind, type GossipVia, type GossipResult, type GossipState, type GossipWeek } from "@/lib/gossip";
 
 const off = () => process.env.NODE_ENV === "production";
 const thisMonday = () => {
@@ -19,7 +19,7 @@ const thisMonday = () => {
 const week = (): GossipWeek => ({ ...(FILE as unknown as GossipWeek), week: thisMonday() });
 const addDays = (iso: string, n: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
-const mem = { found: new Map<string, "overheard" | "regular" | "crew">(), shared: new Set<string>(), cards: new Map<string, string>(), preset: "" };
+const mem = { found: new Map<string, GossipVia | "crew">(), shared: new Set<string>(), cards: new Map<string, string>(), preset: "" };
 const key = (s: string, n: number) => `${s}:${n}`;
 
 /** ?gossip=new (nothing found), some (two stories started), almost (one piece short), done (one finished). */
@@ -64,16 +64,23 @@ export async function previewGossipState(): Promise<GossipState | null> {
   };
 }
 
-export async function previewGossipFind(placeId: string, via: "overheard" | "regular"): Promise<GossipResult<GossipFind>> {
+export async function previewGossipFind(placeId: string, via: GossipVia): Promise<GossipResult<GossipFind>> {
   if (off()) return { ok: false, error: "Previews are off in production." };
   if (via === "regular" && !regularAt(placeId)) return { ok: true, data: { found: [], later: null, finished: [] } };
+  if (via === "restroom" && !PLACES.find((x) => x.id === placeId)?.club) return { ok: false, error: gossipError("no_restroom") };
   const hour = Math.floor(cityMinutes(Date.now(), GAME_CONFIG.cityClock) / 60);
   const out: GossipFind = { found: [], later: null, finished: [] };
   for (const s of week().stories) {
     s.pieces.forEach((p, n) => {
-      if (p.place !== placeId || p.source !== via || mem.found.has(key(s.id, n))) return;
+      // #19: the restroom hears what's said upstairs too.
+      const hears = p.source === via || (via === "restroom" && p.source === "overheard");
+      if (p.place !== placeId || !hears || mem.found.has(key(s.id, n))) return;
       if (!inWindow(p.hours, hour)) { out.later ??= p.hours ?? null; return; }
       mem.found.set(key(s.id, n), via);
+      if (p.source === "restroom") {
+        const b = CITY_ECONOMY.gossip.restroom;
+        out.bonus = { clout: (out.bonus?.clout ?? 0) + b.clout, mood: (out.bonus?.mood ?? 0) + b.mood };
+      }
       out.found.push({ story: s.id, title: s.title, piece: n, text: p.text, count: s.pieces.filter((_, i) => mem.found.has(key(s.id, i))).length });
     });
   }
