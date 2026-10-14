@@ -1329,6 +1329,10 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .party-suggest .chip { flex:none; height:32px; padding:0 12px; font-size:13px; }
 .party-pill { position:absolute; z-index:17; right:12px; top:calc(var(--safe-top) + 92px); }
 /* The event modal's promises (spec section 10). */
+.xc-benefits-box { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.xc-benefits-pill { display:inline-flex; align-items:center; height:24px; padding:0 10px; border-radius:var(--r-pill); background:rgba(255,255,255,.14);
+  font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:inherit; }
+.xc-benefits-more { padding:4px 0; border:0; background:none; color:inherit; opacity:.8; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
 .xc-benefits { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
 .xc-benefits li { display:flex; gap:8px; align-items:flex-start; font-size:13.5px; line-height:1.4; color:inherit; }
 /* Owner, Oct 14: arranging at home. Tap a piece, then up, right, down and left in the arranging bar move it

@@ -33,6 +33,30 @@ export interface MoneyHandlers {
 
 
 /** C26: an exclusive event (a celebrity party), sold as a guest-list spot. */
+/**
+ * What the ticket gets you (spec section 10), under a "Benefits" pill. Owner, Oct 14: the first two show;
+ * the rest open with "more".
+ */
+function PartyBenefits({ where }: { where: string }) {
+  const [open, setOpen] = useState(false);
+  const all = [...PARTY_BENEFITS, { emoji: "🏙️", text: `The party is on the Penthouse Floor, upstairs at ${where}` }];
+  const shown = open ? all : all.slice(0, 2);
+  const more = all.length - 2;
+  return (
+    <div className="xc-benefits-box">
+      <span className="xc-benefits-pill">Benefits</span>
+      <ul className="xc-benefits" aria-label="Benefits">
+        {shown.map((b) => <li key={b.text}><span aria-hidden="true">{b.emoji}</span>{b.text}</li>)}
+      </ul>
+      {more > 0 && (
+        <button type="button" className="xc-benefits-more" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          {open ? "Show less ▴" : `+${more} more ▾`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreProduct; nowMs: number; h: MoneyHandlers; compact?: boolean }) {
   const e = p.event!;
   const s = partyState(e, nowMs);
@@ -60,10 +84,7 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
       <EffectChips energy={e.energy} clout={listed ? undefined : e.clout} mood={e.mood} confidence={e.confidence} />
       {/* v0.11 (spec section 10): what the ticket gets you, before you buy. */}
       {!listed && !compact && (
-        <ul className="xc-benefits" aria-label="What you get">
-          {PARTY_BENEFITS.map((b) => <li key={b.text}><span aria-hidden="true">{b.emoji}</span>{b.text}</li>)}
-          <li><span aria-hidden="true">🏙️</span>The party is on the Penthouse Floor, upstairs at {where}</li>
-        </ul>
+        <PartyBenefits where={where} />
       )}
       <div className="xc-actions">
         {received && !listed && !s.over ? (
