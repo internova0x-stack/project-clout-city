@@ -1,6 +1,6 @@
 "use client";
 
-import { PARTY_BENEFITS } from "@/lib/partyRoom";
+import { PARTY_BENEFITS, PARTY_SUPPORT_LINE } from "@/lib/partyRoom";
 import { doorsLine, eventTimeLine, localDate } from "@/lib/localTime";
 import { useState } from "react";
 import { CITY_ECONOMY, placeById } from "@/lib/city";
@@ -53,6 +53,7 @@ function PartyBenefits({ where }: { where: string }) {
           {open ? "Show less ▴" : `+${more} more ▾`}
         </button>
       )}
+      <p className="xc-support"><i>{PARTY_SUPPORT_LINE.text}</i> {PARTY_SUPPORT_LINE.emoji}</p>
     </div>
   );
 }

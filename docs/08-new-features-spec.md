@@ -252,7 +252,7 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 
 **Built (v0.11 step 6, migration 0038; owner Oct 14):**
 - **$3.99** for every party (`store_products`).
-- **The event card lists what you get** before you buy: meet and chat with real people, a collectible (numbered ticket and badge), a City News mention, and that the party is on the Penthouse Floor.
+- **The event card lists what you get** before you buy: meet and chat with real people, a collectible (numbered ticket and badge), a City News mention, and that the party is on the Penthouse Floor. Under the list, always visible, one aside in smaller text: "Helps keep our servers up and running 😭" (italic words, upright emoji) (owner, Oct 14). It is not a perk and is never called a donation.
 - **Two floors.** Low Light Lounge, the exclusive venue, has stairs up to **the Penthouse Floor** (the game's first multi-floor building). On party nights it's guest list only; the party is up there.
 - **Who you see.** Up there, each player sees 9 others: the real players at the party (crew first, then whoever arrived last), with NPCs filling the gap, each tagged **NPC**. Real players have a name tag; tap it for their profile. Players check in every few seconds (`party_room`); blocks hide people both ways.
 - **Event chat.** **💬 Party chat** opens the group chat for everyone at the party: no daily limit while it's on (a 2-second gap stops floods), the word filter, mutes and bans apply, tap a name to see their profile, report the message (it reaches the Studio's queue, quoted) or block them. Private messages keep their daily cap.
