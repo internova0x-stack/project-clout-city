@@ -102,3 +102,29 @@ These shipped in v0.2 to v0.5 and stay as they are: chat with block, report and 
 | 13 | Won't fix (owner) |
 | 17 | Owner keeps the faux chinchilla coat as real cash |
 | 18 | The build already uses the city clock for club events and real New York time for exclusive parties; only "show in local time" is new (v0.8) |
+
+## Economy recalibration (owner, Oct 14; migration 0039)
+
+"Prices of goods are too cheap so moving around doesn't create a real sink or tension. Recalibrate prices against the ability to earn so there is always a need to make more money." **This wins over the v0.8 numbers above** (subway C$3, taxi C$8/16/28/45, the old rents).
+
+**What was wrong.** A shift paid C$120 for 25 Energy. A home-cooked meal gave the same 25 Energy for about C$5, and shifts had no daily limit. So every extra shift netted about C$115, and a keen player could earn thousands a day while daily costs (C$4 to 95) barely registered.
+
+**The new rules.** Every number lives in `lib/city.ts` and `lib/economy.ts`, mirrored in `game_settings`.
+
+| | Before | Now |
+| --- | --- | --- |
+| Shifts | unlimited | at most **3 a day** across every job (`shiftsPerDay`); the fourth says "That's 3 shifts today" |
+| Shift pay | C$120 / C$135 | unchanged |
+| Daily tasks | C$40 to 90, bonus C$150 | C$25 to 50, bonus C$100 |
+| Gigs (× shift rate) | side 3 to 5, pro 8 to 10, big 15 to 20 | side 2 to 3, pro 5 to 6, big 10 to 12 |
+| Weekly rent | C$600 / 900 / 1,600 | **C$1,750 / 2,600 / 4,500** |
+| Phone (weekly) | C$25 | C$60 |
+| Meals, visits, club events, the bar, groceries | C$1 to 95 | about **2.3 times** (deli C$16, brunch C$42, club C$140, rooftop C$210, bar drink C$60, meal prep C$95) |
+| Subway / taxi | C$3 / C$8, 16, 28, 45 | C$6 / C$18, 35, 60, 95 |
+| Clout per dollar on visits | 0.6 | 0.25, so a visit gives about the same clout as before |
+| Shop | | fashion and makeup about 2.2×, luxury 2.5×, cars and houses 1.5× (car rental too) |
+| Starting cash (birth lottery) | C$3,000 to 6,000 | C$5,000 to 10,000, so even the lowest roll still covers a first week in any home |
+
+Hunt cash, lotto cards, gossip and real-money prices are unchanged.
+
+**How it plays.** A full day (3 shifts, the five tasks and the bonus) earns about C$650, or about C$900 with a side gig. A modest day costs about C$530: studio rent, meals, a few rides and one night out. Saving for anything in the Shop takes days for clothes, weeks for jewelry and months for a car. The 1BR takes steady work; the high-rise needs pro gigs and big breaks. `tests/city.test.ts` checks these relationships so a later tweak can't quietly undo them.

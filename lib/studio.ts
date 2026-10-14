@@ -102,7 +102,12 @@ export interface StudioApi {
   /** v0.10 gossip (migration 0034): weeks go live on their own; the Studio reads, pauses or holds them. */
   gossipList?(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>>;
   gossipStatus?(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>>;
+  /** Setup check (owner, Oct 14): which key, migration or webhook is missing. Never returns a secret. */
+  setupCheck?(): Promise<Admin<SetupCheckRow[]>>;
 }
+
+/** One line of the Studio's Setup check. */
+export interface SetupCheckRow { group: string; label: string; state: "ok" | "warn" | "fail"; detail: string }
 
 /** A gossip week as the Studio sees it. "approved" is live from its Monday (the default). */
 export interface GossipAdmin {

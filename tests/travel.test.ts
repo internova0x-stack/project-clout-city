@@ -5,10 +5,10 @@ import { distanceBand, milesBetween, travelQuote } from "../lib/travel.ts";
 
 test("bands follow the owner's table (Oct 13)", () => {
   assert.deepEqual([0.2, 1.4, 3, 8].map(distanceBand), [0, 1, 2, 3]);
-  assert.deepEqual([0.2, 1.4, 3, 8].map((m) => travelQuote("taxi", m, false).fare), [8, 16, 28, 45]);
+  assert.deepEqual([0.2, 1.4, 3, 8].map((m) => travelQuote("taxi", m, false).fare), [18, 35, 60, 95]);
   assert.deepEqual([0.2, 1.4, 3].map((m) => travelQuote("walk", m, false).energy), [5, 10, 20]);
   assert.equal(travelQuote("walk", 8, false).unavailable, "Too far to walk");
-  assert.equal(travelQuote("subway", 8, false).fare, 3);
+  assert.equal(travelQuote("subway", 8, false).fare, 6);
   assert.equal(travelQuote("car", 3, false).unavailable !== undefined, true);
   assert.equal(travelQuote("car", 3, true).fare, 0);
 });

@@ -112,7 +112,7 @@ do $$ begin
 end $$;
 select pg_temp.assert(jsonb_array_length(public.date_candidates()) >= 4 and (public.date_candidates() -> 0 ->> 'matched')::boolean, 'matches first');
 select pg_temp.assert(public.dating_inbox() -> 'dates' -> 0 ->> 'status' = 'pending', 'host sees pending');
-select pg_temp.assert((public.dating_inbox() -> 'dates' -> 0 ->> 'price')::int = 7, 'price');
+select pg_temp.assert((public.dating_inbox() -> 'dates' -> 0 ->> 'price')::int = 16, 'price (v0.11)');
 
 select pg_temp.as_('00000000-0000-0000-0000-000000000072');
 select pg_temp.assert(not (public.dating_inbox() -> 'dates' -> 0 ->> 'mine')::boolean, 'guest sees the invite');

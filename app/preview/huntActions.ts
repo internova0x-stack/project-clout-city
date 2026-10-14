@@ -8,7 +8,7 @@ import { checkGossipFiles } from "@/lib/gossipImport";
 import FILE from "@/content/hunts/2026-10-19.json";
 import { CITY_ECONOMY } from "@/lib/city";
 import { huntAnswer, huntCard, huntTalk, huntView, validateHunt, type HuntCard, type HuntFile, type HuntProgress, type HuntResult, type HuntState } from "@/lib/hunts";
-import type { Admin, ContentDraft, HuntAdmin, GossipAdmin, GossipFileCheck } from "@/lib/studio";
+import type { Admin, ContentDraft, HuntAdmin, GossipAdmin, GossipFileCheck, SetupCheckRow } from "@/lib/studio";
 import { readContentDrafts } from "@/lib/contentDrafts";
 import type { StyleId } from "@/lib/styles";
 
@@ -153,4 +153,18 @@ export async function previewGossipStatus(week: string, status: GossipAdmin["sta
   if (off()) return { ok: false, error: "Previews are off in production." };
   gossipStatus.set(week, { status, note: status === "review" ? note?.trim() || null : null });
   return { ok: true, data: null };
+}
+
+/** The Studio's Setup check with sample results (a deployment missing the service key and 0038). */
+export async function previewSetupCheck(): Promise<Admin<SetupCheckRow[]>> {
+  if (off()) return { ok: false, error: "Previews are off in production." };
+  return { ok: true, data: [
+    { group: "Vercel", label: "NEXT_PUBLIC_SUPABASE_URL", state: "ok", detail: "Set." },
+    { group: "Vercel", label: "SUPABASE_SERVICE_ROLE_KEY", state: "fail", detail: "Missing in this deployment. Add it in Vercel (Production), then redeploy Production. News, hunts, gossip and payments all need it." },
+    { group: "Vercel", label: "STRIPE_SECRET_KEY", state: "ok", detail: "Set (test mode)." },
+    { group: "Vercel", label: "STRIPE_WEBHOOK_SECRET", state: "fail", detail: "Should start with whsec_ (the destination's Signing secret)." },
+    { group: "Supabase", label: "Migration 0038_party_rooms.sql", state: "fail", detail: "Not run. Run supabase/migrations/0038_party_rooms.sql in the SQL Editor (party floor and chat)." },
+    { group: "Content", label: "content/news/2026-10-12.json", state: "ok", detail: "13 items" },
+    { group: "Stripe", label: "Webhook", state: "warn", detail: "No webhook received yet. Buy a party ticket with card 4242 4242 4242 4242 to test." },
+  ] };
 }

@@ -7,7 +7,7 @@ import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collecto
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, travelQuote } from "./travel.ts";
-import { activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { isLottoPlace, lottoGame, prizeFor } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
@@ -83,6 +83,7 @@ export type SimApi = CityApi & {
 export function createSimApi(initial: CityState, story: () => StoryFeed | null = () => null): SimApi {
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
+  let shiftsToday = 0;
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
   const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(s), gain });
   const fail = (error: string): Promise<CityResult> => Promise.resolve({ ok: false, error });
@@ -219,6 +220,9 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const price = Math.round(base * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1));
       if (a.energy > 0 && p().energy < a.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
+      // v0.11 (0039): a work day is at most shiftsPerDay shifts, across every job.
+      if (a.kind === "shift" && shiftsToday >= CITY_ECONOMY.shiftsPerDay) return fail(SHIFT_LIMIT);
+      if (a.kind === "shift") shiftsToday += 1;
       const first = !s.visitsToday[placeId];
       s.visitsToday[placeId] = (s.visitsToday[placeId] ?? 0) + 1;
       // v0.9 (0031): Mood and Confidence once a day per activity.

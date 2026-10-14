@@ -2,7 +2,8 @@
 // (game_settings 'economy', seeded by supabase/migrations/0003_first_party.sql and
 // re-tuned by later migrations) so they can be tuned without a deploy; these are the
 // same values, used by the UI and checked against the newest migration by
-// tests/economy.test.ts. Rent and the phone bill are weekly (v0.8, owner Oct 13).
+// tests/economy.test.ts. Rent and the phone bill are weekly (v0.8, owner Oct 13);
+// v0.11 raised them with the rest of the prices (migration 0039, owner Oct 14).
 
 export interface Home {
   id: string;
@@ -26,16 +27,16 @@ export interface Economy {
 }
 
 export const ECONOMY: Economy = {
-  birthLottery: { min: 3000, max: 6000, step: 100 },
-  phoneBill: 25,
+  birthLottery: { min: 5000, max: 10000, step: 100 },
+  phoneBill: 60,
   firstParty: { entry: 150, cashReward: 300, cloutReward: 100, confidence: 15, energy: 20 },
   invites: { cloutPerInvite: 50, cliqueSize: 5, cliqueBonus: 500 },
   startingStats: { energy: 100, mood: 60, confidence: 40 },
   playersOnlineThreshold: 1,
   homes: [
-    { id: "astoria_studio", name: "Astoria studio walk-up", neighborhood: "Astoria", rent: 600, emoji: "🪜", blurb: "Fourth floor, no elevator. Free leg day, every day." },
-    { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 900, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
-    { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 1600, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal." },
+    { id: "astoria_studio", name: "Astoria studio walk-up", neighborhood: "Astoria", rent: 1750, emoji: "🪜", blurb: "Fourth floor, no elevator. Free leg day, every day." },
+    { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 2600, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
+    { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 4500, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal." },
   ],
 };
 

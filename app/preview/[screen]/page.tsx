@@ -18,7 +18,7 @@ import {
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
-import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload } from "../huntActions";
+import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
 
@@ -153,7 +153,7 @@ export default async function Preview({
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
-            gossipList: previewGossipList, gossipStatus: previewGossipStatus,
+            gossipList: previewGossipList, gossipStatus: previewGossipStatus, setupCheck: previewSetupCheck,
           }}
         />
       );

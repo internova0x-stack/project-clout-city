@@ -23,8 +23,8 @@ select pg_temp.assert((pg_temp.act('unisphere', 'visit') ->> 'clout')::int = 20,
 select pg_temp.assert((pg_temp.act('unisphere', 'tour') ->> 'confidence')::int = 5, 'Walt''s tour lifts Confidence');
 select pg_temp.assert((pg_temp.act('unisphere', 'wish') ->> 'mood')::int = 4, 'a coin in the fountain');
 -- Today's daily tasks are random: one may land here and pay, so its reward is left out.
-select pg_temp.assert((select p.bank_cash - coalesce((select sum(amount) from public.ledger l where l.player_id = p.id and l.kind in ('daily_task', 'daily_bonus')), 0) = 500 - 15 - 1
-  from public.players p where p.display_name = 'tourist'), 'the tour is C$15 and the coin C$1');
+select pg_temp.assert((select p.bank_cash - coalesce((select sum(amount) from public.ledger l where l.player_id = p.id and l.kind in ('daily_task', 'daily_bonus')), 0) = 500 - 35 - 2
+  from public.players p where p.display_name = 'tourist'), 'the tour is C$35 and the coin C$2 (v0.11)');
 select pg_temp.assert((pg_temp.act('unisphere', 'pretzel') ->> 'energy')::int = 12, 'a pretzel is +12 Energy');
 select pg_temp.assert((pg_temp.act('unisphere', 'people') ->> 'mood')::int = 6, 'people-watching');
 

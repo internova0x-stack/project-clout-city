@@ -42,7 +42,7 @@ set role authenticated;
 
 -- ---- The catalog ----
 select pg_temp.assert(jsonb_array_length(public.store_catalog()) = 9, 'side stories, postcards, collector pieces and two parties');
-select pg_temp.assert((pg_temp.product('col-faux-chinchilla') ->> 'value')::int = 630, 'collector value is 1.5x the priciest fashion item');
+select pg_temp.assert((pg_temp.product('col-faux-chinchilla') ->> 'value')::int = 1388, 'collector value is 1.5x the priciest fashion item');
 select pg_temp.assert((pg_temp.product('postcard-unisphere') ->> 'visited')::boolean is false, 'not visited yet');
 select pg_temp.assert(pg_temp.product('event-jada-sol-listening') #>> '{event,host}' = 'Jada Sol', 'party details');
 
@@ -76,7 +76,7 @@ create temp table c1 as select clout, purchases_count from public.players where 
 grant select on c1 to public;
 select pg_temp.assert(public.payment_grant('evt_col_1', 'cs_col_1', 'pi_col_1', '00000000-0000-0000-0000-000000000050', 'col-faux-chinchilla', 499, 'usd') = 'granted', 'collector granted');
 select pg_temp.assert(public.payment_grant('evt_col_1b', 'cs_col_1', 'pi_col_1', '00000000-0000-0000-0000-000000000050', 'col-faux-chinchilla', 499, 'usd') = 'granted', 'second delivery');
-select pg_temp.assert((select count(*) = 1 and min(value) = 630 and min(acquired) = 'collector' from public.player_items where sku = 'col-faux-chinchilla'), 'one piece in Possessions at 630');
+select pg_temp.assert((select count(*) = 1 and min(value) = 1388 and min(acquired) = 'collector' from public.player_items where sku = 'col-faux-chinchilla'), 'one piece in Possessions at 1388');
 select pg_temp.assert((select clout - (select clout from c1) = round(80 * power(0.85, (select purchases_count from c1)))
                          from public.players where display_name = 'Max'), 'clout with diminishing returns, once');
 select pg_temp.assert((select purchases_count = (select purchases_count from c1) + 1 from public.players where display_name = 'Max'), 'counts as one purchase');

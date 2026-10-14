@@ -5,7 +5,7 @@ import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { TOPIC_LABEL, windowLine } from "@/lib/gossip";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { nextWeekday, weekdayOf, type CastLine, type ContentDraft, type GossipAdmin, type GossipFileCheck, type HuntAdmin, type NewsAdminItem, type Review, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { nextWeekday, weekdayOf, type CastLine, type ContentDraft, type GossipAdmin, type GossipFileCheck, type HuntAdmin, type NewsAdminItem, type Review, type SetupCheckRow, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
@@ -25,7 +25,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -69,10 +69,12 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {api.gossipList && <button aria-pressed={tab === "gossip"} onClick={() => setTab("gossip")}>Gossip</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Metrics</button>}
+          {api.setupCheck && <button aria-pressed={tab === "setup"} onClick={() => setTab("setup")}>Setup</button>}
         </div>
       )}
       {tab === "reports" && <Reports api={api} />}
       {tab === "metrics" && <Metrics api={api} />}
+      {tab === "setup" && <SetupTab api={api} />}
       {tab === "cast" && <CastTab api={api} />}
       {tab === "news" && <NewsTab api={api} />}
       {tab === "hunts" && <HuntsTab api={api} />}
@@ -397,6 +399,58 @@ export function describeEffect(e: StoryEffect): string {
 // Reports: the chat review queue (Clarifications 10.6)
 // ---------------------------------------------------------------------------
 const REASON: Record<StudioReport["reason"], string> = { harassment: "Harassment", spam: "Spam", inappropriate: "Inappropriate", other: "Other" };
+
+/**
+ * Setup check (owner, Oct 14): when news, hunts or payments don't show up, this says which key,
+ * migration or webhook is missing. It runs the news and hunt import too. Secrets are never shown.
+ */
+function SetupTab({ api }: { api: StudioApi }) {
+  const [rows, setRows] = useState<SetupCheckRow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const check = useCallback(async () => {
+    if (!api.setupCheck) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await api.setupCheck();
+      if (r.ok) setRows(r.data); else setError(r.error);
+    } catch {
+      setError("The check glitched. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }, [api]);
+  useEffect(() => { void check(); }, [check]);
+  const groups = [...new Set((rows ?? []).map((r) => r.group))];
+  const fails = (rows ?? []).filter((r) => r.state === "fail").length;
+  return (
+    <section className="studio-card stack-12">
+      <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+        <div className="stack-4">
+          <h2 className="display-md" style={{ margin: 0 }}>Setup check</h2>
+          <p className="meta" style={{ margin: 0 }}>What the live game needs, checked from this deployment. Fix the red lines from the top down.</p>
+        </div>
+        <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void check()}>{busy ? "Checking…" : "Check again"}</button>
+      </div>
+      {error && <p className="studio-note error">{error}</p>}
+      {rows && <p className="meta" style={{ margin: 0 }}>{fails ? `${fails} thing${fails === 1 ? "" : "s"} to fix.` : "Everything checked out."}</p>}
+      {groups.map((g) => (
+        <div key={g} className="stack-8">
+          <h3 className="overline" style={{ margin: 0 }}>{g}</h3>
+          <ul className="setup-rows">
+            {(rows ?? []).filter((r) => r.group === g).map((r) => (
+              <li key={r.label} className={`setup-row ${r.state}`}>
+                <span aria-hidden="true">{r.state === "ok" ? "✅" : r.state === "warn" ? "⚠️" : "❌"}</span>
+                <div className="setup-text"><b>{r.label}</b><span className="meta">{r.detail}</span></div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  );
+}
 
 function Reports({ api }: { api: StudioApi }) {
   const [status, setStatus] = useState<"open" | "all">("open");

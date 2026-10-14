@@ -12,13 +12,14 @@ import type { LatLng } from "./map/geo";
 // ---------------------------------------------------------------------------
 export const CITY_ECONOMY = {
   shiftRate: 120,
-  cloutPerDollar: 0.6,
+  /** v0.11 (owner, Oct 14): prices went up about 2.3 times, so clout per dollar came down to match. */
+  cloutPerDollar: 0.25,
   baseVisitClout: 5,
   /** Mood and Confidence scale clout: 0.7 + 0.3·mood/100 + 0.3·confidence/100. */
   cloutMultiplier: { base: 0.7, mood: 0.3, confidence: 0.3 },
   energy: { dailyTopUp: 20, eventCost: 20 },
   confidenceDriftPerDay: 3,
-  dailyTasks: { count: 5, rewardMin: 40, rewardMax: 90, bonus: 150 },
+  dailyTasks: { count: 5, rewardMin: 25, rewardMax: 50, bonus: 100 },
   sellRate: 0.6,
   /** Each purchase's clout is this fraction of the previous one's (diminishing returns). */
   purchaseCloutDecay: 0.85,
@@ -28,27 +29,32 @@ export const CITY_ECONOMY = {
    * Missed rent: 2 days' grace, then Mood drops daily, then a move to the cheapest home after 6 days
    * (before the next week's rent arrives).
    */
-  bills: { every: "7 days", carRentalDays: 7, phone: 25, graceDays: 2, moodDropPerDay: 8, evictAfterDays: 6, carInsuranceRate: 0.005 },
+  bills: { every: "7 days", carRentalDays: 7, phone: 60, graceDays: 2, moodDropPerDay: 8, evictAfterDays: 6, carInsuranceRate: 0.005 },
   gigs: {
-    // Pay is a multiple of shiftRate. With weekly rent (v0.8): a side gig is about a week in the studio
-    // (C$600), a pro gig a week in the 1BR, a big break a week in the high-rise.
+    // Pay is a multiple of shiftRate. v0.11 recalibration (owner, Oct 14): a side gig is a good day's
+    // extra, a pro gig about a third of a week in the studio, a big break about half a week in the 1BR.
     // Clout (v0.7, owner Oct 13): pro gigs and big breaks also need a reputation, not just a good mood.
-    side: { confidence: 0, clout: 0, chance: 0.9, payMin: 3, payMax: 5, energy: 1.5, waitMinutes: 60 },
-    pro: { confidence: 50, clout: 500, chance: 0.5, payMin: 8, payMax: 10, energy: 2, waitMinutes: 120 },
-    big: { confidence: 80, clout: 2000, chance: 0.22, payMin: 15, payMax: 20, energy: 3, waitMinutes: 240 },
+    side: { confidence: 0, clout: 0, chance: 0.9, payMin: 2, payMax: 3, energy: 1.5, waitMinutes: 60 },
+    pro: { confidence: 50, clout: 500, chance: 0.5, payMin: 5, payMax: 6, energy: 2, waitMinutes: 120 },
+    big: { confidence: 80, clout: 2000, chance: 0.22, payMin: 10, payMax: 12, energy: 3, waitMinutes: 240 },
   },
   shiftEnergy: 25,
+  /**
+   * v0.11 recalibration (owner, Oct 14): a work day is at most this many shifts, across every job.
+   * Without it, cheap groceries turned Energy into unlimited shifts and money stopped mattering.
+   */
+  shiftsPerDay: 3,
   /**
    * Rest at home and drinks at venues (v0.8, #3, #26, #27; owner Oct 13). Caps keep meals the main
    * source of Energy: a nap is +30 twice a day (an 8-second nap on the player's own timer), sitting
    * +10 Energy and +6 Mood three times a day; both only at home. A drink at a club or lounge bar is
-   * the pricey, convenient option: C$28 for +20 Energy, no clout, no cap.
+   * the pricey, convenient option: C$60 for +20 Energy, no clout, no cap.
    */
   rest: {
     nap: { energy: 30, mood: 0, perDay: 2, seconds: 8 },
     sit: { energy: 10, mood: 6, perDay: 3, seconds: 0 },
   },
-  barDrink: { price: 28, energy: 20, tags: ["club", "lounge"] },
+  barDrink: { price: 60, energy: 20, tags: ["club", "lounge"] },
   /**
    * Groceries and home cooking (v0.8, owner Oct 13): the budget option. Bundles are bought at a
    * supermarket (you have to be there) and fill the fridge, up to fridgeMax meals; a bundle that
@@ -60,8 +66,8 @@ export const CITY_ECONOMY = {
     cook: { energy: 25, seconds: 6 },
     tags: ["supermarket"],
     bundles: [
-      { id: "snack-run", emoji: "🥪", label: "Snack run", price: 12, meals: 2, blurb: "Chips, hummus, one sad apple. Technically two meals." },
-      { id: "meal-prep", emoji: "🥦", label: "Meal prep for the week", price: 35, meals: 7, blurb: "Seven containers, one Sunday, infinite smugness." },
+      { id: "snack-run", emoji: "🥪", label: "Snack run", price: 28, meals: 2, blurb: "Chips, hummus, one sad apple. Technically two meals." },
+      { id: "meal-prep", emoji: "🥦", label: "Meal prep for the week", price: 95, meals: 7, blurb: "Seven containers, one Sunday, infinite smugness." },
     ],
   },
   /**
@@ -73,8 +79,8 @@ export const CITY_ECONOMY = {
   travel: {
     bandsMiles: [0.5, 2, 5],
     walk: { energy: [5, 10, 20, null], seconds: [6, 8, 10, null] },
-    subway: { fare: 3, seconds: [5, 6, 7, 8] },
-    taxi: { fare: [8, 16, 28, 45], seconds: [3, 4, 5, 6] },
+    subway: { fare: 6, seconds: [5, 6, 7, 8] },
+    taxi: { fare: [18, 35, 60, 95], seconds: [3, 4, 5, 6] },
     car: { seconds: [3, 4, 5, 6] },
   },
   /**
@@ -185,7 +191,7 @@ export const PLACES: Place[] = [
     tags: ["club", "nightlife", "first_party_venue"],
     lore: "A converted warehouse where the bass is louder than your thoughts. The bouncer has rejected three influencers and one actual prince. You got in once. Act like it was nothing.",
     actions: [
-      { id: "visit", kind: "visit", label: "Get seen on the dance floor", price: 60, energy: 15, mood: 6, confidence: 4, blurb: "Fake it till you make it: pay the bar man to let you in." },
+      { id: "visit", kind: "visit", label: "Get seen on the dance floor", price: 140, energy: 15, mood: 6, confidence: 4, blurb: "Fake it till you make it: pay the bar man to let you in." },
     ],
   },
   {
@@ -194,7 +200,7 @@ export const PLACES: Place[] = [
     tags: ["cafe", "dining_medium", "job_barista"],
     lore: "Oat-milk lattes and unverified rumors, both served hot. The barista knows everyone's business and spells every name wrong on purpose.",
     actions: [
-      { id: "eat", kind: "eat", label: "Brunch and eavesdrop", price: 18, energy: -30, blurb: "Avocado toast that costs more than your phone bill's feelings." },
+      { id: "eat", kind: "eat", label: "Brunch and eavesdrop", price: 42, energy: -30, blurb: "Avocado toast that costs more than your phone bill's feelings." },
       { id: "shift", kind: "shift", label: "Work a barista shift", pay: 120, energy: 25, blurb: "Pull shots, take orders, absorb gossip. Paid in cash and secrets." },
     ],
   },
@@ -204,7 +210,7 @@ export const PLACES: Place[] = [
     tags: ["bodega", "dining_budget"],
     lore: "Open 24 hours, staffed by one man and a cat who runs the place. The chopped cheese is legendary; the receipts are imaginary.",
     actions: [
-      { id: "eat", kind: "eat", label: "Grab a chopped cheese", price: 7, energy: -15, blurb: "Cheap, fast, life-changing. The cat watches you eat it." },
+      { id: "eat", kind: "eat", label: "Grab a chopped cheese", price: 16, energy: -15, blurb: "Cheap, fast, life-changing. The cat watches you eat it." },
     ],
   },
   {
@@ -213,7 +219,7 @@ export const PLACES: Place[] = [
     tags: ["rooftop", "dining_luxury"],
     lore: "Forty floors up, the skyline does the talking. Nobody comes for the food, but the food is incredible, which is suspicious.",
     actions: [
-      { id: "eat", kind: "eat", label: "Dine with a view", price: 95, energy: -55, blurb: "Small plates, big prices, bigger photos. Being seen here is the point." },
+      { id: "eat", kind: "eat", label: "Dine with a view", price: 210, energy: -55, blurb: "Small plates, big prices, bigger photos. Being seen here is the point." },
     ],
   },
   {
@@ -269,7 +275,7 @@ export const PLACES: Place[] = [
     tags: ["rockaway_diner", "diner", "dining_budget"],
     lore: "Vinyl booths, a pie case that rotates like it's auditioning and coffee that has never once been described as artisanal. The waitresses call everyone \"hon\" and mean it.",
     actions: [
-      { id: "eat", kind: "eat", label: "Grab a booth and a stack", price: 14, energy: -25, blurb: "Pancakes the size of hubcaps. The syrup is self-serve and so is the gossip." },
+      { id: "eat", kind: "eat", label: "Grab a booth and a stack", price: 32, energy: -25, blurb: "Pancakes the size of hubcaps. The syrup is self-serve and so is the gossip." },
     ],
   },
   {
@@ -287,7 +293,7 @@ export const PLACES: Place[] = [
     tags: ["pressed_iron", "gym"],
     lore: "Chalk dust, mirrors and men who grunt in full sentences. The front desk keeps very good membership records, which some people find inconvenient.",
     actions: [
-      { id: "workout", kind: "visit", label: "Buy a day pass and lift", price: 15, energy: 20, confidence: 6, mood: 3, blurb: "You lifted. You were seen lifting. Both count." },
+      { id: "workout", kind: "visit", label: "Buy a day pass and lift", price: 35, energy: 20, confidence: 6, mood: 3, blurb: "You lifted. You were seen lifting. Both count." },
     ],
   },
   // ---- Location wave 3 (Milestones v0.5): two monuments, a lounge, the boutique and the dealership ----
@@ -299,9 +305,9 @@ export const PLACES: Place[] = [
     actions: [
       { id: "visit", kind: "visit", label: "Pose with the globe", energy: 5, mood: 6, clout: 20, blurb: "Hold up the world for a photo. Everyone does. Do it anyway." },
       // v0.9 (#32; owner Oct 13): the plaza's activities.
-      { id: "tour", kind: "hangout", label: "Take Walt's tour", price: 15, energy: 8, confidence: 5, blurb: "Forty minutes, three World's Fairs, one ex-wife. You'll know things now." },
-      { id: "wish", kind: "hangout", label: "Toss a coin in the fountain", price: 1, energy: 0, mood: 4, blurb: "Wish for clout. The fountain has heard it before." },
-      { id: "pretzel", kind: "eat", label: "Pretzel from the cart", price: 5, energy: -12, blurb: "Salt crystals the size of dice. Worth every one." },
+      { id: "tour", kind: "hangout", label: "Take Walt's tour", price: 35, energy: 8, confidence: 5, blurb: "Forty minutes, three World's Fairs, one ex-wife. You'll know things now." },
+      { id: "wish", kind: "hangout", label: "Toss a coin in the fountain", price: 2, energy: 0, mood: 4, blurb: "Wish for clout. The fountain has heard it before." },
+      { id: "pretzel", kind: "eat", label: "Pretzel from the cart", price: 12, energy: -12, blurb: "Salt crystals the size of dice. Worth every one." },
       { id: "people", kind: "hangout", label: "People-watch on a bench", energy: 3, mood: 6, blurb: "Tourists, joggers, a man walking a cat. Free entertainment." },
     ],
   },
@@ -314,7 +320,7 @@ export const PLACES: Place[] = [
       { id: "visit", kind: "visit", label: "Catch the skyline at the gantries", energy: 5, mood: 8, clout: 20, blurb: "Golden hour, river breeze, three proposals in progress behind you." },
       // v0.9 (#32; owner Oct 13): the plaza's activities.
       { id: "photoshoot", kind: "hangout", label: "Golden hour photoshoot", energy: 10, confidence: 6, blurb: "Squint at the sun like it owes you money. Inez says that's your angle." },
-      { id: "picnic", kind: "eat", label: "Picnic on the lawn", price: 12, energy: -20, blurb: "A blanket, a baguette and a view that costs nothing. The baguette cost something." },
+      { id: "picnic", kind: "eat", label: "Picnic on the lawn", price: 28, energy: -20, blurb: "A blanket, a baguette and a view that costs nothing. The baguette cost something." },
       { id: "ferries", kind: "hangout", label: "Watch the ferries", energy: 2, mood: 7, blurb: "Boats go by. You do nothing. It's the most productive you've felt all week." },
       { id: "run", kind: "hangout", label: "Run the river path", energy: 15, mood: 4, confidence: 5, blurb: "Two miles, one skyline, zero breath left. You look great, though." },
     ],
@@ -325,7 +331,7 @@ export const PLACES: Place[] = [
     tags: ["lounge", "nightlife", "exclusive_venue"],
     lore: "Velvet booths, jazz on vinyl and a guest list longer than the drinks menu. Celebrities come here to be left alone, loudly.",
     actions: [
-      { id: "visit", kind: "visit", label: "Order something brown and expensive", price: 45, energy: 10, mood: 8, confidence: 3, blurb: "Swirl it. Sniff it. Pretend you can taste the oak." },
+      { id: "visit", kind: "visit", label: "Order something brown and expensive", price: 105, energy: 10, mood: 8, confidence: 3, blurb: "Swirl it. Sniff it. Pretend you can taste the oak." },
     ],
   },
   {
@@ -371,7 +377,7 @@ export const PLACES: Place[] = [
     tags: ["bodega", "dining_budget", "astoria"],
     lore: "Open all night, run by a man named Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account.",
     actions: [
-      { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 6, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
+      { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 14, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
     ],
   },
   {
@@ -380,7 +386,7 @@ export const PLACES: Place[] = [
     tags: ["pizza", "dining_budget", "astoria"],
     lore: "Two brothers, one oven and a feud about anchovies that has lasted eleven years. The slices are great. The yelling is free.",
     actions: [
-      { id: "eat", kind: "eat", label: "Grab a slice", price: 4, energy: -12, blurb: "Fold it like a local. Burn the roof of your mouth like a local." },
+      { id: "eat", kind: "eat", label: "Grab a slice", price: 9, energy: -12, blurb: "Fold it like a local. Burn the roof of your mouth like a local." },
     ],
   },
   {
@@ -389,7 +395,7 @@ export const PLACES: Place[] = [
     tags: ["diner", "dining_medium", "astoria"],
     lore: "A chrome diner with a menu the size of a novel. Breakfast is served all day; regret is served after 2 AM.",
     actions: [
-      { id: "eat", kind: "eat", label: "Pancakes in a booth", price: 16, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
+      { id: "eat", kind: "eat", label: "Pancakes in a booth", price: 38, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
     ],
   },
   {
@@ -398,7 +404,7 @@ export const PLACES: Place[] = [
     tags: ["rooftop", "dining_luxury", "astoria"],
     lore: "A rooftop above 30th Avenue with string lights, small plates and big opinions. The view is Manhattan; the vibe is \"I'm not from Manhattan, on purpose.\"",
     actions: [
-      { id: "eat", kind: "eat", label: "Small plates, big view", price: 70, energy: -50, blurb: "Order the octopus. Photograph the octopus. Eventually, eat the octopus." },
+      { id: "eat", kind: "eat", label: "Small plates, big view", price: 160, energy: -50, blurb: "Order the octopus. Photograph the octopus. Eventually, eat the octopus." },
     ],
   },
   {
@@ -416,7 +422,7 @@ export const PLACES: Place[] = [
     tags: ["club", "nightlife", "astoria"],
     lore: "An old warehouse by the tracks with a sound system that registers on seismographs. The DJ booth is a converted subway car. Nobody knows how it got inside.",
     actions: [
-      { id: "visit", kind: "visit", label: "Dance under the train tracks", price: 50, energy: 15, mood: 6, confidence: 4, blurb: "Every time the N train passes, the whole room cheers." },
+      { id: "visit", kind: "visit", label: "Dance under the train tracks", price: 115, energy: 15, mood: 6, confidence: 4, blurb: "Every time the N train passes, the whole room cheers." },
     ],
   },
   {
@@ -461,7 +467,7 @@ export const PLACES: Place[] = [
     tags: ["college", "campus", "astoria"],
     lore: "Night classes for people with day jobs and big plans. The parking lot has more ambition per square foot than most startups.",
     actions: [
-      { id: "night-class", kind: "visit", label: "Take a night class", price: 20, energy: 15, confidence: 6, clout: 10, blurb: "Public Speaking 101. You speak publicly. Nobody dies." },
+      { id: "night-class", kind: "visit", label: "Take a night class", price: 45, energy: 15, confidence: 6, clout: 10, blurb: "Public Speaking 101. You speak publicly. Nobody dies." },
     ],
   },
   {
@@ -488,7 +494,7 @@ export const PLACES: Place[] = [
     tags: ["gym", "astoria"],
     lore: "Neon lights, loud music and mirrors on every wall, so you can watch yourself almost do a pull-up. Nobody here is related to any other gym, thank you for asking.",
     actions: [
-      { id: "workout", kind: "visit", label: "Work out", price: 12, energy: 20, confidence: 6, mood: 2, blurb: "Leg day. You'll feel it on the stairs to your walk-up." },
+      { id: "workout", kind: "visit", label: "Work out", price: 28, energy: 20, confidence: 6, mood: 2, blurb: "Leg day. You'll feel it on the stairs to your walk-up." },
     ],
   },
   {
@@ -506,7 +512,7 @@ export const PLACES: Place[] = [
     tags: ["cinema", "date_spot", "astoria"],
     lore: "A restored single-screen movie palace with velvet seats and a popcorn machine older than your parents. Perfect for dates; the dark hides nervous faces.",
     actions: [
-      { id: "movie", kind: "eat", label: "Movie and popcorn", price: 15, energy: -10, mood: 8, blurb: "Butter on the popcorn, butter on the seat, butter somehow on your phone." },
+      { id: "movie", kind: "eat", label: "Movie and popcorn", price: 35, energy: -10, mood: 8, blurb: "Butter on the popcorn, butter on the seat, butter somehow on your phone." },
     ],
   },
   {
@@ -515,7 +521,7 @@ export const PLACES: Place[] = [
     tags: ["games", "arena", "astoria"],
     lore: "Rows of glowing rigs, a stage for tournaments and an energy-drink fridge that hums like a jet engine. Arcade Nerds call it home; everyone else calls it loud.",
     actions: [
-      { id: "match", kind: "visit", label: "Play a ranked match", price: 10, energy: 15, confidence: 5, clout: 12, blurb: "You lose to a twelve-year-old. You win the rematch. Character arc." },
+      { id: "match", kind: "visit", label: "Play a ranked match", price: 24, energy: 15, confidence: 5, clout: 12, blurb: "You lose to a twelve-year-old. You win the rematch. Character arc." },
     ],
   },
   // v0.10 (spec section 7): the lotto shop, outside Astoria on purpose; you travel to play.
@@ -557,12 +563,12 @@ export interface ClubEvent {
 }
 
 export const CLUB_EVENTS: ClubEvent[] = [
-  { id: "neon-nights", name: "Neon Nights", placeId: "velvet-static", startHour: 22, hours: 5, entry: 80, clout: 60, confidence: 8, mood: 6, blurb: "Glow sticks, bad decisions, excellent lighting." },
-  { id: "bass-bath", name: "Bass Bath", placeId: "hellgate-hall", startHour: 21, hours: 5, entry: 70, clout: 50, confidence: 7, mood: 7, blurb: "Bass so heavy the train schedule adjusts around it." },
-  { id: "golden-hour", name: "Golden Hour Day Party", placeId: "velvet-static", startHour: 15, hours: 4, entry: 50, clout: 40, confidence: 6, mood: 8, blurb: "A day party for people who can't commit to a night." },
+  { id: "neon-nights", name: "Neon Nights", placeId: "velvet-static", startHour: 22, hours: 5, entry: 185, clout: 60, confidence: 8, mood: 6, blurb: "Glow sticks, bad decisions, excellent lighting." },
+  { id: "bass-bath", name: "Bass Bath", placeId: "hellgate-hall", startHour: 21, hours: 5, entry: 160, clout: 50, confidence: 7, mood: 7, blurb: "Bass so heavy the train schedule adjusts around it." },
+  { id: "golden-hour", name: "Golden Hour Day Party", placeId: "velvet-static", startHour: 15, hours: 4, entry: 115, clout: 40, confidence: 6, mood: 8, blurb: "A day party for people who can't commit to a night." },
   // Campus events at the two universities.
-  { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 15, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },
-  { id: "quad-open-mic", name: "Open Mic on the Quad", placeId: "queensborough-u", startHour: 19, hours: 3, entry: 10, clout: 30, confidence: 8, mood: 6, blurb: "Slam poetry, one ukulele and a guy who only does impressions of his roommate." },
+  { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 35, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },
+  { id: "quad-open-mic", name: "Open Mic on the Quad", placeId: "queensborough-u", startHour: 19, hours: 3, entry: 24, clout: 30, confidence: 8, mood: 6, blurb: "Slam poetry, one ukulele and a guy who only does impressions of his roommate." },
 ];
 
 // ---------------------------------------------------------------------------
@@ -628,31 +634,31 @@ export const SHOP_CATEGORIES: { id: ShopCategory; label: string; emoji: string }
 
 export const SHOP_ITEMS: ShopItem[] = [
   // Fashion
-  { sku: "fit-satin-bomber", category: "fashion", name: "Satin bomber jacket", emoji: "🧥", price: 180, clout: 25, rating: 3, blurb: "Shiny enough to be seen from Jersey.", wear: { slot: "top", kind: "zip", color: "#E0186F", accent: "#14111A" } },
-  { sku: "fit-leather-blazer", category: "fashion", name: "Leather blazer", emoji: "🧥", price: 420, clout: 45, rating: 4, blurb: "Says \"I have a publicist.\" You don't. Yet.", wear: { slot: "top", kind: "blazer", color: "#1F1B26", accent: "#6B6570" } },
-  { sku: "fit-varsity-tee", category: "fashion", name: "Vintage varsity tee", emoji: "👕", price: 65, clout: 10, rating: 2, blurb: "From a college you didn't attend. Iconic.", wear: { slot: "top", kind: "tee", color: "#FFF6E0", accent: "#D93A2F" } },
-  { sku: "fit-wide-trousers", category: "fashion", name: "Wide-leg trousers", emoji: "👖", price: 140, clout: 18, rating: 3, blurb: "Extra fabric, extra confidence.", wear: { slot: "bottom", kind: "pants", color: "#C2AE86" } },
-  { sku: "fit-mini-skirt", category: "fashion", name: "Pleated mini skirt", emoji: "👗", price: 120, clout: 16, rating: 3, blurb: "Brunch-approved. Weather-ignored.", wear: { slot: "bottom", kind: "skirt", color: "#6B2BD9" } },
-  { sku: "fit-chunky-sneakers", category: "fashion", name: "Chunky dad sneakers", emoji: "👟", price: 210, clout: 28, rating: 4, blurb: "Ugly on purpose. Expensive on purpose.", wear: { slot: "shoes", color: "#ECE6DC" } },
-  { sku: "forever-our-bird-hoodie", category: "fashion", name: "\"Forever Our Bird\" hoodie", emoji: "🕊️", price: 85, clout: 12, rating: 2, storyOnly: true, blurb: "Loretta's grief merch, C$85, \"for healing.\" Limited time, unlimited questions.", wear: { slot: "top", kind: "hoodie", color: "#F4F1EA", accent: "#6C8CFF" } },
+  { sku: "fit-satin-bomber", category: "fashion", name: "Satin bomber jacket", emoji: "🧥", price: 395, clout: 25, rating: 3, blurb: "Shiny enough to be seen from Jersey.", wear: { slot: "top", kind: "zip", color: "#E0186F", accent: "#14111A" } },
+  { sku: "fit-leather-blazer", category: "fashion", name: "Leather blazer", emoji: "🧥", price: 925, clout: 45, rating: 4, blurb: "Says \"I have a publicist.\" You don't. Yet.", wear: { slot: "top", kind: "blazer", color: "#1F1B26", accent: "#6B6570" } },
+  { sku: "fit-varsity-tee", category: "fashion", name: "Vintage varsity tee", emoji: "👕", price: 145, clout: 10, rating: 2, blurb: "From a college you didn't attend. Iconic.", wear: { slot: "top", kind: "tee", color: "#FFF6E0", accent: "#D93A2F" } },
+  { sku: "fit-wide-trousers", category: "fashion", name: "Wide-leg trousers", emoji: "👖", price: 310, clout: 18, rating: 3, blurb: "Extra fabric, extra confidence.", wear: { slot: "bottom", kind: "pants", color: "#C2AE86" } },
+  { sku: "fit-mini-skirt", category: "fashion", name: "Pleated mini skirt", emoji: "👗", price: 265, clout: 16, rating: 3, blurb: "Brunch-approved. Weather-ignored.", wear: { slot: "bottom", kind: "skirt", color: "#6B2BD9" } },
+  { sku: "fit-chunky-sneakers", category: "fashion", name: "Chunky dad sneakers", emoji: "👟", price: 460, clout: 28, rating: 4, blurb: "Ugly on purpose. Expensive on purpose.", wear: { slot: "shoes", color: "#ECE6DC" } },
+  { sku: "forever-our-bird-hoodie", category: "fashion", name: "\"Forever Our Bird\" hoodie", emoji: "🕊️", price: 185, clout: 12, rating: 2, storyOnly: true, blurb: "Loretta's grief merch, C$185, \"for healing.\" Limited time, unlimited questions.", wear: { slot: "top", kind: "hoodie", color: "#F4F1EA", accent: "#6C8CFF" } },
   { sku: "col-faux-chinchilla", category: "fashion", name: "Faux chinchilla coat", emoji: "🧥", price: 0, clout: 80, rating: 4, collector: true, blurb: "No chinchillas were harmed. Several egos were.", wear: { slot: "top", kind: "blazer", color: "#D9D2C5", accent: "#A89F92" } },
   { sku: "col-holo-boots", category: "fashion", name: "Holographic platform boots", emoji: "👢", price: 0, clout: 70, rating: 4, collector: true, blurb: "Six inches taller and visible from space.", wear: { slot: "shoes", color: "#B8C6FF" } },
-  { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 55, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
+  { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 120, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
   // Cars
-  { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 14000, clout: 120, rating: 2, rentPerWeek: 350, blurb: "Previously loved. Heavily. It still gets you to the club." },
-  { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 52000, clout: 300, rating: 4, rentPerWeek: 900, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
-  { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 78000, clout: 420, rating: 4, rentPerWeek: 1300, blurb: "Silent, fast and smug. Like a startup founder." },
+  { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 21000, clout: 120, rating: 2, rentPerWeek: 525, blurb: "Previously loved. Heavily. It still gets you to the club." },
+  { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 78000, clout: 300, rating: 4, rentPerWeek: 1350, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
+  { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 117000, clout: 420, rating: 4, rentPerWeek: 1950, blurb: "Silent, fast and smug. Like a startup founder." },
   // Houses
-  { sku: "house-astoria-townhouse", category: "houses", name: "Astoria townhouse", emoji: "🏡", price: 180000, clout: 900, rating: 3, neighborhood: "Astoria", blurb: "A stoop of your own. Neighbors will judge your plants." },
-  { sku: "house-lic-penthouse", category: "houses", name: "LIC penthouse", emoji: "🌆", price: 650000, clout: 2400, rating: 4, neighborhood: "Long Island City", blurb: "Floor-to-ceiling windows, so the city can watch you thrive." },
+  { sku: "house-astoria-townhouse", category: "houses", name: "Astoria townhouse", emoji: "🏡", price: 270000, clout: 900, rating: 3, neighborhood: "Astoria", blurb: "A stoop of your own. Neighbors will judge your plants." },
+  { sku: "house-lic-penthouse", category: "houses", name: "LIC penthouse", emoji: "🌆", price: 975000, clout: 2400, rating: 4, neighborhood: "Long Island City", blurb: "Floor-to-ceiling windows, so the city can watch you thrive." },
   // Luxury
-  { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "⛓️", price: 900, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },
-  { sku: "lux-diamond-studs", category: "luxury", name: "Diamond-ish studs", emoji: "💎", price: 2400, clout: 140, rating: 4, blurb: "They sparkle. That's the whole personality." },
-  { sku: "lux-designer-watch", category: "luxury", name: "Designer watch", emoji: "⌚", price: 6800, clout: 260, rating: 4, blurb: "Tells the time and tells everyone you're doing fine." },
+  { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "⛓️", price: 2250, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },
+  { sku: "lux-diamond-studs", category: "luxury", name: "Diamond-ish studs", emoji: "💎", price: 6000, clout: 140, rating: 4, blurb: "They sparkle. That's the whole personality." },
+  { sku: "lux-designer-watch", category: "luxury", name: "Designer watch", emoji: "⌚", price: 17000, clout: 260, rating: 4, blurb: "Tells the time and tells everyone you're doing fine." },
   // Makeup
-  { sku: "mu-glow-kit", category: "makeup", name: "Glass-skin glow kit", emoji: "✨", price: 75, clout: 12, rating: 3, blurb: "Look like you sleep eight hours. You don't." },
-  { sku: "mu-lip-set", category: "makeup", name: "Lip set in 12 shades of \"nude\"", emoji: "💄", price: 95, clout: 14, rating: 3, blurb: "Twelve shades. You'll wear one. Forever." },
-  { sku: "mu-lash-bar", category: "makeup", name: "Lash bar appointment", emoji: "👁️", price: 160, clout: 20, rating: 2, blurb: "Blink and you'll fan the person next to you." },
+  { sku: "mu-glow-kit", category: "makeup", name: "Glass-skin glow kit", emoji: "✨", price: 165, clout: 12, rating: 3, blurb: "Look like you sleep eight hours. You don't." },
+  { sku: "mu-lip-set", category: "makeup", name: "Lip set in 12 shades of \"nude\"", emoji: "💄", price: 210, clout: 14, rating: 3, blurb: "Twelve shades. You'll wear one. Forever." },
+  { sku: "mu-lash-bar", category: "makeup", name: "Lash bar appointment", emoji: "👁️", price: 350, clout: 20, rating: 2, blurb: "Blink and you'll fan the person next to you." },
 ];
 
 export function placeById(id: string): Place | undefined {

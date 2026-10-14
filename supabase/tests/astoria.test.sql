@@ -45,12 +45,12 @@ select 1 from pg_temp.act('hell-gate-park', 'hangout');
 select pg_temp.assert((pg_temp.act('respawn-arena', 'match') ->> 'clout')::int = 12, 'a ranked match pays its fixed 12 clout');
 select pg_temp.assert((pg_temp.act('astoria-cc', 'night-class') ->> 'confidence')::int = 6, 'night class: +6 Confidence');
 reset role;
-select pg_temp.assert((select sum(amount) = -34 and count(*) = 3 from public.ledger
+select pg_temp.assert((select sum(amount) = -78 and count(*) = 3 from public.ledger
                          where player_id = '00000000-0000-0000-0000-000000000071' and currency = 'cash' and kind in ('eat', 'visit')),
-  'paid C$4 + C$10 + C$20; the firehouse dog and the park are free');
+  'paid C$9 + C$24 + C$45 (v0.11 prices); the firehouse dog and the park are free');
 
 -- The cinema is a date spot (its movie is a meal); a library is not.
-select pg_temp.assert(public.date_target('place', 'reel-queens') ->> 'price' = '15', 'cinema date at C$15');
+select pg_temp.assert(public.date_target('place', 'reel-queens') ->> 'price' = '35', 'cinema date at C$35 (v0.11)');
 select pg_temp.assert(public.date_target('place', 'ditmars-library') is null, 'no dates at the library');
 -- Hellgate Hall has its own club night.
 select pg_temp.assert(public.date_target('event', 'bass-bath') ->> 'placeId' = 'hellgate-hall', 'Bass Bath is at Hellgate Hall');
