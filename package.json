@@ -24,6 +24,9 @@
     "three": "0.180.0"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.1.1",
+    "@gltf-transform/extensions": "^4.1.1",
+    "@gltf-transform/functions": "^4.1.1",
     "@types/node": "22.18.8",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
