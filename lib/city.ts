@@ -52,7 +52,7 @@ export const CITY_ECONOMY = {
    */
   rest: {
     nap: { energy: 30, mood: 0, perDay: 2, seconds: 8 },
-    sit: { energy: 10, mood: 6, perDay: 3, seconds: 0 },
+    sit: { energy: 10, mood: 6, perDay: 3, seconds: 4 },
   },
   barDrink: { price: 60, energy: 20, tags: ["club", "lounge"] },
   /**
@@ -74,14 +74,26 @@ export const CITY_ECONOMY = {
    * Travel (v0.8, #4; owner Oct 13): no spending before arriving. Price and Energy come from four
    * distance bands (under 0.5 mi, 0.5 to 2, 2 to 5, over 5), not routes. Walking is free but tiring
    * and isn't offered past 5 miles; the subway is a flat fare; your own car costs nothing to drive.
-   * Trips are short (3 to 10 seconds of watching), on the player's own timer, always skippable.
+   * Trips take real time on the player's own timer (see `time`); skipping costs a little cash.
    */
   travel: {
     bandsMiles: [0.5, 2, 5],
-    walk: { energy: [5, 10, 20, null], seconds: [6, 8, 10, null] },
-    subway: { fare: 6, seconds: [5, 6, 7, 8] },
-    taxi: { fare: [18, 35, 60, 95], seconds: [3, 4, 5, 6] },
-    car: { seconds: [3, 4, 5, 6] },
+    walk: { energy: [5, 10, 20, null] },
+    subway: { fare: 6 },
+    taxi: { fare: [18, 35, 60, 95] },
+    /**
+     * #13 (owner, Oct 14): trips take 0 to 60 real seconds by distance: base + perMile × miles, capped.
+     * Taxis are quickest for short hops; the subway wins on long ones (traffic). The server sets the
+     * arrival time (players.arrives_at); nothing at the destination works before it.
+     */
+    time: {
+      walk: { base: 6, perMile: 20, max: 60 },
+      subway: { base: 12, perMile: 6, max: 45 },
+      taxi: { base: 5, perMile: 9, max: 60 },
+      car: { base: 5, perMile: 8, max: 55 },
+    },
+    /** Skipping the rest of a trip costs C$1 per `secondsPerCash` seconds left, at least `min`. */
+    skip: { secondsPerCash: 2, min: 5 },
   },
   /**
    * Treasure hunts (v0.6): cash about a pro gig (8 to 10 shifts), clout about 15 to 20% of an

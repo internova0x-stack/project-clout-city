@@ -30,6 +30,12 @@ export const GAME_CONFIG = {
     cookieMaxAgeDays: 30,
   },
 
+  /**
+   * #11 (owner, Oct 14): actions take a moment, on the player's own timer; rewards land when it ends.
+   * Seconds: a chat or browse, a snack; a meal; a visit, workout or class; a shift.
+   */
+  actionSeconds: { quick: 4, snack: 4, meal: 6, visit: 6, shift: 12 },
+
   /** Set for an hour when someone confirms 18+ and then signs in with Google. */
   ageCookieName: "cc_age_ok",
 } as const;

@@ -128,3 +128,27 @@ These shipped in v0.2 to v0.5 and stay as they are: chat with block, report and 
 Hunt cash, lotto cards, gossip and real-money prices are unchanged.
 
 **How it plays.** A full day (3 shifts, the five tasks and the bonus) earns about C$650, or about C$900 with a side gig. A modest day costs about C$530: studio rent, meals, a few rides and one night out. Saving for anything in the Shop takes days for clothes, weeks for jewelry and months for a car. The 1BR takes steady work; the high-rise needs pro gigs and big breaks. `tests/city.test.ts` checks these relationships so a later tweak can't quietly undo them.
+
+## Testing round, Oct 14 (bug fixes A and B; migration 0040)
+
+The owner's notes from testing on an iPhone (Chrome, which uses Apple's WebKit like every iPhone browser). Lotto (#5), night lights (#10), avatars (#9) and bigger floor plans (#19) follow as their own steps.
+
+| # | Note | Fix |
+| --- | --- | --- |
+| 1 | Hide is hard to spot | A green pill everywhere a panel collapses ("Hide" / "All actions") |
+| 2 | Sheets cut off on iPhone | On WebKit, sheets no longer blur what's behind them while they slide (that combination dropped paint); the scrim is a plain dark tint there |
+| 3 | One suggestion per stat, the same everywhere | One per stat, **chosen for where you are**: at home a nap, then cooking (if the fridge has meals), then sitting; out, something right where you are first, then the cheapest place. Each says what it gives, what it costs, how long it takes and how many are left today (`lib/statTips.ts`) |
+| 4 | The online count hides a chip | "At <place>" sits under the HUD with the other chips |
+| 6 | Daily tasks aren't tied to gossip; the Tea app is empty | There was no gossip file for the week of Oct 12. Added it (4 stories, one starting with Sal at the deli). The Studio's Setup check now says when this week's gossip file is missing |
+| 7 | Actions should only happen inside | The place card shows what each thing costs (a pill, not a button); everything happens inside. "Go inside" sits right under "Go there" |
+| 8 | The close ✕ overlaps text | Sheets keep a clear band for the ✕ |
+| 11 | Actions happen in a split second | Everything takes a moment on your own timer, and the rewards land when it ends: a chat or browse 4 s, a snack 4 s, a meal 6 s, a visit, workout or class 6 s, a shift 12 s, a bar drink 4 s, groceries 4 s, an event 6 s, sitting 4 s (naps and cooking keep their 8 s and 6 s). Rows show the time (⏱ 6s) (`lib/actionTime.ts`, `GAME_CONFIG.actionSeconds`) |
+| 12 | Only exclusive events open; exclusives on top | Open club events come first, then the rest by when they open, each saying "Opens in 38 min" with "Go there and wait". Exclusive parties sit at a random spot from 3rd to 7th (steady per player and day) |
+| 13 | Trips end in under a second | Trips take real time by distance and mode, up to a minute (walk 6 s + 20 s a mile, subway 12 s + 6 s a mile up to 45 s, taxi 5 s + 9 s a mile, car 5 s + 8 s a mile). The server records when you arrive; until then the place says "You're still on your way". **Skip costs virtual cash**: C$1 for every 2 seconds left, at least C$5 (`skip_trip`, migration 0040). The timer runs its full length even with Reduce Motion on (that setting cut trips to 0.6 s before) |
+| 14 | The locate button overlaps things | "Me" is the last button in the right-hand column |
+| 15 | The hunt's place button clashes with the text | The step stacks: text, then "📍 Place" |
+| 16 | Arranging arrows aren't uniform | One arrow drawing, turned four ways |
+| 17 | Crew empty state | Five round placeholder faces in flat colors |
+| 18 | No shoes in Your Look; emoji don't match colors | Tabs show the worn piece in its real color (shoes included) instead of emoji |
+| 20 | "Talk to Sal" but both NPCs are "Clerk" | The place's regular is named in the room ("💬 Sal"); tapping him gives the hunt clue, or "do something here first" until you've bought something |
+| — | Map labels under the side menu | Place names slide left to clear the right-hand column |

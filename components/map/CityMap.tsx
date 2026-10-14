@@ -40,6 +40,8 @@ export interface CityMapProps {
   initialPitch?: number;
   /** Moving cars on the streets when zoomed in (v0.3). */
   vehicles?: boolean;
+  /** Owner, Oct 14: px kept clear on the right (the side column); a name pill there slides left so it isn't hidden. */
+  rightInset?: number;
   /** Open framed on every pin (the guest screen), leaving room for the screen's top and bottom panels. */
   fitPins?: { top: number; bottom: number };
 }
@@ -62,7 +64,7 @@ const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins, rightInset = 0 },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -220,6 +222,13 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pins, frame, map]);
 
+  // A name pill that would run under the right-hand side column slides left (its stem stays on the place).
+  const nudge = (x: number, w: number): React.CSSProperties | undefined => {
+    const width = hostRef.current?.clientWidth ?? 0;
+    if (!rightInset || !width) return undefined;
+    const over = x + w / 2 - (width - rightInset);
+    return over > 0 ? { transform: `translateX(${-Math.min(over, w - 28)}px)` } : undefined;
+  };
   return (
     <div className="map-root" aria-label="Map of Queens. Drag to pan, pinch or scroll to zoom." role="application">
       <div className="layer"><div ref={hostRef} className="map-canvas" style={{ width: "100%", height: "100%" }} /></div>
@@ -294,7 +303,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 onClick={() => onPinTap?.(pin)}
                 aria-label={`${pin.name}, ${pin.neighborhood}`}
               >
-                <span className="map-pin-pill glass-hud">
+                <span className="map-pin-pill glass-hud" style={nudge(c.x, pinWidth(pin))}>
                   <span className="map-pin-tile" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={14} /></span>
                   <span className="name">{pin.name}</span>
                 </span>

@@ -2,6 +2,7 @@
 // missing when news, hunts or payments don't show up. Server only. It never returns a secret:
 // keys are reported as present or missing (and Stripe's as test or live mode).
 import { syncWeeklyContent } from "./contentImport";
+import { syncGossipWeeks } from "./gossipImport";
 import { getAdminSupabase } from "./supabase/admin";
 import { SUPABASE_URL } from "./supabase/env";
 
@@ -72,6 +73,16 @@ export async function runSetupCheck(siteOrigin: string): Promise<SetupCheckRow[]
     add("Content", "Hunts stored", (hunts.data?.length ?? 0) > 0 ? "ok" : "warn",
       hunts.error ? hunts.error.message : (hunts.data ?? []).map((h) => `${h.id} (week of ${h.week}, ${h.status})`).join(" · ") || "None yet.");
   }
+
+  // ---- Gossip (#6, Oct 14): the Tea app and the gossip daily tasks need this week's file ----
+  const gossip = await syncGossipWeeks({ force: true }).catch((e: unknown) => [{ week: "gossip", result: `error: ${e instanceof Error ? e.message : String(e)}` }]);
+  for (const g of gossip) add("Content", `Gossip week of ${g.week}`, /^error/.test(g.result) ? "fail" : "ok", g.result);
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const monday = (() => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
+  const thisWeek = gossip.some((g) => g.week === monday && !/^error/.test(g.result));
+  add("Content", "Gossip this week", thisWeek ? "ok" : "fail", thisWeek
+    ? `The week of ${monday} is in: the Tea app and gossip daily tasks have stories.`
+    : `No gossip file for the week of ${monday}. Add content/gossip/${monday}.json (docs/WEEKLY-CONTENT.md), or the Tea app stays empty and the gossip daily tasks don't appear.`);
 
   // ---- Stripe: the key works, and the webhook has been heard from ----
   if (sk) {

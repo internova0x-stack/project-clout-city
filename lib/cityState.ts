@@ -125,6 +125,8 @@ export interface CityApi {
   equipItem(itemId: number, on: boolean): Promise<CityResult>;
   /** v0.8 travel (migration 0025): go to a place (or "home") by walk, subway, taxi or car. */
   travel?(placeId: string, mode: import("./travel.ts").TravelMode): Promise<CityResult>;
+  /** #13 (migration 0040): end the current trip now, for virtual cash by seconds left. */
+  skipTrip?(): Promise<CityResult>;
   /** v0.7 Your Look (migration 0021): the worn clothes (one per slot) and the free headwear, saved at once. */
   saveLook?(itemIds: number[], covering: string): Promise<CityResult>;
   /** v0.8 rest at home (migration 0026): a nap or a sit, capped per day. */
@@ -186,6 +188,7 @@ const ERRORS: Record<string, string> = {
   not_sellable: "Collector pieces can't be sold.",
   not_on_list: "You're not on the list. The door person checked twice.",
   dev_tools_off: "Time travel is switched off here.",
+  still_travelling: "You're still on your way. Hang tight, or skip the rest of the ride.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",

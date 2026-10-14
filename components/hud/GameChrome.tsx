@@ -6,7 +6,7 @@ import type { StatKey, StatTip } from "@/lib/recent";
 import type { ComingSoonKey } from "../ComingSoon";
 import {
   BuildingIcon, ChampagneIcon, ChecklistIcon, ChevronDownIcon, ChevronUpIcon, DiamondIcon,
-  HouseIcon, MapPinIcon, PersonIcon, PhoneIcon, ReceiptIcon, SpeakerIcon, SpeakerOffIcon, StoreIcon,
+  HouseIcon, LocateIcon, MapPinIcon, PersonIcon, PhoneIcon, ReceiptIcon, SpeakerIcon, SpeakerOffIcon, StoreIcon,
 } from "../icons";
 
 export type ChromeAction = ComingSoonKey | "invite" | "tab:home" | "tab:map" | "leaderboard";
@@ -47,6 +47,8 @@ export function GameChrome({
   me,
   tips,
   onTip,
+  atPlace = null,
+  onLocate,
 }: {
   time: string;
   tab: Tab;
@@ -63,6 +65,10 @@ export function GameChrome({
   /** v0.7 step 3: one place per stat in the expanded panel, each a button. */
   tips?: Record<StatKey, StatTip | null>;
   onTip?: (placeId: string) => void;
+  /** #4 (owner, Oct 14): "At <place>" sits in the same stack as the ticker, so the two never overlap. */
+  atPlace?: { name: string; onOpen: () => void } | null;
+  /** #14 (owner, Oct 14): "find me" lives at the bottom of the side column, on the map only. */
+  onLocate?: () => void;
 }) {
   // Stats start collapsed (v0.7, owner Oct 13); the bubble and three mini bars stay in view.
   const [statsOpen, setStatsOpen] = useState(false);
@@ -125,6 +131,9 @@ export function GameChrome({
             <span className="dot-green" aria-hidden="true" /> {values!.online!.toLocaleString()} {values!.online === 1 ? "person" : "people"} online
           </span>
         )}
+        {atPlace && (
+          <button className="glass-hud at-chip" onClick={atPlace.onOpen}>📍 At {atPlace.name}</button>
+        )}
       </div>
 
       {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
@@ -134,6 +143,7 @@ export function GameChrome({
         <SideBtn label="Places" aria="Places" onClick={() => onAction("places")}><BuildingIcon /></SideBtn>
         <SideBtn label="Bills" aria="Bills" dot={values?.billsBadge} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>
         <SideBtn label="Look" aria="Your look" onClick={() => onAction("look")}><PersonIcon /></SideBtn>
+        {onLocate && <SideBtn label="Me" aria="Go to my location" onClick={onLocate}><LocateIcon /></SideBtn>}
       </nav>
 
       {me && !statsOpen && (
@@ -165,9 +175,9 @@ export function GameChrome({
                       <span className="stat-tip-emoji" aria-hidden="true">{tip.emoji}</span>
                       <span className="stat-tip-text">
                         <b>{tip.placeName}</b>
-                        {tip.gig ? `Pays ${formatCash(tip.gig.pay)}` : `${tip.price > 0 ? formatCash(tip.price) : "Free"} · +${tip.gain} ${label}`}
+                        {tip.gig ? `Pays ${formatCash(tip.gig.pay)}` : tip.detail ?? `${tip.price > 0 ? formatCash(tip.price) : "Free"} · +${tip.gain} ${label}`}
                       </span>
-                      <span className="stat-tip-go">{tip.gig ? "Open" : "Go"}</span>
+                      <span className="stat-tip-go">{tip.gig ? "Open" : tip.go ?? "Go"}</span>
                     </button>
                   )}
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ECONOMY } from "@/lib/economy";
 import { GAME_CONFIG } from "@/lib/config";
 import { CRUSH_INVITE_TEXT } from "@/lib/dating";
 import { cliqueProgress, inviteUrl } from "@/lib/invite";
@@ -102,12 +103,20 @@ export function InviteSheet({
           <div style={{ height: 8, borderRadius: 999, background: "var(--chip-off)", overflow: "hidden" }} role="progressbar" aria-valuemin={0} aria-valuemax={size} aria-valuenow={progress.shown}>
             <div style={{ width: `${progress.ratio * 100}%`, height: "100%", background: "var(--taxi-400)", borderRadius: 999, transition: "width .4s ease-out" }} />
           </div>
-          <p className="meta" style={{ margin: "4px 0 0" }}>Rewards unlock when the city opens.</p>
+          <p className="meta" style={{ margin: "4px 0 0" }}>+{ECONOMY.invites.cloutPerInvite} clout for each friend who joins, and +{ECONOMY.invites.cliqueBonus} more when your crew is full.</p>
         </div>
 
         <div className="stack-8">
           {clique.length === 0 ? (
             <div className="card center">
+              {/* #17 (owner, Oct 14): an empty seat for each spot in the crew, filled as friends join. */}
+              <div className="crew-seats" aria-hidden="true">
+                {Array.from({ length: size }, (_, i) => (
+                  <span key={i} className="crew-seat" style={{ background: SEAT_COLORS[i % SEAT_COLORS.length] }}>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="15" r="7" fill="rgba(255,255,255,.85)" /><path d="M7 37c1.5-8 7-12 13-12s11.5 4 13 12" fill="rgba(255,255,255,.85)" /></svg>
+                  </span>
+                ))}
+              </div>
               <p className="title" style={{ margin: 0 }}>Nobody yet</p>
               <p className="subtext" style={{ margin: "4px 0 0" }}>A crew of one is just a mood. Send that link.</p>
             </div>
@@ -133,3 +142,6 @@ export function InviteSheet({
     </Sheet>
   );
 }
+
+/** Flat, soft colors for the empty crew seats. */
+const SEAT_COLORS = ["#F7B7C8", "#B9D8F7", "#C9E8C4", "#F9D9A8", "#D8C8F2"];

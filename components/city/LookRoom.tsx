@@ -8,21 +8,20 @@ import { formatCash } from "@/lib/economy";
 import { HEADWEAR_BASIC, HEADWEAR_CULTURAL, type CoveringId, type Look } from "@/lib/look";
 import { BOTTOM_LABEL, TOP_LABEL, type Outfit } from "@/lib/styles";
 import { outfitWith } from "@/lib/wardrobe";
-import { GARMENT } from "../avatar/garments";
+import { GARMENT, HAT, SHOE } from "../avatar/garments";
 import { ChevronLeftIcon } from "../icons";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
 type Slot = "top" | "bottom" | "shoes" | "accessory";
 type Tab = "hats" | Slot;
-const TABS: { id: Tab; label: string; emoji: string }[] = [
-  { id: "hats", label: "Hats", emoji: "🧢" },
-  { id: "top", label: "Tops", emoji: "👕" },
-  { id: "bottom", label: "Bottoms", emoji: "👖" },
-  { id: "shoes", label: "Shoes", emoji: "👟" },
-  { id: "accessory", label: "Extras", emoji: "✨" },
+const TABS: { id: Tab; label: string }[] = [
+  { id: "hats", label: "Hats" },
+  { id: "top", label: "Tops" },
+  { id: "bottom", label: "Bottoms" },
+  { id: "shoes", label: "Shoes" },
+  { id: "accessory", label: "Extras" },
 ];
-const HAT_EMOJI: Partial<Record<CoveringId, string>> = { none: "🚫", cap: "🧢", fedora: "🎩", bucket: "👒", durag: "🧣", hijab: "🧕", turban: "👳", headwrap: "🎀", kippah: "🔵" };
 
 /** What's worn per slot: an owned item's id, or null for the starter piece. */
 type Worn = Record<Slot, number | null>;
@@ -80,6 +79,15 @@ export function LookRoom({
   const wornItems = (Object.values(worn) as (number | null)[]).map(itemFor).filter((x): x is ShopItem => !!x);
   const outfit = outfitWith(base, wornItems);
   const preview: Look = { ...look, covering };
+  // Headwear takes the avatar's hat color (buildAvatar): the cap color for Bodega Drip, otherwise the outfit's accent.
+  const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
+  const hatIcon = (id: CoveringId) => (id === "none" || !HAT[id] ? <NoneIcon /> : <Shape color={hatColor}>{HAT[id]}</Shape>);
+  // Each category tab shows what's on you in that slot (#18), not a stock emoji.
+  const tabIcon = (t: Tab) => {
+    if (t === "hats") return hatIcon(covering);
+    const it = itemFor(worn[t]);
+    return it ? iconFor(it) : starter(t).icon;
+  };
   const saved = savedWorn();
   const changed = covering !== look.covering || (Object.keys(worn) as Slot[]).some((s) => worn[s] !== saved[s]);
 
@@ -92,13 +100,16 @@ export function LookRoom({
   const starter = (slot: Slot) => {
     if (slot === "top") return { name: TOP_LABEL[base.top], icon: <Garment kind={base.top} color={base.topColor} /> };
     if (slot === "bottom") return { name: BOTTOM_LABEL[base.bottom], icon: <Garment kind={base.bottom} color={base.bottomColor} /> };
-    if (slot === "shoes") return { name: "Your sneakers", icon: <Dot color={base.shoeColor} /> };
+    if (slot === "shoes") return { name: "Your sneakers", icon: <Shape color={base.shoeColor}>{SHOE}</Shape> };
     return { name: base.accessory === "none" ? "Nothing" : "Starter extra", icon: base.accessory === "none" ? <span aria-hidden="true">🚫</span> : <Dot color={base.accessoryColor} /> };
   };
   const iconFor = (it: ShopItem) => {
     const w = it.wear!;
     const kind = (w.kind ?? "") as keyof typeof GARMENT;
-    return GARMENT[kind] ? <Garment kind={kind} color={w.color} /> : <span aria-hidden="true">{it.emoji}</span>;
+    if (GARMENT[kind]) return <Garment kind={kind} color={w.color} />;
+    if (w.slot === "shoes") return <Shape color={w.color}>{SHOE}</Shape>;
+    if (w.slot === "accessory" && HAT[w.kind ?? ""]) return <Shape color={w.color}>{HAT[w.kind ?? ""]}</Shape>;
+    return <span aria-hidden="true">{it.emoji}</span>;
   };
 
   return (
@@ -131,7 +142,7 @@ export function LookRoom({
             <div className="chip-row" role="tablist" aria-label="Categories">
               {TABS.map((t) => (
                 <button key={t.id} role="tab" className="chip" aria-pressed={tab === t.id} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
-                  <span aria-hidden="true">{t.emoji}</span> {t.label}
+                  <span className="look-tab-icon" aria-hidden="true">{tabIcon(t.id)}</span> {t.label}
                 </button>
               ))}
             </div>
@@ -139,7 +150,7 @@ export function LookRoom({
               {tab === "hats"
                 ? [...HEADWEAR_BASIC, ...HEADWEAR_CULTURAL].map((h) => (
                   <Tile key={h.id} on={covering === h.id} wearing={look.covering === h.id} name={h.label} sub="Free"
-                    icon={<span aria-hidden="true">{HAT_EMOJI[h.id]}</span>} onPick={() => setCovering(h.id)} />
+                    icon={hatIcon(h.id)} onPick={() => setCovering(h.id)} />
                 ))
                 : [
                   <Tile key="starter" on={worn[tab] === null} wearing={saved[tab] === null} name={starter(tab).name} sub="Starter"
@@ -192,6 +203,12 @@ function Tile({ on, wearing, name, sub, icon, onPick }: { on: boolean; wearing: 
 
 function Garment({ kind, color }: { kind: keyof typeof GARMENT; color: string }) {
   return <svg viewBox="0 0 60 56" width="34" height="32" fill={color} stroke="rgba(0,0,0,.25)" strokeWidth="1" aria-hidden="true">{GARMENT[kind]}</svg>;
+}
+function Shape({ color, children }: { color: string; children: React.ReactNode }) {
+  return <svg viewBox="0 0 60 56" width="34" height="32" fill={color} stroke="rgba(0,0,0,.25)" strokeWidth="1" aria-hidden="true">{children}</svg>;
+}
+function NoneIcon() {
+  return <svg viewBox="0 0 60 56" width="34" height="32" aria-hidden="true"><circle cx="30" cy="28" r="16" fill="none" stroke="rgba(30,26,40,.45)" strokeWidth="3" /><path d="M19 39 L41 17" stroke="rgba(30,26,40,.45)" strokeWidth="3" strokeLinecap="round" /></svg>;
 }
 function Dot({ color }: { color: string }) {
   return <span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: "50%", background: color, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.2)" }} />;

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { HOME_LOCATIONS, placeById } from "../lib/city.ts";
-import { distanceBand, milesBetween, travelQuote } from "../lib/travel.ts";
+import { distanceBand, milesBetween, skipCost, travelQuote, tripSeconds } from "../lib/travel.ts";
 
 test("bands follow the owner's table (Oct 13)", () => {
   assert.deepEqual([0.2, 1.4, 3, 8].map(distanceBand), [0, 1, 2, 3]);
@@ -13,11 +13,22 @@ test("bands follow the owner's table (Oct 13)", () => {
   assert.equal(travelQuote("car", 3, true).fare, 0);
 });
 
-test("trips are short: 3 to 10 seconds", () => {
-  for (const m of [0.2, 1.4, 3, 8]) for (const mode of ["walk", "subway", "taxi", "car"] as const) {
-    const q = travelQuote(mode, m, true);
-    if (!q.unavailable) assert.ok(q.seconds >= 3 && q.seconds <= 10, `${mode} at ${m} mi`);
+test("trips take longer the farther they go, up to a minute (#13)", () => {
+  for (const mode of ["walk", "subway", "taxi", "car"] as const) {
+    const times = [0, 0.3, 1.4, 3, 8].map((m) => tripSeconds(mode, m));
+    for (let i = 1; i < times.length; i++) assert.ok(times[i] >= times[i - 1], `${mode} grows with distance`);
+    assert.ok(times[0] >= 5 && times.at(-1)! <= 60, `${mode}: ${times}`);
   }
+  assert.equal(tripSeconds("walk", 3), 60);
+  assert.equal(tripSeconds("taxi", 0.4), 9);
+  assert.equal(travelQuote("taxi", 0.4, false).seconds, 9);
+});
+
+test("skipping costs C$1 per 2 seconds left, at least C$5 (#13, matches skip_trip)", () => {
+  assert.equal(skipCost(0), 0);
+  assert.equal(skipCost(3), 5);
+  assert.equal(skipCost(40), 20);
+  assert.equal(skipCost(41), 21);
 });
 
 test("miles are real distances", () => {

@@ -1,0 +1,77 @@
+{
+  "week": "2026-10-12",
+  "stories": [
+    {
+      "id": "peyton-back-seat",
+      "title": "Who's ducking in Peyton's back seat?",
+      "topic": "celebrity",
+      "emoji": "🚗",
+      "teaser": "Peyton Pastel's car-deal tryout photo has a stranger hiding in the back seat. Peyton says \"edit it out\". Astoria says \"zoom in\".",
+      "pieces": [
+        { "text": "Jojo, wiping the steamer: \"Peyton zoomed in on her own photo right here, screamed, and spilled a lavender latte. The stowaway's scarf was her exact pink. Ask at Thread Count who sold it.\"", "place": "grind-and-gossip", "source": "regular" },
+        { "text": "Two clerks folding sweaters: \"Somebody bought our last scarf in Peyton Pink, paid in quarters, and asked if it 'reads famous in the background'. Then she asked for directions to the car lot.\"", "place": "thread-count", "source": "overheard" },
+        { "text": "A salesman to his manager: \"The demo car's back seat had a phone tripod, a granola bar and a ring light. Nobody here owns a ring light. She got in Tuesday and got out Thursday.\"", "place": "boulevard-motors", "source": "overheard", "hours": [10, 18] },
+        { "text": "Inez, scrolling her camera: \"Third proposal shoot this week with the same girl in a pink scarf waving in the background. I said 'excuse me'. She said 'tag me'. She's at the movies tonight, bragging.\"", "place": "gantry-plaza", "source": "regular" },
+        { "text": "Row F, during the trailers: \"That's me in Peyton's back seat. Forty-one new followers. Next week I'm going to be in the back of something bigger.\" Her friend: \"Tiff, please sit down.\"", "place": "reel-queens", "source": "overheard", "hours": [18, 0] }
+      ],
+      "tea": {
+        "headline": "Tiff has been living in the background of Peyton's car deal",
+        "body": "The mystery passenger in Peyton Pastel's car-deal photo is Tiff, \"basically an influencer\", who bought a scarf in Peyton Pink with quarters, moved into a demo car at Boulevard Motors for two days, and has photobombed three proposals at Gantry Plaza while she was at it. Forty-one new followers, most of them still bots. Peyton's team wants her edited out. The car company wants her in the next ad. And to everyone asking: no, a girl who lived in a car lot this week was not in anybody else's back seat on Saturday. Lola, out."
+      }
+    },
+    {
+      "id": "bev-cannoli",
+      "title": "The cannoli on Sgt. Bev's desk",
+      "topic": "regulars",
+      "emoji": "🧁",
+      "teaser": "Every morning at seven, one cannoli appears on the 114½ Precinct's front desk. No note. No witnesses. One very annoyed sergeant.",
+      "pieces": [
+        { "text": "Sgt. Bev, chewing: \"Fourth cannoli this week. I'm a sergeant, hon. I'll find him. The box says Ditmars Deli, so go lean on Sal. Lean hard. Not too hard.\"", "place": "precinct-114-half", "source": "regular" },
+        { "text": "Sal, slicing: \"I don't sell cannoli. I sell the box. Big guy buys an empty box every morning at six-thirty, fills it somewhere else. The Neon Spoon makes them. I'm not jealous.\"", "place": "ditmars-deli", "source": "regular" },
+        { "text": "A waitress at the counter: \"Big guy in a fire jacket orders one cannoli to go every morning and writes a speech on the napkin. He's never finished the speech. Ask the firehouse who he is.\"", "place": "neon-spoon", "source": "overheard", "hours": [5, 11] },
+        { "text": "Captain Rosa, arms crossed: \"Lenny's been 'checking a hydrant' by the precinct every morning at seven. There's no hydrant by the precinct. Gus sees him practicing. Ask Gus.\"", "place": "engine-7", "source": "regular" },
+        { "text": "Gus, from his bench: \"Every evening, same fella. 'Bev, would you like… a cannoli.' Then he panics and eats the cannoli. Two weeks. That's a lot of cannoli. I haven't seen courage like this since 1987.\"", "place": "hell-gate-park", "source": "regular" }
+      ],
+      "tea": {
+        "headline": "The firehouse is courting the precinct, one cannoli at a time",
+        "body": "Astoria's sweetest stakeout is over. Firefighter Lenny of Engine 7 has been buying an empty box at Ditmars Deli, filling it at The Neon Spoon and \"checking a hydrant that doesn't exist\" outside the 114½ Precinct at seven every morning. Every evening he rehearses his big line on Gus's bench, then eats the evidence. Sgt. Bev has known since day two; she's a sergeant. She's just waiting for him to finish the speech. Lola's prediction: by Friday it's two cannoli on that desk and one very red firefighter."
+      }
+    },
+    {
+      "id": "ribbon-to-nowhere",
+      "title": "Tillwater's ribbon to nowhere",
+      "topic": "city-hall",
+      "emoji": "✂️",
+      "teaser": "Councilmember Barb Tillwater cut the ribbon on Astoria's \"new elevator\". Commuters pressed the button. It's a closet.",
+      "pieces": [
+        { "text": "Mr. Penwright, lowering his voice: \"The councilmember borrowed our ceremonial scissors. We have one pair. She returned them with a bit of ribbon and said 'Astoria Blvd, big day.' Go see.\"", "place": "ditmars-library", "source": "regular" },
+        { "text": "On the platform: \"The new elevator door opens onto a mop and two buckets. She pressed 'lobby'. The mop did not move.\" \"Who even told her there was an elevator?\"", "place": "astoria-blvd-station", "source": "overheard", "hours": [6, 11] },
+        { "text": "Somebody at a hot desk, on speaker: \"The press release said 'Astoria's newest elevator, ribbon cutting Monday'. City Hall didn't write it. It came from a domain name. Of course it did.\"", "place": "triborough-works", "source": "overheard", "hours": [9, 17] },
+        { "text": "At the best table: \"My stealth startup just got a ribbon cutting from City Hall, guys. Elevator Pitch Night. Two Bros is catering. Officially a city landmark.\" It is a closet, Chad.", "place": "up-on-thirty", "source": "overheard", "hours": [18, 23] },
+        { "text": "Both brothers behind the counter: \"She ordered a celebration pie for the elevator! Then she found out! Then she ordered ANOTHER pie and called the closet 'Astoria's first pitch room'! She's committed!\"", "place": "two-bros-pizza", "source": "overheard" }
+      ],
+      "tea": {
+        "headline": "City Hall cut a ribbon on Chad Kensington's pitch-night closet",
+        "body": "Chad Kensington, CEO of a stealth startup (a domain name), sent City Hall a press release for \"Astoria's newest elevator\": his Elevator Pitch Night, held in a janitor's closet at Astoria Blvd station. Councilmember Barb Tillwater, who types fast and proofreads never, read faster. She borrowed the library's only ceremonial scissors, cut the ribbon, pressed \"lobby\" and met a mop. Rather than back down, she ordered a second pie and declared the closet \"Astoria's first pitch room\". The mop has not been consulted. Lola, out."
+      }
+    },
+    {
+      "id": "chase-47-minutes",
+      "title": "Chase Clout's missing 47 minutes",
+      "topic": "celebrity",
+      "emoji": "📴",
+      "teaser": "Chase Clout's stream went dark for 47 minutes, his first break in three years. Chat has theories. Astoria has receipts.",
+      "pieces": [
+        { "text": "Pixel, staring at a chair: \"First Saturday in three years he wasn't in that chair. It's still warm. Emotionally. Rocco at Hellgate says he saw him outside without a phone. I don't believe it.\"", "place": "respawn-arena", "source": "regular" },
+        { "text": "Rocco, at the rope: \"Chase Clout. No phone, no headset, standing on the sidewalk staring at a tree like it was a new map. Then he asked me where you buy 'quiet'. I said the grocery store. I was joking.\"", "place": "hellgate-hall", "source": "regular", "hours": [21, 3] },
+        { "text": "Two cashiers: \"He bought a candle called Unplugged Meadow and asked if outside has a mute button. Then he asked for directions to the lounge, 'somewhere dark where nobody says chat'.\"", "place": "steinway-fresh", "source": "overheard" },
+        { "text": "A man in a booth, on the phone: \"He's not banned, he's resting. Is resting a thing? Can we sell resting? Fine, sign him up for the college class. Under a fake name. C. Lout.\"", "place": "low-light-lounge", "source": "overheard", "hours": [20, 2] },
+        { "text": "Two students in the hallway: \"Beginners' Meditation had a new guy, 'C. Lout'. He said 'chat, breathe in' at minute two and fell asleep at minute three. Snored for forty-four minutes. Best class we've had.\"", "place": "astoria-cc", "source": "overheard", "hours": [9, 18] }
+      ],
+      "tea": {
+        "headline": "Chase Clout's mystery blackout was a nap in a meditation class",
+        "body": "The 47 minutes that broke the internet: Chase Clout logged off, bought a candle called Unplugged Meadow, let his manager sign him up for Beginners' Meditation at Astoria Community College as \"C. Lout\", said \"chat, breathe in\" and slept for forty-four minutes. His first rest in three years. He woke up refreshed and announced a fourteen-hour meditation stream, which rather misses the point. And no, a man snoring on a yoga mat was not anybody's mystery date. Lola, out."
+      }
+    }
+  ]
+}

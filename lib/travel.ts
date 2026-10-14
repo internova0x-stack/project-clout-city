@@ -39,20 +39,33 @@ export interface TravelQuote {
   unavailable?: string;
 }
 
+/** #13: seconds a trip takes, by mode and real miles (0 to 60). */
+export function tripSeconds(mode: TravelMode, miles: number): number {
+  const t = CITY_ECONOMY.travel.time[mode];
+  return Math.min(t.max, Math.round(t.base + t.perMile * miles));
+}
+
+/** #13: what skipping the rest of a trip costs, by seconds left (the server charges the same). */
+export function skipCost(secondsLeft: number): number {
+  const s = CITY_ECONOMY.travel.skip;
+  return secondsLeft <= 0 ? 0 : Math.max(s.min, Math.ceil(secondsLeft / s.secondsPerCash));
+}
+
 export function travelQuote(mode: TravelMode, miles: number, hasCar: boolean): TravelQuote {
   const t = CITY_ECONOMY.travel;
   const band = distanceBand(miles);
+  const seconds = tripSeconds(mode, miles);
   switch (mode) {
     case "walk": {
       const energy = t.walk.energy[band];
       return energy == null
         ? { mode, fare: 0, energy: 0, seconds: 0, unavailable: "Too far to walk" }
-        : { mode, fare: 0, energy, seconds: t.walk.seconds[band] ?? 10 };
+        : { mode, fare: 0, energy, seconds };
     }
-    case "subway": return { mode, fare: t.subway.fare, energy: 0, seconds: t.subway.seconds[band] };
-    case "taxi": return { mode, fare: t.taxi.fare[band], energy: 0, seconds: t.taxi.seconds[band] };
+    case "subway": return { mode, fare: t.subway.fare, energy: 0, seconds };
+    case "taxi": return { mode, fare: t.taxi.fare[band], energy: 0, seconds };
     case "car": return hasCar
-      ? { mode, fare: 0, energy: 0, seconds: t.car.seconds[band] }
+      ? { mode, fare: 0, energy: 0, seconds }
       : { mode, fare: 0, energy: 0, seconds: 0, unavailable: "Buy or rent one in the Shop" };
   }
 }
