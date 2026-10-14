@@ -32,22 +32,22 @@ export function RestSheet({ kind, state, busy, onClose, onRest, onGoHome }: {
   const away = (state.player.at_place ?? null) !== null;
   const go = async () => {
     if (!(await onRest(kind))) return;
-    if (kind === "nap") setNapping(true);
+    if (r.seconds > 0) setNapping(true);
     else onClose();
   };
   return (
     <Sheet open onClose={onClose} label={COPY[kind].title}>
       {napping ? (
-        <Countdown seconds={r.seconds} emoji="💤" label="Napping" onDone={onClose} />
+        <Countdown seconds={r.seconds} emoji={kind === "nap" ? "💤" : "🛋️"} label={kind === "nap" ? "Napping" : "Sitting"} onDone={onClose} />
       ) : (
         <div className="stack-12">
           <div>
             <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>{COPY[kind].title}</h2>
             <p className="subtext" style={{ margin: "4px 0 0" }}>{COPY[kind].blurb}</p>
           </div>
-          <EffectChips energy={-r.energy} mood={r.mood} />
+          <EffectChips energy={-r.energy} mood={r.mood} seconds={r.seconds} />
           <p className="meta" style={{ margin: 0 }}>
-            {av.used} of {av.perDay} today · resets at midnight{kind === "nap" ? ` · ${r.seconds} s` : ""}
+            {av.used} of {av.perDay} today · resets at midnight
           </p>
           {away ? (
             <>

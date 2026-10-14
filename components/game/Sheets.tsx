@@ -143,10 +143,12 @@ function Goal({ emoji, title, line, done }: { emoji: string; title: string; line
 
 /** Events (C26): the first-task party until it's done, then club events with real-minute countdowns. */
 export function EventsSheet({
-  open, onClose, partyDone, onOpenParty, city, busy, onAttend, exclusive,
+  open, onClose, partyDone, onOpenParty, city, busy, onAttend, exclusive, onGoThere,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void;
   city: CityState | null; busy: string | null; onAttend: (eventId: string) => void;
+  /** #12: head to a venue before its doors open. */
+  onGoThere?: (placeId: string) => void;
   /** v0.5 exclusive events (real cash), promoted first (Clarifications 9). */
   exclusive?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
 }) {
@@ -163,14 +165,19 @@ export function EventsSheet({
             <span className="subtext" style={{ display: "block" }}>Velvet Static, Long Island City</span>
           </button>
         )}
-        {city && exclusive?.products.filter((p) => liveParty(p, exclusive.nowMs)).map((p) => (
-          <ExclusiveEventCard key={p.sku} p={p} nowMs={exclusive.nowMs} h={exclusive.h} />
-        ))}
-        {city ? (
-          CLUB_EVENTS.map((ev) => {
+        {city ? (() => {
+          // #12 (owner, Oct 14): open events first, then by how soon their doors open.
+          const club = [...CLUB_EVENTS].sort((x, y) => {
+            const ox = eventOpen(x, minutes), oy = eventOpen(y, minutes);
+            if (ox !== oy) return ox ? -1 : 1;
+            return realMinutesUntilOpen(x, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay) - realMinutesUntilOpen(y, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay);
+          });
+          const cards: React.ReactNode[] = club.map((ev) => {
             const isOpen = eventOpen(ev, minutes);
             const av = eventAvailability(ev, isOpen, city);
             const went = city.attendedToday.includes(ev.id);
+            const wait = realMinutesUntilOpen(ev, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay);
+            const here = city.player.at_place === ev.placeId;
             return (
               <div key={ev.id} className="item-card">
                 <span className="tag tag-event">🍸 Club event{isOpen ? " · Happening now" : ""}</span>
@@ -180,10 +187,14 @@ export function EventsSheet({
                 <EffectChips energy={CITY_ECONOMY.energy.eventCost} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} />
                 {went ? (
                   <span className="owned-chip">You went. Back tomorrow.</span>
+                ) : !isOpen ? (
+                  <>
+                    <span className="wait-chip">🕒 Opens in {wait} min · Entry {formatCash(ev.entry)}</span>
+                    {!here && onGoThere && <button className="btn btn-secondary btn-sm" onClick={() => onGoThere(ev.placeId)}>Go there and wait</button>}
+                  </>
                 ) : (
                   <>
-                    {!isOpen && <span className="meta">Doors open in {realMinutesUntilOpen(ev, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay)} min</span>}
-                    {isOpen && !av.ok && <span className="meta reason">{av.reason}</span>}
+                    {!av.ok && <span className="meta reason">{av.reason}</span>}
                     <button className="btn btn-taxi btn-sm" disabled={!av.ok || busy !== null} onClick={() => onAttend(ev.id)}>
                       {busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
                     </button>
@@ -191,8 +202,16 @@ export function EventsSheet({
                 )}
               </div>
             );
-          })
-        ) : (
+          });
+          // Exclusive (real-money) parties sit somewhere from 3rd to 7th, the same spot all day for a player.
+          const day = new Date(now).toISOString().slice(0, 10);
+          (exclusive?.products.filter((p) => liveParty(p, exclusive.nowMs)) ?? []).forEach((p, k) => {
+            const seed = [...`${city.player.id}:${day}:${p.sku}`].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+            const at = Math.min(cards.length, 2 + (seed % 5)) + k;
+            cards.splice(Math.min(at, cards.length), 0, <ExclusiveEventCard key={p.sku} p={p} nowMs={exclusive!.nowMs} h={exclusive!.h} />);
+          });
+          return cards;
+        })() : (
           partyDone && (
             <div className="card hazard-edge stack-4" style={{ paddingLeft: 22 }}>
               <p className="overline" style={{ margin: 0 }}>Coming soon</p>

@@ -26,9 +26,11 @@ set role authenticated;
 
 -- Three shifts across two jobs, then the fourth is refused.
 select 1 from public.travel('grind-and-gossip', 'taxi');
+select 1 from public.skip_trip();
 select pg_temp.assert((public.do_action('grind-and-gossip', 'shift') ->> 'cash')::int >= 120, 'first shift pays');
 select 1 from public.do_action('grind-and-gossip', 'shift');
 select 1 from public.travel('pedal-pushers', 'taxi');
+select 1 from public.skip_trip();
 reset role;
 update public.players set energy = 100 where display_name = 'worker';
 set role authenticated;

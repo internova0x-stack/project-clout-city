@@ -42,7 +42,8 @@ import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew
 import { KeepsakeSheet, PartyPrompt, PlusOneSheet } from "./city/Party";
 import { onList, partyBadge, type PartyApi, type PartyInbox, type PartyMention } from "@/lib/party";
 import type { ShopCategory } from "@/lib/city";
-import { GainToast, useGameNow } from "./city/Common";
+import { ActionTimer, GainToast, useGameNow } from "./city/Common";
+import { actionSeconds, actionVerb, OTHER_SECONDS } from "@/lib/actionTime";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
@@ -56,7 +57,7 @@ import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
-import { statTips } from "@/lib/recent";
+import { contextTips } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
 import { CityMap, type MapApi } from "./map/CityMap";
@@ -210,6 +211,8 @@ export function GameShell({
   const [toast, setToast] = useState<string | null>(null);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  // #20: each tap on the place's regular inside the room starts their talk in the panel.
+  const [talkNonce, setTalkNonce] = useState(0);
   // v0.11: which floor of the building (the exclusive venue has a second, the Penthouse Floor).
   const [insideFloor, setInsideFloor] = useState(1);
   useEffect(() => setInsideFloor(1), [inside?.id]);
@@ -381,12 +384,12 @@ export function GameShell({
   const cityOn = !!(city && cityApi);
   const statSuggestions = useMemo(() => {
     if (!cityOn || !city) return undefined;
-    const tips = statTips(visiblePlaces(feed), me.bank_cash);
+    const tips = contextTips(visiblePlaces(feed), city, { restOn, kitchenOn });
     // With the Confidence and clout a pro gig or big break needs, that's the better use of Confidence.
     const gig = city.gigs.filter((g) => g.tier !== "side" && !g.accepted_at && gigAvailability(g, city).ok).sort((a, b) => b.pay - a.pay)[0];
     if (gig) tips.confidence = { stat: "confidence", placeId: "gigs", placeName: gig.tier === "big" ? "A big break is open" : "A pro gig is open", emoji: "💼", price: 0, gain: 0, gig: { id: gig.id, pay: gig.pay } };
     return tips;
-  }, [cityOn, city, feed, me.bank_cash]);
+  }, [cityOn, city, feed, restOn, kitchenOn]);
   const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);
   const storyOn = !!(feed && storyApi);
 
@@ -481,6 +484,13 @@ export function GameShell({
       return next;
     });
   };
+  /** #11: what's on the action timer right now (rewards land when it runs out). */
+  const [doing, setDoing] = useState<{ emoji: string; label: string; seconds: number; key: number } | null>(null);
+  const timed = (emoji: string, label: string, seconds: number, call: () => Promise<CityResult>) => (): Promise<CityResult> =>
+    seconds <= 0 ? call() : new Promise<void>((done) => {
+      setDoing({ emoji, label, seconds, key: Date.now() });
+      setTimeout(done, seconds * 1000);
+    }).then(() => { setDoing(null); return call(); });
   /** City actions can finish story tasks; the server already counted them, so just re-read the feed. */
   const cityThenStory = async (key: string, call: () => Promise<CityResult>) => {
     const ok = await run(key, call);
@@ -715,13 +725,18 @@ export function GameShell({
     onOpenShop: openShop,
     crew: crew && crewInbox ? { outings: crewInbox.outings.filter((o) => o.myStatus !== "declined"), onBring: (p) => setCrewPlace(p) } : undefined,
     dating: dating && inbox ? { me: me.starting_style, dates: inbox.dates.filter((d) => d.status !== "declined"), bonus: inbox.bonus, onMakeDate: setDateSpot } : undefined,
-    onAction: (pl, a) => cityApi && void cityThenStory(`${pl}:${a}`, () => cityApi.doAction(pl, a)),
-    onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, () => cityApi.attendEvent(id)),
+    onAction: (pl, a) => {
+      if (!cityApi) return;
+      const act = placeById(pl)?.actions.find((x) => x.id === a);
+      const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
+      void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a)));
+    },
+    onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
-    onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, () => cityApi.buyGroceries!(pl, b)) : undefined,
+    onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular } : undefined,
-    onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, () => cityApi.barDrink!(id)) : undefined,
+    onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
     onAttendStoryEvent: storyApi
       ? (id) => void runStory(`story:${id}`, () => storyApi.attendEvent(id)).then((ok) => ok && cityApi && cityApi.refresh().then((r) => r.ok && applyCity(r)))
@@ -959,7 +974,7 @@ export function GameShell({
     },
     [cityOn, travelOn, atPlace, myPos, myPosName, home],
   );
-  /** Go: pay on the server first (arrival is instant there), then show the short trip. */
+  /** Go: pay on the server first (it records when the player arrives), then show the trip. */
   const goTravel = async (mode: TravelMode) => {
     const plan = travelPlan;
     if (!plan || !cityApi?.travel) return;
@@ -1014,6 +1029,7 @@ export function GameShell({
           state={city}
           handlers={handlers}
           onBack={() => setInside(null)}
+          talkNonce={talkNonce}
           room={
             <Room3D
               template={(insideFloor > 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
@@ -1030,7 +1046,11 @@ export function GameShell({
               insetBottom={170}
               mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
-              onNpcTap={() => void (async () => {
+              npcNames={regularAt(inside.id) ? [regularAt(inside.id)!.name.split(" ")[0]] : undefined}
+              onNpcTap={(i) => void (async () => {
+                // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
+                // hunt clue first, in the panel below the room.
+                if (i === 0 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
                 const { who, role } = npcRole(inside);
                 // v0.10: the regular may tell you a piece of gossip first.
                 const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
@@ -1115,14 +1135,22 @@ export function GameShell({
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}
           />
-          {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} />}
+          {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined} />}
         </>
       )}
 
       <GameChrome
         me={{ head: <AvatarHead look={look} outfit={outfit} />, rank: myCard?.rank ?? null, onOpen: () => setPanel("profile") }}
         tips={statSuggestions}
-        onTip={(id) => (id === "gigs" ? setPhone({ open: true, app: "gigs" }) : openPlace(id))}
+        onTip={(id) => {
+          if (id === "gigs") return setPhone({ open: true, app: "gigs" });
+          if (id === "rest:nap" || id === "rest:sit") return setRestKind(id === "rest:nap" ? "nap" : "sit");
+          if (id === "cook") return setKitchenOpen(true);
+          // Something to do right where you are: step inside, where everything happens (#7).
+          const p = placeById(id);
+          if (p && atPlace === id && placeRoom(p)) { setPanel(null); setPlace(null); setTab("map"); return setInside(p); }
+          openPlace(id);
+        }}
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
@@ -1146,6 +1174,7 @@ export function GameShell({
           phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
+      <ActionTimer doing={doing} />
       <GainToast gain={gain} message={toast} onDone={clearGain} />
       {city?.devTools && cityApi && (
         <DevClock
@@ -1248,6 +1277,7 @@ export function GameShell({
         busy={busy}
         onAttend={(id) => handlers.onAttendEvent(id)}
         exclusive={catalog ? { products, nowMs: gameNow, h: money } : undefined}
+        onGoThere={handlers.travel ? (id) => { const p = placeById(id); if (p) { setPanel(null); handlers.travel!.onGoThere(p); } } : undefined}
       />
       {city && cityApi && (
         <>

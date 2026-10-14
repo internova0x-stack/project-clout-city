@@ -62,6 +62,9 @@ export async function travel(placeId: string, mode: string) {
     return { cash: r.cash ?? 0, energy: r.energy ?? 0 } as Gain;
   });
 }
+export async function skipTrip() {
+  return run("skip_trip", {}, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }) as Gain);
+}
 export async function saveLook(itemIds: number[], covering: string) {
   return run("save_look", { p_items: itemIds, p_covering: covering });
 }

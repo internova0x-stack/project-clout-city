@@ -55,6 +55,10 @@ export interface StatTip {
   stat: StatKey; placeId: string; placeName: string; emoji: string; price: number; gain: number;
   /** v0.7: with enough Confidence and clout, the Confidence row points to an open pro gig or big break instead. */
   gig?: { id: number; pay: number };
+  /** #3 (owner, Oct 14): the whole effect line ("+30 Energy · Free · ⏱ 8s · 2 of 2 left today"). */
+  detail?: string;
+  /** The button's word ("Nap", "Cook", "Go", "Do it"). */
+  go?: string;
 }
 
 /**

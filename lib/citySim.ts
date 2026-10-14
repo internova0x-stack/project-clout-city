@@ -6,7 +6,7 @@
 import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
-import { milesBetween, travelQuote } from "./travel.ts";
+import { milesBetween, skipCost, travelQuote } from "./travel.ts";
 import { SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { isLottoPlace, lottoGame, prizeFor } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
@@ -84,6 +84,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
   let shiftsToday = 0;
+  let tripEnds = 0;
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
   const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(s), gain });
   const fail = (error: string): Promise<CityResult> => Promise.resolve({ ok: false, error });
@@ -157,7 +158,15 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       p().bank_cash -= q.fare;
       p().energy -= q.energy;
       p().at_place = dest;
+      tripEnds = Date.now() + q.seconds * 1000;
       return ok({ cash: -q.fare, energy: -q.energy });
+    },
+    skipTrip() {
+      const cost = skipCost(Math.ceil((tripEnds - Date.now()) / 1000));
+      if (p().bank_cash < cost) return fail("Your card got declined. Loudly.");
+      p().bank_cash -= cost;
+      tripEnds = 0;
+      return ok({ cash: -cost });
     },
     rest(kind) {
       const r = CITY_ECONOMY.rest[kind];

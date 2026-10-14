@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
+import { actionSeconds, OTHER_SECONDS } from "@/lib/actionTime";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
@@ -73,7 +74,11 @@ export interface PlaceHandlers {
 }
 
 /** One row per action, then any club events held here (C37, C26). */
-export function ActionList({ place, state, handlers, compact = false }: { place: Place; state: CityState; handlers: PlaceHandlers; compact?: boolean }) {
+export function ActionList({ place, state, handlers, compact = false, preview }: {
+  place: Place; state: CityState; handlers: PlaceHandlers; compact?: boolean;
+  /** #7 (owner, Oct 14): on the place card, rows only show what things cost; everything happens inside. A tap goes in. */
+  preview?: { onTap?: () => void };
+}) {
   const now = useGameNow(state.clockOffsetSeconds, 5000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
   const events = CLUB_EVENTS.filter((e) => e.placeId === place.id);
@@ -82,6 +87,9 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
   const storyTasks = (handlers.story?.tasks ?? []).filter((t) => t.do.place === place.id && !t.done);
   // v0.8: no spending before arriving. Away from the place, every row is a preview.
   const away = !!handlers.travel && !handlers.travel.isHere(place.id);
+  const pill = (text: string) => (
+    <button className="btn btn-secondary btn-sm preview-pill" disabled={!preview?.onTap} onClick={preview?.onTap} aria-label={`${text}. ${preview?.onTap ? "Go inside to do it" : "Go there to do it"}`}>{text}</button>
+  );
   return (
     <div className="stack-8">
       {place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => {
@@ -107,14 +115,14 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {a.kind === "gigs" ? (
                 <span className="meta">Today&apos;s offers, in your Phone</span>
               ) : (
-                <EffectChips price={paid || undefined} pay={a.pay} energy={a.energy} clout={clout} mood={boostUsed(place.id, a.id, state) ? 0 : a.mood} confidence={boostUsed(place.id, a.id, state) ? 0 : a.confidence} />
+                <EffectChips price={paid || undefined} pay={a.pay} energy={a.energy} clout={clout} mood={boostUsed(place.id, a.id, state) ? 0 : a.mood} confidence={boostUsed(place.id, a.id, state) ? 0 : a.confidence} seconds={actionSeconds(a)} />
               )}
               {paid !== (a.price ?? 0) && <span className="meta">Usually {formatCash(a.price ?? 0)} · {world.price?.reason}</span>}
               {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
               {!av.ok && <span className="meta reason">{av.reason}</span>}
               {av.ok && av.note && <span className="meta">{av.note}</span>}
             </div>
-            {away && a.kind !== "gigs" ? (
+            {preview ? pill(a.kind === "gigs" ? "Gigs" : spends ? formatCash(paid) : a.pay ? `+${formatCash(a.pay)}` : "Free") : away && a.kind !== "gigs" ? (
               <span className="lock-chip">On arrival</span>
             ) : (
               <button
@@ -136,7 +144,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
             {!compact && <span className="subtext" style={{ display: "block" }}>Eavesdropping is free. Getting caught is not.</span>}
             <span className="fx-row"><span className="fx fx-pay">Free</span><span className="fx">🍵 Gossip for the Tea app</span></span>
           </div>
-          {away ? <span className="lock-chip">On arrival</span> : (
+          {preview ? pill("Free") : away ? <span className="lock-chip">On arrival</span> : (
             <button className="btn btn-green btn-sm" disabled={handlers.busy !== null} onClick={() => handlers.gossip!.listen(place.id)}>
               {handlers.busy === `listen:${place.id}` ? "…" : "Listen"}
             </button>
@@ -157,7 +165,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
                 {l.unscratched.length > 0 && <span className="fx fx-clout">{l.unscratched.length} to scratch</span>}
               </span>
             </div>
-            {away ? <span className="lock-chip">On arrival</span> : (
+            {preview ? pill(`From ${formatCash(LOTTO_GAMES[0].price)}`) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={handlers.busy !== null} onClick={() => handlers.onOpenLotto!(place.id)}>Play</button>
             )}
           </div>
@@ -180,7 +188,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               </span>
               {!av.ok && <span className="meta reason" style={{ display: "block" }}>{av.reason}</span>}
             </div>
-            {away ? <span className="lock-chip">On arrival</span> : (
+            {preview ? pill(formatCash(b.price)) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onBuyGroceries!(place.id, b.id)}>
                 {handlers.busy === `groceries:${b.id}` ? "…" : formatCash(b.price)}
               </button>
@@ -196,11 +204,11 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
             <div style={{ minWidth: 0, flex: 1 }}>
               <span className="title" style={{ display: "block" }}>🍸 A drink at the bar</span>
               {!compact && <span className="subtext" style={{ display: "block" }}>Overpriced, ice-heavy, and it works. Nobody posts a bar receipt.</span>}
-              <EffectChips price={price} energy={-energy} />
+              <EffectChips price={price} energy={-energy} seconds={OTHER_SECONDS.drink} />
               <span className="meta" style={{ display: "block" }}>No clout · as many as you can afford</span>
               {!av.ok && <span className="meta reason" style={{ display: "block" }}>{av.reason}</span>}
             </div>
-            {away ? <span className="lock-chip">On arrival</span> : (
+            {preview ? pill(formatCash(price)) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onBarDrink!(place.id)}>
                 {handlers.busy === `drink:${place.id}` ? "…" : formatCash(price)}
               </button>
@@ -219,7 +227,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               <span className="title" style={{ display: "block" }}>{ev.name}</span>
               {tasksAt(state, place.id).filter((t) => t.kind === "event" && t.action_id === ev.id).map((t) => <TaskTick key={t.id} t={t} />)}
               {!compact && <span className="subtext" style={{ display: "block" }}>{ev.blurb}</span>}
-              <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} />
+              <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} seconds={OTHER_SECONDS.event} />
               {!open && !state.attendedToday.includes(ev.id) && <span className="meta">Doors open in {wait} min</span>}
               {open && !av.ok && <span className="meta reason">{av.reason}</span>}
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
@@ -229,7 +237,7 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
                 </button>
               )}
             </div>
-            {away ? <span className="lock-chip">On arrival</span> : (
+            {preview ? pill(formatCash(ev.entry)) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
                 {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
               </button>
@@ -249,7 +257,8 @@ export function ActionList({ place, state, handlers, compact = false }: { place:
               {ev.attendable && !ev.cancelled && <EffectChips energy={ev.energy} clout={ev.clout} mood={ev.mood} />}
               {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
             </div>
-            {ev.attendable && !ev.cancelled && (
+            {ev.attendable && !ev.cancelled && preview && pill("Free")}
+            {ev.attendable && !ev.cancelled && !preview && (
               <button className="btn btn-taxi btn-sm" disabled={went || handlers.busy !== null || !handlers.onAttendStoryEvent} onClick={() => handlers.onAttendStoryEvent?.(ev.id)}>
                 {handlers.busy === `story:${ev.id}` ? "…" : went ? "Went" : "Free"}
               </button>
@@ -293,7 +302,7 @@ export function PlaceTasks({ place, state }: { place: Place; state: CityState })
  * v0.11 (spec section 11): a place's actions start folded away (the card stays short), with what's
  * here in one line and today's tasks ticked; one tap opens the full list.
  */
-function ActionsSection({ place, state, handlers }: { place: Place; state: CityState; handlers: PlaceHandlers }) {
+function ActionsSection({ place, state, handlers, enterable, onGoInside }: { place: Place; state: CityState; handlers: PlaceHandlers; enterable: boolean; onGoInside?: () => void }) {
   const [open, setOpen] = useState(false);
   const world = placeStory(handlers.story ?? null, place);
   const names = [
@@ -315,7 +324,7 @@ function ActionsSection({ place, state, handlers }: { place: Place; state: CityS
         <ChevronDownIcon size={20} className="actions-fold-chev" />
       </button>
       {!open && <PlaceTasks place={place} state={state} />}
-      {open && <ActionList place={place} state={state} handlers={handlers} />}
+      {open && <ActionList place={place} state={state} handlers={handlers} preview={enterable ? { onTap: onGoInside } : undefined} />}
     </section>
   );
 }
@@ -327,6 +336,28 @@ function ActionsSection({ place, state, handlers }: { place: Place; state: CityS
 type HuntLine = { say: string; question?: { q: string; choices: string[] }; note?: string; tone?: "hint" | "found" };
 
 function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"] }) {
+  return (
+    <RegularTalk place={place} talk={talk} hunt={hunt} gossip={gossip}
+      frame={(tag) => (
+        <div className="place-art-wrap">
+          <PlaceArt place={place} daytime={daytime} />
+          {tag}
+        </div>
+      )} />
+  );
+}
+
+/**
+ * The place's regular in conversation: the hunt first (clue or question), then a piece of gossip, then
+ * their everyday lines. Shared by the place card's picture and the room (#20, owner Oct 14: tapping the
+ * regular inside, e.g. Sal at the deli, says the same things). `nonce` changes start a new tap.
+ */
+export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
+  place: Place; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"];
+  /** Wraps the tappable name tag (the card puts it on the picture); omitted inside a room, where the avatar is tapped. */
+  frame?: (tag: React.ReactNode) => React.ReactNode;
+  nonce?: number;
+}) {
   const [n, setN] = useState(-1);
   const [huntLine, setHuntLine] = useState<HuntLine | null>(null);
   const [tea, setTea] = useState<{ text: string; note: string; next?: string | null } | null>(null);
@@ -372,17 +403,20 @@ function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Pl
     if (!r.correct) return setHuntLine({ ...huntLine, note: "Not quite. They'll ask again in 10 minutes." });
     setHuntLine({ say: r.line?.say ?? "That's it.", tone: r.reward ? "found" : undefined, note: r.reward ? "🗺️ Treasure found! It's in your Collection." : undefined });
   };
+  // Inside a room the regular's avatar is the button: each tap there bumps `nonce`.
+  const tapRef = useRef(onTap);
+  tapRef.current = onTap;
+  useEffect(() => { if (nonce) void tapRef.current(); }, [nonce]);
+  const tag = first ? (
+    <button className="regular-tag" onClick={() => void onTap()} disabled={asking} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
+      <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
+      <span>{asking ? "…" : n < 0 && !huntLine && !tea ? `💬 ${firstName}` : "Tap for more"}</span>
+    </button>
+  ) : null;
+  if (!frame && !huntLine && !tea && !(first && n >= 0)) return null;
   return (
     <div className="stack-8">
-      <div className="place-art-wrap">
-        <PlaceArt place={place} daytime={daytime} />
-        {first && (
-          <button className="regular-tag" onClick={() => void onTap()} disabled={asking} aria-label={`Talk to ${first.regular.name}, ${first.regular.title}`}>
-            <span className="regular-face" aria-hidden="true">{first.regular.emoji}</span>
-            <span>{asking ? "…" : n < 0 && !huntLine && !tea ? `💬 ${firstName}` : "Tap for more"}</span>
-          </button>
-        )}
-      </div>
+      {frame ? frame(tag) : null}
       {huntLine && (
         <div className={`regular-bubble hunt-bubble${huntLine.tone === "found" ? " found" : ""}`} role="status">
           <span className="meta" style={{ display: "block" }}>🗺️ {first!.regular.name} · {first!.regular.title}</span>
@@ -457,12 +491,15 @@ export function LocationSheet({
           {handlers.dating?.dates.filter((d) => d.placeId === place.id).map((d) => (
             <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
           ))}
-          <ActionsSection place={place} state={state} handlers={handlers} />
+          <ActionsSection place={place} state={state} handlers={handlers} enterable={!!place.template && place.template !== "apartment"} onGoInside={here ? () => onGoInside(place) : undefined} />
           {!here && (
             <div className="stack-4">
               <button className="btn btn-taxi" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
-              <p className="meta" style={{ margin: 0, textAlign: "center" }}>Actions unlock when you arrive.</p>
+              <p className="meta" style={{ margin: 0, textAlign: "center" }}>{place.template && place.template !== "apartment" ? "Everything here happens inside. Go there, then step in." : "Actions unlock when you arrive."}</p>
             </div>
+          )}
+          {here && !!place.template && place.template !== "apartment" && (
+            <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
           {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
           {((handlers.dating && canDateAt(place)) || (handlers.crew && crewActivities(place).length > 0)) && (
@@ -504,9 +541,6 @@ export function LocationSheet({
               </div>
             ) : null;
           })()}
-          {here && !!place.template && place.template !== "apartment" && (
-            <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
-          )}
         </div>
       )}
     </Sheet>
@@ -528,13 +562,15 @@ function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null 
 
 /** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, handlers, onBack, room,
+  place, state, handlers, onBack, room, talkNonce = 0,
 }: {
   place: Place;
   state: CityState;
   handlers: PlaceHandlers;
   onBack: () => void;
   room: React.ReactNode;
+  /** #20: bumped each time the player taps the place's regular in the room. */
+  talkNonce?: number;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -548,6 +584,7 @@ export function InteriorScene({
           <span className="display-sm">{place.emoji} {place.name}</span>
           <span className="panel-toggle">{open ? "Hide" : "All actions"}</span>
         </button>
+        <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
         ) : (

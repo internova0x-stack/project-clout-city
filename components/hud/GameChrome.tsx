@@ -175,9 +175,9 @@ export function GameChrome({
                       <span className="stat-tip-emoji" aria-hidden="true">{tip.emoji}</span>
                       <span className="stat-tip-text">
                         <b>{tip.placeName}</b>
-                        {tip.gig ? `Pays ${formatCash(tip.gig.pay)}` : `${tip.price > 0 ? formatCash(tip.price) : "Free"} · +${tip.gain} ${label}`}
+                        {tip.gig ? `Pays ${formatCash(tip.gig.pay)}` : tip.detail ?? `${tip.price > 0 ? formatCash(tip.price) : "Free"} · +${tip.gain} ${label}`}
                       </span>
-                      <span className="stat-tip-go">{tip.gig ? "Open" : "Go"}</span>
+                      <span className="stat-tip-go">{tip.gig ? "Open" : tip.go ?? "Go"}</span>
                     </button>
                   )}
                 </div>
