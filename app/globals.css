@@ -608,8 +608,9 @@ a { color:inherit; }
 .crowd-dot { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; background:none; cursor:pointer; }
 .crowd-dot .dot-green { width:10px; height:10px; box-shadow:0 0 0 2px #fff, 0 0 8px rgba(64,181,137,.9); }
 /* v0.11: a speech bubble over people you can talk to. */
-.npc-bubble { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:30px; height:26px; border-radius:13px 13px 13px 4px;
-  background:#fff; box-shadow:var(--elev-2); font-size:14px; line-height:1; }
+/* Owner, Oct 14: just the 💬, no white bubble behind it (a soft shadow keeps it readable on any floor). */
+.npc-bubble { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:32px; height:32px; padding:0; border:0;
+  background:none; font-size:20px; line-height:1; cursor:pointer; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
 .npc-bubble:active { transform-origin:bottom left; scale:.92; }
 @media (prefers-reduced-motion: no-preference) { .npc-bubble span { animation:npc-bob 2.4s ease-in-out infinite; } }
 @keyframes npc-bob { 50% { transform:translateY(-2px); } }
@@ -618,8 +619,8 @@ a { color:inherit; }
 .room-edit-bar .chip { height:32px; padding:0 12px; font-size:13px; }
 .interior-head { display:flex; width:100%; justify-content:space-between; align-items:center; gap:8px; color:var(--text-1); }
 /* Owner, Oct 14 (#1): "Hide" / "All actions" is a real, colored button, easy to spot on every panel. */
-.panel-toggle { flex:none; display:inline-flex; align-items:center; height:32px; padding:0 14px; border-radius:var(--r-pill); background:var(--green-500); color:#fff;
-  font-size:14px; font-weight:700; box-shadow:0 4px 12px rgba(64,181,137,.3); }
+/* Owner, Oct 14: plain green words, not a button (the whole header is the tap target). */
+.panel-toggle { flex:none; display:inline-flex; align-items:center; height:32px; color:#23855A; font-size:15px; font-weight:700; }
 .interior-panel:not(.open) { padding:12px 14px; }
 .game.arranging .under-hud, .game.arranging .dev-clock, .game.arranging .stats, .game.arranging .side-col, .game.arranging .room-chips { display:none; }
 .game.arranging .room-edit { left:12px; }
@@ -1341,7 +1342,8 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 /* #7 (owner, Oct 14): on a place card, rows show the price; the doing happens inside. */
 .preview-pill { min-width:64px; font-variant-numeric:tabular-nums; }
 /* #20: the regular's name rides on their speech bubble (e.g. "💬 Sal"). */
-.npc-bubble:has(.npc-name) { display:inline-flex; width:auto; gap:4px; padding:0 10px 0 8px; font-weight:700; font-size:13px; color:var(--text-1); }
+.npc-bubble:has(.npc-name) { display:inline-flex; width:auto; gap:4px; padding:0; font-weight:700; font-size:20px; color:#fff; }
+.npc-bubble .npc-name { font-size:13px; text-shadow:0 1px 3px rgba(0,0,0,.7); }
 
 /* #11 (owner, Oct 14): actions take a moment. A ring that fills, what you're doing, seconds left. */
 .fx.fx-time { color:var(--text-3); }

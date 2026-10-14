@@ -81,7 +81,7 @@ function StoryView({ story, busy, onBack, onShare, onOpenCard }: {
         {story.pieces.map((p) => p.found ? (
           <div key={p.n} className="tea-piece">
             <span className="tea-piece-src">
-              <span>{p.via === "crew" ? "From your crew" : p.source === "regular" ? `${regularAt(p.place)?.name ?? "The regular"} · ${placeById(p.place)?.name ?? ""}` : `Overheard · ${placeById(p.place)?.name ?? ""}`}</span>
+              <span>{p.via === "crew" ? "From your crew" : p.source === "regular" ? `${regularAt(p.place)?.name ?? "The regular"} · ${placeById(p.place)?.name ?? ""}` : `${p.source === "restroom" ? "Overheard in the restroom" : "Overheard"} · ${placeById(p.place)?.name ?? ""}`}</span>
               {onShare && p.via !== "crew" && (p.shared
                 ? <span className="meta">Shared ✓</span>
                 : <button className="tea-share" disabled={busy} onClick={() => onShare(story.id, p.n)}>Share with crew</button>)}
@@ -91,7 +91,7 @@ function StoryView({ story, busy, onBack, onShare, onOpenCard }: {
         ) : (
           <div key={p.n} className="tea-piece missing" aria-label={`Piece ${p.n + 1} not found yet. ${hintLine(p, p.place ? placeById(p.place)?.name : undefined)}`}>
             <p className="body tea-blur" aria-hidden="true">Someone said something about someone, and it was a lot.</p>
-            <span className="tea-hint">{p.source === "regular" ? "🗣️" : "👂"} {hintLine(p, p.place ? placeById(p.place)?.name : undefined)}</span>
+            <span className="tea-hint">{p.source === "regular" ? "🗣️" : p.source === "restroom" ? "🚻" : "👂"} {hintLine(p, p.place ? placeById(p.place)?.name : undefined)}</span>
           </div>
         ))}
       </div>

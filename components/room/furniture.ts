@@ -551,6 +551,18 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(w - 0.1, 0.6, 0.03, k.mat("#CFE3EC", { roughness: 0.05, metalness: 0.5, emissive: "#CFE3EC", emissiveIntensity: opts.night ? 0.2 : 0.08 }), 0, 1.15, -d / 2 + 0.02);
       return { group: g };
     }
+    // #19 clubs: a restroom stall, side panels and a door left ajar, with legs showing underneath.
+    case "stall": {
+      const panel = color ?? "#3A2C5E";
+      for (const sx of [-1, 1]) box(0.04, 1.75, d, panel, sx * (w / 2 - 0.02), 0.15, 0);
+      box(w, 1.75, 0.04, panel, 0, 0.15, -d / 2 + 0.02);
+      const door = box(w * 0.62, 1.6, 0.04, panel, -w * 0.12, 0.2, d / 2 - 0.02);
+      door.rotation.y = 0.35;
+      box(w * 0.3, 1.6, 0.04, panel, w / 2 - w * 0.15, 0.2, d / 2 - 0.02);
+      box(0.3, 0.38, 0.4, "#F4F6F8", 0, 0, -d / 2 + 0.3);
+      box(0.08, 0.04, 0.02, glow("#40B589", 0.8), w / 2 - 0.12, 1.2, d / 2 + 0.01);
+      return { group: g };
+    }
     case "kitchenIsland": {
       box(w, 0.88, d - 0.2, "#F4F1EA", 0, 0, -0.1);
       box(w + 0.06, 0.05, d, "#2A2530", 0, 0.88, 0);

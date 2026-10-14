@@ -1,6 +1,6 @@
 "use server";
 
-import { cityError, type CityResult, type Gain } from "@/lib/cityState";
+import { cityError, type CityResult, type Gain, type VipEntry } from "@/lib/cityState";
 import { loadCityState } from "@/lib/cityServer";
 import type { LottoCard } from "@/lib/lotto";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -100,6 +100,18 @@ export async function scratchLottoCard(cardId: number) {
 }
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });
+}
+// #19 clubs (migration 0046): the VIP door (the cover only when the player says pay) and the VIP bar.
+export async function enterVip(placeId: string, pay: boolean): Promise<CityResult> {
+  let vip: VipEntry | undefined;
+  const r = await run("enter_vip", { p_place: placeId, p_pay: pay }, (d) => {
+    vip = d as VipEntry;
+    return { cash: (d as { cash?: number }).cash ?? 0 };
+  });
+  return r.ok ? { ...r, vip } : r;
+}
+export async function vipSeen(placeId: string) {
+  return run("vip_seen", { p_place: placeId }, asGain);
 }
 export async function moveHome(homeId: string) {
   return run("move_home", { p_home: homeId }, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }));

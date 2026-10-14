@@ -19,6 +19,7 @@ import { placeStory, type StoryFeed } from "@/lib/storyFeed";
 import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
 import { DateStatusRow } from "../dating/Dating";
+import { clubLines } from "./Clubs";
 import { canDateAt, type DateNight } from "@/lib/dating";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
@@ -488,14 +489,26 @@ export function LocationSheet({
             <span className="lola-avatar" aria-hidden="true">💋</span>
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
+          {/* #19 clubs: what's downstairs and upstairs, and the door rule. */}
+          {clubLines(place, state.player.clout).map((l) => <p key={l} className="meta club-line" style={{ margin: 0 }}>{l}</p>)}
           {handlers.dating?.dates.filter((d) => d.placeId === place.id).map((d) => (
             <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
           ))}
           <ActionsSection place={place} state={state} handlers={handlers} enterable={!!place.template && place.template !== "apartment"} onGoInside={here ? () => onGoInside(place) : undefined} />
           {!here && (
             <div className="stack-4">
-              <button className="btn btn-taxi" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
-              <p className="meta" style={{ margin: 0, textAlign: "center" }}>{place.template && place.template !== "apartment" ? "Everything here happens inside. Go there, then step in." : "Actions unlock when you arrive."}</p>
+              {/* #19 the exclusive club's door rule: the server refuses the trip too (migration 0046). */}
+              {(place.club?.doorClout ?? 0) > state.player.clout ? (
+                <>
+                  <button className="btn btn-taxi" disabled>🔒 {(place.club!.doorClout!).toLocaleString("en-US")} clout to get in</button>
+                  <p className="meta" style={{ margin: 0, textAlign: "center" }}>The bouncer checks clout like it&apos;s a passport. Come back with more.</p>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-taxi" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
+                  <p className="meta" style={{ margin: 0, textAlign: "center" }}>{place.template && place.template !== "apartment" ? "Everything here happens inside. Go there, then step in." : "Actions unlock when you arrive."}</p>
+                </>
+              )}
             </div>
           )}
           {here && !!place.template && place.template !== "apartment" && (
@@ -589,7 +602,7 @@ export function InteriorScene({
           <ActionList place={place} state={state} handlers={handlers} compact />
         ) : (
           <>
-            <p className="meta" style={{ margin: "4px 0 0" }}>Tap the floor to walk. Tap a label to use it, or 💬 to talk.</p>
+            <p className="meta" style={{ margin: "4px 0 0" }}>Tap the floor to walk, tap things to use them, or 💬 to talk.</p>
             <PlaceTasks place={place} state={state} />
           </>
         )}

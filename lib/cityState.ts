@@ -36,7 +36,10 @@ export interface CityPlayer {
 export interface DailyTask {
   id: number;
   slot: number;
-  /** "gossip" (v0.11, migration 0036): action_id is "gossip-regular" (talk to the regular) or "gossip-overheard" (Listen in). */
+  /**
+   * "gossip" (v0.11, migration 0036): action_id is "gossip-regular" (talk to the regular), "gossip-overheard"
+   * (Listen in) or, #19, "gossip-restroom" (Listen in downstairs in a club's restroom).
+   */
   kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip";
   place_id: string;
   action_id: string;
@@ -113,7 +116,10 @@ export interface Gain {
   taskCash?: number;
 }
 
-export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard } | { ok: false; error: string };
+/** #19 clubs (migration 0046): the VIP door. `needsCover`: what it costs today (nothing paid yet). */
+export interface VipEntry { access?: "free" | "paid"; needsCover?: number }
+
+export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard; vip?: VipEntry } | { ok: false; error: string };
 
 /** Everything the city screens can ask the server to do. */
 export interface CityApi {
@@ -146,6 +152,10 @@ export interface CityApi {
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
+  /** #19 clubs (migration 0046): up to a club's VIP floor. Without `pay` it only says what the cover is. */
+  enterVip?(placeId: string, pay: boolean): Promise<CityResult>;
+  /** #19 clubs: "Get seen in VIP", once a day per club, twice the main floor's clout. */
+  vipSeen?(placeId: string): Promise<CityResult>;
   /** #19 moving up (migration 0045): move into another rental from the Apartments app. */
   moveHome?(homeId: string): Promise<CityResult>;
   /** v0.5: an exclusive event the player has a ticket for (Mood and Confidence; clout came with the ticket). */
@@ -159,6 +169,17 @@ export const SHIFT_LIMIT = `That's ${CITY_ECONOMY.shiftsPerDay} shifts today, th
 /** #19 (migration 0045): moving needs the home's clout. Shared with the preview simulator. */
 export const HOME_NEEDS_CLOUT = "The landlord googled you. Come back with more clout.";
 
+/** #19 clubs (migration 0046): the exclusive club's door rule and the VIP floor. Shared with the preview simulator. */
+export const DOOR_CLOUT = "The bouncer looks you up, looks you over, and looks away. Come back with more clout.";
+export const VIP_LOCKED = "VIP is upstairs, behind a rope and a person who takes the rope very seriously.";
+export const VIP_ALREADY = "You've been seen in VIP tonight. Being seen twice is just loitering.";
+
+/** #19: the clout the bouncer wants, and the VIP terms, for a club. */
+export function clubDoor(place: { club?: { vip?: "medium" | "exclusive"; doorClout?: number } }) {
+  const vip = place.club?.vip ? CITY_ECONOMY.clubs.vip[place.club.vip] : null;
+  return { doorClout: place.club?.doorClout ?? 0, vip };
+}
+
 /** #9 (migration 0043): a fantasy outfit above the player's clout. Shared with the preview simulator. */
 export const OUTFIT_NEEDS_CLOUT = "The fitting room won't even let you in yet. Earn more clout first.";
 
@@ -170,6 +191,9 @@ const ERRORS: Record<string, string> = {
   no_energy: "Not enough Energy. Eat something, or sleep it off until tomorrow.",
   shift_limit: SHIFT_LIMIT,
   cant_afford: "Your card got declined. Loudly.",
+  door_clout: DOOR_CLOUT,
+  vip_locked: VIP_LOCKED,
+  no_vip: "This club doesn't have a VIP floor. Everyone here is equally important.",
   outfit_needs_clout: OUTFIT_NEEDS_CLOUT,
   home_needs_clout: HOME_NEEDS_CLOUT,
   own_house: "You own a house. Landlords are a thing of your past.",
@@ -396,7 +420,7 @@ const formatCashPlain = (n: number) => `C$${n.toLocaleString("en-US")}`;
 export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id">): string {
   if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
-  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : "overheard", hours: null });
+  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null });
   return `${TASK_VERB[t.kind]} ${placeById(t.place_id)?.name ?? "a place"}`;
 }
 

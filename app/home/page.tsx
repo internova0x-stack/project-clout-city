@@ -4,7 +4,7 @@ import { getClique, requirePlayer } from "@/lib/player";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { attendFirstParty, finishHandoff, setMusicMuted, setTutorialState } from "./actions";
 import {
-  acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, payBill, saveLook, travel, skipTrip, rest, barDrink, buyGroceries, cook, buyLottoCard, scratchLottoCard, refreshCity, saveHomeLayout, moveHome, sellItem, setClockOffset,
+  acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, payBill, saveLook, travel, skipTrip, rest, barDrink, enterVip, vipSeen, buyGroceries, cook, buyLottoCard, scratchLottoCard, refreshCity, saveHomeLayout, moveHome, sellItem, setClockOffset,
 } from "./cityActions";
 import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
@@ -65,6 +65,8 @@ export default async function HomePage() {
         setClockOffset,
         saveHomeLayout,
         moveHome,
+        enterVip,
+        vipSeen,
       }}
       story={city ? story : null}
       storyApi={city && story ? {

@@ -205,6 +205,7 @@ export function PreviewHome({
     async state() { await (gossipReady.current ??= previewGossipReset(gossipPreset)); return previewGossipState(); },
     async find(placeId, via) {
       const r = await previewGossipFind(placeId, via);
+      if (r.ok && r.data.bonus?.clout) sim.storyClout(r.data.bonus.clout);
       return r.ok ? { ok: true, data: { ...r.data, taskCash: sim.gossipTask(placeId, via) } } : r;
     },
     share: previewGossipShare,

@@ -42,7 +42,7 @@ test("rest is home only and capped; the bar sells Energy at clubs and the lounge
   const { createSimApi, sampleCityState } = await import("../lib/citySim.ts");
   const { hasBar, restAvailability } = await import("../lib/cityState.ts");
   const { CITY_ECONOMY, PLACES } = await import("../lib/city.ts");
-  assert.deepEqual(PLACES.filter((p) => hasBar(p.tags)).map((p) => p.id).sort(), ["hellgate-hall", "low-light-lounge", "velvet-static"].sort());
+  assert.deepEqual(PLACES.filter((p) => hasBar(p.tags)).map((p) => p.id).sort(), ["discount-disco", "hellgate-hall", "low-light-lounge", "the-sticky-floor", "ultraviolet-society", "velvet-static"].sort());
   const api = createSimApi(sampleCityState({ energy: 10, mood: 50 }));
   const nap = await api.rest!("nap");
   assert.ok(nap.ok && nap.gain?.energy === 30);
