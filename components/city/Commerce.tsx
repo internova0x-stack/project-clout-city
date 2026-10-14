@@ -460,7 +460,7 @@ function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryA
           );
         })}
       </div>
-      <p className="meta" style={{ margin: 0 }}>Bought pieces wait in storage at home: tap 📦 Storage to place them.</p>
+      <p className="meta" style={{ margin: 0 }}>Bought pieces wait in storage at home: tap 🛋️ there to place them.</p>
     </div>
   );
 }

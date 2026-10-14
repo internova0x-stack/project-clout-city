@@ -506,7 +506,10 @@ export default function Room3D(props: Room3DProps) {
       if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
       propsRef.current.onNpcTap(i);
     };
-    let down: { x: number; y: number; moved: boolean; sliding?: boolean } | null = null;
+    let down: { x: number; y: number; moved: boolean; sliding?: boolean; held?: boolean } | null = null;
+    // Owner, Oct 14: no labels over things; a tap uses a piece, and press-and-hold picks it up to arrange.
+    let holdTimer: ReturnType<typeof setTimeout> | null = null;
+    const clearHold = () => { if (holdTimer) clearTimeout(holdTimer); holdTimer = null; };
     // Sliding (owner, Oct 14): a sideways drag turns the room with the finger, then it settles on the
     // nearest quarter turn (a quick flick of a quarter's third is enough to go on to the next one).
     let slide = 0;
@@ -540,12 +543,24 @@ export default function Room3D(props: Room3DProps) {
       if (touches.size > 2) return;
       down = { x: e.clientX, y: e.clientY, moved: false };
       try { renderer.domElement.setPointerCapture(e.pointerId); } catch { /* a pointer the browser no longer tracks */ }
+      clearHold();
+      if (propsRef.current.editable && !editRef.current.editing) {
+        const at = { x: e.clientX, y: e.clientY };
+        holdTimer = setTimeout(() => {
+          const it = hitItem(at.x, at.y);
+          if (!down || down.moved || !it || !FURNITURE[it.kind].movable) return;
+          down.held = true;
+          setEditing(true);
+          setSelected(it.id);
+          setNote(null);
+        }, 450);
+      }
     };
     const onMove = (e: PointerEvent) => {
       if (touches.has(e.pointerId)) touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pinch && touches.size === 2) return setZoom(pinch.zoom * (spread() / pinch.d));
       if (!down) return;
-      if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
+      if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) { down.moved = true; clearHold(); }
       const dx = e.clientX - down.x;
       if (!down.sliding && down.moved && canSlide() && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(e.clientY - down.y) * 1.5) down.sliding = true;
       if (down.sliding) { slide = slideAngle(dx); return; }
@@ -553,21 +568,14 @@ export default function Room3D(props: Room3DProps) {
     const onUp = (e: PointerEvent) => {
       touches.delete(e.pointerId);
       if (pinch) { if (touches.size < 2) pinch = null; down = null; return; }
+      clearHold();
       const d = down;
       down = null;
-      if (!d) return;
+      if (!d || d.held) return;
       if (d.moved) return swipeTurn(d, e);
       const it = hitItem(e.clientX, e.clientY);
       if (editRef.current.editing) {
         setSelected(it && FURNITURE[it.kind].movable ? it.id : null);
-        return;
-      }
-      // Owner, Oct 14: tapping a piece of furniture at home selects it for arranging (move, rotate);
-      // its label above it is how you use it.
-      if (it && propsRef.current.editable && FURNITURE[it.kind].movable) {
-        setEditing(true);
-        setSelected(it.id);
-        setNote(null);
         return;
       }
       if (it?.use) return goUse(it);
@@ -913,12 +921,14 @@ export default function Room3D(props: Room3DProps) {
           ))}
         </div>
       )}
+      {/* Owner, Oct 14: no labels over things (tap around to find out what they do). The buttons stay for
+          keyboards and screen readers only. */}
       <div className="room-chips" aria-label="Things you can use">
         {usable.map((it) => (
           <button
             key={it.id}
             ref={(el) => { if (el) chipsRef.current.set(it.id, el); else chipsRef.current.delete(it.id); }}
-            className="room-chip glass-hud"
+            className="sr-only"
             onClick={() => tapChip(it)}
             aria-label={it.name}
           >
@@ -926,16 +936,17 @@ export default function Room3D(props: Room3DProps) {
           </button>
         ))}
       </div>
-      {editable && !editing && stored.length > 0 && (
-        <button className="room-storage glass-hud" style={{ top: `calc(${insetTop - 44}px + var(--safe-top))` }} onClick={() => { setEditing(true); setSelected(null); setNote(null); }}>
-          📦 Storage · {stored.length}
+      {editable && !editing && (
+        <button className="room-storage glass-hud" style={{ top: `calc(${insetTop - 44}px + var(--safe-top))` }} onClick={() => { setEditing(true); setSelected(null); setNote(null); }}
+          aria-label={stored.length ? `Arrange your home, ${stored.length} in storage` : "Arrange your home"}>
+          🛋️{stored.length > 0 ? ` 📦 ${stored.length}` : ""}
         </button>
       )}
       {(editable || trial) && editing && (
         <div className="room-edit" style={{ top: `calc(${insetTop - 48}px + var(--safe-top))` }}>
           {editing ? (
             <div className="room-edit-bar glass-hud" role="group" aria-label="Arrange furniture">
-              <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece of furniture")}</span>
+              <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece to move it")}</span>
               {/* Owner, Oct 14: one row. Rotate and the arrows on the left, Cancel and Save on the right. */}
               <div className="room-edit-row">
                 <div className="room-edit-tools" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
