@@ -8,7 +8,7 @@ import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
 import { SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
-import { isLottoPlace, lottoGame, prizeFor } from "./lotto.ts";
+import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 
@@ -50,8 +50,10 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     actionsToday: ["flushing-meadows:hangout"],
     lotto: {
       freeUsed: 0, freeToday: 2, bought: 0, beginnerUntil: new Date(Date.now() + 4 * 86_400_000).toISOString(),
-      week: { start: addDays(today, -1), pool: 7340, entries: 9 }, unscratched: [],
-      draws: [{ week: addDays(today, -8), pool: 6120, entries: 1840, drawnAt: new Date(Date.now() - 86_400_000).toISOString(), mine: false, winner: "dana.vibes" }],
+      unscratched: [],
+      // Sample pots: each game's lucky number and its pot a little above the seed.
+      pots: CITY_ECONOMY.lotto.games.map((g, i) => ({ game: g.id, lucky: [17, 8, 23, 4, 29][i], pool: Math.round(g.pot.seed * 1.06), period: g.period === "day" ? today : addDays(today, -1) })),
+      wins: [{ game: "bodega-cat", amount: 10_640, wonAt: new Date(Date.now() - 86_400_000).toISOString(), mine: false, winner: "dana.vibes" }],
     },
   };
 }
@@ -74,6 +76,8 @@ export type SimApi = CityApi & {
   partyEvent(ev: ExclusiveEvent): Promise<CityResult>;
   /** Previews only (?lotto=win|big|lose): the next cards' prizes, as multiples of the card. */
   lottoNext(times: number[]): void;
+  /** Previews only (?lotto=jackpot): the next card's ⭐ wins its pot. */
+  lottoPot(): void;
   /** v0.11 gossip tasks: talking or listening in at a place completes its task (the find runs on the dev server). */
   gossipTask(placeId: string, via: "overheard" | "regular"): number;
 
@@ -102,12 +106,15 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
 
   // Lucky Star in memory. The real draw is the server's (migration 0032); here it's Math.random,
   // or the preview's queued results.
-  const lottoCards = new Map<number, { game: string; prize: number }>();
+  const lottoCards = new Map<number, { game: string; prize: number; pot: number; lucky: number; numbers: LottoCell[] }>();
   let lottoQueue: number[] = [];
+  let potNext = false;
+  const rand = (n: number) => Math.floor(Math.random() * n);
 
   return {
     refresh: () => ok(),
     lottoNext(times) { lottoQueue = [...times]; },
+    lottoPot() { potNext = true; },
     gossipTask: (placeId, via) => completeTask(placeId, `gossip-${via}`),
 
     buyLottoCard(placeId, gameId, free) {
@@ -126,13 +133,19 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
         if (p().bank_cash < game.price) return fail("Not enough cash for this card.");
         l.bought += 1;
         p().bank_cash -= game.price;
-        l.week.pool = Math.floor(l.week.pool + game.price * CITY_ECONOMY.lotto.jackpot.cut);
       }
-      l.week.entries += 1;
+      const potRow = l.pots.find((x) => x.game === gameId)!;
+      if (!free) potRow.pool = Math.floor(potRow.pool + game.price * CITY_ECONOMY.lotto.potCut);
       const queued = lottoQueue.shift();
-      const prize = queued !== undefined ? queued * game.price : prizeFor(game.price, Math.floor(Math.random() * 100_000));
+      const prize = queued !== undefined ? queued * game.price : prizeFor(game.price, rand(100_000));
+      let pot = 0;
+      if (potNext || rand(game.pot.oneIn) === 0) {
+        pot = potRow.pool;
+        potRow.pool = game.pot.seed;
+        potNext = false;
+      }
       const id = nextId++;
-      lottoCards.set(id, { game: gameId, prize });
+      lottoCards.set(id, { game: gameId, prize, pot, lucky: potRow.lucky, numbers: cardCells(game.price, prize, pot, potRow.lucky, rand) });
       l.unscratched.push({ id, game: gameId });
       return Promise.resolve({ ok: true, state: structuredClone(s), card: { id, game: gameId } });
     },
@@ -141,8 +154,9 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       if (!c || !s.lotto) return fail("That card isn't yours to scratch.");
       lottoCards.delete(cardId);
       s.lotto.unscratched = s.lotto.unscratched.filter((x) => x.id !== cardId);
-      p().bank_cash += c.prize;
-      return Promise.resolve({ ok: true, state: structuredClone(s), card: { id: cardId, game: c.game, prize: c.prize } });
+      p().bank_cash += c.prize + c.pot;
+      if (c.pot) s.lotto.wins = [{ game: c.game, amount: c.pot, wonAt: new Date(now()).toISOString(), mine: true, winner: "you" }, ...(s.lotto.wins ?? [])].slice(0, 3);
+      return Promise.resolve({ ok: true, state: structuredClone(s), card: { id: cardId, game: c.game, prize: c.prize, pot: c.pot, lucky: c.lucky, numbers: c.numbers } });
     },
     travel(placeId, mode) {
       const dest = placeId === "home" ? null : placeId;

@@ -1,8 +1,9 @@
 // Lucky Star Lotto (v0.10, docs/08-new-features-spec.md section 7). The numbers live in
 // CITY_ECONOMY.lotto (lib/city.ts, seeded into the database); the server rules in
-// supabase/migrations/0032_lucky_star_lotto.sql. The browser never decides anything: a card's prize
-// is drawn by the server when the card is bought, kept out of reach until it's scratched, and paid by
-// the server. These helpers only explain the odds and mirror the server's limits for the buttons.
+// supabase/migrations/0032_lucky_star_lotto.sql and 0041_lotto_pots.sql. The browser never decides
+// anything: a card's prize, its pot win and its numbers are drawn by the server when the card is
+// bought, kept out of reach until it's scratched, and paid by the server. These helpers only explain
+// the odds and mirror the server's limits for the buttons.
 // Dependency-free so tests can import it.
 
 import { CITY_ECONOMY } from "./city.ts";
@@ -10,7 +11,16 @@ import { CITY_ECONOMY } from "./city.ts";
 export type LottoGame = (typeof CITY_ECONOMY.lotto.games)[number];
 export type LottoGameId = LottoGame["id"];
 
-/** What lotto_state() tells the player: today's cards, this week's jackpot and cards not yet scratched. */
+/** A game's pot right now (migration 0041): its lucky number, the pot and the day or week it runs. */
+export interface LottoPot { game: string; lucky: number; pool: number; period: string }
+
+/** A pot someone won. `winner` is null when they keep out of the gossip (never for "mine"). */
+export interface LottoWin { game: string; amount: number; wonAt: string; mine: boolean; winner: string | null }
+
+/** One of the player's numbers on a card and the prize under it; n = 0 is the ⭐ (the pot). */
+export interface LottoCell { n: number; prize: number }
+
+/** What lotto_state() tells the player: today's cards, every game's pot and cards not yet scratched. */
 export interface LottoState {
   /** Free cards used today, and how many the player gets today (2 during the first 7 days). */
   freeUsed: number;
@@ -19,21 +29,18 @@ export interface LottoState {
   bought: number;
   /** When beginner's luck ends (ISO), or null once it has. */
   beginnerUntil: string | null;
-  /** This week's jackpot (seed plus the share of every bought card) and the player's entries. */
-  week: { start: string; pool: number; entries: number };
+  /** Every game's lucky number and pot (migration 0041). */
+  pots: LottoPot[];
   /** Cards bought but not scratched yet (a closed tab, a lost connection): scratch them any time. */
   unscratched: { id: number; game: string }[];
-  /** The last three jackpot draws, newest first (migration 0033; missing before it runs). */
-  draws?: LottoDraw[];
+  /** The last three pots won, newest first, for Lola's News card. */
+  wins?: LottoWin[];
 }
 
-/** A finished week's jackpot. `winner` is null when they keep out of the gossip (never for "mine"). */
-export interface LottoDraw { week: string; pool: number; entries: number; drawnAt: string; mine: boolean; winner: string | null }
+/** A card as the server hands it over: nothing but its id until it's scratched. */
+export interface LottoCard { id: number; game: string; prize?: number; pot?: number; lucky?: number; numbers?: LottoCell[] }
 
-/** A card as the server hands it over: no prize until it's scratched. */
-export interface LottoCard { id: number; game: string; prize?: number }
-
-/** The badge for winning a weekly jackpot (migration 0033). */
+/** The badge for winning a pot (it was the weekly jackpot's, migration 0033). */
 export const LOTTO_BADGE = "lotto-jackpot";
 
 export const LOTTO_GAMES: readonly LottoGame[] = CITY_ECONOMY.lotto.games;
@@ -79,8 +86,36 @@ export function oneInLine(n: number): string {
   return `1 in ${Number.isInteger(n) ? n.toLocaleString("en-US") : n.toFixed(2)}`;
 }
 
-/** The jackpot's share of a bought card, in whole and part C$. */
-export const jackpotCut = (game: LottoGame) => Math.round(game.price * CITY_ECONOMY.lotto.jackpot.cut * 100) / 100;
+/** A game's pot: what it starts at, "1 in N" cards and what the seed is worth per card (a share of the price). */
+export function potOdds(game: LottoGame): { seed: number; oneIn: number; share: number } {
+  return { seed: game.pot.seed, oneIn: game.pot.oneIn, share: game.pot.seed / game.pot.oneIn / game.price };
+}
+
+/** "C$5 game · new number at midnight" / "… every Monday". */
+export const periodLine = (game: LottoGame) => (game.period === "day" ? "New number and pot every midnight" : "New number every Monday; the pot grows all week");
+
+/**
+ * The player's numbers on a card, as the server lays them out (lotto_numbers, migration 0041): a
+ * prize puts the lucky number in one cell with that prize, a pot win puts a ⭐ (0) in another, and
+ * every other cell gets a different number with a prize it doesn't pay. `rand(n)` is 0 to n - 1.
+ * Previews and tests only; players' cards come from the server.
+ */
+export function cardCells(price: number, prize: number, pot: number, lucky: number, rand: (n: number) => number): LottoCell[] {
+  const L = CITY_ECONOMY.lotto;
+  const decoys = L.prizes.filter((p) => p.times <= 100).map((p) => p.times * price);
+  const cells: LottoCell[] = [];
+  const used = new Set<number>([lucky, 0]);
+  while (cells.length < L.cells) {
+    const n = 1 + rand(L.luckyMax);
+    if (used.has(n)) continue;
+    used.add(n);
+    cells.push({ n, prize: decoys[rand(decoys.length)] });
+  }
+  const at = rand(L.cells);
+  if (prize > 0) cells[at] = { n: lucky, prize };
+  if (pot > 0) cells[prize > 0 ? (at + 1 + rand(L.cells - 1)) % L.cells : at] = { n: 0, prize: pot };
+  return cells;
+}
 
 export type LottoAvailability = { ok: true } | { ok: false; reason: string };
 
@@ -122,16 +157,16 @@ export function bennyLine(prize: number, price: number, n: number): string {
 }
 
 /** Lola's line for the News card. Satire about the shop, never about the winner. */
-export function jackpotLine(d: LottoDraw, name: string): string {
-  const pot = `C$${d.pool.toLocaleString("en-US")}`;
-  const entries = d.entries.toLocaleString("en-US");
-  if (d.mine) return `It's you. You won last week's ${pot} jackpot at Lucky Star, out of ${entries} cards. Benny is pretending he isn't jealous. He is.`;
-  const who = d.winner ? name : "A lucky Astorian";
+export function potWinLine(w: LottoWin, name: string): string {
+  const pot = `C$${w.amount.toLocaleString("en-US")}`;
+  const game = lottoGame(w.game)?.name ?? "a Lucky Star card";
+  if (w.mine) return `It's you. A ⭐ on your ${game} card won the ${pot} pot at Lucky Star. Benny is pretending he isn't jealous. He is.`;
+  const who = w.winner ? name : "A lucky Astorian";
   const lines = [
-    `${who} walked into Lucky Star and walked out with the ${pot} jackpot. ${entries} cards were in the drum. Benny says he's happy for them, through his teeth.`,
-    `Last week's ${pot} Lucky Star jackpot goes to ${d.winner ? name : "a lucky Astorian"}, out of ${entries} cards. Benny, who has never bought a ticket, calls it "fine".`,
+    `${who} scratched a ⭐ on ${game} and walked out of Lucky Star with the ${pot} pot. Benny says he's happy for them, through his teeth.`,
+    `The ${pot} ${game} pot goes to ${w.winner ? name : "a lucky Astorian"}. Benny, who has never bought a ticket, calls it "fine".`,
   ];
-  return lines[Number(d.week.replaceAll("-", "")) % lines.length];
+  return lines[Math.floor(Date.parse(w.wonAt) / 60_000) % lines.length];
 }
 
 const ERRORS: Record<string, string> = {

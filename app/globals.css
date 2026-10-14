@@ -855,7 +855,7 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .map-pin.compact { display:flex; flex-direction:column; align-items:center; }
 .map-pin-tile.icon-only { width:28px; height:28px; border-radius:9px; display:grid; place-items:center; box-shadow:0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,.3); }
 
-.guest-card-logo { display:block; height:34px; width:auto; margin:0 0 10px; }
+.guest-card-logo { display:block; margin:0 0 10px; font-size:26px; line-height:1.1; }
 .map-stack { display:flex; align-items:center; position:relative; }
 .map-stack .map-pin-tile.icon-only { width:26px; height:26px; }
 .map-stack .map-pin-tile + .map-pin-tile { margin-left:-12px; }
@@ -1191,41 +1191,11 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .game.inside:has(.interior-panel.open) .room-chips { visibility:hidden; }
 
 /* ===================== v0.10 Lucky Star Lotto =====================
-   The counter's card wheel (a drum of the five games), the tickets and the scratch card. Ticket
-   colors come from each game (CITY_ECONOMY.lotto.games); nothing here is gold (gold is real money). */
-.lw { position:relative; height:232px; margin:0 -16px; outline:none; }
-.lw:focus-visible .lw-stage { box-shadow:inset 0 0 0 2px var(--neon-500); border-radius:var(--r-lg); }
-.lw-stage { position:absolute; inset:0 0 22px; perspective:900px; touch-action:pan-y; cursor:grab; overflow:hidden; user-select:none; -webkit-user-select:none; }
-.lw-stage.dragging { cursor:grabbing; }
-.lw-drum { position:absolute; left:50%; top:8px; width:148px; height:196px; margin-left:-74px; transform-style:preserve-3d;
-  transform:translateZ(-160px) rotateY(var(--lw-angle)); transition:transform .5s cubic-bezier(.2,.85,.25,1); }
-.lw-stage.dragging .lw-drum { transition:none; }
-.lw-slot { position:absolute; inset:0; transform:rotateY(var(--lw-at)) translateZ(160px); backface-visibility:hidden; -webkit-backface-visibility:hidden; transition:opacity .3s ease-out; }
-.lw-slot.front .ticket { box-shadow:0 14px 30px rgba(20,17,26,.28), inset 0 0 0 1px rgba(255,255,255,.22); }
-.lw-arrow { position:absolute; top:calc(50% - 32px); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:24px; line-height:1;
-  background:var(--glass-solid); color:var(--text-1); box-shadow:var(--elev-2); z-index:2; }
-.lw-arrow.left { left:14px; } .lw-arrow.right { right:14px; }
-.lw-dots { position:absolute; left:0; right:0; bottom:4px; display:flex; justify-content:center; gap:6px; }
-.lw-dots i { width:6px; height:6px; border-radius:50%; background:var(--divider); transition:width .25s ease-out, background .25s ease-out; }
-.lw-dots i.on { width:18px; border-radius:3px; background:var(--night-900); }
-
-.ticket { position:relative; width:100%; height:100%; display:flex; flex-direction:column; padding:14px; border-radius:16px; overflow:hidden; color:#fff;
-  background:var(--ticket); background:linear-gradient(160deg, color-mix(in srgb, var(--ticket) 88%, #fff), color-mix(in srgb, var(--ticket) 78%, #000));
-  box-shadow:0 8px 20px rgba(20,17,26,.18), inset 0 0 0 1px rgba(255,255,255,.18); }
-.ticket::after { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(120% 60% at 20% 0%, rgba(255,255,255,.28), transparent 60%); }
-.ticket.dark { background:linear-gradient(160deg, #2A2530, #14111A); box-shadow:0 8px 20px rgba(20,17,26,.25), inset 0 0 0 1.5px var(--neon-500); }
-.ticket.dark .ticket-name { color:#FF8CC2; }
+   The counter's list of games and the scratch card. Card colors come from each game
+   (CITY_ECONOMY.lotto.games); nothing here is gold (gold is real money). */
 .ticket-mark { font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; opacity:.85; }
-.ticket-name { margin-top:6px; font-family:var(--font-display); font-size:19px; line-height:1.1; font-weight:800; letter-spacing:-.015em; }
-.ticket-foil { margin-top:auto; height:32px; border-radius:8px; background:repeating-linear-gradient(135deg, #DCDFE6 0 6px, #C6CAD2 6px 12px); box-shadow:inset 0 1px 2px rgba(0,0,0,.15); }
-.ticket-foot { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:6px; margin-top:10px; font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
-.ticket-foot b { display:block; margin-top:1px; font-family:var(--font-display); font-size:14px; white-space:nowrap; font-weight:800; letter-spacing:-.01em; text-transform:none; font-variant-numeric:tabular-nums; }
-/* 5d (owner, Oct 14): a long top prize pushes the price onto its own line instead of off the card's edge. */
 .ticket-price { flex:none; padding:4px 9px; border-radius:var(--r-pill); background:rgba(255,255,255,.22); font-size:13px; font-weight:700; letter-spacing:0; text-transform:none; font-variant-numeric:tabular-nums; }
 
-.lotto-panel { padding:16px; border-radius:var(--r-lg); background:var(--surface-raised); box-shadow:var(--elev-1); }
-.lotto-panel .btn { width:100%; }
-.lotto-odds-link { border:0; cursor:pointer; background:var(--night-900); color:var(--text-on-dark); }
 .lotto-resume { padding-right:6px; }
 .lotto-resume .btn-sm { height:32px; min-width:0; padding:0 12px; font-size:14px; }
 .lotto-odds { width:100%; border-collapse:collapse; font-size:15px; font-variant-numeric:tabular-nums; }
@@ -1248,7 +1218,7 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .scratch-card.dark .scratch-name { color:#FF8CC2; }
 .scratch-card.jackpot { animation:lotto-glow 1.4s ease-in-out infinite alternate; }
 @keyframes lotto-glow { from { box-shadow:0 14px 30px rgba(20,17,26,.22), 0 0 0 0 rgba(255,46,136,0); } to { box-shadow:0 14px 30px rgba(20,17,26,.22), 0 0 0 8px rgba(255,46,136,.35); } }
-@media (prefers-reduced-motion: reduce) { .scratch-card.jackpot { animation:none; } .lw-drum { transition:none; } }
+@media (prefers-reduced-motion: reduce) { .scratch-card.jackpot { animation:none; } }
 .scratch-head { display:flex; justify-content:space-between; align-items:center; }
 .scratch-name { margin:6px 0 0; font-family:var(--font-display); font-size:26px; line-height:1.1; font-weight:800; letter-spacing:-.02em; }
 .scratch-hint { margin:4px 0 0; font-size:13px; line-height:1.35; opacity:.85; }
@@ -1267,25 +1237,7 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .lotto-details summary { cursor:pointer; font-size:14px; font-weight:600; color:var(--text-2); }
 .lotto-details .lotto-odds { margin-top:8px; }
 /* v0.10 step 2: the weekly jackpot, at the counter and in the News. */
-/* Owner, Oct 13: a warm yellow-to-orange gradient with a soft sheen, dark text for contrast. Not gold
-   (gold is only for real money): these are the taxi yellow and the neon gradient's orange. */
-.lotto-jackpot { position:relative; overflow:hidden; display:flex; gap:14px; align-items:center; padding:16px 18px; border-radius:var(--r-lg);
-  background:linear-gradient(135deg, #FFE45C 0%, #FFC21A 38%, #FF9A2E 72%, #FF6A3D 100%); color:var(--night-900);
-  box-shadow:0 10px 24px rgba(255,106,61,.32), inset 0 1px 0 rgba(255,255,255,.55); }
-.lotto-jackpot::before { content:""; position:absolute; inset:0; pointer-events:none;
-  background:radial-gradient(90% 70% at 15% 0%, rgba(255,255,255,.55), transparent 60%), radial-gradient(60% 60% at 100% 100%, rgba(255,46,136,.22), transparent 70%); }
-.lotto-jackpot::after { content:""; position:absolute; top:-50%; bottom:-50%; width:40%; left:-60%; pointer-events:none; transform:rotate(18deg);
-  background:linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation:jackpot-shine 4.5s ease-in-out infinite; }
-@keyframes jackpot-shine { 0%, 55% { left:-60%; } 100% { left:130%; } }
-@media (prefers-reduced-motion: reduce) { .lotto-jackpot::after { animation:none; display:none; } }
-.lotto-jackpot > * { position:relative; }
-.lotto-jackpot-star { font-size:34px; flex:none; filter:drop-shadow(0 3px 6px rgba(160,60,0,.35)); }
-.lotto-jackpot-label { display:block; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(42,26,10,.72); }
-.lotto-jackpot-amount { display:block; margin:2px 0 4px; font-family:var(--font-display); font-size:32px; line-height:1.05; font-weight:800; letter-spacing:-.025em;
-  color:var(--night-900); font-variant-numeric:tabular-nums; text-shadow:0 1px 0 rgba(255,255,255,.4); }
-.lotto-jackpot-meta { display:block; font-size:13.5px; line-height:1.45; font-weight:500; color:rgba(30,20,10,.82); }
-.lotto-jackpot-meta + .lotto-jackpot-meta { margin-top:2px; }
-/* In the News: the same warmth, lighter, with the city news cards' spacing. */
+/* Lola's pot-win card in the News: taxi yellow to the neon gradient's orange, not gold (gold is real money). */
 .jackpot-news { background:linear-gradient(135deg, #FFF6D6 0%, #FFE9C2 60%, #FFDCC4 100%); box-shadow:inset 3px 0 0 #FF9A2E; }
 .jackpot-news.mine { background:linear-gradient(135deg, #FFEB8A 0%, #FFC94D 55%, #FFA65C 100%); }
 .jackpot-news.mine .body { color:var(--text-1) !important; }
@@ -1399,3 +1351,41 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 /* #12: a club event that isn't open yet says when it opens; "Go there and wait" sits under it. */
 .wait-chip { align-self:flex-start; display:inline-flex; padding:6px 12px; border-radius:var(--r-pill); background:#fff;
   box-shadow:inset 0 0 0 1.5px var(--divider); color:var(--text-2); font-size:13px; font-weight:700; }
+
+/* v0.11 Lucky Star pots (owner, Oct 14): the counter lists games with their lucky number and pot. */
+.lotto-free { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:16px; background:var(--green-tint); }
+.lotto-free b { display:block; font-size:15px; color:var(--text-1); }
+.lotto-free small { display:block; font-size:12.5px; font-weight:600; color:var(--green-text); }
+.lotto-free.used { background:var(--surface-card); } .lotto-free.used small { color:var(--text-3); }
+.lotto-free-icon { font-size:22px; flex:none; }
+.lotto-pips { display:flex; gap:5px; flex:none; }
+.lotto-pips i { width:14px; height:14px; border-radius:50%; background:var(--green); }
+.lotto-pips i.used { background:#fff; box-shadow:inset 0 0 0 2px #A9DCC6; }
+.lotto-sec { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:6px 2px -4px; }
+.lotto-sec b { font-family:var(--font-display); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); font-weight:400; }
+.lotto-sec span { font-size:12px; color:var(--text-3); text-align:right; }
+.lotto-game { display:flex; align-items:center; gap:12px; padding:10px; border-radius:18px; background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--divider); }
+.lotto-game.weekly { background:linear-gradient(135deg, #2A2530, #3D2A55); box-shadow:none; color:#fff; }
+.lotto-game-info { flex:1; min-width:0; text-align:left; background:none; border:0; padding:0; color:inherit; cursor:pointer; }
+.lotto-game-info b { display:block; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lotto-game-info small { display:block; font-size:12.5px; color:var(--text-3); }
+.lotto-game.weekly .lotto-game-info small { color:#CFC6DD; }
+.lotto-pot { font-weight:700; color:var(--text-1); font-variant-numeric:tabular-nums; }
+.lotto-game.weekly .lotto-pot { color:#FFE08A; }
+.lotto-buy { flex:none; min-width:68px; }
+.lotto-ball { flex:none; width:46px; height:46px; border-radius:50%; display:grid; place-items:center; color:#fff; font-family:var(--font-display); font-size:18px;
+  background:var(--ball, var(--night-900)); box-shadow:inset 0 -4px 0 rgba(0,0,0,.18); font-variant-numeric:tabular-nums; }
+.lotto-ball.light { width:54px; height:54px; font-size:22px; background:#fff; color:var(--ticket, var(--night-900)); }
+/* The card: the lucky number, then six numbers under one foil. */
+.scratch-lucky { display:flex; align-items:center; gap:12px; margin-top:12px; padding:10px 12px; border-radius:16px; background:rgba(255,255,255,.18); }
+.scratch-lucky b { display:block; font-size:14px; }
+.scratch-lucky small { display:block; font-size:12px; line-height:1.35; opacity:.88; }
+.scratch-window.grid { height:auto; min-height:164px; background:transparent; box-shadow:none; }
+.scratch-cells { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; min-height:164px; }
+.scratch-cells .scratch-wait { grid-column:1 / -1; align-self:center; text-align:center; color:#fff; }
+.scratch-cell { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:78px; border-radius:14px; background:#FFFDF8; color:var(--text-1); }
+.scratch-cell b { font-family:var(--font-display); font-size:22px; font-weight:400; line-height:1; font-variant-numeric:tabular-nums; }
+.scratch-cell small { font-size:12px; font-weight:700; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.scratch-cell.hit { background:#FFF3CC; box-shadow:inset 0 0 0 3px #FFC21A; }
+.scratch-cell.hit small { color:#8A6100; }
+.scratch-cell.star b { font-size:24px; }

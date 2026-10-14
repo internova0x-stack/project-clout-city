@@ -55,7 +55,7 @@ export function PreviewHome({
   partyPreset?: string;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
   huntPreset?: string;
-  /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (last week's draw was mine). */
+  /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (the next card wins its pot). */
   lottoPreset?: string;
   /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
   gossipPreset?: string;
@@ -63,16 +63,15 @@ export function PreviewHome({
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
-    // ?lotto=jackpot: last week's draw was mine.
-    const won = s.lotto?.draws?.[0];
-    if (lottoPreset === "jackpot" && won) Object.assign(won, { mine: true, winner: player.display_name });
     return { ...s, devTools };
-  }, [player, devTools, tasksDone, lottoPreset]);
+  }, [player, devTools, tasksDone]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => {
     const api = createSimApi(city, () => feedRef.current);
     const queue: Record<string, number[]> = { win: [5, 0, 2], big: [100, 0], back: [1, 0], lose: [0, 5] };
     if (lottoPreset && queue[lottoPreset]) api.lottoNext(queue[lottoPreset]);
+    // ?lotto=jackpot: the next card's ⭐ wins its pot.
+    if (lottoPreset === "jackpot") { api.lottoNext([5]); api.lottoPot(); }
     return api;
   }, [city, lottoPreset]);
 
