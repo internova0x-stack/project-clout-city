@@ -38,7 +38,7 @@ components live in `app/globals.css`.
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
-  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes last week's jackpot yours; `?gossip=new|some|almost|done` starts the Tea app in that state. `/preview/studio` shows the Story Studio.
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
 
@@ -64,7 +64,7 @@ components live in `app/globals.css`.
 - No real brand names; businesses are invented. Copy is satirical and never
   promises features that aren't built.
 - Lucky Star Lotto: the server draws every card's prize at purchase and pays it on scratch
-  (`buy_lotto_card`/`scratch_lotto_card`, migration 0032); the browser only names a game. Never send
+  (`buy_lotto_card`/`scratch_lotto_card`, migrations 0032 and 0041: the prize, the pot win and the card's numbers); the browser only names a game. Never send
   a result, price or limit from the client, and real money never touches the lotto.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
   Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the

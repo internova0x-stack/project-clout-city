@@ -120,8 +120,8 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
           </div>
         )}
         <section className="guest-card glass-hud" aria-label="Join Clout City">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/clout-city-logo-dark-simple.png" alt="Clout City NYC" width={649} height={299} className="guest-card-logo" />
+          {/* Owner, Oct 14: the game uses the Studio's wordmark (the neon "Clout City"), not the gold image. */}
+          <h1 className="studio-mark guest-card-logo">Clout City</h1>
           <p className="body-strong" style={{ margin: 0 }}>
             Become the main character.{" "}
             <span style={{ fontWeight: 400, color: "var(--text-3)" }}>Free in your browser.</span>

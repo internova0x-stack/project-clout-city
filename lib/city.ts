@@ -104,11 +104,18 @@ export const CITY_ECONOMY = {
    * Lucky Star Lotto (v0.10, spec section 7; owner Oct 13). Five scratch-card games; each top prize is
    * 1,000 times the card. Every game shares one fixed prize table, in multiples of the card's price and
    * chances per 100,000 cards: about 1 card in 3 wins, the average card pays back 60.5% of its price
-   * and 10% of every bought card feeds the weekly jackpot, so the lotto takes out more C$ than it pays.
+   * and 10% of every bought card feeds that game's pot, so the lotto takes out more C$ than it pays.
    * A prize of 100 times the card or more is a big prize (about 1 card in 4,760). One free card a day
    * (always the C$5 game), a second one through a player's first 7 days, and 5 bought cards a day across
    * all games; all reset at midnight in New York. The server draws every result when the card is bought
    * (migration 0032), and real money never touches any of it.
+   *
+   * v0.11 pots (owner, Oct 14; migration 0041; they replace the weekly jackpot draw): every game has a
+   * lucky number (1 to luckyMax) and a pot. A card shows `cells` of the player's numbers, each with a
+   * prize; a number that matches the lucky number pays its prize at once, and a ⭐ wins the pot. The
+   * small games get a new number and a fresh pot every midnight ("day"), the big ones every Monday
+   * ("week"). Pots start at `seed` and are won 1 card in `oneIn`, harder for every game; after a win
+   * the pot starts again from its seed. The prize table stays the same for every game.
    */
   /**
    * Neighborhood gossip (v0.10, spec section 8; owner Oct 13). 3 to 5 stories a week of exactly five
@@ -124,7 +131,9 @@ export const CITY_ECONOMY = {
     freePerDay: 1,
     beginner: { days: 7, extraPerDay: 1 },
     buyPerDay: 5,
-    jackpot: { seed: 5000, cut: 0.1 },
+    potCut: 0.1,
+    luckyMax: 40,
+    cells: 6,
     prizes: [
       { times: 1, per100k: 20000 },
       { times: 2, per100k: 10000 },
@@ -135,11 +144,11 @@ export const CITY_ECONOMY = {
     ],
     bigFrom: 100,
     games: [
-      { id: "corner-store", name: "Corner Store Classic", price: 5, color: "#40B589", blurb: "The one your uncle buys with exact change." },
-      { id: "bodega-cat", name: "Bodega Cat Bonanza", price: 10, color: "#3E8EDE", blurb: "The cat picked the numbers. The cat has never been wrong." },
-      { id: "rents-due", name: "Rent's Due", price: 20, color: "#FF2E88", blurb: "Financial planning, but make it shiny." },
-      { id: "penthouse-dreams", name: "Penthouse Dreams", price: 50, color: "#7A4FD6", blurb: "Scratch here to see the view. The view is the counter." },
-      { id: "main-character", name: "Main Character", price: 100, color: "#2A2530", blurb: "For people who are sure the plot is about them." },
+      { id: "corner-store", name: "Corner Store Classic", price: 5, color: "#40B589", period: "day", pot: { seed: 5000, oneIn: 5000 }, blurb: "The one your uncle buys with exact change." },
+      { id: "bodega-cat", name: "Bodega Cat Bonanza", price: 10, color: "#3E8EDE", period: "day", pot: { seed: 10000, oneIn: 10000 }, blurb: "The cat picked the numbers. The cat has never been wrong." },
+      { id: "rents-due", name: "Rent's Due", price: 20, color: "#FF2E88", period: "day", pot: { seed: 15000, oneIn: 20000 }, blurb: "Financial planning, but make it shiny." },
+      { id: "penthouse-dreams", name: "Penthouse Dreams", price: 50, color: "#7A4FD6", period: "week", pot: { seed: 50000, oneIn: 50000 }, blurb: "Scratch here to see the view. The view is the counter." },
+      { id: "main-character", name: "Main Character", price: 100, color: "#2A2530", period: "week", pot: { seed: 100000, oneIn: 100000 }, blurb: "For people who are sure the plot is about them." },
     ],
   },
 } as const;

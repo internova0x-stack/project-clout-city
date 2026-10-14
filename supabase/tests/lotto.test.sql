@@ -1,4 +1,4 @@
--- Scenario test for migration 0032 (Lucky Star Lotto: scratch cards drawn and paid by the server).
+-- Scenario test for migrations 0032 and 0041 (Lucky Star Lotto: scratch cards drawn and paid by the server).
 -- Runs in a transaction and rolls back. Run with scripts/test-db.sh.
 \set ON_ERROR_STOP on
 \pset tuples_only on
@@ -66,13 +66,15 @@ select pg_temp.assert(pg_temp.raises($$select public.buy_lotto_card('lucky-star'
 select pg_temp.assert((select bank_cash from public.players where id = auth.uid()) = (select bank_cash from cash0) - 165, '3×C$20 + C$100 + C$5 = C$165');
 select pg_temp.assert((select count(*) from public.ledger where player_id = auth.uid() and kind = 'lotto_card') = 5, 'one ledger row per bought card');
 
--- The counter's numbers: entries, the jackpot (C$5,000 + 10% of C$165) and seven cards to scratch, no prizes.
+-- The counter's numbers: every game's pot and lucky number, and seven cards to scratch, no prizes.
+-- The pots grow by 10% of bought cards: Rent's Due C$15,000 + 3 × C$2 (unless one was just won).
 create temp table st as select public.lotto_state() s;
-select pg_temp.assert((s -> 'week' ->> 'entries')::int = 7, 'every card is a jackpot entry') from st;
-select pg_temp.assert((s -> 'week' ->> 'pool')::int = 5016, 'the jackpot grows by 10% of bought cards') from st;
+select pg_temp.assert(jsonb_array_length(s -> 'pots') = 5, 'a pot for every game') from st;
+select pg_temp.assert((select bool_and((p ->> 'lucky')::int between 1 and 40) from jsonb_array_elements(s -> 'pots') p), 'lucky numbers from 1 to 40') from st;
+select pg_temp.assert((select (p ->> 'pool')::int in (15006, 15000, 15002, 15004) from jsonb_array_elements(s -> 'pots') p where p ->> 'game' = 'rents-due'), 'the pot grows by 10% of bought cards') from st;
 select pg_temp.assert((s ->> 'bought')::int = 5 and (s ->> 'freeUsed')::int = 2, 'today''s counts') from st;
 select pg_temp.assert(jsonb_array_length(s -> 'unscratched') = 7, 'seven cards to scratch') from st;
-select pg_temp.assert(not (s::text like '%prize%'), 'no prizes before scratching') from st;
+select pg_temp.assert(not (s::text like '%prize%') and not (s::text like '%numbers%'), 'no prizes or numbers before scratching') from st;
 
 -- Someone else can't scratch (or peek at) my cards.
 select pg_temp.as_(2);
@@ -89,6 +91,15 @@ select pg_temp.assert((select sum((r ->> 'prize')::int) from scratched) = (selec
 select pg_temp.assert((select bank_cash from public.players where display_name = 'lucky') = (select bank_cash from cash1) + (select sum((r ->> 'prize')::int) from scratched), 'prizes go to the bank');
 select pg_temp.assert((select coalesce(sum(amount), 0) from public.ledger l join public.players p on p.id = l.player_id where p.display_name = 'lucky' and kind = 'lotto_prize') = (select sum((r ->> 'prize')::int) from scratched), 'every prize is in the ledger');
 select pg_temp.assert((select bool_and(prize = 0 or prize in (5, 10, 25, 100, 500, 5000)) from public.lotto_cards where game = 'corner-store'), 'C$5 prizes come from its table');
+-- Each card shows six numbers; a prize is the lucky number with that prize under it, and a card
+-- without a prize has no lucky number on it.
+select pg_temp.assert(bool_and(jsonb_array_length(r -> 'numbers') = 6), 'six numbers on every card') from scratched;
+select pg_temp.assert(bool_and(
+    (select count(*) from jsonb_array_elements(r -> 'numbers') c where (c ->> 'n')::int = (r ->> 'lucky')::int)
+      = case when (r ->> 'prize')::int > 0 then 1 else 0 end), 'the lucky number shows exactly when there''s a prize') from scratched;
+select pg_temp.assert(bool_and((r ->> 'prize')::int = 0 or exists (select 1 from jsonb_array_elements(r -> 'numbers') c
+    where (c ->> 'n')::int = (r ->> 'lucky')::int and (c ->> 'prize')::int = (r ->> 'prize')::int)), 'the prize sits under the lucky number') from scratched;
+select pg_temp.assert(bool_and((select count(distinct c ->> 'n') from jsonb_array_elements(r -> 'numbers') c) = 6), 'no number twice on a card') from scratched;
 set role authenticated;
 select pg_temp.as_(1);
 select pg_temp.assert(pg_temp.raises(format('select public.scratch_lotto_card(%s)', (select (r ->> 'id') from cards where n = 1)), 'lotto_already_scratched'), 'one scratch per card');
