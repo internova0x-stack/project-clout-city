@@ -56,6 +56,8 @@ export const PARTY_BENEFITS = [
   { emoji: "🎟️", text: "Earn a collectible: a numbered ticket and a badge" },
   { emoji: "📰", text: "Get mentioned in City News" },
 ];
+/** Owner, Oct 14: shown under the Benefits box, always visible. Not a perk; never call it a donation. */
+export const PARTY_SUPPORT_LINE = "Help keep our servers up and running 😭";
 
 const ERRORS: Record<string, string> = {
   party_closed: "The doors aren't open. The bouncer is very clear about this.",
