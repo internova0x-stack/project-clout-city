@@ -504,7 +504,7 @@ export function LocationSheet({
               </div>
             ) : null;
           })()}
-          {here && place.depth === "full" && (
+          {here && !!place.template && place.template !== "apartment" && (
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
         </div>

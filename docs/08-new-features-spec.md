@@ -276,6 +276,8 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 - **Side buttons (owner, Oct 14).** Tasks, Events, Places, Bills and Look sit just above the bottom bar on the right, TikTok-style: separate round buttons with a label under each. The map's locate button and credits move to the left.
 - **Speech bubbles.** Everyone you can talk to in a room has a 💬 over their head; tapping it talks to them.
 
+**Built (v0.11 step 5, Oct 14): every place can be entered.** Three new shared rooms (an **office**, a **civic** hall and an outdoor **plaza**) plus a **gym** join the existing ones, and every place but subway stations has a room (`template` in lib/city.ts; `placeRoom()` in lib/rooms.ts). A shared room takes the place's own actions, names and sign: the gigs board opens the gigs, the library desk says "Study in the quiet room", a dance floor only takes events where there are some. Places that were scene cards are recolored with their palette. Offices: Skybridge Tower, Triborough Works, Pedal Pushers. Civic: the library, precinct, firehouse, chapel, Radiant Harbor and Skyline Pier's lobby. Plazas: the parks and Hunter's Pier. Gyms: Pressed Iron and Rep Count. Diners use the café, pizza and the supermarket the counter shop, rooftops the lounge, the dealership the store, the college and the cinema the lecture hall, the games arena the club. Who you talk to fits the place (the librarian, a trainer, the desk sergeant…).
+
 ## 12. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.

@@ -40,7 +40,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
 //   /preview/studio            the Story Studio on an in-memory copy of content/stories (&live=3: the pilot is on Day 3)
 //   /preview/art             every location illustration, day and night
-//   /preview/room?room=cafe|club|counter|astoria_studio&time=night   one 3D room on its own (&mood=natural to compare)
+//   /preview/room?room=cafe|club|counter|astoria_studio|<place id>&time=night   one 3D room on its own (&mood=natural to compare)
 //   add &time=day or &time=night to pin the map
 
 const SAMPLE: Player = {
