@@ -1,5 +1,6 @@
 "use client";
 
+import { PARTY_BENEFITS } from "@/lib/partyRoom";
 import { doorsLine, eventTimeLine, localDate } from "@/lib/localTime";
 import { useState } from "react";
 import { CITY_ECONOMY, placeById } from "@/lib/city";
@@ -57,6 +58,13 @@ export function ExclusiveEventCard({ p, nowMs, h, compact = false }: { p: StoreP
         <div><dt aria-label="When">🕘</dt><dd>{eventTimeLine(e.startsAt)}</dd></div>
       </dl>
       <EffectChips energy={e.energy} clout={listed ? undefined : e.clout} mood={e.mood} confidence={e.confidence} />
+      {/* v0.11 (spec section 10): what the ticket gets you, before you buy. */}
+      {!listed && !compact && (
+        <ul className="xc-benefits" aria-label="What you get">
+          {PARTY_BENEFITS.map((b) => <li key={b.text}><span aria-hidden="true">{b.emoji}</span>{b.text}</li>)}
+          <li><span aria-hidden="true">🏙️</span>The party is on the Penthouse Floor, upstairs at {where}</li>
+        </ul>
+      )}
       <div className="xc-actions">
         {received && !listed && !s.over ? (
           // Someone from your crew wants you as their plus-one.

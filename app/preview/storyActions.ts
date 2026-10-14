@@ -96,10 +96,10 @@ const PARTIES = () => {
   const tomorrow10pm = new Date(now + 24 * hour);
   tomorrow10pm.setHours(22, 0, 0, 0);
   return [
-    { sku: "event-jada-sol-listening", price: 499, id: "jada-sol-listening", name: "Jada Sol's listening party", host: "Jada Sol",
+    { sku: "event-jada-sol-listening", price: 399, id: "jada-sol-listening", name: "Jada Sol's listening party", host: "Jada Sol",
       blurb: "The pop star plays her new album for a guest list that keeps growing and one very nervous publicist. Phones in a velvet bag at the door.",
       startsAt: new Date(now - hour).toISOString(), endsAt: new Date(now + 3 * hour).toISOString(), clout: 120, mood: 8, confidence: 8 },
-    { sku: "event-dex-monroe-afterparty", price: 299, id: "dex-monroe-afterparty", name: "Dex Monroe's sneaker-drop afterparty", host: "Dex Monroe",
+    { sku: "event-dex-monroe-afterparty", price: 399, id: "dex-monroe-afterparty", name: "Dex Monroe's sneaker-drop afterparty", host: "Dex Monroe",
       blurb: "The sneaker king celebrates a shoe nobody can buy. You can't buy it either, but you can stand next to it.",
       startsAt: tomorrow10pm.toISOString(), endsAt: new Date(tomorrow10pm.getTime() + 4 * hour).toISOString(), clout: 80, mood: 8, confidence: 8 },
   ];

@@ -7,6 +7,7 @@ import {
   RingGeometry, SRGBColorSpace, Scene, Vector2, Vector3, WebGLRenderer, type Object3D,
 } from "three";
 import { randomLook, type Look } from "@/lib/look";
+import type { CrowdMember } from "@/lib/partyRoom";
 import {
   FACING, FURNITURE, applyLayout, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
   type LayoutEntry, type RoomItem, type RoomTemplate,
@@ -69,6 +70,12 @@ export interface Room3DProps {
    */
   onExit?: () => void;
   /**
+   * v0.11 party floors: the people at the party (real players and NPCs, marked), standing at the
+   * template's crowdSpots, each with a name tag. Tapping a real player's tag calls onCrowdTap.
+   */
+  crowd?: CrowdMember[];
+  onCrowdTap?: (m: CrowdMember) => void;
+  /**
    * "dream" (the default, approved Oct 12, 2026) is the Monument Valley-inspired look:
    * gradient walls, warm-lit and lavender-shaded faces, soft shadows, haze and motes.
    * "natural" keeps the plain lighting for side-by-side previews.
@@ -85,6 +92,8 @@ export default function Room3D(props: Room3DProps) {
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const bubblesRef = useRef<Map<number, HTMLButtonElement>>(new Map());
   const exitRef = useRef<HTMLButtonElement | null>(null);
+  const crowdTagsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const crowdRef = useRef<{ member: CrowdMember; actor: Actor }[]>([]);
   const propsRef = useRef(props);
   propsRef.current = props;
   const [failed, setFailed] = useState(false);
@@ -544,6 +553,7 @@ export default function Room3D(props: Room3DProps) {
       if (wld.dirty) syncFurniture();
       stepActor(me, dt, t, reduceMotion, (it) => arrive(it));
       for (const n of npcs) stepActor(n, dt, t, reduceMotion);
+      for (const c of crowdRef.current) stepActor(c.actor, dt, t, reduceMotion);
       if (!reduceMotion) {
         for (const b of wld.built.values()) b.tick?.(t);
         motes.forEach((m, i) => { m.position.y = m.userData.baseY + Math.sin(t * 0.6 + i) * 0.12; m.rotation.y = t * 0.4 + i; });
@@ -598,6 +608,14 @@ export default function Room3D(props: Room3DProps) {
         proj.set(doorX, 0, template.d / 2 - 0.12).project(camera);
         exitRef.current.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         exitRef.current.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, 6px)`;
+      }
+      // v0.11 party floors: a name tag over each person at the party.
+      for (const c of crowdRef.current) {
+        const el = crowdTagsRef.current.get(c.member.key);
+        if (!el) continue;
+        proj.set(c.actor.x, 2.1, c.actor.z).project(camera);
+        el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
+        el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
       // v0.11: a speech bubble over everyone you can talk to.
       npcs.forEach((n, i) => {
@@ -736,6 +754,31 @@ export default function Room3D(props: Room3DProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookKey, template.id, daytime, sign, mood]);
 
+  // v0.11 party floors: (re)build the crowd when who's here changes.
+  const crowdKey = JSON.stringify((props.crowd ?? []).map((m) => [m.key, m.npc ? null : m.look]));
+  useEffect(() => {
+    const w = world.current;
+    if (!w) return;
+    for (const c of crowdRef.current) { w.scene.remove(c.actor.rig); c.actor.parts?.dispose(); }
+    const spots = template.crowdSpots ?? [];
+    crowdRef.current = (props.crowd ?? []).slice(0, spots.length).map((member, i) => {
+      const s = spots[i];
+      let seed = (member.key.length * 977 + i * 7919 + 13) % 2147483647;
+      const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+      const look = !member.npc && member.look ? member.look : randomLook(rand, STARTING_STYLES.map((x) => x.id));
+      const actor: Actor = { rig: new Group(), parts: buildAvatar(look, { pedestal: false }), x: s.x, z: s.z, heading: s.facing, mode: "dance", path: [], pending: null, phase: i * 1.3 };
+      castShadows(actor.parts!.root);
+      actor.rig.add(actor.parts!.root);
+      w.scene.add(actor.rig);
+      return { member, actor };
+    });
+    return () => {
+      for (const c of crowdRef.current) { w.scene.remove(c.actor.rig); c.actor.parts?.dispose(); }
+      crowdRef.current = [];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crowdKey, template.id, daytime, sign, mood]);
+
   // Furniture moved or room changed: rebuild placements next frame.
   useEffect(() => {
     if (world.current) world.current.dirty = true;
@@ -765,6 +808,22 @@ export default function Room3D(props: Room3DProps) {
               aria-label="Talk"
             >
               <span aria-hidden="true">💬</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {(props.crowd?.length ?? 0) > 0 && !editing && (
+        <div className="room-chips" aria-label="People at the party">
+          {props.crowd!.slice(0, template.crowdSpots?.length ?? 0).map((m) => (
+            <button
+              key={m.key}
+              ref={(el) => { if (el) crowdTagsRef.current.set(m.key, el); else crowdTagsRef.current.delete(m.key); }}
+              className={`crowd-tag${m.npc ? " npc" : ""}${!m.npc && m.crew ? " crew" : ""}`}
+              disabled={m.npc}
+              onClick={() => props.onCrowdTap?.(m)}
+              aria-label={m.npc ? `${m.name}, an NPC` : m.name}
+            >
+              {m.npc ? <span className="npc-mark">NPC</span> : <>{m.crew ? "👯 " : ""}{m.name.split(" ")[0]}</>}
             </button>
           ))}
         </div>

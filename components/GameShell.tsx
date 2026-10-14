@@ -13,7 +13,9 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_TEMPLATES, PLACE_TEMPLATES, placeRoom, type RoomItem } from "@/lib/rooms";
+import { HOME_TEMPLATES, PLACE_TEMPLATES, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
+import { PARTY_POLL_MS, crowdFor, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
+import { PartyChatSheet } from "./city/PartyChat";
 import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
@@ -136,6 +138,7 @@ export function GameShell({
   dating,
   crew,
   party,
+  partyRoom,
   partyInbox: initialPartyInbox = null,
   cityNews,
   hunt,
@@ -164,6 +167,8 @@ export function GameShell({
   crew?: CrewApi;
   /** v0.9 party keepsakes (migration 0029): plus-ones, "Spotted at" and the gossip setting. */
   party?: PartyApi;
+  /** v0.11 party rooms (migration 0038): who's at the party, and the event chat. */
+  partyRoom?: PartyRoomApi;
   partyInbox?: PartyInbox | null;
   /** v0.6 City News: published items (news_feed(), migration 0017). */
   cityNews?: () => Promise<NewsItem[]>;
@@ -206,6 +211,9 @@ export function GameShell({
   const [toast, setToast] = useState<string | null>(null);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  // v0.11: which floor of the building (the exclusive venue has a second, the Penthouse Floor).
+  const [insideFloor, setInsideFloor] = useState(1);
+  useEffect(() => setInsideFloor(1), [inside?.id]);
   const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null; item?: string | null }>({ open: false, app: null });
   // v0.6 City News: loaded once; the newest headline rides the ticker and, once per session, a home card.
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
@@ -589,6 +597,51 @@ export function GameShell({
     } : undefined,
   };
   const products = (catalog ?? []).map((p) => (p.sku === unlocking ? { ...p, pending: true } : p));
+  // ---- v0.11 party rooms: at the venue, with a ticket (or a plus-one), while the doors are open ----
+  const partyHere = inside ? products.find((x) => x.event?.placeId === inside.id && onList(x)
+    && gameNow >= Date.parse(x.event.startsAt) && gameNow < Date.parse(x.event.endsAt))?.event ?? null : null;
+  const [room, setRoom] = useState<PartyRoomState | null>(null);
+  const [partyChatOpen, setPartyChatOpen] = useState(false);
+  const partyId = partyRoom && partyHere ? partyHere.id : null;
+  useEffect(() => {
+    setRoom(null);
+    if (!partyRoom || !partyId) return;
+    let stop = false;
+    let after = 0;
+    const tick = async () => {
+      const r = await partyRoom.room(partyId, after);
+      if (stop || !r.ok) return;
+      const fresh = r.data.messages;
+      if (fresh.length) after = fresh[fresh.length - 1].id;
+      setRoom((cur) => {
+        const have = new Set((cur?.messages ?? []).map((m) => m.id));
+        return { count: r.data.count, people: r.data.people, messages: [...(cur?.messages ?? []), ...fresh.filter((m) => !have.has(m.id))].slice(-200) };
+      });
+    };
+    void tick();
+    const t = setInterval(() => void tick(), PARTY_POLL_MS);
+    return () => { stop = true; clearInterval(t); };
+  }, [partyRoom, partyId]);
+  const partySay = async (body: string) => {
+    if (!partyRoom || !partyId) return false;
+    setBusy("partychat");
+    const r = await partyRoom.say(partyId, body).finally(() => setBusy(null));
+    if (!r.ok) { setToast(r.error); return false; }
+    setRoom((cur) => (cur && !cur.messages.some((m) => m.id === r.data.id) ? { ...cur, messages: [...cur.messages, r.data] } : cur));
+    return true;
+  };
+  const partyReport = async (m: PartyMessage) => {
+    if (!partyRoom) return;
+    const r = await partyRoom.report(m.id, "inappropriate");
+    setToast(r.ok ? "Reported. A moderator will look at it." : r.error);
+  };
+  const partyBlock = chat ? async (m: PartyMessage) => {
+    const r = await chat.block(m.from, true);
+    if (!r.ok) return setToast(r.error);
+    setRoom((cur) => (cur ? { ...cur, messages: cur.messages.filter((x) => x.from !== m.from), people: cur.people.filter((x) => x.id !== m.from) } : cur));
+    setToast(`Blocked ${handle(m.name)}. You won't see each other here or in Messages.`);
+  } : undefined;
+  const crowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
   const openShop = (category: ShopCategory) => {
     setPlace(null);
     setInside(null);
@@ -746,6 +799,11 @@ export function GameShell({
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
+    if (it.use?.kind === "floor") {
+      if (it.use.to === 1) return setInsideFloor(1);
+      if (partyHere) { setInsideFloor(it.use.to); return setToast(`🎉 The Penthouse Floor. ${partyHere.name} is up here.`); }
+      return setToast("The Penthouse Floor is guest list only, on party nights. The bouncer has a clipboard and no sense of humor.");
+    }
     if (it.use?.kind === "shop") return openShop(it.use.category);
     if (it.use?.kind !== "events") return;
     // The lounge's guest list: a party you have a ticket for, if its doors are open; otherwise the Events list.
@@ -951,6 +1009,7 @@ export function GameShell({
   return (
     <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
       {inside && city ? (
+        <>
         <InteriorScene
           place={inside}
           state={city}
@@ -958,11 +1017,13 @@ export function GameShell({
           onBack={() => setInside(null)}
           room={
             <Room3D
-              template={insideRoom ?? PLACE_TEMPLATES.cafe}
+              template={(insideFloor > 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
+              crowd={crowd}
+              onCrowdTap={(m) => { if (!m.npc && chat) setCardId(m.id); }}
               look={look}
               outfit={outfit}
               daytime={daytime}
-              sign={inside.name}
+              sign={insideFloor === 2 ? `${inside.name} · Penthouse` : inside.name}
               rotatable
               onExit={() => setInside(null)}
               label={`${me.display_name} inside ${inside.name}`}
@@ -980,6 +1041,27 @@ export function GameShell({
             />
           }
         />
+        {/* v0.11 the event chat: everyone at the party, no daily limit tonight. */}
+        {partyHere && room && (
+          <button className="pill-glass glass-hud party-pill" onClick={() => setPartyChatOpen(true)}>
+            💬 Party chat · {room.count} here{room.messages.length ? ` · ${room.messages.length}` : ""}
+          </button>
+        )}
+        {partyHere && room && (
+          <PartyChatSheet
+            open={partyChatOpen}
+            onClose={() => setPartyChatOpen(false)}
+            title={partyHere.name}
+            here={room.count}
+            messages={room.messages}
+            busy={busy === "partychat"}
+            onSend={partySay}
+            onProfile={chat ? (id) => { setPartyChatOpen(false); setCardId(id); } : undefined}
+            onReport={(m) => void partyReport(m)}
+            onBlock={partyBlock ? (m) => void partyBlock(m) : undefined}
+          />
+        )}
+        </>
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D

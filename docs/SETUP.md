@@ -143,7 +143,7 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 
 ```sql
 insert into store_products (sku, product_type, name, price_cents, place_id)
-values ('event-my-party', 'exclusive_event', 'My party', 499, 'low-light-lounge');
+values ('event-my-party', 'exclusive_event', 'My party', 399, 'low-light-lounge');
 insert into exclusive_events (id, sku, place_id, name, host, blurb, starts_at, ends_at, clout, energy, mood, confidence)
 values ('my-party', 'event-my-party', 'low-light-lounge', 'My party', 'Host name', 'One funny line about it.',
         '2026-11-06 22:00 America/New_York', '2026-11-07 02:00 America/New_York', 100, 20, 10, 10);
