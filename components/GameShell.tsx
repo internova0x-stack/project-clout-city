@@ -801,7 +801,7 @@ export function GameShell({
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
     if (it.use?.kind === "floor") {
       if (it.use.to === 1) return setInsideFloor(1);
-      if (partyHere) { setInsideFloor(it.use.to); return setToast(`🎉 The Penthouse Floor. ${partyHere.name} is up here.`); }
+      if (partyHere) return setInsideFloor(it.use.to);
       return setToast("The Penthouse Floor is guest list only, on party nights. The bouncer has a clipboard and no sense of humor.");
     }
     if (it.use?.kind === "shop") return openShop(it.use.category);
