@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { answerWords, inWindow, validateGossipWeek, windowLine, type GossipWeek } from "../lib/gossip.ts";
+import { answerWords, gossipLeads, hintLine, inWindow, leadAction, leadFrom, leadLine, validateGossipWeek, windowLine, type GossipWeek } from "../lib/gossip.ts";
+import { placeById } from "../lib/city.ts";
+import { regularAt } from "../lib/cast.ts";
 
 const week = (): GossipWeek => JSON.parse(readFileSync(new URL("../content/gossip/2026-10-19.json", import.meta.url), "utf8"));
 const problems = (w: unknown, opts = {}) => { const r = validateGossipWeek(w, opts); return r.ok ? [] : r.problems; };
@@ -73,4 +75,34 @@ test("hints say how, what kind of place, where and when, never the place", async
   assert.equal(hintLine({ ...miss, hours: null, place: "two-bros-pizza" }, "Two Bros Who Fight Pizza"), "Overheard at Two Bros Who Fight Pizza");
   assert.match(quietLine([21, 3], 0), /9 PM to 3 AM/);
   assert.ok(quietLine(null, 1).length > 10);
+});
+
+test("the trail (v0.11): leads are each story's next known piece, passed on by everyone else", () => {
+  const piece = (n: number, found: boolean, place: string | null, source: "overheard" | "regular" = "overheard") =>
+    found ? { n, found: true as const, text: "said", place: place!, source, via: "overheard" as const, shared: false }
+          : { n, found: false as const, source, hours: null, place, kind: "cafe", area: "Astoria" };
+  const story = (id: string, pieces: ReturnType<typeof piece>[], done = false) =>
+    ({ id, week: "2026-10-19", endsOn: "2026-11-01", title: id, topic: "regulars" as const, emoji: "🫖", teaser: "t", done, pieces });
+  const state = {
+    cards: [],
+    stories: [
+      // Sal told piece one; piece two (Rosa's) is now named.
+      story("a", [piece(0, true, "ditmars-deli", "regular"), piece(1, false, "grind-and-gossip", "regular"), piece(2, false, null), piece(3, false, null), piece(4, false, null)]),
+      // Not started: the first piece is the lead.
+      story("b", [piece(0, false, "two-bros-pizza"), piece(1, false, null), piece(2, false, null), piece(3, false, null), piece(4, false, null)]),
+      story("c", [piece(0, true, "ditmars-deli")], true),
+    ],
+  };
+  const leads = gossipLeads(state);
+  assert.deepEqual(leads.map((l) => `${l.story}:${l.place}`), ["a:grind-and-gossip", "b:two-bros-pizza"], "finished stories have no lead");
+  assert.equal(leadFrom(state, "grind-and-gossip")?.place, "two-bros-pizza", "never points you to where you are");
+  assert.equal(leadFrom(state, null, 1)?.story, "b", "varies with the seed");
+  assert.equal(leadFrom({ cards: [], stories: [] }, null), null);
+  const rosa = regularAt("grind-and-gossip")!.name;
+  assert.equal(leadAction(leads[0]), `Talk to ${rosa} at ${placeById("grind-and-gossip")!.name}`);
+  assert.equal(leadAction({ place: "velvet-static", source: "overheard", hours: [21, 3] }), "Listen in at Velvet Static, 9 PM to 3 AM");
+  assert.match(leadLine(leads[0]), new RegExp(`Ask ${rosa} at`));
+  assert.match(leadLine(leads[1]), /Go listen\.$/);
+  // The Tea app's hint names the regular once the trail reaches them.
+  assert.match(hintLine(state.stories[0].pieces[1] as never, placeById("grind-and-gossip")!.name), new RegExp(`^Talk to ${rosa} at`));
 });

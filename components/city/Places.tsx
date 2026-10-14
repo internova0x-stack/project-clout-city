@@ -40,7 +40,7 @@ export interface PlaceHandlers {
   gossip?: {
     listen: (placeId: string) => void;
     /** Ask the regular: a piece of gossip they tell, or null for their usual line. */
-    hear: (placeId: string) => Promise<{ text: string; note: string } | null>;
+    hear: (placeId: string) => Promise<{ text: string; note: string; next?: string | null } | null>;
   };
   /** v0.10 Lucky Star Lotto's counter (migration 0032). */
   onOpenLotto?: (placeId: string) => void;
@@ -266,7 +266,7 @@ type HuntLine = { say: string; question?: { q: string; choices: string[] }; note
 function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"] }) {
   const [n, setN] = useState(-1);
   const [huntLine, setHuntLine] = useState<HuntLine | null>(null);
-  const [tea, setTea] = useState<{ text: string; note: string } | null>(null);
+  const [tea, setTea] = useState<{ text: string; note: string; next?: string | null } | null>(null);
   // v0.10: after the hunt (it comes first), the regular's first line may be a piece of gossip.
   const askGossip = async (): Promise<boolean> => {
     if (!gossip) return false;
@@ -342,6 +342,7 @@ function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Pl
           <span className="meta" style={{ display: "block" }}>🍵 {first!.regular.name} · {first!.regular.title}</span>
           &ldquo;{tea.text}&rdquo;
           <span className="meta hunt-note" style={{ display: "block" }}>{tea.note}</span>
+          {tea.next && <span className="tea-next" style={{ marginTop: 8 }}>Next: {tea.next}</span>}
         </div>
       )}
       {said && !huntLine && !tea && (

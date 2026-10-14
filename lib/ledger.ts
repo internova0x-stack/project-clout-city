@@ -43,7 +43,8 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     case "daily_task": {
       const p = e.task ? placeById(e.task.place) : undefined;
       const a = p?.actions.find((x) => x.id === e.task!.action);
-      return { emoji: "✅", title: "Daily task", detail: p ? `${a?.label ?? "Stop by"} · ${p.name}` : null };
+      const gossip = e.task?.action.startsWith("gossip-") ? (e.task.action === "gossip-regular" ? "Heard the tea" : "Listened in") : null;
+      return { emoji: "✅", title: "Daily task", detail: p ? `${gossip ?? a?.label ?? "Stop by"} · ${p.name}` : null };
     }
     case "daily_bonus": return { emoji: "🏆", title: "All five daily tasks", detail: "Bonus" };
     case "purchase": {

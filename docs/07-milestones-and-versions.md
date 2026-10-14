@@ -28,6 +28,7 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.7 | Look and Feel | Creator, profile, Your Look dressing room, buttons, locked boroughs, Collection redesign | About 1 week | — |
 | v0.8 | Getting Around | Travel and arrival, venue drinks, Nap and Sit, groceries and home cooking, weekly bills, event times | 1 to 2 weeks | — |
 | v0.9 | Big Nights | Exclusive event keepsakes, monuments as full locations | About 1 week | — |
+| v0.11 | Doors Open | Code sign-in in the app, Stripe test mode, interface fixes, gossip tasks, content live unless vetoed, every place enterable, the exclusive events update | 1 to 2 weeks | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -195,6 +196,19 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 3. **Built:** gossip's week file and its checks, published automatically (no approval), with the Studio's Gossip tab to read, pause or hold each week (migration 0034); the first week's three stories.
 4. **Built:** gossip in the game: Listen in, regulars' pieces, the Tea app, Tea cards and the Collection's Tea tab, rewards, the badge and crew sharing (migration 0035).
 5. **Built:** the first gossip week (with step 3) and doc updates. v0.10 is complete.
+
+## v0.11 "Doors Open" (1 to 2 weeks, before launch)
+
+**In scope** (owner, Oct 14; docs/08-new-features-spec.md sections 9 to 11, from the third testing round): everything in spec v3's additions ships before launch.
+
+**Owner answers (Oct 14):** no Claude API for now (the weekly Claude Code session keeps drafting); the "Show me more" setting is dropped; subway stations are the one place you can't enter; the exclusive events update (section 10) is in this version.
+
+1. **Built (Oct 14):** sign-in and payments: the 6-digit code as the main sign-in in the installed app; Google sign-in checked in the installed app; Stripe test mode for every real-money product.
+2. **Interface:** actions at places collapsed and expandable; ticks on tasks done at a place; the task icon's daily dot; rotating the apartment in 90° steps; speech bubbles over NPCs you can talk to.
+3. **Built (Oct 14):** gossip tasks and the trail: 2 of each day's 5 tasks send the player to their next gossip piece, and each piece found (and everyone they talk to) points to the next (owner: "everyone they talk to should point them in the right direction"; migration 0036).
+4. **Live unless vetoed:** news and hunts go live after a 24-hour veto window in the Studio, like gossip; News starts live with a drafted week.
+5. **Every place enterable:** office, civic building and outdoor plaza templates; every place but subway stations gets a room.
+6. **Exclusive events update:** $3.99, the benefits in the event modal, a multi-floor venue, 8 to 10 people in the room (NPCs fill in, marked), the event group chat with no daily limit and positive suggestions.
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 

@@ -33,7 +33,8 @@ export interface CityPlayer {
 export interface DailyTask {
   id: number;
   slot: number;
-  kind: "visit" | "eat" | "shift" | "hangout" | "event";
+  /** "gossip" (v0.11, migration 0036): action_id is "gossip-regular" (talk to the regular) or "gossip-overheard" (Listen in). */
+  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip";
   place_id: string;
   action_id: string;
   reward: number;
