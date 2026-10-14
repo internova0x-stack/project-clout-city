@@ -169,6 +169,10 @@ a { color:inherit; }
 .field.field-outline { background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); }
 .field.field-outline:focus-within { box-shadow:0 0 0 2px var(--night-900); }
 .field.field-outline.error { box-shadow:0 0 0 2px var(--red-500); }
+/* v0.11: the 6-digit code, the main sign-in in the installed app. */
+.field.field-code { height:56px; min-width:0; }
+.field.field-code + .btn { height:56px; }
+.field.field-code input { width:100%; font-size:24px; font-weight:700; text-align:center; }
 .field-at { font-size:16px; font-weight:700; color:var(--text-3); margin-right:-6px; }
 .error-text { color:var(--red-text); font-size:13px; line-height:18px; margin-top:6px; }
 .check-row { display:flex; gap:12px; align-items:flex-start; font-size:14px; line-height:20px; color:var(--text-1); cursor:pointer; }

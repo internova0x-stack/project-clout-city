@@ -203,7 +203,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 
 **Owner answers (Oct 14):** no Claude API for now (the weekly Claude Code session keeps drafting); the "Show me more" setting is dropped; subway stations are the one place you can't enter; the exclusive events update (section 10) is in this version.
 
-1. **Sign-in and payments:** the 6-digit code as the main sign-in in the installed app; Google sign-in checked in the installed app; Stripe test mode for every real-money product.
+1. **Built (Oct 14):** sign-in and payments: the 6-digit code as the main sign-in in the installed app; Google sign-in checked in the installed app; Stripe test mode for every real-money product.
 2. **Interface:** actions at places collapsed and expandable; ticks on tasks done at a place; the task icon's daily dot; rotating the apartment in 90° steps; speech bubbles over NPCs you can talk to.
 3. **Gossip tasks:** at least 2 of each day's 5 tasks involve gossip.
 4. **Live unless vetoed:** news and hunts go live after a 24-hour veto window in the Studio, like gossip; News starts live with a drafted week.

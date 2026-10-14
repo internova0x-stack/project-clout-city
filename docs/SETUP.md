@@ -27,6 +27,13 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
    Console → APIs & Services → Credentials → OAuth client ID → Web application, with the
    redirect URI Supabase shows on that page). Until this is done, the "Continue with Google"
    button says Google isn't switched on yet and email keeps working.
+   **Test it in the installed app too (v0.11):** add the game to the home screen, open it from
+   the icon, tap Continue with Google and check you land back in the app signed in. On iPhone the
+   Google page opens in a browser sheet; if you end up signed in there but not in the app, sign in
+   with the email code instead (the installed app asks for the code first, see below) and tell us.
+   **The installed app uses the code (v0.11):** an email link always opens the browser, not the
+   app, so inside the installed app the sign-up sheet asks for the 6-digit code from the same
+   email. The template in step 5 must include `{{ .Token }}` (it does).
 8. **Realtime (v0.2)**: the "people online" pill uses Supabase Realtime presence, which is on by
    default. Nothing to set up.
 9. **The city (v0.3)**: run `0004_the_city.sql`, `0005_monthly_bills.sql` and `0006_home_layout.sql`. Until it runs, the game still opens and the
@@ -53,13 +60,22 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
 ## 2. Vercel
 
 1. Import the GitHub repository at vercel.com/new. Framework: Next.js (auto-detected).
-2. **Environment variables** (Production and Preview):
-   - `NEXT_PUBLIC_SUPABASE_URL`: the Project URL.
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: the anon key.
-   - `NEXT_PUBLIC_SITE_URL`: your live address (used in invite links). Leave unset on
-     Preview so previews use their own address.
+2. **Project → Settings → Environment Variables.** Add each, ticking Production and Preview:
+
+   | Name | Value |
+   | --- | --- |
+   | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase `anon` public key |
+   | `NEXT_PUBLIC_SITE_URL` | Your live address, used in invite links. Production only; leave it off Preview so previews use their own address |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key (section 2b). Secret: never in a `NEXT_PUBLIC_` variable. Payments and the automatic gossip weeks need it |
+   | `STRIPE_SECRET_KEY` | `sk_test_…` (section 2b) |
+   | `STRIPE_WEBHOOK_SECRET` | `whsec_…` (section 2b) |
+
 3. Deploy. Every merge to the main branch redeploys automatically; every pull request
-   gets a preview link.
+   gets a preview link. **After adding or changing a variable, redeploy** (Deployments → ⋯ on
+   the latest → Redeploy): variables only reach new deployments.
+4. Check Supabase **Authentication → URL Configuration** (section 1, step 4) lists the live
+   address and the preview pattern.
 
 ## 2b. Payments (v0.5, Stripe test mode)
 
@@ -69,8 +85,9 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 
 1. Run `supabase/migrations/0008_payments.sql` in the SQL Editor. It adds the catalog
    (`store_products`, with the three side stories at $2.99), purchases and the webhook log.
-2. In the Stripe dashboard, switch on **Test mode**, then **Developers → API keys**: copy the
-   **Secret key** (`sk_test_…`).
+2. In the Stripe dashboard, switch on **Test mode** (top right), then **Developers → API keys**:
+   copy the **Secret key** (`sk_test_…`). You don't create products in Stripe: prices come from
+   `store_products` (see the end of this section).
 3. **Developers → Webhooks → Add endpoint**:
    - URL: `https://<your site>/api/stripe/webhook`
    - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
@@ -89,6 +106,9 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    `4242 4242 4242 4242`, any future date, any CVC. Back in the game it shows "Unlocking…" until
    the webhook lands, then the chapters open. Refund the payment in Stripe (**Payments → Refund**,
    full amount) and the side story locks again.
+   **If it never unlocks:** Stripe → Developers → Webhooks → your endpoint → Event deliveries.
+   A 400 there means the signing secret is wrong; a 500 usually means `SUPABASE_SERVICE_ROLE_KEY`
+   is missing or wrong in Vercel (or the deployment wasn't redeployed after adding it).
 
 7. Run `supabase/migrations/0009_money_wave3.sql`. It adds location wave 3 (two monuments, the
    lounge, the boutique and the dealership) and the other three products: monument postcards

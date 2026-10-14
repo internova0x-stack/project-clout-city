@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { isStandalone } from "./game/FirstSession";
 import { MailIcon } from "./icons";
 import { Sheet } from "./Sheet";
 
@@ -19,6 +20,8 @@ export type AuthMode = "signup" | "login";
 
 // Sign-up and log-in in one: email magic link (no password) plus the 18+
 // confirmation (Clarifications sections 1 and 13; Milestones v0.1).
+// v0.11 (spec section 11): in the installed app the 6-digit code is the main way in, because an
+// email link opens the browser, not the app. The same email carries both.
 export function SignUpSheet({
   open,
   onClose,
@@ -40,6 +43,9 @@ export function SignUpSheet({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
+  // Read after mount so the server render matches the first client render.
+  const [inApp, setInApp] = useState(false);
+  useEffect(() => setInApp(isStandalone()), []);
 
   const canSend = EMAIL.test(email.trim()) && (login || adult) && !busy;
 
@@ -67,7 +73,7 @@ export function SignUpSheet({
       const noAccount = login && /signups? not allowed|not found|user/i.test(err.message);
       setError(
         err.status === 429
-          ? "Easy, tiger. Wait a minute before asking for another link."
+          ? `Easy, tiger. Wait a minute before asking for another ${inApp ? "code" : "link"}.`
           : noAccount
             ? "No account with that email yet. Sign up instead?"
             : "That didn't send. Check the address and try again.",
@@ -103,7 +109,7 @@ export function SignUpSheet({
     const { error: err } = await supabase.auth.verifyOtp({ email: email.trim(), token, type: "email" });
     setBusy(false);
     if (err) {
-      setError("That code didn't work. It may have expired; ask for a new link.");
+      setError(inApp ? "That code didn't work. It may have expired; start over for a new one." : "That code didn't work. It may have expired; ask for a new link.");
       return;
     }
     router.push("/create");
@@ -124,9 +130,13 @@ export function SignUpSheet({
             <p className="overline">{login ? "Welcome back" : invited ? "You've been invited" : "Early access"}</p>
             <h2 className="display-lg" style={{ margin: 0 }}>{login ? "Back to Queens" : "Claim your spot in Queens"}</h2>
             <p className="subtext" style={{ margin: "4px 0 0" }}>
-              {login
-                ? "Enter your email and we'll send a magic link. The city kept your spot warm. Mostly."
-                : "Sign up with your email. We'll send a magic link: no password, no velvet rope."}
+              {inApp
+                ? login
+                  ? "Enter your email and we'll send a 6-digit code. Type it here; no leaving the app."
+                  : "Sign up with your email. We'll send a 6-digit code: no password, no velvet rope."
+                : login
+                  ? "Enter your email and we'll send a magic link. The city kept your spot warm. Mostly."
+                  : "Sign up with your email. We'll send a magic link: no password, no velvet rope."}
             </p>
           </div>
 
@@ -159,7 +169,7 @@ export function SignUpSheet({
           {error && <p className="error-text" role="alert">{error}</p>}
 
           <button type="submit" className="btn btn-taxi" disabled={!canSend}>
-            {busy ? "Sending…" : "Send my magic link ›"}
+            {busy ? "Sending…" : inApp ? "Email me a code ›" : "Send my magic link ›"}
           </button>
           <div className="or-divider"><span>or</span></div>
           <button type="button" className="btn btn-secondary" disabled={busy || (!login && !adult)} onClick={google}>
@@ -175,9 +185,11 @@ export function SignUpSheet({
         <div className="stack-16">
           <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
             <p className="overline">Check your inbox</p>
-            <h2 className="display-lg" style={{ margin: 0 }}>Your link is on its way</h2>
+            <h2 className="display-lg" style={{ margin: 0 }}>{inApp ? "Type your code" : "Your link is on its way"}</h2>
             <p className="subtext" style={{ margin: "4px 0 0" }}>
-              We sent a sign-in link to <strong>{email.trim()}</strong>. Tap it on this phone or any other device.
+              {inApp
+                ? <>We emailed a 6-digit code to <strong>{email.trim()}</strong>. Copy it from your inbox and type it below.</>
+                : <>We sent a sign-in link to <strong>{email.trim()}</strong>. Tap it on this phone or any other device.</>}
             </p>
           </div>
 
@@ -188,10 +200,11 @@ export function SignUpSheet({
               void verifyCode();
             }}
           >
-            <p className="meta" style={{ margin: 0 }}>Got a 6-digit code in the email instead? Type it here.</p>
+            {!inApp && <p className="meta" style={{ margin: 0 }}>Got a 6-digit code in the email instead? Type it here.</p>}
             <div className="row">
-              <label className="field" style={{ flex: 1 }}>
+              <label className={`field${inApp ? " field-code" : ""}`} style={{ flex: 1 }}>
                 <input
+                  autoFocus={inApp}
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   placeholder="123456"
@@ -209,6 +222,7 @@ export function SignUpSheet({
           </form>
 
           {error && <p className="error-text" role="alert">{error}</p>}
+          {inApp && <p className="meta" style={{ margin: "4px 0 0" }}>The email has a link too, but it opens your browser instead of the app. The code keeps you here.</p>}
 
           <button className="btn btn-ghost" onClick={() => { setStage("form"); setCode(""); setError(null); }}>
             Wrong email? Start over
