@@ -13,7 +13,7 @@ import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
-import type { Regular } from "@/lib/cast";
+import { callName, type Regular } from "@/lib/cast";
 import type { HuntResult } from "@/lib/hunts";
 import { placeStory, type StoryFeed } from "@/lib/storyFeed";
 import { ReasonBanner } from "../story/StoryBits";
@@ -42,7 +42,9 @@ export interface PlaceHandlers {
   gossip?: {
     listen: (placeId: string) => void;
     /** Ask the regular: a piece of gossip they tell, or null for their usual line. */
-    hear: (placeId: string) => Promise<{ text: string; note: string; next?: string | null } | null>;
+    hear: (placeId: string) => Promise<{ text: string; note: string; next?: string | null; nextPlace?: string | null } | null>;
+    /** Owner, Oct 14: the "Next lead" line opens that place on the map. */
+    openPlace?: (placeId: string) => void;
   };
   /** v0.10 Lucky Star Lotto's counter (migration 0032). */
   onOpenLotto?: (placeId: string) => void;
@@ -229,7 +231,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
               {tasksAt(state, place.id).filter((t) => t.kind === "event" && t.action_id === ev.id).map((t) => <TaskTick key={t.id} t={t} />)}
               {!compact && <span className="subtext" style={{ display: "block" }}>{ev.blurb}</span>}
               <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} seconds={OTHER_SECONDS.event} />
-              {!open && !state.attendedToday.includes(ev.id) && <span className="meta">Doors open in {wait} min</span>}
+              {!open && !state.attendedToday.includes(ev.id) && <span className="meta" style={{ display: "block" }}>Doors open in {wait} min. Come back then, or wait here.</span>}
               {open && !av.ok && <span className="meta reason">{av.reason}</span>}
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
               {handlers.dating && !compact && (
@@ -238,7 +240,10 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
                 </button>
               )}
             </div>
-            {preview ? pill(formatCash(ev.entry)) : away ? <span className="lock-chip">On arrival</span> : (
+            {/* Owner, Oct 14: say why an event can't be joined yet, rather than a faded price. */}
+            {!open && !state.attendedToday.includes(ev.id) ? (
+              <span className="lock-chip">🕒 {wait} min</span>
+            ) : preview ? pill(formatCash(ev.entry)) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
                 {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
               </button>
@@ -361,7 +366,7 @@ export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
 }) {
   const [n, setN] = useState(-1);
   const [huntLine, setHuntLine] = useState<HuntLine | null>(null);
-  const [tea, setTea] = useState<{ text: string; note: string; next?: string | null } | null>(null);
+  const [tea, setTea] = useState<{ text: string; note: string; next?: string | null; nextPlace?: string | null } | null>(null);
   // v0.10: after the hunt (it comes first), the regular's first line may be a piece of gossip.
   const askGossip = async (): Promise<boolean> => {
     if (!gossip) return false;
@@ -374,7 +379,7 @@ export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
   const [asking, setAsking] = useState(false);
   const first = talk?.(place, 0) ?? null;
   const said = first && n >= 0 ? talk!(place, n) : null;
-  const firstName = first?.regular.name.split(" ")[0] ?? "";
+  const firstName = first ? callName(first.regular.name) : "";
   const onTap = async () => {
     const fresh = n < 0 && !huntLine && !tea;
     // Ask about the hunt on the first tap, and again after a "stop in first" hint.
@@ -440,7 +445,10 @@ export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
           <span className="meta" style={{ display: "block" }}>🍵 {first!.regular.name} · {first!.regular.title}</span>
           &ldquo;{tea.text}&rdquo;
           <span className="meta hunt-note" style={{ display: "block" }}>{tea.note}</span>
-          {tea.next && <span className="tea-next" style={{ marginTop: 8 }}>Next: {tea.next}</span>}
+          {/* Owner, Oct 14: say what this is, and take the player there when tapped. */}
+          {tea.next && (tea.nextPlace && gossip?.openPlace
+            ? <button className="tea-next tea-lead" style={{ marginTop: 8 }} onClick={() => gossip.openPlace!(tea.nextPlace!)}>Next lead: {tea.next} · Show on map ›</button>
+            : <span className="tea-next" style={{ marginTop: 8 }}>Next lead: {tea.next}</span>)}
         </div>
       )}
       {said && !huntLine && !tea && (
@@ -490,7 +498,11 @@ export function LocationSheet({
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
           {/* #19 clubs: what's downstairs and upstairs, and the door rule. */}
-          {clubLines(place, state.player.clout).map((l) => <p key={l} className="meta club-line" style={{ margin: 0 }}>{l}</p>)}
+          {place.club && (
+            <ul className="club-lines">
+              {clubLines(place, state.player.clout).map((l) => <li key={l}>{l}</li>)}
+            </ul>
+          )}
           {handlers.dating?.dates.filter((d) => d.placeId === place.id).map((d) => (
             <DateStatusRow key={d.id} me={handlers.dating!.me} date={d} bonus={handlers.dating!.bonus} />
           ))}
@@ -596,7 +608,7 @@ export function InteriorScene({
       <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
         <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="display-sm">{place.emoji} {place.name}</span>
-          <span className="panel-toggle">{open ? "Hide" : "All actions"}</span>
+          <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
         </button>
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (

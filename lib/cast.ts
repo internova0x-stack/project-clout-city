@@ -59,6 +59,12 @@ export const REGULARS: Regular[] = [
   { id: "benny", name: "Benny Fortuna", title: "the owner, never bought a ticket", placeId: "lucky-star", emoji: "🧑‍🦳", role: "clerk" },
 ];
 
+/** What people call a regular: their first name, or title and surname ("Mr. Penwright", "Sgt. Bev"). */
+export function callName(name: string): string {
+  const [a, b] = name.split(" ");
+  return /\.$/.test(a) && b ? `${a} ${b}` : a;
+}
+
 export function regularAt(placeId: string): Regular | undefined {
   return REGULARS.find((r) => r.placeId === placeId);
 }

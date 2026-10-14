@@ -551,8 +551,9 @@ a { color:inherit; }
 
 /* Reward toast */
 .gain-toast { position:absolute; z-index:70; top:calc(70px + var(--safe-top)); left:50%; transform:translateX(-50%); max-width:calc(100% - 32px);
-  padding:10px 16px; border-radius:var(--r-pill); font-weight:600; font-size:14px; white-space:pre-wrap; text-align:center; box-shadow:var(--elev-3);
-  animation:toast-in .3s ease-out, fade-out .4s ease-in 2.2s forwards; }
+  padding:10px 16px; border-radius:16px; font-weight:600; font-size:14px; line-height:1.4; white-space:pre-wrap; text-align:center; box-shadow:var(--elev-3);
+  width:max-content; max-width:min(360px, calc(100% - 32px));
+  animation:toast-in .3s ease-out, fade-out .4s ease-in 4.1s forwards; }
 @keyframes toast-in { from { opacity:0; transform:translate(-50%, -8px); } to { opacity:1; transform:translate(-50%, 0); } }
 @media (prefers-reduced-motion:reduce) { .gain-toast { animation:none; } }
 
@@ -621,6 +622,12 @@ a { color:inherit; }
 /* Owner, Oct 14 (#1): "Hide" / "All actions" is a real, colored button, easy to spot on every panel. */
 /* Owner, Oct 14: plain green words, not a button (the whole header is the tap target). */
 .panel-toggle { flex:none; display:inline-flex; align-items:center; height:32px; color:#23855A; font-size:15px; font-weight:700; }
+.panel-toggle.hide { color:#C8102E; }
+/* #19 clubs: what's downstairs, upstairs and at the door, one line each under Lola's take. */
+.club-lines { list-style:none; margin:0; padding:12px 14px; display:flex; flex-direction:column; gap:8px; border-radius:16px; background:var(--surface-2, rgba(0,0,0,.04)); }
+.club-lines li { font-size:14px; line-height:1.4; color:var(--text-2); }
+/* Owner, Oct 14: the next gossip lead says what it is and opens that place on the map. */
+button.tea-lead { border:0; font:inherit; font-size:13px; font-weight:600; cursor:pointer; text-align:left; }
 .interior-panel:not(.open) { padding:12px 14px; }
 .game.arranging .under-hud, .game.arranging .dev-clock, .game.arranging .stats, .game.arranging .side-col, .game.arranging .room-chips { display:none; }
 .game.arranging .room-edit { left:12px; }

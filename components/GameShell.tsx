@@ -21,7 +21,7 @@ import { outfitWith } from "@/lib/wardrobe";
 import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
-import { regularAt, regularLine } from "@/lib/cast";
+import { callName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
@@ -701,6 +701,11 @@ export function GameShell({
     const p = s && !s.done ? s.pieces.find((x) => !x.found && x.place) : undefined;
     return p && !p.found && p.place ? leadAction({ place: p.place, source: p.source, hours: p.hours }) : null;
   };
+  const nextPlaceOf = (st: GossipState | null, storyId: string): string | null => {
+    const s = st?.stories.find((x) => x.id === storyId);
+    const p = s && !s.done ? s.pieces.find((x) => !x.found && x.place) : undefined;
+    return p && !p.found ? p.place : null;
+  };
   const nextNote = (st: GossipState | null, storyId: string) => { const n = nextOf(st, storyId); return n ? ` · Next: ${n}` : ""; };
   const listenIn = async (placeId: string, via: "overheard" | "restroom" = "overheard") => {
     if (!gossip) return;
@@ -720,14 +725,14 @@ export function GameShell({
     setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""}${bonus}${nextNote(st, x.story)}${taskNote(r.data)}`);
   };
   /** The regular here: a piece of gossip, or else where to go next. Null when there's nothing to pass on. */
-  const hearRegular = async (placeId: string): Promise<{ text: string; note: string; next?: string | null } | null> => {
+  const hearRegular = async (placeId: string): Promise<{ text: string; note: string; next?: string | null; nextPlace?: string | null } | null> => {
     if (!gossip) return null;
     const r = await gossip.find(placeId, "regular");
     if (!r.ok) return null;
     const st = await afterFind(r.data);
     if (r.data.found.length) {
       const x = r.data.found[0];
-      return { text: x.text, note: `🍵 ${pieceNote(x)} · saved to Tea${taskNote(r.data)}`, next: nextOf(st, x.story) };
+      return { text: x.text, note: `🍵 ${pieceNote(x)} · saved to Tea${taskNote(r.data)}`, next: nextOf(st, x.story), nextPlace: nextPlaceOf(st, x.story) };
     }
     const lead = leadFrom(st, placeId, Date.now() >> 16);
     return lead ? { text: leadLine(lead), note: `🍵 A lead for your Tea${taskNote(r.data)}` } : r.data.taskCash ? { text: "Nothing new today. Come back when the block starts talking.", note: taskNote(r.data).slice(3) } : null;
@@ -761,7 +766,7 @@ export function GameShell({
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
-    gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular } : undefined,
+    gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
     onAttendStoryEvent: storyApi
@@ -1085,7 +1090,7 @@ export function GameShell({
               insetBottom={170}
               mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
-              npcNames={insideFloor === 1 && regularAt(inside.id) ? [regularAt(inside.id)!.name.split(" ")[0]] : undefined}
+              npcNames={insideFloor === 1 && regularAt(inside.id) ? [callName(regularAt(inside.id)!.name)] : undefined}
               onNpcTap={(i) => void (async () => {
                 // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
                 // hunt clue first, in the panel below the room.

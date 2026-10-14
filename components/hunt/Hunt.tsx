@@ -1,7 +1,7 @@
 "use client";
 
 import { CITY_ECONOMY, placeById } from "@/lib/city";
-import { regularAt } from "@/lib/cast";
+import { callName, regularAt } from "@/lib/cast";
 import { formatCash } from "@/lib/economy";
 import type { HuntState } from "@/lib/hunts";
 import { nextNyMonday, nyMidnightLine } from "@/lib/localTime";
@@ -78,7 +78,7 @@ export function HuntTab({ state, style, busy, onJoin, onOpenPlace }: {
                     <span className="body">
                       {asked && h.question
                         ? h.question.retryAt ? "Wrong answer. They'll ask again in a few minutes." : "They asked you a question. Go back and answer it."
-                        : h.step === 0 ? `Start with ${who(h.firstPlace)}. Stop in, then tap ${regularAt(h.firstPlace)?.name.split(" ")[0] ?? "them"}.`
+                        : h.step === 0 ? `Start with ${who(h.firstPlace)}. Stop in, then tap ${(regularAt(h.firstPlace) ? callName(regularAt(h.firstPlace)!.name) : "them")}.`
                         : "Follow the last clue. Stop in at the place, then tap the regular there."}
                     </span>
                     {placeId && <button className="btn btn-secondary btn-sm hunt-open" onClick={() => onOpenPlace(placeId)}>📍 {placeById(placeId)?.name}</button>}
