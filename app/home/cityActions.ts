@@ -101,6 +101,9 @@ export async function scratchLottoCard(cardId: number) {
 export async function payBill(billId: number) {
   return run("pay_bill", { p_bill: billId });
 }
+export async function moveHome(homeId: string) {
+  return run("move_home", { p_home: homeId }, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }));
+}
 export async function saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]) {
   return run("save_home_layout", { p_layout: layout });
 }

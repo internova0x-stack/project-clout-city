@@ -13,7 +13,7 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { PLACE_TEMPLATES, homeTemplate, ownedId, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
+import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -46,6 +46,7 @@ import { ActionTimer, GainToast, useGameNow } from "./city/Common";
 import { actionSeconds, actionVerb, OTHER_SECONDS } from "@/lib/actionTime";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
+import { ViewingBar } from "./city/Apartments";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
 import { newsGossip, splitNews, type NewsItem } from "@/lib/news";
@@ -257,6 +258,9 @@ export function GameShell({
   // #19 Fif's Furniture: which room of the Home tab to open on, and a piece being tried at home.
   const [shopSection, setShopSection] = useState<string | undefined>(undefined);
   const [tryHome, setTryHome] = useState<ShopItem | null>(null);
+  // #19 moving up: a home being looked at from the Apartments app, and the floor you're on at home.
+  const [viewHome, setViewHome] = useState<string | null>(null);
+  const [homeFloor, setHomeFloor] = useState(1);
   const [chatWith, setChatWith] = useState<{ id: string; name: string; style: string } | null>(null);
   const [chatUnread, setChatUnread] = useState(0);
   const [cardId, setCardId] = useState<string | null>(null);
@@ -653,11 +657,18 @@ export function GameShell({
     setRoom((cur) => (cur ? { ...cur, messages: cur.messages.filter((x) => x.from !== m.from), people: cur.people.filter((x) => x.id !== m.from) } : cur));
     setToast(`Blocked ${handle(m.name)}. You won't see each other here or in Messages.`);
   } : undefined;
+  // #19: the home in the room view: a listing being looked at, else your home (upstairs when you're there).
+  const baseHome = homeTemplate(me.home_id, city?.player.house_sku);
+  const upstairs = homeFloor > 1 ? HOME_FLOORS[baseHome.id]?.[homeFloor] : undefined;
+  const floorNow = upstairs ? homeFloor : 1;
+  const viewing = viewHome ? HOME_TEMPLATES[viewHome] : undefined;
   // #19 Fif's Furniture: what the player bought for their home (placed or in storage).
   const ownedPieces: OwnedPiece[] = (city?.items ?? []).flatMap((i) => {
     const it = i.category === "home" ? itemBySku(i.sku) : undefined;
     return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
   });
+  const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
+  const ownedHere = ownedPieces.filter((p) => !elsewhere.has(p.id));
   const crowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
   const openShop = (category: ShopCategory, section?: string) => {
     setPlace(null);
@@ -1094,17 +1105,20 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={homeTemplate(me.home_id, city?.player.house_sku)}
-            layout={city?.homeLayout}
+            template={viewing ?? upstairs ?? baseHome}
+            floor={viewing ? 1 : floorNow}
+            layout={viewing ? null : city?.homeLayout}
             look={look}
             outfit={outfit}
             daytime={daytime}
-            editable={cityOn && flow === "none"}
+            editable={cityOn && flow === "none" && !viewing}
             rotatable={flow === "none"}
             door={flow === "none"}
-            label={`${me.display_name} at home, wearing ${style.label}`}
+            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : `${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
+              if (viewing) return;
+              if (it.use?.kind === "floor") return setHomeFloor(it.use.to);
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
               if (restOn && it.use?.kind === "sleep") setRestKind("nap");
               if (restOn && it.use?.kind === "sit") setRestKind("sit");
@@ -1112,8 +1126,8 @@ export function GameShell({
             }}
             onEditingChange={setArranging}
             mood={roomMood}
-            onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
-            owned={ownedPieces}
+            onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
+            owned={viewing ? undefined : ownedHere}
             trial={tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
             onTrialEnd={() => setTryHome(null)}
             onTrialBuy={cityApi && ((l) => run(`buy:${tryHome!.sku}`, async () => {
@@ -1123,9 +1137,18 @@ export function GameShell({
               if (!r.ok) return r;
               const it = r.state.items.filter((i) => i.sku === sku).sort((a, b) => b.id - a.id)[0];
               if (!it) return r;
-              return cityApi.saveHomeLayout(l.map((e) => (e.id === "trial" ? { ...e, id: ownedId(it.id) } : e)));
+              return cityApi.saveHomeLayout(mergeFloorLayout(r.state.homeLayout, l.map((e) => (e.id === "trial" ? { ...e, id: ownedId(it.id) } : e)), floorNow));
             }))}
           />
+          {viewing && viewHome && (
+            <ViewingBar
+              home={ECONOMY.homes.find((h) => h.id === viewHome)!}
+              state={city}
+              busy={busy !== null}
+              onBack={() => { setViewHome(null); setPhone({ open: true, app: "apartments" }); }}
+              onMove={cityApi?.moveHome ? () => void run(`move:${viewHome}`, () => cityApi.moveHome!(viewHome)).then((ok) => { if (ok) { setViewHome(null); setHomeFloor(1); setToast("Moved in. The broker fee is not refundable, emotionally or otherwise."); } }) : undefined}
+            />
+          )}
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
           )}
@@ -1404,6 +1427,11 @@ export function GameShell({
       )}
       <TeaRevealSheet card={teaCard?.card ?? null} fresh={!!teaCard?.fresh} finished={teaState?.cards.length ?? 0} onClose={() => setTeaCard(null)} />
       <PhoneModal
+        apartments={cityOn && cityApi?.moveHome && city?.player.moved_up !== undefined ? {
+          busy: busy !== null,
+          onLookInside: (id) => { setPhone({ open: false, app: null }); setPanel(null); setTab("home"); setViewHome(id); },
+          onMove: (id) => void run(`move:${id}`, () => cityApi.moveHome!(id)).then((ok) => { if (ok) { setHomeFloor(1); setToast("Moved in. The broker fee is not refundable, emotionally or otherwise."); } }),
+        } : undefined}
         open={phone.open}
         initialApp={phone.app}
         focusBeat={phone.beat}

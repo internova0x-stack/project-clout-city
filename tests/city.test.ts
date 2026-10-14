@@ -88,7 +88,8 @@ test("the preview simulator follows the same clout and resale rules", async () =
 });
 
 test("v0.11 recalibration: money stays tight, so there's always a reason to earn more (owner, Oct 14)", () => {
-  const rents = ECONOMY.homes.map((h) => h.rent).sort((a, b) => a - b);
+  const rent = (id: string) => ECONOMY.homes.find((h) => h.id === id)!.rent;
+  const rents = [rent("astoria_studio"), rent("jackson_heights_1br"), rent("lic_highrise")];
   const { shiftRate, shiftsPerDay, shiftEnergy, gigs, bills, dailyTasks } = CITY_ECONOMY;
   assert.equal(bills.every, "7 days");
   // A full work day: every shift allowed plus the daily tasks and their bonus (no gigs).

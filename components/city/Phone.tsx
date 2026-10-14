@@ -7,6 +7,7 @@ import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { TeaApp } from "./Gossip";
+import { ApartmentsApp } from "./Apartments";
 import type { GossipState, TeaCard } from "@/lib/gossip";
 import { BankView } from "../game/Sheets";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
@@ -16,7 +17,7 @@ import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -25,6 +26,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   // v0.10 neighborhood gossip (migration 0035); hidden until it runs.
   { id: "tea", label: "Tea", emoji: "🍵", tile: "tree" },
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
+  // #19 moving up (migration 0045); hidden until it runs.
+  { id: "apartments", label: "Apartments", emoji: "🔑", tile: "house" },
   // v0.7: the Collection's front door (owner, Oct 13). It opens the Collection sheet over the game.
   { id: "collection", label: "Collection", emoji: "💌", tile: "book" },
   { id: "gigs", label: "Gigs", emoji: "💼", tile: "briefcase" },
@@ -43,7 +46,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments,
 }: {
   open: boolean;
   onClose: () => void;
@@ -76,6 +79,8 @@ export function PhoneModal({
   onOpenCollection?: () => void;
   /** The player's @handle, on the Bank's virtual card. */
   handle?: string;
+  /** #19 moving up: the Apartments app; without it the app is hidden. */
+  apartments?: { busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void };
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -117,7 +122,7 @@ export function PhoneModal({
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state))).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
@@ -138,6 +143,7 @@ export function PhoneModal({
               {/* News and Tea draw their own headers. */}
               {app !== "news" && app !== "tea" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
+              {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
                 <div className="stack-12">

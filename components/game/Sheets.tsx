@@ -8,7 +8,8 @@ import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen }
 import { cityMinutes } from "@/lib/cityClock";
 import { eventAvailability, eventById, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
-import { ECONOMY, formatCash } from "@/lib/economy";
+import { ECONOMY, formatCash, moveCost } from "@/lib/economy";
+import { nextHomeUp } from "../city/Apartments";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { describeEntry, sampleLedger, type LedgerEntry } from "@/lib/ledger";
 import { CloutCard } from "../city/CloutCard";
@@ -118,6 +119,14 @@ export function TasksSheet({
             {city && (
               <>
                 <Goal emoji="🛍️" title="Make your first purchase" done={city.items.some((i) => i.acquired === "bought")} line="Anything from the Shop. Retail therapy counts as self-care." />
+                {city.player.moved_up !== undefined && (() => {
+                  // #19 moving up (owner, Oct 14): an early goal. Done once you've moved somewhere dearer (or bought a house).
+                  const next = nextHomeUp(city);
+                  const done = !!city.player.moved_up || !!city.player.house_sku;
+                  const line = done || !next ? "Upgraded. Your old landlord is already telling people about you."
+                    : `${next.name}: ${(next.moveClout ?? 0).toLocaleString("en-US")} clout and ${formatCash(moveCost(next))} to move. You have ${city.player.clout.toLocaleString("en-US")} clout and ${formatCash(city.player.bank_cash)}. The Apartments app has the listings.`;
+                  return <Goal emoji="🔑" title="Move into a better apartment" done={done} line={line} />;
+                })()}
                 <Goal emoji="💼" title="Collect your first gig payout" done={city.gigs.some((g) => g.collected_at)} line="Gigs live in your Phone. Bigger pay than a shift." />
                 <Goal emoji="🔥" title="Reach 2,000 clout" done={city.player.clout >= 2000} line={`${city.player.clout.toLocaleString()} of 2,000. Strangers are starting to care.`} />
                 <Goal emoji="🏡" title="Own a home" done={!!city.player.house_sku} line="No more rent. Your landlord will miss you. Financially." />

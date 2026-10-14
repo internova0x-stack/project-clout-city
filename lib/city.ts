@@ -571,6 +571,7 @@ export const HOME_PLACE_ID = "home";
 
 /** Where each starter home sits on the map. */
 export const HOME_LOCATIONS: Record<string, LatLng> = {
+  sunnyside_gardens: [40.7472, -73.9182],
   astoria_studio: [40.7745, -73.9050],
   jackson_heights_1br: [40.7520, -73.8830],
   lic_highrise: [40.7470, -73.9560],
@@ -731,6 +732,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 117000, clout: 420, rating: 4, rentPerWeek: 1950, blurb: "Silent, fast and smug. Like a startup founder." },
   // Houses
   { sku: "house-astoria-townhouse", category: "houses", name: "Astoria townhouse", emoji: "🏡", price: 270000, clout: 900, rating: 3, neighborhood: "Astoria", blurb: "A stoop of your own. Neighbors will judge your plants." },
+  { sku: "house-hunters-point-duplex", category: "houses", name: "Hunters Point duplex penthouse", emoji: "🏙️", price: 2400000, clout: 4200, rating: 4, neighborhood: "Long Island City", blurb: "Two floors, a terrace and a hot tub with a view of everyone who doubted you." },
   { sku: "house-lic-penthouse", category: "houses", name: "LIC penthouse", emoji: "🌆", price: 975000, clout: 2400, rating: 4, neighborhood: "Long Island City", blurb: "Floor-to-ceiling windows, so the city can watch you thrive." },
   // Luxury
   { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "⛓️", price: 2250, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },

@@ -63,6 +63,8 @@ export interface Room3DProps {
   /** Screen space kept clear for the HUD (top) and panels (bottom), in px. */
   insetTop?: number;
   insetBottom?: number;
+  /** #19 homes with stairs: which floor this is (bought pieces remember their floor). */
+  floor?: number;
   /** #19 Fif's Furniture: pieces the player bought; placed ones come from the layout, the rest wait in storage. */
   owned?: OwnedPiece[];
   /** #19 "Try it at home": a piece from the Shop, placed for a look before buying. */
@@ -113,7 +115,8 @@ export default function Room3D(props: Room3DProps) {
   const [failed, setFailed] = useState(false);
   const owned = props.owned ?? [];
   const ownedKey = owned.map((o) => o.id).join(",");
-  const [items, setItems] = useState<RoomItem[]>(() => applyLayout(template, layout, owned));
+  const floorNo = props.floor ?? 1;
+  const [items, setItems] = useState<RoomItem[]>(() => applyLayout(template, layout, owned, floorNo));
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -134,13 +137,13 @@ export default function Room3D(props: Room3DProps) {
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
   useEffect(() => {
-    const next = applyLayout(template, layout, propsRef.current.owned ?? []);
+    const next = applyLayout(template, layout, propsRef.current.owned ?? [], propsRef.current.floor ?? 1);
     setItems(next);
     savedRef.current = next;
     setEditing(false);
     setSelected(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template.id, layoutKey, ownedKey]);
+  }, [template.id, layoutKey, ownedKey, floorNo]);
 
   // #19 "Try it at home": drop the Shop's piece into a free spot and start arranging it.
   const trialKey = props.trial?.piece.id ?? "";
@@ -980,7 +983,7 @@ export default function Room3D(props: Room3DProps) {
                       disabled={saving || !trial.canAfford || items.some((i) => !placementOk(template, items, i))}
                       onClick={async () => {
                         setSaving(true);
-                        const ok = (await props.onTrialBuy?.(toLayout(items))) ?? false;
+                        const ok = (await props.onTrialBuy?.(toLayout(items, floorNo))) ?? false;
                         setSaving(false);
                         if (ok) { setEditing(false); setSelected(null); setNote(null); props.onTrialEnd?.(); }
                       }}
@@ -997,7 +1000,7 @@ export default function Room3D(props: Room3DProps) {
                   disabled={saving || items.some((i) => !placementOk(template, items, i))}
                   onClick={async () => {
                     setSaving(true);
-                    const ok = (await props.onSaveLayout?.(toLayout(items))) ?? true;
+                    const ok = (await props.onSaveLayout?.(toLayout(items, floorNo))) ?? true;
                     setSaving(false);
                     if (ok) { savedRef.current = items; setEditing(false); setSelected(null); setNote(null); }
                   }}

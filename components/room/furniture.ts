@@ -567,6 +567,11 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       cyl(0.1, 0.13, 0.14, glow("#FFE3B0", 0.6), 0, 0.66, 0, 10);
       return { group: g };
     }
+    case "hotTub": {
+      box(w, 0.6, d, "#8A6A52");
+      box(w - 0.24, 0.05, d - 0.24, k.mat("#7FD3E6", { emissive: "#7FD3E6", emissiveIntensity: opts.night ? 0.6 : 0.3, roughness: 0.1 }), 0, 0.56, 0);
+      return { group: g, seatY: 0.45 };
+    }
     case "railing": {
       box(w, 0.05, 0.05, METAL, 0, 0.95, 0);
       box(w, 0.04, 0.04, METAL, 0, 0.5, 0);

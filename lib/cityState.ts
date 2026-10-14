@@ -29,6 +29,8 @@ export interface CityPlayer {
   at_place?: string | null;
   /** v0.8 (migration 0027): meals in the fridge; missing until the migration runs. */
   fridge_meals?: number;
+  /** #19 (migration 0045): moved to a dearer home at least once (the early goal); missing until it runs. */
+  moved_up?: boolean;
 }
 
 export interface DailyTask {
@@ -144,6 +146,8 @@ export interface CityApi {
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
+  /** #19 moving up (migration 0045): move into another rental from the Apartments app. */
+  moveHome?(homeId: string): Promise<CityResult>;
   /** v0.5: an exclusive event the player has a ticket for (Mood and Confidence; clout came with the ticket). */
   attendExclusiveEvent?(eventId: string): Promise<CityResult>;
 }
@@ -151,6 +155,9 @@ export interface CityApi {
 // ---------------------------------------------------------------------------
 /** v0.11 (migration 0039): the shift cap's message, shared with the preview simulator. */
 export const SHIFT_LIMIT = `That's ${CITY_ECONOMY.shiftsPerDay} shifts today, the most a body can take. Try a gig on the board, or come back tomorrow.`;
+
+/** #19 (migration 0045): moving needs the home's clout. Shared with the preview simulator. */
+export const HOME_NEEDS_CLOUT = "The landlord googled you. Come back with more clout.";
 
 /** #9 (migration 0043): a fantasy outfit above the player's clout. Shared with the preview simulator. */
 export const OUTFIT_NEEDS_CLOUT = "The fitting room won't even let you in yet. Earn more clout first.";
@@ -164,6 +171,10 @@ const ERRORS: Record<string, string> = {
   shift_limit: SHIFT_LIMIT,
   cant_afford: "Your card got declined. Loudly.",
   outfit_needs_clout: OUTFIT_NEEDS_CLOUT,
+  home_needs_clout: HOME_NEEDS_CLOUT,
+  own_house: "You own a house. Landlords are a thing of your past.",
+  already_home: "You already live there. Unpack first.",
+  rent_due: "Pay this week's rent before you move. Landlords talk.",
   doors_closed: "Doors aren't open yet. The bouncer is pretending not to see you.",
   already_attended: "You already went tonight. Twice would be desperate.",
   gig_active: "Finish your current gig first.",

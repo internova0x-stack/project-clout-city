@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
-import { ECONOMY, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
+import { ECONOMY, SIGNUP_HOMES, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
 import {
   BODIES, BUILDS, DEFAULT_BUILD, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, HEADWEAR_CULTURAL, SKIN_TONES,
   lookChoices, randomLook, type BuildId, type Look, type LookChoices,
@@ -429,7 +429,7 @@ function LotteryStep({
 // Step 4: Home (single choice; homes you can't afford are disabled)
 // ---------------------------------------------------------------------------
 function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorActions["moveIn"]; onDone: () => void }) {
-  const firstAffordable = ECONOMY.homes.find((h) => canAfford(h, cash))?.id ?? null;
+  const firstAffordable = SIGNUP_HOMES.find((h) => canAfford(h, cash))?.id ?? null;
   const [pick, setPick] = useState<string | null>(firstAffordable);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -459,7 +459,7 @@ function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorA
         <span className="body-strong">{formatCash(cash)}</span>
       </div>
       <div className="stack-12" role="radiogroup" aria-label="Homes">
-        {ECONOMY.homes.map((h) => {
+        {SIGNUP_HOMES.map((h) => {
           const ok = canAfford(h, cash);
           const selected = pick === h.id;
           return (
