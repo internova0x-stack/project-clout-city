@@ -208,7 +208,7 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 3. **Built (Oct 14):** gossip tasks and the trail: 2 of each day's 5 tasks send the player to their next gossip piece, and each piece found (and everyone they talk to) points to the next (owner: "everyone they talk to should point them in the right direction"; migration 0036).
 4. **Skipped for now (owner, Oct 14); for the test phase news and hunts publish with no approval at all (migration 0037):** live unless vetoed: news and hunts go live after a 24-hour veto window in the Studio, like gossip; News starts live with a drafted week.
 5. **Built (Oct 14):** every place enterable: office, civic building and outdoor plaza templates; every place but subway stations gets a room.
-6. **Built (Oct 14):** exclusive events update: $3.99, the benefits in the event modal, a multi-floor venue, 8 to 10 people in the room (NPCs fill in, marked), the event group chat with no daily limit and positive suggestions.
+6. **Built (Oct 14):** exclusive events update: $3.99, the benefits in the event modal, a multi-floor venue, 8 to 10 people in the room (NPCs fill in unlabeled; real players get a green dot), the event group chat with no daily limit and positive suggestions.
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 

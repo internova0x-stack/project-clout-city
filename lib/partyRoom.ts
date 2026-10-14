@@ -1,6 +1,6 @@
 // v0.11 exclusive events update (docs/08-new-features-spec.md section 10; owner Oct 14). At a party you
 // have a ticket (or a plus-one) for, the venue's rooftop floor is the party: 8 to 10 other people
-// (the real players there, crew first; NPCs fill the gap, marked as NPCs) and a group chat with no
+// (the real players there, crew first; NPCs fill the gap, unmarked; people you can talk to get a green dot) and a group chat with no
 // daily limit during the party. party_room / party_say / party_report (migration 0038) decide who's
 // in and filter every message. Dependency-free so tests can import it.
 
@@ -24,14 +24,14 @@ export const ROOM_SIZE = 9;
 /** How often the room checks in (ms). */
 export const PARTY_POLL_MS = 4000;
 
-/** One figure in the room: a real player, or an NPC filling the gap (always marked). */
+/** One figure in the room: a real player, or an NPC filling the gap (no mark: only real players get the green dot). */
 export type CrowdMember =
   | { key: string; npc: false; id: string; name: string; style: string; look: Look | null; crew: boolean }
   | { key: string; npc: true; name: string };
 
 const NPC_NAMES = ["Velvet Rope Regular", "Plus-One of a Plus-One", "Guy Who Knows the DJ", "Influencer's Assistant", "Mysterious Sunglasses", "Someone's Cousin", "Brand Ambassador", "Professional Lurker", "Rooftop Philosopher", "The Coat Check Girl's Ex"];
 
-/** Real players first (up to ROOM_SIZE), then NPCs to fill the room, each NPC clearly marked. */
+/** Real players first (up to ROOM_SIZE), then NPCs to fill the room. */
 export function crowdFor(people: PartyPerson[], toLook: (p: PartyPerson) => Look | null, size = ROOM_SIZE): CrowdMember[] {
   const real: CrowdMember[] = people.slice(0, size).map((p) => ({ key: `p:${p.id}`, npc: false, id: p.id, name: p.name, style: p.style, look: toLook(p), crew: p.crew }));
   const fill: CrowdMember[] = Array.from({ length: Math.max(0, size - real.length) }, (_, i) => ({ key: `npc:${i}`, npc: true, name: NPC_NAMES[i % NPC_NAMES.length] }));

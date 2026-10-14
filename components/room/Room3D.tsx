@@ -70,8 +70,8 @@ export interface Room3DProps {
    */
   onExit?: () => void;
   /**
-   * v0.11 party floors: the people at the party (real players and NPCs, marked), standing at the
-   * template's crowdSpots, each with a name tag. Tapping a real player's tag calls onCrowdTap.
+   * v0.11 party floors: the people at the party (real players and NPCs), standing at the
+   * template's crowdSpots, real players with a green "online" dot (NPCs unmarked). Tapping a dot calls onCrowdTap.
    */
   crowd?: CrowdMember[];
   onCrowdTap?: (m: CrowdMember) => void;
@@ -814,16 +814,16 @@ export default function Room3D(props: Room3DProps) {
       )}
       {(props.crowd?.length ?? 0) > 0 && !editing && (
         <div className="room-chips" aria-label="People at the party">
-          {props.crowd!.slice(0, template.crowdSpots?.length ?? 0).map((m) => (
+          {/* Only people you can talk to get a mark: a green "online" dot. NPCs blend into the crowd. */}
+          {props.crowd!.slice(0, template.crowdSpots?.length ?? 0).map((m) => m.npc ? null : (
             <button
               key={m.key}
               ref={(el) => { if (el) crowdTagsRef.current.set(m.key, el); else crowdTagsRef.current.delete(m.key); }}
-              className={`crowd-tag${m.npc ? " npc" : ""}${!m.npc && m.crew ? " crew" : ""}`}
-              disabled={m.npc}
+              className="crowd-dot"
               onClick={() => props.onCrowdTap?.(m)}
-              aria-label={m.npc ? `${m.name}, an NPC` : m.name}
+              aria-label={m.crew ? `${m.name}, in your crew` : m.name}
             >
-              {m.npc ? <span className="npc-mark">NPC</span> : <>{m.crew ? "👯 " : ""}{m.name.split(" ")[0]}</>}
+              <span className="dot-green" aria-hidden="true" />
             </button>
           ))}
         </div>

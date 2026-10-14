@@ -6,7 +6,7 @@ import { findPath, makeGrid, placeFloor, placementOk, useSpot } from "../lib/roo
 
 const person = (n: number, crew = false): PartyPerson => ({ id: `p${n}`, name: `Guest ${n}`, style: "bodega_drip", look: {}, crew });
 
-test("a party room shows 8 to 10 others: real players first, NPCs fill the gap, marked", () => {
+test("a party room shows 8 to 10 others: real players first, NPCs fill the gap", () => {
   assert.ok(ROOM_SIZE >= 8 && ROOM_SIZE <= 10);
   const few = crowdFor([person(1, true), person(2)], () => null);
   assert.equal(few.length, ROOM_SIZE);

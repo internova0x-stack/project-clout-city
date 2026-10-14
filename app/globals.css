@@ -594,12 +594,9 @@ a { color:inherit; }
 .room-chip { position:absolute; left:0; top:0; pointer-events:auto; height:30px; padding:0 12px; border-radius:var(--r-pill);
   font-size:13px; font-weight:600; white-space:nowrap; box-shadow:var(--elev-2); }
 .room-chip::after { content:""; position:absolute; left:50%; bottom:-5px; width:8px; height:8px; transform:translateX(-50%) rotate(45deg); background:inherit; }
-/* v0.11 party floors: name tags over the people at the party; NPCs are marked. */
-.crowd-tag { position:absolute; left:0; top:0; pointer-events:auto; display:inline-flex; align-items:center; gap:4px; max-width:96px; height:22px; padding:0 8px;
-  border-radius:var(--r-pill); background:rgba(255,255,255,.92); box-shadow:var(--elev-2); font-size:11px; font-weight:700; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.crowd-tag.crew { background:var(--neon-tint, #FFE3F0); }
-.crowd-tag.npc { height:16px; padding:0 2px; background:rgba(30,26,40,.6); pointer-events:none; }
-.npc-mark { padding:0 4px; font-size:9px; font-weight:800; letter-spacing:.08em; color:rgba(255,255,255,.85); }
+/* v0.11 party floors: a green "online" dot over the people you can talk to (a bigger tap target around it). NPCs get nothing. */
+.crowd-dot { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; background:none; cursor:pointer; }
+.crowd-dot .dot-green { width:10px; height:10px; box-shadow:0 0 0 2px #fff, 0 0 8px rgba(64,181,137,.9); }
 /* v0.11: a speech bubble over people you can talk to. */
 .npc-bubble { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:30px; height:26px; border-radius:13px 13px 13px 4px;
   background:#fff; box-shadow:var(--elev-2); font-size:14px; line-height:1; }

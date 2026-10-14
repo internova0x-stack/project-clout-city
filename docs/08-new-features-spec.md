@@ -244,7 +244,7 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 - **Price:** $3.99 (set in `store_products`, never in code).
 - **The event modal lists the benefits:** meet and chat with real people, earn a collectible, get mentioned in City News.
 - **The venue:** a special location with multiple floors, the first multi-floor building in the game.
-- **Who you see:** each player sees 8 to 10 other people at once, for performance and a cozy feel. When there aren't enough players, NPCs fill the gap, clearly marked as NPCs.
+- **Who you see:** each player sees 8 to 10 other people at once, for performance and a cozy feel. When there aren't enough players, NPCs fill the gap. Owner, Oct 14: NPCs carry no label (too noisy); real players you can talk to get a green "online" dot, and tapping it opens their card.
 - **Event chat:** a group chat for the people in the room, with no daily message limit inside event rooms during the event. Private messages keep the normal daily cap. The word filter, block and report all apply. (This is the one place strangers can chat; section 12's "stranger chat is ruled out" still holds everywhere else.)
 - **Positive chat suggestions:** the chat offers tappable, positive-only suggestions ("Love the fit 🔥", "First time here?", "Who's on the decks tonight?"), so starting a conversation is easy and the tone stays friendly.
 - **Dropped (owner, Oct 14):** the "Show me more" setting (men, women or everyone). Who you see is never filtered by gender; "Presenting as" stays cosmetic only.

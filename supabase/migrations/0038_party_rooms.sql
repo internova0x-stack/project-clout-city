@@ -3,7 +3,7 @@
 -- Price: $3.99 for every party (store_products, never in code).
 -- The party room: players on the list who are at the venue while the doors are open check in every
 -- few seconds (party_room); each sees up to roomSize (9) of the others, crew first, and the game
--- fills the rest with NPCs, marked as NPCs. Blocks hide people both ways.
+-- fills the rest with NPCs (unlabeled; real players get a green dot). Blocks hide people both ways.
 -- Event chat: a group chat for the people in the room, with no daily limit during the party (a short
 -- gap between messages stops floods). Private messages keep their daily cap. The word filter, mutes,
 -- bans, blocks and reports all apply; a report carries the message into the Studio's review queue.
