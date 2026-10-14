@@ -26,7 +26,9 @@ export type FurnitureKind =
   // v0.10 Lucky Star Lotto
   | "lottoCounter" | "cardRack" | "starSign" | "lottoBoard"
   // v0.11 the exclusive venue's second floor
-  | "stairs";
+  | "stairs"
+  // #19 bigger homes: bathrooms, kitchen islands, bedside tables
+  | "bathtub" | "toilet" | "bathSink" | "kitchenIsland" | "nightstand";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -76,6 +78,10 @@ export interface RoomTemplate {
   /** v0.9 monument plazas: no walls, a raised island of paving, and a landmark taller than a room. */
   outdoor?: { height: number; edge: string; water?: boolean; view: [number, number] };
   window?: boolean;
+  /** #19 bigger homes: the rooms inside, each with its own floor (plan coordinates, x0 < x1, z0 < z1). */
+  rooms?: { name: string; x0: number; z0: number; x1: number; z1: number; floor: string; floorKind: RoomTemplate["floorKind"] }[];
+  /** #19: waist-high walls between rooms, as axis-aligned segments [x0, z0, x1, z1]; the gaps are doorways. */
+  walls?: [number, number, number, number][];
   items: RoomItem[];
   /** Where the avatar enters. */
   spawn: [number, number];
@@ -135,6 +141,11 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   starSign: { w: 1.6, d: 0.2, label: "Sign" },
   lottoBoard: { w: 1.8, d: 0.2, label: "Odds board" },
   stairs: { w: 1.2, d: 1.8, label: "Stairs" },
+  bathtub: { w: 1.6, d: 0.8, label: "Bathtub" },
+  toilet: { w: 0.5, d: 0.7, label: "Toilet" },
+  bathSink: { w: 0.7, d: 0.5, label: "Sink" },
+  kitchenIsland: { w: 1.8, d: 0.9, label: "Kitchen island" },
+  nightstand: { w: 0.5, d: 0.45, label: "Nightstand", movable: true },
 };
 
 // ---------------------------------------------------------------------------
@@ -156,36 +167,178 @@ const studioItems = (sx: number): RoomItem[] => [
   { id: "armchair", kind: "armchair", x: -1.9 * sx, z: 1.95, rot: 2, color: "#40B589", use: sit, label: "Sit" },
 ];
 
-const highriseItems: RoomItem[] = [
-  { id: "bed", kind: "bed", x: -2.8, z: -1.8, rot: 0, color: "#1F1B26", use: { kind: "sleep" }, label: "Nap" },
-  { id: "lamp", kind: "floorLamp", x: -1.6, z: -2.6, rot: 0 },
-  { id: "bookshelf", kind: "bookshelf", x: -0.7, z: -2.65, rot: 0 },
-  { id: "tv", kind: "tvStand", x: 1.0, z: -2.6, rot: 0 },
-  { id: "plant", kind: "plant", x: 2.3, z: -2.6, rot: 0 },
-  { id: "kitchen", kind: "kitchen", x: 3.35, z: -0.6, rot: 3, use: { kind: "cook" }, label: "Kitchen" },
-  { id: "rug", kind: "rug", x: 1.0, z: 0.1, rot: 0, color: "#C2AE86" },
-  { id: "coffee-table", kind: "coffeeTable", x: 1.0, z: 0.0, rot: 0 },
-  { id: "sofa", kind: "sofa", x: 1.0, z: 1.3, rot: 2, color: "#ECE6DC", use: sit, label: "Sit" },
-  { id: "wardrobe", kind: "wardrobe", x: -3.4, z: 0.6, rot: 1, use: { kind: "look" }, label: "Your look" },
-  { id: "dining", kind: "diningTable", x: -1.4, z: 1.6, rot: 0 },
-  { id: "chair-1", kind: "chair", x: -2.35, z: 1.6, rot: 1, use: sit, label: "Sit" },
-  { id: "chair-2", kind: "chair", x: -0.45, z: 1.6, rot: 3, use: sit, label: "Sit" },
-];
+// #19 bigger homes (owner, Oct 14): rooms with their own floors and waist-high walls between them.
+// Item ids carry the home's prefix, so a layout arranged in another home never lands in a wall here.
+type Rooms = NonNullable<RoomTemplate["rooms"]>;
+const room = (name: string, x0: number, z0: number, x1: number, z1: number, floor: string, floorKind: RoomTemplate["floorKind"] = "wood"): Rooms[number] =>
+  ({ name, x0, z0, x1, z1, floor, floorKind });
+const piece = (prefix: string) => (id: string, kind: FurnitureKind, x: number, z: number, rot = 0, extra: Partial<RoomItem> = {}): RoomItem =>
+  ({ id: `${prefix}-${id}`, kind, x, z, rot, ...extra });
+
+// Jackson Heights 1BR (mid rent): two rooms, a bedroom and a living room with a kitchen nook. Room counts
+// follow the price (owner, Oct 14): the cheap studio is one room; dearer homes have more.
+const jh = piece("1br");
+const jacksonHeights: RoomTemplate = {
+  id: "jackson_heights_1br", w: 7.0, d: 6.0, wall: "#D7E4E0", wallAccent: "#A9C2BB", floor: "#8E6242", floorKind: "wood", window: true,
+  rooms: [
+    room("Living", -3.5, -0.2, 3.5, 3.0, "#8E6242"),
+    room("Kitchen", 0.8, -3.0, 3.5, -0.2, "#E6E1D8", "tile"),
+    room("Bedroom", -3.5, -3.0, 0.8, -0.2, "#7E5638"),
+  ],
+  walls: [[-3.5, -0.2, -2.6, -0.2], [-1.6, -0.2, 0.8, -0.2], [0.8, -3.0, 0.8, -0.2]],
+  items: [
+    jh("bed", "bed", -2.0, -1.9, 0, { color: "#6C8CFF", use: { kind: "sleep" }, label: "Nap" }),
+    jh("nightstand", "nightstand", -0.7, -2.7),
+    jh("wardrobe", "wardrobe", 0.4, -1.6, 3, { use: { kind: "look" }, label: "Your look" }),
+    jh("lamp", "floorLamp", -3.2, -2.7),
+    jh("kitchen", "kitchen", 2.2, -2.6, 0, { use: { kind: "cook" }, label: "Kitchen" }),
+    jh("dining", "diningTable", 2.3, -1.0),
+    jh("chair", "chair", 1.35, -1.0, 1, { use: sit, label: "Sit" }),
+    jh("tv", "tvStand", -0.6, 0.3),
+    jh("rug", "rug", -0.6, 1.4, 0, { color: "#E0457B" }),
+    jh("coffee-table", "coffeeTable", -0.6, 1.4),
+    jh("sofa", "sofa", -0.6, 2.45, 2, { color: "#FF8A3D", use: sit, label: "Sit" }),
+    jh("armchair", "armchair", -2.6, 1.4, 1, { color: "#40B589", use: sit, label: "Sit" }),
+    jh("plant", "plant", -3.15, 0.2),
+    jh("bookshelf", "bookshelf", -3.3, 1.3, 1),
+  ],
+  spawn: [0.9, 2.5],
+};
+
+// LIC high-rise: open living and kitchen; a bedroom and a bathroom behind.
+const hr = piece("hr");
+const licHighrise: RoomTemplate = {
+  id: "lic_highrise", w: 9.0, d: 7.0, wall: "#ECEAF0", wallAccent: "#C9C6D2", floor: "#C9B79C", floorKind: "wood", window: true,
+  rooms: [
+    room("Living", -4.5, -0.5, 1.5, 3.5, "#C9B79C"),
+    room("Kitchen", 1.5, -0.5, 4.5, 3.5, "#E6E1D8", "tile"),
+    room("Bedroom", -4.5, -3.5, 1.0, -0.5, "#B89A78"),
+    room("Bathroom", 1.0, -3.5, 4.5, -0.5, "#DDE7EA", "tile"),
+  ],
+  walls: [[-4.5, -0.5, -2.6, -0.5], [-1.6, -0.5, 1.6, -0.5], [2.6, -0.5, 4.5, -0.5], [1.0, -3.5, 1.0, -0.5]],
+  items: [
+    hr("bed", "bed", -3.2, -2.3, 0, { color: "#1F1B26", use: { kind: "sleep" }, label: "Nap" }),
+    hr("nightstand", "nightstand", -2.0, -3.15),
+    hr("desk", "desk", -0.9, -3.15),
+    hr("wardrobe", "wardrobe", 0.6, -2.0, 3, { use: { kind: "look" }, label: "Your look" }),
+    hr("lamp", "floorLamp", -4.2, -0.95),
+    hr("bathtub", "bathtub", 3.6, -3.0),
+    hr("toilet", "toilet", 1.5, -3.1),
+    hr("sink", "bathSink", 2.4, -3.2),
+    hr("tv", "tvStand", -0.4, 0.0),
+    hr("rug", "rug", -0.4, 1.5, 0, { color: "#C2AE86" }),
+    hr("coffee-table", "coffeeTable", -0.4, 1.5),
+    hr("sofa", "sofa", -0.4, 2.8, 2, { color: "#ECE6DC", use: sit, label: "Sit" }),
+    hr("armchair", "armchair", -2.4, 1.5, 1, { color: "#3E5C76", use: sit, label: "Sit" }),
+    hr("bookshelf", "bookshelf", -4.2, 1.6, 1),
+    hr("plant", "plant", -4.1, 0.1),
+    hr("lamp-2", "floorLamp", -4.1, 3.1),
+    hr("kitchen", "kitchen", 4.1, 1.6, 3, { use: { kind: "cook" }, label: "Kitchen" }),
+    hr("fridge", "fridge", 4.1, 0.0, 3),
+    hr("dining", "diningTable", 2.5, 2.2),
+    hr("chair-1", "chair", 2.5, 1.5, 0, { use: sit, label: "Sit" }),
+    hr("chair-2", "chair", 2.5, 2.95, 2, { use: sit, label: "Sit" }),
+  ],
+  spawn: [0.9, 3.0],
+};
+
+// Astoria townhouse (bought): bedroom, home office and bathroom upstairs-style at the back; living and kitchen in front.
+const th = piece("th");
+const astoriaTownhouse: RoomTemplate = {
+  id: "house-astoria-townhouse", w: 11.0, d: 8.0, wall: "#E9D8C4", wallAccent: "#C9B49C", floor: "#A8744A", floorKind: "wood", window: true,
+  rooms: [
+    room("Living", -5.5, 0.5, 0.5, 4.0, "#A8744A"),
+    room("Kitchen", 0.5, 0.5, 5.5, 4.0, "#E8E2D6", "tile"),
+    room("Bedroom", -5.5, -4.0, -1.5, 0.5, "#9A6B45"),
+    room("Office", -1.5, -4.0, 2.0, 0.5, "#B08260"),
+    room("Bathroom", 2.0, -4.0, 5.5, 0.5, "#D9E6E3", "tile"),
+  ],
+  walls: [[-5.5, 0.5, -4.3, 0.5], [-3.3, 0.5, -0.4, 0.5], [0.6, 0.5, 2.6, 0.5], [3.6, 0.5, 5.5, 0.5], [-1.5, -4.0, -1.5, 0.5], [2.0, -4.0, 2.0, 0.5]],
+  items: [
+    th("bed", "bed", -4.0, -2.9, 0, { color: "#E0457B", use: { kind: "sleep" }, label: "Nap" }),
+    th("nightstand", "nightstand", -5.2, -3.65),
+    th("wardrobe", "wardrobe", -5.2, -0.9, 1, { use: { kind: "look" }, label: "Your look" }),
+    th("lamp", "floorLamp", -5.1, 0.0),
+    th("desk", "desk", 0.25, -3.6),
+    th("desk-chair", "chair", 0.25, -2.9, 2, { use: sit, label: "Sit" }),
+    th("bookshelf", "bookshelf", -1.15, -1.5, 1),
+    th("plant", "plant", 1.6, 0.0),
+    th("bathtub", "bathtub", 4.6, -3.5),
+    th("toilet", "toilet", 2.5, -3.55),
+    th("sink", "bathSink", 3.3, -3.7),
+    th("tv", "tvStand", -2.0, 1.0),
+    th("rug", "rug", -2.0, 2.1, 0, { color: "#C2AE86" }),
+    th("coffee-table", "coffeeTable", -2.0, 2.1),
+    th("sofa", "sofa", -2.0, 3.3, 2, { color: "#3E5C76", use: sit, label: "Sit" }),
+    th("armchair", "armchair", -4.4, 2.1, 1, { color: "#D9A43A", use: sit, label: "Sit" }),
+    th("plant-2", "plant", 0.0, 3.6),
+    th("kitchen", "kitchen", 5.1, 2.6, 3, { use: { kind: "cook" }, label: "Kitchen" }),
+    th("fridge", "fridge", 5.1, 0.95, 3),
+    th("island", "kitchenIsland", 3.0, 2.0),
+    th("dining", "diningTable", 1.6, 3.3),
+    th("chair-1", "chair", 0.75, 3.3, 1, { use: sit, label: "Sit" }),
+    th("chair-2", "chair", 2.45, 3.3, 3, { use: sit, label: "Sit" }),
+  ],
+  spawn: [-0.4, 2.4],
+};
+
+// LIC penthouse (bought): a loft with a piano, a master bedroom, a bathroom and a dressing room.
+const ph = piece("ph");
+const licPenthouse: RoomTemplate = {
+  id: "house-lic-penthouse", w: 12.0, d: 8.5, wall: "#E8E6EE", wallAccent: "#B8B4C4", floor: "#D9CBB4", floorKind: "wood", window: true,
+  rooms: [
+    room("Living", -6.0, 0.0, 1.5, 4.25, "#D9CBB4"),
+    room("Kitchen", 1.5, 0.0, 6.0, 4.25, "#ECE8E0", "tile"),
+    room("Bedroom", -6.0, -4.25, -1.0, 0.0, "#C2AA88"),
+    room("Bathroom", -1.0, -4.25, 2.0, 0.0, "#E3ECEF", "tile"),
+    room("Dressing room", 2.0, -4.25, 6.0, 0.0, "#CDB79A"),
+  ],
+  walls: [[-6.0, 0, -4.6, 0], [-3.6, 0, -0.2, 0], [0.8, 0, 2.6, 0], [3.6, 0, 6.0, 0], [-1.0, -4.25, -1.0, 0], [2.0, -4.25, 2.0, 0]],
+  items: [
+    ph("bed", "bed", -4.0, -3.0, 0, { color: "#2A2530", use: { kind: "sleep" }, label: "Nap" }),
+    ph("nightstand-1", "nightstand", -5.2, -3.75),
+    ph("nightstand-2", "nightstand", -2.8, -3.75),
+    ph("lamp", "floorLamp", -1.5, -0.5),
+    ph("plant", "plant", -5.6, -0.4),
+    ph("bathtub", "bathtub", 0.5, -3.65),
+    ph("toilet", "toilet", 1.6, -2.2, 3),
+    ph("sink", "bathSink", -0.55, -2.0, 1),
+    ph("wardrobe", "wardrobe", 4.0, -3.9, 0, { use: { kind: "look" }, label: "Your look" }),
+    ph("plant-2", "plant", 5.6, -3.8),
+    ph("armchair", "armchair", 5.3, -1.0, 3, { color: "#B0135A", use: sit, label: "Sit" }),
+    ph("piano", "piano", -4.5, 2.6, 1),
+    ph("tv", "tvStand", -1.6, 0.45),
+    ph("rug", "rug", -1.6, 2.1, 0, { color: "#6B4FD8" }),
+    ph("coffee-table", "coffeeTable", -1.6, 2.1),
+    ph("sofa", "sofa", -1.6, 3.5, 2, { color: "#F4F1EA", use: sit, label: "Sit" }),
+    ph("armchair-2", "armchair", -3.2, 2.1, 1, { color: "#C9A227", use: sit, label: "Sit" }),
+    ph("lamp-2", "floorLamp", -5.6, 0.5),
+    ph("kitchen", "kitchen", 5.6, 2.4, 3, { use: { kind: "cook" }, label: "Kitchen" }),
+    ph("fridge", "fridge", 5.6, 0.6, 3),
+    ph("island", "kitchenIsland", 3.0, 2.0),
+    ph("dining", "diningTable", 2.6, 3.6),
+    ph("chair-1", "chair", 1.75, 3.6, 1, { use: sit, label: "Sit" }),
+    ph("chair-2", "chair", 3.45, 3.6, 3, { use: sit, label: "Sit" }),
+    ph("plant-3", "plant", 1.2, 3.9),
+  ],
+  spawn: [0.6, 2.4],
+};
 
 export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   astoria_studio: {
     id: "astoria_studio", w: 5.4, d: 5.2, wall: "#E9D8C4", wallAccent: "#C9B49C", floor: "#A8744A", floorKind: "wood", window: true,
     items: studioItems(1), spawn: [0.6, 2.3],
   },
-  jackson_heights_1br: {
-    id: "jackson_heights_1br", w: 6.0, d: 5.4, wall: "#D7E4E0", wallAccent: "#A9C2BB", floor: "#8E6242", floorKind: "wood", window: true,
-    items: studioItems(1.1), spawn: [0.6, 2.4],
-  },
-  lic_highrise: {
-    id: "lic_highrise", w: 7.4, d: 5.8, wall: "#ECEAF0", wallAccent: "#C9C6D2", floor: "#C9B79C", floorKind: "wood", window: true,
-    items: highriseItems, spawn: [2.2, 2.4],
-  },
+  jackson_heights_1br: jacksonHeights,
+  lic_highrise: licHighrise,
+  "house-astoria-townhouse": astoriaTownhouse,
+  "house-lic-penthouse": licPenthouse,
 };
+
+/** The player's home: a bought house, else the rented home (the studio if unknown). */
+export function homeTemplate(homeId: string | null | undefined, houseSku?: string | null): RoomTemplate {
+  return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
+}
 
 export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
 
@@ -563,10 +716,27 @@ function overlaps(a: RoomItem, b: RoomItem): boolean {
   return Math.abs(a.x - b.x) < (fa.w + fb.w) / 2 - 0.02 && Math.abs(a.z - b.z) < (fa.d + fb.d) / 2 - 0.02;
 }
 
-/** True when a moved item sits inside the room without overlapping solid furniture. Rugs may sit under things. */
+/** #19: half the thickness of the waist-high walls between rooms. */
+export const INNER_WALL = 0.06;
+
+/** True when a box (center, half sizes) crosses one of the template's inner walls. */
+export function hitsWall(t: Pick<RoomTemplate, "walls">, x: number, z: number, hw: number, hd: number): boolean {
+  return (t.walls ?? []).some(([x0, z0, x1, z1]) =>
+    x + hw > Math.min(x0, x1) - INNER_WALL && x - hw < Math.max(x0, x1) + INNER_WALL
+    && z + hd > Math.min(z0, z1) - INNER_WALL && z - hd < Math.max(z0, z1) + INNER_WALL);
+}
+
+/** #19: which room of a multi-room home a point is in (its name), if any. */
+export function roomAt(t: Pick<RoomTemplate, "rooms">, x: number, z: number): string | null {
+  return t.rooms?.find((r) => x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1)?.name ?? null;
+}
+
+/** True when a moved item sits inside the room without overlapping solid furniture or a wall. Rugs may sit under things. */
 export function placementOk(t: RoomTemplate, items: RoomItem[], moved: RoomItem): boolean {
   const c = clampItem(t, moved);
   if (Math.abs(c.x - moved.x) > 1e-6 || Math.abs(c.z - moved.z) > 1e-6) return false;
+  const f = footprint(moved);
+  if (hitsWall(t, moved.x, moved.z, f.w / 2 - 0.02, f.d / 2 - 0.02)) return false;
   if (FURNITURE[moved.kind].walkable) return true;
   return items.every((o) => o.id === moved.id || FURNITURE[o.kind].walkable || !overlaps(o, moved));
 }
@@ -627,7 +797,8 @@ export function makeGrid(t: RoomTemplate, items: RoomItem[]) {
         const f = footprint(i);
         return Math.abs(x - i.x) < f.w / 2 + BODY_RADIUS && Math.abs(z - i.z) < f.d / 2 + BODY_RADIUS;
       });
-      blocked[r * cols + c] = edge || hit ? 1 : 0;
+      const wall = hitsWall(t, x, z, BODY_RADIUS, BODY_RADIUS);
+      blocked[r * cols + c] = edge || hit || wall ? 1 : 0;
     }
   }
   const cellOf = (x: number, z: number) => [

@@ -526,6 +526,47 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(0.05, 0.9, d, METAL, w / 2 - 0.03, 0.22 * steps * 0.5, 0);
       return { group: g };
     }
+    // ---- #19 bigger homes ----
+    case "bathtub": {
+      const enamel = "#F4F6F8";
+      box(w, 0.5, d, enamel);
+      box(w - 0.16, 0.04, d - 0.16, k.mat("#8EC9E0", { emissive: "#8EC9E0", emissiveIntensity: 0.15, roughness: 0.1 }), 0, 0.44, 0);
+      box(w, 0.06, 0.08, enamel, 0, 0.5, -d / 2 + 0.04);
+      box(w, 0.06, 0.08, enamel, 0, 0.5, d / 2 - 0.04);
+      cyl(0.025, 0.025, 0.3, METAL, w / 2 - 0.15, 0.5, -d / 2 + 0.1, 6);
+      return { group: g };
+    }
+    case "toilet": {
+      const enamel = "#F4F6F8";
+      box(0.42, 0.42, 0.5, enamel, 0, 0, 0.06);
+      box(0.38, 0.03, 0.44, "#E4E8EC", 0, 0.42, 0.08);
+      box(0.44, 0.44, 0.18, enamel, 0, 0.36, -d / 2 + 0.09);
+      return { group: g, seatY: 0.45 };
+    }
+    case "bathSink": {
+      box(w, 0.8, d, "#E9E4DA");
+      box(w - 0.12, 0.06, d - 0.14, "#F4F6F8", 0, 0.8, 0.02);
+      cyl(0.015, 0.015, 0.16, METAL, 0, 0.86, -d / 2 + 0.08, 6);
+      // The mirror, on the wall behind.
+      box(w - 0.1, 0.6, 0.03, k.mat("#CFE3EC", { roughness: 0.05, metalness: 0.5, emissive: "#CFE3EC", emissiveIntensity: opts.night ? 0.2 : 0.08 }), 0, 1.15, -d / 2 + 0.02);
+      return { group: g };
+    }
+    case "kitchenIsland": {
+      box(w, 0.88, d - 0.2, "#F4F1EA", 0, 0, -0.1);
+      box(w + 0.06, 0.05, d, "#2A2530", 0, 0.88, 0);
+      for (const x of [-w / 4, w / 4]) {
+        cyl(0.16, 0.16, 0.05, BLACK, x, 0.62, d / 2 + 0.12, 10);
+        cyl(0.025, 0.025, 0.62, METAL, x, 0, d / 2 + 0.12, 6);
+      }
+      return { group: g };
+    }
+    case "nightstand": {
+      box(w, 0.5, d, WOOD_DARK);
+      box(w - 0.08, 0.02, 0.01, WOOD, 0, 0.3, d / 2 + 0.005);
+      cyl(0.03, 0.05, 0.16, "#E8C79A", 0, 0.5, 0, 8);
+      cyl(0.1, 0.13, 0.14, glow("#FFE3B0", 0.6), 0, 0.66, 0, 10);
+      return { group: g };
+    }
     case "railing": {
       box(w, 0.05, 0.05, METAL, 0, 0.95, 0);
       box(w, 0.04, 0.04, METAL, 0, 0.5, 0);

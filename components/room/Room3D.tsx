@@ -9,7 +9,7 @@ import {
 import { randomLook, type Look } from "@/lib/look";
 import type { CrowdMember } from "@/lib/partyRoom";
 import {
-  FACING, FURNITURE, GRID, applyLayout, clampItem, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
+  FACING, FURNITURE, GRID, INNER_WALL, applyLayout, clampItem, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
   type LayoutEntry, type RoomItem, type RoomTemplate,
 } from "@/lib/rooms";
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
@@ -24,6 +24,8 @@ import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furnit
 // Every room turns with a sideways slide and zooms with a pinch (v0.11, owner Oct 14).
 
 const WALL_H = 2.7;
+/** #19: walls between rooms stop at the waist (owner, Oct 14), so every room reads at once. */
+const INNER_WALL_H = 1.05;
 const WALK_SPEED = 1.5;
 
 type Mode = "idle" | "walk" | "sit" | "sleep" | "dance";
@@ -292,6 +294,39 @@ export default function Room3D(props: Room3DProps) {
         front.position.set(fx, 2.15, template.d / 2 - 0.01);
         front.rotation.y = Math.PI;
         walls.zPos.add(front);
+      }
+    }
+    // #19 bigger homes: each room's own floor, waist-high walls between rooms, and posts at the doorways.
+    const roomTexes: CanvasTexture[] = [];
+    for (const rm of template.rooms ?? []) {
+      const rw = rm.x1 - rm.x0, rd = rm.z1 - rm.z0;
+      const tex = floorTexture({ ...template, w: rw, d: rd, floor: rm.floor, floorKind: rm.floorKind }, night, dream);
+      roomTexes.push(tex);
+      const f = new Mesh(kit.geo(new PlaneGeometry(rw, rd)), new MeshStandardMaterial({ map: tex, roughness: 0.85 }));
+      f.rotation.x = -Math.PI / 2;
+      f.position.set((rm.x0 + rm.x1) / 2, 0.003, (rm.z0 + rm.z1) / 2);
+      f.receiveShadow = true;
+      f.userData.floor = true;
+      room.add(f);
+    }
+    const innerMat = kit.mat(template.wall, { roughness: 0.95 });
+    for (const [x0, z0, x1, z1] of template.walls ?? []) {
+      const alongX = z0 === z1;
+      const len = alongX ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
+      const t = INNER_WALL * 2;
+      const wall = new Mesh(kit.geo(new BoxGeometry(alongX ? len : t, INNER_WALL_H, alongX ? t : len)), innerMat);
+      wall.position.set((x0 + x1) / 2, INNER_WALL_H / 2, (z0 + z1) / 2);
+      wall.castShadow = wall.receiveShadow = true;
+      const cap = new Mesh(kit.geo(new BoxGeometry(alongX ? len + 0.02 : t + 0.04, 0.05, alongX ? t + 0.04 : len + 0.02)), trimMat);
+      cap.position.set(wall.position.x, INNER_WALL_H + 0.025, wall.position.z);
+      room.add(wall, cap);
+      // A post at each end inside the room: the doorway frames.
+      for (const [px, pz] of [[x0, z0], [x1, z1]]) {
+        if (Math.abs(px) >= template.w / 2 - 0.05 || Math.abs(pz) >= template.d / 2 - 0.05) continue;
+        const post = new Mesh(kit.geo(new BoxGeometry(t + 0.04, INNER_WALL_H + 0.25, t + 0.04)), trimMat);
+        post.position.set(px, (INNER_WALL_H + 0.25) / 2, pz);
+        post.castShadow = true;
+        room.add(post);
       }
     }
     scene.add(room);
@@ -708,6 +743,7 @@ export default function Room3D(props: Room3DProps) {
       npcs.forEach((n) => n.parts?.dispose());
       kit.dispose();
       floorTex.dispose();
+      roomTexes.forEach((t) => t.dispose());
       (floor.material as MeshStandardMaterial).dispose();
       floor.geometry.dispose();
       ring.geometry.dispose();

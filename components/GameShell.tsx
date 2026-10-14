@@ -13,7 +13,7 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_TEMPLATES, PLACE_TEMPLATES, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
+import { PLACE_TEMPLATES, homeTemplate, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -1085,7 +1085,7 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={HOME_TEMPLATES[me.home_id ?? ""] ?? HOME_TEMPLATES.astoria_studio}
+            template={homeTemplate(me.home_id, city?.player.house_sku)}
             layout={city?.homeLayout}
             look={look}
             outfit={outfit}

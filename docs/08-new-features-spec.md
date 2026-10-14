@@ -299,7 +299,17 @@ Owner, Oct 14: "Keep the city life ones as accessible through sale, and the fant
 - When only one presentation has a piece, the other wears it fitted to their skeleton.
 - Rooms: the avatar idles, walks with the pack's walk cycle, sits and lies down as before.
 
-## 13. Later features
+## 13. Bigger homes and venues (#19)
+
+Owner, Oct 14: walled rooms with many items; walls between rooms at waist height; clubs and lounges stay open space, with the restroom (where gossip is juicier) and a VIP lounge on other floors.
+
+- **Rooms follow the price** (owner, Oct 14: "cheap rooms should have single floor plans, with medium and expensive apartment/homes having more rooms accordingly"): the Astoria studio (C$1,750) is one room; the Jackson Heights 1BR (C$2,600) has a bedroom and a living room with a kitchen nook; the LIC high-rise (C$4,500) has living room, kitchen, bedroom and bathroom; the two houses for sale have five rooms (the townhouse adds an office, the penthouse a dressing room). Each room has its own floor (wood, or tile in kitchens and bathrooms). Walls between rooms stop at the waist so every room reads at once; doorways are gaps with posts.
+- **A bought house is your home.** Buying the Astoria townhouse or the LIC penthouse moves you in (rent already stops).
+- **New pieces:** bathtub, toilet, sink with mirror, kitchen island, nightstand.
+- Walking goes through doorways, never through walls; arranged furniture can't be pushed into a wall. Each home's pieces have their own ids, so a layout arranged in one home doesn't carry into another.
+- **Clubs and lounges** (next step): one open floor; stairs down to the restrooms, where Listen in is juicier; stairs up to a VIP floor for medium and exclusive clubs.
+
+## 14. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

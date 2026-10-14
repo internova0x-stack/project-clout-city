@@ -1,15 +1,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PLACES } from "../lib/city.ts";
+import { PLACES, SHOP_ITEMS } from "../lib/city.ts";
 import { ECONOMY } from "../lib/economy.ts";
 import {
-  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
+  FURNITURE, HOME_TEMPLATES, PLACE_TEMPLATES, applyLayout, homeTemplate, roomAt, findPath, makeGrid, placeRoom, placementOk, toLayout, useSpot, type RoomTemplate,
 } from "../lib/rooms.ts";
 
 const all: RoomTemplate[] = [...Object.values(HOME_TEMPLATES), ...Object.values(PLACE_TEMPLATES)];
 
 test("every home has a room", () => {
   for (const h of ECONOMY.homes) assert.ok(HOME_TEMPLATES[h.id], h.id);
+});
+
+test("#19: every house for sale has a floor plan; rooms and walls sit inside it", () => {
+  for (const i of SHOP_ITEMS.filter((x) => x.category === "houses")) {
+    assert.ok(HOME_TEMPLATES[i.sku], i.sku);
+    assert.equal(homeTemplate("astoria_studio", i.sku).id, i.sku, "a bought house replaces the rented home");
+  }
+  assert.equal(homeTemplate("lic_highrise", null).id, "lic_highrise");
+  for (const t of Object.values(HOME_TEMPLATES)) {
+    for (const r of t.rooms ?? []) assert.ok(r.x0 >= -t.w / 2 && r.x1 <= t.w / 2 && r.z0 >= -t.d / 2 && r.z1 <= t.d / 2 && r.x0 < r.x1 && r.z0 < r.z1, `${t.id}/${r.name}`);
+    for (const w of t.walls ?? []) assert.ok(w[0] === w[2] || w[1] === w[3], `${t.id} walls are straight`);
+    if (t.rooms) assert.ok(roomAt(t, t.spawn[0], t.spawn[1]), `${t.id} spawns inside a room`);
+  }
 });
 
 test("furniture fits each room without overlapping", () => {
