@@ -519,6 +519,13 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(w, 1.22, 0.04, boardMat, 0, 0.99, 0.01);
       return { group: g };
     }
+    case "stairs": {
+      // v0.11 the exclusive venue: a short flight rising toward the back, with a rail on one side.
+      const steps = 6;
+      for (let i = 0; i < steps; i++) box(w, 0.22 * (i + 1), d / steps, color ?? WOOD_DARK, 0, 0, d / 2 - (i + 0.5) * (d / steps));
+      box(0.05, 0.9, d, METAL, w / 2 - 0.03, 0.22 * steps * 0.5, 0);
+      return { group: g };
+    }
     case "railing": {
       box(w, 0.05, 0.05, METAL, 0, 0.95, 0);
       box(w, 0.04, 0.04, METAL, 0, 0.5, 0);

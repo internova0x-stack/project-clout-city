@@ -17,6 +17,7 @@ import { syncGossipWeeks } from "@/lib/gossipImport";
 import { syncWeeklyContent } from "@/lib/contentImport";
 import { gossipFind, gossipShare, gossipState } from "./gossipActions";
 import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } from "./partyActions";
+import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
@@ -88,6 +89,8 @@ export default async function HomePage() {
       // Migration 0029 switches on party keepsakes (plus-ones, "Spotted at", the gossip setting).
       party={city && catalog && party ? { inbox: partyInbox, invite: partyInvite, respond: partyRespond, mentions: partyMentions, setNewsOptOut } : undefined}
       partyInbox={party}
+      // Migration 0038 switches on party rooms (party_room failing keeps the crowd and chat hidden).
+      partyRoom={city && catalog ? { room: partyRoomState, say: partyRoomSay, report: partyRoomReport } : undefined}
       // Migration 0011 switches on crushes and date nights.
       dating={chatOn && dating.ok ? {
         inbox: datingInbox, crushStatus, crush: crushToggle, matchSeen, candidates: dateCandidates,

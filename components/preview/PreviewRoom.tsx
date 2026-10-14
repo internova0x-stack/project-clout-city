@@ -17,7 +17,7 @@ export function PreviewRoom({ room, daytime, mood }: { room: string; daytime: bo
   const look = normalizeLook({ body: "curvy", skin: "#8D5524", hair: "braids", hairColor: "#14100E", eyes: "#3B2314", glasses: "round", covering: "none" }, "arcade_nerd");
   return (
     <main className="game">
-      <Room3D template={template} look={look} daytime={daytime} sign={place?.name ?? SIGNS[room]} rotatable onNpcTap={() => {}} onExit={() => {}} label="Room preview" mood={mood} insetTop={40} insetBottom={40} />
+      <Room3D template={template} look={look} daytime={daytime} sign={place?.name ?? SIGNS[room]} rotatable onNpcTap={() => {}} door label="Room preview" mood={mood} insetTop={40} insetBottom={40} />
     </main>
   );
 }

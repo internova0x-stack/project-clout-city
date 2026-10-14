@@ -24,7 +24,9 @@ export type FurnitureKind =
   // v0.9 monument plazas
   | "globe" | "gantry" | "bench" | "foodCart" | "lamppost" | "tree" | "railing"
   // v0.10 Lucky Star Lotto
-  | "lottoCounter" | "cardRack" | "starSign" | "lottoBoard";
+  | "lottoCounter" | "cardRack" | "starSign" | "lottoBoard"
+  // v0.11 the exclusive venue's second floor
+  | "stairs";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -36,6 +38,8 @@ export type ItemUse =
   | { kind: "cook" }
   /** v0.10 the lotto counter: the scratch-card games. */
   | { kind: "lotto" }
+  /** v0.11 the exclusive venue: stairs to another floor of the building. */
+  | { kind: "floor"; to: number }
   /** v0.11 the gigs board (offices): opens today's gigs in the Phone. */
   | { kind: "gigs" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
@@ -50,8 +54,10 @@ export interface RoomItem {
   rot: number;
   color?: string;
   use?: ItemUse;
-  /** A short label for the tap target ("Work a shift"). */
+  /** A short label for the tap target ("Work a shift"), or just an arrow or emoji. */
   label?: string;
+  /** What a screen reader says when the label is only an arrow or an emoji. */
+  name?: string;
 }
 
 export interface RoomTemplate {
@@ -73,6 +79,8 @@ export interface RoomTemplate {
   items: RoomItem[];
   /** Where the avatar enters. */
   spawn: [number, number];
+  /** v0.11 party floors: where the 8 to 10 people at a party stand (lib/partyRoom.ts crowdFor). */
+  crowdSpots?: { x: number; z: number; facing: number }[];
   /** People hanging out (positions and facing), drawn as random New Yorkers. */
   npcs?: { x: number; z: number; facing: number; seated?: boolean }[];
 }
@@ -126,6 +134,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   cardRack: { w: 1.4, d: 0.35, label: "Scratch cards" },
   starSign: { w: 1.6, d: 0.2, label: "Sign" },
   lottoBoard: { w: 1.8, d: 0.2, label: "Odds board" },
+  stairs: { w: 1.2, d: 1.8, label: "Stairs" },
 };
 
 // ---------------------------------------------------------------------------
@@ -178,7 +187,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
 };
 
-export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza";
+export type PlaceTemplateId = "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -370,6 +379,29 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { x: -3.6, z: -1.6, facing: 2.2 },
     ],
   },
+  // ---- v0.11 the exclusive venue's second floor (spec section 10): the Penthouse Floor, where the party is ----
+  penthouse: {
+    id: "penthouse", w: 8.4, d: 7.2, wall: "#241A33", wallAccent: "#F2A900", floor: "#1C1626", floorKind: "concrete", dark: true,
+    items: [
+      { id: "stairs-down", kind: "stairs", x: -3.3, z: 2.2, rot: 2, use: { kind: "floor", to: 1 }, label: "↓", name: "Downstairs" },
+      { id: "dj", kind: "djBooth", x: 1.6, z: -3.0, rot: 0 },
+      { id: "speaker-1", kind: "speaker", x: 3.2, z: -3.05, rot: 0 },
+      { id: "speaker-2", kind: "speaker", x: 0.0, z: -3.05, rot: 0 },
+      { id: "floor", kind: "danceFloor", x: 1.4, z: -0.6, rot: 0, use: { kind: "events" }, label: "Check in 🎟️" },
+      { id: "bar", kind: "bar", x: -2.2, z: -3.0, rot: 0 },
+      { id: "booth-1", kind: "booth", x: -3.6, z: -0.4, rot: 1, color: "#F2A900" },
+      { id: "sofa", kind: "sofa", x: 2.6, z: 2.9, rot: 2, color: "#7A2E3A" },
+      { id: "plant-1", kind: "plant", x: 3.85, z: 0.8, rot: 0 },
+      { id: "plant-2", kind: "plant", x: -1.5, z: 3.25, rot: 0 },
+    ],
+    spawn: [-2.0, 2.6],
+    crowdSpots: [
+      { x: 0.4, z: -1.5, facing: 0.6 }, { x: 2.6, z: -1.3, facing: -2.4 }, { x: 1.5, z: 0.5, facing: 3.0 },
+      { x: -0.8, z: 0.4, facing: 1.2 }, { x: 3.4, z: -0.1, facing: -1.8 }, { x: -2.8, z: -2.2, facing: 3.14 },
+      { x: -1.0, z: -2.2, facing: 3.14 }, { x: -0.6, z: 2.2, facing: 0.4 }, { x: 1.0, z: 2.0, facing: 2.6 },
+      { x: -2.4, z: 1.0, facing: 1.6 },
+    ],
+  },
   // ---- v0.11 shared templates: recolored per place, with its own sign and actions ----
   office: {
     id: "office", w: 7.2, d: 6.2, wall: "#E9EEF2", wallAccent: "#5B7FA6", floor: "#C9C3B8", floorKind: "concrete", window: true,
@@ -447,6 +479,9 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   },
 };
 
+/** v0.11: the exclusive venue's stairs, on the ground floor. */
+const VENUE_STAIRS: RoomItem = { id: "stairs-up", kind: "stairs", x: 0.7, z: -2.4, rot: 0, use: { kind: "floor", to: 2 }, label: "↑", name: "Upstairs" };
+
 /** The bits of a place a room needs (lib/city.ts Place). */
 export interface RoomPlace {
   id: string;
@@ -492,7 +527,16 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }): RoomTemplate 
     return it;
   });
   const accent = place.depth === "scene" && place.palette?.[0];
+  // The exclusive venue has a second floor: stairs up from the lounge.
+  if (place.tags?.includes("exclusive_venue")) items.push(VENUE_STAIRS);
   return { ...base, id: `${base.id}:${place.id}`, items, ...(accent ? { wallAccent: accent } : {}) };
+}
+
+/** v0.11: a building's other floors (the exclusive venue's Penthouse Floor), by floor number. */
+export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number): RoomTemplate | null {
+  if (floor <= 1) return placeRoom(place);
+  if (!place.tags?.includes("exclusive_venue") || floor !== 2) return null;
+  return { ...PLACE_TEMPLATES.penthouse, id: `penthouse:${place.id}` };
 }
 
 // ---------------------------------------------------------------------------

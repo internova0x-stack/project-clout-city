@@ -2,6 +2,8 @@
 
 import type { PartyApi } from "@/lib/party";
 import type { GossipApi } from "@/lib/gossip";
+import type { PartyRoomApi } from "@/lib/partyRoom";
+import { previewPartyReport, previewPartyRoom, previewPartySay } from "@/app/preview/partyRoomActions";
 import { previewGossipFind, previewGossipReset, previewGossipShare, previewGossipState } from "@/app/preview/gossipActions";
 import { previewNews } from "@/app/preview/newsActions";
 import { useCallback, useMemo, useRef } from "react";
@@ -208,6 +210,8 @@ export function PreviewHome({
     },
     share: previewGossipShare,
   }), [gossipPreset, sim]);
+  // v0.11 party rooms in memory (?party=ticket, then go upstairs at the lounge while the party's on).
+  const partyRoomApi = useMemo<PartyRoomApi>(() => ({ room: previewPartyRoom, say: previewPartySay, report: async () => previewPartyReport() }), []);
   // v0.9 party keepsakes in memory (?party=invite|sent).
   const partyApi = useMemo<PartyApi>(() => ({
     async inbox() { await partyReset(); return previewPartyInbox(); },
@@ -249,6 +253,7 @@ export function PreviewHome({
       dating={cityOff ? undefined : dating}
       crew={cityOff ? undefined : crewApi}
       party={cityOff || storyOff ? undefined : partyApi}
+      partyRoom={cityOff || storyOff ? undefined : partyRoomApi}
       cityNews={cityOff ? undefined : previewNews}
       hunt={cityOff ? undefined : huntApi}
       gossip={cityOff ? undefined : gossipApi}

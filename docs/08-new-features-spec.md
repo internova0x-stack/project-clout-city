@@ -244,10 +244,18 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 - **Price:** $3.99 (set in `store_products`, never in code).
 - **The event modal lists the benefits:** meet and chat with real people, earn a collectible, get mentioned in City News.
 - **The venue:** a special location with multiple floors, the first multi-floor building in the game.
-- **Who you see:** each player sees 8 to 10 other people at once, for performance and a cozy feel. When there aren't enough players, NPCs fill the gap, clearly marked as NPCs.
+- **Who you see:** each player sees 8 to 10 other people at once, for performance and a cozy feel. When there aren't enough players, NPCs fill the gap. Owner, Oct 14: NPCs carry no label (too noisy); real players you can talk to get a green "online" dot, and tapping it opens their card.
 - **Event chat:** a group chat for the people in the room, with no daily message limit inside event rooms during the event. Private messages keep the normal daily cap. The word filter, block and report all apply. (This is the one place strangers can chat; section 12's "stranger chat is ruled out" still holds everywhere else.)
 - **Positive chat suggestions:** the chat offers tappable, positive-only suggestions ("Love the fit 🔥", "First time here?", "Who's on the decks tonight?"), so starting a conversation is easy and the tone stays friendly.
 - **Dropped (owner, Oct 14):** the "Show me more" setting (men, women or everyone). Who you see is never filtered by gender; "Presenting as" stays cosmetic only.
+
+**Built (v0.11 step 6, migration 0038; owner Oct 14):**
+- **$3.99** for every party (`store_products`).
+- **The event card lists what you get** before you buy: meet and chat with real people, a collectible (numbered ticket and badge), a City News mention, and that the party is on the Penthouse Floor.
+- **Two floors.** Low Light Lounge, the exclusive venue, has stairs up to **the Penthouse Floor** (the game's first multi-floor building). On party nights it's guest list only; the party is up there.
+- **Who you see.** Up there, each player sees 9 others: the real players at the party (crew first, then whoever arrived last), with NPCs filling the gap, each tagged **NPC**. Real players have a name tag; tap it for their profile. Players check in every few seconds (`party_room`); blocks hide people both ways.
+- **Event chat.** **💬 Party chat** opens the group chat for everyone at the party: no daily limit while it's on (a 2-second gap stops floods), the word filter, mutes and bans apply, tap a name to see their profile, report the message (it reaches the Studio's queue, quoted) or block them. Private messages keep their daily cap.
+- **Positive openers.** Tappable suggestions ("Love the fit 🔥", "First time here?", "Who's on the decks tonight?"…) send in one tap.
 
 ## 11. Interface and sign-in updates
 
@@ -271,8 +279,8 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 - **Task checkboxes.** Every daily task at a place is a checkbox on its card and in the room panel, and on the matching action row; it ticks (and strikes through) when done.
 - **Task dot.** The task icon in the side column shows a dot at the first open of each New York day, cleared when tapped.
 - **Turning and zooming (owner, Oct 14: every room, no buttons).** Slide sideways and the room turns with your finger, settling on the nearest quarter turn; pinch (or the trackpad / mouse wheel) zooms in up to 2.6×, centered on you. The two walls nearest the camera are always cut away, and a place's sign hangs on both its back and front walls so one is always in view.
-- **A front door (owner, Oct 14).** Every room has a front door by the spot you come in, with a doormat and a **🚪 Go out** label: tap it and you walk out (to the map from home, back to the map from a place).
-- **Arranging by tapping (owner, Oct 14).** No Arrange or Turn buttons and no home "Things to do" list: tap a piece of furniture and it's selected with Rotate, Cancel and Save, drag it to move it. The labels over things (Sit, Nap, Kitchen, Your look) are how you use them.
+- **A front door (owner, Oct 14).** Every room has a front door by the spot you come in, with a doormat. Owner, Oct 14 (later): no "Go out" label, since the Map button already does that. On the party floor the labels are trimmed too: the stairs show only an arrow (↑ / ↓), and the dance floor says **Check in 🎟️** until you check in (which claims the ticket, badge and News mention), then **Dance**.
+- **Arranging by tapping (owner, Oct 14).** No Arrange or Turn buttons and no home "Things to do" list: tap a piece of furniture and it's selected; the arranging bar is one row: Rotate and plain up, right, left and down arrows on the left, Cancel and Save on the right (each moves the piece along the floor direction closest to it on screen, one grid step a tap, hold to keep going) with Rotate, Cancel and Save. No drag and drop (owner, Oct 14). Sliding still turns the room while arranging. The labels over things (Sit, Nap, Kitchen, Your look) are how you use them.
 - **Side buttons (owner, Oct 14).** Tasks, Events, Places, Bills and Look sit just above the bottom bar on the right, TikTok-style: separate round buttons with a label under each. The map's locate button and credits move to the left.
 - **Speech bubbles.** Everyone you can talk to in a room has a 💬 over their head; tapping it talks to them.
 
