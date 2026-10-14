@@ -16,6 +16,8 @@ export function outfitWith(base: Outfit, worn: ShopItem[]): Outfit {
       o.bottomColor = w.color;
     } else if (w.slot === "shoes") {
       o.shoeColor = w.color;
+    } else if (w.slot === "outfit") {
+      o.set = w.kind;
     } else if (w.slot === "accessory") {
       o.accessory = (w.kind as AccessoryKind) ?? o.accessory;
       o.accessoryColor = w.color;

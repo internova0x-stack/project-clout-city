@@ -13,10 +13,12 @@ import { ChevronLeftIcon } from "../icons";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
-type Slot = "top" | "bottom" | "shoes" | "accessory";
+type Slot = "outfit" | "top" | "bottom" | "shoes" | "accessory";
 type Tab = "hats" | Slot;
 const TABS: { id: Tab; label: string }[] = [
   { id: "hats", label: "Hats" },
+  // Whole outfits (#9) cover the top, bottom and shoes while they're on.
+  { id: "outfit", label: "Outfits" },
   { id: "top", label: "Tops" },
   { id: "bottom", label: "Bottoms" },
   { id: "shoes", label: "Shoes" },
@@ -51,7 +53,7 @@ export function LookRoom({
   const fashion = state.items.filter((i) => i.category === "fashion" && itemBySku(i.sku)?.wear);
   const slotOf = (sku: string) => itemBySku(sku)?.wear?.slot as Slot | undefined;
   const savedWorn = (): Worn => {
-    const w: Worn = { top: null, bottom: null, shoes: null, accessory: null };
+    const w: Worn = { outfit: null, top: null, bottom: null, shoes: null, accessory: null };
     for (const i of fashion) if (i.equipped) w[slotOf(i.sku)!] = i.id;
     if (trying?.wear) w[trying.wear.slot as Slot] = TRY_ID;
     return w;
@@ -98,6 +100,7 @@ export function LookRoom({
   };
 
   const starter = (slot: Slot) => {
+    if (slot === "outfit") return { name: "No outfit", icon: <NoneIcon /> };
     if (slot === "top") return { name: TOP_LABEL[base.top], icon: <Garment kind={base.top} color={base.topColor} /> };
     if (slot === "bottom") return { name: BOTTOM_LABEL[base.bottom], icon: <Garment kind={base.bottom} color={base.bottomColor} /> };
     if (slot === "shoes") return { name: "Your sneakers", icon: <Shape color={base.shoeColor}>{SHOE}</Shape> };
@@ -162,7 +165,9 @@ export function LookRoom({
                 ]}
             </div>
             {tab !== "hats" && !fashion.some((i) => slotOf(i.sku) === tab) && (
-              <p className="meta" style={{ margin: 0 }}>Just your starter piece so far. The Shop has more, and every piece there has Try it on.</p>
+              <p className="meta" style={{ margin: 0 }}>{tab === "outfit"
+                ? "No outfits yet. The Shop sells city looks, and the wilder ones open up as your clout grows."
+                : "Just your starter piece so far. The Shop has more, and every piece there has Try it on."}</p>
             )}
           </>
         )}
@@ -173,10 +178,14 @@ export function LookRoom({
         {trying ? (
           <>
             <button className="btn btn-secondary" onClick={onClose}>Back to Shop</button>
-            <button className="btn btn-taxi" disabled={busy || state.player.bank_cash < trying.price}
-              onClick={async () => { if (await onBuy?.(trying.sku)) onClose(); }}>
-              {busy ? "…" : state.player.bank_cash < trying.price ? `${formatCash(trying.price - state.player.bank_cash)} short` : `Buy for ${formatCash(trying.price)}`}
-            </button>
+            {(trying.cloutReq ?? 0) > state.player.clout ? (
+              <button className="btn btn-secondary" disabled>🔒 Needs {(trying.cloutReq ?? 0).toLocaleString("en-US")} clout</button>
+            ) : (
+              <button className="btn btn-taxi" disabled={busy || state.player.bank_cash < trying.price}
+                onClick={async () => { if (await onBuy?.(trying.sku)) onClose(); }}>
+                {busy ? "…" : state.player.bank_cash < trying.price ? `${formatCash(trying.price - state.player.bank_cash)} short` : `Buy for ${formatCash(trying.price)}`}
+              </button>
+            )}
           </>
         ) : (
           <>

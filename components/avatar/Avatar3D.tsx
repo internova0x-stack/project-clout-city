@@ -7,7 +7,8 @@ import {
 } from "three";
 import type { Look } from "@/lib/look";
 import { getStyle, type Outfit } from "@/lib/styles";
-import { buildAvatar, type AvatarParts } from "./buildAvatar";
+import type { AvatarParts } from "./buildAvatar";
+import { buildModelAvatar } from "./modelAvatar";
 
 /**
  * The avatar on its stage. Every Look change re-dresses it instantly
@@ -95,10 +96,13 @@ export default function Avatar3D({
     let turnTarget = 0;
     let nextTurn = 4;
     const start = performance.now();
+    let last = start;
 
     const frame = (now: number) => {
       raf = 0;
       const t = (now - start) / 1000;
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
       const s = sceneRef.current;
       const parts = s?.parts;
       if (parts && s) {
@@ -112,6 +116,7 @@ export default function Avatar3D({
           parts.head.rotation.y += (turnTarget - parts.head.rotation.y) * 0.04;
         }
         parts.root.rotation.y = s.spin;
+        parts.update?.(reduceMotion ? 0 : dt);
       }
       renderer.render(scene, camera);
       if (visible && !document.hidden) raf = requestAnimationFrame(frame);
@@ -139,14 +144,24 @@ export default function Avatar3D({
   useEffect(() => {
     const s = sceneRef.current;
     if (!s) return;
-    const parts = buildAvatar(look, { pedestal: framing === "full", outfit });
-    if (s.parts) {
-      parts.head.rotation.y = s.parts.head.rotation.y;
-      s.scene.remove(s.parts.root);
-      s.parts.dispose();
-    }
-    s.scene.add(parts.root);
-    s.parts = parts;
+    const parts = buildModelAvatar(look, { pedestal: framing === "full", outfit });
+    let live = true;
+    // The old look stays until the new model has loaded, so re-dressing never blinks.
+    void (parts.ready ?? Promise.resolve()).then(() => {
+      const now = sceneRef.current;
+      if (!live || !now) return;
+      if (now.parts) {
+        parts.head.rotation.y = now.parts.head.rotation.y;
+        now.scene.remove(now.parts.root);
+        now.parts.dispose();
+      }
+      now.scene.add(parts.root);
+      now.parts = parts;
+    });
+    return () => {
+      live = false;
+      if (sceneRef.current?.parts !== parts) parts.dispose();
+    };
   }, [look.style, look.body, look.build, look.skin, look.hair, look.hairColor, look.eyes, look.glasses, look.covering, look.fit && JSON.stringify(look.fit), framing, outfit && JSON.stringify(outfit)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Drag to spin ----

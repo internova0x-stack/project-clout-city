@@ -6,7 +6,7 @@ import {
 } from "three";
 import type { Look } from "@/lib/look";
 import { getStyle, type Outfit } from "@/lib/styles";
-import { buildAvatar } from "./buildAvatar";
+import { buildModelAvatar } from "./modelAvatar";
 
 /**
  * The avatar's head as a still image for small places like the home-screen bubble (v0.7 step 3).
@@ -31,16 +31,23 @@ export default function AvatarHead({ look, outfit, size = 120 }: { look: Look; o
     const key = new DirectionalLight(0xfff1d6, 1.6);
     key.position.set(-2, 3, 4);
     scene.add(key);
-    const parts = buildAvatar(look, { pedestal: false, outfit });
+    const parts = buildModelAvatar(look, { pedestal: false, outfit });
     scene.add(parts.root);
     const camera = new PerspectiveCamera(30, 1, 0.1, 20);
     camera.position.set(0, 1.62, 1.55);
     camera.lookAt(0, 1.6, 0);
-    renderer.render(scene, camera);
-    setSrc(renderer.domElement.toDataURL("image/png"));
-    parts.dispose();
-    renderer.dispose();
-    renderer.forceContextLoss();
+    let live = true;
+    void (parts.ready ?? Promise.resolve()).then(() => {
+      if (live) {
+        parts.update?.(0);
+        renderer.render(scene, camera);
+        setSrc(renderer.domElement.toDataURL("image/png"));
+      }
+      parts.dispose();
+      renderer.dispose();
+      renderer.forceContextLoss();
+    });
+    return () => { live = false; };
   }, [key, size]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return src

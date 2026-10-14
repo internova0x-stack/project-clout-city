@@ -25,6 +25,8 @@ export interface Outfit {
   shoeColor: string;
   accessory: AccessoryKind;
   accessoryColor: string;
+  /** A whole Shop outfit (lib/avatarCatalog.ts OUTFIT_SETS) worn over the pieces, in its own colors. */
+  set?: string;
 }
 
 export interface StartingStyle {

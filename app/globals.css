@@ -92,6 +92,7 @@ a { color:inherit; }
 .body { font-size:15px; line-height:21px; font-weight:400; }
 .subtext { font-size:13px; line-height:18px; color:var(--text-2); }
 .meta { font-size:12px; line-height:16px; font-weight:500; color:var(--text-3); }
+.meta.locked { color:var(--neon-text); font-weight:700; }
 .overline { font-family:var(--font-label); font-size:12px; line-height:14px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-3); }
 .hud-number { font-family:var(--font-label); font-size:18px; line-height:20px; font-weight:700; font-variant-numeric:tabular-nums; }
 .tagline-bar {

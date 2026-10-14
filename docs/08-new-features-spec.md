@@ -287,7 +287,19 @@ Five-piece gossip stories about the invented cast, Astoria's regulars and invent
 
 **Built (v0.11 step 5, Oct 14): every place can be entered.** Three new shared rooms (an **office**, a **civic** hall and an outdoor **plaza**) plus a **gym** join the existing ones, and every place but subway stations has a room (`template` in lib/city.ts; `placeRoom()` in lib/rooms.ts). A shared room takes the place's own actions, names and sign: the gigs board opens the gigs, the library desk says "Study in the quiet room", a dance floor only takes events where there are some. Places that were scene cards are recolored with their palette. Offices: Skybridge Tower, Triborough Works, Pedal Pushers. Civic: the library, precinct, firehouse, chapel, Radiant Harbor and Skyline Pier's lobby. Plazas: the parks and Hunter's Pier. Gyms: Pressed Iron and Rep Count. Diners use the café, pizza and the supermarket the counter shop, rooftops the lounge, the dealership the store, the college and the cinema the lecture hall, the games arena the club. Who you talk to fits the place (the librarian, a trainer, the desk sergeant…).
 
-## 12. Later features
+## 12. Avatars and outfits (#9)
+
+Owner, Oct 14: "Keep the city life ones as accessible through sale, and the fantasy ones as clothes that can be accessed at higher clout levels. To give players something to work towards."
+
+- **Models.** The avatar is Quaternius's Ultimate Modular Men and Women (CC0), in `public/avatars/` (`scripts/build-avatar-assets.mjs` builds them; `public/avatars/README.md`). Each character is four parts (head, body, legs, feet) on one skeleton, so a look mixes parts from different characters (`lib/avatarCatalog.ts`). Places, rooms and the map don't change.
+- **Every Look option stays.** Skin, eyes, hair color and clothing colors recolor the model. Short hair, curls and the ponytail (Male) and short and long hair (Female) use the pack's own hair; every other style, every hat and covering, and glasses are the game's own shapes on the head. Body types scale the model.
+- **Tops and bottoms** map to the closest pack piece (a hoodie is the pack's hoodie, a skirt is the formal skirt), in the player's colors.
+- **Whole outfits** are a new Shop slot ("Outfits" in Your look). They cover the top, bottoms and shoes in the pack's own colors and can bring a hat or helmet. City outfits are sold for cash: Site crew hi-vis, St. Marks punk, Gala night, Ranch hand overalls, Rockaway beach set. Fantasy outfits also need clout: Adventurer 1,000, Tactical gear 2,500, Witch of Ditmars and Hooded ranger 5,000, Spacefarer 10,000, Royalty 25,000. Clout opens the door and is never spent; `buy_item` checks it (migration 0043). Anyone can try them on.
+- An outfit's hat or helmet replaces a basic hat, never a hijab, turban, headwrap, durag or kippah.
+- When only one presentation has a piece, the other wears it fitted to their skeleton.
+- Rooms: the avatar idles, walks with the pack's walk cycle, sits and lies down as before.
+
+## 13. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

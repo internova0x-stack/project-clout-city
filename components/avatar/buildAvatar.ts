@@ -25,6 +25,17 @@ export interface AvatarParts {
   /** Knee pivots inside each leg (left, right). */
   knees: Object3D[];
   arms: Object3D[];
+  /** Procedural avatar only: the hair, and the hats, coverings, glasses and headphones, in head space. */
+  hair?: Group;
+  headwear?: Group;
+  /** Hip height when standing (poseSit lowers the root by it); the procedural avatar's is 0.9. */
+  hipY?: number;
+  /** Modeled avatar only: resolves once the model has loaded. */
+  ready?: Promise<void>;
+  /** Modeled avatar only: advances the animation and applies the limb poses set on legs/knees/arms/head. */
+  update?(dt: number): void;
+  /** Modeled avatar only: plays the walk cycle (Room3D then leaves the legs alone) or stands. */
+  setMotion?(motion: "idle" | "walk"): void;
   dispose(): void;
 }
 
@@ -401,6 +412,11 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
   const hat = mat(hatColor, { roughness: 0.6 });
 
+  // Hair and headwear sit in their own groups so the modeled avatar (modelAvatar.ts) can wear them too.
+  const hairGroup = new Group();
+  const headwear = new Group();
+  head.add(hairGroup, headwear);
+
   // ---- Hair (hidden under full coverings) ----
   const covering = look.covering;
   const hairHidden = covering === "hijab" || covering === "turban" || covering === "headwrap" || covering === "durag";
@@ -411,27 +427,27 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     return c;
   };
   if (!hairHidden && look.hair !== "bald") {
-    head.add(capMesh(look.hair === "buzz" ? 0.193 : 0.2, look.hair === "buzz" ? 0.47 : 0.55, look.hair === "buzz" ? -0.5 : -0.38));
+    hairGroup.add(capMesh(look.hair === "buzz" ? 0.193 : 0.2, look.hair === "buzz" ? 0.47 : 0.55, look.hair === "buzz" ? -0.5 : -0.38));
     switch (look.hair) {
       case "long": {
         const back = mesh(geo(new CylinderGeometry(0.19, 0.23, 0.42, 13, 1, true, Math.PI * 0.42, Math.PI * 1.16)), hair, 0, -0.2, -0.02);
-        head.add(back);
-        for (const s of [-1, 1]) head.add(limb(0.03, [s * 0.165, 0.02, 0.05], [s * 0.19, -0.3, 0.02], hair));
+        hairGroup.add(back);
+        for (const s of [-1, 1]) hairGroup.add(limb(0.03, [s * 0.165, 0.02, 0.05], [s * 0.19, -0.3, 0.02], hair));
         break;
       }
       case "ponytail":
-        head.add(limb(0.04, [0, 0.06, -0.19], [0, -0.26, -0.26], hair));
-        head.add(mesh(geo(new TorusGeometry(0.035, 0.012, 5, 8)), acc, 0, 0.045, -0.2));
+        hairGroup.add(limb(0.04, [0, 0.06, -0.19], [0, -0.26, -0.26], hair));
+        hairGroup.add(mesh(geo(new TorusGeometry(0.035, 0.012, 5, 8)), acc, 0, 0.045, -0.2));
         break;
       case "bun":
-        head.add(mesh(geo(new SphereGeometry(0.075, 8, 6)), hair, 0, 0.22, -0.05));
+        hairGroup.add(mesh(geo(new SphereGeometry(0.075, 8, 6)), hair, 0, 0.22, -0.05));
         break;
       case "braids":
         for (const s of [-1, 1]) {
           for (let i = 0; i < 7; i++) {
-            head.add(mesh(geo(new SphereGeometry(0.027 - i * 0.0012, 6, 4)), hair, s * (0.13 + i * 0.006), -0.06 - i * 0.055, -0.1 + i * 0.012));
+            hairGroup.add(mesh(geo(new SphereGeometry(0.027 - i * 0.0012, 6, 4)), hair, s * (0.13 + i * 0.006), -0.06 - i * 0.055, -0.1 + i * 0.012));
           }
-          head.add(mesh(geo(new SphereGeometry(0.018, 6, 4)), mat("#FFC21A", { roughness: 0.3 }), s * 0.172, -0.46, -0.016));
+          hairGroup.add(mesh(geo(new SphereGeometry(0.018, 6, 4)), mat("#FFC21A", { roughness: 0.3 }), s * 0.172, -0.46, -0.016));
         }
         break;
       case "curls": {
@@ -443,7 +459,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
           const z = Math.sin(t) * Math.cos(elev) * 0.2 - 0.02;
           const y = Math.sin(elev) * 0.22 + 0.03;
           if (z > 0.08 && y < 0.12) continue; // keep the face clear
-          head.add(mesh(curl, hair, x, y, z));
+          hairGroup.add(mesh(curl, hair, x, y, z));
         }
         break;
       }
@@ -452,7 +468,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
           const t = Math.PI * (0.05 + (i / 10) * 0.9);
           const x = Math.cos(t) * 0.17;
           const z = -Math.sin(t) * 0.15;
-          head.add(limb(0.018, [x, 0.02, z], [x * 1.25, -0.34, z * 1.2], hair));
+          hairGroup.add(limb(0.018, [x, 0.02, z], [x * 1.25, -0.34, z * 1.2], hair));
         }
         break;
       case "short":
@@ -467,26 +483,26 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       const opening = 1.5;
       const wrap = mesh(geo(new SphereGeometry(0.215, 16, 11, Math.PI / 2 + opening / 2, Math.PI * 2 - opening, 0, Math.PI)), fabric, 0, -0.01, -0.005);
       wrap.scale.set(0.95, 1.12, 1.04);
-      head.add(wrap);
+      headwear.add(wrap);
       const brow = mesh(geo(new SphereGeometry(0.217, 16, 5, 0, Math.PI * 2, 0, Math.PI * 0.3)), fabric, 0, -0.005, -0.005);
       brow.scale.set(0.95, 1.12, 1.04);
-      head.add(brow);
+      headwear.add(brow);
       const chin = mesh(geo(new SphereGeometry(0.217, 16, 5, 0, Math.PI * 2, Math.PI * 0.8, Math.PI * 0.2)), fabric, 0, -0.01, -0.005);
       chin.scale.set(0.95, 1.12, 1.04);
-      head.add(chin);
-      head.add(mesh(geo(new CylinderGeometry(0.12, 0.25, 0.24, 13, 1, true)), fabric, 0, -0.3, -0.01));
+      headwear.add(chin);
+      headwear.add(mesh(geo(new CylinderGeometry(0.12, 0.25, 0.24, 13, 1, true)), fabric, 0, -0.3, -0.01));
       break;
     }
     case "turban": {
       const dome = mesh(geo(new SphereGeometry(0.215, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.55)), fabric, 0, 0.02, -0.01);
       dome.scale.set(0.98, 1.3, 1.05);
       dome.rotation.x = -0.18;
-      head.add(dome);
+      headwear.add(dome);
       for (const [y, r] of [[0.04, 0.2], [0.1, 0.19]] as const) {
         const ring = mesh(geo(new TorusGeometry(r, 0.03, 5, 14)), fabric, 0, y, -0.012);
         ring.rotation.x = Math.PI / 2 - 0.18;
         ring.scale.set(0.95, 1.05, 1);
-        head.add(ring);
+        headwear.add(ring);
       }
       break;
     }
@@ -494,26 +510,26 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       const wrapTop = mesh(geo(new SphereGeometry(0.225, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.55)), fabric, 0, 0.03, -0.03);
       wrapTop.scale.set(1.0, 1.45, 1.12);
       wrapTop.rotation.x = -0.32;
-      head.add(wrapTop);
-      head.add(mesh(geo(new SphereGeometry(0.055, 6, 5)), fabric, 0.02, 0.27, 0.06));
+      headwear.add(wrapTop);
+      headwear.add(mesh(geo(new SphereGeometry(0.055, 6, 5)), fabric, 0.02, 0.27, 0.06));
       break;
     }
     case "durag": {
       const cap = mesh(geo(new SphereGeometry(0.198, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.52)), fabric, 0, 0.012, -0.008);
       cap.scale.set(0.93, 1.1, 1.02);
       cap.rotation.x = -0.4;
-      head.add(cap);
+      headwear.add(cap);
       for (const s of [-1, 1]) {
         const tail = mesh(geo(new BoxGeometry(0.045, 0.26, 0.008)), fabric, s * 0.03, -0.14, -0.2);
         tail.rotation.x = 0.25;
-        head.add(tail);
+        headwear.add(tail);
       }
       break;
     }
     case "kippah": {
       const k = mesh(geo(new SphereGeometry(0.1, 9, 4, 0, Math.PI * 2, 0, Math.PI * 0.28)), fabric, 0, 0.13, -0.05);
       k.rotation.x = -0.55;
-      head.add(k);
+      headwear.add(k);
       break;
     }
     // Free basic headwear (v0.7): in the outfit's accent color, or the old cap color for Bodega Drip.
@@ -524,7 +540,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       const brim = mesh(geo(new CylinderGeometry(0.13, 0.13, 0.012, 11)), hat, 0, 0.085, 0.19);
       brim.scale.set(1, 1, 0.8);
       brim.rotation.x = 0.16;
-      head.add(crown, brim);
+      headwear.add(crown, brim);
       break;
     }
     case "fedora": {
@@ -535,14 +551,14 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       const dent = mesh(geo(new BoxGeometry(0.03, 0.02, 0.2)), mat(shade(hatColor, -0.25)), 0, 0.282, -0.015);
       const band = mesh(geo(new CylinderGeometry(0.192, 0.194, 0.035, 14)), mat(shade(hatColor, -0.45)), 0, 0.14, -0.015);
       band.scale.set(1, 1, 0.92);
-      head.add(brim, crown, dent, band);
+      headwear.add(brim, crown, dent, band);
       break;
     }
     case "bucket": {
       const crown = mesh(geo(new CylinderGeometry(0.16, 0.205, 0.15, 14)), hat, 0, 0.16, -0.01);
       const top = mesh(geo(new SphereGeometry(0.16, 14, 4, 0, Math.PI * 2, 0, Math.PI * 0.18)), hat, 0, 0.21, -0.01);
       const brim = mesh(geo(new CylinderGeometry(0.21, 0.28, 0.06, 16, 1, true)), mat(hatColor, { side: DoubleSide }), 0, 0.065, -0.01);
-      head.add(crown, top, brim);
+      headwear.add(crown, top, brim);
       break;
     }
     case "none":
@@ -559,16 +575,16 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
         rim.scale.set(1.25, 1.0, 1);
       }
       rim.rotation.y = s * 0.2;
-      head.add(rim);
+      headwear.add(rim);
       if (look.glasses === "shades") {
         const lens = mesh(geo(new CircleGeometry(0.034, 24)), mat("#0E0B12", { roughness: 0.1, metalness: 0.5, opacity: 0.9 }), s * 0.066, 0.002, 0.191);
         lens.rotation.y = s * 0.2;
-        head.add(lens);
+        headwear.add(lens);
       }
       const temple = mesh(geo(new BoxGeometry(0.006, 0.006, 0.17)), frame, s * 0.158, 0.008, 0.1);
-      head.add(temple);
+      headwear.add(temple);
     }
-    head.add(mesh(geo(new BoxGeometry(0.03, 0.006, 0.006)), frame, 0, 0.01, 0.2));
+    headwear.add(mesh(geo(new BoxGeometry(0.03, 0.006, 0.006)), frame, 0, 0.01, 0.2));
   }
 
   // ---- Starter accessories ----
@@ -577,11 +593,11 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       // Since v0.7 the cap is headwear (look.covering), drawn above.
       break;
     case "headphones": {
-      head.add(mesh(geo(new TorusGeometry(0.215, 0.014, 5, 14, Math.PI)), acc, 0, 0.02, -0.01));
+      headwear.add(mesh(geo(new TorusGeometry(0.215, 0.014, 5, 14, Math.PI)), acc, 0, 0.02, -0.01));
       for (const s of [-1, 1]) {
         const cup = mesh(geo(new CylinderGeometry(0.055, 0.055, 0.04, 9)), acc, s * 0.2, -0.01, -0.005);
         cup.rotation.z = Math.PI / 2;
-        head.add(cup);
+        headwear.add(cup);
       }
       break;
     }
@@ -627,6 +643,8 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     legs,
     knees,
     arms,
+    hair: hairGroup,
+    headwear,
     dispose() {
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());

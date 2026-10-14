@@ -79,6 +79,8 @@ export function ShopSheet({
             {items.map((item) => {
               const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
               const short = player.bank_cash < item.price;
+              // Fantasy outfits wait for clout (#9): try them on any time, buy once you're big enough.
+              const locked = (item.cloutReq ?? 0) > player.clout;
               if (item.collector) {
                 const p = realMoney?.product(item.sku);
                 return (
@@ -112,7 +114,11 @@ export function ShopSheet({
                   <span className="title" style={{ display: "block" }}>{item.name}</span>
                   <span className="subtext clamp-2">{item.blurb}</span>
                   <Stars rating={item.rating} />
-                  <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
+                  {item.cloutReq ? (
+                    <span className={`meta${locked ? " locked" : ""}`}>{locked ? "🔒" : "🔓"} {item.cloutReq.toLocaleString("en-US")} clout{locked ? ` · you have ${player.clout.toLocaleString("en-US")}` : ""}</span>
+                  ) : (
+                    <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
+                  )}
                   {isOwned ? (
                     wearControl(item.sku) ?? <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
                   ) : (
@@ -120,9 +126,13 @@ export function ShopSheet({
                       {onTryOn && item.wear && (
                         <button className="btn btn-secondary btn-sm" onClick={() => onTryOn(item)}>Try it on</button>
                       )}
-                      <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
-                        {formatCash(item.price)}
-                      </button>
+                      {locked ? (
+                        <button className="btn btn-secondary btn-sm" disabled>🔒 {formatCash(item.price)}</button>
+                      ) : (
+                        <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
+                          {formatCash(item.price)}
+                        </button>
+                      )}
                       {!!item.rentPerWeek && (
                         <button className="btn btn-secondary btn-sm" disabled={busy !== null || player.car_mode === "owned"} onClick={() => setConfirm({ item, mode: "rent" })}>
                           Rent {formatCash(item.rentPerWeek)}/wk
