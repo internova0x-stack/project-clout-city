@@ -21,6 +21,8 @@ export interface ChromeValues {
   online: number | null;
   eventsBadge: boolean;
   billsBadge?: boolean;
+  /** v0.11: new tasks today (the first open of each New York day, cleared when tapped). */
+  tasksBadge?: boolean;
   phoneBadge?: boolean;
 }
 
@@ -126,7 +128,10 @@ export function GameChrome({
       </div>
 
       <nav className="side-col glass-hud" aria-label="Quick actions">
-        <button className="side-btn" onClick={() => onAction("tasks")} aria-label="Tasks and goals"><ChecklistIcon /></button>
+        <button className="side-btn" onClick={() => onAction("tasks")} aria-label={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"}>
+          <ChecklistIcon />
+          {values?.tasksBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}
+        </button>
         <button className="side-btn" data-tour="events" onClick={() => onAction("events")} aria-label="Events">
           <ChampagneIcon />
           {values?.eventsBadge && <span className="pin-dot" style={{ top: 6, right: 6 }} />}

@@ -4,7 +4,8 @@
 // enforces every rule; these helpers only mirror them for display.
 // Dependency-free so tests can import it.
 
-import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
+import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
+import { leadAction } from "./gossip.ts";
 import { ECONOMY } from "./economy.ts";
 import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
 
@@ -357,3 +358,16 @@ export function tasksDone(s: CityState): number {
 export function eventById(id: string): ClubEvent | undefined {
   return CLUB_EVENTS.find((e) => e.id === id);
 }
+
+const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at" };
+
+/** "Eat at Ditmars Deli & Dreams", "Go to Neon Nights", "Talk to Sal at …": a daily task's title. */
+export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id">): string {
+  if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
+  // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
+  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : "overheard", hours: null });
+  return `${TASK_VERB[t.kind]} ${placeById(t.place_id)?.name ?? "a place"}`;
+}
+
+/** v0.11 (spec section 11): today's daily tasks at a place, for its checkboxes. */
+export const tasksAt = (state: CityState | null, placeId: string): DailyTask[] => (state?.tasks ?? []).filter((t) => t.place_id === placeId);
