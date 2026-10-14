@@ -7,7 +7,7 @@ export type GlyphName =
   | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
   | "wave" | "church" | "dumbbell" | "condo" | "diner"
   | "globe" | "gantry" | "tumbler" | "hanger" | "car" | "cap" | "columns"
-  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train";
+  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train" | "sofa";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -33,6 +33,7 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   gantry: ["#FFB86B", "#5B4A8A"],
   tumbler: ["#E8B27A", "#7A2E3A"],
   hanger: ["#FF9AC8", "#B5246A"],
+  sofa: ["#FFD27A", "#D9792B"],
   car: ["#FF8A7A", "#B4232F"],
   cap: ["#FF8A8A", "#9E1B32"],
   columns: ["#9CC0F0", "#2F5DA8"],
@@ -65,6 +66,7 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "gantry-plaza": "gantry",
   "low-light-lounge": "tumbler",
   "thread-count": "hanger",
+  "fifs-furniture": "sofa",
   "boulevard-motors": "car",
   "st-johnsons": "cap",
   "queensborough-u": "columns",
@@ -366,6 +368,13 @@ const PATHS: Record<GlyphName, React.ReactNode> = {
       <path d="M5.5 5h13l-1.6 14.2a2 2 0 0 1-2 1.8H9.1a2 2 0 0 1-2-1.8z" fill="#fff" />
       <path d="M7.4 12h9.2l-.8 7H8.2z" fill={SOFT} />
       <rect x="9" y="9" width="4" height="4" rx="1" transform="rotate(12 11 11)" fill="#fff" stroke={SOFT} strokeWidth={0.8} />
+    </>
+  ),
+  sofa: (
+    <>
+      <path d="M5 9.5a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 9.5V12H5z" fill={SOFT} />
+      <path d="M3 11.5a1.8 1.8 0 0 1 3.6 0V13h10.8v-1.5a1.8 1.8 0 0 1 3.6 0V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" fill="#fff" />
+      <path d="M5.5 18v1.6M18.5 18v1.6" stroke="#fff" strokeWidth={1.6} strokeLinecap="round" />
     </>
   ),
   hanger: (

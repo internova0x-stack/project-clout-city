@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CITY_ECONOMY, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type ShopCategory, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
 import { billProgress, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
@@ -23,7 +23,7 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn,
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome,
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
   /** #15: owned clothes can be put on straight from the Shop. */
@@ -35,6 +35,10 @@ export function ShopSheet({
   initialCategory?: ShopCategory;
   /** v0.7 step 4: every clothing piece can be tried on before buying (#24). */
   onTryOn?: (item: ShopItem) => void;
+  /** #19 Fif's Furniture: the Home tab's room to open on ("living", "bedroom"...). */
+  section?: string;
+  /** #19: place a Home piece in your home for a look before buying. */
+  onTryAtHome?: (item: ShopItem) => void;
 }) {
   const [cat, setCat] = useState<ShopCategory>(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
@@ -74,8 +78,20 @@ export function ShopSheet({
             ))}
           </div>
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
+          {cat === "home" && (
+            <HomeShelf
+              items={items}
+              owned={owned}
+              cash={player.bank_cash}
+              purchases={player.purchases_count}
+              busy={busy !== null}
+              section={section}
+              onBuy={(item) => setConfirm({ item, mode: "buy" })}
+              onTryAtHome={onTryAtHome}
+            />
+          )}
           {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
-          <div className="item-grid">
+          {cat !== "home" && <div className="item-grid">
             {items.map((item) => {
               const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
               const short = player.bank_cash < item.price;
@@ -143,7 +159,7 @@ export function ShopSheet({
                 </div>
               );
             })}
-          </div>
+          </div>}
         </div>
       </Sheet>
       <Sheet open={open && !!confirm} onClose={() => setConfirm(null)} label="Confirm purchase">
@@ -388,5 +404,63 @@ export function BillsSheet({
         )}
       </div>
     </Sheet>
+  );
+}
+
+/**
+ * #19 Fif's Furniture: the Shop's Home tab. Pieces are shelved by room; the same piece in other colors
+ * shares one card with swatches. Every piece can be tried at home before buying.
+ */
+function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryAtHome }: {
+  items: ShopItem[]; owned: Set<string>; cash: number; purchases: number; busy: boolean; section?: string;
+  onBuy: (item: ShopItem) => void; onTryAtHome?: (item: ShopItem) => void;
+}) {
+  const start = FURNITURE_ROOMS.some((r) => r.id === section) ? (section as FurnitureRoom) : "living";
+  const [room, setRoom] = useState<FurnitureRoom>(start);
+  const [lastSection, setLastSection] = useState(section);
+  if (section !== lastSection) { setLastSection(section); setRoom(start); }
+  const [pick, setPick] = useState<Record<string, string>>({});
+  const lines = new Map<string, ShopItem[]>();
+  for (const i of items) {
+    const f = i.furniture;
+    if (f?.room === room) lines.set(f.line, [...(lines.get(f.line) ?? []), i]);
+  }
+  return (
+    <div className="stack-12">
+      <div className="chip-row" role="group" aria-label="Rooms">
+        {FURNITURE_ROOMS.map((r) => (
+          <button key={r.id} className="chip chip-sm" aria-pressed={room === r.id} onClick={() => setRoom(r.id)}>{r.label}</button>
+        ))}
+      </div>
+      <div className="item-grid">
+        {[...lines.entries()].map(([line, variants]) => {
+          const item = variants.find((v) => v.sku === pick[line]) ?? variants.find((v) => !owned.has(v.sku)) ?? variants[0];
+          const mine = owned.has(item.sku);
+          return (
+            <div key={line} className="item-card">
+              <IconTile emoji={item.emoji} item={item} />
+              <span className="title" style={{ display: "block" }}>{item.name}</span>
+              <span className="subtext clamp-2">{item.blurb}</span>
+              {variants.length > 1 && (
+                <div className="swatches" role="radiogroup" aria-label="Colors">
+                  {variants.map((v) => (
+                    <button key={v.sku} role="radio" aria-checked={v.sku === item.sku} aria-label={v.sku.split("-").pop()}
+                      className="swatch" style={{ background: v.furniture?.color }} onClick={() => setPick({ ...pick, [line]: v.sku })} />
+                  ))}
+                </div>
+              )}
+              <span className="meta">🔥 up to +{purchaseClout(item.clout, purchases)}</span>
+              {mine ? <span className="owned-chip">Owned{variants.length > 1 ? " in this color" : ""}</span> : (
+                <div className="buy-rent">
+                  {onTryAtHome && <button className="btn btn-secondary btn-sm" onClick={() => onTryAtHome(item)}>Try it at home</button>}
+                  <button className={`btn btn-taxi btn-sm${cash < item.price ? " short" : ""}`} disabled={busy} onClick={() => onBuy(item)}>{formatCash(item.price)}</button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="meta" style={{ margin: 0 }}>Bought pieces wait in storage at home: tap 🛋️ there to place them.</p>
+    </div>
   );
 }

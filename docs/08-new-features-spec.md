@@ -299,7 +299,20 @@ Owner, Oct 14: "Keep the city life ones as accessible through sale, and the fant
 - When only one presentation has a piece, the other wears it fitted to their skeleton.
 - Rooms: the avatar idles, walks with the pack's walk cycle, sits and lies down as before.
 
-## 13. Later features
+## 13. Bigger homes and venues (#19)
+
+Owner, Oct 14: walled rooms with many items; walls between rooms at waist height; clubs and lounges stay open space, with the restroom (where gossip is juicier) and a VIP lounge on other floors.
+
+- **Rooms follow the price** (owner, Oct 14: "cheap rooms should have single floor plans, with medium and expensive apartment/homes having more rooms accordingly"): the Astoria studio (C$1,750) is one room; the Jackson Heights 1BR (C$2,600) has a bedroom and a living room with a kitchen nook; the LIC high-rise (C$4,500) has living room, kitchen, bedroom and bathroom; the two houses for sale have five rooms (the townhouse adds an office, the penthouse a dressing room). Each room has its own floor (wood, or tile in kitchens and bathrooms). Walls between rooms stop at the waist so every room reads at once; doorways are gaps with posts.
+- **A bought house is your home.** Buying the Astoria townhouse or the LIC penthouse moves you in (rent already stops).
+- **New pieces:** bathtub, toilet, sink with mirror, kitchen island, nightstand.
+- Walking goes through doorways, never through walls; arranged furniture can't be pushed into a wall. Each home's pieces have their own ids, so a layout arranged in one home doesn't carry into another.
+- **Fif's Furniture** (owner, Oct 14; migration 0044): a showroom in Long Island City on the map, and a **Home** tab in the Phone's Shop. Pieces are shelved by room (living, bedroom, dining, decor), most in a few colors (one sku per color), and pay a little clout like clothes. **Try it at home** drops the piece into your home to arrange before buying; buying keeps it where it stands. Bought pieces you haven't placed wait in **📦 Storage** at home: tap one to place it, and **Put away** sends it back. Placed pieces are saved in the home layout under `item:<id>`; a spot that doesn't fit (another home, a wall) sends the piece back to storage. Bought seats and beds work like the home's own (Sit, Nap).
+- **The Jackson Heights 1BR** comes a little bigger (7.7 × 6.6 m) and nearly empty (bed, kitchen, wardrobe, one chair) so players furnish it themselves. The studio, the high-rise and the houses stay furnished.
+- **No labels over things** (owner, Oct 14: "let people discover what they can do by tapping around"): rooms show no tap labels. Tapping a piece uses it (the bed naps, the sofa sits, the wardrobe opens Your look, Fif's displays open the Shop); press and hold a piece at home to arrange it, or tap the small 🛋️ button (it shows 📦 and a count when bought pieces wait in storage). The labels stay as hidden buttons for keyboards and screen readers. People keep their 💬.
+- **Clubs and lounges** (next step): one open floor; stairs down to the restrooms, where Listen in is juicier; stairs up to a VIP floor for medium and exclusive clubs.
+
+## 14. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

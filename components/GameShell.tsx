@@ -10,10 +10,10 @@ import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_TEMPLATES, PLACE_TEMPLATES, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
+import { PLACE_TEMPLATES, homeTemplate, ownedId, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { activeGig, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -254,6 +254,9 @@ export function GameShell({
   /** A side story paid for at Stripe, waiting for the webhook to unlock it. */
   const [unlocking, setUnlocking] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState<ShopCategory>("fashion");
+  // #19 Fif's Furniture: which room of the Home tab to open on, and a piece being tried at home.
+  const [shopSection, setShopSection] = useState<string | undefined>(undefined);
+  const [tryHome, setTryHome] = useState<ShopItem | null>(null);
   const [chatWith, setChatWith] = useState<{ id: string; name: string; style: string } | null>(null);
   const [chatUnread, setChatUnread] = useState(0);
   const [cardId, setCardId] = useState<string | null>(null);
@@ -650,11 +653,17 @@ export function GameShell({
     setRoom((cur) => (cur ? { ...cur, messages: cur.messages.filter((x) => x.from !== m.from), people: cur.people.filter((x) => x.id !== m.from) } : cur));
     setToast(`Blocked ${handle(m.name)}. You won't see each other here or in Messages.`);
   } : undefined;
+  // #19 Fif's Furniture: what the player bought for their home (placed or in storage).
+  const ownedPieces: OwnedPiece[] = (city?.items ?? []).flatMap((i) => {
+    const it = i.category === "home" ? itemBySku(i.sku) : undefined;
+    return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
+  });
   const crowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
-  const openShop = (category: ShopCategory) => {
+  const openShop = (category: ShopCategory, section?: string) => {
     setPlace(null);
     setInside(null);
     setShopCategory(category);
+    setShopSection(section);
     setPanel("shop");
   };
   // v0.10 gossip. Finding the fifth piece shows Lola's Tea card and refreshes clout and Mood.
@@ -818,7 +827,7 @@ export function GameShell({
       if (partyHere) return setInsideFloor(it.use.to);
       return setToast("The Penthouse Floor is guest list only, on party nights. The bouncer has a clipboard and no sense of humor.");
     }
-    if (it.use?.kind === "shop") return openShop(it.use.category);
+    if (it.use?.kind === "shop") return openShop(it.use.category, it.use.section);
     if (it.use?.kind !== "events") return;
     // The lounge's guest list: a party you have a ticket for, if its doors are open; otherwise the Events list.
     const party = products.find((x) => x.event?.placeId === p.id && onList(x) && !x.event.attended
@@ -1085,7 +1094,7 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={HOME_TEMPLATES[me.home_id ?? ""] ?? HOME_TEMPLATES.astoria_studio}
+            template={homeTemplate(me.home_id, city?.player.house_sku)}
             layout={city?.homeLayout}
             look={look}
             outfit={outfit}
@@ -1104,6 +1113,18 @@ export function GameShell({
             onEditingChange={setArranging}
             mood={roomMood}
             onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(l)) : Promise.resolve(true))}
+            owned={ownedPieces}
+            trial={tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
+            onTrialEnd={() => setTryHome(null)}
+            onTrialBuy={cityApi && ((l) => run(`buy:${tryHome!.sku}`, async () => {
+              // Buy, then keep the piece where it was tried: the layout's "trial" becomes the new item.
+              const sku = tryHome!.sku;
+              const r = await cityApi.buyItem(sku, "buy");
+              if (!r.ok) return r;
+              const it = r.state.items.filter((i) => i.sku === sku).sort((a, b) => b.id - a.id)[0];
+              if (!it) return r;
+              return cityApi.saveHomeLayout(l.map((e) => (e.id === "trial" ? { ...e, id: ownedId(it.id) } : e)));
+            }))}
           />
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
@@ -1329,6 +1350,8 @@ export function GameShell({
             onBuy={(sku, mode) => run(`buy:${sku}`, () => cityApi.buyItem(sku, mode))}
             onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
             onTryOn={setTryOn}
+            section={shopSection}
+            onTryAtHome={(item) => { setPanel(null); setTryHome(item); setTab("home"); }}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
           <NetWorthSheet
@@ -1576,4 +1599,9 @@ function promptVisible(feed: StoryFeed | null, dismissed: string[]): boolean {
   const vote = arc.predictions.find((p) => p.state === "open" && !p.myVote && new Date(p.closesAt).toDateString() === new Date().toDateString());
   const key = vote ? `vote:${vote.id}` : `beat:${latest.id}`;
   return !dismissed.includes(key) && (arc.beats.some((b) => !b.seen) || !!vote);
+}
+
+/** #19 Fif's Furniture: a Home item as a piece for the room view. */
+function pieceOf(item: ShopItem, id: string): OwnedPiece {
+  return { id, kind: item.furniture!.kind as OwnedPiece["kind"], color: item.furniture!.color, name: item.name, emoji: item.emoji };
 }

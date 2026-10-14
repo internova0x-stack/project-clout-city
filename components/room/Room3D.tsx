@@ -8,8 +8,9 @@ import {
 } from "three";
 import { randomLook, type Look } from "@/lib/look";
 import type { CrowdMember } from "@/lib/partyRoom";
+import { formatCash } from "@/lib/economy";
 import {
-  FACING, FURNITURE, GRID, applyLayout, clampItem, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
+  FACING, FURNITURE, GRID, INNER_WALL, applyLayout, freeSpot, isOwnedId, ownedItem, type OwnedPiece, clampItem, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
   type LayoutEntry, type RoomItem, type RoomTemplate,
 } from "@/lib/rooms";
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
@@ -24,6 +25,8 @@ import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furnit
 // Every room turns with a sideways slide and zooms with a pinch (v0.11, owner Oct 14).
 
 const WALL_H = 2.7;
+/** #19: walls between rooms stop at the waist (owner, Oct 14), so every room reads at once. */
+const INNER_WALL_H = 1.05;
 const WALK_SPEED = 1.5;
 
 type Mode = "idle" | "walk" | "sit" | "sleep" | "dance";
@@ -60,6 +63,13 @@ export interface Room3DProps {
   /** Screen space kept clear for the HUD (top) and panels (bottom), in px. */
   insetTop?: number;
   insetBottom?: number;
+  /** #19 Fif's Furniture: pieces the player bought; placed ones come from the layout, the rest wait in storage. */
+  owned?: OwnedPiece[];
+  /** #19 "Try it at home": a piece from the Shop, placed for a look before buying. */
+  trial?: { piece: OwnedPiece; price: number; canAfford: boolean };
+  /** Buys the trial piece; the layout has it under the id "trial" where it stands. */
+  onTrialBuy?: (layout: LayoutEntry[]) => Promise<boolean>;
+  onTrialEnd?: () => void;
   /** Lets the screen hide overlapping chrome while furniture is being arranged. */
   onEditingChange?: (editing: boolean) => void;
   /**
@@ -101,7 +111,9 @@ export default function Room3D(props: Room3DProps) {
   const propsRef = useRef(props);
   propsRef.current = props;
   const [failed, setFailed] = useState(false);
-  const [items, setItems] = useState<RoomItem[]>(() => applyLayout(template, layout));
+  const owned = props.owned ?? [];
+  const ownedKey = owned.map((o) => o.id).join(",");
+  const [items, setItems] = useState<RoomItem[]>(() => applyLayout(template, layout, owned));
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -122,13 +134,28 @@ export default function Room3D(props: Room3DProps) {
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
   useEffect(() => {
-    const next = applyLayout(template, layout);
+    const next = applyLayout(template, layout, propsRef.current.owned ?? []);
     setItems(next);
     savedRef.current = next;
     setEditing(false);
     setSelected(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template.id, layoutKey]);
+  }, [template.id, layoutKey, ownedKey]);
+
+  // #19 "Try it at home": drop the Shop's piece into a free spot and start arranging it.
+  const trialKey = props.trial?.piece.id ?? "";
+  useEffect(() => {
+    const t = propsRef.current.trial;
+    if (!t) return;
+    const base = savedRef.current.filter((i) => i.id !== "trial");
+    const spot = freeSpot(template, base, ownedItem({ ...t.piece, id: "trial" }, 0, 0, 0));
+    if (!spot) { setNote("No room for it here. Move something first."); return; }
+    setItems([...base, spot]);
+    setEditing(true);
+    setSelected("trial");
+    setNote(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trialKey, template.id]);
 
   const world = useRef<{
     scene: Scene; camera: OrthographicCamera; kit: Kit; furniture: Group; built: Map<string, Built & { obj: Group }>;
@@ -294,6 +321,39 @@ export default function Room3D(props: Room3DProps) {
         walls.zPos.add(front);
       }
     }
+    // #19 bigger homes: each room's own floor, waist-high walls between rooms, and posts at the doorways.
+    const roomTexes: CanvasTexture[] = [];
+    for (const rm of template.rooms ?? []) {
+      const rw = rm.x1 - rm.x0, rd = rm.z1 - rm.z0;
+      const tex = floorTexture({ ...template, w: rw, d: rd, floor: rm.floor, floorKind: rm.floorKind }, night, dream);
+      roomTexes.push(tex);
+      const f = new Mesh(kit.geo(new PlaneGeometry(rw, rd)), new MeshStandardMaterial({ map: tex, roughness: 0.85 }));
+      f.rotation.x = -Math.PI / 2;
+      f.position.set((rm.x0 + rm.x1) / 2, 0.003, (rm.z0 + rm.z1) / 2);
+      f.receiveShadow = true;
+      f.userData.floor = true;
+      room.add(f);
+    }
+    const innerMat = kit.mat(template.wall, { roughness: 0.95 });
+    for (const [x0, z0, x1, z1] of template.walls ?? []) {
+      const alongX = z0 === z1;
+      const len = alongX ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
+      const t = INNER_WALL * 2;
+      const wall = new Mesh(kit.geo(new BoxGeometry(alongX ? len : t, INNER_WALL_H, alongX ? t : len)), innerMat);
+      wall.position.set((x0 + x1) / 2, INNER_WALL_H / 2, (z0 + z1) / 2);
+      wall.castShadow = wall.receiveShadow = true;
+      const cap = new Mesh(kit.geo(new BoxGeometry(alongX ? len + 0.02 : t + 0.04, 0.05, alongX ? t + 0.04 : len + 0.02)), trimMat);
+      cap.position.set(wall.position.x, INNER_WALL_H + 0.025, wall.position.z);
+      room.add(wall, cap);
+      // A post at each end inside the room: the doorway frames.
+      for (const [px, pz] of [[x0, z0], [x1, z1]]) {
+        if (Math.abs(px) >= template.w / 2 - 0.05 || Math.abs(pz) >= template.d / 2 - 0.05) continue;
+        const post = new Mesh(kit.geo(new BoxGeometry(t + 0.04, INNER_WALL_H + 0.25, t + 0.04)), trimMat);
+        post.position.set(px, (INNER_WALL_H + 0.25) / 2, pz);
+        post.castShadow = true;
+        room.add(post);
+      }
+    }
     scene.add(room);
     // Dream mood: haze toward the sky color, and a few slow motes of light.
     const motes: Mesh[] = [];
@@ -446,7 +506,10 @@ export default function Room3D(props: Room3DProps) {
       if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
       propsRef.current.onNpcTap(i);
     };
-    let down: { x: number; y: number; moved: boolean; sliding?: boolean } | null = null;
+    let down: { x: number; y: number; moved: boolean; sliding?: boolean; held?: boolean } | null = null;
+    // Owner, Oct 14: no labels over things; a tap uses a piece, and press-and-hold picks it up to arrange.
+    let holdTimer: ReturnType<typeof setTimeout> | null = null;
+    const clearHold = () => { if (holdTimer) clearTimeout(holdTimer); holdTimer = null; };
     // Sliding (owner, Oct 14): a sideways drag turns the room with the finger, then it settles on the
     // nearest quarter turn (a quick flick of a quarter's third is enough to go on to the next one).
     let slide = 0;
@@ -480,12 +543,24 @@ export default function Room3D(props: Room3DProps) {
       if (touches.size > 2) return;
       down = { x: e.clientX, y: e.clientY, moved: false };
       try { renderer.domElement.setPointerCapture(e.pointerId); } catch { /* a pointer the browser no longer tracks */ }
+      clearHold();
+      if (propsRef.current.editable && !editRef.current.editing) {
+        const at = { x: e.clientX, y: e.clientY };
+        holdTimer = setTimeout(() => {
+          const it = hitItem(at.x, at.y);
+          if (!down || down.moved || !it || !FURNITURE[it.kind].movable) return;
+          down.held = true;
+          setEditing(true);
+          setSelected(it.id);
+          setNote(null);
+        }, 450);
+      }
     };
     const onMove = (e: PointerEvent) => {
       if (touches.has(e.pointerId)) touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pinch && touches.size === 2) return setZoom(pinch.zoom * (spread() / pinch.d));
       if (!down) return;
-      if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
+      if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) { down.moved = true; clearHold(); }
       const dx = e.clientX - down.x;
       if (!down.sliding && down.moved && canSlide() && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(e.clientY - down.y) * 1.5) down.sliding = true;
       if (down.sliding) { slide = slideAngle(dx); return; }
@@ -493,21 +568,14 @@ export default function Room3D(props: Room3DProps) {
     const onUp = (e: PointerEvent) => {
       touches.delete(e.pointerId);
       if (pinch) { if (touches.size < 2) pinch = null; down = null; return; }
+      clearHold();
       const d = down;
       down = null;
-      if (!d) return;
+      if (!d || d.held) return;
       if (d.moved) return swipeTurn(d, e);
       const it = hitItem(e.clientX, e.clientY);
       if (editRef.current.editing) {
         setSelected(it && FURNITURE[it.kind].movable ? it.id : null);
-        return;
-      }
-      // Owner, Oct 14: tapping a piece of furniture at home selects it for arranging (move, rotate);
-      // its label above it is how you use it.
-      if (it && propsRef.current.editable && FURNITURE[it.kind].movable) {
-        setEditing(true);
-        setSelected(it.id);
-        setNote(null);
         return;
       }
       if (it?.use) return goUse(it);
@@ -708,6 +776,7 @@ export default function Room3D(props: Room3DProps) {
       npcs.forEach((n) => n.parts?.dispose());
       kit.dispose();
       floorTex.dispose();
+      roomTexes.forEach((t) => t.dispose());
       (floor.material as MeshStandardMaterial).dispose();
       floor.geometry.dispose();
       ring.geometry.dispose();
@@ -800,6 +869,18 @@ export default function Room3D(props: Room3DProps) {
   };
   useEffect(() => stopHold, []);
   const spotTaken = !!sel && !placementOk(template, items, sel);
+  // #19 Fif's Furniture: bought pieces not in the room are in storage.
+  const stored = owned.filter((o) => !items.some((i) => i.id === o.id));
+  const takeOut = (p: OwnedPiece) => {
+    const spot = freeSpot(template, items, ownedItem(p, 0, 0, 0));
+    if (!spot) { setNote("No free spot for it. Move or put away something first."); return; }
+    setItems((cur) => [...cur, spot]);
+    setSelected(p.id);
+    setNote(null);
+  };
+  const putAway = (id: string) => { setItems((cur) => cur.filter((i) => i.id !== id)); setSelected(null); setNote(null); };
+  const trial = props.trial;
+  const endTrial = () => { setItems(savedRef.current); setEditing(false); setSelected(null); setNote(null); props.onTrialEnd?.(); };
 
   return (
     <div className="room3d layer" style={{ background: derivedBackdrop(template, daytime).css }}>
@@ -840,12 +921,14 @@ export default function Room3D(props: Room3DProps) {
           ))}
         </div>
       )}
+      {/* Owner, Oct 14: no labels over things (tap around to find out what they do). The buttons stay for
+          keyboards and screen readers only. */}
       <div className="room-chips" aria-label="Things you can use">
         {usable.map((it) => (
           <button
             key={it.id}
             ref={(el) => { if (el) chipsRef.current.set(it.id, el); else chipsRef.current.delete(it.id); }}
-            className="room-chip glass-hud"
+            className="sr-only"
             onClick={() => tapChip(it)}
             aria-label={it.name}
           >
@@ -853,11 +936,17 @@ export default function Room3D(props: Room3DProps) {
           </button>
         ))}
       </div>
-      {editable && editing && (
+      {editable && !editing && (
+        <button className="room-storage glass-hud" style={{ top: `calc(${insetTop - 44}px + var(--safe-top))` }} onClick={() => { setEditing(true); setSelected(null); setNote(null); }}
+          aria-label={stored.length ? `Arrange your home, ${stored.length} in storage` : "Arrange your home"}>
+          🛋️{stored.length > 0 ? ` 📦 ${stored.length}` : ""}
+        </button>
+      )}
+      {(editable || trial) && editing && (
         <div className="room-edit" style={{ top: `calc(${insetTop - 48}px + var(--safe-top))` }}>
           {editing ? (
             <div className="room-edit-bar glass-hud" role="group" aria-label="Arrange furniture">
-              <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece of furniture")}</span>
+              <span className="meta" style={{ color: "var(--text-1)" }}>{note ?? (spotTaken ? "That spot's taken. Keep it moving." : sel ? `Use the arrows to move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Tap a piece to move it")}</span>
               {/* Owner, Oct 14: one row. Rotate and the arrows on the left, Cancel and Save on the right. */}
               <div className="room-edit-row">
                 <div className="room-edit-tools" role="group" aria-label={sel ? `Move the ${FURNITURE[sel.kind].label.toLowerCase()}` : "Move"}>
@@ -881,6 +970,26 @@ export default function Room3D(props: Room3DProps) {
                   ))}
                 </div>
                 <div className="room-edit-tools">
+                {sel && isOwnedId(sel.id) && <button className="chip" onClick={() => putAway(sel.id)}>📦 Put away</button>}
+                {trial ? (
+                  <>
+                    <button className="chip" onClick={endTrial}>Back</button>
+                    <button
+                      className="chip"
+                      aria-pressed="true"
+                      disabled={saving || !trial.canAfford || items.some((i) => !placementOk(template, items, i))}
+                      onClick={async () => {
+                        setSaving(true);
+                        const ok = (await props.onTrialBuy?.(toLayout(items))) ?? false;
+                        setSaving(false);
+                        if (ok) { setEditing(false); setSelected(null); setNote(null); props.onTrialEnd?.(); }
+                      }}
+                    >
+                      {saving ? "…" : trial.canAfford ? `Buy · ${formatCash(trial.price)}` : "Can't afford it"}
+                    </button>
+                  </>
+                ) : (
+                <>
                 <button className="chip" onClick={() => { setItems(savedRef.current); setEditing(false); setSelected(null); setNote(null); }}>Cancel</button>
                 <button
                   className="chip"
@@ -895,8 +1004,20 @@ export default function Room3D(props: Room3DProps) {
                 >
                   {saving ? "…" : "Save"}
                 </button>
+                </>
+                )}
                 </div>
               </div>
+              {!trial && stored.length > 0 && (
+                <div className="room-storage-row" role="group" aria-label="In storage">
+                  <span className="meta">📦 In storage</span>
+                  {stored.map((p) => (
+                    <button key={p.id} className="chip" onClick={() => takeOut(p)} aria-label={`Place the ${p.name}`}>
+                      <span aria-hidden="true">{p.emoji}</span> {p.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : null}
         </div>

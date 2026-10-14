@@ -157,7 +157,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -363,6 +363,15 @@ export const PLACES: Place[] = [
     lore: "Racks curated by a woman who once styled a backup dancer for a famous person. The mirrors are flattering on purpose, and so is the lighting.",
     actions: [
       { id: "browse", kind: "visit", label: "Try on things you can't afford", energy: 5, mood: 6, blurb: "The fitting room selfie is free. The jacket is not." },
+    ],
+  },
+  {
+    id: "fifs-furniture", name: "Fif's Furniture", emoji: "🛋️", category: "shopping", neighborhood: "Long Island City",
+    at: [40.7418, -73.9405], depth: "full", template: "showroom", palette: ["#FFC21A", "#F3EBDD", "#2A2530"], opensShop: "home",
+    tags: ["furniture", "shopping", "home"],
+    lore: "Fif has sold every sofa in Queens at least twice. The showroom is set up like the apartment you wish you had, and Fif will tell you it fits through your door. It does not.",
+    actions: [
+      { id: "browse", kind: "visit", label: "Lie on a bed you can't afford", energy: 5, mood: 6, blurb: "Ten minutes on the display mattress. Nobody stops you." },
     ],
   },
   {
@@ -618,7 +627,12 @@ export const GIG_TITLES: Record<GigTier, { title: string; blurb: string }[]> = {
 // ---------------------------------------------------------------------------
 // Shop (Fashion, Cars, Houses, Luxury, Makeup). Virtual cash only in v0.3.
 // ---------------------------------------------------------------------------
-export type ShopCategory = "fashion" | "cars" | "houses" | "luxury" | "makeup";
+export type FurnitureRoom = "living" | "bedroom" | "dining" | "decor";
+export const FURNITURE_ROOMS: { id: FurnitureRoom; label: string }[] = [
+  { id: "living", label: "Living" }, { id: "bedroom", label: "Bedroom" }, { id: "dining", label: "Dining" }, { id: "decor", label: "Decor" },
+];
+
+export type ShopCategory = "fashion" | "home" | "cars" | "houses" | "luxury" | "makeup";
 
 export interface ShopItem {
   sku: string;
@@ -632,6 +646,11 @@ export interface ShopItem {
   blurb: string;
   /** Fashion: which outfit slot it fills and how it renders on the avatar. */
   wear?: { slot: "top" | "bottom" | "shoes" | "accessory" | "outfit"; kind?: string; color: string; accent?: string };
+  /**
+   * Home (#19, Fif's Furniture): the piece it puts in your home (a lib/rooms.ts FurnitureKind), its color,
+   * the room it's shelved under, and its line (the same piece in other colors shares a line).
+   */
+  furniture?: { kind: string; color?: string; room: FurnitureRoom; line: string };
   /** Clout needed to buy it (fantasy outfits); buy_item checks it. */
   cloutReq?: number;
   /** Cars: weekly rental price, if it can be rented. */
@@ -648,8 +667,18 @@ export interface ShopItem {
   collector?: boolean;
 }
 
+/** A furniture line: one Home sku per color (or one plain sku), shelved under a room at Fif's. */
+function furnitureLine(id: string, room: FurnitureRoom, kind: string, name: string, emoji: string, price: number, clout: number, rating: ShopItem["rating"], blurb: string, colors?: Record<string, string>): ShopItem[] {
+  const entries: [string | null, string | undefined][] = colors ? Object.entries(colors) : [[null, undefined]];
+  return entries.map(([c, color]) => ({
+    sku: c ? `home-${id}-${c}` : `home-${id}`, category: "home", name, emoji, price, clout, rating, blurb,
+    furniture: { kind, color, room, line: id },
+  }));
+}
+
 export const SHOP_CATEGORIES: { id: ShopCategory; label: string; emoji: string }[] = [
   { id: "fashion", label: "Fashion", emoji: "👗" },
+  { id: "home", label: "Home", emoji: "🛋️" },
   { id: "cars", label: "Cars", emoji: "🚗" },
   { id: "houses", label: "Houses", emoji: "🏠" },
   { id: "luxury", label: "Luxury", emoji: "💍" },
@@ -681,6 +710,22 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "set-royalty", category: "fashion", name: "Royalty", emoji: "👑", price: 9500, clout: 200, rating: 4, cloutReq: 25000, blurb: "Crown included. Kingdom sold separately.", wear: { slot: "outfit", kind: "royalty", color: "#C9A227" } },
   { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 120, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
   // Cars
+  // ---- Home (#19): Fif's Furniture. One sku per color; pieces in a line share a card in the Shop. ----
+  ...furnitureLine("sofa", "living", "sofa", "Three-seat sofa", "🛋️", 480, 14, 3, "Seats three. Holds one person and their laundry.", { orange: "#FF8A3D", blue: "#6C8CFF", green: "#40B589", cream: "#ECE6DC" }),
+  ...furnitureLine("armchair", "living", "armchair", "Reading armchair", "💺", 220, 8, 2, "For reading. Or for the clothes chair.", { green: "#40B589", berry: "#B0135A", mustard: "#D9A43A" }),
+  ...furnitureLine("coffee-table", "living", "coffeeTable", "Coffee table", "🫖", 140, 5, 2, "Holds coffee, remotes and unopened mail."),
+  ...furnitureLine("tv", "living", "tvStand", "Big TV", "📺", 650, 12, 3, "Larger than your ambitions. For now."),
+  ...furnitureLine("rug", "living", "rug", "Area rug", "🧶", 120, 4, 2, "Ties the room together. Allegedly.", { pink: "#E0457B", sand: "#C2AE86", violet: "#6B4FD8" }),
+  ...furnitureLine("floor-lamp", "living", "floorLamp", "Floor lamp", "💡", 90, 3, 1, "Mood lighting for a mood you're working on."),
+  ...furnitureLine("bookshelf", "living", "bookshelf", "Bookshelf", "📚", 210, 7, 2, "Books you'll read, books you'll display."),
+  ...furnitureLine("bed", "bedroom", "bed", "Platform bed", "🛏️", 900, 20, 3, "Off the floor at last. Your back says thank you.", { blue: "#6C8CFF", pink: "#F2B8C6", black: "#2A2530" }),
+  ...furnitureLine("nightstand", "bedroom", "nightstand", "Nightstand with lamp", "🛏️", 110, 4, 2, "Somewhere to put the phone you won't stop checking."),
+  ...furnitureLine("desk", "bedroom", "desk", "Work desk", "🖥️", 260, 8, 2, "Where side hustles become main hustles."),
+  ...furnitureLine("dining-table", "dining", "diningTable", "Dining table", "🍽️", 340, 10, 2, "Seats four. Mostly holds takeout."),
+  ...furnitureLine("chair", "dining", "chair", "Dining chair", "🪑", 75, 2, 1, "Matches nothing, on purpose.", { oak: "#9A6B45", black: "#1F1B26" }),
+  ...furnitureLine("island", "dining", "kitchenIsland", "Kitchen island", "🏝️", 1400, 30, 4, "Stools included. Dinner parties not."),
+  ...furnitureLine("plant", "decor", "plant", "Monstera", "🪴", 45, 3, 1, "Thrives on neglect. Relatable."),
+  ...furnitureLine("piano", "decor", "piano", "Upright piano", "🎹", 6000, 90, 4, "You'll learn. Eventually. It looks great either way."),
   { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 21000, clout: 120, rating: 2, rentPerWeek: 525, blurb: "Previously loved. Heavily. It still gets you to the club." },
   { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 78000, clout: 300, rating: 4, rentPerWeek: 1350, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
   { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 117000, clout: 420, rating: 4, rentPerWeek: 1950, blurb: "Silent, fast and smug. Like a startup founder." },

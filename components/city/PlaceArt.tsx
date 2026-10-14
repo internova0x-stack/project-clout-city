@@ -148,7 +148,7 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "velvet-static": "purple", "grind-and-gossip": "brown", "lucky-seven-deli": "green", "altitude-718": "deepBlue",
   "flushing-meadows": "green", "pedal-pushers": "yellow", "skybridge-tower": "grey", "skyline-pier": "deepBlue",
   "hunters-pier": "offWhite", "rockaway-diner": "red", "radiant-harbor": "cream", "pressed-iron-gym": "grey",
-  unisphere: "deepBlue", "gantry-plaza": "brown", "low-light-lounge": "purple", "thread-count": "offWhite",
+  unisphere: "deepBlue", "gantry-plaza": "brown", "low-light-lounge": "purple", "thread-count": "offWhite", "fifs-furniture": "yellow",
   "boulevard-motors": "red", "st-johnsons": "red", "queensborough-u": "deepBlue",
   "ditmars-deli": "green", "two-bros-pizza": "red", "neon-spoon": "deepBlue", "up-on-thirty": "purple",
   "steinway-fresh": "cream", "hellgate-hall": "red", "triborough-works": "grey", "ditmars-library": "brown",
@@ -561,7 +561,9 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    case "fifs-furniture":
     case "thread-count": {
+      const fifs = place.id === "fifs-furniture";
       const shop: BoxSpec = { x: -5, y: -4.5, z: 0, w: 8.5, d: 6.5, h: 5, color: mixHex(b, "#E8DCCF", 0.2) };
       const awning: BoxSpec = { x: -5, y: 2, z: 2.9, w: 8.5, d: 1.2, h: 0.25, color: a };
       return (
@@ -571,15 +573,23 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
             <OnLeft b={shop} u={0.6} v={0} uw={5.2} vh={2.8} fill={night ? lit : "#DDEFF6"} opacity={0.9} />
             <OnLeft b={shop} u={6.4} v={0} uw={1.6} vh={2.8} fill={mixHex(c, "#000", 0.1)} />
             {windowsRight(shop, 1, 3, lit, glassDark, night)}
-            <SignLeft b={shop} text="Thread Count" color="#2A2530" ink={a} v={3.6} night={night} />
+            <SignLeft b={shop} text={fifs ? "Fif's Furniture" : "Thread Count"} color="#2A2530" ink={a} v={3.6} night={night} />
             {/* mannequins in the window */}
             {[1.4, 3.2, 5].map((u, i) => {
               const [px, py] = iso(shop.x + u, shop.y + shop.d + 0.03, 0.2);
               return (
+                fifs ? (
+                  // Fif's: an armchair, a lamp and a sofa in the window.
+                  <g key={u}>
+                    <rect x={px - 6} y={py - 9} width={12} height={6} rx={1.5} fill={["#FF8A3D", "#40B589", "#6C8CFF"][i]} />
+                    <rect x={px - 6} y={py - 13} width={12} height={4} rx={1.5} fill={mixHex(["#FF8A3D", "#40B589", "#6C8CFF"][i], "#000", 0.15)} />
+                  </g>
+                ) : (
                 <g key={u}>
                   <circle cx={px} cy={py - 15} r={2.2} fill="#F4EDE6" />
                   <path d={`M${px - 4} ${py - 12} h8 l2 9 h-12z`} fill={["#E0457B", "#2A2530", "#6C8CFF"][i]} />
                 </g>
+                )
               );
             })}
           </Box>
