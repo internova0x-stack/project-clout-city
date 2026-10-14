@@ -1025,7 +1025,8 @@ export function GameShell({
               daytime={daytime}
               sign={insideFloor === 2 ? `${inside.name} · Penthouse` : inside.name}
               rotatable
-              onExit={() => setInside(null)}
+              door
+              labels={insideFloor === 2 ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}
               label={`${me.display_name} inside ${inside.name}`}
               insetBottom={170}
               mood={roomMood}
@@ -1072,7 +1073,7 @@ export function GameShell({
             daytime={daytime}
             editable={cityOn && flow === "none"}
             rotatable={flow === "none"}
-            onExit={flow === "none" ? () => setTab("map") : undefined}
+            door={flow === "none"}
             label={`${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {

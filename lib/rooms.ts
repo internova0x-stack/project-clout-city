@@ -54,8 +54,10 @@ export interface RoomItem {
   rot: number;
   color?: string;
   use?: ItemUse;
-  /** A short label for the tap target ("Work a shift"). */
+  /** A short label for the tap target ("Work a shift"), or just an arrow or emoji. */
   label?: string;
+  /** What a screen reader says when the label is only an arrow or an emoji. */
+  name?: string;
 }
 
 export interface RoomTemplate {
@@ -381,11 +383,11 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   penthouse: {
     id: "penthouse", w: 8.4, d: 7.2, wall: "#241A33", wallAccent: "#F2A900", floor: "#1C1626", floorKind: "concrete", dark: true,
     items: [
-      { id: "stairs-down", kind: "stairs", x: -3.3, z: 2.2, rot: 2, use: { kind: "floor", to: 1 }, label: "Downstairs ↓" },
+      { id: "stairs-down", kind: "stairs", x: -3.3, z: 2.2, rot: 2, use: { kind: "floor", to: 1 }, label: "↓", name: "Downstairs" },
       { id: "dj", kind: "djBooth", x: 1.6, z: -3.0, rot: 0 },
       { id: "speaker-1", kind: "speaker", x: 3.2, z: -3.05, rot: 0 },
       { id: "speaker-2", kind: "speaker", x: 0.0, z: -3.05, rot: 0 },
-      { id: "floor", kind: "danceFloor", x: 1.4, z: -0.6, rot: 0, use: { kind: "events" }, label: "The party" },
+      { id: "floor", kind: "danceFloor", x: 1.4, z: -0.6, rot: 0, use: { kind: "events" }, label: "Check in 🎟️" },
       { id: "bar", kind: "bar", x: -2.2, z: -3.0, rot: 0 },
       { id: "booth-1", kind: "booth", x: -3.6, z: -0.4, rot: 1, color: "#F2A900" },
       { id: "sofa", kind: "sofa", x: 2.6, z: 2.9, rot: 2, color: "#7A2E3A" },
@@ -478,7 +480,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
 };
 
 /** v0.11: the exclusive venue's stairs, on the ground floor. */
-const VENUE_STAIRS: RoomItem = { id: "stairs-up", kind: "stairs", x: 0.7, z: -2.4, rot: 0, use: { kind: "floor", to: 2 }, label: "Upstairs ↑" };
+const VENUE_STAIRS: RoomItem = { id: "stairs-up", kind: "stairs", x: 0.7, z: -2.4, rot: 0, use: { kind: "floor", to: 2 }, label: "↑", name: "Upstairs" };
 
 /** The bits of a place a room needs (lib/city.ts Place). */
 export interface RoomPlace {

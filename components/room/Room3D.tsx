@@ -65,10 +65,12 @@ export interface Room3DProps {
    */
   rotatable?: boolean;
   /**
-   * v0.11 (owner, Oct 14): a front door by the spot you come in, with a doormat and a "Go out" label;
-   * tapping it walks you out (to the map). The door shows on the front wall when the view turns to it.
+   * v0.11 (owner, Oct 14): a front door by the spot you come in, with a doormat. It's scenery: the Map
+   * button (or tab) is the way out, so there's no "Go out" label.
    */
-  onExit?: () => void;
+  door?: boolean;
+  /** Chip text that depends on game state, by item id (the party floor's "Check in 🎟️" then "Dance"). */
+  labels?: Record<string, string>;
   /**
    * v0.11 party floors: the people at the party (real players and NPCs), standing at the
    * template's crowdSpots, real players with a green "online" dot (NPCs unmarked). Tapping a dot calls onCrowdTap.
@@ -91,7 +93,6 @@ export default function Room3D(props: Room3DProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const bubblesRef = useRef<Map<number, HTMLButtonElement>>(new Map());
-  const exitRef = useRef<HTMLButtonElement | null>(null);
   const crowdTagsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const crowdRef = useRef<{ member: CrowdMember; actor: Actor }[]>([]);
   const propsRef = useRef(props);
@@ -113,7 +114,7 @@ export default function Room3D(props: Room3DProps) {
   editRef.current = { editing, selected };
   const savedRef = useRef<RoomItem[]>(items);
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
-  const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void; goExit: () => void } | null>(null);
+  const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
@@ -231,7 +232,7 @@ export default function Room3D(props: Room3DProps) {
     walls.xPos.visible = walls.zPos.visible = false;
     // The front door, in the front wall by the spawn point, and a doormat inside it.
     const doorX = Math.max(-template.w / 2 + 0.7, Math.min(template.w / 2 - 0.7, template.spawn[0]));
-    if (props.onExit && !template.outdoor) {
+    if (props.door && !template.outdoor) {
       const frame = new Mesh(kit.geo(new BoxGeometry(1.12, 2.24, 0.16)), trimMat);
       frame.position.set(doorX, 1.12, template.d / 2 + 0.04);
       const door = new Mesh(kit.geo(new BoxGeometry(0.92, 2.1, 0.06)), kit.mat("#7A4A2E", { roughness: 0.7 }));
@@ -602,13 +603,6 @@ export default function Room3D(props: Room3DProps) {
         el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
-      // v0.11: the "Go out" label over the doormat.
-      if (exitRef.current) {
-        // Just under the doormat, so it doesn't sit on the player (who starts on the mat).
-        proj.set(doorX, 0, template.d / 2 - 0.12).project(camera);
-        exitRef.current.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
-        exitRef.current.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, 6px)`;
-      }
       // v0.11 party floors: a name tag over each person at the party.
       for (const c of crowdRef.current) {
         const el = crowdTagsRef.current.get(c.member.key);
@@ -655,16 +649,9 @@ export default function Room3D(props: Room3DProps) {
       }
     }
 
-    actionsRef.current = { goUse, talk, goExit };
+    actionsRef.current = { goUse, talk };
 
-    let exiting = false;
-    function goExit() {
-      walkTo([doorX, template.d / 2 - 0.45], null);
-      exiting = true;
-      if (me.mode !== "walk") arrive(null);
-    }
     function walkTo(goal: [number, number], use: RoomItem | null) {
-      exiting = false;
       const grid = makeGrid(template, itemsRef.current);
       const path = findPath(grid, [me.x, me.z], goal);
       if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
@@ -682,12 +669,6 @@ export default function Room3D(props: Room3DProps) {
     }
     function arrive(it: RoomItem | null) {
       me.pending = null;
-      if (exiting && !it) {
-        exiting = false;
-        me.heading = 0; // facing the door
-        propsRef.current.onExit?.();
-        return;
-      }
       if (!it?.use) return;
       const [fx, fz] = FACING[it.rot % 4];
       const b = world.current?.built.get(it.id);
@@ -828,11 +809,6 @@ export default function Room3D(props: Room3DProps) {
           ))}
         </div>
       )}
-      {props.onExit && !editing && !template.outdoor && (
-        <div className="room-chips" aria-label="The door">
-          <button ref={exitRef} className="room-chip room-exit glass-hud" onClick={() => actionsRef.current?.goExit()}>🚪 Go out</button>
-        </div>
-      )}
       <div className="room-chips" aria-label="Things you can use">
         {usable.map((it) => (
           <button
@@ -840,8 +816,9 @@ export default function Room3D(props: Room3DProps) {
             ref={(el) => { if (el) chipsRef.current.set(it.id, el); else chipsRef.current.delete(it.id); }}
             className="room-chip glass-hud"
             onClick={() => tapChip(it)}
+            aria-label={it.name}
           >
-            {it.label}
+            {props.labels?.[it.id] ?? it.label}
           </button>
         ))}
       </div>

@@ -603,8 +603,6 @@ a { color:inherit; }
 .npc-bubble:active { transform-origin:bottom left; scale:.92; }
 @media (prefers-reduced-motion: no-preference) { .npc-bubble span { animation:npc-bob 2.4s ease-in-out infinite; } }
 @keyframes npc-bob { 50% { transform:translateY(-2px); } }
-.room-exit { font-weight:700; }
-.room-exit::after { top:-5px; bottom:auto; }
 .room-edit { position:absolute; z-index:16; right:12px; }
 .room-edit-bar { display:flex; flex-direction:column; gap:8px; padding:10px 12px; border-radius:var(--r-lg); max-width:min(320px, calc(100vw - 24px)); box-shadow:var(--elev-2); }
 .room-edit-bar .chip { height:32px; padding:0 12px; font-size:13px; }
