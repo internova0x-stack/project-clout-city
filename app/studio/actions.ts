@@ -10,6 +10,7 @@ import { checkGossipFiles, syncGossipWeeks } from "@/lib/gossipImport";
 import { syncWeeklyContent } from "@/lib/contentImport";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { runSetupCheck } from "@/lib/setupCheck";
+import type { Insights } from "@/lib/insights";
 import { headers } from "next/headers";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -98,7 +99,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -203,6 +204,10 @@ export async function studioDrafts(): Promise<Admin<ContentDraft[]>> {
 }
 export async function studioMetrics() {
   return admin<StudioMetrics>("admin_metrics");
+}
+/** Insights (migration 0053): players, revenue, sessions, retention, funnel, features and spending. */
+export async function studioInsights(days: number) {
+  return admin<Insights>("admin_insights", { p_days: days });
 }
 
 // ---- Setup check (owner, Oct 14): admins only; reports what's missing, never a secret ----

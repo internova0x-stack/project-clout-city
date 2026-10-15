@@ -96,7 +96,8 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    - URL: `https://<your site>/api/stripe/webhook`
    - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
      `checkout.session.expired`, `charge.refunded`, and (unlimited chat's monthly plan, migration
-     0047) `customer.subscription.updated`, `customer.subscription.deleted`
+     0047) `customer.subscription.updated`, `customer.subscription.deleted`, and (VIP renewals in
+     the Studio's Insights, migration 0053) `invoice.paid`
    - Copy its **Signing secret** (`whsec_…`).
    - Vercel preview links sit behind Vercel's login by default, which Stripe can't pass. Point
      the webhook at the production address, or add a second endpoint for a preview with
@@ -173,6 +174,14 @@ Confidence. Ended parties leave the Events list on their own.
 Prices are config: `store_products.price_cents` (shown and charged). To charge a Price you
 created in Stripe instead, set `store_products.stripe_price_id`. Don't change a price on a story
 players are following. Before going live: check **Stripe Tax** settings for digital goods.
+
+**Insights** (migration 0053): the Studio's **Insights** tab shows players, sign-ups, active
+players, revenue, session length, retention (next day, day 7, day 30), first steps, feature use,
+revenue by product and players by rank, for the last 7, 30 or 90 New York days. Studio admins only
+(`admin_insights()`). Session length comes from the game pinging `session_ping()` once a minute while
+it's open and visible (a gap over 5 minutes starts a new session), so it starts counting the day 0053
+runs. Monthly and yearly VIP renewals count once the webhook gets `invoice.paid` (step 3); the first
+payment of each membership already counts as a purchase.
 
 ## 3. Local development (optional)
 

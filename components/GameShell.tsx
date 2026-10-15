@@ -148,6 +148,7 @@ export function GameShell({
   storeApi,
   chat,
   track,
+  ping,
   leaderboardRows,
   dating,
   crew,
@@ -179,6 +180,8 @@ export function GameShell({
   chat?: ChatApi;
   /** v0.5 analytics: one event per name per day (sessions for day-1 return, invites shared). */
   track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared" | "crush_invite_shared") => void;
+  /** Session length (Insights, migration 0053): pinged on open and every minute while the page is visible. */
+  ping?: () => Promise<void>;
   /** v0.5 crushes and date nights (migration 0011). */
   dating?: DatingApi;
   /** Crew outings (migration 0013). */
@@ -500,6 +503,14 @@ export function GameShell({
   }, [dating, loadInbox]);
   // A session a day counts toward day-1 return; unread messages badge the Phone.
   useEffect(() => { track?.("session"); }, [track]);
+  useEffect(() => {
+    if (!ping) return;
+    const beat = () => { if (document.visibilityState === "visible") void ping().catch(() => {}); };
+    beat();
+    const id = window.setInterval(beat, GAME_CONFIG.sessionPingMs);
+    document.addEventListener("visibilitychange", beat);
+    return () => { window.clearInterval(id); document.removeEventListener("visibilitychange", beat); };
+  }, [ping]);
   useEffect(() => {
     if (!chat) return;
     const check = () => void chat.list().then((r) => r.ok && setChatUnread(r.data.reduce((n, c) => n + c.unread, 0)));

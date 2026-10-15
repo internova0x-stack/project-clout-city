@@ -5,6 +5,7 @@ import { previewOnly } from "./guard";
 import type { RecentItem } from "@/lib/recent";
 import type { ChatMessage, ChatResult, ChatStatus, ChatSummary, ChatThread, PlayerCard, ReportReason } from "@/lib/chat";
 import type { StudioMetrics, StudioReport } from "@/lib/studio";
+import type { Insights } from "@/lib/insights";
 import { previewCrushStatus, previewDatingBlock } from "./datingActions";
 import { previewChatUnlimited, previewVip } from "./storyActions";
 import { DAILY_LIMIT } from "@/lib/chat";
@@ -230,5 +231,79 @@ export async function previewStudioMetrics() {
     activeToday: 403, beatOpens: 6210, readers: 790, votes: 1544, voters: 702,
     purchases: { side_arc: { count: 61, cents: 18239 }, exclusive_event: { count: 44, cents: 18756 }, postcard: { count: 93, cents: 9207 }, collector_item: { count: 12, cents: 5388 } },
     refunds: 3, messagesToday: state.messages.length + 2310, openReports: state.reports.filter((r) => r.status === "open").length,
+  });
+}
+
+/** Sample Insights for /preview/studio: a small, growing launch (a fixed shape, so screenshots don't jump). */
+export async function previewStudioInsights(days: number) {
+  previewOnly();
+  const n = Math.min(90, Math.max(7, days));
+  const today = new Date();
+  const wave = (i: number) => 1 + 0.18 * Math.sin(i / 2.2) + (i % 7 === 5 || i % 7 === 6 ? 0.22 : 0);
+  const daily = Array.from({ length: n }, (_, k) => {
+    const i = k + (90 - n);
+    const d = new Date(today.getTime() - (n - 1 - k) * 86_400_000).toISOString().slice(0, 10);
+    const grow = 0.35 + (0.65 * i) / 89;
+    return {
+      date: d,
+      signups: Math.round(28 * grow * wave(i)),
+      active: Math.round(410 * grow * wave(i)),
+      revenueCents: Math.round(((i * 37) % 11) * 499 * grow + (i % 9 === 0 ? 11999 : 0)),
+      avgSessionSeconds: Math.round(430 + 90 * Math.sin(i / 3.1) + i * 1.5),
+    };
+  });
+  const sum = (f: (d: (typeof daily)[number]) => number, last = n) => daily.slice(-last).reduce((a, d) => a + f(d), 0);
+  const active = daily.at(-1)!.active;
+  const week = (w: number) => new Date(today.getTime() - (w * 7 + today.getUTCDay()) * 86_400_000).toISOString().slice(0, 10);
+  return ok<Insights>({
+    days: n,
+    today: daily.at(-1)!.date,
+    totals: {
+      players: 2140, accounts: 2391,
+      signupsToday: daily.at(-1)!.signups, signups7: sum((d) => d.signups, 7), signupsPeriod: sum((d) => d.signups),
+      activeToday: active, active7: 1212, active30: 1688, activePeriod: n >= 30 ? 1688 + (n > 30 ? 214 : 0) : 1212,
+      revenueCents: 1_184_330, revenuePeriodCents: sum((d) => d.revenueCents), revenue7Cents: sum((d) => d.revenueCents, 7),
+      payers: 96, vipMembers: 41, chatForever: 9, refunds: 2,
+      sessionsPeriod: Math.round(sum((d) => d.active) * 1.9), avgSessionSeconds: 512, medianSessionSeconds: 344,
+      sessionsPerActiveDay: 1.9, minutesPerActiveDay: 16.2,
+    },
+    daily,
+    retention: { d1: { cohort: 2088, returned: 793 }, d7: { cohort: 1874, returned: 356 }, d30: { cohort: 1302, returned: 143 } },
+    cohorts: [0, 1, 2, 3, 4, 5, 6, 7].map((w) => {
+      const size = 140 + w * 9;
+      return {
+        week: week(w), size,
+        d1: Math.round(size * (0.36 + w * 0.006)), d1Eligible: w === 0 ? size - 22 : size,
+        d7: w >= 1 ? Math.round(size * (0.17 + w * 0.004)) : 0, d7Eligible: w >= 1 ? size : 0,
+        d30: w >= 5 ? Math.round(size * 0.11) : 0, d30Eligible: w >= 5 ? size : 0,
+      };
+    }),
+    funnel: [
+      { step: "Signed up", n: 2391 }, { step: "Made a character", n: 2140 }, { step: "Moved into a home", n: 1987 },
+      { step: "Went to the first party", n: 1702 }, { step: "Came back the next day", n: 793 }, { step: "Made a purchase", n: 96 },
+    ],
+    features: [
+      { feature: "Visited a place", players: 1640 }, { feature: "Finished a daily task", players: 1311 }, { feature: "Read a story beat", players: 1102 },
+      { feature: "Sent a chat message", players: 688 }, { feature: "Found gossip", players: 742 }, { feature: "Played a treasure hunt", players: 405 },
+      { feature: "Went to a club event", players: 913 }, { feature: "Went on a crew outing", players: 287 }, { feature: "Bought a lotto card", players: 820 },
+      { feature: "Owns a business", players: 233 }, { feature: "Earned a together bonus", players: 371 }, { feature: "Took a job", players: 118 },
+    ].map((f) => ({ ...f, players: Math.round((f.players * (n >= 30 ? 1 : 0.72)) * (n > 30 ? 1.08 : 1)) })),
+    spending: [
+      { type: "chat_pass", count: 74, cents: 528_160, buyers: 50 }, { type: "side_arc", count: 118, cents: 352_820, buyers: 61 },
+      { type: "exclusive_event", count: 52, cents: 207_480, buyers: 33 }, { type: "collector_item", count: 31, cents: 77_190, buyers: 22 },
+      { type: "postcard", count: 37, cents: 18_680, buyers: 19 },
+    ],
+    topProducts: [
+      { sku: "chat-unlimited-monthly", name: "VIP (monthly)", count: 58, cents: 289_420 },
+      { sku: "chat-unlimited-forever", name: "Unlimited chat (forever)", count: 9, cents: 107_991 },
+      { sku: "side_rooftop", name: "Side story: Rooftop Season", count: 44, cents: 131_560 },
+      { sku: "event_gala", name: "Exclusive: Harbor Gala", count: 27, cents: 107_730 },
+      { sku: "chat-unlimited-yearly", name: "VIP (yearly)", count: 3, cents: 11_997 },
+    ],
+    ranks: [
+      { level: 1, players: 812 }, { level: 2, players: 531 }, { level: 3, players: 344 }, { level: 4, players: 205 }, { level: 5, players: 118 },
+      { level: 6, players: 64 }, { level: 7, players: 39 }, { level: 8, players: 17 }, { level: 9, players: 8 }, { level: 10, players: 2 },
+    ],
+    economy: { medianCash: 4180, medianClout: 640 },
   });
 }

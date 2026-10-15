@@ -17,7 +17,7 @@ import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
-import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, track } from "./chatActions";
+import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, sessionPing, track } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
 import { syncGossipWeeks } from "@/lib/gossipImport";
@@ -92,6 +92,8 @@ export default async function HomePage() {
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
       chat={chatOn ? { list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard } : undefined}
       track={chatOn ? track : undefined}
+      // Migration 0053: session length for the Studio's Insights (a missing function is ignored).
+      ping={sessionPing}
       // Migration 0017 switches on City News (an empty feed hides it).
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).

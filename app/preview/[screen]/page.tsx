@@ -14,7 +14,7 @@ import {
 } from "../studioActions";
 import {
   previewChatBlock, previewChatList, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard,
-  previewPlayerCard, previewStudioMetrics, previewStudioReportAction, previewStudioReports,
+  previewPlayerCard, previewStudioInsights, previewStudioMetrics, previewStudioReportAction, previewStudioReports,
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
@@ -152,7 +152,7 @@ export default async function Preview({
           api={{
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
             beatStatus: previewStudioBeatStatus, content: previewStudioContent,
-            reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics,
+            reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics, insights: previewStudioInsights,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
