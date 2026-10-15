@@ -222,8 +222,11 @@ export function CrewPrompt({ inbox, onOpen, onDismiss }: { inbox: CrewInbox; onO
 }
 
 /** Tonight's crew plans: invites to answer, then outings in progress. */
-export function CrewPlansSheet({ open, onClose, inbox, busy, onAnswer, onOpenPlace }: {
+export function CrewPlansSheet({ open, onClose, inbox, busy, onAnswer, onOpenPlace, onInviteFriends, onPickPlace }: {
   open: boolean;
+  /** Owner, Oct 15: an empty evening is a chance to grow the crew. */
+  onInviteFriends?: () => void;
+  onPickPlace?: () => void;
   onClose: () => void;
   inbox: CrewInbox | null;
   busy: boolean;
@@ -252,11 +255,20 @@ export function CrewPlansSheet({ open, onClose, inbox, busy, onAnswer, onOpenPla
           </div>
         )}
         {invites.length === 0 && going.length === 0 && (
-          <div className="card stack-4">
-            <p className="overline" style={{ margin: 0 }}>Nothing tonight</p>
+          <div className="crew-empty">
+            <span className="crew-empty-faces" aria-hidden="true">
+              <span>🕺</span><span>💃</span><span className="crew-empty-add">+</span>
+            </span>
+            <p className="title" style={{ margin: 0 }}>No plans tonight. Yet.</p>
             <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>
-              Tap &ldquo;Bring the crew&rdquo; on any place to invite your friends. +{CREW.perFriendClout} clout for every friend who shows up.
+              Nights out hit different with your people. Bring friends into Clout City, then tap &ldquo;Bring the crew&rdquo; on any place.
             </p>
+            <div className="crew-empty-perks">
+              <span><b>+{CREW.perFriendClout}</b> clout for each friend who shows up</span>
+              <span><b>+{CREW.fullClout}</b> clout when the whole crew comes</span>
+            </div>
+            {onInviteFriends && <button className="btn btn-taxi" onClick={onInviteFriends}>Invite friends to your crew</button>}
+            {onPickPlace && <button className="btn btn-secondary" onClick={onPickPlace}>Pick a place for tonight</button>}
           </div>
         )}
       </div>

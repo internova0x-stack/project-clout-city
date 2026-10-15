@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -9,7 +9,7 @@ import { actionSeconds, OTHER_SECONDS } from "@/lib/actionTime";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, SheetTitle, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
@@ -79,7 +79,7 @@ export interface PlaceHandlers {
   /** Crew outings: "Bring the crew" on any place with a crew activity, and tonight's progress. */
   crew?: { outings: CrewOuting[]; onBring: (place: Place) => void };
   /** v0.13 together bonuses (migration 0050): 👯 next to studying and nights out, and today's plans. */
-  together?: { plans: TogetherPlan[]; onTogether: (placeId: string, actionId: string) => void };
+  together?: { plans: TogetherPlan[]; onTogether: (placeId: string, actionId: string) => void; onAnswer?: (id: number, yes: boolean) => void; busy?: string | null };
   /** v0.6 treasure hunts (joined, unfinished): talking to a regular may be the next clue or question. */
   hunt?: { talk: (placeId: string) => Promise<HuntResult>; answer: (choice: number) => Promise<HuntResult> };
   /** v0.8 travel (#4): where the player is; away from a place its actions are a preview with "Go there". */
@@ -92,7 +92,8 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
   /** #7 (owner, Oct 14): on the place card, rows only show what things cost; everything happens inside. A tap goes in. */
   preview?: { onTap?: () => void };
 }) {
-  const now = useGameNow(state.clockOffsetSeconds, 5000);
+  // Every second: closed doors count down live to opening (owner, Oct 15).
+  const now = useGameNow(state.clockOffsetSeconds, 1000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
   const events = CLUB_EVENTS.filter((e) => e.placeId === place.id);
   const { mood, confidence } = state.player;
@@ -133,7 +134,19 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
               {paid !== (a.price ?? 0) && <span className="meta">Usually {formatCash(a.price ?? 0)} · {world.price?.reason}</span>}
               {(() => {
                 const tp = handlers.together?.plans.find((x) => x.place === place.id && x.action === a.id);
-                if (tp) return <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>👯 With {handle(tp.withName)} · {tp.status === "pending" ? "waiting for a yes" : `${TOGETHER.multiplier}× when you both do it`}</span>;
+                // An invite to you: answer it here (owner, Oct 15: the invited player had no way to say yes).
+                if (tp && !tp.mine && tp.status === "pending") return (
+                  <span className="together-ask">
+                    <span className="meta" style={{ color: "var(--neon-text)" }}>👯 {handle(tp.withName)} wants to do this with you · {TOGETHER.multiplier}×</span>
+                    {handlers.together?.onAnswer && (
+                      <span className="row" style={{ gap: 6 }}>
+                        <button className="chip together-yes" disabled={!!handlers.together.busy} onClick={() => handlers.together!.onAnswer!(tp.id, true)}>Yes, let&apos;s go</button>
+                        <button className="chip" disabled={!!handlers.together.busy} onClick={() => handlers.together!.onAnswer!(tp.id, false)}>Not now</button>
+                      </span>
+                    )}
+                  </span>
+                );
+                if (tp) return <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>👯 With {handle(tp.withName)} · {tp.status === "pending" ? "waiting for their yes" : `${TOGETHER.multiplier}× when you both do it`}</span>;
                 return handlers.together && !preview && canDoTogether(place, a.id)
                   ? <button className="linkish together-link" onClick={() => handlers.together!.onTogether(place.id, a.id)}>👯 Do it together · {TOGETHER.multiplier}×</button>
                   : null;
@@ -239,7 +252,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
       {events.map((ev) => {
         const open = eventOpen(ev, minutes);
         const av = eventAvailability(ev, open, state);
-        const wait = realMinutesUntilOpen(ev, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay);
+        const wait = formatCountdown(realMsUntilOpen(ev, now, GAME_CONFIG.cityClock.realHoursPerCityDay));
         return (
           <div key={ev.id} className="action-row">
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -248,7 +261,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
               {tasksAt(state, place.id).filter((t) => t.kind === "event" && t.action_id === ev.id).map((t) => <TaskTick key={t.id} t={t} />)}
               {!compact && <span className="subtext" style={{ display: "block" }}>{ev.blurb}</span>}
               <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} seconds={OTHER_SECONDS.event} />
-              {!open && !state.attendedToday.includes(ev.id) && <span className="meta" style={{ display: "block" }}>Doors open in {wait} min. Come back then, or wait here.</span>}
+              {!open && !state.attendedToday.includes(ev.id) && <span className="meta" style={{ display: "block" }}>Doors open in <b className="tabular">{wait}</b>. Come back then, or wait here.</span>}
               {open && !av.ok && <span className="meta reason">{av.reason}</span>}
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
               {handlers.dating && !compact && (
@@ -259,7 +272,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
             </div>
             {/* Owner, Oct 14: say why an event can't be joined yet, rather than a faded price. */}
             {!open && !state.attendedToday.includes(ev.id) ? (
-              <span className="lock-chip">🕒 {wait} min</span>
+              <span className="lock-chip tabular" role="timer" aria-label={`Doors open in ${wait}`}>🕒 {wait}</span>
             ) : preview ? pill(formatCash(ev.entry)) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
                 {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}
@@ -629,6 +642,9 @@ export function InteriorScene({
 }) {
   const [open, setOpen] = useState(false);
   const [allHere, setAllHere] = useState(false);
+  const [mini, setMini] = useState(false);
+  // Someone talks (a regular's line, a hunt clue): bring the panel back so it's read.
+  useEffect(() => { if (talkNonce) setMini(false); }, [talkNonce]);
   return (
     <div className="layer interior">
       {room}
@@ -645,12 +661,25 @@ export function InteriorScene({
           <button className="here-hud-btn" onClick={() => setAllHere(true)}>View People</button>
         </div>
       )}
-      <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
-        <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          <span className="display-sm">{place.emoji} {place.name}</span>
-          <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
+      {/* Outside the panel: a sheet inside it sat under the nav bar (owner, Oct 15). */}
+      {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
+      {mini ? (
+        // Owner, Oct 15: the panel needs a way out of the way. Minimized, it's one small pill.
+        <button className="interior-mini pill-glass glass-hud" onClick={() => setMini(false)} aria-label={`Show ${place.name} actions`}>
+          <span className="one-line">{place.emoji} {place.name}</span>
+          <ChevronUpIcon size={16} />
         </button>
-        {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
+      ) : (
+      <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
+        <div className="interior-head-row">
+          <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+            <span className="display-sm">{place.emoji} {place.name}</span>
+            <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
+          </button>
+          <button className="icon-round interior-min" onClick={() => { setOpen(false); setMini(true); }} aria-label="Minimize">
+            <ChevronDownIcon size={18} />
+          </button>
+        </div>
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
@@ -661,6 +690,7 @@ export function InteriorScene({
           </>
         )}
       </section>
+      )}
     </div>
   );
 }

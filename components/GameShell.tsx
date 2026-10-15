@@ -958,7 +958,17 @@ export function GameShell({
       // v0.13: a together plan for this activity pays its bonus once both have done it.
       void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then(() => claimTogether(pl, a));
     },
-    together: together && togetherIn ? { plans: togetherIn.plans, onTogether: (pl, a) => setTogetherTarget({ place: pl, action: a }) } : undefined,
+    together: together && togetherIn ? {
+      plans: togetherIn.plans,
+      onTogether: (pl, a) => setTogetherTarget({ place: pl, action: a }),
+      // Owner, Oct 15: an invite for the activity in front of you is answered right on its row.
+      onAnswer: (id, yes) => void togetherRun(`plan:${id}`, () => together.respond(id, yes)).then((r) => {
+        void loadTogether();
+        const p = togetherIn.plans.find((x) => x.id === id);
+        if (r && yes && p) setToast(`You're in. Do it within ${CITY_ECONOMY.together.windowMinutes} minutes of ${handle(p.withName)} for the bonus.`);
+      }),
+      busy,
+    } : undefined,
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
@@ -1421,7 +1431,7 @@ export function GameShell({
   const partyKey = partyInvite ? `${partyInvite.eventId}:${partyInvite.host.id}` : "";
   const showParty = !showDating && !showCrew && !!partyInvite && partyDismissed !== partyKey && flow === "none" && !arranging && tab === "home" && !inside;
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
-  const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor && tab === "home" && !inside;
+  const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   const showPrompt = showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
   const openChatWith = (p: DatePerson) => {
     setPanel(null);
@@ -2061,6 +2071,8 @@ export function GameShell({
           <CrewPlansSheet
             open={panel === "crew"}
             onClose={() => setPanel(null)}
+            onInviteFriends={() => setPanel("invite")}
+            onPickPlace={() => setPanel("places")}
             inbox={crewInbox}
             busy={crewBusy}
             onAnswer={(id, yes) => void (async () => {

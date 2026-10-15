@@ -92,9 +92,13 @@ export function buildModelAvatar(look: Look, opts: ModelAvatarOptions = {}): Ava
   arms[1].rotation.z = 0.13;
   const head = new Group();
   const torso = new Object3D();
+  // Dancing (owner, Oct 15) also turns the hips, the chest and the forearms.
+  const hips = proxy();
+  const chest = proxy();
+  const forearms = [proxy(), proxy()];
   // The stand-ins' rest turns (callers may pose them before the model has loaded).
   const restOf = new Map<Object3D, [number, number, number]>(
-    [...legs, ...knees, ...arms, head].map((o) => [o, [o.rotation.x, o.rotation.y, o.rotation.z]]),
+    [...legs, ...knees, ...arms, head, hips, chest, ...forearms].map((o) => [o, [o.rotation.x, o.rotation.y, o.rotation.z]]),
   );
 
   const materials: Material[] = [];
@@ -187,6 +191,9 @@ export function buildModelAvatar(look: Look, opts: ModelAvatarOptions = {}): Ava
     side("UpperLeg.L", "UpperLeg.R").forEach((b, i) => drive(b, legs[i]));
     side("LowerLeg.L", "LowerLeg.R").forEach((b, i) => drive(b, knees[i]));
     side("UpperArm.L", "UpperArm.R").forEach((b, i) => drive(b, arms[i]));
+    side("LowerArm.L", "LowerArm.R").forEach((b, i) => drive(b, forearms[i]));
+    drive(bone("Hips"), hips);
+    drive(bone("Chest"), chest);
     drive(headBone, head);
 
     // Animation: idle, and a walk Room3D switches to.
@@ -218,6 +225,9 @@ export function buildModelAvatar(look: Look, opts: ModelAvatarOptions = {}): Ava
     legs,
     knees,
     arms,
+    hips,
+    chest,
+    forearms,
     hipY: HIP_Y[sex] * (BUILD_SCALE[look.build] ?? BUILD_SCALE.athletic).h,
     ready: ready.then(() => undefined),
     setMotion(next) {
