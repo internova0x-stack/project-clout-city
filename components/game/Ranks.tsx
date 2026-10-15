@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { RANKS, nextRank, nextRankLine, rankFor, type Rank } from "@/lib/ranks";
+import { RANKS, money, nextRank, nextRankLine, rankFor, type Rank } from "@/lib/ranks";
 import { Sheet } from "../Sheet";
 import { SheetTitle } from "../city/Common";
 
@@ -52,7 +52,7 @@ export function RanksSheet({ open, onClose, clout, netWorth }: { open: boolean; 
             <span style={{ flex: 1, minWidth: 0 }}>
               <b>{r.title}</b>{r.level === mine && <span className="rank-you">You</span>}
               <span className="meta" style={{ display: "block" }}>
-                {r.level === 1 ? "Where everyone starts" : `${r.clout.toLocaleString("en-US")} clout or C$${r.netWorth.toLocaleString("en-US")}`}
+                {r.level === 1 ? "Where everyone starts" : `${r.clout.toLocaleString("en-US")} clout or ${money(r.netWorth)}`}
               </span>
             </span>
             {r.level < mine && <span aria-label="Reached">✓</span>}

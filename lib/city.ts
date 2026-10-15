@@ -6,6 +6,7 @@
 // the two still match. Dependency-free so tests can import it.
 
 import type { LatLng } from "./map/geo";
+import { RANKS } from "./ranks.ts";
 
 // ---------------------------------------------------------------------------
 // Economy numbers (all tunable; gig pay is a multiple of the shift rate)
@@ -166,6 +167,79 @@ export const CITY_ECONOMY = {
       { id: "main-character", name: "Main Character", price: 100, color: "#2A2530", period: "week", pot: { seed: 100000, oneIn: 100000 }, blurb: "For people who are sure the plot is about them." },
     ],
   },
+  /**
+   * v0.12 businesses (owner, Oct 15; docs/08 section 15): buy them in order, upgrade each three times,
+   * collect the till. Pay accrues by the hour and stops after tillDays. Worth = price × (1 + value per
+   * upgrade) × hype, hype rising with clout to `hype.max` at `hype.clout`. Going public (the last business,
+   * fully upgraded) multiplies its worth. Tuned so a steady player reaches C$1B in about 9 months
+   * (tests/businesses.test.ts simulates it). The server reads all of this; the browser never sends amounts.
+   */
+  businesses: {
+    tillDays: 2,
+    upgrade: { cost: 0.6, pay: 0.5, value: 0.5 },
+    hype: { clout: 150000, max: 2 },
+    goPublic: { clout: 50000, fee: 50_000_000, times: 3 },
+    list: [
+      { id: "hot-dog-cart", name: "Dirty Water Dogs", emoji: "🌭", price: 5_000, payPerDay: 750,
+        blurb: "One cart, one umbrella, a hot dog water recipe older than the city.",
+        upgrades: [
+          { name: "Second umbrella", emoji: "⛱️", blurb: "Twice the shade, twice the line." },
+          { name: "Secret menu", emoji: "🤫", blurb: "It's the same hot dog. It costs more now." },
+          { name: "Influencer collab", emoji: "🤳", blurb: "A creator ate one on camera. The line goes around the block." },
+        ] },
+      { id: "bodega", name: "Bodega, Cat Included", emoji: "🐈", price: 50_000, payPerDay: 6_000,
+        blurb: "Open 24 hours. The cat runs it; you just own it.",
+        upgrades: [
+          { name: "Hot food counter", emoji: "🥪", blurb: "Chopped cheese, all day, every day." },
+          { name: "Lotto machine", emoji: "🎟️", blurb: "Everybody's uncle comes in now." },
+          { name: "The cat gets an agent", emoji: "😼", blurb: "Brand deals. The cat negotiates better than you." },
+        ] },
+      { id: "laundromat", name: "Spin Cycle Laundromat", emoji: "🧺", price: 250_000, payPerDay: 22_500,
+        blurb: "Twenty machines, three of them work. The quarters add up.",
+        upgrades: [
+          { name: "Free Wi-Fi", emoji: "📶", blurb: "People stay. People buy snacks." },
+          { name: "Wash and fold", emoji: "👕", blurb: "You fold strangers' socks for money. Lucrative." },
+          { name: "Laundromat by night", emoji: "🎧", blurb: "A DJ on Fridays. It's a scene now." },
+        ] },
+      { id: "cafe", name: "Oat Milk Surcharge Café", emoji: "☕", price: 1_200_000, payPerDay: 81_600,
+        blurb: "Seven kinds of milk, none of them from a cow. The Wi-Fi password is \"buyanothercoffee\".",
+        upgrades: [
+          { name: "Latte art", emoji: "🎨", blurb: "Every cup a portrait of the customer. Mostly." },
+          { name: "Laptop ban (for vibes)", emoji: "💻", blurb: "Fewer screenwriters, more turnover." },
+          { name: "Second location", emoji: "📍", blurb: "Same café, different neighborhood, same oat milk." },
+        ] },
+      { id: "taco-trucks", name: "Taco Truck Fleet", emoji: "🌮", price: 6_000_000, payPerDay: 300_000,
+        blurb: "Five trucks, one group chat, zero parking tickets paid.",
+        upgrades: [
+          { name: "Late-night route", emoji: "🌙", blurb: "Outside every club at 2 a.m." },
+          { name: "Festival permits", emoji: "🎪", blurb: "Every street fair in Queens." },
+          { name: "A truck in every borough", emoji: "🗽", blurb: "Even Staten Island. Especially Staten Island." },
+        ] },
+      { id: "nightclub", name: "Your Own Nightclub", emoji: "🪩", price: 30_000_000, payPerDay: 1_080_000,
+        blurb: "Your name on the door. The bouncer still doesn't respect you.",
+        upgrades: [
+          { name: "VIP floor", emoji: "🥂", blurb: "Upstairs, where the expensive bottles live." },
+          { name: "Celebrity DJ residency", emoji: "🎛️", blurb: "Every Saturday, a famous person presses play." },
+          { name: "A gold-plated velvet rope", emoji: "✨", blurb: "Completely unnecessary. Wildly profitable." },
+        ] },
+      { id: "apartment-building", name: "Luxury* Apartment Building", emoji: "🏢", price: 150_000_000, payPerDay: 3_900_000,
+        blurb: "*Exposed brick. Forty units, one elevator, rent that should be illegal.",
+        upgrades: [
+          { name: "Rooftop amenity", emoji: "🌇", blurb: "Two lounge chairs and a view. Rent goes up 30%." },
+          { name: "Doorman with opinions", emoji: "🧑‍✈️", blurb: "He judges every delivery. Tenants love it." },
+          { name: "Condo conversion", emoji: "🔑", blurb: "Same units, now for sale, at three times the price." },
+        ] },
+      { id: "startup", name: "Disruptive App Startup", emoji: "📱", price: 700_000_000, payPerDay: 12_600_000,
+        blurb: "It's an app for apps. Investors are thrilled.",
+        upgrades: [
+          { name: "Pivot to AI", emoji: "🤖", blurb: "Same app, new deck, valuation doubles." },
+          { name: "Celebrity board member", emoji: "🌟", blurb: "They don't know what the app does. Nobody does." },
+          { name: "Ring the bell", emoji: "🔔", blurb: "Ready to go public." },
+        ] },
+    ],
+  },
+  /** Player ranks (lib/ranks.ts): each rank's clout and net worth, so the server can name ranks too. */
+  ranks: RANKS.map((r) => ({ clout: r.clout, netWorth: r.netWorth })),
 } as const;
 
 // ---------------------------------------------------------------------------
