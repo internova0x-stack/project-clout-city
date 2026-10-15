@@ -35,7 +35,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -53,6 +53,8 @@ export function PreviewHome({
   crewPreset?: string;
   /** v0.9 plus-ones: "invite" (someone asked you) or "sent" (you have a ticket and a plus-one). */
   partyPreset?: string;
+  /** Player ranks: ?rankup=1-10 opens the rank-up reveal for that rank. */
+  rankUpPreset?: number;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
   huntPreset?: string;
   /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (the next card wins its pot). */
@@ -249,6 +251,7 @@ export function PreviewHome({
   const noop = async () => {};
   return (
     <GameShell
+      previewRankUp={rankUpPreset}
       player={player}
       clique={clique}
       daytimeOverride={daytimeOverride}

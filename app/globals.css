@@ -1456,3 +1456,34 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .here-row:last-child { border-bottom:0; }
 .here-row-name { flex:1; min-width:0; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .here-row .here-face { width:32px; height:32px; font-size:17px; flex:none; }
+/* Player ranks (owner, Oct 15): the chip, the climb on the profile, the list and the rank-up reveal.
+   Pink like the rest of the game; the top ranks get the neon, never gold (gold is for real money). */
+.rank-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border:0; border-radius:var(--r-pill); background:#FFE3EF; color:#B0125E; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; cursor:default; }
+button.rank-chip { cursor:pointer; }
+button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
+.rank-chip.rich { background:#2A1530; color:#FFD3EA; }
+.rank-chip.god { background:var(--g-neon); color:#fff; box-shadow:0 0 14px rgba(255,46,136,.45); }
+.rank-climb { display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:var(--r-md); background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--divider); }
+.rank-bar { height:8px; border-radius:var(--r-pill); background:#F3E6EC; overflow:hidden; }
+.rank-bar > span { display:block; height:100%; border-radius:inherit; background:var(--g-neon); }
+.rank-list { display:flex; flex-direction:column; }
+.rank-row { display:flex; align-items:center; gap:12px; padding:10px 6px; border-bottom:1px solid var(--divider); }
+.rank-row:last-child { border-bottom:0; }
+.rank-row.done { opacity:.6; }
+.rank-row.mine { background:#FFF0F6; border-radius:var(--r-sm); box-shadow:inset 0 0 0 1.5px #FF9FCB; }
+.rank-row-emoji { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:19px; background:#FFE3EF; flex:none; }
+.rank-you { margin-left:8px; padding:2px 8px; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font-size:11px; font-weight:700; vertical-align:2px; }
+.modal-card.rank-up { text-align:center; background:#FFF8F3; color:var(--text-1, #1B1420); border-radius:var(--r-xl); padding:24px 20px 18px; box-shadow:var(--elev-4); animation:reveal-rise .4s ease-out; }
+.rank-up-kicker { color:#B0125E; }
+.rank-up-emoji { display:block; font-size:64px; line-height:1.1; margin-top:10px; animation:reveal-rise .5s ease-out; }
+.modal-card.rank-up.top { background:var(--g-night-reveal); color:var(--text-on-dark); box-shadow:0 0 32px rgba(255,46,136,.45); }
+.modal-card.rank-up.top .rank-up-kicker { color:#FF9FCB; }
+.modal-card.rank-up.god .rank-up-emoji { font-size:84px; filter:drop-shadow(0 0 18px rgba(255,159,203,.9)); }
+/* Owner, Oct 15: who's here, right-aligned under the top HUD (the room's people, not the activity card). */
+.here-hud { position:absolute; z-index:16; top:calc(72px + var(--safe-top)); right:12px; display:flex; align-items:center; gap:8px; padding:5px 5px 5px 8px; }
+.here-stack { display:flex; }
+.here-stack .here-face { width:26px; height:26px; font-size:14px; box-shadow:0 0 0 2px #fff; }
+.here-stack .here-face + .here-face { margin-left:-9px; }
+.here-hud-count { font-size:14px; font-weight:600; white-space:nowrap; }
+.here-hud-count b { font-family:var(--font-label); font-variant-numeric:tabular-nums; }
+.here-hud-btn { height:34px; padding:0 14px; border:0; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font:inherit; font-size:13.5px; font-weight:700; white-space:nowrap; cursor:pointer; }

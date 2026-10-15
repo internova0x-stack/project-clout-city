@@ -92,8 +92,8 @@ export function pickInView(people: { id: string; crew: boolean }[], slots: numbe
   return out;
 }
 
-/** "👥 50 here · 6 in the room" (the true count, which can be more than the list holds). */
+/** "50 players here · 6 in the room" (the true count, which can be more than the list holds). */
 export function hereCountLine(count: number, inView: number): string {
-  const who = `${count.toLocaleString("en-US")} ${count === 1 ? "player" : "players"} here`;
-  return count > inView ? `${who} · ${inView} in the room` : `${who} · tap anyone in the room`;
+  const who = `${count.toLocaleString("en-US")} ${count === 1 ? "player" : "players"}`;
+  return count > inView ? `${who} · ${inView} in the room` : who;
 }

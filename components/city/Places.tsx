@@ -622,33 +622,21 @@ export function InteriorScene({
       <button className="pill-glass glass-hud interior-back" onClick={onBack}>
         <ChevronLeftIcon size={18} /> Map
       </button>
+      {/* Owner, Oct 15: who's here sits under the top HUD, right-aligned, not on the activity card. */}
+      {here && here.count > 0 && (
+        <div className="pill-glass glass-hud here-hud">
+          <span className="here-stack" aria-hidden="true">
+            {here.people.slice(0, 3).map((p) => <span key={p.id} className="here-face">{getStyle(p.style as StyleId).emoji}</span>)}
+          </span>
+          <span className="here-hud-count"><b>{here.count.toLocaleString("en-US")}</b> here</span>
+          <button className="here-hud-btn" onClick={() => setAllHere(true)}>View People</button>
+        </div>
+      )}
       <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
         <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="display-sm">{place.emoji} {place.name}</span>
           <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
         </button>
-        {here && here.people.length > 0 && (() => {
-          const onFloor = here.people.filter((p) => p.floor === here.floor);
-          const chips = [...onFloor.filter((p) => !here.inView.includes(p.id)), ...here.people.filter((p) => p.floor !== here.floor)];
-          const more = Math.max(0, here.count - here.inView.length - Math.min(3, chips.length));
-          return (
-            <div className="here-now">
-              <p className="overline" style={{ margin: 0 }}>👥 {hereCountLine(here.count, here.inView.length)}</p>
-              {chips.length > 0 && (
-                <div className="here-chips">
-                  {chips.slice(0, 3).map((p) => (
-                    <button key={p.id} className="here-chip" onClick={() => here.onOpen(p.id)}>
-                      <span className="here-face" aria-hidden="true">{getStyle(p.style as StyleId).emoji}</span>
-                      <span>{p.name}{p.crew ? " 👯" : ""}</span>
-                      {p.floor !== here.floor && <span className="meta">{p.floor < here.floor ? "downstairs" : "upstairs"}</span>}
-                    </button>
-                  ))}
-                  {more > 0 && <button className="here-chip more" onClick={() => setAllHere(true)}>Everyone +{more}</button>}
-                </div>
-              )}
-            </div>
-          );
-        })()}
         {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (
@@ -727,7 +715,7 @@ function HereList({ open, here, placeName, onClose }: {
   return (
     <Sheet open={open} onClose={onClose} label={`Everyone at ${placeName}`}>
       <SheetTitle>Everyone here</SheetTitle>
-      <p className="meta" style={{ margin: "4px 0 0" }}>{here.count.toLocaleString("en-US")} at {placeName} now · tap someone to meet them</p>
+      <p className="meta" style={{ margin: "4px 0 0" }}>{hereCountLine(here.count, here.inView.length)} · at {placeName} now</p>
       {groups.map((g) => (
         <section key={g.title}>
           <p className="overline" style={{ margin: "16px 0 6px" }}>{g.title} · {g.people.length}</p>

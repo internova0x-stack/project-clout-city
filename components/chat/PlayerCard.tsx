@@ -7,6 +7,8 @@ import { messagesLeftLine } from "./Messages";
 import { ECONOMY, formatCash, formatShort } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
+import { RankChip } from "../game/Ranks";
+import { rankFor } from "@/lib/ranks";
 import type { DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
 import { handle } from "@/lib/validation";
@@ -89,6 +91,8 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
             <span style={{ minWidth: 0 }}>
               <span className="display-md" style={{ display: "block" }}>{handle(card.name)}</span>
               <span className="meta" style={{ display: "block" }}>{style?.label} · {hood}</span>
+              {/* Player ranks (owner, Oct 15): the higher of their clout or net worth. */}
+              <span style={{ display: "block", marginTop: 6 }}><RankChip rank={rankFor(card.clout, card.netWorth ?? 0)} /></span>
             </span>
           </div>
           {/* Meeting players: react, break the ice or say something, right under their name. */}

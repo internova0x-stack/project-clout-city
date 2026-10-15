@@ -5,6 +5,7 @@ import type { Look } from "@/lib/look";
 import type { Outfit } from "@/lib/styles";
 import { formatCash, formatShort } from "@/lib/economy";
 import { recentLine, recentWhen, type RecentItem } from "@/lib/recent";
+import { RankClimb } from "./Ranks";
 import { Sheet } from "../Sheet";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
@@ -47,6 +48,8 @@ export function ProfileSheet({
           <h2 className="display-md profile-name">{name}</h2>
           <p className="body profile-sub">{subtitle}</p>
         </div>
+        {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
+        <RankClimb clout={clout} netWorth={netWorth} />
         <div className="profile-kpis">
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>🔥 {formatShort(clout)}</b><span>Clout</span></button>
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>{rank ? `#${rank.toLocaleString()}` : "—"}</b><span>In Queens</span></button>

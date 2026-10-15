@@ -61,6 +61,8 @@ import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
+import { RankUpCard } from "./game/Ranks";
+import { RANKS, rankFor, type Rank } from "@/lib/ranks";
 import { contextTips } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
@@ -148,6 +150,7 @@ export function GameShell({
   hunt,
   gossip,
   roomMood = "dream",
+  previewRankUp,
 }: {
   player: Player;
   clique: CliqueMember[];
@@ -188,6 +191,8 @@ export function GameShell({
   daytimeOverride?: boolean;
   /** Development previews only: open a step of the first session directly. */
   previewFlow?: Flow;
+  /** Development previews only: show the rank-up reveal for this rank (1 to 10). */
+  previewRankUp?: number;
 }) {
   const [city, setCity] = useState<CityState | null>(initialCity);
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
@@ -279,6 +284,9 @@ export function GameShell({
   const openPlayer = (id: string) => { setPinned((p) => [id, ...p.filter((x) => x !== id)].slice(0, 3)); setCardId(id); };
   const [placeCounts, setPlaceCounts] = useState<PlaceCounts>({});
   const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
+  // Player ranks (owner, Oct 15): the reveal when clout or net worth crosses into a new rank.
+  const [rankUp, setRankUp] = useState<Rank | null>(previewRankUp ? RANKS[previewRankUp - 1] ?? null : null);
+  const seenRank = useRef<number | null>(null);
   useEffect(() => {
     if (!inside || !chat?.presence) { setHere([]); setHereCount(0); return; }
     let stop = false;
@@ -874,6 +882,15 @@ export function GameShell({
     () => (inside ? placeRoom(inside) : null),
     [inside],
   );
+  // Player ranks: the first reading (once the city and net worth are in) is where you are; a higher one
+  // later is a climb.
+  const myRank = rankFor(me.clout, city ? netWorth(city) : me.bank_cash);
+  useEffect(() => {
+    if (!city) return;
+    if (seenRank.current !== null && myRank.level > seenRank.current) setRankUp(myRank);
+    seenRank.current = myRank.level;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myRank.level, !!city]);
   const insideTemplate = inside ? (insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe : null;
   // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
   // nothing over their heads (NPCs keep their 💬), tap the figure to open their card. Crowded places
@@ -1689,6 +1706,7 @@ export function GameShell({
         </>
       )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />
+      {rankUp && <RankUpCard rank={rankUp} name={handle(me.display_name)} onClose={() => setRankUp(null)} />}
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}

@@ -77,7 +77,7 @@ test("crowded places: who's in view (opened first, then crew, then turns)", () =
 });
 
 test("crowded places: the Here now line gives the true count", () => {
-  assert.equal(hereCountLine(50, 5), "50 players here · 5 in the room");
-  assert.equal(hereCountLine(3, 3), "3 players here · tap anyone in the room");
-  assert.equal(hereCountLine(1, 1), "1 player here · tap anyone in the room");
+  assert.equal(hereCountLine(50, 5), "50 players · 5 in the room");
+  assert.equal(hereCountLine(3, 3), "3 players");
+  assert.equal(hereCountLine(1, 1), "1 player");
 });
