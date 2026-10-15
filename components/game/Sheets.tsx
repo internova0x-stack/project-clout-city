@@ -4,7 +4,7 @@ import { ExclusiveEventCard, type MoneyHandlers } from "../city/Money";
 import { liveParty } from "@/lib/store";
 import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, placeById, realMinutesUntilOpen } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, formatCountdown, placeById, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { eventAvailability, eventById, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -161,7 +161,7 @@ export function EventsSheet({
   /** v0.5 exclusive events (real cash), promoted first (Clarifications 9). */
   exclusive?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
 }) {
-  const now = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
+  const now = useGameNow(city?.clockOffsetSeconds ?? 0, 1000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
   return (
     <Sheet open={open} onClose={onClose} label="Events">
@@ -185,7 +185,7 @@ export function EventsSheet({
             const isOpen = eventOpen(ev, minutes);
             const av = eventAvailability(ev, isOpen, city);
             const went = city.attendedToday.includes(ev.id);
-            const wait = realMinutesUntilOpen(ev, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay);
+            const wait = formatCountdown(realMsUntilOpen(ev, now, GAME_CONFIG.cityClock.realHoursPerCityDay));
             const here = city.player.at_place === ev.placeId;
             return (
               <div key={ev.id} className="item-card">
@@ -198,7 +198,7 @@ export function EventsSheet({
                   <span className="owned-chip">You went. Back tomorrow.</span>
                 ) : !isOpen ? (
                   <>
-                    <span className="wait-chip">🕒 Opens in {wait} min · Entry {formatCash(ev.entry)}</span>
+                    <span className="wait-chip tabular" role="timer">🕒 Opens in {wait} · Entry {formatCash(ev.entry)}</span>
                     {!here && onGoThere && <button className="btn btn-secondary btn-sm" onClick={() => onGoThere(ev.placeId)}>Go there and wait</button>}
                   </>
                 ) : (

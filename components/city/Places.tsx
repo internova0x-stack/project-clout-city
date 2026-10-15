@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, realMinutesUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -92,7 +92,8 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
   /** #7 (owner, Oct 14): on the place card, rows only show what things cost; everything happens inside. A tap goes in. */
   preview?: { onTap?: () => void };
 }) {
-  const now = useGameNow(state.clockOffsetSeconds, 5000);
+  // Every second: closed doors count down live to opening (owner, Oct 15).
+  const now = useGameNow(state.clockOffsetSeconds, 1000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
   const events = CLUB_EVENTS.filter((e) => e.placeId === place.id);
   const { mood, confidence } = state.player;
@@ -239,7 +240,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
       {events.map((ev) => {
         const open = eventOpen(ev, minutes);
         const av = eventAvailability(ev, open, state);
-        const wait = realMinutesUntilOpen(ev, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay);
+        const wait = formatCountdown(realMsUntilOpen(ev, now, GAME_CONFIG.cityClock.realHoursPerCityDay));
         return (
           <div key={ev.id} className="action-row">
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -248,7 +249,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
               {tasksAt(state, place.id).filter((t) => t.kind === "event" && t.action_id === ev.id).map((t) => <TaskTick key={t.id} t={t} />)}
               {!compact && <span className="subtext" style={{ display: "block" }}>{ev.blurb}</span>}
               <EffectChips price={ev.entry} energy={20} clout={ev.clout} mood={ev.mood} confidence={ev.confidence} seconds={OTHER_SECONDS.event} />
-              {!open && !state.attendedToday.includes(ev.id) && <span className="meta" style={{ display: "block" }}>Doors open in {wait} min. Come back then, or wait here.</span>}
+              {!open && !state.attendedToday.includes(ev.id) && <span className="meta" style={{ display: "block" }}>Doors open in <b className="tabular">{wait}</b>. Come back then, or wait here.</span>}
               {open && !av.ok && <span className="meta reason">{av.reason}</span>}
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
               {handlers.dating && !compact && (
@@ -259,7 +260,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
             </div>
             {/* Owner, Oct 14: say why an event can't be joined yet, rather than a faded price. */}
             {!open && !state.attendedToday.includes(ev.id) ? (
-              <span className="lock-chip">🕒 {wait} min</span>
+              <span className="lock-chip tabular" role="timer" aria-label={`Doors open in ${wait}`}>🕒 {wait}</span>
             ) : preview ? pill(formatCash(ev.entry)) : away ? <span className="lock-chip">On arrival</span> : (
               <button className="btn btn-taxi btn-sm" disabled={!av.ok || handlers.busy !== null} onClick={() => handlers.onAttendEvent(ev.id)}>
                 {handlers.busy === `event:${ev.id}` ? "…" : formatCash(ev.entry)}

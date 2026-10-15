@@ -928,6 +928,25 @@ export function realMinutesUntilOpen(ev: ClubEvent, cityMinutes: number, realHou
   return Math.ceil((wait * realHoursPerCityDay * 60) / 1440);
 }
 
+/**
+ * Real milliseconds until doors open, to the second (owner, Oct 15: "the mins should be a countdown").
+ * The city clock loops every realHoursPerCityDay real hours; doors open at the event's start hour.
+ */
+export function realMsUntilOpen(ev: ClubEvent, nowMs: number, realHoursPerCityDay = 2): number {
+  const cycle = realHoursPerCityDay * 3_600_000;
+  const at = ((ev.startHour * 60) / 1440) * cycle;
+  const into = ((nowMs % cycle) + cycle) % cycle;
+  return (at - into + cycle) % cycle;
+}
+
+/** "47:05", or "1:02:05" past an hour. */
+export function formatCountdown(ms: number): string {
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+  const mm = h ? String(m).padStart(2, "0") : String(m);
+  return `${h ? `${h}:` : ""}${mm}:${String(sec).padStart(2, "0")}`;
+}
+
 /** The seed the database stores (game_settings 'city'); generated into the migration. */
 /**
  * A collector piece's value in Net Worth: 1.5× the priciest virtual-cash item in its category (Clarifications 5).

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DAILY_LIMIT, chatTime, type ChatApi, type ChatMessage, type ChatStatus, type PlayerCard } from "@/lib/chat";
+import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ReportReason, type ChatMessage, type ChatStatus, type PlayerCard } from "@/lib/chat";
 import { REACTIONS, icebreakers } from "@/lib/meet";
 import { messagesLeftLine } from "./Messages";
 import { ECONOMY, formatCash, formatShort } from "@/lib/economy";
@@ -34,6 +34,27 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
   const [sending, setSending] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  // Block and Report right on the card (owner, Oct 15): a small confirm under the links.
+  const [confirm, setConfirm] = useState<"block" | "report" | null>(null);
+  const [reason, setReason] = useState<ReportReason>("harassment");
+  const blockThem = async () => {
+    if (!card) return;
+    setBusy(true);
+    const r = await api.block(card.id, true);
+    setBusy(false);
+    if (!r.ok) return onToast?.(r.error);
+    onToast?.(`${handle(card.name)} is blocked. You won't see each other's messages.`);
+    onClose();
+  };
+  const reportThem = async () => {
+    if (!card) return;
+    setBusy(true);
+    const r = await api.report(card.id, null, reason, "");
+    setBusy(false);
+    if (!r.ok) return onToast?.(r.error);
+    setConfirm(null);
+    onToast?.("Thanks. Our review team will take a look.");
+  };
   const toggle = async (on: boolean) => {
     if (!card || !dating) return;
     setBusy(true);
@@ -152,8 +173,35 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
                 <span className={`meta${status && !status.unlimited && status.left <= 3 ? " low" : ""}`}>{messagesLeftLine(status)}</span>
                 {out && onOutOfMessages
                   ? <button className="linkish" onClick={onOutOfMessages}>✨ Get unlimited chat</button>
-                  : <button className="meet-open-chat" onClick={() => onMessage({ id: card.id, name: card.name, style: card.style })}>Open chat · Block · Report ›</button>}
+                  : (
+                    <span className="meet-links">
+                      <button className="meet-link chat" onClick={() => onMessage({ id: card.id, name: card.name, style: card.style })}>Open chat</button>
+                      <button className="meet-link block" onClick={() => setConfirm(confirm === "block" ? null : "block")} aria-expanded={confirm === "block"}>Block</button>
+                      <button className="meet-link report" onClick={() => setConfirm(confirm === "report" ? null : "report")} aria-expanded={confirm === "report"}>Report</button>
+                    </span>
+                  )}
               </div>
+              {confirm === "block" && (
+                <div className="meet-confirm">
+                  <span className="body">Block {handle(card.name)}? Neither of you can message the other, and they won&apos;t see you around.</span>
+                  <span className="row" style={{ gap: 8 }}>
+                    <button className="chip" onClick={() => setConfirm(null)}>Cancel</button>
+                    <button className="chip meet-confirm-block" disabled={busy} onClick={() => void blockThem()}>Block</button>
+                  </span>
+                </div>
+              )}
+              {confirm === "report" && (
+                <div className="meet-confirm">
+                  <span className="body">What&apos;s wrong? Your chats with {handle(card.name)} go to our review team.</span>
+                  <span className="chip-row" role="group" aria-label="Reason" style={{ flexWrap: "wrap" }}>
+                    {REPORT_REASONS.map((r) => <button key={r.id} className="chip" aria-pressed={reason === r.id} onClick={() => setReason(r.id)}>{r.label}</button>)}
+                  </span>
+                  <span className="row" style={{ gap: 8 }}>
+                    <button className="chip" onClick={() => setConfirm(null)}>Cancel</button>
+                    <button className="chip meet-confirm-block" disabled={busy} onClick={() => void reportThem()}>Send report</button>
+                  </span>
+                </div>
+              )}
             </div>
           )}
           <div className="profile-kpis">

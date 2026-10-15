@@ -175,3 +175,14 @@ test("bill countdown: drains over the week and turns urgent in the last day (own
   assert.equal(billCountdown({ kind: "rent", amount: 2600, due_date: due }, at + 1000).label, "Due now");
   assert.equal(new Date(billDueAtMs("2026-12-01")).toISOString(), "2026-12-01T05:00:00.000Z"); // EST
 });
+
+test("doors count down to the second (owner, Oct 15)", async () => {
+  const { realMsUntilOpen, formatCountdown, CLUB_EVENTS } = await import("../lib/city.ts");
+  const ev = { ...CLUB_EVENTS[0], startHour: 22 };
+  // City day = 2 real hours, so 10 PM is 110 real minutes into the cycle; 62 minutes in, 48 to go.
+  assert.equal(realMsUntilOpen(ev, 62 * 60_000), 48 * 60_000);
+  assert.equal(formatCountdown(48 * 60_000), "48:00");
+  assert.equal(formatCountdown(47 * 60_000 + 5_400), "47:06");
+  assert.equal(formatCountdown(62 * 60_000 + 5_000), "1:02:05");
+  assert.equal(formatCountdown(0), "0:00");
+});
