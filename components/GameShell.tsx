@@ -7,6 +7,7 @@ import { ECONOMY, formatCash } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
+import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
@@ -134,6 +135,13 @@ function initialFlow(p: Player): Flow {
 // The signed-in home screen: the apartment and the map, the HUD with live
 // clout and cash, and the guided first session (welcome, tour, first party,
 // leaderboard, invite and install prompts).
+/** A failed call: reload when the game was updated under us, else the usual toast. */
+function glitched(e: unknown, toast: (m: string) => void) {
+  if (isStaleBuild(e)) { toast("Clout City was updated. Reloading…"); reloadForNewBuild(); return; }
+  console.error(e);
+  toast("The city glitched. Try again.");
+}
+
 export function GameShell({
   player,
   clique,
@@ -454,8 +462,8 @@ export function GameShell({
       const r = await call();
       if (!r.ok) { setToast(r.error); return null; }
       return r.data;
-    } catch {
-      setToast("The city glitched. Try again.");
+    } catch (e) {
+      glitched(e, setToast);
       return null;
     } finally {
       setBusy(null);
@@ -503,6 +511,14 @@ export function GameShell({
   }, [dating, loadInbox]);
   // A session a day counts toward day-1 return; unread messages badge the Phone.
   useEffect(() => { track?.("session"); }, [track]);
+  // After a deploy, an installed app left open reloads when it comes back (lib/freshBuild.ts).
+  useEffect(() => {
+    const onShow = () => { if (document.visibilityState === "visible") void checkBuild(); };
+    document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("pageshow", onShow);
+    const id = window.setInterval(onShow, 10 * 60_000);
+    return () => { document.removeEventListener("visibilitychange", onShow); window.removeEventListener("pageshow", onShow); window.clearInterval(id); };
+  }, []);
   useEffect(() => {
     if (!ping) return;
     const beat = () => { if (document.visibilityState === "visible") void ping().catch(() => {}); };
@@ -573,8 +589,8 @@ export function GameShell({
       setBusy(key);
       try {
         return applyCity(await call());
-      } catch {
-        setToast("The city glitched. Try again.");
+      } catch (e) {
+        glitched(e, setToast);
         return false;
       } finally {
         setBusy(null);
@@ -590,8 +606,8 @@ export function GameShell({
       if (!r.ok) { setToast(r.error); return null; }
       applyCity({ ...r, gain: undefined });
       return r.card ?? null;
-    } catch {
-      setToast("The city glitched. Try again.");
+    } catch (e) {
+      glitched(e, setToast);
       return null;
     } finally {
       setBusy(null);
@@ -606,8 +622,8 @@ export function GameShell({
       await loadBiz();
       if (cityApi) { const c = await cityApi.refresh(); if (c.ok) applyCity(c); }
       return r.data;
-    } catch {
-      setToast("The city glitched. Try again.");
+    } catch (e) {
+      glitched(e, setToast);
       return null;
     } finally {
       setBusy(null);
@@ -1137,14 +1153,12 @@ export function GameShell({
     });
   };
 
-  // Music starts on the first tap anywhere, remembering the player's choice.
+  // Music starts on the first tap anywhere (and restarts after the phone suspends it), remembering the player's choice.
   useEffect(() => {
     const m = player.music_muted || readLocalMuted();
     setMuted(m);
     music().setMuted(m);
-    const start = () => music().start();
-    window.addEventListener("pointerdown", start, { once: true });
-    return () => window.removeEventListener("pointerdown", start);
+    return music().unlockOnTap();
   }, [player.music_muted]);
   const toggleSound = () => {
     const next = !muted;
