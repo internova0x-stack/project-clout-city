@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 import { DATING, type CrushStatus, type DateCandidate, type DateNight, type DatingInbox, type DatingResult } from "@/lib/dating";
 import { CLUB_EVENTS, PLACES } from "@/lib/city";
 
@@ -47,6 +49,7 @@ function settle(d: Row) {
 /** ?dating=alone has nobody to ask; ?dating=match starts with an unseen "It's mutual"; ?dating=invite with a date invite waiting; ?dating=tonight with one in progress. */
 let alone = false;
 export async function previewDatingReset(preset: string | undefined) {
+  previewOnly();
   s = fresh();
   // ?dating=alone: no crew and no chats yet, so "Make it a date" has nobody to ask (#5).
   alone = preset === "alone";
@@ -60,6 +63,7 @@ export async function previewDatingReset(preset: string | undefined) {
 }
 
 export async function previewDatingInbox() {
+  previewOnly();
   const matches = Object.keys(PEOPLE).filter(matched).map((id) => ({ id, ...PEOPLE[id], seen: s.seen.has(id) }));
   const dates: DateNight[] = s.dates
     .filter((d) => d.status !== "cancelled" && (d.status !== "declined" || d.host === ME))
@@ -77,9 +81,11 @@ export async function previewDatingInbox() {
   return ok<DatingInbox>({ matches, dates, crushes: mine(), max: DATING.maxCrushes, bonus: { mood: DATING.dateMood, clout: DATING.dateClout } });
 }
 export async function previewCrushStatus(id: string) {
+  previewOnly();
   return PEOPLE[id] ? ok(status(id)) : fail("That player isn't around anymore.");
 }
 export async function previewCrush(id: string, on: boolean) {
+  previewOnly();
   if (on) {
     if (!CONNECTED.has(id)) return fail("You two need to know each other first: a crew member or a real chat.");
     if (!has(ME, id) && mine() >= DATING.maxCrushes) return fail(`That's ${DATING.maxCrushes} crushes. Take one back to make room.`);
@@ -91,15 +97,18 @@ export async function previewCrush(id: string, on: boolean) {
   return ok(status(id));
 }
 export async function previewMatchSeen(id: string) {
+  previewOnly();
   s.seen.add(id);
   return ok(null);
 }
 export async function previewDateCandidates() {
+  previewOnly();
   if (alone) return ok<DateCandidate[]>([]);
   const list: DateCandidate[] = [...CONNECTED].map((id) => ({ id, ...PEOPLE[id], matched: matched(id), crush: has(ME, id) }));
   return ok(list.sort((a, b) => Number(b.matched) - Number(a.matched) || a.name.localeCompare(b.name)));
 }
 export async function previewDateInvite(withId: string, kind: "place" | "event", target: string) {
+  previewOnly();
   if (!CONNECTED.has(withId)) return fail("You two need to know each other first: a crew member or a real chat.");
   if (!spot(kind, target)) return fail("Pick a place with food or a club night.");
   const live = (d: Row) => d.status === "pending" || d.status === "accepted";
@@ -112,6 +121,7 @@ export async function previewDateInvite(withId: string, kind: "place" | "event",
   return ok(null);
 }
 export async function previewDateRespond(id: number, yes: boolean) {
+  previewOnly();
   const d = s.dates.find((x) => x.id === id && x.guest === ME);
   if (!d) return fail("That date isn't around anymore.");
   if (d.status !== "pending") return fail("That one's already been answered.");
@@ -120,12 +130,14 @@ export async function previewDateRespond(id: number, yes: boolean) {
   return ok(null);
 }
 export async function previewDateCancel(id: number) {
+  previewOnly();
   const d = s.dates.find((x) => x.id === id && x.host === ME && !x.paid);
   if (d) d.status = "cancelled";
   return ok(null);
 }
 /** The preview city calls this after a visit or an event, like the SQL triggers. */
 export async function previewDateWent(kind: "place" | "event", target: string) {
+  previewOnly();
   for (const d of s.dates) {
     if (d.kind !== kind || d.target !== target || (d.status !== "pending" && d.status !== "accepted")) continue;
     if (d.host === ME) d.hostWent = true;
@@ -136,6 +148,7 @@ export async function previewDateWent(kind: "place" | "event", target: string) {
 }
 /** Blocking cancels everything between the two (as the SQL trigger on blocks does). */
 export async function previewDatingBlock(id: string) {
+  previewOnly();
   s.crushes.delete(`${ME}>${id}`);
   s.crushes.delete(`${id}>${ME}`);
   s.seen.delete(id);

@@ -9,6 +9,7 @@ import { previewNews } from "@/app/preview/newsActions";
 import { useCallback, useMemo, useRef, useEffect } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState } from "@/lib/citySim";
+import { createBusinessSim } from "@/lib/businessSim";
 import type { CityResult } from "@/lib/cityState";
 import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
@@ -25,7 +26,7 @@ import {
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
 import {
-  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
+  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
@@ -35,7 +36,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -53,6 +54,10 @@ export function PreviewHome({
   crewPreset?: string;
   /** v0.9 plus-ones: "invite" (someone asked you) or "sent" (you have a ticket and a plus-one). */
   partyPreset?: string;
+  /** v0.12 businesses: ?biz=some|rich|public starts with businesses. */
+  bizPreset?: string;
+  /** Player ranks: ?rankup=1-10 opens the rank-up reveal for that rank. */
+  rankUpPreset?: number;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
   huntPreset?: string;
   /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (the next card wins its pot). */
@@ -60,11 +65,16 @@ export function PreviewHome({
   /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
   gossipPreset?: string;
 }) {
+  // v0.12 ?biz=some|rich|public: start with businesses, and the cash and clout to match.
+  const boost = bizPreset === "some" ? { cash: 60_000, clout: 11_000 } : bizPreset === "rich" || bizPreset === "public" ? { cash: 60_000_000, clout: 60_000 } : null;
+  const me = useMemo(() => (boost ? { ...player, bank_cash: player.bank_cash + boost.cash, clout: player.clout + boost.clout } : player),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [player, bizPreset]);
   const city = useMemo(() => {
-    const s = sampleCityState({ bank_cash: player.bank_cash, clout: player.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
+    const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
     return { ...s, devTools };
-  }, [player, devTools, tasksDone]);
+  }, [me, player, devTools, tasksDone]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => {
     const api = createSimApi(city, () => feedRef.current);
@@ -74,6 +84,11 @@ export function PreviewHome({
     if (lottoPreset === "jackpot") { api.lottoNext([5]); api.lottoPot(); }
     return api;
   }, [city, lottoPreset]);
+  const businessApi = useMemo(() => createBusinessSim({
+    cash: () => sim.peek().cash,
+    clout: () => sim.peek().clout,
+    pay: (cash, clout = 0) => sim.huntReward(cash, clout),
+  }, bizPreset), [sim, bizPreset]);
 
   // The story store lives on the dev server; clout it pays is mirrored into the sim's player.
   const story = useMemo<StoryApi>(() => {
@@ -166,8 +181,11 @@ export function PreviewHome({
 
   // Meeting players: ?chat=out starts with today's messages used up (the unlimited chat offer).
   useEffect(() => {
-    const preset = new URLSearchParams(window.location.search).get("chat");
+    const q = new URLSearchParams(window.location.search);
+    const preset = q.get("chat");
     if (preset) void previewChatPreset(preset);
+    // Crowded places: ?crowd=50 puts 50 sample players at whatever place you walk into.
+    void previewCrowdPreset(Number(q.get("crowd")) || 0);
   }, []);
   const chat = useMemo<ChatApi>(() => ({
     list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
@@ -246,7 +264,8 @@ export function PreviewHome({
   const noop = async () => {};
   return (
     <GameShell
-      player={player}
+      previewRankUp={rankUpPreset}
+      player={me}
       clique={clique}
       daytimeOverride={daytimeOverride}
       previewFlow={flow}
@@ -263,6 +282,7 @@ export function PreviewHome({
       cityNews={cityOff ? undefined : previewNews}
       hunt={cityOff ? undefined : huntApi}
       gossip={cityOff ? undefined : gossipApi}
+      business={cityOff ? undefined : businessApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,

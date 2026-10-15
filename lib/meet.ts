@@ -4,7 +4,7 @@
 // comes back. Dependency-free so tests can import it.
 
 /** Someone at the same place now (place_presence). */
-export interface HerePerson { id: string; name: string; style: string; look: unknown; crew: boolean; floor: number; clout: number }
+export interface HerePerson { id: string; name: string; style: string; look: unknown; crew: boolean; floor: number; clout: number; netWorth?: number }
 export interface Presence { count: number; people: HerePerson[] }
 /** place_counts: players at each place now, and the first three (crew first). */
 export type PlaceCounts = Record<string, { count: number; names: { name: string; style: string }[] }>;
@@ -66,4 +66,34 @@ export function hereLine(names: string[], count: number): string {
   const more = count - shown.length;
   const list = shown.length <= 1 ? shown.join("") : `${shown.slice(0, -1).join(", ")} and ${shown.at(-1)}`;
   return more > 0 ? `${list} +${more} more` : list;
+}
+
+/** Crowded places (owner, Oct 15): how often one of the people taking turns walks out and another walks in. */
+export const ROTATE_MS = 45_000;
+
+/**
+ * Who stands in the room when more players are here than it holds (lib/rooms.ts playerSlots): the
+ * people you just opened (most recent first), then crew, then everyone else taking turns. The turn
+ * window moves one place each `turn`, so one walks out and one walks in; the rest go in a fixed order
+ * (by id, crew too) so the room doesn't reshuffle every time the list is refreshed. Everyone not picked is
+ * still in the Here now list.
+ */
+export function pickInView(people: { id: string; crew: boolean }[], slots: number, pinned: string[] = [], turn = 0): string[] {
+  if (slots <= 0) return [];
+  const here = new Set(people.map((p) => p.id));
+  const out: string[] = [];
+  for (const id of pinned) if (here.has(id) && !out.includes(id) && out.length < slots) out.push(id);
+  for (const id of people.filter((p) => p.crew).map((p) => p.id).sort()) if (!out.includes(id) && out.length < slots) out.push(id);
+  const rest = people.map((p) => p.id).filter((id) => !out.includes(id)).sort();
+  const room = slots - out.length;
+  if (rest.length <= room) return [...out, ...rest];
+  const start = ((turn % rest.length) + rest.length) % rest.length;
+  for (let i = 0; i < room; i++) out.push(rest[(start + i) % rest.length]);
+  return out;
+}
+
+/** "50 players here · 6 in the room" (the true count, which can be more than the list holds). */
+export function hereCountLine(count: number, inView: number): string {
+  const who = `${count.toLocaleString("en-US")} ${count === 1 ? "player" : "players"}`;
+  return count > inView ? `${who} · ${inView} in the room` : who;
 }

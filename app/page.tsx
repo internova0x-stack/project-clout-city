@@ -14,5 +14,8 @@ export default async function GuestPage({
   if (user) redirect("/create");
 
   const params = await searchParams;
-  return <GuestMap invited={params.invited === "1" || typeof params.ref === "string"} authError={typeof params.auth_error === "string"} />;
+  return (
+    <GuestMap invited={params.invited === "1" || typeof params.ref === "string"} authError={typeof params.auth_error === "string"}
+      at={typeof params.at === "string" ? params.at : undefined} />
+  );
 }

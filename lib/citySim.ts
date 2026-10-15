@@ -71,6 +71,8 @@ export type SimApi = CityApi & {
   storyClout(n: number): void;
   /** A treasure hunt's finale pays cash and clout (the preview's hunt runs on the dev server). */
   huntReward(cash: number, clout: number): void;
+  /** v0.12 businesses in the preview: the player's cash and clout right now. */
+  peek(): { cash: number; clout: number };
   /** What the preview's pretend Stripe webhook grants. */
   grantCollector(sku: string): void;
   grantTicket(clout: number): void;
@@ -431,6 +433,9 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
     huntReward(cash, clout) {
       p().bank_cash += cash;
       p().clout += clout;
+    },
+    peek() {
+      return { cash: p().bank_cash, clout: p().clout };
     },
     grantCollector(sku) {
       const item = itemBySku(sku);

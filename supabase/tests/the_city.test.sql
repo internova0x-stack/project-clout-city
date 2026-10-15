@@ -21,6 +21,8 @@ begin
 end $h$;
 
 insert into auth.users (id) values ('00000000-0000-0000-0000-000000000010');
+-- 0049: the dev tools need a Studio admin.
+insert into public.story_admins (user_id) values ('00000000-0000-0000-0000-000000000010');
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000010', false);
 select 1 from public.create_player('Gus', 'bodega_drip', '{}', null, true);

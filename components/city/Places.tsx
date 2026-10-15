@@ -11,7 +11,7 @@ import { distanceMiles, type LatLng } from "@/lib/map/geo";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { Sheet } from "../Sheet";
-import { EffectChips, useGameNow } from "./Common";
+import { EffectChips, SheetTitle, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
 import { callName, type Regular } from "@/lib/cast";
 import type { HuntResult } from "@/lib/hunts";
@@ -20,7 +20,9 @@ import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
 import { DateStatusRow } from "../dating/Dating";
 import { clubLines } from "./Clubs";
-import { hereLine, type HerePerson, type PlaceCounts } from "@/lib/meet";
+import { RankChip } from "../game/Ranks";
+import { rankFor } from "@/lib/ranks";
+import { hereCountLine, hereLine, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { canDateAt, type DateNight } from "@/lib/dating";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
@@ -608,8 +610,11 @@ export function InteriorScene({
   room: React.ReactNode;
   /** #20: bumped each time the player taps the place's regular in the room. */
   talkNonce?: number;
-  /** Meeting players (owner, Oct 15): the real players here now (crew first), and the floor you're on. */
-  here?: { people: HerePerson[]; floor: number; onOpen: (id: string) => void };
+  /**
+   * Meeting players (owner, Oct 15): the real players here now (crew first), how many in all, who stands
+   * in the room (crowded places: the rest are in the list) and the floor you're on.
+   */
+  here?: { people: HerePerson[]; count: number; inView: string[]; floor: number; onOpen: (id: string) => void };
 }) {
   const [open, setOpen] = useState(false);
   const [allHere, setAllHere] = useState(false);
@@ -619,26 +624,22 @@ export function InteriorScene({
       <button className="pill-glass glass-hud interior-back" onClick={onBack}>
         <ChevronLeftIcon size={18} /> Map
       </button>
+      {/* Owner, Oct 15: who's here sits under the top HUD, right-aligned, not on the activity card. */}
+      {here && here.count > 0 && (
+        <div className="pill-glass glass-hud here-hud">
+          <span className="here-stack" aria-hidden="true">
+            {here.people.slice(0, 3).map((p) => <span key={p.id} className="here-face">{getStyle(p.style as StyleId).emoji}</span>)}
+          </span>
+          <span className="here-hud-count"><b>{here.count.toLocaleString("en-US")}</b> here</span>
+          <button className="here-hud-btn" onClick={() => setAllHere(true)}>View People</button>
+        </div>
+      )}
       <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
         <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="display-sm">{place.emoji} {place.name}</span>
           <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
         </button>
-        {here && here.people.length > 0 && (
-          <div className="here-now">
-            <p className="overline" style={{ margin: 0 }}>👥 {here.people.length} {here.people.length === 1 ? "player" : "players"} here · tap anyone in the room</p>
-            <div className="here-chips">
-              {(allHere ? here.people : here.people.slice(0, 3)).map((p) => (
-                <button key={p.id} className="here-chip" onClick={() => here.onOpen(p.id)}>
-                  <span className="here-face" aria-hidden="true">{getStyle(p.style as StyleId).emoji}</span>
-                  <span>{p.name}{p.crew ? " 👯" : ""}</span>
-                  {p.floor !== here.floor && <span className="meta">{p.floor < here.floor ? "downstairs" : "upstairs"}</span>}
-                </button>
-              ))}
-              {!allHere && here.people.length > 3 && <button className="here-chip more" onClick={() => setAllHere(true)}>+{here.people.length - 3}</button>}
-            </div>
-          </div>
-        )}
+        {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
@@ -694,4 +695,42 @@ export function homeLocation(homeId: string | null): LatLng {
 /** Story places (location wave 2) appear once their arc has started. */
 export function visiblePlaces(story: StoryFeed | null): Place[] {
   return PLACES.filter((p) => !p.story || (story?.startedArcs ?? []).includes(p.story));
+}
+
+/**
+ * Crowded places (owner, Oct 15): everyone here, by where they are. Tapping someone opens their card,
+ * and someone on this floor walks into the room.
+ */
+function HereList({ open, here, placeName, onClose }: {
+  open: boolean;
+  here: { people: HerePerson[]; count: number; inView: string[]; floor: number; onOpen: (id: string) => void };
+  placeName: string;
+  onClose: () => void;
+}) {
+  const groups = [
+    { title: "In the room", people: here.people.filter((p) => here.inView.includes(p.id)) },
+    { title: "Around this floor", people: here.people.filter((p) => p.floor === here.floor && !here.inView.includes(p.id)) },
+    { title: "Downstairs", people: here.people.filter((p) => p.floor < here.floor) },
+    { title: "Upstairs", people: here.people.filter((p) => p.floor > here.floor) },
+  ].filter((g) => g.people.length);
+  const unlisted = here.count - here.people.length;
+  return (
+    <Sheet open={open} onClose={onClose} label={`Everyone at ${placeName}`}>
+      <SheetTitle>Everyone here</SheetTitle>
+      <p className="meta" style={{ margin: "4px 0 0" }}>{hereCountLine(here.count, here.inView.length)} · at {placeName} now</p>
+      {groups.map((g) => (
+        <section key={g.title}>
+          <p className="overline" style={{ margin: "16px 0 6px" }}>{g.title} · {g.people.length}</p>
+          {g.people.map((p) => (
+            <button key={p.id} className="here-row" onClick={() => { here.onOpen(p.id); onClose(); }}>
+              <span className="here-face" aria-hidden="true">{getStyle(p.style as StyleId).emoji}</span>
+              <span className="here-row-name">{p.name}{p.crew && <span className="meta"> · 👯 crew</span>}</span>
+              <span className="meta">{p.clout.toLocaleString("en-US")} clout</span>
+            </button>
+          ))}
+        </section>
+      ))}
+      {unlisted > 0 && <p className="meta" style={{ margin: "14px 0 4px", textAlign: "center" }}>…and {unlisted.toLocaleString("en-US")} more coming and going</p>}
+    </Sheet>
+  );
 }

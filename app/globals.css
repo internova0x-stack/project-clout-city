@@ -566,8 +566,11 @@ a { color:inherit; }
 /* Phone (C29) */
 .phone-wrap { z-index:60; }
 .phone-close { position:absolute; z-index:2; top:calc(14px + var(--safe-top)); right:14px; }
-.phone-device { position:relative; z-index:1; width:min(360px, 100%); height:min(740px, calc(100dvh - 64px)); background:#000; border-radius:48px; padding:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
-.phone-screen { position:relative; width:100%; height:100%; border-radius:38px; overflow:hidden; background:var(--surface-sheet); display:flex; flex-direction:column; }
+/* Android bug (owner, Oct 15): a wide line in an app (a Bank row, a business name) could grow the phone past
+   the screen and push it right. The phone's width comes from the viewport, never from what's inside, and
+   its height follows its width (owner, Oct 15: "the phone looks long" on a narrow screen). */
+.phone-device { position:relative; z-index:1; width:min(360px, calc(100vw - 40px)); aspect-ratio:360 / 740; height:auto; max-height:calc(100dvh - 64px); background:#000; border-radius:48px; padding:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+.phone-screen { position:relative; width:100%; min-width:0; height:100%; border-radius:38px; overflow:hidden; background:var(--surface-sheet); display:flex; flex-direction:column; }
 .phone-status { display:flex; align-items:center; justify-content:space-between; padding:12px 22px 6px; font-size:13px; font-weight:600; color:#fff; position:relative; z-index:2; }
 .phone-status.light { color:var(--text-1); }
 .phone-pill { position:absolute; left:50%; top:10px; transform:translateX(-50%); width:90px; height:26px; border-radius:var(--r-pill); background:#000; }
@@ -577,7 +580,7 @@ a { color:inherit; }
 .phone-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px 8px; margin-top:40px; }
 .phone-app { display:flex; flex-direction:column; align-items:center; gap:6px; font-size:11px; font-weight:500; color:#fff; }
 .phone-icon { position:relative; width:56px; height:56px; border-radius:14px; display:grid; place-items:center; font-size:28px; box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 4px 12px rgba(0,0,0,.3); }
-.phone-app-screen { flex:1; overflow-y:auto; padding:4px 16px 24px; color:var(--text-1); }
+.phone-app-screen { flex:1; min-width:0; overflow-x:hidden; overflow-y:auto; contain:inline-size; padding:4px 16px 24px; color:var(--text-1); }
 .phone-back { display:inline-flex; align-items:center; gap:2px; color:var(--neon-text); font-weight:600; font-size:15px; height:36px; }
 
 /* Gigs (C36) */
@@ -1437,7 +1440,9 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .meet-reactions { display:flex; gap:8px; }
 .meet-react { flex:1; height:44px; border:0; border-radius:14px; background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--border, #D6CFC4); font-size:22px; cursor:pointer; }
 .meet-react:active { transform:scale(.94); }
-.meet-ice { display:block; width:100%; text-align:left; border:0; padding:10px 12px; border-radius:14px; background:var(--surface-raised); font:inherit; font-size:14px; line-height:1.35; color:var(--text-1); cursor:pointer; }
+/* Owner, Oct 15: suggestions, not a text field: pink tint, pink text, a dashed edge. */
+.meet-ice { display:block; width:100%; text-align:left; border:1.5px dashed #FF9FCB; padding:9px 12px; border-radius:14px; background:#FFF0F6; font:inherit; font-size:14px; font-weight:600; line-height:1.35; color:#A3104F; cursor:pointer; }
+.meet-ice:active { background:#FFE3EF; }
 .meet-foot { justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
 .meet-foot .meta.low { color:var(--neon-text, #B0135A); font-weight:700; }
 .linkish { border:0; background:none; padding:0; font:inherit; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; }
@@ -1451,3 +1456,78 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .chat-plan.on { box-shadow:inset 0 0 0 2.5px #FA2D48; background:#FFF1F5; }
 .chat-plan-price { font-weight:800; font-size:17px; text-align:right; }
 .chat-pass-later { display:block; margin:10px auto 0; border:0; background:none; font:inherit; font-weight:600; font-size:14px; color:var(--text-3); cursor:pointer; }
+/* Crowded places (owner, Oct 15): everyone at a place, by where they are. */
+.here-row { width:100%; display:flex; align-items:center; gap:10px; padding:9px 4px; border:0; border-bottom:1px solid var(--divider); background:none; font:inherit; color:var(--text-1); text-align:left; cursor:pointer; }
+.here-row:last-child { border-bottom:0; }
+.here-row-name { flex:1; min-width:0; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.here-row .here-face { width:32px; height:32px; font-size:17px; flex:none; }
+/* Player ranks (owner, Oct 15): the chip, the climb on the profile, the list and the rank-up reveal.
+   Pink like the rest of the game; the top ranks get the neon, never gold (gold is for real money). */
+.rank-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border:0; border-radius:var(--r-pill); background:#FFE3EF; color:#B0125E; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; cursor:default; }
+button.rank-chip { cursor:pointer; }
+button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
+.rank-chip.rich { background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); color:#7A2F33; }
+.rank-chip.god { background:var(--g-neon); color:#fff; box-shadow:0 0 14px rgba(255,46,136,.45); }
+.rank-climb { display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:var(--r-md); background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--divider); }
+.rank-bar { height:8px; border-radius:var(--r-pill); background:#F3E6EC; overflow:hidden; }
+.rank-bar > span { display:block; height:100%; border-radius:inherit; background:var(--g-neon); }
+.rank-list { display:flex; flex-direction:column; }
+.rank-row { display:flex; align-items:center; gap:12px; padding:10px 6px; border-bottom:1px solid var(--divider); }
+.rank-row:last-child { border-bottom:0; }
+.rank-row.done { opacity:.6; }
+.rank-row.mine { background:#FFF0F6; border-radius:var(--r-sm); box-shadow:inset 0 0 0 1.5px #FF9FCB; }
+.rank-row-emoji { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:19px; background:#FFE3EF; flex:none; }
+.rank-you { margin-left:8px; padding:2px 8px; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font-size:11px; font-weight:700; vertical-align:2px; }
+.modal-card.rank-up { text-align:center; background:#FFF8F3; color:var(--text-1, #1B1420); border-radius:var(--r-xl); padding:24px 20px 18px; box-shadow:var(--elev-4); animation:reveal-rise .4s ease-out; }
+.rank-up-kicker { color:#B0125E; }
+.rank-up-emoji { display:block; font-size:64px; line-height:1.1; margin-top:10px; animation:reveal-rise .5s ease-out; }
+/* Owner, Oct 15: Monument Valley hues, not purple: the top ranks get the dusk sky. */
+.modal-card.rank-up.top { background:linear-gradient(180deg,#BFD3EE 0%,#FFE6DA 55%,#FFC9B9 100%); color:#3B1F24; box-shadow:0 24px 60px rgba(120,80,90,.3); }
+.modal-card.rank-up.top .rank-up-kicker { color:#7A2F33; }
+.modal-card.rank-up.god .rank-up-emoji { font-size:84px; filter:drop-shadow(0 0 18px rgba(255,159,203,.9)); }
+/* Owner, Oct 15: who's here, right-aligned under the top HUD (the room's people, not the activity card). */
+.here-hud { position:absolute; z-index:16; top:calc(72px + var(--safe-top)); right:12px; display:flex; align-items:center; gap:7px; height:32px; padding:3px 3px 3px 5px; }
+.here-stack { display:flex; }
+.here-stack .here-face { width:24px; height:24px; font-size:13px; box-shadow:0 0 0 2px #fff; }
+.here-stack .here-face + .here-face { margin-left:-8px; }
+.here-hud-count { font-size:13.5px; line-height:1; font-weight:600; white-space:nowrap; }
+.here-hud-count b { font-family:var(--font-label); font-variant-numeric:tabular-nums; }
+.here-hud-btn { height:26px; padding:0 11px; line-height:1; border:0; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font:inherit; font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer; }
+/* v0.12 businesses (owner, Oct 15): built from the Phone apps' cards, rows and buttons; Monument Valley
+   dusk (peach to coral, deep rose ink) only on the till and going public. No purple. */
+.biz-app { contain:inline-size; min-width:0; }
+/* Cards stack their lines (spans included). */
+.biz-app .card > span, .biz-app .biz-dusk > span, .biz-app .card > .rank-bar { display:block; }
+.biz-upg { padding:12px 0; border-bottom:1px solid var(--divider); }
+.biz-upg:last-child { border-bottom:0; padding-bottom:0; }
+.biz-upg-buy { gap:12px; margin:10px 0 0 48px; align-items:center; }
+/* Owner, Oct 15: the figure was too big; a calm card with even spacing. */
+.biz-worth { display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+.biz-worth > * { margin:0; }
+.biz-worth .rank-bar { align-self:stretch; margin-top:6px; }
+.biz-worth .btn { align-self:stretch; margin-top:8px; }
+.biz-worth-n { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:24px; line-height:28px; font-weight:600; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+.biz-dusk { padding:16px; border-radius:var(--r-lg); background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); color:#7A2F33; }
+.biz-dusk .subtext, .biz-dusk .meta, .biz-ink { color:#7A2F33; }
+.biz-em { flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:24px; background:linear-gradient(160deg,#FFF1E8,#FFC9B9); }
+.biz-em.big { width:56px; height:56px; border-radius:16px; font-size:30px; }
+.biz-em.sm { width:36px; height:36px; border-radius:12px; font-size:18px; }
+.biz-own { text-align:left; font:inherit; background:none; border-left:0; border-right:0; border-top:0; cursor:pointer; }
+.biz-own:last-child { border-bottom:0; }
+.biz-till-amt { flex:none; font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+.biz-price { display:block; font-size:14px; color:var(--text-1); margin-top:2px; }
+.biz-locked { opacity:.5; }
+.biz-done { flex:none; color:var(--green-text, #2E8B63); font-weight:700; font-size:14px; }
+.biz-sky { background:linear-gradient(180deg,rgba(127,179,232,.85) 0%,rgba(191,211,238,.85) 45%,rgba(246,201,160,.85) 100%) !important; }
+.biz-modal { z-index:62; }
+.modal-card.biz-reveal { background:linear-gradient(180deg,#FFFFFF 0%,#FFF4EC 60%,#FFE6DA 100%); }
+.biz-reveal-n { margin:14px 0 4px; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:28px; line-height:32px; font-weight:600; color:#7A2F33; font-variant-numeric:tabular-nums; }
+.biz-reveal-lines { margin:12px 0 14px; font-size:14px; }
+.biz-reveal-lines .list-row { padding:8px 0; }
+/* Owner, Oct 15: figures not too close to the edges. */
+.biz-app .profile-kpi { padding:12px 8px; }
+.biz-app .profile-kpi b { font-size:16px; line-height:20px; letter-spacing:-.01em; }
+.biz-app .list-row .title { font-size:15px; line-height:20px; }
+.biz-own { padding:12px 0; }

@@ -1,4 +1,7 @@
+import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
+import { cookies } from "next/headers";
 import { GameShell } from "@/components/GameShell";
+import { GAME_CONFIG } from "@/lib/config";
 import { loadCityState } from "@/lib/cityServer";
 import { getClique, requirePlayer } from "@/lib/player";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -27,6 +30,8 @@ export const metadata = { title: "Home · Clout City" };
 
 export default async function HomePage() {
   const { player } = await requirePlayer();
+  // Owner, Oct 15: a friend's invite from a place opens that place (the /i/CODE?at= link's cookie).
+  const invitedAt = (await cookies()).get(GAME_CONFIG.invite.placeCookieName)?.value;
   const supabase = await getServerSupabase();
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
@@ -38,6 +43,7 @@ export default async function HomePage() {
   if (chat.ok && chat.data.banned) return <Suspended />;
   return (
     <GameShell
+      invitedAt={invitedAt}
       player={city ? { ...player, ...city.player } : player}
       clique={clique}
       actions={{ setTutorialState, attendFirstParty, finishHandoff, setMusicMuted }}
@@ -86,6 +92,7 @@ export default async function HomePage() {
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).
       hunt={city ? { state: huntState, join: huntJoin, talk: huntTalk, answer: huntAnswer } : undefined}
+      business={city ? { state: businessState, buy: buyBusiness, upgrade: upgradeBusiness, collect: collectTills, goPublic } : undefined}
       // Migration 0035 switches on gossip (gossip_state returns null before it runs).
       gossip={city ? { state: gossipState, find: gossipFind, share: gossipShare } : undefined}
       // Migration 0013 switches on crew outings.

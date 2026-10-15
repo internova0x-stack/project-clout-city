@@ -28,6 +28,9 @@ export const GAME_CONFIG = {
   invite: {
     cookieName: "cc_invite",
     cookieMaxAgeDays: 30,
+    /** Owner, Oct 15: an invite sent from a place ("Bring the crew", "Make it a date") opens that place. */
+    placeCookieName: "cc_invite_at",
+    placeCookieMaxAgeDays: 2,
   },
 
   /**

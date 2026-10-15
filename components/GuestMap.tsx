@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { GUEST_START, type PlacePin } from "@/lib/places";
-import { PLACES } from "@/lib/city";
+import { PLACES, placeById } from "@/lib/city";
 import { music, readLocalMuted } from "@/lib/music";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { CityMap } from "./map/CityMap";
@@ -40,7 +40,8 @@ function timeAgo(iso: string): string {
 // Life reference in Clout City's dark glass: a slim brand bar, live city pills
 // with real numbers, map filter chips (C10), the live ticker (C22) and a
 // sign-up card. Guests pan, zoom and filter freely; tapping a place opens sign-up.
-export function GuestMap({ invited, authError }: { invited: boolean; authError: boolean }) {
+export function GuestMap({ invited, authError, at }: { invited: boolean; authError: boolean; /** Owner, Oct 15: invited to this place. */ at?: string }) {
+  const invitedTo = at ? placeById(at) : undefined;
   const { time, daytime } = useCityClock();
   const [auth, setAuth] = useState<AuthMode | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
@@ -83,13 +84,13 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
     <main className="game">
       <CityMap
         pins={pins}
-        initialCenter={GUEST_START.at}
-        initialZoom={GUEST_START.zoom}
+        initialCenter={invitedTo?.at ?? GUEST_START.at}
+        initialZoom={invitedTo ? 15.5 : GUEST_START.zoom}
         daytime={daytime}
         onPinTap={signUp}
         onLockedTap={signUp}
         attributionControl={false}
-        fitPins={{ top: 150, bottom: 300 }}
+        fitPins={invitedTo ? undefined : { top: 150, bottom: 300 }}
       />
 
       <div className="guest-top">
@@ -128,7 +129,9 @@ export function GuestMap({ invited, authError }: { invited: boolean; authError: 
           </p>
           {(authError || invited) && (
             <p className="subtext" style={{ margin: "6px 0 0", color: authError ? "var(--red-text)" : "var(--text-2)" }}>
-              {authError ? "That sign-in link expired or was already used. Grab a fresh one." : "A friend saved you a spot. Claim your name before the city opens."}
+              {authError ? "That sign-in link expired or was already used. Grab a fresh one."
+                : invitedTo ? `A friend invited you to ${invitedTo.emoji} ${invitedTo.name}. Sign up and meet them there.`
+                : "A friend saved you a spot. Claim your name before the city opens."}
             </p>
           )}
           <div className="row" style={{ gap: 8, marginTop: 12 }}>

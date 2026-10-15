@@ -7,6 +7,9 @@ begin;
 -- player there first, as if they had travelled.
 create function pg_temp.act(p_place text, p_action text) returns jsonb language plpgsql security definer as $h$
 begin update public.players set at_place = p_place where id = auth.uid(); return public.do_action(p_place, p_action); end $h$;
+-- 0049: a hunt line needs you at the place now.
+create function pg_temp.talk(p_place text) returns jsonb language plpgsql security definer as $h$
+begin update public.players set at_place = p_place, arrives_at = null where id = auth.uid(); return public.hunt_talk(p_place); end $h$;
 create function pg_temp.attend(p_event text) returns jsonb language plpgsql security definer as $h$
 begin
   update public.players set at_place = (select x ->> 'placeId' from jsonb_array_elements(public.city() -> 'events') x where x ->> 'id' = p_event)
@@ -69,18 +72,18 @@ select pg_temp.assert(pg_temp.raises($$select public.hunt_talk('ditmars-deli')$$
 select pg_temp.assert(public.hunt_join() -> 'hunt' -> 'track' ->> 'treasure' = 'Cabinet Zero', 'joined the arcade_nerd track');
 select pg_temp.assert(public.hunt_state() -> 'hunt' -> 'chatter' ->> 0 = 'Looking for Cabinet Zero?', 'chatter names the treasure');
 select pg_temp.assert(pg_temp.raises($$select public.hunt_talk('engine-7')$$, 'not_here'), 'wrong place');
-select pg_temp.assert(pg_temp.raises($$select public.hunt_talk('ditmars-deli')$$, 'visit_first'), 'must visit first');
+select pg_temp.assert(pg_temp.raises($$select pg_temp.talk('ditmars-deli')$$, 'visit_first'), 'must visit first');
 
 -- Step 1: visit the deli (normal cost), talk.
 select 1 from pg_temp.act('ditmars-deli', 'eat');
-select pg_temp.assert(public.hunt_talk('ditmars-deli') -> 'line' ->> 'say' = 'Go to the library.', 'step 1 clue');
+select pg_temp.assert(pg_temp.talk('ditmars-deli') -> 'line' ->> 'say' = 'Go to the library.', 'step 1 clue');
 select pg_temp.assert((public.hunt_state() -> 'hunt' ->> 'step')::int = 1, 'a step without a question is done once heard');
 
 -- Step 2: a question. Wrong waits 10 minutes; answers never reach the player.
 select 1 from pg_temp.act('ditmars-library', 'study');
-select pg_temp.assert(public.hunt_talk('ditmars-library') -> 'line' -> 'question' ->> 'q' = 'Which?', 'step 2 asks');
+select pg_temp.assert(pg_temp.talk('ditmars-library') -> 'line' -> 'question' ->> 'q' = 'Which?', 'step 2 asks');
 select pg_temp.assert(public.hunt_state()::text not like '%"answer"%', 'no answer key in the state');
-select pg_temp.assert(public.hunt_talk('ditmars-library') -> 'line' -> 'question' is not null, 'talking again repeats the question');
+select pg_temp.assert(pg_temp.talk('ditmars-library') -> 'line' -> 'question' is not null, 'talking again repeats the question');
 select pg_temp.assert(public.hunt_answer(0) ->> 'correct' = 'false', 'wrong answer');
 select pg_temp.assert(public.hunt_state() -> 'hunt' -> 'question' ->> 'retryAt' is not null, 'retry time shown');
 select pg_temp.assert(pg_temp.raises($$select public.hunt_answer(1)$$, 'wait'), 'must wait 10 minutes');
@@ -91,9 +94,9 @@ select pg_temp.assert(public.hunt_answer(1) ->> 'then' = 'Go to the firehouse.',
 
 -- Step 3, then the finale; three earlier hunt cards make this the fourth (badge).
 select 1 from pg_temp.act('engine-7', 'pet-dog');
-select 1 from public.hunt_talk('engine-7');
+select 1 from pg_temp.talk('engine-7');
 select 1 from pg_temp.act('hell-gate-park', 'hangout');
-select 1 from public.hunt_talk('hell-gate-park');
+select 1 from pg_temp.talk('hell-gate-park');
 reset role;
 insert into public.hunt_cards (player_id, hunt_id, week, theme, treasure, emoji, lore)
 select '00000000-0000-0000-0000-000000000082', 'old-' || i, current_date - 7 * i, 'Old', 'Old thing', '📦', 'An older treasure.' from generate_series(1, 3) i;

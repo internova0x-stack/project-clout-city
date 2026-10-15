@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 import type { RecentItem } from "@/lib/recent";
 import type { ChatMessage, ChatResult, ChatStatus, ChatSummary, ChatThread, PlayerCard, ReportReason } from "@/lib/chat";
 import type { StudioMetrics, StudioReport } from "@/lib/studio";
@@ -8,6 +10,7 @@ import { previewChatUnlimited } from "./storyActions";
 import { DAILY_LIMIT } from "@/lib/chat";
 import { REACTIONS, type PlaceCounts, type Presence } from "@/lib/meet";
 import { PLACES } from "@/lib/city";
+import { STARTING_STYLES } from "@/lib/styles";
 
 // Development previews only: chat, the report queue and metrics in memory, following
 // the rules of supabase/migrations/0010. Refused in production builds.
@@ -25,10 +28,22 @@ const PEOPLE: Record<string, { name: string; style: string; clout: number; homeI
 /** Meeting players: who the preview puts at each place (the same few, turned by the place's name). */
 const HERE_IDS = ["p-tasha", "p-dev", "p-kai", "p-nina", "p-marco", "p-dee"];
 const hereAt = (placeId: string) => {
+  if (crowd.n) return ["p-tasha", "p-dev", ...crowdPeople(crowd.n - 2)];
   const n = placeId.length % 4 + 2;
   return Array.from({ length: n }, (_, i) => HERE_IDS[(placeId.length + i) % HERE_IDS.length]);
 };
 const where = { place: null as string | null };
+/** Crowded places: ?crowd=50 puts that many sample players at whatever place you walk into. */
+const crowd = { n: 0 };
+const FIRST = ["mia", "jay", "luz", "theo", "ari", "zoe", "rico", "bea", "nico", "ivy", "omar", "gia", "leo", "sky", "remy", "nia", "max", "tess", "kofi", "lina"];
+const LAST = [".nyc", "_queens", ".exe", "_astoria", ".jpg", "_lic", "xo", ".fm", "_daily", "2k"];
+function crowdPeople(n: number) {
+  for (let i = 0; i < n; i++) {
+    const id = `p-c${String(i).padStart(2, "0")}`;
+    if (!PEOPLE[id]) PEOPLE[id] = { name: FIRST[i % FIRST.length] + LAST[(i * 7) % LAST.length], style: STARTING_STYLES[(i * 3) % STARTING_STYLES.length].id, clout: 200 + ((i * 7919) % 4800), homeId: "astoria_studio" };
+  }
+  return Array.from({ length: n }, (_, i) => `p-c${String(i).padStart(2, "0")}`);
+}
 const WORDS = ["fuck", "shit", "bitch"];
 const LIMIT = 20;
 let nextId = 100;
@@ -52,6 +67,7 @@ const filter = (s: string) => WORDS.reduce((acc, w) => acc.replace(new RegExp(`\
 const sentToday = () => state.messages.filter((m) => m.from === ME && !m.reaction && new Date(m.at).toDateString() === new Date().toDateString()).length;
 
 export async function previewChatList() {
+  previewOnly();
   const ids = [...new Set(state.messages.flatMap((m) => [m.from, m.to]).filter((x) => x !== ME))];
   const rows: ChatSummary[] = ids.map((id) => {
     const msgs = state.messages.filter((m) => (m.from === id || m.to === id) && !m.hidden);
@@ -65,6 +81,7 @@ export async function previewChatList() {
   return ok(rows.sort((a, b) => b.at.localeCompare(a.at)));
 }
 export async function previewChatThread(id: string) {
+  previewOnly();
   state.read[id] = new Date().toISOString();
   const blocked = state.blocks.has(id);
   const messages: ChatMessage[] = blocked ? [] : state.messages
@@ -73,10 +90,12 @@ export async function previewChatThread(id: string) {
   return ok<ChatThread>({ with: id, blocked, blockedMe: false, messages });
 }
 export async function previewChatStatus() {
+  previewOnly();
   return ok<ChatStatus>({ limit: LIMIT, left: Math.max(0, LIMIT - sentToday()), mutedUntil: null, warned: false, banned: false,
     unlimited: await previewChatUnlimited(), messagesFrom: state.messagesFrom });
 }
 export async function previewChatSend(to: string, body: string): Promise<ChatResult<{ left: number | null }>> {
+  previewOnly();
   if (!PEOPLE[to]) return { ok: false, error: "That player isn't around anymore." };
   if (state.blocks.has(to)) return { ok: false, error: "You can't message this person." };
   if (!body.trim()) return { ok: false, error: "Say something first." };
@@ -86,6 +105,7 @@ export async function previewChatSend(to: string, body: string): Promise<ChatRes
   return ok({ left: unlimited ? null : LIMIT - sentToday() });
 }
 export async function previewChatBlock(id: string, on: boolean) {
+  previewOnly();
   if (on) {
     state.blocks.add(id);
     await previewDatingBlock(id);
@@ -93,6 +113,7 @@ export async function previewChatBlock(id: string, on: boolean) {
   return ok(null);
 }
 export async function previewChatReport(id: string, messageId: number | null, reason: ReportReason, note: string) {
+  previewOnly();
   const msgs = state.messages.filter((m) => m.from === id || m.to === id).slice(-50);
   state.reports.unshift({
     id: nextId++, reason, note: note.trim() || null, status: "open", at: new Date().toISOString(), reviewedAt: null, messageId,
@@ -112,6 +133,7 @@ const recentFor = (seed: number): RecentItem[] => [
 /** The preview home's own player (app/preview/[screen]/page.tsx). */
 const PREVIEW_PLAYER = "00000000-0000-0000-0000-000000000000";
 export async function previewPlayerCard(id: string) {
+  previewOnly();
   if (id === PREVIEW_PLAYER) {
     return ok<PlayerCard | null>({ id, name: "bigsal", style: "arcade_nerd", clout: 850, homeId: "astoria_studio", badges: 3, joined: t(60 * 24 * 3), blocked: false, isMe: true, rank: 128, recent: recentFor(0), netWorth: 5505 });
   }
@@ -124,19 +146,32 @@ export async function previewPlayerCard(id: string) {
 }
 // ---- Meeting players (migration 0047) in memory: a few sample players at every place ----
 /** ?chat=out starts the day with every message used, to show the unlimited chat offer. */
+export async function previewCrowdPreset(n: number) {
+  previewOnly();
+  crowd.n = Math.max(0, Math.min(200, Math.floor(n)));
+}
 export async function previewChatPreset(preset: string) {
+  previewOnly();
   if (preset !== "out") return;
   const at = new Date().toISOString();
   for (let i = state.messages.filter((m) => m.from === ME).length; sentToday() < LIMIT; i++) state.messages.push({ id: nextId++, from: ME, to: "p-tasha", body: `msg ${i}`, at });
 }
 export async function previewPresence(placeId: string, floor: number) {
+  previewOnly();
   where.place = placeId;
+  const club = !!PLACES.find((p) => p.id === placeId)?.club;
   const people = hereAt(placeId).filter((id) => !state.blocks.has(id)).map((id, i) => ({
-    id, name: PEOPLE[id].name, style: PEOPLE[id].style, look: null, crew: id === "p-tasha", floor: i === 1 && floor === 1 && PLACES.find((p) => p.id === placeId)?.club ? 0 : floor, clout: PEOPLE[id].clout,
+    id, name: PEOPLE[id].name, style: PEOPLE[id].style, look: null, crew: id === "p-tasha",
+    // At a club a few are on the other floors (the restroom, VIP).
+    floor: club && (crowd.n ? i % 9 === 4 : i === 1 && floor === 1) ? (floor === 1 ? 0 : 1) : club && crowd.n && i % 9 === 7 ? (floor === 2 ? 1 : 2) : floor, clout: PEOPLE[id].clout,
+    // v0.12: a few rich ones, so the list shows the money ranks too.
+    netWorth: 3000 + PEOPLE[id].clout * 4 + (i % 11 === 3 ? 12_000_000 : i % 7 === 5 ? 1_400_000 : 0),
   }));
-  return ok<Presence>({ count: people.length, people });
+  // The server lists at most 40 (game_settings chat.hereMax) and gives the true count.
+  return ok<Presence>({ count: people.length, people: people.slice(0, 40) });
 }
 export async function previewPlaceCounts() {
+  previewOnly();
   const out: PlaceCounts = {};
   for (const p of PLACES.filter((x) => !x.story).slice(0, 12)) {
     const ids = hereAt(p.id);
@@ -145,6 +180,7 @@ export async function previewPlaceCounts() {
   return ok(out);
 }
 export async function previewChatReact(to: string, emoji: string) {
+  previewOnly();
   if (!PEOPLE[to]) return { ok: false as const, error: "That player isn't around anymore." };
   if (!(REACTIONS as readonly string[]).includes(emoji)) return { ok: false as const, error: "That reaction isn't on the menu." };
   const last = [...state.messages].reverse().find((m) => m.from === ME && m.to === to && m.reaction);
@@ -154,11 +190,13 @@ export async function previewChatReact(to: string, emoji: string) {
   return ok({ id: m.id, mine: true, body: emoji, at: m.at, kind: "reaction" as const });
 }
 export async function previewSetMessagesFrom(who: "anyone" | "crew") {
+  previewOnly();
   state.messagesFrom = who;
   return ok(who);
 }
 /** The leaderboard with ids, so rows open player cards. */
 export async function previewLeaderboard(myClout: number) {
+  previewOnly();
   const rows = [...Object.entries(PEOPLE).map(([id, p]) => ({ id, display_name: p.name, starting_style: p.style, clout: p.clout, is_me: false })),
     { id: ME, display_name: "bigsal", starting_style: "arcade_nerd", clout: myClout, is_me: true }]
     .sort((a, b) => b.clout - a.clout);
@@ -167,6 +205,7 @@ export async function previewLeaderboard(myClout: number) {
 
 // ---- Studio: the review queue and metrics, over the same in-memory chat ----
 export async function previewStudioReports(status: string) {
+  previewOnly();
   if (!state.reports.length) {
     // One sample report so the queue isn't empty on first look.
     await previewChatReport("p-marco", 5, "harassment", "Rude about my outfit. Twice.");
@@ -174,6 +213,7 @@ export async function previewStudioReports(status: string) {
   return ok(state.reports.filter((r) => status === "all" || r.status === status));
 }
 export async function previewStudioReportAction(id: number, action: "dismiss" | "warn" | "mute" | "ban") {
+  previewOnly();
   const r = state.reports.find((x) => x.id === id);
   if (!r) return { ok: false as const, error: "That report is gone." };
   r.status = action === "dismiss" ? "dismissed" : action === "warn" ? "warned" : action === "mute" ? "muted" : "banned";
@@ -184,6 +224,7 @@ export async function previewStudioReportAction(id: number, action: "dismiss" | 
   return ok(null);
 }
 export async function previewStudioMetrics() {
+  previewOnly();
   return ok<StudioMetrics>({
     players: 1284, newThisWeek: 212, firstTask: 1019, invited: 488, invitesJoined: 351, day1Cohort: 1180, day1Returned: 472,
     activeToday: 403, beatOpens: 6210, readers: 790, votes: 1544, voters: 702,

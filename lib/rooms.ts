@@ -1119,6 +1119,21 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
 }
 
 /**
+ * Crowded places (owner, Oct 15): how many real players a room shows before it gets cramped, on top of
+ * its regulars (who never make way: they carry the stories and the gossip). Party floors use their
+ * crowdSpots instead. Everyone else at the place is in the Here now list.
+ */
+export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
+  restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
+  unisphere: 7, gantries: 7, office: 5, civic: 5, gym: 5, plaza: 7, penthouse: 10,
+};
+/** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
+export function playerSlots(t: RoomTemplate): number {
+  if (t.crowdSpots) return t.crowdSpots.length;
+  return PLAYER_SLOTS[t.id.split(":")[0] as PlaceTemplateId] ?? 4;
+}
+
+/**
  * Meeting players (owner, Oct 15): where real players at a place stand in a room without party
  * spots. Free floor cells, spread out, away from the door, the regulars and each other; the same
  * room and count always give the same spots.

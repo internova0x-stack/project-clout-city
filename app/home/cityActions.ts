@@ -120,5 +120,7 @@ export async function saveHomeLayout(layout: { id: string; x: number; z: number;
   return run("save_home_layout", { p_layout: layout });
 }
 export async function setClockOffset(hours: number) {
+  // 0049: staging only (the database also wants a Studio admin).
+  if (process.env.VERCEL_ENV === "production") return { ok: false as const, error: "Not on the live site." };
   return run("dev_set_clock_offset", { p_hours: hours });
 }

@@ -17,6 +17,9 @@ test("rejects codes with look-alike or foreign characters", () => {
 
 test("builds invite links without double slashes", () => {
   assert.equal(inviteUrl("https://cloutcity.app/", "Q7MZ4K"), "https://cloutcity.app/i/Q7MZ4K");
+  // Owner, Oct 15: an invite from a place opens that place.
+  assert.equal(inviteUrl("https://cloutcity.app", "Q7MZ4K", "velvet-static"), "https://cloutcity.app/i/Q7MZ4K?at=velvet-static");
+  assert.equal(inviteUrl("https://cloutcity.app", "Q7MZ4K", null), "https://cloutcity.app/i/Q7MZ4K");
 });
 
 test("clique progress caps at the bonus size", () => {

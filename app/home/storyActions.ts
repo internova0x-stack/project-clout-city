@@ -41,6 +41,8 @@ export async function attendStoryEvent(eventId: string) {
   return run("attend_story_event", { p_event: eventId }, (d) => Number((d as { clout?: number })?.clout) || undefined);
 }
 export async function devStartStory(day: number | null) {
+  // 0049: staging only (the database also wants a Studio admin).
+  if (process.env.VERCEL_ENV === "production") return { ok: false as const, error: "Not on the live site." };
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false as const, error: "Accounts aren't switched on yet." };
   const { data: today } = await supabase.rpc("ny_today");
@@ -48,6 +50,7 @@ export async function devStartStory(day: number | null) {
   return run("dev_story_start", { p_arc: "sarah-bird", p_start: start });
 }
 export async function devEntitleStory(sku: string, on: boolean) {
+  if (process.env.VERCEL_ENV === "production") return { ok: false as const, error: "Not on the live site." };
   return run("dev_grant_entitlement", { p_sku: sku, p_on: on });
 }
 

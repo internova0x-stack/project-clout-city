@@ -13,8 +13,8 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
-import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
+import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
@@ -48,7 +48,7 @@ import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { ViewingBar } from "./city/Apartments";
 import { ChatPassCard } from "./chat/ChatPass";
-import { COUNTS_POLL_MS, PRESENCE_POLL_MS, type HerePerson, type PlaceCounts } from "@/lib/meet";
+import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, pickInView, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
@@ -61,6 +61,10 @@ import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
+import { RankUpCard } from "./game/Ranks";
+import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
+import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
+import { RANKS, rankFor, type Rank } from "@/lib/ranks";
 import { contextTips } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
@@ -147,7 +151,10 @@ export function GameShell({
   cityNews,
   hunt,
   gossip,
+  business,
   roomMood = "dream",
+  previewRankUp,
+  invitedAt,
 }: {
   player: Player;
   clique: CliqueMember[];
@@ -180,6 +187,8 @@ export function GameShell({
   hunt?: HuntApi;
   /** v0.10 neighborhood gossip (migration 0035): Listen in, regulars' pieces, the Tea app and Tea cards. */
   gossip?: GossipApi;
+  /** v0.12 businesses (migration 0048); without it the Businesses app is hidden. */
+  business?: BusinessApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -188,6 +197,10 @@ export function GameShell({
   daytimeOverride?: boolean;
   /** Development previews only: open a step of the first session directly. */
   previewFlow?: Flow;
+  /** Owner, Oct 15: a friend's invite link from a place opens that place's card once the game is ready. */
+  invitedAt?: string;
+  /** Development previews only: show the rank-up reveal for this rank (1 to 10). */
+  previewRankUp?: number;
 }) {
   const [city, setCity] = useState<CityState | null>(initialCity);
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
@@ -271,16 +284,49 @@ export function GameShell({
   const [cardId, setCardId] = useState<string | null>(null);
   // Meeting players (owner, Oct 15; migration 0047): who's here, how many are where, and the unlimited chat offer.
   const [here, setHere] = useState<HerePerson[]>([]);
+  // Crowded places (owner, Oct 15): the true count, the people you opened (they stay in view, most recent
+  // first) and the turn that walks one of the others out and another in.
+  const [hereCount, setHereCount] = useState(0);
+  const [pinned, setPinned] = useState<string[]>([]);
+  const [turn, setTurn] = useState(0);
+  const openPlayer = (id: string) => { setPinned((p) => [id, ...p.filter((x) => x !== id)].slice(0, 3)); setCardId(id); };
   const [placeCounts, setPlaceCounts] = useState<PlaceCounts>({});
   const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
+  // v0.12 businesses: what you own (with the server's clock offset, so tills count like the server's),
+  // the tills-collected card and the go-public reveal.
+  const [biz, setBiz] = useState<BusinessState | null>(null);
+  const [bizOffset, setBizOffset] = useState(0);
+  const [tillsPaid, setTillsPaid] = useState<{ id: string; cash: number }[] | null>(null);
+  const [wentPublic, setWentPublic] = useState(false);
+  // Net worth includes businesses, so ranks wait for this first answer (or its failure, before 0048 runs).
+  const [bizTried, setBizTried] = useState(!business);
+  const loadBiz = useCallback(async () => {
+    if (!business) return;
+    try {
+      const r = await business.state();
+      if (r.ok) { setBiz(r.data); setBizOffset(new Date(r.data.now).getTime() - Date.now()); }
+    } finally {
+      setBizTried(true);
+    }
+  }, [business]);
+  useEffect(() => { void loadBiz(); }, [loadBiz]);
+  // Player ranks (owner, Oct 15): the reveal when clout or net worth crosses into a new rank.
+  const [rankUp, setRankUp] = useState<Rank | null>(previewRankUp ? RANKS[previewRankUp - 1] ?? null : null);
+  const seenRank = useRef<number | null>(null);
   useEffect(() => {
-    if (!inside || !chat?.presence) { setHere([]); return; }
+    if (!inside || !chat?.presence) { setHere([]); setHereCount(0); return; }
     let stop = false;
-    const tick = async () => { const r = await chat.presence!(inside.id, insideFloor); if (!stop && r.ok) setHere(r.data.people); };
+    const tick = async () => { const r = await chat.presence!(inside.id, insideFloor); if (!stop && r.ok) { setHere(r.data.people); setHereCount(r.data.count); } };
     void tick();
     const t = setInterval(() => void tick(), PRESENCE_POLL_MS);
     return () => { stop = true; clearInterval(t); };
   }, [inside, insideFloor, chat]);
+  useEffect(() => {
+    setPinned([]);
+    if (!inside) return;
+    const t = setInterval(() => setTurn((n) => n + 1), ROTATE_MS);
+    return () => clearInterval(t);
+  }, [inside]);
   useEffect(() => {
     if (inside || !chat?.counts) return;
     let stop = false;
@@ -291,6 +337,10 @@ export function GameShell({
   }, [inside, chat]);
   const [inbox, setInbox] = useState<DatingInbox | null>(null);
   const [dateSpot, setDateSpot] = useState<{ kind: "place" | "event"; target: string; price: number } | null>(null);
+  // Owner, Oct 15: the place an invite was sent from (Bring the crew, Make it a date); its link opens there.
+  const [invitePlace, setInvitePlace] = useState<Place | null>(null);
+  const spotPlace = (s: { kind: "place" | "event"; target: string } | null) =>
+    !s ? null : placeById(s.kind === "place" ? s.target : CLUB_EVENTS.find((e) => e.id === s.target)?.placeId ?? "") ?? null;
   const [datingDismissed, setDatingDismissed] = useState<string | null>(null);
   const [datingBusy, setDatingBusy] = useState(false);
   /** Re-reads the dating inbox; a date that just paid out gets its own toast. */
@@ -466,6 +516,22 @@ export function GameShell({
       setBusy(null);
     }
   }, [applyCity]);
+  // v0.12 businesses: every answer refreshes what you own and the city (cash moved).
+  const bizRun = useCallback(async <T,>(key: string, call: () => Promise<BusinessResult<T>>): Promise<T | null> => {
+    setBusy(key);
+    try {
+      const r = await call();
+      if (!r.ok) { setToast(r.error); return null; }
+      await loadBiz();
+      if (cityApi) { const c = await cityApi.refresh(); if (c.ok) applyCity(c); }
+      return r.data;
+    } catch {
+      setToast("The city glitched. Try again.");
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  }, [loadBiz, cityApi, applyCity]);
   useEffect(() => {
     resync.current = () => { if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r)); };
   }, [cityApi, applyCity]);
@@ -694,13 +760,6 @@ export function GameShell({
   });
   const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
   const ownedHere = ownedPieces.filter((p) => !elsewhere.has(p.id));
-  const partyCrowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
-  // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
-  // nothing over their heads (NPCs keep their 💬), tap the figure to open their card.
-  const hereCrowd: CrowdMember[] | undefined = !partyCrowd && here.length
-    ? here.filter((p) => p.floor === insideFloor).map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: normalizeLook(p.look, p.style), crew: p.crew }))
-    : undefined;
-  const crowd = partyCrowd ?? hereCrowd;
   const openShop = (category: ShopCategory, section?: string) => {
     setPlace(null);
     setInside(null);
@@ -869,6 +928,35 @@ export function GameShell({
     () => (inside ? placeRoom(inside) : null),
     [inside],
   );
+  // Player ranks: the first reading (once the city and net worth are in) is where you are; a higher one
+  // later is a climb.
+  // Net worth is everything you own: cash, things and businesses at their worth (owner, Oct 15).
+  const otherWorth = city ? netWorth(city) : me.bank_cash;
+  const myWorth = otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0);
+  const myRank = rankFor(me.clout, myWorth);
+  useEffect(() => {
+    if (!city || !bizTried) return;
+    if (seenRank.current !== null && myRank.level > seenRank.current) setRankUp(myRank);
+    seenRank.current = myRank.level;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myRank.level, !!city, bizTried]);
+  const insideTemplate = inside ? (insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe : null;
+  // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
+  // nothing over their heads (NPCs keep their 💬), tap the figure to open their card. Crowded places
+  // (owner, Oct 15): the room holds a few (lib/rooms.ts playerSlots) beside its regulars, who never make
+  // way; pickInView picks who (opened, crew, then turns) and the rest are in the Here now list.
+  const partyFloor = !!room && insideFloor === 2;
+  const floorPeople: PartyPerson[] = [
+    ...here.filter((p) => p.floor === insideFloor),
+    ...(partyFloor ? room!.people.filter((p) => !here.some((h) => h.id === p.id)) : []),
+  ];
+  const slots = insideTemplate ? playerSlots(insideTemplate) : 0;
+  const inView = pickInView(floorPeople, slots, pinned, turn).map((id) => floorPeople.find((p) => p.id === id)!);
+  const toLook = (p: PartyPerson) => normalizeLook(p.look, p.style);
+  // Party floors fill their spots with extras (lib/partyRoom.ts); anywhere else only real players.
+  const crowd: CrowdMember[] | undefined = partyFloor
+    ? crowdFor(inView, toLook, slots)
+    : inView.length ? inView.map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: toLook(p), crew: p.crew })) : undefined;
   const useInPlace = (p: Place, it: RoomItem) => {
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
@@ -911,6 +999,21 @@ export function GameShell({
   const payoutReady = !!gig && gigReady(gig, gameNow);
   const partyDone = me.first_party_at !== null;
   const handedOff = me.onboarding_step === "handoff_done";
+  // Owner, Oct 15: "the invite link should bring them to that specific location". Once the first session
+  // is done, open the place from the link, then forget it.
+  const invitePlaceDone = useRef(false);
+  useEffect(() => {
+    if (invitePlaceDone.current || !invitedAt || !handedOff || !city) return;
+    invitePlaceDone.current = true;
+    document.cookie = `${GAME_CONFIG.invite.placeCookieName}=; Max-Age=0; path=/`;
+    const p = placeById(invitedAt);
+    if (!p) return;
+    setTab("map");
+    setPlace(p);
+    setTimeout(() => mapRef.current?.moveCamera(p.at, 15.5), 300);
+    setToast(`A friend invited you to ${p.emoji} ${p.name}. Go there to meet them.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invitedAt, handedOff, !!city]);
 
   // First-play pins on Net Worth and Invite appear at the hand-off (step 14).
   useEffect(() => {
@@ -1103,13 +1206,13 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           talkNonce={talkNonce}
-          here={chat?.presence ? { people: here, floor: insideFloor, onOpen: (id) => setCardId(id) } : undefined}
+          here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={
             <Room3D
-              template={(insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
+              template={insideTemplate!}
               crowd={crowd}
-              crowdDots={!!partyCrowd}
-              onCrowdTap={(m) => { if (!m.npc && chat) setCardId(m.id); }}
+              crowdDots={partyFloor}
+              onCrowdTap={(m) => { if (!m.npc && chat) openPlayer(m.id); }}
               look={look}
               outfit={outfit}
               daytime={daytime}
@@ -1509,6 +1612,17 @@ export function GameShell({
       )}
       <PhoneModal
         onChatPass={(out) => setChatPass({ out })}
+        // Hidden until migration 0048 runs (business_state answers).
+        businesses={business && city && biz ? {
+          biz, cash: city.player.bank_cash, clout: me.clout, otherWorth, offsetMs: bizOffset,
+          handlers: {
+            busy,
+            onBuy: (id) => void bizRun(`biz:${id}`, () => business.buy(id)).then((r) => { if (r) setToast(`${businessById(id)?.emoji} ${businessById(id)?.name} is yours. Open for business.`); }),
+            onUpgrade: (id) => void bizRun(`biz:up:${id}`, () => business.upgrade(id)).then((r) => { if (r) setToast(`Upgraded: ${businessById(id)?.upgrades[r.level - 1]?.name}.`); }),
+            onCollect: () => void bizRun("biz:collect", () => business.collect()).then((r) => { if (r && r.paid.length) setTillsPaid(r.paid); }),
+            onGoPublic: () => void bizRun("biz:public", () => business.goPublic()).then((r) => { if (r) setWentPublic(true); }),
+          },
+        } : undefined}
         apartments={cityOn && cityApi?.moveHome && city?.player.moved_up !== undefined ? {
           busy: busy !== null,
           onLookInside: (id) => { setPhone({ open: false, app: null }); setPanel(null); setTab("home"); setViewHome(id); },
@@ -1565,7 +1679,9 @@ export function GameShell({
       <BankSheet open={panel === "bank"} onClose={() => setPanel(null)} bank={me.bank_cash} handle={me.display_name} />
       <InviteSheet
         open={panel === "invite"}
+        place={invitePlace}
         onClose={() => {
+          setInvitePlace(null);
           setPanel(null);
           if (pendingPwa.current) {
             pendingPwa.current = false;
@@ -1598,14 +1714,15 @@ export function GameShell({
             api={dating}
             onClose={() => setDateSpot(null)}
             onSent={(text) => { setDateSpot(null); setToast(text); void loadInbox(); }}
-            onInviteFriend={() => { setDateSpot(null); setPlace(null); setPanel("invite"); }}
-            onCrushInvite={() => { setDateSpot(null); setPlace(null); setPanel("crushInvite"); }}
+            onInviteFriend={() => { setInvitePlace(spotPlace(dateSpot)); setDateSpot(null); setPlace(null); setPanel("invite"); }}
+            onCrushInvite={() => { setInvitePlace(spotPlace(dateSpot)); setDateSpot(null); setPlace(null); setPanel("crushInvite"); }}
           />
           <InviteSheet
             open={panel === "crushInvite"}
-            onClose={() => setPanel("dates")}
+            onClose={() => { setInvitePlace(null); setPanel("dates"); }}
             inviteCode={me.invite_code}
             clique={clique}
+            place={invitePlace}
             crush
             onShared={() => track?.("crush_invite_shared")}
           />
@@ -1618,7 +1735,7 @@ export function GameShell({
             api={crew}
             onClose={() => setCrewPlace(null)}
             onSent={(text) => { setCrewPlace(null); setToast(text); void loadCrew(); }}
-            onInviteFriends={() => { setCrewPlace(null); setPlace(null); setPanel("invite"); }}
+            onInviteFriends={() => { setInvitePlace(crewPlace); setCrewPlace(null); setPlace(null); setPanel("invite"); }}
           />
           <CrewPlansSheet
             open={panel === "crew"}
@@ -1667,6 +1784,12 @@ export function GameShell({
         </>
       )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />
+      {tillsPaid && (
+        <TillsCollectedCard paid={tillsPaid} clout={me.clout} worth={myWorth} onClose={() => setTillsPaid(null)}
+          onUpgrade={() => { setTillsPaid(null); setPhone({ open: true, app: "businesses" }); }} />
+      )}
+      {wentPublic && <WentPublicCard worth={myWorth} onClose={() => setWentPublic(false)} />}
+      {rankUp && <RankUpCard rank={rankUp} name={handle(me.display_name)} onClose={() => setRankUp(null)} />}
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}
@@ -1676,7 +1799,8 @@ export function GameShell({
         subtitle={`${style.emoji} ${style.label} · ${city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.name ?? "Queens"}`}
         clout={me.clout}
         rank={myCard?.rank ?? null}
-        netWorth={city ? netWorth(city) : me.bank_cash}
+        netWorth={myWorth}
+        bestRank={biz?.bestRank}
         badges={(feed?.badges ?? []).map((b) => {
           const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : null);
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };

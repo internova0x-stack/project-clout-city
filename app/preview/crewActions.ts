@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 import { CREW, crewActivities, type CrewInbox, type CrewMember, type CrewOuting, type CrewPerson, type CrewResult } from "@/lib/crew";
 import { placeById } from "@/lib/city";
 
@@ -46,6 +48,7 @@ function went(o: Row, id: string) {
 
 /** ?crew=invite (Marco asks you out), tonight (you're hosting, 3 went), full (5 went; your visit completes it), empty (no crew). */
 export async function previewCrewReset(preset: string | undefined) {
+  previewOnly();
   s = { outings: [], next: 1, pairs: new Set(), fullPaid: false, clout: 0, crew: preset === "empty" ? [] : PEOPLE.map((p) => p.id), preset: preset ?? "" };
   const all = (host: string) => [host, ...[ME, ...PEOPLE.map((p) => p.id)].filter((x) => x !== host)].slice(0, 6);
   if (preset === "invite") {
@@ -64,6 +67,7 @@ export async function previewCrewReset(preset: string | undefined) {
 }
 
 export async function previewCrewInbox() {
+  previewOnly();
   const outings: CrewOuting[] = s.outings
     .filter((o) => o.members.find((m) => m.id === ME)?.status !== "declined")
     .map((o) => {
@@ -78,9 +82,11 @@ export async function previewCrewInbox() {
   return ok<CrewInbox>({ outings, clout: s.clout });
 }
 export async function previewCrewMembers() {
+  previewOnly();
   return ok(s.crew.map(who));
 }
 export async function previewCrewCreate(kind: "place" | "event", placeId: string, activity: string, members: string[]) {
+  previewOnly();
   const place = placeById(placeId);
   if (!place || !crewActivities(place).some((a) => a.kind === kind && a.id === activity)) return fail("The crew can't come along for that one.");
   if (!members.length) return fail("Pick at least one friend.");
@@ -94,6 +100,7 @@ export async function previewCrewCreate(kind: "place" | "event", placeId: string
   return ok(null);
 }
 export async function previewCrewRespond(id: number, yes: boolean) {
+  previewOnly();
   const o = s.outings.find((x) => x.id === id);
   const m = o?.members.find((x) => x.id === ME);
   if (!o || !m || m.status === "host") return fail("That plan isn't around anymore.");
@@ -102,6 +109,7 @@ export async function previewCrewRespond(id: number, yes: boolean) {
 }
 /** The preview city calls this after a visit or an event (complete_task does it in SQL). */
 export async function previewCrewWent(placeId: string, activity: string) {
+  previewOnly();
   for (const o of s.outings) if (o.placeId === placeId && o.activity === activity) went(o, ME);
   return ok(null);
 }

@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 import { loadArcs } from "@/lib/storyContent";
 import { buildFeed, castVote, claimRewards, emptyStoryState, type PlayerStoryState, type VoteCounts } from "@/lib/storyFeedBuild";
 import type { StoryResult } from "@/lib/storyFeed";
@@ -36,14 +38,17 @@ function result(extra: { clout?: number; message?: string } = {}): StoryResult {
 const fail = (error: string): StoryResult => ({ ok: false, error });
 
 export async function previewStoryRefresh(offsetSeconds = 0) {
+  previewOnly();
   store.offset = offsetSeconds;
   return result();
 }
 export async function previewStoryVote(pid: string, option: string) {
+  previewOnly();
   const e = castVote(loadArcs(), store.starts, nowMs(), store.st, pid, option);
   return e ? fail(e) : result();
 }
 export async function previewStoryShadow(pid: string, option: string) {
+  previewOnly();
   if (store.st.votes[pid]) return fail("You already voted on this one, so the archive guess is off.");
   store.st.shadow[pid] = option;
   const arc = loadArcs().find((a) => a.beats.some((b) => b.prediction?.id === pid))!;
@@ -54,11 +59,13 @@ export async function previewStoryShadow(pid: string, option: string) {
   return result();
 }
 export async function previewStorySeen(beatId: string) {
+  previewOnly();
   if (!store.st.seen.includes(beatId)) store.st.seen.push(beatId);
   return result();
 }
 /** Completes a story task by id (share, evidence) or by what was done (place action, event). */
 export async function previewStoryTask(taskId: string, by?: { place?: string; action?: string; event?: string }) {
+  previewOnly();
   const feed = result();
   if (!feed.ok) return feed;
   const task = feed.feed.tasks.find((t) => (by ? (by.event ? t.do.event === by.event : t.do.place === by.place && t.do.action === by.action) : t.id === taskId));
@@ -67,16 +74,19 @@ export async function previewStoryTask(taskId: string, by?: { place?: string; ac
   return result({ clout: task.clout, message: `Story task done: ${task.label}` });
 }
 export async function previewStoryDevStart(day: number | null) {
+  previewOnly();
   store.starts["sarah-bird"] = day === null ? null : addDaysISO(nyDate(nowMs()), -(day - 1));
   if (day === null) store.st = emptyStoryState();
   return result();
 }
 export async function previewStoryEntitle(sku: string, on: boolean) {
+  previewOnly();
   store.st.skus = on ? [...new Set([...store.st.skus, sku])] : store.st.skus.filter((s) => s !== sku);
   return result();
 }
 /** Hours until a story day's time from the current game clock (to drive the city clock offset). */
 export async function previewStoryHoursTo(day: number, time = "12:00") {
+  previewOnly();
   const start = store.starts["sarah-bird"];
   if (!start) return 0;
   const arc = loadArcs().find((a) => a.id === "sarah-bird")!;
@@ -105,6 +115,7 @@ const PARTIES = () => {
   ];
 };
 export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
+  previewOnly();
   if (process.env.NODE_ENV === "production") return null;
   const owned = (sku: string) => store.st.skus.includes(sku);
   // Owned copies get a sample serial (migration 0022 numbers them in collection order).
@@ -135,12 +146,15 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
 }
 /** Meeting players: whether the preview player bought unlimited chat (either plan). */
 export async function previewChatUnlimited() {
+  previewOnly();
   return store.st.skus.includes("chat-unlimited-monthly") || store.st.skus.includes("chat-unlimited-forever");
 }
 export async function previewStoreVisited(placeId: string) {
+  previewOnly();
   visited.add(placeId);
 }
 export async function previewStoreAttended(eventId: string) {
+  previewOnly();
   attended.add(eventId);
   // v0.9: the party's badge (migration 0029 awards it in attend_exclusive_event).
   if (!store.st.badges.some((b) => b.id === `party:${eventId}`)) store.st.badges.push({ id: `party:${eventId}`, arc: "party", earnedAt: new Date().toISOString() });
@@ -152,6 +166,7 @@ const party: PartyInbox = { plusOnes: [], newsOptOut: false };
 /** ?party=invite: Dana asks you to be her plus-one at tomorrow's afterparty. ?party=sent: you have
     a Jada ticket and Marco is coming as your plus-one. ?party=ticket: a Jada ticket, no plus-one yet. */
 export async function previewPartyReset(preset?: string) {
+  previewOnly();
   party.plusOnes = [];
   party.newsOptOut = false;
   const [jada, dex] = PARTIES();
@@ -167,10 +182,12 @@ export async function previewPartyReset(preset?: string) {
   }
 }
 export async function previewPartyInbox(): Promise<PartyInbox | null> {
+  previewOnly();
   if (process.env.NODE_ENV === "production") return null;
   return structuredClone(party);
 }
 export async function previewPartyInvite(eventId: string, guestId: string): Promise<PartyResult> {
+  previewOnly();
   const e = PARTIES().find((x) => x.id === eventId);
   if (!e || !store.st.skus.includes(e.sku)) return { ok: false, error: "You need a ticket to bring someone." };
   if (party.plusOnes.some((x) => x.eventId === eventId && x.mine && x.status !== "declined")) return { ok: false, error: "You already have a plus-one. One per ticket; the bouncer counts." };
@@ -188,12 +205,14 @@ export async function previewPartyInvite(eventId: string, guestId: string): Prom
   return { ok: true };
 }
 export async function previewPartyRespond(eventId: string, yes: boolean): Promise<PartyResult> {
+  previewOnly();
   const row = party.plusOnes.find((x) => x.eventId === eventId && !x.mine && x.status === "invited");
   if (!row) return { ok: false, error: "That invite isn't waiting anymore." };
   row.status = yes ? "in" : "declined";
   return { ok: true };
 }
 export async function previewPartyMentions(): Promise<PartyMention[] | null> {
+  previewOnly();
   if (process.env.NODE_ENV === "production") return null;
   if (party.newsOptOut) return [];
   return PARTIES().filter((e) => attended.has(e.id)).map((e) => {
@@ -203,10 +222,12 @@ export async function previewPartyMentions(): Promise<PartyMention[] | null> {
   });
 }
 export async function previewSetNewsOptOut(out: boolean): Promise<PartyResult> {
+  previewOnly();
   party.newsOptOut = out;
   return { ok: true };
 }
 export async function previewCheckout(sku: string, returnTo: string): Promise<CheckoutResult> {
+  previewOnly();
   if (process.env.NODE_ENV === "production") return { ok: false, error: "Previews are off in production." };
   pending.add(sku);
   setTimeout(() => {

@@ -24,7 +24,8 @@ export interface Economy {
   birthLottery: { min: number; max: number; step: number };
   phoneBill: number;
   firstParty: { entry: number; cashReward: number; cloutReward: number; confidence: number; energy: number };
-  invites: { cloutPerInvite: number; cliqueSize: number; cliqueBonus: number };
+  /** Owner, Oct 15: the first `paidAtOnce` invites pay at sign-up; later ones when the friend comes back a second day. */
+  invites: { cloutPerInvite: number; cliqueSize: number; cliqueBonus: number; paidAtOnce: number };
   startingStats: { energy: number; mood: number; confidence: number };
   playersOnlineThreshold: number;
   homes: Home[];
@@ -36,7 +37,7 @@ export const ECONOMY: Economy = {
   birthLottery: { min: 5000, max: 10000, step: 100 },
   phoneBill: 60,
   firstParty: { entry: 150, cashReward: 300, cloutReward: 100, confidence: 15, energy: 20 },
-  invites: { cloutPerInvite: 50, cliqueSize: 5, cliqueBonus: 500 },
+  invites: { cloutPerInvite: 50, cliqueSize: 5, cliqueBonus: 500, paidAtOnce: 5 },
   startingStats: { energy: 100, mood: 60, confidence: 40 },
   playersOnlineThreshold: 1,
   homes: [
