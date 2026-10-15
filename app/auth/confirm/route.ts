@@ -1,5 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { AFTER_SIGNIN_COOKIE, afterSignIn } from "@/lib/authNext";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Magic-link target (token-hash flow). Works even when the email is opened on a different device
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
   const tokenHash = url.searchParams.get("token_hash");
   if (!tokenHash) return NextResponse.redirect(new URL("/?auth_error=link", request.url));
   const type = TYPES.includes(url.searchParams.get("type") as EmailOtpType) ? (url.searchParams.get("type") as EmailOtpType) : "email";
-  const next = safeNext(url.searchParams.get("next"));
+  const next = afterSignIn(url.searchParams.get("next"), request.cookies.get(AFTER_SIGNIN_COOKIE)?.value);
   return new NextResponse(page(tokenHash, type, next), {
     headers: {
       "content-type": "text/html; charset=utf-8",
@@ -34,18 +35,17 @@ export async function POST(request: NextRequest) {
   const tokenHash = String(form.get("token_hash") ?? "");
   const rawType = String(form.get("type") ?? "email") as EmailOtpType;
   const type = TYPES.includes(rawType) ? rawType : "email";
-  const next = safeNext(String(form.get("next") ?? ""));
+  const next = afterSignIn(String(form.get("next") ?? ""), request.cookies.get(AFTER_SIGNIN_COOKIE)?.value);
   const supabase = await getServerSupabase();
   if (supabase && tokenHash) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) return NextResponse.redirect(new URL(next, request.url), { status: 303 });
+    if (!error) {
+      const res = NextResponse.redirect(new URL(next, request.url), { status: 303 });
+      res.cookies.delete(AFTER_SIGNIN_COOKIE);
+      return res;
+    }
   }
   return NextResponse.redirect(new URL("/?auth_error=link", request.url), { status: 303 });
-}
-
-/** Only same-site paths we expect (the Studio); everything else goes to the game. */
-function safeNext(next: string | null): string {
-  return next === "/studio" ? "/studio" : "/create";
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);

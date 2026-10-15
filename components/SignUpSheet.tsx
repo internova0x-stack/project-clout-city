@@ -8,6 +8,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { isStandalone } from "./game/FirstSession";
 import { MailIcon } from "./icons";
 import { Sheet } from "./Sheet";
+import { AFTER_SIGNIN_COOKIE } from "@/lib/authNext";
 
 function readInviteCookie(): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${GAME_CONFIG.invite.cookieName}=([^;]*)`));
@@ -57,6 +58,8 @@ export function SignUpSheet({
       return;
     }
     setBusy(true);
+    // A game sign-in lands in the game, even after a Studio sign-in attempt on this browser.
+    document.cookie = `${AFTER_SIGNIN_COOKIE}=; path=/; max-age=0`;
     const { error: err } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
