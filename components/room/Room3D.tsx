@@ -892,11 +892,13 @@ export default function Room3D(props: Room3DProps) {
       const look = !member.npc && member.look ? member.look : randomLook(rand, STARTING_STYLES.map((x) => x.id));
       const path = fresh ? [] : findPath(grid, template.spawn, [s.x, s.z]);
       const [x, z] = path.length ? template.spawn : [s.x, s.z];
-      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x, z, heading: s.facing, mode: path.length ? "walk" : party ? "dance" : "idle", path, pending: null, phase: i * 1.3 };
+      // Party floors, and anyone whose spot is on a dance floor, dance (owner, Oct 15).
+      const dances = party || onDanceFloor(itemsRef.current, s.x, s.z);
+      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x, z, heading: s.facing, mode: path.length ? "walk" : dances ? "dance" : "idle", path, pending: null, phase: i * 1.3 };
       castShadows(actor.parts!.root);
       actor.rig.add(actor.parts!.root);
       w.scene.add(actor.rig);
-      crowdRef.current.push({ member, actor, spot, dance: party });
+      crowdRef.current.push({ member, actor, spot, dance: dances });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crowdKey, template.id, daytime, sign, mood]);
@@ -1146,6 +1148,7 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     a.phase += dt * 9;
     // The modeled avatar walks with its own clip.
     if (p.setMotion) {
+      if (p.hips) resetLimbs(p); // off the dance floor: no dance pose on top of the walk
       p.setMotion("walk");
       a.rig.rotation.y = a.heading;
       return;
@@ -1159,20 +1162,77 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     p.arms[1].rotation.x = s * 0.45;
     p.body.position.y = Math.abs(s) * 0.03;
   } else if (a.mode === "dance" && !reduce) {
-    a.phase += dt * 6;
-    const s = Math.sin(a.phase);
-    p.body.position.y = Math.abs(s) * 0.06;
-    p.arms[0].rotation.x = -2.4 + s * 0.4;
-    p.arms[1].rotation.x = -2.4 - s * 0.4;
-    p.arms[0].rotation.z = -0.3;
-    p.arms[1].rotation.z = 0.3;
-    p.legs[0].rotation.x = Math.max(0, s) * 0.3;
-    p.legs[1].rotation.x = Math.max(0, -s) * 0.3;
-    p.root.rotation.y = Math.sin(t * 1.3 + a.phase * 0.1) * 0.5;
+    dance(p, t, a.phase);
   } else if (a.mode === "idle" && !reduce) {
     p.torso.scale.y = 1 + Math.sin(t * 2.1 + a.phase) * 0.008;
   }
   a.rig.rotation.y = a.heading;
+}
+
+/**
+ * Dancing (owner, Oct 15), drawn in code on the shared skeleton: four styles on a 120 BPM beat. Each
+ * person's phase picks their style and puts them a little off the beat, so a crowd never moves as one.
+ * Turns are in the avatar's own frame; arms[0] and forearms[0] are on its -x side.
+ */
+const BEAT = Math.PI * 4; // 2 beats a second
+function dance(p: AvatarParts, t: number, phase: number) {
+  const style = Math.abs(Math.floor(phase * 7.3)) % 4;
+  const b = (t + (phase % 1) * 0.12) * BEAT;
+  const s = Math.sin(b), c = Math.cos(b);
+  const half = Math.sin(b / 2);
+  const bounce = Math.abs(s);
+  const [la, ra] = p.arms;
+  const [lf, rf] = p.forearms ?? [];
+  p.body.position.y = bounce * 0.045;
+  p.head.rotation.set(0.1 * bounce, 0, 0);
+  p.root.rotation.y = 0;
+  for (const k of p.knees) k.rotation.x = 0;
+  for (const l of p.legs) l.rotation.x = 0;
+  if (style === 0) {
+    // Fist pump: one arm punching up on the beat, the other at the hip.
+    ra.rotation.set(-2.5 + 0.45 * s, 0, 0.2);
+    la.rotation.set(-0.5 + 0.2 * c, 0, -0.25);
+    rf?.rotation.set(-0.35, 0, 0);
+    lf?.rotation.set(-1.5, 0, 0);
+    p.hips?.rotation.set(0, 0.12 * half, 0.07 * half);
+    p.chest?.rotation.set(0.05 * bounce, -0.1 * half, 0);
+    p.knees[0].rotation.x = 0.25 * bounce;
+    p.knees[1].rotation.x = 0.25 * bounce;
+  } else if (style === 1) {
+    // Sway: hips side to side on the half beat, arms loose and swinging.
+    p.hips?.rotation.set(0, 0.1 * half, 0.16 * half);
+    p.chest?.rotation.set(0, -0.08 * half, -0.12 * half);
+    la.rotation.set(-0.45 + 0.25 * half, 0, -0.45 - 0.2 * half);
+    ra.rotation.set(-0.45 - 0.25 * half, 0, 0.45 - 0.2 * half);
+    lf?.rotation.set(-1.0 - 0.3 * c, 0, 0);
+    rf?.rotation.set(-1.0 + 0.3 * c, 0, 0);
+    p.knees[0].rotation.x = 0.35 * Math.max(0, half);
+    p.knees[1].rotation.x = 0.35 * Math.max(0, -half);
+  } else if (style === 2) {
+    // Hands up: both arms high, waving in turn, a bigger bounce.
+    p.body.position.y = bounce * 0.07;
+    la.rotation.set(-2.7 + 0.25 * s, 0, -0.35);
+    ra.rotation.set(-2.7 - 0.25 * s, 0, 0.35);
+    lf?.rotation.set(-0.3 - 0.2 * c, 0, 0);
+    rf?.rotation.set(-0.3 + 0.2 * c, 0, 0);
+    p.hips?.rotation.set(0, 0, 0.06 * half);
+    p.chest?.rotation.set(-0.08 * bounce, 0, 0);
+    p.head.rotation.set(-0.15 * bounce, 0, 0);
+    p.knees[0].rotation.x = 0.3 * bounce;
+    p.knees[1].rotation.x = 0.3 * bounce;
+  } else {
+    // Twist: hips and chest turning against each other, elbows bent and pumping, feet stepping.
+    p.hips?.rotation.set(0, 0.3 * s, 0);
+    p.chest?.rotation.set(0, -0.22 * s, 0);
+    la.rotation.set(-0.35 - 0.35 * s, 0, -0.3);
+    ra.rotation.set(-0.35 + 0.35 * s, 0, 0.3);
+    lf?.rotation.set(-1.5, 0, 0);
+    rf?.rotation.set(-1.5, 0, 0);
+    p.legs[0].rotation.x = -0.18 * Math.max(0, s);
+    p.legs[1].rotation.x = -0.18 * Math.max(0, -s);
+    p.knees[0].rotation.x = 0.4 * Math.max(0, s);
+    p.knees[1].rotation.x = 0.4 * Math.max(0, -s);
+  }
 }
 
 function turnToward(cur: number, target: number, k: number) {
@@ -1184,6 +1244,9 @@ function turnToward(cur: number, target: number, k: number) {
 
 function resetLimbs(p: AvatarParts) {
   p.head.rotation.set(0, 0, 0);
+  p.hips?.rotation.set(0, 0, 0);
+  p.chest?.rotation.set(0, 0, 0);
+  p.forearms?.forEach((o) => o.rotation.set(0, 0, 0));
   for (const o of [...p.legs, ...p.knees]) o.rotation.set(0, 0, 0);
   p.arms.forEach((o, i) => o.rotation.set(0, 0, (i === 0 ? -1 : 1) * 0.13));
   p.body.position.y = 0;
@@ -1194,6 +1257,11 @@ function resetLimbs(p: AvatarParts) {
 function standUp(a: Actor) {
   if (a.parts) resetLimbs(a.parts);
   a.mode = "idle";
+}
+
+/** Whether a floor point is on one of the room's dance floors (they're square). */
+function onDanceFloor(items: RoomItem[], x: number, z: number): boolean {
+  return items.some((it) => it.kind === "danceFloor" && Math.abs(x - it.x) <= 1.4 && Math.abs(z - it.z) <= 1.4);
 }
 
 /** Hips on the seat, thighs forward, shins down. */

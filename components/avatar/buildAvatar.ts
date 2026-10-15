@@ -25,6 +25,10 @@ export interface AvatarParts {
   /** Knee pivots inside each leg (left, right). */
   knees: Object3D[];
   arms: Object3D[];
+  /** Modeled avatar only: hip, chest and forearm (left, right) pivots, for dancing. */
+  hips?: Object3D;
+  chest?: Object3D;
+  forearms?: Object3D[];
   /** Procedural avatar only: the hair, and the hats, coverings, glasses and headphones, in head space. */
   hair?: Group;
   headwear?: Group;
