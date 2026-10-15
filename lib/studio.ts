@@ -3,6 +3,7 @@
 // on the schedule (product owner, Oct 12, 2026).
 
 import type { GossipWeek } from "./gossip.ts";
+import type { Insights } from "./insights.ts";
 import type { Arc, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
@@ -83,6 +84,8 @@ export interface StudioApi {
   reports?(status: "open" | "all"): Promise<Admin<StudioReport[]>>;
   reportAction?(id: number, action: "dismiss" | "warn" | "mute" | "ban"): Promise<Admin<null>>;
   metrics?(): Promise<Admin<StudioMetrics>>;
+  /** Insights (migration 0053): the last `days` days (7 to 90). */
+  insights?(days: number): Promise<Admin<Insights>>;
   /** v0.6 regulars' lines (migration 0016). */
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;

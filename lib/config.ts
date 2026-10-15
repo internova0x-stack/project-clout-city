@@ -14,6 +14,10 @@ export const GAME_CONFIG = {
     nightStartsAt: 19,
   },
 
+  /** Insights (migration 0053): the game pings session_ping() this often while it's visible.
+   *  A gap over 5 minutes starts a new session. */
+  sessionPingMs: 60_000,
+
   clique: {
     /** Members needed for the big clique bonus (Clarifications section 7). */
     bonusSize: 5,

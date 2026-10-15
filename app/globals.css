@@ -794,6 +794,26 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .studio-tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
 .studio-tile { display:flex; flex-direction:column; gap:4px; }
 
+/* Insights (migration 0053) */
+:root { --insights-bar:#FF8A6B; }
+.insights-charts { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.insights-chart svg { display:block; }
+.insights-two { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+.insights-two > * { min-width:0; }
+.insights-rows { display:grid; grid-template-columns:minmax(0, max-content) minmax(60px, 1fr) auto; grid-auto-flow:row dense; align-items:center; column-gap:12px; row-gap:10px; }
+.insights-label { grid-column:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.insights-track { grid-column:2; height:8px; border-radius:var(--r-pill); background:var(--chip-off); overflow:hidden; }
+.insights-track > span { display:block; height:100%; border-radius:inherit; background:var(--insights-bar); }
+.insights-num { grid-column:3; text-align:right; white-space:nowrap; }
+.insights-stat { display:flex; flex-direction:column; gap:2px; }
+.insights-retention { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+.insights-table-wrap { overflow-x:auto; }
+.insights-table { width:100%; border-collapse:collapse; font-size:14px; }
+.insights-table th { text-align:left; font-weight:600; color:var(--text-3); font-size:12px; letter-spacing:.04em; text-transform:uppercase; padding:6px 8px; border-bottom:1px solid var(--divider); white-space:nowrap; }
+.insights-table td { padding:8px; border-bottom:1px solid var(--divider); color:var(--text-1); }
+.insights-table tr:last-child td { border-bottom:0; }
+@media (max-width:560px) { .insights-rows { grid-template-columns:minmax(0, 1fr) auto; row-gap:4px; } .insights-label { white-space:normal; } .insights-num { grid-column:2; } .insights-track { grid-column:1 / -1; margin-bottom:8px; } }
+
 /* Crushes and date nights (C40, C41) */
 .crush-wrap { display:inline-flex; align-items:center; gap:8px; flex:none; }
 .crush-btn { color:var(--neon-600); background:#fff; border:1px solid var(--neon-tint); }

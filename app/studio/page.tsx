@@ -3,7 +3,7 @@ import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
 import {
-  studioBeatStatus, studioDrafts, studioSetupCheck, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioMetrics, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
+  studioBeatStatus, studioDrafts, studioSetupCheck, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioMetrics, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +34,7 @@ export default async function StudioPage() {
       who={user.email ?? "admin"}
       api={{
         upload: studioUpload, review: studioReview, schedule: studioSchedule, status: studioStatus, beatStatus: studioBeatStatus, content: studioContent,
-        reports: studioReports, reportAction: studioReportAction, metrics: studioMetrics,
+        reports: studioReports, reportAction: studioReportAction, metrics: studioMetrics, insights: studioInsights,
         castLines: studioCastLines, castAdd: studioCastAdd, castStatus: studioCastStatus,
         newsList: studioNewsList, newsUpload: studioNewsUpload, newsStatus: studioNewsStatus, newsReschedule: studioNewsReschedule,
         huntList: studioHuntList, huntUpload: studioHuntUpload, huntStatus: studioHuntStatus, drafts: studioDrafts,

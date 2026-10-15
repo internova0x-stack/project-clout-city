@@ -53,6 +53,11 @@ export async function POST(request: NextRequest) {
       // Ended (cancelled, unpaid) revokes unlimited chat, so the daily limit comes back; active restores it.
       call = { fn: "payment_subscription", args: { p_event: event.id, p_subscription: o.id, p_status: event.type.endsWith("deleted") ? "canceled" : o.status } };
       break;
+    case "invoice.paid":
+      // Insights (migration 0053): VIP renewals count as revenue. The first invoice is the checkout itself.
+      if (o.billing_reason !== "subscription_cycle" || !o.subscription) break;
+      call = { fn: "payment_renewal", args: { p_event: event.id, p_subscription: o.subscription, p_amount: o.amount_paid, p_currency: o.currency } };
+      break;
     case "charge.refunded":
       // Full refunds revoke; a partial refund is a goodwill credit and keeps access.
       if (o.refunded !== true) break;

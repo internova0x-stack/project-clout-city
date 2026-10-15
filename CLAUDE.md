@@ -66,6 +66,9 @@ components live in `app/globals.css`.
   VIP (migrations 0047, 0051, 0052: $4.99 a month, $39.99 a year; "chat forever" $119.99 is chat only) is the only
   subscription: the monthly and yearly entitlements follow the Stripe subscription (`payment_subscription`).
   `chat_unlimited(player)` is the chat check; `has_entitlement` also unlocks every side story for a VIP (`vip_member`).
+- Insights (migration 0053): `admin_insights()` is the Studio's numbers (admin only). Sessions come from
+  `session_ping()` (GameShell, every `GAME_CONFIG.sessionPingMs`); VIP renewals from the webhook's `invoice.paid`
+  (`payment_renewal`). Revenue counts paid, unrefunded purchases plus renewals.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never

@@ -59,3 +59,10 @@ export async function track(name: "session" | "invite_shared" | "beat_shared" | 
   if (!supabase) return;
   await supabase.rpc("track", { p_name: name });
 }
+
+/** Insights (migration 0053): about once a minute while the game is open and visible. Never fails the game. */
+export async function sessionPing() {
+  const supabase = await getServerSupabase();
+  if (!supabase) return;
+  await supabase.rpc("session_ping").then(() => undefined, () => undefined);
+}
