@@ -20,6 +20,7 @@ export function InviteSheet({
   clique,
   crush = false,
   onShared,
+  place,
 }: {
   open: boolean;
   onClose: () => void;
@@ -29,6 +30,8 @@ export function InviteSheet({
   crush?: boolean;
   /** Analytics: the link was shared or copied. */
   onShared?: () => void;
+  /** Owner, Oct 15: sent from a place ("Bring the crew", "Make it a date"); the link opens that place. */
+  place?: { id: string; name: string; emoji: string } | null;
 }) {
   const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL ?? "");
   const [copied, setCopied] = useState(false);
@@ -36,7 +39,7 @@ export function InviteSheet({
     if (!process.env.NEXT_PUBLIC_SITE_URL) setOrigin(window.location.origin);
   }, []);
 
-  const link = origin ? inviteUrl(origin, inviteCode) : `/i/${inviteCode}`;
+  const link = origin ? inviteUrl(origin, inviteCode, place?.id) : `/i/${inviteCode}${place ? `?at=${place.id}` : ""}`;
   const size = GAME_CONFIG.clique.bonusSize;
   const progress = cliqueProgress(clique.length, size);
 
@@ -52,7 +55,9 @@ export function InviteSheet({
   }
 
   async function share() {
-    const text = crush ? CRUSH_INVITE_TEXT : "I'm on Clout City: New York's only ranking that counts. Claim your name before the city opens.";
+    const text = place
+      ? crush ? `I've got a crush on someone in Clout City. Meet me at ${place.name} and find out if it's you.` : `Meet me at ${place.name} in Clout City. Pull up.`
+      : crush ? CRUSH_INVITE_TEXT : "I'm on Clout City: New York's only ranking that counts. Claim your name before the city opens.";
     if (navigator.share) {
       try {
         await navigator.share({ title: "Clout City NYC", text, url: link });
@@ -84,6 +89,7 @@ export function InviteSheet({
 
         <div className="card stack-12">
           <p className="overline" style={{ margin: 0 }}>Your link</p>
+          {place && <p className="subtext" style={{ margin: 0 }}>It opens {place.emoji} {place.name}, so they land right where you are.</p>}
           <div className="row" style={{ background: "#fff", borderRadius: 12, padding: "10px 12px", boxShadow: "var(--elev-1)" }}>
             <span className="body-strong" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {link.replace(/^https?:\/\//, "")}

@@ -154,6 +154,7 @@ export function GameShell({
   business,
   roomMood = "dream",
   previewRankUp,
+  invitedAt,
 }: {
   player: Player;
   clique: CliqueMember[];
@@ -196,6 +197,8 @@ export function GameShell({
   daytimeOverride?: boolean;
   /** Development previews only: open a step of the first session directly. */
   previewFlow?: Flow;
+  /** Owner, Oct 15: a friend's invite link from a place opens that place's card once the game is ready. */
+  invitedAt?: string;
   /** Development previews only: show the rank-up reveal for this rank (1 to 10). */
   previewRankUp?: number;
 }) {
@@ -334,6 +337,10 @@ export function GameShell({
   }, [inside, chat]);
   const [inbox, setInbox] = useState<DatingInbox | null>(null);
   const [dateSpot, setDateSpot] = useState<{ kind: "place" | "event"; target: string; price: number } | null>(null);
+  // Owner, Oct 15: the place an invite was sent from (Bring the crew, Make it a date); its link opens there.
+  const [invitePlace, setInvitePlace] = useState<Place | null>(null);
+  const spotPlace = (s: { kind: "place" | "event"; target: string } | null) =>
+    !s ? null : placeById(s.kind === "place" ? s.target : CLUB_EVENTS.find((e) => e.id === s.target)?.placeId ?? "") ?? null;
   const [datingDismissed, setDatingDismissed] = useState<string | null>(null);
   const [datingBusy, setDatingBusy] = useState(false);
   /** Re-reads the dating inbox; a date that just paid out gets its own toast. */
@@ -992,6 +999,21 @@ export function GameShell({
   const payoutReady = !!gig && gigReady(gig, gameNow);
   const partyDone = me.first_party_at !== null;
   const handedOff = me.onboarding_step === "handoff_done";
+  // Owner, Oct 15: "the invite link should bring them to that specific location". Once the first session
+  // is done, open the place from the link, then forget it.
+  const invitePlaceDone = useRef(false);
+  useEffect(() => {
+    if (invitePlaceDone.current || !invitedAt || !handedOff || !city) return;
+    invitePlaceDone.current = true;
+    document.cookie = `${GAME_CONFIG.invite.placeCookieName}=; Max-Age=0; path=/`;
+    const p = placeById(invitedAt);
+    if (!p) return;
+    setTab("map");
+    setPlace(p);
+    setTimeout(() => mapRef.current?.moveCamera(p.at, 15.5), 300);
+    setToast(`A friend invited you to ${p.emoji} ${p.name}. Go there to meet them.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invitedAt, handedOff, !!city]);
 
   // First-play pins on Net Worth and Invite appear at the hand-off (step 14).
   useEffect(() => {
@@ -1657,7 +1679,9 @@ export function GameShell({
       <BankSheet open={panel === "bank"} onClose={() => setPanel(null)} bank={me.bank_cash} handle={me.display_name} />
       <InviteSheet
         open={panel === "invite"}
+        place={invitePlace}
         onClose={() => {
+          setInvitePlace(null);
           setPanel(null);
           if (pendingPwa.current) {
             pendingPwa.current = false;
@@ -1690,14 +1714,15 @@ export function GameShell({
             api={dating}
             onClose={() => setDateSpot(null)}
             onSent={(text) => { setDateSpot(null); setToast(text); void loadInbox(); }}
-            onInviteFriend={() => { setDateSpot(null); setPlace(null); setPanel("invite"); }}
-            onCrushInvite={() => { setDateSpot(null); setPlace(null); setPanel("crushInvite"); }}
+            onInviteFriend={() => { setInvitePlace(spotPlace(dateSpot)); setDateSpot(null); setPlace(null); setPanel("invite"); }}
+            onCrushInvite={() => { setInvitePlace(spotPlace(dateSpot)); setDateSpot(null); setPlace(null); setPanel("crushInvite"); }}
           />
           <InviteSheet
             open={panel === "crushInvite"}
-            onClose={() => setPanel("dates")}
+            onClose={() => { setInvitePlace(null); setPanel("dates"); }}
             inviteCode={me.invite_code}
             clique={clique}
+            place={invitePlace}
             crush
             onShared={() => track?.("crush_invite_shared")}
           />
@@ -1710,7 +1735,7 @@ export function GameShell({
             api={crew}
             onClose={() => setCrewPlace(null)}
             onSent={(text) => { setCrewPlace(null); setToast(text); void loadCrew(); }}
-            onInviteFriends={() => { setCrewPlace(null); setPlace(null); setPanel("invite"); }}
+            onInviteFriends={() => { setInvitePlace(crewPlace); setCrewPlace(null); setPlace(null); setPanel("invite"); }}
           />
           <CrewPlansSheet
             open={panel === "crew"}

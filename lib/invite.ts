@@ -15,8 +15,10 @@ export function normalizeInviteCode(raw: string | null | undefined): string | nu
   return code;
 }
 
-export function inviteUrl(origin: string, code: string): string {
-  return `${origin.replace(/\/+$/, "")}/i/${code}`;
+/** The invite link; from a place ("Bring the crew", "Make it a date"), it opens that place (owner, Oct 15). */
+export function inviteUrl(origin: string, code: string, placeId?: string | null): string {
+  const base = `${origin.replace(/\/+$/, "")}/i/${code}`;
+  return placeId ? `${base}?at=${encodeURIComponent(placeId)}` : base;
 }
 
 /** "2 of 5" progress toward the clique bonus, capped at the bonus size. */

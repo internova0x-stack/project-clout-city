@@ -567,8 +567,9 @@ a { color:inherit; }
 .phone-wrap { z-index:60; }
 .phone-close { position:absolute; z-index:2; top:calc(14px + var(--safe-top)); right:14px; }
 /* Android bug (owner, Oct 15): a wide line in an app (a Bank row, a business name) could grow the phone past
-   the screen and push it right. The phone's width comes from the viewport, never from what's inside. */
-.phone-device { position:relative; z-index:1; width:min(360px, calc(100vw - 40px)); height:min(740px, calc(100dvh - 64px)); background:#000; border-radius:48px; padding:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+   the screen and push it right. The phone's width comes from the viewport, never from what's inside, and
+   its height follows its width (owner, Oct 15: "the phone looks long" on a narrow screen). */
+.phone-device { position:relative; z-index:1; width:min(360px, calc(100vw - 40px)); aspect-ratio:360 / 740; height:auto; max-height:calc(100dvh - 64px); background:#000; border-radius:48px; padding:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
 .phone-screen { position:relative; width:100%; min-width:0; height:100%; border-radius:38px; overflow:hidden; background:var(--surface-sheet); display:flex; flex-direction:column; }
 .phone-status { display:flex; align-items:center; justify-content:space-between; padding:12px 22px 6px; font-size:13px; font-weight:600; color:#fff; position:relative; z-index:2; }
 .phone-status.light { color:var(--text-1); }
@@ -1500,8 +1501,13 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .biz-upg { padding:12px 0; border-bottom:1px solid var(--divider); }
 .biz-upg:last-child { border-bottom:0; padding-bottom:0; }
 .biz-upg-buy { gap:12px; margin:10px 0 0 48px; align-items:center; }
+/* Owner, Oct 15: the figure was too big; a calm card with even spacing. */
+.biz-worth { display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+.biz-worth > * { margin:0; }
+.biz-worth .rank-bar { align-self:stretch; margin-top:6px; }
+.biz-worth .btn { align-self:stretch; margin-top:8px; }
 .biz-worth-n { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
-  font-size:30px; line-height:34px; font-weight:600; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  font-size:24px; line-height:28px; font-weight:600; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
 .biz-dusk { padding:16px; border-radius:var(--r-lg); background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); color:#7A2F33; }
 .biz-dusk .subtext, .biz-dusk .meta, .biz-ink { color:#7A2F33; }
 .biz-em { flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:24px; background:linear-gradient(160deg,#FFF1E8,#FFC9B9); }
@@ -1516,7 +1522,12 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .biz-sky { background:linear-gradient(180deg,rgba(127,179,232,.85) 0%,rgba(191,211,238,.85) 45%,rgba(246,201,160,.85) 100%) !important; }
 .biz-modal { z-index:62; }
 .modal-card.biz-reveal { background:linear-gradient(180deg,#FFFFFF 0%,#FFF4EC 60%,#FFE6DA 100%); }
-.biz-reveal-n { margin:12px 0 6px; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
-  font-size:40px; line-height:44px; font-weight:600; color:#7A2F33; font-variant-numeric:tabular-nums; }
+.biz-reveal-n { margin:14px 0 4px; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:28px; line-height:32px; font-weight:600; color:#7A2F33; font-variant-numeric:tabular-nums; }
 .biz-reveal-lines { margin:12px 0 14px; font-size:14px; }
 .biz-reveal-lines .list-row { padding:8px 0; }
+/* Owner, Oct 15: figures not too close to the edges. */
+.biz-app .profile-kpi { padding:12px 8px; }
+.biz-app .profile-kpi b { font-size:16px; line-height:20px; letter-spacing:-.01em; }
+.biz-app .list-row .title { font-size:15px; line-height:20px; }
+.biz-own { padding:12px 0; }

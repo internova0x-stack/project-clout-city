@@ -128,16 +128,17 @@ export function BusinessesApp({ biz, cash, clout, otherWorth, offsetMs, handlers
         <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>Businesses</h2>
         <p className="subtext" style={{ margin: 0 }}>Buy them, upgrade them, collect the till. Every empire starts with a hot dog cart.</p>
       </div>
-      <div className="card stack-8">
+      <div className="card biz-worth">
         <span className="overline">Net worth</span>
         <span className="biz-worth-n">{money(worth)}</span>
-        <span><RankChip rank={rank} /></span>
+        <RankChip rank={rank} />
         {n && <div className="rank-bar" aria-hidden="true"><span style={{ width: `${Math.round(n.progress * 100)}%` }} /></div>}
-        <span className="meta">{nextRankLine(clout, worth)}</span>
-        {owned.length > 0 && <span className="meta">{money(businessesValue(owned, clout))} of it is your businesses.</span>}
+        <span className="meta">
+          {nextRankLine(clout, worth)}{owned.length > 0 ? `. ${money(businessesValue(owned, clout))} of it is your businesses.` : "."}
+        </span>
       </div>
       {owned.length > 0 && (
-        <div className="biz-dusk stack-8">
+        <div className="biz-dusk biz-worth">
           <span className="overline biz-ink">In the tills</span>
           <span className="biz-worth-n biz-ink">{money(total)}</span>
           <span className="subtext biz-ink">{fullCount ? `${fullCount} ${fullCount === 1 ? "till is" : "tills are"} full. They stop filling after 2 days.` : "Tills fill by the hour and stop after 2 days."}</span>
@@ -152,7 +153,7 @@ export function BusinessesApp({ biz, cash, clout, otherWorth, offsetMs, handlers
               <span className="biz-em" aria-hidden="true">{b.emoji}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span className="title" style={{ display: "block" }}>{b.name}</span>
-                <span className="meta">{money(payPerDay(b, o.level))} a day · {o.level} of 3 upgrades{o.public ? " · public 🔔" : ""}</span>
+                <span className="meta">{money(payPerDay(b, o.level))} a day · {o.level}/3 upgrades{o.public ? " · 🔔" : ""}</span>
               </span>
               {full ? <span className="tag tag-event">Full</span> : <span className="biz-till-amt">{money(till)}</span>}
             </button>
