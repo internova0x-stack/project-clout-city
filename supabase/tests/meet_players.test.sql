@@ -23,6 +23,8 @@ select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.
 
 -- Presence: only players at the same place, once they've checked in.
 select pg_temp.at(1, 'velvet-static'); select pg_temp.at(2, 'velvet-static'); select pg_temp.at(3, 'grind-and-gossip');
+-- 0049: upstairs needs VIP access (free from 5,000 clout at Velvet Static).
+reset role; update public.players set clout = 6000 where display_name = 'meet_two'; set role authenticated;
 select pg_temp.as_(2); select 1 from public.place_presence('velvet-static', 2);
 select pg_temp.as_(3); select 1 from public.place_presence('grind-and-gossip', 1);
 select pg_temp.as_(1);

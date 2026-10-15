@@ -10,6 +10,8 @@ create function pg_temp.side(p_sku text) returns jsonb language sql as $$
   select a from jsonb_array_elements(public.story_feed() -> 'arcs') a where a ->> 'sku' = p_sku $$;
 
 insert into auth.users (id) values ('00000000-0000-0000-0000-000000000040'), ('00000000-0000-0000-0000-000000000041');
+-- 0049: the dev tools need a Studio admin.
+insert into public.story_admins (user_id) values ('00000000-0000-0000-0000-000000000041');
 update public.game_settings set value = '{"tools": true, "clockOffsetSeconds": 0}' where key = 'dev';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000040', false);

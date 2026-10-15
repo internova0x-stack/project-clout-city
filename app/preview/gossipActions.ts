@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 // Development previews only: the first gossip week from content/gossip/, moved to the current week,
 // with progress in memory on the dev server (so unfound pieces never reach the browser, as in the
 // game). The preview trusts the place it's told (the city sim keeps the location in the browser).
@@ -24,6 +26,7 @@ const key = (s: string, n: number) => `${s}:${n}`;
 
 /** ?gossip=new (nothing found), some (two stories started), almost (one piece short), done (one finished). */
 export async function previewGossipReset(preset = "some") {
+  previewOnly();
   if (off() || mem.preset === preset) return;
   mem.preset = preset;
   mem.found.clear(); mem.shared.clear(); mem.cards.clear();
@@ -45,6 +48,7 @@ function finish(storyId: string): boolean {
 }
 
 export async function previewGossipState(): Promise<GossipState | null> {
+  previewOnly();
   if (off()) return null;
   const w = week();
   return {
@@ -65,6 +69,7 @@ export async function previewGossipState(): Promise<GossipState | null> {
 }
 
 export async function previewGossipFind(placeId: string, via: GossipVia): Promise<GossipResult<GossipFind>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   if (via === "regular" && !regularAt(placeId)) return { ok: true, data: { found: [], later: null, finished: [] } };
   if (via === "restroom" && !PLACES.find((x) => x.id === placeId)?.club) return { ok: false, error: gossipError("no_restroom") };
@@ -89,6 +94,7 @@ export async function previewGossipFind(placeId: string, via: GossipVia): Promis
 }
 
 export async function previewGossipShare(storyId: string, piece: number): Promise<GossipResult<number>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   if (!mem.found.has(key(storyId, piece))) return { ok: false, error: "You can only share what you've heard." };
   if (mem.shared.has(key(storyId, piece))) return { ok: false, error: "Already shared with your crew. They know." };

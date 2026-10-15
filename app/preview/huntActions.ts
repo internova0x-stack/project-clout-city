@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 import { checkGossipFiles } from "@/lib/gossipImport";
 
 // Development previews only: this week's treasure hunt from the first file in content/hunts/,
@@ -33,6 +35,7 @@ const state = (): HuntState => ({ hunt: huntView(hunt(), prog, Date.now()), card
  * at step 2), "wrong" (a wrong answer, waiting), "finale" (at the last step) or "done" (found, with three older cards: badge).
  */
 export async function previewHuntSetup(mode: string, style: StyleId): Promise<HuntResult> {
+  previewOnly();
   if (off()) return OFF;
   const h = hunt();
   const base: HuntProgress = { style, step: 0, talked: false, wrongAt: null, completedAt: null };
@@ -53,10 +56,12 @@ export async function previewHuntSetup(mode: string, style: StyleId): Promise<Hu
 }
 
 export async function previewHuntState(): Promise<HuntResult> {
+  previewOnly();
   return off() ? OFF : { ok: true, state: state() };
 }
 
 export async function previewHuntJoin(style: StyleId): Promise<HuntResult> {
+  previewOnly();
   if (off()) return OFF;
   prog ??= { style, step: 0, talked: false, wrongAt: null, completedAt: null };
   return { ok: true, state: state() };
@@ -64,6 +69,7 @@ export async function previewHuntJoin(style: StyleId): Promise<HuntResult> {
 
 /** `visited`: the preview city's own record of a visit there today. */
 export async function previewHuntTalk(placeId: string, visited: boolean): Promise<HuntResult> {
+  previewOnly();
   if (off()) return OFF;
   if (!prog) return { ok: false, code: "not_here", error: "They don't have anything for your hunt." };
   const r = huntTalk(hunt(), prog, placeId, visited);
@@ -73,6 +79,7 @@ export async function previewHuntTalk(placeId: string, visited: boolean): Promis
 }
 
 export async function previewHuntAnswer(choice: number): Promise<HuntResult> {
+  previewOnly();
   if (off()) return OFF;
   if (!prog) return { ok: false, code: "not_here", error: "They don't have anything for your hunt." };
   const h = hunt();
@@ -94,10 +101,12 @@ function seed(): HuntAdmin[] {
   return admin;
 }
 export async function previewHuntList(): Promise<Admin<HuntAdmin[]>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   return { ok: true, data: [...seed()].sort((a, b) => b.week.localeCompare(a.week)) };
 }
 export async function previewHuntUpload(json: string): Promise<Admin<null> & { problems?: string[] }> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   let raw: unknown;
   try { raw = JSON.parse(json); } catch { return { ok: false, error: "That isn't valid JSON." }; }
@@ -114,6 +123,7 @@ export async function previewHuntUpload(json: string): Promise<Admin<null> & { p
   return { ok: true, data: null };
 }
 export async function previewHuntStatus(id: string, status: HuntAdmin["status"], note?: string): Promise<Admin<null>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   const row = seed().find((x) => x.id === id);
   if (!row) return { ok: false, error: "That hunt is gone." };
@@ -124,6 +134,7 @@ export async function previewHuntStatus(id: string, status: HuntAdmin["status"],
 
 /** The Studio calendar's week files (the real ones from content/; nothing is saved). */
 export async function previewDrafts(): Promise<Admin<ContentDraft[]>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   return { ok: true, data: await readContentDrafts() };
 }
@@ -131,6 +142,7 @@ export async function previewDrafts(): Promise<Admin<ContentDraft[]>> {
 // ---- The Studio's Gossip tab in preview: the real files from content/gossip (nothing is saved) ----
 const gossipStatus = new Map<string, { status: GossipAdmin["status"]; note: string | null }>();
 export async function previewGossipList(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   const { checks, weeks } = await checkGossipFiles();
   return {
@@ -150,6 +162,7 @@ export async function previewGossipList(): Promise<Admin<{ weeks: GossipAdmin[];
   };
 }
 export async function previewGossipStatus(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   gossipStatus.set(week, { status, note: status === "review" ? note?.trim() || null : null });
   return { ok: true, data: null };
@@ -157,6 +170,7 @@ export async function previewGossipStatus(week: string, status: GossipAdmin["sta
 
 /** The Studio's Setup check with sample results (a deployment missing the service key and 0038). */
 export async function previewSetupCheck(): Promise<Admin<SetupCheckRow[]>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   return { ok: true, data: [
     { group: "Vercel", label: "NEXT_PUBLIC_SUPABASE_URL", state: "ok", detail: "Set." },

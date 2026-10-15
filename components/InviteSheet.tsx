@@ -109,7 +109,7 @@ export function InviteSheet({
           <div style={{ height: 8, borderRadius: 999, background: "var(--chip-off)", overflow: "hidden" }} role="progressbar" aria-valuemin={0} aria-valuemax={size} aria-valuenow={progress.shown}>
             <div style={{ width: `${progress.ratio * 100}%`, height: "100%", background: "var(--taxi-400)", borderRadius: 999, transition: "width .4s ease-out" }} />
           </div>
-          <p className="meta" style={{ margin: "4px 0 0" }}>+{ECONOMY.invites.cloutPerInvite} clout for each friend who joins, and +{ECONOMY.invites.cliqueBonus} more when your crew is full.</p>
+          <p className="meta" style={{ margin: "4px 0 0" }}>+{ECONOMY.invites.cloutPerInvite} clout for each of your first {ECONOMY.invites.paidAtOnce} friends who join (after that, once a friend comes back a second day), and +{ECONOMY.invites.cliqueBonus} more when your crew is full.</p>
         </div>
 
         <div className="stack-8">

@@ -1,5 +1,7 @@
 "use server";
 
+import { previewOnly } from "./guard";
+
 // Development previews only: a party room in memory on the dev server (?party=ticket gives you a
 // ticket to tonight's party at the lounge). A few real-looking guests and some chat; NPCs fill the rest.
 import type { PartyMessage, PartyPerson, PartyRoomResult, PartyRoomState } from "@/lib/partyRoom";
@@ -21,15 +23,18 @@ const mem: { messages: PartyMessage[]; next: number } = {
 };
 
 export async function previewPartyRoom(_eventId: string, after: number): Promise<PartyRoomResult<PartyRoomState>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   return { ok: true, data: { count: PEOPLE.length + 1, people: PEOPLE, messages: mem.messages.filter((m) => m.id > after) } };
 }
 export async function previewPartySay(_eventId: string, body: string): Promise<PartyRoomResult<PartyMessage>> {
+  previewOnly();
   if (off()) return { ok: false, error: "Previews are off in production." };
   const m: PartyMessage = { id: mem.next++, from: "preview", name: "You", body: body.slice(0, 200), at: new Date().toISOString(), mine: true };
   mem.messages.push(m);
   return { ok: true, data: m };
 }
 export async function previewPartyReport(): Promise<PartyRoomResult<null>> {
+  previewOnly();
   return off() ? { ok: false, error: "Previews are off in production." } : { ok: true, data: null };
 }

@@ -47,7 +47,8 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
     `update game_settings set value = '{"tools": true, "clockOffsetSeconds": 0}' where key = 'dev';`
     A red-pink "⏩" pill then moves the game clock for everyone on that project, and (from v0.4)
     can start the Sarah Bird story on any day and unlock the side stories for your account.
-    Never switch it on in production.
+    Since migration 0049 only a Story Studio admin (the `story_admins` table, step 11) can use it, it only
+    unlocks story arcs, and the live site (Vercel production) refuses it. Never switch it on in production.
 11. **Stories (v0.4)**: run `0007_world_state.sql`. It adds the World State tables, the News app's
     functions and Sarah Bird with her three side stories (approved, not scheduled). Then make
     yourself a story admin so you can use the Story Studio at `/studio`:
