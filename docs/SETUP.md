@@ -94,7 +94,8 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 3. **Developers → Webhooks → Add endpoint**:
    - URL: `https://<your site>/api/stripe/webhook`
    - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
-     `checkout.session.expired`, `charge.refunded`
+     `checkout.session.expired`, `charge.refunded`, and (unlimited chat's monthly plan, migration
+     0047) `customer.subscription.updated`, `customer.subscription.deleted`
    - Copy its **Signing secret** (`whsec_…`).
    - Vercel preview links sit behind Vercel's login by default, which Stripe can't pass. Point
      the webhook at the production address, or add a second endpoint for a preview with
@@ -138,6 +139,18 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 11. Run `supabase/migrations/0013_crew_outings.sql`. It switches on crew outings: "Bring the crew"
     on place cards, Crew plans in Messages, +10 clout per friend who goes too and +100 clout and
     +10 Mood when the whole crew (host + 5) goes. Tunable in `game_settings` row `crew`.
+
+12. **Meeting players** (migration 0047). Run `supabase/migrations/0047_meet_players.sql`. Players at
+    the same place see each other in the room and on place cards, react for free and send 20
+    messages a day. **Unlimited chat** is two products in `store_products`: `chat-unlimited-monthly`
+    ($4.99 a month, a Stripe subscription) and `chat-unlimited-forever` ($39.99 once). Nothing to
+    create in Stripe: Checkout builds the monthly price from `store_products` (or set
+    `stripe_price_id` to a recurring Price you made). **Add the two subscription events to the
+    webhook (step 3)**, or a cancelled membership would keep unlimited chat.
+    Test: run out of messages (20 in Messages), pick **Monthly**, pay with `4242 4242 4242 4242`.
+    Chat says "✨ Unlimited chat". Then Stripe → **Customers** → the test customer → the
+    subscription → **Cancel subscription → Immediately**: the webhook revokes it and the 20-a-day
+    limit is back. (A failed renewal does the same once Stripe gives up retrying.)
 
 **Adding a party** (an exclusive event) in the SQL Editor; times are New York time:
 

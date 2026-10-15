@@ -322,7 +322,19 @@ Owner, Oct 14: walled rooms with many items; walls between rooms at waist height
   - **Restroom gossip** ("juicier gossip in the restroom"): Listen in at the mirrors hears everything overheard at that club plus pieces with `"source": "restroom"`, which only turn up there and pay a story's clout and Mood again on the spot (+25 clout, +6 Mood; ledger `gossip_restroom`). Listen in on the place card works as before. Week files may use restroom pieces only at places with a restroom floor, and no gossip goes behind a door rule; the Studio shows them as 🚻.
   - Daily tasks never send a player to a club whose door they can't get through.
 
-## 14. Later features
+## 14. Meeting players (owner, Oct 15; migration 0047)
+
+"Players who are at the same location at the same time are supposed to be able to see each other and chat with each other." "Players should be able to meet other real players in all locations." Brought forward from Later features; strangers may now message each other, with the safety tools below.
+
+- **In the room**, at every place and on every floor: the real players there walk around with the NPCs in their own avatar and look. **Nothing over their heads** (owner: "there are going to be many people, so the screen will get crowded"): tap a figure to open their card. NPCs keep their 💬, so they can be told apart and talked to for gossip. The panel's **Here now** row lists the players (crew first; "+N" shows everyone, with "downstairs"/"upstairs" for other floors).
+- **On the map**: a place's card says "● 3 here now · Tasha, Dev and Kai".
+- **Their card** opens with "Here with you at …", five **free reactions** (👋 🔥 😂 💅 🥂; one per person every few minutes; only between players at the same place, or crewmates), three **Break the ice** openers (about the place, the time of day and their look; tap one to put it in the box), a message box and the day's count. Reactions show in the chat thread as a big emoji.
+- **20 messages a day** (owner), every message you send counts, replies included. Reactions never count.
+- **Unlimited chat** (owner, Oct 15: "match the off-white and pink theme"): the 21st message opens the offer: **Monthly $4.99** (renews until cancelled) or **Forever $39.99** (one payment). Real money through Stripe; it never buys cash or clout. When a monthly plan ends (cancelled, or a renewal fails for good) the **limit comes back**. Also from Settings → Chat.
+- **Who can message me** (Settings): Anyone (default) or My crew; it covers messages and reactions.
+- Safety as before: word filter, block, report, the Studio's review queue, mutes and bans. Blocks hide people both ways, including from Here now.
+
+## 15. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
@@ -330,7 +342,6 @@ Not part of P1; don't build yet. Each needs more players or more art before it's
 | --- | --- | --- |
 | Premium penthouse with parties | One multi-floor apartment bought with real cash. Owners can throw a party once a week, announced to players, with RSVPs and a guest limit, attended by players and NPCs | A fifth real-money product, multi-floor interiors, and enough players to fill a party; parties need moderation |
 | Buildings with multiple floors | Going upstairs inside a place | The exclusive event venue (section 10) is the first; more buildings later |
-| Players at the same place | See which real players are at a location, with preset reactions; real chat only with people you're connected to | Needs live presence and enough players; stranger chat is ruled out |
 | Friends at home | Invite your crew to your apartment and chat there | Part of group hangouts on the roadmap |
 | NPC conversations | Back-and-forth talks with choices | Needs a dialogue system and more writing each week |
 | News on the map | Headlines pop up at the places they mention | After the News feed proves itself |

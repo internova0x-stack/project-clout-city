@@ -29,11 +29,33 @@ export interface CheckoutInput {
   sku: string;
   productType: string;
   email?: string | null;
+  /** Meeting players (migration 0047): "month" makes it a subscription that renews until cancelled. */
+  recurring?: "month" | null;
 }
 
-/** The form body for one Checkout Session: one-time payment, one item, our ids in metadata. */
+/**
+ * The form body for one Checkout Session: one item, our ids in metadata. A one-time payment, or a
+ * monthly subscription (unlimited chat's monthly plan), whose webhooks carry the subscription id.
+ */
 export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
   const metadata = { player_id: i.playerId, sku: i.sku, product_type: i.productType };
+  if (i.recurring) {
+    return {
+      mode: "subscription",
+      success_url: i.successUrl,
+      cancel_url: i.cancelUrl,
+      client_reference_id: i.playerId,
+      customer_email: i.email ?? undefined,
+      line_items: {
+        0: i.priceId
+          ? { price: i.priceId, quantity: 1 }
+          : { quantity: 1, price_data: { currency: i.currency, unit_amount: i.amountCents, recurring: { interval: i.recurring }, product_data: { name: i.name } } },
+      },
+      metadata,
+      subscription_data: { metadata },
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    };
+  }
   return {
     mode: "payment",
     success_url: i.successUrl,

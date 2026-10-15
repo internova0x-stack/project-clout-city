@@ -1,6 +1,7 @@
 "use server";
 
-import { chatError, type ChatResult, type ChatStatus, type ChatSummary, type ChatThread, type PlayerCard, type ReportReason } from "@/lib/chat";
+import type { PlaceCounts, Presence } from "@/lib/meet";
+import { chatError, type ChatMessage, type ChatResult, type ChatStatus, type ChatSummary, type ChatThread, type PlayerCard, type ReportReason } from "@/lib/chat";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind the Messages app and player cards. Each calls one SQL
@@ -21,7 +22,23 @@ export async function chatThread(withId: string) {
   return call<ChatThread>("chat_thread", { p_with: withId });
 }
 export async function chatSend(to: string, body: string) {
-  return call("chat_send", { p_to: to, p_body: body }, (d) => ({ left: Number((d as { left: number }).left) }));
+  return call("chat_send", { p_to: to, p_body: body }, (d) => {
+    const left = (d as { left: number | null }).left;
+    return { left: left === null || left === undefined ? null : Number(left) };
+  });
+}
+// Meeting players (migration 0047).
+export async function chatReact(to: string, emoji: string) {
+  return call<ChatMessage>("react_to", { p_to: to, p_emoji: emoji }, (d) => ({ ...(d as ChatMessage), mine: true }));
+}
+export async function chatSetMessagesFrom(who: "anyone" | "crew") {
+  return call<"anyone" | "crew">("set_messages_from", { p_who: who });
+}
+export async function placePresence(placeId: string, floor: number) {
+  return call<Presence>("place_presence", { p_place: placeId, p_floor: floor });
+}
+export async function placeCounts() {
+  return call<PlaceCounts>("place_counts");
 }
 export async function chatStatus() {
   return call<ChatStatus>("chat_status");

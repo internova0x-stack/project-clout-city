@@ -30,7 +30,7 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Sign in first." };
   const { data: product } = await supabase
-    .from("store_products").select("sku, product_type, name, price_cents, currency, stripe_price_id").eq("sku", sku).maybeSingle();
+    .from("store_products").select("sku, product_type, name, price_cents, currency, stripe_price_id, recurring").eq("sku", sku).maybeSingle();
   if (!product) return { ok: false, error: storeError("unknown_product") };
   const back = `${await origin()}/home?${RETURN_PARAM}=`;
   try {
@@ -45,6 +45,7 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
       sku,
       productType: product.product_type,
       email: user.email,
+      recurring: product.recurring === "month" ? "month" : null,
     });
     const { error } = await supabase.rpc("start_purchase", { p_sku: sku, p_session: session.id });
     if (error) return { ok: false, error: storeError(error.message) };

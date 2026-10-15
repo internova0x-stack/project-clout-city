@@ -6,7 +6,7 @@ import type { PartyRoomApi } from "@/lib/partyRoom";
 import { previewPartyReport, previewPartyRoom, previewPartySay } from "@/app/preview/partyRoomActions";
 import { previewGossipFind, previewGossipReset, previewGossipShare, previewGossipState } from "@/app/preview/gossipActions";
 import { previewNews } from "@/app/preview/newsActions";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useEffect } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState } from "@/lib/citySim";
 import type { CityResult } from "@/lib/cityState";
@@ -25,7 +25,7 @@ import {
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
 import {
-  previewChatBlock, previewChatList, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
+  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
@@ -164,9 +164,15 @@ export function PreviewHome({
     },
   }), [sim]);
 
+  // Meeting players: ?chat=out starts with today's messages used up (the unlimited chat offer).
+  useEffect(() => {
+    const preset = new URLSearchParams(window.location.search).get("chat");
+    if (preset) void previewChatPreset(preset);
+  }, []);
   const chat = useMemo<ChatApi>(() => ({
     list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
     block: previewChatBlock, report: previewChatReport, card: previewPlayerCard,
+    react: previewChatReact, setMessagesFrom: previewSetMessagesFrom, presence: previewPresence, counts: previewPlaceCounts,
   }), []);
   // Crushes and date nights in memory; a date's bonus clout is mirrored into the sim's player.
   const paid = useRef(new Set<number>());

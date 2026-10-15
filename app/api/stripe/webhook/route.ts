@@ -6,7 +6,8 @@ import { getAdminSupabase } from "@/lib/supabase/admin";
 // player bought. Every call is idempotent per Stripe event id (supabase/migrations/0008).
 // Point a Stripe webhook endpoint at /api/stripe/webhook with these events:
 // checkout.session.completed, checkout.session.async_payment_succeeded,
-// checkout.session.expired, charge.refunded.
+// checkout.session.expired, charge.refunded, and (unlimited chat's monthly plan, migration 0047)
+// customer.subscription.updated and customer.subscription.deleted.
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +38,20 @@ export async function POST(request: NextRequest) {
       call = {
         fn: "payment_grant",
         args: {
-          p_event: event.id, p_session: o.id, p_payment: o.payment_intent, p_player: meta.player_id ?? o.client_reference_id,
+          // A subscription's entitlement is keyed by the subscription, so its end can revoke it.
+          p_event: event.id, p_session: o.id, p_payment: o.mode === "subscription" ? o.subscription : o.payment_intent,
+          p_player: meta.player_id ?? o.client_reference_id,
           p_sku: meta.sku, p_amount: o.amount_total, p_currency: o.currency,
         },
       };
       break;
     case "checkout.session.expired":
       call = { fn: "payment_expired", args: { p_event: event.id, p_session: o.id } };
+      break;
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted":
+      // Ended (cancelled, unpaid) revokes unlimited chat, so the daily limit comes back; active restores it.
+      call = { fn: "payment_subscription", args: { p_event: event.id, p_subscription: o.id, p_status: event.type.endsWith("deleted") ? "canceled" : o.status } };
       break;
     case "charge.refunded":
       // Full refunds revoke; a partial refund is a goodwill credit and keeps access.

@@ -1117,3 +1117,46 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
     return Math.abs((p[0] - a[0]) * (b[1] - p[1]) - (p[1] - a[1]) * (b[0] - p[0])) > 1e-9;
   });
 }
+
+/**
+ * Meeting players (owner, Oct 15): where real players at a place stand in a room without party
+ * spots. Free floor cells, spread out, away from the door, the regulars and each other; the same
+ * room and count always give the same spots.
+ */
+export function openSpots(t: RoomTemplate, items: RoomItem[], n: number): { x: number; z: number; facing: number }[] {
+  if (n <= 0) return [];
+  const grid = makeGrid(t, items);
+  const taken: [number, number][] = [t.spawn, ...(t.npcs ?? []).map((p) => [p.x, p.z] as [number, number])];
+  const out: { x: number; z: number; facing: number }[] = [];
+  let seed = (Math.round(t.w * 97 + t.d * 31) + t.id.length * 7919) % 2147483647 || 1;
+  const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+  // Only floor you can walk to from the door (not behind a bar or in a corner boxed in by furniture).
+  const reach = new Uint8Array(grid.cols * grid.rows);
+  const [sc, sr] = grid.cellOf(t.spawn[0], t.spawn[1]);
+  const queue = [sr * grid.cols + sc];
+  reach[queue[0]] = 1;
+  while (queue.length) {
+    const i = queue.pop()!;
+    const c = i % grid.cols, r = Math.floor(i / grid.cols);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, j = nr * grid.cols + nc;
+      if (nc < 0 || nr < 0 || nc >= grid.cols || nr >= grid.rows || reach[j] || grid.blocked[j]) continue;
+      reach[j] = 1;
+      queue.push(j);
+    }
+  }
+  const cells: number[] = [];
+  for (let i = 0; i < grid.cols * grid.rows; i++) if (!grid.blocked[i] && reach[i]) cells.push(i);
+  for (let i = cells.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cells[i], cells[j]] = [cells[j], cells[i]]; }
+  for (const gap of [1.1, 0.8, 0.55]) {
+    for (const i of cells) {
+      if (out.length >= n) return out;
+      const x = grid.toX(i % grid.cols);
+      const z = grid.toZ(Math.floor(i / grid.cols));
+      if (taken.some(([a, b]) => Math.hypot(a - x, b - z) < gap)) continue;
+      taken.push([x, z]);
+      out.push({ x, z, facing: rand() * Math.PI * 2 - Math.PI });
+    }
+  }
+  return out;
+}

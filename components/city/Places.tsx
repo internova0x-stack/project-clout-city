@@ -20,6 +20,8 @@ import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
 import { DateStatusRow } from "../dating/Dating";
 import { clubLines } from "./Clubs";
+import { hereLine, type HerePerson, type PlaceCounts } from "@/lib/meet";
+import { getStyle, type StyleId } from "@/lib/styles";
 import { canDateAt, type DateNight } from "@/lib/dating";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
@@ -46,6 +48,8 @@ export interface PlaceHandlers {
     /** Owner, Oct 14: the "Next lead" line opens that place on the map. */
     openPlace?: (placeId: string) => void;
   };
+  /** Meeting players (migration 0047): how many players are at a place now, and the first few. */
+  here?: (placeId: string) => PlaceCounts[string] | undefined;
   /** v0.10 Lucky Star Lotto's counter (migration 0032). */
   onOpenLotto?: (placeId: string) => void;
   /** v0.8 grocery bundles at supermarkets (migration 0027). */
@@ -497,6 +501,13 @@ export function LocationSheet({
             <span className="lola-avatar" aria-hidden="true">💋</span>
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
+          {/* Meeting players: who's here right now. */}
+          {(() => {
+            const h = handlers.here?.(place.id);
+            return h && h.count > 0 ? (
+              <p className="here-line" style={{ margin: 0 }}><span className="dot-green" aria-hidden="true" /> <b>{h.count} here now</b> · {hereLine(h.names.map((n) => n.name), h.count)}</p>
+            ) : null;
+          })()}
           {/* #19 clubs: what's downstairs and upstairs, and the door rule. */}
           {place.club && (
             <ul className="club-lines">
@@ -588,7 +599,7 @@ function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null 
 
 /** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, handlers, onBack, room, talkNonce = 0,
+  place, state, handlers, onBack, room, talkNonce = 0, here,
 }: {
   place: Place;
   state: CityState;
@@ -597,8 +608,11 @@ export function InteriorScene({
   room: React.ReactNode;
   /** #20: bumped each time the player taps the place's regular in the room. */
   talkNonce?: number;
+  /** Meeting players (owner, Oct 15): the real players here now (crew first), and the floor you're on. */
+  here?: { people: HerePerson[]; floor: number; onOpen: (id: string) => void };
 }) {
   const [open, setOpen] = useState(false);
+  const [allHere, setAllHere] = useState(false);
   return (
     <div className="layer interior">
       {room}
@@ -610,6 +624,21 @@ export function InteriorScene({
           <span className="display-sm">{place.emoji} {place.name}</span>
           <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
         </button>
+        {here && here.people.length > 0 && (
+          <div className="here-now">
+            <p className="overline" style={{ margin: 0 }}>👥 {here.people.length} {here.people.length === 1 ? "player" : "players"} here · tap anyone in the room</p>
+            <div className="here-chips">
+              {(allHere ? here.people : here.people.slice(0, 3)).map((p) => (
+                <button key={p.id} className="here-chip" onClick={() => here.onOpen(p.id)}>
+                  <span className="here-face" aria-hidden="true">{getStyle(p.style as StyleId).emoji}</span>
+                  <span>{p.name}{p.crew ? " 👯" : ""}</span>
+                  {p.floor !== here.floor && <span className="meta">{p.floor < here.floor ? "downstairs" : "upstairs"}</span>}
+                </button>
+              ))}
+              {!allHere && here.people.length > 3 && <button className="here-chip more" onClick={() => setAllHere(true)}>+{here.people.length - 3}</button>}
+            </div>
+          </div>
+        )}
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />

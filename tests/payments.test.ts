@@ -46,3 +46,14 @@ test("return from Stripe and prices", () => {
   assert.equal(formatPrice(99, "usd"), "$0.99");
   assert.match(storeError("payments_off"), /Nothing was charged/);
 });
+
+test("unlimited chat's monthly plan is a subscription; forever is a one-time payment", () => {
+  const base = { name: "Clout City: Unlimited chat", amountCents: 499, currency: "usd", successUrl: "https://x/s", cancelUrl: "https://x/c", playerId: "p1", productType: "chat_pass" };
+  const monthly = checkoutParams({ ...base, sku: "chat-unlimited-monthly", priceId: null, recurring: "month" });
+  assert.equal(monthly.mode, "subscription");
+  const body = formEncode(monthly);
+  assert.match(body, /line_items%5B0%5D%5Bprice_data%5D%5Brecurring%5D%5Binterval%5D=month/);
+  assert.match(body, /subscription_data%5Bmetadata%5D%5Bsku%5D=chat-unlimited-monthly/);
+  assert.doesNotMatch(body, /payment_intent_data/, "subscriptions can't take payment_intent_data");
+  assert.equal(checkoutParams({ ...base, sku: "chat-unlimited-forever", priceId: null, amountCents: 3999 }).mode, "payment");
+});

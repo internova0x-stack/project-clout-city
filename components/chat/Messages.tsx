@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSummary, type ChatThread, type ReportReason } from "@/lib/chat";
+import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSummary, type ChatThread, type ReportReason } from "@/lib/chat";
 import { getStyle, type StyleId } from "@/lib/styles";
 import type { CrushStatus, DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
@@ -19,12 +19,19 @@ export interface MessagesDating {
   onCrushChange: () => void;
 }
 
-// C35: the Messages app in the Phone. 10 messages a day, a word filter on the
-// server, Block and Report from each thread's ⋯ menu, and Report on a long press.
+// C35: the Messages app in the Phone. 20 messages a day (unlimited with a chat pass, migration 0047),
+// a word filter on the server, Block and Report from each thread's ⋯ menu, and Report on a long press.
+
+/** "17 of 20 left today", or "✨ Unlimited chat". */
+export function messagesLeftLine(status: ChatStatus | null): string {
+  if (!status) return "";
+  if (status.mutedUntil || status.banned) return "Chat is paused for you";
+  return status.unlimited ? "✨ Unlimited chat" : `${status.left} of ${status.limit} left today`;
+}
 
 type Overlay = { kind: "menu" } | { kind: "block" } | { kind: "report"; messageId: number | null } | null;
 
-export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: {
+export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, onOutOfMessages }: {
   api: ChatApi;
   /** Open (or start) a thread with this player, e.g. from their profile card. */
   openWith?: { id: string; name: string; style: string } | null;
@@ -32,6 +39,8 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
   onUnread?: (n: number) => void;
   dating?: MessagesDating;
   crew?: { alerts: number; onOpen: () => void };
+  /** Meeting players: the unlimited chat offer, when the day's messages run out. */
+  onOutOfMessages?: () => void;
 }) {
   const [list, setList] = useState<ChatSummary[] | null>(null);
   const [status, setStatus] = useState<ChatStatus | null>(null);
@@ -97,9 +106,12 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
     setBusy(true);
     const r = await api.send(open.id, draft);
     setBusy(false);
-    if (!r.ok) return onToast(r.error);
+    if (!r.ok) {
+      if (r.error === DAILY_LIMIT && onOutOfMessages) return onOutOfMessages();
+      return onToast(r.error);
+    }
     setDraft("");
-    setStatus((s) => (s ? { ...s, left: r.data.left } : s));
+    setStatus((s) => (s ? { ...s, left: r.data.left ?? s.left } : s));
     void loadThread(open.id);
   };
   const block = async (on: boolean) => {
@@ -127,12 +139,12 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
 
   const left = status?.left ?? 0;
   const muted = !!status?.mutedUntil || !!status?.banned;
-  const out = left <= 0;
+  const out = !status?.unlimited && left <= 0;
 
   if (!open) {
     return (
       <div className="stack-12">
-        {status && <span className="chat-left">{muted ? "Chat is paused for you" : `${left} of ${status.limit} left today`}</span>}
+        {status && <span className="chat-left">{messagesLeftLine(status)}</span>}
         {crew && (
           <button className="chat-row date-row" onClick={crew.onOpen}>
             <span className="chat-avatar" aria-hidden="true">👯</span>
@@ -198,7 +210,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
           <p className="meta chat-note">Say hi to {open.name}. Be nice; it&apos;s a small city.</p>
         )}
         {thread?.messages.map((m) => (
-          <div key={m.id} className={`bubble${m.mine ? " mine" : ""}`} {...longPress(m.id, m.mine)}>
+          <div key={m.id} className={`bubble${m.mine ? " mine" : ""}${m.kind === "reaction" ? " reaction" : ""}`} {...longPress(m.id, m.mine)}>
             <span>{m.body}</span>
             <span className="bubble-time">{chatTime(m.at)}</span>
           </div>
@@ -212,14 +224,17 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew }: 
         <p className="meta chat-note">You can&apos;t message {open.name}.</p>
       ) : (
         <div className="chat-dock">
-          <span className="chat-left">{muted ? "Chat is paused for you" : `${left} of ${status?.limit ?? 10} left today`}</span>
+          <span className="chat-left">{messagesLeftLine(status)}</span>
+          {out && !muted && onOutOfMessages && (
+            <button className="btn btn-taxi btn-sm" onClick={onOutOfMessages}>✨ Get unlimited chat</button>
+          )}
           <div className="chat-composer">
             <input
               className="chat-input"
               value={draft}
               maxLength={500}
               disabled={out || muted}
-              placeholder={muted ? "Chat is paused" : out ? "Back tomorrow." : `Message ${open.name}`}
+              placeholder={muted ? "Chat is paused" : out ? "Out of messages until midnight." : `Message ${open.name}`}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") void send(); }}
               aria-label="Message"

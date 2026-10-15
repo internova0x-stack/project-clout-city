@@ -14,7 +14,7 @@ import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, itemBySku, placeById, rea
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
-import { PARTY_POLL_MS, crowdFor, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
+import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
@@ -47,6 +47,8 @@ import { actionSeconds, actionVerb, OTHER_SECONDS } from "@/lib/actionTime";
 import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { ViewingBar } from "./city/Apartments";
+import { ChatPassCard } from "./chat/ChatPass";
+import { COUNTS_POLL_MS, PRESENCE_POLL_MS, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
@@ -267,6 +269,26 @@ export function GameShell({
   const [chatWith, setChatWith] = useState<{ id: string; name: string; style: string } | null>(null);
   const [chatUnread, setChatUnread] = useState(0);
   const [cardId, setCardId] = useState<string | null>(null);
+  // Meeting players (owner, Oct 15; migration 0047): who's here, how many are where, and the unlimited chat offer.
+  const [here, setHere] = useState<HerePerson[]>([]);
+  const [placeCounts, setPlaceCounts] = useState<PlaceCounts>({});
+  const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
+  useEffect(() => {
+    if (!inside || !chat?.presence) { setHere([]); return; }
+    let stop = false;
+    const tick = async () => { const r = await chat.presence!(inside.id, insideFloor); if (!stop && r.ok) setHere(r.data.people); };
+    void tick();
+    const t = setInterval(() => void tick(), PRESENCE_POLL_MS);
+    return () => { stop = true; clearInterval(t); };
+  }, [inside, insideFloor, chat]);
+  useEffect(() => {
+    if (inside || !chat?.counts) return;
+    let stop = false;
+    const tick = async () => { const r = await chat.counts!(); if (!stop && r.ok) setPlaceCounts(r.data); };
+    void tick();
+    const t = setInterval(() => void tick(), COUNTS_POLL_MS);
+    return () => { stop = true; clearInterval(t); };
+  }, [inside, chat]);
   const [inbox, setInbox] = useState<DatingInbox | null>(null);
   const [dateSpot, setDateSpot] = useState<{ kind: "place" | "event"; target: string; price: number } | null>(null);
   const [datingDismissed, setDatingDismissed] = useState<string | null>(null);
@@ -550,7 +572,7 @@ export function GameShell({
       const p = c?.find((x) => x.sku === unlocking);
       if (p?.owned) {
         setUnlocking(null);
-        setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : `🔓 Unlocked: ${p.name}`);
+        setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : p.type === "chat_pass" ? "✨ Unlimited chat is on. Say hi to everyone." : `🔓 Unlocked: ${p.name}`);
         // Show it where it lives; collector pieces and tickets also change clout and Net Worth.
         if (p.type === "side_arc") openNews(null);
         if (p.type === "postcard") setPanel("collection");
@@ -672,7 +694,13 @@ export function GameShell({
   });
   const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
   const ownedHere = ownedPieces.filter((p) => !elsewhere.has(p.id));
-  const crowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
+  const partyCrowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
+  // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
+  // nothing over their heads (NPCs keep their 💬), tap the figure to open their card.
+  const hereCrowd: CrowdMember[] | undefined = !partyCrowd && here.length
+    ? here.filter((p) => p.floor === insideFloor).map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: normalizeLook(p.look, p.style), crew: p.crew }))
+    : undefined;
+  const crowd = partyCrowd ?? hereCrowd;
   const openShop = (category: ShopCategory, section?: string) => {
     setPlace(null);
     setInside(null);
@@ -746,6 +774,7 @@ export function GameShell({
     void loadTea();
   };
   const handlers: PlaceHandlers = {
+    here: chat?.counts ? (id) => placeCounts[id] : undefined,
     busy,
     travel: travelOn ? {
       isHere: (id) => atPlace === id,
@@ -1074,10 +1103,12 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           talkNonce={talkNonce}
+          here={chat?.presence ? { people: here, floor: insideFloor, onOpen: (id) => setCardId(id) } : undefined}
           room={
             <Room3D
               template={(insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
               crowd={crowd}
+              crowdDots={!!partyCrowd}
               onCrowdTap={(m) => { if (!m.npc && chat) setCardId(m.id); }}
               look={look}
               outfit={outfit}
@@ -1309,6 +1340,9 @@ export function GameShell({
           onClose={() => setCardId(null)}
           dating={dating ? { api: dating, onCrushChange: () => void loadInbox() } : undefined}
           onToast={setToast}
+          placeName={(id) => placeById(id)?.name}
+          hour={Math.floor(cityMinutes(gameNow, GAME_CONFIG.cityClock) / 60)}
+          onOutOfMessages={() => setChatPass({ out: true })}
           onMessage={(p) => {
             setCardId(null);
             setPanel(null);
@@ -1464,7 +1498,17 @@ export function GameShell({
         </>
       )}
       <TeaRevealSheet card={teaCard?.card ?? null} fresh={!!teaCard?.fresh} finished={teaState?.cards.length ?? 0} onClose={() => setTeaCard(null)} />
+      {chatPass && (
+        <ChatPassCard
+          products={products.filter((p) => p.type === "chat_pass")}
+          out={chatPass.out}
+          busy={busy}
+          onBuy={(sku) => void buy(sku)}
+          onClose={() => setChatPass(null)}
+        />
+      )}
       <PhoneModal
+        onChatPass={(out) => setChatPass({ out })}
         apartments={cityOn && cityApi?.moveHome && city?.player.moved_up !== undefined ? {
           busy: busy !== null,
           onLookInside: (id) => { setPhone({ open: false, app: null }); setPanel(null); setTab("home"); setViewHome(id); },
