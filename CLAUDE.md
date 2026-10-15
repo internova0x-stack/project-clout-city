@@ -6,7 +6,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
-- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11), the modeled avatars and Shop outfits (section 12), and bigger homes and venues, including the clubs' restroom and VIP floors (section 13). **Wins over the older docs** for those features.
+- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11), the modeled avatars and Shop outfits (section 12), bigger homes and venues, including the clubs' restroom and VIP floors (section 13), and meeting players at every place, with 20 messages a day and unlimited chat (section 14). **Wins over the older docs** for those features.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
 - `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt, news and gossip), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
@@ -38,7 +38,7 @@ components live in `app/globals.css`.
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
-  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state. `/preview/studio` shows the Story Studio.
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer). Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
 
@@ -60,6 +60,8 @@ components live in `app/globals.css`.
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.
+  Unlimited chat (migration 0047) is the one subscription: its entitlement follows the Stripe subscription
+  (`payment_subscription`), and `chat_unlimited(player)` is the only check.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never

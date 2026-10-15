@@ -12,6 +12,7 @@ import { formatCash } from "@/lib/economy";
 import {
   FACING, FURNITURE, GRID, INNER_WALL, applyLayout, freeSpot, isOwnedId, ownedItem, type OwnedPiece, clampItem, findPath, makeGrid, placementOk, snap, toLayout, useSpot,
   type LayoutEntry, type RoomItem, type RoomTemplate,
+  openSpots,
 } from "@/lib/rooms";
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
 import type { AvatarParts } from "../avatar/buildAvatar";
@@ -92,6 +93,11 @@ export interface Room3DProps {
    */
   crowd?: CrowdMember[];
   onCrowdTap?: (m: CrowdMember) => void;
+  /**
+   * Meeting players (owner, Oct 15): false outside party floors. Nothing over anyone's head (only
+   * the NPCs keep their 💬); real players stand around the room and are tapped on the figure itself.
+   */
+  crowdDots?: boolean;
   /**
    * "dream" (the default, approved Oct 12, 2026) is the Monument Valley-inspired look:
    * gradient walls, warm-lit and lavender-shaded faces, soft shadows, haze and motes.
@@ -503,6 +509,15 @@ export default function Room3D(props: Room3DProps) {
       if (!hit) return -1;
       return npcs.findIndex((n) => { let o: Object3D | null = hit.object; while (o) { if (o === n.rig) return true; o = o.parent; } return false; });
     };
+    const hitCrowd = (cx: number, cy: number): CrowdMember | null => {
+      if (!crowdRef.current.length) return null;
+      const r = renderer.domElement.getBoundingClientRect();
+      ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(crowdRef.current.map((c) => c.actor.rig), true)[0];
+      if (!hit) return null;
+      return crowdRef.current.find((c) => { let o: Object3D | null = hit.object; while (o) { if (o === c.actor.rig) return true; o = o.parent; } return false; })?.member ?? null;
+    };
     const talk = (i: number) => {
       const n = npcs[i];
       if (!n || !propsRef.current.onNpcTap) return;
@@ -582,6 +597,13 @@ export default function Room3D(props: Room3DProps) {
         return;
       }
       if (it?.use) return goUse(it);
+      // Meeting players: tap a real player's figure to open their card.
+      const person = hitCrowd(e.clientX, e.clientY);
+      if (person && !person.npc && propsRef.current.onCrowdTap) {
+        const c = crowdRef.current.find((x) => x.member.key === person.key);
+        if (c && c.actor.mode === "idle") c.actor.heading = Math.atan2(me.x - c.actor.x, me.z - c.actor.z);
+        return propsRef.current.onCrowdTap(person);
+      }
       const npc = hitNpc(e.clientX, e.clientY);
       if (npc >= 0) return talk(npc);
       const p = hitFloor(e.clientX, e.clientY);
@@ -821,13 +843,15 @@ export default function Room3D(props: Room3DProps) {
     const w = world.current;
     if (!w) return;
     for (const c of crowdRef.current) { w.scene.remove(c.actor.rig); c.actor.parts?.dispose(); }
-    const spots = template.crowdSpots ?? [];
+    // Party floors have set spots; anywhere else, free floor away from the door and the regulars.
+    const spots = template.crowdSpots ?? openSpots(template, itemsRef.current, (props.crowd ?? []).length);
+    const party = !!template.crowdSpots;
     crowdRef.current = (props.crowd ?? []).slice(0, spots.length).map((member, i) => {
       const s = spots[i];
       let seed = (member.key.length * 977 + i * 7919 + 13) % 2147483647;
       const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
       const look = !member.npc && member.look ? member.look : randomLook(rand, STARTING_STYLES.map((x) => x.id));
-      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x: s.x, z: s.z, heading: s.facing, mode: "dance", path: [], pending: null, phase: i * 1.3 };
+      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x: s.x, z: s.z, heading: s.facing, mode: party ? "dance" : "idle", path: [], pending: null, phase: i * 1.3 };
       castShadows(actor.parts!.root);
       actor.rig.add(actor.parts!.root);
       w.scene.add(actor.rig);
@@ -908,7 +932,15 @@ export default function Room3D(props: Room3DProps) {
           ))}
         </div>
       )}
-      {(props.crowd?.length ?? 0) > 0 && !editing && (
+      {(props.crowd?.length ?? 0) > 0 && !editing && props.crowdDots === false && (
+        <div className="room-chips" aria-label="Players here">
+          {/* Meeting players: no marks over anyone; these buttons are for keyboards and screen readers. */}
+          {props.crowd!.map((m) => m.npc ? null : (
+            <button key={m.key} className="sr-only" onClick={() => props.onCrowdTap?.(m)} aria-label={`${m.name}, a player here`}>{m.name}</button>
+          ))}
+        </div>
+      )}
+      {(props.crowd?.length ?? 0) > 0 && !editing && props.crowdDots !== false && (
         <div className="room-chips" aria-label="People at the party">
           {/* Only people you can talk to get a mark: a green "online" dot. NPCs blend into the crowd. */}
           {props.crowd!.slice(0, template.crowdSpots?.length ?? 0).map((m) => m.npc ? null : (

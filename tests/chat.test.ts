@@ -3,7 +3,8 @@ import { test } from "node:test";
 import { REPORT_REASONS, chatError, chatTime } from "../lib/chat.ts";
 
 test("chat errors read as plain sentences", () => {
-  assert.match(chatError("daily_limit"), /10 for today/);
+  assert.match(chatError("daily_limit"), /20 for today/);
+  assert.match(chatError("ERROR: crew_only"), /only take messages from their crew/);
   assert.match(chatError("ERROR: blocked"), /can't message/);
   assert.equal(chatError("nope"), "Messages glitched. Try again.");
 });

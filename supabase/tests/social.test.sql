@@ -27,12 +27,12 @@ select pg_temp.assert((select count(*) >= 3 and bool_and(id is not null) from pu
 select pg_temp.assert(public.player_card('00000000-0000-0000-0000-000000000062') ->> 'name' = 'Bram', 'player card');
 
 -- ---- Sending: filter, daily limit ----
-select pg_temp.assert((public.chat_status() ->> 'left')::int = 10, '10 a day');
+select pg_temp.assert((public.chat_status() ->> 'left')::int = 20, '20 a day (0047; it was 10)');
 select pg_temp.assert(public.chat_send('00000000-0000-0000-0000-000000000062', 'hey what the fuck is up') ->> 'body' = 'hey what the •••• is up', 'word filter');
 select pg_temp.assert(public.chat_send('00000000-0000-0000-0000-000000000062', 'Scunthorpe is fine') ->> 'body' = 'Scunthorpe is fine', 'whole words only');
 do $$ begin
-  for i in 3..10 loop perform public.chat_send('00000000-0000-0000-0000-000000000062', 'msg ' || i); end loop;
-  begin perform public.chat_send('00000000-0000-0000-0000-000000000062', 'eleven'); raise exception 'FAIL: 11th message';
+  for i in 3..20 loop perform public.chat_send('00000000-0000-0000-0000-000000000062', 'msg ' || i); end loop;
+  begin perform public.chat_send('00000000-0000-0000-0000-000000000062', 'twenty-one'); raise exception 'FAIL: 21st message';
   exception when sqlstate '22023' then null; end;
   begin perform public.chat_send('00000000-0000-0000-0000-000000000061', 'me'); raise exception 'FAIL: message myself';
   exception when sqlstate '22023' then null; end;
@@ -44,8 +44,8 @@ select pg_temp.assert((public.chat_status() ->> 'left')::int = 0, 'none left');
 
 -- ---- Receiving: unread, then read ----
 select pg_temp.as_('00000000-0000-0000-0000-000000000062');
-select pg_temp.assert((public.chat_list() -> 0 ->> 'unread')::int = 10, 'ten unread');
-select pg_temp.assert(jsonb_array_length(public.chat_thread('00000000-0000-0000-0000-000000000061') -> 'messages') = 10, 'thread');
+select pg_temp.assert((public.chat_list() -> 0 ->> 'unread')::int = 20, 'twenty unread');
+select pg_temp.assert(jsonb_array_length(public.chat_thread('00000000-0000-0000-0000-000000000061') -> 'messages') = 20, 'thread');
 select pg_temp.assert((public.chat_list() -> 0 ->> 'unread')::int = 0, 'read after opening');
 select 1 from public.chat_send('00000000-0000-0000-0000-000000000061', 'stop messaging me');
 

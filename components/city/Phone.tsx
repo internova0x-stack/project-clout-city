@@ -1,7 +1,7 @@
 "use client";
 
 import type { PartyMention } from "@/lib/party";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
@@ -46,7 +46,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass,
 }: {
   open: boolean;
   onClose: () => void;
@@ -68,6 +68,8 @@ export function PhoneModal({
   /** v0.5 chat (migration 0010); without it Messages says it opens soon. */
   chat?: ChatApi;
   chatWith?: { id: string; name: string; style: string } | null;
+  /** Meeting players (migration 0047): opens the unlimited chat offer (`out` when the day's messages ran out). */
+  onChatPass?: (out: boolean) => void;
   chatUnread?: number;
   onChatUnread?: (n: number) => void;
   /** v0.5 crushes and date nights: the Messages app shows tonight's dates and the crush button. */
@@ -160,13 +162,14 @@ export function PhoneModal({
                       <button className="chip" aria-pressed={gossip.optedOut} onClick={gossip.onToggle}>{gossip.optedOut ? "On" : "Off"}</button>
                     </div>
                   )}
+                  {chat?.setMessagesFrom && <ChatSettings api={chat} onToast={onToast} onChatPass={onChatPass} />}
                   <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
                 </div>
               )}
               {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.wins} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "tea" && tea && <TeaApp stories={tea.state.stories} cards={tea.state.cards} busy={tea.busy} onHome={() => setApp(null)} onShare={tea.onShare} onOpenCard={tea.onOpenCard} />}
               {app === "messages" && (chat
-                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} />
+                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} onOutOfMessages={onChatPass ? () => onChatPass(true) : undefined} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}
             </div>
           )}
@@ -236,5 +239,39 @@ function GigsApp({ state, now, busy, onAccept, onCollect }: { state: CityState; 
       })}
       {done.length > 0 && <p className="meta">Paid today: {done.map((g) => formatCash(g.pay)).join(", ")}</p>}
     </div>
+  );
+}
+
+/** Meeting players (owner, Oct 15): who can message me, and unlimited chat. */
+function ChatSettings({ api, onToast, onChatPass }: { api: ChatApi; onToast?: (t: string) => void; onChatPass?: (out: boolean) => void }) {
+  const [status, setStatus] = useState<import("@/lib/chat").ChatStatus | null>(null);
+  useEffect(() => { void api.status().then((r) => r.ok && setStatus(r.data)); }, [api]);
+  const set = async (who: "anyone" | "crew") => {
+    const r = await api.setMessagesFrom!(who);
+    if (!r.ok) return onToast?.(r.error);
+    setStatus((s) => (s ? { ...s, messagesFrom: r.data } : s));
+    onToast?.(who === "crew" ? "Only your crew can message you now." : "Anyone can say hi now.");
+  };
+  if (!status) return null;
+  return (
+    <>
+      <div className="list-row static">
+        <span style={{ flex: 1 }}>
+          <span className="title" style={{ display: "block" }}>Who can message me</span>
+          <span className="meta">Messages and reactions from players you meet</span>
+        </span>
+        <span className="row" style={{ gap: 6 }}>
+          <button className="chip" aria-pressed={status.messagesFrom !== "crew"} onClick={() => void set("anyone")}>Anyone</button>
+          <button className="chip" aria-pressed={status.messagesFrom === "crew"} onClick={() => void set("crew")}>My crew</button>
+        </span>
+      </div>
+      <div className="list-row static">
+        <span style={{ flex: 1 }}>
+          <span className="title" style={{ display: "block" }}>Chat</span>
+          <span className="meta">{status.unlimited ? "✨ Unlimited chat is on" : `${status.left} of ${status.limit} messages left today`}</span>
+        </span>
+        {!status.unlimited && onChatPass && <button className="chip" onClick={() => onChatPass(false)}>Go unlimited</button>}
+      </div>
+    </>
   );
 }
