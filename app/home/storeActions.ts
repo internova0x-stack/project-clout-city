@@ -45,7 +45,7 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
       sku,
       productType: product.product_type,
       email: user.email,
-      recurring: product.recurring === "month" ? "month" : null,
+      recurring: product.recurring === "month" || product.recurring === "year" ? product.recurring : null,
     });
     const { error } = await supabase.rpc("start_purchase", { p_sku: sku, p_session: session.id });
     if (error) return { ok: false, error: storeError(error.message) };

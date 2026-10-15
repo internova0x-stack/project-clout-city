@@ -133,9 +133,10 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
     ...SHOP_ITEMS.filter((i) => i.collector).map((i) => ({
       ...base(i.sku), type: "collector_item" as const, name: i.name, priceCents: i.sku === "col-faux-chinchilla" ? 499 : 399, value: collectorValue(i.category),
     })),
-    // Meeting players (migration 0047): unlimited chat, monthly or forever.
+    // Meeting players (migrations 0047, 0051): unlimited chat, monthly, yearly or forever.
     { ...base("chat-unlimited-monthly"), type: "chat_pass" as const, name: "Unlimited chat (monthly)", priceCents: 499 },
-    { ...base("chat-unlimited-forever"), type: "chat_pass" as const, name: "Unlimited chat (forever)", priceCents: 3999 },
+    { ...base("chat-unlimited-yearly"), type: "chat_pass" as const, name: "Unlimited chat (yearly)", priceCents: 3999 },
+    { ...base("chat-unlimited-forever"), type: "chat_pass" as const, name: "Unlimited chat (forever)", priceCents: 11999 },
     ...PARTIES().map((e) => ({
       ...base(e.sku), type: "exclusive_event" as const, name: e.name, priceCents: e.price, placeId: "low-light-lounge",
       event: { id: e.id, placeId: "low-light-lounge", name: e.name, host: e.host, blurb: e.blurb, startsAt: e.startsAt, endsAt: e.endsAt,
@@ -147,7 +148,7 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
 /** Meeting players: whether the preview player bought unlimited chat (either plan). */
 export async function previewChatUnlimited() {
   previewOnly();
-  return store.st.skus.includes("chat-unlimited-monthly") || store.st.skus.includes("chat-unlimited-forever");
+  return ["chat-unlimited-monthly", "chat-unlimited-yearly", "chat-unlimited-forever"].some((s) => store.st.skus.includes(s));
 }
 export async function previewStoreVisited(placeId: string) {
   previewOnly();

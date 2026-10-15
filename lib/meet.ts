@@ -18,7 +18,7 @@ export const PRESENCE_POLL_MS = 10_000;
 export const COUNTS_POLL_MS = 60_000;
 
 /** Unlimited chat's two plans (store_products, prices from the catalog). */
-export const CHAT_PASS = { monthly: "chat-unlimited-monthly", forever: "chat-unlimited-forever" } as const;
+export const CHAT_PASS = { monthly: "chat-unlimited-monthly", yearly: "chat-unlimited-yearly", forever: "chat-unlimited-forever" } as const;
 export const CHAT_PASS_PERKS = [
   { emoji: "💬", text: "Message anyone, as much as you like" },
   { emoji: "🧊", text: "Icebreakers never run out" },

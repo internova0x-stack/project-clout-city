@@ -7,7 +7,7 @@ import { PLACE_TEMPLATES, findPath, makeGrid, openSpots, placeFloor, placeRoom, 
 test("meeting players: 20 a day, five free reactions, two chat passes", () => {
   assert.equal(DAILY_MESSAGES, 20);
   assert.equal(REACTIONS.length, 5);
-  assert.deepEqual(Object.values(CHAT_PASS).sort(), ["chat-unlimited-forever", "chat-unlimited-monthly"]);
+  assert.deepEqual(Object.values(CHAT_PASS).sort(), ["chat-unlimited-forever", "chat-unlimited-monthly", "chat-unlimited-yearly"]);
 });
 
 test("icebreakers: three different openers about the place, the time and the look", () => {

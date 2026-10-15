@@ -29,13 +29,13 @@ export interface CheckoutInput {
   sku: string;
   productType: string;
   email?: string | null;
-  /** Meeting players (migration 0047): "month" makes it a subscription that renews until cancelled. */
-  recurring?: "month" | null;
+  /** Unlimited chat (migrations 0047, 0051): "month" or "year" makes it a subscription that renews until cancelled. */
+  recurring?: "month" | "year" | null;
 }
 
 /**
  * The form body for one Checkout Session: one item, our ids in metadata. A one-time payment, or a
- * monthly subscription (unlimited chat's monthly plan), whose webhooks carry the subscription id.
+ * monthly or yearly subscription (unlimited chat's plans), whose webhooks carry the subscription id.
  */
 export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
   const metadata = { player_id: i.playerId, sku: i.sku, product_type: i.productType };
