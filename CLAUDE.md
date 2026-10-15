@@ -69,6 +69,9 @@ components live in `app/globals.css`.
 - Insights (migration 0053): `admin_insights()` is the Studio's numbers (admin only). Sessions come from
   `session_ping()` (GameShell, every `GAME_CONFIG.sessionPingMs`); VIP renewals from the webhook's `invoice.paid`
   (`payment_renewal`). Revenue counts paid, unrefunded purchases plus renewals.
+- Studio Players (migration 0055): `admin_players()`, `admin_player()` and `admin_player_ban()` (admins only) list
+  players, show a profile and activity timeline (ledger, purchases, reports, admin actions) and ban/unban with a
+  reason logged in `admin_actions`. Message texts never appear there (only counts); reported chats stay in Reports.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never

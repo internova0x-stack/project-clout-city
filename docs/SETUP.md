@@ -175,6 +175,12 @@ Prices are config: `store_products.price_cents` (shown and charged). To charge a
 created in Stripe instead, set `store_products.stripe_price_id`. Don't change a price on a story
 players are following. Before going live: check **Stripe Tax** settings for digital goods.
 
+**Players** (migration 0055): the Studio's **Players** tab lists everyone who made a character (search by
+@handle or email; filters for new, active, paying, VIP, reported, banned and never moved in). Open one for
+their profile, numbers, recent sessions, safety record and activity (every cash and clout change, purchases,
+reports, bans). **Ban** asks for a reason; the player sees the suspended screen next time they open the game.
+**Unban** undoes it. Both are logged. Chat texts stay private (counts only); reported chats are in Reports.
+
 **Insights** (migration 0053): the Studio's **Insights** tab shows players, sign-ups, active
 players, revenue, session length, retention (next day, day 7, day 30), first steps, feature use,
 revenue by product and players by rank, for the last 7, 30 or 90 New York days. Studio admins only
