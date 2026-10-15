@@ -79,7 +79,7 @@ export interface PlaceHandlers {
   /** Crew outings: "Bring the crew" on any place with a crew activity, and tonight's progress. */
   crew?: { outings: CrewOuting[]; onBring: (place: Place) => void };
   /** v0.13 together bonuses (migration 0050): 👯 next to studying and nights out, and today's plans. */
-  together?: { plans: TogetherPlan[]; onTogether: (placeId: string, actionId: string) => void };
+  together?: { plans: TogetherPlan[]; onTogether: (placeId: string, actionId: string) => void; onAnswer?: (id: number, yes: boolean) => void; busy?: string | null };
   /** v0.6 treasure hunts (joined, unfinished): talking to a regular may be the next clue or question. */
   hunt?: { talk: (placeId: string) => Promise<HuntResult>; answer: (choice: number) => Promise<HuntResult> };
   /** v0.8 travel (#4): where the player is; away from a place its actions are a preview with "Go there". */
@@ -134,7 +134,19 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
               {paid !== (a.price ?? 0) && <span className="meta">Usually {formatCash(a.price ?? 0)} · {world.price?.reason}</span>}
               {(() => {
                 const tp = handlers.together?.plans.find((x) => x.place === place.id && x.action === a.id);
-                if (tp) return <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>👯 With {handle(tp.withName)} · {tp.status === "pending" ? "waiting for a yes" : `${TOGETHER.multiplier}× when you both do it`}</span>;
+                // An invite to you: answer it here (owner, Oct 15: the invited player had no way to say yes).
+                if (tp && !tp.mine && tp.status === "pending") return (
+                  <span className="together-ask">
+                    <span className="meta" style={{ color: "var(--neon-text)" }}>👯 {handle(tp.withName)} wants to do this with you · {TOGETHER.multiplier}×</span>
+                    {handlers.together?.onAnswer && (
+                      <span className="row" style={{ gap: 6 }}>
+                        <button className="chip together-yes" disabled={!!handlers.together.busy} onClick={() => handlers.together!.onAnswer!(tp.id, true)}>Yes, let&apos;s go</button>
+                        <button className="chip" disabled={!!handlers.together.busy} onClick={() => handlers.together!.onAnswer!(tp.id, false)}>Not now</button>
+                      </span>
+                    )}
+                  </span>
+                );
+                if (tp) return <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>👯 With {handle(tp.withName)} · {tp.status === "pending" ? "waiting for their yes" : `${TOGETHER.multiplier}× when you both do it`}</span>;
                 return handlers.together && !preview && canDoTogether(place, a.id)
                   ? <button className="linkish together-link" onClick={() => handlers.together!.onTogether(place.id, a.id)}>👯 Do it together · {TOGETHER.multiplier}×</button>
                   : null;
