@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { rideShare, type TogetherCandidate } from "@/lib/together";
+import { RideWithRow } from "../together/Together";
 import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import type { LatLng } from "@/lib/map/geo";
@@ -15,9 +17,12 @@ export interface Trip extends TripPlan { mode: TravelMode; seconds: number; fare
  * v0.8 (#4): "Go there". Walk, subway, taxi or your own car, priced by distance band
  * (lib/travel.ts, public.travel in migration 0025).
  */
-export function TravelSheet({ plan, state, busy, onClose, onGo }: {
+export function TravelSheet({ plan, state, busy, onClose, onGo, ride }: {
   plan: TripPlan | null; state: CityState; busy: boolean; onClose: () => void; onGo: (mode: TravelMode) => void;
+  /** v0.13 ride together: people here with you; riding splits a subway or taxi fare. */
+  ride?: { people: TogetherCandidate[]; onRide: (mode: TravelMode, person: TogetherCandidate) => void };
 }) {
+  const [withId, setWithId] = useState<string | null>(null);
   const miles = plan ? milesBetween(plan.from, plan.to) : 0;
   const quotes = TRAVEL_MODES.map((m) => ({ ...m, q: travelQuote(m.id, miles, !!state.player.car_sku) }));
   const usable = (q: (typeof quotes)[number]["q"]) => !q.unavailable && state.player.bank_cash >= q.fare && state.player.energy >= q.energy;
@@ -28,8 +33,12 @@ export function TravelSheet({ plan, state, busy, onClose, onGo }: {
     // Default to the fastest way you can afford: car, then taxi, subway, walk.
     const first = (["car", "taxi", "subway", "walk"] as TravelMode[]).find((m) => usable(quotes.find((x) => x.id === m)!.q));
     if (first) setPick(first);
+    setWithId(null);
   }
   const chosen = quotes.find((x) => x.id === pick)!;
+  // Riding together: subway or taxi only, each paying half.
+  const rider = ride?.people.find((p) => p.id === withId);
+  const shared = !!rider && (pick === "subway" || pick === "taxi");
   return (
     <Sheet open={!!plan} onClose={onClose} label="Get there">
       {plan && (
@@ -54,10 +63,18 @@ export function TravelSheet({ plan, state, busy, onClose, onGo }: {
               );
             })}
           </div>
-          <button className="btn btn-taxi" disabled={busy || !usable(chosen.q)} onClick={() => onGo(pick)}>
-            {busy ? "…" : `${pick === "walk" ? "Walk there" : pick === "car" ? "Drive there" : `Go by ${chosen.label.toLowerCase()}`}${chosen.q.fare ? ` · ${formatCash(chosen.q.fare)}` : ""}`}
+          {ride?.people.map((p) => (
+            <RideWithRow key={p.id} person={p} on={withId === p.id} onToggle={() => setWithId(withId === p.id ? null : p.id)} />
+          ))}
+          <button className="btn btn-taxi" disabled={busy || !usable(chosen.q) || (!!rider && !shared)} onClick={() => (shared ? ride!.onRide(pick, rider!) : onGo(pick))}>
+            {busy ? "…" : shared
+              ? `Go by ${chosen.label.toLowerCase()} together · ${formatCash(rideShare(chosen.q.fare))} each`
+              : rider ? "Ride together by subway or taxi"
+              : `${pick === "walk" ? "Walk there" : pick === "car" ? "Drive there" : `Go by ${chosen.label.toLowerCase()}`}${chosen.q.fare ? ` · ${formatCash(chosen.q.fare)}` : ""}`}
           </button>
-          <p className="meta" style={{ margin: 0, textAlign: "center" }}>Trips take up to a minute on your own timer, never the city clock. In a rush? Skip the rest for C$1 per 2 seconds.</p>
+          <p className="meta" style={{ margin: 0, textAlign: "center" }}>
+            {shared ? "They get a ride request and pay their half when they accept." : "Trips take up to a minute on your own timer, never the city clock. In a rush? Skip the rest for C$1 per 2 seconds."}
+          </p>
         </div>
       )}
     </Sheet>

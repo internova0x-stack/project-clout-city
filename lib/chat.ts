@@ -47,6 +47,8 @@ export interface PlayerCard {
   recent?: import("./recent.ts").RecentItem[];
   /** v0.7 (migration 0024): bank cash plus everything they own, public (owner, Oct 13). */
   netWorth?: number;
+  /** v0.13 the Jobs board (migration 0050): "⭐ 4.8 · hired 12 times". */
+  jobs?: { hired: number; rating: number | null; rated: number };
   /** Meeting players (migration 0047): the place you're both at right now, if any. */
   herePlace?: string | null;
   /** False when their "who can message me" is crew only (or a block stands). */

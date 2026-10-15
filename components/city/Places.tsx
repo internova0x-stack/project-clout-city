@@ -28,6 +28,8 @@ import { canDateAt, type DateNight } from "@/lib/dating";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
+import { TOGETHER, canDoTogether, type TogetherPlan } from "@/lib/together";
+import { handle } from "@/lib/validation";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
 
@@ -76,6 +78,8 @@ export interface PlaceHandlers {
   };
   /** Crew outings: "Bring the crew" on any place with a crew activity, and tonight's progress. */
   crew?: { outings: CrewOuting[]; onBring: (place: Place) => void };
+  /** v0.13 together bonuses (migration 0050): 👯 next to studying and nights out, and today's plans. */
+  together?: { plans: TogetherPlan[]; onTogether: (placeId: string, actionId: string) => void };
   /** v0.6 treasure hunts (joined, unfinished): talking to a regular may be the next clue or question. */
   hunt?: { talk: (placeId: string) => Promise<HuntResult>; answer: (choice: number) => Promise<HuntResult> };
   /** v0.8 travel (#4): where the player is; away from a place its actions are a preview with "Go there". */
@@ -127,6 +131,13 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
                 <EffectChips price={paid || undefined} pay={a.pay} energy={a.energy} clout={clout} mood={boostUsed(place.id, a.id, state) ? 0 : a.mood} confidence={boostUsed(place.id, a.id, state) ? 0 : a.confidence} seconds={actionSeconds(a)} />
               )}
               {paid !== (a.price ?? 0) && <span className="meta">Usually {formatCash(a.price ?? 0)} · {world.price?.reason}</span>}
+              {(() => {
+                const tp = handlers.together?.plans.find((x) => x.place === place.id && x.action === a.id);
+                if (tp) return <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>👯 With {handle(tp.withName)} · {tp.status === "pending" ? "waiting for a yes" : `${TOGETHER.multiplier}× when you both do it`}</span>;
+                return handlers.together && !preview && canDoTogether(place, a.id)
+                  ? <button className="linkish together-link" onClick={() => handlers.together!.onTogether(place.id, a.id)}>👯 Do it together · {TOGETHER.multiplier}×</button>
+                  : null;
+              })()}
               {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
               {!av.ok && <span className="meta reason">{av.reason}</span>}
               {av.ok && av.note && <span className="meta">{av.note}</span>}

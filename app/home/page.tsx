@@ -1,3 +1,7 @@
+import {
+  cancelJob, decorateSave, endJob, jobFinish, jobHome, jobSettle, jobsBoard, managerCollect, postJob, rateJob, rideOffer, rideRespond, rideStatus, takeJob,
+  togetherClaim, togetherInbox, togetherInvite, togetherRespond, togetherSeen,
+} from "./togetherActions";
 import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
 import { cookies } from "next/headers";
 import { GameShell } from "@/components/GameShell";
@@ -35,8 +39,8 @@ export default async function HomePage() {
   const supabase = await getServerSupabase();
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
-  const [clique, city, story, catalog, chat, dating, crew, party] = await Promise.all([
-    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(),
+  const [clique, city, story, catalog, chat, dating, crew, party, together] = await Promise.all([
+    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(),
   ]);
   // Migration 0010 switches on chat; a banned account sees only a notice.
   const chatOn = chat.ok;
@@ -92,6 +96,12 @@ export default async function HomePage() {
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).
       hunt={city ? { state: huntState, join: huntJoin, talk: huntTalk, answer: huntAnswer } : undefined}
+      // Migration 0050 switches on together bonuses, rides and the Jobs app (together_inbox failing hides them).
+      together={city && together.ok ? {
+        inbox: togetherInbox, invite: togetherInvite, respond: togetherRespond, claim: togetherClaim, seen: togetherSeen,
+        rideOffer, rideRespond, rideStatus,
+        jobs: { board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob },
+      } : undefined}
       business={city ? { state: businessState, buy: buyBusiness, upgrade: upgradeBusiness, collect: collectTills, goPublic } : undefined}
       // Migration 0035 switches on gossip (gossip_state returns null before it runs).
       gossip={city ? { state: gossipState, find: gossipFind, share: gossipShare } : undefined}

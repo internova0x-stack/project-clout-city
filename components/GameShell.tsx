@@ -68,6 +68,12 @@ import { RANKS, rankFor, type Rank } from "@/lib/ranks";
 import { contextTips } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
+import { DecorApproveCard, DecoratingBar, JobsApp, RideWaitCard, TogetherBonusCard, TogetherPlansSheet, TogetherPrompt, TogetherSheet } from "./together/Together";
+import {
+  canDoTogether, jobToApprove, rideShare, togetherAlerts, togetherVerb,
+  type JobHome, type JobsBoard, type MyJob, type RideRequest, type TogetherApi, type TogetherBonus, type TogetherCandidate, type TogetherInbox, type TogetherResult,
+} from "@/lib/together";
+import type { CrewPerson } from "@/lib/crew";
 import { CityMap, type MapApi } from "./map/CityMap";
 import { BoroughSheet } from "./map/BoroughSheet";
 import type { BoroughId } from "@/lib/map/boroughs";
@@ -152,6 +158,7 @@ export function GameShell({
   hunt,
   gossip,
   business,
+  together,
   roomMood = "dream",
   previewRankUp,
   invitedAt,
@@ -189,6 +196,8 @@ export function GameShell({
   gossip?: GossipApi;
   /** v0.12 businesses (migration 0048); without it the Businesses app is hidden. */
   business?: BusinessApi;
+  /** v0.13 Better Together (migration 0050): together bonuses, rides and the Jobs app; hidden without it. */
+  together?: TogetherApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -388,6 +397,67 @@ export function GameShell({
       resync.current();
     }
   }, [crew, player.id]);
+  // ---- v0.13 Better Together: plans, rides and bonuses (polled), and the Jobs board ----
+  const [togetherIn, setTogetherIn] = useState<TogetherInbox | null>(null);
+  const [togetherTarget, setTogetherTarget] = useState<{ place: string; action: string } | null>(null);
+  const [togetherPlansOpen, setTogetherPlansOpen] = useState(false);
+  const [togetherDismissed, setTogetherDismissed] = useState<string | null>(null);
+  const [bonusCard, setBonusCard] = useState<TogetherBonus | null>(null);
+  const [crewPeople, setCrewPeople] = useState<CrewPerson[]>([]);
+  const [rideWait, setRideWait] = useState<{ id: number; name: string; mode: "subway" | "taxi"; each: number; plan: TripPlan } | null>(null);
+  const [jobs, setJobs] = useState<JobsBoard | null>(null);
+  const [decor, setDecor] = useState<JobHome | null>(null);
+  const [approveLater, setApproveLater] = useState<number | null>(null);
+  const loadTogether = useCallback(async () => {
+    if (!together) return null;
+    const r = await together.inbox();
+    if (!r.ok) return null;
+    setTogetherIn(r.data);
+    // A bonus your partner's visit paid while you were elsewhere.
+    if (r.data.bonuses.length) setBonusCard((cur) => cur ?? r.data.bonuses[0]);
+    return r.data;
+  }, [together]);
+  const loadJobs = useCallback(async () => {
+    if (!together) return null;
+    const r = await together.jobs.board();
+    if (r.ok) setJobs(r.data);
+    return r.ok ? r.data : null;
+  }, [together]);
+  useEffect(() => {
+    if (!together) return;
+    void loadTogether();
+    void loadJobs();
+    const t = setInterval(() => { if (document.visibilityState === "visible") { void loadTogether(); void loadJobs(); } }, 20_000);
+    return () => clearInterval(t);
+  }, [together, loadTogether, loadJobs]);
+  useEffect(() => {
+    if (togetherTarget && crew && !crewPeople.length) void crew.members().then((r) => r.ok && setCrewPeople(r.data));
+  }, [togetherTarget, crew, crewPeople.length]);
+  /** After a together activity: if a plan is waiting on it, claim the bonus (quietly when the other hasn't done it yet). */
+  const claimTogether = useCallback(async (placeId: string, actionId: string) => {
+    if (!together || !togetherIn) return;
+    const p = togetherIn.plans.find((x) => x.status === "accepted" && x.place === placeId && x.action === actionId);
+    if (!p) return;
+    const r = await together.claim(p.id);
+    if (r.ok) {
+      setBonusCard(r.data);
+      void loadTogether();
+      resync.current();
+    }
+  }, [together, togetherIn, loadTogether]);
+  const togetherRun = async <T,>(key: string, call: () => Promise<TogetherResult<T>>): Promise<T | null> => {
+    setBusy(key);
+    try {
+      const r = await call();
+      if (!r.ok) { setToast(r.error); return null; }
+      return r.data;
+    } catch {
+      setToast("The city glitched. Try again.");
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  };
   // ---- v0.10 neighborhood gossip: null until migration 0035 runs (no Tea app, no Listen in) ----
   const [teaState, setTeaState] = useState<GossipState | null>(null);
   const [teaCard, setTeaCard] = useState<{ card: TeaCard; fresh: boolean } | null>(null);
@@ -760,6 +830,12 @@ export function GameShell({
   });
   const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
   const ownedHere = ownedPieces.filter((p) => !elsewhere.has(p.id));
+  // v0.13 interior decorator: someone else's home (their furniture, their layout), ground floor.
+  const decorHome = decor ? homeTemplate(decor.homeId, decor.houseSku) : undefined;
+  const decorPieces: OwnedPiece[] = decor ? decor.items.flatMap((i) => {
+    const it = itemBySku(i.sku);
+    return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
+  }).filter((p) => !placedElsewhere(decor.layout, 1).has(p.id)) : [];
   const openShop = (category: ShopCategory, section?: string) => {
     setPlace(null);
     setInside(null);
@@ -848,8 +924,10 @@ export function GameShell({
       if (!cityApi) return;
       const act = placeById(pl)?.actions.find((x) => x.id === a);
       const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
-      void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a)));
+      // v0.13: a together plan for this activity pays its bonus once both have done it.
+      void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then(() => claimTogether(pl, a));
     },
+    together: together && togetherIn ? { plans: togetherIn.plans, onTogether: (pl, a) => setTogetherTarget({ place: pl, action: a }) } : undefined,
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
@@ -1162,6 +1240,133 @@ export function GameShell({
     setTab("map");
     setTrip({ ...plan, mode, seconds: q.seconds, fare: q.fare });
   };
+  // ---- v0.13 ride together: offer, wait for a yes, then both go ----
+  const rideGo = async (mode: TravelMode, person: TogetherCandidate) => {
+    const plan = travelPlan;
+    if (!plan || !together || (mode !== "subway" && mode !== "taxi")) return;
+    const r = await togetherRun("ride", () => together.rideOffer(person.id, plan.toId, mode));
+    if (!r) return;
+    const q = travelQuote(mode, milesBetween(plan.from, plan.to), false);
+    setTravelPlan(null);
+    setRideWait({ id: r.id, name: person.name, mode, each: r.each || rideShare(q.fare), plan });
+  };
+  useEffect(() => {
+    if (!rideWait || !together) return;
+    let stop = false;
+    const tick = async () => {
+      const r = await together.rideStatus(rideWait.id);
+      if (stop || !r.ok || !r.data) return;
+      if (r.data.status === "accepted") {
+        setRideWait(null);
+        setPlace(null);
+        setTab("map");
+        setTrip({ ...rideWait.plan, mode: r.data.mode, seconds: r.data.seconds, fare: -r.data.cash });
+        setToast(`${handle(rideWait.name)} is in. Riding together.`);
+        if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+      } else if (r.data.status !== "pending") {
+        setRideWait(null);
+        setToast(`${handle(rideWait.name)} can't make it. Go on your own?`);
+        setTravelPlan(rideWait.plan);
+      }
+    };
+    const t = setInterval(() => void tick(), 2500);
+    return () => { stop = true; clearInterval(t); };
+  }, [rideWait, together, cityApi, applyCity]);
+  const answerRide = async (ride: RideRequest, yes: boolean) => {
+    if (!together) return;
+    const r = await togetherRun(`ride:${ride.id}`, () => together.rideRespond(ride.id, yes));
+    void loadTogether();
+    if (!r) return;
+    if (r.status !== "accepted") return setToast(yes ? "That ride already left." : "Maybe next time.");
+    const p = placeById(ride.place);
+    setTogetherPlansOpen(false);
+    setPanel(null);
+    setPlace(null);
+    setInside(null);
+    setTab("map");
+    if (p) setTrip({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id, mode: r.mode, seconds: r.seconds, fare: -r.cash });
+    if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  };
+  // ---- v0.13 the Jobs app: decorating someone's home ----
+  const startDecorating = async (id: number) => {
+    if (!together) return;
+    const h = await togetherRun(`decor:${id}`, () => together.jobs.home(id));
+    if (!h) return;
+    setPhone({ open: false, app: null });
+    setPanel(null);
+    setPlace(null);
+    setInside(null);
+    setViewHome(null);
+    setTab("home");
+    setDecor(h);
+    setToast(`🛋️ ${handle(h.posterName)}'s place. Tap ✏️ to move things; it saves as you go.`);
+  };
+  const saveDecor = async (l: Parameters<typeof mergeFloorLayout>[1]): Promise<boolean> => {
+    if (!together || !decor) return false;
+    const next = mergeFloorLayout(decor.layout, l, 1);
+    const r = await togetherRun("layout", () => together.jobs.save(decor.id, next));
+    if (!r) return false;
+    setDecor((d) => (d ? { ...d, layout: next } : d));
+    return true;
+  };
+  const jobsHandlers = together ? {
+    busy,
+    onPlayer: chat ? (id: string) => setCardId(id) : undefined,
+    take: (id: number) => void togetherRun(`take:${id}`, () => together.jobs.take(id)).then((r) => {
+      if (!r) return;
+      void loadJobs();
+      if (r.kind === "decorator") void startDecorating(id);
+      else setToast("💼 You run their tills now. Collect whenever they fill up.");
+    }),
+    post: (kind: "decorator" | "manager", pay: number, cut: number, note: string) => void togetherRun("post", () => together.jobs.post(kind, pay, cut, note)).then((r) => {
+      if (!r) return;
+      setToast(kind === "decorator" ? `Posted. ${formatCash(pay)} is held until you approve.` : "Posted. A manager will find you.");
+      void loadJobs();
+      if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+    }),
+    cancel: (id: number) => void togetherRun(`cancel:${id}`, () => together.jobs.cancel(id)).then((r) => {
+      if (!r) return;
+      if (r.cash) setToast(`Cancelled. ${formatCash(r.cash)} is back in your account.`);
+      void loadJobs();
+      if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+    }),
+    decorate: (id: number) => void startDecorating(id),
+    collect: (id: number) => void togetherRun(`collect:${id}`, () => together.jobs.collect(id)).then((r) => {
+      if (!r) return;
+      setToast(r.cash ? `Collected ${formatCash(r.collected)}. Your cut: ${formatCash(r.cash)}.` : "The tills are empty. Check back later.");
+      void loadJobs();
+      if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+    }),
+    end: (id: number) => void togetherRun(`end:${id}`, () => together.jobs.end(id)).then((r) => { if (r) { setToast("Done. They don't run your tills anymore."); void loadJobs(); } }),
+    approve: () => { setApproveLater(null); setPhone({ open: false, app: null }); },
+    rate: (id: number, stars: number) => void togetherRun(`rate:${id}`, () => together.jobs.rate(id, stars)).then((r) => { if (r !== null) setToast("Thanks. Rated."); void loadJobs(); }),
+  } : null;
+  const approving = together && !decor && flow === "none" && !arranging ? jobToApprove(jobs) : null;
+  const settleDecor = (job: MyJob, keep: boolean, stars: number | null) => {
+    if (!together) return;
+    void togetherRun(`settle:${job.id}`, () => together.jobs.settle(job.id, keep, stars)).then((r) => {
+      if (!r) return;
+      setToast(keep ? `Kept. ${handle(job.workerName)} got paid.` : "Undone. Every piece is back where it was, and the pay is back with you.");
+      void loadJobs();
+      if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+    });
+  };
+  // Ride together: who's at your place when you open Go there (presence is only polled inside a room).
+  const [rideHere, setRideHere] = useState<HerePerson[]>([]);
+  useEffect(() => {
+    if (!travelPlan || !together || !atPlace || !chat?.presence) { setRideHere([]); return; }
+    if (inside?.id === atPlace) { setRideHere(here); return; }
+    let stop = false;
+    void chat.presence(atPlace, 1).then((r) => { if (!stop && r.ok) setRideHere(r.data.people); });
+    return () => { stop = true; };
+  }, [travelPlan, together, atPlace, chat, inside, here]);
+  /** Who can be invited to do something together: crew anywhere, anyone here now. */
+  const togetherPeople: TogetherCandidate[] = (() => {
+    const out = new Map<string, TogetherCandidate>();
+    for (const h of here) out.set(h.id, { id: h.id, name: h.name, style: h.style, crew: h.crew, here: true });
+    for (const c of crewPeople) if (!out.has(c.id)) out.set(c.id, { ...c, crew: true, here: false });
+    return [...out.values()].sort((a, b) => Number(b.crew && b.here) - Number(a.crew && a.here) || Number(b.crew) - Number(a.crew));
+  })();
   const endTrip = () => {
     const t = trip;
     setTrip(null);
@@ -1181,7 +1386,9 @@ export function GameShell({
   const partyInvite = (partyIn?.plusOnes ?? []).find((x) => !x.mine && x.status === "invited");
   const partyKey = partyInvite ? `${partyInvite.eventId}:${partyInvite.host.id}` : "";
   const showParty = !showDating && !showCrew && !!partyInvite && partyDismissed !== partyKey && flow === "none" && !arranging && tab === "home" && !inside;
-  const showPrompt = showDating || showCrew || showParty || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
+  const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
+  const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor && tab === "home" && !inside;
+  const showPrompt = showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
   const openChatWith = (p: DatePerson) => {
     setPanel(null);
     setChatWith({ id: p.id, name: p.name, style: p.style });
@@ -1277,19 +1484,19 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={viewing ?? upstairs ?? baseHome}
-            floor={viewing ? 1 : floorNow}
-            layout={viewing ? null : city?.homeLayout}
+            template={viewing ?? decorHome ?? upstairs ?? baseHome}
+            floor={viewing || decorHome ? 1 : floorNow}
+            layout={viewing ? null : decor ? decor.layout : city?.homeLayout}
             look={look}
             outfit={outfit}
             daytime={daytime}
             editable={cityOn && flow === "none" && !viewing}
             rotatable={flow === "none"}
             door={flow === "none"}
-            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : `${me.display_name} at home, wearing ${style.label}`}
+            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : `${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
-              if (viewing) return;
+              if (viewing || decor) return;
               if (it.use?.kind === "floor") return setHomeFloor(it.use.to);
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
               if (restOn && it.use?.kind === "sleep") setRestKind("nap");
@@ -1298,9 +1505,9 @@ export function GameShell({
             }}
             onEditingChange={setArranging}
             mood={roomMood}
-            onSaveLayout={(l) => (cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
-            owned={viewing ? undefined : ownedHere}
-            trial={tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
+            onSaveLayout={(l) => (decor && together ? saveDecor(l) : cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
+            owned={viewing ? undefined : decor ? decorPieces : ownedHere}
+            trial={!decor && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
             onTrialEnd={() => setTryHome(null)}
             onTrialBuy={cityApi && ((l) => run(`buy:${tryHome!.sku}`, async () => {
               // Buy, then keep the piece where it was tried: the layout's "trial" becomes the new item.
@@ -1321,6 +1528,24 @@ export function GameShell({
               onMove={cityApi?.moveHome ? () => void run(`move:${viewHome}`, () => cityApi.moveHome!(viewHome)).then((ok) => { if (ok) { setViewHome(null); setHomeFloor(1); setToast("Moved in. The broker fee is not refundable, emotionally or otherwise."); } }) : undefined}
             />
           )}
+          {decor && together && (
+            <DecoratingBar
+              name={decor.posterName}
+              endsAt={decor.endsAt}
+              pay={decor.pay}
+              busy={busy !== null}
+              onLeave={() => { setDecor(null); setPhone({ open: true, app: "jobs" }); }}
+              onDone={() => void togetherRun(`finish:${decor.id}`, () => together.jobs.finish(decor.id)).then((r) => {
+                if (!r) return;
+                setDecor(null);
+                setToast(`Done. ${handle(decor.posterName)} gets to look; you get ${formatCash(decor.pay)} and ${CITY_ECONOMY.jobs.decorator.clout} clout if they keep it.`);
+                void loadJobs();
+              })}
+            />
+          )}
+          {showTogether && togetherIn && (
+            <TogetherPrompt inbox={togetherIn} onOpen={() => setTogetherPlansOpen(true)} onDismiss={() => setTogetherDismissed(togetherKey)} />
+          )}
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
           )}
@@ -1330,10 +1555,10 @@ export function GameShell({
           {showParty && partyInvite && (
             <PartyPrompt invite={partyInvite} onOpen={() => setPanel("events")} onDismiss={() => setPartyDismissed(partyKey)} />
           )}
-          {storyOn && flow === "none" && !arranging && !showDating && !showCrew && !showParty && (
+          {storyOn && flow === "none" && !arranging && !decor && !showDating && !showCrew && !showParty && !showTogether && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
-          {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !(storyOn && promptVisible(feed, dismissed)) && (
+          {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
             <NewsPrompt item={latestNews} onOpen={() => openCityNews(latestNews.id)} onDismiss={() => setNewsCard(null)} />
           )}
         </div>
@@ -1536,7 +1761,17 @@ export function GameShell({
             onBuy={(pl, g, free) => lottoCall("lotto:buy", () => cityApi!.buyLottoCard!(pl, g, free))}
             onScratch={(id) => lottoCall("lotto:scratch", () => cityApi!.scratchLottoCard!(id))}
           />
-          <TravelSheet plan={travelPlan} state={city} busy={busy !== null} onClose={() => setTravelPlan(null)} onGo={(m) => void goTravel(m)} />
+          <TravelSheet
+            plan={travelPlan}
+            state={city}
+            busy={busy !== null}
+            onClose={() => setTravelPlan(null)}
+            onGo={(m) => void goTravel(m)}
+            // v0.13: ride with someone here with you (both at the same place, split the fare).
+            ride={together && atPlace && travelPlan?.toId !== "home" && rideHere.length > 0 && togetherIn?.canInvite
+              ? { people: rideHere.slice().sort((a, b) => Number(b.crew) - Number(a.crew)).slice(0, 2).map((h) => ({ id: h.id, name: h.name, style: h.style, crew: h.crew, here: true })), onRide: (m, p) => void rideGo(m, p) }
+              : undefined}
+          />
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />
           <ShopSheet
             open={panel === "shop"}
@@ -1610,7 +1845,58 @@ export function GameShell({
           onClose={() => setChatPass(null)}
         />
       )}
+      {together && (
+        <>
+          <TogetherSheet
+            target={togetherTarget}
+            people={togetherTarget ? togetherPeople.filter((p) => p.crew || (inside?.id === togetherTarget.place && p.here)) : []}
+            inbox={togetherIn}
+            busy={busy !== null}
+            onClose={() => setTogetherTarget(null)}
+            onInvite={(to) => {
+              const t = togetherTarget;
+              if (!t) return;
+              void togetherRun("together", () => together.invite(to, t.place, t.action)).then((r) => {
+                if (!r) return;
+                const who = togetherPeople.find((p) => p.id === to);
+                setTogetherTarget(null);
+                setToast(`👯 Invited ${handle(who?.name)} to ${togetherVerb(t.place, t.action)} together.`);
+                void loadTogether();
+              });
+            }}
+          />
+          <TogetherPlansSheet
+            open={togetherPlansOpen}
+            inbox={togetherIn}
+            busy={busy !== null}
+            onClose={() => setTogetherPlansOpen(false)}
+            onAnswer={(id, yes) => void togetherRun(`plan:${id}`, () => together.respond(id, yes)).then((r) => {
+              void loadTogether();
+              if (!r) return;
+              const p = togetherIn?.plans.find((x) => x.id === id);
+              if (yes && p) { setTogetherPlansOpen(false); openPlace(p.place); setToast(`You're in. Do it within ${CITY_ECONOMY.together.windowMinutes} minutes of ${handle(p.withName)} for the bonus.`); }
+            })}
+            onRide={(ride, yes) => void answerRide(ride, yes)}
+            onOpenPlace={(id) => { setTogetherPlansOpen(false); openPlace(id); }}
+          />
+          {bonusCard && (
+            <TogetherBonusCard bonus={bonusCard} onClose={() => { const b = bonusCard; setBonusCard(null); void together.seen(b.id).then(() => loadTogether()); }} />
+          )}
+          {rideWait && (
+            <RideWaitCard name={rideWait.name} mode={rideWait.mode} each={rideWait.each} onCancel={() => { const p = rideWait.plan; setRideWait(null); setTravelPlan(p); }} />
+          )}
+          {approving && approveLater !== approving.id && !bonusCard && (
+            <DecorApproveCard
+              job={approving}
+              busy={busy !== null}
+              onSettle={(keep, stars) => settleDecor(approving, keep, stars)}
+              onLater={() => { setApproveLater(approving.id); setPhone({ open: false, app: null }); setPanel(null); setPlace(null); setInside(null); setTab("home"); setToast("Take a look around. Review it in Phone → Jobs."); }}
+            />
+          )}
+        </>
+      )}
       <PhoneModal
+        jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers } : undefined}
         onChatPass={(out) => setChatPass({ out })}
         // Hidden until migration 0048 runs (business_state answers).
         businesses={business && city && biz ? {

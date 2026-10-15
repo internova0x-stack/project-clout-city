@@ -2,7 +2,7 @@
 
 Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
-**Current version: v0.11 "Doors Open"** (v0.1 to v0.10 are done; v0.12 "Ownership" and v0.13 "Better Together" are next, then v1.0 "Launch") (see `docs/07-milestones-and-versions.md`).
+**Current version: v0.13 "Better Together"** (v0.1 to v0.12 are done; v1.0 "Launch" is next) (see `docs/07-milestones-and-versions.md`).
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
@@ -38,7 +38,7 @@ components live in `app/globals.css`.
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
-  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer); `?crowd=50` puts 50 sample players at any place you enter; `?biz=some|rich|public` starts with businesses (rich: the whole ladder, ready to go public); `?rankup=1-10` opens that rank's rank-up reveal. Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio.
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer); `?crowd=50` puts 50 sample players at any place you enter; `?biz=some|rich|public` starts with businesses (rich: the whole ladder, ready to go public); `?rankup=1-10` opens that rank's rank-up reveal; `?together=invite|ride|plan|bonus|decorate|approve` starts v0.13's together plans, ride requests, the bonus card, decorating someone's home or approving a decorator. Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
 

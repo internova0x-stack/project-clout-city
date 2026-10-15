@@ -1,6 +1,7 @@
 "use client";
 
 import type { PartyMention } from "@/lib/party";
+import { JobsApp } from "../together/Together";
 import { useEffect, useState } from "react";
 import { GIG_TITLES } from "@/lib/city";
 import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type GigOffer } from "@/lib/cityState";
@@ -18,7 +19,7 @@ import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -29,6 +30,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
   // v0.12 businesses (migration 0048); hidden until it runs.
   { id: "businesses", label: "Businesses", emoji: "🏪", tile: "condo" },
+  // v0.13 Better Together (migration 0050); hidden until it runs.
+  { id: "jobs", label: "Jobs", emoji: "🛋️", tile: "briefcase" },
   // #19 moving up (migration 0045); hidden until it runs.
   { id: "apartments", label: "Apartments", emoji: "🔑", tile: "house" },
   // v0.7: the Collection's front door (owner, Oct 13). It opens the Collection sheet over the game.
@@ -49,7 +52,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs,
 }: {
   open: boolean;
   onClose: () => void;
@@ -88,6 +91,8 @@ export function PhoneModal({
   apartments?: { busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void };
   /** v0.12 businesses: the Businesses app; without it the app is hidden. */
   businesses?: Omit<React.ComponentProps<typeof BusinessesApp>, "onHome">;
+  /** v0.13 the Jobs app (migration 0050); without it the app is hidden. */
+  jobs?: Omit<React.ComponentProps<typeof JobsApp>, "onHome">;
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -129,7 +134,7 @@ export function PhoneModal({
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs)).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
@@ -146,11 +151,12 @@ export function PhoneModal({
           ) : (
             <div className="phone-app-screen">
               {/* Tea draws its own back button (a story goes back to the list first). */}
-              {app !== "tea" && app !== "businesses" && <button className="phone-back" onClick={() => setApp(null)}><ChevronLeftIcon size={20} /> Home</button>}
+              {app !== "tea" && app !== "businesses" && app !== "jobs" && <button className="phone-back" onClick={() => setApp(null)}><ChevronLeftIcon size={20} /> Home</button>}
               {/* News, Tea and Businesses draw their own headers (a business goes back to the list first). */}
-              {app !== "news" && app !== "tea" && app !== "businesses" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
+              {app !== "news" && app !== "tea" && app !== "businesses" && app !== "jobs" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
+              {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
               {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
