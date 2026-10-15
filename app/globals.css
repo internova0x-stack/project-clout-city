@@ -873,10 +873,16 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .crew-progress.done { background:var(--neon-tint); }
 .crew-bar { height:8px; border-radius:var(--r-pill); background:var(--chip-off); overflow:hidden; }
 .crew-bar i { display:block; height:100%; border-radius:var(--r-pill); background:var(--neon-500); transition:width .4s ease-out; }
-/* Crew plans, nothing tonight (owner, Oct 15: invite from here, but quietly). */
-.crew-empty { display:flex; flex-direction:column; gap:6px; }
-.crew-empty-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
-.crew-empty-actions .chip { background:#fff; }
+/* Crew plans, nothing tonight (owner, Oct 15: "another opportunity to invite crew"). */
+.crew-empty { display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:24px 18px 18px; border-radius:var(--r-lg);
+  background:radial-gradient(120% 90% at 50% 0%, #FFF4E6 0%, #FFE3CC 60%, #FFD3B5 100%); }
+.crew-empty-faces { display:flex; }
+.crew-empty-faces span { width:52px; height:52px; margin:0 -5px; border-radius:50%; display:grid; place-items:center; font-size:26px;
+  background:#fff; box-shadow:0 0 0 3px #FFE3CC, var(--elev-1, 0 2px 6px rgba(20,17,26,.12)); }
+.crew-empty-faces .crew-empty-add { background:var(--taxi-400); color:var(--night-900); font-size:24px; font-weight:800; }
+.crew-empty-perks { display:flex; flex-direction:column; gap:6px; width:100%; padding:10px 12px; border-radius:var(--r-sm); background:rgba(255,255,255,.7); font-size:14px; color:var(--text-2); }
+.crew-empty-perks b { color:var(--green-text); font-variant-numeric:tabular-nums; }
+.crew-empty .btn { margin-top:2px; }
 .together-ask { display:flex; flex-direction:column; gap:6px; margin-top:4px; }
 .together-ask .chip { height:32px; font-size:13.5px; }
 .together-yes { background:var(--green-500); color:#fff; font-weight:700; }
