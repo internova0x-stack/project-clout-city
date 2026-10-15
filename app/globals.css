@@ -566,8 +566,10 @@ a { color:inherit; }
 /* Phone (C29) */
 .phone-wrap { z-index:60; }
 .phone-close { position:absolute; z-index:2; top:calc(14px + var(--safe-top)); right:14px; }
-.phone-device { position:relative; z-index:1; width:min(360px, 100%); height:min(740px, calc(100dvh - 64px)); background:#000; border-radius:48px; padding:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
-.phone-screen { position:relative; width:100%; height:100%; border-radius:38px; overflow:hidden; background:var(--surface-sheet); display:flex; flex-direction:column; }
+/* Android bug (owner, Oct 15): a wide line in an app (a Bank row, a business name) could grow the phone past
+   the screen and push it right. The phone's width comes from the viewport, never from what's inside. */
+.phone-device { position:relative; z-index:1; width:min(360px, calc(100vw - 40px)); height:min(740px, calc(100dvh - 64px)); background:#000; border-radius:48px; padding:10px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+.phone-screen { position:relative; width:100%; min-width:0; height:100%; border-radius:38px; overflow:hidden; background:var(--surface-sheet); display:flex; flex-direction:column; }
 .phone-status { display:flex; align-items:center; justify-content:space-between; padding:12px 22px 6px; font-size:13px; font-weight:600; color:#fff; position:relative; z-index:2; }
 .phone-status.light { color:var(--text-1); }
 .phone-pill { position:absolute; left:50%; top:10px; transform:translateX(-50%); width:90px; height:26px; border-radius:var(--r-pill); background:#000; }
@@ -577,7 +579,7 @@ a { color:inherit; }
 .phone-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px 8px; margin-top:40px; }
 .phone-app { display:flex; flex-direction:column; align-items:center; gap:6px; font-size:11px; font-weight:500; color:#fff; }
 .phone-icon { position:relative; width:56px; height:56px; border-radius:14px; display:grid; place-items:center; font-size:28px; box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 4px 12px rgba(0,0,0,.3); }
-.phone-app-screen { flex:1; overflow-y:auto; padding:4px 16px 24px; color:var(--text-1); }
+.phone-app-screen { flex:1; min-width:0; overflow-x:hidden; overflow-y:auto; contain:inline-size; padding:4px 16px 24px; color:var(--text-1); }
 .phone-back { display:inline-flex; align-items:center; gap:2px; color:var(--neon-text); font-weight:600; font-size:15px; height:36px; }
 
 /* Gigs (C36) */
@@ -1490,50 +1492,31 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .here-hud-count { font-size:13.5px; line-height:1; font-weight:600; white-space:nowrap; }
 .here-hud-count b { font-family:var(--font-label); font-variant-numeric:tabular-nums; }
 .here-hud-btn { height:26px; padding:0 11px; line-height:1; border:0; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font:inherit; font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer; }
-/* v0.12 businesses (owner, Oct 15): Monument Valley dusk, peach to coral with deep rose ink; no purple. */
-.biz-worth { padding:14px; border-radius:var(--r-lg); background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); display:flex; flex-direction:column; gap:6px; }
-.biz-worth-n { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; }
-.biz-till { display:flex; align-items:center; gap:12px; padding:14px; border-radius:var(--r-lg); color:#7A2F33;
-  background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); box-shadow:0 14px 30px rgba(120,80,90,.2); }
-.biz-till b { display:block; font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; }
-.biz-till small { display:block; font-size:12px; font-weight:600; opacity:.8; }
-.biz-list { display:flex; flex-direction:column; gap:8px; }
-.biz-row { width:100%; display:flex; align-items:center; gap:12px; padding:10px 12px; border:0; border-radius:var(--r-lg); background:#fff;
-  box-shadow:inset 0 0 0 1.5px var(--divider); font:inherit; color:var(--text-1); text-align:left; cursor:pointer; }
-.biz-row.next { background:#FFF4EC; box-shadow:inset 0 0 0 2px #FFC9B9; cursor:default; }
-.biz-row.locked { opacity:.5; cursor:default; }
-.biz-em { flex:none; width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:23px; background:linear-gradient(160deg,#FFF1E8,#FFC9B9); }
-.biz-em.big { width:64px; height:64px; border-radius:20px; font-size:34px; }
-.biz-n { flex:1; min-width:0; }
-.biz-n b { display:block; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.biz-lv { display:inline-flex; gap:3px; margin-left:6px; vertical-align:1px; }
-.biz-lv i { width:7px; height:7px; border-radius:50%; background:#F6DCD3; }
-.biz-lv i.on { background:#E88A8F; }
-.biz-full { flex:none; padding:3px 9px; border-radius:var(--r-pill); background:#FFE3D8; color:#7A2F33; font-size:11.5px; font-weight:700; white-space:nowrap; }
-.biz-r { flex:none; text-align:right; font-size:12px; color:var(--text-3); white-space:nowrap; }
-.biz-r b { display:block; color:var(--text-1); font-size:14px; }
-.biz-hero { display:flex; align-items:center; gap:14px; }
-.biz-hero b { display:block; font-size:19px; }
-.biz-kpis { display:flex; gap:8px; }
-.biz-kpis > span { flex:1; padding:10px 6px; border-radius:var(--r-md); background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); text-align:center; font-size:11.5px; color:var(--text-3); }
-.biz-kpis b { display:block; font-size:16px; color:var(--text-1); font-variant-numeric:tabular-nums; }
-.biz-ups { display:flex; flex-direction:column; }
-.biz-up { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--divider); }
-.biz-up:last-child { border-bottom:0; }
-.biz-up .biz-em { width:38px; height:38px; font-size:19px; }
-.biz-up.locked { opacity:.5; }
-.biz-up-n { flex:1; min-width:0; }
-.biz-up-n b { display:block; font-size:14px; }
-.biz-up-n .meta { display:block; }
-.biz-done { flex:none; color:var(--green-text, #2E8B63); font-weight:700; font-size:13px; }
-.biz-public { display:flex; flex-direction:column; gap:6px; padding:14px; border-radius:var(--r-lg); color:#7A2F33;
-  background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); }
+/* v0.12 businesses (owner, Oct 15): built from the Phone apps' cards, rows and buttons; Monument Valley
+   dusk (peach to coral, deep rose ink) only on the till and going public. No purple. */
+.biz-app { contain:inline-size; min-width:0; }
+/* Cards stack their lines (spans included). */
+.biz-app .card > span, .biz-app .biz-dusk > span, .biz-app .card > .rank-bar { display:block; }
+.biz-upg { padding:12px 0; border-bottom:1px solid var(--divider); }
+.biz-upg:last-child { border-bottom:0; padding-bottom:0; }
+.biz-upg-buy { gap:12px; margin:10px 0 0 48px; align-items:center; }
+.biz-worth-n { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:30px; line-height:34px; font-weight:600; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+.biz-dusk { padding:16px; border-radius:var(--r-lg); background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); color:#7A2F33; }
+.biz-dusk .subtext, .biz-dusk .meta, .biz-ink { color:#7A2F33; }
+.biz-em { flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:24px; background:linear-gradient(160deg,#FFF1E8,#FFC9B9); }
+.biz-em.big { width:56px; height:56px; border-radius:16px; font-size:30px; }
+.biz-em.sm { width:36px; height:36px; border-radius:12px; font-size:18px; }
+.biz-own { text-align:left; font:inherit; background:none; border-left:0; border-right:0; border-top:0; cursor:pointer; }
+.biz-own:last-child { border-bottom:0; }
+.biz-till-amt { flex:none; font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+.biz-price { display:block; font-size:14px; color:var(--text-1); margin-top:2px; }
+.biz-locked { opacity:.5; }
+.biz-done { flex:none; color:var(--green-text, #2E8B63); font-weight:700; font-size:14px; }
 .biz-sky { background:linear-gradient(180deg,rgba(127,179,232,.85) 0%,rgba(191,211,238,.85) 45%,rgba(246,201,160,.85) 100%) !important; }
-.modal-card.biz-collected { text-align:center; border-radius:var(--r-xl); padding:24px 20px 18px; color:var(--text-1);
-  background:linear-gradient(180deg,#FFFFFF 0%,#FFF4EC 60%,#FFE6DA 100%); box-shadow:0 24px 60px rgba(120,80,90,.28); animation:reveal-rise .4s ease-out; }
-.biz-collected-em { display:block; font-size:56px; line-height:1.1; margin-top:8px; }
-.biz-collected-n { margin:6px 0 8px; line-height:1.1; font-size:40px; font-weight:800; color:#7A2F33; font-variant-numeric:tabular-nums; }
-.biz-collected-lines { display:flex; flex-direction:column; gap:6px; margin-top:14px; text-align:left; font-size:13.5px; }
-.biz-collected-lines > div { display:flex; justify-content:space-between; gap:8px; padding:8px 12px; border-radius:12px; background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); }
-/* The tills-collected and go-public cards open over the phone. */
-.modal-wrap:has(.biz-collected) { z-index:62; }
+.biz-modal { z-index:62; }
+.modal-card.biz-reveal { background:linear-gradient(180deg,#FFFFFF 0%,#FFF4EC 60%,#FFE6DA 100%); }
+.biz-reveal-n { margin:12px 0 6px; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:40px; line-height:44px; font-weight:600; color:#7A2F33; font-variant-numeric:tabular-nums; }
+.biz-reveal-lines { margin:12px 0 14px; font-size:14px; }
+.biz-reveal-lines .list-row { padding:8px 0; }
