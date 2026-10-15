@@ -334,14 +334,6 @@ export function GameShell({
   const [rankUp, setRankUp] = useState<Rank | null>(previewRankUp ? RANKS[previewRankUp - 1] ?? null : null);
   const seenRank = useRef<number | null>(null);
   useEffect(() => {
-    if (!inside || !chat?.presence) { setHere([]); setHereCount(0); return; }
-    let stop = false;
-    const tick = async () => { const r = await chat.presence!(inside.id, insideFloor); if (!stop && r.ok) { setHere(r.data.people); setHereCount(r.data.count); } };
-    void tick();
-    const t = setInterval(() => void tick(), PRESENCE_POLL_MS);
-    return () => { stop = true; clearInterval(t); };
-  }, [inside, insideFloor, chat]);
-  useEffect(() => {
     setPinned([]);
     if (!inside) return;
     const t = setInterval(() => setTurn((n) => n + 1), ROTATE_MS);
@@ -549,6 +541,18 @@ export function GameShell({
   const kitchenOn = !!(travelOn && city?.player.fridge_meals !== undefined && cityApi?.cook);
   const atPlace = travelOn ? city!.player.at_place ?? null : null;
   const atPlaceInfo = atPlace ? placeById(atPlace) : undefined;
+  // Presence (owner, Oct 15: two players at the same café couldn't see each other): you count as here
+  // once you've arrived, inside the room or on the map outside it; inside, on the floor you're on.
+  const presencePlace = inside?.id ?? atPlace;
+  const presenceFloor = inside ? insideFloor : 1;
+  useEffect(() => {
+    if (!presencePlace || !chat?.presence) { setHere([]); setHereCount(0); return; }
+    let stop = false;
+    const tick = async () => { const r = await chat.presence!(presencePlace, presenceFloor); if (!stop && r.ok) { setHere(r.data.people); setHereCount(r.data.count); } };
+    void tick();
+    const t = setInterval(() => void tick(), PRESENCE_POLL_MS);
+    return () => { stop = true; clearInterval(t); };
+  }, [presencePlace, presenceFloor, chat]);
   const myPos = atPlaceInfo?.at ?? home;
   const myPosName = atPlaceInfo?.name ?? "home";
   const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
