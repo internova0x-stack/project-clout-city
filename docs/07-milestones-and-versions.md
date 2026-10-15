@@ -29,6 +29,7 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.8 | Getting Around | Travel and arrival, venue drinks, Nap and Sit, groceries and home cooking, weekly bills, event times | 1 to 2 weeks | — |
 | v0.9 | Big Nights | Exclusive event keepsakes, monuments as full locations | About 1 week | — |
 | v0.11 | Doors Open | Code sign-in in the app, Stripe test mode, interface fixes, gossip tasks, content live unless vetoed, every place enterable, the exclusive events update | 1 to 2 weeks | — |
+| v0.12 | Ownership | Crowded places, player ranks, businesses that make money and real money milestones | 1 to 2 weeks | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -209,6 +210,15 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 4. **Skipped for now (owner, Oct 14); for the test phase news and hunts publish with no approval at all (migration 0037):** live unless vetoed: news and hunts go live after a 24-hour veto window in the Studio, like gossip; News starts live with a drafted week.
 5. **Built (Oct 14):** every place enterable: office, civic building and outdoor plaza templates; every place but subway stations gets a room.
 6. **Built (Oct 14):** exclusive events update: $3.99, the benefits in the event modal, a multi-floor venue, 8 to 10 people in the room (NPCs fill in unlabeled; real players get a green dot), the event group chat with no daily limit and positive suggestions.
+
+## v0.12 "Ownership" (1 to 2 weeks, before launch)
+
+**In scope** (owner, Oct 15; docs/08-new-features-spec.md sections 14 and 15): ranks launch with the real money milestones and businesses together, so nobody is demoted when businesses arrive.
+
+1. Crowded places: a few players per room beside the regulars, who's in view, walking in and out, the people pill under the HUD and View People.
+2. Player ranks: the ten ranks, the profile's climb, ranks on cards and the Everyone here list, the rank-up reveal.
+3. Businesses: the eight businesses, upgrades, the till, hype, going public, net worth including businesses everywhere (cards, leaderboard, ranks).
+4. Business news in the News app, if time allows; otherwise right after launch.
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 

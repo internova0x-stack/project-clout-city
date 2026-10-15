@@ -326,7 +326,9 @@ Owner, Oct 14: walled rooms with many items; walls between rooms at waist height
 
 "Players who are at the same location at the same time are supposed to be able to see each other and chat with each other." "Players should be able to meet other real players in all locations." Brought forward from Later features; strangers may now message each other, with the safety tools below.
 
-- **In the room**, at every place and on every floor: the real players there walk around with the NPCs in their own avatar and look. **Nothing over their heads** (owner: "there are going to be many people, so the screen will get crowded"): tap a figure to open their card. NPCs keep their 💬, so they can be told apart and talked to for gossip. The panel's **Here now** row lists the players (crew first; "+N" shows everyone, with "downstairs"/"upstairs" for other floors).
+- **In the room**, at every place and on every floor: the real players there walk around with the NPCs in their own avatar and look. **Nothing over their heads** (owner: "there are going to be many people, so the screen will get crowded"): tap a figure to open their card. NPCs keep their 💬, so they can be told apart and talked to for gossip.
+- **Crowded places** (owner, Oct 15: "50 players might be at a location but the floor plan only allows 4-7 characters"): each room shows a few players beside its regulars (3 in a restroom, 4 in VIP, 5 or 6 in most rooms, up to 7 in the big ones; `lib/rooms.ts` playerSlots). The regulars never make way: they carry the stories and the gossip. Who stands in the room is picked for each player: the people you just opened, then your crew, then everyone else taking turns (every 45 seconds one walks out of the door and another walks in). On party floors real players come first and extras fill the rest.
+- **Who's here** sits right-aligned under the top HUD (owner, Oct 15; not on the activity card): three faces, "50 here" and **View People**, which opens everyone at the place by where they are (In the room, Around this floor, Downstairs, Upstairs). Tapping someone opens their card and walks them into the room.
 - **On the map**: a place's card says "● 3 here now · Tasha, Dev and Kai".
 - **Their card** opens with "Here with you at …", five **free reactions** (👋 🔥 😂 💅 🥂; one per person every few minutes; only between players at the same place, or crewmates), three **Break the ice** openers (about the place, the time of day and their look; tap one to put it in the box), a message box and the day's count. Reactions show in the chat thread as a big emoji.
 - **20 messages a day** (owner), every message you send counts, replies included. Reactions never count.
@@ -334,7 +336,54 @@ Owner, Oct 14: walled rooms with many items; walls between rooms at waist height
 - **Who can message me** (Settings): Anyone (default) or My crew; it covers messages and reactions.
 - Safety as before: word filter, block, report, the Studio's review queue, mutes and bans. Blocks hide people both ways, including from Here now.
 
-## 15. Later features
+## 15. Ranks and businesses (v0.12 "Ownership"; owner, Oct 15)
+
+### Ranks
+
+"We need categories for Clout City players based on net worth/clout", satirical and USA-wide, with billionaire status at the top (owner). One list; a player holds the higher of the two ladders: **clout** (fame gets you there) or **net worth** (money does). Net worth is everything you own, not cash: cash, your things at their value and your businesses at their valuation (owner: "the C$1B shouldn't be cash but net worth").
+
+| Rank | Title | Clout | or net worth |
+| --- | --- | --- | --- |
+| 1 | 🍜 Ramen Noodle Era | 0 | C$0 |
+| 2 | 🎓 Student Loan Survivor | 100 | C$25,000 |
+| 3 | 💼 Side Hustler | 500 (pro gigs) | C$50,000 |
+| 4 | 💬 Group Chat Famous | 1,000 | C$100,000 |
+| 5 | 📋 On the List | 2,000 (big gigs, the Ultraviolet Society door) | C$250,000 |
+| 6 | 📸 Local Celebrity | 5,000 (free VIP at medium clubs) | C$500,000 |
+| 7 | 🍼 Nepo Baby Energy | 15,000 (free VIP everywhere) | C$1M |
+| 8 | 💸 New Money Rich | 50,000 | C$10M |
+| 9 | 🛥️ Self-Made Billionaire* | 150,000 | C$1B |
+| 10 | ✨ God Status | 500,000 | C$10B |
+
+- The clout steps are the game's own gates (checked by tests). The money steps are real milestones (owner: "so billionaire means billionaire").
+- Shown on the profile (the rank, a bar and "150 clout or C$94,495 to Group Chat Famous"; tap for every rank), player cards and the Everyone here list. Crossing into a rank opens the **rank-up reveal** (Share, and the top three on the night card).
+- Ranks can go down with net worth (a business falls out of fashion); the profile keeps "Best: …".
+
+### Businesses
+
+Buy businesses that make money; their value counts toward net worth. The only way to the top money ranks: wages and gigs make thousands, businesses make billions.
+
+| # | Business | Price | Pays a day | Upgrades (each costs 60% of the price: +50% pay, +50% value) |
+| --- | --- | --- | --- | --- |
+| 1 | 🌭 Dirty Water Dogs (hot dog cart) | C$5,000 | C$750 | Second umbrella · Secret menu · Influencer collab |
+| 2 | 🐈 Bodega, Cat Included | C$50,000 | C$6,000 | Hot food counter · Lotto machine · The cat gets an agent |
+| 3 | 🧺 Spin Cycle Laundromat | C$250,000 | C$22,500 | Free Wi-Fi · Wash and fold · Laundromat by night (DJ) |
+| 4 | ☕ Oat Milk Surcharge Café | C$1.2M | C$81,600 | Latte art · Laptop ban (for vibes) · Second location |
+| 5 | 🌮 Taco Truck Fleet | C$6M | C$300,000 | Late-night route · Festival permits · A truck in every borough |
+| 6 | 🪩 Your Own Nightclub | C$30M | C$1.08M | VIP floor · Celebrity DJ residency · A velvet rope, gold-plated |
+| 7 | 🏢 Luxury* Apartment Building (*exposed brick) | C$150M | C$3.9M | Rooftop amenity · Doorman with opinions · Condo conversion |
+| 8 | 📱 Disruptive App Startup | C$700M | C$12.6M | Pivot to AI · Celebrity board member · Go public |
+
+- **One of each**, bought in order (the next unlocks when you own the one before). Bought from the **Businesses** app on the Phone.
+- **Collect the till**: pay piles up each game day and you collect it in the app (or at the business's spot, later). It stops piling up after **2 days**, so coming back daily pays without punishing a missed day.
+- **Valuation** = the price, +50% per upgrade, times **hype**: from ×1.0 to ×2.0 as your clout goes from 0 to 150,000 (fame brings customers). Fame and money feed each other.
+- **Go public** (the startup's last step): needs 50,000 clout ("investors want a famous founder") and C$50M in fees; triples the startup's valuation.
+- **Business news** (later in v0.12 or after): the News app runs events on businesses: a viral review (+value for a week), a health inspection (closed a day), a celebrity sighting.
+- **Pace** (simulated, a steady player collecting daily): C$1M at about 2 months, C$10M at 3.5 months, **C$1B at about 9 months**, C$10B at about a year. A casual player is a week or two behind.
+- **Server-decided**, like everything with money: prices, pay and valuations in `game_settings`; buying, upgrading, collecting and going public through security-definer functions; every payout a `ledger` row unique per (player, business, day). The browser never sends an amount. Real money never buys a business.
+- **Later: stakes in places on the map** ("Buy into Velvet Static", the top shareholder named on the place card). Whole map places can't belong to one player; everyone visits them.
+
+## 16. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
