@@ -87,7 +87,10 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     });
   };
 
-  // ---- Create the map once ----
+  // ---- Create the map (again after iOS drops its WebGL context: a black map with only the pins) ----
+  const [generation, setGeneration] = useState(0);
+  const lostRef = useRef(false);
+  const viewRef = useRef<{ center: [number, number]; zoom: number; pitch: number } | null>(null);
   useEffect(() => {
     let cancelled = false;
     let instance: MapLibreMap | null = null;
@@ -99,11 +102,11 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         instance = new maplibre.Map({
           container: hostRef.current,
           style: styleFor(themeRef.current, lockedRef.current),
-          center: lngLat(initialCenter),
-          zoom: initialZoom,
+          center: viewRef.current?.center ?? lngLat(initialCenter),
+          zoom: viewRef.current?.zoom ?? initialZoom,
           minZoom: MIN_ZOOM,
           // Tilted so the 3D buildings read; two-finger drag changes the tilt.
-          pitch: initialPitch,
+          pitch: viewRef.current?.pitch ?? initialPitch,
           maxPitch: 60,
           maxZoom: MAX_ZOOM,
           maxBounds: NYC_BOUNDS,
@@ -118,9 +121,12 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         instance.on("move", () => setFrame((f) => f + 1));
         instance.on("resize", () => setFrame((f) => f + 1));
         instance.on("error", (e) => console.warn("map:", e.error?.message ?? e));
+        lostRef.current = false;
+        instance.on("webglcontextlost", () => { lostRef.current = true; });
+        instance.on("webglcontextrestored", () => { lostRef.current = false; instance?.triggerRepaint(); });
         // Start with the credits collapsed to the small (i) button.
         instance.once("load", () => hostRef.current?.querySelector(".maplibregl-compact-show")?.classList.remove("maplibregl-compact-show"));
-        if (fitPins && pins.length > 1) {
+        if (fitPins && pins.length > 1 && !viewRef.current) {
           const lats = pins.map((p) => p.at[0]);
           const lngs = pins.map((p) => p.at[1]);
           instance.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], {
@@ -141,7 +147,37 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [generation]);
+
+  // Back from the background: repaint, and rebuild the map if the browser took its WebGL context
+  // and didn't give it back (iOS, after a while in the background or with many tabs open).
+  useEffect(() => {
+    if (!map) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const check = () => {
+      if (document.visibilityState !== "visible") return;
+      map.resize();
+      map.triggerRepaint();
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (!lostRef.current) return;
+        const c = map.getCenter();
+        viewRef.current = { center: [c.lng, c.lat], zoom: map.getZoom(), pitch: map.getPitch() };
+        setMap(null);
+        setGeneration((g) => g + 1);
+      }, 1200);
+    };
+    const onLost = () => check();
+    map.on("webglcontextlost", onLost);
+    document.addEventListener("visibilitychange", check);
+    window.addEventListener("pageshow", check);
+    return () => {
+      clearTimeout(timer);
+      map.off("webglcontextlost", onLost);
+      document.removeEventListener("visibilitychange", check);
+      window.removeEventListener("pageshow", check);
+    };
+  }, [map]);
 
   // ---- Moving vehicles when zoomed in ----
   useEffect(() => {

@@ -11,8 +11,8 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
 3. **Authentication → Sign In / Providers → Email**: keep Email enabled. Magic links
    confirm the address by themselves, so no extra confirmation step is needed.
 4. **Authentication → URL Configuration**:
-   - **Site URL**: your live address, e.g. `https://cloutcity.vercel.app`.
-   - **Redirect URLs**: add `https://cloutcity.vercel.app/**`, `https://*-your-team.vercel.app/**`
+   - **Site URL**: your live address, e.g. `https://cloutcity.app`.
+   - **Redirect URLs**: add `https://cloutcity.app/**`, `https://www.cloutcity.app/**`, `https://*-your-team.vercel.app/**`
      (Vercel previews) and `http://localhost:3000/**`.
 5. **Authentication → Email Templates**: for both **Magic Link** and **Confirm signup**,
    set the subject to `Your Clout City code: {{ .Token }}` and paste the body from

@@ -1,5 +1,6 @@
 "use client";
 
+import { AFTER_SIGNIN_COOKIE, AFTER_SIGNIN_MAX_AGE } from "@/lib/authNext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getBrowserSupabase } from "@/lib/supabase/client";
@@ -14,7 +15,12 @@ export function StudioSignIn() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const back = () => `${window.location.origin}/auth/callback?next=/studio`;
+  const back = () => {
+    // If Supabase sends the link to the Site URL (the game) or the email's link has no "next", this
+    // still brings the admin back here (lib/authNext.ts).
+    document.cookie = `${AFTER_SIGNIN_COOKIE}=/studio; path=/; max-age=${AFTER_SIGNIN_MAX_AGE}; samesite=lax${location.protocol === "https:" ? "; secure" : ""}`;
+    return `${window.location.origin}/auth/callback?next=/studio`;
+  };
 
   async function send() {
     const supabase = getBrowserSupabase();

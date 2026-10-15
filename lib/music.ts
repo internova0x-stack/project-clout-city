@@ -30,8 +30,13 @@ class Music {
 
   /** Starts the loop (no-op if already playing). Must run inside a user gesture. */
   start() {
+    // iPhone: play as media, so the ring/silent switch doesn't mute the game (Safari 17+).
+    try {
+      const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+      if (session && session.type !== "playback") session.type = "playback";
+    } catch { /* older browsers: nothing to set */ }
     if (this.started) {
-      void this.ctx?.resume();
+      if (this.ctx && this.ctx.state !== "running") void this.ctx.resume();
       return;
     }
     const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -48,6 +53,21 @@ class Music {
     this.nextTime = ctx.currentTime + 0.1;
     this.timer = setInterval(() => this.schedule(), 100);
     document.addEventListener("visibilitychange", this.onVisibility);
+  }
+
+  /** True once the browser lets the loop play (after a tap). */
+  get playing() { return this.ctx?.state === "running"; }
+
+  /**
+   * Starts the music on a tap and keeps trying on later taps until it plays, and again after the
+   * phone suspends it (iOS "interrupted"). Phones only allow audio from a finished tap (pointerup,
+   * touchend, click), never from pointerdown. Returns the cleanup.
+   */
+  unlockOnTap(): () => void {
+    const events = ["pointerup", "touchend", "click", "keydown"] as const;
+    const tap = () => { if (!this.playing) this.start(); };
+    for (const e of events) window.addEventListener(e, tap, { passive: true });
+    return () => { for (const e of events) window.removeEventListener(e, tap); };
   }
 
   setMuted(muted: boolean) {

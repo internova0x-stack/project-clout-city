@@ -17,7 +17,9 @@ import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
-import { chatBlock, chatList, chatReport, chatSend, chatStatus, chatThread, playerCard, sessionPing, track } from "./chatActions";
+import {
+  chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, placeCounts, placePresence, playerCard, sessionPing, track,
+} from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
 import { syncGossipWeeks } from "@/lib/gossipImport";
@@ -90,7 +92,12 @@ export default async function HomePage() {
       } : undefined}
       catalog={catalog}
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
-      chat={chatOn ? { list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard } : undefined}
+      // Migration 0047 (owner, Oct 15: two players in the same café couldn't see each other, because
+      // presence, place counts, reactions and the message setting were never passed in here).
+      chat={chatOn ? {
+        list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard,
+        react: chatReact, setMessagesFrom: chatSetMessagesFrom, presence: placePresence, counts: placeCounts,
+      } : undefined}
       track={chatOn ? track : undefined}
       // Migration 0053: session length for the Studio's Insights (a missing function is ignored).
       ping={sessionPing}

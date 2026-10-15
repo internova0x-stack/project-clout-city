@@ -232,6 +232,7 @@ const ERRORS: Record<string, string> = {
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",
   unknown_item: "That isn't in stock.",
+  no_player: "You've been signed out. Close the game, open it again and sign back in.",
 };
 
 export function cityError(message: string | undefined): string {
