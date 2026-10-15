@@ -1531,3 +1531,21 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .biz-app .profile-kpi b { font-size:16px; line-height:20px; letter-spacing:-.01em; }
 .biz-app .list-row .title { font-size:15px; line-height:20px; }
 .biz-own { padding:12px 0; }
+/* v0.13 Better Together: ride together row and job ratings. */
+.together-ride { padding:12px; border:0; border-radius:var(--r-lg); background:var(--surface-card); }
+.together-stars button { width:40px; height:40px; border:0; background:none; font-size:28px; line-height:1; color:#E3D9CC; cursor:pointer; }
+.together-stars button.on { color:#FF9F1C; }
+.together-pay { display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; }
+.together-pay .chip { justify-content:center; padding:0 6px; font-size:13px; font-weight:600; }
+/* v0.13 Better Together: 👯 on place actions, job cards, the note field, small rating stars. */
+.together-link { display:block; margin-top:6px; padding:0; font-size:13px; font-weight:700; color:var(--neon-text); }
+.job-who { width:100%; padding:0; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.job-who:disabled { cursor:default; }
+.job-note { width:100%; }
+.together-stars.sm button { width:28px; height:28px; font-size:20px; }
+.decor-bar { background:var(--surface-sheet); }
+.job-row { gap:12px; }
+.job-row .title, .job-row .meta { display:block; }
+.job-row .title { font-size:15px; }
+.job-row .chip { flex:none; }
+.chat-plan-badge { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:var(--r-pill); background:#FFE1E8; color:#C2183A; font-size:11.5px; font-weight:800; vertical-align:2px; }

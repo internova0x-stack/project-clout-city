@@ -414,6 +414,15 @@ A **Jobs** board on the Phone: post a job or take one. Paid in game cash only (n
 - **Safety**: payment held by the server and released on approval (or after 24 hours with no answer); a decorator can't sell, delete or buy anything, only move what's there; report and block on every job; daily limits on jobs between the same two players; account-age minimums against alt accounts.
 - **Later jobs**: stylist (picks your outfit), tour guide (takes a newcomer to three places), hype person (boosts your entrance at a club).
 
+### As built (migration 0050, from the approved mockup at `/preview/together`)
+
+- **Do it together**: a 👯 button next to every visit at a library, university or club (`CITY_ECONOMY.together.tags`). Invite **one person**: crew anywhere, or anyone at the place now. They answer in **Plans** (a home-screen prompt, like crew plans). When both have done that activity within 10 minutes (`action_uses.used_at`), `together_claim` pays each player the extra half of their own visit clout and of the activity's confidence (so 1.5× both, at clubs too), once, with a `ledger` row `together`/`invite:<id>`. At most 5 a day per player; accounts under 2 days old can't invite. Both see the bonus card.
+- **Ride together**: on Go there, inside a place, people here with you appear as "Ride with @name". Subway or taxi only. They get a ride request (3 minutes to accept); on yes both pay half (rounded up) and arrive at the same moment. The exclusive club's door checks both.
+- **Jobs app** (Phone): Find work / Hire someone. Decorator pay is held (`job_hold`) when posted; the decorator gets 30 minutes in the client's home (ground floor, their own furniture) and can only move what's there. The client keeps it (pay plus 25 clout to the decorator) or undoes it all (layout restored, pay refunded); kept on its own after 24 hours. Managers collect the client's tills and keep their cut; either side can end it ("Fire").
+- **Ratings**: the client rates the job (1 to 5 stars); player cards say "⭐ 4.8 · hired 12 times on the Jobs board". Rating the client back is for later.
+- **Safety**: one job a day between the same two players, one live job of each kind per worker, account age 2 days, blocked players never see each other's jobs; report and block are on every player card.
+- Not yet: the "arrived with" line on the place card and a shared moment in Recently.
+
 ## 17. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.

@@ -228,6 +228,8 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 1. Together bonuses: travel together (split fare), study together and club together, with the server checking both players are there.
 2. The Jobs board: interior decorator and business manager, held payments, ratings on player cards.
 
+**Built** (migration 0050_better_together.sql, tested by `supabase/tests/together.test.sql`): all of the above; see docs/08 section 16 "As built".
+
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 
 The finished P1: real art in place, outside reviews done, then a soft launch followed by the Sarah Bird pilot.

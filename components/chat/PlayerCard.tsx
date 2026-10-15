@@ -11,6 +11,7 @@ import { RankChip } from "../game/Ranks";
 import { rankFor } from "@/lib/ranks";
 import type { DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
+import { ratingLine } from "@/lib/together";
 import { handle } from "@/lib/validation";
 import { recentLine, recentWhen } from "@/lib/recent";
 
@@ -159,6 +160,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
           </div>
           <p className="meta" style={{ margin: 0 }}>
             🏅 {card.badges} {card.badges === 1 ? "badge" : "badges"} · In the city since {new Date(card.joined).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+            {card.jobs && card.jobs.hired > 0 && <><br />{ratingLine(card.jobs)} on the Jobs board</>}
           </p>
           {card.recent && card.recent.some((r) => recentLine(r)) && (
             <div className="stack-4">

@@ -10,6 +10,7 @@ import { useCallback, useMemo, useRef, useEffect } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState } from "@/lib/citySim";
 import { createBusinessSim } from "@/lib/businessSim";
+import { createTogetherSim } from "@/lib/togetherSim";
 import type { CityResult } from "@/lib/cityState";
 import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
@@ -36,7 +37,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -56,6 +57,8 @@ export function PreviewHome({
   partyPreset?: string;
   /** v0.12 businesses: ?biz=some|rich|public starts with businesses. */
   bizPreset?: string;
+  /** v0.13 Better Together: ?together=invite|ride|plan|bonus|decorate|approve starts in that state. */
+  togetherPreset?: string;
   /** Player ranks: ?rankup=1-10 opens the rank-up reveal for that rank. */
   rankUpPreset?: number;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
@@ -89,6 +92,24 @@ export function PreviewHome({
     clout: () => sim.peek().clout,
     pay: (cash, clout = 0) => sim.huntReward(cash, clout),
   }, bizPreset), [sim, bizPreset]);
+  const togetherApi = useMemo(() => {
+    let layout: unknown = null;
+    return createTogetherSim({
+      cash: () => sim.peek().cash,
+      pay: (cash, clout = 0) => sim.huntReward(cash, clout),
+      async ride(place, mode) {
+        const before = sim.peek().cash;
+        const r = await sim.travel!(place, mode);
+        if (!r.ok) return { ok: false as const, error: r.error };
+        const fare = before - sim.peek().cash;
+        sim.huntReward(fare - Math.ceil(fare / 2), 0);
+        return { ok: true as const, fare, seconds: 20 };
+      },
+      home: () => ({ homeId: "lic_highrise", layout }),
+      saveHome: (l) => { layout = l; },
+      hasBusiness: () => !!bizPreset,
+    }, togetherPreset);
+  }, [sim, togetherPreset, bizPreset]);
 
   // The story store lives on the dev server; clout it pays is mirrored into the sim's player.
   const story = useMemo<StoryApi>(() => {
@@ -283,6 +304,7 @@ export function PreviewHome({
       hunt={cityOff ? undefined : huntApi}
       gossip={cityOff ? undefined : gossipApi}
       business={cityOff ? undefined : businessApi}
+      together={cityOff ? undefined : togetherApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{
         setTutorialState: noop,

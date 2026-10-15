@@ -238,6 +238,27 @@ export const CITY_ECONOMY = {
         ] },
     ],
   },
+  /**
+   * v0.13 "Better Together" (owner, Oct 15; docs/08 section 16). Together bonuses: invite one person
+   * (crew, or anyone at the place now) to do an activity with you; when both do it within windowMinutes,
+   * each gets `multiplier` × its confidence and clout, at most perDay a day. Accounts younger than
+   * minAccountDays can't invite, ride or take jobs (throwaway accounts farm nothing).
+   */
+  together: {
+    multiplier: 1.5,
+    windowMinutes: 10,
+    perDay: 5,
+    minAccountDays: 2,
+    tags: ["library", "university", "club", "nightlife"],
+    /** Ride together: both at the same place, split the fare, arrive together. */
+    ride: { modes: ["subway", "taxi"], expireMinutes: 3 },
+  },
+  /** The Jobs app: hire a real player. Decorator pay is held by the city until the poster approves. */
+  jobs: {
+    perPairPerDay: 1,
+    decorator: { payMin: 200, payMax: 20_000, payChoices: [500, 1_000, 2_500, 5_000], minutes: 30, clout: 25, autoKeepHours: 24 },
+    manager: { cutMin: 5, cutMax: 20, cutChoices: [5, 10, 15, 20] },
+  },
   /** Player ranks (lib/ranks.ts): each rank's clout and net worth, so the server can name ranks too. */
   ranks: RANKS.map((r) => ({ clout: r.clout, netWorth: r.netWorth })),
 } as const;
