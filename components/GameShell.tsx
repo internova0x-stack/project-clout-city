@@ -1897,7 +1897,8 @@ export function GameShell({
       )}
       <PhoneModal
         jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers } : undefined}
-        onChatPass={(out) => setChatPass({ out })}
+        // The offer opens over the game, so the Phone steps aside first (it would cover the card).
+        onChatPass={(out) => { setPhone({ open: false, app: null }); setChatWith(null); setChatPass({ out }); }}
         // Hidden until migration 0048 runs (business_state answers).
         businesses={business && city && biz ? {
           biz, cash: city.player.bank_cash, clout: me.clout, otherWorth, offsetMs: bizOffset,

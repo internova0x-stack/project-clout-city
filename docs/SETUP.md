@@ -143,10 +143,13 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 
 12. **Meeting players** (migration 0047). Run `supabase/migrations/0047_meet_players.sql`. Players at
     the same place see each other in the room and on place cards, react for free and send 20
-    messages a day. **Unlimited chat** is two products in `store_products`: `chat-unlimited-monthly`
-    ($4.99 a month, a Stripe subscription) and `chat-unlimited-forever` ($39.99 once). Nothing to
-    create in Stripe: Checkout builds the monthly price from `store_products` (or set
-    `stripe_price_id` to a recurring Price you made). **Add the two subscription events to the
+    messages a day. **Unlimited chat** is three products in `store_products` (prices from migration
+    0051): `chat-unlimited-monthly` ($4.99 a month) and `chat-unlimited-yearly` ($39.99 a year), both
+    Stripe subscriptions, and `chat-unlimited-forever` ($119.99 once). Nothing to create in Stripe:
+    Checkout builds each price from `store_products`. (If you'd rather manage Prices in Stripe, make a
+    recurring monthly Price, a recurring yearly Price and a one-time Price, and put each one's `price_...`
+    id in that product's `stripe_price_id`. 0051 clears the forever product's old $39.99 Price id.)
+    Players who already bought Forever at $39.99 keep it. **Add the two subscription events to the
     webhook (step 3)**, or a cancelled membership would keep unlimited chat.
     Test: run out of messages (20 in Messages), pick **Monthly**, pay with `4242 4242 4242 4242`.
     Chat says "✨ Unlimited chat". Then Stripe → **Customers** → the test customer → the
