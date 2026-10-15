@@ -93,7 +93,10 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
               <span className="display-md" style={{ display: "block" }}>{handle(card.name)}</span>
               <span className="meta" style={{ display: "block" }}>{style?.label} · {hood}</span>
               {/* Player ranks (owner, Oct 15): the higher of their clout or net worth. */}
-              <span style={{ display: "block", marginTop: 6 }}><RankChip rank={rankFor(card.clout, card.netWorth ?? 0)} /></span>
+              <span className="row" style={{ gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+                <RankChip rank={rankFor(card.clout, card.netWorth ?? 0)} />
+                {card.vipSince && <span className="tag tag-gold">👑 VIP</span>}
+              </span>
             </span>
           </div>
           {/* Meeting players: react, break the ice or say something, right under their name. */}
@@ -160,6 +163,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
           </div>
           <p className="meta" style={{ margin: 0 }}>
             🏅 {card.badges} {card.badges === 1 ? "badge" : "badges"} · In the city since {new Date(card.joined).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+            {card.vipSince && ` · VIP since ${new Date(card.vipSince).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
             {card.jobs && card.jobs.hired > 0 && <><br />{ratingLine(card.jobs)} on the Jobs board</>}
           </p>
           {card.recent && card.recent.some((r) => recentLine(r)) && (

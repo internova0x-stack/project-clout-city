@@ -117,7 +117,9 @@ const PARTIES = () => {
 export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
   previewOnly();
   if (process.env.NODE_ENV === "production") return null;
-  const owned = (sku: string) => store.st.skus.includes(sku);
+  // VIP (migration 0052): side stories are owned while a monthly or yearly plan is.
+  const vip = store.st.skus.includes("chat-unlimited-monthly") || store.st.skus.includes("chat-unlimited-yearly");
+  const owned = (sku: string) => store.st.skus.includes(sku) || (vip && sku.startsWith("side_"));
   // Owned copies get a sample serial (migration 0022 numbers them in collection order).
   const base = (sku: string) => ({
     sku, currency: "usd", parent: null, owned: owned(sku), pending: pending.has(sku),
@@ -134,8 +136,8 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
       ...base(i.sku), type: "collector_item" as const, name: i.name, priceCents: i.sku === "col-faux-chinchilla" ? 499 : 399, value: collectorValue(i.category),
     })),
     // Meeting players (migrations 0047, 0051): unlimited chat, monthly, yearly or forever.
-    { ...base("chat-unlimited-monthly"), type: "chat_pass" as const, name: "Unlimited chat (monthly)", priceCents: 499 },
-    { ...base("chat-unlimited-yearly"), type: "chat_pass" as const, name: "Unlimited chat (yearly)", priceCents: 3999 },
+    { ...base("chat-unlimited-monthly"), type: "chat_pass" as const, name: "VIP (monthly)", priceCents: 499 },
+    { ...base("chat-unlimited-yearly"), type: "chat_pass" as const, name: "VIP (yearly)", priceCents: 3999 },
     { ...base("chat-unlimited-forever"), type: "chat_pass" as const, name: "Unlimited chat (forever)", priceCents: 11999 },
     ...PARTIES().map((e) => ({
       ...base(e.sku), type: "exclusive_event" as const, name: e.name, priceCents: e.price, placeId: "low-light-lounge",
@@ -144,6 +146,11 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
                plusOneOf: party.plusOnes.find((x) => x.eventId === e.id && !x.mine && x.status === "in")?.host.name ?? null },
     })),
   ];
+}
+/** VIP (migration 0052): a monthly or yearly plan in the preview. */
+export async function previewVip() {
+  previewOnly();
+  return store.st.skus.includes("chat-unlimited-monthly") || store.st.skus.includes("chat-unlimited-yearly");
 }
 /** Meeting players: whether the preview player bought unlimited chat (either plan). */
 export async function previewChatUnlimited() {

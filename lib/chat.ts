@@ -25,8 +25,10 @@ export interface ChatThread {
 
 export interface ChatStatus {
   limit: number; left: number; mutedUntil: string | null; warned: boolean; banned: boolean;
-  /** Meeting players (migration 0047): unlimited chat (monthly or forever), and "who can message me". */
+  /** Meeting players (migration 0047): unlimited chat (VIP or chat forever), and "who can message me". */
   unlimited?: boolean;
+  /** VIP (migration 0052): a monthly or yearly member, so side stories are free too. */
+  vip?: boolean;
   messagesFrom?: "anyone" | "crew";
 }
 
@@ -47,6 +49,8 @@ export interface PlayerCard {
   recent?: import("./recent.ts").RecentItem[];
   /** v0.7 (migration 0024): bank cash plus everything they own, public (owner, Oct 13). */
   netWorth?: number;
+  /** VIP (migration 0052): when their membership started; null when not a VIP. */
+  vipSince?: string | null;
   /** v0.13 the Jobs board (migration 0050): "⭐ 4.8 · hired 12 times". */
   jobs?: { hired: number; rating: number | null; rated: number };
   /** Meeting players (migration 0047): the place you're both at right now, if any. */

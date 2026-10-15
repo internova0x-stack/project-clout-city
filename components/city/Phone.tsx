@@ -280,9 +280,9 @@ function ChatSettings({ api, onToast, onChatPass }: { api: ChatApi; onToast?: (t
       <div className="list-row static">
         <span style={{ flex: 1 }}>
           <span className="title" style={{ display: "block" }}>Chat</span>
-          <span className="meta">{status.unlimited ? "✨ Unlimited chat is on" : `${status.left} of ${status.limit} messages left today`}</span>
+          <span className="meta">{status.vip ? "👑 VIP · unlimited chat and side stories" : status.unlimited ? "✨ Unlimited chat is on" : `${status.left} of ${status.limit} messages left today`}</span>
         </span>
-        {!status.unlimited && onChatPass && <button className="chip" onClick={() => onChatPass(false)}>Go unlimited</button>}
+        {!status.unlimited && onChatPass && <button className="chip" onClick={() => onChatPass(false)}>Get VIP</button>}
       </div>
     </>
   );
