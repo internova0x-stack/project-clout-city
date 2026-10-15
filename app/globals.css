@@ -1437,7 +1437,9 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .meet-reactions { display:flex; gap:8px; }
 .meet-react { flex:1; height:44px; border:0; border-radius:14px; background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--border, #D6CFC4); font-size:22px; cursor:pointer; }
 .meet-react:active { transform:scale(.94); }
-.meet-ice { display:block; width:100%; text-align:left; border:0; padding:10px 12px; border-radius:14px; background:var(--surface-raised); font:inherit; font-size:14px; line-height:1.35; color:var(--text-1); cursor:pointer; }
+/* Owner, Oct 15: suggestions, not a text field: pink tint, pink text, a dashed edge. */
+.meet-ice { display:block; width:100%; text-align:left; border:1.5px dashed #FF9FCB; padding:9px 12px; border-radius:14px; background:#FFF0F6; font:inherit; font-size:14px; font-weight:600; line-height:1.35; color:#A3104F; cursor:pointer; }
+.meet-ice:active { background:#FFE3EF; }
 .meet-foot { justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
 .meet-foot .meta.low { color:var(--neon-text, #B0135A); font-weight:700; }
 .linkish { border:0; background:none; padding:0; font:inherit; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; }
@@ -1480,10 +1482,10 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .modal-card.rank-up.top .rank-up-kicker { color:#FF9FCB; }
 .modal-card.rank-up.god .rank-up-emoji { font-size:84px; filter:drop-shadow(0 0 18px rgba(255,159,203,.9)); }
 /* Owner, Oct 15: who's here, right-aligned under the top HUD (the room's people, not the activity card). */
-.here-hud { position:absolute; z-index:16; top:calc(72px + var(--safe-top)); right:12px; display:flex; align-items:center; gap:8px; padding:5px 5px 5px 8px; }
+.here-hud { position:absolute; z-index:16; top:calc(72px + var(--safe-top)); right:12px; display:flex; align-items:center; gap:7px; height:32px; padding:3px 3px 3px 5px; }
 .here-stack { display:flex; }
-.here-stack .here-face { width:26px; height:26px; font-size:14px; box-shadow:0 0 0 2px #fff; }
-.here-stack .here-face + .here-face { margin-left:-9px; }
-.here-hud-count { font-size:14px; font-weight:600; white-space:nowrap; }
+.here-stack .here-face { width:24px; height:24px; font-size:13px; box-shadow:0 0 0 2px #fff; }
+.here-stack .here-face + .here-face { margin-left:-8px; }
+.here-hud-count { font-size:13.5px; line-height:1; font-weight:600; white-space:nowrap; }
 .here-hud-count b { font-family:var(--font-label); font-variant-numeric:tabular-nums; }
-.here-hud-btn { height:34px; padding:0 14px; border:0; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font:inherit; font-size:13.5px; font-weight:700; white-space:nowrap; cursor:pointer; }
+.here-hud-btn { height:26px; padding:0 11px; line-height:1; border:0; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font:inherit; font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer; }
