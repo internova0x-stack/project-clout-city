@@ -94,8 +94,8 @@ export interface Room3DProps {
   crowd?: CrowdMember[];
   onCrowdTap?: (m: CrowdMember) => void;
   /**
-   * Meeting players (owner, Oct 15): false outside party floors. Nothing over anyone's head (only
-   * the NPCs keep their 💬); real players stand around the room and are tapped on the figure itself.
+   * True on party floors, where only the people given a crowd spot get a tag. Everywhere else every
+   * real player here gets one. Either way it's their blue @handle tag (owner, Oct 15).
    */
   crowdDots?: boolean;
   /**
@@ -694,11 +694,11 @@ export default function Room3D(props: Room3DProps) {
         el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
-      // v0.11 party floors: a name tag over each person at the party.
+      // Every real player here: their @handle tag over their head (owner, Oct 15).
       for (const c of crowdRef.current) {
         const el = crowdTagsRef.current.get(c.member.key);
         if (!el) continue;
-        proj.set(c.actor.x, 2.1, c.actor.z).project(camera);
+        proj.set(c.actor.x, 1.95, c.actor.z).project(camera);
         el.style.visibility = Math.abs(proj.x) > 1.05 || Math.abs(proj.y) > 1.05 ? "hidden" : "";
         el.style.transform = `translate(${((proj.x + 1) / 2) * host.clientWidth}px, ${((1 - proj.y) / 2) * host.clientHeight}px) translate(-50%, -100%)`;
       }
@@ -973,26 +973,19 @@ export default function Room3D(props: Room3DProps) {
           ))}
         </div>
       )}
-      {(props.crowd?.length ?? 0) > 0 && !editing && props.crowdDots === false && (
+      {(props.crowd?.length ?? 0) > 0 && !editing && (
         <div className="room-chips" aria-label="Players here">
-          {/* Meeting players: no marks over anyone; these buttons are for keyboards and screen readers. */}
-          {props.crowd!.map((m) => m.npc ? null : (
-            <button key={m.key} className="sr-only" onClick={() => props.onCrowdTap?.(m)} aria-label={`${m.name}, a player here`}>{m.name}</button>
-          ))}
-        </div>
-      )}
-      {(props.crowd?.length ?? 0) > 0 && !editing && props.crowdDots !== false && (
-        <div className="room-chips" aria-label="People at the party">
-          {/* Only people you can talk to get a mark: a green "online" dot. NPCs blend into the crowd. */}
-          {props.crowd!.slice(0, template.crowdSpots?.length ?? 0).map((m) => m.npc ? null : (
+          {/* Owner, Oct 15: every real player wears their @handle in a blue tag (NPCs blend into the crowd).
+              Tap a tag, or the person, to open their card. On party floors, only those with a spot. */}
+          {(props.crowdDots !== false ? props.crowd!.slice(0, template.crowdSpots?.length ?? 0) : props.crowd!).map((m) => m.npc ? null : (
             <button
               key={m.key}
               ref={(el) => { if (el) crowdTagsRef.current.set(m.key, el); else crowdTagsRef.current.delete(m.key); }}
-              className="crowd-dot"
+              className="player-tag"
               onClick={() => props.onCrowdTap?.(m)}
-              aria-label={m.crew ? `${m.name}, in your crew` : m.name}
+              aria-label={m.crew ? `${m.name}, in your crew` : `${m.name}, a player here`}
             >
-              <span className="dot-green" aria-hidden="true" />
+              {m.name.startsWith("@") ? m.name : `@${m.name}`}
             </button>
           ))}
         </div>

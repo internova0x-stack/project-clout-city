@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
-import { billProgress, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem } from "@/lib/cityState";
+import { billCountdown, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem, type UpcomingBill } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
-import { IconTile, SheetTitle, Stars } from "./Common";
+import { IconTile, SheetTitle, Stars, useGameNow } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 import { formatPrice, type StoreProduct } from "@/lib/store";
 
@@ -324,6 +324,20 @@ export function NetWorthSheet({
 const billDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 const BILL_LABEL: Record<Bill["kind"], string> = { rent: "🏠 Rent", phone: "📱 Phone", car_rental: "🚗 Car rental", car_insurance: "🛡️ Car insurance" };
 
+/** Counts down to the deadline: full a week out, empty when it's due; amber under 3 days, red under 1. */
+function BillBar({ bill, now }: { bill: UpcomingBill; now: number }) {
+  const c = billCountdown(bill, now);
+  return (
+    <span className="bill-bar-row">
+      <span className={`gig-progress bill-progress ${c.urgency}`} role="progressbar" aria-label={`${BILL_LABEL[bill.kind]}: time left before it's due`}
+        aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(c.left * 100)} aria-valuetext={c.label}>
+        <span style={{ width: `${Math.max(c.msLeft > 0 ? 2 : 0, Math.round(c.left * 100))}%` }} />
+      </span>
+      <span className={`bill-countdown ${c.urgency}`}>{c.label}</span>
+    </span>
+  );
+}
+
 export function BillsSheet({
   open, onClose, state, busy, onPay,
 }: { open: boolean; onClose: () => void; state: CityState; busy: Busy; onPay: (billId: number) => void }) {
@@ -331,6 +345,8 @@ export function BillsSheet({
   const paid = state.bills.filter((b) => b.status !== "due").slice(0, 8);
   const { player, today } = state;
   const upcoming = upcomingBills(state);
+  const now = useGameNow(state.clockOffsetSeconds, 30_000);
+  const next = upcoming[0] ? billCountdown(upcoming[0], now) : null;
   return (
     <Sheet open={open} onClose={onClose} label="Bills">
       <div className="stack-16">
@@ -341,8 +357,11 @@ export function BillsSheet({
             <span className="bills-empty-icon" aria-hidden="true">✅</span>
             <span className="title">All paid up</span>
             <span className="subtext">&ldquo;Nothing due. Savor it, babe; in New York this feeling lasts about a week.&rdquo; Lola</span>
-            {upcoming[0] && (
-              <span className="meta">Next: {BILL_LABEL[upcoming[0].kind]} · {formatCash(upcoming[0].amount)} on {billDate(upcoming[0].due_date)}</span>
+            {upcoming[0] && next && (
+              <span className="bills-next">
+                <span className="meta">Next: {BILL_LABEL[upcoming[0].kind]} · {formatCash(upcoming[0].amount)} on {billDate(upcoming[0].due_date)}</span>
+                <span className={`bill-countdown ${next.urgency}`}>{next.label}</span>
+              </span>
             )}
           </div>
         )}
@@ -368,14 +387,10 @@ export function BillsSheet({
               <div key={b.kind} className="ledger-row bill-upcoming">
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span className="title" style={{ display: "block", fontSize: 15 }}>{BILL_LABEL[b.kind]}</span>
-                  <span className="meta">{billDate(b.due_date)} · {billStatusLine({ ...b, id: 0, status: "due", paid_at: null }, today)}</span>
+                  <span className="meta">Due {billDate(b.due_date)}</span>
                 </span>
                 <span className="body-strong tabular">{formatCash(b.amount)}</span>
-                {/* Fills as the due date gets closer: how much of this bill's period has gone by. */}
-                <span className="gig-progress bill-progress" role="progressbar" aria-label={`${BILL_LABEL[b.kind]}: how soon it's due`}
-                  aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(billProgress(b, today) * 100)}>
-                  <span style={{ width: `${Math.round(billProgress(b, today) * 100)}%` }} />
-                </span>
+                <BillBar bill={b} now={now} />
               </div>
             ))}
           </div>

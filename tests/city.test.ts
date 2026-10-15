@@ -156,3 +156,22 @@ test("v0.11: three shifts a day across every job, in the preview too (owner, Oct
   assert.equal(fourth.ok, false);
   assert.match(fourth.ok ? "" : fourth.error, /shifts today/);
 });
+
+test("bill countdown: drains over the week and turns urgent in the last day (owner, Oct 15)", async () => {
+  const { billCountdown, billDueAtMs } = await import("../lib/cityState.ts");
+  const due = "2026-10-20";
+  const at = billDueAtMs(due);
+  assert.equal(new Date(at).toISOString(), "2026-10-20T04:00:00.000Z"); // midnight in New York (EDT)
+  const week = billCountdown({ kind: "rent", amount: 2600, due_date: due }, at - 7 * 86_400_000);
+  assert.equal(week.left, 1);
+  assert.equal(week.urgency, "calm");
+  assert.equal(week.label, "7d 0h left");
+  const twoDays = billCountdown({ kind: "rent", amount: 2600, due_date: due }, at - 2 * 86_400_000 - 5 * 3_600_000);
+  assert.equal(twoDays.urgency, "soon");
+  assert.equal(twoDays.label, "2d 5h left");
+  const hours = billCountdown({ kind: "rent", amount: 2600, due_date: due }, at - 3 * 3_600_000 - 20 * 60_000);
+  assert.equal(hours.urgency, "urgent");
+  assert.equal(hours.label, "3h 20m left");
+  assert.equal(billCountdown({ kind: "rent", amount: 2600, due_date: due }, at + 1000).label, "Due now");
+  assert.equal(new Date(billDueAtMs("2026-12-01")).toISOString(), "2026-12-01T05:00:00.000Z"); // EST
+});

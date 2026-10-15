@@ -12,6 +12,7 @@
   --taxi-400:#FFC21A; --taxi-500:#F2A900; --taxi-tint:#FFF3CC;
   --neon-500:#FF2E88; --neon-600:#E0186F; --neon-tint:#FFE3EF; --neon-text:#B0135A;
   --green-500:#40B589; --green-text:#2E8B63; --green-tint:#DEF2E9;
+  --tag-blue:#2F7BEA; /* real players' name tags */
   --red-500:#D93A2F; --red-tint:#FBE9E7; --red-text:#9E2A21;
 
   /* gold: real-cash products only (plus the logo and tagline) */
@@ -592,7 +593,15 @@ a { color:inherit; }
 .gig-progress { height:8px; border-radius:var(--r-pill); background:var(--chip-off); overflow:hidden; }
 .gig-progress span { display:block; height:100%; background:var(--taxi-400); border-radius:inherit; transition:width 1s linear; }
 .bill-upcoming { flex-wrap:wrap; align-items:flex-start; gap:0 16px; }
-.bill-progress { display:block; flex-basis:100%; height:6px; margin-top:10px; }
+.bill-bar-row { display:flex; align-items:center; gap:10px; flex-basis:100%; margin-top:10px; }
+.bill-progress { display:block; flex:1; height:8px; }
+.bill-progress span { background:var(--green-500); }
+.bill-progress.soon span { background:var(--taxi-500); }
+.bill-progress.urgent span { background:var(--red-500); }
+.bill-countdown { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--green-text); }
+.bill-countdown.soon { color:#8A5A00; }
+.bill-countdown.urgent { color:var(--red-text); }
+.bills-next { display:flex; flex-direction:column; align-items:center; gap:4px; }
 .gig-meta { font-variant-numeric:tabular-nums; }
 
 /* Staging time travel */
@@ -609,6 +618,10 @@ a { color:inherit; }
   font-size:13px; font-weight:600; white-space:nowrap; box-shadow:var(--elev-2); }
 .room-chip::after { content:""; position:absolute; left:50%; bottom:-5px; width:8px; height:8px; transform:translateX(-50%) rotate(45deg); background:inherit; }
 /* v0.11 party floors: a green "online" dot over the people you can talk to (a bigger tap target around it). NPCs get nothing. */
+/* Real players' @handle tags in rooms (owner, Oct 15 reference): a solid blue pill, white bold text. */
+.player-tag { position:absolute; left:0; top:0; pointer-events:auto; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  padding:6px 14px; border:0; border-radius:var(--r-pill); background:var(--tag-blue); color:#fff; font:600 14px/1.2 var(--font-ui);
+  box-shadow:0 4px 12px rgba(20,17,26,.35); cursor:pointer; }
 .crowd-dot { position:absolute; left:0; top:0; pointer-events:auto; display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; background:none; cursor:pointer; }
 .crowd-dot .dot-green { width:10px; height:10px; box-shadow:0 0 0 2px #fff, 0 0 8px rgba(64,181,137,.9); }
 /* v0.11: a speech bubble over people you can talk to. */
@@ -1164,7 +1177,8 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .travel-mode-price { font-weight:700; font-size:15px; color:var(--text-1); font-variant-numeric:tabular-nums; }
 .trip { position:fixed; inset:0; z-index:55; pointer-events:none; }
 .trip-route { position:absolute; inset:0; width:100%; height:100%; }
-.trip-route line { stroke:var(--night-900); stroke-width:5; stroke-linecap:round; stroke-dasharray:2 12; opacity:.75; }
+.trip-route line { stroke:var(--text-on-dark); stroke-width:6; stroke-linecap:round; stroke-dasharray:1 14; }
+.trip-route line.halo { stroke:var(--night-900); stroke-width:10; opacity:.7; }
 .trip-ride { position:absolute; width:42px; height:42px; margin:-21px 0 0 -21px; display:grid; place-items:center; font-size:22px; border-radius:12px;
   background:#fff; box-shadow:0 0 0 3px #fff, 0 6px 14px rgba(0,0,0,.3); }
 .trip-ride.taxi { background:var(--taxi-400); }
