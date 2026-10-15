@@ -8,6 +8,7 @@ import { previewChatUnlimited } from "./storyActions";
 import { DAILY_LIMIT } from "@/lib/chat";
 import { REACTIONS, type PlaceCounts, type Presence } from "@/lib/meet";
 import { PLACES } from "@/lib/city";
+import { STARTING_STYLES } from "@/lib/styles";
 
 // Development previews only: chat, the report queue and metrics in memory, following
 // the rules of supabase/migrations/0010. Refused in production builds.
@@ -25,10 +26,22 @@ const PEOPLE: Record<string, { name: string; style: string; clout: number; homeI
 /** Meeting players: who the preview puts at each place (the same few, turned by the place's name). */
 const HERE_IDS = ["p-tasha", "p-dev", "p-kai", "p-nina", "p-marco", "p-dee"];
 const hereAt = (placeId: string) => {
+  if (crowd.n) return ["p-tasha", "p-dev", ...crowdPeople(crowd.n - 2)];
   const n = placeId.length % 4 + 2;
   return Array.from({ length: n }, (_, i) => HERE_IDS[(placeId.length + i) % HERE_IDS.length]);
 };
 const where = { place: null as string | null };
+/** Crowded places: ?crowd=50 puts that many sample players at whatever place you walk into. */
+const crowd = { n: 0 };
+const FIRST = ["mia", "jay", "luz", "theo", "ari", "zoe", "rico", "bea", "nico", "ivy", "omar", "gia", "leo", "sky", "remy", "nia", "max", "tess", "kofi", "lina"];
+const LAST = [".nyc", "_queens", ".exe", "_astoria", ".jpg", "_lic", "xo", ".fm", "_daily", "2k"];
+function crowdPeople(n: number) {
+  for (let i = 0; i < n; i++) {
+    const id = `p-c${String(i).padStart(2, "0")}`;
+    if (!PEOPLE[id]) PEOPLE[id] = { name: FIRST[i % FIRST.length] + LAST[(i * 7) % LAST.length], style: STARTING_STYLES[(i * 3) % STARTING_STYLES.length].id, clout: 200 + ((i * 7919) % 4800), homeId: "astoria_studio" };
+  }
+  return Array.from({ length: n }, (_, i) => `p-c${String(i).padStart(2, "0")}`);
+}
 const WORDS = ["fuck", "shit", "bitch"];
 const LIMIT = 20;
 let nextId = 100;
@@ -124,6 +137,9 @@ export async function previewPlayerCard(id: string) {
 }
 // ---- Meeting players (migration 0047) in memory: a few sample players at every place ----
 /** ?chat=out starts the day with every message used, to show the unlimited chat offer. */
+export async function previewCrowdPreset(n: number) {
+  crowd.n = Math.max(0, Math.min(200, Math.floor(n)));
+}
 export async function previewChatPreset(preset: string) {
   if (preset !== "out") return;
   const at = new Date().toISOString();
@@ -131,10 +147,14 @@ export async function previewChatPreset(preset: string) {
 }
 export async function previewPresence(placeId: string, floor: number) {
   where.place = placeId;
+  const club = !!PLACES.find((p) => p.id === placeId)?.club;
   const people = hereAt(placeId).filter((id) => !state.blocks.has(id)).map((id, i) => ({
-    id, name: PEOPLE[id].name, style: PEOPLE[id].style, look: null, crew: id === "p-tasha", floor: i === 1 && floor === 1 && PLACES.find((p) => p.id === placeId)?.club ? 0 : floor, clout: PEOPLE[id].clout,
+    id, name: PEOPLE[id].name, style: PEOPLE[id].style, look: null, crew: id === "p-tasha",
+    // At a club a few are on the other floors (the restroom, VIP).
+    floor: club && (crowd.n ? i % 9 === 4 : i === 1 && floor === 1) ? (floor === 1 ? 0 : 1) : club && crowd.n && i % 9 === 7 ? (floor === 2 ? 1 : 2) : floor, clout: PEOPLE[id].clout,
   }));
-  return ok<Presence>({ count: people.length, people });
+  // The server lists at most 40 (game_settings chat.hereMax) and gives the true count.
+  return ok<Presence>({ count: people.length, people: people.slice(0, 40) });
 }
 export async function previewPlaceCounts() {
   const out: PlaceCounts = {};

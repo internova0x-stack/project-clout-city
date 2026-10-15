@@ -13,8 +13,8 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, type RoomItem } from "@/lib/rooms";
-import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
+import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
@@ -48,7 +48,7 @@ import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { ViewingBar } from "./city/Apartments";
 import { ChatPassCard } from "./chat/ChatPass";
-import { COUNTS_POLL_MS, PRESENCE_POLL_MS, type HerePerson, type PlaceCounts } from "@/lib/meet";
+import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, pickInView, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
@@ -271,16 +271,28 @@ export function GameShell({
   const [cardId, setCardId] = useState<string | null>(null);
   // Meeting players (owner, Oct 15; migration 0047): who's here, how many are where, and the unlimited chat offer.
   const [here, setHere] = useState<HerePerson[]>([]);
+  // Crowded places (owner, Oct 15): the true count, the people you opened (they stay in view, most recent
+  // first) and the turn that walks one of the others out and another in.
+  const [hereCount, setHereCount] = useState(0);
+  const [pinned, setPinned] = useState<string[]>([]);
+  const [turn, setTurn] = useState(0);
+  const openPlayer = (id: string) => { setPinned((p) => [id, ...p.filter((x) => x !== id)].slice(0, 3)); setCardId(id); };
   const [placeCounts, setPlaceCounts] = useState<PlaceCounts>({});
   const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
   useEffect(() => {
-    if (!inside || !chat?.presence) { setHere([]); return; }
+    if (!inside || !chat?.presence) { setHere([]); setHereCount(0); return; }
     let stop = false;
-    const tick = async () => { const r = await chat.presence!(inside.id, insideFloor); if (!stop && r.ok) setHere(r.data.people); };
+    const tick = async () => { const r = await chat.presence!(inside.id, insideFloor); if (!stop && r.ok) { setHere(r.data.people); setHereCount(r.data.count); } };
     void tick();
     const t = setInterval(() => void tick(), PRESENCE_POLL_MS);
     return () => { stop = true; clearInterval(t); };
   }, [inside, insideFloor, chat]);
+  useEffect(() => {
+    setPinned([]);
+    if (!inside) return;
+    const t = setInterval(() => setTurn((n) => n + 1), ROTATE_MS);
+    return () => clearInterval(t);
+  }, [inside]);
   useEffect(() => {
     if (inside || !chat?.counts) return;
     let stop = false;
@@ -694,13 +706,6 @@ export function GameShell({
   });
   const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
   const ownedHere = ownedPieces.filter((p) => !elsewhere.has(p.id));
-  const partyCrowd = room && insideFloor === 2 ? crowdFor(room.people, (p) => normalizeLook(p.look, p.style)) : undefined;
-  // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
-  // nothing over their heads (NPCs keep their 💬), tap the figure to open their card.
-  const hereCrowd: CrowdMember[] | undefined = !partyCrowd && here.length
-    ? here.filter((p) => p.floor === insideFloor).map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: normalizeLook(p.look, p.style), crew: p.crew }))
-    : undefined;
-  const crowd = partyCrowd ?? hereCrowd;
   const openShop = (category: ShopCategory, section?: string) => {
     setPlace(null);
     setInside(null);
@@ -869,6 +874,23 @@ export function GameShell({
     () => (inside ? placeRoom(inside) : null),
     [inside],
   );
+  const insideTemplate = inside ? (insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe : null;
+  // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
+  // nothing over their heads (NPCs keep their 💬), tap the figure to open their card. Crowded places
+  // (owner, Oct 15): the room holds a few (lib/rooms.ts playerSlots) beside its regulars, who never make
+  // way; pickInView picks who (opened, crew, then turns) and the rest are in the Here now list.
+  const partyFloor = !!room && insideFloor === 2;
+  const floorPeople: PartyPerson[] = [
+    ...here.filter((p) => p.floor === insideFloor),
+    ...(partyFloor ? room!.people.filter((p) => !here.some((h) => h.id === p.id)) : []),
+  ];
+  const slots = insideTemplate ? playerSlots(insideTemplate) : 0;
+  const inView = pickInView(floorPeople, slots, pinned, turn).map((id) => floorPeople.find((p) => p.id === id)!);
+  const toLook = (p: PartyPerson) => normalizeLook(p.look, p.style);
+  // Party floors fill their spots with extras (lib/partyRoom.ts); anywhere else only real players.
+  const crowd: CrowdMember[] | undefined = partyFloor
+    ? crowdFor(inView, toLook, slots)
+    : inView.length ? inView.map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: toLook(p), crew: p.crew })) : undefined;
   const useInPlace = (p: Place, it: RoomItem) => {
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
@@ -1103,13 +1125,13 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           talkNonce={talkNonce}
-          here={chat?.presence ? { people: here, floor: insideFloor, onOpen: (id) => setCardId(id) } : undefined}
+          here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={
             <Room3D
-              template={(insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe}
+              template={insideTemplate!}
               crowd={crowd}
-              crowdDots={!!partyCrowd}
-              onCrowdTap={(m) => { if (!m.npc && chat) setCardId(m.id); }}
+              crowdDots={partyFloor}
+              onCrowdTap={(m) => { if (!m.npc && chat) openPlayer(m.id); }}
               look={look}
               outfit={outfit}
               daytime={daytime}

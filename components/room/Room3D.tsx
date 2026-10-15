@@ -115,7 +115,7 @@ export default function Room3D(props: Room3DProps) {
   const chipsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const bubblesRef = useRef<Map<number, HTMLButtonElement>>(new Map());
   const crowdTagsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const crowdRef = useRef<{ member: CrowdMember; actor: Actor }[]>([]);
+  const crowdRef = useRef<{ member: CrowdMember; actor: Actor; spot: number; dance: boolean; leaving?: boolean }[]>([]);
   const propsRef = useRef(props);
   propsRef.current = props;
   const [failed, setFailed] = useState(false);
@@ -514,7 +514,7 @@ export default function Room3D(props: Room3DProps) {
       const r = renderer.domElement.getBoundingClientRect();
       ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(ndc, camera);
-      const hit = ray.intersectObjects(crowdRef.current.map((c) => c.actor.rig), true)[0];
+      const hit = ray.intersectObjects(crowdRef.current.filter((c) => !c.leaving).map((c) => c.actor.rig), true)[0];
       if (!hit) return null;
       return crowdRef.current.find((c) => { let o: Object3D | null = hit.object; while (o) { if (o === c.actor.rig) return true; o = o.parent; } return false; })?.member ?? null;
     };
@@ -632,7 +632,20 @@ export default function Room3D(props: Room3DProps) {
       if (wld.dirty) syncFurniture();
       stepActor(me, dt, t, reduceMotion, (it) => arrive(it));
       for (const n of npcs) stepActor(n, dt, t, reduceMotion);
-      for (const c of crowdRef.current) stepActor(c.actor, dt, t, reduceMotion);
+      let gone = false;
+      for (const c of crowdRef.current) {
+        stepActor(c.actor, dt, t, reduceMotion);
+        if (c.actor.mode !== "idle") continue;
+        if (c.leaving) gone = true;
+        else if (c.dance) c.actor.mode = "dance";
+      }
+      // Crowded places: whoever walked out reached the door.
+      if (gone) crowdRef.current = crowdRef.current.filter((c) => {
+        if (!c.leaving || c.actor.mode !== "idle") return true;
+        scene.remove(c.actor.rig);
+        c.actor.parts?.dispose();
+        return false;
+      });
       if (!reduceMotion) {
         for (const b of wld.built.values()) b.tick?.(t);
         motes.forEach((m, i) => { m.position.y = m.userData.baseY + Math.sin(t * 0.6 + i) * 0.12; m.rotation.y = t * 0.4 + i; });
@@ -837,32 +850,60 @@ export default function Room3D(props: Room3DProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookKey, template.id, daytime, sign, mood]);
 
-  // v0.11 party floors: (re)build the crowd when who's here changes.
+  // v0.11 party floors and meeting players: the crowd follows who's here. A new scene places everyone at
+  // once; after that (crowded places, owner Oct 15) whoever leaves the view walks out the door and
+  // whoever joins it walks in, so the room changes one person at a time instead of being rebuilt.
   const crowdKey = JSON.stringify((props.crowd ?? []).map((m) => [m.key, m.npc ? null : m.look]));
+  const crowdWorld = useRef<unknown>(null);
   useEffect(() => {
     const w = world.current;
     if (!w) return;
-    for (const c of crowdRef.current) { w.scene.remove(c.actor.rig); c.actor.parts?.dispose(); }
+    const fresh = crowdWorld.current !== w;
+    if (fresh) {
+      for (const c of crowdRef.current) { c.actor.rig.parent?.remove(c.actor.rig); c.actor.parts?.dispose(); }
+      crowdRef.current = [];
+      crowdWorld.current = w;
+    }
     // Party floors have set spots; anywhere else, free floor away from the door and the regulars.
-    const spots = template.crowdSpots ?? openSpots(template, itemsRef.current, (props.crowd ?? []).length);
+    const members = props.crowd ?? [];
+    const spots = template.crowdSpots ?? openSpots(template, itemsRef.current, members.length);
     const party = !!template.crowdSpots;
-    crowdRef.current = (props.crowd ?? []).slice(0, spots.length).map((member, i) => {
-      const s = spots[i];
+    const want = members.slice(0, spots.length);
+    const keys = new Set(want.map((m) => m.key));
+    const grid = makeGrid(template, itemsRef.current);
+    for (const c of crowdRef.current) {
+      if (c.leaving || keys.has(c.member.key)) continue;
+      c.leaving = true;
+      c.dance = false;
+      c.actor.path = findPath(grid, [c.actor.x, c.actor.z], template.spawn);
+      c.actor.mode = "walk";
+      c.actor.parts?.setMotion?.("walk");
+    }
+    const used = new Set(crowdRef.current.filter((c) => !c.leaving).map((c) => c.spot));
+    want.forEach((member, i) => {
+      const have = crowdRef.current.find((c) => !c.leaving && c.member.key === member.key);
+      if (have) { have.member = member; return; }
+      let spot = 0;
+      while (used.has(spot)) spot++;
+      used.add(spot);
+      const s = spots[spot] ?? spots[spots.length - 1];
       let seed = (member.key.length * 977 + i * 7919 + 13) % 2147483647;
       const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
       const look = !member.npc && member.look ? member.look : randomLook(rand, STARTING_STYLES.map((x) => x.id));
-      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x: s.x, z: s.z, heading: s.facing, mode: party ? "dance" : "idle", path: [], pending: null, phase: i * 1.3 };
+      const path = fresh ? [] : findPath(grid, template.spawn, [s.x, s.z]);
+      const [x, z] = path.length ? template.spawn : [s.x, s.z];
+      const actor: Actor = { rig: new Group(), parts: buildModelAvatar(look, { pedestal: false }), x, z, heading: s.facing, mode: path.length ? "walk" : party ? "dance" : "idle", path, pending: null, phase: i * 1.3 };
       castShadows(actor.parts!.root);
       actor.rig.add(actor.parts!.root);
       w.scene.add(actor.rig);
-      return { member, actor };
+      crowdRef.current.push({ member, actor, spot, dance: party });
     });
-    return () => {
-      for (const c of crowdRef.current) { w.scene.remove(c.actor.rig); c.actor.parts?.dispose(); }
-      crowdRef.current = [];
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crowdKey, template.id, daytime, sign, mood]);
+  useEffect(() => () => {
+    for (const c of crowdRef.current) { c.actor.rig.parent?.remove(c.actor.rig); c.actor.parts?.dispose(); }
+    crowdRef.current = [];
+  }, []);
 
   // Furniture moved or room changed: rebuild placements next frame.
   useEffect(() => {

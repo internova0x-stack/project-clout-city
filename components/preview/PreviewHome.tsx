@@ -25,7 +25,7 @@ import {
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
 import {
-  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
+  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
@@ -166,8 +166,11 @@ export function PreviewHome({
 
   // Meeting players: ?chat=out starts with today's messages used up (the unlimited chat offer).
   useEffect(() => {
-    const preset = new URLSearchParams(window.location.search).get("chat");
+    const q = new URLSearchParams(window.location.search);
+    const preset = q.get("chat");
     if (preset) void previewChatPreset(preset);
+    // Crowded places: ?crowd=50 puts 50 sample players at whatever place you walk into.
+    void previewCrowdPreset(Number(q.get("crowd")) || 0);
   }, []);
   const chat = useMemo<ChatApi>(() => ({
     list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
