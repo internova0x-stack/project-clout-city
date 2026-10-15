@@ -17,12 +17,14 @@ export const DAILY_MESSAGES = 20;
 export const PRESENCE_POLL_MS = 10_000;
 export const COUNTS_POLL_MS = 60_000;
 
-/** Unlimited chat's two plans (store_products, prices from the catalog). */
+/** VIP (monthly, yearly) and chat forever (store_products, prices from the catalog; migrations 0047, 0051, 0052). */
 export const CHAT_PASS = { monthly: "chat-unlimited-monthly", yearly: "chat-unlimited-yearly", forever: "chat-unlimited-forever" } as const;
-export const CHAT_PASS_PERKS = [
-  { emoji: "💬", text: "Message anyone, as much as you like" },
-  { emoji: "🧊", text: "Icebreakers never run out" },
-  { emoji: "📌", text: "Keep chatting after you leave the place" },
+/** The two plans that make you a VIP; chat forever is unlimited chat only. */
+export const VIP_SKUS: readonly string[] = [CHAT_PASS.monthly, CHAT_PASS.yearly];
+export const VIP_PERKS = [
+  { emoji: "💬", text: "Unlimited chat with anyone you meet" },
+  { emoji: "📖", text: "Every side story free while you're a member" },
+  { emoji: "👑", text: "A VIP badge on your player card" },
 ];
 
 const PLACE_LINES = [

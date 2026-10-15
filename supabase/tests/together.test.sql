@@ -114,13 +114,20 @@ select pg_temp.assert((select (r ->> 'each')::int = ceil((r ->> 'fare')::int / 2
 select pg_temp.assert(pg_temp.raises($$select public.ride_respond((select (r ->> 'id')::bigint from ride), true)$$, 'unknown_ride'), 'only Bo answers');
 select pg_temp.as_(2);
 select pg_temp.assert((public.together_inbox() -> 'rides' -> 0 ->> 'fromName') = 'anaaa', 'Bo sees the ride');
+reset role;
+-- Bills or top-ups due today land first, so the check below sees only the fare.
+select public.tick(pg_temp.id(1)); select public.tick(pg_temp.id(2));
+create temp table cash_before as select (pg_temp.p(1)).bank_cash a, (pg_temp.p(2)).bank_cash b;
+grant all on cash_before to authenticated;
+set role authenticated;
+select pg_temp.as_(2);
 create temp table rode as select public.ride_respond((select (r ->> 'id')::bigint from ride), true) r;
 grant all on rode to authenticated;
 select pg_temp.assert((select r ->> 'status' = 'accepted' from rode), 'they ride');
 select pg_temp.assert((pg_temp.p(1)).at_place = 'discount-disco' and (pg_temp.p(2)).at_place = 'discount-disco'
                       and (pg_temp.p(1)).arrives_at = (pg_temp.p(2)).arrives_at, 'arriving together');
-select pg_temp.assert((pg_temp.p(1)).bank_cash = 10000 - (select (r ->> 'each')::int from ride)
-                      and (pg_temp.p(2)).bank_cash = 10000 - (select (r ->> 'each')::int from ride), 'each paid half');
+select pg_temp.assert((pg_temp.p(1)).bank_cash = (select a from cash_before) - (select (r ->> 'each')::int from ride)
+                      and (pg_temp.p(2)).bank_cash = (select b from cash_before) - (select (r ->> 'each')::int from ride), 'each paid half');
 select pg_temp.assert((public.ride_respond((select (r ->> 'id')::bigint from ride), true) ->> 'status') = 'accepted', 'answering twice moves nobody again');
 select pg_temp.as_(1);
 select pg_temp.assert((public.ride_status((select (r ->> 'id')::bigint from ride)) ->> 'status') = 'accepted', 'Ana sees it');

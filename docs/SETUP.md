@@ -149,7 +149,8 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
     Checkout builds each price from `store_products`. (If you'd rather manage Prices in Stripe, make a
     recurring monthly Price, a recurring yearly Price and a one-time Price, and put each one's `price_...`
     id in that product's `stripe_price_id`. 0051 clears the forever product's old $39.99 Price id.)
-    Players who already bought Forever at $39.99 keep it. **Add the two subscription events to the
+    Players who already bought Forever at $39.99 keep it. Migration 0052 renames the monthly and yearly
+    plans **VIP**: members also get every side story free while subscribed, and a VIP badge; forever stays chat only. **Add the two subscription events to the
     webhook (step 3)**, or a cancelled membership would keep unlimited chat.
     Test: run out of messages (20 in Messages), pick **Monthly**, pay with `4242 4242 4242 4242`.
     Chat says "✨ Unlimited chat". Then Stripe → **Customers** → the test customer → the

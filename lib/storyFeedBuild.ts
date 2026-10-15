@@ -72,7 +72,9 @@ export function buildFeed(arcs: Arc[], starts: Record<string, string | null>, no
     const day = liveDay(arc, arcs, starts, today);
     if (day === null) continue;
     const start = arc.type === "side" ? starts[arc.parent_arc_id!] ?? null : starts[arc.id] ?? arc.start_at ?? null;
-    const entitled = arc.type === "main" || st.skus.includes(arc.sku ?? "");
+    // VIP (migration 0052): monthly and yearly members have every side story.
+    const vip = st.skus.includes("chat-unlimited-monthly") || st.skus.includes("chat-unlimited-yearly");
+    const entitled = arc.type === "main" || st.skus.includes(arc.sku ?? "") || (arc.type === "side" && vip);
     const finished = day > lastDay(arc);
     const beats = arc.beats.filter((b) => b.status === "active" && b.day <= day).map((b) => ({
       id: b.id, day: b.day, headline: b.news[0].headline, locked: !entitled, seen: st.seen.includes(b.id),

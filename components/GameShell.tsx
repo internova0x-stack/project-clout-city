@@ -48,7 +48,7 @@ import { DevClock } from "./city/DevClock";
 import { PhoneModal, type App } from "./city/Phone";
 import { ViewingBar } from "./city/Apartments";
 import { ChatPassCard } from "./chat/ChatPass";
-import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, pickInView, type HerePerson, type PlaceCounts } from "@/lib/meet";
+import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, VIP_SKUS, pickInView, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
@@ -708,7 +708,7 @@ export function GameShell({
       const p = c?.find((x) => x.sku === unlocking);
       if (p?.owned) {
         setUnlocking(null);
-        setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : p.type === "chat_pass" ? "✨ Unlimited chat is on. Say hi to everyone." : `🔓 Unlocked: ${p.name}`);
+        setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : p.type === "chat_pass" ? (VIP_SKUS.includes(p.sku) ? "👑 You're a VIP. Chat away; every side story is unlocked." : "✨ Unlimited chat is on. Say hi to everyone.") : `🔓 Unlocked: ${p.name}`);
         // Show it where it lives; collector pieces and tickets also change clout and Net Worth.
         if (p.type === "side_arc") openNews(null);
         if (p.type === "postcard") setPanel("collection");
@@ -979,6 +979,11 @@ export function GameShell({
         completeTask: (id: string) => void runStory(`task:${id}`, () => storyApi.completeTask(id)),
         onUnlock: (arc: FeedArc) => (arc.sku ? void buy(arc.sku) : undefined),
         onShared: () => track?.("beat_shared"),
+        // VIP (migration 0052): monthly and yearly members have every side story.
+        vip: catalog?.some((p) => VIP_SKUS.includes(p.sku)) ? {
+          member: !!catalog?.some((p) => VIP_SKUS.includes(p.sku) && p.owned),
+          onJoin: () => { setPhone({ open: false, app: null }); setChatWith(null); setChatPass({ out: false }); },
+        } : undefined,
         product: (sku: string) => {
           const p = catalog?.find((x) => x.sku === sku);
           return p ? { price: formatPrice(p.priceCents, p.currency), pending: unlocking === sku || p.pending } : null;

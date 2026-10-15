@@ -22,6 +22,8 @@ export interface NewsHandlers {
   product?: (sku: string) => { price: string; pending: boolean } | null;
   /** Analytics: a beat was shared. */
   onShared?: () => void;
+  /** VIP (migration 0052): members read every side story free; others can join from a locked story. */
+  vip?: { member: boolean; onJoin: () => void };
 }
 
 /** v0.6 City News handed to the News app. */
@@ -363,7 +365,10 @@ function SideArcs({ arcs, feed, handlers }: { arcs: FeedArc[]; feed: StoryFeed; 
       <p className="overline" style={{ margin: "8px 0 0" }}>Side stories</p>
       {arcs.map((a) => (a.entitled ? (
         <div key={a.id} className="stack-12">
-          <span className="title" style={{ display: "block", marginTop: 8 }}>{a.emoji} {a.title}</span>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginTop: 8 }}>
+            <span className="title" style={{ minWidth: 0 }}>{a.emoji} {a.title}</span>
+            {handlers.vip?.member && <span className="tag tag-gold">👑 Free with VIP</span>}
+          </div>
           {[...a.beats].reverse().map((b) => <BeatCard key={b.id} arc={a} beat={b} feed={feed} handlers={handlers} />)}
         </div>
       ) : (
@@ -378,9 +383,14 @@ function SideArcs({ arcs, feed, handlers }: { arcs: FeedArc[]; feed: StoryFeed; 
             const p = a.sku ? handlers.product?.(a.sku) : null;
             if (p?.pending) return <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled>Unlocking… payment received</button>;
             return (
-              <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
-                {handlers.busy === `buy:${a.sku}` ? "Opening checkout…" : p ? `Unlock for ${p.price}` : "Unlock"}
-              </button>
+              <div className="stack-8">
+                <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
+                  {handlers.busy === `buy:${a.sku}` ? "Opening checkout…" : p ? `Unlock for ${p.price}` : "Unlock"}
+                </button>
+                {handlers.vip && !handlers.vip.member && (
+                  <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={handlers.vip.onJoin}>👑 Free with VIP</button>
+                )}
+              </div>
             );
           })()}
         </div>

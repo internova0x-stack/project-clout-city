@@ -6,7 +6,7 @@ import type { RecentItem } from "@/lib/recent";
 import type { ChatMessage, ChatResult, ChatStatus, ChatSummary, ChatThread, PlayerCard, ReportReason } from "@/lib/chat";
 import type { StudioMetrics, StudioReport } from "@/lib/studio";
 import { previewCrushStatus, previewDatingBlock } from "./datingActions";
-import { previewChatUnlimited } from "./storyActions";
+import { previewChatUnlimited, previewVip } from "./storyActions";
 import { DAILY_LIMIT } from "@/lib/chat";
 import { REACTIONS, type PlaceCounts, type Presence } from "@/lib/meet";
 import { PLACES } from "@/lib/city";
@@ -92,7 +92,7 @@ export async function previewChatThread(id: string) {
 export async function previewChatStatus() {
   previewOnly();
   return ok<ChatStatus>({ limit: LIMIT, left: Math.max(0, LIMIT - sentToday()), mutedUntil: null, warned: false, banned: false,
-    unlimited: await previewChatUnlimited(), messagesFrom: state.messagesFrom });
+    unlimited: await previewChatUnlimited(), vip: await previewVip(), messagesFrom: state.messagesFrom });
 }
 export async function previewChatSend(to: string, body: string): Promise<ChatResult<{ left: number | null }>> {
   previewOnly();

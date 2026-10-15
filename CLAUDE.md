@@ -63,9 +63,9 @@ components live in `app/globals.css`.
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.
-  Unlimited chat (migrations 0047, 0051: $4.99 a month, $39.99 a year, $119.99 forever) is the only subscription:
-  the monthly and yearly entitlements follow the Stripe subscription (`payment_subscription`), and
-  `chat_unlimited(player)` is the only check.
+  VIP (migrations 0047, 0051, 0052: $4.99 a month, $39.99 a year; "chat forever" $119.99 is chat only) is the only
+  subscription: the monthly and yearly entitlements follow the Stripe subscription (`payment_subscription`).
+  `chat_unlimited(player)` is the chat check; `has_entitlement` also unlocks every side story for a VIP (`vip_member`).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never
