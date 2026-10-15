@@ -30,6 +30,7 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.9 | Big Nights | Exclusive event keepsakes, monuments as full locations | About 1 week | — |
 | v0.11 | Doors Open | Code sign-in in the app, Stripe test mode, interface fixes, gossip tasks, content live unless vetoed, every place enterable, the exclusive events update | 1 to 2 weeks | — |
 | v0.12 | Ownership | Crowded places, player ranks, businesses that make money and real money milestones | 1 to 2 weeks | — |
+| v0.13 | Better Together | Together bonuses (travel, study, club), the Jobs board: decorator and business manager, ratings | 1 to 2 weeks | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -219,6 +220,13 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 2. Player ranks: the ten ranks, the profile's climb, ranks on cards and the Everyone here list, the rank-up reveal.
 3. Businesses: the eight businesses, upgrades, the till, hype, going public, net worth including businesses everywhere (cards, leaderboard, ranks).
 4. Business news in the News app, if time allows; otherwise right after launch.
+
+## v0.13 "Better Together" (1 to 2 weeks, before launch)
+
+**In scope** (owner, Oct 15; docs/08-new-features-spec.md section 16): things for players to do together, so they're useful to each other.
+
+1. Together bonuses: travel together (split fare), study together and club together, with the server checking both players are there.
+2. The Jobs board: interior decorator and business manager, held payments, ratings on player cards.
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 

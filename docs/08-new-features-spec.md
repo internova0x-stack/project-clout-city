@@ -383,7 +383,38 @@ Buy businesses that make money; their value counts toward net worth. The only wa
 - **Server-decided**, like everything with money: prices, pay and valuations in `game_settings`; buying, upgrading, collecting and going public through security-definer functions; every payout a `ledger` row unique per (player, business, day). The browser never sends an amount. Real money never buys a business.
 - **Later: stakes in places on the map** ("Buy into Velvet Static", the top shareholder named on the place card). Whole map places can't belong to one player; everyone visits them.
 
-## 16. Later features
+## 16. Better together (v0.13; owner, Oct 15)
+
+"We also need things for players to do together … so players can make themselves useful to each other and interact with each other." Two mechanics: doing things together pays more than doing them alone, and players can hire each other for real jobs.
+
+### Together bonuses
+
+Invite someone (crew or anyone at the same place); when both are in, the action pays more for both.
+
+| Together | How | For both |
+| --- | --- | --- |
+| **Travel together** | "Ride together" on Go there: one trip, the fare split | Half the fare each; you arrive together and the place card says "arrived with tasha.b" |
+| **Study together** | A night class (campus, library) with a study buddy at the same place | 1.5× the confidence and clout |
+| **Club together** | Dance on the same floor within 10 minutes of each other | 1.5× the clout, and a shared moment in both players' Recently |
+
+- The same rule can spread to brunch, workouts and more, one action at a time (a `together` multiplier per action in the city catalog).
+- **Server-decided**: the bonus pays only when the server sees both players at the same place (and floor) inside the window; a `ledger` row per player per pair per day.
+- **Limits** against two accounts farming each other: one together bonus per pair per action a day, at most 5 a day, and accounts younger than 2 days don't earn it.
+
+### Hire a player
+
+A **Jobs** board on the Phone: post a job or take one. Paid in game cash only (never real money), held until the job is done.
+
+| Job | What the player does | Pay |
+| --- | --- | --- |
+| 🛋️ **Interior decorator** | Arranges your home: edit access to your layout for one session (up to 30 minutes). You approve it, or undo it all with one tap | The decorator's price, C$200 to C$20,000, plus 25 clout |
+| 💼 **Business manager** | Collects your tills while you're away (from the Businesses app; they never get your cash) | A cut they set, 5% to 20% of what they collect; you choose who and can fire them any time |
+
+- **Ratings**: both sides rate each other (1 to 5 stars); player cards show "Hired 12 times · ⭐ 4.8". Jobs done also pay clout, so being useful is a way up the ranks.
+- **Safety**: payment held by the server and released on approval (or after 24 hours with no answer); a decorator can't sell, delete or buy anything, only move what's there; report and block on every job; daily limits on jobs between the same two players; account-age minimums against alt accounts.
+- **Later jobs**: stylist (picks your outfit), tour guide (takes a newcomer to three places), hype person (boosts your entrance at a club).
+
+## 17. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
