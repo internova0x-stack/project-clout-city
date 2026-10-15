@@ -152,7 +152,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
                 <span className={`meta${status && !status.unlimited && status.left <= 3 ? " low" : ""}`}>{messagesLeftLine(status)}</span>
                 {out && onOutOfMessages
                   ? <button className="linkish" onClick={onOutOfMessages}>✨ Get unlimited chat</button>
-                  : <button className="linkish" onClick={() => onMessage({ id: card.id, name: card.name, style: card.style })}>Open chat · Block · Report ›</button>}
+                  : <button className="meet-open-chat" onClick={() => onMessage({ id: card.id, name: card.name, style: card.style })}>Open chat · Block · Report ›</button>}
               </div>
             </div>
           )}

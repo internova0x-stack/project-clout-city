@@ -645,6 +645,12 @@ a { color:inherit; }
 /* Owner, Oct 14: the next gossip lead says what it is and opens that place on the map. */
 button.tea-lead { border:0; font:inherit; font-size:13px; font-weight:600; cursor:pointer; text-align:left; }
 .interior-panel:not(.open) { padding:12px 14px; }
+.interior-head-row { display:flex; align-items:center; gap:8px; }
+.interior-head-row .interior-head { flex:1; min-width:0; }
+.interior-min { flex:none; width:32px; height:32px; }
+/* Minimized (owner, Oct 15): just the place's name, out of the way of the room. */
+.interior-mini { position:absolute; z-index:16; left:12px; bottom:calc(88px + var(--safe-bottom)); max-width:calc(100% - 24px); height:40px; padding:0 12px 0 14px;
+  display:inline-flex; align-items:center; gap:8px; border:0; font:inherit; font-size:15px; font-weight:700; color:var(--text-1); cursor:pointer; }
 .game.arranging .under-hud, .game.arranging .dev-clock, .game.arranging .stats, .game.arranging .side-col, .game.arranging .room-chips { display:none; }
 .game.arranging .room-edit { left:12px; }
 .game.arranging .room-edit-bar { max-width:none; }
@@ -867,6 +873,16 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .crew-progress.done { background:var(--neon-tint); }
 .crew-bar { height:8px; border-radius:var(--r-pill); background:var(--chip-off); overflow:hidden; }
 .crew-bar i { display:block; height:100%; border-radius:var(--r-pill); background:var(--neon-500); transition:width .4s ease-out; }
+/* Crew plans, nothing tonight (owner, Oct 15: "another opportunity to invite crew"). */
+.crew-empty { display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:24px 18px 18px; border-radius:var(--r-lg);
+  background:radial-gradient(120% 90% at 50% 0%, #FFF4E6 0%, #FFE3CC 60%, #FFD3B5 100%); }
+.crew-empty-faces { display:flex; }
+.crew-empty-faces span { width:52px; height:52px; margin:0 -5px; border-radius:50%; display:grid; place-items:center; font-size:26px;
+  background:#fff; box-shadow:0 0 0 3px #FFE3CC, var(--elev-1, 0 2px 6px rgba(20,17,26,.12)); }
+.crew-empty-faces .crew-empty-add { background:var(--taxi-400); color:var(--night-900); font-size:24px; font-weight:800; }
+.crew-empty-perks { display:flex; flex-direction:column; gap:6px; width:100%; padding:10px 12px; border-radius:var(--r-sm); background:rgba(255,255,255,.7); font-size:14px; color:var(--text-2); }
+.crew-empty-perks b { color:var(--green-text); font-variant-numeric:tabular-nums; }
+.crew-empty .btn { margin-top:2px; }
 .crew-plan { display:flex; flex-direction:column; gap:6px; width:100%; text-align:left; }
 .crew-prompt { background:linear-gradient(100deg,#FFD24A,#FFA65C); box-shadow:var(--elev-3), 0 6px 18px rgba(255,150,60,.3); }
 .chip-pill { display:inline-flex; align-items:center; height:28px; padding:0 12px; border-radius:var(--r-pill); font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; }
@@ -1479,6 +1495,7 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .meet-ice:active { background:#FFE3EF; }
 .meet-foot { justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
 .meet-foot .meta.low { color:var(--neon-text, #B0135A); font-weight:700; }
+.meet-open-chat { border:0; padding:6px 12px; border-radius:var(--r-pill); background:var(--tag-blue); color:#fff; font:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
 .linkish { border:0; background:none; padding:0; font:inherit; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; }
 .bubble.reaction { background:none !important; box-shadow:none; font-size:28px; padding:0; }
 .bubble.reaction .bubble-time { font-size:11px; }

@@ -2061,6 +2061,8 @@ export function GameShell({
           <CrewPlansSheet
             open={panel === "crew"}
             onClose={() => setPanel(null)}
+            onInviteFriends={() => setPanel("invite")}
+            onPickPlace={() => setPanel("places")}
             inbox={crewInbox}
             busy={crewBusy}
             onAnswer={(id, yes) => void (async () => {

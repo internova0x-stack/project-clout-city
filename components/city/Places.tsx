@@ -9,7 +9,7 @@ import { actionSeconds, OTHER_SECONDS } from "@/lib/actionTime";
 import { formatCash } from "@/lib/economy";
 import { distanceMiles, type LatLng } from "@/lib/map/geo";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from "../icons";
 import { Sheet } from "../Sheet";
 import { EffectChips, SheetTitle, useGameNow } from "./Common";
 import { PlaceArt } from "./PlaceArt";
@@ -629,6 +629,9 @@ export function InteriorScene({
 }) {
   const [open, setOpen] = useState(false);
   const [allHere, setAllHere] = useState(false);
+  const [mini, setMini] = useState(false);
+  // Someone talks (a regular's line, a hunt clue): bring the panel back so it's read.
+  useEffect(() => { if (talkNonce) setMini(false); }, [talkNonce]);
   return (
     <div className="layer interior">
       {room}
@@ -645,12 +648,25 @@ export function InteriorScene({
           <button className="here-hud-btn" onClick={() => setAllHere(true)}>View People</button>
         </div>
       )}
-      <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
-        <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          <span className="display-sm">{place.emoji} {place.name}</span>
-          <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
+      {/* Outside the panel: a sheet inside it sat under the nav bar (owner, Oct 15). */}
+      {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
+      {mini ? (
+        // Owner, Oct 15: the panel needs a way out of the way. Minimized, it's one small pill.
+        <button className="interior-mini pill-glass glass-hud" onClick={() => setMini(false)} aria-label={`Show ${place.name} actions`}>
+          <span className="one-line">{place.emoji} {place.name}</span>
+          <ChevronUpIcon size={16} />
         </button>
-        {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
+      ) : (
+      <section className={`interior-panel${open ? " open" : ""}`} aria-label={`${place.name} actions`}>
+        <div className="interior-head-row">
+          <button className="interior-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+            <span className="display-sm">{place.emoji} {place.name}</span>
+            <span className={`panel-toggle${open ? " hide" : ""}`}>{open ? "Hide" : "All actions"}</span>
+          </button>
+          <button className="icon-round interior-min" onClick={() => { setOpen(false); setMini(true); }} aria-label="Minimize">
+            <ChevronDownIcon size={18} />
+          </button>
+        </div>
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
@@ -661,6 +677,7 @@ export function InteriorScene({
           </>
         )}
       </section>
+      )}
     </div>
   );
 }
