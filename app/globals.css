@@ -1463,7 +1463,7 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .rank-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border:0; border-radius:var(--r-pill); background:#FFE3EF; color:#B0125E; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; cursor:default; }
 button.rank-chip { cursor:pointer; }
 button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
-.rank-chip.rich { background:#2A1530; color:#FFD3EA; }
+.rank-chip.rich { background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); color:#7A2F33; }
 .rank-chip.god { background:var(--g-neon); color:#fff; box-shadow:0 0 14px rgba(255,46,136,.45); }
 .rank-climb { display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:var(--r-md); background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--divider); }
 .rank-bar { height:8px; border-radius:var(--r-pill); background:#F3E6EC; overflow:hidden; }
@@ -1478,8 +1478,9 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .modal-card.rank-up { text-align:center; background:#FFF8F3; color:var(--text-1, #1B1420); border-radius:var(--r-xl); padding:24px 20px 18px; box-shadow:var(--elev-4); animation:reveal-rise .4s ease-out; }
 .rank-up-kicker { color:#B0125E; }
 .rank-up-emoji { display:block; font-size:64px; line-height:1.1; margin-top:10px; animation:reveal-rise .5s ease-out; }
-.modal-card.rank-up.top { background:var(--g-night-reveal); color:var(--text-on-dark); box-shadow:0 0 32px rgba(255,46,136,.45); }
-.modal-card.rank-up.top .rank-up-kicker { color:#FF9FCB; }
+/* Owner, Oct 15: Monument Valley hues, not purple: the top ranks get the dusk sky. */
+.modal-card.rank-up.top { background:linear-gradient(180deg,#BFD3EE 0%,#FFE6DA 55%,#FFC9B9 100%); color:#3B1F24; box-shadow:0 24px 60px rgba(120,80,90,.3); }
+.modal-card.rank-up.top .rank-up-kicker { color:#7A2F33; }
 .modal-card.rank-up.god .rank-up-emoji { font-size:84px; filter:drop-shadow(0 0 18px rgba(255,159,203,.9)); }
 /* Owner, Oct 15: who's here, right-aligned under the top HUD (the room's people, not the activity card). */
 .here-hud { position:absolute; z-index:16; top:calc(72px + var(--safe-top)); right:12px; display:flex; align-items:center; gap:7px; height:32px; padding:3px 3px 3px 5px; }
@@ -1489,3 +1490,50 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .here-hud-count { font-size:13.5px; line-height:1; font-weight:600; white-space:nowrap; }
 .here-hud-count b { font-family:var(--font-label); font-variant-numeric:tabular-nums; }
 .here-hud-btn { height:26px; padding:0 11px; line-height:1; border:0; border-radius:var(--r-pill); background:#FF2E88; color:#fff; font:inherit; font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer; }
+/* v0.12 businesses (owner, Oct 15): Monument Valley dusk, peach to coral with deep rose ink; no purple. */
+.biz-worth { padding:14px; border-radius:var(--r-lg); background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); display:flex; flex-direction:column; gap:6px; }
+.biz-worth-n { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; }
+.biz-till { display:flex; align-items:center; gap:12px; padding:14px; border-radius:var(--r-lg); color:#7A2F33;
+  background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); box-shadow:0 14px 30px rgba(120,80,90,.2); }
+.biz-till b { display:block; font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; }
+.biz-till small { display:block; font-size:12px; font-weight:600; opacity:.8; }
+.biz-list { display:flex; flex-direction:column; gap:8px; }
+.biz-row { width:100%; display:flex; align-items:center; gap:12px; padding:10px 12px; border:0; border-radius:var(--r-lg); background:#fff;
+  box-shadow:inset 0 0 0 1.5px var(--divider); font:inherit; color:var(--text-1); text-align:left; cursor:pointer; }
+.biz-row.next { background:#FFF4EC; box-shadow:inset 0 0 0 2px #FFC9B9; cursor:default; }
+.biz-row.locked { opacity:.5; cursor:default; }
+.biz-em { flex:none; width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:23px; background:linear-gradient(160deg,#FFF1E8,#FFC9B9); }
+.biz-em.big { width:64px; height:64px; border-radius:20px; font-size:34px; }
+.biz-n { flex:1; min-width:0; }
+.biz-n b { display:block; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.biz-lv { display:inline-flex; gap:3px; margin-left:6px; vertical-align:1px; }
+.biz-lv i { width:7px; height:7px; border-radius:50%; background:#F6DCD3; }
+.biz-lv i.on { background:#E88A8F; }
+.biz-full { flex:none; padding:3px 9px; border-radius:var(--r-pill); background:#FFE3D8; color:#7A2F33; font-size:11.5px; font-weight:700; white-space:nowrap; }
+.biz-r { flex:none; text-align:right; font-size:12px; color:var(--text-3); white-space:nowrap; }
+.biz-r b { display:block; color:var(--text-1); font-size:14px; }
+.biz-hero { display:flex; align-items:center; gap:14px; }
+.biz-hero b { display:block; font-size:19px; }
+.biz-kpis { display:flex; gap:8px; }
+.biz-kpis > span { flex:1; padding:10px 6px; border-radius:var(--r-md); background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); text-align:center; font-size:11.5px; color:var(--text-3); }
+.biz-kpis b { display:block; font-size:16px; color:var(--text-1); font-variant-numeric:tabular-nums; }
+.biz-ups { display:flex; flex-direction:column; }
+.biz-up { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--divider); }
+.biz-up:last-child { border-bottom:0; }
+.biz-up .biz-em { width:38px; height:38px; font-size:19px; }
+.biz-up.locked { opacity:.5; }
+.biz-up-n { flex:1; min-width:0; }
+.biz-up-n b { display:block; font-size:14px; }
+.biz-up-n .meta { display:block; }
+.biz-done { flex:none; color:var(--green-text, #2E8B63); font-weight:700; font-size:13px; }
+.biz-public { display:flex; flex-direction:column; gap:6px; padding:14px; border-radius:var(--r-lg); color:#7A2F33;
+  background:linear-gradient(160deg,#FFF1E8 0%,#FFC9B9 55%,#E88A8F 100%); }
+.biz-sky { background:linear-gradient(180deg,rgba(127,179,232,.85) 0%,rgba(191,211,238,.85) 45%,rgba(246,201,160,.85) 100%) !important; }
+.modal-card.biz-collected { text-align:center; border-radius:var(--r-xl); padding:24px 20px 18px; color:var(--text-1);
+  background:linear-gradient(180deg,#FFFFFF 0%,#FFF4EC 60%,#FFE6DA 100%); box-shadow:0 24px 60px rgba(120,80,90,.28); animation:reveal-rise .4s ease-out; }
+.biz-collected-em { display:block; font-size:56px; line-height:1.1; margin-top:8px; }
+.biz-collected-n { margin:6px 0 8px; line-height:1.1; font-size:40px; font-weight:800; color:#7A2F33; font-variant-numeric:tabular-nums; }
+.biz-collected-lines { display:flex; flex-direction:column; gap:6px; margin-top:14px; text-align:left; font-size:13.5px; }
+.biz-collected-lines > div { display:flex; justify-content:space-between; gap:8px; padding:8px 12px; border-radius:12px; background:#fff; box-shadow:inset 0 0 0 1.5px var(--divider); }
+/* The tills-collected and go-public cards open over the phone. */
+.modal-wrap:has(.biz-collected) { z-index:62; }

@@ -152,6 +152,8 @@ export async function previewPresence(placeId: string, floor: number) {
     id, name: PEOPLE[id].name, style: PEOPLE[id].style, look: null, crew: id === "p-tasha",
     // At a club a few are on the other floors (the restroom, VIP).
     floor: club && (crowd.n ? i % 9 === 4 : i === 1 && floor === 1) ? (floor === 1 ? 0 : 1) : club && crowd.n && i % 9 === 7 ? (floor === 2 ? 1 : 2) : floor, clout: PEOPLE[id].clout,
+    // v0.12: a few rich ones, so the list shows the money ranks too.
+    netWorth: 3000 + PEOPLE[id].clout * 4 + (i % 11 === 3 ? 12_000_000 : i % 7 === 5 ? 1_400_000 : 0),
   }));
   // The server lists at most 40 (game_settings chat.hereMax) and gives the true count.
   return ok<Presence>({ count: people.length, people: people.slice(0, 40) });

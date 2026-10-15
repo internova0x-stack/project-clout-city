@@ -15,7 +15,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  * that matter, badges, collections and crew, and "Recently", which other players see too.
  */
 export function ProfileSheet({
-  open, onClose, look, outfit, name, subtitle, clout, rank, netWorth, badges, collections, crew, recent,
+  open, onClose, look, outfit, name, subtitle, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
   onOpenCollection, onOpenNetWorth, onOpenLeaderboard,
 }: {
   open: boolean;
@@ -27,6 +27,8 @@ export function ProfileSheet({
   clout: number;
   rank: number | null;
   netWorth: number;
+  /** v0.12: the highest rank reached (migration 0048), for "Best: …". */
+  bestRank?: number;
   badges: { id: string; emoji: string; name: string }[];
   collections: { postcards: { owned: number; total: number } | null; huntCards: number };
   crew: string[];
@@ -49,7 +51,7 @@ export function ProfileSheet({
           <p className="body profile-sub">{subtitle}</p>
         </div>
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
-        <RankClimb clout={clout} netWorth={netWorth} />
+        <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
         <div className="profile-kpis">
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>🔥 {formatShort(clout)}</b><span>Clout</span></button>
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>{rank ? `#${rank.toLocaleString()}` : "—"}</b><span>In Queens</span></button>

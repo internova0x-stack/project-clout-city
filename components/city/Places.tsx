@@ -20,6 +20,8 @@ import { ReasonBanner } from "../story/StoryBits";
 import { ExclusiveEventCard, PostcardOffer, type MoneyHandlers } from "./Money";
 import { DateStatusRow } from "../dating/Dating";
 import { clubLines } from "./Clubs";
+import { RankChip } from "../game/Ranks";
+import { rankFor } from "@/lib/ranks";
 import { hereCountLine, hereLine, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { canDateAt, type DateNight } from "@/lib/dating";

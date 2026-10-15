@@ -18,7 +18,7 @@ export function RankChip({ rank, onClick }: { rank: Rank; onClick?: () => void }
 }
 
 /** On the profile: the rank, how far to the next one (clout or net worth) and a way to see them all. */
-export function RankClimb({ clout, netWorth }: { clout: number; netWorth: number }) {
+export function RankClimb({ clout, netWorth, best }: { clout: number; netWorth: number; best?: number }) {
   const [all, setAll] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -30,6 +30,7 @@ export function RankClimb({ clout, netWorth }: { clout: number; netWorth: number
         <RankChip rank={rank} onClick={() => setAll(true)} />
         <span className="meta">Rank {rank.level} of 10</span>
       </div>
+      {best && best > rank.level && <span className="meta">Best: {RANKS[best - 1].emoji} {RANKS[best - 1].title}</span>}
       {next && <div className="rank-bar" aria-hidden="true"><span style={{ width: `${Math.round(next.progress * 100)}%` }} /></div>}
       <p className="meta" style={{ margin: 0 }}>{nextRankLine(clout, netWorth)}</p>
       {/* Opened from inside the profile sheet, whose layer would hold it in place: render at the page. */}

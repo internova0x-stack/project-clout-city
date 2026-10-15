@@ -356,7 +356,7 @@ Owner, Oct 14: walled rooms with many items; walls between rooms at waist height
 | 10 | ✨ God Status | 500,000 | C$10B |
 
 - The clout steps are the game's own gates (checked by tests). The money steps are real milestones (owner: "so billionaire means billionaire").
-- Shown on the profile (the rank, a bar and "150 clout or C$94,495 to Group Chat Famous"; tap for every rank), player cards and the Everyone here list. Crossing into a rank opens the **rank-up reveal** (Share, and the top three on the night card).
+- Shown on the profile (the rank, a bar and "150 clout or C$94,495 to Group Chat Famous"; tap for every rank), player cards and the Everyone here list. Crossing into a rank opens the **rank-up reveal** (Share; the top three on a Monument Valley dusk-sky card).
 - Ranks can go down with net worth (a business falls out of fashion); the profile keeps "Best: …".
 
 ### Businesses
@@ -374,13 +374,13 @@ Buy businesses that make money; their value counts toward net worth. The only wa
 | 7 | 🏢 Luxury* Apartment Building (*exposed brick) | C$150M | C$3.9M | Rooftop amenity · Doorman with opinions · Condo conversion |
 | 8 | 📱 Disruptive App Startup | C$700M | C$12.6M | Pivot to AI · Celebrity board member · Go public |
 
-- **One of each**, bought in order (the next unlocks when you own the one before). Bought from the **Businesses** app on the Phone.
+- **One of each**, bought in order (the next unlocks when you own the one before). Bought from the **Businesses** app on the Phone, in Monument Valley dusk colors (owner, Oct 15: not purple).
 - **Collect the till**: pay piles up each game day and you collect it in the app (or at the business's spot, later). It stops piling up after **2 days**, so coming back daily pays without punishing a missed day.
 - **Valuation** = the price, +50% per upgrade, times **hype**: from ×1.0 to ×2.0 as your clout goes from 0 to 150,000 (fame brings customers). Fame and money feed each other.
 - **Go public** (the startup's last step): needs 50,000 clout ("investors want a famous founder") and C$50M in fees; triples the startup's valuation.
 - **Business news** (later in v0.12 or after): the News app runs events on businesses: a viral review (+value for a week), a health inspection (closed a day), a celebrity sighting.
 - **Pace** (simulated, a steady player collecting daily): C$1M at about 2 months, C$10M at 3.5 months, **C$1B at about 9 months**, C$10B at about a year. A casual player is a week or two behind.
-- **Server-decided**, like everything with money: prices, pay and valuations in `game_settings`; buying, upgrading, collecting and going public through security-definer functions; every payout a `ledger` row unique per (player, business, day). The browser never sends an amount. Real money never buys a business.
+- **Server-decided**, like everything with money: prices, pay and valuations in `game_settings`; buying, upgrading, collecting and going public through security-definer functions; every buy, upgrade and till collection a `ledger` row (migration 0048). The browser never sends an amount. Real money never buys a business.
 - **Later: stakes in places on the map** ("Buy into Velvet Static", the top shareholder named on the place card). Whole map places can't belong to one player; everyone visits them.
 
 ## 16. Better together (v0.13; owner, Oct 15)

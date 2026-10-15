@@ -62,6 +62,8 @@ import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
 import { RankUpCard } from "./game/Ranks";
+import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
+import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
 import { RANKS, rankFor, type Rank } from "@/lib/ranks";
 import { contextTips } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
@@ -149,6 +151,7 @@ export function GameShell({
   cityNews,
   hunt,
   gossip,
+  business,
   roomMood = "dream",
   previewRankUp,
 }: {
@@ -183,6 +186,8 @@ export function GameShell({
   hunt?: HuntApi;
   /** v0.10 neighborhood gossip (migration 0035): Listen in, regulars' pieces, the Tea app and Tea cards. */
   gossip?: GossipApi;
+  /** v0.12 businesses (migration 0048); without it the Businesses app is hidden. */
+  business?: BusinessApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -284,6 +289,24 @@ export function GameShell({
   const openPlayer = (id: string) => { setPinned((p) => [id, ...p.filter((x) => x !== id)].slice(0, 3)); setCardId(id); };
   const [placeCounts, setPlaceCounts] = useState<PlaceCounts>({});
   const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
+  // v0.12 businesses: what you own (with the server's clock offset, so tills count like the server's),
+  // the tills-collected card and the go-public reveal.
+  const [biz, setBiz] = useState<BusinessState | null>(null);
+  const [bizOffset, setBizOffset] = useState(0);
+  const [tillsPaid, setTillsPaid] = useState<{ id: string; cash: number }[] | null>(null);
+  const [wentPublic, setWentPublic] = useState(false);
+  // Net worth includes businesses, so ranks wait for this first answer (or its failure, before 0048 runs).
+  const [bizTried, setBizTried] = useState(!business);
+  const loadBiz = useCallback(async () => {
+    if (!business) return;
+    try {
+      const r = await business.state();
+      if (r.ok) { setBiz(r.data); setBizOffset(new Date(r.data.now).getTime() - Date.now()); }
+    } finally {
+      setBizTried(true);
+    }
+  }, [business]);
+  useEffect(() => { void loadBiz(); }, [loadBiz]);
   // Player ranks (owner, Oct 15): the reveal when clout or net worth crosses into a new rank.
   const [rankUp, setRankUp] = useState<Rank | null>(previewRankUp ? RANKS[previewRankUp - 1] ?? null : null);
   const seenRank = useRef<number | null>(null);
@@ -486,6 +509,22 @@ export function GameShell({
       setBusy(null);
     }
   }, [applyCity]);
+  // v0.12 businesses: every answer refreshes what you own and the city (cash moved).
+  const bizRun = useCallback(async <T,>(key: string, call: () => Promise<BusinessResult<T>>): Promise<T | null> => {
+    setBusy(key);
+    try {
+      const r = await call();
+      if (!r.ok) { setToast(r.error); return null; }
+      await loadBiz();
+      if (cityApi) { const c = await cityApi.refresh(); if (c.ok) applyCity(c); }
+      return r.data;
+    } catch {
+      setToast("The city glitched. Try again.");
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  }, [loadBiz, cityApi, applyCity]);
   useEffect(() => {
     resync.current = () => { if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r)); };
   }, [cityApi, applyCity]);
@@ -884,13 +923,16 @@ export function GameShell({
   );
   // Player ranks: the first reading (once the city and net worth are in) is where you are; a higher one
   // later is a climb.
-  const myRank = rankFor(me.clout, city ? netWorth(city) : me.bank_cash);
+  // Net worth is everything you own: cash, things and businesses at their worth (owner, Oct 15).
+  const otherWorth = city ? netWorth(city) : me.bank_cash;
+  const myWorth = otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0);
+  const myRank = rankFor(me.clout, myWorth);
   useEffect(() => {
-    if (!city) return;
+    if (!city || !bizTried) return;
     if (seenRank.current !== null && myRank.level > seenRank.current) setRankUp(myRank);
     seenRank.current = myRank.level;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myRank.level, !!city]);
+  }, [myRank.level, !!city, bizTried]);
   const insideTemplate = inside ? (insideFloor !== 1 ? placeFloor(inside, insideFloor) : null) ?? insideRoom ?? PLACE_TEMPLATES.cafe : null;
   // Meeting players (owner, Oct 15; migration 0047): the real players on this floor stand in the room;
   // nothing over their heads (NPCs keep their 💬), tap the figure to open their card. Crowded places
@@ -1548,6 +1590,17 @@ export function GameShell({
       )}
       <PhoneModal
         onChatPass={(out) => setChatPass({ out })}
+        // Hidden until migration 0048 runs (business_state answers).
+        businesses={business && city && biz ? {
+          biz, cash: city.player.bank_cash, clout: me.clout, otherWorth, offsetMs: bizOffset,
+          handlers: {
+            busy,
+            onBuy: (id) => void bizRun(`biz:${id}`, () => business.buy(id)).then((r) => { if (r) setToast(`${businessById(id)?.emoji} ${businessById(id)?.name} is yours. Open for business.`); }),
+            onUpgrade: (id) => void bizRun(`biz:up:${id}`, () => business.upgrade(id)).then((r) => { if (r) setToast(`Upgraded: ${businessById(id)?.upgrades[r.level - 1]?.name}.`); }),
+            onCollect: () => void bizRun("biz:collect", () => business.collect()).then((r) => { if (r && r.paid.length) setTillsPaid(r.paid); }),
+            onGoPublic: () => void bizRun("biz:public", () => business.goPublic()).then((r) => { if (r) setWentPublic(true); }),
+          },
+        } : undefined}
         apartments={cityOn && cityApi?.moveHome && city?.player.moved_up !== undefined ? {
           busy: busy !== null,
           onLookInside: (id) => { setPhone({ open: false, app: null }); setPanel(null); setTab("home"); setViewHome(id); },
@@ -1706,6 +1759,11 @@ export function GameShell({
         </>
       )}
       <ComingSoon which={soon?.key ?? null} title={soon?.title} onClose={() => setSoon(null)} />
+      {tillsPaid && (
+        <TillsCollectedCard paid={tillsPaid} clout={me.clout} worth={myWorth} onClose={() => setTillsPaid(null)}
+          onUpgrade={() => { setTillsPaid(null); setPhone({ open: true, app: "businesses" }); }} />
+      )}
+      {wentPublic && <WentPublicCard worth={myWorth} onClose={() => setWentPublic(false)} />}
       {rankUp && <RankUpCard rank={rankUp} name={handle(me.display_name)} onClose={() => setRankUp(null)} />}
       <ProfileSheet
         open={panel === "profile"}
@@ -1716,7 +1774,8 @@ export function GameShell({
         subtitle={`${style.emoji} ${style.label} · ${city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.name ?? "Queens"}`}
         clout={me.clout}
         rank={myCard?.rank ?? null}
-        netWorth={city ? netWorth(city) : me.bank_cash}
+        netWorth={myWorth}
+        bestRank={biz?.bestRank}
         badges={(feed?.badges ?? []).map((b) => {
           const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : null);
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };

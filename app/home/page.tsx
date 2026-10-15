@@ -1,3 +1,4 @@
+import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
 import { GameShell } from "@/components/GameShell";
 import { loadCityState } from "@/lib/cityServer";
 import { getClique, requirePlayer } from "@/lib/player";
@@ -86,6 +87,7 @@ export default async function HomePage() {
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).
       hunt={city ? { state: huntState, join: huntJoin, talk: huntTalk, answer: huntAnswer } : undefined}
+      business={city ? { state: businessState, buy: buyBusiness, upgrade: upgradeBusiness, collect: collectTills, goPublic } : undefined}
       // Migration 0035 switches on gossip (gossip_state returns null before it runs).
       gossip={city ? { state: gossipState, find: gossipFind, share: gossipShare } : undefined}
       // Migration 0013 switches on crew outings.

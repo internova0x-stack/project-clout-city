@@ -24,6 +24,8 @@ export interface BusinessState {
   owned: OwnedBusiness[];
   /** The server's clock (ISO), so tills count from the same time as the server. */
   now: string;
+  /** The highest rank reached (players.best_rank), for "Best: …" on the profile. */
+  bestRank?: number;
 }
 
 export interface BusinessApi {
@@ -86,6 +88,21 @@ export function canGoPublic(owned: OwnedBusiness[], clout: number): boolean {
   const last = BUSINESSES[BUSINESSES.length - 1];
   const o = owned.find((x) => x.id === last.id);
   return !!o && !o.public && o.level >= 3 && clout >= B.goPublic.clout;
+}
+
+/** Player-facing text for the server's refusals (migration 0048). */
+export function businessError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("business_locked")) return "Buy the one before it first. Empires go in order.";
+  if (m.includes("cant_afford")) return "Not enough cash yet. Collect your tills or take a gig.";
+  if (m.includes("already_owned")) return "You already own that one.";
+  if (m.includes("max_level")) return "Fully upgraded. It can't get any fancier.";
+  if (m.includes("not_owned")) return "You don't own that business.";
+  if (m.includes("need_clout")) return `Investors want a famous founder: ${B.goPublic.clout.toLocaleString("en-US")} clout to go public.`;
+  if (m.includes("already_public")) return "Already public. The bell only rings once.";
+  if (m.includes("not_ready")) return "Upgrade the startup all the way before going public.";
+  if (m.includes("unknown_business")) return "That business isn't for sale.";
+  return "The deal fell through. Try again.";
 }
 
 export { money } from "./ranks.ts";

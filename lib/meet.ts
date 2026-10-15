@@ -4,7 +4,7 @@
 // comes back. Dependency-free so tests can import it.
 
 /** Someone at the same place now (place_presence). */
-export interface HerePerson { id: string; name: string; style: string; look: unknown; crew: boolean; floor: number; clout: number }
+export interface HerePerson { id: string; name: string; style: string; look: unknown; crew: boolean; floor: number; clout: number; netWorth?: number }
 export interface Presence { count: number; people: HerePerson[] }
 /** place_counts: players at each place now, and the first three (crew first). */
 export type PlaceCounts = Record<string, { count: number; names: { name: string; style: string }[] }>;
