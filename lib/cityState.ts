@@ -367,6 +367,32 @@ export function billProgress(b: UpcomingBill, today: string): number {
   return Math.min(1, Math.max(0, 1 - left / period));
 }
 
+/** When a bill comes due: midnight New York time at the start of its due date. */
+export function billDueAtMs(dueDate: string): number {
+  const utcMidnight = Date.parse(`${dueDate}T00:00:00Z`);
+  // New York's offset that day (-4 or -5 hours), from how the same instant reads there.
+  const ny = new Date(new Date(utcMidnight).toLocaleString("en-US", { timeZone: "America/New_York" })).getTime();
+  const local = new Date(new Date(utcMidnight).toLocaleString("en-US", { timeZone: "UTC" })).getTime();
+  return utcMidnight + (local - ny);
+}
+
+export type BillUrgency = "calm" | "soon" | "urgent";
+
+/**
+ * The live countdown to a coming bill (owner, Oct 15: "a bar counting down to the deadline"):
+ * how long is left, the share of its week left (the bar drains to empty at the deadline), and how
+ * urgent it is (under 3 days: soon; under a day: urgent).
+ */
+export function billCountdown(b: UpcomingBill, nowMs: number): { msLeft: number; left: number; label: string; urgency: BillUrgency } {
+  const periodDays = b.kind === "car_rental" ? CITY_ECONOMY.bills.carRentalDays : billPeriodDays();
+  const msLeft = Math.max(0, billDueAtMs(b.due_date) - nowMs);
+  const left = Math.min(1, msLeft / (periodDays * 86_400_000));
+  const h = Math.floor(msLeft / 3_600_000);
+  const m = Math.floor((msLeft % 3_600_000) / 60_000);
+  const label = msLeft <= 0 ? "Due now" : h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h left` : h >= 1 ? `${h}h ${m}m left` : `${Math.max(1, m)}m left`;
+  return { msLeft, left, label, urgency: h < 24 ? "urgent" : h < 72 ? "soon" : "calm" };
+}
+
 export function dueBills(s: CityState): Bill[] {
   return s.bills.filter((b) => b.status === "due").sort((a, b) => a.due_date.localeCompare(b.due_date));
 }

@@ -130,6 +130,8 @@ export function TripView({ trip, map, onDone, onSkip }: { trip: Trip; map: MapAp
     <div className="trip" role="dialog" aria-label={`On the way to ${trip.toName}`}>
       {a && b && (
         <svg className="trip-route" aria-hidden="true">
+          {/* Owner, Oct 15: dark dots vanished on the night map. Light dots with a dark ring read on both. */}
+          <line className="halo" x1={a.x} y1={a.y} x2={b.x} y2={b.y} />
           <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} />
         </svg>
       )}
