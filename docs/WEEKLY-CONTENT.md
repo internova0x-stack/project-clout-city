@@ -56,6 +56,8 @@ it isn't in your working directory). Work from the main branch.
    - One track per starting style (8), each with its own invented treasure, lore and lines in that
      regular's voice. Questions must be answerable from the game alone, with exactly one right
      answer; move the right answer around; the finale should test something from the trail.
+   Lola's lines (news, "Ask Lola", Tea cards) and DJ Sharm Almight's are written in their voices from
+   docs/CAST.md "Voices": Lola the spicy tea queen, Sharm New York hype with younger slang.
 4. Write content/news/<Monday>.json: 9 to 12 items across Monday to Sunday, including
    - a Monday "hunt" item announcing the hunt (it must name the first place's regular),
    - exactly one Lola column ("column"),

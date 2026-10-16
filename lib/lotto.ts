@@ -160,11 +160,11 @@ export function bennyLine(prize: number, price: number, n: number): string {
 export function potWinLine(w: LottoWin, name: string): string {
   const pot = `C$${w.amount.toLocaleString("en-US")}`;
   const game = lottoGame(w.game)?.name ?? "a Lucky Star card";
-  if (w.mine) return `It's you. A ⭐ on your ${game} card won the ${pot} pot at Lucky Star. Benny is pretending he isn't jealous. He is.`;
+  if (w.mine) return `It's you, babe! A ⭐ on your ${game} card just won the ${pot} pot at Lucky Star. Benny says he isn't jealous. Benny is lying.`;
   const who = w.winner ? name : "A lucky Astorian";
   const lines = [
-    `${who} scratched a ⭐ on ${game} and walked out of Lucky Star with the ${pot} pot. Benny says he's happy for them, through his teeth.`,
-    `The ${pot} ${game} pot goes to ${w.winner ? name : "a lucky Astorian"}. Benny, who has never bought a ticket, calls it "fine".`,
+    `${who} scratched a ⭐ on ${game} and strutted out of Lucky Star with the ${pot} pot. Benny's "happy for them," through his teeth. I have the photos.`,
+    `The ${pot} ${game} pot goes to ${w.winner ? name : "a lucky Astorian"}. Benny, who has never bought a ticket, calls it "fine." Sweetie, it's more than fine.`,
   ];
   return lines[Math.floor(Date.parse(w.wonAt) / 60_000) % lines.length];
 }
