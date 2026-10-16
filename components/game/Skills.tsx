@@ -10,7 +10,7 @@ export function SkillsList({ skills }: { skills: SkillState[] }) {
       <div className="skills-grid">
         {SKILLS.map((def) => {
           const s = byId.get(def.id) ?? { id: def.id, level: 0, best: 0, practice: 0, rusty: false };
-          const part = s.level < MAX_LEVEL ? levelProgress(s.practice) : 0;
+          const part = s.level < MAX_LEVEL && !s.rusty ? levelProgress(s.practice) : 0;
           return (
             <div key={def.id} className="skill-row">
               <div className="skill-head">

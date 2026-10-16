@@ -72,6 +72,9 @@ components live in `app/globals.css`.
 - Studio Players (migration 0055): `admin_players()`, `admin_player()` and `admin_player_ban()` (admins only) list
   players, show a profile and activity timeline (ledger, purchases, reports, admin actions) and ban/unban with a
   reason logged in `admin_actions`. Message texts never appear there (only counts); reported chats stay in Reports.
+- Skills (migration 0056, owner Oct 16): nine skills, 0 to 10 (`lib/skills.ts` mirrors the practice table). Practice
+  comes from triggers on `ledger`, `messages` and cooking, once per thing (`skill_log`); rust is worked out on read
+  (`skill_effective`); a new best level pays 10 × level clout once (ledger 'skill'), and 5 and 10 earn a badge.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. Copy is satirical and never

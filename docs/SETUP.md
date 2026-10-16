@@ -175,6 +175,12 @@ Prices are config: `store_products.price_cents` (shown and charged). To charge a
 created in Stripe instead, set `store_products.stripe_price_id`. Don't change a price on a story
 players are following. Before going live: check **Stripe Tax** settings for digital goods.
 
+**Skills** (migration 0056): a **Skills** tab on the profile: Cooking, Charisma, Fitness, Smarts, Music,
+Hustle, Dance, Gossip and Photography, 0 to 10. Players practice by doing things (visits by the place's
+tags, club and campus events, shifts and gigs, gossip, dates and crew plans, chatting, cooking). A new
+level pays 10 × the level in clout once; levels 5 and 10 earn a badge; player cards show the top three.
+Skills unused for 7 days slowly rust (a level every 20 days, never more than 2 under the best).
+
 **Players** (migration 0055): the Studio's **Players** tab lists everyone who made a character (search by
 @handle or email; filters for new, active, paying, VIP, reported, banned and never moved in). Open one for
 their profile, numbers, recent sessions, safety record and activity (every cash and clout change, purchases,

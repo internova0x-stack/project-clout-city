@@ -41,3 +41,15 @@ export function levelProgress(practice: number): number {
 export interface SkillState { id: SkillId; level: number; best: number; practice: number; rusty: boolean }
 
 export const RUST_LINE = `Skills you don't use for ${RUST.afterDays} days slowly get rusty (about a level every ${RUST.daysPerLevel} days), never more than ${RUST.maxBelowBest} levels under your best. Using a skill stops it.`;
+
+/** Badges at levels 5 and 10 (player_badges "skill-<id>-5|10"): emoji and name, or null for other ids. */
+const MASTER: Record<SkillId, string> = {
+  cooking: "Master Chef", charisma: "Smooth Operator", fitness: "Gym Rat Royalty", smarts: "Big Brain", music: "Headliner",
+  hustle: "Hustle Legend", dance: "Floor Killer", gossip: "Tea Sommelier", photography: "Lens Legend",
+};
+export function skillBadge(id: string): { emoji: string; name: string } | null {
+  const m = id.match(/^skill-([a-z]+)-(5|10)$/);
+  const def = m && SKILLS.find((s) => s.id === m[1]);
+  if (!m || !def) return null;
+  return { emoji: def.emoji, name: m[2] === "10" ? MASTER[def.id] : `${def.name} 5` };
+}

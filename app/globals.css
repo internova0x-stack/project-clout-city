@@ -827,6 +827,9 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .skill-bar > span.on { background:var(--tag-blue); }
 .skill-bar > span.best { background:rgba(47,123,234,.38); }
 .skill-bar > span > i { position:absolute; left:0; top:0; bottom:0; background:rgba(47,123,234,.55); border-radius:inherit; }
+.card-skills { display:flex; flex-wrap:wrap; gap:6px; }
+.card-skill { padding:5px 10px; border-radius:var(--r-pill); background:rgba(47,123,234,.1); color:var(--text-1); font-size:13px; font-weight:600; }
+.card-skill b { color:var(--tag-blue); margin-left:2px; }
 .skill-how { font-size:12.5px; color:var(--text-3); }
 .skill-rust { color:#3E7CB1; font-weight:600; }
 

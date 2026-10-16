@@ -1,5 +1,6 @@
 "use server";
 
+import type { SkillId, SkillState } from "@/lib/skills";
 import type { PlaceCounts, Presence } from "@/lib/meet";
 import { chatError, type ChatMessage, type ChatResult, type ChatStatus, type ChatSummary, type ChatThread, type PlayerCard, type ReportReason } from "@/lib/chat";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -65,4 +66,16 @@ export async function sessionPing() {
   const supabase = await getServerSupabase();
   if (!supabase) return;
   await supabase.rpc("session_ping").then(() => undefined, () => undefined);
+}
+
+/** Skills (migration 0056): your nine skills for the profile's Skills tab; null before the migration. */
+export async function mySkills(): Promise<SkillState[] | null> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc("my_skills");
+  return error ? null : (data as SkillState[]);
+}
+/** Someone's top skills, for their player card. */
+export async function skillsOf(playerId: string) {
+  return call<{ id: SkillId; level: number }[]>("skills_of", { p_player: playerId });
 }

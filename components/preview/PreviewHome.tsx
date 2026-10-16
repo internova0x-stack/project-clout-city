@@ -27,7 +27,7 @@ import {
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
 import {
-  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard,
+  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
@@ -210,7 +210,7 @@ export function PreviewHome({
   }, []);
   const chat = useMemo<ChatApi>(() => ({
     list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
-    block: previewChatBlock, report: previewChatReport, card: previewPlayerCard,
+    block: previewChatBlock, report: previewChatReport, card: previewPlayerCard, skills: previewSkillsOf,
     react: previewChatReact, setMessagesFrom: previewSetMessagesFrom, presence: previewPresence, counts: previewPlaceCounts,
   }), []);
   // Crushes and date nights in memory; a date's bonus clout is mirrored into the sim's player.

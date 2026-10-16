@@ -13,6 +13,7 @@ import type { DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
 import { ratingLine } from "@/lib/together";
 import { handle } from "@/lib/validation";
+import { SKILLS, type SkillId } from "@/lib/skills";
 import { recentLine, recentWhen } from "@/lib/recent";
 
 /** C28: another player's profile card, opened from the leaderboard, with "Message". */
@@ -34,6 +35,8 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
   const [sending, setSending] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  // Skills (migration 0056): their top three, under the numbers.
+  const [topSkills, setTopSkills] = useState<{ id: SkillId; level: number }[]>([]);
   // Block and Report right on the card (owner, Oct 15): a small confirm under the links.
   const [confirm, setConfirm] = useState<"block" | "report" | null>(null);
   const [reason, setReason] = useState<ReportReason>("harassment");
@@ -73,6 +76,8 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
     void api.card(playerId).then((r) => setCard(r.ok ? r.data : null));
     void api.status().then((r) => setStatus(r.ok ? r.data : null));
     void api.thread(playerId).then((r) => setThread(r.ok && !r.data.blocked ? r.data.messages.slice(-6) : []));
+    setTopSkills([]);
+    void api.skills?.(playerId).then((r) => { if (r.ok) setTopSkills(r.data); });
   }, [playerId, api]);
   // Meeting players: react, break the ice, or say something, right on the card.
   const meet = !!card && !card.isMe && !card.blocked && card.canMessage !== undefined;
@@ -209,6 +214,14 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
             <span className="profile-kpi"><b>{card.rank != null ? `#${card.rank.toLocaleString()}` : "—"}</b><span>In Queens</span></span>
             <span className="profile-kpi"><b>{card.netWorth != null ? formatCash(card.netWorth) : "—"}</b><span>Net worth</span></span>
           </div>
+          {topSkills.length > 0 && (
+            <div className="card-skills" aria-label="Top skills">
+              {topSkills.map((k) => {
+                const def = SKILLS.find((d) => d.id === k.id);
+                return def ? <span key={k.id} className="card-skill">{def.emoji} {def.name} <b>{k.level}</b></span> : null;
+              })}
+            </div>
+          )}
           <p className="meta" style={{ margin: 0 }}>
             🏅 {card.badges} {card.badges === 1 ? "badge" : "badges"} · In the city since {new Date(card.joined).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
             {card.vipSince && ` · VIP since ${new Date(card.vipSince).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}

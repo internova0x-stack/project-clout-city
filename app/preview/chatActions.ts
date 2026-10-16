@@ -386,3 +386,14 @@ export async function previewStudioPlayerBan(id: string, ban: boolean, reason: s
   if (ban) PREVIEW_BANS.set(id, reason || null); else PREVIEW_BANS.delete(id);
   return ok({ banned: ban });
 }
+
+/** Skills (migration 0056): sample top skills on preview player cards. */
+export async function previewSkillsOf(playerId: string) {
+  previewOnly();
+  const sets: { id: "dance" | "charisma" | "hustle" | "fitness" | "gossip"; level: number }[][] = [
+    [{ id: "dance", level: 6 }, { id: "charisma", level: 4 }, { id: "gossip", level: 2 }],
+    [{ id: "hustle", level: 7 }, { id: "fitness", level: 3 }],
+    [{ id: "charisma", level: 5 }],
+  ];
+  return ok(sets[playerId.length % sets.length]);
+}
