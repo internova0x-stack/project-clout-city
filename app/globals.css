@@ -1743,12 +1743,13 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .radio-form .radio-submit { flex:1; min-width:0; width:auto; }
 
 /* ---------- v0.14 Clout TV (migration 0058): the app, the viewer, the home card, the Studio queue ---------- */
+/* Owner, Oct 16: a black-to-silver card, "CLOUT" in white, "TV" in black on a white box. */
 .tv-bumper { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; aspect-ratio:320/120; max-width:100%; border-radius:18px; overflow:hidden;
-  background:radial-gradient(120% 90% at 50% 40%, #2E6F7E 0%, #1E3A44 70%, #14111A 100%); color:#fff; box-shadow:var(--elev-2), inset 0 0 0 3px rgba(255,255,255,.06); }
+  background:linear-gradient(135deg, #0B0B0E 0%, #2A2B30 45%, #8E9096 80%, #D6D8DC 100%); color:#fff; box-shadow:var(--elev-2), inset 0 0 0 1px rgba(255,255,255,.12); }
 .tv-bumper::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px); pointer-events:none; }
 .tv-bumper-rec { position:absolute; top:10px; left:12px; font-size:11px; font-weight:800; letter-spacing:.08em; color:#FF5A4A; }
 .tv-bumper-logo { font-size:34px; font-weight:900; letter-spacing:.02em; line-height:1; }
-.tv-bumper-logo b { margin-left:6px; padding:0 8px; border-radius:8px; background:#F2A07B; color:#14111A; }
+.tv-bumper-logo b { margin-left:6px; padding:0 8px; border-radius:8px; background:#FFFFFF; color:#0B0B0E; }
 .tv-bumper-sub { font-size:12px; font-weight:600; opacity:.8; }
 .tv-feature { position:relative; display:block; width:100%; padding:0; border:0; border-radius:18px; overflow:hidden; background:#14111A; box-shadow:var(--elev-2); cursor:pointer; aspect-ratio:4/5; max-width:100%; }
 .tv-feature img { width:100%; height:100%; object-fit:cover; display:block; }
