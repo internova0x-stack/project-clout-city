@@ -1376,12 +1376,182 @@ function arena(t: Themed): Group {
   return g;
 }
 
+/** A ring of low-poly trees around a site, radius r, n of them. */
+function treeRing(g: Group, r: number, n: number, y = 0) {
+  const leaves = solid("#4E8F5A");
+  const trunk = solid("#8B5E3C");
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + 0.1;
+    g.add(at(new Mesh(new CylinderGeometry(0.4, 0.5, 2.6, 5), trunk), Math.cos(a) * r, y + 1.3, Math.sin(a) * r));
+    g.add(at(new Mesh(new ConeGeometry(2.6, 5.5, 6), leaves), Math.cos(a) * r, y + 4.8, Math.sin(a) * r));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// St. Johnsons University: red-brick halls round a great lawn, a tall-spired chapel, a gate
+// ---------------------------------------------------------------------------
+function stJohnsons(t: Themed): Group {
+  const g = new Group();
+  const brick = facade(t, { wall: "#A9483A", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 201, frame: C.cream });
+  const slate = solid("#4A5A6A");
+  g.add(at(new Mesh(new BoxGeometry(84, 0.2, 70), solid("#6DB277")), 0, 0.1, 0));
+  g.add(at(new Mesh(new BoxGeometry(5, 0.25, 60), solid("#E9DCC6")), 0, 0.2, 2));
+  g.add(at(new Mesh(new BoxGeometry(60, 0.25, 5), solid("#E9DCC6")), 0, 0.2, 2));
+  for (const [x, z, w, d] of [[0, -32, 60, 14], [-38, 0, 14, 50], [38, 0, 14, 50]] as const) {
+    g.add(at(litBox(t, w, 14, d, brick, slate, C.amber, 0.45), x, 7, z));
+    g.add(at(gable(w + 0.6, 4, d + 0.6, slate), x, 14, z));
+  }
+  // The chapel and its spire, white against the brick.
+  const white = glowing(t, "#F4F1EA", C.amber, 0.3, 0);
+  g.add(at(new Mesh(new BoxGeometry(14, 14, 24), white), 0, 7, -14));
+  g.add(at(gable(14.6, 6, 24.6, slate), 0, 14, -14));
+  g.add(at(new Mesh(new BoxGeometry(7, 22, 7), white), 0, 11, 0));
+  g.add(at(new Mesh(new CylinderGeometry(3, 3.4, 6, 8), white), 0, 25, 0));
+  g.add(at(new Mesh(new ConeGeometry(3.2, 18, 8), slate), 0, 37, 0));
+  g.add(at(new Mesh(new BoxGeometry(0.4, 3, 0.4), solid(C.amber)), 0, 47.5, 0));
+  g.add(at(nightGlow(t, 7, 22, 7, C.amber, 0.6), 0, 11, 0));
+  // Gate at the front of the lawn.
+  for (const x of [-6, 6]) g.add(at(new Mesh(new BoxGeometry(1.6, 7, 1.6), solid("#A9483A")), x, 3.5, 33));
+  g.add(at(sign(t, "ST. JOHNSONS UNIVERSITY", 18, 1.6, { bg: C.cream, fg: "#B33A3A" }, 1.6), 0, 6.4, 33.9));
+  treeRing(g, 48, 18);
+  for (const [x, z] of [[-14, 14], [14, 14], [0, 24]]) g.add(at(lightPool(t, 10, C.amber, 0.4), x, 0.25, z));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Queensborough University: cream halls with terracotta tile roofs, arcades, and a glass library tower
+// ---------------------------------------------------------------------------
+function queensboroughU(t: Themed): Group {
+  const g = new Group();
+  const stucco = facade(t, { wall: "#EFE3CC", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 211, frame: "#C46A4E" });
+  const tile = solid("#C46A4E");
+  g.add(at(new Mesh(new BoxGeometry(80, 0.2, 66), solid("#6DB277")), 0, 0.1, 0));
+  for (const [x, z, w, d, h] of [[-20, -26, 36, 14, 12], [24, -22, 24, 14, 10], [-34, 8, 12, 40, 10]] as const) {
+    g.add(at(litBox(t, w, h, d, stucco, tile, C.amber, 0.45), x, h / 2, z));
+    g.add(at(gable(w + 1, 3.6, d + 1, tile), x, h, z));
+  }
+  // Arcade along the main hall.
+  for (let i = 0; i < 8; i++) {
+    const x = -36 + i * 4.5;
+    g.add(at(new Mesh(new BoxGeometry(0.9, 5, 0.9), solid("#EFE3CC")), x, 2.5, -17.6));
+  }
+  g.add(at(new Mesh(new BoxGeometry(36, 0.8, 3), tile), -20, 5.4, -17.6));
+  // The library tower: glass, lit at night, with a clock band.
+  const glass = facade(t, { wall: "#3F7F86", glass: "#BFE6F7", style: "curtain", lit: 0.8, seed: 213, frame: "#2E5F66" });
+  g.add(at(litBox(t, 16, 40, 16, glass, solid("#8FA4B8"), C.sky, 0.45), 24, 20, 14));
+  g.add(at(new Mesh(new BoxGeometry(16.6, 3, 16.6), glowing(t, C.cream, "#FFF3DE", 1.4, 0.1)), 24, 37, 14));
+  g.add(at(sign(t, "QUEENSBOROUGH UNIVERSITY", 20, 1.6, { bg: C.cream, fg: "#C46A4E" }, 1.6), -20, 9, -18.9));
+  treeRing(g, 46, 16);
+  for (const [x, z] of [[-10, 0], [8, -6], [-4, 18]]) g.add(at(lightPool(t, 10, C.amber, 0.4), x, 0.25, z));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// World's Fair Towers (Flushing Meadows): three observation towers with saucer tops beside the
+// open ring of the old pavilion
+// ---------------------------------------------------------------------------
+function fairTowers(t: Themed): Group {
+  const g = new Group();
+  const concrete = glowing(t, "#D9D2C5", C.amber, 0.35, 0);
+  const saucer = glowing(t, "#E8735A", "#FF8A4C", 1.2, 0);
+  for (const [x, z, h] of [[-30, -6, 68], [-18, 8, 54], [-36, 14, 40]] as const) {
+    for (const [dx, dz] of [[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]]) g.add(at(new Mesh(new CylinderGeometry(0.7, 1, h, 6), concrete), x + dx, h / 2, z + dz));
+    const top = new Mesh(new CylinderGeometry(7, 4.5, 3, 16), saucer);
+    g.add(at(top, x, h + 1.5, z));
+    g.add(at(new Mesh(new CylinderGeometry(7.4, 7.4, 0.5, 16), glowing(t, C.cream, "#FFE27A", 2.2, 0)), x, h + 3.2, z));
+  }
+  // The pavilion: a ring of tall columns holding an open oval roof frame.
+  const ringR = 26;
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    g.add(at(new Mesh(new CylinderGeometry(0.9, 1.1, 30, 8), concrete), 18 + Math.cos(a) * ringR * 1.25, 15, Math.sin(a) * ringR));
+  }
+  const roofRing = new Mesh(new TorusGeometry(ringR, 1.2, 6, 48), glowing(t, "#F2C14E", "#FFD54A", 1.6, 0));
+  roofRing.rotation.x = Math.PI / 2;
+  roofRing.scale.set(1.25, 1, 1);
+  g.add(at(roofRing, 18, 30, 0));
+  // Map of the city on the floor, as at the fair (a tiled ellipse).
+  const floor = new Mesh(new CylinderGeometry(ringR - 2, ringR - 2, 0.3, 40), solid("#9ED8F7"));
+  floor.scale.set(1.25, 1, 1);
+  g.add(at(floor, 18, 0.2, 0));
+  treeRing(g, 62, 20);
+  g.add(at(lightPool(t, 34, C.amber, 0.35), 18, 0.3, 0));
+  g.add(at(lightPool(t, 20, "#FF8A4C", 0.4), -28, 0.3, 4));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Discount Disco: a strip-mall store turned club: a giant price tag, a light-up floor on the roof
+// ---------------------------------------------------------------------------
+function discountDisco(t: Themed): Group {
+  const g = new Group();
+  const store = facade(t, { wall: C.cream, glass: "#FFD6E2", style: "storefront", lit: 1, seed: 221, frame: "#C8352B" }, 1.4);
+  g.add(at(litBox(t, 30, 8, 18, store, solid("#B9C6CF"), C.pink, 0.55), 0, 4, 0));
+  g.add(at(new Mesh(new BoxGeometry(31, 2, 1), solid("#C8352B")), 0, 7.6, 9.2));
+  g.add(at(sign(t, "DISCOUNT DISCO", 16, 1.8, { bg: "#C8352B", fg: C.cream }, 2.2), 0, 7.6, 9.8));
+  // The giant price tag on the roof, with its string.
+  const tag = at(new Group(), 4, 13, 0);
+  tag.add(sign(t, "50% OFF", 10, 5, { bg: "#F2C14E", fg: "#C8352B" }, 2.4));
+  tag.add(at(new Mesh(new CylinderGeometry(0.6, 0.6, 0.4, 10).rotateX(Math.PI / 2), solid(C.cream)), -4, 1.6, 0.3));
+  tag.rotation.z = 0.15;
+  g.add(tag);
+  for (const x of [1, 7]) g.add(at(new Mesh(new BoxGeometry(0.3, 4, 0.3), solid(C.ink)), x, 9.5, 0));
+  // Light-up dance floor on the roof: a grid of colored tiles.
+  const tileColors = [C.coral, C.tealLight, C.amber, C.pink, C.sky];
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 4; j++) {
+      const c = tileColors[(i + j * 2) % tileColors.length];
+      g.add(at(new Mesh(new BoxGeometry(2.2, 0.2, 2.2), glowing(t, c, c, 1.8, 0.3)), -12 + i * 2.4, 8.15, -6 + j * 2.4));
+    }
+  }
+  g.add(at(lightPool(t, 16, C.pink, 0.45), 0, 0, 10));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Pedal Pushers Hub: a delivery depot with loading docks, racks of cargo bikes and a wheel sign
+// ---------------------------------------------------------------------------
+function bikeHub(t: Themed): Group {
+  const g = new Group();
+  const shed = facade(t, { wall: "#5E7B8C", glass: "#BFE6F7", style: "industrial", lit: 0.6, seed: 231 });
+  g.add(at(litBox(t, 30, 9, 20, shed, solid("#3F5A73"), C.tealLight, 0.4), 0, 4.5, -2));
+  // Roll-up dock doors, lit at night.
+  for (const x of [-9, -3, 3, 9]) g.add(at(new Mesh(new BoxGeometry(4.4, 5, 0.3), glowing(t, "#B9C6CF", "#FFE6AA", 1.6, 0)), x, 2.5, 8.1));
+  // Cargo bikes and stacked boxes out front.
+  const frame = solid(C.coral);
+  const tire = solid(C.ink);
+  for (let i = 0; i < 6; i++) {
+    const b = at(new Group(), -12 + i * 4.6, 0, 12);
+    b.add(at(new Mesh(new TorusGeometry(0.45, 0.1, 4, 10), tire), 0, 0.5, -0.9));
+    b.add(at(new Mesh(new TorusGeometry(0.45, 0.1, 4, 10), tire), 0, 0.5, 0.9));
+    for (const m of b.children) (m as Mesh).rotation.y = Math.PI / 2;
+    b.add(at(new Mesh(new BoxGeometry(0.15, 0.15, 2), frame), 0, 0.9, 0));
+    b.add(at(new Mesh(new BoxGeometry(1, 0.9, 0.9), solid(C.amber)), 0, 1.3, -0.7));
+    g.add(b);
+  }
+  for (const [x, y] of [[12, 0.5], [13.1, 0.5], [12.5, 1.5]]) g.add(at(new Mesh(new BoxGeometry(1, 1, 1), solid("#C9A27A")), x, y, 9));
+  // The wheel sign on the roof.
+  const wheel = at(new Group(), 0, 14, 0);
+  wheel.add(new Mesh(new TorusGeometry(4, 0.45, 6, 24), glowing(t, C.ink, C.tealLight, 2.2, 0)));
+  for (let i = 0; i < 6; i++) {
+    const spoke = new Mesh(new BoxGeometry(0.15, 8, 0.15), solid(C.steel));
+    spoke.rotation.z = (i / 6) * Math.PI;
+    wheel.add(spoke);
+  }
+  g.add(wheel);
+  for (const x of [-2, 2]) g.add(at(new Mesh(new BoxGeometry(0.3, 3, 0.3), solid(C.ink)), x, 10, 0));
+  g.add(at(sign(t, "PEDAL PUSHERS", 14, 1.6, { bg: C.ink, fg: C.tealLight }, 2.2), 0, 7.8, 8.2));
+  g.add(at(lightPool(t, 16, C.amber, 0.45), 0, 0, 12));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
   "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
   gym, diner, church, library, firehouse,
   rooftop, "uv-club": uvClub, "lucky-deli": luckyDeli, "dive-club": diveClub, lotto,
   boutique, showroom, dealership, cinema, arena,
+  "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

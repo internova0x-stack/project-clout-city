@@ -10,7 +10,8 @@ export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "
   | "music-hall" | "lounge" | "bodega" | "pizzeria" | "college"
   | "gym" | "diner" | "church" | "library" | "firehouse"
   | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto"
-  | "boutique" | "showroom" | "dealership" | "cinema" | "arena";
+  | "boutique" | "showroom" | "dealership" | "cinema" | "arena"
+  | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub";
 
 export interface Landmark {
   id: string;
@@ -81,6 +82,12 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "boulevard-motors", placeId: "boulevard-motors", name: "Boulevard Motors", at: [40.7503, -73.9372], kind: "dealership", facing: 180, scale: 1.8, clear: 50, ground: "block" },
   { id: "reel-queens", placeId: "reel-queens", name: "Reel Queens Cinema", at: [40.7605, -73.9196], kind: "cinema", facing: 180, scale: 2, clear: 40, ground: "block" },
   { id: "respawn-arena", placeId: "respawn-arena", name: "Respawn Arena", at: [40.7708, -73.9105], kind: "arena", facing: 180, scale: 1.9, clear: 45, ground: "block" },
+  // Batch 7: campuses, the park's World's Fair towers, a club and the delivery hub.
+  { id: "st-johnsons", placeId: "st-johnsons", name: "St. Johnsons University", at: [40.7224, -73.7949], kind: "st-johnsons", facing: 180, scale: 1.3, clear: 110, ground: "park" },
+  { id: "queensborough-u", placeId: "queensborough-u", name: "Queensborough University", at: [40.7366, -73.817], kind: "queensborough-u", facing: 180, scale: 1.3, clear: 100, ground: "park" },
+  { id: "flushing-meadows", placeId: "flushing-meadows", name: "World's Fair Towers", at: [40.742, -73.844], kind: "fair-towers", facing: 180, scale: 1.3, clear: 75, ground: "park" },
+  { id: "discount-disco", placeId: "discount-disco", name: "Discount Disco", at: [40.7577, -73.8336], kind: "discount-disco", facing: 180, scale: 1.9, clear: 45, ground: "block" },
+  { id: "pedal-pushers", placeId: "pedal-pushers", name: "Pedal Pushers Hub", at: [40.759, -73.928], kind: "bike-hub", facing: 180, scale: 1.9, clear: 42, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 
