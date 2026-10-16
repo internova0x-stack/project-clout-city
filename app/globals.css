@@ -266,6 +266,9 @@ a { color:inherit; }
 .map-pin-dot { width:6px; height:6px; border-radius:50%; background:var(--text-on-dark); box-shadow:0 0 8px rgba(255,246,224,.6); }
 .map-lock { position:absolute; left:0; top:0; display:flex; align-items:center; gap:6px; height:28px; padding:4px 12px; border-radius:var(--r-pill);
   font-size:12px; font-weight:600; color:var(--text-on-dark); white-space:nowrap; pointer-events:auto; box-shadow:var(--elev-2); }
+/* Landmarks that aren't places (owner, Oct 16): a quiet name pill on top of the model, not tappable. */
+.map-landmark-label { position:absolute; left:0; top:0; height:22px; padding:3px 10px; border-radius:var(--r-pill); box-shadow:var(--elev-1);
+  font-size:11px; font-weight:600; line-height:16px; color:var(--text-on-dark); white-space:nowrap; opacity:.92; }
 .map-lock .meta { color:rgba(255,246,224,.6); }
 .map-label { position:absolute; left:0; top:0; font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--map-label); white-space:nowrap; text-shadow:0 1px 4px rgba(0,0,0,.8); }
 .player-marker { position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; border:3px solid var(--taxi-400); background:var(--night-700);

@@ -3,7 +3,8 @@
 // signs glow and monuments are uplit. Everything that changes at night registers in a Themed.
 
 import {
-  AdditiveBlending, BoxGeometry, CanvasTexture, ConeGeometry, CylinderGeometry, DoubleSide, Group,
+  AdditiveBlending, BoxGeometry, CanvasTexture, CircleGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, Float32BufferAttribute, Group,
+  IcosahedronGeometry, Vector3,
   type Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, type Object3D, PlaneGeometry, RepeatWrapping,
   SphereGeometry, SRGBColorSpace, TorusGeometry,
 } from "three";
@@ -248,6 +249,35 @@ function at<T extends Object3D>(o: T, x: number, y: number, z: number): T {
   return o;
 }
 
+/** Searchlights sweeping the sky from these spots (night only). */
+function searchlights(t: Themed, g: Group, spots: [number, number, number][], length = 90) {
+  spots.forEach(([x, y, z], i) => {
+    const pivot = at(new Group(), x, y, z);
+    const beam = new Mesh(
+      new ConeGeometry(length * 0.08, length, 16, 1, true),
+      new MeshBasicMaterial({ color: "#E6F4FF", transparent: true, opacity: 0.12, blending: AdditiveBlending, depthWrite: false, side: DoubleSide }),
+    );
+    beam.position.y = length / 2;
+    beam.rotation.x = Math.PI;
+    beam.renderOrder = 3;
+    pivot.add(beam);
+    pivot.rotation.x = -0.25;
+    t.nightOnly.push(pivot);
+    t.sweep.push({ o: pivot, base: i % 2 ? -0.35 : 0.35, amp: 0.35, speed: 0.6, phase: i * 1.7 });
+    g.add(pivot);
+  });
+}
+
+/** A beam (box) from a to b, for trusses. */
+const tmpV = new Vector3();
+function strut(a: [number, number, number], b: [number, number, number], thick: number, m: Material): Mesh {
+  const va = new Vector3(...a), vb = new Vector3(...b);
+  const mesh = new Mesh(new BoxGeometry(thick, thick, va.distanceTo(vb)), m);
+  mesh.position.copy(tmpV.copy(va).add(vb).multiplyScalar(0.5));
+  mesh.lookAt(vb);
+  return mesh;
+}
+
 // Monument Valley palette (docs/05): warm stone, coral, teal, sky. Never purple.
 const C = {
   stone: "#E3D6C2", stoneDark: "#C9B79C", steel: "#B9C6CF", steelLight: "#D7E1E7", water: "#7FC8E8",
@@ -428,22 +458,7 @@ function club(t: Themed): Group {
   g.add(at(new Mesh(new BoxGeometry(3.4, 3.8, 0.3), glowing(t, "#1B1A22", C.pink, 1.4, 0)), 0, 1.9, 10.1));
   g.add(at(lightPool(t, 14, C.pink, 0.7), 0, 0, 14));
   g.add(lightPool(t, 30, C.tealLight, 0.25));
-  // Searchlights sweeping the sky (night only).
-  for (const [x, phase] of [[-10, 0], [10, 1.7]] as const) {
-    const pivot = at(new Group(), x, 12, 2);
-    const beam = new Mesh(
-      new ConeGeometry(7, 90, 16, 1, true),
-      new MeshBasicMaterial({ color: "#E6F4FF", transparent: true, opacity: 0.12, blending: AdditiveBlending, depthWrite: false, side: DoubleSide }),
-    );
-    beam.position.y = 45;
-    beam.rotation.x = Math.PI;
-    beam.renderOrder = 3;
-    pivot.add(beam);
-    pivot.rotation.x = -0.25;
-    t.nightOnly.push(pivot);
-    t.sweep.push({ o: pivot, base: x < 0 ? 0.35 : -0.35, amp: 0.35, speed: 0.6, phase });
-    g.add(pivot);
-  }
+  searchlights(t, g, [[-10, 12, 2], [10, 12, 2]]);
   return g;
 }
 
@@ -487,8 +502,203 @@ function cafe(t: Themed): Group {
   return g;
 }
 
+// ---------------------------------------------------------------------------
+// Flushing Field (ballpark): brick-walled stands around a diamond, light towers, a rotunda
+// ---------------------------------------------------------------------------
+function ballpark(t: Themed): Group {
+  const g = new Group();
+  const deg = Math.PI / 180;
+  // Grass, the infield diamond and its inner grass (home plate toward +z).
+  const grass = glowing(t, "#5FA36B", "#9FE3A0", 0.35, 0);
+  const field = new Mesh(new CircleGeometry(100, 48), grass);
+  field.rotation.x = -Math.PI / 2;
+  g.add(at(field, 0, 0.3, 0));
+  for (const [size, color, y] of [[30, "#C98E5C", 0.4], [22, "#6DB277", 0.5]] as const) {
+    const sq = new Mesh(new BoxGeometry(size, 0.1, size), solid(color));
+    sq.rotation.y = Math.PI / 4;
+    g.add(at(sq, 0, y, 72 - size / Math.SQRT2));
+  }
+  // Stands behind home plate and down the lines, bleachers in the outfield.
+  const seats = solid("#3E7C8C");
+  seats.side = DoubleSide;
+  const stands = new Mesh(new CylinderGeometry(135, 100, 32, 48, 1, true, -125 * deg, 250 * deg), seats);
+  g.add(at(stands, 0, 16, 0));
+  const bleachers = new Mesh(new CylinderGeometry(122, 104, 9, 24, 1, true, 125 * deg, 110 * deg), seats);
+  g.add(at(bleachers, 0, 4.5, 0));
+  g.add(at(new Mesh(new CylinderGeometry(101, 101, 3, 24, 1, true, 125 * deg, 110 * deg), solid("#2E4A3A")), 0, 1.5, 0));
+  const brick = solid(C.terracotta);
+  brick.side = DoubleSide;
+  g.add(at(new Mesh(new CylinderGeometry(138, 138, 34, 48, 1, true, -125 * deg, 250 * deg), brick), 0, 17, 0));
+  // Rotunda entrance behind home plate, and its sign.
+  g.add(at(litBox(t, 34, 24, 26, facade(t, { wall: C.terracotta, glass: "#4E6B7A", style: "punched", lit: 0.8, seed: 31, frame: C.cream }), solid("#9A5A46"), C.amber, 0.6), 0, 12, 150));
+  g.add(at(sign(t, "FLUSHING FIELD", 30, 4, { bg: C.cream, fg: "#2F5DA8" }, 1.8), 0, 27, 163.2));
+  // Scoreboard.
+  g.add(at(new Mesh(new BoxGeometry(44, 16, 3), solid(C.ink)), 0, 22, -128));
+  g.add(at(new Mesh(new BoxGeometry(40, 12, 0.4), glowing(t, "#2A3440", "#9ED8F7", 1.6, 0.5)), 0, 22, -126.2));
+  // Light towers: bright banks over the field at night.
+  const pole = solid(C.steel);
+  const lamps = glowing(t, C.cream, "#FFFFFF", 3, 0);
+  for (const a of [-110, -60, -20, 20, 60, 110]) {
+    const x = Math.sin(a * deg) * 142, z = Math.cos(a * deg) * 142;
+    g.add(at(new Mesh(new CylinderGeometry(0.8, 1.2, 58, 6), pole), x, 29, z));
+    const bank = at(new Mesh(new BoxGeometry(12, 6, 1), lamps), x, 60, z);
+    bank.lookAt(0, 0, 0);
+    g.add(bank);
+  }
+  g.add(at(lightPool(t, 115, "#FFFFFF", 0.4), 0, 0.2, 0));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Flushing Open Tennis Center: the big round stadium with its roof ring, a second stadium, courts
+// ---------------------------------------------------------------------------
+function stadiumBowl(t: Themed, r: number, h: number): Group {
+  const g = new Group();
+  const wall = glowing(t, "#3D6F8E", C.sky, 0.35, 0);
+  wall.side = DoubleSide;
+  g.add(at(new Mesh(new CylinderGeometry(r, r, h, 40, 1, true), wall), 0, h / 2, 0));
+  const seats = solid("#4F8FB0");
+  seats.side = DoubleSide;
+  g.add(at(new Mesh(new CylinderGeometry(r - 3, r * 0.4, h - 4, 40, 1, true), seats), 0, (h - 4) / 2 + 1, 0));
+  g.add(at(new Mesh(new BoxGeometry(r * 0.55, 0.2, r * 0.75), solid("#3F8F5E")), 0, 0.5, 0));
+  g.add(at(new Mesh(new BoxGeometry(r * 0.3, 0.3, r * 0.5), glowing(t, "#3A6FB0", "#5F9BEA", 1.2, 0)), 0, 0.6, 0));
+  const ring = new Mesh(new TorusGeometry(r, 1.6, 6, 48), glowing(t, "#EEF2F5", C.sky, 1.5, 0));
+  ring.rotation.x = Math.PI / 2;
+  g.add(at(ring, 0, h + 1, 0));
+  const roof = solid("#EEF2F5");
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    const panel = new Mesh(new BoxGeometry(r * 0.32, 1, r * 0.5), roof);
+    panel.position.set(Math.cos(a) * r * 0.78, h + 1.5, Math.sin(a) * r * 0.78);
+    panel.rotation.y = -a + Math.PI / 2;
+    g.add(panel);
+  }
+  return g;
+}
+
+function tennis(t: Themed): Group {
+  const g = new Group();
+  g.add(stadiumBowl(t, 76, 38));
+  g.add(at(stadiumBowl(t, 44, 22), 118, 0, 40));
+  for (let i = 0; i < 6; i++) {
+    const x = -110 - (i % 2) * 26, z = -45 + Math.floor(i / 2) * 45;
+    g.add(at(new Mesh(new BoxGeometry(20, 0.2, 38), solid("#3F8F5E")), x, 0.3, z));
+    g.add(at(new Mesh(new BoxGeometry(11, 0.25, 24), glowing(t, "#3A6FB0", "#5F9BEA", 0.9, 0)), x, 0.4, z));
+  }
+  g.add(at(sign(t, "FLUSHING OPEN", 34, 5, { bg: "#EEF2F5", fg: "#2F5DA8" }, 1.6), 0, 34, 77));
+  g.add(lightPool(t, 95, C.sky, 0.4));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Queensboro Bridge: the cantilever trusses either side of the roadway (the map draws the road
+// and the traffic), towers with spires at the piers, a necklace of lights at night
+// ---------------------------------------------------------------------------
+function bridge(t: Themed): Group {
+  const g = new Group();
+  const steel = glowing(t, "#8FA4B8", "#9ED8F7", 0.35, 0);
+  const pts: [number, number][] = [[-568, 18], [-424, 88], [-244, 38], [-64, 88], [32, 52], [128, 88], [278, 38], [428, 88], [568, 18]];
+  const topAt = (x: number) => {
+    for (let i = 1; i < pts.length; i++) {
+      if (x <= pts[i][0]) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+        return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+      }
+    }
+    return pts[pts.length - 1][1];
+  };
+  const bulb = glowing(t, "#F4FBFF", "#CFE8FF", 2.6, 0);
+  const bulbGeo = new SphereGeometry(1.1, 6, 4);
+  for (const z of [-19, 19]) {
+    for (let i = 1; i < pts.length; i++) g.add(strut([pts[i - 1][0], pts[i - 1][1], z], [pts[i][0], pts[i][1], z], 2.2, steel));
+    g.add(strut([-568, 3, z], [568, 3, z], 2.6, steel));
+    let prev: [number, number, number] | null = null;
+    for (let x = -560; x <= 560; x += 35) {
+      const top = topAt(x);
+      g.add(strut([x, 3, z], [x, top, z], 1.2, steel));
+      if (prev) g.add(strut(prev, [x, top, z], 0.9, steel));
+      prev = [x, 3, z];
+    }
+    for (let x = -560; x <= 560; x += 20) g.add(at(new Mesh(bulbGeo, bulb), x, topAt(x) + 1.6, z));
+  }
+  // Towers and spires at the four piers, cross-braced over the road.
+  const stone = solid(C.stoneDark);
+  for (const [x] of pts.filter(([, y]) => y === 88)) {
+    g.add(at(new Mesh(new BoxGeometry(16, 4, 52), stone), x, 2, 0));
+    for (const z of [-19, 19]) {
+      g.add(at(new Mesh(new BoxGeometry(5, 98, 5), steel), x, 49, z));
+      g.add(at(new Mesh(new ConeGeometry(3, 14, 4), steel), x, 105, z));
+      g.add(at(new Mesh(new SphereGeometry(1.4, 6, 4), glowing(t, "#E5283F", "#FF2D3D", 3, 0.4)), x, 113, z));
+    }
+    g.add(at(new Mesh(new BoxGeometry(4, 4, 40), steel), x, 92, 0));
+    g.add(strut([x, 60, -19], [x, 92, 19], 1.5, steel));
+    g.add(strut([x, 60, 19], [x, 92, -19], 1.5, steel));
+  }
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Astoria Sound Stages: barrel-roofed sound stages behind a brick office, a marquee gate
+// ---------------------------------------------------------------------------
+function studios(t: Themed): Group {
+  const g = new Group();
+  const stageWall = facade(t, { wall: "#E9DCC6", glass: "#C9B79C", style: "industrial", lit: 0.2, seed: 41 }, 0.8);
+  const roofM = solid("#C9B79C");
+  for (const x of [-44, 0, 44]) {
+    g.add(at(litBox(t, 36, 24, 56, stageWall, roofM, C.amber, 0.4), x, 12, -24));
+    const barrel = new Mesh(new CylinderGeometry(18, 18, 56, 16, 1, false, 0, Math.PI), roofM);
+    barrel.rotation.x = Math.PI / 2;
+    barrel.rotation.y = Math.PI / 2;
+    g.add(at(barrel, x, 24, -24));
+    g.add(at(new Mesh(new BoxGeometry(12, 14, 0.4), solid("#8FA4B8")), x, 7, 4.2));
+  }
+  const office = facade(t, { wall: C.terracotta, glass: "#4E6B7A", style: "punched", lit: 0.8, seed: 43, frame: C.cream });
+  g.add(at(litBox(t, 128, 14, 18, office, solid("#9A5A46"), C.amber, 0.55), 0, 7, 18));
+  g.add(at(sign(t, "ASTORIA SOUND STAGES", 60, 6, { bg: C.ink, fg: C.amber }, 2.2), 0, 18, 18));
+  // The gate: two posts, a lintel and a marquee.
+  for (const x of [-9, 9]) g.add(at(new Mesh(new BoxGeometry(2, 9, 2), solid(C.cream)), x, 4.5, 34));
+  g.add(at(sign(t, "NOW SHOOTING", 20, 3, { bg: C.cream, fg: C.coral }, 1.8), 0, 10, 34));
+  searchlights(t, g, [[-60, 15, 18], [60, 15, 18]], 110);
+  g.add(at(lightPool(t, 40, C.amber, 0.4), 0, 0, 30));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Old School Gallery: a red-brick schoolhouse with a cupola, a walled courtyard and an art dome
+// ---------------------------------------------------------------------------
+function gallery(t: Themed): Group {
+  const g = new Group();
+  const brick = facade(t, { wall: "#B5523B", glass: "#4E6B7A", style: "punched", lit: 0.75, seed: 51, frame: C.cream });
+  const roof = solid("#7A3A2C");
+  g.add(at(litBox(t, 48, 16, 16, brick, roof, C.amber, 0.5), 0, 8, -10));
+  for (const x of [-20, 20]) g.add(at(litBox(t, 12, 16, 22, brick, roof, C.amber, 0.5), x, 8, 9));
+  g.add(at(new Mesh(new BoxGeometry(6, 5, 6), solid(C.cream)), 0, 18.5, -10));
+  const cap = new Mesh(new ConeGeometry(4.6, 5, 4), roof);
+  cap.rotation.y = Math.PI / 4;
+  g.add(at(cap, 0, 23.5, -10));
+  g.add(at(sign(t, "OLD SCHOOL GALLERY", 22, 2.6, { bg: C.cream, fg: "#B5523B" }, 1.6), 0, 12.5, -1.8));
+  // Courtyard walls.
+  const concrete = solid("#BDB6AA");
+  g.add(at(new Mesh(new BoxGeometry(52, 4, 1), concrete), 0, 2, 44));
+  for (const x of [-26, 26]) g.add(at(new Mesh(new BoxGeometry(1, 4, 24), concrete), x, 2, 32));
+  // The art dome: faceted, in the palette, glowing from inside at night.
+  const dome = new IcosahedronGeometry(8, 1);
+  const palette = [C.coral, C.tealLight, C.cream, C.sky, C.amber].map((c) => new Color(c));
+  const colors: number[] = [];
+  for (let f = 0; f < dome.attributes.position.count / 3; f++) {
+    const c = palette[f % palette.length];
+    for (let v = 0; v < 3; v++) colors.push(c.r, c.g, c.b);
+  }
+  dome.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  const domeMat = new MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.6, emissive: "#FFD58A", emissiveIntensity: 0 });
+  t.glows.push({ mat: domeMat, day: 0, night: 0.5 });
+  g.add(at(new Mesh(dome, domeMat), 0, 2, 30));
+  g.add(at(lightPool(t, 22, C.amber, 0.5), 0, 0, 30));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
-  unisphere, gantries, "twin-towers": twinTowers, club, cafe,
+  unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

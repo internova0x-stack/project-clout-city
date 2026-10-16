@@ -41,7 +41,23 @@ test("side streets are merged only when nothing nearby avoids them", () => {
 test("every landmark is a real place, and sites and traffic agree", () => {
   for (const l of LANDMARKS) {
     if (l.placeId) assert.ok(PLACES.some((p) => p.id === l.placeId), l.id);
-    assert.ok(onLandmarkSite(l.at[1], l.at[0]), l.id);
+    assert.equal(onLandmarkSite(l.at[1], l.at[0]), l.ground !== "none", l.id);
   }
-  assert.equal(landmarkSites().features.length, LANDMARKS.length);
+  assert.equal(landmarkSites().features.length, LANDMARKS.filter((l) => l.ground !== "none").length);
+});
+
+test("a bridge stands where it is: no site, no moving", () => {
+  const bridge = LANDMARKS.find((l) => l.kind === "bridge")!;
+  const over = { major: true, pts: [[bridge.at[1] - 0.01, bridge.at[0]], [bridge.at[1] + 0.01, bridge.at[0]]] as const };
+  assert.deepEqual(placeLandmark(bridge, [over]), bridge.at);
+});
+
+test("landmarks' sites don't overlap", () => {
+  const sited = LANDMARKS.filter((l) => l.ground !== "none");
+  for (const a of sited) for (const b of sited) {
+    if (a === b) continue;
+    const k = Math.cos((a.at[0] * Math.PI) / 180);
+    const d = Math.hypot((a.at[1] - b.at[1]) * k * M, (a.at[0] - b.at[0]) * M);
+    assert.ok(d > a.clear + b.clear, `${a.id} and ${b.id} are ${d.toFixed(0)} m apart`);
+  }
 });

@@ -6,7 +6,7 @@
 
 import type { LatLng } from "./geo.ts";
 
-export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe";
+export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe" | "ballpark" | "tennis" | "bridge" | "studios" | "gallery";
 
 export interface Landmark {
   id: string;
@@ -25,8 +25,11 @@ export interface Landmark {
    * (owner, Oct 16: "the white roads don't pass under them"). Traffic stops at the edge.
    */
   clear: number;
-  /** What the site's ground is: park grass or a city block. */
-  ground: "park" | "block";
+  /**
+   * What the site's ground is: park grass or a city block. "none" is a structure that stands
+   * where it is over roads or water (a bridge): no site, no placement, traffic drives through.
+   */
+  ground: "park" | "block" | "none";
 }
 
 /** Batch 1: the monument in Queens, then the first game places. */
@@ -35,6 +38,13 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "gantry-plaza", placeId: "gantry-plaza", name: "Gantry Plaza", at: [40.7454, -73.9584], kind: "gantries", facing: 270, scale: 2, clear: 75, ground: "park" },
   { id: "skybridge-tower", placeId: "skybridge-tower", name: "Skybridge Tower", at: [40.7495, -73.9395], kind: "twin-towers", facing: 180, scale: 1.3, clear: 55, ground: "block" },
   { id: "velvet-static", placeId: "velvet-static", name: "Velvet Static", at: [40.7465, -73.9455], kind: "club", facing: 180, scale: 2.2, clear: 55, ground: "block" },
+  // Batch 2: Queens landmarks from the owner's list. Not game places, so they carry a name label
+  // instead of a pin. Branded venues get invented names (no real brands, CLAUDE.md).
+  { id: "flushing-field", name: "Flushing Field", at: [40.7571, -73.8458], kind: "ballpark", facing: 225, scale: 1, clear: 150, ground: "block" },
+  { id: "open-tennis", name: "Flushing Open Tennis Center", at: [40.7505, -73.8462], kind: "tennis", facing: 180, scale: 1, clear: 105, ground: "park" },
+  { id: "queensboro-bridge", name: "Queensboro Bridge", at: [40.7557, -73.9500], kind: "bridge", facing: 209.5, scale: 1, clear: 0, ground: "none" },
+  { id: "astoria-sound-stages", name: "Astoria Sound Stages", at: [40.7564, -73.9245], kind: "studios", facing: 180, scale: 1.2, clear: 85, ground: "block" },
+  { id: "old-school-gallery", name: "Old School Gallery", at: [40.7455, -73.9474], kind: "gallery", facing: 180, scale: 1.4, clear: 50, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 
@@ -43,7 +53,7 @@ export const LANDMARKS: readonly Landmark[] = [
  * ("distance" from a building to a point inside it is 0).
  */
 export function clearOfLandmarks(list: readonly Landmark[] = LANDMARKS): unknown[] {
-  return ["all", ...list.map((l) => [">", ["distance", { type: "Point", coordinates: [l.at[1], l.at[0]] }], l.clear])];
+  return ["all", ...list.filter((l) => l.clear > 0).map((l) => [">", ["distance", { type: "Point", coordinates: [l.at[1], l.at[0]] }], l.clear])];
 }
 
 const M_PER_DEG = 111_320;
@@ -52,7 +62,7 @@ const M_PER_DEG = 111_320;
 export function landmarkSites(list: readonly Landmark[] = LANDMARKS): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
-    features: list.map((l) => {
+    features: list.filter((l) => l.ground !== "none").map((l) => {
       const k = Math.cos((l.at[0] * Math.PI) / 180);
       const ring = Array.from({ length: 41 }, (_, i) => {
         const a = ((i % 40) / 40) * Math.PI * 2;
@@ -66,7 +76,7 @@ export function landmarkSites(list: readonly Landmark[] = LANDMARKS): GeoJSON.Fe
 /** Whether a point (lng, lat) is on a landmark's site: traffic doesn't drive there. */
 export function onLandmarkSite(lng: number, lat: number, list: readonly Landmark[] = LANDMARKS): boolean {
   const k = Math.cos((lat * Math.PI) / 180);
-  return list.some((l) => Math.hypot((lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG) < l.clear);
+  return list.some((l) => l.ground !== "none" && Math.hypot((lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG) < l.clear);
 }
 
 // ---------------------------------------------------------------------------
@@ -94,7 +104,8 @@ function segDist(px: number, py: number, ax: number, ay: number, bx: number, by:
  * comes near, preferring spots that cover no side street. Returns its own spot when that's clear,
  * or when nothing nearby is.
  */
-export function placeLandmark(l: Landmark, roads: readonly RoadLine[]): LatLng {
+export function placeLandmark(l: Landmark, roads: readonly RoadLine[], others: readonly Landmark[] = []): LatLng {
+  if (l.ground === "none") return l.at;
   const k = Math.cos((l.at[0] * Math.PI) / 180);
   // Local meters around the place (x east, y north).
   const toM = (lng: number, lat: number): [number, number] => [(lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG];
@@ -107,7 +118,10 @@ export function placeLandmark(l: Landmark, roads: readonly RoadLine[]): LatLng {
       if (segDist(0, 0, a[0], a[1], b[0], b[1]) <= reach) segs.push({ major: r.major, a, b });
     }
   }
+  const near = others.filter((o) => o.id !== l.id && o.ground !== "none").map((o) => ({ at: toM(o.at[1], o.at[0]), r: o.clear + l.clear }));
   const cost = (x: number, y: number): number => {
+    // Sites never overlap.
+    for (const o of near) if (Math.hypot(x - o.at[0], y - o.at[1]) < o.r) return Infinity;
     let minors = 0;
     for (const s of segs) {
       const d = segDist(x, y, s.a[0], s.a[1], s.b[0], s.b[1]);

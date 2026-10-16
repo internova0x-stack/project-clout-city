@@ -66,6 +66,8 @@ function loadSpots(): Record<string, LatLng> {
     return {};
   }
 }
+/** Landmarks that aren't places show their name from this zoom. */
+const LABEL_ZOOM = 13.5;
 /** Placement needs every street, which the tiles carry from zoom 14. */
 const PLACE_ZOOM = 14;
 
@@ -97,6 +99,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   const [spots, setSpots] = useState<Record<string, LatLng>>(loadSpots);
   const sites = useMemo(() => withPositions(spots), [spots]);
   const sitesRef = useRef(sites);
+  const spotsRef = useRef(spots);
+  spotsRef.current = spots;
   sitesRef.current = sites;
   const siteOf = useMemo(() => new Map(sites.filter((l) => l.placeId).map((l) => [l.placeId!, l.at])), [sites]);
 
@@ -250,7 +254,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       const found: Record<string, LatLng> = {};
       for (const l of todo) {
         done.add(l.id);
-        found[l.id] = placeLandmark(l, roads);
+        found[l.id] = placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found }));
       }
       setSpots((prev) => {
         const next = { ...prev, ...found };
@@ -315,8 +319,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
 
   // A place drawn as a landmark model has its pin on the model's top, not hidden behind it:
   // its height in meters times the screen scale there, foreshortened by the tilt.
-  const lift = (pin: PlacePin, at: LatLng) => {
-    const h = landmarksRef.current?.heights.get(pin.id);
+  const lift = (id: string, at: LatLng) => {
+    const h = landmarksRef.current?.heights.get(id);
     if (!h || map!.getZoom() < LANDMARK_MIN_ZOOM) return 0;
     const a = map!.project(lngLat(at));
     const b = map!.project([at[1] + 10 / (111_320 * Math.cos((at[0] * Math.PI) / 180)), at[0]]);
@@ -330,7 +334,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       // A landmark's pin follows its model when placement moved it off a road.
       const at = siteOf.get(pin.id) ?? pin.at;
       const ground = project(at);
-      const s = { x: ground.x, y: ground.y - lift(pin, at) };
+      const s = { x: ground.x, y: ground.y - lift(pin.id, at) };
       const w = compact ? ICON_PX : pinWidth(pin);
       // Zoomed out, icons may overlap a little before they group, so more places stay visible.
       const near = compact ? 18 : (w: number, ow: number) => (ow + w) / 2 + 4;
@@ -436,6 +440,18 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 <span className="map-pin-stem" />
                 <span className="map-pin-dot" />
               </button>
+            );
+          })}
+
+          {/* Landmarks that aren't game places (a bridge, a ballpark): a name on top, no pin. */}
+          {map.getZoom() >= LABEL_ZOOM && sites.filter((l) => !l.placeId).map((l) => {
+            const ground = project(l.at);
+            const s = { x: ground.x, y: ground.y - lift(l.id, l.at) };
+            if (!visible(s)) return null;
+            return (
+              <span key={l.id} className="map-landmark-label glass-hud" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}>
+                {l.name}
+              </span>
             );
           })}
 
