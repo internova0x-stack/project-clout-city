@@ -4,7 +4,7 @@
 // never drawn: businesses in Clout City are invented (Clarifications section 4).
 
 import type { StyleSpecification } from "maplibre-gl";
-import { clearOfLandmarks, landmarkSites } from "./landmarks.ts";
+import { LANDMARKS, clearOfLandmarks, landmarkSites, type Landmark } from "./landmarks.ts";
 import { TWO_LANE_M, roadWidth } from "./scale.ts";
 
 export type MapTheme = "day" | "night";
@@ -64,7 +64,7 @@ function haze(id: string, classes: string[], w: [number, number, number], alpha:
 /** The dashed outline on locked boroughs (and the borough sheet's mini-map). */
 export const LOCKED_RED = "#E5283F";
 
-export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollection): StyleSpecification {
+export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollection, landmarks: readonly Landmark[] = LANDMARKS): StyleSpecification {
   const p = PALETTES[theme];
   const night = theme === "night";
   return {
@@ -76,7 +76,7 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
     sources: {
       osm: { type: "vector", url: TILE_SOURCE_URL, attribution: MAP_ATTRIBUTION },
       boroughs: { type: "geojson", data: boroughs },
-      "landmark-sites": { type: "geojson", data: landmarkSites() },
+      "landmark-sites": { type: "geojson", data: landmarkSites(landmarks) },
     },
     layers: [
       { id: "land", type: "background", paint: { "background-color": p.land } },
@@ -168,7 +168,7 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         // 3D buildings from OpenStreetMap heights; they rise in as you zoom to street level.
         id: "buildings-3d", type: "fill-extrusion", source: "osm", "source-layer": "building", minzoom: 13,
         // Landmark models (components/map/landmarkLayer.ts) replace the blocks they stand on.
-        filter: ["all", ["!=", ["get", "hide_3d"], true], clearOfLandmarks()],
+        filter: ["all", ["!=", ["get", "hide_3d"], true], clearOfLandmarks(landmarks)],
         paint: {
           "fill-extrusion-color": [
             "interpolate", ["linear"], ["coalesce", ["get", "render_height"], 10], 0, p.building, 80, p.buildingTall,

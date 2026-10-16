@@ -79,7 +79,8 @@ function facadeTextures(o: FacadeOpts) {
   const r = rand(o.seed);
   d.fillStyle = o.wall;
   d.fillRect(0, 0, size, size);
-  n.fillStyle = "#000";
+  // Walls glow faintly at night, as if floodlit; windows glow much brighter.
+  n.fillStyle = "#2B2118";
   n.fillRect(0, 0, size, size);
   for (let cy = 0; cy < CELLS; cy++) {
     for (let cx = 0; cx < CELLS; cx++) {
@@ -141,6 +142,48 @@ function facadeBox(w: number, h: number, d: number, side: Material, roof: Materi
     }
   }
   return new Mesh(g, [side, side, roof, roof, side, side]);
+}
+
+let washTex: CanvasTexture | null = null;
+const HIDDEN = new MeshBasicMaterial({ visible: false });
+
+/**
+ * Night glow on a building: a shell just outside its walls, bright at the foot and fading up,
+ * like floodlights washing the facade, plus a lit outline along the roof edge.
+ */
+function nightGlow(t: Themed, w: number, h: number, d: number, color: string, strength = 0.55): Group {
+  if (!washTex) {
+    const c = document.createElement("canvas");
+    c.width = 4;
+    c.height = 128;
+    const x = c.getContext("2d")!;
+    const grd = x.createLinearGradient(0, 128, 0, 0);
+    grd.addColorStop(0, "rgba(255,255,255,1)");
+    grd.addColorStop(0.45, "rgba(255,255,255,.28)");
+    grd.addColorStop(0.92, "rgba(255,255,255,.12)");
+    grd.addColorStop(1, "rgba(255,255,255,.6)");
+    x.fillStyle = grd;
+    x.fillRect(0, 0, 4, 128);
+    washTex = new CanvasTexture(c);
+  }
+  const g = new Group();
+  const wash = new MeshBasicMaterial({ map: washTex, color, transparent: true, opacity: strength, blending: AdditiveBlending, depthWrite: false });
+  const shell = new Mesh(new BoxGeometry(w + 0.6, h, d + 0.6), [wash, wash, HIDDEN, HIDDEN, wash, wash]);
+  shell.renderOrder = 2;
+  g.add(shell);
+  const edge = new MeshBasicMaterial({ color, transparent: true, opacity: 0.9, blending: AdditiveBlending, depthWrite: false });
+  for (const z of [-d / 2, d / 2]) g.add(at(new Mesh(new BoxGeometry(w + 0.7, 0.35, 0.35), edge), 0, h / 2, z));
+  for (const x of [-w / 2, w / 2]) g.add(at(new Mesh(new BoxGeometry(0.35, 0.35, d + 0.7), edge), x, h / 2, 0));
+  t.nightOnly.push(g);
+  return g;
+}
+
+/** A facade box with its night glow, centered like facadeBox. */
+function litBox(t: Themed, w: number, h: number, d: number, side: Material, roof: Material, glow: string, strength?: number): Group {
+  const g = new Group();
+  g.add(facadeBox(w, h, d, side, roof));
+  g.add(nightGlow(t, w, h, d, glow, strength));
+  return g;
 }
 
 /** A sign: text on a board, glowing at night. */
@@ -283,7 +326,7 @@ function unisphere(t: Themed): Group {
     globe.add(ring);
   }
   g.add(globe);
-  g.add(lightPool(t, 30, C.sky, 0.45));
+  g.add(lightPool(t, 40, C.sky, 0.6));
   return g;
 }
 
@@ -315,8 +358,10 @@ function gantries(t: Themed): Group {
     ramp.position.set(0, 7, 15);
     ramp.rotation.x = 0.4;
     one.add(ramp);
+    one.add(at(nightGlow(t, 13.5, 25, 11.5, "#9ED8F7", 0.4), 0, 12.5, 0));
     g.add(one);
   }
+  g.add(at(lightPool(t, 36, C.amber, 0.35), 0, 1.7, 4));
   const board = sign(t, "LONG ISLAND", 30, 4.5, { bg: C.ink, fg: "#FF4D5E" }, 2);
   g.add(at(board, 15, 28, 0));
   // Lamp posts along the pier.
@@ -336,12 +381,12 @@ function gantries(t: Themed): Group {
 function twinTowers(t: Themed): Group {
   const g = new Group();
   const roof = solid("#8FA4B8");
-  const glassA = facade(t, { wall: "#3F7F86", glass: "#9ED8F7", style: "curtain", lit: 0.45, seed: 11, frame: "#2E5F66" });
-  const glassB = facade(t, { wall: "#4C8C93", glass: "#BFE6F7", style: "curtain", lit: 0.4, seed: 23, frame: "#356B72" });
+  const glassA = facade(t, { wall: "#3F7F86", glass: "#9ED8F7", style: "curtain", lit: 0.8, seed: 11, frame: "#2E5F66" });
+  const glassB = facade(t, { wall: "#4C8C93", glass: "#BFE6F7", style: "curtain", lit: 0.75, seed: 23, frame: "#356B72" });
   const podium = facade(t, { wall: C.cream, glass: "#F2C7A0", style: "storefront", lit: 0.9, seed: 5, frame: C.stoneDark });
-  g.add(at(facadeBox(48, 12, 32, podium, solid(C.stoneDark)), 0, 6, 0));
-  g.add(at(facadeBox(18, 120, 18, glassA, roof), -12, 12 + 60, -2));
-  g.add(at(facadeBox(16, 92, 16, glassB, roof), 12, 12 + 46, -1));
+  g.add(at(litBox(t, 48, 12, 32, podium, solid(C.stoneDark), C.amber, 0.7), 0, 6, 0));
+  g.add(at(litBox(t, 18, 120, 18, glassA, roof, C.sky, 0.45), -12, 12 + 60, -2));
+  g.add(at(litBox(t, 16, 92, 16, glassB, roof, C.sky, 0.45), 12, 12 + 46, -1));
   // Crowns.
   const crownGlow = glowing(t, C.steelLight, C.sky, 1.4, 0);
   g.add(at(new Mesh(new BoxGeometry(14, 8, 14), crownGlow), -12, 136, -2));
@@ -353,7 +398,7 @@ function twinTowers(t: Themed): Group {
   // The sky bridge.
   g.add(at(new Mesh(new BoxGeometry(10, 6, 10), glowing(t, C.sky, C.amber, 1.3, 0)), 0, 76, -1.5));
   g.add(at(new Mesh(new BoxGeometry(10.5, 0.8, 10.5), solid(C.steel)), 0, 72.6, -1.5));
-  g.add(lightPool(t, 34, C.amber, 0.3));
+  g.add(lightPool(t, 48, C.amber, 0.5));
   return g;
 }
 
@@ -362,9 +407,9 @@ function twinTowers(t: Themed): Group {
 // ---------------------------------------------------------------------------
 function club(t: Themed): Group {
   const g = new Group();
-  const brick = facade(t, { wall: C.charcoal, glass: "#5A6170", style: "industrial", lit: 0.25, seed: 7 }, 0.9);
+  const brick = facade(t, { wall: C.charcoal, glass: "#5A6170", style: "industrial", lit: 0.55, seed: 7 }, 1.3);
   const roof = solid("#55545E");
-  g.add(at(facadeBox(32, 10, 20, brick, roof), 0, 5, 0));
+  g.add(at(litBox(t, 32, 10, 20, brick, roof, C.pink, 0.6), 0, 5, 0));
   // Sawtooth roof.
   for (let i = 0; i < 4; i++) {
     const tooth = new Mesh(new CylinderGeometry(3.4, 3.4, 20, 3, 1, false), roof);
@@ -381,7 +426,8 @@ function club(t: Themed): Group {
   // Entrance canopy and door.
   g.add(at(new Mesh(new BoxGeometry(9, 0.6, 3.5), solid(C.ink)), 0, 4.2, 11.6));
   g.add(at(new Mesh(new BoxGeometry(3.4, 3.8, 0.3), glowing(t, "#1B1A22", C.pink, 1.4, 0)), 0, 1.9, 10.1));
-  g.add(at(lightPool(t, 10, C.pink, 0.5), 0, 0, 14));
+  g.add(at(lightPool(t, 14, C.pink, 0.7), 0, 0, 14));
+  g.add(lightPool(t, 30, C.tealLight, 0.25));
   // Searchlights sweeping the sky (night only).
   for (const [x, phase] of [[-10, 0], [10, 1.7]] as const) {
     const pivot = at(new Group(), x, 12, 2);
@@ -406,11 +452,12 @@ function club(t: Themed): Group {
 // ---------------------------------------------------------------------------
 function cafe(t: Themed): Group {
   const g = new Group();
-  const brick = facade(t, { wall: C.terracotta, glass: "#4E6B7A", style: "punched", lit: 0.55, seed: 3, frame: C.cream });
+  const brick = facade(t, { wall: C.terracotta, glass: "#4E6B7A", style: "punched", lit: 0.85, seed: 3, frame: C.cream });
   const store = facade(t, { wall: C.cream, glass: "#F6D7A8", style: "storefront", lit: 1, seed: 9, frame: "#6B4A3A" }, 1.5);
   const roof = solid("#9A5A46");
   g.add(at(facadeBox(12, 4.5, 14, store, roof), 0, 2.25, 0));
   g.add(at(facadeBox(12, 8.5, 14, brick, roof), 0, 4.5 + 4.25, 0));
+  g.add(at(nightGlow(t, 12, 13, 14, C.amber, 0.7), 0, 6.5, 0));
   g.add(at(new Mesh(new BoxGeometry(12.8, 0.8, 14.8), solid(C.cream)), 0, 13.2, 0));
   // Striped awning.
   const c = document.createElement("canvas");
@@ -435,7 +482,8 @@ function cafe(t: Themed): Group {
   tower.add(at(new Mesh(new CylinderGeometry(2.1, 2.1, 3.6, 10), wood), 0, 4.8, 0));
   tower.add(at(new Mesh(new ConeGeometry(2.4, 1.6, 10), solid(C.ink)), 0, 7.4, 0));
   g.add(tower);
-  g.add(at(lightPool(t, 9, C.amber, 0.45), 0, 0, 9));
+  g.add(at(lightPool(t, 12, C.amber, 0.7), 0, 0, 9));
+  g.add(lightPool(t, 16, C.amber, 0.3));
   return g;
 }
 

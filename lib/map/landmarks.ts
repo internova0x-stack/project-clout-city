@@ -68,3 +68,72 @@ export function onLandmarkSite(lng: number, lat: number, list: readonly Landmark
   const k = Math.cos((lat * Math.PI) / 180);
   return list.some((l) => Math.hypot((lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG) < l.clear);
 }
+
+// ---------------------------------------------------------------------------
+// Placement (owner, Oct 16: "they should be inside the blocks"): a landmark moves to the nearest
+// spot where no main road or rail line crosses its site, covering as few side streets as it can.
+// The map runs this on the real streets around it once they've loaded (components/map/CityMap.tsx).
+// ---------------------------------------------------------------------------
+
+/** A road from the map's tiles: its points (lng, lat) and whether it's a main road or rail. */
+export interface RoadLine { major: boolean; pts: readonly (readonly [number, number])[] }
+
+export const MAJOR_ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "rail", "transit"]);
+/** How far a landmark may move from its place's coordinates, and how finely to search. */
+export const PLACE_SEARCH = { radius: 360, step: 12, majorMargin: 8 } as const;
+
+function segDist(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+  const dx = bx - ax, dy = by - ay;
+  const len = dx * dx + dy * dy;
+  const t = len ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len)) : 0;
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+
+/**
+ * Where to stand a landmark: the closest spot (within PLACE_SEARCH.radius) whose site no main road
+ * comes near, preferring spots that cover no side street. Returns its own spot when that's clear,
+ * or when nothing nearby is.
+ */
+export function placeLandmark(l: Landmark, roads: readonly RoadLine[]): LatLng {
+  const k = Math.cos((l.at[0] * Math.PI) / 180);
+  // Local meters around the place (x east, y north).
+  const toM = (lng: number, lat: number): [number, number] => [(lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG];
+  const reach = PLACE_SEARCH.radius + l.clear + PLACE_SEARCH.majorMargin;
+  const segs: { major: boolean; a: [number, number]; b: [number, number] }[] = [];
+  for (const r of roads) {
+    for (let i = 1; i < r.pts.length; i++) {
+      const a = toM(r.pts[i - 1][0], r.pts[i - 1][1]);
+      const b = toM(r.pts[i][0], r.pts[i][1]);
+      if (segDist(0, 0, a[0], a[1], b[0], b[1]) <= reach) segs.push({ major: r.major, a, b });
+    }
+  }
+  const cost = (x: number, y: number): number => {
+    let minors = 0;
+    for (const s of segs) {
+      const d = segDist(x, y, s.a[0], s.a[1], s.b[0], s.b[1]);
+      if (s.major && d < l.clear + PLACE_SEARCH.majorMargin) return Infinity;
+      if (!s.major && d < l.clear) minors++;
+    }
+    // Moving costs a meter a meter; each side street merged under the site costs as much as 150 m.
+    return Math.hypot(x, y) + minors * 150;
+  };
+  let best: [number, number] = [0, 0];
+  let bestCost = cost(0, 0);
+  if (bestCost === 0) return l.at;
+  const n = Math.floor(PLACE_SEARCH.radius / PLACE_SEARCH.step);
+  for (let i = -n; i <= n; i++) {
+    for (let j = -n; j <= n; j++) {
+      const x = i * PLACE_SEARCH.step, y = j * PLACE_SEARCH.step;
+      if (Math.hypot(x, y) > PLACE_SEARCH.radius || Math.hypot(x, y) >= bestCost) continue;
+      const c = cost(x, y);
+      if (c < bestCost) { bestCost = c; best = [x, y]; }
+    }
+  }
+  if (!Number.isFinite(bestCost)) return l.at;
+  return [l.at[0] + best[1] / M_PER_DEG, l.at[1] + best[0] / (k * M_PER_DEG)];
+}
+
+/** The landmarks with some moved to where placeLandmark stood them. */
+export function withPositions(moved: Readonly<Record<string, LatLng>>, list: readonly Landmark[] = LANDMARKS): Landmark[] {
+  return list.map((l) => (moved[l.id] ? { ...l, at: moved[l.id] } : l));
+}

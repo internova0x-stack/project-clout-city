@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
-import { onLandmarkSite } from "@/lib/map/landmarks";
+import { onLandmarkSite, type Landmark } from "@/lib/map/landmarks";
 import { laneOffsetMeters } from "@/lib/map/scale";
 import { VEHICLE_COLORS, type VehicleKind } from "./vehicleModels";
 
@@ -64,7 +64,7 @@ function place(v: Vehicle, lane: number): { at: [number, number]; bearing: numbe
   };
 }
 
-function roadPaths(map: MapLibreMap): Path[] {
+function roadPaths(map: MapLibreMap, sites: readonly Landmark[]): Path[] {
   const bounds = map.getBounds();
   const paths: Path[] = [];
   for (const f of map.querySourceFeatures("osm", { sourceLayer: "transportation" })) {
@@ -83,7 +83,7 @@ function roadPaths(map: MapLibreMap): Path[] {
         return Array.from({ length: n }, (_, j) => [x0 + ((pt[0] - x0) * (j + 1)) / n, y0 + ((pt[1] - y0) * (j + 1)) / n]);
       });
       for (const pt of dense) {
-        if (onLandmarkSite(pt[0], pt[1])) { if (out[out.length - 1].length) out.push([]); }
+        if (onLandmarkSite(pt[0], pt[1], sites)) { if (out[out.length - 1].length) out.push([]); }
         else out[out.length - 1].push(pt);
       }
       return out.filter((r) => r.length > 1);
@@ -108,7 +108,8 @@ function pickKind(cls: string): VehicleKind {
 
 const SPEED: Record<VehicleKind, [number, number]> = { car: [9, 14], suv: [9, 13], bus: [6, 9], moto: [11, 16] };
 
-export function createTraffic(map: MapLibreMap): Traffic {
+/** sites: where the landmarks stand now (they move off main roads once the streets load). */
+export function createTraffic(map: MapLibreMap, sites: () => readonly Landmark[]): Traffic {
   const parked = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   let vehicles: Vehicle[] = [];
   let last = 0;
@@ -119,7 +120,7 @@ export function createTraffic(map: MapLibreMap): Traffic {
       vehicles = [];
       return;
     }
-    const paths = roadPaths(map);
+    const paths = roadPaths(map, sites());
     if (!paths.length) return;
     vehicles = Array.from({ length: Math.min(MAX_VEHICLES, paths.length * 3) }, () => {
       const path = paths[Math.floor(Math.random() * paths.length)];

@@ -1,0 +1,47 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { LANDMARKS, landmarkSites, onLandmarkSite, placeLandmark, type RoadLine } from "../lib/map/landmarks.ts";
+import { PLACES } from "../lib/city.ts";
+
+const M = 111_320;
+const cafe = LANDMARKS.find((l) => l.id === "grind-and-gossip")!;
+const k = Math.cos((cafe.at[0] * Math.PI) / 180);
+/** A straight road through a point offset (east, north meters) from the café, running north-south or east-west. */
+const road = (east: number, north: number, dir: "ns" | "ew", major: boolean): RoadLine => {
+  const lng = cafe.at[1] + east / (k * M), lat = cafe.at[0] + north / M;
+  return { major, pts: dir === "ns" ? [[lng, lat - 0.01], [lng, lat + 0.01]] : [[lng - 0.01, lat], [lng + 0.01, lat]] };
+};
+const metersFrom = (a: readonly [number, number], b: readonly [number, number]) =>
+  Math.hypot((a[1] - b[1]) * k * M, (a[0] - b[0]) * M);
+const nearestMajor = (at: readonly [number, number], roads: RoadLine[]) => Math.min(...roads.filter((r) => r.major).map((r) => {
+  const [p, q] = r.pts;
+  return p[0] === q[0] ? Math.abs((at[1] - p[0]) * k * M) : Math.abs((at[0] - p[1]) * M);
+}));
+
+test("a landmark already inside a block stays put", () => {
+  const roads = [road(-120, 0, "ns", true), road(120, 0, "ns", true), road(0, -100, "ew", false), road(0, 100, "ew", false)];
+  assert.deepEqual(placeLandmark(cafe, roads), cafe.at);
+});
+
+test("a landmark standing on a main road moves off it, into the block", () => {
+  const roads = [road(0, 0, "ns", true), road(160, 0, "ns", true), road(0, 90, "ew", false), road(0, -90, "ew", false)];
+  const at = placeLandmark(cafe, roads);
+  assert.ok(nearestMajor(at, roads) >= cafe.clear, `still ${nearestMajor(at, roads).toFixed(1)} m from a main road`);
+  assert.ok(metersFrom(at, cafe.at) < 120, "moves only as far as it needs");
+});
+
+test("side streets are merged only when nothing nearby avoids them", () => {
+  // A side street through the spot, and a clear block 60 m east.
+  const roads = [road(0, 0, "ew", false), road(-50, 0, "ns", true), road(140, 0, "ns", true), road(0, 70, "ew", false)];
+  const at = placeLandmark(cafe, roads);
+  const north = (at[0] - cafe.at[0]) * M;
+  assert.ok(Math.abs(north) >= cafe.clear - 0.5 && Math.abs(north - 70) >= cafe.clear - 0.5, "clears both side streets");
+});
+
+test("every landmark is a real place, and sites and traffic agree", () => {
+  for (const l of LANDMARKS) {
+    if (l.placeId) assert.ok(PLACES.some((p) => p.id === l.placeId), l.id);
+    assert.ok(onLandmarkSite(l.at[1], l.at[0]), l.id);
+  }
+  assert.equal(landmarkSites().features.length, LANDMARKS.length);
+});

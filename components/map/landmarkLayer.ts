@@ -20,6 +20,8 @@ export interface LandmarkLayer {
   layer: CustomLayerInterface;
   /** Each model's height in meters (as drawn), by place id: pins stand on top of it. */
   heights: ReadonlyMap<string, number>;
+  /** Moves models to where placement stood them (lib/map/landmarks.ts placeLandmark). */
+  setPositions(list: readonly Landmark[]): void;
   setNight(night: boolean): void;
   dispose(): void;
 }
@@ -49,10 +51,12 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   const themed: Themed = newThemed();
   const root = new Group();
   const heights = new Map<string, number>();
+  const models = new Map<string, Group>();
   for (const l of list) {
     const m = mercator(l.at[0], l.at[1]);
     const model = buildLandmark(l.kind, themed);
     model.position.set((m.x - origin.x) / s, 0, (m.y - origin.y) / s);
+    models.set(l.id, model);
     model.rotation.y = ((180 - l.facing) * Math.PI) / 180;
     model.scale.setScalar(l.scale);
     model.name = l.id;
@@ -149,6 +153,15 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     layer,
     heights,
     setNight,
+    setPositions(next) {
+      for (const l of next) {
+        const model = models.get(l.id);
+        if (!model) continue;
+        const m = mercator(l.at[0], l.at[1]);
+        model.position.set((m.x - origin.x) / s, 0, (m.y - origin.y) / s);
+      }
+      map?.triggerRepaint();
+    },
     dispose() {
       renderer?.dispose();
       renderer = null;
