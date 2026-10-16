@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LANDMARKS, fitBridge, landmarkSites, onLandmarkSite, placeLandmark, type RoadLine } from "../lib/map/landmarks.ts";
+import { LANDMARKS, clearOfLandmarks, fitBridge, gridFacing, landmarkSites, onLandmarkSite, onStreet, placeLandmark, type RoadLine, type WaterArea } from "../lib/map/landmarks.ts";
 import { PLACES } from "../lib/city.ts";
 
 const M = 111_320;
@@ -74,4 +74,56 @@ test("a bridge fits its road: end to end, along the road", () => {
   assert.ok(Math.abs(((fit.facing! - 90) % 180) - 115) < 0.5, `facing ${fit.facing}`);
   assert.ok(Math.abs((fit.at[0] - bridge.at[0]) * M - 100) < 1, "centered on the road");
   assert.equal(fitBridge(bridge, [{ major: true, pts: road.pts }]), null, "no bridge road, no fit");
+});
+
+test("landmarks turn to line up with the street grid, front still toward the camera", () => {
+  // A grid turned 29 degrees: streets running at bearings 29 and 119.
+  const line = (bearingDeg: number, offset: number): RoadLine => {
+    const b = (bearingDeg * Math.PI) / 180;
+    const pt = (d: number) => {
+      const east = Math.sin(b) * d + Math.cos(b) * offset, north = Math.cos(b) * d - Math.sin(b) * offset;
+      return [cafe.at[1] + east / (k * M), cafe.at[0] + north / M] as const;
+    };
+    return { major: false, pts: [pt(-200), pt(200)] };
+  };
+  const grid = [line(29, -60), line(29, 60), line(119, -60), line(119, 60)];
+  const f = gridFacing(cafe, grid);
+  assert.ok(Math.abs(f - 209) < 0.5, `facing ${f}`); // of 29, 119, 209, 299: the one nearest south
+  assert.ok(Math.abs(((f - 180 + 540) % 360) - 180) <= 45, "still faces roughly south");
+  assert.equal(gridFacing(cafe, []), cafe.facing, "no streets: keeps its facing");
+  // A plain north-south grid keeps it facing south.
+  assert.ok(Math.abs(gridFacing(cafe, [line(0, -60), line(90, 60)]) - 180) < 0.5);
+});
+
+/** Water east of a line `east` meters from the café (a river along the shore). */
+const riverEast = (east: number): WaterArea => {
+  const lng = cafe.at[1] + east / (k * M);
+  return [[[lng, cafe.at[0] - 0.02], [lng + 0.02, cafe.at[0] - 0.02], [lng + 0.02, cafe.at[0] + 0.02], [lng, cafe.at[0] + 0.02], [lng, cafe.at[0] - 0.02]]];
+};
+
+test("a landmark by the water steps back onto land, its whole site", () => {
+  const roads = [road(-200, 0, "ns", true), road(0, -150, "ew", false), road(0, 150, "ew", false)];
+  // The shore 10 m east of its spot: half the site would be in the river.
+  const at = placeLandmark(cafe, roads, [], [riverEast(10)]);
+  const east = (at[1] - cafe.at[1]) * k * M;
+  assert.ok(east + cafe.clear <= 10 + 4, `site reaches ${(east + cafe.clear).toFixed(1)} m east, the shore is at 10`);
+  assert.deepEqual(placeLandmark(cafe, roads, [], [riverEast(200)]), cafe.at, "far from the water, it stays");
+});
+
+test("a pier park faces the water", () => {
+  const pier = { ...LANDMARKS.find((l) => l.kind === "pier-park")!, at: cafe.at };
+  const roads = [road(-80, 0, "ns", false), road(0, 60, "ew", false)];
+  assert.equal(Math.round(gridFacing(pier, roads, 250, [riverEast(40)])), 90, "east, toward the river");
+  assert.equal(Math.round(gridFacing(pier, roads)), 270, "no water: its own facing");
+});
+
+test("an elevated station sits on its street, along it, and clears only a strip", () => {
+  const station = { ...LANDMARKS.find((l) => l.kind === "el-station")!, at: cafe.at };
+  // A main road running north-south 30 m east, a side street 10 m north.
+  const spot = onStreet(station, [road(30, 0, "ns", true), road(0, 10, "ew", false)])!;
+  assert.ok(Math.abs((spot.at[1] - cafe.at[1]) * k * M - 30) < 0.5, "on the main road");
+  assert.equal(Math.round(spot.facing!) % 180, 90, "its length runs north-south");
+  assert.equal(onStreet(station, [road(300, 0, "ns", true)]), null, "no street near");
+  const strip = clearOfLandmarks([{ ...station, facing: 90 }])[1] as [string, [string, GeoJSON.Geometry], number];
+  assert.equal(strip[1][1].type, "LineString");
 });

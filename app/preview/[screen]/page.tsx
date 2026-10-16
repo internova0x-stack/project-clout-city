@@ -20,6 +20,8 @@ import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActi
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { normalizeLook } from "@/lib/look";
+import { LaunchScreen } from "@/components/LaunchScreen";
+import { LAUNCH_LINES } from "@/lib/launch";
 import type { Player } from "@/lib/player";
 
 // Development-only previews of signed-in screens with sample data, so they can be
@@ -73,7 +75,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together } = await searchParams;
+  const { p: launchP, l: launchL, time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -163,6 +165,8 @@ export default async function Preview({
     }
     case "art":
       return <PreviewArt />;
+    case "launch":
+      return <LaunchScreen progress={Number(launchP ?? 0.6)} line={LAUNCH_LINES[Number(launchL ?? 0) % LAUNCH_LINES.length]} />;
     case "room":
       return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "natural" ? "natural" : "dream"} />;
     default:
