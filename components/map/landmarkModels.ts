@@ -596,7 +596,11 @@ function tennis(t: Themed): Group {
 // ---------------------------------------------------------------------------
 function bridge(t: Themed): Group {
   const g = new Group();
-  const steel = glowing(t, "#8FA4B8", "#9ED8F7", 0.35, 0);
+  // Night (owner, Oct 16: "a yellow glow at night"): the trusses' outline lit warm yellow, a string
+  // of bulbs along the top, floodlit towers and the glow reflected on the water.
+  const YELLOW = "#FFD54A";
+  const steel = glowing(t, "#8FA4B8", YELLOW, 0.5, 0);
+  const outline = glowing(t, "#9DB0C2", YELLOW, 2.6, 0);
   const pts: [number, number][] = [[-568, 18], [-424, 88], [-244, 38], [-64, 88], [32, 52], [128, 88], [278, 38], [428, 88], [568, 18]];
   const topAt = (x: number) => {
     for (let i = 1; i < pts.length; i++) {
@@ -607,11 +611,11 @@ function bridge(t: Themed): Group {
     }
     return pts[pts.length - 1][1];
   };
-  const bulb = glowing(t, "#F4FBFF", "#CFE8FF", 2.6, 0);
-  const bulbGeo = new SphereGeometry(1.1, 6, 4);
+  const bulb = glowing(t, "#FFF3DE", "#FFE27A", 3.2, 0);
+  const bulbGeo = new SphereGeometry(2, 6, 4);
   for (const z of [-19, 19]) {
-    for (let i = 1; i < pts.length; i++) g.add(strut([pts[i - 1][0], pts[i - 1][1], z], [pts[i][0], pts[i][1], z], 2.2, steel));
-    g.add(strut([-568, 3, z], [568, 3, z], 2.6, steel));
+    for (let i = 1; i < pts.length; i++) g.add(strut([pts[i - 1][0], pts[i - 1][1], z], [pts[i][0], pts[i][1], z], 2.6, outline));
+    g.add(strut([-568, 3, z], [568, 3, z], 2.8, outline));
     let prev: [number, number, number] | null = null;
     for (let x = -560; x <= 560; x += 35) {
       const top = topAt(x);
@@ -619,21 +623,26 @@ function bridge(t: Themed): Group {
       if (prev) g.add(strut(prev, [x, top, z], 0.9, steel));
       prev = [x, 3, z];
     }
-    for (let x = -560; x <= 560; x += 20) g.add(at(new Mesh(bulbGeo, bulb), x, topAt(x) + 1.6, z));
+    for (let x = -560; x <= 560; x += 24) g.add(at(new Mesh(bulbGeo, bulb), x, topAt(x) + 2.2, z));
   }
-  // Towers and spires at the four piers, cross-braced over the road.
+  // Towers and spires at the four piers, cross-braced over the road, floodlit at night.
   const stone = solid(C.stoneDark);
   for (const [x] of pts.filter(([, y]) => y === 88)) {
     g.add(at(new Mesh(new BoxGeometry(16, 4, 52), stone), x, 2, 0));
     for (const z of [-19, 19]) {
       g.add(at(new Mesh(new BoxGeometry(5, 98, 5), steel), x, 49, z));
-      g.add(at(new Mesh(new ConeGeometry(3, 14, 4), steel), x, 105, z));
-      g.add(at(new Mesh(new SphereGeometry(1.4, 6, 4), glowing(t, "#E5283F", "#FF2D3D", 3, 0.4)), x, 113, z));
+      g.add(at(nightGlow(t, 5, 98, 5, YELLOW, 0.6), x, 49, z));
+      g.add(at(new Mesh(new ConeGeometry(3, 14, 4), outline), x, 105, z));
+      g.add(at(new Mesh(new SphereGeometry(1.6, 6, 4), glowing(t, "#E5283F", "#FF2D3D", 3, 0.4)), x, 113, z));
     }
-    g.add(at(new Mesh(new BoxGeometry(4, 4, 40), steel), x, 92, 0));
+    g.add(at(new Mesh(new BoxGeometry(4, 4, 40), outline), x, 92, 0));
     g.add(strut([x, 60, -19], [x, 92, 19], 1.5, steel));
     g.add(strut([x, 60, 19], [x, 92, -19], 1.5, steel));
   }
+  // The yellow glow on the water, the length of the bridge.
+  const reflect = lightPool(t, 1, YELLOW, 0.45);
+  reflect.scale.set(600, 70, 1);
+  g.add(reflect);
   return g;
 }
 

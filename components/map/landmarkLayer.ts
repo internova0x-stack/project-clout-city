@@ -6,7 +6,7 @@ import type { CustomLayerInterface, Map as MapLibreMap } from "maplibre-gl";
 import {
   Box3, Camera, DirectionalLight, Group, HemisphereLight, Matrix4, Scene, Vector3, WebGLRenderer,
 } from "three";
-import { LANDMARKS, type Landmark } from "@/lib/map/landmarks";
+import { BRIDGE_BUILT_M, LANDMARKS, type Landmark } from "@/lib/map/landmarks";
 import { exaggeration } from "@/lib/map/scale";
 import { animate, applyTheme, buildLandmark, newThemed, type Themed } from "./landmarkModels";
 import { buildVehicle, setVehiclesNight } from "./vehicleModels";
@@ -159,6 +159,9 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
         if (!model) continue;
         const m = mercator(l.at[0], l.at[1]);
         model.position.set((m.x - origin.x) / s, 0, (m.y - origin.y) / s);
+        model.rotation.y = ((180 - l.facing) * Math.PI) / 180;
+        // A bridge stretches along its length to reach both shores.
+        if (l.kind === "bridge") model.scale.x = l.scale * (l.length ?? BRIDGE_BUILT_M) / BRIDGE_BUILT_M;
       }
       map?.triggerRepaint();
     },

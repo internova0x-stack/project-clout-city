@@ -10,7 +10,7 @@ import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { createTraffic } from "./vehicles";
 import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
-import { LANDMARKS, MAJOR_ROAD_CLASSES, placeLandmark, withPositions, type RoadLine } from "@/lib/map/landmarks";
+import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, placeLandmark, withPositions, type RoadLine, type Spot } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -58,8 +58,8 @@ const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8,
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 /** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
-const SPOTS_KEY = "cc-landmark-spots-v1";
-function loadSpots(): Record<string, LatLng> {
+const SPOTS_KEY = "cc-landmark-spots-v2";
+function loadSpots(): Record<string, Spot> {
   try {
     return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");
   } catch {
@@ -96,7 +96,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   lockedRef.current = locked;
 
   // Landmarks stand off main roads, inside blocks (lib/map/landmarks.ts placeLandmark).
-  const [spots, setSpots] = useState<Record<string, LatLng>>(loadSpots);
+  const [spots, setSpots] = useState<Record<string, Spot>>(loadSpots);
   const sites = useMemo(() => withPositions(spots), [spots]);
   const sitesRef = useRef(sites);
   const spotsRef = useRef(spots);
@@ -248,13 +248,19 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         if (f.properties?.brunnel === "tunnel" || !(MAJOR_ROAD_CLASSES.has(cls) || cls === "minor")) continue;
         const g = f.geometry;
         const lines = g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
-        for (const line of lines) roads.push({ major: MAJOR_ROAD_CLASSES.has(cls), pts: line as [number, number][] });
+        for (const line of lines) roads.push({ major: MAJOR_ROAD_CLASSES.has(cls), bridge: f.properties?.brunnel === "bridge", pts: line as [number, number][] });
       }
       if (!roads.length) return;
-      const found: Record<string, LatLng> = {};
+      const found: Record<string, Spot> = {};
       for (const l of todo) {
         done.add(l.id);
-        found[l.id] = placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found }));
+        // A bridge fits itself to its road; anything else steps off main roads.
+        if (l.ground === "none") {
+          const fit = fitBridge(l, roads);
+          if (fit) found[l.id] = fit;
+        } else {
+          found[l.id] = { at: placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found })) };
+        }
       }
       setSpots((prev) => {
         const next = { ...prev, ...found };

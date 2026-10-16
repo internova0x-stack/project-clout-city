@@ -30,7 +30,15 @@ export interface Landmark {
    * where it is over roads or water (a bridge): no site, no placement, traffic drives through.
    */
   ground: "park" | "block" | "none";
+  /** A bridge's length between its shores, in meters (the model stretches to it). */
+  length?: number;
 }
+
+/** Where the map stood a landmark: placement moves it; a bridge also turns and stretches to its road. */
+export interface Spot { at: LatLng; facing?: number; length?: number }
+
+/** The length the bridge model is built at (components/map/landmarkModels.ts), before stretching. */
+export const BRIDGE_BUILT_M = 1136;
 
 /** Batch 1: the monument in Queens, then the first game places. */
 export const LANDMARKS: readonly Landmark[] = [
@@ -42,7 +50,7 @@ export const LANDMARKS: readonly Landmark[] = [
   // instead of a pin. Branded venues get invented names (no real brands, CLAUDE.md).
   { id: "flushing-field", name: "Flushing Field", at: [40.7571, -73.8458], kind: "ballpark", facing: 225, scale: 1, clear: 150, ground: "block" },
   { id: "open-tennis", name: "Flushing Open Tennis Center", at: [40.7505, -73.8462], kind: "tennis", facing: 180, scale: 1, clear: 105, ground: "park" },
-  { id: "queensboro-bridge", name: "Queensboro Bridge", at: [40.7557, -73.9500], kind: "bridge", facing: 209.5, scale: 1, clear: 0, ground: "none" },
+  { id: "queensboro-bridge", name: "Queensboro Bridge", at: [40.7566, -73.9529], kind: "bridge", facing: 208.5, scale: 1, clear: 0, ground: "none", length: 1305 },
   { id: "astoria-sound-stages", name: "Astoria Sound Stages", at: [40.7564, -73.9245], kind: "studios", facing: 180, scale: 1.2, clear: 85, ground: "block" },
   { id: "old-school-gallery", name: "Old School Gallery", at: [40.7455, -73.9474], kind: "gallery", facing: 180, scale: 1.4, clear: 50, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
@@ -86,7 +94,7 @@ export function onLandmarkSite(lng: number, lat: number, list: readonly Landmark
 // ---------------------------------------------------------------------------
 
 /** A road from the map's tiles: its points (lng, lat) and whether it's a main road or rail. */
-export interface RoadLine { major: boolean; pts: readonly (readonly [number, number])[] }
+export interface RoadLine { major: boolean; bridge?: boolean; pts: readonly (readonly [number, number])[] }
 
 export const MAJOR_ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "rail", "transit"]);
 /** How far a landmark may move from its place's coordinates, and how finely to search. */
@@ -147,7 +155,46 @@ export function placeLandmark(l: Landmark, roads: readonly RoadLine[], others: r
   return [l.at[0] + best[1] / M_PER_DEG, l.at[1] + best[0] / (k * M_PER_DEG)];
 }
 
-/** The landmarks with some moved to where placeLandmark stood them. */
-export function withPositions(moved: Readonly<Record<string, LatLng>>, list: readonly Landmark[] = LANDMARKS): Landmark[] {
-  return list.map((l) => (moved[l.id] ? { ...l, at: moved[l.id] } : l));
+/** The landmarks with some moved (and bridges turned and stretched) to where the map stood them. */
+export function withPositions(moved: Readonly<Record<string, Spot>>, list: readonly Landmark[] = LANDMARKS): Landmark[] {
+  return list.map((l) => {
+    const m = moved[l.id];
+    return m ? { ...l, at: m.at, facing: m.facing ?? l.facing, length: m.length ?? l.length } : l;
+  });
+}
+
+/**
+ * A bridge fitted to its road (owner, Oct 16: "it doesn't cross to the other side"): the bridge
+ * segments of the map's roads near it, along their main direction, end to end. Null when the
+ * map has no bridge road there.
+ */
+export function fitBridge(l: Landmark, roads: readonly RoadLine[]): Spot | null {
+  const k = Math.cos((l.at[0] * Math.PI) / 180);
+  const pts: [number, number][] = [];
+  for (const r of roads) {
+    if (!r.bridge) continue;
+    for (const [lng, lat] of r.pts) {
+      const p: [number, number] = [(lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG];
+      if (Math.hypot(p[0], p[1]) < 900) pts.push(p);
+    }
+  }
+  if (pts.length < 2) return null;
+  // Main direction: the principal axis of the points.
+  const mx = pts.reduce((a, p) => a + p[0], 0) / pts.length, my = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+  let sxx = 0, sxy = 0, syy = 0;
+  for (const [x, y] of pts) { sxx += (x - mx) ** 2; sxy += (x - mx) * (y - my); syy += (y - my) ** 2; }
+  const angle = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+  const ux = Math.cos(angle), uy = Math.sin(angle);
+  const along = pts.map(([x, y]) => (x - mx) * ux + (y - my) * uy);
+  const lo = Math.min(...along), hi = Math.max(...along);
+  const length = hi - lo;
+  if (length < 300) return null;
+  const cx = mx + ux * (lo + hi) / 2, cy = my + uy * (lo + hi) / 2;
+  // The model's length runs along its x axis, which points to (facing - 90) on the compass.
+  const bearing = ((Math.atan2(ux, uy) * 180) / Math.PI + 360) % 180;
+  return {
+    at: [l.at[0] + cy / M_PER_DEG, l.at[1] + cx / (k * M_PER_DEG)],
+    facing: bearing + 90,
+    length: Math.min(2000, length),
+  };
 }

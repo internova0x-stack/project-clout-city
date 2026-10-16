@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LANDMARKS, landmarkSites, onLandmarkSite, placeLandmark, type RoadLine } from "../lib/map/landmarks.ts";
+import { LANDMARKS, fitBridge, landmarkSites, onLandmarkSite, placeLandmark, type RoadLine } from "../lib/map/landmarks.ts";
 import { PLACES } from "../lib/city.ts";
 
 const M = 111_320;
@@ -60,4 +60,18 @@ test("landmarks' sites don't overlap", () => {
     const d = Math.hypot((a.at[1] - b.at[1]) * k * M, (a.at[0] - b.at[0]) * M);
     assert.ok(d > a.clear + b.clear, `${a.id} and ${b.id} are ${d.toFixed(0)} m apart`);
   }
+});
+
+test("a bridge fits its road: end to end, along the road", () => {
+  const bridge = LANDMARKS.find((l) => l.kind === "bridge")!;
+  const kb = Math.cos((bridge.at[0] * Math.PI) / 180);
+  // A road 1,400 m long running east-southeast, centered 100 m north of the bridge's data spot.
+  const pt = (east: number, north: number) => [bridge.at[1] + east / (kb * M), bridge.at[0] + (north + 100) / M] as const;
+  const dir = [Math.sin((115 * Math.PI) / 180), Math.cos((115 * Math.PI) / 180)];
+  const road: RoadLine = { major: true, bridge: true, pts: [-700, -350, 0, 350, 700].map((d) => pt(d * dir[0], d * dir[1])) };
+  const fit = fitBridge(bridge, [road, { major: true, pts: [pt(0, 400), pt(50, 400)] }])!;
+  assert.ok(Math.abs(fit.length! - 1400) < 1, `length ${fit.length}`);
+  assert.ok(Math.abs(((fit.facing! - 90) % 180) - 115) < 0.5, `facing ${fit.facing}`);
+  assert.ok(Math.abs((fit.at[0] - bridge.at[0]) * M - 100) < 1, "centered on the road");
+  assert.equal(fitBridge(bridge, [{ major: true, pts: road.pts }]), null, "no bridge road, no fit");
 });
