@@ -1741,3 +1741,93 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* The form's buttons keep their shape: Cancel at its own width, the request button fills the rest on one line. */
 .radio-form .btn { white-space:nowrap; }
 .radio-form .radio-submit { flex:1; min-width:0; width:auto; }
+
+/* ---------- v0.14 Clout TV (migration 0058): the app, the viewer, the home card, the Studio queue ---------- */
+/* Owner, Oct 16: the colours of a TV-app look the owner shared (our red-pink into coral, a soft diamond
+   lattice; never purple), with the Clout TV logo as before: "CLOUT" in white, "TV" in black on a white box. */
+.tv-bumper { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; aspect-ratio:320/120; max-width:100%; border-radius:18px; overflow:hidden;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.07) 0 1px, transparent 1px 64px),
+    linear-gradient(45deg, rgba(255,255,255,.06) 25%, transparent 25% 75%, rgba(255,255,255,.06) 75%) 0 0 / 90px 90px,
+    linear-gradient(135deg, #FF6A3D 0%, var(--primary-top) 45%, var(--primary-bottom) 100%);
+  color:#fff; box-shadow:var(--elev-2); }
+.tv-bumper-rec { position:absolute; top:10px; left:12px; font-size:11px; font-weight:800; letter-spacing:.08em; color:#fff; opacity:.95; }
+.tv-bumper-logo { display:inline-flex; align-items:center; font-size:34px; font-weight:900; letter-spacing:.02em; line-height:1; }
+.tv-bumper-logo b { display:inline-flex; align-items:center; margin-left:6px; padding:5px 8px 3px; border-radius:8px; background:#FFFFFF; color:#0B0B0E; line-height:1; }
+/* "TV" spray-painted in the Clout City logo's neon (owner, Oct 16). */
+.tv-bumper-logo b i { font-style:normal; font-family:var(--ff-marker),'Permanent Marker','Marker Felt',cursive; font-weight:400; font-size:1.12em; letter-spacing:0; display:inline-block; transform:rotate(-8deg); padding:0 .06em; background:var(--g-neon); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.tv-bumper-sub { position:absolute; left:0; right:0; bottom:12px; text-align:center; font-size:12px; font-weight:600; opacity:.9; }
+.tv-feature { position:relative; display:block; width:100%; padding:0; border:0; border-radius:18px; overflow:hidden; background:#14111A; box-shadow:var(--elev-2); cursor:pointer; aspect-ratio:4/5; max-width:100%; }
+.tv-feature img { width:100%; height:100%; object-fit:cover; display:block; }
+.tv-feature-cap { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:28px 14px 12px; color:#fff; text-align:left;
+  background:linear-gradient(transparent, rgba(20,17,26,.8)); }
+.tv-viewer-on { font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.9; }
+.tv-mine { display:flex; gap:12px; align-items:center; padding:10px; border-radius:14px; background:var(--chip-off); }
+.tv-mine img, .tv-mine-ph { width:56px; height:70px; border-radius:10px; object-fit:cover; flex:none; display:grid; place-items:center; background:#E8E1D6; }
+.tv-mine-text { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.tv-archive { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.tv-archive-item { display:flex; flex-direction:column; gap:2px; padding:0; border:0; background:none; text-align:left; cursor:pointer; min-width:0; }
+.tv-archive-item img { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:12px; display:block; }
+.tv-archive-item .meta { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tv-pick { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; width:100%; max-width:240px; margin:0 auto; aspect-ratio:4/5; padding:16px; border:2px dashed var(--primary-top); border-radius:18px; background:var(--chip-off); color:var(--text-1); font:inherit; text-align:center; cursor:pointer; overflow:hidden; }
+.tv-pick-icon { font-size:36px; }
+.tv-pick.has { padding:0; }
+.tv-pick.has { border-style:solid; border-color:transparent; background:#14111A; }
+.tv-pick img { width:100%; height:100%; object-fit:cover; }
+/* The Big Screen viewer (owner, Oct 16): our type, the red-pink frame, pendulum confetti. */
+.tv-viewer { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:200; overflow:hidden; color:#fff;
+  padding:calc(64px + var(--safe-top)) 24px calc(24px + var(--safe-bottom)); }
+.tv-viewer-scrim { position:absolute; inset:0; background:rgba(10,8,16,.9); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.tv-viewer-glow { position:absolute; left:50%; top:52%; width:520px; height:520px; transform:translate(-50%,-50%); background:radial-gradient(circle, var(--primary-glow), transparent 62%); pointer-events:none; }
+.tv-viewer-close { position:absolute; top:calc(16px + var(--safe-top)); right:16px; z-index:3; }
+.tv-viewer-body { position:relative; z-index:1; width:100%; max-width:340px; display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; }
+.tv-live { display:inline-flex; align-items:center; gap:6px; padding:5px 12px 4px; border-radius:var(--r-pill); background:linear-gradient(180deg, var(--primary-top), var(--primary-bottom));
+  font-family:var(--font-label); font-weight:700; font-size:14px; letter-spacing:.1em; box-shadow:0 4px 14px var(--primary-glow); }
+.tv-live-dot { width:7px; height:7px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
+.tv-headline { margin:0; display:flex; flex-direction:column; font-family:var(--font-display); font-weight:700; letter-spacing:-.015em; }
+.tv-headline-who { font-size:18px; line-height:24px; color:rgba(255,255,255,.9); overflow-wrap:anywhere; }
+.tv-headline-big { font-size:38px; line-height:44px; color:var(--taxi-400); text-shadow:0 2px 0 #B8410F, 0 0 24px rgba(255,194,26,.45); transform:rotate(-2deg); }
+.tv-viewer-pic { position:relative; margin:4px 0 0; width:min(100%, calc((100dvh - 340px - var(--safe-top) - var(--safe-bottom)) * 0.8)); aspect-ratio:4/5; border-radius:14px; overflow:hidden;
+  border:4px solid var(--primary-top); box-shadow:0 0 0 2px var(--primary-bottom), 0 0 34px var(--primary-glow); background:#14111A; }
+.tv-viewer-pic img { width:100%; height:100%; object-fit:cover; display:block; }
+.tv-viewer-pic figcaption { position:absolute; left:0; right:0; bottom:0; padding:40px 14px 10px; text-align:left; display:flex; flex-direction:column; background:linear-gradient(transparent, rgba(20,17,26,.85)); }
+.tv-viewer-pic em { font-style:normal; font-family:var(--font-label); font-weight:700; font-size:14px; letter-spacing:.1em; color:var(--primary-top); }
+.tv-viewer-pic figcaption span { font-family:var(--font-display); font-weight:700; font-size:20px; }
+.tv-viewer-line { position:relative; z-index:0; margin:6px 0 0; max-width:300px; font-family:var(--font-display); font-weight:700; font-size:22px; line-height:28px; letter-spacing:-.01em; text-wrap:balance; }
+.tv-viewer-line mark { position:relative; background:none; color:#fff; white-space:nowrap; }
+.tv-viewer-line mark::after { content:""; position:absolute; left:-2px; right:-2px; bottom:1px; height:8px; border-radius:4px; background:var(--primary-top); opacity:.85; z-index:-1; }
+.tv-viewer-meta { font-family:var(--font-label); font-weight:600; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.6); }
+.tv-viewer-missing { display:grid; place-items:center; height:100%; color:rgba(255,255,255,.6); }
+.tv-confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:2; }
+.tv-confetti i { position:absolute; top:-24px; animation:tv-fall linear forwards; }
+.tv-confetti s { display:block; border-radius:2px; transform-origin:50% var(--arm); transform:rotate(calc(var(--swing) * -1)); animation:tv-swing cubic-bezier(.45,0,.55,1) infinite alternate; }
+@keyframes tv-fall { to { transform:translateY(calc(100dvh + 60px)); } }
+@keyframes tv-swing { to { transform:rotate(var(--swing)); } }
+@media (prefers-reduced-motion: reduce) { .tv-confetti { display:none; } }
+.tv-prompt-thumb { width:40px; height:48px; border-radius:10px; object-fit:cover; flex:none; }
+.tv-queue { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.tv-queue-photo { aspect-ratio:4/5; border-radius:12px; overflow:hidden; background:#14111A; display:grid; place-items:center; }
+.tv-queue-photo img { width:100%; height:100%; object-fit:cover; }
+.tv-confirms { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--text-2); }
+.studio-date { height:40px; padding:0 10px; border-radius:var(--r-sm); border:1px solid #E2DBD0; font:inherit; background:#fff; }
+.map-landmark-label.tappable { pointer-events:auto; cursor:pointer; border:0; font:inherit; }
+/* Clout TV's crop widget: the billboard's 4:5 frame with the photo behind it. */
+.crop-frame { position:relative; width:100%; max-width:min(250px, calc((100dvh - 420px) * 0.8)); margin:8px auto 4px; aspect-ratio:4/5; border-radius:14px; overflow:hidden; background:#14111A; cursor:grab; user-select:none;
+  box-shadow:0 0 0 4px #14111A, 0 0 0 6px #F2A07B, var(--elev-2); }
+.crop-frame:active { cursor:grabbing; }
+.crop-img { position:absolute; left:0; top:0; max-width:none; transform-origin:0 0; pointer-events:none; }
+.crop-grid { position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(to right, transparent 33.2%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.6%, transparent 66.8%),
+             linear-gradient(to bottom, transparent 33.2%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.6%, transparent 66.8%); }
+.crop-tag { position:absolute; top:8px; left:8px; padding:3px 8px; border-radius:var(--r-pill); background:rgba(20,17,26,.7); color:#fff; font-size:11px; font-weight:700; letter-spacing:.04em; }
+.crop-zoom { display:flex; align-items:center; gap:10px; max-width:250px; width:100%; margin:0 auto; font-weight:700; color:var(--text-2); }
+.crop-zoom input { flex:1; accent-color:var(--night-900); }
+.tv-queue-card.on-now { box-shadow:0 0 0 2px #F2A07B, var(--elev-2); }
+.bubble.station { background:#FFF3DE; color:var(--night-900); align-self:flex-start; max-width:85%; }
+.station-head { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }
+.station-head .phone-back { justify-self:start; }
+.station-card { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 12px 16px; text-align:center; }
+.station-card-icon { width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-size:28px; background:var(--chip-off); }
+.tv-confirm-card { display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:16px; background:var(--chip-off); margin-top:4px; }
+.tv-rules { margin:0; padding:0 0 0 18px; display:flex; flex-direction:column; gap:4px; font-size:13px; line-height:18px; color:var(--text-2); }

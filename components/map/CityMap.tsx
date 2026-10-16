@@ -46,6 +46,10 @@ export interface CityMapProps {
   rightInset?: number;
   /** Open framed on every pin (the guest screen), leaving room for the screen's top and bottom panels. */
   fitPins?: { top: number; bottom: number };
+  /** v0.14 Clout TV: the photo on the Clout Tower's big screen (null: the station's ident). */
+  bigScreen?: { url: string | null; handle: string; photo: string } | null;
+  /** Tapping the Clout Tower's name opens today's photo. */
+  onBigScreen?: () => void;
 }
 
 const MIN_ZOOM = 9;
@@ -83,7 +87,7 @@ const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins, rightInset = 0 },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins, rightInset = 0, bigScreen = null, onBigScreen },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -250,6 +254,26 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     };
   }, [map, vehicles]);
   useEffect(() => landmarksRef.current?.setNight(theme === "night"), [theme, map]);
+  // v0.14 Clout TV: the featured photo on the Clout Tower's screen (a signed link that allows the GPU to read it).
+  const screenUrl = bigScreen?.url ?? null;
+  const screenHandle = bigScreen?.handle;
+  // Signed links change on every check; redraw only when the photo itself changes.
+  const screenKey = bigScreen?.photo ?? null;
+  const urlRef = useRef(screenUrl);
+  urlRef.current = screenUrl;
+  useEffect(() => {
+    const lm = landmarksRef.current;
+    if (!lm) return;
+    const url = urlRef.current;
+    if (!screenKey || !url) return lm.setBigScreen(null);
+    let live = true;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => { if (live) lm.setBigScreen(img, screenHandle); };
+    img.onerror = () => { if (live) lm.setBigScreen(null); };
+    img.src = url;
+    return () => { live = false; };
+  }, [screenKey, screenHandle, map, vehicles]);
   useEffect(() => landmarksRef.current?.setPositions(sites), [sites, map]);
 
   // Once a landmark's streets have loaded, stand it where no main road crosses its site.
@@ -483,9 +507,16 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             // A place's pin wins over a landmark's name where they'd overlap.
             if (placed.some((c) => Math.abs(c.x - s.x) < 90 && Math.abs(c.y - s.y) < PIN_HEIGHT_PX + 8)) return null;
             return (
+              l.kind === "clout-tower" && onBigScreen ? (
+                <button key={l.id} className="map-landmark-label glass-hud tappable" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}
+                  onClick={onBigScreen} aria-label="Clout Tower: see who's on the big screen">
+                  📺 {l.name}
+                </button>
+              ) : (
               <span key={l.id} className="map-landmark-label glass-hud" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}>
                 {l.name}
               </span>
+              )
             );
           })}
 

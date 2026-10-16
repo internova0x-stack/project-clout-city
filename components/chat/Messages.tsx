@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSummary, type ChatThread, type ReportReason } from "@/lib/chat";
 import { getStyle, type StyleId } from "@/lib/styles";
+import { STATIONS, type Station, type StationThread } from "@/lib/cloutTv";
 import type { CrushStatus, DatingApi } from "@/lib/dating";
 import { CrushButton } from "../dating/Dating";
 import { handle } from "@/lib/validation";
@@ -31,7 +32,7 @@ export function messagesLeftLine(status: ChatStatus | null): string {
 
 type Overlay = { kind: "menu" } | { kind: "block" } | { kind: "report"; messageId: number | null } | null;
 
-export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, onOutOfMessages }: {
+export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, onOutOfMessages, stations }: {
   api: ChatApi;
   /** Open (or start) a thread with this player, e.g. from their profile card. */
   openWith?: { id: string; name: string; style: string } | null;
@@ -41,7 +42,10 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
   crew?: { alerts: number; onOpen: () => void };
   /** Meeting players: the unlimited chat offer, when the day's messages run out. */
   onOutOfMessages?: () => void;
+  /** v0.14 texts from Real Clout FM and Clout TV (read-only threads). */
+  stations?: { threads: StationThread[]; onRead: (station: Station) => void };
 }) {
+  const [station, setStation] = useState<Station | null>(null);
   const [list, setList] = useState<ChatSummary[] | null>(null);
   const [status, setStatus] = useState<ChatStatus | null>(null);
   const [open, setOpen] = useState<{ id: string; name: string; style: string } | null>(openWith ?? null);
@@ -141,10 +145,50 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
   const muted = !!status?.mutedUntil || !!status?.banned;
   const out = !status?.unlimited && left <= 0;
 
+  const stationThread = station ? stations?.threads.find((t) => t.station === station) : null;
+  if (stationThread) {
+    const st = STATIONS[stationThread.station];
+    return (
+      <div className="chat-thread">
+        <div className="chat-head station-head">
+          <button className="phone-back" onClick={() => setStation(null)}>‹ Messages</button>
+          <span className="title one-line">{st.name}</span>
+          <span aria-hidden="true" />
+        </div>
+        <div className="chat-bubbles">
+          <div className="station-card">
+            <span className="station-card-icon" aria-hidden="true">{st.emoji}</span>
+            <span className="title">{st.name}</span>
+            <span className="meta">The station texts you when you&apos;re on. Replies don&apos;t reach it.</span>
+          </div>
+          {stationThread.messages.map((m) => (
+            <div key={m.id} className="bubble station"><span>{m.body}</span><span className="bubble-time">{chatTime(m.at)}</span></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (!open) {
     return (
       <div className="stack-12">
         {status && <span className="chat-left">{messagesLeftLine(status)}</span>}
+        {stations?.threads.map((t) => {
+          const last = t.messages[t.messages.length - 1];
+          return (
+            <button key={t.station} className="chat-row date-row" onClick={() => { setStation(t.station); if (t.unread) stations.onRead(t.station); }}>
+              <span className="chat-avatar" aria-hidden="true">{STATIONS[t.station].emoji}</span>
+              <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <span className="title" style={{ display: "block" }}>{STATIONS[t.station].name}</span>
+                <span className="subtext chat-last">{last?.body ?? ""}</span>
+              </span>
+              <span className="chat-meta">
+                {last && <span className="meta">{chatTime(last.at)}</span>}
+                {t.unread > 0 && <span className="count-badge">{t.unread}</span>}
+              </span>
+            </button>
+          );
+        })}
         {crew && (
           <button className="chat-row date-row" onClick={crew.onOpen}>
             <span className="chat-avatar" aria-hidden="true">👯</span>

@@ -428,7 +428,7 @@ A **Jobs** board on the Phone: post a job or take one. Paid in game cash only (n
 Two ways for players to feel famous: a shoutout on the city's radio station, and their photo on the big
 screen. Every submission is approved by the owner in the Story Studio; nothing goes public on its own.
 Players give their **Instagram handle**, not their Clout City name (owner, Oct 16: the one exception to
-"no real brand names", for this field only).
+"no real brand names", for this field only). Real Clout FM and Clout TV both use "Big Screen" capitalized.
 
 ### Real Clout FM: shoutouts on "The Wake-Up Call" (migration 0057)
 
@@ -457,11 +457,46 @@ catchphrases and backstory are invented, not modeled on any one real host.
   `radio_report()`; the Studio's `admin_shoutouts()` and `admin_shoutout_action()`. No reward is paid for
   being on air.
 
-### Clout TV: "Make it to the big screen" (next step)
+### Clout TV: "Make it to the Big Screen" (migration 0058)
 
-Players upload a photo of themselves with their Instagram handle; one approved photo a day is featured on the Clout
-Tower's big screen in Astoria, on a home card and in the Clout TV app's archive. Built as its own step;
-the screens inside clubs come later.
+Clout TV is the city's TV station. Players submit a photo of themselves; approved photos take turns on the
+Clout Tower's big screen in Astoria.
+
+- **Where**: a Clout TV app on the Phone (who's on the Big Screen now, past features, your own photos,
+  "Make it to the Big Screen"), a home card ("Now on Clout TV") once per photo, and the **Clout Tower** in
+  Astoria: a Times Square-style tower whose screen shows the live photo with "CLOUT TV" and the @handle,
+  glowing at night.
+- **Submitting**: an "Upload a photo" button, then a crop widget fixed to the billboard's frame (4:5; drag,
+  pinch or slide to zoom; the photo always covers the frame). The photo is cropped on the phone and uploaded
+  at exactly 1080 × 1350 (no location data) to a private storage bucket, in the player's own folder. Then the
+  Instagram handle and three confirmations (a photo of them or one they took; 18 or over; OK to show
+  publicly in the game), each stored with its time. One photo per player per New York day, **20 a day across
+  the city** (owner, Oct 16).
+- **Approval and the rotation** (owner, Oct 16): nothing goes up on its own. The Studio's Big Screen tab:
+  To review (Approve, Show now, Reject), Rotation (in order), On screen & past (Take down), All. **One player
+  every 3 hours**: at 12, 3, 6 and 9 o'clock New York the next approved photo goes up, oldest approval first.
+  **Show now** puts any photo up at once; **Take down** removes it and the next approved one goes up. A photo's
+  turn ends with its slot; with nobody waiting the tower says **"Make it BIG in NY"**.
+- **The Big Screen viewer**: tapping the tower (or the home card, or a photo in the app) opens the photo in
+  the billboard's red-pink frame: "LIVE ON CLOUT TV", "@handle made it to the **Big Screen**", "Now the whole
+  city knows their name", with pendulum-swinging confetti falling across the screen (off with Reduce Motion).
+  Anyone can tap it, so the copy is about the player on it.
+- **Staying live**: games check every minute and right when a new slot starts, and tapping the tower checks
+  first, so the tower and the viewer show the live photo.
+- **Removal**: the owner takes a photo down any time; a player can withdraw their own (waiting, in the
+  rotation, or on screen) from the Clout TV app, which deletes the file.
+- **Data**: `tv_submissions` (player, photo path, Instagram handle, the three confirmation times, New York
+  date, status pending/approved/featured/rejected/withdrawn/taken_down, approved and featured times);
+  `tv_state()`, `tv_submit()`, `tv_withdraw()`; the Studio's `admin_big_screen()` and
+  `admin_big_screen_action()`. Storage policies: upload to your own folder; read your own, what has been on
+  screen, and everything for Studio admins. The screens inside clubs come later.
+
+### Texts from the stations (migration 0058)
+
+A player whose photo goes up gets a text from **Clout TV**; one whose shoutout airs (or makes the wall) gets
+one from **Real Clout FM** (owner, Oct 16). They're read-only threads at the top of Messages, counted on the
+Messages badge; replies don't reach the station. `station_inbox()`, `station_read()`; sent once each when it
+happens, the next time any game checks in.
 
 ## 18. Later features
 

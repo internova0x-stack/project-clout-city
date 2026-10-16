@@ -84,6 +84,9 @@ import { Sheet } from "./Sheet";
 import { useCityClock } from "./useCityClock";
 import { usePlayersOnline } from "./usePresence";
 import { RadioBanner } from "./city/Radio";
+import { TvHomeCard, TvViewer } from "./city/CloutTv";
+import { tvCardSeenKey, type Station, type StationApi, type StationThread, type TvApi, type TvFeature, type TvState } from "@/lib/cloutTv";
+import { uploadToBigScreen } from "@/lib/tvUpload";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
@@ -175,6 +178,8 @@ export function GameShell({
   business,
   together,
   radio,
+  tv,
+  stations,
   roomMood = "dream",
   previewRankUp,
   invitedAt,
@@ -221,6 +226,10 @@ export function GameShell({
   together?: TogetherApi;
   /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
   radio?: RadioApi;
+  /** v0.14 Clout TV (migration 0058): the Clout TV app, the home card and the Clout Tower's screen; hidden until tv_state answers. */
+  tv?: TvApi;
+  /** v0.14 texts from the stations (migration 0058), read-only threads in Messages. */
+  stations?: StationApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -279,6 +288,60 @@ export function GameShell({
     const t = setInterval(() => void check(), 5 * 60_000);
     return () => { live = false; clearInterval(t); };
   }, [radio]);
+  // v0.14 Clout TV: today's feature (the home card once a feature, the tower's screen), checked every few minutes.
+  const [tvNow, setTvNow] = useState<TvState | null>(null);
+  const [tvView, setTvView] = useState<TvFeature | null>(null);
+  const [tvCardSeen, setTvCardSeen] = useState<number | null>(null);
+  const tvApi = useMemo<TvApi | undefined>(() => (tv ? { ...tv, upload: tv.upload ?? uploadToBigScreen } : undefined), [tv]);
+  // The tower shows the live photo (owner, Oct 16): check every minute (so the Studio's Show now and Take
+  // down reach everyone fast) and right when the next 3-hour slot starts.
+  const loadTv = useCallback(async () => {
+    if (!tv) return null;
+    const r = await tv.state().catch(() => null);
+    if (r?.ok) { setTvNow(r.data); return r.data; }
+    return null;
+  }, [tv]);
+  useEffect(() => {
+    if (!tv) return;
+    void loadTv();
+    const t = setInterval(() => void loadTv(), 60_000);
+    return () => clearInterval(t);
+  }, [tv, loadTv]);
+  const tvNextAt = tvNow?.nextAt;
+  useEffect(() => {
+    if (!tvNextAt) return;
+    const ms = Date.parse(tvNextAt) - Date.now() + 2_000;
+    if (ms <= 0 || ms > 6 * 3_600_000) return;
+    const t = setTimeout(() => void loadTv(), ms);
+    return () => clearTimeout(t);
+  }, [tvNextAt, loadTv]);
+  const tvFeature = tvNow?.featured ?? null;
+  // Texts from Real Clout FM and Clout TV (checked with the stations; the badge counts them).
+  const [stationThreads, setStationThreads] = useState<StationThread[]>([]);
+  useEffect(() => {
+    if (!stations) return;
+    let live = true;
+    const check = async () => {
+      const r = await stations.inbox().catch(() => null);
+      if (live && r?.ok) setStationThreads(r.data);
+    };
+    void check();
+    const t = setInterval(() => void check(), 5 * 60_000);
+    return () => { live = false; clearInterval(t); };
+  }, [stations]);
+  const readStation = (st: Station) => {
+    setStationThreads((ts) => ts.map((t) => (t.station === st ? { ...t, unread: 0 } : t)));
+    void stations?.read(st);
+  };
+  const tvCardDue = (() => {
+    if (!tvFeature || tvCardSeen === tvFeature.id) return false;
+    try { return window.localStorage.getItem(tvCardSeenKey(tvFeature.id)) !== "1"; } catch { return true; }
+  })();
+  const dismissTvCard = () => {
+    if (!tvFeature) return;
+    setTvCardSeen(tvFeature.id);
+    try { window.localStorage.setItem(tvCardSeenKey(tvFeature.id), "1"); } catch { /* shows again next visit */ }
+  };
   const closeRadioBanner = useCallback(() => {
     setRadioBanner((b) => {
       if (b) try { window.localStorage.setItem(bannerSeenKey(b.id), "1"); } catch { /* shows again next visit */ }
@@ -1668,7 +1731,10 @@ export function GameShell({
           {storyOn && flow === "none" && !arranging && !decor && !showDating && !showCrew && !showParty && !showTogether && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
-          {newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
+          {tvCardDue && tvFeature && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
+            <TvHomeCard f={tvFeature} onOpen={() => { dismissTvCard(); setTvView(tvFeature); }} onDismiss={dismissTvCard} />
+          )}
+          {!tvCardDue && newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
             <NewsPrompt item={latestNews} onOpen={() => openCityNews(latestNews.id)} onDismiss={() => setNewsCard(null)} />
           )}
         </div>
@@ -1685,6 +1751,9 @@ export function GameShell({
             daytime={daytime}
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}
+            bigScreen={tvFeature ? { url: tvFeature.url, handle: tvFeature.handle, photo: tvFeature.photo } : null}
+            // Tapping the tower checks first, so the photo that opens is the live one.
+            onBigScreen={tv ? () => void loadTv().then((st) => { const f = st ? st.featured : tvFeature; if (f) setTvView(f); else setPhone({ open: true, app: "tv" }); }) : undefined}
           />
           {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined} />}
         </>
@@ -1731,6 +1800,7 @@ export function GameShell({
         <RadioBanner s={radioBanner} api={radio} onToast={setToast} onDone={closeRadioBanner}
           onOpen={() => { closeRadioBanner(); setPhone({ open: true, app: "radio" }); }} />
       )}
+      {tvView && <TvViewer f={tvView} live={tvNow && tvView.id === tvNow.featured?.id ? { nextAt: tvNow.nextAt } : null} onClose={() => setTvView(null)} />}
       <GainToast gain={gain} message={toast} onDone={clearGain} />
       {city?.devTools && cityApi && (
         <DevClock
@@ -2014,6 +2084,8 @@ export function GameShell({
       )}
       <PhoneModal
         radio={radio && radioNow ? radio : undefined}
+        tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
+        stations={stations && stationThreads.length ? { threads: stationThreads, onRead: readStation } : undefined}
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
         jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers } : undefined}
         // The offer opens over the game, so the Phone steps aside first (it would cover the card).

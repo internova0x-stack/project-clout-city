@@ -9,6 +9,8 @@ import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { TeaApp } from "./Gossip";
 import { RadioApp } from "./Radio";
+import { TvApp } from "./CloutTv";
+import type { Station, StationThread, TvApi, TvState } from "@/lib/cloutTv";
 import type { RadioApi } from "@/lib/radio";
 import { BusinessesApp } from "./Businesses";
 import { ApartmentsApp } from "./Apartments";
@@ -21,7 +23,7 @@ import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -31,6 +33,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   { id: "tea", label: "Tea", emoji: "🍵", tile: "tree" },
   // v0.14 Real Clout FM (migration 0057); hidden until it runs.
   { id: "radio", label: "Radio", emoji: "📻", tile: "radio" },
+  // v0.14 Clout TV (migration 0058); hidden until it runs.
+  { id: "tv", label: "Clout TV", emoji: "📺", tile: "tv" },
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
   // v0.12 businesses (migration 0048); hidden until it runs.
   { id: "businesses", label: "Businesses", emoji: "🏪", tile: "condo" },
@@ -56,7 +60,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations,
 }: {
   open: boolean;
   onClose: () => void;
@@ -101,6 +105,10 @@ export function PhoneModal({
   radio?: RadioApi;
   /** A shoutout on air the player hasn't seen yet. */
   radioDot?: boolean;
+  /** v0.14 Clout TV: the Clout TV app; without it the app is hidden. */
+  tv?: { api: TvApi; onChange?: (s: TvState) => void };
+  /** v0.14 texts from Real Clout FM and Clout TV, in Messages. */
+  stations?: { threads: StationThread[]; onRead: (station: Station) => void };
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -142,7 +150,7 @@ export function PhoneModal({
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv)).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
@@ -150,7 +158,10 @@ export function PhoneModal({
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
-                      {a.id === "messages" && chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0) > 0 && <span className="count-badge">{chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0)}</span>}
+                      {a.id === "messages" && (() => {
+                        const n = chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0) + (stations?.threads.reduce((x, t) => x + t.unread, 0) ?? 0);
+                        return n > 0 && <span className="count-badge">{n}</span>;
+                      })()}
                     </span>
                     <span>{a.label}</span>
                   </button>
@@ -167,6 +178,7 @@ export function PhoneModal({
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
               {app === "radio" && radio && <RadioApp api={radio} onToast={(t) => onToast?.(t)} />}
+              {app === "tv" && tv && <TvApp api={tv.api} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
               {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
@@ -191,7 +203,7 @@ export function PhoneModal({
               {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.wins} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "tea" && tea && <TeaApp stories={tea.state.stories} cards={tea.state.cards} busy={tea.busy} onHome={() => setApp(null)} onShare={tea.onShare} onOpenCard={tea.onOpenCard} />}
               {app === "messages" && (chat
-                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} onOutOfMessages={onChatPass ? () => onChatPass(true) : undefined} />
+                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} stations={stations} onOutOfMessages={onChatPass ? () => onChatPass(true) : undefined} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}
             </div>
           )}

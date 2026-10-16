@@ -238,10 +238,13 @@ for players to feel famous, every submission approved by the owner first.
 
 1. Real Clout FM: shoutout requests in a Radio app, the Studio's Shoutouts queue, the 9 a.m. on-air banner,
    the shoutout wall, and the station on the map.
-2. Clout TV: photo submissions, the Studio's Big Screen queue, the Clout TV app and archive, the Clout Tower
-   in Astoria and the home card. The club screens come later.
+2. Clout TV: photo submissions cropped to the billboard (20 a day), the Studio's Big Screen queue with a
+   rotation of one player every 3 hours, Show now and Take down, the Clout TV app and archive, the Clout
+   Tower in Astoria, the Big Screen viewer and the home card; texts from both stations in Messages. The club
+   screens come later.
 
-**Built**: step 1 in migration 0057_clout_fm.sql (tested by `supabase/tests/clout_fm.test.sql`).
+**Built**: step 1 in migration 0057_clout_fm.sql (tested by `supabase/tests/clout_fm.test.sql`); step 2 in
+0058_clout_tv.sql (tested by `supabase/tests/clout_tv.test.sql`).
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 

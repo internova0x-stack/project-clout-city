@@ -28,6 +28,7 @@ import { gossipFind, gossipShare, gossipState } from "./gossipActions";
 import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } from "./partyActions";
 import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomActions";
 import { radioReport, radioRequest, radioState } from "./radioActions";
+import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
@@ -116,6 +117,9 @@ export default async function HomePage() {
       } : undefined}
       // Migration 0057 switches on Real Clout FM (radio_state failing hides the Radio app).
       radio={city ? { state: radioState, request: radioRequest, report: radioReport } : undefined}
+      // Migration 0058 switches on Clout TV (tv_state failing hides it). Photos upload from the browser.
+      tv={city ? { state: tvState, submit: tvSubmit, withdraw: tvWithdraw } : undefined}
+      stations={city ? { inbox: stationInbox, read: stationRead } : undefined}
       business={city ? { state: businessState, buy: buyBusiness, upgrade: upgradeBusiness, collect: collectTills, goPublic } : undefined}
       // Migration 0035 switches on gossip (gossip_state returns null before it runs).
       gossip={city ? { state: gossipState, find: gossipFind, share: gossipShare } : undefined}
