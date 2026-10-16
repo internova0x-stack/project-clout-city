@@ -71,7 +71,7 @@ alter table public.station_messages enable row level security;
 -- No policies on either table: players and the Studio go through the functions below.
 
 /** The start of the current 3-hour slot (12, 3, 6, 9 o'clock New York). */
-create function public.tv_slot_start() returns timestamptz
+create or replace function public.tv_slot_start() returns timestamptz
 language sql stable security definer set search_path = public
 as $$
   select (date_trunc('day', ny) + make_interval(hours => (extract(hour from ny)::int / h) * h)) at time zone 'America/New_York'
@@ -79,12 +79,12 @@ as $$
 $$;
 
 /** The game's clock read now (not at the transaction's start), so a put-up later in a transaction is later. */
-create function public.tv_now() returns timestamptz
+create or replace function public.tv_now() returns timestamptz
 language sql volatile security definer set search_path = public
 as $$ select public.game_now() + (clock_timestamp() - now()) $$;
 
 /** The photo on the screen now: the latest to go up in this 3-hour slot (none: the tower's "Make it BIG in NY"). */
-create function public.tv_current() returns public.tv_submissions
+create or replace function public.tv_current() returns public.tv_submissions
 language sql volatile security definer set search_path = public
 as $$
   select * from public.tv_submissions
@@ -93,13 +93,13 @@ as $$
 $$;
 
 /** Whether a stored photo is public now: it's on the screen or has been. */
-create function public.tv_photo_public(p_path text) returns boolean
+create or replace function public.tv_photo_public(p_path text) returns boolean
 language sql volatile security definer set search_path = public
 as $$ select exists (select 1 from public.tv_submissions where photo_path = p_path and status = 'featured' and featured_at <= public.tv_now()) $$;
 
 
 /** Puts a photo on the screen now and texts its player. */
-create function public.tv_put_up(p_id bigint) returns void
+create or replace function public.tv_put_up(p_id bigint) returns void
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -117,7 +117,7 @@ $$;
  * shoutout that has aired (or made the wall of a show that has aired) gets its text. Runs whenever a
  * game checks in (tv_state, station_inbox).
  */
-create function public.station_sync() returns void
+create or replace function public.station_sync() returns void
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -148,30 +148,45 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Storage: the private big-screen bucket
 -- ---------------------------------------------------------------------------
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('big-screen', 'big-screen', false, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
-on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+-- Hosted Supabase may not let the SQL editor change storage (the storage tables belong to Supabase's
+-- storage role). Then this part only warns, the rest of the migration still runs, and the bucket and its
+-- three policies are added in the dashboard instead (docs/SETUP.md, "Clout TV photo storage").
+do $storage$
+begin
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values ('big-screen', 'big-screen', false, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+  on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+exception when others then
+  raise warning 'Clout TV: could not create the big-screen bucket here (%). Create it in Storage (docs/SETUP.md).', sqlerrm;
+end
+$storage$;
 
-drop policy if exists "big-screen: upload to your own folder" on storage.objects;
-create policy "big-screen: upload to your own folder" on storage.objects for insert to authenticated
-  with check (bucket_id = 'big-screen' and split_part(name, '/', 1) = auth.uid()::text);
-drop policy if exists "big-screen: your own, features and admins" on storage.objects;
-create policy "big-screen: your own, features and admins" on storage.objects for select to authenticated
-  using (bucket_id = 'big-screen' and (split_part(name, '/', 1) = auth.uid()::text or public.tv_photo_public(name) or public.is_story_admin()));
-drop policy if exists "big-screen: delete your own" on storage.objects;
-create policy "big-screen: delete your own" on storage.objects for delete to authenticated
-  using (bucket_id = 'big-screen' and split_part(name, '/', 1) = auth.uid()::text);
+do $policies$
+begin
+  drop policy if exists "big-screen: upload to your own folder" on storage.objects;
+  create policy "big-screen: upload to your own folder" on storage.objects for insert to authenticated
+    with check (bucket_id = 'big-screen' and split_part(name, '/', 1) = auth.uid()::text);
+  drop policy if exists "big-screen: your own, features and admins" on storage.objects;
+  create policy "big-screen: your own, features and admins" on storage.objects for select to authenticated
+    using (bucket_id = 'big-screen' and (split_part(name, '/', 1) = auth.uid()::text or public.tv_photo_public(name) or public.is_story_admin()));
+  drop policy if exists "big-screen: delete your own" on storage.objects;
+  create policy "big-screen: delete your own" on storage.objects for delete to authenticated
+    using (bucket_id = 'big-screen' and split_part(name, '/', 1) = auth.uid()::text);
+exception when others then
+  raise warning 'Clout TV: could not add the big-screen storage policies here (%). Add them in Storage > Policies (docs/SETUP.md).', sqlerrm;
+end
+$policies$;
 
 -- ---------------------------------------------------------------------------
 -- Players
 -- ---------------------------------------------------------------------------
-create function public.tv_public(s public.tv_submissions) returns jsonb
+create or replace function public.tv_public(s public.tv_submissions) returns jsonb
 language sql stable security definer set search_path = public
 as $$ select jsonb_build_object('id', s.id, 'handle', s.handle, 'photo', s.photo_path, 'at', s.featured_at,
                                 'date', (s.featured_at at time zone 'America/New_York')::date) $$;
 
 /** The Clout TV app: who's on the screen, past features, the player's own photos, today's list. */
-create function public.tv_state() returns jsonb
+create or replace function public.tv_state() returns jsonb
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -201,7 +216,7 @@ end;
 $$;
 
 /** Submits an uploaded photo for the big screen, with the three confirmations. */
-create function public.tv_submit(p_path text, p_handle text, p_self boolean, p_adult boolean, p_public boolean) returns jsonb
+create or replace function public.tv_submit(p_path text, p_handle text, p_self boolean, p_adult boolean, p_public boolean) returns jsonb
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -239,7 +254,7 @@ end;
 $$;
 
 /** Withdraws the player's own photo, wherever it is; returns its path so the app can delete the file. */
-create function public.tv_withdraw(p_id bigint) returns text
+create or replace function public.tv_withdraw(p_id bigint) returns text
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -254,7 +269,7 @@ end;
 $$;
 
 /** Texts from the stations, one thread per station, newest last. Brings the stations up to date first. */
-create function public.station_inbox() returns jsonb
+create or replace function public.station_inbox() returns jsonb
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -272,7 +287,7 @@ begin
 end;
 $$;
 
-create function public.station_read(p_station text) returns void
+create or replace function public.station_read(p_station text) returns void
 language sql security definer set search_path = public
 as $$ update public.station_messages set read_at = now() where player_id = auth.uid() and station = p_station and read_at is null $$;
 
@@ -283,7 +298,7 @@ as $$ update public.station_messages set read_at = now() where player_id = auth.
  * Submissions with the player and the three confirmations: "pending" (to review), "approved" (the
  * rotation, in order), "featured" (on the screen now first, then past) or "all". Plus who's up now and when the next slot starts.
  */
-create function public.admin_big_screen(p_status text default 'pending') returns jsonb
+create or replace function public.admin_big_screen(p_status text default 'pending') returns jsonb
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -312,7 +327,7 @@ $$;
  * approve: into the rotation. show_now: on the screen at once (replaces what's up). reject. take_down:
  * off the screen (the next approved photo goes up).
  */
-create function public.admin_big_screen_action(p_id bigint, p_action text) returns void
+create or replace function public.admin_big_screen_action(p_id bigint, p_action text) returns void
 language plpgsql security definer set search_path = public
 as $$
 declare

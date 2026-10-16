@@ -195,6 +195,25 @@ it's open and visible (a gap over 5 minutes starts a new session), so it starts 
 runs. Monthly and yearly VIP renewals count once the webhook gets `invoice.paid` (step 3); the first
 payment of each membership already counts as a purchase.
 
+## 2c. Clout TV photo storage (v0.14, migration 0058)
+
+Migration 0058 tries to create the private `big-screen` storage bucket and its three policies itself. If the
+SQL editor shows a warning starting "Clout TV: could not…" (Supabase doesn't let the SQL editor change
+storage on some projects), the rest of the migration still ran; add the storage part in the dashboard:
+
+1. **Storage → New bucket**: name `big-screen`, **Public bucket off**, file size limit **5 MB**, allowed MIME
+   types `image/jpeg, image/png, image/webp`.
+2. **Storage → Policies → big-screen → New policy → For full customization**, three times (target role
+   `authenticated` each time):
+   - **Upload to your own folder**, operation INSERT, with check:
+     `bucket_id = 'big-screen' and split_part(name, '/', 1) = auth.uid()::text`
+   - **Your own, features and admins**, operation SELECT, using:
+     `bucket_id = 'big-screen' and (split_part(name, '/', 1) = auth.uid()::text or public.tv_photo_public(name) or public.is_story_admin())`
+   - **Delete your own**, operation DELETE, using:
+     `bucket_id = 'big-screen' and split_part(name, '/', 1) = auth.uid()::text`
+
+Run 0057 (Real Clout FM) before 0058. Both are safe to run again.
+
 ## 3. Local development (optional)
 
 ```bash
