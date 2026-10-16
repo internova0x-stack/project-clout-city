@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, Bungee, Inter } from "next/font/google";
+import { Barlow_Condensed, Bungee, Inter, Permanent_Marker } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
@@ -8,6 +8,8 @@ import "./globals.css";
 const bungee = Bungee({ weight: "400", subsets: ["latin"], variable: "--ff-bungee", display: "swap" });
 const barlow = Barlow_Condensed({ weight: ["600", "700"], subsets: ["latin"], variable: "--ff-barlow", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--ff-inter", display: "swap" });
+// Only the Clout TV card's spray-painted "TV" (owner, Oct 16), so it isn't preloaded.
+const marker = Permanent_Marker({ weight: "400", subsets: ["latin"], variable: "--ff-marker", display: "swap", preload: false });
 
 // Low-end phones get solid glass fills instead of backdrop blur (no-blur fallback),
 // and Android's install prompt is kept for the add-to-home-screen step.
@@ -37,7 +39,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bungee.variable} ${barlow.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${bungee.variable} ${barlow.variable} ${inter.variable} ${marker.variable}`} suppressHydrationWarning>
       <body>
         <Script id="cc-boot" strategy="beforeInteractive">{NO_BLUR_SCRIPT}</Script>
         {/* On wide screens the game sits in a phone-sized frame (see .device in globals.css). */}
