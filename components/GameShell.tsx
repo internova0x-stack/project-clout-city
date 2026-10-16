@@ -1457,7 +1457,7 @@ export function GameShell({
   const storyNow = storyOn ? (mainArc(feed) ?? feed?.arcs.find((a) => a.type === "side" && a.entitled && !a.finished) ?? null) : null;
   if (storyNow) {
     quests.push({
-      id: "story", emoji: "📖",
+      id: "story", emoji: "🗞️",
       aria: `Story: ${storyNow.title}, day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}${unseenBeats(feed) ? ", new chapters" : ""}`,
       dot: unseenBeats(feed) > 0,
       onOpen: () => openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null),
