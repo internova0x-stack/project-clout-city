@@ -217,7 +217,14 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   useEffect(() => {
     if (!map) return;
     const traffic = vehicles ? createTraffic(map, () => sitesRef.current) : undefined;
+    const t0 = performance.now();
     const lm = createLandmarkLayer(undefined, traffic);
+    if (process.env.NODE_ENV !== "production") {
+      const w = window as unknown as { __launch?: Record<string, number> };
+      w.__launch = { ...w.__launch, landmarksBuildMs: performance.now() - t0, landmarksBuiltAt: performance.now() };
+      map.once("idle", () => { w.__launch = { ...w.__launch, firstIdleAt: performance.now() }; });
+      map.once("render", () => { w.__launch = { ...w.__launch, firstRenderAt: performance.now() }; });
+    }
     landmarksRef.current = lm;
     lm.setPositions(sitesRef.current);
     lm.setNight(themeRef.current === "night");
