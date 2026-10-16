@@ -10,7 +10,7 @@ import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { createTraffic } from "./vehicles";
 import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
-import { LANDMARKS, MAJOR_ROAD_CLASSES, placeLandmark, withPositions, type RoadLine } from "@/lib/map/landmarks";
+import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, placeLandmark, withPositions, type RoadLine, type Spot } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -58,14 +58,16 @@ const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8,
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 /** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
-const SPOTS_KEY = "cc-landmark-spots-v1";
-function loadSpots(): Record<string, LatLng> {
+const SPOTS_KEY = "cc-landmark-spots-v2";
+function loadSpots(): Record<string, Spot> {
   try {
     return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");
   } catch {
     return {};
   }
 }
+/** Landmarks that aren't places show their name from this zoom. */
+const LABEL_ZOOM = 13.5;
 /** Placement needs every street, which the tiles carry from zoom 14. */
 const PLACE_ZOOM = 14;
 
@@ -94,9 +96,11 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   lockedRef.current = locked;
 
   // Landmarks stand off main roads, inside blocks (lib/map/landmarks.ts placeLandmark).
-  const [spots, setSpots] = useState<Record<string, LatLng>>(loadSpots);
+  const [spots, setSpots] = useState<Record<string, Spot>>(loadSpots);
   const sites = useMemo(() => withPositions(spots), [spots]);
   const sitesRef = useRef(sites);
+  const spotsRef = useRef(spots);
+  spotsRef.current = spots;
   sitesRef.current = sites;
   const siteOf = useMemo(() => new Map(sites.filter((l) => l.placeId).map((l) => [l.placeId!, l.at])), [sites]);
 
@@ -211,8 +215,9 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     lm.setNight(themeRef.current === "night");
     const ensure = () => {
       if (!map.isStyleLoaded() || map.getLayer(LANDMARK_LAYER_ID)) return;
-      // Under the bridges, street names and pins; level with the 3D blocks.
-      map.addLayer(lm.layer, map.getLayer("bridge-casing") ? "bridge-casing" : undefined);
+      // Above the locked boroughs' dark veil (owner, Oct 16: the bridge's Manhattan end was covered
+      // at night), under the street names and pins; level with the 3D blocks by depth.
+      map.addLayer(lm.layer, map.getLayer("street-names") ? "street-names" : undefined);
     };
     ensure();
     map.on("styledata", ensure);
@@ -244,13 +249,19 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         if (f.properties?.brunnel === "tunnel" || !(MAJOR_ROAD_CLASSES.has(cls) || cls === "minor")) continue;
         const g = f.geometry;
         const lines = g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
-        for (const line of lines) roads.push({ major: MAJOR_ROAD_CLASSES.has(cls), pts: line as [number, number][] });
+        for (const line of lines) roads.push({ major: MAJOR_ROAD_CLASSES.has(cls), bridge: f.properties?.brunnel === "bridge", pts: line as [number, number][] });
       }
       if (!roads.length) return;
-      const found: Record<string, LatLng> = {};
+      const found: Record<string, Spot> = {};
       for (const l of todo) {
         done.add(l.id);
-        found[l.id] = placeLandmark(l, roads);
+        // A bridge fits itself to its road; anything else steps off main roads.
+        if (l.ground === "none") {
+          const fit = fitBridge(l, roads);
+          if (fit) found[l.id] = fit;
+        } else {
+          found[l.id] = { at: placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found })) };
+        }
       }
       setSpots((prev) => {
         const next = { ...prev, ...found };
@@ -315,8 +326,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
 
   // A place drawn as a landmark model has its pin on the model's top, not hidden behind it:
   // its height in meters times the screen scale there, foreshortened by the tilt.
-  const lift = (pin: PlacePin, at: LatLng) => {
-    const h = landmarksRef.current?.heights.get(pin.id);
+  const lift = (id: string, at: LatLng) => {
+    const h = landmarksRef.current?.heights.get(id);
     if (!h || map!.getZoom() < LANDMARK_MIN_ZOOM) return 0;
     const a = map!.project(lngLat(at));
     const b = map!.project([at[1] + 10 / (111_320 * Math.cos((at[0] * Math.PI) / 180)), at[0]]);
@@ -330,7 +341,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       // A landmark's pin follows its model when placement moved it off a road.
       const at = siteOf.get(pin.id) ?? pin.at;
       const ground = project(at);
-      const s = { x: ground.x, y: ground.y - lift(pin, at) };
+      const s = { x: ground.x, y: ground.y - lift(pin.id, at) };
       const w = compact ? ICON_PX : pinWidth(pin);
       // Zoomed out, icons may overlap a little before they group, so more places stay visible.
       const near = compact ? 18 : (w: number, ow: number) => (ow + w) / 2 + 4;
@@ -436,6 +447,18 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 <span className="map-pin-stem" />
                 <span className="map-pin-dot" />
               </button>
+            );
+          })}
+
+          {/* Landmarks that aren't game places (a bridge, a ballpark): a name on top, no pin. */}
+          {map.getZoom() >= LABEL_ZOOM && sites.filter((l) => !l.placeId).map((l) => {
+            const ground = project(l.at);
+            const s = { x: ground.x, y: ground.y - lift(l.id, l.at) };
+            if (!visible(s)) return null;
+            return (
+              <span key={l.id} className="map-landmark-label glass-hud" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}>
+                {l.name}
+              </span>
             );
           })}
 
