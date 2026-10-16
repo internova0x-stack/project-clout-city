@@ -60,7 +60,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm,
 }: {
   open: boolean;
   onClose: () => void;
@@ -105,6 +105,8 @@ export function PhoneModal({
   radio?: RadioApi;
   /** A shoutout on air the player hasn't seen yet. */
   radioDot?: boolean;
+  /** v0.14: opened from a station's button, straight to the Radio or Clout TV form. */
+  openForm?: boolean;
   /** v0.14 Clout TV: the Clout TV app; without it the app is hidden. */
   tv?: { api: TvApi; onChange?: (s: TvState) => void };
   /** v0.14 texts from Real Clout FM and Clout TV, in Messages. */
@@ -177,8 +179,8 @@ export function PhoneModal({
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
-              {app === "radio" && radio && <RadioApp api={radio} onToast={(t) => onToast?.(t)} />}
-              {app === "tv" && tv && <TvApp api={tv.api} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
+              {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
+              {app === "tv" && tv && <TvApp api={tv.api} startForm={openForm && app === initialApp} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
               {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (

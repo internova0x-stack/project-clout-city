@@ -510,3 +510,15 @@ Not part of P1; don't build yet. Each needs more players or more art before it's
 | NPC conversations | Back-and-forth talks with choices | Needs a dialogue system and more writing each week |
 | News on the map | Headlines pop up at the places they mention | After the News feed proves itself |
 | Social Scene update | Speed dating, compliment polls, an avatar-only fit-check feed | Needs enough players online at once |
+
+### The stations as places (migration 0059; owner, Oct 16 testing)
+- Real Clout FM and the Clout Tower are places with the full place treatment: a card with their own
+  illustration and lore, a room inside, a pin on their landmark, and they're listed first in Places.
+- **Real Clout FM** (template `radio`): a studio with the broadcast desk, the ON AIR sign and a couch.
+  DJ Sharm Almight is the regular (at the desk, with evergreen lines). Actions: "Sit in on The Wake-Up
+  Call" and **Send Radio Shoutout** (the desk, or the button), which opens the Radio app's request form.
+- **Clout Tower** (template `broadcast`): the control room with a wall screen, cameras and a ring light.
+  Actions: "Watch the Big Screen with the crew", **Get on Billboard** (the ring light), which opens Clout
+  TV's upload, and "On the Big Screen now" (the wall screen, also on the card from anywhere).
+- The station buttons work once you're there, like every place; the Radio and Clout TV apps still work
+  from the Phone anywhere. The Radio app shows even when today's show can't load, and says why.

@@ -519,6 +519,99 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(w, 1.22, 0.04, boardMat, 0, 0.99, 0.01);
       return { group: g };
     }
+    // ---- v0.14 On Air: Real Clout FM's studio and Clout TV's control room ----
+    case "micDesk": {
+      // The broadcast desk: a mixing board, two monitors and the host's mic on a boom arm.
+      box(w, 0.74, d, "#2A2530");
+      box(w + 0.04, 0.04, d + 0.04, "#FF2E88", 0, 0.74);
+      box(1.0, 0.06, 0.45, BLACK, 0, 0.78, 0.1);
+      for (let i = 0; i < 8; i++) box(0.05, 0.03, 0.18, i % 3 ? METAL : "#FFB23D", -0.4 + i * 0.115, 0.84, 0.12);
+      for (const x of [-0.95, 0.95]) {
+        box(0.6, 0.38, 0.04, BLACK, x, 0.95, -0.25);
+        box(0.54, 0.32, 0.02, glow("#7FC8E8", 0.8), x, 0.98, -0.22);
+        box(0.06, 0.2, 0.06, METAL, x, 0.78, -0.27);
+      }
+      cyl(0.02, 0.02, 0.55, METAL, 0.2, 0.78, -0.15);
+      const arm = box(0.03, 0.03, 0.55, METAL, 0.2, 1.3, 0.1);
+      arm.rotation.x = -0.35;
+      cyl(0.07, 0.06, 0.2, "#3A3540", 0.2, 1.18, 0.38, 12);
+      return { group: g };
+    }
+    case "onAirSign": {
+      // ON AIR, lit red-pink: always on (nobody knows where the switch is).
+      let face: Material = glow("#FF2E88", 1.4);
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 256; c.height = 96;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#FF2E88"; x.fillRect(0, 0, c.width, c.height);
+          x.fillStyle = "#FFF6E0"; x.font = "900 54px system-ui, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
+          x.fillText("ON AIR", c.width / 2, c.height / 2 + 2);
+          face = k.mat("#ffffff", { map: new CanvasTexture(c), emissive: "#FF2E88", emissiveIntensity: opts.night ? 0.5 : 0.25 });
+        }
+      }
+      box(w + 0.08, 0.6, 0.06, BLACK, 0, 1.9, -0.03);
+      box(w, 0.52, 0.04, face, 0, 1.94, 0.02);
+      return { group: g };
+    }
+    case "soundPanel": {
+      // Acoustic foam in a checkerboard, so the jingles don't echo.
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
+        const tile = box(w / 6 - 0.03, 0.26, 0.08, (r + c) % 2 ? "#1A2B33" : "#24414C", -w / 2 + (c + 0.5) * (w / 6), 0.9 + r * 0.29, 0);
+        tile.rotation.z = (r + c) % 2 ? Math.PI / 2 : 0;
+      }
+      return { group: g };
+    }
+    case "bigScreen": {
+      // The control room's wall screen: Clout TV's ident ("Make it BIG in NY"), like the tower's.
+      let face: Material = glow("#FF2E88", 0.9);
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 288;
+        const x = c.getContext("2d");
+        if (x) {
+          const grad = x.createLinearGradient(0, 0, c.width, c.height);
+          grad.addColorStop(0, "#FF6A3D"); grad.addColorStop(1, "#FF2E88");
+          x.fillStyle = grad; x.fillRect(0, 0, c.width, c.height);
+          x.textAlign = "center"; x.textBaseline = "middle";
+          x.fillStyle = "#FFFFFF"; x.font = "900 74px system-ui, sans-serif";
+          x.fillText("CLOUT", c.width / 2 - 52, 120);
+          x.fillRect(c.width / 2 + 92, 82, 104, 78);
+          x.fillStyle = "#14111A"; x.fillText("TV", c.width / 2 + 144, 124);
+          x.fillStyle = "#FFF6E0"; x.font = "700 30px system-ui, sans-serif";
+          x.fillText("Make it BIG in NY", c.width / 2, 210);
+          face = k.mat("#ffffff", { map: new CanvasTexture(c), emissive: "#FFFFFF", emissiveIntensity: opts.night ? 0.35 : 0.15 });
+        }
+      }
+      box(w + 0.12, 2.0, 0.08, BLACK, 0, 0.7, -0.04);
+      box(w, 1.88, 0.04, face, 0, 0.76, 0.02);
+      return { group: g };
+    }
+    case "tvCamera": {
+      // A studio camera on a tripod, red tally light on top.
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2;
+        const leg = box(0.04, 1.2, 0.04, METAL, Math.cos(a) * 0.22, 0, Math.sin(a) * 0.22);
+        leg.rotation.set(Math.sin(a) * 0.22, 0, -Math.cos(a) * 0.22);
+      }
+      box(0.32, 0.3, 0.55, BLACK, 0, 1.18, 0);
+      cyl(0.11, 0.13, 0.2, "#3A3540", 0, 1.33, 0.36, 14).rotation.x = Math.PI / 2;
+      box(0.06, 0.06, 0.06, glow("#FF2E88", 1.6), 0.1, 1.5, -0.15);
+      return { group: g };
+    }
+    case "ringLight": {
+      // The billboard photo spot: a ring light on a stand, glowing warm white.
+      cyl(0.03, 0.03, 1.5, METAL, 0, 0, 0);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.32, 0.04, 8, 28)), glow("#FFF6E0", 1.4));
+      ring.position.set(0, 1.62, 0);
+      g.add(ring);
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2;
+        box(0.3, 0.03, 0.04, METAL, Math.cos(a) * 0.14, 0, Math.sin(a) * 0.14).rotation.y = -a;
+      }
+      return { group: g };
+    }
     case "stairs": {
       // v0.11 the exclusive venue: a short flight rising toward the back, with a rail on one side.
       const steps = 6;

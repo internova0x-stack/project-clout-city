@@ -30,7 +30,9 @@ export type FurnitureKind =
   // #19 bigger homes: bathrooms, kitchen islands, bedside tables
   | "bathtub" | "toilet" | "bathSink" | "kitchenIsland" | "nightstand" | "hotTub"
   // #19 clubs: the restroom floor
-  | "stall";
+  | "stall"
+  // v0.14 On Air: Real Clout FM's studio and Clout TV's control room
+  | "micDesk" | "onAirSign" | "soundPanel" | "bigScreen" | "tvCamera" | "ringLight";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -42,6 +44,8 @@ export type ItemUse =
   | { kind: "cook" }
   /** v0.10 the lotto counter: the scratch-card games. */
   | { kind: "lotto" }
+  /** v0.14 On Air: the stations' buttons (Send Radio Shoutout, Get on Billboard, the Big Screen). */
+  | { kind: "station"; what: "shoutout" | "billboard" | "watch" }
   /** v0.11 the exclusive venue: stairs to another floor of the building. */
   | { kind: "floor"; to: number }
   /** #19 clubs: Listen in at the restroom mirrors (juicier gossip, migration 0046). */
@@ -143,6 +147,12 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   tree: { w: 0.8, d: 0.8, label: "Tree" },
   railing: { w: 8.0, d: 0.2, label: "Railing" },
   lottoCounter: { w: 2.6, d: 0.8, label: "Counter" },
+  micDesk: { w: 2.8, d: 0.9, label: "The desk" },
+  onAirSign: { w: 1.4, d: 0.2, label: "On Air" },
+  soundPanel: { w: 1.8, d: 0.15, label: "Foam" },
+  bigScreen: { w: 3.4, d: 0.2, label: "The Big Screen" },
+  tvCamera: { w: 0.7, d: 0.7, label: "Camera" },
+  ringLight: { w: 0.7, d: 0.7, label: "Ring light" },
   cardRack: { w: 1.4, d: 0.35, label: "Scratch cards" },
   starSign: { w: 1.6, d: 0.2, label: "Sign" },
   lottoBoard: { w: 1.8, d: 0.2, label: "Odds board" },
@@ -429,7 +439,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -628,6 +638,40 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     ],
     spawn: [0.2, 1.9],
     npcs: [{ x: -0.6, z: -2.4, facing: 0 }, { x: 1.4, z: 0.4, facing: 2.4 }],
+  },
+  // v0.14 On Air (owner, Oct 16): Real Clout FM's studio. DJ Sharm Almight sits at the desk; the desk
+  // (and the mic in front of it) is "Send Radio Shoutout"; the couch is where guests sit in on the show.
+  radio: {
+    id: "radio", w: 6.4, d: 5.6, wall: "#1F3A44", wallAccent: "#FF2E88", floor: "#9A6B45", floorKind: "wood", window: false, alwaysLit: true,
+    items: [
+      { id: "desk", kind: "micDesk", x: 0.0, z: -1.6, rot: 0, use: { kind: "station", what: "shoutout" }, label: "Send Radio Shoutout" },
+      { id: "on-air", kind: "onAirSign", x: -1.4, z: -2.7, rot: 0 },
+      { id: "foam", kind: "soundPanel", x: 1.35, z: -2.72, rot: 0 },
+      { id: "speaker", kind: "speaker", x: -2.8, z: -2.3, rot: 0 },
+      { id: "speaker-2", kind: "speaker", x: 2.8, z: -2.3, rot: 0 },
+      { id: "couch", kind: "sofa", x: -1.8, z: 1.2, rot: 1, color: "#FF6A3D", use: { kind: "action", actionId: "*0" }, label: "Sit in on the show" },
+      { id: "rug", kind: "rug", x: 0.6, z: 1.0, rot: 0, color: "#FFB23D" },
+      { id: "plant", kind: "plant", x: 2.8, z: 2.3, rot: 0 },
+    ],
+    spawn: [0.8, 1.9],
+    npcs: [{ x: 0.0, z: -2.4, facing: 0, seated: true }, { x: 1.9, z: 0.0, facing: 2.4 }],
+  },
+  // v0.14 On Air: Clout TV's control room at the foot of the tower. The wall screen shows what's on the
+  // Big Screen now; the ring light by the backdrop is "Get on Billboard".
+  broadcast: {
+    id: "broadcast", w: 7.2, d: 6.0, wall: "#2A2530", wallAccent: "#FF6A3D", floor: "#3A3440", floorKind: "tile", window: false, alwaysLit: true,
+    items: [
+      { id: "screen", kind: "bigScreen", x: -0.6, z: -2.9, rot: 0, use: { kind: "station", what: "watch" }, label: "On the Big Screen" },
+      { id: "ring", kind: "ringLight", x: 2.6, z: -1.4, rot: 3, use: { kind: "station", what: "billboard" }, label: "Get on Billboard" },
+      { id: "backdrop", kind: "rug", x: 2.6, z: -0.2, rot: 1, color: "#FF2E88" },
+      { id: "camera", kind: "tvCamera", x: -2.6, z: -0.2, rot: 1 },
+      { id: "camera-2", kind: "tvCamera", x: 0.6, z: 0.6, rot: 2 },
+      { id: "couch", kind: "sofa", x: -0.8, z: 1.9, rot: 2, color: "#FF6A3D", use: { kind: "action", actionId: "*0" }, label: "Watch with the crew" },
+      { id: "plant", kind: "plant", x: 3.2, z: 2.5, rot: 0 },
+      { id: "plant-2", kind: "plant", x: -3.2, z: 2.5, rot: 0 },
+    ],
+    spawn: [1.4, 2.4],
+    npcs: [{ x: -1.8, z: -1.6, facing: 0.6 }, { x: 0.4, z: -1.0, facing: 3.0 }],
   },
   // ---- v0.9 monument plazas (#32): one shared outdoor plaza, each with its own landmark ----
   unisphere: {
@@ -1125,7 +1169,7 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
  */
 export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
-  unisphere: 7, gantries: 7, office: 5, civic: 5, gym: 5, plaza: 7, penthouse: 10,
+  unisphere: 7, gantries: 7, office: 5, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {

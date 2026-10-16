@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -56,6 +56,11 @@ export interface PlaceHandlers {
   here?: (placeId: string) => PlaceCounts[string] | undefined;
   /** v0.10 Lucky Star Lotto's counter (migration 0032). */
   onOpenLotto?: (placeId: string) => void;
+  /**
+   * v0.14 On Air: the stations' own buttons. "shoutout" and "billboard" open the Radio and Clout TV
+   * apps' forms (there, on arrival); "watch" opens the Big Screen's photo (from anywhere).
+   */
+  onStation?: (what: "shoutout" | "billboard" | "watch") => void;
   /** v0.8 grocery bundles at supermarkets (migration 0027). */
   onBuyGroceries?: (placeId: string, bundleId: string) => void;
   /** The story world (v0.4): closures, prices, story events and tasks. */
@@ -204,6 +209,17 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           </div>
         );
       })()}
+      {handlers.onStation && isStation(place) && !world.closed && STATION_ROWS.filter((r) => place.tags.includes(r.tag)).map((r) => (
+        <div className="action-row" key={r.what}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span className="title" style={{ display: "block" }}>{r.title}</span>
+            {!compact && <span className="subtext" style={{ display: "block" }}>{r.blurb}</span>}
+          </div>
+          {preview && !r.anywhere ? pill(r.button) : away && !r.anywhere ? <span className="lock-chip">On arrival</span> : (
+            <button className={`btn ${r.anywhere ? "btn-secondary" : "btn-taxi"} btn-sm`} onClick={() => handlers.onStation!(r.what)}>{r.button}</button>
+          )}
+        </div>
+      ))}
       {handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
         const av = groceryAvailability(b, state);
         const room = CITY_ECONOMY.groceries.fridgeMax - (state.player.fridge_meals ?? 0);
@@ -338,6 +354,13 @@ export function PlaceTasks({ place, state }: { place: Place; state: CityState })
  * v0.11 (spec section 11): a place's actions start folded away (the card stays short), with what's
  * here in one line and today's tasks ticked; one tap opens the full list.
  */
+/** v0.14 On Air: what each station offers on its card (owner, Oct 16: "Send Radio Shoutout", "Get on Billboard"). */
+const STATION_ROWS: { tag: "radio" | "tv"; what: "shoutout" | "billboard" | "watch"; name: string; title: string; blurb: string; button: string; anywhere?: boolean }[] = [
+  { tag: "radio", what: "shoutout", name: "Send Radio Shoutout", title: "🎙️ Send Radio Shoutout", blurb: "One a day. DJ Sharm Almight reads one on The Wake-Up Call at 9 a.m.", button: "Send" },
+  { tag: "tv", what: "billboard", name: "Get on Billboard", title: "📸 Get on Billboard", blurb: "Your photo, forty feet tall over Astoria for three hours. The owner picks.", button: "Upload" },
+  { tag: "tv", what: "watch", name: "On the Big Screen", title: "📺 On the Big Screen now", blurb: "See who made it.", button: "Watch", anywhere: true },
+];
+
 function ActionsSection({ place, state, handlers, enterable, onGoInside }: { place: Place; state: CityState; handlers: PlaceHandlers; enterable: boolean; onGoInside?: () => void }) {
   const [open, setOpen] = useState(false);
   const world = placeStory(handlers.story ?? null, place);
@@ -345,6 +368,7 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
     ...place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => a.label),
     ...(handlers.gossip && !world.closed ? ["Listen in"] : []),
     ...(handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed ? ["Scratch cards"] : []),
+    ...(handlers.onStation && isStation(place) && !world.closed ? STATION_ROWS.filter((r) => place.tags.includes(r.tag) && !r.anywhere).map((r) => r.name) : []),
     ...(handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed ? ["Groceries"] : []),
     ...(handlers.onBarDrink && hasBar(place.tags) && !world.closed ? ["A drink"] : []),
     ...CLUB_EVENTS.filter((e) => e.placeId === place.id).map((e) => e.name),
@@ -699,7 +723,8 @@ export function InteriorScene({
 export function PlacesSheet({
   open, onClose, from, onPick, state, story = null,
 }: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null }) {
-  const rows = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
+  // The stations come first (owner, Oct 16), then everything else nearest first.
+  const rows = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at), s: isStation(p) ? 0 : 1 })).sort((a, b) => a.s - b.s || a.d - b.d);
   return (
     <Sheet open={open} onClose={onClose} label="Places">
       <div className="stack-16">

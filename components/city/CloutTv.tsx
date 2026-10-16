@@ -108,15 +108,23 @@ export function TvHomeCard({ f, onOpen, onDismiss }: { f: TvFeature; onOpen: () 
   );
 }
 
-export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: string) => void; onChange?: (s: TvState) => void }) {
+/** startForm: opened from the tower's "Get on Billboard", straight to the upload when today allows one. */
+export function TvApp({ api, onToast, onChange, startForm }: { api: TvApi; onToast: (t: string) => void; onChange?: (s: TvState) => void; startForm?: boolean }) {
   const [s, setS] = useState<TvState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState(false);
+  const started = useRef(false);
   const [view, setView] = useState<TvFeature | null>(null);
   const [busy, setBusy] = useState<number | null>(null);
   const load = async () => {
     const r = await api.state();
-    if (r.ok) { setS(r.data); setError(null); onChange?.(r.data); } else setError(r.error);
+    if (r.ok) {
+      setS(r.data);
+      setError(null);
+      onChange?.(r.data);
+      if (startForm && !started.current && !r.data.submittedToday && r.data.left > 0) setForm(true);
+      started.current = true;
+    } else setError(r.error);
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { void load(); }, [api]);

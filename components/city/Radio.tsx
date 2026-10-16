@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   RADIO, cleanHandle, localAirTime, maskWords, messageProblem, type RadioApi, type RadioState, type Shoutout,
 } from "@/lib/radio";
@@ -94,13 +94,20 @@ function MineNote({ mine, today }: { mine: NonNullable<RadioState["mine"]>; toda
   return <div className="radio-mine">📨 Your shoutout is in. If {RADIO.host} picks it, you&apos;ll hear it at 9:00 a.m. New York.</div>;
 }
 
-export function RadioApp({ api, onToast }: { api: RadioApi; onToast: (t: string) => void }) {
+/** startForm: opened from the station's "Send Radio Shoutout", straight to the request form when today allows one. */
+export function RadioApp({ api, onToast, startForm }: { api: RadioApi; onToast: (t: string) => void; startForm?: boolean }) {
   const [s, setS] = useState<RadioState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState(false);
+  const started = useRef(false);
   const load = async () => {
     const r = await api.state();
-    if (r.ok) { setS(r.data); setError(null); } else setError(r.error);
+    if (r.ok) {
+      setS(r.data);
+      setError(null);
+      if (startForm && !started.current && !r.data.requestedToday && r.data.left > 0) setForm(true);
+      started.current = true;
+    } else setError(r.error);
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { void load(); }, [api]);

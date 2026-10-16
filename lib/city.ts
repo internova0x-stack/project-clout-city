@@ -266,7 +266,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -707,7 +707,33 @@ export const PLACES: Place[] = [
       { id: "chat", kind: "visit", label: "Shoot the breeze with Benny", energy: 2, mood: 3, blurb: "He tells you his system. The system is not buying tickets." },
     ],
   },
+  // v0.14 On Air (owner, Oct 16): the stations, with the full place treatment.
+  {
+    id: "real-clout-fm", name: "Real Clout FM", emoji: "📻", category: "places", neighborhood: "Astoria",
+    at: [40.7598, -73.9262], depth: "full", template: "radio", palette: ["#FF2E88", "#FFB23D", "#14111A"],
+    tags: ["radio", "station", "astoria"],
+    lore: "Home of The Wake-Up Call, where DJ Sharm Almight reads one lucky shoutout every morning at 9. The ON AIR sign is always lit. Nobody has checked whether the microphone is.",
+    actions: [
+      { id: "sit-in", kind: "visit", label: "Sit in on The Wake-Up Call", energy: 4, mood: 5, confidence: 2, clout: 6, blurb: "You clap at the jingle. Sharm points at you like you're the jingle." },
+    ],
+  },
+  {
+    id: "clout-tower", name: "Clout Tower", emoji: "📺", category: "places", neighborhood: "Astoria",
+    at: [40.7585, -73.9195], depth: "full", template: "broadcast", palette: ["#FF2E88", "#FF6A3D", "#14111A"],
+    tags: ["tv", "station", "astoria"],
+    lore: "Clout TV's tower and the Big Screen on its side: one face, three hours, the whole city looking up. The control room smells like cold coffee and ambition.",
+    actions: [
+      { id: "watch", kind: "visit", label: "Watch the Big Screen with the crew", energy: 3, mood: 4, confidence: 3, clout: 6, blurb: "Someone else's face, forty feet tall. You take notes." },
+    ],
+  },
 ];
+
+/**
+ * v0.14 On Air (owner, Oct 16): the two stations are places too, listed first in Places. Their
+ * own buttons open the Radio and Clout TV apps (Send Radio Shoutout, Get on Billboard).
+ */
+export const STATION_TAGS = ["radio", "tv"] as const;
+export const isStation = (p: Pick<Place, "tags">) => p.tags.some((t) => (STATION_TAGS as readonly string[]).includes(t));
 
 export const HOME_PLACE_ID = "home";
 
