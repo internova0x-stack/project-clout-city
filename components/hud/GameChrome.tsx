@@ -36,7 +36,7 @@ export type Tab = "home" | "map";
  * economy will fill in later show "—" until v0.2.
  */
 /** A round button under the top bar for something in progress (owner, Oct 16): the hunt, a story. */
-export interface QuestButton { id: string; emoji: string; label: string; aria: string; dot: boolean; onOpen: () => void }
+export interface QuestButton { id: string; emoji: string; aria: string; dot: boolean; onOpen: () => void }
 
 export function GameChrome({
   quests = [],
@@ -149,7 +149,6 @@ export function GameChrome({
               <button key={q.id} className="quest-btn" onClick={q.onOpen} aria-label={q.aria}>
                 <span className="quest-circle" aria-hidden="true">{q.emoji}</span>
                 {q.dot && <span className="pin-dot quest-dot" />}
-                <span className="quest-label">{q.label}</span>
               </button>
             ))}
           </div>

@@ -1449,8 +1449,7 @@ export function GameShell({
   if (hunt && huntNow && !huntNow.completedAt) {
     quests.push({
       id: "hunt", emoji: "🎁",
-      label: huntNow.joined && huntNow.track ? `${Math.min(huntNow.step + 1, huntNow.track.steps)} of ${huntNow.track.steps}` : "New hunt",
-      aria: huntNow.joined ? `Treasure hunt: ${huntNow.theme}${huntNow.question ? ", a question is waiting" : ""}` : `New treasure hunt: ${huntNow.theme}`,
+      aria: huntNow.joined && huntNow.track ? `Treasure hunt: ${huntNow.theme}, step ${Math.min(huntNow.step + 1, huntNow.track.steps)} of ${huntNow.track.steps}${huntNow.question ? ", a question is waiting" : ""}` : `New treasure hunt: ${huntNow.theme}`,
       dot: !huntNow.joined || !!huntNow.question,
       onOpen: () => { setTasksTab("hunt"); setPhone({ open: false, app: null }); setPanel("tasks"); },
     });
@@ -1458,8 +1457,8 @@ export function GameShell({
   const storyNow = storyOn ? (mainArc(feed) ?? feed?.arcs.find((a) => a.type === "side" && a.entitled && !a.finished) ?? null) : null;
   if (storyNow) {
     quests.push({
-      id: "story", emoji: storyNow.emoji ?? "📰", label: `Day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}`,
-      aria: `Story: ${storyNow.title}${unseenBeats(feed) ? ", new chapters" : ""}`,
+      id: "story", emoji: "📖",
+      aria: `Story: ${storyNow.title}, day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}${unseenBeats(feed) ? ", new chapters" : ""}`,
       dot: unseenBeats(feed) > 0,
       onOpen: () => openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null),
     });

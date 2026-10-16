@@ -1271,9 +1271,9 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 /* Quest buttons (owner, Oct 16): the hunt and the story, round like the HUD's, until finished. */
 .quest-row { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); right:12px; display:flex; flex-direction:row-reverse; gap:10px; }
 /* In rooms and at home the top-right corner holds "N here" and the 🛋️ button: sit just under them. */
-.game.inside .quest-row { top:calc(120px + var(--safe-top)); }
+.game.inside .quest-row { top:calc(116px + var(--safe-top)); }
 /* At home (owner, Oct 16): the quest buttons stay up top and the 🛋️ arrange button sits under them. */
-.game.at-home:has(.quest-row:not([hidden])) .room-storage { top:calc(148px + var(--safe-top)) !important; }
+.game.at-home:has(.quest-row) .room-storage { top:calc(126px + var(--safe-top)) !important; }
 .game.at-home.has-story-prompt .room-storage { top:calc(72px + var(--safe-top)) !important; }
 .game.travelling .quest-row { display:none; }
 /* A story or news card over the top of the screen covers them: step aside until it's dismissed. */
@@ -1285,7 +1285,6 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
   box-shadow:var(--elev-2), inset 0 0 0 1px rgba(20,17,26,.06); }
 .quest-btn:active .quest-circle { transform:scale(.94); }
 .quest-dot { top:0; right:0; width:11px; height:11px; box-shadow:0 0 0 2px #fff; }
-.quest-label { padding:1px 7px; border-radius:var(--r-pill); background:rgba(20,17,26,.62); color:#fff; font-size:10.5px; font-weight:700; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .at-chip { padding:7px 12px; border-radius:var(--r-pill); font-size:13px; font-weight:700; color:var(--text-1); box-shadow:var(--elev-2); }
 
 /* v0.8 rest at home: the nap countdown ring */
