@@ -22,7 +22,8 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 15, done_at: null },
     { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 15, done_at: null },
     { id: 3, slot: 3, kind: "hangout", place_id: "flushing-meadows", action_id: "hangout", reward: 55, done_at: new Date().toISOString() },
-    { id: 4, slot: 4, kind: "visit", place_id: "velvet-static", action_id: "visit", reward: 90, done_at: null },
+    // Migration 0063: one task a day levels up a skill.
+    { id: 4, slot: 4, kind: "cook", place_id: "home", action_id: "cook", reward: 90, done_at: null, skill: "cooking" },
     { id: 5, slot: 5, kind: "event", place_id: "velvet-static", action_id: "neon-nights", reward: 80, done_at: null },
   ];
   const gig = (id: number, tier: GigOffer["tier"], i: number, pay: number, energy: number, wait: number, conf: number): GigOffer => ({
@@ -241,7 +242,8 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const energy = Math.min(100 - p().energy, CITY_ECONOMY.groceries.cook.energy);
       p().fridge_meals! -= 1;
       p().energy += energy;
-      return ok({ energy });
+      const cash = completeTask("home", "cook");
+      return ok(cash ? { energy, cash } : { energy });
     },
     doAction(placeId, actionId) {
       const place = PLACES.find((x) => x.id === placeId);

@@ -55,12 +55,13 @@ import { createSimApi, sampleCityState } from "../lib/citySim.ts";
 test("availability explains why an action is off", () => {
   const s = sampleCityState({ energy: 5, bank_cash: 3 });
   const club = PLACES.find((p) => p.id === "velvet-static")!;
-  const deli = PLACES.find((p) => p.id === "lucky-seven-deli")!;
+  const deli = PLACES.find((p) => p.id === "lucky-seven-deli")!; // Sip & Spill: its bar bites ("eat")
+  const bites = deli.actions.find((a) => a.id === "eat")!;
   assert.deepEqual(actionAvailability(club.id, club.actions[0], s), { ok: false, reason: "Not enough Energy" });
-  assert.deepEqual(actionAvailability(deli.id, deli.actions[0], s), { ok: false, reason: "Not enough cash" });
+  assert.deepEqual(actionAvailability(deli.id, bites, s), { ok: false, reason: "Not enough cash" });
   const fed = sampleCityState();
   fed.visitsToday[deli.id] = 1;
-  assert.deepEqual(actionAvailability(deli.id, deli.actions[0], fed), { ok: true, note: "Clout again tomorrow" });
+  assert.deepEqual(actionAvailability(deli.id, bites, fed), { ok: true, note: "Clout again tomorrow" });
 });
 
 test("rent lines walk through grace, Mood drop and moving out", () => {

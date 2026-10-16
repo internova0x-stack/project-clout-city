@@ -7,7 +7,7 @@ const row = (kind: string, ref: string, extra = {}) => ({ id: 1, amount: -1, kin
 test("each row says where and what (#29)", () => {
   assert.deepEqual(describeEntry(row("visit", "velvet-static:2026-10-12:1")).title, "Velvet Static");
   assert.equal(describeEntry(row("purchase", "12", { sku: "fit-satin-bomber" })).detail, "Satin bomber jacket");
-  assert.match(describeEntry(row("daily_task", "3", { task: { place: "lucky-seven-deli", action: "eat" } })).detail!, /Lucky Seven Deli/);
+  assert.match(describeEntry(row("daily_task", "3", { task: { place: "lucky-seven-deli", action: "eat" } })).detail!, /Sip & Spill/);
   assert.equal(describeEntry(row("gig", "4", { gig: "Hold a ring light" })).detail, "Hold a ring light");
   assert.equal(describeEntry(row("bill_phone", "9")).title, "Phone bill");
   assert.equal(describeEntry(row("event_entry", "neon-nights:2026-10-12")).title, "Neon Nights");

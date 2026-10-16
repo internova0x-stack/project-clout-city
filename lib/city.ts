@@ -7,6 +7,7 @@
 
 import type { LatLng } from "./map/geo";
 import { RANKS } from "./ranks.ts";
+import type { SkillId } from "./skills.ts";
 
 // ---------------------------------------------------------------------------
 // Economy numbers (all tunable; gig pay is a multiple of the shift rate)
@@ -289,6 +290,8 @@ export interface PlaceAction {
   clout?: number;
   /** Hidden until a story effect unlocks it (World State place_state unlock_action). */
   storyUnlock?: boolean;
+  /** Migration 0064: the skill this action trains, over the place's own (Sip & Spill's speed-meets and Tea Bar). */
+  skill?: SkillId;
 }
 
 export interface Place {
@@ -341,12 +344,16 @@ export const PLACES: Place[] = [
     ],
   },
   {
-    id: "lucky-seven-deli", name: "Lucky Seven Deli", emoji: "🥪", category: "food", neighborhood: "Jackson Heights", tier: "Budget",
-    at: [40.7495, -73.8885], depth: "full", template: "counter", palette: ["#2E8B63", "#FFC21A", "#1F1B26"],
-    tags: ["bodega", "dining_budget"],
-    lore: "Open 24 hours, run by one man and a cat who's clearly the boss. The chopped cheese is legendary, sweetie. The receipts are imaginary. I'd know.",
+    // Owner, Oct 16: the old Lucky Seven Deli became a speed-meet mixer and the city's gossip center. Same id,
+    // so history stays; its actions train Charisma (speed-meets) and Gossip (the Tea Bar).
+    id: "lucky-seven-deli", name: "Sip & Spill", emoji: "🫖", category: "places", neighborhood: "Jackson Heights", tier: "Budget",
+    at: [40.7495, -73.8885], depth: "full", template: "lounge", palette: ["#FF6A5C", "#2FB5A8", "#1F1B26"],
+    tags: ["mixer", "social", "tea", "dining_budget"],
+    lore: "The old Lucky Seven Deli got a glow-up, babe: seven-minute speed-meets up front, the Tea Bar in the back, and the cat stayed on as head of security. Every rumor in Queens passes through here eventually. I'd know. I usually started it.",
     actions: [
-      { id: "eat", kind: "eat", label: "Grab a chopped cheese", price: 16, energy: -15, blurb: "Cheap, fast, life-changing. The cat watches you eat it." },
+      { id: "speed-meet", kind: "visit", label: "Speed-meet", price: 25, energy: 12, mood: 5, confidence: 6, skill: "charisma", blurb: "Seven minutes a table, seven tables a round. Somebody always says they're \"in crypto.\"" },
+      { id: "spill", kind: "visit", label: "Spill the tea", price: 12, energy: 6, mood: 6, skill: "gossip", blurb: "Pull up a stool at the Tea Bar. Pour a cup, pour your heart out, pour someone else's." },
+      { id: "eat", kind: "eat", label: "Grab the bar bites", price: 16, energy: -15, blurb: "Sliders, fries and the chopped cheese, still on the menu by popular demand. The cat insisted." },
     ],
   },
   {
@@ -652,9 +659,10 @@ export const PLACES: Place[] = [
     id: "harmony-chapel", name: "Harmony Community Chapel", emoji: "🕊️", category: "places", neighborhood: "Astoria",
     at: [40.7652, -73.9130], depth: "scene", template: "civic", palette: ["#E8C79A", "#F4EDE6", "#3A2C5E"],
     tags: ["chapel", "quiet", "free", "astoria"],
-    lore: "A small open-door chapel with stained glass and a bulletin board of bake sales. Quiet, everyone's welcome, and the folding chairs are a test of faith. The one place I keep my voice down.",
+    lore: "A small open-door chapel with stained glass and a bulletin board of bake sales. Come say a prayer, everyone's welcome, and the folding chairs are a test of faith. The one place I keep my voice down.",
     actions: [
-      { id: "quiet", kind: "visit", label: "Sit for a quiet moment", energy: 2, mood: 7, blurb: "Ten minutes without your phone. It feels illegal. It's not." },
+      // Owner, Oct 16: a place to pray, for Mood and Confidence.
+      { id: "quiet", kind: "visit", label: "Say a prayer", energy: 2, mood: 7, confidence: 5, blurb: "Ten quiet minutes, one honest ask. You walk out lighter and standing a little taller." },
     ],
   },
   {
@@ -998,7 +1006,7 @@ export function citySeed() {
       id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null,
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
-        clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false,
+        clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false, ...(a.skill ? { skill: a.skill } : {}),
       })),
     })),
     events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood })),

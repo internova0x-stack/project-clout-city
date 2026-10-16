@@ -18,6 +18,7 @@ import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
 import { HuntTab } from "../hunt/Hunt";
 import type { HuntState } from "@/lib/hunts";
+import { LEVEL_AT, MAX_LEVEL, SKILLS, levelFor, levelProgress, type SkillState } from "@/lib/skills";
 
 /** Midnight New York time, shown in the player's own time zone. */
 function resetTimeLocal(): string {
@@ -27,9 +28,37 @@ function resetTimeLocal(): string {
   return new Date(now.getTime() + toMidnight).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
+/** Migration 0063: the skill task's level and progress toward the next level. */
+function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
+  const def = SKILLS.find((d) => d.id === id);
+  if (!def) return null;
+  const s = skills.find((k) => k.id === id) ?? { id: def.id, level: 0, best: 0, practice: 0, rusty: false };
+  const at = levelFor(s.practice);
+  const top = at >= MAX_LEVEL;
+  const into = s.practice - LEVEL_AT[at];
+  const need = top ? 0 : LEVEL_AT[at + 1] - LEVEL_AT[at];
+  const part = s.level < MAX_LEVEL && !s.rusty ? levelProgress(s.practice) : 0;
+  return (
+    <span className="task-skill">
+      <span className="task-skill-head">
+        <span>{def.name} · Level {s.level}{s.rusty && s.best > s.level ? " 🧊" : ""}</span>
+        <span>{top ? "Maxed out" : `${into}/${need} to Level ${at + 1}`}</span>
+      </span>
+      {/* The profile's ten-segment level bar, the current level part-filled by its progress. */}
+      <span className="skill-bar" role="meter" aria-label={`${def.name} level`} aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={s.level}>
+        {Array.from({ length: MAX_LEVEL }, (_, i) => (
+          <span key={i} className={i < s.level ? "on" : i < s.best ? "best" : ""}>
+            {i === s.level && part > 0 && <i style={{ width: `${Math.round(part * 100)}%` }} />}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
@@ -37,6 +66,10 @@ export function TasksSheet({
   /** v0.6 treasure hunts (migration 0018): the Hunt tab. */
   hunt?: { state: HuntState; style: string; busy: boolean; onJoin: () => void };
   tab?: "daily" | "goals" | "hunt";
+  /** Migration 0063: the player's skills, for the skill task's level and progress. */
+  skills?: SkillState[];
+  /** The cooking task opens the kitchen instead of a place. */
+  onCook?: () => void;
 }) {
   const [tab, setTab] = useState<"daily" | "goals" | "hunt">(initialTab ?? "daily");
   useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
@@ -91,11 +124,12 @@ export function TasksSheet({
                     role="button"
                     tabIndex={0}
                     style={{ cursor: t.done_at ? "default" : "pointer" }}
-                    onClick={t.done_at ? undefined : () => onOpenPlace(t.place_id)}
+                    onClick={t.done_at ? undefined : () => (t.kind === "cook" && onCook ? onCook() : onOpenPlace(t.place_id))}
                   >
-                    <span className="select-emoji" aria-hidden="true">{t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
+                    <span className="select-emoji" aria-hidden="true">{t.skill ? SKILLS.find((d) => d.id === t.skill)?.emoji ?? "⭐" : t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
                     <span className="title" style={{ display: "block" }}>{taskTitle(t)}</span>
-                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `${taskRewardLine(t)} · ${t.kind === "gossip" ? "Gossip · " : ""}${placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
+                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `${taskRewardLine(t)} · ${t.kind === "gossip" ? "Gossip · " : ""}${t.kind === "cook" ? "Your kitchen" : placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
+                    {t.skill && <TaskSkill id={t.skill} skills={skills} />}
                     {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
                   </div>
                 ))}

@@ -15,7 +15,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
   const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto] = await Promise.all([
-    supabase.from("daily_tasks").select("id, slot, kind, place_id, action_id, reward, done_at").eq("ny_date", day).order("slot"),
+    supabase.from("daily_tasks").select("*").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
       .select("id, ny_date, tier, title, pay, energy, wait_minutes, confidence_req, accepted_at, ready_at, collected_at")

@@ -10,7 +10,7 @@ import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { createTraffic } from "./vehicles";
 import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
-import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, gridFacing, onStreet, placeLandmark, withPositions, type RoadLine, type Spot, type WaterArea } from "@/lib/map/landmarks";
+import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, gridFacing, onStreet, placeLandmark, streetsNear, withPositions, type RoadLine, type Spot, type WaterArea } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -62,7 +62,7 @@ const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8,
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 /** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
-const SPOTS_KEY = "cc-landmark-spots-v4"; // v4: placed clear of water, the station on its street
+const SPOTS_KEY = "cc-landmark-spots-v5"; // v5: placed only once its streets have loaded (v4: clear of water, the station on its street)
 function loadSpots(): Record<string, Spot> {
   try {
     return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");
@@ -305,6 +305,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       }
       const found: Record<string, Spot> = {};
       for (const l of todo) {
+        // Its streets haven't loaded yet: try again on a later idle, or it would stand off the grid for good.
+        if (l.kind !== "bridge" && !streetsNear(l, roads)) continue;
         done.add(l.id);
         // A bridge fits itself to its road; anything else steps off main roads.
         if (l.kind === "bridge") {

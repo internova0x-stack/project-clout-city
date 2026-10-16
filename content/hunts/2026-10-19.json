@@ -138,7 +138,7 @@
         { "say": "Vee collected napkins like other people collect stamps. Her note says: 'The famous one is pressed inside a book. Ask the man who knows where every book is.'" },
         {
           "say": "Pressed inside a book on product management. It's the most useful thing in that book. Vee wants you to answer this first.",
-          "question": { "q": "Which Astoria diner has a neon name?", "choices": ["Rockaway Diner", "The Neon Spoon", "Up on Thirty", "Lucky Seven Deli"], "answer": 1 },
+          "question": { "q": "Which Astoria diner has a neon name?", "choices": ["Rockaway Diner", "The Neon Spoon", "Up on Thirty", "Sip & Spill"], "answer": 1 },
           "then": "Correct. A firefighter borrowed the book to 'learn agile.' The napkin went with it. Ask the captain."
         },
         { "say": "We tried agile. The fire didn't wait for the sprint review. Gus took the napkin; he said he'd 'pivot it' into a bookmark. He's at the park." },
