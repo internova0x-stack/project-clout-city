@@ -107,8 +107,7 @@ declare
 begin
     update public.tv_submissions set status = 'featured', featured_at = public.tv_now() where id = p_id returning * into s;
   insert into public.station_messages (player_id, station, body, ref)
-  values (s.player_id, 'tv', '📺 You made it to the big screen! Your photo is up on the Clout Tower in Astoria right now, with @' || s.handle
-                              || ' under it. Go take a look before the next one goes up.', 'tv:' || s.id)
+  values (s.player_id, 'tv', '📺 You made it to the Big Screen! Your photo is up on the Clout Tower in Astoria for the next 3 hours. Now the whole city knows your name.', 'tv:' || s.id)
   on conflict do nothing;
 end;
 $$;
@@ -134,8 +133,8 @@ begin
   insert into public.station_messages (player_id, station, body, ref)
   select s.player_id, 'fm',
          case s.status
-           when 'on_air' then '🎙️ You''re on The Wake-Up Call! DJ Sharm Almight just read your shoutout on Real Clout FM: "' || s.message || '" Queens heard it.'
-           else '📌 Your shoutout made today''s wall on Real Clout FM. Open the Radio app to see it.'
+           when 'on_air' then '🎙️ You''re on air! DJ Sharm Almight just read your shoutout on The Wake-Up Call: "' || s.message || '"'
+           else '📌 Your shoutout made today''s wall on Real Clout FM. See it in the Radio app.'
          end,
          'fm:' || s.id
     from public.radio_shoutouts s

@@ -32,7 +32,7 @@ export function BigScreenTab({ api }: { api: StudioApi }) {
   }, [api, status]);
   useEffect(() => { setBoard(null); void load(); }, [load]);
   const act = async (id: number, action: TvAction) => {
-    if (action === "take_down" && !window.confirm("Take this photo off the big screen? The next one in the rotation goes up at once.")) return;
+    if (action === "take_down" && !window.confirm("Take this photo off the Big Screen? The next one in the rotation goes up at once.")) return;
     setBusy(id);
     setError(null);
     const r = await api.bigScreenAction!(id, action);
@@ -45,10 +45,10 @@ export function BigScreenTab({ api }: { api: StudioApi }) {
   return (
     <section className="stack-12">
       <section className="studio-card stack-8">
-        <h2 className="display-md" style={{ margin: 0 }}>📺 {TV.station}: the big screen</h2>
+        <h2 className="display-md" style={{ margin: 0 }}>📺 {TV.station}: the Big Screen</h2>
         <p className="meta" style={{ margin: 0 }}>
           Approve photos into the rotation: a new one goes up every 3 hours (12, 3, 6 and 9 o&apos;clock New York), oldest approval first,
-          and its player gets a text from Clout TV. Show now puts any photo up at once. With nobody waiting, the last photo stays up.
+          and its player gets a text from Clout TV. Show now puts any photo up at once. A photo stays up for its 3 hours; with nobody waiting, the tower says “Make it BIG in NY”.
           Reject photos showing other people without consent, nudity, anyone who looks underage, hate symbols, or real brands as the main subject.
         </p>
         {board && (
@@ -63,7 +63,7 @@ export function BigScreenTab({ api }: { api: StudioApi }) {
       </section>
       {error && <div className="studio-note error"><span className="body-strong">{error}</span></div>}
       {rows === null && !error && <p className="meta">Loading…</p>}
-      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>{status === "pending" ? "Nothing waiting. Queens is camera shy today." : status === "approved" ? "The rotation is empty: approve some photos, or the last one stays up." : "Nothing here yet."}</p></section>}
+      {rows?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>{status === "pending" ? "Nothing waiting. Queens is camera shy today." : status === "approved" ? "The rotation is empty: approve some photos. When the current photo's 3 hours end, the tower says “Make it BIG in NY”." : "Nothing here yet."}</p></section>}
       <div className="tv-queue">
         {rows?.map((s, i) => (
           <article key={s.id} className={`studio-card stack-8 tv-queue-card${s.onNow ? " on-now" : ""}`}>

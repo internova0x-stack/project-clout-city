@@ -293,17 +293,28 @@ export function GameShell({
   const [tvView, setTvView] = useState<TvFeature | null>(null);
   const [tvCardSeen, setTvCardSeen] = useState<number | null>(null);
   const tvApi = useMemo<TvApi | undefined>(() => (tv ? { ...tv, upload: tv.upload ?? uploadToBigScreen } : undefined), [tv]);
+  // The tower shows the live photo (owner, Oct 16): check every minute (so the Studio's Show now and Take
+  // down reach everyone fast) and right when the next 3-hour slot starts.
+  const loadTv = useCallback(async () => {
+    if (!tv) return null;
+    const r = await tv.state().catch(() => null);
+    if (r?.ok) { setTvNow(r.data); return r.data; }
+    return null;
+  }, [tv]);
   useEffect(() => {
     if (!tv) return;
-    let live = true;
-    const check = async () => {
-      const r = await tv.state().catch(() => null);
-      if (live && r?.ok) setTvNow(r.data);
-    };
-    void check();
-    const t = setInterval(() => void check(), 10 * 60_000);
-    return () => { live = false; clearInterval(t); };
-  }, [tv]);
+    void loadTv();
+    const t = setInterval(() => void loadTv(), 60_000);
+    return () => clearInterval(t);
+  }, [tv, loadTv]);
+  const tvNextAt = tvNow?.nextAt;
+  useEffect(() => {
+    if (!tvNextAt) return;
+    const ms = Date.parse(tvNextAt) - Date.now() + 2_000;
+    if (ms <= 0 || ms > 6 * 3_600_000) return;
+    const t = setTimeout(() => void loadTv(), ms);
+    return () => clearTimeout(t);
+  }, [tvNextAt, loadTv]);
   const tvFeature = tvNow?.featured ?? null;
   // Texts from Real Clout FM and Clout TV (checked with the stations; the badge counts them).
   const [stationThreads, setStationThreads] = useState<StationThread[]>([]);
@@ -1740,8 +1751,9 @@ export function GameShell({
             daytime={daytime}
             onPinTap={onPinTap}
             onLockedTap={onLockedTap}
-            bigScreen={tvFeature ? { url: tvFeature.url, handle: tvFeature.handle } : null}
-            onBigScreen={tv ? () => (tvFeature ? setTvView(tvFeature) : setPhone({ open: true, app: "tv" })) : undefined}
+            bigScreen={tvFeature ? { url: tvFeature.url, handle: tvFeature.handle, photo: tvFeature.photo } : null}
+            // Tapping the tower checks first, so the photo that opens is the live one.
+            onBigScreen={tv ? () => void loadTv().then((st) => { const f = st ? st.featured : tvFeature; if (f) setTvView(f); else setPhone({ open: true, app: "tv" }); }) : undefined}
           />
           {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined} />}
         </>
@@ -1788,7 +1800,7 @@ export function GameShell({
         <RadioBanner s={radioBanner} api={radio} onToast={setToast} onDone={closeRadioBanner}
           onOpen={() => { closeRadioBanner(); setPhone({ open: true, app: "radio" }); }} />
       )}
-      {tvView && <TvViewer f={tvView} onClose={() => setTvView(null)} />}
+      {tvView && <TvViewer f={tvView} live={tvNow && tvView.id === tvNow.featured?.id ? { nextAt: tvNow.nextAt } : null} onClose={() => setTvView(null)} />}
       <GainToast gain={gain} message={toast} onDone={clearGain} />
       {city?.devTools && cityApi && (
         <DevClock

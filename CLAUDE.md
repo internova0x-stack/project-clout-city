@@ -38,7 +38,7 @@ components live in `app/globals.css`.
   in-memory simulator (`lib/citySim.ts`); `?city=off` shows the home screen before migration 0004;
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
-  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer); `?crowd=50` puts 50 sample players at any place you enter; `?biz=some|rich|public` starts with businesses (rich: the whole ladder, ready to go public); `?rankup=1-10` opens that rank's rank-up reveal; `?together=invite|ride|plan|bonus|decorate|approve` starts v0.13's together plans, ride requests, the bonus card, decorating someone's home or approving a decorator; `?radio=new|sent|full|notpicked|mine` starts Real Clout FM in that state (shared with the Studio preview's Shoutouts tab). Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio.
+  `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer); `?crowd=50` puts 50 sample players at any place you enter; `?biz=some|rich|public` starts with businesses (rich: the whole ladder, ready to go public); `?rankup=1-10` opens that rank's rank-up reveal; `?together=invite|ride|plan|bonus|decorate|approve` starts v0.13's together plans, ride requests, the bonus card, decorating someone's home or approving a decorator; `?radio=new|sent|full|notpicked|mine` starts Real Clout FM in that state (shared with the Studio preview's Shoutouts tab); `?tv=new|sent|mine|empty` does the same for Clout TV (shared with the Big Screen tab). Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
 
@@ -75,6 +75,10 @@ components live in `app/globals.css`.
 - Skills (migration 0056, owner Oct 16): nine skills, 0 to 10 (`lib/skills.ts` mirrors the practice table). Practice
   comes from triggers on `ledger`, `messages` and cooking, once per thing (`skill_log`); rust is worked out on read
   (`skill_effective`); a new best level pays 10 × level clout once (ledger 'skill'), and 5 and 10 earn a badge.
+- Clout TV (migration 0058): player photos live in the private `big-screen` storage bucket, uploaded from the
+  browser into the player's own folder after cropping to 1080 × 1350; storage policies decide who can read one
+  (its player, Studio admins, everyone once it has been on screen). The server decides what's on screen
+  (`tv_current()`, the 3-hour rotation); the browser never picks it.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

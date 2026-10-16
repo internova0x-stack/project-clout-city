@@ -66,7 +66,7 @@ select pg_temp.assert(exists (select 1 from storage.objects where name = '000000
 select pg_temp.assert(not exists (select 1 from storage.objects where name like '00000000-0000-0000-0000-0000000000b3/%') = false, 'still see your own');
 reset role;
 -- Mia's text from Clout TV.
-select pg_temp.assert(exists (select 1 from public.station_messages where player_id = pg_temp.id(2) and station = 'tv' and body like '%big screen%'), 'mia texted by Clout TV');
+select pg_temp.assert(exists (select 1 from public.station_messages where player_id = pg_temp.id(2) and station = 'tv' and body ilike '%big screen%'), 'mia texted by Clout TV');
 -- Move mia's slot back 3 hours: the next check puts zed up.
 update public.tv_submissions set featured_at = featured_at - interval '3 hours' where handle = 'mia.k';
 set role authenticated; select pg_temp.as_(2);

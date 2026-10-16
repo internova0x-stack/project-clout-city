@@ -150,17 +150,21 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
     const st = STATIONS[stationThread.station];
     return (
       <div className="chat-thread">
-        <div className="chat-head">
+        <div className="chat-head station-head">
           <button className="phone-back" onClick={() => setStation(null)}>‹ Messages</button>
-          <span style={{ flex: 1, minWidth: 0, textAlign: "center" }}><span className="title one-line" style={{ display: "block" }}>{st.emoji} {st.name}</span></span>
-          <span style={{ width: 40 }} aria-hidden="true" />
+          <span className="title one-line">{st.name}</span>
+          <span aria-hidden="true" />
         </div>
         <div className="chat-bubbles">
+          <div className="station-card">
+            <span className="station-card-icon" aria-hidden="true">{st.emoji}</span>
+            <span className="title">{st.name}</span>
+            <span className="meta">The station texts you when you&apos;re on. Replies don&apos;t reach it.</span>
+          </div>
           {stationThread.messages.map((m) => (
             <div key={m.id} className="bubble station"><span>{m.body}</span><span className="bubble-time">{chatTime(m.at)}</span></div>
           ))}
         </div>
-        <p className="meta chat-note">{st.name} sends news here. Replies don&apos;t reach the station.</p>
       </div>
     );
   }

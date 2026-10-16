@@ -153,13 +153,13 @@ export async function previewStationInbox() {
   const mineTv = s.rows.filter((r) => r.player === ME && r.featuredAt && r.status === "featured");
   if (mineTv.length) {
     threads.push({ station: "tv", unread: mineTv.filter((r) => !read.has(`tv:${r.id}`)).length,
-      messages: mineTv.map((r) => ({ id: r.id, at: r.featuredAt!, body: `📺 You made it to the big screen! Your photo is up on the Clout Tower in Astoria right now, with @${r.handle} under it. Go take a look before the next one goes up.` })) });
+      messages: mineTv.map((r) => ({ id: r.id, at: r.featuredAt!, body: "📺 You made it to the Big Screen! Your photo is up on the Clout Tower in Astoria for the next 3 hours. Now the whole city knows your name." })) });
   }
   const radio = await previewRadioState();
   const mine = radio.ok ? radio.data.mine : null;
   if (mine && (mine.status === "on_air" || mine.status === "wall")) {
     threads.push({ station: "fm", unread: read.has(`fm:${mine.id}`) ? 0 : 1, messages: [{ id: mine.id, at: mine.airedAt ?? new Date().toISOString(),
-      body: mine.status === "on_air" ? `🎙️ You're on The Wake-Up Call! DJ Sharm Almight just read your shoutout on Real Clout FM: "${mine.message}" Queens heard it.` : "📌 Your shoutout made today's wall on Real Clout FM. Open the Radio app to see it." }] });
+      body: mine.status === "on_air" ? `🎙️ You're on air! DJ Sharm Almight just read your shoutout on The Wake-Up Call: "${mine.message}"` : "📌 Your shoutout made today's wall on Real Clout FM. See it in the Radio app." }] });
   }
   return { ok: true as const, data: threads };
 }

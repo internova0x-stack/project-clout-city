@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { TV, tvDay, tvTime, type TvApi, type TvFeature, type TvMine, type TvState } from "@/lib/cloutTv";
 import { cleanHandle as cleanTvHandle } from "@/lib/radio";
 import { openPhoto } from "@/lib/tvUpload";
@@ -15,10 +16,10 @@ import { ChevronRightIcon, CloseIcon } from "../icons";
 const MINE_NOTE: Record<TvMine["status"], string> = {
   pending: "Waiting for the producers. If it's picked, it goes into the rotation.",
   approved: "Picked! It's in the rotation: one photo goes up every 3 hours. You'll get a text when it's yours.",
-  featured: "You were on the big screen",
+  featured: "You were on the Big Screen",
   rejected: "Not this time. Try another photo tomorrow.",
   withdrawn: "Withdrawn.",
-  taken_down: "Taken off the big screen.",
+  taken_down: "Taken off the Big Screen.",
 };
 
 /** The station's bumper: a lit screen with the logo, scanlines and a red REC dot. */
@@ -27,24 +28,67 @@ export function TvBumper() {
     <div className="tv-bumper" aria-hidden="true">
       <span className="tv-bumper-rec">● LIVE</span>
       <span className="tv-bumper-logo">CLOUT<b>TV</b></span>
-      <span className="tv-bumper-sub">Make it to the big screen</span>
+      <span className="tv-bumper-sub">Make it to the Big Screen</span>
     </div>
   );
 }
 
-export function TvViewer({ f, onClose }: { f: TvFeature; onClose: () => void }) {
+/** Falling confetti that swings like pendulums (owner, Oct 16). Generated once per open; skipped with Reduce Motion (CSS). */
+function Confetti() {
+  const [pieces] = useState(() => {
+    const colors = ["#FA2D48", "#FFC21A", "#7FE3F0", "#FFF3DE", "#FF6A3D"];
+    let seed = Date.now() % 9973;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    return Array.from({ length: 44 }, (_, i) => ({
+      i,
+      left: rnd() * 96 + 2,
+      fall: 3.4 + rnd() * 1.8,
+      delay: rnd() * 2,
+      w: [6, 8, 10][Math.floor(rnd() * 3)],
+      h: [4, 5, 12][Math.floor(rnd() * 3)],
+      color: colors[Math.floor(rnd() * colors.length)],
+      swing: (28 + rnd() * 20) * (rnd() < 0.5 ? -1 : 1),
+      arm: -(30 + rnd() * 25),
+      period: 0.9 + rnd() * 0.5,
+    }));
+  });
   return (
-    <div className="modal-wrap tv-viewer" role="dialog" aria-modal="true" aria-label={`Clout TV: ${at(f.handle)}`}>
-      <div className="scrim" onClick={onClose} aria-hidden="true" />
-      <figure className="tv-viewer-card">
-        {f.url ? <img src={f.url} alt={`${at(f.handle)} on Clout TV`} /> : <div className="tv-viewer-missing">Photo unavailable</div>}
-        <figcaption>
-          <span className="tv-viewer-on">📺 On Clout TV · {tvDay(f.date)}, {tvTime(f.at)}</span>
-          <span className="title">{at(f.handle)}</span>
-        </figcaption>
-      </figure>
-      <button className="icon-round tv-viewer-close" onClick={onClose} aria-label="Close"><CloseIcon size={18} /></button>
+    <div className="tv-confetti" aria-hidden="true">
+      {pieces.map((p) => (
+        <i key={p.i} style={{ left: `${p.left}%`, animationDuration: `${p.fall}s`, animationDelay: `${p.delay}s` }}>
+          <s style={{ width: p.w, height: p.h, background: p.color, ["--swing" as string]: `${p.swing}deg`, ["--arm" as string]: `${p.arm}px`, animationDuration: `${p.period}s` }} />
+        </i>
+      ))}
     </div>
+  );
+}
+
+/**
+ * The Big Screen, up close (owner, Oct 16): tapping the Clout Tower (or the home card, or a photo in the
+ * Clout TV app) opens the photo in the billboard's frame. Anyone can tap it, so the copy is about the
+ * player on it: "@handle made it to the Big Screen", "Now the whole city knows their name".
+ */
+export function TvViewer({ f, live, onClose }: { f: TvFeature; live?: { nextAt: string } | null; onClose: () => void }) {
+  // Over the whole game, even when opened from inside the Phone.
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div className="tv-viewer" role="dialog" aria-modal="true" aria-label={`${at(f.handle)} made it to the Big Screen`}>
+      <div className="tv-viewer-scrim" onClick={onClose} aria-hidden="true" />
+      <div className="tv-viewer-glow" aria-hidden="true" />
+      <button className="icon-round tv-viewer-close" onClick={onClose} aria-label="Close"><CloseIcon size={18} /></button>
+      <div className="tv-viewer-body">
+        <span className="tv-live">{live ? <><span className="tv-live-dot" aria-hidden="true" />LIVE ON CLOUT TV</> : <>ON CLOUT TV · {tvDay(f.date).toUpperCase()}</>}</span>
+        <h2 className="tv-headline"><span className="tv-headline-who">{at(f.handle)} made it to the</span><span className="tv-headline-big">Big Screen</span></h2>
+        <figure className="tv-viewer-pic">
+          {f.url ? <img src={f.url} alt={`${at(f.handle)} on the Big Screen`} /> : <div className="tv-viewer-missing">Photo unavailable</div>}
+          <figcaption><em>CLOUT TV</em><span>{at(f.handle)}</span></figcaption>
+        </figure>
+        <p className="tv-viewer-line">Now the <mark>whole city</mark> knows their name</p>
+        <span className="tv-viewer-meta">{live ? `On the Clout Tower until ${tvTime(live.nextAt)}` : `Was on the Clout Tower · ${tvTime(f.at)}`}</span>
+      </div>
+      <Confetti />
+    </div>,
+    document.body,
   );
 }
 
@@ -55,7 +99,7 @@ export function TvHomeCard({ f, onOpen, onDismiss }: { f: TvFeature; onOpen: () 
         {f.url ? <img className="tv-prompt-thumb" src={f.url} alt="" /> : <span className="story-prompt-tile" aria-hidden="true">📺</span>}
         <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
           <span className="overline" style={{ display: "block", color: "rgba(20,17,26,.7)" }}>Now on Clout TV</span>
-          <span className="title" style={{ display: "block", color: "var(--night-900)" }}>{at(f.handle)} made it to the big screen</span>
+          <span className="title" style={{ display: "block", color: "var(--night-900)" }}>{at(f.handle)} made it to the Big Screen</span>
         </span>
         <ChevronRightIcon size={18} />
       </button>
@@ -85,7 +129,7 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
     setBusy(m.id);
     const r = await api.withdraw(m.id);
     setBusy(null);
-    onToast(r.ok ? (m.status === "featured" ? "Taken off the big screen. Your photo is deleted." : "Withdrawn. Your photo is deleted.") : r.error);
+    onToast(r.ok ? (m.status === "featured" ? "Taken off the Big Screen. Your photo is deleted." : "Withdrawn. Your photo is deleted.") : r.error);
     void load();
   };
   return (
@@ -94,7 +138,7 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
       {s.featured ? (
         <button className="tv-feature" onClick={() => setView(s.featured)}>
           {s.featured.url ? <img src={s.featured.url} alt={`${at(s.featured.handle)} on Clout TV today`} /> : <span className="tv-viewer-missing">Photo unavailable</span>}
-          <span className="tv-feature-cap"><span className="tv-viewer-on">📺 On the big screen now · next at {tvTime(s.nextAt)}</span><span className="title">{at(s.featured.handle)}</span></span>
+          <span className="tv-feature-cap"><span className="tv-viewer-on">📺 On the Big Screen now · next at {tvTime(s.nextAt)}</span><span className="title">{at(s.featured.handle)}</span></span>
         </button>
       ) : (
         <div className="card stack-4">
@@ -110,7 +154,7 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
               {m.url ? <img src={m.url} alt="" /> : <span className="tv-mine-ph" aria-hidden="true">📷</span>}
               <span className="tv-mine-text">
                 <span className="body-strong">{at(m.handle)} · {tvDay(m.date)}</span>
-                <span className="meta">{m.onNow ? "📺 You're on the big screen right now!" : m.status === "featured" && m.featuredAt ? `${MINE_NOTE.featured} on ${tvDay(m.featuredAt.slice(0, 10))}.` : MINE_NOTE[m.status]}</span>
+                <span className="meta">{m.onNow ? "📺 You're on the Big Screen right now!" : m.status === "featured" && m.featuredAt ? `${MINE_NOTE.featured} on ${tvDay(m.featuredAt.slice(0, 10))}.` : MINE_NOTE[m.status]}</span>
                 {(m.status === "pending" || m.status === "approved" || m.status === "featured") && (
                   <button className="radio-report" disabled={busy !== null} onClick={() => void withdraw(m)}>{busy === m.id ? "…" : "Withdraw"}</button>
                 )}
@@ -122,7 +166,7 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
       {s.submittedToday
         ? <button className="btn btn-secondary" disabled>One photo a day. Come back tomorrow.</button>
         : s.left > 0
-          ? <div className="stack-4"><button className="btn btn-night" onClick={() => setForm(true)}>📸 Make it to the big screen</button>
+          ? <div className="stack-4"><button className="btn btn-night" onClick={() => setForm(true)}>📸 Make it to the Big Screen</button>
               <span className="meta" style={{ textAlign: "center" }}>{s.left} of 20 spots left today · one photo each</span></div>
           : <button className="btn btn-secondary" disabled>Today&apos;s 20 photos are in. Try again tomorrow.</button>}
       {s.archive.length > 0 && (
@@ -139,7 +183,7 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
           </div>
         </div>
       )}
-      {view && <TvViewer f={view} onClose={() => setView(null)} />}
+      {view && <TvViewer f={view} live={view.id === s.featured?.id ? { nextAt: s.nextAt } : null} onClose={() => setView(null)} />}
     </div>
   );
 }
@@ -155,6 +199,9 @@ function SubmitForm({ api, onCancel, onSent }: { api: TvApi; onCancel: () => voi
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  // The form opens at its top, upload button first (the app may have been scrolled down).
+  useEffect(() => { formRef.current?.closest(".phone-app-screen")?.scrollTo(0, 0); }, []);
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo.url); }, [photo]);
   const clean = cleanTvHandle(handle);
   if (cropping) {
@@ -170,7 +217,7 @@ function SubmitForm({ api, onCancel, onSent }: { api: TvApi; onCancel: () => voi
   }
   const ready = !!photo && !!clean && self && adult && publicOk && !busy;
   return (
-    <form className="stack-12 radio-form" onSubmit={async (e) => {
+    <form ref={formRef} className="stack-12 radio-form" onSubmit={async (e) => {
       e.preventDefault();
       if (!ready || !photo || !api.upload) return;
       setBusy(true);
@@ -193,10 +240,23 @@ function SubmitForm({ api, onCancel, onSent }: { api: TvApi; onCancel: () => voi
           setError("That file didn't open as a photo. Try a JPEG or PNG.");
         }
       }} />
-      <button type="button" className={`tv-pick${photo ? " has" : ""}`} onClick={() => input.current?.click()}>
-        {photo ? <img src={photo.url} alt="Your photo, as the billboard shows it" /> : <span className="stack-4" style={{ alignItems: "center" }}><span style={{ fontSize: 32 }} aria-hidden="true">📸</span><span className="body-strong">Pick a photo of you</span><span className="meta">You&apos;ll fit it to the billboard next</span></span>}
-      </button>
-      {photo && <button type="button" className="radio-report" style={{ alignSelf: "center" }} onClick={() => input.current?.click()}>Pick a different photo or crop again</button>}
+      <p className="overline" style={{ margin: 0 }}>Step 1 · Your photo</p>
+      {photo ? (
+        <>
+          <button type="button" className="tv-pick has" onClick={() => input.current?.click()} aria-label="Change your photo">
+            <img src={photo.url} alt="Your photo, as the Big Screen shows it" />
+          </button>
+          <button type="button" className="btn btn-secondary btn-sm" style={{ alignSelf: "center" }} onClick={() => input.current?.click()}>🔄 Change or re-crop photo</button>
+        </>
+      ) : (
+        <div className="tv-pick">
+          <span className="tv-pick-icon" aria-hidden="true">📸</span>
+          <span className="body-strong">A photo of you for the Big Screen</span>
+          <span className="meta">JPEG, PNG or WebP. You&apos;ll fit it to the billboard next.</span>
+          <button type="button" className="btn btn-night btn-sm" onClick={() => input.current?.click()}>⬆️ Upload a photo</button>
+        </div>
+      )}
+      <p className="overline" style={{ margin: "4px 0 0" }}>Step 2 · Your details</p>
       <label className="stack-4">
         <span className="overline">Your Instagram handle</span>
         <span className={`field${handle && !clean ? " error" : ""}`}><input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@your.instagram" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={31} aria-label="Your Instagram handle" /></span>
