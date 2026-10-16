@@ -240,3 +240,35 @@ export function fitBridge(l: Landmark, roads: readonly RoadLine[]): Spot | null 
     length: Math.min(2000, length),
   };
 }
+
+/**
+ * Which way a landmark should face so it lines up with the street grid around it (owner, Oct 16:
+ * "make them tilt in line with the grid"). The grid's direction is the length-weighted average of
+ * nearby street bearings folded into a quarter turn; of the four facings that line up with it, the
+ * one closest to the landmark's own (south, toward the camera) wins. Its own facing when no streets.
+ */
+export function gridFacing(l: Landmark, roads: readonly RoadLine[], radius = 250): number {
+  const k = Math.cos((l.at[0] * Math.PI) / 180);
+  let sx = 0, sy = 0;
+  for (const r of roads) {
+    for (let i = 1; i < r.pts.length; i++) {
+      const ax = (r.pts[i - 1][0] - l.at[1]) * k * M_PER_DEG, ay = (r.pts[i - 1][1] - l.at[0]) * M_PER_DEG;
+      const bx = (r.pts[i][0] - l.at[1]) * k * M_PER_DEG, by = (r.pts[i][1] - l.at[0]) * M_PER_DEG;
+      if (Math.hypot((ax + bx) / 2, (ay + by) / 2) > radius) continue;
+      const len = Math.hypot(bx - ax, by - ay);
+      if (len < 1) continue;
+      const bearing = Math.atan2(bx - ax, by - ay); // radians clockwise from north
+      sx += len * Math.cos(4 * bearing);
+      sy += len * Math.sin(4 * bearing);
+    }
+  }
+  if (Math.hypot(sx, sy) < 1) return l.facing;
+  const grid = ((Math.atan2(sy, sx) / 4) * 180) / Math.PI; // one street direction, -45..45
+  let best = l.facing, bestDiff = Infinity;
+  for (let q = 0; q < 4; q++) {
+    const f = (((grid + q * 90) % 360) + 360) % 360;
+    const diff = Math.abs(((f - l.facing + 540) % 360) - 180);
+    if (diff < bestDiff) { bestDiff = diff; best = f; }
+  }
+  return best;
+}

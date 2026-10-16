@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LANDMARKS, fitBridge, landmarkSites, onLandmarkSite, placeLandmark, type RoadLine } from "../lib/map/landmarks.ts";
+import { LANDMARKS, fitBridge, gridFacing, landmarkSites, onLandmarkSite, placeLandmark, type RoadLine } from "../lib/map/landmarks.ts";
 import { PLACES } from "../lib/city.ts";
 
 const M = 111_320;
@@ -74,4 +74,23 @@ test("a bridge fits its road: end to end, along the road", () => {
   assert.ok(Math.abs(((fit.facing! - 90) % 180) - 115) < 0.5, `facing ${fit.facing}`);
   assert.ok(Math.abs((fit.at[0] - bridge.at[0]) * M - 100) < 1, "centered on the road");
   assert.equal(fitBridge(bridge, [{ major: true, pts: road.pts }]), null, "no bridge road, no fit");
+});
+
+test("landmarks turn to line up with the street grid, front still toward the camera", () => {
+  // A grid turned 29 degrees: streets running at bearings 29 and 119.
+  const line = (bearingDeg: number, offset: number): RoadLine => {
+    const b = (bearingDeg * Math.PI) / 180;
+    const pt = (d: number) => {
+      const east = Math.sin(b) * d + Math.cos(b) * offset, north = Math.cos(b) * d - Math.sin(b) * offset;
+      return [cafe.at[1] + east / (k * M), cafe.at[0] + north / M] as const;
+    };
+    return { major: false, pts: [pt(-200), pt(200)] };
+  };
+  const grid = [line(29, -60), line(29, 60), line(119, -60), line(119, 60)];
+  const f = gridFacing(cafe, grid);
+  assert.ok(Math.abs(f - 209) < 0.5, `facing ${f}`); // of 29, 119, 209, 299: the one nearest south
+  assert.ok(Math.abs(((f - 180 + 540) % 360) - 180) <= 45, "still faces roughly south");
+  assert.equal(gridFacing(cafe, []), cafe.facing, "no streets: keeps its facing");
+  // A plain north-south grid keeps it facing south.
+  assert.ok(Math.abs(gridFacing(cafe, [line(0, -60), line(90, 60)]) - 180) < 0.5);
 });

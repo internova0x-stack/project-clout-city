@@ -10,7 +10,7 @@ import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { createTraffic } from "./vehicles";
 import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
-import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, placeLandmark, withPositions, type RoadLine, type Spot } from "@/lib/map/landmarks";
+import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, gridFacing, placeLandmark, withPositions, type RoadLine, type Spot } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -58,7 +58,7 @@ const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8,
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 /** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
-const SPOTS_KEY = "cc-landmark-spots-v2";
+const SPOTS_KEY = "cc-landmark-spots-v3"; // v3: spots also carry the grid-aligned facing
 function loadSpots(): Record<string, Spot> {
   try {
     return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");
@@ -276,7 +276,9 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
           const fit = fitBridge(l, roads);
           if (fit) found[l.id] = fit;
         } else {
-          found[l.id] = { at: placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found })) };
+          const at = placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found }));
+          // Turned to line up with the streets around where it stands.
+          found[l.id] = { at, facing: gridFacing({ ...l, at }, roads) };
         }
       }
       setSpots((prev) => {
