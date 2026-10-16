@@ -793,6 +793,8 @@ export interface ShopItem {
   blurb: string;
   /** Fashion: which outfit slot it fills and how it renders on the avatar. */
   wear?: { slot: "top" | "bottom" | "shoes" | "accessory" | "outfit"; kind?: string; color: string; accent?: string };
+  /** Cut for one presentation only (owner, Oct 16: platform boots are womenswear): the Shop hides it from the other. */
+  fits?: "m" | "f";
   /**
    * Home (#19, Fif's Furniture): the piece it puts in your home (a lib/rooms.ts FurnitureKind), its color,
    * the room it's shelved under, and its line (the same piece in other colors shares a line).
@@ -842,7 +844,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "fit-chunky-sneakers", category: "fashion", name: "Chunky dad sneakers", emoji: "👟", price: 460, clout: 28, rating: 4, blurb: "Ugly on purpose. Expensive on purpose.", wear: { slot: "shoes", color: "#ECE6DC" } },
   { sku: "forever-our-bird-hoodie", category: "fashion", name: "\"Forever Our Bird\" hoodie", emoji: "🕊️", price: 185, clout: 12, rating: 2, storyOnly: true, blurb: "Loretta's grief merch, C$185, \"for healing.\" Limited time, unlimited questions.", wear: { slot: "top", kind: "hoodie", color: "#F4F1EA", accent: "#6C8CFF" } },
   { sku: "col-faux-chinchilla", category: "fashion", name: "Faux chinchilla coat", emoji: "🧥", price: 0, clout: 80, rating: 4, collector: true, blurb: "No chinchillas were harmed. Several egos were.", wear: { slot: "top", kind: "blazer", color: "#D9D2C5", accent: "#A89F92" } },
-  { sku: "col-holo-boots", category: "fashion", name: "Holographic platform boots", emoji: "👢", price: 0, clout: 70, rating: 4, collector: true, blurb: "Six inches taller and visible from space.", wear: { slot: "shoes", color: "#B8C6FF" } },
+  { sku: "col-holo-boots", category: "fashion", name: "Holographic platform boots", emoji: "👢", price: 0, clout: 70, rating: 4, collector: true, blurb: "Six inches taller and visible from space.", wear: { slot: "shoes", kind: "boots", color: "#B8C6FF", accent: "#7FE3E0" }, fits: "f" },
   // Whole outfits (#9, owner Oct 14): city sets for cash; fantasy sets need clout too, "to give players something to work towards".
   { sku: "set-site-crew", category: "fashion", name: "Site crew hi-vis", emoji: "🦺", price: 240, clout: 14, rating: 2, blurb: "Hard hat, hi-vis, zero construction experience.", wear: { slot: "outfit", kind: "site-crew", color: "#F2A541" } },
   { sku: "set-st-marks-punk", category: "fashion", name: "St. Marks punk", emoji: "🎸", price: 380, clout: 22, rating: 3, blurb: "Ripped on purpose. Angry on schedule.", wear: { slot: "outfit", kind: "st-marks-punk", color: "#14111A" } },

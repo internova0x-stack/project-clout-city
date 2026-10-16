@@ -23,7 +23,7 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome,
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit,
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
   /** #15: owned clothes can be put on straight from the Shop. */
@@ -39,6 +39,8 @@ export function ShopSheet({
   section?: string;
   /** #19: place a Home piece in your home for a look before buying. */
   onTryAtHome?: (item: ShopItem) => void;
+  /** The player's presentation ("m" or "f"): pieces cut for the other one are hidden unless owned. */
+  fit?: "m" | "f";
 }) {
   const [cat, setCat] = useState<ShopCategory>(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
@@ -64,7 +66,8 @@ export function ShopSheet({
   const items = SHOP_ITEMS.filter((i) => i.category === cat
     && (i.category !== "fashion" || !!i.wear) // clothing that can't be worn isn't sold (#15)
     && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku))
-    && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku)));
+    && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku))
+    && (!i.fits || !fit || i.fits === fit || owned.has(i.sku)));
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
@@ -112,7 +115,7 @@ export function ShopSheet({
                     {isOwned || p?.owned ? (
                       wearControl(item.sku) ?? <span className="owned-chip">Owned</span>
                     ) : p?.pending || realMoney?.busy === `buy:${item.sku}` ? (
-                      <button className="btn btn-taxi btn-sm" disabled>{p?.pending ? "Unlocking…" : "Opening checkout…"}</button>
+                      <button className="btn btn-taxi btn-sm" disabled>{p?.pending ? "Unlocking…" : "Opening…"}</button>
                     ) : (
                       <button className="btn btn-taxi btn-sm" disabled={!p || busy !== null} onClick={() => realMoney?.buy(item.sku)}>
                         {p ? formatPrice(p.priceCents, p.currency) : "Unavailable"}

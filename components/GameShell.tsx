@@ -20,6 +20,7 @@ import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type Part
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
+import { modelSex } from "@/lib/avatarCatalog";
 import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
@@ -1864,6 +1865,7 @@ export function GameShell({
             onTryOn={setTryOn}
             section={shopSection}
             onTryAtHome={(item) => { setPanel(null); setTryHome(item); setTab("home"); }}
+            fit={modelSex(look)}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
           <NetWorthSheet

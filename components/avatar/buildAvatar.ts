@@ -213,7 +213,7 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
   const legMat = legsCovered ? bottom : skin;
   const thighR = outfit.bottom === "leggings" ? b.thigh * 0.97 : outfit.bottom === "pants" ? b.thigh * 1.06 : b.thigh;
   const calfR = outfit.bottom === "pants" ? b.calf * 1.18 : b.calf;
-  const boots = outfit.bottom === "skirt";
+  const boots = outfit.bottom === "skirt" || outfit.shoes === "boots";
   const legs: Object3D[] = [];
   const knees: Object3D[] = [];
   for (const s of [-1, 1]) {
