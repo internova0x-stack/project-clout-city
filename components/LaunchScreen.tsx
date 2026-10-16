@@ -9,7 +9,7 @@ export function LaunchScreen({ progress, line, leaving }: { progress: number; li
   return (
     <div className={`launch${leaving ? " leaving" : ""}`} role="status" aria-live="polite" aria-label="Loading Clout City">
       <div className="launch-center">
-        <h1 className="launch-mark">Clout City</h1>
+        <h1 className="studio-mark launch-mark">Clout City</h1>
         <div className="launch-bar" aria-hidden="true">
           <span style={{ transform: `scaleX(${Math.max(0.04, Math.min(1, progress))})` }} />
         </div>
