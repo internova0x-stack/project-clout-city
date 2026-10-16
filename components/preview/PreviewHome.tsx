@@ -285,6 +285,14 @@ export function PreviewHome({
   const noop = async () => {};
   return (
     <GameShell
+      // Skills mockup (owner, Oct 16): sample levels until the rules are built.
+      skills={[
+        { id: "cooking", level: 10, best: 10, practice: 210, rusty: false }, { id: "charisma", level: 3, best: 3, practice: 11, rusty: false },
+        { id: "fitness", level: 2, best: 2, practice: 6, rusty: false }, { id: "smarts", level: 0, best: 0, practice: 2, rusty: false },
+        { id: "music", level: 0, best: 0, practice: 0, rusty: false }, { id: "hustle", level: 5, best: 6, practice: 44, rusty: true },
+        { id: "dance", level: 4, best: 4, practice: 31, rusty: false }, { id: "gossip", level: 1, best: 1, practice: 5, rusty: false },
+        { id: "photography", level: 0, best: 0, practice: 1, rusty: false },
+      ]}
       previewRankUp={rankUpPreset}
       player={me}
       clique={clique}

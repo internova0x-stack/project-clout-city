@@ -813,6 +813,23 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .studio-tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
 .studio-tile { display:flex; flex-direction:column; gap:4px; }
 
+/* Skills (owner, Oct 16): ten blue segments a skill; two columns when the phone is sideways. */
+.profile-tabs { width:100%; }
+.profile-tabs button { flex:1; }
+.skills-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+@media (orientation:landscape) and (min-width:600px) { .skills-grid { grid-template-columns:1fr 1fr; } }
+.skill-row { display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:var(--r-md); background:var(--surface-card); }
+.skill-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.skill-name { font-size:15px; font-weight:600; color:var(--text-1); }
+.skill-level { font-size:14px; font-weight:700; color:var(--tag-blue); font-variant-numeric:tabular-nums; }
+.skill-bar { display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; }
+.skill-bar > span { position:relative; height:7px; border-radius:var(--r-pill); background:rgba(47,123,234,.14); overflow:hidden; }
+.skill-bar > span.on { background:var(--tag-blue); }
+.skill-bar > span.best { background:rgba(47,123,234,.38); }
+.skill-bar > span > i { position:absolute; left:0; top:0; bottom:0; background:rgba(47,123,234,.55); border-radius:inherit; }
+.skill-how { font-size:12.5px; color:var(--text-3); }
+.skill-rust { color:#3E7CB1; font-weight:600; }
+
 /* Players (migration 0055) */
 .players-bar { display:flex; gap:8px; }
 .players-bar .studio-input { flex:1; min-width:0; }

@@ -157,6 +157,7 @@ export function GameShell({
   chat,
   track,
   ping,
+  skills,
   leaderboardRows,
   dating,
   crew,
@@ -190,6 +191,8 @@ export function GameShell({
   track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared" | "crush_invite_shared") => void;
   /** Session length (Insights, migration 0053): pinged on open and every minute while the page is visible. */
   ping?: () => Promise<void>;
+  /** Skills (owner, Oct 16): the profile's Skills tab; absent until they're switched on. */
+  skills?: import("@/lib/skills").SkillState[];
   /** v0.5 crushes and date nights (migration 0011). */
   dating?: DatingApi;
   /** Crew outings (migration 0013). */
@@ -2144,6 +2147,7 @@ export function GameShell({
         }}
         crew={clique.map((c) => c.display_name)}
         recent={myCard?.recent}
+        skills={skills}
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}

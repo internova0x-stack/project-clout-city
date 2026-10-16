@@ -6,6 +6,9 @@ import type { Outfit } from "@/lib/styles";
 import { formatCash, formatShort } from "@/lib/economy";
 import { recentLine, recentWhen, type RecentItem } from "@/lib/recent";
 import { RankClimb } from "./Ranks";
+import { SkillsList } from "./Skills";
+import type { SkillState } from "@/lib/skills";
+import { useState } from "react";
 import { Sheet } from "../Sheet";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
@@ -16,7 +19,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  */
 export function ProfileSheet({
   open, onClose, look, outfit, name, subtitle, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
-  onOpenCollection, onOpenNetWorth, onOpenLeaderboard,
+  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills,
 }: {
   open: boolean;
   onClose: () => void;
@@ -37,7 +40,10 @@ export function ProfileSheet({
   onOpenCollection?: () => void;
   onOpenNetWorth?: () => void;
   onOpenLeaderboard?: () => void;
+  /** Skills (owner, Oct 16): absent until they're switched on, and then there's a Skills tab. */
+  skills?: SkillState[];
 }) {
+  const [tab, setTab] = useState<"profile" | "skills">("profile");
   const lines = (recent ?? []).map((r) => ({ r, line: recentLine(r) })).filter((x) => x.line);
   const { postcards, huntCards } = collections;
   return (
@@ -50,6 +56,13 @@ export function ProfileSheet({
           <h2 className="display-md profile-name">{name}</h2>
           <p className="body profile-sub">{subtitle}</p>
         </div>
+        {skills && (
+          <div className="segmented profile-tabs" role="group" aria-label="Profile sections">
+            <button aria-pressed={tab === "profile"} onClick={() => setTab("profile")}>Profile</button>
+            <button aria-pressed={tab === "skills"} onClick={() => setTab("skills")}>Skills</button>
+          </div>
+        )}
+        {skills && tab === "skills" ? <SkillsList skills={skills} /> : (<>
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
         <div className="profile-kpis">
@@ -97,6 +110,7 @@ export function ProfileSheet({
             <p className="meta" style={{ margin: 0 }}>Other players can see this on your card.</p>
           </div>
         )}
+        </>)}
         <form action="/auth/signout" method="post">
           <button className="btn btn-secondary" type="submit">Log out</button>
         </form>
