@@ -1448,7 +1448,7 @@ export function GameShell({
   const huntNow = huntState?.hunt;
   if (hunt && huntNow && !huntNow.completedAt) {
     quests.push({
-      id: "hunt", emoji: "🗺️",
+      id: "hunt", emoji: "🎁",
       label: huntNow.joined && huntNow.track ? `${Math.min(huntNow.step + 1, huntNow.track.steps)} of ${huntNow.track.steps}` : "New hunt",
       aria: huntNow.joined ? `Treasure hunt: ${huntNow.theme}${huntNow.question ? ", a question is waiting" : ""}` : `New treasure hunt: ${huntNow.theme}`,
       dot: !huntNow.joined || !!huntNow.question,
@@ -1482,7 +1482,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}`}>
       {inside && city ? (
         <>
         <InteriorScene

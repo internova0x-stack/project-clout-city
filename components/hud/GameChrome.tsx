@@ -140,7 +140,10 @@ export function GameChrome({
         {atPlace && (
           <button className="glass-hud at-chip" onClick={atPlace.onOpen}>📍 At {atPlace.name}</button>
         )}
-        {quests.length > 0 && (
+      </div>
+
+      {/* Owner, Oct 16: right-aligned under the top bar, the hunt's gift box outermost, the story beside it. */}
+      {quests.length > 0 && (
           <div className="quest-row">
             {quests.map((q) => (
               <button key={q.id} className="quest-btn" onClick={q.onOpen} aria-label={q.aria}>
@@ -151,8 +154,6 @@ export function GameChrome({
             ))}
           </div>
         )}
-      </div>
-
       {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
       <nav className="side-col" aria-label="Quick actions">
         <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
