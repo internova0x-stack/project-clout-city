@@ -6,7 +6,8 @@
 
 import type { LatLng } from "./geo.ts";
 
-export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe" | "ballpark" | "tennis" | "bridge" | "studios" | "gallery";
+export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe" | "ballpark" | "tennis" | "bridge" | "studios" | "gallery"
+  | "music-hall" | "lounge" | "bodega" | "pizzeria" | "college";
 
 export interface Landmark {
   id: string;
@@ -53,6 +54,12 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "queensboro-bridge", name: "Queensboro Bridge", at: [40.7566, -73.9529], kind: "bridge", facing: 208.5, scale: 1, clear: 0, ground: "none", length: 1305 },
   { id: "astoria-sound-stages", name: "Astoria Sound Stages", at: [40.7564, -73.9245], kind: "studios", facing: 180, scale: 1.2, clear: 85, ground: "block" },
   { id: "old-school-gallery", name: "Old School Gallery", at: [40.7455, -73.9474], kind: "gallery", facing: 180, scale: 1.4, clear: 50, ground: "block" },
+  // Batch 3: Astoria game places.
+  { id: "hellgate-hall", placeId: "hellgate-hall", name: "Hellgate Hall", at: [40.7737, -73.9178], kind: "music-hall", facing: 180, scale: 2, clear: 50, ground: "block" },
+  { id: "low-light-lounge", placeId: "low-light-lounge", name: "Low Light Lounge", at: [40.7612, -73.9175], kind: "lounge", facing: 180, scale: 2.2, clear: 40, ground: "block" },
+  { id: "ditmars-deli", placeId: "ditmars-deli", name: "Ditmars Deli & Dreams", at: [40.7748, -73.9128], kind: "bodega", facing: 180, scale: 2.4, clear: 30, ground: "block" },
+  { id: "two-bros-pizza", placeId: "two-bros-pizza", name: "Two Bros Who Fight Pizza", at: [40.7668, -73.9208], kind: "pizzeria", facing: 180, scale: 2.4, clear: 28, ground: "block" },
+  { id: "astoria-cc", placeId: "astoria-cc", name: "Astoria Community College", at: [40.76, -73.9232], kind: "college", facing: 180, scale: 1.3, clear: 90, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 
