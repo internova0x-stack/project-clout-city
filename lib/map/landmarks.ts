@@ -11,7 +11,8 @@ export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "
   | "gym" | "diner" | "church" | "library" | "firehouse"
   | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto"
   | "boutique" | "showroom" | "dealership" | "cinema" | "arena"
-  | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub";
+  | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub"
+  | "googie-diner" | "sky-dining" | "supermarket" | "cowork" | "precinct";
 
 export interface Landmark {
   id: string;
@@ -88,6 +89,12 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "flushing-meadows", placeId: "flushing-meadows", name: "World's Fair Towers", at: [40.742, -73.844], kind: "fair-towers", facing: 180, scale: 1.3, clear: 75, ground: "park" },
   { id: "discount-disco", placeId: "discount-disco", name: "Discount Disco", at: [40.7577, -73.8336], kind: "discount-disco", facing: 180, scale: 1.9, clear: 45, ground: "block" },
   { id: "pedal-pushers", placeId: "pedal-pushers", name: "Pedal Pushers Hub", at: [40.759, -73.928], kind: "bike-hub", facing: 180, scale: 1.9, clear: 42, ground: "block" },
+  // Batch 8: more Astoria places.
+  { id: "neon-spoon", placeId: "neon-spoon", name: "The Neon Spoon", at: [40.7695, -73.9265], kind: "googie-diner", facing: 180, scale: 2.1, clear: 36, ground: "block" },
+  { id: "up-on-thirty", placeId: "up-on-thirty", name: "Up on Thirty", at: [40.7672, -73.9238], kind: "sky-dining", facing: 180, scale: 1.4, clear: 30, ground: "block" },
+  { id: "steinway-fresh", placeId: "steinway-fresh", name: "Steinway Fresh Mart", at: [40.7628, -73.916], kind: "supermarket", facing: 180, scale: 1.7, clear: 48, ground: "block" },
+  { id: "triborough-works", placeId: "triborough-works", name: "Triborough Works", at: [40.766, -73.9252], kind: "cowork", facing: 180, scale: 1.7, clear: 42, ground: "block" },
+  { id: "precinct-114-half", placeId: "precinct-114-half", name: "The 114½ Precinct", at: [40.769, -73.9228], kind: "precinct", facing: 180, scale: 2, clear: 36, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 

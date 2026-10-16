@@ -1658,6 +1658,138 @@ function bikeHub(t: Themed): Group {
   return g;
 }
 
+// ---------------------------------------------------------------------------
+// The Neon Spoon: a space-age diner with an upswept roof, a wall of glass and a giant neon spoon
+// ---------------------------------------------------------------------------
+function googieDiner(t: Themed): Group {
+  const g = new Group();
+  const store = facade(t, { wall: C.cream, glass: "#FFE6AA", style: "storefront", lit: 1, seed: 241, frame: C.tealLight }, 1.5);
+  g.add(at(facadeBox(22, 5, 12, store, solid(C.cream)), 0, 2.5, 0));
+  // The upswept roof: a tilted slab rising to the front.
+  const roof = new Mesh(new BoxGeometry(26, 0.8, 16), solid(C.tealLight));
+  roof.rotation.x = -0.18;
+  g.add(at(roof, 0, 6.4, 1));
+  g.add(at(new Mesh(new BoxGeometry(26.4, 0.4, 0.4), glowing(t, C.pink, C.pink, 2.4, 0.3)), 0, 7.8, 9));
+  // The spoon: a tilted bowl and handle on a pole, outlined in neon.
+  const spoon = at(new Group(), 9, 13, 4);
+  const neon = glowing(t, "#D7E1E7", C.tealLight, 2.6, 0.3);
+  const bowl = new Mesh(new SphereGeometry(2.2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), neon);
+  bowl.scale.set(1, 0.35, 1.4);
+  bowl.rotation.x = Math.PI / 2;
+  spoon.add(at(bowl, 0, 3.5, 0));
+  spoon.add(at(new Mesh(new BoxGeometry(0.6, 6, 0.3), neon), 0, -0.5, 0));
+  spoon.rotation.z = -0.35;
+  g.add(spoon);
+  g.add(at(new Mesh(new CylinderGeometry(0.2, 0.25, 9, 6), solid(C.steel)), 9, 4.5, 4));
+  g.add(at(sign(t, "THE NEON SPOON", 12, 1.6, { bg: C.ink, fg: C.pink }, 2.4), -2, 6, 7.6));
+  // Starburst lamps along the front.
+  for (const x of [-9, -3, 3]) g.add(at(new Mesh(new IcosahedronGeometry(0.6, 0), glowing(t, C.amber, C.amber, 2.4, 0.2)), x, 5.8, 7.4));
+  g.add(at(lightPool(t, 12, C.tealLight, 0.5), 0, 0, 9));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Up on Thirty: a slender thirty-floor tower crowned by a glass dining room and a lit "30"
+// ---------------------------------------------------------------------------
+function skyDining(t: Themed): Group {
+  const g = new Group();
+  const tower = facade(t, { wall: "#C9B79C", glass: "#4E6B7A", style: "punched", lit: 0.75, seed: 251, frame: C.cream });
+  g.add(at(litBox(t, 16, 96, 16, tower, solid("#8FA4B8"), C.amber, 0.35), 0, 48, 0));
+  // The dining room on top, cantilevered over the street side, all glass and warm light.
+  g.add(at(new Mesh(new BoxGeometry(20, 6, 20), glowing(t, "#BFE6F7", C.amber, 1.6, 0.1)), 0, 99, 2));
+  g.add(at(new Mesh(new BoxGeometry(21, 0.8, 21), solid(C.ink)), 0, 102.4, 2));
+  g.add(at(new Mesh(new BoxGeometry(21, 0.6, 21), solid(C.ink)), 0, 95.7, 2));
+  const bulb = glowing(t, C.cream, "#FFE27A", 2.4, 0);
+  const bulbGeo = new SphereGeometry(0.3, 5, 4);
+  for (let i = 0; i < 16; i++) g.add(at(new Mesh(bulbGeo, bulb), -10 + i * 1.33, 103.2, 12.6));
+  g.add(at(sign(t, "30", 6, 5, { bg: C.ink, fg: C.amber }, 2.8), 0, 107, 2));
+  g.add(at(sign(t, "UP ON THIRTY", 12, 1.6, { bg: C.ink, fg: C.amber }, 2), 0, 4, 8.2));
+  g.add(at(lightPool(t, 14, C.amber, 0.45), 0, 0, 10));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Steinway Fresh Mart: a wide supermarket, a green sign, produce stands, carts and a small lot
+// ---------------------------------------------------------------------------
+function supermarket(t: Themed): Group {
+  const g = new Group();
+  const store = facade(t, { wall: "#F4F1EA", glass: "#FFF3DE", style: "storefront", lit: 1, seed: 261, frame: "#2E7D4F" }, 1.4);
+  g.add(at(litBox(t, 40, 8, 26, store, solid("#B9C6CF"), C.amber, 0.4), 0, 4, -4));
+  g.add(at(new Mesh(new BoxGeometry(42, 2.4, 1.2), solid("#2E7D4F")), 0, 7.4, 9.3));
+  g.add(at(sign(t, "STEINWAY FRESH MART", 26, 2, { bg: "#2E7D4F", fg: C.cream }, 2), 0, 7.4, 10));
+  // Produce stands under a canopy.
+  g.add(at(new Mesh(new BoxGeometry(16, 0.3, 3.4), solid("#2E7D4F")), -10, 4, 11));
+  const fruit = [C.coral, C.amber, "#5FA36B", "#C8352B", "#F2C14E"];
+  for (let i = 0; i < 5; i++) {
+    g.add(at(new Mesh(new BoxGeometry(2.6, 0.9, 1.6), solid("#8B5E3C")), -16 + i * 3, 0.45, 11));
+    g.add(at(new Mesh(new BoxGeometry(2.4, 0.4, 1.4), solid(fruit[i])), -16 + i * 3, 1.1, 11));
+  }
+  // Cart corral and the lot.
+  for (let i = 0; i < 4; i++) g.add(at(new Mesh(new BoxGeometry(0.8, 0.9, 1.4), solid(C.steel)), 8 + i * 0.5, 0.6, 12));
+  parkingLot(g, 0, 22, 40, 14);
+  g.add(at(lightPool(t, 20, C.amber, 0.4), 0, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Triborough Works: a converted brick factory: big arched windows, a rooftop greenhouse, a chimney
+// ---------------------------------------------------------------------------
+function cowork(t: Themed): Group {
+  const g = new Group();
+  const brick = facade(t, { wall: "#9E4A38", glass: "#BFE6F7", style: "industrial", lit: 0.85, seed: 271 }, 1.3);
+  g.add(at(litBox(t, 36, 16, 20, brick, solid("#5E2A22"), C.amber, 0.45), 0, 8, 0));
+  // Tall arched factory windows along the front.
+  const win = glowing(t, "#4E6B7A", "#FFD58A", 1.8, 0);
+  for (let i = 0; i < 5; i++) {
+    const x = -14 + i * 7;
+    g.add(at(new Mesh(new BoxGeometry(4.4, 8, 0.3), win), x, 7, 10.05));
+    const top = new Mesh(new CylinderGeometry(2.2, 2.2, 0.3, 12, 1, false, 0, Math.PI), win);
+    top.rotation.x = Math.PI / 2;
+    top.rotation.z = Math.PI / 2;
+    g.add(at(top, x, 11, 10.05));
+  }
+  // Rooftop greenhouse and the old chimney.
+  g.add(at(new Mesh(new BoxGeometry(14, 4, 9), glowing(t, "#CFEFD8", "#9FE3A0", 1.2, 0.1)), -8, 18, -3));
+  g.add(at(gable(14.4, 2.4, 9.4, glowing(t, "#CFEFD8", "#9FE3A0", 1.2, 0.1)), -8, 20, -3));
+  g.add(at(new Mesh(new CylinderGeometry(1.4, 1.8, 14, 8), solid("#8E3B2E")), 12, 23, -5));
+  g.add(at(sign(t, "TRIBOROUGH WORKS", 20, 2, { bg: C.cream, fg: "#9E4A38" }, 1.8), 0, 14.6, 10.2));
+  // Bike racks out front.
+  for (let i = 0; i < 6; i++) g.add(at(new Mesh(new TorusGeometry(0.5, 0.08, 4, 10, Math.PI), solid(C.steel)), -6 + i * 1.6, 0.5, 13));
+  g.add(at(lightPool(t, 14, C.amber, 0.45), 0, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// The 114½ Precinct: a stone station house, green lamps by the door, a flag, patrol cars
+// ---------------------------------------------------------------------------
+function precinct(t: Themed): Group {
+  const g = new Group();
+  const stone = facade(t, { wall: "#D9CFC0", glass: "#4E6B7A", style: "punched", lit: 0.75, seed: 281, frame: "#8FA4B8" });
+  g.add(at(litBox(t, 18, 13, 16, stone, solid("#5E7B8C"), C.amber, 0.45), 0, 6.5, 0));
+  g.add(at(new Mesh(new BoxGeometry(18.6, 1, 16.6), solid(C.cream)), 0, 13.5, 0));
+  for (let i = 0; i < 3; i++) g.add(at(new Mesh(new BoxGeometry(6 - i, 0.4, 1.2), solid(C.stoneDark)), 0, 0.2 + i * 0.4, 8.6 - i * 0.4));
+  g.add(at(new Mesh(new BoxGeometry(3, 4.4, 0.3), solid("#2F4A63")), 0, 2.4, 8.05));
+  // The green lamps either side of the door, as every station house has.
+  const green = glowing(t, "#4E9A5E", "#7CFF9A", 2.8, 0.4);
+  for (const x of [-2.6, 2.6]) {
+    g.add(at(new Mesh(new CylinderGeometry(0.08, 0.08, 1, 5), solid(C.ink)), x, 4.6, 8.3));
+    g.add(at(new Mesh(new SphereGeometry(0.45, 8, 6), green), x, 4.1, 8.5));
+  }
+  g.add(at(sign(t, "114½ PRECINCT", 12, 1.4, { bg: C.cream, fg: "#2F4A63" }, 1.6), 0, 10.5, 8.2));
+  // Flag on the roof and two patrol cars out front.
+  g.add(at(new Mesh(new CylinderGeometry(0.12, 0.15, 6, 5), solid(C.steel)), -7, 17, 6));
+  g.add(at(new Mesh(new BoxGeometry(2.6, 1.6, 0.08), solid("#2F5DA8")), -5.6, 19, 6));
+  for (const x of [-5, 5]) {
+    const car = parkedCar("#F4F1EA");
+    car.rotation.y = Math.PI / 2;
+    car.add(at(new Mesh(new BoxGeometry(1.6, 0.3, 0.5), glowing(t, "#2F5DA8", "#4D7BFF", 3, 0.4)), 0, 1.8, 0));
+    car.add(at(new Mesh(new BoxGeometry(1.95, 0.25, 4.45), solid("#2F5DA8")), 0, 0.75, 0));
+    g.add(at(car, x, 0, 12));
+  }
+  g.add(at(lightPool(t, 10, "#7CFF9A", 0.35), 0, 0, 10));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
   "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
@@ -1665,6 +1797,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   rooftop, "uv-club": uvClub, "lucky-deli": luckyDeli, "dive-club": diveClub, lotto,
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
+  "googie-diner": googieDiner, "sky-dining": skyDining, supermarket, cowork, precinct,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {
