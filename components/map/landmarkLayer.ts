@@ -4,7 +4,7 @@
 
 import type { CustomLayerInterface, Map as MapLibreMap } from "maplibre-gl";
 import {
-  Box3, Camera, DirectionalLight, Group, HemisphereLight, Matrix4, Scene, Vector3, WebGLRenderer,
+  Box3, Camera, DirectionalLight, Group, HemisphereLight, Matrix4, type Mesh, type Object3D, Scene, Vector3, WebGLRenderer,
 } from "three";
 import { BRIDGE_BUILT_M, LANDMARKS, type Landmark } from "@/lib/map/landmarks";
 import { exaggeration } from "@/lib/map/scale";
@@ -24,6 +24,18 @@ export interface LandmarkLayer {
   setPositions(list: readonly Landmark[]): void;
   setNight(night: boolean): void;
   dispose(): void;
+}
+
+/** The top of a model's solid parts, in meters: searchlight beams and light pools don't count. */
+function buildingTop(model: Group, skip: Set<Object3D>): number {
+  const box = new Box3();
+  const visit = (o: Object3D) => {
+    if (skip.has(o)) return;
+    if ((o as Mesh).isMesh) box.expandByObject(o, false);
+    else o.children.forEach(visit);
+  };
+  model.children.forEach(visit);
+  return box.isEmpty() ? 0 : box.max.y;
 }
 
 /** Web Mercator in MapLibre's units (the world is 0 to 1), so this file needn't load maplibre-gl. */
@@ -51,6 +63,7 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   const themed: Themed = newThemed();
   const root = new Group();
   const heights = new Map<string, number>();
+  const nightOnly = new Set(themed.nightOnly);
   const models = new Map<string, Group>();
   for (const l of list) {
     const m = mercator(l.at[0], l.at[1]);
@@ -61,7 +74,8 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     model.scale.setScalar(l.scale);
     model.name = l.id;
     model.updateMatrixWorld(true);
-    heights.set(l.placeId ?? l.id, new Box3().setFromObject(model).max.y);
+    for (const o of themed.nightOnly) nightOnly.add(o);
+    heights.set(l.placeId ?? l.id, buildingTop(model, nightOnly));
     root.add(model);
   }
   scene.add(root);

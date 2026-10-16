@@ -708,8 +708,196 @@ function gallery(t: Themed): Group {
   return g;
 }
 
+/** A zigzag fire escape on a facade (the front at z), floors from y0 every 3.6 m. */
+function fireEscape(g: Group, x: number, z: number, y0: number, floors: number, m: Material) {
+  for (let f = 0; f < floors; f++) {
+    const y = y0 + f * 3.6;
+    g.add(at(new Mesh(new BoxGeometry(5, 0.25, 1.4), m), x, y, z + 0.7));
+    g.add(at(new Mesh(new BoxGeometry(5, 1, 0.1), m), x, y + 0.5, z + 1.4));
+    if (f < floors - 1) g.add(strut([x + (f % 2 ? 2 : -2), y, z + 0.9], [x + (f % 2 ? -2 : 2), y + 3.6, z + 0.9], 0.2, m));
+  }
+}
+
+/** A sign that hangs off a facade (blade sign), text on both faces. */
+function blade(t: Themed, text: string, h: number, colors: { bg: string; fg: string }, night = 2.4): Mesh {
+  const m = sign(t, text, h, h / 4.2, colors, night);
+  m.rotation.z = Math.PI / 2;
+  m.rotation.y = Math.PI / 2;
+  return m;
+}
+
+// ---------------------------------------------------------------------------
+// Hellgate Hall (club): an old brick music hall with arched windows, a marquee and a blade sign
+// ---------------------------------------------------------------------------
+function musicHall(t: Themed): Group {
+  const g = new Group();
+  const brick = facade(t, { wall: "#8E3B2E", glass: "#3A2E3A", style: "punched", lit: 0.6, seed: 61, frame: C.stoneDark }, 1.2);
+  g.add(at(litBox(t, 26, 16, 30, brick, solid("#5E2A22"), C.coral, 0.55), 0, 8, 0));
+  // Arched windows on the front: cream arches over tall glass.
+  const arch = glowing(t, "#3A2E3A", "#FF8A4C", 1.6, 0);
+  for (const x of [-8, 0, 8]) {
+    g.add(at(new Mesh(new BoxGeometry(4.5, 6, 0.3), arch), x, 10, 15.05));
+    const top = new Mesh(new CylinderGeometry(2.25, 2.25, 0.3, 12, 1, false, 0, Math.PI), arch);
+    top.rotation.x = Math.PI / 2;
+    top.rotation.z = Math.PI / 2;
+    g.add(at(top, x, 13, 15.05));
+  }
+  g.add(at(new Mesh(new BoxGeometry(27, 1.2, 31), solid(C.cream)), 0, 16.4, 0));
+  // Marquee over the doors, with a run of bulbs.
+  g.add(at(new Mesh(new BoxGeometry(16, 2.2, 4), solid(C.ink)), 0, 5, 17));
+  g.add(at(sign(t, "TONIGHT: LOUD", 15, 1.6, { bg: C.cream, fg: "#C8352B" }, 1.8), 0, 5, 19.05));
+  const bulb = glowing(t, C.cream, "#FFE27A", 2.6, 0.1);
+  const bulbGeo = new SphereGeometry(0.28, 6, 4);
+  for (let i = 0; i < 18; i++) g.add(at(new Mesh(bulbGeo, bulb), -7.65 + i * 0.9, 3.75, 19.05));
+  g.add(at(blade(t, "HELLGATE", 13, { bg: C.ink, fg: "#FF5A3C" }), 12, 10, 16.5));
+  searchlights(t, g, [[-9, 16.5, -6], [9, 16.5, -6]], 80);
+  g.add(at(lightPool(t, 13, "#FF8A4C", 0.6), 0, 0, 20));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Low Light Lounge: a dark, low building with an amber glass box on the roof and string lights
+// ---------------------------------------------------------------------------
+function lounge(t: Themed): Group {
+  const g = new Group();
+  const dark = facade(t, { wall: "#2A2F3A", glass: "#A8763E", style: "storefront", lit: 0.95, seed: 71, frame: "#1B1A22" }, 1.1);
+  g.add(at(litBox(t, 22, 8, 18, dark, solid("#3B3A44"), C.amber, 0.45), 0, 4, 0));
+  // The rooftop glass room, warm inside.
+  g.add(at(new Mesh(new BoxGeometry(12, 4, 9), glowing(t, "#C9B79C", C.amber, 1.4, 0.15)), -3, 10, -2));
+  g.add(at(new Mesh(new BoxGeometry(13, 0.5, 10), solid(C.ink)), -3, 12.25, -2));
+  // Terrace planters and string lights.
+  const leaves = solid("#5FA36B");
+  for (const x of [4, 7, 10]) g.add(at(new Mesh(new SphereGeometry(1.1, 6, 4), leaves), x, 9, 7));
+  const bulb = glowing(t, C.cream, "#FFE27A", 2.4, 0);
+  const bulbGeo = new SphereGeometry(0.22, 5, 4);
+  for (let i = 0; i <= 14; i++) {
+    const x = 3 + i * 0.55;
+    g.add(at(new Mesh(bulbGeo, bulb), x, 10.6 - Math.sin((i / 14) * Math.PI) * 0.8, 7.5));
+    g.add(at(new Mesh(bulbGeo, bulb), x, 10.6 - Math.sin((i / 14) * Math.PI) * 0.8, -1));
+  }
+  g.add(at(sign(t, "LOW LIGHT", 10, 1.6, { bg: "#1B1A22", fg: C.amber }, 2.2), 0, 6.6, 9.1));
+  g.add(at(lightPool(t, 10, C.amber, 0.6), 0, 0, 11));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Ditmars Deli & Dreams: a corner bodega under a walk-up, green awning, fruit stand, fire escape
+// ---------------------------------------------------------------------------
+function bodega(t: Themed): Group {
+  const g = new Group();
+  const store = facade(t, { wall: C.cream, glass: "#F6D7A8", style: "storefront", lit: 1, seed: 81, frame: "#2E4A3A" }, 1.6);
+  const brick = facade(t, { wall: "#B9765A", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 83, frame: C.cream });
+  g.add(at(facadeBox(12, 4.2, 12, store, solid("#7A5A46")), 0, 2.1, 0));
+  g.add(at(facadeBox(12, 11, 12, brick, solid("#7A5A46")), 0, 4.2 + 5.5, 0));
+  g.add(at(nightGlow(t, 12, 15.2, 12, C.amber, 0.6), 0, 7.6, 0));
+  g.add(at(new Mesh(new BoxGeometry(12.6, 0.7, 12.6), solid(C.cream)), 0, 15.5, 0));
+  // Green awning on two sides (it's a corner store), with the name.
+  const awning = solid("#2E7D4F");
+  for (const [w, x, z, ry] of [[12.4, 0, 7, 0], [12.4, 7, 0, Math.PI / 2]] as const) {
+    const a = new Mesh(new BoxGeometry(w, 0.3, 2.4), awning);
+    a.position.set(x, 4.3, z);
+    a.rotation.y = ry;
+    a.rotation.x = ry ? 0 : 0.35;
+    if (ry) a.rotation.z = -0.35;
+    g.add(a);
+  }
+  g.add(at(sign(t, "DELI & DREAMS", 10, 1.2, { bg: "#2E7D4F", fg: C.cream }, 1.6), 0, 4.9, 8.2));
+  // Fruit and flowers out front.
+  for (const [x, c] of [[-4, C.coral], [-2.4, C.amber], [-0.8, "#5FA36B"], [0.8, C.pink]] as const) {
+    g.add(at(new Mesh(new BoxGeometry(1.4, 0.9, 1.2), solid("#8B5E3C")), x, 0.45, 7.4));
+    g.add(at(new Mesh(new BoxGeometry(1.2, 0.3, 1), solid(c)), x, 1.05, 7.4));
+  }
+  fireEscape(g, -3, 6, 5.5, 3, solid(C.ink));
+  g.add(at(lightPool(t, 8, C.amber, 0.65), 0, 0, 8));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Two Bros Who Fight Pizza: a narrow walk-up with a giant slice on the roof and a neon PIZZA sign
+// ---------------------------------------------------------------------------
+function pizzeria(t: Themed): Group {
+  const g = new Group();
+  const store = facade(t, { wall: C.cream, glass: "#F6C98E", style: "storefront", lit: 1, seed: 91, frame: "#B33A3A" }, 1.5);
+  const brick = facade(t, { wall: "#C46A4E", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 93, frame: C.cream });
+  g.add(at(facadeBox(9, 4.2, 13, store, solid("#7A3A2C")), 0, 2.1, 0));
+  g.add(at(facadeBox(9, 7.6, 13, brick, solid("#7A3A2C")), 0, 4.2 + 3.8, 0));
+  g.add(at(nightGlow(t, 9, 11.8, 13, C.amber, 0.6), 0, 5.9, 0));
+  // Red-and-white striped awning.
+  const c = document.createElement("canvas");
+  c.width = 128;
+  c.height = 16;
+  const x = c.getContext("2d")!;
+  for (let i = 0; i < 8; i++) {
+    x.fillStyle = i % 2 ? "#FFF3DE" : "#C8352B";
+    x.fillRect(i * 16, 0, 16, 16);
+  }
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  const awning = new Mesh(new PlaneGeometry(8.6, 2.4), new MeshStandardMaterial({ map: tex, side: DoubleSide, roughness: 0.9 }));
+  awning.position.set(0, 4.4, 7.4);
+  awning.rotation.x = -0.9;
+  g.add(awning);
+  g.add(at(sign(t, "PIZZA", 5, 1.3, { bg: "#1B1A22", fg: "#FF5A3C" }, 2.6), 0, 5.6, 6.7));
+  // The giant slice on the roof: crust, cheese, pepperoni.
+  const slice = new Group();
+  const cheese = new Mesh(new CylinderGeometry(0.01, 3.6, 0.6, 3), glowing(t, "#F2C14E", "#FFB347", 0.9, 0));
+  cheese.scale.set(1, 1, 1.9);
+  slice.add(cheese);
+  slice.add(at(new Mesh(new BoxGeometry(6.4, 0.9, 0.9), solid("#C98E5C")), 0, 0, 3.4));
+  for (const [px, pz] of [[0, 0.5], [-1.2, 1.9], [1.2, 1.9], [0, -1.2]]) {
+    const pep = new Mesh(new CylinderGeometry(0.55, 0.55, 0.2, 8), solid("#B33A3A"));
+    slice.add(at(pep, px, 0.35, pz));
+  }
+  slice.rotation.x = -1.15;
+  slice.position.set(0, 15.6, 2);
+  g.add(slice);
+  for (const sx of [-1.6, 1.6]) g.add(at(new Mesh(new BoxGeometry(0.3, 4, 0.3), solid(C.ink)), sx, 13.6, 1));
+  fireEscape(g, 2, 6.5, 5.5, 2, solid(C.ink));
+  g.add(at(lightPool(t, 8, "#FF8A4C", 0.6), 0, 0, 8));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Astoria Community College: halls around a lawn, a clock tower, trees and a flagpole
+// ---------------------------------------------------------------------------
+function college(t: Themed): Group {
+  const g = new Group();
+  const hall = facade(t, { wall: "#D9C7A7", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 101, frame: C.cream });
+  const modern = facade(t, { wall: "#3F7F86", glass: "#BFE6F7", style: "curtain", lit: 0.75, seed: 103, frame: "#2E5F66" });
+  const roof = solid("#8FA4B8");
+  g.add(at(new Mesh(new BoxGeometry(70, 0.2, 60), solid("#6DB277")), 0, 0.1, 0));
+  g.add(at(litBox(t, 60, 18, 16, hall, roof, C.amber, 0.45), 0, 9, -30));
+  g.add(at(litBox(t, 16, 14, 40, hall, roof, C.amber, 0.45), -34, 7, 2));
+  g.add(at(litBox(t, 18, 22, 30, modern, roof, C.sky, 0.45), 34, 11, 6));
+  // Clock tower over the main hall.
+  g.add(at(new Mesh(new BoxGeometry(8, 16, 8), solid("#D9C7A7")), 0, 26, -30));
+  const face = glowing(t, C.cream, "#FFF3DE", 1.8, 0.1);
+  for (const [x, z, ry] of [[0, -25.9, 0], [0, -34.1, Math.PI], [4.1, -30, Math.PI / 2], [-4.1, -30, -Math.PI / 2]] as const) {
+    const c = new Mesh(new CylinderGeometry(2.4, 2.4, 0.2, 16), face);
+    c.rotation.x = Math.PI / 2;
+    c.rotation.z = ry;
+    g.add(at(c, x, 29, z));
+  }
+  const spire = new Mesh(new ConeGeometry(6.2, 8, 4), solid("#5E7B8C"));
+  spire.rotation.y = Math.PI / 4;
+  g.add(at(spire, 0, 38, -30));
+  // Lawn paths, trees and a flagpole.
+  g.add(at(new Mesh(new BoxGeometry(4, 0.25, 40), solid("#E9DCC6")), 0, 0.2, 2));
+  const leaves = solid("#4E8F5A");
+  for (const [x, z] of [[-14, -10], [14, -10], [-14, 12], [14, 12], [-20, 26], [20, 26]]) {
+    g.add(at(new Mesh(new CylinderGeometry(0.5, 0.6, 3, 5), solid("#8B5E3C")), x, 1.5, z));
+    g.add(at(new Mesh(new SphereGeometry(3.4, 7, 5), leaves), x, 5.4, z));
+  }
+  g.add(at(new Mesh(new CylinderGeometry(0.2, 0.25, 16, 5), solid(C.steel)), 8, 8, 24));
+  g.add(at(new Mesh(new BoxGeometry(3.4, 2, 0.1), solid("#2F8F8A")), 9.8, 15, 24));
+  g.add(at(sign(t, "ASTORIA COMMUNITY COLLEGE", 30, 2.4, { bg: C.cream, fg: "#2F5DA8" }, 1.6), 0, 12, -21.9));
+  for (const [x, z] of [[-10, 0], [10, 0], [0, 22]]) g.add(at(lightPool(t, 10, C.amber, 0.45), x, 0.25, z));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
+  "music-hall": musicHall, lounge, bodega, pizzeria, college,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {
