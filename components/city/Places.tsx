@@ -551,11 +551,11 @@ export function LocationSheet({
             <span className="lola-avatar" aria-hidden="true">💋</span>
             <p className="body" style={{ margin: 0 }}>{place.lore}<span className="meta" style={{ display: "block", marginTop: 4 }}>Lola Lowdown</span></p>
           </div>
-          {/* Meeting players: who's here right now. */}
+          {/* Meeting players: who's inside right now (0064: you count too once you're in; the names are others). */}
           {(() => {
             const h = handlers.here?.(place.id);
             return h && h.count > 0 ? (
-              <p className="here-line" style={{ margin: 0 }}><span className="dot-green" aria-hidden="true" /> <b>{h.count} here now</b> · {hereLine(h.names.map((n) => n.name), h.count)}</p>
+              <p className="here-line" style={{ margin: 0 }}><span className="dot-green" aria-hidden="true" /> <b>{h.count} here now</b> · {hereLine([...(here && h.names.length === h.count - 1 ? ["You"] : []), ...h.names.map((n) => n.name)], h.count)}</p>
             ) : null;
           })()}
           {/* #19 clubs: what's downstairs and upstairs, and the door rule. */}
@@ -745,12 +745,16 @@ export function PlacesSheet({
               <button key={p.id} className="list-row" onClick={() => onPick(p)}>
                 <span className="map-pin-tile" aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 12, background: tileBackground(glyphFor(p)) }}><Glyph name={glyphFor(p)} size={24} /></span>
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                  <span className="title" style={{ display: "block" }}>{p.name}</span>
+                  <span className="places-name">
+                    <span className="title">{p.name}</span>
+                    {/* Where the people are (owner, Oct 16): real players there right now, next to the name (place_counts, never NPCs). */}
+                    {(here?.(p.id)?.count ?? 0) > 0 && (
+                      <span className="places-here" aria-label={`${here!(p.id)!.count} ${here!(p.id)!.count === 1 ? "player" : "players"} here`}>
+                        <span className="places-here-dot" aria-hidden="true" />{here!(p.id)!.count}
+                      </span>
+                    )}
+                  </span>
                   <span className="meta">{p.neighborhood} · {d.toFixed(1)} mi{visited ? " · Visited today" : ""}</span>
-                  {/* Where the people are (owner, Oct 16): real players at the place right now (place_counts, never NPCs). */}
-                  {(here?.(p.id)?.count ?? 0) > 0 && (
-                    <span className="places-here"><span className="places-here-dot" aria-hidden="true" />{here!(p.id)!.count} {here!(p.id)!.count === 1 ? "player" : "players"} here</span>
-                  )}
                 </span>
                 <span className="body-strong" style={{ whiteSpace: "nowrap", fontSize: 14 }}>{cost}</span>
                 <ChevronRightIcon size={18} />

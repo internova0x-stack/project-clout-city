@@ -20,6 +20,8 @@ select pg_temp.assert((select count(distinct place_id) from public.daily_tasks) 
 select pg_temp.assert((select (kind = 'cook' and place_id = 'home' and skill = 'cooking')
                           or (kind = 'shift' and skill = 'hustle')
                           or skill = public.skill_for_place(place_id)
+                          or skill = (select a ->> 'skill' from jsonb_array_elements(public.city() -> 'places') p, jsonb_array_elements(p -> 'actions') a
+                                       where p ->> 'id' = place_id and a ->> 'id' = action_id)
                          from public.daily_tasks where skill is not null), 'the skill matches the place');
 
 -- Many fresh lists: the pick covers several skills, cooking among them.

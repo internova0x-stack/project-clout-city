@@ -1274,7 +1274,9 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .action-row .lock-chip { flex:none; padding:6px 10px; border-radius:var(--r-pill); background:var(--surface-card); color:var(--text-3); font-size:12px; font-weight:700; white-space:nowrap; }
 .here-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:var(--r-pill); background:#E3F5EC; color:#1F7A52; font-weight:700; font-size:12.5px; }
 /* Places list: players at a place now (owner, Oct 16), the same green as "online". */
-.places-here { display:flex; width:fit-content; align-items:center; gap:5px; margin-top:4px; padding:2px 8px; border-radius:var(--r-pill); background:#E3F5EC; color:#1F7A52; font-size:12px; font-weight:700; line-height:16px; }
+.places-name { display:flex; align-items:center; gap:8px; min-width:0; }
+.places-name .title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.places-here { display:flex; flex:none; width:fit-content; align-items:center; gap:5px; padding:2px 8px; border-radius:var(--r-pill); background:#E3F5EC; color:#1F7A52; font-size:12px; font-weight:700; line-height:16px; }
 .places-here-dot { width:7px; height:7px; border-radius:50%; background:#2E9E6A; box-shadow:0 0 0 2px rgba(46,158,106,.22); }
 /* While a story prompt covers the top of the map, the ticker steps aside and "At <place>" sits below the prompt. */
 .game.has-story-prompt .under-hud .pill-status { display:none; }
