@@ -24,11 +24,22 @@ export function applyTheme(t: Themed, night: boolean) {
   for (const o of t.nightOnly) o.visible = night;
 }
 
-/** Searchlights and the like; returns whether anything moved. */
+/** Whether an object and all its parents are shown (a landmark off screen is hidden). */
+function shown(o: Object3D | null): boolean {
+  for (let p = o; p; p = p.parent) if (!p.visible) return false;
+  return true;
+}
+
+/** Searchlights and the like, only those on screen; returns whether anything moved. */
 export function animate(t: Themed, seconds: number, night: boolean): boolean {
   if (!night || !t.sweep.length) return false;
-  for (const s of t.sweep) s.o.rotation.z = s.base + Math.sin(seconds * s.speed + s.phase) * s.amp;
-  return true;
+  let moved = false;
+  for (const s of t.sweep) {
+    if (!shown(s.o.parent)) continue;
+    s.o.rotation.z = s.base + Math.sin(seconds * s.speed + s.phase) * s.amp;
+    moved = true;
+  }
+  return moved;
 }
 
 // ---------------------------------------------------------------------------
@@ -1374,10 +1385,5 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {
-  const g = BUILDERS[kind](t);
-  g.traverse((o) => {
-    const m = o as Mesh;
-    if (m.isMesh) m.frustumCulled = false;
-  });
-  return g;
+  return BUILDERS[kind](t);
 }

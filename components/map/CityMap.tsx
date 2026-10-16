@@ -135,6 +135,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
           maxPitch: 60,
           maxZoom: MAX_ZOOM,
           maxBounds: NYC_BOUNDS,
+          // Phones render at 3x; 2x looks the same on a map and is far lighter (owner, Oct 16: heat).
+          pixelRatio: Math.min(2, window.devicePixelRatio || 1),
           dragRotate: false,
           pitchWithRotate: false,
           touchPitch: true,
@@ -143,8 +145,14 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         });
         instance.touchZoomRotate.disableRotation();
         instance.keyboard.disableRotation();
-        instance.on("move", () => setFrame((f) => f + 1));
-        instance.on("resize", () => setFrame((f) => f + 1));
+        // Pins follow the camera at most once per animation frame (moves can fire more often).
+        let pending = 0;
+        const bump = () => {
+          if (pending) return;
+          pending = requestAnimationFrame(() => { pending = 0; setFrame((f) => f + 1); });
+        };
+        instance.on("move", bump);
+        instance.on("resize", bump);
         instance.on("error", (e) => console.warn("map:", e.error?.message ?? e));
         lostRef.current = false;
         instance.on("webglcontextlost", () => { lostRef.current = true; });
@@ -241,7 +249,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     const place = () => {
       if (map.getZoom() < PLACE_ZOOM) return;
       const bounds = map.getBounds();
-      const todo = LANDMARKS.filter((l) => !done.has(l.id) && bounds.contains([l.at[1], l.at[0]]));
+      // Each landmark is placed once per device: later visits use the remembered spot.
+      const todo = LANDMARKS.filter((l) => !done.has(l.id) && !spotsRef.current[l.id] && bounds.contains([l.at[1], l.at[0]]));
       if (!todo.length) return;
       const roads: RoadLine[] = [];
       for (const f of map.querySourceFeatures("osm", { sourceLayer: "transportation" })) {
