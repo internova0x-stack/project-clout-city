@@ -224,7 +224,11 @@ a { color:inherit; }
 @media (max-width:360px) { .hud-time { min-width:0; } .hud-ampm { font-size:10px; } .hud { padding-left:10px; } }
 
 /* Under-HUD pills (C2) */
-.under-hud { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); left:12px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+/* Bounded on both sides so a long headline ends in an ellipsis instead of running off the screen (owner, Oct 16). */
+.under-hud { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); left:12px; right:12px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; pointer-events:none; }
+.under-hud > * { pointer-events:auto; max-width:100%; }
+/* On short phones the side buttons reach up to the pills: stop short of them. */
+@media (max-height:700px) { .under-hud { right:74px; } }
 
 /* Side column (C3) */
 /* v0.11 (owner, Oct 14): just above the bottom bar, TikTok-style: separate round buttons with labels. */
@@ -1053,7 +1057,7 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }
 
 /* ---------- v0.6 City News: ticker headline, home card, news cards ---------- */
-.news-ticker { min-width:0; flex:1 1 auto; max-width:calc(100% - 150px); animation:rise-in .25s ease-out; }
+.news-ticker { min-width:0; flex:1 1 auto; animation:rise-in .25s ease-out; }
 .news-ticker-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .news-prompt { background:linear-gradient(135deg, #FFF6E0 0%, #FFD9C2 100%); }
 .news-card.news-column { background:linear-gradient(160deg, #FFF0F6 0%, #FFFFFF 70%); }
