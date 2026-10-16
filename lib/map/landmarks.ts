@@ -9,7 +9,8 @@ import type { LatLng } from "./geo.ts";
 export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe" | "ballpark" | "tennis" | "bridge" | "studios" | "gallery"
   | "music-hall" | "lounge" | "bodega" | "pizzeria" | "college"
   | "gym" | "diner" | "church" | "library" | "firehouse"
-  | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto";
+  | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto"
+  | "boutique" | "showroom" | "dealership" | "cinema" | "arena";
 
 export interface Landmark {
   id: string;
@@ -74,6 +75,12 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "lucky-seven-deli", placeId: "lucky-seven-deli", name: "Lucky Seven Deli", at: [40.7495, -73.8885], kind: "lucky-deli", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   { id: "the-sticky-floor", placeId: "the-sticky-floor", name: "The Sticky Floor", at: [40.7512, -73.8832], kind: "dive-club", facing: 180, scale: 2.2, clear: 40, ground: "block" },
   { id: "lucky-star", placeId: "lucky-star", name: "Lucky Star Lotto", at: [40.7593, -73.8301], kind: "lotto", facing: 180, scale: 2.4, clear: 30, ground: "block" },
+  // Batch 6: shops and entertainment.
+  { id: "thread-count", placeId: "thread-count", name: "Thread Count Boutique", at: [40.7651, -73.9204], kind: "boutique", facing: 180, scale: 2.2, clear: 30, ground: "block" },
+  { id: "fifs-furniture", placeId: "fifs-furniture", name: "Fif's Furniture", at: [40.7418, -73.9405], kind: "showroom", facing: 180, scale: 1.8, clear: 50, ground: "block" },
+  { id: "boulevard-motors", placeId: "boulevard-motors", name: "Boulevard Motors", at: [40.7503, -73.9372], kind: "dealership", facing: 180, scale: 1.8, clear: 50, ground: "block" },
+  { id: "reel-queens", placeId: "reel-queens", name: "Reel Queens Cinema", at: [40.7605, -73.9196], kind: "cinema", facing: 180, scale: 2, clear: 40, ground: "block" },
+  { id: "respawn-arena", placeId: "respawn-arena", name: "Respawn Arena", at: [40.7708, -73.9105], kind: "arena", facing: 180, scale: 1.9, clear: 45, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 

@@ -1181,11 +1181,196 @@ function lotto(t: Themed): Group {
   return g;
 }
 
+/** A small parked car (for lots and showrooms). */
+function parkedCar(color: string): Group {
+  const g = new Group();
+  g.add(at(new Mesh(new BoxGeometry(1.9, 0.75, 4.4), solid(color, { rough: 0.4 })), 0, 0.7, 0));
+  g.add(at(new Mesh(new BoxGeometry(1.7, 0.6, 2.2), solid("#2A3440")), 0, 1.35, 0.2));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Thread Count Boutique: a cream townhouse with arched display windows, mannequins and topiaries
+// ---------------------------------------------------------------------------
+function boutique(t: Themed): Group {
+  const g = new Group();
+  const upper = facade(t, { wall: "#F4E9DA", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 161, frame: C.ink });
+  g.add(at(facadeBox(14, 9, 13, upper, solid("#C9B79C")), 0, 5 + 4.5, 0));
+  g.add(at(new Mesh(new BoxGeometry(14, 5, 13), solid("#F4E9DA")), 0, 2.5, 0));
+  g.add(at(nightGlow(t, 14, 14, 13, C.pink, 0.45), 0, 7, 0));
+  g.add(at(new Mesh(new BoxGeometry(14.6, 0.7, 13.6), solid(C.ink)), 0, 14.3, 0));
+  // Two arched display windows with mannequins.
+  const display = glowing(t, "#3A4A5A", "#FFD6E2", 1.8, 0);
+  for (const x of [-3.6, 3.6]) {
+    g.add(at(new Mesh(new BoxGeometry(5, 3.6, 0.3), display), x, 2.2, 6.55));
+    const top = new Mesh(new CylinderGeometry(2.5, 2.5, 0.3, 12, 1, false, 0, Math.PI), display);
+    top.rotation.x = Math.PI / 2;
+    top.rotation.z = Math.PI / 2;
+    g.add(at(top, x, 4, 6.55));
+    for (const dx of [-1, 1]) {
+      g.add(at(new Mesh(new CylinderGeometry(0.35, 0.5, 2, 6), solid(dx < 0 ? C.coral : C.tealLight)), x + dx, 1.6, 6));
+      g.add(at(new Mesh(new SphereGeometry(0.3, 6, 4), solid(C.cream)), x + dx, 2.9, 6));
+    }
+  }
+  // Black canopy over the door, topiaries either side.
+  g.add(at(new Mesh(new BoxGeometry(3, 0.3, 2.4), solid(C.ink)), 0, 4.6, 7.6));
+  for (const x of [-6.4, 6.4]) {
+    g.add(at(new Mesh(new BoxGeometry(1, 0.9, 1), solid(C.ink)), x, 0.45, 7.4));
+    g.add(at(new Mesh(new SphereGeometry(0.9, 7, 5), solid("#4E8F5A")), x, 1.6, 7.4));
+  }
+  g.add(at(sign(t, "THREAD COUNT", 10, 1.2, { bg: C.ink, fg: "#FFD6E2" }, 2), 0, 5.6, 6.7));
+  g.add(at(lightPool(t, 9, "#FFD6E2", 0.55), 0, 0, 8));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Fif's Furniture: a big glass showroom of sofas, with a giant armchair on the roof
+// ---------------------------------------------------------------------------
+function showroom(t: Themed): Group {
+  const g = new Group();
+  const glass = facade(t, { wall: "#F2C14E", glass: "#FFF3DE", style: "storefront", lit: 1, seed: 171, frame: "#C98E3C" }, 1.4);
+  g.add(at(litBox(t, 34, 10, 22, glass, solid("#C9B79C"), C.amber, 0.45), 0, 5, 0));
+  // Sofas in the window.
+  for (const [x, c] of [[-12, C.coral], [-4, C.tealLight], [4, C.sky], [12, C.pink]] as const) {
+    g.add(at(new Mesh(new BoxGeometry(5, 1.2, 2), solid(c)), x, 0.9, 9.6));
+    g.add(at(new Mesh(new BoxGeometry(5, 1.4, 0.6), solid(c)), x, 1.6, 8.8));
+  }
+  // The giant armchair.
+  const chair = at(new Group(), 0, 10, -2);
+  const fabric = glowing(t, C.coral, C.coral, 0.6, 0);
+  chair.add(at(new Mesh(new BoxGeometry(9, 2.4, 7), fabric), 0, 2.2, 0));
+  chair.add(at(new Mesh(new BoxGeometry(9, 6, 1.8), fabric), 0, 4.6, -2.6));
+  for (const x of [-4.1, 4.1]) chair.add(at(new Mesh(new BoxGeometry(1.4, 3.4, 7), fabric), x, 3, 0));
+  chair.add(at(new Mesh(new BoxGeometry(7, 0.8, 5), solid(C.cream)), 0, 3.7, 0.6));
+  for (const [x, z] of [[-4, -3], [4, -3], [-4, 3], [4, 3]]) chair.add(at(new Mesh(new BoxGeometry(0.6, 1, 0.6), solid("#8B5E3C")), x, 0.5, z));
+  chair.scale.setScalar(1.5);
+  g.add(chair);
+  g.add(at(sign(t, "FIF'S FURNITURE", 18, 2.2, { bg: "#C8352B", fg: C.cream }, 2.2), 0, 8.4, 11.1));
+  g.add(at(lightPool(t, 18, C.amber, 0.45), 0, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Boulevard Motors: a sloped glass showroom, a lot of cars under lights, bunting and a pylon sign
+// ---------------------------------------------------------------------------
+function dealership(t: Themed): Group {
+  const g = new Group();
+  const glass = facade(t, { wall: "#D7E1E7", glass: "#BFE6F7", style: "curtain", lit: 0.9, seed: 181, frame: "#8FA4B8" }, 1.3);
+  g.add(at(litBox(t, 30, 9, 16, glass, solid("#8FA4B8"), C.sky, 0.45), 0, 4.5, -10));
+  const roof = new Mesh(new BoxGeometry(32, 0.6, 18), solid("#5E7B8C"));
+  roof.rotation.x = -0.12;
+  g.add(at(roof, 0, 9.8, -10));
+  // Showroom cars and the lot.
+  for (const [x, c] of [[-8, "#C8352B"], [0, "#F4F1EA"], [8, "#2F5DA8"]] as const) g.add(at(parkedCar(c), x, 0, -8));
+  const lot = ["#F2B705", "#1F1B26", "#B9BEC6", "#2E4A3A", "#C8352B", "#F4F1EA", "#5B6B7A", "#2F5DA8"];
+  lot.forEach((c, i) => {
+    const car = parkedCar(c);
+    car.rotation.y = 0.5;
+    g.add(at(car, -13 + (i % 4) * 8.5, 0, 6 + Math.floor(i / 4) * 7));
+  });
+  // Lot lights and bunting.
+  const lamp = glowing(t, C.cream, "#FFFFFF", 2.6, 0);
+  for (const x of [-15, 15]) {
+    g.add(at(new Mesh(new CylinderGeometry(0.2, 0.25, 9, 5), solid(C.steel)), x, 4.5, 18));
+    g.add(at(new Mesh(new BoxGeometry(2, 0.5, 1), lamp), x, 9, 18));
+  }
+  for (let i = 0; i < 16; i++) {
+    const flag = new Mesh(new ConeGeometry(0.4, 1, 3), solid([C.coral, C.amber, C.sky, C.tealLight][i % 4]));
+    flag.rotation.x = Math.PI;
+    g.add(at(flag, -15 + i * 2, 8 - Math.sin((i / 15) * Math.PI) * 1.4, 18));
+  }
+  // Pylon sign.
+  g.add(at(new Mesh(new BoxGeometry(1.2, 16, 1.2), solid(C.ink)), 18, 8, 16));
+  g.add(at(sign(t, "BOULEVARD", 9, 2, { bg: "#2F5DA8", fg: C.cream }, 2.2), 18, 17, 16));
+  g.add(at(sign(t, "MOTORS", 9, 2, { bg: C.cream, fg: "#2F5DA8" }, 1.8), 18, 14.8, 16));
+  g.add(at(lightPool(t, 22, "#FFFFFF", 0.35), 0, 0, 10));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Reel Queens Cinema: an art deco movie house, stepped top, tall REEL blade and a bulb marquee
+// ---------------------------------------------------------------------------
+function cinema(t: Themed): Group {
+  const g = new Group();
+  const deco = facade(t, { wall: C.cream, glass: "#4E6B7A", style: "punched", lit: 0.6, seed: 191, frame: "#2F8F8A" });
+  g.add(at(litBox(t, 22, 12, 26, deco, solid("#C9B79C"), C.amber, 0.4), 0, 6, 0));
+  // Stepped deco crown on the front.
+  for (let i = 0; i < 3; i++) g.add(at(new Mesh(new BoxGeometry(12 - i * 3.5, 2, 2), solid(i % 2 ? "#2F8F8A" : C.cream)), 0, 13 + i * 2, 12));
+  // Marquee: a deep box with chasing bulbs and today's title.
+  g.add(at(new Mesh(new BoxGeometry(16, 3, 4), solid(C.ink)), 0, 5.5, 15));
+  g.add(at(sign(t, "NOW: SEQUEL 7", 14, 1.8, { bg: C.cream, fg: "#C8352B" }, 2), 0, 5.5, 17.05));
+  const bulb = glowing(t, C.cream, "#FFE27A", 2.8, 0.15);
+  const bulbGeo = new SphereGeometry(0.25, 5, 4);
+  for (let i = 0; i < 20; i++) {
+    g.add(at(new Mesh(bulbGeo, bulb), -7.6 + i * 0.8, 7.2, 17.05));
+    g.add(at(new Mesh(bulbGeo, bulb), -7.6 + i * 0.8, 3.8, 17.05));
+  }
+  g.add(at(blade(t, "REEL", 12, { bg: "#C8352B", fg: "#FFE27A" }, 2.8), 0, 13, 14.5));
+  // Poster boxes by the doors.
+  for (const x of [-9, 9]) g.add(at(new Mesh(new BoxGeometry(2.4, 3.4, 0.3), glowing(t, "#3A4A5A", C.sky, 1.4, 0)), x, 2.2, 13.1));
+  g.add(at(lightPool(t, 13, "#FFE27A", 0.6), 0, 0, 17));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Respawn Arena: a rounded games arena with an LED band, a giant screen and a controller sign
+// ---------------------------------------------------------------------------
+function arena(t: Themed): Group {
+  const g = new Group();
+  // Faintly lit at night, so the shell reads against the dark map.
+  const shell = glowing(t, "#2A2F3A", "#5FD4C9", 0.3, 0);
+  const body = new Mesh(new CylinderGeometry(18, 20, 12, 32), shell);
+  body.scale.set(1.3, 1, 1);
+  g.add(at(body, 0, 6, 0));
+  const roof = new Mesh(new SphereGeometry(18, 24, 8, 0, Math.PI * 2, 0, Math.PI / 2), solid("#3B3A44"));
+  roof.scale.set(1.3, 0.35, 1);
+  g.add(at(roof, 0, 12, 0));
+  // LED bands, cyan and pink.
+  for (const [y, c] of [[3, C.tealLight], [9, C.pink]] as const) {
+    const band = new Mesh(new TorusGeometry(19.5 - (y === 9 ? 1 : 0), 0.4, 4, 48), glowing(t, c, c, 2.6, 0.4));
+    band.rotation.x = Math.PI / 2;
+    band.scale.set(1.3, 1, 1);
+    g.add(at(band, 0, y, 0));
+  }
+  // The big screen over the entrance.
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 128;
+  const x = c.getContext("2d")!;
+  const grd = x.createLinearGradient(0, 0, 256, 128);
+  grd.addColorStop(0, "#2F8F8A");
+  grd.addColorStop(1, "#E8735A");
+  x.fillStyle = grd;
+  x.fillRect(0, 0, 256, 128);
+  x.fillStyle = "#FFF3DE";
+  x.font = "900 54px system-ui, sans-serif";
+  x.textAlign = "center";
+  x.textBaseline = "middle";
+  x.fillText("GG", 128, 66);
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  const screen = new MeshStandardMaterial({ map: tex, emissive: "#FFFFFF", emissiveMap: tex, emissiveIntensity: 0.3 });
+  t.glows.push({ mat: screen, day: 0.3, night: 1.4 });
+  const scr = new Mesh(new PlaneGeometry(14, 7), screen);
+  g.add(at(scr, 0, 8, 20.7));
+  // Controller sign on the roof.
+  const pad = at(new Group(), 0, 18.5, 4);
+  const padMat = glowing(t, C.ink, C.tealLight, 0.8, 0);
+  pad.add(new Mesh(new BoxGeometry(8, 2.6, 1), padMat));
+  for (const sx of [-3.6, 3.6]) pad.add(at(new Mesh(new CylinderGeometry(1.6, 1.6, 1, 10).rotateX(Math.PI / 2), padMat), sx, -0.8, 0));
+  for (const [bx, by, col] of [[2.2, 0.5, C.coral], [3.2, -0.3, C.amber], [1.4, -0.3, C.tealLight]] as const) pad.add(at(new Mesh(new CylinderGeometry(0.35, 0.35, 0.3, 8).rotateX(Math.PI / 2), glowing(t, col, col, 2.4, 0.3)), bx, by, 0.6));
+  g.add(pad);
+  g.add(at(sign(t, "RESPAWN ARENA", 14, 1.8, { bg: C.ink, fg: C.tealLight }, 2.4), 0, 3.4, 20.6));
+  g.add(at(lightPool(t, 22, C.tealLight, 0.4), 0, 0, 6));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
   "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
   gym, diner, church, library, firehouse,
   rooftop, "uv-club": uvClub, "lucky-deli": luckyDeli, "dive-club": diveClub, lotto,
+  boutique, showroom, dealership, cinema, arena,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {
