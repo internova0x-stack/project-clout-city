@@ -111,7 +111,7 @@ export function buildModelAvatar(look: Look, opts: ModelAvatarOptions = {}): Ava
   let disposed = false;
 
   const ready = (async () => {
-    const parts = modelParts(look, outfit.top, outfit.bottom, outfit.set);
+    const parts = modelParts(look, outfit.top, outfit.bottom, outfit.set, outfit.shoes);
     // Pack hair only bare-headed (it would poke through hats); none at all under a helmet or hood.
     const hairHidden = helmet || (!!gear && set?.hidesHair);
     const hairRef = !gear && (look.covering === "none" || look.covering === "kippah") ? MODEL_HAIR[sex][look.hair] : undefined;
@@ -299,7 +299,7 @@ function recolor(rig: Object3D, look: Look, outfit: Outfit) {
   if (outfit.set) return;
   paint("body", [outfit.topColor, outfit.topAccent]);
   paint("legs", [outfit.bottomColor, outfit.bottomColor]);
-  paint("feet", [outfit.shoeColor, shadeOf(outfit.shoeColor, -0.3)]);
+  paint("feet", [outfit.shoeColor, outfit.shoeAccent ?? shadeOf(outfit.shoeColor, -0.3)]);
 }
 
 function shadeOf(hex: string, f: number): string {

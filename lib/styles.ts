@@ -16,6 +16,8 @@ export type TopKind = "puffer" | "cardigan" | "vest" | "hoodie" | "crop" | "zip"
 export type BottomKind = "pants" | "skirt" | "shorts" | "leggings";
 export type AccessoryKind = "cap" | "tote" | "lanyard" | "choker" | "mat" | "headphones" | "phone" | "none";
 
+export type ShoeKind = "boots";
+
 export interface Outfit {
   top: TopKind;
   topColor: string;
@@ -23,6 +25,9 @@ export interface Outfit {
   bottom: BottomKind;
   bottomColor: string;
   shoeColor: string;
+  /** Shoes with their own shape (lib/avatarCatalog.ts SHOE_MODEL); otherwise they follow the bottom. */
+  shoes?: ShoeKind;
+  shoeAccent?: string;
   accessory: AccessoryKind;
   accessoryColor: string;
   /** A whole Shop outfit (lib/avatarCatalog.ts OUTFIT_SETS) worn over the pieces, in its own colors. */

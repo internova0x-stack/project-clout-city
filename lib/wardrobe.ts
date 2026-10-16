@@ -1,6 +1,6 @@
 // Worn Shop fashion over the starting style's outfit (one item per slot).
 import type { ShopItem } from "./city.ts";
-import type { AccessoryKind, BottomKind, Outfit, TopKind } from "./styles.ts";
+import type { AccessoryKind, BottomKind, Outfit, ShoeKind, TopKind } from "./styles.ts";
 
 export function outfitWith(base: Outfit, worn: ShopItem[]): Outfit {
   const o = { ...base };
@@ -16,6 +16,8 @@ export function outfitWith(base: Outfit, worn: ShopItem[]): Outfit {
       o.bottomColor = w.color;
     } else if (w.slot === "shoes") {
       o.shoeColor = w.color;
+      o.shoes = (w.kind as ShoeKind | undefined) ?? o.shoes;
+      o.shoeAccent = w.accent ?? o.shoeAccent;
     } else if (w.slot === "outfit") {
       o.set = w.kind;
     } else if (w.slot === "accessory") {

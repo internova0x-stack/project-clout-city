@@ -4,7 +4,7 @@
 // can check every choice has a piece.
 
 import type { HairId, Look } from "./look.ts";
-import type { BottomKind, TopKind } from "./styles.ts";
+import type { BottomKind, ShoeKind, TopKind } from "./styles.ts";
 
 /** The model set: men's or women's files (Presenting as: "curvy" is Female). */
 export type ModelSex = "m" | "f";
@@ -49,6 +49,11 @@ export const FEET_MODEL: Record<BottomKind, Record<ModelSex, PartRef>> = {
   skirt: { m: { sex: "m", file: "Suit" }, f: { sex: "f", file: "Suit" } },
   shorts: { m: { sex: "m", file: "Casual_2" }, f: { sex: "f", file: "Punk" } },
   leggings: { m: { sex: "m", file: "Casual_2" }, f: { sex: "f", file: "Casual" } },
+};
+
+/** Shop shoes with their own shape: platform boots are the women's sci-fi boots; men wear the spacesuit's. */
+export const SHOE_MODEL: Record<ShoeKind, Record<ModelSex, PartRef>> = {
+  boots: { m: { sex: "m", file: "Spacesuit" }, f: { sex: "f", file: "SciFi" } },
 };
 
 /**
@@ -103,13 +108,13 @@ export const outfitSet = (id: string | null | undefined) => OUTFIT_SETS.find((o)
 export const KEEPS_COVERING = new Set(["hijab", "turban", "headwrap", "durag", "kippah"]);
 
 /** The parts a look wears, before recoloring. */
-export function modelParts(look: Pick<Look, "body">, top: TopKind, bottom: BottomKind, set?: string | null): Record<PartSlot, PartRef> {
+export function modelParts(look: Pick<Look, "body">, top: TopKind, bottom: BottomKind, set?: string | null, shoes?: ShoeKind): Record<PartSlot, PartRef> {
   const sex = modelSex(look);
   const full = outfitSet(set)?.[sex];
   return {
     head: { sex, file: FACE[sex] },
     body: full?.ref ?? TOP_MODEL[top][sex],
     legs: full?.ref ?? BOTTOM_MODEL[bottom][sex],
-    feet: full?.ref ?? FEET_MODEL[bottom][sex],
+    feet: full?.ref ?? (shoes ? SHOE_MODEL[shoes][sex] : FEET_MODEL[bottom][sex]),
   };
 }
