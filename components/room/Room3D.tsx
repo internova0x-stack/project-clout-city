@@ -104,6 +104,8 @@ export interface Room3DProps {
    * "natural" keeps the plain lighting for side-by-side previews.
    */
   mood?: "natural" | "dream";
+  /** Called once, after the first frame with the player's avatar loaded (the launch screen waits for it). */
+  onReady?: () => void;
 }
 
 export default function Room3D(props: Room3DProps) {
@@ -829,6 +831,9 @@ export default function Room3D(props: Room3DProps) {
 
   // ---- The player's avatar, re-dressed on Look or outfit changes ----
   const lookKey = JSON.stringify([look, outfit ?? null]);
+  const readySent = useRef(false);
+  const onReadyRef = useRef(props.onReady);
+  onReadyRef.current = props.onReady;
   useEffect(() => {
     const w = world.current;
     if (!w) return;
@@ -838,6 +843,13 @@ export default function Room3D(props: Room3DProps) {
     w.me.rig.add(parts.root);
     w.me.parts = parts;
     w.me.mode = "idle";
+    if (!readySent.current) {
+      void (parts.ready ?? Promise.resolve()).then(() => requestAnimationFrame(() => {
+        if (readySent.current) return;
+        readySent.current = true;
+        onReadyRef.current?.();
+      }));
+    }
     // The old outfit stays on screen until the new model has loaded, so a change never blinks.
     if (old) {
       parts.root.visible = false;

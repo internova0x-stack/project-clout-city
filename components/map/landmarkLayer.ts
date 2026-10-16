@@ -20,6 +20,13 @@ export const LANDMARK_MIN_ZOOM = 11.5;
 const ANIMATE_MIN_ZOOM = 13.5;
 /** Moving things redraw the map at most this often (owner, Oct 16: the phone heated up). */
 const ANIMATION_FPS = 30;
+/**
+ * Launch (owner, Oct 16: "loading should be under two seconds"): landmarks this close to where the map
+ * opens are built at once; the rest are built a few at a time while the phone is idle.
+ */
+export const LANDMARK_NEAR_M = 700;
+/** Background building stops for the frame after this many milliseconds. */
+const BUILD_BUDGET_MS = 8;
 
 export interface LandmarkLayer {
   layer: CustomLayerInterface;
@@ -30,6 +37,8 @@ export interface LandmarkLayer {
   setNight(night: boolean): void;
   /** v0.14 Clout TV: the Clout Tower's screen shows this photo and @handle (null: the station's ident). */
   setBigScreen(img: (CanvasImageSource & { width: number; height: number }) | null, handle?: string): void;
+  /** How many landmarks are built so far, of how many (the rest are on their way). */
+  built(): { done: number; total: number };
   dispose(): void;
 }
 
@@ -55,7 +64,28 @@ function mercator(lat: number, lng: number) {
   };
 }
 
-export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traffic?: Traffic): LandmarkLayer {
+/** Meters between two points (near enough for a city). */
+function meters(a: readonly [number, number], b: readonly [number, number]) {
+  const k = 111_320;
+  return Math.hypot((a[0] - b[0]) * k, (a[1] - b[1]) * k * Math.cos((a[0] * Math.PI) / 180));
+}
+
+/** Runs a little work when the phone is idle (a short timeout where requestIdleCallback is missing). */
+function whenIdle(fn: () => void): () => void {
+  const w = globalThis as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+  if (w.requestIdleCallback && w.cancelIdleCallback) {
+    const id = w.requestIdleCallback(fn, { timeout: 500 });
+    return () => w.cancelIdleCallback!(id);
+  }
+  const id = setTimeout(fn, 16);
+  return () => clearTimeout(id);
+}
+
+/**
+ * near: where the map opens. Landmarks within LANDMARK_NEAR_M of it are built now, the rest in the
+ * background, nearest first. Without it every landmark is built now.
+ */
+export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traffic?: Traffic, near?: readonly [number, number]): LandmarkLayer {
   const lat = list.reduce((a, l) => a + l.at[0], 0) / list.length;
   const lng = list.reduce((a, l) => a + l.at[1], 0) / list.length;
   const origin = mercator(lat, lng);
@@ -72,28 +102,53 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   const heights = new Map<string, number>();
   const nightOnly = new Set(themed.nightOnly);
   const models = new Map<string, Group>();
-  for (const l of list) {
+  // Where placement last stood each landmark (setPositions), for the ones built after it was called.
+  const placedAt = new Map<string, Landmark>();
+  // Each landmark's bounds, so ones off screen are skipped (and their searchlights stay still).
+  const bounds = new Map<Group, Sphere>();
+  const measureOne = (model: Group) => bounds.set(model, new Box3().setFromObject(model).getBoundingSphere(new Sphere()));
+  const measure = () => {
+    root.updateMatrixWorld(true);
+    for (const model of models.values()) measureOne(model);
+  };
+  const stand = (model: Group, l: Landmark) => {
     const m = mercator(l.at[0], l.at[1]);
-    const model = buildLandmark(l.kind, themed);
     model.position.set((m.x - origin.x) / s, 0, (m.y - origin.y) / s);
-    models.set(l.id, model);
     model.rotation.y = ((180 - l.facing) * Math.PI) / 180;
+    // A bridge stretches along its length to reach both shores.
+    if (l.kind === "bridge") model.scale.x = l.scale * (l.length ?? BRIDGE_BUILT_M) / BRIDGE_BUILT_M;
+  };
+  const build = (l: Landmark) => {
+    const model = buildLandmark(l.kind, themed);
     model.scale.setScalar(l.scale);
+    stand(model, l);
+    models.set(l.id, model);
     model.name = l.id;
     model.updateMatrixWorld(true);
     for (const o of themed.nightOnly) nightOnly.add(o);
     heights.set(l.placeId ?? l.id, buildingTop(model, nightOnly));
     // Bake the still parts into a few meshes: hundreds of draw calls become a handful.
     mergeStatic(model, new Set([...nightOnly, ...themed.sweep.map((w) => w.o)]), new Set<Material>(themed.glows.map((g) => g.mat)));
+    const moved = placedAt.get(l.id);
+    if (moved) stand(model, moved);
     root.add(model);
-  }
-  // Each landmark's bounds, so ones off screen are skipped (and their searchlights stay still).
-  const bounds = new Map<Group, Sphere>();
-  const measure = () => {
-    root.updateMatrixWorld(true);
-    for (const model of models.values()) bounds.set(model, new Box3().setFromObject(model).getBoundingSphere(new Sphere()));
+    model.updateMatrixWorld(true);
+    measureOne(model);
+    if (l.kind === "clout-tower") paintBigScreen(screen.img, screen.handle);
   };
-  measure();
+  let screen: { img: Parameters<LandmarkLayer["setBigScreen"]>[0]; handle?: string } = { img: null };
+  const queue = near ? [...list].sort((a, b) => meters(a.at, near) - meters(b.at, near)) : [...list];
+  while (queue.length && (!near || meters(queue[0].at, near) <= LANDMARK_NEAR_M)) build(queue.shift()!);
+  // The rest, nearest first, a few at a time while the phone is idle.
+  let cancelBuild: (() => void) | null = null;
+  const buildMore = () => {
+    cancelBuild = null;
+    const until = performance.now() + BUILD_BUDGET_MS;
+    do build(queue.shift()!); while (queue.length && performance.now() < until);
+    applyTheme(themed, night);
+    map?.triggerRepaint();
+    if (queue.length) cancelBuild = whenIdle(buildMore);
+  };
   const frustum = new Frustum();
   scene.add(root);
   // 3D traffic (components/map/vehicles.ts drives it), one model per vehicle while it's on the map.
@@ -114,6 +169,8 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   const mvp = new Matrix4();
   const stats = { frames: 0 };
   let repaintSoon: ReturnType<typeof setTimeout> | null = null;
+
+  if (queue.length) cancelBuild = whenIdle(buildMore);
 
   const setNight = (n: boolean) => {
     night = n;
@@ -196,24 +253,24 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     layer,
     heights,
     setNight,
+    built: () => ({ done: models.size, total: list.length }),
     setBigScreen(img, handle) {
+      screen = { img, handle };
       paintBigScreen(img, handle);
       map?.triggerRepaint();
     },
     setPositions(next) {
       for (const l of next) {
+        placedAt.set(l.id, l);
         const model = models.get(l.id);
-        if (!model) continue;
-        const m = mercator(l.at[0], l.at[1]);
-        model.position.set((m.x - origin.x) / s, 0, (m.y - origin.y) / s);
-        model.rotation.y = ((180 - l.facing) * Math.PI) / 180;
-        // A bridge stretches along its length to reach both shores.
-        if (l.kind === "bridge") model.scale.x = l.scale * (l.length ?? BRIDGE_BUILT_M) / BRIDGE_BUILT_M;
+        if (model) stand(model, l);
       }
       measure();
       map?.triggerRepaint();
     },
     dispose() {
+      cancelBuild?.();
+      queue.length = 0;
       if (repaintSoon) clearTimeout(repaintSoon);
       renderer?.dispose();
       renderer = null;

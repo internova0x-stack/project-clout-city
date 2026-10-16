@@ -87,6 +87,8 @@ import { RadioBanner } from "./city/Radio";
 import { TvHomeCard, TvViewer } from "./city/CloutTv";
 import { tvCardSeenKey, type Station, type StationApi, type StationThread, type TvApi, type TvFeature, type TvState } from "@/lib/cloutTv";
 import { uploadToBigScreen } from "@/lib/tvUpload";
+import { LaunchScreen } from "./LaunchScreen";
+import { launchLine } from "@/lib/launch";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
@@ -148,6 +150,9 @@ function glitched(e: unknown, toast: (m: string) => void) {
   console.error(e);
   toast("The city glitched. Try again.");
 }
+
+/** Set once the launch screen has shown on this page load: moving around the app afterwards is a warm open. */
+let launchedThisPage = false;
 
 export function GameShell({
   player,
@@ -247,6 +252,29 @@ export function GameShell({
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
   const daytime = daytimeOverride ?? clock.daytime;
   const [tab, setTab] = useState<Tab>("home");
+
+  // ---- Launch screen: a cold start, until the apartment and the avatar are on screen (at most 2 s) ----
+  const [launch, setLaunch] = useState<"on" | "leaving" | "off">(() => (launchedThisPage ? "off" : "on"));
+  const [launchP, setLaunchP] = useState(0.08);
+  const [launchCopy, setLaunchCopy] = useState("");
+  const endLaunch = useCallback(() => setLaunch((l) => (l === "on" ? "leaving" : l)), []);
+  useEffect(() => {
+    if (launch !== "on") return;
+    launchedThisPage = true;
+    // The line is picked after hydration (the server and the browser would pick differently).
+    setLaunchCopy(launchLine(Math.random() * 1000));
+    const t0 = performance.now();
+    // The bar creeps toward 90% over the time allowed and fills when the apartment is ready.
+    const tick = window.setInterval(() => setLaunchP((p) => Math.max(p, Math.min(0.9, 0.08 + ((performance.now() - t0) / GAME_CONFIG.launch.maxMs) * 0.82))), 120);
+    const cap = window.setTimeout(endLaunch, GAME_CONFIG.launch.maxMs);
+    return () => { window.clearInterval(tick); window.clearTimeout(cap); };
+  }, [launch, endLaunch]);
+  useEffect(() => {
+    if (launch !== "leaving") return;
+    setLaunchP(1);
+    const t = window.setTimeout(() => setLaunch("off"), GAME_CONFIG.launch.fadeMs);
+    return () => window.clearTimeout(t);
+  }, [launch]);
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
   // v0.7 step 4: a Shop piece being tried on in Your Look.
@@ -1657,6 +1685,7 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
+            onReady={endLaunch}
             template={viewing ?? decorHome ?? upstairs ?? baseHome}
             floor={viewing || decorHome ? 1 : floorNow}
             layout={viewing ? null : decor ? decor.layout : city?.homeLayout}
@@ -2296,6 +2325,7 @@ export function GameShell({
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
       />
+      {launch !== "off" && <LaunchScreen progress={launchP} line={launchCopy} leaving={launch === "leaving"} />}
     </main>
   );
 }
