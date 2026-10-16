@@ -4,7 +4,8 @@
 // never drawn: businesses in Clout City are invented (Clarifications section 4).
 
 import type { StyleSpecification } from "maplibre-gl";
-import { TWO_LANE_M, roadWidth, vehicleSizeExpr } from "./scale.ts";
+import { LANDMARKS, clearOfLandmarks, landmarkSites, type Landmark } from "./landmarks.ts";
+import { TWO_LANE_M, roadWidth } from "./scale.ts";
 
 export type MapTheme = "day" | "night";
 
@@ -63,7 +64,7 @@ function haze(id: string, classes: string[], w: [number, number, number], alpha:
 /** The dashed outline on locked boroughs (and the borough sheet's mini-map). */
 export const LOCKED_RED = "#E5283F";
 
-export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollection): StyleSpecification {
+export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollection, landmarks: readonly Landmark[] = LANDMARKS): StyleSpecification {
   const p = PALETTES[theme];
   const night = theme === "night";
   return {
@@ -75,8 +76,7 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
     sources: {
       osm: { type: "vector", url: TILE_SOURCE_URL, attribution: MAP_ATTRIBUTION },
       boroughs: { type: "geojson", data: boroughs },
-      // Moving cars, fed by components/map/vehicles.ts when zoomed in.
-      vehicles: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+      "landmark-sites": { type: "geojson", data: landmarkSites(landmarks) },
     },
     layers: [
       { id: "land", type: "background", paint: { "background-color": p.land } },
@@ -155,24 +155,20 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": p.highway, "line-width": roadWidth([[10, 1.4], [14, 6.5]], TWO_LANE_M * 1.6) },
       },
+      // Landmark sites cover the streets under a landmark, merging the blocks (lib/map/landmarks.ts).
       {
-        // Top-down cars, SUVs, buses and motorcycles (sprites from components/map/vehicleIcons.ts).
-        id: "vehicles", type: "symbol", source: "vehicles", minzoom: 15,
-        layout: {
-          "icon-image": ["concat", "veh-", ["get", "kind"], "-", ["to-string", ["get", "color"]], night ? "-n" : "-d"],
-          "icon-rotate": ["get", "bearing"],
-          "icon-rotation-alignment": "map",
-          "icon-pitch-alignment": "map",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          // Bigger than life so they read on a phone, at the same scale as the road widths.
-          "icon-size": vehicleSizeExpr(),
-        },
+        id: "landmark-sites", type: "fill", source: "landmark-sites",
+        paint: { "fill-color": ["match", ["get", "ground"], "park", p.park, p.blocks] as unknown as string },
+      },
+      {
+        id: "landmark-sites-edge", type: "line", source: "landmark-sites",
+        paint: { "line-color": night ? "rgba(255,179,71,.18)" : "rgba(255,255,255,.85)", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 1, 17, 3] as unknown as number },
       },
       {
         // 3D buildings from OpenStreetMap heights; they rise in as you zoom to street level.
         id: "buildings-3d", type: "fill-extrusion", source: "osm", "source-layer": "building", minzoom: 13,
-        filter: ["!=", ["get", "hide_3d"], true],
+        // Landmark models (components/map/landmarkLayer.ts) replace the blocks they stand on.
+        filter: ["all", ["!=", ["get", "hide_3d"], true], clearOfLandmarks(landmarks)],
         paint: {
           "fill-extrusion-color": [
             "interpolate", ["linear"], ["coalesce", ["get", "render_height"], 10], 0, p.building, 80, p.buildingTall,

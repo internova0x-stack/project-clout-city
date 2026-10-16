@@ -1,22 +1,32 @@
-import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
+import { onLandmarkSite, type Landmark } from "@/lib/map/landmarks";
 import { laneOffsetMeters } from "@/lib/map/scale";
-import { PIXEL_RATIO, VEHICLE_COLORS, drawVehicleIcon, type VehicleKind } from "./vehicleIcons";
+import { VEHICLE_COLORS, type VehicleKind } from "./vehicleModels";
 
-// Moving traffic on the map when zoomed in (Milestones v0.3): up to 30 top-down
-// cars, SUVs, buses and motorcycles driving along the streets in view, in the
-// right-hand lane, turned to face the road. Pauses when the tab is hidden; never
-// starts under reduced motion. Purely decorative: nothing in the game reads them.
+// Moving traffic on the map when zoomed in (Milestones v0.3): up to 30 cars, cabs, SUVs, buses
+// and scooters driving along the streets in view, in the right-hand lane, turned to face the road.
+// Since Oct 16 they are 3D models in the landmark layer (components/map/landmarkLayer.ts), which
+// steps this simulation every frame it draws. Under reduced motion they stay parked.
+// Purely decorative: nothing in the game reads them.
 
-const MIN_ZOOM = 15;
+export const TRAFFIC_MIN_ZOOM = 15;
 const MAX_VEHICLES = 30;
-const FRAME_MS = 40;
 const SPEED_UP = 2; // a little faster than real Queens traffic, so it reads as moving
 const ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "minor"]);
 const BUS_ROADS = new Set(["trunk", "primary", "secondary"]);
 const M_PER_DEG = 111_320;
 
 interface Path { pts: [number, number][]; cum: number[]; length: number; k: number; cls: string; visible: number[] }
-interface Vehicle { path: Path; at: number; speed: number; dir: 1 | -1; kind: VehicleKind; color: number }
+interface Vehicle { id: number; path: Path; at: number; speed: number; dir: 1 | -1; kind: VehicleKind; color: string }
+
+/** One vehicle this frame: where it is (lng, lat), which way it faces, what it is. */
+export interface VehicleState { id: number; at: [number, number]; bearing: number; kind: VehicleKind; color: string }
+
+export interface Traffic {
+  /** Moves everything on to now (ms) and returns where each vehicle is. */
+  step(now: number): VehicleState[];
+  dispose(): void;
+}
 
 function toPath(coords: [number, number][], cls: string): Path | null {
   if (coords.length < 2) return null;
@@ -54,7 +64,7 @@ function place(v: Vehicle, lane: number): { at: [number, number]; bearing: numbe
   };
 }
 
-function roadPaths(map: MapLibreMap): Path[] {
+function roadPaths(map: MapLibreMap, sites: readonly Landmark[]): Path[] {
   const bounds = map.getBounds();
   const paths: Path[] = [];
   for (const f of map.querySourceFeatures("osm", { sourceLayer: "transportation" })) {
@@ -62,7 +72,23 @@ function roadPaths(map: MapLibreMap): Path[] {
     if (!ROAD_CLASSES.has(cls) || f.properties?.brunnel === "tunnel") continue;
     const g = f.geometry;
     const lines = g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
-    for (const line of lines) {
+    // Streets stop at landmark sites: split each line into the runs outside them.
+    const runs = lines.flatMap((line) => {
+      const out: number[][][] = [[]];
+      // Every ~20 m, so a long straight block that crosses a site still gets cut.
+      const dense = line.flatMap((pt, i) => {
+        if (!i) return [pt];
+        const [x0, y0] = line[i - 1];
+        const n = Math.max(1, Math.ceil(Math.hypot((pt[0] - x0) * 0.76, pt[1] - y0) * M_PER_DEG / 20));
+        return Array.from({ length: n }, (_, j) => [x0 + ((pt[0] - x0) * (j + 1)) / n, y0 + ((pt[1] - y0) * (j + 1)) / n]);
+      });
+      for (const pt of dense) {
+        if (onLandmarkSite(pt[0], pt[1], sites)) { if (out[out.length - 1].length) out.push([]); }
+        else out[out.length - 1].push(pt);
+      }
+      return out.filter((r) => r.length > 1);
+    });
+    for (const line of runs) {
       const visible = line.flatMap(([x, y], i) => (bounds.contains([x, y]) ? [i] : []));
       if (!visible.length) continue;
       const p = toPath(line as [number, number][], cls);
@@ -82,32 +108,19 @@ function pickKind(cls: string): VehicleKind {
 
 const SPEED: Record<VehicleKind, [number, number]> = { car: [9, 14], suv: [9, 13], bus: [6, 9], moto: [11, 16] };
 
-export function startVehicles(map: MapLibreMap): () => void {
-  if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return () => {};
+/** sites: where the landmarks stand now (they move off main roads once the streets load). */
+export function createTraffic(map: MapLibreMap, sites: () => readonly Landmark[]): Traffic {
+  const parked = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   let vehicles: Vehicle[] = [];
-  let raf = 0;
   let last = 0;
-  let stopped = false;
-
-  // Sprites are drawn on first use, and again after a day/night restyle.
-  map.setMissingStyleImageResolver((id) => {
-    if (!id.startsWith("veh-") || map.hasImage(id)) return;
-    const img = drawVehicleIcon(id);
-    if (img) map.addImage(id, img, { pixelRatio: PIXEL_RATIO });
-  });
-
-  const source = () => map.getSource("vehicles") as GeoJSONSource | undefined;
-  const clear = () => {
-    try { source()?.setData({ type: "FeatureCollection", features: [] }); } catch { /* map already removed */ }
-  };
+  let nextId = 1;
 
   const respawn = () => {
-    if (map.getZoom() < MIN_ZOOM) {
+    if (map.getZoom() < TRAFFIC_MIN_ZOOM) {
       vehicles = [];
-      clear();
       return;
     }
-    const paths = roadPaths(map);
+    const paths = roadPaths(map, sites());
     if (!paths.length) return;
     vehicles = Array.from({ length: Math.min(MAX_VEHICLES, paths.length * 3) }, () => {
       const path = paths[Math.floor(Math.random() * paths.length)];
@@ -115,46 +128,42 @@ export function startVehicles(map: MapLibreMap): () => void {
       const near = path.cum[path.visible[Math.floor(Math.random() * path.visible.length)]];
       const kind = pickKind(path.cls);
       const [lo, hi] = SPEED[kind];
+      const colors = VEHICLE_COLORS[kind];
       return {
+        id: nextId++,
         path,
         kind,
-        color: Math.floor(Math.random() * VEHICLE_COLORS[kind].length),
+        color: colors[Math.floor(Math.random() * colors.length)],
         at: Math.min(path.length, Math.max(0, near + (Math.random() - 0.5) * 160)),
-        speed: lo + Math.random() * (hi - lo),
+        speed: parked ? 0 : lo + Math.random() * (hi - lo),
         dir: Math.random() < 0.5 ? 1 : -1,
       };
     });
-  };
-
-  const frame = (t: number) => {
-    if (stopped) return;
-    raf = requestAnimationFrame(frame);
-    if (document.hidden || !vehicles.length || t - last < FRAME_MS) return;
-    const dt = last ? Math.min(0.1, (t - last) / 1000) : 0;
-    last = t;
-    const features: GeoJSON.Feature[] = [];
-    const lane = laneOffsetMeters(map.getZoom());
-    for (const v of vehicles) {
-      v.at += v.dir * v.speed * dt * SPEED_UP;
-      if (v.at > v.path.length) { v.at = v.path.length; v.dir = -1; } // U-turn at the end of the block
-      if (v.at < 0) { v.at = 0; v.dir = 1; }
-      const { at, bearing } = place(v, lane);
-      features.push({ type: "Feature", properties: { kind: v.kind, color: v.color, bearing }, geometry: { type: "Point", coordinates: at } });
-    }
-    source()?.setData({ type: "FeatureCollection", features });
   };
 
   const onIdle = () => { if (!vehicles.length) respawn(); };
   map.on("moveend", respawn);
   map.on("idle", onIdle);
   if (map.loaded()) respawn();
-  raf = requestAnimationFrame(frame);
-  return () => {
-    stopped = true;
-    cancelAnimationFrame(raf);
-    map.off("moveend", respawn);
-    map.off("idle", onIdle);
-    try { map.setMissingStyleImageResolver(null); } catch { /* map already removed */ }
-    clear();
+
+  return {
+    step(now) {
+      if (map.getZoom() < TRAFFIC_MIN_ZOOM) return [];
+      const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
+      last = now;
+      const lane = laneOffsetMeters(map.getZoom());
+      return vehicles.map((v) => {
+        v.at += v.dir * v.speed * dt * SPEED_UP;
+        if (v.at > v.path.length) { v.at = v.path.length; v.dir = -1; } // U-turn at the end of the block
+        if (v.at < 0) { v.at = 0; v.dir = 1; }
+        const { at, bearing } = place(v, lane);
+        return { id: v.id, at, bearing, kind: v.kind, color: v.color };
+      });
+    },
+    dispose() {
+      map.off("moveend", respawn);
+      map.off("idle", onIdle);
+      vehicles = [];
+    },
   };
 }

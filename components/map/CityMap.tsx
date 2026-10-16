@@ -8,7 +8,9 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
-import { startVehicles } from "./vehicles";
+import { createTraffic } from "./vehicles";
+import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
+import { LANDMARKS, MAJOR_ROAD_CLASSES, placeLandmark, withPositions, type RoadLine } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -55,6 +57,18 @@ const PIN_HEIGHT_PX = 30;
 const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8, 41.4]];
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
+/** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
+const SPOTS_KEY = "cc-landmark-spots-v1";
+function loadSpots(): Record<string, LatLng> {
+  try {
+    return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+/** Placement needs every street, which the tiles carry from zoom 14. */
+const PLACE_ZOOM = 14;
+
 const pinWidth = (pin: PlacePin) => Math.min(180, 34 + pin.name.length * 6.6);
 /** Below this zoom, pins show just their icon so every place stays visible across the city. */
 const COMPACT_ZOOM = 13;
@@ -79,12 +93,19 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   const lockedRef = useRef(locked);
   lockedRef.current = locked;
 
+  // Landmarks stand off main roads, inside blocks (lib/map/landmarks.ts placeLandmark).
+  const [spots, setSpots] = useState<Record<string, LatLng>>(loadSpots);
+  const sites = useMemo(() => withPositions(spots), [spots]);
+  const sitesRef = useRef(sites);
+  sitesRef.current = sites;
+  const siteOf = useMemo(() => new Map(sites.filter((l) => l.placeId).map((l) => [l.placeId!, l.at])), [sites]);
+
   const styleFor = (t: MapTheme, lockedSet: Set<BoroughId>) => {
     const fc = boroughData as GeoJSON.FeatureCollection;
     return buildMapStyle(t, {
       ...fc,
       features: fc.features.map((f) => ({ ...f, properties: { ...f.properties, locked: lockedSet.has(f.properties?.id as BoroughId) } })),
-    });
+    }, sitesRef.current);
   };
 
   // ---- Create the map (again after iOS drops its WebGL context: a black map with only the pins) ----
@@ -179,17 +200,74 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     };
   }, [map]);
 
-  // ---- Moving vehicles when zoomed in ----
+  // ---- Landmark models and 3D traffic (three.js), put back after every restyle ----
+  const landmarksRef = useRef<ReturnType<typeof createLandmarkLayer> | null>(null);
   useEffect(() => {
-    if (!map || !vehicles) return;
-    return startVehicles(map);
+    if (!map) return;
+    const traffic = vehicles ? createTraffic(map, () => sitesRef.current) : undefined;
+    const lm = createLandmarkLayer(undefined, traffic);
+    landmarksRef.current = lm;
+    lm.setPositions(sitesRef.current);
+    lm.setNight(themeRef.current === "night");
+    const ensure = () => {
+      if (!map.isStyleLoaded() || map.getLayer(LANDMARK_LAYER_ID)) return;
+      // Under the bridges, street names and pins; level with the 3D blocks.
+      map.addLayer(lm.layer, map.getLayer("bridge-casing") ? "bridge-casing" : undefined);
+    };
+    ensure();
+    map.on("styledata", ensure);
+    map.on("load", ensure);
+    return () => {
+      map.off("styledata", ensure);
+      map.off("load", ensure);
+      if (map.getLayer(LANDMARK_LAYER_ID)) map.removeLayer(LANDMARK_LAYER_ID);
+      lm.dispose();
+      traffic?.dispose();
+      landmarksRef.current = null;
+    };
   }, [map, vehicles]);
+  useEffect(() => landmarksRef.current?.setNight(theme === "night"), [theme, map]);
+  useEffect(() => landmarksRef.current?.setPositions(sites), [sites, map]);
+
+  // Once a landmark's streets have loaded, stand it where no main road crosses its site.
+  useEffect(() => {
+    if (!map) return;
+    const done = new Set<string>();
+    const place = () => {
+      if (map.getZoom() < PLACE_ZOOM) return;
+      const bounds = map.getBounds();
+      const todo = LANDMARKS.filter((l) => !done.has(l.id) && bounds.contains([l.at[1], l.at[0]]));
+      if (!todo.length) return;
+      const roads: RoadLine[] = [];
+      for (const f of map.querySourceFeatures("osm", { sourceLayer: "transportation" })) {
+        const cls = String(f.properties?.class);
+        if (f.properties?.brunnel === "tunnel" || !(MAJOR_ROAD_CLASSES.has(cls) || cls === "minor")) continue;
+        const g = f.geometry;
+        const lines = g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
+        for (const line of lines) roads.push({ major: MAJOR_ROAD_CLASSES.has(cls), pts: line as [number, number][] });
+      }
+      if (!roads.length) return;
+      const found: Record<string, LatLng> = {};
+      for (const l of todo) {
+        done.add(l.id);
+        found[l.id] = placeLandmark(l, roads);
+      }
+      setSpots((prev) => {
+        const next = { ...prev, ...found };
+        if (JSON.stringify(next) === JSON.stringify(prev)) return prev;
+        try { window.localStorage.setItem(SPOTS_KEY, JSON.stringify(next)); } catch { /* private mode: placed again next visit */ }
+        return next;
+      });
+    };
+    map.on("idle", place);
+    return () => { map.off("idle", place); };
+  }, [map]);
 
   // ---- Day/night and lock changes restyle in place (2 s crossfade) ----
   useEffect(() => {
     map?.setStyle(styleFor(theme, locked), { diff: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, theme, locked]);
+  }, [map, theme, locked, sites]);
 
   useImperativeHandle(
     ref,
@@ -235,12 +313,24 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   const size = map ? { w: map.getContainer().clientWidth, h: map.getContainer().clientHeight } : { w: 0, h: 0 };
   const visible = (s: { x: number; y: number }, pad = 120) => s.x > -pad && s.y > -pad && s.x < size.w + pad && s.y < size.h + pad;
 
+  // A place drawn as a landmark model has its pin on the model's top, not hidden behind it:
+  // its height in meters times the screen scale there, foreshortened by the tilt.
+  const lift = (pin: PlacePin, at: LatLng) => {
+    const h = landmarksRef.current?.heights.get(pin.id);
+    if (!h || map!.getZoom() < LANDMARK_MIN_ZOOM) return 0;
+    const a = map!.project(lngLat(at));
+    const b = map!.project([at[1] + 10 / (111_320 * Math.cos((at[0] * Math.PI) / 180)), at[0]]);
+    return (h * Math.hypot(b.x - a.x, b.y - a.y) / 10) * Math.sin((map!.getPitch() * Math.PI) / 180);
+  };
   const placed = useMemo<Placed[]>(() => {
     if (!map) return [];
     const out: (Placed & { spots: { x: number; y: number; w: number }[] })[] = [];
     const compact = map.getZoom() < COMPACT_ZOOM;
     for (const pin of pins) {
-      const s = project(pin.at);
+      // A landmark's pin follows its model when placement moved it off a road.
+      const at = siteOf.get(pin.id) ?? pin.at;
+      const ground = project(at);
+      const s = { x: ground.x, y: ground.y - lift(pin, at) };
       const w = compact ? ICON_PX : pinWidth(pin);
       // Zoomed out, icons may overlap a little before they group, so more places stay visible.
       const near = compact ? 18 : (w: number, ow: number) => (ow + w) / 2 + 4;
@@ -256,7 +346,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pins, frame, map]);
+  }, [pins, frame, map, siteOf]);
 
   // A name pill that would run under the right-hand side column slides left (its stem stays on the place).
   const nudge = (x: number, w: number): React.CSSProperties | undefined => {
