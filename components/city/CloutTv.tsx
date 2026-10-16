@@ -27,7 +27,7 @@ export function TvBumper() {
   return (
     <div className="tv-bumper" aria-hidden="true">
       <span className="tv-bumper-rec">● LIVE</span>
-      <span className="tv-bumper-logo">CLOUT<b>TV</b></span>
+      <span className="tv-bumper-logo">CLOUT<b><i>TV</i></b></span>
       <span className="tv-bumper-sub">Make it to the Big Screen</span>
     </div>
   );
