@@ -6,6 +6,7 @@ import {
   AdditiveBlending, BoxGeometry, CanvasTexture, CylinderGeometry, Group, Mesh, MeshBasicMaterial,
   MeshStandardMaterial, PlaneGeometry, SphereGeometry,
 } from "three";
+import { mergeStatic } from "./mergeModel";
 
 export type VehicleKind = "car" | "suv" | "bus" | "moto";
 
@@ -131,10 +132,18 @@ function moto(color: string): Group {
   return g;
 }
 
+/** One merged model per kind and color (a few draw calls, not twenty), cloned for each vehicle. */
+const prototypes = new Map<string, Group>();
 export function buildVehicle(kind: VehicleKind, color: string): Group {
-  const g = kind === "bus" ? bus() : kind === "moto" ? moto(color) : car(color, kind === "suv");
-  g.traverse((o) => { (o as Mesh).frustumCulled = false; });
-  return g;
+  const key = `${kind}|${color}`;
+  let proto = prototypes.get(key);
+  if (!proto) {
+    proto = kind === "bus" ? bus() : kind === "moto" ? moto(color) : car(color, kind === "suv");
+    const beam = proto.getObjectByName("beam");
+    mergeStatic(proto, new Set(beam ? [beam] : []), new Set(glows.map((g) => g.mat)));
+    prototypes.set(key, proto);
+  }
+  return proto.clone();
 }
 
 /** Lights up the shared materials; each vehicle shows its headlight beam only at night. */

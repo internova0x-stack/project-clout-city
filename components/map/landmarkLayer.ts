@@ -4,17 +4,22 @@
 
 import type { CustomLayerInterface, Map as MapLibreMap } from "maplibre-gl";
 import {
-  Box3, Camera, DirectionalLight, Group, HemisphereLight, Matrix4, type Mesh, type Object3D, Scene, Vector3, WebGLRenderer,
+  Box3, Camera, DirectionalLight, Frustum, Group, HemisphereLight, Matrix4, type Material, type Mesh, type Object3D, Scene, Sphere, Vector3, WebGLRenderer,
 } from "three";
 import { BRIDGE_BUILT_M, LANDMARKS, type Landmark } from "@/lib/map/landmarks";
 import { exaggeration } from "@/lib/map/scale";
 import { animate, applyTheme, buildLandmark, newThemed, type Themed } from "./landmarkModels";
+import { mergeStatic } from "./mergeModel";
 import { buildVehicle, setVehiclesNight } from "./vehicleModels";
 import type { Traffic } from "./vehicles";
 
 export const LANDMARK_LAYER_ID = "landmarks";
 /** Below this zoom the whole city is in view and the models would be specks. */
 export const LANDMARK_MIN_ZOOM = 11.5;
+/** Searchlights sweep only from this zoom; below it they hold still (no redraws). */
+const ANIMATE_MIN_ZOOM = 13.5;
+/** Moving things redraw the map at most this often (owner, Oct 16: the phone heated up). */
+const ANIMATION_FPS = 30;
 
 export interface LandmarkLayer {
   layer: CustomLayerInterface;
@@ -76,8 +81,18 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     model.updateMatrixWorld(true);
     for (const o of themed.nightOnly) nightOnly.add(o);
     heights.set(l.placeId ?? l.id, buildingTop(model, nightOnly));
+    // Bake the still parts into a few meshes: hundreds of draw calls become a handful.
+    mergeStatic(model, new Set([...nightOnly, ...themed.sweep.map((w) => w.o)]), new Set<Material>(themed.glows.map((g) => g.mat)));
     root.add(model);
   }
+  // Each landmark's bounds, so ones off screen are skipped (and their searchlights stay still).
+  const bounds = new Map<Group, Sphere>();
+  const measure = () => {
+    root.updateMatrixWorld(true);
+    for (const model of models.values()) bounds.set(model, new Box3().setFromObject(model).getBoundingSphere(new Sphere()));
+  };
+  measure();
+  const frustum = new Frustum();
   scene.add(root);
   // 3D traffic (components/map/vehicles.ts drives it), one model per vehicle while it's on the map.
   const cars = new Group();
@@ -95,6 +110,8 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   let night = false;
   const started = performance.now();
   const mvp = new Matrix4();
+  const stats = { frames: 0 };
+  let repaintSoon: ReturnType<typeof setTimeout> | null = null;
 
   const setNight = (n: boolean) => {
     night = n;
@@ -154,12 +171,22 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
       if (map.getZoom() < LANDMARK_MIN_ZOOM) return;
       mvp.fromArray(opts.defaultProjectionData.mainMatrix as unknown as number[]);
       camera.projectionMatrix.copy(mvp).multiply(toMercator);
+      frustum.setFromProjectionMatrix(camera.projectionMatrix);
+      for (const [model, sphere] of bounds) model.visible = frustum.intersectsSphere(sphere);
       const now = performance.now();
-      let moving = animate(themed, (now - started) / 1000, night);
-      if (traffic) moving = placeTraffic(now, map.getZoom()) || moving;
+      const zoom = map.getZoom();
+      let moving = zoom >= ANIMATE_MIN_ZOOM && animate(themed, (now - started) / 1000, night);
+      if (traffic) moving = placeTraffic(now, zoom) || moving;
       renderer.resetState();
       renderer.render(scene, camera);
-      if (moving) map.triggerRepaint();
+      if (process.env.NODE_ENV !== "production") (window as unknown as { __landmarkStats?: unknown }).__landmarkStats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, frames: (stats.frames += 1) };
+      // Moving things ask for the next frame, but no more than ANIMATION_FPS a second.
+      if (moving && !repaintSoon) {
+        repaintSoon = setTimeout(() => {
+          repaintSoon = null;
+          map?.triggerRepaint();
+        }, 1000 / ANIMATION_FPS);
+      }
     },
   };
 
@@ -177,9 +204,11 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
         // A bridge stretches along its length to reach both shores.
         if (l.kind === "bridge") model.scale.x = l.scale * (l.length ?? BRIDGE_BUILT_M) / BRIDGE_BUILT_M;
       }
+      measure();
       map?.triggerRepaint();
     },
     dispose() {
+      if (repaintSoon) clearTimeout(repaintSoon);
       renderer?.dispose();
       renderer = null;
       scene.traverse((o) => {

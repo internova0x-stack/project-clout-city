@@ -11,7 +11,7 @@ import { VEHICLE_COLORS, type VehicleKind } from "./vehicleModels";
 
 export const TRAFFIC_MIN_ZOOM = 15;
 const MAX_VEHICLES = 30;
-const SPEED_UP = 2; // a little faster than real Queens traffic, so it reads as moving
+const SPEED_UP = 1.2; // a touch faster than real Queens traffic, so it reads as moving
 const ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "minor"]);
 const BUS_ROADS = new Set(["trunk", "primary", "secondary"]);
 const M_PER_DEG = 111_320;
@@ -115,30 +115,38 @@ export function createTraffic(map: MapLibreMap, sites: () => readonly Landmark[]
   let last = 0;
   let nextId = 1;
 
+  const spawn = (paths: Path[]): Vehicle => {
+    const path = paths[Math.floor(Math.random() * paths.length)];
+    // Start near a point that's on screen, so traffic shows up where you're looking.
+    const near = path.cum[path.visible[Math.floor(Math.random() * path.visible.length)]];
+    const kind = pickKind(path.cls);
+    const [lo, hi] = SPEED[kind];
+    const colors = VEHICLE_COLORS[kind];
+    return {
+      id: nextId++,
+      path,
+      kind,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      at: Math.min(path.length, Math.max(0, near + (Math.random() - 0.5) * 160)),
+      speed: parked ? 0 : lo + Math.random() * (hi - lo),
+      dir: Math.random() < 0.5 ? 1 : -1,
+    };
+  };
+
+  // After a pan, cars still on screen keep driving (owner, Oct 16: they "were jumping around");
+  // the ones left behind go, and new ones join at the new view's streets.
   const respawn = () => {
     if (map.getZoom() < TRAFFIC_MIN_ZOOM) {
       vehicles = [];
       return;
     }
+    const bounds = map.getBounds();
+    const lane = laneOffsetMeters(map.getZoom());
+    vehicles = vehicles.filter((v) => bounds.contains(place(v, lane).at));
+    if (vehicles.length >= MAX_VEHICLES) return;
     const paths = roadPaths(map, sites());
     if (!paths.length) return;
-    vehicles = Array.from({ length: Math.min(MAX_VEHICLES, paths.length * 3) }, () => {
-      const path = paths[Math.floor(Math.random() * paths.length)];
-      // Start near a point that's on screen, so traffic shows up where you're looking.
-      const near = path.cum[path.visible[Math.floor(Math.random() * path.visible.length)]];
-      const kind = pickKind(path.cls);
-      const [lo, hi] = SPEED[kind];
-      const colors = VEHICLE_COLORS[kind];
-      return {
-        id: nextId++,
-        path,
-        kind,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        at: Math.min(path.length, Math.max(0, near + (Math.random() - 0.5) * 160)),
-        speed: parked ? 0 : lo + Math.random() * (hi - lo),
-        dir: Math.random() < 0.5 ? 1 : -1,
-      };
-    });
+    while (vehicles.length < Math.min(MAX_VEHICLES, paths.length * 3)) vehicles.push(spawn(paths));
   };
 
   const onIdle = () => { if (!vehicles.length) respawn(); };
