@@ -7,7 +7,7 @@ export type GlyphName =
   | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
   | "wave" | "church" | "dumbbell" | "condo" | "diner"
   | "globe" | "gantry" | "tumbler" | "hanger" | "car" | "cap" | "columns"
-  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train" | "sofa";
+  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train" | "sofa" | "radio";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -45,6 +45,7 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   film: ["#FF7AB6", "#7A1F6B"],
   gamepad: ["#B8A2FF", "#4B2FB8"],
   train: ["#FFD966", "#E08A12"],
+  radio: ["#FFB27A", "#2E6F7E"],
 };
 
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
@@ -171,6 +172,16 @@ const PATHS: Record<GlyphName, React.ReactNode> = {
       <path d="M7.5 10.2v3.6M5.7 12h3.6" stroke={SOFT} strokeWidth="1.6" strokeLinecap="round" />
       <circle cx="16" cy="10.8" r="1.1" fill={SOFT} />
       <circle cx="17.8" cy="12.9" r="1.1" fill={SOFT} />
+    </>
+  ),
+  // A radio: the body, the speaker grille, the dial and the antenna.
+  radio: (
+    <>
+      <path d="M8 8.5 17 3.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="3" y="8.5" width="18" height="12" rx="3" fill="#fff" />
+      <circle cx="9" cy="14.5" r="3.4" fill={SOFT} />
+      <rect x="14" y="11.5" width="4.5" height="2" rx="1" fill={SOFT} />
+      <circle cx="16.2" cy="16.8" r="1.5" fill={SOFT} />
     </>
   ),
   // A subway car on rails.

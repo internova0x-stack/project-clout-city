@@ -1,5 +1,8 @@
 "use client";
 
+import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
+import type { RadioApi } from "@/lib/radio";
+
 import type { PartyApi } from "@/lib/party";
 import type { GossipApi } from "@/lib/gossip";
 import type { PartyRoomApi } from "@/lib/partyRoom";
@@ -37,7 +40,7 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -59,6 +62,8 @@ export function PreviewHome({
   bizPreset?: string;
   /** v0.13 Better Together: ?together=invite|ride|plan|bonus|decorate|approve starts in that state. */
   togetherPreset?: string;
+  /** v0.14 Real Clout FM: ?radio=new|sent|full|notpicked|mine starts the station in that state. */
+  radioPreset?: string;
   /** Player ranks: ?rankup=1-10 opens the rank-up reveal for that rank. */
   rankUpPreset?: number;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
@@ -87,6 +92,12 @@ export function PreviewHome({
     if (lottoPreset === "jackpot") { api.lottoNext([5]); api.lottoPot(); }
     return api;
   }, [city, lottoPreset]);
+  // v0.14 Real Clout FM: the dev server's in-memory station, shared with /preview/studio's Shoutouts queue.
+  const radioApi = useMemo<RadioApi>(() => ({
+    state: () => previewRadioState(radioPreset ?? ""),
+    request: previewRadioRequest,
+    report: () => previewRadioReport(),
+  }), [radioPreset]);
   const businessApi = useMemo(() => createBusinessSim({
     cash: () => sim.peek().cash,
     clout: () => sim.peek().clout,
@@ -312,6 +323,7 @@ export function PreviewHome({
       hunt={cityOff ? undefined : huntApi}
       gossip={cityOff ? undefined : gossipApi}
       business={cityOff ? undefined : businessApi}
+      radio={cityOff ? undefined : radioApi}
       together={cityOff ? undefined : togetherApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{

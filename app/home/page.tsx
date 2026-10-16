@@ -27,6 +27,7 @@ import { syncWeeklyContent } from "@/lib/contentImport";
 import { gossipFind, gossipShare, gossipState } from "./gossipActions";
 import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } from "./partyActions";
 import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomActions";
+import { radioReport, radioRequest, radioState } from "./radioActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
@@ -113,6 +114,8 @@ export default async function HomePage() {
         rideOffer, rideRespond, rideStatus,
         jobs: { board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob },
       } : undefined}
+      // Migration 0057 switches on Real Clout FM (radio_state failing hides the Radio app).
+      radio={city ? { state: radioState, request: radioRequest, report: radioReport } : undefined}
       business={city ? { state: businessState, buy: buyBusiness, upgrade: upgradeBusiness, collect: collectTills, goPublic } : undefined}
       // Migration 0035 switches on gossip (gossip_state returns null before it runs).
       gossip={city ? { state: gossipState, find: gossipFind, share: gossipShare } : undefined}

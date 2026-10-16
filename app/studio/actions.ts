@@ -12,6 +12,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 import { runSetupCheck } from "@/lib/setupCheck";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "@/lib/adminPlayers";
 import type { Insights } from "@/lib/insights";
+import type { ShoutoutAction, StudioShoutoutDay } from "@/lib/radio";
 import { headers } from "next/headers";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -100,7 +101,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -109,6 +110,13 @@ export async function studioReports(status: "open" | "all") {
 export async function studioReportAction(id: number, action: "dismiss" | "warn" | "mute" | "ban") {
   const r = await admin<unknown>("admin_report_action", { p_report: id, p_action: action });
   return r.ok ? { ok: true as const, data: null } : r;
+}
+// ---- Real Clout FM shoutouts (migration 0057) ----
+export async function studioShoutouts(date?: string) {
+  return admin<StudioShoutoutDay>("admin_shoutouts", { p_date: date ?? null });
+}
+export async function studioShoutoutAction(id: number, action: ShoutoutAction) {
+  return admin<StudioShoutoutDay>("admin_shoutout_action", { p_id: id, p_action: action });
 }
 // ---- Regulars' lines (migration 0016) ----
 export async function studioCastLines() {

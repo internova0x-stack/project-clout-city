@@ -13,7 +13,8 @@ export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "
   | "boutique" | "showroom" | "dealership" | "cinema" | "arena"
   | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub"
   | "googie-diner" | "sky-dining" | "supermarket" | "cowork" | "precinct"
-  | "chapel" | "fitness" | "hell-gate" | "el-station" | "condo-towers" | "pier-park";
+  | "chapel" | "fitness" | "hell-gate" | "el-station" | "condo-towers" | "pier-park"
+  | "radio-station";
 
 export interface Landmark {
   id: string;
@@ -107,6 +108,8 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "astoria-blvd-station", placeId: "astoria-blvd-station", name: "Astoria Blvd station", at: [40.7702, -73.918], kind: "el-station", facing: 180, scale: 1.6, clear: 18, ground: "none", length: 150 },
   { id: "skyline-pier", placeId: "skyline-pier", name: "Skyline Pier Residences", at: [40.7478, -73.9592], kind: "condo-towers", facing: 180, scale: 1.3, clear: 50, ground: "block" },
   { id: "hunters-pier", placeId: "hunters-pier", name: "Hunter's Pier", at: [40.7432, -73.9612], kind: "pier-park", facing: 270, scale: 1.6, clear: 60, ground: "park" },
+  // v0.14 On Air: Real Clout FM's studio and broadcast mast, by the film studios (not a place: a name label).
+  { id: "real-clout-fm", name: "Real Clout FM", at: [40.7598, -73.9262], kind: "radio-station", facing: 180, scale: 1.6, clear: 40, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 

@@ -423,7 +423,47 @@ A **Jobs** board on the Phone: post a job or take one. Paid in game cash only (n
 - **Safety**: one job a day between the same two players, one live job of each kind per worker, account age 2 days, blocked players never see each other's jobs; report and block are on every player card.
 - Not yet: the "arrived with" line on the place card and a shared moment in Recently.
 
-## 17. Later features
+## 17. On Air: Real Clout FM and Clout TV (v0.14; owner, Oct 16)
+
+Two ways for players to feel famous: a shoutout on the city's radio station, and their photo on the big
+screen. Every submission is approved by the owner in the Story Studio; nothing goes public on its own.
+Players give a plain **@handle**: no social network is named in the game (CLAUDE.md: no real brand
+names; owner, Oct 16).
+
+### Real Clout FM: shoutouts on "The Wake-Up Call" (migration 0057)
+
+The station's morning show is hosted by DJ Sharm Almight, a composite character: his personality,
+catchphrases and backstory are invented, not modeled on any one real host.
+
+- **Where**: a Radio app on the Phone (show artwork, today's on-air shoutout, the shoutout wall, "Request a
+  shoutout"), and the station itself on the map in Astoria (a studio with a lit ON AIR sign and a lattice
+  broadcast mast with red beacons; a name label, not a place).
+- **Requesting**: @handle plus a message of up to 140 characters, with a live count and the chat word list
+  masking words as they type (the server masks again). Messages with an "@" are refused: shoutouts can't
+  name or tag anyone else. The player confirms the handle is theirs. One request per player per New York day.
+- **Daily cap**: the first 50 requests each New York day (`game_settings` radio.dailyCap). After that the
+  button reads "Today's list is full. Try again tomorrow."
+- **Approval**: the Studio's Shoutouts tab lists the day's requests in order (handle, message, player). Pick
+  one to air (picking another replaces it), add up to 5 to the wall, reject, or undo.
+- **On air**: 9 a.m. New York, shown in each player's local time; picked later, it airs at once. Every player
+  sees it once as a banner for about 8 seconds ("📻 Real Clout FM: @handle says…"; tap to open the Radio
+  app); it stays in the Radio app as today's shoutout.
+- **Not picked**: a request still waiting when its day ends reads "Not today. Try again tomorrow." A rejected
+  one reads the same (no separate rejection notice).
+- **Safety**: the banner and every shoutout in the app have a report button; reports land in the Studio's
+  Reports queue with the shoutout quoted. Banned or chat-muted players can't request.
+- **Data**: `radio_shoutouts` (player, handle, message, New York date, status pending/on_air/wall/rejected,
+  the owner-confirmation flag, aired time), one per player per date. `radio_state()`, `radio_request()`,
+  `radio_report()`; the Studio's `admin_shoutouts()` and `admin_shoutout_action()`. No reward is paid for
+  being on air.
+
+### Clout TV: "Make it to the big screen" (next step)
+
+Players upload a photo of themselves with their @handle; one approved photo a day is featured on the Clout
+Tower's big screen in Astoria, on a home card and in the Clout TV app's archive. Built as its own step;
+the screens inside clubs come later.
+
+## 18. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

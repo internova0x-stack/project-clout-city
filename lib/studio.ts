@@ -8,6 +8,7 @@ import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "./admi
 import type { Arc, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
+import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -110,6 +111,9 @@ export interface StudioApi {
   /** v0.10 gossip (migration 0034): weeks go live on their own; the Studio reads, pauses or holds them. */
   gossipList?(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>>;
   gossipStatus?(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>>;
+  /** v0.14 Real Clout FM (migration 0057): a New York day's shoutout requests, and picking what airs. */
+  shoutouts?(date?: string): Promise<Admin<StudioShoutoutDay>>;
+  shoutoutAction?(id: number, action: ShoutoutAction): Promise<Admin<StudioShoutoutDay>>;
   /** Setup check (owner, Oct 14): which key, migration or webhook is missing. Never returns a secret. */
   setupCheck?(): Promise<Admin<SetupCheckRow[]>>;
 }

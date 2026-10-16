@@ -31,6 +31,7 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.11 | Doors Open | Code sign-in in the app, Stripe test mode, interface fixes, gossip tasks, content live unless vetoed, every place enterable, the exclusive events update | 1 to 2 weeks | — |
 | v0.12 | Ownership | Crowded places, player ranks, businesses that make money and real money milestones | 1 to 2 weeks | — |
 | v0.13 | Better Together | Together bonuses (travel, study, club), the Jobs board: decorator and business manager, ratings | 1 to 2 weeks | — |
+| v0.14 | On Air | Real Clout FM shoutouts and Clout TV's big screen, both approved in the Studio | 1 to 2 weeks | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
@@ -229,6 +230,18 @@ From the Oct 13 features spec. **docs/08-new-features-spec.md is the source** fo
 2. The Jobs board: interior decorator and business manager, held payments, ratings on player cards.
 
 **Built** (migration 0050_better_together.sql, tested by `supabase/tests/together.test.sql`): all of the above; see docs/08 section 16 "As built".
+
+## v0.14 "On Air" (1 to 2 weeks, before launch)
+
+**In scope** (owner, Oct 16, "Real Clout FM and Clout TV"; docs/08-new-features-spec.md section 17): two ways
+for players to feel famous, every submission approved by the owner first.
+
+1. Real Clout FM: shoutout requests in a Radio app, the Studio's Shoutouts queue, the 9 a.m. on-air banner,
+   the shoutout wall, and the station on the map.
+2. Clout TV: photo submissions, the Studio's Big Screen queue, the Clout TV app and archive, the Clout Tower
+   in Astoria and the home card. The club screens come later.
+
+**Built**: step 1 in migration 0057_clout_fm.sql (tested by `supabase/tests/clout_fm.test.sql`).
 
 ## v1.0 "Launch" (1 to 2 weeks, then the soft launch)
 
