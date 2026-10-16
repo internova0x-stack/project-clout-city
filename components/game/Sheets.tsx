@@ -37,14 +37,20 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
   const top = at >= MAX_LEVEL;
   const into = s.practice - LEVEL_AT[at];
   const need = top ? 0 : LEVEL_AT[at + 1] - LEVEL_AT[at];
+  const part = s.level < MAX_LEVEL && !s.rusty ? levelProgress(s.practice) : 0;
   return (
     <span className="task-skill">
       <span className="task-skill-head">
         <span>{def.name} · Level {s.level}{s.rusty && s.best > s.level ? " 🧊" : ""}</span>
         <span>{top ? "Maxed out" : `${into}/${need} to Level ${at + 1}`}</span>
       </span>
-      <span className="task-skill-bar" role="meter" aria-label={`${def.name} progress to the next level`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(levelProgress(s.practice) * 100)}>
-        <i style={{ width: `${Math.round(levelProgress(s.practice) * 100)}%` }} />
+      {/* The profile's ten-segment level bar, the current level part-filled by its progress. */}
+      <span className="skill-bar" role="meter" aria-label={`${def.name} level`} aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={s.level}>
+        {Array.from({ length: MAX_LEVEL }, (_, i) => (
+          <span key={i} className={i < s.level ? "on" : i < s.best ? "best" : ""}>
+            {i === s.level && part > 0 && <i style={{ width: `${Math.round(part * 100)}%` }} />}
+          </span>
+        ))}
       </span>
     </span>
   );

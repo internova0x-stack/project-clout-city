@@ -842,8 +842,6 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 /* Skill daily task (migration 0063) */
 .task-skill { display:flex; flex-direction:column; gap:5px; margin-top:8px; }
 .task-skill-head { display:flex; justify-content:space-between; gap:8px; font-size:12.5px; font-weight:600; color:var(--tag-blue); font-variant-numeric:tabular-nums; }
-.task-skill-bar { position:relative; height:7px; border-radius:var(--r-pill); background:rgba(47,123,234,.14); overflow:hidden; }
-.task-skill-bar > i { position:absolute; left:0; top:0; bottom:0; background:var(--tag-blue); border-radius:inherit; }
 
 /* Players (migration 0055) */
 .players-bar { display:flex; gap:8px; }
