@@ -1120,13 +1120,42 @@ function uvClub(t: Themed): Group {
 }
 
 // ---------------------------------------------------------------------------
-// Lucky Seven Deli: the corner deli, in yellow, with a big lucky 7 on the roof
+// Sip & Spill (owner, Oct 16; the old Lucky Seven Deli): a glass-front mixer with a giant teacup on the roof
 // ---------------------------------------------------------------------------
-function luckyDeli(t: Themed): Group {
-  const g = bodega(t, { name: "LUCKY 7 DELI", awning: "#F2B705", wall: "#8FA4B8", seed: 141 });
-  const seven = sign(t, "7", 4, 5, { bg: "#C8352B", fg: "#FFE27A" }, 2.6);
-  g.add(at(seven, 2, 18.6, 3));
-  for (const x of [0.6, 3.4]) g.add(at(new Mesh(new BoxGeometry(0.25, 3, 0.25), solid(C.ink)), x, 16.4, 3));
+function mixer(t: Themed): Group {
+  const g = new Group();
+  const glassFront = facade(t, { wall: "#FF6A5C", glass: "#FFE6C8", style: "storefront", lit: 1, seed: 141, frame: C.cream }, 1.6);
+  const upper = facade(t, { wall: "#2FB5A8", glass: "#E9F7FA", style: "punched", lit: 0.8, seed: 143, frame: C.cream });
+  g.add(at(facadeBox(14, 5, 12, glassFront, solid("#B8473C")), 0, 2.5, 0));
+  g.add(at(facadeBox(14, 6.5, 12, upper, solid("#1F7F76")), 0, 5 + 3.25, 0));
+  g.add(at(nightGlow(t, 14, 11.5, 12, C.pink, 0.55), 0, 5.75, 0));
+  g.add(at(new Mesh(new BoxGeometry(14.6, 0.6, 12.6), solid(C.cream)), 0, 11.8, 0));
+  // Striped awning over the speed-meet windows.
+  for (let i = 0; i < 7; i++) {
+    const a = new Mesh(new BoxGeometry(2, 0.3, 2.4), solid(i % 2 ? C.cream : "#FF6A5C"));
+    a.position.set(-6 + i * 2, 5.1, 7);
+    a.rotation.x = 0.35;
+    g.add(a);
+  }
+  g.add(at(sign(t, "SIP & SPILL", 11, 1.5, { bg: C.ink, fg: C.tealLight }, 2.2), 0, 6.2, 6.3));
+  // The giant teacup on the roof: saucer, cup, handle and a curl of steam that glows at night.
+  const china = solid("#FFF8EE");
+  g.add(at(new Mesh(new CylinderGeometry(5, 4.4, 0.5, 28), china), 0, 12.4, 0));
+  g.add(at(new Mesh(new CylinderGeometry(3.8, 2.6, 3.6, 28), china), 0, 14.4, 0));
+  g.add(at(new Mesh(new CylinderGeometry(3.85, 3.85, 0.5, 28), solid("#FF6A5C")), 0, 15.4, 0));
+  g.add(at(new Mesh(new CylinderGeometry(3.5, 3.5, 0.15, 28), solid("#C9803F")), 0, 16.05, 0));
+  const handle = new Mesh(new TorusGeometry(1.2, 0.4, 8, 16), china);
+  handle.position.set(3.9, 14.6, 0);
+  g.add(handle);
+  const steam = glowing(t, "#FFFFFF", C.tealLight, 1.4, 0.15);
+  steam.transparent = true;
+  steam.opacity = 0.85;
+  for (const [x, y, r] of [[-0.6, 17.4, 0.9], [0.4, 18.9, 0.75], [-0.3, 20.2, 0.6]] as const) g.add(at(new Mesh(new SphereGeometry(r, 12, 10), steam), x, y, 0));
+  // A pink speech bubble on the corner: the Tea Bar.
+  const bubble = new Mesh(new SphereGeometry(1.6, 16, 12), glowing(t, C.pink, C.pink, 1.6, 0.2));
+  bubble.scale.set(1.4, 1, 0.5);
+  g.add(at(bubble, 6, 9.5, 6.4));
+  g.add(at(lightPool(t, 9, C.pink, 0.6), 0, 0, 8));
   return g;
 }
 
@@ -2159,7 +2188,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
   "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
   gym, diner, church, library, firehouse,
-  rooftop, "uv-club": uvClub, "lucky-deli": luckyDeli, "dive-club": diveClub, lotto,
+  rooftop, "uv-club": uvClub, mixer, "dive-club": diveClub, lotto,
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
   "googie-diner": googieDiner, hub, "sky-dining": skyDining, supermarket, cowork, precinct,

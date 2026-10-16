@@ -145,7 +145,7 @@ const THEMES: Record<ThemeName, { main: string; sky: [string, string, string]; i
   cream: { main: "#F2E3C4", sky: ["#FFF9EC", "#F4E2BC", "#D8B98A"], isle: "#F3E6CB" },
 };
 const PLACE_THEME: Record<string, ThemeName> = {
-  "velvet-static": "purple", "grind-and-gossip": "brown", "lucky-seven-deli": "green", "altitude-718": "deepBlue",
+  "velvet-static": "purple", "grind-and-gossip": "brown", "lucky-seven-deli": "red", "altitude-718": "deepBlue",
   "flushing-meadows": "green", "pedal-pushers": "yellow", "skybridge-tower": "grey", "skyline-pier": "deepBlue",
   "hunters-pier": "offWhite", "rockaway-diner": "red", "radiant-harbor": "cream", "pressed-iron-gym": "grey",
   unisphere: "deepBlue", "gantry-plaza": "brown", "low-light-lounge": "purple", "thread-count": "offWhite", "fifs-furniture": "yellow",
@@ -312,22 +312,33 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
       );
     }
     case "lucky-seven-deli": {
-      const deli: BoxSpec = { x: -5, y: -4, z: 0, w: 8, d: 6, h: 5, color: "#E9E2D0" };
-      const upper: BoxSpec = { x: -5, y: -4, z: 5, w: 8, d: 6, h: 2.8, color: mixHex("#C97F5A", c, 0.1) };
+      // Sip & Spill (owner, Oct 16): the old deli as a glass-front mixer, teal upstairs, a giant teacup on the roof.
+      const front: BoxSpec = { x: -5, y: -4, z: 0, w: 8, d: 6, h: 4.2, color: "#FF8A7A" };
+      const upper: BoxSpec = { x: -5, y: -4, z: 4.2, w: 8, d: 6, h: 3.4, color: "#3FBFB2" };
+      const [cx, cy] = iso(-1, -1, 7.6);
+      const cupW = 3.6 * S, cupH = 2.6 * S;
       return (
         <>
           {base}
-          <Box b={deli} night={night}>
-            <OnLeft b={deli} u={0.5} v={0} uw={4.6} vh={2.7} fill={night ? lit : glassDark} opacity={0.9} />
-            <OnLeft b={deli} u={5.5} v={0} uw={1.8} vh={2.7} fill={mixHex(a, "#1F1B26", 0.35)} />
-            <OnLeft b={deli} u={0} v={2.9} uw={8} vh={1} fill={a} />
-            <OnRight b={deli} u={0.5} v={0.6} uw={5} vh={2.2} fill={night ? lit : glassDark} opacity={0.75} />
-            <SignLeft b={deli} text="Open 24 hrs" color={b} ink="#14111A" v={3.9} night={night} />
+          <Box b={front} night={night}>
+            <OnLeft b={front} u={0.4} v={0.2} uw={7.2} vh={2.8} fill={night ? lit : "#FFE6C8"} opacity={0.92} />
+            <OnLeft b={front} u={0} v={3.1} uw={8} vh={0.9} fill="#FFF3DE" />
+            <OnRight b={front} u={0.4} v={0.2} uw={5.2} vh={2.8} fill={night ? lit : "#FFE6C8"} opacity={0.85} />
+            <SignLeft b={front} text="SIP & SPILL" color="#14111A" ink="#5FD4C9" v={3.2} night={night} />
           </Box>
           <Box b={upper} night={night}>
             {windowsLeft(upper, 1, 3, lit, glassDark, night)}
             {windowsRight(upper, 1, 2, lit, glassDark, night)}
           </Box>
+          {/* The teacup: saucer, cup, coral rim, handle, steam. */}
+          <ellipse cx={cx} cy={cy} rx={cupW * 0.75} ry={cupW * 0.26} fill="#FFF8EE" stroke="#E7D9C4" strokeWidth={0.8} />
+          <path d={`M ${cx - cupW / 2} ${cy - cupH} L ${cx + cupW / 2} ${cy - cupH} L ${cx + cupW * 0.34} ${cy - 2} Q ${cx} ${cy + 2} ${cx - cupW * 0.34} ${cy - 2} Z`} fill="#FFF8EE" />
+          <ellipse cx={cx} cy={cy - cupH} rx={cupW / 2} ry={cupW * 0.16} fill="#C9803F" stroke="#FF6A5C" strokeWidth={1.6} />
+          <ellipse cx={cx + cupW * 0.52} cy={cy - cupH * 0.55} rx={cupW * 0.14} ry={cupH * 0.24} fill="none" stroke="#FFF8EE" strokeWidth={2.2} />
+          {[0, 1, 2].map((i) => (
+            <circle key={i} cx={cx + (i % 2 ? 2 : -2)} cy={cy - cupH - 5 - i * 5} r={2.6 - i * 0.5} fill={night ? "#BFF3EC" : "#FFFFFF"} opacity={0.85} />
+          ))}
+          {/* The cat stayed on, as head of security. */}
           {(() => {
             const [px, py] = iso(1.5, 3.2, 0);
             return (

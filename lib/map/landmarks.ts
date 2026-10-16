@@ -9,7 +9,7 @@ import type { LatLng } from "./geo.ts";
 export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe" | "ballpark" | "tennis" | "bridge" | "studios" | "gallery"
   | "music-hall" | "lounge" | "bodega" | "pizzeria" | "college"
   | "gym" | "diner" | "church" | "library" | "firehouse"
-  | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto"
+  | "rooftop" | "uv-club" | "mixer" | "dive-club" | "lotto"
   | "boutique" | "showroom" | "dealership" | "cinema" | "arena"
   | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub"
   | "googie-diner" | "hub" | "sky-dining" | "supermarket" | "cowork" | "precinct"
@@ -80,7 +80,7 @@ export const LANDMARKS: readonly Landmark[] = [
   // Batch 5: Long Island City, Jackson Heights and Flushing.
   { id: "altitude-718", placeId: "altitude-718", name: "Altitude 718 Rooftop", at: [40.7425, -73.9555], kind: "rooftop", facing: 180, scale: 1.6, clear: 32, ground: "block" },
   { id: "ultraviolet-society", placeId: "ultraviolet-society", name: "Ultraviolet Society", at: [40.7402, -73.9593], kind: "uv-club", facing: 180, scale: 2, clear: 40, ground: "block" },
-  { id: "lucky-seven-deli", placeId: "lucky-seven-deli", name: "Lucky Seven Deli", at: [40.7495, -73.8885], kind: "lucky-deli", facing: 180, scale: 2.4, clear: 30, ground: "block" },
+  { id: "lucky-seven-deli", placeId: "lucky-seven-deli", name: "Sip & Spill", at: [40.7495, -73.8885], kind: "mixer", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   { id: "the-sticky-floor", placeId: "the-sticky-floor", name: "The Sticky Floor", at: [40.7512, -73.8832], kind: "dive-club", facing: 180, scale: 2.2, clear: 40, ground: "block" },
   { id: "lucky-star", placeId: "lucky-star", name: "Lucky Star Lotto", at: [40.7593, -73.8301], kind: "lotto", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   // Batch 6: shops and entertainment.
@@ -328,9 +328,11 @@ function gridAngle(l: Landmark, roads: readonly RoadLine[], radius: number): num
     for (let i = 1; i < r.pts.length; i++) {
       const ax = (r.pts[i - 1][0] - l.at[1]) * k * M_PER_DEG, ay = (r.pts[i - 1][1] - l.at[0]) * M_PER_DEG;
       const bx = (r.pts[i][0] - l.at[1]) * k * M_PER_DEG, by = (r.pts[i][1] - l.at[0]) * M_PER_DEG;
-      if (Math.hypot((ax + bx) / 2, (ay + by) / 2) > radius) continue;
       const len = Math.hypot(bx - ax, by - ay);
       if (len < 1) continue;
+      // The segment's nearest point, not its middle: a long straight avenue passing by still counts.
+      const t = Math.max(0, Math.min(1, (-ax * (bx - ax) - ay * (by - ay)) / (len * len)));
+      if (Math.hypot(ax + t * (bx - ax), ay + t * (by - ay)) > radius) continue;
       const bearing = Math.atan2(bx - ax, by - ay); // radians clockwise from north
       sx += len * Math.cos(4 * bearing);
       sy += len * Math.sin(4 * bearing);
@@ -338,6 +340,14 @@ function gridAngle(l: Landmark, roads: readonly RoadLine[], radius: number): num
   }
   if (Math.hypot(sx, sy) < 1) return null;
   return ((Math.atan2(sy, sx) / 4) * 180) / Math.PI;
+}
+
+/**
+ * Whether the streets around a landmark have loaded (a street grid within `radius` meters). Until they
+ * have, it isn't placed: placing it early would stand it square to the camera, off the grid, for good.
+ */
+export function streetsNear(l: Landmark, roads: readonly RoadLine[], radius = 250): boolean {
+  return gridAngle(l, roads, radius) !== null;
 }
 
 /** The four facings that line up with a grid, the one closest to `prefer` first. */

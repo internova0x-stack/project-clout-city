@@ -56,7 +56,7 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "clout-tower": "tv",
   "velvet-static": "cocktail",
   "grind-and-gossip": "cup",
-  "lucky-seven-deli": "sandwich",
+  "lucky-seven-deli": "chat",
   "altitude-718": "cutlery",
   "flushing-meadows": "tree",
   "pedal-pushers": "bike",

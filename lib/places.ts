@@ -37,12 +37,12 @@ export const WAVE_1_PINS: PlacePin[] = [
   },
   {
     id: "lucky-seven-deli",
-    name: "Lucky Seven Deli",
-    emoji: "🥪",
-    category: "food",
+    name: "Sip & Spill",
+    emoji: "🫖",
+    category: "places",
     neighborhood: "Jackson Heights",
     at: [40.7495, -73.8885],
-    tags: ["bodega", "dining_budget"],
+    tags: ["mixer", "social", "tea", "dining_budget"],
   },
   {
     id: "altitude-718",

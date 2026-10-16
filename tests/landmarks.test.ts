@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LANDMARKS, clearOfLandmarks, fitBridge, gridFacing, landmarkSites, onLandmarkSite, onStreet, placeLandmark, type RoadLine, type WaterArea } from "../lib/map/landmarks.ts";
+import { LANDMARKS, clearOfLandmarks, fitBridge, gridFacing, landmarkSites, streetsNear, onLandmarkSite, onStreet, placeLandmark, type RoadLine, type WaterArea } from "../lib/map/landmarks.ts";
 import { PLACES } from "../lib/city.ts";
 
 const M = 111_320;
@@ -91,6 +91,9 @@ test("landmarks turn to line up with the street grid, front still toward the cam
   assert.ok(Math.abs(f - 209) < 0.5, `facing ${f}`); // of 29, 119, 209, 299: the one nearest south
   assert.ok(Math.abs(((f - 180 + 540) % 360) - 180) <= 45, "still faces roughly south");
   assert.equal(gridFacing(cafe, []), cafe.facing, "no streets: keeps its facing");
+  // Placement waits for the streets around it: none loaded yet, so it isn't placed (and stuck off the grid).
+  assert.equal(streetsNear(cafe, []), false);
+  assert.equal(streetsNear(cafe, grid), true);
   // A plain north-south grid keeps it facing south.
   assert.ok(Math.abs(gridFacing(cafe, [line(0, -60), line(90, 60)]) - 180) < 0.5);
 });
