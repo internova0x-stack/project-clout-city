@@ -720,11 +720,16 @@ export function InteriorScene({
 }
 
 /** Every open place, nearest first, with what it costs or pays. */
+/** Where the stations sit in the Places list (0-based): 4th and 5th. */
+const STATIONS_AT = 3;
+
 export function PlacesSheet({
-  open, onClose, from, onPick, state, story = null,
-}: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null }) {
-  // The stations come first (owner, Oct 16), then everything else nearest first.
-  const rows = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at), s: isStation(p) ? 0 : 1 })).sort((a, b) => a.s - b.s || a.d - b.d);
+  open, onClose, from, onPick, state, story = null, here,
+}: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null; here?: (placeId: string) => PlaceCounts[string] | undefined }) {
+  // Nearest first, with the two stations 4th and 5th (owner, Oct 16: near the top, not on it).
+  const near = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
+  const rows = near.filter((r) => !isStation(r.p));
+  rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...near.filter((r) => isStation(r.p)));
   return (
     <Sheet open={open} onClose={onClose} label="Places">
       <div className="stack-16">
@@ -742,6 +747,10 @@ export function PlacesSheet({
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                   <span className="title" style={{ display: "block" }}>{p.name}</span>
                   <span className="meta">{p.neighborhood} · {d.toFixed(1)} mi{visited ? " · Visited today" : ""}</span>
+                  {/* Where the people are (owner, Oct 16): real players at the place right now (place_counts, never NPCs). */}
+                  {(here?.(p.id)?.count ?? 0) > 0 && (
+                    <span className="places-here"><span className="places-here-dot" aria-hidden="true" />{here!(p.id)!.count} {here!(p.id)!.count === 1 ? "player" : "players"} here</span>
+                  )}
                 </span>
                 <span className="body-strong" style={{ whiteSpace: "nowrap", fontSize: 14 }}>{cost}</span>
                 <ChevronRightIcon size={18} />

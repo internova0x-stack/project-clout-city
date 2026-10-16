@@ -2009,7 +2009,7 @@ export function GameShell({
               ? { people: rideHere.slice().sort((a, b) => Number(b.crew) - Number(a.crew)).slice(0, 2).map((h) => ({ id: h.id, name: h.name, style: h.style, crew: h.crew, here: true })), onRide: (m, p) => void rideGo(m, p) }
               : undefined}
           />
-          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} onPick={(p) => openPlace(p.id)} />
+          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} here={chat?.counts ? (id) => placeCounts[id] : undefined} onPick={(p) => openPlace(p.id)} />
           <ShopSheet
             open={panel === "shop"}
             onClose={() => setPanel(null)}
