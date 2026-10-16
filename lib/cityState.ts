@@ -6,6 +6,7 @@
 
 import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
 import { leadAction } from "./gossip.ts";
+import { SKILLS, type SkillId } from "./skills.ts";
 import { ECONOMY } from "./economy.ts";
 import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
 
@@ -40,11 +41,13 @@ export interface DailyTask {
    * "gossip" (v0.11, migration 0036): action_id is "gossip-regular" (talk to the regular), "gossip-overheard"
    * (Listen in) or, #19, "gossip-restroom" (Listen in downstairs in a club's restroom).
    */
-  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip";
+  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip" | "cook";
   place_id: string;
   action_id: string;
   reward: number;
   done_at: string | null;
+  /** Migration 0063: the skill this task levels up (one task a day), or null. Cooking tasks are at "home". */
+  skill?: SkillId | null;
 }
 
 export interface GigOffer {
@@ -432,7 +435,7 @@ export function eventById(id: string): ClubEvent | undefined {
   return CLUB_EVENTS.find((e) => e.id === id);
 }
 
-const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at" };
+const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at", cook: "Cook a meal at" };
 
 /** "Eat at Ditmars Deli & Dreams", "Go to Neon Nights", "Talk to Sal at …": a daily task's title. */
 /**
@@ -444,7 +447,16 @@ export function taskRewardLine(t: Pick<DailyTask, "kind" | "reward">): string {
 }
 const formatCashPlain = (n: number) => `C$${n.toLocaleString("en-US")}`;
 
-export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id">): string {
+export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" | "skill">): string {
+  // Migration 0063 (owner, Oct 16): "Level up your cooking skills by cooking at xyz today".
+  if (t.skill) {
+    const skill = SKILLS.find((s) => s.id === t.skill)?.name.toLowerCase() ?? t.skill;
+    if (t.kind === "cook") return `Level up your ${skill}: cook a meal at home today`;
+    const place = placeById(t.place_id);
+    const label = place?.actions.find((a) => a.id === t.action_id)?.label;
+    const doing = label ? label.charAt(0).toLowerCase() + label.slice(1) : TASK_VERB[t.kind].toLowerCase().replace(/ at$/, "");
+    return `Level up your ${skill}: ${doing} at ${place?.name ?? "a place"} today`;
+  }
   if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
   if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null });

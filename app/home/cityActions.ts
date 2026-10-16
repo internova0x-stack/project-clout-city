@@ -84,7 +84,7 @@ export async function buyGroceries(placeId: string, bundleId: string) {
   return run("buy_groceries", { p_place: placeId, p_bundle: bundleId }, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }));
 }
 export async function cook() {
-  return run("cook", {}, (d) => ({ energy: (d as { energy?: number }).energy ?? 0 }));
+  return run("cook", {}, (d) => { const r = d as { energy?: number; taskCash?: number }; return r.taskCash ? { energy: r.energy ?? 0, cash: r.taskCash } : { energy: r.energy ?? 0 }; });
 }
 // v0.10 Lucky Star Lotto (migration 0032). The browser names a game; the server sets the price,
 // checks the limits, draws the prize and, when the card is scratched, reveals and pays it.

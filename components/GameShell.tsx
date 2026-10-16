@@ -434,12 +434,13 @@ export function GameShell({
   const [myCard, setMyCard] = useState<PlayerCard | null>(null);
   const profileOpen = panel === "profile";
   const [tasksTab, setTasksTab] = useState<"daily" | "goals" | "hunt" | undefined>(undefined);
-  // Skills (migration 0056): fresh each time the profile opens.
+  // Skills (migration 0056): fresh each time the profile or the Tasks list (its skill task) opens.
   const [skills, setSkills] = useState(previewSkills);
+  const tasksOpen = panel === "tasks";
   useEffect(() => {
-    if (!profileOpen || !loadSkills) return;
+    if (!(profileOpen || tasksOpen) || !loadSkills) return;
     void loadSkills().then((s) => { if (s) setSkills(s); });
-  }, [profileOpen, loadSkills]);
+  }, [profileOpen, tasksOpen, loadSkills]);
   useEffect(() => {
     if (!chat) return;
     void chat.card(me.id).then((r) => r.ok && r.data && setMyCard(r.data));
@@ -1947,6 +1948,8 @@ export function GameShell({
         cliqueCount={clique.length}
         city={cityOn ? city : null}
         onOpenPlace={openPlace}
+        skills={skills}
+        onCook={() => { setPanel(null); setKitchenOpen(true); }}
         story={storyOn ? feed : null}
         onStoryTask={onStoryTask}
         hunt={hunt && huntState ? {
