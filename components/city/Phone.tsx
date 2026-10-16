@@ -8,6 +8,8 @@ import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { TeaApp } from "./Gossip";
+import { RadioApp } from "./Radio";
+import type { RadioApi } from "@/lib/radio";
 import { BusinessesApp } from "./Businesses";
 import { ApartmentsApp } from "./Apartments";
 import type { GossipState, TeaCard } from "@/lib/gossip";
@@ -19,7 +21,7 @@ import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -27,6 +29,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   { id: "messages", label: "Messages", emoji: "💬", tile: "chat", soon: true },
   // v0.10 neighborhood gossip (migration 0035); hidden until it runs.
   { id: "tea", label: "Tea", emoji: "🍵", tile: "tree" },
+  // v0.14 Real Clout FM (migration 0057); hidden until it runs.
+  { id: "radio", label: "Radio", emoji: "📻", tile: "radio" },
   { id: "bank", label: "Bank", emoji: "💵", tile: "cash" },
   // v0.12 businesses (migration 0048); hidden until it runs.
   { id: "businesses", label: "Businesses", emoji: "🏪", tile: "condo" },
@@ -52,7 +56,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot,
 }: {
   open: boolean;
   onClose: () => void;
@@ -93,6 +97,10 @@ export function PhoneModal({
   businesses?: Omit<React.ComponentProps<typeof BusinessesApp>, "onHome">;
   /** v0.13 the Jobs app (migration 0050); without it the app is hidden. */
   jobs?: Omit<React.ComponentProps<typeof JobsApp>, "onHome">;
+  /** v0.14 Real Clout FM: the Radio app; without it the app is hidden. */
+  radio?: RadioApi;
+  /** A shoutout on air the player hasn't seen yet. */
+  radioDot?: boolean;
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -134,10 +142,11 @@ export function PhoneModal({
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio)).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
+                      {a.id === "radio" && radioDot && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
@@ -157,6 +166,7 @@ export function PhoneModal({
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
+              {app === "radio" && radio && <RadioApp api={radio} onToast={(t) => onToast?.(t)} />}
               {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (

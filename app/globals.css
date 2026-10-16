@@ -1702,3 +1702,42 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .launch-skyline .sky-bridge { stroke:#FFD54A; opacity:.55; filter:drop-shadow(0 0 3px rgba(255,213,74,.6)); }
 .launch-skyline .sky-windows { fill:#FFD58A; opacity:.75; }
 @media (prefers-reduced-motion: reduce) { .launch, .launch-bar > span { transition:none; } }
+
+/* ---------- v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner ---------- */
+.radio-art { position:relative; border-radius:18px; overflow:hidden; aspect-ratio:320/150; max-width:100%; box-shadow:var(--elev-2); }
+.radio-art.small { aspect-ratio:320/96; }
+.radio-art svg { position:absolute; inset:0; width:100%; height:100%; }
+.radio-art-text { position:absolute; left:14px; right:60px; bottom:12px; display:flex; flex-direction:column; color:#fff; text-shadow:0 1px 6px rgba(20,30,40,.45); }
+.radio-art.small .radio-art-text { bottom:8px; }
+.radio-dial { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; opacity:.9; }
+.radio-show { font-size:22px; font-weight:800; line-height:1.1; }
+.radio-art.small .radio-show { font-size:17px; }
+.radio-host { font-size:12px; font-weight:600; opacity:.95; }
+.radio-art.small .radio-host { display:none; }
+.radio-shoutout { display:flex; flex-direction:column; gap:4px; padding:12px 14px; border-radius:16px; background:var(--surface-1, #fff); box-shadow:var(--elev-1); }
+.radio-shoutout.on-air { box-shadow:0 0 0 2px #F2A07B, var(--elev-2); }
+.radio-live { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#C8352B; }
+.radio-live-dot { width:8px; height:8px; border-radius:50%; background:#E8473B; box-shadow:0 0 0 3px rgba(232,71,59,.2); animation:radio-pulse 1.6s ease-in-out infinite; }
+@keyframes radio-pulse { 50% { box-shadow:0 0 0 6px rgba(232,71,59,0); } }
+.radio-report { align-self:flex-start; border:0; background:none; padding:4px 0; font:inherit; font-size:12px; font-weight:600; color:var(--text-3); cursor:pointer; }
+.radio-report-pick { display:flex; flex-wrap:wrap; gap:6px; }
+.radio-mine { padding:12px 14px; border-radius:14px; background:var(--chip-off); font-size:14px; font-weight:600; color:var(--text-2); }
+.radio-mine.good { background:rgba(47,143,138,.14); color:#1F6F6A; }
+.radio-problem { color:var(--red-500); }
+.field.radio-area { height:auto; padding:10px 14px; align-items:stretch; }
+.field.radio-area textarea { flex:1; min-width:0; border:0; outline:0; resize:none; background:transparent; font:inherit; font-size:16px; line-height:1.4; color:var(--text-1); }
+.radio-check { display:flex; align-items:center; gap:10px; }
+.radio-check input { width:20px; height:20px; accent-color:var(--night-900); }
+.radio-banner { position:absolute; z-index:40; background:rgba(255,252,246,.97) !important; backdrop-filter:blur(10px); top:calc(72px + var(--safe-top)); left:12px; right:12px; display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:18px;
+  box-shadow:var(--elev-3, var(--elev-2)); animation:radio-in .35s ease-out; }
+@keyframes radio-in { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+.radio-banner-main { flex:1; min-width:0; display:flex; align-items:center; gap:10px; border:0; background:none; padding:0; text-align:left; font:inherit; color:var(--text-1); cursor:pointer; }
+.radio-banner-icon { font-size:24px; flex:none; }
+.radio-banner-text { display:flex; flex-direction:column; min-width:0; }
+.radio-banner-who { font-size:13px; font-weight:800; }
+.radio-banner-msg { font-size:13px; color:var(--text-2); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.radio-banner-actions { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex:none; }
+.radio-banner .radio-report-pick { position:absolute; left:12px; right:12px; top:calc(100% + 6px); padding:8px; border-radius:14px; background:var(--surface-1, #fff); box-shadow:var(--elev-2); }
+/* The form's buttons keep their shape: Cancel at its own width, the request button fills the rest on one line. */
+.radio-form .btn { white-space:nowrap; }
+.radio-form .radio-submit { flex:1; min-width:0; width:auto; }

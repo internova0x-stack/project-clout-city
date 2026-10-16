@@ -1924,6 +1924,50 @@ function elStation(t: Themed): Group {
 }
 
 // ---------------------------------------------------------------------------
+// Real Clout FM (v0.14 On Air): a three-storey studio with a lit ON AIR sign and the station name, a
+// lattice broadcast mast on the roof with red beacons, and a satellite dish
+// ---------------------------------------------------------------------------
+function radioStation(t: Themed): Group {
+  const g = new Group();
+  const front = facade(t, { wall: "#2E6F7E", glass: "#FFE2B8", style: "punched", lit: 0.85, seed: 331, frame: "#1E3A44" });
+  g.add(at(litBox(t, 18, 12, 14, front, solid("#3D5C66"), C.amber, 0.45), 0, 6, 0));
+  // The station's name across the top, and the ON AIR box over the door (red at night).
+  g.add(at(sign(t, "REAL CLOUT FM 88.8", 14, 1.6, { bg: "#F4F1EA", fg: "#C8352B" }, 1.6), 0, 10.6, 7.1));
+  g.add(at(sign(t, "ON AIR", 4.4, 1.3, { bg: "#C8352B", fg: "#FFF3DE" }, 2.4), 0, 4.2, 7.1));
+  g.add(at(new Mesh(new BoxGeometry(3, 3.2, 0.3), solid("#1E3A44")), 0, 1.6, 7.05));
+  // The mast: four legs tapering to a point, cross-braced, with beacons up its height.
+  const steel = solid("#C8352B", { metal: 0.4, rough: 0.5 });
+  const white = solid("#F4F1EA", { metal: 0.4, rough: 0.5 });
+  const base = 12, top = 46, half0 = 2.2, half1 = 0.3;
+  const corner = (y: number, sx: number, sz: number): [number, number, number] => {
+    const k = (y - base) / (top - base);
+    const h = half0 + (half1 - half0) * k;
+    return [-4 + sx * h, y, -2 + sz * h];
+  };
+  const legs: [number, number][] = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+  for (const [sx, sz] of legs) g.add(strut(corner(base, sx, sz), corner(top, sx, sz), 0.35, steel));
+  for (let y = base, i = 0; y < top - 3; y += 5, i++) {
+    const m = i % 2 ? white : steel;
+    for (let k = 0; k < 4; k++) {
+      const [ax, az] = legs[k], [bx, bz] = legs[(k + 1) % 4];
+      g.add(strut(corner(y, ax, az), corner(y + 5, bx, bz), 0.14, m));
+      g.add(strut(corner(y, ax, az), corner(y, bx, bz), 0.16, m));
+    }
+  }
+  g.add(at(new Mesh(new CylinderGeometry(0.12, 0.12, 6, 6), white), -4, top + 3, -2));
+  const beacon = glowing(t, "#B3202C", "#FF2D3D", 2.6, 0.4);
+  for (const y of [24, 36, top + 6]) g.add(at(new Mesh(new SphereGeometry(0.45, 8, 6), beacon), -4, y, -2));
+  // A dish on the roof, tilted at the sky.
+  const dish = new Mesh(new SphereGeometry(2.2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 3.2), solid("#F4F1EA", { rough: 0.4 }));
+  dish.material.side = DoubleSide;
+  dish.rotation.set(-0.9, 0.6, 0);
+  g.add(at(dish, 5, 13.4, 0));
+  g.add(at(new Mesh(new CylinderGeometry(0.2, 0.3, 1.6, 6), solid("#55545E")), 5, 12.8, 0));
+  g.add(at(lightPool(t, 10, C.amber, 0.45), 0, 0, 9));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
 // Skyline Pier Residences: three stepped glass towers by the water with balconies and a lit crown
 // ---------------------------------------------------------------------------
 function condoTowers(t: Themed): Group {
@@ -1979,7 +2023,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
   "googie-diner": googieDiner, "sky-dining": skyDining, supermarket, cowork, precinct,
-  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark,
+  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

@@ -83,6 +83,8 @@ import type { BoroughId } from "@/lib/map/boroughs";
 import { Sheet } from "./Sheet";
 import { useCityClock } from "./useCityClock";
 import { usePlayersOnline } from "./usePresence";
+import { RadioBanner } from "./city/Radio";
+import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
 const AvatarHead = dynamic(() => import("./avatar/AvatarHead"), { ssr: false });
@@ -172,6 +174,7 @@ export function GameShell({
   gossip,
   business,
   together,
+  radio,
   roomMood = "dream",
   previewRankUp,
   invitedAt,
@@ -216,6 +219,8 @@ export function GameShell({
   business?: BusinessApi;
   /** v0.13 Better Together (migration 0050): together bonuses, rides and the Jobs app; hidden without it. */
   together?: TogetherApi;
+  /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
+  radio?: RadioApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -253,6 +258,33 @@ export function GameShell({
   const [arranging, setArranging] = useState(false);
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // v0.14 Real Clout FM: today's show, checked on open and every few minutes; the banner shows once a shoutout.
+  const [radioNow, setRadioNow] = useState<RadioState | null>(null);
+  const [radioBanner, setRadioBanner] = useState<Shoutout | null>(null);
+  useEffect(() => {
+    if (!radio) return;
+    let live = true;
+    const check = async () => {
+      const r = await radio.state().catch(() => null);
+      if (!live || !r?.ok) return;
+      setRadioNow(r.data);
+      const s = r.data.onAir;
+      if (s && s.date === r.data.today) {
+        let seen = true;
+        try { seen = window.localStorage.getItem(bannerSeenKey(s.id)) === "1"; } catch { seen = false; }
+        if (!seen) setRadioBanner(s);
+      }
+    };
+    void check();
+    const t = setInterval(() => void check(), 5 * 60_000);
+    return () => { live = false; clearInterval(t); };
+  }, [radio]);
+  const closeRadioBanner = useCallback(() => {
+    setRadioBanner((b) => {
+      if (b) try { window.localStorage.setItem(bannerSeenKey(b.id), "1"); } catch { /* shows again next visit */ }
+      return null;
+    });
+  }, []);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
   // #20: each tap on the place's regular inside the room starts their talk in the panel.
@@ -1695,6 +1727,10 @@ export function GameShell({
         }}
       />
       <ActionTimer doing={doing} />
+      {radio && radioBanner && !phone.open && (
+        <RadioBanner s={radioBanner} api={radio} onToast={setToast} onDone={closeRadioBanner}
+          onOpen={() => { closeRadioBanner(); setPhone({ open: true, app: "radio" }); }} />
+      )}
       <GainToast gain={gain} message={toast} onDone={clearGain} />
       {city?.devTools && cityApi && (
         <DevClock
@@ -1977,6 +2013,8 @@ export function GameShell({
         </>
       )}
       <PhoneModal
+        radio={radio && radioNow ? radio : undefined}
+        radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
         jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers } : undefined}
         // The offer opens over the game, so the Phone steps aside first (it would cover the card).
         onChatPass={(out) => { setPhone({ open: false, app: null }); setChatWith(null); setChatPass({ out }); }}
