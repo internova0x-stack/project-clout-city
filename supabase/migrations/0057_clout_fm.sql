@@ -1,7 +1,7 @@
 -- v0.14 "On Air", part 1: Real Clout FM (owner, Oct 16: "Real Clout FM and Clout TV").
 -- Real Clout FM is the city's radio station; its morning show "The Wake-Up Call" with DJ Sharm Almight
 -- reads one player's shoutout a day.
---   * Requests: a player's @handle (no brand named: CLAUDE.md, owner Oct 16) and a message of up to 140
+--   * Requests: the player's Instagram @handle (not their Clout City name; owner, Oct 16) and a message of up to 140
 --     characters, word-filtered, one per player per New York day. The first 50 each day are accepted;
 --     after that the list is full. The player confirms the handle is their own.
 --   * Nothing goes public on its own: the owner picks one a day to air (the Studio's Shoutouts queue)

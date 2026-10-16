@@ -38,7 +38,7 @@ export function WakeUpArt({ small = false }: { small?: boolean }) {
         <circle cx="214" cy="104" r="40" fill="url(#ra-sun)" />
         {[0, 1, 2].map((i) => <circle key={i} cx="214" cy="104" r={52 + i * 14} fill="none" stroke="#FFF1C9" strokeOpacity={0.35 - i * 0.1} strokeWidth="2" />)}
         <path d="M0 150V112h18V96h14v16h10V84h20v28h12V100h16v-8h14v20h12V90h8V78h10v34h14V104h20v8h14V98h16v14h12v-6h18v6h10V92h22v20h16v38Z" fill="#1E3A44" />
-        <g transform="translate(286 16) scale(.62)">
+        <g transform="translate(286 44) scale(.62)">
           <rect x="0" y="0" width="26" height="44" rx="13" fill="#F4F1EA" />
           {[10, 17, 24, 31].map((y) => <rect key={y} x="5" y={y} width="16" height="2" rx="1" fill="#C9B79C" />)}
           <path d="M-6 26a19 19 0 0 0 38 0" fill="none" stroke="#F4F1EA" strokeWidth="3" />
@@ -173,9 +173,10 @@ function RequestForm({ s, api, onCancel, onSent }: { s: RadioState; api: RadioAp
     }}>
       <WakeUpArt small />
       <label className="stack-4">
-        <span className="overline">Your handle</span>
-        <span className={`field${handle && !clean ? " error" : ""}`}><input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@yourhandle" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={RADIO.handleMax + 1} aria-label="Your handle" /></span>
-        {handle && !clean && <span className="meta radio-problem">Letters, numbers, dots and underscores only.</span>}
+        <span className="overline">Your Instagram handle</span>
+        <span className={`field${handle && !clean ? " error" : ""}`}><input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@your.instagram" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={RADIO.handleMax + 1} aria-label="Your Instagram handle" /></span>
+        {handle && !clean ? <span className="meta radio-problem">Letters, numbers, dots and underscores only.</span>
+          : <span className="meta">Your IG handle, not your Clout City name. It&apos;s read out on air.</span>}
       </label>
       <label className="stack-4">
         <span className="row" style={{ justifyContent: "space-between" }}>
@@ -187,13 +188,13 @@ function RequestForm({ s, api, onCancel, onSent }: { s: RadioState; api: RadioAp
       </label>
       <label className="radio-check">
         <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} />
-        <span className="body">This handle is mine.</span>
+        <span className="body">This Instagram handle is mine.</span>
       </label>
       <p className="meta" style={{ margin: 0 }}>The station picks one shoutout a day, plus a few for the wall. Shoutouts can&apos;t name or tag anyone else.</p>
       {error && <p className="body radio-problem" style={{ margin: 0 }}>{error}</p>}
       <div className="row" style={{ gap: 8 }}>
         <button type="button" className="btn btn-secondary" style={{ width: "auto", flex: "none" }} onClick={onCancel}>Cancel</button>
-        <button type="submit" className="btn btn-night" style={{ flex: 1 }} disabled={!ready}>{busy ? "Sending…" : "Send to the station"}</button>
+        <button type="submit" className="btn btn-night radio-submit" disabled={!ready}>{busy ? "Requesting…" : "Request shoutout"}</button>
       </div>
     </form>
   );

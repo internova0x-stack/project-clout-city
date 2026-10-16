@@ -427,8 +427,8 @@ A **Jobs** board on the Phone: post a job or take one. Paid in game cash only (n
 
 Two ways for players to feel famous: a shoutout on the city's radio station, and their photo on the big
 screen. Every submission is approved by the owner in the Story Studio; nothing goes public on its own.
-Players give a plain **@handle**: no social network is named in the game (CLAUDE.md: no real brand
-names; owner, Oct 16).
+Players give their **Instagram handle**, not their Clout City name (owner, Oct 16: the one exception to
+"no real brand names", for this field only).
 
 ### Real Clout FM: shoutouts on "The Wake-Up Call" (migration 0057)
 
@@ -438,7 +438,7 @@ catchphrases and backstory are invented, not modeled on any one real host.
 - **Where**: a Radio app on the Phone (show artwork, today's on-air shoutout, the shoutout wall, "Request a
   shoutout"), and the station itself on the map in Astoria (a studio with a lit ON AIR sign and a lattice
   broadcast mast with red beacons; a name label, not a place).
-- **Requesting**: @handle plus a message of up to 140 characters, with a live count and the chat word list
+- **Requesting**: Instagram handle plus a message of up to 140 characters, with a live count and the chat word list
   masking words as they type (the server masks again). Messages with an "@" are refused: shoutouts can't
   name or tag anyone else. The player confirms the handle is theirs. One request per player per New York day.
 - **Daily cap**: the first 50 requests each New York day (`game_settings` radio.dailyCap). After that the
@@ -459,7 +459,7 @@ catchphrases and backstory are invented, not modeled on any one real host.
 
 ### Clout TV: "Make it to the big screen" (next step)
 
-Players upload a photo of themselves with their @handle; one approved photo a day is featured on the Clout
+Players upload a photo of themselves with their Instagram handle; one approved photo a day is featured on the Clout
 Tower's big screen in Astoria, on a home card and in the Clout TV app's archive. Built as its own step;
 the screens inside clubs come later.
 

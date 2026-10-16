@@ -87,8 +87,8 @@ export async function previewRadioRequest(handle: string, message: string, confi
   const fail = (error: string) => ({ ok: false as const, error });
   const h = cleanHandle(handle);
   const msg = message.trim().replace(/\s+/g, " ");
-  if (!confirmed) return fail("Confirm the handle is yours first.");
-  if (!h) return fail("Handles are letters, numbers, dots and underscores, up to 30.");
+  if (!confirmed) return fail("Confirm the Instagram handle is yours first.");
+  if (!h) return fail("Instagram handles are letters, numbers, dots and underscores, up to 30.");
   if (!msg || msg.length > RADIO.messageMax) return fail(`Say something, in ${RADIO.messageMax} characters or fewer.`);
   if (msg.includes("@")) return fail("Shoutouts can't tag or name anyone else. Keep it about you.");
   if (s.rows.some((r) => r.player === ME && r.date === s.day)) return fail("You've asked for today's shoutout already. One a day.");

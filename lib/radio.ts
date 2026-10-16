@@ -1,4 +1,5 @@
-// v0.14 Real Clout FM (migration 0057): the city's radio station. Its morning show "The Wake-Up Call"
+// v0.14 Real Clout FM (migration 0057): the city's radio station. Players give their Instagram handle,
+// not their Clout City name (owner, Oct 16: the one named brand the game asks for). Its morning show "The Wake-Up Call"
 // with DJ Sharm Almight reads one player's shoutout a day; the owner picks it in the Studio. The rules
 // live in SQL (radio_request, radio_state); this file is the shapes, the copy and the form's checks.
 
@@ -12,7 +13,7 @@ export const RADIO = {
   bannerMs: 8000,
 } as const;
 
-/** A shoutout as players see it: the @handle is public, the player behind it isn't. */
+/** A shoutout as players see it: the Instagram @handle is public, the player behind it isn't. */
 export interface Shoutout {
   id: number;
   handle: string;
@@ -64,8 +65,8 @@ export function radioError(message: string): string {
   const m = message.toLowerCase();
   if (m.includes("list_full")) return "Today's list is full. Try again tomorrow.";
   if (m.includes("already_requested")) return "You've asked for today's shoutout already. One a day.";
-  if (m.includes("confirm_handle")) return "Confirm the handle is yours first.";
-  if (m.includes("bad_handle")) return "Handles are letters, numbers, dots and underscores, up to 30.";
+  if (m.includes("confirm_handle")) return "Confirm the Instagram handle is yours first.";
+  if (m.includes("bad_handle")) return "Instagram handles are letters, numbers, dots and underscores, up to 30.";
   if (m.includes("bad_message")) return `Say something, in ${RADIO.messageMax} characters or fewer.`;
   if (m.includes("no_tags")) return "Shoutouts can't tag or name anyone else. Keep it about you.";
   if (m.includes("not_allowed")) return "Your account can't send shoutouts right now.";

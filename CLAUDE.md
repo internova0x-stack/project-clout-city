@@ -77,7 +77,8 @@ components live in `app/globals.css`.
   (`skill_effective`); a new best level pays 10 × level clout once (ledger 'skill'), and 5 and 10 earn a badge.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
-- No real brand names; businesses are invented. Copy is satirical and never
+- No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
+  for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.
 - Lucky Star Lotto: the server draws every card's prize at purchase and pays it on scratch
   (`buy_lotto_card`/`scratch_lotto_card`, migrations 0032 and 0041: the prize, the pot win and the card's numbers); the browser only names a game. Never send
