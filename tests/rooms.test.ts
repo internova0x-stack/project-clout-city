@@ -131,7 +131,7 @@ test("#19 clubs: restroom and VIP floors, stairs that fit and can be walked to",
     const floors = [1, ...placeFloors(p)].map((f) => [f, placeFloor(p, f)!] as const);
     if (p.club) {
       assert.ok(floors.some(([f]) => f === 0), `${p.id} has a restroom`);
-      assert.equal(floors.some(([f]) => f === 2), !!p.club.vip || p.tags.includes("exclusive_venue"), `${p.id} upstairs`);
+      assert.equal(floors.some(([f]) => f === 2), !!p.club.vip || p.tags.includes("exclusive_venue") || p.tags.includes("hub"), `${p.id} upstairs`);
     } else assert.ok(!floors.some(([f]) => f === 0), `${p.id} has no restroom`);
     for (const [f, t] of floors) {
       for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${p.id} floor ${f}: ${i.id} fits`);
@@ -144,4 +144,18 @@ test("#19 clubs: restroom and VIP floors, stairs that fit and can be walked to",
   const vip = placeFloor(PLACES.find((p) => p.id === "ultraviolet-society")!, 2)!;
   assert.ok(vip.items.some((i) => i.use?.kind === "vip"), "VIP has Get seen in VIP");
   assert.ok(PLACE_TEMPLATES.restroom.items.some((i) => i.use?.kind === "listen"), "the restroom has Listen in");
+});
+
+test("The Hub: four floors (restroom, diner, game room, lounge), each with stairs to the next", () => {
+  const hub = PLACES.find((p) => p.tags.includes("hub"))!;
+  assert.deepEqual([1, ...placeFloors(hub)].sort(), [0, 1, 2, 3]);
+  const stairs = (f: number) => placeFloor(hub, f)!.items.filter((i) => i.use?.kind === "floor").map((i) => (i.use as { to: number }).to).sort();
+  assert.deepEqual(stairs(0), [1]);
+  assert.deepEqual(stairs(1), [0, 2]);
+  assert.deepEqual(stairs(2), [1, 3]);
+  assert.deepEqual(stairs(3), [2]);
+  // Each floor has something to do, from the Hub's own actions.
+  for (const [f, id] of [[1, "eat"], [2, "play"], [3, "hang"]] as const) {
+    assert.ok(placeFloor(hub, f)!.items.some((i) => i.use?.kind === "action" && i.use.actionId === id), `floor ${f} has ${id}`);
+  }
 });

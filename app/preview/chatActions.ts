@@ -174,9 +174,13 @@ export async function previewPresence(placeId: string, floor: number) {
 export async function previewPlaceCounts() {
   previewOnly();
   const out: PlaceCounts = {};
-  for (const p of PLACES.filter((x) => !x.story).slice(0, 12)) {
+  // Every place, so the Places list shows where people are; a few are empty, a few are busy.
+  const SPREAD = [3, 0, 12, 1, 0, 7, 24, 2, 5, 0, 9];
+  for (const p of PLACES.filter((x) => !x.story)) {
     const ids = hereAt(p.id);
-    out[p.id] = { count: ids.length, names: ids.slice(0, 3).map((id) => ({ name: PEOPLE[id].name, style: PEOPLE[id].style })) };
+    const h = [...p.id].reduce((a, ch) => a + ch.charCodeAt(0), 0);
+    const count = crowd.n ? ids.length : SPREAD[h % SPREAD.length];
+    if (count) out[p.id] = { count, names: ids.slice(0, 3).map((id) => ({ name: PEOPLE[id].name, style: PEOPLE[id].style })) };
   }
   return ok(out);
 }

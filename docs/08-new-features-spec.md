@@ -522,3 +522,17 @@ Not part of P1; don't build yet. Each needs more players or more art before it's
   TV's upload, and "On the Big Screen now" (the wall screen, also on the card from anywhere).
 - The station buttons work once you're there, like every place; the Radio and Clout TV apps still work
   from the Phone anywhere. The Radio app shows even when today's show can't load, and says why.
+
+### The Hub and where people are (migration 0061; owner, Oct 16)
+- **The Hub** is the city's meeting point and comes first in Places. It replaced The Neon Spoon (a second diner
+  with no regular) and keeps its id, `neon-spoon`, so visits and payments there stay with players; the Neon
+  Spoon lives on as the diner on its ground floor, so gossip, news and hunts that name it still make sense.
+- Four floors joined by stairs, all open to everyone: 0 the restroom (restroom gossip, as at a club), 1 the
+  Neon Spoon diner ("Pancakes at the Neon Spoon counter"), 2 the game room (arcade cabinets, a pool table:
+  "A round in the game room"), 3 the lounge (couches, a piano: "Hang out in the lounge"). Each floor holds
+  more players than a usual room. `place_presence` counts floors 2 and 3 at the Hub (elsewhere upstairs is VIP).
+- The building: four glass rings, one per floor, stacked off-center around a lit core and each tilted its own
+  way, neon on every rim, a halo and a spire on top.
+- **Places list:** the Hub first, Clout Tower and Real Clout FM 4th and 5th, the rest nearest first. Every
+  place with real players there now shows "N players here" (`place_counts`: players seen there in the last
+  few minutes, never NPCs, not you, not banned or blocked players).

@@ -612,6 +612,36 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       }
       return { group: g };
     }
+    // ---- The Hub's game room ----
+    case "arcade": {
+      // An arcade cabinet in its own color: a lit screen, a control deck, a marquee on top.
+      const body = color ?? "#3BB8C9";
+      box(w, 1.7, d, BLACK);
+      box(w + 0.02, 1.7, 0.04, body, 0, 0, d / 2 - 0.02);
+      const scr = box(w - 0.24, 0.5, 0.04, glow(body, 1.1), 0, 1.0, d / 2);
+      scr.rotation.x = -0.2;
+      box(w - 0.1, 0.08, 0.3, "#2A2530", 0, 0.82, d / 2 + 0.1);
+      cyl(0.04, 0.04, 0.1, "#FF2E88", -0.15, 0.9, d / 2 + 0.12);
+      cyl(0.035, 0.035, 0.03, "#FFB23D", 0.1, 0.9, d / 2 + 0.12);
+      cyl(0.035, 0.035, 0.03, "#3DDC97", 0.22, 0.9, d / 2 + 0.12);
+      box(w, 0.22, 0.12, glow(body, 1.4), 0, 1.72, d / 2 - 0.06);
+      return { group: g };
+    }
+    case "poolTable": {
+      // Green felt, a wood rail, two cues and a rack of balls mid-game.
+      for (const [x, z] of [[-w / 2 + 0.15, -d / 2 + 0.15], [w / 2 - 0.15, -d / 2 + 0.15], [-w / 2 + 0.15, d / 2 - 0.15], [w / 2 - 0.15, d / 2 - 0.15]]) box(0.14, 0.7, 0.14, WOOD_DARK, x, 0, z);
+      box(w, 0.14, d, WOOD_DARK, 0, 0.7);
+      box(w - 0.2, 0.03, d - 0.2, "#2E9E6A", 0, 0.84);
+      const balls = ["#FFB23D", "#FF2E88", "#3BB8C9", "#14111A", "#FF6A3D", "#FFF6E0"];
+      balls.forEach((b, i) => {
+        const ball = new Mesh(k.geo(new SphereGeometry(0.045, 10, 8)), k.mat(b));
+        ball.position.set(0.4 + (i % 3) * 0.1, 0.92, -0.1 + Math.floor(i / 3) * 0.1);
+        g.add(ball);
+      });
+      const cue = box(1.5, 0.03, 0.03, WOOD, -0.2, 0.9, 0.3);
+      cue.rotation.y = 0.3;
+      return { group: g };
+    }
     case "stairs": {
       // v0.11 the exclusive venue: a short flight rising toward the back, with a rail on one side.
       const steps = 6;

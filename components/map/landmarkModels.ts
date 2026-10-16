@@ -1689,6 +1689,49 @@ function googieDiner(t: Themed): Group {
 }
 
 // ---------------------------------------------------------------------------
+// The Hub (owner, Oct 16: "an unusual, futuristic design"): four glass rings, one per floor, stacked
+// off-center and each tilted its own way around a lit core, neon on every rim, a halo and a spire on top
+// ---------------------------------------------------------------------------
+function hub(t: Themed): Group {
+  const g = new Group();
+  g.add(at(new Mesh(new CylinderGeometry(17, 17.5, 0.6, 32), solid("#D9E6EA")), 0, 0.3, 0));
+  g.add(at(new Mesh(new CylinderGeometry(4.6, 5.2, 40, 16), glowing(t, "#9FE3EC", C.tealLight, 1.8, 0.45)), 0, 20, 0));
+  // Slanted legs carry the first ring.
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2 + 0.4;
+    const leg = new Mesh(new CylinderGeometry(0.5, 0.7, 9, 6), solid(C.steelLight, { metal: 0.4, rough: 0.4 }));
+    leg.rotation.set(Math.sin(a) * 0.35, 0, -Math.cos(a) * 0.35);
+    g.add(at(leg, Math.cos(a) * 9, 4.2, Math.sin(a) * 9));
+  }
+  const floors = [
+    { y: 7, r: 13, h: 4.5, dx: 0, dz: 1.2, tilt: [0.05, -0.04], rim: C.pink, glass: "#E9F7FA" },
+    { y: 15.5, r: 11, h: 4, dx: 1.6, dz: -0.6, tilt: [-0.07, 0.05], rim: C.tealLight, glass: "#DDF2F7" },
+    { y: 23.5, r: 12.5, h: 4, dx: -1.4, dz: 0.4, tilt: [0.06, 0.07], rim: C.amber, glass: "#F2F0FA" },
+    { y: 31.5, r: 9.5, h: 3.6, dx: 0.6, dz: 0.8, tilt: [-0.04, -0.08], rim: C.coral, glass: "#E9F7FA" },
+  ];
+  for (const f of floors) {
+    const ring = new Group();
+    ring.add(new Mesh(new CylinderGeometry(f.r, f.r * 0.92, f.h, 28), glowing(t, f.glass, "#FFE6AA", 1.4, 0.12)));
+    ring.add(at(new Mesh(new CylinderGeometry(f.r + 0.4, f.r + 0.4, 0.5, 28), solid(C.steelLight, { metal: 0.3, rough: 0.35 })), 0, f.h / 2, 0));
+    ring.add(at(new Mesh(new CylinderGeometry(f.r * 0.92 + 0.3, f.r * 0.92 + 0.3, 0.4, 28), solid(C.steel, { metal: 0.3, rough: 0.4 })), 0, -f.h / 2, 0));
+    const rim = new Mesh(new TorusGeometry(f.r + 0.35, 0.28, 6, 40), glowing(t, f.rim, f.rim, 2.6, 0.6));
+    rim.rotation.x = Math.PI / 2;
+    ring.add(at(rim, 0, f.h / 2 + 0.1, 0));
+    ring.rotation.set(f.tilt[0], 0, f.tilt[1]);
+    g.add(at(ring, f.dx, f.y, f.dz));
+  }
+  // The halo and the spire.
+  const halo = new Mesh(new TorusGeometry(6.5, 0.35, 6, 40), glowing(t, C.pink, C.pink, 2.8, 0.7));
+  halo.rotation.set(Math.PI / 2 + 0.35, 0.2, 0);
+  g.add(at(halo, 0, 39, 0));
+  g.add(at(new Mesh(new ConeGeometry(1.2, 10, 8), solid(C.steelLight, { metal: 0.5, rough: 0.3 })), 0, 45, 0));
+  g.add(at(new Mesh(new SphereGeometry(0.9, 10, 8), glowing(t, C.pink, C.pink, 3, 1)), 0, 50.5, 0));
+  g.add(at(sign(t, "THE HUB", 12, 2.4, { bg: C.ink, fg: C.tealLight }, 2.6), 0, 7.4, 14.2));
+  g.add(at(lightPool(t, 20, C.tealLight, 0.5), 0, 0, 4));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
 // Up on Thirty: a slender thirty-floor tower crowned by a glass dining room and a lit "30"
 // ---------------------------------------------------------------------------
 function skyDining(t: Themed): Group {
@@ -2119,7 +2162,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   rooftop, "uv-club": uvClub, "lucky-deli": luckyDeli, "dive-club": diveClub, lotto,
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
-  "googie-diner": googieDiner, "sky-dining": skyDining, supermarket, cowork, precinct,
+  "googie-diner": googieDiner, hub, "sky-dining": skyDining, supermarket, cowork, precinct,
   chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation, "clout-tower": cloutTower,
 };
 
