@@ -1481,8 +1481,12 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 /* #7 (owner, Oct 14): on a place card, rows show the price; the doing happens inside. */
 .preview-pill { min-width:64px; font-variant-numeric:tabular-nums; }
 /* #20: the regular's name rides on their speech bubble (e.g. "💬 Sal"). */
-.npc-bubble:has(.npc-name) { display:inline-flex; width:auto; gap:4px; padding:0; font-weight:700; font-size:20px; color:#fff; }
-.npc-bubble .npc-name { font-size:13px; text-shadow:0 1px 3px rgba(0,0,0,.7); }
+/* A place's regular (Sal, Sharm, Lola): a named pill that stands out from players' blue tags (owner, Oct 16:
+   "I couldn't locate Lola Lowdown"). */
+.npc-bubble:has(.npc-name) { display:inline-flex; align-items:center; width:auto; gap:4px; padding:0; font-weight:700; font-size:18px; color:#fff; }
+.npc-bubble .npc-name { font-size:12.5px; text-shadow:0 1px 3px rgba(0,0,0,.7); }
+.npc-bubble.npc-host { padding:4px 10px 4px 7px; border-radius:var(--r-pill); background:var(--primary-bottom); box-shadow:0 2px 8px rgba(20,17,26,.35), 0 0 0 2px #fff; font-size:16px; z-index:2; }
+.npc-bubble.npc-host .npc-name { font-size:13px; text-shadow:none; letter-spacing:.01em; }
 
 /* #11 (owner, Oct 14): actions take a moment. A ring that fills, what you're doing, seconds left. */
 .fx.fx-time { color:var(--text-3); }

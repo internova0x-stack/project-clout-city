@@ -59,6 +59,8 @@ export interface Room3DProps {
   onNpcTap?: (index: number) => void;
   /** #20: names over the room's people by index (the place's regular first), next to their 💬. */
   npcNames?: string[];
+  /** Which of npcNames is the place's regular: their name gets the pink pill, so they're easy to find. */
+  npcHost?: number;
   onSaveLayout?: (layout: LayoutEntry[]) => Promise<boolean>;
   label: string;
   /** Screen space kept clear for the HUD (top) and panels (bottom), in px. */
@@ -978,7 +980,7 @@ export default function Room3D(props: Room3DProps) {
             <button
               key={i}
               ref={(el) => { if (el) bubblesRef.current.set(i, el); else bubblesRef.current.delete(i); }}
-              className="npc-bubble"
+              className={`npc-bubble${i === props.npcHost ? " npc-host" : ""}`}
               onClick={() => actionsRef.current?.talk(i)}
               aria-label={props.npcNames?.[i] ? `Talk to ${props.npcNames[i]}` : "Talk"}
             >
