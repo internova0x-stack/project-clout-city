@@ -59,6 +59,8 @@ export const REGULARS: Regular[] = [
   { id: "benny", name: "Benny Fortuna", title: "the owner, never bought a ticket", placeId: "lucky-star", emoji: "🧑‍🦳", role: "clerk" },
   // v0.14 On Air (owner, Oct 16): the voice of The Wake-Up Call, always at the desk.
   { id: "sharm", name: "Sharm Almight", title: "DJ, The Wake-Up Call", placeId: "real-clout-fm", emoji: "🎙️", role: "bartender" },
+  // The Hub's host (owner, Oct 16): Queens' most reliable unreliable source, greeting everyone at the door.
+  { id: "lola", name: "Lola Lowdown", title: "the host", placeId: "neon-spoon", emoji: "💋", role: "bartender" },
 ];
 
 /** What people call a regular: their first name, or title and surname ("Mr. Penwright", "Sgt. Bev"). */

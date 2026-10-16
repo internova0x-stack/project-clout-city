@@ -533,6 +533,7 @@ Not part of P1; don't build yet. Each needs more players or more art before it's
   more players than a usual room. `place_presence` counts floors 2 and 3 at the Hub (elsewhere upstairs is VIP).
 - The building: four glass rings, one per floor, stacked off-center around a lit core and each tilted its own
   way, neon on every rim, a halo and a spire on top.
+- Lola Lowdown is the host, greeting everyone in the diner (lib/cast.ts, with her own lines).
 - **Places list:** the Hub first, Clout Tower and Real Clout FM 4th and 5th, the rest nearest first. Every
   place with real players there now shows "N players here" (`place_counts`: players seen there in the last
   few minutes, never NPCs, not you, not banned or blocked players).
