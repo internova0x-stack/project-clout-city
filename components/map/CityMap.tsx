@@ -8,7 +8,8 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
-import { startVehicles } from "./vehicles";
+import { createTraffic } from "./vehicles";
+import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -179,11 +180,32 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     };
   }, [map]);
 
-  // ---- Moving vehicles when zoomed in ----
+  // ---- Landmark models and 3D traffic (three.js), put back after every restyle ----
+  const landmarksRef = useRef<ReturnType<typeof createLandmarkLayer> | null>(null);
   useEffect(() => {
-    if (!map || !vehicles) return;
-    return startVehicles(map);
+    if (!map) return;
+    const traffic = vehicles ? createTraffic(map) : undefined;
+    const lm = createLandmarkLayer(undefined, traffic);
+    landmarksRef.current = lm;
+    lm.setNight(themeRef.current === "night");
+    const ensure = () => {
+      if (!map.isStyleLoaded() || map.getLayer(LANDMARK_LAYER_ID)) return;
+      // Under the bridges, street names and pins; level with the 3D blocks.
+      map.addLayer(lm.layer, map.getLayer("bridge-casing") ? "bridge-casing" : undefined);
+    };
+    ensure();
+    map.on("styledata", ensure);
+    map.on("load", ensure);
+    return () => {
+      map.off("styledata", ensure);
+      map.off("load", ensure);
+      if (map.getLayer(LANDMARK_LAYER_ID)) map.removeLayer(LANDMARK_LAYER_ID);
+      lm.dispose();
+      traffic?.dispose();
+      landmarksRef.current = null;
+    };
   }, [map, vehicles]);
+  useEffect(() => landmarksRef.current?.setNight(theme === "night"), [theme, map]);
 
   // ---- Day/night and lock changes restyle in place (2 s crossfade) ----
   useEffect(() => {
@@ -235,12 +257,22 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
   const size = map ? { w: map.getContainer().clientWidth, h: map.getContainer().clientHeight } : { w: 0, h: 0 };
   const visible = (s: { x: number; y: number }, pad = 120) => s.x > -pad && s.y > -pad && s.x < size.w + pad && s.y < size.h + pad;
 
+  // A place drawn as a landmark model has its pin on the model's top, not hidden behind it:
+  // its height in meters times the screen scale there, foreshortened by the tilt.
+  const lift = (pin: PlacePin) => {
+    const h = landmarksRef.current?.heights.get(pin.id);
+    if (!h || map!.getZoom() < LANDMARK_MIN_ZOOM) return 0;
+    const a = map!.project(lngLat(pin.at));
+    const b = map!.project([pin.at[1] + 10 / (111_320 * Math.cos((pin.at[0] * Math.PI) / 180)), pin.at[0]]);
+    return (h * Math.hypot(b.x - a.x, b.y - a.y) / 10) * Math.sin((map!.getPitch() * Math.PI) / 180);
+  };
   const placed = useMemo<Placed[]>(() => {
     if (!map) return [];
     const out: (Placed & { spots: { x: number; y: number; w: number }[] })[] = [];
     const compact = map.getZoom() < COMPACT_ZOOM;
     for (const pin of pins) {
-      const s = project(pin.at);
+      const ground = project(pin.at);
+      const s = { x: ground.x, y: ground.y - lift(pin) };
       const w = compact ? ICON_PX : pinWidth(pin);
       // Zoomed out, icons may overlap a little before they group, so more places stay visible.
       const near = compact ? 18 : (w: number, ow: number) => (ow + w) / 2 + 4;
