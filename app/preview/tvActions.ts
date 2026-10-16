@@ -8,7 +8,8 @@ import type { Station, StationThread, StudioBigScreen, TvAction, TvFeature, TvMi
 // Development previews only: Clout TV in memory, following the rules of migration 0058, shared by
 // /preview/home (the Clout TV app, the home card, the Clout Tower's screen, the stations' texts) and
 // /preview/studio (the Big Screen queue). Sample "photos" are drawn portraits. Refused in production.
-// ?tv=new|sent|mine sets where the preview starts ("mine": your photo is on the screen now).
+// ?tv=new|sent|mine|empty sets where the preview starts ("mine": your photo is on the screen now; "empty":
+// nobody up and nobody waiting, so the tower says "Make it BIG in NY").
 
 interface Row { id: number; player: string; name: string; handle: string; photo: string; url: string; date: string; status: TvStatus; approvedAt: string | null; featuredAt: string | null; at: string }
 
@@ -56,8 +57,8 @@ function seed(preset: string) {
   const rows: Row[] = [
     row(1, "featured", 26, 30, -1),
     row(2, "featured", 7, 30, -1),
-    preset === "new" ? row(0, "pending", null, null) : row(0, "featured", 0.5, 4),
-    row(3, "approved", null, 2),
+    preset === "new" || preset === "empty" ? row(0, "pending", null, null) : row(0, "featured", 0, 4),
+    row(3, preset === "empty" ? "pending" : "approved", null, preset === "empty" ? null : 2),
     row(4, "pending", null, null),
   ];
   let next = 10;
@@ -73,13 +74,15 @@ function get(preset?: string) {
   return store!;
 }
 
+/** On the screen now: the latest to go up in this 3-hour slot (none: "Make it BIG in NY"). */
 const current = (s: NonNullable<typeof store>) =>
-  s.rows.filter((r) => r.status === "featured" && r.featuredAt! <= new Date().toISOString()).sort((a, b) => b.featuredAt!.localeCompare(a.featuredAt!))[0];
+  s.rows.filter((r) => r.status === "featured" && Date.parse(r.featuredAt!) >= slotStart() && r.featuredAt! <= new Date().toISOString())
+    .sort((a, b) => b.featuredAt!.localeCompare(a.featuredAt!))[0];
 
 /** The rotation: a new slot puts the next approved photo up. */
 function sync(s: NonNullable<typeof store>) {
   const cur = current(s);
-  if (!cur || Date.parse(cur.featuredAt!) < slotStart()) {
+  if (!cur) {
     const nxt = s.rows.filter((r) => r.status === "approved").sort((a, b) => a.approvedAt!.localeCompare(b.approvedAt!))[0];
     if (nxt) { nxt.status = "featured"; nxt.featuredAt = new Date().toISOString(); }
   }

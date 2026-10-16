@@ -12,7 +12,8 @@
 --     one player is shown every 3 hours (owner, Oct 16), oldest approval first, from 12, 3, 6 and 9
 --     o'clock New York. "Show now" puts any photo on the screen at once ("we should be able to update
 --     what is showing on the screen when we want"); "take down" removes it and the next one goes up.
---     With nobody waiting, the last photo stays up.
+--     A photo's turn ends with its 3-hour slot; with nobody waiting, the tower shows "Make it BIG in NY"
+--     (owner, Oct 16).
 --   * A player can withdraw their own submission or feature at any time.
 --   * Texts from the stations (owner, Oct 16): a player whose photo goes up gets a message from
 --     "Clout TV", and one whose shoutout airs (or makes the wall) gets one from "Real Clout FM", in the
@@ -69,21 +70,6 @@ create index if not exists station_messages_player_idx on public.station_message
 alter table public.station_messages enable row level security;
 -- No policies on either table: players and the Studio go through the functions below.
 
-/** The game's clock read now (not at the transaction's start), so a put-up later in a transaction is later. */
-create function public.tv_now() returns timestamptz
-language sql volatile security definer set search_path = public
-as $$ select public.game_now() + (clock_timestamp() - now()) $$;
-
-/** The photo on the screen now: the latest one to go up. */
-create function public.tv_current() returns public.tv_submissions
-language sql volatile security definer set search_path = public
-as $$ select * from public.tv_submissions where status = 'featured' and featured_at <= public.tv_now() order by featured_at desc limit 1 $$;
-
-/** Whether a stored photo is public now: it's on the screen or has been. */
-create function public.tv_photo_public(p_path text) returns boolean
-language sql volatile security definer set search_path = public
-as $$ select exists (select 1 from public.tv_submissions where photo_path = p_path and status = 'featured' and featured_at <= public.tv_now()) $$;
-
 /** The start of the current 3-hour slot (12, 3, 6, 9 o'clock New York). */
 create function public.tv_slot_start() returns timestamptz
 language sql stable security definer set search_path = public
@@ -91,6 +77,26 @@ as $$
   select (date_trunc('day', ny) + make_interval(hours => (extract(hour from ny)::int / h) * h)) at time zone 'America/New_York'
     from (select public.game_now() at time zone 'America/New_York' as ny, (public.game_settings_value('tv') ->> 'slotHours')::int as h) x
 $$;
+
+/** The game's clock read now (not at the transaction's start), so a put-up later in a transaction is later. */
+create function public.tv_now() returns timestamptz
+language sql volatile security definer set search_path = public
+as $$ select public.game_now() + (clock_timestamp() - now()) $$;
+
+/** The photo on the screen now: the latest to go up in this 3-hour slot (none: the tower's "Make it BIG in NY"). */
+create function public.tv_current() returns public.tv_submissions
+language sql volatile security definer set search_path = public
+as $$
+  select * from public.tv_submissions
+   where status = 'featured' and featured_at >= public.tv_slot_start() and featured_at <= public.tv_now()
+   order by featured_at desc limit 1
+$$;
+
+/** Whether a stored photo is public now: it's on the screen or has been. */
+create function public.tv_photo_public(p_path text) returns boolean
+language sql volatile security definer set search_path = public
+as $$ select exists (select 1 from public.tv_submissions where photo_path = p_path and status = 'featured' and featured_at <= public.tv_now()) $$;
+
 
 /** Puts a photo on the screen now and texts its player. */
 create function public.tv_put_up(p_id bigint) returns void
@@ -121,7 +127,7 @@ declare
 begin
   perform pg_advisory_xact_lock(hashtext('station_sync'));
   cur := public.tv_current();
-  if cur.id is null or cur.featured_at < public.tv_slot_start() then
+  if cur.id is null then
     select id into nxt from public.tv_submissions where status = 'approved' order by approved_at, id limit 1;
     if nxt is not null then perform public.tv_put_up(nxt); end if;
   end if;

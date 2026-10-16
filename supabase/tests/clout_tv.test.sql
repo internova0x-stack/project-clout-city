@@ -85,8 +85,15 @@ select pg_temp.assert(public.tv_state() -> 'featured' ->> 'handle' = 'mia.k', 's
 select pg_temp.as_(1);
 select public.admin_big_screen_action(current_setting('tv.mia')::bigint, 'take_down');
 select pg_temp.as_(3);
-select pg_temp.assert(public.tv_state() -> 'featured' ->> 'handle' = 'zed', 'taken down: the last one before it shows');
+select pg_temp.assert(public.tv_state() -> 'featured' ->> 'handle' = 'zed', 'taken down: the one before it in this slot shows');
 select pg_temp.assert(not exists (select 1 from storage.objects where name = '00000000-0000-0000-0000-0000000000b2/me.jpg'), 'taken down: private again');
+
+-- When the slot ends with nobody waiting, the screen goes back to "Make it BIG in NY".
+reset role;
+update public.tv_submissions set featured_at = featured_at - interval '3 hours' where status = 'featured';
+set role authenticated; select pg_temp.as_(3);
+select pg_temp.assert(public.tv_state() -> 'featured' = 'null'::jsonb, 'empty rotation: the ident');
+select pg_temp.assert(jsonb_array_length(public.tv_state() -> 'archive') >= 1, 'past features still in the archive');
 
 -- A player withdraws their own (not someone else's).
 select pg_temp.assert(pg_temp.raises($$select public.tv_withdraw(999999)$$, 'unknown_submission'), 'not someone else''s');

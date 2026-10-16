@@ -2000,22 +2000,31 @@ export function paintBigScreen(img: CanvasImageSource & { width: number; height:
     x.font = "800 46px system-ui, sans-serif";
     x.fillText(handle ? `@${handle}`.slice(0, 18) : "", 28, h - 34);
   } else {
-    const g = x.createRadialGradient(w / 2, h * 0.42, 20, w / 2, h * 0.42, w * 0.8);
-    g.addColorStop(0, "#2E6F7E");
+    // Nobody on the screen (owner, Oct 16): "Make it BIG in NY".
+    const g = x.createRadialGradient(w / 2, h * 0.45, 20, w / 2, h * 0.45, w * 0.85);
+    g.addColorStop(0, "#3A1F3A");
     g.addColorStop(1, "#14111A");
     x.fillStyle = g;
     x.fillRect(0, 0, w, h);
     x.textAlign = "center";
     x.fillStyle = "#FFFFFF";
-    x.font = "900 92px system-ui, sans-serif";
-    x.fillText("CLOUT", w / 2, h * 0.42);
-    x.fillStyle = "#F2A07B";
-    x.fillRect(w / 2 - 92, h * 0.47, 184, 104);
-    x.fillStyle = "#14111A";
-    x.fillText("TV", w / 2, h * 0.47 + 86);
-    x.fillStyle = "rgba(255,255,255,.8)";
-    x.font = "700 30px system-ui, sans-serif";
-    x.fillText("Make it to the big screen", w / 2, h * 0.8);
+    x.font = "800 64px system-ui, sans-serif";
+    x.fillText("Make it", w / 2, h * 0.3);
+    x.save();
+    x.translate(w / 2, h * 0.56);
+    x.rotate(-0.04);
+    x.fillStyle = "#B8410F";
+    x.font = "900 196px system-ui, sans-serif";
+    x.fillText("BIG", 0, 8);
+    x.fillStyle = "#FFC21A";
+    x.fillText("BIG", 0, 0);
+    x.restore();
+    x.fillStyle = "#FFFFFF";
+    x.font = "800 64px system-ui, sans-serif";
+    x.fillText("in NY", w / 2, h * 0.73);
+    x.fillStyle = "#FA2D48";
+    x.font = "800 30px system-ui, sans-serif";
+    x.fillText("CLOUT TV", w / 2, h * 0.9);
     x.textAlign = "start";
   }
   tex.needsUpdate = true;

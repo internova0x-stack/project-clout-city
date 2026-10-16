@@ -98,8 +98,8 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
         </button>
       ) : (
         <div className="card stack-4">
-          <span className="title" style={{ display: "block" }}>Nobody on the big screen yet</span>
-          <span className="meta">A new player goes up on the Clout Tower in Astoria every 3 hours. Could be you.</span>
+          <span className="title" style={{ display: "block" }}>Make it BIG in NY</span>
+          <span className="meta">Nobody&apos;s on the Big Screen right now. A new player goes up on the Clout Tower in Astoria every 3 hours. Could be you.</span>
         </div>
       )}
       {s.mine.length > 0 && (
