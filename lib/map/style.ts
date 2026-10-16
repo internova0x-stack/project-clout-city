@@ -33,7 +33,7 @@ export const PALETTES: Record<MapTheme, Palette> = {
     // water), streets in warm sodium amber (brighter on avenues and highways), dark buildings.
     land: "#06080F", water: "#010309", waterDeep: "rgba(255,190,110,.10)", park: "#070C0C", blocks: "#0A0D17", building: "#141621", buildingTall: "#272436",
     minor: "#B8732A", minorCasing: "rgba(0,0,0,0)", major: "#FFB347", majorCasing: "rgba(255,140,30,.25)",
-    highway: "#FFE0A3", highwayCasing: "rgba(255,170,60,.35)", roadGlow: "rgba(255,160,50,.30)", rail: "rgba(120,180,255,.35)",
+    highway: "#FFB347", highwayCasing: "rgba(255,170,60,.3)", roadGlow: "rgba(255,160,50,.30)", rail: "rgba(120,180,255,.35)",
     label: "#B8C6E0", labelHalo: "rgba(14,26,51,.9)", streetLabel: "#C9D1E0",
     locked: "rgba(8,12,24,.62)", queensEdge: "rgba(255,194,26,.5)",
   },

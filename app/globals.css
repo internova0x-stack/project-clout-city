@@ -980,13 +980,11 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 
 /* Zoomed out: pins are just their icon, so the whole city shows its places */
 .map-pin.compact { display:flex; flex-direction:column; align-items:center; }
-.map-pin-tile.icon-only { width:28px; height:28px; border-radius:9px; display:grid; place-items:center; box-shadow:0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,.3); }
+.map-pin-tile.icon-only { width:24px; height:24px; border-radius:8px; display:grid; place-items:center; box-shadow:0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,.3); }
 
 .guest-card-logo { display:block; margin:0 0 10px; font-size:26px; line-height:1.1; }
-.map-stack { display:flex; align-items:center; position:relative; }
-.map-stack .map-pin-tile.icon-only { width:26px; height:26px; }
-.map-stack .map-pin-tile + .map-pin-tile { margin-left:-12px; }
-.map-stack-count { position:absolute; top:-8px; right:-10px; min-width:18px; height:18px; padding:0 4px; border-radius:var(--r-pill); background:var(--night-900); color:#fff; font-size:11px; line-height:18px; text-align:center; box-shadow:0 0 0 2px #fff; }
+/* Places too close to tell apart: one quiet glass circle with how many (owner, Oct 16: "the screen looks chaotic"). */
+.map-cluster { min-width:30px; height:30px; padding:0 8px; border-radius:var(--r-pill); display:grid; place-items:center; font-size:13px; color:var(--text-1); box-shadow:var(--elev-2); }
 
 /* ---------- v0.5.1 fixes: #36 close buttons, #38/#42 page scroll, #41 tutorial ---------- */
 /* #36: the close button always sits on top of the sheet's content (illustrations, the iOS
