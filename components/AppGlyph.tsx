@@ -52,6 +52,8 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
 
 const PLACE_GLYPHS: Record<string, GlyphName> = {
+  "real-clout-fm": "radio",
+  "clout-tower": "tv",
   "velvet-static": "cocktail",
   "grind-and-gossip": "cup",
   "lucky-seven-deli": "sandwich",

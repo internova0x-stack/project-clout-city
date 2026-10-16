@@ -155,6 +155,7 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "precinct-114-half": "deepBlue", "engine-7": "red", "astoria-cc": "green", "harmony-chapel": "offWhite",
   "hell-gate-park": "green", "rep-count": "yellow", "astoria-blvd-station": "yellow", "reel-queens": "purple",
   "respawn-arena": "deepBlue", "the-sticky-floor": "green", "discount-disco": "yellow", "ultraviolet-society": "purple",
+  "real-clout-fm": "red", "clout-tower": "deepBlue",
 };
 function themeOf(place: Place) {
   return THEMES[PLACE_THEME[place.id] ?? "cream"];
@@ -180,6 +181,70 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
   const glassDark = night ? "#2A2350" : "#9FB6D8";
   const base = <Box b={isle} night={night} />;
   switch (place.id) {
+    // v0.14 On Air: Real Clout FM, a low studio with the ON AIR light and a lattice mast on the roof.
+    case "real-clout-fm": {
+      const studio: BoxSpec = { x: -5, y: -4, z: 0, w: 8, d: 7, h: 4, color: a };
+      const mastBase = iso(1.5, -1.5, 4);
+      const mastTop = iso(1.5, -1.5, 12);
+      const onAir = night ? "#FF2E88" : "#FF4F9A";
+      return (
+        <>
+          {base}
+          <Box b={studio} night={night}>
+            {windowsRight(studio, 1, 3, lit, glassDark, night)}
+            <OnLeft b={studio} u={5.4} v={0} uw={1.8} vh={2.4} fill={night ? "#FFD58A" : "#3A2F45"} />
+            <SignLeft b={studio} text={place.name} color="#14111A" ink={b} v={2.1} night={night} />
+            <OnLeft b={studio} u={0.8} v={0.8} uw={2.4} vh={0.9} fill={onAir} />
+          </Box>
+          {night && <circle cx={iso(1.8, 3, 1.25)[0]} cy={iso(1.8, 3, 1.25)[1]} r={10} fill="url(#mv-glow)" />}
+          {/* The mast: two rails, cross braces, and a light on top that blinks at night. */}
+          {[-1, 1].map((k) => <line key={k} x1={mastBase[0] + k * 6} y1={mastBase[1]} x2={mastTop[0] + k * 0.8} y2={mastTop[1]} stroke={night ? "#E9D8FF" : "#5A5470"} strokeWidth={1.2} />)}
+          {Array.from({ length: 7 }, (_, i) => {
+            const t0 = i / 7, t1 = (i + 1) / 7;
+            const y0 = mastBase[1] + (mastTop[1] - mastBase[1]) * t0, y1 = mastBase[1] + (mastTop[1] - mastBase[1]) * t1;
+            const w0 = 6 - 5.2 * t0, w1 = 6 - 5.2 * t1;
+            return <line key={i} x1={mastBase[0] - w0} y1={y0} x2={mastBase[0] + w1} y2={y1} stroke={night ? "#E9D8FF" : "#5A5470"} strokeWidth={0.7} opacity={0.8} />;
+          })}
+          <circle cx={mastTop[0]} cy={mastTop[1] - 2} r={2.4} fill="#FF2E88">
+            {night && <animate attributeName="opacity" values="1;0.25;1" dur="1.6s" repeatCount="indefinite" />}
+          </circle>
+          {[6, 11].map((r) => <circle key={r} cx={mastTop[0]} cy={mastTop[1] - 2} r={r} fill="none" stroke="#FF2E88" strokeWidth={0.8} opacity={night ? 0.55 : 0.35} />)}
+          <Lantern x={4} y={4} night={night} />
+          <Tree x={-5.2} y={4.2} night={night} />
+        </>
+      );
+    }
+    // v0.14 On Air: the Clout Tower, a slim tower with the Big Screen on its face (Clout TV's ident).
+    case "clout-tower": {
+      const tower: BoxSpec = { x: -3, y: -3, z: 0, w: 5, d: 5, h: 12, color: a };
+      const podium: BoxSpec = { x: -5, y: -1, z: 0, w: 9, d: 5, h: 2.4, color: mixHex(a, "#14111A", 0.25) };
+      const sc = [iso(-2.7, 2.03, 4.6), iso(1.7, 2.03, 4.6), iso(1.7, 2.03, 10.6), iso(-2.7, 2.03, 10.6)];
+      const mid = iso(-0.5, 2.03, 7.3);
+      return (
+        <>
+          {base}
+          <Box b={tower} night={night}>{windowsRight(tower, 4, 2, lit, glassDark, night)}</Box>
+          <defs>
+            <linearGradient id={`tv-screen-${night ? "n" : "d"}`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#FF6A3D" />
+              <stop offset="1" stopColor="#FF2E88" />
+            </linearGradient>
+          </defs>
+          <polygon points={pts(sc)} fill="#14111A" />
+          <polygon points={pts(sc.map(([x, y], i) => [x + (i === 0 || i === 3 ? 1.5 : -1.5), y + (i < 2 ? -1.2 : 1.2)] as P))} fill={`url(#tv-screen-${night ? "n" : "d"})`} />
+          {night && <polygon points={pts(sc)} fill="#FF2E88" opacity={0.35} filter="url(#mv-blur)" />}
+          <text x={0} y={0} fontSize={6.2} fontWeight={900} fill="#FFFFFF" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif"
+            transform={`translate(${mid[0]} ${mid[1]}) matrix(0.866 0.5 0 1 0 0)`}>CLOUT TV</text>
+          <Box b={podium} night={night}>
+            <SignLeft b={podium} text={place.name} color="#14111A" ink={b} v={0.5} night={night} />
+          </Box>
+          <circle cx={iso(-0.5, -0.5, 12)[0]} cy={iso(-0.5, -0.5, 12)[1] - 6} r={1.8} fill="#FF2E88" />
+          <line x1={iso(-0.5, -0.5, 12)[0]} y1={iso(-0.5, -0.5, 12)[1]} x2={iso(-0.5, -0.5, 12)[0]} y2={iso(-0.5, -0.5, 12)[1] - 6} stroke={night ? "#E9D8FF" : "#5A5470"} strokeWidth={1} />
+          <Lantern x={4.5} y={4.5} night={night} />
+          <Lantern x={-5} y={4.5} night={night} />
+        </>
+      );
+    }
     // #19 the two cheap clubs share the warehouse look, with their own names and colors.
     case "the-sticky-floor":
     case "discount-disco":

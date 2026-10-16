@@ -344,6 +344,26 @@ export function GameShell({
     return () => clearTimeout(t);
   }, [tvNextAt, loadTv]);
   const tvFeature = tvNow?.featured ?? null;
+  // v0.14 On Air: the stations' buttons (on their cards and inside).
+  const onStation = (what: "shoutout" | "billboard" | "watch") => {
+    if (what === "watch") return openBigScreen();
+    const app = what === "shoutout" ? "radio" : "tv";
+    if (app === "radio" ? !radio : !tv) return setToast("The station's off the air for now. Try again soon.");
+    setPlace(null);
+    setPhone({ open: true, app, form: true });
+  };
+  // Tapping the tower opens at once with what we have (still in its slot), then checks for a newer photo.
+  const openBigScreen = useCallback(() => {
+    const fresh = !!tvNow && (!tvNow.nextAt || Date.parse(tvNow.nextAt) > Date.now());
+    if (fresh) {
+      if (tvFeature) setTvView(tvFeature); else setPhone({ open: true, app: "tv" });
+    }
+    void loadTv().then((st) => {
+      const f = st ? st.featured : tvFeature;
+      if (fresh) { if (f && f.photo !== tvFeature?.photo) setTvView(f); return; }
+      if (f) setTvView(f); else setPhone({ open: true, app: "tv" });
+    });
+  }, [tvNow, tvFeature, loadTv]);
   // Texts from Real Clout FM and Clout TV (checked with the stations; the badge counts them).
   const [stationThreads, setStationThreads] = useState<StationThread[]>([]);
   useEffect(() => {
@@ -385,7 +405,7 @@ export function GameShell({
   useEffect(() => setInsideFloor(1), [inside?.id]);
   // #19 clubs: the VIP rope, when the cover hasn't been paid tonight.
   const [vipAsk, setVipAsk] = useState<{ place: Place; cover: number } | null>(null);
-  const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null; item?: string | null }>({ open: false, app: null });
+  const [phone, setPhone] = useState<{ open: boolean; app: App | null; beat?: string | null; item?: string | null; form?: boolean }>({ open: false, app: null });
   // v0.6 City News: loaded once; the newest headline rides the ticker and, once per session, a home card.
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [newsCard, setNewsCard] = useState<string | null>(null);
@@ -1110,6 +1130,7 @@ export function GameShell({
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
+    onStation: radio || tv ? onStation : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
@@ -1219,6 +1240,7 @@ export function GameShell({
     ? crowdFor(inView, toLook, slots)
     : inView.length ? inView.map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: toLook(p), crew: p.crew })) : undefined;
   const useInPlace = (p: Place, it: RoomItem) => {
+    if (it.use?.kind === "station") return onStation(it.use.what);
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
@@ -1782,7 +1804,7 @@ export function GameShell({
             onLockedTap={onLockedTap}
             bigScreen={tvFeature ? { url: tvFeature.url, handle: tvFeature.handle, photo: tvFeature.photo } : null}
             // Tapping the tower checks first, so the photo that opens is the live one.
-            onBigScreen={tv ? () => void loadTv().then((st) => { const f = st ? st.featured : tvFeature; if (f) setTvView(f); else setPhone({ open: true, app: "tv" }); }) : undefined}
+            onBigScreen={tv ? openBigScreen : undefined}
           />
           {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined} />}
         </>
@@ -2112,7 +2134,8 @@ export function GameShell({
         </>
       )}
       <PhoneModal
-        radio={radio && radioNow ? radio : undefined}
+        // The app shows whenever the station is on; if today's show can't load, the app says why.
+        radio={radio}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
         stations={stations && stationThreads.length ? { threads: stationThreads, onRead: readStation } : undefined}
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
@@ -2138,6 +2161,7 @@ export function GameShell({
         open={phone.open}
         initialApp={phone.app}
         focusBeat={phone.beat}
+        openForm={phone.form}
         cityNews={cityNews ? { items: newsItems, today: newsToday, focus: phone.item ?? null } : undefined}
         chat={chat}
         chatWith={chatWith}
