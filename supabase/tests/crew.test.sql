@@ -88,7 +88,7 @@ end $$;
 reset role;
 -- Five went: each gets +10 for each of the other four.
 select pg_temp.assert((select bool_and(gain = 40) from (
-  select p.id, p.clout - c.clout - coalesce((select sum(amount) from public.ledger l where l.player_id = p.id and l.kind = 'visit'), 0) as gain
+  select p.id, p.clout - c.clout - coalesce((select sum(amount) from public.ledger l where l.player_id = p.id and l.kind in ('visit', 'skill')), 0) as gain
     from public.players p join c0 c using (id) where p.id in (pg_temp.id(91), pg_temp.id(92), pg_temp.id(94), pg_temp.id(95), pg_temp.id(96))) g),
   'four friends each, +40');
 select pg_temp.assert((select count(*) = 0 from public.ledger where kind = 'crew_full'), 'no full bonus without Cal');

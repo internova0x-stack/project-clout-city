@@ -307,3 +307,93 @@ export async function previewStudioInsights(days: number) {
     economy: { medianCash: 4180, medianClout: 640 },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Studio Players (migration 0055): sample players for /preview/studio. Bans last until the server restarts.
+// ---------------------------------------------------------------------------
+const PREVIEW_BANS = new Map<string, string | null>();
+const SAMPLE_PLAYERS = [
+  { id: "p1", name: "bigmich", email: "mich@example.com", style: "bodega_drip", days: 3, seenMin: 4, clout: 335, cash: 1433, worth: 6820, rank: 2, spend: 499, vip: true, reports: 0, moved: true },
+  { id: "p2", name: "Celine", email: "celine@example.com", style: "influencer_soft_glam", days: 3, seenMin: 9, clout: 378, cash: 3051, worth: 3051, rank: 2, spend: 0, vip: false, reports: 0, moved: true },
+  { id: "p3", name: "tasha.b", email: "tasha@example.com", style: "pilates_princess", days: 12, seenMin: 70, clout: 2140, cash: 11500, worth: 48200, rank: 5, spend: 1297, vip: true, reports: 0, moved: true },
+  { id: "p4", name: "jay.fm", email: "jay@example.com", style: "arcade_nerd", days: 8, seenMin: 300, clout: 3319, cash: 900, worth: 22100, rank: 5, spend: 0, vip: false, reports: 2, moved: true },
+  { id: "p5", name: "dev.r", email: "dev@example.com", style: "startup_founder", days: 1, seenMin: 1500, clout: 40, cash: 7200, worth: 7200, rank: 1, spend: 0, vip: false, reports: 0, moved: false },
+  { id: "p6", name: "mia.nyc", email: "mia@example.com", style: "thrift_store_icon", days: 20, seenMin: 4000, clout: 200, cash: 2400, worth: 5100, rank: 1, spend: 299, vip: false, reports: 0, moved: true },
+] as const;
+
+export async function previewStudioPlayers(query: string, filter: string, sort: string, offset: number) {
+  previewOnly();
+  const now = Date.now();
+  let rows = SAMPLE_PLAYERS.map((p) => ({
+    id: p.id, name: p.name, email: p.email, style: p.style, joinedAt: new Date(now - p.days * 86_400_000).toISOString(),
+    lastSeen: new Date(now - p.seenMin * 60_000).toISOString(), clout: p.clout, cash: p.cash, netWorth: p.worth, rank: p.rank,
+    spendCents: p.spend, vip: p.vip, banned: PREVIEW_BANS.has(p.id), openReports: p.reports, movedIn: p.moved,
+  }));
+  const q = query.toLowerCase();
+  if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q) || r.email.includes(q));
+  rows = rows.filter((r) => filter === "new" ? now - Date.parse(r.joinedAt) < 7 * 86_400_000 : filter === "active" ? now - Date.parse(r.lastSeen) < 86_400_000
+    : filter === "paying" ? r.spendCents > 0 : filter === "vip" ? r.vip : filter === "banned" ? r.banned : filter === "reported" ? r.openReports > 0
+    : filter === "no_home" ? !r.movedIn : true);
+  const key = (r: (typeof rows)[number]) => sort === "clout" ? r.clout : sort === "worth" ? r.netWorth : sort === "spend" ? r.spendCents : sort === "seen" ? Date.parse(r.lastSeen) : Date.parse(r.joinedAt);
+  rows.sort((a, b) => key(b) - key(a));
+  return ok({ total: rows.length, rows: rows.slice(offset, offset + 50) });
+}
+
+export async function previewStudioPlayer(id: string) {
+  previewOnly();
+  const p = SAMPLE_PLAYERS.find((x) => x.id === id) ?? SAMPLE_PLAYERS[0];
+  const now = Date.now();
+  const ago = (min: number) => new Date(now - min * 60_000).toISOString();
+  const banned = PREVIEW_BANS.has(p.id);
+  return ok({
+    profile: {
+      id: p.id, name: p.name, email: p.email, style: p.style, look: {}, traits: ["loud", "hustler"],
+      homeId: p.moved ? "jackson_heights_1br" : null, houseSku: null, carSku: null, carMode: null, atPlace: "grind-gossip-cafe",
+      birthCash: 7400, joinedAt: ago(p.days * 1440), movedInAt: p.moved ? ago(p.days * 1440 - 6) : null, firstPartyAt: p.moved ? ago(p.days * 1440 - 20) : null,
+      lastSeen: ago(p.seenMin), inviteCode: "QK7M2P", invitedBy: p.id === "p2" ? { id: "p1", name: "bigmich" } : null, invitedCount: p.id === "p1" ? 1 : 0,
+      crewSize: p.id === "p1" || p.id === "p2" ? 1 : 0, rank: p.rank, vip: p.vip, vipSince: p.vip ? ago(2 * 1440) : null, chatForever: false,
+      banned, bannedAt: banned ? ago(1) : null, banReason: PREVIEW_BANS.get(p.id) ?? null, mutedUntil: null, warnedAt: null, admin: false,
+    },
+    numbers: {
+      clout: p.clout, cash: p.cash, netWorth: p.worth, energy: 64, mood: 71, confidence: 48, spendCents: p.spend, purchases: p.spend ? 1 : 0,
+      sessions: 9, secondsPlayed: 9 * 512, daysActive: Math.min(p.days, 3), messagesSent: 23, businesses: p.worth > 20000 ? 2 : 0, placesVisited: 11,
+    },
+    sessions: [{ startedAt: ago(p.seenMin + 14), seconds: 840 }, { startedAt: ago(p.seenMin + 300), seconds: 420 }, { startedAt: ago(1500), seconds: 1260 }],
+    safety: {
+      reportsAgainst: p.reports ? [{ id: 11, reason: "spam", status: "open", at: ago(180), by: "mia.nyc" }, { id: 9, reason: "harassment", status: "dismissed", at: ago(2000), by: "dev.r" }] : [],
+      reportsMade: 0, blocked: 0, blockedBy: p.reports ? 1 : 0,
+      actions: banned ? [{ action: "ban" as const, reason: PREVIEW_BANS.get(p.id) ?? null, at: ago(1), by: "you" }] : [],
+    },
+    timeline: [
+      ...(banned ? [{ type: "ban" as const, ref: PREVIEW_BANS.get(p.id) ?? null, at: ago(1) }] : []),
+      { type: "ledger" as const, kind: "together", ref: "hellgate-hall:dance", cash: 0, clout: 8, at: ago(p.seenMin + 2) },
+      { type: "ledger" as const, kind: "event_entry", ref: "bass-bath:2026-10-15", cash: -160, clout: 0, at: ago(p.seenMin + 5) },
+      { type: "ledger" as const, kind: "drink", ref: "hellgate-hall:2026-10-15:1", cash: -60, clout: 0, at: ago(p.seenMin + 8) },
+      { type: "ledger" as const, kind: "travel", ref: "taxi:hellgate-hall:1", cash: -18, clout: 0, at: ago(p.seenMin + 12) },
+      { type: "ledger" as const, kind: "visit", ref: "grind-gossip-cafe:2026-10-15", cash: 0, clout: 12, at: ago(p.seenMin + 30) },
+      { type: "ledger" as const, kind: "daily_task", ref: "2026-10-15:3", cash: 40, clout: 0, at: ago(p.seenMin + 34) },
+      ...(p.spend ? [{ type: "purchase" as const, ref: "chat-unlimited-monthly", name: "VIP (monthly)", status: "paid", cents: 499, at: ago(2 * 1440) }] : []),
+      { type: "ledger" as const, kind: "rent", ref: "2026-10-12", cash: -2600, clout: 0, at: ago(3 * 1440 - 30) },
+      ...(p.moved ? [{ type: "moved_in" as const, ref: "jackson_heights_1br", at: ago(p.days * 1440 - 6) }] : []),
+      { type: "ledger" as const, kind: "birth_lottery", ref: "", cash: 7400, clout: 0, at: ago(p.days * 1440 - 2) },
+      { type: "joined" as const, at: ago(p.days * 1440) },
+    ],
+  });
+}
+
+export async function previewStudioPlayerBan(id: string, ban: boolean, reason: string) {
+  previewOnly();
+  if (ban) PREVIEW_BANS.set(id, reason || null); else PREVIEW_BANS.delete(id);
+  return ok({ banned: ban });
+}
+
+/** Skills (migration 0056): sample top skills on preview player cards. */
+export async function previewSkillsOf(playerId: string) {
+  previewOnly();
+  const sets: { id: "dance" | "charisma" | "hustle" | "fitness" | "gossip"; level: number }[][] = [
+    [{ id: "dance", level: 6 }, { id: "charisma", level: 4 }, { id: "gossip", level: 2 }],
+    [{ id: "hustle", level: 7 }, { id: "fitness", level: 3 }],
+    [{ id: "charisma", level: 5 }],
+  ];
+  return ok(sets[playerId.length % sets.length]);
+}

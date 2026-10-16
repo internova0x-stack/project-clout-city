@@ -18,7 +18,7 @@ import {
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
 import {
-  chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, placeCounts, placePresence, playerCard, sessionPing, track,
+  chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
 } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
@@ -96,11 +96,13 @@ export default async function HomePage() {
       // presence, place counts, reactions and the message setting were never passed in here).
       chat={chatOn ? {
         list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard,
-        react: chatReact, setMessagesFrom: chatSetMessagesFrom, presence: placePresence, counts: placeCounts,
+        react: chatReact, setMessagesFrom: chatSetMessagesFrom, presence: placePresence, counts: placeCounts, skills: skillsOf,
       } : undefined}
       track={chatOn ? track : undefined}
       // Migration 0053: session length for the Studio's Insights (a missing function is ignored).
       ping={sessionPing}
+      // Migration 0056: the profile's Skills tab (no tab before the migration).
+      loadSkills={mySkills}
       // Migration 0017 switches on City News (an empty feed hides it).
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).

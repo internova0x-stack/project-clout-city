@@ -4,6 +4,7 @@
 
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
+import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "./adminPlayers.ts";
 import type { Arc, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
@@ -86,6 +87,10 @@ export interface StudioApi {
   metrics?(): Promise<Admin<StudioMetrics>>;
   /** Insights (migration 0053): the last `days` days (7 to 90). */
   insights?(days: number): Promise<Admin<Insights>>;
+  /** Studio Players (migration 0055). */
+  players?(query: string, filter: PlayerFilter, sort: PlayerSort, offset: number): Promise<Admin<PlayerList>>;
+  player?(id: string): Promise<Admin<PlayerProfile>>;
+  playerBan?(id: string, ban: boolean, reason: string): Promise<Admin<{ banned: boolean }>>;
   /** v0.6 regulars' lines (migration 0016). */
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;
@@ -169,6 +174,8 @@ export interface CastLine {
 
 const ERRORS: Record<string, string> = {
   not_admin: "This account isn't a story admin.",
+  is_admin: "That's a Studio admin. Remove them from story_admins first.",
+  unknown_player: "That player isn't around anymore.",
   arc_is_live: "That story is live. Pause or retire it instead of changing it mid-run.",
   not_approved: "Approve the story before scheduling it.",
   start_in_past: "Day 1 can't be in the past.",

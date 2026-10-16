@@ -49,6 +49,8 @@ select pg_temp.later(24);
 select pg_temp.assert((public.collect_tills() ->> 'cash')::int = 1125, 'C$1,125 a day at level 1');
 reset role;
 update public.players set bank_cash = 100000 where display_name = 'tycoon';
+-- Collecting tills trains Hustle (migration 0056), whose level-up clout would add hype: start from none.
+update public.players set clout = 0 where display_name = 'tycoon';
 set role authenticated;
 select 1 from public.upgrade_business('hot-dog-cart'); select 1 from public.upgrade_business('hot-dog-cart');
 select pg_temp.assert(pg_temp.raises($$select public.upgrade_business('hot-dog-cart')$$, 'max_level'), 'three upgrades');

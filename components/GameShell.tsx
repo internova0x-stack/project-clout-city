@@ -8,6 +8,7 @@ import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
+import { skillBadge } from "@/lib/skills";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
@@ -157,6 +158,8 @@ export function GameShell({
   chat,
   track,
   ping,
+  skills: previewSkills,
+  loadSkills,
   leaderboardRows,
   dating,
   crew,
@@ -190,6 +193,9 @@ export function GameShell({
   track?: (name: "session" | "invite_shared" | "beat_shared" | "postcard_shared" | "crush_invite_shared") => void;
   /** Session length (Insights, migration 0053): pinged on open and every minute while the page is visible. */
   ping?: () => Promise<void>;
+  /** Skills (owner, Oct 16): the profile's Skills tab; absent until they're switched on. */
+  skills?: import("@/lib/skills").SkillState[];
+  loadSkills?: () => Promise<import("@/lib/skills").SkillState[] | null>;
   /** v0.5 crushes and date nights (migration 0011). */
   dating?: DatingApi;
   /** Crew outings (migration 0013). */
@@ -277,6 +283,12 @@ export function GameShell({
   // v0.7 step 3: my own public card, for the bubble's rank and the profile's "Recently".
   const [myCard, setMyCard] = useState<PlayerCard | null>(null);
   const profileOpen = panel === "profile";
+  // Skills (migration 0056): fresh each time the profile opens.
+  const [skills, setSkills] = useState(previewSkills);
+  useEffect(() => {
+    if (!profileOpen || !loadSkills) return;
+    void loadSkills().then((s) => { if (s) setSkills(s); });
+  }, [profileOpen, loadSkills]);
   useEffect(() => {
     if (!chat) return;
     void chat.card(me.id).then((r) => r.ok && r.data && setMyCard(r.data));
@@ -2135,7 +2147,7 @@ export function GameShell({
         netWorth={myWorth}
         bestRank={biz?.bestRank}
         badges={(feed?.badges ?? []).map((b) => {
-          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : null);
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id));
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
         })}
         collections={{
@@ -2144,6 +2156,7 @@ export function GameShell({
         }}
         crew={clique.map((c) => c.display_name)}
         recent={myCard?.recent}
+        skills={skills}
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
