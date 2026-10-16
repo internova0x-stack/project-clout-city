@@ -20,7 +20,7 @@ import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type Part
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { outfitWith } from "@/lib/wardrobe";
-import { badgeInfo, chatterLine, mainArc, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
+import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import { callName, regularAt, regularLine } from "@/lib/cast";
@@ -60,7 +60,7 @@ import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
 import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
-import { GameChrome, type ChromeAction, type Tab } from "./hud/GameChrome";
+import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
 import { RankUpCard } from "./game/Ranks";
@@ -283,6 +283,7 @@ export function GameShell({
   // v0.7 step 3: my own public card, for the bubble's rank and the profile's "Recently".
   const [myCard, setMyCard] = useState<PlayerCard | null>(null);
   const profileOpen = panel === "profile";
+  const [tasksTab, setTasksTab] = useState<"daily" | "goals" | "hunt" | undefined>(undefined);
   // Skills (migration 0056): fresh each time the profile opens.
   const [skills, setSkills] = useState(previewSkills);
   useEffect(() => {
@@ -1442,6 +1443,26 @@ export function GameShell({
   const partyInvite = (partyIn?.plusOnes ?? []).find((x) => !x.mine && x.status === "invited");
   const partyKey = partyInvite ? `${partyInvite.eventId}:${partyInvite.host.id}` : "";
   const showParty = !showDating && !showCrew && !!partyInvite && partyDismissed !== partyKey && flow === "none" && !arranging && tab === "home" && !inside;
+  // Quest buttons (owner, Oct 16): this week's hunt and the story you're following, until they're finished.
+  const quests: QuestButton[] = [];
+  const huntNow = huntState?.hunt;
+  if (hunt && huntNow && !huntNow.completedAt) {
+    quests.push({
+      id: "hunt", emoji: "🎁",
+      aria: huntNow.joined && huntNow.track ? `Treasure hunt: ${huntNow.theme}, step ${Math.min(huntNow.step + 1, huntNow.track.steps)} of ${huntNow.track.steps}${huntNow.question ? ", a question is waiting" : ""}` : `New treasure hunt: ${huntNow.theme}`,
+      dot: !huntNow.joined || !!huntNow.question,
+      onOpen: () => { setTasksTab("hunt"); setPhone({ open: false, app: null }); setPanel("tasks"); },
+    });
+  }
+  const storyNow = storyOn ? (mainArc(feed) ?? feed?.arcs.find((a) => a.type === "side" && a.entitled && !a.finished) ?? null) : null;
+  if (storyNow) {
+    quests.push({
+      id: "story", emoji: "📖",
+      aria: `Story: ${storyNow.title}, day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}${unseenBeats(feed) ? ", new chapters" : ""}`,
+      dot: unseenBeats(feed) > 0,
+      onOpen: () => openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null),
+    });
+  }
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   const showPrompt = showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
@@ -1460,7 +1481,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}`}>
       {inside && city ? (
         <>
         <InteriorScene
@@ -1651,6 +1672,7 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
+        quests={trip ? [] : quests}
         time={clock.time}
         tab={tab}
         onAction={onAction}
@@ -1749,7 +1771,8 @@ export function GameShell({
       <BoroughSheet id={lockedBorough} onClose={() => setLockedBorough(null)} />
       <TasksSheet
         open={panel === "tasks"}
-        onClose={() => setPanel(null)}
+        onClose={() => { setPanel(null); setTasksTab(undefined); }}
+        tab={tasksTab}
         partyDone={partyDone}
         onOpenParty={openParty}
         cliqueCount={clique.length}

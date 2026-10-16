@@ -35,7 +35,11 @@ export type Tab = "home" | "map";
  * side column, the collapsible stats panel and the bottom nav. Values the
  * economy will fill in later show "—" until v0.2.
  */
+/** A round button under the top bar for something in progress (owner, Oct 16): the hunt, a story. */
+export interface QuestButton { id: string; emoji: string; aria: string; dot: boolean; onOpen: () => void }
+
 export function GameChrome({
+  quests = [],
   time,
   tab,
   onAction,
@@ -67,6 +71,8 @@ export function GameChrome({
   onTip?: (placeId: string) => void;
   /** #4 (owner, Oct 14): "At <place>" sits in the same stack as the ticker, so the two never overlap. */
   atPlace?: { name: string; onOpen: () => void } | null;
+  /** Shown until finished: this week's hunt and the story you're following, a red dot when something's new. */
+  quests?: QuestButton[];
   /** #14 (owner, Oct 14): "find me" lives at the bottom of the side column, on the map only. */
   onLocate?: () => void;
 }) {
@@ -136,6 +142,17 @@ export function GameChrome({
         )}
       </div>
 
+      {/* Owner, Oct 16: right-aligned under the top bar, the hunt's gift box outermost, the story beside it. */}
+      {quests.length > 0 && (
+          <div className="quest-row">
+            {quests.map((q) => (
+              <button key={q.id} className="quest-btn" onClick={q.onOpen} aria-label={q.aria}>
+                <span className="quest-circle" aria-hidden="true">{q.emoji}</span>
+                {q.dot && <span className="pin-dot quest-dot" />}
+              </button>
+            ))}
+          </div>
+        )}
       {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
       <nav className="side-col" aria-label="Quick actions">
         <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
