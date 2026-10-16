@@ -33,8 +33,11 @@ grant all on here1 to authenticated;
 select pg_temp.assert((select (r ->> 'count')::int = 1 and r -> 'people' -> 0 ->> 'name' = 'meet_two' and (r -> 'people' -> 0 ->> 'floor')::int = 2 from here1),
                       'one other player here (meet_two, upstairs); meet_three is elsewhere');
 select pg_temp.assert((public.place_presence('grind-and-gossip') ->> 'count')::int = 0, 'nothing for a place you are not at');
-select pg_temp.assert((public.place_counts() -> 'velvet-static' ->> 'count')::int = 1 and (public.place_counts() -> 'grind-and-gossip' ->> 'count')::int = 1,
-                      'place counts for the map (not counting yourself)');
+-- 0064: players inside each room, you included (you checked in above); the names are others only.
+select pg_temp.assert((public.place_counts() -> 'velvet-static' ->> 'count')::int = 2 and (public.place_counts() -> 'grind-and-gossip' ->> 'count')::int = 1,
+                      'place counts for the map (players inside the room, you too)');
+select pg_temp.assert((public.place_counts() -> 'velvet-static' -> 'names') = '[{"name": "meet_two", "style": "bodega_drip"}]'::jsonb,
+                      'the names are other players');
 select pg_temp.assert((public.player_card('00000000-0000-0000-0000-0000000000d2') ->> 'herePlace') = 'velvet-static', 'the card says they are here with you');
 
 -- Reactions: free, only together (or crew), one per person every few minutes, never counted.
