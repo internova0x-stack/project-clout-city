@@ -1268,6 +1268,16 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 /* While a story prompt covers the top of the map, the ticker steps aside and "At <place>" sits below the prompt. */
 .game.has-story-prompt .under-hud .pill-status { display:none; }
 .game.has-story-prompt .under-hud .at-chip { margin-top:64px; }
+/* …and so do the quest buttons, unless "At <place>" already did. */
+.game.has-story-prompt .under-hud .quest-row:not(.at-chip ~ .quest-row) { margin-top:64px; }
+/* Quest buttons (owner, Oct 16): the hunt and the story, round like the HUD's, until finished. */
+.quest-row { display:flex; gap:10px; }
+.quest-btn { position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; padding:0; border:0; background:none; cursor:pointer; }
+.quest-circle { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; font-size:23px; background:rgba(255,255,255,.92);
+  box-shadow:var(--elev-2), inset 0 0 0 1px rgba(20,17,26,.06); }
+.quest-btn:active .quest-circle { transform:scale(.94); }
+.quest-dot { top:0; right:0; width:11px; height:11px; box-shadow:0 0 0 2px #fff; }
+.quest-label { padding:1px 7px; border-radius:var(--r-pill); background:rgba(20,17,26,.62); color:#fff; font-size:10.5px; font-weight:700; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .at-chip { padding:7px 12px; border-radius:var(--r-pill); font-size:13px; font-weight:700; color:var(--text-1); box-shadow:var(--elev-2); }
 
 /* v0.8 rest at home: the nap countdown ring */
