@@ -9,6 +9,7 @@ import type { Arc, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
 import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
+import type { StudioBigScreen, TvAction } from "./cloutTv.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -114,6 +115,9 @@ export interface StudioApi {
   /** v0.14 Real Clout FM (migration 0057): a New York day's shoutout requests, and picking what airs. */
   shoutouts?(date?: string): Promise<Admin<StudioShoutoutDay>>;
   shoutoutAction?(id: number, action: ShoutoutAction): Promise<Admin<StudioShoutoutDay>>;
+  /** v0.14 Clout TV (migration 0058): photo submissions by status, the rotation (one every 3 hours) and what's on screen. */
+  bigScreen?(status: "pending" | "approved" | "featured" | "all"): Promise<Admin<StudioBigScreen>>;
+  bigScreenAction?(id: number, action: TvAction): Promise<Admin<null>>;
   /** Setup check (owner, Oct 14): which key, migration or webhook is missing. Never returns a secret. */
   setupCheck?(): Promise<Admin<SetupCheckRow[]>>;
 }
@@ -200,6 +204,12 @@ const ERRORS: Record<string, string> = {
   hunts_week_key: "Another hunt already has that week. Run migration 0019 to let a new hunt replace one nobody has joined.",
   week_in_play: "Players have already joined this week's hunt, so it can't be replaced. Pause it, or use next week.",
   hunt_in_play: "Players have already joined this hunt, so it can't be changed. Pause it, or write next week's.",
+  unknown_shoutout: "That shoutout is gone.",
+  wall_full: "The wall is full for that day.",
+  day_over: "That day's show is over.",
+  unknown_submission: "That photo is gone.",
+  not_pending: "That one was already reviewed.",
+  not_featured: "That one isn't featured.",
 };
 
 export function studioError(message: string | undefined): string {

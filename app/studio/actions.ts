@@ -13,6 +13,7 @@ import { runSetupCheck } from "@/lib/setupCheck";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "@/lib/adminPlayers";
 import type { Insights } from "@/lib/insights";
 import type { ShoutoutAction, StudioShoutoutDay } from "@/lib/radio";
+import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
 import { headers } from "next/headers";
 
 // Server actions behind the Story Studio. Every call goes through an admin_* SQL
@@ -101,7 +102,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("big_screen") ? "Run migration 0058 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -117,6 +118,20 @@ export async function studioShoutouts(date?: string) {
 }
 export async function studioShoutoutAction(id: number, action: ShoutoutAction) {
   return admin<StudioShoutoutDay>("admin_shoutout_action", { p_id: id, p_action: action });
+}
+// ---- Clout TV's Big Screen queue (migration 0058): photos signed with the admin's own session ----
+export async function studioBigScreen(status: "pending" | "approved" | "featured" | "all") {
+  const r = await admin<Omit<StudioBigScreen, "items"> & { items: Omit<StudioTvSubmission, "url">[] }>("admin_big_screen", { p_status: status });
+  if (!r.ok) return r;
+  const supabase = (await getServerSupabase())!;
+  const paths = r.data.items.map((x) => x.photo);
+  const { data } = paths.length ? await supabase.storage.from(TV.bucket).createSignedUrls(paths, 60 * 60) : { data: [] };
+  const urls = new Map((data ?? []).map((d) => [d.path, d.signedUrl]));
+  return { ok: true as const, data: { ...r.data, items: r.data.items.map((x) => ({ ...x, url: urls.get(x.photo) ?? null })) } };
+}
+export async function studioBigScreenAction(id: number, action: TvAction) {
+  const r = await admin<unknown>("admin_big_screen_action", { p_id: id, p_action: action });
+  return r.ok ? { ok: true as const, data: null } : r;
 }
 // ---- Regulars' lines (migration 0016) ----
 export async function studioCastLines() {

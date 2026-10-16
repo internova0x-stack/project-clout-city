@@ -1968,6 +1968,94 @@ function radioStation(t: Themed): Group {
 }
 
 // ---------------------------------------------------------------------------
+// The Clout Tower (v0.14 On Air): a Times Square-style tower in Astoria. Its big screen shows Clout TV's
+// featured photo (paintBigScreen), with LED bands and a lit crown; the screen glows hard at night.
+// ---------------------------------------------------------------------------
+const BIG_SCREEN = { w: 512, h: 640 };
+let bigScreenTex: CanvasTexture | null = null;
+
+/** Draws the big screen: the featured photo with its @handle, or the station's ident when there's none. */
+export function paintBigScreen(img: CanvasImageSource & { width: number; height: number } | null, handle?: string) {
+  const tex = bigScreenTex;
+  if (!tex) return;
+  const c = tex.image as HTMLCanvasElement;
+  const x = c.getContext("2d")!;
+  const { w, h } = BIG_SCREEN;
+  x.fillStyle = "#14111A";
+  x.fillRect(0, 0, w, h);
+  if (img && img.width && img.height) {
+    // Cover the screen, centered.
+    const k = Math.max(w / img.width, h / img.height);
+    const dw = img.width * k, dh = img.height * k;
+    x.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    const g = x.createLinearGradient(0, h - 170, 0, h);
+    g.addColorStop(0, "rgba(20,17,26,0)");
+    g.addColorStop(1, "rgba(20,17,26,.85)");
+    x.fillStyle = g;
+    x.fillRect(0, h - 170, w, 170);
+    x.fillStyle = "#F2A07B";
+    x.font = "800 30px system-ui, sans-serif";
+    x.fillText("CLOUT TV", 28, h - 86);
+    x.fillStyle = "#FFFFFF";
+    x.font = "800 46px system-ui, sans-serif";
+    x.fillText(handle ? `@${handle}`.slice(0, 18) : "", 28, h - 34);
+  } else {
+    const g = x.createRadialGradient(w / 2, h * 0.42, 20, w / 2, h * 0.42, w * 0.8);
+    g.addColorStop(0, "#2E6F7E");
+    g.addColorStop(1, "#14111A");
+    x.fillStyle = g;
+    x.fillRect(0, 0, w, h);
+    x.textAlign = "center";
+    x.fillStyle = "#FFFFFF";
+    x.font = "900 92px system-ui, sans-serif";
+    x.fillText("CLOUT", w / 2, h * 0.42);
+    x.fillStyle = "#F2A07B";
+    x.fillRect(w / 2 - 92, h * 0.47, 184, 104);
+    x.fillStyle = "#14111A";
+    x.fillText("TV", w / 2, h * 0.47 + 86);
+    x.fillStyle = "rgba(255,255,255,.8)";
+    x.font = "700 30px system-ui, sans-serif";
+    x.fillText("Make it to the big screen", w / 2, h * 0.8);
+    x.textAlign = "start";
+  }
+  tex.needsUpdate = true;
+}
+
+function cloutTower(t: Themed): Group {
+  const g = new Group();
+  // The podium: shops along the street, lit windows.
+  const shops = facade(t, { wall: "#3D5C66", glass: "#FFE2B8", style: "storefront", lit: 1, seed: 341, frame: C.coral }, 1.4);
+  g.add(at(litBox(t, 28, 9, 22, shops, solid("#4A6A74"), C.amber, 0.55), 0, 4.5, 0));
+  // The shaft, glass all the way up.
+  const glass = facade(t, { wall: "#2E6F7E", glass: "#BFE6F7", style: "curtain", lit: 0.75, seed: 343, frame: "#1E3A44" });
+  g.add(at(litBox(t, 18, 62, 16, glass, solid("#2E4A55"), C.sky, 0.4), 0, 9 + 31, -1));
+  // The big screen on the front, in a dark frame.
+  const c = document.createElement("canvas");
+  c.width = BIG_SCREEN.w;
+  c.height = BIG_SCREEN.h;
+  bigScreenTex = new CanvasTexture(c);
+  bigScreenTex.colorSpace = SRGBColorSpace;
+  paintBigScreen(null);
+  const screen = new MeshStandardMaterial({ map: bigScreenTex, emissive: "#FFFFFF", emissiveMap: bigScreenTex, emissiveIntensity: 0.55, roughness: 0.6 });
+  t.glows.push({ mat: screen, day: 0.55, night: 1.25 });
+  g.add(at(new Mesh(new BoxGeometry(18, 23, 0.8), solid("#14111A")), 0, 33, 7.2));
+  g.add(at(new Mesh(new PlaneGeometry(16, 20), screen), 0, 33, 7.65));
+  // LED bands wrapping the tower above and below the screen.
+  const coral = glowing(t, "#F2A07B", "#FF8A5C", 1.8, 0.35);
+  const teal = glowing(t, "#7FE3F0", "#7FE3F0", 1.6, 0.3);
+  g.add(at(new Mesh(new BoxGeometry(18.6, 2, 16.6), coral), 0, 19, -1));
+  g.add(at(new Mesh(new BoxGeometry(18.6, 1.2, 16.6), teal), 0, 47, -1));
+  g.add(at(new Mesh(new BoxGeometry(28.6, 1.4, 22.6), teal), 0, 9.6, 0));
+  // The crown: the station's name and a lit spire.
+  g.add(at(sign(t, "CLOUT TV", 14, 3, { bg: "#14111A", fg: "#F2A07B" }, 2.2), 0, 67, 7.1));
+  g.add(at(new Mesh(new BoxGeometry(14.5, 3.6, 14.5), solid("#1E3A44")), 0, 67, -1));
+  g.add(at(new Mesh(new CylinderGeometry(0.25, 0.6, 12, 8), solid("#F4F1EA", { metal: 0.5, rough: 0.4 })), 0, 75, -1));
+  g.add(at(new Mesh(new SphereGeometry(0.8, 10, 8), glowing(t, "#FFE6AA", "#FFE6AA", 2.6, 0.6)), 0, 81.5, -1));
+  g.add(at(lightPool(t, 14, "#7FE3F0", 0.4), 0, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
 // Skyline Pier Residences: three stepped glass towers by the water with balconies and a lit crown
 // ---------------------------------------------------------------------------
 function condoTowers(t: Themed): Group {
@@ -2023,7 +2111,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
   "googie-diner": googieDiner, "sky-dining": skyDining, supermarket, cowork, precinct,
-  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation,
+  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation, "clout-tower": cloutTower,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

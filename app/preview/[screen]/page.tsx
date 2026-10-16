@@ -20,6 +20,7 @@ import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActi
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
+import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { normalizeLook } from "@/lib/look";
 import { LaunchScreen } from "@/components/LaunchScreen";
 import { LAUNCH_LINES } from "@/lib/launch";
@@ -76,7 +77,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { p: launchP, l: launchL, time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio } = await searchParams;
+  const { p: launchP, l: launchL, time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -136,6 +137,7 @@ export default async function Preview({
           gossipPreset={gossip}
           rankUpPreset={Number(rankup) || undefined}
           radioPreset={radio}
+          tvPreset={tv}
           bizPreset={biz}
           togetherPreset={together}
           storyDay={story && /^\d+$/.test(story) ? Number(story) : undefined}
@@ -161,7 +163,7 @@ export default async function Preview({
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
             gossipList: previewGossipList, gossipStatus: previewGossipStatus, setupCheck: previewSetupCheck,
-            shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction,
+            shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
           }}
         />
       );

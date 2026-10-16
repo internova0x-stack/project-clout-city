@@ -2,6 +2,8 @@
 
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
 import type { RadioApi } from "@/lib/radio";
+import { previewStationInbox, previewStationRead, previewTvState, previewTvSubmit, previewTvUpload, previewTvWithdraw } from "@/app/preview/tvActions";
+import type { TvApi } from "@/lib/cloutTv";
 
 import type { PartyApi } from "@/lib/party";
 import type { GossipApi } from "@/lib/gossip";
@@ -39,8 +41,10 @@ import {
 
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
+const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
+
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -64,6 +68,8 @@ export function PreviewHome({
   togetherPreset?: string;
   /** v0.14 Real Clout FM: ?radio=new|sent|full|notpicked|mine starts the station in that state. */
   radioPreset?: string;
+  /** v0.14 Clout TV: ?tv=new|sent|mine starts the big screen in that state. */
+  tvPreset?: string;
   /** Player ranks: ?rankup=1-10 opens the rank-up reveal for that rank. */
   rankUpPreset?: number;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
@@ -98,6 +104,13 @@ export function PreviewHome({
     request: previewRadioRequest,
     report: () => previewRadioReport(),
   }), [radioPreset]);
+  // v0.14 Clout TV: the dev server's in-memory station; uploads go up as data URLs.
+  const tvApi = useMemo<TvApi>(() => ({
+    state: () => previewTvState(tvPreset ?? ""),
+    upload: async (blob) => previewTvUpload(await new Promise<string>((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.readAsDataURL(blob); })),
+    submit: previewTvSubmit,
+    withdraw: previewTvWithdraw,
+  }), [tvPreset]);
   const businessApi = useMemo(() => createBusinessSim({
     cash: () => sim.peek().cash,
     clout: () => sim.peek().clout,
@@ -324,6 +337,8 @@ export function PreviewHome({
       gossip={cityOff ? undefined : gossipApi}
       business={cityOff ? undefined : businessApi}
       radio={cityOff ? undefined : radioApi}
+      tv={cityOff ? undefined : tvApi}
+      stations={cityOff ? undefined : STATIONS_PREVIEW}
       together={cityOff ? undefined : togetherApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       actions={{

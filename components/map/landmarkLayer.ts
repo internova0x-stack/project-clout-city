@@ -8,7 +8,7 @@ import {
 } from "three";
 import { BRIDGE_BUILT_M, LANDMARKS, type Landmark } from "@/lib/map/landmarks";
 import { exaggeration } from "@/lib/map/scale";
-import { animate, applyTheme, buildLandmark, newThemed, type Themed } from "./landmarkModels";
+import { animate, applyTheme, buildLandmark, newThemed, paintBigScreen, type Themed } from "./landmarkModels";
 import { mergeStatic } from "./mergeModel";
 import { buildVehicle, setVehiclesNight } from "./vehicleModels";
 import type { Traffic } from "./vehicles";
@@ -28,6 +28,8 @@ export interface LandmarkLayer {
   /** Moves models to where placement stood them (lib/map/landmarks.ts placeLandmark). */
   setPositions(list: readonly Landmark[]): void;
   setNight(night: boolean): void;
+  /** v0.14 Clout TV: the Clout Tower's screen shows this photo and @handle (null: the station's ident). */
+  setBigScreen(img: (CanvasImageSource & { width: number; height: number }) | null, handle?: string): void;
   dispose(): void;
 }
 
@@ -194,6 +196,10 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     layer,
     heights,
     setNight,
+    setBigScreen(img, handle) {
+      paintBigScreen(img, handle);
+      map?.triggerRepaint();
+    },
     setPositions(next) {
       for (const l of next) {
         const model = models.get(l.id);

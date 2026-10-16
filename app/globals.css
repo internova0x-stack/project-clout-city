@@ -1741,3 +1741,53 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* The form's buttons keep their shape: Cancel at its own width, the request button fills the rest on one line. */
 .radio-form .btn { white-space:nowrap; }
 .radio-form .radio-submit { flex:1; min-width:0; width:auto; }
+
+/* ---------- v0.14 Clout TV (migration 0058): the app, the viewer, the home card, the Studio queue ---------- */
+.tv-bumper { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; aspect-ratio:320/120; max-width:100%; border-radius:18px; overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 40%, #2E6F7E 0%, #1E3A44 70%, #14111A 100%); color:#fff; box-shadow:var(--elev-2), inset 0 0 0 3px rgba(255,255,255,.06); }
+.tv-bumper::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px); pointer-events:none; }
+.tv-bumper-rec { position:absolute; top:10px; left:12px; font-size:11px; font-weight:800; letter-spacing:.08em; color:#FF5A4A; }
+.tv-bumper-logo { font-size:34px; font-weight:900; letter-spacing:.02em; line-height:1; }
+.tv-bumper-logo b { margin-left:6px; padding:0 8px; border-radius:8px; background:#F2A07B; color:#14111A; }
+.tv-bumper-sub { font-size:12px; font-weight:600; opacity:.8; }
+.tv-feature { position:relative; display:block; width:100%; padding:0; border:0; border-radius:18px; overflow:hidden; background:#14111A; box-shadow:var(--elev-2); cursor:pointer; aspect-ratio:4/5; max-width:100%; }
+.tv-feature img { width:100%; height:100%; object-fit:cover; display:block; }
+.tv-feature-cap { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:28px 14px 12px; color:#fff; text-align:left;
+  background:linear-gradient(transparent, rgba(20,17,26,.8)); }
+.tv-viewer-on { font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.9; }
+.tv-mine { display:flex; gap:12px; align-items:center; padding:10px; border-radius:14px; background:var(--chip-off); }
+.tv-mine img, .tv-mine-ph { width:56px; height:70px; border-radius:10px; object-fit:cover; flex:none; display:grid; place-items:center; background:#E8E1D6; }
+.tv-mine-text { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.tv-archive { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.tv-archive-item { display:flex; flex-direction:column; gap:2px; padding:0; border:0; background:none; text-align:left; cursor:pointer; min-width:0; }
+.tv-archive-item img { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:12px; display:block; }
+.tv-archive-item .meta { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tv-pick { display:grid; place-items:center; width:100%; max-width:240px; margin:0 auto; aspect-ratio:4/5; padding:0; border:2px dashed #CFC5B6; border-radius:18px; background:var(--chip-off); color:var(--text-1); font:inherit; cursor:pointer; overflow:hidden; }
+.tv-pick.has { border-style:solid; border-color:transparent; background:#14111A; }
+.tv-pick img { width:100%; height:100%; object-fit:cover; }
+.tv-viewer { display:grid; place-items:center; z-index:80; }
+.tv-viewer-card { position:relative; margin:0; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 120px); border-radius:20px; overflow:hidden; background:#14111A; box-shadow:var(--elev-3); }
+.tv-viewer-card img { display:block; width:100%; max-height:calc(100vh - 200px); object-fit:contain; background:#14111A; }
+.tv-viewer-card figcaption { display:flex; flex-direction:column; gap:2px; padding:12px 16px 14px; color:#fff; }
+.tv-viewer-missing { display:grid; place-items:center; aspect-ratio:4/5; color:rgba(255,255,255,.6); }
+.tv-viewer-close { position:absolute; top:calc(16px + var(--safe-top)); right:16px; z-index:2; }
+.tv-prompt-thumb { width:40px; height:48px; border-radius:10px; object-fit:cover; flex:none; }
+.tv-queue { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.tv-queue-photo { aspect-ratio:4/5; border-radius:12px; overflow:hidden; background:#14111A; display:grid; place-items:center; }
+.tv-queue-photo img { width:100%; height:100%; object-fit:cover; }
+.tv-confirms { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--text-2); }
+.studio-date { height:40px; padding:0 10px; border-radius:var(--r-sm); border:1px solid #E2DBD0; font:inherit; background:#fff; }
+.map-landmark-label.tappable { pointer-events:auto; cursor:pointer; border:0; font:inherit; }
+/* Clout TV's crop widget: the billboard's 4:5 frame with the photo behind it. */
+.crop-frame { position:relative; width:100%; max-width:320px; margin:0 auto; aspect-ratio:4/5; border-radius:14px; overflow:hidden; background:#14111A; cursor:grab; user-select:none;
+  box-shadow:0 0 0 4px #14111A, 0 0 0 6px #F2A07B, var(--elev-2); }
+.crop-frame:active { cursor:grabbing; }
+.crop-img { position:absolute; left:0; top:0; max-width:none; transform-origin:0 0; pointer-events:none; }
+.crop-grid { position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(to right, transparent 33.2%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.6%, transparent 66.8%),
+             linear-gradient(to bottom, transparent 33.2%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.6%, transparent 66.8%); }
+.crop-tag { position:absolute; top:8px; left:8px; padding:3px 8px; border-radius:var(--r-pill); background:rgba(20,17,26,.7); color:#fff; font-size:11px; font-weight:700; letter-spacing:.04em; }
+.crop-zoom { display:flex; align-items:center; gap:10px; max-width:320px; width:100%; margin:0 auto; font-weight:700; color:var(--text-2); }
+.crop-zoom input { flex:1; accent-color:var(--night-900); }
+.tv-queue-card.on-now { box-shadow:0 0 0 2px #F2A07B, var(--elev-2); }
+.bubble.station { background:#FFF3DE; color:var(--night-900); align-self:flex-start; }

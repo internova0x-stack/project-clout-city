@@ -1,0 +1,219 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { TV, tvDay, tvTime, type TvApi, type TvFeature, type TvMine, type TvState } from "@/lib/cloutTv";
+import { cleanHandle as cleanTvHandle } from "@/lib/radio";
+import { openPhoto } from "@/lib/tvUpload";
+import { PhotoCropper } from "./PhotoCropper";
+import { handle as at } from "@/lib/validation";
+import { ChevronRightIcon, CloseIcon } from "../icons";
+
+// v0.14 Clout TV (migration 0058): "Make it to the big screen". The Clout TV app on the Phone (today's
+// featured player, past features, your own photos, the submit form), the full-photo viewer, and the
+// home card on a featured day.
+
+const MINE_NOTE: Record<TvMine["status"], string> = {
+  pending: "Waiting for the producers. If it's picked, it goes into the rotation.",
+  approved: "Picked! It's in the rotation: one photo goes up every 3 hours. You'll get a text when it's yours.",
+  featured: "You were on the big screen",
+  rejected: "Not this time. Try another photo tomorrow.",
+  withdrawn: "Withdrawn.",
+  taken_down: "Taken off the big screen.",
+};
+
+/** The station's bumper: a lit screen with the logo, scanlines and a red REC dot. */
+export function TvBumper() {
+  return (
+    <div className="tv-bumper" aria-hidden="true">
+      <span className="tv-bumper-rec">● LIVE</span>
+      <span className="tv-bumper-logo">CLOUT<b>TV</b></span>
+      <span className="tv-bumper-sub">Make it to the big screen</span>
+    </div>
+  );
+}
+
+export function TvViewer({ f, onClose }: { f: TvFeature; onClose: () => void }) {
+  return (
+    <div className="modal-wrap tv-viewer" role="dialog" aria-modal="true" aria-label={`Clout TV: ${at(f.handle)}`}>
+      <div className="scrim" onClick={onClose} aria-hidden="true" />
+      <figure className="tv-viewer-card">
+        {f.url ? <img src={f.url} alt={`${at(f.handle)} on Clout TV`} /> : <div className="tv-viewer-missing">Photo unavailable</div>}
+        <figcaption>
+          <span className="tv-viewer-on">📺 On Clout TV · {tvDay(f.date)}, {tvTime(f.at)}</span>
+          <span className="title">{at(f.handle)}</span>
+        </figcaption>
+      </figure>
+      <button className="icon-round tv-viewer-close" onClick={onClose} aria-label="Close"><CloseIcon size={18} /></button>
+    </div>
+  );
+}
+
+export function TvHomeCard({ f, onOpen, onDismiss }: { f: TvFeature; onOpen: () => void; onDismiss: () => void }) {
+  return (
+    <div className="story-prompt tv-prompt" role="status">
+      <button className="story-prompt-main" onClick={onOpen}>
+        {f.url ? <img className="tv-prompt-thumb" src={f.url} alt="" /> : <span className="story-prompt-tile" aria-hidden="true">📺</span>}
+        <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+          <span className="overline" style={{ display: "block", color: "rgba(20,17,26,.7)" }}>Now on Clout TV</span>
+          <span className="title" style={{ display: "block", color: "var(--night-900)" }}>{at(f.handle)} made it to the big screen</span>
+        </span>
+        <ChevronRightIcon size={18} />
+      </button>
+      <button className="story-prompt-close" onClick={onDismiss} aria-label="Dismiss"><CloseIcon size={14} /></button>
+    </div>
+  );
+}
+
+export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: string) => void; onChange?: (s: TvState) => void }) {
+  const [s, setS] = useState<TvState | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState(false);
+  const [view, setView] = useState<TvFeature | null>(null);
+  const [busy, setBusy] = useState<number | null>(null);
+  const load = async () => {
+    const r = await api.state();
+    if (r.ok) { setS(r.data); setError(null); onChange?.(r.data); } else setError(r.error);
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void load(); }, [api]);
+
+  if (error) return <div className="card stack-4"><p className="body" style={{ margin: 0 }}>{error}</p></div>;
+  if (!s) return <p className="meta">Warming up the screen…</p>;
+  if (form) return <SubmitForm api={api} onCancel={() => setForm(false)} onSent={() => { setForm(false); onToast("Sent to Clout TV. The producers look at every photo."); void load(); }} />;
+
+  const withdraw = async (m: TvMine) => {
+    setBusy(m.id);
+    const r = await api.withdraw(m.id);
+    setBusy(null);
+    onToast(r.ok ? (m.status === "featured" ? "Taken off the big screen. Your photo is deleted." : "Withdrawn. Your photo is deleted.") : r.error);
+    void load();
+  };
+  return (
+    <div className="stack-12 tv-app">
+      <TvBumper />
+      {s.featured ? (
+        <button className="tv-feature" onClick={() => setView(s.featured)}>
+          {s.featured.url ? <img src={s.featured.url} alt={`${at(s.featured.handle)} on Clout TV today`} /> : <span className="tv-viewer-missing">Photo unavailable</span>}
+          <span className="tv-feature-cap"><span className="tv-viewer-on">📺 On the big screen now · next at {tvTime(s.nextAt)}</span><span className="title">{at(s.featured.handle)}</span></span>
+        </button>
+      ) : (
+        <div className="card stack-4">
+          <span className="title" style={{ display: "block" }}>Nobody on the big screen yet</span>
+          <span className="meta">A new player goes up on the Clout Tower in Astoria every 3 hours. Could be you.</span>
+        </div>
+      )}
+      {s.mine.length > 0 && (
+        <div className="stack-8">
+          <p className="overline" style={{ margin: 0 }}>Your photos</p>
+          {s.mine.map((m) => (
+            <div key={m.id} className="tv-mine">
+              {m.url ? <img src={m.url} alt="" /> : <span className="tv-mine-ph" aria-hidden="true">📷</span>}
+              <span className="tv-mine-text">
+                <span className="body-strong">{at(m.handle)} · {tvDay(m.date)}</span>
+                <span className="meta">{m.onNow ? "📺 You're on the big screen right now!" : m.status === "featured" && m.featuredAt ? `${MINE_NOTE.featured} on ${tvDay(m.featuredAt.slice(0, 10))}.` : MINE_NOTE[m.status]}</span>
+                {(m.status === "pending" || m.status === "approved" || m.status === "featured") && (
+                  <button className="radio-report" disabled={busy !== null} onClick={() => void withdraw(m)}>{busy === m.id ? "…" : "Withdraw"}</button>
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {s.submittedToday
+        ? <button className="btn btn-secondary" disabled>One photo a day. Come back tomorrow.</button>
+        : s.left > 0
+          ? <div className="stack-4"><button className="btn btn-night" onClick={() => setForm(true)}>📸 Make it to the big screen</button>
+              <span className="meta" style={{ textAlign: "center" }}>{s.left} of 20 spots left today · one photo each</span></div>
+          : <button className="btn btn-secondary" disabled>Today&apos;s 20 photos are in. Try again tomorrow.</button>}
+      {s.archive.length > 0 && (
+        <div className="stack-8">
+          <p className="overline" style={{ margin: 0 }}>Past features</p>
+          <div className="tv-archive">
+            {s.archive.map((f) => (
+              <button key={f.id} className="tv-archive-item" onClick={() => setView(f)}>
+                {f.url ? <img src={f.url} alt={`${at(f.handle)}, ${tvDay(f.date)}`} /> : <span className="tv-mine-ph">📷</span>}
+                <span className="meta">{at(f.handle)}</span>
+                <span className="meta">{tvDay(f.date)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {view && <TvViewer f={view} onClose={() => setView(null)} />}
+    </div>
+  );
+}
+
+function SubmitForm({ api, onCancel, onSent }: { api: TvApi; onCancel: () => void; onSent: () => void }) {
+  const [photo, setPhoto] = useState<{ blob: Blob; url: string } | null>(null);
+  // The picked photo, while it's being fitted to the billboard.
+  const [cropping, setCropping] = useState<ImageBitmap | null>(null);
+  const [handle, setHandle] = useState("");
+  const [self, setSelf] = useState(false);
+  const [adult, setAdult] = useState(false);
+  const [publicOk, setPublicOk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => () => { if (photo) URL.revokeObjectURL(photo.url); }, [photo]);
+  const clean = cleanTvHandle(handle);
+  if (cropping) {
+    return (
+      <PhotoCropper img={cropping} onCancel={() => { cropping.close(); setCropping(null); }}
+        onDone={(blob, url) => {
+          if (blob.size > TV.maxBytes) { setError("That photo is too big. Pick a smaller one."); }
+          else setPhoto({ blob, url });
+          cropping.close();
+          setCropping(null);
+        }} />
+    );
+  }
+  const ready = !!photo && !!clean && self && adult && publicOk && !busy;
+  return (
+    <form className="stack-12 radio-form" onSubmit={async (e) => {
+      e.preventDefault();
+      if (!ready || !photo || !api.upload) return;
+      setBusy(true);
+      setError(null);
+      const up = await api.upload(photo.blob);
+      if (!up.ok) { setBusy(false); return setError(up.error); }
+      const r = await api.submit(up.data, handle, self, adult, publicOk);
+      setBusy(false);
+      if (!r.ok) return setError(r.error);
+      onSent();
+    }}>
+      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/heic" hidden onChange={async (e) => {
+        const f = e.target.files?.[0];
+        e.target.value = "";
+        if (!f) return;
+        setError(null);
+        try {
+          setCropping(await openPhoto(f));
+        } catch {
+          setError("That file didn't open as a photo. Try a JPEG or PNG.");
+        }
+      }} />
+      <button type="button" className={`tv-pick${photo ? " has" : ""}`} onClick={() => input.current?.click()}>
+        {photo ? <img src={photo.url} alt="Your photo, as the billboard shows it" /> : <span className="stack-4" style={{ alignItems: "center" }}><span style={{ fontSize: 32 }} aria-hidden="true">📸</span><span className="body-strong">Pick a photo of you</span><span className="meta">You&apos;ll fit it to the billboard next</span></span>}
+      </button>
+      {photo && <button type="button" className="radio-report" style={{ alignSelf: "center" }} onClick={() => input.current?.click()}>Pick a different photo or crop again</button>}
+      <label className="stack-4">
+        <span className="overline">Your Instagram handle</span>
+        <span className={`field${handle && !clean ? " error" : ""}`}><input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@your.instagram" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={31} aria-label="Your Instagram handle" /></span>
+        {handle && !clean ? <span className="meta radio-problem">Letters, numbers, dots and underscores only.</span>
+          : <span className="meta">Your IG handle, not your Clout City name. It shows under your photo.</span>}
+      </label>
+      <div className="stack-8">
+        <label className="radio-check"><input type="checkbox" checked={self} onChange={(e) => setSelf(e.target.checked)} /><span className="body">It&apos;s a photo of me, or one I took.</span></label>
+        <label className="radio-check"><input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} /><span className="body">I&apos;m 18 or over.</span></label>
+        <label className="radio-check"><input type="checkbox" checked={publicOk} onChange={(e) => setPublicOk(e.target.checked)} /><span className="body">It can be shown publicly in the game.</span></label>
+      </div>
+      <p className="meta" style={{ margin: 0 }}>One photo a day, 20 a day across the city. The producers look at every photo first; picked ones take turns on the screen, 3 hours each. Photos of other people, anything explicit, or a brand as the star won&apos;t be picked. You can withdraw yours any time.</p>
+      {error && <p className="body radio-problem" style={{ margin: 0 }}>{error}</p>}
+      <div className="row" style={{ gap: 8 }}>
+        <button type="button" className="btn btn-secondary" style={{ width: "auto", flex: "none" }} onClick={onCancel}>Cancel</button>
+        <button type="submit" className="btn btn-night radio-submit" disabled={!ready}>{busy ? "Sending…" : "Submit photo"}</button>
+      </div>
+    </form>
+  );
+}
