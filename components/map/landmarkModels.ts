@@ -783,16 +783,18 @@ function lounge(t: Themed): Group {
 // ---------------------------------------------------------------------------
 // Ditmars Deli & Dreams: a corner bodega under a walk-up, green awning, fruit stand, fire escape
 // ---------------------------------------------------------------------------
-function bodega(t: Themed): Group {
+interface BodegaLook { name: string; awning: string; wall: string; seed: number }
+
+function bodega(t: Themed, look: BodegaLook = { name: "DELI & DREAMS", awning: "#2E7D4F", wall: "#B9765A", seed: 81 }): Group {
   const g = new Group();
-  const store = facade(t, { wall: C.cream, glass: "#F6D7A8", style: "storefront", lit: 1, seed: 81, frame: "#2E4A3A" }, 1.6);
-  const brick = facade(t, { wall: "#B9765A", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 83, frame: C.cream });
+  const store = facade(t, { wall: C.cream, glass: "#F6D7A8", style: "storefront", lit: 1, seed: look.seed, frame: C.ink }, 1.6);
+  const brick = facade(t, { wall: look.wall, glass: "#4E6B7A", style: "punched", lit: 0.7, seed: look.seed + 2, frame: C.cream });
   g.add(at(facadeBox(12, 4.2, 12, store, solid("#7A5A46")), 0, 2.1, 0));
   g.add(at(facadeBox(12, 11, 12, brick, solid("#7A5A46")), 0, 4.2 + 5.5, 0));
   g.add(at(nightGlow(t, 12, 15.2, 12, C.amber, 0.6), 0, 7.6, 0));
   g.add(at(new Mesh(new BoxGeometry(12.6, 0.7, 12.6), solid(C.cream)), 0, 15.5, 0));
   // Green awning on two sides (it's a corner store), with the name.
-  const awning = solid("#2E7D4F");
+  const awning = solid(look.awning);
   for (const [w, x, z, ry] of [[12.4, 0, 7, 0], [12.4, 7, 0, Math.PI / 2]] as const) {
     const a = new Mesh(new BoxGeometry(w, 0.3, 2.4), awning);
     a.position.set(x, 4.3, z);
@@ -801,7 +803,7 @@ function bodega(t: Themed): Group {
     if (ry) a.rotation.z = -0.35;
     g.add(a);
   }
-  g.add(at(sign(t, "DELI & DREAMS", 10, 1.2, { bg: "#2E7D4F", fg: C.cream }, 1.6), 0, 4.9, 8.2));
+  g.add(at(sign(t, look.name, 10, 1.2, { bg: look.awning, fg: look.awning === "#F2B705" ? C.ink : C.cream }, 1.6), 0, 4.9, 8.2));
   // Fruit and flowers out front.
   for (const [x, c] of [[-4, C.coral], [-2.4, C.amber], [-0.8, "#5FA36B"], [0.8, C.pink]] as const) {
     g.add(at(new Mesh(new BoxGeometry(1.4, 0.9, 1.2), solid("#8B5E3C")), x, 0.45, 7.4));
@@ -895,9 +897,295 @@ function college(t: Themed): Group {
   return g;
 }
 
+/** A gable roof (a triangular prism) w wide, d deep, rising h, its ridge along z. */
+function gable(w: number, h: number, d: number, m: Material): Mesh {
+  const roof = new Mesh(new CylinderGeometry(1, 1, d, 3, 1, false), m);
+  roof.rotation.x = Math.PI / 2;
+  roof.rotation.y = Math.PI / 2;
+  roof.scale.set(h / 1.5, 1, w / 1.732);
+  return roof;
+}
+
+// ---------------------------------------------------------------------------
+// Pressed Iron Gym: a glass-fronted box, a running track on the roof and a giant dumbbell
+// ---------------------------------------------------------------------------
+function gym(t: Themed): Group {
+  const g = new Group();
+  const glass = facade(t, { wall: "#2F8F8A", glass: "#BFE6F7", style: "storefront", lit: 1, seed: 111, frame: "#1F5F5B" }, 1.4);
+  g.add(at(litBox(t, 26, 10, 20, glass, solid("#B9C6CF"), C.tealLight, 0.5), 0, 5, 0));
+  // Rooftop track: a coral oval with a grass middle and lit edge.
+  const track = new Mesh(new CylinderGeometry(9, 9, 0.3, 32), solid(C.coral));
+  track.scale.set(1.3, 1, 0.9);
+  g.add(at(track, 0, 10.2, 0));
+  const infield = new Mesh(new CylinderGeometry(6.5, 6.5, 0.35, 32), solid("#6DB277"));
+  infield.scale.set(1.3, 1, 0.8);
+  g.add(at(infield, 0, 10.25, 0));
+  const edge = new Mesh(new TorusGeometry(9, 0.25, 4, 40), glowing(t, C.cream, C.tealLight, 2.2, 0));
+  edge.rotation.x = Math.PI / 2;
+  edge.scale.set(1.3, 0.9, 1);
+  g.add(at(edge, 0, 10.4, 0));
+  // The dumbbell sign.
+  const iron = glowing(t, C.ink, C.coral, 1.6, 0);
+  const db = at(new Group(), 0, 14.5, 10);
+  db.add(new Mesh(new CylinderGeometry(0.5, 0.5, 10, 8).rotateZ(Math.PI / 2), solid(C.steel)));
+  for (const x of [-5, 5]) {
+    const plate = new Mesh(new CylinderGeometry(2.4, 2.4, 1.6, 12).rotateZ(Math.PI / 2), iron);
+    db.add(at(plate, x, 0, 0));
+  }
+  g.add(db);
+  for (const x of [-3, 3]) g.add(at(new Mesh(new BoxGeometry(0.4, 4, 0.4), solid(C.ink)), x, 12, 10));
+  g.add(at(sign(t, "PRESSED IRON", 16, 2, { bg: C.ink, fg: C.tealLight }, 2.2), 0, 8.4, 10.1));
+  g.add(at(lightPool(t, 13, C.tealLight, 0.45), 0, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Rockaway Diner: a chrome diner car with a red stripe, a row of windows and a neon pole sign
+// ---------------------------------------------------------------------------
+function diner(t: Themed): Group {
+  const g = new Group();
+  const chrome = solid("#D7E1E7", { metal: 0.4, rough: 0.35 });
+  const body = new Mesh(new BoxGeometry(24, 4, 8), chrome);
+  g.add(at(body, 0, 2.6, 0));
+  const top = new Mesh(new CylinderGeometry(4, 4, 24, 16, 1, false, 0, Math.PI), chrome);
+  top.rotation.z = Math.PI / 2;
+  top.scale.set(0.35, 1, 1);
+  g.add(at(top, 0, 4.6, 0));
+  g.add(at(new Mesh(new BoxGeometry(24.1, 0.6, 8.1), solid("#C8352B")), 0, 1.2, 0));
+  const win = glowing(t, "#4E6B7A", "#FFD58A", 1.6, 0);
+  for (let i = 0; i < 9; i++) g.add(at(new Mesh(new BoxGeometry(1.8, 1.4, 8.15), win), -9.6 + i * 2.4, 3.3, 0));
+  g.add(at(new Mesh(new BoxGeometry(3, 3.6, 3), solid(C.cream)), 0, 1.8, 5));
+  // Pole sign.
+  g.add(at(new Mesh(new CylinderGeometry(0.3, 0.3, 10, 6), solid(C.steel)), 13, 5, 6));
+  g.add(at(sign(t, "DINER", 6, 2, { bg: "#C8352B", fg: C.cream }, 2.6), 13, 10.5, 6));
+  g.add(at(sign(t, "ROCKAWAY", 7, 1.2, { bg: C.cream, fg: "#2F5DA8" }, 1.8), 13, 8.6, 6));
+  // A couple of parked cars.
+  g.add(at(new Mesh(new BoxGeometry(2, 1.2, 4.4), solid("#2F5DA8")), -8, 0.8, 9));
+  g.add(at(new Mesh(new BoxGeometry(2, 1.2, 4.4), solid("#F2B705")), -4.5, 0.8, 9));
+  g.add(at(lightPool(t, 13, C.amber, 0.55), 0, 0, 4));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Radiant Harbor Church: a stone nave, a steeple, a rose window and stained glass that glows
+// ---------------------------------------------------------------------------
+function church(t: Themed): Group {
+  const g = new Group();
+  const stone = glowing(t, "#E3D6C2", C.amber, 0.25, 0);
+  const roof = solid("#5E7B8C");
+  g.add(at(new Mesh(new BoxGeometry(16, 12, 30), stone), 0, 6, -2));
+  g.add(at(gable(16.6, 7, 30.6, roof), 0, 12, -2));
+  // Stained glass down both sides.
+  const glassColors = [C.coral, C.sky, C.amber, C.tealLight];
+  for (const x of [-8.05, 8.05]) {
+    for (let i = 0; i < 5; i++) {
+      const m = glowing(t, "#3A4A5A", glassColors[i % 4], 1.8, 0);
+      g.add(at(new Mesh(new BoxGeometry(0.2, 5, 2), m), x, 6.5, -12 + i * 5.5));
+    }
+  }
+  // Front tower and spire.
+  g.add(at(new Mesh(new BoxGeometry(8, 22, 8), stone), 0, 11, 15));
+  g.add(at(new Mesh(new ConeGeometry(5.6, 14, 4).rotateY(Math.PI / 4), roof), 0, 29, 15));
+  g.add(at(new Mesh(new BoxGeometry(0.4, 3, 0.4), solid(C.amber)), 0, 37.5, 15));
+  g.add(at(new Mesh(new BoxGeometry(2, 0.4, 0.4), solid(C.amber)), 0, 38.2, 15));
+  // Rose window and door.
+  const rose = new Mesh(new CylinderGeometry(2.4, 2.4, 0.3, 16), glowing(t, "#3A4A5A", C.coral, 2.2, 0));
+  rose.rotation.x = Math.PI / 2;
+  g.add(at(rose, 0, 14, 19.05));
+  g.add(at(new Mesh(new BoxGeometry(3.4, 5, 0.3), solid("#7A3A2C")), 0, 2.5, 19.05));
+  g.add(at(nightGlow(t, 8, 22, 8, C.amber, 0.6), 0, 11, 15));
+  g.add(at(sign(t, "RADIANT HARBOR", 10, 1.4, { bg: C.cream, fg: "#2F5DA8" }, 1.4), 0, 6.4, 19.2));
+  g.add(at(lightPool(t, 14, C.amber, 0.5), 0, 0, 20));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Ditmars Free Library: a classical library with columns, a pediment, wide steps and arched windows
+// ---------------------------------------------------------------------------
+function library(t: Themed): Group {
+  const g = new Group();
+  const stone = glowing(t, "#E9DCC6", C.amber, 0.25, 0);
+  g.add(at(new Mesh(new BoxGeometry(28, 11, 20), stone), 0, 5.5, -2));
+  g.add(at(new Mesh(new BoxGeometry(29, 1, 21), solid(C.cream)), 0, 11.5, -2));
+  // Portico: steps, six columns, pediment.
+  for (let i = 0; i < 3; i++) g.add(at(new Mesh(new BoxGeometry(18 - i * 1.2, 0.5, 3 - i * 0.8), solid(C.stoneDark)), 0, 0.25 + i * 0.5, 11.5 - i * 0.4));
+  for (let i = 0; i < 6; i++) g.add(at(new Mesh(new CylinderGeometry(0.6, 0.7, 8, 10), solid(C.cream)), -6.25 + i * 2.5, 5.5, 9));
+  g.add(at(new Mesh(new BoxGeometry(16, 1.2, 4), solid(C.cream)), 0, 10.1, 9));
+  // The pediment: a gable 16 m wide and 3.4 m tall, turned to face the street.
+  const pediment = gable(16, 3.4, 4.2, solid(C.cream));
+  pediment.rotation.z = Math.PI / 2;
+  g.add(at(pediment, 0, 11.6, 9));
+  // Tall arched windows, warm at night.
+  const win = glowing(t, "#4E6B7A", "#FFD58A", 1.7, 0);
+  for (const x of [-11, -8, 8, 11]) g.add(at(new Mesh(new BoxGeometry(1.8, 6, 0.3), win), x, 6, 8.05));
+  for (const x of [-14.05, 14.05]) for (const z of [-8, -2, 4]) g.add(at(new Mesh(new BoxGeometry(0.3, 6, 1.8), win), x, 6, z));
+  g.add(at(sign(t, "FREE LIBRARY", 10, 1.1, { bg: C.cream, fg: "#2F5DA8" }, 1.4), 0, 10.1, 11.05));
+  g.add(at(nightGlow(t, 28, 11, 20, C.amber, 0.5), 0, 5.5, -2));
+  g.add(at(lightPool(t, 13, C.amber, 0.5), 0, 0, 14));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Engine 7 Firehouse: red brick, two big bay doors (one open), a fire truck out front, a flag
+// ---------------------------------------------------------------------------
+function firehouse(t: Themed): Group {
+  const g = new Group();
+  const brick = facade(t, { wall: "#B33A3A", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 121, frame: C.cream });
+  g.add(at(litBox(t, 14, 13, 16, brick, solid("#5E2A22"), C.amber, 0.5), 0, 6.5, 0));
+  g.add(at(new Mesh(new BoxGeometry(14.6, 0.8, 16.6), solid(C.cream)), 0, 13.2, 0));
+  // Bay doors: one shut (cream), one open (lit inside).
+  g.add(at(new Mesh(new BoxGeometry(5, 5.5, 0.3), solid(C.cream)), -3.4, 2.75, 8.05));
+  g.add(at(new Mesh(new BoxGeometry(5, 5.5, 0.3), glowing(t, "#3A3F47", "#FFE6AA", 1.8, 0)), 3.4, 2.75, 8.05));
+  g.add(at(sign(t, "ENGINE 7", 9, 1.4, { bg: C.cream, fg: "#B33A3A" }, 1.8), 0, 6.6, 8.2));
+  // The truck: cab, body, ladder, light bar.
+  const red = solid("#C8352B");
+  const truck = at(new Group(), 3.4, 0, 12);
+  truck.add(at(new Mesh(new BoxGeometry(2.6, 2.2, 3), red), 0, 1.6, 3.4));
+  truck.add(at(new Mesh(new BoxGeometry(2.6, 1.8, 6.5), red), 0, 1.4, -1.4));
+  truck.add(at(new Mesh(new BoxGeometry(2.4, 0.3, 7.5), solid(C.steel)), 0, 2.5, -1));
+  truck.add(at(new Mesh(new BoxGeometry(1.8, 0.3, 0.4), glowing(t, "#E5283F", "#FF2D3D", 3, 0.5)), 0, 2.85, 3.6));
+  for (const z of [3.4, -0.5, -3.4]) for (const x of [-1.35, 1.35]) truck.add(at(new Mesh(new CylinderGeometry(0.5, 0.5, 0.4, 8).rotateZ(Math.PI / 2), solid(C.ink)), x, 0.5, z));
+  g.add(truck);
+  // Flag on the roof.
+  g.add(at(new Mesh(new CylinderGeometry(0.12, 0.15, 6, 5), solid(C.steel)), -5, 16.6, 6));
+  g.add(at(new Mesh(new BoxGeometry(2.6, 1.6, 0.08), solid("#2F5DA8")), -3.6, 18.6, 6));
+  g.add(at(lightPool(t, 10, "#FF6B4C", 0.5), 2, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Altitude 718 Rooftop: a slim residential tower with a glass-railed rooftop bar, umbrellas and a pool
+// ---------------------------------------------------------------------------
+function rooftop(t: Themed): Group {
+  const g = new Group();
+  const glass = facade(t, { wall: "#E9DCC6", glass: "#9ED8F7", style: "curtain", lit: 0.75, seed: 131, frame: "#C9B79C" });
+  g.add(at(litBox(t, 20, 64, 20, glass, solid("#C9B79C"), C.amber, 0.4), 0, 32, 0));
+  // The roof deck: glass rail, pool, umbrellas, bar.
+  g.add(at(new Mesh(new BoxGeometry(20.4, 0.4, 20.4), solid("#B59E80")), 0, 64.2, 0));
+  const rail = new MeshStandardMaterial({ color: "#CFE8FF", transparent: true, opacity: 0.45, roughness: 0.2 });
+  for (const [w, d, x, z] of [[20.4, 0.2, 0, 10.1], [20.4, 0.2, 0, -10.1], [0.2, 20.4, 10.1, 0], [0.2, 20.4, -10.1, 0]]) g.add(at(new Mesh(new BoxGeometry(w, 1.4, d), rail), x, 65.1, z));
+  g.add(at(new Mesh(new BoxGeometry(8, 0.3, 4.5), glowing(t, "#5FD4C9", "#5FD4C9", 1.6, 0.2)), -4, 64.5, 4));
+  for (const [x, z, c] of [[4, 4, C.coral], [6, -3, C.cream], [-4, -5, C.coral]] as const) {
+    g.add(at(new Mesh(new CylinderGeometry(0.08, 0.08, 2.4, 4), solid(C.ink)), x, 65.6, z));
+    g.add(at(new Mesh(new ConeGeometry(1.6, 0.7, 8), solid(c)), x, 66.9, z));
+  }
+  g.add(at(new Mesh(new BoxGeometry(6, 1.1, 1.4), glowing(t, C.ink, C.amber, 1.4, 0)), 3, 64.9, -8));
+  const bulb = glowing(t, C.cream, "#FFE27A", 2.4, 0);
+  const bulbGeo = new SphereGeometry(0.25, 5, 4);
+  for (let i = 0; i <= 18; i++) g.add(at(new Mesh(bulbGeo, bulb), -9 + i, 67.4 - Math.sin((i / 18) * Math.PI) * 0.9, 0));
+  g.add(at(sign(t, "ALTITUDE 718", 12, 1.8, { bg: C.ink, fg: C.amber }, 2.2), 0, 62, 10.2));
+  g.add(at(lightPool(t, 16, C.amber, 0.4), 0, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Ultraviolet Society (exclusive club): a black glass cube with glowing seams and a light column
+// ---------------------------------------------------------------------------
+function uvClub(t: Themed): Group {
+  const g = new Group();
+  const black = solid("#14111A", { rough: 0.25, metal: 0.3 });
+  g.add(at(new Mesh(new BoxGeometry(22, 14, 22), black), 0, 7, 0));
+  // Glowing seams: electric blue edges and pink bands.
+  const blue = glowing(t, "#3A5BFF", "#4D7BFF", 2.6, 0.4);
+  const pink = glowing(t, C.pink, C.pink, 2.4, 0.3);
+  for (const [x, z] of [[-11, -11], [11, -11], [-11, 11], [11, 11]]) g.add(at(new Mesh(new BoxGeometry(0.5, 14.2, 0.5), blue), x, 7, z));
+  for (const y of [0.2, 14]) {
+    for (const z of [-11, 11]) g.add(at(new Mesh(new BoxGeometry(22.4, 0.5, 0.5), blue), 0, y, z));
+    for (const x of [-11, 11]) g.add(at(new Mesh(new BoxGeometry(0.5, 0.5, 22.4), blue), x, y, 0));
+  }
+  for (const y of [5, 9]) g.add(at(new Mesh(new BoxGeometry(22.2, 0.25, 22.2), pink), 0, y, 0));
+  // The velvet-rope entrance and a door of light.
+  g.add(at(new Mesh(new BoxGeometry(3, 4.5, 0.3), glowing(t, "#1B1A22", "#CFE8FF", 2.2, 0.3)), 0, 2.25, 11.05));
+  for (const x of [-3, -1.6, 1.6, 3]) g.add(at(new Mesh(new CylinderGeometry(0.1, 0.12, 1.2, 5), solid("#C9B79C")), x, 0.6, 13));
+  g.add(at(new Mesh(new BoxGeometry(6, 0.15, 0.15), solid("#B33A3A")), 0, 1.05, 13));
+  g.add(at(sign(t, "ULTRAVIOLET", 12, 1.6, { bg: "#14111A", fg: "#8FB3FF" }, 2.6), 0, 12, 11.1));
+  // A column of light straight up from the roof.
+  const column = new Mesh(new CylinderGeometry(2.4, 2.4, 120, 16, 1, true), new MeshBasicMaterial({ color: "#7FA2FF", transparent: true, opacity: 0.16, blending: AdditiveBlending, depthWrite: false, side: DoubleSide }));
+  column.renderOrder = 3;
+  t.nightOnly.push(column);
+  g.add(at(column, 0, 74, 0));
+  g.add(at(lightPool(t, 18, "#4D7BFF", 0.45), 0, 0, 0));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Lucky Seven Deli: the corner deli, in yellow, with a big lucky 7 on the roof
+// ---------------------------------------------------------------------------
+function luckyDeli(t: Themed): Group {
+  const g = bodega(t, { name: "LUCKY 7 DELI", awning: "#F2B705", wall: "#8FA4B8", seed: 141 });
+  const seven = sign(t, "7", 4, 5, { bg: "#C8352B", fg: "#FFE27A" }, 2.6);
+  g.add(at(seven, 2, 18.6, 3));
+  for (const x of [0.6, 3.4]) g.add(at(new Mesh(new BoxGeometry(0.25, 3, 0.25), solid(C.ink)), x, 16.4, 3));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// The Sticky Floor (dive club): a low painted box with stripes and a disco ball on the roof
+// ---------------------------------------------------------------------------
+function diveClub(t: Themed): Group {
+  const g = new Group();
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 64;
+  const x = c.getContext("2d")!;
+  const bands = [C.coral, C.amber, C.tealLight, C.sky, C.pink];
+  bands.forEach((col, i) => {
+    x.fillStyle = col;
+    x.beginPath();
+    x.moveTo(i * 60 - 20, 64);
+    x.lineTo(i * 60 + 30, 0);
+    x.lineTo(i * 60 + 60, 0);
+    x.lineTo(i * 60 + 10, 64);
+    x.fill();
+  });
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  const mural = new MeshStandardMaterial({ map: tex, roughness: 0.8, emissive: "#FFFFFF", emissiveMap: tex, emissiveIntensity: 0 });
+  t.glows.push({ mat: mural, day: 0, night: 0.5 });
+  const wall = solid(C.charcoal);
+  g.add(at(new Mesh(new BoxGeometry(24, 7, 16), [wall, wall, solid("#55545E"), wall, mural, wall]), 0, 3.5, 0));
+  g.add(at(nightGlow(t, 24, 7, 16, C.pink, 0.5), 0, 3.5, 0));
+  // The disco ball, sparkling at night.
+  const ball = new Mesh(new IcosahedronGeometry(2.6, 1), glowing(t, "#D7E1E7", "#FFFFFF", 1.2, 0));
+  (ball.material as MeshStandardMaterial).metalness = 0.6;
+  g.add(at(ball, 0, 11, 0));
+  g.add(at(new Mesh(new CylinderGeometry(0.1, 0.1, 1.6, 4), solid(C.ink)), 0, 13.9, 0));
+  g.add(at(new Mesh(new BoxGeometry(0.3, 4, 0.3), solid(C.ink)), 0, 9, 0));
+  searchlights(t, g, [[-9, 7.2, -4], [9, 7.2, -4]], 70);
+  g.add(at(sign(t, "THE STICKY FLOOR", 14, 1.6, { bg: C.ink, fg: C.amber }, 2.2), 0, 5.6, 8.2));
+  g.add(at(lightPool(t, 12, C.pink, 0.55), 0, 0, 10));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Lucky Star Lotto: a bright storefront with a giant star on the roof and a run of lights
+// ---------------------------------------------------------------------------
+function lotto(t: Themed): Group {
+  const g = new Group();
+  const store = facade(t, { wall: "#C8352B", glass: "#FFE6AA", style: "storefront", lit: 1, seed: 151, frame: C.cream }, 1.6);
+  g.add(at(litBox(t, 16, 7, 12, store, solid("#7A2A22"), "#FFD54A", 0.6), 0, 3.5, 0));
+  // The star: two triangles, bulbs round the edge.
+  const starMat = glowing(t, "#FFD54A", "#FFD54A", 2.4, 0.3);
+  for (const rz of [0, Math.PI]) {
+    // A flat triangle facing the street, turned in its own plane (two make the star).
+    const tri = new Mesh(new CylinderGeometry(4, 4, 0.6, 3).rotateX(Math.PI / 2), starMat);
+    tri.rotation.z = rz + Math.PI / 2;
+    g.add(at(tri, 0, 12, 2));
+  }
+  for (const x of [-1.2, 1.2]) g.add(at(new Mesh(new BoxGeometry(0.3, 4, 0.3), solid(C.ink)), x, 8.5, 2));
+  const bulb = glowing(t, C.cream, "#FFE27A", 2.6, 0.1);
+  const bulbGeo = new SphereGeometry(0.25, 5, 4);
+  for (let i = 0; i < 20; i++) g.add(at(new Mesh(bulbGeo, bulb), -7.6 + i * 0.8, 6.8, 6.1));
+  g.add(at(sign(t, "LUCKY STAR LOTTO", 12, 1.6, { bg: C.cream, fg: "#C8352B" }, 2), 0, 5.6, 6.2));
+  g.add(at(lightPool(t, 11, "#FFD54A", 0.55), 0, 0, 8));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
-  "music-hall": musicHall, lounge, bodega, pizzeria, college,
+  "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
+  gym, diner, church, library, firehouse,
+  rooftop, "uv-club": uvClub, "lucky-deli": luckyDeli, "dive-club": diveClub, lotto,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

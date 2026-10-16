@@ -7,7 +7,9 @@
 import type { LatLng } from "./geo.ts";
 
 export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "cafe" | "ballpark" | "tennis" | "bridge" | "studios" | "gallery"
-  | "music-hall" | "lounge" | "bodega" | "pizzeria" | "college";
+  | "music-hall" | "lounge" | "bodega" | "pizzeria" | "college"
+  | "gym" | "diner" | "church" | "library" | "firehouse"
+  | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto";
 
 export interface Landmark {
   id: string;
@@ -60,6 +62,18 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "ditmars-deli", placeId: "ditmars-deli", name: "Ditmars Deli & Dreams", at: [40.7748, -73.9128], kind: "bodega", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   { id: "two-bros-pizza", placeId: "two-bros-pizza", name: "Two Bros Who Fight Pizza", at: [40.7668, -73.9208], kind: "pizzeria", facing: 180, scale: 2.4, clear: 28, ground: "block" },
   { id: "astoria-cc", placeId: "astoria-cc", name: "Astoria Community College", at: [40.76, -73.9232], kind: "college", facing: 180, scale: 1.3, clear: 90, ground: "block" },
+  // Batch 4: more Astoria places.
+  { id: "pressed-iron-gym", placeId: "pressed-iron-gym", name: "Pressed Iron Gym", at: [40.7662, -73.9118], kind: "gym", facing: 180, scale: 2, clear: 40, ground: "block" },
+  { id: "rockaway-diner", placeId: "rockaway-diner", name: "Rockaway Diner", at: [40.7712, -73.9158], kind: "diner", facing: 180, scale: 2.2, clear: 38, ground: "block" },
+  { id: "radiant-harbor", placeId: "radiant-harbor", name: "Radiant Harbor Church", at: [40.7738, -73.9296], kind: "church", facing: 180, scale: 1.8, clear: 50, ground: "block" },
+  { id: "ditmars-library", placeId: "ditmars-library", name: "Ditmars Free Library", at: [40.7735, -73.9098], kind: "library", facing: 180, scale: 1.9, clear: 45, ground: "block" },
+  { id: "engine-7", placeId: "engine-7", name: "Engine 7 Firehouse", at: [40.772, -73.9205], kind: "firehouse", facing: 180, scale: 2.2, clear: 32, ground: "block" },
+  // Batch 5: Long Island City, Jackson Heights and Flushing.
+  { id: "altitude-718", placeId: "altitude-718", name: "Altitude 718 Rooftop", at: [40.7425, -73.9555], kind: "rooftop", facing: 180, scale: 1.6, clear: 32, ground: "block" },
+  { id: "ultraviolet-society", placeId: "ultraviolet-society", name: "Ultraviolet Society", at: [40.7402, -73.9593], kind: "uv-club", facing: 180, scale: 2, clear: 40, ground: "block" },
+  { id: "lucky-seven-deli", placeId: "lucky-seven-deli", name: "Lucky Seven Deli", at: [40.7495, -73.8885], kind: "lucky-deli", facing: 180, scale: 2.4, clear: 30, ground: "block" },
+  { id: "the-sticky-floor", placeId: "the-sticky-floor", name: "The Sticky Floor", at: [40.7512, -73.8832], kind: "dive-club", facing: 180, scale: 2.2, clear: 40, ground: "block" },
+  { id: "lucky-star", placeId: "lucky-star", name: "Lucky Star Lotto", at: [40.7593, -73.8301], kind: "lotto", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 
