@@ -1743,14 +1743,19 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .radio-form .radio-submit { flex:1; min-width:0; width:auto; }
 
 /* ---------- v0.14 Clout TV (migration 0058): the app, the viewer, the home card, the Studio queue ---------- */
-/* Owner, Oct 16: a black-to-silver card, "CLOUT" in white, "TV" in black on a white box. */
+/* Owner, Oct 16: the colours of a TV-app look the owner shared (our red-pink into coral, a soft diamond
+   lattice; never purple), with the Clout TV logo as before: "CLOUT" in white, "TV" in black on a white box. */
 .tv-bumper { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; aspect-ratio:320/120; max-width:100%; border-radius:18px; overflow:hidden;
-  background:linear-gradient(135deg, #0B0B0E 0%, #2A2B30 45%, #8E9096 80%, #D6D8DC 100%); color:#fff; box-shadow:var(--elev-2), inset 0 0 0 1px rgba(255,255,255,.12); }
-.tv-bumper::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px); pointer-events:none; }
-.tv-bumper-rec { position:absolute; top:10px; left:12px; font-size:11px; font-weight:800; letter-spacing:.08em; color:#FF5A4A; }
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.07) 0 1px, transparent 1px 64px),
+    linear-gradient(45deg, rgba(255,255,255,.06) 25%, transparent 25% 75%, rgba(255,255,255,.06) 75%) 0 0 / 90px 90px,
+    linear-gradient(135deg, #FF6A3D 0%, var(--primary-top) 45%, var(--primary-bottom) 100%);
+  color:#fff; box-shadow:var(--elev-2); }
+.tv-bumper-rec { position:absolute; top:10px; left:12px; font-size:11px; font-weight:800; letter-spacing:.08em; color:#fff; opacity:.95; }
 .tv-bumper-logo { display:inline-flex; align-items:center; font-size:34px; font-weight:900; letter-spacing:.02em; line-height:1; }
 .tv-bumper-logo b { display:inline-flex; align-items:center; margin-left:6px; padding:5px 8px 3px; border-radius:8px; background:#FFFFFF; color:#0B0B0E; line-height:1; }
-.tv-bumper-sub { position:absolute; left:0; right:0; bottom:12px; text-align:center; font-size:12px; font-weight:600; opacity:.85; }
+.tv-bumper-sub { position:absolute; left:0; right:0; bottom:12px; text-align:center; font-size:12px; font-weight:600; opacity:.9; }
 .tv-feature { position:relative; display:block; width:100%; padding:0; border:0; border-radius:18px; overflow:hidden; background:#14111A; box-shadow:var(--elev-2); cursor:pointer; aspect-ratio:4/5; max-width:100%; }
 .tv-feature img { width:100%; height:100%; object-fit:cover; display:block; }
 .tv-feature-cap { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:28px 14px 12px; color:#fff; text-align:left;
