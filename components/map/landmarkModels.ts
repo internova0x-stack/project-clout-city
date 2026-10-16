@@ -1894,12 +1894,13 @@ function elStation(t: Themed): Group {
   const g = new Group();
   const steel = solid("#2F6B5A");
   const len = 90;
-  // Columns either side of the avenue, girders and the deck.
-  for (let x = -len / 2; x <= len / 2; x += 10) for (const z of [-9, 9]) g.add(at(new Mesh(new BoxGeometry(0.9, 9, 0.9), steel), x, 4.5, z));
-  for (const z of [-9, 9]) g.add(at(new Mesh(new BoxGeometry(len + 2, 1.2, 1), steel), 0, 9.2, z));
-  g.add(at(new Mesh(new BoxGeometry(len, 0.8, 20), solid("#6B6570")), 0, 10.2, 0));
+  // Columns along the curbs, girders and the deck: as wide as the street, no wider (owner, Oct 16:
+  // "clashing with other structures").
+  for (let x = -len / 2; x <= len / 2; x += 10) for (const z of [-7, 7]) g.add(at(new Mesh(new BoxGeometry(0.9, 9, 0.9), steel), x, 4.5, z));
+  for (const z of [-7, 7]) g.add(at(new Mesh(new BoxGeometry(len + 2, 1.2, 1), steel), 0, 9.2, z));
+  g.add(at(new Mesh(new BoxGeometry(len, 0.8, 16), solid("#6B6570")), 0, 10.2, 0));
   // Platform canopies, lit underneath at night.
-  for (const z of [-6, 6]) {
+  for (const z of [-5, 5]) {
     g.add(at(new Mesh(new BoxGeometry(len - 10, 0.4, 5), solid("#2F6B5A")), 0, 14.4, z));
     for (let x = -len / 2 + 8; x <= len / 2 - 8; x += 12) g.add(at(new Mesh(new BoxGeometry(0.4, 3.8, 0.4), steel), x, 12.5, z));
     g.add(at(new Mesh(new BoxGeometry(len - 12, 0.2, 4), glowing(t, "#D7E1E7", "#FFE6AA", 1.6, 0)), 0, 14.1, z));
@@ -1911,13 +1912,13 @@ function elStation(t: Themed): Group {
     g.add(at(new Mesh(new BoxGeometry(16, 1, 3.05), glowing(t, "#3A4A5A", "#FFE6AA", 1.4, 0)), -27 + i * 18.4, 13, 0));
     g.add(at(new Mesh(new BoxGeometry(18.05, 0.4, 3.05), solid("#F2C14E")), -27 + i * 18.4, 11.4, 0));
   }
-  // Stairs down to the sidewalks, and the station sign.
-  for (const [x, z] of [[-30, 12], [30, -12]] as const) {
-    const stair = new Mesh(new BoxGeometry(3, 0.6, 14), steel);
-    stair.rotation.x = z > 0 ? -0.62 : 0.62;
+  // Stairs down to the sidewalks, running along the street beside the deck, and the station sign.
+  for (const [x, z] of [[-34, 9.5], [34, -9.5]] as const) {
+    const stair = new Mesh(new BoxGeometry(14, 0.6, 2.6), steel);
+    stair.rotation.z = x > 0 ? 0.62 : -0.62;
     g.add(at(stair, x, 5, z));
   }
-  g.add(at(sign(t, "ASTORIA BLVD", 12, 1.4, { bg: "#14111A", fg: C.cream }, 1.6), 0, 16, 9.2));
+  g.add(at(sign(t, "ASTORIA BLVD", 12, 1.4, { bg: "#14111A", fg: C.cream }, 1.6), 0, 16, 7.6));
   g.add(at(lightPool(t, 30, "#FFE6AA", 0.35), 0, 0.2, 0));
   return g;
 }

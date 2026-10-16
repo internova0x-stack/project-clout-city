@@ -10,7 +10,7 @@ import { buildMapStyle, type MapTheme } from "@/lib/map/style";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import { createTraffic } from "./vehicles";
 import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
-import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, gridFacing, placeLandmark, withPositions, type RoadLine, type Spot } from "@/lib/map/landmarks";
+import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, gridFacing, onStreet, placeLandmark, withPositions, type RoadLine, type Spot, type WaterArea } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
 
 /**
@@ -58,7 +58,7 @@ const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8,
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 /** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
-const SPOTS_KEY = "cc-landmark-spots-v3"; // v3: spots also carry the grid-aligned facing
+const SPOTS_KEY = "cc-landmark-spots-v4"; // v4: placed clear of water, the station on its street
 function loadSpots(): Record<string, Spot> {
   try {
     return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");
@@ -268,6 +268,12 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
         for (const line of lines) roads.push({ major: MAJOR_ROAD_CLASSES.has(cls), bridge: f.properties?.brunnel === "bridge", pts: line as [number, number][] });
       }
       if (!roads.length) return;
+      const water: WaterArea[] = [];
+      for (const f of map.querySourceFeatures("osm", { sourceLayer: "water" })) {
+        const g = f.geometry;
+        if (g.type === "Polygon") water.push(g.coordinates as [number, number][][]);
+        else if (g.type === "MultiPolygon") for (const p of g.coordinates) water.push(p as [number, number][][]);
+      }
       const found: Record<string, Spot> = {};
       for (const l of todo) {
         done.add(l.id);
@@ -276,12 +282,12 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
           const fit = fitBridge(l, roads);
           if (fit) found[l.id] = fit;
         } else if (l.ground === "none") {
-          // Over the street (an elevated station): stays put, only turns to the grid.
-          found[l.id] = { at: l.at, facing: gridFacing(l, roads) };
+          // Over the street (an elevated station): set on its street, running along it.
+          found[l.id] = onStreet(l, roads) ?? { at: l.at, facing: gridFacing(l, roads) };
         } else {
-          const at = placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found }));
-          // Turned to line up with the streets around where it stands.
-          found[l.id] = { at, facing: gridFacing({ ...l, at }, roads) };
+          const at = placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found }), water);
+          // Turned to line up with the streets around where it stands; a pier faces the water.
+          found[l.id] = { at, facing: gridFacing({ ...l, at }, roads, 250, l.kind === "pier-park" ? water : []) };
         }
       }
       setSpots((prev) => {

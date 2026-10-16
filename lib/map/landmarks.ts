@@ -37,7 +37,11 @@ export interface Landmark {
    * where it is over roads or water (a bridge): no site, no placement, traffic drives through.
    */
   ground: "park" | "block" | "none";
-  /** A bridge's length between its shores, in meters (the model stretches to it). */
+  /**
+   * A bridge's length between its shores, in meters (the model stretches to it). On a structure
+   * over a street (an elevated station) it's the strip along the street, `clear` meters either
+   * side, where the buildings are hidden.
+   */
   length?: number;
 }
 
@@ -100,7 +104,7 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "harmony-chapel", placeId: "harmony-chapel", name: "Harmony Community Chapel", at: [40.7652, -73.913], kind: "chapel", facing: 180, scale: 2, clear: 32, ground: "block" },
   { id: "rep-count", placeId: "rep-count", name: "Rep Count Fitness", at: [40.764, -73.9146], kind: "fitness", facing: 180, scale: 2, clear: 34, ground: "block" },
   { id: "hell-gate-park", placeId: "hell-gate-park", name: "Hell Gate Park", at: [40.779, -73.9232], kind: "hell-gate", facing: 180, scale: 1.3, clear: 95, ground: "park" },
-  { id: "astoria-blvd-station", placeId: "astoria-blvd-station", name: "Astoria Blvd station", at: [40.7702, -73.918], kind: "el-station", facing: 180, scale: 1.6, clear: 0, ground: "none" },
+  { id: "astoria-blvd-station", placeId: "astoria-blvd-station", name: "Astoria Blvd station", at: [40.7702, -73.918], kind: "el-station", facing: 180, scale: 1.6, clear: 18, ground: "none", length: 150 },
   { id: "skyline-pier", placeId: "skyline-pier", name: "Skyline Pier Residences", at: [40.7478, -73.9592], kind: "condo-towers", facing: 180, scale: 1.3, clear: 50, ground: "block" },
   { id: "hunters-pier", placeId: "hunters-pier", name: "Hunter's Pier", at: [40.7432, -73.9612], kind: "pier-park", facing: 270, scale: 1.6, clear: 60, ground: "park" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
@@ -111,10 +115,23 @@ export const LANDMARKS: readonly Landmark[] = [
  * ("distance" from a building to a point inside it is 0).
  */
 export function clearOfLandmarks(list: readonly Landmark[] = LANDMARKS): unknown[] {
-  return ["all", ...list.filter((l) => l.clear > 0).map((l) => [">", ["distance", { type: "Point", coordinates: [l.at[1], l.at[0]] }], l.clear])];
+  return ["all", ...list.filter((l) => l.clear > 0).map((l) => [">", ["distance", siteShape(l)], l.clear])];
 }
 
 const M_PER_DEG = 111_320;
+
+/** A site's middle: its point, or for a structure over a street, the line it runs along. */
+function siteShape(l: Landmark): GeoJSON.Point | GeoJSON.LineString {
+  if (l.ground !== "none" || !l.length) return { type: "Point", coordinates: [l.at[1], l.at[0]] };
+  // The model's length runs along its x axis, which points to (facing - 90) on the compass.
+  const b = ((l.facing - 90) * Math.PI) / 180;
+  const k = Math.cos((l.at[0] * Math.PI) / 180);
+  const dx = (Math.sin(b) * l.length) / 2, dy = (Math.cos(b) * l.length) / 2;
+  return {
+    type: "LineString",
+    coordinates: [-1, 1].map((s) => [l.at[1] + (s * dx) / (k * M_PER_DEG), l.at[0] + (s * dy) / M_PER_DEG]),
+  };
+}
 
 /** Each landmark's site as a ground polygon (a 40-sided circle), for the map's site layer. */
 export function landmarkSites(list: readonly Landmark[] = LANDMARKS): GeoJSON.FeatureCollection {
@@ -145,6 +162,8 @@ export function onLandmarkSite(lng: number, lat: number, list: readonly Landmark
 
 /** A road from the map's tiles: its points (lng, lat) and whether it's a main road or rail. */
 export interface RoadLine { major: boolean; bridge?: boolean; pts: readonly (readonly [number, number])[] }
+/** A water polygon from the map's tiles: its rings (outer, then holes) of (lng, lat) points. */
+export type WaterArea = readonly (readonly (readonly [number, number])[])[];
 
 export const MAJOR_ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "rail", "transit"]);
 /** How far a landmark may move from its place's coordinates, and how finely to search. */
@@ -158,11 +177,52 @@ function segDist(px: number, py: number, ax: number, ay: number, bx: number, by:
 }
 
 /**
- * Where to stand a landmark: the closest spot (within PLACE_SEARCH.radius) whose site no main road
- * comes near, preferring spots that cover no side street. Returns its own spot when that's clear,
- * or when nothing nearby is.
+ * Which local points (meters, x east, y north, within `reach` of the middle) are on water, as a
+ * grid filled row by row (one pass over the polygons' edges per row, so a long coastline is cheap).
  */
-export function placeLandmark(l: Landmark, roads: readonly RoadLine[], others: readonly Landmark[] = []): LatLng {
+function waterGrid(water: readonly WaterArea[], toM: (lng: number, lat: number) => [number, number], reach: number, cell: number) {
+  const n = Math.ceil(reach / cell);
+  const size = 2 * n + 1;
+  const wet = new Uint8Array(size * size);
+  for (const area of water) {
+    const rings = area.map((r) => r.map(([lng, lat]) => toM(lng, lat)));
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const r of rings) for (const [x, y] of r) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
+    if (maxX < -reach || minX > reach || maxY < -reach || minY > reach) continue;
+    for (let j = 0; j < size; j++) {
+      const y = (j - n) * cell;
+      if (y < minY || y > maxY) continue;
+      // Where this row crosses the polygon's edges (even-odd, so holes count).
+      const xs: number[] = [];
+      for (const r of rings) {
+        for (let i = 0, p = r.length - 1; i < r.length; p = i++) {
+          const [ax, ay] = r[p], [bx, by] = r[i];
+          if ((ay > y) !== (by > y)) xs.push(ax + ((y - ay) / (by - ay)) * (bx - ax));
+        }
+      }
+      xs.sort((a, b) => a - b);
+      for (let q = 0; q + 1 < xs.length; q += 2) {
+        const from = Math.max(0, Math.ceil(xs[q] / cell) + n), to = Math.min(size - 1, Math.floor(xs[q + 1] / cell) + n);
+        for (let i = from; i <= to; i++) wet[j * size + i] = 1;
+      }
+    }
+  }
+  return (x: number, y: number): boolean => {
+    const i = Math.round(x / cell) + n, j = Math.round(y / cell) + n;
+    return i >= 0 && j >= 0 && i < size && j < size && wet[j * size + i] === 1;
+  };
+}
+
+/** Points around a site's edge (and its middle) that must all be on land. */
+const RIM = [[0, 0], ...Array.from({ length: 16 }, (_, i) => [Math.cos((i / 16) * Math.PI * 2), Math.sin((i / 16) * Math.PI * 2)])];
+
+/**
+ * Where to stand a landmark: the closest spot (within PLACE_SEARCH.radius) whose site no main road
+ * comes near and no water reaches (owner, Oct 16: "they look like they're on the water"),
+ * preferring spots that cover no side street. Returns its own spot when that's clear, or when
+ * nothing nearby is.
+ */
+export function placeLandmark(l: Landmark, roads: readonly RoadLine[], others: readonly Landmark[] = [], water: readonly WaterArea[] = []): LatLng {
   if (l.ground === "none") return l.at;
   const k = Math.cos((l.at[0] * Math.PI) / 180);
   // Local meters around the place (x east, y north).
@@ -177,9 +237,11 @@ export function placeLandmark(l: Landmark, roads: readonly RoadLine[], others: r
     }
   }
   const near = others.filter((o) => o.id !== l.id && o.ground !== "none").map((o) => ({ at: toM(o.at[1], o.at[0]), r: o.clear + l.clear }));
+  const wet = water.length ? waterGrid(water, toM, PLACE_SEARCH.radius + l.clear, 4) : null;
   const cost = (x: number, y: number): number => {
-    // Sites never overlap.
+    // Sites never overlap, and stand on land.
     for (const o of near) if (Math.hypot(x - o.at[0], y - o.at[1]) < o.r) return Infinity;
+    if (wet && RIM.some(([u, v]) => wet(x + u * l.clear, y + v * l.clear))) return Infinity;
     let minors = 0;
     for (const s of segs) {
       const d = segDist(x, y, s.a[0], s.a[1], s.b[0], s.b[1]);
@@ -250,12 +312,10 @@ export function fitBridge(l: Landmark, roads: readonly RoadLine[]): Spot | null 
 }
 
 /**
- * Which way a landmark should face so it lines up with the street grid around it (owner, Oct 16:
- * "make them tilt in line with the grid"). The grid's direction is the length-weighted average of
- * nearby street bearings folded into a quarter turn; of the four facings that line up with it, the
- * one closest to the landmark's own (south, toward the camera) wins. Its own facing when no streets.
+ * The street grid's direction around a point: the length-weighted average of nearby street
+ * bearings folded into a quarter turn, in degrees (-45 to 45). Null when there are no streets.
  */
-export function gridFacing(l: Landmark, roads: readonly RoadLine[], radius = 250): number {
+function gridAngle(l: Landmark, roads: readonly RoadLine[], radius: number): number | null {
   const k = Math.cos((l.at[0] * Math.PI) / 180);
   let sx = 0, sy = 0;
   for (const r of roads) {
@@ -270,13 +330,64 @@ export function gridFacing(l: Landmark, roads: readonly RoadLine[], radius = 250
       sy += len * Math.sin(4 * bearing);
     }
   }
-  if (Math.hypot(sx, sy) < 1) return l.facing;
-  const grid = ((Math.atan2(sy, sx) / 4) * 180) / Math.PI; // one street direction, -45..45
-  let best = l.facing, bestDiff = Infinity;
-  for (let q = 0; q < 4; q++) {
-    const f = (((grid + q * 90) % 360) + 360) % 360;
-    const diff = Math.abs(((f - l.facing + 540) % 360) - 180);
-    if (diff < bestDiff) { bestDiff = diff; best = f; }
+  if (Math.hypot(sx, sy) < 1) return null;
+  return ((Math.atan2(sy, sx) / 4) * 180) / Math.PI;
+}
+
+/** The four facings that line up with a grid, the one closest to `prefer` first. */
+function gridFacings(grid: number, prefer: number): number[] {
+  const turn = (d: number) => Math.abs(((d - prefer + 540) % 360) - 180);
+  return [0, 1, 2, 3].map((q) => (((grid + q * 90) % 360) + 360) % 360).sort((a, b) => turn(a) - turn(b));
+}
+
+/**
+ * Which way a landmark should face so it lines up with the street grid around it (owner, Oct 16:
+ * "make them tilt in line with the grid"). Of the four facings that line up with it, the one
+ * closest to the landmark's own (south, toward the camera) wins. Its own facing when no streets.
+ * With `water`, a waterfront landmark (a pier) faces the water when one of the four does.
+ */
+export function gridFacing(l: Landmark, roads: readonly RoadLine[], radius = 250, water: readonly WaterArea[] = []): number {
+  const grid = gridAngle(l, roads, radius);
+  if (grid === null) return l.facing;
+  const options = gridFacings(grid, l.facing);
+  if (!water.length) return options[0];
+  const k = Math.cos((l.at[0] * Math.PI) / 180);
+  const reach = l.clear * 1.5;
+  const wet = waterGrid(water, (lng, lat) => [(lng - l.at[1]) * k * M_PER_DEG, (lat - l.at[0]) * M_PER_DEG], reach + 8, 4);
+  const front = (f: number) => [Math.sin((f * Math.PI) / 180) * reach, Math.cos((f * Math.PI) / 180) * reach];
+  return options.find((f) => { const [x, y] = front(f); return wet(x, y); }) ?? options[0];
+}
+
+/**
+ * A structure over a street (an elevated station) set on its street: the nearest main road within
+ * `radius` meters (else the nearest street), the spot moved onto it and turned to run along it.
+ * Null when no street is near.
+ */
+export function onStreet(l: Landmark, roads: readonly RoadLine[], radius = 80): Spot | null {
+  const major = roads.filter((r) => r.major);
+  return (major.length && nearestStreet(l, major, radius)) || nearestStreet(l, roads, radius);
+}
+
+function nearestStreet(l: Landmark, roads: readonly RoadLine[], radius: number): Spot | null {
+  const k = Math.cos((l.at[0] * Math.PI) / 180);
+  let best: { d: number; x: number; y: number; bearing: number } | null = null;
+  for (const r of roads) {
+    if (r.bridge) continue;
+    for (let i = 1; i < r.pts.length; i++) {
+      const ax = (r.pts[i - 1][0] - l.at[1]) * k * M_PER_DEG, ay = (r.pts[i - 1][1] - l.at[0]) * M_PER_DEG;
+      const bx = (r.pts[i][0] - l.at[1]) * k * M_PER_DEG, by = (r.pts[i][1] - l.at[0]) * M_PER_DEG;
+      const len = (bx - ax) ** 2 + (by - ay) ** 2;
+      if (len < 1) continue;
+      const t = Math.max(0, Math.min(1, (-ax * (bx - ax) - ay * (by - ay)) / len));
+      const x = ax + t * (bx - ax), y = ay + t * (by - ay);
+      const d = Math.hypot(x, y);
+      if (d <= radius && (!best || d < best.d)) best = { d, x, y, bearing: (Math.atan2(bx - ax, by - ay) * 180) / Math.PI };
+    }
   }
-  return best;
+  if (!best) return null;
+  // The model's length runs along its x axis (facing - 90): of the two facings along the street,
+  // the one closer to its own.
+  const options = [best.bearing + 90, best.bearing + 270].map((f) => ((f % 360) + 360) % 360);
+  const turn = (d: number) => Math.abs(((d - l.facing + 540) % 360) - 180);
+  return { at: [l.at[0] + best.y / M_PER_DEG, l.at[1] + best.x / (k * M_PER_DEG)], facing: turn(options[0]) <= turn(options[1]) ? options[0] : options[1] };
 }
