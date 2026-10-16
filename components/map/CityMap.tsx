@@ -215,8 +215,9 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     lm.setNight(themeRef.current === "night");
     const ensure = () => {
       if (!map.isStyleLoaded() || map.getLayer(LANDMARK_LAYER_ID)) return;
-      // Under the bridges, street names and pins; level with the 3D blocks.
-      map.addLayer(lm.layer, map.getLayer("bridge-casing") ? "bridge-casing" : undefined);
+      // Above the locked boroughs' dark veil (owner, Oct 16: the bridge's Manhattan end was covered
+      // at night), under the street names and pins; level with the 3D blocks by depth.
+      map.addLayer(lm.layer, map.getLayer("street-names") ? "street-names" : undefined);
     };
     ensure();
     map.on("styledata", ensure);
