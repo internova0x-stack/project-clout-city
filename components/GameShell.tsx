@@ -24,7 +24,7 @@ import { modelSex } from "@/lib/avatarCatalog";
 import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
-import { callName, regularAt, regularLine } from "@/lib/cast";
+import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
@@ -111,9 +111,15 @@ const TASKS_SEEN_KEY = "cc-tasks-seen";
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
 /** Who's talking in a place (chatter templates are written per role). */
-function npcRole(p: Place): { who: string; role: string } {
+function npcRole(p: Place, floor = 1): { who: string; role: string } {
   // v0.11 shared rooms: who's there depends on the kind of place.
   const tag = (t: string) => p.tags.includes(t);
+  // The Hub (owner, Oct 16): who's there depends on the floor.
+  if (tag("hub")) {
+    if (floor === 2) return { who: "A gamer", role: "regular" };
+    if (floor === 3 || floor === 0) return { who: "A regular", role: "regular" };
+    return { who: "The server", role: "barista" };
+  }
   if (tag("games")) return { who: "A gamer", role: "regular" };
   if (tag("cinema")) return { who: "The usher", role: "clerk" };
   if (tag("police")) return { who: "The desk sergeant", role: "clerk" };
@@ -1656,12 +1662,15 @@ export function GameShell({
               insetBottom={170}
               mood={roomMood}
               onUse={(it) => useInPlace(inside, it)}
-              npcNames={insideFloor === 1 && regularAt(inside.id) ? [callName(regularAt(inside.id)!.name)] : undefined}
+              // Everyone has a name (owner, Oct 16); the regular's is the pink pill.
+              npcNames={(insideTemplate?.npcs ?? []).map((_, i) => (i === 0 && insideFloor === 1 && regularAt(inside.id) ? callName(regularAt(inside.id)!.name) : crowdName(inside.id, insideFloor, i)))}
+              npcHost={insideFloor === 1 && regularAt(inside.id) ? 0 : undefined}
               onNpcTap={(i) => void (async () => {
                 // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
                 // hunt clue first, in the panel below the room.
                 if (i === 0 && insideFloor === 1 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
-                const { who, role } = npcRole(inside);
+                const { who: kind, role } = npcRole(inside, insideFloor);
+                const who = `${crowdName(inside.id, insideFloor, i)} (${kind.replace(/^(A|An|The|Your) /, "")})`;
                 // v0.10: the regular may tell you a piece of gossip first.
                 const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
                 // v0.11: everyone else points the player to their next gossip lead, when they have one.

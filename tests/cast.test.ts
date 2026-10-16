@@ -37,3 +37,18 @@ test("lines: Studio lines join the everyday ones; a live story leads every other
   assert.equal(regularLine(sal, 1, { evergreen: everyday, story }), "b");
   assert.equal(regularLine(sal, 0, { evergreen: {} }), "Nice day for it.");
 });
+
+test("people in a room have their own names, the same every visit and never two alike", async () => {
+  const { crowdName } = await import("../lib/cast.ts");
+  const { PLACES } = await import("../lib/city.ts");
+  const { placeFloor, placeFloors } = await import("../lib/rooms.ts");
+  for (const p of PLACES) {
+    for (const f of [1, ...placeFloors(p)]) {
+      const t = placeFloor(p, f);
+      if (!t?.npcs?.length) continue;
+      const names = t.npcs.map((_, i) => crowdName(p.id, f, i));
+      assert.equal(new Set(names).size, names.length, `${p.id} floor ${f}: ${names.join(", ")}`);
+      assert.deepEqual(names, t.npcs.map((_, i) => crowdName(p.id, f, i)));
+    }
+  }
+});

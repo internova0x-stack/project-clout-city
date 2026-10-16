@@ -69,6 +69,21 @@ export function callName(name: string): string {
   return /\.$/.test(a) && b ? `${a} ${b}` : a;
 }
 
+/**
+ * The people in a room who aren't its regular (owner, Oct 16: "give the characters different names instead of
+ * a generic 'A gamer'"): an invented first name each, the same for a place, floor and spot on every visit,
+ * and never two alike in one room.
+ */
+const CROWD_NAMES = [
+  "Jules", "Marisol", "Dev", "Priya", "Tavi", "Rosalind", "Kenji", "Ama", "Nico", "Bex", "Omari", "Yara", "Sunny", "Ilse",
+  "Mateo", "Noor", "Fitz", "Calla", "Ravi", "Dot", "Hollis", "Zuri", "Benji", "Esme", "Kofi", "Lupe", "Wren", "Dario",
+  "Mina", "Tobias", "Ines", "Rocky", "Shay", "Leandro", "Pia", "Gideon", "Tamsin", "Arlo", "Sol", "Vee",
+];
+export function crowdName(placeId: string, floor: number, i: number): string {
+  const seed = [...`${placeId}:${floor}`].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  return CROWD_NAMES[(seed + i * 7) % CROWD_NAMES.length];
+}
+
 export function regularAt(placeId: string): Regular | undefined {
   return REGULARS.find((r) => r.placeId === placeId);
 }

@@ -700,7 +700,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { id: "plant-2", kind: "plant", x: -4.5, z: -3.4, rot: 0 },
     ],
     spawn: [0.0, 3.2],
-    npcs: [{ x: 0.6, z: 1.6, facing: 3.14 }, { x: -2.0, z: -3.6, facing: 0 }, { x: -1.8, z: 1.8, facing: -2.2 }],
+    npcs: [{ x: 1.4, z: 2.4, facing: 0 }, { x: -2.0, z: -3.6, facing: 0 }, { x: -1.8, z: 1.8, facing: -2.2 }],
   },
   // Second floor: the game room, lit by the cabinets. Stairs down to the diner, up to the lounge.
   hubGames: {
