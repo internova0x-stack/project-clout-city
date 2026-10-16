@@ -66,14 +66,17 @@ function loadSpots(): Record<string, Spot> {
     return {};
   }
 }
-/** Landmarks that aren't places show their name from this zoom. */
-const LABEL_ZOOM = 13.5;
+/** Landmarks that aren't places show their name from this zoom (owner, Oct 16: "the screen looks chaotic"). */
+const LABEL_ZOOM = 15.8;
 /** Placement needs every street, which the tiles carry from zoom 14. */
 const PLACE_ZOOM = 14;
 
 const pinWidth = (pin: PlacePin) => Math.min(180, 34 + pin.name.length * 6.6);
-/** Below this zoom, pins show just their icon so every place stays visible across the city. */
-const COMPACT_ZOOM = 13;
+/**
+ * Below this zoom, pins show just their icon: the 3D buildings already say where things are, and
+ * names only come in close up (owner, Oct 16: "the screen looks chaotic").
+ */
+const COMPACT_ZOOM = 15.8;
 const ICON_PX = 30;
 const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 
@@ -370,9 +373,9 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       const ground = project(at);
       const s = { x: ground.x, y: ground.y - lift(pin.id, at) };
       const w = compact ? ICON_PX : pinWidth(pin);
-      // Zoomed out, icons may overlap a little before they group, so more places stay visible.
-      const near = compact ? 18 : (w: number, ow: number) => (ow + w) / 2 + 4;
-      const hit = out.find((c) => c.spots.some((o) => Math.abs(o.x - s.x) < (typeof near === "number" ? near : near(w, o.w)) && Math.abs(o.y - s.y) < (compact ? 18 : PIN_HEIGHT_PX)));
+      // Icons closer than about one icon apart group into a count, so the map stays calm.
+      const near = compact ? 30 : (w: number, ow: number) => (ow + w) / 2 + 4;
+      const hit = out.find((c) => c.spots.some((o) => Math.abs(o.x - s.x) < (typeof near === "number" ? near : near(w, o.w)) && Math.abs(o.y - s.y) < (compact ? 30 : PIN_HEIGHT_PX)));
       if (hit) {
         hit.pins.push(pin);
         hit.spots.push({ x: s.x, y: s.y, w });
@@ -434,12 +437,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                   }}
                   aria-label={`${c.pins.length} places. Tap to zoom in.`}
                 >
-                  <span className="map-stack" aria-hidden="true">
-                    {c.pins.slice(0, 3).map((p, i) => (
-                      <span key={p.id} className="map-pin-tile icon-only" style={{ background: tileBackground(glyphFor(p)), zIndex: 3 - i }}><Glyph name={glyphFor(p)} size={14} /></span>
-                    ))}
-                    <span className="map-stack-count hud-number">{c.pins.length}</span>
-                  </span>
+                  <span className="map-cluster glass-hud hud-number" aria-hidden="true">{c.pins.length}</span>
                 </button>
               );
             }
@@ -453,7 +451,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                   onClick={() => onPinTap?.(pin)}
                   aria-label={`${pin.name}, ${pin.neighborhood}`}
                 >
-                  <span className="map-pin-tile icon-only" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={16} /></span>
+                  <span className="map-pin-tile icon-only" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={14} /></span>
                   <span className="map-pin-stem" />
                   <span className="map-pin-dot" />
                 </button>
@@ -482,6 +480,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             const ground = project(l.at);
             const s = { x: ground.x, y: ground.y - lift(l.id, l.at) };
             if (!visible(s)) return null;
+            // A place's pin wins over a landmark's name where they'd overlap.
+            if (placed.some((c) => Math.abs(c.x - s.x) < 90 && Math.abs(c.y - s.y) < PIN_HEIGHT_PX + 8)) return null;
             return (
               <span key={l.id} className="map-landmark-label glass-hud" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}>
                 {l.name}

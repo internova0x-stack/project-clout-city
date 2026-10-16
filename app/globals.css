@@ -224,7 +224,11 @@ a { color:inherit; }
 @media (max-width:360px) { .hud-time { min-width:0; } .hud-ampm { font-size:10px; } .hud { padding-left:10px; } }
 
 /* Under-HUD pills (C2) */
-.under-hud { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); left:12px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+/* Bounded on both sides so a long headline ends in an ellipsis instead of running off the screen (owner, Oct 16). */
+.under-hud { position:absolute; z-index:15; top:calc(72px + var(--safe-top)); left:12px; right:12px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; pointer-events:none; }
+.under-hud > * { pointer-events:auto; max-width:100%; }
+/* On short phones the side buttons reach up to the pills: stop short of them. */
+@media (max-height:700px) { .under-hud { right:74px; } }
 
 /* Side column (C3) */
 /* v0.11 (owner, Oct 14): just above the bottom bar, TikTok-style: separate round buttons with labels. */
@@ -976,13 +980,11 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 
 /* Zoomed out: pins are just their icon, so the whole city shows its places */
 .map-pin.compact { display:flex; flex-direction:column; align-items:center; }
-.map-pin-tile.icon-only { width:28px; height:28px; border-radius:9px; display:grid; place-items:center; box-shadow:0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,.3); }
+.map-pin-tile.icon-only { width:24px; height:24px; border-radius:8px; display:grid; place-items:center; box-shadow:0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,.3); }
 
 .guest-card-logo { display:block; margin:0 0 10px; font-size:26px; line-height:1.1; }
-.map-stack { display:flex; align-items:center; position:relative; }
-.map-stack .map-pin-tile.icon-only { width:26px; height:26px; }
-.map-stack .map-pin-tile + .map-pin-tile { margin-left:-12px; }
-.map-stack-count { position:absolute; top:-8px; right:-10px; min-width:18px; height:18px; padding:0 4px; border-radius:var(--r-pill); background:var(--night-900); color:#fff; font-size:11px; line-height:18px; text-align:center; box-shadow:0 0 0 2px #fff; }
+/* Places too close to tell apart: one quiet glass circle with how many (owner, Oct 16: "the screen looks chaotic"). */
+.map-cluster { min-width:30px; height:30px; padding:0 8px; border-radius:var(--r-pill); display:grid; place-items:center; font-size:13px; color:var(--text-1); box-shadow:var(--elev-2); }
 
 /* ---------- v0.5.1 fixes: #36 close buttons, #38/#42 page scroll, #41 tutorial ---------- */
 /* #36: the close button always sits on top of the sheet's content (illustrations, the iOS
@@ -1053,7 +1055,7 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .studio-card .row > select.studio-input, .studio-card .row > input.studio-input { width:auto; flex:1 1 160px; }
 
 /* ---------- v0.6 City News: ticker headline, home card, news cards ---------- */
-.news-ticker { min-width:0; flex:1 1 auto; max-width:calc(100% - 150px); animation:rise-in .25s ease-out; }
+.news-ticker { min-width:0; flex:1 1 auto; animation:rise-in .25s ease-out; }
 .news-ticker-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .news-prompt { background:linear-gradient(135deg, #FFF6E0 0%, #FFD9C2 100%); }
 .news-card.news-column { background:linear-gradient(160deg, #FFF0F6 0%, #FFFFFF 70%); }
