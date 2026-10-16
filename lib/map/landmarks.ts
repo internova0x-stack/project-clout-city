@@ -12,7 +12,8 @@ export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "
   | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto"
   | "boutique" | "showroom" | "dealership" | "cinema" | "arena"
   | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub"
-  | "googie-diner" | "sky-dining" | "supermarket" | "cowork" | "precinct";
+  | "googie-diner" | "sky-dining" | "supermarket" | "cowork" | "precinct"
+  | "chapel" | "fitness" | "hell-gate" | "el-station" | "condo-towers" | "pier-park";
 
 export interface Landmark {
   id: string;
@@ -95,6 +96,13 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "steinway-fresh", placeId: "steinway-fresh", name: "Steinway Fresh Mart", at: [40.7628, -73.916], kind: "supermarket", facing: 180, scale: 1.7, clear: 48, ground: "block" },
   { id: "triborough-works", placeId: "triborough-works", name: "Triborough Works", at: [40.766, -73.9252], kind: "cowork", facing: 180, scale: 1.7, clear: 42, ground: "block" },
   { id: "precinct-114-half", placeId: "precinct-114-half", name: "The 114½ Precinct", at: [40.769, -73.9228], kind: "precinct", facing: 180, scale: 2, clear: 36, ground: "block" },
+  // Batch 9: the last places. The station stands over its street (no site), like the bridge.
+  { id: "harmony-chapel", placeId: "harmony-chapel", name: "Harmony Community Chapel", at: [40.7652, -73.913], kind: "chapel", facing: 180, scale: 2, clear: 32, ground: "block" },
+  { id: "rep-count", placeId: "rep-count", name: "Rep Count Fitness", at: [40.764, -73.9146], kind: "fitness", facing: 180, scale: 2, clear: 34, ground: "block" },
+  { id: "hell-gate-park", placeId: "hell-gate-park", name: "Hell Gate Park", at: [40.779, -73.9232], kind: "hell-gate", facing: 180, scale: 1.3, clear: 95, ground: "park" },
+  { id: "astoria-blvd-station", placeId: "astoria-blvd-station", name: "Astoria Blvd station", at: [40.7702, -73.918], kind: "el-station", facing: 180, scale: 1.6, clear: 0, ground: "none" },
+  { id: "skyline-pier", placeId: "skyline-pier", name: "Skyline Pier Residences", at: [40.7478, -73.9592], kind: "condo-towers", facing: 180, scale: 1.3, clear: 50, ground: "block" },
+  { id: "hunters-pier", placeId: "hunters-pier", name: "Hunter's Pier", at: [40.7432, -73.9612], kind: "pier-park", facing: 270, scale: 1.6, clear: 60, ground: "park" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 

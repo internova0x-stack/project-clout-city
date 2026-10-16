@@ -3,7 +3,7 @@
 // signs glow and monuments are uplit. Everything that changes at night registers in a Themed.
 
 import {
-  AdditiveBlending, BoxGeometry, CanvasTexture, CircleGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, Float32BufferAttribute, Group,
+  AdditiveBlending, BoxGeometry, CanvasTexture, CapsuleGeometry, CircleGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, Float32BufferAttribute, Group,
   IcosahedronGeometry, Vector3,
   type Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, type Object3D, PlaneGeometry, RepeatWrapping,
   SphereGeometry, SRGBColorSpace, TorusGeometry,
@@ -1790,6 +1790,186 @@ function precinct(t: Themed): Group {
   return g;
 }
 
+// ---------------------------------------------------------------------------
+// Harmony Community Chapel: a small white clapboard chapel with a bell tower and a garden
+// ---------------------------------------------------------------------------
+function chapel(t: Themed): Group {
+  const g = new Group();
+  const white = glowing(t, "#F4F1EA", C.amber, 0.3, 0);
+  const roof = solid("#2F8F8A");
+  g.add(at(new Mesh(new BoxGeometry(9, 7, 16), white), 0, 3.5, -2));
+  g.add(at(gable(9.6, 4.5, 16.6, roof), 0, 7, -2));
+  g.add(at(new Mesh(new BoxGeometry(4.5, 12, 4.5), white), 0, 6, 7));
+  g.add(at(new Mesh(new ConeGeometry(3.4, 6, 4).rotateY(Math.PI / 4), roof), 0, 15, 7));
+  g.add(at(new Mesh(new SphereGeometry(0.7, 8, 6), glowing(t, "#C9A26B", C.amber, 1.6, 0)), 0, 10, 7));
+  const glass = [C.coral, C.sky, C.amber];
+  for (const x of [-4.55, 4.55]) for (let i = 0; i < 3; i++) g.add(at(new Mesh(new BoxGeometry(0.2, 3, 1.4), glowing(t, "#3A4A5A", glass[i], 1.8, 0)), x, 3.6, -7 + i * 5));
+  g.add(at(new Mesh(new BoxGeometry(2, 3.4, 0.3), solid("#8B5E3C")), 0, 1.7, 9.3));
+  // Garden: hedges and flower beds.
+  for (const x of [-7, 7]) {
+    g.add(at(new Mesh(new BoxGeometry(2, 1, 14), solid("#4E8F5A")), x, 0.5, 0));
+    g.add(at(new Mesh(new BoxGeometry(1.6, 0.4, 3), solid(C.pink)), x, 1.2, 8));
+  }
+  g.add(at(sign(t, "HARMONY CHAPEL", 7, 0.9, { bg: C.cream, fg: "#2F8F8A" }, 1.4), 0, 4.6, 9.3));
+  g.add(at(lightPool(t, 9, C.amber, 0.5), 0, 0, 9));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Rep Count Fitness: a corner gym with a glass front, a big digital rep counter and a rooftop yoga deck
+// ---------------------------------------------------------------------------
+function fitness(t: Themed): Group {
+  const g = new Group();
+  const glass = facade(t, { wall: "#3B3A44", glass: "#BFE6F7", style: "storefront", lit: 1, seed: 291, frame: C.coral }, 1.4);
+  g.add(at(litBox(t, 18, 9, 16, glass, solid("#55545E"), C.coral, 0.5), 0, 4.5, 0));
+  // The rep counter: a lit digital display on the corner.
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 96;
+  const x = c.getContext("2d")!;
+  x.fillStyle = "#14111A";
+  x.fillRect(0, 0, 256, 96);
+  x.fillStyle = "#FF5A3C";
+  x.font = "900 72px ui-monospace, monospace";
+  x.textAlign = "center";
+  x.textBaseline = "middle";
+  x.fillText("0 9 8", 128, 52);
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  const screen = new MeshStandardMaterial({ map: tex, emissive: "#FFFFFF", emissiveMap: tex, emissiveIntensity: 0.4 });
+  t.glows.push({ mat: screen, day: 0.4, night: 1.8 });
+  g.add(at(new Mesh(new PlaneGeometry(8, 3), screen), 0, 7.4, 8.1));
+  // Rooftop yoga deck with mats and planters.
+  g.add(at(new Mesh(new BoxGeometry(14, 0.3, 12), solid("#C9A27A")), 0, 9.2, 0));
+  for (let i = 0; i < 4; i++) g.add(at(new Mesh(new BoxGeometry(1.2, 0.1, 3), solid([C.coral, C.tealLight, C.amber, C.sky][i])), -4.5 + i * 3, 9.4, 0));
+  for (const x2 of [-6, 6]) g.add(at(new Mesh(new SphereGeometry(1, 6, 4), solid("#4E8F5A")), x2, 10.2, -5));
+  g.add(at(sign(t, "REP COUNT", 8, 1.2, { bg: C.ink, fg: C.coral }, 2.2), 0, 5.4, 8.2));
+  g.add(at(lightPool(t, 10, C.coral, 0.45), 0, 0, 10));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Hell Gate Park: the great steel arch of the rail bridge rising over the park, its stone towers,
+// lawns and a running track
+// ---------------------------------------------------------------------------
+function hellGate(t: Themed): Group {
+  const g = new Group();
+  const stone = glowing(t, "#C9B79C", C.amber, 0.35, 0);
+  const steel = glowing(t, "#B33A3A", "#FF7A5A", 0.5, 0);
+  // Lawns and a track.
+  g.add(at(new Mesh(new CylinderGeometry(70, 70, 0.2, 40), solid("#7CBF7A")), 0, 0.1, 0));
+  const track = new Mesh(new CylinderGeometry(20, 20, 0.3, 32), solid(C.coral));
+  track.scale.set(1.6, 1, 1);
+  g.add(at(track, -26, 0.2, 30));
+  const pitch = new Mesh(new CylinderGeometry(15, 15, 0.35, 32), solid("#5FA36B"));
+  pitch.scale.set(1.6, 1, 1);
+  g.add(at(pitch, -26, 0.25, 30));
+  // Two stone towers and the arch between them (the arch's half reaching over the park).
+  for (const x of [-40, 40]) {
+    g.add(at(new Mesh(new BoxGeometry(12, 40, 14), stone), x, 20, -20));
+    g.add(at(new Mesh(new BoxGeometry(14, 3, 16), stone), x, 41.5, -20));
+  }
+  const pts: [number, number][] = [];
+  for (let i = 0; i <= 16; i++) {
+    const a = (i / 16) * Math.PI;
+    pts.push([-34 + (i / 16) * 68, 30 + Math.sin(a) * 26]);
+  }
+  for (const z of [-26, -14]) {
+    for (let i = 1; i < pts.length; i++) g.add(strut([pts[i - 1][0], pts[i - 1][1], z], [pts[i][0], pts[i][1], z], 2.4, steel));
+    g.add(strut([-34, 34, z], [34, 34, z], 1.8, steel));
+    for (let i = 1; i < pts.length - 1; i += 2) g.add(strut([pts[i][0], 34, z], [pts[i][0], pts[i][1], z], 0.8, steel));
+  }
+  g.add(at(new Mesh(new BoxGeometry(70, 1.2, 14), solid(C.stoneDark)), 0, 34, -20));
+  // Lamps along the paths.
+  lampRow(t, g, -50, 10, 50, 10, 6);
+  g.add(at(lightPool(t, 40, "#FF7A5A", 0.3), 0, 0.3, -20));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Astoria Blvd station: the elevated platform over the avenue: steel columns, a canopy, stairs,
+// and a train waiting at the platform
+// ---------------------------------------------------------------------------
+function elStation(t: Themed): Group {
+  const g = new Group();
+  const steel = solid("#2F6B5A");
+  const len = 90;
+  // Columns either side of the avenue, girders and the deck.
+  for (let x = -len / 2; x <= len / 2; x += 10) for (const z of [-9, 9]) g.add(at(new Mesh(new BoxGeometry(0.9, 9, 0.9), steel), x, 4.5, z));
+  for (const z of [-9, 9]) g.add(at(new Mesh(new BoxGeometry(len + 2, 1.2, 1), steel), 0, 9.2, z));
+  g.add(at(new Mesh(new BoxGeometry(len, 0.8, 20), solid("#6B6570")), 0, 10.2, 0));
+  // Platform canopies, lit underneath at night.
+  for (const z of [-6, 6]) {
+    g.add(at(new Mesh(new BoxGeometry(len - 10, 0.4, 5), solid("#2F6B5A")), 0, 14.4, z));
+    for (let x = -len / 2 + 8; x <= len / 2 - 8; x += 12) g.add(at(new Mesh(new BoxGeometry(0.4, 3.8, 0.4), steel), x, 12.5, z));
+    g.add(at(new Mesh(new BoxGeometry(len - 12, 0.2, 4), glowing(t, "#D7E1E7", "#FFE6AA", 1.6, 0)), 0, 14.1, z));
+  }
+  // A train at the platform, windows lit at night.
+  const car = solid("#B9C6CF", { metal: 0.3, rough: 0.4 });
+  for (let i = 0; i < 4; i++) {
+    g.add(at(new Mesh(new BoxGeometry(18, 3.4, 3), car), -27 + i * 18.4, 12.5, 0));
+    g.add(at(new Mesh(new BoxGeometry(16, 1, 3.05), glowing(t, "#3A4A5A", "#FFE6AA", 1.4, 0)), -27 + i * 18.4, 13, 0));
+    g.add(at(new Mesh(new BoxGeometry(18.05, 0.4, 3.05), solid("#F2C14E")), -27 + i * 18.4, 11.4, 0));
+  }
+  // Stairs down to the sidewalks, and the station sign.
+  for (const [x, z] of [[-30, 12], [30, -12]] as const) {
+    const stair = new Mesh(new BoxGeometry(3, 0.6, 14), steel);
+    stair.rotation.x = z > 0 ? -0.62 : 0.62;
+    g.add(at(stair, x, 5, z));
+  }
+  g.add(at(sign(t, "ASTORIA BLVD", 12, 1.4, { bg: "#14111A", fg: C.cream }, 1.6), 0, 16, 9.2));
+  g.add(at(lightPool(t, 30, "#FFE6AA", 0.35), 0, 0.2, 0));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Skyline Pier Residences: three stepped glass towers by the water with balconies and a lit crown
+// ---------------------------------------------------------------------------
+function condoTowers(t: Themed): Group {
+  const g = new Group();
+  const glass = facade(t, { wall: "#9ED8F7", glass: "#E8F6FF", style: "curtain", lit: 0.8, seed: 301, frame: "#5E8FA6" });
+  const glass2 = facade(t, { wall: "#BFE6F7", glass: "#F4FBFF", style: "curtain", lit: 0.75, seed: 303, frame: "#6FA0B6" });
+  g.add(at(litBox(t, 46, 8, 24, facade(t, { wall: C.cream, glass: "#F2C7A0", style: "storefront", lit: 0.9, seed: 305, frame: C.stoneDark }), solid("#C9B79C"), C.amber, 0.5), 0, 4, 0));
+  for (const [x, h, m] of [[-14, 76, glass], [2, 62, glass2], [16, 48, glass]] as const) {
+    g.add(at(litBox(t, 13, h, 13, m, solid("#8FA4B8"), C.sky, 0.4), x, 8 + h / 2, -2));
+    // Balconies every few floors on the front.
+    for (let y = 14; y < 8 + h; y += 8) g.add(at(new Mesh(new BoxGeometry(13.6, 0.4, 1.6), solid("#F4FBFF")), x, y, 5));
+    g.add(at(new Mesh(new BoxGeometry(13.4, 1, 13.4), glowing(t, C.cream, C.sky, 1.6, 0)), x, 8 + h + 0.5, -2));
+  }
+  g.add(at(sign(t, "SKYLINE PIER", 14, 1.6, { bg: C.ink, fg: C.sky }, 1.8), 0, 6.4, 12.2));
+  g.add(at(lightPool(t, 22, C.sky, 0.35), 0, 0, 10));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Hunter's Pier: a waterfront park: a cantilevered overlook, wavy lawns, a kayak launch, benches
+// ---------------------------------------------------------------------------
+function pierPark(t: Themed): Group {
+  const g = new Group();
+  const deck = solid("#B59E80");
+  // The overlook: a long deck reaching out over the water (toward +z), on slim legs, rail lit at night.
+  const over = new Mesh(new BoxGeometry(10, 0.8, 34), deck);
+  over.rotation.x = -0.08;
+  g.add(at(over, 0, 3.2, 22));
+  for (const z of [10, 24, 36]) for (const x of [-4, 4]) g.add(at(new Mesh(new CylinderGeometry(0.25, 0.25, 4, 5), solid(C.steel)), x, 1.5, z));
+  for (const x of [-5, 5]) g.add(at(new Mesh(new BoxGeometry(0.2, 0.2, 34), glowing(t, C.cream, "#FFE6AA", 2.2, 0)), x, 4.4, 22));
+  // Wavy lawns: low mounds.
+  const grass = solid("#7CBF7A");
+  for (const [x, z, r] of [[-16, -8, 10], [14, -12, 12], [-4, -22, 9]] as const) {
+    const mound = new Mesh(new SphereGeometry(r, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), grass);
+    mound.scale.set(1.4, 0.18, 1);
+    g.add(at(mound, x, 0, z));
+  }
+  // Kayak launch and kayaks.
+  g.add(at(new Mesh(new BoxGeometry(8, 0.4, 6), deck), 18, 0.4, 8));
+  for (const [x, c] of [[16, C.coral], [18.5, C.amber], [21, C.tealLight]] as const) g.add(at(new Mesh(new CapsuleGeometry(0.4, 3.2, 3, 6).rotateX(Math.PI / 2), solid(c)), x, 0.9, 9));
+  // Benches and lamps.
+  for (const x of [-10, -4, 4, 10]) g.add(at(new Mesh(new BoxGeometry(2.4, 0.5, 0.8), solid("#8B5E3C")), x, 0.5, 2));
+  lampRow(t, g, -18, 4, 18, 4, 4);
+  treeRing(g, 30, 10);
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
   "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
@@ -1798,6 +1978,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
   "googie-diner": googieDiner, "sky-dining": skyDining, supermarket, cowork, precinct,
+  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

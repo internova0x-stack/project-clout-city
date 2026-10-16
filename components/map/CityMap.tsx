@@ -272,9 +272,12 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
       for (const l of todo) {
         done.add(l.id);
         // A bridge fits itself to its road; anything else steps off main roads.
-        if (l.ground === "none") {
+        if (l.kind === "bridge") {
           const fit = fitBridge(l, roads);
           if (fit) found[l.id] = fit;
+        } else if (l.ground === "none") {
+          // Over the street (an elevated station): stays put, only turns to the grid.
+          found[l.id] = { at: l.at, facing: gridFacing(l, roads) };
         } else {
           const at = placeLandmark(l, roads, withPositions({ ...spotsRef.current, ...found }));
           // Turned to line up with the streets around where it stands.
