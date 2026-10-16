@@ -225,10 +225,12 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     if (!map) return;
     const traffic = vehicles ? createTraffic(map, () => sitesRef.current) : undefined;
     const t0 = performance.now();
-    const lm = createLandmarkLayer(undefined, traffic);
+    // Only the landmarks around where the map opens are built now; the rest follow while the phone is idle.
+    const c = map.getCenter();
+    const lm = createLandmarkLayer(undefined, traffic, [c.lat, c.lng]);
     if (process.env.NODE_ENV !== "production") {
       const w = window as unknown as { __launch?: Record<string, number> };
-      w.__launch = { ...w.__launch, landmarksBuildMs: performance.now() - t0, landmarksBuiltAt: performance.now() };
+      w.__launch = { ...w.__launch, landmarksBuildMs: performance.now() - t0, landmarksBuiltAt: performance.now(), landmarksNear: lm.built().done };
       map.once("idle", () => { w.__launch = { ...w.__launch, firstIdleAt: performance.now() }; });
       map.once("render", () => { w.__launch = { ...w.__launch, firstRenderAt: performance.now() }; });
     }
