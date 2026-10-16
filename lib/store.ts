@@ -58,8 +58,8 @@ export const serialLabel = (n: number) => `No. ${String(n).padStart(4, "0")}`;
 
 /** Lola's note on the back of each postcard (C39, v0.7 Collection). Keyed by place id. */
 export const POSTCARD_NOTES: Record<string, string> = {
-  unisphere: "Wish you were here. Actually, glad you're not: more globe for me.",
-  "gantry-plaza": "The skyline posed for me. Manhattan never calls back, but it does look good from here.",
+  unisphere: "Wish you were here, babe. Actually, glad you're not: more globe for me.",
+  "gantry-plaza": "The skyline posed for me. Manhattan never calls back, but darling, it does look good from here.",
 };
 
 export type CheckoutResult = { ok: true; url: string } | { ok: false; error: string };

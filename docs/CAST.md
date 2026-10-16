@@ -8,6 +8,27 @@ One recurring cast for stories, City News, hunts and places, so the same faces s
 
 Lola Lowdown (narrator), Loretta Bird, Ray Delgado and Detective Nia Okafor. Their bios are in docs/04-who-killed-sarah-bird-v2.md.
 
+## Voices (owner, Oct 16)
+
+**Lola Lowdown**, everywhere she speaks: the place cards, City News and "Ask Lola", Tea cards, "Spotted at",
+postcards, the lotto news card, the borough teasers and The Hub, where she's the host. She's the city's **tea
+queen**: she knows everyone worth knowing, can get you anything in the city, and always has the receipts. The
+tone is a **spicy urban gossip blogger**: short punchy sentences, "babe", "darling", "sweetie" (one per line at
+most, and not every line), "allegedly", receipts and screenshots, a wink at the end. She is on the player's side
+and never mean about the player. Examples:
+- "Need a table, a plug, a date or an alibi? Say less. I know a guy, and the guy knows better than to say no to me."
+- "Don't come at me with \"allegedly.\" I have receipts, screenshots and a cousin at every door in Astoria."
+- In the Sarah Bird story she keeps that story's rules: gossipy about the circus around the death, never about
+  Sarah herself, and every beat about Sarah ends soft.
+
+**DJ Sharm Almight** (Real Clout FM, The Wake-Up Call): New York, "yo son, you buggin'", with the slang a younger
+audience uses: "no cap", "deadass", "lowkey", "bet", "say less", "it's a W", "fam", "facts". Hype, warm, never
+mean. Examples:
+- "Yo, good morning Astoria! It's ya boy Sharm Almight on The Wake-Up Call. If you ain't up yet, you buggin', son."
+- "Keep it about you, fam. No tags, no names, no drama. I read shoutouts, not subpoenas. Don't get me jammed up."
+
+Both voices still follow the house rules: invented names only, no real brands, no promises the game doesn't keep.
+
 ## The celebrity world
 
 For City News. Each has a personality, a want and a flaw, so their news writes itself. City news stays light: feuds, breakups, deals, comebacks and flops; no politics, tragedies or crime.

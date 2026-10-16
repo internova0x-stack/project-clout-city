@@ -18,18 +18,18 @@ export const BOROUGHS: Borough[] = [
   { id: "queens", name: "Queens" },
   {
     id: "brooklyn", name: "Brooklyn", labelAt: [40.650, -73.950],
-    teaser: "Brownstones, rooftop parties and a man selling C$14 pickles with a straight face. Brooklyn isn't ready for you. Yet.",
+    teaser: "Brownstones, rooftop parties and a man selling C$14 pickles with a straight face. Brooklyn isn't ready for you yet, babe. Neither are the pickles.",
   },
   {
     id: "manhattan", name: "Manhattan", labelAt: [40.785, -73.966],
-    teaser: "Everyone's in a rush, nobody's on time and the rent has its own publicist. Make Queens jealous first, then we'll talk.",
+    teaser: "Everyone's rushing, nobody's on time and the rent has its own publicist. Make Queens jealous first, darling. Then we'll talk.",
   },
   {
     id: "bronx", name: "The Bronx", labelAt: [40.855, -73.870],
-    teaser: "Home of the original block party, and they will know if you're faking it. Come back with some clout.",
+    teaser: "Home of the original block party, and they will know if you're faking it. Come back with some clout, sweetie. I'll vouch for you.",
   },
   {
     id: "staten_island", name: "Staten Island", labelAt: [40.585, -74.150],
-    teaser: "A free ferry, a lot of opinions and one very loud uncle. The boat isn't running for you yet.",
+    teaser: "A free ferry, a lot of opinions and one very loud uncle. The boat isn't running for you yet, babe. I already called ahead.",
   },
 ];

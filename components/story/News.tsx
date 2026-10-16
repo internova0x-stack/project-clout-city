@@ -88,10 +88,10 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
           </div>
         )
       ) : !feed ? (
-        <Quiet text="No story running right now. Lola's sharpening her pencils. The next one starts on a Sunday." />
+        <Quiet text="No story running right now. Lola's sharpening her nails and her pencils. The next one drops on a Sunday, babe." />
       ) : tab === "today" ? (
         live.length === 0 ? (
-          <Quiet text="No story running right now. Lola's sharpening her pencils. The next one starts on a Sunday." />
+          <Quiet text="No story running right now. Lola's sharpening her nails and her pencils. The next one drops on a Sunday, babe." />
         ) : (
           live.map((arc) => (
             <div key={arc.id} className="stack-12">

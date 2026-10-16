@@ -325,7 +325,7 @@ export const PLACES: Place[] = [
     id: "velvet-static", name: "Velvet Static", emoji: "🍸", category: "nightlife", neighborhood: "Long Island City",
     at: [40.7465, -73.9455], depth: "full", template: "club", palette: ["#FF2E88", "#6B2BD9", "#14111A"],
     tags: ["club", "nightlife", "first_party_venue"], club: { vip: "medium" },
-    lore: "A converted warehouse where the bass is louder than your thoughts. The bouncer has rejected three influencers and one actual prince. You got in once. Act like it was nothing.",
+    lore: "A warehouse where the bass is louder than your thoughts, babe. That bouncer has turned away three influencers and one actual prince. You got in once. Act like it was nothing.",
     actions: [
       { id: "visit", kind: "visit", label: "Get seen on the dance floor", price: 140, energy: 15, mood: 6, confidence: 4, blurb: "Fake it till you make it: pay the bar man to let you in." },
     ],
@@ -334,7 +334,7 @@ export const PLACES: Place[] = [
     id: "grind-and-gossip", name: "Grind & Gossip Café", emoji: "☕", category: "food", neighborhood: "Astoria", tier: "Medium",
     at: [40.7645, -73.9225], depth: "full", template: "cafe", palette: ["#C27C4E", "#F4E3C8", "#3A2A20"],
     tags: ["cafe", "dining_medium", "job_barista"],
-    lore: "Oat-milk lattes and unverified rumors, both served hot. The barista knows everyone's business and spells every name wrong on purpose.",
+    lore: "Oat-milk lattes and unverified rumors, both served hot. Jojo knows everyone's business and spells every name wrong on purpose. My kind of barista.",
     actions: [
       { id: "eat", kind: "eat", label: "Brunch and eavesdrop", price: 42, energy: -30, blurb: "Avocado toast that costs more than your phone bill's feelings." },
       { id: "shift", kind: "shift", label: "Work a barista shift", pay: 120, energy: 25, blurb: "Pull shots, take orders, absorb gossip. Paid in cash and secrets." },
@@ -344,7 +344,7 @@ export const PLACES: Place[] = [
     id: "lucky-seven-deli", name: "Lucky Seven Deli", emoji: "🥪", category: "food", neighborhood: "Jackson Heights", tier: "Budget",
     at: [40.7495, -73.8885], depth: "full", template: "counter", palette: ["#2E8B63", "#FFC21A", "#1F1B26"],
     tags: ["bodega", "dining_budget"],
-    lore: "Open 24 hours, staffed by one man and a cat who runs the place. The chopped cheese is legendary; the receipts are imaginary.",
+    lore: "Open 24 hours, run by one man and a cat who's clearly the boss. The chopped cheese is legendary, sweetie. The receipts are imaginary. I'd know.",
     actions: [
       { id: "eat", kind: "eat", label: "Grab a chopped cheese", price: 16, energy: -15, blurb: "Cheap, fast, life-changing. The cat watches you eat it." },
     ],
@@ -353,7 +353,7 @@ export const PLACES: Place[] = [
     id: "altitude-718", name: "Altitude 718 Rooftop", emoji: "🍽️", category: "food", neighborhood: "Long Island City", tier: "Luxury",
     at: [40.7425, -73.9555], depth: "scene", template: "lounge", palette: ["#F2A900", "#1B2A4A", "#E8D7B0"],
     tags: ["rooftop", "dining_luxury"],
-    lore: "Forty floors up, the skyline does the talking. Nobody comes for the food, but the food is incredible, which is suspicious.",
+    lore: "Forty floors up, where the skyline does the talking. Nobody comes for the food, but the food is incredible, which is suspicious. I'm looking into it.",
     actions: [
       { id: "eat", kind: "eat", label: "Dine with a view", price: 210, energy: -55, blurb: "Small plates, big prices, bigger photos. Being seen here is the point." },
     ],
@@ -362,7 +362,7 @@ export const PLACES: Place[] = [
     id: "flushing-meadows", name: "Flushing Meadows Corona Park", emoji: "🌳", category: "parks", neighborhood: "Flushing Meadows",
     at: [40.7420, -73.8440], depth: "scene", template: "plaza", palette: ["#40B589", "#9ED8F7", "#2F6B4F"],
     tags: ["park", "outdoors"],
-    lore: "Fountains, a giant steel globe and joggers judging your form. The fresh air is free, which in this city is basically a scam.",
+    lore: "Fountains, a giant steel globe and joggers judging your form. Fresh air, free of charge, which in this city is basically a scam. Breathe it in, babe.",
     actions: [
       { id: "hangout", kind: "hangout", label: "Hang out by the fountains", energy: 5, mood: 12, blurb: "Touch grass. Literally. Your mood will thank you." },
     ],
@@ -371,7 +371,7 @@ export const PLACES: Place[] = [
     id: "pedal-pushers", name: "Pedal Pushers Hub", emoji: "🚲", category: "places", neighborhood: "Astoria",
     at: [40.7590, -73.9280], depth: "scene", template: "office", palette: ["#6C8CFF", "#FFC21A", "#1F1B26"],
     tags: ["delivery_hub", "job_delivery"],
-    lore: "Bikes, batteries and the eternal hum of someone's order running late. The dispatcher calls everyone \"champ\" and means it.",
+    lore: "Bikes, batteries and the eternal hum of someone's order running late. The dispatcher calls everyone \"champ\" and means it. Rare, in this town.",
     actions: [
       { id: "shift", kind: "shift", label: "Ride a delivery shift", pay: 135, energy: 30, blurb: "Four flights of stairs, no elevator, tip: a thumbs up." },
     ],
@@ -380,7 +380,7 @@ export const PLACES: Place[] = [
     id: "skybridge-tower", name: "Skybridge Tower", emoji: "🏢", category: "places", neighborhood: "Long Island City",
     at: [40.7495, -73.9395], depth: "scene", template: "office", palette: ["#6C8CFF", "#D6CFC4", "#14111A"],
     tags: ["office", "gigs_board"],
-    lore: "Glass, steel and a lobby that smells like ambition and burnt coffee. The gigs board in the lobby is where careers start, or at least side hustles.",
+    lore: "Glass, steel and a lobby that smells like ambition and burnt coffee. The gigs board is where careers start, or at least side hustles. I've seen both.",
     actions: [
       { id: "gigs", kind: "gigs", label: "Check the gigs board", energy: 0, blurb: "Bigger pay than a shift. Bigger egos too." },
     ],
@@ -390,7 +390,7 @@ export const PLACES: Place[] = [
     id: "skyline-pier", name: "Skyline Pier Residences", emoji: "🏙️", category: "places", neighborhood: "Long Island City", story: "sarah-bird",
     at: [40.7478, -73.9592], depth: "scene", template: "civic", palette: ["#9DB2FF", "#E8E2EE", "#2A2350"],
     tags: ["skyline_pier", "residential", "waterfront"],
-    lore: "Glass, concierge and a lobby that smells like eucalyptus and old money pretending to be new. Ray has worked the front desk for twenty years and writes everything down in a little paper book.",
+    lore: "Glass, a concierge and a lobby that smells like eucalyptus and old money pretending to be new. Ray has worked that front desk for twenty years and writes everything down in a little paper book. Everything, darling.",
     actions: [
       { id: "lobby", kind: "visit", label: "Stop by the lobby", price: 0, energy: 5, blurb: "Ray nods. Ray writes something down." },
       { id: "memorial", kind: "visit", label: "Leave flowers at the memorial wall", price: 0, energy: 2, clout: 10, mood: 4, storyUnlock: true, blurb: "White roses, handwritten notes and a lot of quiet. Rest easy, Glass Bird." },
@@ -400,7 +400,7 @@ export const PLACES: Place[] = [
     id: "hunters-pier", name: "Hunter's Pier", emoji: "🌊", category: "parks", neighborhood: "Long Island City", story: "sarah-bird",
     at: [40.7432, -73.9612], depth: "scene", template: "plaza", palette: ["#7FB3E8", "#F6C9A0", "#2F6B5F"],
     tags: ["hunters_pier", "waterfront", "park"],
-    lore: "A pier with the best skyline view in Queens and the worst seagulls in the five boroughs. Joggers, dates and one guy with a saxophone, every single night.",
+    lore: "The best skyline view in Queens and the worst seagulls in the five boroughs. Joggers, first dates and one man with a saxophone, every single night. I've got notes on all of them.",
     actions: [
       { id: "hangout", kind: "hangout", label: "Watch the skyline", energy: 5, mood: 8, blurb: "The city looks better from over here. Most things do." },
     ],
@@ -409,7 +409,7 @@ export const PLACES: Place[] = [
     id: "rockaway-diner", name: "Rockaway Diner", emoji: "🥞", category: "food", neighborhood: "Astoria", tier: "Budget", story: "sarah-bird",
     at: [40.7712, -73.9158], depth: "scene", template: "cafe", palette: ["#E5484D", "#F4E3C8", "#2A2530"],
     tags: ["rockaway_diner", "diner", "dining_budget"],
-    lore: "Vinyl booths, a pie case that rotates like it's auditioning and coffee that has never once been described as artisanal. The waitresses call everyone \"hon\" and mean it.",
+    lore: "Vinyl booths, a pie case that rotates like it's auditioning and coffee nobody has ever called artisanal. The waitresses call everyone \"hon\" and mean it. They also hear everything.",
     actions: [
       { id: "eat", kind: "eat", label: "Grab a booth and a stack", price: 32, energy: -25, blurb: "Pancakes the size of hubcaps. The syrup is self-serve and so is the gossip." },
     ],
@@ -418,7 +418,7 @@ export const PLACES: Place[] = [
     id: "radiant-harbor", name: "Radiant Harbor Church", emoji: "⛪", category: "places", neighborhood: "Astoria", story: "sarah-bird",
     at: [40.7738, -73.9296], depth: "scene", template: "civic", palette: ["#F2C46B", "#F4E3C8", "#3A2C5E"],
     tags: ["radiant_harbor", "church"],
-    lore: "A warm congregation, a very good choir and a building-fund thermometer that's been at 90% for three years. The pastor hosts a podcast. Of course he does.",
+    lore: "A warm congregation, a gorgeous choir and a building-fund thermometer stuck at 90% for three years. The pastor hosts a podcast. Of course he does, babe.",
     actions: [
       { id: "visit", kind: "visit", label: "Sit in on a service", price: 0, energy: 5, mood: 5, blurb: "The choir is genuinely incredible. The coffee after is genuinely not." },
     ],
@@ -427,7 +427,7 @@ export const PLACES: Place[] = [
     id: "pressed-iron-gym", name: "Pressed Iron Gym", emoji: "🏋️", category: "places", neighborhood: "Astoria", story: "sarah-bird",
     at: [40.7662, -73.9118], depth: "scene", template: "gym", palette: ["#6C8CFF", "#C7CCD4", "#1F1B26"],
     tags: ["pressed_iron", "gym"],
-    lore: "Chalk dust, mirrors and men who grunt in full sentences. The front desk keeps very good membership records, which some people find inconvenient.",
+    lore: "Chalk dust, mirrors and men who grunt in full sentences. The front desk keeps very good membership records, which some people find inconvenient. Noted.",
     actions: [
       { id: "workout", kind: "visit", label: "Buy a day pass and lift", price: 35, energy: 20, confidence: 6, mood: 3, blurb: "You lifted. You were seen lifting. Both count." },
     ],
@@ -437,7 +437,7 @@ export const PLACES: Place[] = [
     id: "unisphere", name: "The Unisphere", emoji: "🌐", category: "monument", neighborhood: "Flushing Meadows",
     at: [40.7466, -73.8448], depth: "full", template: "unisphere", palette: ["#8FA4B8", "#9ED8F7", "#2F4F6B"], postcard: "postcard-unisphere",
     tags: ["monument", "park"],
-    lore: "A twelve-story steel globe from a World's Fair that promised flying cars. The cars never came, but the globe stayed, and so did Walt, who gives tours whether you asked or not.",
+    lore: "A twelve-story steel globe from a World's Fair that promised flying cars. The cars never came; the globe stayed, and so did Walt, who gives tours whether you asked or not. Tip him. He talks to me.",
     actions: [
       { id: "visit", kind: "visit", label: "Pose with the globe", energy: 5, mood: 6, clout: 20, blurb: "Hold up the world for a photo. Everyone does. Do it anyway." },
       // v0.9 (#32; owner Oct 13): the plaza's activities.
@@ -451,7 +451,7 @@ export const PLACES: Place[] = [
     id: "gantry-plaza", name: "Gantry Plaza", emoji: "🏗️", category: "monument", neighborhood: "Long Island City",
     at: [40.7454, -73.9584], depth: "full", template: "gantries", palette: ["#3A3540", "#F2A900", "#6C8CFF"], postcard: "postcard-gantry-plaza",
     tags: ["monument", "waterfront"],
-    lore: "Old rail gantries standing guard over the East River like retired bouncers. The best skyline view in Queens, if you can find a spot between the engagement shoots.",
+    lore: "Old rail gantries guarding the East River like retired bouncers. Best skyline in Queens, if you can find a spot between the engagement shoots. Inez shoots half of them. She tells me who's lying.",
     actions: [
       { id: "visit", kind: "visit", label: "Catch the skyline at the gantries", energy: 5, mood: 8, clout: 20, blurb: "Golden hour, river breeze, three proposals in progress behind you." },
       // v0.9 (#32; owner Oct 13): the plaza's activities.
@@ -465,7 +465,7 @@ export const PLACES: Place[] = [
     id: "low-light-lounge", name: "Low Light Lounge", emoji: "🥃", category: "nightlife", neighborhood: "Astoria",
     at: [40.7612, -73.9175], depth: "full", template: "lounge", palette: ["#B8743A", "#2A1E2E", "#E8C79A"],
     tags: ["lounge", "nightlife", "exclusive_venue"], club: {},
-    lore: "Velvet booths, jazz on vinyl and a guest list longer than the drinks menu. Celebrities come here to be left alone, loudly.",
+    lore: "Velvet booths, jazz on vinyl and a guest list longer than the drinks menu. Celebrities come here to be left alone, loudly. I sit two booths over.",
     actions: [
       { id: "visit", kind: "visit", label: "Order something brown and expensive", price: 105, energy: 10, mood: 8, confidence: 3, blurb: "Swirl it. Sniff it. Pretend you can taste the oak." },
     ],
@@ -474,7 +474,7 @@ export const PLACES: Place[] = [
     id: "thread-count", name: "Thread Count Boutique", emoji: "👗", category: "shopping", neighborhood: "Astoria",
     at: [40.7651, -73.9204], depth: "full", template: "store", palette: ["#E0457B", "#F4EDE6", "#2A2530"], opensShop: "fashion",
     tags: ["boutique", "shopping", "fashion"],
-    lore: "Racks curated by a woman who once styled a backup dancer for a famous person. The mirrors are flattering on purpose, and so is the lighting.",
+    lore: "Racks curated by a woman who once styled a backup dancer for a famous person. The mirrors flatter on purpose, and so does the lighting. Trust the fit, not the mirror.",
     actions: [
       { id: "browse", kind: "visit", label: "Try on things you can't afford", energy: 5, mood: 6, blurb: "The fitting room selfie is free. The jacket is not." },
     ],
@@ -483,7 +483,7 @@ export const PLACES: Place[] = [
     id: "fifs-furniture", name: "Fif's Furniture", emoji: "🛋️", category: "shopping", neighborhood: "Long Island City",
     at: [40.7418, -73.9405], depth: "full", template: "showroom", palette: ["#FFC21A", "#F3EBDD", "#2A2530"], opensShop: "home",
     tags: ["furniture", "shopping", "home"],
-    lore: "Fif has sold every sofa in Queens at least twice. The showroom is set up like the apartment you wish you had, and Fif will tell you it fits through your door. It does not.",
+    lore: "Fif has sold every sofa in Queens at least twice. The showroom is the apartment you wish you had, and Fif swears it fits through your door. It does not, sweetie.",
     actions: [
       { id: "browse", kind: "visit", label: "Lie on a bed you can't afford", energy: 5, mood: 6, blurb: "Ten minutes on the display mattress. Nobody stops you." },
     ],
@@ -492,7 +492,7 @@ export const PLACES: Place[] = [
     id: "boulevard-motors", name: "Boulevard Motors", emoji: "🚘", category: "shopping", neighborhood: "Long Island City",
     at: [40.7503, -73.9372], depth: "scene", template: "store", palette: ["#D93A2F", "#E6E8EC", "#1F1B26"], opensShop: "cars",
     tags: ["dealership", "shopping", "cars"],
-    lore: "Balloons, a man in a shiny suit and cars that are all \"basically new.\" Test drives are free; the handshake will cost you.",
+    lore: "Balloons, a man in a shiny suit and cars that are all \"basically new.\" The test drive is free. The handshake will cost you. Read before you sign, babe.",
     actions: [
       { id: "browse", kind: "visit", label: "Take a test drive around the block", energy: 5, mood: 5, confidence: 3, blurb: "Windows down, music up, salesman sweating in the passenger seat." },
     ],
@@ -502,7 +502,7 @@ export const PLACES: Place[] = [
     id: "st-johnsons", name: "St. Johnsons University", emoji: "🎓", category: "campus", neighborhood: "Jamaica",
     at: [40.7224, -73.7949], depth: "full", template: "campus", palette: ["#C8102E", "#F2E6D8", "#1F2A44"],
     tags: ["university", "campus"],
-    lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the student body is here on a scholarship; the other half is here on a parking permit.",
+    lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the students are here on scholarship; the other half are here on a parking permit.",
     actions: [
       { id: "lecture", kind: "visit", label: "Sit in on a lecture", energy: 15, confidence: 6, clout: 15, blurb: "Intro to Marketing. You take notes on the professor's outfit." },
     ],
@@ -511,7 +511,7 @@ export const PLACES: Place[] = [
     id: "queensborough-u", name: "Queensborough University", emoji: "🏛️", category: "campus", neighborhood: "Flushing",
     at: [40.7366, -73.8170], depth: "full", template: "campus", palette: ["#3B6FB6", "#E8E2D0", "#2A2530"],
     tags: ["university", "campus"],
-    lore: "A leafy quad, a library open until 2 AM and forty languages overheard on the walk to class. Tuition is reasonable, which here counts as a personality.",
+    lore: "A leafy quad, a library open until 2 AM and forty languages overheard on the walk to class. Tuition is reasonable, which around here counts as a personality.",
     actions: [
       { id: "lecture", kind: "visit", label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
     ],
@@ -520,7 +520,7 @@ export const PLACES: Place[] = [
     id: "ditmars-deli", name: "Ditmars Deli & Dreams", emoji: "🥪", category: "food", neighborhood: "Astoria", tier: "Budget",
     at: [40.7748, -73.9128], depth: "full", template: "counter", palette: ["#2E9E6A", "#F4E3C8", "#1F1B26"],
     tags: ["bodega", "dining_budget", "astoria"],
-    lore: "Open all night, run by a man named Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account.",
+    lore: "Open all night, run by Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account. I run the fan account.",
     actions: [
       { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 14, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
     ],
@@ -529,7 +529,7 @@ export const PLACES: Place[] = [
     id: "two-bros-pizza", name: "Two Bros Who Fight Pizza", emoji: "🍕", category: "food", neighborhood: "Astoria", tier: "Budget",
     at: [40.7668, -73.9208], depth: "scene", template: "counter", palette: ["#D93A2F", "#FFF1D6", "#2A2530"],
     tags: ["pizza", "dining_budget", "astoria"],
-    lore: "Two brothers, one oven and a feud about anchovies that has lasted eleven years. The slices are great. The yelling is free.",
+    lore: "Two brothers, one oven and a feud about anchovies going on eleven years. The slices are great, the yelling is free and I have it all on video.",
     actions: [
       { id: "eat", kind: "eat", label: "Grab a slice", price: 9, energy: -12, blurb: "Fold it like a local. Burn the roof of your mouth like a local." },
     ],
@@ -541,7 +541,7 @@ export const PLACES: Place[] = [
     id: "neon-spoon", name: "The Hub", emoji: "🛸", category: "places", neighborhood: "Astoria",
     at: [40.7695, -73.9265], depth: "full", template: "hub", palette: ["#3BB8C9", "#FF2E88", "#14111A"],
     tags: ["hub", "diner", "dining_medium", "games", "astoria"], club: {},
-    lore: "Four floors of glass rings stacked like someone dropped a spaceship on 31st Street. Pancakes on the ground floor, games on two, couches on three, and everybody you were hoping to run into.",
+    lore: "Four floors of glass rings stacked like a spaceship parked on 31st Street, babe. The Neon Spoon diner's chrome counter and all-day breakfast downstairs, games on two, couches on three, and everybody worth knowing. Ask for me.",
     actions: [
       { id: "eat", kind: "eat", label: "Pancakes at the Neon Spoon counter", price: 38, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
       { id: "play", kind: "visit", label: "A round in the game room", price: 12, energy: 8, mood: 6, confidence: 2, blurb: "You lose to a stranger. You're friends now. That's how it works up here." },
@@ -552,7 +552,7 @@ export const PLACES: Place[] = [
     id: "up-on-thirty", name: "Up on Thirty", emoji: "🥂", category: "food", neighborhood: "Astoria", tier: "Luxury",
     at: [40.7672, -73.9238], depth: "scene", template: "lounge", palette: ["#C9A0FF", "#F4EDE6", "#1F1B26"],
     tags: ["rooftop", "dining_luxury", "astoria"],
-    lore: "A rooftop above 30th Avenue with string lights, small plates and big opinions. The view is Manhattan; the vibe is \"I'm not from Manhattan, on purpose.\"",
+    lore: "A rooftop above 30th Avenue with string lights, small plates and big opinions. The view is Manhattan; the vibe is \"I'm not from Manhattan, on purpose.\" Reservations go through me.",
     actions: [
       { id: "eat", kind: "eat", label: "Small plates, big view", price: 160, energy: -50, blurb: "Order the octopus. Photograph the octopus. Eventually, eat the octopus." },
     ],
@@ -561,7 +561,7 @@ export const PLACES: Place[] = [
     id: "steinway-fresh", name: "Steinway Fresh Mart", emoji: "🛒", category: "food", neighborhood: "Astoria",
     at: [40.7628, -73.9160], depth: "scene", template: "counter", palette: ["#40B589", "#FFF6E0", "#2A2530"],
     tags: ["supermarket", "astoria"],
-    lore: "Forty kinds of feta and one working shopping cart. Stock the fridge here and cook at home: cheaper than eating out, and nobody photographs it.",
+    lore: "Forty kinds of feta and one working shopping cart. Stock the fridge and cook at home, darling: cheaper than eating out, and nobody photographs it. Your secret's safe.",
     actions: [
       { id: "browse", kind: "visit", label: "Wander the aisles", energy: 3, mood: 3, blurb: "You came for nothing and you're leaving with nothing. Growth." },
     ],
@@ -570,7 +570,7 @@ export const PLACES: Place[] = [
     id: "hellgate-hall", name: "Hellgate Hall", emoji: "🎧", category: "nightlife", neighborhood: "Astoria",
     at: [40.7737, -73.9178], depth: "full", template: "club", palette: ["#FF5A36", "#3A1E6B", "#14111A"],
     tags: ["club", "nightlife", "astoria"], club: { vip: "medium" },
-    lore: "An old warehouse by the tracks with a sound system that registers on seismographs. The DJ booth is a converted subway car. Nobody knows how it got inside.",
+    lore: "A warehouse by the tracks with a sound system that registers on seismographs. The DJ booth is an old subway car. Nobody knows how it got inside. I do. I'm not telling.",
     actions: [
       { id: "visit", kind: "visit", label: "Dance under the train tracks", price: 115, energy: 15, mood: 6, confidence: 4, blurb: "Every time the N train passes, the whole room cheers." },
     ],
@@ -580,7 +580,7 @@ export const PLACES: Place[] = [
     id: "the-sticky-floor", name: "The Sticky Floor", emoji: "🪩", category: "nightlife", neighborhood: "Jackson Heights",
     at: [40.7512, -73.8832], depth: "full", template: "club", palette: ["#3DDC97", "#2B2D6B", "#14111A"],
     tags: ["club", "nightlife"], club: {},
-    lore: "A basement under a phone repair shop with one strobe light and a floor that holds on to your shoes. The DJ takes requests and ignores them. Nobody here is anybody yet, which is the point.",
+    lore: "A basement under a phone repair shop: one strobe light and a floor that keeps your shoes. The DJ takes requests and ignores them. Nobody here is anybody yet. Yet, babe.",
     actions: [
       { id: "visit", kind: "visit", label: "Dance on the sticky floor", price: 40, energy: 15, mood: 6, confidence: 3, blurb: "Your shoes stay. You move. It's a workout, technically." },
     ],
@@ -589,7 +589,7 @@ export const PLACES: Place[] = [
     id: "discount-disco", name: "Discount Disco", emoji: "💿", category: "nightlife", neighborhood: "Flushing",
     at: [40.7577, -73.8336], depth: "full", template: "club", palette: ["#FFC21A", "#B0135A", "#14111A"],
     tags: ["club", "nightlife"], club: {},
-    lore: "A former mattress outlet with a light-up floor that only lights up on one side. Two-for-one everything, including regrets. The disco ball was on clearance and it shows.",
+    lore: "A former mattress outlet with a light-up floor that only lights up on one side. Two-for-one everything, including regrets. The disco ball was on clearance and honey, it shows.",
     actions: [
       { id: "visit", kind: "visit", label: "Do the hustle, on a budget", price: 60, energy: 15, mood: 6, confidence: 3, blurb: "The bass is secondhand. The moves are all yours." },
     ],
@@ -598,7 +598,7 @@ export const PLACES: Place[] = [
     id: "ultraviolet-society", name: "Ultraviolet Society", emoji: "💜", category: "nightlife", neighborhood: "Long Island City",
     at: [40.7402, -73.9593], depth: "full", template: "club", palette: ["#9B5CFF", "#0E0B1F", "#E8E0FF"],
     tags: ["club", "nightlife", "exclusive_club"], club: { vip: "exclusive", doorClout: 2000 },
-    lore: "A glass box on the waterfront with the skyline as its wallpaper. No sign, no line, no photos at the door. The bouncer checks your clout like it's a passport, and some of the best-known faces in Queens have been sent home.",
+    lore: "A glass box on the waterfront with the skyline for wallpaper. No sign, no line, no photos at the door. The bouncer checks clout like a passport and has sent some very famous faces home. I have the list.",
     actions: [
       { id: "visit", kind: "visit", label: "Get seen by the skyline", price: 350, energy: 15, mood: 8, confidence: 6, blurb: "Everyone's pretending not to look at everyone. Join in." },
     ],
@@ -607,7 +607,7 @@ export const PLACES: Place[] = [
     id: "triborough-works", name: "Triborough Works", emoji: "🏢", category: "places", neighborhood: "Astoria",
     at: [40.7660, -73.9252], depth: "scene", template: "office", palette: ["#6C8CFF", "#E6E8EC", "#1F1B26"],
     tags: ["office", "coworking", "gigs_board", "astoria"],
-    lore: "Coworking for people who are \"between rounds.\" Free kombucha, a ping-pong table nobody uses and a gigs board that actually pays.",
+    lore: "Coworking for people who are \"between rounds.\" Free kombucha, a ping-pong table nobody uses and a gigs board that actually pays. Take the gig, skip the kombucha.",
     actions: [
       { id: "gigs", kind: "gigs", label: "Check the gigs board", energy: 0, blurb: "Side gigs pin up here every morning. Some of them are even legal-sounding." },
     ],
@@ -616,7 +616,7 @@ export const PLACES: Place[] = [
     id: "ditmars-library", name: "Ditmars Free Library", emoji: "📚", category: "places", neighborhood: "Astoria",
     at: [40.7735, -73.9098], depth: "scene", template: "civic", palette: ["#B8743A", "#F2E6D8", "#2A2530"],
     tags: ["library", "free", "astoria"],
-    lore: "Quiet, free and full of people pretending to read while charging their phones. The librarian has heard every excuse for a late book. Yours isn't new.",
+    lore: "Quiet, free and full of people pretending to read while charging their phones. The librarian has heard every excuse for a late book. Yours isn't new, sweetie.",
     actions: [
       { id: "study", kind: "visit", label: "Study in the quiet room", energy: 10, confidence: 5, blurb: "Fifty minutes of focus, ten minutes of looking at strangers' book choices." },
     ],
@@ -625,7 +625,7 @@ export const PLACES: Place[] = [
     id: "precinct-114-half", name: "The 114½ Precinct", emoji: "🚓", category: "places", neighborhood: "Astoria",
     at: [40.7690, -73.9228], depth: "scene", template: "civic", palette: ["#2F5FB3", "#E6E8EC", "#14111A"],
     tags: ["police", "free", "astoria"],
-    lore: "The neighborhood's busiest desk sergeant has a coffee mug that says \"World's Okayest Cop.\" Most reports here are about parking. All of them are passionate.",
+    lore: "The busiest desk sergeant in the neighborhood drinks from a mug that says \"World's Okayest Cop.\" Most reports here are about parking. All of them are passionate. Bev tells me everything.",
     actions: [
       { id: "report", kind: "visit", label: "Report a \"stolen\" parking spot", energy: 3, mood: 3, blurb: "They write it down. They will not do anything. You feel heard." },
     ],
@@ -634,7 +634,7 @@ export const PLACES: Place[] = [
     id: "engine-7", name: "Engine 7 Firehouse", emoji: "🚒", category: "places", neighborhood: "Astoria",
     at: [40.7720, -73.9205], depth: "scene", template: "civic", palette: ["#D93A2F", "#F4E3C8", "#1F1B26"],
     tags: ["firehouse", "free", "astoria"],
-    lore: "Big red doors, bigger hearts and a dalmatian named Hydrant who has never once been on time for anything.",
+    lore: "Big red doors, bigger hearts and a dalmatian named Hydrant who has never once been on time. Captain Rosa is my favorite person in Astoria. Keep that between us, babe.",
     actions: [
       { id: "pet-dog", kind: "visit", label: "Pet the firehouse dog", energy: 2, mood: 6, blurb: "Hydrant leans into it. Best part of your week, statistically." },
     ],
@@ -643,7 +643,7 @@ export const PLACES: Place[] = [
     id: "astoria-cc", name: "Astoria Community College", emoji: "🏫", category: "campus", neighborhood: "Astoria",
     at: [40.7600, -73.9232], depth: "scene", template: "campus", palette: ["#2E9E6A", "#E8E2D0", "#2A2530"],
     tags: ["college", "campus", "astoria"],
-    lore: "Night classes for people with day jobs and big plans. The parking lot has more ambition per square foot than most startups.",
+    lore: "Night classes for people with day jobs and big plans. The parking lot has more ambition per square foot than most startups. I respect a hustle.",
     actions: [
       { id: "night-class", kind: "visit", label: "Take a night class", price: 45, energy: 15, confidence: 6, clout: 10, blurb: "Public Speaking 101. You speak publicly. Nobody dies." },
     ],
@@ -652,7 +652,7 @@ export const PLACES: Place[] = [
     id: "harmony-chapel", name: "Harmony Community Chapel", emoji: "🕊️", category: "places", neighborhood: "Astoria",
     at: [40.7652, -73.9130], depth: "scene", template: "civic", palette: ["#E8C79A", "#F4EDE6", "#3A2C5E"],
     tags: ["chapel", "quiet", "free", "astoria"],
-    lore: "A small, open-door chapel with stained glass and a bulletin board covered in bake sales. Everyone's welcome; the folding chairs are not comfortable.",
+    lore: "A small open-door chapel with stained glass and a bulletin board of bake sales. Quiet, everyone's welcome, and the folding chairs are a test of faith. The one place I keep my voice down.",
     actions: [
       { id: "quiet", kind: "visit", label: "Sit for a quiet moment", energy: 2, mood: 7, blurb: "Ten minutes without your phone. It feels illegal. It's not." },
     ],
@@ -661,7 +661,7 @@ export const PLACES: Place[] = [
     id: "hell-gate-park", name: "Hell Gate Park", emoji: "🌳", category: "parks", neighborhood: "Astoria",
     at: [40.7790, -73.9232], depth: "scene", template: "plaza", palette: ["#5CC28F", "#F4E3C8", "#2A2530"],
     tags: ["park", "outdoors", "free", "astoria"],
-    lore: "Riverside lawns under a giant bridge, a running track and a public pool with very strong opinions about swim caps.",
+    lore: "Riverside lawns under a giant bridge, a running track and a public pool with very strong opinions about swim caps. Wear one, babe. They will check.",
     actions: [
       { id: "hangout", kind: "hangout", label: "Hang out by the river", energy: 5, mood: 12, blurb: "Watch the bridge, the joggers and one guy doing tai chi like it's a competition." },
     ],
@@ -670,7 +670,7 @@ export const PLACES: Place[] = [
     id: "rep-count", name: "Rep Count Fitness", emoji: "🏋️", category: "places", neighborhood: "Astoria",
     at: [40.7640, -73.9146], depth: "scene", template: "gym", palette: ["#FF8A3D", "#E6E8EC", "#1F1B26"],
     tags: ["gym", "astoria"],
-    lore: "Neon lights, loud music and mirrors on every wall, so you can watch yourself almost do a pull-up. Nobody here is related to any other gym, thank you for asking.",
+    lore: "Neon lights, loud music and mirrors on every wall, so you can watch yourself almost do a pull-up. Nobody here is related to any other gym. Asked and answered.",
     actions: [
       { id: "workout", kind: "visit", label: "Work out", price: 28, energy: 20, confidence: 6, mood: 2, blurb: "Leg day. You'll feel it on the stairs to your walk-up." },
     ],
@@ -679,7 +679,7 @@ export const PLACES: Place[] = [
     id: "astoria-blvd-station", name: "Astoria Blvd station", emoji: "🚇", category: "places", neighborhood: "Astoria",
     at: [40.7702, -73.9180], depth: "scene", palette: ["#FFC21A", "#E6E8EC", "#1F1B26"],
     tags: ["subway", "transit", "free", "astoria"],
-    lore: "An elevated platform with a view of everyone's laundry. The train is always \"two stops away.\" Pick the subway in \"Go there\" and it gets you anywhere for C$3, eventually.",
+    lore: "An elevated platform with a view of everyone's laundry. The train is always \"two stops away.\" Pick the subway in \"Go there\" and it gets you anywhere for a few bucks, eventually.",
     actions: [
       { id: "platform", kind: "visit", label: "People-watch on the platform", energy: 2, mood: 2, blurb: "A man is eating a full rotisserie chicken. Respect." },
     ],
@@ -688,7 +688,7 @@ export const PLACES: Place[] = [
     id: "reel-queens", name: "Reel Queens Cinema", emoji: "🎬", category: "places", neighborhood: "Astoria",
     at: [40.7605, -73.9196], depth: "scene", template: "campus", palette: ["#E0186F", "#FFE7C2", "#14111A"],
     tags: ["cinema", "date_spot", "astoria"],
-    lore: "A restored single-screen movie palace with velvet seats and a popcorn machine older than your parents. Perfect for dates; the dark hides nervous faces.",
+    lore: "A restored single-screen movie palace with velvet seats and a popcorn machine older than your parents. Perfect for dates: the dark hides nervous faces. And I see in the dark.",
     actions: [
       { id: "movie", kind: "eat", label: "Movie and popcorn", price: 35, energy: -10, mood: 8, blurb: "Butter on the popcorn, butter on the seat, butter somehow on your phone." },
     ],
@@ -697,7 +697,7 @@ export const PLACES: Place[] = [
     id: "respawn-arena", name: "Respawn Arena", emoji: "🎮", category: "places", neighborhood: "Astoria",
     at: [40.7708, -73.9105], depth: "scene", template: "club", palette: ["#6B4FD8", "#9FD8C4", "#14111A"],
     tags: ["games", "arena", "astoria"],
-    lore: "Rows of glowing rigs, a stage for tournaments and an energy-drink fridge that hums like a jet engine. Arcade Nerds call it home; everyone else calls it loud.",
+    lore: "Rows of glowing rigs, a stage for tournaments and an energy-drink fridge that hums like a jet engine. Gamers call it home; everyone else calls it loud. Pixel runs the place and owes me a favor.",
     actions: [
       { id: "match", kind: "visit", label: "Play a ranked match", price: 24, energy: 15, confidence: 5, clout: 12, blurb: "You lose to a twelve-year-old. You win the rematch. Character arc." },
     ],
@@ -707,7 +707,7 @@ export const PLACES: Place[] = [
     id: "lucky-star", name: "Lucky Star Lotto", emoji: "🌟", category: "places", neighborhood: "Flushing",
     at: [40.7593, -73.8301], depth: "full", template: "lotto", palette: ["#FFD84D", "#FF2E88", "#2A2530"],
     tags: ["lotto", "flushing"],
-    lore: "A narrow shop on a loud Flushing corner: a neon star, a rack of scratch cards and Benny, who has never once bought a ticket. Odds are printed on every card, which Benny calls \"the boring part\".",
+    lore: "A narrow shop on a loud Flushing corner: a neon star, a rack of scratch cards and Benny, who has never once bought a ticket. Odds are printed on every card, which Benny calls \"the boring part.\"",
     actions: [
       { id: "chat", kind: "visit", label: "Shoot the breeze with Benny", energy: 2, mood: 3, blurb: "He tells you his system. The system is not buying tickets." },
     ],
@@ -717,7 +717,7 @@ export const PLACES: Place[] = [
     id: "real-clout-fm", name: "Real Clout FM", emoji: "📻", category: "places", neighborhood: "Astoria",
     at: [40.7598, -73.9262], depth: "full", template: "radio", palette: ["#FF2E88", "#FFB23D", "#14111A"],
     tags: ["radio", "station", "astoria"],
-    lore: "Home of The Wake-Up Call, where DJ Sharm Almight reads one lucky shoutout every morning at 9. The ON AIR sign is always lit. Nobody has checked whether the microphone is.",
+    lore: "Home of The Wake-Up Call, where DJ Sharm Almight reads one lucky shoutout every morning at 9. The ON AIR sign is always lit. Nobody has checked whether the mic is. I have.",
     actions: [
       { id: "sit-in", kind: "visit", label: "Sit in on The Wake-Up Call", energy: 4, mood: 5, confidence: 2, clout: 6, blurb: "You clap at the jingle. Sharm points at you like you're the jingle." },
     ],
@@ -726,7 +726,7 @@ export const PLACES: Place[] = [
     id: "clout-tower", name: "Clout Tower", emoji: "📺", category: "places", neighborhood: "Astoria",
     at: [40.7585, -73.9195], depth: "full", template: "broadcast", palette: ["#FF2E88", "#FF6A3D", "#14111A"],
     tags: ["tv", "station", "astoria"],
-    lore: "Clout TV's tower and the Big Screen on its side: one face, three hours, the whole city looking up. The control room smells like cold coffee and ambition.",
+    lore: "Clout TV's tower, and the Big Screen on its side: one face, three hours, the whole city looking up. The control room smells like cold coffee and ambition. Get your face up there, babe.",
     actions: [
       { id: "watch", kind: "visit", label: "Watch the Big Screen with the crew", energy: 3, mood: 4, confidence: 3, clout: 6, blurb: "Someone else's face, forty feet tall. You take notes." },
     ],

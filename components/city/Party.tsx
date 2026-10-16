@@ -136,7 +136,7 @@ export function KeepsakeSheet({ event, plusOneOf, mention, optedOut, onClose, on
             {optedOut ? (
               <p className="body" style={{ margin: 0 }}>You asked to stay out of the gossip, so Lola kept your name out of it. Mysterious.</p>
             ) : (
-              <p className="body" style={{ margin: 0 }}>{mention ? mentionLine(mention) : `Spotted at ${event.name}: you.`} The phones were in the velvet bag; the gossip was not.</p>
+              <p className="body" style={{ margin: 0 }}>{mention ? mentionLine(mention) : `Spotted at ${event.name}: you.`} The phones went in the velvet bag, babe. The gossip went straight to me.</p>
             )}
           </div>
           <button className="btn btn-taxi" onClick={onClose}>Nice</button>
