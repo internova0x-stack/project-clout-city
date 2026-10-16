@@ -32,7 +32,9 @@ export type FurnitureKind =
   // #19 clubs: the restroom floor
   | "stall"
   // v0.14 On Air: Real Clout FM's studio and Clout TV's control room
-  | "micDesk" | "onAirSign" | "soundPanel" | "bigScreen" | "tvCamera" | "ringLight";
+  | "micDesk" | "onAirSign" | "soundPanel" | "bigScreen" | "tvCamera" | "ringLight"
+  // The Hub's game room
+  | "arcade" | "poolTable";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -148,6 +150,8 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   railing: { w: 8.0, d: 0.2, label: "Railing" },
   lottoCounter: { w: 2.6, d: 0.8, label: "Counter" },
   micDesk: { w: 2.8, d: 0.9, label: "The desk" },
+  arcade: { w: 0.9, d: 0.8, label: "Arcade" },
+  poolTable: { w: 2.2, d: 1.2, label: "Pool table" },
   onAirSign: { w: 1.4, d: 0.2, label: "On Air" },
   soundPanel: { w: 1.8, d: 0.15, label: "Foam" },
   bigScreen: { w: 3.4, d: 0.2, label: "The Big Screen" },
@@ -439,7 +443,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -672,6 +676,70 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     ],
     spawn: [1.4, 2.4],
     npcs: [{ x: -1.8, z: -1.6, facing: 0.6 }, { x: 0.4, z: -1.0, facing: 3.0 }],
+  },
+  // ---- The Hub (owner, Oct 16): the meeting point, four floors (HUB_FLOORS) joined by stairs ----
+  // Ground floor: the Neon Spoon diner. Stairs down to the restroom, up to the game room.
+  hub: {
+    id: "hub", w: 10.0, d: 8.0, wall: "#E8F4F6", wallAccent: "#3BB8C9", floor: "#CFE3E8", floorKind: "checker", window: true, alwaysLit: true,
+    items: [
+      { id: "counter", kind: "cafeCounter", x: -2.0, z: -3.0, rot: 0, use: { kind: "action", actionId: "eat" }, label: "Pancakes at the counter" },
+      { id: "pastries", kind: "pastryCase", x: 0.7, z: -3.1, rot: 0 },
+      { id: "stool-1", kind: "barStool", x: -3.0, z: -2.2, rot: 0 },
+      { id: "stool-2", kind: "barStool", x: -2.0, z: -2.2, rot: 0 },
+      { id: "stool-3", kind: "barStool", x: -1.0, z: -2.2, rot: 0 },
+      { id: "booth-1", kind: "booth", x: 4.4, z: -2.6, rot: 1, color: "#FF2E88" },
+      { id: "table-1", kind: "cafeTable", x: 3.4, z: -2.6, rot: 0, use: { kind: "action", actionId: "eat" }, label: "A booth" },
+      { id: "booth-2", kind: "booth", x: 4.4, z: 0.2, rot: 1, color: "#3BB8C9" },
+      { id: "table-2", kind: "cafeTable", x: 3.4, z: 0.2, rot: 0, use: { kind: "action", actionId: "eat" }, label: "A booth" },
+      { id: "emblem", kind: "rug", x: -0.4, z: 0.4, rot: 0, color: "#3BB8C9" },
+      { id: "table-3", kind: "cafeTable", x: -3.4, z: 0.6, rot: 0 },
+      { id: "chair-3", kind: "chair", x: -2.6, z: 0.6, rot: 3 },
+      { id: "stairs-down", kind: "stairs", x: -4.1, z: 2.6, rot: 1, color: "#2B2440", use: { kind: "floor", to: 0 }, label: "↓", name: "Downstairs to the restroom" },
+      { id: "stairs-up", kind: "stairs", x: 4.1, z: 2.6, rot: 3, color: "#3BB8C9", use: { kind: "floor", to: 2 }, label: "↑", name: "Up to the game room" },
+      { id: "plant-1", kind: "plant", x: 2.2, z: -3.4, rot: 0 },
+      { id: "plant-2", kind: "plant", x: -4.5, z: -3.4, rot: 0 },
+    ],
+    spawn: [0.0, 3.2],
+    npcs: [{ x: -2.0, z: -3.6, facing: 0 }, { x: 1.2, z: 1.6, facing: 2.6 }, { x: -1.8, z: 1.8, facing: -2.2 }],
+  },
+  // Second floor: the game room, lit by the cabinets. Stairs down to the diner, up to the lounge.
+  hubGames: {
+    id: "hubGames", w: 10.0, d: 8.0, wall: "#173A3F", wallAccent: "#3DDC97", floor: "#22363A", floorKind: "concrete", dark: true,
+    items: [
+      { id: "arcade-1", kind: "arcade", x: -4.2, z: -3.5, rot: 0, color: "#FF2E88", use: { kind: "action", actionId: "play" }, label: "Play a round" },
+      { id: "arcade-2", kind: "arcade", x: -3.1, z: -3.5, rot: 0, color: "#3BB8C9" },
+      { id: "arcade-3", kind: "arcade", x: -2.0, z: -3.5, rot: 0, color: "#FFB23D", use: { kind: "action", actionId: "play" }, label: "Play a round" },
+      { id: "arcade-4", kind: "arcade", x: -0.9, z: -3.5, rot: 0, color: "#3DDC97" },
+      { id: "pool", kind: "poolTable", x: 1.4, z: 0.0, rot: 0, use: { kind: "action", actionId: "play" }, label: "Rack 'em" },
+      { id: "tv", kind: "tvStand", x: 3.4, z: -3.6, rot: 0 },
+      { id: "couch", kind: "sofa", x: 3.4, z: -2.0, rot: 2, color: "#FF6A3D" },
+      { id: "speaker", kind: "speaker", x: 1.2, z: -3.6, rot: 0 },
+      { id: "stairs-down", kind: "stairs", x: -4.1, z: 2.6, rot: 1, color: "#2B2440", use: { kind: "floor", to: 1 }, label: "↓", name: "Down to the diner" },
+      { id: "stairs-up", kind: "stairs", x: 4.1, z: 2.6, rot: 3, color: "#3DDC97", use: { kind: "floor", to: 3 }, label: "↑", name: "Up to the lounge" },
+    ],
+    spawn: [0.0, 3.2],
+    npcs: [{ x: -2.0, z: -2.6, facing: 3.14 }, { x: 2.6, z: 0.9, facing: 2.6 }],
+  },
+  // Top floor: the lounge, couches under the glass ring. Stairs down to the game room.
+  hubLounge: {
+    id: "hubLounge", w: 10.0, d: 8.0, wall: "#F6EFE6", wallAccent: "#FF6A3D", floor: "#B98A62", floorKind: "wood", window: true, alwaysLit: true,
+    items: [
+      { id: "sofa-1", kind: "sofa", x: -2.4, z: -1.8, rot: 0, color: "#3BB8C9", use: { kind: "action", actionId: "hang" }, label: "Hang out" },
+      { id: "table-1", kind: "coffeeTable", x: -2.4, z: -0.5, rot: 0 },
+      { id: "chair-1", kind: "armchair", x: -4.2, z: -0.4, rot: 1, color: "#FFB23D" },
+      { id: "rug-1", kind: "rug", x: -2.4, z: -0.6, rot: 0, color: "#FFE7C2" },
+      { id: "sofa-2", kind: "sofa", x: 2.6, z: -1.8, rot: 0, color: "#FF6A3D", use: { kind: "action", actionId: "hang" }, label: "Hang out" },
+      { id: "table-2", kind: "coffeeTable", x: 2.6, z: -0.5, rot: 0 },
+      { id: "chair-2", kind: "armchair", x: 0.6, z: 1.0, rot: 2, color: "#3DDC97" },
+      { id: "shelf", kind: "bookshelf", x: -0.2, z: -3.7, rot: 0 },
+      { id: "piano", kind: "piano", x: 3.9, z: 1.0, rot: 3 },
+      { id: "lamp", kind: "floorLamp", x: 4.6, z: -3.6, rot: 0 },
+      { id: "plant-1", kind: "plant", x: -4.6, z: -3.6, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 1.6, z: -3.6, rot: 0 },
+      { id: "stairs-down", kind: "stairs", x: -4.1, z: 2.6, rot: 1, color: "#2B2440", use: { kind: "floor", to: 2 }, label: "↓", name: "Down to the game room" },
+    ],
+    spawn: [0.0, 3.2],
+    npcs: [{ x: -2.4, z: -2.2, facing: 0, seated: true }, { x: 1.8, z: 1.2, facing: 3.14 }],
   },
   // ---- v0.9 monument plazas (#32): one shared outdoor plaza, each with its own landmark ----
   unisphere: {
@@ -909,16 +977,33 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }): RoomTemplate 
  */
 export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number): RoomTemplate | null {
   if (floor === 1) return placeRoom(place);
+  // The Hub: the game room on 2 and the lounge on 3; its restroom is floor 0 like a club's.
+  if (place.tags?.includes("hub") && (floor === 2 || floor === 3)) {
+    const t = PLACE_TEMPLATES[HUB_FLOORS[floor].template];
+    return { ...t, id: `${t.id}:${place.id}` };
+  }
+  if (floor === 0 && place.tags?.includes("hub")) {
+    const t = PLACE_TEMPLATES.restroom;
+    return { ...t, id: `restroom:${place.id}`, items: t.items.map((it) => (it.use?.kind === "floor" ? { ...it, name: "Back up to the diner" } : it)) };
+  }
   if (floor === 0) return place.club ? { ...PLACE_TEMPLATES.restroom, id: `restroom:${place.id}` } : null;
   if (floor !== 2) return null;
   if (place.tags?.includes("exclusive_venue")) return { ...PLACE_TEMPLATES.penthouse, id: `penthouse:${place.id}` };
   return place.club?.vip ? { ...PLACE_TEMPLATES.vip, id: `vip:${place.id}` } : null;
 }
 
-/** #19 clubs: the floors a place has besides the ground floor (0 restroom, 2 upstairs). */
+/** #19 clubs: the floors a place has besides the ground floor (0 restroom, 2 upstairs; the Hub also 3). */
 export function placeFloors(place: RoomPlace & { tags?: string[] }): number[] {
-  return [0, 2].filter((f) => placeFloor(place, f) !== null);
+  return [0, 2, 3].filter((f) => placeFloor(place, f) !== null);
 }
+
+/** The Hub's floors (owner, Oct 16): what each is called on the wall sign, the card and the stairs. */
+export const HUB_FLOORS: Record<number, { name: string; emoji: string; template: PlaceTemplateId }> = {
+  0: { name: "Restroom", emoji: "🚻", template: "restroom" },
+  1: { name: "The Neon Spoon diner", emoji: "🍳", template: "hub" },
+  2: { name: "Game room", emoji: "🎮", template: "hubGames" },
+  3: { name: "Lounge", emoji: "🛋️", template: "hubLounge" },
+};
 
 // ---------------------------------------------------------------------------
 // Layout and geometry helpers
@@ -1170,6 +1255,7 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
 export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
+  hub: 7, hubGames: 7, hubLounge: 7,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {

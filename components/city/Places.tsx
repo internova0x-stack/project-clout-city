@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -726,9 +726,9 @@ const STATIONS_AT = 3;
 export function PlacesSheet({
   open, onClose, from, onPick, state, story = null, here,
 }: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null; here?: (placeId: string) => PlaceCounts[string] | undefined }) {
-  // Nearest first, with the two stations 4th and 5th (owner, Oct 16: near the top, not on it).
+  // The Hub first, the two stations 4th and 5th, everything else nearest first (owner, Oct 16).
   const near = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
-  const rows = near.filter((r) => !isStation(r.p));
+  const rows = [...near.filter((r) => isHub(r.p)), ...near.filter((r) => !isStation(r.p) && !isHub(r.p))];
   rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...near.filter((r) => isStation(r.p)));
   return (
     <Sheet open={open} onClose={onClose} label="Places">

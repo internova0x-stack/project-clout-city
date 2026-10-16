@@ -76,7 +76,7 @@ const PLACE_GLYPHS: Record<string, GlyphName> = {
   "queensborough-u": "columns",
   "ditmars-deli": "sandwich",
   "two-bros-pizza": "pizza",
-  "neon-spoon": "diner",
+  "neon-spoon": "chat",
   "up-on-thirty": "cutlery",
   "steinway-fresh": "cart",
   "hellgate-hall": "cocktail",

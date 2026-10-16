@@ -12,7 +12,7 @@ export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "
   | "rooftop" | "uv-club" | "lucky-deli" | "dive-club" | "lotto"
   | "boutique" | "showroom" | "dealership" | "cinema" | "arena"
   | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub"
-  | "googie-diner" | "sky-dining" | "supermarket" | "cowork" | "precinct"
+  | "googie-diner" | "hub" | "sky-dining" | "supermarket" | "cowork" | "precinct"
   | "chapel" | "fitness" | "hell-gate" | "el-station" | "condo-towers" | "pier-park"
   | "radio-station" | "clout-tower";
 
@@ -96,7 +96,8 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "discount-disco", placeId: "discount-disco", name: "Discount Disco", at: [40.7577, -73.8336], kind: "discount-disco", facing: 180, scale: 1.9, clear: 45, ground: "block" },
   { id: "pedal-pushers", placeId: "pedal-pushers", name: "Pedal Pushers Hub", at: [40.759, -73.928], kind: "bike-hub", facing: 180, scale: 1.9, clear: 42, ground: "block" },
   // Batch 8: more Astoria places.
-  { id: "neon-spoon", placeId: "neon-spoon", name: "The Neon Spoon", at: [40.7695, -73.9265], kind: "googie-diner", facing: 180, scale: 2.1, clear: 36, ground: "block" },
+  // The Hub (owner, Oct 16): was the Neon Spoon's googie diner; now four tilted glass rings round a lit core.
+  { id: "neon-spoon", placeId: "neon-spoon", name: "The Hub", at: [40.7695, -73.9265], kind: "hub", facing: 180, scale: 1.5, clear: 40, ground: "block" },
   { id: "up-on-thirty", placeId: "up-on-thirty", name: "Up on Thirty", at: [40.7672, -73.9238], kind: "sky-dining", facing: 180, scale: 1.4, clear: 30, ground: "block" },
   { id: "steinway-fresh", placeId: "steinway-fresh", name: "Steinway Fresh Mart", at: [40.7628, -73.916], kind: "supermarket", facing: 180, scale: 1.7, clear: 48, ground: "block" },
   { id: "triborough-works", placeId: "triborough-works", name: "Triborough Works", at: [40.766, -73.9252], kind: "cowork", facing: 180, scale: 1.7, clear: 42, ground: "block" },

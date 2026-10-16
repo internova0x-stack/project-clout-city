@@ -266,7 +266,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -534,13 +534,18 @@ export const PLACES: Place[] = [
       { id: "eat", kind: "eat", label: "Grab a slice", price: 9, energy: -12, blurb: "Fold it like a local. Burn the roof of your mouth like a local." },
     ],
   },
+  // The Hub (owner, Oct 16): the city's meeting point, first in Places. It was The Neon Spoon and keeps its
+  // id (players' visits stay theirs); the Neon Spoon is now the diner on its ground floor. Four floors:
+  // 0 the restroom (gossip), 1 the diner, 2 the game room, 3 the lounge (HUB_FLOORS in lib/rooms.ts).
   {
-    id: "neon-spoon", name: "The Neon Spoon", emoji: "🍳", category: "food", neighborhood: "Astoria", tier: "Medium",
-    at: [40.7695, -73.9265], depth: "scene", template: "cafe", palette: ["#3BB8C9", "#FFE7C2", "#2A2530"],
-    tags: ["diner", "dining_medium", "astoria"],
-    lore: "A chrome diner with a menu the size of a novel. Breakfast is served all day; regret is served after 2 AM.",
+    id: "neon-spoon", name: "The Hub", emoji: "🛸", category: "places", neighborhood: "Astoria",
+    at: [40.7695, -73.9265], depth: "full", template: "hub", palette: ["#3BB8C9", "#FF2E88", "#14111A"],
+    tags: ["hub", "diner", "dining_medium", "games", "astoria"], club: {},
+    lore: "Four floors of glass rings stacked like someone dropped a spaceship on 31st Street. Pancakes on the ground floor, games on two, couches on three, and everybody you were hoping to run into.",
     actions: [
-      { id: "eat", kind: "eat", label: "Pancakes in a booth", price: 38, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
+      { id: "eat", kind: "eat", label: "Pancakes at the Neon Spoon counter", price: 38, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
+      { id: "play", kind: "visit", label: "A round in the game room", price: 12, energy: 8, mood: 6, confidence: 2, blurb: "You lose to a stranger. You're friends now. That's how it works up here." },
+      { id: "hang", kind: "hangout", label: "Hang out in the lounge", energy: 2, mood: 8, blurb: "Big couches, bigger opinions. Nobody's in a hurry on the third floor." },
     ],
   },
   {
@@ -734,6 +739,8 @@ export const PLACES: Place[] = [
  */
 export const STATION_TAGS = ["radio", "tv"] as const;
 export const isStation = (p: Pick<Place, "tags">) => p.tags.some((t) => (STATION_TAGS as readonly string[]).includes(t));
+/** The Hub (owner, Oct 16): the meeting point, always first in Places. */
+export const isHub = (p: Pick<Place, "tags">) => p.tags.includes("hub");
 
 export const HOME_PLACE_ID = "home";
 

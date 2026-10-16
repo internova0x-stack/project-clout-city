@@ -12,10 +12,10 @@ import { skillBadge } from "@/lib/skills";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_FLOORS, HOME_TEMPLATES, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -1246,6 +1246,8 @@ export function GameShell({
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
     if (it.use?.kind === "floor") {
       if (it.use.to <= 1) return setInsideFloor(it.use.to);
+      // The Hub's floors are open to everyone.
+      if (isHub(p)) return setInsideFloor(it.use.to);
       // #19 clubs: VIP is free from the club's clout, otherwise the cover for tonight (the server decides).
       if (p.club?.vip && !p.tags.includes("exclusive_venue")) {
         if (!cityApi?.enterVip) return setToast(VIP_LOCKED);
@@ -1646,7 +1648,7 @@ export function GameShell({
               look={look}
               outfit={outfit}
               daytime={daytime}
-              sign={insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
+              sign={isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
               rotatable
               door
               labels={insideFloor === 2 && inside.tags.includes("exclusive_venue") ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}

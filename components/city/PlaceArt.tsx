@@ -857,19 +857,54 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    // The Hub (owner, Oct 16): four glass rings, one per floor, stacked off-center around a lit core,
+    // each tilted its own way, neon on every rim, a halo and a spire on top.
     case "neon-spoon": {
-      const diner: BoxSpec = { x: -6, y: -3, z: 0, w: 10, d: 5, h: 3.8, color: mixHex("#DCE3EA", a, 0.15) };
+      const ringAt = (cx: number, cy: number, z: number, r: number, h: number, tilt: number, rim: string, glass: string, key: number) => {
+        const [px, py] = iso(cx, cy, z);
+        const rx = r * S * 1.22, ry = r * S * 0.7, hh = h * S;
+        const side = night ? mixHex(glass, "#3B2F72", 0.55) : mixHex(glass, "#6E6A9A", 0.22);
+        const top = night ? mixHex(glass, "#E9D8FF", 0.2) : glass;
+        return (
+          <g key={key} transform={`rotate(${tilt} ${px} ${py})`}>
+            <ellipse cx={px} cy={py} rx={rx * 0.94} ry={ry * 0.94} fill={side} />
+            <rect x={px - rx * 0.94} y={py - hh} width={rx * 1.88} height={hh} fill={side} />
+            {/* The lit band of windows round each floor. */}
+            <rect x={px - rx * 0.9} y={py - hh * 0.72} width={rx * 1.8} height={hh * 0.38} fill={night ? "#FFE2A8" : "#BFE6F7"} opacity={night ? 0.85 : 0.9} />
+            <ellipse cx={px} cy={py - hh} rx={rx} ry={ry} fill={top} />
+            <ellipse cx={px} cy={py - hh} rx={rx} ry={ry} fill="none" stroke={rim} strokeWidth={2.2} />
+            {night && <ellipse cx={px} cy={py - hh} rx={rx} ry={ry} fill="none" stroke={rim} strokeWidth={5} opacity={0.35} filter="url(#mv-blur)" />}
+          </g>
+        );
+      };
+      const [cx0, cy0] = iso(0, 0, 0);
+      const [, coreTop] = iso(0, 0, 10.2);
+      const halo = iso(0, 0, 11.0);
       return (
         <>
           {base}
-          <Box b={diner} night={night}>
-            {[0, 1, 2, 3, 4].map((i) => <OnLeft key={i} b={diner} u={0.4 + i * 1.9} v={1} uw={1.5} vh={1.8} fill={night ? lit : glassDark} opacity={0.9} />)}
-            <OnLeft b={diner} u={0} v={0.4} uw={10} vh={0.35} fill={a} />
-            <OnLeft b={diner} u={0} v={3.0} uw={10} vh={0.35} fill={a} />
-          </Box>
-          {(() => { const [px, py] = iso(-1, 2, 3.8); return (<g><rect x={px - 18} y={py - 13} width={36} height={10} rx={5} fill={c} /><text x={px} y={py - 5.6} fontSize={6} fontWeight={800} fill={night ? "#7FF3FF" : a} textAnchor="middle" fontFamily="system-ui, sans-serif">NEON SPOON</text></g>); })()}
-          <Lantern x={5} y={3.5} night={night} />
-          <Tree x={-5.5} y={4.5} night={night} size={0.8} />
+          <rect x={cx0 - 7} y={coreTop} width={14} height={cy0 - coreTop} fill={night ? "#7FE0E8" : "#9ED8F7"} />
+          {night && <rect x={cx0 - 7} y={coreTop} width={14} height={cy0 - coreTop} fill="#5FD4C9" opacity={0.4} filter="url(#mv-blur)" />}
+          {[
+            { x: 0, y: 0.4, z: 0.2, r: 4.6, h: 1.5, tilt: -3, rim: "#FF2E88", glass: "#E9F7FA" },
+            { x: 0.5, y: -0.3, z: 2.5, r: 3.9, h: 1.4, tilt: 4, rim: "#5FD4C9", glass: "#DDF2F7" },
+            { x: -0.4, y: 0.2, z: 4.7, r: 4.3, h: 1.4, tilt: -5, rim: "#FFB23D", glass: "#F2F0FA" },
+            { x: 0.2, y: 0.2, z: 6.9, r: 3.3, h: 1.3, tilt: 3, rim: "#FF6A3D", glass: "#E9F7FA" },
+          ].map((f, i) => ringAt(f.x, f.y, f.z + f.h, f.r, f.h, f.tilt, f.rim, f.glass, i))}
+          <ellipse cx={halo[0]} cy={halo[1]} rx={18} ry={6.5} fill="none" stroke="#FF2E88" strokeWidth={2.4} transform={`rotate(-12 ${halo[0]} ${halo[1]})`} />
+          <polygon points={`${halo[0] - 3},${halo[1]} ${halo[0] + 3},${halo[1]} ${halo[0]},${halo[1] - 12}`} fill={night ? "#E9D8FF" : "#B9C6CF"} />
+          <circle cx={halo[0]} cy={halo[1] - 13} r={2.2} fill="#FF2E88" />
+          {(() => {
+            const [sx, sy] = iso(0, 4.6, 1.6);
+            return (
+              <g>
+                <rect x={sx - 18} y={sy - 6} width={36} height={10} rx={2} fill="#14111A" />
+                <text x={sx} y={sy + 1.6} fontSize={6} fontWeight={900} fill="#5FD4C9" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing={0.6}>THE HUB</text>
+              </g>
+            );
+          })()}
+          <Lantern x={5} y={4.5} night={night} />
+          <Lantern x={-5} y={4.5} night={night} />
         </>
       );
     }
