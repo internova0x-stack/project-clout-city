@@ -1805,7 +1805,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .studio-date { height:40px; padding:0 10px; border-radius:var(--r-sm); border:1px solid #E2DBD0; font:inherit; background:#fff; }
 .map-landmark-label.tappable { pointer-events:auto; cursor:pointer; border:0; font:inherit; }
 /* Clout TV's crop widget: the billboard's 4:5 frame with the photo behind it. */
-.crop-frame { position:relative; width:100%; max-width:320px; margin:0 auto; aspect-ratio:4/5; border-radius:14px; overflow:hidden; background:#14111A; cursor:grab; user-select:none;
+.crop-frame { position:relative; width:100%; max-width:min(250px, calc((100dvh - 420px) * 0.8)); margin:8px auto 4px; aspect-ratio:4/5; border-radius:14px; overflow:hidden; background:#14111A; cursor:grab; user-select:none;
   box-shadow:0 0 0 4px #14111A, 0 0 0 6px #F2A07B, var(--elev-2); }
 .crop-frame:active { cursor:grabbing; }
 .crop-img { position:absolute; left:0; top:0; max-width:none; transform-origin:0 0; pointer-events:none; }
@@ -1813,7 +1813,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
   background:linear-gradient(to right, transparent 33.2%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.6%, transparent 66.8%),
              linear-gradient(to bottom, transparent 33.2%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.6%, transparent 66.8%); }
 .crop-tag { position:absolute; top:8px; left:8px; padding:3px 8px; border-radius:var(--r-pill); background:rgba(20,17,26,.7); color:#fff; font-size:11px; font-weight:700; letter-spacing:.04em; }
-.crop-zoom { display:flex; align-items:center; gap:10px; max-width:320px; width:100%; margin:0 auto; font-weight:700; color:var(--text-2); }
+.crop-zoom { display:flex; align-items:center; gap:10px; max-width:250px; width:100%; margin:0 auto; font-weight:700; color:var(--text-2); }
 .crop-zoom input { flex:1; accent-color:var(--night-900); }
 .tv-queue-card.on-now { box-shadow:0 0 0 2px #F2A07B, var(--elev-2); }
 .bubble.station { background:#FFF3DE; color:var(--night-900); align-self:flex-start; max-width:85%; }
@@ -1821,3 +1821,5 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .station-head .phone-back { justify-self:start; }
 .station-card { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 12px 16px; text-align:center; }
 .station-card-icon { width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-size:28px; background:var(--chip-off); }
+.tv-confirm-card { display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:16px; background:var(--chip-off); margin-top:4px; }
+.tv-rules { margin:0; padding:0 0 0 18px; display:flex; flex-direction:column; gap:4px; font-size:13px; line-height:18px; color:var(--text-2); }

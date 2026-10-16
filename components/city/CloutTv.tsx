@@ -138,7 +138,7 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
       {s.featured ? (
         <button className="tv-feature" onClick={() => setView(s.featured)}>
           {s.featured.url ? <img src={s.featured.url} alt={`${at(s.featured.handle)} on Clout TV today`} /> : <span className="tv-viewer-missing">Photo unavailable</span>}
-          <span className="tv-feature-cap"><span className="tv-viewer-on">📺 On the Big Screen now · next at {tvTime(s.nextAt)}</span><span className="title">{at(s.featured.handle)}</span></span>
+          <span className="tv-feature-cap"><span className="tv-viewer-on">📺 On now · until {tvTime(s.nextAt)}</span><span className="title">{at(s.featured.handle)}</span></span>
         </button>
       ) : (
         <div className="card stack-4">
@@ -153,7 +153,8 @@ export function TvApp({ api, onToast, onChange }: { api: TvApi; onToast: (t: str
             <div key={m.id} className="tv-mine">
               {m.url ? <img src={m.url} alt="" /> : <span className="tv-mine-ph" aria-hidden="true">📷</span>}
               <span className="tv-mine-text">
-                <span className="body-strong">{at(m.handle)} · {tvDay(m.date)}</span>
+                <span className="body-strong">{at(m.handle)}</span>
+                <span className="meta">Sent {tvDay(m.date)}</span>
                 <span className="meta">{m.onNow ? "📺 You're on the Big Screen right now!" : m.status === "featured" && m.featuredAt ? `${MINE_NOTE.featured} on ${tvDay(m.featuredAt.slice(0, 10))}.` : MINE_NOTE[m.status]}</span>
                 {(m.status === "pending" || m.status === "approved" || m.status === "featured") && (
                   <button className="radio-report" disabled={busy !== null} onClick={() => void withdraw(m)}>{busy === m.id ? "…" : "Withdraw"}</button>
@@ -251,24 +252,30 @@ function SubmitForm({ api, onCancel, onSent }: { api: TvApi; onCancel: () => voi
       ) : (
         <div className="tv-pick">
           <span className="tv-pick-icon" aria-hidden="true">📸</span>
-          <span className="body-strong">A photo of you for the Big Screen</span>
-          <span className="meta">JPEG, PNG or WebP. You&apos;ll fit it to the billboard next.</span>
+          <span className="body-strong">A photo of you</span>
+          <span className="meta">JPEG, PNG or WebP. Next, you&apos;ll fit it to the billboard.</span>
           <button type="button" className="btn btn-night btn-sm" onClick={() => input.current?.click()}>⬆️ Upload a photo</button>
         </div>
       )}
-      <p className="overline" style={{ margin: "4px 0 0" }}>Step 2 · Your details</p>
+      <p className="overline" style={{ margin: "8px 0 0" }}>Step 2 · Your details</p>
       <label className="stack-4">
-        <span className="overline">Your Instagram handle</span>
+        <span className="body-strong">Instagram handle</span>
         <span className={`field${handle && !clean ? " error" : ""}`}><input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@your.instagram" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={31} aria-label="Your Instagram handle" /></span>
         {handle && !clean ? <span className="meta radio-problem">Letters, numbers, dots and underscores only.</span>
-          : <span className="meta">Your IG handle, not your Clout City name. It shows under your photo.</span>}
+          : <span className="meta">Your IG, not your Clout City name. It shows under your photo.</span>}
       </label>
-      <div className="stack-8">
-        <label className="radio-check"><input type="checkbox" checked={self} onChange={(e) => setSelf(e.target.checked)} /><span className="body">It&apos;s a photo of me, or one I took.</span></label>
-        <label className="radio-check"><input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} /><span className="body">I&apos;m 18 or over.</span></label>
-        <label className="radio-check"><input type="checkbox" checked={publicOk} onChange={(e) => setPublicOk(e.target.checked)} /><span className="body">It can be shown publicly in the game.</span></label>
+      <div className="tv-confirm-card">
+        <span className="body-strong">Before you send</span>
+        <label className="radio-check"><input type="checkbox" checked={self} onChange={(e) => setSelf(e.target.checked)} /><span className="body">It&apos;s me in the photo, or I took it</span></label>
+        <label className="radio-check"><input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} /><span className="body">I&apos;m 18 or over</span></label>
+        <label className="radio-check"><input type="checkbox" checked={publicOk} onChange={(e) => setPublicOk(e.target.checked)} /><span className="body">It can be shown in the game</span></label>
       </div>
-      <p className="meta" style={{ margin: 0 }}>One photo a day, 20 a day across the city. The producers look at every photo first; picked ones take turns on the screen, 3 hours each. Photos of other people, anything explicit, or a brand as the star won&apos;t be picked. You can withdraw yours any time.</p>
+      <ul className="tv-rules">
+        <li>One photo a day. 20 spots across the city.</li>
+        <li>Every photo is reviewed. Picked ones get 3 hours on the Big Screen.</li>
+        <li>No other people, nothing explicit, no brands as the star.</li>
+        <li>Withdraw yours any time.</li>
+      </ul>
       {error && <p className="body radio-problem" style={{ margin: 0 }}>{error}</p>}
       <div className="row" style={{ gap: 8 }}>
         <button type="button" className="btn btn-secondary" style={{ width: "auto", flex: "none" }} onClick={onCancel}>Cancel</button>

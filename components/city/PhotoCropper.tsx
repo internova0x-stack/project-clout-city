@@ -49,7 +49,10 @@ export function PhotoCropper({ img, onDone, onCancel }: { img: ImageBitmap; onDo
 
   return (
     <div className="stack-12 crop">
-      <p className="overline" style={{ margin: 0 }}>Fit your photo to the billboard</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, textAlign: "center" }}>
+        <span className="title">Fit it to the billboard</span>
+        <span className="meta">What you see is what the Big Screen shows.</span>
+      </div>
       <div
         ref={box}
         className="crop-frame"
@@ -92,7 +95,7 @@ export function PhotoCropper({ img, onDone, onCancel }: { img: ImageBitmap; onDo
           onChange={(e) => crop && set(zoomCrop(crop, min * Number(e.target.value), fw / 2, fh / 2))} />
         <span aria-hidden="true">+</span>
       </label>
-      <p className="meta" style={{ margin: 0, textAlign: "center" }}>Drag to move, pinch or slide to zoom. This is exactly what the big screen shows ({TV.frame.w} × {TV.frame.h}).</p>
+      <p className="meta" style={{ margin: 0, textAlign: "center" }}>Drag to move · pinch or slide to zoom · <span style={{ whiteSpace: "nowrap" }}>{TV.frame.w} × {TV.frame.h}</span></p>
       <div className="row" style={{ gap: 8 }}>
         <button type="button" className="btn btn-secondary" style={{ width: "auto", flex: "none" }} onClick={onCancel}>Back</button>
         <button type="button" className="btn btn-night radio-submit" disabled={!crop || busy} onClick={async () => {
