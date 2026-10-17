@@ -1855,3 +1855,10 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .borough-places { display:flex; flex-wrap:wrap; gap:6px; }
 .borough-place { display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 3px; border-radius:var(--r-pill); background:var(--surface-card); font-size:13px; font-weight:600; color:var(--text-1); }
 .borough-place .map-pin-tile { width:22px; height:22px; border-radius:7px; }
+.borough-tabs { overflow-x:auto; scrollbar-width:none; scroll-snap-type:x proximity; gap:4px; }
+.borough-tabs::-webkit-scrollbar { display:none; }
+/* Owner, Oct 17: two tabs in view and the third peeking, so it reads as a row you can swipe. */
+.borough-tabs button { flex:0 0 calc((100% - 8px) / 2.3); scroll-snap-align:start; padding:0 10px; white-space:nowrap; font-size:15px; }
+.borough-tab-lock { margin-right:5px; font-size:12px; }
+.places-empty { display:flex; flex-direction:column; align-items:center; gap:8px; padding:28px 18px; border-radius:var(--r-md); background:var(--surface-card); text-align:center; }
+.places-empty-emoji { font-size:36px; line-height:40px; }

@@ -734,7 +734,8 @@ export function PlacesSheet({
   openBoroughs?: Set<BoroughId>; gates?: BoroughGate[] | null;
 }) {
   const all = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
-  const tabs = BOROUGHS.filter((b) => all.some((r) => boroughOf(r.p) === b.id));
+  // Owner, Oct 17: every borough is a tab; all but Queens stay locked until they open.
+  const tabs = BOROUGHS;
   const [tab, setTab] = useState<BoroughId>("queens");
   const isOpen = (id: BoroughId) => !openSet || openSet.has(id);
   const inTab = all.filter((r) => boroughOf(r.p) === tab);
@@ -743,20 +744,28 @@ export function PlacesSheet({
   rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...inTab.filter((r) => isStation(r.p)));
   const locked = !isOpen(tab);
   const gate = gates?.find((g) => g.id === tab) ?? null;
+  const borough = BOROUGHS.find((b) => b.id === tab)!;
   return (
     <Sheet open={open} onClose={onClose} label="Places">
       <div className="stack-16">
         <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Places</h2>
         {tabs.length > 1 && (
-          <div className="segmented" role="group" aria-label="Boroughs">
+          <div className="segmented borough-tabs" role="group" aria-label="Boroughs">
             {tabs.map((b) => (
-              <button key={b.id} aria-pressed={tab === b.id} onClick={() => setTab(b.id)}>
-                {!isOpen(b.id) && <span aria-hidden="true">🔒 </span>}{b.name}
+              <button key={b.id} aria-pressed={tab === b.id} onClick={(e) => { setTab(b.id); e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" }); }} aria-label={isOpen(b.id) ? b.name : `${b.name}, locked`}>
+                {!isOpen(b.id) && <span className="borough-tab-lock" aria-hidden="true">🔒</span>}{b.name}
               </button>
             ))}
           </div>
         )}
-        {locked ? (
+        {rows.length === 0 ? (
+          <div className="places-empty">
+            <span className="places-empty-emoji" aria-hidden="true">🚧</span>
+            <p className="title" style={{ margin: 0 }}>{borough.name} is still getting dressed</p>
+            <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{borough.empty ?? "No places here yet. Come back when you're famous."}</p>
+            <p className="meta" style={{ margin: 0 }}>Opens after Brooklyn.</p>
+          </div>
+        ) : locked ? (
           <div className="places-locked-head">
             <p className="overline" style={{ margin: 0 }}>🔒 {rows.length} places waiting</p>
             <p className="meta" style={{ margin: 0 }}>{gateRule(gate ?? { target: GATE_RULE.target, daysNeeded: GATE_RULE.days })}</p>
