@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import AvatarHead from "../avatar/AvatarHead";
 import { LOLA_LOOK } from "@/lib/cast";
 
-// The welcome screen and the five tutorial tooltips (Clarifications section 1;
+// The welcome screen and the tutorial tooltips (Lola's hello, then five) (Clarifications section 1;
 // C15). One tooltip at a time, the rest of the screen dimmed, the target ringed.
 
 // Owner, Oct 17: Lola Lowdown gives the tour, in her voice (the spicy urban gossip blogger).
 export const TOUR = [
-  { target: "clout", text: "Hey babe, Lola Lowdown. I know everyone worth knowing, and now I know you. That flame is your clout: how much this city cares that you exist. Right now? Not a lot. We'll fix that." },
+  // No target: Lola says hello first (owner, Oct 17), with the whole screen dimmed.
+  { target: "welcome", text: "Hey there, welcome to NYC: the city that never sleeps, and never stops talking. I'm Lola Lowdown. I know everyone worth knowing, and now I know you. Let me give you a quick tour." },
+  { target: "clout", text: "That flame is your clout: how much this city cares that you exist. Right now? Not a lot, babe. We'll fix that." },
   { target: "money", text: "Your coins, honey. Rent, fits and the occasional \"tip\" for a bouncer all come out of here. The diamond is your net worth: everything you own that you can casually drop in conversation." },
   { target: "map", text: "This is the map. You're starting in Queens, and the rest of the city stays locked till you're interesting enough. I've seen worse glow-ups. Barely." },
   { target: "phone", text: "Your phone. Updates, gossip and the fam asking if you've \"made it yet.\" My tea comes through here too, so keep it charged." },
