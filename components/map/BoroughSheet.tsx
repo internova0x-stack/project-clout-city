@@ -74,12 +74,12 @@ export function BoroughSheet({ id, onClose, gate = null }: { id: BoroughId | nul
           <BoroughMiniMap key={b.id} id={b.id} />
           <div>
             <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>{b.name}</h2>
-            <p className="meta" style={{ margin: "4px 0 0" }}>🔒 {rule ? gateRule(rule) : "Opens in a later update. Queens first."}{gate && !gate.open && gate.counting === false && before ? ` Counting starts once ${before} opens.` : ""}</p>
+            <p className="meta" style={{ margin: "4px 0 0" }}>🔒 {rule ? gateRule(rule) : "Opens in a later update. Queens first."}{gate && !gate.open && gate.counting === false && before ? ` Next in line once ${before} opens.` : ""}</p>
           </div>
           {gate && !gate.open && gate.counting !== false && (
             <div className="borough-gate">
               <div className="borough-gate-bar" role="meter" aria-label="People out right now" aria-valuemin={0} aria-valuemax={gate.target} aria-valuenow={gate.online}>
-                <i style={{ width: `${Math.min(100, Math.round((gate.peakToday / gate.target) * 100))}%` }} />
+                <i style={{ width: `${Math.min(100, Math.round((gate.online / gate.target) * 100))}%` }} />
               </div>
               <p className="borough-gate-line">{gateProgress(gate)}</p>
               <p className="meta" style={{ margin: 0 }}>Bring your crew out. Every player online counts.</p>

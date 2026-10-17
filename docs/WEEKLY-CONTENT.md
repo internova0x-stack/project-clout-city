@@ -86,6 +86,6 @@ it isn't in your working directory). Work from the main branch.
 ```
 
 ## Boroughs (migration 0066)
-Brooklyn stays locked until 100 players are out at once on 3 different days (or a Studio admin opens it).
+Boroughs open in order (Brooklyn, The Bronx, Staten Island, Manhattan last) the moment 100, 250, 500 and 1,000 players are out at once (or a Studio admin opens one).
 Until it opens, write every hunt step, gossip piece and news lead at a **Queens** place: the server skips
 leads in a locked borough and nobody can travel there, so a Brooklyn piece would be a dead end.
