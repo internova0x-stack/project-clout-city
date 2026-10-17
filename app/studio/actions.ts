@@ -1,7 +1,7 @@
 "use server";
 
 import type { Arc, Status } from "@/lib/stories";
-import { parseArcs, studioError, type Admin, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type GossipAdmin, type GossipFileCheck, type SetupCheckRow, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { applyBeatText, parseArcs, studioError, type Admin, type BeatText, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type GossipAdmin, type GossipFileCheck, type SetupCheckRow, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
@@ -79,6 +79,33 @@ export async function studioStatus(arc: string, status: Status) {
 
 export async function studioBeatStatus(arc: string, beat: string, status: Status) {
   return run("admin_beat_status", { p_arc: arc, p_beat: beat, p_status: status }, `Beat ${beat} is ${status}.`);
+}
+
+/** The Studio's order of stories (migration 0071). */
+export async function studioReorder(ids: string[]) {
+  return run("admin_story_reorder", { p_ids: ids }, "Order saved.");
+}
+
+/** A beat's words only (migration 0071): checked like a file, and the story keeps its approval. */
+export async function studioBeatEdit(arcId: string, beatId: string, text: BeatText): Promise<StudioResult> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  const current = await list(supabase);
+  if (!current.ok) return current;
+  const arcs: Arc[] = [];
+  for (const a of current.arcs) {
+    const { data } = await supabase.rpc("admin_story_get", { p_arc: a.id });
+    if (data) arcs.push(data as Arc);
+  }
+  const arc = arcs.find((a) => a.id === arcId);
+  const beat = arc?.beats.find((b) => b.id === beatId);
+  if (!arc || !beat) return { ok: false, error: "That beat doesn't exist." };
+  const r = applyBeatText(beat, text);
+  if (!r.ok) return { ok: false, error: r.error };
+  const edited = { ...arc, beats: arc.beats.map((b) => (b.id === beatId ? r.beat : b)) };
+  const problems = validateArcs(arcs.map((a) => (a.id === arcId ? edited : a))).filter((p) => p.startsWith(`${arcId}:`) || !p.includes(":"));
+  if (problems.length) return { ok: false, error: `The edit has ${problems.length} problem${problems.length === 1 ? "" : "s"}. Nothing was saved.`, problems };
+  return run("admin_beat_edit", { p_arc: arcId, p_beat: beatId, p_data: r.beat }, `Saved beat ${beatId}.`);
 }
 
 export async function studioContent(arc: string): Promise<{ ok: true; arcs: Arc[] } | { ok: false; error: string }> {

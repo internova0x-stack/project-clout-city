@@ -3,7 +3,7 @@ import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
 import {
-  studioBeatStatus, studioDrafts, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
+  studioBeatEdit, studioBeatStatus, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +33,7 @@ export default async function StudioPage() {
       initial={(data ?? []) as StudioArc[]}
       who={user.email ?? "admin"}
       api={{
-        upload: studioUpload, review: studioReview, schedule: studioSchedule, status: studioStatus, beatStatus: studioBeatStatus, content: studioContent,
+        upload: studioUpload, review: studioReview, schedule: studioSchedule, status: studioStatus, beatStatus: studioBeatStatus, content: studioContent, reorder: studioReorder, beatEdit: studioBeatEdit,
         reports: studioReports, reportAction: studioReportAction, metrics: studioMetrics, insights: studioInsights, players: studioPlayers, player: studioPlayer, playerBan: studioPlayerBan,
         castLines: studioCastLines, castAdd: studioCastAdd, castStatus: studioCastStatus,
         newsList: studioNewsList, newsUpload: studioNewsUpload, newsStatus: studioNewsStatus, newsReschedule: studioNewsReschedule,
