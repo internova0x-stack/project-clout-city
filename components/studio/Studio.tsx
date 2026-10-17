@@ -7,6 +7,9 @@ import { InsightsTab } from "./Insights";
 import { PlayersTab } from "./Players";
 import { ShoutoutsTab } from "./Shoutouts";
 import { BigScreenTab } from "./BigScreen";
+import { StoryPreview, describeEffect } from "./StoryPreview";
+import { StoryBuilder, clearDraft, loadDraft } from "./StoryBuilder";
+import { newArc } from "@/lib/storyBuilder";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
 import { beatText, nextWeekday, weekdayOf, type BeatText, type CastLine, type ContentDraft, type GossipAdmin, type GossipFileCheck, type HuntAdmin, type NewsAdminItem, type Review, type SetupCheckRow, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
@@ -43,6 +46,31 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
       setNote({ kind: "error", text: "The Studio glitched. Try again." });
     } finally {
       setBusy(null);
+    }
+  };
+
+  // The story builder (owner, Oct 17): a new story, or a saved one opened to edit.
+  const [builder, setBuilder] = useState<{ initial: Arc; isNew: boolean } | null>(null);
+  const [checksHost, setChecksHost] = useState<HTMLElement | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [newDraft, setNewDraft] = useState<{ arc: Arc; at: number } | null>(null);
+  useEffect(() => { setNewDraft(loadDraft("new")); }, [builder]);
+  const openBuilder = async (id: string | null) => {
+    if (!id) return setBuilder({ initial: loadDraft("new")?.arc ?? newArc("main"), isNew: true });
+    setBusy("open");
+    const r = await api.content(id);
+    setBusy(null);
+    const found = r.ok ? r.arcs.find((a) => a.id === id) : null;
+    if (!found) return setNote({ kind: "error", text: r.ok ? "That story is gone." : r.error });
+    setBuilder({ initial: loadDraft(id)?.arc ?? found, isNew: false });
+  };
+  const saveBuilt = async (json: string, id: string) => {
+    let saved = false;
+    await apply("upload", async () => { const r = await api.upload(json); saved = r.ok; return r; });
+    if (saved) {
+      clearDraft(builder?.isNew ? "new" : id);
+      setBuilder(null);
+      setSelected(id);
     }
   };
 
@@ -121,8 +149,20 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
 
       {tab === "stories" && <div className="studio-grid">
         <aside className="stack-12">
-          <Upload busy={busy} onUpload={(json) => apply("upload", () => api.upload(json))} />
+          <button className="btn btn-taxi builder-create" disabled={busy !== null} onClick={() => openBuilder(null)}>＋ Create story</button>
+          {showUpload
+            ? <Upload busy={busy} onUpload={(json) => apply("upload", () => api.upload(json))} />
+            : <button className="studio-link" onClick={() => setShowUpload(true)}>or upload a story file</button>}
           <p className="overline" style={{ margin: "8px 0 0" }}>Stories</p>
+          {newDraft && !builder && (
+            <button className="studio-arc builder-draft-row" onClick={() => openBuilder(null)}>
+              <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <span className="title" style={{ display: "block" }}>{newDraft.arc.title || "Untitled story"}</span>
+                <span className="meta" style={{ display: "block" }}>{newDraft.arc.type === "main" ? "Main story" : "Side story"} · Draft in the builder, on this device</span>
+              </span>
+              <span className="tag studio-review draft">Draft</span>
+            </button>
+          )}
           {mains.map((m) => (
             <div key={m.id} className="stack-8">
               <div className="studio-arc-line"><ArcRow a={m} active={m.id === selected} onPick={() => setSelected(m.id)} />{mover(mains, m)}</div>
@@ -134,11 +174,15 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {orphans.map((s) => (
             <div key={s.id} className="studio-arc-line"><ArcRow a={s} side active={s.id === selected} onPick={() => setSelected(s.id)} />{mover(orphans, s)}</div>
           ))}
-          {!arcs.length && <p className="subtext">No stories yet. Upload a story file to start.</p>}
+          {!arcs.length && <p className="subtext">No stories yet. Create one, or upload a story file.</p>}
+          {builder && <div ref={setChecksHost} />}
         </aside>
 
-        {arc ? (
-          <ArcDetail key={arc.id} arc={arc} parent={arcs.find((a) => a.id === arc.parent) ?? null} api={api} busy={busy} apply={apply} />
+        {builder ? (
+          <StoryBuilder key={builder.initial.id || "new"} initial={builder.initial} isNew={builder.isNew} arcs={arcs} api={api} busy={busy} checksHost={checksHost}
+            onSave={saveBuilt} onClose={() => setBuilder(null)} />
+        ) : arc ? (
+          <ArcDetail key={arc.id} arc={arc} parent={arcs.find((a) => a.id === arc.parent) ?? null} api={api} busy={busy} apply={apply} onOpenBuilder={() => openBuilder(arc.id)} />
         ) : (
           <section className="studio-card"><p className="subtext">Pick a story.</p></section>
         )}
@@ -208,9 +252,9 @@ function Upload({ busy, onUpload }: { busy: string | null; onUpload: (json: stri
   );
 }
 
-function ArcDetail({ arc, parent, api, busy, apply }: {
+function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
   arc: StudioArc; parent: StudioArc | null; api: StudioApi; busy: string | null;
-  apply: (key: string, call: () => Promise<StudioResult>) => Promise<void>;
+  apply: (key: string, call: () => Promise<StudioResult>) => Promise<void>; onOpenBuilder: () => void;
 }) {
   const [reviewNote, setReviewNote] = useState(arc.reviewNote ?? "");
   const today = nyToday();
@@ -242,11 +286,15 @@ function ArcDetail({ arc, parent, api, busy, apply }: {
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             <h2 className="display-md" style={{ margin: 0 }}>{arc.title || arc.id}</h2>
-            <span className="meta">{arc.id} · {arc.type === "main" ? "Main story" : `Side story of ${parent?.title ?? arc.parent}`} · {arc.tier === "premium" ? `Premium (${arc.sku})` : "Free"} · {arc.lastDay} days</span>
+            <span className="meta">{arc.id} · {arc.type === "main" ? "Main story" : `Side story of ${parent?.title ?? arc.parent}`} · {arc.tier === "premium" ? `Premium (${arc.sku})` : "Free"} · {arc.lastDay} day{arc.lastDay === 1 ? "" : "s"}</span>
           </div>
           <ReviewTag r={arc.review} />
         </div>
         <span className="body-strong">{stateLine(arc, parent)}{totalVotes ? ` · ${totalVotes.toLocaleString()} votes` : ""}</span>
+        <div className="row" style={{ gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <button className="btn btn-secondary btn-sm" disabled={busy !== null || live} onClick={onOpenBuilder}>Open in builder</button>
+          <span className="meta">{live ? "Live stories can't be rebuilt mid-run; edit a beat's words below." : "Edit the whole story. Saving a change sends it back for review."}</span>
+        </div>
       </div>
 
       {/* 1. One approval */}
@@ -445,13 +493,10 @@ function BeatPanel({ beat, error, released, busy, canEdit, onSave }: {
   );
 }
 
-/** Reads any day of a story the way a player will, with what changes in the city that day. */
+/** Reads any day of a story the way a player will: loads the story and its side stories, then StoryPreview. */
 function PlayerPreview({ arc, api }: { arc: StudioArc; api: StudioApi }) {
   const [content, setContent] = useState<Arc[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [day, setDay] = useState(Math.min(Math.max(arc.day ?? 1, 1), arc.lastDay));
-  const [evening, setEvening] = useState(false);
-  const [owner, setOwner] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -462,21 +507,6 @@ function PlayerPreview({ arc, api }: { arc: StudioArc; api: StudioApi }) {
     else setError(r.error);
   };
 
-  const view = useMemo(() => {
-    if (!content) return null;
-    const today = nyToday();
-    const start = addDaysISO(today, -(day - 1));
-    const starts = { [arc.id]: start };
-    const now = nyTime(start, day, evening ? "23:00" : "12:00");
-    const st = { ...emptyStoryState(), seen: content.flatMap((a) => a.beats.map((b) => b.id)), skus: owner ? content.map((a) => a.sku ?? "").filter(Boolean) : [] };
-    const live = content.map((a) => ({ ...a, status: "active" as const }));
-    return {
-      feed: buildFeed(live, starts, now, st),
-      effects: activeEffects(live.filter((a) => a.type === "main"), today, starts),
-    };
-  }, [content, day, evening, owner, arc.id]);
-
-  const noop = () => {};
   return (
     <div className="studio-card stack-12">
       <span className="overline">Preview as a player</span>
@@ -487,69 +517,10 @@ function PlayerPreview({ arc, api }: { arc: StudioArc; api: StudioApi }) {
           {error && <span className="meta reason">{error}</span>}
         </>
       ) : (
-        <>
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            {Array.from({ length: arc.lastDay + 1 }, (_, i) => i + 1).map((d) => (
-              <button key={d} className="chip" aria-pressed={d === day} onClick={() => setDay(d)}>{d > arc.lastDay ? "After" : `Day ${d}`}</button>
-            ))}
-          </div>
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <button className="chip" aria-pressed={evening} onClick={() => setEvening((v) => !v)}>{evening ? "🌙 11 PM" : "☀️ Noon"}</button>
-            <button className="chip" aria-pressed={owner} onClick={() => setOwner((v) => !v)}>{owner ? "Owns side stories" : "Free player"}</button>
-          </div>
-          <div className="studio-preview">
-            <div className="phone-device studio-phone">
-              <div className="phone-screen">
-                <div className="phone-status light"><span>Day {Math.min(day, arc.lastDay + 1)}</span><span className="phone-pill" aria-hidden="true" /><span aria-hidden="true">▂▄▆ 🔋</span></div>
-                <div className="phone-app-screen">
-                  {view && <NewsApp key={`${day}-${evening}-${owner}`} feed={view.feed} handlers={{ busy: null, vote: noop, shadowGuess: noop, markSeen: noop, completeTask: noop, onUnlock: noop }} />}
-                </div>
-              </div>
-            </div>
-            <div className="stack-8" style={{ flex: 1, minWidth: 0 }}>
-              <span className="title">In the city that day</span>
-              {view && view.effects.length === 0 && <span className="subtext">Nothing changes in the city.</span>}
-              {view?.effects.map((e, i) => (
-                <div key={i} className="studio-effect">
-                  <span className="meta">D{e.day} · {e.beat}</span>
-                  <span className="body">{describeEffect(e.effect)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
+        <StoryPreview content={content} arcId={arc.id} lastDay={arc.lastDay} startDay={arc.day} />
       )}
     </div>
   );
-}
-
-const placesWith = (tags?: string[]) => (tags ?? []).join(", ").replace(/_/g, " ");
-const placeName = (id?: string) => (id ? placeById(id)?.name ?? id : "");
-
-export function describeEffect(e: StoryEffect): string {
-  switch (e.type) {
-    case "price_multiplier":
-      return `Prices ×${e.multiplier} (${e.applies_to?.replace("_", " ")}) at ${placesWith(e.tags)}: “${e.reason}”${e.expires_day ? ` until Day ${e.expires_day}` : ""}`;
-    case "availability":
-      return e.sku
-        ? `${e.state === "open" ? "On sale" : e.state}: ${e.sku}${e.reason ? ` (“${e.reason}”)` : ""}${e.expires_day ? ` until Day ${e.expires_day}` : ""}`
-        : `${e.state === "closed" ? "Closed" : e.state === "restricted" ? "Restricted" : "Open"}: ${placesWith(e.tags)} (“${e.reason}”)${e.expires_day ? ` until Day ${e.expires_day}` : ""}`;
-    case "chatter_topic":
-      return `NPCs talk about ${e.topic} (${e.phase})`;
-    case "task_injection":
-      return `Story tasks today: ${(e.add ?? []).map((t) => t.split(":").pop()).join(", ")}`;
-    case "place_state":
-      return [
-        e.spawn_event && `Event at ${placeName(e.place)}: ${e.spawn_event}`,
-        e.cancel_event && `Cancelled: ${e.cancel_event}`,
-        e.unlock_action && `New action at ${placeName(e.place)}: ${e.unlock_action}`,
-        e.note && `${placeName(e.place)} card note: “${e.note}”`,
-      ].filter(Boolean).join(" · ") || `Change at ${placeName(e.place)}`;
-    case "flag":
-      return `Flag set: ${e.set}`;
-    default:
-      return e.type;
-  }
 }
 
 // ---------------------------------------------------------------------------
