@@ -60,7 +60,7 @@ import { HUNT_BADGE, type HuntApi, type HuntState } from "@/lib/hunts";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
-import { TourTooltip, TOUR } from "./game/Tutorial";
+import { DailyTasksHint, TourTooltip, TOUR } from "./game/Tutorial";
 import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
 import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
@@ -108,6 +108,9 @@ type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" 
 
 const PINS_KEY = "cc_first_pins_seen";
 const TASKS_SEEN_KEY = "cc-tasks-seen";
+/** Owner, Oct 17: set when the first session ends, cleared once the player opens the tasks or Lola's nudge. */
+const DAILY_HINT_KEY = "cc-daily-hint";
+const DAILY_HINT_AFTER_MS = 30_000;
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
 /** Who's talking in a place (chatter templates are written per role). */
@@ -193,6 +196,7 @@ export function GameShell({
   stations,
   roomMood = "dream",
   previewRankUp,
+  previewDailyHint = false,
   invitedAt,
 }: {
   player: Player;
@@ -256,6 +260,8 @@ export function GameShell({
   invitedAt?: string;
   /** Development previews only: show the rank-up reveal for this rank (1 to 10). */
   previewRankUp?: number;
+  /** Preview: Lola's daily-tasks nudge appears after 2 seconds. */
+  previewDailyHint?: boolean;
 }) {
   const [city, setCity] = useState<CityState | null>(initialCity);
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
@@ -1322,6 +1328,22 @@ export function GameShell({
     setTasksSeenDay(city.today);
     try { localStorage.setItem(TASKS_SEEN_KEY, city.today); } catch { /* fine */ }
   }, [city?.today]);
+  // Owner, Oct 17: new players didn't know what to do. If the daily tasks haven't been opened 30 seconds after the
+  // first session ends, Lola rings the button. Once per device; waits for any open sheet to close first.
+  const [dailyHint, setDailyHint] = useState<"waiting" | "due" | "showing" | "done">("done");
+  useEffect(() => {
+    if (previewDailyHint) return setDailyHint("waiting");
+    try { if (handedOff && localStorage.getItem(DAILY_HINT_KEY) === "pending") setDailyHint("waiting"); } catch { /* fine */ }
+  }, [handedOff, previewDailyHint]);
+  useEffect(() => {
+    if (dailyHint !== "waiting") return;
+    const t = setTimeout(() => setDailyHint("due"), previewDailyHint ? 2000 : DAILY_HINT_AFTER_MS);
+    return () => clearTimeout(t);
+  }, [dailyHint, previewDailyHint]);
+  const endDailyHint = useCallback(() => {
+    setDailyHint("done");
+    try { localStorage.removeItem(DAILY_HINT_KEY); } catch { /* fine */ }
+  }, []);
   const markPin = (k: "invite" | "networth") => {
     setPinsSeen((p) => {
       const next = { ...p, [k]: true };
@@ -1379,6 +1401,8 @@ export function GameShell({
   const endHandoff = () => {
     setFlow("none");
     setMe((p) => ({ ...p, onboarding_step: "handoff_done" }));
+    try { localStorage.setItem(DAILY_HINT_KEY, "pending"); } catch { /* private mode: no nudge */ }
+    setDailyHint("waiting");
     void actions.finishHandoff();
   };
   const afterInvitePrompt = () => (isStandalone() ? endHandoff() : setFlow("pwa"));
@@ -1398,7 +1422,7 @@ export function GameShell({
       }
       if (a === "leaderboard") return setPanel("leaderboard");
       if (a === "bank") return setPanel("bank");
-      if (a === "tasks" || a === "daily") { markTasksSeen(); return setPanel("tasks"); }
+      if (a === "tasks" || a === "daily") { markTasksSeen(); endDailyHint(); return setPanel("tasks"); }
       if (a === "events") {
         if (flow === "tour") {
           // Tooltip 5 ends the tour by tapping its target, and starts the first task.
@@ -1420,7 +1444,7 @@ export function GameShell({
       setSoon({ key: a });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flow, cityOn, markTasksSeen],
+    [flow, cityOn, markTasksSeen, endDailyHint],
   );
 
   const onPinTap = useCallback(
@@ -1892,6 +1916,9 @@ export function GameShell({
       )}
 
       {/* ---- Guided first session ---- */}
+      {dailyHint === "due" && flow === "none" && panel === null && !place && (
+        <DailyTasksHint onOpen={() => onAction("daily")} onDismiss={endDailyHint} />
+      )}
       {flow === "tour" && (
         <TourTooltip
           index={tourStep}
