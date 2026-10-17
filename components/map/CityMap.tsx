@@ -62,7 +62,7 @@ const NYC_BOUNDS: [[number, number], [number, number]] = [[-75.2, 40.1], [-72.8,
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
 /** Where landmarks were stood on this device (placeLandmark), so they don't jump on the next visit. */
-const SPOTS_KEY = "cc-landmark-spots-v5"; // v5: placed only once its streets have loaded (v4: clear of water, the station on its street)
+const SPOTS_KEY = "cc-landmark-spots-v6"; // v6: Brooklyn moved into one cluster, St. Johnsons to Jamaica. v5: placed only once its streets have loaded (v4: clear of water, the station on its street)
 function loadSpots(): Record<string, Spot> {
   try {
     return typeof window === "undefined" ? {} : JSON.parse(window.localStorage.getItem(SPOTS_KEY) ?? "{}");

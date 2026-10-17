@@ -31,7 +31,7 @@ import { liveParty, type StoreProduct } from "@/lib/store";
 import { TOGETHER, canDoTogether, type TogetherPlan } from "@/lib/together";
 import { handle } from "@/lib/validation";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
-import { GATE_RULE, gateProgress, gateRule, type BoroughGate } from "@/lib/boroughGates";
+import { gateProgress, gateRule, ruleFor, type BoroughGate } from "@/lib/boroughGates";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
 
@@ -744,10 +744,13 @@ export function PlacesSheet({
   rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...inTab.filter((r) => isStation(r.p)));
   const locked = !isOpen(tab);
   const gate = gates?.find((g) => g.id === tab) ?? null;
+  const rule = ruleFor(tab, gates);
   const borough = BOROUGHS.find((b) => b.id === tab)!;
+  const before = BOROUGHS[BOROUGHS.findIndex((b) => b.id === tab) - 1]?.name ?? "Queens";
   return (
     <Sheet open={open} onClose={onClose} label="Places">
-      <div className="stack-16">
+      {/* Owner, Oct 17: the sheet keeps its height when a borough has nothing to list. */}
+      <div className="stack-16 places-sheet">
         <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Places</h2>
         {tabs.length > 1 && (
           <div className="segmented borough-tabs" role="group" aria-label="Boroughs">
@@ -763,13 +766,14 @@ export function PlacesSheet({
             <span className="places-empty-emoji" aria-hidden="true">🚧</span>
             <p className="title" style={{ margin: 0 }}>{borough.name} is still getting dressed</p>
             <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{borough.empty ?? "No places here yet. Come back when you're famous."}</p>
-            <p className="meta" style={{ margin: 0 }}>Opens after Brooklyn.</p>
+            <p className="meta" style={{ margin: 0 }}>Opens after {before}{rule ? `, once ${rule.target.toLocaleString("en-US")} people are out at once on ${rule.daysNeeded} different days` : ""}.</p>
+            {gate && !gate.open && gate.counting !== false && <p className="places-locked-progress">{gateProgress(gate)}</p>}
           </div>
         ) : locked ? (
           <div className="places-locked-head">
             <p className="overline" style={{ margin: 0 }}>🔒 {rows.length} places waiting</p>
-            <p className="meta" style={{ margin: 0 }}>{gateRule(gate ?? { target: GATE_RULE.target, daysNeeded: GATE_RULE.days })}</p>
-            {gate && <p className="places-locked-progress">{gateProgress(gate)}</p>}
+            {rule && <p className="meta" style={{ margin: 0 }}>{gateRule(rule)}</p>}
+            {gate && !gate.open && gate.counting !== false && <p className="places-locked-progress">{gateProgress(gate)}</p>}
           </div>
         ) : (
           <p className="subtext" style={{ margin: 0 }}>{tab === "queens" ? "Queens and Long Island City, nearest first." : "Nearest first."}</p>

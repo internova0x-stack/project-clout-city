@@ -18,13 +18,6 @@ const CAP = 20;
 const SLOT_H = 3;
 const nyDay = (offset = 0) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date(Date.now() + offset * 86_400_000));
 const ago = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
-/** The start of the current 3-hour slot, New York (12, 3, 6, 9). */
-function slotStart(): number {
-  const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date()));
-  const now = new Date();
-  now.setMinutes(0, 0, 0);
-  return now.getTime() - (hour % SLOT_H) * 3_600_000;
-}
 
 /** A drawn portrait standing in for a player's photo: a backdrop, a figure, sunglasses. */
 function portrait(bg: [string, string], skin: string, hair: string, top: string): string {
@@ -74,10 +67,12 @@ function get(preset?: string) {
   return store!;
 }
 
-/** On the screen now: the latest to go up in this 3-hour slot (none: "Make it BIG in NY"). */
+/** On the screen now: the latest to go up in the last 3 hours, a full 3 hours each (like tv_current, migration 0068). */
 const current = (s: NonNullable<typeof store>) =>
-  s.rows.filter((r) => r.status === "featured" && Date.parse(r.featuredAt!) >= slotStart() && r.featuredAt! <= new Date().toISOString())
+  s.rows.filter((r) => r.status === "featured" && Date.parse(r.featuredAt!) > Date.now() - SLOT_H * 3_600_000 && r.featuredAt! <= new Date().toISOString())
     .sort((a, b) => b.featuredAt!.localeCompare(a.featuredAt!))[0];
+/** When the current slot started: when the photo on screen went up (now, when nothing is up). */
+const slotStart = (s: NonNullable<typeof store>) => { const c = current(s); return c ? Date.parse(c.featuredAt!) : Date.now(); };
 
 /** The rotation: a new slot puts the next approved photo up. */
 function sync(s: NonNullable<typeof store>) {
@@ -99,7 +94,7 @@ export async function previewTvState(preset?: string) {
   const data: TvState = {
     today: s.day,
     featured: cur ? feature(cur) : null,
-    nextAt: new Date(slotStart() + SLOT_H * 3_600_000).toISOString(),
+    nextAt: new Date(slotStart(s) + SLOT_H * 3_600_000).toISOString(),
     archive: s.rows.filter((r) => r.status === "featured" && r !== cur).sort((a, b) => b.featuredAt!.localeCompare(a.featuredAt!)).map(feature),
     mine: s.rows.filter((r) => r.player === ME && r.status !== "withdrawn")
       .map((r): TvMine => ({ id: r.id, handle: r.handle, photo: r.photo, url: r.url, status: r.status, date: r.date, featuredAt: r.featuredAt, onNow: r === cur })),
@@ -182,7 +177,7 @@ export async function previewStudioBigScreen(status: "pending" | "approved" | "f
     .sort((a, b) => Number(b === cur) - Number(a === cur) || (a.approvedAt ?? "~").localeCompare(b.approvedAt ?? "~") || (b.featuredAt ?? "").localeCompare(a.featuredAt ?? "") || a.at.localeCompare(b.at));
   const data: StudioBigScreen = {
     current: cur?.id ?? null,
-    nextAt: new Date(slotStart() + SLOT_H * 3_600_000).toISOString(),
+    nextAt: new Date(slotStart(s) + SLOT_H * 3_600_000).toISOString(),
     cap: CAP,
     today: s.rows.filter((r) => r.date === s.day).length,
     items: rows.map((r) => ({

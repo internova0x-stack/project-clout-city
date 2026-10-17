@@ -9,11 +9,11 @@ create function pg_temp.raises(stmt text, err text) returns boolean language plp
 begin execute stmt; return false; exception when others then if sqlerrm like '%' || err || '%' then return true; end if; raise; end $$;
 
 -- Locked again for this test.
-update public.borough_gates set opened_at = null, opened_by = null where id = 'brooklyn';
+update public.borough_gates set opened_at = null, opened_by = null;
 delete from public.concurrency_days;
 
 -- The seed knows each place's borough.
-select pg_temp.assert((select count(*) from jsonb_array_elements(public.city() -> 'places') p where p ->> 'borough' = 'brooklyn') = 20, 'twenty places in Brooklyn');
+select pg_temp.assert((select count(*) from jsonb_array_elements(public.city() -> 'places') p where p ->> 'borough' = 'brooklyn') = 19, 'nineteen places in Brooklyn');
 select pg_temp.assert(not public.place_open('hellgate-hall') and public.place_open('st-copays') and public.place_open('neon-spoon'), 'Brooklyn locked, Queens open');
 
 insert into auth.users (id) values ('00000000-0000-0000-0000-0000000066b1');
@@ -55,6 +55,25 @@ update public.concurrency_days set peak = 100 where ny_date = public.ny_today() 
 select public.borough_tick();
 select pg_temp.assert(public.borough_open('brooklyn'), 'the third day opens Brooklyn');
 select pg_temp.assert((select opened_by = 'players' from public.borough_gates where id = 'brooklyn'), 'opened by the players');
+
+-- 0069: each borough has its own target, in order, Manhattan last; days before the one before it opened don't count.
+select pg_temp.assert((select string_agg(id || ':' || target, ',' order by position) from public.borough_gates)
+                      = 'brooklyn:100,bronx:250,staten_island:500,manhattan:1000', 'targets in unlock order');
+insert into public.concurrency_days (ny_date, peak) values (public.ny_today() - 4, 300), (public.ny_today() - 3, 300)
+  on conflict (ny_date) do update set peak = excluded.peak;
+update public.concurrency_days set peak = 300 where ny_date = public.ny_today() - 2;
+select public.borough_tick();
+select pg_temp.assert(not public.borough_open('bronx') and public.borough_days_hit('bronx') = 0, 'big days before Brooklyn opened don''t count for the Bronx');
+-- Brooklyn opened 3 days ago: those days count now; the Bronx opens, Staten Island starts counting from today.
+update public.borough_gates set opened_at = now() - interval '4 days' where id = 'brooklyn';
+update public.concurrency_days set peak = 1200 where ny_date >= public.ny_today() - 4;
+select public.borough_tick();
+select pg_temp.assert(public.borough_open('bronx') and not public.borough_open('staten_island') and not public.borough_open('manhattan'), 'one borough at a time');
+select pg_temp.assert(public.borough_counts_from('manhattan') is null, 'Manhattan waits for Staten Island');
+set role authenticated;
+select pg_temp.assert((select string_agg(g ->> 'id' || ':' || (g ->> 'counting'), ',') from jsonb_array_elements(public.borough_state()) g)
+                      = 'brooklyn:false,bronx:false,staten_island:true,manhattan:false', 'the app sees which borough is counting');
+reset role;
 
 -- Today's peak follows players out now (session pings in the last 2 minutes).
 select pg_temp.assert((select peak >= 0 from public.concurrency_days where ny_date = public.ny_today()), 'today has a peak');

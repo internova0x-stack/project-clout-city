@@ -1,6 +1,7 @@
-// Borough gates (owner, Oct 17): Queens is open from day one; the next borough opens for everyone once
-// enough people are out at once, on enough different days. The server decides (borough_state()); this
-// file only holds the shape and the copy. Safe to import anywhere.
+// Borough gates (owner, Oct 17): Queens is open from day one; the others open for everyone, one at a time and
+// in order (Manhattan last), once enough people are out at once on enough different days. Each borough has
+// its own target (migration 0069). The server decides (borough_state()); this file only holds the shape, the
+// targets shown before the server answers, and the copy. Safe to import anywhere.
 
 import type { BoroughId } from "./map/boroughs";
 
@@ -18,14 +19,26 @@ export interface BoroughGate {
   online: number;
   /** Today's peak so far. */
   peakToday: number;
+  /** Its days are being counted now (the borough before it has opened). */
+  counting?: boolean;
 }
 
-/** The rule, shown before the server has answered. */
-export const GATE_RULE = { target: 100, days: 3 } as const;
+/** Each borough's rule, shown before the server has answered (mirrors borough_gates, migration 0069). */
+export const GATE_RULES: Record<Exclude<BoroughId, "queens">, { target: number; daysNeeded: number }> = {
+  brooklyn: { target: 100, daysNeeded: 3 },
+  bronx: { target: 250, daysNeeded: 3 },
+  staten_island: { target: 500, daysNeeded: 3 },
+  manhattan: { target: 1000, daysNeeded: 3 },
+};
+
+/** A borough's rule: the server's when it has answered, else the table above (none for Queens). */
+export function ruleFor(id: BoroughId, gates?: readonly BoroughGate[] | null): { target: number; daysNeeded: number } | null {
+  return gates?.find((g) => g.id === id) ?? (id === "queens" ? null : GATE_RULES[id]);
+}
 
 /** "Opens when 100 people are out at once, on 3 different days." */
 export function gateRule(g: Pick<BoroughGate, "target" | "daysNeeded">): string {
-  return `Opens when ${g.target} people are out at once, on ${g.daysNeeded} different days.`;
+  return `Opens when ${g.target.toLocaleString("en-US")} people are out at once, on ${g.daysNeeded} different days.`;
 }
 
 /** "37 out right now · today's peak 64 · 1 of 3 days" */
