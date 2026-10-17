@@ -168,7 +168,7 @@
         { "say": "Best calendar we ever made. Everyone looked like a movie star. Gus took the mirror for his bench. He says it 'catches the light off the river.'" },
         {
           "say": "Looked in it once. Saw myself at twenty-five. Then I put it down. Vee wants to know you've been around.",
-          "question": { "q": "Which Astoria place is a free library?", "choices": ["Ditmars Free Library", "Atlantic Avenue Community College", "Queensborough University", "Triborough Works"], "answer": 0 },
+          "question": { "q": "Which Astoria place is a free library?", "choices": ["Ditmars Free Library", "Grand Street Community College", "Queensborough University", "Triborough Works"], "answer": 0 },
           "then": "Good. Jojo's got the mirror at the café now, Vee's old table. The password's the mirror's name."
         },
         {

@@ -71,6 +71,13 @@ select pg_temp.assert(exists (select 1 from public.station_messages where player
 update public.tv_submissions set featured_at = featured_at - interval '3 hours' where handle = 'mia.k';
 set role authenticated; select pg_temp.as_(2);
 select pg_temp.assert(public.tv_state() -> 'featured' ->> 'handle' = 'zed', 'next slot: zed');
+-- A full 3 hours from when it went up, whatever the clock says (0068): 2 h 50 min in, zed is still up.
+reset role;
+update public.tv_submissions set featured_at = featured_at - interval '170 minutes' where handle = 'zed';
+select set_config('tv.zed_ends', (select (featured_at + interval '3 hours')::text from public.tv_submissions where handle = 'zed'), false);
+set role authenticated; select pg_temp.as_(2);
+select pg_temp.assert(public.tv_state() -> 'featured' ->> 'handle' = 'zed', 'still up near the end of its 3 hours');
+select pg_temp.assert((public.tv_state() ->> 'nextAt')::timestamptz = current_setting('tv.zed_ends')::timestamptz, 'next slot: 3 hours after it went up');
 select pg_temp.assert(jsonb_array_length(public.tv_state() -> 'archive') = 1, 'mia in the archive');
 -- Mia reads the text in Messages.
 select pg_temp.assert(public.station_inbox() -> 0 ->> 'station' = 'tv' and (public.station_inbox() -> 0 ->> 'unread')::int = 1, 'one unread from Clout TV');

@@ -8,7 +8,7 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import { buildMapStyle, LOCKED_RED } from "@/lib/map/style";
 import { Sheet } from "../Sheet";
 import { PLACES, boroughOf } from "@/lib/city";
-import { GATE_RULE, gateProgress, gateRule, type BoroughGate } from "@/lib/boroughGates";
+import { gateProgress, gateRule, ruleFor, type BoroughGate } from "@/lib/boroughGates";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
@@ -64,7 +64,9 @@ export function BoroughSheet({ id, onClose, gate = null }: { id: BoroughId | nul
   const b = BOROUGHS.find((x) => x.id === id);
   // Owner, Oct 17: the places waiting there, and how close the city is to opening it.
   const waiting = b ? PLACES.filter((p) => boroughOf(p) === b.id && !p.story) : [];
-  const rule = gate ?? (waiting.length ? { target: GATE_RULE.target, daysNeeded: GATE_RULE.days } : null);
+  // Owner, Oct 17: every locked borough shows its own target; progress only for the one being counted now.
+  const rule = b ? ruleFor(b.id, gate ? [gate] : null) : null;
+  const before = b ? BOROUGHS[BOROUGHS.findIndex((x) => x.id === b.id) - 1]?.name : undefined;
   return (
     <Sheet open={!!b} onClose={onClose} label={b ? `${b.name} is locked` : "Locked borough"}>
       {b && (
@@ -72,9 +74,9 @@ export function BoroughSheet({ id, onClose, gate = null }: { id: BoroughId | nul
           <BoroughMiniMap key={b.id} id={b.id} />
           <div>
             <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>{b.name}</h2>
-            <p className="meta" style={{ margin: "4px 0 0" }}>🔒 {rule ? gateRule(rule) : "Opens in a later update. Queens first."}</p>
+            <p className="meta" style={{ margin: "4px 0 0" }}>🔒 {rule ? gateRule(rule) : "Opens in a later update. Queens first."}{gate && !gate.open && gate.counting === false && before ? ` Counting starts once ${before} opens.` : ""}</p>
           </div>
-          {gate && (
+          {gate && !gate.open && gate.counting !== false && (
             <div className="borough-gate">
               <div className="borough-gate-bar" role="meter" aria-label="People out right now" aria-valuemin={0} aria-valuemax={gate.target} aria-valuenow={gate.online}>
                 <i style={{ width: `${Math.min(100, Math.round((gate.peakToday / gate.target) * 100))}%` }} />

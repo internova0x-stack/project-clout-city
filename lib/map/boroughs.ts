@@ -16,16 +16,12 @@ export interface Borough {
   empty?: string;
 }
 
+/** In unlock order (owner, Oct 17): Queens, Brooklyn, the Bronx, Staten Island, then Manhattan last. */
 export const BOROUGHS: Borough[] = [
   { id: "queens", name: "Queens" },
   {
     id: "brooklyn", name: "Brooklyn", labelAt: [40.650, -73.950],
     teaser: "Brownstones, rooftop parties and a man selling C$14 pickles with a straight face. Brooklyn isn't ready for you yet, babe. Neither are the pickles.",
-  },
-  {
-    id: "manhattan", name: "Manhattan", labelAt: [40.785, -73.966],
-    teaser: "Everyone's rushing, nobody's on time and the rent has its own publicist. Make Queens jealous first, darling. Then we'll talk.",
-    empty: "Nothing here yet. Manhattan's places are still in a meeting about the meeting, and the doorman says your name isn't on the list. It isn't on any list. Yet.",
   },
   {
     id: "bronx", name: "The Bronx", labelAt: [40.855, -73.870],
@@ -36,5 +32,10 @@ export const BOROUGHS: Borough[] = [
     id: "staten_island", name: "Staten Island", labelAt: [40.585, -74.150],
     teaser: "A free ferry, a lot of opinions and one very loud uncle. The boat isn't running for you yet, babe. I already called ahead.",
     empty: "Nothing to see yet but a ferry schedule and a very loud uncle with opinions about it. The boat leaves when you're famous. He'll still have opinions.",
+  },
+  {
+    id: "manhattan", name: "Manhattan", labelAt: [40.785, -73.966],
+    teaser: "Everyone's rushing, nobody's on time and the rent has its own publicist. It's the last door in the city: make the other four boroughs jealous first, darling. Then we'll talk.",
+    empty: "Nothing here yet. Manhattan's places are still in a meeting about the meeting, and the doorman says your name isn't on the list. It isn't on any list. Yet.",
   },
 ];

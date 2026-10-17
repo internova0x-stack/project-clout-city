@@ -6,10 +6,11 @@ import { VEHICLE_COLORS, type VehicleKind } from "./vehicleModels";
 // Moving traffic on the map when zoomed in (Milestones v0.3): up to 30 cars, cabs, SUVs, buses
 // and scooters driving along the streets in view, in the right-hand lane, turned to face the road.
 // Since Oct 16 they are 3D models in the landmark layer (components/map/landmarkLayer.ts), which
-// steps this simulation every frame it draws. Under reduced motion they stay parked.
+// steps this simulation every frame it draws. Under reduced motion they drive at a crawl (owner, Oct 17:
+// they should always be moving along slowly). From the neighborhood view the map opens at, not only up close.
 // Purely decorative: nothing in the game reads them.
 
-export const TRAFFIC_MIN_ZOOM = 15;
+export const TRAFFIC_MIN_ZOOM = 13.5;
 const MAX_VEHICLES = 30;
 const SPEED_UP = 1.2; // a touch faster than real Queens traffic, so it reads as moving
 const ROAD_CLASSES = new Set(["motorway", "trunk", "primary", "secondary", "tertiary", "minor"]);
@@ -110,7 +111,7 @@ const SPEED: Record<VehicleKind, [number, number]> = { car: [9, 14], suv: [9, 13
 
 /** sites: where the landmarks stand now (they move off main roads once the streets load). */
 export function createTraffic(map: MapLibreMap, sites: () => readonly Landmark[]): Traffic {
-  const parked = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const crawl = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   let vehicles: Vehicle[] = [];
   let last = 0;
   let nextId = 1;
@@ -128,7 +129,7 @@ export function createTraffic(map: MapLibreMap, sites: () => readonly Landmark[]
       kind,
       color: colors[Math.floor(Math.random() * colors.length)],
       at: Math.min(path.length, Math.max(0, near + (Math.random() - 0.5) * 160)),
-      speed: parked ? 0 : lo + Math.random() * (hi - lo),
+      speed: (lo + Math.random() * (hi - lo)) * (crawl ? 0.35 : 1),
       dir: Math.random() < 0.5 ? 1 : -1,
     };
   };
@@ -147,6 +148,8 @@ export function createTraffic(map: MapLibreMap, sites: () => readonly Landmark[]
     const paths = roadPaths(map, sites());
     if (!paths.length) return;
     while (vehicles.length < Math.min(MAX_VEHICLES, paths.length * 3)) vehicles.push(spawn(paths));
+    // New cars start their own frames: once the map is idle nothing else draws (owner, Oct 17: they'd stopped).
+    map.triggerRepaint();
   };
 
   const onIdle = () => { if (!vehicles.length) respawn(); };
