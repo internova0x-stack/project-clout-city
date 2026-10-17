@@ -18,10 +18,6 @@ export const GAME_CONFIG = {
    *  A gap over 5 minutes starts a new session. */
   sessionPingMs: 60_000,
 
-  /** The launch screen (owner, Oct 16: "loading should be under two seconds"): it covers a cold start
-   *  until the apartment and the avatar are on screen, never longer than maxMs, then fades in fadeMs. */
-  launch: { maxMs: 2_000, fadeMs: 350 },
-
   clique: {
     /** Members needed for the big clique bonus (Clarifications section 7). */
     bonusSize: 5,

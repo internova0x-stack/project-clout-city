@@ -2184,6 +2184,57 @@ function pierPark(t: Themed): Group {
   return g;
 }
 
+
+// ---------------------------------------------------------------------------
+// St. Copay's General Hospital (owner, Oct 17): a white block with blue glass, a red cross on top
+// and an ambulance bay out front
+// ---------------------------------------------------------------------------
+function hospital(t: Themed): Group {
+  const g = new Group();
+  const wing = facade(t, { wall: "#F4F7FA", glass: "#8FC7E8", style: "punched", lit: 0.9, seed: 211, frame: "#C9D6E2" });
+  const tower = facade(t, { wall: "#EAF1F7", glass: "#5FB3D9", style: "curtain", lit: 1, seed: 213, frame: "#F4F7FA" }, 1.3);
+  g.add(at(facadeBox(26, 9, 16, wing, solid("#D5DEE6")), 0, 4.5, 0));
+  g.add(at(facadeBox(13, 22, 13, tower, solid("#D5DEE6")), -4, 11, -1));
+  g.add(at(nightGlow(t, 13, 22, 13, "#9FD8FF", 0.45), -4, 11, -1));
+  // The red cross on the roof, lit at night.
+  const red = glowing(t, "#E5484D", "#FF5A5F", 1.6, 0.3);
+  g.add(at(new Mesh(new BoxGeometry(7, 1.8, 1), red), -4, 24.5, 4.6));
+  g.add(at(new Mesh(new BoxGeometry(1.8, 7, 1), red), -4, 24.5, 4.6));
+  // The ambulance bay: a canopy on posts and a red EMERGENCY sign.
+  g.add(at(new Mesh(new BoxGeometry(10, 0.6, 5), solid("#2B6CB0")), 7, 4.2, 10.2));
+  for (const x of [2.6, 11.4]) g.add(at(new Mesh(new BoxGeometry(0.4, 4, 0.4), solid(C.steel)), x, 2, 12.4));
+  g.add(at(sign(t, "EMERGENCY", 8, 1.3, { bg: "#E5484D", fg: "#FFFFFF" }, 2), 7, 5.3, 12.8));
+  g.add(at(sign(t, "ST. COPAY'S", 10, 1.4, { bg: "#1E3A5F", fg: "#FFFFFF" }, 1.6), -4, 21, 5.6));
+  g.add(at(lightPool(t, 10, "#9FD8FF", 0.45), 7, 0, 12));
+  return g;
+}
+
+// ---------------------------------------------------------------------------
+// Brownstone Sessions (owner, Oct 17): a Fort Greene brownstone with a stoop, warm basement windows
+// and a neon horn over the door
+// ---------------------------------------------------------------------------
+function brownstone(t: Themed): Group {
+  const g = new Group();
+  const stone = facade(t, { wall: "#8A4B32", glass: "#FFD9A0", style: "punched", lit: 1, seed: 221, frame: "#E8D3BF" }, 1.4);
+  g.add(at(facadeBox(9, 15, 12, stone, solid("#5A3020")), 0, 7.5, 0));
+  g.add(at(nightGlow(t, 9, 15, 12, C.amber, 0.6), 0, 7.5, 0));
+  g.add(at(new Mesh(new BoxGeometry(9.6, 0.8, 12.6), solid("#3A2418")), 0, 15.4, 0));
+  // The stoop: steps up to the parlor door, iron rails.
+  for (let i = 0; i < 5; i++) g.add(at(new Mesh(new BoxGeometry(3, 0.6, 1), solid("#9A5A3C")), 1.5, 0.3 + i * 0.6, 9.4 - i * 0.7));
+  for (const x of [-0.1, 3.1]) g.add(at(new Mesh(new BoxGeometry(0.15, 2.4, 3.6), solid(C.ink)), x, 2.2, 8.2));
+  // The basement windows glow; a neon saxophone over the club door.
+  const warm = glowing(t, "#FFB347", "#FFB347", 1.4, 0.35);
+  g.add(at(new Mesh(new BoxGeometry(3, 1.2, 0.2), warm), -2.4, 0.9, 6.1));
+  const horn = glowing(t, "#FF6A3D", "#FF6A3D", 2.2, 0.4);
+  const bell = new Mesh(new ConeGeometry(0.9, 1.6, 16, 1, true), horn);
+  bell.rotation.z = Math.PI / 2.4;
+  g.add(at(bell, -2, 5.4, 6.4));
+  g.add(at(new Mesh(new TorusGeometry(1.1, 0.18, 8, 16, Math.PI), horn), -3.2, 4.6, 6.4));
+  g.add(at(sign(t, "BROWNSTONE SESSIONS", 8, 1.1, { bg: C.ink, fg: C.amber }, 2), 0, 3.6, 6.3));
+  g.add(at(lightPool(t, 7, C.amber, 0.6), 0, 0, 9));
+  return g;
+}
+
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
   "music-hall": musicHall, lounge, bodega: (t) => bodega(t), pizzeria, college,
@@ -2192,7 +2243,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
   "googie-diner": googieDiner, hub, "sky-dining": skyDining, supermarket, cowork, precinct,
-  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation, "clout-tower": cloutTower,
+  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation, "clout-tower": cloutTower, hospital, brownstone,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {

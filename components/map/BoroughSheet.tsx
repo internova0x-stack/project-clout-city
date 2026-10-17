@@ -7,6 +7,9 @@ import boroughData from "@/lib/map/boroughs.geo.json";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import { buildMapStyle, LOCKED_RED } from "@/lib/map/style";
 import { Sheet } from "../Sheet";
+import { PLACES, boroughOf } from "@/lib/city";
+import { GATE_RULE, gateProgress, gateRule, type BoroughGate } from "@/lib/boroughGates";
+import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 
 const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
 
@@ -57,8 +60,11 @@ function BoroughMiniMap({ id }: { id: BoroughId }) {
 }
 
 /** Tapping a locked borough: where it is, that it opens later, and Lola's teaser. */
-export function BoroughSheet({ id, onClose }: { id: BoroughId | null; onClose: () => void }) {
+export function BoroughSheet({ id, onClose, gate = null }: { id: BoroughId | null; onClose: () => void; gate?: BoroughGate | null }) {
   const b = BOROUGHS.find((x) => x.id === id);
+  // Owner, Oct 17: the places waiting there, and how close the city is to opening it.
+  const waiting = b ? PLACES.filter((p) => boroughOf(p) === b.id && !p.story) : [];
+  const rule = gate ?? (waiting.length ? { target: GATE_RULE.target, daysNeeded: GATE_RULE.days } : null);
   return (
     <Sheet open={!!b} onClose={onClose} label={b ? `${b.name} is locked` : "Locked borough"}>
       {b && (
@@ -66,8 +72,30 @@ export function BoroughSheet({ id, onClose }: { id: BoroughId | null; onClose: (
           <BoroughMiniMap key={b.id} id={b.id} />
           <div>
             <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>{b.name}</h2>
-            <p className="meta" style={{ margin: "4px 0 0" }}>🔒 Opens in a later update. Queens first.</p>
+            <p className="meta" style={{ margin: "4px 0 0" }}>🔒 {rule ? gateRule(rule) : "Opens in a later update. Queens first."}</p>
           </div>
+          {gate && (
+            <div className="borough-gate">
+              <div className="borough-gate-bar" role="meter" aria-label="People out right now" aria-valuemin={0} aria-valuemax={gate.target} aria-valuenow={gate.online}>
+                <i style={{ width: `${Math.min(100, Math.round((gate.peakToday / gate.target) * 100))}%` }} />
+              </div>
+              <p className="borough-gate-line">{gateProgress(gate)}</p>
+              <p className="meta" style={{ margin: 0 }}>Bring your crew out. Every player online counts.</p>
+            </div>
+          )}
+          {waiting.length > 0 && (
+            <div className="stack-8">
+              <p className="overline" style={{ margin: 0 }}>{waiting.length} places waiting</p>
+              <div className="borough-places">
+                {waiting.map((p) => (
+                  <span key={p.id} className="borough-place">
+                    <span className="map-pin-tile" aria-hidden="true" style={{ background: tileBackground(glyphFor(p)) }}><Glyph name={glyphFor(p)} size={14} /></span>
+                    {p.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {b.teaser && (
             <div className="lola">
               <span className="lola-avatar" aria-hidden="true">💋</span>

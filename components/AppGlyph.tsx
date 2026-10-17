@@ -7,7 +7,7 @@ export type GlyphName =
   | "cup" | "sandwich" | "cutlery" | "cocktail" | "tree" | "tower" | "bike" | "house"
   | "wave" | "church" | "dumbbell" | "condo" | "diner"
   | "globe" | "gantry" | "tumbler" | "hanger" | "car" | "cap" | "columns"
-  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train" | "sofa" | "radio" | "tv";
+  | "pizza" | "cart" | "book" | "shield" | "firetruck" | "film" | "gamepad" | "train" | "sofa" | "radio" | "tv" | "medical" | "note";
 
 /** Tile gradients (top-left to bottom-right). */
 export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
@@ -47,12 +47,16 @@ export const GLYPH_GRADIENT: Record<GlyphName, [string, string]> = {
   train: ["#FFD966", "#E08A12"],
   radio: ["#FFB27A", "#2E6F7E"],
   tv: ["#7FE3F0", "#1E3A44"],
+  medical: ["#8FD3F4", "#2B6CB0"],
+  note: ["#FFB27A", "#B23A48"],
 };
 
 export const tileBackground = (g: GlyphName) => `linear-gradient(145deg, ${GLYPH_GRADIENT[g][0]}, ${GLYPH_GRADIENT[g][1]})`;
 
 const PLACE_GLYPHS: Record<string, GlyphName> = {
   "real-clout-fm": "radio",
+  "st-copays": "medical",
+  "brownstone-sessions": "note",
   "clout-tower": "tv",
   "velvet-static": "cocktail",
   "grind-and-gossip": "cup",
@@ -115,6 +119,22 @@ export function Glyph({ name, size = 24 }: { name: GlyphName; size?: number }) {
 }
 
 const PATHS: Record<GlyphName, React.ReactNode> = {
+  // A medical cross on a rounded badge (St. Copay's General Hospital).
+  medical: (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="4.5" fill={SOFT} />
+      <path d="M10 6.5h4v3.5h3.5v4H14v3.5h-4V14H6.5v-4H10z" fill="#fff" />
+    </>
+  ),
+  // Two beamed music notes (Brownstone Sessions).
+  note: (
+    <>
+      <path d="M9 17V6.5l10-2.5V15" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M9 6.5l10-2.5v3L9 9.5z" fill={SOFT} />
+      <circle cx="6.8" cy="17.2" r="2.6" fill="#fff" />
+      <circle cx="16.8" cy="15.2" r="2.6" fill="#fff" />
+    </>
+  ),
   // A slice: crust along the top, cheese and two pepperoni.
   pizza: (
     <>

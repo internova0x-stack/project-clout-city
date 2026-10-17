@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -30,6 +30,8 @@ import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
 import { TOGETHER, canDoTogether, type TogetherPlan } from "@/lib/together";
 import { handle } from "@/lib/validation";
+import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
+import { GATE_RULE, gateProgress, gateRule, type BoroughGate } from "@/lib/boroughGates";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
 
@@ -724,17 +726,25 @@ export function InteriorScene({
 const STATIONS_AT = 3;
 
 export function PlacesSheet({
-  open, onClose, from, onPick, state, story = null, here,
-}: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null; here?: (placeId: string) => PlaceCounts[string] | undefined }) {
+  open, onClose, from, onPick, state, story = null, here, openBoroughs: openSet, gates = null,
+}: {
+  open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null;
+  here?: (placeId: string) => PlaceCounts[string] | undefined;
+  /** Owner, Oct 17: places in boroughs that haven't opened go in their own locked section at the end. */
+  openBoroughs?: Set<BoroughId>; gates?: BoroughGate[] | null;
+}) {
   // The Hub first, the two stations 4th and 5th, everything else nearest first (owner, Oct 16).
-  const near = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
+  const isOpen = (p: Place) => !openSet || openSet.has(boroughOf(p));
+  const all = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
+  const near = all.filter((r) => isOpen(r.p));
+  const lockedBy = BOROUGHS.filter((b) => b.id !== "queens").map((b) => ({ b, rows: all.filter((r) => !isOpen(r.p) && boroughOf(r.p) === b.id) })).filter((x) => x.rows.length);
   const rows = [...near.filter((r) => isHub(r.p)), ...near.filter((r) => !isStation(r.p) && !isHub(r.p))];
   rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...near.filter((r) => isStation(r.p)));
   return (
     <Sheet open={open} onClose={onClose} label="Places">
       <div className="stack-16">
         <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Places</h2>
-        <p className="subtext" style={{ margin: 0 }}>Queens and Long Island City. More of the city opens soon.</p>
+        <p className="subtext" style={{ margin: 0 }}>{lockedBy.length ? "Queens and Long Island City. More of the city opens as more people come out." : "Every open borough, nearest first."}</p>
         <div>
           {rows.map(({ p, d }) => {
             const price = Math.min(...p.actions.map((a) => a.price ?? Infinity));
@@ -762,6 +772,30 @@ export function PlacesSheet({
             );
           })}
         </div>
+        {lockedBy.map(({ b, rows: locked }) => {
+          const g = gates?.find((x) => x.id === b.id) ?? null;
+          return (
+            <div key={b.id} className="stack-8">
+              <div className="places-locked-head">
+                <p className="overline" style={{ margin: 0 }}>🔒 {b.name} · {locked.length} places</p>
+                <p className="meta" style={{ margin: 0 }}>{gateRule(g ?? { target: GATE_RULE.target, daysNeeded: GATE_RULE.days })}</p>
+                {g && <p className="places-locked-progress">{gateProgress(g)}</p>}
+              </div>
+              <div>
+                {locked.map(({ p }) => (
+                  <button key={p.id} className="list-row places-locked-row" onClick={() => onPick(p)}>
+                    <span className="map-pin-tile" aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 12, background: tileBackground(glyphFor(p)) }}><Glyph name={glyphFor(p)} size={24} /></span>
+                    <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      <span className="title" style={{ display: "block" }}>{p.name}</span>
+                      <span className="meta">{p.neighborhood}</span>
+                    </span>
+                    <span aria-hidden="true">🔒</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </Sheet>
   );

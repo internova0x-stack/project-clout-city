@@ -44,7 +44,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some",
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -70,6 +70,8 @@ export function PreviewHome({
   radioPreset?: string;
   /** v0.14 Clout TV: ?tv=new|sent|mine starts the big screen in that state. */
   tvPreset?: string;
+  /** Owner, Oct 17: ?brooklyn=open opens Brooklyn; otherwise it's locked with a sample counter. */
+  brooklynPreset?: string;
   /** Player ranks: ?rankup=1-10 opens the rank-up reveal for that rank. */
   rankUpPreset?: number;
   /** Start the treasure hunt in a set state: "new", "joined", "question", "wrong" or "done". */
@@ -337,6 +339,7 @@ export function PreviewHome({
       gossip={cityOff ? undefined : gossipApi}
       business={cityOff ? undefined : businessApi}
       radio={cityOff ? undefined : radioApi}
+      boroughGates={[{ id: "brooklyn", open: brooklynPreset === "open", target: 100, daysNeeded: 3, daysHit: 1, online: 37, peakToday: 64 }]}
       tv={cityOff ? undefined : tvApi}
       stations={cityOff ? undefined : STATIONS_PREVIEW}
       together={cityOff ? undefined : togetherApi}
