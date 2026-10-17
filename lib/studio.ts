@@ -5,7 +5,7 @@
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "./adminPlayers.ts";
-import type { Arc, Status } from "./stories.ts";
+import type { Arc, Beat, Status } from "./stories.ts";
 import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
 import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
@@ -33,6 +33,68 @@ export interface StudioArc {
   startWeekday: string | null;
   beats: { id: string; day: number; headline: string; status: Status; prediction: string | null }[] | null;
   votes: Record<string, number>;
+  /** Its place in the Studio's list (migration 0071; null: after the ordered ones). */
+  position?: number | null;
+}
+
+/**
+ * What the Studio can change in a beat (owner, Oct 17: "click on the beats to read them and to edit them"):
+ * the words only. Days, effects, answers and rewards stay as the file has them, so an edit can't break the
+ * story's rules, and the story keeps its approval.
+ */
+export interface BeatText {
+  news: { headline: string; body?: string; hook?: string; previously?: string | null }[];
+  card_note?: string;
+  evidence?: { title: string; lines: string[] };
+  prediction?: { question: string; options: { id: string; label: string }[]; roasts?: Record<string, string> };
+}
+
+/** A beat's words, for the editor. */
+export function beatText(b: Beat): BeatText {
+  return {
+    news: b.news.map((n) => ({ headline: n.headline, body: n.body, hook: n.hook, previously: n.previously })),
+    card_note: b.card_note,
+    evidence: b.evidence ? { title: b.evidence.title, lines: [...b.evidence.lines] } : undefined,
+    prediction: b.prediction ? { question: b.prediction.question, options: b.prediction.options.map((o) => ({ id: o.id, label: o.label })), roasts: b.prediction.roasts ? { ...b.prediction.roasts } : undefined } : undefined,
+  };
+}
+
+const clean = (s: string | undefined | null) => (typeof s === "string" ? s.trim() : s);
+
+/**
+ * The beat with new words and nothing else changed: same number of news items, same options (matched by id),
+ * same roast keys. Empty optional text is dropped. Returns an error instead when the shape doesn't match.
+ */
+export function applyBeatText(b: Beat, t: BeatText): { ok: true; beat: Beat } | { ok: false; error: string } {
+  if (!Array.isArray(t.news) || t.news.length !== b.news.length) return { ok: false, error: "A beat keeps its number of news items." };
+  if (t.news.some((n) => !clean(n.headline))) return { ok: false, error: "Every news item needs a headline." };
+  const news = b.news.map((n, i) => {
+    const e = t.news[i];
+    const out = { ...n, headline: clean(e.headline)! };
+    for (const k of ["body", "hook"] as const) { const v = clean(e[k]); if (v) out[k] = v; else delete out[k]; }
+    if ("previously" in n || e.previously) { const v = clean(e.previously); out.previously = v || null; }
+    return out;
+  });
+  const beat: Beat = { ...b, news };
+  const note = clean(t.card_note);
+  if (note) beat.card_note = note; else delete beat.card_note;
+  if (b.evidence) {
+    if (!t.evidence || !clean(t.evidence.title)) return { ok: false, error: "The evidence needs a title." };
+    beat.evidence = { ...b.evidence, title: clean(t.evidence.title)!, lines: t.evidence.lines.map((l) => l.trim()).filter(Boolean) };
+  }
+  if (b.prediction) {
+    const p = t.prediction;
+    if (!p || !clean(p.question)) return { ok: false, error: "The prediction needs a question." };
+    const labels = new Map(p.options.map((o) => [o.id, clean(o.label)]));
+    if (b.prediction.options.some((o) => !labels.get(o.id))) return { ok: false, error: "Every option needs a label." };
+    beat.prediction = {
+      ...b.prediction,
+      question: clean(p.question)!,
+      options: b.prediction.options.map((o) => ({ ...o, label: labels.get(o.id)! })),
+      ...(b.prediction.roasts ? { roasts: Object.fromEntries(Object.entries(b.prediction.roasts).map(([k, v]) => [k, clean(p.roasts?.[k]) || v])) } : {}),
+    };
+  }
+  return { ok: true, beat };
 }
 
 /** One report in the chat review queue (admin_reports, migration 0010). */
@@ -81,6 +143,10 @@ export interface StudioApi {
   schedule(arc: string, start: string | null): Promise<StudioResult>;
   status(arc: string, status: Status): Promise<StudioResult>;
   beatStatus(arc: string, beat: string, status: Status): Promise<StudioResult>;
+  /** The Studio's order of stories (migration 0071): every id, top to bottom. */
+  reorder?(ids: string[]): Promise<StudioResult>;
+  /** A beat's words (migration 0071); the story keeps its approval. */
+  beatEdit?(arc: string, beat: string, text: BeatText): Promise<StudioResult>;
   /** Full content of an arc and its side arcs, for the player preview. */
   content(arc: string): Promise<{ ok: true; arcs: Arc[] } | { ok: false; error: string }>;
   /** Chat review queue: open first, newest first. */
@@ -192,6 +258,7 @@ const ERRORS: Record<string, string> = {
   side_arcs_follow_parent: "Side stories run with their main story; schedule the main story.",
   unknown_arc: "That story doesn't exist.",
   unknown_beat: "That beat doesn't exist.",
+  bad_beat: "That edit would change more than the beat's words.",
   bad_arc: "That file isn't a story.",
   bad_status: "Unknown status.",
   bad_decision: "Unknown decision.",

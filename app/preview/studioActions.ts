@@ -4,18 +4,18 @@ import { previewOnly } from "./guard";
 
 import { loadArcs } from "@/lib/storyContent";
 import { lastDay, storyDay, type Arc, type Status } from "@/lib/stories";
-import { parseArcs, weekdayOf, type Review, type StudioArc, type StudioResult } from "@/lib/studio";
+import { applyBeatText, parseArcs, weekdayOf, type BeatText, type Review, type StudioArc, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
 
 // Development previews only: the Story Studio on an in-memory copy of content/stories,
 // following the same rules as the admin_* SQL functions. Refused in production builds.
 
-interface Row { arc: Arc; status: Status; review: Review; note: string | null; reviewedAt: string | null; startAt: string | null; updatedAt: string }
+interface Row { arc: Arc; position: number | null; status: Status; review: Review; note: string | null; reviewedAt: string | null; startAt: string | null; updatedAt: string }
 let rows: Row[] | null = null;
 const VOTES: Record<string, number> = { P1: 1100, P2: 2400, P3: 1860 };
 
 const nyToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
-const store = () => (rows ??= loadArcs().map((arc) => ({ arc, status: arc.status, review: "approved" as Review, note: null, reviewedAt: null, startAt: null, updatedAt: new Date().toISOString() })));
+const store = () => (rows ??= loadArcs().map((arc) => ({ arc, position: null, status: arc.status, review: "approved" as Review, note: null, reviewedAt: null, startAt: null, updatedAt: new Date().toISOString() })));
 const startOf = (r: Row) => (r.arc.type === "side" ? store().find((p) => p.arc.id === r.arc.parent_arc_id)?.startAt ?? null : r.startAt);
 const fail = (error: string, problems?: string[]): StudioResult => ({ ok: false, error, problems });
 
@@ -28,12 +28,14 @@ function list(message?: string): StudioResult {
     return {
       id: r.arc.id, title: r.arc.title, type: r.arc.type, tier: r.arc.tier, sku: r.arc.sku ?? null, parent: r.arc.parent_arc_id ?? null,
       status: r.status, review: r.review, reviewNote: r.note, reviewedAt: r.reviewedAt, startAt: start, day: live, lastDay: lastDay(r.arc),
-      updatedAt: r.updatedAt, startWeekday: r.arc.start_weekday ?? null,
+      updatedAt: r.updatedAt, startWeekday: r.arc.start_weekday ?? null, position: r.position,
       beats: r.arc.beats.map((b) => ({ id: b.id, day: b.day, headline: b.news[0]?.headline ?? "", status: b.status ?? "active", prediction: b.prediction?.id ?? null })),
       votes: Object.fromEntries(r.arc.beats.filter((b) => b.prediction && live && live >= b.day).map((b) => [b.prediction!.id, VOTES[b.prediction!.id] ?? 0])),
     };
   });
-  return { ok: true, arcs: arcs.sort((a, b) => (a.type === b.type ? a.id.localeCompare(b.id) : a.type === "main" ? -1 : 1)), message };
+  // Like admin_story_list (migration 0071): the Studio's order first, then mains before sides, then by id.
+  const pos = (a: StudioArc) => a.position ?? Number.MAX_SAFE_INTEGER;
+  return { ok: true, arcs: arcs.sort((a, b) => pos(a) - pos(b) || (a.type === b.type ? a.id.localeCompare(b.id) : a.type === "main" ? -1 : 1)), message };
 }
 const isLive = (r: Row) => list().ok && (list() as { arcs: StudioArc[] }).arcs.find((a) => a.id === r.arc.id)?.day != null;
 const find = (id: string) => store().find((r) => r.arc.id === id);
@@ -54,7 +56,7 @@ export async function previewStudioUpload(json: string) {
     if (r && isLive(r)) return fail(`${arc.id}: That story is live. Pause or retire it instead of changing it mid-run.`);
     const same = r && JSON.stringify(r.arc) === JSON.stringify(arc);
     if (r) Object.assign(r, { arc, review: same ? r.review : "draft", updatedAt: new Date().toISOString() });
-    else store().push({ arc, status: arc.status ?? "active", review: "draft", note: null, reviewedAt: null, startAt: null, updatedAt: new Date().toISOString() });
+    else store().push({ arc, position: null, status: arc.status ?? "active", review: "draft", note: null, reviewedAt: null, startAt: null, updatedAt: new Date().toISOString() });
   }
   return list(`Saved ${parsed.arcs.map((a) => a.title || a.id).join(", ")}. New or changed stories wait for approval.`);
 }
@@ -107,4 +109,23 @@ export async function previewStudioSetDay(id: string, day: number) {
   d.setUTCDate(d.getUTCDate() - (day - 1));
   r.startAt = d.toISOString().slice(0, 10);
   return list();
+}
+export async function previewStudioReorder(ids: string[]) {
+  previewOnly();
+  ids.forEach((id, i) => { const r = find(id); if (r) r.position = i + 1; });
+  return list("Order saved.");
+}
+export async function previewStudioBeatEdit(id: string, beatId: string, text: BeatText) {
+  previewOnly();
+  const r = find(id);
+  const beat = r?.arc.beats.find((b) => b.id === beatId);
+  if (!r || !beat) return fail("That beat doesn't exist.");
+  const e = applyBeatText(beat, text);
+  if (!e.ok) return fail(e.error);
+  const edited = { ...r.arc, beats: r.arc.beats.map((b) => (b.id === beatId ? e.beat : b)) };
+  const problems = validateArcs(store().map((x) => (x === r ? edited : x.arc))).filter((p) => p.startsWith(`${id}:`) || !p.includes(":"));
+  if (problems.length) return fail(`The edit has ${problems.length} problem${problems.length === 1 ? "" : "s"}. Nothing was saved.`, problems);
+  r.arc = edited;
+  r.updatedAt = new Date().toISOString();
+  return list(`Saved beat ${beatId}.`);
 }
