@@ -60,7 +60,7 @@ import { HUNT_BADGE, type HuntApi, type HuntState } from "@/lib/hunts";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
-import { TourTooltip, TOUR, WelcomeModal } from "./game/Tutorial";
+import { TourTooltip, TOUR } from "./game/Tutorial";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
@@ -102,7 +102,7 @@ export interface GameActions {
 }
 
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
-export type Flow = "none" | "welcome" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
+export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
 type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
 
@@ -143,7 +143,8 @@ function npcRole(p: Place, floor = 1): { who: string; role: string } {
 
 function initialFlow(p: Player): Flow {
   if (p.onboarding_step === "party_done") return "leaderboard"; // resume the hand-off
-  if (!p.first_party_at && p.tutorial_state === "pending") return "welcome";
+  // Owner, Oct 17: no welcome pop-up; Lola says hello as the tour's first step.
+  if (!p.first_party_at && p.tutorial_state === "pending") return "tour";
   return "none";
 }
 
@@ -1863,7 +1864,15 @@ export function GameShell({
         <RadioBanner s={radioBanner} api={radio} onToast={setToast} onDone={closeRadioBanner}
           onOpen={() => { closeRadioBanner(); setPhone({ open: true, app: "radio" }); }} />
       )}
-      {tvView && <TvViewer f={tvView} live={tvNow && tvView.id === tvNow.featured?.id ? { nextAt: tvNow.nextAt } : null} onClose={() => setTvView(null)} />}
+      {tvView && (
+        <TvViewer
+          f={tvView}
+          live={tvNow && tvView.id === tvNow.featured?.id ? { nextAt: tvNow.nextAt } : null}
+          onClose={() => setTvView(null)}
+          // From the map (not the Phone): the tower's own card, to go there or watch with the crew.
+          onVisit={!phone.open && cityOn ? () => { setTvView(null); const t = placeById("clout-tower"); if (t) setPlace(t); } : undefined}
+        />
+      )}
       <GainToast gain={gain} message={toast} onDone={clearGain} />
       {city?.devTools && cityApi && (
         <DevClock
@@ -1888,9 +1897,10 @@ export function GameShell({
       )}
 
       {/* ---- Guided first session ---- */}
-      {flow === "welcome" && (
-        <WelcomeModal
-          onStart={() => { setTourStep(0); setFlow("tour"); }}
+      {flow === "tour" && (
+        <TourTooltip
+          index={tourStep}
+          onNext={() => setTourStep((s) => Math.min(s + 1, TOUR.length - 1))}
           onSkip={() => {
             void actions.setTutorialState("skipped");
             setMe((p) => ({ ...p, tutorial_state: "skipped" }));
@@ -1898,7 +1908,6 @@ export function GameShell({
           }}
         />
       )}
-      {flow === "tour" && <TourTooltip index={tourStep} onNext={() => setTourStep((s) => Math.min(s + 1, TOUR.length - 1))} />}
       <PartySheet open={flow === "party"} onClose={() => setFlow("none")} onAttend={attend} busy={partyBusy} error={partyError} />
       {flow === "partyDone" && <PartyDoneCard onContinue={() => setFlow("leaderboard")} />}
       <LeaderboardSheet
