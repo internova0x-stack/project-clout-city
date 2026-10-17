@@ -340,10 +340,10 @@ export function PreviewHome({
       business={cityOff ? undefined : businessApi}
       radio={cityOff ? undefined : radioApi}
       boroughGates={[
-        { id: "brooklyn", open: brooklynPreset === "open", target: 100, daysNeeded: 3, daysHit: 1, online: 37, peakToday: 64, counting: brooklynPreset !== "open" },
-        { id: "bronx", open: false, target: 250, daysNeeded: 3, daysHit: 0, online: 37, peakToday: 64, counting: brooklynPreset === "open" },
-        { id: "staten_island", open: false, target: 500, daysNeeded: 3, daysHit: 0, online: 37, peakToday: 64, counting: false },
-        { id: "manhattan", open: false, target: 1000, daysNeeded: 3, daysHit: 0, online: 37, peakToday: 64, counting: false },
+        { id: "brooklyn", open: brooklynPreset === "open", target: 100, online: 37, peakToday: 64, counting: brooklynPreset !== "open" },
+        { id: "bronx", open: false, target: 250, online: 37, peakToday: 64, counting: brooklynPreset === "open" },
+        { id: "staten_island", open: false, target: 500, online: 37, peakToday: 64, counting: false },
+        { id: "manhattan", open: false, target: 1000, online: 37, peakToday: 64, counting: false },
       ]}
       tv={cityOff ? undefined : tvApi}
       stations={cityOff ? undefined : STATIONS_PREVIEW}

@@ -766,7 +766,7 @@ export function PlacesSheet({
             <span className="places-empty-emoji" aria-hidden="true">🚧</span>
             <p className="title" style={{ margin: 0 }}>{borough.name} is still getting dressed</p>
             <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{borough.empty ?? "No places here yet. Come back when you're famous."}</p>
-            <p className="meta" style={{ margin: 0 }}>Opens after {before}{rule ? `, once ${rule.target.toLocaleString("en-US")} people are out at once on ${rule.daysNeeded} different days` : ""}.</p>
+            <p className="meta" style={{ margin: 0 }}>Opens after {before}{rule ? `, the moment ${rule.target.toLocaleString("en-US")} people are out at once` : ""}.</p>
             {gate && !gate.open && gate.counting !== false && <p className="places-locked-progress">{gateProgress(gate)}</p>}
           </div>
         ) : locked ? (
