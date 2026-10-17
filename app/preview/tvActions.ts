@@ -153,7 +153,7 @@ export async function previewStationInbox() {
   const mineTv = s.rows.filter((r) => r.player === ME && r.featuredAt && r.status === "featured");
   if (mineTv.length) {
     threads.push({ station: "tv", unread: mineTv.filter((r) => !read.has(`tv:${r.id}`)).length,
-      messages: mineTv.map((r) => ({ id: r.id, at: r.featuredAt!, body: "📺 You made it to the Big Screen! Your photo is up on the Clout Tower in Astoria for the next 3 hours. Now the whole city knows your name." })) });
+      messages: mineTv.map((r) => ({ id: r.id, at: r.featuredAt!, body: "📺 You made it to the Big Screen! Your photo is up on the Clout TV Tower in Astoria for the next 3 hours. Now the whole city knows your name." })) });
   }
   const radio = await previewRadioState();
   const mine = radio.ok ? radio.data.mine : null;

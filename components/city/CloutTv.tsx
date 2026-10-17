@@ -68,7 +68,7 @@ function Confetti() {
  * Clout TV app) opens the photo in the billboard's frame. Anyone can tap it, so the copy is about the
  * player on it: "@handle made it to the Big Screen", "Now the whole city knows their name".
  */
-export function TvViewer({ f, live, onClose }: { f: TvFeature; live?: { nextAt: string } | null; onClose: () => void }) {
+export function TvViewer({ f, live, onClose, onVisit }: { f: TvFeature; live?: { nextAt: string } | null; onClose: () => void; onVisit?: () => void }) {
   // Over the whole game, even when opened from inside the Phone.
   if (typeof document === "undefined") return null;
   return createPortal(
@@ -84,7 +84,8 @@ export function TvViewer({ f, live, onClose }: { f: TvFeature; live?: { nextAt: 
           <figcaption><em>CLOUT TV</em><span>{at(f.handle)}</span></figcaption>
         </figure>
         <p className="tv-viewer-line">Now the <mark>whole city</mark> knows their name</p>
-        <span className="tv-viewer-meta">{live ? `On the Clout Tower until ${tvTime(live.nextAt)}` : `Was on the Clout Tower · ${tvTime(f.at)}`}</span>
+        <span className="tv-viewer-meta">{live ? `On the Clout TV Tower until ${tvTime(live.nextAt)}` : `Was on the Clout TV Tower · ${tvTime(f.at)}`}</span>
+        {onVisit && <button className="tv-viewer-visit" onClick={onVisit}>Go to the Clout TV Tower ›</button>}
       </div>
       <Confetti />
     </div>,
@@ -151,7 +152,7 @@ export function TvApp({ api, onToast, onChange, startForm }: { api: TvApi; onToa
       ) : (
         <div className="card stack-4">
           <span className="title" style={{ display: "block" }}>Make it BIG in NY</span>
-          <span className="meta">Nobody&apos;s on the Big Screen right now. A new player goes up on the Clout Tower in Astoria every 3 hours. Could be you.</span>
+          <span className="meta">Nobody&apos;s on the Big Screen right now. A new player goes up on the Clout TV Tower in Astoria every 3 hours. Could be you.</span>
         </div>
       )}
       {s.mine.length > 0 && (

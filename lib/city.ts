@@ -731,7 +731,7 @@ export const PLACES: Place[] = [
     ],
   },
   {
-    id: "clout-tower", name: "Clout Tower", emoji: "📺", category: "places", neighborhood: "Astoria",
+    id: "clout-tower", name: "Clout TV Tower", emoji: "📺", category: "places", neighborhood: "Astoria",
     at: [40.7585, -73.9195], depth: "full", template: "broadcast", palette: ["#FF2E88", "#FF6A3D", "#14111A"],
     tags: ["tv", "station", "astoria"],
     lore: "Clout TV's tower, and the Big Screen on its side: one face, three hours, the whole city looking up. The control room smells like cold coffee and ambition. Get your face up there, babe.",

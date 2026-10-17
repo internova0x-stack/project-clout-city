@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AvatarHead from "../avatar/AvatarHead";
 import { LOLA_LOOK } from "@/lib/cast";
 
-// The welcome screen and the tutorial tooltips (Lola's hello, then five) (Clarifications section 1;
+// The tutorial tooltips: Lola's hello (with Skip), then five (owner, Oct 17: no separate welcome pop-up) (Clarifications section 1;
 // C15). One tooltip at a time, the rest of the screen dimmed, the target ringed.
 
 // Owner, Oct 17: Lola Lowdown gives the tour, in her voice (the spicy urban gossip blogger).
@@ -18,23 +18,6 @@ export const TOUR = [
   { target: "events", text: "Breaking news 🚨 somebody invited YOU to a party 🥂 I'm as shocked as you are. Tap it and RSVP before they change their mind 👀" },
 ] as const;
 
-export function WelcomeModal({ onStart, onSkip }: { onStart: () => void; onSkip: () => void }) {
-  return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Welcome to New York">
-      <div className="scrim" />
-      <div className="modal-card reveal-card" style={{ textAlign: "left" }}>
-        <p className="overline" style={{ color: "rgba(255,246,224,.6)", margin: 0 }}>Welcome to New York</p>
-        <p className="display-md" style={{ margin: "8px 0 10px" }}>Population: 8 million. People who matter: not you. Yet.</p>
-        <p className="body" style={{ margin: 0, color: "rgba(255,246,224,.85)" }}>
-          You&apos;re here to become the main character. Here&apos;s a quick tour before the city eats you alive.
-        </p>
-        <button className="btn btn-taxi" style={{ marginTop: 20 }} onClick={onStart}>Let&apos;s go</button>
-        <button className="btn btn-ghost" style={{ color: "rgba(255,246,224,.7)" }} onClick={onSkip}>Skip tour (bold of you)</button>
-      </div>
-    </div>
-  );
-}
-
 interface Rect { x: number; y: number; w: number; h: number }
 
 /** The screen the game is drawn in: the phone frame on desktop, the window on phones. */
@@ -44,7 +27,7 @@ function screenBox() {
   return r && r.width < window.innerWidth ? { left: r.left, top: r.top, width: r.width, height: r.height } : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
 }
 
-export function TourTooltip({ index, onNext }: { index: number; onNext: () => void }) {
+export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: () => void; onSkip?: () => void }) {
   const step = TOUR[index];
   const [rect, setRect] = useState<Rect | null>(null);
 
@@ -99,7 +82,8 @@ export function TourTooltip({ index, onNext }: { index: number; onNext: () => vo
         <div className="lola-tip-bubble">
           <p className="lola-tip-who">Lola Lowdown <span>· {index + 1} of {TOUR.length}</span></p>
           <p className="lola-tip-text">{step.text}</p>
-          {!last && <button className="btn btn-taxi lola-tip-next" onClick={onNext}>Next</button>}
+          {!last && <button className="btn btn-taxi lola-tip-next" onClick={onNext}>{index === 0 ? "Let's go" : "Next"}</button>}
+          {index === 0 && onSkip && <button className="lola-tip-skip" onClick={onSkip}>Skip tour (bold of you)</button>}
           {last && <p className="lola-tip-hint">Tap the glowing button 👆</p>}
         </div>
         <div className="lola-tip-head" aria-hidden="true">

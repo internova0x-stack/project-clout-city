@@ -1810,6 +1810,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .tv-viewer-line mark { position:relative; background:none; color:#fff; white-space:nowrap; }
 .tv-viewer-line mark::after { content:""; position:absolute; left:-2px; right:-2px; bottom:1px; height:8px; border-radius:4px; background:var(--primary-top); opacity:.85; z-index:-1; }
 .tv-viewer-meta { font-family:var(--font-label); font-weight:600; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.6); }
+.tv-viewer-visit { margin-top:6px; padding:10px 18px; border:1px solid rgba(255,255,255,.35); border-radius:var(--r-pill); background:rgba(255,255,255,.08); color:#fff; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
 .tv-viewer-missing { display:grid; place-items:center; height:100%; color:rgba(255,255,255,.6); }
 .tv-confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:2; }
 .tv-confetti i { position:absolute; top:-24px; animation:tv-fall linear forwards; }
@@ -1824,6 +1825,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .tv-confirms { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--text-2); }
 .studio-date { height:40px; padding:0 10px; border-radius:var(--r-sm); border:1px solid #E2DBD0; font:inherit; background:#fff; }
 .map-landmark-label.tappable { pointer-events:auto; cursor:pointer; border:0; font:inherit; }
+.map-tower-body { position:absolute; padding:0; border:0; background:transparent; pointer-events:auto; cursor:pointer; border-radius:10px; -webkit-tap-highlight-color:transparent; }
 /* Clout TV's crop widget: the billboard's 4:5 frame with the photo behind it. */
 .crop-frame { position:relative; width:100%; max-width:min(250px, calc((100dvh - 420px) * 0.8)); margin:8px auto 4px; aspect-ratio:4/5; border-radius:14px; overflow:hidden; background:#14111A; cursor:grab; user-select:none;
   box-shadow:0 0 0 4px #14111A, 0 0 0 6px #F2A07B, var(--elev-2); }
@@ -1856,3 +1858,4 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .lola-tip-head { position:relative; flex:none; width:64px; height:64px; border-radius:50%; overflow:hidden; background:linear-gradient(160deg, #FFD1DC, #FF8FB1); box-shadow:0 0 0 3px #FFF8F2, 0 0 0 5px #FF5C8A, var(--elev-2); }
 .lola-tip-head img, .lola-tip-head canvas { width:100%; height:100%; object-fit:cover; transform:scale(1.7) translateY(16%); }
 .lola-tip-kiss { position:absolute; right:-2px; bottom:-2px; font-size:18px; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+.lola-tip-skip { display:block; width:100%; margin-top:6px; padding:8px 0 2px; border:0; background:none; color:var(--text-3); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }

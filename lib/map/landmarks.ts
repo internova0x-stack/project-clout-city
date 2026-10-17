@@ -112,7 +112,7 @@ export const LANDMARKS: readonly Landmark[] = [
   // v0.14 On Air: Real Clout FM's studio and broadcast mast, by the film studios (a place since Oct 16).
   { id: "real-clout-fm", placeId: "real-clout-fm", name: "Real Clout FM", at: [40.7598, -73.9262], kind: "radio-station", facing: 180, scale: 1.6, clear: 40, ground: "block" },
   // v0.14 On Air: the Clout Tower, a Times Square-style tower whose big screen shows Clout TV's feature.
-  { id: "clout-tower", placeId: "clout-tower", name: "Clout Tower", at: [40.7585, -73.9195], kind: "clout-tower", facing: 180, scale: 1.4, clear: 45, ground: "block" },
+  { id: "clout-tower", placeId: "clout-tower", name: "Clout TV Tower", at: [40.7585, -73.9195], kind: "clout-tower", facing: 180, scale: 1.4, clear: 45, ground: "block" },
   { id: "grind-and-gossip", placeId: "grind-and-gossip", name: "Grind & Gossip Café", at: [40.7645, -73.9225], kind: "cafe", facing: 180, scale: 2.4, clear: 30, ground: "block" },
 ];
 

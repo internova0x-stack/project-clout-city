@@ -450,6 +450,22 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             );
           })}
 
+          {/* Owner, Oct 17: the Clout TV Tower's body opens who's on the Big Screen; its pin label opens the tower's card. */}
+          {onBigScreen && sites.filter((l) => l.kind === "clout-tower").map((l) => {
+            const h = lift(l.id, l.at);
+            if (h < 24) return null;
+            const g = project(l.at);
+            if (!visible(g)) return null;
+            const e = project([l.at[0], l.at[1] + 20 / (111_320 * Math.cos((l.at[0] * Math.PI) / 180))]);
+            const w = Math.max(44, 2 * Math.hypot(e.x - g.x, e.y - g.y));
+            // From just under the pin down past the ground point (the base's front edge sits lower on screen).
+            return (
+              <button key={`${l.id}-body`} className="map-tower-body" onClick={onBigScreen}
+                style={{ left: g.x - w / 2, top: g.y - h, width: w, height: h + w * 0.35 }}
+                aria-label="Clout TV Tower: see who's on the Big Screen" />
+            );
+          })}
+
           {placed.map((c) => {
             if (!visible(c)) return null;
             if (c.pins.length > 1) {
@@ -513,7 +529,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             return (
               l.kind === "clout-tower" && onBigScreen ? (
                 <button key={l.id} className="map-landmark-label glass-hud tappable" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}
-                  onClick={onBigScreen} aria-label="Clout Tower: see who's on the big screen">
+                  onClick={onBigScreen} aria-label="Clout TV Tower: see who's on the big screen">
                   📺 {l.name}
                 </button>
               ) : (
