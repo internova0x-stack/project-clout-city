@@ -47,7 +47,8 @@ do $$ begin
   end loop;
 end $$;
 select pg_temp.assert((select count(distinct skill) from seen where skill in ('charisma', 'gossip')) = 2, 'charisma and gossip come up');
-select pg_temp.assert(not exists (select 1 from seen where skill = 'charisma' and (place_id, action_id) <> ('lucky-seven-deli', 'speed-meet')), 'charisma: speed-meet at Sip & Spill');
+select pg_temp.assert(not exists (select 1 from seen where skill = 'charisma' and (place_id, action_id) not in (('lucky-seven-deli', 'speed-meet'), ('st-copays', 'volunteer'))),
+                      'charisma: speed-meet at Sip & Spill, or volunteering at St. Copay''s (0066)');
 select pg_temp.assert(not exists (select 1 from seen where skill = 'gossip' and (place_id, action_id) <> ('lucky-seven-deli', 'spill')), 'gossip: spill the tea at Sip & Spill');
 
 

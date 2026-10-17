@@ -1845,7 +1845,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .map-pin.locked .map-pin-pill { opacity:.78; filter:saturate(.35); }
 .map-pin.locked .map-pin-tile { filter:grayscale(.6); }
 .map-pin.compact.locked { opacity:.7; }
-.places-locked-head { display:flex; flex-direction:column; gap:4px; padding-top:8px; border-top:1px solid var(--line, rgba(0,0,0,.08)); }
+.places-locked-head { display:flex; flex-direction:column; gap:4px; padding:12px 14px; border-radius:var(--r-md); background:var(--surface-card); }
 .places-locked-progress { margin:0; font-size:13px; font-weight:700; color:#1F7A52; }
 .places-locked-row { opacity:.72; }
 .borough-gate { display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:var(--r-md); background:var(--surface-card); }

@@ -18,7 +18,7 @@ import {
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
 import {
-  chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
+  chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
 } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
@@ -105,6 +105,7 @@ export default async function HomePage() {
       ping={sessionPing}
       // Migration 0056: the profile's Skills tab (no tab before the migration).
       loadSkills={mySkills}
+      loadBoroughs={boroughState}
       // Migration 0017 switches on City News (an empty feed hides it).
       cityNews={loadNews}
       // Migration 0018 switches on treasure hunts (hunt_state() failing hides the Hunt tab).

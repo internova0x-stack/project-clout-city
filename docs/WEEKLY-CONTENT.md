@@ -84,3 +84,8 @@ it isn't in your working directory). Work from the main branch.
    hunt and news in the Studio Calendar and approve them by Sunday. The gossip goes live by itself."
    Don't change any code, and don't merge.
 ```
+
+## Boroughs (migration 0066)
+Brooklyn stays locked until 100 players are out at once on 3 different days (or a Studio admin opens it).
+Until it opens, write every hunt step, gossip piece and news lead at a **Queens** place: the server skips
+leads in a locked borough and nobody can travel there, so a Brooklyn piece would be a dead end.
