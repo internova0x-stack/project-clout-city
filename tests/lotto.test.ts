@@ -39,9 +39,9 @@ test("no gold on lotto tickets (gold is real money only)", () => {
   for (const g of LOTTO_GAMES) assert.ok(!["#FEF3C0", "#E1BC85", "#AD8759", "#7E5932"].includes(g.color.toUpperCase()), g.id);
 });
 
-test("Lucky Star is in Flushing, outside Astoria, and sells cards", () => {
+test("Lucky Star is on the Coney Island boardwalk (Brooklyn) and sells cards", () => {
   const p = PLACES.find((x) => x.id === "lucky-star");
-  assert.ok(p && p.neighborhood === "Flushing" && p.tags.includes("lotto") && p.template === "lotto");
+  assert.ok(p && p.neighborhood === "Coney Island" && p.borough === "brooklyn" && p.tags.includes("lotto") && p.template === "lotto");
 });
 
 test("limits mirror the server: free cards, then five bought a day, then cash", () => {

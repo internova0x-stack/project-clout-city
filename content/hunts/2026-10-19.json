@@ -18,7 +18,7 @@
         { "say": "Vee bought a buttered roll here every day for thirty years. She left you a note: 'The shoes are where the quiet people keep the stories.' Also, she owes me four dollars." },
         {
           "say": "Vee's note, yes. She made me promise to ask you something first. Quietly.",
-          "question": { "q": "Which Astoria spot shows movies with popcorn?", "choices": ["Respawn Arena", "Reel Queens Cinema", "Hellgate Hall", "Two Bros Who Fight Pizza"], "answer": 1 },
+          "question": { "q": "Which Astoria spot is the hospital?", "choices": ["Respawn Arena", "St. Copay's General Hospital", "Low Light Lounge", "Steinway Fresh Mart"], "answer": 1 },
           "then": "Correct. Vee lent the shoebox to the firehouse for their charity drive. Ask the captain, and wipe your feet."
         },
         { "say": "The shoebox? Hydrant sat on it for a month. Gus took it off our hands. Said he knew where it belonged. Same bench, every day, under the big bridge." },
@@ -90,7 +90,7 @@
         { "say": "That lantern gave me the creeps, and I work nights. Vee's note: 'It sleeps among the books, where the lights go out at closing time.'" },
         {
           "say": "It sat in our reading room for a week. Three patrons fainted. One left a five-star review. Answer Vee's question first.",
-          "question": { "q": "Which Astoria place is a quiet chapel?", "choices": ["Harmony Community Chapel", "Radiant Harbor Church", "Hellgate Hall", "The Neon Spoon"], "answer": 0 },
+          "question": { "q": "Which Astoria place is a quiet chapel?", "choices": ["Harmony Community Chapel", "Radiant Harbor Church", "The Kiln", "The Neon Spoon"], "answer": 0 },
           "then": "Yes. The firehouse came to check on the smoke smell and took the lantern 'as a precaution.' Ask the captain."
         },
         { "say": "It lit itself in the truck. We don't talk about it. Gus took it. He says it reminds him of the old lighthouse. He's at the park, under the bridge." },
@@ -138,7 +138,7 @@
         { "say": "Vee collected napkins like other people collect stamps. Her note says: 'The famous one is pressed inside a book. Ask the man who knows where every book is.'" },
         {
           "say": "Pressed inside a book on product management. It's the most useful thing in that book. Vee wants you to answer this first.",
-          "question": { "q": "Which Astoria diner has a neon name?", "choices": ["Rockaway Diner", "The Neon Spoon", "Up on Thirty", "Sip & Spill"], "answer": 1 },
+          "question": { "q": "Which Astoria diner has a neon name?", "choices": ["Rockaway Diner", "The Neon Spoon", "Up on Wythe", "Sip & Spill"], "answer": 1 },
           "then": "Correct. A firefighter borrowed the book to 'learn agile.' The napkin went with it. Ask the captain."
         },
         { "say": "We tried agile. The fire didn't wait for the sprint review. Gus took the napkin; he said he'd 'pivot it' into a bookmark. He's at the park." },
@@ -162,13 +162,13 @@
         { "say": "Vee did her lipstick in that mirror before every trip to the deli. Every trip. Her note says: 'The mirror's being looked after by someone who hates selfies.'" },
         {
           "say": "I do hate selfies. Especially in the reading room. Vee asked me to ask you something before I tell you more.",
-          "question": { "q": "What's the name of the Astoria rooftop restaurant?", "choices": ["Altitude 718 Rooftop", "Up on Thirty", "Velvet Static", "The Neon Spoon"], "answer": 1 },
+          "question": { "q": "What's the name of the Astoria jazz lounge?", "choices": ["Altitude 718 Rooftop", "Low Light Lounge", "Velvet Static", "The Hub"], "answer": 1 },
           "then": "Yes. I lent the mirror to the firehouse for their calendar shoot. Go see the captain."
         },
         { "say": "Best calendar we ever made. Everyone looked like a movie star. Gus took the mirror for his bench. He says it 'catches the light off the river.'" },
         {
           "say": "Looked in it once. Saw myself at twenty-five. Then I put it down. Vee wants to know you've been around.",
-          "question": { "q": "Which Astoria place is a free library?", "choices": ["Ditmars Free Library", "Astoria Community College", "Queensborough University", "Triborough Works"], "answer": 0 },
+          "question": { "q": "Which Astoria place is a free library?", "choices": ["Ditmars Free Library", "Atlantic Avenue Community College", "Queensborough University", "Triborough Works"], "answer": 0 },
           "then": "Good. Jojo's got the mirror at the café now, Vee's old table. The password's the mirror's name."
         },
         {
@@ -186,13 +186,13 @@
         { "say": "Vee played arcade games here in the '80s, back when it was a candy store. Her note says: 'The chip's hidden in a manual. Ask the man who lends manuals.'" },
         {
           "say": "It was taped inside a 1983 programming manual. Overdue since 1984. Vee wants a quick check first.",
-          "question": { "q": "Where in Astoria do players go for gaming matches?", "choices": ["Respawn Arena", "Hellgate Hall", "Reel Queens Cinema", "Rep Count Fitness"], "answer": 0 },
+          "question": { "q": "Where in Astoria is the game room?", "choices": ["The Hub", "The Kiln", "Reel Kings Cinema", "Rep Count Fitness"], "answer": 0 },
           "then": "Correct. The firehouse borrowed the manual to fix their radio. Ask the captain."
         },
         { "say": "The radio now plays chiptune. We can't turn it off. Gus took the chip; he said his grandson would know what to do. He's on his bench at the park." },
         {
           "say": "My grandson said it's 'legendary.' Then he asked me for money. Answer me this and it's yours.",
-          "question": { "q": "What's the name of the club in Astoria?", "choices": ["Velvet Static", "Low Light Lounge", "Hellgate Hall", "Triborough Works"], "answer": 2 },
+          "question": { "q": "Which Queens club threw your very first party?", "choices": ["Velvet Static", "Low Light Lounge", "The Kiln", "Triborough Works"], "answer": 0 },
           "then": "That's right. Jojo has the chip at the café, Vee's old table. Password's the cabinet's name."
         },
         {

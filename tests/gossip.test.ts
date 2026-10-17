@@ -120,5 +120,5 @@ test("#19 restroom pieces: only where there's a restroom, never behind a door ru
   x.stories[0].pieces[i].place = "ultraviolet-society";
   assert.ok(problems(x).some((p) => /turns people away at the door/.test(p)));
   assert.match(hintLine({ n: 1, found: false, source: "restroom", hours: null, place: null, kind: "club", area: "Astoria" }), /^Overheard in the restroom at a club in Astoria/);
-  assert.match(leadAction({ place: "hellgate-hall", source: "restroom", hours: null }), /^Listen in downstairs at Hellgate Hall/);
+  assert.match(leadAction({ place: "hellgate-hall", source: "restroom", hours: null }), /^Listen in downstairs at The Kiln/);
 });

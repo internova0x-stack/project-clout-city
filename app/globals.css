@@ -1697,24 +1697,6 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .job-row .chip { flex:none; }
 .chat-plan-badge { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:var(--r-pill); background:#FFE1E8; color:#C2183A; font-size:11.5px; font-weight:800; vertical-align:2px; }
 
-/* ---- Launch screen (owner, Oct 16): neon wordmark, progress, a one-liner, Queens at night ---- */
-.launch { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; background:radial-gradient(120% 80% at 50% 30%, #241D2C 0%, var(--night-900) 60%);
-  padding:env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
-  transition:opacity .35s ease, visibility .35s; }
-.launch.leaving { opacity:0; visibility:hidden; pointer-events:none; }
-.launch-center { display:flex; flex-direction:column; align-items:center; gap:14px; transform:translateY(-6vh); }
-/* The Studio logo's formatting (.studio-mark: weight 800, wide tracking) at the first mockup's width (owner, Oct 16). */
-.launch-mark { margin:0; font-size:34px; line-height:40px; filter:drop-shadow(0 0 10px rgba(255,46,136,.35)); }
-.launch-bar { width:150px; height:4px; border-radius:var(--r-pill); background:rgba(255,246,224,.12); overflow:hidden; }
-.launch-bar > span { display:block; height:100%; background:var(--g-neon); transform-origin:left center; transition:transform .25s ease-out; }
-.launch-line { margin:0; min-height:16px; font-size:12px; line-height:16px; color:rgba(255,246,224,.66); text-align:center; }
-.launch-skyline { position:absolute; left:0; right:0; bottom:0; width:100%; height:22vh; max-height:180px; }
-.launch-skyline .sky-far { fill:#1F1B26; }
-.launch-skyline .sky-near { fill:#2A2530; stroke:#3A3440; }
-.launch-skyline .sky-bridge { stroke:#FFD54A; opacity:.55; filter:drop-shadow(0 0 3px rgba(255,213,74,.6)); }
-.launch-skyline .sky-windows { fill:#FFD58A; opacity:.75; }
-@media (prefers-reduced-motion: reduce) { .launch, .launch-bar > span { transition:none; } }
-
 /* ---------- v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner ---------- */
 .radio-art { position:relative; border-radius:18px; overflow:hidden; aspect-ratio:320/150; max-width:100%; box-shadow:var(--elev-2); }
 .radio-art.small { aspect-ratio:320/96; }
@@ -1859,3 +1841,17 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .lola-tip-head img, .lola-tip-head canvas { width:100%; height:100%; object-fit:cover; transform:scale(1.7) translateY(16%); }
 .lola-tip-kiss { position:absolute; right:-2px; bottom:-2px; font-size:18px; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 .lola-tip-skip { display:block; width:100%; margin-top:6px; padding:8px 0 2px; border:0; background:none; color:var(--text-3); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+/* Owner, Oct 17: places in a borough that hasn't opened. */
+.map-pin.locked .map-pin-pill { opacity:.78; filter:saturate(.35); }
+.map-pin.locked .map-pin-tile { filter:grayscale(.6); }
+.map-pin.compact.locked { opacity:.7; }
+.places-locked-head { display:flex; flex-direction:column; gap:4px; padding:12px 14px; border-radius:var(--r-md); background:var(--surface-card); }
+.places-locked-progress { margin:0; font-size:13px; font-weight:700; color:#1F7A52; }
+.places-locked-row { opacity:.72; }
+.borough-gate { display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:var(--r-md); background:var(--surface-card); }
+.borough-gate-bar { position:relative; height:8px; border-radius:var(--r-pill); background:rgba(46,158,106,.16); overflow:hidden; }
+.borough-gate-bar > i { position:absolute; inset:0 auto 0 0; background:#2E9E6A; border-radius:inherit; }
+.borough-gate-line { margin:0; font-size:14px; font-weight:700; color:var(--text-1); font-variant-numeric:tabular-nums; }
+.borough-places { display:flex; flex-wrap:wrap; gap:6px; }
+.borough-place { display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 3px; border-radius:var(--r-pill); background:var(--surface-card); font-size:13px; font-weight:600; color:var(--text-1); }
+.borough-place .map-pin-tile { width:22px; height:22px; border-radius:7px; }

@@ -61,6 +61,8 @@ import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
 import { BankSheet, EventsSheet, TasksSheet } from "./game/Sheets";
 import { TourTooltip, TOUR } from "./game/Tutorial";
+import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
+import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
@@ -87,8 +89,6 @@ import { RadioBanner } from "./city/Radio";
 import { TvHomeCard, TvViewer } from "./city/CloutTv";
 import { tvCardSeenKey, type Station, type StationApi, type StationThread, type TvApi, type TvFeature, type TvState } from "@/lib/cloutTv";
 import { uploadToBigScreen } from "@/lib/tvUpload";
-import { LaunchScreen } from "./LaunchScreen";
-import { launchLine } from "@/lib/launch";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
@@ -158,9 +158,6 @@ function glitched(e: unknown, toast: (m: string) => void) {
   toast("The city glitched. Try again.");
 }
 
-/** Set once the launch screen has shown on this page load: moving around the app afterwards is a warm open. */
-let launchedThisPage = false;
-
 export function GameShell({
   player,
   clique,
@@ -178,6 +175,8 @@ export function GameShell({
   ping,
   skills: previewSkills,
   loadSkills,
+  boroughGates,
+  loadBoroughs,
   leaderboardRows,
   dating,
   crew,
@@ -217,6 +216,9 @@ export function GameShell({
   /** Skills (owner, Oct 16): the profile's Skills tab; absent until they're switched on. */
   skills?: import("@/lib/skills").SkillState[];
   loadSkills?: () => Promise<import("@/lib/skills").SkillState[] | null>;
+  /** Borough gates (owner, Oct 17): which boroughs are open and how close the next one is (borough_state()). */
+  boroughGates?: BoroughGate[];
+  loadBoroughs?: () => Promise<BoroughGate[] | null>;
   /** v0.5 crushes and date nights (migration 0011). */
   dating?: DatingApi;
   /** Crew outings (migration 0013). */
@@ -260,28 +262,6 @@ export function GameShell({
   const daytime = daytimeOverride ?? clock.daytime;
   const [tab, setTab] = useState<Tab>("home");
 
-  // ---- Launch screen: a cold start, until the apartment and the avatar are on screen (at most 2 s) ----
-  const [launch, setLaunch] = useState<"on" | "leaving" | "off">(() => (launchedThisPage ? "off" : "on"));
-  const [launchP, setLaunchP] = useState(0.08);
-  const [launchCopy, setLaunchCopy] = useState("");
-  const endLaunch = useCallback(() => setLaunch((l) => (l === "on" ? "leaving" : l)), []);
-  useEffect(() => {
-    if (launch !== "on") return;
-    launchedThisPage = true;
-    // The line is picked after hydration (the server and the browser would pick differently).
-    setLaunchCopy(launchLine(Math.random() * 1000));
-    const t0 = performance.now();
-    // The bar creeps toward 90% over the time allowed and fills when the apartment is ready.
-    const tick = window.setInterval(() => setLaunchP((p) => Math.max(p, Math.min(0.9, 0.08 + ((performance.now() - t0) / GAME_CONFIG.launch.maxMs) * 0.82))), 120);
-    const cap = window.setTimeout(endLaunch, GAME_CONFIG.launch.maxMs);
-    return () => { window.clearInterval(tick); window.clearTimeout(cap); };
-  }, [launch, endLaunch]);
-  useEffect(() => {
-    if (launch !== "leaving") return;
-    setLaunchP(1);
-    const t = window.setTimeout(() => setLaunch("off"), GAME_CONFIG.launch.fadeMs);
-    return () => window.clearTimeout(t);
-  }, [launch]);
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
   // v0.7 step 4: a Shop piece being tried on in Your Look.
@@ -738,7 +718,20 @@ export function GameShell({
     if (gig) tips.confidence = { stat: "confidence", placeId: "gigs", placeName: gig.tier === "big" ? "A big break is open" : "A pro gig is open", emoji: "💼", price: 0, gain: 0, gig: { id: gig.id, pay: gig.pay } };
     return tips;
   }, [cityOn, city, feed, restOn, kitchenOn]);
-  const cityPins = useMemo(() => CITY_PINS(home, feed), [home, feed]);
+  // Borough gates (owner, Oct 17): fresh on open and every few minutes; Brooklyn stays locked until the server says so.
+  const [gates, setGates] = useState<BoroughGate[] | null>(boroughGates ?? null);
+  useEffect(() => {
+    if (!loadBoroughs) return;
+    let stop = false;
+    const tick = () => void loadBoroughs().then((g) => { if (!stop && g) setGates(g); });
+    tick();
+    const t = setInterval(tick, 3 * 60_000);
+    return () => { stop = true; clearInterval(t); };
+  }, [loadBoroughs]);
+  const openSet = useMemo(() => openBoroughs(gates), [gates]);
+  const cityPins = useMemo(() => CITY_PINS(home, feed, openSet), [home, feed, openSet]);
+  // The map's dark veil lifts off a borough once it opens.
+  useEffect(() => { mapRef.current?.setBoroughLock("brooklyn", !openSet.has("brooklyn")); }, [openSet, tab]);
   const storyOn = !!(feed && storyApi);
 
   // ---- City actions: one at a time; the server's answer replaces local state ----
@@ -1206,6 +1199,7 @@ export function GameShell({
   const openPlace = (id: string) => {
     const p = placeById(id);
     if (!p) return;
+    if (!openSet.has(boroughOf(p))) { setPanel(null); return setLockedBorough(boroughOf(p)); }
     setPanel(null);
     setTab("map");
     setInside(null);
@@ -1436,6 +1430,8 @@ export function GameShell({
         return setTab("home");
       }
       const p = cityOn ? placeById(pin.id) : undefined;
+      // A place in a borough that hasn't opened: the borough's sheet (what it takes to open it).
+      if (pin.locked && pin.borough) return setLockedBorough(pin.borough);
       if (p) return setPlace(p);
       setSoon({ key: "place", title: pin.name });
     },
@@ -1720,7 +1716,6 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            onReady={endLaunch}
             template={viewing ?? decorHome ?? upstairs ?? baseHome}
             floor={viewing || decorHome ? 1 : floorNow}
             layout={viewing ? null : decor ? decor.layout : city?.homeLayout}
@@ -1947,7 +1942,7 @@ export function GameShell({
       {flow === "pwa" && <PwaPrompt onDone={endHandoff} />}
 
       {/* ---- Panels ---- */}
-      <BoroughSheet id={lockedBorough} onClose={() => setLockedBorough(null)} />
+      <BoroughSheet id={lockedBorough} onClose={() => setLockedBorough(null)} gate={gates?.find((g) => g.id === lockedBorough) ?? null} />
       <TasksSheet
         open={panel === "tasks"}
         onClose={() => { setPanel(null); setTasksTab(undefined); }}
@@ -2032,7 +2027,8 @@ export function GameShell({
               ? { people: rideHere.slice().sort((a, b) => Number(b.crew) - Number(a.crew)).slice(0, 2).map((h) => ({ id: h.id, name: h.name, style: h.style, crew: h.crew, here: true })), onRide: (m, p) => void rideGo(m, p) }
               : undefined}
           />
-          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} here={chat?.counts ? (id) => placeCounts[id] : undefined} onPick={(p) => openPlace(p.id)} />
+          <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} here={chat?.counts ? (id) => placeCounts[id] : undefined} onPick={(p) => openPlace(p.id)}
+            openBoroughs={openSet} gates={gates} />
           <ShopSheet
             open={panel === "shop"}
             onClose={() => setPanel(null)}
@@ -2372,14 +2368,13 @@ export function GameShell({
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
       />
-      {launch !== "off" && <LaunchScreen progress={launchP} line={launchCopy} leaving={launch === "leaving"} />}
     </main>
   );
 }
 
 /** v0.3 pins: every built place plus the player's home. Story places appear once their story starts. */
-const CITY_PINS = (home: readonly [number, number], feed: StoryFeed | null): PlacePin[] => [
-  ...visiblePlaces(feed),
+const CITY_PINS = (home: readonly [number, number], feed: StoryFeed | null, open: Set<BoroughId>): PlacePin[] => [
+  ...visiblePlaces(feed).map((p) => ({ ...p, borough: boroughOf(p), locked: !open.has(boroughOf(p)) })),
   { id: "home", name: "Home", emoji: "🏠", category: "home", neighborhood: "Your place", at: home, tags: ["home"] },
 ];
 

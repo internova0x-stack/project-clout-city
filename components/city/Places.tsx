@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -30,6 +30,8 @@ import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
 import { TOGETHER, canDoTogether, type TogetherPlan } from "@/lib/together";
 import { handle } from "@/lib/validation";
+import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
+import { GATE_RULE, gateProgress, gateRule, type BoroughGate } from "@/lib/boroughGates";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
 
@@ -724,40 +726,69 @@ export function InteriorScene({
 const STATIONS_AT = 3;
 
 export function PlacesSheet({
-  open, onClose, from, onPick, state, story = null, here,
-}: { open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null; here?: (placeId: string) => PlaceCounts[string] | undefined }) {
+  open, onClose, from, onPick, state, story = null, here, openBoroughs: openSet, gates = null,
+}: {
+  open: boolean; onClose: () => void; from: LatLng; onPick: (p: Place) => void; state: CityState | null; story?: StoryFeed | null;
+  here?: (placeId: string) => PlaceCounts[string] | undefined;
+  /** Owner, Oct 17: one tab per borough; a borough that hasn't opened shows its places locked, with what it takes. */
+  openBoroughs?: Set<BoroughId>; gates?: BoroughGate[] | null;
+}) {
+  const all = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
+  const tabs = BOROUGHS.filter((b) => all.some((r) => boroughOf(r.p) === b.id));
+  const [tab, setTab] = useState<BoroughId>("queens");
+  const isOpen = (id: BoroughId) => !openSet || openSet.has(id);
+  const inTab = all.filter((r) => boroughOf(r.p) === tab);
   // The Hub first, the two stations 4th and 5th, everything else nearest first (owner, Oct 16).
-  const near = visiblePlaces(story).map((p) => ({ p, d: distanceMiles(from, p.at) })).sort((a, b) => a.d - b.d);
-  const rows = [...near.filter((r) => isHub(r.p)), ...near.filter((r) => !isStation(r.p) && !isHub(r.p))];
-  rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...near.filter((r) => isStation(r.p)));
+  const rows = [...inTab.filter((r) => isHub(r.p)), ...inTab.filter((r) => !isStation(r.p) && !isHub(r.p))];
+  rows.splice(Math.min(STATIONS_AT, rows.length), 0, ...inTab.filter((r) => isStation(r.p)));
+  const locked = !isOpen(tab);
+  const gate = gates?.find((g) => g.id === tab) ?? null;
   return (
     <Sheet open={open} onClose={onClose} label="Places">
       <div className="stack-16">
         <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Places</h2>
-        <p className="subtext" style={{ margin: 0 }}>Queens and Long Island City. More of the city opens soon.</p>
+        {tabs.length > 1 && (
+          <div className="segmented" role="group" aria-label="Boroughs">
+            {tabs.map((b) => (
+              <button key={b.id} aria-pressed={tab === b.id} onClick={() => setTab(b.id)}>
+                {!isOpen(b.id) && <span aria-hidden="true">🔒 </span>}{b.name}
+              </button>
+            ))}
+          </div>
+        )}
+        {locked ? (
+          <div className="places-locked-head">
+            <p className="overline" style={{ margin: 0 }}>🔒 {rows.length} places waiting</p>
+            <p className="meta" style={{ margin: 0 }}>{gateRule(gate ?? { target: GATE_RULE.target, daysNeeded: GATE_RULE.days })}</p>
+            {gate && <p className="places-locked-progress">{gateProgress(gate)}</p>}
+          </div>
+        ) : (
+          <p className="subtext" style={{ margin: 0 }}>{tab === "queens" ? "Queens and Long Island City, nearest first." : "Nearest first."}</p>
+        )}
         <div>
           {rows.map(({ p, d }) => {
             const price = Math.min(...p.actions.map((a) => a.price ?? Infinity));
             const pay = Math.max(0, ...p.actions.map((a) => a.pay ?? 0));
             const cost = pay ? `Pays ${formatCash(pay)}` : Number.isFinite(price) ? `From ${formatCash(price)}` : p.actions.some((a) => a.kind === "gigs") ? "Gigs board" : "Free";
             const visited = (state?.visitsToday[p.id] ?? 0) > 0;
+            const count = here?.(p.id)?.count ?? 0;
             return (
-              <button key={p.id} className="list-row" onClick={() => onPick(p)}>
+              <button key={p.id} className={`list-row${locked ? " places-locked-row" : ""}`} onClick={() => onPick(p)}>
                 <span className="map-pin-tile" aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 12, background: tileBackground(glyphFor(p)) }}><Glyph name={glyphFor(p)} size={24} /></span>
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                   <span className="places-name">
                     <span className="title">{p.name}</span>
                     {/* Where the people are (owner, Oct 16): real players there right now, next to the name (place_counts, never NPCs). */}
-                    {(here?.(p.id)?.count ?? 0) > 0 && (
-                      <span className="places-here" aria-label={`${here!(p.id)!.count} ${here!(p.id)!.count === 1 ? "player" : "players"} here`}>
-                        <span className="places-here-dot" aria-hidden="true" />{here!(p.id)!.count}
+                    {!locked && count > 0 && (
+                      <span className="places-here" aria-label={`${count} ${count === 1 ? "player" : "players"} here`}>
+                        <span className="places-here-dot" aria-hidden="true" />{count}
                       </span>
                     )}
                   </span>
-                  <span className="meta">{p.neighborhood} · {d.toFixed(1)} mi{visited ? " · Visited today" : ""}</span>
+                  <span className="meta">{p.neighborhood}{locked ? "" : ` · ${d.toFixed(1)} mi${visited ? " · Visited today" : ""}`}</span>
                 </span>
-                <span className="body-strong" style={{ whiteSpace: "nowrap", fontSize: 14 }}>{cost}</span>
-                <ChevronRightIcon size={18} />
+                {locked ? <span aria-hidden="true">🔒</span> : <span className="body-strong" style={{ whiteSpace: "nowrap", fontSize: 14 }}>{cost}</span>}
+                {!locked && <ChevronRightIcon size={18} />}
               </button>
             );
           })}

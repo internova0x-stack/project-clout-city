@@ -391,6 +391,11 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     const b = map!.project([at[1] + 10 / (111_320 * Math.cos((at[0] * Math.PI) / 180)), at[0]]);
     return (h * Math.hypot(b.x - a.x, b.y - a.y) / 10) * Math.sin((map!.getPitch() * Math.PI) / 180);
   };
+  // Owner, Oct 17: a place in a borough that hasn't opened opens that borough's sheet instead.
+  const tapPin = (pin: PlacePin) => {
+    if (pin.locked && pin.borough) return onLockedTap?.(BOROUGHS.find((b) => b.id === pin.borough)?.name ?? "", pin.borough);
+    onPinTap?.(pin);
+  };
   const placed = useMemo<Placed[]>(() => {
     if (!map) return [];
     const out: (Placed & { spots: { x: number; y: number; w: number }[] })[] = [];
@@ -490,9 +495,9 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
               return (
                 <button
                   key={pin.id}
-                  className="map-pin compact"
+                  className={`map-pin compact${pin.locked ? " locked" : ""}`}
                   style={{ transform: `translate(${c.x}px, ${c.y}px) translate(-50%, calc(-100% + 3px))` }}
-                  onClick={() => onPinTap?.(pin)}
+                  onClick={() => tapPin(pin)}
                   aria-label={`${pin.name}, ${pin.neighborhood}`}
                 >
                   <span className="map-pin-tile icon-only" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={14} /></span>
@@ -504,14 +509,14 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             return (
               <button
                 key={pin.id}
-                className="map-pin"
+                className={`map-pin${pin.locked ? " locked" : ""}`}
                 style={{ transform: `translate(${c.x}px, ${c.y}px) translate(-50%, calc(-100% + 3px))` }}
-                onClick={() => onPinTap?.(pin)}
-                aria-label={`${pin.name}, ${pin.neighborhood}`}
+                onClick={() => tapPin(pin)}
+                aria-label={pin.locked ? `${pin.name}, ${pin.neighborhood}: locked until the borough opens` : `${pin.name}, ${pin.neighborhood}`}
               >
                 <span className="map-pin-pill glass-hud" style={nudge(c.x, pinWidth(pin))}>
                   <span className="map-pin-tile" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={14} /></span>
-                  <span className="name">{pin.name}</span>
+                  <span className="name">{pin.locked && <span aria-hidden="true">🔒 </span>}{pin.name}</span>
                 </span>
                 <span className="map-pin-stem" />
                 <span className="map-pin-dot" />

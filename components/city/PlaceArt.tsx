@@ -155,7 +155,7 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "precinct-114-half": "deepBlue", "engine-7": "red", "astoria-cc": "green", "harmony-chapel": "offWhite",
   "hell-gate-park": "green", "rep-count": "yellow", "astoria-blvd-station": "yellow", "reel-queens": "purple",
   "respawn-arena": "deepBlue", "the-sticky-floor": "green", "discount-disco": "yellow", "ultraviolet-society": "purple",
-  "real-clout-fm": "red", "clout-tower": "deepBlue",
+  "real-clout-fm": "red", "clout-tower": "deepBlue", "st-copays": "offWhite", "brownstone-sessions": "brown",
 };
 function themeOf(place: Place) {
   return THEMES[PLACE_THEME[place.id] ?? "cream"];
@@ -308,6 +308,52 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
           })}
           <Tree x={5} y={-3} night={night} />
           <Lantern x={4.5} y={4.5} night={night} />
+        </>
+      );
+    }
+    case "st-copays": {
+      // St. Copay's General Hospital (owner, Oct 17): a white wing, a glass tower, a red cross on top.
+      const wing: BoxSpec = { x: -6, y: -3, z: 0, w: 11, d: 6, h: 3.6, color: "#F4F7FA" };
+      const tower: BoxSpec = { x: -6, y: -3, z: 3.6, w: 5, d: 6, h: 6.4, color: "#E3EEF6" };
+      const [cx, cy] = iso(-3.5, 0, 10.6);
+      return (
+        <>
+          {base}
+          <Box b={wing} night={night}>
+            {windowsLeft(wing, 1, 5, lit, "#8FC7E8", night)}
+            <OnRight b={wing} u={0.6} v={0} uw={2.6} vh={2.2} fill={night ? lit : "#BFE3F5"} opacity={0.9} />
+            <SignLeft b={wing} text="EMERGENCY" color="#E5484D" ink="#FFFFFF" v={2.7} night={night} />
+          </Box>
+          <Box b={tower} night={night}>
+            {windowsLeft(tower, 4, 2, lit, "#5FB3D9", night)}
+            {windowsRight(tower, 4, 3, lit, "#5FB3D9", night)}
+          </Box>
+          <rect x={cx - 7} y={cy - 2.5} width={14} height={5} rx={1} fill="#E5484D" />
+          <rect x={cx - 2.5} y={cy - 7} width={5} height={14} rx={1} fill="#E5484D" />
+          {night && <circle cx={cx} cy={cy} r={12} fill="#FF5A5F" opacity={0.25} filter="url(#mv-blur)" />}
+          <Tree x={5.5} y={3} night={night} />
+          <Lantern x={4.5} y={-2.5} night={night} />
+        </>
+      );
+    }
+    case "brownstone-sessions": {
+      // Brownstone Sessions (owner, Oct 17): a Fort Greene brownstone, a stoop and a glowing basement club.
+      const house: BoxSpec = { x: -3.5, y: -4, z: 0, w: 6, d: 8, h: 9, color: "#9A5A3C" };
+      const [hx, hy] = iso(-3.5, 1.2, 5.6);
+      return (
+        <>
+          {base}
+          <Box b={house} night={night}>
+            {windowsLeft(house, 3, 2, lit, glassDark, night)}
+            {windowsRight(house, 3, 3, lit, glassDark, night)}
+            <OnLeft b={house} u={0.6} v={0.2} uw={4.6} vh={1.3} fill={night ? "#FFB347" : "#FFD9A0"} opacity={0.95} />
+            <SignLeft b={house} text="SESSIONS" color="#14111A" ink="#FFB347" v={1.8} night={night} />
+          </Box>
+          {/* A neon music note over the door. */}
+          <text x={hx + 6} y={hy - 2} fontSize={13} fontWeight={900} fill="#FF6A3D" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif">♪</text>
+          {night && <circle cx={hx + 6} cy={hy - 6} r={10} fill="#FF6A3D" opacity={0.25} filter="url(#mv-blur)" />}
+          <Tree x={5} y={-3} night={night} />
+          <Lantern x={4.5} y={4} night={night} />
         </>
       );
     }

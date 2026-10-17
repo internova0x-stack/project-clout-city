@@ -14,6 +14,9 @@ export interface PlacePin {
   at: LatLng;
   /** World State tags (World State Layer Brief section 2). */
   tags: string[];
+  /** Owner, Oct 17: a place in a borough that hasn't opened yet: shown, locked. */
+  locked?: boolean;
+  borough?: import("./map/boroughs").BoroughId;
 }
 
 export const WAVE_1_PINS: PlacePin[] = [

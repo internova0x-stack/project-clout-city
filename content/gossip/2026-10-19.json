@@ -11,7 +11,7 @@
         { "text": "Jojo swears a woman in giant sunglasses sat in the corner for six hours, ordered one oat milk and kept whispering \"the bridge needs more bridge\".", "place": "grind-and-gossip", "source": "regular" },
         { "text": "In the restroom line, fixing her lashes: \"Her producer says the laptop never left the studio. The studio has a doggy door. And the producer has a dog that loves attention.\"", "place": "velvet-static", "source": "restroom", "hours": [21, 3] },
         { "text": "Someone printed all twelve lyric sheets at the library and left them in the copier tray, with a sticky note: \"ignore these, they're nothing\".", "place": "ditmars-library", "source": "overheard" },
-        { "text": "Pixel says the leak's file names are \"lunaria_FINAL_final_LEAK_THIS_v3\". Pixel does not believe in coincidences.", "place": "respawn-arena", "source": "regular" },
+        { "text": "In The Hub's game room, Pixel from Respawn Arena, over a claw machine: the leak's file names were \"lunaria_FINAL_final_LEAK_THIS_v3\". Pixel does not believe in coincidences.", "place": "neon-spoon", "source": "overheard" },
         { "text": "Two commuters on the platform: \"Her streams tripled overnight. If somebody stole it, they did her the biggest favor of her career.\"", "place": "astoria-blvd-station", "source": "overheard", "hours": [6, 11] }
       ],
       "tea": {
@@ -27,9 +27,9 @@
       "teaser": "The deli guy and the lotto guy haven't spoken in twenty years. Nobody remembers why. Somebody does.",
       "pieces": [
         { "text": "Sal, slicing faster than he needs to: \"Benny? Never heard of him. Tell him I said that. Tell him exactly that.\"", "place": "ditmars-deli", "source": "regular" },
-        { "text": "Benny, not looking up from the counter: \"Twenty years and he still puts the onions on top. That's all I'll say. That's not all I'll say.\"", "place": "lucky-star", "source": "regular" },
+        { "text": "Benny from Lucky Star, in line at the market with a basket of onions: \"Twenty years and he still puts the onions on top. That's all I'll say. That's not all I'll say.\"", "place": "steinway-fresh", "source": "overheard" },
         { "text": "Gus, from his bench: \"1987. Block party. One grill, two men, one recipe. I was there. I had a hot dog.\"", "place": "hell-gate-park", "source": "regular" },
-        { "text": "Two off-duty firefighters at the Hellgate Hall mirrors: \"Every Thanksgiving they bring us both sandwiches and make us vote. Every year it's a tie. We make sure.\"", "place": "hellgate-hall", "source": "restroom" },
+        { "text": "Two off-duty firefighters at the Velvet Static mirrors: \"Every Thanksgiving they bring us both sandwiches and make us vote. Every year it's a tie. We make sure.\"", "place": "velvet-static", "source": "restroom" },
         { "text": "Two regulars over pancakes: \"You know they're cousins, right? Same grandmother. Same recipe card. She wrote it in pencil.\"", "place": "neon-spoon", "source": "overheard", "hours": [6, 12] }
       ],
       "tea": {
@@ -44,11 +44,11 @@
       "emoji": "🍕",
       "teaser": "Councilmember Barb Tillwater wants \"one slice per block\". Two Bros Who Fight Pizza want her recalled. Both of them.",
       "pieces": [
-        { "text": "Behind the counter, both brothers at once: \"ONE slice per BLOCK? We're two guys! We sell two slices! It's in the NAME!\"", "place": "two-bros-pizza", "source": "overheard" },
+        { "text": "The Two Bros brothers, on a coffee run, at the counter at once: \"ONE slice per BLOCK? We're two guys! We sell two slices! It's in the NAME!\"", "place": "grind-and-gossip", "source": "overheard" },
         { "text": "Sgt. Bev, not looking up: \"Forty-two noise complaints about the zoning meeting. Thirty-nine were the brothers. Three were the brothers' mother.\"", "place": "precinct-114-half", "source": "regular" },
         { "text": "A city intern on a coworking couch, whispering into a phone: \"I typed the bill. I might have typed it wrong. How wrong is 'block' versus 'block party'?\"", "place": "triborough-works", "source": "overheard", "hours": [9, 17] },
         { "text": "Mr. Penwright, lowering his voice: \"The councilmember checked out a book on pizza law. It's a cookbook. She returned it with sauce on page forty.\"", "place": "ditmars-library", "source": "regular" },
-        { "text": "At a rooftop table: \"Tillwater just ordered six slices for herself. Six. In public. That's not policy, that's a confession.\"", "place": "up-on-thirty", "source": "overheard", "hours": [18, 23] }
+        { "text": "At the Sip & Spill Tea Bar: \"Tillwater just ordered six slices for herself. Six. In public. That's not policy, that's a confession.\"", "place": "lucky-seven-deli", "source": "overheard", "hours": [18, 23] }
       ],
       "tea": {
         "headline": "\"One slice per block\" was a typo, and the Councilmember is hungry",

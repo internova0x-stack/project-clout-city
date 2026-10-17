@@ -75,6 +75,13 @@ export async function mySkills(): Promise<SkillState[] | null> {
   const { data, error } = await supabase.rpc("my_skills");
   return error ? null : (data as SkillState[]);
 }
+/** Borough gates (migration 0066): which boroughs are open and how close the next one is. Null before 0066 runs. */
+export async function boroughState(): Promise<import("@/lib/boroughGates").BoroughGate[] | null> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc("borough_state");
+  return error ? null : (data as import("@/lib/boroughGates").BoroughGate[]);
+}
 /** Someone's top skills, for their player card. */
 export async function skillsOf(playerId: string) {
   return call<{ id: SkillId; level: number }[]>("skills_of", { p_player: playerId });
