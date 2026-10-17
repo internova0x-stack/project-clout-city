@@ -1,3 +1,5 @@
+import type { Look } from "./look.ts";
+
 // The recurring cast (v0.6, docs/08-new-features-spec.md section 4; the bible is docs/CAST.md).
 // Every name is invented. Celebrities and wannabes appear in City News and in what the
 // regulars say; regulars stand at their place and say a rotating line when tapped.
@@ -62,6 +64,12 @@ export const REGULARS: Regular[] = [
   // The Hub's host (owner, Oct 16): the city's tea queen, who can get you anything and knows everyone worth knowing.
   { id: "lola", name: "Lola Lowdown", title: "the tea queen", placeId: "neon-spoon", emoji: "💋", role: "bartender" },
 ];
+
+/** Lola Lowdown's look (owner, Oct 17: her head is the tour guide's avatar): long pink hair, soft glam. */
+export const LOLA_LOOK: Look = {
+  style: "influencer_soft_glam", body: "curvy", build: "curvy", skin: "#8D5524", hair: "long", hairColor: "#E0457B",
+  eyes: "#3B2314", glasses: "none", covering: "none", fit: null,
+};
 
 /** What people call a regular: their first name, or title and surname ("Mr. Penwright", "Sgt. Bev"). */
 export function callName(name: string): string {

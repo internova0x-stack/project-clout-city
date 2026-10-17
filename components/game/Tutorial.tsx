@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AvatarHead from "../avatar/AvatarHead";
+import { LOLA_LOOK } from "@/lib/cast";
 
 // The welcome screen and the five tutorial tooltips (Clarifications section 1;
 // C15). One tooltip at a time, the rest of the screen dimmed, the target ringed.
 
+// Owner, Oct 17: Lola Lowdown gives the tour, in her voice (the spicy urban gossip blogger).
 export const TOUR = [
-  { target: "clout", text: "This is your clout: a scientific measure of how much strangers care that you exist. Grow it by completing tasks, being seen in the right places and owning things you definitely don't need." },
-  { target: "money", text: "Your bank balance. It pays for rent, outfits and the occasional bribe to a bouncer. The diamond is your net worth, aka everything you own that you can casually mention." },
-  { target: "map", text: "This is the map. You're starting in Queens. The rest of the city is locked until you're interesting enough." },
-  { target: "phone", text: "Your phone. Updates, gossip, and the fam asking if you've \"made it yet.\"" },
-  { target: "events", text: "Breaking news: somebody invited you to a party. We're as surprised as you are. Tap to RSVP." },
+  { target: "clout", text: "Hey babe, Lola Lowdown. I know everyone worth knowing, and now I know you. That flame is your clout: how much this city cares that you exist. Right now? Not a lot. We'll fix that." },
+  { target: "money", text: "Your coins, honey. Rent, fits and the occasional \"tip\" for a bouncer all come out of here. The diamond is your net worth: everything you own that you can casually drop in conversation." },
+  { target: "map", text: "This is the map. You're starting in Queens, and the rest of the city stays locked till you're interesting enough. I've seen worse glow-ups. Barely." },
+  { target: "phone", text: "Your phone. Updates, gossip and the fam asking if you've \"made it yet.\" My tea comes through here too, so keep it charged." },
+  { target: "events", text: "Breaking news: somebody invited YOU to a party. I'm as shocked as you are. Tap it and RSVP before they change their mind." },
 ] as const;
 
 export function WelcomeModal({ onStart, onSkip }: { onStart: () => void; onSkip: () => void }) {
@@ -74,13 +77,6 @@ export function TourTooltip({ index, onNext }: { index: number; onNext: () => vo
   }, [step.target]);
 
   const last = index === TOUR.length - 1;
-  const box = typeof document === "undefined" ? { width: 390, height: 844 } : screenBox();
-  const below = rect ? rect.y + rect.h / 2 < box.height / 2 : true;
-  const cardTop = rect ? (below ? rect.y + rect.h + 14 : undefined) : 120;
-  const cardBottom = rect && !below ? box.height - rect.y + 14 : undefined;
-  const cx = rect ? rect.x + rect.w / 2 : box.width / 2;
-  const cardLeft = Math.min(Math.max(12, cx - 150), box.width - 312);
-
   return (
     <div className="tour" role="dialog" aria-modal="true" aria-label={`Tour, step ${index + 1} of ${TOUR.length}`}>
       {/* The hole: everything but the target is dimmed; the last step only advances by tapping it. */}
@@ -96,13 +92,18 @@ export function TourTooltip({ index, onNext }: { index: number; onNext: () => vo
           {!last && <div className="tour-block" style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }} />}
         </>
       )}
-      <div className="tour-card glass-light" style={{ left: cardLeft, top: cardTop, bottom: cardBottom }}>
-        <span className={`tour-pointer ${below ? "up" : "down"}`} style={{ left: Math.min(Math.max(16, cx - cardLeft - 8), 276) }} />
-        <p className="overline" style={{ margin: 0 }}>{index + 1} of {TOUR.length}</p>
-        <p className="body" style={{ margin: "6px 0 0" }}>{step.text}</p>
-        {!last && (
-          <button className="btn btn-taxi tour-next" onClick={onNext}>Next</button>
-        )}
+      {/* Lola in the bottom-right corner, her line in a chat bubble (owner, Oct 17). */}
+      <div className="lola-tip" key={index}>
+        <div className="lola-tip-bubble">
+          <p className="lola-tip-who">Lola Lowdown <span>· {index + 1} of {TOUR.length}</span></p>
+          <p className="lola-tip-text">{step.text}</p>
+          {!last && <button className="btn btn-taxi lola-tip-next" onClick={onNext}>Next</button>}
+          {last && <p className="lola-tip-hint">Tap the glowing button 👆</p>}
+        </div>
+        <div className="lola-tip-head" aria-hidden="true">
+          <AvatarHead look={LOLA_LOOK} size={64} />
+          <span className="lola-tip-kiss">💋</span>
+        </div>
       </div>
     </div>
   );
