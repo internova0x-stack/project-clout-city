@@ -752,8 +752,8 @@ export function PlacesSheet({
         {tabs.length > 1 && (
           <div className="segmented borough-tabs" role="group" aria-label="Boroughs">
             {tabs.map((b) => (
-              <button key={b.id} aria-pressed={tab === b.id} onClick={() => setTab(b.id)} aria-label={isOpen(b.id) ? b.name : `${b.name}, locked`}>
-                {b.short ?? b.name}{!isOpen(b.id) && <span className="borough-tab-lock" aria-hidden="true">🔒</span>}
+              <button key={b.id} aria-pressed={tab === b.id} onClick={(e) => { setTab(b.id); e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" }); }} aria-label={isOpen(b.id) ? b.name : `${b.name}, locked`}>
+                {!isOpen(b.id) && <span className="borough-tab-lock" aria-hidden="true">🔒</span>}{b.name}
               </button>
             ))}
           </div>
