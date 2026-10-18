@@ -709,6 +709,7 @@ bring in spend (affiliate links). Nothing here is built yet; this section is the
 
 ### Decisions so far (owner, Oct 18)
 - **Rate:** 20% standard; 30% for top creators (a tier we set per creator in the Studio).
+- **Links:** only admins create, edit and retire links, in the Studio. Creators can't make their own.
 - **Prices stay** ($4.99 a month, $39.99 a year, $119.99 chat forever, $2.99 side stories, $3.99 tickets and
   collector pieces). Postcards moved to $1.99 (migration 0086) because the $0.99 price couldn't carry a commission.
 
@@ -775,7 +776,7 @@ bring in spend (affiliate links). Nothing here is built yet; this section is the
     commission, still playing). That list is admin-only; creators never see who their players are.
 - **Creator page** (`/creator`, signed in with the creator's email): their links and code, clicks, sign-ups, paying
   players and earnings per link, earnings by status, payout history and the next payout date. Counts only: never
-  player names, chats or anything personal. Whether creators can make their own links here too is an open question.
+  player names, chats or anything personal. Only admins make links (owner, Oct 18); creators see theirs here, read-only.
 - **Insights:** a creators table (sign-ups, payers, revenue, commission, net after commission, and what we spent on
   their videos) so each creator's cost per paying player is visible.
 
@@ -815,7 +816,6 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
 4. Who gets 30%: a fixed list we choose, or automatic above a number of paying players a month?
 5. Payouts: by hand during the soft launch, then Stripe Connect?
 6. Should referred players get anything (e.g. a welcome outfit or C$ bonus, never real-money value)?
-7. Can creators make their own custom links on their page, or only admins in the Studio?
 
 ## 22. Later features
 
