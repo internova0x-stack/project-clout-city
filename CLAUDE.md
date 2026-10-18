@@ -18,6 +18,8 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
   current version's "In scope" list; anything else gets a "Coming soon" card.
 - `docs/SETUP.md`: Supabase, email template and Vercel setup.
 - `docs/STORIES.md`: adding, approving, scheduling and pausing stories in the Story Studio (`/studio`).
+- `docs/CREATORS.md`: the creator program end to end: adding creators, links, sign-up credit, commissions, the
+  creator page, payouts and video tracking.
 
 ## Stack
 Next.js 16 (App Router, `proxy.ts` instead of middleware), React 19, Supabase
@@ -74,6 +76,8 @@ components live in `app/globals.css`.
   only, never player names); `StudioSignIn` serves it (`dest="/creator"`, `afterSignIn` knows both destinations).
   Step 4 (migration 0090): payouts by hand (`creator_payouts`; `admin_payout_mark` pays everything payable for a creator
   in one row, $50 minimum unless overridden; `admin_payout_void` undoes with a reason; never bank details).
+  Step 5 (migration 0091): `creator_videos` (fee, post date, optional link); `admin_creator_videos()` gives results per
+  video link and each creator's spend vs. results. How-to for the team: `docs/CREATORS.md`.
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.

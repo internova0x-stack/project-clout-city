@@ -67,3 +67,12 @@ test("payouts: the CSV for the bank or PayPal run quotes awkward names", () => {
   const csv = payoutsCsv([{ name: "Glow, Tasha", email: "tasha@example.com", handle: "@tasha", code: "TASHA", payableCents: 7473 }], "2026-11-01");
   assert.equal(csv, 'Creator,Email,Handle,Code,Amount (USD),Date\n"Glow, Tasha",tasha@example.com,@tasha,TASHA,74.73,2026-11-01\n');
 });
+
+import { costPer, keptAfterSpend } from "../lib/creators.ts";
+
+test("videos: cost per result and what we keep after commission and fees", () => {
+  assert.equal(costPer(25000, 41), 610);
+  assert.equal(costPer(25000, 0), null);
+  assert.equal(costPer(0, 12), null);
+  assert.equal(keptAfterSpend(51894, 15568, 55000), -18674);
+});

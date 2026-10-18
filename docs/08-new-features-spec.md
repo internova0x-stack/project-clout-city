@@ -707,7 +707,8 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
 Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
 bring in spend (affiliate links). Every rule below is decided (owner, Oct 18). **Built:** step 1, attribution and links
 (migration 0087), step 2, commissions and performance (migration 0088), step 3, the creator page (migration 0089), and
-step 4's manual payouts (migration 0090). Stripe Connect payouts and step 5 are still to build.
+step 4's manual payouts (migration 0090) and step 5, video tracking (migration 0091). Stripe Connect payouts and the
+briefs library are still to build. How to run it day to day: `docs/CREATORS.md`.
 
 ### Decisions (owner, Oct 18)
 - **Rate:** set per creator in the Studio. New creators default to **20%**; **30%** is the preset for high
@@ -843,7 +844,12 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
    minimum needs a tick ("closing the deal"). A payout marked by mistake is undone with a reason: it stays in the
    history as undone and the money is payable again. Creators see their payouts on `/creator`. Stripe Connect is a
    "coming soon" card.
-5. UGC tracking: videos, fees and cost per paying player.
+5. UGC tracking: videos, fees and cost per paying player. **Built (migration 0091):** Studio → Affiliates → Videos logs
+   each paid video (creator, its own link, title, platform, URL, post date, fee, note). Each video shows clicks,
+   sign-ups, paying players and revenue through its link and the fee per paying player; a video without a link counts
+   toward its creator only. "Cost per creator" sets their total fees against sign-ups, payers, revenue and commission
+   and shows what we keep (net revenue − commission − fees). Removed videos keep their spend. The briefs library is
+   still to build.
 
 ### Answered (owner, Oct 18)
 1. Commission on **net** revenue.

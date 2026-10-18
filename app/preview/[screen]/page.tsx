@@ -18,7 +18,7 @@ import {
   previewPlayerCard, previewStudioInsights, previewStudioMetrics, previewStudioPlayer, previewStudioPlayerBan, previewStudioPlayers, previewStudioReportAction, previewStudioReports,
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
-import { previewCreatorMe, previewStudioPayoutMark, previewStudioPayoutVoid, previewStudioPayouts, previewStudioAffiliates, previewStudioAffiliatesOverview, previewStudioCreatorPage, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
+import { previewCreatorMe, previewStudioVideos, previewStudioVideoSave, previewStudioVideoStatus, previewStudioPayoutMark, previewStudioPayoutVoid, previewStudioPayouts, previewStudioAffiliates, previewStudioAffiliatesOverview, previewStudioCreatorPage, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
@@ -172,7 +172,7 @@ export default async function Preview({
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
             beatStatus: previewStudioBeatStatus, content: previewStudioContent, reorder: previewStudioReorder, beatEdit: previewStudioBeatEdit, goLive: previewStudioGoLive,
             reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics, insights: previewStudioInsights, players: previewStudioPlayers, player: previewStudioPlayer, playerBan: previewStudioPlayerBan,
-            affiliates: previewStudioAffiliates, affiliatesOverview: previewStudioAffiliatesOverview, creatorPage: previewStudioCreatorPage, payouts: previewStudioPayouts, payoutMark: previewStudioPayoutMark, payoutVoid: previewStudioPayoutVoid, creatorSave: previewStudioCreatorSave, linkSave: previewStudioLinkSave, linkStatus: previewStudioLinkStatus,
+            affiliates: previewStudioAffiliates, affiliatesOverview: previewStudioAffiliatesOverview, creatorPage: previewStudioCreatorPage, payouts: previewStudioPayouts, payoutMark: previewStudioPayoutMark, payoutVoid: previewStudioPayoutVoid, videos: previewStudioVideos, videoSave: previewStudioVideoSave, videoStatus: previewStudioVideoStatus, creatorSave: previewStudioCreatorSave, linkSave: previewStudioLinkSave, linkStatus: previewStudioLinkStatus,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,

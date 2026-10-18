@@ -231,3 +231,33 @@ export function payoutsCsv(rows: { name: string; email: string | null; handle: s
   for (const r of rows) lines.push([r.name, r.email ?? "", r.handle ?? "", r.code, (r.payableCents / 100).toFixed(2), today].map(cell).join(","));
   return lines.join("\n") + "\n";
 }
+
+/** The UGC engine's tracking (migration 0091): each paid video, its fee and what its link brought in. */
+export type Platform = "tiktok" | "instagram" | "youtube" | "other";
+export const PLATFORMS: { id: Platform; label: string }[] = [
+  { id: "tiktok", label: "TikTok" },
+  { id: "instagram", label: "Instagram" },
+  { id: "youtube", label: "YouTube" },
+  { id: "other", label: "Other" },
+];
+export const platformLabel = (p: string) => PLATFORMS.find((x) => x.id === p)?.label ?? p;
+export interface CreatorVideo {
+  id: number; creatorId: string; creator: string; linkId: number | null; slug: string | null; title: string; platform: Platform;
+  url: string | null; postedOn: string | null; feeCents: number; note: string | null; status: "live" | "removed";
+  /** Through the video's link; null when it has no link of its own (code only). */
+  clicks: number | null; signups: number | null; payers: number | null; revenueCents: number | null; commissionCents: number | null;
+}
+export interface VideosAdmin {
+  videos: CreatorVideo[];
+  creators: { creatorId: string; name: string; videos: number; spendCents: number; signups: number; payers: number; revenueCents: number; netCents: number; commissionCents: number }[];
+}
+export interface VideoInput { id?: number; creatorId: string; linkId: number | null; title: string; platform: Platform; url: string; postedOn: string; feeCents: number; note: string }
+
+/** Spend per result (cents), or null with no spend or nothing to divide by. */
+export function costPer(spendCents: number, count: number | null): number | null {
+  return spendCents > 0 && count && count > 0 ? Math.round(spendCents / count) : null;
+}
+/** What we keep from a creator after their commission and what we paid for their videos (net revenue basis). */
+export function keptAfterSpend(netCents: number, commissionCents: number, spendCents: number): number {
+  return netCents - commissionCents - spendCents;
+}

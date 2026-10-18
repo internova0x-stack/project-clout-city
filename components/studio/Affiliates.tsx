@@ -14,7 +14,7 @@ import {
 import { itemBySku } from "@/lib/city";
 import { formatPrice } from "@/lib/store";
 import { REFUND_FLAG } from "@/lib/creators";
-import { AffiliatesOverviewView, CreatorPageView, PayoutsView } from "./AffiliateViews";
+import { AffiliatesOverviewView, CreatorPageView, PayoutsView, VideosView } from "./AffiliateViews";
 import type { StudioApi } from "@/lib/studio";
 
 const PERIODS = [7, 30, 90, 0] as const;
@@ -27,7 +27,7 @@ const giftText = (c: Pick<Creator, "giftCash" | "giftItem">) =>
 
 export function AffiliatesTab({ api, preview = false }: { api: StudioApi; preview?: boolean }) {
   const money = !!api.affiliatesOverview;
-  const [view, setView] = useState<"overview" | "creators" | "links" | "payouts">(money ? "overview" : "creators");
+  const [view, setView] = useState<"overview" | "creators" | "links" | "videos" | "payouts">(money ? "overview" : "creators");
   const [opened, setOpened] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof PERIODS)[number]>(30);
   const [data, setData] = useState<Affiliates | null>(null);
@@ -68,9 +68,10 @@ export function AffiliatesTab({ api, preview = false }: { api: StudioApi; previe
           {money && <button className="chip" aria-pressed={view === "overview"} onClick={() => setView("overview")}>Overview</button>}
           <button className="chip" aria-pressed={view === "creators"} onClick={() => setView("creators")}>Creators</button>
           <button className="chip" aria-pressed={view === "links"} onClick={() => setView("links")}>Links</button>
+          {api.videos && <button className="chip" aria-pressed={view === "videos"} onClick={() => setView("videos")}>Videos</button>}
           {api.payouts && <button className="chip" aria-pressed={view === "payouts"} onClick={() => setView("payouts")}>Payouts</button>}
         </div>
-        {view !== "payouts" && <div className="row" style={{ gap: 6, flexWrap: "wrap" }} role="group" aria-label="Period">
+        {view !== "payouts" && view !== "videos" && <div className="row" style={{ gap: 6, flexWrap: "wrap" }} role="group" aria-label="Period">
           {PERIODS.map((p) => <button key={p} className="chip" aria-pressed={days === p} onClick={() => setDays(p)}>{p === 0 ? "All time" : `Last ${p} days`}</button>)}
         </div>}
       </div>
@@ -80,7 +81,8 @@ export function AffiliatesTab({ api, preview = false }: { api: StudioApi; previe
       {!data && !error && <p className="meta">Loading…</p>}
       {view === "overview" && money && <AffiliatesOverviewView api={api} days={days} onOpen={setOpened} />}
       {view === "payouts" && api.payouts && <PayoutsView api={api} onOpen={setOpened} />}
-      {data && view !== "overview" && view !== "payouts" && (<>
+      {view === "videos" && api.videos && <VideosView api={api} creators={creators} onOpen={setOpened} />}
+      {data && view !== "overview" && view !== "payouts" && view !== "videos" && (<>
         <div className="studio-tiles aff-tiles">
           {([
             ["Active creators", n(creators.filter((c) => c.status === "active").length), `${n(creators.length)} in all`],

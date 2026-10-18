@@ -12,7 +12,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 import { runSetupCheck } from "@/lib/setupCheck";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "@/lib/adminPlayers";
 import type { Insights } from "@/lib/insights";
-import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin } from "@/lib/creators";
+import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin, VideoInput, VideosAdmin } from "@/lib/creators";
 import type { ShoutoutAction, StudioShoutoutDay } from "@/lib/radio";
 import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
 import { headers } from "next/headers";
@@ -135,7 +135,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -289,6 +289,16 @@ export async function studioPayoutMark(creatorId: string, method: PayoutMethod, 
 }
 export async function studioPayoutVoid(id: number, reason: string) {
   const r = await admin<unknown>("admin_payout_void", { p_payout: id, p_reason: reason });
+  return r.ok ? { ok: true as const, data: null } : r;
+}
+export async function studioVideos() {
+  return admin<VideosAdmin>("admin_creator_videos");
+}
+export async function studioVideoSave(input: VideoInput) {
+  return admin<number>("admin_creator_video_save", { p_data: input });
+}
+export async function studioVideoStatus(id: number, status: "live" | "removed") {
+  const r = await admin<unknown>("admin_creator_video_status", { p_video: id, p_status: status });
   return r.ok ? { ok: true as const, data: null } : r;
 }
 export async function studioCreatorSave(input: CreatorInput) {

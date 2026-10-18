@@ -10,7 +10,7 @@ import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
 import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
 import type { StudioBigScreen, TvAction } from "./cloutTv.ts";
-import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin } from "./creators.ts";
+import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin, VideoInput, VideosAdmin } from "./creators.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -194,6 +194,10 @@ export interface StudioApi {
   payouts?(): Promise<Admin<PayoutsAdmin>>;
   payoutMark?(creatorId: string, method: PayoutMethod, reference: string, note: string, belowMinimum: boolean): Promise<Admin<{ id: number; totalCents: number }>>;
   payoutVoid?(id: number, reason: string): Promise<Admin<null>>;
+  /** Migration 0091: paid videos, their fees and results. */
+  videos?(): Promise<Admin<VideosAdmin>>;
+  videoSave?(input: VideoInput): Promise<Admin<number>>;
+  videoStatus?(id: number, status: "live" | "removed"): Promise<Admin<null>>;
   /** v0.6 regulars' lines (migration 0016). */
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;
@@ -299,6 +303,11 @@ const ERRORS: Record<string, string> = {
   bad_method: "Pick how it was paid.",
   reason_required: "Say why you're undoing it.",
   no_payout: "That payout is gone or already undone.",
+  link_not_theirs: "That link belongs to another creator.",
+  title_required: "Give the video a title.",
+  bad_platform: "Pick a platform.",
+  bad_fee: "The fee can't be negative.",
+  no_video: "That video is gone.",
   is_admin: "That's a Studio admin. Remove them from story_admins first.",
   unknown_player: "That player isn't around anymore.",
   arc_is_live: "That story is live. Pause or retire it instead of changing it mid-run.",
