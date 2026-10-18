@@ -68,6 +68,8 @@ import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
 import { RankUpCard } from "./game/Ranks";
 import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
+import { PushPrompt, shouldAskPush } from "./push/Push";
+import type { PushApi } from "@/lib/pushClient";
 import type { GoalsApi, GoalsState } from "@/lib/goals";
 import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
 import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
@@ -211,6 +213,8 @@ export function GameShell({
   radio,
   campus,
   goals,
+  push,
+  previewPushAsk = false,
   tv,
   stations,
   roomMood = "dream",
@@ -268,6 +272,10 @@ export function GameShell({
   campus?: CampusApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
   goals?: GoalsApi;
+  /** Push notifications (migration 0078): Lola's ask and Settings → Notifications; hidden without it. */
+  push?: PushApi;
+  /** Development previews (?push=ask): Lola asks after 2 seconds. */
+  previewPushAsk?: boolean;
   /** v0.14 Clout TV (migration 0058): the Clout TV app, the home card and the Clout Tower's screen; hidden until tv_state answers. */
   tv?: TvApi;
   /** v0.14 texts from the stations (migration 0058), read-only threads in Messages. */
@@ -1421,6 +1429,15 @@ export function GameShell({
   // Owner, Oct 17: new players didn't know what to do. If the daily tasks haven't been opened 30 seconds after the
   // first session ends, Lola rings the button. Once per device; waits for any open sheet to close first.
   const [dailyHint, setDailyHint] = useState<"waiting" | "due" | "showing" | "done">("done");
+  // Push notifications (owner, Oct 18): Lola asks once, a little into a session after the first party (not during the
+  // first session's hand-off), and again three days after "Not now".
+  const [pushAsk, setPushAsk] = useState(false);
+  useEffect(() => {
+    if (!push || !partyDone) return;
+    let stop = false;
+    const t = setTimeout(() => void push.prefs().then((r) => { if (!stop && (previewPushAsk || (r.ok && shouldAskPush(r.data)))) setPushAsk(true); }), previewPushAsk ? 2000 : 20_000);
+    return () => { stop = true; clearTimeout(t); };
+  }, [push, partyDone, previewPushAsk]);
   useEffect(() => {
     if (previewDailyHint) return setDailyHint("waiting");
     try { if (handedOff && localStorage.getItem(DAILY_HINT_KEY) === "pending") setDailyHint("waiting"); } catch { /* fine */ }
@@ -2027,6 +2044,9 @@ export function GameShell({
       )}
 
       {/* ---- Guided first session ---- */}
+      {pushAsk && push && flow === "none" && panel === null && !place && dailyHint !== "due" && (
+        <PushPrompt api={push} onToast={setToast} onDone={() => setPushAsk(false)} />
+      )}
       {dailyHint === "due" && flow === "none" && panel === null && !place && (
         <DailyTasksHint onOpen={() => onAction("daily")} onDismiss={endDailyHint} />
       )}
@@ -2314,6 +2334,7 @@ export function GameShell({
         </>
       )}
       <PhoneModal
+        push={push}
         // The app shows whenever the station is on; if today's show can't load, the app says why.
         radio={radio}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}

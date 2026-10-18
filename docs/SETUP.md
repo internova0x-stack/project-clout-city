@@ -214,6 +214,28 @@ storage on some projects), the rest of the migration still ran; add the storage 
 
 Run 0057 (Real Clout FM) before 0058. Both are safe to run again.
 
+## 2d. Push notifications (migration 0078)
+
+Push needs a key pair (VAPID), a secret for the sender's cron, and a schedule.
+
+1. **Make the keys** on your computer: `npx web-push generate-vapid-keys`. It prints a public and a private key.
+2. In **Vercel → Settings → Environment Variables** (Production and Preview), add:
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: the public key.
+   - `VAPID_PRIVATE_KEY`: the private key. Never commit it or paste it anywhere public.
+   - `VAPID_SUBJECT`: `mailto:` plus an address you read, e.g. `mailto:hello@yourdomain.com`.
+   - `CRON_SECRET`: any long random string (`openssl rand -hex 32`).
+   Redeploy after adding them. Keep the same keys forever: new keys log every device out of notifications.
+3. **Schedule the sender** every 5 minutes, calling `https://<your-domain>/api/push/run` with the header
+   `Authorization: Bearer <CRON_SECRET>`:
+   - **Vercel Pro**: add a cron in `vercel.json` (`{"crons":[{"path":"/api/push/run","schedule":"*/5 * * * *"}]}`); Vercel
+     sends the header for you. (Vercel Hobby only allows daily crons, which is too slow.)
+   - **Or Supabase (free)**: Integrations → Cron → new job every 5 minutes, type "HTTP request", POST to the URL above
+     with that header.
+   Game traffic also runs the sender (at most once a minute per server), so chats and invites go out even before the
+   cron is set up; the cron covers quiet times (morning roundups, streak reminders, players who are away).
+4. **Test**: in the game, Phone → Settings → Notifications → On, then **Send a test notification**. On iPhone this only
+   works from the Home Screen app (iOS 16.4 or later).
+
 ## 3. Local development (optional)
 
 ```bash

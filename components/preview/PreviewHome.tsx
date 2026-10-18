@@ -4,6 +4,7 @@ import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/ap
 import type { RadioApi } from "@/lib/radio";
 import { createCampusSim } from "@/lib/campusSim";
 import { createGoalsSim } from "@/lib/goalsSim";
+import type { PushApi, PushPrefs } from "@/lib/pushClient";
 import { PLACES } from "@/lib/city";
 import { clubDoor } from "@/lib/cityState";
 import { previewStationInbox, previewStationRead, previewTvState, previewTvSubmit, previewTvUpload, previewTvWithdraw } from "@/app/preview/tvActions";
@@ -48,7 +49,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -84,6 +85,8 @@ export function PreviewHome({
   lottoPreset?: string;
   /** v0.15 Campus: ?campus=new|pick|week|friday|done starts campus life in that state, standing at St. Johnsons. */
   campusPreset?: string;
+  /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
+  pushPreset?: string;
   /** Daily tasks 2.0: ?goals=new|streak|pass|tonight|chapter starts goals, streaks and passes in that state; day3|day7|day14|goaldone opens that reveal. */
   goalsPreset?: string;
   /** Owner, Oct 17: show Lola's daily-tasks nudge after 2 seconds (?hint=daily). */
@@ -112,6 +115,19 @@ export function PreviewHome({
     if (lottoPreset === "jackpot") { api.lottoNext([5]); api.lottoPot(); }
     return api;
   }, [city, lottoPreset]);
+  // Push notifications: an in-memory device list and switches (the browser's own permission still applies).
+  const pushApi = useMemo<PushApi>(() => {
+    const prefs: PushPrefs = { off: [], devices: pushPreset === "on" ? 1 : 0, askedAt: null };
+    const ok = <T,>(data: T) => Promise.resolve({ ok: true as const, data });
+    return {
+      prefs: () => ok({ ...prefs }),
+      subscribe: () => { prefs.devices = 1; return ok(null); },
+      unsubscribe: () => { prefs.devices = 0; return ok(null); },
+      setOff: (off) => { prefs.off = off; return ok({ ...prefs }); },
+      asked: () => { prefs.askedAt = new Date().toISOString(); return ok({ ...prefs }); },
+      test: () => ok(null),
+    };
+  }, [pushPreset]);
   // Daily tasks 2.0: goals read the simulated player; a pass used tonight opens the simulated door.
   const passRef = useRef<(placeId: string) => boolean>(() => false);
   const goalsApi = useMemo(() => {
@@ -374,6 +390,8 @@ export function PreviewHome({
       radio={cityOff ? undefined : radioApi}
       campus={cityOff ? undefined : campusApi}
       goals={cityOff ? undefined : goalsApi}
+      push={cityOff ? undefined : pushApi}
+      previewPushAsk={pushPreset === "ask"}
       previewGoalsReveal={goalsPreset === "day3" ? { kind: "streak", day: 3, reward: "clout" }
         : goalsPreset === "day7" ? { kind: "streak", day: 7, reward: "collectible", sku: "home-neon-five-sign" }
         : goalsPreset === "day14" ? { kind: "streak", day: 14, reward: "pass" }

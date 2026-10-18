@@ -31,6 +31,9 @@ import { radioReport, radioRequest, radioState } from "./radioActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { goalsState, spendGuestPass } from "./goalsActions";
+import { pushAsked, pushPrefs, pushSetOff, pushSubscribe, pushTest, pushUnsubscribe } from "./pushActions";
+import { kickPush } from "@/lib/pushServer";
+import { after } from "next/server";
 import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
@@ -48,6 +51,8 @@ export default async function HomePage() {
   const [clique, city, story, catalog, chat, dating, crew, party, together, campus] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
   ]);
+  // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
+  after(() => kickPush());
   // Migration 0010 switches on chat; a banned account sees only a notice.
   const chatOn = chat.ok;
   if (chat.ok && chat.data.banned) return <Suspended />;
@@ -120,6 +125,8 @@ export default async function HomePage() {
       } : undefined}
       // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
       goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}
+      // Migration 0078: push notifications (Settings → Notifications and Lola's ask).
+      push={city ? { prefs: pushPrefs, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, setOff: pushSetOff, asked: pushAsked, test: pushTest } : undefined}
       // Migration 0072 switches on campus life (campus_state failing hides it).
       campus={city && campus.ok ? {
         state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard,
