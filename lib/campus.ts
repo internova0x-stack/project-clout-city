@@ -110,3 +110,54 @@ export function roommateNote(nyDate: string): string {
   const days = Math.floor(new Date(`${nyDate}T12:00:00Z`).getTime() / 86_400_000);
   return ROOMMATE_NOTES[((days % ROOMMATE_NOTES.length) + ROOMMATE_NOTES.length) % ROOMMATE_NOTES.length];
 }
+
+// ---------------------------------------------------------------------------
+// What the screens get from the server (campus_state, campus_leaderboard, migration 0072)
+// ---------------------------------------------------------------------------
+
+export interface ExamResult { grade: string; percent: number; correct: number; caught: boolean }
+export interface CourseState { id: string; attendedToday: boolean; daysThisWeek: number; streak: number; exam: ExamResult | null }
+export interface CampusState {
+  campus: CampusId | null;
+  enrolledOn: string | null;
+  transferOn: string | null;
+  week: string;
+  today: string;
+  examsOpen: boolean;
+  scheduleLocked: boolean;
+  courses: CourseState[];
+  gpa: number | null;
+  weekGpa: number | null;
+  scholarshipPaid: boolean;
+}
+export interface ExamQuestion { prompt: string; choices: string[] }
+export interface AttendResult { clout: number; confidence: number; energy: number; streak: number }
+export interface SubmitResult extends ExamResult { weekGpa: number | null; scholarship: number }
+export interface LeaderboardRow { campus: CampusId; students: number; classes: number; points: number; score: number }
+export interface Leaderboard { week: string; campuses: LeaderboardRow[] }
+
+export type CampusResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+/** The campus screens' server calls (app/home/campusActions.ts; the preview's lib/campusSim.ts). */
+export interface CampusApi {
+  state(): Promise<CampusResult<CampusState>>;
+  enrol(campus: CampusId): Promise<CampusResult<CampusState>>;
+  pick(courses: string[]): Promise<CampusResult<CampusState>>;
+  attend(course: string): Promise<CampusResult<AttendResult>>;
+  exam(course: string): Promise<CampusResult<ExamQuestion[]>>;
+  submit(course: string, answers: number[], peek: boolean): Promise<CampusResult<SubmitResult>>;
+  eat(): Promise<CampusResult<{ cash: number; energy: number }>>;
+  leaderboard(): Promise<CampusResult<Leaderboard>>;
+}
+
+/** The joke under each grade on the result card. */
+export function gradeLine(r: ExamResult): string {
+  if (r.caught) return "Caught peeking. The professor wrote \"see me\" in red, then underlined it twice. That's an F, and a story.";
+  switch (r.grade) {
+    case "A": return "Straight A energy. Your parents will screenshot this.";
+    case "B": return "Solid B. The grade of people who have a life.";
+    case "C": return "C's get degrees. That's not advice, it's a fact.";
+    case "D": return "A D is a passing grade in the eyes of the law. Barely.";
+    default: return "An F. Character development is still development.";
+  }
+}

@@ -90,6 +90,8 @@ import { TvHomeCard, TvViewer } from "./city/CloutTv";
 import { tvCardSeenKey, type Station, type StationApi, type StationThread, type TvApi, type TvFeature, type TvState } from "@/lib/cloutTv";
 import { uploadToBigScreen } from "@/lib/tvUpload";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
+import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
+import { CampusSheet } from "./campus/CampusSheet";
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
 const AvatarHead = dynamic(() => import("./avatar/AvatarHead"), { ssr: false });
@@ -192,6 +194,7 @@ export function GameShell({
   business,
   together,
   radio,
+  campus,
   tv,
   stations,
   roomMood = "dream",
@@ -244,6 +247,8 @@ export function GameShell({
   together?: TogetherApi;
   /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
   radio?: RadioApi;
+  /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
+  campus?: CampusApi;
   /** v0.14 Clout TV (migration 0058): the Clout TV app, the home card and the Clout Tower's screen; hidden until tv_state answers. */
   tv?: TvApi;
   /** v0.14 texts from the stations (migration 0058), read-only threads in Messages. */
@@ -713,6 +718,7 @@ export function GameShell({
   // v0.10 Lucky Star Lotto (migration 0032): lotto state is missing until it runs.
   const lottoOn = !!(travelOn && city?.lotto && cityApi?.buyLottoCard && cityApi.scratchLottoCard);
   const [lottoAt, setLottoAt] = useState<string | null>(null);
+  const [campusAt, setCampusAt] = useState<CampusId | null>(null);
   // The nearest supermarket, for "Go shopping" from an empty fridge.
   const grocer = useMemo(() => PLACES.filter((p) => isSupermarket(p.tags)).sort((a, b) => milesBetween(myPos, a.at) - milesBetween(myPos, b.at))[0], [myPos]);
   const cityOn = !!(city && cityApi);
@@ -1138,6 +1144,7 @@ export function GameShell({
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     onStation: radio || tv ? onStation : undefined,
+    onCampus: campus ? (id) => { if (campusById(id)) setCampusAt(id as CampusId); } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
@@ -2034,6 +2041,27 @@ export function GameShell({
             onGoHome={() => { setKitchenOpen(false); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
             onGoShopping={() => { if (!grocer) return; setKitchenOpen(false); setTravelPlan({ from: myPos, to: grocer.at, fromName: myPosName, toName: grocer.name, toId: grocer.id }); }}
           />
+          {campus && campusAt && (() => {
+            const dormHome = ECONOMY.homes.find((h) => h.campus === campusAt);
+            return (
+              <CampusSheet
+                open
+                onClose={() => setCampusAt(null)}
+                campusId={campusAt}
+                api={campus}
+                here={!travelOn || atPlace === campusAt}
+                onDone={(msg) => {
+                  setToast(msg);
+                  void cityApi?.refresh().then((r) => r.ok && applyCity(r));
+                }}
+                dorm={dormHome && cityApi?.moveHome ? {
+                  rent: dormHome.rent,
+                  livesHere: city?.player.home_id === dormHome.id,
+                  onMove: () => { setCampusAt(null); setViewHome(dormHome.id); },
+                } : undefined}
+              />
+            );
+          })()}
           <LottoSheet
             open={lottoAt !== null && lottoOn}
             state={city}
