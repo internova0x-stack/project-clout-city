@@ -911,6 +911,15 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .aff-slug .studio-input { flex:1; min-width:0; }
 .aff-link-line { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; padding:6px 0; border-bottom:1px solid var(--divider); }
 .aff-link-line:last-of-type { border-bottom:0; }
+.aff-list { display:flex; flex-direction:column; }
+.aff-list-row { display:flex; align-items:center; gap:12px; width:100%; padding:10px 0; border:0; border-bottom:1px solid var(--divider); background:none; text-align:left; font:inherit; color:var(--text-1); }
+button.aff-list-row { cursor:pointer; }
+.aff-list-row:last-child { border-bottom:0; }
+.aff-reversal td { color:var(--red-text); }
+.aff-tag.held { margin-left:0; background:var(--chip-off); color:var(--text-2); }
+.aff-tag.payable { margin-left:0; background:var(--green-tint); color:var(--green-text); }
+.aff-tag.paid { margin-left:0; background:var(--surface-card); color:var(--text-3); }
+.aff-tag.flag { background:var(--red-tint); color:var(--red-text); }
 .aff-qr-back { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px; background:rgba(20,17,26,.45); }
 .aff-qr { width:min(360px, 100%); box-shadow:var(--elev-3); }
 @media (max-width:560px) { .aff-tiles { grid-template-columns:repeat(2, minmax(0, 1fr)); } .aff-tiles .display-lg { font-size:26px; } }

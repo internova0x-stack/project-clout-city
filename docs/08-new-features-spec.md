@@ -706,7 +706,7 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
 
 Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
 bring in spend (affiliate links). Every rule below is decided (owner, Oct 18). **Built:** step 1, attribution and links
-(migration 0087). Steps 2 to 5 are still to build.
+(migration 0087), and step 2, commissions and performance (migration 0088). Steps 3 to 5 are still to build.
 
 ### Decisions (owner, Oct 18)
 - **Rate:** set per creator in the Studio. New creators default to **20%**; **30%** is the preset for high
@@ -819,8 +819,17 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
    - Attribution happens when the account is created (`creator_attach`), only for accounts less than a day old,
      never for the creator's own email; a link beats a typed code. The welcome gift's item is a Shop fashion piece
      sold for C$ (not a collector or reward piece).
-2. Commissions and performance: webhook rows on purchases and renewals, reversals on refunds, the 45-day hold; the
-   Affiliates Overview, the money columns and each affiliate's page (funnel, products, retention, players).
+2. **Built (migration 0088).** Commissions and performance: webhook rows on purchases and renewals, reversals on
+   refunds, the 45-day hold; the Affiliates Overview, the money columns and each affiliate's page (funnel, products,
+   retention, players). As built:
+   - One commission per payment, at the creator's rate on the day of the payment. Stripe's real fee comes from the
+     charge's balance transaction; if Stripe can't be read, 2.9% + 30¢ is used and the row is marked as estimated.
+   - Refunds, full or partial, take back the same share of the commission. Unpaid commission comes back inside its
+     hold; commission already paid is taken off the next payout.
+   - A paused creator keeps earning on players they already brought in (the agreement still runs); pausing stops new
+     clicks and sign-ups from counting.
+   - Flags: refunds above 20% of a creator's players' payments. Device-level checks are not built (the game doesn't
+     track devices).
 3. Creator page.
 4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect.
 5. UGC tracking: videos, fees and cost per paying player.

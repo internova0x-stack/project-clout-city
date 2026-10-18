@@ -10,7 +10,7 @@ import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
 import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
 import type { StudioBigScreen, TvAction } from "./cloutTv.ts";
-import type { Affiliates, CreatorInput, LinkInput } from "./creators.ts";
+import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput } from "./creators.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -187,6 +187,9 @@ export interface StudioApi {
   creatorSave?(input: CreatorInput): Promise<Admin<string>>;
   linkSave?(input: LinkInput): Promise<Admin<number>>;
   linkStatus?(id: number, status: "active" | "retired"): Promise<Admin<null>>;
+  /** Migration 0088: the Overview and one affiliate's page. */
+  affiliatesOverview?(days: number): Promise<Admin<AffiliatesOverview>>;
+  creatorPage?(id: string, days: number): Promise<Admin<CreatorPage>>;
   /** v0.6 regulars' lines (migration 0016). */
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;

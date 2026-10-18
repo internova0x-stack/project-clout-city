@@ -14,7 +14,7 @@ const n = (x: number) => x.toLocaleString("en-US");
 const shortDate = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
 /** Bars for one daily number, drawn to scale from zero, with the latest value and the period's peak. */
-function DailyBars({ days, pick, label, format }: { days: InsightsDay[]; pick: (d: InsightsDay) => number; label: string; format: (v: number) => string }) {
+export function DailyBars<D extends { date: string } = InsightsDay>({ days, pick, label, format }: { days: D[]; pick: (d: D) => number; label: string; format: (v: number) => string }) {
   const values = days.map(pick);
   const max = Math.max(1, ...values);
   const total = values.reduce((a, b) => a + b, 0);
@@ -42,7 +42,7 @@ function DailyBars({ days, pick, label, format }: { days: InsightsDay[]; pick: (
 }
 
 /** A horizontal bar for a share of a whole, labelled with the count and the share. Goes inside .insights-rows. */
-function ShareRow({ label, value, of, right }: { label: string; value: number; of: number; right?: string }) {
+export function ShareRow({ label, value, of, right }: { label: string; value: number; of: number; right?: string }) {
   const pct = of > 0 ? Math.min(100, (100 * value) / of) : 0;
   return (
     <>

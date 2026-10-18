@@ -98,6 +98,10 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
      `checkout.session.expired`, `charge.refunded`, and (unlimited chat's monthly plan, migration
      0047) `customer.subscription.updated`, `customer.subscription.deleted`, and (VIP renewals in
      the Studio's Insights, migration 0053) `invoice.paid`
+   - Creator commissions (migration 0088) use these same events: no new ones. For a referred player the webhook
+     reads Stripe's fee from the payment's balance transaction (the restricted key, if you use one, needs read
+     access to PaymentIntents, Charges, Balance transactions and Invoices); when it can't, it estimates 2.9% + 30¢
+     and the Studio marks that row with an asterisk.
    - Copy its **Signing secret** (`whsec_…`).
    - Vercel preview links sit behind Vercel's login by default, which Stripe can't pass. Point
      the webhook at the production address, or add a second endpoint for a preview with
