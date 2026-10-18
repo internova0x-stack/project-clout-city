@@ -2008,7 +2008,10 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .streak-stash-item { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:var(--r-lg); background:var(--surface-card); font-size:13px; min-width:0; }
 .streak-stash-item > span:first-child { font-size:20px; }
 .streak-stash-item.locked { opacity:.55; }
-.streak-dates { display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; width:100%; padding:0; margin-bottom:4px; background:none; }
+.streak-dates { display:flex; flex-direction:column; gap:10px; width:100%; padding:12px; margin-bottom:8px; border-radius:var(--r-lg); background:var(--surface-card); text-align:left; }
+.streak-dates-row { display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
+.streak-dates-foot { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--text-2); }
+.streak-dates-more { color:var(--neon-text); white-space:nowrap; }
 .streak-date { display:grid; place-items:center; aspect-ratio:1; max-width:44px; width:100%; justify-self:center; border-radius:50%; font-size:13px; font-weight:700; color:var(--text-3); box-shadow:inset 0 0 0 1.5px var(--divider); }
 .streak-date.done { background:var(--taxi-400); box-shadow:none; font-size:17px; }
 .streak-date.today:not(.done) { color:var(--text-1); box-shadow:inset 0 0 0 2px var(--neon-600); }

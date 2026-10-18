@@ -63,16 +63,22 @@ export function StreakRow({ goals, onOpen }: { goals: GoalsState; onOpen?: () =>
   const mon = mondayOf(today);
   const full = new Set(goals.streak.days ?? []);
   return (
-    <button className="streak-dates" onClick={onOpen} aria-label={`${goals.streak.current}-day streak. Open streaks`}>
-      {Array.from({ length: 7 }, (_, i) => {
-        const d = addDay(mon, i);
-        const done = full.has(d);
-        return (
-          <span key={d} className={`streak-date${done ? " done" : ""}${d === today ? " today" : ""}`}>
-            {done ? "🔥" : Number(d.slice(8))}
-          </span>
-        );
-      })}
+    <button className="streak-dates" onClick={onOpen} aria-label={`${goals.streak.current}-day streak. See streaks`}>
+      <span className="streak-dates-row">
+        {Array.from({ length: 7 }, (_, i) => {
+          const d = addDay(mon, i);
+          const done = full.has(d);
+          return (
+            <span key={d} className={`streak-date${done ? " done" : ""}${d === today ? " today" : ""}`}>
+              {done ? "🔥" : Number(d.slice(8))}
+            </span>
+          );
+        })}
+      </span>
+      <span className="streak-dates-foot">
+        <span>{goals.streak.current ? `🔥 ${goals.streak.current}-day streak` : "Clear all five to start a streak"}</span>
+        <span className="streak-dates-more">See streaks ›</span>
+      </span>
     </button>
   );
 }
