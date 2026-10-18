@@ -135,7 +135,7 @@ The game earns through four real-money products, all one-time Stripe Checkout pa
 | Exclusive events | Celebrity parties and VIP nights; the first real-money purchase players see | Yes, with diminishing returns |
 | Story side arcs | $2.99 each: a perspective, evidence or insider take on the current story | None |
 | Collector fashion | A few rare pieces, found while browsing the Shop, never promoted | Yes, with diminishing returns |
-| Monument postcards | $0.99 each: a collectible postcard, buyable only after visiting its monument (the visit itself pays the clout) | None |
+| Monument postcards | $1.99 each (was $0.99; owner, Oct 18): a collectible postcard, buyable only after visiting its monument (the visit itself pays the clout) | None |
 
 **Rules that don't bend:**
 

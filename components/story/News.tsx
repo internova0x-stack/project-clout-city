@@ -58,6 +58,11 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
   useEffect(() => {
     if (focusBeat) document.getElementById(`beat-${focusBeat}`)?.scrollIntoView({ block: "start" });
   }, [focusBeat]);
+  // The feed runs oldest first, so opening it lands on the newest released beat.
+  const latestRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!focusBeat && feedTab === "today" && !inArchive) latestRef.current?.scrollIntoView({ block: "start" });
+  }, [focusBeat, feedTab, inArchive]);
 
   const cityNews = city ? splitNews(city.items, city.today) : { recent: [], archive: [] };
   if (!feed && !city) return <Quiet text="The newsroom is still setting up. Stories arrive with the next update of the city." />;
@@ -99,9 +104,13 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
                 <span className="title">{arc.emoji} {arc.title}</span>
                 <span className="meta">Day {arc.day} of {arc.lastDay}</span>
               </div>
-              {[...arc.beats].reverse().map((b) => (
-                <BeatCard key={b.id} arc={arc} beat={b} feed={feed} handlers={handlers} />
+              {/* Owner, Oct 18: every beat in order; released ones in full, then tomorrow's headline, then the rest locked. */}
+              {arc.beats.map((b, i) => (
+                <div key={b.id} ref={i === arc.beats.length - 1 && !focusBeat ? latestRef : undefined}>
+                  <BeatCard arc={arc} beat={b} feed={feed} handlers={handlers} />
+                </div>
               ))}
+              <UpcomingBeats arc={arc} today={feed.today} />
               <SideArcs arcs={sides(arc.id)} feed={feed} handlers={handlers} />
             </div>
           ))
@@ -156,6 +165,45 @@ function CityNewsCard({ item, today, focus = false }: { item: NewsItem; today: s
       <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{item.body}</p>
       <Byline />
     </article>
+  );
+}
+
+/** What's coming (migration 0085): tomorrow's headline as a teaser, every later beat locked by its day. */
+function UpcomingBeats({ arc, today }: { arc: FeedArc; today: string }) {
+  const up = arc.upcoming ?? [];
+  if (!up.length) return null;
+  const when = (day: number) => {
+    const d = new Date(`${today}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + day - arc.day);
+    return day === arc.day + 1 ? "Tomorrow" : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  };
+  const next = up.filter((b) => b.headline);
+  const later = up.filter((b) => !b.headline);
+  return (
+    <div className="stack-8">
+      {next.map((b) => (
+        <article key={b.id} className="beat-card beat-teaser" aria-label={`Day ${b.day}, coming ${when(b.day)}`}>
+          <div className="row beat-head" style={{ justifyContent: "space-between" }}>
+            <span className="overline">Next · {when(b.day)}</span>
+            <span className="meta">Day {b.day} of {arc.lastDay}</span>
+          </div>
+          <h3 className="display-md beat-headline">{b.headline}</h3>
+          <div className="beat-teaser-lines" aria-hidden="true"><span /><span /><span /></div>
+          <p className="meta" style={{ margin: 0 }}>🔒 Unlocks at midnight, New York time. Lola is still fact-checking. Barely.</p>
+        </article>
+      ))}
+      {later.length > 0 && (
+        <div className="beat-locked-list" aria-label="Later beats">
+          {later.map((b) => (
+            <div key={b.id} className="beat-locked-row">
+              <span aria-hidden="true">🔒</span>
+              <span className="title">Day {b.day}</span>
+              <span className="meta">{when(b.day)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

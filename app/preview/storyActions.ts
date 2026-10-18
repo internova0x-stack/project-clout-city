@@ -130,7 +130,7 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
       .filter((a) => a.type === "side" && a.sku)
       .map((a) => ({ ...base(a.sku!), type: "side_arc" as const, name: a.title, priceCents: 299, parent: a.parent_arc_id ?? null })),
     ...PLACES.filter((p) => p.postcard).map((p) => ({
-      ...base(p.postcard!), type: "postcard" as const, name: `Postcard: ${p.name}`, priceCents: 99, placeId: p.id, visited: visited.has(p.id),
+      ...base(p.postcard!), type: "postcard" as const, name: `Postcard: ${p.name}`, priceCents: 199, placeId: p.id, visited: visited.has(p.id),
     })),
     ...SHOP_ITEMS.filter((i) => i.collector).map((i) => ({
       ...base(i.sku), type: "collector_item" as const, name: i.name, priceCents: i.sku === "col-faux-chinchilla" ? 499 : 399, value: collectorValue(i.category),

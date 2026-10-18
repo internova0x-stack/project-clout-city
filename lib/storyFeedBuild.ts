@@ -83,6 +83,9 @@ export function buildFeed(arcs: Arc[], starts: Record<string, string | null>, no
         evidence: b.evidence, pointsAtAnswer: b.points_at_answer,
       } : {}),
     }));
+    // Migration 0085: future beats come locked, with only the next day's headline.
+    const later = arc.beats.filter((b) => b.status === "active" && b.day > day).sort((a, b) => a.day - b.day);
+    const upcoming = later.map((b) => ({ id: b.id, day: b.day, ...(b.day === later[0].day ? { headline: b.news[0].headline } : {}) }));
     const predictions: FeedPrediction[] = [];
     if (arc.type === "main" && start) {
       for (const b of arc.beats.filter((x) => x.prediction && x.status === "active" && x.day <= day)) {
@@ -108,7 +111,7 @@ export function buildFeed(arcs: Arc[], starts: Record<string, string | null>, no
     }
     out.push({
       id: arc.id, title: arc.title, type: arc.type, kind: arc.kind, tier: arc.tier, sku: arc.sku, parent: arc.parent_arc_id,
-      teaser: arc.teaser, emoji: arc.emoji, prompt: arc.prompt, day, lastDay: lastDay(arc), finished, entitled, beats, predictions, badges: arc.badges,
+      teaser: arc.teaser, emoji: arc.emoji, prompt: arc.prompt, day, lastDay: lastDay(arc), finished, entitled, beats, upcoming, predictions, badges: arc.badges,
     });
   }
   const effects = activeEffects(arcs.filter((a) => liveDay(a, arcs, starts, today) !== null), today, starts);
