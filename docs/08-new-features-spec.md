@@ -702,7 +702,132 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
   on a party night (events with `days`, e.g. Greek Row), to that campus's students; **pass_tonight** at 8 PM, once per
   unused guest-list pass.
 
-## 21. Later features
+## 21. Creators: affiliate links and the UGC engine (owner, Oct 18)
+
+Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
+bring in spend (affiliate links). Nothing here is built yet; every rule below is decided (owner, Oct 18).
+
+### Decisions (owner, Oct 18)
+- **Rate:** set per creator in the Studio. New creators default to **20%**; **30%** is the preset for high
+  performers; an admin can set any rate from 0 to 50%. A change applies to payments from then on.
+- **Length:** set per creator in the Studio: **12 months, 24 months or for life** (default 24 months), counted from
+  each player's sign-up. It covers every payment that player makes in that window, renewals included. A player keeps
+  the length that was set when they signed up.
+- **Links:** only admins create, edit and retire links, in the Studio. Creators can't make their own.
+- **Prices stay** ($4.99 a month, $39.99 a year, $119.99 chat forever, $2.99 side stories, $3.99 tickets and
+  collector pieces). Postcards moved to $1.99 (migration 0086) because the $0.99 price couldn't carry a commission.
+
+### Rules
+| Rule | Decision | Why |
+| --- | --- | --- |
+| What the % applies to | **Net revenue**: the price minus Stripe's fee, tax and refunds | Recovers 3 to 9 points of margin versus paying on the price |
+| How long | 12 months, 24 months or for life, per creator (default 24) | Big creators can be offered for life; the rest stay bounded |
+| Hold | Commission becomes payable **45 days** after the payment | Refunds and chargebacks land inside the hold and are taken back |
+| Payout | Monthly, once a creator has **$50** payable | Keeps transfer fees down |
+| Who counts | A player who signs up through a creator's link or code; the first creator wins, forever | Simple, fair, no fights over the same player |
+| Not commissionable | Purchases by the creator's own account; the lotto (no real money anyway) | Self-referral and the 18+ simulated-gambling rule |
+
+### How players are attributed
+- **Link:** `https://<site>/c/<slug>` (for example `/c/tasha` or `/c/tasha-tiktok`). It counts the click, sends the
+  player where the link points, and the game remembers the link on the device for 30 days and attaches it to the
+  account when the player signs up.
+- **Code:** sign-up has an optional "Creator code" field, for people who saw a video rather than tapped a link.
+- **Invites still pay:** if a crew invite and a creator code both apply, the inviter still gets the in-game invite
+  reward and the creator gets the commission. They don't compete.
+- **Once only:** attribution is fixed at sign-up. Changing it later is a Studio action, logged in `admin_actions`.
+- **Welcome gift (owner, Oct 18):** a player who signs up through a creator gets an in-game welcome gift: C$500 and
+  a free Shop outfit item, set per creator in the Studio (ledger 'creator_welcome', paid once). Never real-money
+  products, VIP or anything sold for real money; real money never buys virtual cash, and neither does a referral.
+
+### What we store (migrations, all server-only, no browser access)
+- `creators`: id, name, handle, contact email, code (unique), rate (percent, default 20, 0 to 50), length (12, 24 or
+  null for life), welcome gift (C$ amount and an optional Shop item), status (active or paused), payout details
+  reference (Stripe Connect account id, never bank details), agreed-terms date.
+- `creator_links` (owner, Oct 18: custom links from the dashboard): id, creator_id, slug (unique, e.g. `tasha-tiktok`),
+  label (e.g. "TikTok bio", "Halloween video"), where it lands (the home page, sign-up, or a screen such as a story,
+  the Shop or VIP), optional campaign and video, active or retired, created_by, created_at. Every creator starts
+  with one default link; links are retired, never deleted, so old videos keep counting.
+- `creator_referrals`: player_id (one row per player), creator_id, link_id (null when they typed the code), how (link
+  or code), attributed_at, commission_until (sign-up + the creator's length; null for life).
+- `creator_commissions`: one row per payment, unique per Stripe event (like the ledger): creator, player, purchase or
+  renewal reference, gross, Stripe fee, tax, net, rate, commission, status (held, payable, paid, reversed),
+  payable_on (+45 days), payout id. A refund or chargeback writes a reversing row.
+- `creator_payouts`: creator, period, total, method, Stripe transfer id, paid_at.
+- Clicks: a daily count per link (no per-person tracking).
+
+### How it runs
+- The Stripe webhook already records purchases and renewals (`payment_grant`, `payment_renewal`). For a referred
+  player it also writes a commission row, using the actual Stripe fee from the payment's balance transaction.
+  `payment_refund` writes the reversal. Everything stays idempotent per Stripe event.
+- A daily job moves held rows past their date to payable.
+- **Payouts, phase 1 (soft launch):** the Studio's Creators tab shows what each creator is owed; we pay by hand and
+  mark the payout paid. **Phase 2:** Stripe Connect Express: creators onboard themselves (identity, tax forms, bank),
+  and the payout is a Stripe transfer. Connect also handles 1099s in the US.
+
+### Screens
+- **Studio → Affiliates** (admins; owner, Oct 18: "an affiliate section on the dashboard"). Four views:
+  - **Overview:** totals for the period (7, 30, 90 days, all time): clicks, sign-ups, paying players, revenue,
+    commission owed and paid, and net after commission; a chart of sign-ups and revenue by day; top creators and
+    top links.
+  - **Creators:** every affiliate in a table (rate, status, clicks, sign-ups, click-to-sign-up %, payers,
+    sign-up-to-payer %, revenue, commission held, payable and paid, net). Add a creator; set the rate (20% default,
+    30% high-performer preset, or any rate to 50%), the length (12 months, 24 months, for life) and the welcome gift;
+    pause; approve and mark payouts. Rate and length changes are logged in `admin_actions`. Flags for suspicious patterns (many sign-ups from one device, refunds above
+    20%, the creator's own purchases).
+  - **Links** (owner, Oct 18: "create custom links on the dashboard"): create a link for any creator: pick the
+    creator, type a slug (checked for uniqueness and allowed characters), a label, where it lands, and an optional
+    campaign or video; copy it, show its QR code, retire it. Each link shows the same numbers as a creator, so one
+    video's link can be compared with another's.
+  - **One affiliate** (owner, Oct 18: "see the performance of each user with an affiliate link"): tap a creator to
+    see their links, numbers over time (by day and week), a funnel (clicks → sign-ups → first purchase → VIP), what
+    their players bought (by product), retention of their players (next day, day 7, day 30, like Insights),
+    commission history and payouts, and the list of players they brought in (handle, sign-up date, link, spend,
+    commission, still playing). That list is admin-only; creators never see who their players are.
+- **Creator page** (`/creator`, signed in with the creator's email): their links and code, clicks, sign-ups, paying
+  players and earnings per link, earnings by status, payout history and the next payout date. Counts only: never
+  player names, chats or anything personal. Only admins make links (owner, Oct 18); creators see theirs here, read-only.
+- **Insights:** a creators table (sign-ups, payers, revenue, commission, net after commission, and what we spent on
+  their videos) so each creator's cost per paying player is visible.
+
+### The UGC engine
+- **Briefs:** a short library of video ideas in the game's voice (a story beat reveal, a lotto scratch, a date night
+  gone wrong, a rank up, Lola's tea), each with the creator's code to show on screen.
+- **Tracking:** in the Creators tab, each video's link, fee paid and post date, so spend sits next to the results.
+- **Rules for creators** (part of the creator terms they accept): #ad or the platform's paid-partnership label on
+  every post; no promoting the lotto; 18+ audience; no real brands, no promises about features that aren't built;
+  no buying followers or incentivised installs.
+
+### Economics (per sale, after Stripe 2.9% + 30¢, commission on net)
+| Product | Price | Kept at 20% | Kept at 30% |
+| --- | --- | --- | --- |
+| Postcard | $1.99 | $1.31 | $1.14 |
+| Side story | $2.99 | $2.08 | $1.82 |
+| VIP monthly | $4.99 | $3.64 | $3.18 |
+| VIP yearly | $39.99 | $30.82 | $26.97 |
+| Chat forever | $119.99 | $92.97 | $81.35 |
+Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays no 15 to 30% app-store cut, so even at
+30% we keep about what a store game keeps.
+
+### Build steps (one pull request each)
+1. Attribution and links: `creators`, `creator_links`, the `/c/<slug>` redirect with click counts, the sign-up
+   code, `creator_referrals`; the Studio's Affiliates section with Creators and Links (create, copy, QR, retire)
+   and sign-up counts.
+2. Commissions and performance: webhook rows on purchases and renewals, reversals on refunds, the 45-day hold; the
+   Affiliates Overview, the money columns and each affiliate's page (funnel, products, retention, players).
+3. Creator page.
+4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect.
+5. UGC tracking: videos, fees and cost per paying player.
+
+### Answered (owner, Oct 18)
+1. Commission on **net** revenue.
+2. Length per creator: 12 months, 24 months or for life.
+3. 45-day hold and a $50 minimum.
+4. Rate per creator: 20% by default, 30% for high performers, editable.
+5. Payouts by hand during the soft launch, then Stripe Connect.
+6. Players who join through a creator get an in-game welcome gift.
+7. Only admins make links.
+
+## 22. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
