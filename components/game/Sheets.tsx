@@ -6,10 +6,11 @@ import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, formatCountdown, placeById, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { eventAvailability, eventById, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
+import { eventAvailability, eventById, taskDoneLine, taskQuip, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
+import { GOAL_COPY, type GoalsState } from "@/lib/goals";
+import { GoalLadder, StreakRow, StreaksSection } from "./Goals";
 import { GAME_CONFIG } from "@/lib/config";
-import { ECONOMY, formatCash, moveCost } from "@/lib/economy";
-import { nextHomeUp } from "../city/Apartments";
+import { ECONOMY, formatCash } from "@/lib/economy";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { describeEntry, sampleLedger, type LedgerEntry } from "@/lib/ledger";
 import { CloutCard } from "../city/CloutCard";
@@ -58,20 +59,22 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
   story?: StoryFeed | null; onStoryTask?: (task: StoryFeed["tasks"][number]) => void;
   /** v0.6 treasure hunts (migration 0018): the Hunt tab. */
   hunt?: { state: HuntState; style: string; busy: boolean; onJoin: () => void };
-  tab?: "daily" | "goals" | "hunt";
+  tab?: "daily" | "goals" | "hunt" | "streaks";
   /** Migration 0063: the player's skills, for the skill task's level and progress. */
   skills?: SkillState[];
   /** The cooking task opens the kitchen instead of a place. */
   onCook?: () => void;
+  /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, the streak and passes. */
+  goals?: GoalsState | null;
 }) {
-  const [tab, setTab] = useState<"daily" | "goals" | "hunt">(initialTab ?? "daily");
+  const [tab, setTab] = useState<"daily" | "goals" | "hunt" | "streaks">(initialTab ?? "daily");
   useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
   const { cliqueSize } = ECONOMY.invites;
   const tasks = city?.tasks ?? [];
@@ -85,7 +88,9 @@ export function TasksSheet({
           <button aria-pressed={tab === "goals"} onClick={() => setTab("goals")}>Goals</button>
           {hunt && <button aria-pressed={tab === "hunt"} onClick={() => setTab("hunt")}>Hunt{hunt.state.hunt && !hunt.state.hunt.completedAt ? " 🗺️" : ""}</button>}
         </div>
-        {tab === "hunt" && hunt ? (
+        {tab === "streaks" && goals ? (
+          <StreaksSection goals={goals} owned={(sku) => !!city?.items.some((i) => i.sku === sku)} onBack={() => setTab("daily")} />
+        ) : tab === "hunt" && hunt ? (
           <HuntTab state={hunt.state} style={hunt.style} busy={hunt.busy} onJoin={hunt.onJoin} onOpenPlace={onOpenPlace} />
         ) : tab === "daily" ? (
           <div className="stack-12">
@@ -112,10 +117,12 @@ export function TasksSheet({
             )}
             {city ? (
               <>
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="meta">{done} of {tasks.length} done · new list at {resetTimeLocal()}</span>
-                  <span className="meta">All five: +{formatCash(CITY_ECONOMY.dailyTasks.bonus)}</span>
-                </div>
+                {goals && partyDone && <StreakRow goals={goals} onOpen={() => setTab("streaks")} />}
+                <p className="meta" style={{ margin: 0 }}>
+                  {tasks.length > 0 && done === tasks.length
+                    ? "All five done. Unbothered. Moisturized. Paid. 💅"
+                    : `${done} of ${tasks.length} done. Clear all five: +${formatCash(CITY_ECONOMY.dailyTasks.bonus)} 💸 · fresh list at ${resetTimeLocal()}`}
+                </p>
                 {tasks.map((t) => (
                   <div
                     key={t.id}
@@ -128,7 +135,13 @@ export function TasksSheet({
                   >
                     <span className="select-emoji" aria-hidden="true">{t.skill ? SKILLS.find((d) => d.id === t.skill)?.emoji ?? "⭐" : t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
                     <span className="title" style={{ display: "block" }}>{taskTitle(t)}</span>
-                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? "Done. Paid." : `${taskRewardLine(t)} · ${t.kind === "gossip" ? "Gossip · " : ""}${t.kind === "cook" ? "Your kitchen" : placeById(t.place_id)?.neighborhood ?? "Queens"}`}</span>
+                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? taskDoneLine(t) : taskQuip(t)}</span>
+                    {!t.done_at && (
+                      <span className="task-meta">
+                        <span>{taskRewardLine(t)} · {t.kind === "gossip" ? "Gossip · " : ""}{t.kind === "cook" ? "Your kitchen" : placeById(t.place_id)?.neighborhood ?? "Queens"}</span>
+                        {t.goal && GOAL_COPY[t.goal] && <span className="task-goal">🎯 {GOAL_COPY[t.goal].toward}</span>}
+                      </span>
+                    )}
                     {t.skill && <TaskSkill id={t.skill} skills={skills} />}
                     {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
                   </div>
@@ -148,23 +161,12 @@ export function TasksSheet({
             <div className="select-card multi" aria-pressed={cliqueCount >= cliqueSize}>
               <span className="select-emoji" aria-hidden="true">👯</span>
               <span className="title" style={{ display: "block" }}>Build a crew of {cliqueSize}</span>
-              <span className="subtext" style={{ display: "block" }}>{Math.min(cliqueCount, cliqueSize)} of {cliqueSize} friends joined through your link.</span>
+              <span className="subtext" style={{ display: "block" }}>{Math.min(cliqueCount, cliqueSize)} of {cliqueSize} friends joined through your link. Fame is a group project.</span>
             </div>
-            {city && (
-              <>
-                <Goal emoji="🛍️" title="Make your first purchase" done={city.items.some((i) => i.acquired === "bought")} line="Anything from the Shop. Retail therapy counts as self-care." />
-                {city.player.moved_up !== undefined && (() => {
-                  // #19 moving up (owner, Oct 14): an early goal. Done once you've moved somewhere dearer (or bought a house).
-                  const next = nextHomeUp(city);
-                  const done = !!city.player.moved_up || !!city.player.house_sku;
-                  const line = done || !next ? "Upgraded. Your old landlord is already telling people about you."
-                    : `${next.name}: ${(next.moveClout ?? 0).toLocaleString("en-US")} clout and ${formatCash(moveCost(next))} to move. You have ${city.player.clout.toLocaleString("en-US")} clout and ${formatCash(city.player.bank_cash)}. The Apartments app has the listings.`;
-                  return <Goal emoji="🔑" title="Move into a better apartment" done={done} line={line} />;
-                })()}
-                <Goal emoji="💼" title="Collect your first gig payout" done={city.gigs.some((g) => g.collected_at)} line="Gigs live in your Phone. Bigger pay than a shift." />
-                <Goal emoji="🔥" title="Reach 2,000 clout" done={city.player.clout >= 2000} line={`${city.player.clout.toLocaleString()} of 2,000. Strangers are starting to care.`} />
-                <Goal emoji="🏡" title="Own a home" done={!!city.player.house_sku} line="No more rent. Your landlord will miss you. Financially." />
-              </>
+            {city && goals ? (
+              <GoalLadder goals={goals} clout={city.player.clout} />
+            ) : city && (
+              <p className="meta" style={{ margin: 0 }}>Your goals are loading. Lola is pretending she doesn&apos;t already know them.</p>
             )}
           </div>
         )}
@@ -173,16 +175,6 @@ export function TasksSheet({
   );
 }
 
-function Goal({ emoji, title, line, done }: { emoji: string; title: string; line: string; done: boolean }) {
-  return (
-    <div className="select-card multi" aria-pressed={done}>
-      <span className="select-emoji" aria-hidden="true">{emoji}</span>
-      <span className="title" style={{ display: "block" }}>{title}</span>
-      <span className="subtext" style={{ display: "block" }}>{line}</span>
-      {done && <span className="select-check" aria-hidden="true">✓</span>}
-    </div>
-  );
-}
 
 /** Events (C26): the first-task party until it's done, then club events with real-minute countdowns. */
 export function EventsSheet({

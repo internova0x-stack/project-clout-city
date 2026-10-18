@@ -227,7 +227,8 @@ export function leadAction(l: Pick<GossipLead, "place" | "source" | "hours">): s
   const place = PLACES.find((x) => x.id === l.place)?.name ?? "somewhere";
   const who = l.source === "regular" ? regularAt(l.place)?.name : undefined;
   const when = windowLine(l.hours ?? undefined)?.replace(" (city time)", "");
-  return `${who ? `Talk to ${who} at` : l.source === "restroom" ? "Listen in downstairs at" : "Listen in at"} ${place}${when ? `, ${when}` : ""}`;
+  // Owner, Oct 18: Clout City's voice.
+  return `${who ? `Spill the tea with ${who} at` : l.source === "restroom" ? "Eavesdrop in the restroom at" : "Eavesdrop at"} ${place}${when ? `, ${when}` : ""}`;
 }
 
 /** What a person says when they point the player on: "Ask Rosa at Grind & Gossip Café about “…”." */

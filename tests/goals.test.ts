@@ -1,8 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { CASH_GOALS, GOALS, GOAL_COPY, goalProgress, nextStreakReward, partLine, streakRewardOn } from "../lib/goals.ts";
-import { CITY_ECONOMY, SHOP_ITEMS, citySeed } from "../lib/city.ts";
+import { GOALS, GOAL_COPY, NEXT_CHAPTER, chapters, goalProgress, nextStreakReward, nextUnlock, partLine, streakRewardOn } from "../lib/goals.ts";
+import { CITY_ECONOMY, PLACES, SHOP_ITEMS, citySeed } from "../lib/city.ts";
+import { ECONOMY } from "../lib/economy.ts";
+import { RANKS } from "../lib/ranks.ts";
 
 test("the database's goals settings match lib/goals.ts", () => {
   const dir = new URL("../supabase/migrations/", import.meta.url);
@@ -15,14 +17,37 @@ test("the database's goals settings match lib/goals.ts", () => {
   assert.deepEqual(seed, JSON.parse(JSON.stringify(GOALS)));
 });
 
-test("the ladder: seven goals in the suggested order, each with words and a reward", () => {
-  assert.deepEqual(GOALS.ladder, ["first_purchase", "first_gig", "move_up", "pro_gigs", "first_car", "big_gigs", "own_home"]);
-  for (const id of GOALS.ladder) {
-    assert.ok(GOALS.rewards[id] > 0, id);
-    assert.ok(GOAL_COPY[id].title && GOAL_COPY[id].line && GOAL_COPY[id].emoji, id);
-    assert.ok(GOALS.tags[id], id);
+test("the ladder (owner, Oct 18): long, gated by rank clout, pro gigs before moving up, a home for the long run", () => {
+  const ids = GOALS.ladder.map((g) => g.id);
+  assert.ok(ids.length >= 20, "a long ladder");
+  assert.equal(new Set(ids).size, ids.length, "unique ids");
+  const rankClout = new Set(RANKS.map((r) => r.clout));
+  for (const g of GOALS.ladder) {
+    assert.ok(rankClout.has(g.unlock), `${g.id} unlocks at a rank's clout`);
+    assert.ok(g.reward > 0, g.id);
+    assert.ok(GOAL_COPY[g.id]?.title && GOAL_COPY[g.id].line && GOAL_COPY[g.id].emoji && GOAL_COPY[g.id].toward, g.id);
   }
-  for (const id of CASH_GOALS) assert.ok(GOALS.ladder.includes(id));
+  assert.ok(GOAL_COPY[NEXT_CHAPTER]);
+  for (let i = 1; i < GOALS.ladder.length; i++) assert.ok(GOALS.ladder[i].unlock >= GOALS.ladder[i - 1].unlock, "chapters in order");
+  assert.ok(ids.indexOf("pro_gigs") < ids.indexOf("move_up"), "pro gigs before a better apartment");
+  const home = GOALS.ladder.find((g) => g.id === "own_home")!;
+  assert.ok(home.unlock >= 15000 && home.reward >= 1000, "owning a home is a big deal");
+  assert.ok(GOALS.ladder.filter((g) => g.unlock > 0).length > GOALS.ladder.length / 2, "most goals sit behind clout");
+  assert.deepEqual(chapters().map((c) => c.unlock), [...new Set(GOALS.ladder.map((g) => g.unlock))]);
+  assert.equal(nextUnlock(0), 100);
+  assert.equal(nextUnlock(600), 1000);
+  assert.equal(nextUnlock(10_000_000), null);
+});
+
+test("every goal's check names something the game has", () => {
+  for (const { id, check: c } of GOALS.ladder) {
+    if (c.type === "business") assert.ok(CITY_ECONOMY.businesses.list.some((b) => b.id === c.id), id);
+    if (c.type === "home") assert.ok(ECONOMY.homes.some((h) => h.id === c.home && !h.campus), id);
+    if (c.type === "house") assert.ok(SHOP_ITEMS.some((i) => i.sku === c.sku && i.category === "houses"), id);
+    if (c.type === "door") assert.ok((PLACES.find((p) => p.id === c.place)?.club?.doorClout ?? 0) > 0, id);
+    if (c.type === "vip") assert.ok(PLACES.some((p) => p.club?.vip === c.level), id);
+    if (c.type === "save") assert.ok(c.cash > ECONOMY.birthLottery.max, `${id}: more than anyone starts with`);
+  }
 });
 
 test("the daily mix: 1 gossip + 2 goal + 1 skill + 1 random = 5", () => {

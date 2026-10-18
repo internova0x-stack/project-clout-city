@@ -50,6 +50,8 @@ select pg_temp.assert((public.collect_tills() ->> 'cash')::int = 1125, 'C$1,125 
 reset role;
 update public.players set bank_cash = 100000 where display_name = 'tycoon';
 -- Collecting tills trains Hustle (migration 0056), whose level-up clout would add hype: start from none.
+-- 0074: goals this setup finishes (the cart, the savings) pay their clout first.
+select public.goal_settle(id) from public.players where display_name = 'tycoon';
 update public.players set clout = 0 where display_name = 'tycoon';
 set role authenticated;
 select 1 from public.upgrade_business('hot-dog-cart'); select 1 from public.upgrade_business('hot-dog-cart');
@@ -70,6 +72,8 @@ select pg_temp.assert((public.player_card('00000000-0000-0000-0000-0000000000e1'
 -- Ranks: the higher of clout or net worth; the best is kept.
 select pg_temp.assert((public.business_state() ->> 'bestRank')::int = 8, '75,000 clout: New Money Rich');
 reset role;
+-- 0074: goals this setup finishes (the cart, the savings) pay their clout first.
+select public.goal_settle(id) from public.players where display_name = 'tycoon';
 update public.players set clout = 0 where display_name = 'tycoon';
 select pg_temp.assert(public.rank_level(0, 1000000000) = 9 and public.rank_level(0, 999999999) = 8, 'C$1B is Self-Made Billionaire');
 set role authenticated;

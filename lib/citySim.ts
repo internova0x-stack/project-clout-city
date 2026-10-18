@@ -21,10 +21,10 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     // v0.11: two of the five send the player along the gossip trail (the preview week's starts).
     { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 15, done_at: null },
     { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 15, done_at: null },
-    { id: 3, slot: 3, kind: "hangout", place_id: "flushing-meadows", action_id: "hangout", reward: 55, done_at: new Date().toISOString() },
+    { id: 3, slot: 3, kind: "hangout", place_id: "flushing-meadows", action_id: "hangout", reward: 55, done_at: new Date().toISOString(), goal: "first_gig" },
     // Migration 0063: one task a day levels up a skill.
     { id: 4, slot: 4, kind: "cook", place_id: "home", action_id: "cook", reward: 90, done_at: null, skill: "cooking" },
-    { id: 5, slot: 5, kind: "event", place_id: "velvet-static", action_id: "neon-nights", reward: 80, done_at: null },
+    { id: 5, slot: 5, kind: "event", place_id: "velvet-static", action_id: "neon-nights", reward: 80, done_at: null, goal: "first_gig" },
   ];
   const gig = (id: number, tier: GigOffer["tier"], i: number, pay: number, energy: number, wait: number, conf: number): GigOffer => ({
     id, ny_date: today, tier, title: GIG_TITLES[tier][i].title, pay, energy, wait_minutes: wait, confidence_req: conf,
@@ -73,7 +73,7 @@ export type SimApi = CityApi & {
   /** A treasure hunt's finale pays cash and clout (the preview's hunt runs on the dev server). */
   huntReward(cash: number, clout: number): void;
   /** v0.12 businesses in the preview: the player's cash and clout right now. */
-  peek(): { cash: number; clout: number };
+  peek(): { cash: number; clout: number; confidence: number; allDone: boolean };
   /** What the preview's pretend Stripe webhook grants. */
   grantCollector(sku: string): void;
   grantTicket(clout: number): void;
@@ -88,7 +88,11 @@ export type SimApi = CityApi & {
 };
 
 /** `story` returns the preview's current story feed, so prices, closures and unlocks follow the World State. */
-export function createSimApi(initial: CityState, story: () => StoryFeed | null = () => null): SimApi {
+export function createSimApi(
+  initial: CityState, story: () => StoryFeed | null = () => null,
+  /** Daily tasks 2.0 (lib/goalsSim.ts): a guest-list pass used tonight at this club. */
+  passTonight: (placeId: string) => boolean = () => false,
+): SimApi {
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
   let shiftsToday = 0;
@@ -99,7 +103,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
   const vipAccess = (placeId: string) => {
     const vip = clubDoor(PLACES.find((x) => x.id === placeId) ?? {}).vip;
     if (!vip) return null;
-    return p().clout >= vip.freeClout ? "free" : vipPaid.has(`${placeId}:${s.today}`) ? "paid" : null;
+    return p().clout >= vip.freeClout ? "free" : vipPaid.has(`${placeId}:${s.today}`) ? "paid" : passTonight(placeId) ? "pass" : null;
   };
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
   const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(s), gain });
@@ -180,7 +184,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const to = point(dest);
       if (!from || !to) return fail("That place isn't on the map.");
       const door = dest ? clubDoor(PLACES.find((x) => x.id === dest)!).doorClout : 0;
-      if (p().clout < door) return fail(DOOR_CLOUT);
+      if (p().clout < door && !passTonight(dest!)) return fail(DOOR_CLOUT);
       const q = travelQuote(mode, milesBetween(from, to), !!p().car_sku);
       if (q.unavailable) return fail(mode === "walk" ? "That's too far to walk. Your shoes have filed a complaint." : "You don't have a car. The Shop has some, and so does the subway.");
       if (p().energy < q.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
@@ -439,7 +443,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       p().clout += clout;
     },
     peek() {
-      return { cash: p().bank_cash, clout: p().clout };
+      return { cash: p().bank_cash, clout: p().clout, confidence: p().confidence, allDone: s.tasks.length > 0 && s.tasks.every((t) => t.done_at) };
     },
     grantCollector(sku) {
       const item = itemBySku(sku);

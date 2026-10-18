@@ -99,8 +99,8 @@ test("the trail (v0.11): leads are each story's next known piece, passed on by e
   assert.equal(leadFrom(state, null, 1)?.story, "b", "varies with the seed");
   assert.equal(leadFrom({ cards: [], stories: [] }, null), null);
   const rosa = regularAt("grind-and-gossip")!.name;
-  assert.equal(leadAction(leads[0]), `Talk to ${rosa} at ${placeById("grind-and-gossip")!.name}`);
-  assert.equal(leadAction({ place: "velvet-static", source: "overheard", hours: [21, 3] }), "Listen in at Velvet Static, 9 PM to 3 AM");
+  assert.equal(leadAction(leads[0]), `Spill the tea with ${rosa} at ${placeById("grind-and-gossip")!.name}`);
+  assert.equal(leadAction({ place: "velvet-static", source: "overheard", hours: [21, 3] }), "Eavesdrop at Velvet Static, 9 PM to 3 AM");
   assert.match(leadLine(leads[0]), new RegExp(`Ask ${rosa} at`));
   assert.match(leadLine(leads[1]), /Go listen\.$/);
   // The Tea app's hint names the regular once the trail reaches them.
@@ -120,5 +120,5 @@ test("#19 restroom pieces: only where there's a restroom, never behind a door ru
   x.stories[0].pieces[i].place = "ultraviolet-society";
   assert.ok(problems(x).some((p) => /turns people away at the door/.test(p)));
   assert.match(hintLine({ n: 1, found: false, source: "restroom", hours: null, place: null, kind: "club", area: "Astoria" }), /^Overheard in the restroom at a club in Astoria/);
-  assert.match(leadAction({ place: "hellgate-hall", source: "restroom", hours: null }), /^Listen in downstairs at The Kiln/);
+  assert.match(leadAction({ place: "hellgate-hall", source: "restroom", hours: null }), /^Eavesdrop in the restroom at The Kiln/);
 });

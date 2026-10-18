@@ -48,6 +48,8 @@ export interface DailyTask {
   done_at: string | null;
   /** Migration 0063: the skill this task levels up (one task a day), or null. Cooking tasks are at "home". */
   skill?: SkillId | null;
+  /** Migration 0073: the goal this task was picked for (lib/goals.ts), or null. */
+  goal?: string | null;
 }
 
 export interface GigOffer {
@@ -120,7 +122,7 @@ export interface Gain {
 }
 
 /** #19 clubs (migration 0046): the VIP door. `needsCover`: what it costs today (nothing paid yet). */
-export interface VipEntry { access?: "free" | "paid"; needsCover?: number }
+export interface VipEntry { access?: "free" | "paid" | "pass"; needsCover?: number }
 
 export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard; vip?: VipEntry } | { ok: false; error: string };
 
@@ -460,7 +462,32 @@ export function eventById(id: string): ClubEvent | undefined {
   return CLUB_EVENTS.find((e) => e.id === id);
 }
 
-const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Get seen at", eat: "Eat at", shift: "Work a shift at", hangout: "Hang out at", event: "Go to", gossip: "Listen in at", cook: "Cook a meal at" };
+// Owner, Oct 18: task copy in Clout City's voice. The title still says what to do and where; a line under it jokes.
+const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Be seen at", eat: "Grab a bite at", shift: "Clock in at", hangout: "Kick it at", event: "Pull up to", gossip: "Eavesdrop at", cook: "Cook something at" };
+
+/** The joke under each task, a few per kind; the task's id picks one, so it stays put all day. */
+const TASK_QUIPS: Record<DailyTask["kind"] | "skill", readonly string[]> = {
+  visit: ["If nobody saw you there, did you even go?", "Stand near the good lighting.", "Look busy. Look famous. Ideally both."],
+  eat: ["Calories don't count if you post them.", "Eat like nobody's watching. Someone is.", "Fuel for the grind. And the gossip."],
+  shift: ["Smile at customers. Die a little inside. Get paid.", "Rent is due, babe. Rent is always due.", "Honest work. Gross, but honest."],
+  hangout: ["Doing nothing, but on purpose.", "Touch grass. Influencers swear by it.", "Hang out like your schedule isn't empty."],
+  event: ["Arrive late. Leave later.", "Dress like the photographer is waiting.", "The dance floor misses you. Allegedly."],
+  gossip: ["Ears open, mouth shut. For now.", "Somebody knows something. Go be nosy.", "The tea is hot and you're thirsty."],
+  cook: ["Gordon would yell. Your stomach won't.", "The smoke alarm is part of the recipe.", "Home-cooked. Technically."],
+  skill: ["Your skills are rusting. Literally, we checked.", "Practice now, show off later.", "Get good. Then get annoying about it."],
+};
+const DONE_LINES = ["Done. Lola noticed. 💅", "Paid. Treat yourself (responsibly).", "Ticked. Main character behavior."] as const;
+
+/** The task's joke ("Calories don't count if you post them."), the same all day. */
+export function taskQuip(t: Pick<DailyTask, "id" | "kind" | "skill" | "action_id">): string {
+  const quips = t.kind === "gossip" && t.action_id === "gossip-restroom" ? ["Best acoustics in the club. Go wash your hands."]
+    : t.kind === "gossip" && t.action_id === "gossip-regular" ? ["They know things. They always know things.", "Bring snacks. Leave with secrets."]
+    : TASK_QUIPS[t.skill && t.kind !== "cook" ? "skill" : t.kind];
+  return quips[Math.abs(t.id) % quips.length];
+}
+
+/** What a finished task says, the same all day. */
+export const taskDoneLine = (t: Pick<DailyTask, "id">) => DONE_LINES[Math.abs(t.id) % DONE_LINES.length];
 
 /** "Eat at Ditmars Deli & Dreams", "Go to Neon Nights", "Talk to Sal at …": a daily task's title. */
 /**
@@ -473,16 +500,14 @@ export function taskRewardLine(t: Pick<DailyTask, "kind" | "reward">): string {
 const formatCashPlain = (n: number) => `C$${n.toLocaleString("en-US")}`;
 
 export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" | "skill">): string {
-  // Migration 0063 (owner, Oct 16): "Level up your cooking skills by cooking at xyz today".
+  // Migration 0063 (owner, Oct 16), owner Oct 18: the skill shows as a tag under the title, so the title is the doing.
   if (t.skill) {
-    const skill = SKILLS.find((s) => s.id === t.skill)?.name.toLowerCase() ?? t.skill;
-    if (t.kind === "cook") return `Level up your ${skill}: cook a meal at home today`;
+    if (t.kind === "cook") return "Cook something at home";
     const place = placeById(t.place_id);
     const label = place?.actions.find((a) => a.id === t.action_id)?.label;
-    const doing = label ? label.charAt(0).toLowerCase() + label.slice(1) : TASK_VERB[t.kind].toLowerCase().replace(/ at$/, "");
-    return `Level up your ${skill}: ${doing} at ${place?.name ?? "a place"} today`;
+    return label ? `${label} at ${place?.name ?? "a place"}` : `${TASK_VERB[t.kind]} ${place?.name ?? "a place"}`;
   }
-  if (t.kind === "event") return `Go to ${eventById(t.action_id)?.name ?? "a club event"}`;
+  if (t.kind === "event") return `${TASK_VERB.event} ${eventById(t.action_id)?.name ?? "a club event"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
   if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null });
   return `${TASK_VERB[t.kind]} ${placeById(t.place_id)?.name ?? "a place"}`;

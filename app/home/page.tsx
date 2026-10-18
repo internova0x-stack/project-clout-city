@@ -30,6 +30,7 @@ import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomAction
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
+import { goalsState, spendGuestPass } from "./goalsActions";
 import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
@@ -117,6 +118,8 @@ export default async function HomePage() {
         rideOffer, rideRespond, rideStatus,
         jobs: { board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob },
       } : undefined}
+      // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
+      goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}
       // Migration 0072 switches on campus life (campus_state failing hides it).
       campus={city && campus.ok ? {
         state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard,

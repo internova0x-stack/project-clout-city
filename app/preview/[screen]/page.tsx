@@ -77,7 +77,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -137,6 +137,7 @@ export default async function Preview({
           gossipPreset={gossip}
           dailyHintPreset={hint === "daily"}
           campusPreset={campus}
+          goalsPreset={goals}
           rankUpPreset={Number(rankup) || undefined}
           radioPreset={radio}
           tvPreset={tv}

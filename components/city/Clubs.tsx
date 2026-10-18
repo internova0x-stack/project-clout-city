@@ -22,8 +22,10 @@ export function clubLines(place: Place, clout: number): string[] {
 }
 
 /** The VIP rope: pay the cover for tonight, or stay downstairs. */
-export function VipCoverCard({ place, cover, freeClout, cash, busy, onPay, onClose }: {
+export function VipCoverCard({ place, cover, freeClout, cash, busy, onPay, onClose, passes = 0, onUsePass }: {
   place: Place; cover: number; freeClout: number; cash: number; busy: boolean; onPay: () => void; onClose: () => void;
+  /** Daily tasks 2.0: guest-list passes held (one gets the player up there tonight instead of the cover). */
+  passes?: number; onUsePass?: () => void;
 }) {
   const short = cash < cover;
   return (
@@ -37,6 +39,9 @@ export function VipCoverCard({ place, cover, freeClout, cash, busy, onPay, onClo
           in until midnight, and up there getting seen counts double.
         </p>
         {short && <p className="meta" style={{ margin: "10px 0 0", color: "var(--pink-300, #FF9FCB)" }}>{formatCash(cover - cash)} short</p>}
+        {passes > 0 && onUsePass && (
+          <button className="btn btn-secondary pass-btn" style={{ width: "100%", marginTop: 14 }} disabled={busy} onClick={onUsePass}>🎟️ Use a guest-list pass ({passes})</button>
+        )}
         <div className="row" style={{ gap: 8, marginTop: 18 }}>
           <button className="btn btn-secondary" style={{ flex: 1 }} onClick={onClose}>Not tonight</button>
           <button className="btn btn-taxi" style={{ flex: 1 }} disabled={short || busy} onClick={onPay}>Pay {formatCash(cover)}</button>

@@ -3,6 +3,9 @@
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
 import type { RadioApi } from "@/lib/radio";
 import { createCampusSim } from "@/lib/campusSim";
+import { createGoalsSim } from "@/lib/goalsSim";
+import { PLACES } from "@/lib/city";
+import { clubDoor } from "@/lib/cityState";
 import { previewStationInbox, previewStationRead, previewTvState, previewTvSubmit, previewTvUpload, previewTvWithdraw } from "@/app/preview/tvActions";
 import type { TvApi } from "@/lib/cloutTv";
 
@@ -45,7 +48,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -81,6 +84,8 @@ export function PreviewHome({
   lottoPreset?: string;
   /** v0.15 Campus: ?campus=new|pick|week|friday|done starts campus life in that state, standing at St. Johnsons. */
   campusPreset?: string;
+  /** Daily tasks 2.0: ?goals=new|streak|pass|tonight|chapter starts goals, streaks and passes in that state; day3|day7|day14|goaldone opens that reveal. */
+  goalsPreset?: string;
   /** Owner, Oct 17: show Lola's daily-tasks nudge after 2 seconds (?hint=daily). */
   dailyHintPreset?: boolean;
   /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
@@ -98,13 +103,32 @@ export function PreviewHome({
   }, [me, player, devTools, tasksDone]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => {
-    const api = createSimApi(city, () => feedRef.current);
+    const api = createSimApi(city, () => feedRef.current, (id) => passRef.current(id));
     const queue: Record<string, number[]> = { win: [5, 0, 2], big: [100, 0], back: [1, 0], lose: [0, 5] };
     if (lottoPreset && queue[lottoPreset]) api.lottoNext(queue[lottoPreset]);
     // ?lotto=jackpot: the next card's ⭐ wins its pot.
     if (lottoPreset === "jackpot") { api.lottoNext([5]); api.lottoPot(); }
     return api;
   }, [city, lottoPreset]);
+  // Daily tasks 2.0: goals read the simulated player; a pass used tonight opens the simulated door.
+  const passRef = useRef<(placeId: string) => boolean>(() => false);
+  const goalsApi = useMemo(() => {
+    const g = createGoalsSim(goalsPreset === "new" ? "" : goalsPreset ?? "", {
+      clout: () => sim.peek().clout,
+      cash: () => sim.peek().cash,
+      confidence: () => sim.peek().confidence,
+      allDone: () => sim.peek().allDone,
+      canEnter: (id) => {
+        const place = PLACES.find((x) => x.id === id);
+        if (!place?.club) return { club: false, needed: false };
+        const { doorClout, vip } = clubDoor(place);
+        const clout = sim.peek().clout;
+        return { club: true, needed: clout < doorClout || (!!vip && clout < vip.freeClout) };
+      },
+    });
+    passRef.current = g.passTonight;
+    return g;
+  }, [sim, goalsPreset]);
   // v0.14 Real Clout FM: the dev server's in-memory station, shared with /preview/studio's Shoutouts queue.
   const campusApi = useMemo(() => createCampusSim(campusPreset === "new" ? "" : campusPreset ?? ""), [campusPreset]);
   const radioApi = useMemo<RadioApi>(() => ({
@@ -347,6 +371,11 @@ export function PreviewHome({
       business={cityOff ? undefined : businessApi}
       radio={cityOff ? undefined : radioApi}
       campus={cityOff ? undefined : campusApi}
+      goals={cityOff ? undefined : goalsApi}
+      previewGoalsReveal={goalsPreset === "day3" ? { kind: "streak", day: 3, reward: "clout" }
+        : goalsPreset === "day7" ? { kind: "streak", day: 7, reward: "collectible", sku: "home-neon-five-sign" }
+        : goalsPreset === "day14" ? { kind: "streak", day: 14, reward: "pass" }
+        : goalsPreset === "goaldone" ? { kind: "goal", id: "pro_gigs", next: "first_business" } : undefined}
       boroughGates={[
         { id: "brooklyn", open: brooklynPreset === "open", target: 100, online: 37, peakToday: 64, counting: brooklynPreset !== "open" },
         { id: "bronx", open: false, target: 250, online: 37, peakToday: 64, counting: brooklynPreset === "open" },
