@@ -9,7 +9,7 @@ import { GuestMap } from "@/components/GuestMap";
 import { Studio } from "@/components/studio/Studio";
 import type { StudioArc } from "@/lib/studio";
 import {
-  previewStudioBeatEdit, previewStudioBeatStatus, previewStudioContent, previewStudioReorder, previewStudioList, previewStudioReview, previewStudioSchedule, previewStudioSetDay,
+  previewStudioBeatEdit, previewStudioBeatStatus, previewStudioContent, previewStudioGoLive, previewStudioReorder, previewStudioList, previewStudioReview, previewStudioSchedule, previewStudioSetDay,
   previewStudioStatus, previewStudioUpload,
 } from "../studioActions";
 import {
@@ -164,7 +164,7 @@ export default async function Preview({
           initial={r.ok ? r.arcs : ([] as StudioArc[])}
           api={{
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
-            beatStatus: previewStudioBeatStatus, content: previewStudioContent, reorder: previewStudioReorder, beatEdit: previewStudioBeatEdit,
+            beatStatus: previewStudioBeatStatus, content: previewStudioContent, reorder: previewStudioReorder, beatEdit: previewStudioBeatEdit, goLive: previewStudioGoLive,
             reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics, insights: previewStudioInsights, players: previewStudioPlayers, player: previewStudioPlayer, playerBan: previewStudioPlayerBan,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,

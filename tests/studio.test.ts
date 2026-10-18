@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { applyBeatText, beatText, nextWeekday, parseArcs, studioError, weekdayOf } from "../lib/studio.ts";
+import { STAGE_LABEL, applyBeatText, beatText, nextWeekday, parseArcs, storyStage, studioError, weekdayOf } from "../lib/studio.ts";
 import type { Beat } from "../lib/stories.ts";
 
 test("next Sunday on or after a date", () => {
@@ -54,4 +54,21 @@ test("beat edits change the words only (owner, Oct 17)", () => {
   assert.equal(applyBeatText(beat, { ...t, news: [] }).ok, false);
   assert.equal(applyBeatText(beat, { ...t, news: [{ headline: " " }] }).ok, false);
   assert.equal(applyBeatText(beat, { ...t, prediction: { ...t.prediction!, options: [{ id: "a", label: "Ann" }] } }).ok, false, "every option keeps a label");
+});
+
+test("story stage: one word for where a story stands, approval alone isn't live", () => {
+  const base = { type: "main" as const, status: "active" as const, review: "approved" as const, startAt: null as string | null, day: null as number | null, lastDay: 10 };
+  assert.equal(storyStage({ ...base, review: "draft" }), "review");
+  assert.equal(storyStage({ ...base, review: "declined" }), "declined");
+  assert.equal(storyStage(base), "ready", "approved without a Day 1 is not live");
+  assert.equal(storyStage({ ...base, startAt: "2026-10-25" }), "scheduled");
+  assert.equal(storyStage({ ...base, startAt: "2026-10-18", day: 1 }), "live");
+  assert.equal(storyStage({ ...base, startAt: "2026-10-01", day: 11 }), "finished");
+  assert.equal(storyStage({ ...base, status: "paused", day: null, startAt: "2026-10-18" }), "paused");
+  assert.equal(storyStage({ ...base, status: "retired" }), "retired");
+  const main = { ...base, startAt: "2026-10-25" };
+  assert.equal(storyStage({ ...base, type: "side" }, main), "scheduled", "a side story waits on its main's date");
+  assert.equal(storyStage({ ...base, type: "side" }, { ...main, startAt: null }), "ready");
+  assert.equal(storyStage({ ...base, type: "side", review: "draft" }, main), "review");
+  assert.equal(STAGE_LABEL.ready, "Not live");
 });
