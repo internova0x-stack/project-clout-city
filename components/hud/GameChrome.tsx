@@ -95,7 +95,7 @@ export function GameChrome({
           <span className="hud-time hud-number" aria-label="City time">
             {time ? <>{time.split(" ")[0]}{time.includes(" ") && <small className="hud-ampm">{time.split(" ").slice(1).join(" ")}</small>}</> : "\u00a0"}
           </span>
-          <button className="hud-btn" data-tour="daily" onClick={() => onAction("daily")} aria-label={values ? `Daily tasks, ${values.dailyDone} of ${values.dailyTotal} done` : "Daily tasks"}>
+          <button className="hud-btn" onClick={() => onAction("daily")} aria-label={values ? `Daily tasks, ${values.dailyDone} of ${values.dailyTotal} done` : "Daily tasks"}>
             <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
           </button>
@@ -155,7 +155,7 @@ export function GameChrome({
         )}
       {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
       <nav className="side-col" aria-label="Quick actions">
-        <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
+        <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} tour="tasks" onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
         <SideBtn label="Events" aria="Events" dot={values?.eventsBadge} tour="events" onClick={() => onAction("events")}><ChampagneIcon /></SideBtn>
         <SideBtn label="Places" aria="Places" onClick={() => onAction("places")}><BuildingIcon /></SideBtn>
         <SideBtn label="Bills" aria="Bills" dot={values?.billsBadge} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>

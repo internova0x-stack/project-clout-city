@@ -39,7 +39,10 @@ function useTargetRect(target: string): Rect | null {
       // Keep the ring inside the screen even for targets touching the top edge.
       const x = Math.max(2, Math.min(...rs.map((r) => r.left)) - box.left - 6);
       const y = Math.max(2, Math.min(...rs.map((r) => r.top)) - box.top - 6);
-      setRect({ x, y, w: Math.max(...rs.map((r) => r.right)) - box.left - x + 6, h: Math.max(...rs.map((r) => r.bottom)) - box.top - y + 6 });
+      // ...and its right and bottom edges too (the side column touches the right edge).
+      const right = Math.min(box.width - 6, Math.max(...rs.map((r) => r.right)) - box.left + 6);
+      const bottom = Math.min(box.height - 6, Math.max(...rs.map((r) => r.bottom)) - box.top + 6);
+      setRect({ x, y, w: right - x, h: bottom - y });
     };
     // Measure now, after the layout settles, and whenever the visible screen changes (#41).
     measure();
@@ -104,11 +107,13 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
 export const DAILY_HINT_TEXT = "Psst 👀 these are your daily tasks: five little errands that each pay out, plus a bonus if you clear all five 💸 Fresh list every day, so check in daily, babe 💅";
 
 /**
- * Shown once, 30 seconds after the first session ends if the daily tasks haven't been opened. The button is
- * ringed and tappable (it opens the tasks); "Got it" or a tap anywhere else dismisses it.
+ * Shown once, 30 seconds after the first session ends if the daily tasks haven't been opened. The Tasks button in
+ * the side column is ringed and tappable (it opens the tasks), Lola's bubble just above it; "Got it" or a tap
+ * anywhere else dismisses it.
  */
 export function DailyTasksHint({ onOpen, onDismiss }: { onOpen: () => void; onDismiss: () => void }) {
-  const rect = useTargetRect("daily");
+  const rect = useTargetRect("tasks");
+  const above = rect ? { bottom: Math.max(16, screenBox().height - rect.y + 10) } : undefined;
   return (
     <div className="tour" role="dialog" aria-label="Your daily tasks">
       {rect ? (
@@ -121,7 +126,7 @@ export function DailyTasksHint({ onOpen, onDismiss }: { onOpen: () => void; onDi
           <button className="tour-block daily-hint-target" onClick={onOpen} aria-label="Open your daily tasks" style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }} />
         </>
       ) : <div className="tour-dim" onClick={onDismiss} />}
-      <div className="lola-tip daily-hint">
+      <div className="lola-tip daily-hint" style={above}>
         <div className="lola-tip-bubble">
           <p className="lola-tip-who">Lola Lowdown</p>
           <p className="lola-tip-text">{DAILY_HINT_TEXT}</p>
