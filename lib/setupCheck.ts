@@ -63,6 +63,7 @@ export async function runSetupCheck(siteOrigin: string): Promise<SetupCheckRow[]
   await migration("0078_push.sql", "push notifications", "push_prefs_get", {});
   await migration("0079_membership.sql", "Membership & purchases", "membership_billing", { p_player: "00000000-0000-0000-0000-000000000000" });
   await migration("0080_story_go_live.sql", "Go live now in Stories", "admin_story_go_live", { p_arc: "setup-check" });
+  await migration("0087_creators.sql", "Affiliates: creators and links", "creator_link", { p_slug: "setup-check", p_click: false });
 
   // ---- News and hunts: import now and say what happened to each file ----
   if (has0037) {

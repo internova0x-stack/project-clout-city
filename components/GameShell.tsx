@@ -986,6 +986,10 @@ export function GameShell({
     window.history.replaceState(null, "", url.toString());
     if (open === "messages" || open === "gigs" || open === "businesses") setPhone({ open: true, app: open });
     else if (open === "bills" || open === "tasks" || open === "events") setPanel(open);
+    // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
+    else if (open === "news") openNews(null);
+    else if (open === "shop") openShop("fashion");
+    else if (open === "vip") setChatPass({ out: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Back from Stripe's billing portal (Membership & purchases): reopen the screen with the fresh plan.

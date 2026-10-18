@@ -37,6 +37,13 @@ export const GAME_CONFIG = {
     placeCookieMaxAgeDays: 2,
   },
 
+  /** Creator links (/c/<slug>, spec section 21): the link is kept 30 days through sign-up; a typed code rides an hour for Google sign-in. */
+  creator: {
+    cookieName: "cc_creator",
+    cookieMaxAgeDays: 30,
+    codeCookieName: "cc_creator_code",
+  },
+
   /**
    * #11 (owner, Oct 14): actions take a moment, on the player's own timer; rewards land when it ends.
    * Seconds: a chat or browse, a snack; a meal; a visit, workout or class; a shift.

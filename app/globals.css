@@ -890,6 +890,33 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .player-facts dd { margin:0; color:var(--text-1); min-width:0; overflow-wrap:anywhere; }
 @media (max-width:560px) { .players-nums .meta:last-child { display:none; } }
 
+/* Studio → Affiliates (migration 0087) */
+.aff-table td { vertical-align:top; white-space:nowrap; }
+.aff-table td:first-child { white-space:normal; min-width:140px; }
+.aff-row { cursor:pointer; }
+.aff-row:hover td, .aff-row:focus-visible td { background:var(--surface-card); }
+.aff-retired td { color:var(--text-3); }
+.aff-code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; padding:2px 6px; border-radius:6px; white-space:nowrap; background:var(--chip-off); color:var(--text-1); overflow-wrap:anywhere; }
+.aff-tag { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:var(--r-pill); font-size:12px; font-weight:700; background:var(--chip-off); color:var(--text-2); }
+.aff-tag.active { margin-left:0; background:var(--green-tint); color:var(--green-text); }
+.aff-tag.paused { margin-left:0; background:var(--taxi-tint); color:#7A5600; }
+.aff-tag.high { background:var(--taxi-tint); color:#7A5600; }
+.aff-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+.aff-grid > * { min-width:0; }
+.aff-form { max-width:860px; }
+.aff-code-input { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.06em; }
+.aff-rate .studio-input { width:84px; }
+.aff-rate .studio-input[data-custom="true"] { border-color:var(--taxi-500); }
+.aff-slug { display:flex; align-items:center; gap:4px; }
+.aff-slug .studio-input { flex:1; min-width:0; }
+.aff-link-line { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; padding:6px 0; border-bottom:1px solid var(--divider); }
+.aff-link-line:last-of-type { border-bottom:0; }
+.aff-qr-back { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px; background:rgba(20,17,26,.45); }
+.aff-qr { width:min(360px, 100%); box-shadow:var(--elev-3); }
+@media (max-width:560px) { .aff-tiles { grid-template-columns:repeat(2, minmax(0, 1fr)); } .aff-tiles .display-lg { font-size:26px; } }
+.aff-qr .aff-code { white-space:normal; text-align:center; }
+.aff-qr-img svg { display:block; width:100%; height:auto; border-radius:var(--r-sm); }
+
 /* Insights (migration 0053) */
 :root { --insights-bar:#FF8A6B; }
 .insights-charts { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }

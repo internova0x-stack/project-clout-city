@@ -4,16 +4,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
+import { normalizeCreatorCode } from "@/lib/creators";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { isStandalone } from "./game/FirstSession";
 import { MailIcon } from "./icons";
 import { Sheet } from "./Sheet";
 import { AFTER_SIGNIN_COOKIE } from "@/lib/authNext";
 
-function readInviteCookie(): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${GAME_CONFIG.invite.cookieName}=([^;]*)`));
-  return normalizeInviteCode(match ? decodeURIComponent(match[1]) : null);
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
 }
+const readInviteCookie = () => normalizeInviteCode(readCookie(GAME_CONFIG.invite.cookieName));
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -29,12 +31,17 @@ export function SignUpSheet({
   invited,
   mode = "signup",
   onSwitchMode,
+  creator,
+  gift,
 }: {
   open: boolean;
   onClose: () => void;
   invited?: boolean;
   mode?: AuthMode;
   onSwitchMode?: (mode: AuthMode) => void;
+  /** The creator whose link brought this guest (spec section 21), and their welcome gift in words. */
+  creator?: string;
+  gift?: string | null;
 }) {
   const login = mode === "login";
   const router = useRouter();
@@ -44,11 +51,16 @@ export function SignUpSheet({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
+  // Creator code (spec section 21): for people who saw a video rather than tapped a link. Optional.
+  const [creatorCode, setCreatorCode] = useState("");
+  const [showCreatorCode, setShowCreatorCode] = useState(false);
+  const typedCreator = normalizeCreatorCode(creatorCode);
+  const creatorCodeBad = creatorCode.trim() !== "" && !typedCreator;
   // Read after mount so the server render matches the first client render.
   const [inApp, setInApp] = useState(false);
   useEffect(() => setInApp(isStandalone()), []);
 
-  const canSend = EMAIL.test(email.trim()) && (login || adult) && !busy;
+  const canSend = EMAIL.test(email.trim()) && (login || adult) && !busy && (login || !creatorCodeBad);
 
   async function send() {
     setError(null);
@@ -68,7 +80,11 @@ export function SignUpSheet({
         shouldCreateUser: !login,
         // Kept on the account, so the invite and age confirmation survive even
         // if the email is opened on another device.
-        data: { age_confirmed: true, invite_code: readInviteCookie() },
+        data: {
+          age_confirmed: true,
+          invite_code: readInviteCookie(),
+          ...(login ? {} : { creator_link: readCookie(GAME_CONFIG.creator.cookieName), creator_code: typedCreator }),
+        },
       },
     });
     setBusy(false);
@@ -92,6 +108,7 @@ export function SignUpSheet({
     if (!supabase) return setError("Accounts aren't switched on yet. Check back very soon.");
     // OAuth can't carry metadata, so the 18+ confirmation rides along in a short-lived cookie.
     if (!login) document.cookie = `${GAME_CONFIG.ageCookieName}=1; path=/; max-age=3600; samesite=lax`;
+    if (!login && typedCreator) document.cookie = `${GAME_CONFIG.creator.codeCookieName}=${typedCreator}; path=/; max-age=3600; samesite=lax`;
     setBusy(true);
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -130,7 +147,7 @@ export function SignUpSheet({
           }}
         >
           <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
-            <p className="overline">{login ? "Welcome back" : invited ? "You've been invited" : "Early access"}</p>
+            <p className="overline">{login ? "Welcome back" : creator ? `${creator} sent you` : invited ? "You've been invited" : "Early access"}</p>
             <h2 className="display-lg" style={{ margin: 0 }}>{login ? "Back to Queens" : "Claim your spot in Queens"}</h2>
             <p className="subtext" style={{ margin: "4px 0 0" }}>
               {inApp
@@ -140,6 +157,7 @@ export function SignUpSheet({
                 : login
                   ? "Enter your email and we'll send a magic link. The city kept your spot warm. Mostly."
                   : "Sign up with your email. We'll send a magic link: no password, no velvet rope."}
+              {!login && creator && gift && <> Your welcome gift: {gift}.</>}
             </p>
           </div>
 
@@ -168,6 +186,32 @@ export function SignUpSheet({
             </span>
           </label>
           )}
+
+          {!login && !creator && (showCreatorCode ? (
+            <div className="stack-4">
+              <label className="field" htmlFor="signup-creator">
+                <span aria-hidden="true" style={{ fontSize: 16 }}>🎬</span>
+                <input
+                  id="signup-creator"
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  placeholder="Creator code (optional)"
+                  maxLength={20}
+                  value={creatorCode}
+                  onChange={(e) => setCreatorCode(e.target.value)}
+                  aria-label="Creator code"
+                  aria-invalid={creatorCodeBad}
+                />
+              </label>
+              <p className={creatorCodeBad ? "error-text" : "meta"} style={{ margin: 0 }}>
+                {creatorCodeBad ? "Codes are 3 to 16 letters and numbers." : "Saw us in a video? The code on screen gets you a welcome gift."}
+              </p>
+            </div>
+          ) : (
+            <button type="button" className="linkish" style={{ alignSelf: "flex-start" }} onClick={() => setShowCreatorCode(true)}>
+              Got a creator code?
+            </button>
+          ))}
 
           {error && <p className="error-text" role="alert">{error}</p>}
 
