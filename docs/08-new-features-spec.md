@@ -723,8 +723,9 @@ bring in spend (affiliate links). Nothing here is built yet; this section is the
 | Not commissionable | Purchases by the creator's own account; the lotto (no real money anyway) | Self-referral and the 18+ simulated-gambling rule |
 
 ### How players are attributed
-- **Link:** `https://<site>/?c=TASHA` (or `/c/tasha`). The game remembers the code on the device for 30 days and
-  attaches it to the account when the player signs up.
+- **Link:** `https://<site>/c/<slug>` (for example `/c/tasha` or `/c/tasha-tiktok`). It counts the click, sends the
+  player where the link points, and the game remembers the link on the device for 30 days and attaches it to the
+  account when the player signs up.
 - **Code:** sign-up has an optional "Creator code" field, for people who saw a video rather than tapped a link.
 - **Invites still pay:** if a crew invite and a creator code both apply, the inviter still gets the in-game invite
   reward and the creator gets the commission. They don't compete.
@@ -733,13 +734,17 @@ bring in spend (affiliate links). Nothing here is built yet; this section is the
 ### What we store (migrations, all server-only, no browser access)
 - `creators`: id, name, handle, contact email, code (unique), rate (20 or 30), status (active or paused), payout
   details reference (Stripe Connect account id, never bank details), agreed-terms date.
-- `creator_referrals`: player_id (one row per player), creator_id, how (link or code), attributed_at, commission_until
-  (sign-up + 24 months, for renewals).
+- `creator_links` (owner, Oct 18: custom links from the dashboard): id, creator_id, slug (unique, e.g. `tasha-tiktok`),
+  label (e.g. "TikTok bio", "Halloween video"), where it lands (the home page, sign-up, or a screen such as a story,
+  the Shop or VIP), optional campaign and video, active or retired, created_by, created_at. Every creator starts
+  with one default link; links are retired, never deleted, so old videos keep counting.
+- `creator_referrals`: player_id (one row per player), creator_id, link_id (null when they typed the code), how (link
+  or code), attributed_at, commission_until (sign-up + 24 months, for renewals).
 - `creator_commissions`: one row per payment, unique per Stripe event (like the ledger): creator, player, purchase or
   renewal reference, gross, Stripe fee, tax, net, rate, commission, status (held, payable, paid, reversed),
   payable_on (+45 days), payout id. A refund or chargeback writes a reversing row.
 - `creator_payouts`: creator, period, total, method, Stripe transfer id, paid_at.
-- Clicks: a daily count per code (no per-person tracking).
+- Clicks: a daily count per link (no per-person tracking).
 
 ### How it runs
 - The Stripe webhook already records purchases and renewals (`payment_grant`, `payment_renewal`). For a referred
@@ -751,12 +756,26 @@ bring in spend (affiliate links). Nothing here is built yet; this section is the
   and the payout is a Stripe transfer. Connect also handles 1099s in the US.
 
 ### Screens
-- **Studio → Creators** (admins): add a creator and their code, set the rate, pause; per creator: clicks, sign-ups,
-  paying players, revenue, commission (held, payable, paid); approve and mark payouts; flags for suspicious patterns
-  (many sign-ups from one device, refunds above 20%, the creator's own purchases).
-- **Creator page** (`/creator`, signed in with the creator's email): their link and code, clicks, sign-ups, paying
-  players, earnings by status, payout history and the next payout date. Counts only: never player names, chats or
-  anything personal.
+- **Studio → Affiliates** (admins; owner, Oct 18: "an affiliate section on the dashboard"). Four views:
+  - **Overview:** totals for the period (7, 30, 90 days, all time): clicks, sign-ups, paying players, revenue,
+    commission owed and paid, and net after commission; a chart of sign-ups and revenue by day; top creators and
+    top links.
+  - **Creators:** every affiliate in a table (rate, status, clicks, sign-ups, click-to-sign-up %, payers,
+    sign-up-to-payer %, revenue, commission held, payable and paid, net). Add a creator, set the rate (20 or 30%),
+    pause, and approve and mark payouts. Flags for suspicious patterns (many sign-ups from one device, refunds above
+    20%, the creator's own purchases).
+  - **Links** (owner, Oct 18: "create custom links on the dashboard"): create a link for any creator: pick the
+    creator, type a slug (checked for uniqueness and allowed characters), a label, where it lands, and an optional
+    campaign or video; copy it, show its QR code, retire it. Each link shows the same numbers as a creator, so one
+    video's link can be compared with another's.
+  - **One affiliate** (owner, Oct 18: "see the performance of each user with an affiliate link"): tap a creator to
+    see their links, numbers over time (by day and week), a funnel (clicks → sign-ups → first purchase → VIP), what
+    their players bought (by product), retention of their players (next day, day 7, day 30, like Insights),
+    commission history and payouts, and the list of players they brought in (handle, sign-up date, link, spend,
+    commission, still playing). That list is admin-only; creators never see who their players are.
+- **Creator page** (`/creator`, signed in with the creator's email): their links and code, clicks, sign-ups, paying
+  players and earnings per link, earnings by status, payout history and the next payout date. Counts only: never
+  player names, chats or anything personal. Whether creators can make their own links here too is an open question.
 - **Insights:** a creators table (sign-ups, payers, revenue, commission, net after commission, and what we spent on
   their videos) so each creator's cost per paying player is visible.
 
@@ -780,10 +799,11 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
 30% we keep about what a store game keeps.
 
 ### Build steps (one pull request each)
-1. Attribution: creators table, links and the sign-up code, `creator_referrals`, the Studio's Creators tab (add,
-   codes, rates, sign-up counts).
-2. Commissions: webhook rows on purchases and renewals, reversals on refunds, the 45-day hold, the Creators tab's
-   money columns, Insights table.
+1. Attribution and links: `creators`, `creator_links`, the `/c/<slug>` redirect with click counts, the sign-up
+   code, `creator_referrals`; the Studio's Affiliates section with Creators and Links (create, copy, QR, retire)
+   and sign-up counts.
+2. Commissions and performance: webhook rows on purchases and renewals, reversals on refunds, the 45-day hold; the
+   Affiliates Overview, the money columns and each affiliate's page (funnel, products, retention, players).
 3. Creator page.
 4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect.
 5. UGC tracking: videos, fees and cost per paying player.
@@ -795,6 +815,7 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
 4. Who gets 30%: a fixed list we choose, or automatic above a number of paying players a month?
 5. Payouts: by hand during the soft launch, then Stripe Connect?
 6. Should referred players get anything (e.g. a welcome outfit or C$ bonus, never real-money value)?
+7. Can creators make their own custom links on their page, or only admins in the Studio?
 
 ## 22. Later features
 
