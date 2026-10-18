@@ -65,6 +65,7 @@ export async function runSetupCheck(siteOrigin: string): Promise<SetupCheckRow[]
   await migration("0080_story_go_live.sql", "Go live now in Stories", "admin_story_go_live", { p_arc: "setup-check" });
   await migration("0087_creators.sql", "Affiliates: creators and links", "creator_link", { p_slug: "setup-check", p_click: false });
   await migration("0088_creator_commissions.sql", "Affiliates: commissions", "creator_referred", { p_player: "00000000-0000-0000-0000-000000000000" });
+  await migration("0089_creator_page.sql", "Creator page (/creator)", "creator_me", {});
 
   // ---- News and hunts: import now and say what happened to each file ----
   if (has0037) {

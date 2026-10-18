@@ -922,6 +922,25 @@ button.aff-list-row { cursor:pointer; }
 .aff-tag.payable { margin-left:0; background:var(--green-tint); color:var(--green-text); }
 .aff-tag.paid { margin-left:0; background:var(--surface-card); color:var(--text-3); }
 .aff-tag.flag { background:var(--red-tint); color:var(--red-text); }
+/* The creator page (/creator, migration 0089) */
+.studio.creator-page { padding-inline:max(16px, calc((100% - 1100px) / 2)); }
+.creator-page .stack-4 > span { display:block; }
+.creator-hello { display:flex; flex-wrap:wrap; align-items:center; gap:16px; }
+.creator-hello > .stack-4 { flex:1 1 280px; min-width:0; }
+.creator-page .studio-card > .overline:first-child { display:block; margin-bottom:8px; }
+.creator-code { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.creator-code-value { font-size:20px; padding:6px 12px; letter-spacing:.08em; }
+.creator-link { display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; padding:12px 0; border-bottom:1px solid var(--divider); }
+.creator-link:last-child { border-bottom:0; }
+.creator-link.retired { opacity:.7; }
+.creator-url { white-space:normal; overflow-wrap:anywhere; align-self:flex-start; }
+.creator-nums { display:grid; grid-template-columns:repeat(4, minmax(64px, auto)); gap:4px 16px; margin:0; }
+.creator-nums > div { display:flex; flex-direction:column; }
+.creator-nums dt { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+.creator-nums dd { margin:0; font-weight:700; color:var(--text-1); }
+.creator-rules { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-2); font-size:14px; }
+@media (max-width:560px) { .creator-nums { grid-template-columns:repeat(2, minmax(0, 1fr)); width:100%; } }
+
 .aff-qr-back { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px; background:rgba(20,17,26,.45); }
 .aff-qr { width:min(360px, 100%); box-shadow:var(--elev-3); }
 @media (max-width:560px) { .aff-tiles { grid-template-columns:repeat(2, minmax(0, 1fr)); } .aff-tiles .display-lg { font-size:26px; } }

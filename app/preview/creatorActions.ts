@@ -1,7 +1,7 @@
 "use server";
 
 import { previewOnly } from "./guard";
-import { HOLD_DAYS, commissionOn, normalizeCreatorCode, type Affiliates, type AffiliatesOverview, type Creator, type CreatorInput, type CreatorLink, type CreatorPage, type DayPoint, type LinkInput } from "@/lib/creators";
+import { HOLD_DAYS, commissionOn, normalizeCreatorCode, type Affiliates, type AffiliatesOverview, type Creator, type CreatorInput, type CreatorLink, type CreatorMe, type CreatorPage, type DayPoint, type LinkInput } from "@/lib/creators";
 import type { Admin } from "@/lib/studio";
 
 // The Studio preview's Affiliates tab (migration 0087) on in-memory sample creators. Every name is invented.
@@ -166,4 +166,26 @@ export async function previewStudioCreatorPage(id: string, days: number): Promis
     retention: { d1: { cohort: 380, returned: 171 }, d7: { cohort: 310, returned: 84 }, d30: { cohort: 120, returned: 22 } },
     commissions, players,
   } };
+}
+
+/** The creator page (/creator) as Tasha sees it, for /preview/affiliate (?state=new|paused). */
+export async function previewCreatorMe(state?: string): Promise<CreatorMe> {
+  previewOnly();
+  const c = view(0).creators[0];
+  const fresh = state === "new";
+  const owed = fresh ? { heldCents: 0, payableCents: 0, paidCents: 0, periodCents: 0, periodNetCents: 0 } : c.owed!;
+  const daily = series(30, { clicks: fresh ? 0 : 60, signups: fresh ? 0 : 8, revenue: fresh ? 0 : 1500, rate: c.rate });
+  const months = Array.from({ length: 3 }, (_, i) => { const d = new Date(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - i); return d.toISOString().slice(0, 10); });
+  const next = new Date(); next.setUTCDate(1); next.setUTCMonth(next.getUTCMonth() + 1);
+  return {
+    name: c.name, handle: c.handle, code: c.code, rate: c.rate, months: c.months, status: state === "paused" ? "paused" : "active",
+    termsAt: c.termsAt, giftCash: c.giftCash, giftItem: c.giftItem, owed, nextPayout: next.toISOString().slice(0, 10),
+    totals: fresh ? { clicks: 0, signups: 0, payers: 0, earnedCents: 0 } : { clicks: c.clicks, signups: c.signups, payers: c.payers ?? 0, earnedCents: owed.heldCents + owed.payableCents + owed.paidCents },
+    links: c.links.map((l) => ({ slug: l.slug, label: l.label, lands: l.lands, status: l.status, clicks: fresh ? 0 : l.clicks, signups: fresh ? 0 : l.signups,
+      payers: fresh ? 0 : l.payers ?? 0, earnedCents: fresh ? 0 : Math.round((l.revenueCents ?? 0) * 0.93 * c.rate / 100) })),
+    byCode: fresh ? { signups: 0, payers: 0, earnedCents: 0 } : { signups: c.byCode, payers: 3, earnedCents: 1180 },
+    daily,
+    byMonth: fresh ? [] : months.map((m, i) => ({ month: m, earnedCents: [9140, 6230, 2105][i], payments: [61, 44, 17][i] })),
+    payouts: [],
+  };
 }

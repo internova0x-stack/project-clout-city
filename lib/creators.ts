@@ -174,3 +174,32 @@ export function giftItems(): ShopItem[] {
 export function conversion(signups: number, clicks: number): number | null {
   return clicks > 0 ? Math.round((signups / clicks) * 1000) / 10 : null;
 }
+
+/** The creator page (/creator, migration 0089): a creator's own numbers. Counts only, never who their players are. */
+export interface CreatorMe {
+  name: string;
+  handle: string | null;
+  code: string;
+  rate: number;
+  months: Length;
+  status: "active" | "paused";
+  termsAt: string | null;
+  giftCash: number;
+  giftItem: string | null;
+  owed: Owed;
+  nextPayout: string;
+  totals: { clicks: number; signups: number; payers: number; earnedCents: number };
+  links: { slug: string; label: string; lands: Lands; status: "active" | "retired"; clicks: number; signups: number; payers: number; earnedCents: number }[];
+  byCode: { signups: number; payers: number; earnedCents: number };
+  daily: DayPoint[];
+  byMonth: { month: string; earnedCents: number; payments: number }[];
+  payouts: { period: string; totalCents: number; paidAt: string; method: string }[];
+}
+
+/** "Nov 1, if you have $50 payable by then" — or how far there is to go. */
+export function payoutLine(payableCents: number, nextPayout: string, fmt: (c: number) => string): string {
+  const when = new Date(`${nextPayout}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" });
+  return payableCents >= PAYOUT_MIN_CENTS
+    ? `${fmt(payableCents)} goes out on ${when}.`
+    : `Payouts go out at the start of each month once you have ${fmt(PAYOUT_MIN_CENTS)} payable. ${fmt(PAYOUT_MIN_CENTS - Math.max(0, payableCents))} to go.`;
+}

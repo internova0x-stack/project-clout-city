@@ -7,6 +7,7 @@ import { PreviewArt } from "@/components/preview/PreviewArt";
 import { PreviewRoom } from "@/components/preview/PreviewRoom";
 import { GuestMap } from "@/components/GuestMap";
 import { Studio } from "@/components/studio/Studio";
+import { CreatorDashboard } from "@/components/creator/CreatorDashboard";
 import type { StudioArc } from "@/lib/studio";
 import {
   previewStudioBeatEdit, previewStudioBeatStatus, previewStudioContent, previewStudioGoLive, previewStudioReorder, previewStudioList, previewStudioReview, previewStudioSchedule, previewStudioSetDay,
@@ -17,7 +18,7 @@ import {
   previewPlayerCard, previewStudioInsights, previewStudioMetrics, previewStudioPlayer, previewStudioPlayerBan, previewStudioPlayers, previewStudioReportAction, previewStudioReports,
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
-import { previewStudioAffiliates, previewStudioAffiliatesOverview, previewStudioCreatorPage, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
+import { previewCreatorMe, previewStudioAffiliates, previewStudioAffiliatesOverview, previewStudioCreatorPage, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
@@ -157,6 +158,9 @@ export default async function Preview({
         />
       );
     }
+    case "affiliate":
+      // The creator page (/creator, migration 0089) with sample numbers; ?state=new|paused.
+      return <CreatorDashboard me={await previewCreatorMe(state)} who="tasha@example.com" preview />;
     case "studio": {
       const r = live && /^\d+$/.test(live) ? await previewStudioSetDay("sarah-bird", Number(live)) : await previewStudioList();
       return (
