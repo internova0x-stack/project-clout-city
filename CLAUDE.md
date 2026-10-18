@@ -65,7 +65,11 @@ components live in `app/globals.css`.
   `app/c/[slug]` counts the click (`creator_link`, service role, a daily count per link) and keeps the slug 30 days in
   `cc_creator`; sign-up carries it (or a typed creator code) and `createPlayer` calls `creator_attach`, which fixes the
   attribution once (`creator_referrals`, first creator wins, never the creator's own email, new accounts only) and pays
-  the in-game welcome gift (ledger 'creator_welcome': C$ and a Shop fashion item). Commissions come in step 2.
+  the in-game welcome gift (ledger 'creator_welcome': C$ and a Shop fashion item).
+  Step 2 (migration 0088): the webhook writes `creator_commissions` for a referred player's purchase or renewal inside
+  their window (once per payment, on net: price − Stripe fee − tax, at the creator's rate that day); `charge.refunded`
+  (full or partial) adds proportional reversals. Held/payable/paid are worked out on read (`payable_on` = +45 days,
+  `paid_at`). Studio: Overview, money columns and each affiliate's page (`admin_affiliates_overview`, `admin_creator`).
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.

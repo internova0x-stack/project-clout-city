@@ -122,6 +122,57 @@ export const getSubscription = (secretKey: string, id: string) =>
 export const getCheckoutSession = (secretKey: string, id: string) =>
   stripeCall<{ id: string; customer: string | null }>(secretKey, "GET", `checkout/sessions/${encodeURIComponent(id)}`);
 
+/** Stripe's standard US card fee, used when the real fee can't be read (spec section 21: commission on net). */
+export const estimateFee = (amountCents: number) => Math.round(amountCents * 0.029) + 30;
+
+interface StripeIntent { latest_charge?: string | { balance_transaction?: string | { fee?: number } | null } | null }
+interface StripeInvoice {
+  tax?: number | null;
+  total_taxes?: { amount?: number }[] | null;
+  total_tax_amounts?: { amount?: number }[] | null;
+  payment_intent?: string | { id?: string } | null;
+  payments?: { data?: { payment?: { payment_intent?: string | { id?: string } | null } }[] } | null;
+}
+
+/** The fee on a PaymentIntent expanded to its charge's balance transaction, or null. */
+export function feeFromIntent(pi: StripeIntent): number | null {
+  const charge = pi.latest_charge;
+  const bt = charge && typeof charge === "object" ? charge.balance_transaction : null;
+  return bt && typeof bt === "object" && typeof bt.fee === "number" ? bt.fee : null;
+}
+/** An invoice's tax: older API versions say `tax`, newer ones list `total_taxes` (or `total_tax_amounts`). */
+export function invoiceTax(inv: StripeInvoice): number {
+  if (typeof inv.tax === "number") return inv.tax;
+  const list = inv.total_taxes ?? inv.total_tax_amounts ?? [];
+  return list.reduce((t, x) => t + (x.amount ?? 0), 0);
+}
+/** An invoice's PaymentIntent: on the invoice in older API versions, under `payments` in newer ones. */
+export function invoiceIntent(inv: StripeInvoice): string | null {
+  const id = (v: string | { id?: string } | null | undefined) => (typeof v === "string" ? v : v?.id ?? null);
+  return id(inv.payment_intent) ?? id(inv.payments?.data?.[0]?.payment?.payment_intent) ?? null;
+}
+
+/**
+ * What Stripe kept and what was tax on one payment, for a creator's commission (migration 0088). Reads the fee from
+ * the charge's balance transaction; when Stripe can't be read, estimates it (and says so) rather than failing.
+ */
+export async function paymentCosts(secretKey: string, ref: { paymentIntent?: string | null; invoice?: string | null; amount: number; tax?: number | null }) {
+  let paymentIntent = ref.paymentIntent ?? null;
+  let tax = ref.tax ?? null;
+  if (ref.invoice) {
+    const path = `invoices/${encodeURIComponent(ref.invoice)}`;
+    const inv = await stripeCall<StripeInvoice>(secretKey, "GET", `${path}?expand%5B%5D=payments`)
+      .catch(() => stripeCall<StripeInvoice>(secretKey, "GET", path)).catch(() => null);
+    if (inv) { tax ??= invoiceTax(inv); paymentIntent ??= invoiceIntent(inv); }
+  }
+  let fee: number | null = null;
+  if (paymentIntent) {
+    const pi = await stripeCall<StripeIntent>(secretKey, "GET", `payment_intents/${encodeURIComponent(paymentIntent)}?expand%5B%5D=latest_charge.balance_transaction`).catch(() => null);
+    fee = pi ? feeFromIntent(pi) : null;
+  }
+  return { fee: fee ?? estimateFee(ref.amount), estimated: fee === null, tax: tax ?? 0, paymentIntent, invoice: ref.invoice ?? null };
+}
+
 /** A billing portal session (https://docs.stripe.com/api/customer_portal/sessions/create): its one-time `url`. */
 export const createPortalSession = (secretKey: string, customer: string, returnUrl: string) =>
   stripeCall<{ url: string }>(secretKey, "POST", "billing_portal/sessions", { customer, return_url: returnUrl });

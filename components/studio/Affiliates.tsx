@@ -2,7 +2,7 @@
 
 // Studio → Affiliates (spec section 21, step 1; migration 0087): the creators we work with and their /c/<slug>
 // links. Admins add creators (rate, length, welcome gift), make custom links, copy them or show a QR code, and
-// retire them. Numbers here are clicks and sign-ups; money columns come with commissions (step 2).
+// retire them. Step 2 (migration 0088): the Overview, the money columns and each affiliate's page (AffiliateViews).
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -12,17 +12,23 @@ import {
   normalizeCreatorCode, slugProblem, type Affiliates, type Creator, type CreatorInput, type CreatorLink, type Lands, type Length, type LinkInput,
 } from "@/lib/creators";
 import { itemBySku } from "@/lib/city";
+import { formatPrice } from "@/lib/store";
+import { REFUND_FLAG } from "@/lib/creators";
+import { AffiliatesOverviewView, CreatorPageView } from "./AffiliateViews";
 import type { StudioApi } from "@/lib/studio";
 
 const PERIODS = [7, 30, 90, 0] as const;
 const n = (x: number) => x.toLocaleString("en-US");
 const pct = (x: number | null) => (x === null ? "–" : `${x}%`);
 const origin = () => (process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/+$/, "");
+const cents = (c: number | undefined) => ((c ?? 0) < 0 ? `−${formatPrice(-(c ?? 0))}` : formatPrice(c ?? 0));
 const giftText = (c: Pick<Creator, "giftCash" | "giftItem">) =>
   [c.giftCash > 0 ? `C$${n(c.giftCash)}` : null, c.giftItem ? itemBySku(c.giftItem)?.name ?? c.giftItem : null].filter(Boolean).join(" + ") || "None";
 
 export function AffiliatesTab({ api, preview = false }: { api: StudioApi; preview?: boolean }) {
-  const [view, setView] = useState<"creators" | "links">("creators");
+  const money = !!api.affiliatesOverview;
+  const [view, setView] = useState<"overview" | "creators" | "links">(money ? "overview" : "creators");
+  const [opened, setOpened] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof PERIODS)[number]>(30);
   const [data, setData] = useState<Affiliates | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +46,10 @@ export function AffiliatesTab({ api, preview = false }: { api: StudioApi; previe
   const totals = useMemo(() => creators.reduce((t, c) => ({ clicks: t.clicks + c.clicks, signups: t.signups + c.signups, byCode: t.byCode + c.byCode }), { clicks: 0, signups: 0, byCode: 0 }), [creators]);
   const period = days === 0 ? "All time" : `Last ${days} days`;
 
+  if (opened && !editing && api.creatorPage) {
+    return <CreatorPageView api={api} id={opened} days={days} onBack={() => setOpened(null)}
+      onEdit={() => { const c = creators.find((x) => x.id === opened); if (c) setEditing(c); }} />;
+  }
   if (editing) {
     return (
       <CreatorForm
@@ -55,6 +65,7 @@ export function AffiliatesTab({ api, preview = false }: { api: StudioApi; previe
     <section className="stack-16">
       <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
         <div className="row" style={{ gap: 6 }} role="group" aria-label="View">
+          {money && <button className="chip" aria-pressed={view === "overview"} onClick={() => setView("overview")}>Overview</button>}
           <button className="chip" aria-pressed={view === "creators"} onClick={() => setView("creators")}>Creators</button>
           <button className="chip" aria-pressed={view === "links"} onClick={() => setView("links")}>Links</button>
         </div>
@@ -66,7 +77,8 @@ export function AffiliatesTab({ api, preview = false }: { api: StudioApi; previe
       {error && <div className="studio-note error"><span className="body-strong">{error}</span></div>}
       {ok && <div className="studio-note ok"><span className="body-strong">{ok}</span><button className="chip" onClick={() => setOk(null)}>OK</button></div>}
       {!data && !error && <p className="meta">Loading…</p>}
-      {data && (<>
+      {view === "overview" && money && <AffiliatesOverviewView api={api} days={days} onOpen={setOpened} />}
+      {data && view !== "overview" && (<>
         <div className="studio-tiles aff-tiles">
           {([
             ["Active creators", n(creators.filter((c) => c.status === "active").length), `${n(creators.length)} in all`],
@@ -82,14 +94,14 @@ export function AffiliatesTab({ api, preview = false }: { api: StudioApi; previe
           ))}
         </div>
         {view === "creators"
-          ? <CreatorsTable creators={creators} onAdd={() => setEditing("new")} onOpen={setEditing} />
+          ? <CreatorsTable creators={creators} money={money} onAdd={() => setEditing("new")} onOpen={(c) => (money ? setOpened(c.id) : setEditing(c))} />
           : <LinksView api={api} creators={creators} onChanged={reload} onError={setError} />}
       </>)}
     </section>
   );
 }
 
-function CreatorsTable({ creators, onAdd, onOpen }: { creators: Creator[]; onAdd: () => void; onOpen: (c: Creator) => void }) {
+function CreatorsTable({ creators, money, onAdd, onOpen }: { creators: Creator[]; money: boolean; onAdd: () => void; onOpen: (c: Creator) => void }) {
   return (
     <div className="studio-card stack-12">
       <div className="row" style={{ justifyContent: "space-between", gap: 8 }}>
@@ -102,8 +114,10 @@ function CreatorsTable({ creators, onAdd, onOpen }: { creators: Creator[]; onAdd
         <div className="insights-table-wrap">
           <table className="insights-table aff-table">
             <thead><tr>
-              <th scope="col">Creator</th><th scope="col">Code</th><th scope="col">Rate</th><th scope="col">Length</th><th scope="col">Welcome gift</th>
-              <th scope="col">Clicks</th><th scope="col">Sign-ups</th><th scope="col">Click → sign-up</th><th scope="col">Status</th>
+              <th scope="col">Creator</th><th scope="col">Code</th><th scope="col">Rate</th><th scope="col">Length</th>{!money && <th scope="col">Welcome gift</th>}
+              <th scope="col">Clicks</th><th scope="col">Sign-ups</th><th scope="col">Click → sign-up</th>
+              {money && <><th scope="col">Payers</th><th scope="col">Revenue</th><th scope="col">Commission</th><th scope="col">Held</th><th scope="col">Payable</th><th scope="col">Paid</th><th scope="col">Kept</th></>}
+              <th scope="col">Status</th>
             </tr></thead>
             <tbody>
               {creators.map((c) => (
@@ -112,10 +126,19 @@ function CreatorsTable({ creators, onAdd, onOpen }: { creators: Creator[]; onAdd
                   <td><code className="aff-code">{c.code}</code></td>
                   <td className="tabular">{c.rate}%{c.rate >= RATE.high && <span className="aff-tag high">High</span>}</td>
                   <td>{lengthLabel(c.months)}</td>
-                  <td>{giftText(c)}</td>
+                  {!money && <td>{giftText(c)}</td>}
                   <td className="tabular">{n(c.clicks)}</td>
                   <td className="tabular">{n(c.signups)}{c.byCode > 0 && <span className="meta"> ({n(c.byCode)} code)</span>}</td>
                   <td className="tabular">{pct(conversion(c.signups - c.byCode, c.clicks))}</td>
+                  {money && <>
+                    <td className="tabular">{n(c.payers ?? 0)}{c.signups > 0 && <span className="meta"> ({pct(conversion(c.payers ?? 0, c.signups))})</span>}</td>
+                    <td className="tabular">{formatPrice(c.revenueCents ?? 0)}{(c.refundRate ?? 0) > REFUND_FLAG && <span className="aff-tag flag" title={`${c.refundRate}% of their players' payments were refunded`}>⚑ {c.refundRate}% refunds</span>}</td>
+                    <td className="tabular">{cents(c.owed?.periodCents)}</td>
+                    <td className="tabular">{cents(c.owed?.heldCents)}</td>
+                    <td className="tabular body-strong">{cents(c.owed?.payableCents)}</td>
+                    <td className="tabular">{cents(c.owed?.paidCents)}</td>
+                    <td className="tabular">{cents((c.owed?.periodNetCents ?? 0) - (c.owed?.periodCents ?? 0))}</td>
+                  </>}
                   <td><span className={`aff-tag ${c.status}`}>{c.status === "active" ? "Active" : "Paused"}</span></td>
                 </tr>
               ))}
@@ -123,7 +146,10 @@ function CreatorsTable({ creators, onAdd, onOpen }: { creators: Creator[]; onAdd
           </table>
         </div>
       )}
-      <p className="meta" style={{ margin: 0 }}>Tap a creator to change their rate, length or gift. A new rate applies to payments from then on; a player keeps the length set when they signed up.</p>
+      <p className="meta" style={{ margin: 0 }}>
+        {money ? "Tap a creator for their page: funnel, players, commission history, and their rate, length and gift. Commission and Kept are for the period; Held, Payable and Paid are as of today. " : "Tap a creator to change their rate, length or gift. "}
+        A new rate applies to payments from then on; a player keeps the length set when they signed up.
+      </p>
     </div>
   );
 }
@@ -265,7 +291,9 @@ function LinksView({ api, creators, onChanged, onError }: { api: StudioApi; crea
             <table className="insights-table aff-table">
               <thead><tr>
                 <th scope="col">Link</th><th scope="col">Creator</th><th scope="col">Lands on</th><th scope="col">Campaign</th>
-                <th scope="col">Clicks</th><th scope="col">Sign-ups</th><th scope="col">Click → sign-up</th><th scope="col"><span className="sr-only">Actions</span></th>
+                <th scope="col">Clicks</th><th scope="col">Sign-ups</th><th scope="col">Click → sign-up</th>
+                {rows.some(({ l }) => l.revenueCents !== undefined) && <><th scope="col">Payers</th><th scope="col">Revenue</th></>}
+                <th scope="col"><span className="sr-only">Actions</span></th>
               </tr></thead>
               <tbody>
                 {rows.map(({ c, l }) => (
@@ -277,6 +305,7 @@ function LinksView({ api, creators, onChanged, onError }: { api: StudioApi; crea
                     <td className="tabular">{n(l.clicks)}</td>
                     <td className="tabular">{n(l.signups)}</td>
                     <td className="tabular">{pct(conversion(l.signups, l.clicks))}</td>
+                    {l.revenueCents !== undefined && <><td className="tabular">{n(l.payers ?? 0)}</td><td className="tabular">{formatPrice(l.revenueCents)}</td></>}
                     <td>
                       <span className="row" style={{ gap: 4, flexWrap: "nowrap" }}>
                         <button className="chip" onClick={() => void copy(l)}>{copied === l.id ? "Copied" : "Copy"}</button>

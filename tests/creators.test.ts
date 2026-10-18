@@ -39,3 +39,24 @@ test("creators: click to sign-up", () => {
   assert.equal(conversion(1, 3), 33.3);
   assert.equal(conversion(5, 0), null);
 });
+
+import { commissionOn } from "../lib/creators.ts";
+import { estimateFee, feeFromIntent, invoiceIntent, invoiceTax } from "../lib/stripe.ts";
+
+test("commissions: on net revenue (price − Stripe's fee − tax), at the creator's rate, never negative", () => {
+  assert.deepEqual(commissionOn(3999, 146, 0, 20), { net: 3853, commission: 771 });
+  assert.deepEqual(commissionOn(499, 44, 40, 30), { net: 415, commission: 125 });
+  assert.deepEqual(commissionOn(100, 300, 0, 30), { net: 0, commission: 0 });
+});
+
+test("commissions: Stripe's fee and tax across API versions, with an estimate when the fee can't be read", () => {
+  assert.equal(estimateFee(499), 44);
+  assert.equal(feeFromIntent({ latest_charge: { balance_transaction: { fee: 146 } } }), 146);
+  assert.equal(feeFromIntent({ latest_charge: "ch_1" }), null);
+  assert.equal(invoiceTax({ tax: 40 }), 40);
+  assert.equal(invoiceTax({ total_taxes: [{ amount: 25 }, { amount: 15 }] }), 40);
+  assert.equal(invoiceTax({}), 0);
+  assert.equal(invoiceIntent({ payment_intent: "pi_old" }), "pi_old");
+  assert.equal(invoiceIntent({ payments: { data: [{ payment: { payment_intent: { id: "pi_new" } } }] } }), "pi_new");
+  assert.equal(invoiceIntent({}), null);
+});

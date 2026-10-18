@@ -38,7 +38,12 @@ export interface CreatorLink {
   createdAt: string;
   clicks: number;
   signups: number;
+  /** Migration 0088: players from this link who paid, and what they paid, in the period. */
+  payers?: number;
+  revenueCents?: number;
 }
+/** A creator's commission by state today (held inside the 45 days, payable, paid) and earned in the period. */
+export interface Owed { heldCents: number; payableCents: number; paidCents: number; periodCents: number; periodNetCents: number }
 export interface Creator {
   id: string;
   name: string;
@@ -58,7 +63,53 @@ export interface Creator {
   byCode: number;
   signupsAll: number;
   links: CreatorLink[];
+  /** Migration 0088. */
+  payers?: number;
+  revenueCents?: number;
+  /** Share of their players' payments refunded in the period (a flag above 20%). */
+  refundRate?: number;
+  owed?: Owed;
 }
+
+export interface DayPoint { date: string; clicks: number; signups: number; revenueCents: number; commissionCents?: number }
+/** The Affiliates Overview (migration 0088). */
+export interface AffiliatesOverview {
+  days: number;
+  today: string;
+  totals: { clicks: number; signups: number; payers: number; revenueCents: number; netCents: number; commissionCents: number; heldCents: number; payableCents: number; paidCents: number };
+  daily: DayPoint[];
+  topCreators: { id: string; name: string; signups: number; revenueCents: number }[];
+  topLinks: { id: number; slug: string; creator: string; clicks: number; signups: number }[];
+}
+export type CommissionState = "held" | "payable" | "paid";
+/** One affiliate's page (migration 0088). The player list is admin-only. */
+export interface CreatorPage {
+  days: number;
+  today: string;
+  creator: { id: string; name: string; handle: string | null; code: string; rate: number; months: Length; status: "active" | "paused" };
+  owed: Owed;
+  funnel: { clicks: number; signups: number; movedIn: number; payers: number; vip: number };
+  daily: DayPoint[];
+  products: { sku: string; name: string; type: string | null; count: number; revenueCents: number }[];
+  retention: Record<"d1" | "d7" | "d30", { cohort: number; returned: number }>;
+  commissions: {
+    id: number; kind: "sale" | "renewal" | "reversal"; sku: string | null; name: string | null; player: string | null; at: string;
+    grossCents: number; feeCents: number; taxCents: number; netCents: number; feeEstimated: boolean; rate: number;
+    commissionCents: number; payableOn: string; state: CommissionState;
+  }[];
+  players: { id: string; name: string; joinedAt: string; how: "link" | "code"; link: string | null; spendCents: number; commissionCents: number; lastSeen: string | null; until: string | null }[];
+}
+
+/** Commission on one payment, as the database works it out: rate × (price − Stripe's fee − tax), never below zero. */
+export function commissionOn(grossCents: number, feeCents: number, taxCents: number, rate: number): { net: number; commission: number } {
+  const net = Math.max(0, grossCents - feeCents - taxCents);
+  return { net, commission: Math.round((net * rate) / 100) };
+}
+/** Refunds above this share of a creator's players' payments get a flag in the Studio. */
+export const REFUND_FLAG = 20;
+/** Days a commission is held before it can be paid, and the smallest payout. */
+export const HOLD_DAYS = 45;
+export const PAYOUT_MIN_CENTS = 5000;
 export interface Affiliates { days: number; creators: Creator[] }
 
 /** What the Studio sends to save a creator (the id is missing for a new one). */

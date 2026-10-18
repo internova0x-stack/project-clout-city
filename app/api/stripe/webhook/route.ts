@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifyStripeSignature } from "@/lib/stripe";
+import { paymentCosts, verifyStripeSignature } from "@/lib/stripe";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 
 // The Stripe webhook: the only thing that grants (or, on refund, revokes) what a
@@ -7,7 +7,9 @@ import { getAdminSupabase } from "@/lib/supabase/admin";
 // Point a Stripe webhook endpoint at /api/stripe/webhook with these events:
 // checkout.session.completed, checkout.session.async_payment_succeeded,
 // checkout.session.expired, charge.refunded, and (unlimited chat's monthly plan, migration 0047)
-// customer.subscription.updated and customer.subscription.deleted.
+// customer.subscription.updated and customer.subscription.deleted, plus invoice.paid (renewals).
+// Creators (migration 0088): a payment by a referred player also writes the creator's commission on net revenue
+// (Stripe's fee from the balance transaction, and tax), and a refund, full or partial, takes back its share.
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +66,15 @@ export async function POST(request: NextRequest) {
       call = { fn: "payment_refund", args: { p_event: event.id, p_payment: o.payment_intent } };
       break;
   }
-  if (!call) return NextResponse.json({ received: true, ignored: event.type });
+  if (!call) {
+    // A partial refund keeps access, but still takes back its share of a creator's commission.
+    if (event.type === "charge.refunded") {
+      const commission = await creatorCommission(db, event, o);
+      if (commission === "error") return NextResponse.json({ error: "db" }, { status: 500 });
+      return NextResponse.json({ received: true, commission });
+    }
+    return NextResponse.json({ received: true, ignored: event.type });
+  }
 
   const { data, error } = await db.rpc(call.fn, call.args);
   // Membership & purchases (migration 0079): remember the buyer's Stripe customer for the billing portal.
@@ -77,5 +87,54 @@ export async function POST(request: NextRequest) {
     console.error(`stripe ${event.type} ${event.id} failed`, error);
     return NextResponse.json({ error: "db" }, { status: 500 });
   }
-  return NextResponse.json({ received: true, result: data });
+  const commission = await creatorCommission(db, event, o, call.args.p_player as string | undefined);
+  if (commission === "error") return NextResponse.json({ error: "db" }, { status: 500 });
+  return NextResponse.json({ received: true, result: data, commission });
 }
+
+/**
+ * The creator's side of a payment (migration 0088): a commission on a referred player's purchase or renewal, once
+ * per payment, or the reversal of a refunded one. Idempotent, so a Stripe retry after a 500 is safe.
+ */
+async function creatorCommission(db: NonNullable<ReturnType<typeof getAdminSupabase>>, event: StripeEvent, o: Record<string, unknown>, player?: string) {
+  const secret = process.env.STRIPE_SECRET_KEY ?? "";
+  const str = (v: unknown) => (typeof v === "string" ? v : v && typeof v === "object" && typeof (v as { id?: unknown }).id === "string" ? (v as { id: string }).id : null);
+  let args: Record<string, unknown> | null = null;
+  if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+    if (!player) return null;
+    const referred = await db.rpc("creator_referred", { p_player: player });
+    if (referred.error) return missing(referred.error) ? null : "error";
+    if (!referred.data) return null;
+    const amount = Number(o.amount_total ?? 0);
+    const sub = o.mode === "subscription";
+    const costs = await paymentCosts(secret, {
+      paymentIntent: sub ? null : str(o.payment_intent), invoice: sub ? str(o.invoice) : null, amount,
+      tax: (o.total_details as { amount_tax?: number } | undefined)?.amount_tax ?? null,
+    });
+    args = { p_source: `purchase:${o.id}`, p_kind: "sale", p_player: player, p_sku: ((o.metadata ?? {}) as Record<string, string>).sku, amount, costs };
+  } else if (event.type === "invoice.paid") {
+    const found = await db.rpc("creator_subscription_player", { p_subscription: str(o.subscription) });
+    if (found.error) return missing(found.error) ? null : "error";
+    if (!found.data) return null;
+    const amount = Number(o.amount_paid ?? 0);
+    const costs = await paymentCosts(secret, { invoice: String(o.id), amount });
+    args = { p_source: `renewal:${o.id}`, p_kind: "renewal", p_player: found.data, p_sku: null, amount, costs };
+  } else if (event.type === "charge.refunded") {
+    const r = await db.rpc("creator_commission_refund", {
+      p_event: event.id, p_payment_intent: str(o.payment_intent), p_invoice: str(o.invoice), p_refunded: o.amount_refunded, p_amount: o.amount,
+    });
+    if (r.error) return missing(r.error) ? null : "error";
+    return r.data;
+  }
+  if (!args) return null;
+  const { costs, amount, ...rest } = args as { costs: Awaited<ReturnType<typeof paymentCosts>>; amount: number } & Record<string, unknown>;
+  const r = await db.rpc("creator_commission_record", {
+    p_event: event.id, ...rest, p_payment_intent: costs.paymentIntent, p_invoice: costs.invoice,
+    p_gross: amount, p_fee: costs.fee, p_tax: costs.tax, p_currency: o.currency, p_fee_estimated: costs.estimated,
+  });
+  if (r.error) { console.error(`stripe ${event.id} commission failed`, r.error); return missing(r.error) ? null : "error"; }
+  return r.data;
+}
+
+/** Before migration 0088 is run, payments carry on without commissions. */
+const missing = (e: { message: string }) => /does not exist|schema cache|could not find the function/i.test(e.message);

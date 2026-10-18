@@ -17,7 +17,7 @@ import {
   previewPlayerCard, previewStudioInsights, previewStudioMetrics, previewStudioPlayer, previewStudioPlayerBan, previewStudioPlayers, previewStudioReportAction, previewStudioReports,
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
-import { previewStudioAffiliates, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
+import { previewStudioAffiliates, previewStudioAffiliatesOverview, previewStudioCreatorPage, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
@@ -168,7 +168,7 @@ export default async function Preview({
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
             beatStatus: previewStudioBeatStatus, content: previewStudioContent, reorder: previewStudioReorder, beatEdit: previewStudioBeatEdit, goLive: previewStudioGoLive,
             reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics, insights: previewStudioInsights, players: previewStudioPlayers, player: previewStudioPlayer, playerBan: previewStudioPlayerBan,
-            affiliates: previewStudioAffiliates, creatorSave: previewStudioCreatorSave, linkSave: previewStudioLinkSave, linkStatus: previewStudioLinkStatus,
+            affiliates: previewStudioAffiliates, affiliatesOverview: previewStudioAffiliatesOverview, creatorPage: previewStudioCreatorPage, creatorSave: previewStudioCreatorSave, linkSave: previewStudioLinkSave, linkStatus: previewStudioLinkStatus,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
