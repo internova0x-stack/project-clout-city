@@ -254,7 +254,11 @@ Push needs a key pair (VAPID), a secret for the sender's cron, and a schedule.
      with that header.
    Game traffic also runs the sender (at most once a minute per server), so chats and invites go out even before the
    cron is set up; the cron covers quiet times (morning roundups, streak reminders, players who are away).
-4. **Test**: in the game, Phone → Settings → Notifications → On, then **Send a test notification**. On iPhone this only
+4. **Run `supabase/migrations/0082_push_triggers.sql`** (step 2). Messages, matches, date, crew, ride and together
+   invites and friends joining queue a push the moment they happen. Bills, gigs ready, full tills, streaks about to end,
+   exams and party tickets are found by `push_scan()`, which the scheduled sender runs first, so those need the
+   schedule in step 3. A tap opens the game on the right screen (`/home?open=messages|bills|gigs|tasks|events|businesses`).
+5. **Test**: in the game, Phone → Settings → Notifications → On, then **Send a test notification**. On iPhone this only
    works from the Home Screen app (iOS 16.4 or later).
 
 ## 3. Local development (optional)

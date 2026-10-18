@@ -23,6 +23,9 @@ export async function runPush(opts: { player?: string } = {}): Promise<{ sent: n
   const admin = getAdminSupabase();
   if (!admin) return { sent: 0, dropped: 0, skipped: "no service role" };
   if (!vapid()) return { sent: 0, dropped: 0, skipped: "no VAPID keys" };
+  // Step 2 (migration 0082): queue the time-based reminders (bills, gigs, tills, streaks, exams, tickets) first.
+  // Each key is queued once, so running this every few minutes is cheap; before 0082 it's simply missing.
+  if (!opts.player) await admin.rpc("push_scan").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan failed", error); });
   let qq = admin.from("push_queue").select("id, player_id, kind, group_key, title, body, url, deadline_at, close, created_at").eq("status", "queued").limit(2000);
   if (opts.player) qq = qq.eq("player_id", opts.player);
   const { data: queued, error } = await qq;
