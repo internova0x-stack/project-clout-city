@@ -585,7 +585,7 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 - How many weeks to "graduate", and what alumni get.
 - Who writes the weekly exam questions (Studio weekly routine).
 
-## 19. Daily tasks 2.0: goals, streaks and guest-list passes (proposed; owner, Oct 18)
+## 19. Daily tasks 2.0: goals, streaks and guest-list passes (owner, Oct 18; migrations 0073, 0074)
 
 **Why:** daily tasks should push players to explore different activities and give them a reason to make progress
 every day. Today the five tasks are random and pay flat cash (C$25 to C$50 each plus C$100 for all five), the Goals
@@ -594,15 +594,35 @@ tab has no rewards and no link to tasks, and missing a day costs nothing.
 **Owner decisions (Oct 18):** goal progress is **framing only** (no savings jar: cash stays cash); the **game
 suggests** the next goal; **add streaks**; guest-list passes cover clout-locked venues **and VIP floors**.
 
-### The active goal (suggested by the game)
-- One active goal at a time, the first unfinished one on this ladder: first purchase → first gig payout → move into a
-  better apartment (the next home up) → pro gigs (500 clout, 50 Confidence) → first car (the cheapest car) → big gigs
-  (2,000 clout, 80 Confidence) → own a home.
-- Shown at the top of the Tasks sheet with a progress bar in the goal's own terms ("C$1,240 of C$14,000",
-  "380 of 500 clout"), and what's still missing. Finishing it pays a one-time clout reward and Lola suggests the next.
-- **Goal-linked tasks:** some of the day's tasks are picked to move the goal forward (a car: the dealership and a
-  shift; pro gigs: the gym, a class or a club for Confidence and clout). Their reward line reads as progress
-  ("+C$40 toward your car"). The money is ordinary cash.
+### The goal ladder (owner, Oct 18: "a much longer list, a progression, most of it locked behind clout")
+- 25 goals in ten chapters, one per rank (lib/ranks.ts). A chapter's goals unlock at that rank's clout; the game
+  suggests the first unfinished goal you've unlocked, and when those are all done, reaching the next chapter's clout.
+  A goal finished early still counts and pays, once. The ladder lives in `lib/goals.ts` (`GOALS.ladder`) and in
+  game_settings 'goals'.
+- Pro gigs come before a better apartment; owning a home is a long-run goal (15,000 clout, 1,500 clout reward; any
+  house counts, the progress bar tracks the townhouse).
+
+| Unlocks at | Goals (reward in clout) |
+| --- | --- |
+| 0 (Ramen Noodle Era) | first purchase 25 · first shift 25 · all five daily tasks 50 · first gig payout 50 |
+| 100 | a friend in your crew 75 · save C$15,000 75 · any skill to level 3 75 |
+| 500 | pro gigs 150 · the hot dog cart 150 · move to Jackson Heights 150 |
+| 1,000 | first car 200 · move to Sunnyside Gardens 200 · any skill to level 5 200 |
+| 2,000 | big gigs 300 · past the Ultraviolet Society door 300 · a bodega 300 |
+| 5,000 | a VIP floor at a medium club 500 · move to the LIC high-rise 500 |
+| 15,000 | own a home 1,500 · a laundromat 750 |
+| 50,000 | the LIC penthouse 2,500 · a café 2,500 |
+| 150,000 | the Hunters Point duplex 5,000 · taco trucks 5,000 |
+| 500,000 | take the startup public 10,000 |
+
+- The Goals tab shows every chapter: done ticked, the current goal with a progress bar in its own terms
+  ("C$1,240 of C$14,000", "380 of 500 clout"), locked chapters with "Unlocks at N clout". (No goal card on the Daily
+  tab, owner, Oct 18: the Goals tab is the place for it.) Finishing a goal pays its clout with a reveal.
+- **Goal-linked tasks:** two of the day's tasks are picked to move the goal forward (each goal has a lean: cash goals
+  get a shift and somewhere to spend, the others places that give Confidence and clout). They carry a
+  "🎯 Toward …" tag. The money is ordinary cash.
+- **Task copy (owner, Oct 18):** titles say what to do and where in Clout City's voice ("Grab a bite at…",
+  "Clock in at…", "Spill the tea with…"), with a rotating joke line under each.
 
 ### Streaks
 - A streak counts New York days with **all five tasks done**. One missed day a week is forgiven automatically (a
@@ -613,7 +633,10 @@ suggests** the next goal; **add streaks**; guest-list passes cover clout-locked 
     "Employee of the Month"). It lands in the Collection and can be placed at home.
   - Day 14: a **guest-list pass**.
   - Then every 7 days, alternating a collectible and a pass.
-- The streak shows as a flame and a number on the Tasks sheet and the HUD task ring.
+- The streak shows as a flame pin (white stroke, the other pins' red-pink) on the HUD task counter, and on the Daily
+  tab as a minimal row of this week's date circles, filled with a flame on each full day; tapping it opens the **Streaks section** (owner, Oct 18): the run and best, this week, the last five weeks
+  (full days and frozen days), the reward track (got, next, upcoming), the stash (passes and collectibles) and the
+  rules.
 
 ### Guest-list passes
 - One night (until midnight New York) inside one place you can't get into yet: a club above your door clout or a VIP
@@ -622,9 +645,8 @@ suggests** the next goal; **add streaks**; guest-list passes cover clout-locked 
   is about player numbers, not clout) and never pay out cash.
 - The server's door and VIP checks accept a pass that is active tonight for that place.
 
-### Open question
-- **The daily mix.** Five tasks today: up to 2 gossip (owner, Oct 14), 1 skill, the rest random. Adding 2 goal-linked
-  tasks leaves no random ones. Proposal: 2 goal, 1 gossip, 1 skill, 1 random; or six tasks a day.
+### The daily mix (owner, Oct 18)
+- Five tasks: 1 gossip, 2 goal-linked, 1 skill, 1 random.
 
 ## 20. Later features
 

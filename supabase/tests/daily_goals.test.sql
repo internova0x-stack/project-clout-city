@@ -49,30 +49,42 @@ select pg_temp.assert(exists (select 1 from public.daily_tasks d, jsonb_array_el
                                  and p -> 'tags' ?| array['boutique', 'shopping']), 'and somewhere to spend it');
 select pg_temp.assert((select bool_and(reward between 25 and 50) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000073a1' and goal is not null), 'ordinary cash rewards');
 
--- The goal: first purchase, a count; buying anything finishes it and pays 50 clout, once.
+-- The goal: first purchase, a count; buying anything finishes it and pays 25 clout, once (0074's ladder).
 set role authenticated;
 select pg_temp.as_('00000000-0000-0000-0000-0000000073a1');
 select pg_temp.assert(public.goals_state() -> 'goal' ->> 'id' = 'first_purchase', 'the game suggests the first purchase');
 select pg_temp.assert(public.goals_state() -> 'goal' -> 'parts' = '[{"have": 0, "need": 1, "unit": "count"}]'::jsonb, 'progress as a count');
 select pg_temp.assert(pg_temp.raises($$select public.buy_item('home-trophy-shelf')$$, 'reward_only'), 'streak rewards are not for sale');
 select 1 from public.buy_item('home-plant');
-select pg_temp.assert(public.goals_state() -> 'goal' ->> 'id' = 'first_gig', 'next: the first gig');
+select pg_temp.assert(public.goals_state() -> 'goal' ->> 'id' = 'first_shift', 'next: the first shift');
 select pg_temp.assert(public.goals_state() -> 'done' = '["first_purchase"]'::jsonb, 'first purchase done');
 create temp table c0 as select clout from public.players where id = auth.uid();
 grant all on c0 to authenticated;
 reset role;
 select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a1' and kind = 'goal') = 1, 'goal reward paid once');
-select pg_temp.assert((select amount from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a1' and kind = 'goal' and ref = 'first_purchase') = 50, '50 clout');
+select pg_temp.assert((select amount from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a1' and kind = 'goal' and ref = 'first_purchase') = 25, '25 clout');
 select public.goal_settle('00000000-0000-0000-0000-0000000073a1');
 select pg_temp.assert((select clout from public.players where id = '00000000-0000-0000-0000-0000000073a1') = (select clout from c0), 'settling again pays nothing');
 
--- Clout goals: with the purchase, a gig and a move behind them, the goal is pro gigs (clout and Confidence),
--- and its two tasks give Confidence or clout.
+-- 0074: the ladder is gated by clout. With the first chapter done and no clout, the game suggests reaching 100 clout
+-- (the next chapter); at 500 clout, with the second chapter done too, pro gigs (clout and Confidence) come first,
+-- before the better apartment, and its two tasks give Confidence or clout.
 insert into public.gig_offers (player_id, ny_date, tier, title, pay, energy, wait_minutes, confidence_req, accepted_at, ready_at, collected_at)
 values ('00000000-0000-0000-0000-0000000073a2', public.ny_today(), 'side', 'Test gig', 100, 10, 60, 0, now(), now(), now());
-insert into public.ledger (player_id, currency, amount, kind, ref) values ('00000000-0000-0000-0000-0000000073a2', 'cash', -45, 'purchase', 'test');
-update public.players set moved_up = true where id = '00000000-0000-0000-0000-0000000073a2';
-select pg_temp.assert(public.goal_current('00000000-0000-0000-0000-0000000073a2') ->> 'id' = 'pro_gigs', 'pro gigs next');
+insert into public.ledger (player_id, currency, amount, kind, ref) values
+  ('00000000-0000-0000-0000-0000000073a2', 'cash', -45, 'purchase', 'test'),
+  ('00000000-0000-0000-0000-0000000073a2', 'cash', 120, 'shift', 'test'),
+  ('00000000-0000-0000-0000-0000000073a2', 'cash', 100, 'daily_bonus', '2000-01-01');
+update public.players set clout = 0, confidence = 0, bank_cash = 0 where id = '00000000-0000-0000-0000-0000000073a2';
+select pg_temp.assert(public.goal_current('00000000-0000-0000-0000-0000000073a2') = '{"id": "next_chapter", "parts": [{"have": 0, "need": 100, "unit": "clout"}], "target": null}'::jsonb,
+                      'chapter one done: reach 100 clout next');
+select pg_temp.assert(not ((select g from jsonb_array_elements(public.goal_list('00000000-0000-0000-0000-0000000073a2')) g where g ->> 'id' = 'own_home') ->> 'done')::boolean, 'no home yet');
+select pg_temp.assert((select (g ->> 'unlock')::int from jsonb_array_elements(public.goal_list('00000000-0000-0000-0000-0000000073a2')) g where g ->> 'id' = 'own_home') = 15000, 'a home is a long-run goal');
+insert into public.ledger (player_id, currency, amount, kind, ref) values
+  ('00000000-0000-0000-0000-0000000073a2', 'clout', 0, 'goal', 'first_crew'),
+  ('00000000-0000-0000-0000-0000000073a2', 'clout', 0, 'goal', 'skill_3');
+update public.players set clout = 500, bank_cash = 16000 where id = '00000000-0000-0000-0000-0000000073a2';
+select pg_temp.assert(public.goal_current('00000000-0000-0000-0000-0000000073a2') ->> 'id' = 'pro_gigs', 'pro gigs before the apartment');
 select pg_temp.assert((select jsonb_agg(pt ->> 'unit') from jsonb_array_elements(public.goal_current('00000000-0000-0000-0000-0000000073a2') -> 'parts') pt)
                       = '["clout", "confidence"]'::jsonb, 'clout and Confidence parts');
 select pg_temp.assert((select (pt ->> 'need')::int from jsonb_array_elements(public.goal_current('00000000-0000-0000-0000-0000000073a2') -> 'parts') pt where pt ->> 'unit' = 'clout')
@@ -85,7 +97,10 @@ select pg_temp.assert((select bool_and(coalesce((a ->> 'confidence')::int, 0) > 
                         where d.player_id = '00000000-0000-0000-0000-0000000073a2' and d.goal is not null and p ->> 'id' = d.place_id and a ->> 'id' = d.action_id),
                       'goal tasks give Confidence or clout');
 select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000073a2') = 5, 'still five');
-select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a2' and kind = 'goal') = 3, 'three goals paid');
+select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a2' and kind = 'goal' and amount > 0) = 5, 'five goals paid (four in chapter one, savings)');
+select pg_temp.assert((select amount from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a2' and kind = 'goal' and ref = 'save_15k') = 75, 'saving C$15,000 pays 75');
+-- The hot dog cart: a business goal, its price as the cash part.
+select pg_temp.assert((select g -> 'parts' -> 0 ->> 'need' from jsonb_array_elements(public.goal_list('00000000-0000-0000-0000-0000000073a2')) g where g ->> 'id' = 'first_business')::int = 5000, 'the cart costs C$5,000');
 
 -- Streaks, from a Monday five weeks ago (d0). Mon, Tue, Wed: day 3 pays 50 clout.
 create temp table d as select public.ny_week() - 35 as d0;
@@ -139,6 +154,10 @@ set role authenticated;
 select pg_temp.as_('00000000-0000-0000-0000-0000000073a2');
 select pg_temp.assert((public.goals_state() -> 'streak' ->> 'current')::int = 2 and (public.goals_state() -> 'streak' ->> 'today')::boolean, 'two days, today done');
 select pg_temp.assert(public.goals_state() -> 'streak' -> 'next' = '{"day": 3, "reward": "clout"}'::jsonb, 'day 3 is next');
+-- 0074, the Streaks section: the full days (New York dates) and the run's start; no rewards yet in this run.
+select pg_temp.assert(public.goals_state() -> 'streak' -> 'days' = jsonb_build_array((public.ny_today() - 1)::text, public.ny_today()::text), 'the full days');
+select pg_temp.assert(public.goals_state() -> 'streak' ->> 'startedOn' = (public.ny_today() - 1)::text, 'the run started yesterday');
+select pg_temp.assert(public.goals_state() -> 'streak' -> 'rewards' = '[]'::jsonb, 'no rewards yet');
 -- No pass: no list.
 select pg_temp.assert(pg_temp.raises($$select public.use_guest_pass('ultraviolet-society')$$, 'no_pass'), 'no pass, no list');
 

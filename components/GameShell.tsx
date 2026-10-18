@@ -67,6 +67,8 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { handle } from "@/lib/validation";
 import { ProfileSheet } from "./game/ProfileSheet";
 import { RankUpCard } from "./game/Ranks";
+import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
+import type { GoalsApi, GoalsState } from "@/lib/goals";
 import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
 import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
 import { RANKS, rankFor, type Rank } from "@/lib/ranks";
@@ -195,11 +197,13 @@ export function GameShell({
   together,
   radio,
   campus,
+  goals,
   tv,
   stations,
   roomMood = "dream",
   previewRankUp,
   previewDailyHint = false,
+  previewGoalsReveal,
   invitedAt,
 }: {
   player: Player;
@@ -249,6 +253,8 @@ export function GameShell({
   radio?: RadioApi;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
   campus?: CampusApi;
+  /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
+  goals?: GoalsApi;
   /** v0.14 Clout TV (migration 0058): the Clout TV app, the home card and the Clout Tower's screen; hidden until tv_state answers. */
   tv?: TvApi;
   /** v0.14 texts from the stations (migration 0058), read-only threads in Messages. */
@@ -267,6 +273,8 @@ export function GameShell({
   previewRankUp?: number;
   /** Preview: Lola's daily-tasks nudge appears after 2 seconds. */
   previewDailyHint?: boolean;
+  /** Development previews (?goals=day3|day7|day14|goaldone): open with that reward reveal. */
+  previewGoalsReveal?: GoalsReveal;
 }) {
   const [city, setCity] = useState<CityState | null>(initialCity);
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
@@ -772,6 +780,46 @@ export function GameShell({
     },
     [applyCity],
   );
+  // ---- Daily tasks 2.0: the goal, the streak and passes. goals_state also pays a goal that has just finished, so it
+  // runs when the Tasks sheet opens and shortly after anything that could finish one (a task, clout, cash, a move).
+  const [goalsNow, setGoalsNow] = useState<GoalsState | null>(null);
+  const [goalsReveal, setGoalsReveal] = useState<GoalsReveal | null>(previewGoalsReveal ?? null);
+  const goalsPrev = useRef<GoalsState | null>(null);
+  const ownedSkus = useRef<Set<string>>(new Set());
+  ownedSkus.current = new Set((city?.items ?? []).map((i) => i.sku));
+  const loadGoals = useCallback(async () => {
+    if (!goals) return;
+    const r = await goals.state().catch(() => null);
+    if (!r?.ok) return;
+    const reveal = revealBetween(goalsPrev.current, r.data, (sku) => ownedSkus.current.has(sku));
+    goalsPrev.current = r.data;
+    setGoalsNow(r.data);
+    if (reveal) setGoalsReveal(reveal);
+  }, [goals]);
+  const goalsKey = city ? `${tasksDone(city)}:${city.player.clout}:${city.player.bank_cash}:${city.player.home_id}:${city.player.car_sku}:${city.player.house_sku}:${city.items.length}` : "";
+  useEffect(() => {
+    if (!goals || !goalsKey) return;
+    const t = setTimeout(() => void loadGoals(), goalsPrev.current ? 800 : 0);
+    return () => clearTimeout(t);
+  }, [goals, goalsKey, loadGoals]);
+  useEffect(() => { if (panel === "tasks") void loadGoals(); }, [panel, loadGoals]);
+  const spendPass = useCallback(async (placeId: string): Promise<boolean> => {
+    if (!goals) return false;
+    setBusy(`pass:${placeId}`);
+    try {
+      const r = await goals.usePass(placeId);
+      if (!r.ok) { setToast(r.error); return false; }
+      goalsPrev.current = r.data;
+      setGoalsNow(r.data);
+      return true;
+    } catch (e) {
+      glitched(e, setToast);
+      return false;
+    } finally {
+      setBusy(null);
+    }
+  }, [goals]);
+
   // The lotto's answers carry the card (its id, then its prize); the card itself shows the result.
   const lottoCall = useCallback(async (key: string, call: () => Promise<CityResult>): Promise<LottoCard | null> => {
     setBusy(key);
@@ -1116,6 +1164,17 @@ export function GameShell({
       isHere: (id) => atPlace === id,
       onGoThere: (p) => { setPlace(null); setInside(null); setTravelPlan({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id }); },
       from: { at: myPos, name: myPosName },
+    } : undefined,
+    passes: goals && goalsNow && travelOn ? {
+      held: goalsNow.passes.held,
+      tonight: goalsNow.passes.tonight?.place ?? null,
+      busy: !!busy?.startsWith("pass:"),
+      onUse: (p) => void spendPass(p.id).then((ok) => {
+        if (!ok) return;
+        setToast("🎟️ You're on the list tonight. Act like you've been here before.");
+        setPlace(null); setInside(null);
+        setTravelPlan({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id });
+      }),
     } : undefined,
     money: catalog ? { products, nowMs: gameNow, h: money } : undefined,
     onOpenShop: openShop,
@@ -1718,6 +1777,14 @@ export function GameShell({
             cash={city.player.bank_cash}
             busy={busy === `vip:${vipAsk.place.id}`}
             onClose={() => setVipAsk(null)}
+            passes={goalsNow && !goalsNow.passes.tonight ? goalsNow.passes.held : 0}
+            onUsePass={() => void spendPass(vipAsk.place.id).then(async (ok) => {
+              if (!ok) return;
+              const r = await cityApi!.enterVip!(vipAsk.place.id, false);
+              setVipAsk(null);
+              if (r.ok && r.vip?.access) { setInsideFloor(2); setToast("🎟️ Guest list. Upstairs. Pretend you've been here before."); }
+              else if (!r.ok) setToast(r.error);
+            })}
             onPay={() => void run(`vip:${vipAsk.place.id}`, () => cityApi!.enterVip!(vipAsk.place.id, true)).then((ok) => {
               setVipAsk(null);
               if (ok) { setInsideFloor(2); setToast("🥂 You're in. Act like you've been here before."); }
@@ -1875,6 +1942,7 @@ export function GameShell({
           clout: me.clout,
           bank: me.bank_cash,
           dailyDone: city ? tasksDone(city) : 0,
+          streak: goalsNow?.streak.current ?? 0,
           dailyTotal: city?.tasks.length || 5,
           stats: { energy: me.energy, mood: me.mood, confidence: me.confidence },
           muted,
@@ -1985,6 +2053,7 @@ export function GameShell({
         onOpenParty={openParty}
         cliqueCount={clique.length}
         city={cityOn ? city : null}
+        goals={goalsNow}
         onOpenPlace={openPlace}
         skills={skills}
         onCook={() => { setPanel(null); setKitchenOpen(true); }}
@@ -2397,6 +2466,13 @@ export function GameShell({
       )}
       {wentPublic && <WentPublicCard worth={myWorth} onClose={() => setWentPublic(false)} />}
       {rankUp && <RankUpCard rank={rankUp} name={handle(me.display_name)} onClose={() => setRankUp(null)} />}
+      {goalsReveal && !rankUp && (
+        <GoalsRevealCard
+          reveal={goalsReveal}
+          onClose={() => setGoalsReveal(null)}
+          onOpenGoals={() => { setGoalsReveal(null); setTasksTab("goals"); setPanel("tasks"); }}
+        />
+      )}
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}

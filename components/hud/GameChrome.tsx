@@ -16,6 +16,8 @@ export interface ChromeValues {
   bank: number;
   dailyDone: number;
   dailyTotal: number;
+  /** Daily tasks 2.0: days in a row with all five done (0 hides the flame). */
+  streak?: number;
   stats: { energy: number; mood: number; confidence: number };
   muted: boolean;
   online: number | null;
@@ -98,6 +100,7 @@ export function GameChrome({
           <button className="hud-btn" onClick={() => onAction("daily")} aria-label={values ? `Daily tasks, ${values.dailyDone} of ${values.dailyTotal} done` : "Daily tasks"}>
             <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
+            {!!values?.streak && <span className="hud-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
           </button>
           <button
             className="hud-icon-btn"

@@ -94,6 +94,8 @@ export interface PlaceHandlers {
   hunt?: { talk: (placeId: string) => Promise<HuntResult>; answer: (choice: number) => Promise<HuntResult> };
   /** v0.8 travel (#4): where the player is; away from a place its actions are a preview with "Go there". */
   travel?: { isHere: (placeId: string) => boolean; onGoThere: (place: Place) => void; from: { at: LatLng; name: string } };
+  /** Daily tasks 2.0 (migration 0073): guest-list passes held, the club one's used at tonight, and using one. */
+  passes?: { held: number; tonight: string | null; busy: boolean; onUse: (place: Place) => void };
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -590,10 +592,17 @@ export function LocationSheet({
           {!here && (
             <div className="stack-4">
               {/* #19 the exclusive club's door rule: the server refuses the trip too (migration 0046). */}
-              {(place.club?.doorClout ?? 0) > state.player.clout ? (
+              {(place.club?.doorClout ?? 0) > state.player.clout && handlers.passes?.tonight !== place.id ? (
                 <>
                   <button className="btn btn-taxi" disabled>🔒 {(place.club!.doorClout!).toLocaleString("en-US")} clout to get in</button>
-                  <p className="meta" style={{ margin: 0, textAlign: "center" }}>The bouncer checks clout like it&apos;s a passport. Come back with more.</p>
+                  {handlers.passes && handlers.passes.held > 0 && !handlers.passes.tonight ? (
+                    <>
+                      <button className="btn btn-secondary pass-btn" disabled={handlers.passes.busy} onClick={() => handlers.passes!.onUse(place)}>🎟️ Use a guest-list pass · tonight only</button>
+                      <p className="meta" style={{ margin: 0, textAlign: "center" }}>You have {handlers.passes.held}. The bouncer will pretend he always knew you.</p>
+                    </>
+                  ) : (
+                    <p className="meta" style={{ margin: 0, textAlign: "center" }}>The bouncer checks clout like it&apos;s a passport. Come back with more{handlers.passes ? ", or with a guest-list pass (streak day 14)" : ""}.</p>
+                  )}
                 </>
               ) : (
                 <>

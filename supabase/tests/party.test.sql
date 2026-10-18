@@ -68,6 +68,8 @@ select pg_temp.assert(not (pg_temp.product('event-jada-sol-listening') ->> 'owne
 -- The party: both go in, both get the badge; the guest gets no ticket clout.
 reset role;
 select pg_temp.assert((select count(*) = 1 from public.entitlements where sku = 'event-jada-sol-listening'), 'serial numbers untouched');
+-- 0074: goals already finished pay first (a new day's task list would settle them mid-check).
+select public.goal_settle(id) from public.players;
 create temp table before as select id, clout from public.players;
 grant select on before to public;
 set role authenticated;
