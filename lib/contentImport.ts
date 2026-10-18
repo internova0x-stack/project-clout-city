@@ -1,4 +1,5 @@
-// Test phase (owner, Oct 14): news weeks and treasure hunts go live on their own, like gossip. The
+// Test phase (owner, Oct 14): news weeks and treasure hunts go live on their own, like gossip (and, v0.15, campus exam
+// weeks from content/exams, migration 0077). The
 // game server reads every week file in content/news and content/hunts, checks it with the Studio's
 // rules (lib/news.ts, lib/hunts.ts, story safety included) and stores it approved with
 // content_import_news() / content_import_hunt() (migration 0037, service role only). The Studio still
@@ -7,13 +8,14 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { storyPlaceIds, validateHunt } from "./hunts";
 import { validateNewsWeek } from "./news";
+import { validateExamWeek } from "./exams";
 import { loadArcs } from "./storyContent";
 import { getAdminSupabase } from "./supabase/admin";
 
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
 
-async function weekFiles(kind: "hunts" | "news"): Promise<{ file: string; raw: unknown }[]> {
+async function weekFiles(kind: "hunts" | "news" | "exams"): Promise<{ file: string; raw: unknown }[]> {
   const dir = path.join(process.cwd(), "content", kind);
   const files = (await readdir(dir).catch(() => [] as string[])).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out: { file: string; raw: unknown }[] = [];
@@ -48,6 +50,14 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const { data, error } = await admin.rpc("content_import_hunt", { p_data: r.hunt });
     if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: String(data) });
+  }
+  // v0.15 campus exams (migration 0077): each week's questions; a course already sat that week keeps its set.
+  for (const { file, raw } of await weekFiles("exams")) {
+    const r = validateExamWeek(raw);
+    if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
+    const { data, error } = await admin.rpc("content_import_exams", { p_week: r.week, p_rows: r.rows });
+    if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    out.push({ file, result: `${data} questions` });
   }
   return out;
 }

@@ -526,7 +526,9 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 
 ### Exams (the weekly payoff)
 - Every Friday (New York) each course has a **5-question quiz** with funny multiple-choice questions, written
-  weekly in the Studio like hunts and news (answers live on the server only).
+  weekly like hunts and news (`content/exams/<Monday>.json`, checked by `lib/exams.ts`, stored by the game with
+  `content_import_exams`, migration 0077). Answers live on the server only; a course's set locks once someone has
+  sat it, and weeks without a file use the standing bank.
 - **Grade** = attendance that week plus quiz score: A to F. Grades make a **GPA**; a GPA of 3.5+ at week's end
   pays a scholarship (cash, once a week). One attempt; a "peek at your neighbor's paper" option adds a point
   with a chance of getting caught (an F and a funny note home). Satire, never shaming.
@@ -581,8 +583,9 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 
 ### Phasing
 1. **v0.15 "Campus"** (before v1.0): enrolment, classes with streaks, weekly exams and GPA, dining halls, dorm
-   rooms with the roommate, Greek Row party night, Quad and Library hangouts with study dates, the campus
-   leaderboard.
+   rooms with the roommate, Greek Row party night, Quad and Library hangouts with study dates, weekly exam files.
+   The campus leaderboard screen waits (owner, Oct 18: "leave out the leaderboard for now"); the Pride tab's
+   standings stay as they are.
 2. **Next:** houses (fraternities and sororities) with the weekly ranking, the school play, relationship status.
 3. **Later:** real-player roommates, a campus story arc in the Studio ("Who kidnapped the mascot?"), school merch
    cosmetics, majors and graduating to alumni.
@@ -595,7 +598,8 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 ### Open questions
 - Satirical tuition bill and student-loan joke (game cash only): in v0.15 or later?
 - How many weeks to "graduate", and what alumni get.
-- Who writes the weekly exam questions (Studio weekly routine).
+- ~~Who writes the weekly exam questions~~: the weekly drafting routine (docs/WEEKLY-CONTENT.md) writes
+  `content/exams/<Monday>.json`; the game stores it by itself (migration 0077). The first week is Oct 19.
 
 ## 19. Daily tasks 2.0: goals, streaks and guest-list passes (owner, Oct 18; migrations 0073, 0074)
 

@@ -1,0 +1,421 @@
+{
+  "week": "2026-10-19",
+  "courses": {
+    "main-character-101": [
+      {
+        "prompt": "You walk into a party where you know nobody. The main character move is to:",
+        "choices": [
+          "Text your mom",
+          "Leave",
+          "Find the dog and befriend it first",
+          "Stand by the snacks and wait to be discovered"
+        ],
+        "answer": 2
+      },
+      {
+        "prompt": "Your theme song starts playing in a café. You:",
+        "choices": [
+          "Ask them to turn it up",
+          "Assume it's a coincidence",
+          "Ignore it",
+          "Walk slower"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "The best lighting for a main character is:",
+        "choices": [
+          "Golden hour",
+          "A phone flashlight",
+          "Whatever the bus has",
+          "Fluorescent office"
+        ],
+        "answer": 0
+      },
+      {
+        "prompt": "A side character asks how you're doing. You say:",
+        "choices": [
+          "\"Fine\"",
+          "A three-act monologue",
+          "\"Thriving, obviously\"",
+          "Nothing, you're mid-montage"
+        ],
+        "answer": 2
+      },
+      {
+        "prompt": "Main character energy is best described as:",
+        "choices": [
+          "Never paying for anything",
+          "Thinking the camera is always on",
+          "Being the loudest",
+          "Owning sunglasses"
+        ],
+        "answer": 1
+      }
+    ],
+    "8am-regret-101": [
+      {
+        "prompt": "Your alarm goes off at 7:00 for an 8 AM class. The traditional response is:",
+        "choices": [
+          "Become one with the blanket",
+          "Get up",
+          "Snooze nine times",
+          "Throw the phone"
+        ],
+        "answer": 2
+      },
+      {
+        "prompt": "The professor of an 8 AM class is usually:",
+        "choices": [
+          "A hologram",
+          "Late",
+          "Thrilled",
+          "Also asleep"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "Breakfast before an 8 AM is:",
+        "choices": [
+          "Coffee, technically",
+          "A granola bar from 2023",
+          "A myth",
+          "Eggs and toast"
+        ],
+        "answer": 2
+      },
+      {
+        "prompt": "Attendance at 8 AM classes peaks in:",
+        "choices": [
+          "Week one",
+          "Midterms",
+          "Finals",
+          "Never"
+        ],
+        "answer": 0
+      },
+      {
+        "prompt": "The best seat for an 8 AM class is:",
+        "choices": [
+          "In bed, on video",
+          "Front row",
+          "Next to the radiator",
+          "Near the door for a quick exit"
+        ],
+        "answer": 2
+      }
+    ],
+    "napping-301": [
+      {
+        "prompt": "The ideal power nap is:",
+        "choices": [
+          "Two minutes, aggressively",
+          "20 minutes",
+          "4 hours",
+          "Until you forget what year it is"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The library's best napping spot is:",
+        "choices": [
+          "The reference desk",
+          "Under the stairs, legally",
+          "The silent floor",
+          "The group study room"
+        ],
+        "answer": 2
+      },
+      {
+        "prompt": "Napping on the subway requires:",
+        "choices": [
+          "A pillow",
+          "An alarm one stop early",
+          "Trust in strangers",
+          "All of the above"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "The forbidden nap happens:",
+        "choices": [
+          "During an exam",
+          "At home",
+          "On a Sunday",
+          "After lunch"
+        ],
+        "answer": 0
+      },
+      {
+        "prompt": "Waking up from a nap at 7 PM thinking it's morning is called:",
+        "choices": [
+          "Being a student",
+          "A reset",
+          "Time travel",
+          "The Fog"
+        ],
+        "answer": 3
+      }
+    ],
+    "group-project": [
+      {
+        "prompt": "In every group project, one person:",
+        "choices": [
+          "Does everything",
+          "Disappears after the first meeting",
+          "Only makes the title slide",
+          "All of the above, at once"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "The group chat goes silent for three days. This means:",
+        "choices": [
+          "The chat was deleted",
+          "You are the group now",
+          "Everyone is working hard",
+          "Nobody has started"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "The best time to start a group project is:",
+        "choices": [
+          "The week before",
+          "The night before",
+          "During the presentation",
+          "The day it's assigned"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "\"Let's divide it up\" usually means:",
+        "choices": [
+          "Fair work",
+          "You'll do the hard part",
+          "Nobody will do anything",
+          "A spreadsheet appears"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "On presentation day, the person who did nothing will:",
+        "choices": [
+          "Bring snacks",
+          "Apologize",
+          "Present the conclusion confidently",
+          "Not show up"
+        ],
+        "answer": 2
+      }
+    ],
+    "dining-hall-econ": [
+      {
+        "prompt": "The scarcest resource in the dining hall is:",
+        "choices": [
+          "Patience",
+          "A clean fork",
+          "A free table",
+          "Vegetables"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "Taco Tuesday's tacos are best described as:",
+        "choices": [
+          "Delicious",
+          "Mostly cheese",
+          "Authentic",
+          "A rumor"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "Taking six cookies \"for later\" is an example of:",
+        "choices": [
+          "Supply and demand",
+          "Smart budgeting",
+          "Hoarding, but cute",
+          "Theft"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The waffle machine line is long because:",
+        "choices": [
+          "Waffles are rare",
+          "One person is making four waffles",
+          "It's broken",
+          "Everyone is just standing there"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The dining hall's mystery meat is:",
+        "choices": [
+          "Confidential, legally",
+          "Chicken",
+          "Beef",
+          "A secret"
+        ],
+        "answer": 3
+      }
+    ],
+    "subway-studies": [
+      {
+        "prompt": "\"Showtime!\" on the train means:",
+        "choices": [
+          "Time to leave",
+          "Free dance performance",
+          "A delay",
+          "A movie is starting"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The empty car on a crowded train is empty because:",
+        "choices": [
+          "It's new",
+          "It's a VIP car",
+          "Luck",
+          "There's a reason. Always."
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "Pole etiquette says you should:",
+        "choices": [
+          "Hold it with one hand",
+          "Swing on it",
+          "Avoid it entirely",
+          "Lean your whole body on it"
+        ],
+        "answer": 0
+      },
+      {
+        "prompt": "\"We are delayed because of train traffic ahead\" means:",
+        "choices": [
+          "A short wait",
+          "Nobody knows",
+          "There's a parade",
+          "The train has feelings"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The fastest way across Queens is:",
+        "choices": [
+          "Moving to Queens",
+          "Express train",
+          "Walking",
+          "Waiting for the bus"
+        ],
+        "answer": 1
+      }
+    ],
+    "intro-to-clout": [
+      {
+        "prompt": "Clout is best defined as:",
+        "choices": [
+          "A feeling",
+          "How much strangers care that you exist",
+          "Money",
+          "Followers"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The fastest way to gain clout is to be seen:",
+        "choices": [
+          "At the dentist",
+          "Alone",
+          "At home",
+          "At the right place, at the right time"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "Posting a photo with no caption shows:",
+        "choices": [
+          "Laziness",
+          "Confidence",
+          "A typo",
+          "Mystery"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "Clout lost in one bad post can be regained by:",
+        "choices": [
+          "Deleting everything",
+          "A comeback era",
+          "Moving away",
+          "Never posting again"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "The VIP floor is valuable because:",
+        "choices": [
+          "The chairs",
+          "Better drinks",
+          "Fewer people can get in",
+          "Better music"
+        ],
+        "answer": 2
+      }
+    ],
+    "finance-for-broke": [
+      {
+        "prompt": "A budget is:",
+        "choices": [
+          "A type of airline",
+          "A plan for your money",
+          "A suggestion",
+          "Something rich people do"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "\"I already ate\" at a fancy dinner usually means:",
+        "choices": [
+          "They're on a diet",
+          "They're a vampire",
+          "They ate",
+          "They can't afford it"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "The safest place for your savings is:",
+        "choices": [
+          "The bank",
+          "A lotto ticket",
+          "Your friend Kevin",
+          "Under the mattress"
+        ],
+        "answer": 0
+      },
+      {
+        "prompt": "Rent is due in two days. The smart move is to:",
+        "choices": [
+          "Buy new shoes",
+          "Work a shift",
+          "Ignore it",
+          "Move out"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "Buying a scratch card to pay rent is:",
+        "choices": [
+          "Free money",
+          "A plan",
+          "Not a plan",
+          "Investing"
+        ],
+        "answer": 2
+      }
+    ]
+  }
+}
