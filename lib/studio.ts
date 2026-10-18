@@ -13,6 +13,26 @@ import type { StudioBigScreen, TvAction } from "./cloutTv.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
+/**
+ * Where a story stands for players, in one word (owner, Oct 18: "Approved" didn't say whether it was live).
+ * Approval alone never puts a story live: a main story also needs a Day 1 (Schedule, or Go live now).
+ */
+export type Stage = "review" | "declined" | "ready" | "scheduled" | "live" | "finished" | "paused" | "retired";
+export const STAGE_LABEL: Record<Stage, string> = {
+  review: "Needs review", declined: "Declined", ready: "Not live", scheduled: "Scheduled", live: "Live",
+  finished: "Finished", paused: "Paused", retired: "Retired",
+};
+export function storyStage(a: Pick<StudioArc, "type" | "status" | "review" | "startAt" | "day" | "lastDay">, parent?: Pick<StudioArc, "status" | "review" | "startAt" | "day" | "lastDay"> | null): Stage {
+  if (a.status === "retired") return "retired";
+  if (a.status === "paused") return "paused";
+  if (a.review === "declined") return "declined";
+  if (a.review !== "approved") return "review";
+  if (a.day !== null) return a.day > a.lastDay ? "finished" : "live";
+  // A side story runs with its main story, so it waits on the main's date.
+  const start = a.type === "side" ? (parent && parent.status === "active" && parent.review === "approved" ? parent.startAt : null) : a.startAt;
+  return start ? "scheduled" : "ready";
+}
+
 /** One row of admin_story_list(). */
 export interface StudioArc {
   id: string;
@@ -143,6 +163,8 @@ export interface StudioApi {
   schedule(arc: string, start: string | null): Promise<StudioResult>;
   status(arc: string, status: Status): Promise<StudioResult>;
   beatStatus(arc: string, beat: string, status: Status): Promise<StudioResult>;
+  /** Approves a main story and makes today its Day 1 (migration 0080). */
+  goLive?(arc: string): Promise<StudioResult>;
   /** The Studio's order of stories (migration 0071): every id, top to bottom. */
   reorder?(ids: string[]): Promise<StudioResult>;
   /** A beat's words (migration 0071); the story keeps its approval. */

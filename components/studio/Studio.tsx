@@ -12,7 +12,7 @@ import { StoryBuilder, clearDraft, loadDraft } from "./StoryBuilder";
 import { newArc } from "@/lib/storyBuilder";
 import { activeEffects, addDaysISO, dayDiff, nyTime, type Arc, type StoryEffect, type Status } from "@/lib/stories";
 import { buildFeed, emptyStoryState } from "@/lib/storyFeedBuild";
-import { beatText, nextWeekday, weekdayOf, type BeatText, type CastLine, type ContentDraft, type GossipAdmin, type GossipFileCheck, type HuntAdmin, type NewsAdminItem, type Review, type SetupCheckRow, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
+import { STAGE_LABEL, beatText, nextWeekday, storyStage, weekdayOf, type BeatText, type CastLine, type ContentDraft, type GossipAdmin, type GossipFileCheck, type HuntAdmin, type NewsAdminItem, type Review, type SetupCheckRow, type StudioApi, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { NewsApp } from "../story/News";
 import { handle } from "@/lib/validation";
@@ -89,8 +89,8 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
     const ids = [...groups[0].flatMap((m) => [m, ...groups[1 + mains.findIndex((x) => x.id === m)]]), ...groups[groups.length - 1]];
     apply("reorder", () => api.reorder!(ids));
   };
-  const mover = (g: StudioArc[], a: StudioArc) => api.reorder && g.length > 1 ? (
-    <span className="studio-arc-move">
+  const mover = (g: StudioArc[], a: StudioArc) => api.reorder && (g.length > 1 || a.type === "main") ? (
+    <span className="studio-arc-move" title={g.length === 1 ? "The only main story. Its side stories stay under it; they move among themselves." : undefined}>
       <button className="chip" aria-label={`Move ${a.title || a.id} up`} disabled={busy !== null || g[0].id === a.id} onClick={() => moveArc(a.id, -1)}>↑</button>
       <button className="chip" aria-label={`Move ${a.title || a.id} down`} disabled={busy !== null || g[g.length - 1].id === a.id} onClick={() => moveArc(a.id, 1)}>↓</button>
     </span>
@@ -203,8 +203,10 @@ function stateLine(a: StudioArc, parent?: StudioArc | null): string {
   return "Not scheduled";
 }
 
-function ReviewTag({ r }: { r: Review }) {
-  return <span className={`tag studio-review ${r}`}>{r === "approved" ? "Approved" : r === "declined" ? "Declined" : "Needs review"}</span>;
+/** One status per story (owner, Oct 18): live or not, at a glance. */
+function StageTag({ a, parent }: { a: StudioArc; parent?: StudioArc | null }) {
+  const st = storyStage(a, parent);
+  return <span className={`tag studio-review stage-${st}`}>{st === "live" ? "● " : ""}{STAGE_LABEL[st]}</span>;
 }
 
 function ArcRow({ a, parent, active, side = false, onPick }: { a: StudioArc; parent?: StudioArc; active: boolean; side?: boolean; onPick: () => void }) {
@@ -214,7 +216,7 @@ function ArcRow({ a, parent, active, side = false, onPick }: { a: StudioArc; par
         <span className="title" style={{ display: "block" }}>{a.title || a.id}</span>
         <span className="meta" style={{ display: "block" }}>{side ? "Side story" : "Main story"} · {stateLine(a, parent)}</span>
       </span>
-      <ReviewTag r={a.review} />
+      <StageTag a={a} parent={parent} />
     </button>
   );
 }
@@ -279,6 +281,7 @@ function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
     return () => { gone = true; };
   }, [openBeat, full, api, arc.id]);
   const toggleBeat = (id: string) => setOpenBeat((o) => (o === id ? null : id));
+  const [confirmLive, setConfirmLive] = useState(false);
 
   return (
     <section className="stack-16">
@@ -288,7 +291,7 @@ function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
             <h2 className="display-md" style={{ margin: 0 }}>{arc.title || arc.id}</h2>
             <span className="meta">{arc.id} · {arc.type === "main" ? "Main story" : `Side story of ${parent?.title ?? arc.parent}`} · {arc.tier === "premium" ? `Premium (${arc.sku})` : "Free"} · {arc.lastDay} day{arc.lastDay === 1 ? "" : "s"}</span>
           </div>
-          <ReviewTag r={arc.review} />
+          <StageTag a={arc} parent={parent} />
         </div>
         <span className="body-strong">{stateLine(arc, parent)}{totalVotes ? ` · ${totalVotes.toLocaleString()} votes` : ""}</span>
         <div className="row" style={{ gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -297,18 +300,40 @@ function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
         </div>
       </div>
 
+      {/* Go live now (owner, Oct 18): one press from a finished story to players, today as Day 1. */}
+      {arc.type === "main" && api.goLive && !live && !started && arc.status !== "retired" && (
+        <div className="studio-card studio-golive stack-8">
+          <span className="overline">Go live now</span>
+          <span className="subtext">
+            Approves it{arc.status === "paused" ? ", resumes it" : ""} and makes today, {fmtDate(today)}, Day 1. Players see Day 1 on their next refresh;
+            Day 2 goes out at midnight New York time.
+            {weekdayOf(today) !== weekday ? ` It's written to start on a ${weekday}; today is a ${weekdayOf(today)}.` : ""}
+          </span>
+          {confirmLive ? (
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-taxi btn-sm" disabled={busy !== null} onClick={() => { setConfirmLive(false); void apply("golive", () => api.goLive!(arc.id)); }}>
+                {busy === "golive" ? "Going live…" : "Yes, go live today"}
+              </button>
+              <button className="btn btn-secondary btn-sm" disabled={busy !== null} onClick={() => setConfirmLive(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div><button className="btn btn-taxi btn-sm" disabled={busy !== null} onClick={() => setConfirmLive(true)}>Go live now</button></div>
+          )}
+        </div>
+      )}
+
       {/* 1. One approval */}
       <div className="studio-card stack-8">
         <span className="overline">1 · Review</span>
         <span className="subtext">
           {arc.review === "approved" ? `Approved${arc.reviewedAt ? ` on ${new Date(arc.reviewedAt).toLocaleDateString()}` : ""}. ` : arc.review === "declined" ? "Declined. Upload a fixed file to send it back for review. " : "Waiting for a yes or no. "}
-          One approval puts it on the schedule. Changing the file sends it back here.
+          {live || started ? "" : arc.type === "main" ? "Approving doesn't put it live: give it a Day 1 below, or Go live now. " : `Once approved, it runs with ${parent?.title ?? "its main story"}. `}Changing the file sends it back here.
         </span>
         <textarea className="studio-input" rows={2} value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} placeholder="Note for the writers (required to decline)" aria-label="Review note" />
         <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-taxi btn-sm" disabled={busy !== null || arc.review === "approved"} onClick={() => apply("review", () => api.review(arc.id, "approved", reviewNote))}>Approve</button>
           <button className="btn btn-secondary btn-sm" disabled={busy !== null || arc.review === "declined" || !reviewNote.trim() || live} onClick={() => apply("review", () => api.review(arc.id, "declined", reviewNote))}>Decline</button>
-          {arc.review !== "draft" && !live && <button className="chip" disabled={busy !== null} onClick={() => apply("review", () => api.review(arc.id, "draft", reviewNote))}>Back to review</button>}
+          {arc.review !== "draft" && !live && <button className="chip" disabled={busy !== null} onClick={() => apply("review", () => api.review(arc.id, "draft", reviewNote))}>{arc.startAt && arc.type === "main" ? "Back to review (clears Day 1)" : "Back to review"}</button>}
         </div>
       </div>
 

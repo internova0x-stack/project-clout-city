@@ -32,16 +32,25 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    A story that is live can't be replaced mid-run; pause or retire it instead.
 4. **Approve or decline it.** One approval is enough. Declining needs a note for the writers; it
    stays with the story. Approving again later, or sending it back to review, is always possible
-   until it goes live.
+   until it goes live; sending it back clears its Day 1. A live story can't go back to review or be
+   declined (pause or retire it instead).
 5. **Schedule it.** Pick Day 1 (a Sunday unless the file's `start_weekday` says otherwise, never in
    the past). The Studio shows the finale date, and refuses a week whose finale lands on the same
    day as another story's. Side stories run alongside their main story automatically. Beats go out
    at midnight New York time; votes close at the times in the file.
+   **Approving alone never puts a story live**: a main story needs a Day 1. Each story shows one status
+   (migration 0080): **Needs review**, **Declined**, **Not live** (approved, no Day 1), **Scheduled**,
+   **● Live**, **Paused**, **Finished** or **Retired**.
+   **Go live now** (main stories) does both steps in one press: it approves the story and makes today
+   (New York) Day 1, on any weekday, after a confirm. Players see Day 1 on their next refresh; Day 2 goes
+   out at midnight. Its side stories run with it once they're approved.
 6. **Run it.** While it's live you can:
    - **Pause** the whole story: players stop seeing it and every effect on the city lifts until you
      resume. The calendar keeps counting, so it resumes on the day it would have been.
    - **Retire** it: it ends for good.
    - Pause or retire a **single beat** from the Beats list (for example to pull one headline).
+   - Reorder stories with the arrows: main stories move among main stories, side stories within their
+     main story (the order is the Studio's list only).
 7. **Preview it** at any time with **Preview as a player**: pick a day, noon or 11 PM, free player or
    side-story owner, and see the News app exactly as players will, next to a list of everything the
    story changes in the city that day. Answers stay hidden until their reveal, as in the game.

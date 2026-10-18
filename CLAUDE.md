@@ -110,6 +110,9 @@ components live in `app/globals.css`.
 - Lucky Star Lotto: the server draws every card's prize at purchase and pays it on scratch
   (`buy_lotto_card`/`scratch_lotto_card`, migrations 0032 and 0041: the prize, the pot win and the card's numbers); the browser only names a game. Never send
   a result, price or limit from the client, and real money never touches the lotto.
+- Studio stories (migration 0080): approval alone never puts a story live; a main story needs a Day 1 (schedule,
+  or `admin_story_go_live`: approve + today as Day 1). `storyStage()` (lib/studio.ts) is the one status the Studio
+  shows. A live story can't go back to review or be declined.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
   Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the
   same: `content/hunts/*.json` carries answers; players get `hunt_state()`. Gossip too: `content/gossip/*.json`

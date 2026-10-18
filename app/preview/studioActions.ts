@@ -64,6 +64,7 @@ export async function previewStudioReview(id: string, decision: Review, note: st
   previewOnly();
   const r = find(id);
   if (!r) return fail("That story doesn't exist.");
+  if (decision !== "approved" && isLive(r)) return fail("That story is live. Pause or retire it instead of changing it mid-run.");
   Object.assign(r, { review: decision, note: note.trim() || null, reviewedAt: new Date().toISOString(), startAt: decision === "approved" ? r.startAt : null });
   return list(decision === "approved" ? "Approved. It can be scheduled now." : decision === "declined" ? "Declined. The note is saved with it." : "Back to draft.");
 }
@@ -79,6 +80,15 @@ export async function previewStudioSchedule(id: string, start: string | null) {
   } else if (isLive(r)) return fail("That story is live. Pause or retire it instead of changing it mid-run.");
   r.startAt = start;
   return list(start ? `Scheduled: Day 1 is ${start}.` : "Unscheduled.");
+}
+export async function previewStudioGoLive(id: string) {
+  previewOnly();
+  const r = find(id);
+  if (!r) return fail("That story doesn't exist.");
+  if (r.arc.type !== "main") return fail("Side stories run with their main story; schedule the main story.");
+  if (isLive(r)) return fail("That story is live. Pause or retire it instead of changing it mid-run.");
+  Object.assign(r, { review: "approved", reviewedAt: r.reviewedAt ?? new Date().toISOString(), status: "active", startAt: nyToday() });
+  return list("Live. Today is Day 1: players see it on their next refresh.");
 }
 export async function previewStudioStatus(id: string, status: Status) {
   previewOnly();

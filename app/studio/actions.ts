@@ -73,6 +73,11 @@ export async function studioSchedule(arc: string, start: string | null) {
   return run("admin_story_schedule", { p_arc: arc, p_start: start }, start ? `Scheduled: Day 1 is ${start}.` : "Unscheduled.");
 }
 
+/** Go live now (migration 0080): approved, and today is Day 1. */
+export async function studioGoLive(arc: string) {
+  return run("admin_story_go_live", { p_arc: arc }, "Live. Today is Day 1: players see it on their next refresh.");
+}
+
 export async function studioStatus(arc: string, status: Status) {
   return run("admin_story_status", { p_arc: arc, p_status: status }, status === "active" ? "Resumed." : status === "paused" ? "Paused. Players stop seeing it until it resumes." : "Retired.");
 }
