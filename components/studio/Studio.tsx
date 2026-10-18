@@ -33,7 +33,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup">(api.metrics ? "metrics" : "stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -97,21 +97,33 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
     </span>
   ) : null;
 
+  // Owner, Oct 18: home is the summary dashboard (Launch goals), where the Studio opens.
+  const goHome = () => {
+    setTab(api.metrics ? "metrics" : "stories");
+    setBuilder(null);
+    setNote(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <main className="studio">
       <header className="studio-top">
-        <div>
+        {/* Owner, Oct 18: a way home (the summary dashboard) from anywhere in the Studio; the title does the same. */}
+        <button className="studio-home-title" onClick={goHome} aria-label="Studio home">
           <span className="studio-mark">Clout City</span>
           <h1 className="display-lg" style={{ margin: 0 }}>Story Studio</h1>
-        </div>
-        <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        </button>
+        <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center" }}>
           <span className="meta">{preview ? "Preview: nothing is saved" : `Signed in as ${who}`}</span>
+          <button className="chip" onClick={goHome}>⌂ Home</button>
+          <a className="chip" href={preview ? "/preview/home" : "/home"}>Open the game ›</a>
           {!preview && <form action="/auth/signout" method="post"><button className="chip" type="submit">Log out</button></form>}
         </div>
       </header>
 
       {(api.reports || api.metrics || api.insights || api.castLines || api.newsList) && (
         <div className="segmented studio-tabs" role="group" aria-label="Studio">
+          {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Launch goals</button>}
           <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
           {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
           {api.shoutouts && <button aria-pressed={tab === "shoutouts"} onClick={() => setTab("shoutouts")}>Shoutouts</button>}
@@ -124,7 +136,6 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {api.players && <button aria-pressed={tab === "players"} onClick={() => setTab("players")}>Players</button>}
           {api.affiliates && <button aria-pressed={tab === "affiliates"} onClick={() => setTab("affiliates")}>Affiliates</button>}
           {api.insights && <button aria-pressed={tab === "insights"} onClick={() => setTab("insights")}>Insights</button>}
-          {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Launch goals</button>}
           {api.setupCheck && <button aria-pressed={tab === "setup"} onClick={() => setTab("setup")}>Setup</button>}
         </div>
       )}

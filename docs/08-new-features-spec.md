@@ -706,7 +706,8 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
 
 Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
 bring in spend (affiliate links). Every rule below is decided (owner, Oct 18). **Built:** step 1, attribution and links
-(migration 0087), and step 2, commissions and performance (migration 0088). Steps 3 to 5 are still to build.
+(migration 0087), step 2, commissions and performance (migration 0088), and step 3, the creator page (migration 0089).
+Steps 4 and 5 are still to build.
 
 ### Decisions (owner, Oct 18)
 - **Rate:** set per creator in the Studio. New creators default to **20%**; **30%** is the preset for high
@@ -830,7 +831,11 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
      clicks and sign-ups from counting.
    - Flags: refunds above 20% of a creator's players' payments. Device-level checks are not built (the game doesn't
      track devices).
-3. Creator page.
+3. **Built (migration 0089).** Creator page at `/creator`: the creator signs in with the email the Studio has for them
+   (an email code or Google; they don't need to play), and sees their code, their links (read-only, with copy), clicks,
+   sign-ups, paying players and earnings per link and for the typed code, earnings by state and by month, the next
+   payout date and their payouts (empty until step 4). Counts only: never player names. An email that isn't a
+   creator's sees a short "not on the list" note.
 4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect.
 5. UGC tracking: videos, fees and cost per paying player.
 

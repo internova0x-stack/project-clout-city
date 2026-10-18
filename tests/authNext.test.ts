@@ -13,3 +13,8 @@ test("everything else goes to the game, never somewhere unknown", () => {
   assert.equal(afterSignIn("https://evil.example", undefined), "/create");
   assert.equal(afterSignIn("//evil.example", "/elsewhere"), "/create");
 });
+
+test("a creator sign-in returns to the creator page (migration 0089)", () => {
+  assert.equal(afterSignIn("/creator", null), "/creator");
+  assert.equal(afterSignIn(null, "/creator"), "/creator");
+});
