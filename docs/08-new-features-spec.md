@@ -706,8 +706,8 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
 
 Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
 bring in spend (affiliate links). Every rule below is decided (owner, Oct 18). **Built:** step 1, attribution and links
-(migration 0087), step 2, commissions and performance (migration 0088), and step 3, the creator page (migration 0089).
-Steps 4 and 5 are still to build.
+(migration 0087), step 2, commissions and performance (migration 0088), step 3, the creator page (migration 0089), and
+step 4's manual payouts (migration 0090). Stripe Connect payouts and step 5 are still to build.
 
 ### Decisions (owner, Oct 18)
 - **Rate:** set per creator in the Studio. New creators default to **20%**; **30%** is the preset for high
@@ -836,7 +836,13 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
    sign-ups, paying players and earnings per link and for the typed code, earnings by state and by month, the next
    payout date and their payouts (empty until step 4). Counts only: never player names. An email that isn't a
    creator's sees a short "not on the list" note.
-4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect.
+4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect. **Manual payouts built (migration 0090):**
+   Studio → Affiliates → Payouts lists what each creator is owed today (payable after the hold), flags anyone under
+   the $50 minimum (it rolls over), downloads a CSV of everyone ready to pay, and marks a payout sent (method, our
+   reference, a note; never bank details). One payout takes everything payable for that creator. Paying under the
+   minimum needs a tick ("closing the deal"). A payout marked by mistake is undone with a reason: it stays in the
+   history as undone and the money is payable again. Creators see their payouts on `/creator`. Stripe Connect is a
+   "coming soon" card.
 5. UGC tracking: videos, fees and cost per paying player.
 
 ### Answered (owner, Oct 18)

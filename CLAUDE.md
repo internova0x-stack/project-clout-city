@@ -72,6 +72,8 @@ components live in `app/globals.css`.
   `paid_at`). Studio: Overview, money columns and each affiliate's page (`admin_affiliates_overview`, `admin_creator`).
   Step 3 (migration 0089): `/creator` is the creator's own page (`creator_me()`, matched on the signed-in email; counts
   only, never player names); `StudioSignIn` serves it (`dest="/creator"`, `afterSignIn` knows both destinations).
+  Step 4 (migration 0090): payouts by hand (`creator_payouts`; `admin_payout_mark` pays everything payable for a creator
+  in one row, $50 minimum unless overridden; `admin_payout_void` undoes with a reason; never bank details).
 - Real money: only the Stripe webhook (`app/api/stripe/webhook`, service role) grants or revokes
   entitlements, idempotent per Stripe event; `has_entitlement(player, sku)` is the single gate.
   Prices live in `store_products` (or Stripe), never in code. Real money never buys virtual cash.

@@ -60,3 +60,10 @@ test("commissions: Stripe's fee and tax across API versions, with an estimate wh
   assert.equal(invoiceIntent({ payments: { data: [{ payment: { payment_intent: { id: "pi_new" } } }] } }), "pi_new");
   assert.equal(invoiceIntent({}), null);
 });
+
+import { payoutsCsv } from "../lib/creators.ts";
+
+test("payouts: the CSV for the bank or PayPal run quotes awkward names", () => {
+  const csv = payoutsCsv([{ name: "Glow, Tasha", email: "tasha@example.com", handle: "@tasha", code: "TASHA", payableCents: 7473 }], "2026-11-01");
+  assert.equal(csv, 'Creator,Email,Handle,Code,Amount (USD),Date\n"Glow, Tasha",tasha@example.com,@tasha,TASHA,74.73,2026-11-01\n');
+});

@@ -203,3 +203,31 @@ export function payoutLine(payableCents: number, nextPayout: string, fmt: (c: nu
     ? `${fmt(payableCents)} goes out on ${when}.`
     : `Payouts go out at the start of each month once you have ${fmt(PAYOUT_MIN_CENTS)} payable. ${fmt(PAYOUT_MIN_CENTS - Math.max(0, payableCents))} to go.`;
 }
+
+/** How a payout went out (migration 0090). Bank details are never stored: only our own reference. */
+export type PayoutMethod = "bank_transfer" | "paypal" | "other" | "stripe_connect";
+export const PAYOUT_METHODS: { id: PayoutMethod; label: string }[] = [
+  { id: "bank_transfer", label: "Bank transfer" },
+  { id: "paypal", label: "PayPal" },
+  { id: "other", label: "Other" },
+];
+export const methodLabel = (m: string) => (m === "stripe_connect" ? "Stripe" : PAYOUT_METHODS.find((x) => x.id === m)?.label ?? m);
+
+/** The Studio's Payouts view (migration 0090). */
+export interface PayoutsAdmin {
+  today: string;
+  minimumCents: number;
+  due: { creatorId: string; name: string; handle: string | null; email: string | null; code: string; status: "active" | "paused";
+    connectAccount: string | null; payableCents: number; heldCents: number; nextPayableOn: string | null; lastPaidAt: string | null }[];
+  history: { id: number; creatorId: string; name: string; email: string | null; period: string; totalCents: number; currency: string;
+    method: PayoutMethod; reference: string | null; note: string | null; paidAt: string; paidBy: string | null; items: number;
+    voidedAt: string | null; voidReason: string | null }[];
+}
+
+/** A CSV of payouts to send: one line per creator at or over the minimum (or the rows given). */
+export function payoutsCsv(rows: { name: string; email: string | null; handle: string | null; code: string; payableCents: number }[], today: string): string {
+  const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const lines = [["Creator", "Email", "Handle", "Code", "Amount (USD)", "Date"].join(",")];
+  for (const r of rows) lines.push([r.name, r.email ?? "", r.handle ?? "", r.code, (r.payableCents / 100).toFixed(2), today].map(cell).join(","));
+  return lines.join("\n") + "\n";
+}

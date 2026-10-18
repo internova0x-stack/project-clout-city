@@ -10,7 +10,7 @@ import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
 import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
 import type { StudioBigScreen, TvAction } from "./cloutTv.ts";
-import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput } from "./creators.ts";
+import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin } from "./creators.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -190,6 +190,10 @@ export interface StudioApi {
   /** Migration 0088: the Overview and one affiliate's page. */
   affiliatesOverview?(days: number): Promise<Admin<AffiliatesOverview>>;
   creatorPage?(id: string, days: number): Promise<Admin<CreatorPage>>;
+  /** Migration 0090: payouts by hand. */
+  payouts?(): Promise<Admin<PayoutsAdmin>>;
+  payoutMark?(creatorId: string, method: PayoutMethod, reference: string, note: string, belowMinimum: boolean): Promise<Admin<{ id: number; totalCents: number }>>;
+  payoutVoid?(id: number, reason: string): Promise<Admin<null>>;
   /** v0.6 regulars' lines (migration 0016). */
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;
@@ -290,6 +294,11 @@ const ERRORS: Record<string, string> = {
   no_creator: "That creator is gone.",
   no_link: "That link is gone.",
   bad_lands: "Pick where the link lands.",
+  nothing_payable: "Nothing is payable for that creator right now.",
+  below_minimum: "That's under the $50 minimum. Tick \"Pay below the minimum\" to pay it anyway.",
+  bad_method: "Pick how it was paid.",
+  reason_required: "Say why you're undoing it.",
+  no_payout: "That payout is gone or already undone.",
   is_admin: "That's a Studio admin. Remove them from story_admins first.",
   unknown_player: "That player isn't around anymore.",
   arc_is_live: "That story is live. Pause or retire it instead of changing it mid-run.",
