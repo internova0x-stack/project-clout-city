@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { campusById } from "@/lib/campus";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, eventToday, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -107,7 +107,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
   // Every second: closed doors count down live to opening (owner, Oct 15).
   const now = useGameNow(state.clockOffsetSeconds, 1000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
-  const events = CLUB_EVENTS.filter((e) => e.placeId === place.id);
+  const events = CLUB_EVENTS.filter((e) => e.placeId === place.id && eventToday(e));
   const { mood, confidence } = state.player;
   const world = placeStory(handlers.story ?? null, place);
   const storyTasks = (handlers.story?.tasks ?? []).filter((t) => t.do.place === place.id && !t.done);

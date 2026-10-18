@@ -2,30 +2,96 @@
   "bartender": [
     "Rough day? Same. That'll be fourteen dollars.",
     "Somebody tried to pay with exposure again. Tonight. In this economy.",
-    "If you're here to be seen, the lighting's better by the DJ."
+    "If you're here to be seen, the lighting's better by the DJ.",
+    "I don't judge. I do remember, though.",
+    "Water's free. Dignity's extra.",
+    "The DJ takes requests. The DJ ignores requests."
   ],
   "barista": [
     "Your name's on the cup. Spelled wrong, for authenticity.",
     "Oat, almond, or the gossip? The gossip's free with any large.",
-    "We're out of everything except attitude and espresso."
+    "We're out of everything except attitude and espresso.",
+    "We have a loyalty card. Nobody has ever finished one.",
+    "The Wi-Fi password is on the receipt. The receipt is a myth.",
+    "Iced in October? Bold. Respect."
   ],
   "doorman": [
     "Package for you. Probably. Everybody's got a package.",
-    "Nice day. Not a lot happening. Which in Queens means something's about to."
+    "Nice day. Not a lot happening. Which in Queens means something's about to.",
+    "Your neighbor ordered another treadmill. Third one this year.",
+    "Elevator's working today. Don't jinx it.",
+    "If anyone asks, I didn't see you come in at 4 AM."
   ],
   "driver": [
     "Traffic on the BQE is a lifestyle, not a condition.",
-    "You want the music on or you want to talk? Either way I'm talking."
+    "You want the music on or you want to talk? Either way I'm talking.",
+    "Five stars and I'll tell you a secret about this neighborhood.",
+    "Shortcut through Astoria. Trust me. Don't check the map.",
+    "Last passenger proposed in the back seat. She said maybe."
   ],
   "clerk": [
     "The cat says hi. The cat does not actually say hi.",
-    "Chopped cheese is on the grill. It's always on the grill."
+    "Chopped cheese is on the grill. It's always on the grill.",
+    "Exact change makes my whole day. Nobody ever has exact change.",
+    "We're out of the thing you came for. We have three of something weird.",
+    "Receipt? It's mostly a coupon for something you'll never buy."
   ],
   "professor": [
     "Office hours are Tuesdays. Nobody has ever come. I bring snacks anyway.",
     "This will be on the exam. Everything is on the exam. Life is the exam.",
     "Please stop filming the lecture for your story. Or at least tag the department.",
     "Your phone is not a calculator. Well, it is. But not in my class.",
-    "Fun fact: the library has books. Real ones. You can touch them."
+    "Fun fact: the library has books. Real ones. You can touch them.",
+    "I wrote the textbook. That's why it's two hundred dollars.",
+    "Group projects build character. Mostly resentment, which is a character."
+  ],
+  "regular": [
+    "I've been coming here since before it was cool. Then I stopped. Now I'm back.",
+    "Don't sit there. That's Gary's spot. Gary hasn't been here in a year. Still.",
+    "You look like you've got a secret. Everyone here does.",
+    "I'm not famous yet. I'm famous-adjacent. It's a whole thing.",
+    "My horoscope said I'd meet someone today. Hi. You'll do.",
+    "Ask me about my podcast. Actually don't. Actually do.",
+    "I came here to think. I've been here three hours. No thoughts yet.",
+    "The vibe today is good. Yesterday the vibe was a cry for help."
+  ],
+  "patron": [
+    "Is it just me or is everyone here pretending to be busy?",
+    "I'm only here because my group chat is too quiet.",
+    "Love the fit. Is that from the Shop or from the heart?",
+    "I posted this place and my aunt commented. Worst day of my life.",
+    "If you see a guy in a red cap, I'm not here.",
+    "I'm on a social media break. Take my picture anyway.",
+    "Nice to see a new face. The old faces are getting old.",
+    "I tipped twenty percent and nobody saw. What was the point?",
+    "Have you tried the special? Me neither. It scares me.",
+    "Every time I come here I meet someone. Usually it's you, apparently."
+  ],
+  "student": [
+    "Is this seat taken? Asking for my backpack.",
+    "Did you do the reading? Please say no.",
+    "Want to form a study group? Mostly snacks, some studying.",
+    "My roommate microwaved fish again. I live out here now.",
+    "I switched majors twice this week. Undeclared is a lifestyle.",
+    "The Wi-Fi works best if you hold your laptop up like a sacrifice.",
+    "Coffee number four. My heart says thank you, loudly.",
+    "If you're going to Greek Row tonight, bring earplugs and a second shirt.",
+    "I'm not procrastinating. I'm letting the deadline come to me.",
+    "The squirrels here are bigger than last semester. Somebody's feeding them."
+  ],
+  "librarian": [
+    "Shh. Unless it's gossip. Then whisper it to me.",
+    "The quiet floor is quiet. The second floor is a nightclub with books.",
+    "Return your books. I know where you live. Your library card told me."
+  ],
+  "cook": [
+    "Today's special is yesterday's special, rebranded.",
+    "Tray's on the left. Napkins are a privilege.",
+    "Don't ask what's in the meatloaf. It's a family secret. Not my family."
+  ],
+  "dj": [
+    "This next one goes out to whoever keeps requesting the same song. It's not coming.",
+    "I've been playing the same playlist since freshman year. Classic.",
+    "Dance floor's open. Your dignity can wait at the door."
   ]
 }

@@ -82,6 +82,9 @@ components live in `app/globals.css`.
 - Campus (migration 0072, v0.15): students enrol at one of the two Queens campuses; `campus_*` functions do classes,
   exams, the dining hall and the leaderboard. Exam answers live only in `campus_questions` (no browser access); players
   get the questions without answers. Dorms are homes with a `campus` field: students only, never an eviction target.
+  Campus areas (migration 0075) are the campus place's floors (`CAMPUS_AREAS`: Quad 1, Lecture Hall 2, Library 3,
+  Dining Hall 4, Greek Row 5). Events may carry `days` (ISO weekdays, New York): `attend_event` and the task list
+  honour them (Greek Row party night: Tue, Thu, Fri, Sat).
 - Daily tasks 2.0 (migrations 0073, 0074, spec section 19): the goal ladder is data (`GOALS.ladder`: 25 goals, each
   unlocked at a rank's clout, with a `check` the server's `goal_list` reads); five tasks = 1 gossip, 2 goal-linked (the game's suggested goal,
   `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a

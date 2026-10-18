@@ -538,6 +538,9 @@ export const PLACES: Place[] = [
     lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the students are here on scholarship; the other half are here on a parking permit.",
     actions: [
       { id: "lecture", kind: "visit", label: "Sit in on a lecture", energy: 15, confidence: 6, clout: 15, blurb: "Intro to Marketing. You take notes on the professor's outfit." },
+      // v0.15 campus areas: the Quad and the Library (CAMPUS_AREAS in lib/rooms.ts).
+      { id: "quad", kind: "hangout", label: "Hang out on the Quad", energy: 5, mood: 8, clout: 8, blurb: "Frisbee, a guitar nobody asked for and the best people-watching in Queens." },
+      { id: "study", kind: "visit", label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Silent floor. Someone is eating chips like it's a percussion solo." },
     ],
   },
   {
@@ -547,6 +550,9 @@ export const PLACES: Place[] = [
     lore: "A leafy quad, a library open until 2 AM and forty languages overheard on the walk to class. Tuition is reasonable, which around here counts as a personality.",
     actions: [
       { id: "lecture", kind: "visit", label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
+      // v0.15 campus areas: the Quad and the Library (CAMPUS_AREAS in lib/rooms.ts).
+      { id: "quad", kind: "hangout", label: "Hang out on the Quad", energy: 5, mood: 8, clout: 8, blurb: "Forty languages, one frisbee and a squirrel with a reputation." },
+      { id: "study", kind: "visit", label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Open until 2 AM. The vending machine is the real librarian." },
     ],
   },  // ---- v0.6: the Astoria neighborhood (docs/08-new-features-spec.md section 5). Invented names. ----
   {
@@ -804,6 +810,8 @@ export interface ClubEvent {
   confidence: number;
   mood: number;
   blurb: string;
+  /** v0.15 (owner, Oct 18): the New York weekdays it runs (ISO, 1 Monday to 7 Sunday); every day when absent. */
+  days?: number[];
 }
 
 export const CLUB_EVENTS: ClubEvent[] = [
@@ -817,6 +825,9 @@ export const CLUB_EVENTS: ClubEvent[] = [
   // Campus events at the two universities.
   { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 35, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },
   { id: "quad-open-mic", name: "Open Mic on the Quad", placeId: "queensborough-u", startHour: 19, hours: 3, entry: 24, clout: 30, confidence: 8, mood: 6, blurb: "Slam poetry, one ukulele and a guy who only does impressions of his roommate." },
+  // v0.15 Greek Row party night (owner, Oct 18): Tuesday, Thursday, Friday and Saturday.
+  { id: "greek-row-sj", name: "Greek Row Party Night", placeId: "st-johnsons", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "A theme nobody understood, a playlist from 2016 and a couch that has seen things." },
+  { id: "greek-row-qu", name: "Greek Row Party Night", placeId: "queensborough-u", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "Mystery punch, a ping-pong table with a past and someone's cousin DJing." },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1000,7 +1011,23 @@ export function sellPrice(value: number): number {
 }
 
 /** Minutes since city-clock midnight for a given instant (same formula as lib/cityClock.ts). */
-export function eventOpen(ev: ClubEvent, cityMinutes: number): boolean {
+/** Today's ISO weekday in New York (1 Monday to 7 Sunday). */
+export function nyDow(now = Date.now()): number {
+  const d = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date(now));
+  return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(d) + 1;
+}
+
+/** v0.15: the event runs today (New York); events without days run every day. */
+export const eventToday = (ev: ClubEvent, dow = nyDow()) => !ev.days || ev.days.includes(dow);
+
+/** "Tue, Thu, Fri & Sat". */
+export function eventDaysLine(ev: ClubEvent): string {
+  const names = (ev.days ?? [1, 2, 3, 4, 5, 6, 7]).map((d) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d - 1]);
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}` : names[0] ?? "";
+}
+
+export function eventOpen(ev: ClubEvent, cityMinutes: number, dow = nyDow()): boolean {
+  if (!eventToday(ev, dow)) return false;
   const start = ev.startHour * 60;
   const end = (start + ev.hours * 60) % 1440;
   return start < end ? cityMinutes >= start && cityMinutes < end : cityMinutes >= start || cityMinutes < end;
@@ -1051,7 +1078,7 @@ export function citySeed() {
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false, ...(a.skill ? { skill: a.skill } : {}),
       })),
     })),
-    events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood })),
+    events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood, ...(e.days ? { days: e.days } : {}) })),
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
     shop: SHOP_ITEMS.map((i) => ({
       sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null,

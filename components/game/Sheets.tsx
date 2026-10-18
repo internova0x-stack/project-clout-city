@@ -4,7 +4,7 @@ import { ExclusiveEventCard, type MoneyHandlers } from "../city/Money";
 import { liveParty } from "@/lib/store";
 import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, formatCountdown, placeById, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, eventToday, formatCountdown, placeById, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { eventAvailability, eventById, taskDoneLine, taskQuip, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GOAL_COPY, type GoalsState } from "@/lib/goals";
@@ -202,7 +202,7 @@ export function EventsSheet({
         )}
         {city ? (() => {
           // #12 (owner, Oct 14): open events first, then by how soon their doors open.
-          const club = [...CLUB_EVENTS].sort((x, y) => {
+          const club = CLUB_EVENTS.filter((e) => eventToday(e)).sort((x, y) => {
             const ox = eventOpen(x, minutes), oy = eventOpen(y, minutes);
             if (ox !== oy) return ox ? -1 : 1;
             return realMinutesUntilOpen(x, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay) - realMinutesUntilOpen(y, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay);

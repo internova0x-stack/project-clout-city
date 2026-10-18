@@ -230,6 +230,7 @@ const ERRORS: Record<string, string> = {
   exam_taken: "You already took that exam. No retakes, no matter how nicely you ask.",
   bad_answers: "Answer all five questions first.",
   doors_closed: "Doors aren't open yet. The bouncer is pretending not to see you.",
+  not_tonight: "No party tonight. Greek Row parties are Tuesday, Thursday, Friday and Saturday.",
   already_attended: "You already went tonight. Twice would be desperate.",
   gig_active: "Finish your current gig first.",
   needs_confidence: "This client wants more Confidence than you've got right now.",

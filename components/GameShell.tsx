@@ -12,10 +12,10 @@ import { skillBadge } from "@/lib/skills";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -118,9 +118,19 @@ const DAILY_HINT_AFTER_MS = 30_000;
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
 /** Who's talking in a place (chatter templates are written per role). */
-function npcRole(p: Place, floor = 1): { who: string; role: string } {
+function npcRole(p: Place, floor = 1, index = 0): { who: string; role: string } {
   // v0.11 shared rooms: who's there depends on the kind of place.
   const tag = (t: string) => p.tags.includes(t);
+  // Owner, Oct 18: only the first NPC in a room works there; the rest are the crowd, with lines of their own.
+  // v0.15 campus areas: who works in each building (CAMPUS_AREAS), students everywhere else.
+  if (tag("campus") && p.template === "campus") {
+    if (index > 0 || floor === 1) return { who: "A student", role: "student" };
+    if (floor === 3) return { who: "The librarian", role: "librarian" };
+    if (floor === 4) return { who: "The lunch staff", role: "cook" };
+    if (floor === 5) return { who: "The DJ", role: "dj" };
+    return { who: "A professor", role: "professor" };
+  }
+  if (index > 0) return { who: "A regular", role: "patron" };
   // The Hub (owner, Oct 16): who's there depends on the floor.
   if (tag("hub")) {
     if (floor === 2) return { who: "A gamer", role: "regular" };
@@ -164,6 +174,9 @@ function glitched(e: unknown, toast: (m: string) => void) {
   console.error(e);
   toast("The city glitched. Try again.");
 }
+
+/** v0.15: a campus place, whose areas (CAMPUS_AREAS) are its floors. */
+const isCampusPlace = (p: Place) => p.tags.includes("campus") && p.template === "campus";
 
 export function GameShell({
   player,
@@ -727,6 +740,7 @@ export function GameShell({
   const lottoOn = !!(travelOn && city?.lotto && cityApi?.buyLottoCard && cityApi.scratchLottoCard);
   const [lottoAt, setLottoAt] = useState<string | null>(null);
   const [campusAt, setCampusAt] = useState<CampusId | null>(null);
+  const [campusTab, setCampusTab] = useState<"classes" | "exams" | "dining" | "pride" | undefined>(undefined);
   // The nearest supermarket, for "Go shopping" from an empty fridge.
   const grocer = useMemo(() => PLACES.filter((p) => isSupermarket(p.tags)).sort((a, b) => milesBetween(myPos, a.at) - milesBetween(myPos, b.at))[0], [myPos]);
   const cityOn = !!(city && cityApi);
@@ -1203,7 +1217,7 @@ export function GameShell({
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     onStation: radio || tv ? onStation : undefined,
-    onCampus: campus ? (id) => { if (campusById(id)) setCampusAt(id as CampusId); } : undefined,
+    onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
@@ -1315,6 +1329,12 @@ export function GameShell({
     : inView.length ? inView.map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: toLook(p), crew: p.crew })) : undefined;
   const useInPlace = (p: Place, it: RoomItem) => {
     if (it.use?.kind === "station") return onStation(it.use.what);
+    // v0.15 campus areas: the lecture desks, the library's exam table and the dining hall open Campus life.
+    if (it.use?.kind === "campus") {
+      if (!campus || !campusById(p.id)) return setToast("Campus life is still enrolling. Come back soon.");
+      setCampusTab(it.use.tab);
+      return setCampusAt(p.id as CampusId);
+    }
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
@@ -1346,9 +1366,13 @@ export function GameShell({
     if (party) return money.attend(party.event!.id);
     if (products.some((x) => x.event?.placeId === p.id && liveParty(x, gameNow))) return setPanel("events");
     const minutes = cityMinutes(gameNow, GAME_CONFIG.cityClock);
-    const events = CLUB_EVENTS.filter((e) => e.placeId === p.id);
+    // v0.15: Greek Row's dance floor is for party night; the Quad's board for the other campus events.
+    const greekRow = isCampusPlace(p) && insideFloor === 5;
+    const events = CLUB_EVENTS.filter((e) => e.placeId === p.id && (!isCampusPlace(p) || e.id.startsWith("greek-row") === greekRow));
     const live = events.find((e) => eventOpen(e, minutes) && !city?.attendedToday.includes(e.id));
     if (live) return handlers.onAttendEvent(live.id);
+    const partyNight = events.find((e) => e.days);
+    if (greekRow && partyNight && !eventToday(partyNight)) return setToast(`Party night is ${eventDaysLine(partyNight)}. Tonight it's just a very sticky couch.`);
     const next = events.filter((e) => !eventOpen(e, minutes)).sort((a, b) => realMinutesUntilOpen(a, minutes) - realMinutesUntilOpen(b, minutes))[0];
     if (p.category === "campus") return setToast(next ? `Nothing on yet. ${next.name} starts in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went today. The board says \"See you next semester.\"");
     setToast(next ? `Dancing solo. ${next.name} opens in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went tonight. Dancing anyway.");
@@ -1742,7 +1766,7 @@ export function GameShell({
               look={look}
               outfit={outfit}
               daytime={daytime}
-              sign={isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
+              sign={isCampusPlace(inside) ? `${campusById(inside.id)?.short ?? inside.name} · ${CAMPUS_AREAS[insideFloor]?.name ?? ""}` : isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
               rotatable
               door
               labels={insideFloor === 2 && inside.tags.includes("exclusive_venue") ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}
@@ -1757,13 +1781,15 @@ export function GameShell({
                 // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
                 // hunt clue first, in the panel below the room.
                 if (i === 0 && insideFloor === 1 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
-                const { who: kind, role } = npcRole(inside, insideFloor);
+                const { who: kind, role } = npcRole(inside, insideFloor, i);
                 const who = `${crowdName(inside.id, insideFloor, i)} (${kind.replace(/^(A|An|The|Your) /, "")})`;
                 // v0.10: the regular may tell you a piece of gossip first.
                 const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
-                // v0.11: everyone else points the player to their next gossip lead, when they have one.
-                const lead = !tea && gossipOn ? leadFrom(teaState, inside.id, Date.now() >> 16) : null;
-                setToast(tea ? `${who}: “${tea.text}” ${tea.note}${tea.next ? ` · Next: ${tea.next}` : ""}` : lead ? `${who}: “${leadLine(lead)}”` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
+                // v0.11: some of the others point the player to a gossip lead; owner, Oct 18: not everyone says the same
+                // thing, so each NPC has their own line (and lead) for the city-minute, and only every other one gossips.
+                const beat = Math.floor(Date.now() / 60_000);
+                const lead = !tea && gossipOn && i % 2 === 1 ? leadFrom(teaState, inside.id, beat + i) : null;
+                setToast(tea ? `${who}: “${tea.text}” ${tea.note}${tea.next ? ` · Next: ${tea.next}` : ""}` : lead ? `${who}: “${leadLine(lead)}”` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, beat + i)}”`);
               })()}
             />
           }
@@ -1790,6 +1816,16 @@ export function GameShell({
               if (ok) { setInsideFloor(2); setToast("🥂 You're in. Act like you've been here before."); }
             })}
           />
+        )}
+        {/* v0.15 campus areas: walk between the Quad and the buildings around it. */}
+        {isCampusPlace(inside) && (
+          <nav className="campus-areas" aria-label="Campus">
+            {Object.entries(CAMPUS_AREAS).map(([n, a]) => (
+              <button key={n} className="pill-glass glass-hud" aria-pressed={insideFloor === Number(n)} onClick={() => setInsideFloor(Number(n))}>
+                <span aria-hidden="true">{a.emoji}</span> {a.name}
+              </button>
+            ))}
+          </nav>
         )}
         {partyHere && room && (
           <button className="pill-glass glass-hud party-pill" onClick={() => setPartyChatOpen(true)}>
@@ -2117,6 +2153,7 @@ export function GameShell({
                 open
                 onClose={() => setCampusAt(null)}
                 campusId={campusAt}
+                tab={campusTab}
                 api={campus}
                 here={!travelOn || atPlace === campusAt}
                 onDone={(msg) => {
