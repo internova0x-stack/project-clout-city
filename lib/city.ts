@@ -126,10 +126,11 @@ export const CITY_ECONOMY = {
    * a badge. Stories stay findable for two weeks from their Monday; finished Tea cards are kept.
    * v0.11 (owner, Oct 14): stories are a trail (each piece found names where the next one is) and
    * tasksPerDay of the five daily tasks send the player to their next piece. Owner, Oct 14: those pay
-   * taskClout clout, not cash ("why reward cash for information?"; migration 0042).
+   * taskClout clout, not cash ("why reward cash for information?"; migration 0042). Daily tasks 2.0 (owner, Oct 18;
+   * migration 0073): one gossip task a day, to make room for two goal-linked tasks.
    */
   gossip: {
-    pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 2, taskClout: 15,
+    pieces: 5, storiesPerWeek: { min: 3, max: 5 }, liveDays: 14, clout: 25, mood: 6, badgeAfter: 5, tasksPerDay: 1, taskClout: 15,
     /** #19 clubs (owner, Oct 14: "juicier gossip in the restroom"): a restroom piece pays a story's clout and Mood again, on the spot. */
     restroom: { clout: 25, mood: 6 },
   },
@@ -883,6 +884,11 @@ export interface ShopItem {
    * collectorValue() and `price` stays 0.
    */
   collector?: boolean;
+  /**
+   * Daily tasks 2.0 (migration 0073): a streak reward. Never sold in the Shop (buy_item says 'reward_only') and
+   * never sold back; it arrives with a streak (player_items acquired 'earned'). Price stays 0.
+   */
+  reward?: boolean;
 }
 
 /** A furniture line: one Home sku per color (or one plain sku), shelved under a room at Fif's. */
@@ -944,6 +950,11 @@ export const SHOP_ITEMS: ShopItem[] = [
   ...furnitureLine("island", "dining", "kitchenIsland", "Kitchen island", "🏝️", 1400, 30, 4, "Stools included. Dinner parties not."),
   ...furnitureLine("plant", "decor", "plant", "Monstera", "🪴", 45, 3, 1, "Thrives on neglect. Relatable."),
   ...furnitureLine("piano", "decor", "piano", "Upright piano", "🎹", 6000, 90, 4, "You'll learn. Eventually. It looks great either way."),
+  // Daily tasks 2.0 (owner, Oct 18): streak rewards, never on sale. lib/goals.ts GOALS.streak.collectibles gives them out in this order.
+  { sku: "home-neon-five-sign", category: "home", name: "Neon \"5/5\" sign", emoji: "🔆", price: 0, clout: 0, rating: 3, reward: true, blurb: "Five tasks, every day, for a week. Glows like you have your life together.", furniture: { kind: "tvStand", color: "#FF3EA5", room: "decor", line: "neon-five-sign" } },
+  { sku: "home-trophy-shelf", category: "home", name: "Trophy shelf", emoji: "🏆", price: 0, clout: 0, rating: 3, reward: true, blurb: "Trophies for showing up. Participation has never looked this good.", furniture: { kind: "bookshelf", color: "#B87333", room: "decor", line: "trophy-shelf" } },
+  { sku: "home-employee-frame", category: "home", name: "Framed \"Employee of the Month\"", emoji: "🖼️", price: 0, clout: 0, rating: 3, reward: true, blurb: "You don't have an employer. The frame doesn't need to know.", furniture: { kind: "nightstand", color: "#6C8CFF", room: "decor", line: "employee-frame" } },
+  { sku: "home-streak-lava-lamp", category: "home", name: "Streak lava lamp", emoji: "🌋", price: 0, clout: 0, rating: 4, reward: true, blurb: "Bubbles up every time you don't break the streak. Do not shake.", furniture: { kind: "floorLamp", color: "#8A3FFC", room: "decor", line: "streak-lava-lamp" } },
   { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 21000, clout: 120, rating: 2, rentPerWeek: 525, blurb: "Previously loved. Heavily. It still gets you to the club." },
   { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 78000, clout: 300, rating: 4, rentPerWeek: 1350, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
   { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 117000, clout: 420, rating: 4, rentPerWeek: 1950, blurb: "Silent, fast and smug. Like a startup founder." },
@@ -1044,7 +1055,7 @@ export function citySeed() {
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
     shop: SHOP_ITEMS.map((i) => ({
       sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null,
-      storyOnly: i.storyOnly ?? false, collector: i.collector ?? false, cloutReq: i.cloutReq ?? 0,
+      storyOnly: i.storyOnly ?? false, collector: i.collector ?? false, cloutReq: i.cloutReq ?? 0, ...(i.reward ? { reward: true } : {}),
     })),
     homeLocations: HOME_LOCATIONS,
   };

@@ -82,6 +82,10 @@ components live in `app/globals.css`.
 - Campus (migration 0072, v0.15): students enrol at one of the two Queens campuses; `campus_*` functions do classes,
   exams, the dining hall and the leaderboard. Exam answers live only in `campus_questions` (no browser access); players
   get the questions without answers. Dorms are homes with a `campus` field: students only, never an eviction target.
+- Daily tasks 2.0 (migration 0073, spec section 19): five tasks = 1 gossip, 2 goal-linked (the game's suggested goal,
+  `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a
+  week forgiven) pays clout, reward-only furniture (`reward: true`, never sold or sellable) and guest-list passes
+  (`use_guest_pass`: one night past a club door or onto a VIP floor; `travel` and `vip_access` accept it).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

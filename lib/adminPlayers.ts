@@ -77,6 +77,7 @@ const KIND: Record<string, [string, string]> = {
   vip: ["👑", "VIP floor"], vip_cover: ["👑", "VIP cover"], business_buy: ["🏪", "Bought a business"], business_upgrade: ["🏪", "Upgraded a business"],
   business_till: ["🏪", "Collected the tills"], business_public: ["📈", "Took a business public"], together: ["👯", "Together bonus"],
   job_pay: ["🧰", "Job paid"], job_hold: ["🧰", "Job posted (pay held)"], job_refund: ["🧰", "Job pay returned"], job_cut: ["🧰", "Manager's cut"],
+  goal: ["🎯", "Goal reached"], streak: ["🔥", "Streak reward"],
 };
 
 /** One line for the timeline: an emoji, what happened, and an optional detail. */

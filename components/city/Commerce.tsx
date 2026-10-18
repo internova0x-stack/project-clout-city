@@ -67,6 +67,8 @@ export function ShopSheet({
     && (i.category !== "fashion" || !!i.wear) // clothing that can't be worn isn't sold (#15)
     && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku))
     && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku))
+    // Daily tasks 2.0 (migration 0073): streak rewards are never on sale; they show once a streak has earned them.
+    && (!i.reward || owned.has(i.sku))
     && (!i.fits || !fit || i.fits === fit || owned.has(i.sku)));
   return (
     <>
