@@ -97,15 +97,25 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
     </span>
   ) : null;
 
+  const goHome = () => {
+    setTab("stories");
+    setBuilder(null);
+    setNote(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <main className="studio">
       <header className="studio-top">
-        <div>
+        {/* Owner, Oct 18: a way home from anywhere in the Studio (the title does the same). */}
+        <button className="studio-home-title" onClick={goHome} aria-label="Studio home">
           <span className="studio-mark">Clout City</span>
           <h1 className="display-lg" style={{ margin: 0 }}>Story Studio</h1>
-        </div>
-        <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        </button>
+        <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center" }}>
           <span className="meta">{preview ? "Preview: nothing is saved" : `Signed in as ${who}`}</span>
+          <button className="chip" onClick={goHome}>⌂ Home</button>
+          <a className="chip" href={preview ? "/preview/home" : "/home"}>Open the game ›</a>
           {!preview && <form action="/auth/signout" method="post"><button className="chip" type="submit">Log out</button></form>}
         </div>
       </header>

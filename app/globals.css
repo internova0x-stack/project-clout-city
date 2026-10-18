@@ -715,6 +715,8 @@ button.tea-lead { border:0; font:inherit; font-size:13px; font-weight:600; curso
 .studio-gate { display:grid; place-items:center; }
 .studio-gate .studio-card { width:min(440px, 100%); }
 .studio-top { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+a.chip { text-decoration:none; display:inline-flex; align-items:center; }
+.studio-home-title { display:flex; flex-direction:column; align-items:flex-start; padding:0; border:0; background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; }
 .studio-mark { font-family:var(--font-display, inherit); font-weight:800; font-size:13px; letter-spacing:.12em; text-transform:uppercase; background:var(--g-neon); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .studio-grid { display:grid; grid-template-columns:minmax(0, 1fr); gap:16px; align-items:start; }
 @media (min-width: 900px) { .studio-grid { grid-template-columns:clamp(320px, 26vw, 420px) minmax(0, 1fr); } .studio-grid > aside { position:sticky; top:16px; } }
