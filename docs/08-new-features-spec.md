@@ -540,9 +540,18 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
   computer-controlled **roommate** with quirks (always microwaving fish, alarm at 5 AM, borrows your hoodie)
   who leaves notes. Real-player roommates (both opt in) are a later phase.
 
+### Walking around campus (owner, Oct 18; migration 0075)
+- Each campus is a set of rooms you walk between with the area pills above the place card (`CAMPUS_AREAS` in
+  `lib/rooms.ts`): **the Quad** (where you arrive: lawns, benches, the events board, "Hang out on the Quad"),
+  the **Lecture Hall** ("Go to class" opens Campus life on your courses; "Sit in on a lecture" for visitors), the
+  **Library** ("Study" trains Smarts; the exam table opens your exams), the **Dining Hall** ("Grab a tray") and
+  **Greek Row** (the party room). The walls wear the school's color.
+
 ### Campus parties and events
-- **Greek Row party night** (weekly, from the club/party room), the existing **Homecoming Tailgate** and
-  **Open Mic on the Quad**, plus finals-week "Library All-Nighter" (Energy cost, Smarts and Confidence).
+- **Greek Row party night** on **Tuesday, Thursday, Friday and Saturday** (owner, Oct 18), 9 PM to 2 AM city time,
+  on Greek Row's dance floor. Events can carry `days` (New York weekdays); the server refuses other days and the
+  daily task list skips them. The existing **Homecoming Tailgate** and **Open Mic on the Quad** stay on the Quad's
+  board, plus finals-week "Library All-Nighter" later (Energy cost, Smarts and Confidence).
 
 ### Meeting people
 - The **Quad** and the **Library** are hangout spots on each campus card; the players-at-this-place list

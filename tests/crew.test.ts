@@ -22,7 +22,7 @@ test("the full crew is the host plus 5 friends; bonuses are +10 and +100", () =>
 test("crews do visits, meals, hangouts, lectures and club or campus events, never shifts or gigs", () => {
   assert.deepEqual(crewActivities(place("grind-and-gossip")).map((a) => a.id), ["eat"]);
   assert.deepEqual(crewActivities(place("velvet-static")).map((a) => a.id), ["visit", "neon-nights", "golden-hour"]);
-  assert.deepEqual(crewActivities(place("st-johnsons")).map((a) => a.id), ["lecture", "quad", "study", "homecoming-tailgate"]);
+  assert.deepEqual(crewActivities(place("st-johnsons")).map((a) => a.id), ["lecture", "quad", "study", "homecoming-tailgate", "greek-row-sj"]);
   assert.equal(crewActivities(place("skybridge-tower")).length, 0);
   assert.equal(crewActivities(place("pedal-pushers")).length, 0);
   assert.deepEqual(crewActivities(place("skyline-pier")).map((a) => a.id), ["lobby"], "story-only actions are out");

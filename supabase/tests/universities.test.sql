@@ -39,9 +39,9 @@ select pg_temp.assert((select confidence = 62 and energy = 55 from public.player
   'confidence +6 twice (once per campus), energy -15 per lecture');
 select pg_temp.assert((select count(*) = 2 from public.ledger where player_id = '00000000-0000-0000-0000-000000000081' and kind = 'visit'
                          and ref like any (array['st-johnsons:%', 'queensborough-u:%'])), 'one clout row per campus');
--- Both campus events exist in the city seed.
-select pg_temp.assert((select count(*) = 2 from jsonb_array_elements(public.city() -> 'events') e
-                         where e ->> 'placeId' in ('st-johnsons', 'queensborough-u')), 'two campus events');
+-- Both campus events exist in the city seed, plus Greek Row party night at each campus (migration 0075).
+select pg_temp.assert((select count(*) = 4 from jsonb_array_elements(public.city() -> 'events') e
+                         where e ->> 'placeId' in ('st-johnsons', 'queensborough-u')), 'four campus events');
 
 rollback;
 \echo UNIVERSITY CHECKS PASSED

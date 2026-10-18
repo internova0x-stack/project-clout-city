@@ -12,7 +12,7 @@ import { skillBadge } from "@/lib/skills";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
@@ -118,9 +118,19 @@ const DAILY_HINT_AFTER_MS = 30_000;
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
 /** Who's talking in a place (chatter templates are written per role). */
-function npcRole(p: Place, floor = 1): { who: string; role: string } {
+function npcRole(p: Place, floor = 1, index = 0): { who: string; role: string } {
   // v0.11 shared rooms: who's there depends on the kind of place.
   const tag = (t: string) => p.tags.includes(t);
+  // Owner, Oct 18: only the first NPC in a room works there; the rest are the crowd, with lines of their own.
+  // v0.15 campus areas: who works in each building (CAMPUS_AREAS), students everywhere else.
+  if (tag("campus") && p.template === "campus") {
+    if (index > 0 || floor === 1) return { who: "A student", role: "student" };
+    if (floor === 3) return { who: "The librarian", role: "librarian" };
+    if (floor === 4) return { who: "The lunch staff", role: "cook" };
+    if (floor === 5) return { who: "The DJ", role: "dj" };
+    return { who: "A professor", role: "professor" };
+  }
+  if (index > 0) return { who: "A regular", role: "patron" };
   // The Hub (owner, Oct 16): who's there depends on the floor.
   if (tag("hub")) {
     if (floor === 2) return { who: "A gamer", role: "regular" };
@@ -1356,9 +1366,13 @@ export function GameShell({
     if (party) return money.attend(party.event!.id);
     if (products.some((x) => x.event?.placeId === p.id && liveParty(x, gameNow))) return setPanel("events");
     const minutes = cityMinutes(gameNow, GAME_CONFIG.cityClock);
-    const events = CLUB_EVENTS.filter((e) => e.placeId === p.id);
+    // v0.15: Greek Row's dance floor is for party night; the Quad's board for the other campus events.
+    const greekRow = isCampusPlace(p) && insideFloor === 5;
+    const events = CLUB_EVENTS.filter((e) => e.placeId === p.id && (!isCampusPlace(p) || e.id.startsWith("greek-row") === greekRow));
     const live = events.find((e) => eventOpen(e, minutes) && !city?.attendedToday.includes(e.id));
     if (live) return handlers.onAttendEvent(live.id);
+    const partyNight = events.find((e) => e.days);
+    if (greekRow && partyNight && !eventToday(partyNight)) return setToast(`Party night is ${eventDaysLine(partyNight)}. Tonight it's just a very sticky couch.`);
     const next = events.filter((e) => !eventOpen(e, minutes)).sort((a, b) => realMinutesUntilOpen(a, minutes) - realMinutesUntilOpen(b, minutes))[0];
     if (p.category === "campus") return setToast(next ? `Nothing on yet. ${next.name} starts in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went today. The board says \"See you next semester.\"");
     setToast(next ? `Dancing solo. ${next.name} opens in ${realMinutesUntilOpen(next, minutes)} min.` : "You already went tonight. Dancing anyway.");
@@ -1767,13 +1781,15 @@ export function GameShell({
                 // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
                 // hunt clue first, in the panel below the room.
                 if (i === 0 && insideFloor === 1 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
-                const { who: kind, role } = npcRole(inside, insideFloor);
+                const { who: kind, role } = npcRole(inside, insideFloor, i);
                 const who = `${crowdName(inside.id, insideFloor, i)} (${kind.replace(/^(A|An|The|Your) /, "")})`;
                 // v0.10: the regular may tell you a piece of gossip first.
                 const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
-                // v0.11: everyone else points the player to their next gossip lead, when they have one.
-                const lead = !tea && gossipOn ? leadFrom(teaState, inside.id, Date.now() >> 16) : null;
-                setToast(tea ? `${who}: “${tea.text}” ${tea.note}${tea.next ? ` · Next: ${tea.next}` : ""}` : lead ? `${who}: “${leadLine(lead)}”` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, Date.now())}”`);
+                // v0.11: some of the others point the player to a gossip lead; owner, Oct 18: not everyone says the same
+                // thing, so each NPC has their own line (and lead) for the city-minute, and only every other one gossips.
+                const beat = Math.floor(Date.now() / 60_000);
+                const lead = !tea && gossipOn && i % 2 === 1 ? leadFrom(teaState, inside.id, beat + i) : null;
+                setToast(tea ? `${who}: “${tea.text}” ${tea.note}${tea.next ? ` · Next: ${tea.next}` : ""}` : lead ? `${who}: “${leadLine(lead)}”` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, beat + i)}”`);
               })()}
             />
           }
