@@ -16,10 +16,12 @@ type Tab = "classes" | "exams" | "dining" | "pride";
  * the sheet opens from anywhere, but classes, exams and the dining hall need you on campus.
  */
 export function CampusSheet({
-  open, onClose, campusId, api, here, onDone, dorm,
+  open, onClose, campusId, api, here, onDone, dorm, tab: initialTab,
 }: {
   open: boolean;
   onClose: () => void;
+  /** v0.15 campus areas: the tab to open on (the lecture desks, the library's exam table, the dining hall). */
+  tab?: Tab;
   /** The campus whose card this was opened from. */
   campusId: CampusId;
   api: CampusApi;
@@ -33,7 +35,7 @@ export function CampusSheet({
   const campus = campusById(campusId)!;
   const [s, setS] = useState<CampusState | null>(null);
   const [board, setBoard] = useState<Leaderboard | null>(null);
-  const [tab, setTab] = useState<Tab>("classes");
+  const [tab, setTab] = useState<Tab>(initialTab ?? "classes");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [picks, setPicks] = useState<string[]>([]);

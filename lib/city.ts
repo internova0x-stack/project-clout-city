@@ -538,6 +538,9 @@ export const PLACES: Place[] = [
     lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the students are here on scholarship; the other half are here on a parking permit.",
     actions: [
       { id: "lecture", kind: "visit", label: "Sit in on a lecture", energy: 15, confidence: 6, clout: 15, blurb: "Intro to Marketing. You take notes on the professor's outfit." },
+      // v0.15 campus areas: the Quad and the Library (CAMPUS_AREAS in lib/rooms.ts).
+      { id: "quad", kind: "hangout", label: "Hang out on the Quad", energy: 5, mood: 8, clout: 8, blurb: "Frisbee, a guitar nobody asked for and the best people-watching in Queens." },
+      { id: "study", kind: "visit", label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Silent floor. Someone is eating chips like it's a percussion solo." },
     ],
   },
   {
@@ -547,6 +550,9 @@ export const PLACES: Place[] = [
     lore: "A leafy quad, a library open until 2 AM and forty languages overheard on the walk to class. Tuition is reasonable, which around here counts as a personality.",
     actions: [
       { id: "lecture", kind: "visit", label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
+      // v0.15 campus areas: the Quad and the Library (CAMPUS_AREAS in lib/rooms.ts).
+      { id: "quad", kind: "hangout", label: "Hang out on the Quad", energy: 5, mood: 8, clout: 8, blurb: "Forty languages, one frisbee and a squirrel with a reputation." },
+      { id: "study", kind: "visit", label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Open until 2 AM. The vending machine is the real librarian." },
     ],
   },  // ---- v0.6: the Astoria neighborhood (docs/08-new-features-spec.md section 5). Invented names. ----
   {

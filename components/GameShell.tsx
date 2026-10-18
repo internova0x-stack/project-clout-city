@@ -15,7 +15,7 @@ import { getStyle, starterOutfit } from "@/lib/styles";
 import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventOpen, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -164,6 +164,9 @@ function glitched(e: unknown, toast: (m: string) => void) {
   console.error(e);
   toast("The city glitched. Try again.");
 }
+
+/** v0.15: a campus place, whose areas (CAMPUS_AREAS) are its floors. */
+const isCampusPlace = (p: Place) => p.tags.includes("campus") && p.template === "campus";
 
 export function GameShell({
   player,
@@ -727,6 +730,7 @@ export function GameShell({
   const lottoOn = !!(travelOn && city?.lotto && cityApi?.buyLottoCard && cityApi.scratchLottoCard);
   const [lottoAt, setLottoAt] = useState<string | null>(null);
   const [campusAt, setCampusAt] = useState<CampusId | null>(null);
+  const [campusTab, setCampusTab] = useState<"classes" | "exams" | "dining" | "pride" | undefined>(undefined);
   // The nearest supermarket, for "Go shopping" from an empty fridge.
   const grocer = useMemo(() => PLACES.filter((p) => isSupermarket(p.tags)).sort((a, b) => milesBetween(myPos, a.at) - milesBetween(myPos, b.at))[0], [myPos]);
   const cityOn = !!(city && cityApi);
@@ -1203,7 +1207,7 @@ export function GameShell({
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     onStation: radio || tv ? onStation : undefined,
-    onCampus: campus ? (id) => { if (campusById(id)) setCampusAt(id as CampusId); } : undefined,
+    onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
@@ -1315,6 +1319,12 @@ export function GameShell({
     : inView.length ? inView.map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: toLook(p), crew: p.crew })) : undefined;
   const useInPlace = (p: Place, it: RoomItem) => {
     if (it.use?.kind === "station") return onStation(it.use.what);
+    // v0.15 campus areas: the lecture desks, the library's exam table and the dining hall open Campus life.
+    if (it.use?.kind === "campus") {
+      if (!campus || !campusById(p.id)) return setToast("Campus life is still enrolling. Come back soon.");
+      setCampusTab(it.use.tab);
+      return setCampusAt(p.id as CampusId);
+    }
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
@@ -1742,7 +1752,7 @@ export function GameShell({
               look={look}
               outfit={outfit}
               daytime={daytime}
-              sign={isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
+              sign={isCampusPlace(inside) ? `${campusById(inside.id)?.short ?? inside.name} · ${CAMPUS_AREAS[insideFloor]?.name ?? ""}` : isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
               rotatable
               door
               labels={insideFloor === 2 && inside.tags.includes("exclusive_venue") ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}
@@ -1790,6 +1800,16 @@ export function GameShell({
               if (ok) { setInsideFloor(2); setToast("🥂 You're in. Act like you've been here before."); }
             })}
           />
+        )}
+        {/* v0.15 campus areas: walk between the Quad and the buildings around it. */}
+        {isCampusPlace(inside) && (
+          <nav className="campus-areas" aria-label="Campus">
+            {Object.entries(CAMPUS_AREAS).map(([n, a]) => (
+              <button key={n} className="pill-glass glass-hud" aria-pressed={insideFloor === Number(n)} onClick={() => setInsideFloor(Number(n))}>
+                <span aria-hidden="true">{a.emoji}</span> {a.name}
+              </button>
+            ))}
+          </nav>
         )}
         {partyHere && room && (
           <button className="pill-glass glass-hud party-pill" onClick={() => setPartyChatOpen(true)}>
@@ -2117,6 +2137,7 @@ export function GameShell({
                 open
                 onClose={() => setCampusAt(null)}
                 campusId={campusAt}
+                tab={campusTab}
                 api={campus}
                 here={!travelOn || atPlace === campusAt}
                 onDone={(msg) => {
