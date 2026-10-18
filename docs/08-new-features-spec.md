@@ -664,7 +664,28 @@ suggests** the next goal; **add streaks**; guest-list passes cover clout-locked 
 ### The daily mix (owner, Oct 18)
 - Five tasks: 1 gossip, 2 goal-linked, 1 skill, 1 random.
 
-## 20. Later features
+## 20. Push notifications (owner, Oct 18; migration 0078)
+
+Push only (lock-screen notifications when the game is closed); no in-app inbox. Owner decisions: **4 a day plus chat**,
+quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
+
+- **Tiers.** P0 someone is waiting (messages, matches, date and crew invites, ride requests, a friend joining); P1
+  something expires or costs you (bills, gigs ready, a full till, a streak about to end, exams, party night, a guest
+  pass tonight); P2 you won something (rank up, goals, streak rewards, skills, grades, lotto, on air or on screen); P3
+  come back and play (new tasks, hunts, gossip, story beats, boroughs, win-back), only ever as one morning roundup.
+  The full list with copy is `PUSH_KINDS` in `lib/push.ts`.
+- **When many are queued.** Score = tier (100/70/50/20) + up to 30 as a deadline nears + 15 from a crush, match or
+  crew − 10 per push sent today. One push per player per run: the top score, with the same group (or kind) merged in
+  ("💬 Tasha (3)"). Expired pushes are dropped, never sent late; a push for a player who's in the game is dropped too.
+- **Caps.** 4 a day outside Messages, 15 minutes apart; chat at most every 10 minutes; P3 between 9 AM and 9 PM.
+  Quiet hours hold everything except a date that's happening now. Six switches in Settings → Notifications (Messages,
+  Dates & crew, Money & bills, Reminders, Rewards, News & hunts) and a test button.
+- **Asking.** Lola asks once, a little into a session after the first party; "Not now" waits three days. On iPhone
+  push needs the Home Screen app (iOS 16.4+), so the ask points there first.
+- **Steps.** 1: the plumbing (devices, switches, queue, rules, sender, the ask, Settings). 2: P0 and P1 triggers.
+  3: P2, the P3 roundup and win-back. Money and safety notices (VIP renewals, payments, bans) stay email.
+
+## 21. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

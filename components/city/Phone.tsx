@@ -1,5 +1,9 @@
 "use client";
 
+import { PushSettings } from "../push/Push";
+import { Toggle } from "../Toggle";
+import type { PushApi } from "@/lib/pushClient";
+
 import type { PartyMention } from "@/lib/party";
 import { JobsApp } from "../together/Together";
 import { useEffect, useState } from "react";
@@ -60,7 +64,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push,
 }: {
   open: boolean;
   onClose: () => void;
@@ -81,6 +85,8 @@ export function PhoneModal({
   cityNews?: CityNews;
   /** v0.5 chat (migration 0010); without it Messages says it opens soon. */
   chat?: ChatApi;
+  /** Push notifications (migration 0078): Settings → Notifications; hidden without it. */
+  push?: PushApi;
   chatWith?: { id: string; name: string; style: string } | null;
   /** Meeting players (migration 0047): opens the unlimited chat offer (`out` when the day's messages ran out). */
   onChatPass?: (out: boolean) => void;
@@ -187,7 +193,7 @@ export function PhoneModal({
                 <div className="stack-12">
                   <div className="list-row static">
                     <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Lo-fi city loop</span></span>
-                    <button className="chip" aria-pressed={!muted} onClick={onToggleSound}>{muted ? "Off" : "On"}</button>
+                    <Toggle on={!muted} label="Music" onChange={onToggleSound} />
                   </div>
                   {gossip && (
                     <div className="list-row static">
@@ -195,9 +201,10 @@ export function PhoneModal({
                         <span className="title" style={{ display: "block" }}>Keep me out of the gossip</span>
                         <span className="meta">Your name stays out of Lola&apos;s &ldquo;Spotted at&rdquo; party lines</span>
                       </span>
-                      <button className="chip" aria-pressed={gossip.optedOut} onClick={gossip.onToggle}>{gossip.optedOut ? "On" : "Off"}</button>
+                      <Toggle on={gossip.optedOut} label="Keep me out of the gossip" onChange={gossip.onToggle} />
                     </div>
                   )}
+                  {push && <PushSettings api={push} onToast={onToast} />}
                   {chat?.setMessagesFrom && <ChatSettings api={chat} onToast={onToast} onChatPass={onChatPass} />}
                   <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
                 </div>

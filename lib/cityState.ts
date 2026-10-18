@@ -231,6 +231,8 @@ const ERRORS: Record<string, string> = {
   bad_answers: "Answer all five questions first.",
   doors_closed: "Doors aren't open yet. The bouncer is pretending not to see you.",
   not_tonight: "No party tonight. Greek Row parties are Tuesday, Thursday, Friday and Saturday.",
+  bad_subscription: "Your browser sent a strange subscription. Try turning notifications on again.",
+  bad_category: "That notification setting doesn't exist.",
   already_attended: "You already went tonight. Twice would be desperate.",
   gig_active: "Finish your current gig first.",
   needs_confidence: "This client wants more Confidence than you've got right now.",
