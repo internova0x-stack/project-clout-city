@@ -10,6 +10,7 @@ import { SkillsList } from "./Skills";
 import type { SkillState } from "@/lib/skills";
 import { useState } from "react";
 import { Sheet } from "../Sheet";
+import { ProfileVip } from "../store/Membership";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
@@ -19,7 +20,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  */
 export function ProfileSheet({
   open, onClose, look, outfit, name, subtitle, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
-  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills,
+  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills, vip,
 }: {
   open: boolean;
   onClose: () => void;
@@ -42,6 +43,8 @@ export function ProfileSheet({
   onOpenLeaderboard?: () => void;
   /** Skills (owner, Oct 16): absent until they're switched on, and then there's a Skills tab. */
   skills?: SkillState[];
+  /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
+  vip?: { on: boolean; until?: string | null; onOpen: () => void };
 }) {
   const [tab, setTab] = useState<"profile" | "skills">("profile");
   const lines = (recent ?? []).map((r) => ({ r, line: recentLine(r) })).filter((x) => x.line);
@@ -55,6 +58,7 @@ export function ProfileSheet({
         <div>
           <h2 className="display-md profile-name">{name}</h2>
           <p className="body profile-sub">{subtitle}</p>
+          {vip && <div style={{ textAlign: "center" }}><ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
         </div>
         {skills && (
           <div className="segmented profile-tabs" role="group" aria-label="Profile sections">

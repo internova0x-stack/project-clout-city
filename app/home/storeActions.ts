@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { createCheckoutSession } from "@/lib/stripe";
 import { RETURN_PARAM, storeError, type CheckoutResult, type StoreProduct } from "@/lib/store";
+import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Real-money checkout (Payments Brief v2). The server creates the Stripe Checkout
@@ -33,6 +34,9 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
     .from("store_products").select("sku, product_type, name, price_cents, currency, stripe_price_id, recurring").eq("sku", sku).maybeSingle();
   if (!product) return { ok: false, error: storeError("unknown_product") };
   const back = `${await origin()}/home?${RETURN_PARAM}=`;
+  // Membership & purchases (migration 0079): a returning buyer pays as the same Stripe customer.
+  const billing = await getAdminSupabase()?.rpc("membership_billing", { p_player: user.id });
+  const customer = (billing?.data as { customer?: string | null } | null)?.customer ?? null;
   try {
     const session = await createCheckoutSession(secret, {
       priceId: product.stripe_price_id,
@@ -45,6 +49,7 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
       sku,
       productType: product.product_type,
       email: user.email,
+      customer,
       recurring: product.recurring === "month" || product.recurring === "year" ? product.recurring : null,
     });
     const { error } = await supabase.rpc("start_purchase", { p_sku: sku, p_session: session.id });

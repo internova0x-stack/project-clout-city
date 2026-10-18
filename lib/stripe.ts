@@ -31,7 +31,12 @@ export interface CheckoutInput {
   email?: string | null;
   /** Unlimited chat (migrations 0047, 0051): "month" or "year" makes it a subscription that renews until cancelled. */
   recurring?: "month" | "year" | null;
+  /** The player's Stripe customer (migration 0079), so every purchase lands on one customer and its billing portal. */
+  customer?: string | null;
 }
+
+/** The returning customer, or the email for a new one. */
+const who = (i: CheckoutInput) => (i.customer ? { customer: i.customer } : { customer_email: i.email ?? undefined });
 
 /**
  * The form body for one Checkout Session: one item, our ids in metadata. A one-time payment, or a
@@ -45,7 +50,7 @@ export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
       success_url: i.successUrl,
       cancel_url: i.cancelUrl,
       client_reference_id: i.playerId,
-      customer_email: i.email ?? undefined,
+      ...who(i),
       line_items: {
         0: i.priceId
           ? { price: i.priceId, quantity: 1 }
@@ -61,7 +66,9 @@ export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
     success_url: i.successUrl,
     cancel_url: i.cancelUrl,
     client_reference_id: i.playerId,
-    customer_email: i.email ?? undefined,
+    ...who(i),
+    // Membership & purchases (migration 0079): one-off buyers get a customer too, so the billing portal has their receipts.
+    customer_creation: i.customer ? undefined : "always",
     line_items: {
       0: i.priceId
         ? { price: i.priceId, quantity: 1 }
@@ -84,6 +91,40 @@ export async function createCheckoutSession(secretKey: string, input: CheckoutIn
   if (!res.ok || !data.id || !data.url) throw new Error(`stripe_checkout_failed: ${data.error?.message ?? res.status}`);
   return { id: data.id, url: data.url };
 }
+
+async function stripeCall<T>(secretKey: string, method: "GET" | "POST", path: string, params?: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`https://api.stripe.com/v1/${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${secretKey}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: params ? formEncode(params) : undefined,
+    cache: "no-store",
+  });
+  const data = (await res.json()) as T & { error?: { message?: string } };
+  if (!res.ok) throw new Error(`stripe_${path.split("/")[0]}_failed: ${data.error?.message ?? res.status}`);
+  return data;
+}
+
+/** The parts of a Subscription the Membership screen reads (https://docs.stripe.com/api/subscriptions/object). */
+export interface StripeSubscription {
+  id: string;
+  customer: string;
+  status: string;
+  cancel_at_period_end?: boolean;
+  cancel_at?: number | null;
+  /** Older API versions put the period end on the subscription; newer ones on each item. */
+  current_period_end?: number;
+  items?: { data?: { current_period_end?: number; price?: { unit_amount?: number | null; currency?: string; recurring?: { interval?: string } | null } }[] };
+}
+
+export const getSubscription = (secretKey: string, id: string) =>
+  stripeCall<StripeSubscription>(secretKey, "GET", `subscriptions/${encodeURIComponent(id)}`);
+
+export const getCheckoutSession = (secretKey: string, id: string) =>
+  stripeCall<{ id: string; customer: string | null }>(secretKey, "GET", `checkout/sessions/${encodeURIComponent(id)}`);
+
+/** A billing portal session (https://docs.stripe.com/api/customer_portal/sessions/create): its one-time `url`. */
+export const createPortalSession = (secretKey: string, customer: string, returnUrl: string) =>
+  stripeCall<{ url: string }>(secretKey, "POST", "billing_portal/sessions", { customer, return_url: returnUrl });
 
 /**
  * Checks the Stripe-Signature header (t=…,v1=…) against the raw body: HMAC-SHA256 of

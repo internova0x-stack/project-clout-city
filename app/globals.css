@@ -2031,3 +2031,21 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .toggle:disabled { opacity:.45; cursor:default; }
 .toggle:focus-visible { outline:2px solid var(--neon-600); outline-offset:2px; }
 @media (prefers-reduced-motion: reduce) { .toggle, .toggle-knob { transition:none; } }
+
+/* Membership & purchases (owner, Oct 18): real money, so the VIP card wears gold. */
+.member-card { padding:16px; border-radius:var(--r-lg); background:var(--surface-card); box-shadow:inset 0 0 0 1.5px var(--gold-300); }
+.member-card.warn { box-shadow:inset 0 0 0 1.5px #E5484D; }
+.member-warn-tag { background:#FFE4E2; color:#B42318; }
+.member-muted-tag { background:var(--surface-raised); color:var(--text-2); }
+.member-perks { list-style:none; margin:12px 0 14px; padding:0; display:flex; flex-direction:column; gap:6px; font-size:14px; }
+.member-list { display:flex; flex-direction:column; border-radius:var(--r-lg); background:var(--surface-card); overflow:hidden; }
+.member-row { display:flex; align-items:center; gap:12px; padding:12px 14px; }
+.member-row + .member-row { border-top:1px solid var(--border, #E7E0D6); }
+.member-emoji { font-size:20px; width:28px; text-align:center; }
+.member-name { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.member-row .meta { display:block; }
+.member-price { font-weight:800; font-size:15px; }
+.member-price.refunded { text-decoration:line-through; color:var(--text-3); }
+.member-entry { width:100%; border:0; padding:12px 14px; border-radius:var(--r-lg); background:var(--surface-card); font:inherit; color:inherit; cursor:pointer; box-shadow:inset 0 0 0 1.5px var(--gold-300); }
+.profile-vip { display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:6px 12px; border:0; border-radius:var(--r-pill); font:inherit; font-size:13px; font-weight:700; cursor:pointer; background:var(--surface-raised); color:var(--gold-700); box-shadow:inset 0 0 0 1.5px var(--gold-300); }
+.profile-vip.on { background:var(--gold-100); }
