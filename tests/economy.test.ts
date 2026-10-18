@@ -29,7 +29,7 @@ test("database economy seed matches lib/economy.ts", () => {
   assert.deepEqual(dbRest, rest);
   // The server keeps each home's id and rent, and the moving-up rules (#19, migration 0045).
   assert.deepEqual(dbHomes, homes.map((h) => ({
-    id: h.id, rent: h.rent, ...(h.moveClout ? { moveClout: h.moveClout } : {}), ...(h.signup === false ? { signup: false } : {}),
+    id: h.id, rent: h.rent, ...(h.moveClout ? { moveClout: h.moveClout } : {}), ...(h.signup === false ? { signup: false } : {}), ...(h.campus ? { campus: h.campus } : {}),
   })));
 });
 

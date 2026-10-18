@@ -783,6 +783,9 @@ export const HOME_LOCATIONS: Record<string, LatLng> = {
   astoria_studio: [40.7745, -73.9050],
   jackson_heights_1br: [40.7520, -73.8830],
   lic_highrise: [40.7470, -73.9560],
+  // v0.15 Campus: the dorms, a short walk from each campus.
+  sj_dorm: [40.7208, -73.7972],
+  qu_dorm: [40.7352, -73.8192],
 };
 
 // ---------------------------------------------------------------------------

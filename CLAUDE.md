@@ -79,6 +79,9 @@ components live in `app/globals.css`.
   browser into the player's own folder after cropping to 1080 × 1350; storage policies decide who can read one
   (its player, Studio admins, everyone once it has been on screen). The server decides what's on screen
   (`tv_current()`, the 3-hour rotation); the browser never picks it.
+- Campus (migration 0072, v0.15): students enrol at one of the two Queens campuses; `campus_*` functions do classes,
+  exams, the dining hall and the leaderboard. Exam answers live only in `campus_questions` (no browser access); players
+  get the questions without answers. Dorms are homes with a `campus` field: students only, never an eviction target.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

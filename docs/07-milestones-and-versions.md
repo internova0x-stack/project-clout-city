@@ -32,6 +32,7 @@ Six versions take the game from a 24-hour teaser to launch in roughly 8 to 12 we
 | v0.12 | Ownership | Crowded places, player ranks, businesses that make money and real money milestones | 1 to 2 weeks | — |
 | v0.13 | Better Together | Together bonuses (travel, study, club), the Jobs board: decorator and business manager, ratings | 1 to 2 weeks | — |
 | v0.14 | On Air | Real Clout FM shoutouts and Clout TV's big screen, both approved in the Studio | 1 to 2 weeks | — |
+| v0.15 | Campus | Campus life at the two Queens universities: enrolment, classes and streaks, Friday exams and GPA, the scholarship, the dining hall, dorm rooms, Quad and Library hangouts, Greek Row party night, school vs school (spec section 18) | 1 to 2 weeks | — |
 | v1.0 | Launch | Real art, security review, soft launch, then the story pilot | 1 to 2 weeks | 6 |
 
 ### Location rollout
