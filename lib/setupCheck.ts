@@ -59,6 +59,10 @@ export async function runSetupCheck(siteOrigin: string): Promise<SetupCheckRow[]
   await migration("0036_gossip_trail.sql", "gossip daily tasks", "gossip_leads", { p_player: "00000000-0000-0000-0000-000000000000" });
   const has0037 = await migration("0037_content_autopublish.sql", "news and hunts publish themselves", "content_import_news", { p_items: [] });
   await migration("0038_party_rooms.sql", "party floor and chat", "party_room", { p_event: "setup-check", p_after: 0 });
+  // Recent ones (owner, Oct 18: Go live now failed silently before 0080 was run). Read-only probes.
+  await migration("0078_push.sql", "push notifications", "push_prefs_get", {});
+  await migration("0079_membership.sql", "Membership & purchases", "membership_billing", { p_player: "00000000-0000-0000-0000-000000000000" });
+  await migration("0080_story_go_live.sql", "Go live now in Stories", "admin_story_go_live", { p_arc: "setup-check" });
 
   // ---- News and hunts: import now and say what happened to each file ----
   if (has0037) {

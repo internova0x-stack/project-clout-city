@@ -72,3 +72,9 @@ test("story stage: one word for where a story stands, approval alone isn't live"
   assert.equal(storyStage({ ...base, type: "side", review: "draft" }, main), "review");
   assert.equal(STAGE_LABEL.ready, "Not live");
 });
+
+test("studio errors: a missing migration says so instead of 'glitched'", () => {
+  const m = studioError("Could not find the function public.admin_story_go_live(p_arc) in the schema cache");
+  assert.match(m, /missing a step \(admin_story_go_live\)/);
+  assert.match(m, /Setup tab/);
+});

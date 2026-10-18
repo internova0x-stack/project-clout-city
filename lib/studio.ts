@@ -303,6 +303,11 @@ const ERRORS: Record<string, string> = {
 
 export function studioError(message: string | undefined): string {
   if (message) for (const code of Object.keys(ERRORS)) if (message.includes(code)) return ERRORS[code];
+  // A Studio button whose database function isn't there yet (a migration not run).
+  const fn = message?.match(/function public\.(\w+)|function (\w+)\(/i);
+  if (message && /schema cache|could not find the function|does not exist/i.test(message)) {
+    return `The database is missing a step${fn ? ` (${fn[1] ?? fn[2]})` : ""}. Run the newest files in supabase/migrations; the Setup tab shows which.`;
+  }
   return "The Studio glitched. Try again.";
 }
 
