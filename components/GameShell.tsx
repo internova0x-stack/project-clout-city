@@ -977,6 +977,17 @@ export function GameShell({
     setUnlocking(back.sku);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // A tapped push notification (migration 0082) opens the game at /home?open=<screen>.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const open = url.searchParams.get("open");
+    if (!open) return;
+    url.searchParams.delete("open");
+    window.history.replaceState(null, "", url.toString());
+    if (open === "messages" || open === "gigs" || open === "businesses") setPhone({ open: true, app: open });
+    else if (open === "bills" || open === "tasks" || open === "events") setPanel(open);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Back from Stripe's billing portal (Membership & purchases): reopen the screen with the fresh plan.
   useEffect(() => {
     const url = new URL(window.location.href);

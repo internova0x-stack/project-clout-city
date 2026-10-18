@@ -684,6 +684,13 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
   push needs the Home Screen app (iOS 16.4+), so the ask points there first.
 - **Steps.** 1: the plumbing (devices, switches, queue, rules, sender, the ask, Settings). 2: P0 and P1 triggers.
   3: P2, the P3 roundup and win-back. Money and safety notices (VIP renewals, payments, bans) stay email.
+- **Step 2 (migration 0082).** P0 comes from row triggers on messages (text only, not reactions), crush matches,
+  date nights, crew outing invites, rides, together invites and invites (a friend joining). P1 comes from
+  `push_scan()`, run by the sender each time: bills due today or tomorrow and late ones (one a day; rent 3+ days late
+  is the eviction warning), gigs ready, tills full, a 2+ day streak with today's five not done (6 to 9 PM New York),
+  exams open (Friday) and their last day (Sunday, with an exam left), and party tickets starting within the hour. A
+  trigger can never break the action it watches. Not yet: "your date is now", "the crew is there", party night and
+  a guest pass tonight (they need a time of day the game doesn't store yet).
 
 ## 21. Later features
 

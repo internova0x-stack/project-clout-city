@@ -102,6 +102,8 @@ components live in `app/globals.css`.
   nudged by game traffic) applies `lib/push.ts`: tier score + deadline urgency + close-person bonus − fatigue, merging by
   group, 4 a day plus chat, 15 min apart (chat 10), quiet 10 PM to 9 AM local, expiry, the morning roundup for news, no
   push while in the game. `public/sw.js` only shows pushes (no caching). VAPID keys in env (docs/SETUP.md 2d).
+  Step 2 (migration 0082): P0 pushes come from row triggers (`push_on_*`, which swallow their own errors), P1 from
+  `push_scan()` (service role, run by the sender first; one push per key). Taps open `/home?open=<screen>`.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
