@@ -1,7 +1,7 @@
 "use server";
 
 import { previewOnly } from "./guard";
-import { HOLD_DAYS, commissionOn, normalizeCreatorCode, type Affiliates, type AffiliatesOverview, type Creator, type CreatorInput, type CreatorLink, type CreatorMe, type CreatorPage, type DayPoint, type LinkInput } from "@/lib/creators";
+import { HOLD_DAYS, commissionOn, normalizeCreatorCode, type Affiliates, type AffiliatesOverview, type Creator, type CreatorInput, type CreatorLink, type CreatorMe, type CreatorPage, type DayPoint, type PayoutMethod, type PayoutsAdmin, type LinkInput } from "@/lib/creators";
 import type { Admin } from "@/lib/studio";
 
 // The Studio preview's Affiliates tab (migration 0087) on in-memory sample creators. Every name is invented.
@@ -188,4 +188,42 @@ export async function previewCreatorMe(state?: string): Promise<CreatorMe> {
     byMonth: fresh ? [] : months.map((m, i) => ({ month: m, earnedCents: [9140, 6230, 2105][i], payments: [61, 44, 17][i] })),
     payouts: [],
   };
+}
+
+/** Payouts by hand (migration 0090) on sample data: Tasha is over the minimum, Dev under it. */
+const PAYOUT_HISTORY: PayoutsAdmin["history"] = [];
+let paidNow: Record<string, number> = {};
+export async function previewStudioPayouts(): Promise<Admin<PayoutsAdmin>> {
+  previewOnly();
+  const today = new Date().toISOString().slice(0, 10);
+  const next = new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10);
+  const rows: PayoutsAdmin["due"] = [
+    { creatorId: "c1", name: "Tasha Glow", handle: "@tashaglow", email: "tasha@example.com", code: "TASHA", status: "active", connectAccount: null, payableCents: 7473, heldCents: 13700, nextPayableOn: next, lastPaidAt: null },
+    { creatorId: "c2", name: "Dev Okafor", handle: "@devdoesqueens", email: "dev@example.com", code: "DEVQ", status: "active", connectAccount: null, payableCents: 2190, heldCents: 401, nextPayableOn: next, lastPaidAt: null },
+    { creatorId: "c3", name: "Marisol Reyes", handle: "@marisolsays", email: null, code: "MARI", status: "paused", connectAccount: null, payableCents: 0, heldCents: 290, nextPayableOn: next, lastPaidAt: null },
+  ];
+  const due = rows.map((d) => (paidNow[d.creatorId] ? { ...d, payableCents: 0, lastPaidAt: new Date().toISOString() } : d));
+  if (!PAYOUT_HISTORY.length) PAYOUT_HISTORY.push({ id: 1, creatorId: "c1", name: "Tasha Glow", email: "tasha@example.com", period: "2026-09-01", totalCents: 9964, currency: "usd",
+    method: "paypal", reference: "PP-7Q2K", note: "September payout", paidAt: "2026-10-01T15:12:00Z", paidBy: "boss@example.com", items: 38, voidedAt: null, voidReason: null });
+  return { ok: true, data: { today, minimumCents: 5000, due, history: [...PAYOUT_HISTORY] } };
+}
+export async function previewStudioPayoutMark(creatorId: string, method: PayoutMethod, reference: string, note: string, belowMinimum: boolean): Promise<Admin<{ id: number; totalCents: number }>> {
+  previewOnly();
+  const amounts: Record<string, number> = { c1: 7473, c2: 2190 };
+  const total = paidNow[creatorId] ? 0 : amounts[creatorId] ?? 0;
+  if (total <= 0) return { ok: false, error: "Nothing is payable for that creator right now." };
+  if (total < 5000 && !belowMinimum) return { ok: false, error: "That's under the $50 minimum. Tick \"Pay below the minimum\" to pay it anyway." };
+  paidNow = { ...paidNow, [creatorId]: total };
+  const id = PAYOUT_HISTORY.length + 1;
+  PAYOUT_HISTORY.unshift({ id, creatorId, name: creatorId === "c1" ? "Tasha Glow" : "Dev Okafor", email: null, period: new Date().toISOString().slice(0, 8) + "01", totalCents: total, currency: "usd",
+    method, reference: reference || null, note: note || null, paidAt: new Date().toISOString(), paidBy: "boss@example.com", items: 12, voidedAt: null, voidReason: null });
+  return { ok: true, data: { id, totalCents: total } };
+}
+export async function previewStudioPayoutVoid(id: number, reason: string): Promise<Admin<null>> {
+  previewOnly();
+  const h = PAYOUT_HISTORY.find((x) => x.id === id);
+  if (!h || h.voidedAt) return { ok: false, error: "That payout is gone or already undone." };
+  h.voidedAt = new Date().toISOString(); h.voidReason = reason;
+  const { [h.creatorId]: _gone, ...rest } = paidNow; paidNow = rest;
+  return { ok: true, data: null };
 }

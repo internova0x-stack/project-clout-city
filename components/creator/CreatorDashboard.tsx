@@ -4,7 +4,7 @@
 // only: never player names, chats or anything personal. Links are read-only here; only admins make them.
 
 import { useEffect, useState } from "react";
-import { HOLD_DAYS, creatorUrl, landsLabel, lengthLabel, payoutLine, type CreatorMe } from "@/lib/creators";
+import { HOLD_DAYS, creatorUrl, landsLabel, lengthLabel, methodLabel, payoutLine, type CreatorMe } from "@/lib/creators";
 import { formatPrice } from "@/lib/store";
 import { DailyBars } from "../studio/Insights";
 
@@ -154,7 +154,7 @@ export function CreatorDashboard({ me, who, preview = false }: { me: CreatorMe |
                 {me.payouts.map((p) => (
                   <div key={p.paidAt} className="aff-list-row">
                     <span style={{ flex: 1 }}>{monthName(p.period)}</span>
-                    <span className="meta">{p.method}</span>
+                    <span className="meta">{methodLabel(p.method)} · {new Date(p.paidAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                     <span className="body-strong tabular">{money(p.totalCents)}</span>
                   </div>
                 ))}

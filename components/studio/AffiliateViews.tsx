@@ -5,7 +5,7 @@
 // history, and the players they brought in: admin-only, creators never see who their players are).
 
 import { useEffect, useState } from "react";
-import { HOLD_DAYS, PAYOUT_MIN_CENTS, lengthLabel, type AffiliatesOverview, type CreatorPage, type Owed } from "@/lib/creators";
+import { HOLD_DAYS, PAYOUT_METHODS, PAYOUT_MIN_CENTS, lengthLabel, methodLabel, payoutsCsv, type AffiliatesOverview, type CreatorPage, type Owed, type PayoutMethod, type PayoutsAdmin } from "@/lib/creators";
 import { share } from "@/lib/insights";
 import { recentWhen } from "@/lib/recent";
 import { formatPrice } from "@/lib/store";
@@ -244,5 +244,173 @@ export function CreatorPageView({ api, id, days, onBack, onEdit }: { api: Studio
         {data.players.length > players.length && <button className="chip" style={{ alignSelf: "center" }} onClick={() => setAll(true)}>Show all {n(data.players.length)}</button>}
       </div>
     </div>
+  );
+}
+
+/**
+ * Payouts by hand (migration 0090): what each creator is owed today, marking a payout as sent, the CSV for the bank
+ * or PayPal run, and the history (a payout marked by mistake is undone, not deleted). Stripe Connect comes later.
+ */
+export function PayoutsView({ api, onOpen }: { api: StudioApi; onOpen: (id: string) => void }) {
+  const [data, setData] = useState<PayoutsAdmin | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0);
+  const [paying, setPaying] = useState<string | null>(null);
+  const [undoing, setUndoing] = useState<number | null>(null);
+  useEffect(() => {
+    let stop = false;
+    void api.payouts!().then((r) => { if (!stop) { if (r.ok) { setData(r.data); setError(null); } else setError(r.error); } });
+    return () => { stop = true; };
+  }, [api, nonce]);
+  if (error && !data) return <div className="studio-note error"><span className="body-strong">{error}</span></div>;
+  if (!data) return <p className="meta">Loading…</p>;
+  const ready = data.due.filter((d) => d.payableCents >= data.minimumCents);
+  const total = ready.reduce((t, d) => t + d.payableCents, 0);
+  const csv = () => {
+    const blob = new Blob([payoutsCsv(ready, data.today)], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `clout-city-payouts-${data.today}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  const done = (message: string) => { setPaying(null); setUndoing(null); setOk(message); setError(null); setNonce((x) => x + 1); };
+  return (
+    <div className="stack-16">
+      {error && <div className="studio-note error"><span className="body-strong">{error}</span></div>}
+      {ok && <div className="studio-note ok"><span className="body-strong">{ok}</span><button className="chip" onClick={() => setOk(null)}>OK</button></div>}
+      <div className="studio-tiles aff-tiles">
+        {([
+          ["Ready to pay", money(total), `${n(ready.length)} ${ready.length === 1 ? "creator" : "creators"} at ${formatPrice(data.minimumCents)} or more`],
+          ["Below the minimum", money(data.due.filter((d) => d.payableCents > 0 && d.payableCents < data.minimumCents).reduce((t, d) => t + d.payableCents, 0)), "rolls over to next month"],
+          ["Held", money(data.due.reduce((t, d) => t + d.heldCents, 0)), `inside the ${HOLD_DAYS} days`],
+          ["Paid this year", money(data.history.filter((h) => !h.voidedAt && h.paidAt.slice(0, 4) === data.today.slice(0, 4)).reduce((t, h) => t + h.totalCents, 0)), ((k) => `${n(k)} ${k === 1 ? "payout" : "payouts"} in all`)(data.history.filter((h) => !h.voidedAt).length)],
+        ] as const).map(([label, value, sub]) => (
+          <div key={label} className="studio-card studio-tile"><span className="overline">{label}</span><span className="display-lg tabular">{value}</span><span className="meta">{sub}</span></div>
+        ))}
+      </div>
+
+      <div className="studio-card stack-12">
+        <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+          <span className="overline">Owed today</span>
+          <button className="btn btn-secondary btn-sm" disabled={ready.length === 0} onClick={csv}>Download CSV ({n(ready.length)})</button>
+        </div>
+        {data.due.length === 0 ? <p className="meta" style={{ margin: 0 }}>Nobody is owed anything yet.</p> : (
+          <div className="insights-table-wrap">
+            <table className="insights-table aff-table">
+              <thead><tr><th scope="col">Creator</th><th scope="col">Email</th><th scope="col">Payable</th><th scope="col">Held</th><th scope="col">Next payable</th><th scope="col">Last paid</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
+              <tbody>
+                {data.due.map((d) => (
+                  <tr key={d.creatorId}>
+                    <td><button className="linkish" onClick={() => onOpen(d.creatorId)}>{d.name}</button>{d.status === "paused" && <span className="aff-tag paused" style={{ marginLeft: 6 }}>Paused</span>}</td>
+                    <td>{d.email ?? <span className="meta">no email</span>}</td>
+                    <td className="tabular body-strong">{money(d.payableCents)}{d.payableCents > 0 && d.payableCents < data.minimumCents && <span className="aff-tag held">under {formatPrice(data.minimumCents)}</span>}</td>
+                    <td className="tabular">{money(d.heldCents)}</td>
+                    <td>{d.nextPayableOn ? day(d.nextPayableOn) : "–"}</td>
+                    <td>{d.lastPaidAt ? day(d.lastPaidAt) : "never"}</td>
+                    <td>{d.payableCents > 0 && <button className="chip" onClick={() => setPaying(paying === d.creatorId ? null : d.creatorId)}>{paying === d.creatorId ? "Cancel" : "Mark paid…"}</button>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {paying && <MarkPaid api={api} row={data.due.find((d) => d.creatorId === paying)!} minimum={data.minimumCents} onDone={done} onError={setError} />}
+        <p className="meta" style={{ margin: 0 }}>
+          Send the money first (bank or PayPal), then mark it paid here: it moves from Payable to Paid on the creator&apos;s page.
+          Never type bank details here; a reference (your transfer number) is enough.
+        </p>
+      </div>
+
+      <div className="studio-card stack-12">
+        <span className="overline">Payout history</span>
+        {data.history.length === 0 ? <p className="meta" style={{ margin: 0 }}>No payouts yet.</p> : (
+          <div className="insights-table-wrap">
+            <table className="insights-table aff-table">
+              <thead><tr><th scope="col">Paid</th><th scope="col">Creator</th><th scope="col">Amount</th><th scope="col">Method</th><th scope="col">Reference</th><th scope="col">By</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
+              <tbody>
+                {data.history.map((h) => (
+                  <tr key={h.id} className={h.voidedAt ? "aff-retired" : undefined}>
+                    <td>{day(h.paidAt)}</td>
+                    <td>{h.name}</td>
+                    <td className="tabular body-strong">{money(h.totalCents)}<span className="meta"> · {n(h.items)} {h.items === 1 ? "payment" : "payments"}</span></td>
+                    <td>{methodLabel(h.method)}</td>
+                    <td>{h.reference ?? "–"}{h.note && <span className="meta" style={{ display: "block" }}>{h.note}</span>}</td>
+                    <td className="meta">{h.paidBy ?? "–"}</td>
+                    <td>
+                      {h.voidedAt ? <span className="meta">Undone: {h.voidReason}</span>
+                        : undoing === h.id ? <UndoPayout api={api} id={h.id} onDone={done} onCancel={() => setUndoing(null)} onError={setError} />
+                        : <button className="chip" onClick={() => setUndoing(h.id)}>Undo…</button>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="studio-card stack-8 aff-soon">
+        <span className="overline">Coming soon: Stripe Connect</span>
+        <p className="meta" style={{ margin: 0 }}>Creators onboard themselves (identity, tax forms, bank) and a payout becomes one Stripe transfer. Stripe also files their 1099s in the US. Until then, payouts go out by hand.</p>
+      </div>
+    </div>
+  );
+}
+
+function MarkPaid({ api, row, minimum, onDone, onError }: { api: StudioApi; row: PayoutsAdmin["due"][number]; minimum: number; onDone: (m: string) => void; onError: (e: string) => void }) {
+  const [method, setMethod] = useState<PayoutMethod>("bank_transfer");
+  const [reference, setReference] = useState("");
+  const [note, setNote] = useState("");
+  const below = row.payableCents < minimum;
+  const [anyway, setAnyway] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    const r = await api.payoutMark!(row.creatorId, method, reference, note, anyway);
+    setBusy(false);
+    if (!r.ok) return onError(r.error);
+    onDone(`Marked ${money(r.data.totalCents)} paid to ${row.name}.`);
+  };
+  return (
+    <div className="aff-paybox stack-12">
+      <p className="body-strong" style={{ margin: 0 }}>Mark {money(row.payableCents)} paid to {row.name}</p>
+      <div className="aff-grid">
+        <label className="stack-4"><span className="overline">How</span>
+          <select className="studio-input" value={method} onChange={(e) => setMethod(e.target.value as PayoutMethod)}>
+            {PAYOUT_METHODS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+        </label>
+        <label className="stack-4"><span className="overline">Reference (optional)</span><input className="studio-input" value={reference} onChange={(e) => setReference(e.target.value)} maxLength={120} placeholder="Transfer or PayPal id" /></label>
+        <label className="stack-4"><span className="overline">Note (optional)</span><input className="studio-input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="October payout" /></label>
+      </div>
+      {below && (
+        <label className="check-row">
+          <input type="checkbox" checked={anyway} onChange={(e) => setAnyway(e.target.checked)} />
+          <span>Pay below the {formatPrice(minimum)} minimum (for example, closing the deal)</span>
+        </label>
+      )}
+      <button className="btn btn-taxi btn-sm" style={{ alignSelf: "flex-start" }} disabled={busy || (below && !anyway)} onClick={() => void go()}>{busy ? "Marking…" : `I've sent ${money(row.payableCents)}`}</button>
+    </div>
+  );
+}
+
+function UndoPayout({ api, id, onDone, onCancel, onError }: { api: StudioApi; id: number; onDone: (m: string) => void; onCancel: () => void; onError: (e: string) => void }) {
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    const r = await api.payoutVoid!(id, reason);
+    setBusy(false);
+    if (!r.ok) return onError(r.error);
+    onDone("Payout undone. That money is payable again.");
+  };
+  return (
+    <span className="row" style={{ gap: 6, flexWrap: "nowrap" }}>
+      <input className="studio-input" style={{ width: 180 }} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why? (logged)" maxLength={300} aria-label="Why undo" />
+      <button className="chip" disabled={busy || !reason.trim()} onClick={() => void go()}>Undo</button>
+      <button className="chip" onClick={onCancel}>Keep</button>
+    </span>
   );
 }
