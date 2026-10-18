@@ -702,7 +702,101 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
   on a party night (events with `days`, e.g. Greek Row), to that campus's students; **pass_tonight** at 8 PM, once per
   unused guest-list pass.
 
-## 21. Later features
+## 21. Creators: affiliate links and the UGC engine (proposed; owner, Oct 18)
+
+Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
+bring in spend (affiliate links). Nothing here is built yet; this section is the plan to agree before the soft launch.
+
+### Decisions so far (owner, Oct 18)
+- **Rate:** 20% standard; 30% for top creators (a tier we set per creator in the Studio).
+- **Prices stay** ($4.99 a month, $39.99 a year, $119.99 chat forever, $2.99 side stories, $3.99 tickets and
+  collector pieces). Postcards moved to $1.99 (migration 0086) because the $0.99 price couldn't carry a commission.
+
+### Proposed rules (to confirm)
+| Rule | Proposal | Why |
+| --- | --- | --- |
+| What the % applies to | **Net revenue**: the price minus Stripe's fee, tax and refunds | Recovers 3 to 9 points of margin versus paying on the price |
+| "Lifetime" | One-time purchases: forever. Subscriptions: every renewal for **24 months** from sign-up | A share of every renewal forever is a permanent cost |
+| Hold | Commission becomes payable **45 days** after the payment | Refunds and chargebacks land inside the hold and are taken back |
+| Payout | Monthly, once a creator has **$50** payable | Keeps transfer fees down |
+| Who counts | A player who signs up through a creator's link or code; the first creator wins, forever | Simple, fair, no fights over the same player |
+| Not commissionable | Purchases by the creator's own account; the lotto (no real money anyway) | Self-referral and the 18+ simulated-gambling rule |
+
+### How players are attributed
+- **Link:** `https://<site>/?c=TASHA` (or `/c/tasha`). The game remembers the code on the device for 30 days and
+  attaches it to the account when the player signs up.
+- **Code:** sign-up has an optional "Creator code" field, for people who saw a video rather than tapped a link.
+- **Invites still pay:** if a crew invite and a creator code both apply, the inviter still gets the in-game invite
+  reward and the creator gets the commission. They don't compete.
+- **Once only:** attribution is fixed at sign-up. Changing it later is a Studio action, logged in `admin_actions`.
+
+### What we store (migrations, all server-only, no browser access)
+- `creators`: id, name, handle, contact email, code (unique), rate (20 or 30), status (active or paused), payout
+  details reference (Stripe Connect account id, never bank details), agreed-terms date.
+- `creator_referrals`: player_id (one row per player), creator_id, how (link or code), attributed_at, commission_until
+  (sign-up + 24 months, for renewals).
+- `creator_commissions`: one row per payment, unique per Stripe event (like the ledger): creator, player, purchase or
+  renewal reference, gross, Stripe fee, tax, net, rate, commission, status (held, payable, paid, reversed),
+  payable_on (+45 days), payout id. A refund or chargeback writes a reversing row.
+- `creator_payouts`: creator, period, total, method, Stripe transfer id, paid_at.
+- Clicks: a daily count per code (no per-person tracking).
+
+### How it runs
+- The Stripe webhook already records purchases and renewals (`payment_grant`, `payment_renewal`). For a referred
+  player it also writes a commission row, using the actual Stripe fee from the payment's balance transaction.
+  `payment_refund` writes the reversal. Everything stays idempotent per Stripe event.
+- A daily job moves held rows past their date to payable.
+- **Payouts, phase 1 (soft launch):** the Studio's Creators tab shows what each creator is owed; we pay by hand and
+  mark the payout paid. **Phase 2:** Stripe Connect Express: creators onboard themselves (identity, tax forms, bank),
+  and the payout is a Stripe transfer. Connect also handles 1099s in the US.
+
+### Screens
+- **Studio → Creators** (admins): add a creator and their code, set the rate, pause; per creator: clicks, sign-ups,
+  paying players, revenue, commission (held, payable, paid); approve and mark payouts; flags for suspicious patterns
+  (many sign-ups from one device, refunds above 20%, the creator's own purchases).
+- **Creator page** (`/creator`, signed in with the creator's email): their link and code, clicks, sign-ups, paying
+  players, earnings by status, payout history and the next payout date. Counts only: never player names, chats or
+  anything personal.
+- **Insights:** a creators table (sign-ups, payers, revenue, commission, net after commission, and what we spent on
+  their videos) so each creator's cost per paying player is visible.
+
+### The UGC engine
+- **Briefs:** a short library of video ideas in the game's voice (a story beat reveal, a lotto scratch, a date night
+  gone wrong, a rank up, Lola's tea), each with the creator's code to show on screen.
+- **Tracking:** in the Creators tab, each video's link, fee paid and post date, so spend sits next to the results.
+- **Rules for creators** (part of the creator terms they accept): #ad or the platform's paid-partnership label on
+  every post; no promoting the lotto; 18+ audience; no real brands, no promises about features that aren't built;
+  no buying followers or incentivised installs.
+
+### Economics (per sale, after Stripe 2.9% + 30¢, commission on net)
+| Product | Price | Kept at 20% | Kept at 30% |
+| --- | --- | --- | --- |
+| Postcard | $1.99 | $1.31 | $1.14 |
+| Side story | $2.99 | $2.08 | $1.82 |
+| VIP monthly | $4.99 | $3.64 | $3.18 |
+| VIP yearly | $39.99 | $30.82 | $26.97 |
+| Chat forever | $119.99 | $92.97 | $81.35 |
+Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays no 15 to 30% app-store cut, so even at
+30% we keep about what a store game keeps.
+
+### Build steps (one pull request each)
+1. Attribution: creators table, links and the sign-up code, `creator_referrals`, the Studio's Creators tab (add,
+   codes, rates, sign-up counts).
+2. Commissions: webhook rows on purchases and renewals, reversals on refunds, the 45-day hold, the Creators tab's
+   money columns, Insights table.
+3. Creator page.
+4. Payouts: manual first (owed, mark paid, CSV), then Stripe Connect.
+5. UGC tracking: videos, fees and cost per paying player.
+
+### Open questions for the owner
+1. Net revenue (recommended) or the price as the base for the %?
+2. 24 months on subscriptions, or truly lifetime?
+3. 45-day hold and $50 minimum: OK?
+4. Who gets 30%: a fixed list we choose, or automatic above a number of paying players a month?
+5. Payouts: by hand during the soft launch, then Stripe Connect?
+6. Should referred players get anything (e.g. a welcome outfit or C$ bonus, never real-money value)?
+
+## 22. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
