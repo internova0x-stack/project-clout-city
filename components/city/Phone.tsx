@@ -1,6 +1,7 @@
 "use client";
 
 import { PushSettings } from "../push/Push";
+import { MembershipRow } from "../store/Membership";
 import { Toggle } from "../Toggle";
 import type { PushApi } from "@/lib/pushClient";
 
@@ -64,7 +65,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership,
 }: {
   open: boolean;
   onClose: () => void;
@@ -87,6 +88,8 @@ export function PhoneModal({
   chat?: ChatApi;
   /** Push notifications (migration 0078): Settings → Notifications; hidden without it. */
   push?: PushApi;
+  /** Membership & purchases (owner, Oct 18): the top row of Settings; hidden without payments. */
+  membership?: { vip: "vip" | "forever" | null; onOpen: () => void };
   chatWith?: { id: string; name: string; style: string } | null;
   /** Meeting players (migration 0047): opens the unlimited chat offer (`out` when the day's messages ran out). */
   onChatPass?: (out: boolean) => void;
@@ -191,6 +194,7 @@ export function PhoneModal({
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
                 <div className="stack-12">
+                  {membership && <MembershipRow vip={membership.vip} onOpen={membership.onOpen} />}
                   <div className="list-row static">
                     <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Lo-fi city loop</span></span>
                     <Toggle on={!muted} label="Music" onChange={onToggleSound} />

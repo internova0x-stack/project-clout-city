@@ -69,6 +69,8 @@ import { ProfileSheet } from "./game/ProfileSheet";
 import { RankUpCard } from "./game/Ranks";
 import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
+import { MembershipSheet } from "./store/Membership";
+import type { MembershipApi, MembershipState } from "@/lib/membership";
 import type { PushApi } from "@/lib/pushClient";
 import type { GoalsApi, GoalsState } from "@/lib/goals";
 import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
@@ -215,6 +217,7 @@ export function GameShell({
   goals,
   push,
   previewPushAsk = false,
+  membership,
   tv,
   stations,
   roomMood = "dream",
@@ -276,6 +279,8 @@ export function GameShell({
   push?: PushApi;
   /** Development previews (?push=ask): Lola asks after 2 seconds. */
   previewPushAsk?: boolean;
+  /** Membership & purchases (owner, Oct 18): Settings' top row, the profile's VIP line; hidden without payments. */
+  membership?: MembershipApi;
   /** v0.14 Clout TV (migration 0058): the Clout TV app, the home card and the Clout Tower's screen; hidden until tv_state answers. */
   tv?: TvApi;
   /** v0.14 texts from the stations (migration 0058), read-only threads in Messages. */
@@ -497,6 +502,11 @@ export function GameShell({
   const openPlayer = (id: string) => { setPinned((p) => [id, ...p.filter((x) => x !== id)].slice(0, 3)); setCardId(id); };
   const [placeCounts, setPlaceCounts] = useState<PlaceCounts>({});
   const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
+  const [memberOpen, setMemberOpen] = useState(false);
+  const [member, setMember] = useState<MembershipState | null>(null);
+  useEffect(() => { if (membership && !memberOpen) void membership.state().then((r) => r.ok && setMember(r.data)); }, [membership, memberOpen]);
+  const memberVip = member?.vip ? "vip" as const : member?.chatForever ? "forever" as const : null;
+  const openMembership = () => { setPhone({ open: false, app: null }); setPanel(null); setMemberOpen(true); };
   // v0.12 businesses: what you own (with the server's clock offset, so tills count like the server's),
   // the tills-collected card and the go-public reveal.
   const [biz, setBiz] = useState<BusinessState | null>(null);
@@ -2283,6 +2293,15 @@ export function GameShell({
           onClose={() => setChatPass(null)}
         />
       )}
+      {membership && (
+        <MembershipSheet
+          open={memberOpen}
+          onClose={() => setMemberOpen(false)}
+          api={membership}
+          onGetVip={() => { setMemberOpen(false); setChatPass({ out: false }); }}
+          onToast={setToast}
+        />
+      )}
       {together && (
         <>
           <TogetherSheet
@@ -2335,6 +2354,7 @@ export function GameShell({
       )}
       <PhoneModal
         push={push}
+        membership={membership && storeApi ? { vip: memberVip, onOpen: openMembership } : undefined}
         // The app shows whenever the station is on; if today's show can't load, the app says why.
         radio={radio}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
@@ -2556,6 +2576,7 @@ export function GameShell({
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
+        vip={membership && storeApi ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership } : undefined}
       />
     </main>
   );
