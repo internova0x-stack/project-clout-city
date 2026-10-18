@@ -118,7 +118,7 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
 
 7. Run `supabase/migrations/0009_money_wave3.sql`. It adds location wave 3 (two monuments, the
    lounge, the boutique and the dealership) and the other three products: monument postcards
-   ($0.99, after a visit), two collector fashion pieces ($4.99 and $3.99) and two exclusive
+   ($1.99 since migration 0086, after a visit), two collector fashion pieces ($4.99 and $3.99) and two exclusive
    parties at the lounge, this coming Friday and Saturday, 10 PM to 2 AM New York time.
 
 8. Run `supabase/migrations/0010_social.sql`. It switches on chat in the Phone's Messages app

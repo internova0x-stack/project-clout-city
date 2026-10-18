@@ -52,6 +52,8 @@ export interface FeedArc {
   finished: boolean;
   entitled: boolean;
   beats: FeedBeat[];
+  /** Migration 0085: future beats, locked; only the next day's carry a headline (a teaser). Absent before 0085. */
+  upcoming?: { id: string; day: number; headline?: string }[];
   predictions: FeedPrediction[];
   badges?: { id: string; name: string; emoji: string; line: string }[];
 }

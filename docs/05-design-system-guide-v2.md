@@ -580,7 +580,7 @@ The Phone holds the News app (stories) and Messages (chat); Story mode adds five
 ### C39. Postcard and Collection
 
 - **Postcard:** a 3:2 original illustration of the monument in a vintage postcard frame, with "Greetings from Queens" in the tagline style. Owned postcards carry the 1 pt gold-300 real-money stroke.
-- **Offer on the monument card:** shown once, right after a visit: a row under the actions with a locked postcard thumbnail, "Collect the postcard," and a premium-gold "$0.99" button. The visit's clout is shown separately, so it's clear the clout comes from visiting.
+- **Offer on the monument card:** shown once, right after a visit: a row under the actions with a locked postcard thumbnail, "Collect the postcard," and a premium-gold "$1.99" button (the catalog price). The visit's clout is shown separately, so it's clear the clout comes from visiting.
 - **Collection screen:** opened from the profile (C28) and from a link at the foot of the Net Worth sheet. A 2-column grid: owned postcards in full color with a share button; visited but not owned as locked silhouettes with their price and a premium-gold button; unvisited as outlined cards reading "Visit to unlock."
 - Completing the set awards an achievement badge (C12).
 

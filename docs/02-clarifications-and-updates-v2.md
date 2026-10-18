@@ -249,7 +249,7 @@ P1 has three event types and four real-money products, all bought through one St
 | Exclusive events | Promoted first: the game's first real-money purchase | Diminishing returns (section 5) |
 | Story side arcs ($2.99 each) | Promoted second, inside the story | None |
 | Collector fashion items (a few rare pieces) | Not promoted; discovered while browsing the Shop | Diminishing returns (section 5) |
-| Monument postcards ($0.99 each) | Offered only on the monument's card, once right after a visit; then shown in the Collection as a locked silhouette with its price | None |
+| Monument postcards ($1.99 each; $0.99 until Oct 18, migration 0086) | Offered only on the monument's card, once right after a visit; then shown in the Collection as a locked silhouette with its price | None |
 
 **Postcard rules:** a postcard can be bought only after visiting its monument. Players earn clout from the visit, not the postcard. Postcards live in a separate Collection (not Net Worth, so they don't affect net worth), each has a share button, and completing the set earns a badge. A refund removes the postcard.
 
