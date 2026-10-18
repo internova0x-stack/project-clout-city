@@ -498,7 +498,94 @@ one from **Real Clout FM** (owner, Oct 16). They're read-only threads at the top
 Messages badge; replies don't reach the station. `station_inbox()`, `station_read()`; sent once each when it
 happens, the next time any game checks in.
 
-## 18. Later features
+## 18. Campus life (proposed v0.15 "Campus"; owner, Oct 18)
+
+Clout City launches at New York universities. The campuses are the two parody universities already in Queens
+(no real school is named): **St. Johnsons University** (Jamaica) and **Queensborough University** (Flushing).
+Queens is open from day one, so both are reachable for every player. The aim: delightful, funny and relatable
+things to do on campus, and a reason to come back every day (classes) and every week (exams, parties, house
+rankings). Numbers below are starting values for `game_settings`, tuned later.
+
+**Owner decisions (Oct 18):** use the two Queens campuses; fraternities and sororities ("houses") are
+**separate from Crew** (Crew stays the invited-friends group with its invite rewards); **no player-vs-player
+arguments** of any kind (no roast battles, no feuds between players; conflict stays in stories with the cast).
+
+### Enrolment and identity
+- A player **enrols** at one campus (free, from the campus card). One campus at a time; switching costs a week
+  ("transfer paperwork"). Enrolled players get the campus on their profile and count for its leaderboard.
+- Players never give their real school, dorm or class times; the campus is the game's parody campus.
+
+### Classes (the daily loop)
+- Enrolled players pick **3 courses** a week from a rotating catalog of satirical courses (e.g. "Intro to
+  Main Character Energy", "8 AM Regret 101", "Advanced Napping 301", "Group Project Survival").
+- **Attend** each course once a New York day at the campus (the existing lecture action, per course): Energy for
+  Confidence, a little clout and Smarts practice (skills, migration 0056). Each course keeps an
+  **attendance streak**; missing a day resets it. A class line from the professor (cast regular) each time.
+- Attending counts toward daily tasks (a "Go to class" task when enrolled).
+
+### Exams (the weekly payoff)
+- Every Friday (New York) each course has a **5-question quiz** with funny multiple-choice questions, written
+  weekly in the Studio like hunts and news (answers live on the server only).
+- **Grade** = attendance that week plus quiz score: A to F. Grades make a **GPA**; a GPA of 3.5+ at week's end
+  pays a scholarship (cash, once a week). One attempt; a "peek at your neighbor's paper" option adds a point
+  with a chance of getting caught (an F and a funny note home). Satire, never shaming.
+
+### Dining hall
+- Each campus gets a **dining hall**: a cheap meal (student price for enrolled players) with a menu that
+  changes every day ("Mystery Meat Monday", "Taco Tuesday: the tacos are a rumor") and one overheard line of
+  campus gossip. Reuses the eat action.
+
+### Dorm room
+- A **dorm room** at each campus is a home (the homes system): the cheapest rent in the game, small room, a
+  computer-controlled **roommate** with quirks (always microwaving fish, alarm at 5 AM, borrows your hoodie)
+  who leaves notes. Real-player roommates (both opt in) are a later phase.
+
+### Campus parties and events
+- **Greek Row party night** (weekly, from the club/party room), the existing **Homecoming Tailgate** and
+  **Open Mic on the Quad**, plus finals-week "Library All-Nighter" (Energy cost, Smarts and Confidence).
+
+### Meeting people
+- The **Quad** and the **Library** are hangout spots on each campus card; the players-at-this-place list
+  (section 14) shows who's there, with campus icebreakers ("Is this seat taken?", "Did you do the reading?",
+  "Want to form a study group?"). It should feel like a campus, not a dating app.
+- **Study dates** join the crush and date-night system (v0.5): a date night at the Library or the dining hall.
+
+### Relationship status (later phase)
+- "Make it official": both players confirm; it shows on both profiles; either can end it at once (no notice
+  to anyone else beyond the profile change); block ends it too. Never shows a real school or location.
+
+### Houses: fraternities and sororities (later phase)
+- Parody Greek-letter **houses** on Greek Row, open to everyone (not split by gender). A player joins one house
+  (separate from Crew). Rush week: harmless pledge tasks (no hazing jokes). Houses earn points from members'
+  classes, exams and party attendance; a **weekly house ranking** with a winner's banner and a cosmetic.
+
+### School play (later phase)
+- A weekly play. Players **audition** (Dance or Charisma skill), the game casts the parts; friends watch for
+  Mood and clout. Watching alone is a free visit.
+
+### School vs school
+- A **campus leaderboard**: St. Johnsons vs Queensborough, by enrolled players' clout, classes attended and
+  grades each week. The winning campus gets a banner on its card and a cosmetic for its students.
+
+### Phasing
+1. **v0.15 "Campus"** (before v1.0): enrolment, classes with streaks, weekly exams and GPA, dining halls, dorm
+   rooms with the roommate, Greek Row party night, Quad and Library hangouts with study dates, the campus
+   leaderboard.
+2. **Next:** houses (fraternities and sororities) with the weekly ranking, the school play, relationship status.
+3. **Later:** real-player roommates, a campus story arc in the Studio ("Who kidnapped the mascot?"), school merch
+   cosmetics, majors and graduating to alumni.
+
+### Safety
+- Players may be real classmates. No player-vs-player arguments; chat keeps its daily cap, word list, report and
+  block. Anything public about two players (relationship status) needs both to confirm. Profiles never show a
+  real school, dorm, class time or location. The game stays 18+.
+
+### Open questions
+- Satirical tuition bill and student-loan joke (game cash only): in v0.15 or later?
+- How many weeks to "graduate", and what alumni get.
+- Who writes the weekly exam questions (Studio weekly routine).
+
+## 19. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 

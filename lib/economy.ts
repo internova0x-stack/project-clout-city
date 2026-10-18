@@ -16,6 +16,8 @@ export interface Home {
   moveClout?: number;
   /** False for homes you can only move up to, never pick at sign-up. */
   signup?: boolean;
+  /** v0.15 campus dorms: only students enrolled at this campus can move in (migration 0072). */
+  campus?: string;
 }
 
 export interface Trait { id: string; emoji: string; name: string; blurb: string }
@@ -45,6 +47,9 @@ export const ECONOMY: Economy = {
     { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 2600, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
     { id: "sunnyside_gardens", name: "Sunnyside Gardens 1BR", neighborhood: "Sunnyside", rent: 3200, emoji: "🌿", blurb: "A garden you share with forty neighbors and one very territorial cat.", moveClout: 1000, signup: false },
     { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 4500, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal.", moveClout: 3000 },
+    // v0.15 Campus (owner, Oct 18): the cheapest rent in the city, for enrolled students only. A roommate is included.
+    { id: "sj_dorm", name: "St. Johnsons dorm room", neighborhood: "Jamaica", rent: 1100, emoji: "🛏️", blurb: "Bunk beds, a mini fridge and a roommate who microwaves fish.", signup: false, campus: "st-johnsons" },
+    { id: "qu_dorm", name: "Queensborough dorm room", neighborhood: "Flushing", rent: 1100, emoji: "🛏️", blurb: "Cinder-block chic. The RA has a whistle and opinions.", signup: false, campus: "queensborough-u" },
   ],
   moving: { brokerWeeks: 1 },
 };

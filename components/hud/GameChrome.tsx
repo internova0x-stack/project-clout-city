@@ -155,7 +155,7 @@ export function GameChrome({
         )}
       {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
       <nav className="side-col" aria-label="Quick actions">
-        <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
+        <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} tour="tasks" onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
         <SideBtn label="Events" aria="Events" dot={values?.eventsBadge} tour="events" onClick={() => onAction("events")}><ChampagneIcon /></SideBtn>
         <SideBtn label="Places" aria="Places" onClick={() => onAction("places")}><BuildingIcon /></SideBtn>
         <SideBtn label="Bills" aria="Bills" dot={values?.billsBadge} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>

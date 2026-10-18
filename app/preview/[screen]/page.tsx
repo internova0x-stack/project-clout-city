@@ -29,6 +29,7 @@ import type { Player } from "@/lib/player";
 //   /preview/guest            the guest screen
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
+//   /preview/home?hint=daily  Lola's daily-tasks nudge (owner, Oct 17) after 2 seconds
 //   /preview/home             a player who has finished the first session
 //   /preview/home?flow=pwa    open one step of the first session (welcome, tour, party, partyDone, leaderboard, invitePrompt, pwa)
 //   /preview/home?city=off    the home screen before migration 0004 (city screens say "coming soon")
@@ -75,7 +76,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -133,6 +134,7 @@ export default async function Preview({
           huntPreset={hunt}
           lottoPreset={lotto}
           gossipPreset={gossip}
+          dailyHintPreset={hint === "daily"}
           rankUpPreset={Number(rankup) || undefined}
           radioPreset={radio}
           tvPreset={tv}

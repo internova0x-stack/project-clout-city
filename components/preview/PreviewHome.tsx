@@ -44,7 +44,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some",
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -78,6 +78,8 @@ export function PreviewHome({
   huntPreset?: string;
   /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (the next card wins its pot). */
   lottoPreset?: string;
+  /** Owner, Oct 17: show Lola's daily-tasks nudge after 2 seconds (?hint=daily). */
+  dailyHintPreset?: boolean;
   /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
   gossipPreset?: string;
 }) {
@@ -320,6 +322,7 @@ export function PreviewHome({
         { id: "photography", level: 0, best: 0, practice: 1, rusty: false },
       ]}
       previewRankUp={rankUpPreset}
+      previewDailyHint={dailyHintPreset}
       player={me}
       clique={clique}
       daytimeOverride={daytimeOverride}

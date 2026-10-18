@@ -27,20 +27,22 @@ function screenBox() {
   return r && r.width < window.innerWidth ? { left: r.left, top: r.top, width: r.width, height: r.height } : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
 }
 
-export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: () => void; onSkip?: () => void }) {
-  const step = TOUR[index];
+/** Where a [data-tour] target sits on screen (with a margin), kept up to date as the screen changes. */
+function useTargetRect(target: string): Rect | null {
   const [rect, setRect] = useState<Rect | null>(null);
-
   useEffect(() => {
     const measure = () => {
-      const els = [...document.querySelectorAll<HTMLElement>(`[data-tour="${step.target}"]`)];
+      const els = [...document.querySelectorAll<HTMLElement>(`[data-tour="${target}"]`)];
       if (!els.length) return setRect(null);
       const rs = els.map((e) => e.getBoundingClientRect());
       const box = screenBox();
       // Keep the ring inside the screen even for targets touching the top edge.
       const x = Math.max(2, Math.min(...rs.map((r) => r.left)) - box.left - 6);
       const y = Math.max(2, Math.min(...rs.map((r) => r.top)) - box.top - 6);
-      setRect({ x, y, w: Math.max(...rs.map((r) => r.right)) - box.left - x + 6, h: Math.max(...rs.map((r) => r.bottom)) - box.top - y + 6 });
+      // ...and its right and bottom edges too (the side column touches the right edge).
+      const right = Math.min(box.width - 6, Math.max(...rs.map((r) => r.right)) - box.left + 6);
+      const bottom = Math.min(box.height - 6, Math.max(...rs.map((r) => r.bottom)) - box.top + 6);
+      setRect({ x, y, w: right - x, h: bottom - y });
     };
     // Measure now, after the layout settles, and whenever the visible screen changes (#41).
     measure();
@@ -59,7 +61,13 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
       vv?.removeEventListener("resize", measure);
       vv?.removeEventListener("scroll", measure);
     };
-  }, [step.target]);
+  }, [target]);
+  return rect;
+}
+
+export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: () => void; onSkip?: () => void }) {
+  const step = TOUR[index];
+  const rect = useTargetRect(step.target);
 
   const last = index === TOUR.length - 1;
   return (
@@ -85,6 +93,45 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
           {!last && <button className="btn btn-taxi lola-tip-next" onClick={onNext}>{index === 0 ? "Let's go" : "Next"}</button>}
           {index === 0 && onSkip && <button className="lola-tip-skip" onClick={onSkip}>Skip tour (bold of you)</button>}
           {last && <p className="lola-tip-hint">Tap the glowing button 👆</p>}
+        </div>
+        <div className="lola-tip-head" aria-hidden="true">
+          <AvatarHead look={LOLA_LOOK} size={64} />
+          <span className="lola-tip-kiss">💋</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Owner, Oct 17: new players didn't know what to do. Lola's nudge toward the daily tasks (lib/city.ts dailyTasks). */
+export const DAILY_HINT_TEXT = "Psst 👀 these are your daily tasks: five little errands that each pay out, plus a bonus if you clear all five 💸 Fresh list every day, so check in daily, babe 💅";
+
+/**
+ * Shown once, 30 seconds after the first session ends if the daily tasks haven't been opened. The Tasks button in
+ * the side column is ringed and tappable (it opens the tasks), Lola's bubble just above it; "Got it" or a tap
+ * anywhere else dismisses it.
+ */
+export function DailyTasksHint({ onOpen, onDismiss }: { onOpen: () => void; onDismiss: () => void }) {
+  const rect = useTargetRect("tasks");
+  const above = rect ? { bottom: Math.max(16, screenBox().height - rect.y + 10) } : undefined;
+  return (
+    <div className="tour" role="dialog" aria-label="Your daily tasks">
+      {rect ? (
+        <>
+          <div className="tour-hole pulse" style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }} />
+          <div className="tour-block" onClick={onDismiss} style={{ left: 0, top: 0, right: 0, height: rect.y }} />
+          <div className="tour-block" onClick={onDismiss} style={{ left: 0, top: rect.y + rect.h, right: 0, bottom: 0 }} />
+          <div className="tour-block" onClick={onDismiss} style={{ left: 0, top: rect.y, width: rect.x, height: rect.h }} />
+          <div className="tour-block" onClick={onDismiss} style={{ left: rect.x + rect.w, top: rect.y, right: 0, height: rect.h }} />
+          <button className="tour-block daily-hint-target" onClick={onOpen} aria-label="Open your daily tasks" style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }} />
+        </>
+      ) : <div className="tour-dim" onClick={onDismiss} />}
+      <div className="lola-tip daily-hint" style={above}>
+        <div className="lola-tip-bubble">
+          <p className="lola-tip-who">Lola Lowdown</p>
+          <p className="lola-tip-text">{DAILY_HINT_TEXT}</p>
+          <button className="btn btn-taxi lola-tip-next" onClick={onOpen}>Show me</button>
+          <button className="lola-tip-skip" onClick={onDismiss}>Got it</button>
         </div>
         <div className="lola-tip-head" aria-hidden="true">
           <AvatarHead look={LOLA_LOOK} size={64} />

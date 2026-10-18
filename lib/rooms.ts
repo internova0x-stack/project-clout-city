@@ -427,6 +427,9 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   },
   jackson_heights_1br: jacksonHeights,
   lic_highrise: licHighrise,
+  // v0.15 Campus: the dorm rooms, in each school's colors (the roommate's side arrives with the campus screens).
+  sj_dorm: { id: "sj_dorm", w: 5.4, d: 5.2, wall: "#F2E6D8", wallAccent: "#C8102E", floor: "#B08A5E", floorKind: "wood", window: true, items: studioItems(1), spawn: [0.6, 2.3] },
+  qu_dorm: { id: "qu_dorm", w: 5.4, d: 5.2, wall: "#E8E2D0", wallAccent: "#3B6FB6", floor: "#B08A5E", floorKind: "wood", window: true, items: studioItems(1), spawn: [0.6, 2.3] },
   "house-astoria-townhouse": astoriaTownhouse,
   "house-lic-penthouse": licPenthouse,
   sunnyside_gardens: sunnysideGardens,

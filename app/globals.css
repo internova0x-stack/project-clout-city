@@ -1931,3 +1931,5 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .builder-bar > .meta { margin-right:auto; }
 .builder-toggle.on, .builder-toggle.on[aria-pressed="true"] { color:var(--text-1); }
 .builder textarea.studio-input, .builder input.studio-input:not(.builder-id) { font-family:inherit; }
+/* Owner, Oct 17: Lola's daily-tasks nudge rings the HUD button; the ring itself opens the tasks. */
+.daily-hint-target { border:0; padding:0; background:transparent; cursor:pointer; border-radius:18px; }
