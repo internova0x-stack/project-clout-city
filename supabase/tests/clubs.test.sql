@@ -15,6 +15,8 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c7', false);
 select 1 from public.create_player('clubber', 'bodega_drip', '{}', null, true);
 select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
+-- The game syncs first (today's tasks, and since 0073 any goal rewards), so the clout set below stays put.
+select 1 from public.sync_player();
 reset role;
 update public.players set bank_cash = 20000, clout = 1999, energy = 100, mood = 50, confidence = 50 where display_name = 'clubber';
 set role authenticated;

@@ -39,7 +39,15 @@ select public.gossip_import(jsonb_build_object('week', date_trunc('week', public
 select pg_temp.assert((select count(*) from public.gossip_leads('00000000-0000-0000-0000-0000000000f1')) = 2, 'one lead per story');
 select pg_temp.assert((select place from public.gossip_leads('00000000-0000-0000-0000-0000000000f1') where story = 'trail-a') = 'ditmars-deli', 'trail A starts at the deli');
 
--- Today's list: two gossip tasks (one per lead) and three ordinary ones; the regular comes first.
+-- Today's list (0073, owner Oct 18): one gossip task and four others; the regular comes first.
+delete from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000000f1';
+select public.ensure_daily('00000000-0000-0000-0000-0000000000f1');
+select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000000f1') = 5, 'still five tasks');
+select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000000f1' and kind = 'gossip') = 1, 'one is gossip');
+select pg_temp.assert((select place_id || ':' || action_id from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000000f1' and slot = 1)
+  = 'ditmars-deli:gossip-regular', 'the one: talk to Sal at the deli');
+-- With tasksPerDay at 2 (as before 0073), one task per lead, never two at the same place; the regular first.
+update public.game_settings set value = jsonb_set(value, '{economy,gossip,tasksPerDay}', '2') where key = 'city';
 delete from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000000f1';
 select public.ensure_daily('00000000-0000-0000-0000-0000000000f1');
 select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000000f1') = 5, 'still five tasks');

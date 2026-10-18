@@ -183,6 +183,10 @@ export function clubDoor(place: { club?: { vip?: "medium" | "exclusive"; doorClo
   return { doorClout: place.club?.doorClout ?? 0, vip };
 }
 
+/** Daily tasks 2.0 (migration 0073): streak rewards can't be bought or sold. Shared with the preview simulator. */
+export const REWARD_ONLY = "Not for sale. This one is earned with a streak of full task days.";
+export const REWARD_KEEP = "Streak rewards are yours for keeps. No resale, no regrets.";
+
 /** #9 (migration 0043): a fantasy outfit above the player's clout. Shared with the preview simulator. */
 export const OUTFIT_NEEDS_CLOUT = "The fitting room won't even let you in yet. Earn more clout first.";
 
@@ -202,6 +206,14 @@ const ERRORS: Record<string, string> = {
   own_house: "You own a house. Landlords are a thing of your past.",
   already_home: "You already live there. Unpack first.",
   rent_due: "Pay this week's rent before you move. Landlords talk.",
+  // Daily tasks 2.0 (migration 0073): streak rewards and guest-list passes.
+  reward_only: REWARD_ONLY,
+  reward_unsellable: REWARD_KEEP,
+  no_pass: "No guest-list pass on you. Keep the streak going: day 14 brings one.",
+  pass_used_tonight: "You're already on a guest list tonight. One velvet rope at a time.",
+  pass_not_needed: "You can already get in there. Save the pass for a door that says no.",
+  not_a_club: "Guest-list passes work at clubs. Nobody keeps a list at the deli.",
+  borough_locked: "That borough isn't open yet. It opens once the city fills up, guest list or not.",
   // v0.15 Campus (migration 0072).
   dorm_students_only: "Dorms are for students. Enroll at that campus first: the RA checks.",
   not_enrolled: "Enroll here first. The registrar has a form. Of course it does.",

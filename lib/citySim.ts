@@ -8,7 +8,7 @@ import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
-import { DOOR_CLOUT, HOME_NEEDS_CLOUT, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
@@ -327,6 +327,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const item = itemBySku(sku);
       if (!item || (item.storyOnly && !storyItemOpen(story(), sku).open)) return fail("That isn't in stock.");
       if (item.collector) return fail("That piece is real cash only.");
+      if (item.reward) return fail(REWARD_ONLY);
       if (s.items.some((i) => i.sku === sku)) return fail("You already own that. Calm down.");
       if (p().clout < (item.cloutReq ?? 0)) return fail(OUTFIT_NEEDS_CLOUT);
       const price = mode === "rent" ? item.rentPerWeek ?? 0 : item.price;
@@ -347,6 +348,7 @@ export function createSimApi(initial: CityState, story: () => StoryFeed | null =
       const it = s.items.find((i) => i.id === itemId);
       if (!it) return fail("You don't own that.");
       if (it.acquired === "collector") return fail("Collector pieces can't be sold.");
+      if (itemBySku(it.sku)?.reward) return fail(REWARD_KEEP);
       const amount = sellPrice(it.value);
       s.items = s.items.filter((i) => i.id !== itemId);
       p().bank_cash += amount;
