@@ -20,6 +20,7 @@ export default function Privacy() {
         <li><strong>Your 18+ confirmation</strong> and when you gave it.</li>
         <li><strong>Your game profile</strong>: your in-game name, starting style and look.</li>
         <li><strong>Invite records</strong>: whose invite link you joined through, and who joined through yours.</li>
+        <li><strong>Creator records</strong>: if you joined through a creator&apos;s link or code, which creator. Creators see counts only, never who you are.</li>
         <li><strong>Basic technical data</strong> needed to run the service, such as sign-in session cookies and server logs.</li>
       </ul>
 
@@ -33,7 +34,7 @@ export default function Privacy() {
       <p>We use Supabase (accounts and database) and Vercel (hosting) to run the game. [Counsel to confirm processor list, data locations and transfer terms.]</p>
 
       <h2>Cookies</h2>
-      <p>We use cookies to keep you signed in and to remember an invite link you followed. We don&apos;t use advertising cookies.</p>
+      <p>We use cookies to keep you signed in and to remember an invite link or a creator&apos;s link you followed (so the friend or creator who sent you gets credit). We don&apos;t use advertising cookies.</p>
 
       <h2>Your choices</h2>
       <p>You can ask us to access, correct or delete your data at [contact email]. Deleting your account removes your profile and invite records.</p>

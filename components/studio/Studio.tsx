@@ -5,6 +5,7 @@ import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { TOPIC_LABEL, windowLine } from "@/lib/gossip";
 import { InsightsTab } from "./Insights";
 import { PlayersTab } from "./Players";
+import { AffiliatesTab } from "./Affiliates";
 import { ShoutoutsTab } from "./Shoutouts";
 import { BigScreenTab } from "./BigScreen";
 import { StoryPreview, describeEffect } from "./StoryPreview";
@@ -32,7 +33,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "shoutouts" | "bigscreen" | "players" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup">("stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup">("stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -121,6 +122,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {api.gossipList && <button aria-pressed={tab === "gossip"} onClick={() => setTab("gossip")}>Gossip</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.players && <button aria-pressed={tab === "players"} onClick={() => setTab("players")}>Players</button>}
+          {api.affiliates && <button aria-pressed={tab === "affiliates"} onClick={() => setTab("affiliates")}>Affiliates</button>}
           {api.insights && <button aria-pressed={tab === "insights"} onClick={() => setTab("insights")}>Insights</button>}
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Launch goals</button>}
           {api.setupCheck && <button aria-pressed={tab === "setup"} onClick={() => setTab("setup")}>Setup</button>}
@@ -130,6 +132,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
       {tab === "shoutouts" && api.shoutouts && <ShoutoutsTab api={api} />}
       {tab === "bigscreen" && api.bigScreen && <BigScreenTab api={api} />}
       {tab === "players" && api.players && <PlayersTab api={api} />}
+      {tab === "affiliates" && api.affiliates && <AffiliatesTab api={api} preview={preview} />}
       {tab === "insights" && api.insights && <InsightsTab load={api.insights} />}
       {tab === "metrics" && <Metrics api={api} />}
       {tab === "setup" && <SetupTab api={api} />}

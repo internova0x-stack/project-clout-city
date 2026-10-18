@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
+import { normalizeCreatorCode } from "@/lib/creators";
 import { isValidLook, normalizeLook, lookChoices } from "@/lib/look";
 import { isStyleId } from "@/lib/styles";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -58,6 +59,18 @@ export async function createPlayer(input: {
   }
 
   cookieStore.delete(GAME_CONFIG.invite.cookieName);
+
+  // Creators (spec section 21, migration 0087): the link followed on this device or kept on the account, or the
+  // typed code. The server decides whether it counts and pays the welcome gift once; sign-up never fails over it.
+  const slug = (typeof meta.creator_link === "string" ? meta.creator_link : null) ?? cookieStore.get(GAME_CONFIG.creator.cookieName)?.value ?? null;
+  const creatorCode = normalizeCreatorCode(typeof meta.creator_code === "string" ? meta.creator_code : null) ??
+    normalizeCreatorCode(cookieStore.get(GAME_CONFIG.creator.codeCookieName)?.value);
+  if (slug || creatorCode) {
+    const { error: creatorError } = await supabase.rpc("creator_attach", { p_slug: slug, p_code: creatorCode });
+    if (creatorError && !/does not exist|schema cache/i.test(creatorError.message)) console.error("creator_attach failed", creatorError);
+    cookieStore.delete(GAME_CONFIG.creator.cookieName);
+    cookieStore.delete(GAME_CONFIG.creator.codeCookieName);
+  }
   return { ok: true };
 }
 

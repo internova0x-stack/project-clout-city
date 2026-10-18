@@ -10,6 +10,7 @@ import type { NewsItem } from "./news.ts";
 import type { HuntFile } from "./hunts.ts";
 import type { ShoutoutAction, StudioShoutoutDay } from "./radio.ts";
 import type { StudioBigScreen, TvAction } from "./cloutTv.ts";
+import type { Affiliates, CreatorInput, LinkInput } from "./creators.ts";
 
 export type Review = "draft" | "approved" | "declined";
 
@@ -181,6 +182,11 @@ export interface StudioApi {
   players?(query: string, filter: PlayerFilter, sort: PlayerSort, offset: number): Promise<Admin<PlayerList>>;
   player?(id: string): Promise<Admin<PlayerProfile>>;
   playerBan?(id: string, ban: boolean, reason: string): Promise<Admin<{ banned: boolean }>>;
+  /** Affiliates (migration 0087): creators and their links, with numbers for the last `days` days (0 = all time). */
+  affiliates?(days: number): Promise<Admin<Affiliates>>;
+  creatorSave?(input: CreatorInput): Promise<Admin<string>>;
+  linkSave?(input: LinkInput): Promise<Admin<number>>;
+  linkStatus?(id: number, status: "active" | "retired"): Promise<Admin<null>>;
   /** v0.6 regulars' lines (migration 0016). */
   castLines?(): Promise<Admin<CastLine[]>>;
   castAdd?(npc: string, line: string, kind: "line" | "update", weekOf: string | null): Promise<Admin<null>>;
@@ -270,6 +276,17 @@ export interface CastLine {
 
 const ERRORS: Record<string, string> = {
   not_admin: "This account isn't a story admin.",
+  name_required: "Give the creator a name.",
+  bad_code: "Codes are 3 to 16 letters and numbers.",
+  code_taken: "Another creator already has that code.",
+  bad_rate: "The rate goes from 0 to 50%.",
+  bad_length: "Pick 12 months, 24 months or for life.",
+  bad_gift_item: "The gift has to be a Shop fashion item (not a collector piece).",
+  slug_taken: "That link is taken. Links are never deleted, so pick another.",
+  bad_slug: "Links use letters, numbers and single hyphens, 2 to 40 of them.",
+  no_creator: "That creator is gone.",
+  no_link: "That link is gone.",
+  bad_lands: "Pick where the link lands.",
   is_admin: "That's a Studio admin. Remove them from story_admins first.",
   unknown_player: "That player isn't around anymore.",
   arc_is_live: "That story is live. Pause or retire it instead of changing it mid-run.",

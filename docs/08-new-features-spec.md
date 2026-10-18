@@ -705,7 +705,8 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
 ## 21. Creators: affiliate links and the UGC engine (owner, Oct 18)
 
 Creators we work with make short videos about Clout City (the UGC engine) and earn a share of what the players they
-bring in spend (affiliate links). Nothing here is built yet; every rule below is decided (owner, Oct 18).
+bring in spend (affiliate links). Every rule below is decided (owner, Oct 18). **Built:** step 1, attribution and links
+(migration 0087). Steps 2 to 5 are still to build.
 
 ### Decisions (owner, Oct 18)
 - **Rate:** set per creator in the Studio. New creators default to **20%**; **30%** is the preset for high
@@ -809,9 +810,15 @@ Before tax, Stripe Billing (0.7% on subscriptions) and refunds. A web game pays 
 30% we keep about what a store game keeps.
 
 ### Build steps (one pull request each)
-1. Attribution and links: `creators`, `creator_links`, the `/c/<slug>` redirect with click counts, the sign-up
-   code, `creator_referrals`; the Studio's Affiliates section with Creators and Links (create, copy, QR, retire)
-   and sign-up counts.
+1. **Built (migration 0087).** Attribution and links: `creators`, `creator_links`, the `/c/<slug>` redirect with click
+   counts, the sign-up code, `creator_referrals`; the Studio's Affiliates section with Creators and Links (create,
+   copy, QR, retire) and sign-up counts. As built:
+   - Links land on the city (home), sign-up (opened), News, the Shop or the VIP plans. Guests land on the front door
+     with "<creator> sent you" and the gift named; players who already have an account go straight to that screen.
+   - A retired link, or any link of a paused creator, still lands visitors but stops counting clicks and sign-ups.
+   - Attribution happens when the account is created (`creator_attach`), only for accounts less than a day old,
+     never for the creator's own email; a link beats a typed code. The welcome gift's item is a Shop fashion piece
+     sold for C$ (not a collector or reward piece).
 2. Commissions and performance: webhook rows on purchases and renewals, reversals on refunds, the 45-day hold; the
    Affiliates Overview, the money columns and each affiliate's page (funnel, products, retention, players).
 3. Creator page.

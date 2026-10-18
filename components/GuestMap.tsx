@@ -9,6 +9,10 @@ import { CityMap } from "./map/CityMap";
 import { SignUpSheet, type AuthMode } from "./SignUpSheet";
 import { useCityClock } from "./useCityClock";
 import { handle } from "@/lib/validation";
+import { itemBySku } from "@/lib/city";
+
+/** A creator's link brought this guest here (spec section 21): who, and the welcome gift waiting at sign-up. */
+export interface CreatorWelcome { name: string; giftCash: number; giftItem: string | null }
 
 type Filter = "all" | PlacePin["category"];
 
@@ -40,10 +44,19 @@ function timeAgo(iso: string): string {
 // Life reference in Clout City's dark glass: a slim brand bar, live city pills
 // with real numbers, map filter chips (C10), the live ticker (C22) and a
 // sign-up card. Guests pan, zoom and filter freely; tapping a place opens sign-up.
-export function GuestMap({ invited, authError, at }: { invited: boolean; authError: boolean; /** Owner, Oct 15: invited to this place. */ at?: string }) {
+export function GuestMap({ invited, authError, at, creator, openSignUp = false }: {
+  invited: boolean;
+  authError: boolean;
+  /** Owner, Oct 15: invited to this place. */
+  at?: string;
+  creator?: CreatorWelcome | null;
+  /** A creator link that lands on sign-up. */
+  openSignUp?: boolean;
+}) {
   const invitedTo = at ? placeById(at) : undefined;
   const { time, daytime } = useCityClock();
-  const [auth, setAuth] = useState<AuthMode | null>(null);
+  const [auth, setAuth] = useState<AuthMode | null>(openSignUp ? "signup" : null);
+  const gift = creator ? giftLine(creator) : null;
   const [filter, setFilter] = useState<Filter>("all");
   const [residents, setResidents] = useState<number | null>(null);
   const [arrivals, setArrivals] = useState<Arrival[]>([]);
@@ -127,7 +140,12 @@ export function GuestMap({ invited, authError, at }: { invited: boolean; authErr
             Become the main character.{" "}
             <span style={{ fontWeight: 400, color: "var(--text-3)" }}>Free in your browser.</span>
           </p>
-          {(authError || invited) && (
+          {creator && !authError && (
+            <p className="subtext guest-creator" style={{ margin: "6px 0 0" }}>
+              <strong>{creator.name}</strong> sent you.{gift ? ` Sign up and ${gift} are waiting for you.` : " Sign up and say hi to Queens."}
+            </p>
+          )}
+          {(authError || invited) && !(creator && !authError) && (
             <p className="subtext" style={{ margin: "6px 0 0", color: authError ? "var(--red-text)" : "var(--text-2)" }}>
               {authError ? "That sign-in link expired or was already used. Grab a fresh one."
                 : invitedTo ? `A friend invited you to ${invitedTo.emoji} ${invitedTo.name}. Sign up and meet them there.`
@@ -148,7 +166,14 @@ export function GuestMap({ invited, authError, at }: { invited: boolean; authErr
         </section>
       </div>
 
-      <SignUpSheet open={auth !== null} mode={auth ?? "signup"} onClose={() => setAuth(null)} onSwitchMode={setAuth} invited={invited} />
+      <SignUpSheet open={auth !== null} mode={auth ?? "signup"} onClose={() => setAuth(null)} onSwitchMode={setAuth} invited={invited} creator={creator?.name} gift={gift} />
     </main>
   );
+}
+
+/** "C$500 and a Bucket hat": the welcome gift in words, or null when there is none. */
+function giftLine(c: CreatorWelcome): string | null {
+  const item = c.giftItem ? itemBySku(c.giftItem) : undefined;
+  const parts = [c.giftCash > 0 ? `C$${c.giftCash.toLocaleString()}` : null, item ? `a free ${item.name.toLowerCase()}` : null].filter(Boolean);
+  return parts.length ? parts.join(" and ") : null;
 }

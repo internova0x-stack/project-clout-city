@@ -17,6 +17,7 @@ import {
   previewPlayerCard, previewStudioInsights, previewStudioMetrics, previewStudioPlayer, previewStudioPlayerBan, previewStudioPlayers, previewStudioReportAction, previewStudioReports,
 } from "../chatActions";
 import { previewCastAdd, previewCastLines, previewCastStatus } from "../castActions";
+import { previewStudioAffiliates, previewStudioCreatorSave, previewStudioLinkSave, previewStudioLinkStatus } from "../creatorActions";
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
@@ -78,12 +79,13 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
     case "guest":
-      return <GuestMap invited={false} authError={false} />;
+      // ?via=tasha: a guest who followed a creator's link (migration 0087); ?via=tasha-signup lands on sign-up.
+      return <GuestMap invited={false} authError={false} creator={via ? { name: "Tasha Glow", giftCash: 500, giftItem: "fit-bucket-hat" } : null} openSignUp={via === "tasha-signup"} />;
     case "creator": {
       const s = Math.min(3, Math.max(0, Number(step ?? 0))) as CreatorStep;
       return (
@@ -166,6 +168,7 @@ export default async function Preview({
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
             beatStatus: previewStudioBeatStatus, content: previewStudioContent, reorder: previewStudioReorder, beatEdit: previewStudioBeatEdit, goLive: previewStudioGoLive,
             reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics, insights: previewStudioInsights, players: previewStudioPlayers, player: previewStudioPlayer, playerBan: previewStudioPlayerBan,
+            affiliates: previewStudioAffiliates, creatorSave: previewStudioCreatorSave, linkSave: previewStudioLinkSave, linkStatus: previewStudioLinkStatus,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
