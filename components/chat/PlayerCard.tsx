@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ReportReason, type ChatMessage, type ChatStatus, type PlayerCard } from "@/lib/chat";
 import { REACTIONS, icebreakers } from "@/lib/meet";
+import { placeById } from "@/lib/city";
 import { messagesLeftLine } from "./Messages";
 import { ECONOMY, formatCash, formatShort } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
@@ -102,7 +103,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
     if (!r.ok) return onToast?.(r.error);
     setThread((t) => [...t, r.data].slice(-6));
   };
-  const ice = card ? icebreakers(card.herePlace ? placeName?.(card.herePlace) ?? null : null, hour, card.id.length + new Date().getDate()) : [];
+  const ice = card ? icebreakers(card.herePlace ? placeName?.(card.herePlace) ?? null : null, hour, card.id.length + new Date().getDate(), !!card.herePlace && !!placeById(card.herePlace)?.tags.includes("campus")) : [];
   const style = card ? getStyle(card.style as StyleId) : null;
   const hood = card ? ECONOMY.homes.find((h) => h.id === card.homeId)?.neighborhood ?? "Queens" : "";
   return (

@@ -43,6 +43,16 @@ const STYLE_LINES = [
   "You look like you know everyone here. Do you?",
 ];
 
+/** v0.15: on campus (the Quad, the Library), openers that feel like a campus, not a dating app. */
+const CAMPUS_LINES = [
+  "Is this seat taken?",
+  "Did you do the reading? Please say no.",
+  "Want to form a study group? Mostly snacks, some studying.",
+  "Red Pigeons or Fighting Bagels? Choose carefully.",
+  "Be honest: did you make it to the 8 AM?",
+  "Library or the Quad: where does the real studying happen?",
+];
+
 /** The city-clock part of the day, for icebreakers. */
 export function partOfDay(hour: number): "morning" | "day" | "night" {
   return hour >= 5 && hour < 11 ? "morning" : hour >= 11 && hour < 18 ? "day" : "night";
@@ -52,8 +62,9 @@ export function partOfDay(hour: number): "morning" | "day" | "night" {
  * Three suggested openers: one about the place, one about the time, one about their look. `seed`
  * turns them so two players don't always get the same lines. Positive by design.
  */
-export function icebreakers(placeName: string | null, hour: number, seed = 0): string[] {
+export function icebreakers(placeName: string | null, hour: number, seed = 0, campus = false): string[] {
   const pick = <T,>(list: readonly T[], n: number) => list[Math.abs(n) % list.length];
+  if (campus) return [0, 1, 2].map((i) => CAMPUS_LINES[(Math.abs(seed) + i * 2) % CAMPUS_LINES.length]);
   const out = [
     placeName ? pick(PLACE_LINES, seed).replace("{place}", placeName) : "Fancy seeing you here.",
     pick(TIME_LINES[partOfDay(hour)], seed >> 1),

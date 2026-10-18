@@ -25,7 +25,7 @@ import { RankChip } from "../game/Ranks";
 import { rankFor } from "@/lib/ranks";
 import { hereCountLine, hereLine, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { getStyle, type StyleId } from "@/lib/styles";
-import { canDateAt, type DateNight } from "@/lib/dating";
+import { canDateAt, isStudySpot, type DateNight } from "@/lib/dating";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
@@ -299,7 +299,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
               {!open && state.attendedToday.includes(ev.id) && <span className="meta">You went today. Back tomorrow.</span>}
               {handlers.dating && !compact && (
                 <button className="btn btn-secondary btn-sm date-btn" onClick={() => handlers.dating!.onMakeDate({ kind: "event", target: ev.id, price: ev.entry })}>
-                  🌙 Make it a date
+                  {isStudySpot(place) ? "📚 Make it a study date" : "🌙 Make it a date"}
                 </button>
               )}
             </div>
@@ -623,7 +623,7 @@ export function LocationSheet({
                   className="btn btn-secondary social-btn"
                   onClick={() => handlers.dating!.onMakeDate({ kind: "place", target: place.id, price: place.actions.find((a) => a.kind === "eat")?.price ?? 0 })}
                 >
-                  🌙 Make it a date
+                  {isStudySpot(place) ? "📚 Make it a study date" : "🌙 Make it a date"}
                 </button>
               )}
               {/* #19: no crew outing where the bouncer would turn you away. */}

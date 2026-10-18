@@ -41,7 +41,7 @@ export interface DailyTask {
    * "gossip" (v0.11, migration 0036): action_id is "gossip-regular" (talk to the regular), "gossip-overheard"
    * (Listen in) or, #19, "gossip-restroom" (Listen in downstairs in a club's restroom).
    */
-  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip" | "cook";
+  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip" | "cook" | "class";
   place_id: string;
   action_id: string;
   reward: number;
@@ -464,7 +464,7 @@ export function eventById(id: string): ClubEvent | undefined {
 }
 
 // Owner, Oct 18: task copy in Clout City's voice. The title still says what to do and where; a line under it jokes.
-const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Be seen at", eat: "Grab a bite at", shift: "Clock in at", hangout: "Kick it at", event: "Pull up to", gossip: "Eavesdrop at", cook: "Cook something at" };
+const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Be seen at", eat: "Grab a bite at", shift: "Clock in at", hangout: "Kick it at", event: "Pull up to", gossip: "Eavesdrop at", cook: "Cook something at", class: "Go to class at" };
 
 /** The joke under each task, a few per kind; the task's id picks one, so it stays put all day. */
 const TASK_QUIPS: Record<DailyTask["kind"] | "skill", readonly string[]> = {
@@ -475,6 +475,7 @@ const TASK_QUIPS: Record<DailyTask["kind"] | "skill", readonly string[]> = {
   event: ["Arrive late. Leave later.", "Dress like the photographer is waiting.", "The dance floor misses you. Allegedly."],
   gossip: ["Ears open, mouth shut. For now.", "Somebody knows something. Go be nosy.", "The tea is hot and you're thirsty."],
   cook: ["Gordon would yell. Your stomach won't.", "The smoke alarm is part of the recipe.", "Home-cooked. Technically."],
+  class: ["Attendance is half the grade. The other half is vibes.", "Sit in the back. Look engaged. Nod occasionally.", "Your professor noticed you were gone. Barely."],
   skill: ["Your skills are rusting. Literally, we checked.", "Practice now, show off later.", "Get good. Then get annoying about it."],
 };
 const DONE_LINES = ["Done. Lola noticed. 💅", "Paid. Treat yourself (responsibly).", "Ticked. Main character behavior."] as const;

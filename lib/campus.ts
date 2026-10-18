@@ -131,7 +131,7 @@ export interface CampusState {
   scholarshipPaid: boolean;
 }
 export interface ExamQuestion { prompt: string; choices: string[] }
-export interface AttendResult { clout: number; confidence: number; energy: number; streak: number }
+export interface AttendResult { clout: number; confidence: number; energy: number; streak: number; /** Migration 0076: today's "Go to class" task. */ taskCash?: number }
 export interface SubmitResult extends ExamResult { weekGpa: number | null; scholarship: number }
 export interface LeaderboardRow { campus: CampusId; students: number; classes: number; points: number; score: number }
 export interface Leaderboard { week: string; campuses: LeaderboardRow[] }

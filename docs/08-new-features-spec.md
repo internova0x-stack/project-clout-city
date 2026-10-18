@@ -521,7 +521,8 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 - **Attend** each course once a New York day at the campus (the existing lecture action, per course): Energy for
   Confidence, a little clout and Smarts practice (skills, migration 0056). Each course keeps an
   **attendance streak**; missing a day resets it. A class line from the professor (cast regular) each time.
-- Attending counts toward daily tasks (a "Go to class" task when enrolled).
+- Enrolled students get a **"Go to class"** daily task in place of the random one (migration 0076); attending any of
+  the week's classes completes it.
 
 ### Exams (the weekly payoff)
 - Every Friday (New York) each course has a **5-question quiz** with funny multiple-choice questions, written
@@ -557,7 +558,9 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 - The **Quad** and the **Library** are hangout spots on each campus card; the players-at-this-place list
   (section 14) shows who's there, with campus icebreakers ("Is this seat taken?", "Did you do the reading?",
   "Want to form a study group?"). It should feel like a campus, not a dating app.
-- **Study dates** join the crush and date-night system (v0.5): a date night at the Library or the dining hall.
+- **Study dates** join the crush and date-night system (v0.5): a date night on campus, free (migration 0076). Going
+  to the campus (any action there) counts, as at any other date spot. Campus icebreakers on player cards: "Is this
+  seat taken?", "Did you do the reading?", "Want to form a study group?"
 
 ### Relationship status (later phase)
 - "Make it official": both players confirm; it shows on both profiles; either can end it at once (no notice
