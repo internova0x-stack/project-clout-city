@@ -2,6 +2,7 @@
 
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
 import type { RadioApi } from "@/lib/radio";
+import { createCampusSim } from "@/lib/campusSim";
 import { previewStationInbox, previewStationRead, previewTvState, previewTvSubmit, previewTvUpload, previewTvWithdraw } from "@/app/preview/tvActions";
 import type { TvApi } from "@/lib/cloutTv";
 
@@ -44,7 +45,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -78,6 +79,8 @@ export function PreviewHome({
   huntPreset?: string;
   /** v0.10 Lucky Star: the next cards' results ("win", "big", "back" or "lose"), or "jackpot" (the next card wins its pot). */
   lottoPreset?: string;
+  /** v0.15 Campus: ?campus=new|pick|week|friday|done starts campus life in that state, standing at St. Johnsons. */
+  campusPreset?: string;
   /** Owner, Oct 17: show Lola's daily-tasks nudge after 2 seconds (?hint=daily). */
   dailyHintPreset?: boolean;
   /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
@@ -89,7 +92,7 @@ export function PreviewHome({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [player, bizPreset]);
   const city = useMemo(() => {
-    const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id });
+    const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id, ...(campusPreset !== undefined ? { at_place: "st-johnsons" } : {}) });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
     return { ...s, devTools };
   }, [me, player, devTools, tasksDone]);
@@ -103,6 +106,7 @@ export function PreviewHome({
     return api;
   }, [city, lottoPreset]);
   // v0.14 Real Clout FM: the dev server's in-memory station, shared with /preview/studio's Shoutouts queue.
+  const campusApi = useMemo(() => createCampusSim(campusPreset === "new" ? "" : campusPreset ?? ""), [campusPreset]);
   const radioApi = useMemo<RadioApi>(() => ({
     state: () => previewRadioState(radioPreset ?? ""),
     request: previewRadioRequest,
@@ -342,6 +346,7 @@ export function PreviewHome({
       gossip={cityOff ? undefined : gossipApi}
       business={cityOff ? undefined : businessApi}
       radio={cityOff ? undefined : radioApi}
+      campus={cityOff ? undefined : campusApi}
       boroughGates={[
         { id: "brooklyn", open: brooklynPreset === "open", target: 100, online: 37, peakToday: 64, counting: brooklynPreset !== "open" },
         { id: "bronx", open: false, target: 250, online: 37, peakToday: 64, counting: brooklynPreset === "open" },

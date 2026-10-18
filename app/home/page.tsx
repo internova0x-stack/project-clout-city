@@ -30,6 +30,7 @@ import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomAction
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
+import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 
 export const dynamic = "force-dynamic";
@@ -43,8 +44,8 @@ export default async function HomePage() {
   const supabase = await getServerSupabase();
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
-  const [clique, city, story, catalog, chat, dating, crew, party, together] = await Promise.all([
-    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(),
+  const [clique, city, story, catalog, chat, dating, crew, party, together, campus] = await Promise.all([
+    getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
   ]);
   // Migration 0010 switches on chat; a banned account sees only a notice.
   const chatOn = chat.ok;
@@ -115,6 +116,10 @@ export default async function HomePage() {
         inbox: togetherInbox, invite: togetherInvite, respond: togetherRespond, claim: togetherClaim, seen: togetherSeen,
         rideOffer, rideRespond, rideStatus,
         jobs: { board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob },
+      } : undefined}
+      // Migration 0072 switches on campus life (campus_state failing hides it).
+      campus={city && campus.ok ? {
+        state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard,
       } : undefined}
       // Migration 0057 switches on Real Clout FM (radio_state failing hides the Radio app).
       radio={city ? { state: radioState, request: radioRequest, report: radioReport } : undefined}

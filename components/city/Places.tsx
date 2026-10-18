@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { campusById } from "@/lib/campus";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
@@ -63,6 +64,8 @@ export interface PlaceHandlers {
    * apps' forms (there, on arrival); "watch" opens the Big Screen's photo (from anywhere).
    */
   onStation?: (what: "shoutout" | "billboard" | "watch") => void;
+  /** v0.15 Campus (migration 0072): campus life at the two universities (opens from anywhere; acting needs you there). */
+  onCampus?: (placeId: string) => void;
   /** v0.8 grocery bundles at supermarkets (migration 0027). */
   onBuyGroceries?: (placeId: string, bundleId: string) => void;
   /** The story world (v0.4): closures, prices, story events and tasks. */
@@ -222,6 +225,16 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           )}
         </div>
       ))}
+      {handlers.onCampus && isCampus(place) && (
+        <div className="action-row">
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span className="title" style={{ display: "block" }}>🎓 Campus life</span>
+            {!compact && <span className="subtext" style={{ display: "block" }}>Enroll, go to class, Friday exams, the dining hall and the dorm.</span>}
+          </div>
+          {/* It opens from anywhere (the leaderboard and your schedule); classes and exams need you on campus. */}
+          <button className="btn btn-taxi btn-sm" onClick={() => handlers.onCampus!(place.id)}>Open</button>
+        </div>
+      )}
       {handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
         const av = groceryAvailability(b, state);
         const room = CITY_ECONOMY.groceries.fridgeMax - (state.player.fridge_meals ?? 0);
@@ -357,6 +370,9 @@ export function PlaceTasks({ place, state }: { place: Place; state: CityState })
  * here in one line and today's tasks ticked; one tap opens the full list.
  */
 /** v0.14 On Air: what each station offers on its card (owner, Oct 16: "Send Radio Shoutout", "Get on Billboard"). */
+/** The two universities with campus life (v0.15). */
+const isCampus = (place: Place) => !!campusById(place.id);
+
 const STATION_ROWS: { tag: "radio" | "tv"; what: "shoutout" | "billboard" | "watch"; name: string; title: string; blurb: string; button: string; anywhere?: boolean }[] = [
   { tag: "radio", what: "shoutout", name: "Send Radio Shoutout", title: "🎙️ Send Radio Shoutout", blurb: "One a day. DJ Sharm Almight reads one on The Wake-Up Call at 9 a.m.", button: "Send" },
   { tag: "tv", what: "billboard", name: "Get on Billboard", title: "📸 Get on Billboard", blurb: "Your photo, forty feet tall over Astoria for three hours. The owner picks.", button: "Upload" },
@@ -371,6 +387,7 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
     ...(handlers.gossip && !world.closed ? ["Listen in"] : []),
     ...(handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed ? ["Scratch cards"] : []),
     ...(handlers.onStation && isStation(place) && !world.closed ? STATION_ROWS.filter((r) => place.tags.includes(r.tag) && !r.anywhere).map((r) => r.name) : []),
+    ...(handlers.onCampus && isCampus(place) ? ["Campus life"] : []),
     ...(handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed ? ["Groceries"] : []),
     ...(handlers.onBarDrink && hasBar(place.tags) && !world.closed ? ["A drink"] : []),
     ...CLUB_EVENTS.filter((e) => e.placeId === place.id).map((e) => e.name),

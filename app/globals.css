@@ -1933,3 +1933,28 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .builder textarea.studio-input, .builder input.studio-input:not(.builder-id) { font-family:inherit; }
 /* Owner, Oct 17: Lola's daily-tasks nudge rings the HUD button; the ring itself opens the tasks. */
 .daily-hint-target { border:0; padding:0; background:transparent; cursor:pointer; border-radius:18px; }
+
+/* ---- v0.15 Campus (spec section 18): the campus sheet ---- */
+.campus-head { display:flex; align-items:center; gap:12px; }
+.campus-crest { width:52px; height:52px; flex:none; border-radius:16px; display:grid; place-items:center; font-size:28px; background:linear-gradient(160deg, #FDE2C8, #F6B48F); box-shadow:var(--elev-1); }
+.campus-courses { display:grid; gap:8px; }
+.campus-course { display:flex; align-items:center; gap:12px; width:100%; padding:12px; border-radius:16px; background:var(--surface-card, #fff); box-shadow:var(--elev-1); border:2px solid transparent; }
+.campus-course.pick { cursor:pointer; font:inherit; color:inherit; }
+.campus-course.pick.on { border-color:var(--taxi-400); background:var(--taxi-tint, #FFF3CC); }
+.campus-course-emoji { width:40px; height:40px; flex:none; border-radius:12px; display:grid; place-items:center; font-size:22px; background:var(--chip-off); }
+.campus-tick { width:26px; height:26px; flex:none; border-radius:50%; display:grid; place-items:center; background:var(--taxi-400); color:var(--text-1); font-weight:800; }
+.campus-choice { width:100%; min-height:48px; padding:12px 14px; border-radius:14px; text-align:left; font:inherit; font-size:15px; font-weight:600; background:var(--chip-off); color:var(--text-1); border:2px solid transparent; cursor:pointer; }
+.campus-choice.on { border-color:var(--taxi-400); background:var(--taxi-tint, #FFF3CC); }
+.campus-peek { align-items:flex-start; font-size:14px; }
+.campus-result { display:flex; align-items:center; gap:14px; }
+.campus-grade { width:64px; height:64px; flex:none; border-radius:18px; display:grid; place-items:center; font-size:38px; font-weight:800; color:#fff; background:var(--text-2); }
+.campus-result.grade-A .campus-grade, .campus-grade-chip.grade-A { background:#2E9E6A; }
+.campus-result.grade-B .campus-grade, .campus-grade-chip.grade-B { background:#3B82C4; }
+.campus-result.grade-C .campus-grade, .campus-grade-chip.grade-C { background:#E3A019; }
+.campus-result.grade-D .campus-grade, .campus-grade-chip.grade-D { background:#E8735A; }
+.campus-result.grade-F .campus-grade, .campus-grade-chip.grade-F { background:#C8352B; }
+.campus-grade-chip { min-width:36px; height:36px; padding:0 8px; border-radius:10px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:18px; background:var(--text-2); }
+.campus-gpa { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.campus-board.mine { box-shadow:0 0 0 2px var(--taxi-400), var(--elev-1); }
+.campus-bar { height:8px; border-radius:999px; background:var(--chip-off); overflow:hidden; margin:8px 0 6px; }
+.campus-bar span { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg, #F6B48F, #E8735A); }
