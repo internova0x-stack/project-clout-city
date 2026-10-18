@@ -1,7 +1,7 @@
 "use server";
 
 import { previewOnly } from "./guard";
-import { HOLD_DAYS, commissionOn, normalizeCreatorCode, type Affiliates, type AffiliatesOverview, type Creator, type CreatorInput, type CreatorLink, type CreatorMe, type CreatorPage, type DayPoint, type PayoutMethod, type PayoutsAdmin, type LinkInput } from "@/lib/creators";
+import { HOLD_DAYS, commissionOn, normalizeCreatorCode, type Affiliates, type AffiliatesOverview, type Creator, type CreatorInput, type CreatorLink, type CreatorMe, type CreatorPage, type DayPoint, type PayoutMethod, type PayoutsAdmin, type VideoInput, type VideosAdmin, type CreatorVideo, type LinkInput } from "@/lib/creators";
 import type { Admin } from "@/lib/studio";
 
 // The Studio preview's Affiliates tab (migration 0087) on in-memory sample creators. Every name is invented.
@@ -225,5 +225,46 @@ export async function previewStudioPayoutVoid(id: number, reason: string): Promi
   if (!h || h.voidedAt) return { ok: false, error: "That payout is gone or already undone." };
   h.voidedAt = new Date().toISOString(); h.voidReason = reason;
   const { [h.creatorId]: _gone, ...rest } = paidNow; paidNow = rest;
+  return { ok: true, data: null };
+}
+
+/** Paid videos (migration 0091) on sample data: results come from each video's link. */
+const VIDEOS: Omit<CreatorVideo, "creator" | "slug" | "clicks" | "signups" | "payers" | "revenueCents" | "commissionCents">[] = [
+  { id: 1, creatorId: "c1", linkId: 2, title: "Moving to Queens with C$0", platform: "tiktok", url: "https://example.com/v/1", postedOn: "2026-10-02", feeCents: 25000, note: null, status: "live" },
+  { id: 2, creatorId: "c1", linkId: 3, title: "Haunted Hell Gate tour", platform: "tiktok", url: "https://example.com/v/2", postedOn: "2026-10-12", feeCents: 30000, note: "Brief: a date night gone wrong", status: "live" },
+  { id: 3, creatorId: "c2", linkId: 5, title: "Shop haul in Astoria", platform: "instagram", url: null, postedOn: "2026-09-28", feeCents: 15000, note: null, status: "removed" },
+  { id: 4, creatorId: "c2", linkId: null, title: "Story time: my first date", platform: "youtube", url: null, postedOn: "2026-10-09", feeCents: 20000, note: "Code only in the video", status: "live" },
+];
+export async function previewStudioVideos(): Promise<Admin<VideosAdmin>> {
+  previewOnly();
+  const v = view(0);
+  const links = v.creators.flatMap((c) => c.links.map((l) => ({ ...l, rate: c.rate })));
+  const videos = VIDEOS.map((x) => {
+    const c = v.creators.find((k) => k.id === x.creatorId)!;
+    const l = links.find((k) => k.id === x.linkId);
+    return { ...x, creator: c.name, slug: l?.slug ?? null, clicks: l ? l.clicks : null, signups: l ? l.signups : null, payers: l ? l.payers ?? 0 : null,
+      revenueCents: l ? l.revenueCents ?? 0 : null, commissionCents: l ? Math.round((l.revenueCents ?? 0) * 0.93 * l.rate / 100) : null };
+  });
+  return { ok: true, data: { videos, creators: v.creators.map((c) => ({
+    creatorId: c.id, name: c.name, videos: VIDEOS.filter((x) => x.creatorId === c.id && x.status === "live").length,
+    spendCents: VIDEOS.filter((x) => x.creatorId === c.id).reduce((t, x) => t + x.feeCents, 0), signups: c.signups, payers: c.payers ?? 0,
+    revenueCents: c.revenueCents ?? 0, netCents: c.owed?.periodNetCents ?? 0, commissionCents: c.owed?.periodCents ?? 0 })) } };
+}
+export async function previewStudioVideoSave(input: VideoInput): Promise<Admin<number>> {
+  previewOnly();
+  if (!input.title.trim()) return { ok: false, error: "Give the video a title." };
+  const old = VIDEOS.find((x) => x.id === input.id);
+  const row = { creatorId: input.creatorId, linkId: input.linkId, title: input.title.trim(), platform: input.platform, url: input.url || null,
+    postedOn: input.postedOn || null, feeCents: input.feeCents, note: input.note || null };
+  if (old) { Object.assign(old, row); return { ok: true, data: old.id }; }
+  const id = VIDEOS.length + 1;
+  VIDEOS.unshift({ id, ...row, status: "live" });
+  return { ok: true, data: id };
+}
+export async function previewStudioVideoStatus(id: number, status: "live" | "removed"): Promise<Admin<null>> {
+  previewOnly();
+  const v = VIDEOS.find((x) => x.id === id);
+  if (!v) return { ok: false, error: "That video is gone." };
+  v.status = status;
   return { ok: true, data: null };
 }

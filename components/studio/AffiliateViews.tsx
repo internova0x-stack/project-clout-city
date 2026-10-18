@@ -5,7 +5,7 @@
 // history, and the players they brought in: admin-only, creators never see who their players are).
 
 import { useEffect, useState } from "react";
-import { HOLD_DAYS, PAYOUT_METHODS, PAYOUT_MIN_CENTS, lengthLabel, methodLabel, payoutsCsv, type AffiliatesOverview, type CreatorPage, type Owed, type PayoutMethod, type PayoutsAdmin } from "@/lib/creators";
+import { HOLD_DAYS, PAYOUT_METHODS, PAYOUT_MIN_CENTS, PLATFORMS, costPer, keptAfterSpend, lengthLabel, methodLabel, payoutsCsv, platformLabel, type AffiliatesOverview, type Creator, type CreatorPage, type CreatorVideo, type Owed, type PayoutMethod, type PayoutsAdmin, type Platform, type VideoInput, type VideosAdmin } from "@/lib/creators";
 import { share } from "@/lib/insights";
 import { recentWhen } from "@/lib/recent";
 import { formatPrice } from "@/lib/store";
@@ -412,5 +412,183 @@ function UndoPayout({ api, id, onDone, onCancel, onError }: { api: StudioApi; id
       <button className="chip" disabled={busy || !reason.trim()} onClick={() => void go()}>Undo</button>
       <button className="chip" onClick={onCancel}>Keep</button>
     </span>
+  );
+}
+
+/**
+ * The UGC engine's tracking (migration 0091): each paid video with its link, fee and post date next to what that
+ * link brought in, and each creator's spend against their results (cost per paying player, kept after everything).
+ */
+export function VideosView({ api, creators, onOpen }: { api: StudioApi; creators: Creator[]; onOpen: (id: string) => void }) {
+  const [data, setData] = useState<VideosAdmin | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0);
+  const [editing, setEditing] = useState<CreatorVideo | "new" | null>(null);
+  const [showRemoved, setShowRemoved] = useState(false);
+  useEffect(() => {
+    let stop = false;
+    void api.videos!().then((r) => { if (!stop) { if (r.ok) { setData(r.data); setError(null); } else setError(r.error); } });
+    return () => { stop = true; };
+  }, [api, nonce]);
+  if (error && !data) return <div className="studio-note error"><span className="body-strong">{error}</span></div>;
+  if (!data) return <p className="meta">Loading…</p>;
+  const done = (m: string) => { setEditing(null); setOk(m); setError(null); setNonce((x) => x + 1); };
+  const spend = data.videos.reduce((t, v) => t + v.feeCents, 0);
+  const linked = data.videos.filter((v) => v.payers !== null);
+  const vSignups = linked.reduce((t, v) => t + (v.signups ?? 0), 0);
+  const vPayers = linked.reduce((t, v) => t + (v.payers ?? 0), 0);
+  const linkedSpend = linked.reduce((t, v) => t + v.feeCents, 0);
+  const cpp = (c: number | null) => (c === null ? "–" : formatPrice(c));
+  const rows = data.videos.filter((v) => showRemoved || v.status === "live");
+  const status = async (v: CreatorVideo) => {
+    const r = await api.videoStatus!(v.id, v.status === "live" ? "removed" : "live");
+    if (!r.ok) return setError(r.error);
+    done(v.status === "live" ? `Marked "${v.title}" removed. Its spend still counts.` : `"${v.title}" is live again.`);
+  };
+  return (
+    <div className="stack-16">
+      {error && <div className="studio-note error"><span className="body-strong">{error}</span></div>}
+      {ok && <div className="studio-note ok"><span className="body-strong">{ok}</span><button className="chip" onClick={() => setOk(null)}>OK</button></div>}
+      <div className="studio-tiles aff-tiles">
+        {([
+          ["Spent on videos", money(spend), `${n(data.videos.length)} ${data.videos.length === 1 ? "video" : "videos"} logged`],
+          ["Sign-ups from video links", n(vSignups), `${cpp(costPer(linkedSpend, vSignups))} per sign-up`],
+          ["Paying players", n(vPayers), `${cpp(costPer(linkedSpend, vPayers))} per paying player`],
+          ["Kept after everything", money(data.creators.reduce((t, c) => t + keptAfterSpend(c.netCents, c.commissionCents, c.spendCents), 0)), "net revenue − commission − video fees"],
+        ] as const).map(([label, value, sub]) => (
+          <div key={label} className="studio-card studio-tile"><span className="overline">{label}</span><span className="display-lg tabular">{value}</span><span className="meta">{sub}</span></div>
+        ))}
+      </div>
+
+      {editing ? (
+        <VideoForm api={api} creators={creators} video={editing === "new" ? null : editing} onCancel={() => setEditing(null)} onSaved={done} onError={setError} />
+      ) : null}
+
+      <div className="studio-card stack-12">
+        <div className="row" style={{ justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+          <span className="overline">Videos</span>
+          <span className="row" style={{ gap: 6 }}>
+            {data.videos.some((v) => v.status === "removed") && <button className="chip" aria-pressed={showRemoved} onClick={() => setShowRemoved((x) => !x)}>Show removed</button>}
+            {!editing && creators.length > 0 && <button className="btn btn-taxi btn-sm" onClick={() => setEditing("new")}>＋ Log a video</button>}
+          </span>
+        </div>
+        {rows.length === 0 ? <p className="meta" style={{ margin: 0 }}>{creators.length ? "No videos logged yet. Log each paid video with its own link, so its results show here." : "Add a creator first."}</p> : (
+          <div className="insights-table-wrap">
+            <table className="insights-table aff-table">
+              <thead><tr>
+                <th scope="col">Posted</th><th scope="col">Video</th><th scope="col">Creator</th><th scope="col">Link</th><th scope="col">Fee</th>
+                <th scope="col">Clicks</th><th scope="col">Sign-ups</th><th scope="col">Paying</th><th scope="col">Revenue</th><th scope="col">Per paying player</th>
+                <th scope="col"><span className="sr-only">Actions</span></th>
+              </tr></thead>
+              <tbody>
+                {rows.map((v) => (
+                  <tr key={v.id} className={v.status === "removed" ? "aff-retired" : undefined}>
+                    <td>{v.postedOn ? day(v.postedOn) : "–"}</td>
+                    <td><span className="body-strong">{v.url ? <a href={v.url} target="_blank" rel="noreferrer">{v.title}</a> : v.title}</span>
+                      <span className="meta" style={{ display: "block" }}>{platformLabel(v.platform)}{v.status === "removed" ? " · removed" : ""}{v.note ? ` · ${v.note}` : ""}</span></td>
+                    <td><button className="linkish" onClick={() => onOpen(v.creatorId)}>{v.creator}</button></td>
+                    <td>{v.slug ? <code className="aff-code">/c/{v.slug}</code> : <span className="meta">code only</span>}</td>
+                    <td className="tabular">{money(v.feeCents)}</td>
+                    <td className="tabular">{v.clicks === null ? "–" : n(v.clicks)}</td>
+                    <td className="tabular">{v.signups === null ? "–" : n(v.signups)}</td>
+                    <td className="tabular">{v.payers === null ? "–" : n(v.payers)}</td>
+                    <td className="tabular">{v.revenueCents === null ? "–" : money(v.revenueCents)}</td>
+                    <td className="tabular body-strong">{v.payers === null ? "–" : cpp(costPer(v.feeCents, v.payers))}</td>
+                    <td><span className="row" style={{ gap: 4, flexWrap: "nowrap" }}>
+                      <button className="chip" onClick={() => setEditing(v)}>Edit</button>
+                      <button className="chip" onClick={() => void status(v)}>{v.status === "live" ? "Removed" : "Live again"}</button>
+                    </span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="meta" style={{ margin: 0 }}>A video&apos;s numbers come from its own link, so give every paid video a link in the Links view. Videos without one (code only) count toward their creator below.</p>
+      </div>
+
+      <div className="studio-card stack-12">
+        <span className="overline">Cost per creator · all time</span>
+        <div className="insights-table-wrap">
+          <table className="insights-table aff-table">
+            <thead><tr>
+              <th scope="col">Creator</th><th scope="col">Videos</th><th scope="col">Spent</th><th scope="col">Sign-ups</th><th scope="col">Paying</th>
+              <th scope="col">Per sign-up</th><th scope="col">Per paying player</th><th scope="col">Revenue</th><th scope="col">Commission</th><th scope="col">Kept</th>
+            </tr></thead>
+            <tbody>
+              {data.creators.map((c) => {
+                const kept = keptAfterSpend(c.netCents, c.commissionCents, c.spendCents);
+                return (
+                  <tr key={c.creatorId}>
+                    <td><button className="linkish" onClick={() => onOpen(c.creatorId)}>{c.name}</button></td>
+                    <td className="tabular">{n(c.videos)}</td>
+                    <td className="tabular">{money(c.spendCents)}</td>
+                    <td className="tabular">{n(c.signups)}</td>
+                    <td className="tabular">{n(c.payers)}</td>
+                    <td className="tabular">{cpp(costPer(c.spendCents, c.signups))}</td>
+                    <td className="tabular body-strong">{cpp(costPer(c.spendCents, c.payers))}</td>
+                    <td className="tabular">{money(c.revenueCents)}</td>
+                    <td className="tabular">{money(c.commissionCents)}</td>
+                    <td className={`tabular body-strong${kept < 0 ? " aff-neg" : ""}`}>{money(kept)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="meta" style={{ margin: 0 }}>Kept = net revenue from their players (after Stripe&apos;s fee and tax) − their commission − what we paid for their videos. Red means they cost more than they brought in so far.</p>
+      </div>
+    </div>
+  );
+}
+
+function VideoForm({ api, creators, video, onCancel, onSaved, onError }: { api: StudioApi; creators: Creator[]; video: CreatorVideo | null; onCancel: () => void; onSaved: (m: string) => void; onError: (e: string) => void }) {
+  const [f, setF] = useState<VideoInput>(() => video
+    ? { id: video.id, creatorId: video.creatorId, linkId: video.linkId, title: video.title, platform: video.platform, url: video.url ?? "", postedOn: video.postedOn ?? "", feeCents: video.feeCents, note: video.note ?? "" }
+    : { creatorId: creators[0]?.id ?? "", linkId: null, title: "", platform: "tiktok", url: "", postedOn: new Date().toISOString().slice(0, 10), feeCents: 0, note: "" });
+  const [fee, setFee] = useState(video ? (video.feeCents / 100).toFixed(2) : "");
+  const [busy, setBusy] = useState(false);
+  const set = <K extends keyof VideoInput>(k: K, v: VideoInput[K]) => setF((x) => ({ ...x, [k]: v }));
+  const links = creators.find((c) => c.id === f.creatorId)?.links ?? [];
+  const feeCents = Math.round(Number(fee || 0) * 100);
+  const save = async () => {
+    setBusy(true);
+    const r = await api.videoSave!({ ...f, feeCents });
+    setBusy(false);
+    if (!r.ok) return onError(r.error);
+    onSaved(video ? `Saved "${f.title.trim()}".` : `Logged "${f.title.trim()}".`);
+  };
+  return (
+    <div className="studio-card stack-12">
+      <span className="overline">{video ? "Edit video" : "Log a video"}</span>
+      <div className="aff-grid">
+        <label className="stack-4"><span className="overline">Creator</span>
+          <select className="studio-input" value={f.creatorId} onChange={(e) => setF((x) => ({ ...x, creatorId: e.target.value, linkId: null }))}>
+            {creators.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </label>
+        <label className="stack-4"><span className="overline">Its link</span>
+          <select className="studio-input" value={f.linkId ?? ""} onChange={(e) => set("linkId", e.target.value ? Number(e.target.value) : null)}>
+            <option value="">No link (code only)</option>
+            {links.map((l) => <option key={l.id} value={l.id}>/c/{l.slug} · {l.label}{l.status === "retired" ? " (retired)" : ""}</option>)}
+          </select>
+        </label>
+        <label className="stack-4"><span className="overline">Title</span><input className="studio-input" value={f.title} onChange={(e) => set("title", e.target.value)} maxLength={80} placeholder="Haunted Hell Gate tour" /></label>
+        <label className="stack-4"><span className="overline">Platform</span>
+          <select className="studio-input" value={f.platform} onChange={(e) => set("platform", e.target.value as Platform)}>
+            {PLATFORMS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+          </select>
+        </label>
+        <label className="stack-4"><span className="overline">Posted on</span><input className="studio-input" type="date" value={f.postedOn} onChange={(e) => set("postedOn", e.target.value)} /></label>
+        <label className="stack-4"><span className="overline">Fee we paid ($)</span><input className="studio-input" type="number" min={0} step={0.01} value={fee} onChange={(e) => setFee(e.target.value)} placeholder="150.00" /></label>
+        <label className="stack-4"><span className="overline">Video URL (optional)</span><input className="studio-input" type="url" value={f.url} onChange={(e) => set("url", e.target.value)} maxLength={300} placeholder="https://…" /></label>
+        <label className="stack-4"><span className="overline">Note (optional)</span><input className="studio-input" value={f.note} onChange={(e) => set("note", e.target.value)} maxLength={300} placeholder="Brief: a date night gone wrong" /></label>
+      </div>
+      <div className="row" style={{ gap: 8 }}>
+        <button className="btn btn-taxi btn-sm" disabled={busy || !f.title.trim() || !f.creatorId || feeCents < 0} onClick={() => void save()}>{busy ? "Saving…" : video ? "Save" : "Log video"}</button>
+        <button className="btn btn-secondary btn-sm" onClick={onCancel}>Cancel</button>
+      </div>
+    </div>
   );
 }
