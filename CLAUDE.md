@@ -84,7 +84,8 @@ components live in `app/globals.css`.
   get the questions without answers. Dorms are homes with a `campus` field: students only, never an eviction target.
   Campus areas (migration 0075) are the campus place's floors (`CAMPUS_AREAS`: Quad 1, Lecture Hall 2, Library 3,
   Dining Hall 4, Greek Row 5). Events may carry `days` (ISO weekdays, New York): `attend_event` and the task list
-  honour them (Greek Row party night: Tue, Thu, Fri, Sat).
+  honour them (Greek Row party night: Tue, Thu, Fri, Sat). Migration 0076: students' "Go to class" task (kind 'class',
+  done by `campus_attend`) and free study dates (`date_target` treats a campus as a date spot at C$0).
 - Daily tasks 2.0 (migrations 0073, 0074, spec section 19): the goal ladder is data (`GOALS.ladder`: 25 goals, each
   unlocked at a rank's clout, with a `check` the server's `goal_list` reads); five tasks = 1 gossip, 2 goal-linked (the game's suggested goal,
   `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a

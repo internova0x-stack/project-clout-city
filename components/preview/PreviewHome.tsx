@@ -99,8 +99,10 @@ export function PreviewHome({
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id, ...(campusPreset !== undefined ? { at_place: "st-johnsons" } : {}) });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
+    // v0.15 (migration 0076): students get "Go to class" in place of the random task.
+    if (campusPreset && campusPreset !== "new") s.tasks = s.tasks.map((t) => (t.slot === 5 ? { ...t, kind: "class" as const, place_id: "st-johnsons", action_id: "class", goal: null } : t));
     return { ...s, devTools };
-  }, [me, player, devTools, tasksDone]);
+  }, [me, player, devTools, tasksDone, campusPreset]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => {
     const api = createSimApi(city, () => feedRef.current, (id) => passRef.current(id));

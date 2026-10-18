@@ -71,8 +71,12 @@ export function datingError(message: string | undefined): string {
 
 /** C41: date nights happen at places with a meal, or at club events. Never exclusive events. */
 export function canDateAt(place: Place): boolean {
-  return place.actions.some((a) => a.kind === "eat");
+  // v0.15 (migration 0076): the campuses are study-date spots, free.
+  return place.actions.some((a) => a.kind === "eat") || isStudySpot(place);
 }
+
+/** v0.15 study dates: a date night on campus. */
+export const isStudySpot = (place: Pick<Place, "tags">) => place.tags.includes("campus");
 export function dateSpotName(kind: "place" | "event", target: string): string {
   if (kind === "event") return CLUB_EVENTS.find((e) => e.id === target)?.name ?? target;
   return PLACES.find((p) => p.id === target)?.name ?? target;

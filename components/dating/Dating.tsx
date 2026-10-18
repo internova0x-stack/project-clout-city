@@ -80,7 +80,7 @@ export function DateInviteCard({ date, busy, onAnswer }: { date: DateNight; busy
           <span className="overline" style={{ display: "block", color: "var(--neon-text)" }}>{date.matched ? "Date night · Matched" : "Date night"}</span>
           <span className="title" style={{ display: "block" }}>{date.with.name} wants to meet at {where}</span>
           <span className="meta" style={{ display: "block" }}>
-            {place && date.kind === "event" ? `${place.name} · ` : ""}You each pay your own way · <span className="tabular">{formatCash(date.price)}</span>
+            {place && date.kind === "event" ? `${place.name} · ` : ""}{date.price > 0 ? <>You each pay your own way · <span className="tabular">{formatCash(date.price)}</span></> : "A study date. Free, unless you count the vending machine."}
           </span>
           <span className="meta" style={{ display: "block" }}>Expires at midnight</span>
         </span>
@@ -163,7 +163,7 @@ export function DateSheet({ spot, api, onClose, onSent, onInviteFriend, onCrushI
         <div className="stack-4">
           <h2 className="display-md" style={{ margin: 0 }}>Make it a date</h2>
           <p className="subtext" style={{ margin: 0 }}>
-            {where} tonight · <span className="tabular">{formatCash(spot.price)}</span> each. Go whenever you&apos;re on; once you both have, you both get a little glow.
+            {where} tonight · {spot.price > 0 ? <><span className="tabular">{formatCash(spot.price)}</span> each</> : "free"}. Go whenever you&apos;re on; once you both have, you both get a little glow.
           </p>
         </div>
         {error && <p className="meta" role="alert" style={{ margin: 0, color: "var(--red-600, #C8323A)" }}>{error}</p>}

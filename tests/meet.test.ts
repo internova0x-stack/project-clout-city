@@ -81,3 +81,10 @@ test("crowded places: the Here now line gives the true count", () => {
   assert.equal(hereCountLine(3, 3), "3 players");
   assert.equal(hereCountLine(1, 1), "1 player");
 });
+
+test("campus icebreakers (v0.15): three different campus openers, never the club ones", () => {
+  const lines = icebreakers("St. Johnsons University", 23, 5, true);
+  assert.equal(lines.length, 3);
+  assert.equal(new Set(lines).size, 3);
+  assert.ok(lines.every((l) => !/DJ|Big night/.test(l)));
+});

@@ -71,7 +71,7 @@ export function CampusSheet({
   const lockIn = () => act("pick", () => api.pick(picks), (d) => { setS(d); setPicks([]); });
   const attend = (id: string) => act(`attend:${id}`, () => api.attend(id), (d) => {
     void load();
-    onDone(`📚 ${courseById(id)?.name}: +${d.clout} clout · +${d.confidence} Confidence${d.streak > 1 ? ` · 🔥 ${d.streak}-day streak` : ""}`);
+    onDone(`📚 ${courseById(id)?.name}: +${d.clout} clout · +${d.confidence} Confidence${d.streak > 1 ? ` · 🔥 ${d.streak}-day streak` : ""}${d.taskCash ? ` · ✅ Go to class: +C$${d.taskCash}` : ""}`);
   });
   const startExam = (id: string) => act(`exam:${id}`, () => api.exam(id), (q) => {
     setResult(null);
