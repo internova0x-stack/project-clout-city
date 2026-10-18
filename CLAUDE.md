@@ -40,7 +40,7 @@ components live in `app/globals.css`.
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
   `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer); `?crowd=50` puts 50 sample players at any place you enter; `?biz=some|rich|public` starts with businesses (rich: the whole ladder, ready to go public); `?rankup=1-10` opens that rank's rank-up reveal; `?together=invite|ride|plan|bonus|decorate|approve` starts v0.13's together plans, ride requests, the bonus card, decorating someone's home or approving a decorator; `?radio=new|sent|full|notpicked|mine` starts Real Clout FM in that state (shared with the Studio preview's Shoutouts tab); `?tv=new|sent|mine|empty` does the same for Clout TV (shared with the Big Screen tab). `?goals=new|streak|pass|tonight|chapter` starts goals and streaks (`day3|day7|day14|goaldone` open a reveal); `?campus=new|pick|week|friday|done` starts campus life (v0.15) standing at St. Johnsons (open its card's Campus life); `?hint=daily` shows Lola's daily-tasks nudge after 2 seconds. Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio.
 - `npm run validate:stories`: checks every file in `content/stories/`.
-- `npm run validate:content`: checks every hunt, news and gossip week file in `content/` (the Studio's rules).
+- `npm run validate:content`: checks every hunt, news, gossip and exam week file in `content/` (the Studio's rules).
 
 ## Rules for this codebase
 - Player data is permanent from day one: change the schema only with a new file in
@@ -85,7 +85,9 @@ components live in `app/globals.css`.
   Campus areas (migration 0075) are the campus place's floors (`CAMPUS_AREAS`: Quad 1, Lecture Hall 2, Library 3,
   Dining Hall 4, Greek Row 5). Events may carry `days` (ISO weekdays, New York): `attend_event` and the task list
   honour them (Greek Row party night: Tue, Thu, Fri, Sat). Migration 0076: students' "Go to class" task (kind 'class',
-  done by `campus_attend`) and free study dates (`date_target` treats a campus as a date spot at C$0).
+  done by `campus_attend`) and free study dates (`date_target` treats a campus as a date spot at C$0). Exam weeks
+  (migration 0077) live in `content/exams/<Monday>.json` with answers (server and scripts only, `lib/exams.ts`);
+  the game stores them with `content_import_exams`, locking a course once someone has sat it.
 - Daily tasks 2.0 (migrations 0073, 0074, spec section 19): the goal ladder is data (`GOALS.ladder`: 25 goals, each
   unlocked at a rank's clout, with a `check` the server's `goal_list` reads); five tasks = 1 gossip, 2 goal-linked (the game's suggested goal,
   `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a

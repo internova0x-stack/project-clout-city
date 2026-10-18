@@ -1,4 +1,4 @@
-// Checks every week file in content/hunts/, content/news/ and content/gossip/ with the same rules the
+// Checks every week file in content/hunts/, content/news/, content/gossip/ and content/exams/ with the same rules the
 // Studio uses (lib/hunts.ts, lib/news.ts, lib/gossip.ts), plus: each hunt week has a Monday hunt
 // announcement in its news, and no gossip story id repeats across weeks.
 // The weekly drafting routine runs this before opening its pull request (docs/WEEKLY-CONTENT.md).
@@ -7,6 +7,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { validateHunt } from "../lib/hunts.ts";
 import { validateNewsWeek } from "../lib/news.ts";
 import { validateGossipWeek } from "../lib/gossip.ts";
+import { validateExamWeek } from "../lib/exams.ts";
 
 const root = new URL("../content/", import.meta.url);
 const list = (dir: string) => readdirSync(new URL(dir, root)).filter((f) => f.endsWith(".json")).sort();
@@ -47,5 +48,13 @@ for (const f of list("gossip/")) {
   if (dup.length) { fail(`content/gossip/${f}`, dup); continue; }
   for (const s of r.week.stories) gossipIds.set(s.id, f);
   console.log(`✓ content/gossip/${f} (${r.week.stories.length} stories)`);
+}
+// v0.15 campus exams: five questions per course, a week per file.
+for (const f of list("exams/")) {
+  const raw = JSON.parse(readFileSync(new URL(`exams/${f}`, root), "utf8"));
+  const r = validateExamWeek(raw);
+  if (!r.ok) { fail(`content/exams/${f}`, r.problems); continue; }
+  if (f !== `${raw.week}.json`) { fail(`content/exams/${f}`, [`name the file after its week: ${raw.week}.json`]); continue; }
+  console.log(`✓ content/exams/${f} (${r.rows.length} questions)`);
 }
 if (failed) process.exit(1);

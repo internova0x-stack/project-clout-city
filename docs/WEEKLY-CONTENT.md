@@ -1,7 +1,7 @@
 # Weekly content: the drafting routine
 
-Every week needs a treasure hunt, a week of City News and a week of neighborhood gossip
-(docs/08-new-features-spec.md sections 1, 3 and 8). Claude doesn't run on its own inside the game: a
+Every week needs a treasure hunt, a week of City News, a week of neighborhood gossip and, since v0.15, the
+campus exam questions (docs/08-new-features-spec.md sections 1, 3, 8 and 18). Claude doesn't run on its own inside the game: a
 **scheduled Claude Code session** (a Routine) drafts the next week and opens a pull request. You
 approve the hunt and news in the Studio. **Gossip is automatic** (owner, Oct 13): once its file is
 merged it goes live on its Monday by itself; the Studio's **Gossip** tab shows it in full, and you
@@ -22,6 +22,7 @@ can Pause it or Hold it with a note.
 | Thursday to Saturday | You | Read the pull request (its description lists the theme, the eight treasures and every headline). Ask for changes in a comment or edit the files, then merge |
 | After the deploy | You | Studio → **Calendar**: press **Load** on the week's hunt and news. Then **Hunts**: skim the eight tracks, read one in full, Approve (or Send back with a note). **News**: Approve all |
 | After the deploy | The game | Stores the gossip week by itself (within 10 minutes of the next visit). Nothing to approve: read it in the Studio's **Gossip** tab if you like, and Pause or Hold it if something's off |
+| After the deploy | The game | Stores the exam week by itself (migration 0077, `lib/contentImport.ts`). A course's questions can be changed until the first student sits that exam; after that the week's set is locked. Without a week file, exams use the standing question bank |
 | Monday 00:00 | The game | The hunt starts, the news publishes day by day, and the week's gossip stories become findable for 14 days |
 
 If a week is missing on Friday, the Calendar shows "⚠️ No hunt yet" for this week and next.
@@ -41,8 +42,8 @@ Draft next week's Clout City content (repository internova0x-stack/project-clout
 it isn't in your working directory). Work from the main branch.
 
 1. Find the week: the Monday after today, New York time (YYYY-MM-DD). If content/hunts/<Monday>.json,
-   content/news/<Monday>.json and content/gossip/<Monday>.json all exist on main already, stop and
-   say so (write only the missing ones otherwise).
+   content/news/<Monday>.json, content/gossip/<Monday>.json and content/exams/<Monday>.json all exist on
+   main already, stop and say so (write only the missing ones otherwise).
 2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
    4 and 8), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they
    stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
@@ -76,11 +77,16 @@ it isn't in your working directory). Work from the main branch.
    Low Light Lounge (any place with a restroom floor), the juiciest line in the story; it's only
    heard downstairs and pays extra clout. Never put a piece at Ultraviolet Society (its door needs
    2,000 clout).
-6. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
-7. Commit only those three files on a new branch content/week-<Monday>, push it, and open a pull
+6. Write content/exams/<Monday>.json (v0.15 campus life, lib/exams.ts): five multiple-choice questions for
+   every course in lib/campus.ts COURSES, each a satirical joke about that course's subject (campus life,
+   napping, the subway, group projects, money, clout), answerable by common sense, with exactly one right
+   answer, 2 to 5 short choices, and the right answer moved around (not always the second choice). No real
+   people, schools, brands or politics; nothing mean about any group. Don't reuse last week's prompts.
+7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
+8. Commit only those four files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news
-   headline by day, and each gossip story's title and Tea headline. End with: "Merge, then load the
+   headline by day, each gossip story's title and Tea headline, and one sample exam question per course. End with: "Merge, then load the
    hunt and news in the Studio Calendar and approve them by Sunday. The gossip goes live by itself."
    Don't change any code, and don't merge.
 ```
