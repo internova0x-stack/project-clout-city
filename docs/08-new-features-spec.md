@@ -585,7 +585,48 @@ arguments** of any kind (no roast battles, no feuds between players; conflict st
 - How many weeks to "graduate", and what alumni get.
 - Who writes the weekly exam questions (Studio weekly routine).
 
-## 19. Later features
+## 19. Daily tasks 2.0: goals, streaks and guest-list passes (proposed; owner, Oct 18)
+
+**Why:** daily tasks should push players to explore different activities and give them a reason to make progress
+every day. Today the five tasks are random and pay flat cash (C$25 to C$50 each plus C$100 for all five), the Goals
+tab has no rewards and no link to tasks, and missing a day costs nothing.
+
+**Owner decisions (Oct 18):** goal progress is **framing only** (no savings jar: cash stays cash); the **game
+suggests** the next goal; **add streaks**; guest-list passes cover clout-locked venues **and VIP floors**.
+
+### The active goal (suggested by the game)
+- One active goal at a time, the first unfinished one on this ladder: first purchase → first gig payout → move into a
+  better apartment (the next home up) → pro gigs (500 clout, 50 Confidence) → first car (the cheapest car) → big gigs
+  (2,000 clout, 80 Confidence) → own a home.
+- Shown at the top of the Tasks sheet with a progress bar in the goal's own terms ("C$1,240 of C$14,000",
+  "380 of 500 clout"), and what's still missing. Finishing it pays a one-time clout reward and Lola suggests the next.
+- **Goal-linked tasks:** some of the day's tasks are picked to move the goal forward (a car: the dealership and a
+  shift; pro gigs: the gym, a class or a club for Confidence and clout). Their reward line reads as progress
+  ("+C$40 toward your car"). The money is ordinary cash.
+
+### Streaks
+- A streak counts New York days with **all five tasks done**. One missed day a week is forgiven automatically (a
+  freeze); a second missed day resets it.
+- Streak rewards are clout, items and passes, never extra cash (rent must stay a decision):
+  - Day 3: +50 clout.
+  - Day 7: a **task-only collectible**, a piece the Shop never sells (a neon "5/5" sign, a trophy shelf, a framed
+    "Employee of the Month"). It lands in the Collection and can be placed at home.
+  - Day 14: a **guest-list pass**.
+  - Then every 7 days, alternating a collectible and a pass.
+- The streak shows as a flame and a number on the Tasks sheet and the HUD task ring.
+
+### Guest-list passes
+- One night (until midnight New York) inside one place you can't get into yet: a club above your door clout or a VIP
+  floor above your free-entry clout. The player picks the place when they use the pass.
+- One pass held at a time; unused passes don't expire until used. They never open a locked borough (Brooklyn's lock
+  is about player numbers, not clout) and never pay out cash.
+- The server's door and VIP checks accept a pass that is active tonight for that place.
+
+### Open question
+- **The daily mix.** Five tasks today: up to 2 gossip (owner, Oct 14), 1 skill, the rest random. Adding 2 goal-linked
+  tasks leaves no random ones. Proposal: 2 goal, 1 gossip, 1 skill, 1 random; or six tasks a day.
+
+## 20. Later features
 
 Not part of P1; don't build yet. Each needs more players or more art before it's worth building.
 
