@@ -88,6 +88,7 @@ export async function previewStudioGoLive(id: string) {
   if (r.arc.type !== "main") return fail("Side stories run with their main story; schedule the main story.");
   if (isLive(r)) return fail("That story is live. Pause or retire it instead of changing it mid-run.");
   Object.assign(r, { review: "approved", reviewedAt: r.reviewedAt ?? new Date().toISOString(), status: "active", startAt: nyToday() });
+  for (const x of store()) if (x.arc.parent_arc_id === id && x.review === "draft") Object.assign(x, { review: "approved", reviewedAt: new Date().toISOString() });
   return list("Live. Today is Day 1: players see it on their next refresh.");
 }
 export async function previewStudioStatus(id: string, status: Status) {

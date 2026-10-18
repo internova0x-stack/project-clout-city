@@ -1,4 +1,4 @@
--- Scenario test for migration 0080 (Go live now, and no "back to review" for a live story).
+-- Scenario test for migrations 0080 and 0081 (Go live now, its side stories, and no "back to review" for a live story).
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
@@ -21,6 +21,9 @@ select public.admin_story_upsert(jsonb_build_object('id', 'golive-a', 'title', '
                              jsonb_build_object('id', 'ga-2', 'day', 2, 'news', jsonb_build_array(jsonb_build_object('headline', 'Day two')), 'effects', '[]'::jsonb))));
 select public.admin_story_upsert(jsonb_build_object('id', 'golive-side', 'title', 'S', 'type', 'side', 'tier', 'free', 'parent_arc_id', 'golive-a', 'status', 'active',
   'beats', jsonb_build_array(jsonb_build_object('id', 'gs-1', 'day', 1, 'news', jsonb_build_array(jsonb_build_object('headline', 'Side')), 'effects', '[]'::jsonb))));
+select public.admin_story_upsert(jsonb_build_object('id', 'golive-declined', 'title', 'D', 'type', 'side', 'tier', 'free', 'parent_arc_id', 'golive-a', 'status', 'active',
+  'beats', jsonb_build_array(jsonb_build_object('id', 'gd-1', 'day', 1, 'news', jsonb_build_array(jsonb_build_object('headline', 'No')), 'effects', '[]'::jsonb))));
+select public.admin_story_review('golive-declined', 'declined', 'not this one');
 select pg_temp.assert(pg_temp.raises($$select public.admin_story_go_live('golive-side')$$, 'side_arcs_follow_parent'), 'sides follow their main');
 
 -- Go live now: approved, today is Day 1, on any weekday; players see Day 1.
@@ -28,10 +31,9 @@ select public.admin_story_go_live('golive-a');
 select pg_temp.assert((select x ->> 'review' = 'approved' and (x ->> 'day')::int = 1 and x ->> 'startAt' = public.ny_today()::text
                          from jsonb_array_elements(public.admin_story_list()) x where x ->> 'id' = 'golive-a'), 'live today');
 select pg_temp.assert(pg_temp.raises($$select public.admin_story_go_live('golive-a')$$, 'arc_is_live'), 'once');
--- Its side story runs with it once approved.
-select pg_temp.assert((select x ->> 'day' is null from jsonb_array_elements(public.admin_story_list()) x where x ->> 'id' = 'golive-side'), 'side waits for approval');
-select public.admin_story_review('golive-side', 'approved');
+-- Its side story waiting for review goes live with it (0081); a declined one stays off.
 select pg_temp.assert((select (x ->> 'day')::int = 1 from jsonb_array_elements(public.admin_story_list()) x where x ->> 'id' = 'golive-side'), 'side runs with its main');
+select pg_temp.assert((select x ->> 'day' is null from jsonb_array_elements(public.admin_story_list()) x where x ->> 'id' = 'golive-declined'), 'declined side stays off');
 
 -- A live story can't go back to review or be declined (that used to clear Day 1 mid-run).
 select pg_temp.assert(pg_temp.raises($$select public.admin_story_review('golive-a', 'draft')$$, 'arc_is_live'), 'no back to review when live');

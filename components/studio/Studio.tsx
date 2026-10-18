@@ -182,7 +182,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           <StoryBuilder key={builder.initial.id || "new"} initial={builder.initial} isNew={builder.isNew} arcs={arcs} api={api} busy={busy} checksHost={checksHost}
             onSave={saveBuilt} onClose={() => setBuilder(null)} />
         ) : arc ? (
-          <ArcDetail key={arc.id} arc={arc} parent={arcs.find((a) => a.id === arc.parent) ?? null} api={api} busy={busy} apply={apply} onOpenBuilder={() => openBuilder(arc.id)} />
+          <ArcDetail key={arc.id} arc={arc} parent={arcs.find((a) => a.id === arc.parent) ?? null} sides={sidesOf(arc.id)} api={api} busy={busy} apply={apply} onOpenBuilder={() => openBuilder(arc.id)} />
         ) : (
           <section className="studio-card"><p className="subtext">Pick a story.</p></section>
         )}
@@ -254,8 +254,8 @@ function Upload({ busy, onUpload }: { busy: string | null; onUpload: (json: stri
   );
 }
 
-function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
-  arc: StudioArc; parent: StudioArc | null; api: StudioApi; busy: string | null;
+function ArcDetail({ arc, parent, sides = [], api, busy, apply, onOpenBuilder }: {
+  arc: StudioArc; parent: StudioArc | null; sides?: StudioArc[]; api: StudioApi; busy: string | null;
   apply: (key: string, call: () => Promise<StudioResult>) => Promise<void>; onOpenBuilder: () => void;
 }) {
   const [reviewNote, setReviewNote] = useState(arc.reviewNote ?? "");
@@ -282,6 +282,7 @@ function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
   }, [openBeat, full, api, arc.id]);
   const toggleBeat = (id: string) => setOpenBeat((o) => (o === id ? null : id));
   const [confirmLive, setConfirmLive] = useState(false);
+  const sidesWaiting = sides.filter((x) => x.review === "draft").length;
 
   return (
     <section className="stack-16">
@@ -305,7 +306,7 @@ function ArcDetail({ arc, parent, api, busy, apply, onOpenBuilder }: {
         <div className="studio-card studio-golive stack-8">
           <span className="overline">Go live now</span>
           <span className="subtext">
-            Approves it{arc.status === "paused" ? ", resumes it" : ""} and makes today, {fmtDate(today)}, Day 1. Players see Day 1 on their next refresh;
+            Approves it{sidesWaiting ? ` and its ${sidesWaiting} side ${sidesWaiting === 1 ? "story" : "stories"} waiting for review` : ""}{arc.status === "paused" ? ", resumes it" : ""} and makes today, {fmtDate(today)}, Day 1. Players see Day 1 on their next refresh;
             Day 2 goes out at midnight New York time.
             {weekdayOf(today) !== weekday ? ` It's written to start on a ${weekday}; today is a ${weekdayOf(today)}.` : ""}
           </span>

@@ -43,7 +43,8 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    **● Live**, **Paused**, **Finished** or **Retired**.
    **Go live now** (main stories) does both steps in one press: it approves the story and makes today
    (New York) Day 1, on any weekday, after a confirm. Players see Day 1 on their next refresh; Day 2 goes
-   out at midnight. Its side stories run with it once they're approved.
+   out at midnight. Its side stories waiting for review go live with it (migration 0081); a declined one stays
+   off. If you went live before 0081, approve each side story and it joins at once.
 6. **Run it.** While it's live you can:
    - **Pause** the whole story: players stop seeing it and every effect on the city lifts until you
      resume. The calendar keeps counting, so it resumes on the day it would have been.
