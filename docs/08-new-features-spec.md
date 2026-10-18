@@ -691,6 +691,12 @@ quiet hours **10 PM to 9 AM** (the player's local time), **win-back pushes in**.
   exams open (Friday) and their last day (Sunday, with an exam left), and party tickets starting within the hour. A
   trigger can never break the action it watches. Not yet: "your date is now", "the crew is there", party night and
   a guest pass tonight (they need a time of day the game doesn't store yet).
+- **Step 3 (migration 0083).** P2 from the ledger (goal, streak, skill, jackpot and pot wins, scholarship) and a new
+  best rank; on air and on the Big Screen when they actually air (`push_scan_rewards`). Rewards earned while playing
+  are dropped by the sender (the player saw them); the ones that land while away go out. P3 (`push_roundup`, 8 AM to
+  8 PM New York) only for players who haven't opened the game today: five new tasks, a new hunt and fresh gossip on
+  Mondays, today's story beat, a borough opening, and win-back at 3, 7 and 14 days away. The sender folds every P3
+  into one "☀️ Your Clout City morning" push.
 
 ## 21. Later features
 
