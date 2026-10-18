@@ -977,6 +977,15 @@ export function GameShell({
     setUnlocking(back.sku);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Back from Stripe's billing portal (Membership & purchases): reopen the screen with the fresh plan.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("membership") !== "back" || !membership) return;
+    url.searchParams.delete("membership");
+    window.history.replaceState(null, "", url.toString());
+    setMemberOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     if (!unlocking || !storeApi) return;
     const started = Date.now();
@@ -2354,7 +2363,7 @@ export function GameShell({
       )}
       <PhoneModal
         push={push}
-        membership={membership && storeApi ? { vip: memberVip, onOpen: openMembership } : undefined}
+        membership={membership && member ? { vip: memberVip, onOpen: openMembership } : undefined}
         // The app shows whenever the station is on; if today's show can't load, the app says why.
         radio={radio}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
@@ -2576,7 +2585,7 @@ export function GameShell({
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
-        vip={membership && storeApi ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership } : undefined}
+        vip={membership && member ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership } : undefined}
       />
     </main>
   );

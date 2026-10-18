@@ -195,6 +195,27 @@ it's open and visible (a gap over 5 minutes starts a new session), so it starts 
 runs. Monthly and yearly VIP renewals count once the webhook gets `invoice.paid` (step 3); the first
 payment of each membership already counts as a purchase.
 
+**Membership & purchases** (migration 0079, owner Oct 18). Run `supabase/migrations/0079_membership.sql`.
+Phone → Settings (top row) and the profile (the 👑 line under the name) open a screen with the player's VIP
+plan, its renewal date, chat forever and every real-money purchase. **Manage billing** opens Stripe's billing
+portal. Set the portal up once in Stripe (**Settings → Billing → Customer portal**, in test mode and again in
+live mode):
+- **Cancellations**: on, **At end of billing period** (VIP runs to the end of what the player paid for; the
+  webhook ends it when Stripe does). Turn on the cancellation reason survey if you like.
+- **Subscriptions → Customers can switch plans**: on. Switching needs real Prices: in **Product catalog**, create
+  one product "Clout City VIP" with a $4.99 monthly and a $39.99 yearly recurring price, put each `price_…` id in
+  `store_products.stripe_price_id` for `chat-unlimited-monthly` and `chat-unlimited-yearly` (step 12), and add
+  that product here. Memberships bought before that (on Checkout's one-off prices) may not offer the switch.
+  Proration: your call (Stripe's default prorates).
+- **Payment methods**: customers can update them. **Invoice history**: on.
+- **Business information**: your terms and privacy links (`/terms`, `/privacy`) and a support email.
+- **Default redirect link**: leave empty (the game sends players back to `/home?membership=back`).
+The webhook saves each buyer's Stripe customer from now on (nothing new to add to the endpoint's events), and
+one-off purchases now create a customer too. Buyers from before 0079 are found once, from their subscription or
+checkout. Test: buy VIP monthly with `4242 4242 4242 4242`, open Settings → **Membership & purchases** →
+**Manage billing**, cancel: back in the game it says "Cancelled · you're VIP until …" and VIP stays on until
+then. **Renew** in the portal turns it back.
+
 ## 2c. Clout TV photo storage (v0.14, migration 0058)
 
 Migration 0058 tries to create the private `big-screen` storage bucket and its three policies itself. If the

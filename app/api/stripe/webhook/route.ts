@@ -67,6 +67,11 @@ export async function POST(request: NextRequest) {
   if (!call) return NextResponse.json({ received: true, ignored: event.type });
 
   const { data, error } = await db.rpc(call.fn, call.args);
+  // Membership & purchases (migration 0079): remember the buyer's Stripe customer for the billing portal.
+  if (!error && call.fn === "payment_grant" && typeof o.customer === "string" && call.args.p_player) {
+    const saved = await db.rpc("payment_customer", { p_player: call.args.p_player, p_customer: o.customer });
+    if (saved.error) console.error(`stripe ${event.id} customer not saved`, saved.error);
+  }
   if (error) {
     // A 500 makes Stripe retry later; the event id keeps the retry from doubling anything.
     console.error(`stripe ${event.type} ${event.id} failed`, error);

@@ -17,6 +17,7 @@ import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
+import { membershipPortal, membershipState } from "./membershipActions";
 import {
   chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
 } from "./chatActions";
@@ -101,6 +102,7 @@ export default async function HomePage() {
       } : undefined}
       catalog={catalog}
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
+      membership={catalog ? { state: membershipState, portal: membershipPortal } : undefined}
       // Migration 0047 (owner, Oct 15: two players in the same café couldn't see each other, because
       // presence, place counts, reactions and the message setting were never passed in here).
       chat={chatOn ? {
