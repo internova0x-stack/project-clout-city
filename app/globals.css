@@ -401,8 +401,8 @@ a { color:inherit; }
 .modal-light { background:var(--surface-sheet); color:var(--text-1); border-radius:var(--r-xl); padding:24px 20px 16px; box-shadow:var(--elev-4); animation:reveal-rise .32s ease-out; }
 .stat-fill.good { background:var(--green-500); } .stat-fill.mid { background:var(--taxi-400); } .stat-fill.low { background:var(--red-500); }
 .segmented { display:flex; height:44px; padding:4px; border-radius:14px; background:var(--chip-off); }
-.segmented button { flex:1; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out; }
-.segmented button[aria-pressed="true"] { background:#fff; color:var(--text-1); box-shadow:var(--elev-1); }
+.segmented button { flex:1; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out, color .2s ease-out; }
+.segmented button[aria-pressed="true"] { background:var(--night-900); color:#fff; }  /* Owner, Oct 19: the active tab is black, like done tasks. */
 .lb-sheet { display:flex; flex-direction:column; gap:20px; padding-bottom:12px; }
 .lb-summary { display:flex; flex-direction:column; gap:4px; }
 .lb-list { display:flex; flex-direction:column; padding:6px; }
