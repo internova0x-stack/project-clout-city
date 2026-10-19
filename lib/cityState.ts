@@ -6,7 +6,7 @@
 
 import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
 import { leadAction } from "./gossip.ts";
-import { SKILLS, type SkillId } from "./skills.ts";
+import { PERK_ERRORS, SKILLS, type SkillId } from "./skills.ts";
 import { ECONOMY } from "./economy.ts";
 import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
 
@@ -109,6 +109,8 @@ export interface CityState {
   restToday?: { nap: number; sit: number };
   /** v0.10 Lucky Star Lotto (migration 0032): today's cards and the week's jackpot. Missing until 0032 runs. */
   lotto?: LottoState;
+  /** Skill perks (migration 0092): levels, this week's skill gigs and accepted invites. Missing until 0092 runs. */
+  perks?: import("./skills.ts").PerksState;
 }
 
 /** What changed after an action, for the reward toast. */
@@ -122,7 +124,7 @@ export interface Gain {
 }
 
 /** #19 clubs (migration 0046): the VIP door. `needsCover`: what it costs today (nothing paid yet). */
-export interface VipEntry { access?: "free" | "paid" | "pass"; needsCover?: number }
+export interface VipEntry { access?: "free" | "paid" | "pass" | "skill"; needsCover?: number }
 
 export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard; vip?: VipEntry } | { ok: false; error: string };
 
@@ -165,6 +167,10 @@ export interface CityApi {
   moveHome?(homeId: string): Promise<CityResult>;
   /** v0.5: an exclusive event the player has a ticket for (Mood and Confidence; clout came with the ticket). */
   attendExclusiveEvent?(eventId: string): Promise<CityResult>;
+  /** Skill perks (migration 0092): take a skill gig (once a week), collect it, or accept an invite (once). */
+  takeSkillGig?(perkId: string): Promise<CityResult>;
+  collectSkillGig?(perkId: string): Promise<CityResult>;
+  acceptSkillInvite?(perkId: string): Promise<CityResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -274,6 +280,7 @@ export function cityError(message: string | undefined): string {
   if (story) return story[1].trim();
   const lotto = lottoError(message);
   if (lotto) return lotto;
+  if (message) for (const code of ["unknown_perk", "skill_locked", "gig_done_week"]) if (message.includes(code)) return PERK_ERRORS[code];
   if (message) for (const code of Object.keys(ERRORS)) if (message.includes(code)) return ERRORS[code];
   return "The city glitched. Try again.";
 }

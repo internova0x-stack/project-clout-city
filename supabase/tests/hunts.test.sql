@@ -99,7 +99,7 @@ select 1 from pg_temp.act('hell-gate-park', 'hangout');
 select 1 from pg_temp.talk('hell-gate-park');
 reset role;
 insert into public.hunt_cards (player_id, hunt_id, week, theme, treasure, emoji, lore)
-select '00000000-0000-0000-0000-000000000082', 'old-' || i, current_date - 7 * i, 'Old', 'Old thing', '📦', 'An older treasure.' from generate_series(1, 3) i;
+select '00000000-0000-0000-0000-000000000082', 'old-' || i, date_trunc('week', public.ny_today())::date - 7 * i, 'Old', 'Old thing', '📦', 'An older treasure.' from generate_series(1, 3) i;
 set role authenticated;
 create temp table fin as select public.hunt_answer(0) r;
 select pg_temp.assert((select r -> 'reward' = jsonb_build_object('cash', 1080, 'clout', 250, 'badge', true) from fin), 'finale pays cash, clout and the badge');

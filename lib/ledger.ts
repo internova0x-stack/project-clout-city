@@ -1,5 +1,6 @@
 import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById } from "./city.ts";
 import { lottoGame } from "./lotto.ts";
+import { SKILL_PERKS } from "./skills.ts";
 
 /**
  * The Bank's history (v0.7, #29): each cash row says where and what. Rows come from
@@ -36,6 +37,11 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     case "hangout": return { emoji: "🌳", title: place?.name ?? "Hangout", detail: actionLabel("hangout") };
     case "shift": return { emoji: "💼", title: place?.name ?? "Shift pay", detail: place ? `Shift pay · ${actionLabel("shift") ?? "a shift"}` : null };
     case "gig": return { emoji: "💼", title: "Gig payout", detail: e.gig ?? null };
+    // ref: perk:week (migration 0092).
+    case "skill_gig": {
+      const perk = SKILL_PERKS.find((x) => x.id === first);
+      return { emoji: perk?.emoji ?? "💼", title: "Skill gig", detail: perk?.name ?? null };
+    }
     case "event_entry": {
       const ev = CLUB_EVENTS.find((x) => x.id === first);
       return { emoji: "🎟️", title: ev?.name ?? "Club event", detail: ev ? placeById(ev.placeId)?.name ?? null : null };

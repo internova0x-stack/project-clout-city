@@ -498,6 +498,7 @@ a { color:inherit; }
 .meta.reason { color:var(--red-text); display:block; }
 .clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .tag-pro { background:var(--taxi-tint); color:#7A5600; }
+.tag-skill { background:rgba(47,123,234,.12); color:var(--tag-blue); }
 
 /* Effect chips (C37) */
 .fx-row { display:flex; flex-wrap:wrap; gap:6px 8px; margin-top:8px; }
@@ -857,6 +858,15 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .card-skill b { color:var(--tag-blue); margin-left:2px; }
 .skill-how { font-size:12.5px; color:var(--text-3); }
 .skill-rust { color:#3E7CB1; font-weight:600; }
+.skill-perks { list-style:none; margin:2px 0 0; padding:8px 0 0; border-top:1px solid rgba(47,123,234,.12); display:flex; flex-direction:column; gap:8px; }
+.skill-perks li { display:grid; grid-template-columns:38px 20px minmax(0, 1fr) auto; align-items:center; gap:6px; font-size:13px; color:var(--text-3); }
+.skill-perks li.open { color:var(--text-1); }
+.skill-perk-lv { font-size:11px; font-weight:700; text-align:center; padding:2px 0; border-radius:var(--r-pill); background:rgba(47,123,234,.1); color:var(--tag-blue); }
+.skill-perks li.open .skill-perk-lv { background:var(--tag-blue); color:#fff; }
+.skill-perk-name { display:flex; flex-direction:column; line-height:1.25; font-weight:600; min-width:0; }
+.skill-perk-name small { font-size:11.5px; font-weight:500; color:var(--text-3); }
+.skill-perk-state { font-size:11.5px; font-weight:700; color:var(--text-3); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.btn-xs { height:32px; width:auto; padding:0 12px; border-radius:var(--r-sm); font-size:13px; flex:none; white-space:nowrap; }
 /* Skill daily task (migration 0063) */
 .task-skill { display:flex; flex-direction:column; gap:5px; margin-top:8px; }
 .task-skill-head { display:flex; justify-content:space-between; gap:8px; font-size:12.5px; font-weight:600; color:var(--tag-blue); font-variant-numeric:tabular-nums; }

@@ -899,3 +899,32 @@ Not part of P1; don't build yet. Each needs more players or more art before it's
 - **Places list:** the Hub first, Clout Tower and Real Clout FM 4th and 5th, the rest nearest first. Every
   place with real players there now shows "N players here" (`place_counts`: players seen there in the last
   few minutes, never NPCs, not you, not banned or blocked players).
+
+## 22. Skill perks: skills open doors (owner, Oct 19; migration 0092)
+
+The owner: "If you are very skilled at cooking, you can get a gig to come cook somewhere that pays a lot. If you have a
+lot of charisma, you can be invited for an award show. If you can really dance, you get invited to the VIP of the
+club", and it is told on the Skills screen.
+
+- **What opens:** every skill has three perks, at levels 3, 6 and 9 (`SKILL_PERKS` in lib/skills.ts; the rules are
+  copied into game_settings 'skill_perks' and a test keeps them equal). A perk is one of:
+  - **Gig:** paid work for that skill. Once a week each (week = Monday, New York), takes Energy (25, 50, 75) and time
+    (1, 2, 4 hours) like a board gig, and only one gig runs at a time, board or skill. Pays C$ on collect; level-9 gigs
+    add 100 clout. Examples: private chef on an Astoria rooftop (Cooking 6, C$600), a celebrity's dinner party
+    (Cooking 9, C$2,000), headline the park festival stage (Music 9, C$2,000).
+  - **Invite:** accepted once (RSVP), pays clout (50, 150, 500); level-9 invites add a badge. Charisma 9 is the
+    Cloutie Awards, presenting ("Cloutie Presenter"); Smarts 9 speaks at Big Ideas Night; Hustle 9 the investor
+    dinner; Gossip 9 an off-the-record brunch.
+  - **Access:** Dance 3 gets you past every club door, whatever your clout (the bouncer saw you dance). Dance 9 opens
+    every club's VIP floor for free (`vip_access` answers 'skill'). Both last while you hold the level.
+- **Level now, not best:** every check uses the skill's level with rust (`skill_now`), so a rusty skill closes its
+  higher perks until it is trained back. Gigs and invites already done stay done.
+- **Where players see it:** the profile's Skills tab lists each skill's three perks under its bar (Lv chip, then ✓
+  when open) with the button: Take it, a countdown, Collect, Done this week, RSVP, You went or On. The Gigs app adds
+  "From your skills" under the day's offers, with the next perk to unlock. A club's card says when your dancing gets
+  you in or upstairs. Skill gig pay shows in the Bank as "Skill gig".
+- **Server:** `skill_perks_state()`, `skill_gig_take(perk)`, `skill_gig_collect(perk)`, `skill_invite_accept(perk)`
+  (ledger cash/clout 'skill_gig' ref perk:week, clout 'skill_invite' ref perk); `accept_gig` also waits for a running
+  skill gig. Collecting a skill gig counts as practice for its skill.
+- **Not built:** push notifications for newly opened perks, and perks for other players to see on your card.
+

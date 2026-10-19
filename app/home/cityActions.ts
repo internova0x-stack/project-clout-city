@@ -47,6 +47,16 @@ export async function acceptGig(offerId: number) {
 export async function collectGig(offerId: number) {
   return run("collect_gig", { p_offer: offerId }, (d) => ({ cash: Number(d) }));
 }
+// Skill perks (migration 0092).
+export async function takeSkillGig(perkId: string) {
+  return run("skill_gig_take", { p_perk: perkId });
+}
+export async function collectSkillGig(perkId: string) {
+  return run("skill_gig_collect", { p_perk: perkId }, (d) => ({ cash: Number(d) }));
+}
+export async function acceptSkillInvite(perkId: string) {
+  return run("skill_invite_accept", { p_perk: perkId }, (d) => ({ clout: Number(d) }));
+}
 export async function buyItem(sku: string, mode: "buy" | "rent") {
   return run("buy_item", { p_sku: sku, p_mode: mode }, asGain);
 }
