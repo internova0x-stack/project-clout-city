@@ -3,6 +3,8 @@
 import { MAX_LEVEL, RUST_LINE, SKILLS, levelProgress, perkReward, perkStatus, perksFor, type PerksState, type SkillPerk, type SkillState } from "@/lib/skills";
 import { formatCash } from "@/lib/economy";
 import { formatCountdown, useGameNow } from "../city/Common";
+import { ChevronDownIcon } from "../icons";
+import { useState } from "react";
 
 /** Skill perks (migration 0092): what the Skills tab and the Gigs app need to act on a perk. */
 export interface PerkHandlers {
@@ -19,6 +21,9 @@ export interface PerkHandlers {
 export function SkillsList({ skills, perks }: { skills: SkillState[]; perks?: PerkHandlers }) {
   const byId = new Map(skills.map((s) => [s.id, s]));
   const now = useGameNow(perks?.clockOffsetSeconds ?? 0);
+  // Owner, Oct 19: each card folds; only the first starts open.
+  const [open, setOpen] = useState<Set<string>>(() => new Set([SKILLS[0].id]));
+  const toggle = (id: string) => setOpen((o) => { const n = new Set(o); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   return (
     <div className="stack-12">
       <p className="meta skills-intro" style={{ margin: 0 }}>
@@ -31,12 +36,17 @@ export function SkillsList({ skills, perks }: { skills: SkillState[]; perks?: Pe
           const part = s.level < MAX_LEVEL && !s.rusty ? levelProgress(s.practice) : 0;
           // Without migration 0092 the perks still show, unlocked by the level the profile knows.
           const state: PerksState = perks?.state ?? { levels: Object.fromEntries(skills.map((x) => [x.id, x.level])) as PerksState["levels"], gigs: [], invites: [] };
+          const isOpen = open.has(def.id);
+          const unlocked = perksFor(def.id).filter((p) => perkStatus(p, state, now) !== "locked").length;
+          const ready = !!perks && perksFor(def.id).some((p) => ["take", "collect", "rsvp"].includes(perkStatus(p, state, now)));
+          const rust = s.rusty && s.best > s.level && <b className="skill-rust"> · 🧊 Rusty (best {s.best})</b>;
           return (
-            <div key={def.id} className="skill-row">
-              <div className="skill-head">
+            <div key={def.id} className={`skill-row${isOpen ? " open" : ""}`}>
+              <button className="skill-head" aria-expanded={isOpen} aria-controls={`skill-${def.id}`} onClick={() => toggle(def.id)}>
                 <span className="skill-name"><span aria-hidden="true">{def.emoji}</span> {def.name}</span>
                 <span className="skill-level">Level {s.level}</span>
-              </div>
+                <ChevronDownIcon size={18} className="skill-chev" />
+              </button>
               <div className="skill-bar" role="meter" aria-label={`${def.name} level`} aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={s.level}>
                 {Array.from({ length: MAX_LEVEL }, (_, i) => (
                   <span key={i} className={i < s.level ? "on" : i < s.best ? "best" : ""}>
@@ -44,15 +54,24 @@ export function SkillsList({ skills, perks }: { skills: SkillState[]; perks?: Pe
                   </span>
                 ))}
               </div>
-              <span className="skill-how">
-                {def.how}
-                {s.rusty && s.best > s.level && <b className="skill-rust"> · 🧊 Rusty (best {s.best})</b>}
-              </span>
-              <ul className="skill-perks" aria-label={`What ${def.name} gets you`}>
-                {perksFor(def.id).map((p) => (
-                  <PerkRow key={p.id} perk={p} state={state} now={now} handlers={perks} />
-                ))}
-              </ul>
+              {isOpen ? (
+                <div id={`skill-${def.id}`} className="stack-8">
+                  <span className="skill-how">
+                    {def.how}
+                    {rust}
+                  </span>
+                  <ul className="skill-perks" aria-label={`What ${def.name} gets you`}>
+                    {perksFor(def.id).map((p) => (
+                      <PerkRow key={p.id} perk={p} state={state} now={now} handlers={perks} />
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <span className="skill-how">
+                  {unlocked} of 3 perks open{ready ? " · one's waiting for you" : ""}
+                  {rust}
+                </span>
+              )}
             </div>
           );
         })}

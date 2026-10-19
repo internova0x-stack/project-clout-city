@@ -845,7 +845,10 @@ textarea.chat-input { height:auto; border-radius:16px; padding:10px 14px; resize
 .skills-grid { display:grid; grid-template-columns:1fr; gap:10px; }
 @media (orientation:landscape) and (min-width:600px) { .skills-grid { grid-template-columns:1fr 1fr; } }
 .skill-row { display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:var(--r-md); background:var(--surface-card); }
-.skill-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.skill-head { display:flex; align-items:center; gap:8px; width:100%; padding:0; border:0; background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; }
+.skill-head .skill-name { flex:1; min-width:0; }
+.skill-chev { flex:none; color:var(--text-3); transition:transform .2s ease; }
+.skill-row.open .skill-chev { transform:rotate(180deg); }
 .skill-name { font-size:15px; font-weight:600; color:var(--text-1); }
 .skill-level { font-size:14px; font-weight:700; color:var(--tag-blue); font-variant-numeric:tabular-nums; }
 .skill-bar { display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; }

@@ -919,7 +919,7 @@ club", and it is told on the Skills screen.
     every club's VIP floor for free (`vip_access` answers 'skill'). Both last while you hold the level.
 - **Level now, not best:** every check uses the skill's level with rust (`skill_now`), so a rusty skill closes its
   higher perks until it is trained back. Gigs and invites already done stay done.
-- **Where players see it:** the profile's Skills tab lists each skill's three perks under its bar (Lv chip, then ✓
+- **Where players see it:** the profile's Skills tab folds each skill card (the first starts open; a folded card says "N of 3 perks open" and when one is waiting) and lists its three perks under its bar (Lv chip, then ✓
   when open) with the button: Take it, a countdown, Collect, Done this week, RSVP, You went or On. The Gigs app adds
   "From your skills" under the day's offers, with the next perk to unlock. A club's card says when your dancing gets
   you in or upstairs. Skill gig pay shows in the Bank as "Skill gig".
