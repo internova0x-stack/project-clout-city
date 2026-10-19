@@ -812,6 +812,15 @@ export function GameShell({
     },
     [applyCity],
   );
+  // Skill perks (migration 0092): skill gigs, invites and club access, shared by the Skills tab and the Gigs app.
+  const perkHandlers = useMemo(() => (cityApi?.takeSkillGig && city?.perks ? {
+    state: city.perks,
+    clockOffsetSeconds: city.clockOffsetSeconds,
+    busy,
+    onTake: (id: string) => void run(`perk:${id}`, () => cityApi.takeSkillGig!(id)),
+    onCollect: (id: string) => void run(`perk:${id}`, () => cityApi.collectSkillGig!(id)),
+    onRsvp: (id: string) => void run(`perk:${id}`, () => cityApi.acceptSkillInvite!(id)),
+  } : undefined), [cityApi, city?.perks, city?.clockOffsetSeconds, busy, run]);
   // ---- Daily tasks 2.0: the goal, the streak and passes. goals_state also pays a goal that has just finished, so it
   // runs when the Tasks sheet opens and shortly after anything that could finish one (a task, clout, cash, a move).
   const [goalsNow, setGoalsNow] = useState<GoalsState | null>(null);
@@ -2437,6 +2446,7 @@ export function GameShell({
         busy={busy}
         onAccept={(id) => cityApi && void run(`gig:${id}`, () => cityApi.acceptGig(id))}
         onCollect={(id) => cityApi && void run(`gig:${id}`, () => cityApi.collectGig(id))}
+        perks={perkHandlers}
         muted={muted}
         onToggleSound={toggleSound}
         gossip={party && partyIn ? {
@@ -2597,6 +2607,7 @@ export function GameShell({
         crew={clique.map((c) => c.display_name)}
         recent={myCard?.recent}
         skills={skills}
+        perks={perkHandlers}
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}

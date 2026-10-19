@@ -20,7 +20,7 @@ import { previewGossipFind, previewGossipReset, previewGossipShare, previewGossi
 import { previewNews } from "@/app/preview/newsActions";
 import { useCallback, useMemo, useRef, useEffect } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
-import { createSimApi, sampleCityState } from "@/lib/citySim";
+import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
 import { createBusinessSim } from "@/lib/businessSim";
 import { createTogetherSim } from "@/lib/togetherSim";
 import type { CityResult } from "@/lib/cityState";
@@ -51,7 +51,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -87,6 +87,8 @@ export function PreviewHome({
   lottoPreset?: string;
   /** v0.15 Campus: ?campus=new|pick|week|friday|done starts campus life in that state, standing at St. Johnsons. */
   campusPreset?: string;
+  /** Skill perks (migration 0092): "pro" starts with high skill levels. */
+  skillsPreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
   pushPreset?: string;
   /** Membership & purchases: ?member=vip|monthly|cancelling|pastdue|forever|free|none (default vip). */
@@ -104,12 +106,12 @@ export function PreviewHome({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [player, bizPreset]);
   const city = useMemo(() => {
-    const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id, ...(campusPreset !== undefined ? { at_place: "st-johnsons" } : {}) });
+    const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id, ...(campusPreset !== undefined ? { at_place: "st-johnsons" } : {}) }, sampleSkills(skillsPreset === "pro"));
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
     // v0.15 (migration 0076): students get "Go to class" in place of the random task.
     if (campusPreset && campusPreset !== "new") s.tasks = s.tasks.map((t) => (t.slot === 5 ? { ...t, kind: "class" as const, place_id: "st-johnsons", action_id: "class", goal: null } : t));
     return { ...s, devTools };
-  }, [me, player, devTools, tasksDone, campusPreset]);
+  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset]);
   const feedRef = useRef<StoryFeed | null>(null);
   const sim = useMemo(() => {
     const api = createSimApi(city, () => feedRef.current, (id) => passRef.current(id));
@@ -365,14 +367,7 @@ export function PreviewHome({
   const noop = async () => {};
   return (
     <GameShell
-      // Skills mockup (owner, Oct 16): sample levels until the rules are built.
-      skills={[
-        { id: "cooking", level: 3, best: 3, practice: 19, rusty: false }, { id: "charisma", level: 3, best: 3, practice: 11, rusty: false },
-        { id: "fitness", level: 2, best: 2, practice: 6, rusty: false }, { id: "smarts", level: 0, best: 0, practice: 2, rusty: false },
-        { id: "music", level: 0, best: 0, practice: 0, rusty: false }, { id: "hustle", level: 5, best: 6, practice: 44, rusty: true },
-        { id: "dance", level: 4, best: 4, practice: 31, rusty: false }, { id: "gossip", level: 1, best: 1, practice: 5, rusty: false },
-        { id: "photography", level: 0, best: 0, practice: 1, rusty: false },
-      ]}
+      skills={sampleSkills(skillsPreset === "pro")}
       previewRankUp={rankUpPreset}
       previewDailyHint={dailyHintPreset}
       player={me}

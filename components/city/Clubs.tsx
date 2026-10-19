@@ -8,16 +8,18 @@ import { clubDoor } from "@/lib/cityState";
 import type { Place } from "@/lib/city";
 
 /** "🚻 Restroom downstairs · 🥂 VIP upstairs, free from 5,000 clout" and the door rule, for a club's card. */
-export function clubLines(place: Place, clout: number): string[] {
+export function clubLines(place: Place, clout: number, dance: { door: boolean; vip: boolean } = { door: false, vip: false }): string[] {
   if (!place.club) return [];
   // The Hub: what's on each floor, all open to everyone.
   if (place.tags.includes("hub")) return ["🍳 The Neon Spoon diner on the ground floor", "🎮 Game room on two · 🛋️ Lounge on three", "🚻 Restroom downstairs, where the real gossip is"];
   const { doorClout, vip } = clubDoor(place);
   const lines: string[] = [];
-  if (doorClout) lines.push(clout >= doorClout ? `🕶️ The bouncer knows your name (${doorClout.toLocaleString("en-US")} clout at the door)` : `🔒 ${doorClout.toLocaleString("en-US")} clout at the door · you have ${clout.toLocaleString("en-US")}`);
+  if (doorClout) lines.push(clout >= doorClout ? `🕶️ The bouncer knows your name (${doorClout.toLocaleString("en-US")} clout at the door)`
+    // Skill perks (migration 0092): Dance 3 gets you past every door.
+    : dance.door ? `💃 The bouncer saw you dance. You're in (${doorClout.toLocaleString("en-US")} clout at the door)` : `🔒 ${doorClout.toLocaleString("en-US")} clout at the door · you have ${clout.toLocaleString("en-US")}`);
   // Owner, Oct 14: one line each, not crammed together.
   lines.push("🚻 Restroom downstairs, where the real gossip is");
-  if (vip) lines.push(`🥂 VIP upstairs: ${clout >= vip.freeClout ? "you're on the list" : `free from ${vip.freeClout.toLocaleString("en-US")} clout, or ${formatCash(vip.cover)} for the night`}`);
+  if (vip) lines.push(`🥂 VIP upstairs: ${clout >= vip.freeClout ? "you're on the list" : dance.vip ? "💃 on the house, for your moves" : `free from ${vip.freeClout.toLocaleString("en-US")} clout, or ${formatCash(vip.cover)} for the night`}`);
   return lines;
 }
 

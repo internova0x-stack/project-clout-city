@@ -6,7 +6,7 @@ import type { Outfit } from "@/lib/styles";
 import { formatCash, formatShort } from "@/lib/economy";
 import { recentLine, recentWhen, type RecentItem } from "@/lib/recent";
 import { RankClimb } from "./Ranks";
-import { SkillsList } from "./Skills";
+import { SkillsList, type PerkHandlers } from "./Skills";
 import type { SkillState } from "@/lib/skills";
 import { useState } from "react";
 import { Sheet } from "../Sheet";
@@ -20,7 +20,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  */
 export function ProfileSheet({
   open, onClose, look, outfit, name, subtitle, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
-  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills, vip,
+  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills, perks, vip,
 }: {
   open: boolean;
   onClose: () => void;
@@ -43,6 +43,8 @@ export function ProfileSheet({
   onOpenLeaderboard?: () => void;
   /** Skills (owner, Oct 16): absent until they're switched on, and then there's a Skills tab. */
   skills?: SkillState[];
+  /** Skill perks (migration 0092): gigs, invites and access per skill; absent until it runs. */
+  perks?: PerkHandlers;
   /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
   vip?: { on: boolean; until?: string | null; onOpen: () => void };
 }) {
@@ -66,7 +68,7 @@ export function ProfileSheet({
             <button aria-pressed={tab === "skills"} onClick={() => setTab("skills")}>Skills</button>
           </div>
         )}
-        {skills && tab === "skills" ? <SkillsList skills={skills} /> : (<>
+        {skills && tab === "skills" ? <SkillsList skills={skills} perks={perks} /> : (<>
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
         <div className="profile-kpis">

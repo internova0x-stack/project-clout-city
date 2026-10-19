@@ -27,6 +27,8 @@ import type { ChatApi } from "@/lib/chat";
 import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
+import { PerkAction, type PerkHandlers } from "../game/Skills";
+import { SKILLS, SKILL_PERKS, perkStatus } from "@/lib/skills";
 
 export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv";
 
@@ -64,7 +66,7 @@ const noop = () => {};
 const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, markSeen: noop, completeTask: noop, onUnlock: noop };
 
 export function PhoneModal({
-  open, onClose, time, state, busy, onAccept, onCollect, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
+  open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership,
 }: {
   open: boolean;
@@ -74,6 +76,8 @@ export function PhoneModal({
   busy: string | null;
   onAccept: (id: number) => void;
   onCollect: (id: number) => void;
+  /** Skill perks (migration 0092): the skill gigs your levels have opened. */
+  perks?: PerkHandlers;
   muted: boolean;
   onToggleSound: () => void;
   /** v0.9 (migration 0029): "Keep me out of the gossip", and the player's "Spotted at" lines. */
@@ -185,7 +189,7 @@ export function PhoneModal({
               {app !== "tea" && app !== "businesses" && app !== "jobs" && <button className="phone-back" onClick={() => setApp(null)}><ChevronLeftIcon size={20} /> Home</button>}
               {/* News, Tea and Businesses draw their own headers (a business goes back to the list first). */}
               {app !== "news" && app !== "tea" && app !== "businesses" && app !== "jobs" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
-              {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} /> : <Soon text="Gigs open with the city." />)}
+              {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} perks={perks} /> : <Soon text="Gigs open with the city." />)}
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
@@ -238,7 +242,7 @@ function Soon({ text }: { text: string }) {
 const blurbFor = (g: GigOffer) => GIG_TITLES[g.tier].find((t) => t.title === g.title)?.blurb ?? "";
 
 /** C36: today's offers and the active gig. */
-function GigsApp({ state, now, busy, onAccept, onCollect }: { state: CityState; now: number; busy: string | null; onAccept: (id: number) => void; onCollect: (id: number) => void }) {
+function GigsApp({ state, now, busy, onAccept, onCollect, perks }: { state: CityState; now: number; busy: string | null; onAccept: (id: number) => void; onCollect: (id: number) => void; perks?: PerkHandlers }) {
   const active = activeGig(state);
   const offers = state.gigs.filter((g) => !g.accepted_at && g.ny_date === state.today);
   const done = state.gigs.filter((g) => g.collected_at && g.ny_date === state.today);
@@ -285,6 +289,40 @@ function GigsApp({ state, now, busy, onAccept, onCollect }: { state: CityState; 
         );
       })}
       {done.length > 0 && <p className="meta">Paid today: {done.map((g) => formatCash(g.pay)).join(", ")}</p>}
+      {perks && <SkillGigs perks={perks} now={now} />}
+    </div>
+  );
+}
+
+/** Skill gigs (owner, Oct 19): what your skills have opened, once a week each. */
+function SkillGigs({ perks, now }: { perks: PerkHandlers; now: number }) {
+  const gigs = SKILL_PERKS.filter((p) => p.kind === "gig");
+  const open = gigs.filter((p) => perkStatus(p, perks.state, now) !== "locked");
+  const next = gigs.filter((p) => perkStatus(p, perks.state, now) === "locked").sort((a, b) =>
+    (a.level - (perks.state.levels[a.skill] ?? 0)) - (b.level - (perks.state.levels[b.skill] ?? 0)))[0];
+  return (
+    <div className="stack-8">
+      <p className="overline" style={{ margin: "8px 0 0" }}>From your skills</p>
+      {open.length === 0 && <p className="subtext" style={{ margin: 0 }}>Get any skill to level 3 and clients start calling.</p>}
+      {open.map((p) => {
+        const skill = SKILLS.find((x) => x.id === p.skill)!;
+        return (
+          <div key={p.id} className="gig-card skill-gig">
+            <span className="tag tag-skill">{skill.emoji} {skill.name} {p.level}</span>
+            <span className="title" style={{ display: "block" }}>{p.emoji} {p.name}</span>
+            <span className="subtext">{p.blurb}</span>
+            <span className="meta gig-meta">
+              <span className="money-pos">{formatCash(p.pay ?? 0)}</span>{p.clout ? ` + ${p.clout} clout` : ""} · ⚡ −{p.energy} · ⏱ {(p.waitMinutes ?? 0) / 60} h · once a week
+            </span>
+            <PerkAction perk={p} state={perks.state} now={now} handlers={perks} />
+          </div>
+        );
+      })}
+      {next && (
+        <p className="meta" style={{ margin: 0 }}>
+          Next: {next.emoji} {next.name} at {SKILLS.find((x) => x.id === next.skill)!.name} {next.level}. Your profile's Skills tab shows them all.
+        </p>
+      )}
     </div>
   );
 }

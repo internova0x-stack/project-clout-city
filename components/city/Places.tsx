@@ -35,6 +35,7 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import { gateProgress, gateRule, ruleFor, type BoroughGate } from "@/lib/boroughGates";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
 import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
+import { perkOn } from "@/lib/skills";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = {
   food: "Food", nightlife: "Nightlife", parks: "Park", places: "Places", home: "Home", monument: "Monument", shopping: "Shopping", campus: "University",
@@ -582,7 +583,7 @@ export function LocationSheet({
           {/* #19 clubs: what's downstairs and upstairs, and the door rule. */}
           {place.club && (
             <ul className="club-lines">
-              {clubLines(place, state.player.clout).map((l) => <li key={l}>{l}</li>)}
+              {clubLines(place, state.player.clout, { door: perkOn(state.perks, "door"), vip: perkOn(state.perks, "vip") }).map((l) => <li key={l}>{l}</li>)}
             </ul>
           )}
           {handlers.dating?.dates.filter((d) => d.placeId === place.id).map((d) => (
@@ -592,7 +593,7 @@ export function LocationSheet({
           {!here && (
             <div className="stack-4">
               {/* #19 the exclusive club's door rule: the server refuses the trip too (migration 0046). */}
-              {(place.club?.doorClout ?? 0) > state.player.clout && handlers.passes?.tonight !== place.id ? (
+              {(place.club?.doorClout ?? 0) > state.player.clout && handlers.passes?.tonight !== place.id && !perkOn(state.perks, "door") ? (
                 <>
                   <button className="btn btn-taxi" disabled>🔒 {(place.club!.doorClout!).toLocaleString("en-US")} clout to get in</button>
                   {handlers.passes && handlers.passes.held > 0 && !handlers.passes.tonight ? (

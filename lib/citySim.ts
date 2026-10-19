@@ -10,12 +10,22 @@ import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
 import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
+import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 
 const CLOCK = { realHoursPerCityDay: 2, dayStartsAt: 6, nightStartsAt: 19 };
 
-export function sampleCityState(overrides: Partial<CityState["player"]> = {}): CityState {
+/** Sample skills for the preview (the profile's Skills tab and skill perks); `?skills=pro` uses the high set. */
+export function sampleSkills(pro = false): SkillState[] {
+  const lv = (id: SkillId, level: number, best = level, rusty = false): SkillState => ({ id, level, best, practice: LEVEL_AT[level] + (level < 10 ? 1 : 0), rusty });
+  return pro
+    ? [lv("cooking", 9), lv("charisma", 9), lv("fitness", 6), lv("smarts", 9), lv("music", 7), lv("hustle", 6), lv("dance", 9), lv("gossip", 3), lv("photography", 6, 8, true)]
+    : [lv("cooking", 3), lv("charisma", 3), lv("fitness", 2), lv("smarts", 0), lv("music", 0), lv("hustle", 5, 6, true), lv("dance", 4), lv("gossip", 1), lv("photography", 0)];
+}
+const levelsOf = (skills: SkillState[]) => Object.fromEntries(skills.map((x) => [x.id, x.level])) as PerksState["levels"];
+
+export function sampleCityState(overrides: Partial<CityState["player"]> = {}, skills: SkillState[] = sampleSkills()): CityState {
   const today = new Date().toISOString().slice(0, 10);
   const tasks: DailyTask[] = [
     // v0.11: two of the five send the player along the gossip trail (the preview week's starts).
@@ -50,6 +60,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}): C
     homeLayout: null,
     restToday: { nap: 0, sit: 0 },
     actionsToday: ["flushing-meadows:hangout"],
+    perks: { levels: levelsOf(skills), gigs: [], invites: [] },
     lotto: {
       freeUsed: 0, freeToday: 2, bought: 0, beginnerUntil: new Date(Date.now() + 4 * 86_400_000).toISOString(),
       unscratched: [],
@@ -103,7 +114,7 @@ export function createSimApi(
   const vipAccess = (placeId: string) => {
     const vip = clubDoor(PLACES.find((x) => x.id === placeId) ?? {}).vip;
     if (!vip) return null;
-    return p().clout >= vip.freeClout ? "free" : vipPaid.has(`${placeId}:${s.today}`) ? "paid" : passTonight(placeId) ? "pass" : null;
+    return p().clout >= vip.freeClout ? "free" : perkOn(s.perks, "vip") ? "skill" : vipPaid.has(`${placeId}:${s.today}`) ? "paid" : passTonight(placeId) ? "pass" : null;
   };
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
   const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(s), gain });
@@ -184,7 +195,7 @@ export function createSimApi(
       const to = point(dest);
       if (!from || !to) return fail("That place isn't on the map.");
       const door = dest ? clubDoor(PLACES.find((x) => x.id === dest)!).doorClout : 0;
-      if (p().clout < door && !passTonight(dest!)) return fail(DOOR_CLOUT);
+      if (p().clout < door && !passTonight(dest!) && !perkOn(s.perks, "door")) return fail(DOOR_CLOUT);
       const q = travelQuote(mode, milesBetween(from, to), !!p().car_sku);
       if (q.unavailable) return fail(mode === "walk" ? "That's too far to walk. Your shoes have filed a complaint." : "You don't have a car. The Shop has some, and so does the subway.");
       if (p().energy < q.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
@@ -310,7 +321,7 @@ export function createSimApi(
     acceptGig(offerId) {
       const g = s.gigs.find((x) => x.id === offerId);
       if (!g) return fail("That offer expired at midnight.");
-      if (activeGig(s)) return fail("Finish your current gig first.");
+      if (activeGig(s) || s.perks?.gigs.some((x) => !x.collected_at)) return fail("Finish your current gig first.");
       if (p().clout < gigCloutReq(g.tier)) return fail("This client googled you. Come back with more clout.");
       if (p().confidence < g.confidence_req) return fail("This client wants more Confidence than you've got right now.");
       if (p().energy < g.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
@@ -318,6 +329,40 @@ export function createSimApi(
       g.accepted_at = new Date(now()).toISOString();
       g.ready_at = new Date(now() + g.wait_minutes * 60_000).toISOString();
       return ok({ energy: -g.energy });
+    },
+    // Skill perks (migration 0092).
+    takeSkillGig(perkId) {
+      const perk = SKILL_PERKS.find((x) => x.id === perkId && x.kind === "gig");
+      const st = s.perks;
+      if (!perk || !st) return fail(PERK_ERRORS.unknown_perk);
+      if ((st.levels[perk.skill] ?? 0) < perk.level) return fail(PERK_ERRORS.skill_locked);
+      if (st.gigs.some((x) => x.perk === perkId)) return fail(PERK_ERRORS.gig_done_week);
+      if (activeGig(s) || st.gigs.some((x) => !x.collected_at)) return fail(PERK_ERRORS.gig_active);
+      if (p().energy < perk.energy!) return fail(PERK_ERRORS.no_energy);
+      p().energy -= perk.energy!;
+      // The preview finishes skill gigs in seconds, so the whole loop can be tried.
+      st.gigs.push({ perk: perkId, accepted_at: new Date(now()).toISOString(), ready_at: new Date(now() + 8_000).toISOString(), collected_at: null });
+      return ok({ energy: -perk.energy! });
+    },
+    collectSkillGig(perkId) {
+      const perk = SKILL_PERKS.find((x) => x.id === perkId);
+      const g = s.perks?.gigs.find((x) => x.perk === perkId && !x.collected_at);
+      if (!perk || !g) return fail(PERK_ERRORS.unknown_perk);
+      if (new Date(g.ready_at!).getTime() > now()) return fail(PERK_ERRORS.not_ready);
+      g.collected_at = new Date(now()).toISOString();
+      p().bank_cash += perk.pay!;
+      p().clout += perk.clout ?? 0;
+      return ok({ cash: perk.pay, ...(perk.clout ? { clout: perk.clout } : {}) });
+    },
+    acceptSkillInvite(perkId) {
+      const perk = SKILL_PERKS.find((x) => x.id === perkId && x.kind === "invite");
+      const st = s.perks;
+      if (!perk || !st) return fail(PERK_ERRORS.unknown_perk);
+      if ((st.levels[perk.skill] ?? 0) < perk.level) return fail(PERK_ERRORS.skill_locked);
+      if (st.invites.includes(perkId)) return ok();
+      st.invites.push(perkId);
+      p().clout += perk.clout!;
+      return ok({ clout: perk.clout });
     },
     collectGig(offerId) {
       const g = s.gigs.find((x) => x.id === offerId);

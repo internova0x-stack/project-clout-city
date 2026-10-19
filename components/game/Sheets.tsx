@@ -101,20 +101,7 @@ export function TasksSheet({
                 <span className="subtext" style={{ display: "block" }}>First task. Pull up to Velvet Static in Long Island City.</span>
               </div>
             )}
-            {(story?.tasks ?? []).length > 0 && (
-              <>
-                <p className="overline" style={{ margin: "4px 0 0" }}>📰 Story · today only</p>
-                {story!.tasks.map((t) => (
-                  <div key={t.id} className="select-card multi" aria-pressed={t.done} role="button" tabIndex={0}
-                    style={{ cursor: t.done ? "default" : "pointer" }} onClick={t.done ? undefined : () => onStoryTask?.(t)}>
-                    <span className="select-emoji" aria-hidden="true">🔍</span>
-                    <span className="title" style={{ display: "block" }}>{t.label}</span>
-                    <span className="subtext" style={{ display: "block" }}>{t.done ? "Done. Lola noticed." : `+${t.clout} clout`}</span>
-                    {t.done && <span className="select-check" aria-hidden="true">✓</span>}
-                  </div>
-                ))}
-              </>
-            )}
+            {/* Owner, Oct 18: five tasks a day, no more. A story's task shows on its place's action instead (Places). */}
             {city ? (
               <>
                 {goals && partyDone && <StreakRow goals={goals} onOpen={() => setTab("streaks")} />}
