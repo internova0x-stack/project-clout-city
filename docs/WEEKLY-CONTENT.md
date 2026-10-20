@@ -47,7 +47,10 @@ it isn't in your working directory). Work from the main branch.
 2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
    4 and 8), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they
    stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
-   content/news/ and content/gossip/ so nothing repeats.
+   content/news/ and content/gossip/ so nothing repeats. Also read docs/culture/VOICE.md (the voice rules)
+   and content/culture/ (slang.json, parody-names.json, npcs.json): write each regular from their profile
+   (personality, likes, dislikes, the slang they use), give Lola one or two slang terms per message, and use
+   the invented names from parody-names.json for any team, transit card, museum, landmark or brand.
 3. Write content/hunts/<Monday>.json: a hunt players will talk about.
    - Make it an event, not an errand: real stakes (a rival crew racing you, a celebrity's stolen
      prize, a mystery with a deadline), a cast member or two caught up in it, and a finale that
@@ -82,7 +85,8 @@ it isn't in your working directory). Work from the main branch.
    napping, the subway, group projects, money, clout), answerable by common sense, with exactly one right
    answer, 2 to 5 short choices, and the right answer moved around (not always the second choice). No real
    people, schools, brands or politics; nothing mean about any group. Don't reuse last week's prompts.
-7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report.
+7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report (validate:content
+   also fails on any real brand, team or trademarked name).
 8. Commit only those four files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news

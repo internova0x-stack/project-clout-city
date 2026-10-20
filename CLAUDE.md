@@ -7,6 +7,8 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
 - `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11), the modeled avatars and Shop outfits (section 12), bigger homes and venues, including the clubs' restroom and VIP floors (section 13), meeting players at every place, with 20 messages a day and unlimited chat (section 14), v0.12's player ranks and businesses (section 15), v0.13's together bonuses and Jobs board (section 16), v0.14's Real Clout FM and Clout TV (section 17), v0.15's campus life (section 18), daily tasks 2.0: goals, streaks and guest-list passes (section 19), push notifications (section 20), the creator affiliates and UGC engine (section 21) and skill perks (section 22). **Wins over the older docs** for those features.
+- `docs/culture/README.md`: the culture packs C1 to C6 (NYC food, slang, transit, events, characters), their status and
+  the owner's Oct 20 decisions; `docs/culture/VOICE.md` holds the voice rules for every character and generated line.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
 - `docs/WEEKLY-CONTENT.md`: the weekly drafting routine (hunt, news and gossip), the Studio Calendar and the approval loop.
 - `docs/CAST.md`: the recurring cast (celebrities, wannabes, regulars at places). Every name invented.
@@ -133,6 +135,10 @@ components live in `app/globals.css`.
   real New York evening, since the city clock loops every two hours).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
+- Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
+  for real names and Astoria's character profiles live in `content/culture/*.json` (C1); tapping a regular plays their
+  everyday lines plus their profile's catchphrases (`withCatchphrases`, lib/culture.ts). `validate:content` and
+  tests/culture.test.ts fail on any name in `parody-names.json`.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.
