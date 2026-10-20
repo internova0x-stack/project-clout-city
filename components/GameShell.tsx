@@ -25,7 +25,7 @@ import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryA
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import NPC_PROFILES from "@/content/culture/npcs.json";
-import { withCatchphrases, type NpcProfile } from "@/lib/culture";
+import { rememberedLine, withCatchphrases, type NpcProfile } from "@/lib/culture";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
@@ -1285,7 +1285,9 @@ export function GameShell({
       if (!r) return null;
       const story = feed?.chatter?.find((t) => t.lines)?.lines ?? null;
       // Studio lines first, then this week's city news as gossip.
-      const live = { [r.id]: [...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
+      // C2: Sal remembers your order after three different days at the deli.
+      const known = rememberedLine(NPC_PROFILES.profiles as NpcProfile[], r.id, city?.regularDays?.[p.id] ?? 0);
+      const live = { [r.id]: [...(known ? [known] : []), ...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
       return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: EVERYDAY_LINES }) };
     },
     hunt: hunt && huntOn ? {

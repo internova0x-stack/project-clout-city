@@ -67,6 +67,12 @@ export const REGULARS: Regular[] = [
   { id: "rev-mercy", name: "Rev. Mercy Adeyemi", title: "the reverend", placeId: "harmony-chapel", emoji: "🕊️", role: "patron" },
   { id: "yesenia", name: "Yesenia Ortiz", title: "the station agent", placeId: "astoria-blvd-station", emoji: "🚇", role: "driver" },
   { id: "nour", name: "Nour El-Sayed", title: "the Big Screen producer", placeId: "clout-tower", emoji: "🎬", role: "dj" },
+  // Culture pack C2: the people at Astoria's new food places.
+  { id: "arben", name: "Arben Krasniqi", title: "the owner", placeId: "still-a-dollar-slice", emoji: "🍕", role: "cook" },
+  { id: "tariq", name: "Tariq Hossain", title: "the cart owner", placeId: "white-sauce-cart", emoji: "🥙", role: "cook" },
+  { id: "lou", name: "Lou Ferraro", title: "the cart owner", placeId: "boiled-and-beloved", emoji: "🌭", role: "cook" },
+  { id: "andreas", name: "Andreas Charalambous", title: "the owner", placeId: "feta-compli", emoji: "🫒", role: "bartender" },
+  { id: "hersh", name: "Hersh Weiss", title: "the owner, at the counter", placeId: "schlep-and-schmear", emoji: "🥯", role: "clerk" },
   // v0.14 On Air (owner, Oct 16): the voice of The Wake-Up Call, always at the desk.
   { id: "sharm", name: "Sharm Almight", title: "DJ, The Wake-Up Call", placeId: "real-clout-fm", emoji: "🎙️", role: "bartender" },
   // The Hub's host (owner, Oct 16): the city's tea queen, who can get you anything and knows everyone worth knowing.

@@ -39,6 +39,8 @@ export interface NpcProfile {
   regular: string | null;
   slang: string[];
   story?: string;
+  /** C2: after `days` different days at their place, they say `line` (Sal remembers your order). */
+  remembers?: { days: number; line: string };
 }
 
 export interface CultureData {
@@ -69,6 +71,12 @@ export function withCatchphrases(lines: Record<string, string[]>, profiles: NpcP
     out[p.regular] = [...new Set([...(out[p.regular] ?? []), ...p.catchphrases])];
   }
   return out;
+}
+
+/** C2: the line a regular says once they know you (`days` = different days at their place), or null. */
+export function rememberedLine(profiles: NpcProfile[], regularId: string, days: number): string | null {
+  const r = profiles.find((p) => p.regular === regularId)?.remembers;
+  return r && days >= r.days ? r.line : null;
 }
 
 /** Accent spellings the voice rules rule out (docs/culture/VOICE.md). Dropped g's in slang ("buggin'") are fine. */
@@ -104,6 +112,7 @@ export function validateCulture(d: CultureData, ctx: { placeIds: string[]; astor
       if (l.length > 240) problems.push(`${at}: "${l.slice(0, 30)}…" is over 240 characters`);
       for (const ph of PHONETIC_SPELLINGS) if (wordRe(ph, "i").test(l)) problems.push(`${at}: "${ph}" is accent spelling`);
     }
+    if (p.remembers && !(p.remembers.days >= 1 && p.remembers.line && p.remembers.line.length <= 240)) problems.push(`${at}: "remembers" needs days (1 or more) and a line of 240 characters or fewer`);
     const hits = brandHits(JSON.stringify(p), d.parody.names);
     if (hits.length) problems.push(`${at}: real names ${hits.join(", ")}`);
   }
