@@ -94,6 +94,8 @@ export interface CityState {
   items: PlayerItem[];
   /** Uses per place today. */
   visitsToday: Record<string, number>;
+  /** C2: different New York days the player has done something at a place (Sal remembers your order after 3). */
+  regularDays?: Record<string, number>;
   /** v0.9 (migration 0031): activities used today, "place:action". Mood and Confidence come once a day
       per activity; missing before the migration, when they came once a day per place. */
   actionsToday?: string[];
@@ -267,6 +269,7 @@ const ERRORS: Record<string, string> = {
   not_on_list: "You're not on the list. The door person checked twice.",
   dev_tools_off: "Time travel is switched off here.",
   still_travelling: "You're still on your way. Hang tight, or skip the rest of the ride.",
+  closed_now: "Closed right now. The card says when they open.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",

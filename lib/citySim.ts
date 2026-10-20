@@ -3,12 +3,12 @@
 // a database. It follows the same rules as supabase/migrations/0004 in simplified
 // form; the SQL is the source of truth.
 
-import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, purchaseClout, sellPrice, visitClout } from "./city.ts";
+import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, placeOpen, purchaseClout, sellPrice, visitClout } from "./city.ts";
 import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { milesBetween, skipCost, travelQuote } from "./travel.ts";
-import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, cityError, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
@@ -54,6 +54,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}, sk
     ],
     items: [{ id: 301, sku: "fit-bucket-hat", category: "fashion", value: 55, acquired: "bought", equipped: true }],
     visitsToday: { "flushing-meadows": 1 },
+    regularDays: { "flushing-meadows": 4, "ditmars-deli": 2 },
     attendedToday: [],
     clockOffsetSeconds: 0,
     devTools: false,
@@ -271,6 +272,8 @@ export function createSimApi(
       if (a.storyUnlock && !world.unlocked.includes(a.id)) return fail("That isn't something you can do here.");
       if (world.closed) return fail(world.closed.reason);
       if (world.restricted && !world.restricted.allow.includes(a.id)) return fail(world.restricted.reason);
+      // C2 (migration 0093): opening hours on the city clock.
+      if (!placeOpen(place, cityMinutes(now(), CLOCK))) return fail(cityError("closed_now"));
       const base = a.price ?? 0;
       const price = Math.round(base * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1));
       if (a.energy > 0 && p().energy < a.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
@@ -279,6 +282,7 @@ export function createSimApi(
       if (a.kind === "shift" && shiftsToday >= CITY_ECONOMY.shiftsPerDay) return fail(SHIFT_LIMIT);
       if (a.kind === "shift") shiftsToday += 1;
       const first = !s.visitsToday[placeId];
+      if (first) s.regularDays = { ...s.regularDays, [placeId]: (s.regularDays?.[placeId] ?? 0) + 1 };
       s.visitsToday[placeId] = (s.visitsToday[placeId] ?? 0) + 1;
       // v0.9 (0031): Mood and Confidence once a day per activity.
       const key = `${placeId}:${actionId}`;

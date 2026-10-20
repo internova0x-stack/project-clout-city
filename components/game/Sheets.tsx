@@ -4,7 +4,7 @@ import { ExclusiveEventCard, type MoneyHandlers } from "../city/Money";
 import { liveParty } from "@/lib/store";
 import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { CITY_ECONOMY, CLUB_EVENTS, eventOpen, eventToday, formatCountdown, placeById, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, closedLine, eventOpen, eventToday, formatCountdown, placeById, placeOpen, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { eventAvailability, eventById, taskDoneLine, taskQuip, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GOAL_COPY, type GoalsState } from "@/lib/goals";
@@ -127,6 +127,7 @@ export function TasksSheet({
                       <span className="task-meta">
                         <span>{taskRewardLine(t)} · {t.kind === "gossip" ? "Gossip · " : ""}{t.kind === "cook" ? "Your kitchen" : placeById(t.place_id)?.neighborhood ?? "Queens"}</span>
                         {t.goal && GOAL_COPY[t.goal] && <span className="task-goal">🎯 {GOAL_COPY[t.goal].toward}</span>}
+                        {placeById(t.place_id)?.hours && <TaskHours placeId={t.place_id} offsetSeconds={city.clockOffsetSeconds} />}
                       </span>
                     )}
                     {t.skill && <TaskSkill id={t.skill} skills={skills} />}
@@ -164,6 +165,14 @@ export function TasksSheet({
 
 
 /** Events (C26): the first-task party until it's done, then club events with real-minute countdowns. */
+/** C2: a task at a place that's shut right now says when it opens (owner, Oct 20: tasks may use places with hours). */
+function TaskHours({ placeId, offsetSeconds }: { placeId: string; offsetSeconds: number }) {
+  const minutes = cityMinutes(useGameNow(offsetSeconds, 1000), GAME_CONFIG.cityClock);
+  const place = placeById(placeId);
+  if (!place || placeOpen(place, minutes)) return null;
+  return <span className="meta">🕒 {closedLine(place, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay)}</span>;
+}
+
 export function EventsSheet({
   open, onClose, partyDone, onOpenParty, city, busy, onAttend, exclusive, onGoThere,
 }: {
