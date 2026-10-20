@@ -10,13 +10,29 @@ Packs ship one at a time, in order, each only when the owner says "Build C<numbe
 | Pack | Focus | Status |
 | --- | --- | --- |
 | C1 | Voice and content foundations | **Built** (Oct 20) |
-| C2 | Astoria food and Energy | Next |
+| C2 | Astoria food and Energy | **Built** (Oct 20) |
 | C3 | Astoria Park, jobs, roommates, first-time touches | Waiting |
 | C4 | Transit and transit news | Waiting |
 | C5 | Calendar events, sports, cultural invites (before Dec 31 for the NYE countdown) | Waiting |
 | C6 | Stories, tea, hunts and dating spots | Waiting |
 
 The guide's "Later: borough packs" wait until those boroughs open.
+
+## C2: Astoria food (built Oct 20)
+
+| Place | Tier | Hours (city clock) | On the menu | Person |
+| --- | --- | --- | --- | --- |
+| Ditmars Deli & Dreams (Sal's) | Budget | Always open | Bacon, egg and cheese C$8 (+12 Energy, the cheapest breakfast), chopped cheese C$14, **Pet Also Sal** (+4 Mood) | Sal, who remembers your order after 3 different days |
+| Still-a-Dollar Slice | Budget | 10 AM to 1 AM | A slice C$6 (+10), **two slices and a soda** C$13 (+20) | Arben Krasniqi |
+| The White Sauce Cart | Budget | 6 PM to 5 AM | Chicken over rice C$14 (+20) | Tariq Hossain |
+| Boiled & Beloved Hot Dogs | Budget | 10 AM to 8 PM | Two dirty water dogs C$9 (+12) | Lou Ferraro |
+| Feta Compli Taverna | Medium | 12 PM to 11 PM | Souvlaki and grilled octopus C$40 (+30) | Andreas Charalambous |
+| Schlep & Schmear Deli | Medium | 7 AM to 9 PM | Pastrami on rye C$38 (+28) | Hersh Weiss |
+
+How hours work: one city hour is five real minutes, so a closed place opens within two real hours at most. The
+place card shows "Open 6 PM to 5 AM" or "Closed · opens 6 PM (in 25 min)", buttons stay off while it's shut,
+and a daily task at a shut place says when it opens. The server refuses anything at a shut place (migration 0093).
+Prices sit above home cooking per Energy, so cooking stays the cheapest way to eat (an existing rule).
 
 ## Where the content lives (edit these, no code needed)
 

@@ -139,6 +139,10 @@ components live in `app/globals.css`.
   for real names and Astoria's character profiles live in `content/culture/*.json` (C1); tapping a regular plays their
   everyday lines plus their profile's catchphrases (`withCatchphrases`, lib/culture.ts). `validate:content` and
   tests/culture.test.ts fail on any name in `parody-names.json`.
+  C2 (migration 0093): places may carry `hours` {open, close} on the city clock (close before open runs past midnight;
+  unset = always open). `place_visits_open` (a trigger like `require_here`) refuses anything at a shut place
+  ('closed_now'); the card, actions and daily tasks say when it opens. Sal remembers your order after 3 different
+  days at the deli (`remembers` in npcs.json, counted from `place_visits` rows).
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.

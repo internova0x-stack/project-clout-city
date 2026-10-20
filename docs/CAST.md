@@ -86,6 +86,11 @@ Tap a regular on a place card to hear a line; each tap says the next one. While 
 | Harmony Community Chapel | Rev. Mercy Adeyemi, the reverend (C1) | patron | “Everyone's welcome. The chairs are a test of faith.” |
 | Astoria Blvd station | Yesenia Ortiz, the station agent (C1) | driver | “¿Qué lo que? The train is two stops away. It's always two stops away.” |
 | Clout TV Tower | Nour El-Sayed, the Big Screen producer (C1) | dj | “Three hours on the Big Screen. Make the photo count.” |
+| Still-a-Dollar Slice | Arben Krasniqi, the owner (C2) | cook | “Two slices and a soda? Say less. Already in the oven.” |
+| The White Sauce Cart | Tariq Hossain, the cart owner (C2) | cook | “Three a.m. is my rush hour. Everybody's honest at three a.m.” |
+| Boiled & Beloved Hot Dogs | Lou Ferraro, the cart owner (C2) | cook | “Onions? Mustard? Don't ask about the water.” |
+| Feta Compli Taverna | Andreas Charalambous, the owner (C2) | bartender | “Today is somebody's name day. It's always somebody's name day.” |
+| Schlep & Schmear Deli | Hersh Weiss, the owner, at the counter (C2) | clerk | “On line, not in line. You're in New York now.” |
 
 Tapping a regular plays their everyday lines (`content/cast-lines.json`) and their profile's catchphrases
 (`content/culture/npcs.json`). Rockaway Diner (Effie, the waitress) and Radiant Harbor Church (Pastor Vale) have
