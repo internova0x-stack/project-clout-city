@@ -61,6 +61,13 @@ About 20 minutes, all in web dashboards. You need a GitHub, Supabase and Vercel 
 > testing. Before sharing the link widely, add an SMTP provider under
 > **Authentication → Emails → SMTP Settings** (Resend, Postmark or similar).
 
+### Which migrations have run?
+
+Paste `scripts/migration-status.sql` into the SQL Editor and press Run. It's read-only (it changes nothing) and lists every
+migration as **run**, **NOT RUN** (listed first) or **repair file** (safe to run again). Run only the NOT RUN files, oldest
+first. Don't re-run a file that says **run**: most just stop with "already exists", but the ones that refresh the city
+(places, shop, prices) would put back an older city over a newer one.
+
 ## 2. Vercel
 
 1. Import the GitHub repository at vercel.com/new. Framework: Next.js (auto-detected).
