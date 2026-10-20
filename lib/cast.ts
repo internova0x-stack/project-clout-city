@@ -59,6 +59,14 @@ export const REGULARS: Regular[] = [
   { id: "gus", name: "Gus", title: "same bench, every day", placeId: "hell-gate-park", emoji: "👴", role: "driver" },
   { id: "inez", name: "Inez", title: "the wedding photographer", placeId: "gantry-plaza", emoji: "📸", role: "driver" },
   { id: "benny", name: "Benny Fortuna", title: "the owner, never bought a ticket", placeId: "lucky-star", emoji: "🧑‍🦳", role: "clerk" },
+  // Culture pack C1 (owner, Oct 20): every Astoria place gets its person; profiles in content/culture/npcs.json.
+  { id: "dr-eleni", name: "Dr. Eleni Markou", title: "the ER doctor", placeId: "st-copays", emoji: "👩‍⚕️", role: "patron" },
+  { id: "marcos", name: "Marcos Albuquerque", title: "the owner", placeId: "low-light-lounge", emoji: "🎸", role: "bartender" },
+  { id: "camila", name: "Camila Restrepo", title: "the store manager", placeId: "steinway-fresh", emoji: "🛒", role: "clerk" },
+  { id: "valentina", name: "Valentina Ospina", title: "runs the gigs board", placeId: "triborough-works", emoji: "💻", role: "regular" },
+  { id: "rev-mercy", name: "Rev. Mercy Adeyemi", title: "the reverend", placeId: "harmony-chapel", emoji: "🕊️", role: "patron" },
+  { id: "yesenia", name: "Yesenia Ortiz", title: "the station agent", placeId: "astoria-blvd-station", emoji: "🚇", role: "driver" },
+  { id: "nour", name: "Nour El-Sayed", title: "the Big Screen producer", placeId: "clout-tower", emoji: "🎬", role: "dj" },
   // v0.14 On Air (owner, Oct 16): the voice of The Wake-Up Call, always at the desk.
   { id: "sharm", name: "Sharm Almight", title: "DJ, The Wake-Up Call", placeId: "real-clout-fm", emoji: "🎙️", role: "bartender" },
   // The Hub's host (owner, Oct 16): the city's tea queen, who can get you anything and knows everyone worth knowing.

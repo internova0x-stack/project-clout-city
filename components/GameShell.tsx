@@ -24,6 +24,8 @@ import { modelSex } from "@/lib/avatarCatalog";
 import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
+import NPC_PROFILES from "@/content/culture/npcs.json";
+import { withCatchphrases, type NpcProfile } from "@/lib/culture";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
@@ -98,6 +100,9 @@ import { uploadToBigScreen } from "@/lib/tvUpload";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import { CampusSheet } from "./campus/CampusSheet";
+
+/** Culture pack C1: a regular's everyday lines plus their profile's catchphrases. */
+const EVERYDAY_LINES = withCatchphrases(CAST_LINES, NPC_PROFILES.profiles as NpcProfile[]);
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
 const AvatarHead = dynamic(() => import("./avatar/AvatarHead"), { ssr: false });
@@ -1281,7 +1286,7 @@ export function GameShell({
       const story = feed?.chatter?.find((t) => t.lines)?.lines ?? null;
       // Studio lines first, then this week's city news as gossip.
       const live = { [r.id]: [...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
-      return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: CAST_LINES }) };
+      return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: EVERYDAY_LINES }) };
     },
     hunt: hunt && huntOn ? {
       talk: async (placeId) => {

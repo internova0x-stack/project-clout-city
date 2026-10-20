@@ -3,8 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { CELEBRITIES, REGULARS, WANNABES, regularAt, regularLine } from "../lib/cast.ts";
 import { PLACES } from "../lib/city.ts";
+import { withCatchphrases, type NpcProfile } from "../lib/culture.ts";
 
-const evergreen = JSON.parse(readFileSync(new URL("../content/cast-lines.json", import.meta.url), "utf8")) as Record<string, string[]>;
+const castLines = JSON.parse(readFileSync(new URL("../content/cast-lines.json", import.meta.url), "utf8")) as Record<string, string[]>;
+const profiles = JSON.parse(readFileSync(new URL("../content/culture/npcs.json", import.meta.url), "utf8")).profiles as NpcProfile[];
+// What a tap draws on: the everyday lines plus the profile's catchphrases (culture pack C1).
+const evergreen = withCatchphrases(castLines, profiles);
 const generic = JSON.parse(readFileSync(new URL("../content/chatter-generic.json", import.meta.url), "utf8")) as Record<string, string[]>;
 
 test("the cast: one celebrity per type, unique ids, invented league-free types", () => {
@@ -22,7 +26,7 @@ test("every regular stands at a real place, speaks a known story role and has ev
     for (const l of evergreen[r.id]) assert.ok(l.length <= 240, `${r.id}: "${l.slice(0, 30)}…" fits the Studio limit`);
   }
   assert.equal(new Set(REGULARS.map((r) => r.placeId)).size, REGULARS.length, "one regular per place");
-  for (const id of Object.keys(evergreen)) assert.ok(REGULARS.some((r) => r.id === id), `${id} in cast-lines.json is a regular`);
+  for (const id of Object.keys(castLines)) assert.ok(REGULARS.some((r) => r.id === id), `${id} in cast-lines.json is a regular`);
   assert.equal(regularAt("ditmars-deli")?.name, "Sal");
   assert.equal(regularAt("thread-count"), undefined);
 });
