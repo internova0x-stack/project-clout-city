@@ -325,6 +325,11 @@ export interface Place {
    * upstairs (CITY_ECONOMY.clubs.vip); `doorClout` is the clout the bouncer wants to let you in at all.
    */
   club?: { vip?: "medium" | "exclusive"; doorClout?: number };
+  /**
+   * Culture pack C2 (owner, Oct 20): opening hours on the city clock, whole hours 0 to 23. `close` before `open`
+   * runs past midnight. Unset means always open (every place before C2, and Sal's, open all night).
+   */
+  hours?: { open: number; close: number };
 }
 
 export const PLACES: Place[] = [
@@ -561,7 +566,57 @@ export const PLACES: Place[] = [
     tags: ["bodega", "dining_budget", "astoria"],
     lore: "Open all night, run by Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account. I run the fan account.",
     actions: [
+      // C2: the cheapest breakfast in the game, and the cat (a small Mood boost).
+      { id: "bec", kind: "eat", label: "Bacon, egg and cheese on a roll", price: 8, energy: -12, blurb: "Salt, pepper, ketchup. The cheapest breakfast in the city and the best one in Queens." },
       { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 14, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
+      { id: "pet-cat", kind: "visit", label: "Pet Also Sal", energy: 1, mood: 4, blurb: "He allows it. Briefly. Then he goes back to sleeping on the bread." },
+    ],
+  },
+  // ---- Culture pack C2 (owner, Oct 20): Astoria food. Opening hours on the city clock; Sal's stays open all night. ----
+  {
+    id: "still-a-dollar-slice", name: "Still-a-Dollar Slice", emoji: "🍕", category: "food", neighborhood: "Astoria", tier: "Budget",
+    at: [40.7712, -73.9150], depth: "scene", template: "counter", palette: ["#D93A2F", "#FFF1D6", "#2A2530"], hours: { open: 10, close: 1 },
+    tags: ["pizza", "dining_budget", "astoria"],
+    lore: "The sign says a dollar. The sign is from 2009, babe. Two slices and a soda is still the best lunch deal in Queens, deadass, and Arben folds yours for you if you look new.",
+    actions: [
+      { id: "slice", kind: "eat", label: "Grab a slice", price: 6, energy: -10, blurb: "Fold it. Burn the roof of your mouth. Welcome to New York." },
+      { id: "combo", kind: "eat", label: "Two slices and a soda", price: 13, energy: -20, blurb: "The working city's lunch deal. The soda is whatever's coldest." },
+    ],
+  },
+  {
+    id: "white-sauce-cart", name: "The White Sauce Cart", emoji: "🥙", category: "food", neighborhood: "Astoria", tier: "Budget",
+    at: [40.7708, -73.9172], depth: "scene", template: "plaza", palette: ["#F2A33A", "#FFF6E0", "#1F1B26"], hours: { open: 18, close: 5 },
+    tags: ["halal_cart", "late_night", "dining_budget", "astoria"],
+    lore: "Chicken over rice, a mountain of white sauce and the best thing open on this corner after midnight. Tariq has fed every bartender in Astoria at 3 a.m. Say less, just get the extra sauce.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Chicken over rice, extra white sauce", price: 14, energy: -20, blurb: "Red sauce at your own risk. Tariq warned you. Twice." },
+    ],
+  },
+  {
+    id: "boiled-and-beloved", name: "Boiled & Beloved Hot Dogs", emoji: "🌭", category: "food", neighborhood: "Astoria", tier: "Budget",
+    at: [40.7768, -73.9245], depth: "scene", template: "plaza", palette: ["#3E8EDE", "#FFD84D", "#1F1B26"], hours: { open: 10, close: 20 },
+    tags: ["hot_dog_cart", "dining_budget", "astoria"],
+    lore: "A cart, an umbrella and hot dog water older than some of these buildings. Lou has worked the park gate for thirty summers. Gross? Facts. Beloved? Also facts.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Two dirty water dogs", price: 9, energy: -12, blurb: "Onions, mustard, no questions. Especially about the water." },
+    ],
+  },
+  {
+    id: "feta-compli", name: "Feta Compli Taverna", emoji: "🫒", category: "food", neighborhood: "Astoria", tier: "Medium",
+    at: [40.7676, -73.9188], depth: "scene", template: "cafe", palette: ["#2F6FB3", "#F4F1EA", "#1F1B26"], hours: { open: 12, close: 23 },
+    tags: ["taverna", "dining_medium", "astoria"],
+    lore: "Grilled octopus, spanakopita a yiayia signed off on and a waiter who shouts \"Opa!\" whether or not anything's on fire. Name-day parties take over the back room mad often. Book ahead, sweetie.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Souvlaki platter and grilled octopus", price: 40, energy: -30, blurb: "Andreas brings bread you didn't order. You eat all of it. That's the plan." },
+    ],
+  },
+  {
+    id: "schlep-and-schmear", name: "Schlep & Schmear Deli", emoji: "🥯", category: "food", neighborhood: "Astoria", tier: "Medium",
+    at: [40.7645, -73.9205], depth: "scene", template: "counter", palette: ["#B8743A", "#FFF6E0", "#2A2530"], hours: { open: 7, close: 21 },
+    tags: ["jewish_deli", "dining_medium", "astoria"],
+    lore: "Pastrami stacked like a rent increase, knishes the size of your fist and Hersh at the counter, who has never once said \"have a nice day.\" Kvetch about the line all you want; it's worth the schlep.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Pastrami on rye, half-sour pickle", price: 38, energy: -28, blurb: "Hersh slices it by hand and judges you by hand. Both are excellent." },
     ],
   },
   {
@@ -990,6 +1045,38 @@ export function placeById(id: string): Place | undefined {
 /** The borough a place is in (Queens unless set). */
 export const boroughOf = (p: Pick<Place, "borough">): BoroughId => p.borough ?? "queens";
 
+/** C2: is a place open at this city-clock minute (0 to 1439)? Places without hours always are. */
+export function placeOpen(p: Pick<Place, "hours">, cityMinutes: number): boolean {
+  if (!p.hours) return true;
+  const { open, close } = p.hours;
+  const h = cityMinutes / 60;
+  return open < close ? h >= open && h < close : h >= open || h < close;
+}
+
+/** "6 PM", "12 AM". */
+export function hourLabel(h: number): string {
+  const h24 = ((h % 24) + 24) % 24;
+  return `${h24 % 12 === 0 ? 12 : h24 % 12} ${h24 < 12 ? "AM" : "PM"}`;
+}
+
+/** "Open 6 PM to 5 AM". */
+export function hoursLine(p: Pick<Place, "hours">): string | null {
+  return p.hours ? `Open ${hourLabel(p.hours.open)} to ${hourLabel(p.hours.close)}` : null;
+}
+
+/** Real minutes until a closed place opens (one city hour = 5 real minutes at the default clock). */
+export function realMinutesUntilPlaceOpens(p: Pick<Place, "hours">, cityMinutes: number, realHoursPerCityDay = 2): number {
+  if (!p.hours || placeOpen(p, cityMinutes)) return 0;
+  const wait = (p.hours.open * 60 - cityMinutes + 1440) % 1440;
+  return Math.ceil((wait * realHoursPerCityDay * 60) / 1440);
+}
+
+/** "Closed · opens 6 PM (in 25 min)". */
+export function closedLine(p: Pick<Place, "hours">, cityMinutes: number, realHoursPerCityDay = 2): string {
+  const mins = realMinutesUntilPlaceOpens(p, cityMinutes, realHoursPerCityDay);
+  return `Closed · opens ${hourLabel(p.hours?.open ?? 0)} (in ${mins} min)`;
+}
+
 export function itemBySku(sku: string): ShopItem | undefined {
   return SHOP_ITEMS.find((i) => i.sku === sku);
 }
@@ -1073,6 +1160,7 @@ export function citySeed() {
     economy: CITY_ECONOMY,
     places: PLACES.map((p) => ({
       id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null, borough: boroughOf(p),
+      ...(p.hours ? { hours: p.hours } : {}),
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false, ...(a.skill ? { skill: a.skill } : {}),
