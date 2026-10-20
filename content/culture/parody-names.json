@@ -1,0 +1,42 @@
+{
+  "about": "Invented stand-ins for real brands, teams and trademarked names (culture pack C1). 'real' lists the names that must never appear in player-facing copy or content; npm run validate:content and tests/culture.test.ts fail on any of them. Real landmarks and streets are fine (see 'allowed'). Matching is whole-word and ignores case unless 'caseSensitive' is true (for short names that are also ordinary words).",
+  "names": [
+    { "category": "sports", "real": ["Mets"], "caseSensitive": true, "parody": "the Flushing Meteors", "note": "Queens' baseball team. Home games at Meteor Park in Flushing. No league is ever named (docs/CAST.md)." },
+    { "category": "sports", "real": ["Yankees", "Bronx Bombers"], "parody": "the Bronx Bigshots", "note": "The Bronx's baseball team, Queens' rivals. Home is Bigshot Stadium, locked with the Bronx." },
+    { "category": "sports", "real": ["Knicks"], "parody": "the Manhattan Knickknacks", "note": "Basketball. Dunk Daniels' team stays unnamed." },
+    { "category": "sports", "real": ["Nets"], "caseSensitive": true, "parody": "the Brooklyn Hoopsters" },
+    { "category": "sports", "real": ["New York Jets"], "parody": "the Jersey Jetlags" },
+    { "category": "sports", "real": ["New York Giants"], "parody": "the Jersey Gargantuans" },
+    { "category": "venue", "real": ["Citi Field"], "parody": "Meteor Park", "note": "The Meteors' stadium in Flushing." },
+    { "category": "venue", "real": ["Yankee Stadium"], "parody": "Bigshot Stadium" },
+    { "category": "venue", "real": ["Madison Square Garden"], "parody": "Madison Circle Garden" },
+    { "category": "transit", "real": ["MetroCard", "OMNY"], "parody": "the OMG Card", "note": "Single ride, weekly and monthly (C4)." },
+    { "category": "transit", "real": ["MTA"], "caseSensitive": true, "parody": "the Metro Rail Authority (the MRA)", "note": "Who posts the delays in News (C4)." },
+    { "category": "transit", "real": ["Uber", "Lyft"], "parody": "Hailr", "note": "The rideshare app (C4)." },
+    { "category": "event", "real": ["Met Gala"], "parody": "the First Monday Ball", "note": "First Monday in May. Later, with Manhattan." },
+    { "category": "event", "real": ["Macy's"], "parody": "the Big Balloon Parade", "note": "The Thanksgiving parade." },
+    { "category": "event", "real": ["US Open"], "caseSensitive": true, "parody": "the Queens Open", "note": "Tennis in Flushing Meadows, late summer." },
+    { "category": "museum", "real": ["Metropolitan Museum", "the Met"], "caseSensitive": true, "parody": "the Grand Museum of Old Stuff" },
+    { "category": "museum", "real": ["MoMA"], "caseSensitive": true, "parody": "MoNA, the Museum of Nearly Art" },
+    { "category": "museum", "real": ["Guggenheim"], "parody": "the Spiral" },
+    { "category": "landmark", "real": ["Empire State Building"], "parody": "the Imperial Spire" },
+    { "category": "landmark", "real": ["Rockefeller"], "parody": "the Midtown Plaza Tree", "note": "The holiday tree." },
+    { "category": "landmark", "real": ["World Trade Center", "One World Trade", "Freedom Tower"], "parody": "the Tall Glass One" },
+    { "category": "landmark", "real": ["Chrysler Building"], "parody": "the Chromecap Building" },
+    { "category": "restaurant", "real": ["Carbone"], "parody": "Carbonara by Appointment" },
+    { "category": "restaurant", "real": ["Rao's"], "parody": "Ray-O's (one table, since forever)" },
+    { "category": "restaurant", "real": ["Nobu"], "parody": "Nobody's" },
+    { "category": "restaurant", "real": ["Peter Luger"], "parody": "Peter Lugnut's Steakhouse" },
+    { "category": "restaurant", "real": ["Katz's"], "parody": "Kvetch's Delicatessen" },
+    { "category": "brand", "real": ["Coca-Cola", "Coke", "Pepsi"], "caseSensitive": true, "parody": "a soda", "note": "Owner, Oct 20: \"two slices and a soda\"." },
+    { "category": "brand", "real": ["Starbucks"], "parody": "a chain café" },
+    { "category": "brand", "real": ["I ♥ NY", "I Love NY", "I ❤ NY", "I ❤️ NY"], "parody": "I ♡ The City", "note": "The tourist shirt Lola roasts (C3)." },
+    { "category": "school", "real": ["NYU", "CUNY", "SUNY"], "caseSensitive": true, "parody": "Village University / the City Colleges", "note": "Queens already has St. Johnsons University and Queensborough University." },
+    { "category": "school", "real": ["Columbia University"], "parody": "Morningside University" }
+  ],
+  "allowed": [
+    { "name": "Instagram", "why": "Owner, Oct 16: Real Clout FM and Clout TV ask for the player's Instagram handle by name." },
+    { "name": "Real landmarks and streets", "why": "Allowed by the guide: The Unisphere, Flushing Meadows Corona Park, Gantry Plaza, Times Square, the Statue of Liberty, Steinway Street, Ditmars Boulevard, 31st Street." },
+    { "name": "Steinway Fresh Mart", "why": "Owner, Oct 20 (conflict report row 33): named after the street, kept." }
+  ]
+}
