@@ -148,3 +148,9 @@ export async function studioShopEdit(sku: string, fields: Partial<Pick<CatalogIt
 export async function studioShopAudit(sku: string): Promise<Admin<ShopAuditRow[]>> {
   return rpc<ShopAuditRow[]>("admin_shop_audit", { p_sku: sku });
 }
+
+/** Clout Couture: the next drop of a sold-out numbered piece (admin_couture_new_drop: numbering continues, News item). */
+export async function studioShopNewDrop(sku: string, size?: number | null): Promise<Admin<null>> {
+  const r = await rpc<unknown>("admin_couture_new_drop", { p_sku: sku, p_size: size ?? null });
+  return r.ok ? { ok: true, data: null } : r;
+}

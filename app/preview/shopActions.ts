@@ -2,7 +2,7 @@
 
 import { previewOnly } from "./guard";
 import { SHOP_ITEMS } from "@/lib/city";
-import { canMove, fieldProblems, fromShopItem, imageMatches, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
+import { canMove, COUTURE_NOW, fieldProblems, fromShopItem, imageMatches, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
 import type { Admin, ShopAction, ShopAuditRow, ShopImportResult } from "@/lib/studio";
 
@@ -28,11 +28,30 @@ function store(): Map<string, CatalogItem> {
   return rows;
 }
 const list = () => [...store().values()].filter((i) => i.status !== "deleted");
+
+// Clout Couture's step 5 pieces (docs/shop-manager.md section 5) are on sale in the preview, with their shipped pictures,
+// so /preview/home shows the drop as players will see it once the owner approves it in the Studio.
+let coutureReady: Promise<void> | null = null;
+function withCouture(): Promise<void> {
+  return (coutureReady ??= (async () => {
+    const prep = await prepareImport(await readShopFile("clout-couture.json"), "clout-couture.json", list());
+    for (const d of prep.drafts) {
+      if (!COUTURE_NOW.has(d.sku) || store().has(d.sku)) continue;
+      // A sample of each drop already sold; the Tourbillon's has sold out, so the Studio shows its next drop.
+      const size = d.editionSize ?? 100;
+      const issued = d.sku === "ledger-tourbillon" ? size : 7 + ([...d.sku].reduce((n, ch) => n + ch.charCodeAt(0), 0) % (size - 8));
+      store().set(d.sku, { ...d, status: "live", goLiveAt: null, images: shippedPictures(d.sku, d.sourceImage), imageStatus: "ready", imageError: null,
+                           note: null, sold: true, origin: "import",
+                           edition: { size, drop: 1, dropEnd: size, issued, left: size - issued, soldOut: issued >= size } });
+    }
+  })());
+}
 const log = (sku: string, action: string, before: unknown, after: unknown, note: string | null = null) =>
   audit.unshift({ sku, action, at: new Date().toISOString(), before, after, note, actor: "preview" });
 
 export async function previewShopList(): Promise<Admin<CatalogItem[]>> {
   previewOnly();
+  await withCouture();
   for (const i of list()) if (i.status === "scheduled" && isOnSale(i, Date.now())) { i.status = "live"; log(i.sku, "went_live", { status: "scheduled" }, { status: "live" }); }
   return { ok: true, data: list().map((i) => ({ ...i })) };
 }
@@ -151,5 +170,19 @@ export async function previewShopAudit(sku: string): Promise<Admin<ShopAuditRow[
 /** The preview game's Shop: what's on sale here, as shop_catalog_public() gives players. */
 export async function previewShopCatalog(): Promise<CatalogItem[]> {
   previewOnly();
+  await withCouture();
   return list().filter((i) => isOnSale(i, Date.now()) || i.status === "retired");
+}
+
+export async function previewShopNewDrop(sku: string, size?: number | null): Promise<Admin<null>> {
+  previewOnly();
+  const i = store().get(sku);
+  if (!i?.editionSize) return { ok: false, error: "Only numbered pieces have drops." };
+  const e = i.edition ?? { size: i.editionSize, drop: 1, dropEnd: i.editionSize, issued: i.editionSize, left: 0, soldOut: true };
+  if (!e.soldOut) return { ok: false, error: "This drop hasn't sold out yet." };
+  const n = size ?? i.editionSize;
+  i.editionSize = n;
+  i.edition = { size: n, drop: e.drop + 1, dropEnd: Math.max(e.dropEnd, e.issued) + n, issued: e.issued, left: n, soldOut: false };
+  log(sku, "new_drop", { drop: e.drop }, { drop: e.drop + 1 });
+  return { ok: true, data: null };
 }

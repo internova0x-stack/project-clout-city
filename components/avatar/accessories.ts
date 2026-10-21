@@ -8,6 +8,7 @@ import {
   SphereGeometry, TorusGeometry, TubeGeometry, Vector3, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import type { AccessoryWear } from "@/lib/accessories";
+import { buildSetHat } from "./setHats";
 
 type Opts = Partial<{ roughness: number; metalness: number; opacity: number; side: typeof DoubleSide }>;
 
@@ -34,6 +35,8 @@ const metal = (k: ReturnType<typeof kit>, c: string) => k.mat(c, { metalness: 0.
 
 /** A head piece, in the head's space. */
 export function buildHeadAccessory(a: AccessoryWear): { group: Group; dispose(): void } {
+  // Clout Couture's crown is the Royalty outfit's crown in its own gold and stones.
+  if (a.kind === "crown") return buildSetHat("crown", a.color, a.accent);
   const k = kit();
   const { add, mat } = k;
   const main = mat(a.color), trim = mat(a.accent);

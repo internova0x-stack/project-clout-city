@@ -10,7 +10,7 @@ import {
   type CatalogItem, type CatalogStatus, type EditableField, type ShopFile, type ShopTab, type StyleLine,
 } from "@/lib/shopCatalog";
 import type { ShopAction, ShopAuditRow, ShopImportResult, StudioApi } from "@/lib/studio";
-import { formatPrice } from "@/lib/store";
+import { editionLine, formatPrice, serialLabel, type Edition } from "@/lib/store";
 import { ShopArt, ShopCardPreview } from "../city/ShopCard";
 import { GraphicsSwitch } from "../GraphicsSwitch";
 
@@ -284,6 +284,7 @@ function ItemPage({ api, item, all, busy, onBack, onChanged, act, process }: {
         {item.status === "scheduled" && <button className="btn btn-secondary btn-sm" onClick={() => void act([item.sku], "unschedule")}>Back to review</button>}
         {item.status === "live" && <button className="btn btn-secondary btn-sm" onClick={() => void act([item.sku], "retire")}>Retire: stop selling (owners keep it)</button>}
         {item.status === "retired" && <button className="btn btn-taxi btn-sm" onClick={() => void act([item.sku], "restore")}>Restore: back on sale</button>}
+        {item.edition && <DropControl api={api} sku={item.sku} edition={item.edition} onChanged={onChanged} />}
         {item.status !== "scheduled" && (
           confirmDelete ? (
             <span className="row" style={{ gap: 6 }}>
@@ -340,5 +341,34 @@ function ItemPage({ api, item, all, busy, onBack, onChanged, act, process }: {
         ))}
       </div>
     </section>
+  );
+}
+
+/** Clout Couture (migration 0102): where the drop stands, and the next drop once it has sold out (numbering continues). */
+function DropControl({ api, sku, edition, onChanged }: { api: StudioApi; sku: string; edition: Edition; onChanged: () => Promise<void> | void }) {
+  const [size, setSize] = useState(String(edition.size));
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const n = Number(size);
+  return (
+    <span className="stack-8">
+      <span className="meta">
+        Numbered: {editionLine(edition)} · {serialLabel(1 + edition.dropEnd - edition.size)} to {serialLabel(edition.dropEnd)} · {edition.issued} issued in all
+      </span>
+      {edition.soldOut && api.shopNewDrop && (
+        <span className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+          <input className="studio-input" type="number" min={1} value={size} onChange={(e) => setSize(e.target.value)} aria-label="Copies in the next drop" style={{ width: 90 }} />
+          <button className="btn btn-taxi btn-sm" disabled={busy || !(n >= 1)} onClick={async () => {
+            setBusy(true); setMsg(null);
+            const r = await api.shopNewDrop!(sku, n);
+            setBusy(false);
+            if (!r.ok) return setMsg(r.error);
+            setMsg(`Drop ${edition.drop + 1} is on sale, with Lola's News item.`);
+            await onChanged();
+          }}>Open drop {edition.drop + 1} ({n >= 1 ? n : "?"} copies)</button>
+        </span>
+      )}
+      {msg && <span className="meta">{msg}</span>}
+    </span>
   );
 }

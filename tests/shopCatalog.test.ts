@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
 import { brandHits } from "../lib/culture.ts";
 import {
-  canMove, cloutCurve, defaultPresentation, fieldProblems, fromShopItem, isOnSale, isReady, parseCatalogFile, readiness, tabForAccessory,
+  canMove, cloutCurve, COUTURE_NOW, defaultPresentation, fieldProblems, fromShopItem, isOnSale, isReady, parseCatalogFile, readiness, tabForAccessory,
   type CatalogItem,
 } from "../lib/shopCatalog.ts";
 
@@ -26,7 +26,7 @@ test("every catalog file loads: 97 new items, 56 pictures for items on sale, no 
   for (const d of drafts) {
     assert.deepEqual(fieldProblems(d, { brandHits: (t) => brandHits(t, parody) }), [], d.sku);
     assert.ok(!SHOP_ITEMS.some((i) => i.sku === d.sku), `${d.sku} is new`);
-    assert.equal(d.wearable, false, `${d.sku} waits for its template`);
+    assert.equal(d.wearable, COUTURE_NOW.has(d.sku), `${d.sku}: only Couture's first pieces are unlocked by the file itself`);
   }
 });
 

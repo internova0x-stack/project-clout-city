@@ -1,4 +1,4 @@
-import { studioShopAction, studioShopAudit, studioShopEdit, studioShopFiles, studioShopImport, studioShopList, studioShopProcessImages } from "./shopActions";
+import { studioShopAction, studioShopAudit, studioShopNewDrop, studioShopEdit, studioShopFiles, studioShopImport, studioShopList, studioShopProcessImages } from "./shopActions";
 import { Studio } from "@/components/studio/Studio";
 import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
@@ -36,7 +36,7 @@ export default async function StudioPage() {
       api={{
         upload: studioUpload, review: studioReview, schedule: studioSchedule, status: studioStatus, beatStatus: studioBeatStatus, content: studioContent, reorder: studioReorder, beatEdit: studioBeatEdit, goLive: studioGoLive,
         shopList: studioShopList, shopFiles: studioShopFiles, shopImport: studioShopImport, shopProcessImages: studioShopProcessImages,
-        shopAction: studioShopAction, shopEdit: studioShopEdit, shopAudit: studioShopAudit,
+        shopAction: studioShopAction, shopEdit: studioShopEdit, shopAudit: studioShopAudit, shopNewDrop: studioShopNewDrop,
         reports: studioReports, reportAction: studioReportAction, metrics: studioMetrics, insights: studioInsights, players: studioPlayers, player: studioPlayer, playerBan: studioPlayerBan,
         affiliates: studioAffiliates, affiliatesOverview: studioAffiliatesOverview, creatorPage: studioCreatorPage, payouts: studioPayouts, payoutMark: studioPayoutMark, payoutVoid: studioPayoutVoid, videos: studioVideos, videoSave: studioVideoSave, videoStatus: studioVideoStatus, creatorSave: studioCreatorSave, linkSave: studioLinkSave, linkStatus: studioLinkStatus,
         castLines: studioCastLines, castAdd: studioCastAdd, castStatus: studioCastStatus,

@@ -616,9 +616,13 @@ export function createSimApi(
       return { cash: p().bank_cash, clout: p().clout, confidence: p().confidence, allDone: s.tasks.length > 0 && s.tasks.every((t) => t.done_at) };
     },
     grantCollector(sku) {
-      const item = itemBySku(sku);
+      // The code's collector pieces, or a catalog one (Clout Couture, migration 0102): worn accessories filed as fashion,
+      // valued by their Shop tab, and a car goes in the garage.
+      const c = itemBySku(sku) ? undefined : s.catalog?.find((x) => x.sku === sku && x.realCash);
+      const item = itemBySku(sku) ?? (c && { category: (wearSlot(sku) && c.tab !== "fashion" ? "fashion" : c.tab) as ShopItem["category"], clout: c.clout });
       if (!item || s.items.some((i) => i.sku === sku)) return;
-      s.items.push({ id: nextId++, sku, category: item.category, value: collectorValue(item.category), acquired: "collector", equipped: false });
+      s.items.push({ id: nextId++, sku, category: item.category, value: collectorValue(c?.tab ?? item.category), acquired: "collector", equipped: false });
+      if (c?.tab === "cars" && p().car_mode !== "owned") Object.assign(p(), { car_sku: sku, car_mode: "owned" });
       p().clout += purchaseClout(item.clout, p().purchases_count);
       p().purchases_count += 1;
     },

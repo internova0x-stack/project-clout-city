@@ -1,7 +1,7 @@
 // The Shop catalog's clothes on the new bodies (stage 4 of the avatar and Shop upgrade; owner, Oct 21: "go"). Every
 // top, bottom, dress and pair of shoes in content/shop/*.json is worn as the game's garment templates in its colors,
 // with its details, fabric pattern and finish, read from its description. A dress (slot "one-piece") is a top and a
-// bottom at once. Real-money Clout Couture pieces come with stage 5.
+// bottom at once. Clout Couture's suit and heels came with stage 5 (migration 0102).
 //
 // Some shapes are approximations the shader dresses up: shoes have no heel height (the bodies' feet stay flat), a
 // platform is drawn on an ordinary sole, a cropped puffer or windbreaker keeps the template's length.
@@ -74,6 +74,8 @@ export const CATALOG_WEAR: Record<string, CatalogWear> = {
   "block-party-mini-skirt": bottom({ file: "skirt", color: "#9DB7D5", accent: "#9DB7D5", kind: plain, pattern: P.denim | P.holes }),
   // Dresses: a top and a bottom in one
   "after-hours-mini": dress({ file: "vest", color: "#14111A", accent: "#14111A", kind: plain }, { file: "skirt", color: "#14111A", accent: "#14111A", kind: plain }),
+  // Clout Couture: a midnight-blue three-piece with a gold silk lining (the jacket and trousers as one piece).
+  "sartorio-bespoke-suit": dress({ file: "blazer", color: "#1B2440", accent: "#D4AF37" }, { file: "pants", color: "#1B2440", accent: "#1B2440" }),
   "red-carpet-rehearsal-gown": dress({ file: "vest", color: "#E8D9B5", accent: "#E8D9B5", kind: plain, finish: "satin" }, { file: "gown", color: "#E8D9B5", accent: "#E8D9B5", finish: "satin" }),
   "midnight-velvet-dress": dress({ file: "vest", color: "#14111A", accent: "#4A4F57", kind: plain, pattern: P.lacing, finish: "velvet" }, { file: "midi", color: "#14111A", accent: "#14111A", finish: "velvet" }),
   "board-meeting-wrap-dress": dress({ file: "cardigan", color: "#1F6B4A", accent: "#1F6B4A", kind: plain }, { file: "midi", color: "#1F6B4A", accent: "#1F6B4A" }),
@@ -85,6 +87,8 @@ export const CATALOG_WEAR: Record<string, CatalogWear> = {
   "nightshift-platforms": shoes({ file: "boots", color: "#14111A", accent: "#D9DDE3", finish: "leather" }),
   "honor-roll-loafers": shoes({ file: "sneakers", color: "#6B3F1F", accent: "#3A2414", kind: dressShoes, pattern: P.strap }),
   "glow-lap-runners": shoes({ file: "sneakers", color: "#FF7A59", accent: "#FFD3C4", pattern: P.glowSole }),
+  // Clout Couture: black patent with mirror-gold soles.
+  "gilded-sole-heels": shoes({ file: "sneakers", color: "#0E0C10", accent: "#D4AF37", kind: dressShoes, finish: "patent", cover: 0 }),
   "gala-gold-heels": shoes({ file: "sneakers", color: "#C9A227", accent: "#E9F4FF", kind: dressShoes, pattern: P.sandal, finish: "patent", cover: 0 }),
   "lime-sculpt-clogs": shoes({ file: "sneakers", color: "#B8D84A", accent: "#8FAF2E", kind: dressShoes, finish: "matte" }),
   "never-worked-a-day-boots": shoes({ file: "boots", color: "#7A5A3A", accent: "#4A3422", finish: "suede" }),

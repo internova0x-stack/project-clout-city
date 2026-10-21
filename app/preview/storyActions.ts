@@ -1,6 +1,7 @@
 "use server";
 
 import { previewOnly } from "./guard";
+import { previewShopCatalog } from "./shopActions";
 
 import { loadArcs } from "@/lib/storyContent";
 import { buildFeed, castVote, claimRewards, emptyStoryState, type PlayerStoryState, type VoteCounts } from "@/lib/storyFeedBuild";
@@ -135,6 +136,16 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
     ...SHOP_ITEMS.filter((i) => i.collector).map((i) => ({
       ...base(i.sku), type: "collector_item" as const, name: i.name, priceCents: i.sku === "col-faux-chinchilla" ? 499 : 399, value: collectorValue(i.category),
     })),
+    // Clout Couture (migration 0102): the preview catalog's numbered pieces, with a sample of each drop already sold.
+    ...(await previewShopCatalog()).filter((c) => c.realCash && c.priceUsdCents && c.edition).map((c) => {
+      const e = c.edition!;
+      const mine = owned(c.sku) ? 1 : 0, held = pending.has(c.sku) ? 1 : 0;
+      return {
+        ...base(c.sku), type: "collector_item" as const, name: c.name, priceCents: c.priceUsdCents!, value: collectorValue(c.tab),
+        serial: mine ? e.issued + 1 : null,
+        edition: { ...e, issued: e.issued + mine, left: Math.max(0, e.left - mine - held), soldOut: e.soldOut || e.left - mine - held <= 0 },
+      };
+    }),
     // Meeting players (migrations 0047, 0051): unlimited chat, monthly, yearly or forever.
     { ...base("chat-unlimited-monthly"), type: "chat_pass" as const, name: "VIP (monthly)", priceCents: 499 },
     { ...base("chat-unlimited-yearly"), type: "chat_pass" as const, name: "VIP (yearly)", priceCents: 3999 },

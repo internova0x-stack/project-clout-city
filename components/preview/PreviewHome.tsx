@@ -56,7 +56,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, calendarPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, calendarPreset, couturePreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -98,6 +98,8 @@ export function PreviewHome({
   transitPreset?: string;
   /** C5: "today" moves every calendar event to right now, so each can be tried; "gift" also starts with a gift box. */
   calendarPreset?: string;
+  /** ?couture=soldout: every Clout Couture drop has sold out. */
+  couturePreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
   pushPreset?: string;
   /** Membership & purchases: ?member=vip|monthly|cancelling|pastdue|forever|free|none (default vip). */
@@ -122,10 +124,12 @@ export function PreviewHome({
       ...(transitPreset === "pass" ? { transit_pass_until: new Date(Date.now() + 5 * 86_400_000).toISOString() } : { transit_pass_until: null }) }, sampleSkills(skillsPreset === "pro"), { firstDay: player.tutorial_state === "pending", startingStyle: player.starting_style });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
     s.calendar = { attended: [], gifts: calendarPreset === "gift" ? 1 : 0 };
+    // The preview Shop's catalog, so its pieces (and Clout Couture's) can be bought and owned.
+    if (catalog) s.catalog = catalog;
     // v0.15 (migration 0076): students get "Go to class" in place of the random task.
     if (campusPreset && campusPreset !== "new") s.tasks = s.tasks.map((t) => (t.slot === 5 ? { ...t, kind: "class" as const, place_id: "st-johnsons", action_id: "class", goal: null } : t));
     return { ...s, devTools };
-  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset, transitPreset, calendarPreset]);
+  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset, transitPreset, calendarPreset, catalog]);
   // C5: the calendar, with ?calendar=today|gift moving every event to now (an hour ago for three hours).
   const calendar = useMemo<CalendarData>(() => {
     const { events, ...rest } = CALENDAR_FILE as CalendarData & { about?: string };
@@ -262,22 +266,28 @@ export function PreviewHome({
   // The ?party preset applies once per page load, before the first catalog or inbox read.
   const partyReady = useRef<Promise<void> | null>(null);
   const partyReset = useCallback(() => (partyReady.current ??= previewPartyReset(partyPreset)), [partyPreset]);
-  const granted = useRef(new Set<string>());
-  const storeApi = useMemo<StoreApi>(() => ({
-    async catalog() {
-      await partyReset(); // ?party=ticket|sent hand out a ticket first
-      const c = await previewStoreCatalog();
-      catalogRef.current = c;
-      for (const p of c ?? []) {
-        if (!p.owned || granted.current.has(p.sku)) continue;
-        granted.current.add(p.sku);
-        if (p.type === "collector_item") sim.grantCollector(p.sku);
-        if (p.type === "exclusive_event" && p.event) sim.grantTicket(p.event.clout);
-      }
-      return c;
-    },
-    checkout: (sku) => previewCheckout(sku, window.location.pathname + window.location.search),
-  }), [sim, partyReset]);
+  const storeApi = useMemo<StoreApi>(() => {
+    // Per simulator: a new one (the Shop catalog arriving) is granted its pieces again.
+    const granted = new Set<string>();
+    return {
+      async catalog() {
+        await partyReset(); // ?party=ticket|sent hand out a ticket first
+        const raw = await previewStoreCatalog();
+        const c = couturePreset === "soldout"
+          ? raw?.map((p) => (p.edition && !p.owned ? { ...p, edition: { ...p.edition, issued: p.edition.size, left: 0, soldOut: true } } : p)) ?? null
+          : raw;
+        catalogRef.current = c;
+        for (const p of c ?? []) {
+          if (!p.owned || granted.has(p.sku)) continue;
+          granted.add(p.sku);
+          if (p.type === "collector_item") sim.grantCollector(p.sku);
+          if (p.type === "exclusive_event" && p.event) sim.grantTicket(p.event.clout);
+        }
+        return c;
+      },
+      checkout: (sku) => previewCheckout(sku, window.location.pathname + window.location.search),
+    };
+  }, [sim, partyReset, couturePreset]);
 
   // City actions can finish story tasks (as do_action does in SQL).
   const api = useMemo(() => ({

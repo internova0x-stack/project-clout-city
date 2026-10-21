@@ -34,7 +34,9 @@ export type FurnitureKind =
   // v0.14 On Air: Real Clout FM's studio and Clout TV's control room
   | "micDesk" | "onAirSign" | "soundPanel" | "bigScreen" | "tvCamera" | "ringLight"
   // The Hub's game room
-  | "arcade" | "poolTable";
+  | "arcade" | "poolTable"
+  // Clout Couture (migration 0102): the owner in gold on a marble pedestal
+  | "statue";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -136,6 +138,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   drinksFridge: { w: 1.4, d: 0.7, label: "Drinks" },
   cat: { w: 0.5, d: 0.3, label: "The cat" },
   piano: { w: 1.5, d: 1.4, label: "Piano", movable: true },
+  statue: { w: 0.8, d: 0.8, label: "Statue", movable: true },
   clothesRack: { w: 1.6, d: 0.5, label: "Rack" },
   mirror: { w: 0.9, d: 0.3, label: "Mirror" },
   displayTable: { w: 1.2, d: 0.8, label: "Display" },

@@ -49,6 +49,9 @@ export interface Built {
   seatY?: number;
 }
 
+/** The statue's pedestal height: the gold avatar stands on it. */
+export const STATUE_TOP = 0.62;
+
 const WOOD = "#9A6B45";
 const WOOD_DARK = "#5A3E2B";
 const METAL = "#B9BEC6";
@@ -278,6 +281,15 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       front.material = k.mat("#CFE8FF", { emissive: "#CFE8FF", emissiveIntensity: opts.night ? 0.7 : 0.35, opacity: 0.9 });
       const cans = ["#D93A2F", "#40B589", "#F2B705", "#6C8CFF"];
       for (let r = 0; r < 4; r++) for (let i = 0; i < 6; i++) cyl(0.04, 0.04, 0.16, cans[(i + r) % 4], -w / 2 + 0.2 + i * 0.2, 0.2 + r * 0.42, 0.1, 6);
+      return { group: g };
+    }
+    case "statue": {
+      // A black marble pedestal with a gold plaque; Room3D stands the owner's avatar, in gold, on top (STATUE_TOP).
+      const marble = k.mat("#1F1B26", { roughness: 0.25, metalness: 0.1 });
+      box(w, 0.08, d, marble);
+      box(w - 0.14, STATUE_TOP - 0.16, d - 0.14, marble, 0, 0.08, 0);
+      box(w, 0.08, d, marble, 0, STATUE_TOP - 0.08, 0);
+      box(0.3, 0.1, 0.01, k.mat(color ?? "#D4AF37", { roughness: 0.3, metalness: 0.85 }), 0, STATUE_TOP * 0.45, (d - 0.14) / 2 + 0.006);
       return { group: g };
     }
     case "piano": {

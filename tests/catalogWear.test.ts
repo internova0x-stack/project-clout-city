@@ -10,7 +10,8 @@ const catalog = readdirSync("content/shop").filter((f) => f.endsWith(".json")).f
 });
 
 test("every Shop catalog top, bottom, dress and pair of shoes has its pieces on the new bodies", () => {
-  const clothes = catalog.filter((i) => ["top", "bottom", "one-piece", "shoes"].includes(i.slot ?? "") && i.template);
+  // With Clout Couture's suit and heels (migration 0102).
+  const clothes = catalog.filter((i) => ["top", "bottom", "one-piece", "shoes"].includes(i.slot ?? "") && (i.template || i.realCash));
   assert.ok(clothes.length >= 60, `${clothes.length} pieces of clothing`);
   assert.deepEqual(Object.keys(CATALOG_WEAR).sort(), clothes.map((i) => i.id!).sort(), "one entry per catalog piece, nothing extra");
   for (const i of clothes) {

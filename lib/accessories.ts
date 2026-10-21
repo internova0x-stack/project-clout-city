@@ -17,12 +17,12 @@ export type AccessoryKind =
   | "hoops" | "drops"
   | "rope-chains" | "flame-chain" | "pearls" | "ring-choker" | "scarf"
   | "tote" | "sling" | "doctor-bag" | "mini-bag" | "shoulder-bag" | "clutch"
-  | "iced-watch";
+  | "iced-watch" | "crown";
 
 /** One accessory as worn: its shape and colors. */
 export interface AccessoryWear { slot: AccessorySlot; kind: AccessoryKind; color: string; accent: string }
 
-/** The catalog's accessories by sku (Clout Couture's crown, shades and watch come with stage 5). */
+/** The catalog's accessories by sku, with Clout Couture's crown, shades and watch (stage 5, migration 0102). */
 export const ACCESSORIES: Record<string, AccessoryWear> = {
   "patchwork-bucket-hat": { slot: "head", kind: "bucket", color: "#5B7FA6", accent: "#2E4A6E" },
   "corner-beanie": { slot: "head", kind: "beanie", color: "#1F1B26", accent: "#14111A" },
@@ -46,13 +46,17 @@ export const ACCESSORIES: Record<string, AccessoryWear> = {
   "lilac-errand-bag": { slot: "hand", kind: "shoulder-bag", color: "#B9A2D8", accent: "#D9DDE3" },
   "afterparty-clutch": { slot: "hand", kind: "clutch", color: "#D9DDE3", accent: "#F4F7FF" },
   "ice-rink-watch": { slot: "wrist", kind: "iced-watch", color: "#C9A227", accent: "#E9F4FF" },
+  // Clout Couture: solid gold, gold-mirror lenses; the tourbillon's diamonds; the crown's rubies.
+  "midas-shades": { slot: "face", kind: "oversized-shades", color: "#D4AF37", accent: "#E8C55A" },
+  "ledger-tourbillon": { slot: "wrist", kind: "iced-watch", color: "#D4AF37", accent: "#F4F7FF" },
+  "clout-crown": { slot: "head", kind: "crown", color: "#D4AF37", accent: "#B3122E" },
 };
 
 /** The catalog templates the accessories above stand for ("rigid:hat", "mini_bag", "watch"). */
 export const ACCESSORY_TEMPLATES = ["rigid:hat", "rigid:balaclava", "rigid:eyewear", "rigid:earrings", "rigid:necklace", "rigid:choker", "rigid:scarf", "rigid:bag", "mini_bag", "watch"] as const;
 
 /** Head pieces that sit over the hair (only its lengths show) and the one that hides it. */
-export const ACCESSORY_HATS: ReadonlySet<AccessoryKind> = new Set(["bucket", "beanie", "fedora", "wide-brim", "balaclava"]);
+export const ACCESSORY_HATS: ReadonlySet<AccessoryKind> = new Set(["bucket", "beanie", "fedora", "wide-brim", "balaclava", "crown"]);
 export const ACCESSORY_HIDES_HAIR: ReadonlySet<AccessoryKind> = new Set(["balaclava"]);
 
 /** The worn accessories by slot (the last one wins a slot), for the avatar. */

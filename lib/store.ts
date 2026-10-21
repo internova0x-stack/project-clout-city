@@ -21,7 +21,24 @@ export interface StoreProduct {
   /** v0.7 (migration 0022): owned copies are numbered in the order players collected them. */
   serial?: number | null;
   ownedAt?: string | null;
+  /** Clout Couture (migration 0102): a numbered piece's drop and what's left of it. */
+  edition?: Edition | null;
 }
+
+/** A numbered drop: `size` per drop, numbers up to `dropEnd`, `issued` so far (refunded copies keep theirs). */
+export interface Edition { size: number; drop: number; dropEnd: number; issued: number; left: number; soldOut: boolean }
+
+/** Every real-money purchase over $50 shows the confirmation sheet first (docs/shop-manager.md section 3). */
+export const CONFIRM_ABOVE_CENTS = 5000;
+export const needsConfirm = (p: Pick<StoreProduct, "priceCents"> | null | undefined) => !!p && p.priceCents > CONFIRM_ABOVE_CENTS;
+
+/** "Drop 1 · 63 of 100 left", or "Sold out" until the next drop. */
+export function editionLine(e: Edition): string {
+  return e.soldOut ? `Drop ${e.drop} · Sold out` : `Drop ${e.drop} · ${e.left} of ${e.size} left`;
+}
+
+/** Badge for owning any Clout Couture piece (migration 0102). */
+export const COUTURE_BADGE = { id: "clout-couture", name: "Clout Couture", emoji: "💎", line: "Owns a numbered Clout Couture piece." };
 
 export interface ExclusiveEvent {
   id: string;
@@ -90,6 +107,9 @@ const ERRORS: Record<string, string> = {
   event_over: "That party's over. The cleanup crew says hi.",
   unknown_product: "That isn't for sale.",
   no_player: "Finish moving in first.",
+  sold_out: "That drop just sold out. Nothing was charged; the next drop gets announced in the News.",
+  not_for_sale: "That piece isn't on sale right now. Nothing was charged.",
+  already_own_car: "You already own a car. One garage, one car: sell yours first.",
 };
 
 export function storeError(message: string | undefined): string {

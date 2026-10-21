@@ -389,3 +389,31 @@ function CardDetail({ picked, flipped, onFlip, handle, onBack, onShare }: {
     </div>
   );
 }
+
+/**
+ * Every real-money purchase over $50 asks first (docs/shop-manager.md section 3): what it is, the price, that it is
+ * charged in real money and can't be sold for virtual cash. Checkout opens only from here.
+ */
+export function BigBuySheet({ p, onClose, onConfirm, busy }: { p: StoreProduct | null; onClose: () => void; onConfirm: (sku: string) => void; busy: boolean }) {
+  return (
+    <Sheet open={!!p} onClose={onClose} label="Confirm a real-money purchase">
+      {p && (
+        <div className="stack-16">
+          <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>Buy {p.name} for {formatPrice(p.priceCents, p.currency)}?</h2>
+          <div className="card stack-8">
+            <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Price</span><span className="body-strong">{formatPrice(p.priceCents, p.currency)}</span></div>
+            <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Paid with</span><span className="body-strong">Real money, at checkout</span></div>
+            {p.edition && <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Edition</span><span className="body-strong">Numbered, {p.edition.left} of {p.edition.size} left</span></div>}
+          </div>
+          <p className="meta" style={{ margin: 0 }}>
+            {p.type === "collector_item"
+              ? "A collector piece: it's yours to keep and show off, with no gameplay advantage. It can't be sold for virtual cash or traded."
+              : "Charged once at checkout. Nothing is charged until you pay there."}
+          </p>
+          <button className="btn btn-taxi" disabled={busy} onClick={() => onConfirm(p.sku)}>{busy ? "Opening…" : `Continue to checkout`}</button>
+          <button className="btn btn-ghost" onClick={onClose}>Not now</button>
+        </div>
+      )}
+    </Sheet>
+  );
+}

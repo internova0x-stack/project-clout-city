@@ -2,6 +2,7 @@
 // the catalog files in content/shop/ become drafts, the clout curve, the presentation default and the readiness checks.
 // Pure and dependency-free (the parody names are passed in), so tests, the Studio and the server share it.
 
+import type { Edition } from "./store.ts";
 import type { ShopItem } from "./city.ts";
 import { SHOP_STATIC_IMAGES } from "./shopImagesStatic.ts";
 
@@ -74,6 +75,8 @@ export interface CatalogItem {
   note: string | null;
   /** Anyone owns it (Delete is blocked then). */
   sold: boolean;
+  /** Clout Couture (migration 0102): a numbered piece's drop and what's left of it. */
+  edition?: Edition | null;
   origin: "code" | "import";
   file: string | null;
   /** Everything else (customizable fields, the batch, Couture notes). */
@@ -170,7 +173,11 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : N
  * entry that can't load. `couturePriceFor(tab)` gives a Clout Couture piece's clout: the most expensive C$ item's clout
  * in that tab.
  */
-export function parseCatalogFile(raw: unknown, file: string, opts: { coutureCloutFor?: (tab: ShopTab) => number } = {}): {
+/** Clout Couture pieces that work in the game now (migration 0102); the yacht, jet, plaza statue and mansion come later. */
+export const COUTURE_NOW: ReadonlySet<string> = new Set(["cloud-nine-sofa", "self-portrait-statue", "velocity-veloce", "sartorio-bespoke-suit",
+  "gilded-sole-heels", "midas-shades", "ledger-tourbillon", "clout-crown"]);
+
+export function parseCatalogFile(raw: unknown, file: string, opts: { coutureCloutFor?: (tab: ShopTab) => number; wearableNow?: (sku: string) => boolean } = {}): {
   drafts: CatalogDraft[]; images: ImageMatch[]; problems: { id: string; problem: string }[];
 } {
   const drafts: CatalogDraft[] = [];
@@ -208,8 +215,8 @@ export function parseCatalogFile(raw: unknown, file: string, opts: { coutureClou
       clout: realCash ? (opts.coutureCloutFor?.(tab) ?? 0) : cloutCurve(price),
       tier, stars: Number.isInteger(it.stars) ? (it.stars as number) : realCash ? 4 : 1,
       styleLines: Array.isArray(it.styleLines) ? (it.styleLines as unknown[]).map(String) : [],
-      // Couture pieces all wait on stage 5 (their 3D, map spots and editions); the file's wearable flag says the same.
-      template: template ?? (couture ? `couture:${slot ?? "piece"}` : null), wearable: false,
+      // Wearable once its shape exists (the caller knows the client's tables) or it is one of the Couture pieces built in stage 5.
+      template: template ?? (couture ? `couture:${slot ?? "piece"}` : null), wearable: COUTURE_NOW.has(id) || !!opts.wearableNow?.(id),
       realCash, priceUsdCents: realCash && Number.isFinite(usd) ? Math.round(usd * 100) : null,
       editionSize: Number.isInteger(it.editionSize) ? (it.editionSize as number) : null,
       sourceImage: str(it.sourceImage) || null, transparent: it.transparent === true,
