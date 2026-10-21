@@ -143,6 +143,11 @@ components live in `app/globals.css`.
   unset = always open). `place_visits_open` (a trigger like `require_here`) refuses anything at a shut place
   ('closed_now'); the card, actions and daily tasks say when it opens. Sal remembers your order after 3 different
   days at the deli (`remembers` in npcs.json, counted from `place_visits` rows).
+  C3 (migration 0094): homes may carry `roommate` (the player pays their half; "Room share with a roommate" is the first
+  sign-up home and now the cheapest, so evictions land there); the roommate's intro and daily note come from
+  npcs.json `roommates` (components/home/Roommate.tsx). On the New York day a player moves in (not students),
+  `ensure_daily` starts with `dailyTasks.firstDay`. Goals 'regular' (days at a place) and 'solo' (no roommate) open
+  the ladder. An action's `task` gives its daily task its own title.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.

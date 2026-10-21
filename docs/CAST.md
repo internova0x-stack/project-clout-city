@@ -92,6 +92,10 @@ Tap a regular on a place card to hear a line; each tap says the next one. While 
 | Feta Compli Taverna | Andreas Charalambous, the owner (C2) | bartender | “Today is somebody's name day. It's always somebody's name day.” |
 | Schlep & Schmear Deli | Hersh Weiss, the owner, at the counter (C2) | clerk | “On line, not in line. You're in New York now.” |
 
+**Roommate (C3):** Priya Raman, 27, a night-shift ER nurse at St. Copay's from Edison, New Jersey, shares the
+"Room share with a roommate" apartment. She introduces herself once and leaves a fridge note a day
+(`roommates` in `content/culture/npcs.json`).
+
 Tapping a regular plays their everyday lines (`content/cast-lines.json`) and their profile's catchphrases
 (`content/culture/npcs.json`). Rockaway Diner (Effie, the waitress) and Radiant Harbor Church (Pastor Vale) have
 profiles but nobody on the card: they're the Sarah Bird story's places.

@@ -11,12 +11,36 @@ Packs ship one at a time, in order, each only when the owner says "Build C<numbe
 | --- | --- | --- |
 | C1 | Voice and content foundations | **Built** (Oct 20) |
 | C2 | Astoria food and Energy | **Built** (Oct 20) |
-| C3 | Astoria Park, jobs, roommates, first-time touches | Waiting |
+| C3 | Astoria Park, jobs, roommates, first-time touches | **Built** (Oct 21) |
 | C4 | Transit and transit news | Waiting |
 | C5 | Calendar events, sports, cultural invites (before Dec 31 for the NYE countdown) | Waiting |
 | C6 | Stories, tea, hunts and dating spots | Waiting |
 
 The guide's "Later: borough packs" wait until those boroughs open.
+
+## C3: the park, jobs, the roommate and the first day (built Oct 21, migration 0094)
+
+- **Hell Gate Park** (the game's Astoria Park, name kept): "Sit on a bench by the river" (+12 Mood; the old hangout,
+  same id), "Take a lap around the track" (+4 Mood, +3 Confidence, trains Fitness), "Picnic on the lawn" (C$18, +14
+  Energy, a date spot when C6 comes) and a dog-walking shift.
+- **Three new shifts**, inside the usual 3 shifts a day: walk dogs at the park (C$110), work the register at Sal's
+  (C$120), work the deli counter at Schlep & Schmear (C$130, only while the deli's open).
+- **The roommate.** "Room share with a roommate" in Astoria is the first home at sign-up ("Most new arrivals start
+  here"): C$900 a week, the player's half. The apartment has two single beds (yours to nap in, and Priya's). Priya
+  Raman, a night-shift ER nurse from New Jersey (`roommates` in content/culture/npcs.json), introduces herself the
+  first time the player is home after their first session, naming their half of the rent and their own rent day, with
+  Lola's aside ("Your roommate's sweet till Thursday. That's when rent's due. Deadass."). After that she leaves a note
+  on the fridge each day. The intro is remembered per device. An eviction now lands in the share (the cheapest home).
+- **The first day.** On the New York day a player moves in, the daily tasks start with "Get a BEC at Sal's", "Pet the
+  bodega cat" and "Take a lap in Hell Gate Park" (`dailyTasks.firstDay` in lib/city.ts); the other two are picked as
+  usual. Enrolled students keep their "Go to class" slot instead. The tour and the first party are unchanged.
+- **Two goals** open the ladder: "Become a regular" (3 different days at Sal's, 25 clout) and "Get your own place"
+  (a home without a roommate, or a house; 75 clout). Players already living alone finish "Get your own place" the
+  next time goals pay out, so they get its 75 clout once.
+- **The first tea:** "Who's illegally subletting on 31st?" is in this week's gossip (week of Oct 19, findable until
+  Nov 2). It ends with Chad Kensington, CEO.
+- Left for later: the guide's featured Shop items (puffer jacket, bodega cat plushie, the "I ♡ The City" shirt) need
+  new 3D models; the Shop's transit pass is C4 and the team cap is C5.
 
 ## C2: Astoria food (built Oct 20)
 
