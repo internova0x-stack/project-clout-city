@@ -9,6 +9,7 @@ import type { LatLng } from "./map/geo";
 import { RANKS } from "./ranks.ts";
 import type { SkillId } from "./skills.ts";
 import type { BoroughId } from "./map/boroughs";
+import { ECONOMY } from "./economy.ts";
 
 // ---------------------------------------------------------------------------
 // Economy numbers (all tunable; gig pay is a multiple of the shift rate)
@@ -89,8 +90,24 @@ export const CITY_ECONOMY = {
   travel: {
     bandsMiles: [0.5, 2, 5],
     walk: { energy: [5, 10, 20, null] },
-    subway: { fare: 6 },
+    /**
+     * Culture pack C4 (owner, Oct 20). Each neighborhood's train line (a trip rides the line of where it's going);
+     * the OMG Card's unlimited passes (bought on the Travel screen, not possessions: no Net Worth, no resale; rides
+     * are free while one lasts); and showtime dancers, about one subway trip in ten, +3 clout once a New York day.
+     * A transit delay posted in News adds its seconds to that line's trips while it lasts (migration 0095).
+     */
+    subway: {
+      fare: 6,
+      lines: { Astoria: "N/W", "Long Island City": "N/W", Flushing: "7", "Flushing Meadows": "7", "Jackson Heights": "7", Sunnyside: "7", Jamaica: "E" } as Record<string, string>,
+      passes: [
+        { id: "week", label: "OMG Card · 7-day unlimited", days: 7, price: 70 },
+        { id: "month", label: "OMG Card · 30-day unlimited", days: 30, price: 250 },
+      ],
+      showtime: { chance: 0.1, clout: 3 },
+    },
+    /** C4: the green cab (the "taxi" id stays) and a rideshare, a little faster and pricier. */
     taxi: { fare: [18, 35, 60, 95] },
+    rideshare: { fare: [25, 49, 84, 133] },
     /**
      * #13 (owner, Oct 14): trips take 0 to 60 real seconds by distance: base + perMile × miles, capped.
      * Taxis are quickest for short hops; the subway wins on long ones (traffic). The server sets the
@@ -100,6 +117,7 @@ export const CITY_ECONOMY = {
       walk: { base: 6, perMile: 20, max: 60 },
       subway: { base: 12, perMile: 6, max: 45 },
       taxi: { base: 5, perMile: 9, max: 60 },
+      rideshare: { base: 4, perMile: 7, max: 50 },
       car: { base: 5, perMile: 8, max: 55 },
     },
     /** Skipping the rest of a trip costs C$1 per `secondsPerCash` seconds left, at least `min`. */
@@ -816,10 +834,11 @@ export const PLACES: Place[] = [
   },
   // v0.10 (spec section 7): the lotto shop, outside Astoria on purpose; you travel to play.
   {
-    id: "lucky-star", borough: "brooklyn", name: "Lucky Star Lotto", emoji: "🌟", category: "places", neighborhood: "Williamsburg",
-    at: [40.7138, -73.9585], depth: "full", template: "lotto", palette: ["#FFD84D", "#FF2E88", "#2A2530"],
+    // C4 (owner, Oct 21): back in Flushing, so every player can reach it from day one (it's part of v1.0).
+    id: "lucky-star", name: "Lucky Star Lotto", emoji: "🌟", category: "places", neighborhood: "Flushing",
+    at: [40.7593, -73.8303], depth: "full", template: "lotto", palette: ["#FFD84D", "#FF2E88", "#2A2530"],
     tags: ["lotto", "flushing"],
-    lore: "A narrow shop on a loud Bedford Avenue corner: a neon star, a rack of scratch cards and Benny, who has never once bought a ticket. Odds are printed on every card, which Benny calls \"the boring part.\"",
+    lore: "A narrow shop on Main Street, squeezed between a dumpling counter and a phone-case kiosk: a neon star, a rack of scratch cards and Benny, who has never once bought a ticket. It's a schlep on the 7, babe. Odds are printed on every card, which Benny calls \"the boring part.\"",
     actions: [
       { id: "chat", kind: "visit", label: "Shoot the breeze with Benny", energy: 2, mood: 3, blurb: "He tells you his system. The system is not buying tickets." },
     ],
@@ -1177,6 +1196,8 @@ export function collectorValue(category: ShopCategory): number {
 export function citySeed() {
   return {
     economy: CITY_ECONOMY,
+    // C4: each home's train line, from its neighborhood (a trip home rides it).
+    homeLines: Object.fromEntries(ECONOMY.homes.map((h) => [h.id, CITY_ECONOMY.travel.subway.lines[h.neighborhood] ?? null])),
     places: PLACES.map((p) => ({
       id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null, borough: boroughOf(p),
       ...(p.hours ? { hours: p.hours } : {}),

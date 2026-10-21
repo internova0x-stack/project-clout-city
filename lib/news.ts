@@ -4,8 +4,16 @@
 // News never changes prices or places (only stories do). Dependency-free so tests can import it.
 
 import { CELEBRITIES, REGULARS, WANNABES } from "./cast.ts";
+import { CITY_ECONOMY } from "./city.ts";
 
-export type NewsKind = "city" | "column" | "hunt";
+/** C4 (owner, Oct 20): "transit" is the Metro Rail Authority's service updates (delays, reroutes, weekend changes, fares). */
+export type NewsKind = "city" | "column" | "hunt" | "transit";
+
+/**
+ * C4: a transit update's line and, for a delay, the extra seconds it adds to that line's subway trips from `from`
+ * (New York time, "HH:MM") for `hours` on its day (migration 0095). Without `delay` it's news only.
+ */
+export interface TransitInfo { line: string; from: string; hours: number; delay?: number }
 
 /** One published item, as players get it from news_feed(). */
 export interface NewsItem {
@@ -16,15 +24,19 @@ export interface NewsItem {
   cast: string[];
   /** Publish day, YYYY-MM-DD (New York). */
   day: string;
+  transit?: TransitInfo;
 }
 
 /** The week file the Studio uploads. Days are Mon to Sun of `week` (a Monday). */
 export interface NewsWeekFile {
   week: string;
-  items: { id: string; kind: NewsKind; day: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"; headline: string; body: string; cast?: string[] }[];
+  items: ({ id: string; kind: NewsKind; day: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"; headline: string; body: string; cast?: string[] } & Partial<TransitInfo>)[];
 }
 
-export const NEWS_KIND_LABEL: Record<NewsKind, string> = { city: "City news", column: "💌 Ask Lola", hunt: "🗺️ Treasure hunt" };
+export const NEWS_KIND_LABEL: Record<NewsKind, string> = { city: "City news", column: "💌 Ask Lola", hunt: "🗺️ Treasure hunt", transit: "🚇 Metro Rail Authority" };
+/** C4: the lines a transit update can name (lib/city.ts travel.subway.lines). */
+export const TRANSIT_LINES = [...new Set(Object.values(CITY_ECONOMY.travel.subway.lines))];
+const minutesOf = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 const CAST_IDS = new Set([...CELEBRITIES, ...WANNABES, ...REGULARS].map((c) => c.id));
 
@@ -50,13 +62,24 @@ export function validateNewsWeek(raw: unknown): { ok: true; items: NewsItem[] } 
     if (!/^[a-z0-9-]{3,60}$/.test(it.id ?? "")) problems.push(`${at}: id must be 3 to 60 lowercase letters, numbers and dashes`);
     if (seen.has(it.id)) problems.push(`${at}: duplicate id`);
     seen.add(it.id);
-    if (!["city", "column", "hunt"].includes(it.kind)) problems.push(`${at}: kind must be city, column or hunt`);
+    if (!["city", "column", "hunt", "transit"].includes(it.kind)) problems.push(`${at}: kind must be city, column, hunt or transit`);
+    // C4: a transit update names its line and window; a delay is 10 to 30 seconds. Other kinds carry none of it.
+    let transit: TransitInfo | undefined;
+    if (it.kind === "transit") {
+      if (!TRANSIT_LINES.includes(it.line ?? "")) problems.push(`${at}: line must be one of ${TRANSIT_LINES.join(", ")}`);
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(it.from ?? "")) problems.push(`${at}: from must be a New York time, "HH:MM"`);
+      else if (!(Number.isInteger(it.hours) && it.hours! >= 1 && it.hours! <= 6 && minutesOf(it.from!) + it.hours! * 60 <= 24 * 60)) problems.push(`${at}: hours must be 1 to 6 and end by midnight`);
+      if (it.delay !== undefined && !(Number.isInteger(it.delay) && it.delay >= 10 && it.delay <= 30)) problems.push(`${at}: delay must be 10 to 30 seconds`);
+      transit = { line: it.line!, from: it.from!, hours: it.hours!, ...(it.delay !== undefined ? { delay: it.delay } : {}) };
+    } else if (it.line !== undefined || it.delay !== undefined || it.from !== undefined || it.hours !== undefined) {
+      problems.push(`${at}: line, from, hours and delay are for transit updates only`);
+    }
     if (!DAYS.includes(it.day)) problems.push(`${at}: day must be one of ${DAYS.join(", ")}`);
     if (typeof it.headline !== "string" || it.headline.trim().length < 8 || it.headline.length > 110) problems.push(`${at}: headline must be 8 to 110 characters`);
     if (typeof it.body !== "string" || it.body.trim().length < 20 || it.body.length > 600) problems.push(`${at}: body must be 20 to 600 characters`);
     for (const c of it.cast ?? []) if (!CAST_IDS.has(c)) problems.push(`${at}: "${c}" isn't in the cast (docs/CAST.md)`);
     if (it.kind === "hunt" && it.day !== "Mon") problems.push(`${at}: hunt announcements run on Mondays`);
-    if (problems.length === 0) items.push({ id: it.id, kind: it.kind, headline: it.headline.trim(), body: it.body.trim(), cast: it.cast ?? [], day: addDays(week, DAYS.indexOf(it.day)) });
+    if (problems.length === 0) items.push({ id: it.id, kind: it.kind, headline: it.headline.trim(), body: it.body.trim(), cast: it.cast ?? [], day: addDays(week, DAYS.indexOf(it.day)), ...(transit ? { transit } : {}) });
   }
   if (items.filter((x) => x.kind === "column").length > 1) problems.push("Lola's column runs once a week");
   return problems.length ? { ok: false, problems } : { ok: true, items };
@@ -72,4 +95,38 @@ export function splitNews(items: NewsItem[], today: string): { recent: NewsItem[
 /** What the regulars repeat: the latest city news, as gossip. */
 export function newsGossip(items: NewsItem[], today: string, max = 2): string[] {
   return splitNews(items, today).recent.filter((i) => i.kind === "city").slice(0, max).map((i) => `Did you hear? ${i.headline}.`);
+}
+
+/** New York's date (YYYY-MM-DD) and minutes past midnight at `nowMs`. */
+export function nyClock(nowMs: number): { day: string; minutes: number } {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(new Date(nowMs)).map((p) => [p.type, p.value]));
+  return { day: `${parts.year}-${parts.month}-${parts.day}`, minutes: Number(parts.hour) * 60 + Number(parts.minute) };
+}
+
+/** C4: is this transit update running now (its day, within its window)? */
+export function transitLive(item: Pick<NewsItem, "day" | "transit">, nowMs: number): boolean {
+  if (!item.transit) return false;
+  const { day, minutes } = nyClock(nowMs);
+  const from = minutesOf(item.transit.from);
+  return item.day === day && minutes >= from && minutes < from + item.transit.hours * 60;
+}
+
+/** C4: the delays running now, by line: the longest one's seconds and the item that posted it (the server adds the same). */
+export function activeDelays(items: NewsItem[], nowMs: number): Record<string, { seconds: number; item: NewsItem }> {
+  const out: Record<string, { seconds: number; item: NewsItem }> = {};
+  for (const i of items) {
+    if (i.kind !== "transit" || !i.transit?.delay || !transitLive(i, nowMs)) continue;
+    if (!out[i.transit.line] || out[i.transit.line].seconds < i.transit.delay) out[i.transit.line] = { seconds: i.transit.delay, item: i };
+  }
+  return out;
+}
+
+/** "until 11 AM": when a transit update ends. */
+export function transitUntil(t: TransitInfo): string {
+  const end = minutesOf(t.from) + t.hours * 60;
+  const h = Math.floor(end / 60) % 24;
+  const m = end % 60;
+  return `until ${h % 12 === 0 ? 12 : h % 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "AM" : "PM"}`;
 }

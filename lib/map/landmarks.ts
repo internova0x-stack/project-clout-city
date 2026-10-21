@@ -82,7 +82,7 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "ultraviolet-society", placeId: "ultraviolet-society", name: "Ultraviolet Society", at: [40.7135, -73.9625], kind: "uv-club", facing: 180, scale: 2, clear: 40, ground: "block" },
   { id: "lucky-seven-deli", placeId: "lucky-seven-deli", name: "Sip & Spill", at: [40.7495, -73.8885], kind: "mixer", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   { id: "the-sticky-floor", placeId: "the-sticky-floor", name: "The Sticky Floor", at: [40.7058, -73.9372], kind: "dive-club", facing: 180, scale: 2.2, clear: 40, ground: "block" },
-  { id: "lucky-star", placeId: "lucky-star", name: "Lucky Star Lotto", at: [40.7138, -73.9585], kind: "lotto", facing: 180, scale: 2.4, clear: 30, ground: "block" },
+  { id: "lucky-star", placeId: "lucky-star", name: "Lucky Star Lotto", at: [40.7593, -73.8303], kind: "lotto", facing: 180, scale: 2.4, clear: 30, ground: "block" },
   // Batch 6: shops and entertainment.
   { id: "thread-count", placeId: "thread-count", name: "Thread Count Boutique", at: [40.7172, -73.957], kind: "boutique", facing: 180, scale: 2.2, clear: 30, ground: "block" },
   { id: "fifs-furniture", placeId: "fifs-furniture", name: "Fif's Furniture", at: [40.7272, -73.9532], kind: "showroom", facing: 180, scale: 1.8, clear: 50, ground: "block" },
