@@ -26,6 +26,7 @@ import { rankFor } from "@/lib/ranks";
 import { hereCountLine, hereLine, type HerePerson, type PlaceCounts } from "@/lib/meet";
 import { getStyle, type StyleId } from "@/lib/styles";
 import { canDateAt, isStudySpot, type DateNight } from "@/lib/dating";
+import DATE_SPOTS from "@/content/culture/date-spots.json";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
@@ -655,6 +656,11 @@ export function LocationSheet({
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
           {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
+          {/* C6: Lola's four New York date spots get her line (content/culture/date-spots.json). */}
+          {handlers.dating && (() => {
+            const spot = DATE_SPOTS.spots.find((d) => d.place === place.id);
+            return spot ? <p className="meta date-spot-line" style={{ margin: "6px 0 0" }}>💘 <strong>Date spot.</strong> {spot.line}</p> : null;
+          })()}
           {((handlers.dating && canDateAt(place)) || (handlers.crew && crewActivities(place).length > 0)) && (
             <div className="row" style={{ gap: 8 }}>
               {handlers.dating && canDateAt(place) && (
