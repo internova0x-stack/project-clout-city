@@ -48,7 +48,9 @@ components live in `app/globals.css`.
 
 ## Rules for this codebase
 - Player data is permanent from day one: change the schema only with a new file in
-  `supabase/migrations/`, never by editing an applied one.
+  `supabase/migrations/`, never by editing an applied one. Every new migration gets a row in
+  `scripts/migration-status.sql` (the read-only "which have run" check; `tests/migrationStatus.test.ts` enforces it):
+  something only that file leaves behind, tested false before it and true after it (`npm run test:db`).
 - Writes to `players`/`invites` go through security-definer SQL functions; RLS
   blocks direct writes.
 - Tunable numbers live in `lib/config.ts` (client) and `game_settings` (economy, in the
