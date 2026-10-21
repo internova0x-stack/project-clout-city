@@ -5,11 +5,13 @@ import { ACCESSORIES, ACCESSORY_SLOTS, ACCESSORY_TEMPLATES, accessoriesFor } fro
 
 const catalog = readdirSync("content/shop").filter((f) => f.endsWith(".json")).flatMap((f) => {
   const d = JSON.parse(readFileSync(`content/shop/${f}`, "utf8"));
-  return (Array.isArray(d) ? d : d.items ?? []) as { id?: string; slot?: string; template?: string }[];
+  return (Array.isArray(d) ? d : d.items ?? []) as { id?: string; slot?: string; template?: string; realCash?: boolean }[];
 });
 
 test("every Shop accessory waiting on a rigid piece has its shape and colors, in its own slot", () => {
-  const waiting = catalog.filter((i) => (ACCESSORY_TEMPLATES as readonly string[]).includes(i.template ?? ""));
+  // Clout Couture's shades, watch and crown (migration 0102) are worn in an accessory slot too.
+  const waiting = catalog.filter((i) => (ACCESSORY_TEMPLATES as readonly string[]).includes(i.template ?? "")
+    || (i.realCash && (ACCESSORY_SLOTS as readonly string[]).includes(i.slot ?? "")));
   assert.ok(waiting.length >= 20, `${waiting.length} accessories`);
   for (const i of waiting) {
     const a = ACCESSORIES[i.id!];

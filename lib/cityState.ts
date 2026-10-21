@@ -422,7 +422,9 @@ export function upcomingBills(s: CityState): UpcomingBill[] {
   const rent = ECONOMY.homes.find((h) => h.id === p.home_id)?.rent;
   if (!p.house_sku && p.next_rent_due && rent) out.push({ kind: "rent", amount: rent, due_date: p.next_rent_due });
   if (p.next_phone_due) out.push({ kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: p.next_phone_due });
-  const car = p.car_sku ? itemBySku(p.car_sku) : undefined;
+  // A catalog car (Clout Couture's Veloce) is insured like the priciest C$ car (migration 0102 sets its price).
+  const listed = p.car_sku ? s.catalog?.find((c) => c.sku === p.car_sku) : undefined;
+  const car = p.car_sku ? itemBySku(p.car_sku) ?? (listed ? { price: listed.price, rentPerWeek: 0 } : undefined) : undefined;
   if (car && p.next_car_due) {
     out.push(p.car_mode === "rented"
       ? { kind: "car_rental", amount: car.rentPerWeek ?? 0, due_date: p.next_car_due }

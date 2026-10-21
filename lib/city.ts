@@ -1187,6 +1187,15 @@ export function itemBySku(sku: string): ShopItem | undefined {
   return SHOP_ITEMS.find((i) => i.sku === sku);
 }
 
+/**
+ * The furniture of home pieces sold from the Shop catalog (Clout Couture, migration 0102): the code's own pieces carry
+ * theirs on SHOP_ITEMS. The statue is the owner's avatar in gold on a pedestal (components/room/Room3D.tsx).
+ */
+export const CATALOG_FURNITURE: Record<string, NonNullable<ShopItem["furniture"]>> = {
+  "cloud-nine-sofa": { kind: "sofa", color: "#E3CFA6", room: "living", line: "cloud-nine-sofa" },
+  "self-portrait-statue": { kind: "statue", color: "#D4AF37", room: "decor", line: "self-portrait-statue" },
+};
+
 /** Clout from a visit or meal: by price (base value, never a story-modified price), scaled by Mood and Confidence. */
 export function visitClout(price: number, mood: number, confidence: number): number {
   const m = CITY_ECONOMY.cloutMultiplier;

@@ -186,6 +186,13 @@ components live in `app/globals.css`.
   picture (`shippedPictures`), and the Studio's Load uses them instead of processing (tests/shopPictures.test.ts).
   `/preview/studio` → Shop runs on an in-memory catalog and really processes pictures; what's approved there shows in
   `/preview/home`'s Shop (run `npm run dev` with `NODE_USE_ENV_PROXY=1` where downloads need a proxy).
+  Clout Couture (migration 0102, step 5): real-money catalog pieces get a `store_products` row once scheduled or live;
+  numbered editions (`entitlements.edition_no`, never reissued; `couture_edition(sku)`; drops end at `drop_end`) with a
+  real limit in `start_purchase` ('sold_out', 'not_for_sale', 'already_own_car'); `admin_couture_new_drop` continues the
+  numbering with Lola's News item; badge 'clout-couture'; real-money purchases over $50 confirm first (`BigBuySheet`).
+  `COUTURE_NOW` (lib/shopCatalog.ts) lists the pieces that work in game; `CATALOG_FURNITURE` (lib/city.ts) the sofa and
+  the statue (Room3D draws the owner in gold); a real-money car is priced, for insurance, like the priciest C$ car.
+  Accessories sold in Luxury are filed as fashion; collector values come from the Shop tab. `?couture=soldout` previews it.
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
   in `assets/avatar-animations.json`; `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git-ignored:
   never commit or ship the raw files) and `npm run avatars:build` (`scripts/build-base-avatars.mjs`) makes the game copies

@@ -13,7 +13,7 @@ import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
-import { CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CATALOG_FURNITURE, CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
@@ -31,7 +31,7 @@ import CALENDAR_FILE from "@/content/culture/calendar.json";
 import { calendarLive, phoneInvite, type CalendarData } from "@/lib/calendar";
 import { RoommateCard, roommateCardDue, roommateMet } from "./home/Roommate";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
-import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
+import { formatPrice, liveParty, needsConfirm, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
 import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
@@ -41,7 +41,7 @@ import { TeaRevealSheet } from "./city/Gossip";
 import { TEA_BADGE, leadAction, leadFrom, leadLine, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
 import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
 import { formatMiles, lineFor, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
-import { CollectionSheet, type MoneyHandlers } from "./city/Money";
+import { BigBuySheet, CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
 import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
@@ -1070,8 +1070,12 @@ export function GameShell({
     return () => { stop = true; clearInterval(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlocking, storeApi, storyApi, offset]);
-  const buy = async (sku: string) => {
+  // Over $50, the confirmation sheet first (BigBuySheet), then checkout.
+  const [bigBuy, setBigBuy] = useState<StoreProduct | null>(null);
+  const buy = async (sku: string, confirmed = false) => {
     if (!storeApi) return setToast("Purchases aren't switched on yet. Nothing was charged.");
+    const product = catalog?.find((p) => p.sku === sku);
+    if (!confirmed && needsConfirm(product)) return setBigBuy(product!);
     setBusy(`buy:${sku}`);
     const r = await storeApi.checkout(sku).catch(() => ({ ok: false as const, error: "Checkout didn't open. Nothing was charged; try again." }));
     if (r.ok) return window.location.assign(r.url); // keeps "Opening checkout…" until Stripe loads
@@ -1169,8 +1173,15 @@ export function GameShell({
   const floorNow = upstairs ? homeFloor : 1;
   const viewing = viewHome ? HOME_TEMPLATES[viewHome] : undefined;
   // #19 Fif's Furniture: what the player bought for their home (placed or in storage).
+  // A catalog piece (Clout Couture's sofa and statue) has its furniture in CATALOG_FURNITURE and its words in the catalog.
+  const homeItem = (sku: string): ShopItem | undefined => {
+    const it = itemBySku(sku);
+    if (it?.furniture || !CATALOG_FURNITURE[sku]) return it;
+    const c = city?.catalog?.find((x) => x.sku === sku);
+    return { ...(it ?? {}), sku, category: "home", name: c?.name ?? sku, emoji: c?.emoji ?? "🛋️", furniture: CATALOG_FURNITURE[sku] } as ShopItem;
+  };
   const ownedPieces: OwnedPiece[] = (city?.items ?? []).flatMap((i) => {
-    const it = i.category === "home" ? itemBySku(i.sku) : undefined;
+    const it = i.category === "home" ? homeItem(i.sku) : undefined;
     return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
   });
   const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
@@ -1178,7 +1189,7 @@ export function GameShell({
   // v0.13 interior decorator: someone else's home (their furniture, their layout), ground floor.
   const decorHome = decor ? homeTemplate(decor.homeId, decor.houseSku) : undefined;
   const decorPieces: OwnedPiece[] = decor ? decor.items.flatMap((i) => {
-    const it = itemBySku(i.sku);
+    const it = homeItem(i.sku);
     return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
   }).filter((p) => !placedElsewhere(decor.layout, 1).has(p.id)) : [];
   const openShop = (category: ShopCategory, section?: string) => {
@@ -2344,6 +2355,7 @@ export function GameShell({
             catalog={catalogOverride ?? city.catalog}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
+          <BigBuySheet p={bigBuy} onClose={() => setBigBuy(null)} busy={busy !== null} onConfirm={(sku) => { setBigBuy(null); void buy(sku, true); }} />
           <NetWorthSheet
             open={panel === "networth"}
             onClose={() => setPanel(null)}
@@ -2353,6 +2365,7 @@ export function GameShell({
             onSell={(id) => run(`sell:${id}`, () => cityApi.sellItem(id))}
             onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
             onOpenCollection={catalog ? () => setPanel("collection") : undefined}
+            serial={(sku) => products.find((p) => p.sku === sku)?.serial}
           />
           <CollectionSheet
             open={panel === "collection"}

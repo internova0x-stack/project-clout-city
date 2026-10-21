@@ -17,7 +17,7 @@ import {
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
 import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
-import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furniture";
+import { buildFurniture, makeKit, STATUE_TOP, tagItem, type Built, type Kit } from "./furniture";
 import { renderQuality } from "@/lib/graphics";
 
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
@@ -118,6 +118,8 @@ export interface Room3DProps {
 
 export default function Room3D(props: Room3DProps) {
   const { template, layout, look, outfit, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "dream" } = props;
+  // Clout Couture's statue is the player as they look now, in gold.
+  const lookRef = useRef({ look, outfit });
   // Some shops keep their daytime lights on all night (the lotto's bright yellow room).
   const daytime = props.daytime || !!template.alwaysLit;
   const dream = mood === "dream";
@@ -177,7 +179,7 @@ export default function Room3D(props: Room3DProps) {
   }, [trialKey, template.id]);
 
   const world = useRef<{
-    scene: Scene; camera: OrthographicCamera; kit: Kit; furniture: Group; built: Map<string, Built & { obj: Group }>;
+    scene: Scene; camera: OrthographicCamera; kit: Kit; furniture: Group; built: Map<string, Built & { obj: Group; statue?: AvatarParts }>;
     me: Actor; npcs: Actor[]; ring: Mesh; floor: Mesh; dirty: boolean; fit: () => void;
   } | null>(null);
 
@@ -744,17 +746,19 @@ export default function Room3D(props: Room3DProps) {
       const wld = world.current!;
       wld.dirty = false;
       const cur = itemsRef.current;
-      for (const [id, b] of wld.built) if (!cur.some((i) => i.id === id)) { furniture.remove(b.obj); wld.built.delete(id); }
+      for (const [id, b] of wld.built) if (!cur.some((i) => i.id === id)) { furniture.remove(b.obj); wld.built.delete(id); b.statue?.dispose(); }
       for (const it of cur) {
         let b = wld.built.get(it.id);
         if (!b) {
           const made = buildFurniture(it, kit, { night });
           const obj = new Group();
           obj.add(made.group);
+          const statue = it.kind === "statue" ? goldStatue(lookRef.current.look, lookRef.current.outfit) : undefined;
+          if (statue) obj.add(statue.root);
           castShadows(obj);
           tagItem(obj, it.id);
           furniture.add(obj);
-          b = { ...made, obj };
+          b = { ...made, obj, statue };
           wld.built.set(it.id, b);
         }
         b.obj.position.set(it.x, 0, it.z);
@@ -855,6 +859,7 @@ export default function Room3D(props: Room3DProps) {
 
   // ---- The player's avatar, re-dressed on Look or outfit changes ----
   const lookKey = JSON.stringify([look, outfit ?? null]);
+  lookRef.current = { look, outfit };
   const readySent = useRef(false);
   const onReadyRef = useRef(props.onReady);
   onReadyRef.current = props.onReady;
@@ -1479,4 +1484,27 @@ export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: strin
     css: `radial-gradient(85% 45% at 72% 16%, ${glow}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 52%, ${bot} 100%)`,
     haze: mid,
   };
+}
+
+/**
+ * Clout Couture's Self-Portrait Statue: the player's avatar on the pedestal, frozen mid-wave, every surface solid gold
+ * (one plain metal material, so the fabrics' patterns and the body type's widening give way to a smooth casting).
+ */
+function goldStatue(look: Parameters<typeof buildModelAvatar>[0], outfit: NonNullable<Parameters<typeof buildModelAvatar>[1]>["outfit"]): AvatarParts {
+  const parts = buildModelAvatar(look, { outfit, pedestal: false });
+  parts.root.position.y = STATUE_TOP;
+  parts.root.scale.setScalar(0.82);
+  parts.root.visible = false;
+  const gold = new MeshStandardMaterial({ color: "#F0C850", metalness: 0.55, roughness: 0.3, emissive: "#4A3500", emissiveIntensity: 0.6 });
+  void (parts.ready ?? Promise.resolve()).then(() => {
+    parts.play?.("wave");
+    parts.update?.(0.75);
+    parts.root.traverse((o) => {
+      const m = o as Mesh;
+      if (m.isMesh) { m.material = gold; m.castShadow = true; }
+    });
+    parts.root.visible = true;
+  });
+  const dispose = parts.dispose.bind(parts);
+  return { ...parts, dispose: () => { dispose(); gold.dispose(); } };
 }

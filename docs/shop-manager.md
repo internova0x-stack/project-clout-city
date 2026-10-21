@@ -145,6 +145,22 @@ Each stage is its own pull request with a preview link (the owner's order, Oct 2
 | 4. The rest of the wardrobe | The remaining garment templates, then rigid accessories (hats, glasses, earrings, necklaces, bags, watches); each item unlocks as its template passes. New templates for every item players already own (the 22 clothing pieces and 11 outfit sets). The style mechanics: "Complete your look", the venue-match Confidence boost, the Full look badge and style daily tasks (a budget piece counts the same as a luxury one). **The new bodies switch on for everyone** once everything players own has a template | Every owned item renders on the new bodies; the switch is on |
 | 5. Clout Couture | Non-wearables first (the Cloud Nine Sofa, the Self-Portrait Statue, the Velocity Veloce), then the wearables (suit, heels, shades, watch, crown, 24k Glow). The yacht, jet and plaza statue need map placement and 3D models and come after. The Waterfront Mansion and Billionaire's Row come later (owner, Oct 21) | A test-mode purchase of each piece grants it, numbers it and a refund takes it back |
 
+**Step 5 as built (migration 0102).** A real-money catalog piece gets its checkout product (`store_products`, a
+collector item) once it is scheduled or live. Each copy's number is stored on its entitlement when the webhook grants it
+(`edition_no`, the next number; refunds keep theirs, so a number is never reissued) and shown as "No. 0042" on the Shop
+card, in Net Worth and on the piece. `start_purchase` refuses a piece that isn't on sale (`not_for_sale`) or whose drop
+is spoken for (`sold_out`: numbers issued plus checkouts open in the last 35 minutes). Studio → Shop → a sold-out piece
+→ **Open drop N** continues the numbering, optionally at a new size, and posts Lola's News item
+(`admin_couture_new_drop`). Every real-money purchase over $50 (the crown, "chat forever") shows the confirmation sheet
+first. Owning a piece earns the **Clout Couture** badge; a refund of the last one takes it back. In the game: the suit
+and heels are worn like the catalog's clothes, the shades, watch and crown like its accessories (filed as fashion,
+valued by their Luxury tab), the sofa and statue are home furniture (the statue is the owner in gold, waving, on a
+black marble pedestal; it follows their look), and the Velocity Veloce is their car (one owned car at a time; it ends a
+rental; insured like the priciest C$ car). Held back: the **24k Glow Ritual** (its shimmer isn't built), the suit's
+cloth, lining and monogram choices, the crown/tiara choice and the crown icon by the owner's name. Their descriptions
+no longer promise them. Preview: `/preview/home` sells the eight pieces (the watch's sample drop is sold out;
+`?couture=soldout` sells out every drop).
+
 **Stage 2 as built (Oct 21):** the owner's bald masters live in `assets/avatars/` (never served); `node
 scripts/build-base-avatars.mjs` makes the game's copies in `public/avatars/body/` (`m.glb`, `f.glb` about 0.53 MB, 12k
 triangles, 1024 px skin; `m-low.glb`, `f-low.glb` about 0.35 MB, 6k triangles, 512 px). `components/avatar/baseAvatar.ts`

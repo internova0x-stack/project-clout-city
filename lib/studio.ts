@@ -235,6 +235,8 @@ export interface StudioApi {
   shopAction?(skus: string[], action: ShopAction, opts?: { at?: string | null; note?: string; news?: boolean }): Promise<Admin<{ done: string[]; refused: { sku: string; reason: string }[] }>>;
   shopEdit?(sku: string, fields: Partial<Pick<CatalogItem, EditableField>>): Promise<Admin<null>>;
   shopAudit?(sku: string): Promise<Admin<ShopAuditRow[]>>;
+  /** Clout Couture (migration 0102): the next drop of a sold-out numbered piece (optionally a new size), with Lola's News item. */
+  shopNewDrop?(sku: string, size?: number | null): Promise<Admin<null>>;
   /** Setup check (owner, Oct 14): which key, migration or webhook is missing. Never returns a secret. */
   setupCheck?(): Promise<Admin<SetupCheckRow[]>>;
 }

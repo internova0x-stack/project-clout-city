@@ -10,7 +10,7 @@ import { getStyle, type StyleId } from "@/lib/styles";
 import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars, useGameNow } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
-import { formatPrice, type StoreProduct } from "@/lib/store";
+import { editionLine, formatPrice, serialLabel, type StoreProduct } from "@/lib/store";
 import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, shippedPictures, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
 
@@ -103,10 +103,14 @@ export function ShopSheet({
           <span className="title" style={{ display: "block" }}>{item.name}</span>
           <span className="subtext clamp-2">{item.blurb}</span>
           <Stars rating={item.rating} />
-          {item.editionSize ? <span className="meta">Numbered · {item.editionSize} per drop</span> : null}
+          {(isOwned || p?.owned) && p?.serial ? <span className="meta">✨ Yours: {serialLabel(p.serial)}</span>
+            : p?.edition ? <span className={`meta${p.edition.soldOut ? " locked" : ""}`}>Numbered · {editionLine(p.edition)}</span>
+            : item.editionSize ? <span className="meta">Numbered · {item.editionSize} per drop</span> : null}
           <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}{p ? ` · worth ${formatCash(p.value ?? 0)}` : ""}</span>
           {isOwned || p?.owned ? (
             wearControl(item.sku) ?? <span className="owned-chip">Owned</span>
+          ) : p?.edition?.soldOut && !p.pending ? (
+            <button className="btn btn-secondary btn-sm" disabled>Sold out</button>
           ) : soon ? (
             <>
               <span className="meta locked">🔒 Coming soon</span>
@@ -247,25 +251,34 @@ export function ShopSheet({
 // Net Worth (C25, renamed from Possessions in #30): bank cash, then items by category; sell at 60%.
 // ---------------------------------------------------------------------------
 export function NetWorthSheet({
-  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection,
+  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection, serial,
 }: {
   open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean>;
   /** #15: owned clothes can be put on from their detail. */
   onEquip?: (itemId: number, on: boolean) => void;
   /** Postcards live in the Collection, not here (they don't count toward net worth). */
   onOpenCollection?: () => void;
+  /** Clout Couture (migration 0102): a numbered piece's edition number. */
+  serial?: (sku: string) => number | null | undefined;
 }) {
   const [detail, setDetail] = useState<PlayerItem | null>(null);
   const [confirming, setConfirming] = useState(false);
   const total = netWorth(state);
   const starter = getStyle(style).starterItems;
   const close = () => { setDetail(null); setConfirming(false); };
-  const item = detail ? itemBySku(detail.sku) : undefined;
+  // Pieces sold from the Shop catalog (the batch files, Clout Couture) have their words and pictures there.
+  const listed = state.catalog ? catalogShopItems(state.catalog, itemBySku) : [];
+  const info = (sku: string): (ShopItem & { image?: string | null }) | undefined => listed.find((c) => c.sku === sku) ?? itemBySku(sku);
+  const item = detail ? info(detail.sku) : undefined;
   return (
     <>
       <Sheet open={open && !detail} onClose={onClose} label="Net Worth" tall>
         <div className="stack-16">
-          <SheetTitle right={formatCash(total)}>Net Worth</SheetTitle>
+          <SheetTitle>Net Worth</SheetTitle>
+          <div className="balance-hero">
+            <span className="overline">Cash and everything you own</span>
+            <span className="balance-big">{formatCash(total)}</span>
+          </div>
           <div className="list-row static">
             <IconTile emoji="💵" size={40} />
             <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Bank cash</span></span>
@@ -279,13 +292,13 @@ export function NetWorthSheet({
               <div key={c.id}>
                 <p className="overline" style={{ margin: "0 0 4px" }}>{c.label}</p>
                 {mine.map((i) => {
-                  const it = itemBySku(i.sku);
+                  const it = info(i.sku);
                   return (
                     <button key={i.id} className="list-row" onClick={() => setDetail(i)}>
-                      <IconTile emoji={it?.emoji ?? "📦"} size={40} item={it} />
+                      <ShopArt image={it?.image} emoji={it?.emoji ?? "📦"} size={40} item={it} />
                       <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                         <span className="title" style={{ display: "block" }}>{it?.name ?? i.sku}</span>
-                        <span className="meta">{i.acquired === "earned" ? "Earned" : i.acquired === "collector" ? "✨ Collector" : "Bought"}{i.equipped ? " · Wearing" : ""}</span>
+                        <span className="meta">{i.acquired === "earned" ? "Earned" : i.acquired === "collector" ? `✨ Collector${serial?.(i.sku) ? ` · ${serialLabel(serial(i.sku)!)}` : ""}` : "Bought"}{i.equipped ? " · Wearing" : ""}</span>
                       </span>
                       <span className="body-strong tabular">{formatCash(i.value)}</span>
                     </button>
@@ -319,7 +332,7 @@ export function NetWorthSheet({
       <Sheet open={open && !!detail} onClose={close} label={item?.name ?? "Item"}>
         {detail && item && (
           <div className="stack-16">
-            <IconTile emoji={item.emoji} item={item} />
+            <ShopArt image={item.image} emoji={item.emoji} item={item} />
             <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>
               {confirming ? `Sell your ${item.name.toLowerCase()} for ${formatCash(sellPrice(detail.value))}?` : item.name}
             </h2>
@@ -353,7 +366,9 @@ export function NetWorthSheet({
                   );
                 })()}
                 {detail.acquired === "collector" ? (
-                  <p className="meta" style={{ margin: 0 }}>✨ A collector piece, bought with real cash. It can&apos;t be sold for virtual cash.</p>
+                  <p className="meta" style={{ margin: 0 }}>
+                    ✨ A collector piece, bought with real cash{serial?.(detail.sku) ? `: ${serialLabel(serial(detail.sku)!)}` : ""}. It can&apos;t be sold for virtual cash.
+                  </p>
                 ) : (
                   <button className="btn btn-destructive" onClick={() => setConfirming(true)}>Sell for {formatCash(sellPrice(detail.value))}</button>
                 )}

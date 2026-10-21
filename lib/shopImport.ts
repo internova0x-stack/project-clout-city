@@ -4,6 +4,8 @@
 
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { ACCESSORIES } from "./accessories";
+import { CATALOG_WEAR } from "./catalogWear";
 import { brandHits, type ParodyName } from "./culture";
 import { fieldProblems, parseCatalogFile, type CatalogDraft, type CatalogItem, type ImageMatch, type ShopFile, type ShopTab } from "./shopCatalog";
 import { fetchSourceImage, imagePaths, processShopImage } from "./shopImages";
@@ -56,7 +58,7 @@ export function coutureClout(catalog: Pick<CatalogItem, "tab" | "realCash" | "pr
 export async function prepareImport(raw: unknown, file: string, catalog: CatalogItem[]): Promise<{
   drafts: CatalogDraft[]; images: ImageMatch[]; problems: string[];
 }> {
-  const parsed = parseCatalogFile(raw, file, { coutureCloutFor: coutureClout(catalog) });
+  const parsed = parseCatalogFile(raw, file, { coutureCloutFor: coutureClout(catalog), wearableNow: (sku) => !!CATALOG_WEAR[sku] || !!ACCESSORIES[sku] });
   const brands = await brandCheck();
   const problems = parsed.problems.map((p) => `${p.id}: ${p.problem}`);
   const drafts: CatalogDraft[] = [];
