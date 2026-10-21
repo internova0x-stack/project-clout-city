@@ -1,0 +1,44 @@
+{
+  "about": "Culture pack C5 (owner, Oct 20): events on real New York dates. Each runs on its date from 'from' (New York time, HH:MM) for 'hours', at its place: be there and tap Go in Events. 'invite' events are a neighbor's party (a Greek name day): wearing something from the Shop pays the dress-code clout, and arriving without a gift (a gift box from Sal's or Schlep & Schmear) costs the gift penalty. Copied into the database by migration 0096 (game_settings 'calendar'); tests/calendar.test.ts keeps the two equal. Add a year's dates as they come.",
+  "giftPrice": 15,
+  "giftsMax": 2,
+  "giftPlaces": ["ditmars-deli", "schlep-and-schmear"],
+  "events": [
+    {
+      "id": "name-day-dimitra-2026", "kind": "invite", "date": "2026-10-26", "from": "18:00", "hours": 5, "place": "feta-compli",
+      "title": "Dimitra's name day", "host": "Dimitra Papadakis, your neighbor from 4B",
+      "blurb": "It's the feast of Saint Demetrios, so every Dimitra and Dimitris in Astoria is celebrating. She booked the taverna's back room. Dress up, bring something sweet, say \"Chronia polla.\"",
+      "entry": 0, "clout": 40, "mood": 10, "dressCode": { "label": "Dress up: wear something from the Shop", "clout": 25 }, "gift": { "label": "Bring a gift box", "penalty": 20 }
+    },
+    {
+      "id": "halloween-31st-2026", "kind": "block_party", "date": "2026-10-31", "from": "17:00", "hours": 6, "place": "neon-spoon",
+      "title": "Halloween on 31st Street", "host": null,
+      "blurb": "Thirty-first Street closes for costumes, candy and a DJ on The Hub's steps. Half the block is dressed as the N train. The other half is dressed as delays.",
+      "entry": 0, "clout": 50, "mood": 12
+    },
+    {
+      "id": "name-day-andreas-2026", "kind": "invite", "date": "2026-11-30", "from": "19:00", "hours": 4, "place": "feta-compli",
+      "title": "Andreas's name day", "host": "Andreas Charalambous, at Feta Compli Taverna",
+      "blurb": "Saint Andrew's day: Andreas closes the taverna to the public and opens it to everyone he's ever fed. Wear something nice and don't come empty-handed. He will notice. He will say nothing. He will remember.",
+      "entry": 0, "clout": 40, "mood": 10, "dressCode": { "label": "Dress up: wear something from the Shop", "clout": 25 }, "gift": { "label": "Bring a gift box", "penalty": 20 }
+    },
+    {
+      "id": "nye-countdown-2026", "kind": "countdown", "date": "2026-12-31", "from": "21:00", "hours": 3, "place": "ditmars-heights-rooftop",
+      "title": "New Year's Eve countdown on the roof", "host": null,
+      "blurb": "Times Square is a nine-hour wait and no bathroom. The roof has heaters, a view of the whole skyline and a countdown with Lola on the mic. Locals only. Deadass the best seat in Queens.",
+      "entry": 60, "clout": 100, "mood": 15
+    },
+    {
+      "id": "greek-parade-2027", "kind": "parade", "date": "2027-03-28", "from": "12:00", "hours": 4, "place": "neon-spoon",
+      "title": "Greek Independence Day Parade on 31st Street", "host": null,
+      "blurb": "Blue and white from Ditmars to Broadway: marching bands, folk dancers, three generations of yiayias on folding chairs and Andreas handing out loukoumades. Wave a flag, eat everything.",
+      "entry": 0, "clout": 60, "mood": 14
+    },
+    {
+      "id": "name-day-gus-eleni-2027", "kind": "invite", "date": "2027-05-21", "from": "18:00", "hours": 5, "place": "hell-gate-park",
+      "title": "Gus and Dr. Eleni's name day picnic", "host": "Gus (Konstantinos) and Dr. Eleni Markou",
+      "blurb": "Saints Constantine and Helen share a feast day, so Gus and Dr. Eleni share a picnic by the river. Gus brings stories from 1987. Eleni brings a first-aid kit, just in case Gus tells the long one.",
+      "entry": 0, "clout": 40, "mood": 12, "dressCode": { "label": "Dress up: wear something from the Shop", "clout": 25 }, "gift": { "label": "Bring a gift box", "penalty": 20 }
+    }
+  ]
+}

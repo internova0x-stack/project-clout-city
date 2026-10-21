@@ -104,6 +104,7 @@ from (values
   ('0092_skill_perks.sql', coalesce((to_regclass('public.skill_gig_runs') is not null), false)),
   ('0093_astoria_food.sql', coalesce((exists (select 1 from pg_proc where proname='place_hours_open' and pronamespace='public'::regnamespace)), false)),
   ('0094_astoria_park_roommates.sql', coalesce(((select value from public.game_settings where key='city') -> 'economy' -> 'dailyTasks' ? 'firstDay'), false)),
-  ('0095_transit.sql', coalesce((exists (select 1 from pg_proc where proname='buy_transit_pass' and pronamespace='public'::regnamespace)), false))
+  ('0095_transit.sql', coalesce((exists (select 1 from pg_proc where proname='buy_transit_pass' and pronamespace='public'::regnamespace)), false)),
+  ('0096_calendar.sql', coalesce((exists (select 1 from pg_proc where proname='calendar_attend' and pronamespace='public'::regnamespace)), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
