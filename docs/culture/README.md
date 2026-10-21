@@ -12,11 +12,28 @@ Packs ship one at a time, in order, each only when the owner says "Build C<numbe
 | C1 | Voice and content foundations | **Built** (Oct 20) |
 | C2 | Astoria food and Energy | **Built** (Oct 20) |
 | C3 | Astoria Park, jobs, roommates, first-time touches | **Built** (Oct 21) |
-| C4 | Transit and transit news | Waiting |
+| C4 | Transit and transit news | **Built** (Oct 21) |
 | C5 | Calendar events, sports, cultural invites (before Dec 31 for the NYE countdown) | Waiting |
 | C6 | Stories, tea, hunts and dating spots | Waiting |
 
 The guide's "Later: borough packs" wait until those boroughs open.
+
+## C4: transit and transit news (built Oct 21, migration 0095)
+
+- **Train lines.** Every trip by subway rides the line of where it's going: the N/W for Astoria and Long Island City,
+  the 7 for Flushing, Jackson Heights and Sunnyside, the E for Jamaica (`travel.subway.lines` in lib/city.ts).
+  Trips stay on the player's own timer, in seconds (owner, Oct 20).
+- **Metro Rail Authority updates in News** (a new "transit" kind): delays, reroutes, weekend service changes and fare
+  news (satire only; fares never change). Each names its line and a window ("from" in New York time, for "hours"); a
+  delay adds 10 to 30 seconds to that line's subway trips while it runs. The Travel sheet shows it ("⚠️ delays +20 s"
+  and the headline) and the trip bar counts it. This week's file has five updates; the weekly routine writes 3 to 5.
+- **The OMG Card**: a 7-day pass (C$70) or 30-day pass (C$250), bought on the Travel sheet ("Ride a lot? Get an OMG
+  Card"). Subway rides are free while it lasts; a second one stacks. Not a possession: no Net Worth, no resale.
+- **Green cab and rideshare.** The taxi is the green cab now (same price); the rideshare is quicker and dearer
+  (C$25 to C$133 by distance).
+- **Showtime dancers** on about one subway ride in ten: a card on the trip screen, "Watch" for +3 clout, once a day.
+- **Lucky Star Lotto** is back on Main Street, Flushing (owner, Oct 21: part of v1.0), reachable from day one.
+- **No listening in at a shut place** (owner, Oct 21): the server refuses it and the button waits for opening time.
 
 ## C3: the park, jobs, the roommate and the first day (built Oct 21, migration 0094)
 
@@ -110,6 +127,8 @@ The rows of the Oct 20 conflict report, as answered. "A" means the recommended f
 | 31 | "Generated" content | The weekly content routine reads the culture files; the content check blocks real names |
 | 32 | Picnic date | A paid picnic, so the park counts as a date spot |
 | 33 | Real names already in the game | Leave them (landmarks, Steinway Fresh Mart, Instagram) |
+
+Answers from Oct 21: the lotto moves back to Flushing (done in C4); "Listen in" doesn't work at a shut place.
 
 Answers to the open questions:
 - Lola's arrival line in the guide keeps its four sentences (not trimmed).
