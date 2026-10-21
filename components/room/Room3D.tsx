@@ -18,6 +18,7 @@ import { STARTING_STYLES, type Outfit } from "@/lib/styles";
 import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
 import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furniture";
+import { renderQuality } from "@/lib/graphics";
 
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
 // player's avatar, which walks where you tap, sits on seats, naps on the bed and
@@ -180,18 +181,20 @@ export default function Room3D(props: Room3DProps) {
     const host = hostRef.current;
     if (!host) return;
     let renderer: WebGLRenderer;
+    const quality = renderQuality();
     try {
-      renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+      renderer = new WebGLRenderer({ antialias: quality.antialias, alpha: true, powerPreference: "low-power" });
     } catch {
       setFailed(true);
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setPixelRatio(quality.pixelRatio);
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = template.dark ? 1.15 : 1.0;
     renderer.setClearColor(0x000000, 0);
-    renderer.shadowMap.enabled = true;
+    // Low graphics (lib/graphics.ts): no shadows, no antialiasing, 1x pixels.
+    renderer.shadowMap.enabled = quality.shadows;
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.domElement.style.touchAction = "none";
     host.appendChild(renderer.domElement);
@@ -1189,7 +1192,7 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
  * Turns are in the avatar's own frame; arms[0] and forearms[0] are on its -x side.
  */
 const BEAT = Math.PI * 4; // 2 beats a second
-function dance(p: AvatarParts, t: number, phase: number) {
+export function dance(p: AvatarParts, t: number, phase: number) {
   const style = Math.abs(Math.floor(phase * 7.3)) % 4;
   const b = (t + (phase % 1) * 0.12) * BEAT;
   const s = Math.sin(b), c = Math.cos(b);
@@ -1256,7 +1259,7 @@ function turnToward(cur: number, target: number, k: number) {
   return cur + d * Math.min(1, k);
 }
 
-function resetLimbs(p: AvatarParts) {
+export function resetLimbs(p: AvatarParts) {
   p.head.rotation.set(0, 0, 0);
   p.hips?.rotation.set(0, 0, 0);
   p.chest?.rotation.set(0, 0, 0);
@@ -1279,7 +1282,7 @@ function onDanceFloor(items: RoomItem[], x: number, z: number): boolean {
 }
 
 /** Hips on the seat, thighs forward, shins down. */
-function poseSit(p: AvatarParts, seatY: number) {
+export function poseSit(p: AvatarParts, seatY: number) {
   resetLimbs(p);
   p.root.position.set(0, seatY + 0.04 - (p.hipY ?? 0.9), -0.12);
   for (const l of p.legs) l.rotation.x = -Math.PI / 2;
@@ -1289,7 +1292,7 @@ function poseSit(p: AvatarParts, seatY: number) {
 }
 
 /** On the back, head toward the headboard. */
-function poseLie(p: AvatarParts, mattressY: number) {
+export function poseLie(p: AvatarParts, mattressY: number) {
   resetLimbs(p);
   p.root.rotation.x = -Math.PI / 2;
   p.root.position.set(0, mattressY + 0.14, 0);

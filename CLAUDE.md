@@ -43,6 +43,7 @@ components live in `app/globals.css`.
   `?story=3` starts the Sarah Bird story on Day 3; `?dating=match|invite|tonight|alone` starts crushes and
   date nights in that state; `?crew=invite|tonight|full|empty` does the same for crew outings;
   `?hunt=new|joined|question|wrong|finale|done` for the treasure hunt; `?lotto=win|big|back|lose` sets the next scratch cards' results and `?lotto=jackpot` makes the next card win its pot; `?gossip=new|some|almost|done` starts the Tea app in that state; `?chat=out` starts with today's 20 messages used (the unlimited chat offer); `?crowd=50` puts 50 sample players at any place you enter; `?biz=some|rich|public` starts with businesses (rich: the whole ladder, ready to go public); `?rankup=1-10` opens that rank's rank-up reveal; `?together=invite|ride|plan|bonus|decorate|approve` starts v0.13's together plans, ride requests, the bonus card, decorating someone's home or approving a decorator; `?radio=new|sent|full|notpicked|mine` starts Real Clout FM in that state (shared with the Studio preview's Shoutouts tab); `?tv=new|sent|mine|empty` does the same for Clout TV (shared with the Big Screen tab). `?goals=new|streak|pass|tonight|chapter` starts goals and streaks (`day3|day7|day14|goaldone` open a reveal); `?campus=new|pick|week|friday|done` starts campus life (v0.15) standing at St. Johnsons (open its card's Campus life); `?hint=daily` shows Lola's daily-tasks nudge after 2 seconds; `?push=ask` shows Lola's notifications ask (`?push=on` starts with a device on); `?member=vip|monthly|cancelling|pastdue|forever|free|none` sets Membership & purchases (Settings' top row, the profile's VIP line); `?transit=showtime` puts showtime dancers on every subway ride and `?transit=pass` starts with an OMG Card (the preview's News always has a live 7-train delay, C4); `?calendar=today` moves every calendar event to now and `?calendar=gift` does that with a gift box in hand (C5); `?skills=pro` starts with high skill levels (skill gigs, invites and Dance's club access open; preview skill gigs finish in 8 seconds). Sample players stand at every place in the preview. `/preview/studio` shows the Story Studio (its Affiliates tab runs on sample creators); `/preview/guest?via=tasha` shows a guest who followed a creator's link (`?via=tasha-signup` lands on sign-up); `/preview/affiliate` shows the creator page (`?state=new|paused`).
+  `/preview/moves` shows every move on the new avatar bodies (`?skin`, `?build`); `?graphics=low` and `?bodies=new` work on any screen.
 - `npm run validate:stories`: checks every file in `content/stories/`.
 - `npm run validate:content`: checks every hunt, news, gossip and exam week file in `content/` (the Studio's rules).
 
@@ -182,6 +183,12 @@ components live in `app/globals.css`.
   private `shop-masters`. Real-money price edits change `store_products.price_cents` and drop the old Stripe price id.
   `/preview/studio` → Shop runs on an in-memory catalog and really processes pictures; what's approved there shows in
   `/preview/home`'s Shop (run `npm run dev` with `NODE_USE_ENV_PROXY=1` where downloads need a proxy).
+- New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): masters in `assets/avatars/`, game copies (full and
+  `-low`) built by `scripts/build-base-avatars.mjs` into `public/avatars/body/`; `buildModelAvatar` hands over to
+  `buildBaseAvatar` when `newBodies()` (lib/graphics.ts: a per-device switch in Studio → Shop, or `?bodies=new`). Off for
+  players until stage 4. `lowGraphics()` (Settings → Low graphics, `?graphics=low|high`, on by itself only on clearly weak
+  phones) picks the low files; renderers take `renderQuality()` (no shadows, no antialiasing, 1x). `/preview/moves` shows
+  every move on both bodies.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.

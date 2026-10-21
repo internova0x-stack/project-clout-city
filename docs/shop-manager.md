@@ -145,5 +145,15 @@ Each stage is its own pull request with a preview link (the owner's order, Oct 2
 | 4. The rest of the wardrobe | The remaining garment templates, then rigid accessories (hats, glasses, earrings, necklaces, bags, watches); each item unlocks as its template passes. New templates for every item players already own (the 22 clothing pieces and 11 outfit sets). The style mechanics: "Complete your look", the venue-match Confidence boost, the Full look badge and style daily tasks (a budget piece counts the same as a luxury one). **The new bodies switch on for everyone** once everything players own has a template | Every owned item renders on the new bodies; the switch is on |
 | 5. Clout Couture | Non-wearables first (the Cloud Nine Sofa, the Self-Portrait Statue, the Velocity Veloce), then the wearables (suit, heels, shades, watch, crown, 24k Glow). The yacht, jet and plaza statue need map placement and 3D models and come after. The Waterfront Mansion and Billionaire's Row come later (owner, Oct 21) | A test-mode purchase of each piece grants it, numbers it and a refund takes it back |
 
-**Waiting on the owner:** the bald base bodies (stage 2) and, before the switch-on in stage 4, the extra animations
-(idle, run, wave, interact, sit, lie down) for the new bodies.
+**Stage 2 as built (Oct 21):** the owner's bald masters live in `assets/avatars/` (never served); `node
+scripts/build-base-avatars.mjs` makes the game's copies in `public/avatars/body/` (`m.glb`, `f.glb` about 0.53 MB, 12k
+triangles, 1024 px skin; `m-low.glb`, `f-low.glb` about 0.35 MB, 6k triangles, 512 px). `components/avatar/baseAvatar.ts`
+recolors the skin, paints the outfit colors on the body's own underwear (until stage 3's templates), sizes the game's hair
+and headwear to the head, makes the idle from the walk, and drives the game's sit, lie down and dance poses (the owner
+approved them in `/preview/moves`, Oct 21). Low graphics (`lib/graphics.ts`): the low files, no shadows, no antialiasing
+and 1x pixels in rooms, the avatar viewer and the map; on by itself only on clearly weak phones (2 GB or 2 cores),
+otherwise Settings → Low graphics. The new bodies are a per-device switch in Studio → Shop (`?bodies=new` for one visit).
+
+**Animations later (owner, Oct 21):** extra moves (from Higgsfield or elsewhere) come after stage 4. Each must be made on
+the same 24-bone skeleton (best: animate `assets/avatars/base-*.glb` itself); check the first file before a batch, and
+preview each one in a few outfits before it goes in.

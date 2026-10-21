@@ -18,6 +18,8 @@ import {
   type PartRef, type PartSlot,
 } from "@/lib/avatarCatalog";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
+import { buildBaseAvatar } from "./baseAvatar";
+import { newBodies } from "@/lib/graphics";
 
 const BASE = "/avatars";
 const cache = new Map<string, Promise<GLTF>>();
@@ -68,6 +70,8 @@ const HEADWEAR_OFFSET = new Vector3(0, 0.12, 0);
 export interface ModelAvatarOptions { pedestal?: boolean; outfit?: Outfit }
 
 export function buildModelAvatar(look: Look, opts: ModelAvatarOptions = {}): AvatarParts {
+  // Step 2 of the avatar upgrade: the new base bodies, a preview until every owned item has its template (stage 4).
+  if (newBodies()) return buildBaseAvatar(look, opts);
   const outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
   const sex = modelSex(look);
   // A whole outfit's hat or helmet replaces a basic hat, never a faith or cultural covering.
