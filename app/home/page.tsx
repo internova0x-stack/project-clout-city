@@ -11,7 +11,7 @@ import { getClique, requirePlayer } from "@/lib/player";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { attendFirstParty, finishHandoff, setMusicMuted, setTutorialState } from "./actions";
 import {
-  acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, payBill, saveLook, travel, skipTrip, buyTransitPass, watchShowtime, calendarAttend, buyGift, rest, barDrink, enterVip, vipSeen, buyGroceries, cook, buyLottoCard, scratchLottoCard, refreshCity, takeSkillGig, collectSkillGig, acceptSkillInvite, saveHomeLayout, moveHome, sellItem, setClockOffset,
+  acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, setItemOptions, payBill, saveLook, travel, skipTrip, buyTransitPass, watchShowtime, calendarAttend, buyGift, rest, barDrink, enterVip, vipSeen, buyGroceries, cook, buyLottoCard, scratchLottoCard, refreshCity, takeSkillGig, collectSkillGig, acceptSkillInvite, saveHomeLayout, moveHome, sellItem, setClockOffset,
 } from "./cityActions";
 import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
@@ -19,7 +19,7 @@ import {
 import { loadCatalog, startCheckout } from "./storeActions";
 import { membershipPortal, membershipState } from "./membershipActions";
 import {
-  chatBlock, chatList, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
+  chatBlock, chatList, chatCrowned, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
 } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
@@ -74,6 +74,7 @@ export default async function HomePage() {
         buyItem,
         sellItem,
         equipItem,
+        setItemOptions,
         saveLook,
         travel,
         skipTrip,
@@ -113,7 +114,7 @@ export default async function HomePage() {
       // Migration 0047 (owner, Oct 15: two players in the same café couldn't see each other, because
       // presence, place counts, reactions and the message setting were never passed in here).
       chat={chatOn ? {
-        list: chatList, thread: chatThread, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard,
+        list: chatList, thread: chatThread, crowned: chatCrowned, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard,
         react: chatReact, setMessagesFrom: chatSetMessagesFrom, presence: placePresence, counts: placeCounts, skills: skillsOf,
       } : undefined}
       track={chatOn ? track : undefined}

@@ -502,7 +502,7 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
     materials.push(mat);
     const u = {
       uSkin: { value: new Color(look.skin) }, uSkinRef: { value: new Color(SKIN_REF[sex]) }, uHair: { value: new Color(look.hairColor) },
-      uCover: { value: 0 },
+      uCover: { value: 0 }, uGlow: { value: !opts.bare && outfit.glow ? 1 : 0 },
     };
     const geo = mesh.geometry;
     if (!geo.getAttribute("cover")) geo.setAttribute("cover", geo.getAttribute("_cover") ?? new BufferAttribute(new Float32Array(geo.getAttribute("position").count), 1));
@@ -512,7 +512,7 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
       sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute float region;\nattribute float cover;\nvarying float vRegion;\nflat varying float vCover;\nvoid main() {\n  vRegion = region;\n  vCover = cover;");
       widenVertex(sh, widen);
       sh.fragmentShader = sh.fragmentShader
-        .replace("void main() {", `uniform vec3 uSkin; uniform vec3 uSkinRef; uniform vec3 uHair; uniform int uCover;
+        .replace("void main() {", `uniform vec3 uSkin; uniform vec3 uSkinRef; uniform vec3 uHair; uniform int uCover; uniform float uGlow;
 varying float vRegion;
 flat varying float vCover;
 float lumOf(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
@@ -530,6 +530,13 @@ void main() {`)
     // Brows and lashes (dark, on the head) take the hair color.
     float browW = step(3.5, vRegion) * (1.0 - smoothstep(0.03, 0.08, lum)) * (1.0 - skinW);
     c = mix(c, skin, skinW);
+    // The 24k Glow Ritual: a warm gold sheen on the skin and fine gold flecks that catch the light as you move.
+    if (uGlow > 0.5) {
+      vec3 gold = vec3(1.0, 0.8, 0.36);
+      c = mix(c, c * gold * 1.45, 0.32 * skinW);
+      float fleck = fract(sin(dot(floor(gl_FragCoord.xy / 2.0), vec2(12.9898, 78.233))) * 43758.5453);
+      c += gold * step(0.965, fleck) * 0.55 * skinW;
+    }
     c = mix(c, uHair * 0.55, browW);
     diffuseColor.rgb = c;
   }`);

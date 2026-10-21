@@ -152,6 +152,68 @@ reset role;
 select pg_temp.assert((select value from public.player_items where sku = 'midas-shades') = public.collector_value('luxury')
                       and public.collector_value('luxury') <> public.collector_value('fashion'), 'valued as Luxury, its Shop tab');
 
+-- ---- 24k Glow Ritual (0103): sold in Makeup, worn as fashion in its own slot ----
+reset role;
+insert into public.shop_catalog (sku, status, tab, slot, name, price, clout, stars, real_cash, price_usd_cents, edition_size, collection, origin)
+values ('24k-glow-ritual', 'live', 'makeup', 'face-effect', '24k Glow Ritual', 0, 20, 4, true, 999, 100, 'Clout Couture', 'import');
+select pg_temp.assert(public.shop_item('24k-glow-ritual') ->> 'category' = 'fashion', 'the glow is filed as fashion');
+set role authenticated;
+select pg_temp.as_player(2);
+select public.start_purchase('24k-glow-ritual', 'cs_g_2');
+reset role;
+select pg_temp.assert(public.payment_grant('evt_g_2', 'cs_g_2', 'pi_g_2', '00000000-0000-0000-0000-000000000102', '24k-glow-ritual', 999, 'usd') = 'granted', 'glow granted');
+select pg_temp.assert((select value from public.player_items where sku = '24k-glow-ritual') = public.collector_value('makeup'), 'valued as Makeup');
+set role authenticated;
+select pg_temp.as_player(2);
+select 1 from public.equip_item((select id from public.player_items where player_id = auth.uid() and sku = '24k-glow-ritual'), true);
+select pg_temp.assert((select equipped from public.player_items where player_id = auth.uid() and sku = '24k-glow-ritual'), 'glow on');
+select 1 from public.equip_item((select id from public.player_items where player_id = auth.uid() and sku = '24k-glow-ritual'), false);
+select pg_temp.assert(not (select equipped from public.player_items where player_id = auth.uid() and sku = '24k-glow-ritual'), 'and off');
+
+-- ---- 0103: the crown by your name, crown or tiara; the suit's cloth, lining and monogram ----
+reset role;
+insert into public.shop_catalog (sku, status, tab, slot, name, price, clout, stars, real_cash, price_usd_cents, edition_size, collection, origin)
+values ('clout-crown', 'live', 'luxury', 'head', 'The Clout Crown', 0, 200, 4, true, 7999, 50, 'Clout Couture', 'import'),
+       ('sartorio-bespoke-suit', 'live', 'fashion', 'one-piece', 'Sartorio Bespoke Suit', 0, 200, 4, true, 2499, 100, 'Clout Couture', 'import');
+update public.game_settings set value = jsonb_set(value, '{words}', coalesce(value -> 'words', '[]') || '["zzz"]') where key = 'chat';
+set role authenticated;
+select pg_temp.as_player(1);
+select public.start_purchase('clout-crown', 'cs_k_1');
+select public.start_purchase('sartorio-bespoke-suit', 'cs_s_1');
+reset role;
+select pg_temp.assert(public.payment_grant('evt_k_1', 'cs_k_1', 'pi_k_1', '00000000-0000-0000-0000-000000000101', 'clout-crown', 7999, 'usd') = 'granted', 'crown granted');
+select pg_temp.assert(public.payment_grant('evt_s_1', 'cs_s_1', 'pi_s_1', '00000000-0000-0000-0000-000000000101', 'sartorio-bespoke-suit', 2499, 'usd') = 'granted', 'suit granted');
+set role authenticated;
+select pg_temp.as_player(2);
+select pg_temp.assert(public.crowned_players() = array['00000000-0000-0000-0000-000000000101'::uuid], 'everyone sees who wears the crown');
+do $$ begin
+  begin perform public.set_item_options((select id from public.player_items where sku = 'clout-crown'), '{"style": "tiara"}'); raise exception 'FAIL: someone else''s crown';
+  exception when sqlstate '22023' then null; end;
+end $$;
+select pg_temp.as_player(1);
+create temp table mine as select id, sku from public.player_items where player_id = auth.uid();
+select pg_temp.assert(public.set_item_options((select id from mine where sku = 'clout-crown'), '{"style": "tiara"}') = '{"style": "tiara"}', 'a tiara');
+select pg_temp.assert(public.set_item_options((select id from mine where sku = 'sartorio-bespoke-suit'), '{"cloth": "#14111A", "lining": "#B3122E", "monogram": " abc "}')
+                      = '{"cloth": "#14111A", "lining": "#B3122E", "monogram": "ABC"}', 'black cloth, crimson lining, ABC');
+select pg_temp.assert((select options ->> 'monogram' from public.player_items where id = (select id from mine where sku = 'sartorio-bespoke-suit')) = 'ABC', 'saved on the piece');
+do $$ begin
+  begin perform public.set_item_options((select id from mine where sku = 'clout-crown'), '{"style": "hat"}'); raise exception 'FAIL: a hat';
+  exception when sqlstate '22023' then null; end;
+  begin perform public.set_item_options((select id from mine where sku = 'sartorio-bespoke-suit'), '{"cloth": "#FF00FF"}'); raise exception 'FAIL: off-palette';
+  exception when sqlstate '22023' then null; end;
+  begin perform public.set_item_options((select id from mine where sku = 'sartorio-bespoke-suit'), '{"monogram": "ABCD"}'); raise exception 'FAIL: four letters';
+  exception when sqlstate '22023' then null; end;
+  begin perform public.set_item_options((select id from mine where sku = 'sartorio-bespoke-suit'), '{"monogram": "zzz"}'); raise exception 'FAIL: filtered word';
+  exception when sqlstate '22023' then if sqlerrm <> 'monogram_not_allowed' then raise; end if; end;
+  begin perform public.set_item_options((select id from public.player_items where player_id = auth.uid() and sku <> all(array['clout-crown', 'sartorio-bespoke-suit']) limit 1), '{}'); raise exception 'FAIL: options on any piece';
+  exception when sqlstate '22023' then null; end;
+end $$;
+reset role;
+select pg_temp.assert(public.payment_refund('evt_k_1r', 'pi_k_1') = 'revoked', 'crown refunded');
+set role authenticated;
+select pg_temp.as_player(2);
+select pg_temp.assert(public.crowned_players() = '{}', 'no crown, no crown by the name');
+
 reset role;
 rollback;
 \echo couture: ok

@@ -44,7 +44,7 @@ import {
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
 import {
-  previewChatBlock, previewChatList, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
+  previewChatBlock, previewChatList, previewCrowned, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
@@ -329,7 +329,7 @@ export function PreviewHome({
     void previewCrowdPreset(Number(q.get("crowd")) || 0);
   }, []);
   const chat = useMemo<ChatApi>(() => ({
-    list: previewChatList, thread: previewChatThread, send: previewChatSend, status: previewChatStatus,
+    list: previewChatList, thread: previewChatThread, crowned: previewCrowned, send: previewChatSend, status: previewChatStatus,
     block: previewChatBlock, report: previewChatReport, card: previewPlayerCard, skills: previewSkillsOf,
     react: previewChatReact, setMessagesFrom: previewSetMessagesFrom, presence: previewPresence, counts: previewPlaceCounts,
   }), []);

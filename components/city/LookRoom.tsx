@@ -7,14 +7,14 @@ import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { HEADWEAR_BASIC, HEADWEAR_CULTURAL, type CoveringId, type Look } from "@/lib/look";
 import { BOTTOM_LABEL, TOP_LABEL, type Outfit } from "@/lib/styles";
-import { outfitFromSkus, slotsClash, wearSlot } from "@/lib/wearing";
+import { itemOptionsBySku, outfitFromSkus, slotsClash, wearSlot } from "@/lib/wearing";
 import { GARMENT, HAT, SHOE } from "../avatar/garments";
 import { ChevronLeftIcon } from "../icons";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
 /** Item slots: the starting style's (top, bottom, shoes, extra), whole outfits, dresses and the Shop's accessories. */
-type Slot = "outfit" | "top" | "bottom" | "one-piece" | "shoes" | "accessory" | "head" | "face" | "ears" | "neck" | "hand" | "wrist";
+type Slot = "outfit" | "top" | "bottom" | "one-piece" | "shoes" | "accessory" | "head" | "face" | "ears" | "neck" | "hand" | "wrist" | "glow";
 type Tab = "hats" | Slot;
 const TABS: { id: Tab; label: string; owned?: boolean }[] = [
   // Headwear: the free basics and coverings, and Shop hats (slot "head").
@@ -32,8 +32,10 @@ const TABS: { id: Tab; label: string; owned?: boolean }[] = [
   { id: "neck", label: "Necklaces", owned: true },
   { id: "hand", label: "Bags", owned: true },
   { id: "wrist", label: "Watches", owned: true },
+  // Clout Couture's 24k Glow Ritual (migration 0103): on or off like any piece.
+  { id: "glow", label: "Glow", owned: true },
 ];
-const SLOTS: Slot[] = ["outfit", "top", "bottom", "one-piece", "shoes", "accessory", "head", "face", "ears", "neck", "hand", "wrist"];
+const SLOTS: Slot[] = ["outfit", "top", "bottom", "one-piece", "shoes", "accessory", "head", "face", "ears", "neck", "hand", "wrist", "glow"];
 
 /** What's worn per slot: an owned item's id, or null for the starter piece (or nothing). */
 type Worn = Record<Slot, number | null>;
@@ -101,7 +103,7 @@ export function LookRoom({
     return { name: c?.name ?? it?.name ?? trying?.name ?? sku, emoji: c?.emoji ?? it?.emoji ?? "🛍️", image: c?.images?.card ?? null, item: it };
   };
   const wornSkus = (Object.values(worn) as (number | null)[]).map(skuFor).filter((x): x is string => !!x);
-  const outfit = outfitFromSkus(base, wornSkus);
+  const outfit = outfitFromSkus(base, wornSkus, itemOptionsBySku(state.items));
   const preview: Look = { ...look, covering };
   // Headwear takes the avatar's hat color (buildAvatar): the cap color for Bodega Drip, otherwise the outfit's accent.
   const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
@@ -124,6 +126,7 @@ export function LookRoom({
   const starter = (slot: Slot) => {
     if (slot === "outfit") return { name: "No outfit", icon: <NoneIcon /> };
     if (slot === "one-piece") return { name: "No dress", icon: <NoneIcon /> };
+    if (slot === "glow") return { name: "No glow", icon: <NoneIcon /> };
     if (slot !== "top" && slot !== "bottom" && slot !== "shoes" && slot !== "accessory") return { name: "Nothing", icon: <NoneIcon /> };
     if (slot === "top") return { name: TOP_LABEL[base.top], icon: <Garment kind={base.top} color={base.topColor} /> };
     if (slot === "bottom") return { name: BOTTOM_LABEL[base.bottom], icon: <Garment kind={base.bottom} color={base.bottomColor} /> };

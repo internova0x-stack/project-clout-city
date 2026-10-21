@@ -193,6 +193,9 @@ components live in `app/globals.css`.
   `COUTURE_NOW` (lib/shopCatalog.ts) lists the pieces that work in game; `CATALOG_FURNITURE` (lib/city.ts) the sofa and
   the statue (Room3D draws the owner in gold); a real-money car is priced, for insurance, like the priciest C$ car.
   Accessories sold in Luxury are filed as fashion; collector values come from the Shop tab. `?couture=soldout` previews it.
+  Migration 0103: the 24k Glow Ritual is worn (slot 'face-effect', "glow" in lib/wearing.ts; Outfit.glow, baseAvatar's skin
+  shader); `player_items.options` + `set_item_options` (crown or tiara; the suit's cloth, lining, monogram: lib/couture.ts,
+  tests/couture.test.ts keeps the palettes in step); `crowned_players()` puts a 👑 by owners' names (leaderboard, chat).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
   in `assets/avatar-animations.json`; `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git-ignored:
   never commit or ship the raw files) and `npm run avatars:build` (`scripts/build-base-avatars.mjs`) makes the game copies

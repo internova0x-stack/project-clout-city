@@ -1,5 +1,6 @@
 "use server";
 
+import type { ItemOptions } from "@/lib/couture";
 import { cityError, type CityResult, type Gain, type TripInfo, type VipEntry } from "@/lib/cityState";
 import { loadCityState } from "@/lib/cityServer";
 import type { LottoCard } from "@/lib/lotto";
@@ -65,6 +66,9 @@ export async function sellItem(itemId: number) {
 }
 export async function equipItem(itemId: number, on: boolean) {
   return run("equip_item", { p_item: itemId, p_on: on });
+}
+export async function setItemOptions(itemId: number, options: ItemOptions) {
+  return run("set_item_options", { p_item: itemId, p_options: options });
 }
 export async function travel(placeId: string, mode: string) {
   let trip: TripInfo | undefined;

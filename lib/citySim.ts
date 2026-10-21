@@ -3,6 +3,7 @@
 // a database. It follows the same rules as supabase/migrations/0004 in simplified
 // form; the SQL is the source of truth.
 
+import { CROWN_SKU, SUIT_CLOTHS, SUIT_LININGS, cleanMonogram, hasOptions } from "./couture.ts";
 import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, placeOpen, purchaseClout, sellPrice, visitClout, type ShopItem } from "./city.ts";
 import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
@@ -535,6 +536,18 @@ export function createSimApi(
       // One piece per slot, a dress counting as the top and the bottom (migration 0101 wear_slots).
       if (on) for (const o of s.items) { const os = wearSlot(o.sku); if (o.id !== it.id && os && slotsClash(os, slot)) o.equipped = false; }
       it.equipped = on;
+      return ok();
+    },
+    setItemOptions(itemId, o) {
+      const it = s.items.find((i) => i.id === itemId);
+      if (!it || !hasOptions(it.sku)) return fail("That piece has no choices to make.");
+      if (it.sku === CROWN_SKU) it.options = { style: o.style === "tiara" ? "tiara" : "crown" };
+      else {
+        const mono = cleanMonogram(o.monogram ?? "");
+        if (mono === null) return fail("Up to three letters, A to Z.");
+        if (!SUIT_CLOTHS.some((c) => c.hex === (o.cloth ?? SUIT_CLOTHS[0].hex)) || !SUIT_LININGS.some((c) => c.hex === (o.lining ?? SUIT_LININGS[0].hex))) return fail("That isn't one of the choices.");
+        it.options = { cloth: o.cloth ?? SUIT_CLOTHS[0].hex, lining: o.lining ?? SUIT_LININGS[0].hex, monogram: mono };
+      }
       return ok();
     },
     saveLook(itemIds) {

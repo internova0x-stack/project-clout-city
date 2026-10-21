@@ -91,6 +91,8 @@ export interface PlayerItem {
   value: number;
   acquired: "bought" | "earned" | "collector";
   equipped: boolean;
+  /** Clout Couture's choices (migration 0103): the crown or a tiara, the suit's cloth, lining and monogram. */
+  options?: import("./couture.ts").ItemOptions;
 }
 
 export interface CityState {
@@ -158,6 +160,8 @@ export interface CityApi {
   buyItem(sku: string, mode: "buy" | "rent"): Promise<CityResult>;
   sellItem(itemId: number): Promise<CityResult>;
   equipItem(itemId: number, on: boolean): Promise<CityResult>;
+  /** Clout Couture (migration 0103): a piece's choices (crown or tiara; the suit's cloth, lining and monogram). */
+  setItemOptions?(itemId: number, options: import("./couture.ts").ItemOptions): Promise<CityResult>;
   /** v0.8 travel (migration 0025): go to a place (or "home") by walk, subway, taxi or car. */
   travel?(placeId: string, mode: import("./travel.ts").TravelMode): Promise<CityResult>;
   /** C4 (migration 0095): buy a 7- or 30-day OMG Card; watch the showtime dancers on this ride. */
@@ -285,6 +289,10 @@ const ERRORS: Record<string, string> = {
   already_owned: "You already own that. Calm down.",
   already_own_house: "You already own a house. One mortgage-free life at a time.",
   already_own_car: "You already own a car. Parking one is hard enough.",
+  bad_option: "That isn't one of the choices.",
+  bad_monogram: "Up to three letters, A to Z.",
+  monogram_not_allowed: "The tailor won't stitch that. Pick other initials.",
+  no_options: "That piece has no choices to make.",
   already_renting: "You're already renting a car.",
   not_rentable: "That can't be rented.",
   not_wearable: "You can't wear that. You could try, but no.",

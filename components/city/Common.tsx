@@ -144,3 +144,8 @@ export function ActionTimer({ doing }: { doing: { emoji: string; label: string; 
     </div>
   );
 }
+
+/** Clout Couture (migration 0103): the small crown by a Clout Crown owner's name, on the leaderboard and in chat. */
+export function CrownMark() {
+  return <span className="crown-mark" role="img" aria-label="Wears the Clout Crown" title="Wears the Clout Crown">👑</span>;
+}
