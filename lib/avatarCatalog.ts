@@ -35,16 +35,17 @@ export const GARMENT_TEMPLATES: Record<string, { cover: number; slot: "top" | "b
   blazer: { cover: 64, slot: "top", kind: 7, hem: 0 }, puffer: { cover: 128, slot: "top", kind: 8, hem: 0.01 },
   pants: { cover: 256, slot: "bottom", kind: 9 }, shorts: { cover: 512, slot: "bottom", kind: 10 }, leggings: { cover: 1024, slot: "bottom", kind: 11 },
   skirt: { cover: 2048, slot: "bottom", kind: 12 }, boots: { cover: 4096, slot: "shoes", kind: 13 },
+  sneakers: { cover: 8192, slot: "shoes", kind: 14 },
 };
 
-/** The templates an outfit wears on the new bodies, with their colors (whole Shop outfits wait for stage 4's sets). */
+/** The templates an outfit wears on the new bodies, with their colors. The bodies are barefoot in a plain base layer,
+ *  so shoes without a template of their own are sneakers; a whole Shop outfit wears its pieces until stage 4's sets. */
 export function garmentsFor(o: Pick<Outfit, "top" | "topColor" | "topAccent" | "bottom" | "bottomColor" | "shoes" | "shoeColor" | "shoeAccent" | "set">) {
-  if (o.set) return [];
   const pick = (file: string, color: string, accent: string) => (GARMENT_TEMPLATES[file] ? [{ file, ...GARMENT_TEMPLATES[file], color, accent }] : []);
   return [
     ...pick(o.top, o.topColor, o.topAccent),
     ...pick(o.bottom, o.bottomColor, o.topAccent),
-    ...(o.shoes ? pick(o.shoes, o.shoeColor, o.shoeAccent ?? "#2B2B2B") : []),
+    ...pick(o.shoes && GARMENT_TEMPLATES[o.shoes] ? o.shoes : "sneakers", o.shoeColor, o.shoeAccent ?? "#2B2B2B"),
   ];
 }
 

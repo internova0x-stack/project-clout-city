@@ -177,6 +177,19 @@ had drawn ovals), its details are drawn from the finished surface (straight pock
 softened and it hugs the shoulder joints. The baked basics are calmer (half the texture's shading) and the shins' baked
 socks take the shoe color (no dark band above the shoes). `/preview/moves?outfit=hair` shows every hairstyle.
 
-**Animations later (owner, Oct 21):** extra moves (from Higgsfield or elsewhere) come after stage 4. Each must be made on
-the same 24-bone skeleton (best: animate `assets/avatars/base-*.glb` itself); check the first file before a batch, and
-preview each one in a few outfits before it goes in.
+**New bodies and animations (Oct 21, assets/avatar-animations.json version 2):** the bodies are now the owner's bald,
+barefoot ones in a flat grey base layer, with 6 clips each (idle, run, sit, sleep, dance, wave; the male dance is Hip Hop
+Dance 1, the female All Night Dance). `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git ignores
+it: never commit or ship the raw files) and `npm run avatars:build` makes everything in `public/avatars/` from them:
+the bodies (about 0.53 MB, low 0.33 MB), every garment template and hairstyle, and one animation file per body
+(`m-anims.glb`, `f-anims.glb`, about 0.35 MB: the walk and every clip). The clips were rigged on their own, so their
+bind poses and bone lengths differ a little from the body's; `scripts/retarget.mjs` moves each one over in world space
+(each bone's turn from its own bind pose, put on the body's), keeping the body's bone lengths and scaling the hips'
+movement, and refuses a clip whose bones are named or joined differently (none were). The earlier fixes hold: padded
+texture islands, matte materials (roughness 0.9, metalness 0), the base layer never recolored (only the skin tone and
+the brows), and body types never scale or turn the head or neck: `lib/bodyTypes.ts` works out how each vertex of the
+body and its clothes moves to be wider (the torso from the spine, arms and legs from their bones) and the shader adds it
+before skinning; height scales the whole figure. Barefoot bodies wear sneakers unless the outfit has boots; a whole Shop
+outfit wears its pieces until stage 4's sets. The game plays a clip by name (`AvatarParts.play`); which moments use
+which clip waits for the owner's approval of `/preview/moves?outfit=anims`. New clips must be made on these bodies
+(same 24 bones); add them to the JSON file and rebuild.

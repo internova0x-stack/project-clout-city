@@ -186,12 +186,17 @@ components live in `app/globals.css`.
   picture (`shippedPictures`), and the Studio's Load uses them instead of processing (tests/shopPictures.test.ts).
   `/preview/studio` → Shop runs on an in-memory catalog and really processes pictures; what's approved there shows in
   `/preview/home`'s Shop (run `npm run dev` with `NODE_USE_ENV_PROXY=1` where downloads need a proxy).
-- New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): masters in `assets/avatars/`, game copies (full and
-  `-low`) built by `scripts/build-base-avatars.mjs` into `public/avatars/body/`; `buildModelAvatar` hands over to
+- New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
+  in `assets/avatar-animations.json`; `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git-ignored:
+  never commit or ship the raw files) and `npm run avatars:build` (`scripts/build-base-avatars.mjs`) makes the game copies
+  (full and `-low`) in `public/avatars/body/`, plus `{m,f}-anims.glb` (the walk and every clip, retargeted onto the body's
+  skeleton by `scripts/retarget.mjs`; `AvatarParts.play(name)`; `/preview/moves?outfit=anims`). The base layer is never
+  recolored (skin tone and brows only); body types never scale the head or neck (`lib/bodyTypes.ts`: per-vertex widening
+  added by the shader, height scales the figure); barefoot bodies wear the sneakers template unless the outfit has boots; `buildModelAvatar` hands over to
   `buildBaseAvatar` when `newBodies()` (lib/graphics.ts: a per-device switch in Studio → Shop, or `?bodies=new`). Off for
   players until stage 4. `lowGraphics()` (Settings → Low graphics, `?graphics=low|high`, on by itself only on clearly weak
   phones) picks the low files; renderers take `renderQuality()` (no shadows, no antialiasing, 1x). `/preview/moves` shows
-  every move on both bodies. Garment templates (stage 3: the hoodie) are cut from the masters by `scripts/garments.mjs`
+  every move on both bodies. Garment templates (the hoodie, then the stage 4 wardrobe) are cut from the bodies by `scripts/garments.mjs`
   into `public/avatars/garments/`, share the body's skeleton, and hide the skin under them (`_COVER` bits); the outfit's
   top picks one from `GARMENT_TEMPLATES` (lib/avatarCatalog.ts). `/preview/moves?outfit=hoodie` shows all eight body types.
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus

@@ -12,6 +12,8 @@
 //   z  height above the hem (meters)
 //   w  part: 0 body of the garment, 0.5 hood, 1 drawstring
 
+import { Matrix4, Vector3 } from "three";
+
 /** Cover groups (bits in each body vertex's _COVER): skin hidden under a garment. Stage 4 adds more. */
 export const COVER = { hoodie: 1 };
 
@@ -42,7 +44,10 @@ export function readBody(prim, skin) {
   for (let i = 0; i < count; i++) sn[wid[i]] = add(sn[wid[i]], nrm[i]);
   const smooth = sn.map(norm);
   const names = skin.listJoints().map((j) => j.getName());
-  const bone = Object.fromEntries(skin.listJoints().map((j) => [j.getName(), j.getWorldTranslation()]));
+  // Bone positions in the bind pose, in the vertices' own space: the skin's inverse bind matrices, inverted (the
+  // nodes' own values may be a pose, the first frame of an animation).
+  const ibm = skin.getInverseBindMatrices().getArray();
+  const bone = Object.fromEntries(skin.listJoints().map((j, i) => [j.getName(), new Vector3().setFromMatrixPosition(new Matrix4().fromArray(ibm, i * 16).invert()).toArray()]));
   return { count, pos, nrm: Array.from({ length: count }, (_, i) => smooth[wid[i]]), joints, weights, idx, wid, names, bone };
 }
 

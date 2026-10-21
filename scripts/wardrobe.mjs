@@ -5,7 +5,7 @@
 //   top     hem (meters below the top of the legs; the legs themselves stay out), sleeves (long, short or none), neckline (crew, scoop, V, open front, collar), fit
 //   bottom  waist, leg end (ankle, above the knee), fit
 //   skirt   a skirt hangs from the hips over both legs, so it is its own surface (a flared cone), not a cut
-//   boots   the baked sneakers and the shin up to mid-calf
+//   boots   the foot and the shin up to mid-calf; sneakers, the foot to just above the ankle
 //
 // _PAT, read by the game's garment shader (components/avatar/baseAvatar.ts) with the template's own details:
 //   x  distance to a hem, cuff or waistband (meters, capped at 1)
@@ -29,6 +29,8 @@ export const WARDROBE = {
   leggings: { kind: "bottom", bit: 1024, end: "ankle", gap: 0.0035 },
   skirt: { kind: "skirt", bit: 2048 },
   boots: { kind: "boots", bit: 4096, gap: 0.006 },
+  // The default shoes on the barefoot bodies: the foot and the ankle, a low top just above the ankle bone.
+  sneakers: { kind: "boots", bit: 8192, gap: 0.008, end: "ankle" },
 };
 if (Object.values(WARDROBE).some((t) => t.bit & COVER.hoodie)) throw new Error("cover bit clash");
 
@@ -53,6 +55,7 @@ export function wardrobeFit(body) {
     })),
     ankle: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.86), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     thigh: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}UpLeg`, `${s}Leg`, 0.62), sub(B[`${s}Leg`], B[`${s}UpLeg`]))])),
+    ankleTop: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.93), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     calf: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.5), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
   };
 }
@@ -134,7 +137,8 @@ export function wardrobeKeep(body, f, t) {
       return blend(base, { LeftLeg: leg("Left"), RightLeg: leg("Right"), LeftArm: arm, RightArm: arm });
     }
     if (t.kind === "boots") {
-      const leg = (side) => ({ s: before(f.calf[side], p), edge: "cuff" });
+      // The foot's side of the cut (below it), so the shoe holds the foot and stops on the shin.
+      const leg = (side) => ({ s: -before(t.end === "ankle" ? f.ankleTop[side] : f.calf[side], p), edge: "cuff" });
       const r = blend({ s: -0.05, edge: "cuff" }, { LeftLeg: leg("Left"), RightLeg: leg("Right") });
       return r;
     }
@@ -241,7 +245,7 @@ export function buildWardrobe(body, name) {
   const t = WARDROBE[name], f = wardrobeFit(body);
   if (t.kind === "skirt") return buildSkirt(body, f);
   const keep = wardrobeKeep(body, f, t);
-  const { V, P: smoothed, tris, border, nbrs, along } = cutShell(body, keep, t.kind === "boots" ? 20 : 60);
+  const { V, P: smoothed, tris, border, nbrs, along } = cutShell(body, keep, t.kind === "boots" ? (t.end ? 50 : 20) : 60);
   smoothSkin(V, nbrs, t.kind === "top" ? 6 : 4);
   const limbW = (v, re) => v.j.reduce((w, j, k) => w + (re.test(body.names[j] ?? "") ? v.w[k] : 0), 0);
   const shoulders = ["LeftArm", "RightArm"].map((n) => body.bone[n]);

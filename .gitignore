@@ -10,3 +10,6 @@ next-env.d.ts
 .DS_Store
 npm-debug.log*
 public/maplibre/
+
+# The owner's raw avatar sources (scripts/fetch-avatar-sources.mjs): never committed.
+/assets/avatars/sources/
