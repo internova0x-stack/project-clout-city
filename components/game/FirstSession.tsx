@@ -1,5 +1,6 @@
 "use client";
 
+import { CrownMark } from "../city/Common";
 import { useEffect, useState } from "react";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { cliqueProgress } from "@/lib/invite";
@@ -73,16 +74,22 @@ interface Row { id?: string; rank: number; display_name: string; starting_style:
 
 /** C27: the clout leaderboard, Queens or Crew. */
 export function LeaderboardSheet({
-  open, onClose, cta, myClout, onOpenPlayer, fetchRows,
+  open, onClose, cta, myClout, onOpenPlayer, fetchRows, fetchCrowned,
 }: {
   open: boolean; onClose: () => void; cta?: { label: string; onClick: () => void }; myClout: number;
   /** v0.5: tap a row to open that player's card (and message them). */
   onOpenPlayer?: (id: string) => void;
   /** Development previews: sample rows instead of the database. */
   fetchRows?: (scope: "queens" | "clique") => Promise<Row[]>;
+  /** Clout Couture (migration 0103): Clout Crown owners, for the crown by their name. */
+  fetchCrowned?: () => Promise<string[]>;
 }) {
   const [scope, setScope] = useState<"queens" | "clique">("queens");
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [crowned, setCrowned] = useState<ReadonlySet<string>>(new Set());
+  // Once per opening (fetchCrowned is a fresh function on every render of the shell).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (open && fetchCrowned) void fetchCrowned().then((ids) => setCrowned(new Set(ids))).catch(() => undefined); }, [open]);
   const [me, setMe] = useState<{ rank: number; total: number } | null>(null);
 
   useEffect(() => {
@@ -139,7 +146,7 @@ export function LeaderboardSheet({
             >
               <span className="meta lb-rank">{r.rank}</span>
               <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
-              <span className="title lb-name">{handle(r.display_name)}{r.is_me ? " (you)" : ""}</span>
+              <span className="title lb-name">{handle(r.display_name)}{r.id && crowned.has(r.id) && <CrownMark />}{r.is_me ? " (you)" : ""}</span>
               <span className="hud-number lb-clout">🔥 {Number(r.clout).toLocaleString()}</span>
             </div>
           ))}

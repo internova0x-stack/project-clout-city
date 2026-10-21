@@ -41,6 +41,22 @@ export function buildHeadAccessory(a: AccessoryWear): { group: Group; dispose():
   const { add, mat } = k;
   const main = mat(a.color), trim = mat(a.accent);
   switch (a.kind) {
+    case "tiara": {
+      // The crown worn as a tiara (migration 0103): a slim gold band over the front of the hair, peaks rising to the
+      // middle, a stone on each.
+      const gold = metal(k, a.color), r = 0.2, y = 0.135;
+      const band = new Group();
+      band.rotation.x = -0.32;
+      k.group.add(band);
+      add(new TorusGeometry(r, 0.009, 8, 32, Math.PI), gold, 0, y, 0, band).rotation.x = Math.PI / 2;
+      for (let i = 0; i <= 8; i++) {
+        const t = (i / 8) * Math.PI, h = 0.03 + 0.07 * Math.pow(Math.sin(t), 3);
+        const peak = add(new ConeGeometry(0.011, h, 5), gold, Math.cos(t) * r, y + h / 2, Math.sin(t) * r, band);
+        peak.rotation.set(Math.sin(t) * 0.25, 0, -Math.cos(t) * 0.25);
+        add(new SphereGeometry(i === 4 ? 0.013 : 0.007, 8, 6), mat(a.accent, { roughness: 0.15, metalness: 0.3 }), Math.cos(t) * (r + 0.004), y + 0.008, Math.sin(t) * (r + 0.004), band);
+      }
+      break;
+    }
     case "bucket": {
       // Denim squares: the crown in two blues, a stitched brim.
       add(new CylinderGeometry(0.16, 0.205, 0.15, 16), main, 0, 0.16, -0.01);

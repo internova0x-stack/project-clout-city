@@ -1,5 +1,6 @@
 "use client";
 
+import { CrownMark } from "../city/Common";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSummary, type ChatThread, type ReportReason } from "@/lib/chat";
 import { getStyle, type StyleId } from "@/lib/styles";
@@ -60,8 +61,11 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
   const bottom = useRef<HTMLDivElement>(null);
   const press = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Clout Couture (migration 0103): a crown by the names of Clout Crown owners.
+  const [crowned, setCrowned] = useState<ReadonlySet<string>>(new Set());
   const loadList = useCallback(async () => {
-    const [l, s] = await Promise.all([api.list(), api.status()]);
+    const [l, s, k] = await Promise.all([api.list(), api.status(), api.crowned?.()]);
+    if (k?.ok) setCrowned(new Set(k.data));
     if (l.ok) {
       setList(l.data);
       onUnread?.(l.data.reduce((n, c) => n + c.unread, 0));
@@ -221,7 +225,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
             <span className="chat-avatar" aria-hidden="true">{getStyle(c.style as StyleId).emoji}</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
               <span className="title" style={{ display: "block" }}>
-                {handle(c.name)}{dating?.matched.includes(c.with) && !c.blocked && <span className="tag matched-tag">Matched</span>}
+                {handle(c.name)}{crowned.has(c.with) && <CrownMark />}{dating?.matched.includes(c.with) && !c.blocked && <span className="tag matched-tag">Matched</span>}
               </span>
               <span className="subtext chat-last">{c.blocked ? "Blocked" : `${c.lastMine ? "You: " : ""}${c.last ?? ""}`}</span>
             </span>
@@ -240,7 +244,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
       <div className="chat-head">
         <button className="phone-back" onClick={() => { setOpen(null); setThread(null); void loadList(); }}>‹ Messages</button>
         <span style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
-          <span className="title one-line" style={{ display: "block" }}>{getStyle(open.style as StyleId).emoji} {handle(open.name)}</span>
+          <span className="title one-line" style={{ display: "block" }}>{getStyle(open.style as StyleId).emoji} {handle(open.name)}{crowned.has(open.id) && <CrownMark />}</span>
           {crush?.matched && <span className="tag matched-tag" style={{ margin: 0 }}>💗 Matched</span>}
         </span>
         {crush && !thread?.blocked && <CrushButton status={crush} busy={crushBusy} onToggle={(on) => void toggleCrush(on)} showCount={false} />}

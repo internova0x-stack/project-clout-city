@@ -20,7 +20,7 @@ import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES,
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
-import { outfitFromSkus } from "@/lib/wearing";
+import { itemOptionsBySku, outfitFromSkus } from "@/lib/wearing";
 import { modelSex } from "@/lib/avatarCatalog";
 import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -757,7 +757,7 @@ export function GameShell({
   const style = getStyle(look.style);
   // Everything worn: the code's pieces, the Shop catalog's clothes and accessories (lib/wearing.ts).
   const wornSkus = city ? city.items.filter((i) => i.equipped && i.category === "fashion").map((i) => i.sku) : [];
-  const outfit = wornSkus.length ? outfitFromSkus(starterOutfit(style, look.body, look.fit), wornSkus) : undefined;
+  const outfit = wornSkus.length ? outfitFromSkus(starterOutfit(style, look.body, look.fit), wornSkus, itemOptionsBySku(city?.items ?? [])) : undefined;
   const home = homeLocation(me.home_id);
   // v0.8 travel (#4): where the player is. Null is home; without migration 0025 there's no travel.
   const travelOn = !!(city && cityApi?.travel && city.player.at_place !== undefined);
@@ -2192,6 +2192,7 @@ export function GameShell({
         myClout={me.clout}
         onOpenPlayer={chat ? (id) => setCardId(id) : undefined}
         fetchRows={leaderboardRows}
+        fetchCrowned={chat?.crowned ? () => chat.crowned!().then((r) => (r.ok ? r.data : [])) : undefined}
       />
       {chat && (
         <PlayerCardSheet
@@ -2366,6 +2367,7 @@ export function GameShell({
             onEquip={(id, on) => void run(`equip:${id}`, () => cityApi.equipItem(id, on))}
             onOpenCollection={catalog ? () => setPanel("collection") : undefined}
             serial={(sku) => products.find((p) => p.sku === sku)?.serial}
+            onOptions={cityApi.setItemOptions ? (id, o) => run(`options:${id}`, () => cityApi.setItemOptions!(id, o)) : undefined}
           />
           <CollectionSheet
             open={panel === "collection"}

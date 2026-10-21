@@ -11,6 +11,7 @@ import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars, useGameNow } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 import { editionLine, formatPrice, serialLabel, type StoreProduct } from "@/lib/store";
+import { CROWN_SKU, CROWN_STYLES, SUIT_CLOTHS, SUIT_LININGS, cleanMonogram, hasOptions, optionsLine, type ItemOptions } from "@/lib/couture";
 import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, shippedPictures, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
 
@@ -251,7 +252,7 @@ export function ShopSheet({
 // Net Worth (C25, renamed from Possessions in #30): bank cash, then items by category; sell at 60%.
 // ---------------------------------------------------------------------------
 export function NetWorthSheet({
-  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection, serial,
+  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection, serial, onOptions,
 }: {
   open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean>;
   /** #15: owned clothes can be put on from their detail. */
@@ -260,6 +261,8 @@ export function NetWorthSheet({
   onOpenCollection?: () => void;
   /** Clout Couture (migration 0102): a numbered piece's edition number. */
   serial?: (sku: string) => number | null | undefined;
+  /** Clout Couture (migration 0103): saves a piece's choices (crown or tiara; the suit's cloth, lining, monogram). */
+  onOptions?: (itemId: number, options: ItemOptions) => Promise<boolean>;
 }) {
   const [detail, setDetail] = useState<PlayerItem | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -298,7 +301,7 @@ export function NetWorthSheet({
                       <ShopArt image={it?.image} emoji={it?.emoji ?? "📦"} size={40} item={it} />
                       <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                         <span className="title" style={{ display: "block" }}>{it?.name ?? i.sku}</span>
-                        <span className="meta">{i.acquired === "earned" ? "Earned" : i.acquired === "collector" ? `✨ Collector${serial?.(i.sku) ? ` · ${serialLabel(serial(i.sku)!)}` : ""}` : "Bought"}{i.equipped ? " · Wearing" : ""}</span>
+                        <span className="meta">{i.acquired === "earned" ? "Earned" : i.acquired === "collector" ? `✨ Collector${serial?.(i.sku) ? ` · ${serialLabel(serial(i.sku)!)}` : ""}` : "Bought"}{i.equipped ? " · Wearing" : ""}{optionsLine(i.sku, i.options) ? ` · ${optionsLine(i.sku, i.options)}` : ""}</span>
                       </span>
                       <span className="body-strong tabular">{formatCash(i.value)}</span>
                     </button>
@@ -365,6 +368,10 @@ export function NetWorthSheet({
                     </button>
                   );
                 })()}
+                {onOptions && hasOptions(detail.sku) && (
+                  <ItemOptionsEditor key={detail.id} sku={detail.sku} saved={state.items.find((i) => i.id === detail.id)?.options}
+                    busy={busy !== null} onSave={(o) => onOptions(detail.id, o)} />
+                )}
                 {detail.acquired === "collector" ? (
                   <p className="meta" style={{ margin: 0 }}>
                     ✨ A collector piece, bought with real cash{serial?.(detail.sku) ? `: ${serialLabel(serial(detail.sku)!)}` : ""}. It can&apos;t be sold for virtual cash.
@@ -378,6 +385,56 @@ export function NetWorthSheet({
         )}
       </Sheet>
     </>
+  );
+}
+
+/** Clout Couture (migration 0103): make a piece yours. The Clout Crown as a crown or a tiara; the suit's cloth, lining and
+ *  up to three monogram initials (the server runs the chat word filter). Saving changes the avatar at once. */
+function ItemOptionsEditor({ sku, saved, busy, onSave }: { sku: string; saved?: ItemOptions; busy: boolean; onSave: (o: ItemOptions) => Promise<boolean> }) {
+  const [o, setO] = useState<ItemOptions>(saved ?? {});
+  const [note, setNote] = useState<string | null>(null);
+  const crown = sku === CROWN_SKU;
+  const mono = cleanMonogram(o.monogram ?? "");
+  const same = JSON.stringify(saved ?? {}) === JSON.stringify(o);
+  const swatches = (label: string, list: { hex: string; label: string }[], key: "cloth" | "lining") => (
+    <div className="stack-8">
+      <span className="overline">{label}: {list.find((c) => c.hex === (o[key] ?? list[0].hex))?.label}</span>
+      <div className="swatches" role="group" aria-label={label}>
+        {list.map((c) => (
+          <button key={c.hex} aria-pressed={(o[key] ?? list[0].hex) === c.hex} aria-label={c.label} className="swatch" style={{ background: c.hex }}
+            onClick={() => setO({ ...o, [key]: c.hex })} />
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div className="card stack-12">
+      <span className="title">Make it yours</span>
+      {crown ? (
+        <div className="segmented" role="group" aria-label="Wear it as">
+          {CROWN_STYLES.map((c) => (
+            <button key={c.id} aria-pressed={(o.style ?? "crown") === c.id} onClick={() => setO({ ...o, style: c.id })}>{c.label}</button>
+          ))}
+        </div>
+      ) : (
+        <>
+          {swatches("Cloth", SUIT_CLOTHS, "cloth")}
+          {swatches("Lining", SUIT_LININGS, "lining")}
+          <div className="stack-8">
+            <span className="overline">Monogram (up to 3 letters)</span>
+            <label className="field">
+              <input value={o.monogram ?? ""} maxLength={3} autoCapitalize="characters" placeholder="ABC" aria-label="Monogram"
+                onChange={(e) => setO({ ...o, monogram: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} />
+            </label>
+          </div>
+        </>
+      )}
+      <button className="btn btn-secondary" disabled={busy || same || mono === null}
+        onClick={async () => { setNote(null); setNote((await onSave({ ...o, ...(crown ? {} : { monogram: mono ?? "" }) })) ? "Saved." : null); }}>
+        {busy ? "…" : "Save"}
+      </button>
+      {note && <span className="meta">{note}</span>}
+    </div>
   );
 }
 

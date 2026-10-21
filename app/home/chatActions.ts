@@ -19,6 +19,10 @@ async function call<T>(fn: string, args: Record<string, unknown> = {}, map: (d: 
 export async function chatList() {
   return call<ChatSummary[]>("chat_list");
 }
+/** Clout Couture (migration 0103): Clout Crown owners, for the crown by their name. */
+export async function chatCrowned() {
+  return call<string[]>("crowned_players", {}, (d) => (Array.isArray(d) ? (d as string[]) : []));
+}
 export async function chatThread(withId: string) {
   return call<ChatThread>("chat_thread", { p_with: withId });
 }

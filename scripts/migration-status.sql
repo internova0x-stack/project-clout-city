@@ -111,6 +111,7 @@ from (values
   ('0099_shop_manager.sql', coalesce((to_regclass('public.shop_catalog') is not null), false)),
   ('0100_style_looks.sql', coalesce((to_regclass('public.style_boosts') is not null), false)),
   ('0101_switch_on.sql', coalesce((to_regprocedure('public.wear_slots(text)') is not null), false)),
-  ('0102_couture.sql', coalesce((to_regprocedure('public.couture_edition(text)') is not null), false))
+  ('0102_couture.sql', coalesce((to_regprocedure('public.couture_edition(text)') is not null), false)),
+  ('0103_couture_glow.sql', coalesce((to_regprocedure('public.crowned_players()') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

@@ -29,7 +29,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
       .or(`ny_date.eq.${day},and(accepted_at.not.is.null,collected_at.is.null)`)
       .order("id"),
     supabase.from("bills").select("id, kind, amount, due_date, status, paid_at").order("due_date", { ascending: false }).limit(30),
-    supabase.from("player_items").select("id, sku, category, value, acquired, equipped").order("created_at"),
+    // "*": options (migration 0103) arrives once it has run.
+    supabase.from("player_items").select("*").order("created_at"),
     supabase.from("place_visits").select("place_id, visits").eq("ny_date", day),
     supabase.from("event_attendance").select("event_id").eq("ny_date", day),
     supabase.from("game_settings").select("value").eq("key", "dev").maybeSingle(),
@@ -84,7 +85,10 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     tasks: (tasks.data ?? []) as DailyTask[],
     gigs: (gigs.data ?? []) as GigOffer[],
     bills: (bills.data ?? []) as Bill[],
-    items: (items.data ?? []) as PlayerItem[],
+    items: ((items.data ?? []) as (PlayerItem & { options?: PlayerItem["options"] })[]).map((i) => ({
+      id: i.id, sku: i.sku, category: i.category, value: i.value, acquired: i.acquired, equipped: i.equipped,
+      ...(i.options && Object.keys(i.options).length ? { options: i.options } : {}),
+    })),
     regularDays: ((days.data ?? []) as { place_id: string }[]).reduce<Record<string, number>>((m, v) => ({ ...m, [v.place_id]: (m[v.place_id] ?? 0) + 1 }), {}),
     visitsToday: Object.fromEntries(((visits.data ?? []) as { place_id: string; visits: number }[]).map((v) => [v.place_id, v.visits])),
     attendedToday: ((attended.data ?? []) as { event_id: string }[]).map((a) => a.event_id),

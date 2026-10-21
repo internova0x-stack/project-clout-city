@@ -40,6 +40,8 @@ export interface Outfit {
   /** Shop catalog clothes worn (lib/catalogWear.ts), by the slot their pieces fill (a dress fills top and bottom). New
    *  bodies only: they replace that slot's starter or code piece. */
   pieces?: Partial<Record<"top" | "bottom" | "shoes", SetPiece[]>>;
+  /** Clout Couture's 24k Glow Ritual (migration 0103): a gold shimmer on the bare skin. New bodies only. */
+  glow?: boolean;
 }
 
 export interface StartingStyle {

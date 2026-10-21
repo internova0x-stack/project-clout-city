@@ -156,9 +156,13 @@ first. Owning a piece earns the **Clout Couture** badge; a refund of the last on
 and heels are worn like the catalog's clothes, the shades, watch and crown like its accessories (filed as fashion,
 valued by their Luxury tab), the sofa and statue are home furniture (the statue is the owner in gold, waving, on a
 black marble pedestal; it follows their look), and the Velocity Veloce is their car (one owned car at a time; it ends a
-rental; insured like the priciest C$ car). Held back: the **24k Glow Ritual** (its shimmer isn't built), the suit's
-cloth, lining and monogram choices, the crown/tiara choice and the crown icon by the owner's name. Their descriptions
-no longer promise them. Preview: `/preview/home` sells the eight pieces (the watch's sample drop is sold out;
+rental; insured like the priciest C$ car).
+
+**Couture extras (migration 0103).** The **24k Glow Ritual** is worn in its own slot (Your Look → Glow): a gold sheen and
+fine gold flecks on the bare skin. Net Worth → a piece → **Make it yours**: the Clout Crown as a crown or a tiara; the suit's
+cloth (six colors), lining (five) and up to three monogram initials (the chat word filter applies; `set_item_options`
+checks the same palettes as lib/couture.ts). Clout Crown owners get a 👑 by their name on the leaderboard and in chat
+(`crowned_players()`). Preview: `/preview/moves?outfit=accessories&pick=24k-glow-ritual,clout-crown-tiara`. Preview: `/preview/home` sells the eight pieces (the watch's sample drop is sold out;
 `?couture=soldout` sells out every drop).
 
 **Stage 2 as built (Oct 21):** the owner's bald masters live in `assets/avatars/` (never served); `node

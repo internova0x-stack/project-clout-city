@@ -292,6 +292,64 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(0.3, 0.1, 0.01, k.mat(color ?? "#D4AF37", { roughness: 0.3, metalness: 0.85 }), 0, STATUE_TOP * 0.45, (d - 0.14) / 2 + 0.006);
       return { group: g };
     }
+    case "throne": {
+      // The Clout Throne: a stepped gold dais, a magenta velvet seat, and behind it a fan of gold spikes, phones on
+      // selfie sticks and ring lights (look A, owner Oct 21). Sitting puts you on the cushion (seatY).
+      const gold = k.mat(color ?? "#D4AF37", { roughness: 0.42, metalness: 0.25 });
+      const bronze = k.mat("#A9772A", { roughness: 0.5, metalness: 0.2 });
+      const velvet = k.mat("#8E1F4A", { roughness: 0.9 });
+      const screen = k.mat("#1F1B26", { roughness: 0.25, metalness: 0.2 });
+      for (let i = 0; i < 3; i++) box(w - i * 0.22, 0.15, d - i * 0.24, i % 2 ? bronze : gold, 0, i * 0.15, -i * 0.1);
+      box(0.72, 0.26, 0.62, gold, 0, 0.45, -0.18);
+      box(0.66, 0.07, 0.56, velvet, 0, 0.71, -0.16);
+      for (const sx of [-1, 1]) box(0.14, 0.36, 0.6, gold, sx * 0.42, 0.45, -0.18);
+      box(0.6, 0.95, 0.08, velvet, 0, 0.71, -0.47);
+      const fan = new Group();
+      fan.position.set(0, 0.95, -0.55);
+      g.add(fan);
+      const ray = (angle: number, len: number, part: "spike" | "stick" | "ring", z = 0) => {
+        const arm = new Group();
+        arm.rotation.z = angle;
+        arm.position.z = z;
+        fan.add(arm);
+        if (part === "spike") {
+          const m = new Mesh(k.geo(new ConeGeometry(0.075, len, 4)), z < 0 ? bronze : gold);
+          m.position.y = len / 2;
+          arm.add(m);
+          // Gold phones laid along each spike, screens out.
+          for (const at of [0.28, 0.55]) {
+            const ph = new Mesh(k.geo(new BoxGeometry(0.1, 0.17, 0.02)), gold);
+            ph.position.set(0, len * at, 0.035);
+            arm.add(ph);
+            const sc = new Mesh(k.geo(new BoxGeometry(0.08, 0.14, 0.006)), screen);
+            sc.position.set(0, len * at, 0.047);
+            arm.add(sc);
+          }
+        } else {
+          const stick = new Mesh(k.geo(new CylinderGeometry(0.008, 0.008, len, 5)), gold);
+          stick.position.y = len / 2;
+          arm.add(stick);
+          if (part === "stick") {
+            const ph = new Mesh(k.geo(new BoxGeometry(0.1, 0.06, 0.015)), screen);
+            ph.position.set(0, len + 0.02, 0.01);
+            arm.add(ph);
+          } else {
+            const ring = new Mesh(k.geo(new TorusGeometry(0.09, 0.018, 6, 20)), glow("#FFF4D6", 1.4));
+            ring.position.set(0, len + 0.09, 0.02);
+            arm.add(ring);
+          }
+        }
+      };
+      // Two layers of spikes, the back one offset and darker, tallest in the middle.
+      for (let i = 0; i <= 18; i++) {
+        const t = -1.4 + (i / 18) * 2.8;
+        ray(t, 0.6 + 0.8 * Math.cos(t * 0.9) + (i % 2) * 0.22, "spike");
+        if (i < 18) ray(t + 0.078, 0.75 + 0.85 * Math.cos(t * 0.9), "spike", -0.08);
+      }
+      for (const t of [-1.15, -0.55, 0.55, 1.15]) ray(t, 1.05 + Math.cos(t) * 0.25, "stick");
+      for (const t of [-0.85, 0.1, 0.85]) ray(t, 0.95 + Math.cos(t) * 0.3, "ring");
+      return { group: g, seatY: 0.78 };
+    }
     case "piano": {
       box(w, 0.75, 0.6, BLACK, 0, 0.22, -0.35);
       const lid = box(w, 0.04, d - 0.1, k.mat(BLACK, { roughness: 0.25, metalness: 0.2 }), 0, 0.97, 0.05);

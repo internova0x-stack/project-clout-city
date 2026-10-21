@@ -173,9 +173,9 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : N
  * entry that can't load. `couturePriceFor(tab)` gives a Clout Couture piece's clout: the most expensive C$ item's clout
  * in that tab.
  */
-/** Clout Couture pieces that work in the game now (migration 0102); the yacht, jet, plaza statue and mansion come later. */
+/** Clout Couture pieces that work in the game now (migrations 0102, 0103); the yacht, jet, plaza statue and mansion come later. */
 export const COUTURE_NOW: ReadonlySet<string> = new Set(["cloud-nine-sofa", "self-portrait-statue", "velocity-veloce", "sartorio-bespoke-suit",
-  "gilded-sole-heels", "midas-shades", "ledger-tourbillon", "clout-crown"]);
+  "gilded-sole-heels", "midas-shades", "ledger-tourbillon", "clout-crown", "24k-glow-ritual", "clout-throne"]);
 
 export function parseCatalogFile(raw: unknown, file: string, opts: { coutureCloutFor?: (tab: ShopTab) => number; wearableNow?: (sku: string) => boolean } = {}): {
   drafts: CatalogDraft[]; images: ImageMatch[]; problems: { id: string; problem: string }[];

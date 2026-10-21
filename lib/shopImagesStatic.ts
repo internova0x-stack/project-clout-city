@@ -86,6 +86,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/clout-one-jet-hzdzcb-256.webp",
     "detail": "/shop-img/clout-one-jet-hzdzcb-768.webp"
   },
+  "clout-throne": {
+    "card": "/shop-img/clout-throne-11bgilx-256.webp",
+    "detail": "/shop-img/clout-throne-11bgilx-768.webp"
+  },
   "col-faux-chinchilla": {
     "card": "/shop-img/col-faux-chinchilla-1b7tkjp-256.webp",
     "detail": "/shop-img/col-faux-chinchilla-1b7tkjp-768.webp"

@@ -200,6 +200,13 @@ export async function previewSetMessagesFrom(who: "anyone" | "crew") {
   return ok(who);
 }
 /** The leaderboard with ids, so rows open player cards. */
+/** Clout Couture: the most famous sample player wears the Clout Crown. */
+export async function previewCrowned(): Promise<ChatResult<string[]>> {
+  previewOnly();
+  const top = Object.entries(PEOPLE).sort((a, b) => b[1].clout - a[1].clout)[0];
+  return { ok: true, data: top ? [top[0]] : [] };
+}
+
 export async function previewLeaderboard(myClout: number) {
   previewOnly();
   const rows = [...Object.entries(PEOPLE).map(([id, p]) => ({ id, display_name: p.name, starting_style: p.style, clout: p.clout, is_me: false })),

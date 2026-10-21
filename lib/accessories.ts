@@ -17,7 +17,7 @@ export type AccessoryKind =
   | "hoops" | "drops"
   | "rope-chains" | "flame-chain" | "pearls" | "ring-choker" | "scarf"
   | "tote" | "sling" | "doctor-bag" | "mini-bag" | "shoulder-bag" | "clutch"
-  | "iced-watch" | "crown";
+  | "iced-watch" | "crown" | "tiara";
 
 /** One accessory as worn: its shape and colors. */
 export interface AccessoryWear { slot: AccessorySlot; kind: AccessoryKind; color: string; accent: string }
@@ -57,6 +57,7 @@ export const ACCESSORY_TEMPLATES = ["rigid:hat", "rigid:balaclava", "rigid:eyewe
 
 /** Head pieces that sit over the hair (only its lengths show) and the one that hides it. */
 export const ACCESSORY_HATS: ReadonlySet<AccessoryKind> = new Set(["bucket", "beanie", "fedora", "wide-brim", "balaclava", "crown"]);
+// The tiara sits on the hair, which stays whole.
 export const ACCESSORY_HIDES_HAIR: ReadonlySet<AccessoryKind> = new Set(["balaclava"]);
 
 /** The worn accessories by slot (the last one wins a slot), for the avatar. */
