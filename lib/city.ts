@@ -601,6 +601,26 @@ export const PLACES: Place[] = [
       { id: "cashier", kind: "shift", label: "Work the register", pay: 120, energy: 25, blurb: "Lotto tickets, loose cigarettes you refuse to sell and forty \"you got change for a twenty?\"" },
     ],
   },
+  // ---- Culture pack C5 (owner, Oct 20): the rooftop for the NYE countdown, and the Meteors' ballpark in Flushing. ----
+  {
+    id: "ditmars-heights-rooftop", name: "Ditmars Heights Rooftop", emoji: "🌃", category: "food", neighborhood: "Astoria", tier: "Luxury",
+    at: [40.7741, -73.9169], depth: "scene", template: "lounge", palette: ["#6B2BD9", "#FFD2A8", "#14111A"], hours: { open: 16, close: 2 },
+    tags: ["rooftop", "dining_luxury", "astoria"],
+    lore: "Six floors up on Ditmars, with string lights, heat lamps and the whole skyline from the bridge to the city. Kiki runs the guest list like a border crossing. New Year's Eve up here? Facts, babe: best seat in Queens.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Small plates and a skyline", price: 120, energy: -45, blurb: "Grilled halloumi, a view of the bridge and a bill you'll photograph for the group chat." },
+    ],
+  },
+  {
+    id: "meteor-park", name: "Meteor Park", emoji: "⚾", category: "places", neighborhood: "Flushing Meadows",
+    at: [40.7571, -73.8458], depth: "scene", template: "plaza", palette: ["#1F4FA8", "#FF7A1A", "#F4F1EA"],
+    tags: ["stadium", "sports", "flushing"],
+    lore: "Home of the Flushing Meteors, Queens' own heartbreak since forever. Forty thousand seats, one apple that pops up after a home run and a fan base that boos the Bronx Bigshots on principle. Mad loud on game nights, babe.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Ballpark dog and a cold soda", price: 16, energy: -12, blurb: "Overpriced, underwhelming, absolutely perfect in the seventh inning." },
+      { id: "tour", kind: "visit", label: "Walk the concourse", energy: 6, mood: 5, blurb: "Murals of every season that almost happened. Hope springs eternal in Queens." },
+    ],
+  },
   // ---- Culture pack C2 (owner, Oct 20): Astoria food. Opening hours on the city clock; Sal's stays open all night. ----
   {
     id: "still-a-dollar-slice", name: "Still-a-Dollar Slice", emoji: "🍕", category: "food", neighborhood: "Astoria", tier: "Budget",
@@ -919,6 +939,8 @@ export const CLUB_EVENTS: ClubEvent[] = [
   { id: "homecoming-tailgate", name: "Homecoming Tailgate", placeId: "st-johnsons", startHour: 16, hours: 4, entry: 35, clout: 35, confidence: 4, mood: 10, blurb: "Foam fingers, lukewarm wings and alumni reliving 2009." },
   { id: "quad-open-mic", name: "Open Mic on the Quad", placeId: "queensborough-u", startHour: 19, hours: 3, entry: 24, clout: 30, confidence: 8, mood: 6, blurb: "Slam poetry, one ukulele and a guy who only does impressions of his roommate." },
   // v0.15 Greek Row party night (owner, Oct 18): Tuesday, Thursday, Friday and Saturday.
+  // C5 (owner, Oct 20): the Flushing Meteors' home games at Meteor Park, five nights a week (no league is ever named).
+  { id: "meteors-home-game", name: "Meteors home game", placeId: "meteor-park", startHour: 19, hours: 3, entry: 45, clout: 45, confidence: 4, mood: 10, days: [2, 3, 5, 6, 7], blurb: "Queens vs. whoever's in town. Boo the Bronx Bigshots even when they're not playing. Tradition." },
   { id: "greek-row-sj", name: "Greek Row Party Night", placeId: "st-johnsons", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "A theme nobody understood, a playlist from 2016 and a couch that has seen things." },
   { id: "greek-row-qu", name: "Greek Row Party Night", placeId: "queensborough-u", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "Mystery punch, a ping-pong table with a past and someone's cousin DJing." },
 ];
@@ -1036,6 +1058,9 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "set-ranger", category: "fashion", name: "Hooded ranger", emoji: "🏹", price: 1800, clout: 60, rating: 4, cloutReq: 5000, blurb: "Mysterious. Also cold.", wear: { slot: "outfit", kind: "ranger", color: "#5A3A22" } },
   { sku: "set-spacefarer", category: "fashion", name: "Spacefarer", emoji: "🚀", price: 4200, clout: 110, rating: 4, cloutReq: 10000, blurb: "First Queens resident in orbit, according to their bio.", wear: { slot: "outfit", kind: "spacefarer", color: "#E8692E" } },
   { sku: "set-royalty", category: "fashion", name: "Royalty", emoji: "👑", price: 9500, clout: 200, rating: 4, cloutReq: 25000, blurb: "Crown included. Kingdom sold separately.", wear: { slot: "outfit", kind: "royalty", color: "#C9A227" } },
+  // C5: the Flushing Meteors' gear (an invented team, its own colors).
+  { sku: "fit-meteors-cap", category: "fashion", name: "Flushing Meteors cap", emoji: "🧢", price: 45, clout: 6, rating: 2, blurb: "Blue and orange. Worn backwards in the bleachers, forwards at job interviews.", wear: { slot: "accessory", kind: "cap", color: "#1F4FA8" } },
+  { sku: "fit-meteors-jersey", category: "fashion", name: "Flushing Meteors home jersey", emoji: "⚾", price: 120, clout: 10, rating: 2, blurb: "Pinstripes are for the Bronx. This is for believers.", wear: { slot: "top", kind: "tee", color: "#F4F1EA", accent: "#FF7A1A" } },
   { sku: "fit-bucket-hat", category: "fashion", name: "Bucket hat", emoji: "👒", price: 120, clout: 8, rating: 2, blurb: "Hides bad hair days and good ideas.", wear: { slot: "accessory", kind: "cap", color: "#40B589" } },
   // Cars
   // ---- Home (#19): Fif's Furniture. One sku per color; pieces in a line share a card in the Shop. ----
@@ -1199,14 +1224,14 @@ export function citySeed() {
     // C4: each home's train line, from its neighborhood (a trip home rides it).
     homeLines: Object.fromEntries(ECONOMY.homes.map((h) => [h.id, CITY_ECONOMY.travel.subway.lines[h.neighborhood] ?? null])),
     places: PLACES.map((p) => ({
-      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null, borough: boroughOf(p),
+      id: p.id, name: p.name, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null, borough: boroughOf(p),
       ...(p.hours ? { hours: p.hours } : {}),
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false, ...(a.skill ? { skill: a.skill } : {}),
       })),
     })),
-    events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood, ...(e.days ? { days: e.days } : {}) })),
+    events: CLUB_EVENTS.map((e) => ({ id: e.id, name: e.name, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood, ...(e.days ? { days: e.days } : {}) })),
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
     shop: SHOP_ITEMS.map((i) => ({
       sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null,

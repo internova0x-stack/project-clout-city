@@ -17,6 +17,7 @@ import { CloutCard } from "../city/CloutCard";
 import { EffectChips, useGameNow } from "../city/Common";
 import type { StoryFeed } from "@/lib/storyFeed";
 import { Sheet } from "../Sheet";
+import { CalendarSection, type CalendarHandlers } from "../city/Calendar";
 import { HuntTab } from "../hunt/Hunt";
 import type { HuntState } from "@/lib/hunts";
 import { LEVEL_AT, MAX_LEVEL, SKILLS, levelFor, levelProgress, type SkillState } from "@/lib/skills";
@@ -174,8 +175,10 @@ function TaskHours({ placeId, offsetSeconds }: { placeId: string; offsetSeconds:
 }
 
 export function EventsSheet({
-  open, onClose, partyDone, onOpenParty, city, busy, onAttend, exclusive, onGoThere,
+  open, onClose, partyDone, onOpenParty, city, busy, onAttend, exclusive, onGoThere, calendar,
 }: {
+  /** C5 (migration 0096): events on real New York dates, first in the list. */
+  calendar?: CalendarHandlers;
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void;
   city: CityState | null; busy: string | null; onAttend: (eventId: string) => void;
   /** #12: head to a venue before its doors open. */
@@ -196,6 +199,7 @@ export function EventsSheet({
             <span className="subtext" style={{ display: "block" }}>Velvet Static, Long Island City</span>
           </button>
         )}
+        {city && calendar && <CalendarSection city={city} nowMs={now} h={calendar} />}
         {city ? (() => {
           // #12 (owner, Oct 14): open events first, then by how soon their doors open.
           const club = CLUB_EVENTS.filter((e) => eventToday(e)).sort((x, y) => {

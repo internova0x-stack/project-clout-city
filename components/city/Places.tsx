@@ -97,6 +97,10 @@ export interface PlaceHandlers {
   travel?: { isHere: (placeId: string) => boolean; onGoThere: (place: Place) => void; from: { at: LatLng; name: string } };
   /** Daily tasks 2.0 (migration 0073): guest-list passes held, the club one's used at tonight, and using one. */
   passes?: { held: number; tonight: string | null; busy: boolean; onUse: (place: Place) => void };
+  /** C5 (migration 0096): gift boxes for name-day parties, sold at these places. */
+  gift?: { places: string[]; price: number; held: number; max: number; onBuy: () => void };
+  /** C5: the calendar event on here right now (its title), which keeps the card from saying "Closed" during it. */
+  calendarOn?: (placeId: string) => string | null;
 }
 
 /** One row per action, then any club events held here (C37, C26). */
@@ -183,6 +187,21 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           </div>
         );
       })}
+      {/* C5: a gift box for a name-day party (the invite says to bring one). */}
+      {handlers.gift?.places.includes(place.id) && (
+        <div className="action-row">
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span className="title" style={{ display: "block" }}>🎁 Gift box for a name day</span>
+            {!compact && <span className="subtext" style={{ display: "block" }}>Pastries in a ribbon. Never show up to a name day empty-handed.</span>}
+            <span className="meta">{handlers.gift.held > 0 ? `You have ${handlers.gift.held}` : "You have none"} · hold up to {handlers.gift.max}</span>
+          </div>
+          {preview ? pill(formatCash(handlers.gift.price)) : away ? <span className="lock-chip">On arrival</span> : (
+            <button className="btn btn-taxi btn-sm" disabled={handlers.busy !== null || handlers.gift.held >= handlers.gift.max || state.player.bank_cash < handlers.gift.price} onClick={handlers.gift.onBuy}>
+              {handlers.busy === "gift" ? "…" : formatCash(handlers.gift.price)}
+            </button>
+          )}
+        </div>
+      )}
       {handlers.gossip && !world.closed && (
         <div className="action-row">
           <div style={{ minWidth: 0, flex: 1 }}>
@@ -574,7 +593,11 @@ export function LocationSheet({
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>
             {place.tier && <span className="tag tag-neutral">{place.tier} dining</span>}
-            {place.hours && <PlaceHoursTag place={place} offsetSeconds={state.clockOffsetSeconds} />}
+            {(() => {
+              const party = handlers.calendarOn?.(place.id);
+              if (party) return <span className="tag tag-positive">🎉 {party} · on now, see Events</span>;
+              return place.hours && <PlaceHoursTag place={place} offsetSeconds={state.clockOffsetSeconds} />;
+            })()}
             {place.tags.some((t) => t.startsWith("job_")) && <span className="tag tag-positive">Hiring</span>}
           </div>
           <div>

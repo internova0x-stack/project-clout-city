@@ -34,6 +34,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?campus=new|pick|week|friday|done  campus life (v0.15), standing at St. Johnsons
 //   /preview/home?transit=showtime  showtime dancers on every subway ride (C4); ?transit=pass starts with an OMG Card.
 //   The preview's News always has a live 7-train delay, so trips to Flushing take longer by subway.
+//   /preview/home?calendar=today  every calendar event (C5) is on right now; ?calendar=gift also starts with a gift box
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
 //   /preview/home?member=vip|monthly|cancelling|pastdue|forever|free|none  Membership & purchases (Settings, profile)
 //   /preview/home?hint=daily  Lola's daily-tasks nudge (owner, Oct 17) after 2 seconds
@@ -83,7 +84,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -146,6 +147,7 @@ export default async function Preview({
           campusPreset={campus}
           skillsPreset={skills}
           transitPreset={transit}
+          calendarPreset={calendar}
           goalsPreset={goals}
           pushPreset={push}
           memberPreset={member}

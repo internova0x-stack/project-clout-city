@@ -60,7 +60,7 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "velvet-static", placeId: "velvet-static", name: "Velvet Static", at: [40.7465, -73.9455], kind: "club", facing: 180, scale: 2.2, clear: 55, ground: "block" },
   // Batch 2: Queens landmarks from the owner's list. Not game places, so they carry a name label
   // instead of a pin. Branded venues get invented names (no real brands, CLAUDE.md).
-  { id: "flushing-field", name: "Flushing Field", at: [40.7571, -73.8458], kind: "ballpark", facing: 225, scale: 1, clear: 150, ground: "block" },
+  { id: "flushing-field", placeId: "meteor-park", name: "Meteor Park", at: [40.7571, -73.8458], kind: "ballpark", facing: 225, scale: 1, clear: 150, ground: "block" },
   { id: "open-tennis", name: "Flushing Open Tennis Center", at: [40.7505, -73.8462], kind: "tennis", facing: 180, scale: 1, clear: 105, ground: "park" },
   { id: "queensboro-bridge", name: "Queensboro Bridge", at: [40.7566, -73.9529], kind: "bridge", facing: 208.5, scale: 1, clear: 0, ground: "none", length: 1305 },
   { id: "astoria-sound-stages", name: "Astoria Sound Stages", at: [40.7564, -73.9245], kind: "studios", facing: 180, scale: 1.2, clear: 85, ground: "block" },

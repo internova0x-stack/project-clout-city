@@ -157,7 +157,7 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "respawn-arena": "deepBlue", "the-sticky-floor": "green", "discount-disco": "yellow", "ultraviolet-society": "purple",
   "real-clout-fm": "red", "clout-tower": "deepBlue", "st-copays": "offWhite", "brownstone-sessions": "brown",
   "still-a-dollar-slice": "red", "white-sauce-cart": "yellow", "boiled-and-beloved": "deepBlue", "feta-compli": "deepBlue",
-  "schlep-and-schmear": "brown",
+  "schlep-and-schmear": "brown", "ditmars-heights-rooftop": "purple", "meteor-park": "deepBlue",
 };
 function themeOf(place: Place) {
   return THEMES[PLACE_THEME[place.id] ?? "cream"];
@@ -1220,6 +1220,47 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
           {[[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6]].map(([x, y]) => { const [px, py] = iso(x, y, 7.2); return <line key={`${x}${y}`} x1={px} y1={py} x2={tx} y2={ty} stroke={c} strokeWidth={0.6} opacity={0.6} />; })}
           <Lantern x={-4.5} y={3.5} night={night} />
           <Tree x={4.6} y={4.2} night={night} size={0.8} />
+        </>
+      );
+    }
+    // ---- Culture pack C5: the Ditmars Heights rooftop (string lights on the roof) and Meteor Park (the ballpark). ----
+    case "ditmars-heights-rooftop": {
+      const bldg: BoxSpec = { x: -4, y: -4, z: 0, w: 7, d: 7, h: 6.5, color: mixHex("#B86A4A", b, 0.25) };
+      const roof: BoxSpec = { x: -4, y: -4, z: 6.5, w: 7, d: 7, h: 0.4, color: "#3A2F44" };
+      return (
+        <>
+          {base}
+          <Box b={bldg} night={night}>
+            {windowsLeft(bldg, 2, 3, lit, glassDark, night)}
+            {windowsRight(bldg, 2, 3, lit, glassDark, night)}
+            <SignLeft b={bldg} text="Ditmars Heights" color={a} ink="#FFFFFF" v={5.2} night={night} />
+          </Box>
+          <Box b={roof} night={night} />
+          {[[-3.4, -3.4], [2.6, -3.4], [2.6, 2.6], [-3.4, 2.6]].map(([x, y]) => { const [px, py] = iso(x, y, 6.9); return <rect key={`${x}${y}`} x={px - 0.5} y={py - 8} width={1} height={8} fill="#2A2330" />; })}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const [px, py] = iso(-3.4 + (i % 6) * 1.2, i < 6 ? -3.4 : 2.6, 9 - Math.sin(((i % 6) / 5) * Math.PI) * 0.6);
+            return <circle key={i} cx={px} cy={py} r={1.1} fill={night ? lit : "#FFE9B8"} />;
+          })}
+          {night && (() => { const [px, py] = iso(-0.4, -0.4, 8.5); return <circle cx={px} cy={py} r={34} fill={lit} opacity={0.18} filter="url(#mv-blur)" />; })()}
+          <Lantern x={4.6} y={4.2} night={night} />
+        </>
+      );
+    }
+    case "meteor-park": {
+      const ring = (z: number, rx: number, ry: number) => { const [px, py] = iso(0, 0, z); return { px, py, rx: rx * S, ry: ry * S }; };
+      const lo = ring(0, 5.8, 3.4), hi = ring(3.2, 5.8, 3.4), field = ring(3.2, 4.2, 2.3);
+      const wall = mixHex(b, "#D7DDE8", 0.35);
+      return (
+        <>
+          {base}
+          <path d={`M${lo.px - lo.rx},${lo.py} A${lo.rx},${lo.ry} 0 0 0 ${lo.px + lo.rx},${lo.py} L${hi.px + hi.rx},${hi.py} A${hi.rx},${hi.ry} 0 0 1 ${hi.px - hi.rx},${hi.py} Z`} fill={night ? mixHex(wall, "#1B1640", 0.5) : wall} />
+          <ellipse cx={hi.px} cy={hi.py} rx={hi.rx} ry={hi.ry} fill={a} />
+          <ellipse cx={field.px} cy={field.py} rx={field.rx} ry={field.ry} fill={night ? "#3F8F5A" : "#6CC28A"} />
+          <polygon points={`${field.px},${field.py + field.ry * 0.7} ${field.px + field.rx * 0.35},${field.py + field.ry * 0.25} ${field.px},${field.py - field.ry * 0.2} ${field.px - field.rx * 0.35},${field.py + field.ry * 0.25}`} fill="#D9A877" />
+          {[-1, 1].map((k) => { const [px, py] = iso(k * 5.2, -2.6, 3.2); return (<g key={k}><rect x={px - 0.6} y={py - 22} width={1.2} height={22} fill="#3A3540" /><rect x={px - 4} y={py - 26} width={8} height={4} rx={1} fill={night ? lit : "#F4F1EA"} />{night && <circle cx={px} cy={py - 24} r={12} fill={lit} opacity={0.3} filter="url(#mv-blur)" />}</g>); })}
+          {(() => { const [px, py] = iso(0, -3.4, 3.2); return <text x={px} y={py - 4} textAnchor="middle" fontSize={7} fontWeight={800} fill={c}>METEORS</text>; })()}
+          <Tree x={-5.5} y={4.5} night={night} size={0.8} />
+          <Lantern x={5} y={4.5} night={night} />
         </>
       );
     }

@@ -18,7 +18,9 @@ import type { PartyRoomApi } from "@/lib/partyRoom";
 import { previewPartyReport, previewPartyRoom, previewPartySay } from "@/app/preview/partyRoomActions";
 import { previewGossipFind, previewGossipReset, previewGossipShare, previewGossipState } from "@/app/preview/gossipActions";
 import { previewNews } from "@/app/preview/newsActions";
-import { activeDelays, type NewsItem } from "@/lib/news";
+import { activeDelays, nyClock, type NewsItem } from "@/lib/news";
+import CALENDAR_FILE from "@/content/culture/calendar.json";
+import type { CalendarData } from "@/lib/calendar";
 import { useCallback, useMemo, useRef, useEffect } from "react";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
@@ -52,7 +54,7 @@ import {
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, calendarPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -92,6 +94,8 @@ export function PreviewHome({
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
   transitPreset?: string;
+  /** C5: "today" moves every calendar event to right now, so each can be tried; "gift" also starts with a gift box. */
+  calendarPreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
   pushPreset?: string;
   /** Membership & purchases: ?member=vip|monthly|cancelling|pastdue|forever|free|none (default vip). */
@@ -112,10 +116,19 @@ export function PreviewHome({
     const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id, ...(campusPreset !== undefined ? { at_place: "st-johnsons" } : {}),
       ...(transitPreset === "pass" ? { transit_pass_until: new Date(Date.now() + 5 * 86_400_000).toISOString() } : { transit_pass_until: null }) }, sampleSkills(skillsPreset === "pro"), { firstDay: player.tutorial_state === "pending" });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
+    s.calendar = { attended: [], gifts: calendarPreset === "gift" ? 1 : 0 };
     // v0.15 (migration 0076): students get "Go to class" in place of the random task.
     if (campusPreset && campusPreset !== "new") s.tasks = s.tasks.map((t) => (t.slot === 5 ? { ...t, kind: "class" as const, place_id: "st-johnsons", action_id: "class", goal: null } : t));
     return { ...s, devTools };
-  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset, transitPreset]);
+  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset, transitPreset, calendarPreset]);
+  // C5: the calendar, with ?calendar=today|gift moving every event to now (an hour ago for three hours).
+  const calendar = useMemo<CalendarData>(() => {
+    const { events, ...rest } = CALENDAR_FILE as CalendarData & { about?: string };
+    if (!calendarPreset) return { ...rest, events };
+    const { day, minutes } = nyClock(Date.now());
+    const from = `${String(Math.max(0, Math.min(20, Math.floor(minutes / 60) - 1))).padStart(2, "0")}:00`;
+    return { ...rest, events: events.map((e) => ({ ...e, date: day, from, hours: 3 })) };
+  }, [calendarPreset]);
   // C4: the preview's News carries a live 7-train delay (app/preview/newsActions.ts); the simulator adds it to subway trips.
   const delaysRef = useRef<NewsItem[]>([]);
   useEffect(() => { void previewNews().then((items) => { delaysRef.current = items; }); }, []);
@@ -124,13 +137,13 @@ export function PreviewHome({
     const api = createSimApi(city, () => feedRef.current, (id) => passRef.current(id), {
       delayFor: (line) => (line ? activeDelays(delaysRef.current, Date.now())[line]?.seconds ?? 0 : 0),
       ...(transitPreset === "showtime" ? { showtimeChance: 1 } : {}),
-    });
+    }, calendar);
     const queue: Record<string, number[]> = { win: [5, 0, 2], big: [100, 0], back: [1, 0], lose: [0, 5] };
     if (lottoPreset && queue[lottoPreset]) api.lottoNext(queue[lottoPreset]);
     // ?lotto=jackpot: the next card's ⭐ wins its pot.
     if (lottoPreset === "jackpot") { api.lottoNext([5]); api.lottoPot(); }
     return api;
-  }, [city, lottoPreset, transitPreset]);
+  }, [city, lottoPreset, transitPreset, calendar]);
   // Push notifications: an in-memory device list and switches (the browser's own permission still applies).
   const pushApi = useMemo<PushApi>(() => {
     const prefs: PushPrefs = { off: [], devices: pushPreset === "on" ? 1 : 0, askedAt: null };
@@ -377,6 +390,7 @@ export function PreviewHome({
   const noop = async () => {};
   return (
     <GameShell
+      calendarData={calendar}
       skills={sampleSkills(skillsPreset === "pro")}
       previewRankUp={rankUpPreset}
       previewDailyHint={dailyHintPreset}

@@ -37,6 +37,7 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   ride_request: { tier: 0, category: "social", ttlMin: 60 },
   together_invite: { tier: 0, category: "social", ttlMin: 720 },
   friend_joined: { tier: 0, category: "social", ttlMin: 2880 },
+  calendar_invite: { tier: 0, category: "social", ttlMin: 1440 },
   // P1: something expires or costs you
   bill_due: { tier: 1, category: "money", ttlMin: 1440 },
   bill_overdue: { tier: 1, category: "money", ttlMin: 1440 },
@@ -49,6 +50,7 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   party_soon: { tier: 1, category: "reminders", ttlMin: 60 },
   event_ticket: { tier: 1, category: "reminders", ttlMin: 90 },
   pass_tonight: { tier: 1, category: "reminders", ttlMin: 240 },
+  calendar_tonight: { tier: 1, category: "reminders", ttlMin: 300 },
   // P2: you won something
   rank_up: { tier: 2, category: "rewards", ttlMin: 1440 },
   goal_done: { tier: 2, category: "rewards", ttlMin: 1440 },
