@@ -1,0 +1,556 @@
+{
+ "id": "lady-liberty",
+ "title": "Lady Liberty Custody Battle",
+ "type": "main",
+ "tier": "free",
+ "status": "active",
+ "start_at": null,
+ "start_weekday": "sunday",
+ "borough_scope": [
+  "queens"
+ ],
+ "prompt": "New Jersey wants weekends with the Statue of Liberty. Pick a side, babe.",
+ "emoji": "🗽",
+ "answer_key": {
+  "ruling": "everyone-who-arrived",
+  "exhibit": "gus-ferry-stub",
+  "server_only": true
+ },
+ "badges": [
+  {
+   "id": "called-the-witness",
+   "name": "Called the Witness",
+   "emoji": "🎤",
+   "line": "You knew who was taking the stand before the bailiff did."
+  },
+  {
+   "id": "harbor-mouth",
+   "name": "Harbor Mouth",
+   "emoji": "⛴️",
+   "line": "Three for three in the custody battle. The ferry salutes you."
+  },
+  {
+   "id": "late-for-the-ferry",
+   "name": "Late for the Ferry",
+   "emoji": "🎟️",
+   "line": "You called the ruling from the archive. Late, but on board."
+  }
+ ],
+ "bonus_badge": {
+  "badge": "harbor-mouth",
+  "requires": [
+   "P1",
+   "P2",
+   "P3"
+  ]
+ },
+ "shadow_badge": "late-for-the-ferry",
+ "tasks": [
+  {
+   "id": "story:lady-liberty:gallery",
+   "label": "Get a seat in the courthouse gallery",
+   "do": {
+    "place": "court-square-courthouse",
+    "action": "gallery"
+   },
+   "clout": 20
+  },
+  {
+   "id": "story:lady-liberty:opening",
+   "label": "Catch the opening arguments",
+   "do": {
+    "event": "ll-opening-arguments"
+   },
+   "clout": 25
+  },
+  {
+   "id": "story:lady-liberty:share-witness",
+   "label": "Spill it: share the surprise witness",
+   "do": {
+    "share": "ll-3"
+   },
+   "clout": 15
+  },
+  {
+   "id": "story:lady-liberty:exhibit",
+   "label": "Study Exhibit 14",
+   "do": {
+    "evidence": "ll-5"
+   },
+   "clout": 10
+  },
+  {
+   "id": "story:lady-liberty:steps",
+   "label": "Wave a sign on the courthouse steps",
+   "do": {
+    "place": "court-square-courthouse",
+    "action": "steps"
+   },
+   "clout": 25
+  },
+  {
+   "id": "story:lady-liberty:verdict",
+   "label": "Be on the steps for the ruling",
+   "do": {
+    "event": "ll-verdict-steps"
+   },
+   "clout": 30
+  }
+ ],
+ "events": [
+  {
+   "id": "ll-opening-arguments",
+   "name": "Opening arguments: New York v. New Jersey",
+   "place": "court-square-courthouse",
+   "attendable": true,
+   "energy": 8,
+   "clout": 25,
+   "mood": 4,
+   "blurb": "Two lawyers, one statue and a gallery split down the middle like a wedding nobody wanted. Free, if you can get a seat."
+  },
+  {
+   "id": "ll-verdict-steps",
+   "name": "The ruling, live on the steps",
+   "place": "court-square-courthouse",
+   "attendable": true,
+   "energy": 8,
+   "clout": 30,
+   "mood": 8,
+   "blurb": "Foam crowns, two marching bands that refuse to share a key and a speaker on the steps for the judge's ruling. Free."
+  }
+ ],
+ "beats": [
+  {
+   "id": "ll-1",
+   "day": 1,
+   "status": "active",
+   "news": [
+    {
+     "headline": "New Jersey Files for Custody of Lady Liberty",
+     "previously": null,
+     "body": "Babe, it's happening. New Jersey just filed for joint custody of the Statue of Liberty in the Interstate Custody Court at Court Square. Their lawyer, Dominic \"Dom\" Ruggiero-Patel of Hoboken, says she \"faces Jersey, waves at Jersey, and is basically ours.\" They want every weekend and every other Fourth of July. New York's counsel, Rivka Adler-Santos, called it \"adorable.\" Mad disrespectful, darling.",
+     "hook": "Judge Philomena Okafor-Brandt has scheduled opening arguments for tomorrow. She has asked both sides to \"please bring fewer foam crowns.\""
+    }
+   ],
+   "effects": [
+    {
+     "type": "chatter_topic",
+     "topic": "lady-liberty",
+     "phase": "early",
+     "priority": 2
+    },
+    {
+     "type": "task_injection",
+     "add": [
+      "story:lady-liberty:gallery"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ll-2",
+   "day": 2,
+   "status": "active",
+   "news": [
+    {
+     "headline": "A Whole Diner Walks Into Court",
+     "previously": "New Jersey sued New York for weekends with the Statue of Liberty.",
+     "body": "Dom Ruggiero-Patel opened with a slideshow titled \"She Literally Faces Us\" and forty supporters who arrived in a rented diner booth, on wheels. Rivka Adler-Santos opened with one sentence: \"She was a gift to all of us, and New York has been holding the receipt.\" The court-sketch artist ran out of blue. The bailiff recorded a podcast episode at lunch.",
+     "hook": "Dom closed by promising a surprise witness tomorrow, \"someone who knows what it means to be unfairly famous.\""
+    }
+   ],
+   "effects": [
+    {
+     "type": "place_state",
+     "place": "court-square-courthouse",
+     "spawn_event": "ll-opening-arguments",
+     "expires_day": 3
+    },
+    {
+     "type": "task_injection",
+     "add": [
+      "story:lady-liberty:opening"
+     ]
+    }
+   ],
+   "prediction": {
+    "id": "P1",
+    "question": "Who is New Jersey's surprise witness?",
+    "options": [
+     {
+      "id": "chardonnay-shade",
+      "label": "Chardonnay Shade"
+     },
+     {
+      "id": "dunk-daniels",
+      "label": "Dunk Daniels"
+     },
+     {
+      "id": "skyler-beta",
+      "label": "Skyler Beta"
+     },
+     {
+      "id": "brock-squarejaw",
+      "label": "Brock Squarejaw"
+     }
+    ],
+    "closes_at": {
+     "day": 2,
+     "time": "23:59"
+    },
+    "reveal_beat": "ll-3",
+    "correct": "chardonnay-shade",
+    "reward": {
+     "clout": 50,
+     "badge": "called-the-witness"
+    },
+    "changeable": true,
+    "roasts": {
+     "dunk-daniels": "You picked Dunk. He'd have shown up for the ruling next Tuesday. Maybe.",
+     "skyler-beta": "You picked Skyler. He was busy launching an app about it. Wrong, but on brand.",
+     "brock-squarejaw": "You picked Brock. He auditioned for the role of the statue instead. Didn't get it."
+    }
+   }
+  },
+  {
+   "id": "ll-3",
+   "day": 3,
+   "status": "active",
+   "news": [
+    {
+     "headline": "Chardonnay Shade Takes the Stand (and the Spotlight)",
+     "previously": "Both sides opened, and New Jersey promised a surprise witness.",
+     "body": "New Jersey's surprise witness was Chardonnay Shade, reality TV's favorite villain, testifying as a \"character witness for the statue.\" She called Lady Liberty \"a strong independent woman who deserves a weekend home\" and cried in her confessional voice. Rivka cross-examined for nine minutes. Chardonnay admitted she has never been to either state's side of the harbor, and once called the statue \"that green girl from the boat.\" Wildin'.",
+     "hook": "Outside, the court steps have opened to sign-wavers. Inside, Skyler Beta announced \"CustodyLink,\" an app that splits famous landmarks by the hour. It crashed during the announcement."
+    }
+   ],
+   "effects": [
+    {
+     "type": "place_state",
+     "place": "court-square-courthouse",
+     "unlock_action": "steps",
+     "note": "Sign-wavers on the steps"
+    },
+    {
+     "type": "task_injection",
+     "add": [
+      "story:lady-liberty:share-witness",
+      "story:lady-liberty:steps"
+     ]
+    },
+    {
+     "type": "chatter_topic",
+     "topic": "lady-liberty",
+     "phase": "mid",
+     "priority": 2
+    }
+   ]
+  },
+  {
+   "id": "ll-4",
+   "day": 4,
+   "status": "active",
+   "news": [
+    {
+     "headline": "Jersey Wants to Settle. With What, Though?",
+     "previously": "New Jersey's star witness, Chardonnay Shade, fell apart under cross-examination.",
+     "body": "After a rough Tuesday, Dom Ruggiero-Patel asked for a recess and a \"family meeting\" with New York's side. Sources say he slid a sealed envelope across the table and said, \"Everybody has a price, Rivka. Ours comes with fries.\" Rivka hasn't opened it yet, sweetie. She's been awake since Sunday.",
+     "hook": "The bailiff's podcast says the offer \"smells like a Hoboken Saturday.\" That narrows nothing down."
+    }
+   ],
+   "effects": [],
+   "prediction": {
+    "id": "P2",
+    "question": "What's in New Jersey's settlement offer?",
+    "options": [
+     {
+      "id": "diner",
+      "label": "A diner in Hoboken, open 24/7, forever"
+     },
+     {
+      "id": "stadium",
+      "label": "The Jersey Jetlags' stadium"
+     },
+     {
+      "id": "turnpike-exit",
+      "label": "Naming rights to a turnpike exit"
+     },
+     {
+      "id": "every-fourth",
+      "label": "Every Fourth of July, in exchange for every Tuesday"
+     }
+    ],
+    "closes_at": {
+     "day": 4,
+     "time": "23:59"
+    },
+    "reveal_beat": "ll-5",
+    "correct": "diner",
+    "reward": {
+     "clout": 75
+    },
+    "changeable": true,
+    "roasts": {
+     "stadium": "You picked the stadium. The Jetlags said no before Jersey even asked.",
+     "turnpike-exit": "You picked a turnpike exit. Tempting. Wrong. Very Jersey of you to guess it.",
+     "every-fourth": "You picked Tuesdays. Nobody wants Tuesdays. That's the whole point of Tuesdays."
+    }
+   }
+  },
+  {
+   "id": "ll-5",
+   "day": 5,
+   "status": "active",
+   "news": [
+    {
+     "headline": "The Diner Offer, and Exhibit 14",
+     "previously": "New Jersey slid New York a sealed settlement offer.",
+     "body": "The envelope held the deed to the Tri-State Diner in Hoboken, open around the clock, \"with lifetime refills and a booth with her name on it.\" Rivka read it aloud, said \"no\" and ordered disco fries to go, which the gallery called diplomacy. Then Jersey filed Exhibit 14: a photo proving the statue's face points toward New Jersey. New York answered that she points her torch at everyone.",
+     "hook": "Judge Okafor-Brandt asked one question nobody could answer: \"Which of you actually brought her here?\""
+    }
+   ],
+   "evidence": {
+    "title": "Exhibit 14, filed by New Jersey",
+    "kind": "photo",
+    "lines": [
+     "A long-lens photo of the Statue of Liberty from the New Jersey shore.",
+     "A red arrow drawn on her face. A caption in marker: \"SHE IS LOOKING AT US.\"",
+     "A sticky note from Rivka: \"She is looking at the ocean, Dom.\"",
+     "Filed 9:14 AM, Interstate Custody Court"
+    ]
+   },
+   "effects": [
+    {
+     "type": "task_injection",
+     "add": [
+      "story:lady-liberty:exhibit"
+     ]
+    }
+   ],
+   "prediction": {
+    "id": "P3",
+    "question": "Who gets custody of Lady Liberty?",
+    "options": [
+     {
+      "id": "new-york",
+      "label": "New York, full custody"
+     },
+     {
+      "id": "new-jersey",
+      "label": "New Jersey, weekends and holidays"
+     },
+     {
+      "id": "joint",
+      "label": "Joint custody, every other week"
+     },
+     {
+      "id": "everyone",
+      "label": "Nobody owns her: she belongs to everyone who ever arrived"
+     }
+    ],
+    "closes_at": {
+     "day": 6,
+     "time": "23:59"
+    },
+    "reveal_beat": "ll-8",
+    "correct": "everyone",
+    "reward": {
+     "clout": 200
+    },
+    "changeable": true,
+    "roasts": {
+     "new-york": "You picked New York. Classic New York move. The judge had other plans.",
+     "new-jersey": "You picked Jersey. Bold. The diner thanks you for your loyalty.",
+     "joint": "You picked joint custody. Very reasonable. Way too reasonable for this court."
+    }
+   }
+  },
+  {
+   "id": "ll-6",
+   "day": 6,
+   "status": "active",
+   "news": [
+    {
+     "headline": "Closing Arguments, Then Silence",
+     "previously": "New York turned down a diner and New Jersey filed a photo of the statue's face.",
+     "body": "Dom closed in a foam crown, quoting a turnpike sign. Rivka closed by reading the names of her four grandparents and the ships they came on. Even the Jersey diner booth went quiet. The judge took the case under advisement and the courthouse is gallery-only while she deliberates. Lola's sources say she asked her clerk for \"old ferry records, all of them.\"",
+     "hook": "A man in a flat cap was seen leaving the judge's chambers with a scrapbook under his arm. He took the N train back to Astoria."
+    }
+   ],
+   "effects": [
+    {
+     "type": "availability",
+     "tags": [
+      "liberty_court"
+     ],
+     "state": "restricted",
+     "allow": [
+      "gallery"
+     ],
+     "reason": "Deliberations: gallery only",
+     "expires_day": 8
+    },
+    {
+     "type": "chatter_topic",
+     "topic": "lady-liberty",
+     "phase": "late",
+     "priority": 2
+    }
+   ]
+  },
+  {
+   "id": "ll-7",
+   "day": 7,
+   "status": "active",
+   "points_at_answer": true,
+   "card_note": "Voting closed. The ruling drops tomorrow.",
+   "news": [
+    {
+     "headline": "The Scrapbook From the Bench",
+     "previously": "The judge went looking for old ferry records, and a man with a scrapbook visited her chambers.",
+     "body": "The man in the flat cap was Gus, darling. Yes, our Gus, the one on the bench in Hell Gate Park since forever. His family scrapbook held a ferry stub from 1902: his grandfather's, stamped at the harbor, and under \"Bound for\" someone wrote one word, \"everywhere.\" Gus says he only came because \"the lawyers kept saying 'ours' and nobody asked who 'ours' is.\"",
+     "hook": "The judge has entered the stub as Exhibit 15 and booked the courthouse steps for her ruling tomorrow. She has asked for a bigger speaker."
+    }
+   ],
+   "effects": [
+    {
+     "type": "place_state",
+     "place": "court-square-courthouse",
+     "spawn_event": "ll-verdict-steps",
+     "expires_day": 9
+    },
+    {
+     "type": "task_injection",
+     "add": [
+      "story:lady-liberty:verdict"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ll-8",
+   "day": 8,
+   "status": "active",
+   "news": [
+    {
+     "headline": "Custody to Everyone Who Ever Arrived",
+     "previously": "Gus brought the judge his grandfather's 1902 ferry stub, \"Bound for: everywhere.\"",
+     "body": "Ruling from the steps: Lady Liberty can't belong to New York or New Jersey, because she was never theirs to keep. Custody goes to \"everyone who ever arrived, from either shore, and everyone still on the way.\" Visitation follows the ferry schedule. Dom hugged Rivka. Rivka allowed it. The Tri-State Diner is renaming a booth after Gus, and the bailiff's podcast hit number one. Deadass, I cried, babe.",
+     "hook": "Lola's sign-off: \"New Jersey has already filed an appeal for the Brooklyn Bridge. On a weekday. We'll see.\""
+    }
+   ],
+   "effects": [
+    {
+     "type": "chatter_topic",
+     "topic": "lady-liberty",
+     "phase": "post",
+     "priority": 2
+    },
+    {
+     "type": "flag",
+     "set": "lady-liberty-ruled"
+    }
+   ]
+  }
+ ],
+ "chatter": {
+  "lady-liberty": {
+   "early": {
+    "bartender": [
+     "Half the bar is wearing foam crowns. The other half is wearing Jersey. It's a Tuesday.",
+     "Somebody ordered a \"Custody Battle\" cocktail. I made one up. It's just two drinks."
+    ],
+    "barista": [
+     "A guy asked for a latte \"with no Jersey in it.\" Sir, it's oat milk.",
+     "We're writing NY or NJ on the cups. Nobody's winning. Everybody's tipping."
+    ],
+    "doorman": [
+     "Jersey plates on every block today. They're all parked facing the harbor. On purpose.",
+     "Guy tried to get in with a foam crown and a lawyer. I let the crown in."
+    ],
+    "driver": [
+     "Drove a Hoboken lawyer to Court Square. He made me pass the harbor twice for 'emotional reasons.'",
+     "Every fare asks whose side I'm on. I'm on the side of the meter, babe."
+    ],
+    "clerk": [
+     "Sold out of green face paint by noon. The cat has opinions on it.",
+     "Somebody tried to pay in New Jersey quarters. Same quarters. Different energy."
+    ],
+    "cook": [
+     "Jersey says their diners are better. Come taste my pancakes and then file your paperwork.",
+     "Making torch-shaped churros. The judge would approve. Probably."
+    ]
+   },
+   "mid": {
+    "bartender": [
+     "Chardonnay Shade testified for a statue. I've heard everything now. Next round, please.",
+     "The surprise witness had never been to the harbor. I've had regulars with better alibis."
+    ],
+    "barista": [
+     "Skyler's custody app crashed before my espresso did. Impressive, honestly.",
+     "Rivka Adler-Santos ordered a quad shot and a nap. Got one of them."
+    ],
+    "doorman": [
+     "The diner booth on wheels double-parked at the courthouse. Respect.",
+     "Bailiff's podcast is in the top ten. I'm a guest next week. Don't tell my wife."
+    ],
+    "driver": [
+     "Fare asked me to drive past the statue 'so she knows we care.' It's across the harbor, son.",
+     "Jersey made an offer, I heard. Comes with fries. Everything over there comes with fries."
+    ],
+    "clerk": [
+     "Selling 'Team Torch' bumper stickers and 'Team Diner' ones. Guess which ones are sticky.",
+     "A lady bought six foam crowns. One for each grandkid, and one for the lawyer."
+    ],
+    "cook": [
+     "Jersey offered a diner? I'd have offered a dumpling. Easy settlement.",
+     "Everyone's eating standing up today. Court gives people nerves."
+    ]
+   },
+   "late": {
+    "bartender": [
+     "Judge wants old ferry records. Smart lady. Follow the boats.",
+     "The whole bar went quiet at Rivka's closing. Then they ordered nachos. Healing."
+    ],
+    "barista": [
+     "A man in a flat cap ordered a regular coffee and carried a scrapbook like it was a baby.",
+     "Nobody's arguing anymore. Everybody's just looking up their grandparents."
+    ],
+    "doorman": [
+     "Court's gallery only now. I know the feeling. Some nights the club is too.",
+     "Saw Gus on the N with a scrapbook. Gus doesn't ride the N. Something's up."
+    ],
+    "driver": [
+     "Everybody wants the ferry today. Even the guy who gets seasick on escalators.",
+     "Fare told me about her grandma's boat. I turned the meter off. Don't tell anyone."
+    ],
+    "clerk": [
+     "People are bringing in old photos to scan. The copier hasn't worked this hard since tax season.",
+     "The cat sat on a ferry schedule all morning. The cat knows."
+    ]
+   },
+   "post": {
+    "bartender": [
+     "To everyone who ever arrived. First round's on the house. Second round's on Jersey.",
+     "Dom and Rivka came in together. Split the check. Growth."
+    ],
+    "barista": [
+     "New latte: 'Bound for Everywhere.' It's a regular coffee. With a story.",
+     "Gus came in. The whole café stood up. He told us to sit down."
+    ],
+    "doorman": [
+     "Everybody's welcome tonight. That's the ruling. I'm following the ruling.",
+     "Jersey appealed for the Brooklyn Bridge already. On a weekday. Wild."
+    ],
+    "driver": [
+     "Drove Gus home. He tipped me with a ferry schedule. I'm framing it.",
+     "Every fare is calling the statue 'our girl' now. Everybody's girl. Correct."
+    ],
+    "clerk": [
+     "Out of foam crowns. Out of green paint. Full of good vibes.",
+     "Somebody left a new ferry stub on the counter. 'Bound for: Queens.' Cute."
+    ]
+   }
+  }
+ }
+}
