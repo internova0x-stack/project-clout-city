@@ -4,8 +4,8 @@
 // (BodyFit, taken by baseAvatar when it loads) and pinned to a bone, so they move with every pose and animation.
 
 import {
-  BoxGeometry, CapsuleGeometry, CircleGeometry, ConeGeometry, CylinderGeometry, DoubleSide, Group, Mesh, MeshStandardMaterial,
-  SphereGeometry, TorusGeometry, Vector3, type BufferGeometry, type Material, type Object3D,
+  BoxGeometry, CapsuleGeometry, CatmullRomCurve3, CircleGeometry, ConeGeometry, CylinderGeometry, DoubleSide, Group, Mesh, MeshStandardMaterial,
+  SphereGeometry, TorusGeometry, TubeGeometry, Vector3, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import type { AccessoryWear } from "@/lib/accessories";
 
@@ -142,8 +142,10 @@ export interface BodyFit {
   neck: { at: Vector3; r: number; chestFront: number };
   /** The torso round the middle of the chest (its middle and half width and depth), for a crossbody strap. */
   chest: { at: Vector3; rx: number; rz: number };
-  /** The hips' front-side, where a crossbody bag sits. */
+  /** The front of the -x hip, where a crossbody bag sits. */
   hip: Vector3;
+  /** A crossbody strap's path round the torso: over the +x shoulder, across the front to the -x hip, back up behind. */
+  strap: Vector3[];
   /** The left wrist: where it is, the forearm's direction toward the hand, the wrist's radius. */
   wrist: { at: Vector3; dir: Vector3; r: number };
   /** The right hand standing (idle), where a bag is held. */
@@ -236,19 +238,11 @@ export function buildBodyAccessory(a: AccessoryWear, f: BodyFit): { group: Group
       break;
     }
     case "sling": {
-      // A strap across the chest from shoulder to hip, the bag at the front of the hip.
-      // The strap's ring lies level in a holder tipped sideways, so it runs from one shoulder across to the other hip;
-      // tipped, it has to be longer across to clear the torso.
-      const tilt = 0.75;
-      const holder = new Group();
-      holder.position.set(f.chest.at.x, f.chest.at.y - 0.1, f.chest.at.z);
-      holder.rotation.z = tilt;
-      group.add(holder);
-      const strap = add(new TorusGeometry(1, 0.011, 6, 64), mat(a.accent, { roughness: 0.8 }), 0, 0, 0, holder);
-      strap.rotation.x = Math.PI / 2;
-      strap.scale.set((f.chest.rx + f.gap + 0.03) / Math.cos(tilt), f.chest.rz + f.gap + 0.035, 1);
-      const bag = add(new CapsuleGeometry(0.05, 0.1, 4, 10), mat(a.color, { roughness: 0.55 }), f.hip.x, f.hip.y + 0.04, f.hip.z + f.gap + 0.03);
-      bag.rotation.z = Math.PI / 2;
+      // The strap follows the measured path (over one shoulder, across to the other hip, back up behind); the bag sits
+      // at the front of that hip, tipped along the strap.
+      add(new TubeGeometry(new CatmullRomCurve3(f.strap, true, "centripetal"), 64, 0.009, 6, true), mat(a.accent, { roughness: 0.8 }));
+      const bag = add(new CapsuleGeometry(0.048, 0.1, 4, 10), mat(a.color, { roughness: 0.55 }), f.hip.x, f.hip.y, f.hip.z + 0.03);
+      bag.rotation.z = Math.PI / 2 - 0.5;
       bag.scale.set(1, 1, 0.5);
       bone = "Spine01";
       break;
