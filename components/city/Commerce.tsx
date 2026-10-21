@@ -9,6 +9,10 @@ import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars, useGameNow } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 import { formatPrice, type StoreProduct } from "@/lib/store";
+import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
+import { ShopArt } from "./ShopCard";
+
+const COUTURE = "Clout Couture";
 
 /** Real-money purchases from inside a sheet: the catalog row, and Stripe Checkout. */
 export interface RealMoney {
@@ -23,7 +27,7 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit,
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit, catalog,
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
   /** #15: owned clothes can be put on straight from the Shop. */
@@ -41,14 +45,17 @@ export function ShopSheet({
   onTryAtHome?: (item: ShopItem) => void;
   /** The player's presentation ("m" or "f"): pieces cut for the other one are hidden unless owned. */
   fit?: "m" | "f";
+  /** The Shop Manager (migration 0099): what's on sale, with pictures. Without it (before 0099) the Shop is the code's list. */
+  catalog?: CatalogItem[];
 }) {
   const [cat, setCat] = useState<ShopCategory>(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
+  const [line, setLine] = useState<string>("all");
   if (initialCategory !== lastInitial) {
     setLastInitial(initialCategory);
     setCat(initialCategory);
   }
-  const [confirm, setConfirm] = useState<{ item: ShopItem; mode: "buy" | "rent" } | null>(null);
+  const [confirm, setConfirm] = useState<{ item: ShopCardItem; mode: "buy" | "rent" } | null>(null);
   const owned = ownedSkus(state);
   const { player } = state;
   // Owned clothes get a Wear button instead of a bare "Owned" (#15).
@@ -61,27 +68,128 @@ export function ShopSheet({
       </button>
     );
   };
+  const source: ShopCardItem[] = catalog
+    ? catalogShopItems(catalog, itemBySku)
+    : SHOP_ITEMS.map((i) => ({ ...i, image: null, detailImage: null, wearableNow: true, styleLines: [], collection: null, priceUsdCents: null, presentation: i.fits ?? "all", retired: false, editionSize: null }));
   // Story-only items (e.g. the "Forever Our Bird" hoodie) show only while a story has them on sale.
-  // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up).
-  const items = SHOP_ITEMS.filter((i) => i.category === cat
-    && (i.category !== "fashion" || !!i.wear) // clothing that can't be worn isn't sold (#15)
+  // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up), or, still being
+  // built (Clout Couture), locked with their price.
+  const shows = (i: ShopCardItem) => (!i.retired || owned.has(i.sku))
+    // Clothing shows when it can be worn, or locked until its template exists (owner, Oct 21).
+    && (i.category !== "fashion" || !!i.wear || !i.wearableNow)
     && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku))
-    && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku))
+    && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku) || !i.wearableNow)
     // Daily tasks 2.0 (migration 0073): streak rewards are never on sale; they show once a streak has earned them.
     && (!i.reward || owned.has(i.sku))
-    && (!i.fits || !fit || i.fits === fit || owned.has(i.sku)));
+    && (!i.fits || !fit || i.fits === fit || owned.has(i.sku));
+  const inTab = source.filter((i) => i.category === cat && shows(i));
+  // Clout Couture (owner, Oct 21): a row at the top of Luxury with every piece, and at the top of a piece's own tab.
+  const couture = source.filter((i) => i.collection === COUTURE && shows(i) && (cat === "luxury" || i.category === cat));
+  const lines = cat === "fashion" ? STYLE_LINES.filter((l) => inTab.some((i) => i.styleLines.includes(l))) : [];
+  const items = inTab.filter((i) => i.collection !== COUTURE && (line === "all" || !lines.length || i.styleLines.includes(line)));
+  const card = (item: ShopCardItem) => {
+    const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
+    const soon = !item.wearableNow;
+    if (item.collector) {
+      const p = realMoney?.product(item.sku);
+      return (
+        <div key={item.sku} className="item-card collector">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+            <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
+            <span className="tag tag-gold">✨ Real cash</span>
+          </div>
+          <span className="title" style={{ display: "block" }}>{item.name}</span>
+          <span className="subtext clamp-2">{item.blurb}</span>
+          <Stars rating={item.rating} />
+          {item.editionSize ? <span className="meta">Numbered · {item.editionSize} per drop</span> : null}
+          <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}{p ? ` · worth ${formatCash(p.value ?? 0)}` : ""}</span>
+          {isOwned || p?.owned ? (
+            wearControl(item.sku) ?? <span className="owned-chip">Owned</span>
+          ) : soon ? (
+            <>
+              <span className="meta locked">🔒 Coming soon</span>
+              <button className="btn btn-taxi btn-sm" disabled>{item.priceUsdCents ? formatPrice(item.priceUsdCents, "usd") : "Soon"}</button>
+            </>
+          ) : p?.pending || realMoney?.busy === `buy:${item.sku}` ? (
+            <button className="btn btn-taxi btn-sm" disabled>{p?.pending ? "Unlocking…" : "Opening…"}</button>
+          ) : (
+            <button className="btn btn-taxi btn-sm" disabled={!p || busy !== null} onClick={() => realMoney?.buy(item.sku)}>
+              {p ? formatPrice(p.priceCents, p.currency) : "Unavailable"}
+            </button>
+          )}
+        </div>
+      );
+    }
+    const short = player.bank_cash < item.price;
+    // Fantasy outfits wait for clout (#9): try them on any time, buy once you're big enough.
+    const locked = (item.cloutReq ?? 0) > player.clout;
+    return (
+      <div key={item.sku} className="item-card">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+          <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
+          {item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
+        </div>
+        <span className="title" style={{ display: "block" }}>{item.name}</span>
+        <span className="subtext clamp-2">{item.blurb}</span>
+        <Stars rating={item.rating} />
+        {item.cloutReq ? (
+          <span className={`meta${locked ? " locked" : ""}`}>{locked ? "🔒" : "🔓"} {item.cloutReq.toLocaleString("en-US")} clout{locked ? ` · you have ${player.clout.toLocaleString("en-US")}` : ""}</span>
+        ) : (
+          <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
+        )}
+        {isOwned ? (
+          wearControl(item.sku) ?? <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
+        ) : soon ? (
+          <>
+            <span className="meta locked">🔒 Coming soon to your wardrobe</span>
+            <button className="btn btn-secondary btn-sm" disabled>{formatCash(item.price)}</button>
+          </>
+        ) : (
+          <div className="buy-rent">
+            {onTryOn && item.wear && (
+              <button className="btn btn-secondary btn-sm" onClick={() => onTryOn(item)}>Try it on</button>
+            )}
+            {locked ? (
+              <button className="btn btn-secondary btn-sm" disabled>🔒 {formatCash(item.price)}</button>
+            ) : (
+              <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
+                {formatCash(item.price)}
+              </button>
+            )}
+            {!!item.rentPerWeek && (
+              <button className="btn btn-secondary btn-sm" disabled={busy !== null || player.car_mode === "owned"} onClick={() => setConfirm({ item, mode: "rent" })}>
+                Rent {formatCash(item.rentPerWeek)}/wk
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
         <div className="stack-16">
           <SheetTitle right={formatCash(player.bank_cash)}>Shop</SheetTitle>
           <div className="chip-row" role="group" aria-label="Categories">
-            {SHOP_CATEGORIES.map((c) => (
-              <button key={c.id} className="chip" aria-pressed={cat === c.id} onClick={() => setCat(c.id)}>
+            {SHOP_CATEGORIES.filter((c) => c.id !== "accessories" || source.some((i) => i.category === "accessories" && shows(i))).map((c) => (
+              <button key={c.id} className="chip" aria-pressed={cat === c.id} onClick={() => { setCat(c.id); setLine("all"); }}>
                 <span aria-hidden="true">{c.emoji}</span> {c.label}
               </button>
             ))}
           </div>
+          {lines.length > 0 && (
+            <div className="chip-row" role="group" aria-label="Style lines">
+              <button className="chip chip-sm" aria-pressed={line === "all"} onClick={() => setLine("all")}>All</button>
+              {lines.map((l) => <button key={l} className="chip chip-sm" aria-pressed={line === l} onClick={() => setLine(l)}>{STYLE_LINE_LABEL[l]}</button>)}
+            </div>
+          )}
+          {couture.length > 0 && (
+            <div className="stack-8">
+              <p className="overline" style={{ margin: 0 }}>✨ Clout Couture</p>
+              <div className="couture-row">{couture.map(card)}</div>
+            </div>
+          )}
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
           {cat === "home" && (
             <HomeShelf
@@ -96,75 +204,7 @@ export function ShopSheet({
             />
           )}
           {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
-          {cat !== "home" && <div className="item-grid">
-            {items.map((item) => {
-              const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
-              const short = player.bank_cash < item.price;
-              // Fantasy outfits wait for clout (#9): try them on any time, buy once you're big enough.
-              const locked = (item.cloutReq ?? 0) > player.clout;
-              if (item.collector) {
-                const p = realMoney?.product(item.sku);
-                return (
-                  <div key={item.sku} className="item-card collector">
-                    <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <IconTile emoji={item.emoji} item={item} />
-                      <span className="tag tag-gold">✨ Real cash</span>
-                    </div>
-                    <span className="title" style={{ display: "block" }}>{item.name}</span>
-                    <span className="subtext clamp-2">{item.blurb}</span>
-                    <Stars rating={item.rating} />
-                    <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)} · worth {formatCash(p?.value ?? 0)}</span>
-                    {isOwned || p?.owned ? (
-                      wearControl(item.sku) ?? <span className="owned-chip">Owned</span>
-                    ) : p?.pending || realMoney?.busy === `buy:${item.sku}` ? (
-                      <button className="btn btn-taxi btn-sm" disabled>{p?.pending ? "Unlocking…" : "Opening…"}</button>
-                    ) : (
-                      <button className="btn btn-taxi btn-sm" disabled={!p || busy !== null} onClick={() => realMoney?.buy(item.sku)}>
-                        {p ? formatPrice(p.priceCents, p.currency) : "Unavailable"}
-                      </button>
-                    )}
-                  </div>
-                );
-              }
-              return (
-                <div key={item.sku} className="item-card">
-                  <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <IconTile emoji={item.emoji} item={item} />
-                    {item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
-                  </div>
-                  <span className="title" style={{ display: "block" }}>{item.name}</span>
-                  <span className="subtext clamp-2">{item.blurb}</span>
-                  <Stars rating={item.rating} />
-                  {item.cloutReq ? (
-                    <span className={`meta${locked ? " locked" : ""}`}>{locked ? "🔒" : "🔓"} {item.cloutReq.toLocaleString("en-US")} clout{locked ? ` · you have ${player.clout.toLocaleString("en-US")}` : ""}</span>
-                  ) : (
-                    <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
-                  )}
-                  {isOwned ? (
-                    wearControl(item.sku) ?? <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
-                  ) : (
-                    <div className="buy-rent">
-                      {onTryOn && item.wear && (
-                        <button className="btn btn-secondary btn-sm" onClick={() => onTryOn(item)}>Try it on</button>
-                      )}
-                      {locked ? (
-                        <button className="btn btn-secondary btn-sm" disabled>🔒 {formatCash(item.price)}</button>
-                      ) : (
-                        <button className={`btn btn-taxi btn-sm${short ? " short" : ""}`} disabled={busy !== null} onClick={() => setConfirm({ item, mode: "buy" })}>
-                          {formatCash(item.price)}
-                        </button>
-                      )}
-                      {!!item.rentPerWeek && (
-                        <button className="btn btn-secondary btn-sm" disabled={busy !== null || player.car_mode === "owned"} onClick={() => setConfirm({ item, mode: "rent" })}>
-                          Rent {formatCash(item.rentPerWeek)}/wk
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>}
+          {cat !== "home" && <div className="item-grid">{items.map(card)}</div>}
         </div>
       </Sheet>
       <Sheet open={open && !!confirm} onClose={() => setConfirm(null)} label="Confirm purchase">
@@ -173,7 +213,7 @@ export function ShopSheet({
           const after = player.bank_cash - price;
           return (
             <div className="stack-16">
-              <IconTile emoji={confirm.item.emoji} item={confirm.item} />
+              <ShopArt image={confirm.item.image} emoji={confirm.item.emoji} item={confirm.item} size={confirm.item.image ? 96 : 52} />
               <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>
                 {confirm.mode === "rent" ? `Rent the ${confirm.item.name.toLowerCase()}?` : `Buy the ${confirm.item.name.toLowerCase()}?`}
               </h2>
@@ -432,15 +472,15 @@ export function BillsSheet({
  * shares one card with swatches. Every piece can be tried at home before buying.
  */
 function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryAtHome }: {
-  items: ShopItem[]; owned: Set<string>; cash: number; purchases: number; busy: boolean; section?: string;
-  onBuy: (item: ShopItem) => void; onTryAtHome?: (item: ShopItem) => void;
+  items: ShopCardItem[]; owned: Set<string>; cash: number; purchases: number; busy: boolean; section?: string;
+  onBuy: (item: ShopCardItem) => void; onTryAtHome?: (item: ShopItem) => void;
 }) {
   const start = FURNITURE_ROOMS.some((r) => r.id === section) ? (section as FurnitureRoom) : "living";
   const [room, setRoom] = useState<FurnitureRoom>(start);
   const [lastSection, setLastSection] = useState(section);
   if (section !== lastSection) { setLastSection(section); setRoom(start); }
   const [pick, setPick] = useState<Record<string, string>>({});
-  const lines = new Map<string, ShopItem[]>();
+  const lines = new Map<string, ShopCardItem[]>();
   for (const i of items) {
     const f = i.furniture;
     if (f?.room === room) lines.set(f.line, [...(lines.get(f.line) ?? []), i]);
@@ -458,7 +498,7 @@ function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryA
           const mine = owned.has(item.sku);
           return (
             <div key={line} className="item-card">
-              <IconTile emoji={item.emoji} item={item} />
+              <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
               <span className="title" style={{ display: "block" }}>{item.name}</span>
               <span className="subtext clamp-2">{item.blurb}</span>
               {variants.length > 1 && (

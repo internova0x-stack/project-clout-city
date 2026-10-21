@@ -21,7 +21,9 @@ import { previewNews } from "@/app/preview/newsActions";
 import { activeDelays, nyClock, type NewsItem } from "@/lib/news";
 import CALENDAR_FILE from "@/content/culture/calendar.json";
 import type { CalendarData } from "@/lib/calendar";
-import { useCallback, useMemo, useRef, useEffect } from "react";
+import { useCallback, useMemo, useRef, useEffect, useState } from "react";
+import { previewShopCatalog } from "@/app/preview/shopActions";
+import type { CatalogItem } from "@/lib/shopCatalog";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
 import { createBusinessSim } from "@/lib/businessSim";
@@ -107,6 +109,9 @@ export function PreviewHome({
   /** v0.10 gossip: "new" (nothing found), "some" (two stories started), "almost" (one piece short) or "done". */
   gossipPreset?: string;
 }) {
+  // The Shop Manager's preview (migration 0099): the Shop shows what /preview/studio's Shop tab put on sale.
+  const [catalog, setCatalog] = useState<CatalogItem[] | undefined>(undefined);
+  useEffect(() => { void previewShopCatalog().then(setCatalog).catch(() => undefined); }, []);
   // v0.12 ?biz=some|rich|public: start with businesses, and the cash and clout to match.
   const boost = bizPreset === "some" ? { cash: 60_000, clout: 11_000 } : bizPreset === "rich" || bizPreset === "public" ? { cash: 60_000_000, clout: 60_000 } : null;
   const me = useMemo(() => (boost ? { ...player, bank_cash: player.bank_cash + boost.cash, clout: player.clout + boost.clout } : player),
@@ -391,6 +396,7 @@ export function PreviewHome({
   return (
     <GameShell
       calendarData={calendar}
+      catalogOverride={catalog}
       skills={sampleSkills(skillsPreset === "pro")}
       previewRankUp={rankUpPreset}
       previewDailyHint={dailyHintPreset}

@@ -120,6 +120,8 @@ export interface CityState {
   perks?: import("./skills.ts").PerksState;
   /** C5 (migration 0096): calendar events this player went to, and gift boxes held. Missing until 0096 runs. */
   calendar?: import("./calendar.ts").CalendarState;
+  /** The Shop Manager (migration 0099): what's on sale, with pictures; undefined before 0099 (the Shop uses the code's list). */
+  catalog?: import("./shopCatalog.ts").CatalogItem[];
 }
 
 /** What changed after an action, for the reward toast. */
@@ -290,6 +292,9 @@ const ERRORS: Record<string, string> = {
   already_went: "You already went. They're still talking about it.",
   no_gifts_here: "Gift boxes are at Sal's and Schlep & Schmear.",
   gifts_full: "You already have your hands full of gift boxes.",
+  // The Shop Manager (migration 0099).
+  not_for_sale: "That one isn't on sale right now.",
+  not_wearable_yet: "That piece is coming soon to your wardrobe.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",
