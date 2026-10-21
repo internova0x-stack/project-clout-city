@@ -158,6 +158,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/fishnet-fridays-top-1ns47ww-256.webp",
     "detail": "/shop-img/fishnet-fridays-top-1ns47ww-768.webp"
   },
+  "fit-bucket-hat": {
+    "card": "/shop-img/fit-bucket-hat-yg5wgh-256.webp",
+    "detail": "/shop-img/fit-bucket-hat-yg5wgh-768.webp"
+  },
   "fit-chunky-sneakers": {
     "card": "/shop-img/fit-chunky-sneakers-ryv1wt-256.webp",
     "detail": "/shop-img/fit-chunky-sneakers-ryv1wt-768.webp"
@@ -165,6 +169,14 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
   "fit-leather-blazer": {
     "card": "/shop-img/fit-leather-blazer-37iflo-256.webp",
     "detail": "/shop-img/fit-leather-blazer-37iflo-768.webp"
+  },
+  "fit-meteors-cap": {
+    "card": "/shop-img/fit-meteors-cap-1uga9xo-256.webp",
+    "detail": "/shop-img/fit-meteors-cap-1uga9xo-768.webp"
+  },
+  "fit-meteors-jersey": {
+    "card": "/shop-img/fit-meteors-jersey-1548qj6-256.webp",
+    "detail": "/shop-img/fit-meteors-jersey-1548qj6-768.webp"
   },
   "fit-mini-skirt": {
     "card": "/shop-img/fit-mini-skirt-7jkx2y-256.webp",
@@ -185,6 +197,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
   "forest-floor-hoodie": {
     "card": "/shop-img/forest-floor-hoodie-sbxgu8-256.webp",
     "detail": "/shop-img/forest-floor-hoodie-sbxgu8-768.webp"
+  },
+  "forever-our-bird-hoodie": {
+    "card": "/shop-img/forever-our-bird-hoodie-1fjjyzg-256.webp",
+    "detail": "/shop-img/forever-our-bird-hoodie-1fjjyzg-768.webp"
   },
   "future-is-bright-visor": {
     "card": "/shop-img/future-is-bright-visor-12oe7iz-256.webp",
@@ -238,6 +254,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/home-bed-blue-zbqfzk-256.webp",
     "detail": "/shop-img/home-bed-blue-zbqfzk-768.webp"
   },
+  "home-bookshelf": {
+    "card": "/shop-img/home-bookshelf-10fg0i8-256.webp",
+    "detail": "/shop-img/home-bookshelf-10fg0i8-768.webp"
+  },
   "home-chair-black": {
     "card": "/shop-img/home-chair-oak-sgy5ms-256.webp",
     "detail": "/shop-img/home-chair-oak-sgy5ms-768.webp"
@@ -258,9 +278,21 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/home-dining-table-twnd7j-256.webp",
     "detail": "/shop-img/home-dining-table-twnd7j-768.webp"
   },
+  "home-employee-frame": {
+    "card": "/shop-img/home-employee-frame-14j7yl0-256.webp",
+    "detail": "/shop-img/home-employee-frame-14j7yl0-768.webp"
+  },
+  "home-floor-lamp": {
+    "card": "/shop-img/home-floor-lamp-1c8p1yd-256.webp",
+    "detail": "/shop-img/home-floor-lamp-1c8p1yd-768.webp"
+  },
   "home-island": {
     "card": "/shop-img/home-island-ksn8vc-256.webp",
     "detail": "/shop-img/home-island-ksn8vc-768.webp"
+  },
+  "home-neon-five-sign": {
+    "card": "/shop-img/home-neon-five-sign-akez0h-256.webp",
+    "detail": "/shop-img/home-neon-five-sign-akez0h-768.webp"
   },
   "home-nightstand": {
     "card": "/shop-img/home-nightstand-19717qv-256.webp",
@@ -273,6 +305,18 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
   "home-plant": {
     "card": "/shop-img/home-plant-1t7rpfn-256.webp",
     "detail": "/shop-img/home-plant-1t7rpfn-768.webp"
+  },
+  "home-rug-pink": {
+    "card": "/shop-img/home-rug-pink-44vjbc-256.webp",
+    "detail": "/shop-img/home-rug-pink-44vjbc-768.webp"
+  },
+  "home-rug-sand": {
+    "card": "/shop-img/home-rug-sand-zy1yqx-256.webp",
+    "detail": "/shop-img/home-rug-sand-zy1yqx-768.webp"
+  },
+  "home-rug-violet": {
+    "card": "/shop-img/home-rug-violet-kpbgz3-256.webp",
+    "detail": "/shop-img/home-rug-violet-kpbgz3-768.webp"
   },
   "home-sofa-blue": {
     "card": "/shop-img/home-sofa-orange-1nwuym2-256.webp",
@@ -289,6 +333,14 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
   "home-sofa-orange": {
     "card": "/shop-img/home-sofa-orange-1nwuym2-256.webp",
     "detail": "/shop-img/home-sofa-orange-1nwuym2-768.webp"
+  },
+  "home-streak-lava-lamp": {
+    "card": "/shop-img/home-streak-lava-lamp-yyzv76-256.webp",
+    "detail": "/shop-img/home-streak-lava-lamp-yyzv76-768.webp"
+  },
+  "home-trophy-shelf": {
+    "card": "/shop-img/home-trophy-shelf-txj2yz-256.webp",
+    "detail": "/shop-img/home-trophy-shelf-txj2yz-768.webp"
   },
   "home-tv": {
     "card": "/shop-img/home-tv-19kc1vu-256.webp",
@@ -506,9 +558,37 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/set-ranch-hand-e1v08q-256.webp",
     "detail": "/shop-img/set-ranch-hand-e1v08q-768.webp"
   },
+  "set-ranger": {
+    "card": "/shop-img/set-ranger-1mm1gz3-256.webp",
+    "detail": "/shop-img/set-ranger-1mm1gz3-768.webp"
+  },
   "set-rockaway-beach": {
     "card": "/shop-img/set-rockaway-beach-3s1jc5-256.webp",
     "detail": "/shop-img/set-rockaway-beach-3s1jc5-768.webp"
+  },
+  "set-royalty": {
+    "card": "/shop-img/set-royalty-r9jan-256.webp",
+    "detail": "/shop-img/set-royalty-r9jan-768.webp"
+  },
+  "set-site-crew": {
+    "card": "/shop-img/set-site-crew-r9bzy1-256.webp",
+    "detail": "/shop-img/set-site-crew-r9bzy1-768.webp"
+  },
+  "set-spacefarer": {
+    "card": "/shop-img/set-spacefarer-c0me76-256.webp",
+    "detail": "/shop-img/set-spacefarer-c0me76-768.webp"
+  },
+  "set-st-marks-punk": {
+    "card": "/shop-img/set-st-marks-punk-affy2b-256.webp",
+    "detail": "/shop-img/set-st-marks-punk-affy2b-768.webp"
+  },
+  "set-tactical": {
+    "card": "/shop-img/set-tactical-11b8rls-256.webp",
+    "detail": "/shop-img/set-tactical-11b8rls-768.webp"
+  },
+  "set-witch": {
+    "card": "/shop-img/set-witch-danahy-256.webp",
+    "detail": "/shop-img/set-witch-danahy-768.webp"
   },
   "sidewalk-throne-sandals": {
     "card": "/shop-img/sidewalk-throne-sandals-rxtg35-256.webp",

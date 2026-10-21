@@ -88,8 +88,14 @@ export type CatalogDraft = Omit<CatalogItem, "status" | "goLiveAt" | "images" | 
 /** A catalog file in the repo, for the Import panel's Load buttons. */
 export interface ShopFile { file: string; label: string; items: number; pictures: number; problems: string[] }
 
-/** live-shop-images.json: a picture for an item already on sale, matched by its exact name. */
-export interface ImageMatch { liveName: string; tab: string; sourceImage: string; transparent: boolean }
+/** live-shop-images.json: a picture for an item already on sale, matched by its exact name (or by its sku, where a
+ *  line's colors share the name and each has its own picture: the three area rugs). */
+export interface ImageMatch { liveName: string; tab: string; sourceImage: string; transparent: boolean; sku?: string }
+
+/** The items on sale a picture entry is for. */
+export function imageMatches<T extends { sku: string; name: string }>(m: ImageMatch, items: readonly T[]): T[] {
+  return items.filter((i) => (m.sku ? i.sku === m.sku : i.name === m.liveName));
+}
 
 // ---------------------------------------------------------------------------
 // Moves and actions (section 1)
@@ -176,7 +182,7 @@ export function parseCatalogFile(raw: unknown, file: string, opts: { coutureClou
   const couture = typeof f.collection === "string";
   for (const it of items) {
     if (typeof it.liveName === "string") {
-      images.push({ liveName: it.liveName, tab: str(it.tab), sourceImage: str(it.sourceImage), transparent: it.transparent === true });
+      images.push({ liveName: it.liveName, tab: str(it.tab), sourceImage: str(it.sourceImage), transparent: it.transparent === true, ...(typeof it.sku === "string" ? { sku: it.sku } : {}) });
       continue;
     }
     const id = str(it.id);

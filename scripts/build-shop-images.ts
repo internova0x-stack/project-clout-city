@@ -8,7 +8,7 @@
 // Already-processed pictures are kept; delete public/shop-img/ to redo them all.
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
-import { parseCatalogFile } from "../lib/shopCatalog.ts";
+import { imageMatches, parseCatalogFile } from "../lib/shopCatalog.ts";
 import { fetchSourceImage, imagePaths, processShopImage } from "../lib/shopImages.ts";
 
 const DIR = "public/shop-img";
@@ -21,7 +21,7 @@ for (const file of readdirSync("content/shop").filter((f) => f.endsWith(".json")
   const parsed = parseCatalogFile(JSON.parse(readFileSync(`content/shop/${file}`, "utf8")), file);
   for (const d of parsed.drafts) if (d.sourceImage) wanted.push({ sku: d.sku, source: d.sourceImage, transparent: d.transparent });
   for (const m of parsed.images) {
-    const live = SHOP_ITEMS.filter((i) => i.name === m.liveName);
+    const live = imageMatches(m, SHOP_ITEMS);
     if (!live.length) missing.push(`${file}: "${m.liveName}" isn't in the Shop`);
     for (const i of live) wanted.push({ sku: i.sku, source: m.sourceImage, transparent: m.transparent });
   }

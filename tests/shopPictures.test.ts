@@ -2,14 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
-import { parseCatalogFile, shippedPictures } from "../lib/shopCatalog.ts";
+import { imageMatches, parseCatalogFile, shippedPictures } from "../lib/shopCatalog.ts";
 
 test("every picture in the catalog files ships with the game (npm run build:shop-images)", () => {
   for (const file of readdirSync("content/shop").filter((f) => f.endsWith(".json"))) {
     const parsed = parseCatalogFile(JSON.parse(readFileSync(`content/shop/${file}`, "utf8")), file);
     const want = [
       ...parsed.drafts.filter((d) => d.sourceImage).map((d) => ({ sku: d.sku, source: d.sourceImage })),
-      ...parsed.images.flatMap((m) => SHOP_ITEMS.filter((i) => i.name === m.liveName).map((i) => ({ sku: i.sku, source: m.sourceImage }))),
+      ...parsed.images.flatMap((m) => imageMatches(m, SHOP_ITEMS).map((i) => ({ sku: i.sku, source: m.sourceImage }))),
     ];
     for (const w of want) {
       const p = shippedPictures(w.sku, w.source);
@@ -24,10 +24,16 @@ test("every picture in the catalog files ships with the game (npm run build:shop
 });
 
 test("every item on sale before the catalog files has its picture", () => {
-  const live = JSON.parse(readFileSync("content/shop/live-shop-images.json", "utf8")).items as { liveName: string }[];
-  for (const { liveName } of live) {
-    const items = SHOP_ITEMS.filter((i) => i.name === liveName);
-    assert.ok(items.length, `"${liveName}" isn't in the Shop`);
-    for (const i of items) assert.ok(shippedPictures(i.sku), `${liveName} (${i.sku})`);
+  const { images } = parseCatalogFile(JSON.parse(readFileSync("content/shop/live-shop-images.json", "utf8")), "live-shop-images.json");
+  for (const m of images) {
+    const items = imageMatches(m, SHOP_ITEMS);
+    assert.ok(items.length, `"${m.liveName}" isn't in the Shop`);
+    for (const i of items) assert.ok(shippedPictures(i.sku), `${m.liveName} (${i.sku})`);
   }
+});
+
+test("no item on sale shows an emoji any more", () => {
+  const files = readdirSync("content/shop").filter((f) => f.endsWith(".json"));
+  const pictured = new Set(files.flatMap((f) => parseCatalogFile(JSON.parse(readFileSync(`content/shop/${f}`, "utf8")), f).images.flatMap((m) => imageMatches(m, SHOP_ITEMS).map((i) => i.sku))));
+  assert.deepEqual(SHOP_ITEMS.filter((i) => !pictured.has(i.sku)).map((i) => i.sku), []);
 });
