@@ -27,6 +27,9 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
 2. **Check it.** `npm run validate:stories` runs every rule: ids and beat days in order, places,
    tags, items and tasks that exist, price caps and expiries, reason text on every change, and
    prediction windows that close before their reveal. The Studio runs the same checks when you upload, and saves nothing if one fails.
+   **Or just merge it** (culture pack C6, migration 0098): a story file in `content/stories/` that the Studio doesn't
+   have yet loads by itself, waiting in **Needs review** (when the Studio's story list opens, or within 10 minutes of the
+   next game visit). It never changes a story the Studio already has; edits still go through the upload below.
 3. **Upload it.** In the Studio, **Add or update a story** → choose the file (or paste the JSON) →
    **Check and save**. New stories, and any story whose file changed, go to **Needs review**.
    A story that is live can't be replaced mid-run; pause or retire it instead.

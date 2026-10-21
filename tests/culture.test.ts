@@ -68,3 +68,17 @@ test("catchphrases join a regular's everyday lines, once each; story people stay
   ]);
   assert.deepEqual(merged, { sal: ["a", "b"] });
 });
+
+test("C6: the four date spots are real places where a date night works", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { PLACES } = await import("../lib/city.ts");
+  const { canDateAt } = await import("../lib/dating.ts");
+  const spots = JSON.parse(readFileSync(new URL("../content/culture/date-spots.json", import.meta.url), "utf8")).spots as { place: string; line: string }[];
+  assert.equal(spots.length, 4);
+  for (const s of spots) {
+    const p = PLACES.find((x) => x.id === s.place);
+    assert.ok(p && canDateAt(p) && !p.story, s.place);
+    assert.ok(s.line.length > 20 && s.line.length <= 200, s.place);
+  }
+  assert.equal(PLACES.find((p) => p.id === "downstairs-on-main")?.neighborhood, "Flushing");
+});

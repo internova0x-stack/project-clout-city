@@ -1,0 +1,557 @@
+{
+  "id": "the-lease",
+  "title": "The Lease",
+  "type": "main",
+  "tier": "free",
+  "status": "active",
+  "start_at": null,
+  "start_weekday": "sunday",
+  "borough_scope": [
+    "queens"
+  ],
+  "prompt": "A rent-stabilized one-bedroom just opened up in Astoria. Everybody wants it. Who gets it?",
+  "emoji": "🔑",
+  "answer_key": {
+    "heir": "dolores",
+    "server_only": true
+  },
+  "badges": [
+    {
+      "id": "lease-whisperer",
+      "name": "Lease Whisperer",
+      "emoji": "🔑",
+      "line": "You called the ruling before the judge did."
+    },
+    {
+      "id": "rent-stabilized",
+      "name": "Rent Stabilized",
+      "emoji": "🏠",
+      "line": "Three for three. You'd survive Queens Housing Court."
+    },
+    {
+      "id": "stoop-historian",
+      "name": "Stoop Historian",
+      "emoji": "🪑",
+      "line": "You cracked The Lease from the archive. The stoop remembers."
+    }
+  ],
+  "bonus_badge": {
+    "badge": "rent-stabilized",
+    "requires": [
+      "P1",
+      "P2",
+      "P3"
+    ]
+  },
+  "shadow_badge": "stoop-historian",
+  "tasks": [
+    {
+      "id": "story:the-lease:sit-on-stoop",
+      "label": "Sit on the stoop at The Ditmars Walk-Up",
+      "do": {
+        "place": "ditmars-walkup",
+        "action": "stoop"
+      },
+      "clout": 20
+    },
+    {
+      "id": "story:the-lease:tenant-meeting",
+      "label": "Go to the emergency tenants' meeting",
+      "do": {
+        "event": "lt-tenant-meeting"
+      },
+      "clout": 25
+    },
+    {
+      "id": "story:the-lease:share-claim",
+      "label": "Spill it: share Kostas's succession claim",
+      "do": {
+        "share": "lt-3"
+      },
+      "clout": 15
+    },
+    {
+      "id": "story:the-lease:read-log",
+      "label": "Read Teddy's recycling log",
+      "do": {
+        "evidence": "lt-4"
+      },
+      "clout": 10
+    },
+    {
+      "id": "story:the-lease:sit-in-court",
+      "label": "Sit in the gallery at Queens Housing Court",
+      "do": {
+        "place": "queens-housing-court",
+        "action": "gallery"
+      },
+      "clout": 25
+    }
+  ],
+  "events": [
+    {
+      "id": "lt-tenant-meeting",
+      "name": "Emergency tenants' meeting on the stoop",
+      "place": "ditmars-walkup",
+      "attendable": true,
+      "energy": 8,
+      "clout": 25,
+      "mood": 5,
+      "blurb": "Folding chairs, a box of Agnes's favorite cookies and twelve neighbors who have each been waiting forty years to say \"I told you so\" to the landlord. Free."
+    },
+    {
+      "id": "lt-hearing",
+      "name": "The 3R hearing",
+      "place": "queens-housing-court",
+      "attendable": true,
+      "energy": 10,
+      "clout": 30,
+      "mood": 3,
+      "blurb": "Courtroom B, 10 AM, standing room only. Bring a sandwich. The judge has a reputation and a very loud gavel."
+    }
+  ],
+  "beats": [
+    {
+      "id": "lt-1",
+      "day": 1,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Fifty-Two Years in 3R",
+          "previously": null,
+          "body": "Agnes Pappas, 91, died peacefully in her sleep at The Ditmars Walk-Up, the same rent-stabilized one-bedroom she moved into in 1974. C$700 a month, babe. Seven hundred. She outlived three landlords, two boilers and a whole neighborhood's worth of rent increases. Teddy the super left her cookies on the radiator, like every Sunday.",
+          "hook": "By dinner, three different people had asked Teddy for the keys to 3R. Agnes's body was still warm. The lease was warmer."
+        }
+      ],
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "the-lease",
+          "phase": "early",
+          "priority": 2
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:the-lease:sit-on-stoop"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lt-2",
+      "day": 2,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Three Claims, One Kitchen",
+          "previously": "Agnes Pappas died in her rent-stabilized apartment, 3R, after 52 years.",
+          "body": "First up: grand-nephew Kostas Pappas, who moved an air fryer and a ring light into 3R three weeks ago and now says he's \"family, legally.\" Then the landlord, Keystone Vey Realty, taped a VACANT notice to the door; its lawyer, Harlan Vey, calls 3R \"a luxury micro-loft opportunity.\" And Dolores Ferreira, 64, the upstairs neighbor who did Agnes's shopping for fifteen years, just keeps watering the plants. Deadass, sweetie, the stoop is a war room.",
+          "hook": "Chad Kensington, CEO, and Tiff were spotted on the stairs with a tape measure. They say they're \"just looking.\" Nobody just looks at a stabilized lease."
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "ditmars-walkup",
+          "spawn_event": "lt-tenant-meeting",
+          "expires_day": 4
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:the-lease:tenant-meeting"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lt-3",
+      "day": 3,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Kostas Files for Succession",
+          "previously": "Agnes's grand-nephew, the landlord and her upstairs neighbor all want apartment 3R.",
+          "body": "To keep a stabilized lease after a tenant dies, you have to have lived there with them for two years. Kostas filed at Queens Housing Court this morning, swearing he has. His proof: an air-fryer receipt, his gym's address change and a photo of Agnes's cat on his ring light. Darling, the cat has been dead since 2019.",
+          "hook": "Teddy, asked who's really been living in 3R, said only this: \"Ask who takes out the recycling.\""
+        }
+      ],
+      "effects": [
+        {
+          "type": "task_injection",
+          "add": [
+            "story:the-lease:share-claim"
+          ]
+        }
+      ],
+      "prediction": {
+        "id": "P1",
+        "question": "Who's really been living in 3R with Agnes?",
+        "options": [
+          {
+            "id": "kostas",
+            "label": "Kostas, the grand-nephew"
+          },
+          {
+            "id": "dolores",
+            "label": "Dolores, the upstairs neighbor"
+          },
+          {
+            "id": "chad",
+            "label": "Chad's \"co-living pod\""
+          },
+          {
+            "id": "nobody",
+            "label": "Nobody. Agnes lived alone"
+          }
+        ],
+        "closes_at": {
+          "day": 4,
+          "time": "23:59"
+        },
+        "reveal_beat": "lt-5",
+        "correct": "dolores",
+        "reward": {
+          "clout": 50
+        },
+        "changeable": true,
+        "roasts": {
+          "kostas": "You picked Kostas. His mail goes to his mom's house in Bayside. So does his laundry.",
+          "chad": "You picked Chad. He's banned from 31st Street and, as of Tuesday, this building.",
+          "nobody": "You picked nobody. Somebody's been taking out the recycling every Tuesday for two years, hon."
+        }
+      }
+    },
+    {
+      "id": "lt-4",
+      "day": 4,
+      "status": "active",
+      "news": [
+        {
+          "headline": "The Landlord Changes the Locks",
+          "previously": "Kostas filed to inherit 3R, and the super hinted somebody else lives there.",
+          "body": "Keystone Vey Realty changed the locks on 3R at 6 AM, then offered C$50,000 \"cash for keys\" to whoever leaves first. Kostas asked if it comes in a check. Dolores asked who would water the plants. Meanwhile Teddy produced a spiral notebook: twenty-two years of who put out what recycling, by apartment. He is the building's whole memory, babe, with receipts.",
+          "hook": "Harlan Vey was seen outside with a real estate photographer and a wide-angle lens. Nobody photographs a walk-up for fun."
+        }
+      ],
+      "evidence": {
+        "title": "Teddy's recycling log, apartment 3R",
+        "kind": "document",
+        "lines": [
+          "Spiral notebook, coffee rings, very neat handwriting.",
+          "3R · Tuesdays · since two years ago: \"D.F. takes it down. Agnes can't do stairs since the hip.\"",
+          "Same page, last month: \"Ring light box in 3R recycling. Not D.F.'s. Not Agnes's.\"",
+          "Signed: T. Bautista, Super"
+        ]
+      },
+      "effects": [
+        {
+          "type": "availability",
+          "tags": [
+            "walkup_3r"
+          ],
+          "state": "restricted",
+          "allow": [
+            "stoop"
+          ],
+          "reason": "New locks: stoop only",
+          "expires_day": 8
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:the-lease:read-log"
+          ]
+        }
+      ],
+      "prediction": {
+        "id": "P2",
+        "question": "What does Keystone Vey do next?",
+        "options": [
+          {
+            "id": "listing",
+            "label": "Lists 3R as a luxury rental before the ruling"
+          },
+          {
+            "id": "buyout",
+            "label": "Pays Kostas to drop his claim"
+          },
+          {
+            "id": "sue",
+            "label": "Sues Dolores for trespassing"
+          },
+          {
+            "id": "sell",
+            "label": "Sells the whole building"
+          }
+        ],
+        "closes_at": {
+          "day": 5,
+          "time": "23:59"
+        },
+        "reveal_beat": "lt-6",
+        "correct": "listing",
+        "reward": {
+          "clout": 75
+        },
+        "changeable": true,
+        "roasts": {
+          "buyout": "You picked a buyout. Kostas asked for C$50K. They offered him a tote bag.",
+          "sue": "You picked a lawsuit. Suing a 64-year-old who waters plants? Even Vey has a publicist.",
+          "sell": "You picked a sale. Why sell a building when you can rename a closet a micro-loft?"
+        }
+      }
+    },
+    {
+      "id": "lt-5",
+      "day": 5,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Dolores Has the Electric Bill",
+          "previously": "The landlord locked 3R and offered C$50,000 to whoever walks away.",
+          "body": "Dolores Ferreira finally talked, on the stoop, with a folder. After Agnes's hip surgery two years ago she moved down into 3R \"just for a few weeks\" and never moved back up. The electric bill has been in both their names since. Her mail comes to 3R. Teddy's log has her on recycling every Tuesday. Kostas admitted he lives with his mom in Bayside and only \"stored stuff\" in 3R. Mad respect, Dolores.",
+          "hook": "Harlan Vey's statement: \"A neighbor is not family.\" The judge sets the hearing for Saturday."
+        }
+      ],
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "the-lease",
+          "phase": "mid",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "lt-6",
+      "day": 6,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Luxury Micro-Loft, Original Radiator",
+          "previously": "Dolores proved she's lived in 3R for two years, with the bills to show it.",
+          "body": "It happened: Keystone Vey listed 3R before the ruling. \"Luxury micro-loft, C$4,200 a month, exposed history, original radiator.\" The photos show Agnes's plants. Fourteen people applied in an hour, including Chad Kensington, CEO, who wants to run it as a \"heritage co-living pod.\" The building's group chat is wildin'. Teddy took down the listing flyer from the lobby and put it in the recycling. Tuesday, sweetie.",
+          "hook": "Tomorrow, everybody goes to Queens Housing Court. Kostas says he's bringing his own lawyer. His lawyer is his cousin."
+        }
+      ],
+      "effects": [
+        {
+          "type": "price_multiplier",
+          "tags": [
+            "walkup_3r"
+          ],
+          "applies_to": "visit_price",
+          "multiplier": 1.5,
+          "reason": "Open-house crowds on the stoop",
+          "expires_day": 8
+        }
+      ],
+      "prediction": {
+        "id": "P3",
+        "question": "Who gets the lease to 3R?",
+        "options": [
+          {
+            "id": "dolores",
+            "label": "Dolores"
+          },
+          {
+            "id": "kostas",
+            "label": "Kostas"
+          },
+          {
+            "id": "vey",
+            "label": "Nobody: Keystone Vey gets it back"
+          },
+          {
+            "id": "chad",
+            "label": "Chad Kensington, CEO"
+          }
+        ],
+        "closes_at": {
+          "day": 6,
+          "time": "23:59"
+        },
+        "reveal_beat": "lt-8",
+        "correct": "dolores",
+        "reward": {
+          "clout": 200,
+          "badge": "lease-whisperer"
+        },
+        "changeable": true,
+        "roasts": {
+          "kostas": "You picked Kostas. The judge asked him what floor 3R is on. He said four.",
+          "vey": "You picked the landlord. The judge read the micro-loft listing out loud. Then she laughed.",
+          "chad": "You picked Chad. His application was a pitch deck. The judge does not do pitch decks."
+        }
+      }
+    },
+    {
+      "id": "lt-7",
+      "day": 7,
+      "status": "active",
+      "points_at_answer": true,
+      "card_note": "Voting closed. The ruling drops tomorrow.",
+      "news": [
+        {
+          "headline": "Courtroom B, Standing Room Only",
+          "previously": "Keystone Vey listed 3R as a C$4,200 luxury micro-loft before the judge could rule.",
+          "body": "Half the building came to Queens Housing Court with sandwiches. Kostas's cousin-lawyer called Dolores \"the help.\" Dolores called him \"Kostakis\" and he sat down. Then Teddy took the stand with his notebook, read out two years of Tuesdays, and the gallery applauded a list of recycling. Harlan Vey objected. The judge said, \"To what, the recycling?\"",
+          "hook": "The judge will rule tomorrow at 9 AM. Lola has a seat saved. Bring coffee, regular."
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "queens-housing-court",
+          "spawn_event": "lt-hearing",
+          "expires_day": 8
+        },
+        {
+          "type": "chatter_topic",
+          "topic": "the-lease",
+          "phase": "late",
+          "priority": 2
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:the-lease:sit-in-court"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lt-8",
+      "day": 8,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Dolores Keeps 3R",
+          "previously": "Teddy's recycling log was the star of the 3R hearing at Queens Housing Court.",
+          "body": "Ruling: Dolores Ferreira lived in 3R with Agnes for two years as family in every way that counts, so the rent-stabilized lease is hers. C$700 a month, babe. Keystone Vey has to take down the listing and give her the new keys. Kostas keeps the air fryer. Chad has pivoted to a podcast. Dolores's first act as tenant: cookies on the radiator for Teddy, every Sunday, like Agnes.",
+          "hook": "Lola's sign-off: \"Dolores's old apartment upstairs, 4R, is empty now. Keystone Vey is calling it a penthouse.\""
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "ditmars-walkup",
+          "unlock_action": "vigil",
+          "note": "Agnes's card wall"
+        },
+        {
+          "type": "chatter_topic",
+          "topic": "the-lease",
+          "phase": "post",
+          "priority": 2
+        },
+        {
+          "type": "flag",
+          "set": "the-lease-solved"
+        }
+      ]
+    }
+  ],
+  "chatter": {
+    "the-lease": {
+      "early": {
+        "bartender": [
+          "Lady at the bar toasted Agnes with ouzo, then asked if 3R has a dishwasher.",
+          "C$700 a month since 1974. I've had bar tabs higher than that woman's rent."
+        ],
+        "barista": [
+          "Three people asked me today if I know anyone at The Ditmars Walk-Up. I make lattes, babe.",
+          "Somebody ordered a large regular and a moment of silence for Agnes. We did both."
+        ],
+        "doorman": [
+          "Teddy's been the super there twenty-two years. He knows which tenant uses which detergent.",
+          "A stabilized lease opening up in Astoria? That's not real estate, that's a lottery ticket."
+        ],
+        "driver": [
+          "Picked up a guy with an air fryer on his lap headed to Ditmars. Didn't ask.",
+          "Two fares today wanted to drive past the walk-up. Slowly. Like it's a celebrity house."
+        ],
+        "clerk": [
+          "Agnes bought one lemon a week for fifty years. One. We kept a lemon for her today anyway.",
+          "Dolores came in and bought cookies and a plant mister. Same as every week."
+        ],
+        "cook": [
+          "A one-bedroom for C$700? I'd fight a landlord for that too. I'd fight a landlord for free.",
+          "My cousin's been on a waitlist for a stabilized place since 2011. He still checks the mail."
+        ]
+      },
+      "mid": {
+        "bartender": [
+          "New locks at 6 AM and a cash-for-keys offer by noon. Keystone Vey moves faster than the N train.",
+          "Kostas was in here saying he's \"basically lived there.\" Basically is doing a lot of work, son."
+        ],
+        "barista": [
+          "Dolores has a folder. Color-coded. I'd let that woman do my taxes.",
+          "Teddy's notebook is the most talked-about book in Astoria since the library got air conditioning."
+        ],
+        "doorman": [
+          "Electric bill in both names for two years? That's not a neighbor. That's a roommate with manners.",
+          "Harlan Vey keeps saying \"vacant.\" The plants in the window say otherwise."
+        ],
+        "driver": [
+          "Dropped Harlan Vey at the walk-up. Tipped in a business card. A business card.",
+          "Real estate photographer in my back seat asked how to make a closet look like a loft. I said lie."
+        ],
+        "clerk": [
+          "Kostas came in to buy a lease. I told him we only sell lottery tickets. He bought six.",
+          "Keystone Vey's guy asked if we sell \"VACANT\" signs. We sell tape. He bought the tape."
+        ],
+        "cook": [
+          "The listing says \"exposed history.\" That means the paint is from 1974.",
+          "Chad Kensington asked if the micro-loft comes with a kombucha tap. It comes with a radiator, Chad."
+        ]
+      },
+      "late": {
+        "bartender": [
+          "Half the walk-up is going to court with sandwiches. That's love in Queens.",
+          "Lola's saving a seat in Courtroom B. She's saving it with a scarf and a threat."
+        ],
+        "barista": [
+          "Somebody ordered \"whatever the judge drinks.\" Nobody knows what the judge drinks.",
+          "If Teddy reads the recycling log out loud, I'm going. That's theater."
+        ],
+        "doorman": [
+          "Kostas's lawyer is his cousin. His cousin went to law school online. For a month.",
+          "Fourteen people applied for a C$4,200 micro-loft in an hour. This city is buggin'."
+        ],
+        "driver": [
+          "Everybody wants a ride to Queens Housing Court tomorrow. Surge pricing on justice.",
+          "Drove Dolores to her lawyer's. She brought me a plant. For my dashboard."
+        ],
+        "cook": [
+          "I'm packing the gallery a tray of spanakopita. Agnes would've wanted the judge fed.",
+          "The landlord brought a lawyer. Dolores brought a folder. My money's on the folder."
+        ]
+      },
+      "post": {
+        "bartender": [
+          "Dolores keeps 3R. First round's on the building. The building is broke, so it's on me.",
+          "Teddy came in after the ruling and had one beer. One. Agnes would've been proud."
+        ],
+        "barista": [
+          "Dolores ordered a regular and paid with exact change. Tenant energy.",
+          "They're calling 4R a penthouse now. It has a skylight. The skylight leaks."
+        ],
+        "doorman": [
+          "Kostas is selling the air fryer. Barely used. Mostly emotional.",
+          "Agnes's name stays on the buzzer. Dolores says she's not taking it down. Good."
+        ],
+        "clerk": [
+          "Dolores bought two lemons today. Two. Big week.",
+          "Harlan Vey bought a scratch card on the way out of court. Lost. Twice in one day."
+        ],
+        "cook": [
+          "Chad Kensington has a podcast about the lease now. Episode one is twelve minutes of him clearing his throat.",
+          "Every Sunday, cookies on the radiator. Some things in this city still stay stable."
+        ]
+      }
+    }
+  }
+}

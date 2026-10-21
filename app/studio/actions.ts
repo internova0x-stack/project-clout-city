@@ -39,6 +39,8 @@ async function run(fn: string, args: Record<string, unknown>, message: string): 
 export async function studioList(): Promise<StudioResult> {
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  // C6 (migration 0098): new story files in the repo wait in the list for review.
+  await syncWeeklyContent({ force: true }).catch(() => []);
   return list(supabase);
 }
 

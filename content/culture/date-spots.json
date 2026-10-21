@@ -1,0 +1,9 @@
+{
+  "about": "Culture pack C6 (owner, Oct 21): the guide's four New York date spots. Any place with a meal is a date spot (lib/dating.ts canDateAt); these four get Lola's line on their card, above \"Make it a date\". The date night costs the place's first meal, as always.",
+  "spots": [
+    { "place": "downstairs-on-main", "line": "Flushing food court: twenty stalls, one table, split everything. If they share the last soup dumpling, babe, that's love." },
+    { "place": "hell-gate-park", "line": "A picnic on the lawn, the bridge lit up, bodega sandwiches on a blanket. Cheap, cute and nobody can hear you nervous-laugh." },
+    { "place": "ditmars-heights-rooftop", "line": "The rooftop: heat lamps, the whole skyline and Kiki on the list. Dress like you're on the list, too." },
+    { "place": "ditmars-deli", "line": "The 2 AM deli date: two chopped cheeses, the cat watching, Sal pretending not to. If it works here, it works anywhere. Deadass." }
+  ]
+}

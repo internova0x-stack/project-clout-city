@@ -1,0 +1,134 @@
+{
+  "week": "2026-10-26",
+  "items": [
+    {
+      "id": "hunt-best-halal-cart",
+      "kind": "hunt",
+      "day": "Mon",
+      "headline": "A food critic will crown the best halal cart in Queens on Sunday. Queens is not calm",
+      "body": "Margot Saltworth, the critic who once gave a bagel two stars and moved to Philadelphia over it, is naming the best halal cart in Queens. Five clues, five people who eat late, one cart and a treasure its owner kept for whoever gets there first. Start with Sal at the deli. Tasks, then Hunt."
+    },
+    {
+      "id": "name-day-season",
+      "kind": "city",
+      "day": "Mon",
+      "headline": "It's somebody's name day in Astoria again. Tonight it's Dimitra from 4B",
+      "body": "Feta Compli's back room is booked from 6 PM for Dimitra Papadakis, and half of Ditmars is invited. Andreas says to dress up, bring something sweet and say \"Chronia polla\" like you mean it. Sal has gift boxes by the register. He has never sold this many gift boxes.",
+      "cast": ["andreas", "sal"]
+    },
+    {
+      "id": "chase-clout-dumpling-stream",
+      "kind": "city",
+      "day": "Tue",
+      "headline": "Chase Clout tries to eat 100 dumplings on stream in Flushing; Wen cuts him off at 31",
+      "body": "\"Chat, CHAT, she took my plate.\" Wen Zhao of Downstairs on Main says nobody wastes her dumplings for content, and handed him a to-go box and a lecture. The lecture got more views than the stream.",
+      "cast": ["chase-clout", "wen"]
+    },
+    {
+      "id": "dunk-daniels-meteors",
+      "kind": "city",
+      "day": "Tue",
+      "headline": "Dunk Daniels throws the first pitch at Meteor Park, arrives for the seventh inning",
+      "body": "The Flushing Meteors waited, then played, then nearly finished. Dunk jogged out in 400-dollar sneakers and threw a perfect strike to nobody. Hector in Section 7 says it's the most Meteors thing he's seen since 1986.",
+      "cast": ["dunk-daniels", "hector"]
+    },
+    {
+      "id": "ask-lola-staten-island-ferry",
+      "kind": "column",
+      "day": "Wed",
+      "headline": "Ask Lola: \"He lives in Staten Island and won't take the ferry. Is it over?\"",
+      "body": "\"Babe. The ferry is free, it has a view of Lady Liberty and they sell snacks. A man who won't ride a free boat to see you will not ride the 7 to meet your mother. Also, my readers wrote in: one says her man stands on the subway stairs to text, one says hers calls every cab a Hailr. Ladies, you deserve someone who walks fast and stands right. Deadass.\" Lola Lowdown"
+    },
+    {
+      "id": "skyler-beta-parking-app",
+      "kind": "city",
+      "day": "Wed",
+      "headline": "Skyler Beta launches an app to find parking in Astoria; it just shows a lawn chair",
+      "body": "\"Spotr\" maps every free spot in Queens in real time. Users report it maps one spot on 31st Street, guarded by a lawn chair, a cone and a mannequin. Skyler calls it \"a known feature.\"",
+      "cast": ["skyler-beta"]
+    },
+    {
+      "id": "peyton-pastel-rooftop",
+      "kind": "city",
+      "day": "Thu",
+      "headline": "Peyton Pastel books the whole Ditmars Heights roof for a photo; Kiki lets in nine people",
+      "body": "\"The list is the list,\" says Kiki Mensah, who turned away Peyton's lighting guy, her other lighting guy and a man who said he was her cousin. The photo is gorgeous. Kiki is in it, by accident, looking unimpressed.",
+      "cast": ["peyton-pastel", "kiki"]
+    },
+    {
+      "id": "chardonnay-greek-lessons",
+      "kind": "city",
+      "day": "Thu",
+      "headline": "Chardonnay Shade seen in Astoria every night this week, sunglasses on, indoors",
+      "body": "Our sources place her at the back table of a certain taverna, then in a certain kitchen. She has learned one word of Greek. It means \"enough.\" She uses it on herself.",
+      "cast": ["chardonnay-shade"]
+    },
+    {
+      "id": "halloween-31st-street",
+      "kind": "city",
+      "day": "Fri",
+      "headline": "31st Street closes Saturday for Halloween: costumes, candy and a DJ on The Hub's steps",
+      "body": "Five to eleven, Saturday night, free. Lola is hosting and has \"a concept.\" Last year half the block came as the N train and the other half came as the delays. Find it in Events, under On the calendar.",
+      "cast": ["lola"]
+    },
+    {
+      "id": "brock-squarejaw-cart",
+      "kind": "city",
+      "day": "Sat",
+      "headline": "Brock Squarejaw does his own stunt: ordering at a halal cart at 3 AM without saying \"extra\"",
+      "body": "He lasted four seconds. Tariq gave him extra anyway. \"Everybody says extra eventually,\" says Tariq. \"Some people just need a minute.\"",
+      "cast": ["brock-squarejaw", "tariq"]
+    },
+    {
+      "id": "tiff-bookmobile",
+      "kind": "city",
+      "day": "Sun",
+      "headline": "Tiff tries to film a \"day in my life\" at the library; Mr. Penwright shushes the ring light",
+      "body": "312 followers watched Tiff read the first page of a book, then the back cover, then her phone. Mr. Penwright says she's welcome back any time, without the light. And quietly.",
+      "cast": ["tiff", "penwright"]
+    },
+    {
+      "id": "mra-nw-mon-signal",
+      "kind": "transit",
+      "day": "Mon",
+      "headline": "N/W delays this evening: a signal at 39th Avenue \"needs a moment\"",
+      "body": "Expect delays on the N/W while crews talk to the signal. The MRA thanks you for your patience and also for your silence.",
+      "line": "N/W",
+      "from": "17:00",
+      "hours": 3,
+      "delay": 15
+    },
+    {
+      "id": "mra-7-wed-crowding",
+      "kind": "transit",
+      "day": "Wed",
+      "headline": "7 train crowding: everyone is going to the same dumpling place",
+      "body": "Heavy crowds on the 7 toward Flushing this evening. Trains are running, slowly, full of people holding to-go containers like trophies.",
+      "line": "7",
+      "from": "18:00",
+      "hours": 3,
+      "delay": 20
+    },
+    {
+      "id": "mra-e-fri-weekend",
+      "kind": "transit",
+      "day": "Fri",
+      "headline": "E train weekend notice: trains will run, the MRA promises, \"in some order\"",
+      "body": "Weekend service on the E is \"under review.\" Check before you ride. Check again on the platform. Then just get on whatever comes.",
+      "line": "E",
+      "from": "08:00",
+      "hours": 4
+    },
+    {
+      "id": "mra-nw-sat-halloween",
+      "kind": "transit",
+      "day": "Sat",
+      "headline": "N/W slow Saturday night: a train dressed as a bus for Halloween",
+      "body": "Extra time between trains on the N/W tonight. The MRA says it isn't a costume. The MRA has been saying that for years.",
+      "line": "N/W",
+      "from": "18:00",
+      "hours": 5,
+      "delay": 25
+    }
+  ]
+}

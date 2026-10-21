@@ -64,7 +64,9 @@ it isn't in your working directory). Work from the main branch.
    docs/CAST.md "Voices": Lola the spicy tea queen, Sharm New York hype with younger slang.
 4. Write content/news/<Monday>.json: 9 to 12 news items across Monday to Sunday (plus the transit updates below), including
    - a Monday "hunt" item announcing the hunt (it must name the first place's regular),
-   - exactly one Lola column ("column"),
+   - exactly one Lola column ("column"), answering an NYC dating complaint (culture pack C6, owner Oct 21): the
+     New York kind ("he lives in Staten Island and won't take the ferry", "she stands on the subway stairs to text",
+     "he calls every cab a Hailr"), never about anyone's background; Lola rules on it in her voice,
    - city news about the invented cast only (lib/cast.ts ids in "cast"): light, satirical, no real
      people, brands, politics, tragedies or crime, nothing that changes prices or places.
    - 3 to 5 Metro Rail Authority updates ("transit", culture pack C4): delays, reroutes, weekend service changes

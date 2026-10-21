@@ -14,9 +14,38 @@ Packs ship one at a time, in order, each only when the owner says "Build C<numbe
 | C3 | Astoria Park, jobs, roommates, first-time touches | **Built** (Oct 21) |
 | C4 | Transit and transit news | **Built** (Oct 21) |
 | C5 | Calendar events, sports, cultural invites (before Dec 31 for the NYE countdown) | **Built** (Oct 21) |
-| C6 | Stories, tea, hunts and dating spots | Waiting |
+| C6 | Stories, tea, hunts and dating spots | **Built** (Oct 21) |
 
 The guide's "Later: borough packs" wait until those boroughs open.
+
+## C6: stories, tea, hunts and dating spots (built Oct 21, migration 0098)
+
+- **Tea, week of Oct 26** (`content/gossip/2026-10-26.json`, live by itself from Monday): "The bodega cat is missing"
+  (Also Sal has a second life as "Pastrami" at Schlep & Schmear), "A reality star at the Greek taverna" (Chardonnay
+  Shade's secret cooking show stars Andreas's mother) and "Who's saving parking spots with a lawn chair?" (Mr.
+  Penwright, for the bookmobile). The 31st Street sublet ran in C3.
+- **Hunt, week of Oct 26** (`content/hunts/2026-10-26.json`): "The Best Halal Cart in Queens". A critic, Margot
+  Saltworth, crowns a cart on Sunday; five clues run Sal's deli → Lou's hot dog cart → Yesenia at Astoria Blvd →
+  Captain Rosa at Engine 7 → Tariq's White Sauce Cart. Eight treasures, one per starting style (the Golden Squeeze
+  Bottle, the First Cart Umbrella, the Day-One Receipt, the 3 A.M. Lantern, the Green Sauce Recipe Card, the Napkin
+  Business Plan, the Ring-Light Platter, the Cricket Radio). That week's City News (`content/news/2026-10-26.json`)
+  announces it, so the Thursday drafting routine leaves the week alone.
+- **Two story blueprints waiting in the Story Studio** (Needs review; nothing goes live until you approve and pick a
+  Day 1):
+  - *The Lease* (8 days): Agnes Pappas dies after 52 years in rent-stabilized 3R (C$700 a month). Her grand-nephew,
+    the landlord and the upstairs neighbor all want it. The hidden truth: Dolores, the neighbor, has lived there for two
+    years; the housing court gives her the lease. Places: The Ditmars Walk-Up and Queens Housing Court (story places,
+    on the map only while it runs). Teddy the super is the witness.
+  - *Lady Liberty Custody Battle* (8 days): New Jersey sues for weekends with the Statue of Liberty at Court Square
+    Courthouse. Chardonnay Shade testifies; Jersey offers a diner to settle; Gus's grandfather's 1902 ferry stub
+    decides it: custody goes to everyone who ever arrived. Place: Court Square Courthouse (a story place).
+  - Each has three predictions, badges, tasks, events and city chatter. Story files now load into the Studio by
+    themselves once merged (migration 0098), so there's nothing to upload.
+- **Date spots** (`content/culture/date-spots.json`): Lola's line on four cards, above "Make it a date": the new
+  **Downstairs on Main Food Court** in Flushing (dumplings C$15, a bubble tea to split; Wen Zhao runs the dumpling
+  stall), the Hell Gate Park picnic, the Ditmars Heights rooftop and the 2 AM deli date at Sal's.
+- **NYC complaints in the dating column**: next week's "Ask Lola" is "He lives in Staten Island and won't take the
+  ferry", and the weekly drafting routine now writes the column around an NYC dating complaint every week.
 
 ## C5: calendar events, sports and cultural invites (built Oct 21, migration 0096)
 

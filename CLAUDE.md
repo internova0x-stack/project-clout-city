@@ -165,6 +165,12 @@ components live in `app/globals.css`.
   Migration 0097: pushes for invites (`push_scan_calendar`, run by `push_scan_tonight`, on game_now()): 'calendar_invite'
   once when it reaches the Phone, 'calendar_tonight' from 3 hours before it starts (names the gift box); never for
   someone who went. The city seed now carries place and event names (`push_place` said "somewhere good" before).
+  C6 (migration 0098): content only, plus two mechanisms. `content_import_story` (service role, run by
+  `syncWeeklyContent` and when the Studio's story list opens) stores a repo story file the Studio doesn't have yet as
+  'draft' (Needs review) and never touches an existing one. Story-only places (The Ditmars Walk-Up, Queens Housing Court,
+  Court Square Courthouse) carry `story`, so gossip and hunts never use them; keep a story's effects on its own places.
+  Lola's four date spots are `content/culture/date-spots.json` (a line on the place card). The weekly column answers an
+  NYC dating complaint (docs/WEEKLY-CONTENT.md).
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.
