@@ -175,7 +175,7 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : N
  */
 /** Clout Couture pieces that work in the game now (migrations 0102 to 0104); the Waterfront Mansion comes later. */
 export const COUTURE_NOW: ReadonlySet<string> = new Set(["cloud-nine-sofa", "self-portrait-statue", "velocity-veloce", "sartorio-bespoke-suit",
-  "gilded-sole-heels", "midas-shades", "ledger-tourbillon", "clout-crown", "24k-glow-ritual", "clout-throne",
+  "gilded-sole-heels", "midas-shades", "ledger-tourbillon", "clout-crown", "24k-glow-ritual", "clout-throne", "clout-throne-midnight",
   "astoria-yacht", "clout-one-jet", "plaza-statue"]);
 
 export function parseCatalogFile(raw: unknown, file: string, opts: { coutureCloutFor?: (tab: ShopTab) => number; wearableNow?: (sku: string) => boolean } = {}): {
