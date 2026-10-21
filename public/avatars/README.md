@@ -9,3 +9,9 @@ and the shared animations (Idle, Idle_Neutral, Walk, Run, Wave, Interact) stored
 in `m/_anims.glb` and `f/_anims.glb`.
 
 Which parts the game uses for each Look and Shop piece: `lib/avatarCatalog.ts`.
+
+## The new base bodies (`body/`)
+
+Made from the owner's bald masters in `assets/avatars/` by `node scripts/build-base-avatars.mjs`: `m.glb` and `f.glb`
+(full detail) and `m-low.glb`, `f-low.glb` (low graphics). One skinned mesh each, a 24-bone skeleton and a walk.
+Used by `components/avatar/baseAvatar.ts` while the new-bodies switch is on (`lib/graphics.ts`).

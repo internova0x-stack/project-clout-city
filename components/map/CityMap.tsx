@@ -12,6 +12,7 @@ import { createTraffic } from "./vehicles";
 import { LANDMARK_LAYER_ID, LANDMARK_MIN_ZOOM, createLandmarkLayer } from "./landmarkLayer";
 import { LANDMARKS, MAJOR_ROAD_CLASSES, fitBridge, gridFacing, onStreet, placeLandmark, streetsNear, withPositions, type RoadLine, type Spot, type WaterArea } from "@/lib/map/landmarks";
 import type { PlacePin } from "@/lib/places";
+import { lowGraphics } from "@/lib/graphics";
 
 /**
  * The small map interface the rest of the game talks to (Clarifications section 4):
@@ -142,8 +143,8 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
           maxPitch: 60,
           maxZoom: MAX_ZOOM,
           maxBounds: NYC_BOUNDS,
-          // Phones render at 3x; 2x looks the same on a map and is far lighter (owner, Oct 16: heat).
-          pixelRatio: Math.min(2, window.devicePixelRatio || 1),
+          // Phones render at 3x; 2x looks the same on a map and is far lighter (owner, Oct 16: heat). Low graphics: 1x.
+          pixelRatio: Math.min(lowGraphics() ? 1 : 2, window.devicePixelRatio || 1),
           dragRotate: false,
           pitchWithRotate: false,
           touchPitch: true,

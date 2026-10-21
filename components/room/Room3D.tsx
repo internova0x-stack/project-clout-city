@@ -18,6 +18,7 @@ import { STARTING_STYLES, type Outfit } from "@/lib/styles";
 import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
 import { buildFurniture, makeKit, tagItem, type Built, type Kit } from "./furniture";
+import { renderQuality } from "@/lib/graphics";
 
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
 // player's avatar, which walks where you tap, sits on seats, naps on the bed and
@@ -180,18 +181,20 @@ export default function Room3D(props: Room3DProps) {
     const host = hostRef.current;
     if (!host) return;
     let renderer: WebGLRenderer;
+    const quality = renderQuality();
     try {
-      renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+      renderer = new WebGLRenderer({ antialias: quality.antialias, alpha: true, powerPreference: "low-power" });
     } catch {
       setFailed(true);
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setPixelRatio(quality.pixelRatio);
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = template.dark ? 1.15 : 1.0;
     renderer.setClearColor(0x000000, 0);
-    renderer.shadowMap.enabled = true;
+    // Low graphics (lib/graphics.ts): no shadows, no antialiasing, 1x pixels.
+    renderer.shadowMap.enabled = quality.shadows;
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.domElement.style.touchAction = "none";
     host.appendChild(renderer.domElement);

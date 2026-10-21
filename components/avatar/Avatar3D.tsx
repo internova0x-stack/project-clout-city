@@ -9,6 +9,7 @@ import type { Look } from "@/lib/look";
 import { getStyle, type Outfit } from "@/lib/styles";
 import type { AvatarParts } from "./buildAvatar";
 import { buildModelAvatar } from "./modelAvatar";
+import { renderQuality } from "@/lib/graphics";
 
 /**
  * The avatar on its stage. Every Look change re-dresses it instantly
@@ -38,13 +39,14 @@ export default function Avatar3D({
     if (!host) return;
 
     let renderer: WebGLRenderer;
+    const quality = renderQuality();
     try {
-      renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+      renderer = new WebGLRenderer({ antialias: quality.antialias, alpha: true, powerPreference: "low-power" });
     } catch {
       setFailed(true);
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setPixelRatio(quality.pixelRatio);
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;

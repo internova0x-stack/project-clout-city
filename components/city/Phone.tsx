@@ -2,6 +2,7 @@
 
 import { PushSettings } from "../push/Push";
 import { MembershipRow } from "../store/Membership";
+import { GraphicsSwitch } from "../GraphicsSwitch";
 import { Toggle } from "../Toggle";
 import type { PushApi } from "@/lib/pushClient";
 
@@ -214,6 +215,7 @@ export function PhoneModal({
                     <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Lo-fi city loop</span></span>
                     <Toggle on={!muted} label="Music" onChange={onToggleSound} />
                   </div>
+                  <GraphicsSwitch kind="low" onToast={onToast} />
                   {gossip && (
                     <div className="list-row static">
                       <span style={{ flex: 1 }}>

@@ -12,6 +12,7 @@ import {
 import type { ShopAction, ShopAuditRow, ShopImportResult, StudioApi } from "@/lib/studio";
 import { formatPrice } from "@/lib/store";
 import { ShopArt, ShopCardPreview } from "../city/ShopCard";
+import { GraphicsSwitch } from "../GraphicsSwitch";
 
 const TAB_LABEL: Record<ShopTab, string> = { fashion: "Fashion", accessories: "Accessories", home: "Home", cars: "Cars", houses: "Houses", luxury: "Luxury", makeup: "Makeup" };
 const cash = (i: CatalogItem) => (i.realCash ? (i.priceUsdCents ? formatPrice(i.priceUsdCents, "usd") : "$–") : `C$${i.price.toLocaleString("en-US")}`);
@@ -112,6 +113,11 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
           {!!note.list?.length && <ul>{note.list.slice(0, 30).map((l) => <li key={l} className="meta">{l}</li>)}</ul>}
         </div>
       )}
+      <div className="studio-card stack-12">
+        <span className="title">New avatar bodies</span>
+        <span className="subtext">They stay off for players until every Shop outfit has a template that fits them. Turn them on here to see them in the game on this device.</span>
+        <GraphicsSwitch kind="bodies" onToast={(t) => setNote({ kind: "ok", text: t })} />
+      </div>
       <div className="studio-card stack-12">
         <span className="title">Import a catalog file</span>
         <span className="subtext">Files merged into content/shop show here. Importing makes drafts and processes their pictures; nothing goes live without your approval.</span>

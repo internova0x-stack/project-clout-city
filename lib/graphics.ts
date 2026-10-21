@@ -17,10 +17,11 @@ function param(name: string): string | null {
   return new URLSearchParams(location.search).get(name);
 }
 
-/** A weak phone: little memory, few cores or a small screen with a high pixel ratio. */
+/** A clearly weak phone: 2 GB of memory or less (Chrome reports it) or 2 cores or fewer. Kept strict on purpose:
+ *  Safari reports 4 cores on fast iPhones, and anyone else can turn low graphics on in Settings. */
 export function weakDevice(nav: { deviceMemory?: number; hardwareConcurrency?: number } | undefined = typeof navigator === "undefined" ? undefined : navigator as never): boolean {
   if (!nav) return false;
-  return (nav.deviceMemory !== undefined && nav.deviceMemory <= 3) || (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4);
+  return (nav.deviceMemory !== undefined && nav.deviceMemory <= 2) || (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 2);
 }
 
 /** Is low-graphics mode on for this device? The player's choice wins; otherwise weak phones get it. */
