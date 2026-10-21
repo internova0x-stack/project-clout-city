@@ -621,6 +621,47 @@ export const PLACES: Place[] = [
       { id: "tour", kind: "visit", label: "Walk the concourse", energy: 6, mood: 5, blurb: "Murals of every season that almost happened. Hope springs eternal in Queens." },
     ],
   },
+  // ---- Culture pack C6 (owner, Oct 21): a Flushing food court (a date spot), and the places of two new stories. ----
+  {
+    id: "downstairs-on-main", name: "Downstairs on Main Food Court", emoji: "🥟", category: "food", neighborhood: "Flushing", tier: "Budget",
+    at: [40.7585, -73.8301], depth: "scene", template: "counter", palette: ["#E0452B", "#FFE7B8", "#2A2530"],
+    tags: ["food_court", "dining_budget", "flushing"],
+    lore: "Down a staircase that looks like a mistake: twenty stalls, hand-pulled noodles, soup dumplings and a line that moves faster than the 7. Wen has run the dumpling stall since before your favorite influencer was born. Cash only vibes, babe.",
+    actions: [
+      { id: "eat", kind: "eat", label: "Dumplings and hand-pulled noodles", price: 15, energy: -22, blurb: "Burn your tongue on the first soup dumpling. Everybody does. It's the toll." },
+      { id: "bubble", kind: "visit", label: "Split a bubble tea", price: 7, energy: 3, mood: 6, blurb: "Two straws, one cup, a lot of eye contact. Works every time." },
+    ],
+  },
+  // Story places (C6): on the map only while their story runs.
+  {
+    id: "ditmars-walkup", name: "The Ditmars Walk-Up", emoji: "🏚️", category: "places", neighborhood: "Astoria", story: "the-lease",
+    at: [40.7746, -73.9121], depth: "scene", template: "civic", palette: ["#B86A4A", "#F2E3C4", "#2A2530"],
+    tags: ["walkup_3r", "residential"],
+    lore: "Five floors, no elevator, one rent-stabilized one-bedroom: 3R, C$700 a month since the Carter administration. Agnes Pappas lived there 52 years. Now everybody wants it, and Teddy the super has a front-row seat.",
+    actions: [
+      { id: "stoop", kind: "visit", label: "Sit on the stoop", price: 0, energy: 4, mood: 3, blurb: "Teddy waters the plants. Everyone pretends not to look up at 3R." },
+      { id: "vigil", kind: "visit", label: "Leave a card for Agnes", price: 0, energy: 2, clout: 10, mood: 4, storyUnlock: true, blurb: "Her name's still on the buzzer. Somebody keeps bringing her favorite cookies." },
+    ],
+  },
+  {
+    id: "queens-housing-court", name: "Queens Housing Court", emoji: "⚖️", category: "places", neighborhood: "Jamaica", story: "the-lease",
+    at: [40.7037, -73.8080], depth: "scene", template: "civic", palette: ["#6B6F7A", "#E9EDF3", "#1F2A44"],
+    tags: ["housing_court", "civic"],
+    lore: "Fluorescent lights, a vending machine that only takes exact change and the most dramatic theater in Queens, free. Bring a sandwich. Bring a lawyer if you can. Bring the sandwich either way.",
+    actions: [
+      { id: "gallery", kind: "visit", label: "Sit in the gallery", price: 0, energy: 6, mood: 2, blurb: "The judge has seen everything. Twice. She still raises an eyebrow." },
+    ],
+  },
+  {
+    id: "court-square-courthouse", name: "Court Square Courthouse", emoji: "🗽", category: "places", neighborhood: "Long Island City", story: "lady-liberty",
+    at: [40.7471, -73.9436], depth: "scene", template: "civic", palette: ["#3E8E7E", "#E9EDF3", "#1F2A44"],
+    tags: ["liberty_court", "civic"],
+    lore: "Columns, marble and a line around the block, because New York and New Jersey are fighting over who gets the Statue of Liberty on weekends. The court-sketch artist is booked solid. The bailiff has a podcast now.",
+    actions: [
+      { id: "gallery", kind: "visit", label: "Get a seat in the gallery", price: 0, energy: 6, mood: 3, blurb: "Bring snacks. The New Jersey side brought a whole diner." },
+      { id: "steps", kind: "visit", label: "Wave a sign on the steps", price: 0, energy: 4, clout: 10, mood: 4, storyUnlock: true, blurb: "\"SHE'S A NEW YORKER\" in glitter. You and four hundred cousins." },
+    ],
+  },
   // ---- Culture pack C2 (owner, Oct 20): Astoria food. Opening hours on the city clock; Sal's stays open all night. ----
   {
     id: "still-a-dollar-slice", name: "Still-a-Dollar Slice", emoji: "🍕", category: "food", neighborhood: "Astoria", tier: "Budget",

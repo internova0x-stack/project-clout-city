@@ -158,6 +158,7 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "real-clout-fm": "red", "clout-tower": "deepBlue", "st-copays": "offWhite", "brownstone-sessions": "brown",
   "still-a-dollar-slice": "red", "white-sauce-cart": "yellow", "boiled-and-beloved": "deepBlue", "feta-compli": "deepBlue",
   "schlep-and-schmear": "brown", "ditmars-heights-rooftop": "purple", "meteor-park": "deepBlue",
+  "downstairs-on-main": "red", "ditmars-walkup": "brown", "queens-housing-court": "grey", "court-square-courthouse": "green",
 };
 function themeOf(place: Place) {
   return THEMES[PLACE_THEME[place.id] ?? "cream"];
@@ -1030,6 +1031,9 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
         </>
       );
     }
+    // C6: the two courthouses share the library's columns and pediment (in their own colors).
+    case "queens-housing-court":
+    case "court-square-courthouse":
     case "ditmars-library": {
       const hall: BoxSpec = { x: -5.5, y: -4, z: 0, w: 10, d: 6, h: 4.6, color: mixHex(b, "#E8D6BE", 0.3) };
       const roof: BoxSpec = { x: -5.8, y: -4.3, z: 4.6, w: 10.6, d: 6.6, h: 0.6, color: mixHex(a, "#F2E6D8", 0.4) };
@@ -1184,8 +1188,9 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
     // ---- Culture pack C2: Astoria food. Shopfronts for the slice shop, the taverna and the deli; carts under umbrellas. ----
     case "still-a-dollar-slice":
     case "feta-compli":
-    case "schlep-and-schmear": {
-      const sign = { "still-a-dollar-slice": "Still-a-Dollar", "feta-compli": "Feta Compli", "schlep-and-schmear": "Schlep & Schmear" }[place.id]!;
+    case "schlep-and-schmear":
+    case "downstairs-on-main": {
+      const sign = { "still-a-dollar-slice": "Still-a-Dollar", "feta-compli": "Feta Compli", "schlep-and-schmear": "Schlep & Schmear", "downstairs-on-main": "Food Court ↓" }[place.id]!;
       const shop: BoxSpec = { x: -4.5, y: -4, z: 0, w: 7, d: 6, h: 4.8, color: mixHex(b, "#F4EDE6", 0.4) };
       const upper: BoxSpec = { x: -4.5, y: -4, z: 4.8, w: 7, d: 6, h: 2.6, color: mixHex("#B86A4A", c, 0.15) };
       return (
@@ -1261,6 +1266,24 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
           {(() => { const [px, py] = iso(0, -3.4, 3.2); return <text x={px} y={py - 4} textAnchor="middle" fontSize={7} fontWeight={800} fill={c}>METEORS</text>; })()}
           <Tree x={-5.5} y={4.5} night={night} size={0.8} />
           <Lantern x={5} y={4.5} night={night} />
+        </>
+      );
+    }
+    // C6: The Lease's five-floor walk-up, with a fire escape and the stoop.
+    case "ditmars-walkup": {
+      const bldg: BoxSpec = { x: -3.5, y: -3.5, z: 0, w: 6, d: 6, h: 9, color: mixHex("#B86A4A", b, 0.2) };
+      return (
+        <>
+          {base}
+          <Box b={bldg} night={night}>
+            {windowsLeft(bldg, 5, 3, lit, glassDark, night)}
+            {windowsRight(bldg, 5, 2, lit, glassDark, night)}
+            {[1, 2, 3, 4].map((f) => <OnLeft key={f} b={bldg} u={1.6} v={f * 1.8 - 0.1} uw={2.8} vh={0.25} fill="#2A2330" />)}
+            <OnLeft b={bldg} u={2.3} v={0} uw={1.4} vh={1.6} fill={mixHex(a, "#1F1B26", 0.4)} />
+          </Box>
+          {(() => { const [px, py] = iso(-0.5, 2.6, 0); return <rect x={px - 9} y={py - 3} width={18} height={3} rx={0.8} fill="#9A8E86" />; })()}
+          <Tree x={4.5} y={3.8} night={night} size={0.8} />
+          <Lantern x={-4.6} y={3.6} night={night} />
         </>
       );
     }

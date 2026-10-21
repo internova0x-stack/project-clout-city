@@ -710,6 +710,35 @@
         "deadass",
         "facts"
       ]
+    },
+    {
+      "id": "teddy",
+      "name": "Teodoro \"Teddy\" Bautista",
+      "age": 58,
+      "background": "Filipino-American, born in Manila, raised in Woodside",
+      "personality": "The building's super for twenty-two years. Fixes everything, forgets nothing, and keeps a folding chair on the stoop for whoever needs to talk. Loyal to the tenants, allergic to the landlord's lawyer.",
+      "yearsInNeighborhood": 22,
+      "catchphrases": [
+        "The boiler's older than me and nicer than the landlord. Facts.",
+        "You want to know who lives in 3R? Ask who's been taking out the recycling."
+      ],
+      "likes": [
+        "A dry basement",
+        "Agnes's cookies",
+        "Tenants who label their recycling"
+      ],
+      "dislikes": [
+        "Management companies with three-letter names",
+        "Space heaters",
+        "Anybody who says \"luxury\" about a walk-up"
+      ],
+      "placeId": "ditmars-walkup",
+      "role": "the super",
+      "regular": "teddy",
+      "slang": [
+        "facts",
+        "stoop"
+      ]
     }
   ],
   "roommates": [

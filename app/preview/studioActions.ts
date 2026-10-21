@@ -15,7 +15,10 @@ let rows: Row[] | null = null;
 const VOTES: Record<string, number> = { P1: 1100, P2: 2400, P3: 1860 };
 
 const nyToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
-const store = () => (rows ??= loadArcs().map((arc) => ({ arc, position: null, status: arc.status, review: "approved" as Review, note: null, reviewedAt: null, startAt: null, updatedAt: new Date().toISOString() })));
+// The pilot (Sarah Bird and its side stories) starts approved; newer story files wait for review, as the game's
+// loader leaves them (C6, migration 0098).
+const pilot = (arc: Arc) => arc.id === "sarah-bird" || arc.parent_arc_id === "sarah-bird";
+const store = () => (rows ??= loadArcs().map((arc) => ({ arc, position: null, status: arc.status, review: (pilot(arc) ? "approved" : "draft") as Review, note: null, reviewedAt: null, startAt: null, updatedAt: new Date().toISOString() })));
 const startOf = (r: Row) => (r.arc.type === "side" ? store().find((p) => p.arc.id === r.arc.parent_arc_id)?.startAt ?? null : r.startAt);
 const fail = (error: string, problems?: string[]): StudioResult => ({ ok: false, error, problems });
 

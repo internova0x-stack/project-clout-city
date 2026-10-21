@@ -76,6 +76,9 @@ export const REGULARS: Regular[] = [
   // Culture pack C5: the rooftop's guest list and the ballpark's longest-serving usher.
   { id: "kiki", name: "Kiki Mensah", title: "runs the guest list", placeId: "ditmars-heights-rooftop", emoji: "🌃", role: "doorman" },
   { id: "hector", name: "Hector Rivera", title: "usher, Section 7", placeId: "meteor-park", emoji: "⚾", role: "driver" },
+  // Culture pack C6: the dumpling stall in Flushing, and the super of The Lease's walk-up (seen while that story runs).
+  { id: "wen", name: "Wen Zhao", title: "runs the dumpling stall", placeId: "downstairs-on-main", emoji: "🥟", role: "cook" },
+  { id: "teddy", name: "Teddy Bautista", title: "the super", placeId: "ditmars-walkup", emoji: "🔧", role: "doorman" },
   // v0.14 On Air (owner, Oct 16): the voice of The Wake-Up Call, always at the desk.
   { id: "sharm", name: "Sharm Almight", title: "DJ, The Wake-Up Call", placeId: "real-clout-fm", emoji: "🎙️", role: "bartender" },
   // The Hub's host (owner, Oct 16): the city's tea queen, who can get you anything and knows everyone worth knowing.

@@ -10,6 +10,7 @@ import { storyPlaceIds, validateHunt } from "./hunts";
 import { validateNewsWeek } from "./news";
 import { validateExamWeek } from "./exams";
 import { loadArcs } from "./storyContent";
+import { validateArcs } from "./storyValidation";
 import { getAdminSupabase } from "./supabase/admin";
 
 const EVERY_MS = 10 * 60_000;
@@ -58,6 +59,19 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const { data, error } = await admin.rpc("content_import_exams", { p_week: r.week, p_rows: r.rows });
     if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} questions` });
+  }
+  // Culture pack C6 (migration 0098): a story file the Studio doesn't have yet waits there for review. Stories the Studio
+  // already has are never touched (edits go through the Studio's upload; approving and Day 1 stay the owner's).
+  let arcs: ReturnType<typeof loadArcs> = [];
+  try { arcs = loadArcs(); } catch { /* no story files */ }
+  const problems = validateArcs(arcs);
+  for (const arc of arcs) {
+    const file = `content/stories/${arc.id}.json`;
+    const mine = problems.find((p) => p.startsWith(`${arc.id}:`));
+    if (mine) { out.push({ file, result: `skipped: ${mine}` }); continue; }
+    const { data, error } = await admin.rpc("content_import_story", { p_data: arc });
+    if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    out.push({ file, result: String(data) });
   }
   return out;
 }
