@@ -154,6 +154,29 @@ approved them in `/preview/moves`, Oct 21). Low graphics (`lib/graphics.ts`): th
 and 1x pixels in rooms, the avatar viewer and the map; on by itself only on clearly weak phones (2 GB or 2 cores),
 otherwise Settings → Low graphics. The new bodies are a per-device switch in Studio → Shop (`?bodies=new` for one visit).
 
+**Stage 3 as built (Oct 21):** garment templates are made by `scripts/garments.mjs` (run by
+`scripts/build-base-avatars.mjs`) from the bald masters' own surface in the bind pose: a keep function marks the
+garment (the hoodie: hem at the top of the legs, cuffs at the wrists, a collar around the neck measured from its shape,
+under the chin), the cut is clipped exactly on its edges, smoothed into fabric and pushed 1.2 cm (sleeves) to 1.7 cm
+(body) off the skin, and keeps the body's skin weights, so it bends with every pose, animation and body type. The hood
+(rolled down, bunched at the back) and drawstrings are added as parts. Details are drawn by the game's shader from
+`_PAT` (ribbed hem and cuffs, the kangaroo pocket, the hood a shade off, drawstrings in the outfit's accent, a darker
+inside). Files: `public/avatars/garments/hoodie-m.glb`, `hoodie-f.glb` (about 0.12 MB) and `-low` versions. Each body
+vertex carries `_COVER` bits, so skin under a worn garment isn't drawn (no poke-through). The game wears a template when
+the outfit's top has one (`GARMENT_TEMPLATES` in lib/avatarCatalog.ts); `/preview/moves?outfit=hoodie` shows it on all
+eight body types. Shop items that need the hoodie template stay locked until stage 4 unlocks items as the new bodies
+switch on.
+
+**Polish after the owner's review (Oct 21: "The avatars and outfits look a little botched"):** the game's old cartoon
+hair sat on the new heads like a helmet, so every hairstyle is now grown from each body's own scalp by
+`scripts/hair.mjs` (into `public/avatars/hair/<m|f>[-low].glb`, one mesh per style and one for its lengths): a hairline at
+the forehead, temples and nape, the ears left bare, thickness by style (more at the crown; curls bumpy), and lengths
+(long hair to the shoulder blades, a ponytail, a bun, two braids, locs) that drape off the body. Full coverings hide it;
+under a cap or hat only the lengths show. The hoodie's rib bands only follow the hem and cuffs (tiny gaps in the master
+had drawn ovals), its details are drawn from the finished surface (straight pocket lines), its skin weights are
+softened and it hugs the shoulder joints. The baked basics are calmer (half the texture's shading) and the shins' baked
+socks take the shoe color (no dark band above the shoes). `/preview/moves?outfit=hair` shows every hairstyle.
+
 **Animations later (owner, Oct 21):** extra moves (from Higgsfield or elsewhere) come after stage 4. Each must be made on
 the same 24-bone skeleton (best: animate `assets/avatars/base-*.glb` itself); check the first file before a batch, and
 preview each one in a few outfits before it goes in.

@@ -15,3 +15,15 @@ Which parts the game uses for each Look and Shop piece: `lib/avatarCatalog.ts`.
 Made from the owner's bald masters in `assets/avatars/` by `node scripts/build-base-avatars.mjs`: `m.glb` and `f.glb`
 (full detail) and `m-low.glb`, `f-low.glb` (low graphics). One skinned mesh each, a 24-bone skeleton and a walk.
 Used by `components/avatar/baseAvatar.ts` while the new-bodies switch is on (`lib/graphics.ts`).
+
+## Garment templates (`garments/`)
+
+Cut from the same masters by `scripts/garments.mjs` (run by `scripts/build-base-avatars.mjs`): the hoodie for each body,
+in full and low detail, on the body's own skeleton. Worn by `components/avatar/baseAvatar.ts` when the outfit's top has
+a template (`GARMENT_TEMPLATES` in `lib/avatarCatalog.ts`).
+
+## Hair (`hair/`)
+
+Every hairstyle for each body, grown from the master's scalp by `scripts/hair.mjs` (run by
+`scripts/build-base-avatars.mjs`): one skinned mesh per style (`short`, `buzz`, `long`, ...) and one for its lengths
+(`long-lengths`, `ponytail-lengths`, ...). Worn by `components/avatar/baseAvatar.ts`.

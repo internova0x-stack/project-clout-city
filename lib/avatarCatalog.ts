@@ -23,6 +23,13 @@ export const modelSex = (look: Pick<Look, "body">): ModelSex => (look.body === "
 /** The face every avatar wears (its own hair is hidden; the Look's hair goes on top). */
 export const FACE: Record<ModelSex, string> = { m: "Casual_2", f: "Casual" };
 
+/**
+ * Garment templates on the new base bodies (stage 3 of the avatar upgrade): the file in public/avatars/garments/
+ * (built by scripts/build-base-avatars.mjs) and its cover bit (scripts/garments.mjs COVER: the skin it hides).
+ * A top without one keeps the painted basics until stage 4.
+ */
+export const GARMENT_TEMPLATES: Partial<Record<TopKind, { file: string; cover: number }>> = { hoodie: { file: "hoodie", cover: 1 } };
+
 /** Tops: the character whose Body part is closest to each top. */
 export const TOP_MODEL: Record<TopKind, Record<ModelSex, PartRef>> = {
   puffer: { m: { sex: "m", file: "Casual_Hoodie" }, f: { sex: "m", file: "Casual_Hoodie" } },
