@@ -128,7 +128,8 @@ The rows of the Oct 20 conflict report, as answered. "A" means the recommended f
 | 32 | Picnic date | A paid picnic, so the park counts as a date spot |
 | 33 | Real names already in the game | Leave them (landmarks, Steinway Fresh Mart, Instagram) |
 
-Answers from Oct 21: the lotto moves back to Flushing (done in C4); "Listen in" doesn't work at a shut place.
+Answers from Oct 21: the lotto moves back to Flushing (done in C4); "Listen in" doesn't work at a shut place; an
+evicted player moving into the room share with Priya (now the cheapest home) is fine.
 
 Answers to the open questions:
 - Lola's arrival line in the guide keeps its four sentences (not trimmed).
