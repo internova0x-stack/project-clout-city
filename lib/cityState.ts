@@ -32,7 +32,12 @@ export interface CityPlayer {
   fridge_meals?: number;
   /** #19 (migration 0045): moved to a dearer home at least once (the early goal); missing until it runs. */
   moved_up?: boolean;
+  /** C4 (migration 0095): when the player's OMG Card runs out (subway rides are free until then); missing before it runs. */
+  transit_pass_until?: string | null;
 }
+
+/** C4: what the server says about a trip it just started: its real length (a delay included) and any showtime. */
+export interface TripInfo { seconds: number; line: string | null; delay: number; showtime: boolean }
 
 export interface DailyTask {
   id: number;
@@ -128,7 +133,7 @@ export interface Gain {
 /** #19 clubs (migration 0046): the VIP door. `needsCover`: what it costs today (nothing paid yet). */
 export interface VipEntry { access?: "free" | "paid" | "pass" | "skill"; needsCover?: number }
 
-export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard; vip?: VipEntry } | { ok: false; error: string };
+export type CityResult = { ok: true; state: CityState; gain?: Gain; card?: LottoCard; vip?: VipEntry; trip?: TripInfo } | { ok: false; error: string };
 
 /** Everything the city screens can ask the server to do. */
 export interface CityApi {
@@ -142,6 +147,9 @@ export interface CityApi {
   equipItem(itemId: number, on: boolean): Promise<CityResult>;
   /** v0.8 travel (migration 0025): go to a place (or "home") by walk, subway, taxi or car. */
   travel?(placeId: string, mode: import("./travel.ts").TravelMode): Promise<CityResult>;
+  /** C4 (migration 0095): buy a 7- or 30-day OMG Card; watch the showtime dancers on this ride. */
+  buyTransitPass?(pass: string): Promise<CityResult>;
+  watchShowtime?(): Promise<CityResult>;
   /** #13 (migration 0040): end the current trip now, for virtual cash by seconds left. */
   skipTrip?(): Promise<CityResult>;
   /** v0.7 Your Look (migration 0021): the worn clothes (one per slot) and the free headwear, saved at once. */
@@ -270,6 +278,8 @@ const ERRORS: Record<string, string> = {
   dev_tools_off: "Time travel is switched off here.",
   still_travelling: "You're still on your way. Hang tight, or skip the rest of the ride.",
   closed_now: "Closed right now. The card says when they open.",
+  unknown_pass: "That pass isn't sold here.",
+  no_showtime: "The dancers already got off. Showtime waits for no one.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",

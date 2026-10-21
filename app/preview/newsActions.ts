@@ -14,7 +14,15 @@ export async function previewNews(): Promise<NewsItem[]> {
   const d = new Date(`${today}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
   const r = validateNewsWeek({ ...WEEK, week: d.toISOString().slice(0, 10) });
-  return r.ok ? r.items : [];
+  if (!r.ok) return [];
+  // C4: a Metro Rail Authority delay on the 7, live from the top of this hour for three hours, and a weekend change.
+  const hour = Math.min(20, Number(new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour: "2-digit", hourCycle: "h23" })));
+  const from = `${String(hour).padStart(2, "0")}:00`;
+  return [
+    ...r.items,
+    { id: "preview-7-delay", kind: "transit", day: today, cast: [], headline: "7 train delays: a signal problem at Queensboro Plaza", body: "Expect delays on the 7 in both directions while crews fix a signal. The MRA thanks you for your patience, which it has never once deserved.", transit: { line: "7", from, hours: 3, delay: 25 } },
+    { id: "preview-nw-weekend", kind: "transit", day: today, cast: [], headline: "N/W weekend: trains run local, all of them, forever", body: "This weekend the N and W make every stop between Astoria and the city. Bring a snack and a podcast with many episodes.", transit: { line: "N/W", from: "00:00", hours: 6 } },
+  ];
 }
 
 // ---- The Studio's News tab in preview (in memory, nothing is saved) ----

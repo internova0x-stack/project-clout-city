@@ -15,8 +15,8 @@ begin execute stmt; return false; exception when others then if sqlerrm like '%'
 update public.borough_gates set opened_at = null, opened_by = null;
 delete from public.concurrency_days;
 
--- The seed knows each place's borough.
-select pg_temp.assert((select count(*) from jsonb_array_elements(public.city() -> 'places') p where p ->> 'borough' = 'brooklyn') = 19, 'nineteen places in Brooklyn');
+-- The seed knows each place's borough (C4, 0095: Lucky Star Lotto moved back to Flushing, so eighteen).
+select pg_temp.assert((select count(*) from jsonb_array_elements(public.city() -> 'places') p where p ->> 'borough' = 'brooklyn') = 18, 'eighteen places in Brooklyn');
 select pg_temp.assert(not public.place_open('hellgate-hall') and public.place_open('st-copays') and public.place_open('neon-spoon'), 'Brooklyn locked, Queens open');
 
 insert into auth.users (id) values ('00000000-0000-0000-0000-0000000066b1');

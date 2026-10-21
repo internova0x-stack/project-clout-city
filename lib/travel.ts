@@ -5,13 +5,23 @@ import type { LatLng } from "./map/geo.ts";
  * Travel (v0.8, #4): how far, which distance band, and what each way of getting there costs.
  * Mirrors public.travel() (migration 0025), which charges the same numbers.
  */
-export type TravelMode = "walk" | "subway" | "taxi" | "car";
+export type TravelMode = "walk" | "subway" | "taxi" | "rideshare" | "car";
+/** C4 (owner, Oct 20): the taxi is the outer boroughs' green cab now (its id stays "taxi"), plus a rideshare. */
 export const TRAVEL_MODES: { id: TravelMode; label: string; emoji: string }[] = [
   { id: "walk", label: "Walk", emoji: "🚶" },
   { id: "subway", label: "Subway", emoji: "🚇" },
-  { id: "taxi", label: "Taxi", emoji: "🚕" },
+  { id: "taxi", label: "Green cab", emoji: "🚕" },
+  { id: "rideshare", label: "Rideshare", emoji: "📱" },
   { id: "car", label: "Your car", emoji: "🚗" },
 ];
+
+/** C4: the train line a trip to this neighborhood rides ("N/W", "7", "E"), or null where none is mapped. */
+export function lineFor(area: string | null | undefined): string | null {
+  return (area && CITY_ECONOMY.travel.subway.lines[area]) || null;
+}
+
+/** "the 7 train", "the N/W". */
+export const lineName = (line: string) => (line.includes("/") ? `the ${line}` : `the ${line} train`);
 
 /** Straight-line miles between two points (haversine). */
 export function milesBetween([lat1, lng1]: LatLng, [lat2, lng2]: LatLng): number {
@@ -51,10 +61,14 @@ export function skipCost(secondsLeft: number): number {
   return secondsLeft <= 0 ? 0 : Math.max(s.min, Math.ceil(secondsLeft / s.secondsPerCash));
 }
 
-export function travelQuote(mode: TravelMode, miles: number, hasCar: boolean): TravelQuote {
+/**
+ * C4: what a trip costs. `delay` adds seconds to the subway (a transit delay posted in News on that line); a live OMG
+ * Card (`pass`) makes the subway free.
+ */
+export function travelQuote(mode: TravelMode, miles: number, hasCar: boolean, opts: { delay?: number; pass?: boolean } = {}): TravelQuote {
   const t = CITY_ECONOMY.travel;
   const band = distanceBand(miles);
-  const seconds = tripSeconds(mode, miles);
+  const seconds = tripSeconds(mode, miles) + (mode === "subway" ? opts.delay ?? 0 : 0);
   switch (mode) {
     case "walk": {
       const energy = t.walk.energy[band];
@@ -62,8 +76,9 @@ export function travelQuote(mode: TravelMode, miles: number, hasCar: boolean): T
         ? { mode, fare: 0, energy: 0, seconds: 0, unavailable: "Too far to walk" }
         : { mode, fare: 0, energy, seconds };
     }
-    case "subway": return { mode, fare: t.subway.fare, energy: 0, seconds };
+    case "subway": return { mode, fare: opts.pass ? 0 : t.subway.fare, energy: 0, seconds };
     case "taxi": return { mode, fare: t.taxi.fare[band], energy: 0, seconds };
+    case "rideshare": return { mode, fare: t.rideshare.fare[band], energy: 0, seconds };
     case "car": return hasCar
       ? { mode, fare: 0, energy: 0, seconds }
       : { mode, fare: 0, energy: 0, seconds: 0, unavailable: "Buy or rent one in the Shop" };

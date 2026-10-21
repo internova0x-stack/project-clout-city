@@ -5,7 +5,8 @@ import { SpottedCard } from "../city/Party";
 import { PotWinNewsCard } from "../city/Lotto";
 import type { LottoWin } from "@/lib/lotto";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { NEWS_KIND_LABEL, splitNews, type NewsItem } from "@/lib/news";
+import { NEWS_KIND_LABEL, splitNews, transitLive, transitUntil, type NewsItem } from "@/lib/news";
+import { lineName } from "@/lib/travel";
 import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
 
 // The News app (C30 to C34): today's story, side stories, the archive, predictions
@@ -163,7 +164,14 @@ function CityNewsCard({ item, today, focus = false }: { item: NewsItem; today: s
       </div>
       <h3 className="title" style={{ margin: 0, fontSize: 18, lineHeight: 1.25 }}>{item.headline}</h3>
       <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{item.body}</p>
-      <Byline />
+      {/* C4: a transit update names its line; a delay that's on now says so, and the subway takes longer. */}
+      {item.transit ? (
+        <p className="meta" style={{ margin: 0 }}>
+          🚇 {lineName(item.transit.line).replace(/^the /, "The ")}
+          {item.transit.delay ? ` · trips +${item.transit.delay} s ${transitUntil(item.transit)}` : ` · ${transitUntil(item.transit)}`}
+          {transitLive(item, Date.now()) && <b style={{ color: "#B4561A" }}> · Live now</b>}
+        </p>
+      ) : <Byline />}
     </article>
   );
 }

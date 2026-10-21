@@ -1358,6 +1358,13 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .trip-progress span { display:block; height:100%; background:linear-gradient(90deg, var(--primary-top), #FF8A65); }
 .trip-skip { position:absolute; right:16px; bottom:calc(28px + var(--safe-bottom)); pointer-events:auto; height:46px; padding:0 18px; border-radius:var(--r-pill);
   background:var(--night-900); color:#fff; font-weight:700; font-size:15px; box-shadow:var(--elev-2); }
+/* C4: showtime dancers on the train (a card above the skip button) and a delay on the Travel sheet. */
+.trip-showtime { position:absolute; left:14px; right:14px; bottom:calc(88px + var(--safe-bottom)); pointer-events:auto; display:grid; gap:6px; padding:12px 14px;
+  border-radius:20px; background:rgba(255,255,255,.96); box-shadow:0 8px 24px rgba(0,0,0,.16); }
+.trip-showtime b { font-size:15.5px; color:var(--text-1); }
+.trip-showtime small { font-size:13px; color:var(--text-2); }
+.trip-showtime .btn { justify-self:start; }
+.travel-delay { color:#B4561A; font-weight:700; }
 .game.travelling .hud, .game.travelling .under-hud, .game.travelling .side-col, .game.travelling .stats, .game.travelling .me-bubble,
 .game.travelling .nav { display:none; }
 .action-row .lock-chip { flex:none; padding:6px 10px; border-radius:var(--r-pill); background:var(--surface-card); color:var(--text-3); font-size:12px; font-weight:700; white-space:nowrap; }

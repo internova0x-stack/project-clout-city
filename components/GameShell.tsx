@@ -37,7 +37,7 @@ import { LottoSheet } from "./city/Lotto";
 import { TeaRevealSheet } from "./city/Gossip";
 import { TEA_BADGE, leadAction, leadFrom, leadLine, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
 import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
-import { formatMiles, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
+import { formatMiles, lineFor, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { CollectionSheet, type MoneyHandlers } from "./city/Money";
 import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
@@ -58,7 +58,7 @@ import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, VIP_SKUS, pickInView, type
 import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
-import { newsGossip, splitNews, type NewsItem } from "@/lib/news";
+import { activeDelays, newsGossip, splitNews, type NewsItem } from "@/lib/news";
 import { HUNT_BADGE, type HuntApi, type HuntState } from "@/lib/hunts";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
@@ -1624,16 +1624,30 @@ export function GameShell({
     [cityOn, travelOn, atPlace, myPos, myPosName, home],
   );
   /** Go: pay on the server first (it records when the player arrives), then show the trip. */
+  // C4: the trip's train line (where it's going), any delay posted in News on it now, and the OMG Card.
+  const passLive = !!city?.player.transit_pass_until && Date.parse(city.player.transit_pass_until) > gameNow;
+  const travelTransit = travelPlan && city ? (() => {
+    const line = lineFor(travelPlan.toId === "home" ? ECONOMY.homes.find((h) => h.id === me.home_id)?.neighborhood : placeById(travelPlan.toId)?.neighborhood);
+    return {
+      line,
+      delay: (line && activeDelays(newsItems, gameNow)[line]) || null,
+      passUntil: city.player.transit_pass_until,
+      onBuyPass: cityApi?.buyTransitPass ? (id: string) => void run(`pass:${id}`, () => cityApi.buyTransitPass!(id)) : undefined,
+    };
+  })() : null;
   const goTravel = async (mode: TravelMode) => {
     const plan = travelPlan;
     if (!plan || !cityApi?.travel) return;
-    const ok = await run("travel", () => cityApi.travel!(plan.toId, mode));
+    // C4 (migration 0095): the server's own trip length (a posted delay included) and any showtime dancers.
+    let info: CityResult | null = null;
+    const ok = await run("travel", async () => (info = await cityApi.travel!(plan.toId, mode)));
     if (!ok) return;
-    const q = travelQuote(mode, milesBetween(plan.from, plan.to), !!city?.player.car_sku);
+    const t = info && (info as CityResult).ok ? (info as Extract<CityResult, { ok: true }>).trip : undefined;
+    const q = travelQuote(mode, milesBetween(plan.from, plan.to), !!city?.player.car_sku, { delay: travelTransit?.delay?.seconds ?? 0, pass: passLive });
     setTravelPlan(null);
     setPlace(null);
     setTab("map");
-    setTrip({ ...plan, mode, seconds: q.seconds, fare: q.fare });
+    setTrip({ ...plan, mode, seconds: t?.seconds ?? q.seconds, fare: q.fare, line: t?.line ?? null, delay: t?.delay ?? 0, showtime: !!t?.showtime });
   };
   // ---- v0.13 ride together: offer, wait for a yes, then both go ----
   const rideGo = async (mode: TravelMode, person: TogetherCandidate) => {
@@ -2034,7 +2048,8 @@ export function GameShell({
             // Tapping the tower checks first, so the photo that opens is the live one.
             onBigScreen={tv ? openBigScreen : undefined}
           />
-          {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined} />}
+          {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined}
+            onShowtime={cityApi?.watchShowtime ? () => run("showtime", () => cityApi.watchShowtime!()) : undefined} />}
         </>
       )}
 
@@ -2272,6 +2287,7 @@ export function GameShell({
             busy={busy !== null}
             onClose={() => setTravelPlan(null)}
             onGo={(m) => void goTravel(m)}
+            transit={travelTransit ?? undefined}
             // v0.13: ride with someone here with you (both at the same place, split the fare).
             ride={together && atPlace && travelPlan?.toId !== "home" && rideHere.length > 0 && togetherIn?.canInvite
               ? { people: rideHere.slice().sort((a, b) => Number(b.crew) - Number(a.crew)).slice(0, 2).map((h) => ({ id: h.id, name: h.name, style: h.style, crew: h.crew, here: true })), onRide: (m, p) => void rideGo(m, p) }

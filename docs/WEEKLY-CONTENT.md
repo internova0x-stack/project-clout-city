@@ -62,11 +62,17 @@ it isn't in your working directory). Work from the main branch.
      answer; move the right answer around; the finale should test something from the trail.
    Lola's lines (news, "Ask Lola", Tea cards) and DJ Sharm Almight's are written in their voices from
    docs/CAST.md "Voices": Lola the spicy tea queen, Sharm New York hype with younger slang.
-4. Write content/news/<Monday>.json: 9 to 12 items across Monday to Sunday, including
+4. Write content/news/<Monday>.json: 9 to 12 news items across Monday to Sunday (plus the transit updates below), including
    - a Monday "hunt" item announcing the hunt (it must name the first place's regular),
    - exactly one Lola column ("column"),
    - city news about the invented cast only (lib/cast.ts ids in "cast"): light, satirical, no real
      people, brands, politics, tragedies or crime, nothing that changes prices or places.
+   - 3 to 5 Metro Rail Authority updates ("transit", culture pack C4): delays, reroutes, weekend service changes
+     and fare news for the lines players ride (N/W in Astoria and Long Island City, the 7 to Flushing, Jackson
+     Heights and Sunnyside, the E to Jamaica). Each has "line", "from" (New York time, "HH:MM") and "hours" (1 to 6,
+     ending by midnight); two or three are delays with "delay" (10 to 30 seconds), which really slow that line's
+     subway trips while they run. Spread them over the week and the day (a morning rush, an evening, a weekend).
+     Fare news is satire only: fares never change. Name the agency "the Metro Rail Authority" (never a real one).
 5. Write content/gossip/<Monday>.json: 3 to 5 gossip stories (one about the celebrity cast, one about
    Astoria's regulars, one about invented City Hall business is a good mix), each exactly five
    pieces at five different places that build to a reveal, plus Lola's write-up ("tea"). Use
