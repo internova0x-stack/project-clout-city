@@ -55,6 +55,31 @@
       "id": "brick-tackleton-cooking-show", "kind": "city", "day": "Sun", "cast": ["brick-tackleton"],
       "headline": "Brick Tackleton's cooking show premieres; every dish is a protein shake",
       "body": "Episode one: breakfast (a shake). Episode two: dinner (a warmer shake). Critics praise his knife work, which was used only to open the shake."
+    },
+    {
+      "id": "mra-7-signal-wed", "kind": "transit", "day": "Wed", "line": "7", "from": "16:00", "hours": 4, "delay": 20,
+      "headline": "7 train delays: a signal at Queensboro Plaza is \"thinking about it\"",
+      "body": "Expect delays on the 7 in both directions this evening while crews talk a signal into turning green. The Metro Rail Authority thanks you for your patience, which it has never once deserved."
+    },
+    {
+      "id": "mra-nw-thu-morning", "kind": "transit", "day": "Thu", "line": "N/W", "from": "07:00", "hours": 4, "delay": 15,
+      "headline": "N/W running slow: a train has entered a \"mechanical mood\"",
+      "body": "Morning N and W trains are running with delays after one train refused to leave Astoria Blvd. Crews say it's \"just tired.\" Same, honestly."
+    },
+    {
+      "id": "mra-fare-study-fri", "kind": "transit", "day": "Fri", "line": "7", "from": "09:00", "hours": 2,
+      "headline": "MRA board votes to study whether to discuss a fare increase",
+      "body": "After a four-hour meeting, the Metro Rail Authority board agreed to form a committee to decide whether to schedule a meeting about fares. Fares stay where they are. The snacks at the meeting were excellent."
+    },
+    {
+      "id": "mra-7-weekend-sat", "kind": "transit", "day": "Sat", "line": "7", "from": "08:00", "hours": 6,
+      "headline": "Weekend service: the 7 runs local to Flushing, every stop, no exceptions",
+      "body": "This Saturday the 7 makes every stop between Long Island City and Flushing. Bring a snack, a podcast and the patience of a saint. The dumplings at the end are worth it."
+    },
+    {
+      "id": "mra-nw-reroute-sun", "kind": "transit", "day": "Sun", "line": "N/W", "from": "11:00", "hours": 5, "delay": 25,
+      "headline": "N/W rerouted on Sunday: trains take \"the scenic route\"",
+      "body": "Track work sends Sunday N and W trains on a detour. The MRA calls it scenic. Riders call it a schlep. Allow extra time to reach Astoria."
     }
   ]
 }
