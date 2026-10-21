@@ -1,5 +1,7 @@
 "use client";
 
+import { previewCoutureMap, previewPlazaBook, previewPlazaWeeks } from "@/app/preview/coutureActions";
+import type { CoutureApi } from "@/lib/coutureMap";
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
 import type { RadioApi } from "@/lib/radio";
 import { createCampusSim } from "@/lib/campusSim";
@@ -54,6 +56,9 @@ import {
 // Development previews only: the home screen with an in-memory city and story
 // world, so every v0.3 and v0.4 screen can be tried without a database. Nothing is saved.
 const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead };
+
+/** Clout Couture on the map with sample owners (app/preview/coutureActions.ts). */
+const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
   player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, calendarPreset, couturePreset,
@@ -448,6 +453,7 @@ export function PreviewHome({
       stations={cityOff ? undefined : STATIONS_PREVIEW}
       together={cityOff ? undefined : togetherApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
+      coutureApi={cityOff ? undefined : PREVIEW_COUTURE}
       actions={{
         setTutorialState: noop,
         finishHandoff: noop,

@@ -9,7 +9,8 @@ import {
   EDITABLE, PRESENTATION_LABEL, SHOP_TABS, SLOTS, STATUS_LABEL, STYLE_LINES, STYLE_LINE_LABEL, cloutCurve, isReady, readiness,
   type CatalogItem, type CatalogStatus, type EditableField, type ShopFile, type ShopTab, type StyleLine,
 } from "@/lib/shopCatalog";
-import type { ShopAction, ShopAuditRow, ShopImportResult, StudioApi } from "@/lib/studio";
+import type { CoutureOwner, ShopAction, ShopAuditRow, ShopImportResult, StudioApi } from "@/lib/studio";
+import { MAP_SKUS } from "@/lib/coutureMap";
 import { editionLine, formatPrice, serialLabel, type Edition } from "@/lib/store";
 import { ShopArt, ShopCardPreview } from "../city/ShopCard";
 import { GraphicsSwitch } from "../GraphicsSwitch";
@@ -285,6 +286,7 @@ function ItemPage({ api, item, all, busy, onBack, onChanged, act, process }: {
         {item.status === "live" && <button className="btn btn-secondary btn-sm" onClick={() => void act([item.sku], "retire")}>Retire: stop selling (owners keep it)</button>}
         {item.status === "retired" && <button className="btn btn-taxi btn-sm" onClick={() => void act([item.sku], "restore")}>Restore: back on sale</button>}
         {item.edition && <DropControl api={api} sku={item.sku} edition={item.edition} onChanged={onChanged} />}
+        {MAP_SKUS.has(item.sku) && api.shopCoutureOwners && <CoutureOwners api={api} sku={item.sku} />}
         {item.status !== "scheduled" && (
           confirmDelete ? (
             <span className="row" style={{ gap: 6 }}>
@@ -368,6 +370,56 @@ function DropControl({ api, sku, edition, onChanged }: { api: StudioApi; sku: st
           }}>Open drop {edition.drop + 1} ({n >= 1 ? n : "?"} copies)</button>
         </span>
       )}
+      {msg && <span className="meta">{msg}</span>}
+    </span>
+  );
+}
+
+/**
+ * Clout Couture on the map (migration 0104): who owns this yacht, jet or statue and the name the map shows. A name on a
+ * hull or banner can be hidden (the edition number shows instead); the week's statue can come off the plaza (refund it in
+ * Stripe if that's the call).
+ */
+function CoutureOwners({ api, sku }: { api: StudioApi; sku: string }) {
+  const [owners, setOwners] = useState<CoutureOwner[] | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+  const load = useCallback(async () => {
+    const r = await api.shopCoutureOwners!(sku);
+    if (r.ok) setOwners(r.data); else setMsg(r.error);
+  }, [api, sku]);
+  useEffect(() => { void load(); }, [load]);
+  if (!owners) return msg ? <span className="meta">{msg}</span> : null;
+  const plaza = sku === "plaza-statue";
+  return (
+    <span className="stack-8">
+      <span className="body-strong">{plaza ? "Statues and their weeks" : "On the map"}</span>
+      {!owners.length && <span className="meta">Nobody owns one yet.</span>}
+      {owners.map((o) => (
+        <span key={o.player} className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <span className="meta" style={{ flex: 1, minWidth: 160 }}>
+            {o.edition ? `No. ${String(o.edition).padStart(4, "0")} · ` : ""}{o.displayName}{o.hidden ? ` (shows as ${o.shown})` : ""}{plaza ? ` · ${o.week ?? "not booked"}` : ""}
+          </span>
+          {!plaza && api.shopCoutureName && (
+            <button className="chip" onClick={async () => {
+              const r = await api.shopCoutureName!(o.player, sku, !o.hidden);
+              setMsg(r.ok ? (o.hidden ? `${o.displayName}'s name is back.` : `${o.displayName}'s name is hidden.`) : r.error);
+              await load();
+            }}>{o.hidden ? "Show name" : "Hide name"}</button>
+          )}
+          {plaza && o.week && api.shopPlazaRemove && (
+            <>
+              <input className="studio-input" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" aria-label="Reason" style={{ width: 160 }} />
+              <button className="chip" disabled={!reason.trim()} onClick={async () => {
+                const r = await api.shopPlazaRemove!(o.week!, reason);
+                setMsg(r.ok ? "Off the plaza. Refund it in Stripe if that's the call." : r.error);
+                setReason("");
+                await load();
+              }}>Take it down</button>
+            </>
+          )}
+        </span>
+      ))}
       {msg && <span className="meta">{msg}</span>}
     </span>
   );

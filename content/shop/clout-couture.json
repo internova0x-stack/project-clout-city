@@ -267,7 +267,7 @@
       "name": "Statue in the Plaza",
       "tab": "Map",
       "slot": "plaza",
-      "description": "A gold statue of the owner's avatar (pose and outfit at purchase) placed in the Unisphere plaza for 7 days with a plaque, then moved to the owner's apartment permanently. Only one statue in the plaza at a time: buyers book an available week. The Story Studio can remove a statue, with a refund.",
+      "description": "A gold statue of the owner's avatar (in the look they wear when they book their week) placed in the Unisphere plaza for 7 days with a plaque, then moved to the owner's apartment permanently. Only one statue in the plaza at a time: buyers book an available week. The Story Studio can remove a statue, with a refund.",
       "realCash": true,
       "priceUsd": 120.0,
       "editionSize": 52,

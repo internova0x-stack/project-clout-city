@@ -196,6 +196,10 @@ components live in `app/globals.css`.
   Migration 0103: the 24k Glow Ritual is worn (slot 'face-effect', "glow" in lib/wearing.ts; Outfit.glow, baseAvatar's skin
   shader); `player_items.options` + `set_item_options` (crown or tiara; the suit's cloth, lining, monogram: lib/couture.ts,
   tests/couture.test.ts keeps the palettes in step); `crowned_players()` puts a 👑 by owners' names (leaderboard, chat).
+  Migration 0104: Couture on the map (`couture_map()`: yachts moored off Astoria, jets of owners in the game, the week's
+  plaza statue; lib/coutureMap.ts, components/map/coutureModels.ts, `setCouture` in the landmark layer); `plaza_bookings`
+  (`plaza_weeks`, `plaza_book`, one a week, the look kept at booking; home after its week); Studio `admin_couture_owners`,
+  `admin_couture_name` (hide a name), `admin_plaza_remove`. The Clout Throne is home furniture (`throne`, sittable).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
   in `assets/avatar-animations.json`; `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git-ignored:
   never commit or ship the raw files) and `npm run avatars:build` (`scripts/build-base-avatars.mjs`) makes the game copies

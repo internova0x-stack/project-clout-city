@@ -1,5 +1,6 @@
 "use client";
 
+import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/lib/coutureMap";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
@@ -211,6 +212,7 @@ export function GameShell({
   boroughGates,
   loadBoroughs,
   leaderboardRows,
+  coutureApi,
   dating,
   crew,
   party,
@@ -300,6 +302,8 @@ export function GameShell({
   tv?: TvApi;
   /** v0.14 texts from the stations (migration 0058), read-only threads in Messages. */
   stations?: StationApi;
+  /** Clout Couture on the map (migration 0104): yachts, jets, the plaza statue and its booking. */
+  coutureApi?: CoutureApi;
   /** Development previews: sample leaderboard rows. */
   leaderboardRows?: Parameters<typeof LeaderboardSheet>[0]["fetchRows"];
   /** Rooms use the Monument Valley-style "dream" lighting; "natural" stays for comparison in previews. */
@@ -522,6 +526,16 @@ export function GameShell({
   const [chatWith, setChatWith] = useState<{ id: string; name: string; style: string } | null>(null);
   const [chatUnread, setChatUnread] = useState(0);
   const [cardId, setCardId] = useState<string | null>(null);
+  // Clout Couture on the map (migration 0104), refreshed every minute so jets come and go with their owners.
+  const [coutureMap, setCoutureMap] = useState<CoutureMap | null>(null);
+  useEffect(() => {
+    if (!coutureApi) return;
+    let live = true;
+    const load = () => void coutureApi.map().then((r) => { if (live && r.ok) setCoutureMap(r.data); }).catch(() => undefined);
+    load();
+    const t = setInterval(load, 60_000);
+    return () => { live = false; clearInterval(t); };
+  }, [coutureApi]);
   // Meeting players (owner, Oct 15; migration 0047): who's here, how many are where, and the unlimited chat offer.
   const [here, setHere] = useState<HerePerson[]>([]);
   // Crowded places (owner, Oct 15): the true count, the people you opened (they stay in view, most recent
@@ -1181,6 +1195,8 @@ export function GameShell({
     return { ...(it ?? {}), sku, category: "home", name: c?.name ?? sku, emoji: c?.emoji ?? "🛋️", furniture: CATALOG_FURNITURE[sku] } as ShopItem;
   };
   const ownedPieces: OwnedPiece[] = (city?.items ?? []).flatMap((i) => {
+    // The Plaza Statue stands in front of the Unisphere first; it comes home once its booked week is over.
+    if (i.sku === PLAZA_SKU) return plazaWeekOver(coutureMap?.myPlazaWeek ?? null, city!.today) ? [pieceOf(homeItem(i.sku)!, ownedId(i.id))] : [];
     const it = i.category === "home" ? homeItem(i.sku) : undefined;
     return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
   });
@@ -2085,6 +2101,8 @@ export function GameShell({
             bigScreen={tvFeature ? { url: tvFeature.url, handle: tvFeature.handle, photo: tvFeature.photo } : null}
             // Tapping the tower checks first, so the photo that opens is the live one.
             onBigScreen={tv ? openBigScreen : undefined}
+            couture={coutureMap}
+            onOpenPlayer={chat ? (id) => setCardId(id) : undefined}
           />
           {trip && <TripView key={`${trip.toId}:${trip.mode}`} trip={trip} map={mapRef.current} onDone={endTrip} onSkip={cityApi?.skipTrip ? () => run("skip-trip", () => cityApi.skipTrip!()) : undefined}
             onShowtime={cityApi?.watchShowtime ? () => run("showtime", () => cityApi.watchShowtime!()) : undefined} />}
@@ -2368,6 +2386,7 @@ export function GameShell({
             onOpenCollection={catalog ? () => setPanel("collection") : undefined}
             serial={(sku) => products.find((p) => p.sku === sku)?.serial}
             onOptions={cityApi.setItemOptions ? (id, o) => run(`options:${id}`, () => cityApi.setItemOptions!(id, o)) : undefined}
+            couture={coutureApi}
           />
           <CollectionSheet
             open={panel === "collection"}

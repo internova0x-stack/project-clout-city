@@ -1195,6 +1195,8 @@ export const CATALOG_FURNITURE: Record<string, NonNullable<ShopItem["furniture"]
   "cloud-nine-sofa": { kind: "sofa", color: "#E3CFA6", room: "living", line: "cloud-nine-sofa" },
   "self-portrait-statue": { kind: "statue", color: "#D4AF37", room: "decor", line: "self-portrait-statue" },
   "clout-throne": { kind: "throne", color: "#D4AF37", room: "living", line: "clout-throne" },
+  // The Plaza Statue comes home after its week in front of the Unisphere (migration 0104).
+  "plaza-statue": { kind: "statue", color: "#D4AF37", room: "decor", line: "plaza-statue" },
 };
 
 /** Clout from a visit or meal: by price (base value, never a story-modified price), scaled by Mood and Confidence. */

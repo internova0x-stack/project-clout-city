@@ -1,5 +1,5 @@
 import { AvatarMoves } from "@/components/preview/AvatarMoves";
-import { previewShopAction, previewShopAudit, previewShopNewDrop, previewShopEdit, previewShopFiles, previewShopImport, previewShopList, previewShopProcessImages } from "../shopActions";
+import { previewShopAction, previewShopAudit, previewShopNewDrop, previewCoutureOwners, previewCoutureName, previewPlazaRemove, previewShopEdit, previewShopFiles, previewShopImport, previewShopList, previewShopProcessImages } from "../shopActions";
 import { notFound } from "next/navigation";
 import { ECONOMY } from "@/lib/economy";
 import { Creator, type CreatorStep } from "@/components/Creator";
@@ -183,7 +183,7 @@ export default async function Preview({
             upload: previewStudioUpload, review: previewStudioReview, schedule: previewStudioSchedule, status: previewStudioStatus,
             beatStatus: previewStudioBeatStatus, content: previewStudioContent, reorder: previewStudioReorder, beatEdit: previewStudioBeatEdit, goLive: previewStudioGoLive,
             shopList: previewShopList, shopFiles: previewShopFiles, shopImport: previewShopImport, shopProcessImages: previewShopProcessImages,
-            shopAction: previewShopAction, shopEdit: previewShopEdit, shopAudit: previewShopAudit, shopNewDrop: previewShopNewDrop,
+            shopAction: previewShopAction, shopEdit: previewShopEdit, shopAudit: previewShopAudit, shopNewDrop: previewShopNewDrop, shopCoutureOwners: previewCoutureOwners, shopCoutureName: previewCoutureName, shopPlazaRemove: previewPlazaRemove,
             reports: previewStudioReports, reportAction: previewStudioReportAction, metrics: previewStudioMetrics, insights: previewStudioInsights, players: previewStudioPlayers, player: previewStudioPlayer, playerBan: previewStudioPlayerBan,
             affiliates: previewStudioAffiliates, affiliatesOverview: previewStudioAffiliatesOverview, creatorPage: previewStudioCreatorPage, payouts: previewStudioPayouts, payoutMark: previewStudioPayoutMark, payoutVoid: previewStudioPayoutVoid, videos: previewStudioVideos, videoSave: previewStudioVideoSave, videoStatus: previewStudioVideoStatus, creatorSave: previewStudioCreatorSave, linkSave: previewStudioLinkSave, linkStatus: previewStudioLinkStatus,
             castLines: previewCastLines, castAdd: previewCastAdd, castStatus: previewCastStatus,

@@ -42,3 +42,16 @@ test("choices reach the avatar: a tiara, the suit in its cloth and lining, the g
   assert.equal(optionsLine(SUIT_SKU, { cloth: "#14111A", lining: "#B3122E", monogram: "ABC" }), "Black · Crimson lining · ABC");
   assert.equal(optionsLine(CROWN_SKU, { style: "tiara" }), "Worn as a tiara");
 });
+
+test("the marina moves out until its moorings float, and the jets keep their own loops", async () => {
+  const { fitMarina, mooring, onWater, jetLoop } = await import("../lib/coutureMap.ts");
+  // A river: everything west of the shore line through the first mooring is water.
+  const [lat0, lng0] = mooring(0).at;
+  const river = [[[[lng0 - 0.02, lat0 - 0.02], [lng0 - 0.0006, lat0 - 0.02], [lng0 - 0.0006, lat0 + 0.03], [lng0 - 0.02, lat0 + 0.03], [lng0 - 0.02, lat0 - 0.02]]]] as [number, number][][][];
+  assert.equal(onWater(mooring(0).at, river), false, "the shore line is land");
+  const shift = fitMarina(river, 24)!;
+  assert.ok(shift > 0 && shift <= 600, `moved out ${shift} m`);
+  for (let n = 0; n < 24; n++) assert.ok(onWater(mooring(n, shift).at, river), `mooring ${n} floats`);
+  assert.equal(fitMarina([], 24), null, "no water loaded: nothing to fit");
+  assert.notDeepEqual(jetLoop(0), jetLoop(1));
+});

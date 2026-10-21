@@ -2,7 +2,7 @@
 
 import { wearSlot } from "@/lib/wearing";
 import { LOOK_LABEL, STYLE } from "@/lib/style";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
 import { billCountdown, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem, type UpcomingBill } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
@@ -11,6 +11,7 @@ import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars, useGameNow } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 import { editionLine, formatPrice, serialLabel, type StoreProduct } from "@/lib/store";
+import { JET_SKU, PLAZA_SKU, YACHT_SKU, weekLabel, type CoutureApi, type PlazaWeeks } from "@/lib/coutureMap";
 import { CROWN_SKU, CROWN_STYLES, SUIT_CLOTHS, SUIT_LININGS, cleanMonogram, hasOptions, optionsLine, type ItemOptions } from "@/lib/couture";
 import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, shippedPictures, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
@@ -252,7 +253,7 @@ export function ShopSheet({
 // Net Worth (C25, renamed from Possessions in #30): bank cash, then items by category; sell at 60%.
 // ---------------------------------------------------------------------------
 export function NetWorthSheet({
-  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection, serial, onOptions,
+  open, onClose, state, style, busy, onSell, onEquip, onOpenCollection, serial, onOptions, couture,
 }: {
   open: boolean; onClose: () => void; state: CityState; style: StyleId; busy: Busy; onSell: (itemId: number) => Promise<boolean>;
   /** #15: owned clothes can be put on from their detail. */
@@ -263,6 +264,8 @@ export function NetWorthSheet({
   serial?: (sku: string) => number | null | undefined;
   /** Clout Couture (migration 0103): saves a piece's choices (crown or tiara; the suit's cloth, lining, monogram). */
   onOptions?: (itemId: number, options: ItemOptions) => Promise<boolean>;
+  /** Clout Couture on the map (migration 0104): the plaza statue's booking. */
+  couture?: CoutureApi;
 }) {
   const [detail, setDetail] = useState<PlayerItem | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -368,6 +371,9 @@ export function NetWorthSheet({
                     </button>
                   );
                 })()}
+                {detail.sku === YACHT_SKU && <p className="meta" style={{ margin: 0 }}>🛥️ Moored off the Astoria waterfront with your name on the hull. Tap it on the map to open your card.</p>}
+                {detail.sku === JET_SKU && <p className="meta" style={{ margin: 0 }}>✈️ Flies over Queens whenever you're in the game, trailing a banner with your name.</p>}
+                {detail.sku === PLAZA_SKU && couture && <PlazaBooking key={detail.id} api={couture} />}
                 {onOptions && hasOptions(detail.sku) && (
                   <ItemOptionsEditor key={detail.id} sku={detail.sku} saved={state.items.find((i) => i.id === detail.id)?.options}
                     busy={busy !== null} onSave={(o) => onOptions(detail.id, o)} />
@@ -385,6 +391,44 @@ export function NetWorthSheet({
         )}
       </Sheet>
     </>
+  );
+}
+
+/** Clout Couture (migration 0104): the Plaza Statue's week in front of the Unisphere, then it comes home. */
+function PlazaBooking({ api }: { api: CoutureApi }) {
+  const [state, setState] = useState<PlazaWeeks | null>(null);
+  const [pick, setPick] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { void api.weeks().then((r) => (r.ok ? setState(r.data) : setNote(r.error))); }, [api]);
+  if (!state) return note ? <p className="meta" style={{ margin: 0 }}>{note}</p> : null;
+  if (state.mine) {
+    return (
+      <div className="card stack-8">
+        <span className="title" style={{ display: "block" }}>🗽 Your week: {weekLabel(state.mine)}</span>
+        <span className="meta" style={{ display: "block" }}>Your statue stands in front of the Unisphere, with a plaque, all week. After that it moves into your home.</span>
+      </div>
+    );
+  }
+  return (
+    <div className="card stack-12">
+      <span className="title" style={{ display: "block" }}>🗽 Book your week at the Unisphere</span>
+      <span className="meta" style={{ display: "block" }}>One statue a week. It's cast in the look you're wearing when you book, then comes home when the week is over.</span>
+      <div className="chip-row" role="group" aria-label="Weeks">
+        {state.weeks.map((w) => (
+          <button key={w.week} className="chip" aria-pressed={pick === w.week} disabled={w.taken} onClick={() => setPick(w.week)}>
+            {w.taken ? `${weekLabel(w.week)} · taken` : weekLabel(w.week)}
+          </button>
+        ))}
+      </div>
+      <button className="btn btn-taxi" disabled={!pick || busy || !state.canBook} onClick={async () => {
+        setBusy(true); setNote(null);
+        const r = await api.book(pick!);
+        setBusy(false);
+        if (r.ok) setState(r.data); else setNote(r.error);
+      }}>{busy ? "…" : pick ? `Book the week of ${weekLabel(pick)}` : "Pick a week"}</button>
+      {note && <span className="meta">{note}</span>}
+    </div>
   );
 }
 

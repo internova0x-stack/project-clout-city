@@ -2,6 +2,7 @@ import {
   cancelJob, decorateSave, endJob, jobFinish, jobHome, jobSettle, jobsBoard, managerCollect, postJob, rateJob, rideOffer, rideRespond, rideStatus, takeJob,
   togetherClaim, togetherInbox, togetherInvite, togetherRespond, togetherSeen,
 } from "./togetherActions";
+import { coutureMap, plazaBook, plazaWeeks } from "./coutureActions";
 import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
 import { cookies } from "next/headers";
 import { GameShell } from "@/components/GameShell";
@@ -110,6 +111,7 @@ export default async function HomePage() {
       } : undefined}
       catalog={catalog}
       storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
+      coutureApi={{ map: coutureMap, weeks: plazaWeeks, book: plazaBook }}
       membership={catalog ? { state: membershipState, portal: membershipPortal } : undefined}
       // Migration 0047 (owner, Oct 15: two players in the same café couldn't see each other, because
       // presence, place counts, reactions and the message setting were never passed in here).

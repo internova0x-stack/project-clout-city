@@ -7,11 +7,18 @@ import {
   Box3, Camera, DirectionalLight, Frustum, Group, HemisphereLight, Matrix4, type Material, type Mesh, type Object3D, Scene, Sphere, Vector3, WebGLRenderer,
 } from "three";
 import { BRIDGE_BUILT_M, LANDMARKS, type Landmark } from "@/lib/map/landmarks";
-import { exaggeration } from "@/lib/map/scale";
+import { exaggeration, metersPerPx } from "@/lib/map/scale";
 import { animate, applyTheme, buildLandmark, newThemed, paintBigScreen, type Themed } from "./landmarkModels";
 import { mergeStatic } from "./mergeModel";
 import { buildVehicle, setVehiclesNight } from "./vehicleModels";
 import type { Traffic } from "./vehicles";
+import { buildJet, buildPlazaPedestal, buildYacht, PEDESTAL_TOP } from "./coutureModels";
+import { goldStatue } from "../avatar/goldStatue";
+import type { AvatarParts } from "../avatar/buildAvatar";
+import { jetLoop, mooring, PLAZA_STATUE_AT, type CoutureMap } from "@/lib/coutureMap";
+import { normalizeLook } from "@/lib/look";
+import { getStyle, starterOutfit } from "@/lib/styles";
+import { outfitFromSkus } from "@/lib/wearing";
 
 export const LANDMARK_LAYER_ID = "landmarks";
 /** Below this zoom the whole city is in view and the models would be specks. */
@@ -37,6 +44,8 @@ export interface LandmarkLayer {
   setNight(night: boolean): void;
   /** v0.14 Clout TV: the Clout Tower's screen shows this photo and @handle (null: the station's ident). */
   setBigScreen(img: (CanvasImageSource & { width: number; height: number }) | null, handle?: string): void;
+  /** Clout Couture on the map (migration 0104): moored yachts, jets in the air and this week's plaza statue. */
+  setCouture(state: CoutureMap): void;
   /** How many landmarks are built so far, of how many (the rest are on their way). */
   built(): { done: number; total: number };
   dispose(): void;
@@ -184,6 +193,71 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   };
   setNight(false);
 
+  // ---- Clout Couture (lib/coutureMap.ts): yachts by their owner, jets by their owner, one statue ----
+  const couture = new Group();
+  scene.add(couture);
+  const local = (ll: readonly [number, number]) => { const m = mercator(ll[0], ll[1]); return [(m.x - origin.x) / s, (m.y - origin.y) / s] as const; };
+  const yachts = new Map<string, { key: string; group: Group; dispose(): void }>();
+  const jets = new Map<string, { key: string; i: number; group: Group; banner: Group; dispose(): void }>();
+  let statue: { key: string; group: Group; parts: AvatarParts; dispose(): void } | null = null;
+  const setCouture = (state: CoutureMap) => {
+    const sync = <T extends { key: string; group: Group; dispose(): void }>(have: Map<string, T>, want: { player: string; name: string }[], make: (o: { player: string; name: string }, i: number) => T) => {
+      for (const [id, y] of have) {
+        if (want.some((w) => w.player === id && `${w.name}` === y.key)) continue;
+        couture.remove(y.group); y.dispose(); have.delete(id);
+      }
+      want.forEach((w, i) => { if (!have.has(w.player)) { const made = make(w, i); have.set(w.player, made); couture.add(made.group); } });
+    };
+    sync(yachts, state.yachts, (o) => ({ key: o.name, ...buildYacht(o.name) }));
+    state.yachts.forEach((o, i) => {
+      const y = yachts.get(o.player)!, spot = mooring(i, state.marinaShift ?? 0), [x, z] = local(spot.at);
+      y.group.position.set(x, 0.3, z);
+      y.group.rotation.y = ((90 - spot.bow) * Math.PI) / 180;
+      y.group.scale.setScalar(1.25);
+    });
+    sync(jets, state.jets, (o, i) => ({ key: o.name, i, ...buildJet(o.name) }));
+    state.jets.forEach((o, i) => { jets.get(o.player)!.i = i; });
+    const key = state.statue ? `${state.statue.player}:${state.statue.week}:${state.statue.name}` : "";
+    if ((statue?.key ?? "") !== key) {
+      if (statue) { couture.remove(statue.group); statue.dispose(); statue = null; }
+      if (state.statue) {
+        const st = state.statue;
+        const look = normalizeLook(st.look, st.style);
+        const outfit = outfitFromSkus(starterOutfit(getStyle(look.style), look.body, look.fit), st.outfit);
+        const pedestal = buildPlazaPedestal(st.name);
+        const parts = goldStatue(look, outfit);
+        parts.root.scale.multiplyScalar(6);
+        parts.root.position.y = PEDESTAL_TOP;
+        pedestal.group.add(parts.root);
+        const [x, z] = local(PLAZA_STATUE_AT);
+        pedestal.group.position.set(x, 0, z);
+        // Bigger than life, like the Unisphere it stands in front of.
+        pedestal.group.scale.setScalar(2.5);
+        void (parts.ready ?? Promise.resolve()).then(() => map?.triggerRepaint());
+        statue = { key, group: pedestal.group, parts, dispose: () => { parts.dispose(); pedestal.dispose(); } };
+        couture.add(pedestal.group);
+      }
+    }
+    map?.triggerRepaint();
+  };
+  const flyJets = (now: number, zoom: number): boolean => {
+    // Readable from any height: about 90 px nose to tail, never smaller than 2.4× life.
+    const size = Math.max(2.4, (90 * metersPerPx(zoom)) / 36);
+    const t = (now - started) / 1000;
+    for (const j of jets.values()) {
+      const loop = jetLoop(j.i);
+      const a = (t / loop.lap) * Math.PI * 2 + loop.phase;
+      const [cx, cz] = local(loop.center);
+      j.group.position.set(cx + Math.cos(a) * loop.radius, loop.height, cz + Math.sin(a) * loop.radius);
+      // Nose along the circle (the model's nose is +x), banked into the turn.
+      j.group.rotation.set(0, -a - Math.PI / 2, 0);
+      j.group.rotateX(-0.25);
+      j.group.scale.setScalar(size);
+      j.banner.rotation.x = Math.sin(t * 4 + j.i) * 0.18;
+    }
+    return jets.size > 0;
+  };
+
   const placeTraffic = (now: number, zoom: number): boolean => {
     const states = traffic!.step(now);
     const seen = new Set<number>();
@@ -236,6 +310,7 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
       const zoom = map.getZoom();
       let moving = zoom >= ANIMATE_MIN_ZOOM && animate(themed, (now - started) / 1000, night);
       if (traffic) moving = placeTraffic(now, zoom) || moving;
+      moving = flyJets(now, zoom) || moving;
       renderer.resetState();
       renderer.render(scene, camera);
       if (process.env.NODE_ENV !== "production") (window as unknown as { __landmarkStats?: unknown }).__landmarkStats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, frames: (stats.frames += 1) };
@@ -254,6 +329,7 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     heights,
     setNight,
     built: () => ({ done: models.size, total: list.length }),
+    setCouture,
     setBigScreen(img, handle) {
       screen = { img, handle };
       paintBigScreen(img, handle);
@@ -272,6 +348,9 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
       cancelBuild?.();
       queue.length = 0;
       if (repaintSoon) clearTimeout(repaintSoon);
+      for (const y of yachts.values()) y.dispose();
+      for (const j of jets.values()) j.dispose();
+      statue?.dispose();
       renderer?.dispose();
       renderer = null;
       scene.traverse((o) => {

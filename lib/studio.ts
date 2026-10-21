@@ -237,6 +237,10 @@ export interface StudioApi {
   shopAudit?(sku: string): Promise<Admin<ShopAuditRow[]>>;
   /** Clout Couture (migration 0102): the next drop of a sold-out numbered piece (optionally a new size), with Lola's News item. */
   shopNewDrop?(sku: string, size?: number | null): Promise<Admin<null>>;
+  /** Clout Couture on the map (migration 0104): a map piece's owners, hiding a name, taking a statue off the plaza. */
+  shopCoutureOwners?(sku: string): Promise<Admin<CoutureOwner[]>>;
+  shopCoutureName?(player: string, sku: string, hidden: boolean): Promise<Admin<null>>;
+  shopPlazaRemove?(week: string, reason: string): Promise<Admin<null>>;
   /** Setup check (owner, Oct 14): which key, migration or webhook is missing. Never returns a secret. */
   setupCheck?(): Promise<Admin<SetupCheckRow[]>>;
 }
@@ -409,3 +413,6 @@ export interface ShopImportResult {
   toProcess: string[];
 }
 export interface ShopAuditRow { action: string; at: string; before: unknown; after: unknown; note: string | null; actor: string | null }
+
+/** A map piece's owner as the Studio sees it (admin_couture_owners, migration 0104). */
+export interface CoutureOwner { player: string; displayName: string; shown: string; edition: number | null; hidden: boolean; week: string | null }
