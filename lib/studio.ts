@@ -2,6 +2,7 @@
 // the admin_* SQL functions (supabase/migrations/0007); one approval puts a story
 // on the schedule (product owner, Oct 12, 2026).
 
+import type { CatalogItem, EditableField, ShopFile } from "./shopCatalog.ts";
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "./adminPlayers.ts";
@@ -223,6 +224,17 @@ export interface StudioApi {
   /** v0.14 Clout TV (migration 0058): photo submissions by status, the rotation (one every 3 hours) and what's on screen. */
   bigScreen?(status: "pending" | "approved" | "featured" | "all"): Promise<Admin<StudioBigScreen>>;
   bigScreenAction?(id: number, action: TvAction): Promise<Admin<null>>;
+  /** The Shop Manager (migration 0099; docs/shop-manager.md). */
+  shopList?(): Promise<Admin<CatalogItem[]>>;
+  shopFiles?(): Promise<Admin<ShopFile[]>>;
+  /** Loads a repo catalog file (by name) or pasted JSON as drafts and picture matches. */
+  shopImport?(source: { file: string } | { json: string }): Promise<Admin<ShopImportResult>>;
+  /** Processes up to four items' pictures; the Studio calls it again until none are left. */
+  shopProcessImages?(skus: string[]): Promise<Admin<{ sku: string; ok: boolean; error?: string }[]>>;
+  /** approve (now, or at `at` for a drop), send_back (with a note), unschedule, retire, restore, delete. */
+  shopAction?(skus: string[], action: ShopAction, opts?: { at?: string | null; note?: string; news?: boolean }): Promise<Admin<{ done: string[]; refused: { sku: string; reason: string }[] }>>;
+  shopEdit?(sku: string, fields: Partial<Pick<CatalogItem, EditableField>>): Promise<Admin<null>>;
+  shopAudit?(sku: string): Promise<Admin<ShopAuditRow[]>>;
   /** Setup check (owner, Oct 14): which key, migration or webhook is missing. Never returns a secret. */
   setupCheck?(): Promise<Admin<SetupCheckRow[]>>;
 }
@@ -287,6 +299,12 @@ export interface CastLine {
 
 const ERRORS: Record<string, string> = {
   not_admin: "This account isn't a story admin.",
+  // The Shop Manager (migration 0099).
+  sold_retire_instead: "Someone owns this, so it can't be deleted. Retire it instead: owners keep it.",
+  image_not_ready: "Process its picture first.",
+  note_needed: "Write a note for the writer.",
+  not_allowed: "That move isn't allowed from this status.",
+  unknown_item: "That item isn't in the catalog anymore.",
   name_required: "Give the creator a name.",
   bad_code: "Codes are 3 to 16 letters and numbers.",
   code_taken: "Another creator already has that code.",
@@ -375,3 +393,17 @@ export function nextWeekday(from: string, weekday = "sunday"): string {
 }
 
 export const weekdayOf = (day: string) => WEEKDAYS[new Date(`${day}T12:00:00Z`).getUTCDay()];
+
+/** Shop Manager actions (docs/shop-manager.md section 1). */
+export type ShopAction = "approve" | "send_back" | "unschedule" | "retire" | "restore" | "delete";
+export interface ShopImportResult {
+  added: string[]; updated: string[]; kept: string[]; unchanged: string[];
+  /** Items on sale that got a new picture source, by name. */
+  pictures: { name: string; skus: string[] }[];
+  /** Picture names with no item on sale. */
+  notFound: string[];
+  problems: string[];
+  /** Items whose picture is waiting to be processed. */
+  toProcess: string[];
+}
+export interface ShopAuditRow { action: string; at: string; before: unknown; after: unknown; note: string | null; actor: string | null }
