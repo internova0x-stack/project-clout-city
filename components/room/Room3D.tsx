@@ -17,6 +17,7 @@ import {
 import { STARTING_STYLES, type Outfit } from "@/lib/styles";
 import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
+import { goldStatue } from "../avatar/goldStatue";
 import { buildFurniture, makeKit, STATUE_TOP, tagItem, type Built, type Kit } from "./furniture";
 import { renderQuality } from "@/lib/graphics";
 
@@ -754,7 +755,7 @@ export default function Room3D(props: Room3DProps) {
           const obj = new Group();
           obj.add(made.group);
           const statue = it.kind === "statue" ? goldStatue(lookRef.current.look, lookRef.current.outfit) : undefined;
-          if (statue) obj.add(statue.root);
+          if (statue) { statue.root.position.y = STATUE_TOP; obj.add(statue.root); }
           castShadows(obj);
           tagItem(obj, it.id);
           furniture.add(obj);
@@ -1484,27 +1485,4 @@ export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: strin
     css: `radial-gradient(85% 45% at 72% 16%, ${glow}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 52%, ${bot} 100%)`,
     haze: mid,
   };
-}
-
-/**
- * Clout Couture's Self-Portrait Statue: the player's avatar on the pedestal, frozen mid-wave, every surface solid gold
- * (one plain metal material, so the fabrics' patterns and the body type's widening give way to a smooth casting).
- */
-function goldStatue(look: Parameters<typeof buildModelAvatar>[0], outfit: NonNullable<Parameters<typeof buildModelAvatar>[1]>["outfit"]): AvatarParts {
-  const parts = buildModelAvatar(look, { outfit, pedestal: false });
-  parts.root.position.y = STATUE_TOP;
-  parts.root.scale.setScalar(0.82);
-  parts.root.visible = false;
-  const gold = new MeshStandardMaterial({ color: "#F0C850", metalness: 0.55, roughness: 0.3, emissive: "#4A3500", emissiveIntensity: 0.6 });
-  void (parts.ready ?? Promise.resolve()).then(() => {
-    parts.play?.("wave");
-    parts.update?.(0.75);
-    parts.root.traverse((o) => {
-      const m = o as Mesh;
-      if (m.isMesh) { m.material = gold; m.castShadow = true; }
-    });
-    parts.root.visible = true;
-  });
-  const dispose = parts.dispose.bind(parts);
-  return { ...parts, dispose: () => { dispose(); gold.dispose(); } };
 }

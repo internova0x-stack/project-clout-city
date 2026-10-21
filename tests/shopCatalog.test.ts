@@ -16,9 +16,9 @@ const files = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => ({ 
 const parsed = files.map(({ f, raw }) => ({ f, ...parseCatalogFile(raw, f, { coutureCloutFor: () => 260 }) }));
 const drafts = parsed.flatMap((p) => p.drafts);
 
-test("every catalog file loads: 98 new items, 56 pictures for items on sale, no problems", () => {
+test("every catalog file loads: 99 new items, 56 pictures for items on sale, no problems", () => {
   for (const p of parsed) assert.deepEqual(p.problems, [], p.f);
-  assert.equal(drafts.length, 98);
+  assert.equal(drafts.length, 99);
   assert.equal(new Set(drafts.map((d) => d.sku)).size, drafts.length, "unique ids");
   const images = parsed.flatMap((p) => p.images);
   assert.equal(images.length, 56);
@@ -60,10 +60,11 @@ test("clout sits on the live curve; Clout Couture takes the tab's top C$ item", 
 
   assert.equal(drafts.find((d) => d.sku === "cloud-puffer")!.clout, cloutCurve(420));
   const couture = drafts.filter((d) => d.collection === "Clout Couture");
-  assert.equal(couture.length, 14);
+  assert.equal(couture.length, 15);
   for (const d of couture) assert.ok(d.realCash && d.price === 0 && d.priceUsdCents! > 0 && d.clout === 260, d.sku);
   assert.equal(drafts.find((d) => d.sku === "waterfront-mansion")!.editionSize, 10);
   assert.equal(drafts.find((d) => d.sku === "clout-throne")!.priceUsdCents, 29900, "the Clout Throne: $299 (owner, Oct 21)");
+  assert.equal(drafts.find((d) => d.sku === "clout-throne-midnight")!.priceUsdCents, 39900, "the Midnight Edition: $399 (owner, Oct 21)");
 });
 
 test("statuses move only the allowed ways; sold items can't be deleted", () => {

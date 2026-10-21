@@ -171,6 +171,24 @@
       "editionNote": "per drop; later drops priced the same or higher; added by the owner, Oct 21"
     },
     {
+      "id": "clout-throne-midnight",
+      "name": "The Clout Throne: Midnight Edition",
+      "tab": "Home",
+      "slot": "living",
+      "description": "Gunmetal, gold and a hundred microphones nobody let you speak into. One magenta ring light, for your close-up. Still uncomfortable. Still worth it.",
+      "realCash": true,
+      "priceUsd": 399.0,
+      "editionSize": 10,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_181453_0a6c946e-0f0e-4bc2-bd85-932bd937b5d0.png",
+      "images": {
+        "card": "shop/clout-throne-midnight-256.webp",
+        "detail": "shop/clout-throne-midnight-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher; added by the owner, Oct 21"
+    },
+    {
       "id": "24k-glow-ritual",
       "name": "24k Glow Ritual",
       "tab": "Makeup",
@@ -267,7 +285,7 @@
       "name": "Statue in the Plaza",
       "tab": "Map",
       "slot": "plaza",
-      "description": "A gold statue of the owner's avatar (pose and outfit at purchase) placed in the Unisphere plaza for 7 days with a plaque, then moved to the owner's apartment permanently. Only one statue in the plaza at a time: buyers book an available week. The Story Studio can remove a statue, with a refund.",
+      "description": "A gold statue of the owner's avatar (in the look they wear when they book their week) placed in the Unisphere plaza for 7 days with a plaque, then moved to the owner's apartment permanently. Only one statue in the plaza at a time: buyers book an available week. The Story Studio can remove a statue, with a refund.",
       "realCash": true,
       "priceUsd": 120.0,
       "editionSize": 52,

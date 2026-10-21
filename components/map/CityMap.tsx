@@ -1,5 +1,6 @@
 "use client";
 
+import { fitMarina, mooring, PLAZA_STATUE_AT, type CoutureMap } from "@/lib/coutureMap";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
@@ -51,6 +52,10 @@ export interface CityMapProps {
   bigScreen?: { url: string | null; handle: string; photo: string } | null;
   /** Tapping the Clout Tower's name opens today's photo. */
   onBigScreen?: () => void;
+  /** Clout Couture on the map (migration 0104): yachts, jets, the week's plaza statue. */
+  couture?: CoutureMap | null;
+  /** Tapping a yacht's or the statue's name opens its owner's card. */
+  onOpenPlayer?: (playerId: string) => void;
 }
 
 const MIN_ZOOM = 9;
@@ -73,6 +78,11 @@ function loadSpots(): Record<string, Spot> {
 }
 /** Landmarks that aren't places show their name from this zoom (owner, Oct 16: "the screen looks chaotic"). */
 const LABEL_ZOOM = 15.8;
+/** Clout Couture's names (the yachts, the plaza statue) show from this zoom. */
+const COUTURE_LABEL_ZOOM = 15;
+/** Where the marina fitted itself to the water on this device (fitMarina), in meters out from the shore line. */
+const MARINA_KEY = "cc-marina-shift-v1";
+const YACHT_LABEL_ZOOM = 16.3;
 /** Placement needs every street, which the tiles carry from zoom 14. */
 const PLACE_ZOOM = 14;
 
@@ -88,7 +98,7 @@ const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 interface Placed { key: string; x: number; y: number; pins: PlacePin[] }
 
 export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
-  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins, rightInset = 0, bigScreen = null, onBigScreen },
+  { pins, player, initialCenter, initialZoom = 15.5, daytime = false, onPinTap, onLockedTap, attributionControl = true, vehicles = false, initialPitch = 45, fitPins, rightInset = 0, bigScreen = null, onBigScreen, couture = null, onOpenPlayer },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -278,6 +288,33 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
     return () => { live = false; };
   }, [screenKey, screenHandle, map, vehicles]);
   useEffect(() => landmarksRef.current?.setPositions(sites), [sites, map]);
+  // Clout Couture: the marina moves out until every mooring floats on the map's own water (once per device).
+  const [marinaShift, setMarinaShift] = useState<number>(() => {
+    try { return Number(window.localStorage.getItem(MARINA_KEY) ?? "0") || 0; } catch { return 0; }
+  });
+  useEffect(() => {
+    if (!map || !couture?.yachts.length) return;
+    let done = false;
+    try { done = window.localStorage.getItem(MARINA_KEY) !== null; } catch { /* fit again */ }
+    if (done) return;
+    const fit = () => {
+      if (map.getZoom() < PLACE_ZOOM || !map.getBounds().contains([mooring(0).at[1], mooring(0).at[0]])) return;
+      const water: [number, number][][][] = [];
+      for (const f of map.querySourceFeatures("osm", { sourceLayer: "water" })) {
+        const g = f.geometry;
+        if (g.type === "Polygon") water.push(g.coordinates as [number, number][][]);
+        else if (g.type === "MultiPolygon") for (const p of g.coordinates) water.push(p as [number, number][][]);
+      }
+      const shift = fitMarina(water, Math.max(24, couture.yachts.length));
+      if (shift === null) return;
+      setMarinaShift(shift);
+      try { window.localStorage.setItem(MARINA_KEY, String(shift)); } catch { /* fits again next visit */ }
+      map.off("idle", fit);
+    };
+    map.on("idle", fit);
+    return () => { map.off("idle", fit); };
+  }, [map, couture?.yachts.length]);
+  useEffect(() => { if (couture) landmarksRef.current?.setCouture({ ...couture, marinaShift }); }, [couture, map, marinaShift]);
 
   // Once a landmark's streets have loaded, stand it where no main road crosses its site.
   useEffect(() => {
@@ -543,6 +580,23 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 {l.name}
               </span>
               )
+            );
+          })}
+
+          {/* Clout Couture: each yacht's owner on its bow, and the plaza statue's owner; tapping opens their card. */}
+          {couture && map.getZoom() >= COUTURE_LABEL_ZOOM && [
+            // Yachts only close up, every other one a little higher so neighbors don't overlap.
+            ...(map.getZoom() >= YACHT_LABEL_ZOOM ? couture.yachts.map((y, i) => ({ key: `y:${y.player}`, player: y.player, at: mooring(i, marinaShift).at, text: `🛥️ ${y.name}`, up: i % 2 ? 22 : 12 })) : []),
+            ...(couture.statue ? [{ key: "statue", player: couture.statue.player, at: PLAZA_STATUE_AT, text: `🗽 @${couture.statue.name}`, up: 24 }] : []),
+          ].map((o) => {
+            const g = project(o.at);
+            const s = { x: g.x, y: g.y - o.up * (map.getZoom() - 13) };
+            if (!visible(s)) return null;
+            return onOpenPlayer ? (
+              <button key={o.key} className="map-landmark-label glass-hud tappable" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}
+                onClick={() => onOpenPlayer(o.player)} aria-label={`${o.text}: open their card`}>{o.text}</button>
+            ) : (
+              <span key={o.key} className="map-landmark-label glass-hud" style={{ transform: `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)` }}>{o.text}</span>
             );
           })}
 

@@ -49,6 +49,9 @@ export interface Built {
   seatY?: number;
 }
 
+/** The Clout Throne's Midnight Edition is drawn in this gunmetal (lib/city.ts CATALOG_FURNITURE). */
+export const THRONE_MIDNIGHT = "#2E3138";
+
 /** The statue's pedestal height: the gold avatar stands on it. */
 export const STATUE_TOP = 0.62;
 
@@ -293,21 +296,28 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       return { group: g };
     }
     case "throne": {
-      // The Clout Throne: a stepped gold dais, a magenta velvet seat, and behind it a fan of gold spikes, phones on
-      // selfie sticks and ring lights (look A, owner Oct 21). Sitting puts you on the cushion (seatY).
-      const gold = k.mat(color ?? "#D4AF37", { roughness: 0.42, metalness: 0.25 });
-      const bronze = k.mat("#A9772A", { roughness: 0.5, metalness: 0.2 });
-      const velvet = k.mat("#8E1F4A", { roughness: 0.9 });
+      // The Clout Throne: a stepped dais, a velvet seat, and behind it a fan of spikes, phones on selfie sticks and ring
+      // lights. Look A (owner, Oct 21) is gold with magenta velvet; the Midnight Edition (look B) is gunmetal with gold
+      // trim, red velvet, microphones among the spikes and one magenta ring light. Sitting puts you on the cushion (seatY).
+      const midnight = color === THRONE_MIDNIGHT;
+      const gold = k.mat(midnight ? THRONE_MIDNIGHT : color ?? "#D4AF37", { roughness: midnight ? 0.35 : 0.42, metalness: midnight ? 0.45 : 0.25 });
+      const bronze = k.mat(midnight ? "#1F2126" : "#A9772A", { roughness: 0.5, metalness: 0.2 });
+      const trim = midnight ? k.mat("#EBC657", { roughness: 0.4, metalness: 0.25 }) : gold;
+      const velvet = k.mat(midnight ? "#A3172F" : "#8E1F4A", { roughness: 0.9 });
       const screen = k.mat("#1F1B26", { roughness: 0.25, metalness: 0.2 });
-      for (let i = 0; i < 3; i++) box(w - i * 0.22, 0.15, d - i * 0.24, i % 2 ? bronze : gold, 0, i * 0.15, -i * 0.1);
+      for (let i = 0; i < 3; i++) {
+        box(w - i * 0.22, 0.15, d - i * 0.24, midnight ? k.mat("#4A4D55", { roughness: 0.8 }) : i % 2 ? bronze : gold, 0, i * 0.15, -i * 0.1);
+        // Gold edging on the Midnight Edition's stone steps.
+        if (midnight) box(w - i * 0.22 + 0.01, 0.025, 0.02, trim, 0, i * 0.15 + 0.13, (d - i * 0.24) / 2 - i * 0.1);
+      }
       box(0.72, 0.26, 0.62, gold, 0, 0.45, -0.18);
       box(0.66, 0.07, 0.56, velvet, 0, 0.71, -0.16);
-      for (const sx of [-1, 1]) box(0.14, 0.36, 0.6, gold, sx * 0.42, 0.45, -0.18);
+      for (const sx of [-1, 1]) { box(0.14, 0.36, 0.6, gold, sx * 0.42, 0.45, -0.18); if (midnight) box(0.15, 0.03, 0.61, trim, sx * 0.42, 0.8, -0.18); }
       box(0.6, 0.95, 0.08, velvet, 0, 0.71, -0.47);
       const fan = new Group();
       fan.position.set(0, 0.95, -0.55);
       g.add(fan);
-      const ray = (angle: number, len: number, part: "spike" | "stick" | "ring", z = 0) => {
+      const ray = (angle: number, len: number, part: "spike" | "stick" | "ring" | "mic", z = 0) => {
         const arm = new Group();
         arm.rotation.z = angle;
         arm.position.z = z;
@@ -316,9 +326,14 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
           const m = new Mesh(k.geo(new ConeGeometry(0.075, len, 4)), z < 0 ? bronze : gold);
           m.position.y = len / 2;
           arm.add(m);
-          // Gold phones laid along each spike, screens out.
+          // A gold tip on the Midnight Edition's spikes; phones laid along each spike, screens out.
+          if (midnight) {
+            const tip = new Mesh(k.geo(new ConeGeometry(0.03, 0.14, 4)), trim);
+            tip.position.y = len - 0.06;
+            arm.add(tip);
+          }
           for (const at of [0.28, 0.55]) {
-            const ph = new Mesh(k.geo(new BoxGeometry(0.1, 0.17, 0.02)), gold);
+            const ph = new Mesh(k.geo(new BoxGeometry(0.1, 0.17, 0.02)), midnight ? trim : gold);
             ph.position.set(0, len * at, 0.035);
             arm.add(ph);
             const sc = new Mesh(k.geo(new BoxGeometry(0.08, 0.14, 0.006)), screen);
@@ -326,15 +341,19 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
             arm.add(sc);
           }
         } else {
-          const stick = new Mesh(k.geo(new CylinderGeometry(0.008, 0.008, len, 5)), gold);
+          const stick = new Mesh(k.geo(new CylinderGeometry(0.008, 0.008, len, 5)), midnight ? trim : gold);
           stick.position.y = len / 2;
           arm.add(stick);
-          if (part === "stick") {
+          if (part === "mic") {
+            const head = new Mesh(k.geo(new SphereGeometry(0.05, 8, 6)), k.mat("#14111A", { roughness: 0.6 }));
+            head.position.set(0, len + 0.04, 0);
+            arm.add(head);
+          } else if (part === "stick") {
             const ph = new Mesh(k.geo(new BoxGeometry(0.1, 0.06, 0.015)), screen);
             ph.position.set(0, len + 0.02, 0.01);
             arm.add(ph);
           } else {
-            const ring = new Mesh(k.geo(new TorusGeometry(0.09, 0.018, 6, 20)), glow("#FFF4D6", 1.4));
+            const ring = new Mesh(k.geo(new TorusGeometry(midnight ? 0.13 : 0.09, 0.018, 6, 20)), glow(midnight ? "#FF3DA5" : "#FFF4D6", 1.4));
             ring.position.set(0, len + 0.09, 0.02);
             arm.add(ring);
           }
@@ -347,7 +366,10 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
         if (i < 18) ray(t + 0.078, 0.75 + 0.85 * Math.cos(t * 0.9), "spike", -0.08);
       }
       for (const t of [-1.15, -0.55, 0.55, 1.15]) ray(t, 1.05 + Math.cos(t) * 0.25, "stick");
-      for (const t of [-0.85, 0.1, 0.85]) ray(t, 0.95 + Math.cos(t) * 0.3, "ring");
+      if (midnight) {
+        for (const t of [-0.95, -0.3, 0.3, 0.95]) ray(t, 1.2 + Math.cos(t) * 0.2, "mic");
+        ray(0, 0.62, "ring", 0.06);
+      } else for (const t of [-0.85, 0.1, 0.85]) ray(t, 0.95 + Math.cos(t) * 0.3, "ring");
       return { group: g, seatY: 0.78 };
     }
     case "piano": {

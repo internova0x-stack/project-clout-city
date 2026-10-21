@@ -4,7 +4,7 @@ import { previewOnly } from "./guard";
 import { SHOP_ITEMS } from "@/lib/city";
 import { canMove, COUTURE_NOW, fieldProblems, fromShopItem, imageMatches, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
-import type { Admin, ShopAction, ShopAuditRow, ShopImportResult } from "@/lib/studio";
+import type { Admin, CoutureOwner, ShopAction, ShopAuditRow, ShopImportResult } from "@/lib/studio";
 
 // Development previews only: the Shop Manager on an in-memory copy of the Shop (the same rules as migration 0099's
 // admin_shop_* functions). Pictures are really processed (sharp) and kept as data URLs, so the preview game's Shop
@@ -184,5 +184,38 @@ export async function previewShopNewDrop(sku: string, size?: number | null): Pro
   i.editionSize = n;
   i.edition = { size: n, drop: e.drop + 1, dropEnd: Math.max(e.dropEnd, e.issued) + n, issued: e.issued, left: n, soldOut: false };
   log(sku, "new_drop", { drop: e.drop }, { drop: e.drop + 1 });
+  return { ok: true, data: null };
+}
+
+// Clout Couture on the map: sample owners (the same as app/preview/coutureActions.ts draws).
+const thisMonday = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
+const sampleOwners: Record<string, CoutureOwner[]> = {
+  "astoria-yacht": [
+    { player: "p-nina", displayName: "nina.nyc", shown: "nina.nyc", edition: 1, hidden: false, week: null },
+    { player: "p-dev", displayName: "dev.r", shown: "dev.r", edition: 2, hidden: false, week: null },
+    { player: "p-tasha", displayName: "tasha.b", shown: "tasha.b", edition: 3, hidden: false, week: null },
+    { player: "p-marco", displayName: "Marco", shown: "No. 0004", edition: 4, hidden: true, week: null },
+  ],
+  "clout-one-jet": [{ player: "p-nina", displayName: "nina.nyc", shown: "nina.nyc", edition: 1, hidden: false, week: null }],
+  "plaza-statue": [{ player: "p-nina", displayName: "nina.nyc", shown: "nina.nyc", edition: 1, hidden: false, week: thisMonday }],
+};
+export async function previewCoutureOwners(sku: string): Promise<Admin<CoutureOwner[]>> {
+  previewOnly();
+  return { ok: true, data: sampleOwners[sku] ?? [] };
+}
+export async function previewCoutureName(player: string, sku: string, hidden: boolean): Promise<Admin<null>> {
+  previewOnly();
+  const o = sampleOwners[sku]?.find((x) => x.player === player);
+  if (!o) return { ok: false, error: "No such owner." };
+  Object.assign(o, { hidden, shown: hidden ? `No. ${String(o.edition ?? 0).padStart(4, "0")}` : o.displayName });
+  return { ok: true, data: null };
+}
+export async function previewPlazaRemove(week: string, reason: string): Promise<Admin<null>> {
+  previewOnly();
+  if (!reason.trim()) return { ok: false, error: "Add a reason first." };
+  const list = sampleOwners["plaza-statue"];
+  const o = list?.find((x) => x.week === week);
+  if (!o) return { ok: false, error: "No statue that week." };
+  o.week = null;
   return { ok: true, data: null };
 }

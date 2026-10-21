@@ -5,7 +5,7 @@
 
 import { getServerSupabase } from "@/lib/supabase/server";
 import { getAdminSupabase } from "@/lib/supabase/admin";
-import { studioError, type Admin, type ShopAction, type ShopAuditRow, type ShopImportResult } from "@/lib/studio";
+import { studioError, type Admin, type CoutureOwner, type ShopAction, type ShopAuditRow, type ShopImportResult } from "@/lib/studio";
 import { fieldProblems, readiness, shippedPictures, type CatalogItem, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
 
@@ -152,5 +152,20 @@ export async function studioShopAudit(sku: string): Promise<Admin<ShopAuditRow[]
 /** Clout Couture: the next drop of a sold-out numbered piece (admin_couture_new_drop: numbering continues, News item). */
 export async function studioShopNewDrop(sku: string, size?: number | null): Promise<Admin<null>> {
   const r = await rpc<unknown>("admin_couture_new_drop", { p_sku: sku, p_size: size ?? null });
+  return r.ok ? { ok: true, data: null } : r;
+}
+
+/** Clout Couture on the map (migration 0104): a yacht's, jet's or statue's owners as the map shows them. */
+export async function studioCoutureOwners(sku: string): Promise<Admin<CoutureOwner[]>> {
+  return rpc<CoutureOwner[]>("admin_couture_owners", { p_sku: sku });
+}
+/** Hides an owner's name on the hull or banner (the edition number shows), or shows it again. */
+export async function studioCoutureName(player: string, sku: string, hidden: boolean): Promise<Admin<null>> {
+  const r = await rpc<unknown>("admin_couture_name", { p_player: player, p_sku: sku, p_hidden: hidden });
+  return r.ok ? { ok: true, data: null } : r;
+}
+/** Takes the week's statue off the plaza (a refund, if any, is made in Stripe). */
+export async function studioPlazaRemove(week: string, reason: string): Promise<Admin<null>> {
+  const r = await rpc<unknown>("admin_plaza_remove", { p_week: week, p_reason: reason });
   return r.ok ? { ok: true, data: null } : r;
 }

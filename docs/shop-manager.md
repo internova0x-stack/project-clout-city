@@ -162,7 +162,18 @@ rental; insured like the priciest C$ car).
 fine gold flecks on the bare skin. Net Worth → a piece → **Make it yours**: the Clout Crown as a crown or a tiara; the suit's
 cloth (six colors), lining (five) and up to three monogram initials (the chat word filter applies; `set_item_options`
 checks the same palettes as lib/couture.ts). Clout Crown owners get a 👑 by their name on the leaderboard and in chat
-(`crowned_players()`). Preview: `/preview/moves?outfit=accessories&pick=24k-glow-ritual,clout-crown-tiara`. Preview: `/preview/home` sells the eight pieces (the watch's sample drop is sold out;
+(`crowned_players()`). Preview: `/preview/moves?outfit=accessories&pick=24k-glow-ritual,clout-crown-tiara`.
+
+**Couture on the map (migration 0104).** `couture_map()` is what the map draws (components/map/coutureModels.ts, in the
+landmark layer): every **Astoria Yacht** moored side by side off the Astoria waterfront (lib/coutureMap.ts `mooring`;
+the marina moves out until each mooring floats on the map's own water, once per device), its owner's name on the hull
+and on a tappable label (it opens their card); every **Clout One Jet** whose owner was in the game in the last 10
+minutes circling Queens with a banner of their name; and the week's **Statue in the Plaza** on a black marble pedestal
+in front of the Unisphere, in gold, with a plaque. Names go through the chat word filter; Studio → Shop → the piece →
+**Hide name** shows the edition number instead. The statue's owner books a week in Net Worth (`plaza_weeks`,
+`plaza_book`; one statue a week, cast in the look they wear when they book); after its week it comes home as furniture.
+Studio → **Take it down** (with a reason) frees the week; a refund in Stripe takes the piece and the booking back.
+Preview: `/preview/home` has sample yachts, two jets and nina.nyc's statue (Map tab). Preview: `/preview/home` sells the eight pieces (the watch's sample drop is sold out;
 `?couture=soldout` sells out every drop).
 
 **Stage 2 as built (Oct 21):** the owner's bald masters live in `assets/avatars/` (never served); `node

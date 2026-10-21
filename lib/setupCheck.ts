@@ -73,6 +73,7 @@ export async function runSetupCheck(siteOrigin: string): Promise<SetupCheckRow[]
   await migration("0101_switch_on.sql", "Shop clothes and accessories worn on the new bodies", "wear_slots", { p_slot: "top" });
   await migration("0102_couture.sql", "Clout Couture: numbered editions, real limits and drops", "admin_couture_new_drop", { p_sku: "-" });
   await migration("0103_couture_glow.sql", "Clout Couture: the glow, the crown by your name, crown or tiara, the suit's choices", "crowned_players", {});
+  await migration("0104_couture_map.sql", "Clout Couture on the map: yachts, jets, the plaza statue", "couture_map", {});
 
   // ---- News and hunts: import now and say what happened to each file ----
   if (has0037) {
