@@ -38,6 +38,11 @@ The guide's "Later: borough packs" wait until those boroughs open.
   You're invited · Dimitra Papadakis"). Tapping it opens Events. Dressing up means wearing anything from the Shop
   (+25 clout). A gift box (C$15, up to 2) comes from Sal's or Schlep & Schmear ("🎁 Gift box for a name day" on their
   card); arriving without one costs 20 of the 40 clout. While a party is on, the place card says so instead of "Closed".
+- **Push notifications for invites** (owner, Oct 21, migration 0097): "💌 Dimitra Papadakis invited you" once, when
+  the invite reaches the Phone (two weeks ahead), and "🎉 Dimitra's name day is tonight" from 3 PM on the day, saying
+  whether you still need a gift box. Both open Events, follow the usual push rules (Settings → Notifications: the
+  invite is under "Dates & crew", the reminder under "Reminders"; quiet hours; 4 a day) and stop once you've gone.
+  Fixed on the way: pushes that name a place (date nights, crew outings) said "somewhere good"; they now say the place.
 - **Ditmars Heights Rooftop** (new, Astoria, luxury): string lights, heaters and the skyline; open 4 PM to 2 AM on the
   city clock; small plates C$120. Kiki Mensah, a Bronx girl who runs the guest list, roots for the Bronx Bigshots and lets the roof boo her.
 - **Meteor Park** (new, Flushing Meadows): the Flushing Meteors' ballpark. A ballpark dog and soda (C$16) and a walk

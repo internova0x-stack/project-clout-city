@@ -1224,14 +1224,14 @@ export function citySeed() {
     // C4: each home's train line, from its neighborhood (a trip home rides it).
     homeLines: Object.fromEntries(ECONOMY.homes.map((h) => [h.id, CITY_ECONOMY.travel.subway.lines[h.neighborhood] ?? null])),
     places: PLACES.map((p) => ({
-      id: p.id, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null, borough: boroughOf(p),
+      id: p.id, name: p.name, tags: p.tags, story: p.story ?? null, at: p.at, area: p.neighborhood, club: p.club ?? null, borough: boroughOf(p),
       ...(p.hours ? { hours: p.hours } : {}),
       actions: p.actions.map((a) => ({
         id: a.id, kind: a.kind, price: a.price ?? 0, pay: a.pay ?? 0, energy: a.energy, mood: a.mood ?? 0, confidence: a.confidence ?? 0,
         clout: a.clout ?? null, storyUnlock: a.storyUnlock ?? false, ...(a.skill ? { skill: a.skill } : {}),
       })),
     })),
-    events: CLUB_EVENTS.map((e) => ({ id: e.id, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood, ...(e.days ? { days: e.days } : {}) })),
+    events: CLUB_EVENTS.map((e) => ({ id: e.id, name: e.name, placeId: e.placeId, startHour: e.startHour, hours: e.hours, entry: e.entry, clout: e.clout, confidence: e.confidence, mood: e.mood, ...(e.days ? { days: e.days } : {}) })),
     gigs: Object.fromEntries(Object.entries(GIG_TITLES).map(([tier, list]) => [tier, list.map((g) => g.title)])),
     shop: SHOP_ITEMS.map((i) => ({
       sku: i.sku, category: i.category, price: i.price, clout: i.clout, rentPerWeek: i.rentPerWeek ?? 0, slot: i.wear?.slot ?? null,

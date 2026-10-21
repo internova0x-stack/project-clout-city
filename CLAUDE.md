@@ -162,6 +162,9 @@ components live in `app/globals.css`.
   gift penalty without a gift box (`buy_gift` at Sal's or Schlep & Schmear, players.gifts, ledger cash 'gift'). The next
   name day shows on the Phone's home screen from two weeks out (`phoneInvite`); a place card shows a live event instead
   of "Closed". Meteor Park (Flushing) holds the Flushing Meteors' home games (a club event); the rooftop holds NYE.
+  Migration 0097: pushes for invites (`push_scan_calendar`, run by `push_scan_tonight`, on game_now()): 'calendar_invite'
+  once when it reaches the Phone, 'calendar_tonight' from 3 hours before it starts (names the gift box); never for
+  someone who went. The city seed now carries place and event names (`push_place` said "somewhere good" before).
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.

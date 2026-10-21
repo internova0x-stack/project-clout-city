@@ -67,7 +67,9 @@ reset role;
 select pg_temp.assert((select transit_pass_until > now() + interval '13 days' from public.players where id = '00000000-0000-0000-0000-000000000951'), 'a second week stacks');
 select pg_temp.assert((select count(*) = 2 from public.ledger where player_id = '00000000-0000-0000-0000-000000000951' and kind = 'transit_pass'), 'both on the ledger');
 
--- Showtime: only when the server put dancers on this ride; +3 clout once a day.
+-- Showtime: only when the server put dancers on this ride; +3 clout once a day. (The free ride above has its own
+-- 1-in-10 chance of dancers, so clear them first.)
+update public.players set showtime_until = null where id = '00000000-0000-0000-0000-000000000951';
 set role authenticated;
 select pg_temp.assert(pg_temp.raises($$select public.showtime_watch()$$, 'no_showtime'), 'no dancers, no clout');
 reset role;
