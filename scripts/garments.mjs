@@ -15,14 +15,14 @@
 /** Cover groups (bits in each body vertex's _COVER): skin hidden under a garment. Stage 4 adds more. */
 export const COVER = { hoodie: 1 };
 
-const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-const mul = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
-const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const len = (a) => Math.hypot(a[0], a[1], a[2]);
-const norm = (a) => { const l = len(a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
-const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+export const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+export const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+export const mul = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+export const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+export const len = (a) => Math.hypot(a[0], a[1], a[2]);
+export const norm = (a) => { const l = len(a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+export const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+export const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
 /** Reads a body primitive into plain arrays, welded by position (the masters split vertices along UV seams). */
 export function readBody(prim, skin) {
@@ -78,7 +78,7 @@ export function hoodieFit(body) {
     const h = B[`${side}Hand`], f = B[`${side}ForeArm`], dir = norm(sub(h, f));
     return { at: sub(h, mul(dir, 0.012)), dir };
   };
-  return { front, hemY, neckY, center: [cx, neckY, cz], rNeck, rCut: rNeck + 0.012, ceiling: Math.max(neckY + 0.008, chinY - 0.01), wrists: { Left: wrist("Left"), Right: wrist("Right") } };
+  return { front, hemY, neckY, chinY, center: [cx, neckY, cz], rNeck, rCut: rNeck + 0.012, ceiling: Math.max(neckY + 0.008, chinY - 0.01), wrists: { Left: wrist("Left"), Right: wrist("Right") } };
 }
 
 /** The hoodie's keep function: positive inside it. Also says which edge is nearest (hem, cuff or neck). */
@@ -115,11 +115,13 @@ function mixSkin(ja, wa, jb, wb, t) {
   return { j: top.map((x) => x[0]), w: top.map((x) => x[1] / sum) };
 }
 
-/** Builds the hoodie for one body: plain arrays the build script writes as a skinned primitive. */
-export function buildHoodie(body) {
-  const fit = hoodieFit(body);
-  const keep = Array.from({ length: body.count }, (_, i) => hoodieKeep(body, fit, i));
-
+/**
+ * Cuts the part of the body where keep(i).s >= 0, clipped exactly on the zero line (new vertices on the edges are
+ * shared by neighbours, so no cracks), welded, then Taubin-smoothed `smooth` times with its edges pinned. Returns the
+ * cut's vertices (V: skin position p, normal n, skin joints j and weights w, nearest edge), smoothed positions P,
+ * triangles, the edge flags and each vertex's neighbours.
+ */
+export function cutShell(body, keep, smooth) {
   // 1. Cut: welded vertices inside, plus new ones exactly on the edges (shared by neighbours, so no cracks).
   const V = [], at = new Map();
   const vert = (k, make) => { if (!at.has(k)) { at.set(k, V.length); V.push(make()); } return at.get(k); };
@@ -157,10 +159,9 @@ export function buildHoodie(body) {
   const nbrs = Array.from({ length: V.length }, () => new Set());
   for (let f = 0; f < tris.length; f += 3) for (let k = 0; k < 3; k++) { nbrs[tris[f + k]].add(tris[f + (k + 1) % 3]); nbrs[tris[f + k]].add(tris[f + (k + 2) % 3]); }
 
-  // 3. Fabric: Taubin smoothing (shrink, then grow back) drapes over the navel, ribs and muscles, then the cloth
-  //    stands off the skin: looser on the body than on the sleeves.
+  // 3. Taubin smoothing (shrink, then grow back): cloth drapes over the navel, ribs and muscles.
   let P = V.map((v) => v.p);
-  for (let it = 0; it < 24; it++) {
+  for (let it = 0; it < smooth; it++) {
     for (const k of [0.5, -0.53]) {
       P = P.map((p, i) => {
         if (border[i] || !nbrs[i].size) return p;
@@ -171,20 +172,61 @@ export function buildHoodie(body) {
       });
     }
   }
-  const isArm = (v) => v.j.some((j, k) => v.w[k] > 0.5 && /Arm|Hand/.test(body.names[j] ?? ""));
+  return { V, P, tris, border, nbrs };
+}
+
+/**
+ * Softens skin weights across a cut (averaging with neighbours, keeping the four biggest): cloth stands off the skin,
+ * so a sharp change of bone (shoulder to arm) would fold it into a crease when the arms come down.
+ */
+export function smoothSkin(V, nbrs, iterations) {
+  let W = V.map((v) => { const m = new Map(); v.j.forEach((j, k) => { if (v.w[k] > 0) m.set(j, (m.get(j) ?? 0) + v.w[k]); }); return m; });
+  for (let it = 0; it < iterations; it++) {
+    W = W.map((m, i) => {
+      if (!nbrs[i].size) return m;
+      const out = new Map();
+      for (const [j, w] of m) out.set(j, w * 0.5);
+      for (const n of nbrs[i]) for (const [j, w] of W[n]) out.set(j, (out.get(j) ?? 0) + (w * 0.5) / nbrs[i].size);
+      return out;
+    });
+  }
+  W.forEach((m, i) => {
+    const top = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+    while (top.length < 4) top.push([0, 0]);
+    const sum = top.reduce((t, x) => t + x[1], 0) || 1;
+    V[i].j = top.map((x) => x[0]); V[i].w = top.map((x) => x[1] / sum);
+  });
+}
+
+/** Builds the hoodie for one body: plain arrays the build script writes as a skinned primitive. */
+export function buildHoodie(body) {
+  const fit = hoodieFit(body);
+  const keep = Array.from({ length: body.count }, (_, i) => hoodieKeep(body, fit, i));
+
+  const { V, P: smoothed, tris, border, nbrs } = cutShell(body, keep, 70);
+  let P = smoothed;
+  smoothSkin(V, nbrs, 30);
+  // The cloth stands off the skin: 1.7 cm on the body, easing to 1.2 cm down the sleeves (by arm weight, so the
+  // shoulder seam has no step).
+  const armW = (v) => v.j.reduce((w, j, k) => w + (/Arm|Hand/.test(body.names[j] ?? "") ? v.w[k] : 0), 0);
+  const isArm = (v) => armW(v) > 0.5;
+  // Round the shoulder joints the cloth hugs closer (0.8 cm): lowering the arms from the model's A-pose squeezes it.
+  const joints = ["LeftArm", "RightArm"].map((n) => body.bone[n]);
+  const nearShoulder = (p) => Math.max(...joints.map((j) => 1 - Math.min(1, Math.max(0, (len(sub(p, j)) - 0.06) / 0.07))));
   P = P.map((p, i) => {
-    const v = V[i], gap = isArm(v) ? 0.012 : 0.017;
+    const v = V[i], gap = 0.017 - 0.005 * Math.min(1, armW(v)) - 0.007 * nearShoulder(v.p);
     const d = dot(sub(p, v.p), v.n);
     return d < gap ? add(p, mul(v.n, gap - d)) : p;
   });
 
   // 4. Pattern: distance to the hem or a cuff, the front's coordinates, the part.
-  const rib = V.map((v, i) => (border[i] && v.edge !== "neck" ? P[i] : null)).filter(Boolean);
+  const rib = V.map((v, i) => (border[i] && (v.edge === "hem" || v.edge === "cuff") ? P[i] : null)).filter(Boolean);
   const pat = V.map((v, i) => {
     let d = 1;
     for (const b of rib) { const e = len(sub(P[i], b)); if (e < d) d = e; }
-    const onFront = (v.p[2] - fit.center[2]) * fit.front > 0.02 && !isArm(v);
-    return [d, onFront ? v.p[0] - fit.center[0] : 1, v.p[1] - fit.hemY, 0];
+    // From the finished surface (smoothing slides vertices along it), so the pocket's lines stay straight.
+    const onFront = (P[i][2] - fit.center[2]) * fit.front > 0.02 && !isArm(v);
+    return [d, onFront ? P[i][0] - fit.center[0] : 1, P[i][1] - fit.hemY, 0];
   });
   const out = { pos: P, joints: V.map((v) => v.j), weights: V.map((v) => v.w), pat, idx: tris };
 

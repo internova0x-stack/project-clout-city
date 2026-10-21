@@ -21,3 +21,9 @@ Used by `components/avatar/baseAvatar.ts` while the new-bodies switch is on (`li
 Cut from the same masters by `scripts/garments.mjs` (run by `scripts/build-base-avatars.mjs`): the hoodie for each body,
 in full and low detail, on the body's own skeleton. Worn by `components/avatar/baseAvatar.ts` when the outfit's top has
 a template (`GARMENT_TEMPLATES` in `lib/avatarCatalog.ts`).
+
+## Hair (`hair/`)
+
+Every hairstyle for each body, grown from the master's scalp by `scripts/hair.mjs` (run by
+`scripts/build-base-avatars.mjs`): one skinned mesh per style (`short`, `buzz`, `long`, ...) and one for its lengths
+(`long-lengths`, `ponytail-lengths`, ...). Worn by `components/avatar/baseAvatar.ts`.

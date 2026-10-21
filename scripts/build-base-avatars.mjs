@@ -6,7 +6,8 @@
 // The walk is kept (resampled); the idle is made from it in the game (components/avatar/baseAvatar.ts). Each body
 // vertex carries _COVER, the garments that hide it (scripts/garments.mjs COVER), so the game skips skin under clothes.
 // Each garment template (scripts/garments.mjs) becomes public/avatars/garments/<template>-<m|f>[-low].glb: the cut
-// surface on the same skeleton, no texture, its details in _PAT for the game's shader.
+// surface on the same skeleton, no texture, its details in _PAT for the game's shader. Every hairstyle
+// (scripts/hair.mjs) is grown from the scalp into public/avatars/hair/<m|f>[-low].glb.
 //
 // Usage: node scripts/build-base-avatars.mjs
 import { NodeIO } from "@gltf-transform/core";
@@ -16,6 +17,7 @@ import { MeshoptSimplifier } from "meshoptimizer";
 import sharp from "sharp";
 import { mkdirSync, statSync } from "node:fs";
 import { buildHoodie, coverBits, readBody } from "./garments.mjs";
+import { buildHair } from "./hair.mjs";
 
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 await MeshoptSimplifier.ready;
@@ -23,6 +25,7 @@ await MeshoptSimplifier.ready;
 const QUANTIZE = { pattern: /^[^_]/ };
 const GARMENTS = { hoodie: buildHoodie };
 mkdirSync("public/avatars/garments", { recursive: true });
+mkdirSync("public/avatars/hair", { recursive: true });
 
 const size = (out) => `${Math.round(statSync(out).size / 1024)} KB`;
 for (const [src, sex] of [["assets/avatars/base-male.glb", "m"], ["assets/avatars/base-female.glb", "f"]]) {
@@ -46,36 +49,53 @@ for (const [src, sex] of [["assets/avatars/base-male.glb", "m"], ["assets/avatar
     console.log(out, size(out));
 
     for (const [name, make] of Object.entries(GARMENTS)) {
-      const g = await io.read(src);
-      const root = g.getRoot(), buf = root.listBuffers()[0];
-      const gp = root.listMeshes()[0].listPrimitives()[0];
-      const shape = make(readBody(gp, root.listSkins()[0]));
-      for (const sem of gp.listSemantics()) gp.setAttribute(sem, null);
-      for (const a of root.listAnimations()) {
-        a.listChannels().forEach((c) => c.dispose());
-        a.listSamplers().forEach((sm) => { sm.getInput()?.dispose(); sm.getOutput()?.dispose(); sm.dispose(); });
-        a.dispose();
-      }
-      const flat = (rows, Arr) => Arr.from(rows.flat());
-      const acc = (type, array, normalized = false) => g.createAccessor().setType(type).setArray(array).setBuffer(buf).setNormalized(normalized);
-      gp.setAttribute("POSITION", acc("VEC3", flat(shape.pos, Float32Array)));
-      gp.setAttribute("NORMAL", acc("VEC3", normals(shape)));
-      gp.setAttribute("JOINTS_0", acc("VEC4", flat(shape.joints, Uint16Array)));
-      gp.setAttribute("WEIGHTS_0", acc("VEC4", flat(shape.weights, Float32Array)));
-      gp.setAttribute("_PAT", acc("VEC4", Int16Array.from(shape.pat.flat().map((v) => Math.round(Math.max(-1, Math.min(1, v)) * 32767))), true));
-      gp.setIndices(acc("SCALAR", Uint32Array.from(shape.idx)));
-      gp.setMaterial(g.createMaterial(name).setRoughnessFactor(0.92).setMetallicFactor(0).setDoubleSided(true));
-      await g.transform(
-        weld(),
-        ...(low ? [simplify({ simplifier: MeshoptSimplifier, ratio: 0.5, error: 0.002, lockBorder: true })] : []),
-        quantize(QUANTIZE),
-        prune(),
-      );
-      const gout = `public/avatars/garments/${name}-${sex}${low ? "-low" : ""}.glb`;
-      await io.write(gout, g);
-      console.log(gout, size(gout));
+      await writeParts(src, `public/avatars/garments/${name}-${sex}${low ? "-low" : ""}.glb`, (body) => ({ [name]: make(body) }), low);
     }
+    // Every hairstyle for this body in one file (scripts/hair.mjs).
+    await writeParts(src, `public/avatars/hair/${sex}${low ? "-low" : ""}.glb`, buildHair, low);
   }
+}
+
+/**
+ * Writes skinned parts built from a master body (garments, hair) as one file: the master's skeleton, no animation or
+ * texture, one mesh per part (named), each with its _PAT details for the game's shader.
+ */
+async function writeParts(src, out, make, low) {
+  const g = await io.read(src);
+  const root = g.getRoot(), buf = root.listBuffers()[0];
+  const bodyNode = root.listNodes().find((n) => n.getMesh());
+  const skin = bodyNode.getSkin(), parent = bodyNode.getParentNode();
+  const parts = make(readBody(bodyNode.getMesh().listPrimitives()[0], skin));
+  for (const a of root.listAnimations()) {
+    a.listChannels().forEach((c) => c.dispose());
+    a.listSamplers().forEach((sm) => { sm.getInput()?.dispose(); sm.getOutput()?.dispose(); sm.dispose(); });
+    a.dispose();
+  }
+  bodyNode.getMesh().dispose();
+  bodyNode.dispose();
+  const flat = (rows, Arr) => Arr.from(rows.flat());
+  const acc = (type, array, normalized = false) => g.createAccessor().setType(type).setArray(array).setBuffer(buf).setNormalized(normalized);
+  const material = g.createMaterial("part").setRoughnessFactor(0.92).setMetallicFactor(0).setDoubleSided(true);
+  for (const [name, shape] of Object.entries(parts)) {
+    const prim = g.createPrimitive()
+      .setAttribute("POSITION", acc("VEC3", flat(shape.pos, Float32Array)))
+      .setAttribute("NORMAL", acc("VEC3", normals(shape)))
+      .setAttribute("JOINTS_0", acc("VEC4", flat(shape.joints, Uint16Array)))
+      .setAttribute("WEIGHTS_0", acc("VEC4", flat(shape.weights, Float32Array)))
+      .setAttribute("_PAT", acc("VEC4", Int16Array.from(shape.pat.flat().map((v) => Math.round(Math.max(-1, Math.min(1, v)) * 32767))), true))
+      .setIndices(acc("SCALAR", Uint32Array.from(shape.idx)))
+      .setMaterial(material);
+    const node = g.createNode(name).setMesh(g.createMesh(name).addPrimitive(prim)).setSkin(skin);
+    parent.addChild(node);
+  }
+  await g.transform(
+    weld(),
+    ...(low ? [simplify({ simplifier: MeshoptSimplifier, ratio: 0.5, error: 0.002, lockBorder: true })] : []),
+    quantize(QUANTIZE),
+    prune(),
+  );
+  await io.write(out, g);
+  console.log(out, size(out));
 }
 
 /** Area-weighted vertex normals of a garment. */

@@ -43,3 +43,24 @@ test("the hoodie fits both bodies: neck, hem and wrists where a hoodie's are", a
     assert.ok(hidden.every((p: number[]) => p[1] > fit.hemY), `${sex}: nothing below the hem hidden`);
   }
 });
+
+test("every hairstyle grows from the scalp of both bodies, above the chin, with its lengths off the body", async () => {
+  // @ts-expect-error plain JavaScript build helper
+  const { HAIR_STYLES, buildHair, headFit } = await import("../scripts/hair.mjs");
+  const { HAIRS } = await import("../lib/look.ts");
+  assert.deepEqual([...HAIR_STYLES, "bald"].sort(), HAIRS.map((h: { id: string }) => h.id).sort(), "a hair file part for every hairstyle but bald");
+  for (const sex of ["m", "f"] as const) {
+    const body = await master(sex);
+    const f = headFit(body);
+    const parts = buildHair(body);
+    for (const style of HAIR_STYLES) {
+      const scalp = parts[style];
+      assert.ok(scalp && scalp.pos.length > 200, `${sex} ${style}: scalp`);
+      assert.ok(scalp.pos.every((p: number[]) => p.every(Number.isFinite) && p[1] > f.chin), `${sex} ${style}: above the chin`);
+    }
+    for (const style of ["long", "ponytail", "bun", "braids", "locs"]) assert.ok(parts[`${style}-lengths`]?.pos.length, `${sex} ${style}: has lengths`);
+    for (const [name, part] of Object.entries(parts) as [string, { pos: number[][] }][]) {
+      assert.ok(part.pos.every((p) => p.every(Number.isFinite)), `${sex} ${name}: every vertex is a number`);
+    }
+  }
+});

@@ -5,7 +5,9 @@
 //   * Skin tone: the texture's skin is recolored to the Look's (a shader keys on the baked orange, keeping its shading).
 //   * Until garment templates exist (stages 3 and 4), the baked grey basics take the outfit's colors by body region
 //     (top, bottom, shoes from each vertex's main bone), and the brows take the hair color.
-//   * Hair, hats, coverings and glasses are the game's own (buildAvatar), fitted to the head measured from the mesh.
+//   * Hair is grown from each body's own scalp (scripts/hair.mjs: public/avatars/hair/), so it fits the head; under a
+//     hat only its lengths show, and full coverings hide it. Hats, coverings and glasses are the game's own
+//     (buildAvatar), fitted to the head measured from the mesh.
 //   * Body types stretch the skeleton, as before; the idle is made from the walk (arms at rest, a slow breath).
 //   * Low-graphics mode loads the lighter file (half the triangles, a 512 px texture).
 //   * Garment templates (stage 3: the hoodie) are cut from the same body by scripts/garments.mjs and share its
@@ -69,18 +71,21 @@ function garmentMaterial(top: string, accent: string): MeshStandardMaterial {
     if (part > 0.75) c = uAccent;
     else if (part > 0.25) c = uTop * 0.93;
     else {
-      // Ribbed bands: 4 cm at the hem and cuffs, a seam line where they start.
+      // Ribbed bands: 4 cm at the hem and cuffs, with fine ribs and a soft seam where they start (antialiased).
       float d = vPat.x;
-      if (d < 0.04) c *= 0.84;
-      if (abs(d - 0.04) < 0.003) c *= 0.8;
-      // The kangaroo pocket: a trapezoid on the front, 3.5 to 17 cm above the hem, stitched round its edge.
+      float band = 1.0 - smoothstep(0.038, 0.042, d);
+      c *= mix(1.0, 0.86 + 0.05 * sin(vPat.y * 900.0), band);
+      float seam = 1.0 - smoothstep(0.0, fwidth(d) * 1.5 + 0.0005, abs(d - 0.04));
+      c *= 1.0 - 0.12 * seam;
+      // The kangaroo pocket: a trapezoid on the front, 3.5 to 17 cm above the hem, a soft stitched edge.
       vec2 q = vPat.yz;
       float t = (q.y - 0.035) / 0.135;
       float hw = mix(0.15, 0.1, clamp(t, 0.0, 1.0));
-      if (t > 0.0 && t < 1.0 && abs(q.x) < hw) {
-        c *= 0.96;
-        if (hw - abs(q.x) < 0.006 || q.y - 0.035 < 0.005 || 0.17 - q.y < 0.005) c *= 0.8;
-      }
+      float inside = min(min(hw - abs(q.x), q.y - 0.035), 0.17 - q.y);
+      float aa = fwidth(inside) * 1.5 + 0.0005;
+      float pocket = smoothstep(-aa, aa, inside);
+      float edge = (1.0 - smoothstep(0.0, aa * 2.0, abs(inside - 0.004))) * pocket;
+      c *= 1.0 - 0.04 * pocket - 0.12 * edge;
     }
     if (!gl_FrontFacing) c *= 0.55;
     diffuseColor.rgb = c;
@@ -90,11 +95,53 @@ function garmentMaterial(top: string, accent: string): MeshStandardMaterial {
   return mat;
 }
 
-/** Body regions for the outfit colors, by a vertex's main bone. */
-const REGION_OF = (name: string): number =>
-  /Foot|Toe/i.test(name) ? 3 : /UpLeg|Leg/i.test(name) || /^Hips$/i.test(name) ? 2 : /^Head$|head_end|headfront/.test(name) ? 4 : 1;
+/** Hair that full coverings hide (as buildAvatar). */
+const HIDES_HAIR = new Set(["hijab", "turban", "headwrap", "durag"]);
 
-/** Marks each vertex's region (1 top, 2 bottom, 3 shoes, 4 head) from its heaviest bone. Once per geometry. */
+/** The hair's look from its _PAT attribute (scripts/hair.mjs): strands as fine streaks round the head and down the
+ *  lengths, braids and locs in segments, a darker underside, a soft sheen. */
+function hairMaterial(color: string): MeshStandardMaterial {
+  const mat = new MeshStandardMaterial({ roughness: 0.62, metalness: 0, side: DoubleSide });
+  const u = { uHair: { value: new Color(color) } };
+  mat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute vec4 pat;\nvarying vec4 vPat;\nvoid main() {\n  vPat = pat;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace("void main() {", "uniform vec3 uHair;\nvarying vec4 vPat;\nvoid main() {")
+      .replace("#include <map_fragment>", `#include <map_fragment>
+  {
+    float part = vPat.z;
+    float streak;
+    if (part > 0.4 && part < 0.6) streak = 0.5 + 0.5 * sin(vPat.y * 260.0);          // braids and locs: segments
+    else streak = 0.5 + 0.5 * sin(vPat.x * 3.14159 * 160.0 + sin(vPat.y * 9.0) * 3.0); // fine strands
+    vec3 c = uHair * (0.94 + (part > 0.4 && part < 0.6 ? 0.18 : 0.07) * streak);
+    if (!gl_FrontFacing) c *= 0.6;
+    diffuseColor.rgb = c;
+  }`);
+  };
+  mat.customProgramCacheKey = () => "cc-hair";
+  return mat;
+}
+
+/** Re-skins a part from a parts file (hair, garments) onto the body's bones, beside the body mesh. */
+function attachPart(from: SkinnedMesh, mesh: SkinnedMesh, bones: Map<string, Bone>, material: Material): SkinnedMesh {
+  const g = from.geometry;
+  if (!g.getAttribute("pat")) g.setAttribute("pat", g.getAttribute("_pat"));
+  const part = new SkinnedMesh(g, material);
+  part.position.copy(mesh.position); part.quaternion.copy(mesh.quaternion); part.scale.copy(mesh.scale);
+  part.castShadow = true;
+  part.frustumCulled = false;
+  mesh.parent!.add(part);
+  part.bind(new Skeleton(from.skeleton.bones.map((b) => bones.get(b.name) ?? b), from.skeleton.boneInverses), from.bindMatrix);
+  return part;
+}
+
+/** Body regions for the outfit colors, by a vertex's main bone: the shins (2.75, between the bottom and the shoes so
+ *  blending across the knee and ankle never crosses the head's code) carry the baked socks, worn in the shoe color. */
+const REGION_OF = (name: string): number =>
+  /Foot|Toe/i.test(name) ? 3 : /(Left|Right)Leg$/.test(name) ? 2.75 : /UpLeg/i.test(name) || /^Hips$/i.test(name) ? 2 : /^Head$|head_end|headfront/.test(name) ? 4 : 1;
+
+/** Marks each vertex's region (1 top, 2 bottom, 2.75 shins, 3 shoes, 4 head) from its heaviest bone. Once per geometry. */
 function markRegions(mesh: SkinnedMesh) {
   const g = mesh.geometry;
   if (g.getAttribute("region")) return;
@@ -234,7 +281,8 @@ void main() {`)
     float grey = 1.0 - smoothstep(0.06, 0.16, sat);
     vec3 cloth = vRegion < 1.5 ? uTop : vRegion < 2.5 ? uBottom : uShoe;
     float ref = vRegion > 2.5 ? 0.9 : lumOf(uGreyRef);
-    vec3 dyed = cloth * clamp(lum / ref, 0.0, 1.5);
+    // Half the texture's light and shade: the baked basics are noisy (folds, frayed edges, dark socks).
+    vec3 dyed = cloth * mix(1.0, clamp(lum / ref, 0.0, 1.4), vRegion > 2.5 ? 0.3 : 0.5);
     // AI textures are noisy, so the region decides, not the texel: anything on the body that isn't skin is cloth.
     float clothW = step(0.5, vRegion) * step(vRegion, 3.5) * step(0.02, lum) * max(grey, 0.85);
     // Brows and lashes (dark, on the head) take the hair color.
@@ -250,25 +298,29 @@ void main() {`)
 
     // The garment, on the body's own bones (whole Shop outfits wait for stage 4).
     const garment = outfit.set ? undefined : GARMENT_TEMPLATES[outfit.top];
+    const low = lowGraphics() ? "-low" : "";
     if (garment) {
-      const g = await load(`/avatars/garments/${garment.file}-${sex}${lowGraphics() ? "-low" : ""}.glb`).catch(() => null);
+      const g = await load(`/avatars/garments/${garment.file}-${sex}${low}.glb`).catch(() => null);
       let src: SkinnedMesh | null = null;
       g?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
       if (disposed) return;
       if (src) {
-        const from = src as SkinnedMesh;
-        const gg = from.geometry;
-        if (!gg.getAttribute("pat")) gg.setAttribute("pat", gg.getAttribute("_pat"));
         const gm = garmentMaterial(outfit.topColor, outfit.topAccent);
         materials.push(gm);
-        const cloth = new SkinnedMesh(gg, gm);
-        cloth.position.copy(mesh.position); cloth.quaternion.copy(mesh.quaternion); cloth.scale.copy(mesh.scale);
-        cloth.castShadow = true;
-        cloth.frustumCulled = false;
-        mesh.parent!.add(cloth);
-        cloth.bind(new Skeleton(from.skeleton.bones.map((b) => bones.get(b.name) ?? b), from.skeleton.boneInverses), from.bindMatrix);
+        attachPart(src, mesh, bones, gm);
         u.uCover.value = garment.cover;
       }
+    }
+
+    // The hair, grown from this body's scalp: the style, and its lengths; under a hat, the lengths only.
+    const hatOn = !!proc.headwear?.children.length;
+    if (look.hair !== "bald" && !HIDES_HAIR.has(look.covering)) {
+      const h = await load(`/avatars/hair/${sex}${low}.glb`).catch(() => null);
+      if (disposed) return;
+      const want = new Set([...(hatOn ? [] : [look.hair]), `${look.hair}-lengths`]);
+      const hm = hairMaterial(look.hairColor);
+      materials.push(hm);
+      h?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh && want.has(o.name)) attachPart(o as SkinnedMesh, mesh, bones, hm); });
     }
 
     // The head: measured from the head's vertices at the bind pose, so the game's hair and hats fit it.
@@ -287,7 +339,6 @@ void main() {`)
       const inv = new Matrix4().copy(headBone.matrixWorld).invert();
       const placed = new Matrix4().compose(center.add(new Vector3(0, size.y * 0.06, 0)), new Quaternion(), new Vector3(k, k, k));
       holder.applyMatrix4(inv.multiply(placed));
-      if (proc.hair) holder.add(proc.hair);
       if (proc.headwear) holder.add(proc.headwear);
       holder.traverse((o) => { if ((o as { isMesh?: boolean }).isMesh) o.castShadow = true; });
       headBone.add(holder);

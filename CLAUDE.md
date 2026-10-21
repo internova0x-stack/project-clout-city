@@ -191,6 +191,8 @@ components live in `app/globals.css`.
   every move on both bodies. Garment templates (stage 3: the hoodie) are cut from the masters by `scripts/garments.mjs`
   into `public/avatars/garments/`, share the body's skeleton, and hide the skin under them (`_COVER` bits); the outfit's
   top picks one from `GARMENT_TEMPLATES` (lib/avatarCatalog.ts). `/preview/moves?outfit=hoodie` shows all eight body types.
+  Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
+  its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.

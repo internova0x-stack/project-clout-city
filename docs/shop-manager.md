@@ -167,6 +167,16 @@ the outfit's top has one (`GARMENT_TEMPLATES` in lib/avatarCatalog.ts); `/previe
 eight body types. Shop items that need the hoodie template stay locked until stage 4 unlocks items as the new bodies
 switch on.
 
+**Polish after the owner's review (Oct 21: "The avatars and outfits look a little botched"):** the game's old cartoon
+hair sat on the new heads like a helmet, so every hairstyle is now grown from each body's own scalp by
+`scripts/hair.mjs` (into `public/avatars/hair/<m|f>[-low].glb`, one mesh per style and one for its lengths): a hairline at
+the forehead, temples and nape, the ears left bare, thickness by style (more at the crown; curls bumpy), and lengths
+(long hair to the shoulder blades, a ponytail, a bun, two braids, locs) that drape off the body. Full coverings hide it;
+under a cap or hat only the lengths show. The hoodie's rib bands only follow the hem and cuffs (tiny gaps in the master
+had drawn ovals), its details are drawn from the finished surface (straight pocket lines), its skin weights are
+softened and it hugs the shoulder joints. The baked basics are calmer (half the texture's shading) and the shins' baked
+socks take the shoe color (no dark band above the shoes). `/preview/moves?outfit=hair` shows every hairstyle.
+
 **Animations later (owner, Oct 21):** extra moves (from Higgsfield or elsewhere) come after stage 4. Each must be made on
 the same 24-bone skeleton (best: animate `assets/avatars/base-*.glb` itself); check the first file before a batch, and
 preview each one in a few outfits before it goes in.
