@@ -91,6 +91,8 @@ Tap a regular on a place card to hear a line; each tap says the next one. While 
 | Boiled & Beloved Hot Dogs | Lou Ferraro, the cart owner (C2) | cook | “Onions? Mustard? Don't ask about the water.” |
 | Feta Compli Taverna | Andreas Charalambous, the owner (C2) | bartender | “Today is somebody's name day. It's always somebody's name day.” |
 | Schlep & Schmear Deli | Hersh Weiss, the owner, at the counter (C2) | clerk | “On line, not in line. You're in New York now.” |
+| Ditmars Heights Rooftop | Akosua "Kiki" Mensah, runs the guest list (C5) | doorman | “Bronx girl in a Queens bar. I root for the Bigshots up here and the whole roof boos.” |
+| Meteor Park | Hector Rivera, usher, Section 7 (C5) | driver | “Section 7, row 12, forty years. I've seen the Meteors lose in ways science can't explain.” |
 
 **Roommate (C3):** Priya Raman, 27, a night-shift ER nurse at St. Copay's from Edison, New Jersey, shares the
 "Room share with a roommate" apartment. She introduces herself once and leaves a fridge note a day

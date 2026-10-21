@@ -13,10 +13,40 @@ Packs ship one at a time, in order, each only when the owner says "Build C<numbe
 | C2 | Astoria food and Energy | **Built** (Oct 20) |
 | C3 | Astoria Park, jobs, roommates, first-time touches | **Built** (Oct 21) |
 | C4 | Transit and transit news | **Built** (Oct 21) |
-| C5 | Calendar events, sports, cultural invites (before Dec 31 for the NYE countdown) | Waiting |
+| C5 | Calendar events, sports, cultural invites (before Dec 31 for the NYE countdown) | **Built** (Oct 21) |
 | C6 | Stories, tea, hunts and dating spots | Waiting |
 
 The guide's "Later: borough packs" wait until those boroughs open.
+
+## C5: calendar events, sports and cultural invites (built Oct 21, migration 0096)
+
+- **On the calendar** (top of the Events sheet): events on real New York dates and times, not the city clock. Be at
+  the place while it runs and tap **Go**; each pays once. The list is `content/culture/calendar.json` (edit it to add
+  next year's dates; the content check tells you if something's off):
+
+  | Event | When (New York time) | Where | Pays |
+  | --- | --- | --- | --- |
+  | 💌 Dimitra's name day (invite) | Mon Oct 26, 6 to 11 PM | Feta Compli Taverna | 40 clout, +25 dressed up, −20 without a gift; +10 Mood |
+  | 🎃 Halloween on 31st Street | Sat Oct 31, 5 to 11 PM | The Hub | 50 clout, +12 Mood |
+  | 💌 Andreas's name day (invite) | Mon Nov 30, 7 to 11 PM | Feta Compli Taverna | as Dimitra's |
+  | 🎆 New Year's Eve countdown on the roof | Thu Dec 31, 9 PM to midnight | Ditmars Heights Rooftop | C$60 entry; 100 clout, +15 Mood |
+  | 🎺 Greek Independence Day Parade | Sun Mar 28, 2027, noon to 4 PM | The Hub (31st Street) | 60 clout, +14 Mood |
+  | 💌 Gus and Dr. Eleni's name day picnic (invite) | Fri May 21, 2027, 6 to 11 PM | Hell Gate Park | 40 clout, +25 / −20; +12 Mood |
+
+  Events show up to 75 days ahead, so NYE is on the calendar from mid-October. Times Square stays locked.
+- **The cultural invite, end to end.** Two weeks before a name day, the invite sits on the Phone's home screen ("💌
+  You're invited · Dimitra Papadakis"). Tapping it opens Events. Dressing up means wearing anything from the Shop
+  (+25 clout). A gift box (C$15, up to 2) comes from Sal's or Schlep & Schmear ("🎁 Gift box for a name day" on their
+  card); arriving without one costs 20 of the 40 clout. While a party is on, the place card says so instead of "Closed".
+- **Ditmars Heights Rooftop** (new, Astoria, luxury): string lights, heaters and the skyline; open 4 PM to 2 AM on the
+  city clock; small plates C$120. Kiki Mensah, a Bronx girl who runs the guest list, roots for the Bronx Bigshots and lets the roof boo her.
+- **Meteor Park** (new, Flushing Meadows): the Flushing Meteors' ballpark. A ballpark dog and soda (C$16) and a walk
+  around the concourse any time; **Meteors home game** in Events, 7 to 10 PM on the city clock, Tuesday, Wednesday and Friday to
+  Sunday (New York), C$45, +45 clout. Hector Rivera, an usher in Section 7 for forty years, has opinions.
+- **Shop:** the Flushing Meteors cap (C$45) and home jersey (C$120), in Fashion. Wearing either counts as dressing up.
+- **Queens vs. the Bronx:** new lines for Gus, Lou, Sal and Sharm about the Bronx Bigshots. No league is ever named.
+- Left for later: other cultures' invites (a Lunar New Year dinner in Flushing, Diwali in Jackson Heights) are easy to
+  add as calendar rows when the owner picks dates; the Bronx's stadium stays locked with the Bronx.
 
 ## C4: transit and transit news (built Oct 21, migration 0095)
 
