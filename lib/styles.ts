@@ -2,6 +2,8 @@
 // Each sets 3 to 4 cheap starter items and gives no stats or bonuses.
 // Hair, glasses and coverings are free Look options, never part of a style.
 
+import type { AccessoryWear } from "./accessories.ts";
+
 export type StyleId =
   | "bodega_drip"
   | "thrift_store_icon"
@@ -32,6 +34,8 @@ export interface Outfit {
   accessoryColor: string;
   /** A whole Shop outfit (lib/avatarCatalog.ts OUTFIT_SETS) worn over the pieces, in its own colors. */
   set?: string;
+  /** Shop accessories worn (lib/accessories.ts): hats, glasses, earrings, necklaces, bags, a watch. New bodies only. */
+  extras?: AccessoryWear[];
 }
 
 export interface StartingStyle {

@@ -32,6 +32,8 @@ import { lowGraphics } from "@/lib/graphics";
 import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 import { buildSetHat, SET_HAT_HIDES_HAIR } from "./setHats";
+import { buildBodyAccessory, buildHeadAccessory, type BodyFit } from "./accessories";
+import { ACCESSORY_HATS, ACCESSORY_HIDES_HAIR } from "@/lib/accessories";
 import type { ModelAvatarOptions } from "./modelAvatar";
 
 const cache = new Map<string, Promise<GLTF>>();
@@ -276,19 +278,117 @@ function markRegions(mesh: SkinnedMesh) {
   if (!g.getAttribute("region")) g.setAttribute("region", g.getAttribute("_region") ?? new BufferAttribute(new Float32Array(g.getAttribute("position").count), 1));
 }
 
+/** How far each top template stands off the skin (scripts/wardrobe.mjs gaps, plus its thickness), for what's worn on it. */
+const TOP_GAP: Record<string, number> = { hoodie: 0.02, tee: 0.017, crop: 0.014, vest: 0.017, zip: 0.019, cardigan: 0.017, blazer: 0.019, puffer: 0.038 };
+
+/**
+ * A body's measurements for its accessories (components/avatar/accessories.ts BodyFit), in the body group's space at the
+ * bind pose: the neck's base, the chest, the hip, the left wrist. Widths follow the body type (the shader's widening).
+ */
+function measureBody(mesh: SkinnedMesh, body: Group, bones: Map<string, Bone>, build: { w: number; l: number }, gap: number): BodyFit {
+  body.updateMatrixWorld(true);
+  const pos = mesh.geometry.getAttribute("position");
+  const pts: Vector3[] = [];
+  for (let i = 0; i < pos.count; i++) pts.push(body.worldToLocal(mesh.applyBoneTransform(i, new Vector3().fromBufferAttribute(pos, i)).applyMatrix4(mesh.matrixWorld)));
+  // The torso without the arms (they hang beside the hips and chest): by each vertex's heaviest bone.
+  const joints = mesh.geometry.getAttribute("skinIndex"), weights = mesh.geometry.getAttribute("skinWeight");
+  const names = mesh.skeleton.bones.map((b) => b.name);
+  const torso = pts.filter((_, i) => {
+    let best = 0, bw = -1;
+    for (let k = 0; k < 4; k++) { const w = weights.getComponent(i, k); if (w > bw) { bw = w; best = joints.getComponent(i, k); } }
+    return !/(Arm|Hand)$/.test(names[best] ?? "");
+  });
+  const boneAt = (n: string) => { const b = bones.get(n); return b ? body.worldToLocal(b.getWorldPosition(new Vector3())) : new Vector3(); };
+  const flat = (p: Vector3, c: Vector3) => Math.hypot(p.x - c.x, p.z - c.z);
+  const mean = (xs: number[], d: number) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : d);
+  // The neck's base: a slice just above the neck bone.
+  const nb = boneAt("neck"), ny = nb.y + 0.01;
+  const ring = pts.filter((p) => Math.abs(p.y - ny) < 0.012 && flat(p, nb) < 0.11);
+  const at = new Vector3(mean(ring.map((p) => p.x), nb.x), ny, mean(ring.map((p) => p.z), nb.z));
+  const r = mean(ring.map((p) => flat(p, at)), 0.055);
+  const chestFrontRaw = Math.max(at.z + r, ...pts.filter((p) => Math.abs(p.x - at.x) < 0.04 && Math.abs(p.y - (ny - 0.12)) < 0.012).map((p) => p.z));
+  // The chest: a slice at the upper spine, without the arms.
+  const sb = boneAt("Spine02");
+  const slice = torso.filter((p) => Math.abs(p.y - sb.y) < 0.012 && Math.abs(p.x - sb.x) < 0.2);
+  const xs = slice.map((p) => p.x), zs = slice.map((p) => p.z);
+  const cz = (Math.max(...zs, sb.z) + Math.min(...zs, sb.z)) / 2;
+  const chest = { at: new Vector3(sb.x, sb.y, cz), rx: ((Math.max(...xs, sb.x + 0.15) - Math.min(...xs, sb.x - 0.15)) / 2) * build.w, rz: ((Math.max(...zs, cz + 0.1) - Math.min(...zs, cz - 0.1)) / 2) * build.w };
+  // A crossbody strap's path: over the top of the +x shoulder, down across the front to the -x hip and back up behind,
+  // standing off the body (and its clothes) all the way; the bag sits at the front of that hip.
+  const hb = boneAt("Hips"), hy = hb.y + 0.02;
+  const sx = nb.x + 0.09;
+  const shoulderY = Math.max(nb.y - 0.05, ...torso.filter((p) => Math.abs(p.x - sx) < 0.02 && Math.abs(p.z - at.z) < 0.05 && p.y > nb.y - 0.12 && p.y < nb.y + 0.06).map((p) => p.y));
+  const hipX = Math.min(hb.x - 0.12, ...torso.filter((p) => Math.abs(p.y - hy) < 0.015 && Math.abs(p.z - hb.z) < 0.06).map((p) => p.x));
+  const off = 0.012 + gap;
+  const top = new Vector3(sx, shoulderY + off, at.z), bottom = new Vector3(hb.x + (hipX - hb.x) * build.w - off, hy, hb.z);
+  const front: Vector3[] = [], back: Vector3[] = [];
+  for (let k = 1; k < 8; k++) {
+    const q = top.clone().lerp(bottom, k / 8);
+    const near = torso.filter((p) => Math.hypot(p.x - q.x, p.y - q.y) < 0.025).map((p) => p.z);
+    const mid = near.length ? (Math.max(...near) + Math.min(...near)) / 2 : cz;
+    const hi = near.length ? Math.max(...near) : cz + 0.1, lo = near.length ? Math.min(...near) : cz - 0.1;
+    front.push(new Vector3(q.x, q.y, mid + (hi - mid) * build.w + off));
+    back.push(new Vector3(q.x, q.y, mid + (lo - mid) * build.w - off));
+  }
+  const strap = [top, ...front, bottom, ...back.reverse()];
+  const bagX = hb.x - 0.1;
+  const hipFront = Math.max(hb.z + 0.08, ...torso.filter((p) => Math.abs(p.y - hy) < 0.02 && Math.abs(p.x - bagX) < 0.03).map((p) => p.z));
+  const hip = new Vector3(bagX, hy, hb.z + (hipFront - hb.z) * build.w + off);
+  // The left wrist: 3 cm up the forearm from the hand bone.
+  const hand = boneAt("LeftHand"), dir = hand.clone().sub(boneAt("LeftForeArm")).normalize();
+  const cuff = hand.clone().addScaledVector(dir, -0.03);
+  const near = pts.filter((p) => Math.abs(p.clone().sub(cuff).dot(dir)) < 0.01).map((p) => p.clone().sub(cuff).projectOnPlane(dir).length()).filter((d) => d < 0.07);
+  return {
+    neck: { at, r, chestFront: at.z + (chestFrontRaw - at.z) * build.w },
+    chest, hip, strap,
+    wrist: { at: hand, dir, r: mean(near, 0.028) * build.l },
+    hand: boneAt("RightHand"),
+    gap,
+  };
+}
+
+/** The thigh's radius (meters, body space): the mean distance of the left thigh's middle from its bone line. */
+function measureThigh(mesh: SkinnedMesh, body: Group, bones: Map<string, Bone>): number {
+  const up = bones.get("LeftUpLeg"), knee = bones.get("LeftLeg");
+  if (!up || !knee) return 0.085;
+  body.updateMatrixWorld(true);
+  const a = body.worldToLocal(up.getWorldPosition(new Vector3())), b = body.worldToLocal(knee.getWorldPosition(new Vector3()));
+  const ab = b.clone().sub(a), pos = mesh.geometry.getAttribute("position"), v = new Vector3();
+  let sum = 0, n = 0;
+  for (let i = 0; i < pos.count; i++) {
+    body.worldToLocal(mesh.applyBoneTransform(i, v.fromBufferAttribute(pos, i)).applyMatrix4(mesh.matrixWorld));
+    const t = v.clone().sub(a).dot(ab) / ab.lengthSq();
+    if (t < 0.35 || t > 0.65) continue;
+    const d = v.clone().sub(a.clone().addScaledVector(ab, t)).length();
+    if (d < 0.14) { sum += d; n++; }
+  }
+  return n ? sum / n : 0.085;
+}
+
 /** `bare` (previews only): the body in its base layer, nothing worn. */
 export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: boolean } = {}): AvatarParts {
   const outfit: Outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
   const sex = modelSex(look);
   // A whole outfit's hat (SET_LOOKS), unless the player wears a faith or culture covering: that always stays. It
   // replaces the player's own cap or hat and any headphones.
-  const setHat = opts.bare || KEEPS_COVERING.has(look.covering) ? undefined : (outfit.set ? SET_LOOKS[outfit.set]?.[sex]?.hat : undefined);
+  // Shop accessories (lib/accessories.ts): a Shop hat steps aside for a faith or culture covering too, and otherwise
+  // wins over the outfit's hat; Shop glasses replace the Look's.
+  const keeps = KEEPS_COVERING.has(look.covering);
+  const extras = (opts.bare ? [] : outfit.extras ?? []).filter((x) => !(x.slot === "head" && keeps));
+  const headExtra = extras.find((x) => x.slot === "head");
+  const setHat = opts.bare || keeps || headExtra ? undefined : (outfit.set ? SET_LOOKS[outfit.set]?.[sex]?.hat : undefined);
+  const anyHat = !!setHat || !!headExtra;
   // The procedural avatar, for its headwear (glasses, caps, coverings) and pedestal only.
-  const proc = buildAvatar(setHat ? { ...look, covering: "none" } : look, {
+  const proc = buildAvatar({ ...look, covering: anyHat ? "none" : look.covering, glasses: extras.some((x) => x.slot === "face") ? "none" : look.glasses }, {
     pedestal: opts.pedestal ?? false,
-    outfit: setHat && outfit.accessory === "headphones" ? { ...outfit, accessory: "none" } : outfit,
+    outfit: anyHat && outfit.accessory === "headphones" ? { ...outfit, accessory: "none" } : outfit,
   });
   const hat = setHat ? buildSetHat(setHat.kind, setHat.color, setHat.accent) : null;
+  const headPieces = extras.filter((x) => x.slot === "head" || x.slot === "face" || x.slot === "ears").map(buildHeadAccessory);
+  const bodyPieces: { dispose(): void }[] = [];
+  // Bags held in the hand: put down while sitting or lying (they'd go through the legs or the bed).
+  const heldBags: Object3D[] = [];
+  const showBags = () => heldBags.forEach((b) => { b.visible = !posed; });
   const root = new Group();
   const body = new Group();
   root.add(body);
@@ -321,6 +421,12 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
   // Where each of those clips puts the hips (and the knees, the head) in the body's space, measured once loaded.
   const marks: Partial<Record<"sit" | "lie", { hips: Vector3; knees: Vector3; head: Vector3 }>> = {};
   const driven: { bone: Object3D; rest: Quaternion; src: Object3D; restEuler: [number, number, number] }[] = [];
+  // Sitting: the clip rests the hands on the knees or between them, on the body it was made on; wider thighs (the female
+  // body, wider body types, trousers) would swallow them, so each frame a hand inside a thigh is swung out to its
+  // surface by turning its upper arm (keepHandsOut).
+  let thighR = 0.085;
+  const sitBones: { thighs: [Bone | undefined, Bone | undefined][] } = { thighs: [] };
+  const sitSides: { arm: Bone; fore: Bone; hand: Bone }[] = [];
   let model: Object3D | null = null;
   let disposed = false;
   const build = BASE_BUILD_SCALE[look.build] ?? BASE_BUILD_SCALE.athletic;
@@ -401,8 +507,8 @@ void main() {`)
     u.uCover.value = cover;
 
     // The hair, grown from this body's scalp: the style, and its lengths; under a hat, the lengths only.
-    const hatOn = !!setHat || HATS.has(look.covering);
-    const hairHidden = HIDES_HAIR.has(look.covering) || (!!setHat && SET_HAT_HIDES_HAIR.has(setHat.kind));
+    const hatOn = !!setHat || (!!headExtra && ACCESSORY_HATS.has(headExtra.kind)) || (!anyHat && HATS.has(look.covering));
+    const hairHidden = HIDES_HAIR.has(look.covering) || (!!setHat && SET_HAT_HIDES_HAIR.has(setHat.kind)) || (!!headExtra && ACCESSORY_HIDES_HAIR.has(headExtra.kind));
     if (look.hair !== "bald" && !hairHidden) {
       const h = await load(`/avatars/hair/${sex}${low}.glb`).catch(() => null);
       if (disposed) return;
@@ -430,6 +536,7 @@ void main() {`)
       holder.applyMatrix4(inv.multiply(placed));
       if (proc.headwear) holder.add(proc.headwear);
       if (hat) holder.add(hat.group);
+      for (const p of headPieces) holder.add(p.group);
       holder.traverse((o) => { if ((o as { isMesh?: boolean }).isMesh) o.castShadow = true; });
       headBone.add(holder);
     }
@@ -438,6 +545,18 @@ void main() {`)
     rig.scale.setScalar(build.h);
     body.add(rig);
     model = rig;
+
+    // Shop accessories on the body (necklaces, the scarf, a crossbody, the watch): made for this body's measurements
+    // and pinned to their bone; bags in the hand wait for the idle pose, below.
+    const handHeld = extras.filter((x) => x.slot === "hand" && x.kind !== "sling");
+    const fit = extras.some((x) => x.slot === "neck" || x.slot === "wrist" || x.slot === "hand") ? measureBody(mesh, body, bones, build, TOP_GAP[worn.find((w) => w.slot === "top")?.file ?? ""] ?? 0) : null;
+    const pin = (piece: ReturnType<typeof buildBodyAccessory>) => {
+      bodyPieces.push(piece);
+      body.add(piece.group);
+      root.updateMatrixWorld(true);
+      bones.get(piece.bone)?.attach(piece.group);
+    };
+    if (fit) for (const x of extras) if ((x.slot === "neck" || x.slot === "wrist" || x.slot === "hand") && !handHeld.includes(x)) pin(buildBodyAccessory(x, fit));
 
     // Stand-ins → bones (index 0 is the -x side, as in buildAvatar).
     rig.updateMatrixWorld(true);
@@ -453,6 +572,12 @@ void main() {`)
     side("LeftLeg", "RightLeg").forEach((b, i) => drive(b, knees[i]));
     side("LeftArm", "RightArm").forEach((b, i) => drive(b, arms[i]));
     side("LeftForeArm", "RightForeArm").forEach((b, i) => drive(b, forearms[i]));
+    for (const s of ["Left", "Right"]) {
+      const arm = bones.get(`${s}Arm`), fore = bones.get(`${s}ForeArm`), hand = bones.get(`${s}Hand`);
+      if (arm && fore && hand) sitSides.push({ arm, fore, hand });
+      sitBones.thighs.push([bones.get(`${s}UpLeg`), bones.get(`${s}Leg`)]);
+    }
+    thighR = measureThigh(mesh, body, bones) * build.l + (worn.some((w) => w.slot === "bottom") ? 0.012 : 0);
     drive(bones.get("Hips"), hips);
     drive(bones.get("Spine"), chest);
     drive(headBone, head);
@@ -472,6 +597,16 @@ void main() {`)
       marks[kind] = { hips: at("Hips"), knees: at("LeftLeg").add(at("RightLeg")).multiplyScalar(0.5), head: at("Head") };
       a.stop();
     }
+    // A bag is held in the right hand where it hangs standing (the idle's first frame).
+    if (fit && handHeld.length && actions.idle) {
+      actions.idle.reset().play();
+      mixer.update(0);
+      root.updateMatrixWorld(true);
+      fit.hand = at("RightHand");
+      for (const x of handHeld) { const piece = buildBodyAccessory(x, fit); pin(piece); heldBags.push(piece.group); }
+      showBags();
+      actions.idle.stop();
+    }
     mixer.addEventListener("finished", (e) => {
       if (once && e.action === actions[once]) { once = null; playing = null; fade(e.action, actions[motion]); }
     });
@@ -482,6 +617,55 @@ void main() {`)
     if (!disposed) body.add(proc.body);
   });
 
+  const hp = new Vector3(), sp = new Vector3(), ta = new Vector3(), tb = new Vector3(), cp = new Vector3(), ws = new Vector3();
+  const swing = new Quaternion(), parentQ = new Quaternion();
+  /** Pushes each hand's palm out of either thigh (sitting), turning the upper arm; positions in world space. */
+  function keepHandsOut() {
+    body.getWorldScale(ws);
+    const R = (thighR + 0.03) * ws.x;
+    for (const s of sitSides) {
+      for (let pass = 0; pass < 3; pass++) {
+        // The palm: a little past the wrist, along the forearm.
+        s.hand.getWorldPosition(hp);
+        s.fore.getWorldPosition(cp);
+        hp.addScaledVector(hp.clone().sub(cp).normalize(), 0.05 * ws.x);
+        let push: Vector3 | null = null;
+        for (const [up, knee] of sitBones.thighs) {
+          if (!up || !knee) continue;
+          up.getWorldPosition(ta);
+          knee.getWorldPosition(tb);
+          const ab = tb.clone().sub(ta), t = Math.max(0, Math.min(1, hp.clone().sub(ta).dot(ab) / ab.lengthSq()));
+          const c = ta.clone().addScaledVector(ab, t), out = hp.clone().sub(c), d = out.length();
+          // Out to the surface, never down (a hand below a thigh would go into the seat): up or to the side instead.
+          if (d < R) {
+            const dir = d > 1e-5 ? out.normalize() : new Vector3(0, 1, 0);
+            if (dir.y < 0) { dir.y = 0; if (dir.lengthSq() < 0.04) dir.set(0, 1, 0); dir.normalize(); }
+            push = dir.multiplyScalar(R - d + 0.002 * ws.x);
+          }
+        }
+        // Between the thighs and below their tops (where the seat is): up into the lap.
+        if (!push && sitBones.thighs.length === 2) {
+          const cs = sitBones.thighs.map(([up, knee]) => {
+            up!.getWorldPosition(ta);
+            knee!.getWorldPosition(tb);
+            const ab = tb.clone().sub(ta), t = Math.max(0, Math.min(1, hp.clone().sub(ta).dot(ab) / ab.lengthSq()));
+            return ta.clone().addScaledVector(ab, t);
+          });
+          const across = cs[1].clone().sub(cs[0]), u = hp.clone().sub(cs[0]).dot(across) / across.lengthSq();
+          const lapY = (cs[0].y + cs[1].y) / 2 + thighR * 0.5 * ws.x;
+          if (u > 0 && u < 1 && hp.y < lapY) push = new Vector3(0, lapY - hp.y, 0);
+        }
+        if (!push) break;
+        // Turn the upper arm about the shoulder so the palm moves by `push`.
+        s.arm.getWorldPosition(sp);
+        const from = hp.clone().sub(sp), to = hp.clone().add(push).sub(sp);
+        swing.setFromUnitVectors(from.normalize(), to.normalize());
+        s.arm.parent!.getWorldQuaternion(parentQ);
+        s.arm.quaternion.premultiply(parentQ.clone().invert().multiply(swing).multiply(parentQ));
+        s.arm.updateMatrixWorld(true);
+      }
+    }
+  }
   const fade = (from: AnimationAction | undefined, to: AnimationAction | undefined, loop = true) => {
     if (!to || to === from) return;
     to.setLoop(loop ? LoopRepeat : LoopOnce, loop ? Infinity : 1);
@@ -534,11 +718,12 @@ void main() {`)
     play(clip, playOnce) {
       // Kept even before the clips have loaded; a clip the body doesn't have leaves the idle or walk on.
       if (clip === playing && !playOnce) return;
-      if (posed && clip !== (posed.kind === "sit" ? "sit" : "sleep")) posed = null;
+      if (posed && clip !== (posed.kind === "sit" ? "sit" : "sleep")) { posed = null; showBags(); }
       switchTo(clip, !playOnce);
     },
     pose(kind, surfaceY = 0) {
       posed = kind ? { kind, y: surfaceY } : null;
+      showBags();
       if (!kind) { if (playing === "sit" || playing === "sleep") switchTo(null); return; }
       const clip = kind === "sit" ? "sit" : "sleep";
       if (playing !== clip) switchTo(clip);
@@ -550,6 +735,7 @@ void main() {`)
       mixer.update(dt);
       model.updateMatrixWorld(true);
       rootQ.setFromRotationMatrix(m4.extractRotation(model.matrixWorld)).invert();
+      if (posed?.kind === "sit") keepHandsOut();
       for (const d of driven) {
         const { x, y, z } = d.src.rotation;
         const rx = x - d.restEuler[0], ry = y - d.restEuler[1], rz = z - d.restEuler[2];
@@ -565,6 +751,8 @@ void main() {`)
       materials.forEach((m) => m.dispose());
       proc.dispose();
       hat?.dispose();
+      headPieces.forEach((p) => p.dispose());
+      bodyPieces.forEach((p) => p.dispose());
     },
   };
 }

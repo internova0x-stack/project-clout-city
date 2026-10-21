@@ -86,7 +86,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar, skin, build, outfit, size } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar, skin, build, outfit, size, pick } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -195,9 +195,9 @@ export default async function Preview({
     }
     case "art":
       return <PreviewArt />;
-    // The avatar upgrade: the new base bodies doing every move (?skin=0-7, ?build=; ?outfit=hoodie for stage 3; ?size= tile pixels).
+    // The avatar upgrade: the new base bodies doing every move (?skin=0-7, ?build=; ?outfit=hoodie for stage 3; ?size= tile pixels; ?pick=a,b only those columns).
     case "moves":
-      return <AvatarMoves skin={Number(skin ?? 3)} build={build as import("@/lib/look").Look["build"] | undefined} outfit={outfit} size={size ? Number(size) : undefined} />;
+      return <AvatarMoves skin={Number(skin ?? 3)} build={build as import("@/lib/look").Look["build"] | undefined} outfit={outfit} size={size ? Number(size) : undefined} pick={pick} />;
     case "room":
       return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "natural" ? "natural" : "dream"} />;
     default:

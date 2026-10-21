@@ -116,13 +116,13 @@ export function roommateNoteFor(r: Pick<Roommate, "notes">, nyDate: string): str
 export const PHONETIC_SPELLINGS = ["dese", "dem guys", "dose guys", "youse", "fuggedaboutit", "tawk", "cawfee", "da boss"];
 
 /**
- * The culture files' rules: 30 unique slang terms, one profile per Astoria place (`astoria` place ids), regulars that
+ * The culture files' rules: unique slang terms (the guide's 30 and the owner's additions), one profile per Astoria place (`astoria` place ids), regulars that
  * exist and stand at their profile's place, known slang ids, short lines, and no real names or accent spellings.
  */
 export function validateCulture(d: CultureData, ctx: { placeIds: string[]; astoria: string[]; regulars: { id: string; placeId: string }[] }): string[] {
   const problems: string[] = [];
   const ids = d.slang.terms.map((t) => t.id);
-  if (ids.length !== 30) problems.push(`slang: ${ids.length} terms, the guide's table has 30`);
+  if (ids.length < 30) problems.push(`slang: ${ids.length} terms, the guide's table has 30 (the owner adds more)`);
   if (new Set(ids).size !== ids.length) problems.push("slang: ids repeat");
   for (const t of d.slang.terms) if (!t.term || !t.meaning || !t.example) problems.push(`slang ${t.id}: needs a term, meaning and example`);
 

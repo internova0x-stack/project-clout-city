@@ -12,7 +12,7 @@ const data: CultureData = {
   npcs: JSON.parse(read("content/culture/npcs.json")),
 };
 
-test("culture files: 30 slang terms, one profile per Astoria place, regulars where they stand", () => {
+test("culture files: the slang dictionary (30 and the owner's additions), one profile per Astoria place, regulars where they stand", () => {
   const astoria = PLACES.filter((p) => p.neighborhood === "Astoria" && boroughOf(p) === "queens").map((p) => p.id);
   assert.deepEqual(validateCulture(data, { placeIds: PLACES.map((p) => p.id), astoria, regulars: REGULARS }), []);
   // Every Astoria place that isn't a story's has someone on its card.

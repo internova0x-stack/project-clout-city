@@ -143,7 +143,7 @@ Prices sit above home cooking per Energy, so cooking stays the cheapest way to e
 
 | File | What's in it |
 | --- | --- |
-| `content/culture/slang.json` | The 30-term slang dictionary: term, meaning, origin, an example line |
+| `content/culture/slang.json` | The slang dictionary (the guide's 30 terms plus the owner's: maxxing, aura, flex, Oct 21): term, meaning, origin, an example line |
 | `content/culture/parody-names.json` | Real brands, teams and trademarked names, each with its invented stand-in. Also the short list of real names that are allowed |
 | `content/culture/npcs.json` | One profile per Astoria place: name, age, background, personality, years in the neighborhood, catchphrases, likes, dislikes, place, slang they use |
 | `content/cast-lines.json` | Everyday lines for the people on place cards (unchanged format) |
