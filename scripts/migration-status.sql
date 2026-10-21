@@ -108,6 +108,7 @@ from (values
   ('0096_calendar.sql', coalesce((exists (select 1 from pg_proc where proname='calendar_attend' and pronamespace='public'::regnamespace)), false)),
   ('0097_push_calendar.sql', coalesce((exists (select 1 from pg_proc where proname='push_scan_calendar' and pronamespace='public'::regnamespace)), false)),
   ('0098_c6_places_stories.sql', coalesce((exists (select 1 from pg_proc where proname='content_import_story' and pronamespace='public'::regnamespace)), false)),
-  ('0099_shop_manager.sql', coalesce((to_regclass('public.shop_catalog') is not null), false))
+  ('0099_shop_manager.sql', coalesce((to_regclass('public.shop_catalog') is not null), false)),
+  ('0100_style_looks.sql', coalesce((to_regclass('public.style_boosts') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

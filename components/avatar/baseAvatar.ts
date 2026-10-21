@@ -1,29 +1,34 @@
-// The new base bodies (step 2 of the avatar upgrade, docs/shop-manager.md section 5; owner, Oct 21): one bald, skinned
-// body per presentation (public/avatars/body/, built by scripts/build-base-avatars.mjs), with a 24-bone skeleton,
-// a baked texture and a walk. It returns the same AvatarParts as the modeled and procedural avatars, so Room3D and
-// Avatar3D pose it the same way (legs, knees, arms, forearms, hips, chest and head stand-ins on top of the clip).
-//   * Skin tone: the texture's skin is recolored to the Look's (a shader keys on the baked orange, keeping its shading).
-//   * Until garment templates exist (stages 3 and 4), the baked grey basics take the outfit's colors by body region
-//     (top, bottom, shoes from each vertex's main bone), and the brows take the hair color.
+// The new base bodies (docs/shop-manager.md section 5; owner, Oct 21): one bald, barefoot body per presentation in a
+// plain grey base layer (public/avatars/body/, built by scripts/build-base-avatars.mjs from assets/avatar-animations.json),
+// with a 24-bone skeleton and a matte texture. It returns the same AvatarParts as the modeled and procedural avatars,
+// so Room3D and Avatar3D pose it the same way (legs, knees, arms, forearms, hips, chest and head stand-ins on top of
+// the clip).
+//   * Skin tone: the texture's skin is recolored to the Look's (a shader keys on the baked orange, keeping its shading);
+//     the brows take the hair color. The base layer itself is never recolored.
+//   * Clothes are garment templates (scripts/garments.mjs, scripts/wardrobe.mjs), cut from the same body and sharing its
+//     skeleton, so they bend with every pose and body type; the skin they hide isn't drawn (each vertex's cover bits).
+//     Shoes without a template of their own are sneakers.
 //   * Hair is grown from each body's own scalp (scripts/hair.mjs: public/avatars/hair/), so it fits the head; under a
 //     hat only its lengths show, and full coverings hide it. Hats, coverings and glasses are the game's own
 //     (buildAvatar), fitted to the head measured from the mesh.
-//   * Body types stretch the skeleton, as before; the idle is made from the walk (arms at rest, a slow breath).
-//   * Low-graphics mode loads the lighter file (half the triangles, a 512 px texture).
-//   * Garment templates (stage 3: the hoodie) are cut from the same body by scripts/garments.mjs and share its
-//     skeleton, so they bend with every pose and body type; the skin they hide is skipped (each vertex's cover bits).
+//   * Body types never scale the head or neck (owner, Oct 21): every vertex of the body and its garments gets how it
+//     moves to be wider (the torso, the arms and legs: lib/bodyTypes.ts), added by the shader before skinning; height is
+//     the whole figure's scale.
+//   * Animations: {m,f}-anims.glb holds the walk and every clip, retargeted onto the body's skeleton (scripts/retarget.mjs).
+//   * Low-graphics mode loads the lighter files (fewer triangles, a 512 px texture).
 
 import {
-  AnimationClip, AnimationMixer, Box3, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D,
-  Quaternion, QuaternionKeyframeTrack, Skeleton, SkinnedMesh, Vector3, VectorKeyframeTrack, type AnimationAction, type Bone,
-  type Material,
+  AnimationMixer, Box3, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
+  Skeleton, SkinnedMesh, Vector2, Vector3, type AnimationAction, type BufferGeometry, type Bone, type Material,
+  type WebGLProgramParametersWithUniforms,
 } from "three";
 import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { GARMENT_TEMPLATES, modelSex } from "@/lib/avatarCatalog";
+import { garmentsFor, modelSex } from "@/lib/avatarCatalog";
 import { lowGraphics } from "@/lib/graphics";
+import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 import type { ModelAvatarOptions } from "./modelAvatar";
 
@@ -40,52 +45,147 @@ function load(path: string): Promise<GLTF> {
   return p;
 }
 
-/** The baked colors the shader keys on (measured from the masters' textures). */
+/** The baked skin color the shader keys on (measured from the bodies' textures). */
 const SKIN_REF = { m: "rgb(226,140,89)", f: "rgb(253,158,98)" } as const;
-const GREY_REF = "rgb(147,147,146)";
 
-/** Body types: width (x, z) and height multipliers, with the head kept its own size (as the modeled avatar). */
-export const BASE_BUILD_SCALE: Record<Look["build"], { w: number; h: number }> = {
-  athletic: { w: 1, h: 1 }, curvy: { w: 1.05, h: 1 }, slim: { w: 0.9, h: 1.01 }, broad: { w: 1.12, h: 1 }, plus: { w: 1.22, h: 0.99 }, petite: { w: 0.94, h: 0.94 },
+/** Body types: how much wider the torso (w) and the arms and legs (l) get, and the whole figure's height (h). */
+export const BASE_BUILD_SCALE: Record<Look["build"], { w: number; l: number; h: number }> = {
+  athletic: { w: 1, l: 1, h: 1 }, curvy: { w: 1.07, l: 1.05, h: 1 }, slim: { w: 0.9, l: 0.9, h: 1.01 }, broad: { w: 1.14, l: 1.1, h: 1 },
+  plus: { w: 1.24, l: 1.2, h: 0.99 }, petite: { w: 0.95, l: 0.95, h: 0.94 },
 };
-/** Hip height of each body standing (the Hips bone), for sitting; the masters are 1.75 (m) and 1.68 (f) tall. */
-export const BASE_HIP_Y: Record<"m" | "f", number> = { m: 0.94, f: 0.92 };
+/** Hip height of each body standing (the Hips bone), for sitting. */
+export const BASE_HIP_Y: Record<"m" | "f", number> = { m: 0.97, f: 0.97 };
+
+/** The body-type offsets (widenAttrs) added before skinning, for a body or garment material sharing `widen`. */
+function widenVertex(sh: WebGLProgramParametersWithUniforms, widen: { value: Vector2 }) {
+  sh.uniforms.uWiden = widen;
+  sh.vertexShader = sh.vertexShader
+    .replace("void main() {", "attribute vec3 widen;\nattribute vec3 widenl;\nuniform vec2 uWiden;\nvoid main() {")
+    .replace("#include <begin_vertex>", "#include <begin_vertex>\n  transformed += widen * uWiden.x + widenl * uWiden.y;");
+}
+/** The body-type offsets of a skinned mesh's vertices (lib/bodyTypes.ts), worked out once per geometry from its own
+ *  skin in the bind pose, as the attributes the shader reads. */
+function widenAttrs(mesh: SkinnedMesh) {
+  const g = mesh.geometry;
+  if (g.getAttribute("widen")) return;
+  const pos = g.getAttribute("position"), joints = g.getAttribute("skinIndex"), weights = g.getAttribute("skinWeight");
+  const { bones, boneInverses } = mesh.skeleton;
+  // A bone's bind position in the mesh's own space (the files are quantized: the inverse bind matrices carry the
+  // scale). The bind matrix itself, not bindMatrixInverse: in "attached" mode three.js keeps that one at the mesh's
+  // current world matrix (the rig's centimeters).
+  const unbind = mesh.bindMatrix.clone().invert();
+  const at = new Map(bones.map((b, i) => {
+    const v = new Vector3().applyMatrix4(boneInverses[i].clone().invert()).applyMatrix4(unbind);
+    return [b.name, [v.x, v.y, v.z] as V3];
+  }));
+  const { torso, limb } = widenOffsets(
+    pos.count, (i) => [pos.getX(i), pos.getY(i), pos.getZ(i)], (i, k) => joints.getComponent(i, k), (i, k) => weights.getComponent(i, k),
+    bones.map((b) => b.name), (name) => at.get(name),
+  );
+  g.setAttribute("widen", new BufferAttribute(torso, 3));
+  g.setAttribute("widenl", new BufferAttribute(limb, 3));
+}
 
 /** The procedural head's size in its own space (buildAvatar's skull: radius 0.19, scaled 0.92, 1.12, 0.98). */
 const PROC_HEAD = new Vector3(0.175, 0.213, 0.186);
 
-/** The garment's details from its _PAT attribute (scripts/garments.mjs): ribbed hem and cuffs, the kangaroo pocket,
- *  the hood a shade off, the drawstrings in the accent, the inside darker. */
-function garmentMaterial(top: string, accent: string): MeshStandardMaterial {
-  const mat = new MeshStandardMaterial({ roughness: 0.92, metalness: 0, side: DoubleSide });
-  const u = { uTop: { value: new Color(top) }, uAccent: { value: new Color(accent) } };
+/** A garment's details from its _PAT attribute (scripts/garments.mjs, scripts/wardrobe.mjs), by its template's kind
+ *  (GARMENT_TEMPLATES): ribbed bands, the hoodie's pocket, zips, buttons, lapels, quilting, pleats, waistbands, soles.
+ *  Lines are antialiased (fwidth); the inside is darker. */
+function garmentMaterial(kind: number, color: string, accent: string, widen: { value: Vector2 }, hideAbove = 9): MeshStandardMaterial {
+  const mat = new MeshStandardMaterial({ roughness: kind === 8 ? 0.55 : 0.92, metalness: 0, side: DoubleSide });
+  const u = { uTop: { value: new Color(color) }, uAccent: { value: new Color(accent) }, uKind: { value: kind }, uHideAbove: { value: hideAbove } };
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute vec4 pat;\nvarying vec4 vPat;\nvoid main() {\n  vPat = pat;");
+    widenVertex(sh, widen);
     sh.fragmentShader = sh.fragmentShader
-      .replace("void main() {", "uniform vec3 uTop; uniform vec3 uAccent;\nvarying vec4 vPat;\nvoid main() {")
+      .replace("void main() {", `uniform vec3 uTop; uniform vec3 uAccent; uniform int uKind; uniform float uHideAbove;
+varying vec4 vPat;
+// 1 on a line at "at" (half-width w), soft-edged.
+float lineAt(float v, float at, float w) { float a = fwidth(v) * 1.2 + 0.0004; return 1.0 - smoothstep(w, w + a, abs(v - at)); }
+// 1 inside a round button of radius r at p.
+float dotAt(vec2 q, vec2 p, float r) { float d = length(q - p); float a = fwidth(d) * 1.2 + 0.0004; return 1.0 - smoothstep(r, r + a, d); }
+void main() {`)
       .replace("#include <map_fragment>", `#include <map_fragment>
   {
     vec3 c = uTop;
-    float part = vPat.w;
-    if (part > 0.75) c = uAccent;
-    else if (part > 0.25) c = uTop * 0.93;
-    else {
-      // Ribbed bands: 4 cm at the hem and cuffs, with fine ribs and a soft seam where they start (antialiased).
-      float d = vPat.x;
+    float part = vPat.w, d = vPat.x;
+    vec2 q = vPat.yz; // across the front (1 off it), height above the top of the legs
+    // A bottom under a top isn't drawn above the top's hem (the two bend a little differently and would cross).
+    if (uKind >= 9 && uKind <= 12 && q.y > uHideAbove) discard;
+    // On the front only: where a triangle spans the front's coordinates and the back's marker, q.x jumps.
+    bool front = q.x < 0.9 && fwidth(q.x) < 0.02;
+    if (part > 0.75) c = uAccent;                              // drawstrings
+    else if (part > 0.4) c = uTop * 0.93;                      // the hood
+    else if (part > 0.2) c = uKind == 5 ? uAccent : uTop * 0.9; // collars (a zip jacket's in its accent)
+    else if (uKind == 1) {
+      // The hoodie: ribbed hem and cuffs, the kangaroo pocket.
       float band = 1.0 - smoothstep(0.038, 0.042, d);
-      c *= mix(1.0, 0.86 + 0.05 * sin(vPat.y * 900.0), band);
-      float seam = 1.0 - smoothstep(0.0, fwidth(d) * 1.5 + 0.0005, abs(d - 0.04));
-      c *= 1.0 - 0.12 * seam;
-      // The kangaroo pocket: a trapezoid on the front, 3.5 to 17 cm above the hem, a soft stitched edge.
-      vec2 q = vPat.yz;
+      c *= mix(1.0, 0.86 + 0.05 * sin(q.x * 900.0), band);
+      c *= 1.0 - 0.12 * lineAt(d, 0.04, 0.0);
       float t = (q.y - 0.035) / 0.135;
       float hw = mix(0.15, 0.1, clamp(t, 0.0, 1.0));
       float inside = min(min(hw - abs(q.x), q.y - 0.035), 0.17 - q.y);
       float aa = fwidth(inside) * 1.5 + 0.0005;
       float pocket = smoothstep(-aa, aa, inside);
-      float edge = (1.0 - smoothstep(0.0, aa * 2.0, abs(inside - 0.004))) * pocket;
-      c *= 1.0 - 0.04 * pocket - 0.12 * edge;
+      c *= 1.0 - 0.04 * pocket - 0.12 * (1.0 - smoothstep(0.0, aa * 2.0, abs(inside - 0.004))) * pocket;
+    } else if (uKind == 2 || uKind == 3) {
+      // Tee and crop top: a stitched hem and sleeve ends.
+      c *= 1.0 - 0.1 * lineAt(d, 0.016, 0.0);
+    } else if (uKind == 4) {
+      // Vest: a placket with buttons, two welt pockets, bound edges.
+      c *= 1.0 - 0.12 * (1.0 - smoothstep(0.012, 0.014, d));
+      if (front) {
+        c *= 1.0 - 0.15 * lineAt(q.x, 0.0, 0.0006);
+        for (int i = 0; i < 5; i++) c = mix(c, uAccent, dotAt(q, vec2(0.012, 0.06 + float(i) * 0.06), 0.006));
+        c *= 1.0 - 0.18 * lineAt(q.y, 0.13, 0.0012) * step(0.05, abs(q.x)) * step(abs(q.x), 0.13);
+      }
+    } else if (uKind == 5) {
+      // Zip jacket (bomber): wide ribbed cuffs and hem, a zip up the middle.
+      float band = 1.0 - smoothstep(0.042, 0.046, d);
+      c *= mix(1.0, 0.82 + 0.06 * sin(q.x * 900.0 + q.y * 600.0), band);
+      if (front) c = mix(c, uAccent, lineAt(q.x, 0.0, 0.003));
+    } else if (uKind == 6) {
+      // Cardigan: ribbed edges all round the opening, five buttons below it.
+      float band = 1.0 - smoothstep(0.028, 0.032, d);
+      c *= mix(1.0, 0.86 + 0.06 * sin(q.y * 700.0), band);
+      if (front) for (int i = 0; i < 5; i++) c = mix(c, uAccent, dotAt(q, vec2(0.0, 0.05 + float(i) * 0.055), 0.0075));
+    } else if (uKind == 7) {
+      // Blazer: lapels a shade darker (the band along the open front, up high), two buttons, pocket flaps.
+      c *= 1.0 - 0.16 * (1.0 - smoothstep(0.042, 0.046, d)) * smoothstep(0.26, 0.28, q.y);
+      c *= 1.0 - 0.1 * (1.0 - smoothstep(0.006, 0.008, d));
+      if (front) {
+        for (int i = 0; i < 2; i++) c = mix(c, uAccent, dotAt(q, vec2(0.0, 0.17 + float(i) * 0.09), 0.008));
+        c *= 1.0 - 0.22 * lineAt(q.y, 0.09, 0.001) * step(0.06, abs(q.x)) * step(abs(q.x), 0.15);
+      }
+    } else if (uKind == 8) {
+      // Puffer: quilted channels with a soft puff, a zip up the middle.
+      float ch = fract(q.y / 0.075);
+      c *= 0.84 + 0.16 * sin(ch * 3.14159);
+      c *= 1.0 - 0.25 * lineAt(ch, 0.0, 0.02);
+      if (front) c = mix(c, uAccent, lineAt(q.x, 0.0, 0.003));
+    } else if (uKind >= 9 && uKind <= 11) {
+      // Trousers, shorts, leggings: a waistband (near the top edge), the fly on trousers, stitched cuffs.
+      bool top = q.y > -0.15;
+      float wb = top ? 1.0 - smoothstep(0.032, 0.036, d) : 0.0;
+      c *= 1.0 - 0.1 * wb - 0.14 * (top ? lineAt(d, 0.034, 0.0) : lineAt(d, 0.015, 0.0));
+      if (uKind == 9 && front && q.y > -0.03) c *= 1.0 - 0.14 * lineAt(q.x, 0.018, 0.0006);
+    } else if (uKind == 12) {
+      // Skirt: knife pleats round it, a waistband.
+      float a = q.x;
+      c *= 0.9 + 0.1 * abs(sin(a * 3.14159 * 14.0));
+      c *= 1.0 - 0.12 * (q.y > -0.05 ? 1.0 - smoothstep(0.028, 0.032, d) : 0.0);
+    } else if (uKind == 13) {
+      // Boots: a chunky sole in the accent, a padded top.
+      c = mix(c, uAccent, 1.0 - smoothstep(0.028, 0.032, q.y));
+      c *= 1.0 - 0.12 * (1.0 - smoothstep(0.02, 0.024, d));
+    } else if (uKind == 14) {
+      // Sneakers: a white rubber sole with a stripe in the accent, a padded collar.
+      float sole = 1.0 - smoothstep(0.022, 0.026, q.y);
+      c = mix(c, vec3(0.94, 0.93, 0.9), sole);
+      c = mix(c, uAccent, lineAt(q.y, 0.03, 0.002));
+      c *= 1.0 - 0.14 * (1.0 - smoothstep(0.012, 0.016, d));
     }
     if (!gl_FrontFacing) c *= 0.55;
     diffuseColor.rgb = c;
@@ -127,6 +227,7 @@ function hairMaterial(color: string): MeshStandardMaterial {
 function attachPart(from: SkinnedMesh, mesh: SkinnedMesh, bones: Map<string, Bone>, material: Material): SkinnedMesh {
   const g = from.geometry;
   if (!g.getAttribute("pat")) g.setAttribute("pat", g.getAttribute("_pat"));
+  widenAttrs(from);
   const part = new SkinnedMesh(g, material);
   part.position.copy(mesh.position); part.quaternion.copy(mesh.quaternion); part.scale.copy(mesh.scale);
   part.castShadow = true;
@@ -136,67 +237,14 @@ function attachPart(from: SkinnedMesh, mesh: SkinnedMesh, bones: Map<string, Bon
   return part;
 }
 
-/** Body regions for the outfit colors, by a vertex's main bone: the shins (2.75, between the bottom and the shoes so
- *  blending across the knee and ankle never crosses the head's code) carry the baked socks, worn in the shoe color. */
-const REGION_OF = (name: string): number =>
-  /Foot|Toe/i.test(name) ? 3 : /(Left|Right)Leg$/.test(name) ? 2.75 : /UpLeg/i.test(name) || /^Hips$/i.test(name) ? 2 : /^Head$|head_end|headfront/.test(name) ? 4 : 1;
-
-/** Marks each vertex's region (1 top, 2 bottom, 2.75 shins, 3 shoes, 4 head) from its heaviest bone. Once per geometry. */
+/** Each vertex's region (scripts/wardrobe.mjs bodyRegions, built with the files): 4 is the head, for the brows. */
 function markRegions(mesh: SkinnedMesh) {
   const g = mesh.geometry;
-  if (g.getAttribute("region")) return;
-  const joints = g.getAttribute("skinIndex"), weights = g.getAttribute("skinWeight");
-  const names = mesh.skeleton.bones.map((b) => b.name);
-  const out = new Float32Array(joints.count);
-  for (let i = 0; i < joints.count; i++) {
-    let best = 0, bw = -1;
-    for (let k = 0; k < 4; k++) { const w = weights.getComponent(i, k); if (w > bw) { bw = w; best = joints.getComponent(i, k); } }
-    out[i] = REGION_OF(names[best] ?? "");
-  }
-  g.setAttribute("region", new BufferAttribute(out, 1));
+  if (!g.getAttribute("region")) g.setAttribute("region", g.getAttribute("_region") ?? new BufferAttribute(new Float32Array(g.getAttribute("position").count), 1));
 }
 
-/** The idle: the walk's average upper-body pose (arms at rest), legs at their bind pose, and a slow breath. */
-function makeIdle(walk: AnimationClip, bones: Map<string, Bone>): AnimationClip {
-  const tracks: (QuaternionKeyframeTrack | VectorKeyframeTrack)[] = [];
-  const upper = /Spine|neck|Head|Shoulder|Arm|Hand/;
-  for (const t of walk.tracks) {
-    const [name, prop] = t.name.split(".");
-    if (prop === "quaternion") {
-      const bone = bones.get(name);
-      let q = new Quaternion();
-      if (upper.test(name)) {
-        // The mean rotation over the cycle (sign-aligned to the first key).
-        const v = t.values, acc = new Quaternion(0, 0, 0, 0), first = new Quaternion().fromArray(v, 0);
-        for (let i = 0; i < v.length; i += 4) {
-          const k = new Quaternion().fromArray(v, i);
-          const s = k.dot(first) < 0 ? -1 : 1;
-          acc.set(acc.x + s * k.x, acc.y + s * k.y, acc.z + s * k.z, acc.w + s * k.w);
-        }
-        q = acc.normalize();
-      } else if (bone) q.copy(bone.quaternion);
-      else continue;
-      // The chest breathes: a small nod forward and back every four seconds. Every other bone sways by a hair, so the
-      // pose keeps changing: three.js only rewrites a property whose value changed, and update() resets the driven
-      // bones every frame, so a perfectly still clip would leave them at the bind pose.
-      const keys = [0, 2, 4];
-      const sway = /^Spine$/.test(name) ? 0.025 : 0.0002;
-      const values: number[] = [];
-      for (const time of keys) {
-        const b = time === 2 ? q.clone().multiply(new Quaternion().setFromEuler(new Euler(sway, 0, 0))) : q;
-        values.push(b.x, b.y, b.z, b.w);
-      }
-      tracks.push(new QuaternionKeyframeTrack(t.name, keys, values));
-    } else if (prop === "position" && /Hips/.test(name)) {
-      const v = t.values, n = v.length / 3, avg = [0, 0, 0];
-      for (let i = 0; i < v.length; i += 3) { avg[0] += v[i] / n; avg[1] += v[i + 1] / n; avg[2] += v[i + 2] / n; }
-      tracks.push(new VectorKeyframeTrack(t.name, [0, 2, 4], [...avg, avg[0], avg[1] + 0.0004, avg[2], ...avg]));
-    }
-  }
-  return new AnimationClip("Idle", 4, tracks);
-}
-
-export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions = {}): AvatarParts {
+/** `bare` (previews only): the body in its base layer, nothing worn. */
+export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: boolean } = {}): AvatarParts {
   const outfit: Outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
   const sex = modelSex(look);
   // The procedural avatar, for its hair, headwear and pedestal only (whole outfits' hats arrive with stage 4).
@@ -223,12 +271,14 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions = {}): Avat
 
   const materials: Material[] = [];
   let mixer: AnimationMixer | null = null;
-  let actions: Partial<Record<"idle" | "walk", AnimationAction>> = {};
+  const actions: Record<string, AnimationAction> = {};
   let motion: "idle" | "walk" = "idle";
+  let playing: string | null = null;
   const driven: { bone: Object3D; rest: Quaternion; src: Object3D; restEuler: [number, number, number] }[] = [];
   let model: Object3D | null = null;
   let disposed = false;
   const build = BASE_BUILD_SCALE[look.build] ?? BASE_BUILD_SCALE.athletic;
+  const widen = { value: new Vector2(build.w - 1, build.l - 1) };
 
   const ready = (async () => {
     const gltf = await load(`/avatars/body/${sex}${lowGraphics() ? "-low" : ""}.glb`);
@@ -245,22 +295,23 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions = {}): Avat
     mesh.receiveShadow = true;
     mesh.frustumCulled = false;
 
-    // Recolor: skin to the Look's tone, the grey basics to the outfit by region, the shoes, the brows to the hair.
+    // Recolor: the skin to the Look's tone and the brows to the hair; the base layer stays as it is.
     const mat = (mesh.material as MeshStandardMaterial).clone();
     mesh.material = mat;
     materials.push(mat);
     const u = {
-      uSkin: { value: new Color(look.skin) }, uSkinRef: { value: new Color(SKIN_REF[sex]) }, uGreyRef: { value: new Color(GREY_REF) },
-      uTop: { value: new Color(outfit.topColor) }, uBottom: { value: new Color(outfit.bottomColor) }, uShoe: { value: new Color(outfit.shoeColor) },
-      uHair: { value: new Color(look.hairColor) }, uCover: { value: 0 },
+      uSkin: { value: new Color(look.skin) }, uSkinRef: { value: new Color(SKIN_REF[sex]) }, uHair: { value: new Color(look.hairColor) },
+      uCover: { value: 0 },
     };
     const geo = mesh.geometry;
     if (!geo.getAttribute("cover")) geo.setAttribute("cover", geo.getAttribute("_cover") ?? new BufferAttribute(new Float32Array(geo.getAttribute("position").count), 1));
+    widenAttrs(mesh);
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, u);
       sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute float region;\nattribute float cover;\nvarying float vRegion;\nflat varying float vCover;\nvoid main() {\n  vRegion = region;\n  vCover = cover;");
+      widenVertex(sh, widen);
       sh.fragmentShader = sh.fragmentShader
-        .replace("void main() {", `uniform vec3 uSkin; uniform vec3 uSkinRef; uniform vec3 uGreyRef; uniform vec3 uTop; uniform vec3 uBottom; uniform vec3 uShoe; uniform vec3 uHair; uniform int uCover;
+        .replace("void main() {", `uniform vec3 uSkin; uniform vec3 uSkinRef; uniform vec3 uHair; uniform int uCover;
 varying float vRegion;
 flat varying float vCover;
 float lumOf(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
@@ -270,47 +321,38 @@ void main() {`)
   if ((int(vCover + 0.5) & uCover) != 0) discard;
   {
     vec3 c = diffuseColor.rgb;
-    float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
-    float sat = mx > 0.001 ? (mx - mn) / mx : 0.0;
     float lum = lumOf(c);
     // Skin: the baked orange, keyed by its color direction; its light and shade carry over.
     float d = distance(normalize(c + 1e-4), normalize(uSkinRef));
     float skinW = smoothstep(0.26, 0.12, d) * step(0.01, lum);
     vec3 skin = uSkin * clamp(lum / lumOf(uSkinRef), 0.0, 1.6);
-    // The grey basics and white shoes take the outfit's colors by region.
-    float grey = 1.0 - smoothstep(0.06, 0.16, sat);
-    vec3 cloth = vRegion < 1.5 ? uTop : vRegion < 2.5 ? uBottom : uShoe;
-    float ref = vRegion > 2.5 ? 0.9 : lumOf(uGreyRef);
-    // Half the texture's light and shade: the baked basics are noisy (folds, frayed edges, dark socks).
-    vec3 dyed = cloth * mix(1.0, clamp(lum / ref, 0.0, 1.4), vRegion > 2.5 ? 0.3 : 0.5);
-    // AI textures are noisy, so the region decides, not the texel: anything on the body that isn't skin is cloth.
-    float clothW = step(0.5, vRegion) * step(vRegion, 3.5) * step(0.02, lum) * max(grey, 0.85);
     // Brows and lashes (dark, on the head) take the hair color.
     float browW = step(3.5, vRegion) * (1.0 - smoothstep(0.03, 0.08, lum)) * (1.0 - skinW);
-    vec3 brow = uHair * 0.55;
     c = mix(c, skin, skinW);
-    c = mix(c, dyed, clothW * (1.0 - skinW));
-    c = mix(c, brow, browW);
+    c = mix(c, uHair * 0.55, browW);
     diffuseColor.rgb = c;
   }`);
     };
     mat.customProgramCacheKey = () => "cc-base-avatar";
 
     // The garment, on the body's own bones (whole Shop outfits wait for stage 4).
-    const garment = outfit.set ? undefined : GARMENT_TEMPLATES[outfit.top];
+    // The outfit's garments, on the body's own bones; the skin they hide isn't drawn.
     const low = lowGraphics() ? "-low" : "";
-    if (garment) {
-      const g = await load(`/avatars/garments/${garment.file}-${sex}${low}.glb`).catch(() => null);
+    const worn = opts.bare ? [] : garmentsFor(outfit);
+    const files = await Promise.all(worn.map((g) => load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null)));
+    if (disposed) return;
+    let cover = 0;
+    worn.forEach((g, k) => {
       let src: SkinnedMesh | null = null;
-      g?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
-      if (disposed) return;
-      if (src) {
-        const gm = garmentMaterial(outfit.topColor, outfit.topAccent);
-        materials.push(gm);
-        attachPart(src, mesh, bones, gm);
-        u.uCover.value = garment.cover;
-      }
-    }
+      files[k]?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
+      if (!src) return;
+      const topHem = g.slot === "bottom" ? worn.find((w) => w.slot === "top")?.hem : undefined;
+      const gm = garmentMaterial(g.kind, g.color, g.accent, widen, topHem === undefined ? 9 : topHem + 0.03);
+      materials.push(gm);
+      attachPart(src, mesh, bones, gm);
+      cover |= g.cover;
+    });
+    u.uCover.value = cover;
 
     // The hair, grown from this body's scalp: the style, and its lengths; under a hat, the lengths only.
     const hatOn = !!proc.headwear?.children.length;
@@ -344,9 +386,8 @@ void main() {`)
       headBone.add(holder);
     }
 
-    // Size, body type and facing (the masters face +z, like the other avatars).
-    rig.scale.set(build.w, build.h, build.w);
-    if (headBone && build.w !== 1) headBone.scale.set(1 / build.w, 1, 1 / build.w);
+    // Height (the whole figure; width is the shader's) and facing (the bodies face +z, like the other avatars).
+    rig.scale.setScalar(build.h);
     body.add(rig);
     model = rig;
 
@@ -369,15 +410,20 @@ void main() {`)
     drive(headBone, head);
 
     mixer = new AnimationMixer(rig);
-    const walk = gltf.animations[0];
-    const idle = walk ? makeIdle(walk, bones) : undefined;
-    actions = { idle: idle && mixer.clipAction(idle), walk: walk && mixer.clipAction(walk) };
-    actions[motion]?.play();
+    const anims = await load(`/avatars/body/${sex}-anims.glb`).catch(() => null);
+    if (disposed) return;
+    for (const clip of anims?.animations ?? []) actions[clip.name] = mixer.clipAction(clip);
+    (actions[playing ?? motion] ?? actions.idle)?.play();
     mixer.update(Math.random() * 2);
   })().catch(() => {
     if (!disposed) body.add(proc.body);
   });
 
+  const fade = (from: AnimationAction | undefined, to: AnimationAction | undefined) => {
+    if (!to || to === from) return;
+    to.reset().play();
+    if (from) to.crossFadeFrom(from, 0.25, false);
+  };
   const q = new Quaternion();
   const pq = new Quaternion();
   const delta = new Quaternion();
@@ -391,12 +437,16 @@ void main() {`)
     ready: ready.then(() => undefined),
     setMotion(next) {
       if (next === motion) return;
-      const from = actions[motion];
-      const to = actions[next];
+      const from = actions[playing ?? motion] ?? actions[motion];
       motion = next;
-      if (!to) return;
-      to.reset().play();
-      if (from) to.crossFadeFrom(from, 0.2, false);
+      if (!playing || !actions[playing]) fade(from, actions[next]);
+    },
+    play(clip) {
+      if (clip === playing) return;
+      const from = actions[playing ?? motion] ?? actions[motion];
+      // Kept even before the clips have loaded; a clip the body doesn't have leaves the idle or walk on.
+      playing = clip;
+      fade(from, actions[playing ?? motion] ?? actions[motion]);
     },
     update(dt) {
       if (!mixer || !model) return;

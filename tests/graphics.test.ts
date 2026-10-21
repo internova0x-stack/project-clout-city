@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
 import { lowGraphics, newBodies, renderQuality, weakDevice } from "../lib/graphics.ts";
 
 test("only clearly weak phones get low graphics by themselves", () => {
@@ -24,6 +26,25 @@ test("every base body ships in full and low detail, and stays small", () => {
       const p = `public/avatars/body/${sex}${low}.glb`;
       assert.ok(existsSync(p), p);
       assert.ok(statSync(p).size < (low ? 450_000 : 700_000), `${p} is ${statSync(p).size} bytes`);
+    }
+  }
+});
+
+test("each body has one animation file: the walk and every clip in assets/avatar-animations.json, on its skeleton", async () => {
+  const io = new NodeIO().registerExtensions(ALL_EXTENSIONS as never);
+  const spec = JSON.parse(readFileSync("assets/avatar-animations.json", "utf8"));
+  for (const [sex, body] of [["m", "male"], ["f", "female"]]) {
+    const p = `public/avatars/body/${sex}-anims.glb`;
+    assert.ok(statSync(p).size < 500_000, `${p} is ${statSync(p).size} bytes`);
+    const anims = (await io.read(p)).getRoot();
+    const want = ["walk", ...spec.clips.filter((c: { body: string }) => c.body === body).map((c: { name: string }) => c.name)];
+    assert.deepEqual(anims.listAnimations().map((a) => a.getName()).sort(), want.sort(), `${sex}: clips`);
+    assert.equal(anims.listMeshes().length, 0, `${sex}: no body in the animation file`);
+    // Every channel drives a bone of the body (by name), and only the hips move.
+    const bones = new Set((await io.read(`public/avatars/body/${sex}.glb`)).getRoot().listSkins()[0].listJoints().map((j) => j.getName()));
+    for (const a of anims.listAnimations()) for (const c of a.listChannels()) {
+      assert.ok(bones.has(c.getTargetNode()!.getName()), `${sex} ${a.getName()}: ${c.getTargetNode()!.getName()} is a bone of the body`);
+      if (c.getTargetPath() === "translation") assert.equal(c.getTargetNode()!.getName(), "Hips");
     }
   }
 });
