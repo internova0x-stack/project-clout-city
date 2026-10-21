@@ -7,7 +7,7 @@ import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collecto
 import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
-import { milesBetween, skipCost, travelQuote } from "./travel.ts";
+import { lineFor, milesBetween, skipCost, travelQuote } from "./travel.ts";
 import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, cityError, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
@@ -112,11 +112,16 @@ export function createSimApi(
   initial: CityState, story: () => StoryFeed | null = () => null,
   /** Daily tasks 2.0 (lib/goalsSim.ts): a guest-list pass used tonight at this club. */
   passTonight: (placeId: string) => boolean = () => false,
+  /** C4: transit delays posted in the preview's News (seconds, by line); `showtime` 1 makes every subway ride have dancers. */
+  transit: { delayFor: (line: string | null) => number; showtimeChance?: number } = { delayFor: () => 0 },
 ): SimApi {
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
   let shiftsToday = 0;
   let tripEnds = 0;
+  // C4: the showtime dancers on this ride, and the day their clout was paid.
+  let showtimeUntil = 0;
+  let showtimePaidOn: string | null = null;
   // #19 clubs: VIP covers paid and VIP visits, by "place:day".
   const vipPaid = new Set<string>();
   const vipSeenOn = new Set<string>();
@@ -205,7 +210,11 @@ export function createSimApi(
       if (!from || !to) return fail("That place isn't on the map.");
       const door = dest ? clubDoor(PLACES.find((x) => x.id === dest)!).doorClout : 0;
       if (p().clout < door && !passTonight(dest!) && !perkOn(s.perks, "door")) return fail(DOOR_CLOUT);
-      const q = travelQuote(mode, milesBetween(from, to), !!p().car_sku);
+      // C4 (migration 0095): the destination's line, its delay, the OMG Card, showtime dancers.
+      const line = lineFor(dest ? PLACES.find((x) => x.id === dest)?.neighborhood : ECONOMY.homes.find((h) => h.id === p().home_id)?.neighborhood);
+      const delay = mode === "subway" ? transit.delayFor(line) : 0;
+      const pass = !!p().transit_pass_until && Date.parse(p().transit_pass_until!) > Date.now();
+      const q = travelQuote(mode, milesBetween(from, to), !!p().car_sku, { delay, pass });
       if (q.unavailable) return fail(mode === "walk" ? "That's too far to walk. Your shoes have filed a complaint." : "You don't have a car. The Shop has some, and so does the subway.");
       if (p().energy < q.energy) return fail("Not enough Energy. Eat something, or sleep it off until tomorrow.");
       if (p().bank_cash < q.fare) return fail("Your card got declined. Loudly.");
@@ -213,7 +222,27 @@ export function createSimApi(
       p().energy -= q.energy;
       p().at_place = dest;
       tripEnds = Date.now() + q.seconds * 1000;
-      return ok({ cash: -q.fare, energy: -q.energy });
+      const showtime = mode === "subway" && showtimePaidOn !== s.today && Math.random() < (transit.showtimeChance ?? CITY_ECONOMY.travel.subway.showtime.chance);
+      showtimeUntil = showtime ? tripEnds + 60_000 : 0;
+      return ok({ cash: -q.fare, energy: -q.energy }).then((r) => (r.ok ? { ...r, trip: { seconds: q.seconds, line: mode === "subway" ? line : null, delay, showtime } } : r));
+    },
+    buyTransitPass(passId) {
+      const pass = CITY_ECONOMY.travel.subway.passes.find((x) => x.id === passId);
+      if (!pass) return fail(cityError("unknown_pass"));
+      if (p().bank_cash < pass.price) return fail("Your card got declined. Loudly.");
+      p().bank_cash -= pass.price;
+      const from = Math.max(Date.now(), p().transit_pass_until ? Date.parse(p().transit_pass_until!) : 0);
+      p().transit_pass_until = new Date(from + pass.days * 86_400_000).toISOString();
+      return ok({ cash: -pass.price });
+    },
+    watchShowtime() {
+      if (showtimeUntil < Date.now()) return fail(cityError("no_showtime"));
+      showtimeUntil = 0;
+      if (showtimePaidOn === s.today) return ok({ clout: 0 });
+      showtimePaidOn = s.today;
+      const clout = CITY_ECONOMY.travel.subway.showtime.clout;
+      p().clout += clout;
+      return ok({ clout });
     },
     skipTrip() {
       const cost = skipCost(Math.ceil((tripEnds - Date.now()) / 1000));

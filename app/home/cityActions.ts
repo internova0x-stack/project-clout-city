@@ -1,6 +1,6 @@
 "use server";
 
-import { cityError, type CityResult, type Gain, type VipEntry } from "@/lib/cityState";
+import { cityError, type CityResult, type Gain, type TripInfo, type VipEntry } from "@/lib/cityState";
 import { loadCityState } from "@/lib/cityServer";
 import type { LottoCard } from "@/lib/lotto";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -67,10 +67,20 @@ export async function equipItem(itemId: number, on: boolean) {
   return run("equip_item", { p_item: itemId, p_on: on });
 }
 export async function travel(placeId: string, mode: string) {
-  return run("travel", { p_place: placeId, p_mode: mode }, (d) => {
-    const r = d as { cash?: number; energy?: number };
-    return { cash: r.cash ?? 0, energy: r.energy ?? 0 } as Gain;
+  let trip: TripInfo | undefined;
+  const r = await run("travel", { p_place: placeId, p_mode: mode }, (d) => {
+    const x = d as { cash?: number; energy?: number; seconds?: number; line?: string | null; delay?: number; showtime?: boolean };
+    // C4 (migration 0095): the server's own trip length (a line's delay included) and any showtime dancers.
+    if (typeof x.seconds === "number") trip = { seconds: x.seconds, line: x.line ?? null, delay: x.delay ?? 0, showtime: !!x.showtime };
+    return { cash: x.cash ?? 0, energy: x.energy ?? 0 } as Gain;
   });
+  return r.ok ? { ...r, trip } : r;
+}
+export async function buyTransitPass(pass: string) {
+  return run("buy_transit_pass", { p_pass: pass }, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }) as Gain);
+}
+export async function watchShowtime() {
+  return run("showtime_watch", {}, (d) => ({ clout: (d as { clout?: number }).clout ?? 0 }) as Gain);
 }
 export async function skipTrip() {
   return run("skip_trip", {}, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }) as Gain);
