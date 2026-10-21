@@ -201,5 +201,11 @@ own details and hat (`SET_LOOKS` in lib/avatarCatalog.ts), no longer a character
 when sitting; `overalls`, worn over the top), details by `GARMENT_DETAILS` (hi-vis bands, ripped knees, dress shoes, a
 quilted suit, a plain robe) and hats built in the head's space like the caps (components/avatar/setHats.ts: hard hat,
 cowboy, explorer, helmet, witch, hood, space helmet, crown). A faith or culture covering always stays; the hat steps
-aside. `/preview/moves?outfit=sets` shows all 11 on both bodies. New clips must be made on these bodies
+aside. `/preview/moves?outfit=sets` shows all 11 on both bodies. Shop accessories (Oct 21, "go"): the 22 catalog accessories (hats, the balaclava, glasses, earrings, necklaces, the
+choker and scarf, bags, the watch) have shapes and colors in `lib/accessories.ts`; components/avatar/accessories.ts draws
+head pieces in the head's space and makes neck, hand and wrist pieces for each body's measurements (`measureBody` in
+baseAvatar: neck base, chest, hip, wrist; bags in the right hand at the idle pose), pinned to a bone. A Shop hat steps
+aside for a faith or culture covering and beats an outfit's hat; Shop glasses replace the Look's. They stay locked
+(wearable false) until the switch-on migration, which also lets save_look take the accessories category.
+`/preview/moves?outfit=accessories&pick=a,b` previews them. New clips must be made on these bodies
 (same 24 bones); add them to the JSON file and rebuild.

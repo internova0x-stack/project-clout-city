@@ -8,7 +8,8 @@
 // hairstyle (columns) on both bodies from the front and the back, and under a cap. ?outfit=wardrobe shows every
 // everyday template (stage 4): eight looks (columns) on both bodies standing, sitting and walking. ?outfit=anims shows
 // both bodies (owner, Oct 21: assets/avatar-animations.json), in their base layer and dressed, standing, walking and
-// doing each clip. ?outfit=sets shows every whole Shop outfit on both bodies, standing, sitting and walking.
+// doing each clip. ?outfit=sets shows every whole Shop outfit on both bodies, standing, sitting and walking;
+// ?outfit=accessories every Shop accessory the same way.
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -19,6 +20,7 @@ import { dance, poseLie, poseSit, resetLimbs } from "../room/Room3D";
 import { BUILDS, DEFAULT_LOOK, HAIR_COLORS, SKIN_TONES, type Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
 import { OUTFIT_SETS } from "@/lib/avatarCatalog";
+import { ACCESSORIES } from "@/lib/accessories";
 
 const MOVES = ["Idle", "Walk", "Sit", "Lie down", "Dance: fist pump", "Dance: sway", "Dance: hands up", "Dance: twist", "Back"] as const;
 type Move = (typeof MOVES)[number];
@@ -32,12 +34,13 @@ const DANCE_PHASE = [0.01, 0.14, 0.28, 0.42];
 /** The clips columns (?outfit=anims): the label and the clip played ("idle" and "walk" are the standing and the walk). */
 const CLIPS: [string, string][] = [["Standing", "idle"], ["Walk", "walk"], ["Run", "run"], ["Sit", "sit"], ["Sleep", "sleep"], ["Dance", "dance"], ["Wave", "wave"]];
 
-export function AvatarMoves({ skin = 3, build, outfit, size }: { skin?: number; build?: Look["build"]; outfit?: string; size?: number }) {
+export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: number; build?: Look["build"]; outfit?: string; size?: number; pick?: string }) {
   const garment = outfit === "hoodie";
   const hairs = outfit === "hair";
   const wardrobe = outfit === "wardrobe";
   const anims = outfit === "anims";
   const sets = outfit === "sets";
+  const extras = outfit === "accessories";
   const LOOKS: [string, Partial<Outfit>][] = [
     ["Tee + trousers", { top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", bottom: "pants", bottomColor: "#2E3A55" }],
     ["Crop + skirt", { top: "crop", topColor: "#E86A92", topAccent: "#2B2B2B", bottom: "skirt", bottomColor: "#2B2B2B" }],
@@ -50,7 +53,8 @@ export function AvatarMoves({ skin = 3, build, outfit, size }: { skin?: number; 
   ];
   const WARDROBE_ROWS: [string, "curvy" | "straight", string][] = [["Female", "curvy", "Idle"], ["Female, sitting", "curvy", "Sit"], ["Male", "straight", "Idle"], ["Male, walking", "straight", "Walk"]];
   const HAIR_COLS = ["short", "buzz", "long", "ponytail", "bun", "braids", "curls", "locs", "long + cap"];
-  const moves: string[] = sets ? OUTFIT_SETS.map((o) => o.id) : anims ? CLIPS.map((c) => c[0]) : wardrobe ? LOOKS.map((l) => l[0]) : hairs ? HAIR_COLS : garment ? GARMENT_MOVES : ALL_MOVES;
+  const picked = (all: string[]) => (pick ? all.filter((c) => pick.split(",").includes(c)) : all);
+  const moves: string[] = extras ? picked(Object.keys(ACCESSORIES)) : sets ? picked(OUTFIT_SETS.map((o) => o.id)) : anims ? CLIPS.map((c) => c[0]) : wardrobe ? LOOKS.map((l) => l[0]) : hairs ? HAIR_COLS : garment ? GARMENT_MOVES : ALL_MOVES;
   const cell = size ?? (garment ? 170 : 220);
   const rowsOf = (): { look: Look; outfit?: Outfit; label: string; back?: boolean; move?: string; bare?: boolean }[] => {
     if (anims) return (["curvy", "straight"] as const).flatMap((body, b) => [true, false].map((bare) => ({
@@ -58,7 +62,7 @@ export function AvatarMoves({ skin = 3, build, outfit, size }: { skin?: number; 
       outfit: { ...starterOutfit(getStyle(body === "curvy" ? "pilates_princess" : "bodega_drip"), body, null), accessory: "none" } as Outfit,
       label: `${body === "curvy" ? "Female" : "Male"}${bare ? ", base layer" : ", dressed"}`, bare,
     })));
-    if (sets) return WARDROBE_ROWS.map(([label, body, move], i) => ({
+    if (sets || extras) return WARDROBE_ROWS.map(([label, body, move], i) => ({
       look: { ...DEFAULT_LOOK, body, build: body === "curvy" ? "curvy" : "athletic", skin: SKIN_TONES[(skin + i * 2) % 8], hair: body === "curvy" ? "long" : "short", hairColor: HAIR_COLORS[i % 3], covering: "none", glasses: "none", style: "bodega_drip" } as Look,
       outfit: starterOutfit(getStyle("bodega_drip"), body, null), label, move,
     }));
@@ -96,8 +100,8 @@ export function AvatarMoves({ skin = 3, build, outfit, size }: { skin?: number; 
     const tiles: { scene: Scene; cam: PerspectiveCamera; parts: AvatarParts; move: string; rig: Group }[] = [];
     rows.forEach(({ look: base, outfit: rowOutfit, back, move: rowMove, bare }) => moves.forEach((col) => {
       const look: Look = hairs ? { ...base, hair: col.split(" ")[0] as Look["hair"], covering: col.endsWith("cap") ? "cap" : "none" } : base;
-      const move = sets ? rowMove! : anims ? CLIPS.find((c) => c[0] === col)![1] : hairs ? (back ? "Back" : "Idle") : wardrobe ? rowMove! : col;
-      const o: Outfit | undefined = sets ? { ...rowOutfit!, set: col } : wardrobe ? { ...rowOutfit!, shoes: undefined, set: undefined, ...LOOKS.find((l) => l[0] === col)![1] } as Outfit : rowOutfit;
+      const move = sets || extras ? rowMove! : anims ? CLIPS.find((c) => c[0] === col)![1] : hairs ? (back ? "Back" : "Idle") : wardrobe ? rowMove! : col;
+      const o: Outfit | undefined = extras ? { ...rowOutfit!, top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", extras: [ACCESSORIES[col]] } : sets ? { ...rowOutfit!, set: col } : wardrobe ? { ...rowOutfit!, shoes: undefined, set: undefined, ...LOOKS.find((l) => l[0] === col)![1] } as Outfit : rowOutfit;
       const scene = new Scene();
       scene.background = new Color("#EDE6DA");
       scene.add(new HemisphereLight(0xffffff, 0x8a7f70, 1.6), new AmbientLight(0xffffff, 0.4));
@@ -149,15 +153,15 @@ export function AvatarMoves({ skin = 3, build, outfit, size }: { skin?: number; 
     Promise.all(tiles.map((x) => x.parts.ready)).then(() => { (window as unknown as { movesReady: boolean }).movesReady = true; });
     frame();
     return () => { cancelAnimationFrame(raf); tiles.forEach((x) => x.parts.dispose()); renderer.dispose(); };
-  }, [skin, build, outfit, size, host]);
+  }, [skin, build, outfit, size, pick, host]);
   const page = (
     <main style={{ position: "fixed", inset: 0, overflow: "auto", zIndex: 50, padding: 16, background: "#EDE6DA", color: "#17141C" }}>
-      <h1 className="display-md" style={{ margin: "0 0 8px" }}>{sets ? "Whole outfits on the new bodies" : anims ? "New bodies and their animations" : wardrobe ? "The everyday wardrobe" : hairs ? "Every hairstyle" : garment ? "The hoodie on every body type" : "New bodies: every move"}</h1>
-      <p className="meta" style={{ margin: "0 0 12px" }}>{sets ? "Every Shop outfit set, made from the game's own garments in its colors, with its hat." : anims ? "Each body in its plain base layer, then dressed (clothes, sneakers and hair are rebuilt from the new bodies). Every clip is moved onto the body's own skeleton." : wardrobe ? "Every top, bottom and the boots players can own, cut from the body itself so they bend with every pose." : hairs ? "Grown from each body's own scalp, so it fits the head. Under a hat only the lengths show." : garment
+      <h1 className="display-md" style={{ margin: "0 0 8px" }}>{extras ? "Shop accessories on the new bodies" : sets ? "Whole outfits on the new bodies" : anims ? "New bodies and their animations" : wardrobe ? "The everyday wardrobe" : hairs ? "Every hairstyle" : garment ? "The hoodie on every body type" : "New bodies: every move"}</h1>
+      <p className="meta" style={{ margin: "0 0 12px" }}>{extras ? "Hats, glasses and earrings fit the head; necklaces, the scarf, bags and the watch are made for each body and move with it." : sets ? "Every Shop outfit set, made from the game's own garments in its colors, with its hat." : anims ? "Each body in its plain base layer, then dressed (clothes, sneakers and hair are rebuilt from the new bodies). Every clip is moved onto the body's own skeleton." : wardrobe ? "Every top, bottom and the boots players can own, cut from the body itself so they bend with every pose." : hairs ? "Grown from each body's own scalp, so it fits the head. Under a hat only the lengths show." : garment
         ? "Rows: the four female and four male body types. The hoodie is cut from the body itself, so it bends with every pose."
         : "Top: Female, curvy. Bottom: Male, athletic. The idle is made from the walk; sitting, lying and dancing are the game's own poses."}</p>
       <div style={{ display: "flex" }}>
-        {(garment || hairs || wardrobe || anims || sets) && (
+        {(garment || hairs || wardrobe || anims || sets || extras) && (
           <div style={{ width: 110, paddingTop: 18, fontSize: 12, fontWeight: 700 }}>
             {rows.map((r) => <div key={r.label} style={{ height: cell + 24, display: "flex", alignItems: "center" }}>{r.label}</div>)}
           </div>
