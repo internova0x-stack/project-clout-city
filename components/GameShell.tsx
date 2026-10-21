@@ -19,8 +19,8 @@ import { GAME_CONFIG } from "@/lib/config";
 import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
-import { VIP_LOCKED, activeGig, clubDoor, dueBills, equippedItems, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
-import { outfitWith } from "@/lib/wardrobe";
+import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { outfitFromSkus } from "@/lib/wearing";
 import { modelSex } from "@/lib/avatarCatalog";
 import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
@@ -755,8 +755,9 @@ export function GameShell({
 
   const look = normalizeLook(me.look, me.starting_style);
   const style = getStyle(look.style);
-  const worn = city ? equippedItems(city) : [];
-  const outfit = worn.length ? outfitWith(starterOutfit(style, look.body, look.fit), worn) : undefined;
+  // Everything worn: the code's pieces, the Shop catalog's clothes and accessories (lib/wearing.ts).
+  const wornSkus = city ? city.items.filter((i) => i.equipped && i.category === "fashion").map((i) => i.sku) : [];
+  const outfit = wornSkus.length ? outfitFromSkus(starterOutfit(style, look.body, look.fit), wornSkus) : undefined;
   const home = homeLocation(me.home_id);
   // v0.8 travel (#4): where the player is. Null is home; without migration 0025 there's no travel.
   const travelOn = !!(city && cityApi?.travel && city.player.at_place !== undefined);

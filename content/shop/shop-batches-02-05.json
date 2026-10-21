@@ -31,7 +31,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "hoodie",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085026_2ded7106-c17d-4486-8f05-69ccff5bac37.png",
       "images": {
         "card": "shop/forest-floor-hoodie-256.webp",
@@ -57,7 +57,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "varsity_jacket",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085025_9cf3a276-46f1-479f-b03e-4ab4306271a4.png",
       "images": {
         "card": "shop/alumni-of-nothing-varsity-256.webp",
@@ -82,7 +82,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "mesh_layer",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085027_26dedd09-3723-4e7a-b1b2-8b40ed12f34d.png",
       "images": {
         "card": "shop/fishnet-fridays-top-256.webp",
@@ -108,7 +108,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "corset_top",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085026_7aed59e9-7d2b-4e06-adbb-e0f66477a394.png",
       "images": {
         "card": "shop/chained-heart-corset-256.webp",
@@ -133,7 +133,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "pleated_skirt",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085052_11e18b21-1fc5-46d2-83d5-77871f31d51c.png",
       "images": {
         "card": "shop/study-hall-tartan-skirt-256.webp",
@@ -159,7 +159,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "loafers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085052_8347715c-714a-4bc2-909c-956bb4bd1409.png",
       "images": {
         "card": "shop/honor-roll-loafers-256.webp",
@@ -184,7 +184,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "leggings",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085054_d335292a-a7ce-4ddb-8ef5-9c2a57390ce6.png",
       "images": {
         "card": "shop/mint-condition-leggings-256.webp",
@@ -209,7 +209,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sneakers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085052_69989170-ccf3-4170-99d0-3e041e5a444b.png",
       "images": {
         "card": "shop/glow-lap-runners-256.webp",
@@ -235,7 +235,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "button_down",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085131_46f312f1-8a09-40d6-afdb-6e12d17fa435.png",
       "images": {
         "card": "shop/crisp-monday-shirt-256.webp",
@@ -260,7 +260,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "trousers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085131_16f5768b-652b-415c-9d49-4a4962522b40.png",
       "images": {
         "card": "shop/quarterly-review-trousers-256.webp",
@@ -285,7 +285,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "crop_top",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085132_533291fb-e39f-4410-b584-e13bda73939a.png",
       "images": {
         "card": "shop/baby-pink-rib-crop-256.webp",
@@ -311,7 +311,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "heels",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085131_e66c1c6a-cf8a-400e-acc2-ce07966d32b3.png",
       "images": {
         "card": "shop/gala-gold-heels-256.webp",
@@ -336,7 +336,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "tee",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085417_3e3bf0c3-034e-4b30-b3b7-06b301563607.png",
       "images": {
         "card": "shop/unfinished-business-tee-256.webp",
@@ -362,7 +362,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:hat",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085418_795da373-9bdf-45b8-844c-2bab3a7dfeb8.png",
       "images": {
         "card": "shop/patchwork-bucket-hat-256.webp",
@@ -387,7 +387,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "wide_leg_trousers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085417_4ac6f6db-acad-41d3-8b63-4328d87de800.png",
       "images": {
         "card": "shop/second-life-denim-trousers-256.webp",
@@ -412,7 +412,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "clogs",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085418_4007d802-0cc4-4801-ab36-15b9ccd1a242.png",
       "images": {
         "card": "shop/lime-sculpt-clogs-256.webp",
@@ -437,7 +437,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:scarf",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085448_f60caeaa-e3f9-4247-9379-8b71db6bb580.png",
       "images": {
         "card": "shop/gilded-silk-scarf-256.webp",
@@ -463,7 +463,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "quarter_zip",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085449_b827a261-d991-48c1-9495-f8124edd5563.png",
       "images": {
         "card": "shop/trust-fund-quarter-zip-256.webp",
@@ -489,7 +489,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "blazer",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085449_92e4c93d-5e60-415f-8cf7-47fab7f54366.png",
       "images": {
         "card": "shop/faculty-lounge-tweed-blazer-256.webp",
@@ -515,7 +515,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "blazer",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085448_6c64ac1d-aef5-4f09-a02b-777b0c723bd8.png",
       "images": {
         "card": "shop/corner-office-pinstripe-jacket-256.webp",
@@ -540,7 +540,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "cargo",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085516_e694a30c-30ce-4a4d-96fa-63a0195768eb.png",
       "images": {
         "card": "shop/every-pocket-cargos-256.webp",
@@ -565,7 +565,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:choker",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085516_10818881-c1e1-4714-8d6a-1964ef8f604d.png",
       "images": {
         "card": "shop/velvet-ring-choker-256.webp",
@@ -590,7 +590,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "windbreaker",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085517_ad23e8c4-8750-489b-b3ee-ddcc11bf29cc.png",
       "images": {
         "card": "shop/sky-lap-windbreaker-256.webp",
@@ -615,7 +615,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "slip_skirt",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085515_87ef5d45-0974-44e5-bfa2-64efe1d0f1dd.png",
       "images": {
         "card": "shop/emerald-satin-slip-skirt-256.webp",
@@ -642,7 +642,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "hoodie",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090739_97a482a2-090f-4c2f-9237-70127b5fe879.png",
       "images": {
         "card": "shop/survived-something-hoodie-256.webp",
@@ -669,7 +669,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "puffer",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090744_5bc2d181-ed64-4a8c-ba05-05c260b159fa.png",
       "images": {
         "card": "shop/dune-cloud-puffer-256.webp",
@@ -696,7 +696,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "joggers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090753_c3ef4a84-d115-4ae3-af1d-3f8d05542818.png",
       "images": {
         "card": "shop/post-apocalypse-lounge-pants-256.webp",
@@ -723,7 +723,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sweater",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090757_e9235667-c33c-45eb-88d8-c7b2aa4d6075.png",
       "images": {
         "card": "shop/moth-approved-knit-256.webp",
@@ -750,7 +750,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "work_boots",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090802_0e518eee-33e8-4e9d-b88b-7b67a347d169.png",
       "images": {
         "card": "shop/never-worked-a-day-boots-256.webp",
@@ -777,7 +777,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "long_sleeve",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090807_72fe8bbf-12fa-479f-96da-72128740f06a.png",
       "images": {
         "card": "shop/unfinished-thought-thermal-256.webp",
@@ -804,7 +804,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "work_jacket",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090812_e696aeaa-3d0d-4d66-816f-b3649e850a02.png",
       "images": {
         "card": "shop/inherited-barn-jacket-256.webp",
@@ -831,7 +831,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "vest",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090816_dfa0d71d-1a4b-419f-aa22-356db9b365b9.png",
       "images": {
         "card": "shop/nowhere-to-be-vest-256.webp",
@@ -858,7 +858,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "parka",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090821_1bd8aca5-97db-4710-8722-45c45f7fb927.png",
       "images": {
         "card": "shop/expedition-to-brunch-parka-256.webp",
@@ -885,7 +885,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:balaclava",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090826_72ed1a61-7898-47fc-b01f-acbcadab6cc8.png",
       "images": {
         "card": "shop/incognito-knit-256.webp",
@@ -912,7 +912,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "denim_jacket",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090831_deec648f-a324-4d72-b734-7be8d89aacec.png",
       "images": {
         "card": "shop/already-vintage-denim-jacket-256.webp",
@@ -939,7 +939,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sneakers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090835_41d36e80-3993-4e66-bff2-6cdea494ef5c.png",
       "images": {
         "card": "shop/pre-destroyed-runners-256.webp",
@@ -965,7 +965,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:eyewear",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090208_8ef93c67-5485-4a3e-869c-75f96399ac99.png",
       "images": {
         "card": "shop/brunch-shades-256.webp",
@@ -991,7 +991,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:eyewear",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090207_ae496a0e-8375-4f58-9f05-d67afa72a856.png",
       "images": {
         "card": "shop/future-is-bright-visor-256.webp",
@@ -1016,7 +1016,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:eyewear",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090208_c26bb1cf-7859-4100-86e7-7b8943a0892c.png",
       "images": {
         "card": "shop/old-money-frames-256.webp",
@@ -1042,7 +1042,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:hat",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090208_826c5bda-8b4d-4c19-9c3b-d5539f433f5d.png",
       "images": {
         "card": "shop/corner-beanie-256.webp",
@@ -1067,7 +1067,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:hat",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090237_09dfbc87-7dd1-4af7-ace6-69c64db67193.png",
       "images": {
         "card": "shop/midtown-fedora-256.webp",
@@ -1093,7 +1093,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:hat",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_9d7d6968-a0da-4f0e-9513-a65aa1914bc0.png",
       "images": {
         "card": "shop/gallery-opening-hat-256.webp",
@@ -1125,7 +1125,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:earrings",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_fa52dead-beb0-4e48-8218-995be3792245.png",
       "images": {
         "card": "shop/everyday-hoops-256.webp",
@@ -1150,7 +1150,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:necklace",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_93da606d-513e-4e64-9076-b436da9f3470.png",
       "images": {
         "card": "shop/double-rope-chains-256.webp",
@@ -1176,7 +1176,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:necklace",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090301_80c00373-32a6-456f-ad1a-04c6fe004fdc.png",
       "images": {
         "card": "shop/the-clout-flame-256.webp",
@@ -1202,7 +1202,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:bag",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090302_d59864b0-48c9-4f2e-b216-56a6dae13d1b.png",
       "images": {
         "card": "shop/farmers-market-tote-256.webp",
@@ -1228,7 +1228,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:bag",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090302_6ca8b417-3420-4678-a903-75428507fd97.png",
       "images": {
         "card": "shop/commute-sling-256.webp",
@@ -1254,7 +1254,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:bag",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090302_7d7a6a30-1379-4b38-a097-e6a9a769bd39.png",
       "images": {
         "card": "shop/emerald-hour-bag-256.webp",

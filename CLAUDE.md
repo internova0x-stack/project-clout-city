@@ -193,15 +193,20 @@ components live in `app/globals.css`.
   skeleton by `scripts/retarget.mjs`; `AvatarParts.play(name)`; `/preview/moves?outfit=anims`). The base layer is never
   recolored (skin tone and brows only); body types never scale the head or neck (`lib/bodyTypes.ts`: per-vertex widening
   added by the shader, height scales the figure); barefoot bodies wear the sneakers template unless the outfit has boots; `buildModelAvatar` hands over to
-  `buildBaseAvatar` when `newBodies()` (lib/graphics.ts: a per-device switch in Studio → Shop, or `?bodies=new`). Off for
-  players until stage 4. `lowGraphics()` (Settings → Low graphics, `?graphics=low|high`, on by itself only on clearly weak
+  `buildBaseAvatar` when `newBodies()` (lib/graphics.ts): on for everyone since the switch-on (migration 0101); a device
+  can go back to the old ones (Studio → Shop's switch, or `?bodies=old`). `lowGraphics()` (Settings → Low graphics, `?graphics=low|high`, on by itself only on clearly weak
   phones) picks the low files; renderers take `renderQuality()` (no shadows, no antialiasing, 1x). `/preview/moves` shows
   every move on both bodies. Garment templates (the hoodie, then the stage 4 wardrobe) are cut from the bodies by `scripts/garments.mjs`
   into `public/avatars/garments/`, share the body's skeleton, and hide the skin under them (`_COVER` bits); the outfit's
   top picks one from `GARMENT_TEMPLATES` (lib/avatarCatalog.ts); whole Shop outfits wear `SET_LOOKS` (templates in their
   colors, details and a hat from components/avatar/setHats.ts; `?outfit=sets`).
   Shop accessories: `lib/accessories.ts` (shape and colors by sku) drawn by components/avatar/accessories.ts; locked
-  until switch-on (`?outfit=accessories&pick=`). `/preview/moves?outfit=hoodie` shows all eight body types.
+  until switch-on (`?outfit=accessories&pick=`).
+  Shop catalog clothes: `lib/catalogWear.ts` (pieces, patterns, finishes by sku; Outfit.pieces by slot; `?outfit=catalog`).
+  Switch-on (migration 0101): the catalog's clothes and accessories are wearable; wearable accessories are filed as
+  fashion; a dress (slot 'one-piece') is a top and a bottom (`wear_slots`, equip_item, save_look 'one_piece_conflict',
+  style_counts); lib/wearing.ts mirrors it (wearSlot, slotsClash, outfitFromSkus); Your Look has Dresses and a tab per
+  accessory slot once something's owned there. The home bubble's portrait aims at the head (AvatarHead). `/preview/moves?outfit=hoodie` shows all eight body types.
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
   its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

@@ -24,7 +24,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "puffer",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084458_28f55fc1-d24c-4a88-86e6-d9667793a862.png",
       "images": {
         "card": "shop/cloud-puffer-256.webp",
@@ -48,7 +48,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sneakers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084503_6fd7ccac-7327-4888-a801-fafd5b7d5736.png",
       "images": {
         "card": "shop/cloud-step-hitops-256.webp",
@@ -71,7 +71,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "long_coat",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084508_55002674-fada-442c-a35a-8c4b217d3894.png",
       "images": {
         "card": "shop/midnight-buckle-coat-256.webp",
@@ -95,7 +95,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "platform_boots",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084512_25a41f69-a808-44c3-be81-fd10370e2599.png",
       "images": {
         "card": "shop/nightshift-platforms-256.webp",
@@ -118,7 +118,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "cardigan",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084516_81c47c88-8e5b-48fc-95b5-a360df5cb5f1.png",
       "images": {
         "card": "shop/library-card-cardigan-256.webp",
@@ -141,7 +141,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "track_jacket",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084520_88330aa2-ae88-45c0-9aab-0194c38938ba.png",
       "images": {
         "card": "shop/lilac-lap-track-jacket-256.webp",
@@ -165,7 +165,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "blazer",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084525_5899c524-a58a-4c4a-8e27-2d7da0ac002b.png",
       "images": {
         "card": "shop/midtown-camel-blazer-256.webp",
@@ -188,7 +188,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "wide_leg_trousers",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084529_3cdc68ef-0cd0-4493-8f4d-08455e9b4259.png",
       "images": {
         "card": "shop/champagne-hour-trousers-256.webp",
@@ -211,7 +211,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "long_coat",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084533_2e3de0e9-bf02-41fb-a817-54eaf34b0153.png",
       "images": {
         "card": "shop/old-money-cashmere-coat-256.webp",
@@ -234,7 +234,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sculpt_jacket",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084538_5c72050d-74e1-4f12-9837-4ab5e14948dd.png",
       "images": {
         "card": "shop/sartorio-sculpt-jacket-256.webp",
@@ -258,7 +258,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "watch",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084543_c9fa602e-d7cc-4e0d-ac5e-27d3454f7b95.png",
       "images": {
         "card": "shop/ice-rink-watch-256.webp",
@@ -281,7 +281,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "mini_bag",
-      "wearable": false,
+      "wearable": true,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084548_71fec852-7ed2-422f-985d-ed04f0a251a1.png",
       "images": {
         "card": "shop/blush-mini-top-handle-256.webp",

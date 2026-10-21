@@ -34,6 +34,7 @@ import { buildAvatar, type AvatarParts } from "./buildAvatar";
 import { buildSetHat, SET_HAT_HIDES_HAIR } from "./setHats";
 import { buildBodyAccessory, buildHeadAccessory, type BodyFit } from "./accessories";
 import { ACCESSORY_HATS, ACCESSORY_HIDES_HAIR } from "@/lib/accessories";
+import type { Finish } from "@/lib/avatarCatalog";
 import type { ModelAvatarOptions } from "./modelAvatar";
 
 const cache = new Map<string, Promise<GLTF>>();
@@ -96,16 +97,21 @@ const PROC_HEAD = new Vector3(0.175, 0.213, 0.186);
 /** A garment's details from its _PAT attribute (scripts/garments.mjs, scripts/wardrobe.mjs), by its template's kind
  *  (GARMENT_TEMPLATES): ribbed bands, the hoodie's pocket, zips, buttons, lapels, quilting, pleats, waistbands, soles.
  *  Lines are antialiased (fwidth); the inside is darker. */
-function garmentMaterial(kind: number, color: string, accent: string, widen: { value: Vector2 }, hideAbove = 9): MeshStandardMaterial {
-  const mat = new MeshStandardMaterial({ roughness: kind === 8 ? 0.55 : kind === 17 ? 0.35 : 0.92, metalness: 0, side: DoubleSide });
-  const u = { uTop: { value: new Color(color) }, uAccent: { value: new Color(accent) }, uKind: { value: kind }, uHideAbove: { value: hideAbove } };
+function garmentMaterial(kind: number, color: string, accent: string, widen: { value: Vector2 }, hideAbove = 9, pattern = 0, finish?: Finish): MeshStandardMaterial {
+  const mat = new MeshStandardMaterial({ roughness: finish ? FINISH_ROUGHNESS[finish] : kind === 8 ? 0.55 : kind === 17 ? 0.35 : 0.92, metalness: 0, side: DoubleSide });
+  // uUnit: meters per unit of the garment file's own space (set when it's attached), for the fabric patterns.
+  const u = { uTop: { value: new Color(color) }, uAccent: { value: new Color(accent) }, uKind: { value: kind }, uHideAbove: { value: hideAbove }, uPattern: { value: pattern }, uUnit: { value: 1 } };
+  mat.userData.uniforms = u;
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
-    sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute vec4 pat;\nvarying vec4 vPat;\nvoid main() {\n  vPat = pat;");
+    sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute vec4 pat;\nvarying vec4 vPat;\nvarying vec3 vObj;\nvarying vec3 vObjN;\nvoid main() {\n  vPat = pat;\n  vObj = position;\n  vObjN = normal;");
     widenVertex(sh, widen);
     sh.fragmentShader = sh.fragmentShader
-      .replace("void main() {", `uniform vec3 uTop; uniform vec3 uAccent; uniform int uKind; uniform float uHideAbove;
+      .replace("void main() {", `uniform vec3 uTop; uniform vec3 uAccent; uniform int uKind; uniform float uHideAbove; uniform int uPattern; uniform float uUnit;
 varying vec4 vPat;
+varying vec3 vObj;
+varying vec3 vObjN;
+bool has(int bit) { return (uPattern & bit) != 0; }
 // 1 on a line at "at" (half-width w), soft-edged.
 float lineAt(float v, float at, float w) { float a = fwidth(v) * 1.2 + 0.0004; return 1.0 - smoothstep(w, w + a, abs(v - at)); }
 // 1 inside a round button of radius r at p.
@@ -220,6 +226,46 @@ void main() {`)
       c = mix(c, uAccent, lineAt(q.y, 0.03, 0.002));
       c *= 1.0 - 0.14 * (1.0 - smoothstep(0.012, 0.016, d));
     }
+    // Fabric patterns (lib/catalogWear.ts PATTERN), on the garment's own surface in meters: (across, up) on the side it
+    // faces, so they hold still on the cloth through every pose.
+    if (uPattern != 0) {
+      vec3 o = vObj * uUnit;
+      vec3 n = normalize(vObjN);
+      vec2 w = abs(n.x) > abs(n.z) ? o.zy : o.xy;
+      float hole = sin(o.x * 37.0 + 1.3) * sin(o.y * 41.0) * sin((o.z + o.y) * 29.0 + 0.7);
+      if (has(32)) { vec2 g = fract(vec2(w.x + w.y, w.x - w.y) * 80.0); if (min(g.x, g.y) > 0.16) discard; }  // mesh / fishnet
+      if (has(64) && (hole > 0.82 || (d < 0.012 && fract(w.x * 90.0) > 0.6))) discard;                     // holes, frayed edges
+      if (has(16384) && vPat.z > 0.026 && lineAt(vPat.z, 0.055, 0.009) + lineAt(vPat.z, 0.09, 0.008) < 0.5) discard; // sandal straps
+      if (has(1)) c *= 0.93 + 0.07 * sin((w.x + w.y) * 700.0);                                              // denim twill
+      if (has(2)) c *= 0.92 + 0.08 * sin(w.y * 520.0);                                                       // knit rows
+      if (has(128)) c *= 0.88 + 0.12 * abs(sin(w.x * 70.0 + sin(w.y * 55.0) * 1.6));                        // cable knit
+      if (has(256)) c *= 0.9 + 0.1 * sin(w.x * 420.0);                                                       // ribbed
+      if (has(512)) { vec2 g = abs(fract(w * 140.0) - 0.5); c *= 0.9 + 0.1 * smoothstep(0.3, 0.45, max(g.x, g.y)); } // waffle
+      if (has(4) || has(131072)) {                                                                             // tartan, gingham
+        float p = has(4) ? 16.0 : 30.0;
+        float a2 = step(0.5, fract(w.x * p)), b2 = step(0.5, fract(w.y * p));
+        c = has(4) ? mix(c, uAccent, 0.45 * (a2 + b2) * 0.5) * (1.0 - 0.18 * a2 * b2) : mix(c, uAccent, (a2 + b2) * 0.5);
+        if (has(4)) c = mix(c, vec3(0.85, 0.12, 0.12), lineAt(fract(w.x * p * 0.5), 0.5, 0.012) * 0.6);
+      }
+      if (has(8)) c = mix(c, uAccent, lineAt(fract(w.x * 80.0), 0.5, 0.025) * 0.6);                         // pinstripe
+      if (has(16)) c *= 0.9 + 0.1 * sin((w.x + abs(fract(w.y * 40.0) - 0.5) * 0.025) * 650.0);              // herringbone
+      if (has(1024)) c = mix(c, uAccent, step(0.5, fract((floor(w.x * 9.0) + floor(w.y * 9.0)) * 0.5)) * 0.7); // patchwork
+      if (has(2048)) c = mix(c, uAccent, step(0.0, w.x + 0.05 * sin(w.y * 9.0)));                            // two panels
+      if (has(4096) && abs(o.x) > 0.19) c = uAccent;                                                          // contrast sleeves
+      if (has(8192) && front) {                                                                               // corset lacing
+        float z = fract(q.y * 28.0);
+        c = mix(c, uAccent, lineAt(abs(q.x), abs(z - 0.5) * 0.04, 0.0012) * step(abs(q.x), 0.025));
+        c *= 1.0 - 0.15 * (lineAt(abs(q.x), 0.05, 0.0012) + lineAt(abs(q.x), 0.1, 0.0012));
+      }
+      if (has(32768) && vPat.z < 0.03) c = uAccent * 1.6;                                                      // glowing soles
+      if (has(65536) && lineAt(vPat.z, 0.06, 0.008) > 0.5) c = uAccent;                                       // a strap or bow
+      if (has(262144)) c *= 0.85 + 0.15 * fract(sin(dot(floor(w * 260.0), vec2(12.9898, 78.233))) * 43758.5); // faux fur
+      if (has(524288) && abs(n.x) > 0.6) {                                                                    // cargo pockets
+        float y = o.y, zz = o.z;
+        c *= 1.0 - 0.18 * (lineAt(abs(zz), 0.06, 0.0012) * step(abs(y + 0.25), 0.07) + lineAt(abs(y + 0.25), 0.07, 0.0012) * step(abs(zz), 0.06));
+      }
+      if (has(1048576)) c *= 1.0 - 0.18 * lineAt(fract(q.y * 7.0), 0.0, 0.03);                              // ruffle tiers
+    }
     if (!gl_FrontFacing) c *= 0.55;
     diffuseColor.rgb = c;
   }`);
@@ -277,6 +323,9 @@ function markRegions(mesh: SkinnedMesh) {
   const g = mesh.geometry;
   if (!g.getAttribute("region")) g.setAttribute("region", g.getAttribute("_region") ?? new BufferAttribute(new Float32Array(g.getAttribute("position").count), 1));
 }
+
+/** How each finish shines (lib/catalogWear.ts). */
+const FINISH_ROUGHNESS: Record<Finish, number> = { leather: 0.38, satin: 0.3, patent: 0.18, velvet: 0.88, suede: 0.97, matte: 0.95 };
 
 /** How far each top template stands off the skin (scripts/wardrobe.mjs gaps, plus its thickness), for what's worn on it. */
 const TOP_GAP: Record<string, number> = { hoodie: 0.02, tee: 0.017, crop: 0.014, vest: 0.017, zip: 0.019, cardigan: 0.017, blazer: 0.019, puffer: 0.038 };
@@ -499,9 +548,11 @@ void main() {`)
       files[k]?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
       if (!src) return;
       const topHem = g.slot === "bottom" && g.file !== "overalls" ? worn.find((w) => w.slot === "top")?.hem : undefined;
-      const gm = garmentMaterial(g.kind, g.color, g.accent, widen, topHem === undefined ? 9 : topHem + 0.03);
+      const gm = garmentMaterial(g.kind, g.color, g.accent, widen, topHem === undefined ? 9 : topHem + 0.03, g.pattern ?? 0, g.finish);
       materials.push(gm);
-      attachPart(src, mesh, bones, gm);
+      const part = attachPart(src, mesh, bones, gm);
+      // Meters per unit of the file's space: its inverse bind matrices carry its quantization (and the rig's centimeters).
+      gm.userData.uniforms.uUnit.value = new Vector3().setFromMatrixScale(part.skeleton.boneInverses[0]).x * 0.01;
       cover |= g.cover;
     });
     u.uCover.value = cover;
@@ -707,6 +758,8 @@ void main() {`)
 
   return {
     root, body, head, torso, eyes: [], legs, knees, arms, hips, chest, forearms,
+    // The game's headwear sits in a holder at the head's middle, upright with +z the face (portraits aim at it).
+    headwear: proc.headwear,
     hipY: BASE_HIP_Y[sex] * build.h,
     ready: ready.then(() => undefined),
     setMotion(next) {

@@ -1,7 +1,8 @@
 // Low-graphics mode and the new-bodies preview (step 2 of the avatar upgrade; owner, Oct 21: "there should be a way to
 // render lower graphics for lower end phones"). Both are per device, kept in localStorage; a URL parameter can set
 // them for one visit (?graphics=low|high, ?bodies=new|old). Low graphics is on by itself on weak phones until the
-// player chooses. The new bodies are a preview for Studio admins until every owned item has its template (stage 4).
+// player chooses. The new bodies are on for everyone since stage 4's switch-on (migration 0101: every owned item has
+// its template); a device can still go back to the old ones for a while (Studio → Shop, or ?bodies=old).
 
 const KEY_LOW = "cc-graphics-low";
 const KEY_BODIES = "cc-new-bodies";
@@ -34,13 +35,13 @@ export function lowGraphics(): boolean {
 }
 export function setLowGraphics(on: boolean) { write(KEY_LOW, on ? "1" : "0"); }
 
-/** The new base bodies (preview until stage 4's switch-on). */
+/** The new base bodies: on, unless this device chose the old ones. */
 export function newBodies(): boolean {
   const p = param("bodies");
   if (p === "new" || p === "old") return p === "new";
-  return read(KEY_BODIES) === "1";
+  return read(KEY_BODIES) !== "0";
 }
-export function setNewBodies(on: boolean) { write(KEY_BODIES, on ? "1" : null); }
+export function setNewBodies(on: boolean) { write(KEY_BODIES, on ? null : "0"); }
 
 /** The renderer settings for the current mode: pixel ratio cap, shadows and antialiasing. */
 export function renderQuality(): { pixelRatio: number; shadows: boolean; antialias: boolean } {

@@ -30,13 +30,18 @@ export const WARDROBE = {
   shorts: { kind: "bottom", bit: 512, end: "thigh", gap: 0.008 },
   leggings: { kind: "bottom", bit: 1024, end: "ankle", gap: 0.0035 },
   skirt: { kind: "skirt", bit: 2048 },
-  boots: { kind: "boots", bit: 4096, gap: 0.006 },
+  boots: { kind: "boots", bit: 4096, gap: 0.011 },
   // The default shoes on the barefoot bodies: the foot and the ankle, a low top just above the ankle bone.
   sneakers: { kind: "boots", bit: 8192, gap: 0.008, end: "ankle" },
   // The whole Shop outfits' own pieces (lib/avatarCatalog.ts SET_LOOKS): a gown or robe's skirt to the ankle, and
   // overalls (trousers with a bib and two straps over the shoulders, outside the top worn under them).
-  gown: { kind: "skirt", bit: 16384, long: true },
+  gown: { kind: "skirt", bit: 16384, length: "long" },
   overalls: { kind: "overalls", bit: 32768, gap: 0.021 },
+  // The Shop catalog's pieces (lib/catalogWear.ts): a midi skirt to mid-calf, knee-high boots, and a long coat's tails
+  // (from the top's hem to below the knee, open at the front, over whatever trousers are under; they hide no skin).
+  midi: { kind: "skirt", bit: 65536, length: "midi" },
+  kneeboots: { kind: "boots", bit: 131072, gap: 0.016, end: "knee" },
+  coattail: { kind: "skirt", bit: 0, length: "coat" },
 };
 if (Object.values(WARDROBE).some((t) => t.bit & COVER.hoodie)) throw new Error("cover bit clash");
 
@@ -64,6 +69,7 @@ export function wardrobeFit(body) {
     })),
     ankle: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.86), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     thigh: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}UpLeg`, `${s}Leg`, 0.62), sub(B[`${s}Leg`], B[`${s}UpLeg`]))])),
+    kneeLow: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.1), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     ankleTop: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.93), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     calf: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.5), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
   };
@@ -160,7 +166,7 @@ export function wardrobeKeep(body, f, t) {
     }
     if (t.kind === "boots") {
       // The foot's side of the cut (below it), so the shoe holds the foot and stops on the shin.
-      const leg = (side) => ({ s: -before(t.end === "ankle" ? f.ankleTop[side] : f.calf[side], p), edge: "cuff" });
+      const leg = (side) => ({ s: -before(t.end === "ankle" ? f.ankleTop[side] : t.end === "knee" ? f.kneeLow[side] : f.calf[side], p), edge: "cuff" });
       const r = blend({ s: -0.05, edge: "cuff" }, { LeftLeg: leg("Left"), RightLeg: leg("Right") });
       return r;
     }
@@ -265,7 +271,7 @@ export function wardrobeCover(body, bits) {
 /** Builds one template for one body: { pos, joints, weights, pat, idx }. */
 export function buildWardrobe(body, name) {
   const t = WARDROBE[name], f = wardrobeFit(body);
-  if (t.kind === "skirt") return buildSkirt(body, f, t.long);
+  if (t.kind === "skirt") return buildSkirt(body, f, t.length);
   const keep = wardrobeKeep(body, f, t);
   const { V, P: smoothed, tris, border, nbrs, along } = cutShell(body, keep, t.kind === "boots" ? (t.end ? 50 : 20) : 60);
   smoothSkin(V, nbrs, t.kind === "top" ? 6 : 4);
@@ -342,14 +348,18 @@ function addCollar(out, f, t, V, P) {
 }
 
 /** A skirt: a flared cone from the waist over both legs, to mid-thigh, pleated by the shader. */
-function buildSkirt(body, f, long = false) {
+function buildSkirt(body, f, length = "mini") {
+  // mini: to mid-thigh; midi: to mid-calf; long: just above the ankles; coat: a coat's tails from the top's hem to
+  // below the knee, open at the front, standing off the trousers under them.
+  const long = length !== "mini", coat = length === "coat";
   const B = body.bone, names = body.names;
   const hipsJ = names.indexOf("Hips"), lJ = names.indexOf("LeftUpLeg"), rJ = names.indexOf("RightUpLeg"), sJ = names.indexOf("Spine02");
   const lK = names.indexOf("LeftLeg"), rK = names.indexOf("RightLeg"), kneeY = (B.LeftLeg[1] + B.RightLeg[1]) / 2;
   const cx = B.Hips[0], cz = B.Hips[2];
   // A skirt stops at mid-thigh; a gown just above the ankles, flaring wider so the legs stay inside as they move.
-  const top = f.waistY, bottom = long ? lerp(B.LeftLeg, B.LeftFoot, 0.8)[1] : lerp(B.LeftUpLeg, B.LeftLeg, 0.42)[1];
-  const segs = 40, rows = long ? 22 : 10;
+  const top = coat ? f.hemY + 0.03 : f.waistY;
+  const bottom = { mini: lerp(B.LeftUpLeg, B.LeftLeg, 0.42), midi: lerp(B.LeftLeg, B.LeftFoot, 0.45), long: lerp(B.LeftLeg, B.LeftFoot, 0.8), coat: lerp(B.LeftLeg, B.LeftFoot, 0.12) }[length][1];
+  const segs = 40, rows = length === "mini" ? 10 : Math.round(22 * (top - bottom) / 0.75);
   const angle = (p) => Math.atan2(p[0] - cx, (p[2] - cz) * f.front);
   // The body's outline round the hips and thighs, by height and angle.
   const near = body.pos.filter((p, i) => p[1] > bottom - 0.02 && p[1] < top + 0.02 && !/Arm/.test(limbOf(body, i)));
@@ -370,7 +380,7 @@ function buildSkirt(body, f, long = false) {
     for (let k = 0; k < segs; k++) {
       const a = (k / segs) * 2 * Math.PI - Math.PI;
       // Never narrower lower down, plus a flare.
-      radii[k] = Math.max(radii[k], outline(a, y) + 0.012) + (r ? (long ? 0.006 + 0.01 * t : 0.006) : 0);
+      radii[k] = Math.max(radii[k], outline(a, y) + (coat ? 0.03 : 0.012)) + (r ? (long ? 0.006 + 0.01 * t : 0.006) : 0);
       const q = [cx + Math.sin(a) * radii[k], y, cz + Math.cos(a) * f.front * radii[k]];
       // Lower down, the front follows the thighs (sitting lifts it) and each side its own leg.
       const front = Math.max(0, Math.cos(a)), left = (1 + Math.sin(a)) / 2;
@@ -393,6 +403,8 @@ function buildSkirt(body, f, long = false) {
     }
   }
   for (let r = 0; r < rows; r++) for (let k = 0; k < segs; k++) {
+    // A coat is open down the front.
+    if (coat && Math.abs(k - segs / 2 + 0.5) < 1) continue;
     const a = ring[r][k], b = ring[r][(k + 1) % segs], c = ring[r + 1][k], d = ring[r + 1][(k + 1) % segs];
     out.idx.push(a, c, b, b, c, d);
   }

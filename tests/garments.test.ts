@@ -23,13 +23,15 @@ test("every garment template has its files, small, and the game's cover bits and
   assert.deepEqual(Object.keys(GARMENT_TEMPLATES).sort(), Object.keys(build).sort(), "the same templates in the game and the build");
   for (const [file, g] of Object.entries(GARMENT_TEMPLATES)) {
     assert.equal(g.cover, build[file].bit, `${file}: cover bit`);
-    assert.equal(g.slot, build[file].kind === "skirt" || build[file].kind === "overalls" ? "bottom" : build[file].kind === "boots" ? "shoes" : build[file].kind, `${file}: slot`);
+    const slot = file === "coattail" ? "top" : build[file].kind === "skirt" || build[file].kind === "overalls" ? "bottom" : build[file].kind === "boots" ? "shoes" : build[file].kind;
+    assert.equal(g.slot, slot, `${file}: slot`);
     for (const f of ["m", "f", "m-low", "f-low"]) {
       const p = `public/avatars/garments/${file}-${f}.glb`;
       assert.ok(statSync(p).size < 200_000, `${p} is ${statSync(p).size} bytes`);
     }
   }
-  const bits = Object.values(GARMENT_TEMPLATES).map((g) => g.cover);
+  // (A coat's tails hide no skin: bit 0.)
+  const bits = Object.values(GARMENT_TEMPLATES).map((g) => g.cover).filter((b) => b);
   assert.equal(new Set(bits).size, bits.length, "every template has its own bit");
   assert.ok(bits.every((b) => b > 0 && b < 2 ** 24 && (b & (b - 1)) === 0), "single bits a float holds exactly");
 });

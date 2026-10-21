@@ -38,6 +38,8 @@ export const GARMENT_TEMPLATES: Record<string, { cover: number; slot: "top" | "b
   sneakers: { cover: 8192, slot: "shoes", kind: 14 },
   // Only in whole outfits (SET_LOOKS): a gown or robe's long skirt, and overalls (worn over a top).
   gown: { cover: 16384, slot: "bottom", kind: 15 }, overalls: { cover: 32768, slot: "bottom", kind: 16 },
+  // The Shop catalog's pieces (lib/catalogWear.ts): a midi skirt, knee-high boots, a long coat's tails (they hide no skin).
+  midi: { cover: 65536, slot: "bottom", kind: 15 }, kneeboots: { cover: 131072, slot: "shoes", kind: 13 }, coattail: { cover: 0, slot: "top", kind: 2 },
 };
 
 /**
@@ -50,7 +52,14 @@ export const GARMENT_DETAILS = { plain: 2, quilted: 8, dressShoes: 17, hiVis: 18
 export type SetHat = "hardhat" | "cowboy" | "explorer" | "helmet" | "witch" | "hood" | "space" | "crown";
 
 /** One piece of a whole outfit on the new bodies: a garment template, its colors, and optionally other details. */
-export interface SetPiece { file: string; color: string; accent: string; kind?: number }
+/** How a piece's material shines. */
+export type Finish = "leather" | "satin" | "patent" | "velvet" | "suede" | "matte";
+/**
+ * One piece worn on the new bodies: a garment template, its colors, and optionally other details (`kind`), fabric
+ * patterns (`pattern`, bit flags: lib/catalogWear.ts PATTERN), a finish, and the skin it hides (`cover`, when not
+ * the template's own: a fishnet top or sandals hide none).
+ */
+export interface SetPiece { file: string; color: string; accent: string; kind?: number; pattern?: number; finish?: Finish; cover?: number }
 export interface SetLook {
   pieces: SetPiece[];
   hat?: { kind: SetHat; color: string; accent: string };
@@ -111,16 +120,22 @@ export const SET_LOOKS: Record<string, { m: SetLook; f: SetLook }> = {
   },
 };
 
+/** Pieces with their templates' slot, cover and hem filled in (a piece's own kind and cover win). */
+export function piecesOf(pieces: readonly SetPiece[]) {
+  return pieces.filter((p) => GARMENT_TEMPLATES[p.file]).map((p) => ({ ...GARMENT_TEMPLATES[p.file], ...p, kind: p.kind ?? GARMENT_TEMPLATES[p.file].kind, cover: p.cover ?? GARMENT_TEMPLATES[p.file].cover }));
+}
+
 /** The templates an outfit wears on the new bodies, with their colors. The bodies are barefoot in a plain base layer,
  *  so shoes without a template of their own are sneakers; a whole Shop outfit wears its own pieces (SET_LOOKS). */
-export function garmentsFor(o: Pick<Outfit, "top" | "topColor" | "topAccent" | "bottom" | "bottomColor" | "shoes" | "shoeColor" | "shoeAccent" | "set">, sex: ModelSex = "m") {
+export function garmentsFor(o: Pick<Outfit, "top" | "topColor" | "topAccent" | "bottom" | "bottomColor" | "shoes" | "shoeColor" | "shoeAccent" | "set" | "pieces">, sex: ModelSex = "m") {
   const set = o.set ? SET_LOOKS[o.set]?.[sex] : undefined;
-  if (set) return set.pieces.filter((p) => GARMENT_TEMPLATES[p.file]).map((p) => ({ ...GARMENT_TEMPLATES[p.file], ...p, kind: p.kind ?? GARMENT_TEMPLATES[p.file].kind }));
-  const pick = (file: string, color: string, accent: string) => (GARMENT_TEMPLATES[file] ? [{ file, ...GARMENT_TEMPLATES[file], color, accent }] : []);
+  if (set) return piecesOf(set.pieces);
+  // Shop catalog clothes (lib/catalogWear.ts) take their slot; the rest is the outfit's own pieces.
+  const pick = (slot: "top" | "bottom" | "shoes", file: string, color: string, accent: string) => piecesOf(o.pieces?.[slot] ?? [{ file, color, accent }]);
   return [
-    ...pick(o.top, o.topColor, o.topAccent),
-    ...pick(o.bottom, o.bottomColor, o.topAccent),
-    ...pick(o.shoes && GARMENT_TEMPLATES[o.shoes] ? o.shoes : "sneakers", o.shoeColor, o.shoeAccent ?? "#2B2B2B"),
+    ...pick("top", o.top, o.topColor, o.topAccent),
+    ...pick("bottom", o.bottom, o.bottomColor, o.topAccent),
+    ...pick("shoes", o.shoes && GARMENT_TEMPLATES[o.shoes] ? o.shoes : "sneakers", o.shoeColor, o.shoeAccent ?? "#2B2B2B"),
   ];
 }
 
