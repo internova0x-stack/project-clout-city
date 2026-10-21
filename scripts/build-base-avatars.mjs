@@ -18,12 +18,14 @@ import sharp from "sharp";
 import { mkdirSync, statSync } from "node:fs";
 import { buildHoodie, coverBits, readBody } from "./garments.mjs";
 import { buildHair } from "./hair.mjs";
+import { bleedTexture } from "./texture-bleed.mjs";
+import { WARDROBE, bodyRegions, buildWardrobe, flattenCollar, smoothBasics, wardrobeCover } from "./wardrobe.mjs";
 
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 await MeshoptSimplifier.ready;
 // Our own attributes (_COVER bits, _PAT details) keep their exact values.
 const QUANTIZE = { pattern: /^[^_]/ };
-const GARMENTS = { hoodie: buildHoodie };
+const GARMENTS = { hoodie: buildHoodie, ...Object.fromEntries(Object.keys(WARDROBE).map((n) => [n, (body) => buildWardrobe(body, n)])) };
 mkdirSync("public/avatars/garments", { recursive: true });
 mkdirSync("public/avatars/hair", { recursive: true });
 
@@ -33,7 +35,20 @@ for (const [src, sex] of [["assets/avatars/base-male.glb", "m"], ["assets/avatar
     const doc = await io.read(src);
     const prim = doc.getRoot().listMeshes()[0].listPrimitives()[0];
     const body = readBody(prim, doc.getRoot().listSkins()[0]);
-    prim.setAttribute("_COVER", doc.createAccessor().setType("SCALAR").setArray(coverBits(body)).setBuffer(doc.getRoot().listBuffers()[0]));
+    // The baked collar pressed into the neck (scripts/wardrobe.mjs flattenCollar), in the file too.
+    flattenCollar(body);
+    smoothBasics(body); // the baked tee's folds smoothed like skin (scripts/wardrobe.mjs)
+    const pos = prim.getAttribute("POSITION"), nrm = prim.getAttribute("NORMAL");
+    for (let i = 0; i < body.count; i++) { pos.setElement(i, body.pos[i]); nrm.setElement(i, body.nrm[i]); }
+    // Cover bits as whole numbers in a float (the shader tests them as an int); every template's bit at once.
+    const bits = Float32Array.from(coverBits(body));
+    const more = new Uint32Array(body.count);
+    wardrobeCover(body, more);
+    for (let i = 0; i < bits.length; i++) bits[i] = bits[i] + more[i];
+    prim.setAttribute("_COVER", doc.createAccessor().setType("SCALAR").setArray(bits).setBuffer(doc.getRoot().listBuffers()[0]));
+    prim.setAttribute("_REGION", doc.createAccessor().setType("SCALAR").setArray(bodyRegions(body)).setBuffer(doc.getRoot().listBuffers()[0]));
+    // The texture's islands padded outward, so mipmaps never bring in the white between them (light seams).
+    await bleedTexture(doc.getRoot().listTextures()[0], prim);
     const px = low ? 512 : 1024;
     await doc.transform(
       dedup(),
@@ -65,7 +80,10 @@ async function writeParts(src, out, make, low) {
   const root = g.getRoot(), buf = root.listBuffers()[0];
   const bodyNode = root.listNodes().find((n) => n.getMesh());
   const skin = bodyNode.getSkin(), parent = bodyNode.getParentNode();
-  const parts = make(readBody(bodyNode.getMesh().listPrimitives()[0], skin));
+  const body = readBody(bodyNode.getMesh().listPrimitives()[0], skin);
+  flattenCollar(body); // the same shape as the body file
+  smoothBasics(body);
+  const parts = make(body);
   for (const a of root.listAnimations()) {
     a.listChannels().forEach((c) => c.dispose());
     a.listSamplers().forEach((sm) => { sm.getInput()?.dispose(); sm.getOutput()?.dispose(); sm.dispose(); });

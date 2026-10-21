@@ -4,7 +4,7 @@
 // can check every choice has a piece.
 
 import type { HairId, Look } from "./look.ts";
-import type { BottomKind, ShoeKind, TopKind } from "./styles.ts";
+import type { BottomKind, Outfit, ShoeKind, TopKind } from "./styles.ts";
 
 /** The model set: men's or women's files (Presenting as: "curvy" is Female). */
 export type ModelSex = "m" | "f";
@@ -24,11 +24,29 @@ export const modelSex = (look: Pick<Look, "body">): ModelSex => (look.body === "
 export const FACE: Record<ModelSex, string> = { m: "Casual_2", f: "Casual" };
 
 /**
- * Garment templates on the new base bodies (stage 3 of the avatar upgrade): the file in public/avatars/garments/
- * (built by scripts/build-base-avatars.mjs) and its cover bit (scripts/garments.mjs COVER: the skin it hides).
- * A top without one keeps the painted basics until stage 4.
+ * Garment templates on the new base bodies (stages 3 and 4 of the avatar upgrade): the file in public/avatars/garments/
+ * (built by scripts/build-base-avatars.mjs: scripts/garments.mjs and scripts/wardrobe.mjs), its cover bit (the skin it
+ * hides; the build's COVER and WARDROBE bits) and its shader details (kind). An outfit wears one per slot.
  */
-export const GARMENT_TEMPLATES: Partial<Record<TopKind, { file: string; cover: number }>> = { hoodie: { file: "hoodie", cover: 1 } };
+export const GARMENT_TEMPLATES: Record<string, { cover: number; slot: "top" | "bottom" | "shoes"; kind: number; hem?: number }> = {
+  // hem: a top's hem, in meters above the top of the legs (scripts/wardrobe.mjs); a bottom under it isn't drawn above.
+  hoodie: { cover: 1, slot: "top", kind: 1, hem: 0 }, tee: { cover: 2, slot: "top", kind: 2, hem: 0 }, crop: { cover: 4, slot: "top", kind: 3, hem: 0.2 },
+  vest: { cover: 8, slot: "top", kind: 4, hem: 0.02 }, zip: { cover: 16, slot: "top", kind: 5, hem: 0.02 }, cardigan: { cover: 32, slot: "top", kind: 6, hem: 0 },
+  blazer: { cover: 64, slot: "top", kind: 7, hem: 0 }, puffer: { cover: 128, slot: "top", kind: 8, hem: 0.01 },
+  pants: { cover: 256, slot: "bottom", kind: 9 }, shorts: { cover: 512, slot: "bottom", kind: 10 }, leggings: { cover: 1024, slot: "bottom", kind: 11 },
+  skirt: { cover: 2048, slot: "bottom", kind: 12 }, boots: { cover: 4096, slot: "shoes", kind: 13 },
+};
+
+/** The templates an outfit wears on the new bodies, with their colors (whole Shop outfits wait for stage 4's sets). */
+export function garmentsFor(o: Pick<Outfit, "top" | "topColor" | "topAccent" | "bottom" | "bottomColor" | "shoes" | "shoeColor" | "shoeAccent" | "set">) {
+  if (o.set) return [];
+  const pick = (file: string, color: string, accent: string) => (GARMENT_TEMPLATES[file] ? [{ file, ...GARMENT_TEMPLATES[file], color, accent }] : []);
+  return [
+    ...pick(o.top, o.topColor, o.topAccent),
+    ...pick(o.bottom, o.bottomColor, o.topAccent),
+    ...(o.shoes ? pick(o.shoes, o.shoeColor, o.shoeAccent ?? "#2B2B2B") : []),
+  ];
+}
 
 /** Tops: the character whose Body part is closest to each top. */
 export const TOP_MODEL: Record<TopKind, Record<ModelSex, PartRef>> = {

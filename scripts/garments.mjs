@@ -47,7 +47,7 @@ export function readBody(prim, skin) {
 }
 
 /** How much of a vertex's weight sits on bones matching a pattern. */
-function weightOn(body, i, re) {
+export function weightOn(body, i, re) {
   let w = 0;
   for (let k = 0; k < 4; k++) if (re.test(body.names[body.joints[i][k]] ?? "")) w += body.weights[i][k];
   return w;
@@ -100,13 +100,14 @@ function hoodieKeep(body, fit, i) {
 /** The body's cover bits: the vertices well inside each garment (4 cm from its edges). */
 export function coverBits(body) {
   const fit = hoodieFit(body);
-  const bits = new Uint16Array(body.count);
-  for (let i = 0; i < body.count; i++) if (hoodieKeep(body, fit, i).s > 0.04) bits[i] |= COVER.hoodie;
+  // Float32 holding whole numbers: exact up to 24 bits, and a standard attribute type for glTF.
+  const bits = new Float32Array(body.count);
+  for (let i = 0; i < body.count; i++) if (hoodieKeep(body, fit, i).s > 0.04) bits[i] = COVER.hoodie;
   return bits;
 }
 
 /** Merges two vertices' skin influences (weighted), keeping the four biggest. */
-function mixSkin(ja, wa, jb, wb, t) {
+export function mixSkin(ja, wa, jb, wb, t) {
   const m = new Map();
   for (let k = 0; k < 4; k++) { m.set(ja[k], (m.get(ja[k]) ?? 0) + wa[k] * (1 - t)); m.set(jb[k], (m.get(jb[k]) ?? 0) + wb[k] * t); }
   const top = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
@@ -148,6 +149,21 @@ export function cutShell(body, keep, smooth) {
     for (let k = 1; k + 1 < poly.length; k++) if (poly[0] !== poly[k] && poly[k] !== poly[k + 1] && poly[0] !== poly[k + 1]) tris.push(poly[0], poly[k], poly[k + 1]);
   }
 
+  // Loose scraps: where the body's and a limb's rules meet, a few triangles can be kept apart from the garment. Only
+  // pieces with at least 5% of the biggest piece's triangles stay (a garment can have parts, like two boots).
+  {
+    const parent = V.map((_, i) => i);
+    const find = (x) => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+    for (let f = 0; f < tris.length; f += 3) { const a = find(tris[f]); parent[find(tris[f + 1])] = a; parent[find(tris[f + 2])] = a; }
+    const size = new Map();
+    for (let f = 0; f < tris.length; f += 3) { const r = find(tris[f]); size.set(r, (size.get(r) ?? 0) + 1); }
+    const biggest = Math.max(...size.values());
+    const kept = [];
+    for (let f = 0; f < tris.length; f += 3) if (size.get(find(tris[f])) >= biggest * 0.05) kept.push(tris[f], tris[f + 1], tris[f + 2]);
+    tris.length = 0;
+    tris.push(...kept);
+  }
+
   // 2. Edges of the cut (each edge used by one triangle): pinned while smoothing.
   const edgeUse = new Map();
   for (let f = 0; f < tris.length; f += 3) for (let k = 0; k < 3; k++) {
@@ -158,6 +174,13 @@ export function cutShell(body, keep, smooth) {
   for (const [key, n] of edgeUse) if (n === 1) for (const v of key.split(",")) border[+v] = 1;
   const nbrs = Array.from({ length: V.length }, () => new Set());
   for (let f = 0; f < tris.length; f += 3) for (let k = 0; k < 3; k++) { nbrs[tris[f + k]].add(tris[f + (k + 1) % 3]); nbrs[tris[f + k]].add(tris[f + (k + 2) % 3]); }
+  // The cut's edges follow the body's mesh, which zigzags: smooth each edge along itself (its two edge neighbours),
+  // so hems, cuffs and necklines are clean curves.
+  const along = V.map((_, i) => (border[i] ? [...nbrs[i]].filter((n) => border[n] && edgeUse.get(i < n ? `${i},${n}` : `${n},${i}`) === 1) : []));
+  for (let it = 0; it < 8; it++) {
+    const moved = V.map((v, i) => (along[i].length === 2 ? lerp(v.p, mul(add(V[along[i][0]].p, V[along[i][1]].p), 0.5), 0.5) : v.p));
+    moved.forEach((p, i) => { V[i].p = p; });
+  }
 
   // 3. Taubin smoothing (shrink, then grow back): cloth drapes over the navel, ribs and muscles.
   let P = V.map((v) => v.p);
@@ -172,7 +195,16 @@ export function cutShell(body, keep, smooth) {
       });
     }
   }
-  return { V, P, tris, border, nbrs };
+  return { V, P, tris, border, nbrs, along };
+}
+
+/** Smooths a garment's finished edges along themselves (after it's pushed off the skin, whose normals are uneven). */
+export function smoothEdges(P, along, iterations = 6) {
+  for (let it = 0; it < iterations; it++) {
+    const moved = P.map((p, i) => (along[i]?.length === 2 ? lerp(p, mul(add(P[along[i][0]], P[along[i][1]]), 0.5), 0.5) : p));
+    moved.forEach((p, i) => { P[i] = p; });
+  }
+  return P;
 }
 
 /**

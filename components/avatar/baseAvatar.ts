@@ -22,7 +22,7 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { GARMENT_TEMPLATES, modelSex } from "@/lib/avatarCatalog";
+import { garmentsFor, modelSex } from "@/lib/avatarCatalog";
 import { lowGraphics } from "@/lib/graphics";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 import type { ModelAvatarOptions } from "./modelAvatar";
@@ -54,38 +54,96 @@ export const BASE_HIP_Y: Record<"m" | "f", number> = { m: 0.94, f: 0.92 };
 /** The procedural head's size in its own space (buildAvatar's skull: radius 0.19, scaled 0.92, 1.12, 0.98). */
 const PROC_HEAD = new Vector3(0.175, 0.213, 0.186);
 
-/** The garment's details from its _PAT attribute (scripts/garments.mjs): ribbed hem and cuffs, the kangaroo pocket,
- *  the hood a shade off, the drawstrings in the accent, the inside darker. */
-function garmentMaterial(top: string, accent: string): MeshStandardMaterial {
-  const mat = new MeshStandardMaterial({ roughness: 0.92, metalness: 0, side: DoubleSide });
-  const u = { uTop: { value: new Color(top) }, uAccent: { value: new Color(accent) } };
+/** A garment's details from its _PAT attribute (scripts/garments.mjs, scripts/wardrobe.mjs), by its template's kind
+ *  (GARMENT_TEMPLATES): ribbed bands, the hoodie's pocket, zips, buttons, lapels, quilting, pleats, waistbands, soles.
+ *  Lines are antialiased (fwidth); the inside is darker. */
+function garmentMaterial(kind: number, color: string, accent: string, hideAbove = 9): MeshStandardMaterial {
+  const mat = new MeshStandardMaterial({ roughness: kind === 8 ? 0.55 : 0.92, metalness: 0, side: DoubleSide });
+  const u = { uTop: { value: new Color(color) }, uAccent: { value: new Color(accent) }, uKind: { value: kind }, uHideAbove: { value: hideAbove } };
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute vec4 pat;\nvarying vec4 vPat;\nvoid main() {\n  vPat = pat;");
     sh.fragmentShader = sh.fragmentShader
-      .replace("void main() {", "uniform vec3 uTop; uniform vec3 uAccent;\nvarying vec4 vPat;\nvoid main() {")
+      .replace("void main() {", `uniform vec3 uTop; uniform vec3 uAccent; uniform int uKind; uniform float uHideAbove;
+varying vec4 vPat;
+// 1 on a line at "at" (half-width w), soft-edged.
+float lineAt(float v, float at, float w) { float a = fwidth(v) * 1.2 + 0.0004; return 1.0 - smoothstep(w, w + a, abs(v - at)); }
+// 1 inside a round button of radius r at p.
+float dotAt(vec2 q, vec2 p, float r) { float d = length(q - p); float a = fwidth(d) * 1.2 + 0.0004; return 1.0 - smoothstep(r, r + a, d); }
+void main() {`)
       .replace("#include <map_fragment>", `#include <map_fragment>
   {
     vec3 c = uTop;
-    float part = vPat.w;
-    if (part > 0.75) c = uAccent;
-    else if (part > 0.25) c = uTop * 0.93;
-    else {
-      // Ribbed bands: 4 cm at the hem and cuffs, with fine ribs and a soft seam where they start (antialiased).
-      float d = vPat.x;
+    float part = vPat.w, d = vPat.x;
+    vec2 q = vPat.yz; // across the front (1 off it), height above the top of the legs
+    // A bottom under a top isn't drawn above the top's hem (the two bend a little differently and would cross).
+    if (uKind >= 9 && uKind <= 12 && q.y > uHideAbove) discard;
+    // On the front only: where a triangle spans the front's coordinates and the back's marker, q.x jumps.
+    bool front = q.x < 0.9 && fwidth(q.x) < 0.02;
+    if (part > 0.75) c = uAccent;                              // drawstrings
+    else if (part > 0.4) c = uTop * 0.93;                      // the hood
+    else if (part > 0.2) c = uKind == 5 ? uAccent : uTop * 0.9; // collars (a zip jacket's in its accent)
+    else if (uKind == 1) {
+      // The hoodie: ribbed hem and cuffs, the kangaroo pocket.
       float band = 1.0 - smoothstep(0.038, 0.042, d);
-      c *= mix(1.0, 0.86 + 0.05 * sin(vPat.y * 900.0), band);
-      float seam = 1.0 - smoothstep(0.0, fwidth(d) * 1.5 + 0.0005, abs(d - 0.04));
-      c *= 1.0 - 0.12 * seam;
-      // The kangaroo pocket: a trapezoid on the front, 3.5 to 17 cm above the hem, a soft stitched edge.
-      vec2 q = vPat.yz;
+      c *= mix(1.0, 0.86 + 0.05 * sin(q.x * 900.0), band);
+      c *= 1.0 - 0.12 * lineAt(d, 0.04, 0.0);
       float t = (q.y - 0.035) / 0.135;
       float hw = mix(0.15, 0.1, clamp(t, 0.0, 1.0));
       float inside = min(min(hw - abs(q.x), q.y - 0.035), 0.17 - q.y);
       float aa = fwidth(inside) * 1.5 + 0.0005;
       float pocket = smoothstep(-aa, aa, inside);
-      float edge = (1.0 - smoothstep(0.0, aa * 2.0, abs(inside - 0.004))) * pocket;
-      c *= 1.0 - 0.04 * pocket - 0.12 * edge;
+      c *= 1.0 - 0.04 * pocket - 0.12 * (1.0 - smoothstep(0.0, aa * 2.0, abs(inside - 0.004))) * pocket;
+    } else if (uKind == 2 || uKind == 3) {
+      // Tee and crop top: a stitched hem and sleeve ends.
+      c *= 1.0 - 0.1 * lineAt(d, 0.016, 0.0);
+    } else if (uKind == 4) {
+      // Vest: a placket with buttons, two welt pockets, bound edges.
+      c *= 1.0 - 0.12 * (1.0 - smoothstep(0.012, 0.014, d));
+      if (front) {
+        c *= 1.0 - 0.15 * lineAt(q.x, 0.0, 0.0006);
+        for (int i = 0; i < 5; i++) c = mix(c, uAccent, dotAt(q, vec2(0.012, 0.06 + float(i) * 0.06), 0.006));
+        c *= 1.0 - 0.18 * lineAt(q.y, 0.13, 0.0012) * step(0.05, abs(q.x)) * step(abs(q.x), 0.13);
+      }
+    } else if (uKind == 5) {
+      // Zip jacket (bomber): wide ribbed cuffs and hem, a zip up the middle.
+      float band = 1.0 - smoothstep(0.042, 0.046, d);
+      c *= mix(1.0, 0.82 + 0.06 * sin(q.x * 900.0 + q.y * 600.0), band);
+      if (front) c = mix(c, uAccent, lineAt(q.x, 0.0, 0.003));
+    } else if (uKind == 6) {
+      // Cardigan: ribbed edges all round the opening, five buttons below it.
+      float band = 1.0 - smoothstep(0.028, 0.032, d);
+      c *= mix(1.0, 0.86 + 0.06 * sin(q.y * 700.0), band);
+      if (front) for (int i = 0; i < 5; i++) c = mix(c, uAccent, dotAt(q, vec2(0.0, 0.05 + float(i) * 0.055), 0.0075));
+    } else if (uKind == 7) {
+      // Blazer: lapels a shade darker (the band along the open front, up high), two buttons, pocket flaps.
+      c *= 1.0 - 0.16 * (1.0 - smoothstep(0.042, 0.046, d)) * smoothstep(0.26, 0.28, q.y);
+      c *= 1.0 - 0.1 * (1.0 - smoothstep(0.006, 0.008, d));
+      if (front) {
+        for (int i = 0; i < 2; i++) c = mix(c, uAccent, dotAt(q, vec2(0.0, 0.17 + float(i) * 0.09), 0.008));
+        c *= 1.0 - 0.22 * lineAt(q.y, 0.09, 0.001) * step(0.06, abs(q.x)) * step(abs(q.x), 0.15);
+      }
+    } else if (uKind == 8) {
+      // Puffer: quilted channels with a soft puff, a zip up the middle.
+      float ch = fract(q.y / 0.075);
+      c *= 0.84 + 0.16 * sin(ch * 3.14159);
+      c *= 1.0 - 0.25 * lineAt(ch, 0.0, 0.02);
+      if (front) c = mix(c, uAccent, lineAt(q.x, 0.0, 0.003));
+    } else if (uKind >= 9 && uKind <= 11) {
+      // Trousers, shorts, leggings: a waistband (near the top edge), the fly on trousers, stitched cuffs.
+      bool top = q.y > -0.15;
+      float wb = top ? 1.0 - smoothstep(0.032, 0.036, d) : 0.0;
+      c *= 1.0 - 0.1 * wb - 0.14 * (top ? lineAt(d, 0.034, 0.0) : lineAt(d, 0.015, 0.0));
+      if (uKind == 9 && front && q.y > -0.03) c *= 1.0 - 0.14 * lineAt(q.x, 0.018, 0.0006);
+    } else if (uKind == 12) {
+      // Skirt: knife pleats round it, a waistband.
+      float a = q.x;
+      c *= 0.9 + 0.1 * abs(sin(a * 3.14159 * 14.0));
+      c *= 1.0 - 0.12 * (q.y > -0.05 ? 1.0 - smoothstep(0.028, 0.032, d) : 0.0);
+    } else if (uKind == 13) {
+      // Boots: a chunky sole in the accent, a padded top.
+      c = mix(c, uAccent, 1.0 - smoothstep(0.028, 0.032, q.y));
+      c *= 1.0 - 0.12 * (1.0 - smoothstep(0.02, 0.024, d));
     }
     if (!gl_FrontFacing) c *= 0.55;
     diffuseColor.rgb = c;
@@ -145,6 +203,9 @@ const REGION_OF = (name: string): number =>
 function markRegions(mesh: SkinnedMesh) {
   const g = mesh.geometry;
   if (g.getAttribute("region")) return;
+  // Built with the files (scripts/wardrobe.mjs bodyRegions: the head by shape, so the baked collar is body).
+  const built = g.getAttribute("_region");
+  if (built) { g.setAttribute("region", built); return; }
   const joints = g.getAttribute("skinIndex"), weights = g.getAttribute("skinWeight");
   const names = mesh.skeleton.bones.map((b) => b.name);
   const out = new Float32Array(joints.count);
@@ -252,7 +313,7 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions = {}): Avat
     const u = {
       uSkin: { value: new Color(look.skin) }, uSkinRef: { value: new Color(SKIN_REF[sex]) }, uGreyRef: { value: new Color(GREY_REF) },
       uTop: { value: new Color(outfit.topColor) }, uBottom: { value: new Color(outfit.bottomColor) }, uShoe: { value: new Color(outfit.shoeColor) },
-      uHair: { value: new Color(look.hairColor) }, uCover: { value: 0 },
+      uHair: { value: new Color(look.hairColor) }, uCover: { value: 0 }, uTopSkin: { value: 0 }, uBottomSkin: { value: 0 },
     };
     const geo = mesh.geometry;
     if (!geo.getAttribute("cover")) geo.setAttribute("cover", geo.getAttribute("_cover") ?? new BufferAttribute(new Float32Array(geo.getAttribute("position").count), 1));
@@ -260,7 +321,7 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions = {}): Avat
       Object.assign(sh.uniforms, u);
       sh.vertexShader = sh.vertexShader.replace("void main() {", "attribute float region;\nattribute float cover;\nvarying float vRegion;\nflat varying float vCover;\nvoid main() {\n  vRegion = region;\n  vCover = cover;");
       sh.fragmentShader = sh.fragmentShader
-        .replace("void main() {", `uniform vec3 uSkin; uniform vec3 uSkinRef; uniform vec3 uGreyRef; uniform vec3 uTop; uniform vec3 uBottom; uniform vec3 uShoe; uniform vec3 uHair; uniform int uCover;
+        .replace("void main() {", `uniform vec3 uSkin; uniform vec3 uSkinRef; uniform vec3 uGreyRef; uniform vec3 uTop; uniform vec3 uBottom; uniform vec3 uShoe; uniform vec3 uHair; uniform int uCover; uniform float uTopSkin; uniform float uBottomSkin;
 varying float vRegion;
 flat varying float vCover;
 float lumOf(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
@@ -291,26 +352,35 @@ void main() {`)
     c = mix(c, skin, skinW);
     c = mix(c, dyed, clothW * (1.0 - skinW));
     c = mix(c, brow, browW);
+    // Under template clothes, what shows of the baked basics (a crop top's midriff, a vest's arms) is plain skin: no
+    // trace of the basics' print.
+    if ((uTopSkin > 0.5 && vRegion < 1.5) || (uBottomSkin > 0.5 && vRegion > 1.5 && vRegion < 2.5)) c = uSkin * (0.93 + 0.07 * clamp(lum / lumOf(uSkinRef), 0.0, 1.0));
     diffuseColor.rgb = c;
   }`);
     };
     mat.customProgramCacheKey = () => "cc-base-avatar";
 
     // The garment, on the body's own bones (whole Shop outfits wait for stage 4).
-    const garment = outfit.set ? undefined : GARMENT_TEMPLATES[outfit.top];
+    // The outfit's garments, on the body's own bones; the skin they hide isn't drawn.
     const low = lowGraphics() ? "-low" : "";
-    if (garment) {
-      const g = await load(`/avatars/garments/${garment.file}-${sex}${low}.glb`).catch(() => null);
+    const worn = garmentsFor(outfit);
+    const files = await Promise.all(worn.map((g) => load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null)));
+    if (disposed) return;
+    let cover = 0;
+    worn.forEach((g, k) => {
       let src: SkinnedMesh | null = null;
-      g?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
-      if (disposed) return;
-      if (src) {
-        const gm = garmentMaterial(outfit.topColor, outfit.topAccent);
-        materials.push(gm);
-        attachPart(src, mesh, bones, gm);
-        u.uCover.value = garment.cover;
-      }
-    }
+      files[k]?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
+      if (!src) return;
+      const topHem = g.slot === "bottom" ? worn.find((w) => w.slot === "top")?.hem : undefined;
+      const gm = garmentMaterial(g.kind, g.color, g.accent, topHem === undefined ? 9 : topHem + 0.03);
+      materials.push(gm);
+      attachPart(src, mesh, bones, gm);
+      cover |= g.cover;
+    });
+    u.uCover.value = cover;
+    // Under a template top, the baked basics' top shows as skin (a crop top's midriff, a vest's arms).
+    u.uTopSkin.value = worn.some((g) => g.slot === "top") ? 1 : 0;
+    u.uBottomSkin.value = worn.some((g) => g.slot === "bottom") ? 1 : 0;
 
     // The hair, grown from this body's scalp: the style, and its lengths; under a hat, the lengths only.
     const hatOn = !!proc.headwear?.children.length;
