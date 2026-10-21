@@ -23,6 +23,8 @@ export interface Home {
    * npcs.json "roommates") pays the rest. Moving to a home without one finishes "Get your own place".
    */
   roommate?: string;
+  /** Clout Couture (migration 0105): only owners of this real-money piece can move in (the Waterfront Mansion). */
+  couture?: string;
 }
 
 export interface Trait { id: string; emoji: string; name: string; blurb: string }
@@ -57,6 +59,9 @@ export const ECONOMY: Economy = {
     // v0.15 Campus (owner, Oct 18): the cheapest rent in the city, for enrolled students only. A roommate is included.
     { id: "sj_dorm", name: "St. Johnsons dorm room", neighborhood: "Jamaica", rent: 1100, emoji: "🛏️", blurb: "Bunk beds, a mini fridge and a roommate who microwaves fish.", signup: false, campus: "st-johnsons" },
     { id: "qu_dorm", name: "Queensborough dorm room", neighborhood: "Flushing", rent: 1100, emoji: "🛏️", blurb: "Cinder-block chic. The RA has a whistle and opinions.", signup: false, campus: "queensborough-u" },
+    // Clout Couture (migration 0105): owners only. The weekly "rent" is its upkeep, the priciest Astoria rent, so living
+    // here never saves money compared with a C$ home (content/shop/clout-couture.json).
+    { id: "waterfront_mansion", name: "The Waterfront Mansion", neighborhood: "Astoria", rent: 1750, emoji: "🏛️", blurb: "Glass, stone and your name on the gate. Billionaire's Row, Astoria waterfront.", signup: false, couture: "waterfront-mansion" },
   ],
   moving: { brokerWeeks: 1 },
 };
@@ -64,10 +69,13 @@ export const ECONOMY: Economy = {
 /** Homes offered at sign-up (moving-up homes come later, from the Apartments app). */
 export const SIGNUP_HOMES = ECONOMY.homes.filter((h) => h.signup !== false);
 
-/** What moving into a home costs now: the first week's rent plus the broker fee. */
+/** What moving into a home costs now: the first week's rent plus the broker fee (your own mansion has no broker). */
 export function moveCost(home: Home, e: Economy = ECONOMY): number {
-  return home.rent * (1 + e.moving.brokerWeeks);
+  return home.rent * (1 + (home.couture ? 0 : e.moving.brokerWeeks));
 }
+
+/** The priciest Astoria rent: the Waterfront Mansion's weekly upkeep matches it (tests/economy.test.ts). */
+export const topAstoriaRent = (e: Economy = ECONOMY) => Math.max(...e.homes.filter((h) => h.neighborhood === "Astoria" && !h.couture).map((h) => h.rent));
 
 export const TRAITS: Trait[] = [
   { id: "main_character", emoji: "🎬", name: "Main Character Energy", blurb: "Narrates own life in the third person." },

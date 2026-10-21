@@ -74,6 +74,7 @@ export async function runSetupCheck(siteOrigin: string): Promise<SetupCheckRow[]
   await migration("0102_couture.sql", "Clout Couture: numbered editions, real limits and drops", "admin_couture_new_drop", { p_sku: "-" });
   await migration("0103_couture_glow.sql", "Clout Couture: the glow, the crown by your name, crown or tiara, the suit's choices", "crowned_players", {});
   await migration("0104_couture_map.sql", "Clout Couture on the map: yachts, jets, the plaza statue", "couture_map", {});
+  await migration("0105_waterfront_mansion.sql", "the Waterfront Mansion: Billionaire's Row, living there, upkeep", "plaza_weeks", {});
 
   // ---- News and hunts: import now and say what happened to each file ----
   if (has0037) {

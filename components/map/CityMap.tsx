@@ -1,6 +1,6 @@
 "use client";
 
-import { fitMarina, mooring, PLAZA_STATUE_AT, type CoutureMap } from "@/lib/coutureMap";
+import { fitMarina, mooring, plotAt, PLAZA_STATUE_AT, type CoutureMap } from "@/lib/coutureMap";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
@@ -588,6 +588,11 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             // Yachts only close up, every other one a little higher so neighbors don't overlap.
             ...(map.getZoom() >= YACHT_LABEL_ZOOM ? couture.yachts.map((y, i) => ({ key: `y:${y.player}`, player: y.player, at: mooring(i, marinaShift).at, text: `🛥️ ${y.name}`, up: i % 2 ? 22 : 12 })) : []),
             ...(couture.statue ? [{ key: "statue", player: couture.statue.player, at: PLAZA_STATUE_AT, text: `🗽 @${couture.statue.name}`, up: 24 }] : []),
+            // The Waterfront Mansions: the name on each gate, where Billionaire's Row stands.
+            ...(() => {
+              const row = sites.find((l) => l.id === "billionaires-row");
+              return row ? (couture.mansions ?? []).map((m) => ({ key: `m:${m.player}`, player: m.player, at: plotAt(row, m.plot), text: `🏛️ ${m.name}`, up: 8 })) : [];
+            })(),
           ].map((o) => {
             const g = project(o.at);
             const s = { x: g.x, y: g.y - o.up * (map.getZoom() - 13) };

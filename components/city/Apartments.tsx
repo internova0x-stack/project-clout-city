@@ -19,8 +19,13 @@ export function roomCount(homeId: string): number {
 /** The next rental up from where you live (the early goal's target), if any. */
 export function nextHomeUp(state: CityState): Home | undefined {
   const rent = ECONOMY.homes.find((h) => h.id === state.player.home_id)?.rent ?? 0;
-  return ECONOMY.homes.filter((h) => h.rent > rent).sort((a, b) => a.rent - b.rent)[0];
+  return ECONOMY.homes.filter((h) => h.rent > rent && !h.couture).sort((a, b) => a.rent - b.rent)[0];
 }
+
+/** Clout Couture homes show only to their owners (the Waterfront Mansion, migration 0105). */
+const listed = (state: CityState, h: Home) => !h.couture || state.items.some((i) => i.sku === h.couture);
+/** What a home's weekly bill is called: the mansion's is upkeep. */
+const billWord = (h: Home | undefined) => (h?.couture ? "upkeep" : "rent");
 
 /** Why you can't move into a home right now, or null. */
 export function moveBlock(state: CityState, home: Home): string | null {
@@ -44,10 +49,10 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
         <span aria-hidden="true">{p.house_sku ? "🏡" : current?.emoji ?? "🏠"}</span>
         <span>
           <b>You live in: {p.house_sku ? "your own house" : current?.name ?? "Queens"}</b>
-          <small>{p.house_sku ? "No rent. Your landlord misses you." : `${formatCash(current?.rent ?? 0)} rent a week · ${roomCount(p.home_id ?? "")} room${roomCount(p.home_id ?? "") > 1 ? "s" : ""}`}</small>
+          <small>{p.house_sku ? "No rent. Your landlord misses you." : `${formatCash(current?.rent ?? 0)} ${billWord(current)} a week · ${roomCount(p.home_id ?? "")} room${roomCount(p.home_id ?? "") > 1 ? "s" : ""}`}</small>
         </span>
       </div>
-      {ECONOMY.homes.filter((h) => h.id !== p.home_id).map((h) => {
+      {ECONOMY.homes.filter((h) => h.id !== p.home_id && listed(state, h)).map((h) => {
         const block = moveBlock(state, h);
         const cost = moveCost(h);
         const short = p.bank_cash < cost;
@@ -57,15 +62,15 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
             <div className="row" style={{ gap: 12 }}>
               <span className="apt-emoji" aria-hidden="true">{h.emoji}</span>
               <span style={{ minWidth: 0 }}>
-                <span className="title" style={{ display: "block" }}>{h.name}</span>
-                <span className="meta">{h.neighborhood} · {formatCash(h.rent)} rent a week</span>
+                <span className="title" style={{ display: "block" }}>{h.couture ? `Your mansion: ${h.name}` : h.name}</span>
+                <span className="meta">{h.neighborhood} · {formatCash(h.rent)} {billWord(h)} a week</span>
               </span>
             </div>
             <div className="chip-row" style={{ gap: 6 }}>
               {next?.id === h.id && !p.house_sku && <span className="tag tag-event">Next step up</span>}
               <span className="tag tag-neutral">{rooms} room{rooms > 1 ? "s" : ""}</span>
             </div>
-            <span className="subtext">{h.blurb}</span>
+            <span className="subtext">{h.blurb}{h.couture ? " The upkeep matches the priciest rent in Astoria, so it never saves you money." : ""}</span>
             {/* The price on its own line, so the button never wraps (owner, Oct 14). */}
             <span className="apt-cost"><b>{formatCash(cost)}</b> to move in</span>
             {block ? <span className="meta locked">{block}</span>

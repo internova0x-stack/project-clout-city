@@ -243,6 +243,7 @@ const ERRORS: Record<string, string> = {
   home_needs_clout: HOME_NEEDS_CLOUT,
   own_house: "You own a house. Landlords are a thing of your past.",
   already_home: "You already live there. Unpack first.",
+  owners_only: "That one is for Waterfront Mansion owners. It's in the Shop's Clout Couture.",
   rent_due: "Pay this week's rent before you move. Landlords talk.",
   // Daily tasks 2.0 (migration 0073): streak rewards and guest-list passes.
   reward_only: REWARD_ONLY,

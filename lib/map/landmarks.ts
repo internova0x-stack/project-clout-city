@@ -14,7 +14,7 @@ export type LandmarkKind = "unisphere" | "gantries" | "twin-towers" | "club" | "
   | "st-johnsons" | "queensborough-u" | "fair-towers" | "discount-disco" | "bike-hub" | "hospital" | "brownstone"
   | "googie-diner" | "hub" | "sky-dining" | "supermarket" | "cowork" | "precinct"
   | "chapel" | "fitness" | "hell-gate" | "el-station" | "condo-towers" | "pier-park"
-  | "radio-station" | "clout-tower";
+  | "radio-station" | "clout-tower" | "billionaires-row";
 
 export interface Landmark {
   id: string;
@@ -111,6 +111,8 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "hell-gate-park", placeId: "hell-gate-park", name: "Hell Gate Park", at: [40.779, -73.9232], kind: "hell-gate", facing: 180, scale: 1.3, clear: 95, ground: "park" },
   { id: "astoria-blvd-station", placeId: "astoria-blvd-station", name: "Astoria Blvd station", at: [40.7702, -73.918], kind: "el-station", facing: 180, scale: 1.6, clear: 18, ground: "none", length: 150 },
   { id: "skyline-pier", placeId: "skyline-pier", name: "Skyline Pier Residences", at: [40.7478, -73.9592], kind: "condo-towers", facing: 180, scale: 1.3, clear: 50, ground: "block" },
+  // Clout Couture (migration 0105): ten mansion plots on the Astoria waterfront, empty lawns until they sell.
+  { id: "billionaires-row", name: "Billionaire's Row", at: [40.7702, -73.9342], kind: "billionaires-row", facing: 270, scale: 1, clear: 120, ground: "park" },
   { id: "hunters-pier", placeId: "hunters-pier", name: "Hunter's Pier", at: [40.7432, -73.9612], kind: "pier-park", facing: 270, scale: 1.6, clear: 60, ground: "park" },
   // v0.14 On Air: Real Clout FM's studio and broadcast mast, by the film studios (a place since Oct 16).
   { id: "real-clout-fm", placeId: "real-clout-fm", name: "Real Clout FM", at: [40.7598, -73.9262], kind: "radio-station", facing: 180, scale: 1.6, clear: 40, ground: "block" },

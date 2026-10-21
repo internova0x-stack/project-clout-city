@@ -143,7 +143,7 @@ Each stage is its own pull request with a preview link (the owner's order, Oct 2
 | 2. New base bodies | The bald base bodies (owner to supply), recolored for skin tone, with the game's hair, headwear and coverings on top; the four body types; files cut to about 0.5 MB each; a **low-graphics mode** (on by itself on weak phones, plus a Settings switch). Behind a preview switch only the owner sees | The bodies walk, sit and wave in the preview at every body type, on a low-end phone |
 | 3. The hoodie | The first garment template, made from the body's own surface so it bends with every pose and body type, in both presentations | A hoodie looks right walking, sitting and lying down on all eight body types |
 | 4. The rest of the wardrobe | The remaining garment templates, then rigid accessories (hats, glasses, earrings, necklaces, bags, watches); each item unlocks as its template passes. New templates for every item players already own (the 22 clothing pieces and 11 outfit sets). The style mechanics: "Complete your look", the venue-match Confidence boost, the Full look badge and style daily tasks (a budget piece counts the same as a luxury one). **The new bodies switch on for everyone** once everything players own has a template | Every owned item renders on the new bodies; the switch is on |
-| 5. Clout Couture | Non-wearables first (the Cloud Nine Sofa, the Self-Portrait Statue, the Velocity Veloce), then the wearables (suit, heels, shades, watch, crown, 24k Glow). The yacht, jet and plaza statue need map placement and 3D models and come after. The Waterfront Mansion and Billionaire's Row come later (owner, Oct 21) | A test-mode purchase of each piece grants it, numbers it and a refund takes it back |
+| 5. Clout Couture | Non-wearables first (the Cloud Nine Sofa, the Self-Portrait Statue, the Velocity Veloce), then the wearables (suit, heels, shades, watch, crown, 24k Glow). The yacht, jet and plaza statue need map placement and 3D models and come after. The Waterfront Mansion and Billionaire's Row: migration 0105 | A test-mode purchase of each piece grants it, numbers it and a refund takes it back |
 
 **Step 5 as built (migration 0102).** A real-money catalog piece gets its checkout product (`store_products`, a
 collector item) once it is scheduled or live. Each copy's number is stored on its entitlement when the webhook grants it
@@ -175,6 +175,15 @@ in front of the Unisphere, in gold, with a plaque. Names go through the chat wor
 Studio → **Take it down** (with a reason) frees the week; a refund in Stripe takes the piece and the booking back.
 Preview: `/preview/home` has sample yachts, two jets and nina.nyc's statue (Map tab). Preview: `/preview/home` sells the eight pieces (the watch's sample drop is sold out;
 `?couture=soldout` sells out every drop).
+
+**The Waterfront Mansion (migration 0105).** Buying it gives the owner one of ten plots on **Billionaire's Row** (a
+landmark on the East River shore of Astoria): the lowest free plot, and a Lola news item names the new neighbor. The
+mansion stands on its plot with the owner's name on a tappable tag at the gate, its windows lit at night. It's a home:
+only its owner sees it in Apartments and can move in (one week's upkeep up front, no broker fee); the weekly bill says
+"upkeep" and matches the top Astoria rent. Inside are two floors in ivory, gold and marble. Ten exist: the Shop says sold
+out while every plot is taken. A refund in Stripe frees the plot (the next buyer gets it) and moves the owner to the
+cheapest home. Studio → Shop → the mansion → **Hide name** works as for the yacht. Preview: `/preview/home` has three
+sample mansions (Map tab, near Hell Gate).
 
 **Stage 2 as built (Oct 21):** the owner's bald masters live in `assets/avatars/` (never served); `node
 scripts/build-base-avatars.mjs` makes the game's copies in `public/avatars/body/` (`m.glb`, `f.glb` about 0.53 MB, 12k

@@ -426,6 +426,10 @@ const duplexUp: RoomTemplate = {
   spawn: [-4.0, 3.0],
 };
 
+// Clout Couture's Waterfront Mansion (migration 0105): the duplex's two floors in marble, ivory and gold, owners only.
+const mansionDown: RoomTemplate = { ...duplexDown, id: "waterfront_mansion", wall: "#F4F1EA", wallAccent: "#C9A227", floor: "#EDE6DA", floorKind: "tile" };
+const mansionUp: RoomTemplate = { ...duplexUp, id: "waterfront_mansion:2", wall: "#F4F1EA", wallAccent: "#C9A227", floor: "#E3D9C6", floorKind: "tile" };
+
 export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   astoria_studio: {
     id: "astoria_studio", w: 5.4, d: 5.2, wall: "#E9D8C4", wallAccent: "#C9B49C", floor: "#A8744A", floorKind: "wood", window: true,
@@ -455,11 +459,13 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   "house-lic-penthouse": licPenthouse,
   sunnyside_gardens: sunnysideGardens,
   "house-hunters-point-duplex": duplexDown,
+  waterfront_mansion: mansionDown,
 };
 
-/** #19: a home's upper floors (the duplex), by floor number. */
+/** #19: a home's upper floors (the duplex, the mansion), by floor number. */
 export const HOME_FLOORS: Record<string, Record<number, RoomTemplate>> = {
   "house-hunters-point-duplex": { 2: duplexUp },
+  waterfront_mansion: { 2: mansionUp },
 };
 
 /** The player's home: a bought house, else the rented home (the studio if unknown). */

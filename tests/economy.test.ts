@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { ECONOMY, TRAITS, canAfford, formatCash, formatCashShort, formatShort, lotteryLine } from "../lib/economy.ts";
+import { ECONOMY, moveCost, topAstoriaRent, TRAITS, canAfford, formatCash, formatCashShort, formatShort, lotteryLine } from "../lib/economy.ts";
 import { formatPrice } from "../lib/store.ts";
 
 const sql = readFileSync(new URL("../supabase/migrations/0003_first_party.sql", import.meta.url), "utf8");
@@ -30,8 +30,15 @@ test("database economy seed matches lib/economy.ts", () => {
   // The server keeps each home's id and rent, and the moving-up rules (#19, migration 0045).
   assert.deepEqual(dbHomes, homes.map((h) => ({
     id: h.id, rent: h.rent, ...(h.moveClout ? { moveClout: h.moveClout } : {}), ...(h.signup === false ? { signup: false } : {}), ...(h.campus ? { campus: h.campus } : {}),
-    ...(h.roommate ? { roommate: h.roommate } : {}),
+    ...(h.roommate ? { roommate: h.roommate } : {}), ...(h.couture ? { couture: h.couture } : {}),
   })));
+});
+
+test("the Waterfront Mansion's upkeep is the priciest Astoria rent", () => {
+  const mansion = ECONOMY.homes.find((h) => h.couture === "waterfront-mansion")!;
+  assert.equal(mansion.rent, topAstoriaRent());
+  assert.equal(mansion.signup, false, "never offered at sign-up");
+  assert.equal(moveCost(mansion), mansion.rent, "no broker fee to move into your own mansion");
 });
 
 test("database trait ids match lib/economy.ts", () => {

@@ -8,12 +8,19 @@ import type { LatLng } from "./map/geo.ts";
 export const YACHT_SKU = "astoria-yacht";
 export const JET_SKU = "clout-one-jet";
 export const PLAZA_SKU = "plaza-statue";
+export const MANSION_SKU = "waterfront-mansion";
+export const MANSION_HOME = "waterfront_mansion";
 /** Couture pieces that live on the map rather than on you or in your home. */
-export const MAP_SKUS: ReadonlySet<string> = new Set([YACHT_SKU, JET_SKU, PLAZA_SKU]);
+export const MAP_SKUS: ReadonlySet<string> = new Set([YACHT_SKU, JET_SKU, PLAZA_SKU, MANSION_SKU]);
 
 export interface MapOwner { player: string; name: string; edition: number | null }
 export interface PlazaStatue { player: string; name: string; week: string; look: Record<string, unknown>; style: string; outfit: string[] }
+/** A Waterfront Mansion on its plot (1 to 10) of Billionaire's Row (migration 0105). */
+export interface MansionOwner { player: string; name: string; plot: number }
 export interface CoutureMap {
+  mansions?: MansionOwner[];
+  /** The player's own plot, if they own the mansion. */
+  myPlot?: number | null;
   yachts: MapOwner[];
   jets: MapOwner[];
   statue: PlazaStatue | null;
@@ -115,4 +122,23 @@ export function plazaWeekOver(monday: string | null, today: string): boolean {
   const end = new Date(`${monday}T00:00:00Z`);
   end.setUTCDate(end.getUTCDate() + 7);
   return today >= end.toISOString().slice(0, 10);
+}
+
+/**
+ * Billionaire's Row's ten plots in the landmark's own meters (x across, z toward the front; components/map/landmarkModels.ts
+ * draws the lawns there): two rows of five either side of the promenade.
+ */
+export function plotLocal(plot: number): [number, number] {
+  const i = plot - 1;
+  return [-84 + (i % 5) * 42, i < 5 ? -26 : 26];
+}
+
+/** Where a plot is on the map, from where the row stands (its spot, facing and scale; lib/map/landmarks.ts). */
+export function plotAt(row: { at: LatLng; facing: number; scale: number }, plot: number): LatLng {
+  const [x, z] = plotLocal(plot);
+  // As the landmark layer turns a model: rotation.y = (180 - facing)°.
+  const t = ((180 - row.facing) * Math.PI) / 180;
+  const east = (x * Math.cos(t) + z * Math.sin(t)) * row.scale;
+  const south = (-x * Math.sin(t) + z * Math.cos(t)) * row.scale;
+  return offset(row.at, -south, east);
 }

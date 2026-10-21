@@ -200,6 +200,12 @@ components live in `app/globals.css`.
   plaza statue; lib/coutureMap.ts, components/map/coutureModels.ts, `setCouture` in the landmark layer); `plaza_bookings`
   (`plaza_weeks`, `plaza_book`, one a week, the look kept at booking; home after its week); Studio `admin_couture_owners`,
   `admin_couture_name` (hide a name), `admin_plaza_remove`. The Clout Throne is home furniture (`throne`, sittable).
+  Migration 0105: the Waterfront Mansion is a home (`waterfront_mansion`, `couture` in ECONOMY.homes; owners only,
+  `move_home` 'owners_only'; the move costs one week, no broker fee; its weekly upkeep is the rent, matched to the top
+  Astoria rent). Buying it takes the lowest free of ten plots on Billionaire's Row (`mansion_plots`, a Lola news item);
+  sold out only while all ten are taken; a refund frees the plot and moves the owner to `cheapest_home` (which skips
+  couture homes). The row is a landmark (`billionaires-row`), the mansions sit on their plots (`plotLocal`/`plotAt`,
+  lib/coutureMap.ts) with the owner's name at the gate; the interior is a two-floor home (lib/rooms.ts `mansionDown/Up`).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
   in `assets/avatar-animations.json`; `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git-ignored:
   never commit or ship the raw files) and `npm run avatars:build` (`scripts/build-base-avatars.mjs`) makes the game copies

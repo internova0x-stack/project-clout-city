@@ -5,7 +5,8 @@ import type { CoutureMap, CoutureResult, PlazaWeeks } from "@/lib/coutureMap";
 
 // Development previews only: Clout Couture on the map (migration 0104) with sample owners. Five yachts moored off
 // Astoria, two jets in the air, nina.nyc's statue in front of the Unisphere this week, and a booking for the preview
-// player once they own a statue (bought in the preview Shop).
+// player once they own a statue (bought in the preview Shop). Three Waterfront Mansions stand on Billionaire's Row
+// (migration 0105).
 
 const monday = (offsetWeeks = 0) => {
   const d = new Date();
@@ -29,6 +30,11 @@ export async function previewCoutureMap(): Promise<CoutureResult<CoutureMap>> {
       jets: [{ player: "p-nina", name: "nina.nyc", edition: 1 }, { player: "p-dev", name: "dev.r", edition: 2 }],
       statue: { player: "p-nina", name: "nina.nyc", week: monday(0), look: { style: "pilates_princess", skin: "#C68642", body: "curvy" }, style: "pilates_princess", outfit: ["clout-crown"] },
       myPlazaWeek: booked,
+      mansions: [
+        { player: "p-nina", name: "nina.nyc", plot: 1 }, { player: "p-dev", name: "dev.r", plot: 2 },
+        { player: "p-kenji", name: "Kenji", plot: 6 },
+      ],
+      myPlot: null,
     },
   };
 }

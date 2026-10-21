@@ -146,3 +146,31 @@ export function buildPlazaPedestal(name: string): { group: Group; dispose(): voi
   at(namePanel(k, `@${name} · this week`, 6.4, 1.6, "#17141C", null, "700"), 0, PEDESTAL_TOP / 2, 4.72, k.group);
   return { group: k.group, dispose: () => k.dispose() };
 }
+
+/**
+ * The Waterfront Mansion (migration 0105): glass and stone on its plot, front toward +z (the promenade), its windows
+ * lit at night (`windows`, the layer turns them up), and a gold gate with the owner's name at the front of the lawn.
+ */
+export function buildMansion(name: string): { group: Group; windows: MeshStandardMaterial; dispose(): void } {
+  const k = kit();
+  const stone = k.mat("#E4DCCB", { rough: 0.7 }), dark = k.mat("#2B2F36", { rough: 0.4, metal: 0.2 });
+  const gold = k.mat("#EBC657", { metal: 0.2, rough: 0.4 }), water = k.mat("#5FB6D9", { rough: 0.15, metal: 0.1 });
+  const windows = k.mat("#9FC4D8", { rough: 0.15, metal: 0.3, emissive: "#FFD98A" });
+  windows.emissiveIntensity = 0.15;
+  // A stone base, two glass floors set back from each other, a flat roof with a gold edge.
+  at(new Mesh(k.geo(new BoxGeometry(28, 5, 18)), stone), 0, 2.5, -2, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(26, 4.6, 16)), windows), 1, 7.3, -2.6, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(27, 0.6, 17)), stone), 1, 9.9, -2.6, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(18, 4.4, 12)), windows), -3, 12.4, -4, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(19, 0.6, 13)), dark), -3, 14.9, -4, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(19.2, 0.25, 13.2)), gold), -3, 15.3, -4, k.group);
+  // Stone fins across the glass, a pool on the lawn.
+  for (const x of [-11, -5, 1, 7, 13]) at(new Mesh(k.geo(new BoxGeometry(0.8, 4.6, 0.8)), stone), x, 7.3, 5.6, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(12, 0.3, 5)), water), 6, 0.5, 11, k.group);
+  // The gate: two stone posts, a gold bar and the owner's name.
+  for (const sx of [-1, 1]) at(new Mesh(k.geo(new BoxGeometry(1.4, 4.5, 1.4)), stone), sx * 6, 2.25, 16, k.group);
+  at(new Mesh(k.geo(new BoxGeometry(12, 0.5, 0.4)), gold), 0, 4.2, 16, k.group);
+  const plate = namePanel(k, name, 10, 1.6, "#17141C", "#EBC657", "800");
+  at(plate, 0, 3.1, 16.25, k.group);
+  return { group: k.group, windows, dispose: () => k.dispose() };
+}

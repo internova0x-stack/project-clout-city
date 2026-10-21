@@ -197,6 +197,11 @@ const sampleOwners: Record<string, CoutureOwner[]> = {
     { player: "p-marco", displayName: "Marco", shown: "No. 0004", edition: 4, hidden: true, week: null },
   ],
   "clout-one-jet": [{ player: "p-nina", displayName: "nina.nyc", shown: "nina.nyc", edition: 1, hidden: false, week: null }],
+  "waterfront-mansion": [
+    { player: "p-nina", displayName: "nina.nyc", shown: "nina.nyc", edition: 1, hidden: false, week: null },
+    { player: "p-dev", displayName: "dev.r", shown: "dev.r", edition: 2, hidden: false, week: null },
+    { player: "p-kenji", displayName: "Kenji", shown: "Kenji", edition: 3, hidden: false, week: null },
+  ],
   "plaza-statue": [{ player: "p-nina", displayName: "nina.nyc", shown: "nina.nyc", edition: 1, hidden: false, week: thisMonday }],
 };
 export async function previewCoutureOwners(sku: string): Promise<Admin<CoutureOwner[]>> {

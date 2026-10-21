@@ -947,6 +947,8 @@ export const HOME_LOCATIONS: Record<string, LatLng> = {
   // v0.15 Campus: the dorms, a short walk from each campus.
   sj_dorm: [40.7208, -73.7972],
   qu_dorm: [40.7352, -73.8192],
+  // Clout Couture: Billionaire's Row on the Astoria waterfront (lib/map/landmarks.ts "billionaires-row").
+  waterfront_mansion: [40.7702, -73.9342],
 };
 
 // ---------------------------------------------------------------------------

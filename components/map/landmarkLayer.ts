@@ -4,7 +4,7 @@
 
 import type { CustomLayerInterface, Map as MapLibreMap } from "maplibre-gl";
 import {
-  Box3, Camera, DirectionalLight, Frustum, Group, HemisphereLight, Matrix4, type Material, type Mesh, type Object3D, Scene, Sphere, Vector3, WebGLRenderer,
+  Box3, Camera, DirectionalLight, Frustum, Group, HemisphereLight, Matrix4, type Material, type Mesh, type MeshStandardMaterial, type Object3D, Scene, Sphere, Vector3, WebGLRenderer,
 } from "three";
 import { BRIDGE_BUILT_M, LANDMARKS, type Landmark } from "@/lib/map/landmarks";
 import { exaggeration, metersPerPx } from "@/lib/map/scale";
@@ -12,10 +12,10 @@ import { animate, applyTheme, buildLandmark, newThemed, paintBigScreen, type The
 import { mergeStatic } from "./mergeModel";
 import { buildVehicle, setVehiclesNight } from "./vehicleModels";
 import type { Traffic } from "./vehicles";
-import { buildJet, buildPlazaPedestal, buildYacht, PEDESTAL_TOP } from "./coutureModels";
+import { buildJet, buildMansion, buildPlazaPedestal, buildYacht, PEDESTAL_TOP } from "./coutureModels";
 import { goldStatue } from "../avatar/goldStatue";
 import type { AvatarParts } from "../avatar/buildAvatar";
-import { jetLoop, mooring, PLAZA_STATUE_AT, type CoutureMap } from "@/lib/coutureMap";
+import { jetLoop, mooring, plotLocal, PLAZA_STATUE_AT, type CoutureMap, type MansionOwner } from "@/lib/coutureMap";
 import { normalizeLook } from "@/lib/look";
 import { getStyle, starterOutfit } from "@/lib/styles";
 import { outfitFromSkus } from "@/lib/wearing";
@@ -111,6 +111,9 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
   const heights = new Map<string, number>();
   const nightOnly = new Set(themed.nightOnly);
   const models = new Map<string, Group>();
+  // Clout Couture's mansions by owner, and the ones couture_map() says stand now (attachMansions, below).
+  const mansions = new Map<string, { key: string; group: Group; windows: MeshStandardMaterial; dispose(): void }>();
+  let wantMansions: MansionOwner[] = [];
   // Where placement last stood each landmark (setPositions), for the ones built after it was called.
   const placedAt = new Map<string, Landmark>();
   // Each landmark's bounds, so ones off screen are skipped (and their searchlights stay still).
@@ -144,6 +147,7 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     model.updateMatrixWorld(true);
     measureOne(model);
     if (l.kind === "clout-tower") paintBigScreen(screen.img, screen.handle);
+    if (l.kind === "billionaires-row") attachMansions();
   };
   let screen: { img: Parameters<LandmarkLayer["setBigScreen"]>[0]; handle?: string } = { img: null };
   const queue = near ? [...list].sort((a, b) => meters(a.at, near) - meters(b.at, near)) : [...list];
@@ -183,6 +187,7 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
 
   const setNight = (n: boolean) => {
     night = n;
+    for (const m of mansions.values()) m.windows.emissiveIntensity = n ? 1.3 : 0.15;
     applyTheme(themed, n);
     setVehiclesNight(n);
     hemi.intensity = n ? 0.8 : 1.6;
@@ -208,6 +213,8 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
       }
       want.forEach((w, i) => { if (!have.has(w.player)) { const made = make(w, i); have.set(w.player, made); couture.add(made.group); } });
     };
+    wantMansions = state.mansions ?? [];
+    attachMansions();
     sync(yachts, state.yachts, (o) => ({ key: o.name, ...buildYacht(o.name) }));
     state.yachts.forEach((o, i) => {
       const y = yachts.get(o.player)!, spot = mooring(i, state.marinaShift ?? 0), [x, z] = local(spot.at);
@@ -240,6 +247,28 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
     }
     map?.triggerRepaint();
   };
+  // The Waterfront Mansions stand on Billionaire's Row's plots, inside its model (so they move with it when it's placed).
+  // A function declaration: build() calls it for the row, possibly before this line runs.
+  function attachMansions() {
+    const row = models.get("billionaires-row");
+    if (!row) return;
+    for (const [id, m] of mansions) {
+      if (wantMansions.some((w) => w.player === id && `${w.plot}:${w.name}` === m.key)) continue;
+      m.group.removeFromParent(); m.dispose(); mansions.delete(id);
+    }
+    for (const w of wantMansions) {
+      if (mansions.has(w.player)) continue;
+      const built = buildMansion(w.name);
+      const [x, z] = plotLocal(w.plot);
+      built.group.position.set(x, 0.4, z < 0 ? z - 4 : z + 4);
+      // Front (+z) toward the promenade.
+      built.group.rotation.y = z < 0 ? 0 : Math.PI;
+      built.windows.emissiveIntensity = night ? 1.3 : 0.15;
+      row.add(built.group);
+      mansions.set(w.player, { key: `${w.plot}:${w.name}`, ...built });
+    }
+    measure();
+  }
   const flyJets = (now: number, zoom: number): boolean => {
     // Readable from any height: about 90 px nose to tail, never smaller than 2.4× life.
     const size = Math.max(2.4, (90 * metersPerPx(zoom)) / 36);
@@ -349,6 +378,7 @@ export function createLandmarkLayer(list: readonly Landmark[] = LANDMARKS, traff
       queue.length = 0;
       if (repaintSoon) clearTimeout(repaintSoon);
       for (const y of yachts.values()) y.dispose();
+      for (const m of mansions.values()) m.dispose();
       for (const j of jets.values()) j.dispose();
       statue?.dispose();
       renderer?.dispose();

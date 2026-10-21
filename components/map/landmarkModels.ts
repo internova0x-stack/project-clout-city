@@ -2,6 +2,7 @@
 // y up, z south, the front facing +z. Monument Valley colors by day; at night windows light up,
 // signs glow and monuments are uplit. Everything that changes at night registers in a Themed.
 
+import { plotLocal } from "@/lib/coutureMap";
 import {
   AdditiveBlending, BoxGeometry, CanvasTexture, CapsuleGeometry, CircleGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, Float32BufferAttribute, Group,
   IcosahedronGeometry, Vector3,
@@ -2186,6 +2187,33 @@ function pierPark(t: Themed): Group {
 
 
 // ---------------------------------------------------------------------------
+// Billionaire's Row (Clout Couture, migration 0105): a stone promenade to the water with ten hedged lawns either side,
+// each a plot for a Waterfront Mansion (lib/coutureMap.ts plotLocal; the mansions are added by the landmark layer).
+// ---------------------------------------------------------------------------
+function billionairesRow(t: Themed): Group {
+  const g = new Group();
+  const stone = solid("#D9D2C3"), lawn = solid("#86C17E"), hedge = solid("#3F7A45"), gold = solid("#C9A227", { metal: 0.3, rough: 0.4 });
+  g.add(at(new Mesh(new BoxGeometry(230, 0.3, 14), stone), 0, 0.15, 0));
+  for (let p = 1; p <= 10; p++) {
+    const [x, z] = plotLocal(p);
+    g.add(at(new Mesh(new BoxGeometry(38, 0.4, 34), lawn), x, 0.2, z));
+    // A low hedge on three sides, open to the promenade.
+    const back = z < 0 ? z - 17 : z + 17;
+    g.add(at(new Mesh(new BoxGeometry(38, 1.6, 1.2), hedge), x, 1, back));
+    for (const sx of [-1, 1]) g.add(at(new Mesh(new BoxGeometry(1.2, 1.6, 34), hedge), x + sx * 19, 1, z));
+  }
+  // The name at the land end, gold on stone.
+  g.add(at(new Mesh(new BoxGeometry(2, 7, 2), gold), -118, 3.5, -8));
+  g.add(at(new Mesh(new BoxGeometry(2, 7, 2), gold), -118, 3.5, 8));
+  const name = sign(t, "BILLIONAIRE'S ROW", 18, 3, { bg: "#1F1B26", fg: "#EBC657" });
+  name.rotation.y = -Math.PI / 2;
+  g.add(at(name, -118.5, 6.5, 0));
+  lampRow(t, g, -110, -8, 110, -8, 8);
+  lampRow(t, g, -110, 8, 110, 8, 8);
+  return g;
+}
+
+// ---------------------------------------------------------------------------
 // St. Copay's General Hospital (owner, Oct 17): a white block with blue glass, a red cross on top
 // and an ambulance bay out front
 // ---------------------------------------------------------------------------
@@ -2243,7 +2271,7 @@ const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   boutique, showroom, dealership, cinema, arena,
   "st-johnsons": stJohnsons, "queensborough-u": queensboroughU, "fair-towers": fairTowers, "discount-disco": discountDisco, "bike-hub": bikeHub,
   "googie-diner": googieDiner, hub, "sky-dining": skyDining, supermarket, cowork, precinct,
-  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation, "clout-tower": cloutTower, hospital, brownstone,
+  chapel, fitness, "hell-gate": hellGate, "el-station": elStation, "condo-towers": condoTowers, "pier-park": pierPark, "radio-station": radioStation, "clout-tower": cloutTower, "billionaires-row": billionairesRow, hospital, brownstone,
 };
 
 export function buildLandmark(kind: LandmarkKind, t: Themed): Group {
