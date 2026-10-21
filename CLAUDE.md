@@ -181,6 +181,9 @@ components live in `app/globals.css`.
   Players read `shop_catalog_public()` (city.catalog; the Shop falls back to the code's list before 0099). Pictures:
   `lib/shopImages.ts` (sharp: color-key the cream background, 256/768 px WebP) to the public `shop` bucket, masters in
   private `shop-masters`. Real-money price edits change `store_products.price_cents` and drop the old Stripe price id.
+  Pictures also ship with the game: `npm run build:shop-images` processes every `sourceImage` in `content/shop/` into
+  `public/shop-img/` and generates `lib/shopImagesStatic.ts` (by sku); the Shop shows them when the catalog has no stored
+  picture (`shippedPictures`), and the Studio's Load uses them instead of processing (tests/shopPictures.test.ts).
   `/preview/studio` → Shop runs on an in-memory catalog and really processes pictures; what's approved there shows in
   `/preview/home`'s Shop (run `npm run dev` with `NODE_USE_ENV_PROXY=1` where downloads need a proxy).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): masters in `assets/avatars/`, game copies (full and

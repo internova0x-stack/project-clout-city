@@ -6,7 +6,8 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { brandHits, type ParodyName } from "./culture";
 import { fieldProblems, parseCatalogFile, type CatalogDraft, type CatalogItem, type ImageMatch, type ShopFile, type ShopTab } from "./shopCatalog";
-import { fetchSourceImage, processShopImage } from "./shopImages";
+import { fetchSourceImage, imagePaths, processShopImage } from "./shopImages";
+export { imagePaths };
 
 const DIR = () => path.join(process.cwd(), "content", "shop");
 
@@ -65,14 +66,6 @@ export async function prepareImport(raw: unknown, file: string, catalog: Catalog
     else drafts.push(d);
   }
   return { drafts, images: parsed.images, problems };
-}
-
-/** Where a processed picture goes: versioned by its source, so a new picture never shows a cached old one. */
-export function imagePaths(sku: string, source: string): { card: string; detail: string; master: string } {
-  let h = 0;
-  for (const c of source) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const v = h.toString(36);
-  return { card: `${sku}-${v}-256.webp`, detail: `${sku}-${v}-768.webp`, master: `${sku}-${v}.png` };
 }
 
 /** Downloads and processes one item's picture. */

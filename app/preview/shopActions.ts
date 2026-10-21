@@ -2,7 +2,7 @@
 
 import { previewOnly } from "./guard";
 import { SHOP_ITEMS } from "@/lib/city";
-import { canMove, fieldProblems, fromShopItem, isOnSale, readiness, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
+import { canMove, fieldProblems, fromShopItem, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
 import type { Admin, ShopAction, ShopAuditRow, ShopImportResult } from "@/lib/studio";
 
@@ -79,11 +79,13 @@ export async function previewShopProcessImages(skus: string[]): Promise<Admin<{ 
     const i = store().get(sku);
     if (!i?.sourceImage) { out.push({ sku, ok: false, error: "no picture source" }); continue; }
     try {
-      const img = await buildImages(i);
+      // Shipped with the game (scripts/build-shop-images.ts) unless the picture is new.
+      const shipped = shippedPictures(sku, i.sourceImage);
+      const img = shipped ? null : await buildImages(i);
       const url = (b: Buffer) => `data:image/webp;base64,${b.toString("base64")}`;
       // Every color of a furniture line shares one picture: process it once.
       for (const x of list().filter((x) => x === i || (x.sourceImage === i.sourceImage && x.imageStatus !== "ready"))) {
-        x.images = { card: url(img.card), detail: url(img.detail) };
+        x.images = shipped ?? { card: url(img!.card), detail: url(img!.detail) };
         x.imageStatus = "ready"; x.imageError = null;
         if (x.status === "draft") x.status = "pending_review";
         log(x.sku, "image", null, { card: "(processed)" });

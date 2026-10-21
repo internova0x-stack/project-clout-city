@@ -4,6 +4,7 @@
 // and 768 px (detail) at about 80% WebP quality. Server only (sharp).
 
 import sharp from "sharp";
+import { sourceVersion } from "./shopCatalog.ts";
 
 export const SHOP_IMAGE_SIZES = { card: 256, detail: 768 } as const;
 
@@ -80,4 +81,10 @@ export async function fetchSourceImage(url: string): Promise<Buffer> {
   const buf = Buffer.from(await res.arrayBuffer());
   if (buf.length > 20 * 1024 * 1024) throw new Error("image over 20 MB");
   return buf;
+}
+
+/** Where a processed picture goes: versioned by its source, so a new picture never shows a cached old one. */
+export function imagePaths(sku: string, source: string): { card: string; detail: string; master: string } {
+  const v = sourceVersion(source);
+  return { card: `${sku}-${v}-256.webp`, detail: `${sku}-${v}-768.webp`, master: `${sku}-${v}.png` };
 }

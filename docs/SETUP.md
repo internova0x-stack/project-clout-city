@@ -280,7 +280,14 @@ Migration 0099 creates two Storage buckets: **shop** (public: the 256 px and 768
 **shop-masters** (private: the original PNGs, never sent to players). If the SQL Editor can't create them (it warns),
 create both in Supabase → Storage with those names, `shop` public and `shop-masters` private.
 
-Pictures are processed and uploaded by the server with `SUPABASE_SERVICE_ROLE_KEY` (already set for payments). In the
+**The pictures ship with the game** (Oct 21): `npm run build:shop-images` downloads every `sourceImage` in
+`content/shop/*.json`, processes it the same way and saves the two WebPs in `public/shop-img/`, with
+`lib/shopImagesStatic.ts` mapping each item to them. So items already on sale show their pictures as soon as the code is
+deployed (even before migration 0099), and the Studio's **Load** uses the shipped pictures instantly instead of
+processing again. Run the script again after adding a catalog file (it keeps pictures already made). New items still
+need **Approve** in the Studio to go on sale.
+
+A picture that isn't shipped (a new link edited in the Studio) is processed and uploaded by the server with `SUPABASE_SERVICE_ROLE_KEY` (already set for payments). In the
 Studio: **Shop** → **Load** a catalog file → the pictures process with a progress bar → review and approve. The free
 Supabase plan includes about 1 GB of storage and 5 GB of downloads a month; every Shop picture together is roughly
 15 MB.
