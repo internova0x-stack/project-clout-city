@@ -16,12 +16,12 @@ const files = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => ({ 
 const parsed = files.map(({ f, raw }) => ({ f, ...parseCatalogFile(raw, f, { coutureCloutFor: () => 260 }) }));
 const drafts = parsed.flatMap((p) => p.drafts);
 
-test("every catalog file loads: 97 new items, 36 pictures for items on sale, no problems", () => {
+test("every catalog file loads: 97 new items, 56 pictures for items on sale, no problems", () => {
   for (const p of parsed) assert.deepEqual(p.problems, [], p.f);
   assert.equal(drafts.length, 97);
   assert.equal(new Set(drafts.map((d) => d.sku)).size, drafts.length, "unique ids");
   const images = parsed.flatMap((p) => p.images);
-  assert.equal(images.length, 36);
+  assert.equal(images.length, 56);
   for (const m of images) assert.ok(SHOP_ITEMS.some((i) => i.name === m.liveName), `"${m.liveName}" is on sale`);
   for (const d of drafts) {
     assert.deepEqual(fieldProblems(d, { brandHits: (t) => brandHits(t, parody) }), [], d.sku);

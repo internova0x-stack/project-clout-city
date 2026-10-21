@@ -2,7 +2,7 @@
 
 import { previewOnly } from "./guard";
 import { SHOP_ITEMS } from "@/lib/city";
-import { canMove, fieldProblems, fromShopItem, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
+import { canMove, fieldProblems, fromShopItem, imageMatches, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
 import type { Admin, ShopAction, ShopAuditRow, ShopImportResult } from "@/lib/studio";
 
@@ -63,7 +63,7 @@ export async function previewShopImport(source: { file: string } | { json: strin
     } else r.kept.push(d.sku);
   }
   for (const m of prep.images) {
-    const hits = list().filter((i) => i.name === m.liveName);
+    const hits = imageMatches(m, list());
     for (const h of hits) if (h.sourceImage !== m.sourceImage) Object.assign(h, { sourceImage: m.sourceImage, transparent: m.transparent, imageStatus: "none", file: h.file ?? file });
     if (hits.length) r.pictures.push({ name: m.liveName, skus: hits.map((h) => h.sku) }); else r.notFound.push(m.liveName);
   }

@@ -54,6 +54,9 @@ export async function studioShopImport(source: { file: string } | { json: string
     Object.assign(result, r.data);
   }
   for (const m of prep.images) {
+    // A picture for one color of a line (matched by sku) ships with the game: the Shop shows it by sku
+    // (shippedPictures), and the database's match by name would give every color the same one.
+    if (m.sku) { result.pictures.push({ name: m.liveName, skus: [m.sku] }); continue; }
     const r = await rpc<string[]>("admin_shop_image_source", { p_name: m.liveName, p_source: m.sourceImage, p_transparent: m.transparent, p_file: file });
     if (!r.ok) return r;
     if (r.data.length) result.pictures.push({ name: m.liveName, skus: r.data });

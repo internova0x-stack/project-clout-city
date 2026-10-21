@@ -98,10 +98,10 @@ export const SET_LOOKS: Record<string, { m: SetLook; f: SetLook }> = {
     pieces: [{ file: "zip", color: "#5E7B3A", accent: "#C2AE86" }, { file: "pants", color: "#C2AE86", accent: "#C2AE86" }, { file: "boots", color: "#5A3A22", accent: "#2B2B2B" }],
     hat: { kind: "explorer", color: "#8C6A4F", accent: "#3A2A1C" },
   }),
-  tactical: {
-    m: { pieces: [{ file: "zip", color: "#3A3F47", accent: "#14111A" }, { file: "pants", color: "#4A4F57", accent: "#4A4F57" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }], hat: { kind: "helmet", color: "#4A5A3A", accent: "#2B2B2B" } },
-    f: { pieces: [{ file: "vest", color: "#4A5A3A", accent: "#14111A" }, { file: "leggings", color: "#3A3F47", accent: "#3A3F47" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }] },
-  },
+  tactical: both({
+    pieces: [{ file: "zip", color: "#3A3F47", accent: "#14111A" }, { file: "pants", color: "#4A4F57", accent: "#4A4F57" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }],
+    hat: { kind: "helmet", color: "#4A5A3A", accent: "#2B2B2B" },
+  }),
   witch: both({
     pieces: [{ file: "zip", color: "#5B2C8F", accent: "#C9A227", kind: plain }, { file: "gown", color: "#5B2C8F", accent: "#C9A227" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }],
     hat: { kind: "witch", color: "#3A1C5C", accent: "#C9A227" },
@@ -110,10 +110,10 @@ export const SET_LOOKS: Record<string, { m: SetLook; f: SetLook }> = {
     pieces: [{ file: "zip", color: "#5A3A22", accent: "#3A2A1C", kind: plain }, { file: "leggings", color: "#3A3F2A", accent: "#3A3F2A" }, { file: "boots", color: "#5A3A22", accent: "#2B2B2B" }],
     hat: { kind: "hood", color: "#3F4A2E", accent: "#2B2F20" },
   }),
-  spacefarer: {
-    m: { pieces: [{ file: "puffer", color: "#E8692E", accent: "#D9DDE3" }, { file: "pants", color: "#E8692E", accent: "#D9DDE3", kind: quilted }, { file: "boots", color: "#D9DDE3", accent: "#3A3F47" }], hat: { kind: "space", color: "#D9DDE3", accent: "#E8692E" } },
-    f: { pieces: [{ file: "zip", color: "#D9DDE3", accent: "#E8692E" }, { file: "leggings", color: "#E8692E", accent: "#E8692E" }, { file: "boots", color: "#D9DDE3", accent: "#3A3F47" }] },
-  },
+  spacefarer: both({
+    pieces: [{ file: "puffer", color: "#E8692E", accent: "#D9DDE3" }, { file: "pants", color: "#E8692E", accent: "#D9DDE3", kind: quilted }, { file: "boots", color: "#D9DDE3", accent: "#3A3F47" }],
+    hat: { kind: "space", color: "#D9DDE3", accent: "#E8692E" },
+  }),
   royalty: {
     m: { pieces: [{ file: "blazer", color: "#7A1F2B", accent: "#C9A227" }, { file: "pants", color: "#F4F1EA", accent: "#F4F1EA" }, { file: "boots", color: "#14111A", accent: "#C9A227" }], hat: { kind: "crown", color: "#C9A227", accent: "#B33A3A" } },
     f: { pieces: [{ file: "blazer", color: "#7A1F2B", accent: "#C9A227" }, { file: "gown", color: "#7A1F2B", accent: "#C9A227" }, { file: "sneakers", color: "#C9A227", accent: "#8C6D12", kind: dressShoes }], hat: { kind: "crown", color: "#C9A227", accent: "#B33A3A" } },
