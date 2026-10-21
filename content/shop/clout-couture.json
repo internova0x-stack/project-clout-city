@@ -153,6 +153,24 @@
       "editionNote": "per drop; later drops priced the same or higher"
     },
     {
+      "id": "clout-throne",
+      "name": "The Clout Throne",
+      "tab": "Home",
+      "slot": "living",
+      "description": "Forged from a thousand fused phones and the selfie sticks of everyone who doubted you. Ring lights included. Uncomfortable. Worth it.",
+      "realCash": true,
+      "priceUsd": 299.0,
+      "editionSize": 10,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_181452_6b6e9c68-e862-4c20-899a-1c51251c954e.png",
+      "images": {
+        "card": "shop/clout-throne-256.webp",
+        "detail": "shop/clout-throne-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher; added by the owner, Oct 21"
+    },
+    {
       "id": "24k-glow-ritual",
       "name": "24k Glow Ritual",
       "tab": "Makeup",

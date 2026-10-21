@@ -35,8 +35,8 @@ export type FurnitureKind =
   | "micDesk" | "onAirSign" | "soundPanel" | "bigScreen" | "tvCamera" | "ringLight"
   // The Hub's game room
   | "arcade" | "poolTable"
-  // Clout Couture (migration 0102): the owner in gold on a marble pedestal
-  | "statue";
+  // Clout Couture (migration 0102): the owner in gold on a marble pedestal; the Clout Throne
+  | "statue" | "throne";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -139,6 +139,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   cat: { w: 0.5, d: 0.3, label: "The cat" },
   piano: { w: 1.5, d: 1.4, label: "Piano", movable: true },
   statue: { w: 0.8, d: 0.8, label: "Statue", movable: true },
+  throne: { w: 1.4, d: 1.3, label: "Throne", movable: true },
   clothesRack: { w: 1.6, d: 0.5, label: "Rack" },
   mirror: { w: 0.9, d: 0.3, label: "Mirror" },
   displayTable: { w: 1.2, d: 0.8, label: "Display" },
@@ -1192,6 +1193,7 @@ export const isOwnedId = (id: string) => id.startsWith("item:");
 const OWNED_USE: Partial<Record<FurnitureKind, Pick<RoomItem, "use" | "label">>> = {
   sofa: { use: { kind: "sit" }, label: "Sit" }, armchair: { use: { kind: "sit" }, label: "Sit" },
   chair: { use: { kind: "sit" }, label: "Sit" }, bed: { use: { kind: "sleep" }, label: "Nap" },
+  throne: { use: { kind: "sit" }, label: "Sit" },
 };
 export function ownedItem(p: OwnedPiece, x: number, z: number, rot: number): RoomItem {
   return { id: p.id, kind: p.kind, x, z, rot: ((rot % 4) + 4) % 4, color: p.color, name: p.name, ...OWNED_USE[p.kind] };
