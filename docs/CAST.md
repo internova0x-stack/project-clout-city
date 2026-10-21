@@ -49,6 +49,15 @@ For City News. Each has a personality, a want and a flaw, so their news writes i
 | Tech founder | Skyler Beta | Hoodie, ten apps, three pivots a year | To build the everything app | None of the apps work |
 | Influencer | Peyton Pastel | Pastel everything, link in bio | A brand deal with a car company | Every apology video goes viral |
 
+## Fashion houses (owner, Oct 21)
+
+Invented designers behind Shop drops (`docs/fashion-style-lines.md`):
+
+- **Vale Sartorio**: the avant-garde designer behind runway drops (the Sartorio Sculpt Jacket, the Sartorio Ruffle
+  Dress and, in Clout Couture, the Sartorio Bespoke Suit). Sculptural, asymmetric, unbothered by your budget.
+- **Duke Ledger**: old money who never says how old; his personal watchmaker made the Ledger Tourbillon (Clout
+  Couture). The quiet-luxury house of the Luxury line.
+
 ## The wannabes
 
 - **DJ Polaroid**: A struggling DJ who plays Hellgate Hall's 7 PM slot to an empty room.

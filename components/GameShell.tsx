@@ -217,6 +217,7 @@ export function GameShell({
   partyInbox: initialPartyInbox = null,
   cityNews,
   calendarData = CALENDAR_FILE as CalendarData,
+  catalogOverride,
   hunt,
   gossip,
   business,
@@ -272,6 +273,8 @@ export function GameShell({
   cityNews?: () => Promise<NewsItem[]>;
   /** C5: the calendar of real-date events (the preview passes one with its dates moved). */
   calendarData?: CalendarData;
+  /** The preview's Shop catalog (what was approved in /preview/studio); the game reads city.catalog. */
+  catalogOverride?: import("@/lib/shopCatalog").CatalogItem[];
   /** v0.6 treasure hunts (migration 0018); without it there's no Hunt tab. */
   hunt?: HuntApi;
   /** v0.10 neighborhood gossip (migration 0035): Listen in, regulars' pieces, the Tea app and Tea cards. */
@@ -2325,6 +2328,7 @@ export function GameShell({
             section={shopSection}
             onTryAtHome={(item) => { setPanel(null); setTryHome(item); setTab("home"); }}
             fit={modelSex(look)}
+            catalog={catalogOverride ?? city.catalog}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
           />
           <NetWorthSheet

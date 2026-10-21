@@ -171,6 +171,17 @@ components live in `app/globals.css`.
   Court Square Courthouse) carry `story`, so gossip and hunts never use them; keep a story's effects on its own places.
   Lola's four date spots are `content/culture/date-spots.json` (a line on the place card). The weekly column answers an
   NYC dating complaint (docs/WEEKLY-CONTENT.md).
+- The Shop Manager (migration 0099; docs/shop-manager.md, docs/fashion-style-lines.md, spec section 23; v1.0): the Shop's
+  catalog is `shop_catalog` (statuses draft → pending_review → scheduled/live → retired; deleted only if never sold),
+  with `shop_audit`. Add Shop items in Studio → Shop (import `content/shop/*.json`), not in `lib/city.ts` (`SHOP_ITEMS`
+  keeps the pieces from before it: their wear and furniture data). A trigger rebuilds `city() -> 'shop'` from the
+  catalog whenever 'city' or the catalog is written, so `shop_item()` and every purchase function work as before; a
+  player_items trigger refuses buying what isn't on sale ('not_for_sale') or can't be worn yet ('not_wearable_yet').
+  Players read `shop_catalog_public()` (city.catalog; the Shop falls back to the code's list before 0099). Pictures:
+  `lib/shopImages.ts` (sharp: color-key the cream background, 256/768 px WebP) to the public `shop` bucket, masters in
+  private `shop-masters`. Real-money price edits change `store_products.price_cents` and drop the old Stripe price id.
+  `/preview/studio` → Shop runs on an in-memory catalog and really processes pictures; what's approved there shows in
+  `/preview/home`'s Shop (run `npm run dev` with `NODE_USE_ENV_PROXY=1` where downloads need a proxy).
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
   for the player's Instagram handle by name (v0.14). Copy is satirical and never
   promises features that aren't built.

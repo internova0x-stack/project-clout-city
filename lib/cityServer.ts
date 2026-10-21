@@ -1,3 +1,4 @@
+import type { CatalogItem } from "./shopCatalog";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Bill, CityPlayer, CityState, DailyTask, GigOffer, PlayerItem } from "./cityState";
 import type { LottoState } from "./lotto";
@@ -20,7 +21,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
-  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks, days, calendar] = await Promise.all([
+  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks, days, calendar, catalog] = await Promise.all([
     supabase.from("daily_tasks").select("*").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
@@ -48,6 +49,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     supabase.from("place_visits").select("place_id").in("place_id", REMEMBER_PLACES),
     // Migration 0096; missing until it runs, which hides calendar attendance and gift boxes.
     supabase.rpc("calendar_state"),
+    // Migration 0099; missing until it runs, when the Shop shows the code's list as before.
+    supabase.rpc("shop_catalog_public"),
   ]);
   const devValue = (dev.data?.value ?? {}) as { tools?: boolean; clockOffsetSeconds?: number };
   return {
@@ -91,6 +94,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     lotto: lotto.error || !lotto.data ? undefined : (lotto.data as LottoState),
     perks: perks.error || !perks.data ? undefined : (perks.data as PerksState),
     calendar: calendar.error || !calendar.data ? undefined : (calendar.data as CalendarState),
+    catalog: catalog.error || !Array.isArray(catalog.data) ? undefined : (catalog.data as CatalogItem[]),
     restToday: rest.error ? undefined : Object.assign({ nap: 0, sit: 0 }, Object.fromEntries(((rest.data ?? []) as { kind: string; uses: number }[]).map((r) => [r.kind, r.uses]))),
   };
 }

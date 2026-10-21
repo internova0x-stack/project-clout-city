@@ -928,3 +928,24 @@ club", and it is told on the Skills screen.
   skill gig. Collecting a skill gig counts as practice for its skill.
 - **Not built:** push notifications for newly opened perks, and perks for other players to see on your card.
 
+## 23. The avatar and Shop upgrade (owner, Oct 21; part of v1.0)
+
+The plan, its rules and its five stages are `docs/shop-manager.md` (it wins on detail); the style lines, templates and
+art style are `docs/fashion-style-lines.md`. The owner's decisions of Oct 21:
+
+- **Order:** (1) the Shop Manager, the import, pictures instead of emoji, approving home, cars, houses and makeup;
+  (2) the new base bodies (bald versions with hair, headwear and coverings on top), body types, optimization and a
+  low-graphics mode for low-end phones; (3) the hoodie template as proof; (4) the remaining garment templates, then
+  accessories, plus the style mechanics; (5) Clout Couture, non-wearables first.
+- **The catalog lives in the database** (migration 0099), every item on sale then brought in as live. The game still
+  reads `city() -> 'shop'`, which the catalog keeps in step. New items are added in the Studio's Shop tab, not in
+  `lib/city.ts`.
+- **Clothes are gender based:** each item is Female only or Male and Female (defaults in shop-manager.md section 2).
+- **Clothing that can't be worn yet shows, locked** ("Coming soon to your wardrobe"), and can't be bought.
+- **Clout follows the live curve** (about 0.6 × price^0.62). Fantasy outfits keep their clout locks.
+- **Tabs:** jewelry and watches in Luxury; hats, shades, scarves and bags in a new Accessories tab; Clout Couture as a
+  row at the top of Luxury (and of a piece's own tab), with no Map tab.
+- **The faux chinchilla coat** stays real cash, at $16.99.
+- **Clout Couture editions:** numbering continues across drops, and an edition can be brought back. A mansion owner can
+  have other homes; Billionaire's Row comes later.
+- **Pictures** are stored in Supabase Storage (public `shop` bucket; masters in the private `shop-masters` bucket).

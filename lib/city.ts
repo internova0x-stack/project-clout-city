@@ -1016,7 +1016,7 @@ export const FURNITURE_ROOMS: { id: FurnitureRoom; label: string }[] = [
   { id: "living", label: "Living" }, { id: "bedroom", label: "Bedroom" }, { id: "dining", label: "Dining" }, { id: "decor", label: "Decor" },
 ];
 
-export type ShopCategory = "fashion" | "home" | "cars" | "houses" | "luxury" | "makeup";
+export type ShopCategory = "fashion" | "accessories" | "home" | "cars" | "houses" | "luxury" | "makeup";
 
 export interface ShopItem {
   sku: string;
@@ -1069,6 +1069,8 @@ function furnitureLine(id: string, room: FurnitureRoom, kind: string, name: stri
 
 export const SHOP_CATEGORIES: { id: ShopCategory; label: string; emoji: string }[] = [
   { id: "fashion", label: "Fashion", emoji: "👗" },
+  // The Shop Manager (owner, Oct 21): hats, shades, scarves and bags; jewelry and watches stay in Luxury.
+  { id: "accessories", label: "Accessories", emoji: "🕶️" },
   { id: "home", label: "Home", emoji: "🛋️" },
   { id: "cars", label: "Cars", emoji: "🚗" },
   { id: "houses", label: "Houses", emoji: "🏠" },

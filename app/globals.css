@@ -2155,3 +2155,29 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .beat-locked-row { display:flex; align-items:center; gap:10px; padding:14px 16px; border-radius:var(--r-lg); background:#E4E2DE;
   box-shadow:var(--elev-2); color:var(--text-3); filter:grayscale(1); }
 .beat-locked-row .title { flex:1; color:var(--text-3); }
+
+/* The Shop Manager (migration 0099): Shop pictures, and the Studio's Shop tab. */
+.shop-art { display:block; object-fit:contain; border-radius:var(--r-md); background:var(--surface-raised); flex:none; }
+.shop-art.big { border-radius:var(--r-lg); }
+.shop-previews { display:flex; gap:12px; flex-wrap:wrap; }
+.shop-preview { padding:12px; border-radius:var(--r-lg); background:var(--surface-sheet); }
+.shop-preview.dark { background:var(--night-900); --surface-card:var(--night-700); --surface-raised:var(--night-800); --text-1:var(--text-on-dark); --text-2:#D9D0C0; --text-3:#B8AFA2; color:var(--text-on-dark); }
+.shop-progress { height:8px; border-radius:var(--r-pill); background:var(--chip-off); overflow:hidden; }
+.shop-progress > span { display:block; height:100%; background:var(--taxi-500); transition:width .3s; }
+.shop-row { display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--divider); }
+.shop-row:last-of-type { border-bottom:0; }
+.shop-row > input { width:20px; height:20px; flex:none; }
+.shop-row-main { display:flex; align-items:center; gap:12px; flex:1; min-width:0; padding:10px 4px; border:0; background:none; text-align:left; font:inherit; color:var(--text-1); cursor:pointer; }
+.shop-bulk { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; position:sticky; top:8px; z-index:2; }
+.shop-checks { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+.shop-edit { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
+.shop-filters { flex-wrap:wrap; }
+.shop-filters > * { flex:1 1 140px; }
+.players-tag.shop-status.live { background:#DDF6E8; color:#1E6B45; }
+.players-tag.shop-status.scheduled { background:var(--taxi-tint); }
+.players-tag.shop-status.retired { opacity:.7; }
+.meta.locked { color:var(--text-2); font-weight:600; }
+.shop-edit label { display:flex; flex-direction:column; gap:4px; }
+.couture-row { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(160px, 46%); gap:10px; overflow-x:auto; padding-bottom:4px; scroll-snap-type:x mandatory; }
+.couture-row > .item-card { scroll-snap-align:start; }
+.couture-row .item-card > .row:first-child { flex-wrap:wrap; gap:6px; }

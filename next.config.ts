@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
   // game and the Studio store gossip weeks from content/gossip (lib/gossipImport.ts; story files for
   // its safety check). Server only: none of these reach a browser.
   outputFileTracingIncludes: {
-    "/studio": ["./content/hunts/*.json", "./content/news/*.json", "./content/gossip/*.json", "./content/stories/*.json"],
+    // The Shop Manager's import (lib/shopImport.ts): the catalog files and the invented-names list.
+    "/studio": ["./content/hunts/*.json", "./content/news/*.json", "./content/gossip/*.json", "./content/stories/*.json", "./content/shop/*.json", "./content/culture/parody-names.json"],
     "/home": ["./content/gossip/*.json", "./content/stories/*.json", "./content/hunts/*.json", "./content/news/*.json", "./content/exams/*.json"],
   },
 };

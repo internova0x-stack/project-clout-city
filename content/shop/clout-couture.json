@@ -1,0 +1,267 @@
+{
+  "collection": "Clout Couture",
+  "rules": [
+    "Real-money collector items: shown with a $ price, the gold card border and the REAL CASH tag; bought through the existing Stripe checkout; refunds revoke the item.",
+    "Limited numbered editions: editionSize per item (100 per drop for the first eight; 50, 50, 25 and 10 for the yacht, crown, jet and mansion; the plaza statue is one per week). The edition number shows on the item and on the owner's profile ('No. 0042 of 100'). Limits are real; never fake scarcity.",
+    "Pure status, no gameplay advantage: the Velocity Veloce travels exactly like any other owned car; clout equals the most expensive C$ item in the same category, never more.",
+    "Net worth: value is 1.5x the most expensive C$ item in the same Shop category (existing rule), and collector items DO count toward the net worth leaderboard (owner decision).",
+    "Not tradable, not sellable for C$, and not giftable for now.",
+    "Owning any piece earns a 'Clout Couture' badge. Each new drop gets a Lola Lowdown News item.",
+    "The only home in this collection is the Waterfront Mansion, and it has a weekly C$ upkeep equal to the top Astoria rent, because owning a home normally stops rent and real money must never buy an economic advantage.",
+    "Map items (yacht, jet, plaza statue) and the mansion need map placement and 3D models in addition to their Shop images; they can ship after the simpler items.",
+    "Every real-money purchase over $50 shows the confirmation sheet first; turn on Stripe Radar fraud screening, since higher prices attract chargebacks.",
+    "Owner names shown on the yacht, jet banner and mansion gate go through the word filter and can be reset from the Story Studio."
+  ],
+  "items": [
+    {
+      "id": "sartorio-bespoke-suit",
+      "name": "Sartorio Bespoke Suit",
+      "tab": "Fashion",
+      "slot": "one-piece",
+      "description": "Tailor-made midnight-blue three-piece suit with a gold silk lining. Buyers choose the cloth color, lining color and up to three monogram initials.",
+      "realCash": true,
+      "priceUsd": 24.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": false,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093137_6c5de3c6-cc57-4d69-8c42-1103b4d0fa5f.png",
+      "images": {
+        "card": "shop/sartorio-bespoke-suit-256.webp",
+        "detail": "shop/sartorio-bespoke-suit-768.webp"
+      },
+      "customizable": [
+        "clothColor",
+        "liningColor",
+        "monogramInitials (max 3 letters, word filter applies)"
+      ],
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "gilded-sole-heels",
+      "name": "Gilded Sole Heels",
+      "tab": "Fashion",
+      "slot": "shoes",
+      "description": "Black patent stiletto heels with six-inch heels and the house signature: mirror-gold soles.",
+      "realCash": true,
+      "priceUsd": 14.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": false,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093350_82368cfb-1123-4bdb-a6eb-2fd9d5dc445a.png",
+      "images": {
+        "card": "shop/gilded-sole-heels-256.webp",
+        "detail": "shop/gilded-sole-heels-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "midas-shades",
+      "name": "Midas Shades",
+      "tab": "Luxury",
+      "slot": "face",
+      "description": "Solid-gold sculpted sunglasses with gold-mirror lenses.",
+      "realCash": true,
+      "priceUsd": 9.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": false,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093137_7ebb5b2d-0a36-4c84-9ef3-d9e91152ddab.png",
+      "images": {
+        "card": "shop/midas-shades-256.webp",
+        "detail": "shop/midas-shades-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "ledger-tourbillon",
+      "name": "The Ledger Tourbillon",
+      "tab": "Luxury",
+      "slot": "wrist",
+      "description": "Duke Ledger's personal watchmaker's rose-gold watch with an exposed spinning movement. Numbered on the dial.",
+      "realCash": true,
+      "priceUsd": 29.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": false,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093138_f7836d7a-3177-49c5-b4c1-eaf390ef64f7.png",
+      "images": {
+        "card": "shop/ledger-tourbillon-256.webp",
+        "detail": "shop/ledger-tourbillon-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "velocity-veloce",
+      "name": "Velocity Veloce",
+      "tab": "Cars",
+      "slot": "car",
+      "description": "Invented wedge hypercar in metallic magenta with scissor doors and neon underglow. Travels exactly like any other owned car.",
+      "realCash": true,
+      "priceUsd": 49.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": null,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093206_d9c00bb1-535f-4b46-af17-5a76d4a419b2.png",
+      "images": {
+        "card": "shop/velocity-veloce-256.webp",
+        "detail": "shop/velocity-veloce-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "cloud-nine-sofa",
+      "name": "Cloud Nine Sofa",
+      "tab": "Home",
+      "slot": "living",
+      "description": "Oversized curved champagne-velvet sofa with a polished gold frame.",
+      "realCash": true,
+      "priceUsd": 14.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": null,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093207_8fcb6433-04fc-4bdb-9783-dc8c7702ad99.png",
+      "images": {
+        "card": "shop/cloud-nine-sofa-256.webp",
+        "detail": "shop/cloud-nine-sofa-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "self-portrait-statue",
+      "name": "Self-Portrait Statue",
+      "tab": "Home",
+      "slot": "decor",
+      "description": "A solid-gold statue of the buyer's own avatar, in the outfit they wore when they bought it, on a black marble pedestal. The Shop card uses a generic statue image; the placed statue renders the buyer's avatar in gold.",
+      "realCash": true,
+      "priceUsd": 29.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": null,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093207_0ab1c25d-9d23-4e89-9dc6-b2f9672f83ea.png",
+      "images": {
+        "card": "shop/self-portrait-statue-256.webp",
+        "detail": "shop/self-portrait-statue-768.webp"
+      },
+      "personalized": "render the owner's avatar (pose and outfit at purchase) in a gold material",
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "24k-glow-ritual",
+      "name": "24k Glow Ritual",
+      "tab": "Makeup",
+      "slot": "face-effect",
+      "description": "Gold-flake facial set that gives the avatar a subtle permanent shimmer (toggle on or off in Your Look).",
+      "realCash": true,
+      "priceUsd": 9.99,
+      "editionSize": 100,
+      "currency": "$",
+      "wearable": false,
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_093206_c9e6a9ba-eba6-493c-bf69-29e12a4351af.png",
+      "images": {
+        "card": "shop/24k-glow-ritual-256.webp",
+        "detail": "shop/24k-glow-ritual-768.webp"
+      },
+      "editionNote": "per drop; later drops priced the same or higher"
+    },
+    {
+      "id": "astoria-yacht",
+      "name": "The Astoria Yacht",
+      "tab": "Map",
+      "slot": "waterfront",
+      "description": "A white-and-gold superyacht moored at the Astoria waterfront with the owner's name on the hull (word filter and review apply). Tapping it opens the owner's profile. Decoration only: no travel effect.",
+      "realCash": true,
+      "priceUsd": 69.99,
+      "editionSize": 50,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_094212_2f4409ae-ad79-4b5c-ac01-3f5f776389d6.png",
+      "images": {
+        "card": "shop/astoria-yacht-256.webp",
+        "detail": "shop/astoria-yacht-768.webp"
+      }
+    },
+    {
+      "id": "clout-crown",
+      "name": "The Clout Crown",
+      "tab": "Luxury",
+      "slot": "head",
+      "description": "A jeweled gold crown (or tiara, the buyer's choice) for the avatar, plus a small crown icon next to the owner's name on leaderboards and in chat. Status only: no stat effect.",
+      "realCash": true,
+      "priceUsd": 79.99,
+      "editionSize": 50,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_094211_164113f4-e701-4bb4-ada6-68b1a65b3206.png",
+      "images": {
+        "card": "shop/clout-crown-256.webp",
+        "detail": "shop/clout-crown-768.webp"
+      },
+      "customizable": [
+        "style: crown or tiara (the tiara needs its own image later)"
+      ]
+    },
+    {
+      "id": "clout-one-jet",
+      "name": "Clout One Private Jet",
+      "tab": "Map",
+      "slot": "sky",
+      "description": "A black-and-gold private jet that flies across the city map when its owner logs in, trailing a banner with their display name (word filter and review apply). Decoration only: no travel effect.",
+      "realCash": true,
+      "priceUsd": 89.99,
+      "editionSize": 25,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_094210_be219068-6284-4c98-9eaf-c231889bc075.png",
+      "images": {
+        "card": "shop/clout-one-jet-256.webp",
+        "detail": "shop/clout-one-jet-768.webp"
+      }
+    },
+    {
+      "id": "waterfront-mansion",
+      "name": "The Waterfront Mansion",
+      "tab": "Houses",
+      "slot": "plot",
+      "description": "A glass-and-stone mansion on one of 10 private plots along 'Billionaire's Row' on the Astoria waterfront, with the owner's name on the gate. A real 3D building on the map, lit at night, with a large interior the owner can decorate and invite their crew into. The owner can live in it, but pays a weekly upkeep in C$ equal to the most expensive rent in Astoria, so it never saves money compared with a C$ home. Lola announces each new owner.",
+      "realCash": true,
+      "priceUsd": 99.99,
+      "editionSize": 10,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_094211_853994c9-3af7-474e-9fb7-aa80d9778a68.png",
+      "images": {
+        "card": "shop/waterfront-mansion-256.webp",
+        "detail": "shop/waterfront-mansion-768.webp"
+      },
+      "editionNote": "10 plots total; a refund frees a plot",
+      "weeklyUpkeepCs": "equal to the most expensive Astoria rent (config)"
+    },
+    {
+      "id": "plaza-statue",
+      "name": "Statue in the Plaza",
+      "tab": "Map",
+      "slot": "plaza",
+      "description": "A gold statue of the owner's avatar (pose and outfit at purchase) placed in the Unisphere plaza for 7 days with a plaque, then moved to the owner's apartment permanently. Only one statue in the plaza at a time: buyers book an available week. The Story Studio can remove a statue, with a refund.",
+      "realCash": true,
+      "priceUsd": 120.0,
+      "editionSize": 52,
+      "currency": "$",
+      "transparent": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_094242_57281e42-240c-412a-a1d5-4270c7b1c5ea.png",
+      "images": {
+        "card": "shop/plaza-statue-256.webp",
+        "detail": "shop/plaza-statue-768.webp"
+      },
+      "editionNote": "1 per week (at most 52 a year); booking queue",
+      "personalized": "render the owner's avatar in gold"
+    }
+  ]
+}
