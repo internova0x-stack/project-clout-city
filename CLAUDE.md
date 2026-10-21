@@ -201,7 +201,8 @@ components live in `app/globals.css`.
   top picks one from `GARMENT_TEMPLATES` (lib/avatarCatalog.ts); whole Shop outfits wear `SET_LOOKS` (templates in their
   colors, details and a hat from components/avatar/setHats.ts; `?outfit=sets`).
   Shop accessories: `lib/accessories.ts` (shape and colors by sku) drawn by components/avatar/accessories.ts; locked
-  until switch-on (`?outfit=accessories&pick=`). `/preview/moves?outfit=hoodie` shows all eight body types.
+  until switch-on (`?outfit=accessories&pick=`).
+  Shop catalog clothes: `lib/catalogWear.ts` (pieces, patterns, finishes by sku; Outfit.pieces by slot; `?outfit=catalog`). `/preview/moves?outfit=hoodie` shows all eight body types.
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
   its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

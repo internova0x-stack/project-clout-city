@@ -3,6 +3,7 @@
 // Hair, glasses and coverings are free Look options, never part of a style.
 
 import type { AccessoryWear } from "./accessories.ts";
+import type { SetPiece } from "./avatarCatalog.ts";
 
 export type StyleId =
   | "bodega_drip"
@@ -36,6 +37,9 @@ export interface Outfit {
   set?: string;
   /** Shop accessories worn (lib/accessories.ts): hats, glasses, earrings, necklaces, bags, a watch. New bodies only. */
   extras?: AccessoryWear[];
+  /** Shop catalog clothes worn (lib/catalogWear.ts), by the slot their pieces fill (a dress fills top and bottom). New
+   *  bodies only: they replace that slot's starter or code piece. */
+  pieces?: Partial<Record<"top" | "bottom" | "shoes", SetPiece[]>>;
 }
 
 export interface StartingStyle {

@@ -25,7 +25,7 @@ import { WARDROBE, bodyRegions, buildWardrobe, wardrobeCover } from "./wardrobe.
 
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 await MeshoptSimplifier.ready;
-// The standard attributes are quantized; our own are small by themselves: _COVER bits and _REGION as whole numbers,
+// The standard attributes are quantized; our own are small by themselves: _COVER bits as whole numbers in a float, _REGION in a byte,
 // _PAT details as normalized 16-bit numbers. (Body types are worked out in the game when a body loads: lib/bodyTypes.ts.)
 const QUANTIZE = { pattern: /^(POSITION|NORMAL|TEXCOORD|JOINTS|WEIGHTS|TANGENT)/ };
 const GARMENTS = { hoodie: buildHoodie, ...Object.fromEntries(Object.keys(WARDROBE).map((n) => [n, (body) => buildWardrobe(body, n)])) };
@@ -55,11 +55,12 @@ for (const [body, sex] of [["male", "m"], ["female", "f"]]) {
     const root = doc.getRoot(), prim = root.listMeshes()[0].listPrimitives()[0], skin = root.listSkins()[0];
     const b = readBody(prim, skin);
     // Cover bits as whole numbers in a float (the shader tests them as an int); every template's bit at once.
-    const bits = Uint16Array.from(coverBits(b));
+    // (Whole numbers in a float: exact up to 24 bits, more than 16 templates' worth.)
+    const bits = Float32Array.from(coverBits(b));
     const more = new Uint32Array(b.count);
     wardrobeCover(b, more);
     for (let i = 0; i < bits.length; i++) bits[i] = bits[i] + more[i];
-    if (more.some((m) => m >= 2 ** 16)) throw new Error("cover bits past 16");
+    if (more.some((m) => m >= 2 ** 24)) throw new Error("cover bits past 24");
     prim.setAttribute("_COVER", doc.createAccessor().setType("SCALAR").setArray(bits).setBuffer(root.listBuffers()[0]));
     // Regions: whole numbers (1 body, 4 head), so a byte each.
     prim.setAttribute("_REGION", doc.createAccessor().setType("SCALAR").setArray(Uint8Array.from(bodyRegions(b), (r) => (r > 3.5 ? 4 : 1))).setBuffer(root.listBuffers()[0]));
