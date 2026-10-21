@@ -1,0 +1,110 @@
+{
+  "version": "2: new base bodies (bald, barefoot, flat mid-grey underwear)",
+  "purpose": "New base bodies and their animation clips, made with Higgsfield (Meshy auto-rig, same bone naming as before: Hips, Spine, neck, Head, LeftArm and so on). Download everything (allow d8j0ntlcm91z4.cloudfront.net in the network settings). Each file is too large for the repository and contains a full rigged body; never commit or ship the raw files.",
+  "bodies": {
+    "male": {
+      "heightMeters": 1.75,
+      "baseBody": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_143806_ff98b36f-89bc-4c1b-a246-c88e4627b62e.glb",
+      "includes": "rigged body with the walk (clip 30, Casual_Walk)"
+    },
+    "female": {
+      "heightMeters": 1.68,
+      "baseBody": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_143811_1474d108-ab01-4d22-89f6-1804b9e3588e.glb",
+      "includes": "rigged body with the walk (clip 30, Casual_Walk)"
+    }
+  },
+  "steps": [
+    "Replace the source bodies behind public/avatars/body/m.glb and f.glb with the two baseBody files and rerun the build step that regenerates every outfit, hairstyle and the low-graphics versions.",
+    "Extract the animation from each clip into one shared, optimized animation file per body, matched to the new m.glb and f.glb skeletons, alongside the walk from the base body.",
+    "Replaces version 1 of this file (the older bodies in t-shirts); ignore those earlier clip links.",
+    "Male dance is Hip Hop Dance 1; female dance is All Night Dance.",
+    "Apply the earlier fixes: edge padding on textures, matte materials (roughness 0.9, metalness 0), no recoloring of the base layer, and never scale or rotate the head and neck bones for body types.",
+    "Report any clip that doesn't fit the skeleton instead of guessing."
+  ],
+  "clips": [
+    {
+      "body": "male",
+      "name": "idle",
+      "libraryClip": "Idle",
+      "libraryClipId": 0,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_144305_7a680c24-2908-4e6d-8d07-2bde5b628efc.glb"
+    },
+    {
+      "body": "male",
+      "name": "run",
+      "libraryClip": "RunFast",
+      "libraryClipId": 16,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_144311_0f49d15e-ca8d-4531-aabe-b9d2fe784ecb.glb"
+    },
+    {
+      "body": "male",
+      "name": "sit",
+      "libraryClip": "Chair_Sit_Idle_M",
+      "libraryClipId": 33,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_144317_d76a879c-3b12-483e-b9b8-18b8aa527f78.glb"
+    },
+    {
+      "body": "male",
+      "name": "sleep",
+      "libraryClip": "Sleep_Normally",
+      "libraryClipId": 267,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_144321_cfa24a4e-993a-4d9e-936b-f4ca9d55128c.glb"
+    },
+    {
+      "body": "male",
+      "name": "dance",
+      "libraryClip": "Hip_Hop_Dance_1",
+      "libraryClipId": 592,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_144327_ec7317a3-b7ab-46c6-beef-9e340d6794f9.glb"
+    },
+    {
+      "body": "male",
+      "name": "wave",
+      "libraryClip": "Big_Wave_Hello",
+      "libraryClipId": 28,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_144332_8a20109c-ea91-40d8-b8fd-eb764fdc9c2b.glb"
+    },
+    {
+      "body": "female",
+      "name": "idle",
+      "libraryClip": "Idle",
+      "libraryClipId": 0,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_145236_f73769f1-c0c1-4c69-a143-41732556c726.glb"
+    },
+    {
+      "body": "female",
+      "name": "run",
+      "libraryClip": "RunFast",
+      "libraryClipId": 16,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_145241_2f9e10ea-b346-4996-aa7c-5d065e111ea1.glb"
+    },
+    {
+      "body": "female",
+      "name": "sit",
+      "libraryClip": "Chair_Sit_Idle_F",
+      "libraryClipId": 32,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_145246_7f0ad835-e3dc-4dbb-9606-00868fa80fa6.glb"
+    },
+    {
+      "body": "female",
+      "name": "sleep",
+      "libraryClip": "Sleep_Normally",
+      "libraryClipId": 267,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_145252_eb19b790-b9a7-4820-b1b0-ad4d1ca0fe8b.glb"
+    },
+    {
+      "body": "female",
+      "name": "dance",
+      "libraryClip": "All_Night_Dance",
+      "libraryClipId": 64,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_145257_a953001a-5ee1-4444-b3eb-a95f223aea07.glb"
+    },
+    {
+      "body": "female",
+      "name": "wave",
+      "libraryClip": "Big_Wave_Hello",
+      "libraryClipId": 28,
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_145302_9c8f21e3-2955-41c4-8139-53786f5b10b8.glb"
+    }
+  ]
+}
