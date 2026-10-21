@@ -83,14 +83,14 @@ Calendar's hunt and news files); a file can also be chosen from the computer or 
 | Field | Rule |
 | --- | --- |
 | `id` | Lowercase letters, numbers and dashes; unique across the Shop |
-| `name`, `description` | 3 to 60 and 10 to 200 characters; no real brand names (`content/culture/parody-names.json`); the word filter applies |
+| `name`, `description` | 3 to 60 and 10 to 500 characters; no real brand names (`content/culture/parody-names.json`); the word filter applies |
 | Tab | Fashion, Accessories, Home, Cars, Houses, Luxury or Makeup. The files' `accessories` category maps to **Accessories** for hats, shades, scarves, chokers and bags, and to **Luxury** for jewelry and watches (necklaces, earrings, chains, pearls, watches). Clout Couture's map pieces (yacht, jet, plaza statue) go in **Luxury** (no Map tab, owner Oct 21) |
 | Slot | Fashion: top, bottom, one-piece, shoes. Accessories and Luxury: head, face, ears, neck, wrist, hand. A one-piece fills top and bottom: putting one on takes off the top and bottom, and putting on a top or bottom takes off the one-piece |
 | Presentation | Female only or Male and Female (owner, Oct 21). Default on import: dresses and gowns, skirts, heels, the sports bra, halter, bodysuit and crop tops, Mary Janes, slingbacks, ballet flats, platform sandals, clutches and mini bags are **Female only**; everything else is **Male and Female**. Editable per item |
-| Style lines | One to three of: streetwear, gothic, nerdy-preppy, sporty, business-casual, fashionista, luxury, avant-garde, wasteland-luxe |
+| Style lines | One or more of: streetwear, gothic, nerdy-preppy, sporty, business-casual, fashionista, luxury, avant-garde, wasteland-luxe |
 | Tier, stars | budget, mid or luxury; 1 to 4 stars |
 | Price (C$) | A whole number above 0 |
-| Clout | Set by the game's live curve, not the file (owner, Oct 21): clout ≈ 0.54 × price^0.635, rounded, which matches the clothing, jewelry and watches already on sale (a C$395 bomber gives 25, a C$17,000 watch 260). Cars, houses and home pieces follow their own tabs' existing values. Diminishing returns on repeat purchases stay as they are. Editable, with a warning more than 20% off the curve |
+| Clout | Set by the game's live curve, not the file (owner, Oct 21): clout ≈ 0.6 × price^0.62, rounded, which matches the clothing, jewelry and watches already on sale (a C$395 bomber gives 25, a C$17,000 watch 260). Cars, houses and home pieces follow their own tabs' existing values. Diminishing returns on repeat purchases stay as they are. Editable, with a warning more than 20% off the curve |
 | Real money | `priceUsd` creates the item's `store_products` row in Stripe test mode (section 3) |
 | Template | The garment template or rigid accessory it needs to be worn (`hoodie`, `rigid:hat` and so on) |
 

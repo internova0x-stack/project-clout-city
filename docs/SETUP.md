@@ -274,6 +274,17 @@ Push needs a key pair (VAPID), a secret for the sender's cron, and a schedule.
 5. **Test**: in the game, Phone → Settings → Notifications → On, then **Send a test notification**. On iPhone this only
    works from the Home Screen app (iOS 16.4 or later).
 
+## 2e. Shop pictures (the Shop Manager, migration 0099)
+
+Migration 0099 creates two Storage buckets: **shop** (public: the 256 px and 768 px WebP pictures players see) and
+**shop-masters** (private: the original PNGs, never sent to players). If the SQL Editor can't create them (it warns),
+create both in Supabase → Storage with those names, `shop` public and `shop-masters` private.
+
+Pictures are processed and uploaded by the server with `SUPABASE_SERVICE_ROLE_KEY` (already set for payments). In the
+Studio: **Shop** → **Load** a catalog file → the pictures process with a progress bar → review and approve. The free
+Supabase plan includes about 1 GB of storage and 5 GB of downloads a month; every Shop picture together is roughly
+15 MB.
+
 ## 3. Local development (optional)
 
 ```bash
