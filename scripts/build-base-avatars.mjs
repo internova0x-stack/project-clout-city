@@ -31,6 +31,10 @@ const QUANTIZE = { pattern: /^(POSITION|NORMAL|TEXCOORD|JOINTS|WEIGHTS|TANGENT)/
 const GARMENTS = { hoodie: buildHoodie, ...Object.fromEntries(Object.keys(WARDROBE).map((n) => [n, (body) => buildWardrobe(body, n)])) };
 const SPEC = JSON.parse(readFileSync("assets/avatar-animations.json", "utf8"));
 const SRC = "assets/avatars/sources";
+// Clips one body takes from the other (same 24 bones, retargeted the same way). The female sit was made for a high
+// stool (knees up, feet tucked back under the seat), so on a chair, sofa or bench her shins went through the seat
+// (owner, Oct 21: "An error on some of the legs"); she sits with the male clip, an ordinary chair sit.
+const BORROW = { female: { sit: "male" } };
 mkdirSync("public/avatars/garments", { recursive: true });
 mkdirSync("public/avatars/hair", { recursive: true });
 
@@ -105,7 +109,10 @@ async function writeAnimations(body, sex) {
     anim.addSampler(s).addChannel(doc.createAnimationChannel().setTargetNode(byName.Hips).setTargetPath("translation").setSampler(s));
   };
   // The walk is the body's own (its skeleton), retargeted onto itself so every clip is made the same way.
-  const clips = [{ name: "walk", file: `${SRC}/${body}-body.glb` }, ...SPEC.clips.filter((c) => c.body === body).map((c) => ({ name: c.name, file: `${SRC}/${body}-${c.name}.glb` }))];
+  const clips = [{ name: "walk", file: `${SRC}/${body}-body.glb` }, ...SPEC.clips.filter((c) => c.body === body).map((c) => {
+    const from = BORROW[body]?.[c.name] ?? body;
+    return { name: c.name, file: `${SRC}/${from}-${c.name}.glb` };
+  })];
   const results = [];
   for (const c of clips) {
     try {

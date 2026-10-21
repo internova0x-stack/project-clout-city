@@ -12,7 +12,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AmbientLight, Clock, Color, DirectionalLight, Group, HemisphereLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { AmbientLight, BoxGeometry, Clock, Color, DirectionalLight, Group, HemisphereLight, Mesh, MeshStandardMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { buildBaseAvatar } from "../avatar/baseAvatar";
 import type { AvatarParts } from "../avatar/buildAvatar";
 import { dance, poseLie, poseSit, resetLimbs } from "../room/Room3D";
@@ -101,7 +101,17 @@ export function AvatarMoves({ skin = 3, build, outfit, size }: { skin?: number; 
       rig.add(parts.root);
       rig.rotation.y = move === "Walk" || move === "walk" || move === "run" ? -0.5 : move === "Back" ? Math.PI + 0.35 : move === "sleep" ? 0 : 0.35;
       scene.add(rig);
-      if (anims) parts.play?.(move === "idle" || move === "walk" ? null : move);
+      if (anims) {
+        // Sitting and lying go through the game's own poseSit and poseLie, onto a seat and a bed as in the rooms.
+        const box = (w: number, h: number, d: number, z: number, color: string) => {
+          const m = new Mesh(new BoxGeometry(w, h, d), new MeshStandardMaterial({ color, roughness: 0.9 }));
+          m.position.set(0, h / 2, z);
+          rig.add(m);
+        };
+        if (move === "sit") { poseSit(parts, 0.46); box(0.55, 0.46, 0.5, -0.12, "#8C6A4F"); }
+        else if (move === "sleep") { poseLie(parts, 0.5); box(1.1, 0.5, 2.0, -0.85, "#B9C4D6"); rig.position.z = 0.85; }
+        else parts.play?.(move === "idle" || move === "walk" ? null : move);
+      }
       const lying = move === "Lie down" || move === "sleep";
       const cam = new PerspectiveCamera(lying ? 34 : 30, 1, 0.1, 50);
       if (lying) { cam.position.set(1.6, 2.6, 2.2); cam.lookAt(0, 0.4, 0); } else if (hairs) { cam.position.set(0, 1.45, 1.5); cam.lookAt(0, 1.4, 0); } else { cam.position.set(0, 1.05, 4.1); cam.lookAt(0, 0.85, 0); }
