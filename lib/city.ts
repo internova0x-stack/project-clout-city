@@ -22,7 +22,14 @@ export const CITY_ECONOMY = {
   cloutMultiplier: { base: 0.7, mood: 0.3, confidence: 0.3 },
   energy: { dailyTopUp: 20, eventCost: 20 },
   confidenceDriftPerDay: 3,
-  dailyTasks: { count: 5, rewardMin: 25, rewardMax: 50, bonus: 100 },
+  /**
+   * C3 (owner, Oct 20): a player's first day of tasks starts with `firstDay` (a BEC at Sal's, pet the cat, a lap in
+   * the park); the rest of the five are picked as usual (migration 0094's ensure_daily).
+   */
+  dailyTasks: {
+    count: 5, rewardMin: 25, rewardMax: 50, bonus: 100,
+    firstDay: [{ place: "ditmars-deli", action: "bec" }, { place: "ditmars-deli", action: "pet-cat" }, { place: "hell-gate-park", action: "lap" }],
+  },
   sellRate: 0.6,
   /** Each purchase's clout is this fraction of the previous one's (diminishing returns). */
   purchaseCloutDecay: 0.85,
@@ -294,6 +301,8 @@ export interface PlaceAction {
   storyUnlock?: boolean;
   /** Migration 0064: the skill this action trains, over the place's own (Sip & Spill's speed-meets and Tea Bar). */
   skill?: SkillId;
+  /** C3: the daily task's own title when this action is picked ("Get a BEC at Sal's"), instead of the generic one. */
+  task?: string;
 }
 
 export interface Place {
@@ -563,13 +572,15 @@ export const PLACES: Place[] = [
   {
     id: "ditmars-deli", name: "Ditmars Deli & Dreams", emoji: "🥪", category: "food", neighborhood: "Astoria", tier: "Budget",
     at: [40.7748, -73.9128], depth: "full", template: "counter", palette: ["#2E9E6A", "#F4E3C8", "#1F1B26"],
-    tags: ["bodega", "dining_budget", "astoria"],
+    tags: ["bodega", "dining_budget", "astoria", "job_cashier"],
     lore: "Open all night, run by Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account. I run the fan account.",
     actions: [
       // C2: the cheapest breakfast in the game, and the cat (a small Mood boost).
-      { id: "bec", kind: "eat", label: "Bacon, egg and cheese on a roll", price: 8, energy: -12, blurb: "Salt, pepper, ketchup. The cheapest breakfast in the city and the best one in Queens." },
+      { id: "bec", kind: "eat", label: "Bacon, egg and cheese on a roll", task: "Get a BEC at Sal's", price: 8, energy: -12, blurb: "Salt, pepper, ketchup. The cheapest breakfast in the city and the best one in Queens." },
       { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 14, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
-      { id: "pet-cat", kind: "visit", label: "Pet Also Sal", energy: 1, mood: 4, blurb: "He allows it. Briefly. Then he goes back to sleeping on the bread." },
+      { id: "pet-cat", kind: "visit", label: "Pet Also Sal", task: "Pet the bodega cat", energy: 1, mood: 4, blurb: "He allows it. Briefly. Then he goes back to sleeping on the bread." },
+      // C3: a shift behind the register.
+      { id: "cashier", kind: "shift", label: "Work the register", pay: 120, energy: 25, blurb: "Lotto tickets, loose cigarettes you refuse to sell and forty \"you got change for a twenty?\"" },
     ],
   },
   // ---- Culture pack C2 (owner, Oct 20): Astoria food. Opening hours on the city clock; Sal's stays open all night. ----
@@ -613,10 +624,12 @@ export const PLACES: Place[] = [
   {
     id: "schlep-and-schmear", name: "Schlep & Schmear Deli", emoji: "🥯", category: "food", neighborhood: "Astoria", tier: "Medium",
     at: [40.7645, -73.9205], depth: "scene", template: "counter", palette: ["#B8743A", "#FFF6E0", "#2A2530"], hours: { open: 7, close: 21 },
-    tags: ["jewish_deli", "dining_medium", "astoria"],
+    tags: ["jewish_deli", "dining_medium", "astoria", "job_deli"],
     lore: "Pastrami stacked like a rent increase, knishes the size of your fist and Hersh at the counter, who has never once said \"have a nice day.\" Kvetch about the line all you want; it's worth the schlep.",
     actions: [
       { id: "eat", kind: "eat", label: "Pastrami on rye, half-sour pickle", price: 38, energy: -28, blurb: "Hersh slices it by hand and judges you by hand. Both are excellent." },
+      // C3: a shift at the counter (only while the deli's open).
+      { id: "counter", kind: "shift", label: "Work the deli counter", pay: 130, energy: 28, blurb: "Slice, wrap, yell \"next!\" Hersh says you have the wrists for it." },
     ],
   },
   {
@@ -755,10 +768,14 @@ export const PLACES: Place[] = [
   {
     id: "hell-gate-park", name: "Hell Gate Park", emoji: "🌳", category: "parks", neighborhood: "Astoria",
     at: [40.7790, -73.9232], depth: "scene", template: "plaza", palette: ["#5CC28F", "#F4E3C8", "#2A2530"],
-    tags: ["park", "outdoors", "free", "astoria"],
+    tags: ["park", "outdoors", "free", "astoria", "job_dogwalker"],
     lore: "Riverside lawns under a giant bridge, a running track and a public pool with very strong opinions about swim caps. Wear one, babe. They will check.",
     actions: [
-      { id: "hangout", kind: "hangout", label: "Hang out by the river", energy: 5, mood: 12, blurb: "Watch the bridge, the joggers and one guy doing tai chi like it's a competition." },
+      // C3 (owner, Oct 20): the hangout is a bench now (same id, so players' history stays), plus a lap, a picnic and dog walking.
+      { id: "hangout", kind: "hangout", label: "Sit on a bench by the river", energy: 5, mood: 12, blurb: "Watch the bridge, the joggers and one guy doing tai chi like it's a competition." },
+      { id: "lap", kind: "visit", label: "Take a lap around the track", task: "Take a lap in Hell Gate Park", energy: 12, mood: 4, confidence: 3, skill: "fitness", blurb: "One lap. Okay, half a lap and a very confident walk." },
+      { id: "picnic", kind: "eat", label: "Picnic on the lawn", price: 18, energy: -14, mood: 6, blurb: "Bodega sandwiches, a blanket and the bridge doing its best impression of a postcard." },
+      { id: "walk-dogs", kind: "shift", label: "Walk dogs for the Ditmars crowd", task: "Work a dog-walking shift", pay: 110, energy: 20, mood: 2, blurb: "Three Frenchies, one leash tangle, zero respect for your schedule. Mad money, though." },
     ],
   },
   {
@@ -842,6 +859,8 @@ export const HOME_PLACE_ID = "home";
 /** Where each starter home sits on the map. */
 export const HOME_LOCATIONS: Record<string, LatLng> = {
   sunnyside_gardens: [40.7472, -73.9182],
+  // C3: the shared apartment, a few blocks from Sal's.
+  astoria_share: [40.7735, -73.9145],
   astoria_studio: [40.7745, -73.9050],
   jackson_heights_1br: [40.7520, -73.8830],
   lic_highrise: [40.7470, -73.9560],

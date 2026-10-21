@@ -18,6 +18,11 @@ export interface Home {
   signup?: boolean;
   /** v0.15 campus dorms: only students enrolled at this campus can move in (migration 0072). */
   campus?: string;
+  /**
+   * Culture pack C3 (owner, Oct 20): a shared apartment. `rent` is the player's half; the roommate (content/culture/
+   * npcs.json "roommates") pays the rest. Moving to a home without one finishes "Get your own place".
+   */
+  roommate?: string;
 }
 
 export interface Trait { id: string; emoji: string; name: string; blurb: string }
@@ -43,6 +48,8 @@ export const ECONOMY: Economy = {
   startingStats: { energy: 100, mood: 60, confidence: 40 },
   playersOnlineThreshold: 1,
   homes: [
+    // C3 (owner, Oct 20): the main pick at sign-up. Two single beds, one roommate, half the rent.
+    { id: "astoria_share", name: "Room share with a roommate", neighborhood: "Astoria", rent: 900, emoji: "🛏️", roommate: "priya", blurb: "Two beds, one bathroom schedule, half the rent. Your roommate works nights. Mostly." },
     { id: "astoria_studio", name: "Astoria studio walk-up", neighborhood: "Astoria", rent: 1750, emoji: "🪜", blurb: "Fourth floor, no elevator. Free leg day, every day." },
     { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 2600, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
     { id: "sunnyside_gardens", name: "Sunnyside Gardens 1BR", neighborhood: "Sunnyside", rent: 3200, emoji: "🌿", blurb: "A garden you share with forty neighbors and one very territorial cat.", moveClout: 1000, signup: false },
