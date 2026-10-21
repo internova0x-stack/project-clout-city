@@ -190,9 +190,11 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
             {tasksAt(state, place.id).filter((t) => t.action_id === "gossip-overheard").map((t) => <TaskTick key={t.id} t={t} />)}
             {!compact && <span className="subtext" style={{ display: "block" }}>Eavesdropping is free. Getting caught is not.</span>}
             <span className="fx-row"><span className="fx fx-pay">Free</span><span className="fx">🍵 Gossip for the Tea app</span></span>
+            {/* Owner, Oct 21: nobody to overhear while it's shut (migration 0095). */}
+            {!placeOpen(place, minutes) && <span className="meta reason">{closedLine(place, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay)}</span>}
           </div>
           {preview ? pill("Free") : away ? <span className="lock-chip">On arrival</span> : (
-            <button className="btn btn-green btn-sm" disabled={handlers.busy !== null} onClick={() => handlers.gossip!.listen(place.id)}>
+            <button className="btn btn-green btn-sm" disabled={handlers.busy !== null || !placeOpen(place, minutes)} onClick={() => handlers.gossip!.listen(place.id)}>
               {handlers.busy === `listen:${place.id}` ? "…" : "Listen"}
             </button>
           )}
