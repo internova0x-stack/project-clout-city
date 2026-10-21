@@ -1,0 +1,460 @@
+{
+  "week": "2026-10-26",
+  "id": "best-halal-cart",
+  "theme": "The Best Halal Cart in Queens",
+  "intro": "Margot Saltworth, the food critic who once gave a bagel two stars and moved to Philadelphia over the backlash, is crowning the best halal cart in Queens on Sunday. Lola's readers are at war. Five clues, five people who eat late, one cart, and a treasure its owner kept for whoever finds it first. Start with Sal at the deli.",
+  "places": [
+    "ditmars-deli",
+    "boiled-and-beloved",
+    "astoria-blvd-station",
+    "engine-7",
+    "white-sauce-cart"
+  ],
+  "chatter": [
+    "You're after {treasure}? Margot Saltworth is too. She has a fork and a deadline. You have an OMG Card and comfortable shoes.",
+    "Everybody's arguing about the best halal cart. Nobody's arguing about {treasure}. They just want it.",
+    "Somebody said {treasure} is behind a cart on Steinway. Somebody also said the white sauce is just mayo. Both wrong."
+  ],
+  "tracks": {
+    "bodega_drip": {
+      "treasure": "The Golden Squeeze Bottle",
+      "emoji": "🧴",
+      "lore": "The first white-sauce bottle Tariq ever filled, sprayed gold by his cousin for the cart's tenth birthday. Still squeezes. Still drips. Collectors have offered C$5,000.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The Golden Squeeze Bottle? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The Golden Squeeze Bottle for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The Silver Ladle",
+              "The Golden Squeeze Bottle",
+              "The Red Sauce Warning",
+              "The Midnight Spatula"
+            ],
+            "answer": 1
+          },
+          "then": "The Golden Squeeze Bottle. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "thrift_store_icon": {
+      "treasure": "The First Cart Umbrella",
+      "emoji": "☂️",
+      "lore": "Faded orange, three patches, one cigarette burn from 2011. It shaded the cart's first winter on 31st Street and every famous argument since.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The First Cart Umbrella? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The First Cart Umbrella for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The First Cart Umbrella",
+              "The Steinway Awning",
+              "The Lucky Parasol",
+              "The Blue Tarp of Truth"
+            ],
+            "answer": 0
+          },
+          "then": "The First Cart Umbrella. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "midtown_finance": {
+      "treasure": "The Day-One Receipt",
+      "emoji": "🧾",
+      "lore": "Order #0001: chicken over rice, C$4, paid in quarters by a cab driver who still eats there every Tuesday. Framed, laminated, priceless.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The Day-One Receipt? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The Day-One Receipt for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The Golden Ticket",
+              "Order #0100",
+              "The Day-One Receipt",
+              "The Tuesday Tab"
+            ],
+            "answer": 2
+          },
+          "then": "The Day-One Receipt. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "night_owl_goth": {
+      "treasure": "The 3 A.M. Lantern",
+      "emoji": "🏮",
+      "lore": "A battery lantern that has hung on the cart every night since it opened. Tariq calls it the lighthouse. Everyone lost after midnight finds their way by it.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The 3 A.M. Lantern? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The 3 A.M. Lantern for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The Night Bus Sign",
+              "The 3 A.M. Lantern",
+              "The Moonlight Grill",
+              "The Lighthouse of Steinway"
+            ],
+            "answer": 1
+          },
+          "then": "The 3 A.M. Lantern. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "pilates_princess": {
+      "treasure": "The Green Sauce Recipe Card",
+      "emoji": "🥬",
+      "lore": "The one sauce nobody has ever seen on the menu: herbs, lime and a secret Tariq only writes on index cards. This is the only card.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The Green Sauce Recipe Card? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The Green Sauce Recipe Card for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The Lime Sauce Scroll",
+              "The Wellness Drizzle",
+              "The Herb Garden Card",
+              "The Green Sauce Recipe Card"
+            ],
+            "answer": 3
+          },
+          "then": "The Green Sauce Recipe Card. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "startup_founder": {
+      "treasure": "The Napkin Business Plan",
+      "emoji": "📝",
+      "lore": "Tariq's whole plan, written on a cart napkin at sixteen: one cart, one sauce, never close before the bars do. Zero investors. Still profitable.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The Napkin Business Plan? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The Napkin Business Plan for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The Napkin Business Plan",
+              "The Pitch Deck",
+              "The Cart Charter",
+              "The Sauce Manifesto"
+            ],
+            "answer": 0
+          },
+          "then": "The Napkin Business Plan. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "influencer_soft_glam": {
+      "treasure": "The Ring-Light Platter",
+      "emoji": "💡",
+      "lore": "A foil tray so perfectly lit by the cart's lamp that it went viral four times. Lola calls it the most photographed rice in Queens.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The Ring-Light Platter? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The Ring-Light Platter for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The Viral Tray",
+              "The Glow-Up Plate",
+              "The Ring-Light Platter",
+              "The Golden Hour Foil"
+            ],
+            "answer": 2
+          },
+          "then": "The Ring-Light Platter. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    },
+    "arcade_nerd": {
+      "treasure": "The Cricket Radio",
+      "emoji": "📻",
+      "lore": "The cart's little radio, stuck on cricket since 2012. It has called every match, every rainout and one marriage proposal in the line.",
+      "steps": [
+        {
+          "say": "Margot Saltworth, the critic, was in here asking about carts. Ock, I told her the truth: the best one isn't on any list. Lou at the hot dog cart by the park gate knows. Cart people know cart people. Tell her Sal sent you, and buy something first."
+        },
+        {
+          "say": "Sal sent you? Then you know how to find a place by the smell. Before I tell you anything about my competition, one question.",
+          "question": {
+            "q": "What's the name of the cat at Sal's deli?",
+            "choices": [
+              "Also Sal",
+              "Hydrant",
+              "Mustard",
+              "Little Ditmars"
+            ],
+            "answer": 0
+          },
+          "then": "Also Sal, correct. Fine. The best cart isn't mine, it kills me to say it. Ask the station agent at Astoria Blvd who's on line at 2 a.m. The night shift always knows."
+        },
+        {
+          "say": "¿Qué lo que? You're the one hunting The Cricket Radio? Half my night riders get off the N, walk straight past three carts and stand on one line, white sauce on their sleeves. The firefighters at Engine 7 eat there after every late call. Ask the captain."
+        },
+        {
+          "say": "Every late call, we stop at the same cart, and the dog knows the way better than the driver. If you know the dog, you're one of us.",
+          "question": {
+            "q": "What's the name of the Engine 7 firehouse dog?",
+            "choices": [
+              "Sparky",
+              "Hydrant",
+              "Ladder",
+              "Also Sal"
+            ],
+            "answer": 1
+          },
+          "then": "Hydrant, wepa! The cart is Tariq's, on the corner by the station, the one that opens when the city clock hits 6 PM. He's keeping The Cricket Radio for whoever gets there before the critic. He'll want the password: the name of the thing you came for."
+        },
+        {
+          "say": "Margot Saltworth was here at midnight with a notebook and a fork, B. I told her the best cart isn't the sauce, it's the people on line. I've been keeping something for whoever walked the whole trail. Password first.",
+          "question": {
+            "q": "What's the password?",
+            "choices": [
+              "The High-Score Speaker",
+              "The Night Shift Walkman",
+              "The Line Jukebox",
+              "The Cricket Radio"
+            ],
+            "answer": 3
+          },
+          "then": "The Cricket Radio. Deadass, you earned it. Margot crowned the cart this morning, and she thanked the line. Extra rice, on the house, this once."
+        }
+      ]
+    }
+  }
+}

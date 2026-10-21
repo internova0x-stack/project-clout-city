@@ -1,0 +1,120 @@
+{
+  "week": "2026-10-26",
+  "stories": [
+    {
+      "id": "missing-bodega-cat",
+      "title": "The bodega cat is missing",
+      "topic": "regulars",
+      "emoji": "🐈",
+      "teaser": "Also Sal, the cat who runs Sal's deli, hasn't been on his chip shelf for two days. Sal says he's fine. Sal is not fine. Find me four more pieces.",
+      "pieces": [
+        {
+          "text": "Sal put up a flyer: \"MISSING. Orange. Answers to Also Sal. Owes me nothing, I owe him everything.\" He's taped it to the register, the door and his own forehead.",
+          "place": "ditmars-deli",
+          "source": "regular"
+        },
+        {
+          "text": "Captain Rosa says the firehouse got a call about an orange cat on a fire escape on Ditmars, dragging a whole pastrami slice up the ladder. By the time they got there, gone.",
+          "place": "engine-7",
+          "source": "regular"
+        },
+        {
+          "text": "Gus says an orange cat crosses Ditmars every Tuesday at 7 AM sharp, heading toward the other deli. \"Like a commuter. Better attendance than the N.\"",
+          "place": "hell-gate-park",
+          "source": "regular"
+        },
+        {
+          "text": "Two commuters on the platform: \"Wait, the cat at Schlep & Schmear? Pastrami? Orange, big attitude, sleeps on the rye?\" \"That's not Pastrami. That's Also Sal.\"",
+          "place": "astoria-blvd-station",
+          "source": "overheard",
+          "hours": [6, 11]
+        },
+        {
+          "text": "Hersh, slicing: \"Pastrami's been coming in Tuesdays and Fridays for six years. Fridays I give him the ends. Tuesdays he gives me the look. He's a regular.\"",
+          "place": "schlep-and-schmear",
+          "source": "regular"
+        }
+      ],
+      "tea": {
+        "headline": "Also Sal has a second family at Schlep & Schmear",
+        "body": "Babe, the cat was never missing. Also Sal has been living a double life for SIX YEARS: Mondays at Sal's on the chip shelf, Tuesdays and Fridays at Schlep & Schmear as \"Pastrami\", sleeping on the rye. He came home this morning like nothing happened, smelling of brisket. Sal and Hersh met on Ditmars to talk custody and ended up splitting a chopped cheese. Shared custody, two names, zero apologies. The most New York cat alive, deadass."
+      }
+    },
+    {
+      "id": "reality-star-at-feta",
+      "title": "A reality star at the Greek taverna",
+      "topic": "celebrity",
+      "emoji": "🫒",
+      "teaser": "Chardonnay Shade has been at Feta Compli every night this week, sunglasses on, indoors. Dating? Hiding? Filming? Find four more pieces and I'll tell you.",
+      "pieces": [
+        {
+          "text": "Andreas, polishing a glass: \"She asks for the back table, orders the octopus, then goes into the kitchen with my mother for two hours. I don't ask. My mother doesn't answer.\"",
+          "place": "feta-compli",
+          "source": "regular"
+        },
+        {
+          "text": "Jojo says Chardonnay ordered a large oat latte \"for Kyria Eleni\" and asked how to say \"too much salt\" in Greek. Then wrote it down. On her hand.",
+          "place": "grind-and-gossip",
+          "source": "regular"
+        },
+        {
+          "text": "Nour at the tower: a reality crew booked three cameras and a boom mic for \"a kitchen in Astoria, very private, very Greek, do not tell Lola.\" Too late.",
+          "place": "clout-tower",
+          "source": "regular"
+        },
+        {
+          "text": "In the restroom line: \"Her network passed on her spin-off, so she's pitching a cooking show. The twist is she can't cook. The other twist is somebody's mother can.\"",
+          "place": "velvet-static",
+          "source": "restroom"
+        },
+        {
+          "text": "Arben says a woman in huge sunglasses bought forty slices \"for a crew\" at midnight and asked if he'd ever considered being on television. He said no. She said \"yet.\"",
+          "place": "still-a-dollar-slice",
+          "source": "regular"
+        }
+      ],
+      "tea": {
+        "headline": "Chardonnay Shade's secret cooking show stars Andreas's mother",
+        "body": "Darling, it's a spin-off. Chardonnay Shade's network passed on her solo show, so she pitched \"Chardonnay Can't Cook\", filmed in the back kitchen at Feta Compli. The problem: the breakout star is Andreas's mother, Kyria Eleni, who has roasted Chardonnay on camera eleven times and taught her one recipe. Test audiences want a show called \"Eleni Can.\" Chardonnay is reportedly wildin'. Andreas says the octopus is not available for interviews."
+      }
+    },
+    {
+      "id": "lawn-chair-parking",
+      "title": "Who's saving parking spots with a lawn chair?",
+      "topic": "city-hall",
+      "emoji": "🪑",
+      "teaser": "Somebody's been saving the same spot on 31st Street with a lawn chair, a traffic cone and, as of Tuesday, a mannequin. Astoria wants a name.",
+      "pieces": [
+        {
+          "text": "Sgt. Bev has nine complaints about \"the chair.\" Three are from the same man. One is from the mannequin's ex, which Bev did not know was possible.",
+          "place": "precinct-114-half",
+          "source": "regular"
+        },
+        {
+          "text": "Camila says somebody bought a lawn chair, a roll of library tape and a wig at the store on Monday and asked for a receipt \"for the city's records.\"",
+          "place": "steinway-fresh",
+          "source": "regular"
+        },
+        {
+          "text": "Yesenia saw a man in a cardigan carrying a mannequin up the station stairs at 6 AM, whispering \"we're almost there, Gertrude.\"",
+          "place": "astoria-blvd-station",
+          "source": "regular"
+        },
+        {
+          "text": "On a bench by the river: \"The chair has a sign now. In very neat handwriting. It says RESERVED FOR LITERACY.\"",
+          "place": "hell-gate-park",
+          "source": "overheard"
+        },
+        {
+          "text": "At the cafe: \"The chair is right where the bookmobile parks Thursdays. Some cardigan guy yells 'shh' at anybody who touches it.\"",
+          "place": "grind-and-gossip",
+          "source": "overheard"
+        }
+      ],
+      "tea": {
+        "headline": "Mr. Penwright has been saving the bookmobile's spot with a mannequin",
+        "body": "Sweetie, it's the librarian. Mr. Penwright has spent three weeks guarding the bookmobile's Thursday spot on 31st with a lawn chair, a cone and a mannequin named Gertrude in a library lanyard, because the bookmobile kept circling for forty minutes and missing story hour. Nine complaints, one very tight Sgt. Bev and a neighborhood that has never felt more strongly about parking. The city gave the bookmobile a real sign. Gertrude now works the returns desk. Facts."
+      }
+    }
+  ]
+}
