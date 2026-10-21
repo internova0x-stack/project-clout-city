@@ -30,6 +30,9 @@
     { "id": "kvetch", "term": "Kvetch", "meaning": "Complain", "origin": "Yiddish", "example": "Stop kvetching and eat your knish." },
     { "id": "mira", "term": "Mira", "meaning": "Look, hey", "origin": "Spanish", "example": "Mira, the cat's sleeping on the bread again." },
     { "id": "wepa", "term": "Wepa", "meaning": "A cheer of celebration", "origin": "Puerto Rican Spanish", "example": "You got the job? Wepa!" },
-    { "id": "que-lo-que", "term": "¿Qué lo que?", "meaning": "What's up?", "origin": "Dominican Spanish", "example": "¿Qué lo que? The usual?" }
+    { "id": "que-lo-que", "term": "¿Qué lo que?", "meaning": "What's up?", "origin": "Dominican Spanish", "example": "¿Qué lo que? The usual?" },
+    { "id": "maxxing", "term": "Maxxing", "meaning": "Going all out on one thing about yourself, tacked onto it: auramaxxing, revenuemaxxing, sleepmaxxing", "origin": "Internet slang (owner, Oct 21)", "example": "He's revenuemaxxing: three side hustles and a podcast." },
+    { "id": "aura", "term": "Aura", "meaning": "The presence someone gives off; what you do earns or loses it (\"plus a thousand aura\")", "origin": "Internet slang (owner, Oct 21)", "example": "Tripped on the subway stairs. Minus a thousand aura.", "ambiguous": true },
+    { "id": "flex", "term": "Flex", "meaning": "Showing off, or the thing you show off (\"that's a flex\")", "origin": "Hip-hop slang (owner, Oct 21)", "example": "A rooftop table on a Tuesday? That's a flex.", "ambiguous": true }
   ]
 }
