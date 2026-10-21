@@ -10,7 +10,8 @@
 //     Shoes without a template of their own are sneakers.
 //   * Hair is grown from each body's own scalp (scripts/hair.mjs: public/avatars/hair/), so it fits the head; under a
 //     hat only its lengths show, and full coverings hide it. Hats, coverings and glasses are the game's own
-//     (buildAvatar), fitted to the head measured from the mesh.
+//     (buildAvatar), fitted to the head measured from the mesh; so are the whole outfits' hats (setHats.ts).
+//   * Whole Shop outfits are garment templates in their own colors and details, with their hat (SET_LOOKS).
 //   * Body types never scale the head or neck (owner, Oct 21): every vertex of the body and its garments gets how it
 //     moves to be wider (the torso, the arms and legs: lib/bodyTypes.ts), added by the shader before skinning; height is
 //     the whole figure's scale.
@@ -26,10 +27,11 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { garmentsFor, modelSex } from "@/lib/avatarCatalog";
+import { garmentsFor, KEEPS_COVERING, modelSex, SET_LOOKS } from "@/lib/avatarCatalog";
 import { lowGraphics } from "@/lib/graphics";
 import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
+import { buildSetHat, SET_HAT_HIDES_HAIR } from "./setHats";
 import type { ModelAvatarOptions } from "./modelAvatar";
 
 const cache = new Map<string, Promise<GLTF>>();
@@ -93,7 +95,7 @@ const PROC_HEAD = new Vector3(0.175, 0.213, 0.186);
  *  (GARMENT_TEMPLATES): ribbed bands, the hoodie's pocket, zips, buttons, lapels, quilting, pleats, waistbands, soles.
  *  Lines are antialiased (fwidth); the inside is darker. */
 function garmentMaterial(kind: number, color: string, accent: string, widen: { value: Vector2 }, hideAbove = 9): MeshStandardMaterial {
-  const mat = new MeshStandardMaterial({ roughness: kind === 8 ? 0.55 : 0.92, metalness: 0, side: DoubleSide });
+  const mat = new MeshStandardMaterial({ roughness: kind === 8 ? 0.55 : kind === 17 ? 0.35 : 0.92, metalness: 0, side: DoubleSide });
   const u = { uTop: { value: new Color(color) }, uAccent: { value: new Color(accent) }, uKind: { value: kind }, uHideAbove: { value: hideAbove } };
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
@@ -112,8 +114,9 @@ void main() {`)
     vec3 c = uTop;
     float part = vPat.w, d = vPat.x;
     vec2 q = vPat.yz; // across the front (1 off it), height above the top of the legs
-    // A bottom under a top isn't drawn above the top's hem (the two bend a little differently and would cross).
-    if (uKind >= 9 && uKind <= 12 && q.y > uHideAbove) discard;
+    // A bottom under a top isn't drawn above the top's hem (the two bend a little differently and would cross);
+    // every other piece gets a hem far above.
+    if (q.y > uHideAbove) discard;
     // On the front only: where a triangle spans the front's coordinates and the back's marker, q.x jumps.
     bool front = q.x < 0.9 && fwidth(q.x) < 0.02;
     if (part > 0.75) c = uAccent;                              // drawstrings
@@ -165,12 +168,23 @@ void main() {`)
       c *= 0.84 + 0.16 * sin(ch * 3.14159);
       c *= 1.0 - 0.25 * lineAt(ch, 0.0, 0.02);
       if (front) c = mix(c, uAccent, lineAt(q.x, 0.0, 0.003));
-    } else if (uKind >= 9 && uKind <= 11) {
+    } else if (uKind == 18) {
+      // Hi-vis jacket (a zip jacket): ribbed cuffs and hem, the zip, two reflective bands round the body and sleeves.
+      c *= mix(1.0, 0.86, 1.0 - smoothstep(0.03, 0.034, d));
+      if (front) c = mix(c, uAccent * 0.7, lineAt(q.x, 0.0, 0.003));
+      float band = max(lineAt(q.y, 0.07, 0.016), lineAt(q.y, 0.2, 0.016));
+      c = mix(c, uAccent * 1.15, band);
+    } else if (uKind >= 9 && uKind <= 11 || uKind == 19) {
       // Trousers, shorts, leggings: a waistband (near the top edge), the fly on trousers, stitched cuffs.
       bool top = q.y > -0.15;
       float wb = top ? 1.0 - smoothstep(0.032, 0.036, d) : 0.0;
       c *= 1.0 - 0.1 * wb - 0.14 * (top ? lineAt(d, 0.034, 0.0) : lineAt(d, 0.015, 0.0));
-      if (uKind == 9 && front && q.y > -0.03) c *= 1.0 - 0.14 * lineAt(q.x, 0.018, 0.0006);
+      if ((uKind == 9 || uKind == 19) && front && q.y > -0.03) c *= 1.0 - 0.14 * lineAt(q.x, 0.018, 0.0006);
+      // Ripped (punk): frayed slashes round the knees, the threads showing pale.
+      if (uKind == 19 && q.y < -0.3 && q.y > -0.55) {
+        float slash = smoothstep(0.93, 0.99, sin(q.y * 48.0));
+        c = mix(c, vec3(0.78, 0.76, 0.72) * (0.85 + 0.15 * sin(q.y * 900.0)), slash * 0.85);
+      }
     } else if (uKind == 12) {
       // Skirt: knife pleats round it, a waistband.
       float a = q.x;
@@ -180,6 +194,23 @@ void main() {`)
       // Boots: a chunky sole in the accent, a padded top.
       c = mix(c, uAccent, 1.0 - smoothstep(0.028, 0.032, q.y));
       c *= 1.0 - 0.12 * (1.0 - smoothstep(0.02, 0.024, d));
+    } else if (uKind == 15) {
+      // Gown or robe: soft folds falling from a waistband.
+      c *= 0.92 + 0.08 * abs(sin(q.x * 3.14159 * 9.0));
+      c *= 1.0 - 0.12 * (q.y > -0.05 ? 1.0 - smoothstep(0.028, 0.032, d) : 0.0);
+    } else if (uKind == 16) {
+      // Overalls: denim twill, stitched hems, a bib pocket and brass buttons where the straps meet the bib.
+      c *= 0.94 + 0.06 * sin((q.x + q.y) * 700.0);
+      c *= 1.0 - 0.14 * lineAt(d, 0.012, 0.0);
+      if (front && q.y > 0.1) {
+        c *= 1.0 - 0.18 * (lineAt(abs(q.x), 0.07, 0.0008) * step(0.12, q.y) * step(q.y, 0.22) + lineAt(q.y, 0.12, 0.0008) * step(abs(q.x), 0.07));
+        // The buttons sit on each strap, 3 cm below the bib's top edge (by the distance to that edge).
+        c = mix(c, uAccent, dotAt(vec2(abs(q.x), d), vec2(0.075, 0.03), 0.009) * step(0.15, q.y));
+      }
+    } else if (uKind == 17) {
+      // Dress shoes: polished leather, a thin sole and heel in the accent.
+      c = mix(c, uAccent, 1.0 - smoothstep(0.012, 0.016, q.y));
+      c *= 1.0 - 0.1 * (1.0 - smoothstep(0.008, 0.012, d));
     } else if (uKind == 14) {
       // Sneakers: a white rubber sole with a stripe in the accent, a padded collar.
       float sole = 1.0 - smoothstep(0.022, 0.026, q.y);
@@ -197,6 +228,8 @@ void main() {`)
 
 /** Hair that full coverings hide (as buildAvatar). */
 const HIDES_HAIR = new Set(["hijab", "turban", "headwrap", "durag"]);
+/** Headwear that sits over the hair: only its lengths show under it (glasses and small coverings leave it all). */
+const HATS = new Set(["cap", "fedora", "bucket"]);
 
 /** The hair's look from its _PAT attribute (scripts/hair.mjs): strands as fine streaks round the head and down the
  *  lengths, braids and locs in segments, a darker underside, a soft sheen. */
@@ -247,8 +280,15 @@ function markRegions(mesh: SkinnedMesh) {
 export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: boolean } = {}): AvatarParts {
   const outfit: Outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
   const sex = modelSex(look);
-  // The procedural avatar, for its hair, headwear and pedestal only (whole outfits' hats arrive with stage 4).
-  const proc = buildAvatar(look, { pedestal: opts.pedestal ?? false, outfit });
+  // A whole outfit's hat (SET_LOOKS), unless the player wears a faith or culture covering: that always stays. It
+  // replaces the player's own cap or hat and any headphones.
+  const setHat = opts.bare || KEEPS_COVERING.has(look.covering) ? undefined : (outfit.set ? SET_LOOKS[outfit.set]?.[sex]?.hat : undefined);
+  // The procedural avatar, for its headwear (glasses, caps, coverings) and pedestal only.
+  const proc = buildAvatar(setHat ? { ...look, covering: "none" } : look, {
+    pedestal: opts.pedestal ?? false,
+    outfit: setHat && outfit.accessory === "headphones" ? { ...outfit, accessory: "none" } : outfit,
+  });
+  const hat = setHat ? buildSetHat(setHat.kind, setHat.color, setHat.accent) : null;
   const root = new Group();
   const body = new Group();
   root.add(body);
@@ -344,7 +384,7 @@ void main() {`)
     // The garment, on the body's own bones (whole Shop outfits wait for stage 4).
     // The outfit's garments, on the body's own bones; the skin they hide isn't drawn.
     const low = lowGraphics() ? "-low" : "";
-    const worn = opts.bare ? [] : garmentsFor(outfit);
+    const worn = opts.bare ? [] : garmentsFor(outfit, sex);
     const files = await Promise.all(worn.map((g) => load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null)));
     if (disposed) return;
     let cover = 0;
@@ -352,7 +392,7 @@ void main() {`)
       let src: SkinnedMesh | null = null;
       files[k]?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
       if (!src) return;
-      const topHem = g.slot === "bottom" ? worn.find((w) => w.slot === "top")?.hem : undefined;
+      const topHem = g.slot === "bottom" && g.file !== "overalls" ? worn.find((w) => w.slot === "top")?.hem : undefined;
       const gm = garmentMaterial(g.kind, g.color, g.accent, widen, topHem === undefined ? 9 : topHem + 0.03);
       materials.push(gm);
       attachPart(src, mesh, bones, gm);
@@ -361,8 +401,9 @@ void main() {`)
     u.uCover.value = cover;
 
     // The hair, grown from this body's scalp: the style, and its lengths; under a hat, the lengths only.
-    const hatOn = !!proc.headwear?.children.length;
-    if (look.hair !== "bald" && !HIDES_HAIR.has(look.covering)) {
+    const hatOn = !!setHat || HATS.has(look.covering);
+    const hairHidden = HIDES_HAIR.has(look.covering) || (!!setHat && SET_HAT_HIDES_HAIR.has(setHat.kind));
+    if (look.hair !== "bald" && !hairHidden) {
       const h = await load(`/avatars/hair/${sex}${low}.glb`).catch(() => null);
       if (disposed) return;
       const want = new Set([...(hatOn ? [] : [look.hair]), `${look.hair}-lengths`]);
@@ -388,6 +429,7 @@ void main() {`)
       const placed = new Matrix4().compose(center.add(new Vector3(0, size.y * 0.06, 0)), new Quaternion(), new Vector3(k, k, k));
       holder.applyMatrix4(inv.multiply(placed));
       if (proc.headwear) holder.add(proc.headwear);
+      if (hat) holder.add(hat.group);
       holder.traverse((o) => { if ((o as { isMesh?: boolean }).isMesh) o.castShadow = true; });
       headBone.add(holder);
     }
@@ -522,6 +564,7 @@ void main() {`)
       mixer?.stopAllAction();
       materials.forEach((m) => m.dispose());
       proc.dispose();
+      hat?.dispose();
     },
   };
 }

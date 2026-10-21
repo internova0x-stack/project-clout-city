@@ -4,7 +4,9 @@
 //
 //   top     hem (meters below the top of the legs; the legs themselves stay out), sleeves (long, short or none), neckline (crew, scoop, V, open front, collar), fit
 //   bottom  waist, leg end (ankle, above the knee), fit
-//   skirt   a skirt hangs from the hips over both legs, so it is its own surface (a flared cone), not a cut
+//   skirt   a skirt hangs from the hips over both legs, so it is its own surface (a flared cone), not a cut; a gown's
+//           runs to the ankle
+//   overalls  trousers to the ankle with a bib up to the chest and straps over the shoulders
 //   boots   the foot and the shin up to mid-calf; sneakers, the foot to just above the ankle
 //
 // _PAT, read by the game's garment shader (components/avatar/baseAvatar.ts) with the template's own details:
@@ -31,6 +33,10 @@ export const WARDROBE = {
   boots: { kind: "boots", bit: 4096, gap: 0.006 },
   // The default shoes on the barefoot bodies: the foot and the ankle, a low top just above the ankle bone.
   sneakers: { kind: "boots", bit: 8192, gap: 0.008, end: "ankle" },
+  // The whole Shop outfits' own pieces (lib/avatarCatalog.ts SET_LOOKS): a gown or robe's skirt to the ankle, and
+  // overalls (trousers with a bib and two straps over the shoulders, outside the top worn under them).
+  gown: { kind: "skirt", bit: 16384, long: true },
+  overalls: { kind: "overalls", bit: 32768, gap: 0.021 },
 };
 if (Object.values(WARDROBE).some((t) => t.bit & COVER.hoodie)) throw new Error("cover bit clash");
 
@@ -46,6 +52,9 @@ export function wardrobeFit(body) {
     // The crop top stops between the chest and the navel; the waistband sits a little above the hip bone.
     cropY: lerp(B.Spine02, B.Spine01, 0.55)[1],
     waistY: B.Hips[1] + 0.035,
+    // Overalls: the bib's top edge on the chest; each strap 7.5 cm either side of the middle.
+    bibY: lerp(B.Spine01, B.Spine02, 0.75)[1],
+    strapX: 0.075,
     hipsY: B.Hips[1],
     shortSleeve: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Arm`, `${s}ForeArm`, 0.45), sub(B[`${s}ForeArm`], B[`${s}Arm`]))])),
     // Sleeveless: the armhole, square to the line from the neck to the shoulder joint, just inside the joint.
@@ -131,6 +140,19 @@ export function wardrobeKeep(body, f, t) {
       const base = { s: f.waistY - p[1], edge: "waist" };
       const leg = (side) => {
         const e = before(t.end === "ankle" ? f.ankle[side] : f.thigh[side], p);
+        return e < base.s ? { s: e, edge: "cuff" } : base;
+      };
+      const arm = { s: -0.05, edge: "waist" };
+      return blend(base, { LeftLeg: leg("Left"), RightLeg: leg("Right"), LeftArm: arm, RightArm: arm });
+    }
+    if (t.kind === "overalls") {
+      // Below the bib's top edge everything but the arms (the legs to the ankle); above it, the two straps, up and
+      // over the shoulders to the back.
+      const dx = Math.abs(Math.abs(p[0] - f.center[0]) - f.strapX);
+      const strap = p[1] < f.neckY - 0.01 ? 0.022 - dx : -1;
+      const base = { s: Math.max(f.bibY - p[1], strap), edge: f.bibY - p[1] > strap ? "waist" : "strap" };
+      const leg = (side) => {
+        const e = before(f.ankle[side], p);
         return e < base.s ? { s: e, edge: "cuff" } : base;
       };
       const arm = { s: -0.05, edge: "waist" };
@@ -243,7 +265,7 @@ export function wardrobeCover(body, bits) {
 /** Builds one template for one body: { pos, joints, weights, pat, idx }. */
 export function buildWardrobe(body, name) {
   const t = WARDROBE[name], f = wardrobeFit(body);
-  if (t.kind === "skirt") return buildSkirt(body, f);
+  if (t.kind === "skirt") return buildSkirt(body, f, t.long);
   const keep = wardrobeKeep(body, f, t);
   const { V, P: smoothed, tris, border, nbrs, along } = cutShell(body, keep, t.kind === "boots" ? (t.end ? 50 : 20) : 60);
   smoothSkin(V, nbrs, t.kind === "top" ? 6 : 4);
@@ -320,12 +342,14 @@ function addCollar(out, f, t, V, P) {
 }
 
 /** A skirt: a flared cone from the waist over both legs, to mid-thigh, pleated by the shader. */
-function buildSkirt(body, f) {
+function buildSkirt(body, f, long = false) {
   const B = body.bone, names = body.names;
   const hipsJ = names.indexOf("Hips"), lJ = names.indexOf("LeftUpLeg"), rJ = names.indexOf("RightUpLeg"), sJ = names.indexOf("Spine02");
+  const lK = names.indexOf("LeftLeg"), rK = names.indexOf("RightLeg"), kneeY = (B.LeftLeg[1] + B.RightLeg[1]) / 2;
   const cx = B.Hips[0], cz = B.Hips[2];
-  const top = f.waistY, bottom = lerp(B.LeftUpLeg, B.LeftLeg, 0.42)[1];
-  const segs = 40, rows = 10;
+  // A skirt stops at mid-thigh; a gown just above the ankles, flaring wider so the legs stay inside as they move.
+  const top = f.waistY, bottom = long ? lerp(B.LeftLeg, B.LeftFoot, 0.8)[1] : lerp(B.LeftUpLeg, B.LeftLeg, 0.42)[1];
+  const segs = 40, rows = long ? 22 : 10;
   const angle = (p) => Math.atan2(p[0] - cx, (p[2] - cz) * f.front);
   // The body's outline round the hips and thighs, by height and angle.
   const near = body.pos.filter((p, i) => p[1] > bottom - 0.02 && p[1] < top + 0.02 && !/Arm/.test(limbOf(body, i)));
@@ -346,12 +370,21 @@ function buildSkirt(body, f) {
     for (let k = 0; k < segs; k++) {
       const a = (k / segs) * 2 * Math.PI - Math.PI;
       // Never narrower lower down, plus a flare.
-      radii[k] = Math.max(radii[k], outline(a, y) + 0.012) + (r ? 0.006 : 0);
+      radii[k] = Math.max(radii[k], outline(a, y) + 0.012) + (r ? (long ? 0.006 + 0.01 * t : 0.006) : 0);
       const q = [cx + Math.sin(a) * radii[k], y, cz + Math.cos(a) * f.front * radii[k]];
       // Lower down, the front follows the thighs (sitting lifts it) and each side its own leg.
-      const leg = t * (0.25 + 0.3 * Math.max(0, Math.cos(a)));
-      const left = (1 + Math.sin(a)) / 2;
-      const top4 = [[hipsJ, (1 - leg) * (t < 0.15 ? 0.7 : 1)], [lJ, leg * left], [rJ, leg * (1 - left)], [sJ, t < 0.15 ? (1 - leg) * 0.3 : 0]];
+      const front = Math.max(0, Math.cos(a)), left = (1 + Math.sin(a)) / 2;
+      let top4;
+      if (!long) {
+        const leg = t * (0.25 + 0.3 * front);
+        top4 = [[hipsJ, (1 - leg) * (t < 0.15 ? 0.7 : 1)], [lJ, leg * left], [rJ, leg * (1 - left)], [sJ, t < 0.15 ? (1 - leg) * 0.3 : 0]];
+      } else {
+        // A gown: down to the knees its front follows the thighs (a lap when sitting), below them the shins (it falls
+        // to the floor from the knees, and swings with the steps); the back hangs from the hips.
+        const legW = (0.25 + 0.6 * front) * Math.min(1, (top - y) / (top - kneeY));
+        const [jl, jr] = y > kneeY ? [lJ, rJ] : [lK, rK];
+        top4 = [[hipsJ, (1 - legW) * (t < 0.15 ? 0.7 : 1)], [jl, legW * left], [jr, legW * (1 - left)], [sJ, t < 0.15 ? (1 - legW) * 0.3 : 0]];
+      }
       const sum = top4.reduce((s, x) => s + x[1], 0);
       out.joints.push(top4.map((x) => x[0])); out.weights.push(top4.map((x) => x[1] / sum));
       out.pos.push(q);

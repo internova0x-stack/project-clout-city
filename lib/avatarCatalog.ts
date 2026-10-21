@@ -36,11 +36,86 @@ export const GARMENT_TEMPLATES: Record<string, { cover: number; slot: "top" | "b
   pants: { cover: 256, slot: "bottom", kind: 9 }, shorts: { cover: 512, slot: "bottom", kind: 10 }, leggings: { cover: 1024, slot: "bottom", kind: 11 },
   skirt: { cover: 2048, slot: "bottom", kind: 12 }, boots: { cover: 4096, slot: "shoes", kind: 13 },
   sneakers: { cover: 8192, slot: "shoes", kind: 14 },
+  // Only in whole outfits (SET_LOOKS): a gown or robe's long skirt, and overalls (worn over a top).
+  gown: { cover: 16384, slot: "bottom", kind: 15 }, overalls: { cover: 32768, slot: "bottom", kind: 16 },
+};
+
+/**
+ * The shader's details beyond each template's own (components/avatar/baseAvatar.ts garmentMaterial): a set's piece can
+ * wear a template with another look, e.g. a zip jacket as a hi-vis jacket or a plain robe.
+ */
+export const GARMENT_DETAILS = { plain: 2, quilted: 8, dressShoes: 17, hiVis: 18, ripped: 19 } as const;
+
+/** Hats and helmets the whole outfits wear on the new bodies (components/avatar/setHats.ts). */
+export type SetHat = "hardhat" | "cowboy" | "explorer" | "helmet" | "witch" | "hood" | "space" | "crown";
+
+/** One piece of a whole outfit on the new bodies: a garment template, its colors, and optionally other details. */
+export interface SetPiece { file: string; color: string; accent: string; kind?: number }
+export interface SetLook {
+  pieces: SetPiece[];
+  hat?: { kind: SetHat; color: string; accent: string };
+}
+
+const { plain, quilted, dressShoes, hiVis, ripped } = GARMENT_DETAILS;
+const both = (look: SetLook) => ({ m: look, f: look });
+
+/**
+ * Whole Shop outfits on the new bodies (stage 4, owner Oct 21: "go"): each is the game's own garment templates in the
+ * outfit's colors, with its own details and hat, instead of a character from the old pack. A chosen faith or culture
+ * covering always stays (KEEPS_COVERING); the hat steps aside for it.
+ */
+export const SET_LOOKS: Record<string, { m: SetLook; f: SetLook }> = {
+  "site-crew": both({
+    pieces: [{ file: "zip", color: "#F2A541", accent: "#D9DDE3", kind: hiVis }, { file: "pants", color: "#2E3A55", accent: "#2E3A55" }, { file: "boots", color: "#6B4A2B", accent: "#2B2B2B" }],
+    hat: { kind: "hardhat", color: "#F2C230", accent: "#C99A12" },
+  }),
+  "st-marks-punk": {
+    m: { pieces: [{ file: "zip", color: "#14111A", accent: "#C9CED6" }, { file: "pants", color: "#23262E", accent: "#23262E", kind: ripped }, { file: "boots", color: "#14111A", accent: "#3A3F47" }] },
+    f: { pieces: [{ file: "zip", color: "#14111A", accent: "#C9CED6" }, { file: "skirt", color: "#8E1F2F", accent: "#14111A" }, { file: "boots", color: "#14111A", accent: "#3A3F47" }] },
+  },
+  "gala-night": {
+    m: { pieces: [{ file: "blazer", color: "#4E7A3A", accent: "#C9A227" }, { file: "pants", color: "#14111A", accent: "#14111A" }, { file: "sneakers", color: "#14111A", accent: "#0E0C10", kind: dressShoes }] },
+    f: { pieces: [{ file: "vest", color: "#4E7A3A", accent: "#C9A227", kind: plain }, { file: "gown", color: "#4E7A3A", accent: "#C9A227" }, { file: "sneakers", color: "#C9A227", accent: "#8C6D12", kind: dressShoes }] },
+  },
+  "ranch-hand": both({
+    pieces: [{ file: "tee", color: "#B33A3A", accent: "#F4F1EA" }, { file: "overalls", color: "#5B7FA6", accent: "#C9A227" }, { file: "boots", color: "#6B4A2B", accent: "#3A2A1C" }],
+    hat: { kind: "cowboy", color: "#C2AE86", accent: "#5A3A22" },
+  }),
+  "rockaway-beach": {
+    m: { pieces: [{ file: "vest", color: "#F4F1EA", accent: "#B33A3A", kind: plain }, { file: "shorts", color: "#B33A3A", accent: "#F4F1EA" }, { file: "sneakers", color: "#F4F1EA", accent: "#B33A3A" }] },
+    f: { pieces: [{ file: "crop", color: "#B33A3A", accent: "#F4F1EA" }, { file: "shorts", color: "#2E7FB3", accent: "#F4F1EA" }, { file: "sneakers", color: "#F4F1EA", accent: "#B33A3A" }] },
+  },
+  adventurer: both({
+    pieces: [{ file: "zip", color: "#5E7B3A", accent: "#C2AE86" }, { file: "pants", color: "#C2AE86", accent: "#C2AE86" }, { file: "boots", color: "#5A3A22", accent: "#2B2B2B" }],
+    hat: { kind: "explorer", color: "#8C6A4F", accent: "#3A2A1C" },
+  }),
+  tactical: {
+    m: { pieces: [{ file: "zip", color: "#3A3F47", accent: "#14111A" }, { file: "pants", color: "#4A4F57", accent: "#4A4F57" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }], hat: { kind: "helmet", color: "#4A5A3A", accent: "#2B2B2B" } },
+    f: { pieces: [{ file: "vest", color: "#4A5A3A", accent: "#14111A" }, { file: "leggings", color: "#3A3F47", accent: "#3A3F47" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }] },
+  },
+  witch: both({
+    pieces: [{ file: "zip", color: "#5B2C8F", accent: "#C9A227", kind: plain }, { file: "gown", color: "#5B2C8F", accent: "#C9A227" }, { file: "boots", color: "#14111A", accent: "#2B2B2B" }],
+    hat: { kind: "witch", color: "#3A1C5C", accent: "#C9A227" },
+  }),
+  ranger: both({
+    pieces: [{ file: "zip", color: "#5A3A22", accent: "#3A2A1C", kind: plain }, { file: "leggings", color: "#3A3F2A", accent: "#3A3F2A" }, { file: "boots", color: "#5A3A22", accent: "#2B2B2B" }],
+    hat: { kind: "hood", color: "#3F4A2E", accent: "#2B2F20" },
+  }),
+  spacefarer: {
+    m: { pieces: [{ file: "puffer", color: "#E8692E", accent: "#D9DDE3" }, { file: "pants", color: "#E8692E", accent: "#D9DDE3", kind: quilted }, { file: "boots", color: "#D9DDE3", accent: "#3A3F47" }], hat: { kind: "space", color: "#D9DDE3", accent: "#E8692E" } },
+    f: { pieces: [{ file: "zip", color: "#D9DDE3", accent: "#E8692E" }, { file: "leggings", color: "#E8692E", accent: "#E8692E" }, { file: "boots", color: "#D9DDE3", accent: "#3A3F47" }] },
+  },
+  royalty: {
+    m: { pieces: [{ file: "blazer", color: "#7A1F2B", accent: "#C9A227" }, { file: "pants", color: "#F4F1EA", accent: "#F4F1EA" }, { file: "boots", color: "#14111A", accent: "#C9A227" }], hat: { kind: "crown", color: "#C9A227", accent: "#B33A3A" } },
+    f: { pieces: [{ file: "blazer", color: "#7A1F2B", accent: "#C9A227" }, { file: "gown", color: "#7A1F2B", accent: "#C9A227" }, { file: "sneakers", color: "#C9A227", accent: "#8C6D12", kind: dressShoes }], hat: { kind: "crown", color: "#C9A227", accent: "#B33A3A" } },
+  },
 };
 
 /** The templates an outfit wears on the new bodies, with their colors. The bodies are barefoot in a plain base layer,
- *  so shoes without a template of their own are sneakers; a whole Shop outfit wears its pieces until stage 4's sets. */
-export function garmentsFor(o: Pick<Outfit, "top" | "topColor" | "topAccent" | "bottom" | "bottomColor" | "shoes" | "shoeColor" | "shoeAccent" | "set">) {
+ *  so shoes without a template of their own are sneakers; a whole Shop outfit wears its own pieces (SET_LOOKS). */
+export function garmentsFor(o: Pick<Outfit, "top" | "topColor" | "topAccent" | "bottom" | "bottomColor" | "shoes" | "shoeColor" | "shoeAccent" | "set">, sex: ModelSex = "m") {
+  const set = o.set ? SET_LOOKS[o.set]?.[sex] : undefined;
+  if (set) return set.pieces.filter((p) => GARMENT_TEMPLATES[p.file]).map((p) => ({ ...GARMENT_TEMPLATES[p.file], ...p, kind: p.kind ?? GARMENT_TEMPLATES[p.file].kind }));
   const pick = (file: string, color: string, accent: string) => (GARMENT_TEMPLATES[file] ? [{ file, ...GARMENT_TEMPLATES[file], color, accent }] : []);
   return [
     ...pick(o.top, o.topColor, o.topAccent),

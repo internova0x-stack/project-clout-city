@@ -198,7 +198,8 @@ components live in `app/globals.css`.
   phones) picks the low files; renderers take `renderQuality()` (no shadows, no antialiasing, 1x). `/preview/moves` shows
   every move on both bodies. Garment templates (the hoodie, then the stage 4 wardrobe) are cut from the bodies by `scripts/garments.mjs`
   into `public/avatars/garments/`, share the body's skeleton, and hide the skin under them (`_COVER` bits); the outfit's
-  top picks one from `GARMENT_TEMPLATES` (lib/avatarCatalog.ts). `/preview/moves?outfit=hoodie` shows all eight body types.
+  top picks one from `GARMENT_TEMPLATES` (lib/avatarCatalog.ts); whole Shop outfits wear `SET_LOOKS` (templates in their
+  colors, details and a hat from components/avatar/setHats.ts; `?outfit=sets`). `/preview/moves?outfit=hoodie` shows all eight body types.
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
   its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask
