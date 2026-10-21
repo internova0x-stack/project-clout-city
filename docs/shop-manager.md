@@ -190,6 +190,10 @@ texture islands, matte materials (roughness 0.9, metalness 0), the base layer ne
 the brows), and body types never scale or turn the head or neck: `lib/bodyTypes.ts` works out how each vertex of the
 body and its clothes moves to be wider (the torso from the spine, arms and legs from their bones) and the shader adds it
 before skinning; height scales the whole figure. Barefoot bodies wear sneakers unless the outfit has boots; a whole Shop
-outfit wears its pieces until stage 4's sets. The game plays a clip by name (`AvatarParts.play`); which moments use
-which clip waits for the owner's approval of `/preview/moves?outfit=anims`. New clips must be made on these bodies
+outfit wears its pieces until stage 4's sets. Where each clip plays (owner, Oct 21: "go"): standing is the idle; sitting on a seat, sofa,
+bench or in class is the sit clip and lying in a bed the sleep clip, both put on the seat or mattress by `poseSit` and
+`poseLie` (`AvatarParts.pose`); dance floors play the dance clip; a tap on a regular or a player is a hello (they wave,
+and you wave back if you're standing); a walk longer than 5 m in a room is a jog (the run clip, twice the speed). The
+female sit was made for a high stool and put her shins through seats, so she sits with the male clip
+(`BORROW` in scripts/build-base-avatars.mjs).  New clips must be made on these bodies
 (same 24 bones); add them to the JSON file and rebuild.

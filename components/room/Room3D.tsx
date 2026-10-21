@@ -30,6 +30,9 @@ const WALL_H = 2.7;
 /** #19: walls between rooms stop at the waist (owner, Oct 14), so every room reads at once. */
 const INNER_WALL_H = 1.05;
 const WALK_SPEED = 1.5;
+/** New bodies jog when the way is longer than RUN_FROM meters (owner, Oct 21), at RUN_SPEED. */
+const RUN_FROM = 5;
+const RUN_SPEED = 3;
 
 type Mode = "idle" | "walk" | "sit" | "sleep" | "dance";
 
@@ -43,6 +46,8 @@ interface Actor {
   path: [number, number][];
   pending: RoomItem | null;
   phase: number;
+  /** New bodies: a long walk is a jog (the run clip, at RUN_SPEED). */
+  run?: boolean;
 }
 
 export interface Room3DProps {
@@ -525,10 +530,20 @@ export default function Room3D(props: Room3DProps) {
       if (!hit) return null;
       return crowdRef.current.find((c) => { let o: Object3D | null = hit.object; while (o) { if (o === c.actor.rig) return true; o = o.parent; } return false; })?.member ?? null;
     };
+    // New bodies (owner, Oct 21): a tap on a regular or a player is a hello: they wave, and so do you when you're
+    // standing, facing them.
+    const greet = (other: Actor) => {
+      if (other.mode === "idle") other.parts?.play?.("wave", true);
+      if (me.mode === "idle" && me.parts?.play) {
+        me.heading = Math.atan2(other.x - me.x, other.z - me.z);
+        me.parts.play("wave", true);
+      }
+    };
     const talk = (i: number) => {
       const n = npcs[i];
       if (!n || !propsRef.current.onNpcTap) return;
       if (n.mode === "idle") n.heading = Math.atan2(me.x - n.x, me.z - n.z); // they look over when you talk to them
+      greet(n);
       propsRef.current.onNpcTap(i);
     };
     let down: { x: number; y: number; moved: boolean; sliding?: boolean; held?: boolean } | null = null;
@@ -609,6 +624,7 @@ export default function Room3D(props: Room3DProps) {
       if (person && !person.npc && propsRef.current.onCrowdTap) {
         const c = crowdRef.current.find((x) => x.member.key === person.key);
         if (c && c.actor.mode === "idle") c.actor.heading = Math.atan2(me.x - c.actor.x, me.z - c.actor.z);
+        if (c) greet(c.actor);
         return propsRef.current.onCrowdTap(person);
       }
       const npc = hitNpc(e.clientX, e.clientY);
@@ -774,6 +790,9 @@ export default function Room3D(props: Room3DProps) {
         return;
       }
       me.path = path.slice(1);
+      let way = 0;
+      for (let i = 1; i < path.length; i++) way += Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]);
+      me.run = !!me.parts?.play && way > RUN_FROM;
       if (!me.path.length) arrive(use);
       else me.mode = "walk";
     }
@@ -1133,7 +1152,8 @@ const ARROW_ORDER = [0, 1, 3, 2];
 function stepActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: (it: RoomItem | null) => void) {
   poseActor(a, dt, t, reduce, onArrive);
   // The modeled avatar plays its clip, then takes the limb turns set above.
-  a.parts?.update?.(reduce && a.mode !== "walk" ? 0 : dt);
+  // Reduced motion freezes standing and dancing; sitting and lying still settle into their pose.
+  a.parts?.update?.(reduce && a.mode !== "walk" && a.mode !== "sit" && a.mode !== "sleep" ? 0 : dt);
 }
 
 function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: (it: RoomItem | null) => void) {
@@ -1144,7 +1164,9 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     const target = a.path[0];
     if (!target) {
       a.mode = "idle";
+      a.run = false;
       resetLimbs(p);
+      p.play?.(null);
       p.setMotion?.("idle");
       onArrive?.(a.pending);
       return;
@@ -1152,7 +1174,7 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     const dx = target[0] - a.x;
     const dz = target[1] - a.z;
     const dist = Math.hypot(dx, dz);
-    const step = WALK_SPEED * dt;
+    const step = (a.run ? RUN_SPEED : WALK_SPEED) * dt;
     if (dist <= step) {
       a.x = target[0];
       a.z = target[1];
@@ -1167,6 +1189,7 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     if (p.setMotion) {
       if (p.hips) resetLimbs(p); // off the dance floor: no dance pose on top of the walk
       p.setMotion("walk");
+      p.play?.(a.run ? "run" : null);
       a.rig.rotation.y = a.heading;
       return;
     }
@@ -1179,7 +1202,9 @@ function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
     p.arms[1].rotation.x = s * 0.45;
     p.body.position.y = Math.abs(s) * 0.03;
   } else if (a.mode === "dance" && !reduce) {
-    dance(p, t, a.phase);
+    // New bodies dance with their own clip; the others with the poses drawn in code.
+    if (p.play) p.play("dance");
+    else dance(p, t, a.phase);
   } else if (a.mode === "idle" && !reduce) {
     p.torso.scale.y = 1 + Math.sin(t * 2.1 + a.phase) * 0.008;
   }
@@ -1272,7 +1297,11 @@ export function resetLimbs(p: AvatarParts) {
 }
 
 function standUp(a: Actor) {
-  if (a.parts) resetLimbs(a.parts);
+  if (a.parts) {
+    resetLimbs(a.parts);
+    a.parts.pose?.(null);
+    a.parts.play?.(null);
+  }
   a.mode = "idle";
 }
 
@@ -1281,9 +1310,10 @@ function onDanceFloor(items: RoomItem[], x: number, z: number): boolean {
   return items.some((it) => it.kind === "danceFloor" && Math.abs(x - it.x) <= 1.4 && Math.abs(z - it.z) <= 1.4);
 }
 
-/** Hips on the seat, thighs forward, shins down. */
+/** Hips on the seat, thighs forward, shins down (new bodies: their sit clip, on the seat). */
 export function poseSit(p: AvatarParts, seatY: number) {
   resetLimbs(p);
+  if (p.pose) return p.pose("sit", seatY);
   p.root.position.set(0, seatY + 0.04 - (p.hipY ?? 0.9), -0.12);
   for (const l of p.legs) l.rotation.x = -Math.PI / 2;
   for (const k of p.knees) k.rotation.x = Math.PI / 2;
@@ -1291,9 +1321,10 @@ export function poseSit(p: AvatarParts, seatY: number) {
   p.arms[1].rotation.x = -0.35;
 }
 
-/** On the back, head toward the headboard. */
+/** On the back, head toward the headboard (new bodies: their sleep clip, on the mattress). */
 export function poseLie(p: AvatarParts, mattressY: number) {
   resetLimbs(p);
+  if (p.pose) return p.pose("lie", mattressY);
   p.root.rotation.x = -Math.PI / 2;
   p.root.position.set(0, mattressY + 0.14, 0);
 }

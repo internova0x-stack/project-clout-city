@@ -40,9 +40,12 @@ export interface AvatarParts {
   update?(dt: number): void;
   /** Modeled avatar only: plays the walk cycle (Room3D then leaves the legs alone) or stands. */
   setMotion?(motion: "idle" | "walk"): void;
-  /** New bodies only: plays one of the body's clips on a loop ("run", "sit", "sleep", "dance", "wave"...), or goes back
-   *  to the idle or walk (null). */
-  play?(clip: string | null): void;
+  /** New bodies only: plays one of the body's clips ("run", "dance", "wave"...) on a loop, or once and then back to
+   *  the idle or walk; null goes back to the idle or walk. */
+  play?(clip: string | null, once?: boolean): void;
+  /** New bodies only: sits (the sit clip, thighs on a seat at surfaceY) or lies down (the sleep clip, on a mattress at
+   *  surfaceY), placed by moving root as poseSit and poseLie do; null gets up. */
+  pose?(kind: "sit" | "lie" | null, surfaceY?: number): void;
   dispose(): void;
 }
 

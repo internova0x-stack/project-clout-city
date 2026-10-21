@@ -18,7 +18,7 @@
 //   * Low-graphics mode loads the lighter files (fewer triangles, a 512 px texture).
 
 import {
-  AnimationMixer, Box3, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
+  AnimationMixer, Box3, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
   Skeleton, SkinnedMesh, Vector2, Vector3, type AnimationAction, type BufferGeometry, type Bone, type Material,
   type WebGLProgramParametersWithUniforms,
 } from "three";
@@ -274,6 +274,12 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
   const actions: Record<string, AnimationAction> = {};
   let motion: "idle" | "walk" = "idle";
   let playing: string | null = null;
+  // A clip played once (the wave) goes back to the idle or walk when it ends.
+  let once: string | null = null;
+  // Sitting and lying (Room3D's poseSit, poseLie): the clip, and the seat or mattress height to put it on.
+  let posed: { kind: "sit" | "lie"; y: number } | null = null;
+  // Where each of those clips puts the hips (and the knees, the head) in the body's space, measured once loaded.
+  const marks: Partial<Record<"sit" | "lie", { hips: Vector3; knees: Vector3; head: Vector3 }>> = {};
   const driven: { bone: Object3D; rest: Quaternion; src: Object3D; restEuler: [number, number, number] }[] = [];
   let model: Object3D | null = null;
   let disposed = false;
@@ -413,17 +419,59 @@ void main() {`)
     const anims = await load(`/avatars/body/${sex}-anims.glb`).catch(() => null);
     if (disposed) return;
     for (const clip of anims?.animations ?? []) actions[clip.name] = mixer.clipAction(clip);
+    // The sit and sleep clips' first frames, measured: where the hips, knees and head end up.
+    const at = (name: string) => { const b = bones.get(name); return b ? body.worldToLocal(b.getWorldPosition(new Vector3())) : new Vector3(); };
+    for (const [kind, clip] of [["sit", "sit"], ["lie", "sleep"]] as const) {
+      const a = actions[clip];
+      if (!a) continue;
+      a.reset().play();
+      mixer.update(0);
+      root.updateMatrixWorld(true);
+      marks[kind] = { hips: at("Hips"), knees: at("LeftLeg").add(at("RightLeg")).multiplyScalar(0.5), head: at("Head") };
+      a.stop();
+    }
+    mixer.addEventListener("finished", (e) => {
+      if (once && e.action === actions[once]) { once = null; playing = null; fade(e.action, actions[motion]); }
+    });
     (actions[playing ?? motion] ?? actions.idle)?.play();
     mixer.update(Math.random() * 2);
+    place();
   })().catch(() => {
     if (!disposed) body.add(proc.body);
   });
 
-  const fade = (from: AnimationAction | undefined, to: AnimationAction | undefined) => {
+  const fade = (from: AnimationAction | undefined, to: AnimationAction | undefined, loop = true) => {
     if (!to || to === from) return;
+    to.setLoop(loop ? LoopRepeat : LoopOnce, loop ? Infinity : 1);
     to.reset().play();
     if (from) to.crossFadeFrom(from, 0.25, false);
   };
+  const switchTo = (clip: string | null, loop = true) => {
+    const from = actions[playing ?? motion] ?? actions[motion];
+    playing = clip;
+    once = loop ? null : clip;
+    fade(from, actions[playing ?? motion] ?? actions[motion], loop);
+  };
+  /**
+   * Puts a sitting or lying clip on its seat or mattress (the avatar's root, in the actor's space, as the old poses):
+   * sitting, the thighs rest on the seat with the hips 12 cm back from its middle; lying, on the back with the head
+   * toward -z (the headboard) and the hips 95 cm from the actor's spot, the clip's floor on the mattress.
+   */
+  function place() {
+    const m = posed && marks[posed.kind];
+    if (!posed || !m) return;
+    if (posed.kind === "sit") {
+      // The thighs' underside: between the hips and the knees, a thigh's thickness below the bones.
+      const under = (m.hips.y + m.knees.y) / 2 - 0.08 * build.h;
+      root.rotation.set(0, 0, 0);
+      root.position.set(-m.hips.x, posed.y - under, -0.12 - m.hips.z);
+      return;
+    }
+    const turn = Math.PI - Math.atan2(m.head.x - m.hips.x, m.head.z - m.hips.z);
+    root.rotation.set(0, turn, 0);
+    const hips = m.hips.clone().applyAxisAngle(new Vector3(0, 1, 0), turn);
+    root.position.set(-hips.x, posed.y, -0.95 * build.h - hips.z);
+  }
   const q = new Quaternion();
   const pq = new Quaternion();
   const delta = new Quaternion();
@@ -441,12 +489,18 @@ void main() {`)
       motion = next;
       if (!playing || !actions[playing]) fade(from, actions[next]);
     },
-    play(clip) {
-      if (clip === playing) return;
-      const from = actions[playing ?? motion] ?? actions[motion];
+    play(clip, playOnce) {
       // Kept even before the clips have loaded; a clip the body doesn't have leaves the idle or walk on.
-      playing = clip;
-      fade(from, actions[playing ?? motion] ?? actions[motion]);
+      if (clip === playing && !playOnce) return;
+      if (posed && clip !== (posed.kind === "sit" ? "sit" : "sleep")) posed = null;
+      switchTo(clip, !playOnce);
+    },
+    pose(kind, surfaceY = 0) {
+      posed = kind ? { kind, y: surfaceY } : null;
+      if (!kind) { if (playing === "sit" || playing === "sleep") switchTo(null); return; }
+      const clip = kind === "sit" ? "sit" : "sleep";
+      if (playing !== clip) switchTo(clip);
+      place();
     },
     update(dt) {
       if (!mixer || !model) return;
