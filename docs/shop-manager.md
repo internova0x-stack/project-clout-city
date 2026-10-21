@@ -195,5 +195,11 @@ bench or in class is the sit clip and lying in a bed the sleep clip, both put on
 `poseLie` (`AvatarParts.pose`); dance floors play the dance clip; a tap on a regular or a player is a hello (they wave,
 and you wave back if you're standing); a walk longer than 5 m in a room is a jog (the run clip, twice the speed). The
 female sit was made for a high stool and put her shins through seats, so she sits with the male clip
-(`BORROW` in scripts/build-base-avatars.mjs).  New clips must be made on these bodies
+(`BORROW` in scripts/build-base-avatars.mjs).  Whole Shop outfits (Oct 21, "go"): each of the 11 sets is the game's own templates in its colors with its
+own details and hat (`SET_LOOKS` in lib/avatarCatalog.ts), no longer a character from the old pack: two new templates
+(`gown`, a skirt to the ankle whose front follows the thighs down to the knees and the shins below them, so it drapes
+when sitting; `overalls`, worn over the top), details by `GARMENT_DETAILS` (hi-vis bands, ripped knees, dress shoes, a
+quilted suit, a plain robe) and hats built in the head's space like the caps (components/avatar/setHats.ts: hard hat,
+cowboy, explorer, helmet, witch, hood, space helmet, crown). A faith or culture covering always stays; the hat steps
+aside. `/preview/moves?outfit=sets` shows all 11 on both bodies. New clips must be made on these bodies
 (same 24 bones); add them to the JSON file and rebuild.

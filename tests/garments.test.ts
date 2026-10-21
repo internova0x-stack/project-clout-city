@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, statSync } from "node:fs";
 import { NodeIO } from "@gltf-transform/core";
-import { GARMENT_TEMPLATES, garmentsFor } from "../lib/avatarCatalog.ts";
+import { GARMENT_TEMPLATES, OUTFIT_SETS, SET_LOOKS, garmentsFor } from "../lib/avatarCatalog.ts";
 // @ts-expect-error plain JavaScript build helper
 import { COVER, buildHoodie, coverBits, hoodieFit, readBody } from "../scripts/garments.mjs";
 
@@ -23,7 +23,7 @@ test("every garment template has its files, small, and the game's cover bits and
   assert.deepEqual(Object.keys(GARMENT_TEMPLATES).sort(), Object.keys(build).sort(), "the same templates in the game and the build");
   for (const [file, g] of Object.entries(GARMENT_TEMPLATES)) {
     assert.equal(g.cover, build[file].bit, `${file}: cover bit`);
-    assert.equal(g.slot, build[file].kind === "skirt" ? "bottom" : build[file].kind === "boots" ? "shoes" : build[file].kind, `${file}: slot`);
+    assert.equal(g.slot, build[file].kind === "skirt" || build[file].kind === "overalls" ? "bottom" : build[file].kind === "boots" ? "shoes" : build[file].kind, `${file}: slot`);
     for (const f of ["m", "f", "m-low", "f-low"]) {
       const p = `public/avatars/garments/${file}-${f}.glb`;
       assert.ok(statSync(p).size < 200_000, `${p} is ${statSync(p).size} bytes`);
@@ -42,7 +42,8 @@ test("every top and bottom players can own has a template on the new bodies", as
   assert.deepEqual(garmentsFor(o).map((g) => [g.file, g.color]), [["tee", "#fff"], ["skirt", "#111"], ["boots", "#222"]]);
   // The bodies are barefoot in a base layer: shoes without a template are sneakers, and a whole outfit wears its pieces.
   assert.deepEqual(garmentsFor({ ...o, shoes: undefined }).map((g) => g.file), ["tee", "skirt", "sneakers"]);
-  assert.deepEqual(garmentsFor({ ...o, set: "royalty" }).map((g) => g.file), ["tee", "skirt", "boots"]);
+  assert.deepEqual(garmentsFor({ ...o, set: "royalty" }, "m").map((g) => g.file), ["blazer", "pants", "boots"], "a whole outfit wears its own pieces");
+  assert.deepEqual(garmentsFor({ ...o, set: "no-such-set" }).map((g) => g.file), ["tee", "skirt", "boots"], "an unknown outfit wears the pieces");
 });
 
 test("the hoodie fits both bodies: neck, hem and wrists where a hoodie's are", { skip: noSources }, async () => {
@@ -115,5 +116,15 @@ test("every clip in assets/avatar-animations.json retargets onto its body", { sk
       assert.ok(r.duration > 0.2, `${sex} ${c.name}: ${r.duration}s`);
       for (const q of Object.values(r.rotations) as Float32Array[]) assert.ok(q.every(Number.isFinite), `${sex} ${c.name}: rotations are numbers`);
     }
+  }
+});
+
+test("every whole Shop outfit has its look on both new bodies: a top, a bottom and shoes from the templates", () => {
+  assert.deepEqual(Object.keys(SET_LOOKS).sort(), OUTFIT_SETS.map((o) => o.id).sort());
+  for (const [id, looks] of Object.entries(SET_LOOKS)) for (const sex of ["m", "f"] as const) {
+    const pieces = garmentsFor({ top: "tee", topColor: "#fff", topAccent: "#000", bottom: "pants", bottomColor: "#111", shoeColor: "#222", set: id }, sex);
+    assert.equal(pieces.length, looks[sex].pieces.length, `${id} ${sex}: every piece is a template`);
+    assert.deepEqual(pieces.map((p) => p.slot).sort(), ["bottom", "shoes", "top"], `${id} ${sex}: one top, one bottom, one pair of shoes`);
+    for (const p of pieces) assert.match(p.color, /^#[0-9A-F]{6}$/i, `${id} ${sex}: ${p.file} color`);
   }
 });
