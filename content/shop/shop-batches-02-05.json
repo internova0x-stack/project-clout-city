@@ -1,0 +1,1266 @@
+{
+  "batches": [
+    "shop-batch-02",
+    "shop-batch-03",
+    "shop-batch-04-wasteland-luxe",
+    "shop-batch-05-accessories"
+  ],
+  "notes": [
+    "Same art style and rules as content/shop/shop-batch-01.json.",
+    "Items with transparent: true (the Wasteland Luxe batch) already have transparent PNG sources; skip background removal for them. Items with transparent: false still have the plain cream background: remove it with a simple color-key on the flat background, treating the floor shadow the same way on every item. Then resize everything to 256 px and 768 px, convert to WebP at about 80% quality, upload both, and keep the masters in storage.",
+    "Prices are in C$. clout is round(sqrt(price)); use the game's own Shop clout formula instead if it has one.",
+    "template values starting with 'rigid:' are accessories that don't bend with the body. They can be made from Higgsfield 3D models (GLB) attached to the head, face, ears, neck or hand, so they can become wearable before clothing templates exist.",
+    "wearable is false until the item's template works in both presentations; items stay hidden from the Shop until then.",
+    "Style line 'wasteland-luxe' is a new tag for the distressed-luxury look; it sits under Luxury and Avant-garde."
+  ],
+  "items": [
+    {
+      "batch": "02",
+      "id": "forest-floor-hoodie",
+      "name": "Forest Floor Hoodie",
+      "description": "Plain heavyweight forest-green hoodie.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "streetwear"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 65,
+      "clout": 8,
+      "currency": "C$",
+      "realCash": false,
+      "template": "hoodie",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085026_2ded7106-c17d-4486-8f05-69ccff5bac37.png",
+      "images": {
+        "card": "shop/forest-floor-hoodie-256.webp",
+        "detail": "shop/forest-floor-hoodie-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "alumni-of-nothing-varsity",
+      "name": "Alumni of Nothing Varsity",
+      "description": "Quilted black leather varsity jacket with cream sleeves.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "streetwear",
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 4800,
+      "clout": 69,
+      "currency": "C$",
+      "realCash": false,
+      "template": "varsity_jacket",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085025_9cf3a276-46f1-479f-b03e-4ab4306271a4.png",
+      "images": {
+        "card": "shop/alumni-of-nothing-varsity-256.webp",
+        "detail": "shop/alumni-of-nothing-varsity-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "fishnet-fridays-top",
+      "name": "Fishnet Fridays Top",
+      "description": "Sheer black mesh long-sleeve top.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "gothic"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 45,
+      "clout": 7,
+      "currency": "C$",
+      "realCash": false,
+      "template": "mesh_layer",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085027_26dedd09-3723-4e7a-b1b2-8b40ed12f34d.png",
+      "images": {
+        "card": "shop/fishnet-fridays-top-256.webp",
+        "detail": "shop/fishnet-fridays-top-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "chained-heart-corset",
+      "name": "Chained Heart Corset",
+      "description": "Black lace corset top with silver chain details.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "gothic",
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 3200,
+      "clout": 57,
+      "currency": "C$",
+      "realCash": false,
+      "template": "corset_top",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085026_7aed59e9-7d2b-4e06-adbb-e0f66477a394.png",
+      "images": {
+        "card": "shop/chained-heart-corset-256.webp",
+        "detail": "shop/chained-heart-corset-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "study-hall-tartan-skirt",
+      "name": "Study Hall Tartan Skirt",
+      "description": "Pleated navy-and-green tartan skirt.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "nerdy-preppy"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 240,
+      "clout": 15,
+      "currency": "C$",
+      "realCash": false,
+      "template": "pleated_skirt",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085052_11e18b21-1fc5-46d2-83d5-77871f31d51c.png",
+      "images": {
+        "card": "shop/study-hall-tartan-skirt-256.webp",
+        "detail": "shop/study-hall-tartan-skirt-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "honor-roll-loafers",
+      "name": "Honor Roll Loafers",
+      "description": "Polished brown leather penny loafers.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "nerdy-preppy",
+        "business-casual"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 310,
+      "clout": 18,
+      "currency": "C$",
+      "realCash": false,
+      "template": "loafers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085052_8347715c-714a-4bc2-909c-956bb4bd1409.png",
+      "images": {
+        "card": "shop/honor-roll-loafers-256.webp",
+        "detail": "shop/honor-roll-loafers-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "mint-condition-leggings",
+      "name": "Mint Condition Leggings",
+      "description": "High-waisted mint athletic leggings.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "sporty"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 160,
+      "clout": 13,
+      "currency": "C$",
+      "realCash": false,
+      "template": "leggings",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085054_d335292a-a7ce-4ddb-8ef5-9c2a57390ce6.png",
+      "images": {
+        "card": "shop/mint-condition-leggings-256.webp",
+        "detail": "shop/mint-condition-leggings-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "glow-lap-runners",
+      "name": "Glow Lap Runners",
+      "description": "Neon-coral running sneakers with glowing soles.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "sporty"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 2400,
+      "clout": 49,
+      "currency": "C$",
+      "realCash": false,
+      "template": "sneakers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085052_69989170-ccf3-4170-99d0-3e041e5a444b.png",
+      "images": {
+        "card": "shop/glow-lap-runners-256.webp",
+        "detail": "shop/glow-lap-runners-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "crisp-monday-shirt",
+      "name": "Crisp Monday Shirt",
+      "description": "Crisp white button-down shirt.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "business-casual",
+        "nerdy-preppy"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 70,
+      "clout": 8,
+      "currency": "C$",
+      "realCash": false,
+      "template": "button_down",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085131_46f312f1-8a09-40d6-afdb-6e12d17fa435.png",
+      "images": {
+        "card": "shop/crisp-monday-shirt-256.webp",
+        "detail": "shop/crisp-monday-shirt-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "quarterly-review-trousers",
+      "name": "Quarterly Review Trousers",
+      "description": "Charcoal tailored trousers with a sharp crease.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "business-casual"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 380,
+      "clout": 19,
+      "currency": "C$",
+      "realCash": false,
+      "template": "trousers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085131_16f5768b-652b-415c-9d49-4a4962522b40.png",
+      "images": {
+        "card": "shop/quarterly-review-trousers-256.webp",
+        "detail": "shop/quarterly-review-trousers-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "baby-pink-rib-crop",
+      "name": "Baby Pink Rib Crop",
+      "description": "Baby-pink ribbed crop top.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "fashionista"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 40,
+      "clout": 6,
+      "currency": "C$",
+      "realCash": false,
+      "template": "crop_top",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085132_533291fb-e39f-4410-b584-e13bda73939a.png",
+      "images": {
+        "card": "shop/baby-pink-rib-crop-256.webp",
+        "detail": "shop/baby-pink-rib-crop-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "02",
+      "id": "gala-gold-heels",
+      "name": "Gala Gold Heels",
+      "description": "Gold strappy heels with crystal straps.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "fashionista",
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 3800,
+      "clout": 62,
+      "currency": "C$",
+      "realCash": false,
+      "template": "heels",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085131_e66c1c6a-cf8a-400e-acc2-ce07966d32b3.png",
+      "images": {
+        "card": "shop/gala-gold-heels-256.webp",
+        "detail": "shop/gala-gold-heels-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "unfinished-business-tee",
+      "name": "Unfinished Business Tee",
+      "description": "Oversized deconstructed tee in rust and grey panels.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "avant-garde"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 55,
+      "clout": 7,
+      "currency": "C$",
+      "realCash": false,
+      "template": "tee",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085417_3e3bf0c3-034e-4b30-b3b7-06b301563607.png",
+      "images": {
+        "card": "shop/unfinished-business-tee-256.webp",
+        "detail": "shop/unfinished-business-tee-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "patchwork-bucket-hat",
+      "name": "Patchwork Bucket Hat",
+      "description": "Bucket hat made of mismatched denim squares.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [
+        "avant-garde",
+        "streetwear"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 60,
+      "clout": 8,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085418_795da373-9bdf-45b8-844c-2bab3a7dfeb8.png",
+      "images": {
+        "card": "shop/patchwork-bucket-hat-256.webp",
+        "detail": "shop/patchwork-bucket-hat-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "second-life-denim-trousers",
+      "name": "Second Life Denim Trousers",
+      "description": "Wide-leg upcycled patchwork denim trousers.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 290,
+      "clout": 17,
+      "currency": "C$",
+      "realCash": false,
+      "template": "wide_leg_trousers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085417_4ac6f6db-acad-41d3-8b63-4328d87de800.png",
+      "images": {
+        "card": "shop/second-life-denim-trousers-256.webp",
+        "detail": "shop/second-life-denim-trousers-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "lime-sculpt-clogs",
+      "name": "Lime Sculpt Clogs",
+      "description": "Chunky sculptural lime-green clogs.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 340,
+      "clout": 18,
+      "currency": "C$",
+      "realCash": false,
+      "template": "clogs",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085418_4007d802-0cc4-4801-ab36-15b9ccd1a242.png",
+      "images": {
+        "card": "shop/lime-sculpt-clogs-256.webp",
+        "detail": "shop/lime-sculpt-clogs-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "gilded-silk-scarf",
+      "name": "Gilded Silk Scarf",
+      "description": "Cream and soft-gold silk scarf with an abstract pattern.",
+      "category": "accessories",
+      "slot": "neck",
+      "styleLines": [
+        "luxury"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 650,
+      "clout": 25,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:scarf",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085448_f60caeaa-e3f9-4247-9379-8b71db6bb580.png",
+      "images": {
+        "card": "shop/gilded-silk-scarf-256.webp",
+        "detail": "shop/gilded-silk-scarf-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "trust-fund-quarter-zip",
+      "name": "Trust Fund Quarter-Zip",
+      "description": "Oatmeal fine-knit merino quarter-zip.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "luxury",
+        "business-casual"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 720,
+      "clout": 27,
+      "currency": "C$",
+      "realCash": false,
+      "template": "quarter_zip",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085449_b827a261-d991-48c1-9495-f8124edd5563.png",
+      "images": {
+        "card": "shop/trust-fund-quarter-zip-256.webp",
+        "detail": "shop/trust-fund-quarter-zip-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "faculty-lounge-tweed-blazer",
+      "name": "Faculty Lounge Tweed Blazer",
+      "description": "Herringbone tweed blazer with suede elbow patches.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "nerdy-preppy",
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 2900,
+      "clout": 54,
+      "currency": "C$",
+      "realCash": false,
+      "template": "blazer",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085449_92e4c93d-5e60-415f-8cf7-47fab7f54366.png",
+      "images": {
+        "card": "shop/faculty-lounge-tweed-blazer-256.webp",
+        "detail": "shop/faculty-lounge-tweed-blazer-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "corner-office-pinstripe-jacket",
+      "name": "Corner Office Pinstripe Jacket",
+      "description": "Navy pinstripe double-breasted jacket with gold buttons.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "business-casual",
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 5500,
+      "clout": 74,
+      "currency": "C$",
+      "realCash": false,
+      "template": "blazer",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085448_6c64ac1d-aef5-4f09-a02b-777b0c723bd8.png",
+      "images": {
+        "card": "shop/corner-office-pinstripe-jacket-256.webp",
+        "detail": "shop/corner-office-pinstripe-jacket-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "every-pocket-cargos",
+      "name": "Every Pocket Cargos",
+      "description": "Olive cargo pants with many utility pockets.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "streetwear"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 180,
+      "clout": 13,
+      "currency": "C$",
+      "realCash": false,
+      "template": "cargo",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085516_e694a30c-30ce-4a4d-96fa-63a0195768eb.png",
+      "images": {
+        "card": "shop/every-pocket-cargos-256.webp",
+        "detail": "shop/every-pocket-cargos-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "velvet-ring-choker",
+      "name": "Velvet Ring Choker",
+      "description": "Black velvet choker with a silver ring pendant.",
+      "category": "accessories",
+      "slot": "neck",
+      "styleLines": [
+        "gothic"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 35,
+      "clout": 6,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:choker",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085516_10818881-c1e1-4714-8d6a-1964ef8f604d.png",
+      "images": {
+        "card": "shop/velvet-ring-choker-256.webp",
+        "detail": "shop/velvet-ring-choker-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "sky-lap-windbreaker",
+      "name": "Sky Lap Windbreaker",
+      "description": "Sky-blue cropped windbreaker with a high collar.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "sporty"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 190,
+      "clout": 14,
+      "currency": "C$",
+      "realCash": false,
+      "template": "windbreaker",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085517_ad23e8c4-8750-489b-b3ee-ddcc11bf29cc.png",
+      "images": {
+        "card": "shop/sky-lap-windbreaker-256.webp",
+        "detail": "shop/sky-lap-windbreaker-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "03",
+      "id": "emerald-satin-slip-skirt",
+      "name": "Emerald Satin Slip Skirt",
+      "description": "Emerald-green satin slip midi skirt.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "fashionista"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 260,
+      "clout": 16,
+      "currency": "C$",
+      "realCash": false,
+      "template": "slip_skirt",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_085515_87ef5d45-0974-44e5-bfa2-64efe1d0f1dd.png",
+      "images": {
+        "card": "shop/emerald-satin-slip-skirt-256.webp",
+        "detail": "shop/emerald-satin-slip-skirt-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "04",
+      "id": "survived-something-hoodie",
+      "name": "Survived Something Hoodie",
+      "description": "Oversized bone hoodie, distressed with frayed hems and holes.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 680,
+      "clout": 26,
+      "currency": "C$",
+      "realCash": false,
+      "template": "hoodie",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090739_97a482a2-090f-4c2f-9237-70127b5fe879.png",
+      "images": {
+        "card": "shop/survived-something-hoodie-256.webp",
+        "detail": "shop/survived-something-hoodie-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "dune-cloud-puffer",
+      "name": "Dune Cloud Puffer",
+      "description": "Oversized sand cropped puffer in matte nylon.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 3400,
+      "clout": 58,
+      "currency": "C$",
+      "realCash": false,
+      "template": "puffer",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090744_5bc2d181-ed64-4a8c-ba05-05c260b159fa.png",
+      "images": {
+        "card": "shop/dune-cloud-puffer-256.webp",
+        "detail": "shop/dune-cloud-puffer-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "post-apocalypse-lounge-pants",
+      "name": "Post-Apocalypse Lounge Pants",
+      "description": "Faded slate baggy sweatpants with stacked ankles.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 520,
+      "clout": 23,
+      "currency": "C$",
+      "realCash": false,
+      "template": "joggers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090753_c3ef4a84-d115-4ae3-af1d-3f8d05542818.png",
+      "images": {
+        "card": "shop/post-apocalypse-lounge-pants-256.webp",
+        "detail": "shop/post-apocalypse-lounge-pants-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "moth-approved-knit",
+      "name": "Moth-Approved Knit",
+      "description": "Oversized oatmeal knit with intentional holes.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 890,
+      "clout": 30,
+      "currency": "C$",
+      "realCash": false,
+      "template": "sweater",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090757_e9235667-c33c-45eb-88d8-c7b2aa4d6075.png",
+      "images": {
+        "card": "shop/moth-approved-knit-256.webp",
+        "detail": "shop/moth-approved-knit-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "never-worked-a-day-boots",
+      "name": "Never Worked a Day Boots",
+      "description": "Scuffed mud-brown suede work boots.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 2600,
+      "clout": 51,
+      "currency": "C$",
+      "realCash": false,
+      "template": "work_boots",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090802_0e518eee-33e8-4e9d-b88b-7b67a347d169.png",
+      "images": {
+        "card": "shop/never-worked-a-day-boots-256.webp",
+        "detail": "shop/never-worked-a-day-boots-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "unfinished-thought-thermal",
+      "name": "Unfinished Thought Thermal",
+      "description": "Faded charcoal waffle thermal with raw seams.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 240,
+      "clout": 15,
+      "currency": "C$",
+      "realCash": false,
+      "template": "long_sleeve",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090807_72fe8bbf-12fa-479f-96da-72128740f06a.png",
+      "images": {
+        "card": "shop/unfinished-thought-thermal-256.webp",
+        "detail": "shop/unfinished-thought-thermal-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "inherited-barn-jacket",
+      "name": "Inherited Barn Jacket",
+      "description": "Frayed tan canvas work jacket with patched elbows.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 3900,
+      "clout": 62,
+      "currency": "C$",
+      "realCash": false,
+      "template": "work_jacket",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090812_e696aeaa-3d0d-4d66-816f-b3649e850a02.png",
+      "images": {
+        "card": "shop/inherited-barn-jacket-256.webp",
+        "detail": "shop/inherited-barn-jacket-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "nowhere-to-be-vest",
+      "name": "Nowhere to Be Vest",
+      "description": "Washed grey utility vest with cargo pockets.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 740,
+      "clout": 27,
+      "currency": "C$",
+      "realCash": false,
+      "template": "vest",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090816_dfa0d71d-1a4b-419f-aa22-356db9b365b9.png",
+      "images": {
+        "card": "shop/nowhere-to-be-vest-256.webp",
+        "detail": "shop/nowhere-to-be-vest-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "expedition-to-brunch-parka",
+      "name": "Expedition to Brunch Parka",
+      "description": "Oversized distressed olive parka with a frayed hood.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 5800,
+      "clout": 76,
+      "currency": "C$",
+      "realCash": false,
+      "template": "parka",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090821_1bd8aca5-97db-4710-8722-45c45f7fb927.png",
+      "images": {
+        "card": "shop/expedition-to-brunch-parka-256.webp",
+        "detail": "shop/expedition-to-brunch-parka-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "incognito-knit",
+      "name": "Incognito Knit",
+      "description": "Chunky sand knit balaclava.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 420,
+      "clout": 20,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:balaclava",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090826_72ed1a61-7898-47fc-b01f-acbcadab6cc8.png",
+      "images": {
+        "card": "shop/incognito-knit-256.webp",
+        "detail": "shop/incognito-knit-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "already-vintage-denim-jacket",
+      "name": "Already Vintage Denim Jacket",
+      "description": "Washed sand denim jacket with a ripped raw hem.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 960,
+      "clout": 31,
+      "currency": "C$",
+      "realCash": false,
+      "template": "denim_jacket",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090831_deec648f-a324-4d72-b734-7be8d89aacec.png",
+      "images": {
+        "card": "shop/already-vintage-denim-jacket-256.webp",
+        "detail": "shop/already-vintage-denim-jacket-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "04",
+      "id": "pre-destroyed-runners",
+      "name": "Pre-Destroyed Runners",
+      "description": "Chunky worn-in faded grey leather sneakers.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "wasteland-luxe",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 1900,
+      "clout": 44,
+      "currency": "C$",
+      "realCash": false,
+      "template": "sneakers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090835_41d36e80-3993-4e66-bff2-6cdea494ef5c.png",
+      "images": {
+        "card": "shop/pre-destroyed-runners-256.webp",
+        "detail": "shop/pre-destroyed-runners-768.webp"
+      },
+      "transparent": true
+    },
+    {
+      "batch": "05",
+      "id": "brunch-shades",
+      "name": "Brunch Shades",
+      "description": "Oversized tortoiseshell sunglasses.",
+      "category": "accessories",
+      "slot": "face",
+      "styleLines": [
+        "fashionista",
+        "nerdy-preppy"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 35,
+      "clout": 6,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:eyewear",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090208_8ef93c67-5485-4a3e-869c-75f96399ac99.png",
+      "images": {
+        "card": "shop/brunch-shades-256.webp",
+        "detail": "shop/brunch-shades-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "future-is-bright-visor",
+      "name": "Future Is Bright Visor",
+      "description": "Chrome wraparound shield sunglasses.",
+      "category": "accessories",
+      "slot": "face",
+      "styleLines": [
+        "sporty",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 220,
+      "clout": 15,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:eyewear",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090207_ae496a0e-8375-4f58-9f05-d67afa72a856.png",
+      "images": {
+        "card": "shop/future-is-bright-visor-256.webp",
+        "detail": "shop/future-is-bright-visor-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "old-money-frames",
+      "name": "Old Money Frames",
+      "description": "Thin gold square sunglasses with gradient lenses.",
+      "category": "accessories",
+      "slot": "face",
+      "styleLines": [
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 1800,
+      "clout": 42,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:eyewear",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090208_c26bb1cf-7859-4100-86e7-7b8943a0892c.png",
+      "images": {
+        "card": "shop/old-money-frames-256.webp",
+        "detail": "shop/old-money-frames-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "corner-beanie",
+      "name": "Corner Beanie",
+      "description": "Black ribbed beanie with a folded cuff.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [
+        "streetwear",
+        "gothic"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 25,
+      "clout": 5,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090208_826c5bda-8b4d-4c19-9c3b-d5539f433f5d.png",
+      "images": {
+        "card": "shop/corner-beanie-256.webp",
+        "detail": "shop/corner-beanie-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "midtown-fedora",
+      "name": "Midtown Fedora",
+      "description": "Charcoal wool fedora with a black band.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [
+        "business-casual"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 280,
+      "clout": 17,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090237_09dfbc87-7dd1-4af7-ace6-69c64db67193.png",
+      "images": {
+        "card": "shop/midtown-fedora-256.webp",
+        "detail": "shop/midtown-fedora-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "gallery-opening-hat",
+      "name": "Gallery Opening Hat",
+      "description": "Wide-brim cream felt hat with a gold band.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [
+        "fashionista",
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 1400,
+      "clout": 37,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_9d7d6968-a0da-4f0e-9513-a65aa1914bc0.png",
+      "images": {
+        "card": "shop/gallery-opening-hat-256.webp",
+        "detail": "shop/gallery-opening-hat-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "everyday-hoops",
+      "name": "Everyday Hoops",
+      "description": "Polished silver hoop earrings.",
+      "category": "accessories",
+      "slot": "ears",
+      "styleLines": [
+        "streetwear",
+        "gothic",
+        "nerdy-preppy",
+        "sporty",
+        "business-casual",
+        "fashionista",
+        "luxury",
+        "avant-garde"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 30,
+      "clout": 5,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:earrings",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_fa52dead-beb0-4e48-8218-995be3792245.png",
+      "images": {
+        "card": "shop/everyday-hoops-256.webp",
+        "detail": "shop/everyday-hoops-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "double-rope-chains",
+      "name": "Double Rope Chains",
+      "description": "Two layered gold rope chains.",
+      "category": "accessories",
+      "slot": "neck",
+      "styleLines": [
+        "streetwear"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 650,
+      "clout": 25,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:necklace",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_93da606d-513e-4e64-9076-b436da9f3470.png",
+      "images": {
+        "card": "shop/double-rope-chains-256.webp",
+        "detail": "shop/double-rope-chains-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "the-clout-flame",
+      "name": "The Clout Flame",
+      "description": "Iced-out gold chain with a gem-encrusted flame pendant.",
+      "category": "accessories",
+      "slot": "neck",
+      "styleLines": [
+        "streetwear",
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 15000,
+      "clout": 122,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:necklace",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090301_80c00373-32a6-456f-ad1a-04c6fe004fdc.png",
+      "images": {
+        "card": "shop/the-clout-flame-256.webp",
+        "detail": "shop/the-clout-flame-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "farmers-market-tote",
+      "name": "Farmers Market Tote",
+      "description": "Plain cream canvas tote.",
+      "category": "accessories",
+      "slot": "hand",
+      "styleLines": [
+        "nerdy-preppy",
+        "avant-garde"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 40,
+      "clout": 6,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:bag",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090302_d59864b0-48c9-4f2e-b216-56a6dae13d1b.png",
+      "images": {
+        "card": "shop/farmers-market-tote-256.webp",
+        "detail": "shop/farmers-market-tote-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "commute-sling",
+      "name": "Commute Sling",
+      "description": "Black nylon crossbody sling bag.",
+      "category": "accessories",
+      "slot": "hand",
+      "styleLines": [
+        "streetwear",
+        "sporty"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 180,
+      "clout": 13,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:bag",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090302_6ca8b417-3420-4678-a903-75428507fd97.png",
+      "images": {
+        "card": "shop/commute-sling-256.webp",
+        "detail": "shop/commute-sling-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "05",
+      "id": "emerald-hour-bag",
+      "name": "Emerald Hour Bag",
+      "description": "Structured emerald croc-embossed doctor bag with gold hardware.",
+      "category": "accessories",
+      "slot": "hand",
+      "styleLines": [
+        "luxury",
+        "fashionista"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 8500,
+      "clout": 92,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:bag",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090302_7d7a6a30-1379-4b38-a097-e6a9a769bd39.png",
+      "images": {
+        "card": "shop/emerald-hour-bag-256.webp",
+        "detail": "shop/emerald-hour-bag-768.webp"
+      },
+      "transparent": false
+    }
+  ]
+}

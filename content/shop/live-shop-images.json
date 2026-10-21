@@ -1,0 +1,300 @@
+{
+  "purpose": "Images for the items already in the live Shop, which currently show emoji. Match each by its exact name in the Shop and replace the emoji with the image. Prices, clout and other data stay as they are in the game.",
+  "processing": "Same as the shop batch files: items with transparent false still have the flat cream background; remove it with a simple color-key, then resize to 256 px and 768 px, convert to WebP at about 80% quality, upload, and keep the masters.",
+  "mismatchesToCheck": [
+    "Faux chinchilla coat is still a real-cash item in the live Shop; the decided rule is that it is an expensive C$ item.",
+    "Adventurer is locked behind 1,000 clout; the Shop plan says price is the only barrier, with no clout gating. Confirm with the owner whether this is intentional.",
+    "The live Shop's tabs are Fashion, Home, Cars, Houses, Luxury and Makeup. The new catalog files use 'fashion' and 'accessories': put jewelry and watches under Luxury, and add an Accessories tab (or fold into Fashion) for shades, hats and bags.",
+    "Home items will also need 3D models to place in the apartment; these images are for the Shop cards only."
+  ],
+  "items": [
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Satin bomber jacket",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_083824_8996ccfe-985b-49ee-ad95-59e48deca140.png",
+      "transparent": false,
+      "note": "Reused: the approved style sample."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Leather blazer",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092041_2610284b-66c2-4271-a75c-7d5af1d8fb77.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Vintage varsity tee",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092042_a886ea0f-e134-4b1e-8bb2-954041322a27.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Wide-leg trousers",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084529_3cdc68ef-0cd0-4493-8f4d-08455e9b4259.png",
+      "transparent": true,
+      "note": "Reused: the Champagne Hour Trousers image (already transparent)."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Pleated mini skirt",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092042_8371011d-1627-40c8-8c45-00aed9c68fe6.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Chunky dad sneakers",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092042_097c14a5-ba3d-4a95-ab53-c957140a754f.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Faux chinchilla coat",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092110_70e7f12d-bd96-4ac9-b63c-0b783c76f558.png",
+      "transparent": false,
+      "note": "See mismatch: the live Shop still sells this for real cash."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Holographic platform boots",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092110_bd2bfe37-4669-40d3-b609-4e787664831c.png",
+      "transparent": false,
+      "note": "Real-cash collector item in the live Shop."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Gala night",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092111_79607e09-b2b4-4f49-adf3-41ab7e294b2e.png",
+      "transparent": false,
+      "note": "Outfit set."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Ranch hand overalls",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092110_d96084f6-b958-49fa-953a-44e81d3866f5.png",
+      "transparent": false,
+      "note": "Outfit set."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Rockaway beach set",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092139_5b6ccc9c-b348-4604-a30d-016a59e4c723.png",
+      "transparent": false,
+      "note": "Outfit set."
+    },
+    {
+      "tab": "Fashion",
+      "subTab": "",
+      "liveName": "Adventurer",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092139_f033af1f-1f35-46d2-b55f-1aa0b6453dd2.png",
+      "transparent": false,
+      "note": "Outfit set. See mismatch: locked behind 1,000 clout."
+    },
+    {
+      "tab": "Home",
+      "subTab": "Living",
+      "liveName": "Three-seat sofa",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092207_4e993da4-6920-4150-b43e-596ac72942f0.png",
+      "transparent": false,
+      "note": "Shown in burnt orange; other color swatches can tint the 3D model."
+    },
+    {
+      "tab": "Home",
+      "subTab": "Living",
+      "liveName": "Reading armchair",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092209_aae78c51-b029-42c1-acc8-6585c8d78a40.png",
+      "transparent": false,
+      "note": "Shown in emerald."
+    },
+    {
+      "tab": "Home",
+      "subTab": "Living",
+      "liveName": "Coffee table",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092239_03f271be-24b3-4555-ab71-b96997b2d848.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Living",
+      "liveName": "Big TV",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092237_0bc91210-3ac2-4950-84e1-0a4113267ece.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Bedroom",
+      "liveName": "Platform bed",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092237_ddbaffa0-125c-43cd-86b7-473710ff52fd.png",
+      "transparent": false,
+      "note": "Shown with blue bedding."
+    },
+    {
+      "tab": "Home",
+      "subTab": "Bedroom",
+      "liveName": "Nightstand with lamp",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092237_bb639196-b5f4-4913-aa53-4e8f49e4c170.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Bedroom",
+      "liveName": "Work desk",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092307_83411e09-28d7-43d0-b372-c204c7158804.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Dining",
+      "liveName": "Dining table",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092307_20281821-37e6-4974-9bc0-9b00ffa3e94d.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Dining",
+      "liveName": "Dining chair",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092307_6a07eec9-a0b6-46be-a940-5a5daebcb210.png",
+      "transparent": false,
+      "note": "Shown in brown."
+    },
+    {
+      "tab": "Home",
+      "subTab": "Dining",
+      "liveName": "Kitchen island",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092308_83e51eb5-96fa-4805-8fcf-8ae51959a5ba.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Decor",
+      "liveName": "Monstera",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092336_09cbfc26-c0a6-439f-94b0-227b039a8415.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Home",
+      "subTab": "Decor",
+      "liveName": "Upright piano",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092336_b13187b7-549d-4e88-b1ce-ddffdb315013.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Cars",
+      "subTab": "",
+      "liveName": "Pre-loved hatchback",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092335_8463b8c6-af59-46e3-9e95-88109b935e99.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Cars",
+      "subTab": "",
+      "liveName": "Luxury sedan",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092336_b143b3d0-99ac-4d3d-827c-fc32bfc29a54.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Cars",
+      "subTab": "",
+      "liveName": "Electric coupe",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092403_e426b76a-5d44-4855-8132-2eddd55dcb1b.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Houses",
+      "subTab": "",
+      "liveName": "Astoria townhouse",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092403_4db77207-6040-4c2e-b67f-d5cffd6e00ca.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Houses",
+      "subTab": "",
+      "liveName": "Hunters Point duplex penthouse",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092404_d6185c7c-141e-4e03-8315-45782671b044.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Houses",
+      "subTab": "",
+      "liveName": "LIC penthouse",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092405_5a7d633b-0ab7-4afd-80d5-9a06d94077d0.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Luxury",
+      "subTab": "",
+      "liveName": "Chunky gold-tone chain",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_93da606d-513e-4e64-9076-b436da9f3470.png",
+      "transparent": false,
+      "note": "Reused: the Double Rope Chains image."
+    },
+    {
+      "tab": "Luxury",
+      "subTab": "",
+      "liveName": "Diamond-ish studs",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092138_f4921bf8-9c8c-454f-8143-4b1ad32fd086.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Luxury",
+      "subTab": "",
+      "liveName": "Designer watch",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084543_c9fa602e-d7cc-4e0d-ac5e-27d3454f7b95.png",
+      "transparent": true,
+      "note": "Reused: the Ice Rink Watch image (already transparent)."
+    },
+    {
+      "tab": "Makeup",
+      "subTab": "",
+      "liveName": "Glass-skin glow kit",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092138_dbd3eef7-e91e-4b1b-922e-de16a0cfa65c.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Makeup",
+      "subTab": "",
+      "liveName": "Lip set in 12 shades of \"nude\"",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092208_225639d5-3ac7-4fa5-9d2d-7464d0146683.png",
+      "transparent": false,
+      "note": ""
+    },
+    {
+      "tab": "Makeup",
+      "subTab": "",
+      "liveName": "Lash bar appointment",
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092207_18833f38-c4d8-4556-9855-2636b9688c44.png",
+      "transparent": false,
+      "note": ""
+    }
+  ]
+}

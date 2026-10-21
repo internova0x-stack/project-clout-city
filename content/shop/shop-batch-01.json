@@ -1,0 +1,292 @@
+{
+  "batch": "shop-batch-01",
+  "notes": [
+    "Art style: low-poly flat-shaded 3D product shots (see the Fashion Style Lines doc).",
+    "sourceImage is a transparent PNG master from Higgsfield. Download it, resize to 256 px and 768 px, convert to WebP at about 80% quality, upload both sizes to the CDN, and keep the master in storage. Never ship the master to players.",
+    "Prices are in C$. clout is round(sqrt(price)) as a starting point; if the game already has a clout formula for Shop items, use it instead and keep diminishing returns.",
+    "wearable is false until the item's garment template (or rigid 3D accessory) exists in both presentations. Per the rules, clothing that can't be worn stays hidden from the Shop until then.",
+    "All clothing is available to both presentations."
+  ],
+  "items": [
+    {
+      "id": "cloud-puffer",
+      "name": "Corner Store Cloud Puffer",
+      "description": "Oversized black puffer with orange lining.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "streetwear"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 420,
+      "clout": 20,
+      "currency": "C$",
+      "realCash": false,
+      "template": "puffer",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084458_28f55fc1-d24c-4a88-86e6-d9667793a862.png",
+      "images": {
+        "card": "shop/cloud-puffer-256.webp",
+        "detail": "shop/cloud-puffer-768.webp"
+      }
+    },
+    {
+      "id": "cloud-step-hitops",
+      "name": "Cloud Step Hi-Tops",
+      "description": "Fresh white high-tops with chunky soles.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "streetwear",
+        "sporty"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 95,
+      "clout": 10,
+      "currency": "C$",
+      "realCash": false,
+      "template": "sneakers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084503_6fd7ccac-7327-4888-a801-fafd5b7d5736.png",
+      "images": {
+        "card": "shop/cloud-step-hitops-256.webp",
+        "detail": "shop/cloud-step-hitops-768.webp"
+      }
+    },
+    {
+      "id": "midnight-buckle-coat",
+      "name": "Midnight Buckle Coat",
+      "description": "Long black leather coat with silver buckles.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "gothic"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 780,
+      "clout": 28,
+      "currency": "C$",
+      "realCash": false,
+      "template": "long_coat",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084508_55002674-fada-442c-a35a-8c4b217d3894.png",
+      "images": {
+        "card": "shop/midnight-buckle-coat-256.webp",
+        "detail": "shop/midnight-buckle-coat-768.webp"
+      }
+    },
+    {
+      "id": "nightshift-platforms",
+      "name": "Nightshift Platforms",
+      "description": "Black chunky platform boots with silver hardware.",
+      "category": "fashion",
+      "slot": "shoes",
+      "styleLines": [
+        "gothic",
+        "avant-garde"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 460,
+      "clout": 21,
+      "currency": "C$",
+      "realCash": false,
+      "template": "platform_boots",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084512_25a41f69-a808-44c3-be81-fd10370e2599.png",
+      "images": {
+        "card": "shop/nightshift-platforms-256.webp",
+        "detail": "shop/nightshift-platforms-768.webp"
+      }
+    },
+    {
+      "id": "library-card-cardigan",
+      "name": "Library Card Cardigan",
+      "description": "Navy cable-knit cardigan with cream buttons.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "nerdy-preppy"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 85,
+      "clout": 9,
+      "currency": "C$",
+      "realCash": false,
+      "template": "cardigan",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084516_81c47c88-8e5b-48fc-95b5-a360df5cb5f1.png",
+      "images": {
+        "card": "shop/library-card-cardigan-256.webp",
+        "detail": "shop/library-card-cardigan-768.webp"
+      }
+    },
+    {
+      "id": "lilac-lap-track-jacket",
+      "name": "Lilac Lap Track Jacket",
+      "description": "Lilac zip-up track jacket with white piping.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "sporty"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 110,
+      "clout": 10,
+      "currency": "C$",
+      "realCash": false,
+      "template": "track_jacket",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084520_88330aa2-ae88-45c0-9aab-0194c38938ba.png",
+      "images": {
+        "card": "shop/lilac-lap-track-jacket-256.webp",
+        "detail": "shop/lilac-lap-track-jacket-768.webp"
+      }
+    },
+    {
+      "id": "midtown-camel-blazer",
+      "name": "Midtown Camel Blazer",
+      "description": "Camel tailored blazer.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "business-casual",
+        "luxury"
+      ],
+      "tier": "mid",
+      "stars": 3,
+      "priceCs": 650,
+      "clout": 25,
+      "currency": "C$",
+      "realCash": false,
+      "template": "blazer",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084525_5899c524-a58a-4c4a-8e27-2d7da0ac002b.png",
+      "images": {
+        "card": "shop/midtown-camel-blazer-256.webp",
+        "detail": "shop/midtown-camel-blazer-768.webp"
+      }
+    },
+    {
+      "id": "champagne-hour-trousers",
+      "name": "Champagne Hour Trousers",
+      "description": "High-waisted champagne satin wide-leg trousers.",
+      "category": "fashion",
+      "slot": "bottom",
+      "styleLines": [
+        "fashionista"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 540,
+      "clout": 23,
+      "currency": "C$",
+      "realCash": false,
+      "template": "wide_leg_trousers",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084529_3cdc68ef-0cd0-4493-8f4d-08455e9b4259.png",
+      "images": {
+        "card": "shop/champagne-hour-trousers-256.webp",
+        "detail": "shop/champagne-hour-trousers-768.webp"
+      }
+    },
+    {
+      "id": "old-money-cashmere-coat",
+      "name": "Old Money Cashmere Coat",
+      "description": "Cream cashmere long coat with a shawl collar.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "luxury"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 9500,
+      "clout": 97,
+      "currency": "C$",
+      "realCash": false,
+      "template": "long_coat",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084533_2e3de0e9-bf02-41fb-a817-54eaf34b0153.png",
+      "images": {
+        "card": "shop/old-money-cashmere-coat-256.webp",
+        "detail": "shop/old-money-cashmere-coat-768.webp"
+      }
+    },
+    {
+      "id": "sartorio-sculpt-jacket",
+      "name": "Sartorio Sculpt Jacket",
+      "description": "Vale Sartorio's sculptural asymmetric jacket in olive and coral.",
+      "category": "fashion",
+      "slot": "top",
+      "styleLines": [
+        "avant-garde"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 7200,
+      "clout": 85,
+      "currency": "C$",
+      "realCash": false,
+      "template": "sculpt_jacket",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084538_5c72050d-74e1-4f12-9837-4ab5e14948dd.png",
+      "images": {
+        "card": "shop/sartorio-sculpt-jacket-256.webp",
+        "detail": "shop/sartorio-sculpt-jacket-768.webp"
+      }
+    },
+    {
+      "id": "ice-rink-watch",
+      "name": "Ice Rink Watch",
+      "description": "Gold statement watch covered in gems.",
+      "category": "accessories",
+      "slot": "wrist",
+      "styleLines": [
+        "luxury",
+        "streetwear"
+      ],
+      "tier": "luxury",
+      "stars": 4,
+      "priceCs": 18000,
+      "clout": 134,
+      "currency": "C$",
+      "realCash": false,
+      "template": "watch",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084543_c9fa602e-d7cc-4e0d-ac5e-27d3454f7b95.png",
+      "images": {
+        "card": "shop/ice-rink-watch-256.webp",
+        "detail": "shop/ice-rink-watch-768.webp"
+      }
+    },
+    {
+      "id": "blush-mini-top-handle",
+      "name": "Blush Mini Top-Handle",
+      "description": "Small blush-pink top-handle bag with a gold clasp.",
+      "category": "accessories",
+      "slot": "hand",
+      "styleLines": [
+        "fashionista"
+      ],
+      "tier": "mid",
+      "stars": 2,
+      "priceCs": 680,
+      "clout": 26,
+      "currency": "C$",
+      "realCash": false,
+      "template": "mini_bag",
+      "wearable": false,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084548_71fec852-7ed2-422f-985d-ed04f0a251a1.png",
+      "images": {
+        "card": "shop/blush-mini-top-handle-256.webp",
+        "detail": "shop/blush-mini-top-handle-768.webp"
+      }
+    }
+  ]
+}
