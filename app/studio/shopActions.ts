@@ -6,7 +6,7 @@
 import { getServerSupabase } from "@/lib/supabase/server";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { studioError, type Admin, type ShopAction, type ShopAuditRow, type ShopImportResult } from "@/lib/studio";
-import { fieldProblems, readiness, type CatalogItem, type EditableField, type ShopFile } from "@/lib/shopCatalog";
+import { fieldProblems, readiness, shippedPictures, type CatalogItem, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
 
 async function rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<Admin<T>> {
@@ -74,6 +74,16 @@ export async function studioShopProcessImages(skus: string[]): Promise<Admin<{ s
   for (const sku of skus.slice(0, 4)) {
     const item = cat.data.find((i) => i.sku === sku);
     if (!item?.sourceImage) { out.push({ sku, ok: false, error: "no picture source" }); continue; }
+    // Shipped with the game (scripts/build-shop-images.ts): no download, no upload.
+    const shipped = shippedPictures(sku, item.sourceImage);
+    if (shipped) {
+      const same = cat.data.filter((x) => x.sku === sku || (x.sourceImage === item.sourceImage && x.imageStatus !== "ready"));
+      for (const x of same) {
+        const r = await rpc<null>("admin_shop_set_image", { p_sku: x.sku, p_images: shipped, p_error: null });
+        out.push(r.ok ? { sku: x.sku, ok: true } : { sku: x.sku, ok: false, error: r.error });
+      }
+      continue;
+    }
     try {
       const img = await buildImages(item);
       const put = async (bucket: string, p: string, body: Buffer, type: string) => {

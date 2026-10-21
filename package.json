@@ -12,7 +12,8 @@
     "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\"",
     "test:db": "bash scripts/test-db.sh",
     "validate:stories": "node --experimental-strip-types --no-warnings scripts/validate-stories.ts",
-    "validate:content": "node --experimental-strip-types --no-warnings scripts/validate-content.ts"
+    "validate:content": "node --experimental-strip-types --no-warnings scripts/validate-content.ts",
+    "build:shop-images": "NODE_USE_ENV_PROXY=1 node --experimental-strip-types --no-warnings scripts/build-shop-images.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

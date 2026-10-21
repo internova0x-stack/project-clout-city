@@ -9,7 +9,7 @@ import { Sheet } from "../Sheet";
 import { IconTile, SheetTitle, Stars, useGameNow } from "./Common";
 import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 import { formatPrice, type StoreProduct } from "@/lib/store";
-import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
+import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, shippedPictures, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
 
 const COUTURE = "Clout Couture";
@@ -70,7 +70,7 @@ export function ShopSheet({
   };
   const source: ShopCardItem[] = catalog
     ? catalogShopItems(catalog, itemBySku)
-    : SHOP_ITEMS.map((i) => ({ ...i, image: null, detailImage: null, wearableNow: true, styleLines: [], collection: null, priceUsdCents: null, presentation: i.fits ?? "all", retired: false, editionSize: null }));
+    : SHOP_ITEMS.map((i) => ({ ...i, image: shippedPictures(i.sku)?.card ?? null, detailImage: shippedPictures(i.sku)?.detail ?? null, wearableNow: true, styleLines: [], collection: null, priceUsdCents: null, presentation: i.fits ?? "all", retired: false, editionSize: null }));
   // Story-only items (e.g. the "Forever Our Bird" hoodie) show only while a story has them on sale.
   // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up), or, still being
   // built (Clout Couture), locked with their price.

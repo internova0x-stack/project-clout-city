@@ -3,6 +3,7 @@
 // Pure and dependency-free (the parody names are passed in), so tests, the Studio and the server share it.
 
 import type { ShopItem } from "./city.ts";
+import { SHOP_STATIC_IMAGES } from "./shopImagesStatic.ts";
 
 export type ShopTab = "fashion" | "accessories" | "home" | "cars" | "houses" | "luxury" | "makeup";
 export const SHOP_TABS: ShopTab[] = ["fashion", "accessories", "home", "cars", "houses", "luxury", "makeup"];
@@ -305,6 +306,25 @@ export const isReady = (i: CatalogItem, ctx: FieldContext = {}) => readiness(i, 
 export const EDITABLE = ["name", "description", "price", "clout", "tier", "stars", "styleLines", "slot", "tab", "presentation", "priceUsdCents", "editionSize", "emoji"] as const;
 export type EditableField = (typeof EDITABLE)[number];
 
+/** A picture's version from its source link (in its file names, so a new picture never shows a cached old one). */
+export function sourceVersion(source: string): string {
+  let h = 0;
+  for (const c of source) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h.toString(36);
+}
+
+/**
+ * The pictures shipped with the game (scripts/build-shop-images.ts, public/shop-img/): by sku, or for a source link
+ * (any item that shares that picture). The Shop shows them when the catalog has no stored picture yet.
+ */
+export function shippedPictures(sku: string, source?: string | null): { card: string; detail: string } | null {
+  if (!source) return SHOP_STATIC_IMAGES[sku] ?? null;
+  const v = `-${sourceVersion(source)}-256.webp`;
+  const own = SHOP_STATIC_IMAGES[sku];
+  if (own?.card.endsWith(v)) return own;
+  return Object.values(SHOP_STATIC_IMAGES).find((p) => p.card.endsWith(v)) ?? null;
+}
+
 // ---------------------------------------------------------------------------
 // The game's Shop: catalog rows on top of the pieces the code knows how to wear or place
 // ---------------------------------------------------------------------------
@@ -327,7 +347,8 @@ export function catalogShopItems(catalog: Pick<CatalogItem, "sku" | "status" | "
       ...(c.presentation !== "all" ? { fits: c.presentation } : { fits: undefined }),
     };
     return {
-      ...item, image: c.images?.card ?? null, detailImage: c.images?.detail ?? null, wearableNow: c.wearable, styleLines: c.styleLines,
+      ...item, image: c.images?.card ?? shippedPictures(c.sku)?.card ?? null, detailImage: c.images?.detail ?? shippedPictures(c.sku)?.detail ?? null,
+      wearableNow: c.wearable, styleLines: c.styleLines,
       collection: c.collection, priceUsdCents: c.priceUsdCents, presentation: c.presentation, retired: c.status === "retired", editionSize: c.editionSize,
     };
   });
