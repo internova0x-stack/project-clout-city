@@ -1,5 +1,5 @@
 {
-  "about": "Astoria's people (culture pack C1): one profile per Astoria place, every name invented. A profile whose 'regular' names someone in lib/cast.ts stands at that place in the game; their catchphrases join their everyday lines (content/cast-lines.json) when tapped. Profiles marked 'story' belong to a story's place and only speak through that story. Voice rules: docs/culture/VOICE.md. Edit freely; npm test checks the shape.",
+  "about": "Astoria's people (culture pack C1): one profile per Astoria place, every name invented. A profile whose 'regular' names someone in lib/cast.ts stands at that place in the game; their catchphrases join their everyday lines (content/cast-lines.json) when tapped. Profiles marked 'story' belong to a story's place and only speak through that story. Voice rules: docs/culture/VOICE.md. Edit freely; npm test checks the shape. 'roommates' are the people who share a home with the player (C3): they introduce themselves once and leave a note a day.",
   "template": {
     "id": "Short id, the same as the regular's id in lib/cast.ts when they stand at the place",
     "name": "Invented full name",
@@ -679,6 +679,35 @@
         "schmear",
         "kvetch",
         "putz"
+      ]
+    }
+  ],
+  "roommates": [
+    {
+      "id": "priya",
+      "name": "Priya Raman",
+      "age": 27,
+      "background": "Indian-American, grew up in Edison, New Jersey, moved to Astoria for nursing school",
+      "personality": "Night-shift ER nurse at St. Copay's. Warm, blunt, allergic to dishes left in the sink. Will defend New Jersey to the death.",
+      "yearsInNeighborhood": 4,
+      "intro": [
+        "Hey! I'm Priya, your roommate. I work nights at St. Copay's, so if you hear the door at 7 a.m., that's me, not a burglar.",
+        "Rent's split down the middle: your half is {rent}, due {day} every week. The landlord is grimy, but the radiator works. Mostly.",
+        "Bathroom schedule's on the fridge. And yes, I'm from Jersey. We can fight about the Statue of Liberty later."
+      ],
+      "notes": [
+        "Left you half a pastrami sandwich from Hersh's. The good half. You're welcome.",
+        "The radiator is making the noise again. Deadass, it sounds like a trombone.",
+        "Night shift was wild. A man came in with a bagel stuck on his thumb. He's fine. The bagel isn't.",
+        "Took your umbrella. It's raining in Jersey. Don't ask why I was in Jersey.",
+        "Rent day's coming. Leave your half on the fridge like a civilized person.",
+        "Also Sal says hi. Also Sal is a cat. I've been awake for 20 hours.",
+        "Bought the good dish soap. That's a love language. Use it."
+      ],
+      "lola": "Your roommate's sweet till {day}. That's when rent's due. Deadass.",
+      "slang": [
+        "grimy",
+        "deadass"
       ]
     }
   ]

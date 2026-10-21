@@ -25,7 +25,8 @@ import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryA
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import NPC_PROFILES from "@/content/culture/npcs.json";
-import { rememberedLine, withCatchphrases, type NpcProfile } from "@/lib/culture";
+import { rememberedLine, withCatchphrases, type NpcProfile, type Roommate } from "@/lib/culture";
+import { RoommateCard, roommateCardDue, roommateMet } from "./home/Roommate";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
 import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
@@ -446,6 +447,10 @@ export function GameShell({
   // v0.6 City News: loaded once; the newest headline rides the ticker and, once per session, a home card.
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [newsCard, setNewsCard] = useState<string | null>(null);
+  /** C3: bumped when the roommate card is dismissed, so it hides (its "seen" lives in localStorage). */
+  // Starts at -1 so the server render and the first client render agree (localStorage is read after mount).
+  const [roommateTick, setRoommateTick] = useState(-1);
+  useEffect(() => setRoommateTick(0), []);
   useEffect(() => {
     if (!cityNews) return;
     void cityNews().then((items) => {
@@ -1798,7 +1803,17 @@ export function GameShell({
   }
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
-  const showPrompt = showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
+  // C3: the roommate's intro, then a note a day, when no other home card is up.
+  const homeRoommate = ((): Roommate | null => {
+    const id = city && !city.player.house_sku ? ECONOMY.homes.find((h) => h.id === me.home_id)?.roommate : undefined;
+    return (id && (NPC_PROFILES.roommates as Roommate[]).find((r) => r.id === id)) || null;
+  })();
+  // The intro comes before the TV and news cards (a new player meets their roommate first); the daily note waits for them.
+  const roommateIntro = !!homeRoommate && roommateTick >= 0 && !roommateMet(homeRoommate);
+  const showRoommate = !!homeRoommate && !!city && roommateCardDue(homeRoommate, city.today) && roommateTick >= 0
+    && !showDating && !showCrew && !showParty && !showTogether && flow === "none" && !arranging && !decor && tab === "home" && !inside
+    && !(storyOn && promptVisible(feed, dismissed)) && (roommateIntro || (!(tvCardDue && tvFeature) && !(newsCard && latestNews?.id === newsCard)));
+  const showPrompt = showRoommate || showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
   const openChatWith = (p: DatePerson) => {
     setPanel(null);
     setChatWith({ id: p.id, name: p.name, style: p.style });
@@ -1991,11 +2006,15 @@ export function GameShell({
           {storyOn && flow === "none" && !arranging && !decor && !showDating && !showCrew && !showParty && !showTogether && (
             <StoryPrompt feed={feed} dismissed={dismissed} onOpen={(beat) => openNews(beat)} onDismiss={dismissStory} />
           )}
-          {tvCardDue && tvFeature && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
+          {tvCardDue && tvFeature && !(showRoommate && roommateIntro) && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
             <TvHomeCard f={tvFeature} onOpen={() => { dismissTvCard(); setTvView(tvFeature); }} onDismiss={dismissTvCard} />
           )}
-          {!tvCardDue && newsCard && latestNews?.id === newsCard && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
+          {!tvCardDue && newsCard && latestNews?.id === newsCard && !(showRoommate && roommateIntro) && flow === "none" && !arranging && !showDating && !showCrew && !showParty && !showTogether && !(storyOn && promptVisible(feed, dismissed)) && (
             <NewsPrompt item={latestNews} onOpen={() => openCityNews(latestNews.id)} onDismiss={() => setNewsCard(null)} />
+          )}
+          {showRoommate && homeRoommate && city && (
+            <RoommateCard roommate={homeRoommate} rent={formatCash(ECONOMY.homes.find((h) => h.id === me.home_id)?.rent ?? 0)}
+              rentDue={city.player.next_rent_due} today={city.today} onDone={() => setRoommateTick((n) => n + 1)} />
           )}
         </div>
       ) : (

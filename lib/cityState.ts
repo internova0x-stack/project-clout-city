@@ -514,6 +514,9 @@ export function taskRewardLine(t: Pick<DailyTask, "kind" | "reward">): string {
 const formatCashPlain = (n: number) => `C$${n.toLocaleString("en-US")}`;
 
 export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" | "skill">): string {
+  // C3: an action can carry its own task title ("Get a BEC at Sal's").
+  const own = placeById(t.place_id)?.actions.find((a) => a.id === t.action_id)?.task;
+  if (own) return own;
   // Migration 0063 (owner, Oct 16), owner Oct 18: the skill shows as a tag under the title, so the title is the doing.
   if (t.skill) {
     if (t.kind === "cook") return "Cook something at home";

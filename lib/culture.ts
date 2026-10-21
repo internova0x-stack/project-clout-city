@@ -79,6 +79,39 @@ export function rememberedLine(profiles: NpcProfile[], regularId: string, days: 
   return r && days >= r.days ? r.line : null;
 }
 
+/** C3: the person who shares a home with the player (content/culture/npcs.json "roommates"). */
+export interface Roommate {
+  id: string;
+  name: string;
+  age: number;
+  background: string;
+  personality: string;
+  yearsInNeighborhood: number;
+  /** Said once, the first time the player is home. {rent} and {day} are filled in. */
+  intro: string[];
+  /** One a day, after the intro. */
+  notes: string[];
+  /** Lola's aside about rent day ({day}). */
+  lola: string;
+  slang: string[];
+}
+
+/** "Thursday": the weekday of a New York date (YYYY-MM-DD). */
+export function weekdayOf(nyDate: string): string {
+  return new Date(`${nyDate}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+}
+
+/** A roommate line with the player's half of the rent and their rent day filled in. */
+export function fillRoommateLine(line: string, rent: string, day: string): string {
+  return line.replaceAll("{rent}", rent).replaceAll("{day}", day);
+}
+
+/** Today's note (one a day, in turn). */
+export function roommateNoteFor(r: Pick<Roommate, "notes">, nyDate: string): string {
+  const days = Math.floor(new Date(`${nyDate}T12:00:00Z`).getTime() / 86_400_000);
+  return r.notes[((days % r.notes.length) + r.notes.length) % r.notes.length];
+}
+
 /** Accent spellings the voice rules rule out (docs/culture/VOICE.md). Dropped g's in slang ("buggin'") are fine. */
 export const PHONETIC_SPELLINGS = ["dese", "dem guys", "dose guys", "youse", "fuggedaboutit", "tawk", "cawfee", "da boss"];
 

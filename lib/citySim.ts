@@ -25,9 +25,17 @@ export function sampleSkills(pro = false): SkillState[] {
 }
 const levelsOf = (skills: SkillState[]) => Object.fromEntries(skills.map((x) => [x.id, x.level])) as PerksState["levels"];
 
-export function sampleCityState(overrides: Partial<CityState["player"]> = {}, skills: SkillState[] = sampleSkills()): CityState {
+export function sampleCityState(overrides: Partial<CityState["player"]> = {}, skills: SkillState[] = sampleSkills(), opts: { firstDay?: boolean } = {}): CityState {
   const today = new Date().toISOString().slice(0, 10);
-  const tasks: DailyTask[] = [
+  // C3 (migration 0094): a new player's first day starts with the fixed tasks, then a gossip lead and a skill.
+  const firstDay: DailyTask[] = [
+    ...CITY_ECONOMY.dailyTasks.firstDay.map((f, i) => ({
+      id: 11 + i, slot: 1 + i, kind: PLACES.find((p) => p.id === f.place)!.actions.find((a) => a.id === f.action)!.kind as DailyTask["kind"], place_id: f.place, action_id: f.action, reward: [35, 25, 40][i] ?? 30, done_at: null,
+    })),
+    { id: 14, slot: 4, kind: "gossip", place_id: "grind-and-gossip", action_id: "gossip-regular", reward: 15, done_at: null },
+    { id: 15, slot: 5, kind: "cook", place_id: "home", action_id: "cook", reward: 45, done_at: null, skill: "cooking" },
+  ];
+  const tasks: DailyTask[] = opts.firstDay ? firstDay : [
     // v0.11: two of the five send the player along the gossip trail (the preview week's starts).
     { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 15, done_at: null },
     { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 15, done_at: null },

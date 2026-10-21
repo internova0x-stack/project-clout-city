@@ -45,6 +45,8 @@ export function createGoalsSim(preset = "", city: GoalsSimCity): GoalsApi & { pa
       : c.type === "car" ? cash(21000)
       : c.type === "house" ? cash(270000)
       : c.type === "skill" ? [{ have: 2, need: c.level, unit: "count" as const }]
+      : c.type === "regular" ? [{ have: 1, need: c.days, unit: "count" as const }]
+      : c.type === "solo" ? cash(3500)
       : [{ have: 0, need: 1, unit: "count" as const }];
     return { id: g.id, parts, target: null };
   };
