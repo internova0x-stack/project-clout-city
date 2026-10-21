@@ -3,6 +3,9 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
+-- C3 (migration 0094): a player's move-in day starts with fixed tasks; these scenarios are about an ordinary day.
+create function pg_temp.settled() returns void language plpgsql security definer as $h$
+begin update public.players set moved_in_at = now() - interval '3 days' where id = auth.uid(); end $h$;
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
 
@@ -10,7 +13,7 @@ insert into auth.users (id) values ('00000000-0000-0000-0000-0000000063a1');
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000063a1', false);
 select 1 from public.create_player('chef', 'bodega_drip', '{}', null, true);
-select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
+select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio'); select pg_temp.settled();
 select 1 from public.sync_player();
 
 -- Five tasks, exactly one a skill task, at a place the skill rules train it; no place twice.
