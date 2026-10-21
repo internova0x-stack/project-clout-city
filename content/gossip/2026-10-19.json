@@ -54,6 +54,24 @@
         "headline": "\"One slice per block\" was a typo, and the Councilmember is hungry",
         "body": "Astoria nearly lost its pizza to a typo. Councilmember Barb Tillwater's bill was meant to fund \"one slice per block party\", a free slice at every street fair, until an intern dropped a word and the 114½ Precinct got forty-two noise complaints, mostly from two brothers and their mother. The fix goes to a vote Thursday. Tillwater was last seen eating six slices on a rooftop, which Lola is calling research. The brothers are still yelling. That part was never a typo."
       }
+    },
+    {
+      "id": "sublet-on-31st",
+      "title": "Who's illegally subletting on 31st?",
+      "topic": "regulars",
+      "emoji": "🔑",
+      "teaser": "Word on 31st Street is somebody's subletting a rent-stabilized apartment. Illegally. Find me four more pieces and I'll tell you who.",
+      "pieces": [
+        { "text": "Three different people keep picking up packages for apartment 4C on 31st, all addressed to the same grandmother. None of them are grandmothers. Camila sees them at the store.", "place": "ditmars-deli", "source": "regular" },
+        { "text": "Somebody's buying groceries for \"Grandma Kensington\": forty oat milks, six ring-light bulbs, zero prunes. Valentina says the name rings a bell at the coworking space.", "place": "steinway-fresh", "source": "regular" },
+        { "text": "At demo night, Chad Kensington pitched a \"co-living pod\". The slide was a photo of a rent-stabilized kitchen on 31st. Tiff was in the photo, making a smoothie.", "place": "triborough-works", "source": "regular" },
+        { "text": "Two commuters on the platform: \"Tiff pays C$900 a week for a bunk in somebody's grandma's place. Grandma's in Florida. The landlord is very much not.\"", "place": "astoria-blvd-station", "source": "overheard", "hours": [6, 11]},
+        { "text": "Bev, over her mug: the landlord came in this morning to report a \"mystery tenant\" in 4C. Bev wrote it down. She did not do anything. She did call Lola.", "place": "precinct-114-half", "source": "regular" }
+      ],
+      "tea": {
+        "headline": "Chad Kensington, CEO, is the illegal sublet on 31st",
+        "body": "Babe, the stealth startup was a grandma's apartment the whole time. Chad Kensington, CEO, has been renting bunks in his grandmother's rent-stabilized one-bedroom on 31st to three influencers, Tiff included, and calling it a \"co-living pod\". Grandma is in Florida, the landlord is wildin', and Tiff's smoothie video is now evidence. The lease is the only stable thing about Chad. Allegedly. With receipts."
+      }
     }
   ]
 }
