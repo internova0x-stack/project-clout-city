@@ -93,6 +93,8 @@ Tap a regular on a place card to hear a line; each tap says the next one. While 
 | Schlep & Schmear Deli | Hersh Weiss, the owner, at the counter (C2) | clerk | “On line, not in line. You're in New York now.” |
 | Ditmars Heights Rooftop | Akosua "Kiki" Mensah, runs the guest list (C5) | doorman | “Bronx girl in a Queens bar. I root for the Bigshots up here and the whole roof boos.” |
 | Meteor Park | Hector Rivera, usher, Section 7 (C5) | driver | “Section 7, row 12, forty years. I've seen the Meteors lose in ways science can't explain.” |
+| Downstairs on Main Food Court | Wen Zhao, runs the dumpling stall (C6) | cook | “Eighteen pleats on every dumpling. Seventeen and my mother calls me from Fuzhou.” |
+| The Ditmars Walk-Up (story place, *The Lease*) | Teodoro "Teddy" Bautista, the super (C6) | doorman | “Everybody's suddenly a relative of Agnes. I've got a list.” |
 
 **Roommate (C3):** Priya Raman, 27, a night-shift ER nurse at St. Copay's from Edison, New Jersey, shares the
 "Room share with a roommate" apartment. She introduces herself once and leaves a fridge note a day
@@ -108,3 +110,9 @@ profiles but nobody on the card: they're the Sarah Bird story's places.
 - Regulars may gossip about celebrities and wannabes, never about real people or brands.
 - A weekly personal update is one line (240 characters or fewer) in the Studio’s Cast tab, as a “Personal update” for that Monday’s week.
 - Lines are satire with affection: the joke is on fame, not on the people who chase it.
+
+**Story casts (C6, waiting for review in the Studio):** *The Lease*: Agnes Pappas (91, the late tenant of 3R), her
+grand-nephew Kostas Pappas, Dolores Ferreira (the upstairs neighbor), Harlan Vey of Keystone Vey Realty, Teddy the super.
+*Lady Liberty Custody Battle*: Judge Philomena Okafor-Brandt, Dominic "Dom" Ruggiero-Patel (New Jersey's lawyer, of
+Hoboken), Rivka Adler-Santos (New York's counsel), the court-sketch artist, the bailiff with a podcast; Gus brings the
+deciding exhibit. Every name invented.
