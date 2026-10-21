@@ -26,6 +26,8 @@ import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import NPC_PROFILES from "@/content/culture/npcs.json";
 import { rememberedLine, withCatchphrases, type NpcProfile, type Roommate } from "@/lib/culture";
+import CALENDAR_FILE from "@/content/culture/calendar.json";
+import { calendarLive, phoneInvite, type CalendarData } from "@/lib/calendar";
 import { RoommateCard, roommateCardDue, roommateMet } from "./home/Roommate";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
@@ -214,6 +216,7 @@ export function GameShell({
   partyRoom,
   partyInbox: initialPartyInbox = null,
   cityNews,
+  calendarData = CALENDAR_FILE as CalendarData,
   hunt,
   gossip,
   business,
@@ -267,6 +270,8 @@ export function GameShell({
   partyInbox?: PartyInbox | null;
   /** v0.6 City News: published items (news_feed(), migration 0017). */
   cityNews?: () => Promise<NewsItem[]>;
+  /** C5: the calendar of real-date events (the preview passes one with its dates moved). */
+  calendarData?: CalendarData;
   /** v0.6 treasure hunts (migration 0018); without it there's no Hunt tab. */
   hunt?: HuntApi;
   /** v0.10 neighborhood gossip (migration 0035): Listen in, regulars' pieces, the Tea app and Tea cards. */
@@ -1285,6 +1290,12 @@ export function GameShell({
     onAttendStoryEvent: storyApi
       ? (id) => void runStory(`story:${id}`, () => storyApi.attendEvent(id)).then((ok) => ok && cityApi && cityApi.refresh().then((r) => r.ok && applyCity(r)))
       : undefined,
+    // C5 (migration 0096): gift boxes for name-day parties, at Sal's and Schlep & Schmear.
+    gift: cityApi?.buyGift && city?.calendar ? {
+      places: calendarData.giftPlaces, price: calendarData.giftPrice, held: city.calendar.gifts, max: calendarData.giftsMax,
+      onBuy: () => void run("gift", () => cityApi.buyGift!()),
+    } : undefined,
+    calendarOn: city?.calendar ? (placeId) => calendarData.events.find((e) => e.place === placeId && calendarLive(e, gameNow))?.title ?? null : undefined,
     regular: (p, n) => {
       const r = regularAt(p.id);
       if (!r) return null;
@@ -2220,6 +2231,12 @@ export function GameShell({
         onAttend={(id) => handlers.onAttendEvent(id)}
         exclusive={catalog ? { products, nowMs: gameNow, h: money } : undefined}
         onGoThere={handlers.travel ? (id) => { const p = placeById(id); if (p) { setPanel(null); handlers.travel!.onGoThere(p); } } : undefined}
+        calendar={cityApi?.calendarAttend && city?.calendar ? {
+          data: calendarData,
+          busy,
+          onAttend: (id) => void run(`calendar:${id}`, () => cityApi.calendarAttend!(id)),
+          onGoThere: handlers.travel ? (id) => { const p = placeById(id); if (p) { setPanel(null); handlers.travel!.onGoThere(p); } } : undefined,
+        } : undefined}
       />
       {city && cityApi && (
         <>
@@ -2428,6 +2445,10 @@ export function GameShell({
         </>
       )}
       <PhoneModal
+        invite={(() => {
+          const e = city?.calendar && cityApi?.calendarAttend ? phoneInvite(calendarData.events, city.calendar.attended, gameNow) : null;
+          return e ? { event: e, onOpen: () => { setPhone({ open: false, app: null }); setPanel("events"); } } : undefined;
+        })()}
         push={push}
         membership={membership && member ? { vip: memberVip, onOpen: openMembership } : undefined}
         // The app shows whenever the station is on; if today's show can't load, the app says why.

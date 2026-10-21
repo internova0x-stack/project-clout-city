@@ -118,6 +118,8 @@ export interface CityState {
   lotto?: LottoState;
   /** Skill perks (migration 0092): levels, this week's skill gigs and accepted invites. Missing until 0092 runs. */
   perks?: import("./skills.ts").PerksState;
+  /** C5 (migration 0096): calendar events this player went to, and gift boxes held. Missing until 0096 runs. */
+  calendar?: import("./calendar.ts").CalendarState;
 }
 
 /** What changed after an action, for the reward toast. */
@@ -149,6 +151,9 @@ export interface CityApi {
   travel?(placeId: string, mode: import("./travel.ts").TravelMode): Promise<CityResult>;
   /** C4 (migration 0095): buy a 7- or 30-day OMG Card; watch the showtime dancers on this ride. */
   buyTransitPass?(pass: string): Promise<CityResult>;
+  /** C5 (migration 0096): go to a calendar event; buy a gift box for a name-day party. */
+  calendarAttend?(eventId: string): Promise<CityResult>;
+  buyGift?(): Promise<CityResult>;
   watchShowtime?(): Promise<CityResult>;
   /** #13 (migration 0040): end the current trip now, for virtual cash by seconds left. */
   skipTrip?(): Promise<CityResult>;
@@ -280,6 +285,11 @@ const ERRORS: Record<string, string> = {
   closed_now: "Closed right now. The card says when they open.",
   unknown_pass: "That pass isn't sold here.",
   no_showtime: "The dancers already got off. Showtime waits for no one.",
+  unknown_event: "That isn't on the calendar.",
+  not_now: "That's not happening right now. Check the date and time on the card.",
+  already_went: "You already went. They're still talking about it.",
+  no_gifts_here: "Gift boxes are at Sal's and Schlep & Schmear.",
+  gifts_full: "You already have your hands full of gift boxes.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",

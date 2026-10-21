@@ -79,6 +79,15 @@ export async function travel(placeId: string, mode: string) {
 export async function buyTransitPass(pass: string) {
   return run("buy_transit_pass", { p_pass: pass }, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }) as Gain);
 }
+export async function calendarAttend(eventId: string) {
+  return run("calendar_attend", { p_event: eventId }, (d) => {
+    const r = d as { clout?: number; mood?: number; cash?: number };
+    return { clout: r.clout ?? 0, mood: r.mood ?? 0, cash: r.cash ?? 0 } as Gain;
+  });
+}
+export async function buyGift() {
+  return run("buy_gift", {}, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }) as Gain);
+}
 export async function watchShowtime() {
   return run("showtime_watch", {}, (d) => ({ clout: (d as { clout?: number }).clout ?? 0 }) as Gain);
 }

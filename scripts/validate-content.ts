@@ -11,6 +11,7 @@ import { validateNewsWeek } from "../lib/news.ts";
 import { validateGossipWeek } from "../lib/gossip.ts";
 import { validateExamWeek } from "../lib/exams.ts";
 import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts";
+import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
 
@@ -72,6 +73,11 @@ const astoria = PLACES.filter((p) => p.neighborhood === "Astoria" && boroughOf(p
 const cultureProblems = validateCulture(culture, { placeIds: PLACES.map((p) => p.id), astoria, regulars: REGULARS });
 if (cultureProblems.length) fail("content/culture/", cultureProblems);
 else console.log(`✓ content/culture/ (${culture.slang.terms.length} slang terms, ${culture.npcs.profiles.length} profiles, ${culture.parody.names.length} invented names)`);
+// Culture pack C5: the calendar of real-date events.
+const calendar = JSON.parse(readFileSync(new URL("culture/calendar.json", root), "utf8"));
+const calendarProblems = validateCalendar(calendar, PLACES.map((p) => p.id));
+if (calendarProblems.length) fail("content/culture/calendar.json", calendarProblems);
+else console.log(`✓ content/culture/calendar.json (${calendar.events.length} events)`);
 // No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
 const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {
   const u = new URL(f, dir);

@@ -8,6 +8,7 @@ import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { lineFor, milesBetween, skipCost, travelQuote } from "./travel.ts";
+import { calendarLive, calendarReward, dressedUp, type CalendarData } from "./calendar.ts";
 import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, cityError, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
@@ -114,6 +115,8 @@ export function createSimApi(
   passTonight: (placeId: string) => boolean = () => false,
   /** C4: transit delays posted in the preview's News (seconds, by line); `showtime` 1 makes every subway ride have dancers. */
   transit: { delayFor: (line: string | null) => number; showtimeChance?: number } = { delayFor: () => 0 },
+  /** C5: the calendar (content/culture/calendar.json, passed in by the preview, which may move its dates). */
+  calendar: CalendarData | null = null,
 ): SimApi {
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
@@ -225,6 +228,31 @@ export function createSimApi(
       const showtime = mode === "subway" && showtimePaidOn !== s.today && Math.random() < (transit.showtimeChance ?? CITY_ECONOMY.travel.subway.showtime.chance);
       showtimeUntil = showtime ? tripEnds + 60_000 : 0;
       return ok({ cash: -q.fare, energy: -q.energy }).then((r) => (r.ok ? { ...r, trip: { seconds: q.seconds, line: mode === "subway" ? line : null, delay, showtime } } : r));
+    },
+    calendarAttend(eventId) {
+      const e = calendar?.events.find((x) => x.id === eventId);
+      if (!e) return fail(cityError("unknown_event"));
+      if (!calendarLive(e, now())) return fail(cityError("not_now"));
+      if ((p().at_place ?? null) !== e.place) return fail("You're not there yet. Go there first.");
+      const cal = s.calendar ?? { attended: [], gifts: 0 };
+      if (cal.attended.includes(e.id)) return fail(cityError("already_went"));
+      if (p().bank_cash < e.entry) return fail("Your card got declined. Loudly.");
+      const r = calendarReward(e, { dressed: dressedUp(s.items), gifts: cal.gifts });
+      p().bank_cash -= e.entry;
+      p().clout = Math.max(0, p().clout + r.clout);
+      p().mood = Math.min(100, p().mood + r.mood);
+      s.calendar = { attended: [...cal.attended, e.id], gifts: cal.gifts - (r.gift === "brought" ? 1 : 0) };
+      return ok({ clout: r.clout, mood: r.mood, cash: -e.entry });
+    },
+    buyGift() {
+      if (!calendar) return fail(cityError("no_gifts_here"));
+      if (!calendar.giftPlaces.includes(p().at_place ?? "")) return fail(cityError("no_gifts_here"));
+      const cal = s.calendar ?? { attended: [], gifts: 0 };
+      if (cal.gifts >= calendar.giftsMax) return fail(cityError("gifts_full"));
+      if (p().bank_cash < calendar.giftPrice) return fail("Your card got declined. Loudly.");
+      p().bank_cash -= calendar.giftPrice;
+      s.calendar = { ...cal, gifts: cal.gifts + 1 };
+      return ok({ cash: -calendar.giftPrice });
     },
     buyTransitPass(passId) {
       const pass = CITY_ECONOMY.travel.subway.passes.find((x) => x.id === passId);

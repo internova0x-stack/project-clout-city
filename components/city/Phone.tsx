@@ -27,6 +27,7 @@ import type { ChatApi } from "@/lib/chat";
 import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
 import { formatCountdown, useGameNow } from "./Common";
+import { whenLine, type CalendarEvent } from "@/lib/calendar";
 import { PerkAction, type PerkHandlers } from "../game/Skills";
 import { SKILLS, SKILL_PERKS, perkStatus } from "@/lib/skills";
 
@@ -68,6 +69,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership,
+  invite,
 }: {
   open: boolean;
   onClose: () => void;
@@ -124,6 +126,8 @@ export function PhoneModal({
   tv?: { api: TvApi; onChange?: (s: TvState) => void };
   /** v0.14 texts from Real Clout FM and Clout TV, in Messages. */
   stations?: { threads: StationThread[]; onRead: (station: Station) => void };
+  /** Culture pack C5: a neighbor's name-day invite on the home screen; "See it" opens it in Events. */
+  invite?: { event: CalendarEvent; onOpen: () => void };
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -164,6 +168,13 @@ export function PhoneModal({
             <div className="phone-home">
               <div className="phone-clock">{time.replace(/ [AP]M$/, "") || "9:41"}</div>
               <div className="phone-city">Queens</div>
+              {invite && (
+                <button className="phone-invite" onClick={invite.onOpen}>
+                  <span className="phone-invite-head">💌 You're invited · {invite.event.host?.split(",")[0]}</span>
+                  <strong>{invite.event.title}</strong>
+                  <span>{whenLine(invite.event, now)}. Dress up, and don't come empty-handed.</span>
+                </button>
+              )}
               <div className="phone-grid">
                 {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv)).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
