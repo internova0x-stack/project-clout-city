@@ -1,3 +1,4 @@
+import { AvatarMoves } from "@/components/preview/AvatarMoves";
 import { previewShopAction, previewShopAudit, previewShopEdit, previewShopFiles, previewShopImport, previewShopList, previewShopProcessImages } from "../shopActions";
 import { notFound } from "next/navigation";
 import { ECONOMY } from "@/lib/economy";
@@ -85,7 +86,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar, skin, build } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -194,6 +195,9 @@ export default async function Preview({
     }
     case "art":
       return <PreviewArt />;
+    // Step 2 of the avatar upgrade: the new base bodies doing every move (?skin=0-7, ?build=).
+    case "moves":
+      return <AvatarMoves skin={Number(skin ?? 3)} build={build as import("@/lib/look").Look["build"] | undefined} />;
     case "room":
       return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "natural" ? "natural" : "dream"} />;
     default:
