@@ -214,5 +214,9 @@ waffle, tartan, gingham, pinstripe, herringbone, patchwork, panels, contrast sle
 fur, cargo pockets, ruffles, sandal straps, glowing soles) and finishes (leather, satin, patent, velvet, suede). A dress
 fills the top and the bottom. Approximations: shoes keep a flat foot (no heel height), platforms and cropped lengths
 are drawn on the template's shape. Cover bits are whole numbers in a float now (more than 16 templates).
-`/preview/moves?outfit=catalog&pick=a,b` previews them; Your Look wears them with the switch-on. New clips must be made on these bodies
+`/preview/moves?outfit=catalog&pick=a,b` previews them; Your Look wears them with the switch-on. Switch-on (Oct 21, "go"): migration 0101 unlocks the 84 catalog pieces with shapes (the content files say wearable too,
+so a later import keeps them unlocked; the owner still approves each in the Studio), files wearable accessories as
+fashion, and makes a dress a top and a bottom (`wear_slots`). Your Look shows Dresses, Shop hats under Hats and a tab per
+accessory slot once one is owned; the Shop's Try it on and Wear work for catalog pieces. The new bodies are the default
+(lib/graphics.ts); Studio → Shop's switch takes one device back to the old ones. New clips must be made on these bodies
 (same 24 bones); add them to the JSON file and rebuild.

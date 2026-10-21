@@ -3,7 +3,7 @@
 // a database. It follows the same rules as supabase/migrations/0004 in simplified
 // form; the SQL is the source of truth.
 
-import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, placeOpen, purchaseClout, sellPrice, visitClout } from "./city.ts";
+import { CITY_ECONOMY, CLUB_EVENTS, GIG_TITLES, HOME_LOCATIONS, PLACES, collectorValue, eventOpen, itemBySku, placeOpen, purchaseClout, sellPrice, visitClout, type ShopItem } from "./city.ts";
 import { ECONOMY, moveCost } from "./economy.ts";
 import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
@@ -15,6 +15,7 @@ import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type Skill
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 import { STYLE, fullLooks, styleCounts, venueLine } from "./style.ts";
+import { slotsClash, wearSlot } from "./wearing.ts";
 
 const CLOCK = { realHoursPerCityDay: 2, dayStartsAt: 6, nightStartsAt: 19 };
 
@@ -27,11 +28,23 @@ export function sampleSkills(pro = false): SkillState[] {
 }
 const levelsOf = (skills: SkillState[]) => Object.fromEntries(skills.map((x) => [x.id, x.level])) as PerksState["levels"];
 
+/** A Shop catalog piece the code doesn't know (the batch files), as a ShopItem the preview can sell: only once it can
+ *  be worn and is live; wearable accessories are filed as fashion, as migration 0101 does. */
+function catalogShopItem(s: Pick<CityState, "catalog">, sku: string): ShopItem | undefined {
+  const c = s.catalog?.find((x) => x.sku === sku);
+  if (!c || !c.wearable || c.status !== "live" || c.realCash) return undefined;
+  const wearable = !!wearSlot(sku);
+  return {
+    sku, name: c.name, emoji: c.emoji, price: c.price, clout: c.clout, rating: Math.min(4, Math.max(1, c.stars)) as ShopItem["rating"], blurb: c.description,
+    category: (wearable && c.tab === "accessories" ? "fashion" : c.tab) as ShopItem["category"],
+  };
+}
+
 /** The preview's style counts, for the preview player's starting style. */
 function simStyleCounts(s: Pick<CityState, "items" | "catalog">, startingStyle: string) {
   return styleCounts(s.items.filter((i) => i.category === "fashion" && i.equipped).map((i) => {
     const c = s.catalog?.find((x) => x.sku === i.sku);
-    return { slot: c?.slot ?? itemBySku(i.sku)?.wear?.slot ?? null, lines: c?.styleLines.length ? c.styleLines : (STYLE.liveLines as Record<string, readonly string[]>)[i.sku] ?? [] };
+    return { slot: c?.slot ?? wearSlot(i.sku) ?? null, lines: c?.styleLines.length ? c.styleLines : (STYLE.liveLines as Record<string, readonly string[]>)[i.sku] ?? [] };
   }), startingStyle);
 }
 function simStyle(s: Pick<CityState, "items" | "catalog">, boost: { line: string; place: string } | null, startingStyle: string): NonNullable<CityState["style"]> {
@@ -483,7 +496,7 @@ export function createSimApi(
       return ok({ cash: g.pay });
     },
     buyItem(sku, mode) {
-      const item = itemBySku(sku);
+      const item = itemBySku(sku) ?? catalogShopItem(s, sku);
       if (!item || (item.storyOnly && !storyItemOpen(story(), sku).open)) return fail("That isn't in stock.");
       if (item.collector) return fail("That piece is real cash only.");
       if (item.reward) return fail(REWARD_ONLY);
@@ -517,16 +530,18 @@ export function createSimApi(
     },
     equipItem(itemId, on) {
       const it = s.items.find((i) => i.id === itemId);
-      const slot = it && itemBySku(it.sku)?.wear?.slot;
+      const slot = it && it.category === "fashion" ? wearSlot(it.sku) : undefined;
       if (!it || !slot) return fail("You can't wear that. You could try, but no.");
-      if (on) for (const o of s.items) if (o.id !== it.id && itemBySku(o.sku)?.wear?.slot === slot) o.equipped = false;
+      // One piece per slot, a dress counting as the top and the bottom (migration 0101 wear_slots).
+      if (on) for (const o of s.items) { const os = wearSlot(o.sku); if (o.id !== it.id && os && slotsClash(os, slot)) o.equipped = false; }
       it.equipped = on;
       return ok();
     },
     saveLook(itemIds) {
-      const slots = itemIds.map((id) => itemBySku(s.items.find((i) => i.id === id)?.sku ?? "")?.wear?.slot);
+      const slots = itemIds.map((id) => wearSlot(s.items.find((i) => i.id === id)?.sku ?? ""));
       if (slots.some((x) => !x)) return fail("You can't wear that. You could try, but no.");
       if (new Set(slots).size !== slots.length) return fail("One top, one bottom, one pair of shoes. You're not a closet.");
+      if (slots.includes("one-piece") && (slots.includes("top") || slots.includes("bottom"))) return fail("A dress is already a top and a bottom. Pick one.");
       for (const i of s.items) if (i.category === "fashion") i.equipped = itemIds.includes(i.id);
       return ok();
     },

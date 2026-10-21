@@ -1,5 +1,6 @@
 "use client";
 
+import { wearSlot } from "@/lib/wearing";
 import { LOOK_LABEL, STYLE } from "@/lib/style";
 import { useState } from "react";
 import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
@@ -62,7 +63,7 @@ export function ShopSheet({
   // Owned clothes get a Wear button instead of a bare "Owned" (#15).
   const wearControl = (sku: string) => {
     const mine = state.items.find((i) => i.sku === sku && i.category === "fashion");
-    if (!mine || !onEquip || !itemBySku(sku)?.wear) return null;
+    if (!mine || !onEquip || !wearSlot(sku)) return null;
     return (
       <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
         {mine.equipped ? "Wearing ✓" : "Wear"}
@@ -148,7 +149,7 @@ export function ShopSheet({
           </>
         ) : (
           <div className="buy-rent">
-            {onTryOn && item.wear && (
+            {onTryOn && (item.wear || wearSlot(item.sku)) && (
               <button className="btn btn-secondary btn-sm" onClick={() => onTryOn(item)}>Try it on</button>
             )}
             {locked ? (
@@ -344,7 +345,7 @@ export function NetWorthSheet({
                 </div>
                 {(() => {
                   const live = state.items.find((i) => i.id === detail.id);
-                  if (!live || !onEquip || !item.wear) return null;
+                  if (!live || !onEquip || live.category !== "fashion" || !wearSlot(live.sku)) return null;
                   return (
                     <button className={`btn ${live.equipped ? "btn-secondary" : "btn-taxi"}`} disabled={busy !== null} onClick={() => onEquip(live.id, !live.equipped)}>
                       {live.equipped ? "Take it off" : "Wear it"}

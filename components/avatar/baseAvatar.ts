@@ -758,6 +758,8 @@ void main() {`)
 
   return {
     root, body, head, torso, eyes: [], legs, knees, arms, hips, chest, forearms,
+    // The game's headwear sits in a holder at the head's middle, upright with +z the face (portraits aim at it).
+    headwear: proc.headwear,
     hipY: BASE_HIP_Y[sex] * build.h,
     ready: ready.then(() => undefined),
     setMotion(next) {

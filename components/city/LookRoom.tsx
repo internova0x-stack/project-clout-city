@@ -7,25 +7,35 @@ import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { HEADWEAR_BASIC, HEADWEAR_CULTURAL, type CoveringId, type Look } from "@/lib/look";
 import { BOTTOM_LABEL, TOP_LABEL, type Outfit } from "@/lib/styles";
-import { outfitWith } from "@/lib/wardrobe";
+import { outfitFromSkus, slotsClash, wearSlot } from "@/lib/wearing";
 import { GARMENT, HAT, SHOE } from "../avatar/garments";
 import { ChevronLeftIcon } from "../icons";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
-type Slot = "outfit" | "top" | "bottom" | "shoes" | "accessory";
+/** Item slots: the starting style's (top, bottom, shoes, extra), whole outfits, dresses and the Shop's accessories. */
+type Slot = "outfit" | "top" | "bottom" | "one-piece" | "shoes" | "accessory" | "head" | "face" | "ears" | "neck" | "hand" | "wrist";
 type Tab = "hats" | Slot;
-const TABS: { id: Tab; label: string }[] = [
+const TABS: { id: Tab; label: string; owned?: boolean }[] = [
+  // Headwear: the free basics and coverings, and Shop hats (slot "head").
   { id: "hats", label: "Hats" },
   // Whole outfits (#9) cover the top, bottom and shoes while they're on.
   { id: "outfit", label: "Outfits" },
   { id: "top", label: "Tops" },
   { id: "bottom", label: "Bottoms" },
+  // A dress is a top and a bottom (migration 0101); the tabs below show once there's something to wear in them.
+  { id: "one-piece", label: "Dresses", owned: true },
   { id: "shoes", label: "Shoes" },
   { id: "accessory", label: "Extras" },
+  { id: "face", label: "Glasses", owned: true },
+  { id: "ears", label: "Earrings", owned: true },
+  { id: "neck", label: "Necklaces", owned: true },
+  { id: "hand", label: "Bags", owned: true },
+  { id: "wrist", label: "Watches", owned: true },
 ];
+const SLOTS: Slot[] = ["outfit", "top", "bottom", "one-piece", "shoes", "accessory", "head", "face", "ears", "neck", "hand", "wrist"];
 
-/** What's worn per slot: an owned item's id, or null for the starter piece. */
+/** What's worn per slot: an owned item's id, or null for the starter piece (or nothing). */
 type Worn = Record<Slot, number | null>;
 const TRY_ID = -1;
 
@@ -50,17 +60,25 @@ export function LookRoom({
   trying?: ShopItem | null;
   onBuy?: (sku: string) => Promise<boolean>;
 }) {
-  const fashion = state.items.filter((i) => i.category === "fashion" && itemBySku(i.sku)?.wear);
-  const slotOf = (sku: string) => itemBySku(sku)?.wear?.slot as Slot | undefined;
+  const fashion = state.items.filter((i) => i.category === "fashion" && wearSlot(i.sku));
+  const slotOf = (sku: string) => wearSlot(sku) as Slot | undefined;
+  const tryingSlot = trying ? slotOf(trying.sku) : undefined;
+  /** Picks `id` for `slot`, taking off what it clashes with (a dress and a top or bottom). */
+  const pick = (w: Worn, slot: Slot, id: number | null): Worn => {
+    const next = { ...w, [slot]: id };
+    if (id !== null) for (const o of SLOTS) if (o !== slot && next[o] !== null && slotsClash(o, slot)) next[o] = null;
+    return next;
+  };
   const savedWorn = (): Worn => {
-    const w: Worn = { outfit: null, top: null, bottom: null, shoes: null, accessory: null };
+    let w = Object.fromEntries(SLOTS.map((x) => [x, null])) as Worn;
     for (const i of fashion) if (i.equipped) w[slotOf(i.sku)!] = i.id;
-    if (trying?.wear) w[trying.wear.slot as Slot] = TRY_ID;
+    if (tryingSlot) w = pick(w, tryingSlot, TRY_ID);
     return w;
   };
+  const tabOf = (slot: Slot | undefined): Tab => (!slot ? "top" : slot === "head" ? "hats" : slot);
   const [worn, setWorn] = useState<Worn>(savedWorn);
   const [covering, setCovering] = useState<CoveringId>(look.covering);
-  const [tab, setTab] = useState<Tab>(trying?.wear ? (trying.wear.slot as Slot) : "top");
+  const [tab, setTab] = useState<Tab>(tabOf(tryingSlot));
   const [error, setError] = useState<string | null>(null);
   // Start fresh each time the room opens (or opens on another Shop piece).
   const openKey = `${open}:${trying?.sku ?? ""}`;
@@ -70,28 +88,32 @@ export function LookRoom({
     if (open) {
       setWorn(savedWorn());
       setCovering(look.covering);
-      setTab(trying?.wear ? (trying.wear.slot as Slot) : "top");
+      setTab(tabOf(tryingSlot));
       setError(null);
     }
   }
   if (!open) return null;
 
-  const itemFor = (id: number | null): ShopItem | undefined =>
-    id === TRY_ID ? trying ?? undefined : id === null ? undefined : itemBySku(fashion.find((i) => i.id === id)?.sku ?? "");
-  const wornItems = (Object.values(worn) as (number | null)[]).map(itemFor).filter((x): x is ShopItem => !!x);
-  const outfit = outfitWith(base, wornItems);
+  const skuFor = (id: number | null): string | undefined => (id === TRY_ID ? trying?.sku : id === null ? undefined : fashion.find((i) => i.id === id)?.sku);
+  /** A worn or owned piece's name and picture: the code's item, else the Shop catalog's row. */
+  const infoFor = (sku: string): { name: string; emoji: string; image: string | null; item?: ShopItem } => {
+    const it = itemBySku(sku), c = state.catalog?.find((x) => x.sku === sku);
+    return { name: c?.name ?? it?.name ?? trying?.name ?? sku, emoji: c?.emoji ?? it?.emoji ?? "🛍️", image: c?.images?.card ?? null, item: it };
+  };
+  const wornSkus = (Object.values(worn) as (number | null)[]).map(skuFor).filter((x): x is string => !!x);
+  const outfit = outfitFromSkus(base, wornSkus);
   const preview: Look = { ...look, covering };
   // Headwear takes the avatar's hat color (buildAvatar): the cap color for Bodega Drip, otherwise the outfit's accent.
   const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
   const hatIcon = (id: CoveringId) => (id === "none" || !HAT[id] ? <NoneIcon /> : <Shape color={hatColor}>{HAT[id]}</Shape>);
   // Each category tab shows what's on you in that slot (#18), not a stock emoji.
   const tabIcon = (t: Tab) => {
-    if (t === "hats") return hatIcon(covering);
-    const it = itemFor(worn[t]);
-    return it ? iconFor(it) : starter(t).icon;
+    if (t === "hats") return worn.head !== null ? iconForSku(skuFor(worn.head)!) : hatIcon(covering);
+    const sku = skuFor(worn[t]);
+    return sku ? iconForSku(sku) : starter(t).icon;
   };
   const saved = savedWorn();
-  const changed = covering !== look.covering || (Object.keys(worn) as Slot[]).some((s) => worn[s] !== saved[s]);
+  const changed = covering !== look.covering || SLOTS.some((s) => worn[s] !== saved[s]);
 
   const save = async () => {
     setError(null);
@@ -101,6 +123,8 @@ export function LookRoom({
 
   const starter = (slot: Slot) => {
     if (slot === "outfit") return { name: "No outfit", icon: <NoneIcon /> };
+    if (slot === "one-piece") return { name: "No dress", icon: <NoneIcon /> };
+    if (slot !== "top" && slot !== "bottom" && slot !== "shoes" && slot !== "accessory") return { name: "Nothing", icon: <NoneIcon /> };
     if (slot === "top") return { name: TOP_LABEL[base.top], icon: <Garment kind={base.top} color={base.topColor} /> };
     if (slot === "bottom") return { name: BOTTOM_LABEL[base.bottom], icon: <Garment kind={base.bottom} color={base.bottomColor} /> };
     if (slot === "shoes") return { name: "Your sneakers", icon: <Shape color={base.shoeColor}>{SHOE}</Shape> };
@@ -114,6 +138,15 @@ export function LookRoom({
     if (w.slot === "accessory" && HAT[w.kind ?? ""]) return <Shape color={w.color}>{HAT[w.kind ?? ""]}</Shape>;
     return <span aria-hidden="true">{it.emoji}</span>;
   };
+  /** A piece's tile picture: the code's icon, else the Shop picture, else its emoji. */
+  const iconForSku = (sku: string) => {
+    const info = infoFor(sku);
+    if (info.item?.wear) return iconFor(info.item);
+    // eslint-disable-next-line @next/next/no-img-element
+    return info.image ? <img src={info.image} alt="" width={34} height={34} style={{ objectFit: "contain" }} /> : <span aria-hidden="true">{info.emoji}</span>;
+  };
+  const owns = (slot: Slot) => fashion.some((i) => slotOf(i.sku) === slot) || tryingSlot === slot;
+  const tabs = TABS.filter((t) => !t.owned || owns(t.id as Slot));
 
   return (
     <div className={`look-room${trying ? " trying" : ""}`} role="dialog" aria-modal="true" aria-label={trying ? `Try on the ${trying.name}` : "Your look"}>
@@ -143,25 +176,31 @@ export function LookRoom({
         ) : (
           <>
             <div className="chip-row" role="tablist" aria-label="Categories">
-              {TABS.map((t) => (
+              {tabs.map((t) => (
                 <button key={t.id} role="tab" className="chip" aria-pressed={tab === t.id} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
                   <span className="look-tab-icon" aria-hidden="true">{tabIcon(t.id)}</span> {t.label}
                 </button>
               ))}
             </div>
-            <div className="look-grid" role="radiogroup" aria-label={TABS.find((t) => t.id === tab)!.label}>
+            <div className="look-grid" role="radiogroup" aria-label={TABS.find((t) => t.id === tab)?.label ?? "Pieces"}>
               {tab === "hats"
-                ? [...HEADWEAR_BASIC, ...HEADWEAR_CULTURAL].map((h) => (
-                  <Tile key={h.id} on={covering === h.id} wearing={look.covering === h.id} name={h.label} sub="Free"
-                    icon={hatIcon(h.id)} onPick={() => setCovering(h.id)} />
-                ))
+                ? [
+                  ...[...HEADWEAR_BASIC, ...HEADWEAR_CULTURAL].map((h) => (
+                    <Tile key={h.id} on={worn.head === null && covering === h.id} wearing={saved.head === null && look.covering === h.id} name={h.label} sub="Free"
+                      icon={hatIcon(h.id)} onPick={() => { setCovering(h.id); setWorn({ ...worn, head: null }); }} />
+                  )),
+                  // Shop hats: a free cap or hat comes off for one; a faith or culture covering stays (the hat steps aside).
+                  ...fashion.filter((i) => slotOf(i.sku) === "head").map((i) => (
+                    <Tile key={i.id} on={worn.head === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)}
+                      onPick={() => { setWorn({ ...worn, head: i.id }); if (covering === "cap" || covering === "fedora" || covering === "bucket") setCovering("none"); }} />
+                  )),
+                ]
                 : [
-                  <Tile key="starter" on={worn[tab] === null} wearing={saved[tab] === null} name={starter(tab).name} sub="Starter"
+                  <Tile key="starter" on={worn[tab] === null} wearing={saved[tab] === null} name={starter(tab).name} sub={tab === "top" || tab === "bottom" || tab === "shoes" || tab === "accessory" ? "Starter" : "Off"}
                     icon={starter(tab).icon} onPick={() => setWorn({ ...worn, [tab]: null })} />,
-                  ...fashion.filter((i) => slotOf(i.sku) === tab).map((i) => {
-                    const it = itemBySku(i.sku)!;
-                    return <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={it.name} sub="Owned" icon={iconFor(it)} onPick={() => setWorn({ ...worn, [tab]: i.id })} />;
-                  }),
+                  ...fashion.filter((i) => slotOf(i.sku) === tab).map((i) => (
+                    <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} onPick={() => setWorn(pick(worn, tab, i.id))} />
+                  )),
                 ]}
             </div>
             {tab !== "hats" && !fashion.some((i) => slotOf(i.sku) === tab) && (

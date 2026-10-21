@@ -29,7 +29,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "mini_dress",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091147_44e6f13a-10b1-48a0-a973-d2506eb3e59b.png",
       "images": {
@@ -55,7 +55,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "gown",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091147_38de69c6-2529-4fe9-9f4e-a96d66185afa.png",
       "images": {
@@ -80,7 +80,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "midi_dress",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091148_033d33e8-1d96-4543-9e6f-6ccc1de59ccf.png",
       "images": {
@@ -106,7 +106,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "knee_boots",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091147_b05ac21a-f386-4053-8d3f-941a76fb74aa.png",
       "images": {
@@ -131,7 +131,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "mary_janes",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091224_a1be82cf-031f-439b-9a25-1bcac7e1f923.png",
       "images": {
@@ -157,7 +157,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "tennis_skirt",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091223_69b16a5e-1043-4a73-b212-19b2992959e0.png",
       "images": {
@@ -182,7 +182,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sports_bra",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091223_55ce5fb6-30aa-4b09-bf0d-027a8e30eec6.png",
       "images": {
@@ -207,7 +207,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "biker_shorts",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091222_5e30c6b1-6f01-4653-a451-f288ebc08f78.png",
       "images": {
@@ -232,7 +232,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "wrap_dress",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091251_cd05686c-f216-4969-a935-cb930933269f.png",
       "images": {
@@ -257,7 +257,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "slingbacks",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091251_a71c9926-526c-4f80-aa3d-52f9af23f3c7.png",
       "images": {
@@ -283,7 +283,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "faux_fur_jacket",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091251_b67ef5ac-f34e-4c4e-89e9-f7a77290e698.png",
       "images": {
@@ -308,7 +308,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "mini_skirt",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091251_10a974e3-210b-48e8-90e8-056bf20ca8fb.png",
       "images": {
@@ -333,7 +333,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "halter_top",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091618_2e5d1ccd-6774-435f-bff5-37b951f1aea1.png",
       "images": {
@@ -359,7 +359,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "bodysuit",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091619_efc0a013-9079-47c5-a23a-92769fe6c1c3.png",
       "images": {
@@ -384,7 +384,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "ballet_flats",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091619_4aa364ab-8f7a-4cd6-bbb3-ecc13e041ff8.png",
       "images": {
@@ -409,7 +409,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "platform_sandals",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091618_fce741bf-4cf6-47fe-acbd-f83d817f7d2a.png",
       "images": {
@@ -434,7 +434,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:necklace",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091647_0464224f-f3c0-4614-bf84-c7153fb7fbee.png",
       "images": {
@@ -459,7 +459,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:earrings",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091651_007398e5-3336-4cfd-aaf2-a412008269e6.png",
       "images": {
@@ -485,7 +485,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:bag",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091647_b775fab9-4ee5-48d8-9187-1ac48bff5455.png",
       "images": {
@@ -511,7 +511,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "rigid:bag",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091648_e8d9864b-4f90-43e8-9b3e-14a468be197d.png",
       "images": {
@@ -536,7 +536,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "ruffle_dress",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091720_ed389819-0763-47be-a04f-cef315c56a62.png",
       "images": {
@@ -563,7 +563,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "knit_maxi_dress",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091721_a32e5fad-f8a2-44ba-b829-49beb138992b.png",
       "images": {
@@ -589,7 +589,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "sundress",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091721_d5c97e01-179a-4ef4-bacd-6468db6e6171.png",
       "images": {
@@ -615,7 +615,7 @@
       "currency": "C$",
       "realCash": false,
       "template": "trench",
-      "wearable": false,
+      "wearable": true,
       "transparent": false,
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_091720_496cdc04-8cc4-4836-bc2c-c2a3475df4c4.png",
       "images": {

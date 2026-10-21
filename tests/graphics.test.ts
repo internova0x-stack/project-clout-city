@@ -14,9 +14,9 @@ test("only clearly weak phones get low graphics by themselves", () => {
   assert.equal(weakDevice(undefined), false);
 });
 
-test("on the server (no browser) the defaults are full graphics and the current bodies", () => {
+test("on the server (no browser) the defaults are full graphics and the new bodies", () => {
   assert.equal(lowGraphics(), false);
-  assert.equal(newBodies(), false);
+  assert.equal(newBodies(), true, "the new bodies are on for everyone (stage 4's switch-on)");
   assert.deepEqual(renderQuality(), { pixelRatio: 1, shadows: true, antialias: true });
 });
 

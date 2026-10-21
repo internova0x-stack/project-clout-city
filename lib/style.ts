@@ -74,7 +74,9 @@ export function styleCounts(worn: readonly WornPiece[], startingStyle: string | 
   const covered = new Set<string>();
   for (const w of worn) {
     if (w.slot === "outfit") { ["top", "bottom", "shoes"].forEach((s) => covered.add(s)); w.lines.forEach((l) => addTo(l, STYLE.fullMin)); continue; }
-    if (w.slot) covered.add(w.slot);
+    // A dress covers the top and the bottom (migration 0101's style_counts).
+    if (w.slot === "one-piece") ["top", "bottom"].forEach((s) => covered.add(s));
+    else if (w.slot) covered.add(w.slot);
     w.lines.forEach((l) => addTo(l, 1));
   }
   const own = startingStyle ? (STYLE.startingLines as Record<string, string>)[startingStyle] : undefined;

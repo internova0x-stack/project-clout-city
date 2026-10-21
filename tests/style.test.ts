@@ -47,3 +47,7 @@ test("venue match: two pieces of a line at a place that suits it", () => {
   assert.deepEqual(lookBadge("look-gothic"), { emoji: "🖤", name: "Full Goth look" });
   assert.equal(lookBadge("skill-cooking-5"), null);
 });
+
+test("a dress covers the top and the bottom; only the shoes stay the starting style's", () => {
+  assert.deepEqual(styleCounts([{ slot: "one-piece", lines: ["fashionista"] }], "bodega_drip"), { fashionista: 1, streetwear: 1 });
+});
