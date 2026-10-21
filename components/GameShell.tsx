@@ -9,6 +9,7 @@ import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
 import { skillBadge } from "@/lib/skills";
+import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { getStyle, starterOutfit } from "@/lib/styles";
@@ -341,6 +342,17 @@ export function GameShell({
   const [arranging, setArranging] = useState(false);
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // Migration 0100: the day's venue boost, said once when it lands ("Your Goth look fits The Kiln: +5 Confidence").
+  const styleBoostKey = city?.style?.boost ? `${city.today}:${city.style.boost.place}` : null;
+  // A boost already earned before this visit to the game isn't news.
+  const styleBoostSeen = useRef<string | null>(initialCity?.style?.boost ? `${initialCity.today}:${initialCity.style.boost.place}` : null);
+  useEffect(() => {
+    if (!styleBoostKey || styleBoostSeen.current === styleBoostKey) return;
+    styleBoostSeen.current = styleBoostKey;
+    const b = city!.style!.boost!;
+    setToast(`Your ${LOOK_LABEL[b.line] ?? ""} look fits ${placeById(b.place)?.name ?? "here"}: +${STYLE.venueConfidence} Confidence 💅`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleBoostKey]);
   // v0.14 Real Clout FM: today's show, checked on open and every few minutes; the banner shows once a shoutout.
   const [radioNow, setRadioNow] = useState<RadioState | null>(null);
   const [radioBanner, setRadioBanner] = useState<Shoutout | null>(null);
@@ -2659,12 +2671,13 @@ export function GameShell({
         outfit={outfit}
         name={handle(me.display_name)}
         subtitle={`${style.emoji} ${style.label} · ${city?.player.house_sku ? "Homeowner" : ECONOMY.homes.find((h) => h.id === me.home_id)?.name ?? "Queens"}`}
+        looks={city?.style?.full}
         clout={me.clout}
         rank={myCard?.rank ?? null}
         netWorth={myWorth}
         bestRank={biz?.bestRank}
         badges={(feed?.badges ?? []).map((b) => {
-          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id));
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id) ?? lookBadge(b.id));
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
         })}
         collections={{

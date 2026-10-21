@@ -1,5 +1,6 @@
 "use client";
 
+import { LOOK_LABEL, STYLE } from "@/lib/style";
 import { useState } from "react";
 import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
 import { billCountdown, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem, type UpcomingBill } from "@/lib/cityState";
@@ -132,6 +133,7 @@ export function ShopSheet({
         <span className="title" style={{ display: "block" }}>{item.name}</span>
         <span className="subtext clamp-2">{item.blurb}</span>
         <Stars rating={item.rating} />
+        {!isOwned && <LookHint item={item} counts={state.style?.counts} />}
         {item.cloutReq ? (
           <span className={`meta${locked ? " locked" : ""}`}>{locked ? "🔒" : "🔓"} {item.cloutReq.toLocaleString("en-US")} clout{locked ? ` · you have ${player.clout.toLocaleString("en-US")}` : ""}</span>
         ) : (
@@ -523,4 +525,20 @@ function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryA
       <p className="meta" style={{ margin: 0 }}>Bought pieces wait in storage at home: tap 🛋️ there to place them.</p>
     </div>
   );
+}
+
+/**
+ * "Complete your look" (migration 0100): what a fashion piece would do for a style line the player already wears.
+ * Any piece counts the same toward a look, whatever it costs.
+ */
+function LookHint({ item, counts }: { item: ShopCardItem; counts?: Record<string, number> }) {
+  if (!counts || item.category !== "fashion") return null;
+  const lines = item.styleLines.length ? item.styleLines : ((STYLE.liveLines as Record<string, readonly string[]>)[item.sku] ?? []);
+  // The line closest to a full look first; then one already full ("Matches your Streetwear look").
+  const worn = lines.map((l) => ({ l, have: counts[l] ?? 0 })).filter((x) => x.have > 0);
+  const best = worn.filter((x) => x.have < STYLE.fullMin).sort((a, b) => b.have - a.have)[0] ?? worn[0];
+  if (!best) return null;
+  const name = LOOK_LABEL[best.l] ?? best.l;
+  const line = best.have >= STYLE.fullMin ? `Matches your ${name} look` : best.have + 1 >= STYLE.fullMin ? `Completes your ${name} look` : `${name} look: you wear ${best.have} of ${STYLE.fullMin}`;
+  return <span className="meta">✨ {line}</span>;
 }

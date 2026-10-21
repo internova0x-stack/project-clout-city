@@ -14,6 +14,7 @@ import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./
 import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
+import { STYLE, fullLooks, styleCounts, venueLine } from "./style.ts";
 
 const CLOCK = { realHoursPerCityDay: 2, dayStartsAt: 6, nightStartsAt: 19 };
 
@@ -26,7 +27,28 @@ export function sampleSkills(pro = false): SkillState[] {
 }
 const levelsOf = (skills: SkillState[]) => Object.fromEntries(skills.map((x) => [x.id, x.level])) as PerksState["levels"];
 
-export function sampleCityState(overrides: Partial<CityState["player"]> = {}, skills: SkillState[] = sampleSkills(), opts: { firstDay?: boolean } = {}): CityState {
+/** The preview's style counts, for the preview player's starting style. */
+function simStyleCounts(s: Pick<CityState, "items" | "catalog">, startingStyle: string) {
+  return styleCounts(s.items.filter((i) => i.category === "fashion" && i.equipped).map((i) => {
+    const c = s.catalog?.find((x) => x.sku === i.sku);
+    return { slot: c?.slot ?? itemBySku(i.sku)?.wear?.slot ?? null, lines: c?.styleLines.length ? c.styleLines : (STYLE.liveLines as Record<string, readonly string[]>)[i.sku] ?? [] };
+  }), startingStyle);
+}
+function simStyle(s: Pick<CityState, "items" | "catalog">, boost: { line: string; place: string } | null, startingStyle: string): NonNullable<CityState["style"]> {
+  const counts = simStyleCounts(s, startingStyle);
+  return { counts, full: fullLooks(counts), boost };
+}
+
+/** The sample day's style task: the starting style's line, at the first place that suits it. */
+function styleTask(startingStyle: string): DailyTask {
+  const line = (STYLE.startingLines as Record<string, string>)[startingStyle] ?? "streetwear";
+  const tags = (STYLE.venues as Record<string, readonly string[]>)[line] ?? [];
+  const place = PLACES.find((p) => !p.story && p.tags.some((t) => tags.includes(t)) && p.actions.some((a) => ["visit", "hangout", "eat"].includes(a.kind)))!;
+  const action = place.actions.find((a) => ["visit", "hangout", "eat"].includes(a.kind))!;
+  return { id: 2, slot: 2, kind: `style:${line}`, place_id: place.id, action_id: action.id, reward: 45, done_at: null };
+}
+
+export function sampleCityState(overrides: Partial<CityState["player"]> = {}, skills: SkillState[] = sampleSkills(), opts: { firstDay?: boolean; startingStyle?: string } = {}): CityState {
   const today = new Date().toISOString().slice(0, 10);
   // C3 (migration 0094): a new player's first day starts with the fixed tasks, then a gossip lead and a skill.
   const firstDay: DailyTask[] = [
@@ -39,7 +61,8 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}, sk
   const tasks: DailyTask[] = opts.firstDay ? firstDay : [
     // v0.11: two of the five send the player along the gossip trail (the preview week's starts).
     { id: 1, slot: 1, kind: "gossip", place_id: "ditmars-deli", action_id: "gossip-regular", reward: 15, done_at: null },
-    { id: 2, slot: 2, kind: "gossip", place_id: "two-bros-pizza", action_id: "gossip-overheard", reward: 15, done_at: null },
+    // Migration 0100: some days, a task asks for a full look (the preview player's starting Streetwear counts).
+    styleTask(opts.startingStyle ?? "bodega_drip"),
     { id: 3, slot: 3, kind: "hangout", place_id: "flushing-meadows", action_id: "hangout", reward: 55, done_at: new Date().toISOString(), goal: "first_gig" },
     // Migration 0063: one task a day levels up a skill.
     { id: 4, slot: 4, kind: "cook", place_id: "home", action_id: "cook", reward: 90, done_at: null, skill: "cooking" },
@@ -49,7 +72,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}, sk
     id, ny_date: today, tier, title: GIG_TITLES[tier][i].title, pay, energy, wait_minutes: wait, confidence_req: conf,
     accepted_at: null, ready_at: null, collected_at: null,
   });
-  return {
+  const st: CityState = {
     player: {
       id: "preview", bank_cash: 5450, clout: 850, energy: 80, mood: 60, confidence: 55, home_id: "astoria_studio",
       next_rent_due: addDays(today, 3), next_phone_due: addDays(today, 5), next_car_due: null, house_sku: null, car_sku: null, car_mode: null, purchases_count: 1, at_place: null, fridge_meals: 4, moved_up: false, ...overrides,
@@ -79,6 +102,8 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}, sk
       wins: [{ game: "bodega-cat", amount: 10_640, wonAt: new Date(Date.now() - 86_400_000).toISOString(), mine: false, winner: "dana.vibes" }],
     },
   };
+  st.style = simStyle(st, null, opts.startingStyle ?? "bodega_drip");
+  return st;
 }
 
 function addDays(day: string, n: number): string {
@@ -117,6 +142,8 @@ export function createSimApi(
   transit: { delayFor: (line: string | null) => number; showtimeChance?: number } = { delayFor: () => 0 },
   /** C5: the calendar (content/culture/calendar.json, passed in by the preview, which may move its dates). */
   calendar: CalendarData | null = null,
+  /** Migration 0100: the preview player's starting style (their clothes count toward its line). */
+  startingStyle = "bodega_drip",
 ): SimApi {
   let s: CityState = structuredClone(initial);
   let nextId = 1000;
@@ -134,12 +161,22 @@ export function createSimApi(
     return p().clout >= vip.freeClout ? "free" : perkOn(s.perks, "vip") ? "skill" : vipPaid.has(`${placeId}:${s.today}`) ? "paid" : passTonight(placeId) ? "pass" : null;
   };
   const now = () => Date.now() + s.clockOffsetSeconds * 1000;
-  const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(s), gain });
+  // Migration 0100 in memory: style counts from what's worn (the preview player started in Bodega Drip), the venue
+  // boost once a day, style tasks only while the look is worn.
+  let styleBoost: { line: string; place: string; day: string } | null = null;
+  const styleNow = () => simStyleCounts(s, startingStyle);
+  const withStyle = () => {
+    s.style = simStyle(s, styleBoost?.day === s.today ? { line: styleBoost.line, place: styleBoost.place } : null, startingStyle);
+    return s;
+  };
+  const ok = (gain?: Gain): Promise<CityResult> => Promise.resolve({ ok: true, state: structuredClone(withStyle()), gain });
   const fail = (error: string): Promise<CityResult> => Promise.resolve({ ok: false, error });
   const p = () => s.player;
 
   const completeTask = (placeId: string, actionId: string): number => {
-    const t = s.tasks.find((x) => !x.done_at && x.place_id === placeId && x.action_id === actionId);
+    const counts = styleNow();
+    const t = s.tasks.find((x) => !x.done_at && x.place_id === placeId && x.action_id === actionId
+      && (!x.kind.startsWith("style:") || (counts[x.kind.slice(6)] ?? 0) >= STYLE.fullMin));
     if (!t) return 0;
     t.done_at = new Date(now()).toISOString();
     // Owner, Oct 14 (migration 0042): gossip tasks pay clout, not cash.
@@ -363,7 +400,11 @@ export function createSimApi(
       p().mood = Math.min(100, p().mood + mood);
       p().confidence = Math.min(100, p().confidence + confidence);
       const taskCash = completeTask(placeId, actionId);
-      return ok({ cash: (a.pay ?? 0) - price + taskCash, clout, energy: -a.energy, mood, confidence, taskCash });
+      // The venue boost lands after the action (the server's deferred trigger), so it isn't in this action's clout.
+      let styleConf = 0;
+      const line = styleBoost?.day === s.today ? null : venueLine(styleNow(), place.tags);
+      if (line) { styleBoost = { line, place: placeId, day: s.today }; styleConf = Math.min(100 - p().confidence, STYLE.venueConfidence); p().confidence += styleConf; }
+      return ok({ cash: (a.pay ?? 0) - price + taskCash, clout, energy: -a.energy, mood, confidence: confidence + styleConf, taskCash });
     },
     attendEvent(eventId) {
       const ev = CLUB_EVENTS.find((e) => e.id === eventId);

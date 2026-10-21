@@ -1,5 +1,6 @@
 "use client";
 
+import { LOOK_LABEL, lookBadge } from "@/lib/style";
 import dynamic from "next/dynamic";
 import type { Look } from "@/lib/look";
 import type { Outfit } from "@/lib/styles";
@@ -19,7 +20,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  * that matter, badges, collections and crew, and "Recently", which other players see too.
  */
 export function ProfileSheet({
-  open, onClose, look, outfit, name, subtitle, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
+  open, onClose, look, outfit, name, subtitle, looks, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
   onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills, perks, vip,
 }: {
   open: boolean;
@@ -28,6 +29,8 @@ export function ProfileSheet({
   outfit?: Outfit;
   name: string;
   subtitle: string;
+  /** Migration 0100: the style lines worn as a full look (3+ pieces), shown under the name. */
+  looks?: string[];
   clout: number;
   rank: number | null;
   netWorth: number;
@@ -60,6 +63,11 @@ export function ProfileSheet({
         <div>
           <h2 className="display-md profile-name">{name}</h2>
           <p className="body profile-sub">{subtitle}</p>
+          {!!looks?.length && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 6 }}>
+              {looks.map((l) => <span key={l} className="tag">{lookBadge(`look-${l}`)?.emoji} Full {LOOK_LABEL[l] ?? l} look</span>)}
+            </div>
+          )}
           {vip && <div style={{ textAlign: "center" }}><ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
         </div>
         {skills && (

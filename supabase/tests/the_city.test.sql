@@ -40,6 +40,9 @@ end $$;
 reset role;
 update public.players set bank_cash = 5000, energy = 100, mood = 50, confidence = 50 where display_name = 'Gus';
 update public.game_settings set value = '{"tools": true, "clockOffsetSeconds": 0}' where key = 'dev';
+-- Migration 0100's style bonuses (a Confidence boost at a place that suits the look) would change these exact
+-- numbers; supabase/tests/style_looks.test.sql covers them.
+delete from public.game_settings where key = 'style';
 set role authenticated;
 
 -- Day 0: syncing makes five daily tasks and starts the weekly bills.

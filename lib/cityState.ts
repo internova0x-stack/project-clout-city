@@ -6,6 +6,7 @@
 
 import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById, type ClubEvent, type PlaceAction, type ShopItem } from "./city.ts";
 import { leadAction } from "./gossip.ts";
+import { LOOK_LABEL } from "./style.ts";
 import { PERK_ERRORS, SKILLS, type SkillId } from "./skills.ts";
 import { ECONOMY } from "./economy.ts";
 import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
@@ -39,6 +40,9 @@ export interface CityPlayer {
 /** C4: what the server says about a trip it just started: its real length (a delay included) and any showtime. */
 export interface TripInfo { seconds: number; line: string | null; delay: number; showtime: boolean }
 
+/** Migration 0100: "Wear a full <line> look to <place>", done only while that look is worn. */
+export type StyleTaskKind = `style:${string}`;
+
 export interface DailyTask {
   id: number;
   slot: number;
@@ -46,7 +50,7 @@ export interface DailyTask {
    * "gossip" (v0.11, migration 0036): action_id is "gossip-regular" (talk to the regular), "gossip-overheard"
    * (Listen in) or, #19, "gossip-restroom" (Listen in downstairs in a club's restroom).
    */
-  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip" | "cook" | "class";
+  kind: "visit" | "eat" | "shift" | "hangout" | "event" | "gossip" | "cook" | "class" | StyleTaskKind;
   place_id: string;
   action_id: string;
   reward: number;
@@ -122,7 +126,12 @@ export interface CityState {
   calendar?: import("./calendar.ts").CalendarState;
   /** The Shop Manager (migration 0099): what's on sale, with pictures; undefined before 0099 (the Shop uses the code's list). */
   catalog?: import("./shopCatalog.ts").CatalogItem[];
+  /** Migration 0100: pieces worn per style line, full looks, today's venue boost. Missing until 0100 runs. */
+  style?: StyleState;
 }
+
+/** style_state() (migration 0100). */
+export interface StyleState { counts: Record<string, number>; full: string[]; boost: { line: string; place: string } | null }
 
 /** What changed after an action, for the reward toast. */
 export interface Gain {
@@ -501,10 +510,11 @@ export function eventById(id: string): ClubEvent | undefined {
 }
 
 // Owner, Oct 18: task copy in Clout City's voice. The title still says what to do and where; a line under it jokes.
-const TASK_VERB: Record<DailyTask["kind"], string> = { visit: "Be seen at", eat: "Grab a bite at", shift: "Clock in at", hangout: "Kick it at", event: "Pull up to", gossip: "Eavesdrop at", cook: "Cook something at", class: "Go to class at" };
+const TASK_VERB: Record<Exclude<DailyTask["kind"], StyleTaskKind>, string> = { visit: "Be seen at", eat: "Grab a bite at", shift: "Clock in at", hangout: "Kick it at", event: "Pull up to", gossip: "Eavesdrop at", cook: "Cook something at", class: "Go to class at" };
 
 /** The joke under each task, a few per kind; the task's id picks one, so it stays put all day. */
-const TASK_QUIPS: Record<DailyTask["kind"] | "skill", readonly string[]> = {
+const TASK_QUIPS: Record<Exclude<DailyTask["kind"], StyleTaskKind> | "skill" | "style", readonly string[]> = {
+  style: ["Dress for the place you want.", "The outfit does the talking. You just walk in.", "Matching the venue is a love language."],
   visit: ["If nobody saw you there, did you even go?", "Stand near the good lighting.", "Look busy. Look famous. Ideally both."],
   eat: ["Calories don't count if you post them.", "Eat like nobody's watching. Someone is.", "Fuel for the grind. And the gossip."],
   shift: ["Smile at customers. Die a little inside. Get paid.", "Rent is due, babe. Rent is always due.", "Honest work. Gross, but honest."],
@@ -521,7 +531,7 @@ const DONE_LINES = ["Done. Lola noticed. 💅", "Paid. Treat yourself (responsib
 export function taskQuip(t: Pick<DailyTask, "id" | "kind" | "skill" | "action_id">): string {
   const quips = t.kind === "gossip" && t.action_id === "gossip-restroom" ? ["Best acoustics in the club. Go wash your hands."]
     : t.kind === "gossip" && t.action_id === "gossip-regular" ? ["They know things. They always know things.", "Bring snacks. Leave with secrets."]
-    : TASK_QUIPS[t.skill && t.kind !== "cook" ? "skill" : t.kind];
+    : TASK_QUIPS[t.kind.startsWith("style:") ? "style" : t.skill && t.kind !== "cook" ? "skill" : t.kind as Exclude<DailyTask["kind"], StyleTaskKind>];
   return quips[Math.abs(t.id) % quips.length];
 }
 
@@ -547,12 +557,14 @@ export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" |
     if (t.kind === "cook") return "Cook something at home";
     const place = placeById(t.place_id);
     const label = place?.actions.find((a) => a.id === t.action_id)?.label;
-    return label ? `${label} at ${place?.name ?? "a place"}` : `${TASK_VERB[t.kind]} ${place?.name ?? "a place"}`;
+    return label ? `${label} at ${place?.name ?? "a place"}` : `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${place?.name ?? "a place"}`;
   }
   if (t.kind === "event") return `${TASK_VERB.event} ${eventById(t.action_id)?.name ?? "a club event"}`;
+  // Migration 0100: a style task.
+  if (t.kind.startsWith("style:")) return `Wear a full ${LOOK_LABEL[t.kind.slice(6)] ?? "matching"} look to ${placeById(t.place_id)?.name ?? "a place"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
   if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null });
-  return `${TASK_VERB[t.kind]} ${placeById(t.place_id)?.name ?? "a place"}`;
+  return `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${placeById(t.place_id)?.name ?? "a place"}`;
 }
 
 /** v0.11 (spec section 11): today's daily tasks at a place, for its checkboxes. */

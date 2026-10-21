@@ -119,7 +119,7 @@ export function PreviewHome({
     [player, bizPreset]);
   const city = useMemo(() => {
     const s = sampleCityState({ bank_cash: me.bank_cash, clout: me.clout, energy: player.energy, mood: player.mood, confidence: player.confidence, home_id: player.home_id, ...(campusPreset !== undefined ? { at_place: "st-johnsons" } : {}),
-      ...(transitPreset === "pass" ? { transit_pass_until: new Date(Date.now() + 5 * 86_400_000).toISOString() } : { transit_pass_until: null }) }, sampleSkills(skillsPreset === "pro"), { firstDay: player.tutorial_state === "pending" });
+      ...(transitPreset === "pass" ? { transit_pass_until: new Date(Date.now() + 5 * 86_400_000).toISOString() } : { transit_pass_until: null }) }, sampleSkills(skillsPreset === "pro"), { firstDay: player.tutorial_state === "pending", startingStyle: player.starting_style });
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));
     s.calendar = { attended: [], gifts: calendarPreset === "gift" ? 1 : 0 };
     // v0.15 (migration 0076): students get "Go to class" in place of the random task.
@@ -142,7 +142,7 @@ export function PreviewHome({
     const api = createSimApi(city, () => feedRef.current, (id) => passRef.current(id), {
       delayFor: (line) => (line ? activeDelays(delaysRef.current, Date.now())[line]?.seconds ?? 0 : 0),
       ...(transitPreset === "showtime" ? { showtimeChance: 1 } : {}),
-    }, calendar);
+    }, calendar, player.starting_style);
     const queue: Record<string, number[]> = { win: [5, 0, 2], big: [100, 0], back: [1, 0], lose: [0, 5] };
     if (lottoPreset && queue[lottoPreset]) api.lottoNext(queue[lottoPreset]);
     // ?lotto=jackpot: the next card's ⭐ wins its pot.
