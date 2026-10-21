@@ -39,7 +39,7 @@ test("3 to 5 stories, unique ids, a Monday week", () => {
 test("a regular's piece needs a regular there", () => {
   const w = week();
   const p = w.stories[0].pieces.find((x) => x.source === "overheard")!;
-  p.place = "steinway-fresh";
+  p.place = "flushing-meadows";
   p.source = "regular";
   assert.ok(problems(w).some((x) => /has no regular/.test(x)));
 });

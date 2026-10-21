@@ -1,0 +1,714 @@
+{
+  "about": "Astoria's people (culture pack C1): one profile per Astoria place, every name invented. A profile whose 'regular' names someone in lib/cast.ts stands at that place in the game; their catchphrases join their everyday lines (content/cast-lines.json) when tapped. Profiles marked 'story' belong to a story's place and only speak through that story. Voice rules: docs/culture/VOICE.md. Edit freely; npm test checks the shape. 'roommates' are the people who share a home with the player (C3): they introduce themselves once and leave a note a day.",
+  "template": {
+    "id": "Short id, the same as the regular's id in lib/cast.ts when they stand at the place",
+    "name": "Invented full name",
+    "age": "Number",
+    "background": "Cultural background, in the person's own terms. Vary it within a building type; never a punchline",
+    "personality": "One or two sentences",
+    "yearsInNeighborhood": "Number",
+    "catchphrases": "Two to five lines they actually say (240 characters or fewer each). No phonetic accent spelling",
+    "likes": "A few things",
+    "dislikes": "A few things",
+    "placeId": "The place in lib/city.ts",
+    "role": "Their job or part at the place",
+    "regular": "The lib/cast.ts regular id, or null when they don't stand on the place card",
+    "slang": "Ids from content/culture/slang.json they reach for. Empty is fine: not everyone uses slang",
+    "story": "Optional: the story whose place this is (they only speak through that story)",
+    "remembers": "Optional: { days, line }. After that many different days at the place, their first line is this one (C2: Sal remembers your order)"
+  },
+  "profiles": [
+    {
+      "id": "sal",
+      "name": "Salah \"Sal\" Mansour",
+      "age": 54,
+      "background": "Egyptian-American, grew up in Alexandria, moved to Steinway Street at 19",
+      "personality": "Dry, generous, pretends not to care and remembers everything. Owns the corner and runs it like a small country.",
+      "yearsInNeighborhood": 35,
+      "catchphrases": [
+        "Ock! The usual? Salt, pepper, ketchup. I know, I know.",
+        "Also Sal is sleeping on the bread. Take the roll from the other side.",
+        "Mira, twenty-two years on this corner. I've seen landlords come and go. Mostly come."
+      ],
+      "likes": [
+        "Regulars who say good morning",
+        "The cat",
+        "Backgammon on the stoop"
+      ],
+      "dislikes": [
+        "People who pet the cat without buying anything",
+        "Rent increases",
+        "Exact change in pennies"
+      ],
+      "placeId": "ditmars-deli",
+      "role": "the owner",
+      "regular": "sal",
+      "slang": [
+        "ock",
+        "mira",
+        "bec",
+        "chopped-cheese",
+        "stoop"
+      ],
+      "remembers": {
+        "days": 3,
+        "line": "Ock! BEC, salt, pepper, ketchup. Already on the grill. Also Sal saved you a spot on the bread."
+      }
+    },
+    {
+      "id": "jojo",
+      "name": "Joana \"Jojo\" Ribeiro",
+      "age": 26,
+      "background": "Brazilian-American, born in Minas Gerais, raised on 36th Avenue",
+      "personality": "Nosy, quick, spells every name wrong on purpose. Saving for film school one tip jar at a time.",
+      "yearsInNeighborhood": 14,
+      "catchphrases": [
+        "Regular coffee? Milk, two sugars, one rumor. Coming right up.",
+        "Deadass, I heard it before it happened.",
+        "Tip jar's for film school. Gossip's free with a large."
+      ],
+      "likes": [
+        "Telenovelas",
+        "Oat milk",
+        "Being right first"
+      ],
+      "dislikes": [
+        "Laptop campers",
+        "People who say \"just water\"",
+        "Spoilers she didn't start"
+      ],
+      "placeId": "grind-and-gossip",
+      "role": "the barista",
+      "regular": "jojo",
+      "slang": [
+        "regular-coffee",
+        "deadass",
+        "facts"
+      ]
+    },
+    {
+      "id": "effie",
+      "name": "Efthymia \"Effie\" Lambrou",
+      "age": 61,
+      "background": "Greek-American, born in Astoria to parents from Crete",
+      "personality": "Calls everyone hon, hears everything, repeats only the true parts. Has worked the counter longer than the pie case has rotated.",
+      "yearsInNeighborhood": 61,
+      "catchphrases": [
+        "Sit anywhere, hon. Not there. There.",
+        "Coffee's bottomless. My patience isn't.",
+        "I don't gossip. I just remember out loud."
+      ],
+      "likes": [
+        "Sunday regulars",
+        "Her grandson's band",
+        "A full pie case"
+      ],
+      "dislikes": [
+        "Reporters",
+        "Split checks for eight",
+        "Ketchup on eggs at 3 PM"
+      ],
+      "placeId": "rockaway-diner",
+      "role": "the waitress",
+      "regular": null,
+      "slang": [
+        "on-line"
+      ],
+      "story": "sarah-bird"
+    },
+    {
+      "id": "gideon-vale",
+      "name": "Pastor Gideon Vale",
+      "age": 48,
+      "background": "Midwestern transplant, came to Queens from Ohio for a radio job",
+      "personality": "Smooth, warm on camera, vanity dressed as humility (docs/04-who-killed-sarah-bird-v2.md is canon).",
+      "yearsInNeighborhood": 15,
+      "catchphrases": [
+        "Blessed and booked, friends.",
+        "The Lord provides. The building fund helps."
+      ],
+      "likes": [
+        "His podcast",
+        "Chamomile tea",
+        "Groundbreakings"
+      ],
+      "dislikes": [
+        "Audits",
+        "Hard questions"
+      ],
+      "placeId": "radiant-harbor",
+      "role": "the pastor",
+      "regular": null,
+      "slang": [],
+      "story": "sarah-bird"
+    },
+    {
+      "id": "dr-eleni",
+      "name": "Dr. Eleni Markou",
+      "age": 44,
+      "background": "Greek-American, born on 23rd Avenue, first doctor in her family",
+      "personality": "Brisk, funny, unshockable. Runs the ER like a diner rush and tells you exactly how long the wait is.",
+      "yearsInNeighborhood": 44,
+      "catchphrases": [
+        "Deadass, drink some water. That's the whole prescription.",
+        "The wait is two hours. I said what I said.",
+        "Sickness doesn't care about your follower count. Neither do I. Sit."
+      ],
+      "likes": [
+        "Night shifts",
+        "Her yiayia's spanakopita",
+        "Patients who follow instructions"
+      ],
+      "dislikes": [
+        "Self-diagnosis from comment sections",
+        "The vending machine",
+        "Copays"
+      ],
+      "placeId": "st-copays",
+      "role": "the ER doctor",
+      "regular": "dr-eleni",
+      "slang": [
+        "deadass",
+        "facts"
+      ]
+    },
+    {
+      "id": "marcos",
+      "name": "Marcos Albuquerque",
+      "age": 39,
+      "background": "Brazilian, from Recife; came for a gig in 2009 and stayed",
+      "personality": "Laid-back jazz bassist who bought the lounge with his bandmates. Keeps the celebrities' secrets and the vinyl in order.",
+      "yearsInNeighborhood": 15,
+      "catchphrases": [
+        "Booth two is taken. By whom? Nobody. Officially.",
+        "Bossa nova on Tuesdays. Say less.",
+        "Celebrities come here to be left alone. Loudly. I just turn the record up."
+      ],
+      "likes": [
+        "Vinyl",
+        "Quiet tippers",
+        "Tuesday jam nights"
+      ],
+      "dislikes": [
+        "Phones out at the bar",
+        "Requests for songs he's never heard",
+        "Cover bands"
+      ],
+      "placeId": "low-light-lounge",
+      "role": "the owner",
+      "regular": "marcos",
+      "slang": [
+        "say-less",
+        "facts"
+      ]
+    },
+    {
+      "id": "lola",
+      "name": "Lola Lowdown",
+      "age": 34,
+      "background": "Queens born and raised; she never says where her family's from, on purpose (\"I'm from everywhere you can't get a table\")",
+      "personality": "Queens' most reliable unreliable source and the city's tea queen: warm, dramatic, always heard something, always on the player's side.",
+      "yearsInNeighborhood": 34,
+      "catchphrases": [
+        "Say less, babe. I already know.",
+        "Allegedly. With receipts.",
+        "Mad people asked who you are today. I told them to wait."
+      ],
+      "likes": [
+        "Receipts",
+        "Screenshots",
+        "A good comeback story"
+      ],
+      "dislikes": [
+        "Being second to hear",
+        "Tourists in matching shirts",
+        "Anyone mean to her people"
+      ],
+      "placeId": "neon-spoon",
+      "role": "the host, the tea queen",
+      "regular": "lola",
+      "slang": [
+        "say-less",
+        "deadass",
+        "mad",
+        "bet",
+        "wildin",
+        "facts"
+      ]
+    },
+    {
+      "id": "camila",
+      "name": "Camila Restrepo",
+      "age": 33,
+      "background": "Colombian-American, born in Medellín, raised in Jackson Heights",
+      "personality": "Store manager with a recipe channel and opinions about every shopper's cart. Fiercely practical, secretly sentimental.",
+      "yearsInNeighborhood": 9,
+      "catchphrases": [
+        "Forty kinds of feta. Mira, I've tasted all of them.",
+        "Meal prep is cheaper than eating out. I'm not judging. I'm calculating.",
+        "Cart's wobbly? They all wobble. It's character."
+      ],
+      "likes": [
+        "Sunday meal prep",
+        "Arepas done right",
+        "Coupons"
+      ],
+      "dislikes": [
+        "People who open the eggs",
+        "Express-lane cheaters",
+        "Wasted food"
+      ],
+      "placeId": "steinway-fresh",
+      "role": "the store manager",
+      "regular": "camila",
+      "slang": [
+        "mira",
+        "facts"
+      ]
+    },
+    {
+      "id": "valentina",
+      "name": "Valentina Ospina",
+      "age": 31,
+      "background": "Colombian-American, born in Cali, came to Queens at 12",
+      "personality": "Founder of a scheduling app that, unusually, works. Runs the coworking space's gigs board and has no patience for \"between rounds.\"",
+      "yearsInNeighborhood": 19,
+      "catchphrases": [
+        "The gigs board refreshes every morning. Bet.",
+        "Ignore the kombucha. Take the gig.",
+        "My app works. That's my whole pitch. Investors find it confusing."
+      ],
+      "likes": [
+        "Spreadsheets",
+        "Shipping on Fridays",
+        "People who reply"
+      ],
+      "dislikes": [
+        "Stealth startups",
+        "Ping-pong as strategy",
+        "Chad Kensington, CEO"
+      ],
+      "placeId": "triborough-works",
+      "role": "the founder who runs the gigs board",
+      "regular": "valentina",
+      "slang": [
+        "bet",
+        "odee"
+      ]
+    },
+    {
+      "id": "penwright",
+      "name": "Mr. Desmond Penwright",
+      "age": 70,
+      "background": "Trinidadian-born, came to Queens in 1978",
+      "personality": "Gentle, precise, a whisperer of gossip and late-fee forgiveness. Has read everything; admits to nothing.",
+      "yearsInNeighborhood": 46,
+      "catchphrases": [
+        "Shh. Unless it's gossip. Then whisper.",
+        "A late book is a story that wanted more time.",
+        "Your excuse is not new. It is, however, well told."
+      ],
+      "likes": [
+        "Mysteries",
+        "Steelpan on Sundays",
+        "Returned books"
+      ],
+      "dislikes": [
+        "Dog-eared pages",
+        "Loud phone calls",
+        "Spoilers"
+      ],
+      "placeId": "ditmars-library",
+      "role": "the librarian",
+      "regular": "penwright",
+      "slang": []
+    },
+    {
+      "id": "sgt-bev",
+      "name": "Sgt. Bev Kowalski",
+      "age": 52,
+      "background": "Polish-American, grew up in Greenpoint, moved to Astoria for the commute",
+      "personality": "Tired, funny, tells Lola everything. Keeps the precinct ambient: parking reports, lost cats, passionate neighbors.",
+      "yearsInNeighborhood": 24,
+      "catchphrases": [
+        "Another parking report? Get on line, hon.",
+        "You're buggin'. It's a parking spot, not a crime scene.",
+        "I write it down. That's the service."
+      ],
+      "likes": [
+        "Pierogi Fridays",
+        "Quiet nights",
+        "Her mug"
+      ],
+      "dislikes": [
+        "Car alarms",
+        "Paperwork in triplicate",
+        "People who say \"do you know who I am\""
+      ],
+      "placeId": "precinct-114-half",
+      "role": "the desk sergeant",
+      "regular": "sgt-bev",
+      "slang": [
+        "on-line",
+        "buggin"
+      ]
+    },
+    {
+      "id": "captain-rosa",
+      "name": "Captain Rosa Díaz-Moore",
+      "age": 49,
+      "background": "Puerto Rican and Irish-American, from Woodside",
+      "personality": "Big laugh, bigger heart. Runs Engine 7 and its very late dalmatian, Hydrant.",
+      "yearsInNeighborhood": 21,
+      "catchphrases": [
+        "Hydrant ate a helmet again. Don't tell the chief.",
+        "Wepa! Somebody finally fixed the hydrant on 31st.",
+        "Pet the dog, sign the calendar, go home happy."
+      ],
+      "likes": [
+        "Firehouse chili",
+        "Block parties",
+        "Hydrant (most days)"
+      ],
+      "dislikes": [
+        "Blocked hydrants",
+        "Grill fires",
+        "Hydrant (some days)"
+      ],
+      "placeId": "engine-7",
+      "role": "the captain",
+      "regular": "captain-rosa",
+      "slang": [
+        "wepa"
+      ]
+    },
+    {
+      "id": "rev-mercy",
+      "name": "Rev. Mercy Adeyemi",
+      "age": 58,
+      "background": "Nigerian-American, from Lagos by way of Flatbush",
+      "personality": "Warm, frank, runs an open-door chapel and the best bake sale in Queens. Everyone's welcome, the folding chairs included.",
+      "yearsInNeighborhood": 18,
+      "catchphrases": [
+        "Everyone's welcome. The chairs are a test of faith.",
+        "Need ten quiet minutes? Say less.",
+        "Bake sale Saturday. The jollof sells out by noon."
+      ],
+      "likes": [
+        "Choir practice",
+        "Jollof rice",
+        "Second chances"
+      ],
+      "dislikes": [
+        "Phones during prayer",
+        "Cold coffee",
+        "Gossip about grief"
+      ],
+      "placeId": "harmony-chapel",
+      "role": "the reverend",
+      "regular": "rev-mercy",
+      "slang": [
+        "say-less"
+      ]
+    },
+    {
+      "id": "gus",
+      "name": "Konstantinos \"Gus\" Pappas",
+      "age": 78,
+      "background": "Greek, from Kalamata, came to Astoria in 1968",
+      "personality": "Retired tailor, same bench every day, stories about 1987 for anyone who sits. Rates the joggers' form out loud.",
+      "yearsInNeighborhood": 56,
+      "catchphrases": [
+        "Seen a lot from this bench. Want to hear about 1987?",
+        "The bridge was here first. Then me. Then the joggers.",
+        "Sit, sit. The bench is free. The stories cost nothing either."
+      ],
+      "likes": [
+        "Backgammon",
+        "The river at sunset",
+        "Name days"
+      ],
+      "dislikes": [
+        "Scooters on the path",
+        "Pigeons with ambition",
+        "The Bronx Bigshots"
+      ],
+      "placeId": "hell-gate-park",
+      "role": "same bench, every day",
+      "regular": "gus",
+      "slang": []
+    },
+    {
+      "id": "yesenia",
+      "name": "Yesenia Ortiz",
+      "age": 45,
+      "background": "Dominican-American, born in Santiago, raised in Corona",
+      "personality": "The station agent who has seen everything twice. Knows when the train is really coming and won't tell you if you're rude.",
+      "yearsInNeighborhood": 22,
+      "catchphrases": [
+        "¿Qué lo que? The train is two stops away. It's always two stops away.",
+        "It's a schlep to Flushing. Bring a snack.",
+        "Showtime kids got on at Queensboro Plaza. Hold your coffee."
+      ],
+      "likes": [
+        "Bachata on her break",
+        "Polite riders",
+        "Fresh platform paint"
+      ],
+      "dislikes": [
+        "People leaning on the doors",
+        "Garbled announcements",
+        "Pigeons on the mezzanine"
+      ],
+      "placeId": "astoria-blvd-station",
+      "role": "the station agent",
+      "regular": "yesenia",
+      "slang": [
+        "que-lo-que",
+        "schlep"
+      ]
+    },
+    {
+      "id": "sharm",
+      "name": "Sharm Almight",
+      "age": 29,
+      "background": "Haitian-American, raised in Queens Village",
+      "personality": "Hype, warm, never mean; the voice of The Wake-Up Call on Real Clout FM.",
+      "yearsInNeighborhood": 29,
+      "catchphrases": [
+        "Yo, good morning Astoria! If you ain't up yet, you buggin', son.",
+        "Send it in, then pray to the nine o'clock gods. Bet."
+      ],
+      "likes": [
+        "Morning shows",
+        "Griot on Fridays",
+        "Shoutouts that make his mom laugh"
+      ],
+      "dislikes": [
+        "Dead air",
+        "Shoutouts with subpoenas in them"
+      ],
+      "placeId": "real-clout-fm",
+      "role": "DJ, The Wake-Up Call",
+      "regular": "sharm",
+      "slang": [
+        "buggin",
+        "son",
+        "deadass",
+        "bet",
+        "say-less",
+        "facts"
+      ]
+    },
+    {
+      "id": "nour",
+      "name": "Nour El-Sayed",
+      "age": 31,
+      "background": "Egyptian-American, born in Cairo, raised on Steinway Street",
+      "personality": "Runs the Big Screen's control room. Calm under pressure, merciless with a bad crop.",
+      "yearsInNeighborhood": 24,
+      "catchphrases": [
+        "Three hours on the Big Screen. Make the photo count.",
+        "Crop it to the shoulders. Trust me, I've seen thousands.",
+        "The whole city looks up at that screen. Odee pressure, honestly."
+      ],
+      "likes": [
+        "Golden-hour light",
+        "Clean edits",
+        "Koshari after a late shift"
+      ],
+      "dislikes": [
+        "Blurry selfies",
+        "Finger in the corner",
+        "Cold control-room coffee"
+      ],
+      "placeId": "clout-tower",
+      "role": "the Big Screen producer",
+      "regular": "nour",
+      "slang": [
+        "odee"
+      ]
+    },
+    {
+      "id": "arben",
+      "name": "Arben Krasniqi",
+      "age": 46,
+      "background": "Albanian-American, born in Pristina, raised in the Bronx",
+      "personality": "Fast hands, slow smile. Has folded a hundred thousand slices and still argues the price is a dollar, spiritually.",
+      "yearsInNeighborhood": 17,
+      "catchphrases": [
+        "Two slices and a soda? Say less. Already in the oven.",
+        "The sign says a dollar. The sign is sentimental.",
+        "Fold it down the middle. Like a local. There you go."
+      ],
+      "likes": [
+        "A crispy bottom",
+        "Lunch rush",
+        "His daughter's soccer games"
+      ],
+      "dislikes": [
+        "Forks",
+        "People who blot the grease",
+        "Pineapple debates"
+      ],
+      "placeId": "still-a-dollar-slice",
+      "role": "the owner",
+      "regular": "arben",
+      "slang": [
+        "say-less",
+        "facts"
+      ]
+    },
+    {
+      "id": "tariq",
+      "name": "Tariq Hossain",
+      "age": 38,
+      "background": "Bangladeshi-American, from Sylhet, came to Queens at 16",
+      "personality": "Night owl, philosopher of sauces. Knows every bartender, cabbie and nurse who gets off shift after midnight.",
+      "yearsInNeighborhood": 14,
+      "catchphrases": [
+        "White sauce, yes. Red sauce, careful. I'm not responsible after that.",
+        "Three a.m. is my rush hour. Everybody's honest at three a.m.",
+        "You look tired, B. Extra rice. On the house this once.",
+        "Parking by my cart on a Friday night? Fuhgeddaboudit."
+      ],
+      "likes": [
+        "Cricket on the radio",
+        "Regulars who say his name right",
+        "Cold nights with a long line"
+      ],
+      "dislikes": [
+        "Parking tickets",
+        "People who ask for the sauce on the side",
+        "Rain"
+      ],
+      "placeId": "white-sauce-cart",
+      "role": "the cart owner",
+      "regular": "tariq",
+      "slang": [
+        "b",
+        "deadass",
+        "fuhgeddaboudit"
+      ]
+    },
+    {
+      "id": "lou",
+      "name": "Luisa \"Lou\" Ferraro",
+      "age": 63,
+      "background": "Italian-American, born in Bensonhurst, Astoria by marriage",
+      "personality": "Loud, kind, gives directions nobody asked for. Thirty summers at the park gate and a hot dog for every lost tourist.",
+      "yearsInNeighborhood": 40,
+      "catchphrases": [
+        "Onions? Mustard? Don't ask about the water. Nobody asks about the water.",
+        "You drove to the park? Next time take the train. I'm right by the stop.",
+        "Mad hot out. Get two. One for the walk."
+      ],
+      "likes": [
+        "Summer concerts in the park",
+        "Exact change",
+        "Her grandkids' visits"
+      ],
+      "dislikes": [
+        "Pigeons near the bun drawer",
+        "Seagulls (worse)",
+        "Anyone who says 'frankfurter' wrong"
+      ],
+      "placeId": "boiled-and-beloved",
+      "role": "the cart owner",
+      "regular": "lou",
+      "slang": [
+        "mad"
+      ]
+    },
+    {
+      "id": "andreas",
+      "name": "Andreas Charalambous",
+      "age": 52,
+      "background": "Greek Cypriot, from Limassol, came to Astoria in 1994",
+      "personality": "Host first, chef second, shouter of 'Opa!' third. Remembers every name day on 30th Avenue.",
+      "yearsInNeighborhood": 30,
+      "catchphrases": [
+        "Opa! Sit, sit. The bread is coming whether you want it or not.",
+        "Today is somebody's name day. It's always somebody's name day.",
+        "The octopus? Facts. Best in Queens. Don't tell my cousin."
+      ],
+      "likes": [
+        "Name-day parties",
+        "Lemon on everything",
+        "Loud tables"
+      ],
+      "dislikes": [
+        "Empty plates going back half full",
+        "Early closings",
+        "Ketchup near the souvlaki"
+      ],
+      "placeId": "feta-compli",
+      "role": "the owner",
+      "regular": "andreas",
+      "slang": [
+        "facts"
+      ]
+    },
+    {
+      "id": "hersh",
+      "name": "Herschel \"Hersh\" Weiss",
+      "age": 67,
+      "background": "Jewish New Yorker, grew up in Crown Heights, opened the deli in 1989",
+      "personality": "Gruff at the counter, generous in the kitchen. Slices pastrami by hand, gives free pickles to anyone who looks hungry.",
+      "yearsInNeighborhood": 35,
+      "catchphrases": [
+        "On line, not in line. You're in New York now.",
+        "You want a schmear? Everything bagel, schmear, done. Next.",
+        "Don't kvetch about the wait. Kvetch about the rent. The wait is worth it."
+      ],
+      "likes": [
+        "Hand-sliced pastrami",
+        "The Sunday crossword",
+        "Regulars who order fast"
+      ],
+      "dislikes": [
+        "Mayonnaise on corned beef",
+        "Cell phones at the counter",
+        "Putzes who cut the line"
+      ],
+      "placeId": "schlep-and-schmear",
+      "role": "the owner, at the counter",
+      "regular": "hersh",
+      "slang": [
+        "on-line",
+        "schmear",
+        "kvetch",
+        "putz"
+      ]
+    }
+  ],
+  "roommates": [
+    {
+      "id": "priya",
+      "name": "Priya Raman",
+      "age": 27,
+      "background": "Indian-American, grew up in Edison, New Jersey, moved to Astoria for nursing school",
+      "personality": "Night-shift ER nurse at St. Copay's. Warm, blunt, allergic to dishes left in the sink. Will defend New Jersey to the death.",
+      "yearsInNeighborhood": 4,
+      "intro": [
+        "Hey! I'm Priya, your roommate. I work nights at St. Copay's, so if you hear the door at 7 a.m., that's me, not a burglar.",
+        "Rent's split down the middle: your half is {rent}, due {day} every week. The landlord is grimy, but the radiator works. Mostly.",
+        "Bathroom schedule's on the fridge. And yes, I'm from Jersey. We can fight about the Statue of Liberty later."
+      ],
+      "notes": [
+        "Left you half a pastrami sandwich from Hersh's. The good half. You're welcome.",
+        "The radiator is making the noise again. Deadass, it sounds like a trombone.",
+        "Night shift was wild. A man came in with a bagel stuck on his thumb. He's fine. The bagel isn't.",
+        "Took your umbrella. It's raining in Jersey. Don't ask why I was in Jersey.",
+        "Rent day's coming. Leave your half on the fridge like a civilized person.",
+        "Also Sal says hi. Also Sal is a cat. I've been awake for 20 hours.",
+        "Bought the good dish soap. That's a love language. Use it."
+      ],
+      "lola": "Your roommate's sweet till {day}. That's when rent's due. Deadass.",
+      "slang": [
+        "grimy",
+        "deadass"
+      ]
+    }
+  ]
+}

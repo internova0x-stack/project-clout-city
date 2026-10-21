@@ -480,7 +480,8 @@ function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorA
                   </span>
                   <span className="subtext" style={{ display: "block" }}>{h.blurb}</span>
                   <span className="meta" style={{ display: "block", marginTop: 4 }}>
-                    Rent <strong className={ok ? "" : "price-bad"}>{formatCash(h.rent)}</strong>/week
+                    {h.roommate ? "Your half of the rent" : "Rent"} <strong className={ok ? "" : "price-bad"}>{formatCash(h.rent)}</strong>/week
+                    {h.roommate && " · Most new arrivals start here"}
                     {!ok && " · Leaves too little for this month"}
                   </span>
                 </span>

@@ -19,7 +19,11 @@ export type GoalCheck =
   | { type: "house"; sku: string }
   | { type: "door"; place: string }
   | { type: "vip"; level: "medium" }
-  | { type: "public" };
+  | { type: "public" }
+  /** C3: different New York days with something done at a place (Sal remembers your order after 3). */
+  | { type: "regular"; place: string; days: number }
+  /** C3: living without a roommate (a home without `roommate`, or a house). */
+  | { type: "solo" };
 
 /**
  * One goal on the ladder (owner, Oct 18: a long ladder, most of it behind clout). `unlock` is the clout at which the
@@ -32,10 +36,13 @@ export interface GoalDef { id: string; unlock: number; reward: number; lean: "ca
 /** The ladder as the database has it (game_settings 'goals'; tests/goals.test.ts keeps the two equal). */
 const LADDER: GoalDef[] = [
   // 🍜 Ramen Noodle Era
+  // C3 (owner, Oct 20): the two Astoria goals open the ladder; becoming a regular brings players back on days 2 and 3.
+  { id: "regular", unlock: 0, reward: 25, lean: "cash", tags: ["bodega"], check: { type: "regular", place: "ditmars-deli", days: 3 } },
   { id: "first_purchase", unlock: 0, reward: 25, lean: "cash", tags: ["boutique", "shopping"], check: { type: "purchase" } },
   { id: "first_shift", unlock: 0, reward: 25, lean: "cash", tags: [], check: { type: "shift" } },
   { id: "full_day", unlock: 0, reward: 50, lean: "boost", tags: [], check: { type: "full_day" } },
   { id: "first_gig", unlock: 0, reward: 50, lean: "boost", tags: ["gym", "campus", "club", "monument"], check: { type: "gig" } },
+  { id: "own_place", unlock: 0, reward: 75, lean: "cash", tags: [], check: { type: "solo" } },
   // 🎓 Student Loan Survivor
   { id: "first_crew", unlock: 100, reward: 75, lean: "boost", tags: ["club", "nightlife"], check: { type: "crew", count: 1 } },
   { id: "save_15k", unlock: 100, reward: 75, lean: "cash", tags: [], check: { type: "save", cash: 15000 } },
@@ -153,6 +160,8 @@ export function nextUnlock(clout: number): number | null {
  * `toward` tags the goal's daily tasks.
  */
 export const GOAL_COPY: Record<string, { emoji: string; title: string; line: string; toward: string }> = {
+  regular: { emoji: "🥪", title: "Become a regular", line: "Three different days at Sal's and he starts your order before you ask. That's love in Queens.", toward: "Toward being a regular" },
+  own_place: { emoji: "🔑", title: "Get your own place", line: "Nobody moves to New York to keep a roommate forever. Get your own keys.", toward: "Toward your own keys" },
   first_purchase: { emoji: "🛍️", title: "Make your first purchase", line: "Buy literally anything. Retail therapy is still therapy.", toward: "Toward your first haul" },
   first_shift: { emoji: "⏱️", title: "Work your first shift", line: "Clock in. Smile at a customer. Die a little inside. Get paid.", toward: "Toward your first paycheck" },
   full_day: { emoji: "✅", title: "Clear all five daily tasks", line: "Every errand, one day. Your mom would be so proud.", toward: "Toward a perfect day" },

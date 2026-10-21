@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { campusById } from "@/lib/campus";
-import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, eventToday, formatCountdown, isHub, isStation, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, eventToday, closedLine, formatCountdown, hoursLine, isHub, isStation, placeOpen, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
@@ -121,8 +121,9 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
     <div className="stack-8">
       {place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => {
         const base = actionAvailability(place.id, { ...a, price: Math.round((a.price ?? 0) * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1)) }, state);
-        // Story closures win; restrictions allow only listed actions (World State stacking rules).
+        // Story closures win; restrictions allow only listed actions (World State stacking rules). C2: then opening hours.
         const av = world.closed ? { ok: false as const, reason: world.closed.reason }
+          : !placeOpen(place, minutes) && a.kind !== "gigs" ? { ok: false as const, reason: closedLine(place, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay) }
           : world.restricted && !world.restricted.allow.includes(a.id) ? { ok: false as const, reason: world.restricted.reason }
           : base;
         const paid = Math.round((a.price ?? 0) * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1));
@@ -537,6 +538,17 @@ export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
   );
 }
 
+/** C2: "🕒 Open 6 PM to 5 AM", or when it's shut, when it opens (ticks with the city clock). */
+function PlaceHoursTag({ place, offsetSeconds }: { place: Place; offsetSeconds: number }) {
+  const minutes = cityMinutes(useGameNow(offsetSeconds, 1000), GAME_CONFIG.cityClock);
+  const open = placeOpen(place, minutes);
+  return (
+    <span className={`tag ${open ? "tag-positive" : "tag-neutral"}`}>
+      🕒 {open ? hoursLine(place) : closedLine(place, minutes, GAME_CONFIG.cityClock.realHoursPerCityDay)}
+    </span>
+  );
+}
+
 /** C37: the location card, opened from a pin or the Places list. */
 export function LocationSheet({
   place, state, daytime, handlers, onClose, onGoInside, from,
@@ -560,6 +572,7 @@ export function LocationSheet({
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>
             {place.tier && <span className="tag tag-neutral">{place.tier} dining</span>}
+            {place.hours && <PlaceHoursTag place={place} offsetSeconds={state.clockOffsetSeconds} />}
             {place.tags.some((t) => t.startsWith("job_")) && <span className="tag tag-positive">Hiring</span>}
           </div>
           <div>

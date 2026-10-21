@@ -1,13 +1,18 @@
 // Checks every week file in content/hunts/, content/news/, content/gossip/ and content/exams/ with the same rules the
 // Studio uses (lib/hunts.ts, lib/news.ts, lib/gossip.ts), plus: each hunt week has a Monday hunt
 // announcement in its news, and no gossip story id repeats across weeks.
+// Culture pack C1: the culture files (content/culture/) follow their rules, and no file in content/ uses a real brand,
+// team or trademarked name from content/culture/parody-names.json.
 // The weekly drafting routine runs this before opening its pull request (docs/WEEKLY-CONTENT.md).
 // Usage: npm run validate:content
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { validateHunt } from "../lib/hunts.ts";
 import { validateNewsWeek } from "../lib/news.ts";
 import { validateGossipWeek } from "../lib/gossip.ts";
 import { validateExamWeek } from "../lib/exams.ts";
+import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts";
+import { PLACES, boroughOf } from "../lib/city.ts";
+import { REGULARS } from "../lib/cast.ts";
 
 const root = new URL("../content/", import.meta.url);
 const list = (dir: string) => readdirSync(new URL(dir, root)).filter((f) => f.endsWith(".json")).sort();
@@ -57,4 +62,27 @@ for (const f of list("exams/")) {
   if (f !== `${raw.week}.json`) { fail(`content/exams/${f}`, [`name the file after its week: ${raw.week}.json`]); continue; }
   console.log(`✓ content/exams/${f} (${r.rows.length} questions)`);
 }
+// Culture pack C1: the slang, the invented names and Astoria's profiles.
+const culture: CultureData = {
+  slang: JSON.parse(readFileSync(new URL("culture/slang.json", root), "utf8")),
+  parody: JSON.parse(readFileSync(new URL("culture/parody-names.json", root), "utf8")),
+  npcs: JSON.parse(readFileSync(new URL("culture/npcs.json", root), "utf8")),
+};
+const astoria = PLACES.filter((p) => p.neighborhood === "Astoria" && boroughOf(p) === "queens").map((p) => p.id);
+const cultureProblems = validateCulture(culture, { placeIds: PLACES.map((p) => p.id), astoria, regulars: REGULARS });
+if (cultureProblems.length) fail("content/culture/", cultureProblems);
+else console.log(`✓ content/culture/ (${culture.slang.terms.length} slang terms, ${culture.npcs.profiles.length} profiles, ${culture.parody.names.length} invented names)`);
+// No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
+const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {
+  const u = new URL(f, dir);
+  return statSync(u).isDirectory() ? walk(new URL(`${f}/`, dir)) : f.endsWith(".json") ? [u.pathname] : [];
+});
+let brandFiles = 0;
+for (const file of walk(root)) {
+  if (file.endsWith("culture/parody-names.json")) continue;
+  brandFiles++;
+  const hits = brandHits(readFileSync(file, "utf8"), culture.parody.names);
+  if (hits.length) fail(file.slice(file.indexOf("content/")), [`real names: ${[...new Set(hits)].join(", ")} (use the invented ones in content/culture/parody-names.json)`]);
+}
+console.log(`✓ no real brand names in ${brandFiles} content files`);
 if (failed) process.exit(1);

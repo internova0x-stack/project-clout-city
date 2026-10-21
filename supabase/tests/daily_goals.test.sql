@@ -4,6 +4,9 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
+-- C3 (migration 0094): a player's move-in day starts with fixed tasks; these scenarios are about an ordinary day.
+create function pg_temp.settled() returns void language plpgsql security definer as $h$
+begin update public.players set moved_in_at = now() - interval '3 days' where id = auth.uid(); end $h$;
 create function pg_temp.assert(ok boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; end $$;
 create function pg_temp.raises(stmt text, err text) returns boolean language plpgsql as $$
@@ -19,13 +22,19 @@ insert into auth.users (id) values ('00000000-0000-0000-0000-0000000073a1'), ('0
 set role authenticated;
 select pg_temp.as_('00000000-0000-0000-0000-0000000073a1');
 select 1 from public.create_player('Goaldie', 'bodega_drip', '{}', null, true);
-select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
+select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio'); select pg_temp.settled();
 select 1 from public.sync_player();
 select pg_temp.as_('00000000-0000-0000-0000-0000000073a2');
 select 1 from public.create_player('Streaky', 'bodega_drip', '{}', null, true);
-select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
+select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio'); select pg_temp.settled();
 select 1 from public.sync_player();
 reset role;
+-- C3 (0094): "Become a regular" now opens the ladder; count it done so these scenarios start from the first purchase.
+insert into public.ledger (player_id, currency, amount, kind, ref) values
+  ('00000000-0000-0000-0000-0000000073a1', 'clout', 0, 'goal', 'regular'),
+  ('00000000-0000-0000-0000-0000000073a2', 'clout', 0, 'goal', 'regular');
+delete from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000073a1';
+select public.ensure_daily('00000000-0000-0000-0000-0000000073a1');
 
 -- Browser access: the two RPCs for players only; the helpers for nobody.
 select pg_temp.assert(not has_function_privilege('anon', 'public.goals_state()', 'execute'), 'anon: no goals_state');
@@ -57,11 +66,12 @@ select pg_temp.assert(public.goals_state() -> 'goal' -> 'parts' = '[{"have": 0, 
 select pg_temp.assert(pg_temp.raises($$select public.buy_item('home-trophy-shelf')$$, 'reward_only'), 'streak rewards are not for sale');
 select 1 from public.buy_item('home-plant');
 select pg_temp.assert(public.goals_state() -> 'goal' ->> 'id' = 'first_shift', 'next: the first shift');
-select pg_temp.assert(public.goals_state() -> 'done' = '["first_purchase"]'::jsonb, 'first purchase done');
+-- C3: a studio has no roommate, so "Get your own place" is done from the start.
+select pg_temp.assert(public.goals_state() -> 'done' = '["regular", "first_purchase", "own_place"]'::jsonb, 'first purchase done');
 create temp table c0 as select clout from public.players where id = auth.uid();
 grant all on c0 to authenticated;
 reset role;
-select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a1' and kind = 'goal') = 1, 'goal reward paid once');
+select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a1' and kind = 'goal' and ref = 'first_purchase') = 1, 'goal reward paid once');
 select pg_temp.assert((select amount from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a1' and kind = 'goal' and ref = 'first_purchase') = 25, '25 clout');
 select public.goal_settle('00000000-0000-0000-0000-0000000073a1');
 select pg_temp.assert((select clout from public.players where id = '00000000-0000-0000-0000-0000000073a1') = (select clout from c0), 'settling again pays nothing');
@@ -97,7 +107,7 @@ select pg_temp.assert((select bool_and(coalesce((a ->> 'confidence')::int, 0) > 
                         where d.player_id = '00000000-0000-0000-0000-0000000073a2' and d.goal is not null and p ->> 'id' = d.place_id and a ->> 'id' = d.action_id),
                       'goal tasks give Confidence or clout');
 select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000073a2') = 5, 'still five');
-select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a2' and kind = 'goal' and amount > 0) = 5, 'five goals paid (four in chapter one, savings)');
+select pg_temp.assert((select count(*) from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a2' and kind = 'goal' and amount > 0) = 6, 'six goals paid (four in chapter one, your own place (C3), savings)');
 select pg_temp.assert((select amount from public.ledger where player_id = '00000000-0000-0000-0000-0000000073a2' and kind = 'goal' and ref = 'save_15k') = 75, 'saving C$15,000 pays 75');
 -- The hot dog cart: a business goal, its price as the cash part.
 select pg_temp.assert((select g -> 'parts' -> 0 ->> 'need' from jsonb_array_elements(public.goal_list('00000000-0000-0000-0000-0000000073a2')) g where g ->> 'id' = 'first_business')::int = 5000, 'the cart costs C$5,000');

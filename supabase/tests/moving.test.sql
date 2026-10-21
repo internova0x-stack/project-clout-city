@@ -21,6 +21,8 @@ select 1 from public.create_player('mover_one', 'bodega_drip', '{}', null, true)
 select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
 reset role;
 update public.players set bank_cash = 10000, clout = 999 where display_name = 'mover_one';
+-- C3 (0094): a studio finishes "Get your own place"; count it paid so its 75 clout doesn't tip this player past 1,000.
+insert into public.ledger (player_id, currency, amount, kind, ref) values ('00000000-0000-0000-0000-0000000000f3', 'clout', 0, 'goal', 'own_place');
 set role authenticated;
 
 select pg_temp.assert(pg_temp.raises($$select public.move_home('astoria_studio')$$, 'already_home'), 'already living there');

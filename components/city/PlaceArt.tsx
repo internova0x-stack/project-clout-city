@@ -156,6 +156,8 @@ const PLACE_THEME: Record<string, ThemeName> = {
   "hell-gate-park": "green", "rep-count": "yellow", "astoria-blvd-station": "yellow", "reel-queens": "purple",
   "respawn-arena": "deepBlue", "the-sticky-floor": "green", "discount-disco": "yellow", "ultraviolet-society": "purple",
   "real-clout-fm": "red", "clout-tower": "deepBlue", "st-copays": "offWhite", "brownstone-sessions": "brown",
+  "still-a-dollar-slice": "red", "white-sauce-cart": "yellow", "boiled-and-beloved": "deepBlue", "feta-compli": "deepBlue",
+  "schlep-and-schmear": "brown",
 };
 function themeOf(place: Place) {
   return THEMES[PLACE_THEME[place.id] ?? "cream"];
@@ -1176,6 +1178,48 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
           </Box>
           {(() => { const [px, py] = iso(-0.5, 0, 4.4); return (<g><rect x={px - 9} y={py - 10} width={18} height={9} rx={4.5} fill={b} /><circle cx={px - 4.5} cy={py - 5.5} r={1.4} fill={c} /><circle cx={px + 4} cy={py - 6.5} r={1} fill={c} /><circle cx={px + 5.6} cy={py - 4.8} r={1} fill={c} />{night && <circle cx={px} cy={py - 6} r={14} fill={b} opacity={0.25} filter="url(#mv-blur)" />}</g>); })()}
           <Lantern x={5} y={4} night={night} />
+        </>
+      );
+    }
+    // ---- Culture pack C2: Astoria food. Shopfronts for the slice shop, the taverna and the deli; carts under umbrellas. ----
+    case "still-a-dollar-slice":
+    case "feta-compli":
+    case "schlep-and-schmear": {
+      const sign = { "still-a-dollar-slice": "Still-a-Dollar", "feta-compli": "Feta Compli", "schlep-and-schmear": "Schlep & Schmear" }[place.id]!;
+      const shop: BoxSpec = { x: -4.5, y: -4, z: 0, w: 7, d: 6, h: 4.8, color: mixHex(b, "#F4EDE6", 0.4) };
+      const upper: BoxSpec = { x: -4.5, y: -4, z: 4.8, w: 7, d: 6, h: 2.6, color: mixHex("#B86A4A", c, 0.15) };
+      return (
+        <>
+          {base}
+          <Box b={shop} night={night}>
+            <OnLeft b={shop} u={0.5} v={0} uw={4} vh={2.6} fill={night ? lit : glassDark} opacity={0.9} />
+            <OnLeft b={shop} u={4.9} v={0} uw={1.6} vh={2.6} fill={mixHex(a, "#1F1B26", 0.35)} />
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => <OnLeft key={i} b={shop} u={i} v={2.75} uw={0.5} vh={0.8} fill={i % 2 ? "#FFFFFF" : a} />)}
+            <SignLeft b={shop} text={sign} color={a} ink="#FFFFFF" v={3.6} night={night} />
+          </Box>
+          <Box b={upper} night={night}>{windowsLeft(upper, 1, 3, lit, glassDark, night)}{windowsRight(upper, 1, 2, lit, glassDark, night)}</Box>
+          <Lantern x={3.8} y={3.2} night={night} />
+          <Tree x={-5} y={4} night={night} size={0.8} />
+        </>
+      );
+    }
+    case "white-sauce-cart":
+    case "boiled-and-beloved": {
+      const cart: BoxSpec = { x: -2.2, y: -1.4, z: 0.8, w: 4.4, d: 2.8, h: 2.4, color: mixHex(b, "#E6E8EC", 0.3) };
+      const pts = (z: number, r: number) => [[-r, -r], [r, -r], [r, r], [-r, r]].map(([x, y]) => iso(x, y, z).join(",")).join(" ");
+      const [tx, ty] = iso(0, 0, 8.6);
+      return (
+        <>
+          {base}
+          {[[-1.8, -1], [1.8, -1], [-1.8, 1], [1.8, 1]].map(([x, y]) => { const [px, py] = iso(x, y, 0); return <circle key={`${x}${y}`} cx={px} cy={py - 1.6} r={1.6} fill="#3A3540" />; })}
+          <Box b={cart} night={night}>
+            <OnLeft b={cart} u={0.3} v={0.4} uw={3.8} vh={1.2} fill={night ? lit : "#FFFFFF"} opacity={0.85} />
+          </Box>
+          {(() => { const [px, py] = iso(0, 0, 3.2); return <rect x={px - 0.4} y={ty + 2} width={0.8} height={py - ty - 2} fill="#3A3540" />; })()}
+          <polygon points={pts(7.2, 3.6)} fill={a} opacity={0.95} />
+          {[[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6]].map(([x, y]) => { const [px, py] = iso(x, y, 7.2); return <line key={`${x}${y}`} x1={px} y1={py} x2={tx} y2={ty} stroke={c} strokeWidth={0.6} opacity={0.6} />; })}
+          <Lantern x={-4.5} y={3.5} night={night} />
+          <Tree x={4.6} y={4.2} night={night} size={0.8} />
         </>
       );
     }

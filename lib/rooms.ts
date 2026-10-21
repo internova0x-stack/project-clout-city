@@ -427,6 +427,21 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
     id: "astoria_studio", w: 5.4, d: 5.2, wall: "#E9D8C4", wallAccent: "#C9B49C", floor: "#A8744A", floorKind: "wood", window: true,
     items: studioItems(1), spawn: [0.6, 2.3],
   },
+  // Culture pack C3 (owner, Oct 20: "two beds or a bunk"): the shared apartment, two single beds side by side. Yours is
+  // the one you nap in; Priya's is made with hospital corners.
+  astoria_share: {
+    id: "astoria_share", w: 6.0, d: 5.2, wall: "#E4DCCB", wallAccent: "#B9A88E", floor: "#9C6C46", floorKind: "wood", window: true,
+    items: [
+      { id: "share-bed", kind: "bed", x: -2.1, z: -1.5, rot: 0, color: "#6C8CFF", use: { kind: "sleep" }, label: "Nap" },
+      { id: "share-bed-priya", kind: "bed", x: 0.1, z: -1.5, rot: 0, color: "#E0457B", name: "Priya's bed" },
+      { id: "share-plant", kind: "plant", x: 1.6, z: -2.3, rot: 0 },
+      { id: "share-kitchen", kind: "kitchen", x: 2.65, z: -0.4, rot: 3, use: { kind: "cook" }, label: "Kitchen" },
+      { id: "share-rug", kind: "rug", x: 0.2, z: 1.0, rot: 0, color: "#40B589" },
+      { id: "share-sofa", kind: "sofa", x: 0.2, z: 1.9, rot: 2, color: "#FF8A3D", use: sit, label: "Sit" },
+      { id: "share-wardrobe", kind: "wardrobe", x: -2.65, z: 1.0, rot: 1, use: { kind: "look" }, label: "Your look" },
+    ],
+    spawn: [0.9, 0.6],
+  },
   jackson_heights_1br: jacksonHeights,
   lic_highrise: licHighrise,
   // v0.15 Campus: the dorm rooms, in each school's colors (the roommate's side arrives with the campus screens).

@@ -122,7 +122,7 @@ export default async function Preview({
     case "home": {
       const fresh = state === "new";
       const player: Player = fresh
-        ? { ...SAMPLE, onboarding_step: "home_done", tutorial_state: "pending", first_party_at: null, clout: 0, bank_cash: 5300, energy: 100, confidence: 40 }
+        ? { ...SAMPLE, onboarding_step: "home_done", tutorial_state: "pending", first_party_at: null, clout: 0, bank_cash: 5300, energy: 100, confidence: 40, home_id: "astoria_share" }
         : SAMPLE;
       return (
         <PreviewHome

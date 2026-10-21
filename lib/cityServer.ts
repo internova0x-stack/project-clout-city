@@ -2,6 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Bill, CityPlayer, CityState, DailyTask, GigOffer, PlayerItem } from "./cityState";
 import type { LottoState } from "./lotto";
 import type { PerksState } from "./skills";
+import NPCS from "../content/culture/npcs.json";
+
+/** C2: places whose person remembers you after a few different days (content/culture/npcs.json "remembers"). */
+const REMEMBER_PLACES = NPCS.profiles.filter((p) => "remembers" in p && p.remembers).map((p) => p.placeId);
 
 // Loads the signed-in player's city state. Runs the lazy daily tick first
 // (sync_player), so bills, tasks and gig offers are current. Returns null when
@@ -15,7 +19,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
-  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks] = await Promise.all([
+  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks, days] = await Promise.all([
     supabase.from("daily_tasks").select("*").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
@@ -39,6 +43,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     supabase.rpc("lotto_state"),
     // Migration 0092; missing until it runs, which hides skill gigs and invites.
     supabase.rpc("skill_perks_state"),
+    // C2: one place_visits row per place per New York day, so rows are days.
+    supabase.from("place_visits").select("place_id").in("place_id", REMEMBER_PLACES),
   ]);
   const devValue = (dev.data?.value ?? {}) as { tools?: boolean; clockOffsetSeconds?: number };
   return {
@@ -69,6 +75,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     gigs: (gigs.data ?? []) as GigOffer[],
     bills: (bills.data ?? []) as Bill[],
     items: (items.data ?? []) as PlayerItem[],
+    regularDays: ((days.data ?? []) as { place_id: string }[]).reduce<Record<string, number>>((m, v) => ({ ...m, [v.place_id]: (m[v.place_id] ?? 0) + 1 }), {}),
     visitsToday: Object.fromEntries(((visits.data ?? []) as { place_id: string; visits: number }[]).map((v) => [v.place_id, v.visits])),
     attendedToday: ((attended.data ?? []) as { event_id: string }[]).map((a) => a.event_id),
     clockOffsetSeconds: Number(devValue.clockOffsetSeconds ?? 0),

@@ -29,6 +29,11 @@ mean. Examples:
 
 Both voices still follow the house rules: invented names only, no real brands, no promises the game doesn't keep.
 
+Culture pack C1 (owner, Oct 20): Lola also uses **one or two slang terms per message** from
+`content/culture/slang.json`, keeping her own style. Every character and generated line follows
+[docs/culture/VOICE.md](culture/VOICE.md); each Astoria person has a full profile (background, personality,
+catchphrases, likes, dislikes) in `content/culture/npcs.json`.
+
 ## The celebrity world
 
 For City News. Each has a personality, a want and a flaw, so their news writes itself. City news stays light: feuds, breakups, deals, comebacks and flops; no politics, tragedies or crime.
@@ -74,6 +79,26 @@ Tap a regular on a place card to hear a line; each tap says the next one. While 
 | Hell Gate Park | Gus, same bench, every day | driver | “Seen a lot from this bench. Want to hear about 1987?” |
 | Lucky Star Lotto | Benny Fortuna, the owner, never bought a ticket | clerk | “Never bought one myself. Somebody's gotta stay rich.” |
 | Gantry Plaza | Inez, the wedding photographer | driver | “Third proposal today. She said yes. They always say yes here. It's the lighting.” |
+| St. Copay's General Hospital | Dr. Eleni Markou, the ER doctor (C1) | patron | “The wait is two hours. I said what I said.” |
+| Low Light Lounge | Marcos Albuquerque, the owner (C1) | bartender | “Booth two is taken. By whom? Nobody. Officially.” |
+| Steinway Fresh Mart | Camila Restrepo, the store manager (C1) | clerk | “Forty kinds of feta. Mira, I've tasted all of them.” |
+| Triborough Works | Valentina Ospina, runs the gigs board (C1) | regular | “Ignore the kombucha. Take the gig.” |
+| Harmony Community Chapel | Rev. Mercy Adeyemi, the reverend (C1) | patron | “Everyone's welcome. The chairs are a test of faith.” |
+| Astoria Blvd station | Yesenia Ortiz, the station agent (C1) | driver | “¿Qué lo que? The train is two stops away. It's always two stops away.” |
+| Clout TV Tower | Nour El-Sayed, the Big Screen producer (C1) | dj | “Three hours on the Big Screen. Make the photo count.” |
+| Still-a-Dollar Slice | Arben Krasniqi, the owner (C2) | cook | “Two slices and a soda? Say less. Already in the oven.” |
+| The White Sauce Cart | Tariq Hossain, the cart owner (C2) | cook | “Three a.m. is my rush hour. Everybody's honest at three a.m.” |
+| Boiled & Beloved Hot Dogs | Lou Ferraro, the cart owner (C2) | cook | “Onions? Mustard? Don't ask about the water.” |
+| Feta Compli Taverna | Andreas Charalambous, the owner (C2) | bartender | “Today is somebody's name day. It's always somebody's name day.” |
+| Schlep & Schmear Deli | Hersh Weiss, the owner, at the counter (C2) | clerk | “On line, not in line. You're in New York now.” |
+
+**Roommate (C3):** Priya Raman, 27, a night-shift ER nurse at St. Copay's from Edison, New Jersey, shares the
+"Room share with a roommate" apartment. She introduces herself once and leaves a fridge note a day
+(`roommates` in `content/culture/npcs.json`).
+
+Tapping a regular plays their everyday lines (`content/cast-lines.json`) and their profile's catchphrases
+(`content/culture/npcs.json`). Rockaway Diner (Effie, the waitress) and Radiant Harbor Church (Pastor Vale) have
+profiles but nobody on the card: they're the Sarah Bird story's places.
 
 ## Writing for the cast
 
