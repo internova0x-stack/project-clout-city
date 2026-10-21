@@ -73,6 +73,9 @@ export const REGULARS: Regular[] = [
   { id: "lou", name: "Lou Ferraro", title: "the cart owner", placeId: "boiled-and-beloved", emoji: "🌭", role: "cook" },
   { id: "andreas", name: "Andreas Charalambous", title: "the owner", placeId: "feta-compli", emoji: "🫒", role: "bartender" },
   { id: "hersh", name: "Hersh Weiss", title: "the owner, at the counter", placeId: "schlep-and-schmear", emoji: "🥯", role: "clerk" },
+  // Culture pack C5: the rooftop's guest list and the ballpark's longest-serving usher.
+  { id: "kiki", name: "Kiki Mensah", title: "runs the guest list", placeId: "ditmars-heights-rooftop", emoji: "🌃", role: "doorman" },
+  { id: "hector", name: "Hector Rivera", title: "usher, Section 7", placeId: "meteor-park", emoji: "⚾", role: "driver" },
   // v0.14 On Air (owner, Oct 16): the voice of The Wake-Up Call, always at the desk.
   { id: "sharm", name: "Sharm Almight", title: "DJ, The Wake-Up Call", placeId: "real-clout-fm", emoji: "🎙️", role: "bartender" },
   // The Hub's host (owner, Oct 16): the city's tea queen, who can get you anything and knows everyone worth knowing.

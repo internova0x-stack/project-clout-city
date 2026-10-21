@@ -680,6 +680,36 @@
         "kvetch",
         "putz"
       ]
+    },
+    {
+      "id": "kiki",
+      "name": "Akosua \"Kiki\" Mensah",
+      "age": 33,
+      "background": "Ghanaian-American, born in Kumasi, raised in the Bronx",
+      "personality": "Runs the rooftop's guest list like a border crossing and the party like a family reunion. Roots for the Bronx Bigshots in a Queens bar, loudly, on purpose.",
+      "yearsInNeighborhood": 6,
+      "catchphrases": [
+        "You on the list? You're on the list. Don't tell anyone how easy that was.",
+        "Best view of the skyline in Queens. Deadass. Ask anybody who's been to the other ones.",
+        "New Year's up here: heaters, a countdown and nobody wearing a diaper. Times Square could never."
+      ],
+      "likes": [
+        "Heat lamps",
+        "Skyline photos at golden hour",
+        "The Bronx Bigshots"
+      ],
+      "dislikes": [
+        "Line cutters",
+        "Flash photography at the bar",
+        "Meteors fans gloating (rare, to be fair)"
+      ],
+      "placeId": "ditmars-heights-rooftop",
+      "role": "the guest-list manager",
+      "regular": "kiki",
+      "slang": [
+        "deadass",
+        "facts"
+      ]
     }
   ],
   "roommates": [
