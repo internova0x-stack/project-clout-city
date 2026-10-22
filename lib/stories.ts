@@ -32,7 +32,14 @@ export interface StoryEffect {
 }
 
 /** `body` is the feed card's teaser; `post` the full blog post behind "Read more" (owner, Oct 22; paragraphs split by a blank line). */
-export interface NewsItem { headline: string; body?: string; hook?: string; previously?: string | null; post?: string }
+export interface NewsItem { headline: string; body?: string; hook?: string; previously?: string | null; post?: string; cast?: string[] }
+
+/**
+ * A story's key characters (owner, Oct 22): shown as avatar heads at the end of each blog post (the beat's `cast`, ids
+ * from here), with a short bio on tap. `look` uses the game's avatar options (lib/look.ts) and `style` a starting style.
+ * Side stories use their main story's characters unless they list their own.
+ */
+export interface StoryCharacter { id: string; name: string; role: string; bio: string; style: string; look: Record<string, unknown> }
 
 export interface PredictionOption { id: string; label: string }
 export interface Prediction {
@@ -101,6 +108,7 @@ export interface Arc {
   events?: StoryEvent[];
   beats: Beat[];
   chatter?: Record<string, Partial<Record<Phase, Record<string, string[]>>>>;
+  characters?: StoryCharacter[];
 }
 
 export const NY = "America/New_York";

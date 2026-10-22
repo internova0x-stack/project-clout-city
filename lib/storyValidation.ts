@@ -2,6 +2,7 @@
 // Returns a list of problems; an empty list means the content can ship.
 
 import { PLACES, SHOP_ITEMS } from "./city.ts";
+import { isValidLook } from "./look.ts";
 import { PRICE_CAP, dayDiff, lastDay, nyTime, type Arc, type Phase } from "./stories.ts";
 
 const STATUSES = ["active", "paused", "retired"];
@@ -74,6 +75,19 @@ export function validateArcs(arcs: Arc[]): string[] {
       for (const b of arc.beats) if (b.day > parentLast) err(a, `${b.id}: drops after the parent arc ends`);
       if (arc.beats.some((b) => b.effects.some((e) => e.type !== "flag"))) err(a, "side-arc effects are personal-layer only; shared effects are not allowed");
     }
+
+    // ---- characters (owner, Oct 22): avatar heads and bios at the end of each post ----
+    const charIds = new Set<string>();
+    for (const c of arc.characters ?? []) {
+      if (!c.id || charIds.has(c.id)) err(a, `character ${c.id || "(no id)"}: missing or repeated id`);
+      charIds.add(c.id);
+      if (!c.name?.trim() || !c.role?.trim()) err(a, `character ${c.id}: needs a name and a role`);
+      if (!c.bio || c.bio.length < 20 || c.bio.length > 280) err(a, `character ${c.id}: the bio is 20 to 280 characters`);
+      if (!isValidLook(c.look, c.style)) err(a, `character ${c.id}: the look uses an option the avatar doesn't have`);
+    }
+    const parentChars = arc.parent_arc_id ? byId.get(arc.parent_arc_id)?.characters ?? [] : [];
+    const known = new Set([...charIds, ...parentChars.map((c) => c.id)]);
+    for (const b of arc.beats) for (const id of b.news?.[0]?.cast ?? []) if (!known.has(id)) err(a, `${b.id}: cast names unknown character ${id}`);
 
     // ---- effects: types, tags, expiries, caps ----
     const eventIds = new Set((arc.events ?? []).map((e) => e.id));

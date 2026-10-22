@@ -79,7 +79,7 @@ export function buildFeed(arcs: Arc[], starts: Record<string, string | null>, no
     const beats = arc.beats.filter((b) => b.status === "active" && b.day <= day).map((b) => ({
       id: b.id, day: b.day, headline: b.news[0].headline, locked: !entitled, seen: st.seen.includes(b.id),
       ...(entitled ? {
-        body: b.news[0].body, post: b.news[0].post, ...(b.news[0].post ? { read: st.paid.includes(`read:${b.id}`) } : {}), hook: b.news[0].hook, previously: b.news[0].previously ?? undefined, cardNote: b.card_note,
+        body: b.news[0].body, post: b.news[0].post, cast: b.news[0].cast, ...(b.news[0].post ? { read: st.paid.includes(`read:${b.id}`) } : {}), hook: b.news[0].hook, previously: b.news[0].previously ?? undefined, cardNote: b.card_note,
         evidence: b.evidence, pointsAtAnswer: b.points_at_answer,
       } : {}),
     }));
@@ -112,6 +112,8 @@ export function buildFeed(arcs: Arc[], starts: Record<string, string | null>, no
     out.push({
       id: arc.id, title: arc.title, type: arc.type, kind: arc.kind, tier: arc.tier, sku: arc.sku, parent: arc.parent_arc_id,
       teaser: arc.teaser, emoji: arc.emoji, prompt: arc.prompt, day, lastDay: lastDay(arc), finished, entitled, beats, upcoming, predictions, badges: arc.badges,
+      // Owner, Oct 22: the characters at the end of each post (a side story uses its main story's unless it has its own).
+      characters: arc.characters ?? (arc.parent_arc_id ? arcs.find((p) => p.id === arc.parent_arc_id)?.characters : undefined),
     });
   }
   const effects = activeEffects(arcs.filter((a) => liveDay(a, arcs, starts, today) !== null), today, starts);

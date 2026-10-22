@@ -16,6 +16,8 @@ export interface FeedBeat {
   post?: string;
   /** Migration 0117: whether this player has opened the post (reading pays clout once). */
   read?: boolean;
+  /** Owner, Oct 22: ids of the post's key characters (FeedArc.characters). */
+  cast?: string[];
   hook?: string;
   previously?: string;
   cardNote?: string;
@@ -60,6 +62,8 @@ export interface FeedArc {
   upcoming?: { id: string; day: number; headline?: string }[];
   predictions: FeedPrediction[];
   badges?: { id: string; name: string; emoji: string; line: string }[];
+  /** Owner, Oct 22: the story's key characters, shown as avatar heads at the end of a post. */
+  characters?: { id: string; name: string; role: string; bio: string; style: string; look: Record<string, unknown> }[];
 }
 
 export interface StoryFeed {

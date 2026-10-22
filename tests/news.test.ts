@@ -60,3 +60,23 @@ test("reading a story's blog post pays the same clout in the game and the databa
   const sql = readFileSync(new URL("../supabase/migrations/0117_story_read_clout.sql", import.meta.url), "utf8");
   assert.match(sql, new RegExp(`reward constant int := ${GAME_CONFIG.storyReadClout};`));
 });
+
+test("story characters come from the story files: the cast of each released post, a side story borrows its main's (owner, Oct 22)", async () => {
+  const { withCharacters } = await import("../lib/storyCharacters.ts");
+  const { loadArcs } = await import("../lib/storyContent.ts");
+  const files = loadArcs();
+  const beat = (id: string, locked = false) => ({ id, day: 1, headline: "H", locked, seen: false });
+  const arc = (id: string, beats: ReturnType<typeof beat>[]) => ({ id, title: id, type: "main" as const, tier: "free" as const, day: 1, lastDay: 9, finished: false, entitled: true, beats, predictions: [] });
+  const feed = { arcs: [arc("diss-and-tell", [beat("dt-1")]), arc("diss-and-tell-cosign", [beat("dtc-1", true)])] } as unknown as Parameters<typeof withCharacters>[0];
+  const out = withCharacters(feed, files);
+  const main = out.arcs[0];
+  assert.ok((main.characters ?? []).some((c) => c.id === "toni-treasure"));
+  assert.deepEqual(main.beats[0].cast, ["lord-menace", "big-ruckus", "toni-treasure"]);
+  assert.equal(out.arcs[1].characters?.length, main.characters?.length, "the side story uses the main story's characters");
+  assert.equal(out.arcs[1].beats[0].cast, undefined, "nothing for a locked post");
+  // Every cast id is a known character, and every look is one the avatar can draw (the story checks too).
+  for (const a of files) for (const b of a.beats) for (const id of b.news[0]?.cast ?? []) {
+    const chars = a.characters ?? files.find((p) => p.id === a.parent_arc_id)?.characters ?? [];
+    assert.ok(chars.some((c) => c.id === id), `${b.id}: ${id}`);
+  }
+});

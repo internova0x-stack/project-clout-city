@@ -2,6 +2,7 @@
 
 import { storyError, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
 import { getServerSupabase } from "@/lib/supabase/server";
+import { withCharacters } from "@/lib/storyCharacters";
 
 // Server actions for the News app and story world. Each calls one SQL function,
 // then returns the player's fresh story feed (supabase/migrations/0007).
@@ -17,7 +18,7 @@ async function run(fn: string, args: Record<string, unknown>, clout?: (data: unk
   }
   const { data, error } = await supabase.rpc("story_feed");
   if (error || !data) return { ok: false, error: "The newsroom is closed on this server." };
-  return { ok: true, feed: data as StoryFeed, clout: earned };
+  return { ok: true, feed: withCharacters(data as StoryFeed), clout: earned };
 }
 
 const taskClout = (d: unknown) => (Array.isArray(d) ? d.reduce((n, t) => n + (Number(t?.clout) || 0), 0) : undefined);
@@ -62,5 +63,5 @@ export async function loadStoryFeed(): Promise<StoryFeed | null> {
   const supabase = await getServerSupabase();
   if (!supabase) return null;
   const { data, error } = await supabase.rpc("story_feed");
-  return error ? null : (data as StoryFeed);
+  return error ? null : withCharacters(data as StoryFeed);
 }
