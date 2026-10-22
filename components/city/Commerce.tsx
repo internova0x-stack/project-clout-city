@@ -66,14 +66,11 @@ export function ShopSheet({
   const wearControl = (sku: string) => {
     const mine = state.items.find((i) => i.sku === sku && i.category === "fashion");
     if (!mine || !onEquip || !wearSlot(sku)) return null;
-    // Owned clothes say so, so "Wear" never reads as the price (owner, Oct 22).
+    // The card's Owned pill says it's yours, so "Wear" never reads as the price (owner, Oct 22).
     return (
-      <div className="row" style={{ gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-        <span className="owned-chip">Owned</span>
-        <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} style={{ flex: "1 1 auto", whiteSpace: "nowrap" }} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
-          {mine.equipped ? "Wearing ✓" : "Wear"}
-        </button>
-      </div>
+      <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} style={{ whiteSpace: "nowrap" }} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
+        {mine.equipped ? "Wearing ✓" : "Wear"}
+      </button>
     );
   };
   const source: ShopCardItem[] = catalog
@@ -107,7 +104,10 @@ export function ShopSheet({
         <div key={item.sku} className="item-card collector">
           <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
             <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
-            <span className="tag tag-gold">✨ Real cash</span>
+            <span className="stack-4" style={{ alignItems: "flex-end" }}>
+              <span className="tag tag-gold">✨ Real cash</span>
+              {(isOwned || p?.owned) && <OwnedPill />}
+            </span>
           </div>
           <span className="title" style={{ display: "block" }}>{item.name}</span>
           <span className="subtext clamp-2">{item.blurb}</span>
@@ -117,7 +117,7 @@ export function ShopSheet({
             : item.editionSize ? <span className="meta">Numbered · {item.editionSize} per drop</span> : null}
           <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}{p ? ` · worth ${formatCash(p.value ?? 0)}` : ""}</span>
           {isOwned || p?.owned ? (
-            wearControl(item.sku) ?? <span className="owned-chip">Owned</span>
+            wearControl(item.sku)
           ) : p?.edition?.soldOut && !p.pending ? (
             <button className="btn btn-secondary btn-sm" disabled>Sold out</button>
           ) : soon ? (
@@ -142,7 +142,7 @@ export function ShopSheet({
       <div key={item.sku} className="item-card">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
-          {item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
+          {isOwned ? <OwnedPill /> : item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
         </div>
         <span className="title" style={{ display: "block" }}>{item.name}</span>
         <span className="subtext clamp-2">{item.blurb}</span>
@@ -154,7 +154,7 @@ export function ShopSheet({
           <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
         )}
         {isOwned ? (
-          wearControl(item.sku) ?? <span className="owned-chip">{player.car_sku === item.sku && player.car_mode === "rented" ? "Renting" : "Owned"}</span>
+          wearControl(item.sku) ?? (player.car_sku === item.sku && player.car_mode === "rented" ? <span className="owned-chip">Renting</span> : null)
         ) : soon ? (
           <>
             <span className="meta locked">🔒 Coming soon to your wardrobe</span>
@@ -604,6 +604,9 @@ export function BillsSheet({
  * #19 Fif's Furniture: the Shop's Home tab. Pieces are shelved by room; the same piece in other colors
  * shares one card with swatches. Every piece can be tried at home before buying.
  */
+/** Bought pieces carry this pill on their card (owner, Oct 22). */
+const OwnedPill = () => <span className="tag tag-positive owned-pill">✓ Owned</span>;
+
 function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryAtHome }: {
   items: ShopCardItem[]; owned: Set<string>; cash: number; purchases: number; busy: boolean; section?: string;
   onBuy: (item: ShopCardItem) => void; onTryAtHome?: (item: ShopItem) => void;
@@ -631,7 +634,10 @@ function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryA
           const mine = owned.has(item.sku);
           return (
             <div key={line} className="item-card">
-              <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
+              <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
+                {mine && <OwnedPill />}
+              </div>
               <span className="title" style={{ display: "block" }}>{item.name}</span>
               <span className="subtext clamp-2">{item.blurb}</span>
               {variants.length > 1 && (
@@ -643,7 +649,7 @@ function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryA
                 </div>
               )}
               <span className="meta">🔥 up to +{purchaseClout(item.clout, purchases)}</span>
-              {mine ? <span className="owned-chip">Owned{variants.length > 1 ? " in this color" : ""}</span> : (
+              {mine ? (variants.length > 1 && <span className="meta">You have this color</span>) : (
                 <div className="buy-rent">
                   {onTryAtHome && <button className="btn btn-secondary btn-sm" onClick={() => onTryAtHome(item)}>Try it at home</button>}
                   <button className={`btn btn-taxi btn-sm${cash < item.price ? " short" : ""}`} disabled={busy} onClick={() => onBuy(item)}>{formatCash(item.price)}</button>
