@@ -120,6 +120,7 @@ from (values
   ('0108_shop_duplicates.sql', coalesce((select exists (select 1 from public.shop_audit where action = 'dedupe')), false)),
   ('0109_look_fit.sql', coalesce((to_regprocedure('public.save_look(bigint[], text, jsonb)') is not null), false)),
   ('0110_aura.sql', coalesce((select pg_get_functiondef(f) like '%''Aura''%' from (select to_regprocedure('public.push_on_reward()') f) x where f is not null), false)),
-  ('0111_headwear_shop.sql', coalesce((select exists (select 1 from public.shop_catalog where sku = 'satin-durag')), false))
+  ('0111_headwear_shop.sql', coalesce((select exists (select 1 from public.shop_catalog where sku = 'satin-durag')), false)),
+  ('0112_rent_short.sql', coalesce((to_regprocedure('public.push_scan_rent_short()') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

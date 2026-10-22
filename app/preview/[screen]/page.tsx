@@ -37,6 +37,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
 //   /preview/home?campus=new|pick|week|friday|done  campus life (v0.15), standing at St. Johnsons
 //   /preview/home?transit=showtime  showtime dancers on every subway ride (C4); ?transit=pass starts with an OMG Card.
+//   /preview/home?rent=short|late|evict  the rent alarm: C$930 in the bank with rent due in 2 days, a day late, or 4 days late.
 //   The preview's News always has a live 7-train delay, so trips to Flushing take longer by subway.
 //   /preview/home?calendar=today  every calendar event (C5) is on right now; ?calendar=gift also starts with a gift box
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
@@ -90,7 +91,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar, couture, mayor, skin, build, outfit, size, pick } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -153,6 +154,7 @@ export default async function Preview({
           campusPreset={campus}
           skillsPreset={skills}
           transitPreset={transit}
+          rentPreset={rent}
           calendarPreset={calendar}
           couturePreset={couture}
           mayorPreset={mayor}

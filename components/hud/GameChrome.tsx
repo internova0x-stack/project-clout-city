@@ -23,6 +23,8 @@ export interface ChromeValues {
   online: number | null;
   eventsBadge: boolean;
   billsBadge?: boolean;
+  /** The rent alarm is on (lib/cityState.ts rentAlert): the bank pill shows a ❗ (owner, Oct 22). */
+  cashAlert?: boolean;
   /** v0.11: new tasks today (the first open of each New York day, cleared when tapped). */
   tasksBadge?: boolean;
   phoneBadge?: boolean;
@@ -120,7 +122,9 @@ export function GameChrome({
             <span className="circle"><DiamondIcon size={18} /></span>
             {netWorthPin && <span className="pin-dot" />}
           </button>
-          <button className="hud-btn" data-tour="money" onClick={() => onAction("bank")} aria-label="Bank balance">
+          <button className={`hud-btn${values?.cashAlert ? " cash-alert" : ""}`} data-tour="money" onClick={() => onAction(values?.cashAlert ? "bills" : "bank")}
+            aria-label={values?.cashAlert ? "Bank balance: not enough for your bills" : "Bank balance"}>
+            {values?.cashAlert && <span className="cash-alert-mark" aria-hidden="true">❗</span>}
             <span className="hud-number">{values ? formatCashShort(values.bank) : "C$—"}</span>
           </button>
         </div>
