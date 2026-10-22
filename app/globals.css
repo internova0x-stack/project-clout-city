@@ -699,6 +699,7 @@ button.tea-lead { border:0; font:inherit; font-size:13px; font-weight:600; curso
 .side-teaser .locked-row { padding:10px 0; }
 .side-teaser > .locked-row + .locked-row { margin-top:0; }
 .locked-row { display:block; padding:6px 0; border-top:1px solid var(--divider); color:var(--text-3); }
+.owned-pill { white-space:nowrap; flex-shrink:0; }
 .tag-gold { background:var(--gold-100); color:var(--gold-700); white-space:nowrap; flex-shrink:0; }
 .btn-gold { background:var(--g-gold); color:var(--night-900); box-shadow:var(--elev-2); }
 .reason-banner { display:flex; align-items:center; gap:8px; min-height:36px; padding:8px 12px; border-radius:var(--r-pill); background:var(--surface-raised); color:var(--text-1); box-shadow:var(--elev-1); position:relative; overflow:hidden; }
