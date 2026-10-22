@@ -7,6 +7,7 @@ import { InsightsTab } from "./Insights";
 import { PlayersTab } from "./Players";
 import { AffiliatesTab } from "./Affiliates";
 import { ShoutoutsTab } from "./Shoutouts";
+import { MayorInboxTab } from "./MayorInbox";
 import { BigScreenTab } from "./BigScreen";
 import { ShopManagerTab } from "./ShopManager";
 import { StoryPreview, describeEffect } from "./StoryPreview";
@@ -34,7 +35,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
-  const [tab, setTab] = useState<"stories" | "reports" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup" | "shop">(api.metrics ? "metrics" : "stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "mayor" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup" | "shop">(api.metrics ? "metrics" : "stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -127,6 +128,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {api.metrics && <button aria-pressed={tab === "metrics"} onClick={() => setTab("metrics")}>Launch goals</button>}
           <button aria-pressed={tab === "stories"} onClick={() => setTab("stories")}>Stories</button>
           {api.reports && <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}>Reports</button>}
+          {api.mailbag && <button aria-pressed={tab === "mayor"} onClick={() => setTab("mayor")}>Mayor&apos;s Inbox</button>}
           {api.shoutouts && <button aria-pressed={tab === "shoutouts"} onClick={() => setTab("shoutouts")}>Shoutouts</button>}
           {api.bigScreen && <button aria-pressed={tab === "bigscreen"} onClick={() => setTab("bigscreen")}>Big Screen</button>}
           {api.huntList && api.newsList && <button aria-pressed={tab === "calendar"} onClick={() => setTab("calendar")}>Calendar</button>}
@@ -142,6 +144,7 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
         </div>
       )}
       {tab === "reports" && <Reports api={api} />}
+      {tab === "mayor" && api.mailbag && <MayorInboxTab api={api} />}
       {tab === "shoutouts" && api.shoutouts && <ShoutoutsTab api={api} />}
       {tab === "bigscreen" && api.bigScreen && <BigScreenTab api={api} />}
       {tab === "players" && api.players && <PlayersTab api={api} />}

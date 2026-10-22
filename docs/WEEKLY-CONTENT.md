@@ -69,6 +69,10 @@ it isn't in your working directory). Work from the main branch.
      "he calls every cab a Hailr"), never about anyone's background; Lola rules on it in her voice,
    - city news about the invented cast only (lib/cast.ts ids in "cast"): light, satirical, no real
      people, brands, politics, tragedies or crime, nothing that changes prices or places.
+   - at least one city item starring Mayor Mama-Mandee ("mayor-mama-mandee" in "cast"; owner Oct 22, the validator
+     requires it): a ribbon cutting, a fix, a civic event, in his voice from docs/CAST.md. When the team has marked
+     Mayor's Inbox letters done that week, he can announce what really got fixed ("You wrote, we fixed it");
+     never politics, and never a fix that didn't ship.
    - 3 to 5 Metro Rail Authority updates ("transit", culture pack C4): delays, reroutes, weekend service changes
      and fare news for the lines players ride (N/W in Astoria and Long Island City, the 7 to Flushing, Jackson
      Heights and Sunnyside, the E to Jamaica). Each has "line", "from" (New York time, "HH:MM") and "hours" (1 to 6,

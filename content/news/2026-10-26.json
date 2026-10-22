@@ -9,6 +9,14 @@
       "body": "Margot Saltworth, the critic who once gave a bagel two stars and moved to Philadelphia over it, is naming the best halal cart in Queens. Five clues, five people who eat late, one cart and a treasure its owner kept for whoever gets there first. Start with Sal at the deli. Tasks, then Hunt."
     },
     {
+      "id": "mayor-opens-inbox",
+      "kind": "city",
+      "day": "Mon",
+      "headline": "Mayor Mama-Mandee opens his inbox: \"Write me. I read everything. Then we fix it\"",
+      "body": "City Hall has a new app on every phone: the Mayor app. Found a bug, got an idea, mad about the rent? Write the Mayor. \"You talk, I listen, my team gets on it,\" he told reporters, then cut a ribbon on a pothole that had just been filled. Lola says she's writing first.",
+      "cast": ["mayor-mama-mandee", "lola"]
+    },
+    {
       "id": "name-day-season",
       "kind": "city",
       "day": "Mon",

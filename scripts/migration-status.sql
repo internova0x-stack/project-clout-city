@@ -113,6 +113,7 @@ from (values
   ('0101_switch_on.sql', coalesce((to_regprocedure('public.wear_slots(text)') is not null), false)),
   ('0102_couture.sql', coalesce((to_regprocedure('public.couture_edition(text)') is not null), false)),
   ('0103_couture_glow.sql', coalesce((to_regprocedure('public.crowned_players()') is not null), false)),
-  ('0104_couture_map.sql', coalesce((to_regclass('public.plaza_bookings') is not null), false))
+  ('0104_couture_map.sql', coalesce((to_regclass('public.plaza_bookings') is not null), false)),
+  ('0105_mayor_letters.sql', coalesce((to_regclass('public.mayor_letters') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

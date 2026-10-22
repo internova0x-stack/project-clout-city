@@ -26,6 +26,18 @@ export const CELEBRITIES: Celebrity[] = [
   { id: "peyton-pastel", name: "Peyton Pastel", type: "influencer", personality: "Pastel everything, link in bio", wants: "A brand deal with a car company", flaw: "Every apology video goes viral" },
 ];
 
+/** City Hall (owner, Oct 22): the Mayor, a recurring face in City News every week and the one who answers players'
+ *  letters in the Phone's Mayor app (lib/mayor.ts). */
+export interface Official { id: string; name: string; title: string; bit: string; /** Profile picture (public/). */ portrait: string }
+
+export const MAYOR_MAMA_MANDEE: Official = {
+  id: "mayor-mama-mandee", name: "Mayor Mama-Mandee", title: "the Mayor",
+  bit: "Enthusiastic, everywhere at once, listens to his constituents and fixes the city's problems fast; never met a ribbon he wouldn't cut",
+  // Owner, Oct 22: a big smile, a mustache and a short beard.
+  portrait: "/cast/mayor-mama-mandee.webp",
+};
+export const OFFICIALS: Official[] = [MAYOR_MAMA_MANDEE];
+
 export interface Wannabe { id: string; name: string; bit: string }
 
 export const WANNABES: Wannabe[] = [

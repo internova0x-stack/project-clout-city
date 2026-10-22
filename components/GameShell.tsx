@@ -103,6 +103,7 @@ import { TvHomeCard, TvViewer } from "./city/CloutTv";
 import { tvCardSeenKey, type Station, type StationApi, type StationThread, type TvApi, type TvFeature, type TvState } from "@/lib/cloutTv";
 import { uploadToBigScreen } from "@/lib/tvUpload";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
+import type { MayorApi } from "@/lib/mayor";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import { CampusSheet } from "./campus/CampusSheet";
 
@@ -226,6 +227,7 @@ export function GameShell({
   business,
   together,
   radio,
+  mayor,
   campus,
   goals,
   push,
@@ -288,6 +290,8 @@ export function GameShell({
   together?: TogetherApi;
   /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
   radio?: RadioApi;
+  /** Contact the Mayor (migration 0105): the Phone's feedback app; hidden until mayor_letters_state answers. */
+  mayor?: MayorApi;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
   campus?: CampusApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
@@ -378,6 +382,20 @@ export function GameShell({
     const t = setInterval(() => void check(), 5 * 60_000);
     return () => { live = false; clearInterval(t); };
   }, [radio]);
+  // Contact the Mayor: replies waiting (a badge on the app), checked on open and every few minutes; null hides the app.
+  const [mayorUnseen, setMayorUnseen] = useState<number | null>(null);
+  useEffect(() => {
+    if (!mayor) return;
+    let live = true;
+    const check = async () => {
+      const r = await mayor.state().catch(() => null);
+      if (live && r?.ok) setMayorUnseen(r.data.unseen);
+    };
+    void check();
+    const t = setInterval(() => void check(), 5 * 60_000);
+    return () => { live = false; clearInterval(t); };
+  }, [mayor]);
+  const mayorSeen = useCallback(() => setMayorUnseen(0), []);
   // v0.14 Clout TV: today's feature (the home card once a feature, the tower's screen), checked every few minutes.
   const [tvNow, setTvNow] = useState<TvState | null>(null);
   const [tvView, setTvView] = useState<TvFeature | null>(null);
@@ -2504,6 +2522,7 @@ export function GameShell({
         membership={membership && member ? { vip: memberVip, onOpen: openMembership } : undefined}
         // The app shows whenever the station is on; if today's show can't load, the app says why.
         radio={radio}
+        mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
         stations={stations && stationThreads.length ? { threads: stationThreads, onRead: readStation } : undefined}
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}

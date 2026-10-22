@@ -14,6 +14,8 @@ import { activeGig, gigAvailability, gigCloutReq, gigReady, type CityState, type
 import { formatCash } from "@/lib/economy";
 import { tileBackground, type GlyphName } from "../AppGlyph";
 import { TeaApp } from "./Gossip";
+import { MayorApp } from "./Mayor";
+import type { MayorApi } from "@/lib/mayor";
 import { RadioApp } from "./Radio";
 import { TvApp } from "./CloutTv";
 import type { Station, StationThread, TvApi, TvState } from "@/lib/cloutTv";
@@ -32,7 +34,7 @@ import { whenLine, type CalendarEvent } from "@/lib/calendar";
 import { PerkAction, type PerkHandlers } from "../game/Skills";
 import { SKILLS, SKILL_PERKS, perkStatus } from "@/lib/skills";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -54,6 +56,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   // v0.7: the Collection's front door (owner, Oct 13). It opens the Collection sheet over the game.
   { id: "collection", label: "Collection", emoji: "💌", tile: "book" },
   { id: "gigs", label: "Gigs", emoji: "💼", tile: "briefcase" },
+  // Contact the Mayor (migration 0105): feedback to the team; hidden without it.
+  { id: "mayor", label: "Mayor", emoji: "🏛️", tile: "columns" },
   { id: "settings", label: "Settings", emoji: "⚙️", tile: "gear" },
 ];
 
@@ -70,7 +74,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership,
-  invite,
+  invite, mayor,
 }: {
   open: boolean;
   onClose: () => void;
@@ -129,6 +133,8 @@ export function PhoneModal({
   stations?: { threads: StationThread[]; onRead: (station: Station) => void };
   /** Culture pack C5: a neighbor's name-day invite on the home screen; "See it" opens it in Events. */
   invite?: { event: CalendarEvent; onOpen: () => void };
+  /** Contact the Mayor (migration 0105): the feedback app, and whether a reply waits unread; without it the app is hidden. */
+  mayor?: { api: MayorApi; unseen: number; onSeen: () => void };
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -177,11 +183,12 @@ export function PhoneModal({
                 </button>
               )}
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor)).map((a) => (
                   <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
                       {a.id === "radio" && radioDot && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
+                      {a.id === "mayor" && mayor && mayor.unseen > 0 && <span className="count-badge">{mayor.unseen}</span>}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
@@ -205,6 +212,7 @@ export function PhoneModal({
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
+              {app === "mayor" && mayor && <MayorApp api={mayor.api} onSeen={mayor.onSeen} onToast={(t) => onToast?.(t)} />}
               {app === "tv" && tv && <TvApp api={tv.api} startForm={openForm && app === initialApp} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
               {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}

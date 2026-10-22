@@ -2,6 +2,7 @@
 // the admin_* SQL functions (supabase/migrations/0007); one approval puts a story
 // on the schedule (product owner, Oct 12, 2026).
 
+import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { CatalogItem, EditableField, ShopFile } from "./shopCatalog.ts";
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
@@ -218,6 +219,9 @@ export interface StudioApi {
   /** v0.10 gossip (migration 0034): weeks go live on their own; the Studio reads, pauses or holds them. */
   gossipList?(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>>;
   gossipStatus?(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>>;
+  /** Contact the Mayor (migration 0105): players' letters, marking them read or done, and writing back. */
+  mailbag?(filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
+  letter?(id: number, status: LetterStatus, reply: string | null, filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
   /** v0.14 Real Clout FM (migration 0057): a New York day's shoutout requests, and picking what airs. */
   shoutouts?(date?: string): Promise<Admin<StudioShoutoutDay>>;
   shoutoutAction?(id: number, action: ShoutoutAction): Promise<Admin<StudioShoutoutDay>>;
