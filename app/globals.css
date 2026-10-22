@@ -2233,3 +2233,6 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* A collector card's "Real cash" pill wraps under the picture instead of running past the card (owner, Oct 22). */
 .item-card.collector > .row:first-child { flex-wrap:wrap; gap:6px; }
 .item-card.collector .tag-gold { white-space:nowrap; max-width:100%; }
+.shop-cats.shop-pres { background:none; padding:0; }
+.shop-cats.shop-pres button { border:1.5px solid var(--divider); }
+.shop-cats.shop-pres button.on { border-color:var(--night-900); }

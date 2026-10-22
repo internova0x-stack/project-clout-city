@@ -20,6 +20,10 @@ const cash = (i: CatalogItem) => (i.realCash ? (i.priceUsdCents ? formatPrice(i.
 const STATUSES: CatalogStatus[] = ["pending_review", "draft", "scheduled", "live", "retired"];
 type Filters = { status: CatalogStatus | "all"; tab: ShopTab | "all"; line: string; tier: string; pres: string; money: boolean; ready: boolean; locked: boolean };
 const NO_FILTERS: Filters = { status: "all", tab: "all", line: "", tier: "", pres: "", money: false, ready: false, locked: false };
+/** Gender tabs (owner, Oct 22): Male and Female show what those players can buy (their pieces plus unisex). */
+const PRES_TABS: { id: string; label: string }[] = [{ id: "", label: "All" }, { id: "m", label: "👨 Male" }, { id: "f", label: "👩 Female" }, { id: "all", label: "Unisex" }];
+const fitsPres = (i: Pick<CatalogItem, "presentation">, pres: string) =>
+  !pres || (pres === "all" ? i.presentation === "all" : i.presentation === pres || i.presentation === "all");
 const localInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 
 export function ShopManagerTab({ api }: { api: StudioApi }) {
@@ -49,7 +53,7 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
   const inStatus = useMemo(() => (items ?? []).filter((i) => f.status === "all" || i.status === f.status), [items, f.status]);
   const shown = useMemo(() => inStatus.filter((i) =>
     (f.tab === "all" || i.tab === f.tab) && (!f.line || i.styleLines.includes(f.line))
-    && (!f.tier || i.tier === f.tier) && (!f.pres || i.presentation === f.pres) && (!f.money || i.realCash)
+    && (!f.tier || i.tier === f.tier) && fitsPres(i, f.pres) && (!f.money || i.realCash)
     && (!f.ready || isReady(i, { others: items ?? [] })) && (!f.locked || !i.wearable)
     && (!q.trim() || `${i.name} ${i.sku}`.toLowerCase().includes(q.trim().toLowerCase()))), [inStatus, items, f, q]);
 
@@ -192,13 +196,22 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
       </div>
 
       <div className="shop-cats" role="tablist" aria-label="Category">
-        <button role="tab" aria-selected={f.tab === "all"} className={f.tab === "all" ? "on" : ""} onClick={() => setF({ ...f, tab: "all" })}>All <span>{inStatus.length}</span></button>
+        <button role="tab" aria-selected={f.tab === "all"} className={f.tab === "all" ? "on" : ""} onClick={() => setF({ ...f, tab: "all", pres: "" })}>All <span>{inStatus.length}</span></button>
         {SHOP_TABS.map((t) => (
-          <button key={t} role="tab" aria-selected={f.tab === t} className={f.tab === t ? "on" : ""} onClick={() => setF({ ...f, tab: t })}>
+          <button key={t} role="tab" aria-selected={f.tab === t} className={f.tab === t ? "on" : ""} onClick={() => setF({ ...f, tab: t, pres: "" })}>
             {TAB_LABEL[t]} <span>{inStatus.filter((i) => i.tab === t).length}</span>
           </button>
         ))}
       </div>
+      {(f.tab === "fashion" || f.tab === "accessories") && (
+        <div className="shop-cats shop-pres" role="tablist" aria-label="Gender">
+          {PRES_TABS.map((p) => (
+            <button key={p.id} role="tab" aria-selected={f.pres === p.id} className={f.pres === p.id ? "on" : ""} onClick={() => setF({ ...f, pres: p.id })}>
+              {p.label} <span>{inStatus.filter((i) => i.tab === f.tab && fitsPres(i, p.id)).length}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <div className="row" style={{ gap: 6, flexWrap: "wrap" }} role="group" aria-label="Status">
         <button className="chip" aria-pressed={f.status === "all"} onClick={() => setF({ ...f, status: "all" })}>Every status {items.length}</button>
         {STATUSES.map((s) => <button key={s} className="chip" aria-pressed={f.status === s} onClick={() => setF({ ...f, status: s })}>{STATUS_LABEL[s]} {counts[s]}</button>)}
@@ -210,9 +223,6 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
         </select>
         <select className="studio-input" value={f.tier} onChange={(e) => setF({ ...f, tier: e.target.value })} aria-label="Tier">
           <option value="">Every tier</option><option value="budget">Budget</option><option value="mid">Mid</option><option value="luxury">Luxury</option>
-        </select>
-        <select className="studio-input" value={f.pres} onChange={(e) => setF({ ...f, pres: e.target.value })} aria-label="Presentation">
-          <option value="">Everyone</option><option value="all">Male and Female</option><option value="f">Female only</option><option value="m">Male only</option>
         </select>
       </div>
       <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
