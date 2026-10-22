@@ -112,6 +112,14 @@ export function chatterLine(feed: StoryFeed | null, npc: string, generic: Record
   return g[seed % g.length];
 }
 
+/** Owner, Oct 22: a post shows at most this many characters, the story's most important first. */
+export const POST_CAST_MAX = 5;
+
+/** The characters under a post: its cast in the story's own order (the list is written most important first), at most 5. */
+export function postCast(arc: Pick<FeedArc, "characters">, ids: string[] = []): NonNullable<FeedArc["characters"]> {
+  return (arc.characters ?? []).filter((c) => ids.includes(c.id)).slice(0, POST_CAST_MAX);
+}
+
 export const mainArc = (feed: StoryFeed | null) => feed?.arcs.find((a) => a.type === "main" && !a.finished) ?? null;
 
 export function unseenBeats(feed: StoryFeed | null): number {

@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 import { Sheet } from "../Sheet";
 import { normalizeLook } from "@/lib/look";
 import { GAME_CONFIG } from "@/lib/config";
-import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
+import { badgeInfo, postCast, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
 
 // The News app (C30 to C34): today's story, side stories, the archive, predictions
 // with live results, reveals with Lola's roast, evidence cards and shadow guesses.
@@ -241,7 +241,7 @@ const AvatarHead = dynamic(() => import("../avatar/AvatarHead"), { ssr: false })
 
 /** Owner, Oct 22: the post's key characters as avatar heads; tapping one shows their bio. */
 function StoryCast({ arc, ids }: { arc: FeedArc; ids: string[] }) {
-  const people = ids.flatMap((id) => arc.characters?.find((c) => c.id === id) ?? []);
+  const people = postCast(arc, ids);
   const [open, setOpen] = useState<string | null>(null);
   if (!people.length) return null;
   const who = people.find((c) => c.id === open);

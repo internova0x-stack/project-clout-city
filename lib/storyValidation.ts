@@ -88,6 +88,7 @@ export function validateArcs(arcs: Arc[]): string[] {
     const parentChars = arc.parent_arc_id ? byId.get(arc.parent_arc_id)?.characters ?? [] : [];
     const known = new Set([...charIds, ...parentChars.map((c) => c.id)]);
     for (const b of arc.beats) for (const id of b.news?.[0]?.cast ?? []) if (!known.has(id)) err(a, `${b.id}: cast names unknown character ${id}`);
+    for (const b of arc.beats) if ((b.news?.[0]?.cast?.length ?? 0) > 5) err(a, `${b.id}: a post shows at most 5 characters (cast)`);
 
     // ---- effects: types, tags, expiries, caps ----
     const eventIds = new Set((arc.events ?? []).map((e) => e.id));

@@ -80,3 +80,12 @@ test("story characters come from the story files: the cast of each released post
     assert.ok(chars.some((c) => c.id === id), `${b.id}: ${id}`);
   }
 });
+
+test("a post shows at most 5 characters, the story's most important first", async () => {
+  const { postCast } = await import("../lib/storyFeed.ts");
+  const c = (id: string) => ({ id, name: id, role: "r", bio: "b", style: "s", look: {} });
+  const arc = { characters: ["a", "b", "c", "d", "e", "f", "g"].map(c) };
+  assert.deepEqual(postCast(arc, ["g", "c", "a", "f", "e", "d", "b"]).map((x) => x.id), ["a", "b", "c", "d", "e"]);
+  assert.deepEqual(postCast(arc, ["f", "zz", "b"]).map((x) => x.id), ["b", "f"]);
+  assert.deepEqual(postCast({}, ["a"]), []);
+});
