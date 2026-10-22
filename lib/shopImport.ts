@@ -33,7 +33,7 @@ export async function listShopFiles(): Promise<ShopFile[]> {
       const r = parseCatalogFile(raw, file);
       const label = typeof raw.collection === "string" ? raw.collection : typeof raw.batch === "string" ? raw.batch
         : Array.isArray(raw.batches) ? (raw.batches as string[]).join(", ") : r.images.length ? "Pictures for items on sale" : file;
-      out.push({ file, label, items: r.drafts.length, pictures: r.images.length, problems: r.problems.map((p) => `${p.id}: ${p.problem}`) });
+      out.push({ file, label, items: r.drafts.length, pictures: r.images.length, problems: r.problems.map((p) => `${p.id}: ${p.problem}`), skus: r.drafts.map((d) => d.sku) });
     } catch (e) {
       out.push({ file, label: file, items: 0, pictures: 0, problems: [e instanceof Error ? e.message : "not valid JSON"] });
     }

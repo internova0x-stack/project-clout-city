@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
 import { brandHits } from "../lib/culture.ts";
 import {
-  canMove, cloutCurve, COUTURE_NOW, defaultPresentation, fieldProblems, fromShopItem, isOnSale, isReady, parseCatalogFile, readiness, tabForAccessory,
+  canMove, cloutCurve, COUTURE_NOW, defaultPresentation, fieldProblems, fileProgress, fromShopItem, isOnSale, isReady, parseCatalogFile, readiness, tabForAccessory,
   type CatalogItem,
 } from "../lib/shopCatalog.ts";
 
@@ -122,4 +122,12 @@ test("migration 0099 seeds every item on sale, exactly as the Shop had it", asyn
   assert.ok(m, "seed");
   assert.deepEqual(JSON.parse(m[1].replace(/''/g, "'")), JSON.parse(JSON.stringify(shopSeed())));
   assert.equal(shopSeed().length, SHOP_ITEMS.length);
+});
+
+test("a catalog file's progress: what's not loaded yet, and the rest by status", () => {
+  const catalog = [{ sku: "a", status: "live" as const }, { sku: "b", status: "pending_review" as const }, { sku: "c", status: "deleted" as const }];
+  const p = fileProgress({ skus: ["a", "b", "c", "d"] }, catalog);
+  assert.deepEqual(p.notLoaded, ["c", "d"]);
+  assert.deepEqual(p.byStatus, { live: 1, pending_review: 1 });
+  assert.deepEqual(fileProgress({}, catalog).notLoaded, []);
 });
