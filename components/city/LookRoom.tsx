@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { itemBySku, type ShopItem } from "@/lib/city";
+import { shippedPictures } from "@/lib/shopCatalog";
 import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { HEADWEAR_BASIC, HEADWEAR_CULTURAL, type CoveringId, type Look } from "@/lib/look";
@@ -153,12 +154,15 @@ export function LookRoom({
     if (w.slot === "accessory" && HAT[w.kind ?? ""]) return <Shape color={w.color}>{HAT[w.kind ?? ""]}</Shape>;
     return <span aria-hidden="true">{it.emoji}</span>;
   };
-  /** A piece's tile picture: the code's icon, else the Shop picture, else its emoji. */
+  /** A piece's Shop picture (the catalog's, else the one shipped with the game), if it has one. */
+  const pictureFor = (sku: string) => infoFor(sku).image ?? shippedPictures(sku)?.card ?? null;
+  /** A piece's tile picture: the same picture the Shop shows (owner, Oct 22), else the code's icon, else its emoji. */
   const iconForSku = (sku: string) => {
-    const info = infoFor(sku);
-    if (info.item?.wear) return iconFor(info.item);
+    const info = infoFor(sku), pic = pictureFor(sku);
     // eslint-disable-next-line @next/next/no-img-element
-    return info.image ? <img src={info.image} alt="" width={34} height={34} style={{ objectFit: "contain" }} /> : <span aria-hidden="true">{info.emoji}</span>;
+    if (pic) return <img src={pic} alt="" className="look-pic" />;
+    if (info.item?.wear) return iconFor(info.item);
+    return <span aria-hidden="true">{info.emoji}</span>;
   };
   const owns = (slot: Slot) => fashion.some((i) => slotOf(i.sku) === slot) || tryingSlot === slot;
   const tabs = TABS.filter((t) => !t.owned || owns(t.id as Slot));
@@ -206,7 +210,7 @@ export function LookRoom({
                   )),
                   // Shop hats: a free cap or hat comes off for one; a faith or culture covering stays (the hat steps aside).
                   ...fashion.filter((i) => slotOf(i.sku) === "head").map((i) => (
-                    <Tile key={i.id} on={worn.head === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)}
+                    <Tile key={i.id} on={worn.head === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} photo={!!pictureFor(i.sku)}
                       onPick={() => { setWorn({ ...worn, head: i.id }); if (covering === "cap" || covering === "fedora" || covering === "bucket") setCovering("none"); }} />
                   )),
                 ]
@@ -223,14 +227,14 @@ export function LookRoom({
                     );
                   }),
                   ...fashion.filter((i) => slotOf(i.sku) === tab).map((i) => (
-                    <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} onPick={() => setWorn(pick(worn, tab, i.id))} />
+                    <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} photo={!!pictureFor(i.sku)} onPick={() => setWorn(pick(worn, tab, i.id))} />
                   )),
                 ]
                 : [
                   <Tile key="starter" on={worn[tab] === null} wearing={saved[tab] === null} name={starter(tab).name} sub={tab === "shoes" ? "Free" : tab === "accessory" ? "Starter" : "Off"}
                     icon={starter(tab).icon} onPick={() => setWorn({ ...worn, [tab]: null })} />,
                   ...fashion.filter((i) => slotOf(i.sku) === tab).map((i) => (
-                    <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} onPick={() => setWorn(pick(worn, tab, i.id))} />
+                    <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} photo={!!pictureFor(i.sku)} onPick={() => setWorn(pick(worn, tab, i.id))} />
                   )),
                 ]}
             </div>
@@ -281,12 +285,12 @@ export function LookRoom({
   );
 }
 
-function Tile({ on, wearing, name, sub, icon, onPick }: { on: boolean; wearing: boolean; name: string; sub: string; icon: React.ReactNode; onPick: () => void }) {
+function Tile({ on, wearing, name, sub, icon, photo, onPick }: { on: boolean; wearing: boolean; name: string; sub: string; icon: React.ReactNode; photo?: boolean; onPick: () => void }) {
   return (
     <button role="radio" aria-checked={on} className={`look-tile${on ? " on" : ""}${on && !wearing ? " trying" : ""}`} onClick={onPick}>
       {on && !wearing && <span className="look-trying">Trying</span>}
       {on && wearing && <span className="look-check" aria-hidden="true">✓</span>}
-      <span className="look-icon">{icon}</span>
+      <span className={`look-icon${photo ? " photo" : ""}`}>{icon}</span>
       <b>{name}</b>
       <small>{wearing ? "Wearing" : sub}</small>
     </button>
