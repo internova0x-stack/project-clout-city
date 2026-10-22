@@ -246,6 +246,14 @@ components live in `app/globals.css`.
   accessory slot once something's owned there. The home bubble's portrait aims at the head (AvatarHead). `/preview/moves?outfit=hoodie` shows all eight body types.
   Your Look keeps the starter clothes (migration 0109, owner Oct 22): Tops, Bottoms and Shoes list the starting style's
   pieces and colors (`STYLE_FITS`) free beside owned ones; `save_look(items, covering, fit)` stores players.look.fit.
+  Oct 22 follow-ups: free pieces show Higgsfield pictures tinted to the color (`public/look-img/`, `StarterPic`); every style
+  offers a tee and pants plus basic colors (blue, black, white tops; black, navy pants) and no free zip-up; each piece
+  starts in its default color and the rest open with clout (`colorUnlocks`, `COLOR_UNLOCKS`, 50 to 1,000; checked in
+  `saveLook` and the creator's action; a color already worn stays). One free basic hat, the cap, always `FREE_CAP_COLOR`;
+  no fedora or bucket hat, and no hijab (owner: a sensitive piece that needs care); a saved one reads as none. The durag,
+  turban, headwrap and kippah are Shop pieces (content/shop/headwear.json; migration 0111 puts them live and gives each to
+  whoever wore it), drawn as coverings in their own color (`COVERING_ACCESSORIES`, buildAvatar's `hatColor`). Extras are
+  Shop pieces only; an empty tab links to the Shop. Charisma is called Aura (id 'charisma' kept; migration 0110's push).
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
   its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

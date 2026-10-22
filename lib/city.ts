@@ -381,7 +381,7 @@ export const PLACES: Place[] = [
   },
   {
     // Owner, Oct 16: the old Lucky Seven Deli became a speed-meet mixer and the city's gossip center. Same id,
-    // so history stays; its actions train Charisma (speed-meets) and Gossip (the Tea Bar).
+    // so history stays; its actions train Aura (speed-meets) and Gossip (the Tea Bar).
     id: "lucky-seven-deli", name: "Sip & Spill", emoji: "🫖", category: "places", neighborhood: "Jackson Heights", tier: "Budget",
     at: [40.7495, -73.8885], depth: "full", template: "lounge", palette: ["#FF6A5C", "#2FB5A8", "#1F1B26"],
     tags: ["mixer", "social", "tea", "dining_budget"],

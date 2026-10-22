@@ -6,12 +6,12 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
 import { ECONOMY, SIGNUP_HOMES, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
 import {
-  BODIES, BUILDS, DEFAULT_BUILD, NYERS, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, HEADWEAR_CULTURAL, SKIN_TONES,
+  BODIES, BUILDS, DEFAULT_BUILD, NYERS, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, SKIN_TONES,
   lookChoices, randomLook, type BuildId, type Look, type LookChoices,
 } from "@/lib/look";
 import { GARMENT } from "./avatar/garments";
 import { CloutCard } from "./city/CloutCard";
-import { BOTTOM_LABEL, STARTING_STYLES, STYLE_FITS, STYLE_IDS, TOP_LABEL, defaultFit, getStyle, type BottomKind, type Fit, type TopKind } from "@/lib/styles";
+import { BOTTOM_LABEL, STARTING_STYLES, STYLE_FITS, STYLE_IDS, TOP_LABEL, colorUnlocks, defaultFit, getStyle, type BottomKind, type Fit, type TopKind } from "@/lib/styles";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { cleanName, nameError } from "@/lib/validation";
 import { ChevronLeftIcon, ShuffleIcon } from "./icons";
@@ -291,19 +291,13 @@ function LookStep({
       <OutfitPicker look={look} onChange={(fit) => set("fit", fit)} />
 
       <div className="stack-8">
-        <p className="overline" style={{ margin: 0 }}>Headwear · all free</p>
+        <p className="overline" style={{ margin: 0 }}>Headwear · free</p>
         <div className="option-chips" role="group" aria-label="Headwear">
           {HEADWEAR_BASIC.map((o) => (
             <button key={o.id} className="chip" aria-pressed={look.covering === o.id} onClick={() => set("covering", o.id)}>{HAT_EMOJI[o.id] ?? ""}{o.label}</button>
           ))}
         </div>
-        <p className="creator-label">Cultural and religious</p>
-        <div className="option-chips" role="group" aria-label="Cultural and religious coverings">
-          {HEADWEAR_CULTURAL.map((o) => (
-            <button key={o.id} className="chip" aria-pressed={look.covering === o.id} onClick={() => set("covering", o.id)}>{o.label}</button>
-          ))}
-        </div>
-        <p className="meta" style={{ margin: 0 }}>Premium hats live in the Shop.</p>
+        <p className="meta" style={{ margin: 0 }}>More hats and headwear live in the Shop.</p>
       </div>
 
       <OptionGroup label="Hair" options={HAIRS} value={look.hair} onPick={(v) => set("hair", v)} />
@@ -512,7 +506,7 @@ function HomeStep({ cash, onMoveIn, onDone }: { cash: number; onMoveIn: CreatorA
 // ---------------------------------------------------------------------------
 // v0.7 creator pieces: body-type silhouettes, the starter outfit picker, the starting-cash card
 // ---------------------------------------------------------------------------
-const HAT_EMOJI: Partial<Record<Look["covering"], string>> = { cap: "🧢 ", fedora: "🎩 ", bucket: "👒 " };
+const HAT_EMOJI: Partial<Record<Look["covering"], string>> = { cap: "🧢 " };
 
 /** Half-widths at the shoulder, chest, waist and hip (and thigh), plus height, per body type. */
 const SILHOUETTE: Record<"m" | "f", Record<string, { sh: number; ch: number; wa: number; hi: number; th: number; h: number; bust?: number; belly?: number }>> = {
@@ -573,27 +567,34 @@ function OutfitPicker({ look, onChange }: { look: Look; onChange: (fit: Fit) => 
       <div className="outfit-panel stack-8">
         <span className="outfit-label">Top</span>
         {piece(o.tops, fit.top, fit.topColor, (k) => TOP_LABEL[k as TopKind], (k) => pick({ top: k as TopKind }))}
-        <OutfitSwatches label="Top color" colors={o.topColors} value={fit.topColor} onPick={(c) => pick({ topColor: c })} />
+        <OutfitSwatches label="Top color" colors={o.topColors} value={fit.topColor} locks={colorUnlocks(style, look.body, "top")} onPick={(c) => pick({ topColor: c })} />
       </div>
       <div className="outfit-panel stack-8">
         <span className="outfit-label">Bottom</span>
         {piece(o.bottoms, fit.bottom, fit.bottomColor, (k) => BOTTOM_LABEL[k as BottomKind], (k) => pick({ bottom: k as BottomKind }))}
-        <OutfitSwatches label="Bottom color" colors={o.bottomColors} value={fit.bottomColor} onPick={(c) => pick({ bottomColor: c })} />
+        <OutfitSwatches label="Bottom color" colors={o.bottomColors} value={fit.bottomColor} locks={colorUnlocks(style, look.body, "bottom")} onPick={(c) => pick({ bottomColor: c })} />
       </div>
       <div className="outfit-panel stack-8">
         <span className="outfit-label">Shoes</span>
-        <OutfitSwatches label="Shoe color" colors={o.shoeColors} value={fit.shoeColor} onPick={(c) => pick({ shoeColor: c })} />
+        <OutfitSwatches label="Shoe color" colors={o.shoeColors} value={fit.shoeColor} locks={colorUnlocks(style, look.body, "shoe")} onPick={(c) => pick({ shoeColor: c })} />
+        <p className="meta" style={{ margin: 0 }}>More colors open up as your clout grows. 🔒</p>
       </div>
     </div>
   );
 }
 
-function OutfitSwatches({ label, colors, value, onPick }: { label: string; colors: string[]; value: string; onPick: (c: string) => void }) {
+/** A new player has no clout yet: past each piece's default color, the swatches show a lock (owner, Oct 22). */
+function OutfitSwatches({ label, colors, value, locks, onPick }: { label: string; colors: string[]; value: string; locks: Map<string, number>; onPick: (c: string) => void }) {
   return (
     <div className="swatches outfit-swatches" role="group" aria-label={label}>
-      {colors.map((c, i) => (
-        <button key={c} className="swatch" style={{ background: c }} aria-pressed={value === c} aria-label={`${label} ${i + 1}`} onClick={() => onPick(c)} />
-      ))}
+      {colors.map((c, i) => {
+        const need = locks.get(c) ?? 0;
+        return need > 0 ? (
+          <button key={c} className="swatch locked" style={{ background: c }} disabled aria-label={`${label} ${i + 1}, opens at ${need} clout`} title={`Opens at ${need} clout`}><span aria-hidden="true">🔒</span></button>
+        ) : (
+          <button key={c} className="swatch" style={{ background: c }} aria-pressed={value === c} aria-label={`${label} ${i + 1}`} onClick={() => onPick(c)} />
+        );
+      })}
     </div>
   );
 }

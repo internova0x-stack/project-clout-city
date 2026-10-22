@@ -13,7 +13,7 @@ import { skillBadge } from "@/lib/skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
+import { colorUnlocks, defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
 import { CATALOG_FURNITURE, CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -2424,6 +2424,8 @@ export function GameShell({
             base={starterOutfit(style, look.body, look.fit)}
             fit={look.fit ?? defaultFit(style, look.body)}
             fits={STYLE_FITS[style.id]}
+            colorLocks={(part) => colorUnlocks(style, look.body, part)}
+            onShop={(category) => { setTryOn(null); openShop(category); }}
             state={city}
             busy={busy !== null}
             trying={tryOn}

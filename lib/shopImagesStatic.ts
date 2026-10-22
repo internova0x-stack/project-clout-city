@@ -382,6 +382,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/inherited-barn-jacket-54gb25-256.webp",
     "detail": "/shop-img/inherited-barn-jacket-54gb25-768.webp"
   },
+  "knit-kippah": {
+    "card": "/shop-img/knit-kippah-j6wfo5-256.webp",
+    "detail": "/shop-img/knit-kippah-j6wfo5-768.webp"
+  },
   "ledger-tourbillon": {
     "card": "/shop-img/ledger-tourbillon-1xuv0a9-256.webp",
     "detail": "/shop-img/ledger-tourbillon-1xuv0a9-768.webp"
@@ -530,6 +534,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/sartorio-sculpt-jacket-1cfr6kg-256.webp",
     "detail": "/shop-img/sartorio-sculpt-jacket-1cfr6kg-768.webp"
   },
+  "satin-durag": {
+    "card": "/shop-img/satin-durag-1ghpjx1-256.webp",
+    "detail": "/shop-img/satin-durag-1ghpjx1-768.webp"
+  },
   "seamless-night-bodysuit": {
     "card": "/shop-img/seamless-night-bodysuit-ak8e7e-256.webp",
     "detail": "/shop-img/seamless-night-bodysuit-ak8e7e-768.webp"
@@ -614,6 +622,10 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/survived-something-hoodie-1wzdxpk-256.webp",
     "detail": "/shop-img/survived-something-hoodie-1wzdxpk-768.webp"
   },
+  "terracotta-headwrap": {
+    "card": "/shop-img/terracotta-headwrap-aulenk-256.webp",
+    "detail": "/shop-img/terracotta-headwrap-aulenk-768.webp"
+  },
   "the-clout-flame": {
     "card": "/shop-img/the-clout-flame-1ymjfx4-256.webp",
     "detail": "/shop-img/the-clout-flame-1ymjfx4-768.webp"
@@ -641,5 +653,9 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
   "waterfront-mansion": {
     "card": "/shop-img/waterfront-mansion-id8wso-256.webp",
     "detail": "/shop-img/waterfront-mansion-id8wso-768.webp"
+  },
+  "wrapped-turban": {
+    "card": "/shop-img/wrapped-turban-16mt5or-256.webp",
+    "detail": "/shop-img/wrapped-turban-16mt5or-768.webp"
   }
 };

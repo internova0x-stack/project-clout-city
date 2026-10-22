@@ -16,9 +16,9 @@ const files = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => ({ 
 const parsed = files.map(({ f, raw }) => ({ f, ...parseCatalogFile(raw, f, { coutureCloutFor: () => 260 }) }));
 const drafts = parsed.flatMap((p) => p.drafts);
 
-test("every catalog file loads: 99 new items, 53 pictures for items on sale, no problems", () => {
+test("every catalog file loads: 103 new items, 53 pictures for items on sale, no problems", () => {
   for (const p of parsed) assert.deepEqual(p.problems, [], p.f);
-  assert.equal(drafts.length, 99);
+  assert.equal(drafts.length, 103);
   assert.equal(new Set(drafts.map((d) => d.sku)).size, drafts.length, "unique ids");
   const images = parsed.flatMap((p) => p.images);
   assert.equal(images.length, 53);

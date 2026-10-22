@@ -17,7 +17,12 @@ export type AccessoryKind =
   | "hoops" | "drops"
   | "rope-chains" | "flame-chain" | "pearls" | "ring-choker" | "scarf"
   | "tote" | "sling" | "doctor-bag" | "mini-bag" | "shoulder-bag" | "clutch"
-  | "iced-watch" | "crown" | "tiara";
+  | "iced-watch" | "crown" | "tiara"
+  // Sold in the Shop since Oct 22 (owner): worn as the coverings that used to be free (buildBaseAvatar, COVERING_ACCESSORIES).
+  | "durag" | "turban" | "headwrap" | "kippah";
+
+/** Shop headwear the avatar draws as a covering (buildAvatar's durag, turban, headwrap and kippah), not as a rigid hat. */
+export const COVERING_ACCESSORIES: ReadonlySet<AccessoryKind> = new Set<AccessoryKind>(["durag", "turban", "headwrap", "kippah"]);
 
 /** One accessory as worn: its shape and colors. */
 export interface AccessoryWear { slot: AccessorySlot; kind: AccessoryKind; color: string; accent: string }
@@ -25,6 +30,10 @@ export interface AccessoryWear { slot: AccessorySlot; kind: AccessoryKind; color
 /** The catalog's accessories by sku, with Clout Couture's crown, shades and watch (stage 5, migration 0102). */
 export const ACCESSORIES: Record<string, AccessoryWear> = {
   "patchwork-bucket-hat": { slot: "head", kind: "bucket", color: "#5B7FA6", accent: "#2E4A6E" },
+  "satin-durag": { slot: "head", kind: "durag", color: "#14111A", accent: "#2A2733" },
+  "wrapped-turban": { slot: "head", kind: "turban", color: "#23314F", accent: "#1A2540" },
+  "terracotta-headwrap": { slot: "head", kind: "headwrap", color: "#C65A2E", accent: "#E8A87C" },
+  "knit-kippah": { slot: "head", kind: "kippah", color: "#23314F", accent: "#3A4E7A" },
   "corner-beanie": { slot: "head", kind: "beanie", color: "#1F1B26", accent: "#14111A" },
   "midtown-fedora": { slot: "head", kind: "fedora", color: "#3A3F47", accent: "#14111A" },
   "gallery-opening-hat": { slot: "head", kind: "wide-brim", color: "#EDE3CF", accent: "#C9A227" },

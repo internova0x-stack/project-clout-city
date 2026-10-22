@@ -9,7 +9,7 @@ import {
   Mesh, MeshStandardMaterial, Object3D, SphereGeometry, TorusGeometry, Vector2,
   type BufferGeometry, type Material,
 } from "three";
-import type { Look } from "@/lib/look";
+import { FREE_CAP_COLOR, type Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
 
 export interface AvatarParts {
@@ -95,7 +95,7 @@ function shade(hex: string, f: number): string {
   return `#${c.getHexString()}`;
 }
 
-export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Outfit } = {}): AvatarParts {
+export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Outfit; hatColor?: string } = {}): AvatarParts {
   const style = getStyle(look.style);
   const outfit = opts.outfit ?? starterOutfit(style, look.body, look.fit);
   const { b, height } = buildFor(look);
@@ -418,8 +418,8 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     head.add(upperLip);
   }
 
-  // Hats take the old cap color for Bodega Drip, otherwise the outfit's accent.
-  const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
+  // The free cap comes in one color (owner, Oct 22); other headwear takes the outfit's accent.
+  const hatColor = opts.hatColor ?? (look.covering === "cap" ? FREE_CAP_COLOR : outfit.topAccent);
   const hat = mat(hatColor, { roughness: 0.6 });
 
   // Hair and headwear sit in their own groups so the modeled avatar (modelAvatar.ts) can wear them too.
@@ -487,29 +487,30 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     }
   }
 
-  // ---- Coverings (free for every style) ----
+  // ---- Coverings (Shop pieces since Oct 22: in the piece's own color, opts.hatColor) ----
+  const coverFabric = opts.hatColor ? mat(opts.hatColor, { roughness: 0.8, side: DoubleSide }) : fabric;
   switch (covering) {
     case "hijab": {
       const opening = 1.5;
-      const wrap = mesh(geo(new SphereGeometry(0.215, 16, 11, Math.PI / 2 + opening / 2, Math.PI * 2 - opening, 0, Math.PI)), fabric, 0, -0.01, -0.005);
+      const wrap = mesh(geo(new SphereGeometry(0.215, 16, 11, Math.PI / 2 + opening / 2, Math.PI * 2 - opening, 0, Math.PI)), coverFabric, 0, -0.01, -0.005);
       wrap.scale.set(0.95, 1.12, 1.04);
       headwear.add(wrap);
-      const brow = mesh(geo(new SphereGeometry(0.217, 16, 5, 0, Math.PI * 2, 0, Math.PI * 0.3)), fabric, 0, -0.005, -0.005);
+      const brow = mesh(geo(new SphereGeometry(0.217, 16, 5, 0, Math.PI * 2, 0, Math.PI * 0.3)), coverFabric, 0, -0.005, -0.005);
       brow.scale.set(0.95, 1.12, 1.04);
       headwear.add(brow);
-      const chin = mesh(geo(new SphereGeometry(0.217, 16, 5, 0, Math.PI * 2, Math.PI * 0.8, Math.PI * 0.2)), fabric, 0, -0.01, -0.005);
+      const chin = mesh(geo(new SphereGeometry(0.217, 16, 5, 0, Math.PI * 2, Math.PI * 0.8, Math.PI * 0.2)), coverFabric, 0, -0.01, -0.005);
       chin.scale.set(0.95, 1.12, 1.04);
       headwear.add(chin);
-      headwear.add(mesh(geo(new CylinderGeometry(0.12, 0.25, 0.24, 13, 1, true)), fabric, 0, -0.3, -0.01));
+      headwear.add(mesh(geo(new CylinderGeometry(0.12, 0.25, 0.24, 13, 1, true)), coverFabric, 0, -0.3, -0.01));
       break;
     }
     case "turban": {
-      const dome = mesh(geo(new SphereGeometry(0.215, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.55)), fabric, 0, 0.02, -0.01);
+      const dome = mesh(geo(new SphereGeometry(0.215, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.55)), coverFabric, 0, 0.02, -0.01);
       dome.scale.set(0.98, 1.3, 1.05);
       dome.rotation.x = -0.18;
       headwear.add(dome);
       for (const [y, r] of [[0.04, 0.2], [0.1, 0.19]] as const) {
-        const ring = mesh(geo(new TorusGeometry(r, 0.03, 5, 14)), fabric, 0, y, -0.012);
+        const ring = mesh(geo(new TorusGeometry(r, 0.03, 5, 14)), coverFabric, 0, y, -0.012);
         ring.rotation.x = Math.PI / 2 - 0.18;
         ring.scale.set(0.95, 1.05, 1);
         headwear.add(ring);
@@ -517,27 +518,27 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       break;
     }
     case "headwrap": {
-      const wrapTop = mesh(geo(new SphereGeometry(0.225, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.55)), fabric, 0, 0.03, -0.03);
+      const wrapTop = mesh(geo(new SphereGeometry(0.225, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.55)), coverFabric, 0, 0.03, -0.03);
       wrapTop.scale.set(1.0, 1.45, 1.12);
       wrapTop.rotation.x = -0.32;
       headwear.add(wrapTop);
-      headwear.add(mesh(geo(new SphereGeometry(0.055, 6, 5)), fabric, 0.02, 0.27, 0.06));
+      headwear.add(mesh(geo(new SphereGeometry(0.055, 6, 5)), coverFabric, 0.02, 0.27, 0.06));
       break;
     }
     case "durag": {
-      const cap = mesh(geo(new SphereGeometry(0.198, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.52)), fabric, 0, 0.012, -0.008);
+      const cap = mesh(geo(new SphereGeometry(0.198, 14, 7, 0, Math.PI * 2, 0, Math.PI * 0.52)), coverFabric, 0, 0.012, -0.008);
       cap.scale.set(0.93, 1.1, 1.02);
       cap.rotation.x = -0.4;
       headwear.add(cap);
       for (const s of [-1, 1]) {
-        const tail = mesh(geo(new BoxGeometry(0.045, 0.26, 0.008)), fabric, s * 0.03, -0.14, -0.2);
+        const tail = mesh(geo(new BoxGeometry(0.045, 0.26, 0.008)), coverFabric, s * 0.03, -0.14, -0.2);
         tail.rotation.x = 0.25;
         headwear.add(tail);
       }
       break;
     }
     case "kippah": {
-      const k = mesh(geo(new SphereGeometry(0.1, 9, 4, 0, Math.PI * 2, 0, Math.PI * 0.28)), fabric, 0, 0.13, -0.05);
+      const k = mesh(geo(new SphereGeometry(0.1, 9, 4, 0, Math.PI * 2, 0, Math.PI * 0.28)), coverFabric, 0, 0.13, -0.05);
       k.rotation.x = -0.55;
       headwear.add(k);
       break;
