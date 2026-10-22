@@ -247,9 +247,9 @@ components live in `app/globals.css`.
   Your Look keeps the starter clothes (migration 0109, owner Oct 22): Tops, Bottoms and Shoes list the starting style's
   pieces and colors (`STYLE_FITS`) free beside owned ones; `save_look(items, covering, fit)` stores players.look.fit.
   Oct 22 follow-ups: free pieces show Higgsfield pictures tinted to the color (`public/look-img/`, `StarterPic`); every style
-  offers a tee and pants plus basic colors (blue, black, white tops; black, navy pants) and no free zip-up; each piece
-  starts in its default color and the rest open with clout (`colorUnlocks`, `COLOR_UNLOCKS`, 50 to 1,000; checked in
-  `saveLook` and the creator's action; a color already worn stays). One free basic hat, the cap, always `FREE_CAP_COLOR`;
+  offers a tee and pants and no free zip-up; starter pieces come in one color each, no color selector (owner, Oct 22:
+  grey tops, black bottoms, white shoes, `STARTER_COLORS`; `storedFit` keeps an old fit's pieces in those colors). One free
+  basic hat, the cap, always `FREE_CAP_COLOR`;
   no fedora or bucket hat, and no hijab (owner: a sensitive piece that needs care); a saved one reads as none. The durag,
   turban, headwrap and kippah are Shop pieces (content/shop/headwear.json; migration 0111 puts them live and gives each to
   whoever wore it), drawn as coverings in their own color (`COVERING_ACCESSORIES`, buildAvatar's `hatColor`). Extras are

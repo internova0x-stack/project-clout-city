@@ -7,7 +7,7 @@ import { shippedPictures } from "@/lib/shopCatalog";
 import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { HEADWEAR_BASIC, HEADWEAR_CULTURAL, type CoveringId, type Look } from "@/lib/look";
-import { BOTTOM_LABEL, TOP_LABEL, type BottomKind, type ColorPart, type Fit, type Outfit, type StyleFits, type TopKind } from "@/lib/styles";
+import { BOTTOM_LABEL, TOP_LABEL, type BottomKind, type Fit, type Outfit, type StyleFits, type TopKind } from "@/lib/styles";
 import { itemOptionsBySku, outfitFromSkus, slotsClash, wearSlot } from "@/lib/wearing";
 import { GARMENT, HAT, SHOE } from "../avatar/garments";
 import { ChevronLeftIcon } from "../icons";
@@ -50,7 +50,7 @@ const TRY_ID = -1;
  * which opens this room in try-on mode for one piece you don't own yet ("Try it on").
  */
 export function LookRoom({
-  open, onClose, look, base, fit: savedFit, fits, colorLocks, state, busy, onSave, trying, onBuy, onShop,
+  open, onClose, look, base, fit: savedFit, fits, state, busy, onSave, trying, onBuy, onShop,
 }: {
   open: boolean;
   onClose: () => void;
@@ -61,8 +61,6 @@ export function LookRoom({
   /** The starter clothes on now, and the ones the style offers (the creator's choices, free to switch, migration 0109). */
   fit: Fit;
   fits: StyleFits;
-  /** Clout each starter color opens at (lib/styles.ts colorUnlocks). */
-  colorLocks: (part: ColorPart) => Map<string, number>;
   state: CityState;
   busy: boolean;
   /** `fit` is set only when the starter clothes changed. */
@@ -92,7 +90,6 @@ export function LookRoom({
   const [worn, setWorn] = useState<Worn>(savedWorn);
   const [covering, setCovering] = useState<CoveringId>(look.covering);
   const [fit, setFit] = useState<Fit>(savedFit);
-  const [lockNote, setLockNote] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>(tabOf(tryingSlot));
   const [error, setError] = useState<string | null>(null);
   // Start fresh each time the room opens (or opens on another Shop piece).
@@ -242,25 +239,6 @@ export function LookRoom({
                   )),
                 ]}
             </div>
-            {(tab === "top" || tab === "bottom" || tab === "shoes") && (
-              <div className="stack-4">
-                <span className="overline">{tab === "top" ? "Starter top color" : tab === "bottom" ? "Starter bottom color" : "Sneaker color"}</span>
-                <div className="swatches" role="radiogroup" aria-label="Colors">
-                  {(tab === "top" ? fits.topColors : tab === "bottom" ? fits.bottomColors : fits.shoeColors).map((c) => {
-                    const key = tab === "top" ? "topColor" : tab === "bottom" ? "bottomColor" : "shoeColor";
-                    // Colors open with clout (owner, Oct 22); one already worn stays yours.
-                    const need = colorLocks(tab === "shoes" ? "shoe" : tab).get(c) ?? 0;
-                    const open = need <= state.player.clout || savedFit[key] === c;
-                    return open
-                      ? <button key={c} role="radio" aria-checked={fit[key] === c} aria-label={`Color ${c}`} className="swatch" style={{ background: c }}
-                          onClick={() => { setLockNote(null); wearStarter(tab, { [key]: c }); }} />
-                      : <button key={c} role="radio" aria-checked={false} aria-label={`Color ${c}, opens at ${need} clout`} className="swatch locked" style={{ background: c }}
-                          onClick={() => setLockNote(`That color opens at ${need.toLocaleString("en-US")} clout. You have ${state.player.clout.toLocaleString("en-US")}.`)}><span aria-hidden="true">🔒</span></button>;
-                  })}
-                </div>
-                {lockNote && <p className="meta" style={{ margin: 0 }}>{lockNote}</p>}
-              </div>
-            )}
             {!fashion.some((i) => slotOf(i.sku) === (tab === "hats" ? "head" : tab)) && (
               <div className="stack-4">
                 <p className="meta" style={{ margin: 0 }}>{tab === "outfit"

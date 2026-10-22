@@ -2,7 +2,7 @@
 // Guide section 12): body, skin, hair, hair color, eyes, glasses and coverings.
 // None of these are ever sold in the Shop. The starting style only sets the outfit.
 
-import { getStyle, isStyleId, isValidFit, styleOutfit, type Fit, type StyleId } from "./styles.ts";
+import { getStyle, isStyleId, isValidFit, storedFit, styleOutfit, type Fit, type StyleId } from "./styles.ts";
 
 export interface Option<T extends string> { id: T; label: string }
 
@@ -140,7 +140,7 @@ export function normalizeLook(raw: unknown, style: unknown): Look {
     eyes: has(EYE_COLORS, r.eyes) ? r.eyes : DEFAULT_LOOK.eyes,
     glasses: has(GLASSES, r.glasses) ? r.glasses : DEFAULT_LOOK.glasses,
     covering,
-    fit: isValidFit(st, r.fit) ? r.fit : null,
+    fit: storedFit(st, r.fit),
     ...(NYERS.some((n) => n.id === r.nyer) ? { nyer: r.nyer as NyerId } : {}),
   };
 }

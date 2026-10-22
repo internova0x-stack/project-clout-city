@@ -11,7 +11,7 @@ import {
 } from "@/lib/look";
 import { GARMENT } from "./avatar/garments";
 import { CloutCard } from "./city/CloutCard";
-import { BOTTOM_LABEL, STARTING_STYLES, STYLE_FITS, STYLE_IDS, TOP_LABEL, colorUnlocks, defaultFit, getStyle, type BottomKind, type Fit, type TopKind } from "@/lib/styles";
+import { BOTTOM_LABEL, STARTING_STYLES, STYLE_FITS, STYLE_IDS, TOP_LABEL, defaultFit, getStyle, type BottomKind, type Fit, type TopKind } from "@/lib/styles";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { cleanName, nameError } from "@/lib/validation";
 import { ChevronLeftIcon, ShuffleIcon } from "./icons";
@@ -567,37 +567,16 @@ function OutfitPicker({ look, onChange }: { look: Look; onChange: (fit: Fit) => 
       <div className="outfit-panel stack-8">
         <span className="outfit-label">Top</span>
         {piece(o.tops, fit.top, fit.topColor, (k) => TOP_LABEL[k as TopKind], (k) => pick({ top: k as TopKind }))}
-        <OutfitSwatches label="Top color" colors={o.topColors} value={fit.topColor} locks={colorUnlocks(style, look.body, "top")} onPick={(c) => pick({ topColor: c })} />
       </div>
       <div className="outfit-panel stack-8">
         <span className="outfit-label">Bottom</span>
         {piece(o.bottoms, fit.bottom, fit.bottomColor, (k) => BOTTOM_LABEL[k as BottomKind], (k) => pick({ bottom: k as BottomKind }))}
-        <OutfitSwatches label="Bottom color" colors={o.bottomColors} value={fit.bottomColor} locks={colorUnlocks(style, look.body, "bottom")} onPick={(c) => pick({ bottomColor: c })} />
       </div>
-      <div className="outfit-panel stack-8">
-        <span className="outfit-label">Shoes</span>
-        <OutfitSwatches label="Shoe color" colors={o.shoeColors} value={fit.shoeColor} locks={colorUnlocks(style, look.body, "shoe")} onPick={(c) => pick({ shoeColor: c })} />
-        <p className="meta" style={{ margin: 0 }}>More colors open up as your clout grows. 🔒</p>
-      </div>
+      <p className="meta" style={{ margin: 0 }}>Starter pieces come in grey, black and white. The Shop has every color.</p>
     </div>
   );
 }
 
-/** A new player has no clout yet: past each piece's default color, the swatches show a lock (owner, Oct 22). */
-function OutfitSwatches({ label, colors, value, locks, onPick }: { label: string; colors: string[]; value: string; locks: Map<string, number>; onPick: (c: string) => void }) {
-  return (
-    <div className="swatches outfit-swatches" role="group" aria-label={label}>
-      {colors.map((c, i) => {
-        const need = locks.get(c) ?? 0;
-        return need > 0 ? (
-          <button key={c} className="swatch locked" style={{ background: c }} disabled aria-label={`${label} ${i + 1}, opens at ${need} clout`} title={`Opens at ${need} clout`}><span aria-hidden="true">🔒</span></button>
-        ) : (
-          <button key={c} className="swatch" style={{ background: c }} aria-pressed={value === c} aria-label={`${label} ${i + 1}`} onClick={() => onPick(c)} />
-        );
-      })}
-    </div>
-  );
-}
 
 /** The birth lottery's reveal (v0.7, #46): a quiet Monument Valley card at dusk (owner, Oct 13). */
 function CashCard({ cash, handle }: { cash: number; handle: string }) {
