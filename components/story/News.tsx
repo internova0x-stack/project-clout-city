@@ -7,9 +7,11 @@ import type { LottoWin } from "@/lib/lotto";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NEWS_KIND_LABEL, splitNews, transitLive, transitUntil, type NewsItem } from "@/lib/news";
 import { lineName } from "@/lib/travel";
+import dynamic from "next/dynamic";
 import { Sheet } from "../Sheet";
+import { normalizeLook } from "@/lib/look";
 import { GAME_CONFIG } from "@/lib/config";
-import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
+import { badgeInfo, postCast, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
 
 // The News app (C30 to C34): today's story, side stories, the archive, predictions
 // with live results, reveals with Lola's roast, evidence cards and shadow guesses.
@@ -235,6 +237,36 @@ function Quiet({ text }: { text: string }) {
   );
 }
 
+const AvatarHead = dynamic(() => import("../avatar/AvatarHead"), { ssr: false });
+
+/** Owner, Oct 22: the post's key characters as avatar heads; tapping one shows their bio. */
+function StoryCast({ arc, ids }: { arc: FeedArc; ids: string[] }) {
+  const people = postCast(arc, ids);
+  const [open, setOpen] = useState<string | null>(null);
+  if (!people.length) return null;
+  const who = people.find((c) => c.id === open);
+  return (
+    <section className="story-cast" aria-label="Characters">
+      <span className="overline">Characters</span>
+      <div className={`story-cast-row${who ? " has-pick" : ""}`}>
+        {people.map((c) => (
+          <button key={c.id} type="button" className="story-cast-person" aria-pressed={open === c.id} onClick={() => setOpen(open === c.id ? null : c.id)}>
+            <span className="story-cast-face"><AvatarHead look={normalizeLook(c.look, c.style)} size={44} /></span>
+            <span className="story-cast-name">{c.name}</span>
+          </button>
+        ))}
+      </div>
+      {who && (
+        <div className="story-cast-bio" role="status">
+          <span className="title">{who.name}</span>
+          <span className="meta">{who.role}</span>
+          <p className="body" style={{ margin: 0 }}>{who.bio}</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 const Byline = () => (
   <div className="row" style={{ gap: 8 }}>
     <span className="lola-avatar" style={{ width: 24, height: 24, fontSize: 13 }} aria-hidden="true">💋</span>
@@ -301,6 +333,7 @@ export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc:
             {beat.post.split(/\n\s*\n/).map((para, i) => <p key={i} className="body blog-para">{para.trim()}</p>)}
             {beat.hook && <p className="title beat-hook">{beat.hook}</p>}
             <button className="btn btn-night btn-sm" onClick={share}>↗ Share{shareTask && !shareTask.done ? ` · +${shareTask.clout} 🔥` : ""}</button>
+            <StoryCast arc={arc} ids={beat.cast ?? []} />
           </article>
         </Sheet>
       )}

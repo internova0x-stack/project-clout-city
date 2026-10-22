@@ -16,6 +16,8 @@ export interface FeedBeat {
   post?: string;
   /** Migration 0117: whether this player has opened the post (reading pays clout once). */
   read?: boolean;
+  /** Owner, Oct 22: ids of the post's key characters (FeedArc.characters). */
+  cast?: string[];
   hook?: string;
   previously?: string;
   cardNote?: string;
@@ -60,6 +62,8 @@ export interface FeedArc {
   upcoming?: { id: string; day: number; headline?: string }[];
   predictions: FeedPrediction[];
   badges?: { id: string; name: string; emoji: string; line: string }[];
+  /** Owner, Oct 22: the story's key characters, shown as avatar heads at the end of a post. */
+  characters?: { id: string; name: string; role: string; bio: string; style: string; look: Record<string, unknown> }[];
 }
 
 export interface StoryFeed {
@@ -106,6 +110,14 @@ export function chatterLine(feed: StoryFeed | null, npc: string, generic: Record
   }
   const g = generic[npc] ?? generic.bartender ?? ["Nice day for it."];
   return g[seed % g.length];
+}
+
+/** Owner, Oct 22: a post shows at most this many characters, the story's most important first. */
+export const POST_CAST_MAX = 5;
+
+/** The characters under a post: its cast in the story's own order (the list is written most important first), at most 5. */
+export function postCast(arc: Pick<FeedArc, "characters">, ids: string[] = []): NonNullable<FeedArc["characters"]> {
+  return (arc.characters ?? []).filter((c) => ids.includes(c.id)).slice(0, POST_CAST_MAX);
 }
 
 export const mainArc = (feed: StoryFeed | null) => feed?.arcs.find((a) => a.type === "main" && !a.finished) ?? null;

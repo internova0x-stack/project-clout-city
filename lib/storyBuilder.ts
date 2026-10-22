@@ -120,6 +120,7 @@ function cleanBeat(b: Beat, arc: Arc): Beat {
     if (text(n.body)) item.body = text(n.body);
     if (text(n.hook)) item.hook = text(n.hook);
     if (text(n.post)) item.post = text(n.post);
+    if (n.cast?.length) item.cast = list(n.cast);
     return item;
   });
   const out: Beat = { id: b.id, day: b.day, status: b.status ?? "active", news, effects: b.effects.map((e) => cleanEffect(e, arc.id)) };
@@ -176,6 +177,7 @@ export function cleanArc(draft: Arc): Arc {
     blurb: text(e.blurb),
   }));
   if (events.length) arc.events = events;
+  if (draft.characters?.length) arc.characters = draft.characters;
   arc.beats = draft.beats.map((b) => cleanBeat(b, { ...draft, id }));
   const chatter: NonNullable<Arc["chatter"]> = {};
   for (const [topic, phases] of Object.entries(draft.chatter ?? {})) {
