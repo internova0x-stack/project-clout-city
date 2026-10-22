@@ -13,7 +13,7 @@ import { storyItemOpen, type StoryFeed } from "@/lib/storyFeed";
 import { editionLine, formatPrice, serialLabel, type StoreProduct } from "@/lib/store";
 import { JET_SKU, PLAZA_SKU, YACHT_SKU, weekLabel, type CoutureApi, type PlazaWeeks } from "@/lib/coutureMap";
 import { CROWN_SKU, CROWN_STYLES, SUIT_CLOTHS, SUIT_LININGS, cleanMonogram, hasOptions, optionsLine, type ItemOptions } from "@/lib/couture";
-import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, shippedPictures, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
+import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, newArrivals, shippedPictures, shopOrder, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
 
 const COUTURE = "Clout Couture";
@@ -95,9 +95,9 @@ export function ShopSheet({
   const inTab = source.filter((i) => (cat === "couture" ? i.collection === COUTURE : i.category === cat && i.collection !== COUTURE) && shows(i));
   // Clout Couture (owner, Oct 21): a row at the top of Luxury with every piece, and at the top of a piece's own tab.
   const lines = cat === "fashion" ? STYLE_LINES.filter((l) => inTab.some((i) => i.styleLines.includes(l))) : [];
-  // Real-money pieces come after the C$ ones in every tab (owner, Oct 22), unless a tab has nothing else.
-  const items = inTab.filter((i) => line === "all" || !lines.length || i.styleLines.includes(line))
-    .sort((a, b) => Number(!!a.collector) - Number(!!b.collector));
+  // Cheapest first, real-money pieces after the C$ ones (owner, Oct 22), with what's new in a row on top.
+  const items = shopOrder(inTab.filter((i) => line === "all" || !lines.length || i.styleLines.includes(line)));
+  const fresh = newArrivals(items.filter((i) => !owned.has(i.sku) && !i.retired), Date.now());
   const card = (item: ShopCardItem) => {
     const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
     const soon = !item.wearableNow;
@@ -208,6 +208,12 @@ export function ShopSheet({
           )}
           {cat === "couture" && <p className="subtext" style={{ margin: 0 }}>Clout Couture: numbered pieces, paid in real cash. Once a drop sells out, it's gone.</p>}
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
+          {fresh.length > 0 && (
+            <section className="stack-8">
+              <span className="overline">✨ New in the Shop</span>
+              <div className="shop-new-row">{fresh.map(card)}</div>
+            </section>
+          )}
           {cat === "home" && (
             <HomeShelf
               items={items}

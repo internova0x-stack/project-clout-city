@@ -215,7 +215,8 @@ components live in `app/globals.css`.
   (`plaza_weeks`, `plaza_book`, one a week, the look kept at booking; home after its week); Studio `admin_couture_owners`,
   `admin_couture_name` (hide a name), `admin_plaza_remove`. The Clout Throne is home furniture (`throne`, sittable).
   Shop order (owner, Oct 22): Clout Couture is its own Shop tab (after Luxury), out of every other tab; collector cards
-  come after the C$ items. The Home tab is labelled "Furniture" (id still 'home'). Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
+  come after the C$ items. Every tab lists cheapest first (`shopOrder`), under a "New in the Shop" row of what went on sale in
+  the last 14 days (`newArrivals`, the catalog's go_live_at; up to 8, not owned). The Home tab is labelled "Furniture" (id still 'home'). Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
   lib/accessories.ts), never by the code's `ShopItem.wear`, which they don't have. Migration 0106: Hell Gate Park is
   named Astoria Park (id `hell-gate-park` kept; city seed regenerated).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
