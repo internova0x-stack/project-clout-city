@@ -211,6 +211,7 @@ export function GameShell({
   ping,
   skills: previewSkills,
   loadSkills,
+  initialCard,
   boroughGates,
   loadBoroughs,
   leaderboardRows,
@@ -263,6 +264,8 @@ export function GameShell({
   /** Skills (owner, Oct 16): the profile's Skills tab; absent until they're switched on. */
   skills?: import("@/lib/skills").SkillState[];
   loadSkills?: () => Promise<import("@/lib/skills").SkillState[] | null>;
+  /** The player's own card (Queens rank, recent), loaded with the page. */
+  initialCard?: PlayerCard | null;
   /** Borough gates (owner, Oct 17): which boroughs are open and how close the next one is (borough_state()). */
   boroughGates?: BoroughGate[];
   loadBoroughs?: () => Promise<BoroughGate[] | null>;
@@ -512,7 +515,7 @@ export function GameShell({
   }, [cityNews]);
   // v0.6 treasure hunts: null until hunt_state() answers (no migration, no Hunt tab).
   // v0.7 step 3: my own public card, for the bubble's rank and the profile's "Recently".
-  const [myCard, setMyCard] = useState<PlayerCard | null>(null);
+  const [myCard, setMyCard] = useState<PlayerCard | null>(initialCard ?? null);
   const profileOpen = panel === "profile";
   const [tasksTab, setTasksTab] = useState<"daily" | "goals" | "hunt" | undefined>(undefined);
   // Skills (migration 0056): fresh each time the profile or the Tasks list (its skill task) opens.
