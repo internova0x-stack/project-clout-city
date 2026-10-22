@@ -9,6 +9,7 @@ import { NEWS_KIND_LABEL, splitNews, transitLive, transitUntil, type NewsItem } 
 import { lineName } from "@/lib/travel";
 import dynamic from "next/dynamic";
 import { Sheet } from "../Sheet";
+import { ChevronDownIcon } from "../icons";
 import { normalizeLook } from "@/lib/look";
 import { GAME_CONFIG } from "@/lib/config";
 import { badgeInfo, postCast, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
@@ -124,8 +125,8 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
                   <BeatCard arc={arc} beat={b} feed={feed} handlers={handlers} />
                 </div>
               ))}
-              <UpcomingBeats arc={arc} today={feed.today} />
               <SideArcs arcs={sides(arc.id)} feed={feed} handlers={handlers} />
+              <UpcomingBeats arc={arc} today={feed.today} />
             </div>
           ))
         )
@@ -479,44 +480,55 @@ function ArchiveBeat({ arc, beat, feed, handlers }: { arc: FeedArc; beat: FeedBe
   );
 }
 
-/** C34: side stories, locked as teasers until bought. */
+/** C34: side stories (owner, Oct 22): a compact card each, between today's post and the locked days. Tap to open:
+ * before buying it shows the teaser and the Unlock / VIP buttons, after buying the released posts. */
 function SideArcs({ arcs, feed, handlers }: { arcs: FeedArc[]; feed: StoryFeed; handlers: NewsHandlers }) {
+  const [open, setOpen] = useState<string | null>(null);
   if (!arcs.length) return null;
   return (
     <div className="stack-8">
-      <p className="overline" style={{ margin: "8px 0 0" }}>Side stories</p>
-      {arcs.map((a) => (a.entitled ? (
-        <div key={a.id} className="stack-12">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginTop: 8 }}>
-            <span className="title" style={{ minWidth: 0 }}>{a.emoji} {a.title}</span>
-            {handlers.vip?.member && <span className="tag tag-gold">👑 Free with VIP</span>}
-          </div>
-          {[...a.beats].reverse().map((b) => <BeatCard key={b.id} arc={a} beat={b} feed={feed} handlers={handlers} />)}
-        </div>
-      ) : (
-        <div key={a.id} className="side-teaser stack-12">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-            <span className="title" style={{ minWidth: 0 }}>{a.emoji} {a.title}</span>
-            <span className="tag tag-gold">✨ Real cash</span>
-          </div>
-          <span className="subtext">{a.teaser}</span>
-          {a.beats.map((b) => <span key={b.id} className="meta locked-row">🔒 {b.headline}</span>)}
-          {(() => {
-            const p = a.sku ? handlers.product?.(a.sku) : null;
-            if (p?.pending) return <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled>Unlocking… payment received</button>;
-            return (
-              <div className="stack-8">
-                <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
-                  {handlers.busy === `buy:${a.sku}` ? "Opening checkout…" : p ? `Unlock for ${p.price}` : "Unlock"}
-                </button>
-                {handlers.vip && !handlers.vip.member && (
-                  <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={handlers.vip.onJoin}>👑 Free with VIP</button>
-                )}
+      {arcs.map((a) => {
+        const isOpen = open === a.id;
+        const released = a.beats.filter((b) => !b.locked);
+        return (
+          <section key={a.id} className={`side-card${isOpen ? " open" : ""}${a.entitled ? "" : " side-card-locked"}`}>
+            <button type="button" className="side-card-head" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : a.id)}>
+              <span style={{ minWidth: 0, flex: 1, textAlign: "left" }}>
+                <span className="overline" style={{ display: "block" }}>
+                  Side story{a.entitled ? (handlers.vip?.member ? " · 👑 Free with VIP" : " · Unlocked") : ""}
+                </span>
+                <span className="title side-card-title">{a.emoji} {a.title}</span>
+              </span>
+              <ChevronDownIcon size={20} className="side-card-chev" />
+            </button>
+            {isOpen && (a.entitled ? (
+              <div className="stack-12">
+                {released.length === 0
+                  ? <p className="meta" style={{ margin: 0 }}>The first post lands soon. Lola is typing.</p>
+                  : [...released].reverse().map((b) => <BeatCard key={b.id} arc={a} beat={b} feed={feed} handlers={handlers} />)}
               </div>
-            );
-          })()}
-        </div>
-      )))}
+            ) : (
+              <div className="stack-12">
+                <span className="subtext">{a.teaser}</span>
+                {(() => {
+                  const p = a.sku ? handlers.product?.(a.sku) : null;
+                  if (p?.pending) return <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled>Unlocking… payment received</button>;
+                  return (
+                    <div className="stack-8">
+                      <button className="btn btn-taxi btn-sm" style={{ width: "100%" }} disabled={handlers.busy === `buy:${a.sku}`} onClick={() => handlers.onUnlock(a)}>
+                        {handlers.busy === `buy:${a.sku}` ? "Opening checkout…" : p ? `Unlock for ${p.price}` : "Unlock"}
+                      </button>
+                      {handlers.vip && !handlers.vip.member && (
+                        <button className="btn btn-secondary btn-sm" style={{ width: "100%" }} onClick={handlers.vip.onJoin}>👑 Free with VIP</button>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            ))}
+          </section>
+        );
+      })}
     </div>
   );
 }
