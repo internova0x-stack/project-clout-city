@@ -93,7 +93,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -181,6 +181,7 @@ export default async function Preview({
           bizPreset={biz}
           togetherPreset={together}
           storyDay={story && /^\d+$/.test(story) ? Number(story) : undefined}
+          storyArc={arc}
           clique={[
             { display_name: "tasha.b", starting_style: "pilates_princess", joined_at: new Date(0).toISOString() },
             { display_name: "Marco", starting_style: "midtown_finance", joined_at: new Date(1).toISOString() },

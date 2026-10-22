@@ -14,7 +14,9 @@ import { PLACES, SHOP_ITEMS, collectorValue } from "@/lib/city";
 // Development previews only: the story world in memory on the dev server, so the
 // News app can be tried without a database. Refused in production builds.
 
-const store: { starts: Record<string, string | null>; st: PlayerStoryState; offset: number } = {
+// `arc` is the main story the preview runs (Sarah Bird unless ?arc= names another, e.g. diss-and-tell).
+const store: { starts: Record<string, string | null>; st: PlayerStoryState; offset: number; arc: string } = {
+  arc: "sarah-bird",
   starts: { "sarah-bird": null },
   st: emptyStoryState(),
   offset: 0,
@@ -74,9 +76,13 @@ export async function previewStoryTask(taskId: string, by?: { place?: string; ac
   store.st.tasksDone.push(task.id);
   return result({ clout: task.clout, message: `Story task done: ${task.label}` });
 }
-export async function previewStoryDevStart(day: number | null) {
+export async function previewStoryDevStart(day: number | null, arcId?: string) {
   previewOnly();
-  store.starts["sarah-bird"] = day === null ? null : addDaysISO(nyDate(nowMs()), -(day - 1));
+  if (arcId && arcId !== store.arc && loadArcs().some((a) => a.id === arcId && a.type === "main")) {
+    store.starts = { [arcId]: null };
+    store.arc = arcId;
+  }
+  store.starts[store.arc] = day === null ? null : addDaysISO(nyDate(nowMs()), -(day - 1));
   if (day === null) store.st = emptyStoryState();
   return result();
 }
@@ -88,9 +94,9 @@ export async function previewStoryEntitle(sku: string, on: boolean) {
 /** Hours until a story day's time from the current game clock (to drive the city clock offset). */
 export async function previewStoryHoursTo(day: number, time = "12:00") {
   previewOnly();
-  const start = store.starts["sarah-bird"];
+  const start = store.starts[store.arc];
   if (!start) return 0;
-  const arc = loadArcs().find((a) => a.id === "sarah-bird")!;
+  const arc = loadArcs().find((a) => a.id === store.arc)!;
   const ms = predictionWindow(arc, { day } as never, { closes_at: { day, time } } as never, start).closes - 59_999;
   return (ms - Date.now()) / 3_600_000;
 }

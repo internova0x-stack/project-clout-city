@@ -64,7 +64,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -74,6 +74,8 @@ export function PreviewHome({
   storyOff?: boolean;
   /** Start the pilot so today is this story day (the first refresh does it). */
   storyDay?: number;
+  /** ?arc=: which main story ?story= starts (Sarah Bird by default). */
+  storyArc?: string;
   /** All five daily tasks already done (to see the HUD's finished state). */
   tasksDone?: boolean;
   /** Start crushes and date nights in a set state: "match", "invite" or "tonight". */
@@ -267,7 +269,7 @@ export function PreviewHome({
         if (preset === undefined || !r.ok) return r;
         const day = preset;
         preset = undefined;
-        return keep(previewStoryDevStart(day));
+        return keep(previewStoryDevStart(day, storyArc));
       },
       vote: (pid, o) => keep(previewStoryVote(pid, o)),
       shadowGuess: (pid, o) => keep(previewStoryShadow(pid, o)),
