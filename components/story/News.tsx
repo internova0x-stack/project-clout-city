@@ -248,7 +248,7 @@ function StoryCast({ arc, ids }: { arc: FeedArc; ids: string[] }) {
   return (
     <section className="story-cast" aria-label="Characters">
       <span className="overline">Characters</span>
-      <div className="story-cast-row">
+      <div className={`story-cast-row${who ? " has-pick" : ""}`}>
         {people.map((c) => (
           <button key={c.id} type="button" className="story-cast-person" aria-pressed={open === c.id} onClick={() => setOpen(open === c.id ? null : c.id)}>
             <span className="story-cast-face"><AvatarHead look={normalizeLook(c.look, c.style)} size={44} /></span>
