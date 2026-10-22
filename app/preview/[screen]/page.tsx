@@ -8,6 +8,7 @@ import { PreviewHome } from "@/components/preview/PreviewHome";
 import { PreviewArt } from "@/components/preview/PreviewArt";
 import { PreviewRoom } from "@/components/preview/PreviewRoom";
 import { GuestMap } from "@/components/GuestMap";
+import { WelcomeBack } from "@/components/WelcomeBack";
 import { Studio } from "@/components/studio/Studio";
 import { CreatorDashboard } from "@/components/creator/CreatorDashboard";
 import type { StudioArc } from "@/lib/studio";
@@ -57,6 +58,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?dating=match   crushes and date nights: match (an unseen "It's mutual"), invite (a date invite waiting), tonight (a date in progress), alone (nobody to ask yet)
 //   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
 //   /preview/studio            the Story Studio on an in-memory copy of content/stories (&live=3: the pilot is on Day 3)
+//   /preview/welcome          the welcome-back screen (Continue / Start over, migration 0114); ?restart=wait: started over 10 days ago
 //   /preview/art             every location illustration, day and night
 //   /preview/room?room=cafe|club|counter|astoria_studio|<place id>&time=night   one 3D room on its own (&mood=natural to compare)
 //   add &time=day or &time=night to pin the map
@@ -91,13 +93,24 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
     case "guest":
       // ?via=tasha: a guest who followed a creator's link (migration 0087); ?via=tasha-signup lands on sign-up.
       return <GuestMap invited={false} authError={false} creator={via ? { name: "Tasha Glow", giftCash: 500, giftItem: "fit-bucket-hat" } : null} openSignUp={via === "tasha-signup"} />;
+    case "welcome":
+      return (
+        <WelcomeBack preview
+          data={{ name: SAMPLE.display_name, style: SAMPLE.starting_style, look: SAMPLE.look, bank: SAMPLE.bank_cash, homeId: "jackson_heights_1br", houseSku: null, homeLayout: null,
+            items: [{ id: 1, sku: "fit-satin-bomber", category: "fashion", equipped: true }],
+            restart: restart === "wait" ? { can: false, nextAt: new Date(Date.now() + 20 * 86_400_000).toISOString() } : { can: true, nextAt: null } }}
+          onRestart={async () => {
+            "use server";
+            return { ok: true as const };
+          }} />
+      );
     case "creator": {
       const s = Math.min(3, Math.max(0, Number(step ?? 0))) as CreatorStep;
       return (

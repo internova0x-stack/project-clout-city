@@ -109,3 +109,29 @@ export async function moveIn(homeId: string): Promise<StepResult> {
   const { error } = await callStep("move_in", { p_home: homeId });
   return error ? { ok: false, error } : { ok: true };
 }
+
+/** Start over (migration 0114): the welcome screen's button. The server checks the 30 days and resets the run. */
+export async function restartPlayer(): Promise<StepResult> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  const { error } = await supabase.rpc("restart_player");
+  if (!error) return { ok: true };
+  if (error.message.includes("restart_too_soon")) return { ok: false, error: `You can only start over once every ${GAME_CONFIG.restartDays} days.` };
+  if (error.message.includes("banned")) return { ok: false, error: "This account can't start over." };
+  console.error("restart_player failed", error);
+  return { ok: false, error: "The city glitched. Try again in a second." };
+}
+
+/** The creator's look step after starting over: a new style and look, same username. */
+export async function restartLook(input: { name: string; style: string; look: unknown; ageConfirmed?: boolean }): Promise<CreateResult> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  if (!isStyleId(input.style)) return { ok: false, error: "Pick a starting style." };
+  if (!isValidLook(input.look, input.style)) return { ok: false, error: "Something's off with your look. Try picking again." };
+  const { error } = await supabase.rpc("restart_look", { p_style: input.style, p_look: lookChoices(normalizeLook(input.look, input.style)) });
+  if (error) {
+    console.error("restart_look failed", error);
+    return { ok: false, error: "The city glitched. Try again in a second." };
+  }
+  return { ok: true };
+}

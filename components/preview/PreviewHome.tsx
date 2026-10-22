@@ -129,7 +129,7 @@ export function PreviewHome({
   // v0.12 ?biz=some|rich|public: start with businesses, and the cash and clout to match.
   const boost = bizPreset === "some" ? { cash: 60_000, clout: 11_000 } : bizPreset === "rich" || bizPreset === "public" ? { cash: 60_000_000, clout: 60_000 } : null;
   const rentOn = rentPreset === "short" || rentPreset === "late" || rentPreset === "evict";
-  const me = useMemo(() => (boost ? { ...player, bank_cash: player.bank_cash + boost.cash, clout: player.clout + boost.clout } : rentOn ? { ...player, bank_cash: 930 } : player),
+  const me = useMemo(() => (boost ? { ...player, bank_cash: player.bank_cash + boost.cash, clout: player.clout + boost.clout } : rentOn ? { ...player, bank_cash: 230 } : player),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [player, bizPreset]);
   const city = useMemo(() => {
@@ -137,7 +137,7 @@ export function PreviewHome({
       ...(transitPreset === "pass" ? { transit_pass_until: new Date(Date.now() + 5 * 86_400_000).toISOString() } : { transit_pass_until: null }) }, sampleSkills(skillsPreset === "pro"), { firstDay: player.tutorial_state === "pending", startingStyle: player.starting_style });
     if (rentOn) {
       const day = (n: number) => new Date(Date.parse(`${s.today}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
-      const rent = ECONOMY.homes.find((h) => h.id === s.player.home_id)?.rent ?? 1750;
+      const rent = ECONOMY.homes.find((h) => h.id === s.player.home_id)?.rent ?? 425;
       s.bills = s.bills.map((b) => (b.status === "due" ? { ...b, status: "paid" as const, paid_at: new Date().toISOString() } : b));
       if (rentPreset === "short") s.player.next_rent_due = day(2);
       else s.bills = [...s.bills, { id: 299, kind: "rent", amount: rent, due_date: day(rentPreset === "late" ? -1 : -4), status: "due", paid_at: null }];

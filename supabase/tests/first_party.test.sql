@@ -60,7 +60,7 @@ select pg_temp.assert(:roll1 between (public.economy() -> 'birthLottery' ->> 'mi
 select home_id, bank_cash, onboarding_step from public.move_in('astoria_studio');
 select bank_cash, clout, confidence, energy, onboarding_step from public.attend_first_party(true);
 select bank_cash as bank_after, clout as clout_after from public.attend_first_party(false) \gset
-select pg_temp.assert(:bank_after = :roll1 - 1750 - 150 + 300, 'bank after party (weekly studio rent, v0.11)');
+select pg_temp.assert(:bank_after = :roll1 - 425 - 150 + 300, 'bank after party (weekly studio rent, 0113)');
 select pg_temp.assert(:clout_after = 750 + 100, 'clout after party');
 select * from public.leaderboard('queens', 10);
 select * from public.my_rank('clique');
@@ -69,8 +69,8 @@ select onboarding_step from public.players;
 
 -- LIC high-rise is refused when the cash can't cover a week's rent + phone + party.
 reset role;
-update public.players set bank_cash = 3000 where display_name = 'Bea';
-update public.players set traits = array['loud','hustler'], birth_cash = 3000, onboarding_step = 'lottery_done' where display_name = 'Bea';
+update public.players set bank_cash = 1100 where display_name = 'Bea';
+update public.players set traits = array['loud','hustler'], birth_cash = 1100, onboarding_step = 'lottery_done' where display_name = 'Bea';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
 do $$ begin

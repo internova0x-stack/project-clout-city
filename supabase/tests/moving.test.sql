@@ -31,15 +31,15 @@ reset role;
 update public.players set clout = 1000 where display_name = 'mover_one';
 set role authenticated;
 select 1 from public.move_home('sunnyside_gardens');
-select pg_temp.assert((select home_id = 'sunnyside_gardens' and moved_up and bank_cash = 10000 - 6400 and next_rent_due = public.ny_today() + 7
-                       from public.players where display_name = 'mover_one'), 'moved: C$6,400 paid, moved_up set, next rent in a week');
+select pg_temp.assert((select home_id = 'sunnyside_gardens' and moved_up and bank_cash = 10000 - 1500 and next_rent_due = public.ny_today() + 7
+                       from public.players where display_name = 'mover_one'), 'moved: C$1,500 paid, moved_up set, next rent in a week');
 select pg_temp.assert((select count(*) from public.ledger l join public.players p on p.id = l.player_id
                        where p.display_name = 'mover_one' and l.ref like 'move:sunnyside_gardens:%') = 2, 'rent and broker fee in the ledger');
 select pg_temp.assert(pg_temp.raises($$select public.move_home('lic_highrise')$$, 'home_needs_clout'), 'the high-rise needs 3,000 clout');
 reset role;
 update public.players set clout = 5000, bank_cash = 1000 where display_name = 'mover_one';
 set role authenticated;
-select pg_temp.assert(pg_temp.raises($$select public.move_home('lic_highrise')$$, 'cant_afford'), 'C$9,000 to move');
+select pg_temp.assert(pg_temp.raises($$select public.move_home('lic_highrise')$$, 'cant_afford'), 'C$2,100 to move');
 -- Moving down is allowed and keeps the goal.
 reset role;
 update public.players set bank_cash = 10000 where display_name = 'mover_one';

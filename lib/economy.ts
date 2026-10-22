@@ -3,7 +3,8 @@
 // re-tuned by later migrations) so they can be tuned without a deploy; these are the
 // same values, used by the UI and checked against the newest migration by
 // tests/economy.test.ts. Rent and the phone bill are weekly (v0.8, owner Oct 13);
-// v0.11 raised them with the rest of the prices (migration 0039, owner Oct 14).
+// v0.11 raised them with the rest of the prices (migration 0039, owner Oct 14); migration 0113
+// (owner, Oct 22) made rent realistic for a week: about a quarter of New York's monthly rent.
 
 export interface Home {
   id: string;
@@ -41,7 +42,7 @@ export interface Economy {
 }
 
 export const ECONOMY: Economy = {
-  birthLottery: { min: 5000, max: 10000, step: 100 },
+  birthLottery: { min: 1500, max: 3000, step: 100 },
   phoneBill: 60,
   firstParty: { entry: 150, cashReward: 300, cloutReward: 100, confidence: 15, energy: 20 },
   invites: { cloutPerInvite: 50, cliqueSize: 5, cliqueBonus: 500, paidAtOnce: 5 },
@@ -49,14 +50,14 @@ export const ECONOMY: Economy = {
   playersOnlineThreshold: 1,
   homes: [
     // C3 (owner, Oct 20): the main pick at sign-up. Two single beds, one roommate, half the rent.
-    { id: "astoria_share", name: "Room share with a roommate", neighborhood: "Astoria", rent: 900, emoji: "🛏️", roommate: "priya", blurb: "Two beds, one bathroom schedule, half the rent. Your roommate works nights. Mostly." },
-    { id: "astoria_studio", name: "Astoria studio walk-up", neighborhood: "Astoria", rent: 1750, emoji: "🪜", blurb: "Fourth floor, no elevator. Free leg day, every day." },
-    { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 2600, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
-    { id: "sunnyside_gardens", name: "Sunnyside Gardens 1BR", neighborhood: "Sunnyside", rent: 3200, emoji: "🌿", blurb: "A garden you share with forty neighbors and one very territorial cat.", moveClout: 1000, signup: false },
-    { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 4500, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal.", moveClout: 3000 },
+    { id: "astoria_share", name: "Room share with a roommate", neighborhood: "Astoria", rent: 225, emoji: "🛏️", roommate: "priya", blurb: "Two beds, one bathroom schedule, half the rent. Your roommate works nights. Mostly." },
+    { id: "astoria_studio", name: "Astoria studio walk-up", neighborhood: "Astoria", rent: 425, emoji: "🪜", blurb: "Fourth floor, no elevator. Free leg day, every day." },
+    { id: "jackson_heights_1br", name: "Jackson Heights 1BR", neighborhood: "Jackson Heights", rent: 600, emoji: "🛋️", blurb: "A real bedroom door. Your parents will finally be proud." },
+    { id: "sunnyside_gardens", name: "Sunnyside Gardens 1BR", neighborhood: "Sunnyside", rent: 750, emoji: "🌿", blurb: "A garden you share with forty neighbors and one very territorial cat.", moveClout: 1000, signup: false },
+    { id: "lic_highrise", name: "Long Island City high-rise", neighborhood: "Long Island City", rent: 1050, emoji: "🌆", blurb: "Skyline view, rooftop pool, rent that should be illegal.", moveClout: 3000 },
     // v0.15 Campus (owner, Oct 18): the cheapest rent in the city, for enrolled students only. A roommate is included.
-    { id: "sj_dorm", name: "St. Johnsons dorm room", neighborhood: "Jamaica", rent: 1100, emoji: "🛏️", blurb: "Bunk beds, a mini fridge and a roommate who microwaves fish.", signup: false, campus: "st-johnsons" },
-    { id: "qu_dorm", name: "Queensborough dorm room", neighborhood: "Flushing", rent: 1100, emoji: "🛏️", blurb: "Cinder-block chic. The RA has a whistle and opinions.", signup: false, campus: "queensborough-u" },
+    { id: "sj_dorm", name: "St. Johnsons dorm room", neighborhood: "Jamaica", rent: 250, emoji: "🛏️", blurb: "Bunk beds, a mini fridge and a roommate who microwaves fish.", signup: false, campus: "st-johnsons" },
+    { id: "qu_dorm", name: "Queensborough dorm room", neighborhood: "Flushing", rent: 250, emoji: "🛏️", blurb: "Cinder-block chic. The RA has a whistle and opinions.", signup: false, campus: "queensborough-u" },
   ],
   moving: { brokerWeeks: 1 },
 };

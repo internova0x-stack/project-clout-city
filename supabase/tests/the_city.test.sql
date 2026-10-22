@@ -159,7 +159,7 @@ select pg_temp.assert((select car_mode = 'rented' from public.players where disp
 select 1 from public.dev_set_clock_offset(:rent_in * 24);
 select 1 from public.sync_player();
 select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'car_rental'), 'car rental due weekly');
-select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'rent' and amount = 2600), 'weekly rent due');
+select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'rent' and amount = 600), 'weekly rent due');
 select pg_temp.assert((select count(*) = 1 from public.bills where status = 'due' and kind = 'phone' and amount = 60), 'weekly phone bill');
 select id as phone_bill from public.bills where kind = 'phone' \gset
 select 1 from public.pay_bill(:phone_bill);
@@ -180,9 +180,9 @@ select pg_temp.assert((select mood = :mood_due - 8 from public.players where dis
 -- Six days late (before next week's rent): moved to the cheapest home, old rent forgiven, a new rent bill.
 select 1 from public.dev_set_clock_offset((:rent_in + 6) * 24);
 select 1 from public.sync_player();
--- C3 (0094): the cheapest home is now the roommate share (your half, C$900).
+-- C3 (0094): the cheapest home is now the roommate share (your half, C$225 since 0113).
 select pg_temp.assert((select home_id = 'astoria_share' from public.players where display_name = 'Gus'), 'evicted to cheapest home');
-select pg_temp.assert((select count(*) = 1 from public.bills where kind = 'rent' and status = 'due' and amount = 900), 'new rent bill');
+select pg_temp.assert((select count(*) = 1 from public.bills where kind = 'rent' and status = 'due' and amount = 225), 'new rent bill');
 select pg_temp.assert((select next_rent_due = public.ny_today() + 7 from public.players where display_name = 'Gus'), 'new rent weekly');
 
 -- Clout never moved without a ledger row.

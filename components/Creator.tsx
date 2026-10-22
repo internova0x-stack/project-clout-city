@@ -43,6 +43,7 @@ export function Creator({
   initialTraits,
   initialCash,
   initialName,
+  restarting = false,
 }: {
   needsAgeConfirm: boolean;
   actions: CreatorActions;
@@ -52,6 +53,8 @@ export function Creator({
   initialCash?: number | null;
   /** The claimed username (for the starting-cash card when resuming). */
   initialName?: string | null;
+  /** Start over (migration 0114): the look step keeps the username and saves a new look instead of claiming one. */
+  restarting?: boolean;
 }) {
   const router = useRouter();
   const [handleName, setHandleName] = useState(initialName ?? "");
@@ -106,6 +109,7 @@ export function Creator({
             setLook={setLook}
             needsAgeConfirm={needsAgeConfirm}
             locked={lookLocked}
+            keptName={restarting ? initialName ?? undefined : undefined}
             onSubmit={actions.createPlayer}
             onDone={(name) => { setHandleName(name); advance(1); }}
           />
@@ -143,16 +147,18 @@ function StepSheet({ children, cta }: { children: ReactNode; cta: ReactNode }) {
 // Step 1: Look
 // ---------------------------------------------------------------------------
 function LookStep({
-  look, setLook, needsAgeConfirm, locked, onSubmit, onDone,
+  look, setLook, needsAgeConfirm, locked, keptName, onSubmit, onDone,
 }: {
   look: Look;
   setLook: (fn: (l: Look) => Look) => void;
   needsAgeConfirm: boolean;
   locked: boolean;
+  /** Starting over: the username stays (no claiming, no availability check). */
+  keptName?: string;
   onSubmit: CreatorActions["createPlayer"];
   onDone: (name: string) => void;
 }) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(keptName ?? "");
   const [adult, setAdult] = useState(!needsAgeConfirm);
   const [touched, setTouched] = useState(false);
   const [taken, setTaken] = useState(false);
@@ -173,19 +179,19 @@ function LookStep({
     }));
   const localError = touched ? nameError(name) : null;
   const nameMessage = error?.field === "name" ? error.text : localError ?? (taken ? "That username's taken. Somebody got there first." : null);
-  const canSubmit = !nameError(name) && !taken && adult && !pending;
+  const canSubmit = (!!keptName || (!nameError(name) && !taken)) && adult && !pending;
 
   useEffect(() => {
     const supabase = getBrowserSupabase();
     const clean = cleanName(name);
     setTaken(false);
-    if (!supabase || nameError(clean)) return;
+    if (!supabase || keptName || nameError(clean)) return;
     const t = setTimeout(async () => {
       const { data } = await supabase.rpc("is_name_available", { p_display_name: clean });
       if (cleanName(name) === clean) setTaken(data === false);
     }, 450);
     return () => clearTimeout(t);
-  }, [name]);
+  }, [name, keptName]);
 
   if (locked) {
     return (
@@ -213,10 +219,16 @@ function LookStep({
     <StepSheet
       cta={
         <button className="btn btn-taxi" onClick={submit} disabled={!cleanName(name) || (!canSubmit && touched)}>
-          {pending ? "Claiming…" : "Claim my username ›"}
+          {pending ? (keptName ? "Saving…" : "Claiming…") : keptName ? "Keep this look ›" : "Claim my username ›"}
         </button>
       }
     >
+      {keptName ? (
+        <div className="card stack-4">
+          <p className="title" style={{ margin: 0 }}>Starting over as @{keptName}</p>
+          <p className="subtext" style={{ margin: 0 }}>New look, new luck, same name. The city has a short memory.</p>
+        </div>
+      ) : (
       <div className="stack-8">
         <label className="title" htmlFor="name" style={{ margin: 0 }}>Pick your username</label>
         <div className={`field field-outline${nameMessage ? " error" : ""}`}>
@@ -240,6 +252,7 @@ function LookStep({
         </div>
         {nameMessage && <p className="error-text" role="alert" style={{ margin: 0 }}>{nameMessage}</p>}
       </div>
+      )}
 
       <div className="stack-8">
         <p className="overline" style={{ margin: 0 }}>Presenting as</p>

@@ -80,7 +80,7 @@ select pg_temp.assert(public.campus_state() ->> 'gpa' is not null, 'GPA shown');
 select pg_temp.assert((public.campus_eat() ->> 'cash')::int = -6, 'student price');
 -- Dorm: students of that campus only.
 select pg_temp.assert(pg_temp.raises($$select public.move_home('qu_dorm')$$, 'dorm_students_only'), 'not the other campus dorm');
-select pg_temp.assert((public.move_home('sj_dorm') ->> 'cash')::int = -2200, 'dorm move-in: a week plus the broker week');
+select pg_temp.assert((public.move_home('sj_dorm') ->> 'cash')::int = -500, 'dorm move-in: a week plus the broker week');
 
 -- A visitor pays the visitor price at the dining hall; anon can't call anything.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000072a2', false);

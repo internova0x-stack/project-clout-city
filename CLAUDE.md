@@ -140,6 +140,16 @@ components live in `app/globals.css`.
   rent date (`push_scan_rent_short`, run by the sender after push_scan, opens Gigs); in the game, `rentAlert()` (lib/cityState.ts)
   shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and puts a ❗ on the bank pill
   (`?rent=short|late|evict` in the preview).
+- Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
+  screen (components/WelcomeBack.tsx: their home in 3D behind the account card, Continue to `/home`, Log out, Start over;
+  `/preview/welcome`, `?restart=wait`). `restart_player()` (once every 30 days, `GAME_CONFIG.restartDays`; `restart_status()`)
+  keeps the account, username, real money (entitlements, purchases, 'collector' items taken off, a Couture car), crew,
+  chats, dates, badges and story votes; it resets cash, clout, rank, home, C$ items, bills, skills, tasks, goals, streaks,
+  businesses, campus, hunts, gossip and lotto, moves the ledger to `ledger_archive` (so rewards pay again) and sends the
+  player back to the creator: `restart_pending()` opens it on the look step with the name kept (`restart_look`), then traits,
+  a new birth lottery and a home. Realistic weekly rent (migration 0113, owner Oct 22): rent is about a quarter of New York's
+  monthly rent (room share C$225, studio C$425, 1BR C$600, Sunnyside C$750, LIC C$1,050, dorms C$250); the lottery rolls
+  C$1,500 to 3,000.
 - Contact the Mayor (migration 0105, owner Oct 22): the Phone's Mayor app is players' feedback to the team. Letters
   (`mayor_write`: bug, idea, complaint, praise, other; 10 to 1000 characters; 5 a New York day; the server adds the
   player's place and device) land in Studio → Mayor's Inbox (`admin_mayor_letters`, `admin_mayor_letter`: read, done,

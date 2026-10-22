@@ -103,7 +103,7 @@ test("#19 every Home item is a real piece, and Fif's showroom opens the Home tab
 test("#19 moving up: Sunnyside is a move-up home, moving costs rent plus the broker fee", () => {
   assert.ok(!SIGNUP_HOMES.some((h) => h.id === "sunnyside_gardens"), "not offered at sign-up");
   const sunny = ECONOMY.homes.find((h) => h.id === "sunnyside_gardens")!;
-  assert.equal(moveCost(sunny), 6400);
+  assert.equal(moveCost(sunny), 1500);
   assert.equal(sunny.moveClout, 1000);
   assert.ok(HOME_TEMPLATES.sunnyside_gardens && (HOME_TEMPLATES.sunnyside_gardens.rooms?.length ?? 0) === 3);
   assert.ok(HOME_FLOORS["house-hunters-point-duplex"]?.[2], "the duplex has an upstairs");
