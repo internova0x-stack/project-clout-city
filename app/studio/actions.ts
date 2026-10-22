@@ -3,6 +3,7 @@
 import type { Arc, Status } from "@/lib/stories";
 import { applyBeatText, parseArcs, studioError, type Admin, type BeatText, type Review, type CastLine, type NewsAdminItem, type HuntAdmin, type ContentDraft, type GossipAdmin, type GossipFileCheck, type SetupCheckRow, type StudioArc, type StudioMetrics, type StudioReport, type StudioResult } from "@/lib/studio";
 import { validateArcs } from "@/lib/storyValidation";
+import { loadArcs } from "@/lib/storyContent";
 import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
 import { readContentDrafts } from "@/lib/contentDrafts";
@@ -43,7 +44,40 @@ export async function studioList(): Promise<StudioResult> {
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   // C6 (migration 0098): new story files in the repo wait in the list for review.
   const synced = await syncWeeklyContent({ force: true }).catch(() => []);
-  return list(supabase, storyImportTrouble(synced) ?? undefined);
+  const added = await addRepoStories();
+  return list(supabase, added.note ?? storyImportTrouble(synced) ?? undefined);
+}
+
+/**
+ * Story files in the repo that the Studio doesn't have yet, saved as the signed-in admin (owner, Oct 22: Diss & Tell
+ * never appeared). The automatic import needs the server's service key and migration 0098; this needs neither, only
+ * admin_story_upsert, which checks story_admins itself. New stories land in Needs review; existing ones are never touched.
+ */
+export async function addRepoStories(): Promise<{ added: string[]; note: string | null }> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { added: [], note: null };
+  let files: Arc[] = [];
+  try { files = loadArcs(); } catch (e) { return { added: [], note: `The story files couldn't be read on the server (${e instanceof Error ? e.message : "unknown error"}).` }; }
+  const { data, error } = await supabase.rpc("admin_story_list");
+  if (error) return { added: [], note: null };
+  const have = new Set(((data ?? []) as StudioArc[]).map((a) => a.id));
+  const missing = files.filter((a) => !have.has(a.id)).sort((a, b) => (a.type === b.type ? 0 : a.type === "main" ? -1 : 1));
+  if (!missing.length) return { added: [], note: null };
+  const problems = validateArcs(files);
+  const added: string[] = [];
+  const trouble: string[] = [];
+  for (const arc of missing) {
+    const mine = problems.find((p) => p.startsWith(`${arc.id}:`));
+    if (mine) { trouble.push(`${arc.title || arc.id}: ${mine.slice(arc.id.length + 1).trim()}`); continue; }
+    const { error: upErr } = await supabase.rpc("admin_story_upsert", { p_data: arc });
+    if (upErr) trouble.push(`${arc.title || arc.id}: ${studioError(upErr.message)}`);
+    else added.push(arc.title || arc.id);
+  }
+  const parts = [
+    added.length ? `New from the repo, waiting for review: ${added.join(", ")}.` : "",
+    trouble.length ? `These story files didn't load: ${trouble.join("; ")}` : "",
+  ].filter(Boolean);
+  return { added, note: parts.join(" ") || null };
 }
 
 export async function studioUpload(json: string): Promise<StudioResult> {
@@ -70,8 +104,22 @@ export async function studioUpload(json: string): Promise<StudioResult> {
 }
 
 export async function studioReview(arc: string, decision: Review, note: string) {
-  const msg = decision === "approved" ? "Approved. It can be scheduled now." : decision === "declined" ? "Declined. The note is saved with it." : "Back to draft.";
-  return run("admin_story_review", { p_arc: arc, p_decision: decision, p_note: note.trim() || null }, msg);
+  if (decision !== "approved") {
+    const msg = decision === "declined" ? "Declined. The note is saved with it." : "Back to draft.";
+    return run("admin_story_review", { p_arc: arc, p_decision: decision, p_note: note.trim() || null }, msg);
+  }
+  // Owner, Oct 22: a main story goes out with all its side stories at once, so approving it approves the ones
+  // waiting for review too (a declined side story stays off until it's approved on its own).
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false as const, error: "Accounts aren't switched on yet." };
+  const { error } = await supabase.rpc("admin_story_review", { p_arc: arc, p_decision: "approved", p_note: note.trim() || null });
+  if (error) return { ok: false as const, error: studioError(error.message) };
+  const { data } = await supabase.rpc("admin_story_list");
+  const sides = ((data ?? []) as StudioArc[]).filter((a) => a.parent === arc && a.review === "draft");
+  for (const side of sides) await supabase.rpc("admin_story_review", { p_arc: side.id, p_decision: "approved", p_note: null });
+  return list(supabase, sides.length
+    ? `Approved with its ${sides.length} side stor${sides.length === 1 ? "y" : "ies"}. They go out together once it has a Day 1.`
+    : "Approved. It can be scheduled now.");
 }
 
 export async function studioSchedule(arc: string, start: string | null) {

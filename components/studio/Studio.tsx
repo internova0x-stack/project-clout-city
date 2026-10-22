@@ -35,7 +35,7 @@ export function Studio({ initial, initialNote, api, who, preview = false }: { in
   const [arcs, setArcs] = useState(initial);
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(initialNote ? { kind: "error", text: initialNote } : null);
+  const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(initialNote ? { kind: initialNote.includes("didn't") || initialNote.includes("couldn't") ? "error" : "ok", text: initialNote } : null);
   const [tab, setTab] = useState<"stories" | "reports" | "mayor" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup" | "shop">(api.metrics ? "metrics" : "stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
@@ -602,7 +602,11 @@ function PlayerPreview({ arc, api }: { arc: StudioArc; api: StudioApi }) {
           {error && <span className="meta reason">{error}</span>}
         </>
       ) : (
-        <StoryPreview content={content} arcId={arc.id} lastDay={arc.lastDay} startDay={arc.day} />
+        <>
+          {/* Owner, Oct 22: a way out of the preview. */}
+          <button className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setContent(null)}>✕ Close preview</button>
+          <StoryPreview content={content} arcId={arc.id} lastDay={arc.lastDay} startDay={arc.day} />
+        </>
       )}
     </div>
   );

@@ -37,7 +37,8 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
 3. **Upload it.** In the Studio, **Add or update a story** → choose the file (or paste the JSON) →
    **Check and save**. New stories, and any story whose file changed, go to **Needs review**.
    A story that is live can't be replaced mid-run; pause or retire it instead.
-4. **Approve or decline it.** One approval is enough. Declining needs a note for the writers; it
+4. **Approve or decline it.** One approval is enough. Approving a main story approves its side stories waiting for
+   review too, so they go out together (owner, Oct 22). Declining needs a note for the writers; it
    stays with the story. Approving again later, or sending it back to review, is always possible
    until it goes live; sending it back clears its Day 1. A live story can't go back to review or be
    declined (pause or retire it instead).
