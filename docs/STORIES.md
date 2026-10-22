@@ -33,7 +33,7 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    avatar look) and each beat's news its `cast` (ids; a side story may use its parent's). The post ends with their avatar
    heads under Share; tapping one shows the bio. They're attached on the server from the repo file, so a story already in
    the Studio picks them up without a re-upload. **A bio is the character's public persona only and never hints at a
-   twist** (owner): it shows on every day's post, Day 1 included.
+   twist** (owner): it shows on every day's post, Day 1 included. Write it as a plain, factual bio tied to the story (who they are, how they enter it), not in Lola's slangy voice.
 2. **Check it.** `npm run validate:stories` runs every rule: ids and beat days in order, places,
    tags, items and tasks that exist, price caps and expiries, reason text on every change, and
    prediction windows that close before their reveal. The Studio runs the same checks when you upload, and saves nothing if one fails.

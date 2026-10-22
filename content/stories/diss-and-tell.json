@@ -710,7 +710,7 @@
       "name": "Lord Menace",
       "role": "Rapper · \"King of Steinway Street\"",
       "style": "bodega_drip",
-      "bio": "Three platinum plaques, one chain heavier than a small dog and a reputation as the scariest man in Queens. Never smiles in photos. Never.",
+      "bio": "Queens rapper with three platinum plaques who calls himself the King of Steinway Street. His photo of a woman in a red dress at Velvet Static started a public feud with Big Ruckus.",
       "look": {
         "body": "straight",
         "build": "broad",
@@ -727,7 +727,7 @@
       "name": "Big Ruckus",
       "role": "Rapper · \"Boss of Ditmars Boulevard\"",
       "style": "night_owl_goth",
-      "bio": "Once told a podcast he \"doesn't feel fear, only weather.\" Runs Ditmars Boulevard, or says he does, and has never lost an argument on a mic.",
+      "bio": "Rapper known as the Boss of Ditmars Boulevard, famous for telling a podcast he \"doesn't feel fear, only weather.\" He posted the same woman in the same booth fifty minutes after Lord Menace.",
       "look": {
         "body": "straight",
         "build": "plus",
@@ -744,7 +744,7 @@
       "name": "Toni Treasure",
       "role": "24, of Whitestone · \"aspiring everything\"",
       "style": "influencer_soft_glam",
-      "bio": "Twenty-four, from Whitestone, and aspiring to everything: model, singer, influencer, possibly real estate. Always in the corner booth, always in red.",
+      "bio": "A 24-year-old from Whitestone whose profile reads \"aspiring everything.\" Both rappers claim her as their girlfriend. She has neither confirmed nor denied either one.",
       "look": {
         "body": "curvy",
         "build": "curvy",
@@ -761,7 +761,7 @@
       "name": "Marty Kessler-Vance, Esq.",
       "role": "Lawyer · \"INSULTED? CALL MARTY\"",
       "style": "midtown_finance",
-      "bio": "The face on the expressway billboard. Bills by the quarter hour, sues by the dozen and answers his own phone on the first ring.",
+      "bio": "Personal injury and defamation lawyer behind the \"INSULTED? CALL MARTY\" billboard on the expressway. He represents Lord Menace.",
       "look": {
         "body": "straight",
         "build": "slim",
@@ -778,7 +778,7 @@
       "name": "Gloria Szabo-Reyes",
       "role": "Lawyer · \"Szabo Sues!\"",
       "style": "midtown_finance",
-      "bio": "Bus-shelter ads in three boroughs and a jingle you can't get out of your head. Takes the cases nobody else will, and wins more than she should.",
+      "bio": "Queens litigator whose \"SZABO SUES!\" ads cover bus shelters across the borough. She represents Big Ruckus.",
       "look": {
         "body": "curvy",
         "build": "petite",
@@ -795,7 +795,7 @@
       "name": "Lil Cosign",
       "role": "Lord Menace's hype man",
       "style": "arcade_nerd",
-      "bio": "Lord Menace's hype man. Shouts \"YEAH!\" at the end of every line, wherever he is, whoever is talking.",
+      "bio": "Lord Menace's hype man, 26, from Rego Park. He backs up every verse on stage and works with Menace in his basement studio.",
       "look": {
         "body": "straight",
         "build": "slim",
@@ -812,7 +812,7 @@
       "name": "Tiny Thunder",
       "role": "Big Ruckus's hype man",
       "style": "bodega_drip",
-      "bio": "Big Ruckus's hype man. Six foot five, soft-spoken, and has never once been tiny or thunderous.",
+      "bio": "Big Ruckus's hype man. Six foot seven and famously quiet, he drives Ruckus to most of his appearances.",
       "look": {
         "body": "straight",
         "build": "broad",
@@ -829,7 +829,7 @@
       "name": "Sal",
       "role": "Owner, Ditmars Deli & Dreams",
       "style": "thrift_store_icon",
-      "bio": "Runs Ditmars Deli & Dreams, the chalkboard out front and the best egg sandwich in Astoria. Remembers your order after three visits.",
+      "bio": "Owner of Ditmars Deli & Dreams, which he has run for twenty-two years. He keeps his regulars' orders on a chalkboard by the register.",
       "look": {
         "body": "straight",
         "build": "broad",
@@ -846,7 +846,7 @@
       "name": "DJ Sharm Almight",
       "role": "Host, The Wake-Up Call on Real Clout FM",
       "style": "night_owl_goth",
-      "bio": "\"Yo, good morning Astoria!\" Queens' loudest alarm clock, host of The Wake-Up Call. If it happened overnight, he's saying it on air by 7.",
+      "bio": "Host of The Wake-Up Call, the morning show on Real Clout FM. Most of Queens hears the day's news from him first.",
       "look": {
         "body": "straight",
         "build": "athletic",
