@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   EDITABLE, PRESENTATION_LABEL, SHOP_TABS, SLOTS, STATUS_LABEL, STYLE_LINES, STYLE_LINE_LABEL, cloutCurve, isReady, readiness,
-  type CatalogItem, type CatalogStatus, type EditableField, type ShopFile, type ShopTab, type StyleLine,
+  fileProgress, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile, type ShopTab, type StyleLine,
 } from "@/lib/shopCatalog";
 import type { CoutureOwner, ShopAction, ShopAuditRow, ShopImportResult, StudioApi } from "@/lib/studio";
 import { MAP_SKUS } from "@/lib/coutureMap";
@@ -29,7 +29,7 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; list?: string[] } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
-  const [f, setF] = useState<Filters>({ ...NO_FILTERS, status: "pending_review" });
+  const [f, setF] = useState<Filters>(NO_FILTERS);
   const [q, setQ] = useState("");
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState<string | null>(null);
@@ -45,11 +45,16 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
   // One per picture: items sharing a picture (a furniture line's colors) get it together.
   const waiting = useMemo(() => { const seen = new Set<string>(); return (items ?? []).filter((i) => i.sourceImage && i.imageStatus !== "ready" && !seen.has(i.sourceImage) && seen.add(i.sourceImage)).map((i) => i.sku); }, [items]);
   const counts = useMemo(() => Object.fromEntries(STATUSES.map((s) => [s, (items ?? []).filter((i) => i.status === s).length])) as Record<CatalogStatus, number>, [items]);
-  const shown = useMemo(() => (items ?? []).filter((i) =>
-    (f.status === "all" || i.status === f.status) && (f.tab === "all" || i.tab === f.tab) && (!f.line || i.styleLines.includes(f.line))
+  /** Items in the chosen status (the category tabs count these). */
+  const inStatus = useMemo(() => (items ?? []).filter((i) => f.status === "all" || i.status === f.status), [items, f.status]);
+  const shown = useMemo(() => inStatus.filter((i) =>
+    (f.tab === "all" || i.tab === f.tab) && (!f.line || i.styleLines.includes(f.line))
     && (!f.tier || i.tier === f.tier) && (!f.pres || i.presentation === f.pres) && (!f.money || i.realCash)
     && (!f.ready || isReady(i, { others: items ?? [] })) && (!f.locked || !i.wearable)
-    && (!q.trim() || `${i.name} ${i.sku}`.toLowerCase().includes(q.trim().toLowerCase()))), [items, f, q]);
+    && (!q.trim() || `${i.name} ${i.sku}`.toLowerCase().includes(q.trim().toLowerCase()))), [inStatus, items, f, q]);
+
+  const notLoaded = useMemo(() => files.reduce((n, x) => n + fileProgress(x, items ?? []).notLoaded.length, 0), [files, items]);
+  const lockedLive = useMemo(() => (items ?? []).filter((i) => i.status === "live" && !i.wearable).length, [items]);
 
   /** Processes pictures four at a time until none are left (a function stays inside its time limit). */
   const processAll = async (skus: string[]) => {
@@ -88,6 +93,11 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
     await processAll(d.toProcess);
   };
 
+  /** Loads, one after another, every file that still has items the Studio doesn't have. */
+  const loadMissing = async () => {
+    for (const x of files) if (fileProgress(x, items ?? []).notLoaded.length) await doImport({ file: x.file });
+  };
+
   const act = async (skus: string[], action: ShopAction, opts: { at?: string | null; note?: string } = {}) => {
     setBusy(action); setNote(null);
     const r = await api.shopAction!(skus, action, opts);
@@ -105,6 +115,8 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
   if (item) return <ItemPage api={api} item={item} all={items} busy={busy} onBack={() => setOpen(null)} onChanged={load} act={act} process={processAll} />;
 
   const selectable = (i: CatalogItem) => i.status === "pending_review" && isReady(i, { others: items });
+  // "Select all" picks what can really be sold: locked pieces (the mansion, waiting for Manhattan) are ticked by hand.
+  const readyShown = shown.filter((i) => selectable(i) && i.wearable);
   return (
     <section className="stack-16">
       {note && (
@@ -120,17 +132,47 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
         <GraphicsSwitch kind="bodies" onToast={(t) => setNote({ kind: "ok", text: t })} />
       </div>
       <div className="studio-card stack-12">
+        <span className="title">What&apos;s in the game</span>
+        <span className="subtext">Players only see items that are live (or scheduled and dropped). Everything else is still with you: load it, check it, approve it.</span>
+        <div className="shop-overview">
+          <button onClick={() => setF({ ...NO_FILTERS, status: "live" })}><strong>{counts.live}</strong><span>Live in the game</span>{lockedLive ? <em>{lockedLive} locked (can&apos;t be bought yet)</em> : null}</button>
+          <button onClick={() => setF({ ...NO_FILTERS, status: "scheduled" })}><strong>{counts.scheduled}</strong><span>Scheduled drops</span></button>
+          <button className={counts.pending_review ? "todo" : ""} onClick={() => setF({ ...NO_FILTERS, status: "pending_review" })}><strong>{counts.pending_review}</strong><span>Waiting for your review</span></button>
+          <button className={counts.draft ? "todo" : ""} onClick={() => setF({ ...NO_FILTERS, status: "draft" })}><strong>{counts.draft}</strong><span>Drafts</span></button>
+          <button className={notLoaded ? "todo" : ""} onClick={() => document.getElementById("shop-files")?.scrollIntoView({ behavior: "smooth" })}><strong>{notLoaded}</strong><span>In files, not loaded yet</span></button>
+          <button onClick={() => setF({ ...NO_FILTERS, status: "retired" })}><strong>{counts.retired}</strong><span>Retired</span></button>
+        </div>
+      </div>
+      <div className="studio-card stack-12" id="shop-files">
         <span className="title">Import a catalog file</span>
-        <span className="subtext">Files merged into content/shop show here. Importing makes drafts and processes their pictures; nothing goes live without your approval.</span>
-        {files.map((x) => (
-          <div key={x.file} className="row" style={{ gap: 8, justifyContent: "space-between", flexWrap: "wrap" }}>
-            <span style={{ minWidth: 0 }}>
-              <span className="body-strong">{x.label}</span>
-              <span className="meta" style={{ display: "block" }}>{x.file} · {x.items ? `${x.items} items` : ""}{x.items && x.pictures ? " · " : ""}{x.pictures ? `${x.pictures} pictures` : ""}{x.problems.length ? ` · ⚠️ ${x.problems.length} problems` : ""}</span>
-            </span>
-            <button className="btn btn-taxi btn-sm" disabled={busy !== null || !!progress} onClick={() => void doImport({ file: x.file })}>{busy === "import" ? "…" : "Load"}</button>
-          </div>
-        ))}
+        <span className="subtext">Files merged into content/shop show here. Loading makes drafts and processes their pictures; nothing goes live without your approval.</span>
+        {files.map((x) => {
+          const fp = fileProgress(x, items);
+          const parts = [
+            fp.notLoaded.length && `⚠️ ${fp.notLoaded.length} not loaded yet`,
+            fp.byStatus.live && `${fp.byStatus.live} live`,
+            fp.byStatus.scheduled && `${fp.byStatus.scheduled} scheduled`,
+            fp.byStatus.pending_review && `${fp.byStatus.pending_review} need review`,
+            fp.byStatus.draft && `${fp.byStatus.draft} drafts`,
+            fp.byStatus.retired && `${fp.byStatus.retired} retired`,
+          ].filter(Boolean);
+          return (
+            <div key={x.file} className="row" style={{ gap: 8, justifyContent: "space-between", flexWrap: "wrap" }}>
+              <span style={{ minWidth: 0 }}>
+                <span className="body-strong">{x.label}</span>
+                <span className="meta" style={{ display: "block" }}>{x.file} · {x.items ? `${x.items} items` : ""}{x.items && x.pictures ? " · " : ""}{x.pictures ? `${x.pictures} pictures` : ""}{x.problems.length ? ` · ⚠️ ${x.problems.length} problems` : ""}</span>
+                {parts.length > 0 && <span className={`meta${fp.notLoaded.length ? " shop-file-todo" : ""}`} style={{ display: "block" }}>{parts.join(" · ")}</span>}
+              </span>
+              <button className={`btn btn-sm ${fp.notLoaded.length || !x.items ? "btn-taxi" : "btn-secondary"}`} disabled={busy !== null || !!progress} onClick={() => void doImport({ file: x.file })}>
+                {busy === "import" ? "…" : fp.notLoaded.length || !x.items ? "Load" : "Load again"}
+              </button>
+            </div>
+          );
+        })}
+        {files.some((x) => fileProgress(x, items).notLoaded.length) && (
+          <button className="btn btn-taxi btn-sm" style={{ alignSelf: "start" }} disabled={busy !== null || !!progress}
+            onClick={() => void loadMissing()}>Load every file with items not loaded yet</button>
+        )}
         {paste === null ? (
           <button className="chip" style={{ alignSelf: "start" }} onClick={() => setPaste("")}>Or paste a catalog file</button>
         ) : (
@@ -149,15 +191,20 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
         ) : null}
       </div>
 
+      <div className="shop-cats" role="tablist" aria-label="Category">
+        <button role="tab" aria-selected={f.tab === "all"} className={f.tab === "all" ? "on" : ""} onClick={() => setF({ ...f, tab: "all" })}>All <span>{inStatus.length}</span></button>
+        {SHOP_TABS.map((t) => (
+          <button key={t} role="tab" aria-selected={f.tab === t} className={f.tab === t ? "on" : ""} onClick={() => setF({ ...f, tab: t })}>
+            {TAB_LABEL[t]} <span>{inStatus.filter((i) => i.tab === t).length}</span>
+          </button>
+        ))}
+      </div>
       <div className="row" style={{ gap: 6, flexWrap: "wrap" }} role="group" aria-label="Status">
-        <button className="chip" aria-pressed={f.status === "all"} onClick={() => setF({ ...f, status: "all" })}>All {items.length}</button>
+        <button className="chip" aria-pressed={f.status === "all"} onClick={() => setF({ ...f, status: "all" })}>Every status {items.length}</button>
         {STATUSES.map((s) => <button key={s} className="chip" aria-pressed={f.status === s} onClick={() => setF({ ...f, status: s })}>{STATUS_LABEL[s]} {counts[s]}</button>)}
       </div>
       <div className="players-bar shop-filters">
         <input className="studio-input" type="search" placeholder="Search by name" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search items" />
-        <select className="studio-input" value={f.tab} onChange={(e) => setF({ ...f, tab: e.target.value as ShopTab | "all" })} aria-label="Tab">
-          <option value="all">Every tab</option>{SHOP_TABS.map((t) => <option key={t} value={t}>{TAB_LABEL[t]}</option>)}
-        </select>
         <select className="studio-input" value={f.line} onChange={(e) => setF({ ...f, line: e.target.value })} aria-label="Style line">
           <option value="">Every style line</option>{STYLE_LINES.map((s) => <option key={s} value={s}>{STYLE_LINE_LABEL[s]}</option>)}
         </select>
@@ -186,36 +233,76 @@ export function ShopManagerTab({ api }: { api: StudioApi }) {
         </div>
       )}
 
-      <div className="studio-card">
-        <p className="meta" style={{ margin: "0 0 4px" }}>{shown.length} item{shown.length === 1 ? "" : "s"}{f.status === "pending_review" ? " waiting for review · tick the ready ones to approve together" : ""}</p>
-        {shown.length === 0 && <p className="meta" style={{ margin: 0 }}>Nothing here.</p>}
-        {shown.map((i) => {
-          const checks = readiness(i, { others: items });
-          const blockers = checks.filter((c) => c.blocking && !c.ok).length;
-          return (
-            <div key={i.sku} className="shop-row">
-              <input type="checkbox" aria-label={`Select ${i.name}`} disabled={!selectable(i)} checked={picked.has(i.sku)}
-                onChange={(e) => { const n = new Set(picked); if (e.target.checked) n.add(i.sku); else n.delete(i.sku); setPicked(n); }} />
-              <button className="shop-row-main" onClick={() => setOpen(i.sku)}>
-                <ShopArt image={i.images?.card} emoji={i.emoji} size={48} />
-                <span className="players-who">
-                  <span className="body-strong one-line">{i.name}</span>
-                  <span className="meta one-line">{TAB_LABEL[i.tab]}{i.slot ? ` · ${i.slot}` : ""} · {PRESENTATION_LABEL[i.presentation]}{i.tier ? ` · ${i.tier}` : ""}</span>
-                  <span className="players-tags">
-                    <span className={`players-tag shop-status ${i.status}`}>{STATUS_LABEL[i.status]}</span>
-                    {i.realCash && <span className="players-tag vip">✨ Real money</span>}
-                    {!i.wearable && <span className="players-tag">🔒 Locked</span>}
-                    {i.imageStatus === "failed" && <span className="players-tag flag">Picture failed</span>}
-                    {i.status === "pending_review" && (blockers ? <span className="players-tag flag">⚠️ {blockers} to fix</span> : <span className="players-tag paying">✅ Ready</span>)}
-                  </span>
-                </span>
-                <span className="players-nums"><span className="body-strong tabular">{cash(i)}</span><span className="meta tabular">🔥 {i.clout}</span></span>
-              </button>
-            </div>
-          );
-        })}
+      <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "space-between" }}>
+        <p className="meta" style={{ margin: 0 }}>{shown.length} item{shown.length === 1 ? "" : "s"}{readyShown.length ? ` · ${readyShown.length} ready to sell (tick them to approve together)` : ""}</p>
+        {readyShown.length > 0 && (
+          <button className="chip" onClick={() => setPicked(new Set(readyShown.map((i) => i.sku)))}>Select all {readyShown.length} ready</button>
+        )}
+      </div>
+      {shown.length === 0 && <div className="studio-card"><p className="meta" style={{ margin: 0 }}>Nothing here.</p></div>}
+      <div className="shop-grid">
+        {shown.map((i) => <ItemCard key={i.sku} i={i} all={items} busy={busy !== null || !!progress} picked={picked.has(i.sku)} selectable={selectable(i)}
+          onPick={(on) => { const n = new Set(picked); if (on) n.add(i.sku); else n.delete(i.sku); setPicked(n); }}
+          onOpen={() => setOpen(i.sku)} act={act} process={processAll} />)}
       </div>
     </section>
+  );
+}
+
+/** One item in the list: its picture, details, where it stands, and the quick actions for its status. */
+function ItemCard({ i, all, busy, picked, selectable, onPick, onOpen, act, process }: {
+  i: CatalogItem; all: CatalogItem[]; busy: boolean; picked: boolean; selectable: boolean; onPick: (on: boolean) => void; onOpen: () => void;
+  act: (skus: string[], action: ShopAction, opts?: { at?: string | null; note?: string }) => Promise<void>; process: (skus: string[]) => Promise<void>;
+}) {
+  const checks = readiness(i, { others: all });
+  const blockers = checks.filter((c) => c.blocking && !c.ok);
+  const inGame = i.status === "live" || i.status === "scheduled";
+  const where = i.status === "live" ? (i.wearable ? "In the game: on sale" : "In the game, locked: players see it but can't buy it yet")
+    : i.status === "scheduled" ? `Drops ${i.goLiveAt ? new Date(i.goLiveAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "soon"}`
+    : i.status === "pending_review" ? (blockers.length ? `Not in the game: ${blockers.length} thing${blockers.length === 1 ? "" : "s"} to fix before approval`
+      : i.wearable ? "Not in the game: ready for your approval" : "Not in the game: ready, but once approved it shows locked until it works in the game")
+    : i.status === "draft" ? (i.note ? `Not in the game: sent back (${i.note})` : i.sourceImage && i.imageStatus !== "ready" ? "Not in the game: its picture needs processing" : "Not in the game: draft")
+    : "Retired: off sale, owners keep it";
+  return (
+    <article className={`shop-item${picked ? " picked" : ""}`}>
+      <button className="shop-item-pic" onClick={onOpen} aria-label={`Open ${i.name}`}>
+        <ShopArt image={i.images?.card} emoji={i.emoji} size={96} />
+      </button>
+      <div className="shop-item-body">
+        <div className="row" style={{ gap: 8, justifyContent: "space-between", alignItems: "start" }}>
+          <button className="shop-item-name" onClick={onOpen}>{i.name}</button>
+          {i.status === "pending_review" && <input type="checkbox" aria-label={`Select ${i.name}`} disabled={!selectable} checked={picked} onChange={(e) => onPick(e.target.checked)} />}
+        </div>
+        <span className="meta">{TAB_LABEL[i.tab]}{i.slot ? ` · ${i.slot}` : ""} · {PRESENTATION_LABEL[i.presentation]}{i.tier ? ` · ${i.tier}` : ""}{i.collection ? ` · ${i.collection}` : ""}</span>
+        {i.description && <span className="subtext shop-item-desc">{i.description}</span>}
+        <span className="row" style={{ gap: 10 }}>
+          <span className="body-strong tabular">{cash(i)}</span>
+          <span className="meta tabular">🔥 {i.clout} clout</span>
+          {i.editionSize ? <span className="meta">{i.editionSize} made</span> : null}
+        </span>
+        <span className="players-tags">
+          <span className={`players-tag shop-status ${i.status}`}>{STATUS_LABEL[i.status]}</span>
+          {i.realCash && <span className="players-tag vip">✨ Real money</span>}
+          {!i.wearable && <span className="players-tag">🔒 Locked</span>}
+          {i.imageStatus === "failed" && <span className="players-tag flag">Picture failed</span>}
+          {i.sold && <span className="players-tag">Owned by players</span>}
+        </span>
+        <span className={`meta shop-item-where${inGame ? " in" : ""}`}>{where}</span>
+        <div className="row shop-item-actions">
+          {i.status === "pending_review" && (
+            <button className="btn btn-taxi btn-sm" disabled={busy || blockers.length > 0} title={blockers.map((b) => `${b.label}: ${b.detail}`).join("; ") || undefined}
+              onClick={() => void act([i.sku], "approve")}>Approve: on sale now</button>
+          )}
+          {i.status === "draft" && i.sourceImage && i.imageStatus !== "ready" && (
+            <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void process([i.sku])}>{i.imageStatus === "failed" ? "Retry picture" : "Process picture"}</button>
+          )}
+          {i.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void act([i.sku], "unschedule")}>Back to review</button>}
+          {i.status === "live" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void act([i.sku], "retire")}>Retire</button>}
+          {i.status === "retired" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void act([i.sku], "restore")}>Restore</button>}
+          <button className="chip" onClick={onOpen}>Details and edit</button>
+        </div>
+      </div>
+    </article>
   );
 }
 

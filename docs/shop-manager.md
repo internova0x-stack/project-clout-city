@@ -53,6 +53,16 @@ only if the item has never been sold.
 
 The list view filters by status, tab, style line, tier, presentation, real money and readiness, and searches by name.
 
+**The Shop list (owner, Oct 22: "I want to be able to see every item in the shop").** Studio → Shop opens on
+**What's in the game**: how many items are live (and how many of those are locked), scheduled, waiting for review,
+drafts, retired, and still in a file but not loaded yet; each count opens that list. Each catalog file says how far it
+has come ("12 not loaded yet", "14 live · 1 need review"); **Load every file with items not loaded yet** loads them all
+(drafts, then their pictures, then Needs review). Below, category tabs (All, Fashion, Accessories, Home, Cars, Houses,
+Luxury, Makeup, with counts) and status chips pick the list; every item is a card with its picture, details, price,
+clout, status, whether it's in the game and why not, and the actions for its status (approve, process its picture,
+back to review, retire, restore; send back, edit, schedule and delete are on its details page). **Select all ready**
+ticks every ready item that can be sold (locked pieces are ticked by hand) for one **Approve now**.
+
 ## 2. Import
 
 **Where.** Studio → Shop → **Import**. Catalog files merged into `content/shop/` show a **Load** button (like the

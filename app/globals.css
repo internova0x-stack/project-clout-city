@@ -2195,3 +2195,30 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .mayor-kinds { flex-wrap:wrap; gap:6px; }
 .mayor-reply { padding:10px 12px; border-radius:14px; background:rgba(31,163,92,.1); }
 .mayor-para { margin:8px 0 0; }
+
+/* Studio → Shop: what's in the game, category tabs and the item cards (owner, Oct 22). */
+.shop-overview { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:8px; }
+.shop-overview button { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:12px; border:1px solid var(--divider); border-radius:var(--r-md); background:var(--surface-raised); font:inherit; color:var(--text-1); text-align:left; cursor:pointer; }
+.shop-overview button.todo { border-color:var(--taxi-400); background:var(--taxi-tint); }
+.shop-overview strong { font-size:24px; font-family:var(--font-display); }
+.shop-overview span { font-size:13px; color:var(--text-2); }
+.shop-overview em { font-style:normal; font-size:12px; color:var(--text-3); }
+.shop-file-todo { color:#B4231B; font-weight:600; }
+.shop-cats { display:flex; gap:4px; overflow-x:auto; padding:4px; border-radius:var(--r-pill); background:var(--chip-off); scrollbar-width:none; }
+.shop-cats button { flex:none; padding:8px 14px; border:0; border-radius:var(--r-pill); background:none; font:inherit; font-weight:600; color:var(--text-2); cursor:pointer; white-space:nowrap; }
+.shop-cats button span { font-weight:500; color:var(--text-3); margin-left:2px; }
+.shop-cats button.on { background:var(--night-900); color:var(--text-on-dark); }
+.shop-cats button.on span { color:var(--text-on-dark); opacity:.7; }
+.shop-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px; }
+.shop-item { display:flex; gap:12px; padding:12px; border-radius:var(--r-lg); background:var(--surface-card); box-shadow:var(--elev-1); border:2px solid transparent; }
+.shop-item.picked { border-color:var(--taxi-400); }
+.shop-item-pic { flex:none; padding:0; border:0; background:none; cursor:pointer; align-self:flex-start; }
+.shop-item-body { display:flex; flex-direction:column; gap:6px; min-width:0; flex:1; }
+.shop-item-body > input { width:20px; height:20px; }
+.shop-item-name { padding:0; border:0; background:none; font:inherit; font-weight:700; font-size:16px; color:var(--text-1); text-align:left; cursor:pointer; }
+.shop-item-name:hover { text-decoration:underline; }
+.shop-item-desc { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.shop-item-where { color:var(--text-3); }
+.shop-item-where.in { color:var(--done-green); font-weight:600; }
+.shop-item-actions { gap:6px; flex-wrap:wrap; margin-top:2px; }
+@media (max-width: 420px) { .shop-grid { grid-template-columns:1fr; } .shop-filters > * { flex-basis:45%; } }

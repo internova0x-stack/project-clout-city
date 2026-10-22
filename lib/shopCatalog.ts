@@ -89,7 +89,20 @@ export interface CatalogItem {
 export type CatalogDraft = Omit<CatalogItem, "status" | "goLiveAt" | "images" | "imageStatus" | "imageError" | "note" | "sold" | "origin" | "updatedAt">;
 
 /** A catalog file in the repo, for the Import panel's Load buttons. */
-export interface ShopFile { file: string; label: string; items: number; pictures: number; problems: string[] }
+export interface ShopFile { file: string; label: string; items: number; pictures: number; problems: string[]; /** The file's item ids. */ skus?: string[] }
+
+/** How far a catalog file has come: items not loaded into the Studio yet, and the rest by status. */
+export function fileProgress(f: Pick<ShopFile, "skus">, catalog: readonly Pick<CatalogItem, "sku" | "status">[]): { notLoaded: string[]; byStatus: Partial<Record<CatalogStatus, number>> } {
+  const have = new Map(catalog.map((i) => [i.sku, i.status]));
+  const notLoaded: string[] = [];
+  const byStatus: Partial<Record<CatalogStatus, number>> = {};
+  for (const sku of f.skus ?? []) {
+    const st = have.get(sku);
+    if (!st || st === "deleted") notLoaded.push(sku);
+    else byStatus[st] = (byStatus[st] ?? 0) + 1;
+  }
+  return { notLoaded, byStatus };
+}
 
 /** live-shop-images.json: a picture for an item already on sale, matched by its exact name (or by its sku, where a
  *  line's colors share the name and each has its own picture: the three area rugs). */
