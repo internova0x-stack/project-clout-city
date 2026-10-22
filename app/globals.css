@@ -2275,7 +2275,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .welcome-room { position:absolute; inset:0; }
 .welcome .room3d { background:transparent !important; }
 .welcome-head { position:absolute; top:calc(32px + var(--safe-top, 0px)); left:16px; right:16px; text-align:center; pointer-events:none; }
-.studio-mark.welcome-mark { display:block; margin:0; font-size:40px; line-height:1.05; }
+.studio-mark.welcome-mark { display:block; width:fit-content; margin:0 auto; font-size:40px; line-height:1.05; letter-spacing:.07em; }
 .welcome-tag { margin:6px 0 0; font-size:16px; color:var(--text-2); }
 .welcome-card { position:absolute; left:16px; right:16px; bottom:calc(20px + var(--safe-bottom, 0px)); max-width:480px; margin:0 auto;
   display:flex; flex-direction:column; gap:14px; padding:16px; border-radius:28px; background:rgba(255,255,255,.92);

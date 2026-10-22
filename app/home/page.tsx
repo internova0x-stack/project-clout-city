@@ -51,8 +51,10 @@ export default async function HomePage() {
   const supabase = await getServerSupabase();
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
-  const [clique, city, story, catalog, chat, dating, crew, party, together, campus] = await Promise.all([
+  // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
+  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
+    playerCard(player.id), mySkills().catch(() => null),
   ]);
   // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
   after(() => kickPush());
@@ -125,6 +127,8 @@ export default async function HomePage() {
       ping={sessionPing}
       // Migration 0056: the profile's Skills tab (no tab before the migration).
       loadSkills={mySkills}
+      skills={skills ?? undefined}
+      initialCard={myCard.ok ? myCard.data : null}
       loadBoroughs={boroughState}
       // Migration 0017 switches on City News (an empty feed hides it).
       cityNews={loadNews}
