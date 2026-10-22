@@ -519,8 +519,10 @@ export function GameShell({
   const [skills, setSkills] = useState(previewSkills);
   const tasksOpen = panel === "tasks";
   useEffect(() => {
-    if (!(profileOpen || tasksOpen) || !loadSkills) return;
+    // Loaded once at the start too, so the profile's Skills tab is ready the moment it opens (owner, Oct 22).
+    if (!loadSkills || (skills && !(profileOpen || tasksOpen))) return;
     void loadSkills().then((s) => { if (s) setSkills(s); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileOpen, tasksOpen, loadSkills]);
   useEffect(() => {
     if (!chat) return;
@@ -569,7 +571,10 @@ export function GameShell({
   const [chatPass, setChatPass] = useState<{ out: boolean } | null>(null);
   const [memberOpen, setMemberOpen] = useState(false);
   const [member, setMember] = useState<MembershipState | null>(null);
-  useEffect(() => { if (membership && !memberOpen) void membership.state().then((r) => r.ok && setMember(r.data)); }, [membership, memberOpen]);
+  const [memberLoaded, setMemberLoaded] = useState(false);
+  useEffect(() => {
+    if (membership && !memberOpen) void membership.state().then((r) => { if (r.ok) setMember(r.data); setMemberLoaded(true); });
+  }, [membership, memberOpen]);
   const memberVip = member?.vip ? "vip" as const : member?.chatForever ? "forever" as const : null;
   const openMembership = () => { setPhone({ open: false, app: null }); setPanel(null); setMemberOpen(true); };
   // v0.12 businesses: what you own (with the server's clock offset, so tills count like the server's),
@@ -2753,12 +2758,13 @@ export function GameShell({
         }}
         crew={clique.map((c) => c.display_name)}
         recent={myCard?.recent}
-        skills={skills}
+        skills={skills ?? (loadSkills ? null : undefined)}
         perks={perkHandlers}
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
-        vip={membership && member ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership } : undefined}
+        vip={membership && member ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership }
+          : membership && !memberLoaded ? { on: false, onOpen: openMembership, loading: true } : undefined}
       />
     </main>
   );
