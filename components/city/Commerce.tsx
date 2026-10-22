@@ -79,8 +79,9 @@ export function ShopSheet({
   // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up), or, still being
   // built (Clout Couture), locked with their price.
   const shows = (i: ShopCardItem) => (!i.retired || owned.has(i.sku))
-    // Clothing shows when it can be worn, or locked until its template exists (owner, Oct 21).
-    && (i.category !== "fashion" || !!i.wear || !i.wearableNow)
+    // Clothing shows when it can be worn, or locked until its template exists (owner, Oct 21). Catalog clothes carry
+    // their wear in lib/catalogWear.ts and lib/accessories.ts, not on the code's ShopItem (wearSlot knows both).
+    && (i.category !== "fashion" || !!i.wear || !!wearSlot(i.sku) || !i.wearableNow)
     && (!i.storyOnly || storyItemOpen(story, i.sku).open || owned.has(i.sku))
     && (!i.collector || !!realMoney?.product(i.sku) || owned.has(i.sku) || !i.wearableNow)
     // Daily tasks 2.0 (migration 0073): streak rewards are never on sale; they show once a streak has earned them.
