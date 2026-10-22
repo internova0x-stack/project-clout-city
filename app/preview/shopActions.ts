@@ -2,7 +2,7 @@
 
 import { previewOnly } from "./guard";
 import { SHOP_ITEMS } from "@/lib/city";
-import { canMove, COUTURE_NOW, fieldProblems, fromShopItem, imageMatches, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
+import { canMove, COUTURE_NOW, RETIRED_DUPLICATES, fieldProblems, fromShopItem, imageMatches, isOnSale, readiness, shippedPictures, type CatalogItem, type CatalogStatus, type EditableField, type ShopFile } from "@/lib/shopCatalog";
 import { brandCheck, buildImages, listShopFiles, prepareImport, readShopFile } from "@/lib/shopImport";
 import type { Admin, CoutureOwner, ShopAction, ShopAuditRow, ShopImportResult } from "@/lib/studio";
 
@@ -21,7 +21,7 @@ function store(): Map<string, CatalogItem> {
     // Real-money pieces at their store prices (the chinchilla at $16.99, owner Oct 21).
     const usd = ({ "col-faux-chinchilla": 1699, "col-holo-boots": 399 } as Record<string, number>)[i.sku] ?? null;
     rows!.set(i.sku, {
-      ...fromShopItem(i, usd), status: "live", goLiveAt: null, images: null, imageStatus: "none",
+      ...fromShopItem(i, usd), status: RETIRED_DUPLICATES.has(i.sku) ? "retired" : "live", goLiveAt: null, images: null, imageStatus: "none",
       imageError: null, note: null, sold: OWNED.has(i.sku), origin: "code", file: null,
     });
   });

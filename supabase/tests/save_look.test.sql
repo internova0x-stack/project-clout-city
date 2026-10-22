@@ -24,13 +24,13 @@ create temp table theirs as select id from public.player_items where player_id =
 grant select on theirs to authenticated;
 
 set role authenticated;
-select 1 from public.buy_item('fit-satin-bomber'); select 1 from public.buy_item('fit-leather-blazer'); select 1 from public.buy_item('fit-wide-trousers');
+select 1 from public.buy_item('fit-satin-bomber'); select 1 from public.buy_item('fit-leather-blazer'); select 1 from public.buy_item('fit-mini-skirt');
 create temp table ids as select sku, id from public.player_items where player_id = auth.uid();
 grant select on ids to authenticated;
 
-select public.save_look(array[(select id from ids where sku = 'fit-leather-blazer'), (select id from ids where sku = 'fit-wide-trousers')], 'fedora');
+select public.save_look(array[(select id from ids where sku = 'fit-leather-blazer'), (select id from ids where sku = 'fit-mini-skirt')], 'fedora');
 select pg_temp.assert((select array_agg(sku order by sku) from public.player_items where player_id = auth.uid() and equipped)
-                      = array['fit-leather-blazer', 'fit-wide-trousers'], 'worn exactly what was saved');
+                      = array['fit-leather-blazer', 'fit-mini-skirt'], 'worn exactly what was saved');
 select pg_temp.assert((select look ->> 'covering' from public.players where id = auth.uid()) = 'fedora', 'headwear saved');
 select pg_temp.assert((select look ->> 'build' from public.players where id = auth.uid()) = 'athletic', 'legacy look gets its build');
 

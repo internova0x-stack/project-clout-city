@@ -63,8 +63,8 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "detail": "/shop-img/chained-heart-corset-1wlr4qv-768.webp"
   },
   "champagne-hour-trousers": {
-    "card": "/shop-img/fit-wide-trousers-139kp1v-256.webp",
-    "detail": "/shop-img/fit-wide-trousers-139kp1v-768.webp"
+    "card": "/shop-img/champagne-hour-trousers-139kp1v-256.webp",
+    "detail": "/shop-img/champagne-hour-trousers-139kp1v-768.webp"
   },
   "cloud-nine-sofa": {
     "card": "/shop-img/cloud-nine-sofa-os5rnx-256.webp",
@@ -127,8 +127,8 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "detail": "/shop-img/crisp-monday-shirt-9uozkz-768.webp"
   },
   "double-rope-chains": {
-    "card": "/shop-img/lux-gold-chain-uqvn8l-256.webp",
-    "detail": "/shop-img/lux-gold-chain-uqvn8l-768.webp"
+    "card": "/shop-img/double-rope-chains-uqvn8l-256.webp",
+    "detail": "/shop-img/double-rope-chains-uqvn8l-768.webp"
   },
   "dune-cloud-puffer": {
     "card": "/shop-img/dune-cloud-puffer-1reawxh-256.webp",
@@ -197,10 +197,6 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
   "fit-varsity-tee": {
     "card": "/shop-img/fit-varsity-tee-r7dkol-256.webp",
     "detail": "/shop-img/fit-varsity-tee-r7dkol-768.webp"
-  },
-  "fit-wide-trousers": {
-    "card": "/shop-img/fit-wide-trousers-139kp1v-256.webp",
-    "detail": "/shop-img/fit-wide-trousers-139kp1v-768.webp"
   },
   "forest-floor-hoodie": {
     "card": "/shop-img/forest-floor-hoodie-sbxgu8-256.webp",
@@ -371,8 +367,8 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "detail": "/shop-img/house-lic-penthouse-133yajw-768.webp"
   },
   "ice-rink-watch": {
-    "card": "/shop-img/lux-designer-watch-qfo81g-256.webp",
-    "detail": "/shop-img/lux-designer-watch-qfo81g-768.webp"
+    "card": "/shop-img/ice-rink-watch-qfo81g-256.webp",
+    "detail": "/shop-img/ice-rink-watch-qfo81g-768.webp"
   },
   "incognito-knit": {
     "card": "/shop-img/incognito-knit-ngqg6e-256.webp",
@@ -414,17 +410,9 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/lime-sculpt-clogs-45azf3-256.webp",
     "detail": "/shop-img/lime-sculpt-clogs-45azf3-768.webp"
   },
-  "lux-designer-watch": {
-    "card": "/shop-img/lux-designer-watch-qfo81g-256.webp",
-    "detail": "/shop-img/lux-designer-watch-qfo81g-768.webp"
-  },
   "lux-diamond-studs": {
     "card": "/shop-img/lux-diamond-studs-11x0cji-256.webp",
     "detail": "/shop-img/lux-diamond-studs-11x0cji-768.webp"
-  },
-  "lux-gold-chain": {
-    "card": "/shop-img/lux-gold-chain-uqvn8l-256.webp",
-    "detail": "/shop-img/lux-gold-chain-uqvn8l-768.webp"
   },
   "match-point-skirt": {
     "card": "/shop-img/match-point-skirt-1iuei6y-256.webp",

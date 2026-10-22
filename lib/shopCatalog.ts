@@ -404,3 +404,6 @@ export function newArrivals<T extends Pick<ShopCardItem, "since">>(items: readon
   return items.filter((i) => i.since && Date.parse(i.since) >= from && Date.parse(i.since) <= nowMs)
     .sort((a, b) => Date.parse(b.since!) - Date.parse(a.since!)).slice(0, SHOP_NEW.max);
 }
+
+/** Retired by migration 0108 for showing another item's picture (owner, Oct 22): owners keep them, with their emoji. */
+export const RETIRED_DUPLICATES: ReadonlySet<string> = new Set(["lux-gold-chain", "lux-designer-watch", "fit-wide-trousers"]);
