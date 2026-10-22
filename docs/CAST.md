@@ -134,3 +134,8 @@ grand-nephew Kostas Pappas, Dolores Ferreira (the upstairs neighbor), Harlan Vey
 *Lady Liberty Custody Battle*: Judge Philomena Okafor-Brandt, Dominic "Dom" Ruggiero-Patel (New Jersey's lawyer, of
 Hoboken), Rivka Adler-Santos (New York's counsel), the court-sketch artist, the bailiff with a podcast; Gus brings the
 deciding exhibit. Every name invented.
+*Diss & Tell* (`content/stories/diss-and-tell.json`): Lord Menace (legal name Desmond Pettibone, of Forest Hills) and
+Big Ruckus (Gerald Fennimore III, of Douglaston, and his Pomeranian Princess Biscuit), the two biggest rappers in New
+York; Toni Treasure of Whitestone, who runs the whole beef as @QueensReceipts; their lawyers Marty Kessler-Vance and
+Gloria Szabo-Reyes ("Szabo Sues!"), married to each other; Lil Cosign, Menace's hype man; Talon Talk Nail Spa on
+Steinway Street. Sal, Kiki, DJ Sharm Almight and Engine 7 appear as themselves. Every name invented.
