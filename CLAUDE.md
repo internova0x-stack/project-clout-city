@@ -140,8 +140,16 @@ components live in `app/globals.css`.
   (`mayor_write`: bug, idea, complaint, praise, other; 10 to 1000 characters; 5 a New York day; the server adds the
   player's place and device) land in Studio → Mayor's Inbox (`admin_mayor_letters`, `admin_mayor_letter`: read, done,
   a reply the player sees in the app with a badge until opened, `mayor_seen`). Letters never reach other players.
-  Mayor Mama-Mandee (lib/cast.ts `OFFICIALS`, docs/CAST.md "Voices") welcomes players in the app and is in City News
-  every week from 2026-10-26 (`validateNewsWeek` requires a city item with him in its cast).
+  Mayor Papa-Dani (lib/cast.ts `OFFICIALS`, docs/CAST.md "Voices") welcomes players in the app and is in City News
+  every week from 2026-10-26 (`validateNewsWeek` requires a city item with him in its cast). Renamed Mayor Papa-Dani
+  (owner, Oct 22; id `mayor-papa-dani`, the old `mayor-mama-mandee` still accepted); he has a step in Lola's tour
+  (components/game/Tutorial.tsx, `who: "mayor"`).
+- Autopilot (migration 0107, owner Oct 22; lib/autopilot.ts): game_settings 'autopilot' {news, hunts, gossip, stories},
+  all on, switched in Studio → Calendar (`autopilot()`, `admin_autopilot_set`). `syncWeeklyContent` stores news and
+  hunt files only while theirs is on; a new gossip week arrives held ('review') while Tea is paused (`gossip_import`);
+  `story_autopilot()` (service role, run by the sync) starts the next main story in the Studio's order today when none is
+  running or scheduled (declined and retired never start; a paused story mid-run keeps the slot). The weekly routine
+  merges its own pull request once its checks pass (docs/WEEKLY-CONTENT.md).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
@@ -206,8 +214,8 @@ components live in `app/globals.css`.
   plaza statue; lib/coutureMap.ts, components/map/coutureModels.ts, `setCouture` in the landmark layer); `plaza_bookings`
   (`plaza_weeks`, `plaza_book`, one a week, the look kept at booking; home after its week); Studio `admin_couture_owners`,
   `admin_couture_name` (hide a name), `admin_plaza_remove`. The Clout Throne is home furniture (`throne`, sittable).
-  Shop order (owner, Oct 22): real-money pieces (the Couture row, collector cards) come after the C$ items in every tab,
-  first only when a tab has nothing else. Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
+  Shop order (owner, Oct 22): Clout Couture is its own Shop tab (after Luxury), out of every other tab; collector cards
+  come after the C$ items. The Home tab is labelled "Furniture" (id still 'home'). Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
   lib/accessories.ts), never by the code's `ShopItem.wear`, which they don't have. Migration 0106: Hell Gate Park is
   named Astoria Park (id `hell-gate-park` kept; city seed regenerated).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed

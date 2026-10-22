@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MAYOR, kindOf, type LetterStatus, type MailbagFilter, type StudioLetter, type StudioMailbag } from "@/lib/mayor";
 import { placeById } from "@/lib/city";
-import { MAYOR_MAMA_MANDEE } from "@/lib/cast";
+import { MAYOR_PAPA_DANI } from "@/lib/cast";
 import type { StudioApi } from "@/lib/studio";
 
 // Contact the Mayor (migration 0105): Mayor's Inbox, every letter players send from the Phone's Mayor app. Open a
@@ -39,7 +39,7 @@ export function MayorInboxTab({ api }: { api: StudioApi }) {
           <div className="stack-4">
             <h2 className="display-md row" style={{ margin: 0, gap: 10 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={MAYOR_MAMA_MANDEE.portrait} alt="" width={40} height={40} style={{ borderRadius: "50%" }} /> Mayor&apos;s Inbox
+              <img src={MAYOR_PAPA_DANI.portrait} alt="" width={40} height={40} style={{ borderRadius: "50%" }} /> Mayor&apos;s Inbox
             </h2>
             <p className="meta" style={{ margin: 0 }}>
               Letters players send from the Phone&apos;s Mayor app: bugs, ideas, complaints and love letters. A reply goes to the

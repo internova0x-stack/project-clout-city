@@ -52,7 +52,7 @@ export function ShopSheet({
   /** The Shop Manager (migration 0099): what's on sale, with pictures. Without it (before 0099) the Shop is the code's list. */
   catalog?: CatalogItem[];
 }) {
-  const [cat, setCat] = useState<ShopCategory>(initialCategory);
+  const [cat, setCat] = useState<ShopCategory | "couture">(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
   const [line, setLine] = useState<string>("all");
   if (initialCategory !== lastInitial) {
@@ -91,14 +91,13 @@ export function ShopSheet({
     // Daily tasks 2.0 (migration 0073): streak rewards are never on sale; they show once a streak has earned them.
     && (!i.reward || owned.has(i.sku))
     && (!i.fits || !fit || i.fits === fit || owned.has(i.sku));
-  const inTab = source.filter((i) => i.category === cat && shows(i));
+  // Clout Couture is its own tab (owner, Oct 22), so its pieces stay out of the other tabs.
+  const inTab = source.filter((i) => (cat === "couture" ? i.collection === COUTURE : i.category === cat && i.collection !== COUTURE) && shows(i));
   // Clout Couture (owner, Oct 21): a row at the top of Luxury with every piece, and at the top of a piece's own tab.
-  const couture = source.filter((i) => i.collection === COUTURE && shows(i) && (cat === "luxury" || i.category === cat));
   const lines = cat === "fashion" ? STYLE_LINES.filter((l) => inTab.some((i) => i.styleLines.includes(l))) : [];
   // Real-money pieces come after the C$ ones in every tab (owner, Oct 22), unless a tab has nothing else.
-  const items = inTab.filter((i) => i.collection !== COUTURE && (line === "all" || !lines.length || i.styleLines.includes(line)))
+  const items = inTab.filter((i) => line === "all" || !lines.length || i.styleLines.includes(line))
     .sort((a, b) => Number(!!a.collector) - Number(!!b.collector));
-  const coutureFirst = !items.some((i) => !i.collector);
   const card = (item: ShopCardItem) => {
     const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
     const soon = !item.wearableNow;
@@ -183,19 +182,17 @@ export function ShopSheet({
       </div>
     );
   };
-  const coutureRow = couture.length > 0 && (
-    <div className="stack-8">
-      <p className="overline" style={{ margin: 0 }}>✨ Clout Couture</p>
-      <div className="couture-row">{couture.map(card)}</div>
-    </div>
-  );
+  const hasCouture = source.some((i) => i.collection === COUTURE && shows(i));
+  const tabs: { id: ShopCategory | "couture"; label: string; emoji: string }[] = SHOP_CATEGORIES
+    .filter((c) => c.id !== "accessories" || source.some((i) => i.category === "accessories" && i.collection !== COUTURE && shows(i)))
+    .flatMap((c) => (c.id === "luxury" && hasCouture ? [c, { id: "couture" as const, label: "Couture", emoji: "✨" }] : [c]));
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
         <div className="stack-16">
           <SheetTitle right={formatCash(player.bank_cash)}>Shop</SheetTitle>
           <div className="chip-row" role="group" aria-label="Categories">
-            {SHOP_CATEGORIES.filter((c) => c.id !== "accessories" || source.some((i) => i.category === "accessories" && shows(i))).map((c) => (
+            {tabs.map((c) => (
               <button key={c.id} className="chip" aria-pressed={cat === c.id} onClick={() => { setCat(c.id); setLine("all"); }}>
                 <span aria-hidden="true">{c.emoji}</span> {c.label}
               </button>
@@ -207,7 +204,7 @@ export function ShopSheet({
               {lines.map((l) => <button key={l} className="chip chip-sm" aria-pressed={line === l} onClick={() => setLine(l)}>{STYLE_LINE_LABEL[l]}</button>)}
             </div>
           )}
-          {coutureFirst && coutureRow}
+          {cat === "couture" && <p className="subtext" style={{ margin: 0 }}>Clout Couture: numbered pieces, paid in real cash. Once a drop sells out, it's gone.</p>}
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
           {cat === "home" && (
             <HomeShelf
@@ -223,7 +220,6 @@ export function ShopSheet({
           )}
           {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
           {cat !== "home" && <div className="item-grid">{items.map(card)}</div>}
-          {!coutureFirst && coutureRow}
         </div>
       </Sheet>
       <Sheet open={open && !!confirm} onClose={() => setConfirm(null)} label="Confirm purchase">

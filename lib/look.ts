@@ -17,6 +17,16 @@ export type BuildId = "slim" | "athletic" | "broad" | "plus" | "petite" | "curvy
 // "Presenting as" (Clarifications section 16): cosmetic only. It picks the avatar's build,
 // is never shown as a label and is never used by dating, crews or rankings. The stored ids
 // predate the rename and stay as they are. Four body types each arrive in v0.7.
+/** What kind of New Yorker the player is (owner, Oct 22): picked in the creator, shown on the profile. Identity only. */
+export type NyerId = "native" | "transplant" | "new" | "future";
+export const NYERS: { id: NyerId; label: string; sub: string }[] = [
+  { id: "native", label: "Native New Yorker", sub: "You already know ball. Let's go!" },
+  { id: "transplant", label: "Transplant New Yorker", sub: "More New York than those born in New York." },
+  { id: "new", label: "New New Yorker", sub: "Experience something new every day." },
+  { id: "future", label: "Future Immigrant", sub: "Experience NY before you make the big move." },
+];
+export const nyerLabel = (id: NyerId | undefined) => NYERS.find((n) => n.id === id)?.label ?? null;
+
 export const BODIES: Option<BodyId>[] = [
   { id: "straight", label: "Male" },
   { id: "curvy", label: "Female" },
@@ -87,6 +97,8 @@ export interface Look {
   covering: CoveringId;
   /** The starter outfit pick; null wears the style's own outfit. */
   fit: Fit | null;
+  /** What kind of New Yorker (owner, Oct 22); players from before it have none. */
+  nyer?: NyerId;
 }
 
 /** The free choices stored in players.look (the style has its own column). */
@@ -129,6 +141,7 @@ export function normalizeLook(raw: unknown, style: unknown): Look {
     glasses: has(GLASSES, r.glasses) ? r.glasses : DEFAULT_LOOK.glasses,
     covering,
     fit: isValidFit(st, r.fit) ? r.fit : null,
+    ...(NYERS.some((n) => n.id === r.nyer) ? { nyer: r.nyer as NyerId } : {}),
   };
 }
 
@@ -140,7 +153,8 @@ export function isValidLook(raw: unknown, style: unknown): boolean {
     has(BODIES, r.body) && has(SKIN_TONES, r.skin) && has(HAIRS, r.hair) && has(HAIR_COLORS, r.hairColor) &&
     has(EYE_COLORS, r.eyes) && has(GLASSES, r.glasses) && has(COVERINGS, r.covering) &&
     (r.build === undefined || has(BUILDS[r.body as BodyId], r.build)) &&
-    (r.fit === undefined || r.fit === null || isValidFit(style, r.fit))
+    (r.fit === undefined || r.fit === null || isValidFit(style, r.fit)) &&
+    (r.nyer === undefined || NYERS.some((n) => n.id === r.nyer))
   );
 }
 

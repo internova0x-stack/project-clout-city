@@ -8,6 +8,7 @@ import { PlayersTab } from "./Players";
 import { AffiliatesTab } from "./Affiliates";
 import { ShoutoutsTab } from "./Shoutouts";
 import { MayorInboxTab } from "./MayorInbox";
+import { AutopilotCard } from "./Autopilot";
 import { BigScreenTab } from "./BigScreen";
 import { ShopManagerTab } from "./ShopManager";
 import { StoryPreview, describeEffect } from "./StoryPreview";
@@ -1208,9 +1209,10 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
   };
   return (
     <section className="stack-12">
+      <AutopilotCard api={api} />
       <p className="meta" style={{ margin: 0 }}>
-        Each week: the stories running, the hunt (Monday to Sunday) and the news by day. Files the weekly drafting routine commits to
-        <code> content/</code> show a Load button once merged; loading only uploads them, and they still wait for your approval.
+        Each week: the stories running, the hunt (Monday to Sunday) and the news by day. With autopilot on, the weekly drafting
+        routine's files go live by themselves; while one is paused, its files show a Load button here and wait for your approval.
       </p>
       {ok && <div className="studio-note ok" role="status"><span className="body-strong">{ok}</span></div>}
       {error && (

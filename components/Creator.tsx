@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
 import { ECONOMY, SIGNUP_HOMES, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
 import {
-  BODIES, BUILDS, DEFAULT_BUILD, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, HEADWEAR_CULTURAL, SKIN_TONES,
+  BODIES, BUILDS, DEFAULT_BUILD, NYERS, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, HEADWEAR_CULTURAL, SKIN_TONES,
   lookChoices, randomLook, type BuildId, type Look, type LookChoices,
 } from "@/lib/look";
 import { GARMENT } from "./avatar/garments";
@@ -89,7 +89,7 @@ export function Creator({
             </div>
           </div>
           {step === 0 ? (
-            <button className="icon-round" onClick={() => setLook(randomLook(Math.random, STYLE_IDS))} aria-label="Shuffle look">
+            <button className="icon-round" onClick={() => setLook((l) => ({ ...randomLook(Math.random, STYLE_IDS), ...(l.nyer ? { nyer: l.nyer } : {}) }))} aria-label="Shuffle look">
               <ShuffleIcon size={18} />
             </button>
           ) : (
@@ -246,6 +246,18 @@ function LookStep({
         <div className="binary" role="group" aria-label="Presenting as">
           {BODIES.map((o) => (
             <button key={o.id} aria-pressed={look.body === o.id} onClick={() => setPresenting(o.id)}>{o.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="stack-8">
+        <p className="overline" style={{ margin: 0 }}>What kind of New Yorker are you?</p>
+        <div className="nyer-tiles" role="radiogroup" aria-label="What kind of New Yorker are you?">
+          {NYERS.map((n) => (
+            <button key={n.id} role="radio" aria-checked={look.nyer === n.id} className="nyer-tile" onClick={() => set("nyer", n.id)}>
+              <span className="body-strong">{n.label}</span>
+              <span className="meta">{n.sub}</span>
+            </button>
           ))}
         </div>
       </div>

@@ -115,6 +115,7 @@ from (values
   ('0103_couture_glow.sql', coalesce((to_regprocedure('public.crowned_players()') is not null), false)),
   ('0104_couture_map.sql', coalesce((to_regclass('public.plaza_bookings') is not null), false)),
   ('0105_mayor_letters.sql', coalesce((to_regclass('public.mayor_letters') is not null), false)),
-  ('0106_astoria_park.sql', coalesce(((select value::text from public.game_settings where key='city') like '%"Astoria Park"%'), false))
+  ('0106_astoria_park.sql', coalesce(((select value::text from public.game_settings where key='city') like '%"Astoria Park"%'), false)),
+  ('0107_autopilot.sql', coalesce((to_regprocedure('public.story_autopilot()') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

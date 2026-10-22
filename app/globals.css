@@ -2222,3 +2222,11 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .shop-item-where.in { color:var(--done-green); font-weight:600; }
 .shop-item-actions { gap:6px; flex-wrap:wrap; margin-top:2px; }
 @media (max-width: 420px) { .shop-grid { grid-template-columns:1fr; } .shop-filters > * { flex-basis:45%; } }
+/* The Mayor's step in the tour (owner, Oct 22): his portrait instead of Lola's head. */
+.lola-tip-head.mayor-tip-head { background:linear-gradient(160deg, #FFF3C4, #BFE8CF); box-shadow:0 0 0 3px #FFF8F2, 0 0 0 5px #1F7A5C, var(--elev-2); }
+.lola-tip-head.mayor-tip-head img { transform:none; }
+.lola-tip.mayor .lola-tip-who { color:#1F7A5C; }
+/* The creator's "What kind of New Yorker are you?" (owner, Oct 22). */
+.nyer-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.nyer-tile { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 12px; border-radius:var(--r-md); border:1.5px solid var(--divider); background:var(--surface-card); font:inherit; color:var(--text-1); text-align:left; cursor:pointer; }
+.nyer-tile[aria-checked="true"] { border-color:var(--night-900); box-shadow:0 0 0 1px var(--night-900); }

@@ -15,6 +15,7 @@ import type { Insights } from "@/lib/insights";
 import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin, VideoInput, VideosAdmin } from "@/lib/creators";
 import type { ShoutoutAction, StudioShoutoutDay } from "@/lib/radio";
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "@/lib/mayor";
+import type { Autopilot, AutopilotKind } from "@/lib/autopilot";
 import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
 import { headers } from "next/headers";
 
@@ -138,7 +139,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("mayor") ? "Run migration 0105 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("mayor") ? "Run migration 0105 first." : fn.includes("autopilot") ? "Run migration 0107 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -149,6 +150,12 @@ export async function studioReportAction(id: number, action: "dismiss" | "warn" 
   return r.ok ? { ok: true as const, data: null } : r;
 }
 // ---- Real Clout FM shoutouts (migration 0057) ----
+export async function studioAutopilot() {
+  return admin<Autopilot>("autopilot");
+}
+export async function studioAutopilotSet(kind: AutopilotKind, on: boolean) {
+  return admin<Autopilot>("admin_autopilot_set", { p_kind: kind, p_on: on });
+}
 export async function studioMailbag(filter: MailbagFilter) {
   return admin<StudioMailbag>("admin_mayor_letters", { p_filter: filter });
 }

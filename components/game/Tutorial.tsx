@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import AvatarHead from "../avatar/AvatarHead";
-import { LOLA_LOOK } from "@/lib/cast";
+import { LOLA_LOOK, MAYOR_PAPA_DANI } from "@/lib/cast";
 
 // The tutorial tooltips: Lola's hello (with Skip), then five (owner, Oct 17: no separate welcome pop-up) (Clarifications section 1;
 // C15). One tooltip at a time, the rest of the screen dimmed, the target ringed.
 
-// Owner, Oct 17: Lola Lowdown gives the tour, in her voice (the spicy urban gossip blogger). Culture pack C1 (owner,
+// Owner, Oct 17: Lola Lowdown gives the tour (Mayor Papa-Dani says hello in one step, owner Oct 22), in her voice (the spicy urban gossip blogger). Culture pack C1 (owner,
 // Oct 20): one or two slang terms from content/culture/slang.json in every line (tests/culture.test.ts checks).
 export const TOUR = [
   // No target: Lola says hello first (owner, Oct 17), with the whole screen dimmed.
@@ -16,6 +16,8 @@ export const TOUR = [
   { target: "money", text: "Your coins, sweetie 💸 Rent, fits and the occasional \"tip\" for a bouncer all come out of here, and rent comes around mad fast. The diamond 💎 is your net worth: everything you own that you can casually drop in conversation." },
   { target: "map", text: "This is the map 🗺️ You're starting in Queens, and the rest of the city stays locked 🔒 till you're interesting enough. Facts: I've seen worse glow-ups. Barely 😏" },
   { target: "phone", text: "Your phone 📱 Updates, gossip and the fam asking if you've \"made it yet.\" My tea 🍵 comes through here too, so keep it charged. Bet?" },
+  // Owner, Oct 22: the Mayor welcomes every newcomer and points at his app (the Phone's Mayor app, migration 0105).
+  { target: "phone", who: "mayor", text: "Welcome to Queens, neighbor! I'm Mayor Papa-Dani 🏛️ Something broken? A big idea? Need to kvetch about the rent? Write me in the Mayor app on your phone. I read every letter, and my team gets on it fast 🎉" },
   { target: "events", text: "Breaking news 🚨 somebody invited YOU to a party 🥂 They're wildin', and I'm as shocked as you are. Tap it and RSVP before they change their mind 👀" },
 ] as const;
 
@@ -69,6 +71,7 @@ function useTargetRect(target: string): Rect | null {
 export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: () => void; onSkip?: () => void }) {
   const step = TOUR[index];
   const rect = useTargetRect(step.target);
+  const mayor = "who" in step && step.who === "mayor";
 
   const last = index === TOUR.length - 1;
   return (
@@ -87,18 +90,25 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
         </>
       )}
       {/* Lola in the bottom-right corner, her line in a chat bubble (owner, Oct 17). */}
-      <div className="lola-tip" key={index}>
+      <div className={`lola-tip${mayor ? " mayor" : ""}`} key={index}>
         <div className="lola-tip-bubble">
-          <p className="lola-tip-who">Lola Lowdown <span>· {index + 1} of {TOUR.length}</span></p>
+          <p className="lola-tip-who">{mayor ? MAYOR_PAPA_DANI.name : "Lola Lowdown"} <span>· {index + 1} of {TOUR.length}</span></p>
           <p className="lola-tip-text">{step.text}</p>
           {!last && <button className="btn btn-taxi lola-tip-next" onClick={onNext}>{index === 0 ? "Let's go" : "Next"}</button>}
           {index === 0 && onSkip && <button className="lola-tip-skip" onClick={onSkip}>Skip tour (bold of you)</button>}
           {last && <p className="lola-tip-hint">Tap the glowing button 👆</p>}
         </div>
-        <div className="lola-tip-head" aria-hidden="true">
-          <AvatarHead look={LOLA_LOOK} size={64} />
-          <span className="lola-tip-kiss">💋</span>
-        </div>
+        {mayor ? (
+          <div className="lola-tip-head mayor-tip-head" aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={MAYOR_PAPA_DANI.portrait} alt="" width={64} height={64} />
+          </div>
+        ) : (
+          <div className="lola-tip-head" aria-hidden="true">
+            <AvatarHead look={LOLA_LOOK} size={64} />
+            <span className="lola-tip-kiss">💋</span>
+          </div>
+        )}
       </div>
     </div>
   );

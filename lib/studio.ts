@@ -3,6 +3,7 @@
 // on the schedule (product owner, Oct 12, 2026).
 
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
+import type { Autopilot, AutopilotKind } from "./autopilot.ts";
 import type { CatalogItem, EditableField, ShopFile } from "./shopCatalog.ts";
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
@@ -219,6 +220,9 @@ export interface StudioApi {
   /** v0.10 gossip (migration 0034): weeks go live on their own; the Studio reads, pauses or holds them. */
   gossipList?(): Promise<Admin<{ weeks: GossipAdmin[]; files: GossipFileCheck[] }>>;
   gossipStatus?(week: string, status: GossipAdmin["status"], note?: string): Promise<Admin<null>>;
+  /** Autopilot (migration 0107): the switches, and flipping one. */
+  autopilot?(): Promise<Admin<Autopilot>>;
+  autopilotSet?(kind: AutopilotKind, on: boolean): Promise<Admin<Autopilot>>;
   /** Contact the Mayor (migration 0105): players' letters, marking them read or done, and writing back. */
   mailbag?(filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
   letter?(id: number, status: LetterStatus, reply: string | null, filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
