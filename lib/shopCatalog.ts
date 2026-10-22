@@ -280,7 +280,7 @@ export interface FieldContext {
   /** Words from content/culture/parody-names.json that count as real brand names. */
   brandHits?: (text: string) => string[];
   /** Other items in the catalog (for duplicate names). */
-  others?: Pick<CatalogItem, "sku" | "name" | "status" | "extra">[];
+  others?: (Pick<CatalogItem, "sku" | "name" | "status" | "extra"> & { sourceImage?: string | null })[];
 }
 
 /** Problems with an item's fields; an empty list means it can be saved. */
@@ -309,8 +309,10 @@ export function readiness(i: CatalogItem, ctx: FieldContext = {}): Check[] {
   const words = problems.filter((x) => /^name|^description|brand/.test(x));
   const place = problems.filter((x) => /^tab|^slot|presentation|style line/.test(x));
   const line = (x: Pick<CatalogItem, "extra">) => (typeof x.extra?.line === "string" ? x.extra.line : null);
-  const dup = (ctx.others ?? []).find((o) => o.sku !== i.sku && o.status !== "deleted" && o.name.trim().toLowerCase() === i.name.trim().toLowerCase()
-    && !(line(o) && line(o) === line(i)));
+  // Never list the same product twice (owner, Oct 22): another item with this name or this picture blocks approval,
+  // unless both are colors of one line.
+  const dup = (ctx.others ?? []).find((o) => o.sku !== i.sku && o.status !== "deleted" && !(line(o) && line(o) === line(i))
+    && (o.name.trim().toLowerCase() === i.name.trim().toLowerCase() || (!!i.sourceImage && o.sourceImage === i.sourceImage)));
   const off = i.realCash ? 0 : Math.abs(i.clout - cloutCurve(i.price)) / Math.max(1, cloutCurve(i.price));
   return [
     { id: "image", label: "Image", ok: i.imageStatus === "ready" || (i.origin === "code" && !i.sourceImage), blocking: true,
@@ -319,7 +321,8 @@ export function readiness(i: CatalogItem, ctx: FieldContext = {}): Check[] {
     { id: "placement", label: "Tab, slot, style lines, presentation", ok: !place.length, blocking: true, detail: place.join("; ") || "OK" },
     { id: "price", label: "Price", ok: !problems.includes("price"), blocking: true,
       detail: i.realCash ? (i.priceUsdCents ? `$${(i.priceUsdCents / 100).toFixed(2)}${i.editionSize ? ` · editions of ${i.editionSize}` : ""}` : "No dollar price") : `C$${i.price.toLocaleString("en-US")}` },
-    { id: "duplicate", label: "No duplicate name", ok: !dup, blocking: true, detail: dup ? `Same name as ${dup.sku}` : "OK" },
+    { id: "duplicate", label: "Not a duplicate", ok: !dup, blocking: true,
+      detail: dup ? `Same ${dup.name.trim().toLowerCase() === i.name.trim().toLowerCase() ? "name" : "picture"} as ${dup.name} (${dup.sku})` : "OK" },
     { id: "clout", label: "Clout", ok: !problems.includes("clout") && off <= 0.2, blocking: false,
       detail: off > 0.2 ? `${i.clout} is more than 20% off the curve (${cloutCurve(i.price)})` : `${i.clout}` },
     { id: "wearable", label: "Wearable", ok: i.wearable, blocking: false,

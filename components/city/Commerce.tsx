@@ -95,6 +95,8 @@ export function ShopSheet({
   // Cheapest first, real-money pieces after the C$ ones (owner, Oct 22), with what's new in a row on top.
   const items = shopOrder(inTab.filter((i) => line === "all" || !lines.length || i.styleLines.includes(line)));
   const fresh = newArrivals(items.filter((i) => !owned.has(i.sku) && !i.retired), Date.now());
+  // A piece in the New row isn't listed again below it (owner, Oct 22: no duplicates in the listing).
+  const rest = items.filter((i) => !fresh.includes(i));
   const card = (item: ShopCardItem) => {
     const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
     const soon = !item.wearableNow;
@@ -216,7 +218,7 @@ export function ShopSheet({
           )}
           {cat === "home" && (
             <HomeShelf
-              items={items}
+              items={rest}
               owned={owned}
               cash={player.bank_cash}
               purchases={player.purchases_count}
@@ -227,7 +229,7 @@ export function ShopSheet({
             />
           )}
           {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
-          {cat !== "home" && <div className="item-grid">{items.map(card)}</div>}
+          {cat !== "home" && <div className="item-grid">{rest.map(card)}</div>}
         </div>
       </Sheet>
       <Sheet open={open && !!confirm} onClose={() => setConfirm(null)} label="Confirm purchase">

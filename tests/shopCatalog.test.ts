@@ -145,3 +145,31 @@ test("the Shop lists C$ pieces cheapest first, then real cash cheapest first, an
   assert.deepEqual(fresh.map((i) => i.name), ["Today", "Week"]);
   assert.equal(newArrivals(Array.from({ length: 20 }, (_, n) => it(`N${n}`, 1, { since: days(1) })), now).length, SHOP_NEW.max);
 });
+
+test("no product is listed twice: every Shop file and the code's items have unique ids, names and pictures", () => {
+  const all = [
+    ...SHOP_ITEMS.map((i) => ({ sku: i.sku, name: i.name, pic: null as string | null, line: i.furniture?.line ?? null, from: "lib/city.ts" })),
+    ...parsed.flatMap((p) => p.drafts.map((d) => ({ sku: d.sku, name: d.name, pic: d.sourceImage, line: typeof d.extra?.line === "string" ? d.extra.line : null, from: p.f }))),
+  ];
+  const ids = new Map<string, string>(), names = new Map<string, { line: string | null; at: string }>(), pics = new Map<string, string>();
+  for (const i of all) {
+    const at = `${i.sku} (${i.from})`;
+    // A file may re-list a code item (same id) to give it a picture: that's the same product, not a second listing.
+    const prev = ids.get(i.sku);
+    if (prev) { assert.ok(prev.endsWith("(lib/city.ts)"), `${at} repeats ${prev}`); continue; }
+    ids.set(i.sku, at);
+    // Colors of one furniture line share a name on purpose (the Shop shows them as one card with swatches).
+    const same = names.get(i.name.trim().toLowerCase());
+    assert.ok(!same || (!!i.line && same.line === i.line), `${at}: same name as ${same?.at}`);
+    names.set(i.name.trim().toLowerCase(), { line: i.line, at });
+    if (i.pic) { assert.ok(!pics.has(i.pic), `${at}: same picture as ${pics.get(i.pic)}`); pics.set(i.pic, at); }
+  }
+});
+
+test("a second item with the same picture can't be approved", () => {
+  const a = { ...row(), sku: "a-coat", name: "A coat", sourceImage: "https://x/coat.png" };
+  const b = { ...row(), sku: "b-coat", name: "Another coat", sourceImage: "https://x/coat.png" };
+  const d = readiness(b, { others: [a, b] }).find((c) => c.id === "duplicate")!;
+  assert.equal(d.ok, false);
+  assert.match(d.detail, /Same picture as A coat/);
+});
