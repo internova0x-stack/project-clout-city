@@ -33,7 +33,7 @@ import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 import { buildSetHat, SET_HAT_HIDES_HAIR } from "./setHats";
 import { buildBodyAccessory, buildHeadAccessory, type BodyFit } from "./accessories";
-import { ACCESSORY_HATS, ACCESSORY_HIDES_HAIR } from "@/lib/accessories";
+import { ACCESSORY_HATS, ACCESSORY_HIDES_HAIR, COVERING_ACCESSORIES } from "@/lib/accessories";
 import type { Finish } from "@/lib/avatarCatalog";
 import type { ModelAvatarOptions } from "./modelAvatar";
 
@@ -416,7 +416,12 @@ function measureThigh(mesh: SkinnedMesh, body: Group, bones: Map<string, Bone>):
 
 /** `bare` (previews only): the body in its base layer, nothing worn. */
 export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: boolean } = {}): AvatarParts {
-  const outfit: Outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
+  const fullOutfit: Outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
+  // A durag, turban, headwrap or kippah from the Shop (owner, Oct 22) is worn as the covering it used to be for free:
+  // the same shape, hair hidden the same way, in the piece's own color.
+  const bought = opts.bare ? undefined : fullOutfit.extras?.find((x) => x.slot === "head" && COVERING_ACCESSORIES.has(x.kind));
+  if (bought) look = { ...look, covering: bought.kind as Look["covering"] };
+  const outfit: Outfit = bought ? { ...fullOutfit, extras: fullOutfit.extras!.filter((x) => x !== bought) } : fullOutfit;
   const sex = modelSex(look);
   // A whole outfit's hat (SET_LOOKS), unless the player wears a faith or culture covering: that always stays. It
   // replaces the player's own cap or hat and any headphones.
@@ -429,6 +434,7 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
   const anyHat = !!setHat || !!headExtra;
   // The procedural avatar, for its headwear (glasses, caps, coverings) and pedestal only.
   const proc = buildAvatar({ ...look, covering: anyHat ? "none" : look.covering, glasses: extras.some((x) => x.slot === "face") ? "none" : look.glasses }, {
+    hatColor: bought?.color,
     pedestal: opts.pedestal ?? false,
     outfit: anyHat && outfit.accessory === "headphones" ? { ...outfit, accessory: "none" } : outfit,
   });

@@ -265,7 +265,7 @@ export function LookRoom({
               <div className="stack-4">
                 <p className="meta" style={{ margin: 0 }}>{tab === "outfit"
                   ? "No outfits yet. The Shop sells city looks, and the wilder ones open up as your clout grows."
-                  : tab === "hats" ? "The cap and the coverings are free. The Shop has more hats, and every piece there has Try it on."
+                  : tab === "hats" ? "The cap is free. The Shop has more hats and headwear, and every piece there has Try it on."
                   : tab === "top" || tab === "bottom" || tab === "shoes" ? "Your starter clothes are free to switch. The Shop has more, and every piece there has Try it on."
                   : "Nothing here yet. The Shop has more, and every piece there has Try it on."}</p>
                 {onShop && (

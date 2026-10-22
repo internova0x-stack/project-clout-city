@@ -1,0 +1,104 @@
+{
+  "batch": "headwear",
+  "notes": [
+    "Owner, Oct 22: the cap is the only free hat; the durag, turban, headwrap and kippah are sold here. Migration 0111 puts them live and gives each to the players who wore it as a free covering.",
+    "The avatar draws them as the coverings they used to be (lib/accessories.ts COVERING_ACCESSORIES), in their own colors.",
+    "Same art style and processing as the other shop batch files."
+  ],
+  "items": [
+    {
+      "batch": "headwear",
+      "id": "satin-durag",
+      "name": "Satin Durag",
+      "description": "Black satin with long ties. Waves protected.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [
+        "streetwear"
+      ],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 35,
+      "clout": 6,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": true,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261022_145316_32213a25-2948-45c7-bc3a-bd2380f6c855.png",
+      "images": {
+        "card": "shop/satin-durag-256.webp",
+        "detail": "shop/satin-durag-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "headwear",
+      "id": "wrapped-turban",
+      "name": "Wrapped Turban",
+      "description": "A neatly wrapped turban in deep navy.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 70,
+      "clout": 8,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": true,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261022_145317_357c95b4-7fe6-4608-897b-2c6d4ac1bc6b.png",
+      "images": {
+        "card": "shop/wrapped-turban-256.webp",
+        "detail": "shop/wrapped-turban-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "headwear",
+      "id": "terracotta-headwrap",
+      "name": "Terracotta Headwrap",
+      "description": "Terracotta cotton, tied with a knot on top.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 55,
+      "clout": 7,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": true,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261022_145317_21ca16a2-e0ad-4f7b-8a8a-2e98b00e6b1f.png",
+      "images": {
+        "card": "shop/terracotta-headwrap-256.webp",
+        "detail": "shop/terracotta-headwrap-768.webp"
+      },
+      "transparent": false
+    },
+    {
+      "batch": "headwear",
+      "id": "knit-kippah",
+      "name": "Knit Kippah",
+      "description": "A simple navy knit kippah.",
+      "category": "accessories",
+      "slot": "head",
+      "styleLines": [],
+      "tier": "budget",
+      "stars": 1,
+      "priceCs": 30,
+      "clout": 5,
+      "currency": "C$",
+      "realCash": false,
+      "template": "rigid:hat",
+      "wearable": true,
+      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261022_145316_77f53038-adde-4919-a7c4-0aabf7b971cf.png",
+      "images": {
+        "card": "shop/knit-kippah-256.webp",
+        "detail": "shop/knit-kippah-768.webp"
+      },
+      "transparent": false
+    }
+  ]
+}

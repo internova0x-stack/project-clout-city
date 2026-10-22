@@ -250,7 +250,9 @@ components live in `app/globals.css`.
   offers a tee and pants plus basic colors (blue, black, white tops; black, navy pants) and no free zip-up; each piece
   starts in its default color and the rest open with clout (`colorUnlocks`, `COLOR_UNLOCKS`, 50 to 1,000; checked in
   `saveLook` and the creator's action; a color already worn stays). One free basic hat, the cap, always `FREE_CAP_COLOR`;
-  no fedora or bucket hat, and no hijab (owner: a sensitive piece that needs care); a saved one reads as none. Extras are
+  no fedora or bucket hat, and no hijab (owner: a sensitive piece that needs care); a saved one reads as none. The durag,
+  turban, headwrap and kippah are Shop pieces (content/shop/headwear.json; migration 0111 puts them live and gives each to
+  whoever wore it), drawn as coverings in their own color (`COVERING_ACCESSORIES`, buildAvatar's `hatColor`). Extras are
   Shop pieces only; an empty tab links to the Shop. Charisma is called Aura (id 'charisma' kept; migration 0110's push).
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
   its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.

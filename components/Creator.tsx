@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
 import { ECONOMY, SIGNUP_HOMES, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
 import {
-  BODIES, BUILDS, DEFAULT_BUILD, NYERS, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, HEADWEAR_CULTURAL, SKIN_TONES,
+  BODIES, BUILDS, DEFAULT_BUILD, NYERS, DEFAULT_LOOK, EYE_COLORS, GLASSES, HAIRS, HAIR_COLORS, HEADWEAR_BASIC, SKIN_TONES,
   lookChoices, randomLook, type BuildId, type Look, type LookChoices,
 } from "@/lib/look";
 import { GARMENT } from "./avatar/garments";
@@ -291,19 +291,13 @@ function LookStep({
       <OutfitPicker look={look} onChange={(fit) => set("fit", fit)} />
 
       <div className="stack-8">
-        <p className="overline" style={{ margin: 0 }}>Headwear · all free</p>
+        <p className="overline" style={{ margin: 0 }}>Headwear · free</p>
         <div className="option-chips" role="group" aria-label="Headwear">
           {HEADWEAR_BASIC.map((o) => (
             <button key={o.id} className="chip" aria-pressed={look.covering === o.id} onClick={() => set("covering", o.id)}>{HAT_EMOJI[o.id] ?? ""}{o.label}</button>
           ))}
         </div>
-        <p className="creator-label">Cultural and religious</p>
-        <div className="option-chips" role="group" aria-label="Cultural and religious coverings">
-          {HEADWEAR_CULTURAL.map((o) => (
-            <button key={o.id} className="chip" aria-pressed={look.covering === o.id} onClick={() => set("covering", o.id)}>{o.label}</button>
-          ))}
-        </div>
-        <p className="meta" style={{ margin: 0 }}>Premium hats live in the Shop.</p>
+        <p className="meta" style={{ margin: 0 }}>More hats and headwear live in the Shop.</p>
       </div>
 
       <OptionGroup label="Hair" options={HAIRS} value={look.hair} onPick={(v) => set("hair", v)} />

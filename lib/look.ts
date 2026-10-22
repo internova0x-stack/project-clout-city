@@ -68,15 +68,11 @@ export const HEADWEAR_BASIC: Option<CoveringId>[] = [
 ];
 export const FREE_CAP_COLOR = "#1F1B26";
 /**
- * Cultural and religious coverings, after the basics. The hijab was taken out (owner, Oct 22: a sensitive cultural piece
- * that needs a lot of care); a saved one reads as no covering.
+ * No free coverings any more (owner, Oct 22: "remove all hats except the cap"). The durag, turban, headwrap and kippah
+ * are Shop pieces (content/shop/headwear.json; migration 0111 gave each to whoever wore it); the hijab was taken out (a
+ * sensitive cultural piece that needs a lot of care). A saved one reads as no covering.
  */
-export const HEADWEAR_CULTURAL: Option<CoveringId>[] = [
-  { id: "durag", label: "Durag" },
-  { id: "turban", label: "Turban" },
-  { id: "headwrap", label: "Headwrap" },
-  { id: "kippah", label: "Kippah" },
-];
+export const HEADWEAR_CULTURAL: Option<CoveringId>[] = [];
 export const COVERINGS: Option<CoveringId>[] = [...HEADWEAR_BASIC, ...HEADWEAR_CULTURAL];
 
 export const SKIN_TONES = [
