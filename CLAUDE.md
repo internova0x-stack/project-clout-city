@@ -279,6 +279,9 @@ components live in `app/globals.css`.
 - Studio stories (migration 0080): approval alone never puts a story live; a main story needs a Day 1 (schedule,
   or `admin_story_go_live`: approve + today as Day 1, and its side stories waiting for review, migration 0081). `storyStage()` (lib/studio.ts) is the one status the Studio
   shows. A live story can't go back to review or be declined.
+- Story blog posts (migration 0115, owner Oct 22): a beat's `news[0].post` is the full post behind the feed card's "Read the
+  full post" (`body` is then the teaser; lib/storyValidation.ts checks 300+ words in paragraphs); `story_feed()` sends it
+  only for released beats. Diss & Tell (content/stories/diss-and-tell.json) is the first story written this way.
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
   Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the
   same: `content/hunts/*.json` carries answers; players get `hunt_state()`. Gossip too: `content/gossip/*.json`

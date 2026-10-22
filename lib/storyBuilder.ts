@@ -119,6 +119,7 @@ function cleanBeat(b: Beat, arc: Arc): Beat {
     else if (n.previously === null) item.previously = null;
     if (text(n.body)) item.body = text(n.body);
     if (text(n.hook)) item.hook = text(n.hook);
+    if (text(n.post)) item.post = text(n.post);
     return item;
   });
   const out: Beat = { id: b.id, day: b.day, status: b.status ?? "active", news, effects: b.effects.map((e) => cleanEffect(e, arc.id)) };

@@ -7,6 +7,7 @@ import type { LottoWin } from "@/lib/lotto";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NEWS_KIND_LABEL, splitNews, transitLive, transitUntil, type NewsItem } from "@/lib/news";
 import { lineName } from "@/lib/travel";
+import { Sheet } from "../Sheet";
 import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
 
 // The News app (C30 to C34): today's story, side stories, the archive, predictions
@@ -241,6 +242,7 @@ const Byline = () => (
 /** C30: a beat card, with its evidence, prediction and any reveals it carries. */
 export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc: FeedArc; beat: FeedBeat; feed: StoryFeed; handlers: NewsHandlers; hideBody?: boolean }) {
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [postOpen, setPostOpen] = useState(false);
   const shareTask = feed.tasks.find((t) => t.do.share === beat.id);
   const evidenceTask = feed.tasks.find((t) => t.do.evidence === beat.id);
   const prediction = arc.predictions.find((p) => p.beatId === beat.id);
@@ -272,11 +274,29 @@ export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc:
         </div>
       )}
       <h3 className="display-md beat-headline">{beat.headline}</h3>
-      {!hideBody && (
+      {!hideBody && (beat.post ? (
+        // Owner, Oct 22: stories read like a blog. The card is the title and a teaser; the post is behind Read more.
+        <>
+          {beat.body && <p className="body beat-body">{beat.body}</p>}
+          <button className="link-btn beat-more" type="button" onClick={() => setPostOpen(true)}>Read the full post ›</button>
+        </>
+      ) : (
         <>
           {beat.body && <p className="body beat-body">{beat.body}</p>}
           {beat.hook && <p className="title beat-hook">{beat.hook}</p>}
         </>
+      ))}
+      {beat.post && (
+        <Sheet open={postOpen} onClose={() => setPostOpen(false)} label={beat.headline} tall>
+          <article className="blog-post">
+            <span className="overline">{arc.emoji} {arc.title} · Day {beat.day} of {arc.lastDay}</span>
+            <h2 className="display-lg blog-title">{beat.headline}</h2>
+            <Byline />
+            {beat.post.split(/\n\s*\n/).map((para, i) => <p key={i} className="body blog-para">{para.trim()}</p>)}
+            {beat.hook && <p className="title beat-hook">{beat.hook}</p>}
+            <button className="btn btn-night btn-sm" onClick={share}>↗ Share{shareTask && !shareTask.done ? ` · +${shareTask.clout} 🔥` : ""}</button>
+          </article>
+        </Sheet>
       )}
       {beat.cardNote && <p className="meta" style={{ margin: 0 }}>🗳️ {beat.cardNote}</p>}
       <div className="row beat-foot" style={{ justifyContent: "space-between" }}>

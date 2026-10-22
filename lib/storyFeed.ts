@@ -12,6 +12,8 @@ export interface FeedBeat {
   locked: boolean;
   seen: boolean;
   body?: string;
+  /** The full blog post behind "Read more" (owner, Oct 22); absent on older stories. */
+  post?: string;
   hook?: string;
   previously?: string;
   cardNote?: string;

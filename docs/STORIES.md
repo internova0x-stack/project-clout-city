@@ -24,6 +24,10 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    the News text, optional evidence, a prediction (question, options, when voting closes, which
    beat reveals it, the right answer) and effects on the city (prices, closures, chatter, story
    tasks, events). Side stories are `"type": "side"`, `"tier": "premium"` with a `sku`.
+   **Blog posts (owner, Oct 22; migration 0115):** a beat's news may carry `post`, the full blog post (300+ words,
+   paragraphs split by a blank line). The feed card then shows the headline and `body` as a short teaser (400 characters at
+   most) with **Read the full post ›**, which opens the post with its hook at the end. Write posts in Lola's gossip-blog
+   voice ("Roommates…") with a few terms from `content/culture/slang.json`. Older stories without posts show as before.
 2. **Check it.** `npm run validate:stories` runs every rule: ids and beat days in order, places,
    tags, items and tasks that exist, price caps and expiries, reason text on every change, and
    prediction windows that close before their reveal. The Studio runs the same checks when you upload, and saves nothing if one fails.
