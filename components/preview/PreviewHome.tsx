@@ -53,7 +53,7 @@ import {
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
-  previewCheckout, previewStoreAttended, previewStoreCatalog, previewStoreVisited, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryShadow, previewStoryTask, previewStoryVote,
+  previewCheckout, previewStoreAttended, previewStoreCatalog, previewStoreVisited, previewStoryDevStart, previewStoryEntitle, previewStoryRefresh, previewStorySeen, previewStoryRead, previewStoryShadow, previewStoryTask, previewStoryVote,
 } from "@/app/preview/storyActions";
 
 // Development previews only: the home screen with an in-memory city and story
@@ -274,6 +274,7 @@ export function PreviewHome({
       vote: (pid, o) => keep(previewStoryVote(pid, o)),
       shadowGuess: (pid, o) => keep(previewStoryShadow(pid, o)),
       markSeen: (id) => keep(previewStorySeen(id)),
+      readPost: (id) => keep(previewStoryRead(id)),
       completeTask: (id) => keep(previewStoryTask(id)),
       async attendEvent(id) {
         const ev = feedRef.current?.events.find((e) => e.id === id);

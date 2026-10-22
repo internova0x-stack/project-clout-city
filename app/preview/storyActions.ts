@@ -10,6 +10,7 @@ import type { CheckoutResult, StoreProduct } from "@/lib/store";
 import type { PartyInbox, PartyMention, PartyResult, PlusOne } from "@/lib/party";
 import { addDaysISO, predictionWindow } from "@/lib/stories";
 import { PLACES, SHOP_ITEMS, collectorValue } from "@/lib/city";
+import { GAME_CONFIG } from "@/lib/config";
 
 // Development previews only: the story world in memory on the dev server, so the
 // News app can be tried without a database. Refused in production builds.
@@ -65,6 +66,14 @@ export async function previewStorySeen(beatId: string) {
   previewOnly();
   if (!store.st.seen.includes(beatId)) store.st.seen.push(beatId);
   return result();
+}
+/** Opening a blog post (migration 0117): pays clout once per post. */
+export async function previewStoryRead(beatId: string) {
+  previewOnly();
+  const key = `read:${beatId}`;
+  if (store.st.paid.includes(key)) return result();
+  store.st.paid.push(key);
+  return result({ clout: GAME_CONFIG.storyReadClout });
 }
 /** Completes a story task by id (share, evidence) or by what was done (place action, event). */
 export async function previewStoryTask(taskId: string, by?: { place?: string; action?: string; event?: string }) {

@@ -54,3 +54,9 @@ test("the news card on arriving: never one already seen; today's first, then the
   assert.ok(!items.some((i) => i.id === "later" && pickNewsCard([i], today, []) !== null), "never tomorrow's");
   assert.equal(addSeen(Array.from({ length: 80 }, (_, i) => `x${i}`), ["new"]).length, NEWS_SEEN_MAX);
 });
+
+test("reading a story's blog post pays the same clout in the game and the database (migration 0117)", async () => {
+  const { GAME_CONFIG } = await import("../lib/config.ts");
+  const sql = readFileSync(new URL("../supabase/migrations/0117_story_read_clout.sql", import.meta.url), "utf8");
+  assert.match(sql, new RegExp(`reward constant int := ${GAME_CONFIG.storyReadClout};`));
+});

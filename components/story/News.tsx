@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NEWS_KIND_LABEL, splitNews, transitLive, transitUntil, type NewsItem } from "@/lib/news";
 import { lineName } from "@/lib/travel";
 import { Sheet } from "../Sheet";
+import { GAME_CONFIG } from "@/lib/config";
 import { badgeInfo, type FeedArc, type FeedBeat, type FeedPrediction, type StoryFeed } from "@/lib/storyFeed";
 
 // The News app (C30 to C34): today's story, side stories, the archive, predictions
@@ -18,6 +19,8 @@ export interface NewsHandlers {
   vote: (pid: string, option: string) => void;
   shadowGuess: (pid: string, option: string) => void;
   markSeen: (beatId: string) => void;
+  /** Opening a blog post (migration 0117): pays clout once per post. */
+  readPost?: (beatId: string) => void;
   completeTask: (taskId: string) => void;
   onUnlock: (arc: FeedArc) => void;
   /** Real-money state of a side story (price from the store catalog, and whether a payment is unlocking). */
@@ -278,7 +281,10 @@ export function BeatCard({ arc, beat, feed, handlers, hideBody = false }: { arc:
         // Owner, Oct 22: stories read like a blog. The card is the title and a teaser; the post is behind Read more.
         <>
           {beat.body && <p className="body beat-body">{beat.body}</p>}
-          <button className="link-btn beat-more" type="button" onClick={() => setPostOpen(true)}>Read the full post ›</button>
+          <button className="link-btn beat-more" type="button" onClick={() => {
+            setPostOpen(true);
+            if (beat.read === false) handlers.readPost?.(beat.id);
+          }}>Read the full post{beat.read === false && handlers.readPost ? ` · +${GAME_CONFIG.storyReadClout} 🔥` : ""} ›</button>
         </>
       ) : (
         <>

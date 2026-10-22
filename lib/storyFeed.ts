@@ -14,6 +14,8 @@ export interface FeedBeat {
   body?: string;
   /** The full blog post behind "Read more" (owner, Oct 22); absent on older stories. */
   post?: string;
+  /** Migration 0117: whether this player has opened the post (reading pays clout once). */
+  read?: boolean;
   hook?: string;
   previously?: string;
   cardNote?: string;
@@ -130,6 +132,8 @@ export interface StoryApi {
   vote(predictionId: string, optionId: string): Promise<StoryResult>;
   shadowGuess(predictionId: string, optionId: string): Promise<StoryResult>;
   markSeen(beatId: string): Promise<StoryResult>;
+  /** Opens a blog post: pays GAME_CONFIG.storyReadClout once per post (migration 0117). */
+  readPost?(beatId: string): Promise<StoryResult>;
   completeTask(taskId: string): Promise<StoryResult>;
   attendEvent(eventId: string): Promise<StoryResult>;
   /** Staging only (dev tools): start the pilot on a given story day today, or unschedule (null). */

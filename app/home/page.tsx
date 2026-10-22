@@ -15,7 +15,7 @@ import {
   acceptGig, attendClubEvent, attendExclusiveEvent, buyItem, collectGig, doCityAction, equipItem, setItemOptions, payBill, saveLook, travel, skipTrip, buyTransitPass, watchShowtime, calendarAttend, buyGift, rest, barDrink, enterVip, vipSeen, buyGroceries, cook, buyLottoCard, scratchLottoCard, refreshCity, takeSkillGig, collectSkillGig, acceptSkillInvite, saveHomeLayout, moveHome, sellItem, setClockOffset,
 } from "./cityActions";
 import {
-  attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, refreshStory, shadowGuessStory, voteStory,
+  attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, readStoryPost, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
 import { membershipPortal, membershipState } from "./membershipActions";
@@ -108,6 +108,7 @@ export default async function HomePage() {
         vote: voteStory,
         shadowGuess: shadowGuessStory,
         markSeen: markBeatSeen,
+        readPost: readStoryPost,
         completeTask: completeStoryTask,
         attendEvent: attendStoryEvent,
         ...(city.devTools ? { devStart: devStartStory, devEntitle: devEntitleStory } : {}),

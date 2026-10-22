@@ -79,7 +79,7 @@ export function buildFeed(arcs: Arc[], starts: Record<string, string | null>, no
     const beats = arc.beats.filter((b) => b.status === "active" && b.day <= day).map((b) => ({
       id: b.id, day: b.day, headline: b.news[0].headline, locked: !entitled, seen: st.seen.includes(b.id),
       ...(entitled ? {
-        body: b.news[0].body, post: b.news[0].post, hook: b.news[0].hook, previously: b.news[0].previously ?? undefined, cardNote: b.card_note,
+        body: b.news[0].body, post: b.news[0].post, ...(b.news[0].post ? { read: st.paid.includes(`read:${b.id}`) } : {}), hook: b.news[0].hook, previously: b.news[0].previously ?? undefined, cardNote: b.card_note,
         evidence: b.evidence, pointsAtAnswer: b.points_at_answer,
       } : {}),
     }));
