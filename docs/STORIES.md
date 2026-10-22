@@ -29,6 +29,11 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    most) with **Read the full post ›**, which opens the post with its hook at the end. Write posts in Lola's gossip-blog
    voice ("Roommates…") with a few terms from `content/culture/slang.json`. Older stories without posts show as before. Opening a post pays 10 clout once per post (migration 0117,
    `read_post`, ledger 'story_read'; the button shows "+10 🔥" until it's read).
+   **Characters (owner, Oct 22):** a story may list `characters` (id, name, role, a 20 to 280 character bio, style and an
+   avatar look) and each beat's news its `cast` (ids; a side story may use its parent's). The post ends with their avatar
+   heads under Share; tapping one shows the bio. They're attached on the server from the repo file, so a story already in
+   the Studio picks them up without a re-upload. **A bio is the character's public persona only and never hints at a
+   twist** (owner): it shows on every day's post, Day 1 included.
 2. **Check it.** `npm run validate:stories` runs every rule: ids and beat days in order, places,
    tags, items and tasks that exist, price caps and expiries, reason text on every change, and
    prediction windows that close before their reveal. The Studio runs the same checks when you upload, and saves nothing if one fails.
