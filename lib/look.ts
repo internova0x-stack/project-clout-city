@@ -19,13 +19,13 @@ export type BuildId = "slim" | "athletic" | "broad" | "plus" | "petite" | "curvy
 // predate the rename and stay as they are. Four body types each arrive in v0.7.
 /** What kind of New Yorker the player is (owner, Oct 22): picked in the creator, shown on the profile. Identity only. */
 export type NyerId = "native" | "transplant" | "new" | "future";
-export const NYERS: { id: NyerId; label: string; sub: string }[] = [
-  { id: "native", label: "Native New Yorker", sub: "You already know ball. Let's go!" },
-  { id: "transplant", label: "Transplant New Yorker", sub: "More New York than those born in New York." },
-  { id: "new", label: "New New Yorker", sub: "Experience something new every day." },
-  { id: "future", label: "Future Immigrant", sub: "Experience NY before you make the big move." },
+export const NYERS: { id: NyerId; label: string; sub: string; emoji: string }[] = [
+  { id: "native", emoji: "🗽", label: "Native New Yorker", sub: "You already know ball. Let's go!" },
+  { id: "transplant", emoji: "🧳", label: "Transplant New Yorker", sub: "More New York than those born in New York." },
+  { id: "new", emoji: "✨", label: "New New Yorker", sub: "Experience something new every day." },
+  { id: "future", emoji: "✈️", label: "Future Immigrant", sub: "Experience NY before you make the big move." },
 ];
-export const nyerLabel = (id: NyerId | undefined) => NYERS.find((n) => n.id === id)?.label ?? null;
+export const nyerLabel = (id: NyerId | undefined) => { const n = NYERS.find((x) => x.id === id); return n ? `${n.emoji} ${n.label}` : null; };
 
 export const BODIES: Option<BodyId>[] = [
   { id: "straight", label: "Male" },

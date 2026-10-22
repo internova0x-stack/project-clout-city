@@ -63,7 +63,7 @@ export function ProfileSheet({
         <div>
           <h2 className="display-md profile-name">{name}</h2>
           <p className="body profile-sub">{subtitle}</p>
-          {nyerLabel(look.nyer) && <p className="meta profile-sub" style={{ margin: 0 }}>🗽 {nyerLabel(look.nyer)}</p>}
+          {nyerLabel(look.nyer) && <p className="meta profile-sub" style={{ margin: 0 }}>{nyerLabel(look.nyer)}</p>}
           {!!looks?.length && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 6 }}>
               {looks.map((l) => <span key={l} className="tag">{lookBadge(`look-${l}`)?.emoji} Full {LOOK_LABEL[l] ?? l} look</span>)}

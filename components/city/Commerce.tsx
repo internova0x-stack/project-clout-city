@@ -68,9 +68,9 @@ export function ShopSheet({
     if (!mine || !onEquip || !wearSlot(sku)) return null;
     // Owned clothes say so, so "Wear" never reads as the price (owner, Oct 22).
     return (
-      <div className="row" style={{ gap: 8, alignItems: "center" }}>
+      <div className="row" style={{ gap: 6, alignItems: "center", flexWrap: "wrap" }}>
         <span className="owned-chip">Owned</span>
-        <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} style={{ flex: 1 }} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
+        <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} style={{ flex: "1 1 auto", whiteSpace: "nowrap" }} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
           {mine.equipped ? "Wearing ✓" : "Wear"}
         </button>
       </div>
@@ -183,9 +183,11 @@ export function ShopSheet({
     );
   };
   const hasCouture = source.some((i) => i.collection === COUTURE && shows(i));
-  const tabs: { id: ShopCategory | "couture"; label: string; emoji: string }[] = SHOP_CATEGORIES
-    .filter((c) => c.id !== "accessories" || source.some((i) => i.category === "accessories" && i.collection !== COUTURE && shows(i)))
-    .flatMap((c) => (c.id === "luxury" && hasCouture ? [c, { id: "couture" as const, label: "Couture", emoji: "✨" }] : [c]));
+  const tabs: { id: ShopCategory | "couture"; label: string; emoji: string }[] = [
+    ...SHOP_CATEGORIES.filter((c) => c.id !== "accessories" || source.some((i) => i.category === "accessories" && i.collection !== COUTURE && shows(i))),
+    // Couture is the last tab (owner, Oct 22).
+    ...(hasCouture ? [{ id: "couture" as const, label: "Couture", emoji: "✨" }] : []),
+  ];
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
