@@ -60,7 +60,12 @@ test("v0.7: body types per presentation; older rows keep their shape and Bodega 
   // Builds belong to their presentation.
   assert.equal(normalizeLook({ body: "straight", build: "petite" }, "arcade_nerd").build, "athletic");
   assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), build: "curvy" }, "bodega_drip"), false);
-  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), covering: "fedora" }, "bodega_drip"), true);
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), covering: "cap" }, "bodega_drip"), true);
+  // One free basic hat, and no hijab (owner, Oct 22): a saved fedora, bucket hat or hijab reads as no headwear.
+  for (const gone of ["fedora", "bucket", "hijab"]) {
+    assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), covering: gone }, "bodega_drip"), false, gone);
+    assert.equal(normalizeLook({ body: "straight", build: "slim", covering: gone }, "bodega_drip").covering, "none", gone);
+  }
 });
 
 test("v0.7: a starter fit must use its style's garments and colors", () => {

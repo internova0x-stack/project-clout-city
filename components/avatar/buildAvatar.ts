@@ -9,7 +9,7 @@ import {
   Mesh, MeshStandardMaterial, Object3D, SphereGeometry, TorusGeometry, Vector2,
   type BufferGeometry, type Material,
 } from "three";
-import type { Look } from "@/lib/look";
+import { FREE_CAP_COLOR, type Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
 
 export interface AvatarParts {
@@ -418,8 +418,8 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
     head.add(upperLip);
   }
 
-  // Hats take the old cap color for Bodega Drip, otherwise the outfit's accent.
-  const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
+  // The free cap comes in one color (owner, Oct 22); other headwear takes the outfit's accent.
+  const hatColor = look.covering === "cap" ? FREE_CAP_COLOR : outfit.topAccent;
   const hat = mat(hatColor, { roughness: 0.6 });
 
   // Hair and headwear sit in their own groups so the modeled avatar (modelAvatar.ts) can wear them too.

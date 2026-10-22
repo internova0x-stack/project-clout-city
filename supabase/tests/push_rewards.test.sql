@@ -25,7 +25,7 @@ select public.ledger_once('00000000-0000-0000-0000-0000000083a1', 'clout', 50, '
 select public.ledger_once('00000000-0000-0000-0000-0000000083a1', 'cash', 12000, 'lotto_jackpot', '2026-10-12');
 select public.ledger_once('00000000-0000-0000-0000-0000000083a1', 'cash', 120, 'shift', 'x');
 select pg_temp.assert(pg_temp.q('00000000-0000-0000-0000-0000000083a1', 'goal_done') = 1, 'one goal push for cash and clout');
-select pg_temp.assert((select title from public.push_queue where player_id = '00000000-0000-0000-0000-0000000083a1' and kind = 'skill_up') = '📈 Charisma level 5', 'skill copy');
+select pg_temp.assert((select title from public.push_queue where player_id = '00000000-0000-0000-0000-0000000083a1' and kind = 'skill_up') = '📈 Aura level 5', 'skill copy (Charisma is called Aura, migration 0110)');
 select pg_temp.assert((select body from public.push_queue where player_id = '00000000-0000-0000-0000-0000000083a1' and kind = 'lotto_win') like 'C$12,000%', 'jackpot amount');
 select pg_temp.assert((select count(*) from public.push_queue where player_id = '00000000-0000-0000-0000-0000000083a1') = 3, 'pay pushes nothing');
 

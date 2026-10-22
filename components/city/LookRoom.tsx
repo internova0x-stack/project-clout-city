@@ -7,7 +7,7 @@ import { shippedPictures } from "@/lib/shopCatalog";
 import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { HEADWEAR_BASIC, HEADWEAR_CULTURAL, type CoveringId, type Look } from "@/lib/look";
-import { BOTTOM_LABEL, TOP_LABEL, type BottomKind, type Fit, type Outfit, type StyleFits, type TopKind } from "@/lib/styles";
+import { BOTTOM_LABEL, TOP_LABEL, type BottomKind, type ColorPart, type Fit, type Outfit, type StyleFits, type TopKind } from "@/lib/styles";
 import { itemOptionsBySku, outfitFromSkus, slotsClash, wearSlot } from "@/lib/wearing";
 import { GARMENT, HAT, SHOE } from "../avatar/garments";
 import { ChevronLeftIcon } from "../icons";
@@ -17,24 +17,26 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 /** Item slots: the starting style's (top, bottom, shoes, extra), whole outfits, dresses and the Shop's accessories. */
 type Slot = "outfit" | "top" | "bottom" | "one-piece" | "shoes" | "accessory" | "head" | "face" | "ears" | "neck" | "hand" | "wrist" | "glow";
 type Tab = "hats" | Slot;
-const TABS: { id: Tab; label: string; owned?: boolean }[] = [
+// Each tab carries an emoji (owner, Oct 22).
+const TABS: { id: Tab; label: string; emoji: string; owned?: boolean }[] = [
   // Headwear: the free basics and coverings, and Shop hats (slot "head").
-  { id: "hats", label: "Hats" },
+  { id: "hats", label: "Hats", emoji: "🧢" },
   // Whole outfits (#9) cover the top, bottom and shoes while they're on.
-  { id: "outfit", label: "Outfits" },
-  { id: "top", label: "Tops" },
-  { id: "bottom", label: "Bottoms" },
+  { id: "outfit", label: "Outfits", emoji: "🧥" },
+  { id: "top", label: "Tops", emoji: "👕" },
+  { id: "bottom", label: "Bottoms", emoji: "👖" },
   // A dress is a top and a bottom (migration 0101); the tabs below show once there's something to wear in them.
-  { id: "one-piece", label: "Dresses", owned: true },
-  { id: "shoes", label: "Shoes" },
-  { id: "accessory", label: "Extras" },
-  { id: "face", label: "Glasses", owned: true },
-  { id: "ears", label: "Earrings", owned: true },
-  { id: "neck", label: "Necklaces", owned: true },
-  { id: "hand", label: "Bags", owned: true },
-  { id: "wrist", label: "Watches", owned: true },
+  { id: "one-piece", label: "Dresses", emoji: "👗", owned: true },
+  { id: "shoes", label: "Shoes", emoji: "👟" },
+  // Extras are Shop pieces only (owner, Oct 22): the new bodies don't draw the old starter extras.
+  { id: "accessory", label: "Extras", emoji: "✨", owned: true },
+  { id: "face", label: "Glasses", emoji: "🕶️", owned: true },
+  { id: "ears", label: "Earrings", emoji: "💎", owned: true },
+  { id: "neck", label: "Necklaces", emoji: "📿", owned: true },
+  { id: "hand", label: "Bags", emoji: "👜", owned: true },
+  { id: "wrist", label: "Watches", emoji: "⌚", owned: true },
   // Clout Couture's 24k Glow Ritual (migration 0103): on or off like any piece.
-  { id: "glow", label: "Glow", owned: true },
+  { id: "glow", label: "Glow", emoji: "🌟", owned: true },
 ];
 const SLOTS: Slot[] = ["outfit", "top", "bottom", "one-piece", "shoes", "accessory", "head", "face", "ears", "neck", "hand", "wrist", "glow"];
 
@@ -48,7 +50,7 @@ const TRY_ID = -1;
  * which opens this room in try-on mode for one piece you don't own yet ("Try it on").
  */
 export function LookRoom({
-  open, onClose, look, base, fit: savedFit, fits, state, busy, onSave, trying, onBuy,
+  open, onClose, look, base, fit: savedFit, fits, colorLocks, state, busy, onSave, trying, onBuy, onShop,
 }: {
   open: boolean;
   onClose: () => void;
@@ -59,6 +61,8 @@ export function LookRoom({
   /** The starter clothes on now, and the ones the style offers (the creator's choices, free to switch, migration 0109). */
   fit: Fit;
   fits: StyleFits;
+  /** Clout each starter color opens at (lib/styles.ts colorUnlocks). */
+  colorLocks: (part: ColorPart) => Map<string, number>;
   state: CityState;
   busy: boolean;
   /** `fit` is set only when the starter clothes changed. */
@@ -66,6 +70,8 @@ export function LookRoom({
   /** Shop try-on: a piece the player doesn't own. */
   trying?: ShopItem | null;
   onBuy?: (sku: string) => Promise<boolean>;
+  /** Opens the Shop on the tab that sells this kind of piece (an empty Your Look tab links there). */
+  onShop?: (category: "fashion" | "accessories") => void;
 }) {
   const fashion = state.items.filter((i) => i.category === "fashion" && wearSlot(i.sku));
   const slotOf = (sku: string) => wearSlot(sku) as Slot | undefined;
@@ -86,6 +92,7 @@ export function LookRoom({
   const [worn, setWorn] = useState<Worn>(savedWorn);
   const [covering, setCovering] = useState<CoveringId>(look.covering);
   const [fit, setFit] = useState<Fit>(savedFit);
+  const [lockNote, setLockNote] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>(tabOf(tryingSlot));
   const [error, setError] = useState<string | null>(null);
   // Start fresh each time the room opens (or opens on another Shop piece).
@@ -113,14 +120,10 @@ export function LookRoom({
   const outfit = outfitFromSkus({ ...base, ...fit }, wornSkus, itemOptionsBySku(state.items));
   const preview: Look = { ...look, covering };
   // Headwear takes the avatar's hat color (buildAvatar): the cap color for Bodega Drip, otherwise the outfit's accent.
-  const hatColor = outfit.accessory === "cap" ? outfit.accessoryColor : outfit.topAccent;
-  const hatIcon = (id: CoveringId) => (id === "none" || !HAT[id] ? <NoneIcon /> : <Shape color={hatColor}>{HAT[id]}</Shape>);
-  // Each category tab shows what's on you in that slot (#18), not a stock emoji.
-  const tabIcon = (t: Tab) => {
-    if (t === "hats") return worn.head !== null ? iconForSku(skuFor(worn.head)!) : hatIcon(covering);
-    const sku = skuFor(worn[t]);
-    return sku ? iconForSku(sku) : starter(t).icon;
-  };
+  const hatColor = outfit.topAccent;
+  const hatIcon = (id: CoveringId) => (id === "none" || !HAT[id] ? <NoneIcon />
+    // eslint-disable-next-line @next/next/no-img-element
+    : STARTER_PICS[id] ? <img src={STARTER_PICS[id]} alt="" className="look-pic" /> : <Shape color={hatColor}>{HAT[id]}</Shape>);
   const saved = savedWorn();
   const fitChanged = (Object.keys(fit) as (keyof Fit)[]).some((k) => fit[k] !== savedFit[k]);
   const changed = covering !== look.covering || fitChanged || SLOTS.some((s) => worn[s] !== saved[s]);
@@ -141,9 +144,9 @@ export function LookRoom({
     if (slot === "one-piece") return { name: "No dress", icon: <NoneIcon /> };
     if (slot === "glow") return { name: "No glow", icon: <NoneIcon /> };
     if (slot !== "top" && slot !== "bottom" && slot !== "shoes" && slot !== "accessory") return { name: "Nothing", icon: <NoneIcon /> };
-    if (slot === "top") return { name: TOP_LABEL[fit.top], icon: <Garment kind={fit.top} color={fit.topColor} /> };
-    if (slot === "bottom") return { name: BOTTOM_LABEL[fit.bottom], icon: <Garment kind={fit.bottom} color={fit.bottomColor} /> };
-    if (slot === "shoes") return { name: "Your sneakers", icon: <Shape color={fit.shoeColor}>{SHOE}</Shape> };
+    if (slot === "top") return { name: TOP_LABEL[fit.top], icon: <StarterPic kind={fit.top} color={fit.topColor} /> };
+    if (slot === "bottom") return { name: BOTTOM_LABEL[fit.bottom], icon: <StarterPic kind={fit.bottom} color={fit.bottomColor} /> };
+    if (slot === "shoes") return { name: "Your sneakers", icon: <StarterPic kind="sneakers" color={fit.shoeColor} /> };
     return { name: base.accessory === "none" ? "Nothing" : "Starter extra", icon: base.accessory === "none" ? <span aria-hidden="true">🚫</span> : <Dot color={base.accessoryColor} /> };
   };
   const iconFor = (it: ShopItem) => {
@@ -176,8 +179,7 @@ export function LookRoom({
           <h1 className="display-sm" style={{ margin: 0, color: "var(--text-1)" }}>{trying ? "Try it on" : "Your look"}</h1>
           <span style={{ width: 36 }} />
         </div>
-        {trying ? <span className="look-banner">Not yours yet · {formatCash(trying.price)}</span>
-          : changed ? <span className="look-banner">Trying on · not saved</span> : null}
+        {trying && <span className="look-banner">Not yours yet · {formatCash(trying.price)}</span>}
       </div>
 
       <div className="look-panel">
@@ -197,7 +199,7 @@ export function LookRoom({
             <div className="chip-row" role="tablist" aria-label="Categories">
               {tabs.map((t) => (
                 <button key={t.id} role="tab" className="chip" aria-pressed={tab === t.id} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
-                  <span className="look-tab-icon" aria-hidden="true">{tabIcon(t.id)}</span> {t.label}
+                  <span aria-hidden="true">{t.emoji}</span> {t.label}
                 </button>
               ))}
             </div>
@@ -206,12 +208,12 @@ export function LookRoom({
                 ? [
                   ...[...HEADWEAR_BASIC, ...HEADWEAR_CULTURAL].map((h) => (
                     <Tile key={h.id} on={worn.head === null && covering === h.id} wearing={saved.head === null && look.covering === h.id} name={h.label} sub="Free"
-                      icon={hatIcon(h.id)} onPick={() => { setCovering(h.id); setWorn({ ...worn, head: null }); }} />
+                      icon={hatIcon(h.id)} photo={!!STARTER_PICS[h.id]} onPick={() => { setCovering(h.id); setWorn({ ...worn, head: null }); }} />
                   )),
                   // Shop hats: a free cap or hat comes off for one; a faith or culture covering stays (the hat steps aside).
                   ...fashion.filter((i) => slotOf(i.sku) === "head").map((i) => (
                     <Tile key={i.id} on={worn.head === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} photo={!!pictureFor(i.sku)}
-                      onPick={() => { setWorn({ ...worn, head: i.id }); if (covering === "cap" || covering === "fedora" || covering === "bucket") setCovering("none"); }} />
+                      onPick={() => { setWorn({ ...worn, head: i.id }); if (covering === "cap") setCovering("none"); }} />
                   )),
                 ]
                 : tab === "top" || tab === "bottom" ? [
@@ -222,7 +224,7 @@ export function LookRoom({
                     return (
                       <Tile key={`starter-${k}`} on={worn[tab] === null && worn["one-piece"] === null && mine} wearing={saved[tab] === null && saved["one-piece"] === null && wasMine}
                         name={tab === "top" ? TOP_LABEL[k as TopKind] : BOTTOM_LABEL[k as BottomKind]} sub="Free"
-                        icon={<Garment kind={k as TopKind} color={tab === "top" ? fit.topColor : fit.bottomColor} />}
+                        icon={<StarterPic kind={k} color={tab === "top" ? fit.topColor : fit.bottomColor} />} photo
                         onPick={() => wearStarter(tab, tab === "top" ? { top: k as TopKind } : { bottom: k as BottomKind })} />
                     );
                   }),
@@ -231,8 +233,10 @@ export function LookRoom({
                   )),
                 ]
                 : [
-                  <Tile key="starter" on={worn[tab] === null} wearing={saved[tab] === null} name={starter(tab).name} sub={tab === "shoes" ? "Free" : tab === "accessory" ? "Starter" : "Off"}
-                    icon={starter(tab).icon} onPick={() => setWorn({ ...worn, [tab]: null })} />,
+                  ...(tab === "accessory" ? [] : [
+                    <Tile key="starter" on={worn[tab] === null} wearing={saved[tab] === null} name={starter(tab).name} sub={tab === "shoes" ? "Free" : "Off"}
+                      icon={starter(tab).icon} photo={tab === "shoes"} onPick={() => setWorn({ ...worn, [tab]: null })} />,
+                  ]),
                   ...fashion.filter((i) => slotOf(i.sku) === tab).map((i) => (
                     <Tile key={i.id} on={worn[tab] === i.id} wearing={i.equipped} name={infoFor(i.sku).name} sub="Owned" icon={iconForSku(i.sku)} photo={!!pictureFor(i.sku)} onPick={() => setWorn(pick(worn, tab, i.id))} />
                   )),
@@ -244,17 +248,32 @@ export function LookRoom({
                 <div className="swatches" role="radiogroup" aria-label="Colors">
                   {(tab === "top" ? fits.topColors : tab === "bottom" ? fits.bottomColors : fits.shoeColors).map((c) => {
                     const key = tab === "top" ? "topColor" : tab === "bottom" ? "bottomColor" : "shoeColor";
-                    return <button key={c} role="radio" aria-checked={fit[key] === c} aria-label={`Color ${c}`} className="swatch" style={{ background: c }}
-                      onClick={() => wearStarter(tab, { [key]: c })} />;
+                    // Colors open with clout (owner, Oct 22); one already worn stays yours.
+                    const need = colorLocks(tab === "shoes" ? "shoe" : tab).get(c) ?? 0;
+                    const open = need <= state.player.clout || savedFit[key] === c;
+                    return open
+                      ? <button key={c} role="radio" aria-checked={fit[key] === c} aria-label={`Color ${c}`} className="swatch" style={{ background: c }}
+                          onClick={() => { setLockNote(null); wearStarter(tab, { [key]: c }); }} />
+                      : <button key={c} role="radio" aria-checked={false} aria-label={`Color ${c}, opens at ${need} clout`} className="swatch locked" style={{ background: c }}
+                          onClick={() => setLockNote(`That color opens at ${need.toLocaleString("en-US")} clout. You have ${state.player.clout.toLocaleString("en-US")}.`)}><span aria-hidden="true">🔒</span></button>;
                   })}
                 </div>
+                {lockNote && <p className="meta" style={{ margin: 0 }}>{lockNote}</p>}
               </div>
             )}
-            {tab !== "hats" && !fashion.some((i) => slotOf(i.sku) === tab) && (
-              <p className="meta" style={{ margin: 0 }}>{tab === "outfit"
-                ? "No outfits yet. The Shop sells city looks, and the wilder ones open up as your clout grows."
-                : tab === "top" || tab === "bottom" || tab === "shoes" ? "Your starter clothes are free to switch. The Shop has more, and every piece there has Try it on."
-                : "Just your starter piece so far. The Shop has more, and every piece there has Try it on."}</p>
+            {!fashion.some((i) => slotOf(i.sku) === (tab === "hats" ? "head" : tab)) && (
+              <div className="stack-4">
+                <p className="meta" style={{ margin: 0 }}>{tab === "outfit"
+                  ? "No outfits yet. The Shop sells city looks, and the wilder ones open up as your clout grows."
+                  : tab === "hats" ? "The cap and the coverings are free. The Shop has more hats, and every piece there has Try it on."
+                  : tab === "top" || tab === "bottom" || tab === "shoes" ? "Your starter clothes are free to switch. The Shop has more, and every piece there has Try it on."
+                  : "Nothing here yet. The Shop has more, and every piece there has Try it on."}</p>
+                {onShop && (
+                  <button className="link-btn" onClick={() => onShop(tab === "hats" || ACCESSORY_TABS.has(tab) ? "accessories" : "fashion")}>
+                    {tab === "outfit" ? "Shop outfits" : tab === "hats" ? "Shop hats" : tab === "top" ? "Shop tops" : tab === "bottom" ? "Shop bottoms" : tab === "shoes" ? "Shop shoes" : "Go to the Shop"} →
+                  </button>
+                )}
+              </div>
             )}
           </>
         )}
@@ -277,7 +296,7 @@ export function LookRoom({
         ) : (
           <>
             <button className="btn btn-secondary" disabled={!changed || busy} onClick={() => { setWorn(saved); setCovering(look.covering); setFit(savedFit); }}>Undo</button>
-            <button className="btn btn-taxi" disabled={!changed || busy} onClick={() => void save()}>{busy ? "…" : "Save look"}</button>
+            <button className="btn btn-taxi" disabled={!changed || busy} onClick={() => void save()}>{busy ? "…" : changed ? "Save look" : "Saved"}</button>
           </>
         )}
       </div>
@@ -309,3 +328,26 @@ function NoneIcon() {
 function Dot({ color }: { color: string }) {
   return <span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: "50%", background: color, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.2)" }} />;
 }
+
+/** Tabs whose pieces the Shop sells under Accessories. */
+const ACCESSORY_TABS: ReadonlySet<Tab> = new Set<Tab>(["face", "ears", "neck", "hand", "wrist"]);
+
+/** The free pieces' pictures (owner, Oct 22: made with Higgsfield in the Shop's style; public/look-img/). */
+const STARTER_PICS: Partial<Record<string, string>> = {
+  cap: "/look-img/cap.webp",
+};
+/**
+ * A starter piece's picture in the player's color: the light grey picture is the mask and, multiplied over the color,
+ * keeps its shading. Falls back to the drawn icon for a piece with no picture.
+ */
+function StarterPic({ kind, color }: { kind: string; color: string }) {
+  const src = `/look-img/${kind}.webp`;
+  if (!STARTER_KINDS.has(kind)) return kind === "sneakers" ? <Shape color={color}>{SHOE}</Shape> : <Garment kind={kind as keyof typeof GARMENT} color={color} />;
+  return (
+    <span className="look-tint" style={{ background: color, WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" />
+    </span>
+  );
+}
+const STARTER_KINDS: ReadonlySet<string> = new Set(["puffer", "cardigan", "vest", "hoodie", "crop", "zip", "blazer", "tee", "pants", "skirt", "shorts", "leggings", "sneakers"]);

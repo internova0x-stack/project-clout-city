@@ -58,17 +58,21 @@ export const GLASSES: Option<GlassesId>[] = [
   { id: "shades", label: "Shades" },
 ];
 
-/** Free basic headwear, listed first (premium hats are sold in the Shop). */
+/**
+ * Free basic headwear, listed first (premium hats are sold in the Shop). One basic hat, in one color (owner, Oct 22): the
+ * cap, always FREE_CAP_COLOR. The fedora and the bucket hat are gone; a saved one reads as no hat.
+ */
 export const HEADWEAR_BASIC: Option<CoveringId>[] = [
   { id: "none", label: "None" },
   { id: "cap", label: "Cap" },
-  { id: "fedora", label: "Fedora" },
-  { id: "bucket", label: "Bucket hat" },
-  { id: "durag", label: "Durag" },
 ];
-/** Cultural and religious coverings, after the basics. */
+export const FREE_CAP_COLOR = "#1F1B26";
+/**
+ * Cultural and religious coverings, after the basics. The hijab was taken out (owner, Oct 22: a sensitive cultural piece
+ * that needs a lot of care); a saved one reads as no covering.
+ */
 export const HEADWEAR_CULTURAL: Option<CoveringId>[] = [
-  { id: "hijab", label: "Hijab" },
+  { id: "durag", label: "Durag" },
   { id: "turban", label: "Turban" },
   { id: "headwrap", label: "Headwrap" },
   { id: "kippah", label: "Kippah" },

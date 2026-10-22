@@ -8,7 +8,7 @@ export interface SkillDef { id: SkillId; emoji: string; name: string; how: strin
 
 export const SKILLS: readonly SkillDef[] = [
   { id: "cooking", emoji: "🍳", name: "Cooking", how: "Cook at home" },
-  { id: "charisma", emoji: "😎", name: "Charisma", how: "Chat, react, date, plan with your crew" },
+  { id: "charisma", emoji: "😎", name: "Aura", how: "Chat, react, date, plan with your crew" },
   { id: "fitness", emoji: "💪", name: "Fitness", how: "Gyms, parks, walking places" },
   { id: "smarts", emoji: "📚", name: "Smarts", how: "Study at the library or on campus" },
   { id: "music", emoji: "🎸", name: "Music", how: "Open mics, lounge sets, live nights" },
