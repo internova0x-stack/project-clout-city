@@ -2236,3 +2236,5 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .shop-cats.shop-pres { background:none; padding:0; }
 .shop-cats.shop-pres button { border:1.5px solid var(--divider); }
 .shop-cats.shop-pres button.on { border-color:var(--night-900); }
+.shop-color { display:inline-flex; align-items:center; gap:4px; margin-left:8px; font-size:13px; font-weight:600; color:var(--text-2); text-transform:capitalize; }
+.shop-color > span { width:12px; height:12px; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,.2); }

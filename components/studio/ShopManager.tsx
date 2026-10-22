@@ -13,6 +13,7 @@ import type { CoutureOwner, ShopAction, ShopAuditRow, ShopImportResult, StudioAp
 import { MAP_SKUS } from "@/lib/coutureMap";
 import { editionLine, formatPrice, serialLabel, type Edition } from "@/lib/store";
 import { ShopArt, ShopCardPreview } from "../city/ShopCard";
+import { SHOP_ITEMS, itemBySku } from "@/lib/city";
 import { GraphicsSwitch } from "../GraphicsSwitch";
 
 const TAB_LABEL: Record<ShopTab, string> = { fashion: "Fashion", accessories: "Accessories", home: "Furniture", cars: "Cars", houses: "Houses", luxury: "Luxury", makeup: "Makeup" };
@@ -24,6 +25,12 @@ const NO_FILTERS: Filters = { status: "all", tab: "all", line: "", tier: "", pre
 const PRES_TABS: { id: string; label: string }[] = [{ id: "", label: "All" }, { id: "m", label: "👨 Male" }, { id: "f", label: "👩 Female" }, { id: "all", label: "Unisex" }];
 const fitsPres = (i: Pick<CatalogItem, "presentation">, pres: string) =>
   !pres || (pres === "all" ? i.presentation === "all" : i.presentation === pres || i.presentation === "all");
+/** A furniture piece's color (owner, Oct 22: one bed in three colors looked like three beds): from the code's line. */
+const colorOf = (sku: string) => {
+  const f = itemBySku(sku)?.furniture;
+  if (!f || SHOP_ITEMS.filter((i) => i.furniture?.line === f.line).length < 2) return null;
+  return { name: sku.split("-").pop()!, hex: f.color };
+};
 const localInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 
 export function ShopManagerTab({ api }: { api: StudioApi }) {
@@ -280,7 +287,10 @@ function ItemCard({ i, all, busy, picked, selectable, onPick, onOpen, act, proce
       </button>
       <div className="shop-item-body">
         <div className="row" style={{ gap: 8, justifyContent: "space-between", alignItems: "start" }}>
-          <button className="shop-item-name" onClick={onOpen}>{i.name}</button>
+          <button className="shop-item-name" onClick={onOpen}>
+            {i.name}
+            {colorOf(i.sku) && <span className="shop-color"><span style={{ background: colorOf(i.sku)!.hex }} aria-hidden="true" /> {colorOf(i.sku)!.name}</span>}
+          </button>
           {i.status === "pending_review" && <input type="checkbox" aria-label={`Select ${i.name}`} disabled={!selectable} checked={picked} onChange={(e) => onPick(e.target.checked)} />}
         </div>
         <span className="meta">{TAB_LABEL[i.tab]}{i.slot ? ` · ${i.slot}` : ""} · {PRESENTATION_LABEL[i.presentation]}{i.tier ? ` · ${i.tier}` : ""}{i.collection ? ` · ${i.collection}` : ""}</span>
