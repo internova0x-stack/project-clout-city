@@ -129,6 +129,13 @@ Hunt cash, lotto cards, gossip and real-money prices are unchanged.
 
 **How it plays.** A full day (3 shifts, the five tasks and the bonus) earns about C$650, or about C$900 with a side gig. A modest day costs about C$530: studio rent, meals, a few rides and one night out. Saving for anything in the Shop takes days for clothes, weeks for jewelry and months for a car. The 1BR takes steady work; the high-rise needs pro gigs and big breaks. `tests/city.test.ts` checks these relationships so a later tweak can't quietly undo them.
 
+**Update (owner, Oct 22; migration 0113): realistic weekly rent.** "$2000/week in rent is a lot for the starter apartments
+in NY." The rents above were real New York monthly rents billed every week; rent is now about a quarter: room share
+C$225, Astoria studio C$425, Jackson Heights 1BR C$600, Sunnyside C$750, LIC high-rise C$1,050, dorms C$250 a week.
+The birth lottery rolls C$1,500 to 3,000 so the first weeks still feel tight (the lowest roll still covers a first week
+anywhere). A full day now covers a week in the studio; the high-rise still takes more than a day's work a week. Open rent
+bills were lowered to the new rent. Everything else in the table is unchanged.
+
 ## Testing round, Oct 14 (bug fixes A and B; migration 0040)
 
 The owner's notes from testing on an iPhone (Chrome, which uses Apple's WebKit like every iPhone browser). Avatars (#9) and bigger floor plans (#19) follow as their own steps.

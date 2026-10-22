@@ -45,7 +45,7 @@ test("the minimum roll always covers the cheapest home, the phone bill and the p
 
 test("with weekly rent (v0.8), even the lowest roll covers a first week anywhere", () => {
   for (const h of ECONOMY.homes) assert.equal(canAfford(h, ECONOMY.birthLottery.min), true, h.id);
-  assert.equal(canAfford(ECONOMY.homes[2], 1000), false, "the rule still guards a broke player");
+  assert.equal(canAfford(ECONOMY.homes[2], 500), false, "the rule still guards a broke player");
 });
 
 test("the first party is net positive and the lottery lines cover the range", () => {

@@ -18,6 +18,9 @@ export const GAME_CONFIG = {
    *  A gap over 5 minutes starts a new session. */
   sessionPingMs: 60_000,
 
+  /** Start over (migration 0114, owner Oct 22): once every this many days; the SQL says the same. */
+  restartDays: 30,
+
   clique: {
     /** Members needed for the big clique bonus (Clarifications section 7). */
     bonusSize: 5,

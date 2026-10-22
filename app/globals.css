@@ -2268,3 +2268,32 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .shop-color { display:inline-flex; align-items:center; gap:4px; margin-left:8px; font-size:13px; font-weight:600; color:var(--text-2); text-transform:capitalize; }
 .shop-color > span { width:12px; height:12px; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,.2); }
 @media (prefers-reduced-motion:reduce) { .story-prompt.rent-alert.evict { animation:none; } }
+
+/* ---------- Welcome back (owner, Oct 22): the returning player's home behind Continue / Start over ---------- */
+.welcome { position:fixed; inset:0; overflow:hidden; color:var(--text-1);
+  background:linear-gradient(180deg, #FFF4E8 0%, #FFE0C2 40%, #FFC08A 75%, #FF9A4D 100%); }
+.welcome-room { position:absolute; inset:0; }
+.welcome .room3d { background:transparent !important; }
+.welcome-head { position:absolute; top:calc(32px + var(--safe-top, 0px)); left:16px; right:16px; text-align:center; pointer-events:none; }
+.studio-mark.welcome-mark { display:block; margin:0; font-size:40px; line-height:1.05; }
+.welcome-tag { margin:6px 0 0; font-size:16px; color:var(--text-2); }
+.welcome-card { position:absolute; left:16px; right:16px; bottom:calc(20px + var(--safe-bottom, 0px)); max-width:480px; margin:0 auto;
+  display:flex; flex-direction:column; gap:14px; padding:16px; border-radius:28px; background:rgba(255,255,255,.92);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); box-shadow:var(--elev-4); }
+.welcome-me { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:20px; background:var(--surface-card); }
+.welcome-face { width:52px; height:52px; border-radius:50%; overflow:hidden; background:#DCEBF7; flex:none; display:grid; place-items:center; }
+.welcome-who { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.welcome-who strong { font-size:18px; line-height:22px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.welcome-who span { font-size:14px; color:var(--text-2); }
+.welcome-card .btn-taxi { height:56px; font-size:19px; text-decoration:none; }
+.welcome-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; color:var(--text-2); }
+.welcome-foot strong { color:var(--text-1); }
+.welcome-foot .link-btn { color:var(--primary); text-decoration:none; }
+.welcome-over { align-self:center; color:var(--text-2); font-weight:600; }
+.welcome-sheet { display:flex; flex-direction:column; gap:14px; padding:4px 0 8px; }
+.welcome-sheet h2, .welcome-sheet p { margin:0; }
+.welcome-lists { display:grid; grid-template-columns:1fr; gap:12px; }
+.welcome-lists > div { background:var(--surface-card); border-radius:var(--r-lg); padding:12px 14px; }
+.welcome-lists h3 { margin:0 0 6px; }
+.welcome-lists ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; font-size:15px; line-height:20px; }
+.welcome-wait { padding:12px 14px; border-radius:var(--r-lg); background:var(--surface-card); }

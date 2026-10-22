@@ -15,10 +15,10 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000941', false);
 select 1 from public.create_player('newinqueens', 'arcade_nerd', '{}', null, true);
 select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery();
--- The roommate share is a sign-up home: the player's half is C$900.
+-- The roommate share is a sign-up home: the player's half is C$225 (0113; was C$900).
 select pg_temp.assert((public.move_in('astoria_share')).home_id = 'astoria_share', 'moved into the share');
 reset role;
-select pg_temp.assert((select -amount = 900 from public.ledger where player_id = '00000000-0000-0000-0000-000000000941' and kind = 'rent'), 'first rent: your half, C$900');
+select pg_temp.assert((select -amount = 225 from public.ledger where player_id = '00000000-0000-0000-0000-000000000941' and kind = 'rent'), 'first rent: your half, C$225');
 update public.players set energy = 100, bank_cash = 2000 where id = '00000000-0000-0000-0000-000000000941';
 
 -- Day one: the BEC, the cat and a lap come first; five tasks in all.

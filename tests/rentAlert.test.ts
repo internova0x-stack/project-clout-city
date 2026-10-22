@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-// The rent alarm (owner, Oct 22): a card and a red bank pill when rent is coming and the bank can't cover it.
+// The rent alarm (owner, Oct 22): a card and a ❗ on the bank pill when rent is coming and the bank can't cover it.
 test("the rent alarm: short before rent, late or eviction after, quiet when the bank covers it", async () => {
   const { sampleCityState } = await import("../lib/citySim.ts");
   const { rentAlert } = await import("../lib/cityState.ts");
@@ -16,19 +16,19 @@ test("the rent alarm: short before rent, late or eviction after, quiet when the 
   // Plenty of cash, or rent far off: nothing.
   assert.equal(rentAlert(base(5000, 2).s), null);
   assert.equal(rentAlert(base(100, 6).s), null);
-  // Rent in two days, C$930 against C$1,750: short.
-  const short = rentAlert(base(930, 2).s)!;
+  // Rent in two days, C$230 against C$425: short.
+  const short = rentAlert(base(230, 2).s)!;
   assert.equal(short.level, "short");
-  assert.equal(short.short, 820);
+  assert.equal(short.short, 195);
   assert.match(short.title, /in 2 days/);
   // A day late and short: late, find a gig.
-  const { s: late, day } = base(930, null);
-  late.bills.push({ id: 9, kind: "rent", amount: 1750, due_date: day(-1), status: "due", paid_at: null });
+  const { s: late, day } = base(230, null);
+  late.bills.push({ id: 9, kind: "rent", amount: 425, due_date: day(-1), status: "due", paid_at: null });
   assert.equal(rentAlert(late)!.level, "late");
   assert.equal(rentAlert(late)!.canPay, false);
   // Four days late: past the grace period, the move-out countdown.
   const { s: evict, day: d2 } = base(5000, null);
-  evict.bills.push({ id: 9, kind: "rent", amount: 1750, due_date: d2(-4), status: "due", paid_at: null });
+  evict.bills.push({ id: 9, kind: "rent", amount: 425, due_date: d2(-4), status: "due", paid_at: null });
   const e = rentAlert(evict)!;
   assert.equal(e.level, "evict");
   assert.equal(e.canPay, true);

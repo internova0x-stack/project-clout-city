@@ -88,7 +88,7 @@ test("the preview simulator follows the same clout and resale rules", async () =
   assert.ok(sold.ok && sold.gain?.cash === 87 && netWorth(sold.state) > 0);
 });
 
-test("v0.11 recalibration: money stays tight, so there's always a reason to earn more (owner, Oct 14)", () => {
+test("rent is realistic for a week (owner, Oct 22; was v0.11's tighter rents), and the big homes still take work", () => {
   const rent = (id: string) => ECONOMY.homes.find((h) => h.id === id)!.rent;
   const rents = [rent("astoria_studio"), rent("jackson_heights_1br"), rent("lic_highrise")];
   const { shiftRate, shiftsPerDay, shiftEnergy, gigs, bills, dailyTasks } = CITY_ECONOMY;
@@ -96,10 +96,9 @@ test("v0.11 recalibration: money stays tight, so there's always a reason to earn
   // A full work day: every shift allowed plus the daily tasks and their bonus (no gigs).
   const fullDay = shiftsPerDay * shiftRate + dailyTasks.count * (dailyTasks.rewardMin + dailyTasks.rewardMax) / 2 + dailyTasks.bonus;
   assert.ok(shiftsPerDay * shiftEnergy <= 100, "a work day fits in one day's Energy");
-  assert.ok(fullDay < rents[0] / 2, `a full day (${fullDay}) doesn't cover half a week in the studio`);
-  assert.ok(5 * fullDay > rents[0] + bills.phone, "five full days cover the studio and the phone");
-  assert.ok(5 * fullDay < rents[2], "the high-rise needs gigs, not just shifts");
-  assert.ok(gigs.big.payMax * shiftRate < rents[1], "no single gig pays a week in the 1BR");
+  assert.ok(fullDay > rents[0], `a full day (${fullDay}) covers a week in the studio`);
+  assert.ok(fullDay < rents[2], "the high-rise takes more than one full day a week");
+  assert.ok(gigs.big.payMin * shiftRate > rents[1], "a big gig pays a week in the 1BR");
   assert.ok(bills.evictAfterDays < 7, "the move happens before next week's rent");
 });
 
@@ -129,7 +128,7 @@ test("upcoming bills show each amount and date, including the phone bill (#22)",
   assert.deepEqual(upcomingBills(s), [
     { kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: "2026-10-16" },
     { kind: "car_rental", amount: 525, due_date: "2026-10-18" },
-    { kind: "rent", amount: 1750, due_date: "2026-10-20" },
+    { kind: "rent", amount: 425, due_date: "2026-10-20" },
   ]);
   const owner = sampleCityState({ house_sku: "house-x", next_phone_due: "2026-10-16", car_sku: "car-hatchback", car_mode: "owned", next_car_due: "2026-10-30" });
   assert.deepEqual(upcomingBills(owner).map((b) => [b.kind, b.amount]), [["phone", 60], ["car_insurance", 105]]);

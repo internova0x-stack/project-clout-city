@@ -22,9 +22,9 @@ select 1 from public.create_player('Later', 'bodega_drip', '{}', null, true);
 select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
 select public.push_subscribe('https://push.example/112c', 'k', 'a', 'America/New_York');
 reset role;
-update public.players set next_rent_due = public.ny_today() + 2, bank_cash = 900 where id = '00000000-0000-0000-0000-0000000112a1';
+update public.players set next_rent_due = public.ny_today() + 2, bank_cash = 200 where id = '00000000-0000-0000-0000-0000000112a1';
 update public.players set next_rent_due = public.ny_today() + 2, bank_cash = 90000 where id = '00000000-0000-0000-0000-0000000112a2';
-update public.players set next_rent_due = public.ny_today() + 6, bank_cash = 900 where id = '00000000-0000-0000-0000-0000000112a3';
+update public.players set next_rent_due = public.ny_today() + 6, bank_cash = 200 where id = '00000000-0000-0000-0000-0000000112a3';
 delete from public.push_queue where player_id::text like '00000000-0000-0000-0000-0000000112a%';
 
 select public.push_scan_rent_short();

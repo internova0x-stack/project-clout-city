@@ -21,7 +21,7 @@ set role authenticated;
 -- The settings carry the new numbers.
 select pg_temp.assert((public.city() -> 'economy' ->> 'shiftsPerDay')::int = 3, 'three shifts a day');
 reset role;
-select pg_temp.assert(public.rent_for('astoria_studio') = 1750 and public.rent_for('lic_highrise') = 4500, 'new weekly rents');
+select pg_temp.assert(public.rent_for('astoria_studio') = 425 and public.rent_for('lic_highrise') = 1050, 'weekly rents (realistic since 0113)');
 set role authenticated;
 
 -- Three shifts across two jobs, then the fourth is refused.

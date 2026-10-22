@@ -12,9 +12,9 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000b2
 select 1 from public.create_player('weekly', 'bodega_drip', '{}', null, true);
 select 1 from public.set_traits(array['loud', 'hustler']);
 select public.roll_birth_lottery() as rolled \gset
-select pg_temp.assert(:rolled between 5000 and 10000, 'the lottery rolls C$5,000 to C$10,000 (v0.11)');
+select pg_temp.assert(:rolled between 1500 and 3000, 'the lottery rolls C$1,500 to C$3,000 (0113)');
 select 1 from public.move_in('lic_highrise');
-select pg_temp.assert((select bank_cash = :rolled - 4500 from public.players where id = auth.uid()), 'even the lowest roll covers a first week in the high-rise');
+select pg_temp.assert((select bank_cash = :rolled - 1050 from public.players where id = auth.uid()), 'even the lowest roll covers a first week in the high-rise');
 
 -- An owned car: insurance is 0.5% of its price, weekly.
 reset role;
@@ -27,7 +27,7 @@ update public.players set next_car_due = public.ny_today(), next_rent_due = publ
 set role authenticated;
 select 1 from public.sync_player();
 select pg_temp.assert((select amount = 105 from public.bills where kind = 'car_insurance'), 'hatchback insurance C$105 a week');
-select pg_temp.assert((select amount = 4500 from public.bills where kind = 'rent'), 'high-rise rent C$4,500 a week');
+select pg_temp.assert((select amount = 1050 from public.bills where kind = 'rent'), 'high-rise rent C$1,050 a week');
 select pg_temp.assert((select amount = 60 from public.bills where kind = 'phone'), 'phone C$60 a week');
 select pg_temp.assert((select next_rent_due = public.ny_today() + 7 and next_phone_due = public.ny_today() + 7 and next_car_due = public.ny_today() + 7
   from public.players where id = auth.uid()), 'all three next week');
