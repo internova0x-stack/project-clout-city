@@ -34,6 +34,9 @@ export async function shadowGuessStory(predictionId: string, optionId: string) {
 export async function markBeatSeen(beatId: string) {
   return run("mark_beat_seen", { p_beat: beatId });
 }
+export async function readStoryPost(beatId: string) {
+  return run("read_post", { p_beat: beatId }, (d) => Number(d) || undefined);
+}
 export async function completeStoryTask(taskId: string) {
   return run("complete_story_task", { p_task: taskId }, taskClout);
 }

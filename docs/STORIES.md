@@ -27,7 +27,8 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    **Blog posts (owner, Oct 22; migration 0115):** a beat's news may carry `post`, the full blog post (300+ words,
    paragraphs split by a blank line). The feed card then shows the headline and `body` as a short teaser (400 characters at
    most) with **Read the full post ›**, which opens the post with its hook at the end. Write posts in Lola's gossip-blog
-   voice ("Roommates…") with a few terms from `content/culture/slang.json`. Older stories without posts show as before.
+   voice ("Roommates…") with a few terms from `content/culture/slang.json`. Older stories without posts show as before. Opening a post pays 10 clout once per post (migration 0117,
+   `read_post`, ledger 'story_read'; the button shows "+10 🔥" until it's read).
 2. **Check it.** `npm run validate:stories` runs every rule: ids and beat days in order, places,
    tags, items and tasks that exist, price caps and expiries, reason text on every change, and
    prediction windows that close before their reveal. The Studio runs the same checks when you upload, and saves nothing if one fails.

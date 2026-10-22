@@ -1411,6 +1411,7 @@ export function GameShell({
         vote: (pid: string, o: string) => void runStory(`vote:${pid}`, () => storyApi.vote(pid, o)),
         shadowGuess: (pid: string, o: string) => void runStory(`shadow:${pid}`, () => storyApi.shadowGuess(pid, o)),
         markSeen: (id: string) => void storyApi.markSeen(id).then((r) => r.ok && setFeed(r.feed)),
+        readPost: storyApi.readPost ? (id: string) => void runStory(`read:${id}`, () => storyApi.readPost!(id)) : undefined,
         completeTask: (id: string) => void runStory(`task:${id}`, () => storyApi.completeTask(id)),
         onUnlock: (arc: FeedArc) => (arc.sku ? void buy(arc.sku) : undefined),
         onShared: () => track?.("beat_shared"),

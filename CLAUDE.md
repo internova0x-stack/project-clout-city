@@ -282,6 +282,8 @@ components live in `app/globals.css`.
 - Story blog posts (migration 0115, owner Oct 22): a beat's `news[0].post` is the full post behind the feed card's "Read the
   full post" (`body` is then the teaser; lib/storyValidation.ts checks 300+ words in paragraphs); `story_feed()` sends it
   only for released beats. Diss & Tell (content/stories/diss-and-tell.json) is the first story written this way.
+  Reading a post pays `GAME_CONFIG.storyReadClout` (10) clout once (migration 0117, `read_post`, ledger 'story_read'; the
+  feed's `read` flag hides the "+10 🔥" afterwards).
 - Story content lives in `content/stories/*.json` and is read only on the server or by the
   Studio (answers must never reach a player's bundle); players get `story_feed()`. Hunts are the
   same: `content/hunts/*.json` carries answers; players get `hunt_state()`. Gossip too: `content/gossip/*.json`
