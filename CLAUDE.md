@@ -138,7 +138,7 @@ components live in `app/globals.css`.
   real New York evening, since the city clock loops every two hours).
   Rent alarm (migration 0112, owner Oct 22): rent due within 3 days and too little in the bank sends 'rent_short' once per
   rent date (`push_scan_rent_short`, run by the sender after push_scan, opens Gigs); in the game, `rentAlert()` (lib/cityState.ts)
-  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and turns the bank pill red
+  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and puts a ❗ on the bank pill
   (`?rent=short|late|evict` in the preview).
 - Contact the Mayor (migration 0105, owner Oct 22): the Phone's Mayor app is players' feedback to the team. Letters
   (`mayor_write`: bug, idea, complaint, praise, other; 10 to 1000 characters; 5 a New York day; the server adds the
