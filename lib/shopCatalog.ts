@@ -359,11 +359,13 @@ export function shippedPictures(sku: string, source?: string | null): { card: st
 export type ShopCardItem = ShopItem & {
   image: string | null; detailImage: string | null; wearableNow: boolean; styleLines: string[]; collection: string | null;
   priceUsdCents: number | null; presentation: Presentation; retired: boolean; editionSize: number | null;
+  /** When it went on sale (the catalog's go-live time), for the Shop's New row; null for the code's own pieces. */
+  since?: string | null;
 };
 
 /** The Shop's items in a tab, from the catalog (what's on sale, and retired pieces). `base` is the code's ShopItem by sku. */
-export function catalogShopItems(catalog: Pick<CatalogItem, "sku" | "status" | "tab" | "name" | "description" | "emoji" | "price" | "clout" | "stars"
-  | "images" | "wearable" | "styleLines" | "collection" | "priceUsdCents" | "presentation" | "realCash" | "editionSize" | "slot">[],
+export function catalogShopItems(catalog: (Pick<CatalogItem, "sku" | "status" | "tab" | "name" | "description" | "emoji" | "price" | "clout" | "stars"
+  | "images" | "wearable" | "styleLines" | "collection" | "priceUsdCents" | "presentation" | "realCash" | "editionSize" | "slot"> & { goLiveAt?: string | null })[],
   base: (sku: string) => ShopItem | undefined): ShopCardItem[] {
   return catalog.map((c) => {
     const b = base(c.sku);
@@ -377,6 +379,25 @@ export function catalogShopItems(catalog: Pick<CatalogItem, "sku" | "status" | "
       ...item, image: c.images?.card ?? shippedPictures(c.sku)?.card ?? null, detailImage: c.images?.detail ?? shippedPictures(c.sku)?.detail ?? null,
       wearableNow: c.wearable, styleLines: c.styleLines,
       collection: c.collection, priceUsdCents: c.priceUsdCents, presentation: c.presentation, retired: c.status === "retired", editionSize: c.editionSize,
+      since: c.goLiveAt ?? null,
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// The Shop's order (owner, Oct 22): a New row on top, then C$ pieces cheapest first, then real cash cheapest first
+// ---------------------------------------------------------------------------
+export const SHOP_NEW = { days: 14, max: 8 } as const;
+
+/** Cheapest first: C$ pieces by price, then real-cash pieces by their dollar price; ties by name. */
+export function shopOrder<T extends Pick<ShopCardItem, "collector" | "price" | "priceUsdCents" | "name">>(items: readonly T[]): T[] {
+  const cost = (i: T) => (i.collector ? i.priceUsdCents ?? 0 : i.price);
+  return [...items].sort((a, b) => Number(!!a.collector) - Number(!!b.collector) || cost(a) - cost(b) || a.name.localeCompare(b.name));
+}
+
+/** The New row: pieces that went on sale in the last SHOP_NEW.days, newest first, at most SHOP_NEW.max. */
+export function newArrivals<T extends Pick<ShopCardItem, "since">>(items: readonly T[], nowMs: number): T[] {
+  const from = nowMs - SHOP_NEW.days * 86_400_000;
+  return items.filter((i) => i.since && Date.parse(i.since) >= from && Date.parse(i.since) <= nowMs)
+    .sort((a, b) => Date.parse(b.since!) - Date.parse(a.since!)).slice(0, SHOP_NEW.max);
 }

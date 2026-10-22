@@ -543,6 +543,9 @@ a { color:inherit; }
 
 /* Shop (C23) and event cards (C26) */
 .item-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+/* The Shop's New row (owner, Oct 22): newest pieces, swiped sideways above the tab. */
+.shop-new-row { display:grid; grid-auto-flow:column; grid-auto-columns:calc(50% - 5px); gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:4px; }
+.shop-new-row > .item-card { scroll-snap-align:start; }
 .item-card { display:flex; flex-direction:column; gap:6px; background:var(--surface-card); border-radius:var(--r-lg); padding:14px; min-width:0; }
 .item-card .btn-sm { width:100%; margin-top:auto; }
 .item-card .tag { align-self:flex-start; }

@@ -144,6 +144,7 @@ export async function previewShopAction(skus: string[], action: ShopAction, opts
     const before = { status: i.status, goLiveAt: i.goLiveAt };
     i.status = to;
     if (to === "scheduled") i.goLiveAt = opts.at ?? null;
+    if (to === "live") i.goLiveAt = i.goLiveAt ?? new Date().toISOString();
     if (action === "send_back") i.note = opts.note ?? null;
     log(sku, action, before, { status: to, goLiveAt: i.goLiveAt }, opts.note ?? null);
     done.push(sku);

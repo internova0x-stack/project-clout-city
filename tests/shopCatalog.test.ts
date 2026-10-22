@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
 import { brandHits } from "../lib/culture.ts";
-import {
+import { SHOP_NEW, newArrivals, shopOrder,
   canMove, cloutCurve, COUTURE_NOW, defaultPresentation, fieldProblems, fileProgress, fromShopItem, isOnSale, isReady, parseCatalogFile, readiness, tabForAccessory,
   type CatalogItem,
 } from "../lib/shopCatalog.ts";
@@ -130,4 +130,18 @@ test("a catalog file's progress: what's not loaded yet, and the rest by status",
   assert.deepEqual(p.notLoaded, ["c", "d"]);
   assert.deepEqual(p.byStatus, { live: 1, pending_review: 1 });
   assert.deepEqual(fileProgress({}, catalog).notLoaded, []);
+});
+
+test("the Shop lists C$ pieces cheapest first, then real cash cheapest first, and a New row of recent pieces", () => {
+  const it = (name: string, price: number, extra: Partial<{ collector: boolean; priceUsdCents: number; since: string | null }> = {}) =>
+    ({ name, price, collector: false, priceUsdCents: null as number | null, since: null as string | null, ...extra });
+  const order = shopOrder([it("Yacht", 0, { collector: true, priceUsdCents: 9999 }), it("Coat", 900), it("Cap", 40),
+    it("Shades", 0, { collector: true, priceUsdCents: 499 }), it("Belt", 40)]);
+  assert.deepEqual(order.map((i) => i.name), ["Belt", "Cap", "Coat", "Shades", "Yacht"]);
+  const now = Date.parse("2026-10-22T12:00:00Z");
+  const days = (d: number) => new Date(now - d * 86_400_000).toISOString();
+  const fresh = newArrivals([it("Old", 1, { since: days(SHOP_NEW.days + 1) }), it("Week", 1, { since: days(7) }), it("Today", 1, { since: days(0) }),
+    it("Code", 1), it("Later", 1, { since: days(-2) })], now);
+  assert.deepEqual(fresh.map((i) => i.name), ["Today", "Week"]);
+  assert.equal(newArrivals(Array.from({ length: 20 }, (_, n) => it(`N${n}`, 1, { since: days(1) })), now).length, SHOP_NEW.max);
 });
