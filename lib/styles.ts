@@ -206,15 +206,13 @@ export const TOP_LABEL: Record<TopKind, string> = {
 export const BOTTOM_LABEL: Record<BottomKind, string> = { pants: "Pants", skirt: "Skirt", shorts: "Shorts", leggings: "Leggings" };
 
 /**
- * Basics every style offers on top of its own (owner, Oct 22: "blue tees and black trousers"): a tee, pants and these
- * colors, appended to each
- * style's lists below, so the creator and Your Look always have them. The zip-up isn't a free top any more (owner,
- * Oct 22: "keep that as something they have to buy"); a saved fit with it falls back to the style's own outfit.
+ * Every style offers a tee and pants on top of its own pieces (owner, Oct 22), and the zip-up isn't a free top (it's
+ * something to buy). Starter pieces come in one color each (owner, Oct 22): grey tops, black bottoms, white shoes, for
+ * every style; a fit saved in another color wears these (normalizeLook, starterOutfit).
  */
 const BASIC_TOPS: TopKind[] = ["tee"];
 const BASIC_BOTTOMS: BottomKind[] = ["pants"];
-const BASIC_TOP_COLORS = ["#2F6FDB", "#26232D", "#F4F1EA"];
-const BASIC_BOTTOM_COLORS = ["#26232D", "#23314F", "#3D5A80"];
+export const STARTER_COLORS = { topColor: "#8E8C94", bottomColor: "#26232D", shoeColor: "#F4F1EA" } as const;
 const withBasics = <T,>(own: T[], basics: T[]) => [...own, ...basics.filter((c) => !own.includes(c))];
 
 const OWN_FITS: Record<StyleId, StyleFits> = {
@@ -270,10 +268,18 @@ const OWN_FITS: Record<StyleId, StyleFits> = {
 
 export const STYLE_FITS: Record<StyleId, StyleFits> = Object.fromEntries(Object.entries(OWN_FITS).map(([id, f]) => [id, {
   ...f, tops: withBasics(f.tops, BASIC_TOPS), bottoms: withBasics(f.bottoms, BASIC_BOTTOMS),
-  topColors: withBasics(f.topColors, BASIC_TOP_COLORS), bottomColors: withBasics(f.bottomColors, BASIC_BOTTOM_COLORS),
+  topColors: [STARTER_COLORS.topColor], bottomColors: [STARTER_COLORS.bottomColor], shoeColors: [STARTER_COLORS.shoeColor],
 }])) as Record<StyleId, StyleFits>;
 
 /** A stored fit is valid only if every piece and color is on its style's lists. */
+/** A stored fit's pieces, in the starter colors (a fit saved in another color keeps its pieces); null if they aren't the style's. */
+export function storedFit(style: StyleId, fit: unknown): Fit | null {
+  const f = fit as Partial<Fit> | null;
+  const o = STYLE_FITS[style];
+  return f && typeof f === "object" && o.tops.includes(f.top as TopKind) && o.bottoms.includes(f.bottom as BottomKind)
+    ? { top: f.top as TopKind, bottom: f.bottom as BottomKind, ...STARTER_COLORS } : null;
+}
+
 export function isValidFit(style: StyleId, fit: unknown): fit is Fit {
   const f = fit as Partial<Fit> | null;
   const o = STYLE_FITS[style];
@@ -284,41 +290,11 @@ export function isValidFit(style: StyleId, fit: unknown): fit is Fit {
 /** The fit a style starts with for a presentation. */
 export function defaultFit(style: StartingStyle, body: "straight" | "curvy"): Fit {
   const o = styleOutfit(style, body);
-  return { top: o.top, topColor: o.topColor, bottom: o.bottom, bottomColor: o.bottomColor, shoeColor: o.shoeColor };
+  return { top: o.top, bottom: o.bottom, ...STARTER_COLORS };
 }
 
 /** The outfit to draw: the style's (accent and accessory) with the player's fit on top. */
 export function starterOutfit(style: StartingStyle, body: "straight" | "curvy", fit?: Fit | null): Outfit {
   const o = styleOutfit(style, body);
-  return fit ? { ...o, ...fit } : o;
-}
-
-// ---------------------------------------------------------------------------
-// Starter colors unlock with clout (owner, Oct 22): each starter piece starts in the style's own color for the player's
-// presentation; the rest open one by one, the basics (blue, black, white) first, all within a week or two of play
-// (1,000 clout is rank 4, Group Chat Famous). Pieces stay free; only the colors wait.
-// ---------------------------------------------------------------------------
-export const COLOR_UNLOCKS = [50, 100, 200, 300, 450, 600, 800, 1000];
-export type ColorPart = "top" | "bottom" | "shoe";
-const PART_KEY = { top: "topColor", bottom: "bottomColor", shoe: "shoeColor" } as const;
-
-/** Clout needed for each of a part's colors: the default 0, the basics next, then the style's own in list order. */
-export function colorUnlocks(style: StartingStyle, body: "straight" | "curvy", part: ColorPart): Map<string, number> {
-  const f = STYLE_FITS[style.id];
-  const list = part === "top" ? f.topColors : part === "bottom" ? f.bottomColors : f.shoeColors;
-  const def = defaultFit(style, body)[PART_KEY[part]];
-  const basics = part === "top" ? BASIC_TOP_COLORS : part === "bottom" ? BASIC_BOTTOM_COLORS : [];
-  const order = [def, ...basics.filter((c) => c !== def && list.includes(c)), ...list.filter((c) => c !== def && !basics.includes(c))];
-  return new Map(order.map((c, i) => [c, i === 0 ? 0 : COLOR_UNLOCKS[Math.min(i - 1, COLOR_UNLOCKS.length - 1)]]));
-}
-
-/**
- * True when every color in `fit` is open at this clout. A color the player already wears (`kept`) stays theirs, so
- * nobody loses what they picked before colors waited for clout.
- */
-export function fitColorsOpen(style: StartingStyle, body: "straight" | "curvy", fit: Fit, clout: number, kept?: Fit | null): boolean {
-  return (["top", "bottom", "shoe"] as const).every((part) => {
-    const c = fit[PART_KEY[part]];
-    return c === kept?.[PART_KEY[part]] || (colorUnlocks(style, body, part).get(c) ?? Infinity) <= clout;
-  });
+  return { ...o, ...(fit ? { top: fit.top, bottom: fit.bottom } : {}), ...STARTER_COLORS };
 }

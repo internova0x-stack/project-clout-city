@@ -5,7 +5,7 @@ import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
 import { normalizeCreatorCode } from "@/lib/creators";
 import { isValidLook, normalizeLook, lookChoices } from "@/lib/look";
-import { fitColorsOpen, getStyle, isStyleId } from "@/lib/styles";
+import { isStyleId } from "@/lib/styles";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { cleanName, nameError } from "@/lib/validation";
 
@@ -28,11 +28,6 @@ export async function createPlayer(input: {
   if (problem) return { ok: false, error: problem, field: "name" };
   if (!isStyleId(input.style)) return { ok: false, error: "Pick a starting style." };
   if (!isValidLook(input.look, input.style)) return { ok: false, error: "Something's off with your look. Try picking again." };
-  {
-    // A new player has no clout: starter colors past each piece's default wait (owner, Oct 22).
-    const st = getStyle(input.style), l = normalizeLook(input.look, input.style);
-    if (l.fit && !fitColorsOpen(st, l.body, l.fit, 0)) return { ok: false, error: "Those colors open up with clout. Pick the starter color for now." };
-  }
 
   const meta = user.user_metadata ?? {};
   const cookieStore = await cookies();

@@ -1,8 +1,7 @@
 "use server";
 
 import type { ItemOptions } from "@/lib/couture";
-import { defaultFit, fitColorsOpen, getStyle, isValidFit, type Fit } from "@/lib/styles";
-import { normalizeLook } from "@/lib/look";
+import { getStyle, isValidFit, type Fit } from "@/lib/styles";
 import { getSession } from "@/lib/player";
 import { cityError, type CityResult, type Gain, type TripInfo, type VipEntry } from "@/lib/cityState";
 import { loadCityState } from "@/lib/cityServer";
@@ -104,15 +103,11 @@ export async function skipTrip() {
 /** `fit` (migration 0109) switches the starter clothes; left out, the starter clothes stay as they are. */
 export async function saveLook(itemIds: number[], covering: string, fit?: Fit | null) {
   if (fit) {
-    // Starter colors wait for clout (owner, Oct 22): checked against the player's own row, never the browser's word.
+    // Starter pieces come in one color each (owner, Oct 22): only the style's pieces, in those colors, save.
     const { player } = await getSession();
     if (!player) return { ok: false as const, error: "Your sign-in expired. Sign in again." };
-    const look = normalizeLook(player.look, player.starting_style);
     const style = getStyle(player.starting_style);
     if (!isValidFit(style.id, fit)) return { ok: false as const, error: cityError("bad_fit") };
-    if (!fitColorsOpen(style, look.body, fit, player.clout, look.fit ?? defaultFit(style, look.body))) {
-      return { ok: false as const, error: "That color opens up with more clout. Keep going." };
-    }
   }
   return fit === undefined
     ? run("save_look", { p_items: itemIds, p_covering: covering })
