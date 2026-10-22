@@ -1,6 +1,7 @@
 "use server";
 
 import type { ItemOptions } from "@/lib/couture";
+import type { Fit } from "@/lib/styles";
 import { cityError, type CityResult, type Gain, type TripInfo, type VipEntry } from "@/lib/cityState";
 import { loadCityState } from "@/lib/cityServer";
 import type { LottoCard } from "@/lib/lotto";
@@ -98,8 +99,11 @@ export async function watchShowtime() {
 export async function skipTrip() {
   return run("skip_trip", {}, (d) => ({ cash: (d as { cash?: number }).cash ?? 0 }) as Gain);
 }
-export async function saveLook(itemIds: number[], covering: string) {
-  return run("save_look", { p_items: itemIds, p_covering: covering });
+/** `fit` (migration 0109) switches the starter clothes; left out, the starter clothes stay as they are. */
+export async function saveLook(itemIds: number[], covering: string, fit?: Fit | null) {
+  return fit === undefined
+    ? run("save_look", { p_items: itemIds, p_covering: covering })
+    : run("save_look", { p_items: itemIds, p_covering: covering, p_fit: fit });
 }
 export async function rest(kind: "nap" | "sit") {
   return run("rest", { p_kind: kind }, (d) => {

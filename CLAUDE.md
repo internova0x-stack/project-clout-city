@@ -244,6 +244,8 @@ components live in `app/globals.css`.
   fashion; a dress (slot 'one-piece') is a top and a bottom (`wear_slots`, equip_item, save_look 'one_piece_conflict',
   style_counts); lib/wearing.ts mirrors it (wearSlot, slotsClash, outfitFromSkus); Your Look has Dresses and a tab per
   accessory slot once something's owned there. The home bubble's portrait aims at the head (AvatarHead). `/preview/moves?outfit=hoodie` shows all eight body types.
+  Your Look keeps the starter clothes (migration 0109, owner Oct 22): Tops, Bottoms and Shoes list the starting style's
+  pieces and colors (`STYLE_FITS`) free beside owned ones; `save_look(items, covering, fit)` stores players.look.fit.
   Hair on the new bodies is grown from each scalp by `scripts/hair.mjs` (`public/avatars/hair/`, one mesh per style plus
   its `-lengths`); full coverings hide it, under a hat only the lengths show; `?outfit=hair` previews every style.
 - No real brand names; businesses are invented. One exception (owner, Oct 16): Real Clout FM and Clout TV ask

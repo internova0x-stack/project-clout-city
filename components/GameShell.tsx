@@ -13,7 +13,7 @@ import { skillBadge } from "@/lib/skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { getStyle, starterOutfit } from "@/lib/styles";
+import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
 import { CATALOG_FURNITURE, CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -2422,14 +2422,16 @@ export function GameShell({
             onClose={() => (tryOn ? setTryOn(null) : setPanel(null))}
             look={look}
             base={starterOutfit(style, look.body, look.fit)}
+            fit={look.fit ?? defaultFit(style, look.body)}
+            fits={STYLE_FITS[style.id]}
             state={city}
             busy={busy !== null}
             trying={tryOn}
-            onSave={async (ids, covering) => {
+            onSave={async (ids, covering, fit) => {
               if (!cityApi.saveLook) return false;
-              const ok = await run("look", () => cityApi.saveLook!(ids, covering));
-              // Headwear lives on the player's look; saving also fills in the build (migration 0021).
-              if (ok) setMe((m) => ({ ...m, look: { ...m.look, covering, build: look.build } }));
+              const ok = await run("look", () => cityApi.saveLook!(ids, covering, fit));
+              // Headwear and the starter clothes live on the player's look; saving also fills in the build (migration 0021).
+              if (ok) setMe((m) => ({ ...m, look: { ...m.look, covering, build: look.build, ...(fit ? { fit } : {}) } }));
               return ok;
             }}
             onBuy={(sku) => run(`buy:${sku}`, async () => {

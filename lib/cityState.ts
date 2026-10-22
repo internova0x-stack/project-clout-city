@@ -9,6 +9,7 @@ import { leadAction } from "./gossip.ts";
 import { LOOK_LABEL } from "./style.ts";
 import { PERK_ERRORS, SKILLS, type SkillId } from "./skills.ts";
 import { ECONOMY } from "./economy.ts";
+import type { Fit } from "./styles.ts";
 import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
 
 export interface CityPlayer {
@@ -173,7 +174,8 @@ export interface CityApi {
   /** #13 (migration 0040): end the current trip now, for virtual cash by seconds left. */
   skipTrip?(): Promise<CityResult>;
   /** v0.7 Your Look (migration 0021): the worn clothes (one per slot) and the free headwear, saved at once. */
-  saveLook?(itemIds: number[], covering: string): Promise<CityResult>;
+  /** `fit` switches the starter clothes (migration 0109); left out, they stay as they are. */
+  saveLook?(itemIds: number[], covering: string, fit?: Fit | null): Promise<CityResult>;
   /** v0.8 rest at home (migration 0026): a nap or a sit, capped per day. */
   rest?(kind: RestKind): Promise<CityResult>;
   /** v0.8 a drink at a club or lounge bar (migration 0026): Energy for cash, no clout. */
@@ -233,6 +235,9 @@ export const OUTFIT_NEEDS_CLOUT = "The fitting room won't even let you in yet. E
 const ERRORS: Record<string, string> = {
   one_per_slot: "One top, one bottom, one pair of shoes. You're not a closet.",
   bad_covering: "That hat isn't in the city yet.",
+  bad_fit: "That isn't one of your starter pieces.",
+  // Saving starter clothes before migration 0109 (the RPC names the missing parameter).
+  p_fit: "Switching starter clothes isn't on yet. Run migration 0109.",
   no_energy: "Not enough Energy. Eat something, or sleep it off until tomorrow.",
   shift_limit: SHIFT_LIMIT,
   cant_afford: "Your card got declined. Loudly.",
