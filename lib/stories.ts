@@ -31,7 +31,8 @@ export interface StoryEffect {
   set?: string;
 }
 
-export interface NewsItem { headline: string; body?: string; hook?: string; previously?: string | null }
+/** `body` is the feed card's teaser; `post` the full blog post behind "Read more" (owner, Oct 22; paragraphs split by a blank line). */
+export interface NewsItem { headline: string; body?: string; hook?: string; previously?: string | null; post?: string }
 
 export interface PredictionOption { id: string; label: string }
 export interface Prediction {

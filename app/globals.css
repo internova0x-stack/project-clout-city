@@ -2298,3 +2298,10 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .welcome-lists h3 { margin:0 0 6px; }
 .welcome-lists ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; font-size:15px; line-height:20px; }
 .welcome-wait { padding:12px 14px; border-radius:var(--r-lg); background:var(--surface-card); }
+
+/* ---------- Story blog posts (owner, Oct 22): the feed card's Read more opens the full post ---------- */
+.beat-more { color:var(--primary); text-decoration:none; }
+.blog-post { display:flex; flex-direction:column; gap:14px; padding-bottom:8px; }
+.blog-title { margin:0; padding-right:44px; }
+.blog-para { margin:0; font-size:16px; line-height:25px; color:var(--text-1); }
+.blog-post .btn { align-self:flex-start; }

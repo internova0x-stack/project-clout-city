@@ -1,0 +1,654 @@
+{
+  "id": "diss-and-tell",
+  "title": "Diss & Tell",
+  "type": "main",
+  "tier": "free",
+  "status": "active",
+  "start_at": null,
+  "start_weekday": "thursday",
+  "borough_scope": [
+    "queens"
+  ],
+  "prompt": "The two biggest rappers in New York are beefing over one girl. Pick a side, babe. Or don't.",
+  "emoji": "🎤",
+  "answer_key": {
+    "mastermind": "toni",
+    "server_only": true
+  },
+  "badges": [
+    {
+      "id": "saw-the-setup",
+      "name": "Saw the Setup",
+      "emoji": "🧾",
+      "line": "You named the real boss of the beef before Queens did."
+    },
+    {
+      "id": "napkin-signed",
+      "name": "Napkin Signed",
+      "emoji": "💅",
+      "line": "Three for three. Toni would like you to sign something."
+    },
+    {
+      "id": "late-to-the-beef",
+      "name": "Late to the Beef",
+      "emoji": "🥪",
+      "line": "You cracked Diss & Tell from the archive. Late, but well fed."
+    }
+  ],
+  "bonus_badge": {
+    "badge": "napkin-signed",
+    "requires": [
+      "P1",
+      "P2",
+      "P3"
+    ]
+  },
+  "shadow_badge": "late-to-the-beef",
+  "tasks": [
+    {
+      "id": "story:diss-and-tell:hear-it-on-air",
+      "label": "Hear the beef break on The Wake-Up Call",
+      "do": {
+        "place": "real-clout-fm",
+        "action": "sit-in"
+      },
+      "clout": 20
+    },
+    {
+      "id": "story:diss-and-tell:listening-party",
+      "label": "Go to the diss track double feature",
+      "do": {
+        "event": "dt-listening-party"
+      },
+      "clout": 25
+    },
+    {
+      "id": "story:diss-and-tell:order-at-sals",
+      "label": "Order at Sal's in solidarity",
+      "do": {
+        "place": "ditmars-deli",
+        "action": "bec"
+      },
+      "clout": 20
+    },
+    {
+      "id": "story:diss-and-tell:read-spa-book",
+      "label": "Read the nail spa's appointment book",
+      "do": {
+        "evidence": "dt-3"
+      },
+      "clout": 10
+    },
+    {
+      "id": "story:diss-and-tell:share-legal-name",
+      "label": "Spill it: share Lord Menace's legal name",
+      "do": {
+        "share": "dt-4"
+      },
+      "clout": 15
+    },
+    {
+      "id": "story:diss-and-tell:toni-on-air",
+      "label": "Catch Toni's side, live on the radio",
+      "do": {
+        "event": "dt-toni-live"
+      },
+      "clout": 25
+    },
+    {
+      "id": "story:diss-and-tell:watch-premiere",
+      "label": "Watch Toni's premiere on the Big Screen",
+      "do": {
+        "event": "dt-premiere"
+      },
+      "clout": 30
+    }
+  ],
+  "events": [
+    {
+      "id": "dt-listening-party",
+      "name": "Diss track double feature",
+      "place": "velvet-static",
+      "attendable": true,
+      "energy": 10,
+      "clout": 25,
+      "mood": 6,
+      "blurb": "Both diss tracks on a loop, two fan sections that won't make eye contact and the famous booth roped off like a museum piece. Free."
+    },
+    {
+      "id": "dt-toni-live",
+      "name": "Toni Treasure, live on The Wake-Up Call",
+      "place": "real-clout-fm",
+      "attendable": true,
+      "energy": 8,
+      "clout": 25,
+      "mood": 4,
+      "blurb": "Toni tells her side. Bring tissues for her, earplugs for Sharm and a pen, in case someone gets served. Free."
+    },
+    {
+      "id": "dt-premiere",
+      "name": "\"Both of Y'all\" premiere on the Big Screen",
+      "place": "clout-tower",
+      "attendable": true,
+      "energy": 8,
+      "clout": 30,
+      "mood": 8,
+      "blurb": "Nine PM, forty feet tall, one woman and two voicemails. Matching robes optional. Free."
+    }
+  ],
+  "beats": [
+    {
+      "id": "dt-1",
+      "day": 1,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Two Kings, One Booth",
+          "previously": null,
+          "body": "The two biggest rappers in New York just posted the same girl, in the same dress, in the same booth, fifty minutes apart. By midnight it was two diss tracks, a tow receipt and a retainer. Queens is wildin'.",
+          "hook": "Engine 7 confirms the tow, and that Ruckus asked the whole firehouse \"not to tell anybody.\" They told everybody.",
+          "post": "Roommates, pull up a chair, grab a regular coffee and cancel your plans, because the two biggest rappers in New York are at war, and chile, it is over a girl.\n\nLet's start at the beginning. Yesterday at 4:12 PM, Lord Menace, the self-crowned King of Steinway Street, three platinum plaques and a chain that weighs more than my cousin's dog, posted a photo of a gorgeous young woman in a red dress in the corner booth at Velvet Static. Caption: \"my queen 👑.\" Sweet, right? We love to see a man in love.\n\nFifty minutes later. FIFTY. Big Ruckus, the Boss of Ditmars Boulevard, the man who once said on a podcast that he \"doesn't feel fear, only weather,\" posted the SAME woman. In the SAME red dress. In the SAME corner booth. Caption: \"wifey. stay out her DMs.\" Roommates, the booth didn't even get a day off.\n\nThe woman is Toni Treasure, 24, of Whitestone, whose page says \"aspiring everything\" and whose follower count has gone up by 400,000 since breakfast. Her only statement so far is a shrug emoji and two words: \"boys pls.\" Sis didn't confirm, didn't deny, didn't even tag the booth. Deadass the most efficient press release I have ever seen.\n\nBy dinner, both men had unfollowed each other, unfollowed the booth and unfollowed every account that had ever posted the dress. The comment sections were wildin'. Team Menace said Ruckus is \"a rental.\" Team Ruckus said Menace \"smells like mouthwash.\" Somebody's aunt asked if anybody had seen her reading glasses. The internet is in shambles.\n\nThen midnight hit, and not these grown men turning a love triangle into a double album.\n\nLord Menace went first with \"Rental Car Ruckus,\" a two-minute diss track about the day Big Ruckus's lime-green sports car got towed from a fire hydrant outside Engine 7 on Ditmars. The cover art? The actual tow receipt. Plate number blurred, dignity not. The hook goes, and I'm quoting: \"You got towed on Ditmars, couldn't even feed the meter / rented all that flex, man, you ain't even the leaser.\" Is it good? No. Did I play it four times? Mind your business.\n\nForty minutes later, Big Ruckus answered with \"Retainer,\" and y'all, he went for the teeth. According to the song, Lord Menace sleeps in a retainer every night, and his mother, a very respected dentist in Forest Hills, still books his cleanings for him. \"Big bad Menace with the plastic in his mouth / mommy made the appointment, now the King's heading south.\" A dental drill buzzes under the second verse. The producer understood the assignment.\n\nBy sunrise, \"Rental Car Ruckus\" and \"Retainer\" were number one and number two on the Queens chart, and Velvet Static was charging a little extra at the door, because everybody and their mother wants to sit in The Booth. The club is throwing a diss track double feature: both songs on a loop, two fan sections that refuse to make eye contact and the famous booth roped off like a museum piece. Say less, I'll be there.\n\nAnd because this city never misses: Engine 7 confirmed the tow to my source. They also confirmed that when the truck came, Big Ruckus asked the entire firehouse \"not to tell anybody.\" Babe, they told everybody. One of them told me with his helmet still on.\n\nMeanwhile, Toni posted one selfie this morning, cheesin' in sunglasses, captioned \"I hate when men fight over me 🥺.\" Then she pinned her tip link. Twice.\n\nSo, Roommates: Team Menace, Team Ruckus or Team Toni? Choose wisely, because something tells me this booth is about to get crowded."
+        }
+      ],
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "diss-and-tell",
+          "phase": "early",
+          "priority": 2
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:diss-and-tell:hear-it-on-air",
+            "story:diss-and-tell:listening-party"
+          ]
+        },
+        {
+          "type": "place_state",
+          "place": "velvet-static",
+          "spawn_event": "dt-listening-party",
+          "expires_day": 3
+        },
+        {
+          "type": "price_multiplier",
+          "tags": [
+            "first_party_venue"
+          ],
+          "applies_to": "visit_price",
+          "multiplier": 1.5,
+          "reason": "Everybody wants the booth from the photos",
+          "expires_day": 3
+        }
+      ]
+    },
+    {
+      "id": "dt-2",
+      "day": 2,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Defamation by Sandwich",
+          "previously": "Lord Menace and Big Ruckus both claimed Toni Treasure, then traded diss tracks about a towed rental car and a retainer.",
+          "body": "Lord Menace is suing Sal's deli for C$2 million over a chalkboard sandwich: egg whites, dry toast, no salt. His lawyer calls it character assassination. Sal has one sentence for him.",
+          "hook": "The court papers list the plaintiff's legal name. Lola has a copy, and she's deadass waiting for the right moment.",
+          "post": "Roommates, I have been doing this a long time, and I have never, ever had to type the words \"Exhibit A is a chalkboard.\" Until today.\n\nLord Menace, the King of Steinway Street, the man whose diss track topped the Queens chart yesterday, is suing Ditmars Deli & Dreams. Sal's. The corner. The cat. For C$2 million.\n\nChile, let me explain. For years Sal has kept a little chalkboard by the register with the regulars' orders on it, so the morning guy doesn't have to ask. Yesterday somebody posted a photo of that chalkboard, and it went around the world twice before lunch. Line one: \"THE BIG RUCKUS: double pastrami, triple cheese, hot peppers.\" Line two, right underneath: \"THE LORD MENACE: egg whites, dry toast, no salt, no butter.\"\n\nNot the King of Steinway Street ordering egg whites with no salt. The comments did not survive. \"No salt? He IS the salt.\" \"Menace to cholesterol.\" \"That's not a sandwich, that's a cry for help.\" Somebody remixed \"Retainer\" with the chalkboard as the cover art. The internet is in shambles, and Sal is on line at the bank depositing all that foot traffic.\n\nEnter Marty Kessler-Vance, Esq., the face on the expressway billboard that says \"INSULTED? CALL MARTY,\" and now officially Lord Menace's lawyer. Marty filed this morning, calling the chalkboard \"sandwich-based character assassination\" and \"a deliberate attempt to portray my client as a man who fears sodium.\" He's asking for C$2 million, the chalkboard itself and \"a public apology, in chalk.\"\n\nI called Sal for comment. Sal, who has run that corner for twenty-two years and has watched landlords come and go (mostly come), gave me one statement, and I'm printing it in full: \"Mira, he orders it every morning. I wrote it down.\" Then he hung up, because there was a line. There is always a line now. Folks are wrapped around the block asking for \"The Lord Menace,\" eating egg whites with their eyes closed like it's a wellness retreat, then ordering a BEC to recover.\n\nI pulled the court papers, Roommates, because that's what I do. Forty pages, mostly in Marty's billboard font. There is one detail I'm sitting on. The papers have to list the plaintiff's legal name. Lord Menace's legal name. The one his mother uses. I have it. I'm deadass not saying it yet. Let me cook.\n\nMeanwhile, over on Ditmars Boulevard, Big Ruckus is having the time of his life. He posted a picture of himself eating \"The Big Ruckus\" at Sal's counter, captioned \"real men eat salt.\" He tagged the deli. He did not tag Sal, who was in the picture, in an apron, looking tight.\n\nAnd where is Toni Treasure in all of this, you ask? Sis posted a sandwich emoji. Just the emoji. Then she posted a story from the Ditmars Heights Rooftop with a cocktail and the caption \"somebody's treating me tonight 💕.\" Somebody. No name. Both rappers liked it within ninety seconds. Both of them. I have the screenshots.\n\nMarty says the case is moving fast. Sal says he's not touching the chalkboard. Lord Menace says he's ready to \"take this all the way to the top.\" The top of what, B? The menu?\n\nSo let's play, Roommates. How does the sandwich lawsuit end? Does Menace walk away with the two million? Does Sal settle and hand out free egg whites for life? Does a judge make him rename it? Or does the King of Steinway Street drop the whole thing before anybody has to say something embarrassing out loud? Cast your vote, and tell me: would you sue over a sandwich?"
+        }
+      ],
+      "effects": [
+        {
+          "type": "price_multiplier",
+          "tags": [
+            "bodega"
+          ],
+          "applies_to": "visit_price",
+          "multiplier": 1.5,
+          "reason": "Line around the block for \"The Lord Menace\"",
+          "expires_day": 5
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:diss-and-tell:order-at-sals"
+          ]
+        }
+      ],
+      "prediction": {
+        "id": "P1",
+        "question": "How does the sandwich lawsuit end?",
+        "options": [
+          {
+            "id": "menace-wins",
+            "label": "Menace wins the C$2 million"
+          },
+          {
+            "id": "settles",
+            "label": "Sal settles: free sandwiches for life"
+          },
+          {
+            "id": "rename",
+            "label": "The judge makes Sal rename it"
+          },
+          {
+            "id": "dropped",
+            "label": "Menace drops the case"
+          }
+        ],
+        "closes_at": {
+          "day": 3,
+          "time": "23:59"
+        },
+        "reveal_beat": "dt-4",
+        "correct": "dropped",
+        "reward": {
+          "clout": 50
+        },
+        "changeable": true,
+        "roasts": {
+          "menace-wins": "You picked a C$2 million payday. For egg whites. Sal laughed so hard he gave the cat a day off.",
+          "settles": "You picked free sandwiches for life. Sal doesn't do free. Ask anybody who's tried to pet the cat without buying something.",
+          "rename": "You picked a rename. The chalkboard stays. It's the most photographed menu in Queens now."
+        }
+      }
+    },
+    {
+      "id": "dt-3",
+      "day": 3,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Matching Robes",
+          "previously": "Lord Menace sued Sal's deli for C$2 million over a sandwich named after him.",
+          "body": "Big Ruckus is suing a nail spa over a French tip, and then the photos leak: both rappers, same spa, same Tuesday, matching robes. One curtain between them, and somebody booked them both.",
+          "hook": "The photos came from a brand-new account, @QueensReceipts. Each rapper says the other leaked them. Neither of them booked the appointment.",
+          "post": "Roommates. ROOMMATES. Sit down. I need you seated for this one.\n\nBig Ruckus has a lawyer now too, because of course he does. Her name is Gloria Szabo-Reyes, and if you have ever waited for a bus anywhere in Queens you know her face, because it's on every bus shelter next to two words in yellow: \"SZABO SUES!\" There's a jingle. I have had that jingle in my head for years. Now you will too. You're welcome.\n\nGloria filed this morning for Big Ruckus against Talon Talk Nail Spa on Steinway Street. The complaint, and I read it twice to be sure, says the spa gave Lord Menace \"a noticeably superior French tip\" and gave her client \"a standard French tip with visible favoritism.\" Damages: \"emotional, cuticular and reputational.\"\n\nChile, you're asking how Big Ruckus even knows what Lord Menace's French tip looks like. Me too. And around 2 AM, the internet answered.\n\nA brand-new account called @QueensReceipts, created eleven days ago, zero posts before last night, dropped four photos. Photo one: Lord Menace, King of Steinway Street, in a fluffy white robe, cucumber slices over his eyes, hands soaking in a little bowl. Photo two: Big Ruckus, Boss of Ditmars Boulevard, in the SAME fluffy white robe, feet in a paraffin dip, also wearing cucumbers. Photo three: the wide shot. They are ten feet apart. Same spa. Same Tuesday. Same 11 AM. There is exactly one beige curtain between them. Photo four is just the curtain.\n\nNeither of them knew, y'all. Look at their faces. That's peace. That's two grown men who have never been more relaxed in their lives, doing it next to their worst enemy without the slightest clue. The way I screamed. Mad respect to that curtain, honestly. It has done more for peace in Queens than anybody with a podium.\n\nThe comments were wildin'. \"Beef? That's a spa day.\" \"Matching robes is a love language.\" \"The curtain is the real winner.\" A nail tech in Flushing posted a zoomed-in breakdown of both manicures and concluded that Menace's tips are \"slightly cleaner on the smile line.\" Gloria has entered that post into evidence, which, son, I don't think helps you.\n\nEach rapper says the other leaked the photos to embarrass him. Lord Menace: \"He set me up, period.\" Big Ruckus: \"Why would I leak a picture of ME in a robe? I look amazing, but still.\" Fair.\n\nHere's where it gets interesting, Roommates. My cousin knows the receptionist at Talon Talk, and the receptionist let me see the appointment book. I've posted the page with this story, so go read it yourself, but here are the highlights. Pink spiral book. Glitter pen. Both men booked at 11:00. Both asked for the curtain closed. One of them cried a little at the bill. I won't say which, but he owns a very small dog. Oops. That's for tomorrow.\n\nAnd then there's the line that has me up at night. Both appointments were booked by \"a friend.\" Same phone number for both. And in the margin, in glitter pen, the receptionist wrote: \"she says they'll love the surprise.\"\n\nShe.\n\nNeither of these men booked his own pedicure. Somebody booked them both, at the same time, at the same spa, and then somebody, maybe the same somebody, had a camera ready. Who books a grown man's pedicure? His mother? His assistant? A woman who knows exactly where both of them will be at 11 AM on a Tuesday?\n\nToni Treasure, for the record, posted a nail emoji this afternoon. Fresh set. Pink. Flawless smile line. Just saying.\n\nSo y'all tell me: who's running @QueensReceipts? Drop your theories, because something about this is grimy, and I love it."
+        }
+      ],
+      "evidence": {
+        "title": "Talon Talk Nail Spa, appointment book",
+        "kind": "document",
+        "lines": [
+          "Pink spiral book, glitter pen, one coffee ring.",
+          "11:00 · \"Mr. M.\" Gel French tip, cucumber mask. Asked for the curtain closed.",
+          "11:00 · \"Mr. R.\" Pedicure, paraffin dip. Asked for the curtain closed. Cried a little at the bill.",
+          "Both booked by \"a friend,\" from the same phone number. In the margin: \"she says they'll love the surprise.\""
+        ]
+      },
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "diss-and-tell",
+          "phase": "mid",
+          "priority": 2
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:diss-and-tell:read-spa-book"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dt-4",
+      "day": 4,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Desmond Pettibone Has Left the Building",
+          "previously": "Big Ruckus sued a nail spa, and leaked photos caught both rappers getting pedicures side by side.",
+          "body": "Lord Menace walked out of his own lawsuit rather than say his legal name, so Big Ruckus's lawyer said it for him on the courthouse steps. Then the other side came back with an oboe and a Pomeranian.",
+          "hook": "Sal kept the chalkboard and added a third sandwich: \"THE TONI: whatever he's having, on his tab.\" Toni goes on Real Clout FM tomorrow to tell her side.",
+          "post": "Roommates, I told you I was sitting on something. I'm standing up now.\n\nThis morning Lord Menace was due at Marty Kessler-Vance's office to give a deposition in the sandwich case. Simple stuff: you sit, you swear, you state your full legal name for the record. Lord Menace sat. Lord Menace swore. Then the court reporter asked him to state his full legal name, and, according to two people in that room, the King of Steinway Street stared at the ceiling for forty seconds, whispered \"nah\" and walked out.\n\nBy 11 AM, Marty had filed to drop the entire lawsuit. All C$2 million of it. The chalkboard stays. Sal stays. The egg whites stay. Lord Menace would rather lose a lawsuit than say his own name out loud. And chile, once you hear it, you'll understand.\n\nBecause Gloria Szabo-Reyes, Big Ruckus's lawyer, was waiting on the courthouse steps with a folder, a smile and a portable speaker, and she said it for him. Into a microphone. With the jingle playing.\n\nDesmond. Pettibone.\n\nDESMOND PETTIBONE, y'all.\n\nThe internet is in shambles. \"Desmond Pettibone returns his library books early.\" \"Desmond Pettibone has a favorite stapler.\" \"Desmond Pettibone says excuse me to pigeons.\" By lunch, Big Ruckus was selling black hoodies with PETTIBONE across the chest in big white letters, and they sold out in nine minutes. Not him monetizing the man's birth certificate. We love an entrepreneur, I guess?\n\nBut Roommates, you know this city. Nobody stays on top for long.\n\nAt 3 PM, Marty Kessler-Vance, freshly off a case he no longer had, held his own press conference outside the nail spa, and he came with paperwork. Big Ruckus, the Boss of Ditmars Boulevard, the man who \"doesn't feel fear, only weather,\" is legally Gerald Fennimore III. The third. There were two before him. He grew up in a four-bedroom colonial in Douglaston with a koi pond. He played oboe in a youth orchestra for six years and once won a regional medal for \"expressive phrasing.\" And he owns a fluffy white Pomeranian named Princess Biscuit, who has her own page, a heated bed and a stylist.\n\nMarty held up a photo of Princess Biscuit in a tiny tiara. The crowd gasped. Somebody fainted, allegedly, but I think she was just hungry.\n\nTwo of the biggest rappers in New York, and between them: an oboe, a retainer, a Pomeranian and a mother who books cleanings. These are not tough guys, sweetie. These are two very soft men in very loud jackets.\n\nLord Menace hasn't posted since the steps. Big Ruckus posted Princess Biscuit with the caption \"she's a rider,\" deleted it, then posted it again. The PETTIBONE hoodies are back in stock, and now somebody is selling FENNIMORE hoodies too, and that somebody isn't either rapper. I'm deadass trying to find out who.\n\nAnd then there's Sal. I swung by the deli this afternoon. The chalkboard is famous now: tourists take pictures of it, and a guy proposed in front of it. Sal has added a third line under the other two, in fresh chalk:\n\n\"THE TONI: whatever he's having, on his tab.\"\n\nI asked Sal what that means. Sal said, \"Ock, I just write the orders.\" Then he gave me a look I'm still thinking about, and charged me full price.\n\nTomorrow morning, Toni Treasure goes on Real Clout FM to tell her side for the very first time. Set your alarms. Bet.\n\nSo tell me, Roommates: Desmond or Gerald, whose real name hit harder? And what do you think Sal knows that we don't?"
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "ditmars-deli",
+          "note": "The famous chalkboard",
+          "expires_day": 10
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:diss-and-tell:share-legal-name"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dt-5",
+      "day": 5,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Toni Tells Her Side",
+          "previously": "Lord Menace dropped his lawsuit rather than say his legal name, Desmond Pettibone, in court.",
+          "body": "Toni Treasure finally tells her side on Real Clout FM: one tear, ring light on, tip link read out twice. Then DJ Sharm Almight gets served live on air, by two lawyers at once.",
+          "hook": "By sundown each rapper had bought Toni an apology gift: a C$40,000 diamond phone case. The same case, from the same jeweler, who says she already returned one for cash.",
+          "post": "Roommates, I woke up at 6 AM for this. I don't wake up at 6 AM for my own birthday.\n\nToni Treasure, the woman at the center of the biggest beef in New York, went on The Wake-Up Call at Real Clout FM this morning, and DJ Sharm Almight gave her the whole first hour. She walked in wearing all white, sunglasses on indoors, carrying her own ring light. On the radio, y'all. She brought a ring light to the radio.\n\nSharm opened with \"Yo, good morning, Queens, the lady of the hour is in the building,\" and Toni said, \"Thank you, I'm just a regular girl,\" which is something only a woman with her own ring light says.\n\nThen she told her side. Here it is, in her words. On whether she's dating Lord Menace: \"I love Desmond in a very special way.\" On whether she's dating Big Ruckus: \"I love Gerald in a very special way.\" On whether those are the same special way: \"Different ways. On different days.\" Sharm asked which days. Toni said, \"Respect my privacy.\"\n\nAt minute twelve she cried. One tear. Left eye. Perfectly lit. She called herself \"a victim of two very large men's very small feelings,\" and the phone lines lit up so hard the board op had to unplug one. Then she asked listeners to please respect her privacy at this difficult time. Then she read out her tip link. Then she read it out again, slower, \"for the people driving.\"\n\nChile.\n\nThen came the part nobody will forget. Sharm, bless him, tried to keep it clean. He said, \"Keep it about you, fam. I read shoutouts, not subpoenas.\" And as the words left his mouth, the studio door opened, and in walked Marty Kessler-Vance AND Gloria Szabo-Reyes, at the same time, through the same door, each holding an envelope. They served him. Live. On air. Both of them. For \"platforming.\" Sharm said, \"Y'all are buggin',\" and then read the weather like a professional. The internet is in shambles. That clip has more plays than both diss tracks combined.\n\nNow, my question is how two lawyers on opposite sides of a beef walked into the same building at the same second. They said \"coincidence.\" Hmm.\n\nMeanwhile, the rappers were clearly listening, because by sundown each had bought Toni an apology gift. Lord Menace posted a box: a C$40,000 diamond-covered phone case, \"for my queen.\" Two hours later, Big Ruckus posted a box: a C$40,000 diamond-covered phone case, \"for wifey.\" Same case. Same box. Same jeweler. I called the jeweler, who was audibly cheesin', and he told me one of the two cases had \"already come back for a full cash refund, same afternoon.\"\n\nI'll say that again for the people in the back. One of the phone cases has already been returned. For cash.\n\nThe comments are split. Half of y'all say Toni is a poor sweet girl caught between two clowns. The other half say she's the smartest person in Queens. A woman named Gladys wrote, \"Baby is revenuemaxxing and I respect it.\" Gladys, I see you.\n\nAnd then there's @QueensReceipts. It posted again tonight: a screenshot of Lord Menace's dental appointment reminder and a voice memo of Big Ruckus practicing the oboe, badly, at 1 AM. Whoever runs that account knows both men's calendars, both men's secrets and both men's phone numbers.\n\nSo it's time, Roommates. Who's behind @QueensReceipts? The lawyers, cooking up drama for the billable hours? Lil Cosign, Lord Menace's hype man, who has been suspiciously quiet all week? Sal, with his famous chalkboard and his booming business? Or Toni Treasure herself? Voting closes tomorrow at midnight. And tell me: whose side are you on after that interview?"
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "real-clout-fm",
+          "spawn_event": "dt-toni-live",
+          "expires_day": 6
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:diss-and-tell:toni-on-air"
+          ]
+        }
+      ],
+      "prediction": {
+        "id": "P2",
+        "question": "Who's behind @QueensReceipts, the account leaking both rappers' secrets?",
+        "options": [
+          {
+            "id": "lawyers",
+            "label": "The lawyers, for the billable hours"
+          },
+          {
+            "id": "cosign",
+            "label": "Lil Cosign, Menace's hype man"
+          },
+          {
+            "id": "sal",
+            "label": "Sal, for the sandwich sales"
+          },
+          {
+            "id": "toni",
+            "label": "Toni Treasure"
+          }
+        ],
+        "closes_at": {
+          "day": 6,
+          "time": "23:59"
+        },
+        "reveal_beat": "dt-8",
+        "correct": "toni",
+        "reward": {
+          "clout": 200,
+          "badge": "saw-the-setup"
+        },
+        "changeable": true,
+        "roasts": {
+          "lawyers": "You picked the lawyers. They're greedy, not organized. Different problem, babe.",
+          "cosign": "You picked Lil Cosign. He can't even leave a group chat. He's still in one from 2019.",
+          "sal": "You picked Sal. Sal doesn't post. Sal barely texts. Sal writes things on a chalkboard."
+        }
+      }
+    },
+    {
+      "id": "dt-6",
+      "day": 6,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Objection: They're Married",
+          "previously": "Toni cried on the radio, and both rappers' lawyers served DJ Sharm Almight on air.",
+          "body": "A Bayside mail carrier cracks the case nobody saw coming: the rappers' lawyers share a mailbox. Both men fire both lawyers, and Toni books a date night for tomorrow. With which man? Yes.",
+          "hook": "Toni just posted \"date night tomorrow 💕\" from the Ditmars Heights Rooftop. Both rappers think it's their date. Same table, same time.",
+          "post": "Roommates, I need you to know that the most important person in this entire beef is a mail carrier in Bayside named Rosalind, and she deserves a parade.\n\nRosalind has delivered mail on the same Bayside block for sixteen years. Yesterday she watched the clip of two lawyers serving DJ Sharm Almight at the same time, and something bothered her. Last night she sent my tip line one photo. A mailbox. A nice one, black with gold trim. And on it, two names: KESSLER-VANCE and SZABO-REYES.\n\nY'all.\n\nMarty Kessler-Vance, Lord Menace's lawyer. Gloria Szabo-Reyes, Big Ruckus's lawyer. Opposite sides of the biggest beef in New York. Married. For NINETEEN years. Same house. Same mailbox. Same golden retriever. And, according to public records, a brand-new timeshare they closed on this week, a few days after this whole beef started.\n\nBetween the sandwich suit, the nail spa suit, the countersuits and the Sharm situation, those two have billed our favorite rappers a combined C$600,000. Sis and her husband turned a love triangle into a family business.\n\nThey put out a joint statement, on joint letterhead, and I can't stop laughing about it: \"Our marriage is a coincidence, and also a family business, and those are not mutually exclusive.\" Marty added, separately, \"We never discuss cases at home.\" Gloria added, separately, \"We discuss them constantly at home. He's lying.\"\n\nThe internet is in shambles. Somebody stuck a little sticker on every \"SZABO SUES!\" bus shelter in Astoria that now makes it read \"SZABO SUES... HER HUSBAND'S CLIENTS.\" Mad creative, honestly.\n\nBoth rappers found out the same way you did, from the timeline. And for the first time all week, they did the exact same thing at the exact same time: they each fired both lawyers. Lord Menace fired Marty and then, for reasons, also fired Gloria, who never worked for him. Big Ruckus fired Gloria and also fired Marty. Each lawyer has now been fired twice in one afternoon.\n\nAnd then, Roommates, in a move that makes zero sense, both men announced they will now represent themselves. Not the retainer guy and the oboe player filing legal papers in purple gel pen. Lord Menace is suing Big Ruckus for \"damage to the brand.\" Big Ruckus has countersued for \"hurtful bars.\" A court clerk was overheard asking, \"Is this a lawsuit or a group chat?\" Facts.\n\nNow, does all this mean the lawyers were behind @QueensReceipts? They had a motive: every leak meant another lawsuit, and every lawsuit meant another invoice. They had access: they knew both men's legal names and both men's schedules. And they're grimy enough to share a mailbox and a straight face for over a week. A lot of y'all have already voted for them. I'm just saying the case is looking... interesting.\n\nBut Toni Treasure, of course, had the last word. At 9 PM she posted a photo from the Ditmars Heights Rooftop: a table for two by the railing, the city lit up behind it, and the caption \"date night tomorrow 💕.\"\n\nWithin four minutes, Lord Menace commented \"can't wait baby 👑.\" Within five, Big Ruckus commented \"see you there wifey.\" Neither has seen the other's comment, because they've blocked each other. Same table. Same time. Two men. One railing. Oh, this is going to be good.\n\nLast call, Roommates: voting on @QueensReceipts closes at midnight, and so does tonight's new one. What's Toni's next move? Does she marry Lord Menace? Marry Big Ruckus? Drop a single of her own? Or sue them both? Tell me what you'd do in her heels."
+        }
+      ],
+      "effects": [
+        {
+          "type": "chatter_topic",
+          "topic": "diss-and-tell",
+          "phase": "late",
+          "priority": 2
+        }
+      ],
+      "prediction": {
+        "id": "P3",
+        "question": "What's Toni's next move?",
+        "options": [
+          {
+            "id": "menace",
+            "label": "She marries Lord Menace"
+          },
+          {
+            "id": "ruckus",
+            "label": "She marries Big Ruckus"
+          },
+          {
+            "id": "single",
+            "label": "She drops her own single"
+          },
+          {
+            "id": "sues",
+            "label": "She sues them both"
+          }
+        ],
+        "closes_at": {
+          "day": 6,
+          "time": "23:59"
+        },
+        "reveal_beat": "dt-9",
+        "correct": "single",
+        "reward": {
+          "clout": 75
+        },
+        "changeable": true,
+        "roasts": {
+          "menace": "You picked Desmond. She liked his card. Not him. His card.",
+          "ruckus": "You picked Gerald. Princess Biscuit had better odds, and Princess Biscuit bites.",
+          "sues": "You picked a lawsuit. Why sue two men when you already own half of both?"
+        }
+      }
+    },
+    {
+      "id": "dt-7",
+      "day": 7,
+      "status": "active",
+      "points_at_answer": true,
+      "card_note": "Voting closed. The truth drops tomorrow.",
+      "news": [
+        {
+          "headline": "Two Rappers, One Restroom",
+          "previously": "The rappers' lawyers turned out to be married, and Toni booked both men for the same date.",
+          "body": "Two rappers, two dozen roses each, one single-stall restroom, forty-five minutes. They came out knowing exactly who booked their pedicures.",
+          "hook": "Then both men looked up the number that booked their pedicures. It was already in both phones, saved as \"Toni 💕.\"",
+          "post": "Roommates, the votes are locked, and I promise you none of y'all were ready for last night.\n\n9:00 PM, Ditmars Heights Rooftop. Kiki Mensah, who runs the guest list up there and has seen everything, told me she knew it was going to be a night when two cars pulled up at the exact same second and two men in two very different jackets got out holding two dozen red roses each. Lord Menace, in a white faux-fur coat in October. Big Ruckus, in a lime-green suit that matched his late rental car.\n\nThey saw each other at the elevator. Kiki says they both froze \"like a nature documentary.\" Neither said a word. They rode up together, roses held up like shields, staring at the floor numbers. Deadass the longest elevator ride in Queens history.\n\nWhen the doors opened, Toni's table by the railing was empty. Two glasses. A little card: \"RESERVED: T.T.\" And then, Kiki says, both men panicked at the same time and ran for the restroom.\n\nThere is one restroom on that floor, y'all. Single stall.\n\nThey were in there for forty-five minutes. Kiki timed it. \"I've seen people take longer,\" she told me, \"but never two of them.\"\n\nWhat happened in that restroom stayed in that restroom until about 11 PM, when a waiter with very good ears and no sense of privacy told me everything. At first it was a standoff. Then Menace sneezed and Ruckus said \"bless you\" out of pure reflex. Then it got quiet. And then, chile, they started talking.\n\nRuckus said Toni told him her grandmother needed emergency dental work, so he sent C$8,000. Menace went pale. Toni had told him the same thing, the same week. He sent C$8,000 too. Same grandmother. Same tooth. Back left molar, \"the one that's been bothering her since the summer.\"\n\nSo Lord Menace, Desmond Pettibone himself, did what any grown man would do: he called his mom, the dentist, from the restroom, on speaker. Dr. Pettibone listened to the whole story, asked two questions and said, \"Sweetheart, that procedure doesn't exist. And that woman's grandmother has dentures. The whole senior center in Whitestone knows.\"\n\nThe waiter says you could hear a rose petal drop.\n\nThen they kept going. Rooftop dinners: both paid. \"Studio time\": both paid. The diamond phone case: both bought, one came back for cash. Ruckus asked Menace if he'd booked that pedicure. Menace said no. Ruckus said he never booked his either. So who did?\n\nRuckus pulled up the spa's confirmation text. Menace pulled up his. Same number. They checked their contacts. It was already saved. In both phones. Under the same name.\n\n\"Toni 💕.\"\n\nThey walked out at 9:47 PM, roses in the trash, and left separately, heads down, not a word. Toni never showed. That date-night photo, it turns out, was from last week. The way they both got played on the same night is odee.\n\nI don't make the news, Roommates, I just report it. But I went back through the times @QueensReceipts posted. Every leak landed within an hour of Toni seeing one of these men. Every single one.\n\nVoting's closed. The truth drops tomorrow. And if you voted for the lawyers, babe, it's not too late to apologize to Marty and Gloria. They're busy suing each other's former clients anyway.\n\nSo I'll ask the only question that matters tonight: if you found that number in your phone under a heart emoji, what would you do?"
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "ditmars-heights-rooftop",
+          "note": "The restroom where the beef ended",
+          "expires_day": 10
+        }
+      ]
+    },
+    {
+      "id": "dt-8",
+      "day": 8,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Toni Treasure Owns the Beef",
+          "previously": "Hiding in one restroom, the rappers found they'd both paid for the same grandmother's imaginary tooth.",
+          "body": "@QueensReceipts finally logs in as itself. There's a spreadsheet, a confession and two napkins signed at Sal's, and one woman now owns half the beef.",
+          "hook": "A countdown just went up on the Clout TV Big Screen: \"Toni Treasure. Tomorrow, 9 PM.\"",
+          "post": "Roommates, it was her. It was always her. @QueensReceipts is Toni Treasure.\n\nAt noon today, @QueensReceipts posted one photo: Toni, cheesin', in that same red dress, in that same Velvet Static booth, holding two phones. Caption: \"hi boys 💕.\" Then she renamed the account \"Toni Treasure (Official)\" and posted a thread. Y'all, she confessed to everything, and she did it with receipts.\n\nHere's what she laid out, and I've checked every line. She met Lord Menace at a listening party in the spring and Big Ruckus at a car show a month later. She dated them both \"exclusively.\" She booked the matching pedicures herself, from her own number, because she \"wanted them to have a self-care day, and also content.\" She sent the tow receipt to Lord Menace. She told Big Ruckus about the retainer. She spotted Desmond's legal name on a pharmacy bag and Gerald's on an oboe case, and she made sure each lawyer knew exactly where to look.\n\nAnd the money. Toni posted a little spreadsheet, color-coded. Rooftop dinners, twice a week, two men: C$94,000. \"Studio budget\": C$60,000 from each. Grandma's imaginary molar: C$8,000 times two. Two diamond phone cases, both returned for cash (yes, both, the second went back this morning): C$80,000. Total: C$310,000, before tips.\n\nBut Roommates, that's not even the twist. The twist is a napkin.\n\nOn their very first dates, at Ditmars Deli & Dreams of all places, Toni had each man sign \"a cute little contract\" on the back of a napkin. She posted photos of both. Same wording, two signatures, a grease stain on each: \"I agree that Toni gets 50% of anything that comes out of this, beef included.\" Signed, Desmond Pettibone. Signed, Gerald Fennimore III. And under both, as witness, in very neat handwriting: \"Sal.\"\n\nSo Toni Treasure, 24, of Whitestone, legally owns half of \"Rental Car Ruckus\" and half of \"Retainer.\" Numbers one and two on the Queens chart. She owns half of both diss tracks about her. She owns half the beef. The internet is in shambles, and I am lying on my kitchen floor.\n\nI went to the deli, obviously. The chalkboard is still up, and the napkins are now framed on the wall above the cat's bowl. I asked Sal why he never said anything, through the lawsuit, the deposition and a week of reporters on line out the door. Sal wiped the counter, looked at me and said: \"Nobody asked.\" Then he gave me a BEC on the house. First time ever. I'm deadass framing the receipt.\n\nThe lawyers? Marty and Gloria released a joint statement saying they \"had no idea\" and \"would be delighted to represent Ms. Treasure going forward.\" Sis declined: \"I read my own contracts.\"\n\nThe rappers? Neither has posted. A source close to Lord Menace says he's \"at his mom's.\" A source close to Big Ruckus says he's \"walking Princess Biscuit for a very long time.\" Lil Cosign posted a broken heart, then a sandwich, then a question mark. Lil Cosign has never been more relatable.\n\nTo everybody who called it: I see you. You saw the setup when Queens didn't. We love to see it.\n\nAnd it's not over. Tonight a countdown went up on the Clout TV Big Screen, forty feet tall over Astoria: \"Toni Treasure. Tomorrow, 9 PM.\" Nour El-Sayed in the control room would only tell me, \"She knows how to make a photo count.\"\n\nSo tell me, Roommates: villain, genius or both? And be honest: would you have signed the napkin?"
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "ditmars-deli",
+          "note": "The napkin contracts, framed",
+          "expires_day": 11
+        },
+        {
+          "type": "flag",
+          "set": "diss-and-tell-solved"
+        }
+      ]
+    },
+    {
+      "id": "dt-9",
+      "day": 9,
+      "status": "active",
+      "news": [
+        {
+          "headline": "Both of Y'all",
+          "previously": "Toni Treasure ran the whole beef, and she owns half of both diss tracks.",
+          "body": "Toni's debut single premieres forty feet tall on the Big Screen, sampling both men's voicemails. The rappers answer with matching robes, a dropped lawsuit and an acoustic duo nobody saw coming.",
+          "hook": "Lola's sign-off: \"Toni was just spotted at Velvet Static with two of Brooklyn's biggest producers. Separately. Same booth, different nights.\"",
+          "post": "Roommates, she did it. She really did it.\n\nAt 9 PM last night, the Big Screen on the side of the Clout TV Tower went black, then pink, and then Toni Treasure filled it, forty feet tall, in that red dress, in that booth. Underneath her, in white letters: \"BOTH OF Y'ALL.\" Hundreds of people packed the plaza. Yerr, you could hear the screaming from Steinway Street.\n\nThe song is three minutes and twelve seconds long, and I'm sorry to say it's incredible. The beat is a slowed-down mashup of \"Rental Car Ruckus\" and \"Retainer,\" which she owns half of, so she didn't have to ask anybody. The hook samples both men's voicemails, and I need you to hear this. Big Ruckus, sweet and sleepy: \"baby, who's Gerald?\" Then Lord Menace, panicking: \"what do you mean my mom called you?\" Then Toni, over all of it: \"Both of y'all paid for the same tooth / both of y'all lied, but I sold the truth.\"\n\nNumber one in Queens in fifty-eight minutes. \"Rental Car Ruckus\" slid to two and \"Retainer\" to three, and she gets half of those too. Toni Treasure currently owns most of the Queens chart. That's not a flex, sweetie. That's a portfolio.\n\nThe comments, of course, were wildin'. \"She didn't get played, she got PAID.\" \"Two diss tracks walked so she could run.\" \"Somebody check on the curtain.\"\n\nThen this morning the plot thickened, thinned out and turned into soup. Lord Menace and Big Ruckus held their first-ever joint press conference outside Ditmars Deli & Dreams. They came out together. In matching white robes. From the spa. They said they'd been \"talking a lot\" since the restroom, and they announced a joint lawsuit against Toni Treasure for \"emotional damages, financial damages and damages to the tooth fund.\"\n\nThat lasted eleven minutes. Because Marty Kessler-Vance and Gloria Szabo-Reyes showed up, together, holding hands, and offered to represent them both \"at a couples' discount.\" The rappers looked at each other, looked at the lawyers, looked through the window at Sal's framed napkins, and dropped the lawsuit on the spot. Desmond said, \"We've been sued enough for one week. And we did most of the suing.\" Gerald said, \"Facts.\"\n\nAnd then, Roommates, they announced something I couldn't have predicted in a hundred years. Lord Menace and Big Ruckus are now a duo. Not a rap duo. An acoustic duo. Name: Desmond & Gerald. One guitar, one oboe, a lot of feelings. Their first single is \"We Got Played,\" a slow, sincere ballad about trust, imaginary dental work and a beige curtain. It's number nine in Queens. My cousin cried. My cousin is forty.\n\nEvery lawsuit is done: Sal, the nail spa, DJ Sharm and each other. Talon Talk Nail Spa has a new package called \"The Curtain\": two pedicures, one curtain, half price. Sal kept the chalkboard and added a fourth line: \"THE DESMOND & GERALD: one egg whites, one double pastrami, they share.\" Sharm played \"We Got Played\" on The Wake-Up Call and said, \"That's growth, fam. Say less.\"\n\nAnd Toni? Toni's doing great. She bought everybody on line at the slice shop a slice, on her own tab, for the first time all month. She thanked \"both of y'all\" in her caption. And she signed a brand-new deal, on paper this time, not a napkin. Growth all around.\n\nBut you know I never sign off without one more cup of tea. Toni was just spotted at Velvet Static with two of Brooklyn's biggest producers. Separately. Same booth. Different nights.\n\nHere we go again, Roommates. So tell me: are you streaming \"Both of Y'all\" or \"We Got Played\"? And who do you think those two producers are about to sue?"
+        }
+      ],
+      "effects": [
+        {
+          "type": "place_state",
+          "place": "clout-tower",
+          "spawn_event": "dt-premiere",
+          "expires_day": 11
+        },
+        {
+          "type": "task_injection",
+          "add": [
+            "story:diss-and-tell:watch-premiere"
+          ]
+        },
+        {
+          "type": "chatter_topic",
+          "topic": "diss-and-tell",
+          "phase": "post",
+          "priority": 2
+        }
+      ]
+    }
+  ],
+  "chatter": {
+    "diss-and-tell": {
+      "early": {
+        "bartender": [
+          "Two rappers, one girl, one booth. I've seen this movie. Nobody tips in this movie.",
+          "Half the bar is Team Menace, half is Team Ruckus. The other half wants to know who Toni is."
+        ],
+        "barista": [
+          "Somebody ordered a latte \"with Menace energy.\" I gave him decaf. He didn't notice.",
+          "Toni Treasure came in, ordered nothing and took four selfies with the menu. Iconic, honestly."
+        ],
+        "doorman": [
+          "Menace's car and Ruckus's car pulled up at the same time. Both drivers said \"my guy was here first.\"",
+          "Every tough guy I ever met at a door was scared of something. Usually the door."
+        ],
+        "driver": [
+          "Drove Lord Menace to Forest Hills. He asked me to drop him two blocks from his mom's so nobody would see.",
+          "A tow truck went down Ditmars and three people started rapping at it. This city."
+        ],
+        "clerk": [
+          "Guy came in asking for \"The Lord Menace.\" Egg whites, dry toast. He ate it like a threat.",
+          "Ruckus fans want double pastrami. Menace fans want egg whites. Both want it free."
+        ],
+        "cook": [
+          "Kid asked for his slice \"Ruckus style.\" I said what's that. He said triple cheese and a lawyer.",
+          "Two diss tracks before lunch? I can't get two orders out before lunch."
+        ],
+        "dj": [
+          "Both camps sent photos for the Big Screen. Same booth, same dress, same girl. I cropped them both to Toni.",
+          "Toni's selfie lighting is professional. Deadass, she's done this before."
+        ]
+      },
+      "mid": {
+        "bartender": [
+          "Matching robes, matching cucumbers, one curtain. That's not beef, that's a spa day.",
+          "Desmond Pettibone is the name of a man who returns his library books early. Respect, honestly."
+        ],
+        "barista": [
+          "Sharm got served on air and still read the weather. Professional.",
+          "Somebody tipped me a PETTIBONE hoodie. Just the hoodie. Folded."
+        ],
+        "doorman": [
+          "Princess Biscuit has a bigger entourage than both of them combined.",
+          "Gerald Fennimore the Third asked if the line was for him. Sir, it's for the restroom."
+        ],
+        "driver": [
+          "Drove a lawyer from the courthouse to a nail spa. Then a different lawyer, same route, same tip.",
+          "Ruckus had me circle the block until the guy in the PETTIBONE hoodie left. Four laps."
+        ],
+        "clerk": [
+          "Somebody asked for \"The Toni.\" Whatever he's having, on his tab. He paid. They always pay.",
+          "A lawyer came in, bought a coffee and sued nobody. Weird day."
+        ],
+        "cook": [
+          "Menace's lawyer and Ruckus's lawyer ordered lunch together. Shared a plate. Think about it.",
+          "Two French tips at one spa on one Tuesday? That's not a coincidence, that's a booking."
+        ],
+        "dj": [
+          "Toni asked how many people see the Big Screen at once. Then she asked about 9 PM slots. Interesting questions for a victim.",
+          "Ruckus sent a photo of Princess Biscuit for the Big Screen. Honestly, best crop all week."
+        ]
+      },
+      "late": {
+        "bartender": [
+          "Married nineteen years and suing each other's clients. That's how they keep the spark alive.",
+          "Everybody says the lawyers leaked it. The lawyers can't even agree on dinner."
+        ],
+        "barista": [
+          "Two dozen roses each? The florist on 31st Street is retiring early.",
+          "Toni ordered two drinks and put each one on a different man's tab. Neither man was here."
+        ],
+        "doorman": [
+          "Forty-five minutes in one restroom. Longest peace talks in Queens history.",
+          "Two rappers asked for the same table tonight. Same name on the reservation, too. Hers."
+        ],
+        "driver": [
+          "Picked Toni up at the rooftop. She asked for the scenic route past the Clout TV Tower. Twice.",
+          "Everybody thinks it's the lawyers. The lawyers took the bus home. Separately. On purpose."
+        ],
+        "clerk": [
+          "Grandma's emergency tooth? My grandma has two teeth and never charged anybody for either.",
+          "A girl had two different men sign napkins at my counter once. I remember the napkins. Big napkin energy."
+        ],
+        "cook": [
+          "A dentist came in for lunch and said \"there is no such tooth.\" Then she left. Chills.",
+          "Everybody's blaming the lawyers. Follow the money. The money has a ring light."
+        ],
+        "dj": [
+          "Someone booked tomorrow's 9 PM slot on the Big Screen. Paid in cash. Two different envelopes.",
+          "I've cropped a thousand selfies. Hers are lit like a premiere."
+        ]
+      },
+      "post": {
+        "bartender": [
+          "\"Both of Y'all\" came on and the whole bar sang the hook. Two guys in the corner didn't. Matching robes.",
+          "Desmond and Gerald played an acoustic set here. One guitar, one oboe, a lot of feelings."
+        ],
+        "barista": [
+          "Toni came in and paid for her own coffee. First time. She tipped with a signed napkin.",
+          "We named a latte \"The Napkin.\" Fifty percent goes to Toni, apparently."
+        ],
+        "doorman": [
+          "Princess Biscuit is on the guest list now. The rappers aren't.",
+          "Toni's new security asked for three things: the fire exit, the back door and her royalties."
+        ],
+        "driver": [
+          "Drove Desmond and Gerald to an open mic. They held hands at a red light. Growth.",
+          "Played \"We Got Played\" three times. The fare asked me to stop. The fare was Gerald."
+        ],
+        "clerk": [
+          "Those napkins are framed now. Everybody wants a picture. Nobody wants a sandwich. Buy a sandwich.",
+          "Both of them came in and ordered the same thing. Egg whites. Healing."
+        ],
+        "cook": [
+          "Toni bought the whole line a slice. On whose tab? Hers. Finally.",
+          "\"We Got Played\" is number nine in Queens. My nephew cried. My nephew is forty."
+        ],
+        "dj": [
+          "Forty feet tall, nine PM, one take. Best premiere we've had on the Big Screen.",
+          "Both rappers sent one photo for the Big Screen. Together. Matching robes. Approved."
+        ]
+      }
+    }
+  }
+}

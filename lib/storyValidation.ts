@@ -56,6 +56,14 @@ export function validateArcs(arcs: Arc[]): string[] {
       if (!b.news?.[0]?.headline) err(a, `${b.id}: missing headline`);
       if (arc.type === "main" && b.day > 1 && !b.news?.[0]?.previously) err(a, `${b.id}: main beats after Day 1 need a "previously" line`);
       if (arc.type === "main" && !b.news?.[0]?.hook) err(a, `${b.id}: every main beat ends on a hook`);
+      // A blog post (owner, Oct 22) is a real read: several paragraphs, and the card's body stays a short teaser.
+      const post = b.news?.[0]?.post;
+      if (post !== undefined) {
+        const words = post.split(/\s+/).filter(Boolean).length;
+        if (words < 300) err(a, `${b.id}: the post is ${words} words; a blog post needs at least 300`);
+        if (post.split(/\n\s*\n/).length < 3) err(a, `${b.id}: the post needs paragraphs (a blank line between them)`);
+        if ((b.news[0].body ?? "").length > 400) err(a, `${b.id}: with a post, the body is the teaser (400 characters at most)`);
+      }
     }
     if (arc.type === "main") {
       const days = arc.beats.map((b) => b.day);
