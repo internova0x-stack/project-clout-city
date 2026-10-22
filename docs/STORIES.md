@@ -31,8 +31,8 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    `read_post`, ledger 'story_read'; the button shows "+10 🔥" until it's read).
    **Characters (owner, Oct 22):** a story may list `characters` (id, name, role, a 20 to 280 character bio, style and an
    avatar look) and each beat's news its `cast` (ids; a side story may use its parent's). The post ends with their avatar
-   heads under Share (at most 5, in the order of the story's `characters` list, so write that list most important first; a
-   post's `cast` has 5 ids at most); tapping one shows the bio. They're attached on the server from the repo file, so a story already in
+   heads under Share (a post's `cast` may name any number, but only the 5 most important show, in the order of the story's
+   `characters` list, so write that list most important first); tapping one shows the bio. They're attached on the server from the repo file, so a story already in
    the Studio picks them up without a re-upload. **A bio is the character's public persona only and never hints at a
    twist** (owner): it shows on every day's post, Day 1 included. Write it as a plain, factual bio tied to the story (who they are, how they enter it), not in Lola's slangy voice.
 2. **Check it.** `npm run validate:stories` runs every rule: ids and beat days in order, places,
