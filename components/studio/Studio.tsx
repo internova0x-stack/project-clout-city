@@ -31,11 +31,11 @@ import { NEWS_KIND_LABEL } from "@/lib/news";
 const nyToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
 const fmtDate = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
 
-export function Studio({ initial, api, who, preview = false }: { initial: StudioArc[]; api: StudioApi; who: string; preview?: boolean }) {
+export function Studio({ initial, initialNote, api, who, preview = false }: { initial: StudioArc[]; initialNote?: string | null; api: StudioApi; who: string; preview?: boolean }) {
   const [arcs, setArcs] = useState(initial);
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(null);
+  const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(initialNote ? { kind: "error", text: initialNote } : null);
   const [tab, setTab] = useState<"stories" | "reports" | "mayor" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup" | "shop">(api.metrics ? "metrics" : "stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
@@ -174,7 +174,6 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
           {showUpload
             ? <Upload busy={busy} onUpload={(json) => apply("upload", () => api.upload(json))} />
             : <button className="studio-link" onClick={() => setShowUpload(true)}>or upload a story file</button>}
-          <p className="overline" style={{ margin: "8px 0 0" }}>Stories</p>
           {newDraft && !builder && (
             <button className="studio-arc builder-draft-row" onClick={() => openBuilder(null)}>
               <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
@@ -184,14 +183,29 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
               <span className="tag studio-review draft">Draft</span>
             </button>
           )}
-          {mains.map((m) => (
-            <div key={m.id} className="stack-8">
-              <div className="studio-arc-line"><ArcRow a={m} active={m.id === selected} onPick={() => setSelected(m.id)} />{mover(mains, m)}</div>
-              {sidesOf(m.id).map((s) => (
-                <div key={s.id} className="studio-arc-line"><ArcRow a={s} parent={m} side active={s.id === selected} onPick={() => setSelected(s.id)} />{mover(sidesOf(m.id), s)}</div>
-              ))}
-            </div>
-          ))}
+          {/* Owner, Oct 22: each main story is one card with its side stories inside it, grouped by where it stands. */}
+          {STORY_SECTIONS.map((sec) => {
+            const group = mains.filter((m) => sec.stages.includes(storyStage(m)));
+            if (!group.length) return null;
+            return (
+              <section key={sec.id} className="stack-8" aria-label={sec.label}>
+                <p className="overline studio-section">{sec.label} <span className="meta">{group.length}</span></p>
+                {group.map((m) => (
+                  <div key={m.id} className={`studio-story-group${sidesOf(m.id).some((s) => s.id === selected) || m.id === selected ? " open" : ""}`}>
+                    <div className="studio-arc-line"><ArcRow a={m} active={m.id === selected} onPick={() => setSelected(m.id)} />{mover(mains, m)}</div>
+                    {sidesOf(m.id).length > 0 && (
+                      <div className="studio-sides">
+                        <span className="meta studio-sides-label">Side stories of {m.title || m.id} · {sidesOf(m.id).length}</span>
+                        {sidesOf(m.id).map((s) => (
+                          <div key={s.id} className="studio-arc-line"><ArcRow a={s} parent={m} side active={s.id === selected} onPick={() => setSelected(s.id)} />{mover(sidesOf(m.id), s)}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+            );
+          })}
           {orphans.map((s) => (
             <div key={s.id} className="studio-arc-line"><ArcRow a={s} side active={s.id === selected} onPick={() => setSelected(s.id)} />{mover(orphans, s)}</div>
           ))}
@@ -211,6 +225,14 @@ export function Studio({ initial, api, who, preview = false }: { initial: Studio
     </main>
   );
 }
+
+/** The story list's groups (owner, Oct 22): where each main story stands, live first. */
+const STORY_SECTIONS: { id: string; label: string; stages: ReturnType<typeof storyStage>[] }[] = [
+  { id: "live", label: "Live now", stages: ["live"] },
+  { id: "next", label: "Up next", stages: ["scheduled", "ready", "review", "declined"] },
+  { id: "paused", label: "Paused", stages: ["paused"] },
+  { id: "done", label: "Finished and retired", stages: ["finished", "retired"] },
+];
 
 /** The story day by the calendar, whatever its status (a paused story keeps counting). */
 const calendarDay = (a: StudioArc) => (a.startAt && a.startAt <= nyToday() ? dayDiff(a.startAt, nyToday()) + 1 : null);
@@ -389,14 +411,30 @@ function ArcDetail({ arc, parent, sides = [], api, busy, apply, onOpenBuilder }:
       {/* 3. Run */}
       <div className="studio-card stack-8">
         <span className="overline">3 · Run</span>
-        <span className="subtext">Pausing hides the story and its effects on the city until you resume. Retiring ends it for good.</span>
-        <div className="segmented" role="group" aria-label="Story status">
-          {(["active", "paused", "retired"] as Status[]).map((s) => (
-            <button key={s} aria-pressed={arc.status === s} disabled={busy !== null || arc.status === s} onClick={() => apply("status", () => api.status(arc.id, s))}>
-              {s === "active" ? "Running" : s === "paused" ? "Paused" : "Retired"}
-            </button>
-          ))}
-        </div>
+        {/* Owner, Oct 22: buttons, not tabs. Pause or resume, and a separate Retire that asks first. */}
+        {arc.status === "retired" ? (
+          <span className="subtext">Retired: this story has ended for good and players no longer see it.</span>
+        ) : (
+          <>
+            <span className="subtext">
+              {arc.status === "paused"
+                ? "Paused: players don't see it and its effects on the city are lifted. Resume picks up on the day it would be."
+                : storyStage(arc, parent) === "live"
+                  ? "Live now. Pausing hides the story and its effects on the city until you resume; retiring ends it for good."
+                  : "Not live yet. Pausing keeps it off even once it's scheduled; retiring ends it for good."}
+            </span>
+            <div className="row studio-run" style={{ gap: 8, flexWrap: "wrap" }}>
+              {arc.status === "paused" ? (
+                <button className="btn btn-taxi btn-sm" disabled={busy !== null} onClick={() => apply("status", () => api.status(arc.id, "active"))}>▶ Resume</button>
+              ) : (
+                <button className="btn btn-secondary btn-sm" disabled={busy !== null} onClick={() => apply("status", () => api.status(arc.id, "paused"))}>Pause</button>
+              )}
+              <button className="btn btn-destructive btn-sm" disabled={busy !== null} onClick={() => {
+                if (window.confirm(`Retire "${arc.title || arc.id}"? It ends for good: players stop seeing it and it can't be resumed.`)) void apply("status", () => api.status(arc.id, "retired"));
+              }}>Retire</button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Beats: tap one to read it; edit its words (owner, Oct 17). */}

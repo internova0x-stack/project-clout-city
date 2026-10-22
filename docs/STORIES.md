@@ -52,7 +52,10 @@ Remove one with `delete from story_admins where user_id = (select id from auth.u
    (New York) Day 1, on any weekday, after a confirm. Players see Day 1 on their next refresh; Day 2 goes
    out at midnight. Its side stories waiting for review go live with it (migration 0081); a declined one stays
    off. If you went live before 0081, approve each side story and it joins at once.
-6. **Run it.** While it's live you can:
+   **The list (owner, Oct 22):** each main story is one card with its side stories inside it, under **Live now**, **Up
+   next**, **Paused** and **Finished and retired**. Opening the Studio first loads any new story file from the repo; a file
+   that can't load says why at the top.
+6. **Run it.** **Pause** / **Resume** and a separate **Retire** (which asks first). While it's live you can:
    - **Pause** the whole story: players stop seeing it and every effect on the city lifts until you
      resume. The calendar keeps counting, so it resumes on the day it would have been.
    - **Retire** it: it ends for good.

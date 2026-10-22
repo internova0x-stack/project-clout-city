@@ -2305,3 +2305,11 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .blog-title { margin:0; padding-right:44px; }
 .blog-para { margin:0; font-size:16px; line-height:25px; color:var(--text-1); }
 .blog-post .btn { align-self:flex-start; }
+
+/* ---------- Studio story list (owner, Oct 22): one card per main story, its side stories inside ---------- */
+.studio-section { margin:10px 0 0; display:flex; align-items:baseline; gap:6px; }
+.studio-story-group { display:flex; flex-direction:column; gap:8px; padding:8px; border-radius:var(--r-lg); background:var(--surface-card); }
+.studio-story-group.open { box-shadow:inset 0 0 0 1px rgba(232,32,58,.25); }
+.studio-sides { display:flex; flex-direction:column; gap:6px; margin-left:12px; padding-left:12px; border-left:2px solid var(--divider); }
+.studio-sides-label { padding:2px 0 0; }
+.studio-sides .studio-arc.side, .studio-sides .studio-arc-line > .studio-arc.side { margin-left:0; width:100%; }

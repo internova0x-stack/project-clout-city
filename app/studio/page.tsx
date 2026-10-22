@@ -1,5 +1,6 @@
 import { studioShopAction, studioShopAudit, studioShopNewDrop, studioCoutureOwners, studioCoutureName, studioPlazaRemove, studioShopEdit, studioShopFiles, studioShopImport, studioShopList, studioShopProcessImages } from "./shopActions";
 import { Studio } from "@/components/studio/Studio";
+import { storyImportTrouble, syncWeeklyContent } from "@/lib/contentImport";
 import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -28,10 +29,14 @@ export default async function StudioPage() {
       </Gate>
     );
   }
+  // C6: story files in the repo the Studio doesn't have yet load into Needs review first; one that can't says why.
+  const synced = await syncWeeklyContent({ force: true }).catch(() => []);
+  const storyTrouble = storyImportTrouble(synced);
   const { data } = await supabase.rpc("admin_story_list");
   return (
     <Studio
       initial={(data ?? []) as StudioArc[]}
+      initialNote={storyTrouble}
       who={user.email ?? "admin"}
       api={{
         upload: studioUpload, review: studioReview, schedule: studioSchedule, status: studioStatus, beatStatus: studioBeatStatus, content: studioContent, reorder: studioReorder, beatEdit: studioBeatEdit, goLive: studioGoLive,
