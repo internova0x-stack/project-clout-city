@@ -44,12 +44,12 @@ export function ProfileSheet({
   onOpenCollection?: () => void;
   onOpenNetWorth?: () => void;
   onOpenLeaderboard?: () => void;
-  /** Skills (owner, Oct 16): absent until they're switched on, and then there's a Skills tab. */
-  skills?: SkillState[];
+  /** Skills (owner, Oct 16): absent until they're switched on, and then there's a Skills tab (null: still loading). */
+  skills?: SkillState[] | null;
   /** Skill perks (migration 0092): gigs, invites and access per skill; absent until it runs. */
   perks?: PerkHandlers;
   /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
-  vip?: { on: boolean; until?: string | null; onOpen: () => void };
+  vip?: { on: boolean; until?: string | null; onOpen: () => void; loading?: boolean };
 }) {
   const [tab, setTab] = useState<"profile" | "skills">("profile");
   const lines = (recent ?? []).map((r) => ({ r, line: recentLine(r) })).filter((x) => x.line);
@@ -69,15 +69,17 @@ export function ProfileSheet({
               {looks.map((l) => <span key={l} className="tag">{lookBadge(`look-${l}`)?.emoji} Full {LOOK_LABEL[l] ?? l} look</span>)}
             </div>
           )}
-          {vip && <div style={{ textAlign: "center" }}><ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
+          {/* While membership loads, its space is kept so nothing below jumps when it arrives (owner, Oct 22). */}
+          {vip && <div style={{ textAlign: "center", visibility: vip.loading ? "hidden" : undefined }} aria-hidden={vip.loading || undefined}>
+            <ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
         </div>
-        {skills && (
+        {skills !== undefined && (
           <div className="segmented profile-tabs" role="group" aria-label="Profile sections">
             <button aria-pressed={tab === "profile"} onClick={() => setTab("profile")}>Profile</button>
             <button aria-pressed={tab === "skills"} onClick={() => setTab("skills")}>Skills</button>
           </div>
         )}
-        {skills && tab === "skills" ? <SkillsList skills={skills} perks={perks} /> : (<>
+        {skills !== undefined && tab === "skills" ? (skills ? <SkillsList skills={skills} perks={perks} /> : <p className="subtext">Loading your skills…</p>) : (<>
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
         <div className="profile-kpis">
