@@ -66,10 +66,14 @@ export function ShopSheet({
   const wearControl = (sku: string) => {
     const mine = state.items.find((i) => i.sku === sku && i.category === "fashion");
     if (!mine || !onEquip || !wearSlot(sku)) return null;
+    // Owned clothes say so, so "Wear" never reads as the price (owner, Oct 22).
     return (
-      <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
-        {mine.equipped ? "Wearing ✓" : "Wear"}
-      </button>
+      <div className="row" style={{ gap: 8, alignItems: "center" }}>
+        <span className="owned-chip">Owned</span>
+        <button className={`btn btn-sm ${mine.equipped ? "btn-secondary" : "btn-taxi"}`} style={{ flex: 1 }} disabled={busy !== null} onClick={() => onEquip(mine.id, !mine.equipped)}>
+          {mine.equipped ? "Wearing ✓" : "Wear"}
+        </button>
+      </div>
     );
   };
   const source: ShopCardItem[] = catalog
@@ -91,7 +95,10 @@ export function ShopSheet({
   // Clout Couture (owner, Oct 21): a row at the top of Luxury with every piece, and at the top of a piece's own tab.
   const couture = source.filter((i) => i.collection === COUTURE && shows(i) && (cat === "luxury" || i.category === cat));
   const lines = cat === "fashion" ? STYLE_LINES.filter((l) => inTab.some((i) => i.styleLines.includes(l))) : [];
-  const items = inTab.filter((i) => i.collection !== COUTURE && (line === "all" || !lines.length || i.styleLines.includes(line)));
+  // Real-money pieces come after the C$ ones in every tab (owner, Oct 22), unless a tab has nothing else.
+  const items = inTab.filter((i) => i.collection !== COUTURE && (line === "all" || !lines.length || i.styleLines.includes(line)))
+    .sort((a, b) => Number(!!a.collector) - Number(!!b.collector));
+  const coutureFirst = !items.some((i) => !i.collector);
   const card = (item: ShopCardItem) => {
     const isOwned = owned.has(item.sku) || (item.category === "cars" && player.car_sku === item.sku);
     const soon = !item.wearableNow;
@@ -176,6 +183,12 @@ export function ShopSheet({
       </div>
     );
   };
+  const coutureRow = couture.length > 0 && (
+    <div className="stack-8">
+      <p className="overline" style={{ margin: 0 }}>✨ Clout Couture</p>
+      <div className="couture-row">{couture.map(card)}</div>
+    </div>
+  );
   return (
     <>
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
@@ -194,12 +207,7 @@ export function ShopSheet({
               {lines.map((l) => <button key={l} className="chip chip-sm" aria-pressed={line === l} onClick={() => setLine(l)}>{STYLE_LINE_LABEL[l]}</button>)}
             </div>
           )}
-          {couture.length > 0 && (
-            <div className="stack-8">
-              <p className="overline" style={{ margin: 0 }}>✨ Clout Couture</p>
-              <div className="couture-row">{couture.map(card)}</div>
-            </div>
-          )}
+          {coutureFirst && coutureRow}
           {cat === "houses" && <p className="subtext" style={{ margin: 0 }}>Own a house and rent stops. Sell it and rent starts again.</p>}
           {cat === "home" && (
             <HomeShelf
@@ -215,6 +223,7 @@ export function ShopSheet({
           )}
           {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
           {cat !== "home" && <div className="item-grid">{items.map(card)}</div>}
+          {!coutureFirst && coutureRow}
         </div>
       </Sheet>
       <Sheet open={open && !!confirm} onClose={() => setConfirm(null)} label="Confirm purchase">

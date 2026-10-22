@@ -168,7 +168,7 @@ export function LookRoom({
         {trying ? (
           <div className="stack-12">
             <div className="row" style={{ gap: 12 }}>
-              <span className="look-icon big">{iconFor(trying)}</span>
+              <span className="look-icon big">{iconForSku(trying.sku)}</span>
               <span style={{ minWidth: 0 }}>
                 <span className="title" style={{ display: "block", color: "var(--text-1)" }}>{trying.name}</span>
                 <span className="subtext">{trying.blurb}</span>

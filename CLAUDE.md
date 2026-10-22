@@ -206,6 +206,10 @@ components live in `app/globals.css`.
   plaza statue; lib/coutureMap.ts, components/map/coutureModels.ts, `setCouture` in the landmark layer); `plaza_bookings`
   (`plaza_weeks`, `plaza_book`, one a week, the look kept at booking; home after its week); Studio `admin_couture_owners`,
   `admin_couture_name` (hide a name), `admin_plaza_remove`. The Clout Throne is home furniture (`throne`, sittable).
+  Shop order (owner, Oct 22): real-money pieces (the Couture row, collector cards) come after the C$ items in every tab,
+  first only when a tab has nothing else. Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
+  lib/accessories.ts), never by the code's `ShopItem.wear`, which they don't have. Migration 0106: Hell Gate Park is
+  named Astoria Park (id `hell-gate-park` kept; city seed regenerated).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
   in `assets/avatar-animations.json`; `npm run avatars:fetch` downloads them into `assets/avatars/sources/` (git-ignored:
   never commit or ship the raw files) and `npm run avatars:build` (`scripts/build-base-avatars.mjs`) makes the game copies

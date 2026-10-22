@@ -34,7 +34,7 @@ test("skipping costs C$1 per 2 seconds left, at least C$5 (#13, matches skip_tri
 test("miles are real distances", () => {
   const home = HOME_LOCATIONS.astoria_studio;
   const d = milesBetween(home, placeById("hell-gate-park")!.at);
-  assert.ok(d > 0.1 && d < 3, `Astoria studio to Hell Gate Park: ${d}`);
+  assert.ok(d > 0.1 && d < 3, `Astoria studio to Astoria Park: ${d}`);
   assert.equal(milesBetween(home, home), 0);
 });
 

@@ -108,7 +108,7 @@ export const LANDMARKS: readonly Landmark[] = [
   { id: "brownstone-sessions", placeId: "brownstone-sessions", name: "Brownstone Sessions", at: [40.7128, -73.944], kind: "brownstone", facing: 180, scale: 2.2, clear: 28, ground: "block" },
   { id: "harmony-chapel", placeId: "harmony-chapel", name: "Harmony Community Chapel", at: [40.7652, -73.913], kind: "chapel", facing: 180, scale: 2, clear: 32, ground: "block" },
   { id: "rep-count", placeId: "rep-count", name: "Rep Count Fitness", at: [40.7168, -73.9468], kind: "fitness", facing: 180, scale: 2, clear: 34, ground: "block" },
-  { id: "hell-gate-park", placeId: "hell-gate-park", name: "Hell Gate Park", at: [40.779, -73.9232], kind: "hell-gate", facing: 180, scale: 1.3, clear: 95, ground: "park" },
+  { id: "hell-gate-park", placeId: "hell-gate-park", name: "Astoria Park", at: [40.779, -73.9232], kind: "hell-gate", facing: 180, scale: 1.3, clear: 95, ground: "park" },
   { id: "astoria-blvd-station", placeId: "astoria-blvd-station", name: "Astoria Blvd station", at: [40.7702, -73.918], kind: "el-station", facing: 180, scale: 1.6, clear: 18, ground: "none", length: 150 },
   { id: "skyline-pier", placeId: "skyline-pier", name: "Skyline Pier Residences", at: [40.7478, -73.9592], kind: "condo-towers", facing: 180, scale: 1.3, clear: 50, ground: "block" },
   { id: "hunters-pier", placeId: "hunters-pier", name: "Hunter's Pier", at: [40.7432, -73.9612], kind: "pier-park", facing: 270, scale: 1.6, clear: 60, ground: "park" },

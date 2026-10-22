@@ -554,19 +554,21 @@ export function buildAvatar(look: Look, opts: { pedestal?: boolean; outfit?: Out
       break;
     }
     case "fedora": {
-      const brim = mesh(geo(new CylinderGeometry(0.3, 0.3, 0.014, 18)), hat, 0, 0.12, -0.01);
+      // Seated at the brow line, as wide as the head there (owner, Oct 22: it perched on the new bodies' bald heads).
+      const brim = mesh(geo(new CylinderGeometry(0.3, 0.3, 0.014, 18)), hat, 0, 0.075, -0.01);
       brim.rotation.x = -0.06;
-      const crown = mesh(geo(new CylinderGeometry(0.15, 0.19, 0.16, 14)), hat, 0, 0.2, -0.015);
-      crown.scale.set(1, 1, 0.92);
-      const dent = mesh(geo(new BoxGeometry(0.03, 0.02, 0.2)), mat(shade(hatColor, -0.25)), 0, 0.282, -0.015);
-      const band = mesh(geo(new CylinderGeometry(0.192, 0.194, 0.035, 14)), mat(shade(hatColor, -0.45)), 0, 0.14, -0.015);
-      band.scale.set(1, 1, 0.92);
+      const crown = mesh(geo(new CylinderGeometry(0.155, 0.207, 0.17, 14)), hat, 0, 0.16, -0.015);
+      crown.scale.set(1, 1, 0.94);
+      const dent = mesh(geo(new BoxGeometry(0.03, 0.02, 0.2)), mat(shade(hatColor, -0.25)), 0, 0.245, -0.015);
+      const band = mesh(geo(new CylinderGeometry(0.209, 0.211, 0.035, 14)), mat(shade(hatColor, -0.45)), 0, 0.095, -0.015);
+      band.scale.set(1, 1, 0.94);
       headwear.add(brim, crown, dent, band);
       break;
     }
     case "bucket": {
       const crown = mesh(geo(new CylinderGeometry(0.16, 0.205, 0.15, 14)), hat, 0, 0.16, -0.01);
-      const top = mesh(geo(new SphereGeometry(0.16, 14, 4, 0, Math.PI * 2, 0, Math.PI * 0.18)), hat, 0, 0.21, -0.01);
+      const top = mesh(geo(new SphereGeometry(0.162, 14, 6, 0, Math.PI * 2, 0, Math.PI / 2)), hat, 0, 0.235, -0.01);
+      top.scale.set(1, 0.2, 1);
       const brim = mesh(geo(new CylinderGeometry(0.21, 0.28, 0.06, 16, 1, true)), mat(hatColor, { side: DoubleSide }), 0, 0.065, -0.01);
       headwear.add(crown, top, brim);
       break;

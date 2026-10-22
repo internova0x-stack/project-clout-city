@@ -1921,7 +1921,7 @@ function fitness(t: Themed): Group {
 }
 
 // ---------------------------------------------------------------------------
-// Hell Gate Park: the great steel arch of the rail bridge rising over the park, its stone towers,
+// Astoria Park (Hell Gate Bridge): the great steel arch of the rail bridge rising over the park, its stone towers,
 // lawns and a running track
 // ---------------------------------------------------------------------------
 function hellGate(t: Themed): Group {

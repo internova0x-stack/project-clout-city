@@ -43,7 +43,7 @@ The guide's "Later: borough packs" wait until those boroughs open.
     themselves once merged (migration 0098), so there's nothing to upload.
 - **Date spots** (`content/culture/date-spots.json`): Lola's line on four cards, above "Make it a date": the new
   **Downstairs on Main Food Court** in Flushing (dumplings C$15, a bubble tea to split; Wen Zhao runs the dumpling
-  stall), the Hell Gate Park picnic, the Ditmars Heights rooftop and the 2 AM deli date at Sal's.
+  stall), the Astoria Park picnic, the Ditmars Heights rooftop and the 2 AM deli date at Sal's.
 - **NYC complaints in the dating column**: next week's "Ask Lola" is "He lives in Staten Island and won't take the
   ferry", and the weekly drafting routine now writes the column around an NYC dating complaint every week.
 
@@ -60,7 +60,7 @@ The guide's "Later: borough packs" wait until those boroughs open.
   | 💌 Andreas's name day (invite) | Mon Nov 30, 7 to 11 PM | Feta Compli Taverna | as Dimitra's |
   | 🎆 New Year's Eve countdown on the roof | Thu Dec 31, 9 PM to midnight | Ditmars Heights Rooftop | C$60 entry; 100 clout, +15 Mood |
   | 🎺 Greek Independence Day Parade | Sun Mar 28, 2027, noon to 4 PM | The Hub (31st Street) | 60 clout, +14 Mood |
-  | 💌 Gus and Dr. Eleni's name day picnic (invite) | Fri May 21, 2027, 6 to 11 PM | Hell Gate Park | 40 clout, +25 / −20; +12 Mood |
+  | 💌 Gus and Dr. Eleni's name day picnic (invite) | Fri May 21, 2027, 6 to 11 PM | Astoria Park | 40 clout, +25 / −20; +12 Mood |
 
   Events show up to 75 days ahead, so NYE is on the calendar from mid-October. Times Square stays locked.
 - **The cultural invite, end to end.** Two weeks before a name day, the invite sits on the Phone's home screen ("💌
@@ -101,7 +101,7 @@ The guide's "Later: borough packs" wait until those boroughs open.
 
 ## C3: the park, jobs, the roommate and the first day (built Oct 21, migration 0094)
 
-- **Hell Gate Park** (the game's Astoria Park, name kept): "Sit on a bench by the river" (+12 Mood; the old hangout,
+- **Astoria Park** (renamed from Hell Gate Park, owner Oct 22; id `hell-gate-park` kept): "Sit on a bench by the river" (+12 Mood; the old hangout,
   same id), "Take a lap around the track" (+4 Mood, +3 Confidence, trains Fitness), "Picnic on the lawn" (C$18, +14
   Energy, a date spot when C6 comes) and a dog-walking shift.
 - **Three new shifts**, inside the usual 3 shifts a day: walk dogs at the park (C$110), work the register at Sal's
@@ -113,7 +113,7 @@ The guide's "Later: borough packs" wait until those boroughs open.
   Lola's aside ("Your roommate's sweet till Thursday. That's when rent's due. Deadass."). After that she leaves a note
   on the fridge each day. The intro is remembered per device. An eviction now lands in the share (the cheapest home).
 - **The first day.** On the New York day a player moves in, the daily tasks start with "Get a BEC at Sal's", "Pet the
-  bodega cat" and "Take a lap in Hell Gate Park" (`dailyTasks.firstDay` in lib/city.ts); the other two are picked as
+  bodega cat" and "Take a lap in Astoria Park" (`dailyTasks.firstDay` in lib/city.ts); the other two are picked as
   usual. Enrolled students keep their "Go to class" slot instead. The tour and the first party are unchanged.
 - **Two goals** open the ladder: "Become a regular" (3 different days at Sal's, 25 clout) and "Get your own place"
   (a home without a roommate, or a house; 75 clout). Players already living alone finish "Get your own place" the
@@ -171,7 +171,7 @@ The rows of the Oct 20 conflict report, as answered. "A" means the recommended f
 | 11 | Roommate | **The roommate apartment is the main pick at sign-up**; the studio stays. Owner: "two beds or a bunk" (two single beds suggested; dorms already have bunks) |
 | 12 | Starting cash | Stays C$5,000 to 10,000 |
 | 13 | Sitting in the park | The park's hangout becomes "Sit on a bench"; add "Take a lap" and "Picnic" |
-| 14 | Park name | Keep Hell Gate Park |
+| 14 | Park name | Keep Hell Gate Park (Oct 22: renamed Astoria Park, the real park's name) |
 | 15 | Shifts | Dog walker, bodega cashier and deli counter as normal shifts |
 | 16 | Goals | Add "Get your own place" and "Become a regular" at 0 clout |
 | 17 | "Remembers your order" | After 3 different days at Sal's |

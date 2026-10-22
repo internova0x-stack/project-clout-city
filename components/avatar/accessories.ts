@@ -60,7 +60,8 @@ export function buildHeadAccessory(a: AccessoryWear): { group: Group; dispose():
     case "bucket": {
       // Denim squares: the crown in two blues, a stitched brim.
       add(new CylinderGeometry(0.16, 0.205, 0.15, 16), main, 0, 0.16, -0.01);
-      add(new SphereGeometry(0.16, 16, 4, 0, Math.PI * 2, 0, Math.PI * 0.18), trim, 0, 0.21, -0.01);
+      // A low dome closing the crown's top (it floated above the hat as a sliver before).
+      add(new SphereGeometry(0.162, 16, 6, 0, Math.PI * 2, 0, Math.PI / 2), trim, 0, 0.235, -0.01).scale.set(1, 0.2, 1);
       for (let i = 0; i < 4; i++) {
         const p = add(new CylinderGeometry(0.168, 0.2, 0.072, 4, 1, true, i * (Math.PI / 2), Math.PI / 4), i % 2 ? trim : mat("#7E9CC0", { side: DoubleSide }), 0, i < 2 ? 0.2 : 0.125, -0.01);
         p.scale.set(1.01, 1, 1.01);
@@ -80,16 +81,18 @@ export function buildHeadAccessory(a: AccessoryWear): { group: Group; dispose():
       break;
     }
     case "fedora": {
-      add(new CylinderGeometry(0.3, 0.3, 0.014, 22), main, 0, 0.12, -0.01).rotation.x = -0.06;
-      add(new CylinderGeometry(0.15, 0.19, 0.16, 16), main, 0, 0.2, -0.015).scale.set(1, 1, 0.92);
-      add(new BoxGeometry(0.03, 0.02, 0.2), mat(a.accent), 0, 0.282, -0.015);
-      add(new CylinderGeometry(0.192, 0.194, 0.035, 16), trim, 0, 0.14, -0.015).scale.set(1, 1, 0.92);
+      // Seated on the head (owner, Oct 22: it perched on top of the new bald heads): the brim at the brow line, the
+      // crown as wide as the head there.
+      add(new CylinderGeometry(0.3, 0.3, 0.014, 22), main, 0, 0.075, -0.01).rotation.x = -0.06;
+      add(new CylinderGeometry(0.155, 0.207, 0.17, 16), main, 0, 0.16, -0.015).scale.set(1, 1, 0.94);
+      add(new BoxGeometry(0.03, 0.02, 0.2), mat(a.accent), 0, 0.245, -0.015);
+      add(new CylinderGeometry(0.209, 0.211, 0.035, 16), trim, 0, 0.095, -0.015).scale.set(1, 1, 0.94);
       break;
     }
     case "wide-brim": {
-      add(new CylinderGeometry(0.4, 0.4, 0.012, 32), main, 0, 0.12, -0.01).rotation.x = -0.05;
-      add(new CylinderGeometry(0.16, 0.19, 0.15, 18), main, 0, 0.195, -0.015).scale.set(1, 1, 0.94);
-      add(new CylinderGeometry(0.192, 0.194, 0.03, 18), metal(k, a.accent), 0, 0.14, -0.015).scale.set(1, 1, 0.94);
+      add(new CylinderGeometry(0.4, 0.4, 0.012, 32), main, 0, 0.075, -0.01).rotation.x = -0.05;
+      add(new CylinderGeometry(0.165, 0.207, 0.16, 18), main, 0, 0.155, -0.015).scale.set(1, 1, 0.95);
+      add(new CylinderGeometry(0.209, 0.211, 0.03, 18), metal(k, a.accent), 0, 0.095, -0.015).scale.set(1, 1, 0.95);
       break;
     }
     case "balaclava": {

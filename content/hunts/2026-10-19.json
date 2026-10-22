@@ -96,7 +96,7 @@
         { "say": "It lit itself in the truck. We don't talk about it. Gus took it. He says it reminds him of the old lighthouse. He's at the park, under the bridge." },
         {
           "say": "That lantern hung on the river when I was a boy. It's seen things. Tell me something you've seen.",
-          "question": { "q": "What does the pool at Hell Gate Park have strong opinions about?", "choices": ["Sunscreen", "Swim caps", "Cannonballs", "Goggles"], "answer": 1 },
+          "question": { "q": "What does the pool at Astoria Park have strong opinions about?", "choices": ["Sunscreen", "Swim caps", "Cannonballs", "Goggles"], "answer": 1 },
           "then": "Swim caps. Never forget it. Jojo has the lantern at the café now, Vee's old table. The password is its name."
         },
         {
