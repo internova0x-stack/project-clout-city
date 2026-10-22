@@ -71,3 +71,10 @@ test("v0.7: a starter fit must use its style's garments and colors", () => {
   assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit }, "bodega_drip"), true);
   assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit: { ...fit, bottom: "gown" } }, "bodega_drip"), false);
 });
+
+test("the New Yorker type: optional, kept when known, refused when not", () => {
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), nyer: "transplant" }, "bodega_drip"), true);
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), nyer: "tourist" }, "bodega_drip"), false);
+  assert.equal(normalizeLook({ ...lookChoices(DEFAULT_LOOK), nyer: "native" }, "bodega_drip").nyer, "native");
+  assert.equal(normalizeLook({ ...lookChoices(DEFAULT_LOOK), nyer: "tourist" }, "bodega_drip").nyer, undefined);
+});

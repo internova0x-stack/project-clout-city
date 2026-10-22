@@ -12,6 +12,7 @@ import { validateExamWeek } from "./exams";
 import { loadArcs } from "./storyContent";
 import { validateArcs } from "./storyValidation";
 import { getAdminSupabase } from "./supabase/admin";
+import { readAutopilot } from "./autopilot";
 
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
@@ -37,7 +38,9 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
   try { storyPlaces = loadArcs().flatMap((a) => storyPlaceIds(a as unknown as Parameters<typeof storyPlaceIds>[0])); } catch { /* no stories */ }
   const out: { file: string; result: string }[] = [];
   const missing = (msg: string) => /does not exist|schema cache/i.test(msg);
-  for (const { file, raw } of await weekFiles("news")) {
+  // Autopilot (migration 0107): a paused kind waits for the Studio. Before 0107 every kind is on.
+  const auto = readAutopilot((await admin.from("game_settings").select("value").eq("key", "autopilot").maybeSingle()).data?.value);
+  for (const { file, raw } of auto.news ? await weekFiles("news") : []) {
     const r = validateNewsWeek(raw);
     if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
     const { data, error } = await admin.rpc("content_import_news", { p_items: r.items });
@@ -45,7 +48,7 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} items` });
   }
-  for (const { file, raw } of await weekFiles("hunts")) {
+  for (const { file, raw } of auto.hunts ? await weekFiles("hunts") : []) {
     const r = validateHunt(raw, { storyPlaces });
     if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
     const { data, error } = await admin.rpc("content_import_hunt", { p_data: r.hunt });
@@ -72,6 +75,11 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const { data, error } = await admin.rpc("content_import_story", { p_data: arc });
     if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: String(data) });
+  }
+  // Autopilot (migration 0107): when no story is running or scheduled, the next one in the Studio's list starts today.
+  if (auto.stories) {
+    const { data, error } = await admin.rpc("story_autopilot");
+    if (!error && data) out.push({ file: `content/stories/${data}.json`, result: "started today (autopilot)" });
   }
   return out;
 }

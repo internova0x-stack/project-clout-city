@@ -28,7 +28,7 @@ function seed(preset: string) {
   }));
   if (preset !== "new") {
     rows.push({ id: rows.length + 1, kind: "bug", message: "My avatar's hoodie went see-through on the subway.", at: ago(60 * 26),
-      status: preset === "reply" ? "done" : "read", reply: preset === "reply" ? "Thanks for the heads up! The tailors fixed it in today's update. — Mayor Mama-Mandee" : null,
+      status: preset === "reply" ? "done" : "read", reply: preset === "reply" ? "Thanks for the heads up! The tailors fixed it in today's update. — Mayor Papa-Dani" : null,
       repliedAt: preset === "reply" ? ago(30) : null, player: ME, context: { place: "flushing-meadows", device: "iPhone · Safari" }, seen: preset !== "reply", date: "2000-01-01" });
   }
   store = { rows, next: rows.length + 1, preset };

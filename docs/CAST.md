@@ -27,7 +27,7 @@ mean. Examples:
 - "Yo, good morning Astoria! It's ya boy Sharm Almight on The Wake-Up Call. If you ain't up yet, you buggin', son."
 - "Keep it about you, fam. No tags, no names, no drama. I read shoutouts, not subpoenas. Don't get me jammed up."
 
-**Mayor Mama-Mandee** (City Hall, owner Oct 22): the city's mayor and a recurring face, in City News every week
+**Mayor Papa-Dani** (City Hall, owner Oct 22): the city's mayor and a recurring face, in City News every week
 and in the Phone's Mayor app, where he welcomes players and answers their letters (lib/mayor.ts). Enthusiastic,
 everywhere at once, a listener: he hears his constituents out, takes their feedback and gets problems fixed fast,
 then cuts a ribbon on the fix. Big exclamation points, "neighbor", "my door is always open", "you talk, I listen".

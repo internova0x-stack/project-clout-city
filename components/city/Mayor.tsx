@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MAYOR_MAMA_MANDEE } from "@/lib/cast";
+import { MAYOR_PAPA_DANI } from "@/lib/cast";
 import { LETTER_KINDS, MAYOR, MAYOR_WELCOME, kindOf, letterProblem, type LetterKind, type LetterStatus, type MayorApi, type MayorState } from "@/lib/mayor";
 
 // Contact the Mayor (migration 0105): the Phone's feedback app. Pick what it's about, write the letter, send; your
@@ -53,7 +53,7 @@ export function MayorApp({ api, onToast, onSeen }: { api: MayorApi; onToast: (te
       <div className="mayor-hero stack-8">
         <div className="row" style={{ gap: 10 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="mayor-portrait" src={MAYOR_MAMA_MANDEE.portrait} alt={MAYOR.name} width={56} height={56} />
+          <img className="mayor-portrait" src={MAYOR_PAPA_DANI.portrait} alt={MAYOR.name} width={56} height={56} />
           <div className="stack-4">
             <span className="title" style={{ display: "block" }}>A welcome from {MAYOR.name}</span>
             <span className="meta" style={{ display: "block" }}>{MAYOR.office}, City Hall</span>
@@ -80,7 +80,7 @@ export function MayorApp({ api, onToast, onSeen }: { api: MayorApi; onToast: (te
             <span className={`meta${message.trim().length > MAYOR.messageMax ? " radio-problem" : ""}`}>{message.trim().length}/{MAYOR.messageMax}</span>
           </span>
           <span className={`field radio-area${problem ? " error" : ""}`}>
-            <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5} placeholder={kind ? kindOf(kind).placeholder : "Dear Mayor Mama-Mandee, …"} aria-label="Your letter" />
+            <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5} placeholder={kind ? kindOf(kind).placeholder : "Dear Mayor Papa-Dani, …"} aria-label="Your letter" />
           </span>
           {problem && <span className="meta radio-problem">{problem}</span>}
         </label>
@@ -107,7 +107,7 @@ export function MayorApp({ api, onToast, onSeen }: { api: MayorApi; onToast: (te
               {l.reply && (
                 <div className="mayor-reply stack-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="mayor-portrait mayor-portrait-sm" src={MAYOR_MAMA_MANDEE.portrait} alt="" width={28} height={28} />
+                  <img className="mayor-portrait mayor-portrait-sm" src={MAYOR_PAPA_DANI.portrait} alt="" width={28} height={28} />
                   <span className="overline" style={{ display: "block" }}>{unseenIds.has(l.id) ? "New · " : ""}{MAYOR.name} replied{l.repliedAt ? ` · ${when(l.repliedAt)}` : ""}</span>
                   <span className="body" style={{ display: "block" }}>{l.reply}</span>
                 </div>

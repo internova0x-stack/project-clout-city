@@ -15,7 +15,7 @@ import { editionLine, formatPrice, serialLabel, type Edition } from "@/lib/store
 import { ShopArt, ShopCardPreview } from "../city/ShopCard";
 import { GraphicsSwitch } from "../GraphicsSwitch";
 
-const TAB_LABEL: Record<ShopTab, string> = { fashion: "Fashion", accessories: "Accessories", home: "Home", cars: "Cars", houses: "Houses", luxury: "Luxury", makeup: "Makeup" };
+const TAB_LABEL: Record<ShopTab, string> = { fashion: "Fashion", accessories: "Accessories", home: "Furniture", cars: "Cars", houses: "Houses", luxury: "Luxury", makeup: "Makeup" };
 const cash = (i: CatalogItem) => (i.realCash ? (i.priceUsdCents ? formatPrice(i.priceUsdCents, "usd") : "$–") : `C$${i.price.toLocaleString("en-US")}`);
 const STATUSES: CatalogStatus[] = ["pending_review", "draft", "scheduled", "live", "retired"];
 type Filters = { status: CatalogStatus | "all"; tab: ShopTab | "all"; line: string; tier: string; pres: string; money: boolean; ready: boolean; locked: boolean };

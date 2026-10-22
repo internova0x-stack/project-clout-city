@@ -30,13 +30,15 @@ export const CELEBRITIES: Celebrity[] = [
  *  letters in the Phone's Mayor app (lib/mayor.ts). */
 export interface Official { id: string; name: string; title: string; bit: string; /** Profile picture (public/). */ portrait: string }
 
-export const MAYOR_MAMA_MANDEE: Official = {
-  id: "mayor-mama-mandee", name: "Mayor Mama-Mandee", title: "the Mayor",
+export const MAYOR_PAPA_DANI: Official = {
+  id: "mayor-papa-dani", name: "Mayor Papa-Dani", title: "the Mayor",
   bit: "Enthusiastic, everywhere at once, listens to his constituents and fixes the city's problems fast; never met a ribbon he wouldn't cut",
   // Owner, Oct 22: a big smile, a mustache and a short beard.
-  portrait: "/cast/mayor-mama-mandee.webp",
+  portrait: "/cast/mayor-papa-dani.webp",
 };
-export const OFFICIALS: Official[] = [MAYOR_MAMA_MANDEE];
+export const OFFICIALS: Official[] = [MAYOR_PAPA_DANI];
+/** The Mayor's id before his rename (owner, Oct 22: Mama-Mandee became Papa-Dani); news files may still carry it. */
+export const MAYOR_OLD_IDS: readonly string[] = ["mayor-mama-mandee"];
 
 export interface Wannabe { id: string; name: string; bit: string }
 

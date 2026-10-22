@@ -51,10 +51,10 @@ test("no real brand, team or trademarked name in the game's copy or content", ()
   assert.deepEqual(found, []);
 });
 
-test("Lola's tour and tasks nudge: one or two slang terms per line", () => {
+test("the tour (Lola and the Mayor) and the tasks nudge: one or two slang terms per line", () => {
   const src = read("components/game/Tutorial.tsx");
   const lines = [...src.matchAll(/text: "((?:[^"\\]|\\.)*)"/g), ...src.matchAll(/DAILY_HINT_TEXT = "((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]);
-  assert.equal(lines.length, 7);
+  assert.equal(lines.length, 8);
   for (const l of lines) {
     const n = slangCount(l, data.slang.terms);
     assert.ok(n >= 1 && n <= 2, `${n} slang terms: "${l.slice(0, 40)}…"`);

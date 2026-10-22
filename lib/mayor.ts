@@ -3,12 +3,12 @@
 // back, which the player sees in the app. The rules live in SQL (mayor_write, mayor_letters); this file is the shapes,
 // the copy and the form's checks.
 
-import { MAYOR_MAMA_MANDEE } from "./cast.ts";
+import { MAYOR_PAPA_DANI } from "./cast.ts";
 
 export const MAYOR = {
   /** The city's mayor (owner, Oct 22): enthusiastic, listens to his constituents and fixes the city's problems fast. */
-  name: MAYOR_MAMA_MANDEE.name,
-  office: `Office of ${MAYOR_MAMA_MANDEE.name}`,
+  name: MAYOR_PAPA_DANI.name,
+  office: `Office of ${MAYOR_PAPA_DANI.name}`,
   messageMin: 10,
   messageMax: 1000,
   replyMax: 1000,
@@ -18,7 +18,7 @@ export const MAYOR = {
 
 /** His welcome letter at the top of the app. Warm and quick, and it never promises more than a read and a reply. */
 export const MAYOR_WELCOME = [
-  "Welcome to City Hall, neighbor! I'm Mayor Mama-Mandee, and my door is always open. Well, this app is. Same thing!",
+  "Welcome to City Hall, neighbor! I'm Mayor Papa-Dani, and my door is always open. Well, this app is. Same thing!",
   "Something broken? Got a big idea? Mad about the rent? Write me. My team and I read every single letter, and when something's busted in this city, we get on it fast.",
   "You talk, I listen. That's the deal. Now go make some clout!",
 ] as const;

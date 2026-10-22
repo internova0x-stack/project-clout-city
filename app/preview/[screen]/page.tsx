@@ -25,6 +25,7 @@ import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsU
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
 import { previewStudioLetter, previewStudioMailbag } from "../mayorActions";
+import { previewAutopilot, previewAutopilotSet } from "../autopilotActions";
 import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -193,7 +194,7 @@ export default async function Preview({
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
             gossipList: previewGossipList, gossipStatus: previewGossipStatus, setupCheck: previewSetupCheck,
-            mailbag: previewStudioMailbag, letter: previewStudioLetter,
+            mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet,
             shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
           }}
         />

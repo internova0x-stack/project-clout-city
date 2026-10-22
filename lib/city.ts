@@ -1071,7 +1071,7 @@ export const SHOP_CATEGORIES: { id: ShopCategory; label: string; emoji: string }
   { id: "fashion", label: "Fashion", emoji: "👗" },
   // The Shop Manager (owner, Oct 21): hats, shades, scarves and bags; jewelry and watches stay in Luxury.
   { id: "accessories", label: "Accessories", emoji: "🕶️" },
-  { id: "home", label: "Home", emoji: "🛋️" },
+  { id: "home", label: "Furniture", emoji: "🛋️" },
   { id: "cars", label: "Cars", emoji: "🚗" },
   { id: "houses", label: "Houses", emoji: "🏠" },
   { id: "luxury", label: "Luxury", emoji: "💍" },

@@ -7,6 +7,12 @@ approve the hunt and news in the Studio. **Gossip is automatic** (owner, Oct 13)
 merged it goes live on its Monday by itself; the Studio's **Gossip** tab shows it in full, and you
 can Pause it or Hold it with a note.
 
+> **Autopilot (owner, Oct 22; migration 0107, lib/autopilot.ts):** the routine merges its own pull request once its
+> checks pass, and everything goes live by itself: news, hunts and Tea from their files, and stories one after another
+> (when a story ends, the next one in the Studio's Stories order is approved and starts that day). Studio → **Calendar**
+> has a switch for each; a paused kind waits for you (news and hunts: Load and Approve below; Tea: approve the week in
+> Gossip; stories: approve and pick a Day 1).
+
 > **Test phase (owner, Oct 14): news and hunts are automatic too.** No approval this round: once a
 > news or hunt week file is merged, the game stores it approved by itself (within 10 minutes of the
 > next visit, or at once when you open the Studio's News or Hunts tab; migration 0037,
@@ -19,7 +25,8 @@ can Pause it or Hold it with a note.
 | When (New York) | Who | What |
 | --- | --- | --- |
 | Thursday morning | The Routine | Drafts `content/hunts/<Monday>.json`, `content/news/<Monday>.json` and `content/gossip/<Monday>.json` for the coming Monday's week, runs the checks, opens a pull request "Content: week of …" |
-| Thursday to Saturday | You | Read the pull request (its description lists the theme, the eight treasures and every headline). Ask for changes in a comment or edit the files, then merge |
+| Thursday | The Routine | Merges its own pull request once its checks pass (autopilot) |
+| Any time | You (optional) | Read the merged pull request; pause a kind in Studio → Calendar to approve it yourself next time |
 | After the deploy | You | Studio → **Calendar**: press **Load** on the week's hunt and news. Then **Hunts**: skim the eight tracks, read one in full, Approve (or Send back with a note). **News**: Approve all |
 | After the deploy | The game | Stores the gossip week by itself (within 10 minutes of the next visit). Nothing to approve: read it in the Studio's **Gossip** tab if you like, and Pause or Hold it if something's off |
 | After the deploy | The game | Stores the exam week by itself (migration 0077, `lib/contentImport.ts`). A course's questions can be changed until the first student sits that exam; after that the week's set is locked. Without a week file, exams use the standing question bank |
@@ -69,7 +76,7 @@ it isn't in your working directory). Work from the main branch.
      "he calls every cab a Hailr"), never about anyone's background; Lola rules on it in her voice,
    - city news about the invented cast only (lib/cast.ts ids in "cast"): light, satirical, no real
      people, brands, politics, tragedies or crime, nothing that changes prices or places.
-   - at least one city item starring Mayor Mama-Mandee ("mayor-mama-mandee" in "cast"; owner Oct 22, the validator
+   - at least one city item starring Mayor Papa-Dani ("mayor-papa-dani" in "cast"; owner Oct 22, the validator
      requires it): a ribbon cutting, a fix, a civic event, in his voice from docs/CAST.md. When the team has marked
      Mayor's Inbox letters done that week, he can announce what really got fixed ("You wrote, we fixed it");
      never politics, and never a fix that didn't ship.
@@ -102,9 +109,11 @@ it isn't in your working directory). Work from the main branch.
 8. Commit only those four files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news
-   headline by day, each gossip story's title and Tea headline, and one sample exam question per course. End with: "Merge, then load the
-   hunt and news in the Studio Calendar and approve them by Sunday. The gossip goes live by itself."
-   Don't change any code, and don't merge.
+   headline by day, each gossip story's title and Tea headline, and one sample exam question per course. End with: "Autopilot:
+   merged by the routine; it goes live by itself unless it's paused in Studio → Calendar."
+9. Autopilot (owner, Oct 22): once validate:content and npm test pass, merge the pull request yourself (a merge commit).
+   If a check fails and you can't fix it, leave the pull request open and say why in its description.
+   Don't change any code.
 ```
 
 ## Boroughs (migration 0066)

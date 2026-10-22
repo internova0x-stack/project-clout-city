@@ -2,7 +2,7 @@
 
 import { LOOK_LABEL, lookBadge } from "@/lib/style";
 import dynamic from "next/dynamic";
-import type { Look } from "@/lib/look";
+import { nyerLabel, type Look } from "@/lib/look";
 import type { Outfit } from "@/lib/styles";
 import { formatCash, formatShort } from "@/lib/economy";
 import { recentLine, recentWhen, type RecentItem } from "@/lib/recent";
@@ -63,6 +63,7 @@ export function ProfileSheet({
         <div>
           <h2 className="display-md profile-name">{name}</h2>
           <p className="body profile-sub">{subtitle}</p>
+          {nyerLabel(look.nyer) && <p className="meta profile-sub" style={{ margin: 0 }}>🗽 {nyerLabel(look.nyer)}</p>}
           {!!looks?.length && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 6 }}>
               {looks.map((l) => <span key={l} className="tag">{lookBadge(`look-${l}`)?.emoji} Full {LOOK_LABEL[l] ?? l} look</span>)}
