@@ -35,14 +35,6 @@
     {
       "tab": "Fashion",
       "subTab": "",
-      "liveName": "Wide-leg trousers",
-      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084529_3cdc68ef-0cd0-4493-8f4d-08455e9b4259.png",
-      "transparent": true,
-      "note": "Reused: the Champagne Hour Trousers image (already transparent)."
-    },
-    {
-      "tab": "Fashion",
-      "subTab": "",
       "liveName": "Pleated mini skirt",
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092042_8371011d-1627-40c8-8c45-00aed9c68fe6.png",
       "transparent": false,
@@ -251,26 +243,10 @@
     {
       "tab": "Luxury",
       "subTab": "",
-      "liveName": "Chunky gold-tone chain",
-      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_090236_93da606d-513e-4e64-9076-b436da9f3470.png",
-      "transparent": false,
-      "note": "Reused: the Double Rope Chains image."
-    },
-    {
-      "tab": "Luxury",
-      "subTab": "",
       "liveName": "Diamond-ish studs",
       "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_092138_f4921bf8-9c8c-454f-8143-4b1ad32fd086.png",
       "transparent": false,
       "note": ""
-    },
-    {
-      "tab": "Luxury",
-      "subTab": "",
-      "liveName": "Designer watch",
-      "sourceImage": "https://d8j0ntlcm91z4.cloudfront.net/user_3Kt1pu7c4Uz3DGQBKKhT7AptIgl/hf_20261021_084543_c9fa602e-d7cc-4e0d-ac5e-27d3454f7b95.png",
-      "transparent": true,
-      "note": "Reused: the Ice Rink Watch image (already transparent)."
     },
     {
       "tab": "Makeup",

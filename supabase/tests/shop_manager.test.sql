@@ -25,7 +25,7 @@ insert into public.story_admins (user_id) values (pg_temp.id(1));
 update public.players set bank_cash = 100000, clout = 0 where id = pg_temp.id(2);
 
 -- The seed: everything on sale is live, and the game's Shop list is unchanged.
-select pg_temp.assert((select count(*) from public.shop_catalog where status = 'live' and origin = 'code') = 64, 'every item on sale is live');
+select pg_temp.assert((select count(*) from public.shop_catalog where status = 'live' and origin = 'code') = 61, 'every item on sale is live (64, less the 3 duplicates migration 0108 retires)');
 select pg_temp.assert(jsonb_array_length(public.city() -> 'shop') = 64, 'the city shop lists them');
 select pg_temp.assert(public.shop_item('fit-satin-bomber') @> '{"price": 395, "clout": 25, "slot": "top", "category": "fashion", "status": "live"}', 'shop_item as before');
 select pg_temp.assert(public.shop_item('house-lic-penthouse') ->> 'slot' is null, 'houses keep their null slot');

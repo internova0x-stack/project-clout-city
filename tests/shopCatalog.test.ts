@@ -16,12 +16,12 @@ const files = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => ({ 
 const parsed = files.map(({ f, raw }) => ({ f, ...parseCatalogFile(raw, f, { coutureCloutFor: () => 260 }) }));
 const drafts = parsed.flatMap((p) => p.drafts);
 
-test("every catalog file loads: 99 new items, 56 pictures for items on sale, no problems", () => {
+test("every catalog file loads: 99 new items, 53 pictures for items on sale, no problems", () => {
   for (const p of parsed) assert.deepEqual(p.problems, [], p.f);
   assert.equal(drafts.length, 99);
   assert.equal(new Set(drafts.map((d) => d.sku)).size, drafts.length, "unique ids");
   const images = parsed.flatMap((p) => p.images);
-  assert.equal(images.length, 56);
+  assert.equal(images.length, 53);
   for (const m of images) assert.ok(SHOP_ITEMS.some((i) => i.name === m.liveName), `"${m.liveName}" is on sale`);
   for (const d of drafts) {
     assert.deepEqual(fieldProblems(d, { brandHits: (t) => brandHits(t, parody) }), [], d.sku);
@@ -151,6 +151,11 @@ test("no product is listed twice: every Shop file and the code's items have uniq
     ...SHOP_ITEMS.map((i) => ({ sku: i.sku, name: i.name, pic: null as string | null, line: i.furniture?.line ?? null, from: "lib/city.ts" })),
     ...parsed.flatMap((p) => p.drafts.map((d) => ({ sku: d.sku, name: d.name, pic: d.sourceImage, line: typeof d.extra?.line === "string" ? d.extra.line : null, from: p.f }))),
   ];
+  // live-shop-images.json gives pictures to the pieces already on sale (by name): never one another item already has.
+  for (const p of parsed) for (const m of p.images) {
+    const i = all.find((x) => x.from === "lib/city.ts" && x.name === m.liveName);
+    if (i && !i.pic) i.pic = m.sourceImage;
+  }
   const ids = new Map<string, string>(), names = new Map<string, { line: string | null; at: string }>(), pics = new Map<string, string>();
   for (const i of all) {
     const at = `${i.sku} (${i.from})`;

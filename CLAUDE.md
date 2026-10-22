@@ -218,7 +218,9 @@ components live in `app/globals.css`.
   come after the C$ items. Every tab lists cheapest first (`shopOrder`), under a "New in the Shop" row of what went on sale in
   the last 14 days (`newArrivals`, the catalog's go_live_at; up to 8, not owned), never repeated in the list below). No product is listed twice
   (owner, Oct 22): approval is blocked by another item's name or picture (`readiness` 'duplicate', a furniture line's colors
-  aside), and tests/shopCatalog.test.ts fails on a repeated id, name or picture across `content/shop/` and `SHOP_ITEMS`. The Home tab is labelled "Furniture" (id still 'home'). Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
+  aside), and tests/shopCatalog.test.ts fails on a repeated id, name or picture across `content/shop/` and `SHOP_ITEMS` (live-shop-images' borrowed pictures included).
+  Migration 0108 retired the three older pieces that showed a newer item's picture (`RETIRED_DUPLICATES`: chunky chain,
+  designer watch, wide-leg trousers; owners keep them with their emoji). The Home tab is labelled "Furniture" (id still 'home'). Catalog clothes show and try on by `wearSlot()` (lib/catalogWear.ts,
   lib/accessories.ts), never by the code's `ShopItem.wear`, which they don't have. Migration 0106: Hell Gate Park is
   named Astoria Park (id `hell-gate-park` kept; city seed regenerated).
 - New avatar bodies (stage 2 of the upgrade, docs/shop-manager.md): the owner's bald, barefoot bodies and clips are listed
