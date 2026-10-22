@@ -4,7 +4,7 @@ import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
 import {
-  studioBeatEdit, studioBeatStatus, studioGoLive, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioAffiliates, studioAffiliatesOverview, studioPayouts, studioPayoutMark, studioPayoutVoid, studioVideos, studioVideoSave, studioVideoStatus, studioCreatorPage, studioCreatorSave, studioLinkSave, studioLinkStatus, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
+  studioBeatEdit, studioBeatStatus, studioGoLive, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioMailbag, studioLetter, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioAffiliates, studioAffiliatesOverview, studioPayouts, studioPayoutMark, studioPayoutVoid, studioVideos, studioVideoSave, studioVideoStatus, studioCreatorPage, studioCreatorSave, studioLinkSave, studioLinkStatus, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +43,7 @@ export default async function StudioPage() {
         newsList: studioNewsList, newsUpload: studioNewsUpload, newsStatus: studioNewsStatus, newsReschedule: studioNewsReschedule,
         huntList: studioHuntList, huntUpload: studioHuntUpload, huntStatus: studioHuntStatus, drafts: studioDrafts,
         gossipList: studioGossipList, gossipStatus: studioGossipStatus, setupCheck: studioSetupCheck,
+        mailbag: studioMailbag, letter: studioLetter,
         shoutouts: studioShoutouts, shoutoutAction: studioShoutoutAction, bigScreen: studioBigScreen, bigScreenAction: studioBigScreenAction,
       }}
     />

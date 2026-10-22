@@ -3,7 +3,7 @@
 // file in content/news/, uploaded and approved in the Story Studio, and published day by day.
 // News never changes prices or places (only stories do). Dependency-free so tests can import it.
 
-import { CELEBRITIES, REGULARS, WANNABES } from "./cast.ts";
+import { CELEBRITIES, MAYOR_MAMA_MANDEE, OFFICIALS, REGULARS, WANNABES } from "./cast.ts";
 import { CITY_ECONOMY } from "./city.ts";
 
 /** C4 (owner, Oct 20): "transit" is the Metro Rail Authority's service updates (delays, reroutes, weekend changes, fares). */
@@ -38,7 +38,9 @@ export const NEWS_KIND_LABEL: Record<NewsKind, string> = { city: "City news", co
 export const TRANSIT_LINES = [...new Set(Object.values(CITY_ECONOMY.travel.subway.lines))];
 const minutesOf = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-const CAST_IDS = new Set([...CELEBRITIES, ...WANNABES, ...REGULARS].map((c) => c.id));
+const CAST_IDS = new Set([...CELEBRITIES, ...WANNABES, ...REGULARS, ...OFFICIALS].map((c) => c.id));
+/** The Mayor is a weekly regular in City News from this week on (owner, Oct 22). */
+export const MAYOR_WEEKLY_FROM = "2026-10-26";
 
 const addDays = (iso: string, n: number) => {
   const d = new Date(`${iso}T12:00:00Z`);
@@ -82,6 +84,9 @@ export function validateNewsWeek(raw: unknown): { ok: true; items: NewsItem[] } 
     if (problems.length === 0) items.push({ id: it.id, kind: it.kind, headline: it.headline.trim(), body: it.body.trim(), cast: it.cast ?? [], day: addDays(week, DAYS.indexOf(it.day)), ...(transit ? { transit } : {}) });
   }
   if (items.filter((x) => x.kind === "column").length > 1) problems.push("Lola's column runs once a week");
+  if (items.length && week >= MAYOR_WEEKLY_FROM && !items.some((x) => x.kind === "city" && x.cast.includes(MAYOR_MAMA_MANDEE.id))) {
+    problems.push(`${MAYOR_MAMA_MANDEE.name} is in the news every week: add a city item with "${MAYOR_MAMA_MANDEE.id}" in its cast`);
+  }
   return problems.length ? { ok: false, problems } : { ok: true, items };
 }
 

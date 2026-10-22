@@ -24,6 +24,7 @@ import { previewCreatorMe, previewStudioVideos, previewStudioVideoSave, previewS
 import { previewNewsList, previewNewsReschedule, previewNewsStatus, previewNewsUpload } from "../newsActions";
 import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus, previewHuntStatus, previewHuntUpload, previewSetupCheck } from "../huntActions";
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
+import { previewStudioLetter, previewStudioMailbag } from "../mayorActions";
 import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -38,6 +39,7 @@ import type { Player } from "@/lib/player";
 //   The preview's News always has a live 7-train delay, so trips to Flushing take longer by subway.
 //   /preview/home?calendar=today  every calendar event (C5) is on right now; ?calendar=gift also starts with a gift box
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
+//   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
 //   /preview/home?member=vip|monthly|cancelling|pastdue|forever|free|none  Membership & purchases (Settings, profile)
 //   /preview/home?hint=daily  Lola's daily-tasks nudge (owner, Oct 17) after 2 seconds
@@ -87,7 +89,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar, couture, skin, build, outfit, size, pick } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, calendar, couture, mayor, skin, build, outfit, size, pick } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -152,6 +154,7 @@ export default async function Preview({
           transitPreset={transit}
           calendarPreset={calendar}
           couturePreset={couture}
+          mayorPreset={mayor}
           goalsPreset={goals}
           pushPreset={push}
           memberPreset={member}
@@ -190,6 +193,7 @@ export default async function Preview({
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
             gossipList: previewGossipList, gossipStatus: previewGossipStatus, setupCheck: previewSetupCheck,
+            mailbag: previewStudioMailbag, letter: previewStudioLetter,
             shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
           }}
         />
