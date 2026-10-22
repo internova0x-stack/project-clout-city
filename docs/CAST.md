@@ -94,7 +94,7 @@ Tap a regular on a place card to hear a line; each tap says the next one. While 
 | The 114½ Precinct | Sgt. Bev Kowalski, the desk sergeant | doorman | “Another parking report? Get in line, hon.” |
 | Respawn Arena | Pixel, the arena manager | driver | “Tournament Friday. Chase Clout might show up. Might also get banned.” |
 | The Unisphere | Walt, the tour guide | driver | “Fun fact: this globe has outlived three of my marriages.” |
-| Hell Gate Park | Gus, same bench, every day | driver | “Seen a lot from this bench. Want to hear about 1987?” |
+| Astoria Park | Gus, same bench, every day | driver | “Seen a lot from this bench. Want to hear about 1987?” |
 | Lucky Star Lotto | Benny Fortuna, the owner, never bought a ticket | clerk | “Never bought one myself. Somebody's gotta stay rich.” |
 | Gantry Plaza | Inez, the wedding photographer | driver | “Third proposal today. She said yes. They always say yes here. It's the lighting.” |
 | St. Copay's General Hospital | Dr. Eleni Markou, the ER doctor (C1) | patron | “The wait is two hours. I said what I said.” |

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { GARMENT_TEMPLATES } from "../lib/avatarCatalog.ts";
 import { CATALOG_WEAR, catalogPieces } from "../lib/catalogWear.ts";
+import { itemBySku } from "../lib/city.ts";
 
 const catalog = readdirSync("content/shop").filter((f) => f.endsWith(".json")).flatMap((f) => {
   const d = JSON.parse(readFileSync(`content/shop/${f}`, "utf8"));
@@ -13,7 +14,10 @@ test("every Shop catalog top, bottom, dress and pair of shoes has its pieces on 
   // With Clout Couture's suit and heels (migration 0102).
   const clothes = catalog.filter((i) => ["top", "bottom", "one-piece", "shoes"].includes(i.slot ?? "") && (i.template || i.realCash));
   assert.ok(clothes.length >= 60, `${clothes.length} pieces of clothing`);
-  assert.deepEqual(Object.keys(CATALOG_WEAR).sort(), clothes.map((i) => i.id!).sort(), "one entry per catalog piece, nothing extra");
+  // Besides the catalog, a few of the code's own collector pieces are worn as what they are (owner, Oct 22).
+  const code = Object.keys(CATALOG_WEAR).filter((sku) => itemBySku(sku));
+  for (const sku of code) assert.equal(CATALOG_WEAR[sku].slot, itemBySku(sku)!.wear?.slot, `${sku}: worn where the code's item is`);
+  assert.deepEqual(Object.keys(CATALOG_WEAR).filter((sku) => !code.includes(sku)).sort(), clothes.map((i) => i.id!).sort(), "one entry per catalog piece, nothing extra");
   for (const i of clothes) {
     const w = CATALOG_WEAR[i.id!];
     assert.equal(w.slot, i.slot, `${i.id}: worn where the catalog says`);

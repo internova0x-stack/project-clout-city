@@ -845,14 +845,14 @@ export const PLACES: Place[] = [
     ],
   },
   {
-    id: "hell-gate-park", name: "Hell Gate Park", emoji: "🌳", category: "parks", neighborhood: "Astoria",
+    id: "hell-gate-park", name: "Astoria Park", emoji: "🌳", category: "parks", neighborhood: "Astoria",
     at: [40.7790, -73.9232], depth: "scene", template: "plaza", palette: ["#5CC28F", "#F4E3C8", "#2A2530"],
     tags: ["park", "outdoors", "free", "astoria", "job_dogwalker"],
     lore: "Riverside lawns under a giant bridge, a running track and a public pool with very strong opinions about swim caps. Wear one, babe. They will check.",
     actions: [
       // C3 (owner, Oct 20): the hangout is a bench now (same id, so players' history stays), plus a lap, a picnic and dog walking.
       { id: "hangout", kind: "hangout", label: "Sit on a bench by the river", energy: 5, mood: 12, blurb: "Watch the bridge, the joggers and one guy doing tai chi like it's a competition." },
-      { id: "lap", kind: "visit", label: "Take a lap around the track", task: "Take a lap in Hell Gate Park", energy: 12, mood: 4, confidence: 3, skill: "fitness", blurb: "One lap. Okay, half a lap and a very confident walk." },
+      { id: "lap", kind: "visit", label: "Take a lap around the track", task: "Take a lap in Astoria Park", energy: 12, mood: 4, confidence: 3, skill: "fitness", blurb: "One lap. Okay, half a lap and a very confident walk." },
       { id: "picnic", kind: "eat", label: "Picnic on the lawn", price: 18, energy: -14, mood: 6, blurb: "Bodega sandwiches, a blanket and the bridge doing its best impression of a postcard." },
       { id: "walk-dogs", kind: "shift", label: "Walk dogs for the Ditmars crowd", task: "Work a dog-walking shift", pay: 110, energy: 20, mood: 2, blurb: "Three Frenchies, one leash tangle, zero respect for your schedule. Mad money, though." },
     ],

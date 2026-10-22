@@ -97,6 +97,10 @@ export const CATALOG_WEAR: Record<string, CatalogWear> = {
   "hall-pass-mary-janes": shoes({ file: "sneakers", color: "#14111A", accent: "#D9DDE3", kind: dressShoes, pattern: P.strap, finish: "patent" }),
   "out-of-office-slingbacks": shoes({ file: "sneakers", color: "#E3C3A8", accent: "#B08A6E", kind: dressShoes }),
   "recital-ballet-flats": shoes({ file: "sneakers", color: "#F4C6CF", accent: "#E8A6B4", kind: dressShoes, pattern: P.strap }),
+  // Collector pieces from before the catalog (lib/city.ts SHOP_ITEMS) worn as what they are, not their old cartoon shapes
+  // (owner, Oct 22: "Wearing" but not on the avatar): a long grey faux-fur coat, and lilac patent platform boots.
+  "col-faux-chinchilla": top({ file: "puffer", color: "#CFC9C1", accent: "#B4ADA3", kind: plain, pattern: P.fur, finish: "matte" }, { file: "coattail", color: "#CFC9C1", accent: "#B4ADA3", pattern: P.fur, finish: "matte" }),
+  "col-holo-boots": shoes({ file: "kneeboots", color: "#C9B8F2", accent: "#7FE3E0", finish: "patent" }),
   "sidewalk-throne-sandals": shoes({ file: "sneakers", color: "#EDE3CF", accent: "#EDE3CF", kind: dressShoes, pattern: P.sandal, cover: 0 }),
 };
 
