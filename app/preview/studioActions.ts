@@ -69,7 +69,12 @@ export async function previewStudioReview(id: string, decision: Review, note: st
   if (!r) return fail("That story doesn't exist.");
   if (decision !== "approved" && isLive(r)) return fail("That story is live. Pause or retire it instead of changing it mid-run.");
   Object.assign(r, { review: decision, note: note.trim() || null, reviewedAt: new Date().toISOString(), startAt: decision === "approved" ? r.startAt : null });
-  return list(decision === "approved" ? "Approved. It can be scheduled now." : decision === "declined" ? "Declined. The note is saved with it." : "Back to draft.");
+  // A main story's side stories waiting for review are approved with it (owner, Oct 22), as in the game's Studio.
+  const sides = decision === "approved" ? store().filter((x) => x.arc.parent_arc_id === id && x.review === "draft") : [];
+  for (const x of sides) Object.assign(x, { review: "approved", reviewedAt: new Date().toISOString() });
+  return list(decision === "approved"
+    ? sides.length ? `Approved with its ${sides.length} side stor${sides.length === 1 ? "y" : "ies"}. They go out together once it has a Day 1.` : "Approved. It can be scheduled now."
+    : decision === "declined" ? "Declined. The note is saved with it." : "Back to draft.");
 }
 export async function previewStudioSchedule(id: string, start: string | null) {
   previewOnly();

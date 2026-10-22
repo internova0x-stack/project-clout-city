@@ -5,8 +5,7 @@ import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
 import {
-  studioBeatEdit, studioBeatStatus, studioGoLive, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioMailbag, studioLetter, studioAutopilot, studioAutopilotSet, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioAffiliates, studioAffiliatesOverview, studioPayouts, studioPayoutMark, studioPayoutVoid, studioVideos, studioVideoSave, studioVideoStatus, studioCreatorPage, studioCreatorSave, studioLinkSave, studioLinkStatus, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload,
-} from "./actions";
+  studioBeatEdit, studioBeatStatus, studioGoLive, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioMailbag, studioLetter, studioAutopilot, studioAutopilotSet, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioAffiliates, studioAffiliatesOverview, studioPayouts, studioPayoutMark, studioPayoutVoid, studioVideos, studioVideoSave, studioVideoStatus, studioCreatorPage, studioCreatorSave, studioLinkSave, studioLinkStatus, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload, addRepoStories } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +30,8 @@ export default async function StudioPage() {
   }
   // C6: story files in the repo the Studio doesn't have yet load into Needs review first; one that can't says why.
   const synced = await syncWeeklyContent({ force: true }).catch(() => []);
-  const storyTrouble = storyImportTrouble(synced);
+  const repo = await addRepoStories();
+  const storyTrouble = repo.note ?? storyImportTrouble(synced);
   const { data } = await supabase.rpc("admin_story_list");
   return (
     <Studio
