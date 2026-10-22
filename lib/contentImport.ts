@@ -27,6 +27,12 @@ async function weekFiles(kind: "hunts" | "news" | "exams"): Promise<{ file: stri
   return out;
 }
 
+/** Story files that didn't load into the Studio (skipped by its checks, an error, a missing migration), said plainly. */
+export function storyImportTrouble(results: { file: string; result: string }[]): string | null {
+  const bad = results.filter((r) => r.file.startsWith("content/stories/") && !/^(kept|added|started)/.test(r.result));
+  return bad.length ? `These story files didn't load: ${bad.map((r) => `${r.file} (${r.result})`).join("; ")}` : null;
+}
+
 /** Stores the repo's news weeks and hunts (at most every 10 minutes per server, or now with `force`). */
 export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise<{ file: string; result: string }[]> {
   const now = Date.now();
@@ -37,6 +43,7 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
   let storyPlaces: string[] = [];
   try { storyPlaces = loadArcs().flatMap((a) => storyPlaceIds(a as unknown as Parameters<typeof storyPlaceIds>[0])); } catch { /* no stories */ }
   const out: { file: string; result: string }[] = [];
+  // A kind whose migration hasn't run yet is skipped (and retried next run); the others, stories included, still load.
   const missing = (msg: string) => /does not exist|schema cache/i.test(msg);
   // Autopilot (migration 0107): a paused kind waits for the Studio. Before 0107 every kind is on.
   const auto = readAutopilot((await admin.from("game_settings").select("value").eq("key", "autopilot").maybeSingle()).data?.value);
@@ -45,14 +52,14 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
     const { data, error } = await admin.rpc("content_import_news", { p_items: r.items });
     // Before migration 0037 runs, the function is missing: try again on the next run.
-    if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    if (error) { if (missing(error.message)) { lastRun = 0; out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} items` });
   }
   for (const { file, raw } of auto.hunts ? await weekFiles("hunts") : []) {
     const r = validateHunt(raw, { storyPlaces });
     if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
     const { data, error } = await admin.rpc("content_import_hunt", { p_data: r.hunt });
-    if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    if (error) { if (missing(error.message)) { lastRun = 0; out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: String(data) });
   }
   // v0.15 campus exams (migration 0077): each week's questions; a course already sat that week keeps its set.
@@ -60,7 +67,7 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const r = validateExamWeek(raw);
     if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
     const { data, error } = await admin.rpc("content_import_exams", { p_week: r.week, p_rows: r.rows });
-    if (error) { if (missing(error.message)) { lastRun = 0; return out; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    if (error) { if (missing(error.message)) { lastRun = 0; out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} questions` });
   }
   // Culture pack C6 (migration 0098): a story file the Studio doesn't have yet waits there for review. Stories the Studio

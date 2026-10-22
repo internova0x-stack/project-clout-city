@@ -7,7 +7,7 @@ import { validateNewsWeek } from "@/lib/news";
 import { storyPlaceIds, validateHunt } from "@/lib/hunts";
 import { readContentDrafts } from "@/lib/contentDrafts";
 import { checkGossipFiles, syncGossipWeeks } from "@/lib/gossipImport";
-import { syncWeeklyContent } from "@/lib/contentImport";
+import { storyImportTrouble, syncWeeklyContent } from "@/lib/contentImport";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { runSetupCheck } from "@/lib/setupCheck";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "@/lib/adminPlayers";
@@ -42,8 +42,8 @@ export async function studioList(): Promise<StudioResult> {
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   // C6 (migration 0098): new story files in the repo wait in the list for review.
-  await syncWeeklyContent({ force: true }).catch(() => []);
-  return list(supabase);
+  const synced = await syncWeeklyContent({ force: true }).catch(() => []);
+  return list(supabase, storyImportTrouble(synced) ?? undefined);
 }
 
 export async function studioUpload(json: string): Promise<StudioResult> {
