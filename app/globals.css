@@ -2230,3 +2230,6 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .nyer-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .nyer-tile { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 12px; border-radius:var(--r-md); border:1.5px solid var(--divider); background:var(--surface-card); font:inherit; color:var(--text-1); text-align:left; cursor:pointer; }
 .nyer-tile[aria-checked="true"] { border-color:var(--night-900); box-shadow:0 0 0 1px var(--night-900); }
+/* A collector card's "Real cash" pill wraps under the picture instead of running past the card (owner, Oct 22). */
+.item-card.collector > .row:first-child { flex-wrap:wrap; gap:6px; }
+.item-card.collector .tag-gold { white-space:nowrap; max-width:100%; }

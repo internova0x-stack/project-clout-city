@@ -255,7 +255,7 @@ function LookStep({
         <div className="nyer-tiles" role="radiogroup" aria-label="What kind of New Yorker are you?">
           {NYERS.map((n) => (
             <button key={n.id} role="radio" aria-checked={look.nyer === n.id} className="nyer-tile" onClick={() => set("nyer", n.id)}>
-              <span className="body-strong">{n.label}</span>
+              <span className="body-strong"><span aria-hidden="true">{n.emoji}</span> {n.label}</span>
               <span className="meta">{n.sub}</span>
             </button>
           ))}
