@@ -41,5 +41,16 @@ select pg_temp.assert(pg_temp.raises($$select public.save_look(array(select id f
 select pg_temp.assert(pg_temp.raises($$select public.save_look(array(select id from theirs), 'none')$$, 'not_wearable'), 'someone else''s item refused');
 select pg_temp.assert(pg_temp.raises($$select public.save_look('{}', 'crown')$$, 'bad_covering'), 'unknown headwear refused');
 
+-- Migration 0109: the starter clothes switch with the look (free), and switch back to the style's own with null.
+select public.save_look(array[(select id from ids where sku = 'fit-satin-bomber')], 'none',
+  '{"top": "hoodie", "topColor": "#2F6FDB", "bottom": "shorts", "bottomColor": "#26232D", "shoeColor": "#E8692E"}');
+select pg_temp.assert((select look -> 'fit' ->> 'top' from public.players where id = auth.uid()) = 'hoodie', 'starter top saved');
+select pg_temp.assert((select array_agg(sku) from public.player_items where player_id = auth.uid() and equipped) = array['fit-satin-bomber'], 'items saved with it');
+select public.save_look('{}', 'none', null);
+select pg_temp.assert(not ((select look from public.players where id = auth.uid()) ? 'fit'), 'null wears the style''s own');
+select pg_temp.assert(pg_temp.raises($$select public.save_look('{}', 'none', '{"top": "hoodie"}')$$, 'bad_fit'), 'half a fit refused');
+select pg_temp.assert(pg_temp.raises($$select public.save_look('{}', 'none', '{"top": 1, "topColor": "x", "bottom": "y", "bottomColor": "z", "shoeColor": "w"}')$$, 'bad_fit'), 'non-text fit refused');
+select pg_temp.assert(pg_temp.raises($$select public.save_look('{}', 'crown', null)$$, 'bad_covering'), 'the two-argument checks still apply');
+
 rollback;
 \echo SAVE LOOK CHECKS PASSED
