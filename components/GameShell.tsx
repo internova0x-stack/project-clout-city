@@ -20,7 +20,8 @@ import { GAME_CONFIG } from "@/lib/config";
 import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
-import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, rentAlert, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { RentAlertCard } from "./city/RentAlert";
 import { itemOptionsBySku, outfitFromSkus } from "@/lib/wearing";
 import { modelSex } from "@/lib/avatarCatalog";
 import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryApi, type StoryFeed, type StoryResult } from "@/lib/storyFeed";
@@ -489,6 +490,8 @@ export function GameShell({
   // v0.6 City News: loaded once; the newest headline rides the ticker and, once per session, a home card.
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [newsCard, setNewsCard] = useState<string | null>(null);
+  // The rent alarm (owner, Oct 22): dismissed until it changes (another bill, more owed, a new day).
+  const [rentAlarmOff, setRentAlarmOff] = useState<string | null>(null);
   /** C3: bumped when the roommate card is dismissed, so it hides (its "seen" lives in localStorage). */
   // Starts at -1 so the server render and the first client render agree (localStorage is read after mount).
   const [roommateTick, setRoommateTick] = useState(-1);
@@ -1888,6 +1891,8 @@ export function GameShell({
     });
   }
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
+  const rentAlarm = city ? rentAlert(city) : null;
+  const rentAlarmKey = rentAlarm && city ? `${rentAlarm.level}:${rentAlarm.owed}:${city.today}` : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // C3: the roommate's intro, then a note a day, when no other home card is up.
   const homeRoommate = ((): Roommate | null => {
@@ -2077,6 +2082,10 @@ export function GameShell({
               })}
             />
           )}
+          {rentAlarm && rentAlarmKey !== rentAlarmOff && flow === "none" && !arranging && !decor && (
+            <RentAlertCard alert={rentAlarm} onDismiss={() => setRentAlarmOff(rentAlarmKey)}
+              onGigs={() => { setPlace(null); setPhone({ open: true, app: "gigs" }); }} onBills={() => setPanel("bills")} />
+          )}
           {showTogether && togetherIn && (
             <TogetherPrompt inbox={togetherIn} onOpen={() => setTogetherPlansOpen(true)} onDismiss={() => setTogetherDismissed(togetherKey)} />
           )}
@@ -2160,12 +2169,13 @@ export function GameShell({
           online,
           eventsBadge: !partyDone,
           billsBadge: !!city && dueBills(city).length > 0,
+          cashAlert: !!rentAlarm,
           tasksBadge: !!city && city.tasks.length > 0 && tasksSeenDay !== "" && tasksSeenDay !== city.today && handedOff,
           phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <ActionTimer doing={doing} />
-      {radio && radioBanner && !phone.open && (
+      {radio && radioBanner && !phone.open && !(rentAlarm && rentAlarmKey !== rentAlarmOff) && (
         <RadioBanner s={radioBanner} api={radio} onToast={setToast} onDone={closeRadioBanner}
           onOpen={() => { closeRadioBanner(); setPhone({ open: true, app: "radio" }); }} />
       )}

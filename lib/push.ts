@@ -42,6 +42,7 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   bill_due: { tier: 1, category: "money", ttlMin: 1440 },
   bill_overdue: { tier: 1, category: "money", ttlMin: 1440 },
   eviction_warning: { tier: 1, category: "money", ttlMin: 1440 },
+  rent_short: { tier: 1, category: "money", ttlMin: 1440 },
   gig_ready: { tier: 1, category: "money", ttlMin: 720 },
   till_full: { tier: 1, category: "money", ttlMin: 1440 },
   streak_risk: { tier: 1, category: "reminders", ttlMin: 300 },

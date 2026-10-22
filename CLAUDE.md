@@ -136,6 +136,10 @@ components live in `app/globals.css`.
   win-back from `push_scan()` (`push_scan_rewards`, `push_roundup`; P3 only for players not in the game today).
   Migration 0084: date tonight, crew there, party night and guest pass tonight (`push_on_crew_went`, `push_scan_tonight`;
   real New York evening, since the city clock loops every two hours).
+  Rent alarm (migration 0112, owner Oct 22): rent due within 3 days and too little in the bank sends 'rent_short' once per
+  rent date (`push_scan_rent_short`, run by the sender after push_scan, opens Gigs); in the game, `rentAlert()` (lib/cityState.ts)
+  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and turns the bank pill red
+  (`?rent=short|late|evict` in the preview).
 - Contact the Mayor (migration 0105, owner Oct 22): the Phone's Mayor app is players' feedback to the team. Letters
   (`mayor_write`: bug, idea, complaint, praise, other; 10 to 1000 characters; 5 a New York day; the server adds the
   player's place and device) land in Studio → Mayor's Inbox (`admin_mayor_letters`, `admin_mayor_letter`: read, done,

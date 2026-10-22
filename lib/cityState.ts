@@ -8,7 +8,7 @@ import { CITY_ECONOMY, CLUB_EVENTS, itemBySku, placeById, type ClubEvent, type P
 import { leadAction } from "./gossip.ts";
 import { LOOK_LABEL } from "./style.ts";
 import { PERK_ERRORS, SKILLS, type SkillId } from "./skills.ts";
-import { ECONOMY } from "./economy.ts";
+import { ECONOMY, formatCash } from "./economy.ts";
 import type { Fit } from "./styles.ts";
 import { lottoError, type LottoCard, type LottoState } from "./lotto.ts";
 
@@ -502,6 +502,55 @@ export function billStatusLine(bill: Bill, today: string): string {
   if (bill.kind !== "rent") return `${late} day${late === 1 ? "" : "s"} late`;
   if (late <= graceDays) return `${late} day${late === 1 ? "" : "s"} late. Grace period: ${graceDays - late + 1} left before Mood drops.`;
   return `${late} days late. Mood is dropping; you move out in ${Math.max(0, evictAfterDays - late)} day${evictAfterDays - late === 1 ? "" : "s"}.`;
+}
+
+/**
+ * The rent alarm (owner, Oct 22: "no sense of emergency to get gigs to make rent"): late bills, or rent and other bills
+ * due in the next few days with too little in the bank. Shown as a card on the home screen and a red bank pill; the
+ * same rule sends the 'rent_short' push (migration 0112). Null when there's nothing to worry about.
+ */
+export interface RentAlert {
+  level: "evict" | "late" | "short";
+  title: string;
+  line: string;
+  owed: number;
+  short: number;
+  /** Enough in the bank to pay what's late now. */
+  canPay: boolean;
+}
+export const RENT_ALERT_DAYS = 3;
+export function rentAlert(s: CityState): RentAlert | null {
+  const cash = Math.max(0, s.player.bank_cash);
+  const { graceDays, evictAfterDays } = CITY_ECONOMY.bills;
+  // Bills already issued: an alarm when they're late, or when the bank can't cover them (due today and affordable is
+  // just the Bills badge).
+  const issued = dueBills(s);
+  const issuedOwed = issued.reduce((a, b) => a + b.amount, 0);
+  const late = issued.some((b) => b.due_date < s.today) || issuedOwed > cash ? issued : [];
+  if (late.length) {
+    const owed = late.reduce((a, b) => a + b.amount, 0);
+    const rent = late.find((b) => b.kind === "rent");
+    const lateDays = rent ? daysBetween(rent.due_date, s.today) : 0;
+    const left = Math.max(0, evictAfterDays - lateDays);
+    const evict = !!rent && lateDays > graceDays;
+    const short = Math.max(0, owed - cash);
+    return {
+      level: evict ? "evict" : "late", owed, short, canPay: short === 0,
+      title: evict ? `🚪 Pay rent or move out in ${left} day${left === 1 ? "" : "s"}` : `🧾 ${formatCash(owed)} in bills to pay`,
+      line: short === 0 ? (evict ? "Mood is dropping every day it's late. Pay it in Bills." : "Pay it in Bills before your Mood starts dropping.")
+        : `You have ${formatCash(cash)}: ${formatCash(short)} short. Pick up a gig, fast.`,
+    };
+  }
+  const soon = upcomingBills(s).filter((b) => { const d = daysBetween(s.today, b.due_date); return d >= 0 && d <= RENT_ALERT_DAYS; });
+  const rent = soon.find((b) => b.kind === "rent");
+  const owed = soon.reduce((a, b) => a + b.amount, 0);
+  if (!rent || owed <= cash) return null;
+  const d = daysBetween(s.today, rent.due_date);
+  return {
+    level: "short", owed, short: owed - cash, canPay: false,
+    title: `💸 Rent's due ${d === 0 ? "today" : d === 1 ? "tomorrow" : `in ${d} days`}`,
+    line: `${formatCash(owed)} due, ${formatCash(cash)} in the bank. You're ${formatCash(owed - cash)} short: grab a gig.`,
+  };
 }
 
 export function netWorth(s: CityState): number {

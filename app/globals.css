@@ -712,6 +712,15 @@ button.tea-lead { border:0; font:inherit; font-size:13px; font-weight:600; curso
 .story-prompt-main { flex:1; min-width:0; display:flex; align-items:center; gap:10px; padding:12px; color:var(--night-900); }
 .story-prompt-tile { width:40px; height:40px; border-radius:var(--r-sm); background:#fff; display:grid; place-items:center; font-size:20px; flex:none; box-shadow:var(--elev-1); }
 .story-prompt-close { width:36px; display:grid; place-items:center; color:rgba(20,17,26,.6); }
+/* The rent alarm (owner, Oct 22): above the other home cards, amber when short, red when late. */
+.story-prompt.rent-alert { z-index:18; background:#FFF3CC; box-shadow:var(--elev-3), inset 0 0 0 2px #F2A900; }
+.story-prompt.rent-alert.late, .story-prompt.rent-alert.evict { background:#FFE3E3; box-shadow:var(--elev-3), inset 0 0 0 2px #E5484D; }
+.story-prompt.rent-alert.evict { animation:rent-pulse 1.6s ease-in-out infinite; }
+@keyframes rent-pulse { 50% { box-shadow:var(--elev-3), inset 0 0 0 3px #E5484D, 0 0 0 6px rgba(229,72,77,.18); } }
+.rent-alert-main { flex:1; min-width:0; padding:12px; color:var(--night-900); }
+.rent-alert-main .btn-sm { width:auto; flex:none; }
+.hud-btn.cash-alert .hud-number { color:#E5484D; }
+.hud-btn.cash-alert { box-shadow:inset 0 0 0 2px #E5484D; }
 .chatter-row { display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:var(--r-lg); background:var(--surface-card); }
 .chatter-bubble { position:absolute; z-index:30; left:50%; transform:translateX(-50%); top:calc(124px + var(--safe-top)); max-width:min(340px, calc(100% - 32px));
   padding:12px 14px; border-radius:18px; background:#fff; color:var(--text-1); box-shadow:var(--elev-3); font-size:14px; line-height:19px; animation:rise-in .25s ease-out; }
@@ -2256,3 +2265,4 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .shop-cats.shop-pres button.on { border-color:var(--night-900); }
 .shop-color { display:inline-flex; align-items:center; gap:4px; margin-left:8px; font-size:13px; font-weight:600; color:var(--text-2); text-transform:capitalize; }
 .shop-color > span { width:12px; height:12px; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,.2); }
+@media (prefers-reduced-motion:reduce) { .story-prompt.rent-alert.evict { animation:none; } }

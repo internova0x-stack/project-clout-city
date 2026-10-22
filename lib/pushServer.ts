@@ -26,6 +26,8 @@ export async function runPush(opts: { player?: string } = {}): Promise<{ sent: n
   // Step 2 (migration 0082): queue the time-based reminders (bills, gigs, tills, streaks, exams, tickets) first.
   // Each key is queued once, so running this every few minutes is cheap; before 0082 it's simply missing.
   if (!opts.player) await admin.rpc("push_scan").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan failed", error); });
+  // Migration 0112: rent due within three days and not enough in the bank (owner, Oct 22).
+  if (!opts.player) await admin.rpc("push_scan_rent_short").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan_rent_short failed", error); });
   let qq = admin.from("push_queue").select("id, player_id, kind, group_key, title, body, url, deadline_at, close, created_at").eq("status", "queued").limit(2000);
   if (opts.player) qq = qq.eq("player_id", opts.player);
   const { data: queued, error } = await qq;
