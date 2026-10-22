@@ -97,6 +97,22 @@ export function splitNews(items: NewsItem[], today: string): { recent: NewsItem[
   return { recent: sorted.filter((i) => i.day >= cutoff), archive: sorted.filter((i) => i.day < cutoff) };
 }
 
+/**
+ * The news card on arriving in the game (owner, Oct 22): never one this device has already seen. Today's items first,
+ * in feed order, so each visit that day brings the next one; with nothing new today, the latest unseen item of the week.
+ * Reading the City tab marks everything there seen, so no card follows.
+ */
+export function pickNewsCard(items: NewsItem[], today: string, seen: readonly string[]): NewsItem | null {
+  const recent = splitNews(items, today).recent.filter((i) => !seen.includes(i.id));
+  return recent.find((i) => i.day === today) ?? recent[0] ?? null;
+}
+
+/** Remembered seen ids: the newest first, at most this many (older ones have left the week's feed anyway). */
+export const NEWS_SEEN_MAX = 60;
+export function addSeen(seen: readonly string[], ids: readonly string[]): string[] {
+  return [...ids.filter((id) => !seen.includes(id)), ...seen].slice(0, NEWS_SEEN_MAX);
+}
+
 /** What the regulars repeat: the latest city news, as gossip. */
 export function newsGossip(items: NewsItem[], today: string, max = 2): string[] {
   return splitNews(items, today).recent.filter((i) => i.kind === "city").slice(0, max).map((i) => `Did you hear? ${i.headline}.`);

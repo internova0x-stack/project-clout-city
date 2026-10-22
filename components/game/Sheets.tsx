@@ -279,12 +279,16 @@ function useLedger(refreshKey: unknown): LedgerEntry[] | null {
 }
 
 /** Cash history (#29): each row says where and what. */
+/** The Bank shows this many transactions, then "View more" adds as many again (owner, Oct 22). */
+const LEDGER_PAGE = 10;
+
 export function LedgerList({ rows }: { rows: LedgerEntry[] | null }) {
+  const [shown, setShown] = useState(LEDGER_PAGE);
   return (
     <div>
       {rows === null && <p className="meta">Loading…</p>}
       {rows?.length === 0 && <p className="meta">No transactions yet. Spend something; it&apos;s good for the economy.</p>}
-      {rows?.map((r) => {
+      {rows?.slice(0, shown).map((r) => {
         const d = describeEntry(r);
         return (
           <div key={r.id} className="ledger-row">
@@ -301,6 +305,11 @@ export function LedgerList({ rows }: { rows: LedgerEntry[] | null }) {
           </div>
         );
       })}
+      {rows && rows.length > shown && (
+        <button className="btn btn-secondary ledger-more" type="button" onClick={() => setShown((n) => n + LEDGER_PAGE)}>
+          View more ({rows.length - shown})
+        </button>
+      )}
     </div>
   );
 }

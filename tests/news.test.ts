@@ -36,3 +36,21 @@ test("items publish on their day; a week later they move to the archive; regular
   assert.deepEqual(splitNews(items, "2026-10-20").archive.map((i) => i.id), ["mon-item"]);
   assert.deepEqual(newsGossip(items, "2026-10-14"), ["Did you hear? Monday headline."]);
 });
+
+test("the news card on arriving: never one already seen; today's first, then the week's (owner, Oct 22)", async () => {
+  const { pickNewsCard, addSeen, NEWS_SEEN_MAX } = await import("../lib/news.ts");
+  const mk = (id: string, day: string) => ({ id, kind: "city", day, headline: id, body: id }) as import("../lib/news.ts").NewsItem;
+  const items = [mk("old", "2026-10-20"), mk("a", "2026-10-22"), mk("b", "2026-10-22"), mk("later", "2026-10-23")];
+  const today = "2026-10-22";
+  let seen: string[] = [];
+  const first = pickNewsCard(items, today, seen)!;
+  assert.equal(first.day, today, "today's news first");
+  seen = addSeen(seen, [first.id]);
+  const second = pickNewsCard(items, today, seen)!;
+  assert.ok(second.day === today && second.id !== first.id, "the next visit brings another of today's");
+  seen = addSeen(seen, [second.id]);
+  assert.equal(pickNewsCard(items, today, seen)?.id, "old", "then the week's unseen");
+  assert.equal(pickNewsCard(items, today, addSeen(seen, ["old"])), null, "all read: no card");
+  assert.ok(!items.some((i) => i.id === "later" && pickNewsCard([i], today, []) !== null), "never tomorrow's");
+  assert.equal(addSeen(Array.from({ length: 80 }, (_, i) => `x${i}`), ["new"]).length, NEWS_SEEN_MAX);
+});

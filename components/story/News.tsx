@@ -28,7 +28,7 @@ export interface NewsHandlers {
 }
 
 /** v0.6 City News handed to the News app. */
-export interface CityNews { items: NewsItem[]; today: string; focus?: string | null }
+export interface CityNews { items: NewsItem[]; today: string; focus?: string | null; onSeen?: (ids: string[]) => void }
 
 export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [] }: {
   feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews;
@@ -46,6 +46,13 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
   const live = (feed?.arcs ?? []).filter((a) => a.type === "main" && !a.finished);
   const archive = (feed?.arcs ?? []).filter((a) => a.type === "main" && a.finished);
   const sides = (parent: string) => (feed?.arcs ?? []).filter((a) => a.type === "side" && a.parent === parent);
+
+  // Reading the City tab marks its items seen, so none comes back as a card on the home screen (owner, Oct 22).
+  const cityIds = (city?.items ?? []).map((i) => i.id).join(",");
+  useEffect(() => {
+    if (tab === "city" && cityIds) city?.onSeen?.(cityIds.split(","));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, cityIds]);
 
   // Opening the app marks today's released beats as read (clears NEW after a moment).
   const unseen = useMemo(() => live.flatMap((a) => a.beats.filter((b) => !b.seen).map((b) => b.id)), [live]);

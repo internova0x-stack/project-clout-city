@@ -63,7 +63,7 @@ import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, VIP_SKUS, pickInView, type
 import { VipCoverCard } from "./city/Clubs";
 import { InteriorScene, LocationSheet, PlacesSheet, homeLocation, visiblePlaces, type PlaceHandlers } from "./city/Places";
 import { NewsPrompt, StoryPrompt } from "./story/StoryBits";
-import { activeDelays, newsGossip, splitNews, type NewsItem } from "@/lib/news";
+import { activeDelays, addSeen, newsGossip, pickNewsCard, type NewsItem } from "@/lib/news";
 import { HUNT_BADGE, type HuntApi, type HuntState } from "@/lib/hunts";
 import { ComingSoon, type ComingSoonKey } from "./ComingSoon";
 import { InvitePrompt, LeaderboardSheet, PartyDoneCard, PartySheet, PwaPrompt, isStandalone } from "./game/FirstSession";
@@ -504,11 +504,14 @@ export function GameShell({
     void cityNews().then((items) => {
       setNewsItems(items);
       const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-      const latest = splitNews(items, today).recent[0];
+      // Once per visit, a news item this device hasn't seen yet (owner, Oct 22: never the same one twice).
       try {
-        if (latest && sessionStorage.getItem("cc_news_card") !== "shown") {
-          sessionStorage.setItem("cc_news_card", "shown");
-          setNewsCard(latest.id);
+        if (sessionStorage.getItem("cc_news_card") === "shown") return;
+        sessionStorage.setItem("cc_news_card", "shown");
+        const pick = pickNewsCard(items, today, readNewsSeen());
+        if (pick) {
+          writeNewsSeen(addSeen(readNewsSeen(), [pick.id]));
+          setNewsCard(pick.id);
         }
       } catch { /* private mode: skip the card */ }
     });
@@ -1032,7 +1035,7 @@ export function GameShell({
     if (ok && crewInbox?.outings.length) void loadCrew();
   };
   const newsToday = city?.today ?? new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-  const latestNews = splitNews(newsItems, newsToday).recent[0] ?? null;
+  const latestNews = newsItems.find((i) => i.id === newsCard) ?? null;
   const openCityNews = (id: string) => {
     setPanel(null);
     setPlace(null);
@@ -2570,7 +2573,11 @@ export function GameShell({
         initialApp={phone.app}
         focusBeat={phone.beat}
         openForm={phone.form}
-        cityNews={cityNews ? { items: newsItems, today: newsToday, focus: phone.item ?? null } : undefined}
+        cityNews={cityNews ? { items: newsItems, today: newsToday, focus: phone.item ?? null, onSeen: (ids) => {
+          // Reading the City tab: nothing there pops up again as a card (owner, Oct 22).
+          try { writeNewsSeen(addSeen(readNewsSeen(), ids)); } catch { /* private mode */ }
+          setNewsCard(null);
+        } } : undefined}
         chat={chat}
         chatWith={chatWith}
         chatUnread={chatUnread}
@@ -2792,4 +2799,13 @@ function promptVisible(feed: StoryFeed | null, dismissed: string[]): boolean {
 /** #19 Fif's Furniture: a Home item as a piece for the room view. */
 function pieceOf(item: ShopItem, id: string): OwnedPiece {
   return { id, kind: item.furniture!.kind as OwnedPiece["kind"], color: item.furniture!.color, name: item.name, emoji: item.emoji };
+}
+
+/** News items this device has seen as a card or in the City tab (newest first). */
+function readNewsSeen(): string[] {
+  const v = JSON.parse(localStorage.getItem("cc_news_seen") ?? "[]");
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+}
+function writeNewsSeen(ids: string[]) {
+  localStorage.setItem("cc_news_seen", JSON.stringify(ids));
 }

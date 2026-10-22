@@ -415,6 +415,7 @@ a { color:inherit; }
 .lb-clout { color:var(--taxi-500); flex:none; }
 .lb-row.me { background:var(--taxi-tint); }
 .lb-avatar { width:36px; height:36px; border-radius:50%; background:var(--night-900); display:grid; place-items:center; font-size:17px; flex:none; }
+.ledger-more { margin-top:14px; }
 .ledger-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--divider); }
 .money-pos { color:var(--green-text); } .money-neg { color:var(--text-1); }
 .pill-online { position:relative; }
