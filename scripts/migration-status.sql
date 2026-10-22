@@ -124,6 +124,7 @@ from (values
   ('0112_rent_short.sql', coalesce((to_regprocedure('public.push_scan_rent_short()') is not null), false)),
   ('0113_realistic_rent.sql', coalesce((select (value #>> '{birthLottery,max}')::int = 3000 from public.game_settings where key = 'economy'), false)),
   ('0114_start_over.sql', coalesce((to_regprocedure('public.restart_player()') is not null), false)),
-  ('0115_story_posts.sql', coalesce((select pg_get_functiondef(f) like '%''post''%' from (select to_regprocedure('public.story_feed()') f) x where f is not null), false))
+  ('0115_story_posts.sql', coalesce((select pg_get_functiondef(f) like '%''post''%' from (select to_regprocedure('public.story_feed()') f) x where f is not null), false)),
+  ('0116_diss_and_tell_sides.sql', coalesce((select exists (select 1 from public.store_products where sku = 'side_diss_and_tell_cosign')), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
