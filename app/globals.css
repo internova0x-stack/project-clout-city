@@ -2349,17 +2349,16 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 
 /* Loading (owner, Oct 23): the launch screen and the Continue button's spinner. */
 .app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
-  background:#14111A; color:rgba(255,255,255,.78); overflow:hidden; isolation:isolate; }
-/* A soft dusk horizon in the bottom quarter (owner, Oct 23: Monument Valley style): muted plum, dusty rose and peach,
-   eased with many stops and a wide glow so there are no bands. */
-.app-loading::after { content:""; position:absolute; left:-20%; right:-20%; bottom:0; height:34%; z-index:-1; pointer-events:none;
+  color:rgba(255,255,255,.86);
+  /* Owner, Oct 23: the New York skyline at night under a dark veil, darkest where the words sit. */
   background:
-    radial-gradient(60% 75% at 50% 100%, rgba(255,176,138,.55) 0%, rgba(240,138,124,.38) 30%, rgba(196,98,122,.20) 58%, rgba(120,60,110,.08) 80%, transparent 100%),
-    linear-gradient(180deg, rgba(20,17,26,0) 0%, rgba(58,32,64,.35) 30%, rgba(122,60,98,.55) 55%, rgba(196,104,112,.7) 78%, rgba(236,150,120,.85) 100%);
-  -webkit-mask-image:linear-gradient(180deg, transparent 0%, #000 45%); mask-image:linear-gradient(180deg, transparent 0%, #000 45%); }
+    radial-gradient(70% 28% at 50% 50%, rgba(8,6,12,.55) 0%, rgba(8,6,12,0) 100%),
+    linear-gradient(180deg, rgba(8,6,12,.55) 0%, rgba(8,6,12,.6) 40%, rgba(8,6,12,.62) 60%, rgba(8,6,12,.5) 100%),
+    url("/loading-skyline.webp") center 62% / cover no-repeat,
+    #14111A; }
 .app-spinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(255,255,255,.14); border-top-color:var(--neon-500);
   animation:app-spin .8s linear infinite; }
-.app-loading-text { margin:0; font-size:15px; font-weight:600; }
+.app-loading-text { margin:0; font-size:15px; font-weight:600; text-shadow:0 1px 10px rgba(0,0,0,.85); }
 .btn.is-loading { pointer-events:none; opacity:.92; }
 .btn-spinner { display:inline-block; width:18px; height:18px; margin-right:8px; vertical-align:-3px; border-radius:50%;
   border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; animation:app-spin .8s linear infinite; }
