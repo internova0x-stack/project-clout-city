@@ -1,6 +1,7 @@
 import { AvatarMoves } from "@/components/preview/AvatarMoves";
 import { previewShopAction, previewShopAudit, previewShopNewDrop, previewCoutureOwners, previewCoutureName, previewPlazaRemove, previewShopEdit, previewShopFiles, previewShopImport, previewShopList, previewShopProcessImages } from "../shopActions";
 import { notFound } from "next/navigation";
+import { AppLoading } from "@/components/AppLoading";
 import { ECONOMY } from "@/lib/economy";
 import { Creator, type CreatorStep } from "@/components/Creator";
 import type { Flow } from "@/components/GameShell";
@@ -58,6 +59,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?dating=match   crushes and date nights: match (an unseen "It's mutual"), invite (a date invite waiting), tonight (a date in progress), alone (nobody to ask yet)
 //   /preview/home?story=3        start the Sarah Bird pilot so today is story Day 3 (story=off hides stories)
 //   /preview/studio            the Story Studio on an in-memory copy of content/stories (&live=3: the pilot is on Day 3)
+//   /preview/loading          the launch loader (app/loading.tsx)
 //   /preview/welcome          the welcome-back screen (Continue / Start over, migration 0114); ?restart=wait: started over 10 days ago
 //   /preview/art             every location illustration, day and night
 //   /preview/room?room=cafe|club|counter|astoria_studio|<place id>&time=night   one 3D room on its own (&mood=natural to compare)
@@ -100,6 +102,8 @@ export default async function Preview({
     case "guest":
       // ?via=tasha: a guest who followed a creator's link (migration 0087); ?via=tasha-signup lands on sign-up.
       return <GuestMap invited={false} authError={false} creator={via ? { name: "Tasha Glow", giftCash: 500, giftItem: "fit-bucket-hat" } : null} openSignUp={via === "tasha-signup"} />;
+    case "loading":
+      return <AppLoading />;
     case "welcome":
       return (
         <WelcomeBack preview

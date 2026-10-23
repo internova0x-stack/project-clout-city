@@ -2346,3 +2346,15 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .pin-dot.pin-pulse::after { content:""; position:absolute; inset:0; border-radius:50%; background:var(--neon-600); animation:pin-pulse 1.6s ease-out infinite; }
 @keyframes pin-pulse { 0% { transform:scale(1); opacity:.7; } 100% { transform:scale(2.6); opacity:0; } }
 @media (prefers-reduced-motion: reduce) { .pin-dot.pin-pulse::after { animation:none; opacity:0; } }
+
+/* Loading (owner, Oct 23): the launch screen and the Continue button's spinner. */
+.app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
+  background:linear-gradient(180deg, #FFF4E8 0%, #FFE0C2 40%, #FFC08A 75%, #FF9A4D 100%); color:var(--text-2); }
+.app-spinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(224,24,111,.18); border-top-color:var(--neon-600);
+  animation:app-spin .8s linear infinite; }
+.app-loading-text { margin:0; font-size:15px; font-weight:600; }
+.btn.is-loading { pointer-events:none; opacity:.92; }
+.btn-spinner { display:inline-block; width:18px; height:18px; margin-right:8px; vertical-align:-3px; border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; animation:app-spin .8s linear infinite; }
+@keyframes app-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .app-spinner, .btn-spinner { animation-duration:2.4s; } }
