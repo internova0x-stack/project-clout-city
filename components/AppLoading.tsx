@@ -1,5 +1,6 @@
 // Owner, Oct 23: launching the app sat on a black screen while the server got the player ready. This shows at once
-// (app/loading.tsx, app/home/loading.tsx): the wordmark on the welcome screen's orange and a spinning ring.
+// (app/loading.tsx, app/home/loading.tsx): the wordmark on black with a red-orange glow
+// along the bottom (owner, Oct 23) and a spinning ring.
 export function AppLoading({ text = "Loading the city…" }: { text?: string }) {
   return (
     <main className="app-loading" role="status" aria-live="polite">

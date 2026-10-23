@@ -2349,8 +2349,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 
 /* Loading (owner, Oct 23): the launch screen and the Continue button's spinner. */
 .app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
-  background:linear-gradient(180deg, #FFF4E8 0%, #FFE0C2 40%, #FFC08A 75%, #FF9A4D 100%); color:var(--text-2); }
-.app-spinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(224,24,111,.18); border-top-color:var(--neon-600);
+  background:linear-gradient(180deg, #14111A 0%, #14111A 75%, #5A1420 84%, #E0301E 93%, #FF6A1F 100%); color:rgba(255,255,255,.78); }
+.app-spinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(255,255,255,.14); border-top-color:var(--neon-500);
   animation:app-spin .8s linear infinite; }
 .app-loading-text { margin:0; font-size:15px; font-weight:600; }
 .btn.is-loading { pointer-events:none; opacity:.92; }
