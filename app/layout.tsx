@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Bungee, Inter, Permanent_Marker } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { launchStartupImages } from "@/lib/launchImages";
 
 // The three typefaces from the Design System Guide (section 4), downloaded at
 // build time and served with the app, so they never depend on Google at runtime.
@@ -19,7 +20,8 @@ export const metadata: Metadata = {
   title: "Clout City NYC",
   description: "Arrive in New York as a nobody. Chase clout. Tap in, blow up.",
   applicationName: "Clout City",
-  appleWebApp: { capable: true, title: "Clout City", statusBarStyle: "black-translucent" },
+  // iPhone launch images (owner, Oct 23): the loading screen instead of black while the page arrives.
+  appleWebApp: { capable: true, title: "Clout City", statusBarStyle: "black-translucent", startupImage: launchStartupImages() },
   icons: { icon: "/icons/favicon-64.png", apple: "/icons/apple-touch-icon.png" },
   openGraph: {
     title: "Clout City NYC",

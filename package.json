@@ -15,6 +15,7 @@
     "validate:content": "node --experimental-strip-types --no-warnings scripts/validate-content.ts",
     "avatars:fetch": "NODE_USE_ENV_PROXY=1 node scripts/fetch-avatar-sources.mjs",
     "avatars:build": "node scripts/build-base-avatars.mjs",
+    "build:launch-images": "node --experimental-strip-types --no-warnings scripts/launch-images.mjs",
     "build:shop-images": "NODE_USE_ENV_PROXY=1 node --experimental-strip-types --no-warnings scripts/build-shop-images.ts"
   },
   "dependencies": {

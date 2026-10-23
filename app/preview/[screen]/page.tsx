@@ -95,7 +95,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -103,7 +103,8 @@ export default async function Preview({
       // ?via=tasha: a guest who followed a creator's link (migration 0087); ?via=tasha-signup lands on sign-up.
       return <GuestMap invited={false} authError={false} creator={via ? { name: "Tasha Glow", giftCash: 500, giftItem: "fit-bucket-hat" } : null} openSignUp={via === "tasha-signup"} />;
     case "loading":
-      return <AppLoading />;
+      // ?still=1: the iPhone launch image (scripts/launch-images.mjs)
+      return <AppLoading still={still === "1"} />;
     case "welcome":
       return (
         <WelcomeBack preview

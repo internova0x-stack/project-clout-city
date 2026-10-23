@@ -2348,19 +2348,27 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 @media (prefers-reduced-motion: reduce) { .pin-dot.pin-pulse::after { animation:none; opacity:0; } }
 
 /* Loading (owner, Oct 23): the launch screen and the Continue button's spinner. */
-.app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
-  color:rgba(255,255,255,.86);
-  /* Owner, Oct 23: the New York skyline at night under a dark veil, darkest where the words sit. */
-  background:
-    radial-gradient(70% 28% at 50% 50%, rgba(8,6,12,.55) 0%, rgba(8,6,12,0) 100%),
-    linear-gradient(180deg, rgba(8,6,12,.55) 0%, rgba(8,6,12,.6) 40%, rgba(8,6,12,.62) 60%, rgba(8,6,12,.5) 100%),
-    url("/loading-skyline.webp") center 62% / cover no-repeat,
-    #14111A; }
-.app-spinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(255,255,255,.14); border-top-color:var(--neon-500);
+.app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:18px;
+  padding:calc(16vh + var(--safe-top, 0px)) 24px 0; background:#14111A; color:rgba(255,255,255,.9); overflow:hidden; isolation:isolate; }
+/* Owner, Oct 23: Queens at night in the game's style, framed from the bottom so the river, the train and the skyline
+   stay in view on any screen; it drifts slowly (a Ken Burns move). The sky above is empty, so the words sit there. */
+.app-loading::before { content:""; position:absolute; inset:0; z-index:-2; background:url("/loading-skyline.webp") center bottom / cover no-repeat;
+  transform-origin:50% 80%; animation:app-drift 24s ease-in-out infinite alternate; }
+/* A light veil: only the sky behind the words is darkened, the city keeps its colour. */
+.app-loading::after { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(180deg, rgba(10,8,20,.55) 0%, rgba(10,8,20,.35) 28%, rgba(10,8,20,0) 48%, rgba(10,8,20,0) 80%, rgba(10,8,20,.25) 100%); }
+@keyframes app-drift { from { transform:scale(1); } to { transform:scale(1.07) translateY(-1%); } }
+.app-loading .welcome-mark { text-shadow:0 2px 24px rgba(10,8,20,.45); }
+.app-spinner { width:40px; height:40px; border-radius:50%; border:4px solid rgba(255,255,255,.16); border-top-color:var(--neon-500);
   animation:app-spin .8s linear infinite; }
-.app-loading-text { margin:0; font-size:15px; font-weight:600; text-shadow:0 1px 10px rgba(0,0,0,.85); }
+.app-loading-text { margin:0; font-size:15px; font-weight:600; text-shadow:0 1px 10px rgba(0,0,0,.6); }
+.app-loading-tip { position:absolute; left:50%; bottom:calc(28px + var(--safe-bottom, 0px)); transform:translateX(-50%); width:calc(100% - 48px); margin:0; max-width:320px; padding:10px 14px; border-radius:14px; background:rgba(20,17,26,.72); backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(6px); font-size:14px; line-height:19px; text-align:center; animation:tip-in .35s ease-out; }
+.app-loading-tip b { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--neon-500); margin-bottom:2px; }
+@keyframes tip-in { from { opacity:0; transform:translate(-50%, 4px); } to { opacity:1; transform:translateX(-50%); } }
+.app-loading.still::before { animation:none; }
 .btn.is-loading { pointer-events:none; opacity:.92; }
 .btn-spinner { display:inline-block; width:18px; height:18px; margin-right:8px; vertical-align:-3px; border-radius:50%;
   border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; animation:app-spin .8s linear infinite; }
 @keyframes app-spin { to { transform:rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .app-spinner, .btn-spinner { animation-duration:2.4s; } }
+@media (prefers-reduced-motion: reduce) { .app-spinner, .btn-spinner { animation-duration:2.4s; } .app-loading::before, .app-loading-tip { animation:none; } }
