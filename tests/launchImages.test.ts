@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { LAUNCH_SCREENS, launchImageName, launchStartupImages } from "../lib/launchImages.ts";
 import { LOADING_TIPS } from "../lib/loadingTips.ts";
+import { LAUNCH_SCREENS, launchImageName, launchStartupImages } from "../lib/launchImages.ts";
 
 test("every iPhone launch image is listed once and shipped in public/splash", () => {
   const names = LAUNCH_SCREENS.map(launchImageName);
@@ -11,6 +11,7 @@ test("every iPhone launch image is listed once and shipped in public/splash", ()
   assert.ok(existsSync(new URL("../public/loading-skyline.webp", import.meta.url)));
 });
 
-test("Lola's loading tips are short enough for a phone", () => {
+
+test("Mayor Papa-Dani's loading tips are short enough for a phone", () => {
   for (const t of LOADING_TIPS) assert.ok(t.length <= 70, t);
 });

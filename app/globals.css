@@ -2362,13 +2362,16 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .app-spinner { width:40px; height:40px; border-radius:50%; border:4px solid rgba(255,255,255,.16); border-top-color:var(--neon-500);
   animation:app-spin .8s linear infinite; }
 .app-loading-text { margin:0; font-size:15px; font-weight:600; text-shadow:0 1px 10px rgba(0,0,0,.6); }
-.app-loading-tip { position:absolute; left:50%; bottom:calc(28px + var(--safe-bottom, 0px)); transform:translateX(-50%); width:calc(100% - 48px); margin:0; max-width:320px; padding:10px 14px; border-radius:14px; background:rgba(20,17,26,.72); backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(6px); font-size:14px; line-height:19px; text-align:center; animation:tip-in .35s ease-out; }
+.app-loading-tip { position:absolute; left:50%; bottom:calc(28px + var(--safe-bottom, 0px)); transform:translateX(-50%); width:calc(100% - 48px);
+  max-width:340px; display:flex; align-items:center; gap:12px; padding:10px 14px 10px 10px; border-radius:16px; background:rgba(20,17,26,.74);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+.app-loading-tip img { flex:none; width:40px; height:40px; border-radius:50%; object-fit:cover; background:#fff; }
+.app-loading-tip p { margin:0; font-size:14px; line-height:19px; text-align:left; animation:tip-in .35s ease-out; }
 .app-loading-tip b { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--neon-500); margin-bottom:2px; }
-@keyframes tip-in { from { opacity:0; transform:translate(-50%, 4px); } to { opacity:1; transform:translateX(-50%); } }
+@keyframes tip-in { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
 .app-loading.still::before { animation:none; }
 .btn.is-loading { pointer-events:none; opacity:.92; }
 .btn-spinner { display:inline-block; width:18px; height:18px; margin-right:8px; vertical-align:-3px; border-radius:50%;
   border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; animation:app-spin .8s linear infinite; }
 @keyframes app-spin { to { transform:rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .app-spinner, .btn-spinner { animation-duration:2.4s; } .app-loading::before, .app-loading-tip { animation:none; } }
+@media (prefers-reduced-motion: reduce) { .app-spinner, .btn-spinner { animation-duration:2.4s; } .app-loading::before, .app-loading-tip p { animation:none; } }

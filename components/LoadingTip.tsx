@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MAYOR_PAPA_DANI } from "@/lib/cast";
 import { LOADING_TIPS } from "@/lib/loadingTips";
 
 export function LoadingTip() {
@@ -11,5 +12,11 @@ export function LoadingTip() {
     const t = setInterval(() => setI((n) => (n + 1) % LOADING_TIPS.length), 3500);
     return () => clearInterval(t);
   }, []);
-  return <p className="app-loading-tip" key={i}><b>Lola&apos;s tip</b> {LOADING_TIPS[i]}</p>;
+  return (
+    <div className="app-loading-tip">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={MAYOR_PAPA_DANI.portrait} alt="" width={40} height={40} />
+      <p key={i}><b>{MAYOR_PAPA_DANI.name}</b> {LOADING_TIPS[i]}</p>
+    </div>
+  );
 }
