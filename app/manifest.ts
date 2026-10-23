@@ -11,6 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
+    // Owner, Oct 23: the launch splash matches the loading screen's black (app/loading.tsx).
     background_color: "#14111A",
     theme_color: "#14111A",
     icons: [
