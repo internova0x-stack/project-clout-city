@@ -118,13 +118,14 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
 export const DAILY_HINT_TEXT = "Psst 👀 these are your daily tasks: five little errands that each pay out, plus a mad bonus if you clear all five 💸 Fresh list every day, so check in daily, babe 💅";
 
 /**
- * Shown once, 30 seconds after the first session ends if the daily tasks haven't been opened. The Tasks button in
- * the side column is ringed and tappable (it opens the tasks), Lola's bubble just above it; "Got it" or a tap
+ * Shown once, 30 seconds after the first session ends if the daily tasks haven't been opened. The task counter in
+ * the HUD is ringed and tappable (it opens the tasks), Lola's bubble just above it; "Got it" or a tap
  * anywhere else dismisses it.
  */
 export function DailyTasksHint({ onOpen, onDismiss }: { onOpen: () => void; onDismiss: () => void }) {
   const rect = useTargetRect("tasks");
-  const above = rect ? { bottom: Math.max(16, screenBox().height - rect.y + 10) } : undefined;
+  // The counter up top (owner, Oct 23): Lola sits at the bottom; a target low on the screen puts her just above it.
+  const above = rect && rect.y > screenBox().height / 2 ? { bottom: Math.max(16, screenBox().height - rect.y + 10) } : undefined;
   return (
     <div className="tour" role="dialog" aria-label="Your daily tasks">
       {rect ? (

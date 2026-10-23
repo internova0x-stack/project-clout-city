@@ -42,6 +42,10 @@ export const DiamondIcon = (p: IconProps) => (
 export const ChecklistIcon = (p: IconProps) => (
   <Icon {...p}><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></Icon>
 );
+/** Skills (owner, Oct 23): a target. */
+export const TargetIcon = (p: IconProps) => (
+  <Icon {...p}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" /></Icon>
+);
 export const ChampagneIcon = (p: IconProps) => (
   <Icon {...p}><path d="M8 22h8" /><path d="M7 10h10" /><path d="M12 15v7" /><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5z" /></Icon>
 );

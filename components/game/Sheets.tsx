@@ -60,7 +60,7 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
@@ -74,6 +74,8 @@ export function TasksSheet({
   onCook?: () => void;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, the streak and passes. */
   goals?: GoalsState | null;
+  /** Owner, Oct 23: the skill task links to the Skills sheet. */
+  onOpenSkills?: (skill: string) => void;
 }) {
   const [tab, setTab] = useState<"daily" | "goals" | "hunt" | "streaks">(initialTab ?? "daily");
   useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
@@ -132,6 +134,9 @@ export function TasksSheet({
                       </span>
                     )}
                     {t.skill && <TaskSkill id={t.skill} skills={skills} />}
+                    {t.skill && onOpenSkills && (
+                      <button className="task-skills-link" onClick={(e) => { e.stopPropagation(); onOpenSkills(t.skill!); }}>See skills ›</button>
+                    )}
                     {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
                   </div>
                 ))}

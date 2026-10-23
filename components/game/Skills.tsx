@@ -4,6 +4,7 @@ import { MAX_LEVEL, RUST_LINE, SKILLS, levelProgress, perkReward, perkStatus, pe
 import { formatCash } from "@/lib/economy";
 import { formatCountdown, useGameNow } from "../city/Common";
 import { ChevronDownIcon } from "../icons";
+import { Sheet } from "../Sheet";
 import { useState } from "react";
 
 /** Skill perks (migration 0092): what the Skills tab and the Gigs app need to act on a perk. */
@@ -18,11 +19,11 @@ export interface PerkHandlers {
 
 /** The profile's Skills tab (owner, Oct 16): each skill's level as ten segments, with how to train it, and (owner,
     Oct 19) what it gets you at levels 3, 6 and 9: paid gigs, invites and club access. */
-export function SkillsList({ skills, perks }: { skills: SkillState[]; perks?: PerkHandlers }) {
+export function SkillsList({ skills, perks, initialOpen }: { skills: SkillState[]; perks?: PerkHandlers; initialOpen?: string }) {
   const byId = new Map(skills.map((s) => [s.id, s]));
   const now = useGameNow(perks?.clockOffsetSeconds ?? 0);
   // Owner, Oct 19: each card folds; only the first starts open.
-  const [open, setOpen] = useState<Set<string>>(() => new Set([SKILLS[0].id]));
+  const [open, setOpen] = useState<Set<string>>(() => new Set([initialOpen ?? SKILLS[0].id]));
   const toggle = (id: string) => setOpen((o) => { const n = new Set(o); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   return (
     <div className="stack-12">
@@ -117,4 +118,32 @@ export function PerkAction({ perk, state, now, handlers }: { perk: SkillPerk; st
     case "on": return <span className="skill-perk-state">On</span>;
     default: return null;
   }
+}
+
+/** The Skills sheet (owner, Oct 23): the side column's Skills button opens it straight from home. Today's skill task
+    sits on top (it opens Tasks), and that skill's card starts open. */
+export function SkillsSheet({ open, onClose, skills, perks, today, onOpenTasks }: {
+  open: boolean; onClose: () => void; skills: SkillState[] | null; perks?: PerkHandlers;
+  today?: { skill: string; title: string; done: boolean } | null; onOpenTasks: () => void;
+}) {
+  const def = today ? SKILLS.find((d) => d.id === today.skill) : null;
+  return (
+    <Sheet open={open} onClose={onClose} label="Skills">
+      <div className="stack-16">
+        <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Skills</h2>
+        {today && def && (
+          <button className="skills-today" onClick={onOpenTasks}>
+            <span className="skills-today-emoji" aria-hidden="true">{def.emoji}</span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="overline" style={{ display: "block" }}>Today&apos;s skill task{today.done ? " · done ✓" : ""}</span>
+              <span className="title" style={{ display: "block" }}>{today.title}</span>
+              <span className="meta" style={{ display: "block" }}>Trains {def.name}</span>
+            </span>
+            <span className="skills-today-go" aria-hidden="true">›</span>
+          </button>
+        )}
+        {skills ? <SkillsList key={today?.skill ?? "all"} skills={skills} perks={perks} initialOpen={today?.skill} /> : <p className="subtext">Loading your skills…</p>}
+      </div>
+    </Sheet>
+  );
 }

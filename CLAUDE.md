@@ -140,6 +140,9 @@ components live in `app/globals.css`.
   rent date (`push_scan_rent_short`, run by the sender after push_scan, opens Gigs); in the game, `rentAlert()` (lib/cityState.ts)
   shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and turns the Bills button's pin into a ❗ (the bank pill stays the balance)
   (`?rent=short|late|evict` in the preview).
+- HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt) and its
+  pin pulses until the day's tasks are opened; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
+  today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
   screen (components/WelcomeBack.tsx: their home in 3D behind the account card, Continue to `/home`, Log out, Start over;
   `/preview/welcome`, `?restart=wait`). `restart_player()` (once every 30 days, `GAME_CONFIG.restartDays`; `restart_status()`)
