@@ -2349,7 +2349,14 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 
 /* Loading (owner, Oct 23): the launch screen and the Continue button's spinner. */
 .app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
-  background:linear-gradient(180deg, #14111A 0%, #14111A 75%, #5A1420 84%, #E0301E 93%, #FF6A1F 100%); color:rgba(255,255,255,.78); }
+  background:#14111A; color:rgba(255,255,255,.78); overflow:hidden; isolation:isolate; }
+/* A soft dusk horizon in the bottom quarter (owner, Oct 23: Monument Valley style): muted plum, dusty rose and peach,
+   eased with many stops and a wide glow so there are no bands. */
+.app-loading::after { content:""; position:absolute; left:-20%; right:-20%; bottom:0; height:34%; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(60% 75% at 50% 100%, rgba(255,176,138,.55) 0%, rgba(240,138,124,.38) 30%, rgba(196,98,122,.20) 58%, rgba(120,60,110,.08) 80%, transparent 100%),
+    linear-gradient(180deg, rgba(20,17,26,0) 0%, rgba(58,32,64,.35) 30%, rgba(122,60,98,.55) 55%, rgba(196,104,112,.7) 78%, rgba(236,150,120,.85) 100%);
+  -webkit-mask-image:linear-gradient(180deg, transparent 0%, #000 45%); mask-image:linear-gradient(180deg, transparent 0%, #000 45%); }
 .app-spinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(255,255,255,.14); border-top-color:var(--neon-500);
   animation:app-spin .8s linear infinite; }
 .app-loading-text { margin:0; font-size:15px; font-weight:600; }
