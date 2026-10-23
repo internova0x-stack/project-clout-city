@@ -23,9 +23,9 @@ export interface ChromeValues {
   online: number | null;
   eventsBadge: boolean;
   billsBadge?: boolean;
-  /** The rent alarm is on (lib/cityState.ts rentAlert): the bank pill shows a ❗ (owner, Oct 22). */
+  /** The rent alarm is on (lib/cityState.ts rentAlert): the Bills button's pin turns into a ❗ (owner, Oct 23). */
   cashAlert?: boolean;
-  /** v0.11: new tasks today (the first open of each New York day, cleared when tapped). */
+  /** v0.11: new tasks today (the first open of each New York day, cleared when tapped); pins Tasks and the HUD counter. */
   tasksBadge?: boolean;
   phoneBadge?: boolean;
 }
@@ -103,6 +103,7 @@ export function GameChrome({
             <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
             {!!values?.streak && <span className="hud-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
+            {values?.tasksBadge && <span className="pin-dot hud-tasks-dot" />}
           </button>
           <button
             className="hud-icon-btn"
@@ -122,9 +123,7 @@ export function GameChrome({
             <span className="circle"><DiamondIcon size={18} /></span>
             {netWorthPin && <span className="pin-dot" />}
           </button>
-          <button className={`hud-btn${values?.cashAlert ? " cash-alert" : ""}`} data-tour="money" onClick={() => onAction(values?.cashAlert ? "bills" : "bank")}
-            aria-label={values?.cashAlert ? "Bank balance: not enough for your bills" : "Bank balance"}>
-            {values?.cashAlert && <span className="cash-alert-mark" aria-hidden="true">❗</span>}
+          <button className="hud-btn" data-tour="money" onClick={() => onAction("bank")} aria-label="Bank balance">
             <span className="hud-number">{values ? formatCashShort(values.bank) : "C$—"}</span>
           </button>
         </div>
@@ -165,7 +164,7 @@ export function GameChrome({
         <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} tour="tasks" onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>
         <SideBtn label="Events" aria="Events" dot={values?.eventsBadge} tour="events" onClick={() => onAction("events")}><ChampagneIcon /></SideBtn>
         <SideBtn label="Places" aria="Places" onClick={() => onAction("places")}><BuildingIcon /></SideBtn>
-        <SideBtn label="Bills" aria="Bills" dot={values?.billsBadge} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>
+        <SideBtn label="Bills" aria={values?.cashAlert ? "Bills: not enough in the bank" : "Bills"} dot={values?.billsBadge} alert={values?.cashAlert} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>
         <SideBtn label="Look" aria="Your look" onClick={() => onAction("look")}><PersonIcon /></SideBtn>
         {onLocate && <SideBtn label="Me" aria="Go to my location" onClick={onLocate}><LocateIcon /></SideBtn>}
       </nav>
@@ -284,12 +283,13 @@ function FlameFilled({ size = 20 }: { size?: number }) {
   );
 }
 
-function SideBtn({ label, aria, dot, tour, onClick, children }: { label: string; aria: string; dot?: boolean; tour?: string; onClick: () => void; children: React.ReactNode }) {
+/** `alert` (urgent, e.g. rent the bank can't cover) shows a ❗ in place of the pin. */
+function SideBtn({ label, aria, dot, alert, tour, onClick, children }: { label: string; aria: string; dot?: boolean; alert?: boolean; tour?: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button className="side-btn" data-tour={tour} onClick={onClick} aria-label={aria}>
       <span className="side-ico glass-hud">
         {children}
-        {dot && <span className="pin-dot" style={{ top: 2, right: 2 }} />}
+        {alert ? <span className="side-alert-mark" aria-hidden="true">!</span> : dot && <span className="pin-dot" style={{ top: 2, right: 2 }} />}
       </span>
       <span className="side-lbl" aria-hidden="true">{label}</span>
     </button>

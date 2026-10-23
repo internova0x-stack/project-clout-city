@@ -138,7 +138,7 @@ components live in `app/globals.css`.
   real New York evening, since the city clock loops every two hours).
   Rent alarm (migration 0112, owner Oct 22): rent due within 3 days and too little in the bank sends 'rent_short' once per
   rent date (`push_scan_rent_short`, run by the sender after push_scan, opens Gigs); in the game, `rentAlert()` (lib/cityState.ts)
-  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and puts a ❗ on the bank pill
+  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and turns the Bills button's pin into a ❗ (the bank pill stays the balance)
   (`?rent=short|late|evict` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
   screen (components/WelcomeBack.tsx: their home in 3D behind the account card, Continue to `/home`, Log out, Start over;
