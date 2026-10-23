@@ -2341,8 +2341,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .skills-today { display:flex; align-items:center; gap:12px; width:100%; padding:14px 16px; border-radius:var(--r-lg); background:var(--surface-card); color:var(--text-1); }
 .skills-today-emoji { font-size:28px; line-height:1; flex:none; }
 .skills-today-go { font-size:24px; color:var(--text-3); flex:none; }
-.task-skills-link { display:block; margin-top:8px; font-size:13px; font-weight:700; color:var(--primary); }
-/* Owner, Oct 23: until the day's tasks are opened, the counter's ring pulses gently. */
-.hud-btn.hud-pulse { animation:hud-pulse 1.8s ease-in-out infinite; }
-@keyframes hud-pulse { 0%, 100% { box-shadow:0 0 0 0 rgba(224,24,111,0); } 50% { box-shadow:0 0 0 4px rgba(224,24,111,.28); } }
-@media (prefers-reduced-motion: reduce) { .hud-btn.hud-pulse { animation:none; box-shadow:0 0 0 2px rgba(224,24,111,.35); } }
+.task-skills-link { display:block; margin-top:8px; font-size:13px; font-weight:700; color:var(--tag-blue); }
+/* Owner, Oct 23: until the day's tasks are opened, the counter's pin pulses. */
+.pin-dot.pin-pulse::after { content:""; position:absolute; inset:0; border-radius:50%; background:var(--neon-600); animation:pin-pulse 1.6s ease-out infinite; }
+@keyframes pin-pulse { 0% { transform:scale(1); opacity:.7; } 100% { transform:scale(2.6); opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .pin-dot.pin-pulse::after { animation:none; opacity:0; } }

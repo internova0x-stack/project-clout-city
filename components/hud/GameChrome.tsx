@@ -103,11 +103,11 @@ export function GameChrome({
           <span className="hud-time hud-number" aria-label="City time">
             {time ? <>{time.split(" ")[0]}{time.includes(" ") && <small className="hud-ampm">{time.split(" ").slice(1).join(" ")}</small>}</> : "\u00a0"}
           </span>
-          <button className={`hud-btn${values?.tasksBadge ? " hud-pulse" : ""}`} data-tour="tasks" onClick={() => onAction("daily")} aria-label={values ? `Tasks and goals, ${values.dailyDone} of ${values.dailyTotal} daily tasks done` : "Tasks and goals"}>
+          <button className="hud-btn" data-tour="tasks" onClick={() => onAction("daily")} aria-label={values ? `Tasks and goals, ${values.dailyDone} of ${values.dailyTotal} daily tasks done` : "Tasks and goals"}>
             <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
             {!!values?.streak && <span className="hud-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
-            {values?.tasksBadge && <span className="pin-dot hud-tasks-dot" />}
+            {values?.tasksBadge && <span className="pin-dot hud-tasks-dot pin-pulse" />}
           </button>
           <button
             className="hud-icon-btn"
