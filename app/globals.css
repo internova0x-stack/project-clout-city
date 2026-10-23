@@ -2336,3 +2336,13 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .side-card.open .side-card-chev { transform:rotate(180deg); }
 .side-card > .stack-12 > .subtext { display:block; line-height:1.5; }
 .side-card .beat-card { background:#fff; }
+
+/* The Skills sheet (owner, Oct 23) and the skill task's link to it */
+.skills-today { display:flex; align-items:center; gap:12px; width:100%; padding:14px 16px; border-radius:var(--r-lg); background:var(--surface-card); color:var(--text-1); }
+.skills-today-emoji { font-size:28px; line-height:1; flex:none; }
+.skills-today-go { font-size:24px; color:var(--text-3); flex:none; }
+.task-skills-link { display:block; margin-top:8px; font-size:13px; font-weight:700; color:var(--primary); }
+/* Owner, Oct 23: until the day's tasks are opened, the counter's ring pulses gently. */
+.hud-btn.hud-pulse { animation:hud-pulse 1.8s ease-in-out infinite; }
+@keyframes hud-pulse { 0%, 100% { box-shadow:0 0 0 0 rgba(224,24,111,0); } 50% { box-shadow:0 0 0 4px rgba(224,24,111,.28); } }
+@media (prefers-reduced-motion: reduce) { .hud-btn.hud-pulse { animation:none; box-shadow:0 0 0 2px rgba(224,24,111,.35); } }

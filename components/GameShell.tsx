@@ -9,7 +9,8 @@ import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
-import { skillBadge } from "@/lib/skills";
+import { SKILL_PERKS, perkStatus, skillBadge } from "@/lib/skills";
+import { SkillsSheet } from "./game/Skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
@@ -20,7 +21,7 @@ import { GAME_CONFIG } from "@/lib/config";
 import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
-import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, rentAlert, gigReady, netWorth, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
+import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, rentAlert, gigReady, netWorth, taskTitle, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
 import { RentAlertCard } from "./city/RentAlert";
 import { itemOptionsBySku, outfitFromSkus } from "@/lib/wearing";
 import { modelSex } from "@/lib/avatarCatalog";
@@ -124,7 +125,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
+type Panel = "tasks" | "skills" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const TASKS_SEEN_KEY = "cc-tasks-seen";
@@ -523,7 +524,7 @@ export function GameShell({
   const [tasksTab, setTasksTab] = useState<"daily" | "goals" | "hunt" | undefined>(undefined);
   // Skills (migration 0056): fresh each time the profile or the Tasks list (its skill task) opens.
   const [skills, setSkills] = useState(previewSkills);
-  const tasksOpen = panel === "tasks";
+  const tasksOpen = panel === "tasks" || panel === "skills";
   useEffect(() => {
     // Loaded once at the start too, so the profile's Skills tab is ready the moment it opens (owner, Oct 22).
     if (!loadSkills || (skills && !(profileOpen || tasksOpen))) return;
@@ -1672,6 +1673,7 @@ export function GameShell({
       if (a === "leaderboard") return setPanel("leaderboard");
       if (a === "bank") return setPanel("bank");
       if (a === "tasks" || a === "daily") { markTasksSeen(); endDailyHint(); return setPanel("tasks"); }
+      if (a === "skills") return setPanel("skills");
       if (a === "events") {
         if (flow === "tour") {
           // Tooltip 5 ends the tour by tapping its target, and starts the first task.
@@ -2183,6 +2185,8 @@ export function GameShell({
           billsBadge: !!city && dueBills(city).length > 0,
           cashAlert: !!rentAlarm,
           tasksBadge: !!city && city.tasks.length > 0 && tasksSeenDay !== "" && tasksSeenDay !== city.today && handedOff,
+          skillsOn: !!(loadSkills || skills),
+          skillsBadge: !!perkHandlers && SKILL_PERKS.some((p) => ["take", "collect", "rsvp"].includes(perkStatus(p, perkHandlers.state, gameNow))),
           phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
@@ -2282,6 +2286,17 @@ export function GameShell({
 
       {/* ---- Panels ---- */}
       <BoroughSheet id={lockedBorough} onClose={() => setLockedBorough(null)} gate={gates?.find((g) => g.id === lockedBorough) ?? null} />
+      <SkillsSheet
+        open={panel === "skills"}
+        onClose={() => setPanel(null)}
+        skills={skills ?? null}
+        perks={perkHandlers}
+        today={(() => {
+          const t = city?.tasks.find((x) => x.skill);
+          return t?.skill ? { skill: t.skill, title: taskTitle(t), done: !!t.done_at } : null;
+        })()}
+        onOpenTasks={() => { markTasksSeen(); setPanel("tasks"); }}
+      />
       <TasksSheet
         open={panel === "tasks"}
         onClose={() => { setPanel(null); setTasksTab(undefined); }}
@@ -2293,6 +2308,7 @@ export function GameShell({
         goals={goalsNow}
         onOpenPlace={openPlace}
         skills={skills}
+        onOpenSkills={loadSkills || skills ? () => setPanel("skills") : undefined}
         onCook={() => { setPanel(null); setKitchenOpen(true); }}
         story={storyOn ? feed : null}
         onStoryTask={onStoryTask}
