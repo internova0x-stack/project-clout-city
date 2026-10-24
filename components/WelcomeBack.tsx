@@ -5,7 +5,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sheet } from "./Sheet";
 import { CATALOG_FURNITURE, itemBySku, type ShopItem } from "@/lib/city";
 import { GAME_CONFIG } from "@/lib/config";
@@ -46,11 +46,13 @@ export function WelcomeBack({ data, onRestart, preview = false }: { data: Welcom
   const [sheet, setSheet] = useState(false);
   const [busy, setBusy] = useState(false);
   const [going, setGoing] = useState(false);
-  // Back from the game (the page restored from cache): the button is a button again.
+  const fallback = useRef<number | undefined>(undefined);
+  // Back from the game (the page restored from cache): the button is a button again. Leaving for the game cancels the
+  // full-page fallback.
   useEffect(() => {
     const reset = () => setGoing(false);
     window.addEventListener("pageshow", reset);
-    return () => window.removeEventListener("pageshow", reset);
+    return () => { window.removeEventListener("pageshow", reset); window.clearTimeout(fallback.current); };
   }, []);
   const [error, setError] = useState<string | null>(null);
   const look = useMemo(() => normalizeLook(data.look, data.style), [data.look, data.style]);
@@ -104,7 +106,15 @@ export function WelcomeBack({ data, onRestart, preview = false }: { data: Welcom
         </div>
         {/* Owner, Oct 23: a spinner at once, so the tap never looks ignored while the game loads. */}
         <a className={`btn btn-taxi${going ? " is-loading" : ""}`} href="/home" aria-busy={going}
-          onClick={(e) => { if (going) return e.preventDefault(); setGoing(true); }}>
+          onClick={(e) => {
+            // Owner, Oct 24: the spinner shows at once and this screen stays up while the game loads (an in-app
+            // navigation, no splash in between); a full page load takes over if that stalls.
+            e.preventDefault();
+            if (going) return;
+            setGoing(true);
+            router.push("/home");
+            fallback.current = window.setTimeout(() => window.location.assign("/home"), 20000);
+          }}>
           {going ? <><span className="btn-spinner" aria-hidden="true" /> Loading…</> : "Continue"}
         </a>
         <div className="welcome-foot">

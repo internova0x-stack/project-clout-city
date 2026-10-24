@@ -828,6 +828,19 @@ export function GameShell({
   }, [presencePlace, presenceFloor, chat]);
   const myPos = atPlaceInfo?.at ?? home;
   const myPosName = atPlaceInfo?.name ?? "home";
+  // Owner, Oct 24: opening the game picks up where the player left off: inside the deli (or wherever) they were last
+  // at, ground floor, or on the map beside it. Once per visit, and never over a push notification's own screen or
+  // the first-session flow.
+  const [deepLinked] = useState(() => typeof window !== "undefined" && new URL(window.location.href).searchParams.has("open"));
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (resumed.current || !city) return;
+    resumed.current = true;
+    if (deepLinked || flow !== "none" || !atPlaceInfo) return;
+    setTab("map");
+    if (placeRoom(atPlaceInfo)) setInside(atPlaceInfo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city]);
   const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);

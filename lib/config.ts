@@ -5,6 +5,9 @@ export const GAME_CONFIG = {
   /** Current shipped version (see docs/07-milestones-and-versions.md). */
   version: "0.1",
 
+  /** Owner, Oct 24: the launch splash stays at least this long from the moment the app opens (a typical splash). */
+  splashMinMs: 2200,
+
   cityClock: {
     /** One in-game day every N real hours (Clarifications section 12). */
     realHoursPerCityDay: 2,

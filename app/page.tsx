@@ -1,4 +1,7 @@
+import { Suspense } from "react";
 import { cookies } from "next/headers";
+import { AppLoading } from "@/components/AppLoading";
+import { SplashHold } from "@/components/SplashHold";
 import { redirect } from "next/navigation";
 import { GuestMap, type CreatorWelcome } from "@/components/GuestMap";
 import { WelcomeBack, type WelcomeData, type WelcomeItem } from "@/components/WelcomeBack";
@@ -20,11 +23,21 @@ async function creatorWelcome(): Promise<CreatorWelcome | null> {
 
 export const dynamic = "force-dynamic";
 
-export default async function GuestPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+type Search = Promise<Record<string, string | string[] | undefined>>;
+
+// Owner, Oct 24: the splash (AppLoading) is the app's launch screen only. It streams at once on `/` while the server
+// gets the player ready, and SplashHold keeps it up for a typical splash length (GAME_CONFIG.splashMinMs). Nothing
+// else has a loading boundary, so Continue keeps the welcome screen (and its spinner) up until the game is ready.
+export default function GuestPage({ searchParams }: { searchParams: Search }) {
+  return (
+    <Suspense fallback={<AppLoading />}>
+      <Guest searchParams={searchParams} />
+      <SplashHold />
+    </Suspense>
+  );
+}
+
+async function Guest({ searchParams }: { searchParams: Search }) {
   const params = await searchParams;
   // Supabase falls back to the Site URL (here) when it doesn't recognize a sign-in's redirect:
   // finish signing in through the callback, which also knows a Studio sign-in (lib/authNext.ts).
