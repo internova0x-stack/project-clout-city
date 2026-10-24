@@ -2375,3 +2375,6 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
   border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff; animation:app-spin .8s linear infinite; }
 @keyframes app-spin { to { transform:rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .app-spinner, .btn-spinner { animation-duration:2.4s; } .app-loading::before, .app-loading-tip p { animation:none; } }
+/* The splash held over the first screen (owner, Oct 24), then faded out. */
+.splash-hold { position:fixed; inset:0; z-index:2000; transition:opacity .4s ease; }
+.splash-hold.out { opacity:0; pointer-events:none; }

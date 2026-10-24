@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { AppLoading } from "@/components/AppLoading";
+import { SplashHold } from "@/components/SplashHold";
 import { redirect } from "next/navigation";
 import { GuestMap, type CreatorWelcome } from "@/components/GuestMap";
 import { WelcomeBack, type WelcomeData, type WelcomeItem } from "@/components/WelcomeBack";
@@ -24,13 +25,14 @@ export const dynamic = "force-dynamic";
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
-// Owner, Oct 24: the splash (AppLoading) is the app's launch screen only: it streams at once on `/` while the server
-// gets the player ready. Nothing else has a loading boundary, so Continue keeps the welcome screen (and its spinner)
-// up until the game is ready instead of flashing the splash again.
+// Owner, Oct 24: the splash (AppLoading) is the app's launch screen only. It streams at once on `/` while the server
+// gets the player ready, and SplashHold keeps it up for a typical splash length (GAME_CONFIG.splashMinMs). Nothing
+// else has a loading boundary, so Continue keeps the welcome screen (and its spinner) up until the game is ready.
 export default function GuestPage({ searchParams }: { searchParams: Search }) {
   return (
     <Suspense fallback={<AppLoading />}>
       <Guest searchParams={searchParams} />
+      <SplashHold />
     </Suspense>
   );
 }
