@@ -143,7 +143,8 @@ components live in `app/globals.css`.
 - HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt) and its
   pin pulses until the day's tasks are opened; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
   today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
-- Loading (owner, Oct 23): `app/loading.tsx` and `app/home/loading.tsx` show `AppLoading` at once (Queens at night in the
+- Loading (owner, Oct 23-24): the launch splash `AppLoading` is `/`'s Suspense fallback only (no loading.tsx, so Continue
+  keeps the welcome screen and its spinner up until the game is ready); it shows at once (Queens at night in the
   game's style, `public/loading-skyline.webp`, made with Higgsfield; Mayor Papa-Dani's tips from `lib/loadingTips.ts`); Continue spins.
   iPhone launch images are `public/splash/` (lib/launchImages.ts; regenerate with `npm run build:launch-images` on a running
   dev server after changing the loader; `/preview/loading?still=1` is what they show).
