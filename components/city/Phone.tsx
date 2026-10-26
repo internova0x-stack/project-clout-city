@@ -76,7 +76,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership,
-  invite, mayor,
+  invite, mayor, locked,
 }: {
   open: boolean;
   onClose: () => void;
@@ -118,6 +118,8 @@ export function PhoneModal({
   /** The player's @handle, on the Bank's virtual card. */
   handle?: string;
   /** #19 moving up: the Apartments app; without it the app is hidden. */
+  /** Apps locked until a rank (owner, Oct 26): the label says when ("Rank 2"). */
+  locked?: Partial<Record<App, string>>;
   apartments?: {
     busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void;
     /** Sublets (migration 0119): Apartments gets a Rent / Sublets switch. */
@@ -190,7 +192,10 @@ export function PhoneModal({
               )}
               <div className="phone-grid">
                 {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor)).map((a) => (
-                  <button key={a.id} className="phone-app" onClick={() => (a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
+                  <button key={a.id} className={`phone-app${locked?.[a.id] ? " locked" : ""}`} aria-label={locked?.[a.id] ? `${a.label}, opens at ${locked[a.id]}` : undefined}
+                    onClick={() => (locked?.[a.id] ? onToast?.(`🔒 ${a.label} opens at ${locked[a.id]}. Keep earning clout.`) : a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
+                    <span style={{ position: "relative" }}>
+                    {locked?.[a.id] && <span className="phone-lock" aria-hidden="true">🔒</span>}
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">
                       {a.emoji}
                       {a.id === "radio" && radioDot && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
@@ -204,7 +209,8 @@ export function PhoneModal({
                         return n > 0 && <span className="count-badge">{n}</span>;
                       })()}
                     </span>
-                    <span>{a.label}</span>
+                    </span>
+                    <span>{a.label}{locked?.[a.id] && <small>{locked[a.id]}</small>}</span>
                   </button>
                 ))}
               </div>

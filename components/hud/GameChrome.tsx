@@ -61,6 +61,7 @@ export function GameChrome({
   onTip,
   atPlace = null,
   homeScore = null,
+  starter = null,
   onLocate,
 }: {
   time: string;
@@ -83,6 +84,8 @@ export function GameChrome({
   atPlace?: { name: string; onOpen: () => void } | null;
   /** The home score (migration 0120), at home: the pill opens its sheet. */
   homeScore?: { score: number; tier: string; onOpen: () => void } | null;
+  /** Starter Week (owner, Oct 26): the current mission, under the invite. */
+  starter?: ReactNode;
   /** Shown until finished: this week's hunt and the story you're following, a red dot when something's new. */
   quests?: QuestButton[];
   /** #14 (owner, Oct 14): "find me" lives at the bottom of the side column, on the map only. */
@@ -142,6 +145,7 @@ export function GameChrome({
           Invite your Crew
           {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
         </button>
+        {starter}
         {/* The Crib Rating (migration 0120; owner, Oct 26: under the invite), at home only. */}
         {homeScore && (
           <button className="pill-glass glass-hud crib-pill" onClick={homeScore.onOpen} aria-label={`Crib Rating ${homeScore.score} out of 100, ${homeScore.tier}`}>

@@ -77,7 +77,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -125,6 +125,10 @@ export function PreviewHome({
   homeScorePreset?: string;
   /** ?visit=none|hosting|invite|guest: having people over (migration 0121) in that state. */
   visitPreset?: string;
+  /** ?starter=0-10: Starter Week with that many missions done. */
+  starterPreset?: string;
+  /** ?apps=locked: Businesses and Jobs locked as for a Rank 1 player. */
+  appsPreset?: string;
   /** Skill perks (migration 0092): "pro" starts with high skill levels. */
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
@@ -524,6 +528,8 @@ export function PreviewHome({
       couple={cityOff ? undefined : couple}
       sublet={cityOff ? undefined : sublet}
       visits={cityOff ? undefined : visitApi}
+      starter={starterPreset !== undefined ? { done: Math.max(0, Math.min(10, Number(starterPreset) || 0)), daysLeft: 6 } : undefined}
+      lockAppsPreview={appsPreset === "locked"}
       crew={cityOff ? undefined : crewApi}
       party={cityOff || storyOff ? undefined : partyApi}
       partyRoom={cityOff || storyOff ? undefined : partyRoomApi}

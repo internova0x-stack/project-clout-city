@@ -2412,3 +2412,20 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .game.has-crib .story-prompt { top:calc(164px + var(--safe-top)); }
 /* During a visit (migration 0121) the visit bar takes the top: the pills and home cards under the HUD step aside. */
 .game.in-visit .under-hud, .game.in-visit .story-prompt, .game.in-visit .room-storage, .game.in-visit .quest-row { display:none; }
+/* Starter Week (owner, Oct 26): the pill under "Invite your Crew" and the mission list. */
+.starter-pill { display:flex; align-items:center; gap:8px; max-width:calc(100vw - 110px); white-space:nowrap; }
+.starter-count { flex:none; font-weight:800; font-size:13px; color:var(--neon-text); }
+.starter-next { min-width:0; overflow:hidden; text-overflow:ellipsis; font-size:14px; }
+.starter-row.done { opacity:.55; }
+.starter-row.done .title { text-decoration:line-through; }
+.starter-row.now { background:var(--neon-tint); border-radius:14px; padding-left:10px; padding-right:10px; }
+.starter-dot { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:800; background:var(--chip-off); color:var(--text-2); }
+.starter-row.done .starter-dot { background:var(--green-tint, #DEF2E9); color:var(--green-text, #2E8B63); }
+.starter-row.now .starter-dot { background:var(--neon-500); color:#fff; }
+/* Locked apps (owner, Oct 26): the same icon, dimmed, with a lock and when it opens. */
+.phone-app.locked .phone-icon { filter:grayscale(.6); opacity:.5; }
+.phone-lock { position:absolute; z-index:2; right:-4px; bottom:-4px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:11px; background:#14111A; box-shadow:0 0 0 2px rgba(255,255,255,.7); }
+.phone-app.locked small { display:block; font-size:10px; opacity:.85; }
+/* With the Starter Week pill under the invite, home cards sit a row lower again. */
+.game.has-starter .story-prompt { top:calc(164px + var(--safe-top)); }
+.game.has-starter.has-crib .story-prompt { top:calc(212px + var(--safe-top)); }
