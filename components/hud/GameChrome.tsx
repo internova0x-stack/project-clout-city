@@ -60,6 +60,7 @@ export function GameChrome({
   tips,
   onTip,
   atPlace = null,
+  homeScore = null,
   onLocate,
 }: {
   time: string;
@@ -79,6 +80,8 @@ export function GameChrome({
   onTip?: (placeId: string) => void;
   /** #4 (owner, Oct 14): "At <place>" sits in the same stack as the ticker, so the two never overlap. */
   atPlace?: { name: string; onOpen: () => void } | null;
+  /** The home score (migration 0120), at home: the pill opens its sheet. */
+  homeScore?: { score: number; tier: string; onOpen: () => void } | null;
   /** Shown until finished: this week's hunt and the story you're following, a red dot when something's new. */
   quests?: QuestButton[];
   /** #14 (owner, Oct 14): "find me" lives at the bottom of the side column, on the map only. */
@@ -138,6 +141,13 @@ export function GameChrome({
           Invite your Crew
           {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
         </button>
+        {/* The Crib Rating (migration 0120; owner, Oct 26: under the invite), at home only. */}
+        {homeScore && (
+          <button className="pill-glass glass-hud crib-pill" onClick={homeScore.onOpen} aria-label={`Crib Rating ${homeScore.score} out of 100, ${homeScore.tier}`}>
+            <span className="crib-ring" style={{ ["--p" as string]: `${homeScore.score}%` }} aria-hidden="true"><b>{homeScore.score}</b></span>
+            <span className="crib-label" aria-hidden="true"><small>Crib Rating</small>{homeScore.tier}</span>
+          </button>
+        )}
         {showHeadline ? (
           <button className="pill-status glass-hud news-ticker" onClick={headline!.onOpen} key={`h${tick}`}>
             <span aria-hidden="true">📰</span> <span className="news-ticker-text">{headline!.text}</span>

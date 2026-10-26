@@ -62,6 +62,8 @@ export interface PlayerCard {
   partner?: { id: string; name: string; since: string } | null;
   /** Sublets (migration 0119): "🏠 Subletting from" / "🔑 Hosting", unless they hide it. */
   sublet?: { role: "host" | "sub"; id: string; name: string } | null;
+  /** The home score (migration 0120), 0 to 100. */
+  homeScore?: number | null;
 }
 
 export type ReportReason = "harassment" | "spam" | "inappropriate" | "other";

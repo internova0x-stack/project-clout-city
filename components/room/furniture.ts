@@ -5,7 +5,7 @@
 
 import {
   BoxGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Group, Mesh,
-  MeshStandardMaterial, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
+  MeshStandardMaterial, SRGBColorSpace, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import { FURNITURE, type RoomItem } from "@/lib/rooms";
 
@@ -785,6 +785,29 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
         cyl(0.16, 0.16, 0.05, BLACK, x, 0.62, d / 2 + 0.12, 10);
         cyl(0.025, 0.025, 0.62, METAL, x, 0, d / 2 + 0.12, 6);
       }
+      return { group: g };
+    }
+    case "painting": {
+      // Wall art (migration 0120): a gilt frame hung against the wall behind the piece's spot, the picture drawn onto a
+      // canvas once it loads (tests have no canvas, so they keep the plain cream board).
+      const fw = 1.0, fh = 0.75, y0 = 1.15, back = -d / 2;
+      box(fw + 0.1, fh + 0.1, 0.05, item.color ?? "#B08D57", 0, y0 - 0.05, back + 0.025);
+      let face: Material = k.mat("#ECE6DC");
+      if (typeof document !== "undefined" && item.art) {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 384;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#ECE6DC"; x.fillRect(0, 0, c.width, c.height);
+          const tex = new CanvasTexture(c);
+          tex.colorSpace = SRGBColorSpace;
+          face = k.mat("#ffffff", { map: tex, roughness: 0.9 });
+          const img = new Image();
+          img.onload = () => { x.drawImage(img, 0, 0, c.width, c.height); tex.needsUpdate = true; };
+          img.src = item.art;
+        }
+      }
+      box(fw, fh, 0.012, face, 0, y0, back + 0.056);
       return { group: g };
     }
     case "nightstand": {

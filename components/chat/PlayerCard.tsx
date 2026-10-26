@@ -7,6 +7,7 @@ import { placeById } from "@/lib/city";
 import { messagesLeftLine } from "./Messages";
 import { ECONOMY, formatCash, formatShort } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
+import { tierFor } from "@/lib/homeScore";
 import { Sheet } from "../Sheet";
 import { RankChip } from "../game/Ranks";
 import { rankFor } from "@/lib/ranks";
@@ -125,6 +126,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
                 {card.vipSince && <span className="tag tag-gold">👑 VIP</span>}
               </span>
               {card.partner && <span className="partner-line" style={{ marginTop: 6 }}>💞 Dating {handle(card.partner.name)}</span>}
+              {card.homeScore != null && card.homeScore > 0 && <span className="meta" style={{ display: "block", marginTop: 6 }}>🏠 Crib Rating {card.homeScore} · {tierFor(card.homeScore)}</span>}
               {card.sublet && <span className="partner-line" style={{ marginTop: 6, display: "flex" }}>{card.sublet.role === "sub" ? `🏠 Subletting from ${handle(card.sublet.name)}` : `🔑 Hosting ${handle(card.sublet.name)}`}</span>}
             </span>
           </div>

@@ -22,6 +22,54 @@ export const SHOP_STATIC_IMAGES: Record<string, { card: string; detail: string }
     "card": "/shop-img/alumni-of-nothing-varsity-d2oi49-256.webp",
     "detail": "/shop-img/alumni-of-nothing-varsity-d2oi49-768.webp"
   },
+  "art-astoria-rooftops": {
+    "card": "/shop-img/art-astoria-rooftops-16mxd4s-256.webp",
+    "detail": "/shop-img/art-astoria-rooftops-16mxd4s-768.webp"
+  },
+  "art-bagel-blue": {
+    "card": "/shop-img/art-bagel-blue-105fhai-256.webp",
+    "detail": "/shop-img/art-bagel-blue-105fhai-768.webp"
+  },
+  "art-bodega-cat-sunday": {
+    "card": "/shop-img/art-bodega-cat-sunday-1srvyiv-256.webp",
+    "detail": "/shop-img/art-bodega-cat-sunday-1srvyiv-768.webp"
+  },
+  "art-bridge-rain": {
+    "card": "/shop-img/art-bridge-rain-5szvyl-256.webp",
+    "detail": "/shop-img/art-bridge-rain-5szvyl-768.webp"
+  },
+  "art-clout": {
+    "card": "/shop-img/art-clout-1lktche-256.webp",
+    "detail": "/shop-img/art-clout-1lktche-768.webp"
+  },
+  "art-globe-fog": {
+    "card": "/shop-img/art-globe-fog-1917kd1-256.webp",
+    "detail": "/shop-img/art-globe-fog-1917kd1-768.webp"
+  },
+  "art-golden-hour-7": {
+    "card": "/shop-img/art-golden-hour-7-zs7dtw-256.webp",
+    "detail": "/shop-img/art-golden-hour-7-zs7dtw-768.webp"
+  },
+  "art-laundromat-dreams": {
+    "card": "/shop-img/art-laundromat-dreams-1vaeu68-256.webp",
+    "detail": "/shop-img/art-laundromat-dreams-1vaeu68-768.webp"
+  },
+  "art-night-game": {
+    "card": "/shop-img/art-night-game-1bknd0v-256.webp",
+    "detail": "/shop-img/art-night-game-1bknd0v-768.webp"
+  },
+  "art-pigeon-portrait": {
+    "card": "/shop-img/art-pigeon-portrait-spnjzp-256.webp",
+    "detail": "/shop-img/art-pigeon-portrait-spnjzp-768.webp"
+  },
+  "art-rent-is-due": {
+    "card": "/shop-img/art-rent-is-due-1p30c5d-256.webp",
+    "detail": "/shop-img/art-rent-is-due-1p30c5d-768.webp"
+  },
+  "art-self-made": {
+    "card": "/shop-img/art-self-made-13aeojz-256.webp",
+    "detail": "/shop-img/art-self-made-13aeojz-768.webp"
+  },
   "astoria-yacht": {
     "card": "/shop-img/astoria-yacht-5jj9rl-256.webp",
     "detail": "/shop-img/astoria-yacht-5jj9rl-768.webp"

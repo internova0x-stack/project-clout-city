@@ -33,7 +33,7 @@ export const SLOTS: Record<ShopTab, readonly string[]> = {
   fashion: ["top", "bottom", "one-piece", "shoes", "accessory", "outfit"],
   accessories: ["head", "face", "ears", "neck", "wrist", "hand"],
   luxury: ["head", "face", "ears", "neck", "wrist", "hand", "car", "waterfront", "sky", "plaza", "face-effect"],
-  home: ["living", "bedroom", "dining", "decor", "kitchen", "bathroom", "plot"],
+  home: ["living", "bedroom", "dining", "decor", "art", "kitchen", "bathroom", "plot"],
   cars: ["car"],
   houses: ["plot"],
   makeup: ["face-effect"],
@@ -215,6 +215,8 @@ export function parseCatalogFile(raw: unknown, file: string, opts: { coutureClou
     if (couture) tab = COUTURE_TAB[str(it.tab).toLowerCase()] ?? "luxury";
     else if (it.category === "accessories") tab = tabForAccessory({ template, slot });
     else if (it.category === "fashion") tab = "fashion";
+    // Wall art (migration 0120): furniture sold in Furniture → Art.
+    else if (it.category === "home") tab = "home";
     else { problems.push({ id: id || name, problem: `unknown category "${str(it.category)}"` }); continue; }
     const realCash = it.realCash === true;
     const price = realCash ? 0 : Math.round(num(it.priceCs));
@@ -245,7 +247,7 @@ function emojiFor(tab: ShopTab, slot: string | null, template: string | null): s
   const t = template ?? "";
   if (tab === "cars") return "🏎️";
   if (tab === "houses") return "🏛️";
-  if (tab === "home") return /statue/.test(t) || slot === "decor" ? "🗿" : "🛋️";
+  if (tab === "home") return slot === "art" ? "🖼️" : /statue/.test(t) || slot === "decor" ? "🗿" : "🛋️";
   if (tab === "makeup") return "✨";
   if (slot === "sky") return "🛩️";
   if (slot === "waterfront") return "🛥️";

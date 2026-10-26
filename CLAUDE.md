@@ -193,6 +193,12 @@ components live in `app/globals.css`.
   (`players_sublet_moves`, `block_sublet_trigger`); ratings, renewals, roommate hang, card lines (`sublet_public`).
   Settings: game_settings 'sublets', mirrored by lib/sublets.ts (tests/sublets.test.ts). `?sublet=browse|listed|living|
   hosting|notice|ended` in the preview (Phone → Apartments → Sublets).
+- Crib Rating (migration 0120, owner Oct 26; spec section 26; code and database say home score): `home_score(player)`
+  scores placed bought pieces 0 to 100 (rooms 4 × 10, quality: distinct lines' stars against the home's target, wall art
+  5 each up to 20); `home_score_state()` pays 40/70/100 once (ledger 'home_score'); lib/homeScore.ts mirrors game_settings
+  'home_score' (tests/homeScore.test.ts) and works it out on the client for the 🏠 pill beside "Invite your Crew"
+  (components/home/HomeScore.tsx). Wall art: content/shop/wall-art.json, live in Furniture → Art, kind 'painting'
+  (`CATALOG_FURNITURE`, `shopBase`, pictures in public/art/). `?homescore=furnished` in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

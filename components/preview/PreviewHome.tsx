@@ -72,7 +72,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -116,6 +116,8 @@ export function PreviewHome({
   couplePreset?: string;
   /** ?sublet=browse|listed|living|hosting|notice|ended: sublets (migration 0119) in that state. */
   subletPreset?: string;
+  /** ?homescore=furnished: the home starts with furniture and three paintings placed (the home score, migration 0120). */
+  homeScorePreset?: string;
   /** Skill perks (migration 0092): "pro" starts with high skill levels. */
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
@@ -162,10 +164,19 @@ export function PreviewHome({
     s.calendar = { attended: [], gifts: calendarPreset === "gift" ? 1 : 0 };
     // The preview Shop's catalog, so its pieces (and Clout Couture's) can be bought and owned.
     if (catalog) s.catalog = catalog;
+    // ?homescore=furnished: pieces in four rooms and three paintings on the walls.
+    if (homeScorePreset === "furnished") {
+      const placed: [string, number, number, number][] = [
+        ["art-golden-hour-7", -0.4, -2.52, 0], ["art-bodega-cat-sunday", 1.3, -2.52, 0], ["art-clout", -2.62, 0.4, 1],
+        ["home-plant", 2.2, 1.9, 0], ["home-chair-oak", -1.9, 2.0, 0], ["home-rug-violet", 0.4, 1.2, 0],
+      ];
+      s.items = [...s.items, ...placed.map(([sku], i) => ({ id: 9101 + i, sku, category: "home" as const, value: 0, acquired: "bought" as const, equipped: false }))];
+      s.homeLayout = placed.map(([, x, z, rot], i) => ({ id: `item:${9101 + i}`, x, z, rot }));
+    }
     // v0.15 (migration 0076): students get "Go to class" in place of the random task.
     if (campusPreset && campusPreset !== "new") s.tasks = s.tasks.map((t) => (t.slot === 5 ? { ...t, kind: "class" as const, place_id: "st-johnsons", action_id: "class", goal: null } : t));
     return { ...s, devTools };
-  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset, transitPreset, calendarPreset, catalog, rentOn, rentPreset]);
+  }, [me, player, devTools, tasksDone, campusPreset, skillsPreset, transitPreset, calendarPreset, catalog, rentOn, rentPreset, homeScorePreset]);
   // C5: the calendar, with ?calendar=today|gift moving every event to now (an hour ago for three hours).
   const calendar = useMemo<CalendarData>(() => {
     const { events, ...rest } = CALENDAR_FILE as CalendarData & { about?: string };

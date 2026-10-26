@@ -44,6 +44,13 @@ function withCouture(): Promise<void> {
                            note: null, sold: true, origin: "import",
                            edition: { size, drop: 1, dropEnd: size, issued, left: size - issued, soldOut: issued >= size } });
     }
+    // Wall art (migration 0120 puts the paintings live in Furniture → Art).
+    const art = await prepareImport(await readShopFile("wall-art.json"), "wall-art.json", list());
+    for (const d of art.drafts) {
+      if (store().has(d.sku)) continue;
+      store().set(d.sku, { ...d, wearable: true, status: "live", goLiveAt: null, images: shippedPictures(d.sku, d.sourceImage), imageStatus: "ready",
+                           imageError: null, note: null, sold: false, origin: "import", edition: null });
+    }
   })());
 }
 const log = (sku: string, action: string, before: unknown, after: unknown, note: string | null = null) =>

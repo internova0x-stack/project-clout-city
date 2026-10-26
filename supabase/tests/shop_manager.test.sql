@@ -26,7 +26,7 @@ update public.players set bank_cash = 100000, clout = 0 where id = pg_temp.id(2)
 
 -- The seed: everything on sale is live, and the game's Shop list is unchanged.
 select pg_temp.assert((select count(*) from public.shop_catalog where status = 'live' and origin = 'code') = 61, 'every item on sale is live (64, less the 3 duplicates migration 0108 retires)');
-select pg_temp.assert(jsonb_array_length(public.city() -> 'shop') = 68, 'the city shop lists them (and migration 0111''s four headwear pieces)');
+select pg_temp.assert(jsonb_array_length(public.city() -> 'shop') = 80, 'the city shop lists them (and migration 0111''s four headwear pieces, 0120''s twelve paintings)');
 select pg_temp.assert(public.shop_item('fit-satin-bomber') @> '{"price": 395, "clout": 25, "slot": "top", "category": "fashion", "status": "live"}', 'shop_item as before');
 select pg_temp.assert(public.shop_item('house-lic-penthouse') ->> 'slot' is null, 'houses keep their null slot');
 select pg_temp.assert((select price_cents from public.store_products where sku = 'col-faux-chinchilla') = 1699, 'chinchilla $16.99');
@@ -34,12 +34,12 @@ select pg_temp.assert((select price_usd_cents from public.shop_catalog where sku
 
 -- A later city seed can't undo the catalog.
 update public.game_settings set value = value - 'shop' where key = 'city';
-select pg_temp.assert(jsonb_array_length(public.city() -> 'shop') = 68, 'a city rewrite keeps the shop');
+select pg_temp.assert(jsonb_array_length(public.city() -> 'shop') = 80, 'a city rewrite keeps the shop');
 
 -- Players: the public Shop, and nothing for anon or a non-admin in the Studio.
 set role authenticated;
 select pg_temp.as_(2);
-select pg_temp.assert(jsonb_array_length(public.shop_catalog_public()) = 68, 'players see what is on sale');
+select pg_temp.assert(jsonb_array_length(public.shop_catalog_public()) = 80, 'players see what is on sale');
 select pg_temp.assert(pg_temp.raises($$select public.admin_shop_list()$$, ''), 'not an admin');
 reset role;
 select pg_temp.assert(not has_function_privilege('anon', 'public.shop_catalog_public()', 'execute'), 'anon');

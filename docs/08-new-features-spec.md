@@ -1008,3 +1008,28 @@ line. Pushes: a new application, accepted, a renewal ask, a roommate hang waitin
 
 **Phase 2 (not built).** Whole-apartment sublets while away, Lola's "Sublet Horror Stories" column and the scam
 listing satire.
+
+## 26. The Crib Rating and wall art (owner, Oct 26: "Yes to both", "Go with Crib Rating"; migration 0120)
+
+A home's **Crib Rating** (code and database: the home score) is 0 to 100 for how well it's furnished, relative to the
+home, so a beautifully done room share can reach 100 like a penthouse. It gives players a reason to invest in their
+place beyond looks.
+
+**How it's worked out.** Only bought pieces placed in the home count (not what the place came with, not storage).
+- Rooms (40): 10 each for living, bedroom, dining and decor with at least one piece placed.
+- Quality (40): the stars of every distinct piece (one per furniture line, 1 to 4) against the home's target: room
+  share and dorms 8, studio 10, Jackson Heights 14, Sunnyside 16, LIC 18, an owned house 24.
+- Wall art (20): 5 for each distinct painting.
+Real-money pieces count by their stars like any other (at most 4), never more. Levels: Bare walls (0), Moved in (20),
+Cozy (40), Stylish (60), Magazine-ready (80), Iconic (100).
+
+**What it pays and where it shows.** Reaching 40, 70 and 100 pays 50, 100 and 250 clout once each (ledger
+'home_score'). At home, a "🏠 61" pill beside "Invite your Crew" opens the breakdown: the three parts, "Next up" tips
+that open the right Shop section, and the milestones. Player cards show "🏠 Crib Rating 82 · Magazine-ready".
+
+**Wall art.** Twelve paintings by invented artists (content/shop/wall-art.json, made with Higgsfield) in Furniture →
+Art, C$95 to C$9,500. Each hangs on a wall (kind 'painting', walkable so it never blocks furniture; place it with its
+back to a wall) and shows its picture from public/art/.
+
+**Later.** Better sleep in a high-rated home, goals on the ladder, Lola's "Crib of the Week" in News, and having people
+over (the next build).
