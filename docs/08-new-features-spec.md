@@ -949,3 +949,23 @@ art style are `docs/fashion-style-lines.md`. The owner's decisions of Oct 21:
 - **Clout Couture editions:** numbering continues across drops, and an edition can be brought back. A mansion owner can
   have other homes; Billionaire's Row comes later.
 - **Pictures** are stored in Supabase Storage (public `shop` bucket; masters in the private `shop-masters` bucket).
+
+
+## 24. Relationships (owner, Oct 26; migration 0118)
+
+The step after "It's mutual" (Clarifications section 14). Phase 1, as recommended and approved on Oct 26:
+
+| Stage | How | What changes |
+| --- | --- | --- |
+| Crush | As before: secret, up to 3 | Nothing visible |
+| Matched | Both crush on each other | "Matched" on the chat; date nights pay their bonus |
+| Dating | 3 completed date nights, then one asks "Make it official?" and the other says yes | 💞 on both player cards (each can hide theirs), the couple streak starts |
+
+- **Rules.** One partner at a time. Both accounts at least 7 days old. Going official ends every other crush of both (quietly) and no new crushes can be made while dating. An ask stays open 7 days.
+- **Couple streak.** A New York day counts when the pair completes a date night, earns a together bonus, or trades 5 messages each way. One missed day in any 7 is forgiven. Day 3: +30 clout; day 7: +75 and a badge; day 14: +150 and a badge; day 30: +300 and a badge.
+- **Date nights together** pay +15 Mood and +35 clout (instead of +10 and +25).
+- **Gifts.** A gift box from Sal's or Schlep & Schmear goes to the partner: their Mood +10, the sender's clout +10, once a day.
+- **Anniversaries.** Every week together +15 clout, every month +50.
+- **Breaking up.** Either partner, any time, no penalty and nothing public: the other sees a gentle note once. The same two can't go official again for 14 days. Blocking ends it at once.
+- **Pushes.** "wants to make it official" and "sent you a gift" (P0 social); taps open "Us".
+- **Later.** Living together (shared home, split rent), Lola's column mentions (opt-out), couple Shop items, the Clout TV couple photo, matching-fit clout.

@@ -38,6 +38,9 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   together_invite: { tier: 0, category: "social", ttlMin: 720 },
   friend_joined: { tier: 0, category: "social", ttlMin: 2880 },
   calendar_invite: { tier: 0, category: "social", ttlMin: 1440 },
+  // Relationships (migration 0118)
+  couple_ask: { tier: 0, category: "social", ttlMin: 2880 },
+  couple_gift: { tier: 0, category: "social", ttlMin: 1440 },
   // P1: something expires or costs you
   bill_due: { tier: 1, category: "money", ttlMin: 1440 },
   bill_overdue: { tier: 1, category: "money", ttlMin: 1440 },

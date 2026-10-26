@@ -48,6 +48,8 @@ import {
   previewCrush, previewCrushStatus, previewDateCancel, previewDateCandidates, previewDateInvite, previewDateRespond, previewDateWent, previewDatingInbox,
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
+import { previewCoupleAnswer, previewCoupleAsk, previewCoupleEnd, previewCoupleGift, previewCoupleReset, previewCoupleSeen, previewCoupleShow, previewCoupleState } from "@/app/preview/coupleActions";
+import type { CoupleApi, CoupleResult, CoupleState } from "@/lib/couples";
 import {
   previewChatBlock, previewChatList, previewCrowned, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
 } from "@/app/preview/chatActions";
@@ -64,7 +66,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -104,6 +106,8 @@ export function PreviewHome({
   campusPreset?: string;
   /** ?at=<place id>: the player was last at that place (the game opens there, owner Oct 24). */
   atPreset?: string;
+  /** ?couple=progress|ask|dating|gift|ended: relationships (migration 0118) in that state. */
+  couplePreset?: string;
   /** Skill perks (migration 0092): "pro" starts with high skill levels. */
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
@@ -380,6 +384,24 @@ export function PreviewHome({
       invite: previewDateInvite, respond: previewDateRespond, cancel: previewDateCancel,
     };
   }, [datingPreset, sim]);
+  // Relationships in memory (app/preview/coupleActions.ts); streak rewards are mirrored into the sim's player.
+  const couple = useMemo<CoupleApi>(() => {
+    let started = false;
+    const ready = async () => { if (!started) { started = true; await previewCoupleReset(couplePreset); } };
+    const mirror = async <T,>(r: CoupleResult<T>) => {
+      if (r.ok && r.data && typeof r.data === "object" && "paid" in r.data) {
+        const n = (r.data as unknown as CoupleState).paid.reduce((t, x) => t + x.clout, 0);
+        if (n) sim.storyClout(n);
+      }
+      return r;
+    };
+    return {
+      async state() { await ready(); return mirror(await previewCoupleState()); },
+      ask: async (id) => mirror(await previewCoupleAsk(id)),
+      answer: async (id, yes) => mirror(await previewCoupleAnswer(id, yes)),
+      end: previewCoupleEnd, show: previewCoupleShow, gift: previewCoupleGift, seen: previewCoupleSeen,
+    };
+  }, [couplePreset, sim]);
   // Crew outings in memory; crew bonus clout is mirrored into the sim's player.
   const crewPaid = useRef(0);
   const crewApi = useMemo<CrewApi>(() => {
@@ -451,6 +473,7 @@ export function PreviewHome({
       storeApi={cityOff || storyOff ? undefined : storeApi}
       chat={cityOff ? undefined : chat}
       dating={cityOff ? undefined : dating}
+      couple={cityOff ? undefined : couple}
       crew={cityOff ? undefined : crewApi}
       party={cityOff || storyOff ? undefined : partyApi}
       partyRoom={cityOff || storyOff ? undefined : partyRoomApi}

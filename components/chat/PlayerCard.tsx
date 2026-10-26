@@ -124,6 +124,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
                 <RankChip rank={rankFor(card.clout, card.netWorth ?? 0)} />
                 {card.vipSince && <span className="tag tag-gold">👑 VIP</span>}
               </span>
+              {card.partner && <span className="partner-line" style={{ marginTop: 6 }}>💞 Dating {handle(card.partner.name)}</span>}
             </span>
           </div>
           {/* Meeting players: react, break the ice or say something, right under their name. */}

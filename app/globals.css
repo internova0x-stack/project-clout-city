@@ -2378,3 +2378,16 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* The splash held over the first screen (owner, Oct 24), then faded out. */
 .splash-hold { position:fixed; inset:0; z-index:2000; transition:opacity .4s ease; }
 .splash-hold.out { opacity:0; pointer-events:none; }
+
+/* Relationships (migration 0118): "Us" */
+.couple-head { display:flex; flex-direction:column; align-items:center; gap:6px; padding-right:0; text-align:center; }
+.couple-streak .title { font-size:17px; }
+.couple-today { font-size:14px; line-height:19px; color:var(--text-2); }
+.couple-today.done { color:var(--done-green, #1E9E5A); font-weight:600; }
+.couple-toggle { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--r-lg); background:var(--surface-card); }
+.couple-end { align-self:center; color:var(--red-text); font-weight:600; }
+.couple-match { align-items:center; }
+.couple-dates { display:flex; gap:4px; margin-top:6px; }
+.couple-dates i { width:22px; height:6px; border-radius:3px; background:var(--chip-off, #E4E0DA); }
+.couple-dates i.on { background:var(--neon-500); }
+.partner-line { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:var(--neon-text); }
