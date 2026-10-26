@@ -100,6 +100,8 @@ export const REGULARS: Regular[] = [
 ];
 
 /** Lola Lowdown's look (owner, Oct 17: her head is the tour guide's avatar): soft glam; light-skinned and mixed, long brunette hair (owner, Oct 26). */
+/** Her portrait in the tour and hint bubbles (owner, Oct 26: the 3D hair read as a durag; made with Higgsfield, like the Mayor's). */
+export const LOLA_PORTRAIT = "/cast/lola-lowdown.webp";
 export const LOLA_LOOK: Look = {
   style: "influencer_soft_glam", body: "curvy", build: "curvy", skin: "#E0AC69", hair: "long", hairColor: "#4A2C1A",
   eyes: "#3B2314", glasses: "none", covering: "none", fit: null,

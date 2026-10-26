@@ -6,8 +6,7 @@
 //   2 · Unlocks on the Phone (suggestion 3)   5 · Tasks open on day one (suggestion 5)
 //   3 · A new feature unlocks (suggestion 3)  6 · Shorter tour lines (suggestion 6)
 
-import AvatarHead from "../avatar/AvatarHead";
-import { LOLA_LOOK } from "@/lib/cast";
+import { LOLA_PORTRAIT } from "@/lib/cast";
 import { Sheet } from "../Sheet";
 
 function Backdrop() {
@@ -15,7 +14,7 @@ function Backdrop() {
 }
 
 function Lola({ size = 44 }: { size?: number }) {
-  return <span className="lola-tip-head" style={{ width: size, height: size, position: "relative", flex: "none" }} aria-hidden="true"><AvatarHead look={LOLA_LOOK} size={size} /></span>;
+  return <span className="lola-tip-head" style={{ width: size, height: size, position: "relative", flex: "none" }} aria-hidden="true">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={LOLA_PORTRAIT} alt="" width={size} height={size} /></span>;
 }
 
 function Bar({ value }: { value: number }) {
@@ -232,7 +231,7 @@ function ShortTour() {
           <p className="lola-tip-text">🔥 Clout = how much the city cares. More clout, more doors open.</p>
           <button className="btn btn-taxi lola-tip-next">Next</button>
         </div>
-        <div className="lola-tip-head" aria-hidden="true"><AvatarHead look={LOLA_LOOK} size={64} /><span className="lola-tip-kiss">💋</span></div>
+        <div className="lola-tip-head" aria-hidden="true">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={LOLA_PORTRAIT} alt="" width={64} height={64} /><span className="lola-tip-kiss">💋</span></div>
       </div>
       <div className="card stack-12" style={{ position: "fixed", left: 12, right: 12, bottom: 16, maxHeight: "58vh", overflow: "auto", zIndex: 62, background: "#FFF8F2", color: "var(--text-1)" }}>
         <span className="overline">Every line, before → after</span>

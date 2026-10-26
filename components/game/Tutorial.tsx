@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AvatarHead from "../avatar/AvatarHead";
-import { LOLA_LOOK, MAYOR_PAPA_DANI } from "@/lib/cast";
+import { LOLA_PORTRAIT, MAYOR_PAPA_DANI } from "@/lib/cast";
 
 // The tutorial tooltips: Lola's hello (with Skip), then five (owner, Oct 17: no separate welcome pop-up) (Clarifications section 1;
 // C15). One tooltip at a time, the rest of the screen dimmed, the target ringed.
@@ -105,7 +104,8 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
           </div>
         ) : (
           <div className="lola-tip-head" aria-hidden="true">
-            <AvatarHead look={LOLA_LOOK} size={64} />
+{/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={LOLA_PORTRAIT} alt="" width={64} height={64} />
             <span className="lola-tip-kiss">💋</span>
           </div>
         )}
@@ -146,7 +146,8 @@ export function DailyTasksHint({ onOpen, onDismiss }: { onOpen: () => void; onDi
           <button className="lola-tip-skip" onClick={onDismiss}>Got it</button>
         </div>
         <div className="lola-tip-head" aria-hidden="true">
-          <AvatarHead look={LOLA_LOOK} size={64} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={LOLA_PORTRAIT} alt="" width={64} height={64} />
           <span className="lola-tip-kiss">💋</span>
         </div>
       </div>
