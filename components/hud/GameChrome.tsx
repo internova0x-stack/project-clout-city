@@ -137,19 +137,17 @@ export function GameChrome({
       </header>
 
       <div className="under-hud">
-        {/* The home score (migration 0120) sits beside the invite, at home only. */}
-        <div className="row" style={{ gap: 8, pointerEvents: "none" }}>
-          <button className="pill-glass glass-hud" style={{ position: "relative", pointerEvents: "auto", whiteSpace: "nowrap" }} onClick={() => onAction("invite")}>
-            Invite your Crew
-            {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
+        <button className="pill-glass glass-hud" style={{ position: "relative" }} onClick={() => onAction("invite")}>
+          Invite your Crew
+          {invitePin && <span className="pin-dot" style={{ top: -2, right: -2 }} />}
+        </button>
+        {/* The Crib Rating (migration 0120; owner, Oct 26: under the invite), at home only. */}
+        {homeScore && (
+          <button className="pill-glass glass-hud crib-pill" onClick={homeScore.onOpen} aria-label={`Crib Rating ${homeScore.score} out of 100, ${homeScore.tier}`}>
+            <span className="crib-ring" style={{ ["--p" as string]: `${homeScore.score}%` }} aria-hidden="true"><b>{homeScore.score}</b></span>
+            <span className="crib-label" aria-hidden="true"><small>Crib Rating</small>{homeScore.tier}</span>
           </button>
-          {homeScore && (
-            <button className="pill-glass glass-hud crib-pill" style={{ pointerEvents: "auto" }} onClick={homeScore.onOpen} aria-label={`Crib Rating ${homeScore.score} out of 100, ${homeScore.tier}`}>
-              <span className="crib-ring" style={{ ["--p" as string]: `${homeScore.score}%` }} aria-hidden="true"><b>{homeScore.score}</b></span>
-              <span className="crib-label" aria-hidden="true"><small>Crib Rating</small>{homeScore.tier}</span>
-            </button>
-          )}
-        </div>
+        )}
         {showHeadline ? (
           <button className="pill-status glass-hud news-ticker" onClick={headline!.onOpen} key={`h${tick}`}>
             <span aria-hidden="true">📰</span> <span className="news-ticker-text">{headline!.text}</span>

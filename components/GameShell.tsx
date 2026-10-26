@@ -2100,7 +2100,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && flow === "none" ? " has-crib" : ""}`}>
       {inside && city ? (
         <>
         <InteriorScene
