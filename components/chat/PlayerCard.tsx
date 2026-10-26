@@ -125,6 +125,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
                 {card.vipSince && <span className="tag tag-gold">👑 VIP</span>}
               </span>
               {card.partner && <span className="partner-line" style={{ marginTop: 6 }}>💞 Dating {handle(card.partner.name)}</span>}
+              {card.sublet && <span className="partner-line" style={{ marginTop: 6, display: "flex" }}>{card.sublet.role === "sub" ? `🏠 Subletting from ${handle(card.sublet.name)}` : `🔑 Hosting ${handle(card.sublet.name)}`}</span>}
             </span>
           </div>
           {/* Meeting players: react, break the ice or say something, right under their name. */}

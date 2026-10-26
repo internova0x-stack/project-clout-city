@@ -38,6 +38,7 @@ import type { Player } from "@/lib/player";
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
 //   /preview/home?couple=progress|ask|dating|gift|ended  relationships (migration 0118); open Phone → Messages → Us
+//   /preview/home?sublet=browse|listed|living|hosting|notice|ended  sublets (migration 0119); open Phone → Apartments → Sublets
 //   /preview/home?at=ditmars-deli  the player was last at that place: the game opens inside it
 //   /preview/home?campus=new|pick|week|friday|done  campus life (v0.15), standing at St. Johnsons
 //   /preview/home?transit=showtime  showtime dancers on every subway ride (C4); ?transit=pass starts with an OMG Card.
@@ -97,7 +98,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -174,6 +175,7 @@ export default async function Preview({
           campusPreset={campus}
           atPreset={at}
           couplePreset={couple}
+          subletPreset={sublet}
           skillsPreset={skills}
           transitPreset={transit}
           rentPreset={rent}

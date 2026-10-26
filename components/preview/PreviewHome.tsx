@@ -51,6 +51,12 @@ import {
 import { previewCoupleAnswer, previewCoupleAsk, previewCoupleEnd, previewCoupleGift, previewCoupleReset, previewCoupleSeen, previewCoupleShow, previewCoupleState } from "@/app/preview/coupleActions";
 import type { CoupleApi, CoupleResult, CoupleState } from "@/lib/couples";
 import {
+  previewSubletAnswer, previewSubletApply, previewSubletHang, previewSubletHome, previewSubletLeave, previewSubletList, previewSubletNotice,
+  previewSubletRate, previewSubletRenew, previewSubletRenewAnswer, previewSubletReset, previewSubletSeen, previewSubletShow, previewSubletState,
+  previewSubletUnlist, previewSubletWithdraw,
+} from "@/app/preview/subletActions";
+import type { SubletApi } from "@/lib/sublets";
+import {
   previewChatBlock, previewChatList, previewCrowned, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
 } from "@/app/preview/chatActions";
 import {
@@ -66,7 +72,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -108,6 +114,8 @@ export function PreviewHome({
   atPreset?: string;
   /** ?couple=progress|ask|dating|gift|ended: relationships (migration 0118) in that state. */
   couplePreset?: string;
+  /** ?sublet=browse|listed|living|hosting|notice|ended: sublets (migration 0119) in that state. */
+  subletPreset?: string;
   /** Skill perks (migration 0092): "pro" starts with high skill levels. */
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
@@ -402,6 +410,18 @@ export function PreviewHome({
       end: previewCoupleEnd, show: previewCoupleShow, gift: previewCoupleGift, seen: previewCoupleSeen,
     };
   }, [couplePreset, sim]);
+  // Sublets in memory (app/preview/subletActions.ts).
+  const sublet = useMemo<SubletApi>(() => {
+    let started = false;
+    const ready = async () => { if (!started) { started = true; await previewSubletReset(subletPreset); } };
+    return {
+      async state() { await ready(); return previewSubletState(); },
+      async home() { await ready(); return previewSubletHome(); },
+      list: previewSubletList, unlist: previewSubletUnlist, apply: previewSubletApply, withdraw: previewSubletWithdraw,
+      answer: previewSubletAnswer, notice: previewSubletNotice, leave: previewSubletLeave, renew: previewSubletRenew,
+      renewAnswer: previewSubletRenewAnswer, hang: previewSubletHang, show: previewSubletShow, rate: previewSubletRate, seen: previewSubletSeen,
+    };
+  }, [subletPreset]);
   // Crew outings in memory; crew bonus clout is mirrored into the sim's player.
   const crewPaid = useRef(0);
   const crewApi = useMemo<CrewApi>(() => {
@@ -474,6 +494,7 @@ export function PreviewHome({
       chat={cityOff ? undefined : chat}
       dating={cityOff ? undefined : dating}
       couple={cityOff ? undefined : couple}
+      sublet={cityOff ? undefined : sublet}
       crew={cityOff ? undefined : crewApi}
       party={cityOff || storyOff ? undefined : partyApi}
       partyRoom={cityOff || storyOff ? undefined : partyRoomApi}

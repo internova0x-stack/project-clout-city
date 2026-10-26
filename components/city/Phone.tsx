@@ -22,6 +22,8 @@ import type { Station, StationThread, TvApi, TvState } from "@/lib/cloutTv";
 import type { RadioApi } from "@/lib/radio";
 import { BusinessesApp } from "./Businesses";
 import { ApartmentsApp } from "./Apartments";
+import { SubletsApp, type SubletHandlers } from "./Sublets";
+import { subletAlerts, type SubletState } from "@/lib/sublets";
 import type { GossipState, TeaCard } from "@/lib/gossip";
 import { BankView } from "../game/Sheets";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
@@ -116,7 +118,11 @@ export function PhoneModal({
   /** The player's @handle, on the Bank's virtual card. */
   handle?: string;
   /** #19 moving up: the Apartments app; without it the app is hidden. */
-  apartments?: { busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void };
+  apartments?: {
+    busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void;
+    /** Sublets (migration 0119): Apartments gets a Rent / Sublets switch. */
+    sublets?: { state: SubletState | null; h: SubletHandlers; onOpen: () => void };
+  };
   /** v0.12 businesses: the Businesses app; without it the app is hidden. */
   businesses?: Omit<React.ComponentProps<typeof BusinessesApp>, "onHome">;
   /** v0.13 the Jobs app (migration 0050); without it the app is hidden. */
@@ -189,6 +195,7 @@ export function PhoneModal({
                       {a.emoji}
                       {a.id === "radio" && radioDot && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "mayor" && mayor && mayor.unseen > 0 && <span className="count-badge">{mayor.unseen}</span>}
+                      {a.id === "apartments" && subletAlerts(apartments?.sublets?.state ?? null) > 0 && <span className="count-badge">{subletAlerts(apartments!.sublets!.state)}</span>}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
@@ -214,7 +221,9 @@ export function PhoneModal({
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
               {app === "mayor" && mayor && <MayorApp api={mayor.api} onSeen={mayor.onSeen} onToast={(t) => onToast?.(t)} />}
               {app === "tv" && tv && <TvApp api={tv.api} startForm={openForm && app === initialApp} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
-              {app === "apartments" && apartments && state && <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />}
+              {app === "apartments" && apartments && state && (apartments.sublets
+                ? <ApartmentsTabs apartments={apartments as Required<NonNullable<typeof apartments>>} state={state} />
+                : <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />)}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
               {app === "settings" && (
                 <div className="stack-12">
@@ -379,5 +388,28 @@ function ChatSettings({ api, onToast, onChatPass }: { api: ChatApi; onToast?: (t
         {!status.unlimited && onChatPass && <button className="chip" onClick={() => onChatPass(false)}>Get VIP</button>}
       </div>
     </>
+  );
+}
+
+/** Apartments with sublets (migration 0119): Rent (moving) and Sublets. Opens on Sublets when one is going on. */
+function ApartmentsTabs({ apartments, state }: { apartments: Required<NonNullable<Parameters<typeof PhoneModal>[0]["apartments"]>>; state: CityState }) {
+  const sub = apartments.sublets.state;
+  const busy = !!sub && !!(sub.live || sub.mine || sub.ended || subletAlerts(sub) > 0);
+  const [tab, setTab] = useState<"rent" | "sublets">(busy ? "sublets" : "rent");
+  const { onOpen } = apartments.sublets;
+  useEffect(() => { onOpen(); }, [onOpen]);
+  // The state can arrive after the app opens: a sublet going on switches to its tab, once.
+  const [switched, setSwitched] = useState(busy);
+  useEffect(() => { if (busy && !switched) { setSwitched(true); setTab("sublets"); } }, [busy, switched]);
+  return (
+    <div className="stack-12">
+      <div className="segmented" role="group" aria-label="Apartments">
+        <button aria-pressed={tab === "rent"} onClick={() => setTab("rent")}>Rent</button>
+        <button aria-pressed={tab === "sublets"} onClick={() => setTab("sublets")}>Sublets{subletAlerts(sub) > 0 ? ` · ${subletAlerts(sub)}` : ""}</button>
+      </div>
+      {tab === "rent"
+        ? <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />
+        : <SubletsApp state={sub} myHomeId={state.player.home_id} bank={state.player.bank_cash} h={apartments.sublets.h} />}
+    </div>
   );
 }

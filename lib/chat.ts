@@ -60,6 +60,8 @@ export interface PlayerCard {
   crew?: boolean;
   /** Relationships (migration 0118): who they're dating, unless they hide it. */
   partner?: { id: string; name: string; since: string } | null;
+  /** Sublets (migration 0119): "🏠 Subletting from" / "🔑 Hosting", unless they hide it. */
+  sublet?: { role: "host" | "sub"; id: string; name: string } | null;
 }
 
 export type ReportReason = "harassment" | "spam" | "inappropriate" | "other";

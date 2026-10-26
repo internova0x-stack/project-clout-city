@@ -969,3 +969,42 @@ The step after "It's mutual" (Clarifications section 14). Phase 1, as recommende
 - **Breaking up.** Either partner, any time, no penalty and nothing public: the other sees a gentle note once. The same two can't go official again for 14 days. Blocking ends it at once.
 - **Pushes.** "wants to make it official" and "sent you a gift" (P0 social); taps open "Us".
 - **Later.** Living together (shared home, split rent), Lola's column mentions (opt-out), couple Shop items, the Clout TV couple photo, matching-fit clout.
+
+## 25. Sublets, phase 1 (owner, Oct 26: "Go with your recommendations"; migration 0119)
+
+Subletting is New York rent culture: someone with a bigger place lets a spare room for a few weeks. Phase 1 is room
+sublets only. The first mockup is `/preview/sublets?s=1..7`; the built screens are `/preview/home?sublet=browse|listed|
+living|hosting|notice|ended` (Phone → Apartments → Sublets).
+
+**Who can host.** A player renting the Jackson Heights 1BR, Sunnyside Gardens or the LIC high-rise (not the room
+share, the studio, dorms or an owned house). Both accounts 7+ days old. One sublet per player at a time, as host or
+subtenant; a host with an open listing can't apply elsewhere, and the other way round. C$ only; real money never
+touches it.
+
+**Listing.** Apartments gets a Rent / Sublets switch. The host sets a weekly rent between a quarter and half of the
+home's rent (the floor stops friends using it to dodge rent) and a range of 1 to 8 weeks, plus an optional note
+(140 characters). The host's crew sees a new listing for 24 hours, then everyone. Listings show the host's rating and
+the clout rule the sublet skips. Editing keeps the crew-first clock; taking it down closes its applications.
+
+**Applying.** The subtenant picks a length and writes an optional note; up to 3 applications at a time, none while
+rent is due at home. Nothing is charged until the host accepts; then the first week's rent plus a one-week deposit
+leave the subtenant's bank (ledger 'sublet_rent', 'sublet_deposit'), the rent goes to the host ('sublet_income') and the
+game holds the deposit. Accepting closes the listing, its other applications and the subtenant's other applications.
+
+**Living there.** The subtenant skips the home's clout requirement and the Home tab shows the host's place with a second
+bed in the first free spot (read-only: they can't move furniture; sleeping, sitting and cooking work). A bar switches to
+their own place, which is held: no rent bills there while they sublet (`bills_sublet_hold`), furniture kept. Rent is
+charged every 7 days from the start, ahead (`sublet_settle`, run whenever either side opens the game and by the push
+sender's `sublet_settle_all`); if the subtenant can't pay, the sublet ends and the deposit comes back. Roommate hang:
+when both tap it on the same New York day, both get +10 clout (ledger 'sublet_hang', once a day).
+
+**Ending.** The subtenant can leave any time; the host gives 7 days' notice (and can take it back). The end date, a
+block by either side, the host moving, buying a house or being evicted, or Start over also end it. The deposit always
+comes back in full. Both rate the other (1 to 5 stars) on an "it's over" card; ratings show on listings and
+applications. Either side can ask to renew (1 to 4 more weeks); the other says yes or no.
+
+**Cards and pushes.** Player cards show "🏠 Subletting from @host" / "🔑 Hosting @sub"; each side can hide their own
+line. Pushes: a new application, accepted, a renewal ask, a roommate hang waiting, notice given, the sublet ended.
+
+**Phase 2 (not built).** Whole-apartment sublets while away, Lola's "Sublet Horror Stories" column and the scam
+listing satire.
