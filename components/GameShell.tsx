@@ -49,6 +49,8 @@ import { PlayerCardSheet } from "./chat/PlayerCard";
 import type { ChatApi } from "@/lib/chat";
 import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
 import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
+import { CouplePrompt, CoupleSheet } from "./dating/Couple";
+import { coupleAlerts, coupleBadge, type CoupleApi, type CoupleState } from "@/lib/couples";
 import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
 import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew";
 import { KeepsakeSheet, PartyPrompt, PlusOneSheet } from "./city/Party";
@@ -125,7 +127,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "skills" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
+type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const TASKS_SEEN_KEY = "cc-tasks-seen";
@@ -218,6 +220,7 @@ export function GameShell({
   leaderboardRows,
   coutureApi,
   dating,
+  couple,
   crew,
   party,
   partyRoom,
@@ -272,6 +275,8 @@ export function GameShell({
   loadBoroughs?: () => Promise<BoroughGate[] | null>;
   /** v0.5 crushes and date nights (migration 0011). */
   dating?: DatingApi;
+  /** Relationships (migration 0118): going official, the couple streak, gifts. */
+  couple?: CoupleApi;
   /** Crew outings (migration 0013). */
   crew?: CrewApi;
   /** v0.9 party keepsakes (migration 0029): plus-ones, "Spotted at" and the gossip setting. */
@@ -645,6 +650,37 @@ export function GameShell({
       resync.current();
     }
   }, [dating]);
+  // ---- Relationships (migration 0118): "Us" ----
+  const [coupleS, setCoupleS] = useState<CoupleState | null>(null);
+  const [coupleBusy, setCoupleBusy] = useState(false);
+  const [coupleError, setCoupleError] = useState<string | null>(null);
+  const [coupleDismissed, setCoupleDismissed] = useState<string | null>(null);
+  const takeCouple = useCallback((st: CoupleState) => {
+    setCoupleS(st);
+    // couple_state pays streak days and anniversaries as it reads them.
+    const total = st.paid.reduce((n, x) => n + x.clout, 0);
+    if (total > 0) {
+      setGain({ clout: total });
+      const x = st.paid[st.paid.length - 1];
+      setToast(x.kind === "streak" ? `💞 ${x.day}-day couple streak. +${total} clout.` : `💞 Happy ${x.kind === "week" ? `${x.n}-week` : `${x.n}-month`} anniversary. +${total} clout.`);
+      resync.current();
+    }
+  }, []);
+  const loadCouple = useCallback(async () => {
+    if (!couple) return;
+    const r = await couple.state();
+    if (r.ok && r.data) takeCouple(r.data);
+  }, [couple, takeCouple]);
+  const coupleRun = async (fn: () => Promise<{ ok: true; data: CoupleState } | { ok: false; error: string }>, text?: string) => {
+    setCoupleBusy(true);
+    setCoupleError(null);
+    const r = await fn();
+    setCoupleBusy(false);
+    if (!r.ok) return setCoupleError(r.error);
+    takeCouple(r.data);
+    if (text) setToast(text);
+    resync.current();
+  };
   // ---- Crew outings: the inbox, and what changed since the last look ----
   const [crewInbox, setCrewInbox] = useState<CrewInbox | null>(null);
   const crewRef = useRef<CrewInbox | null>(null);
@@ -773,6 +809,17 @@ export function GameShell({
     const t = setInterval(() => void loadInbox(), 60_000);
     return () => clearInterval(t);
   }, [dating, loadInbox]);
+  useEffect(() => {
+    if (!couple) return;
+    void loadCouple();
+    const t = setInterval(() => void loadCouple(), 90_000);
+    return () => clearInterval(t);
+  }, [couple, loadCouple]);
+  // Opening "Us" refreshes it (dates done, today's streak) and marks gifts and the breakup note seen.
+  useEffect(() => {
+    if (panel !== "us" || !couple) return;
+    void loadCouple();
+  }, [panel, couple, loadCouple]);
   // A session a day counts toward day-1 return; unread messages badge the Phone.
   useEffect(() => { track?.("session"); }, [track]);
   // After a deploy, an installed app left open reloads when it comes back (lib/freshBuild.ts).
@@ -1085,7 +1132,7 @@ export function GameShell({
     url.searchParams.delete("open");
     window.history.replaceState(null, "", url.toString());
     if (open === "messages" || open === "gigs" || open === "businesses") setPhone({ open: true, app: open });
-    else if (open === "bills" || open === "tasks" || open === "events") setPanel(open);
+    else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
     else if (open === "shop") openShop("fashion");
@@ -1893,7 +1940,9 @@ export function GameShell({
   const showDating = !!dating && datingAlerts(inbox) > 0 && datingDismissed !== datingKey && flow === "none" && !arranging && tab === "home" && !inside;
   const crewKey = crewInbox ? crewInbox.outings.filter((o) => !o.mine && o.myStatus === "invited").map((o) => o.id).join() : "";
   // One home card at a time: dates first, then crew plans, then the story.
-  const showCrew = !showDating && !!crew && crewAlerts(crewInbox) > 0 && crewDismissed !== crewKey && flow === "none" && !arranging && tab === "home" && !inside;
+  const coupleKey = coupleS ? `${coupleS.asks.filter((a) => !a.mine).map((a) => a.id).join()}|${coupleS.gifts.received.map((g) => g.id).join()}|${coupleS.ended?.id ?? ""}` : "";
+  const showCouple = !showDating && !!couple && coupleAlerts(coupleS) > 0 && coupleDismissed !== coupleKey && flow === "none" && !arranging && tab === "home" && !inside;
+  const showCrew = !showDating && !showCouple && !!crew && crewAlerts(crewInbox) > 0 && crewDismissed !== crewKey && flow === "none" && !arranging && tab === "home" && !inside;
   const partyInvite = (partyIn?.plusOnes ?? []).find((x) => !x.mine && x.status === "invited");
   const partyKey = partyInvite ? `${partyInvite.eventId}:${partyInvite.host.id}` : "";
   const showParty = !showDating && !showCrew && !!partyInvite && partyDismissed !== partyKey && flow === "none" && !arranging && tab === "home" && !inside;
@@ -2119,6 +2168,9 @@ export function GameShell({
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
           )}
+          {showCouple && coupleS && (
+            <CouplePrompt state={coupleS} onOpen={() => setPanel("us")} onDismiss={() => setCoupleDismissed(coupleKey)} />
+          )}
           {showCrew && crewInbox && (
             <CrewPrompt inbox={crewInbox} onOpen={() => setPanel("crew")} onDismiss={() => setCrewDismissed(crewKey)} />
           )}
@@ -2200,7 +2252,7 @@ export function GameShell({
           tasksBadge: !!city && city.tasks.length > 0 && tasksSeenDay !== "" && tasksSeenDay !== city.today && handedOff,
           skillsOn: !!(loadSkills || skills),
           skillsBadge: !!perkHandlers && SKILL_PERKS.some((p) => ["take", "collect", "rsvp"].includes(perkStatus(p, perkHandlers.state, gameNow))),
-          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
+          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || coupleAlerts(coupleS) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <ActionTimer doing={doing} />
@@ -2618,6 +2670,11 @@ export function GameShell({
           matched: inbox?.matches.map((m) => m.id) ?? [],
           onOpenDates: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("dates"); },
           onCrushChange: () => void loadInbox(),
+          us: couple && coupleS ? {
+            line: coupleS.partner ? `${coupleS.partner.name} · 🔥 ${coupleS.streak}-day streak` : coupleS.matches.length ? "Make it official with a match" : "Match, date three times, make it official",
+            alerts: coupleAlerts(coupleS),
+            onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("us"); },
+          } : undefined,
         } : undefined}
         crew={crew ? { alerts: crewAlerts(crewInbox), onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("crew"); } } : undefined}
         handle={me.display_name}
@@ -2686,6 +2743,26 @@ export function GameShell({
             onCancel={(id) => void datingRun(() => dating.cancel(id), "Date called off.")}
             onCrushInvite={() => setPanel("crushInvite")}
           />
+          {couple && (
+            <CoupleSheet
+              open={panel === "us"}
+              onClose={() => { setPanel(null); setCoupleError(null); if (coupleS && coupleAlerts(coupleS) > 0) { void couple.seen().then(() => loadCouple()); } }}
+              me={me.starting_style}
+              state={coupleS}
+              h={{
+                busy: coupleBusy,
+                error: coupleError,
+                onAsk: (id) => void coupleRun(() => couple.ask(id), "Asked. Now act normal."),
+                onAnswer: (id, yes) => void coupleRun(() => couple.answer(id, yes), yes ? "💞 It's official." : "No rush. They'll understand."),
+                onGift: () => void coupleRun(() => couple.gift(), "🎁 Gift box sent."),
+                onShow: (on) => void coupleRun(() => couple.show(on)),
+                onEnd: () => void coupleRun(() => couple.end(), "It's over. Be kind to yourself."),
+                onPlanDate: () => { setPanel("places"); setToast("Pick a restaurant or a club night, then tap “Make it a date”."); },
+                onMessage: (p) => { setPanel(null); openChatWith({ id: p.id, name: p.name, style: p.style }); },
+                onSeen: () => void couple.seen().then(() => loadCouple()),
+              }}
+            />
+          )}
           <DateSheet
             spot={dateSpot}
             api={dating}
@@ -2789,7 +2866,7 @@ export function GameShell({
         netWorth={myWorth}
         bestRank={biz?.bestRank}
         badges={(feed?.badges ?? []).map((b) => {
-          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id) ?? lookBadge(b.id));
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id) ?? coupleBadge(b.id) ?? lookBadge(b.id));
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
         })}
         collections={{

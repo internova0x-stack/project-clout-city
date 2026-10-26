@@ -175,6 +175,15 @@ components live in `app/globals.css`.
   `story_autopilot()` (service role, run by the sync) starts the next main story in the Studio's order today when none is
   running or scheduled (declined and retired never start; a paused story mid-run keeps the slot). The weekly routine
   merges its own pull request once its checks pass (docs/WEEKLY-CONTENT.md).
+- Relationships (migration 0118, owner Oct 26; spec section 24): a match goes official after 3 completed date nights
+  (`couple_ask`/`couple_answer`; accounts 7+ days old, one partner each, 14-day cool-off after a breakup, blocking ends it,
+  other crushes end and none can be made while dating). `couple_state()` is the "Us" screen (Phone → Messages → Us,
+  components/dating/Couple.tsx, `?open=us`) and pays what's due: the couple streak (a completed date, a together bonus or
+  5 messages each way per New York day, one miss a week forgiven; days 3/7/14/30, ledger 'couple_streak', badges
+  couple-7/14/30) and weekly/monthly anniversaries (ledger 'couple_anniv'). Gift boxes go to the partner (`couple_gift`,
+  once a day). Partners' date nights pay 15 Mood and 35 clout. "💞 Dating @name" on the player card unless hidden
+  (`couple_show`). Settings: game_settings 'couples', mirrored by lib/couples.ts (tests/couples.test.ts).
+  `?couple=progress|ask|dating|gift|ended` in the preview. Living together, Lola mentions and couple Shop items: later.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

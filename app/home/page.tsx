@@ -39,6 +39,7 @@ import { kickPush } from "@/lib/pushServer";
 import { after } from "next/server";
 import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
+import { coupleAnswer, coupleAsk, coupleEnd, coupleGift, coupleSeen, coupleShow, coupleState } from "./coupleActions";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +53,9 @@ export default async function HomePage() {
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
   // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
-  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills] = await Promise.all([
+  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
-    playerCard(player.id), mySkills().catch(() => null),
+    playerCard(player.id), mySkills().catch(() => null), coupleState(),
   ]);
   // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
   after(() => kickPush());
@@ -170,6 +171,10 @@ export default async function HomePage() {
       dating={chatOn && dating.ok ? {
         inbox: datingInbox, crushStatus, crush: crushToggle, matchSeen, candidates: dateCandidates,
         invite: dateInvite, respond: dateRespond, cancel: dateCancel,
+      } : undefined}
+      // Migration 0118 switches on relationships (couple_state fails before it runs).
+      couple={chatOn && dating.ok && couple.ok ? {
+        state: coupleState, ask: coupleAsk, answer: coupleAnswer, end: coupleEnd, show: coupleShow, gift: coupleGift, seen: coupleSeen,
       } : undefined}
     />
   );

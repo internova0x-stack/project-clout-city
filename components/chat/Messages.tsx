@@ -19,6 +19,8 @@ export interface MessagesDating {
   onOpenDates: () => void;
   /** A crush changed (it may have just become mutual). */
   onCrushChange: () => void;
+  /** Relationships (migration 0118): the "Us" row; dating shows the partner and streak. */
+  us?: { line: string; alerts: number; onOpen: () => void };
 }
 
 // C35: the Messages app in the Phone. 20 messages a day (unlimited with a chat pass, migration 0047),
@@ -201,6 +203,16 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
               <span className="subtext chat-last">{crew.alerts > 0 ? "Your crew wants you out tonight" : "Tonight's outings with your crew"}</span>
             </span>
             <span className="chat-meta">{crew.alerts > 0 && <span className="count-badge">{crew.alerts}</span>}</span>
+          </button>
+        )}
+        {dating?.us && (
+          <button className="chat-row date-row" onClick={dating.us.onOpen}>
+            <span className="chat-avatar" aria-hidden="true">💞</span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="title" style={{ display: "block" }}>Us</span>
+              <span className="subtext chat-last">{dating.us.line}</span>
+            </span>
+            <span className="chat-meta">{dating.us.alerts > 0 && <span className="count-badge">{dating.us.alerts}</span>}</span>
           </button>
         )}
         {dating && (

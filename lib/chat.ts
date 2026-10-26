@@ -58,6 +58,8 @@ export interface PlayerCard {
   /** False when their "who can message me" is crew only (or a block stands). */
   canMessage?: boolean;
   crew?: boolean;
+  /** Relationships (migration 0118): who they're dating, unless they hide it. */
+  partner?: { id: string; name: string; since: string } | null;
 }
 
 export type ReportReason = "harassment" | "spam" | "inappropriate" | "other";
