@@ -199,6 +199,13 @@ components live in `app/globals.css`.
   'home_score' (tests/homeScore.test.ts) and works it out on the client for the 🏠 pill beside "Invite your Crew"
   (components/home/HomeScore.tsx). Wall art: content/shop/wall-art.json, live in Furniture → Art, kind 'painting'
   (`CATALOG_FURNITURE`, `shopBase`, pictures in public/art/). `?homescore=furnished` in the preview.
+- Having people over (migration 0121, owner Oct 26; spec section 27): `visit_host` (hangout now for an hour, 3 a day;
+  party up to 12 h ahead for two hours, 1 a day, snacks paid), guests from `visit_invitable` (crew, partner, chats, may_reach),
+  capacity by home (`visit_capacity`); guests `visit_answer`/`visit_arrive`/`visit_leave`; `visit_room` is the 4-second poll
+  (presence, chat after an id, and `visit_settle`: 2 minutes there pays guest and host once, host clout × (1 + Crib Rating
+  / 100), a partner's couple day). lib/visits.ts mirrors game_settings 'visits' (tests/visits.test.ts); components/home/
+  Visits.tsx (sheet, home card, bar); the entry is the stats panel's Mood row, which like every stat lists up to three
+  actions (`contextTipLists`, lib/statTips.ts). `?visit=none|hosting|invite|guest` in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

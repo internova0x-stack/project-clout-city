@@ -38,6 +38,7 @@ import type { Player } from "@/lib/player";
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
 //   /preview/home?couple=progress|ask|dating|gift|ended  relationships (migration 0118); open Phone → Messages → Us
+//   /preview/home?visit=none|hosting|invite|guest  having people over (migration 0121): the stats panel's Mood row, the visit sheet
 //   /preview/home?homescore=furnished  the home score (migration 0120): furniture and three paintings placed; tap 🏠 under the top bar
 //   /preview/home?sublet=browse|listed|living|hosting|notice|ended  sublets (migration 0119); open Phone → Apartments → Sublets
 //   /preview/home?at=ditmars-deli  the player was last at that place: the game opens inside it
@@ -99,7 +100,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -178,6 +179,7 @@ export default async function Preview({
           couplePreset={couple}
           subletPreset={sublet}
           homeScorePreset={homescore}
+          visitPreset={visit}
           skillsPreset={skills}
           transitPreset={transit}
           rentPreset={rent}

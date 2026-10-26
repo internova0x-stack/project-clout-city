@@ -76,7 +76,8 @@ export function GameChrome({
   /** v0.7 step 3: the avatar-head bubble beside the collapsed stats; it opens the profile. */
   me?: { head: ReactNode; rank?: number | null; onOpen: () => void };
   /** v0.7 step 3: one place per stat in the expanded panel, each a button. */
-  tips?: Record<StatKey, StatTip | null>;
+  /** Owner, Oct 26: each stat can offer more than one action. */
+  tips?: Record<StatKey, StatTip[]>;
   onTip?: (placeId: string) => void;
   /** #4 (owner, Oct 14): "At <place>" sits in the same stack as the ticker, so the two never overlap. */
   atPlace?: { name: string; onOpen: () => void } | null;
@@ -201,7 +202,7 @@ export function GameChrome({
             {(["energy", "mood", "confidence"] as const).map((k) => {
               const label = k[0].toUpperCase() + k.slice(1);
               const v = values?.stats[k];
-              const tip = tips?.[k];
+              const list = tips?.[k] ?? [];
               return (
                 <div key={k} className="stat-block">
                   <div className="stat-row" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={v}>
@@ -210,8 +211,8 @@ export function GameChrome({
                       {v !== undefined && <span className={`stat-fill ${statLevel(v)}`} style={{ display: "block", width: `${v}%` }} />}
                     </span>
                   </div>
-                  {tip && onTip && (
-                    <button className="stat-tip" onClick={() => onTip(tip.placeId)}>
+                  {onTip && list.map((tip) => (
+                    <button key={tip.placeId} className="stat-tip" onClick={() => onTip(tip.placeId)}>
                       <span className="stat-tip-emoji" aria-hidden="true">{tip.emoji}</span>
                       <span className="stat-tip-text">
                         <b>{tip.placeName}</b>
@@ -219,7 +220,7 @@ export function GameChrome({
                       </span>
                       <span className="stat-tip-go">{tip.gig ? "Open" : tip.go ?? "Go"}</span>
                     </button>
-                  )}
+                  ))}
                 </div>
               );
             })}

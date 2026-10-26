@@ -1033,3 +1033,33 @@ back to a wall) and shows its picture from public/art/.
 
 **Later.** Better sleep in a high-rated home, goals on the ladder, Lola's "Crib of the Week" in News, and having people
 over (the next build).
+
+## 27. Having people over (owner, Oct 26; migration 0121)
+
+The crew home visits, brought forward from the Waterfront Mansion: a player invites people to their home.
+
+**Where it starts.** The stats panel's Mood row (owner: "Invite people over should be part of the actions in the mood
+HUD"): at home, "Have people over" (+Mood and clout a guest) opens the visit sheet; while hosting, the row shows the
+visit. Each stat now lists several actions (owner: "allow more than one action under a category"): at home its home
+options (nap, cook, sit), then the best place to go; out, something here, then the best place elsewhere, up to three.
+Invites also arrive as a home card and a push (`/home?open=plans`).
+
+**Two kinds.** A hangout: now, for an hour, 3 a day. A house party: now or up to 12 hours ahead, two hours, one a day,
+snacks paid up front (C$40 + C$20 a guest the home holds).
+
+**Who and how many.** Crew, a partner, and anyone the host chats with, if they take the host's messages. Room share and
+dorms hold 2 guests, the studio 3, Jackson Heights 4, Sunnyside 5, LIC 6, an owned house 8. One visit at a time; not
+while subletting someone else's room.
+
+**The visit.** A guest taps "Go now" and is in the host's home (their furniture and paintings, read-only) with everyone
+there, the host's room shows its guests, and a bar on top has the time left, the chat and Leave (the host's: Guests).
+The room checks in every 4 seconds; someone counts as there for 3 minutes after their last check-in.
+
+**Rewards.** A guest there for 2 minutes gets clout and Mood once (hangout 10 and 8, party 25 and 15); the host gets
+clout for each, times (1 + Crib Rating / 100) at the start (hangout 8, party 20), plus Mood (4 or 6 a guest, up to 30 a
+visit). A partner's visit counts toward the couple streak.
+
+**Safety.** Guests touch nothing. The host sends anyone home, wraps it up or calls an upcoming party off (the snacks
+are spent); blocking removes a guest at once; the chat is the host's (muted players can't post).
+
+**Later.** Dinner parties with the cooking skill, open-door parties for the crew's crew, Lola's "Crib of the Week".
