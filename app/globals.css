@@ -2391,3 +2391,13 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .couple-dates i { width:22px; height:6px; border-radius:3px; background:var(--chip-off, #E4E0DA); }
 .couple-dates i.on { background:var(--neon-500); }
 .partner-line { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:var(--neon-text); }
+
+/* The home score (migration 0120, owner Oct 26): the ring, the bars and the milestone dots. */
+.home-score-head { display:flex; align-items:center; gap:16px; padding-right:44px; }
+.home-score-ring { flex:none; width:84px; height:84px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--neon-500, #FF2E88) var(--p), var(--chip-off) 0); position:relative; }
+.home-score-ring::after { content:""; position:absolute; inset:8px; border-radius:50%; background:var(--surface-sheet); }
+.home-score-ring b { position:relative; z-index:1; font-size:28px; font-weight:800; }
+.home-score-bar { height:8px; border-radius:4px; background:var(--chip-off); overflow:hidden; }
+.home-score-bar i { display:block; height:100%; border-radius:4px; background:var(--night-900); }
+.home-score-dot { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:800; background:var(--chip-off); color:var(--text-2); }
+.home-score-dot.on { background:var(--green-tint, #DEF2E9); color:var(--green-text, #2E8B63); }

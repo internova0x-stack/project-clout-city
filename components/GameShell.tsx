@@ -15,7 +15,7 @@ import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
 import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
-import { CATALOG_FURNITURE, CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
+import { CATALOG_FURNITURE, CITY_ECONOMY, shopBase, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
 import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, ownedItem, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
@@ -51,6 +51,8 @@ import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from 
 import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { CouplePrompt, CoupleSheet } from "./dating/Couple";
 import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
+import { HomeScoreSheet } from "./home/HomeScore";
+import { homeScore as scoreHome, qualityTarget, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
 import { subletAlerts, type SubletApi, type SubletHome, type SubletResult, type SubletState } from "@/lib/sublets";
 import { coupleAlerts, coupleBadge, type CoupleApi, type CoupleState } from "@/lib/couples";
 import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
@@ -129,7 +131,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | null;
+type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | "homescore" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const TASKS_SEEN_KEY = "cc-tasks-seen";
@@ -224,6 +226,7 @@ export function GameShell({
   dating,
   couple,
   sublet,
+  homeScoreApi,
   crew,
   party,
   partyRoom,
@@ -282,6 +285,8 @@ export function GameShell({
   couple?: CoupleApi;
   /** Sublets (migration 0119): Apartments → Sublets, and the subtenant's room. */
   sublet?: SubletApi;
+  /** The home score (migration 0120): pays its milestones; without it the score still shows, worked out here. */
+  homeScoreApi?: { state(): Promise<{ ok: true; data: HomeScore & { paid: { score: number; clout: number }[]; reached: number[] } } | { ok: false; error: string }> };
   /** Crew outings (migration 0013). */
   crew?: CrewApi;
   /** v0.9 party keepsakes (migration 0029): plus-ones, "Spotted at" and the gossip setting. */
@@ -1366,6 +1371,34 @@ export function GameShell({
     return { template, layout, owned: spot ? [...pieces, bed] : pieces, hostName: subHome.hostName };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subHome, subMine, subS?.live?.role]);
+  // The home score (migration 0120): the pieces placed in my home, by room, line and stars; the server pays milestones.
+  const homeScoreNow = useMemo<HomeScore | null>(() => {
+    if (!city) return null;
+    const ids = new Set((Array.isArray(city.homeLayout) ? city.homeLayout as { id?: unknown }[] : []).map((e) => String(e?.id ?? "")));
+    const pieces: ScoredPiece[] = city.items.filter((i) => i.category === "home" && ids.has(ownedId(i.id))).flatMap((i) => {
+      const b = shopBase(i.sku);
+      const f = b?.furniture ?? CATALOG_FURNITURE[i.sku];
+      const c = city.catalog?.find((x) => x.sku === i.sku);
+      const room = f?.room ?? c?.slot;
+      return room ? [{ room, line: f?.line ?? i.sku, stars: c?.stars ?? b?.rating ?? 1 }] : [];
+    });
+    return scoreHome(pieces, qualityTarget(city.player.home_id, city.player.house_sku));
+  }, [city]);
+  const [homeReached, setHomeReached] = useState<number[]>([]);
+  const homeScoreKey = homeScoreNow?.score;
+  useEffect(() => {
+    if (!homeScoreApi || homeScoreKey === undefined) return;
+    void homeScoreApi.state().then((r) => {
+      if (!r.ok) return;
+      setHomeReached(r.data.reached);
+      const n = r.data.paid.reduce((t, m) => t + m.clout, 0);
+      if (n) {
+        setToast(`🏠 Home score ${Math.max(...r.data.paid.map((m) => m.score))}. +${n} clout.`);
+        if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [homeScoreApi, homeScoreKey]);
   // v0.13 interior decorator: someone else's home (their furniture, their layout), ground floor.
   const decorHome = decor ? homeTemplate(decor.homeId, decor.houseSku) : undefined;
   const decorPieces: OwnedPiece[] = decor ? decor.items.flatMap((i) => {
@@ -2304,6 +2337,7 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
+        homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
         quests={trip ? [] : quests}
         time={clock.time}
         tab={tab}
@@ -2818,6 +2852,13 @@ export function GameShell({
             onCancel={(id) => void datingRun(() => dating.cancel(id), "Date called off.")}
             onCrushInvite={() => setPanel("crushInvite")}
           />
+          <HomeScoreSheet
+            open={panel === "homescore"}
+            onClose={() => setPanel(null)}
+            s={homeScoreNow}
+            reached={homeReached}
+            onShop={(room) => openShop("home", room)}
+          />
           {couple && (
             <CoupleSheet
               open={panel === "us"}
@@ -2980,7 +3021,7 @@ function promptVisible(feed: StoryFeed | null, dismissed: string[]): boolean {
 
 /** #19 Fif's Furniture: a Home item as a piece for the room view. */
 function pieceOf(item: ShopItem, id: string): OwnedPiece {
-  return { id, kind: item.furniture!.kind as OwnedPiece["kind"], color: item.furniture!.color, name: item.name, emoji: item.emoji };
+  return { id, kind: item.furniture!.kind as OwnedPiece["kind"], color: item.furniture!.color, name: item.name, emoji: item.emoji, ...(item.furniture!.art ? { art: item.furniture!.art } : {}) };
 }
 
 /** News items this device has seen as a card or in the City tab (newest first). */

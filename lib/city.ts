@@ -1011,9 +1011,11 @@ export const GIG_TITLES: Record<GigTier, { title: string; blurb: string }[]> = {
 // ---------------------------------------------------------------------------
 // Shop (Fashion, Cars, Houses, Luxury, Makeup). Virtual cash only in v0.3.
 // ---------------------------------------------------------------------------
-export type FurnitureRoom = "living" | "bedroom" | "dining" | "decor";
+export type FurnitureRoom = "living" | "bedroom" | "dining" | "decor" | "art";
 export const FURNITURE_ROOMS: { id: FurnitureRoom; label: string }[] = [
   { id: "living", label: "Living" }, { id: "bedroom", label: "Bedroom" }, { id: "dining", label: "Dining" }, { id: "decor", label: "Decor" },
+  // Wall art (migration 0120, owner Oct 26): paintings for the home score.
+  { id: "art", label: "Art" },
 ];
 
 export type ShopCategory = "fashion" | "accessories" | "home" | "cars" | "houses" | "luxury" | "makeup";
@@ -1036,7 +1038,7 @@ export interface ShopItem {
    * Home (#19, Fif's Furniture): the piece it puts in your home (a lib/rooms.ts FurnitureKind), its color,
    * the room it's shelved under, and its line (the same piece in other colors shares a line).
    */
-  furniture?: { kind: string; color?: string; room: FurnitureRoom; line: string };
+  furniture?: { kind: string; color?: string; room: FurnitureRoom; line: string; /** Wall art: the painting's picture (public/art/). */ art?: string };
   /** Clout needed to buy it (fantasy outfits); buy_item checks it. */
   cloutReq?: number;
   /** Cars: weekly rental price, if it can be rented. */
@@ -1199,7 +1201,28 @@ export const CATALOG_FURNITURE: Record<string, NonNullable<ShopItem["furniture"]
   "clout-throne-midnight": { kind: "throne", color: "#2E3138", room: "living", line: "clout-throne" },
   // The Plaza Statue comes home after its week in front of the Unisphere (migration 0104).
   "plaza-statue": { kind: "statue", color: "#D4AF37", room: "decor", line: "plaza-statue" },
+  // Wall art (migration 0120; content/shop/wall-art.json): paintings that hang on a wall, sold in Furniture → Art.
+  "art-bodega-cat-sunday": { kind: "painting", room: "art", line: "art-bodega-cat-sunday", art: "/art/art-bodega-cat-sunday.webp" },
+  "art-golden-hour-7": { kind: "painting", room: "art", line: "art-golden-hour-7", art: "/art/art-golden-hour-7.webp" },
+  "art-rent-is-due": { kind: "painting", room: "art", line: "art-rent-is-due", art: "/art/art-rent-is-due.webp" },
+  "art-astoria-rooftops": { kind: "painting", room: "art", line: "art-astoria-rooftops", art: "/art/art-astoria-rooftops.webp" },
+  "art-pigeon-portrait": { kind: "painting", room: "art", line: "art-pigeon-portrait", art: "/art/art-pigeon-portrait.webp" },
+  "art-bagel-blue": { kind: "painting", room: "art", line: "art-bagel-blue", art: "/art/art-bagel-blue.webp" },
+  "art-globe-fog": { kind: "painting", room: "art", line: "art-globe-fog", art: "/art/art-globe-fog.webp" },
+  "art-night-game": { kind: "painting", room: "art", line: "art-night-game", art: "/art/art-night-game.webp" },
+  "art-laundromat-dreams": { kind: "painting", room: "art", line: "art-laundromat-dreams", art: "/art/art-laundromat-dreams.webp" },
+  "art-bridge-rain": { kind: "painting", room: "art", line: "art-bridge-rain", art: "/art/art-bridge-rain.webp" },
+  "art-self-made": { kind: "painting", room: "art", line: "art-self-made", art: "/art/art-self-made.webp" },
+  "art-clout": { kind: "painting", room: "art", line: "art-clout", art: "/art/art-clout.webp" },
 };
+
+/** The code's piece for a sku, or a catalog painting's (its furniture only; the catalog has the words and price). */
+export function shopBase(sku: string): ShopItem | undefined {
+  const it = itemBySku(sku);
+  const f = CATALOG_FURNITURE[sku];
+  if (it || f?.room !== "art") return it;
+  return { sku, category: "home", name: sku, emoji: "🖼️", price: 0, clout: 0, rating: 1, blurb: "", furniture: f };
+}
 
 /** Clout from a visit or meal: by price (base value, never a story-modified price), scaled by Mood and Confidence. */
 export function visitClout(price: number, mood: number, confidence: number): number {

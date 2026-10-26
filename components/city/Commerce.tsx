@@ -3,7 +3,7 @@
 import { wearSlot } from "@/lib/wearing";
 import { LOOK_LABEL, STYLE } from "@/lib/style";
 import { useEffect, useState } from "react";
-import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
+import { CITY_ECONOMY, FURNITURE_ROOMS, SHOP_CATEGORIES, SHOP_ITEMS, itemBySku, shopBase, purchaseClout, sellPrice, type FurnitureRoom, type ShopCategory, type ShopItem } from "@/lib/city";
 import { billCountdown, billStatusLine, daysBetween, dueBills, upcomingBills, netWorth, ownedSkus, type Bill, type CityState, type PlayerItem, type UpcomingBill } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import { getStyle, type StyleId } from "@/lib/styles";
@@ -74,7 +74,7 @@ export function ShopSheet({
     );
   };
   const source: ShopCardItem[] = catalog
-    ? catalogShopItems(catalog, itemBySku)
+    ? catalogShopItems(catalog, shopBase)
     : SHOP_ITEMS.map((i) => ({ ...i, image: shippedPictures(i.sku)?.card ?? null, detailImage: shippedPictures(i.sku)?.detail ?? null, wearableNow: true, styleLines: [], collection: null, priceUsdCents: null, presentation: i.fits ?? "all", retired: false, editionSize: null }));
   // Story-only items (e.g. the "Forever Our Bird" hoodie) show only while a story has them on sale.
   // Collector pieces show only when they're in the store catalog (migration 0008+ and Stripe set up), or, still being
@@ -289,7 +289,7 @@ export function NetWorthSheet({
   const starter = getStyle(style).starterItems;
   const close = () => { setDetail(null); setConfirming(false); };
   // Pieces sold from the Shop catalog (the batch files, Clout Couture) have their words and pictures there.
-  const listed = state.catalog ? catalogShopItems(state.catalog, itemBySku) : [];
+  const listed = state.catalog ? catalogShopItems(state.catalog, shopBase) : [];
   const info = (sku: string): (ShopItem & { image?: string | null }) | undefined => listed.find((c) => c.sku === sku) ?? itemBySku(sku);
   const item = detail ? info(detail.sku) : undefined;
   return (

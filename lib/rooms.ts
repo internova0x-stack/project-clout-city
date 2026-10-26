@@ -36,7 +36,9 @@ export type FurnitureKind =
   // The Hub's game room
   | "arcade" | "poolTable"
   // Clout Couture (migration 0102): the owner in gold on a marble pedestal; the Clout Throne
-  | "statue" | "throne";
+  | "statue" | "throne"
+  // Wall art (migration 0120): a framed painting that hangs on a wall
+  | "painting";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -76,6 +78,8 @@ export interface RoomItem {
   label?: string;
   /** What a screen reader says when the label is only an arrow or an emoji. */
   name?: string;
+  /** Wall art: the painting's picture. */
+  art?: string;
 }
 
 export interface RoomTemplate {
@@ -140,6 +144,8 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   piano: { w: 1.5, d: 1.4, label: "Piano", movable: true },
   statue: { w: 0.8, d: 0.8, label: "Statue", movable: true },
   throne: { w: 1.4, d: 1.3, label: "Throne", movable: true },
+  // Hangs above furniture, so it never blocks a piece (walkable); place it with its back to a wall.
+  painting: { w: 1.1, d: 0.12, walkable: true, label: "Painting", movable: true },
   clothesRack: { w: 1.6, d: 0.5, label: "Rack" },
   mirror: { w: 0.9, d: 0.3, label: "Mirror" },
   displayTable: { w: 1.2, d: 0.8, label: "Display" },
@@ -1185,7 +1191,7 @@ export function placementOk(t: RoomTemplate, items: RoomItem[], moved: RoomItem)
 }
 
 /** #19 Fif's Furniture: a piece the player bought (a player_items row), placed through the home layout. */
-export interface OwnedPiece { id: string; kind: FurnitureKind; color?: string; name: string; emoji: string }
+export interface OwnedPiece { id: string; kind: FurnitureKind; color?: string; name: string; emoji: string; art?: string }
 /** The layout id of a bought piece. */
 export const ownedId = (itemId: number) => `item:${itemId}`;
 export const isOwnedId = (id: string) => id.startsWith("item:");
@@ -1196,7 +1202,7 @@ const OWNED_USE: Partial<Record<FurnitureKind, Pick<RoomItem, "use" | "label">>>
   throne: { use: { kind: "sit" }, label: "Sit" },
 };
 export function ownedItem(p: OwnedPiece, x: number, z: number, rot: number): RoomItem {
-  return { id: p.id, kind: p.kind, x, z, rot: ((rot % 4) + 4) % 4, color: p.color, name: p.name, ...OWNED_USE[p.kind] };
+  return { id: p.id, kind: p.kind, x, z, rot: ((rot % 4) + 4) % 4, color: p.color, name: p.name, ...(p.art ? { art: p.art } : {}), ...OWNED_USE[p.kind] };
 }
 
 /**
