@@ -7,18 +7,18 @@ import { LOLA_LOOK, MAYOR_PAPA_DANI } from "@/lib/cast";
 // The tutorial tooltips: Lola's hello (with Skip), then five (owner, Oct 17: no separate welcome pop-up) (Clarifications section 1;
 // C15). One tooltip at a time, the rest of the screen dimmed, the target ringed.
 
-// Owner, Oct 17: Lola Lowdown gives the tour (Mayor Papa-Dani says hello in one step, owner Oct 22), in her voice (the spicy urban gossip blogger). Culture pack C1 (owner,
-// Oct 20): one or two slang terms from content/culture/slang.json in every line (tests/culture.test.ts checks).
+// Owner, Oct 17: Lola Lowdown gives the tour (Mayor Papa-Dani says hello in one step, owner Oct 22), in her voice (owner, Oct 26: mostly TMZ, a
+// little Shade Room; at most one slang term from content/culture/slang.json a line, tests/culture.test.ts checks).
 export const TOUR = [
   // No target: Lola says hello first (owner, Oct 17), with the whole screen dimmed.
-  { target: "welcome", text: "Hey there, welcome to NYC 🗽 Deadass, nobody here sleeps, and nobody stops talking. I'm Lola Lowdown 💋 I know everyone worth knowing, and now I know you. Let me give you a quick tour ✨" },
-  { target: "clout", text: "That flame 🔥 is your clout: how much this city cares that you exist. Right now? Not a lot, babe. We'll fix that. Say less 💅" },
-  { target: "money", text: "Your coins, sweetie 💸 Rent, fits and the occasional \"tip\" for a bouncer all come out of here, and rent comes around mad fast. The diamond 💎 is your net worth: everything you own that you can casually drop in conversation." },
-  { target: "map", text: "This is the map 🗺️ You're starting in Queens, and the rest of the city stays locked 🔒 till you're interesting enough. Facts: I've seen worse glow-ups. Barely 😏" },
-  { target: "phone", text: "Your phone 📱 Updates, gossip and the fam asking if you've \"made it yet.\" My tea 🍵 comes through here too, so keep it charged. Bet?" },
+  { target: "welcome", text: "BREAKING 🚨 A new face just landed in New York, and sources tell me it's you. I'm Lola Lowdown 💋 I know everyone worth knowing, and now I know you. Let me show you around ✨" },
+  { target: "clout", text: "That flame 🔥 is your clout: how much New York cares that you exist. Current status? Unconfirmed, babe. We're working on it 💅" },
+  { target: "money", text: "Your money, sweetie 💸 Rent, fits and the occasional \"tip\" for a bouncer all come out of here, and rent comes around fast. The diamond 💎 is your net worth: everything you own, on the record." },
+  { target: "map", text: "This is the map 🗺️ You're starting in Queens. The rest of New York stays locked 🔒 until you're interesting enough. Insiders say it won't take long 👀" },
+  { target: "phone", text: "Your phone 📱 Updates, invites and my tea 🍵 land here first. Chile, keep it charged. You'll want to see what's coming." },
   // Owner, Oct 22: the Mayor welcomes every newcomer and points at his app (the Phone's Mayor app, migration 0105).
   { target: "phone", who: "mayor", text: "Welcome to Queens, neighbor! I'm Mayor Papa-Dani 🏛️ Something broken? A big idea? Need to kvetch about the rent? Write me in the Mayor app on your phone. I read every letter, and my team gets on it fast 🎉" },
-  { target: "events", text: "Breaking news 🚨 somebody invited YOU to a party 🥂 They're wildin', and I'm as shocked as you are. Tap it and RSVP before they change their mind 👀" },
+  { target: "events", text: "Developing story 🚨 Someone invited YOU to a party 🥂 We reached out for comment, and they confirmed it. Tap it and RSVP before they change their mind 👀" },
 ] as const;
 
 interface Rect { x: number; y: number; w: number; h: number }
@@ -115,7 +115,7 @@ export function TourTooltip({ index, onNext, onSkip }: { index: number; onNext: 
 }
 
 /** Owner, Oct 17: new players didn't know what to do. Lola's nudge toward the daily tasks (lib/city.ts dailyTasks). */
-export const DAILY_HINT_TEXT = "Psst 👀 these are your daily tasks: five little errands that each pay out, plus a mad bonus if you clear all five 💸 Fresh list every day, so check in daily, babe 💅";
+export const DAILY_HINT_TEXT = "Psst 👀 these are your daily tasks: five little errands that each pay, plus a bonus if you clear all five 💸 A new list drops every day. Check in daily, babe 💅";
 
 /**
  * Shown once, 30 seconds after the first session ends if the daily tasks haven't been opened. The task counter in

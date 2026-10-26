@@ -667,7 +667,7 @@ export const PLACES: Place[] = [
     id: "still-a-dollar-slice", name: "Still-a-Dollar Slice", emoji: "🍕", category: "food", neighborhood: "Astoria", tier: "Budget",
     at: [40.7712, -73.9150], depth: "scene", template: "counter", palette: ["#D93A2F", "#FFF1D6", "#2A2530"], hours: { open: 10, close: 1 },
     tags: ["pizza", "dining_budget", "astoria"],
-    lore: "The sign says a dollar. The sign is from 2009, babe. Two slices and a soda is still the best lunch deal in Queens, deadass, and Arben folds yours for you if you look new.",
+    lore: "The sign says a dollar. The sign is from 2009, babe. Two slices and a soda is still the best lunch deal in Queens, and Arben folds yours for you if you look new.",
     actions: [
       { id: "slice", kind: "eat", label: "Grab a slice", price: 6, energy: -10, blurb: "Fold it. Burn the roof of your mouth. Welcome to New York." },
       { id: "combo", kind: "eat", label: "Two slices and a soda", price: 13, energy: -20, blurb: "The working city's lunch deal. The soda is whatever's coldest." },
@@ -677,7 +677,7 @@ export const PLACES: Place[] = [
     id: "white-sauce-cart", name: "The White Sauce Cart", emoji: "🥙", category: "food", neighborhood: "Astoria", tier: "Budget",
     at: [40.7708, -73.9172], depth: "scene", template: "plaza", palette: ["#F2A33A", "#FFF6E0", "#1F1B26"], hours: { open: 18, close: 5 },
     tags: ["halal_cart", "late_night", "dining_budget", "astoria"],
-    lore: "Chicken over rice, a mountain of white sauce and the best thing open on this corner after midnight. Tariq has fed every bartender in Astoria at 3 a.m. Say less, just get the extra sauce.",
+    lore: "Chicken over rice, a mountain of white sauce and the best thing open on this corner after midnight. Tariq has fed every bartender in Astoria at 3 a.m. Our advice: get the extra sauce.",
     actions: [
       { id: "eat", kind: "eat", label: "Chicken over rice, extra white sauce", price: 14, energy: -20, blurb: "Red sauce at your own risk. Tariq warned you. Twice." },
     ],

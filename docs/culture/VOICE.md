@@ -29,10 +29,13 @@ They sit on top of the house rules in docs/CAST.md ("Writing for the cast").
 
 ## Lola Lowdown
 
-Everything in docs/CAST.md "Voices" still holds (the spicy tea queen, on the player's side, "babe", "darling" or
-"sweetie" at most once per line). Added in C1:
-- **One or two slang terms per message** from the slang dictionary, never more. She keeps her own gossip-blogger
-  style; the slang is seasoning (owner, Oct 20).
+Everything in docs/CAST.md "Voices" still holds (the tea queen, on the player's side, "babe", "darling" or
+"sweetie" at most once per line).
+- **Less slang (owner, Oct 26): mostly TMZ, a little Shade Room.** She writes like a celebrity-news desk: "BREAKING",
+  "developing", "sources tell me", "we're told", "insiders say", "we reached out for comment", "on the record". A
+  little Shade Room on top: a 👀, a "chile" or a raised eyebrow now and then, never every line. **At most one slang
+  term per message** from the slang dictionary, and none is fine (this replaces C1's "one or two", Oct 20). Don't
+  call the player "Roommates": the game has real roommates.
 - **Short in onboarding:** three brief sentences, as a rule. The guide's arrival line keeps its four (owner, Oct 20).
 - Never a cultural label or a slur for the player.
 - Always teases what's next: a shift, a goal, a piece of tea.

@@ -56,7 +56,7 @@ it isn't in your working directory). Work from the main branch.
    stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
    content/news/ and content/gossip/ so nothing repeats. Also read docs/culture/VOICE.md (the voice rules)
    and content/culture/ (slang.json, parody-names.json, npcs.json): write each regular from their profile
-   (personality, likes, dislikes, the slang they use), give Lola one or two slang terms per message, and use
+   (personality, likes, dislikes, the slang they use), give Lola at most one slang term per message (mostly TMZ, a little Shade Room: docs/culture/VOICE.md), and use
    the invented names from parody-names.json for any team, transit card, museum, landmark or brand.
 3. Write content/hunts/<Monday>.json: a hunt players will talk about.
    - Make it an event, not an errand: real stakes (a rival crew racing you, a celebrity's stolen

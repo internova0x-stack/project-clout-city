@@ -99,9 +99,9 @@ export const REGULARS: Regular[] = [
   { id: "lola", name: "Lola Lowdown", title: "the tea queen", placeId: "neon-spoon", emoji: "💋", role: "bartender" },
 ];
 
-/** Lola Lowdown's look (owner, Oct 17: her head is the tour guide's avatar): long pink hair, soft glam. */
+/** Lola Lowdown's look (owner, Oct 17: her head is the tour guide's avatar): soft glam; light-skinned and mixed, long brunette hair (owner, Oct 26). */
 export const LOLA_LOOK: Look = {
-  style: "influencer_soft_glam", body: "curvy", build: "curvy", skin: "#8D5524", hair: "long", hairColor: "#E0457B",
+  style: "influencer_soft_glam", body: "curvy", build: "curvy", skin: "#E0AC69", hair: "long", hairColor: "#4A2C1A",
   eyes: "#3B2314", glasses: "none", covering: "none", fit: null,
 };
 

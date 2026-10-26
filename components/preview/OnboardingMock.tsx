@@ -210,15 +210,15 @@ function TasksDayOne() {
 }
 
 const TOUR_LINES: [string, string, string][] = [
-  ["Welcome", "Hey there, welcome to NYC 🗽 Deadass, nobody here sleeps, and nobody stops talking. I'm Lola Lowdown 💋 I know everyone worth knowing, and now I know you. Let me give you a quick tour ✨",
+  ["Welcome", "BREAKING 🚨 A new face just landed in New York, and sources tell me it's you. I'm Lola Lowdown 💋 I know everyone worth knowing, and now I know you. Let me show you around ✨",
     "Welcome to NYC 🗽 I'm Lola, I know everyone. Quick tour?"],
-  ["Clout", "That flame 🔥 is your clout: how much this city cares that you exist. Right now? Not a lot, babe. We'll fix that. Say less 💅",
+  ["Clout", "That flame 🔥 is your clout: how much New York cares that you exist. Current status? Unconfirmed, babe. We're working on it 💅",
     "🔥 Clout = how much the city cares. More clout, more doors open."],
-  ["Money", "Your coins, sweetie 💸 Rent, fits and the occasional \"tip\" for a bouncer all come out of here, and rent comes around mad fast. The diamond 💎 is your net worth: everything you own that you can casually drop in conversation.",
+  ["Money", "Your money, sweetie 💸 Rent, fits and the occasional \"tip\" for a bouncer all come out of here, and rent comes around fast. The diamond 💎 is your net worth: everything you own, on the record.",
     "💸 Your cash. Rent's due every week, so keep some handy."],
-  ["Map", "This is the map 🗺️ You're starting in Queens, and the rest of the city stays locked 🔒 till you're interesting enough. Facts: I've seen worse glow-ups. Barely 😏",
+  ["Map", "This is the map 🗺️ You're starting in Queens. The rest of New York stays locked 🔒 until you're interesting enough. Insiders say it won't take long 👀",
     "🗺️ Tap a place to go. Queens first; the rest unlocks later."],
-  ["Phone", "Your phone 📱 Updates, gossip and the fam asking if you've \"made it yet.\" My tea 🍵 comes through here too, so keep it charged. Bet?",
+  ["Phone", "Your phone 📱 Updates, invites and my tea 🍵 land here first. Chile, keep it charged. You'll want to see what's coming.",
     "📱 Gigs, messages and my gossip live in here."],
 ];
 
