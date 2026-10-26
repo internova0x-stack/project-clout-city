@@ -2401,3 +2401,10 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .home-score-bar i { display:block; height:100%; border-radius:4px; background:var(--night-900); }
 .home-score-dot { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:800; background:var(--chip-off); color:var(--text-2); }
 .home-score-dot.on { background:var(--green-tint, #DEF2E9); color:var(--green-text, #2E8B63); }
+/* The Crib Rating pill: a progress ring with the score, the level beside it. */
+.crib-pill { display:flex; align-items:center; gap:7px; padding:3px 12px 3px 3px; white-space:nowrap; }
+.crib-ring { position:relative; flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--neon-500) var(--p), rgba(20,17,26,.12) 0); }
+.crib-ring::after { content:""; position:absolute; inset:3.5px; border-radius:50%; background:#fff; }
+.crib-ring b { position:relative; z-index:1; font-size:13px; font-weight:800; color:var(--night-900); }
+.crib-label { display:flex; flex-direction:column; align-items:flex-start; line-height:1.1; font-size:13px; font-weight:700; }
+.crib-label small { white-space:nowrap; font-size:9px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-2); }

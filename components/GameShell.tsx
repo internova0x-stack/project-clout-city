@@ -1393,7 +1393,7 @@ export function GameShell({
       setHomeReached(r.data.reached);
       const n = r.data.paid.reduce((t, m) => t + m.clout, 0);
       if (n) {
-        setToast(`🏠 Home score ${Math.max(...r.data.paid.map((m) => m.score))}. +${n} clout.`);
+        setToast(`🏠 Crib Rating ${Math.max(...r.data.paid.map((m) => m.score))}. +${n} clout.`);
         if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
       }
     });

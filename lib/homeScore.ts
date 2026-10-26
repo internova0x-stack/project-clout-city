@@ -1,4 +1,4 @@
-// The home score (migration 0120, owner Oct 26; spec section 26): 0 to 100 for how well a home is furnished, relative to
+// The home score, called the Crib Rating in the game (migration 0120, owner Oct 26; spec section 26): 0 to 100 for how well a home is furnished, relative to
 // the home, so a beautifully done room share can reach 100 as well as a penthouse. The server's home_score() is the
 // one that pays; this mirror shows it at once and explains it. Safe to import anywhere.
 

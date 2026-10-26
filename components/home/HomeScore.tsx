@@ -33,7 +33,7 @@ export function HomeScoreSheet({ open, onClose, s, reached, onShop }: {
   const next = s ? nextMilestone(s.score) : null;
   const tips = s ? homeTips(s) : [];
   return (
-    <Sheet open={open} onClose={onClose} label="Home score" tall>
+    <Sheet open={open} onClose={onClose} label="Crib Rating" tall>
       {!s ? <p className="meta">Loading…</p> : (
         <div className="stack-16">
           <div className="home-score-head">
@@ -41,7 +41,7 @@ export function HomeScoreSheet({ open, onClose, s, reached, onShop }: {
               <b>{s.score}</b>
             </span>
             <span style={{ minWidth: 0 }}>
-              <span className="overline" style={{ display: "block" }}>Home score</span>
+              <span className="overline" style={{ display: "block" }}>Crib Rating</span>
               <span className="display-md" style={{ display: "block" }}>{s.tier}</span>
               <span className="meta">Out of 100, for the place you live now. Only pieces you&apos;ve placed count.</span>
             </span>

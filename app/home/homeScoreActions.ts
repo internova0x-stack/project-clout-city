@@ -12,6 +12,6 @@ export async function homeScoreState(): Promise<{ ok: true; data: State } | { ok
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc("home_score_state");
-  if (error) return { ok: false, error: "The home score is taking a nap." };
+  if (error) return { ok: false, error: "The Crib Rating is taking a nap." };
   return { ok: true, data: data as State };
 }
