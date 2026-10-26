@@ -52,6 +52,8 @@ import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { CouplePrompt, CoupleSheet } from "./dating/Couple";
 import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
+import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/Visits";
+import { KIND_LABEL, VISITS, VISIT_POLL_MS, hostCloutPerGuest, visitAlerts, visitClock, type VisitApi, type VisitHome, type VisitMessage, type VisitRoom, type VisitState } from "@/lib/visits";
 import { homeScore as scoreHome, qualityTarget, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
 import { subletAlerts, type SubletApi, type SubletHome, type SubletResult, type SubletState } from "@/lib/sublets";
 import { coupleAlerts, coupleBadge, type CoupleApi, type CoupleState } from "@/lib/couples";
@@ -91,7 +93,7 @@ import type { GoalsApi, GoalsState } from "@/lib/goals";
 import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
 import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
 import { RANKS, rankFor, type Rank } from "@/lib/ranks";
-import { contextTips } from "@/lib/statTips";
+import { contextTipLists } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
 import { DecorApproveCard, DecoratingBar, JobsApp, RideWaitCard, TogetherBonusCard, TogetherPlansSheet, TogetherPrompt, TogetherSheet } from "./together/Together";
@@ -131,7 +133,7 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | "homescore" | null;
+type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | "homescore" | "visits" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const TASKS_SEEN_KEY = "cc-tasks-seen";
@@ -227,6 +229,7 @@ export function GameShell({
   couple,
   sublet,
   homeScoreApi,
+  visits,
   crew,
   party,
   partyRoom,
@@ -286,6 +289,8 @@ export function GameShell({
   /** Sublets (migration 0119): Apartments → Sublets, and the subtenant's room. */
   sublet?: SubletApi;
   /** The home score (migration 0120): pays its milestones; without it the score still shows, worked out here. */
+  /** Having people over (migration 0121): hangouts and house parties at home. */
+  visits?: VisitApi;
   homeScoreApi?: { state(): Promise<{ ok: true; data: HomeScore & { paid: { score: number; clout: number }[]; reached: number[] } } | { ok: false; error: string }> };
   /** Crew outings (migration 0013). */
   crew?: CrewApi;
@@ -687,6 +692,21 @@ export function GameShell({
     const r = await sublet.state();
     if (r.ok && r.data) setSubS(r.data);
   }, [sublet]);
+  const [visitS, setVisitS] = useState<VisitState | null>(null);
+  const [visitBusy, setVisitBusy] = useState(false);
+  const [visitErr, setVisitErr] = useState<string | null>(null);
+  const [visitDismissed, setVisitDismissed] = useState<string | null>(null);
+  // The visit I'm a guest at (its id), the host's home, the room (who's here) and its chat.
+  const [visitAt, setVisitAt] = useState<number | null>(null);
+  const [visitHomeData, setVisitHomeData] = useState<VisitHome | null>(null);
+  const [visitRoomS, setVisitRoomS] = useState<VisitRoom | null>(null);
+  const [visitMsgs, setVisitMsgs] = useState<VisitMessage[]>([]);
+  const [visitChatOpen, setVisitChatOpen] = useState(false);
+  const loadVisits = useCallback(async () => {
+    if (!visits) return;
+    const r = await visits.state();
+    if (r.ok && r.data) setVisitS(r.data);
+  }, [visits]);
   const loadCouple = useCallback(async () => {
     if (!couple) return;
     const r = await couple.state();
@@ -842,6 +862,12 @@ export function GameShell({
     const t = setInterval(() => void loadSublet(), 120_000);
     return () => clearInterval(t);
   }, [sublet, loadSublet]);
+  useEffect(() => {
+    if (!visits) return;
+    void loadVisits();
+    const t = setInterval(() => void loadVisits(), 45_000);
+    return () => clearInterval(t);
+  }, [visits, loadVisits]);
   // The subtenant's room: the host's place, loaded once per sublet.
   const subLiveId = subS?.live?.role === "sub" ? subS.live.id : null;
   useEffect(() => {
@@ -935,12 +961,24 @@ export function GameShell({
   const cityOn = !!(city && cityApi);
   const statSuggestions = useMemo(() => {
     if (!cityOn || !city) return undefined;
-    const tips = contextTips(visiblePlaces(feed), city, { restOn, kitchenOn });
+    const tips = contextTipLists(visiblePlaces(feed), city, { restOn, kitchenOn });
     // With the Confidence and clout a pro gig or big break needs, that's the better use of Confidence.
     const gig = city.gigs.filter((g) => g.tier !== "side" && !g.accepted_at && gigAvailability(g, city).ok).sort((a, b) => b.pay - a.pay)[0];
-    if (gig) tips.confidence = { stat: "confidence", placeId: "gigs", placeName: gig.tier === "big" ? "A big break is open" : "A pro gig is open", emoji: "💼", price: 0, gain: 0, gig: { id: gig.id, pay: gig.pay } };
+    if (gig) tips.confidence = [{ stat: "confidence" as const, placeId: "gigs", placeName: gig.tier === "big" ? "A big break is open" : "A pro gig is open", emoji: "💼", price: 0, gain: 0, gig: { id: gig.id, pay: gig.pay } }, ...tips.confidence].slice(0, 3);
+    // Having people over (owner, Oct 26: "part of the actions in the mood HUD"): at home, the Mood row's suggestion.
+    if (visitS && (city.player.at_place ?? null) === null) {
+      const h = visitS.hosting;
+      if (h) {
+        const live = Date.parse(h.starts) <= Date.now();
+        tips.mood = [{ stat: "mood" as const, placeId: "visits", placeName: live ? `Your ${KIND_LABEL[h.kind].name.toLowerCase()} is on` : `${KIND_LABEL[h.kind].name} later`, emoji: KIND_LABEL[h.kind].emoji,
+          price: 0, gain: VISITS.kinds[h.kind].hostMood, go: "Open", detail: `${h.guests.filter((g) => g.here).length} here · ${visitClock(h.starts, h.ends)}` }, ...tips.mood].slice(0, 3);
+      } else if (!visitS.blocked && visitS.left.hang > 0 && visitS.invitable.length > 0) {
+        tips.mood = [{ stat: "mood" as const, placeId: "visits", placeName: "Have people over", emoji: "🏠", price: 0, gain: VISITS.kinds.hang.hostMood, go: "Invite",
+          detail: `+${VISITS.kinds.hang.hostMood} Mood and +${hostCloutPerGuest("hang", visitS.crib)} clout a guest · Free` }, ...tips.mood].slice(0, 3);
+      }
+    }
     return tips;
-  }, [cityOn, city, feed, restOn, kitchenOn]);
+  }, [cityOn, city, feed, restOn, kitchenOn, visitS]);
   // Borough gates (owner, Oct 17): fresh on open and every few minutes; Brooklyn stays locked until the server says so.
   const [gates, setGates] = useState<BoroughGate[] | null>(boroughGates ?? null);
   useEffect(() => {
@@ -1166,6 +1204,8 @@ export function GameShell({
     window.history.replaceState(null, "", url.toString());
     if (open === "messages" || open === "gigs" || open === "businesses" || open === "apartments") setPhone({ open: true, app: open });
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
+    // A visit invite (migration 0121).
+    else if (open === "plans") setPanel("visits");
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
     else if (open === "shop") openShop("fashion");
@@ -1399,6 +1439,88 @@ export function GameShell({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [homeScoreApi, homeScoreKey]);
+  // Having people over (migration 0121): the visit's room is polled while I'm a guest there, or hosting one that's on
+  // and I'm at home; guests see the host's place with everyone in it.
+  const hostLive = visitS?.hosting && Date.parse(visitS.hosting.starts) <= Date.now() ? visitS.hosting : null;
+  const roomVisitId = visitAt ?? (hostLive && tab === "home" && !inside ? hostLive.id : null);
+  const visitAfter = useRef(0);
+  useEffect(() => {
+    visitAfter.current = 0;
+    setVisitMsgs([]);
+    setVisitRoomS(null);
+    if (!visits || roomVisitId === null) return;
+    let stop = false;
+    const poll = async () => {
+      const r = await visits.room(roomVisitId, visitAfter.current);
+      if (stop) return;
+      if (!r.ok) { if (visitAt === roomVisitId) { setVisitAt(null); setToast(r.error); } return; }
+      setVisitRoomS((prev) => {
+        if (r.data.me?.paid && prev && !prev.me?.paid) setToast(`${KIND_LABEL[r.data.kind].emoji} +${VISITS.kinds[r.data.kind].guestClout} clout, +${VISITS.kinds[r.data.kind].guestMood} Mood. Good hang.`);
+        return r.data;
+      });
+      if (r.data.messages.length) {
+        visitAfter.current = r.data.messages[r.data.messages.length - 1].id;
+        setVisitMsgs((m) => [...m, ...r.data.messages.filter((x) => !m.some((y) => y.id === x.id))].slice(-80));
+      }
+      if (r.data.over && visitAt === roomVisitId) { setVisitAt(null); setToast("That's a wrap. Everyone's heading home."); }
+    };
+    void poll();
+    const t = setInterval(() => void poll(), VISIT_POLL_MS);
+    return () => { stop = true; clearInterval(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visits, roomVisitId]);
+  useEffect(() => {
+    if (!visits || visitAt === null) { setVisitHomeData(null); return; }
+    void visits.home(visitAt).then((r) => { if (r.ok) setVisitHomeData(r.data); });
+  }, [visits, visitAt]);
+  const visitView = useMemo(() => {
+    if (!visitHomeData || visitAt === null) return null;
+    const template = homeTemplate(visitHomeData.homeId, visitHomeData.houseSku);
+    const owned: OwnedPiece[] = visitHomeData.items.flatMap((i) => {
+      const it = homeItem(i.sku);
+      return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
+    }).filter((p) => !placedElsewhere(visitHomeData.layout, 1).has(p.id));
+    return { template, layout: visitHomeData.layout, owned, hostName: visitHomeData.hostName };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visitHomeData, visitAt]);
+  const visitCrowd: CrowdMember[] | undefined = visitRoomS && roomVisitId !== null
+    ? visitRoomS.people.map((p) => ({ key: `p:${p.id}`, npc: false as const, id: p.id, name: p.name, style: p.style, look: normalizeLook(p.look, p.style), crew: false }))
+    : undefined;
+  const visitRun = async <T,>(fn: () => Promise<{ ok: true; data: T } | { ok: false; error: string }>, text?: string): Promise<T | null> => {
+    setVisitBusy(true);
+    setVisitErr(null);
+    const r = await fn();
+    setVisitBusy(false);
+    if (!r.ok) { setVisitErr(r.error); return null; }
+    if (text) setToast(text);
+    return r.data;
+  };
+  const goToVisit = async (id: number) => {
+    if (!visits) return;
+    const r = await visitRun(() => visits.arrive(id));
+    if (!r) return;
+    setPanel(null); setPhone({ open: false, app: null }); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1);
+    setVisitAt(id);
+    void loadVisits();
+  };
+  const visitH: VisitHandlers | null = visits ? {
+    busy: visitBusy,
+    error: visitErr,
+    onHost: (kind, guests, startsAt) => void visitRun(() => visits.host(kind, guests, startsAt), kind === "party" ? "🎉 Invites sent. Snacks are on the way." : "🏠 Invites sent. Tidy up.")
+      .then((st) => { if (st) { setVisitS(st); if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); } }),
+    onEnd: () => void visitRun(() => visits.end(), "Wrapped. Everyone out, nicely.").then((st) => st && setVisitS(st)),
+    onSendHome: (id) => void visitRun(() => visits.sendHome(id)).then((st) => st && setVisitS(st)),
+    onAnswer: (id, yes) => void visitRun(() => visits.answer(id, yes), yes ? "See you there." : "Maybe next time.").then((st) => st && setVisitS(st)),
+    onGo: (id) => void goToVisit(id),
+  } : null;
+  const leaveVisit = async () => {
+    if (!visits || visitAt === null) return;
+    const st = await visitRun(() => visits.leave(visitAt), "Home sweet home.");
+    setVisitAt(null);
+    setVisitChatOpen(false);
+    if (st) setVisitS(st);
+    if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  };
   // v0.13 interior decorator: someone else's home (their furniture, their layout), ground floor.
   const decorHome = decor ? homeTemplate(decor.homeId, decor.houseSku) : undefined;
   const decorPieces: OwnedPiece[] = decor ? decor.items.flatMap((i) => {
@@ -2084,7 +2206,10 @@ export function GameShell({
   const showRoommate = !!homeRoommate && !!city && roommateCardDue(homeRoommate, city.today) && roommateTick >= 0
     && !showDating && !showCrew && !showParty && !showTogether && flow === "none" && !arranging && !decor && tab === "home" && !inside
     && !(storyOn && promptVisible(feed, dismissed)) && (roommateIntro || (!(tvCardDue && tvFeature) && !(newsCard && latestNews?.id === newsCard)));
-  const showPrompt = showRoommate || showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
+  const visitKey = visitS ? visitS.invites.filter((i) => i.status === "invited").map((i) => i.id).join() : "";
+  const showVisit = !!visits && visitAlerts(visitS) > 0 && visitDismissed !== visitKey && !showDating && !showCouple && !showCrew && !showParty && !showTogether
+    && flow === "none" && !arranging && tab === "home" && !inside && visitAt === null;
+  const showPrompt = showVisit || showRoommate || showDating || showCrew || showParty || showTogether || (storyOn && flow === "none" && !arranging && tab === "home" && !inside && promptVisible(feed, dismissed));
   const openChatWith = (p: DatePerson) => {
     setPanel(null);
     setChatWith({ id: p.id, name: p.name, style: p.style });
@@ -2100,7 +2225,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && flow === "none" ? " has-crib" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${tab === "home" && !inside && (visitView || (hostLive && visitRoomS)) ? " in-visit" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? " has-crib" : ""}`}>
       {inside && city ? (
         <>
         <InteriorScene
@@ -2203,20 +2328,22 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={viewing ?? decorHome ?? subView?.template ?? upstairs ?? baseHome}
-            floor={viewing || decorHome || subView ? 1 : floorNow}
-            layout={viewing ? null : decor ? decor.layout : subView ? subView.layout : city?.homeLayout}
+            template={viewing ?? decorHome ?? visitView?.template ?? subView?.template ?? upstairs ?? baseHome}
+            floor={viewing || decorHome || visitView || subView ? 1 : floorNow}
+            layout={viewing ? null : decor ? decor.layout : visitView ? visitView.layout : subView ? subView.layout : city?.homeLayout}
+            crowd={viewing || decor ? undefined : visitCrowd}
+            onCrowdTap={(m) => { if (!m.npc && chat) openPlayer(m.id); }}
             look={look}
             outfit={outfit}
             daytime={daytime}
-            editable={cityOn && flow === "none" && !viewing && !subView}
+            editable={cityOn && flow === "none" && !viewing && !subView && !visitView}
             rotatable={flow === "none"}
             door={flow === "none"}
-            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : subView ? `${me.display_name} in the spare room at ${subView.hostName}'s place` : `${me.display_name} at home, wearing ${style.label}`}
+            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : visitView ? `${me.display_name} at ${visitView.hostName}'s place` : subView ? `${me.display_name} in the spare room at ${subView.hostName}'s place` : `${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
               if (viewing || decor) return;
-              if (it.use?.kind === "floor") return subView ? undefined : setHomeFloor(it.use.to);
+              if (it.use?.kind === "floor") return subView || visitView ? undefined : setHomeFloor(it.use.to);
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
               if (restOn && it.use?.kind === "sleep") setRestKind("nap");
               if (restOn && it.use?.kind === "sit") setRestKind("sit");
@@ -2225,8 +2352,8 @@ export function GameShell({
             onEditingChange={setArranging}
             mood={roomMood}
             onSaveLayout={(l) => (decor && together ? saveDecor(l) : cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
-            owned={viewing ? undefined : decor ? decorPieces : subView ? subView.owned : ownedHere}
-            trial={!decor && !subView && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
+            owned={viewing ? undefined : decor ? decorPieces : visitView ? visitView.owned : subView ? subView.owned : ownedHere}
+            trial={!decor && !subView && !visitView && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
             onTrialEnd={() => setTryHome(null)}
             onTrialBuy={cityApi && ((l) => run(`buy:${tryHome!.sku}`, async () => {
               // Buy, then keep the piece where it was tried: the layout's "trial" becomes the new item.
@@ -2238,7 +2365,15 @@ export function GameShell({
               return cityApi.saveHomeLayout(mergeFloorLayout(r.state.homeLayout, l.map((e) => (e.id === "trial" ? { ...e, id: ownedId(it.id) } : e)), floorNow));
             }))}
           />
-          {subS?.live?.role === "sub" && subHome && !viewing && !decor && (
+          {visitView && visitRoomS && (
+            <VisitBar title={`${KIND_LABEL[visitRoomS.kind].emoji} At ${handle(visitView.hostName)}'s`} clock={visitClock(visitRoomS.starts, visitRoomS.ends)}
+              here={visitRoomS.people.length + 1} unread={0} onChat={() => setVisitChatOpen(true)} onLeave={() => void leaveVisit()} leaveLabel="Leave" />
+          )}
+          {!visitView && hostLive && visitRoomS && !viewing && !decor && (
+            <VisitBar title={`${KIND_LABEL[hostLive.kind].emoji} You're hosting`} clock={visitClock(hostLive.starts, hostLive.ends)}
+              here={visitRoomS.people.length} unread={0} onChat={() => setVisitChatOpen(true)} onLeave={() => setPanel("visits")} leaveLabel="Guests" />
+          )}
+          {subS?.live?.role === "sub" && subHome && !viewing && !decor && !visitView && (
             <SubletHomeBar hostName={subHome.hostName} mine={subMine} onToggle={() => { setSubMine((m) => !m); setHomeFloor(1); }} />
           )}
           {viewing && viewHome && (
@@ -2274,6 +2409,9 @@ export function GameShell({
           )}
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
+          )}
+          {showVisit && visitS && (
+            <VisitPrompt invite={visitS.invites.find((i) => i.status === "invited")!} onOpen={() => setPanel("visits")} onDismiss={() => setVisitDismissed(visitKey)} />
           )}
           {showCouple && coupleS && (
             <CouplePrompt state={coupleS} onOpen={() => setPanel("us")} onDismiss={() => setCoupleDismissed(coupleKey)} />
@@ -2329,6 +2467,7 @@ export function GameShell({
           if (id === "gigs") return setPhone({ open: true, app: "gigs" });
           if (id === "rest:nap" || id === "rest:sit") return setRestKind(id === "rest:nap" ? "nap" : "sit");
           if (id === "cook") return setKitchenOpen(true);
+          if (id === "visits") return setPanel("visits");
           // Something to do right where you are: step inside, where everything happens (#7).
           const p = placeById(id);
           if (p && atPlace === id && placeRoom(p)) { setPanel(null); setPlace(null); setTab("map"); return setInside(p); }
@@ -2337,7 +2476,7 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
-        homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
+        homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
         quests={trip ? [] : quests}
         time={clock.time}
         tab={tab}
@@ -2360,7 +2499,7 @@ export function GameShell({
           tasksBadge: !!city && city.tasks.length > 0 && tasksSeenDay !== "" && tasksSeenDay !== city.today && handedOff,
           skillsOn: !!(loadSkills || skills),
           skillsBadge: !!perkHandlers && SKILL_PERKS.some((p) => ["take", "collect", "rsvp"].includes(perkStatus(p, perkHandlers.state, gameNow))),
-          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || coupleAlerts(coupleS) > 0 || subletAlerts(subS) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
+          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || coupleAlerts(coupleS) > 0 || subletAlerts(subS) > 0 || visitAlerts(visitS) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <ActionTimer doing={doing} />
@@ -2852,6 +2991,28 @@ export function GameShell({
             onCancel={(id) => void datingRun(() => dating.cancel(id), "Date called off.")}
             onCrushInvite={() => setPanel("crushInvite")}
           />
+          {visits && visitH && (
+            <VisitsSheet open={panel === "visits"} onClose={() => { setPanel(null); setVisitErr(null); }} state={visitS} h={visitH} />
+          )}
+          {visits && roomVisitId !== null && (
+            <PartyChatSheet
+              open={visitChatOpen}
+              onClose={() => setVisitChatOpen(false)}
+              title={visitRoomS ? `${KIND_LABEL[visitRoomS.kind].name} at ${visitRoomS.mine ? "yours" : handle(visitRoomS.host.name)}` : "Chat"}
+              here={(visitRoomS?.people.length ?? 0) + 1}
+              messages={visitMsgs}
+              busy={visitBusy}
+              onSend={async (body) => {
+                const r = await visits.say(roomVisitId, body);
+                if (!r.ok) { setToast(r.error); return false; }
+                visitAfter.current = Math.max(visitAfter.current, r.data.id);
+                setVisitMsgs((m) => (m.some((y) => y.id === r.data.id) ? m : [...m, r.data]));
+                return true;
+              }}
+              onProfile={chat ? (id) => { setVisitChatOpen(false); setCardId(id); } : undefined}
+              onReport={() => setToast("Noted. Block them from their card, or tell the Mayor if it keeps up.")}
+            />
+          )}
           <HomeScoreSheet
             open={panel === "homescore"}
             onClose={() => setPanel(null)}

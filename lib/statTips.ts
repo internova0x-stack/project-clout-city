@@ -12,31 +12,33 @@ const NAME: Record<StatKey, string> = { energy: "Energy", mood: "Mood", confiden
 const line = (gain: number, stat: StatKey, price: number, seconds: number, limit?: string) =>
   [`+${gain} ${NAME[stat]}`, price > 0 ? formatCash(price) : "Free", seconds > 0 ? `⏱ ${seconds}s` : null, limit ?? null].filter(Boolean).join(" · ");
 
+/** A rest at home ("rest:nap", "rest:sit") for a stat, if it raises it and is left today. */
+function restTip(kind: "nap" | "sit", stat: StatKey, s: CityState): StatTip | null {
+  const r = CITY_ECONOMY.rest[kind];
+  const gain = stat === "energy" ? r.energy : stat === "mood" ? r.mood : 0;
+  const av = restAvailability(kind, s);
+  if (!av.ok || gain <= 0) return null;
+  return {
+    stat, placeId: `rest:${kind}`, placeName: kind === "nap" ? "Take a nap" : "Sit a while", emoji: kind === "nap" ? "😴" : "🛋️",
+    price: 0, gain, go: kind === "nap" ? "Nap" : "Sit",
+    detail: line(gain, stat, 0, r.seconds, `${av.perDay - av.used} of ${av.perDay} left today`),
+  };
+}
+
+/** Cooking a meal from the fridge, for Energy. */
+function cookTip(s: CityState): StatTip | null {
+  if (!cookAvailability(s).ok) return null;
+  const cook = CITY_ECONOMY.groceries.cook;
+  const meals = s.player.fridge_meals ?? 0;
+  return { stat: "energy", placeId: "cook", placeName: "Cook a meal", emoji: "🍳", price: 0, gain: cook.energy, go: "Cook",
+    detail: line(cook.energy, "energy", 0, cook.seconds, `${meals} meal${meals === 1 ? "" : "s"} in the fridge`) };
+}
+
 /** At home: a nap, then cooking, then sitting for Energy; sitting for Mood. Rest ids are "rest:nap", "rest:sit", "cook". */
 function homeTip(stat: StatKey, s: CityState, restOn: boolean, kitchenOn: boolean): StatTip | null {
   if (!restOn || (s.player.at_place ?? null) !== null) return null;
-  const rest = (kind: "nap" | "sit"): StatTip | null => {
-    const r = CITY_ECONOMY.rest[kind];
-    const gain = stat === "energy" ? r.energy : stat === "mood" ? r.mood : 0;
-    const av = restAvailability(kind, s);
-    if (!av.ok || gain <= 0) return null;
-    return {
-      stat, placeId: `rest:${kind}`, placeName: kind === "nap" ? "Take a nap" : "Sit a while", emoji: kind === "nap" ? "😴" : "🛋️",
-      price: 0, gain, go: kind === "nap" ? "Nap" : "Sit",
-      detail: line(gain, stat, 0, r.seconds, `${av.perDay - av.used} of ${av.perDay} left today`),
-    };
-  };
-  if (stat === "energy") {
-    const cook = CITY_ECONOMY.groceries.cook;
-    const meals = s.player.fridge_meals ?? 0;
-    return rest("nap")
-      ?? (kitchenOn && cookAvailability(s).ok
-        ? { stat, placeId: "cook", placeName: "Cook a meal", emoji: "🍳", price: 0, gain: cook.energy, go: "Cook",
-            detail: line(cook.energy, stat, 0, cook.seconds, `${meals} meal${meals === 1 ? "" : "s"} in the fridge`) }
-        : null)
-      ?? rest("sit");
-  }
-  if (stat === "mood") return rest("sit");
+  if (stat === "energy") return restTip("nap", stat, s) ?? (kitchenOn ? cookTip(s) : null) ?? restTip("sit", stat, s);
+  if (stat === "mood") return restTip("sit", stat, s);
   return null;
 }
 
@@ -59,4 +61,29 @@ function placeTip(stat: StatKey, places: readonly Place[], s: CityState): StatTi
 export function contextTips(places: readonly Place[], s: CityState, opts: { restOn: boolean; kitchenOn: boolean }): Record<StatKey, StatTip | null> {
   const pick = (stat: StatKey) => homeTip(stat, s, opts.restOn, opts.kitchenOn) ?? placeTip(stat, places, s);
   return { energy: pick("energy"), mood: pick("mood"), confidence: pick("confidence") };
+}
+
+/**
+ * Owner, Oct 26: "allow more than one action under a category". Every option for each stat, best first, up to `max`:
+ * at home the home's own (a nap, cooking, sitting), then the best place to go; out, something here, then the best
+ * place elsewhere.
+ */
+export function contextTipLists(places: readonly Place[], s: CityState, opts: { restOn: boolean; kitchenOn: boolean }, max = 3): Record<StatKey, StatTip[]> {
+  const atHome = (s.player.at_place ?? null) === null;
+  const homeOptions = (stat: StatKey): StatTip[] => {
+    if (!atHome || !opts.restOn) return [];
+    const out = stat === "energy" ? [restTip("nap", stat, s), opts.kitchenOn ? cookTip(s) : null, restTip("sit", stat, s)]
+      : stat === "mood" ? [restTip("sit", stat, s)] : [];
+    return out.filter((t): t is StatTip => !!t);
+  };
+  const lists = {} as Record<StatKey, StatTip[]>;
+  for (const stat of ["energy", "mood", "confidence"] as StatKey[]) {
+    const list = homeOptions(stat);
+    const here = !atHome && s.player.at_place ? placeTip(stat, places.filter((p) => p.id === s.player.at_place), s) : null;
+    if (here) list.push(here);
+    const away = placeTip(stat, places, s);
+    if (away && !list.some((t) => t.placeId === away.placeId)) list.push(away);
+    lists[stat] = list.slice(0, max);
+  }
+  return lists;
 }

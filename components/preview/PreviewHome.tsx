@@ -57,6 +57,11 @@ import {
 } from "@/app/preview/subletActions";
 import type { SubletApi } from "@/lib/sublets";
 import {
+  previewVisitAnswer, previewVisitArrive, previewVisitEnd, previewVisitHome, previewVisitHost, previewVisitLeave, previewVisitReset,
+  previewVisitRoom, previewVisitSay, previewVisitSendHome, previewVisitState,
+} from "@/app/preview/visitActions";
+import type { VisitApi } from "@/lib/visits";
+import {
   previewChatBlock, previewChatList, previewCrowned, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
 } from "@/app/preview/chatActions";
 import {
@@ -72,7 +77,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -118,6 +123,8 @@ export function PreviewHome({
   subletPreset?: string;
   /** ?homescore=furnished: the home starts with furniture and three paintings placed (the home score, migration 0120). */
   homeScorePreset?: string;
+  /** ?visit=none|hosting|invite|guest: having people over (migration 0121) in that state. */
+  visitPreset?: string;
   /** Skill perks (migration 0092): "pro" starts with high skill levels. */
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
@@ -421,6 +428,16 @@ export function PreviewHome({
       end: previewCoupleEnd, show: previewCoupleShow, gift: previewCoupleGift, seen: previewCoupleSeen,
     };
   }, [couplePreset, sim]);
+  // Having people over in memory (app/preview/visitActions.ts).
+  const visitApi = useMemo<VisitApi>(() => {
+    let started = false;
+    const ready = async () => { if (!started) { started = true; await previewVisitReset(visitPreset); } };
+    return {
+      async state() { await ready(); return previewVisitState(); },
+      host: previewVisitHost, end: previewVisitEnd, sendHome: previewVisitSendHome, answer: previewVisitAnswer, arrive: previewVisitArrive,
+      leave: previewVisitLeave, room: previewVisitRoom, home: previewVisitHome, say: previewVisitSay,
+    };
+  }, [visitPreset]);
   // Sublets in memory (app/preview/subletActions.ts).
   const sublet = useMemo<SubletApi>(() => {
     let started = false;
@@ -506,6 +523,7 @@ export function PreviewHome({
       dating={cityOff ? undefined : dating}
       couple={cityOff ? undefined : couple}
       sublet={cityOff ? undefined : sublet}
+      visits={cityOff ? undefined : visitApi}
       crew={cityOff ? undefined : crewApi}
       party={cityOff || storyOff ? undefined : partyApi}
       partyRoom={cityOff || storyOff ? undefined : partyRoomApi}
