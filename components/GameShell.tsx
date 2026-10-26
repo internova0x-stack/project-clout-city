@@ -18,7 +18,7 @@ import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
 import { CATALOG_FURNITURE, CITY_ECONOMY, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, homeTemplate, mergeFloorLayout, ownedId, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, ownedItem, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, rentAlert, gigReady, netWorth, taskTitle, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -50,6 +50,8 @@ import type { ChatApi } from "@/lib/chat";
 import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
 import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { CouplePrompt, CoupleSheet } from "./dating/Couple";
+import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
+import { subletAlerts, type SubletApi, type SubletHome, type SubletResult, type SubletState } from "@/lib/sublets";
 import { coupleAlerts, coupleBadge, type CoupleApi, type CoupleState } from "@/lib/couples";
 import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
 import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew";
@@ -221,6 +223,7 @@ export function GameShell({
   coutureApi,
   dating,
   couple,
+  sublet,
   crew,
   party,
   partyRoom,
@@ -277,6 +280,8 @@ export function GameShell({
   dating?: DatingApi;
   /** Relationships (migration 0118): going official, the couple streak, gifts. */
   couple?: CoupleApi;
+  /** Sublets (migration 0119): Apartments → Sublets, and the subtenant's room. */
+  sublet?: SubletApi;
   /** Crew outings (migration 0013). */
   crew?: CrewApi;
   /** v0.9 party keepsakes (migration 0029): plus-ones, "Spotted at" and the gossip setting. */
@@ -666,6 +671,17 @@ export function GameShell({
       resync.current();
     }
   }, []);
+  const [subS, setSubS] = useState<SubletState | null>(null);
+  const [subHome, setSubHome] = useState<SubletHome | null>(null);
+  const [subBusy, setSubBusy] = useState(false);
+  const [subError, setSubError] = useState<string | null>(null);
+  // A subtenant looking at their own (held) place instead of the sublet.
+  const [subMine, setSubMine] = useState(false);
+  const loadSublet = useCallback(async () => {
+    if (!sublet) return;
+    const r = await sublet.state();
+    if (r.ok && r.data) setSubS(r.data);
+  }, [sublet]);
   const loadCouple = useCallback(async () => {
     if (!couple) return;
     const r = await couple.state();
@@ -815,6 +831,18 @@ export function GameShell({
     const t = setInterval(() => void loadCouple(), 90_000);
     return () => clearInterval(t);
   }, [couple, loadCouple]);
+  useEffect(() => {
+    if (!sublet) return;
+    void loadSublet();
+    const t = setInterval(() => void loadSublet(), 120_000);
+    return () => clearInterval(t);
+  }, [sublet, loadSublet]);
+  // The subtenant's room: the host's place, loaded once per sublet.
+  const subLiveId = subS?.live?.role === "sub" ? subS.live.id : null;
+  useEffect(() => {
+    if (!sublet || !subLiveId) { setSubHome(null); setSubMine(false); return; }
+    void sublet.home().then((r) => { if (r.ok) setSubHome(r.data); });
+  }, [sublet, subLiveId]);
   // Opening "Us" refreshes it (dates done, today's streak) and marks gifts and the breakup note seen.
   useEffect(() => {
     if (panel !== "us" || !couple) return;
@@ -1131,7 +1159,7 @@ export function GameShell({
     if (!open) return;
     url.searchParams.delete("open");
     window.history.replaceState(null, "", url.toString());
-    if (open === "messages" || open === "gigs" || open === "businesses") setPhone({ open: true, app: open });
+    if (open === "messages" || open === "gigs" || open === "businesses" || open === "apartments") setPhone({ open: true, app: open });
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
@@ -1295,6 +1323,49 @@ export function GameShell({
   });
   const elsewhere = placedElsewhere(city?.homeLayout, floorNow);
   const ownedHere = ownedPieces.filter((p) => !elsewhere.has(p.id));
+  // Sublets (migration 0119): each call returns the fresh state; money moved, so the bank refreshes too.
+  const subletRun = async (fn: () => Promise<SubletResult<SubletState>>, text?: string, refresh = false) => {
+    setSubBusy(true);
+    setSubError(null);
+    const r = await fn();
+    setSubBusy(false);
+    if (!r.ok) return setSubError(r.error);
+    setSubS(r.data);
+    if (text) setToast(text);
+    if (refresh && cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  };
+  const subletH: SubletHandlers | null = sublet ? {
+    busy: subBusy,
+    error: subError,
+    list: (rent, a, b, note) => void subletRun(() => sublet.list(rent, a, b, note), "🔑 Listed. Your crew sees it first."),
+    unlist: () => void subletRun(() => sublet.unlist(), "Listing taken down."),
+    apply: (id, weeks, note) => void subletRun(() => sublet.apply(id, weeks, note), "Applied. Nothing's charged unless they say yes."),
+    withdraw: (id) => void subletRun(() => sublet.withdraw(id), "Application withdrawn."),
+    answer: (id, yes) => void subletRun(() => sublet.answer(id, yes), yes ? "🔑 You've got a subtenant. First week's rent is in." : "Declined.", yes),
+    notice: (on) => void subletRun(() => sublet.notice(on), on ? "Notice given. Seven days." : "Notice taken back."),
+    leave: () => void subletRun(() => sublet.leave(), "Moved out. Deposit's back.", true),
+    renew: (w) => void subletRun(() => sublet.renew(w), "Asked to renew."),
+    renewAnswer: (yes) => void subletRun(() => sublet.renewAnswer(yes), yes ? "Renewed." : "Not renewing."),
+    hang: () => void subletRun(() => sublet.hang(), undefined, true),
+    show: (on) => void subletRun(() => sublet.show(on)),
+    rate: (id, n) => void subletRun(() => sublet.rate(id, n), "Rated. Thanks."),
+    seen: (id) => void subletRun(() => sublet.seen(id)),
+    onSeeHome: () => { setPhone({ open: false, app: null }); setPanel(null); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1); setSubMine(false); },
+  } : null;
+  // The subtenant's room: the host's place and furniture, plus a second bed in the first free spot.
+  const subView = useMemo(() => {
+    if (!subHome || subMine || subS?.live?.role !== "sub") return null;
+    const template = homeTemplate(subHome.homeId, null);
+    const pieces: OwnedPiece[] = subHome.items.flatMap((i) => {
+      const it = homeItem(i.sku);
+      return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
+    }).filter((p) => !placedElsewhere(subHome.layout, 1).has(p.id));
+    const bed: OwnedPiece = { id: "sublet:bed", kind: "bed", color: "#8FA3C7", name: "Your bed", emoji: "🛏️" };
+    const spot = freeSpot(template, applyLayout(template, subHome.layout, pieces, 1), ownedItem(bed, 0, 0, 0));
+    const layout = [...(Array.isArray(subHome.layout) ? subHome.layout : []), ...(spot ? [{ id: bed.id, x: spot.x, z: spot.z, rot: 0 }] : [])];
+    return { template, layout, owned: spot ? [...pieces, bed] : pieces, hostName: subHome.hostName };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subHome, subMine, subS?.live?.role]);
   // v0.13 interior decorator: someone else's home (their furniture, their layout), ground floor.
   const decorHome = decor ? homeTemplate(decor.homeId, decor.houseSku) : undefined;
   const decorPieces: OwnedPiece[] = decor ? decor.items.flatMap((i) => {
@@ -1972,7 +2043,7 @@ export function GameShell({
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // C3: the roommate's intro, then a note a day, when no other home card is up.
   const homeRoommate = ((): Roommate | null => {
-    const id = city && !city.player.house_sku ? ECONOMY.homes.find((h) => h.id === me.home_id)?.roommate : undefined;
+    const id = city && !city.player.house_sku && !subView ? ECONOMY.homes.find((h) => h.id === me.home_id)?.roommate : undefined;
     return (id && (NPC_PROFILES.roommates as Roommate[]).find((r) => r.id === id)) || null;
   })();
   // The intro comes before the TV and news cards (a new player meets their roommate first); the daily note waits for them.
@@ -2099,20 +2170,20 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={viewing ?? decorHome ?? upstairs ?? baseHome}
-            floor={viewing || decorHome ? 1 : floorNow}
-            layout={viewing ? null : decor ? decor.layout : city?.homeLayout}
+            template={viewing ?? decorHome ?? subView?.template ?? upstairs ?? baseHome}
+            floor={viewing || decorHome || subView ? 1 : floorNow}
+            layout={viewing ? null : decor ? decor.layout : subView ? subView.layout : city?.homeLayout}
             look={look}
             outfit={outfit}
             daytime={daytime}
-            editable={cityOn && flow === "none" && !viewing}
+            editable={cityOn && flow === "none" && !viewing && !subView}
             rotatable={flow === "none"}
             door={flow === "none"}
-            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : `${me.display_name} at home, wearing ${style.label}`}
+            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : subView ? `${me.display_name} in the spare room at ${subView.hostName}'s place` : `${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
               if (viewing || decor) return;
-              if (it.use?.kind === "floor") return setHomeFloor(it.use.to);
+              if (it.use?.kind === "floor") return subView ? undefined : setHomeFloor(it.use.to);
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
               if (restOn && it.use?.kind === "sleep") setRestKind("nap");
               if (restOn && it.use?.kind === "sit") setRestKind("sit");
@@ -2121,8 +2192,8 @@ export function GameShell({
             onEditingChange={setArranging}
             mood={roomMood}
             onSaveLayout={(l) => (decor && together ? saveDecor(l) : cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
-            owned={viewing ? undefined : decor ? decorPieces : ownedHere}
-            trial={!decor && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
+            owned={viewing ? undefined : decor ? decorPieces : subView ? subView.owned : ownedHere}
+            trial={!decor && !subView && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
             onTrialEnd={() => setTryHome(null)}
             onTrialBuy={cityApi && ((l) => run(`buy:${tryHome!.sku}`, async () => {
               // Buy, then keep the piece where it was tried: the layout's "trial" becomes the new item.
@@ -2134,6 +2205,9 @@ export function GameShell({
               return cityApi.saveHomeLayout(mergeFloorLayout(r.state.homeLayout, l.map((e) => (e.id === "trial" ? { ...e, id: ownedId(it.id) } : e)), floorNow));
             }))}
           />
+          {subS?.live?.role === "sub" && subHome && !viewing && !decor && (
+            <SubletHomeBar hostName={subHome.hostName} mine={subMine} onToggle={() => { setSubMine((m) => !m); setHomeFloor(1); }} />
+          )}
           {viewing && viewHome && (
             <ViewingBar
               home={ECONOMY.homes.find((h) => h.id === viewHome)!}
@@ -2252,7 +2326,7 @@ export function GameShell({
           tasksBadge: !!city && city.tasks.length > 0 && tasksSeenDay !== "" && tasksSeenDay !== city.today && handedOff,
           skillsOn: !!(loadSkills || skills),
           skillsBadge: !!perkHandlers && SKILL_PERKS.some((p) => ["take", "collect", "rsvp"].includes(perkStatus(p, perkHandlers.state, gameNow))),
-          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || coupleAlerts(coupleS) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
+          phoneBadge: payoutReady || chatUnread > 0 || datingAlerts(inbox) > 0 || coupleAlerts(coupleS) > 0 || subletAlerts(subS) > 0 || crewAlerts(crewInbox) > 0 || (storyOn && (mainArc(feed)?.beats.some((b) => !b.seen) ?? false)),
         }}
       />
       <ActionTimer doing={doing} />
@@ -2648,6 +2722,7 @@ export function GameShell({
         } : undefined}
         apartments={cityOn && cityApi?.moveHome && city?.player.moved_up !== undefined ? {
           busy: busy !== null,
+          sublets: sublet && subletH ? { state: subS, h: subletH, onOpen: loadSublet } : undefined,
           onLookInside: (id) => { setPhone({ open: false, app: null }); setPanel(null); setTab("home"); setViewHome(id); },
           onMove: (id) => void run(`move:${id}`, () => cityApi.moveHome!(id)).then((ok) => { if (ok) { setHomeFloor(1); setToast("Moved in. The broker fee is not refundable, emotionally or otherwise."); } }),
         } : undefined}

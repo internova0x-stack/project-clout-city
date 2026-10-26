@@ -127,6 +127,7 @@ from (values
   ('0115_story_posts.sql', coalesce((select pg_get_functiondef(f) like '%''post''%' from (select to_regprocedure('public.story_feed()') f) x where f is not null), false)),
   ('0116_diss_and_tell_sides.sql', coalesce((select exists (select 1 from public.store_products where sku = 'side_diss_and_tell_cosign')), false)),
   ('0117_story_read_clout.sql', coalesce((to_regprocedure('public.read_post(text)') is not null), false)),
-  ('0118_relationships.sql', coalesce((to_regclass('public.relationships') is not null), false))
+  ('0118_relationships.sql', coalesce((to_regclass('public.relationships') is not null), false)),
+  ('0119_sublets.sql', coalesce((to_regclass('public.sublets') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

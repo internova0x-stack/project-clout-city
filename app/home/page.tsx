@@ -40,6 +40,10 @@ import { after } from "next/server";
 import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 import { coupleAnswer, coupleAsk, coupleEnd, coupleGift, coupleSeen, coupleShow, coupleState } from "./coupleActions";
+import {
+  subletAnswer, subletApply, subletHang, subletHome, subletLeave, subletList, subletNotice, subletRate, subletRenew, subletRenewAnswer,
+  subletSeen, subletShow, subletState, subletUnlist, subletWithdraw,
+} from "./subletActions";
 
 export const dynamic = "force-dynamic";
 
@@ -53,9 +57,9 @@ export default async function HomePage() {
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
   // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
-  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple] = await Promise.all([
+  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple, subletS] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
-    playerCard(player.id), mySkills().catch(() => null), coupleState(),
+    playerCard(player.id), mySkills().catch(() => null), coupleState(), subletState(),
   ]);
   // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
   after(() => kickPush());
@@ -175,6 +179,12 @@ export default async function HomePage() {
       // Migration 0118 switches on relationships (couple_state fails before it runs).
       couple={chatOn && dating.ok && couple.ok ? {
         state: coupleState, ask: coupleAsk, answer: coupleAnswer, end: coupleEnd, show: coupleShow, gift: coupleGift, seen: coupleSeen,
+      } : undefined}
+      // Migration 0119 switches on sublets (sublet_state fails before it runs).
+      sublet={subletS.ok ? {
+        state: subletState, home: subletHome, list: subletList, unlist: subletUnlist, apply: subletApply, withdraw: subletWithdraw,
+        answer: subletAnswer, notice: subletNotice, leave: subletLeave, renew: subletRenew, renewAnswer: subletRenewAnswer,
+        hang: subletHang, show: subletShow, rate: subletRate, seen: subletSeen,
       } : undefined}
     />
   );

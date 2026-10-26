@@ -184,6 +184,15 @@ components live in `app/globals.css`.
   once a day). Partners' date nights pay 15 Mood and 35 clout. "💞 Dating @name" on the player card unless hidden
   (`couple_show`). Settings: game_settings 'couples', mirrored by lib/couples.ts (tests/couples.test.ts).
   `?couple=progress|ask|dating|gift|ended` in the preview. Living together, Lola mentions and couple Shop items: later.
+- Sublets (migration 0119, owner Oct 26; spec section 25): renters of the 1BR, Sunnyside or LIC let a spare room
+  (`sublet_list`: a quarter to half their rent, 1 to 8 weeks, crew-first for 24 hours); `sublet_apply`, `sublet_answer`
+  (first week + a one-week deposit, ledger 'sublet_rent'/'sublet_income'/'sublet_deposit'); rent every 7 days ahead
+  (`sublet_settle`, also the push sender's `sublet_settle_all`; unpaid ends it); the subtenant's own rent bills are held
+  (`bills_sublet_hold`) and the Home tab shows the host's place with a second bed (`sublet_home`, components/city/Sublets.tsx
+  `SubletHomeBar`); notice 7 days, leave any time, the deposit always comes back; moving, blocking and Start over end it
+  (`players_sublet_moves`, `block_sublet_trigger`); ratings, renewals, roommate hang, card lines (`sublet_public`).
+  Settings: game_settings 'sublets', mirrored by lib/sublets.ts (tests/sublets.test.ts). `?sublet=browse|listed|living|
+  hosting|notice|ended` in the preview (Phone → Apartments → Sublets).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
