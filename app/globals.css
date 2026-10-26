@@ -2411,4 +2411,4 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* With the Crib Rating under the invite, the home card sits one row lower. */
 .game.has-crib .story-prompt { top:calc(164px + var(--safe-top)); }
 /* During a visit (migration 0121) the visit bar takes the top: the pills and home cards under the HUD step aside. */
-.game.in-visit .under-hud, .game.in-visit .story-prompt, .game.in-visit .room-storage { display:none; }
+.game.in-visit .under-hud, .game.in-visit .story-prompt, .game.in-visit .room-storage, .game.in-visit .quest-row { display:none; }
