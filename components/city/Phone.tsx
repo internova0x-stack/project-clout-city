@@ -394,9 +394,13 @@ function ChatSettings({ api, onToast, onChatPass }: { api: ChatApi; onToast?: (t
 /** Apartments with sublets (migration 0119): Rent (moving) and Sublets. Opens on Sublets when one is going on. */
 function ApartmentsTabs({ apartments, state }: { apartments: Required<NonNullable<Parameters<typeof PhoneModal>[0]["apartments"]>>; state: CityState }) {
   const sub = apartments.sublets.state;
-  const [tab, setTab] = useState<"rent" | "sublets">(sub && (sub.live || sub.mine || sub.ended || subletAlerts(sub) > 0) ? "sublets" : "rent");
+  const busy = !!sub && !!(sub.live || sub.mine || sub.ended || subletAlerts(sub) > 0);
+  const [tab, setTab] = useState<"rent" | "sublets">(busy ? "sublets" : "rent");
   const { onOpen } = apartments.sublets;
   useEffect(() => { onOpen(); }, [onOpen]);
+  // The state can arrive after the app opens: a sublet going on switches to its tab, once.
+  const [switched, setSwitched] = useState(busy);
+  useEffect(() => { if (busy && !switched) { setSwitched(true); setTab("sublets"); } }, [busy, switched]);
   return (
     <div className="stack-12">
       <div className="segmented" role="group" aria-label="Apartments">
