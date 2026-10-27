@@ -241,6 +241,7 @@ export function GameShell({
   starter: starterIn,
   deleteAccount,
   lockAppsPreview,
+  demo,
   crew,
   party,
   partyRoom,
@@ -306,6 +307,8 @@ export function GameShell({
   starter?: StarterApi;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
   lockAppsPreview?: boolean;
+  /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
+  demo?: { signUp: (why: "invite" | "end") => void };
   /** Having people over (migration 0121): hangouts and house parties at home. */
   visits?: VisitApi;
   homeScoreApi?: { state(): Promise<{ ok: true; data: HomeScore & { paid: { score: number; clout: number }[]; reached: number[] } } | { ok: false; error: string }> };
@@ -2039,6 +2042,7 @@ export function GameShell({
     // Owner, Oct 26: the daily tasks open once, right after onboarding (the sheet as it is), instead of Lola's nudge.
     onAction("daily");
     void actions.finishHandoff();
+    demo?.signUp("end");
   };
   const afterInvitePrompt = () => (isStandalone() ? endHandoff() : setFlow("pwa"));
 
@@ -2052,6 +2056,7 @@ export function GameShell({
       if (a === "tab:home") return setTab("home");
       if (a === "tab:map") return setTab("map");
       if (a === "invite") {
+        if (demo) return demo.signUp("invite");
         markPin("invite");
         return setPanel("invite");
       }
@@ -2080,7 +2085,7 @@ export function GameShell({
       setSoon({ key: a });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flow, cityOn, markTasksSeen, endDailyHint],
+    [flow, cityOn, markTasksSeen, endDailyHint, demo],
   );
 
   const onPinTap = useCallback(
@@ -2661,8 +2666,8 @@ export function GameShell({
       {flow === "partyDone" && <PartyDoneCard onContinue={() => setFlow("leaderboard")} />}
       <LeaderboardSheet
         open={flow === "leaderboard" || panel === "leaderboard"}
-        onClose={() => (flow === "leaderboard" ? setFlow("invitePrompt") : setPanel(null))}
-        cta={flow === "leaderboard" ? { label: "Climb the ladder", onClick: () => setFlow("invitePrompt") } : undefined}
+        onClose={() => (flow === "leaderboard" ? (demo ? endHandoff() : setFlow("invitePrompt")) : setPanel(null))}
+        cta={flow === "leaderboard" ? { label: "Climb the ladder", onClick: () => (demo ? endHandoff() : setFlow("invitePrompt")) } : undefined}
         myClout={me.clout}
         onOpenPlayer={chat ? (id) => setCardId(id) : undefined}
         fetchRows={leaderboardRows}

@@ -3,12 +3,15 @@
 import { useMemo, useState } from "react";
 import CALENDAR_FILE from "@/content/culture/calendar.json";
 import { Creator, type CreatorActions } from "@/components/Creator";
-import { GameShell } from "@/components/GameShell";
+import { GameShell, type Flow } from "@/components/GameShell";
 import type { CalendarData } from "@/lib/calendar";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
 import { ECONOMY } from "@/lib/economy";
 import { lookChoices, type Look } from "@/lib/look";
+import type { CityResult } from "@/lib/cityState";
 import type { Player } from "@/lib/player";
+import { createStarterSim } from "@/lib/starterSim";
+import { Sheet } from "@/components/Sheet";
 
 // Demo mode (owner, Oct 27): a guest makes a character and plays the first session on the in-memory city
 // (lib/citySim.ts), entirely in the browser. Nothing reaches the server and nothing is saved; the banner and the end
@@ -64,6 +67,40 @@ function DemoCity({ player }: { player: Player }) {
     skills, { firstDay: true, startingStyle: player.starting_style },
   ), [player, skills]);
   const sim = useMemo(() => createSimApi(city, () => null, () => false, { delayFor: () => 0 }, calendar, player.starting_style), [city, calendar, player.starting_style]);
+  // Starter Week in memory, marked by the same calls as the preview (components/preview/PreviewHome.tsx).
+  const starter = useMemo(() => createStarterSim(0, (cash, clout) => sim.huntReward(cash, clout)), [sim]);
+  const api = useMemo(() => {
+    const mark = starter.mark;
+    const after = (id: string) => (r: CityResult) => { if (r.ok) mark(id); return r; };
+    return {
+      ...sim,
+      travel: async (...a: Parameters<NonNullable<typeof sim.travel>>) => { const r = await sim.travel!(...a); if (r.ok && a[0] === "hell-gate-park") mark("park"); return r; },
+      acceptGig: async (id: number) => after("gig")(await sim.acceptGig(id)),
+      collectGig: async (id: number) => after("collect")(await sim.collectGig(id)),
+      payBill: async (id: number) => {
+        const r = await sim.payBill(id);
+        if (r.ok && r.state.bills.find((b) => b.id === id)?.kind === "rent") mark("rent");
+        return r;
+      },
+      saveLook: async (...a: Parameters<NonNullable<typeof sim.saveLook>>) => after("look")(await sim.saveLook!(...a)),
+      saveHomeLayout: async (layout: { id: string; x: number; z: number; rot: number }[]) => {
+        const r = await sim.saveHomeLayout(layout);
+        if (r.ok && layout.some((l) => r.state.items.some((i) => `item:${i.id}` === l.id && i.category === "home" && i.acquired === "bought"))) mark("furniture");
+        return r;
+      },
+      calendarAttend: async (id: string) => after("event")(await sim.calendarAttend!(id)),
+      attendEvent: async (id: string) => after("event")(await sim.attendEvent(id)),
+      doAction: async (placeId: string, actionId: string) => {
+        const r = await sim.doAction(placeId, actionId);
+        if (r.ok && placeId === "ditmars-deli") mark("breakfast");
+        if (r.ok && placeId === "hell-gate-park") mark("park");
+        return r;
+      },
+    };
+  }, [sim, starter]);
+  const [ask, setAsk] = useState<"invite" | "end" | null>(null);
+  // Development only: ?flow=leaderboard jumps to the end of the first session (to check the end card).
+  const [devFlow] = useState(() => (process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("flow") as Flow | null) ?? undefined : undefined));
   return (
     <div className="demo-mode">
       <DemoBanner />
@@ -73,7 +110,10 @@ function DemoCity({ player }: { player: Player }) {
         player={player}
         clique={[]}
         city={city}
-        cityApi={sim}
+        cityApi={api}
+        starter={starter.api}
+        demo={{ signUp: setAsk }}
+        previewFlow={devFlow}
         actions={{
           setTutorialState: noop,
           finishHandoff: noop,
@@ -84,7 +124,29 @@ function DemoCity({ player }: { player: Player }) {
           }),
         }}
       />
+      <DemoSignUp why={ask} onClose={() => setAsk(null)} />
     </div>
+  );
+}
+
+/** The demo's ask: from "Invite your Crew", and when the first session ends. Nothing carries over, so it never says it does. */
+function DemoSignUp({ why, onClose }: { why: "invite" | "end" | null; onClose: () => void }) {
+  return (
+    <Sheet open={why !== null} onClose={onClose} label="Sign up">
+      <div className="stack-16">
+        <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
+          <p className="overline">{why === "invite" ? "Crew" : "That was the demo"}</p>
+          <h2 className="display-lg" style={{ margin: 0 }}>{why === "invite" ? "Your crew can't come to a demo" : "Ready to make it real?"}</h2>
+          <p className="subtext" style={{ margin: "4px 0 0" }}>
+            {why === "invite"
+              ? "Sign up and you get your own invite link. Friends who join are your crew: plans, rides, parties, the lot."
+              : "Sign up free and make your character for real: the same Queens, real players to meet, date and outdo, and everything you do saved."}
+          </p>
+        </div>
+        <a className="btn btn-taxi" href={SIGN_UP} style={{ textDecoration: "none" }}>Sign up free ›</a>
+        <button className="btn btn-ghost" onClick={onClose}>Keep looking around</button>
+      </div>
+    </Sheet>
   );
 }
 
