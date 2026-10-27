@@ -156,6 +156,8 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
             <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
             <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
           </div>
+          {/* Demo mode (owner, Oct 27): play the first session before signing up (app/demo). */}
+          <a className="guest-demo-link" href="/demo">Not sure yet? Play a quick demo, no sign-up ›</a>
           <p className="meta guest-foot">
             A parody · 18+ · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · No ad trackers
             <br />

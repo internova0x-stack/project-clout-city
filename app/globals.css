@@ -2461,3 +2461,9 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .delete-row { align-self:center; margin-top:4px; color:var(--red-text); }
 .deleted-note { position:fixed; left:12px; right:12px; top:calc(12px + env(safe-area-inset-top)); z-index:2001; display:flex; gap:10px; align-items:center;
   padding:12px 14px; border-radius:var(--r-lg); background:var(--surface-sheet, #FFF8F2); color:var(--text-1); box-shadow:var(--elev-3, 0 12px 32px rgba(0,0,0,.35)); font-size:14px; }
+
+/* Demo mode (owner, Oct 27): a thin strip across the top; the creator and the game sit below it. */
+.demo-banner { position:fixed; z-index:9999; top:0; left:0; right:0; height:calc(34px + var(--safe-top, 0px)); padding:var(--safe-top, 0px) 8px 0 14px; display:flex; gap:10px; align-items:center; justify-content:space-between; background:#14111a; color:#fff; font-size:13px; white-space:nowrap; }
+.demo-banner-cta { background:var(--g-neon, #ff2d6f); color:#fff; font-weight:700; font-size:12px; text-decoration:none; padding:5px 11px; border-radius:999px; }
+.demo-mode > main, .demo-mode .game { top:calc(34px + var(--safe-top, 0px)) !important; }
+.guest-demo-link { display:block; margin-top:10px; text-align:center; color:inherit; font-weight:600; font-size:14px; text-decoration:underline; text-underline-offset:3px; opacity:.9; }

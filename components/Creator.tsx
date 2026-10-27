@@ -4,7 +4,7 @@ import { isAdult, validBirthdate } from "@/lib/age";
 import { AgeBlockedNote, BirthdateField, useAgeBlocked, type PartialBirthdate } from "./AgeGate";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
 import { ECONOMY, SIGNUP_HOMES, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
 import {
@@ -48,6 +48,7 @@ export function Creator({
   initialCash,
   initialName,
   restarting = false,
+  onFinished,
 }: {
   needsAgeConfirm: boolean;
   actions: CreatorActions;
@@ -59,6 +60,8 @@ export function Creator({
   initialName?: string | null;
   /** Start over (migration 0114): the look step keeps the username and saves a new look instead of claiming one. */
   restarting?: boolean;
+  /** Demo mode (owner, Oct 27): the finished character goes here instead of to /home; nothing is saved. */
+  onFinished?: (c: { name: string; look: Look; traits: string[]; cash: number; homeId: string }) => void;
 }) {
   const router = useRouter();
   const [handleName, setHandleName] = useState(initialName ?? "");
@@ -68,6 +71,7 @@ export function Creator({
   const [traits, setTraits] = useState<string[]>(initialTraits ?? []);
   const [cash, setCash] = useState<number | null>(initialCash ?? null);
   const lookLocked = initialStep > 0 || furthest > 0;
+  const movedTo = useRef<string | null>(null);
 
   const advance = (to: CreatorStep) => {
     setStep(to);
@@ -125,11 +129,13 @@ export function Creator({
             cash={cash ?? 0}
             onMoveIn={async (homeId) => {
               const r = await actions.moveIn(homeId);
+              if (r.ok) movedTo.current = homeId;
               // PostHog (owner, Oct 27): the character is done once they have a home. No name.
               if (r.ok) track("character_created", { style: look.style, body: look.body, build: look.build, nyer: look.nyer ?? null, traits: traits.length, birth_cash: cash ?? null, home_id: homeId, restarted: restarting });
               return r;
             }}
             onDone={() => {
+              if (onFinished) return onFinished({ name: handleName, look, traits, cash: cash ?? 0, homeId: movedTo.current ?? "astoria_share" });
               router.replace("/home?welcome=1");
               router.refresh();
             }}
