@@ -1,9 +1,10 @@
 "use server";
 
 import { headers } from "next/headers";
-import { createPortalSession, getCheckoutSession, getSubscription } from "@/lib/stripe";
+import { createPortalSession, getCheckoutSession, getSubscription, stripeUnknown } from "@/lib/stripe";
 import { purchaseEmoji, vipFromSubscription, type MembershipResult, type MembershipState } from "@/lib/membership";
 import { getAdminSupabase } from "@/lib/supabase/admin";
+import { forgetCustomer } from "@/lib/supabase/stripeCustomer";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Membership & purchases (migration 0079): the player's plan and receipts, read from the database and, for the
@@ -19,6 +20,8 @@ interface Stored {
 }
 
 const OFF = "Payments aren't switched on yet.";
+const NOTHING = "Nothing to manage yet: Stripe opens a billing page after your first purchase.";
+
 
 async function player() {
   const supabase = await getServerSupabase();
@@ -44,7 +47,7 @@ async function billing(secret: string, playerId: string): Promise<Billing | null
         await admin.rpc("payment_customer", { p_player: playerId, p_customer: found });
       }
     } catch (e) {
-      console.error("membership customer lookup failed", e);
+      if (!stripeUnknown(e, "customer") && !stripeUnknown(e, "subscription")) console.error("membership customer lookup failed", e);
     }
   }
   return b;
@@ -67,7 +70,8 @@ export async function membershipState(): Promise<MembershipResult<MembershipStat
       try {
         vip = vipFromSubscription(await getSubscription(secret, b.subscription), { plan, priceCents: s.vip.priceCents, currency: s.vip.currency });
       } catch (e) {
-        console.error("membership subscription read failed", e);
+        // A test-mode subscription read with live keys: VIP shows without a renewal date.
+        if (!stripeUnknown(e, "subscription")) console.error("membership subscription read failed", e);
       }
     }
   }
@@ -89,13 +93,17 @@ export async function membershipPortal(): Promise<MembershipResult<{ url: string
   if (!p) return { ok: false, error: "Sign in first." };
   if (!secret) return { ok: false, error: OFF };
   const b = await billing(secret, p.user.id);
-  if (!b?.customer) return { ok: false, error: "Nothing to manage yet: Stripe opens a billing page after your first purchase." };
+  if (!b?.customer) return { ok: false, error: NOTHING };
   try {
     const h = await headers();
     const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
     const { url } = await createPortalSession(secret, b.customer, `${origin}/home?membership=back`);
     return { ok: true, data: { url } };
   } catch (e) {
+    if (stripeUnknown(e, "customer")) {
+      await forgetCustomer(p.user.id);
+      return { ok: false, error: NOTHING };
+    }
     console.error("billing portal failed", e);
     return { ok: false, error: "Stripe's billing page didn't open. Nothing changed; try again." };
   }
