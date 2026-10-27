@@ -51,6 +51,9 @@ test("no typed text or email goes to PostHog", () => {
   for (const m of shell.matchAll(/trackEvent\("chat_message_sent", (\{[^}]*\})/g)) assert.doesNotMatch(m[1], /body[,}]|body:|text/, m[1]);
   const init = readFileSync(new URL("../instrumentation-client.ts", import.meta.url), "utf8");
   assert.match(init, /maskAllInputs: true/);
+  // Consent (GDPR/ePrivacy): nothing is sent or stored until the player accepts the banner.
+  assert.match(init, /opt_out_capturing_by_default: true/);
+  assert.match(init, /opt_out_persistence_by_default: true/);
   assert.match(init, /maskTextSelector: "\.ph-sensitive"/);
   const chat = readFileSync(new URL("../components/chat/Messages.tsx", import.meta.url), "utf8");
   assert.match(chat, /chat-bubbles ph-sensitive/);

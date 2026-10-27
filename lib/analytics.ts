@@ -22,6 +22,25 @@ export function resetAnalytics(): void {
   if (typeof window !== "undefined" && posthog.__loaded) posthog.reset();
 }
 
+/** Consent (GDPR/ePrivacy): "pending" until the player answers the banner; null when analytics isn't running. */
+export type Consent = "granted" | "denied" | "pending";
+export function consentStatus(): Consent | null {
+  if (typeof window === "undefined" || !posthog.__loaded || analyticsOff(window.location.pathname)) return null;
+  return posthog.get_explicit_consent_status();
+}
+/** Accept turns on analytics and session replay; reject (or turning it off later) stops both and forgets this device. */
+export function setConsent(granted: boolean): void {
+  if (typeof window === "undefined" || !posthog.__loaded) return;
+  if (granted) {
+    posthog.opt_in_capturing();
+    posthog.startSessionRecording();
+  } else {
+    posthog.stopSessionRecording();
+    posthog.opt_out_capturing();
+  }
+  window.dispatchEvent(new Event("cc-consent"));
+}
+
 /** A per-device "once" (first place visited, signup completed, rent missed): true the first time for this key. */
 export function firstTime(key: string): boolean {
   try {

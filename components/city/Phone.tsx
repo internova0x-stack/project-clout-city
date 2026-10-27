@@ -3,6 +3,7 @@
 import { PushSettings } from "../push/Push";
 import { MembershipRow } from "../store/Membership";
 import { GraphicsSwitch } from "../GraphicsSwitch";
+import { ConsentSwitch } from "../ConsentBanner";
 import { Toggle } from "../Toggle";
 import type { PushApi } from "@/lib/pushClient";
 
@@ -239,6 +240,8 @@ export function PhoneModal({
                     <Toggle on={!muted} label="Music" onChange={onToggleSound} />
                   </div>
                   <GraphicsSwitch kind="low" onToast={onToast} />
+                  {/* Privacy choices (owner, Oct 27): the analytics consent, changeable any time. */}
+                  <ConsentSwitch onToast={onToast} />
                   {gossip && (
                     <div className="list-row static">
                       <span style={{ flex: 1 }}>
