@@ -18,6 +18,8 @@ import { ChevronLeftIcon, ShuffleIcon } from "./icons";
 
 const Avatar3D = dynamic(() => import("./avatar/Avatar3D"), { ssr: false });
 
+import { track } from "@/lib/analytics";
+
 const STEPS = ["Look", "Traits", "Birth lottery", "Home"] as const;
 export type CreatorStep = 0 | 1 | 2 | 3;
 
@@ -119,7 +121,12 @@ export function Creator({
         {step === 3 && (
           <HomeStep
             cash={cash ?? 0}
-            onMoveIn={actions.moveIn}
+            onMoveIn={async (homeId) => {
+              const r = await actions.moveIn(homeId);
+              // PostHog (owner, Oct 27): the character is done once they have a home. No name.
+              if (r.ok) track("character_created", { style: look.style, body: look.body, build: look.build, nyer: look.nyer ?? null, traits: traits.length, birth_cash: cash ?? null, home_id: homeId, restarted: restarting });
+              return r;
+            }}
             onDone={() => {
               router.replace("/home?welcome=1");
               router.refresh();

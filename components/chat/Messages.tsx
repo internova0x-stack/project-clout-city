@@ -161,7 +161,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
           <span className="title one-line">{st.name}</span>
           <span aria-hidden="true" />
         </div>
-        <div className="chat-bubbles">
+        <div className="chat-bubbles ph-sensitive">
           <div className="station-card">
             <span className="station-card-icon" aria-hidden="true">{st.emoji}</span>
             <span className="title">{st.name}</span>
@@ -186,7 +186,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
               <span className="chat-avatar" aria-hidden="true">{STATIONS[t.station].emoji}</span>
               <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                 <span className="title" style={{ display: "block" }}>{STATIONS[t.station].name}</span>
-                <span className="subtext chat-last">{last?.body ?? ""}</span>
+                <span className="subtext chat-last ph-sensitive">{last?.body ?? ""}</span>
               </span>
               <span className="chat-meta">
                 {last && <span className="meta">{chatTime(last.at)}</span>}
@@ -200,7 +200,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
             <span className="chat-avatar" aria-hidden="true">👯</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
               <span className="title" style={{ display: "block" }}>Crew plans</span>
-              <span className="subtext chat-last">{crew.alerts > 0 ? "Your crew wants you out tonight" : "Tonight's outings with your crew"}</span>
+              <span className="subtext chat-last ph-sensitive">{crew.alerts > 0 ? "Your crew wants you out tonight" : "Tonight's outings with your crew"}</span>
             </span>
             <span className="chat-meta">{crew.alerts > 0 && <span className="count-badge">{crew.alerts}</span>}</span>
           </button>
@@ -210,7 +210,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
             <span className="chat-avatar" aria-hidden="true">💞</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
               <span className="title" style={{ display: "block" }}>Us</span>
-              <span className="subtext chat-last">{dating.us.line}</span>
+              <span className="subtext chat-last ph-sensitive">{dating.us.line}</span>
             </span>
             <span className="chat-meta">{dating.us.alerts > 0 && <span className="count-badge">{dating.us.alerts}</span>}</span>
           </button>
@@ -220,7 +220,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
             <span className="chat-avatar" aria-hidden="true">🌙</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
               <span className="title" style={{ display: "block" }}>Date nights</span>
-              <span className="subtext chat-last">{dating.alerts > 0 ? "Something's waiting for you" : "Crushes, matches and tonight's plans"}</span>
+              <span className="subtext chat-last ph-sensitive">{dating.alerts > 0 ? "Something's waiting for you" : "Crushes, matches and tonight's plans"}</span>
             </span>
             <span className="chat-meta">{dating.alerts > 0 && <span className="count-badge">{dating.alerts}</span>}</span>
           </button>
@@ -239,7 +239,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
               <span className="title" style={{ display: "block" }}>
                 {handle(c.name)}{crowned.has(c.with) && <CrownMark />}{dating?.matched.includes(c.with) && !c.blocked && <span className="tag matched-tag">Matched</span>}
               </span>
-              <span className="subtext chat-last">{c.blocked ? "Blocked" : `${c.lastMine ? "You: " : ""}${c.last ?? ""}`}</span>
+              <span className="subtext chat-last ph-sensitive">{c.blocked ? "Blocked" : `${c.lastMine ? "You: " : ""}${c.last ?? ""}`}</span>
             </span>
             <span className="chat-meta">
               <span className="meta">{chatTime(c.at)}</span>
@@ -263,7 +263,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
         <button className="icon-round chat-more" aria-label="More" onClick={() => setOverlay({ kind: "menu" })}>⋯</button>
       </div>
 
-      <div className="chat-bubbles">
+      <div className="chat-bubbles ph-sensitive">
         {thread === null && <p className="meta">Loading…</p>}
         {thread?.blocked && <p className="meta chat-note">You blocked {open.name}. Their messages are hidden.</p>}
         {thread && !thread.blocked && thread.messages.length === 0 && (

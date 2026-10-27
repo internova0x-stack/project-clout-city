@@ -4,5 +4,6 @@ import { getServerSupabase } from "@/lib/supabase/server";
 export async function POST(request: NextRequest) {
   const supabase = await getServerSupabase();
   if (supabase) await supabase.auth.signOut();
-  return NextResponse.redirect(new URL("/", request.url), { status: 303 });
+  // `bye` tells the welcome page to forget the player in analytics (components/Analytics.tsx).
+  return NextResponse.redirect(new URL("/?bye=1", request.url), { status: 303 });
 }

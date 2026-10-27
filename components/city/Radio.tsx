@@ -79,7 +79,7 @@ function ShoutoutCard({ s, api, onToast, onAir = false }: { s: Shoutout; api: Ra
     <article className={`radio-shoutout${onAir ? " on-air" : ""}`}>
       {onAir && <span className="radio-live"><span className="radio-live-dot" aria-hidden="true" /> On air</span>}
       <span className="title">{at(s.handle)} says…</span>
-      <span className="body">“{s.message}”</span>
+      <span className="body ph-sensitive">“{s.message}”</span>
       <ReportRow s={s} api={api} onDone={onToast} />
     </article>
   );
@@ -221,7 +221,7 @@ export function RadioBanner({ s, api, onToast, onOpen, onDone }: { s: Shoutout; 
         <span className="radio-banner-icon" aria-hidden="true">📻</span>
         <span className="radio-banner-text">
           <span className="radio-banner-who">{RADIO.station}: {at(s.handle)} says…</span>
-          <span className="radio-banner-msg">“{s.message}”</span>
+          <span className="radio-banner-msg ph-sensitive">“{s.message}”</span>
         </span>
       </button>
       <div className="radio-banner-actions">

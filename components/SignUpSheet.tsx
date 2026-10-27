@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { track } from "@/lib/analytics";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
 import { normalizeCreatorCode } from "@/lib/creators";
@@ -70,6 +71,7 @@ export function SignUpSheet({
       return;
     }
     setBusy(true);
+    if (!login) track("signup_started", { method: "email", invited: !!readInviteCookie(), via_creator: !!(readCookie(GAME_CONFIG.creator.cookieName) || typedCreator), installed_app: inApp });
     // A game sign-in lands in the game, even after a Studio sign-in attempt on this browser.
     document.cookie = `${AFTER_SIGNIN_COOKIE}=; path=/; max-age=0`;
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -108,6 +110,7 @@ export function SignUpSheet({
     if (!supabase) return setError("Accounts aren't switched on yet. Check back very soon.");
     // OAuth can't carry metadata, so the 18+ confirmation rides along in a short-lived cookie.
     if (!login) document.cookie = `${GAME_CONFIG.ageCookieName}=1; path=/; max-age=3600; samesite=lax`;
+    if (!login) track("signup_started", { method: "google", invited: !!readInviteCookie(), via_creator: !!(readCookie(GAME_CONFIG.creator.cookieName) || typedCreator), installed_app: inApp });
     if (!login && typedCreator) document.cookie = `${GAME_CONFIG.creator.codeCookieName}=${typedCreator}; path=/; max-age=3600; samesite=lax`;
     setBusy(true);
     const { error: err } = await supabase.auth.signInWithOAuth({

@@ -45,6 +45,7 @@ import {
   subletSeen, subletShow, subletState, subletUnlist, subletWithdraw,
 } from "./subletActions";
 import { homeScoreState } from "./homeScoreActions";
+import { AnalyticsUser } from "@/components/Analytics";
 import { starterHide, starterState } from "./starterActions";
 import { visitAnswer, visitArrive, visitEnd, visitHome, visitHost, visitLeave, visitRoom, visitSay, visitSendHome, visitState } from "./visitActions";
 
@@ -70,6 +71,8 @@ export default async function HomePage() {
   const chatOn = chat.ok;
   if (chat.ok && chat.data.banned) return <Suspended />;
   return (
+    <>
+    <AnalyticsUser id={player.id} />
     <GameShell
       invitedAt={invitedAt}
       player={city ? { ...player, ...city.player } : player}
@@ -199,6 +202,7 @@ export default async function HomePage() {
         hang: subletHang, show: subletShow, rate: subletRate, seen: subletSeen,
       } : undefined}
     />
+    </>
   );
 }
 

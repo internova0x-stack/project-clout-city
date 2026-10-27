@@ -103,7 +103,7 @@ export function MayorApp({ api, onToast, onSeen }: { api: MayorApi; onToast: (te
                 <span className="meta">{kindOf(l.kind).emoji} {kindOf(l.kind).label} · {when(l.at)}</span>
                 <span className={`tag ${STATUS[l.status].cls}`}>{STATUS[l.status].label}</span>
               </div>
-              <span className="body">{l.message}</span>
+              <span className="body ph-sensitive">{l.message}</span>
               {l.reply && (
                 <div className="mayor-reply stack-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
