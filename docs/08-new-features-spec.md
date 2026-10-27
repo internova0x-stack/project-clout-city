@@ -1086,3 +1086,11 @@ nudge). The tour, the tasks' design and the leaderboard are unchanged.
 
 **Lola (owner, Oct 26).** A light-skinned, mixed woman with long brunette hair, drawn as a portrait like the Mayor's
 (`public/cast/lola-lowdown.webp`); her voice is mostly TMZ, a little Shade Room, with at most one slang term a line.
+
+**Satire pass (owner, Oct 27).** Starter Week's missions, the first-day tasks and the first rank's goals are written as New
+York satire ("Console a billionaire's depressed dog in Astoria Park", "Ask the bodega cat for permission to exist", "Escape
+your roommate's sourdough starter"); what completes each is unchanged. The first party is celebrity influencer Peyton
+Pastel's launch party, on two tickets the player's roommate's cousin "found" at Velvet Static's coat check. Sir Barksley, a
+billionaire's depressed Pomeranian, sits on a bench in Astoria Park with Dmitri, his walker: the first visit during Starter
+Week opens his scene (three ways to console him, each with its own reply); after that the park card shows Dmitri's update
+of the day. Luxury rides (a limo, a helicopter) were previewed and taken out for now.
