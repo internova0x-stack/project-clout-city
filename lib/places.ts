@@ -90,6 +90,7 @@ export const QUEENS_CENTER: LatLng = [40.718, -73.838];
 
 /**
  * Where guests land: the Long Island City waterfront, Queens' going-out spot
- * (rooftop bars, the club strip and the skyline view). Street-level zoom.
+ * (rooftop bars, the club strip and the skyline view). Owner, Oct 27: helicopter height, tilted toward the street,
+ * instead of the whole city fitted on screen.
  */
-export const GUEST_START = { at: [40.7455, -73.9474] as LatLng, zoom: 13.65, label: "Long Island City", tagline: "Where Queens goes out" };
+export const GUEST_START = { at: [40.7455, -73.9474] as LatLng, zoom: 16.8, pitch: 60, label: "Long Island City", tagline: "Where Queens goes out" };

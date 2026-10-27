@@ -99,11 +99,11 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
         pins={pins}
         initialCenter={invitedTo?.at ?? GUEST_START.at}
         initialZoom={invitedTo ? 15.5 : GUEST_START.zoom}
+        initialPitch={GUEST_START.pitch}
         daytime={daytime}
         onPinTap={signUp}
         onLockedTap={signUp}
         attributionControl={false}
-        fitPins={invitedTo ? undefined : { top: 150, bottom: 300 }}
       />
 
       <div className="guest-top">
