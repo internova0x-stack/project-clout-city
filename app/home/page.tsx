@@ -47,6 +47,7 @@ import {
 import { homeScoreState } from "./homeScoreActions";
 import { AnalyticsUser } from "@/components/Analytics";
 import { starterHide, starterState } from "./starterActions";
+import { deleteAccount } from "./accountActions";
 import { visitAnswer, visitArrive, visitEnd, visitHome, visitHost, visitLeave, visitRoom, visitSay, visitSendHome, visitState } from "./visitActions";
 
 export const dynamic = "force-dynamic";
@@ -190,6 +191,8 @@ export default async function HomePage() {
       homeScoreApi={homeS.ok ? { state: homeScoreState } : undefined}
       // Migration 0122 switches on Starter Week (starter_state fails before it runs).
       starter={starterS.ok ? { state: starterState, hide: starterHide } : undefined}
+      // Migration 0124 switches on Delete my account (account_delete_prepare fails before it runs, and nothing is deleted).
+      deleteAccount={deleteAccount}
       // Migration 0121 switches on having people over (visit_state fails before it runs).
       visits={visitS.ok ? {
         state: visitState, host: visitHost, end: visitEnd, sendHome: visitSendHome, answer: visitAnswer, arrive: visitArrive,

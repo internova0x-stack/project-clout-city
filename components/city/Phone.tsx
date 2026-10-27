@@ -4,6 +4,7 @@ import { PushSettings } from "../push/Push";
 import { MembershipRow } from "../store/Membership";
 import { GraphicsSwitch } from "../GraphicsSwitch";
 import { ConsentSwitch } from "../ConsentBanner";
+import { DeleteAccountRow } from "../DeleteAccount";
 import { Toggle } from "../Toggle";
 import type { PushApi } from "@/lib/pushClient";
 
@@ -76,7 +77,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
   invite, mayor, locked,
 }: {
   open: boolean;
@@ -104,6 +105,8 @@ export function PhoneModal({
   push?: PushApi;
   /** Membership & purchases (owner, Oct 18): the top row of Settings; hidden without payments. */
   membership?: { vip: "vip" | "forever" | null; onOpen: () => void };
+  /** Delete my account (Settings' last row). */
+  onDeleteAccount?: () => void;
   chatWith?: { id: string; name: string; style: string } | null;
   /** Meeting players (migration 0047): opens the unlimited chat offer (`out` when the day's messages ran out). */
   onChatPass?: (out: boolean) => void;
@@ -254,6 +257,8 @@ export function PhoneModal({
                   {push && <PushSettings api={push} onToast={onToast} />}
                   {chat?.setMessagesFrom && <ChatSettings api={chat} onToast={onToast} onChatPass={onChatPass} />}
                   <form action="/auth/signout" method="post"><button className="btn btn-secondary" type="submit">Log out</button></form>
+                  {/* Owner, Oct 27: GDPR right to erasure. */}
+                  {onDeleteAccount && <DeleteAccountRow onOpen={onDeleteAccount} />}
                 </div>
               )}
               {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.wins} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
