@@ -229,6 +229,12 @@ export async function paymentCosts(secretKey: string, ref: { paymentIntent?: str
   return { fee: fee ?? estimateFee(ref.amount), estimated: fee === null, tax: tax ?? 0, paymentIntent, invoice: ref.invoice ?? null };
 }
 
+/**
+ * Stripe doesn't know this id in the current mode: a customer or subscription made with test keys, read with live ones
+ * (or another account's). The game forgets it rather than failing (owner, Oct 27).
+ */
+export const stripeUnknown = (e: unknown, what: "customer" | "subscription") => new RegExp(`No such ${what}`, "i").test(String(e));
+
 /** A billing portal session (https://docs.stripe.com/api/customer_portal/sessions/create): its one-time `url`. */
 export const createPortalSession = (secretKey: string, customer: string, returnUrl: string) =>
   stripeCall<{ url: string }>(secretKey, "POST", "billing_portal/sessions", { customer, return_url: returnUrl });

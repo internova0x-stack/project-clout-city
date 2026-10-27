@@ -1,7 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
-import { createCheckoutSession } from "@/lib/stripe";
+import { createCheckoutSession, stripeUnknown, type CheckoutInput } from "@/lib/stripe";
+import { forgetCustomer } from "@/lib/supabase/stripeCustomer";
 import { RETURN_PARAM, storeError, type CheckoutResult, type StoreProduct } from "@/lib/store";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -38,7 +39,7 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
   const billing = await getAdminSupabase()?.rpc("membership_billing", { p_player: user.id });
   const customer = (billing?.data as { customer?: string | null } | null)?.customer ?? null;
   try {
-    const session = await createCheckoutSession(secret, {
+    const input: CheckoutInput = {
       priceId: product.stripe_price_id,
       name: `Clout City: ${product.name}`,
       amountCents: product.price_cents,
@@ -51,7 +52,16 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
       email: user.email,
       customer,
       recurring: product.recurring === "month" || product.recurring === "year" ? product.recurring : null,
-    });
+    };
+    let session;
+    try {
+      session = await createCheckoutSession(secret, input);
+    } catch (e) {
+      // A saved customer from test mode (or another Stripe account): forget it and pay as a new customer.
+      if (!customer || !stripeUnknown(e, "customer")) throw e;
+      await forgetCustomer(user.id);
+      session = await createCheckoutSession(secret, { ...input, customer: null });
+    }
     const { error } = await supabase.rpc("start_purchase", { p_sku: sku, p_session: session.id });
     if (error) return { ok: false, error: storeError(error.message) };
     return { ok: true, url: session.url };
