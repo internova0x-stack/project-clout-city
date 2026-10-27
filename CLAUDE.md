@@ -226,6 +226,13 @@ components live in `app/globals.css`.
   Consent (owner, Oct 27; GDPR/ePrivacy): PostHog starts opted out (`opt_out_capturing_by_default`, no cookies or storage) until
   the player taps Accept on `ConsentBanner` (app/layout.tsx); Reject keeps it off; Settings has the `ConsentSwitch`
   (`setConsent`, `consentStatus` in lib/analytics.ts). VIP plans state the renewal and how to cancel above the button (ChatPass).
+- Delete my account (migration 0124, owner Oct 27; GDPR erasure): Settings' last row → `DeleteAccountSheet` (type DELETE) →
+  `deleteAccount` (app/home/accountActions.ts): `account_delete_prepare` (service role: clears admin `reviewed_by` marks,
+  counts the deletion in `account_deletions` without who, returns the Stripe customer), cancels every live subscription
+  (`cancelAllSubscriptions`; stops if Stripe fails), removes Clout TV photos, `auth.admin.deleteUser` (everything cascades;
+  creator commissions stay, player set null), optional PostHog person delete (`POSTHOG_PERSONAL_API_KEY`), then `/?bye=1&deleted=1`.
+  Terms and Privacy (app/terms, app/privacy, Oct 27) describe what the game does: keep them in step when a feature changes what
+  is collected, shown to others, sold or renewed; [brackets] are the company's details, still to fill in.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
