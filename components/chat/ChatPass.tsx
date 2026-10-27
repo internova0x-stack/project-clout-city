@@ -73,12 +73,12 @@ export function ChatPassCard({ products, out, busy, onBuy, onClose }: {
           </p>
         )}
         {chosen && (
-          <button className="btn btn-taxi" style={{ marginTop: 10, width: "100%" }} disabled={!!busy || pending} onClick={() => onBuy(chosen.p.sku)}>
+          <button className="btn btn-taxi" style={{ marginTop: 18, width: "100%" }} disabled={!!busy || pending} onClick={() => onBuy(chosen.p.sku)}>
             {pending ? "Unlocking…" : busy === `buy:${chosen.p.sku}` ? "Opening checkout…" : `${label} · ${formatPrice(chosen.p.priceCents, chosen.p.currency)}${chosen.per}`}
           </button>
         )}
         <button className="chat-pass-later" onClick={onClose}>Not now</button>
-        <p className="meta" style={{ margin: "8px 0 0" }}>Real money, through Stripe. If a VIP plan ends, the daily limit comes back and side stories lock again.</p>
+        <p className="meta chat-pass-foot">Real money, through Stripe. If a VIP plan ends, the daily limit comes back and side stories lock again.</p>
       </div>
     </div>
   );
