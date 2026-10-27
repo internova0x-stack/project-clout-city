@@ -36,7 +36,7 @@ export default function Privacy() {
       <p>We use Supabase (accounts and database) and Vercel (hosting) to run the game, and PostHog for analytics and session replays. [Counsel to confirm processor list, data locations and transfer terms.]</p>
 
       <h2>Cookies</h2>
-      <p>We use cookies to keep you signed in and to remember an invite link or a creator&apos;s link you followed (so the friend or creator who sent you gets credit). PostHog keeps a cookie and browser storage with a random ID so it can tell visits and sessions apart; logging out starts a new, unlinked ID. We don&apos;t use advertising cookies.</p>
+      <p>We use cookies to keep you signed in and to remember an invite link or a creator&apos;s link you followed (so the friend or creator who sent you gets credit). Analytics and session replays only start if you tap Accept on the cookie banner; then PostHog keeps a cookie and browser storage with a random ID so it can tell visits and sessions apart, and logging out starts a new, unlinked ID. Tap Reject, or turn it off any time in Settings → Analytics and session replay, and nothing is collected. We don&apos;t use advertising cookies.</p>
 
       <h2>Your choices</h2>
       <p>You can ask us to access, correct or delete your data at [contact email]. Deleting your account removes your profile and invite records.</p>

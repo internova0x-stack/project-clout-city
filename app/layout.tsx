@@ -3,6 +3,7 @@ import { Barlow_Condensed, Bungee, Inter, Permanent_Marker } from "next/font/goo
 import Script from "next/script";
 import "./globals.css";
 import { launchStartupImages } from "@/lib/launchImages";
+import { ConsentBanner } from "@/components/ConsentBanner";
 
 // The three typefaces from the Design System Guide (section 4), downloaded at
 // build time and served with the app, so they never depend on Google at runtime.
@@ -45,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Script id="cc-boot" strategy="beforeInteractive">{NO_BLUR_SCRIPT}</Script>
         {/* On wide screens the game sits in a phone-sized frame (see .device in globals.css). */}
-        <div className="device">{children}</div>
+        <div className="device">{children}<ConsentBanner /></div>
       </body>
     </html>
   );

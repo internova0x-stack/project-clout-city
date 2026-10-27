@@ -2441,3 +2441,13 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .barksley-line { margin:0; padding:10px 12px; border-radius:var(--r-md); background:var(--surface-card); font-size:15px; line-height:1.4; }
 .barksley-choice { gap:12px; font-size:20px; }
 .barksley-row { gap:12px; margin-top:8px; }
+/* Consent (owner, Oct 27): the analytics banner, above everything until answered. On desktop .device's transform keeps it in the frame. */
+.consent-banner { position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:2000; display:flex; flex-direction:column; gap:10px;
+  padding:14px 16px; border-radius:var(--r-lg); background:var(--surface-sheet, #FFF8F2); color:var(--text-1); box-shadow:var(--elev-3, 0 12px 32px rgba(0,0,0,.35)); }
+.consent-banner .body { font-size:14px; line-height:1.4; }
+.consent-banner a { color:var(--neon-text); font-weight:600; }
+.chat-pass-terms { margin:18px 0 0; font-size:12.5px; line-height:1.45; }
+/* Owner, Oct 27: more room between the terms, the button, "Not now" and the small print. */
+.chat-pass .chat-pass-later { margin:14px auto 0; padding:8px 16px; }
+.chat-pass .chat-pass-foot { margin:14px 0 0; line-height:1.45; }
+.chat-pass-terms a { color:var(--neon-text); font-weight:600; }

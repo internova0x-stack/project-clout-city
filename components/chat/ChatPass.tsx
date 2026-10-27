@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 // VIP (owner, Oct 15; migration 0052, approved mockup): the offer when the day's 20 messages run out, or
 // from Settings. VIP monthly or yearly (unlimited chat, every side story, a badge) or chat forever
 // (unlimited chat only). Prices come from the catalog; only the Stripe webhook turns it on.
@@ -24,14 +25,14 @@ export function ChatPassCard({ products, out, busy, onBuy, onClose }: {
   const first = [yearly, monthly, forever].find(Boolean);
   const [pick, setPick] = useState<string | undefined>(first?.sku);
   const plans = [
-    monthly && { p: monthly, name: "VIP monthly", note: "Renews each month · cancel anytime", per: "/month" },
+    monthly && { p: monthly, name: "VIP monthly", note: "Renews automatically every month · cancel anytime", per: "/month", every: "month" },
     yearly && {
       p: yearly, name: "VIP yearly", per: "/year",
-      note: `${formatPrice(Math.round(yearly.priceCents / 12), yearly.currency)} a month, billed once a year`,
+      note: `${formatPrice(Math.round(yearly.priceCents / 12), yearly.currency)} a month, billed yearly · renews automatically`, every: "year",
       badge: monthly && yearly.priceCents < monthly.priceCents * 12 ? `Save ${Math.round((1 - yearly.priceCents / (monthly.priceCents * 12)) * 100)}%` : undefined,
     },
-    forever && { p: forever, name: "Chat forever", note: "Unlimited chat for good · side stories not included", per: "" },
-  ].filter((x): x is { p: StoreProduct; name: string; note: string; per: string; badge?: string } => !!x);
+    forever && { p: forever, name: "Chat forever", note: "One payment, no renewal · side stories not included", per: "" },
+  ].filter(Boolean) as { p: StoreProduct; name: string; note: string; per: string; badge?: string; every?: string }[];
   const chosen = plans.find((x) => x.p.sku === pick) ?? plans[0];
   const pending = plans.some((x) => x.p.pending);
   const label = chosen?.p.sku === CHAT_PASS.forever ? "Get chat forever" : "Become a VIP";
@@ -62,13 +63,22 @@ export function ChatPassCard({ products, out, busy, onBuy, onClose }: {
             ))}
           </div>
         )}
+        {/* FTC / California auto-renewal law (owner, Oct 27): the renewal and how to cancel, right above the button. */}
         {chosen && (
-          <button className="btn btn-taxi" style={{ marginTop: 14, width: "100%" }} disabled={!!busy || pending} onClick={() => onBuy(chosen.p.sku)}>
+          <p className="meta chat-pass-terms">
+            {chosen.every
+              ? <>Renews automatically every {chosen.every} at {formatPrice(chosen.p.priceCents, chosen.p.currency)} until you cancel. Cancel anytime in Settings → Membership; cancelling stops the next renewal and VIP runs to the end of what you paid for.</>
+              : <>One payment of {formatPrice(chosen.p.priceCents, chosen.p.currency)}. It never renews.</>}
+            {" "}<Link href="/terms">Terms</Link>
+          </p>
+        )}
+        {chosen && (
+          <button className="btn btn-taxi" style={{ marginTop: 18, width: "100%" }} disabled={!!busy || pending} onClick={() => onBuy(chosen.p.sku)}>
             {pending ? "Unlocking…" : busy === `buy:${chosen.p.sku}` ? "Opening checkout…" : `${label} · ${formatPrice(chosen.p.priceCents, chosen.p.currency)}${chosen.per}`}
           </button>
         )}
         <button className="chat-pass-later" onClick={onClose}>Not now</button>
-        <p className="meta" style={{ margin: "8px 0 0" }}>Real money, through Stripe. If a VIP plan ends, the daily limit comes back and side stories lock again.</p>
+        <p className="meta chat-pass-foot">Real money, through Stripe. If a VIP plan ends, the daily limit comes back and side stories lock again.</p>
       </div>
     </div>
   );
