@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BARKSLEY, barksleyUpdate, type BarksleyChoice } from "@/lib/barksley";
+import { STARTER_MISSIONS } from "@/lib/starter";
 import { Sheet } from "../Sheet";
 
 // Sir Barksley (owner, Oct 27): the billionaire's depressed dog in Astoria Park and Dmitri, his walker. The first time
@@ -43,7 +44,8 @@ export function BarksleySheet({ open, onClose, first, today }: { open: boolean; 
           <div className="stack-12">
             <p className="body" style={{ margin: 0 }}>{picked.reply}</p>
             <p className="barksley-line"><b>{BARKSLEY.walker}:</b> {picked.walker}</p>
-            <button className="btn btn-taxi" onClick={close}>{first ? "Consoled 🐕" : "Bye, Sir Barksley"}</button>
+            {first && <p className="barksley-line"><b>{BARKSLEY.walker}:</b> {BARKSLEY.tip} <b>+C${STARTER_MISSIONS.find((m) => m.id === "park")?.reward.cash ?? 0}</b></p>}
+            <button className="btn btn-taxi" onClick={close}>{first ? "Take the tip 💸" : "Bye, Sir Barksley"}</button>
           </div>
         )}
       </div>

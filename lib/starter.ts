@@ -20,7 +20,7 @@ export interface StarterMission {
 
 export const STARTER_MISSIONS: StarterMission[] = [
   { id: "breakfast", emoji: "🥯", title: "Order from Sal without making eye contact", why: "Eye contact is for tourists. Food brings your Energy back.", reward: { cash: 25 }, go: { kind: "place", place: "ditmars-deli" } },
-  { id: "park", emoji: "🐕", title: "Console a billionaire's depressed dog in Astoria Park", why: "Sir Barksley's owner moved to Miami \"for tax reasons\". Tap a place on the map to go there.", reward: { clout: 10 }, go: { kind: "place", place: "hell-gate-park" } },
+  { id: "park", emoji: "🐕", title: "Console a billionaire's depressed dog in Astoria Park", why: "Sir Barksley's owner moved to Miami \"for tax reasons\". Tap a place on the map to go there.", reward: { cash: 500 }, go: { kind: "place", place: "hell-gate-park" } },
   { id: "gig", emoji: "💼", title: "Take a gig from a \"serial entrepreneur\"", why: "Four companies, no office, one vape. Gigs pay the rent.", reward: { clout: 15 }, go: { kind: "app", app: "gigs" } },
   { id: "collect", emoji: "💵", title: "Get paid before he \"circles back\"", why: "Come back when the timer's done. Invoice with confidence.", reward: { cash: 50 }, go: { kind: "app", app: "gigs" } },
   { id: "look", emoji: "🕶️", title: "Change your look so your ex's cousin won't recognize you", why: "Fits are clout. Disguises are a bonus.", reward: { clout: 10 }, go: { kind: "panel", panel: "look" } },

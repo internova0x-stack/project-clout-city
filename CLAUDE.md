@@ -208,7 +208,7 @@ components live in `app/globals.css`.
   actions (`contextTipLists`, lib/statTips.ts). `?visit=none|hosting|invite|guest` in the preview.
 - Starter Week (migration 0122, owner Oct 26; spec section 28): ten missions for players who joined after it (game_settings
   'starter', mirrored by lib/starter.ts, tests/starter.test.ts), marked by error-swallowing triggers (`starter_mark`) and paid by
-  `starter_state()` (ledger 'starter' per mission, 'starter_finish': C$500, badge 'starter-week', the violet rug); 7 days,
+  `starter_state()` (ledger 'starter' per mission, 'starter_finish': C$500, badge 'starter-week', the violet rug); 7 days, (migration 0123: the park mission, consoling Sir Barksley, pays a C$500 tip; a mission pays once in any currency);
   `starter_hide`. The pill sits under "Invite your Crew" (components/game/Starter.tsx); the current mission's place glows on
   the map (`PlacePin.glow`). Businesses and Jobs open at Rank 2 (`APP_UNLOCKS`, Lola's `UnlockReveal` once); the daily tasks
   open once when onboarding ends. `?starter=0-10` in the preview (lib/starterSim.ts marks from the simulated city's calls).

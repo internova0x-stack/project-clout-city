@@ -3102,7 +3102,7 @@ export function GameShell({
             />
           )}
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
-            onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog."); } setBarksley(null); }} />
+            onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (
             <StarterSheet open={panel === "starter"} onClose={() => setPanel(null)} done={starter.done} daysLeft={starter.daysLeft}
               onGo={starterGo} onHide={() => { setStarter(null); setPanel(null); void starterIn?.hide(); setToast("Starter Week hidden. You've got this."); }} />
