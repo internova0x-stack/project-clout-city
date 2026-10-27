@@ -6,7 +6,8 @@ import { RideWithRow } from "../together/Together";
 import type { CityState } from "@/lib/cityState";
 import { formatCash } from "@/lib/economy";
 import type { LatLng } from "@/lib/map/geo";
-import { formatMiles, lineName, milesBetween, skipCost, TRAVEL_MODES, travelQuote, type TravelMode } from "@/lib/travel";
+import { RANKS } from "@/lib/ranks";
+import { formatMiles, LUXURY_RIDES, lineName, milesBetween, skipCost, TRAVEL_MODES, travelQuote, type TravelMode } from "@/lib/travel";
 import { CITY_ECONOMY } from "@/lib/city";
 import { transitUntil, type NewsItem } from "@/lib/news";
 import type { MapApi } from "../map/CityMap";
@@ -84,6 +85,19 @@ export function TravelSheet({ plan, state, busy, onClose, onGo, ride, transit }:
                 </button>
               );
             })}
+          </div>
+          {/* Owner, Oct 27: luxury rides, locked until a rank (not bookable yet). */}
+          <div className="stack-8" aria-label="Luxury rides">
+            {LUXURY_RIDES.map((r) => (
+              <div key={r.id} className="travel-mode locked" aria-disabled="true">
+                <span className="travel-mode-emoji" aria-hidden="true">{r.emoji}</span>
+                <span className="travel-mode-text">
+                  <b>{r.label} <span aria-hidden="true">🔒</span></b>
+                  <small>Opens at Rank {r.rank}, {RANKS[r.rank - 1].title} · {r.line}</small>
+                </span>
+                <span className="travel-mode-price">{formatCash(r.fare)}</span>
+              </div>
+            ))}
           </div>
           {transit?.delay && (
             <p className="meta" style={{ margin: 0 }}>

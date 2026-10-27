@@ -2436,3 +2436,6 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .map-pin-star { margin-left:4px; font-size:12px; }
 @keyframes starter-glow { 50% { box-shadow:0 0 0 2px var(--neon-500), 0 0 22px 8px rgba(255, 64, 160, .3); } }
 @media (prefers-reduced-motion: reduce) { .map-pin.glow .map-pin-pill, .map-pin.glow.compact .map-pin-tile, .map-pin.glow .map-cluster { animation:none; } }
+/* Luxury rides (owner, Oct 27): shown, locked until a rank. */
+.travel-mode.locked { opacity:.6; cursor:default; }
+.travel-mode.locked .travel-mode-price { text-decoration:none; }

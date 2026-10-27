@@ -15,6 +15,15 @@ export const TRAVEL_MODES: { id: TravelMode; label: string; emoji: string }[] = 
   { id: "car", label: "Your car", emoji: "🚗" },
 ];
 
+/**
+ * Luxury rides (owner, Oct 27): shown in the travel sheet, locked until a rank, priced to hurt. Not bookable yet: a trip
+ * by limo or helicopter needs its own server mode, built once the owner signs off.
+ */
+export const LUXURY_RIDES = [
+  { id: "limo", label: "Stretch limo", emoji: "🚘", fare: 2_500, rank: 6, line: "Tinted windows, so nobody sees you're going four blocks." },
+  { id: "helicopter", label: "Helicopter", emoji: "🚁", fare: 25_000, rank: 8, line: "Lands on whichever roof doesn't sue." },
+] as const;
+
 /** C4: the train line a trip to this neighborhood rides ("N/W", "7", "E"), or null where none is mapped. */
 export function lineFor(area: string | null | undefined): string | null {
   return (area && CITY_ECONOMY.travel.subway.lines[area]) || null;

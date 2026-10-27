@@ -99,9 +99,9 @@ export function TasksSheet({
           <div className="stack-12">
             {!partyDone && (
               <div className="select-card" style={{ cursor: "pointer" }} onClick={onOpenParty} role="button" tabIndex={0}>
-                <span className="select-emoji" aria-hidden="true">🍾</span>
-                <span className="title" style={{ display: "block" }}>You&apos;ve been invited to a party</span>
-                <span className="subtext" style={{ display: "block" }}>First task. Pull up to Velvet Static in Long Island City.</span>
+                <span className="select-emoji" aria-hidden="true">🎟️</span>
+                <span className="title" style={{ display: "block" }}>Use the stolen tickets to Peyton Pastel&apos;s party</span>
+                <span className="subtext" style={{ display: "block" }}>First task. Velvet Static, Long Island City. You&apos;re Brittany tonight.</span>
               </div>
             )}
             {/* Owner, Oct 18: five tasks a day, no more. A story's task shows on its place's action instead (Places). */}
@@ -199,8 +199,8 @@ export function EventsSheet({
         <h2 className="display-lg" style={{ margin: 0, paddingRight: 44 }}>Events</h2>
         {!partyDone && (
           <button className="party-card" style={{ textAlign: "left", width: "100%" }} onClick={onOpenParty}>
-            <span className="tag tag-event">🍸 Club event · Happening now</span>
-            <span className="title" style={{ display: "block", marginTop: 8 }}>You&apos;ve been invited to a party</span>
+            <span className="tag tag-event">🎟️ Stolen tickets · Happening now</span>
+            <span className="title" style={{ display: "block", marginTop: 8 }}>Peyton Pastel&apos;s launch party (you&apos;re not invited)</span>
             <span className="subtext" style={{ display: "block" }}>Velvet Static, Long Island City</span>
           </button>
         )}

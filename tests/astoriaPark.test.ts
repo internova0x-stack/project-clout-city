@@ -66,6 +66,6 @@ test("the two Astoria goals open the ladder", () => {
   assert.deepEqual(regular.check, { type: "regular", place: "ditmars-deli", days: 3 });
   assert.ok(regular.unlock === 0 && own.unlock === 0);
   assert.deepEqual(own.check, { type: "solo" });
-  assert.equal(GOAL_COPY.own_place.title, "Get your own place");
-  assert.equal(GOAL_COPY.regular.title, "Become a regular");
+  assert.equal(GOAL_COPY.own_place.title, "Escape your roommate's sourdough starter");
+  assert.equal(GOAL_COPY.regular.title, "Get Sal to start your order before you ask");
 });

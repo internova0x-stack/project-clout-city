@@ -19,16 +19,16 @@ export interface StarterMission {
 }
 
 export const STARTER_MISSIONS: StarterMission[] = [
-  { id: "breakfast", emoji: "🥯", title: "Eat breakfast at Sal's Deli", why: "Food brings your Energy back.", reward: { cash: 25 }, go: { kind: "place", place: "ditmars-deli" } },
-  { id: "park", emoji: "🗺️", title: "Walk to Astoria Park", why: "Tap a place on the map to go there.", reward: { clout: 10 }, go: { kind: "place", place: "hell-gate-park" } },
-  { id: "gig", emoji: "💼", title: "Take your first gig", why: "Gigs pay the rent.", reward: { clout: 15 }, go: { kind: "app", app: "gigs" } },
-  { id: "collect", emoji: "💵", title: "Collect your gig pay", why: "Come back when the timer's done.", reward: { cash: 50 }, go: { kind: "app", app: "gigs" } },
-  { id: "look", emoji: "👕", title: "Change your look", why: "Fits are clout.", reward: { clout: 10 }, go: { kind: "panel", panel: "look" } },
-  { id: "furniture", emoji: "🛋️", title: "Buy furniture and place it at home", why: "A better home, a better Crib Rating.", reward: { cash: 75 }, go: { kind: "shop", category: "home" } },
-  { id: "message", emoji: "💬", title: "Message another player", why: "The city is other people.", reward: { clout: 15 }, go: { kind: "app", app: "messages" } },
-  { id: "gossip", emoji: "🍵", title: "Find a piece of gossip", why: "Lola's Tea pays for what you dig up.", reward: { clout: 20 }, go: { kind: "app", app: "tea" } },
-  { id: "rent", emoji: "🧾", title: "Pay your rent", why: "Late rent costs Mood, then your home.", reward: { clout: 20 }, go: { kind: "panel", panel: "bills" } },
-  { id: "event", emoji: "🥂", title: "Go to an event", why: "Nights out are where clout lives.", reward: { clout: 25 }, go: { kind: "panel", panel: "events" } },
+  { id: "breakfast", emoji: "🥯", title: "Order from Sal without making eye contact", why: "Eye contact is for tourists. Food brings your Energy back.", reward: { cash: 25 }, go: { kind: "place", place: "ditmars-deli" } },
+  { id: "park", emoji: "🐕", title: "Console a billionaire's depressed dog in Astoria Park", why: "Sir Barksley's owner moved to Miami \"for tax reasons\". Tap a place on the map to go there.", reward: { clout: 10 }, go: { kind: "place", place: "hell-gate-park" } },
+  { id: "gig", emoji: "💼", title: "Take a gig from a \"serial entrepreneur\"", why: "Four companies, no office, one vape. Gigs pay the rent.", reward: { clout: 15 }, go: { kind: "app", app: "gigs" } },
+  { id: "collect", emoji: "💵", title: "Get paid before he \"circles back\"", why: "Come back when the timer's done. Invoice with confidence.", reward: { cash: 50 }, go: { kind: "app", app: "gigs" } },
+  { id: "look", emoji: "🕶️", title: "Change your look so your ex's cousin won't recognize you", why: "Fits are clout. Disguises are a bonus.", reward: { clout: 10 }, go: { kind: "panel", panel: "look" } },
+  { id: "furniture", emoji: "🛋️", title: "Buy furniture a stranger online called \"a vibe\"", why: "Then place it at home. A better crib, a better Crib Rating.", reward: { cash: 75 }, go: { kind: "shop", category: "home" } },
+  { id: "message", emoji: "💬", title: "Slide into a stranger's DMs with no plan", why: "Message another player. Everyone else is winging it too.", reward: { clout: 15 }, go: { kind: "app", app: "messages" } },
+  { id: "gossip", emoji: "🍵", title: "Overhear something you'll swear you weren't listening to", why: "Lola's Tea pays for what you dig up.", reward: { clout: 20 }, go: { kind: "app", app: "tea" } },
+  { id: "rent", emoji: "🧾", title: "Pay rent and pretend it doesn't hurt", why: "Your landlord is saving up for a second boat. Late rent costs Mood, then your home.", reward: { clout: 20 }, go: { kind: "panel", panel: "bills" } },
+  { id: "event", emoji: "🥂", title: "Walk into an event like you're on the list", why: "Confidence is a guest list. Nights out are where clout lives.", reward: { clout: 25 }, go: { kind: "panel", panel: "events" } },
 ];
 
 /** Finishing all ten: a badge, cash and a piece of furniture. */
