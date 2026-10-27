@@ -1,5 +1,6 @@
 "use client";
 
+import { SLOW_DOWN_EVENT, SLOW_DOWN_TEXT } from "@/lib/rateLimits";
 import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/lib/coutureMap";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -912,6 +913,13 @@ export function GameShell({
   }, [panel, couple, loadCouple]);
   // A session a day counts toward day-1 return; unread messages badge the Phone.
   useEffect(() => { track?.("session"); }, [track]);
+  // Rate limits (migration 0126): the database refused a burst of requests; say so, at most every 30 seconds.
+  useEffect(() => {
+    let last = 0;
+    const onSlow = () => { if (Date.now() - last > 30_000) { last = Date.now(); setToast(SLOW_DOWN_TEXT); } };
+    window.addEventListener(SLOW_DOWN_EVENT, onSlow);
+    return () => window.removeEventListener(SLOW_DOWN_EVENT, onSlow);
+  }, []);
   // After a deploy, an installed app left open reloads when it comes back (lib/freshBuild.ts).
   useEffect(() => {
     const onShow = () => { if (document.visibilityState === "visible") void checkBuild(); };

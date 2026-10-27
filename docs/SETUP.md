@@ -315,6 +315,19 @@ Activity (or Web analytics): a `$pageview` appears within a minute. Sign in and 
 the Supabase user id; the custom events are listed in `lib/analyticsEvents.ts`. Replays appear under Session replay a few
 minutes after a session ends.
 
+## 2g. Rate limits (migration 0126)
+
+Running 0126 switches the limits on by itself (it sets `pgrst.db_pre_request` on the `authenticator` role and reloads the
+API). The numbers are in `game_settings` 'rate_limits' (edit the row to change them; no deploy needed). To switch them off
+in an emergency, run in the SQL Editor:
+
+```sql
+alter role authenticator reset pgrst.db_pre_request;
+notify pgrst, 'reload config';
+```
+
+Running 0126 again (or the `alter role ... set` line in it) switches them back on.
+
 ## 3. Local development (optional)
 
 ```bash
