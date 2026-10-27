@@ -43,7 +43,7 @@ insert into public.place_visits (player_id, place_id, ny_date) values (pg_temp.u
 set role authenticated;
 select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'paid') = 2, 'breakfast and park paid now');
-select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 35, 'C$25 + 10 clout');
+select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 525, 'C$25 + the dog''s C$500 tip (migration 0123)');
 select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'paid') = 0, 'paid once');
 select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(12)) = 0, 'veteran: nothing');
 reset role;
@@ -73,7 +73,7 @@ set role authenticated;
 select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert((public.starter_state() ->> 'finished')::boolean, 'finished');
 select pg_temp.assert(pg_temp.paid('starter_finish', pg_temp.u(11)) = 500, 'C$500');
-select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 25 + 10 + 15 + 50 + 10 + 75 + 15 + 20 + 20 + 25, 'every mission once');
+select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 25 + 500 + 15 + 50 + 10 + 75 + 15 + 20 + 20 + 25, 'every mission once');
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'starter-week'), 'badge');
 select pg_temp.assert(exists (select 1 from public.player_items where player_id = pg_temp.u(11) and sku = 'home-rug-violet' and acquired = 'earned'), 'the rug');
 select pg_temp.assert(not (public.starter_state() ->> 'finished')::boolean, 'finish shows once');
@@ -97,5 +97,15 @@ do $$ begin perform 1 from public.starter_marks; raise exception 'FAIL: marks re
 exception when insufficient_privilege then null; end $$;
 do $$ begin perform public.starter_mark(pg_temp.u(13), 'gig'); raise exception 'FAIL: starter_mark callable';
 exception when insufficient_privilege then null; end $$;
+
+-- ---- Migration 0123: a player already paid 10 clout for the park isn't paid the C$500 tip as well ----
+reset role;
+update public.starter_progress set hidden_at = null, started_at = now() where player_id = pg_temp.u(13);
+insert into public.ledger (player_id, currency, amount, kind, ref) values (pg_temp.u(13), 'clout', 10, 'starter', 'park');
+insert into public.starter_marks (player_id, mission) values (pg_temp.u(13), 'park');
+set role authenticated;
+select pg_temp.as_(pg_temp.u(13)::text);
+select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'paid') = 0, 'the park paid once, in clout');
+select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(13)) = 10, 'no tip on top');
 
 rollback;

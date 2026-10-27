@@ -208,10 +208,14 @@ components live in `app/globals.css`.
   actions (`contextTipLists`, lib/statTips.ts). `?visit=none|hosting|invite|guest` in the preview.
 - Starter Week (migration 0122, owner Oct 26; spec section 28): ten missions for players who joined after it (game_settings
   'starter', mirrored by lib/starter.ts, tests/starter.test.ts), marked by error-swallowing triggers (`starter_mark`) and paid by
-  `starter_state()` (ledger 'starter' per mission, 'starter_finish': C$500, badge 'starter-week', the violet rug); 7 days,
+  `starter_state()` (ledger 'starter' per mission, 'starter_finish': C$500, badge 'starter-week', the violet rug); 7 days, (migration 0123: the park mission, consoling Sir Barksley, pays a C$500 tip; a mission pays once in any currency);
   `starter_hide`. The pill sits under "Invite your Crew" (components/game/Starter.tsx); the current mission's place glows on
   the map (`PlacePin.glow`). Businesses and Jobs open at Rank 2 (`APP_UNLOCKS`, Lola's `UnlockReveal` once); the daily tasks
   open once when onboarding ends. `?starter=0-10` in the preview (lib/starterSim.ts marks from the simulated city's calls).
+  Satire pass (owner, Oct 27): missions, the first-day tasks and the first goals read as New York satire; the first party is
+  celebrity influencer Peyton Pastel's, on tickets "found" at a coat check (FirstSession.tsx `PARTY_HOST`). Sir Barksley
+  (lib/barksley.ts, components/city/Barksley.tsx): the billionaire's depressed Pomeranian in Astoria Park; his scene opens on
+  the first visit during Starter Week (met once per device), then a row on the park card with Dmitri's daily update.
 - Analytics (owner, Oct 27): PostHog starts in `instrumentation-client.ts` (Next 15.3+; env `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`,
   `NEXT_PUBLIC_POSTHOG_HOST`; no token, nothing starts): autocapture, page views, session replay with every input masked and
   `.ph-sensitive` masked (put that class on anything players type for others: chat, letters, shoutouts, notes; autocapture skips

@@ -9,7 +9,13 @@ const sql = readFileSync(new URL("../supabase/migrations/0122_starter_week.sql",
 const missions = JSON.parse(sql.match(/'missions', '(\[[\s\S]*?\])'::jsonb/)![1]) as { id: string; cash: number; clout: number }[];
 const finish = JSON.parse(sql.match(/'finish', '(\{[\s\S]*?\})'::jsonb/)![1]) as { badge: string; cash: number; item: string };
 
-test("the missions, rewards and finish match the migration", () => {
+// Migration 0123 (owner, Oct 27): consoling the dog pays a C$500 tip instead of 10 clout.
+const tip = readFileSync(new URL("../supabase/migrations/0123_starter_dog_tip.sql", import.meta.url), "utf8");
+assert.match(tip, /jsonb_build_object\('id', 'park', 'cash', 500, 'clout', 0\)/);
+const park = missions.find((m) => m.id === "park")!;
+park.cash = 500; park.clout = 0;
+
+test("the missions, rewards and finish match the migrations", () => {
   assert.deepEqual(missions.map((m) => m.id), STARTER_MISSIONS.map((m) => m.id));
   for (const m of STARTER_MISSIONS) {
     const s = missions.find((x) => x.id === m.id)!;
@@ -36,7 +42,7 @@ test("the preview sim pays each mission once, then the finish", async () => {
   assert.equal(cash + clout, 0, "the preset's missions were paid before");
   sim.mark("rent");
   const a = await sim.api.state();
-  assert.ok(a.ok && a.data?.paid.length === 1 && clout === 20);
+  assert.ok(a.ok && a.data?.paid.length === 1 && clout === 20, "rent: +20 clout");
   sim.mark("event");
   const b = await sim.api.state();
   assert.ok(b.ok && b.data?.finished && cash === STARTER_FINISH.cash && !b.data.active);

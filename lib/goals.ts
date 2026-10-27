@@ -160,12 +160,12 @@ export function nextUnlock(clout: number): number | null {
  * `toward` tags the goal's daily tasks.
  */
 export const GOAL_COPY: Record<string, { emoji: string; title: string; line: string; toward: string }> = {
-  regular: { emoji: "🥪", title: "Become a regular", line: "Three different days at Sal's and he starts your order before you ask. That's love in Queens.", toward: "Toward being a regular" },
-  own_place: { emoji: "🔑", title: "Get your own place", line: "Nobody moves to New York to keep a roommate forever. Get your own keys.", toward: "Toward your own keys" },
-  first_purchase: { emoji: "🛍️", title: "Make your first purchase", line: "Buy literally anything. Retail therapy is still therapy.", toward: "Toward your first haul" },
-  first_shift: { emoji: "⏱️", title: "Work your first shift", line: "Clock in. Smile at a customer. Die a little inside. Get paid.", toward: "Toward your first paycheck" },
-  full_day: { emoji: "✅", title: "Clear all five daily tasks", line: "Every errand, one day. Your mom would be so proud.", toward: "Toward a perfect day" },
-  first_gig: { emoji: "💼", title: "Collect your first gig payout", line: "A gig pays more than a shift and asks fewer questions.", toward: "Toward your first gig" },
+  regular: { emoji: "🥪", title: "Get Sal to start your order before you ask", line: "Three different days at Sal's and he starts your order before you ask. That's love in Queens.", toward: "Toward being a regular" },
+  own_place: { emoji: "🔑", title: "Escape your roommate's sourdough starter", line: "It has a name. It has a feeding schedule. It has more rights than you. Get your own keys.", toward: "Toward your own keys" },
+  first_purchase: { emoji: "🛍️", title: "Buy something you absolutely don't need", line: "Retail therapy is still therapy. Cheaper than the real kind, barely.", toward: "Toward your first haul" },
+  first_shift: { emoji: "⏱️", title: "Survive one shift without crying in the walk-in", line: "Clock in. Smile at a customer. Die a little inside. Get paid.", toward: "Toward your first paycheck" },
+  full_day: { emoji: "✅", title: "Do all five errands like a functioning adult", line: "Every errand, one day. Your mom would be so proud.", toward: "Toward a perfect day" },
+  first_gig: { emoji: "💼", title: "Get paid by someone with \"founder\" in their bio", line: "A gig pays more than a shift and asks fewer questions.", toward: "Toward your first gig" },
   first_crew: { emoji: "👯", title: "Bring a friend into your crew", line: "Being famous alone is just being weird in public.", toward: "Toward a crew" },
   save_15k: { emoji: "🏦", title: "Save C$15,000", line: "An emergency fund. For emergencies like brunch.", toward: "Toward your savings" },
   skill_3: { emoji: "⭐", title: "Get any skill to level 3", line: "Get good at one thing. Anything. We're not picky.", toward: "Toward level 3" },

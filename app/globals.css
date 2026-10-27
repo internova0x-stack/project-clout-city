@@ -2436,3 +2436,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .map-pin-star { margin-left:4px; font-size:12px; }
 @keyframes starter-glow { 50% { box-shadow:0 0 0 2px var(--neon-500), 0 0 22px 8px rgba(255, 64, 160, .3); } }
 @media (prefers-reduced-motion: reduce) { .map-pin.glow .map-pin-pill, .map-pin.glow.compact .map-pin-tile, .map-pin.glow .map-cluster { animation:none; } }
+/* Sir Barksley (owner, Oct 27): the billionaire's depressed dog in Astoria Park. */
+.barksley-face { flex:none; border-radius:50%; object-fit:cover; box-shadow:0 0 0 3px #FFF8F2, 0 0 0 5px var(--neon-500); }
+.barksley-line { margin:0; padding:10px 12px; border-radius:var(--r-md); background:var(--surface-card); font-size:15px; line-height:1.4; }
+.barksley-choice { gap:12px; font-size:20px; }
+.barksley-row { gap:12px; margin-top:8px; }

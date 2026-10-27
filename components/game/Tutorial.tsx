@@ -17,7 +17,7 @@ export const TOUR = [
   { target: "phone", text: "Your phone 📱 Updates, invites and my tea 🍵 land here first. Chile, keep it charged. You'll want to see what's coming." },
   // Owner, Oct 22: the Mayor welcomes every newcomer and points at his app (the Phone's Mayor app, migration 0105).
   { target: "phone", who: "mayor", text: "Welcome to Queens, neighbor! I'm Mayor Papa-Dani 🏛️ Something broken? A big idea? Need to kvetch about the rent? Write me in the Mayor app on your phone. I read every letter, and my team gets on it fast 🎉" },
-  { target: "events", text: "Developing story 🚨 Someone invited YOU to a party 🥂 We reached out for comment, and they confirmed it. Tap it and RSVP before they change their mind 👀" },
+  { target: "events", text: "Developing story 🚨 Two tickets to celebrity influencer Peyton Pastel's party just vanished from a coat check 🥂 Sources say they're in your pocket. Tap it before security does the math 👀" },
 ] as const;
 
 interface Rect { x: number; y: number; w: number; h: number }

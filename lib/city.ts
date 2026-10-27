@@ -594,9 +594,9 @@ export const PLACES: Place[] = [
     lore: "Open all night, run by Sal and a cat named Also Sal. The chopped cheese has a fan account. Sal does not know about the fan account. I run the fan account.",
     actions: [
       // C2: the cheapest breakfast in the game, and the cat (a small Mood boost).
-      { id: "bec", kind: "eat", label: "Bacon, egg and cheese on a roll", task: "Get a BEC at Sal's", price: 8, energy: -12, blurb: "Salt, pepper, ketchup. The cheapest breakfast in the city and the best one in Queens." },
+      { id: "bec", kind: "eat", label: "Bacon, egg and cheese on a roll", task: "Get a BEC at Sal's and say \"salt, pepper, ketchup\" like you were born here", price: 8, energy: -12, blurb: "Salt, pepper, ketchup. The cheapest breakfast in the city and the best one in Queens." },
       { id: "eat", kind: "eat", label: "Chopped cheese at the counter", price: 14, energy: -15, blurb: "Wrapped in foil, handed over with zero eye contact. Perfect." },
-      { id: "pet-cat", kind: "visit", label: "Pet Also Sal", task: "Pet the bodega cat", energy: 1, mood: 4, blurb: "He allows it. Briefly. Then he goes back to sleeping on the bread." },
+      { id: "pet-cat", kind: "visit", label: "Pet Also Sal", task: "Ask the bodega cat for permission to exist", energy: 1, mood: 4, blurb: "He allows it. Briefly. Then he goes back to sleeping on the bread." },
       // C3: a shift behind the register.
       { id: "cashier", kind: "shift", label: "Work the register", pay: 120, energy: 25, blurb: "Lotto tickets, loose cigarettes you refuse to sell and forty \"you got change for a twenty?\"" },
     ],
@@ -852,7 +852,7 @@ export const PLACES: Place[] = [
     actions: [
       // C3 (owner, Oct 20): the hangout is a bench now (same id, so players' history stays), plus a lap, a picnic and dog walking.
       { id: "hangout", kind: "hangout", label: "Sit on a bench by the river", energy: 5, mood: 12, blurb: "Watch the bridge, the joggers and one guy doing tai chi like it's a competition." },
-      { id: "lap", kind: "visit", label: "Take a lap around the track", task: "Take a lap in Astoria Park", energy: 12, mood: 4, confidence: 3, skill: "fitness", blurb: "One lap. Okay, half a lap and a very confident walk." },
+      { id: "lap", kind: "visit", label: "Take a lap around the track", task: "Get lapped by a 70-year-old in Astoria Park", energy: 12, mood: 4, confidence: 3, skill: "fitness", blurb: "One lap. Okay, half a lap and a very confident walk." },
       { id: "picnic", kind: "eat", label: "Picnic on the lawn", price: 18, energy: -14, mood: 6, blurb: "Bodega sandwiches, a blanket and the bridge doing its best impression of a postcard." },
       { id: "walk-dogs", kind: "shift", label: "Walk dogs for the Ditmars crowd", task: "Work a dog-walking shift", pay: 110, energy: 20, mood: 2, blurb: "Three Frenchies, one leash tangle, zero respect for your schedule. Mad money, though." },
     ],

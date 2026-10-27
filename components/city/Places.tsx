@@ -27,6 +27,8 @@ import { hereCountLine, hereLine, type HerePerson, type PlaceCounts } from "@/li
 import { getStyle, type StyleId } from "@/lib/styles";
 import { canDateAt, isStudySpot, type DateNight } from "@/lib/dating";
 import DATE_SPOTS from "@/content/culture/date-spots.json";
+import { BARKSLEY } from "@/lib/barksley";
+import { BarksleyRow } from "./Barksley";
 import { crewActivities, type CrewOuting } from "@/lib/crew";
 import { CrewProgress } from "../crew/Crew";
 import { liveParty, type StoreProduct } from "@/lib/store";
@@ -44,6 +46,8 @@ const CATEGORY_LABEL: Record<Place["category"], string> = {
 
 export interface PlaceHandlers {
   busy: string | null;
+  /** Owner, Oct 27: Sir Barksley's scene (Astoria Park). */
+  onBarksley?: () => void;
   onAction: (placeId: string, actionId: string) => void;
   onAttendEvent: (eventId: string) => void;
   onOpenGigs: () => void;
@@ -656,6 +660,8 @@ export function LocationSheet({
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
           {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
+          {/* Owner, Oct 27: Sir Barksley, the billionaire's depressed dog, on his bench in Astoria Park. */}
+          {handlers.onBarksley && place.id === BARKSLEY.placeId && <BarksleyRow onOpen={handlers.onBarksley} today={state.today} />}
           {/* C6: Lola's four New York date spots get her line (content/culture/date-spots.json). */}
           {handlers.dating && (() => {
             const spot = DATE_SPOTS.spots.find((d) => d.place === place.id);

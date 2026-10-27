@@ -16,23 +16,25 @@ import { handle } from "@/lib/validation";
 
 const PARTY = ECONOMY.firstParty;
 export const PARTY_VENUE = "Velvet Static";
+/** Owner, Oct 27: the first party is Peyton Pastel's (lib/cast.ts), on tickets that "fell off" the coat check. */
+export const PARTY_HOST = "Peyton Pastel";
 
 /** C26: the first-task party, always "Happening now". */
 export function PartySheet({
   open, onClose, onAttend, busy, error,
 }: { open: boolean; onClose: () => void; onAttend: (withClique: boolean) => void; busy: boolean; error: string | null }) {
   return (
-    <Sheet open={open} onClose={onClose} label="You've been invited to a party">
+    <Sheet open={open} onClose={onClose} label={`Stolen tickets to celebrity influencer ${PARTY_HOST}'s party`}>
       <div className="stack-16">
         <div className="party-card">
           <div className="row" style={{ justifyContent: "space-between" }}>
-            <span className="tag tag-event">🍸 Club event</span>
+            <span className="tag tag-event">🎟️ Stolen tickets</span>
             <span className="badge-new" style={{ background: "var(--neon-600)" }}>Happening now</span>
           </div>
-          <p className="display-md" style={{ margin: "12px 0 4px" }}>You&apos;ve been invited to a party</p>
+          <p className="display-md" style={{ margin: "12px 0 4px" }}>Celebrity influencer {PARTY_HOST}&apos;s launch party (you&apos;re not invited)</p>
           <p className="subtext" style={{ margin: 0 }}>
-            <strong style={{ color: "var(--text-1)" }}>{PARTY_VENUE}</strong>, Long Island City. Somebody put your name on the list.
-            Nobody knows who. Don&apos;t ask questions.
+            Your roommate&apos;s cousin works coat check at <strong style={{ color: "var(--text-1)" }}>{PARTY_VENUE}</strong> and
+            &ldquo;found&rdquo; two tickets to the most pastel night in Queens. The name on them is Brittany. You are Brittany now.
           </p>
           <div className="row" style={{ gap: 6, marginTop: 12, flexWrap: "wrap" }}>
             <span className="tag tag-neutral">Entry {formatCash(PARTY.entry)}</span>
@@ -43,9 +45,9 @@ export function PartySheet({
           </div>
         </div>
         {error && <p className="error-text" role="alert">{error}</p>}
-        <button className="btn btn-taxi" disabled={busy} onClick={() => onAttend(true)}>Bring the crew</button>
-        <button className="btn btn-secondary" disabled={busy} onClick={() => onAttend(false)}>Pull up solo</button>
-        <p className="meta center" style={{ margin: 0 }}>Entry is paid in virtual cash. Inviting is optional; showing up is the task.</p>
+        <button className="btn btn-taxi" disabled={busy} onClick={() => onAttend(true)}>Sneak in with the crew</button>
+        <button className="btn btn-secondary" disabled={busy} onClick={() => onAttend(false)}>Sneak in solo</button>
+        <p className="meta center" style={{ margin: 0 }}>The cousin&apos;s &ldquo;finder&apos;s fee&rdquo; is paid in virtual cash. Inviting is optional; getting in is the task.</p>
       </div>
     </Sheet>
   );
@@ -57,8 +59,8 @@ export function PartyDoneCard({ onContinue }: { onContinue: () => void }) {
       <div className="scrim" />
       <div className="modal-card reveal-card">
         <span className="tag tag-positive">Task complete</span>
-        <p className="display-md" style={{ margin: "12px 0 8px" }}>You were seen.</p>
-        <p className="body" style={{ margin: 0, color: "rgba(255,246,224,.85)" }}>Nobody knows who you are, but they saw you. That&apos;s a start.</p>
+        <p className="display-md" style={{ margin: "12px 0 8px" }}>You got in. Nobody checked.</p>
+        <p className="body" style={{ margin: 0, color: "rgba(255,246,224,.85)" }}>Celebrity influencer {PARTY_HOST} took a selfie with you in the background. You&apos;re technically content now.</p>
         <p className="hud-number" style={{ margin: "14px 0 0", fontSize: 22 }}>
           <span style={{ color: "var(--green-500)" }}>+{formatCash(PARTY.cashReward - PARTY.entry)}</span>
           <span style={{ color: "rgba(255,246,224,.5)" }}> · </span>
