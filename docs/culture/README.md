@@ -201,4 +201,4 @@ Answers to the open questions:
 - Showtime dancers: a small card during a subway trip, about 1 trip in 10, +3 clout, once a day (to confirm in C4).
 - Delays: 10 to 30 extra seconds on that line, for a few hours.
 - Character lines ship without a separate community review.
-- Not every character uses slang. Lola keeps her own voice with one or two slang terms.
+- Not every character uses slang. Lola keeps her own voice with at most one slang term (owner, Oct 26: mostly TMZ, a little Shade Room).

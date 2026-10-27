@@ -1974,7 +1974,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .lola-tip-next { margin-top:12px; width:100%; }
 .lola-tip-hint { margin:10px 0 0; font-size:13px; font-weight:700; color:#D6336C; }
 .lola-tip-head { position:relative; flex:none; width:64px; height:64px; border-radius:50%; overflow:hidden; background:linear-gradient(160deg, #FFD1DC, #FF8FB1); box-shadow:0 0 0 3px #FFF8F2, 0 0 0 5px #FF5C8A, var(--elev-2); }
-.lola-tip-head img, .lola-tip-head canvas { width:100%; height:100%; object-fit:cover; transform:scale(1.7) translateY(16%); }
+/* Lola and the Mayor are portraits (owner, Oct 26); no zoom, so nothing is cut off. */
+.lola-tip-head img, .lola-tip-head canvas { width:100%; height:100%; object-fit:cover; }
 .lola-tip-kiss { position:absolute; right:-2px; bottom:-2px; font-size:18px; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 .lola-tip-skip { display:block; width:100%; margin-top:6px; padding:8px 0 2px; border:0; background:none; color:var(--text-3); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
 /* Owner, Oct 17: places in a borough that hasn't opened. */
@@ -2255,7 +2256,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 @media (max-width: 420px) { .shop-grid { grid-template-columns:1fr; } .shop-filters > * { flex-basis:45%; } }
 /* The Mayor's step in the tour (owner, Oct 22): his portrait instead of Lola's head. */
 .lola-tip-head.mayor-tip-head { background:linear-gradient(160deg, #FFF3C4, #BFE8CF); box-shadow:0 0 0 3px #FFF8F2, 0 0 0 5px #1F7A5C, var(--elev-2); }
-.lola-tip-head.mayor-tip-head img { transform:none; }
+.lola-tip-head img { transform:none; }
 .lola-tip.mayor .lola-tip-who { color:#1F7A5C; }
 /* The creator's "What kind of New Yorker are you?" (owner, Oct 22). */
 .nyer-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -2412,3 +2413,26 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .game.has-crib .story-prompt { top:calc(164px + var(--safe-top)); }
 /* During a visit (migration 0121) the visit bar takes the top: the pills and home cards under the HUD step aside. */
 .game.in-visit .under-hud, .game.in-visit .story-prompt, .game.in-visit .room-storage, .game.in-visit .quest-row { display:none; }
+/* Starter Week (owner, Oct 26): the pill under "Invite your Crew" and the mission list. */
+.starter-pill { display:flex; align-items:center; gap:8px; max-width:calc(100vw - 110px); white-space:nowrap; }
+.starter-count { flex:none; font-weight:800; font-size:13px; color:var(--neon-text); }
+.starter-next { min-width:0; overflow:hidden; text-overflow:ellipsis; font-size:14px; }
+.starter-row.done { opacity:.55; }
+.starter-row.done .title { text-decoration:line-through; }
+.starter-row.now { background:var(--neon-tint); border-radius:14px; padding-left:10px; padding-right:10px; }
+.starter-dot { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:800; background:var(--chip-off); color:var(--text-2); }
+.starter-row.done .starter-dot { background:var(--green-tint, #DEF2E9); color:var(--green-text, #2E8B63); }
+.starter-row.now .starter-dot { background:var(--neon-500); color:#fff; }
+/* Locked apps (owner, Oct 26): the same icon, dimmed, with a lock and when it opens. */
+.phone-app.locked .phone-icon { filter:grayscale(.6); opacity:.5; }
+.phone-lock { position:absolute; z-index:2; right:-4px; bottom:-4px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:11px; background:#14111A; box-shadow:0 0 0 2px rgba(255,255,255,.7); }
+.phone-app.locked small { display:block; font-size:10px; opacity:.85; }
+/* With the Starter Week pill under the invite, home cards sit a row lower again. */
+.game.has-starter .story-prompt { top:calc(164px + var(--safe-top)); }
+.game.has-starter.has-crib .story-prompt { top:calc(212px + var(--safe-top)); }
+/* Starter Week (owner, Oct 26): the current mission's place glows on the map. */
+.map-pin.glow .map-pin-pill, .map-pin.glow.compact .map-pin-tile, .map-pin.glow .map-cluster { box-shadow:0 0 0 2px var(--neon-500), 0 0 14px 4px rgba(255, 64, 160, .6); animation:starter-glow 1.6s ease-in-out infinite; }
+.map-pin.glow { z-index:3; }
+.map-pin-star { margin-left:4px; font-size:12px; }
+@keyframes starter-glow { 50% { box-shadow:0 0 0 2px var(--neon-500), 0 0 22px 8px rgba(255, 64, 160, .3); } }
+@media (prefers-reduced-motion: reduce) { .map-pin.glow .map-pin-pill, .map-pin.glow.compact .map-pin-tile, .map-pin.glow .map-cluster { animation:none; } }

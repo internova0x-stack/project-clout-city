@@ -52,6 +52,8 @@ import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { CouplePrompt, CoupleSheet } from "./dating/Couple";
 import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
+import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
+import { APP_UNLOCKS, STARTER_FINISH_TOAST, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
 import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/Visits";
 import { KIND_LABEL, VISITS, VISIT_POLL_MS, hostCloutPerGuest, visitAlerts, visitClock, type VisitApi, type VisitHome, type VisitMessage, type VisitRoom, type VisitState } from "@/lib/visits";
 import { homeScore as scoreHome, qualityTarget, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
@@ -133,12 +135,13 @@ export interface GameActions {
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
 export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
-type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | "homescore" | "visits" | null;
+type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | "homescore" | "visits" | "starter" | null;
 
 const PINS_KEY = "cc_first_pins_seen";
 const TASKS_SEEN_KEY = "cc-tasks-seen";
 /** Owner, Oct 17: set when the first session ends, cleared once the player opens the tasks or Lola's nudge. */
 const DAILY_HINT_KEY = "cc-daily-hint";
+const UNLOCK_KEY = "cc-rank2-apps";
 const DAILY_HINT_AFTER_MS = 30_000;
 const STORY_DISMISSED_KEY = "cc_story_dismissed";
 
@@ -230,6 +233,8 @@ export function GameShell({
   sublet,
   homeScoreApi,
   visits,
+  starter: starterIn,
+  lockAppsPreview,
   crew,
   party,
   partyRoom,
@@ -289,6 +294,10 @@ export function GameShell({
   /** Sublets (migration 0119): Apartments → Sublets, and the subtenant's room. */
   sublet?: SubletApi;
   /** The home score (migration 0120): pays its milestones; without it the score still shows, worked out here. */
+  /** Starter Week (migration 0122): ten missions for a new player's first week, marked as they happen and paid on read. */
+  starter?: StarterApi;
+  /** Preview: lock the apps that open at a rank, whatever the player's rank. */
+  lockAppsPreview?: boolean;
   /** Having people over (migration 0121): hangouts and house parties at home. */
   visits?: VisitApi;
   homeScoreApi?: { state(): Promise<{ ok: true; data: HomeScore & { paid: { score: number; clout: number }[]; reached: number[] } } | { ok: false; error: string }> };
@@ -624,6 +633,7 @@ export function GameShell({
   useEffect(() => { void loadBiz(); }, [loadBiz]);
   // Player ranks (owner, Oct 15): the reveal when clout or net worth crosses into a new rank.
   const [rankUp, setRankUp] = useState<Rank | null>(previewRankUp ? RANKS[previewRankUp - 1] ?? null : null);
+  const [unlockReveal, setUnlockReveal] = useState(previewRankUp === 2);
   const seenRank = useRef<number | null>(null);
   useEffect(() => {
     setPinned([]);
@@ -1513,6 +1523,41 @@ export function GameShell({
     onAnswer: (id, yes) => void visitRun(() => visits.answer(id, yes), yes ? "See you there." : "Maybe next time.").then((st) => st && setVisitS(st)),
     onGo: (id) => void goToVisit(id),
   } : null;
+  // Starter Week: the current mission; Go takes the player where it happens.
+  const [starter, setStarter] = useState<StarterState | null>(null);
+  const starterLoading = useRef(false);
+  // Null or over once: never asked again this session (older players, hidden, finished, or past its days).
+  const starterOver = useRef(false);
+  const loadStarter = useCallback(async () => {
+    if (!starterIn || starterLoading.current || starterOver.current) return;
+    starterLoading.current = true;
+    const r = await starterIn.state().finally(() => { starterLoading.current = false; });
+    if (!r.ok) return;
+    if (!r.data?.active) starterOver.current = true;
+    setStarter(r.data && r.data.active ? r.data : null);
+    const d = r.data;
+    if (!d || (!d.paid.length && !d.finished)) return;
+    setToast(d.finished ? STARTER_FINISH_TOAST : d.paid.length === 1 ? starterToast(d.paid[0].id) : `⭐ Starter Week: ${d.paid.length} missions done`);
+    if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  }, [starterIn, cityApi, applyCity]);
+  // Missions are marked by what the player just did: check after the city changes, or the phone or a sheet closes
+  // (messages, gossip, the Shop), a moment later so a burst of updates asks once. Not during the first session.
+  useEffect(() => {
+    if (!starterIn || flow !== "none") return;
+    const t = setTimeout(() => void loadStarter(), 1200);
+    return () => clearTimeout(t);
+  }, [starterIn, flow, city, phone.open, panel, loadStarter]);
+  const starterGo = (m: StarterMission) => {
+    setPanel(null);
+    const g = m.go;
+    if (g.kind === "place") { setTab("map"); openPlace(g.place); }
+    else if (g.kind === "app") setPhone({ open: true, app: g.app });
+    else if (g.kind === "shop") openShop(g.category);
+    else setPanel(g.panel === "look" ? (cityOn ? "look" : "profile") : g.panel);
+  };
+  // The current mission's place glows on the map (owner, Oct 26).
+  const starterPlace = (() => { const g = starter ? nextMission(starter.done)?.go : null; return g?.kind === "place" ? g.place : null; })();
+  const starterPins = useMemo(() => starterPlace ? cityPins.map((p) => p.id === starterPlace ? { ...p, glow: true } : p) : cityPins, [cityPins, starterPlace]);
   const leaveVisit = async () => {
     if (!visits || visitAt === null) return;
     const st = await visitRun(() => visits.leave(visitAt), "Home sweet home.");
@@ -1744,6 +1789,11 @@ export function GameShell({
   useEffect(() => {
     if (!city || !bizTried) return;
     if (seenRank.current !== null && myRank.level > seenRank.current) setRankUp(myRank);
+    // Businesses and Jobs open at Rank 2 (owner, Oct 26): a device that saw them locked gets Lola's "New for you" once.
+    try {
+      if (myRank.level < APP_UNLOCKS.jobs.rank) localStorage.setItem(UNLOCK_KEY, "locked");
+      else if (localStorage.getItem(UNLOCK_KEY) === "locked") { localStorage.setItem(UNLOCK_KEY, "shown"); setUnlockReveal(true); }
+    } catch { /* private mode: no reveal */ }
     seenRank.current = myRank.level;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myRank.level, !!city, bizTried]);
@@ -1937,8 +1987,8 @@ export function GameShell({
   const endHandoff = () => {
     setFlow("none");
     setMe((p) => ({ ...p, onboarding_step: "handoff_done" }));
-    try { localStorage.setItem(DAILY_HINT_KEY, "pending"); } catch { /* private mode: no nudge */ }
-    setDailyHint("waiting");
+    // Owner, Oct 26: the daily tasks open once, right after onboarding (the sheet as it is), instead of Lola's nudge.
+    onAction("daily");
     void actions.finishHandoff();
   };
   const afterInvitePrompt = () => (isStandalone() ? endHandoff() : setFlow("pwa"));
@@ -2225,7 +2275,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${tab === "home" && !inside && (visitView || (hostLive && visitRoomS)) ? " in-visit" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? " has-crib" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${tab === "home" && !inside && (visitView || (hostLive && visitRoomS)) ? " in-visit" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? " has-crib" : ""}${starter && !inside && flow === "none" && !visitView ? " has-starter" : ""}`}>
       {inside && city ? (
         <>
         <InteriorScene
@@ -2441,7 +2491,7 @@ export function GameShell({
           <CityMap
             ref={mapRef}
             rightInset={72}
-            pins={cityOn ? cityPins : WAVE_1_PINS}
+            pins={cityOn ? starterPins : WAVE_1_PINS}
             vehicles={cityOn}
             player={{ at: cityOn ? myPos : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
             initialCenter={cityOn ? ASTORIA_CENTER : DEFAULT_PLAYER_LOCATION}
@@ -2476,6 +2526,7 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
+        starter={starter && !inside && flow === "none" && !visitView ? <StarterPill done={starter.done} onOpen={() => setPanel("starter")} /> : null}
         homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
         quests={trip ? [] : quests}
         time={clock.time}
@@ -2867,6 +2918,7 @@ export function GameShell({
         </>
       )}
       <PhoneModal
+        locked={lockAppsPreview || myRank.level < 2 ? Object.fromEntries(Object.entries(APP_UNLOCKS).filter(([, u]) => lockAppsPreview || myRank.level < u.rank).map(([id, u]) => [id, u.label])) : undefined}
         invite={(() => {
           const e = city?.calendar && cityApi?.calendarAttend ? phoneInvite(calendarData.events, city.calendar.attended, gameNow) : null;
           return e ? { event: e, onOpen: () => { setPhone({ open: false, app: null }); setPanel("events"); } } : undefined;
@@ -3013,6 +3065,10 @@ export function GameShell({
               onReport={() => setToast("Noted. Block them from their card, or tell the Mayor if it keeps up.")}
             />
           )}
+          {starter && (
+            <StarterSheet open={panel === "starter"} onClose={() => setPanel(null)} done={starter.done} daysLeft={starter.daysLeft}
+              onGo={starterGo} onHide={() => { setStarter(null); setPanel(null); void starterIn?.hide(); setToast("Starter Week hidden. You've got this."); }} />
+          )}
           <HomeScoreSheet
             open={panel === "homescore"}
             onClose={() => setPanel(null)}
@@ -3123,6 +3179,9 @@ export function GameShell({
       )}
       {wentPublic && <WentPublicCard worth={myWorth} onClose={() => setWentPublic(false)} />}
       {rankUp && <RankUpCard rank={rankUp} name={handle(me.display_name)} onClose={() => setRankUp(null)} />}
+      {unlockReveal && !rankUp && flow === "none" && (
+        <UnlockReveal onClose={() => setUnlockReveal(false)} onOpen={() => { setUnlockReveal(false); setPanel(null); setPhone({ open: true, app: null }); }} />
+      )}
       {goalsReveal && !rankUp && (
         <GoalsRevealCard
           reveal={goalsReveal}

@@ -13,7 +13,8 @@ Lola Lowdown (narrator), Loretta Bird, Ray Delgado and Detective Nia Okafor. The
 **Lola Lowdown**, everywhere she speaks: the place cards, City News and "Ask Lola", Tea cards, "Spotted at",
 postcards, the lotto news card, the borough teasers and The Hub, where she's the host. She's the city's **tea
 queen**: she knows everyone worth knowing, can get you anything in the city, and always has the receipts. The
-tone is a **spicy urban gossip blogger**: short punchy sentences, "babe", "darling", "sweetie" (one per line at
+tone is a **celebrity-news reporter, mostly TMZ with a little Shade Room** (owner, Oct 26; it was a spicy urban
+gossip blogger): short punchy sentences, "breaking", "sources say", a 👀 now and then, "babe", "darling", "sweetie" (one per line at
 most, and not every line), "allegedly", receipts and screenshots, a wink at the end. She is on the player's side
 and never mean about the player. Examples:
 - "Need a table, a plug, a date or an alibi? Say less. I know a guy, and the guy knows better than to say no to me."
@@ -38,7 +39,7 @@ that really shipped. Examples:
 
 All three voices still follow the house rules: invented names only, no real brands, no promises the game doesn't keep.
 
-Culture pack C1 (owner, Oct 20): Lola also uses **one or two slang terms per message** from
+Culture pack C1 (owner, Oct 20; lowered Oct 26): Lola uses **at most one slang term per message** from
 `content/culture/slang.json`, keeping her own style. Every character and generated line follows
 [docs/culture/VOICE.md](culture/VOICE.md); each Astoria person has a full profile (background, personality,
 catchphrases, likes, dislikes) in `content/culture/npcs.json`.

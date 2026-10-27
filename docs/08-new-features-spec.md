@@ -1063,3 +1063,26 @@ visit). A partner's visit counts toward the couple streak.
 are spent); blocking removes a guest at once; the chat is the host's (muted players can't post).
 
 **Later.** Dinner parties with the cooking skill, open-door parties for the crew's crew, Lola's "Crib of the Week".
+
+## 28. Starter Week and the first-week fixes (owner, Oct 26: new players "don't know what to do"; migration 0122)
+
+**Starter Week.** Ten small missions for a new player's first seven days, each teaching one part of the game by doing
+it: breakfast at Sal's Deli (+C$25), walk to Astoria Park (+10 🔥), take a gig (+15 🔥), collect its pay (+C$50), change
+your look (+10 🔥), buy furniture and place it (+C$75), message a player (+15 🔥), find a piece of gossip (+20 🔥), pay
+rent (+20 🔥), go to an event (+25 🔥). All ten: the "Fresh Off the 7 Train" badge, C$500 and a violet area rug.
+- A pill under "Invite your Crew" shows the count and the first mission not done; it opens a sheet with all ten and a
+  Go button for that one (a place, an app, the Shop's Furniture tab or a sheet). Missions count in any order.
+- Marks come from what the game already writes (triggers on place visits, the player's place, look and layout, gigs,
+  messages, gossip, bills and events; they swallow their own errors). `starter_state()` pays what's due once (ledger
+  'starter', ref the mission; 'starter_finish') and the game shows a toast for each.
+- Only players who joined after migration 0122; it ends after 7 days, when finished, or when hidden.
+- The current mission's place glows on the map (neon, never gold).
+
+**Apps by rank.** Businesses and Jobs open at Rank 2 (a 🔒 and "Rank 2" on their tiles until then); every other app is
+open from day one. A device that saw them locked gets Lola's "New for you" once they open.
+
+**Tasks after onboarding.** The daily tasks open once, as they are, when onboarding ends (in place of Lola's 30-second
+nudge). The tour, the tasks' design and the leaderboard are unchanged.
+
+**Lola (owner, Oct 26).** A light-skinned, mixed woman with long brunette hair, drawn as a portrait like the Mayor's
+(`public/cast/lola-lowdown.webp`); her voice is mostly TMZ, a little Shade Room, with at most one slang term a line.

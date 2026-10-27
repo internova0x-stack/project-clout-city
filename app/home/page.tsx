@@ -45,6 +45,7 @@ import {
   subletSeen, subletShow, subletState, subletUnlist, subletWithdraw,
 } from "./subletActions";
 import { homeScoreState } from "./homeScoreActions";
+import { starterHide, starterState } from "./starterActions";
 import { visitAnswer, visitArrive, visitEnd, visitHome, visitHost, visitLeave, visitRoom, visitSay, visitSendHome, visitState } from "./visitActions";
 
 export const dynamic = "force-dynamic";
@@ -59,9 +60,9 @@ export default async function HomePage() {
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
   // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
-  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple, subletS, homeS, visitS] = await Promise.all([
+  const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple, subletS, homeS, visitS, starterS] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
-    playerCard(player.id), mySkills().catch(() => null), coupleState(), subletState(), homeScoreState(), visitState(),
+    playerCard(player.id), mySkills().catch(() => null), coupleState(), subletState(), homeScoreState(), visitState(), starterState(),
   ]);
   // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
   after(() => kickPush());
@@ -184,6 +185,8 @@ export default async function HomePage() {
       } : undefined}
       // Migration 0120 switches on the home score's milestones (the score shows either way).
       homeScoreApi={homeS.ok ? { state: homeScoreState } : undefined}
+      // Migration 0122 switches on Starter Week (starter_state fails before it runs).
+      starter={starterS.ok ? { state: starterState, hide: starterHide } : undefined}
       // Migration 0121 switches on having people over (visit_state fails before it runs).
       visits={visitS.ok ? {
         state: visitState, host: visitHost, end: visitEnd, sendHome: visitSendHome, answer: visitAnswer, arrive: visitArrive,

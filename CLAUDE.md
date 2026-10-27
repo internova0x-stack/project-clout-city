@@ -206,6 +206,12 @@ components live in `app/globals.css`.
   / 100), a partner's couple day). lib/visits.ts mirrors game_settings 'visits' (tests/visits.test.ts); components/home/
   Visits.tsx (sheet, home card, bar); the entry is the stats panel's Mood row, which like every stat lists up to three
   actions (`contextTipLists`, lib/statTips.ts). `?visit=none|hosting|invite|guest` in the preview.
+- Starter Week (migration 0122, owner Oct 26; spec section 28): ten missions for players who joined after it (game_settings
+  'starter', mirrored by lib/starter.ts, tests/starter.test.ts), marked by error-swallowing triggers (`starter_mark`) and paid by
+  `starter_state()` (ledger 'starter' per mission, 'starter_finish': C$500, badge 'starter-week', the violet rug); 7 days,
+  `starter_hide`. The pill sits under "Invite your Crew" (components/game/Starter.tsx); the current mission's place glows on
+  the map (`PlacePin.glow`). Businesses and Jobs open at Rank 2 (`APP_UNLOCKS`, Lola's `UnlockReveal` once); the daily tasks
+  open once when onboarding ends. `?starter=0-10` in the preview (lib/starterSim.ts marks from the simulated city's calls).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

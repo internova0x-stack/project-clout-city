@@ -130,6 +130,7 @@ from (values
   ('0118_relationships.sql', coalesce((to_regclass('public.relationships') is not null), false)),
   ('0119_sublets.sql', coalesce((to_regclass('public.sublets') is not null), false)),
   ('0120_home_score.sql', coalesce((to_regprocedure('public.home_score_state()') is not null), false)),
-  ('0121_home_visits.sql', coalesce((to_regclass('public.visits') is not null), false))
+  ('0121_home_visits.sql', coalesce((to_regclass('public.visits') is not null), false)),
+  ('0122_starter_week.sql', coalesce((to_regclass('public.starter_marks') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

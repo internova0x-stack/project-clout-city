@@ -17,6 +17,8 @@ export interface PlacePin {
   /** Owner, Oct 17: a place in a borough that hasn't opened yet: shown, locked. */
   locked?: boolean;
   borough?: import("./map/boroughs").BoroughId;
+  /** Starter Week (owner, Oct 26): the current mission's place glows. */
+  glow?: boolean;
 }
 
 export const WAVE_1_PINS: PlacePin[] = [

@@ -515,7 +515,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
               return (
                 <button
                   key={c.key}
-                  className="map-pin"
+                  className={`map-pin${c.pins.some((p) => p.glow) ? " glow" : ""}`}
                   style={{ transform: `translate(${c.x}px, ${c.y}px) translate(-50%, -50%)` }}
                   onClick={() => {
                     const lat = c.pins.reduce((a, p) => a + p.at[0], 0) / c.pins.length;
@@ -533,7 +533,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
               return (
                 <button
                   key={pin.id}
-                  className={`map-pin compact${pin.locked ? " locked" : ""}`}
+                  className={`map-pin compact${pin.locked ? " locked" : ""}${pin.glow ? " glow" : ""}`}
                   style={{ transform: `translate(${c.x}px, ${c.y}px) translate(-50%, calc(-100% + 3px))` }}
                   onClick={() => tapPin(pin)}
                   aria-label={`${pin.name}, ${pin.neighborhood}`}
@@ -547,7 +547,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
             return (
               <button
                 key={pin.id}
-                className={`map-pin${pin.locked ? " locked" : ""}`}
+                className={`map-pin${pin.locked ? " locked" : ""}${pin.glow ? " glow" : ""}`}
                 style={{ transform: `translate(${c.x}px, ${c.y}px) translate(-50%, calc(-100% + 3px))` }}
                 onClick={() => tapPin(pin)}
                 aria-label={pin.locked ? `${pin.name}, ${pin.neighborhood}: locked until the borough opens` : `${pin.name}, ${pin.neighborhood}`}
@@ -555,6 +555,7 @@ export const CityMap = forwardRef<MapApi, CityMapProps>(function CityMap(
                 <span className="map-pin-pill glass-hud" style={nudge(c.x, pinWidth(pin))}>
                   <span className="map-pin-tile" aria-hidden="true" style={{ background: tileBackground(glyphFor(pin)) }}><Glyph name={glyphFor(pin)} size={14} /></span>
                   <span className="name">{pin.locked && <span aria-hidden="true">🔒 </span>}{pin.name}</span>
+                  {pin.glow && <span className="map-pin-star" aria-hidden="true">⭐</span>}
                 </span>
                 <span className="map-pin-stem" />
                 <span className="map-pin-dot" />
