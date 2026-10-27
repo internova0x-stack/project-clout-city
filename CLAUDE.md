@@ -223,6 +223,9 @@ components live in `app/globals.css`.
   (`AnalyticsUser`); `/auth/signout` lands on `/?bye=1`, which resets. Custom events: lib/analyticsEvents.ts (pure, tested by
   tests/analytics.test.ts); `trackedCity` wraps the city API in GameShell (tasks, rent, places, events, C$ Shop); chat sends,
   story posts and real-money purchases are tracked where they happen. Never put typed text in a property.
+  Consent (owner, Oct 27; GDPR/ePrivacy): PostHog starts opted out (`opt_out_capturing_by_default`, no cookies or storage) until
+  the player taps Accept on `ConsentBanner` (app/layout.tsx); Reject keeps it off; Settings has the `ConsentSwitch`
+  (`setConsent`, `consentStatus` in lib/analytics.ts). VIP plans state the renewal and how to cancel above the button (ChatPass).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
