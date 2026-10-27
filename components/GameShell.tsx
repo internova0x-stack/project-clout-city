@@ -54,6 +54,7 @@ import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
+import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
 import { APP_UNLOCKS, STARTER_FINISH_TOAST, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
@@ -237,6 +238,7 @@ export function GameShell({
   homeScoreApi,
   visits,
   starter: starterIn,
+  deleteAccount,
   lockAppsPreview,
   crew,
   party,
@@ -297,6 +299,8 @@ export function GameShell({
   /** Sublets (migration 0119): Apartments → Sublets, and the subtenant's room. */
   sublet?: SubletApi;
   /** The home score (migration 0120): pays its milestones; without it the score still shows, worked out here. */
+  /** Delete my account (migration 0124): cancels VIP, removes photos and the account (app/home/accountActions.ts). */
+  deleteAccount?: DeleteAccountAction;
   /** Starter Week (migration 0122): ten missions for a new player's first week, marked as they happen and paid on read. */
   starter?: StarterApi;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
@@ -525,6 +529,8 @@ export function GameShell({
   }, []);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  // Delete my account (owner, Oct 27): Settings' last row opens the confirmation sheet.
+  const [deleteOpen, setDeleteOpen] = useState(false);
   // Sir Barksley (owner, Oct 27): his scene; `first` is the Starter Week consoling, once per device.
   const [barksley, setBarksley] = useState<{ first: boolean } | null>(null);
   // #20: each tap on the place's regular inside the room starts their talk in the panel.
@@ -2960,6 +2966,7 @@ export function GameShell({
         })()}
         push={push}
         membership={membership && member ? { vip: memberVip, onOpen: openMembership } : undefined}
+        onDeleteAccount={deleteAccount ? () => { setPhone({ open: false, app: null }); setDeleteOpen(true); } : undefined}
         // The app shows whenever the station is on; if today's show can't load, the app says why.
         radio={radio}
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
@@ -3101,6 +3108,7 @@ export function GameShell({
               onReport={() => setToast("Noted. Block them from their card, or tell the Mayor if it keeps up.")}
             />
           )}
+          {deleteAccount && <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={deleteAccount} />}
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (

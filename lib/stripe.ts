@@ -92,7 +92,7 @@ export async function createCheckoutSession(secretKey: string, input: CheckoutIn
   return { id: data.id, url: data.url };
 }
 
-async function stripeCall<T>(secretKey: string, method: "GET" | "POST", path: string, params?: Record<string, unknown>): Promise<T> {
+async function stripeCall<T>(secretKey: string, method: "GET" | "POST" | "DELETE", path: string, params?: Record<string, unknown>): Promise<T> {
   const res = await fetch(`https://api.stripe.com/v1/${path}`, {
     method,
     headers: { Authorization: `Bearer ${secretKey}`, "Content-Type": "application/x-www-form-urlencoded" },
@@ -118,6 +118,14 @@ export interface StripeSubscription {
 
 export const getSubscription = (secretKey: string, id: string) =>
   stripeCall<StripeSubscription>(secretKey, "GET", `subscriptions/${encodeURIComponent(id)}`);
+
+/** Delete my account (owner, Oct 27): every subscription of a customer that would still bill, cancelled now. */
+export async function cancelAllSubscriptions(secretKey: string, customer: string): Promise<number> {
+  const list = await stripeCall<{ data: StripeSubscription[] }>(secretKey, "GET", `subscriptions?customer=${encodeURIComponent(customer)}&status=all&limit=100`);
+  const live = list.data.filter((x) => !["canceled", "incomplete_expired"].includes(x.status));
+  for (const x of live) await stripeCall(secretKey, "DELETE", `subscriptions/${encodeURIComponent(x.id)}`);
+  return live.length;
+}
 
 export const getCheckoutSession = (secretKey: string, id: string) =>
   stripeCall<{ id: string; customer: string | null }>(secretKey, "GET", `checkout/sessions/${encodeURIComponent(id)}`);

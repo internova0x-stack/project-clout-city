@@ -301,6 +301,10 @@ Supabase plan includes about 1 GB of storage and 5 GB of downloads a month; ever
 2. In PostHog → Project settings → Session replay: switch **Record user sessions** on. The game masks every input and
    anything marked `ph-sensitive` (chats, Mayor letters, shoutouts, notes) on the device before it's sent.
 3. Without the token (local development, previews) nothing starts. The Story Studio never sends anything.
+4. Delete my account (migration 0124) also deletes the player's PostHog person and events when the server has
+   `POSTHOG_PERSONAL_API_KEY` (PostHog → Settings → Personal API keys, with "person: write") and `POSTHOG_PROJECT_ID`
+   (the number in the project's URL). Without them, delete the person by hand in PostHog → People (search the
+   player's id) when someone deletes their account.
 
 Checking it works: open the live game in a normal browser (PostHog ignores bots and automated browsers), then PostHog →
 Activity (or Web analytics): a `$pageview` appears within a minute. Sign in and play: the person shows under People with
