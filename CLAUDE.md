@@ -230,6 +230,12 @@ components live in `app/globals.css`.
   Consent (owner, Oct 27; GDPR/ePrivacy): PostHog starts opted out (`opt_out_capturing_by_default`, no cookies or storage) until
   the player taps Accept on `ConsentBanner` (app/layout.tsx); Reject keeps it off; Settings has the `ConsentSwitch`
   (`setConsent`, `consentStatus` in lib/analytics.ts). VIP plans state the renewal and how to cancel above the button (ChatPass).
+- Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
+  signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
+  gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are
+  never counted; over a limit is HTTP 429 'rate_limited'; a broken check lets requests through. game_settings 'rate_limits',
+  mirrored by lib/rateLimits.ts (tests/rateLimits.test.ts). The browser client shows "slow down" (`SLOW_DOWN_EVENT`, GameShell).
+  A new function players can spam: add it to a bucket.
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google
