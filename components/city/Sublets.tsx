@@ -162,7 +162,7 @@ function ListingView({ l, myHomeId, bank, h, err, onBack }: {
         <Face style={l.host.style} />
         <span style={{ flex: 1, minWidth: 0 }}>
           <span className="title" style={{ display: "block" }}>Hosted by {handle(l.host.name)}</span>
-          <span className="meta">{ratingLine(l.host.rating)}{l.note ? ` · “${l.note}”` : ""}</span>
+          <span className="meta ph-sensitive">{ratingLine(l.host.rating)}{l.note ? ` · “${l.note}”` : ""}</span>
         </span>
       </div>
       {!l.applied && (
@@ -286,7 +286,7 @@ function MyListing({ m, h, onEdit }: { m: SubletMine; h: SubletHandlers; onEdit:
               <span className="meta">{ratingLine(a.from.rating)} · {a.from.days} days in the city · {a.weeks} week{a.weeks === 1 ? "" : "s"}</span>
             </span>
           </div>
-          {a.note && <span className="body" style={{ color: "var(--text-2)" }}>&ldquo;{a.note}&rdquo;</span>}
+          {a.note && <span className="body ph-sensitive" style={{ color: "var(--text-2)" }}>&ldquo;{a.note}&rdquo;</span>}
           <div className="row" style={{ gap: 8 }}>
             <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} disabled={h.busy} onClick={() => h.answer(a.id, false)}>Decline</button>
             <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} disabled={h.busy} onClick={() => h.answer(a.id, true)}>Accept</button>

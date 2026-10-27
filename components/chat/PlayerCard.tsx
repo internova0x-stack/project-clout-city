@@ -140,7 +140,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
           {meet && card.canMessage && (
             <div className="meet stack-12">
               {thread.length > 0 && (
-                <div className="meet-thread">
+                <div className="meet-thread ph-sensitive">
                   {thread.map((m) => (
                     <span key={m.id} className={`bubble${m.mine ? " mine" : ""}${m.kind === "reaction" ? " reaction" : ""}`}>
                       <span>{m.body}</span><span className="bubble-time">{chatTime(m.at)}</span>

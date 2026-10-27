@@ -212,6 +212,13 @@ components live in `app/globals.css`.
   `starter_hide`. The pill sits under "Invite your Crew" (components/game/Starter.tsx); the current mission's place glows on
   the map (`PlacePin.glow`). Businesses and Jobs open at Rank 2 (`APP_UNLOCKS`, Lola's `UnlockReveal` once); the daily tasks
   open once when onboarding ends. `?starter=0-10` in the preview (lib/starterSim.ts marks from the simulated city's calls).
+- Analytics (owner, Oct 27): PostHog starts in `instrumentation-client.ts` (Next 15.3+; env `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`,
+  `NEXT_PUBLIC_POSTHOG_HOST`; no token, nothing starts): autocapture, page views, session replay with every input masked and
+  `.ph-sensitive` masked (put that class on anything players type for others: chat, letters, shoutouts, notes; autocapture skips
+  it too). Never on the Story Studio (`analyticsOff`). `identify(supabase user id)` only, never an email or name
+  (`AnalyticsUser`); `/auth/signout` lands on `/?bye=1`, which resets. Custom events: lib/analyticsEvents.ts (pure, tested by
+  tests/analytics.test.ts); `trackedCity` wraps the city API in GameShell (tasks, rent, places, events, C$ Shop); chat sends,
+  story posts and real-money purchases are tracked where they happen. Never put typed text in a property.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

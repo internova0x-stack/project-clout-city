@@ -292,6 +292,21 @@ Studio: **Shop** → **Load** a catalog file → the pictures process with a pro
 Supabase plan includes about 1 GB of storage and 5 GB of downloads a month; every Shop picture together is roughly
 15 MB.
 
+## 2f. Analytics (PostHog, owner Oct 27)
+
+1. In Vercel → Settings → Environment Variables: `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` (PostHog → Project settings →
+   Project token, starts with `phc_`) and `NEXT_PUBLIC_POSTHOG_HOST` (`https://us.i.posthog.com` or
+   `https://eu.i.posthog.com`, whichever region the project is in). Redeploy after adding them: `NEXT_PUBLIC_` values
+   are baked in at build time.
+2. In PostHog → Project settings → Session replay: switch **Record user sessions** on. The game masks every input and
+   anything marked `ph-sensitive` (chats, Mayor letters, shoutouts, notes) on the device before it's sent.
+3. Without the token (local development, previews) nothing starts. The Story Studio never sends anything.
+
+Checking it works: open the live game in a normal browser (PostHog ignores bots and automated browsers), then PostHog →
+Activity (or Web analytics): a `$pageview` appears within a minute. Sign in and play: the person shows under People with
+the Supabase user id; the custom events are listed in `lib/analyticsEvents.ts`. Replays appear under Session replay a few
+minutes after a session ends.
+
 ## 3. Local development (optional)
 
 ```bash

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { AnalyticsUser } from "@/components/Analytics";
 import { Creator, type CreatorStep } from "@/components/Creator";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeLook } from "@/lib/look";
@@ -21,6 +22,9 @@ export default async function CreatePage() {
   // Start over (migration 0114): back to the look step with the username kept, until the new look is saved.
   const restarting = player ? await restartPending() : false;
   return (
+    <>
+    {/* No player yet: the account was just made (signup_completed, once). */}
+    <AnalyticsUser id={user.id} newAccount={!player} />
     <Creator
       needsAgeConfirm={!restarting && user.user_metadata?.age_confirmed !== true && !ageCookie}
       actions={{ createPlayer: restarting ? restartLook : createPlayer, saveTraits, rollBirthLottery, moveIn }}
@@ -31,6 +35,7 @@ export default async function CreatePage() {
       initialCash={player?.birth_cash}
       initialName={player?.display_name}
     />
+    </>
   );
 }
 

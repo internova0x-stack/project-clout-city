@@ -12,7 +12,7 @@ export default function Privacy() {
         <strong>Draft for early access.</strong> This policy is a plain-language placeholder and is pending
         review by a lawyer before Clout City&apos;s public launch. Placeholders are shown in [brackets].
       </p>
-      <p>Last updated: October 12, 2026</p>
+      <p>Last updated: October 27, 2026</p>
 
       <h2>What we collect</h2>
       <ul>
@@ -22,6 +22,8 @@ export default function Privacy() {
         <li><strong>Invite records</strong>: whose invite link you joined through, and who joined through yours.</li>
         <li><strong>Creator records</strong>: if you joined through a creator&apos;s link or code, which creator. Creators see counts only, never who you are.</li>
         <li><strong>Basic technical data</strong> needed to run the service, such as sign-in session cookies and server logs.</li>
+        <li><strong>How you use the game</strong> (analytics): the pages you open, the buttons you tap, and game moments such as signing up, finishing a daily task, paying rent, buying something or sending a message (that one was sent, never what it said). This is linked to your account&apos;s ID number, not your email or real name.</li>
+        <li><strong>Session replays</strong>: recordings of how the game screen changed while you played (taps, scrolling, screens), used to find bugs and confusing spots. Everything you type is hidden before it leaves your device, and so are chats, letters to the Mayor, shoutouts and notes to other players.</li>
       </ul>
 
       <h2>What other players see</h2>
@@ -31,10 +33,10 @@ export default function Privacy() {
       <p>To run the game, keep your account secure, credit invites, and improve Clout City. We don&apos;t sell your personal information.</p>
 
       <h2>Who processes it</h2>
-      <p>We use Supabase (accounts and database) and Vercel (hosting) to run the game. [Counsel to confirm processor list, data locations and transfer terms.]</p>
+      <p>We use Supabase (accounts and database) and Vercel (hosting) to run the game, and PostHog for analytics and session replays. [Counsel to confirm processor list, data locations and transfer terms.]</p>
 
       <h2>Cookies</h2>
-      <p>We use cookies to keep you signed in and to remember an invite link or a creator&apos;s link you followed (so the friend or creator who sent you gets credit). We don&apos;t use advertising cookies.</p>
+      <p>We use cookies to keep you signed in and to remember an invite link or a creator&apos;s link you followed (so the friend or creator who sent you gets credit). PostHog keeps a cookie and browser storage with a random ID so it can tell visits and sessions apart; logging out starts a new, unlinked ID. We don&apos;t use advertising cookies.</p>
 
       <h2>Your choices</h2>
       <p>You can ask us to access, correct or delete your data at [contact email]. Deleting your account removes your profile and invite records.</p>

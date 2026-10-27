@@ -4,6 +4,7 @@ import { AppLoading } from "@/components/AppLoading";
 import { SplashHold } from "@/components/SplashHold";
 import { redirect } from "next/navigation";
 import { GuestMap, type CreatorWelcome } from "@/components/GuestMap";
+import { AnalyticsSignedOut, AnalyticsUser } from "@/components/Analytics";
 import { WelcomeBack, type WelcomeData, type WelcomeItem } from "@/components/WelcomeBack";
 import { restartPlayer } from "./create/actions";
 import { GAME_CONFIG } from "@/lib/config";
@@ -44,12 +45,15 @@ async function Guest({ searchParams }: { searchParams: Search }) {
   if (typeof params.code === "string") redirect(`/auth/callback?code=${encodeURIComponent(params.code)}`);
   const { user, player } = await getSession();
   // A returning player gets the welcome screen (owner, Oct 22): Continue, or Start over (migration 0114).
-  if (user && player && creationDone(player)) return <WelcomeBack data={await welcomeData(player)} onRestart={restartPlayer} />;
+  if (user && player && creationDone(player)) return <><AnalyticsUser id={user.id} /><WelcomeBack data={await welcomeData(player)} onRestart={restartPlayer} /></>;
   if (user) redirect("/create");
 
   return (
+    <>
+    <AnalyticsSignedOut />
     <GuestMap invited={params.invited === "1" || typeof params.ref === "string"} authError={typeof params.auth_error === "string"}
       at={typeof params.at === "string" ? params.at : undefined} creator={await creatorWelcome()} openSignUp={params.signup === "1"} />
+    </>
   );
 }
 

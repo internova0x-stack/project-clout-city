@@ -284,7 +284,7 @@ function OpenJobCard({ job, h, canWork }: { job: OpenJob; h: JobsHandlers; canWo
         </span>
       </button>
       <div><span className={`tag ${decor ? "tag-event" : "tag-neutral"}`}>{decor ? "🛋️ Interior decorator" : "💼 Business manager"}</span></div>
-      {job.note && <span className="subtext">&ldquo;{job.note}&rdquo;</span>}
+      {job.note && <span className="subtext ph-sensitive">&ldquo;{job.note}&rdquo;</span>}
       {decor
         ? <span className="biz-price"><b>{formatCash(job.pay)}</b> + {JOBS.decorator.clout} clout · held until they approve</span>
         : <span className="biz-price"><b>{job.cut}%</b> of what you collect{job.perDay ? ` · about ${formatCash(job.perDay)} a day` : ""}</span>}

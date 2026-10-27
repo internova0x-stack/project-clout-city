@@ -35,7 +35,7 @@ export function PartyChatSheet({
           <h2 className="display-md" style={{ margin: 0 }}>{title}</h2>
           <p className="meta" style={{ margin: 0 }}>No message limit tonight. Be nice; the bouncer reads everything.</p>
         </div>
-        <div className="party-msgs" role="log" aria-live="polite">
+        <div className="party-msgs ph-sensitive" role="log" aria-live="polite">
           {messages.length === 0 && <p className="meta" style={{ textAlign: "center", margin: "24px 0" }}>Nobody's said anything yet. Be the first; it's a party.</p>}
           {messages.map((m) => (
             <div key={m.id} className={`party-msg${m.mine ? " mine" : ""}`}>

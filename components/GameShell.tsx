@@ -53,6 +53,7 @@ import { CouplePrompt, CoupleSheet } from "./dating/Couple";
 import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
+import { track as trackEvent, trackedCity } from "@/lib/analytics";
 import { APP_UNLOCKS, STARTER_FINISH_TOAST, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
 import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/Visits";
 import { KIND_LABEL, VISITS, VISIT_POLL_MS, hostCloutPerGuest, visitAlerts, visitClock, type VisitApi, type VisitHome, type VisitMessage, type VisitRoom, type VisitState } from "@/lib/visits";
@@ -213,12 +214,12 @@ export function GameShell({
   daytimeOverride,
   previewFlow,
   city: initialCity = null,
-  cityApi,
+  cityApi: cityApiIn,
   story: initialStory = null,
   storyApi,
   catalog: initialCatalog = null,
   storeApi,
-  chat,
+  chat: chatIn,
   track,
   ping,
   skills: previewSkills,
@@ -360,6 +361,16 @@ export function GameShell({
   previewGoalsReveal?: GoalsReveal;
 }) {
   const [city, setCity] = useState<CityState | null>(initialCity);
+  // PostHog analytics (owner, Oct 27): the city's and chat's calls report what happened (lib/analytics.ts); no text.
+  const cityApi = useMemo(() => (cityApiIn ? trackedCity(cityApiIn) : undefined), [cityApiIn]);
+  const chat = useMemo(() => (chatIn ? {
+    ...chatIn,
+    send: async (to: string, body: string) => {
+      const r = await chatIn.send(to, body);
+      if (r.ok) trackEvent("chat_message_sent", { channel: "direct", length: body.trim().length });
+      return r;
+    },
+  } : undefined), [chatIn]);
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
   const daytime = daytimeOverride ?? clock.daytime;
   const [tab, setTab] = useState<Tab>("home");
@@ -1243,6 +1254,10 @@ export function GameShell({
       const p = c?.find((x) => x.sku === unlocking);
       if (p?.owned) {
         setUnlocking(null);
+        const paid = { sku: p.sku, product_type: p.type, price: p.priceCents / 100, currency: p.currency.toUpperCase() };
+        trackEvent("purchase_completed", paid);
+        // Shop pieces bought with real money (collector items) also count as Shop purchases, in dollars.
+        if (p.type === "collector_item") trackEvent("shop_item_bought", { item: p.sku, category: "collector", price: p.priceCents / 100, currency: "$", mode: "buy" });
         setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : p.type === "chat_pass" ? (VIP_SKUS.includes(p.sku) ? "👑 You're a VIP. Chat away; every side story is unlocked." : "✨ Unlimited chat is on. Say hi to everyone.") : `🔓 Unlocked: ${p.name}`);
         // Show it where it lives; collector pieces and tickets also change clout and Net Worth.
         if (p.type === "side_arc") openNews(null);
@@ -1252,6 +1267,8 @@ export function GameShell({
         if (cityApi && (p.type === "collector_item" || p.type === "exclusive_event")) void cityApi.refresh().then((r) => r.ok && applyCity(r));
       } else if (Date.now() - started > 90_000) {
         setUnlocking(null);
+        // Paid at Stripe, still unlocking: the payment happened either way.
+        trackEvent("purchase_completed", { sku: unlocking, product_type: p?.type ?? null, price: p ? p.priceCents / 100 : null, currency: p?.currency.toUpperCase() ?? null, unlocked: false });
         setToast("Payment received. Unlocking can take a minute; it will appear on its own.");
       }
     };
@@ -1343,6 +1360,7 @@ export function GameShell({
     setBusy("partychat");
     const r = await partyRoom.say(partyId, body).finally(() => setBusy(null));
     if (!r.ok) { setToast(r.error); return false; }
+    trackEvent("chat_message_sent", { channel: "party", length: body.trim().length });
     setRoom((cur) => (cur && !cur.messages.some((m) => m.id === r.data.id) ? { ...cur, messages: [...cur.messages, r.data] } : cur));
     return true;
   };
@@ -1743,7 +1761,13 @@ export function GameShell({
         vote: (pid: string, o: string) => void runStory(`vote:${pid}`, () => storyApi.vote(pid, o)),
         shadowGuess: (pid: string, o: string) => void runStory(`shadow:${pid}`, () => storyApi.shadowGuess(pid, o)),
         markSeen: (id: string) => void storyApi.markSeen(id).then((r) => r.ok && setFeed(r.feed)),
-        readPost: storyApi.readPost ? (id: string) => void runStory(`read:${id}`, () => storyApi.readPost!(id)) : undefined,
+        readPost: storyApi.readPost ? (id: string) => {
+          const arc = feed?.arcs.find((x) => x.beats.some((bt) => bt.id === id));
+          const beat = arc?.beats.find((bt) => bt.id === id);
+          // Each opening of a full post (the first one pays the clout); `first_read` tells them apart.
+          trackEvent("story_chapter_read", { story: arc?.id ?? null, beat: id, day: beat?.day ?? null, first_read: !beat?.read });
+          void runStory(`read:${id}`, () => storyApi.readPost!(id));
+        } : undefined,
         completeTask: (id: string) => void runStory(`task:${id}`, () => storyApi.completeTask(id)),
         onUnlock: (arc: FeedArc) => (arc.sku ? void buy(arc.sku) : undefined),
         onShared: () => track?.("beat_shared"),
@@ -3057,6 +3081,7 @@ export function GameShell({
               onSend={async (body) => {
                 const r = await visits.say(roomVisitId, body);
                 if (!r.ok) { setToast(r.error); return false; }
+                trackEvent("chat_message_sent", { channel: "visit", length: body.trim().length });
                 visitAfter.current = Math.max(visitAfter.current, r.data.id);
                 setVisitMsgs((m) => (m.some((y) => y.id === r.data.id) ? m : [...m, r.data]));
                 return true;
