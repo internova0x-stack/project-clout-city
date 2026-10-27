@@ -232,7 +232,7 @@ components live in `app/globals.css`.
   (`cancelAllSubscriptions`; stops if Stripe fails), removes Clout TV photos, `auth.admin.deleteUser` (everything cascades;
   creator commissions stay, player set null), optional PostHog person delete (`POSTHOG_PERSONAL_API_KEY`), then `/?bye=1&deleted=1`.
   Terms and Privacy (app/terms, app/privacy, Oct 27) describe what the game does: keep them in step when a feature changes what
-  is collected, shown to others, sold or renewed; [brackets] are the company's details, still to fill in.
+  is collected, shown to others, sold or renewed. Operator: Internova Technologies Inc (Washington, DC), hello@cloutcity.app.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

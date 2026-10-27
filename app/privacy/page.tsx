@@ -4,20 +4,17 @@ export const metadata = { title: "Privacy Policy · Clout City" };
 
 // Privacy Policy (owner, Oct 27): written from what the game stores and sends (lib/, supabase/migrations/), the
 // consent banner (PostHog), Delete my account (migration 0124) and the gap analysis (GDPR/UK GDPR,
-// ePrivacy, US state privacy laws, COPPA). Details in [brackets] are the company's to fill in; counsel should review.
+// ePrivacy, US state privacy laws, COPPA). Company details and retention from the owner (Oct 27); counsel should review.
 export default function Privacy() {
   return (
     <main className="legal">
       <p><Link href="/">‹ Back to Queens</Link></p>
       <h1>Privacy Policy</h1>
       <p>Effective: October 27, 2026</p>
-      <p className="draft">
-        Details in [brackets] are being finalized and will be filled in before Clout City&apos;s public launch.
-      </p>
       <p>
-        This policy explains what [Company legal name] (&quot;Clout City&quot;, &quot;we&quot;, &quot;us&quot;)
+        This policy explains what Internova Technologies Inc (&quot;Clout City&quot;, &quot;we&quot;, &quot;us&quot;)
         collects when you play Clout City NYC, why, who we share it with, and the choices and rights you have. We are the
-        controller of your personal data. Contact: [contact email], [address].
+        controller of your personal data. Contact: <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a>, 431 Woodcrest Dr SE, Washington, DC 20032.
       </p>
 
       <h2>1. The short version</h2>
@@ -92,7 +89,7 @@ export default function Privacy() {
         <li><strong>Vercel</strong>: hosting and delivery of the website.</li>
         <li><strong>Stripe</strong>: payments, subscriptions, receipts and fraud prevention.</li>
         <li><strong>PostHog</strong>: analytics and session replays, only if you accept.</li>
-        <li><strong>[Email provider]</strong>: sending sign-in emails.</li>
+        <li><strong>Our email delivery provider</strong>: sending sign-in links and codes.</li>
         <li><strong>Your browser&apos;s push service</strong> (for example Apple, Google or Mozilla): delivering notifications you turned on.</li>
       </ul>
       <p>
@@ -112,10 +109,10 @@ export default function Privacy() {
       <h2>7. How long we keep it</h2>
       <ul>
         <li><strong>Your account and game data:</strong> while your account exists. When you delete your account, it&apos;s deleted right away from the game&apos;s database, along with your Clout TV photos.</li>
-        <li><strong>Backups:</strong> deleted data can remain in encrypted backups for up to [30] days before they&apos;re overwritten.</li>
-        <li><strong>Purchase records:</strong> Stripe keeps payment records as tax and accounting law requires. Creator commission records are kept without any link to you.</li>
-        <li><strong>Analytics and session replays:</strong> up to [12 months], and deleted with your account [where supported].</li>
-        <li><strong>Server logs:</strong> up to [30] days.</li>
+        <li><strong>Backups:</strong> deleted data can remain in encrypted backups for up to 30 days before they&apos;re overwritten.</li>
+        <li><strong>Purchase records:</strong> Stripe keeps payment records as long as tax and accounting law requires (typically 7 years). Creator commission records are kept without any link to you.</li>
+        <li><strong>Analytics:</strong> up to 12 months. <strong>Session replays:</strong> up to 90 days. Both are deleted when you delete your account.</li>
+        <li><strong>Server logs:</strong> up to 30 days.</li>
         <li>We keep only a count of deleted accounts (when, and whether they&apos;d made a purchase), never who.</li>
       </ul>
 
@@ -124,7 +121,7 @@ export default function Privacy() {
         <li><strong>Delete:</strong> Phone → Settings → Delete my account, any time. It&apos;s immediate and permanent.</li>
         <li><strong>Analytics:</strong> accept or reject on the banner, and change it any time in Settings.</li>
         <li><strong>Notifications, gossip mentions, who can message you:</strong> in Settings.</li>
-        <li><strong>Access, a copy, correction, restriction or objection:</strong> email [contact email] from the address on your account. We answer within one month (EU/UK) or 45 days (US states), and may need to confirm it&apos;s you.</li>
+        <li><strong>Access, a copy, correction, restriction or objection:</strong> email <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a> from the address on your account. We answer within one month (EU/UK) or 45 days (US states), and may need to confirm it&apos;s you.</li>
         <li><strong>EU, UK and EEA:</strong> you also have the right to data portability, to withdraw consent at any time (without affecting earlier processing), and to complain to your data protection authority.</li>
         <li><strong>US state privacy laws</strong> (such as California): you have the right to know, access, correct and delete your personal information, and not to be discriminated against for using these rights. We don&apos;t sell or share personal information for targeted advertising, so there&apos;s nothing to opt out of. An authorized agent may ask for you with your permission.</li>
       </ul>
@@ -140,7 +137,7 @@ export default function Privacy() {
       <p>
         We and our providers process data in the United States and other countries. When personal data from the EU, UK or
         EEA is transferred, we rely on appropriate safeguards such as the European Commission&apos;s Standard Contractual
-        Clauses and the UK addendum. [Counsel to confirm provider regions.]
+        Clauses and the UK addendum.
       </p>
 
       <h2>11. Security</h2>
@@ -158,7 +155,7 @@ export default function Privacy() {
 
       <h2>13. Contact</h2>
       <p>
-        [Company legal name], [address]. Email: [contact email]. [EU/UK representative, if required: name and address.]
+        Internova Technologies Inc, 431 Woodcrest Dr SE, Washington, DC 20032. Email: <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a>.
         See also our <Link href="/terms">Terms of Service</Link>.
       </p>
     </main>
