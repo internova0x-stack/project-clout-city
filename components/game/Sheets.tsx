@@ -100,7 +100,7 @@ export function TasksSheet({
             {!partyDone && (
               <div className="select-card" style={{ cursor: "pointer" }} onClick={onOpenParty} role="button" tabIndex={0}>
                 <span className="select-emoji" aria-hidden="true">🎟️</span>
-                <span className="title" style={{ display: "block" }}>Use the stolen tickets to Peyton Pastel&apos;s party</span>
+                <span className="title" style={{ display: "block" }}>Use the stolen tickets to celebrity influencer Peyton Pastel&apos;s party</span>
                 <span className="subtext" style={{ display: "block" }}>First task. Velvet Static, Long Island City. You&apos;re Brittany tonight.</span>
               </div>
             )}
@@ -200,7 +200,7 @@ export function EventsSheet({
         {!partyDone && (
           <button className="party-card" style={{ textAlign: "left", width: "100%" }} onClick={onOpenParty}>
             <span className="tag tag-event">🎟️ Stolen tickets · Happening now</span>
-            <span className="title" style={{ display: "block", marginTop: 8 }}>Peyton Pastel&apos;s launch party (you&apos;re not invited)</span>
+            <span className="title" style={{ display: "block", marginTop: 8 }}>Celebrity influencer Peyton Pastel&apos;s launch party (you&apos;re not invited)</span>
             <span className="subtext" style={{ display: "block" }}>Velvet Static, Long Island City</span>
           </button>
         )}
