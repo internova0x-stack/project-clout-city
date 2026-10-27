@@ -97,6 +97,9 @@ components live in `app/globals.css`.
   service role). Open: recorded only. Lost: `payment_refund` under `<event>:lost`, the creator's commission reversed, and
   for a VIP charge (no purchase matches; player found by the charge's customer) the webhook cancels their subscriptions.
   Won or closed otherwise: nothing changes.
+  EU/UK withdrawal (owner, Oct 27): every Checkout Session requires the buyer's tick (`consent_collection.terms_of_service`,
+  `withdrawalText` in lib/stripe.ts: delivered at once, the 14-day right ends); without the Terms URL in Stripe's public details
+  it falls back to the same words by the pay button (`consent: "notice"`).
 - Insights (migration 0053): `admin_insights()` is the Studio's numbers (admin only). Sessions come from
   `session_ping()` (GameShell, every `GAME_CONFIG.sessionPingMs`); VIP renewals from the webhook's `invoice.paid`
   (`payment_renewal`). Revenue counts paid, unrefunded purchases plus renewals.

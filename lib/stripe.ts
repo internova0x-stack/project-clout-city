@@ -33,6 +33,36 @@ export interface CheckoutInput {
   recurring?: "month" | "year" | null;
   /** The player's Stripe customer (migration 0079), so every purchase lands on one customer and its billing portal. */
   customer?: string | null;
+  /**
+   * EU/UK withdrawal (owner, Oct 27): "required" makes Checkout show a box the buyer must tick (needs the Terms URL in
+   * Stripe's public details); "notice" only says it beside the pay button (the fallback when that URL isn't set).
+   */
+  consent?: "required" | "notice";
+}
+
+/**
+ * EU/UK 14-day withdrawal (Consumer Rights Directive art. 16(m); Terms section 5): digital content delivered at once
+ * loses the right only with the buyer's express consent and acknowledgement, given at checkout.
+ */
+export function withdrawalText(siteOrigin: string, subscription: boolean): string {
+  const what = subscription ? "VIP to start right away" : "my purchase delivered right away";
+  return `I agree to the [Terms](${siteOrigin}/terms). I want ${what}, and I understand I lose my 14-day right to withdraw `
+    + `once it starts${subscription ? " (I can still cancel any time to stop renewals)" : ""}.`;
+}
+
+/** The same, as a notice beside the pay button. */
+export const withdrawalNotice = (subscription: boolean) =>
+  `By paying, you ask for ${subscription ? "VIP to start" : "your purchase"} right away and accept that you lose your 14-day `
+  + `right to withdraw once it starts${subscription ? " (you can still cancel any time to stop renewals)" : ""}. See our Terms.`;
+
+/** The consent part of a Checkout Session: a required tick box, or the same words beside the pay button. */
+function consentParams(i: CheckoutInput): Record<string, unknown> {
+  let origin = "";
+  try { origin = new URL(i.successUrl).origin; } catch { /* a relative URL: the link stays relative */ }
+  const message = withdrawalText(origin, !!i.recurring);
+  return (i.consent ?? "required") === "required"
+    ? { consent_collection: { terms_of_service: "required" }, custom_text: { terms_of_service_acceptance: { message } } }
+    : { custom_text: { submit: { message: withdrawalNotice(!!i.recurring) } } };
 }
 
 /** The returning customer, or the email for a new one. */
@@ -58,6 +88,7 @@ export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
       },
       metadata,
       subscription_data: { metadata },
+      ...consentParams(i),
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     };
   }
@@ -76,12 +107,25 @@ export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
     },
     metadata,
     payment_intent_data: { metadata },
+    ...consentParams(i),
     // Sessions that are never paid end after 30 minutes, which clears the "unlocking" state.
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
   };
 }
 
 export async function createCheckoutSession(secretKey: string, input: CheckoutInput): Promise<{ id: string; url: string }> {
+  try {
+    return await checkoutOnce(secretKey, input);
+  } catch (e) {
+    // The tick box needs the Terms URL set in Stripe (Settings → Public details). Until it is, checkout still works,
+    // with the same words beside the pay button.
+    if ((input.consent ?? "required") !== "required" || !/terms of service/i.test(String(e))) throw e;
+    console.error("Stripe checkout: set the Terms of service URL in Stripe's public details to require the withdrawal tick box", e);
+    return checkoutOnce(secretKey, { ...input, consent: "notice" });
+  }
+}
+
+async function checkoutOnce(secretKey: string, input: CheckoutInput): Promise<{ id: string; url: string }> {
   const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: { Authorization: `Bearer ${secretKey}`, "Content-Type": "application/x-www-form-urlencoded" },
