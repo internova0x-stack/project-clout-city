@@ -53,6 +53,8 @@ import { CouplePrompt, CoupleSheet } from "./dating/Couple";
 import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
+import { BarksleySheet } from "./city/Barksley";
+import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
 import { APP_UNLOCKS, STARTER_FINISH_TOAST, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
 import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/Visits";
@@ -523,6 +525,8 @@ export function GameShell({
   }, []);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  // Sir Barksley (owner, Oct 27): his scene; `first` is the Starter Week consoling, once per device.
+  const [barksley, setBarksley] = useState<{ first: boolean } | null>(null);
   // #20: each tap on the place's regular inside the room starts their talk in the panel.
   const [talkNonce, setTalkNonce] = useState(0);
   // v0.11: which floor of the building (the exclusive venue has a second, the Penthouse Floor).
@@ -1573,6 +1577,12 @@ export function GameShell({
     else if (g.kind === "shop") openShop(g.category);
     else setPanel(g.panel === "look" ? (cityOn ? "look" : "profile") : g.panel);
   };
+  // Starter Week's dog: at Astoria Park for the first time this week, Sir Barksley's scene opens by itself (owner, Oct 27).
+  const atPark = (inside?.id ?? (city?.player.at_place === BARKSLEY.placeId ? place?.id : null)) === BARKSLEY.placeId;
+  useEffect(() => {
+    if (atPark && starter && !barksleyMet() && !barksley) setBarksley({ first: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [atPark, !!starter]);
   // The current mission's place glows on the map (owner, Oct 26).
   const starterPlace = (() => { const g = starter ? nextMission(starter.done)?.go : null; return g?.kind === "place" ? g.place : null; })();
   const starterPins = useMemo(() => starterPlace ? cityPins.map((p) => p.id === starterPlace ? { ...p, glow: true } : p) : cityPins, [cityPins, starterPlace]);
@@ -1705,6 +1715,7 @@ export function GameShell({
     } : undefined,
     onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
+    onBarksley: () => setBarksley({ first: !barksleyMet() }),
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     onStation: radio || tv ? onStation : undefined,
@@ -3090,6 +3101,8 @@ export function GameShell({
               onReport={() => setToast("Noted. Block them from their card, or tell the Mayor if it keeps up.")}
             />
           )}
+          <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
+            onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog."); } setBarksley(null); }} />
           {starter && (
             <StarterSheet open={panel === "starter"} onClose={() => setPanel(null)} done={starter.done} daysLeft={starter.daysLeft}
               onGo={starterGo} onHide={() => { setStarter(null); setPanel(null); void starterIn?.hide(); setToast("Starter Week hidden. You've got this."); }} />
