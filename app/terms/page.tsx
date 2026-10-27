@@ -4,18 +4,15 @@ export const metadata = { title: "Terms of Service · Clout City" };
 
 // Terms of Service (owner, Oct 27): written from what the game does (purchases, VIP, player content, Clout TV,
 // the lotto, creators, Delete my account) and the gap analysis (FTC / California auto-renewal, EU consumer rights,
-// DMCA). Details in [brackets] are the company's to fill in; counsel should review before v1.0.
+// DMCA). Company details from the owner (Oct 27); counsel should review before v1.0.
 export default function Terms() {
   return (
     <main className="legal">
       <p><Link href="/">‹ Back to Queens</Link></p>
       <h1>Terms of Service</h1>
       <p>Effective: October 27, 2026</p>
-      <p className="draft">
-        Details in [brackets] are being finalized and will be filled in before Clout City&apos;s public launch.
-      </p>
       <p>
-        These terms are an agreement between you and [Company legal name] (&quot;Clout City&quot;, &quot;we&quot;,
+        These terms are an agreement between you and Internova Technologies Inc (&quot;Clout City&quot;, &quot;we&quot;,
         &quot;us&quot;) about Clout City NYC, the browser game at this website. By creating an account or playing, you
         agree to them and to our <Link href="/privacy">Privacy Policy</Link>. If you don&apos;t agree, please don&apos;t
         use Clout City.
@@ -31,7 +28,7 @@ export default function Terms() {
       <h2>2. Your account</h2>
       <p>
         You sign in with a link or code sent to your email, or with Google. Keep your email secure: anyone who can read it
-        can sign in as you. You&apos;re responsible for what happens on your account. Tell us at [contact email] if you
+        can sign in as you. You&apos;re responsible for what happens on your account. Tell us at <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a> if you
         think someone else is using it.
       </p>
 
@@ -63,7 +60,7 @@ export default function Terms() {
       <ul>
         <li><strong>What you get:</strong> a licence to use the item or feature in Clout City for as long as your account exists and the game runs. Clout Couture pieces are numbered limited editions; a number is never reissued.</li>
         <li><strong>Delivery:</strong> digital purchases are delivered to your account right after payment (it can take a minute).</li>
-        <li><strong>Refunds:</strong> purchases are final except where the law gives you a right to a refund, or where we choose to give one (for example, if something you bought didn&apos;t arrive or didn&apos;t work). Ask at [contact email]. If a payment is refunded, the item or time it paid for is removed.</li>
+        <li><strong>Refunds:</strong> purchases are final except where the law gives you a right to a refund, or where we choose to give one (for example, if something you bought didn&apos;t arrive or didn&apos;t work). Ask at <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a>. If a payment is refunded, the item or time it paid for is removed.</li>
         <li><strong>Chargebacks:</strong> if you dispute a payment with your bank, we may remove what it paid for while the dispute is open, and close the account if it&apos;s found to be fraudulent.</li>
         <li><strong>EU and UK players:</strong> you normally have 14 days to withdraw from an online purchase. Because digital content is delivered immediately, that right ends once delivery starts, if you agreed to immediate delivery and acknowledged losing the right. This doesn&apos;t affect your legal rights if an item is faulty.</li>
       </ul>
@@ -100,8 +97,8 @@ export default function Terms() {
 
       <h2>8. Copyright complaints</h2>
       <p>
-        If you believe something in Clout City infringes your copyright, send a notice to our designated agent: [Agent
-        name], [address], [email]. Include: your signature; the work you say is infringed; what in Clout City infringes
+        If you believe something in Clout City infringes your copyright, send a notice to our designated agent: Copyright
+        Agent, Internova Technologies Inc, 431 Woodcrest Dr SE, Washington, DC 20032, <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a> (subject line &quot;DMCA notice&quot;). Include: your signature; the work you say is infringed; what in Clout City infringes
         it and where; your contact details; a statement that you believe in good faith the use isn&apos;t authorized;
         and a statement, under penalty of perjury, that your notice is accurate and you&apos;re the owner or authorized to
         act for them. We remove infringing material promptly. If your content was removed and you believe that was a
@@ -113,7 +110,7 @@ export default function Terms() {
       <p>Don&apos;t:</p>
       <ul>
         <li>use bots, scripts, macros or modified clients, or automate play;</li>
-        <li>exploit bugs (tell us instead at [contact email] or in the Mayor app);</li>
+        <li>exploit bugs (tell us instead at <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a> or in the Mayor app);</li>
         <li>make extra accounts to farm invite, creator or Starter Week rewards;</li>
         <li>buy, sell or trade accounts, items or virtual cash for anything of real value;</li>
         <li>harass, threaten or scam other players, or try to get their personal information;</li>
@@ -131,7 +128,7 @@ export default function Terms() {
       <ul>
         <li><strong>You:</strong> delete your account any time in Phone → Settings → Delete my account. It&apos;s immediate and permanent: your character, progress, chats, photos and purchases go with it, and any VIP plan is cancelled. (&quot;Start over&quot; on the welcome screen resets your character instead and keeps your account and purchases.)</li>
         <li><strong>Us:</strong> we may suspend or close accounts that break these terms or the law, or that put other players or the game at risk. If we close an account for breaking these terms, purchases aren&apos;t refunded, except where the law requires.</li>
-        <li><strong>If Clout City shuts down,</strong> we&apos;ll give at least [30] days&apos; notice in the game and stop selling real-money items and new VIP periods.</li>
+        <li><strong>If Clout City shuts down,</strong> we&apos;ll give at least 30 days&apos; notice in the game and stop selling real-money items and new VIP periods.</li>
       </ul>
 
       <h2>12. Disclaimers</h2>
@@ -146,14 +143,15 @@ export default function Terms() {
         To the extent the law allows, we&apos;re not liable for indirect, incidental, special or consequential losses, or
         loss of data, profits or virtual items, and our total liability to you is limited to the greater of what you paid
         us in the 12 months before the claim and US$50. Some places don&apos;t allow these limits, so they may not apply to
-        you. [Counsel to confirm.]
+        you.
       </p>
 
       <h2>14. Disputes and governing law</h2>
       <p>
-        These terms are governed by the laws of [State], USA, without regard to conflict-of-law rules. Before filing a
-        claim, contact us at [contact email] so we can try to resolve it informally. [Counsel to complete: courts or
-        arbitration, class-action waiver, small-claims exception.] If you live in the EU or UK, you can also bring
+        These terms are governed by the laws of the District of Columbia, USA, without regard to conflict-of-law rules. Before filing a
+        claim, contact us at <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a> so we can try to resolve it informally within 60 days. If we can&apos;t, claims go to the
+        courts located in Washington, DC, and you and we agree to their jurisdiction; either of us may instead bring a claim in
+        small-claims court where you live if it qualifies. If you live in the EU or UK, you can also bring
         proceedings in your home country, and your local consumer protections still apply.
       </p>
 
@@ -165,7 +163,7 @@ export default function Terms() {
       </p>
 
       <h2>16. Contact</h2>
-      <p>[Company legal name], [address]. Email: [contact email]. In the game, the Phone&apos;s Mayor app reaches our team too.</p>
+      <p>Internova Technologies Inc, 431 Woodcrest Dr SE, Washington, DC 20032. Email: <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a>. In the game, the Phone&apos;s Mayor app reaches our team too.</p>
     </main>
   );
 }
