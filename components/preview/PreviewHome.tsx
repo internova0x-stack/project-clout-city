@@ -31,6 +31,7 @@ import type { CatalogItem } from "@/lib/shopCatalog";
 import { GameShell, type Flow } from "@/components/GameShell";
 import { ECONOMY } from "@/lib/economy";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
+import { createStarterSim } from "@/lib/starterSim";
 import { createBusinessSim } from "@/lib/businessSim";
 import { createTogetherSim } from "@/lib/togetherSim";
 import type { CityResult } from "@/lib/cityState";
@@ -354,17 +355,58 @@ export function PreviewHome({
   }, [sim, partyReset, couturePreset]);
 
   // City actions can finish story tasks (as do_action does in SQL).
+  // Starter Week in memory (lib/starterSim.ts): the wrapped calls below mark missions the way migration 0122's triggers do.
+  const starterSim = useMemo(() => createStarterSim(Number(starterPreset) || 0, (cash, clout) => sim.huntReward(cash, clout)), [starterPreset, sim]);
+  const mark = starterSim.mark;
   const api = useMemo(() => ({
     ...sim,
+    async travel(...a: Parameters<NonNullable<typeof sim.travel>>): Promise<CityResult> {
+      const [placeId] = a;
+      const r = await sim.travel!(...a);
+      if (r.ok && placeId === "hell-gate-park") mark("park");
+      return r;
+    },
+    async acceptGig(offerId: number): Promise<CityResult> {
+      const r = await sim.acceptGig(offerId);
+      if (r.ok) mark("gig");
+      return r;
+    },
+    async collectGig(offerId: number): Promise<CityResult> {
+      const r = await sim.collectGig(offerId);
+      if (r.ok) mark("collect");
+      return r;
+    },
+    async payBill(billId: number): Promise<CityResult> {
+      const r = await sim.payBill(billId);
+      if (r.ok && r.state.bills.find((b) => b.id === billId)?.kind === "rent") mark("rent");
+      return r;
+    },
+    async saveLook(...a: Parameters<NonNullable<typeof sim.saveLook>>): Promise<CityResult> {
+      const r = await sim.saveLook!(...a);
+      if (r.ok) mark("look");
+      return r;
+    },
+    async saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult> {
+      const r = await sim.saveHomeLayout(layout);
+      if (r.ok && layout.some((l) => r.state.items.some((i) => `item:${i.id}` === l.id && i.category === "home" && i.acquired === "bought"))) mark("furniture");
+      return r;
+    },
+    async calendarAttend(eventId: string): Promise<CityResult> {
+      const r = await sim.calendarAttend!(eventId);
+      if (r.ok) mark("event");
+      return r;
+    },
     async attendExclusiveEvent(eventId: string): Promise<CityResult> {
       const ev = catalogRef.current?.find((p) => p.event?.id === eventId)?.event;
       if (!ev) return { ok: false, error: "That event doesn't exist." };
       const r = await sim.partyEvent(ev);
+      if (r.ok) mark("event");
       if (r.ok) await previewStoreAttended(eventId);
       return r;
     },
     async attendEvent(eventId: string): Promise<CityResult> {
       const r = await sim.attendEvent(eventId);
+      if (r.ok) mark("event");
       if (r.ok) await previewDateWent("event", eventId);
       if (r.ok) await previewCrewWent(CLUB_EVENTS.find((e) => e.id === eventId)?.placeId ?? "", eventId);
       return r;
@@ -372,6 +414,8 @@ export function PreviewHome({
     async doAction(placeId: string, actionId: string): Promise<CityResult> {
       const r = await sim.doAction(placeId, actionId);
       if (!r.ok) return r;
+      if (placeId === "ditmars-deli") mark("breakfast");
+      if (placeId === "hell-gate-park") mark("park");
       await previewDateWent("place", placeId);
       await previewCrewWent(placeId, actionId);
       if (placeById(placeId)?.postcard) await previewStoreVisited(placeId);
@@ -382,7 +426,7 @@ export function PreviewHome({
       const fresh = await sim.refresh();
       return fresh.ok ? { ...fresh, gain: { ...r.gain, clout: (r.gain?.clout ?? 0) + t.clout } } : r;
     },
-  }), [sim]);
+  }), [sim, mark]);
 
   // Meeting players: ?chat=out starts with today's messages used up (the unlimited chat offer).
   useEffect(() => {
@@ -393,10 +437,11 @@ export function PreviewHome({
     void previewCrowdPreset(Number(q.get("crowd")) || 0);
   }, []);
   const chat = useMemo<ChatApi>(() => ({
-    list: previewChatList, thread: previewChatThread, crowned: previewCrowned, send: previewChatSend, status: previewChatStatus,
+    list: previewChatList, thread: previewChatThread, crowned: previewCrowned, status: previewChatStatus,
     block: previewChatBlock, report: previewChatReport, card: previewPlayerCard, skills: previewSkillsOf,
     react: previewChatReact, setMessagesFrom: previewSetMessagesFrom, presence: previewPresence, counts: previewPlaceCounts,
-  }), []);
+    async send(...a: Parameters<typeof previewChatSend>) { const r = await previewChatSend(...a); if (r.ok) mark("message"); return r; },
+  }), [mark]);
   // Crushes and date nights in memory; a date's bonus clout is mirrored into the sim's player.
   const paid = useRef(new Set<number>());
   const dating = useMemo<DatingApi>(() => {
@@ -474,11 +519,12 @@ export function PreviewHome({
     async state() { await (gossipReady.current ??= previewGossipReset(gossipPreset)); return previewGossipState(); },
     async find(placeId, via) {
       const r = await previewGossipFind(placeId, via);
+      if (r.ok) mark("gossip");
       if (r.ok && r.data.bonus?.clout) sim.storyClout(r.data.bonus.clout);
       return r.ok ? { ok: true, data: { ...r.data, taskCash: sim.gossipTask(placeId, via) } } : r;
     },
     share: previewGossipShare,
-  }), [gossipPreset, sim]);
+  }), [gossipPreset, sim, mark]);
   // v0.11 party rooms in memory (?party=ticket, then go upstairs at the lounge while the party's on).
   const partyRoomApi = useMemo<PartyRoomApi>(() => ({ room: previewPartyRoom, say: previewPartySay, report: async () => previewPartyReport() }), []);
   // v0.9 party keepsakes in memory (?party=invite|sent).
@@ -528,7 +574,7 @@ export function PreviewHome({
       couple={cityOff ? undefined : couple}
       sublet={cityOff ? undefined : sublet}
       visits={cityOff ? undefined : visitApi}
-      starter={starterPreset !== undefined ? { done: Math.max(0, Math.min(10, Number(starterPreset) || 0)), daysLeft: 6 } : undefined}
+      starter={cityOff || starterPreset === undefined ? undefined : starterSim.api}
       lockAppsPreview={appsPreset === "locked"}
       crew={cityOff ? undefined : crewApi}
       party={cityOff || storyOff ? undefined : partyApi}

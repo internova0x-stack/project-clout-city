@@ -2430,3 +2430,9 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* With the Starter Week pill under the invite, home cards sit a row lower again. */
 .game.has-starter .story-prompt { top:calc(164px + var(--safe-top)); }
 .game.has-starter.has-crib .story-prompt { top:calc(212px + var(--safe-top)); }
+/* Starter Week (owner, Oct 26): the current mission's place glows on the map. */
+.map-pin.glow .map-pin-pill, .map-pin.glow.compact .map-pin-tile, .map-pin.glow .map-cluster { box-shadow:0 0 0 2px var(--neon-500), 0 0 14px 4px rgba(255, 64, 160, .6); animation:starter-glow 1.6s ease-in-out infinite; }
+.map-pin.glow { z-index:3; }
+.map-pin-star { margin-left:4px; font-size:12px; }
+@keyframes starter-glow { 50% { box-shadow:0 0 0 2px var(--neon-500), 0 0 22px 8px rgba(255, 64, 160, .3); } }
+@media (prefers-reduced-motion: reduce) { .map-pin.glow .map-pin-pill, .map-pin.glow.compact .map-pin-tile, .map-pin.glow .map-cluster { animation:none; } }
