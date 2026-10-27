@@ -114,6 +114,10 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
      access to PaymentIntents, Charges, Balance transactions and Invoices); when it can't, it estimates 2.9% + 30¢
      and the Studio marks that row with an asterisk.
    - Copy its **Signing secret** (`whsec_…`).
+4. **EU/UK withdrawal tick box** (owner, Oct 27): Settings → Business → **Public details** → set **Terms of service** to
+   `https://cloutcity.app/terms` (in live and in Sandbox). Checkout then shows a box buyers must tick: they want the
+   purchase right away and lose the 14-day right to withdraw. Until it's set, checkout still works and shows the same
+   words beside the pay button (the server logs a reminder).
    - Vercel preview links sit behind Vercel's login by default, which Stripe can't pass. Point
      the webhook at the production address, or add a second endpoint for a preview with
      **Deployment Protection** off for it.

@@ -60,3 +60,16 @@ test("unlimited chat's monthly and yearly plans are subscriptions; forever is a 
   assert.match(yearly, /line_items%5B0%5D%5Bprice_data%5D%5Brecurring%5D%5Binterval%5D=year/);
   assert.equal(checkoutParams({ ...base, sku: "chat-unlimited-forever", priceId: null, amountCents: 11999 }).mode, "payment");
 });
+
+test("checkout asks for the EU/UK withdrawal consent (a tick box), or says it by the pay button", () => {
+  const base = { priceId: null, name: "x", amountCents: 299, currency: "usd", successUrl: "https://cloutcity.app/home?paid=1", cancelUrl: "https://cloutcity.app/home", playerId: "p", sku: "s", productType: "side_arc" };
+  const box = checkoutParams(base) as { consent_collection: { terms_of_service: string }; custom_text: { terms_of_service_acceptance: { message: string } } };
+  assert.equal(box.consent_collection.terms_of_service, "required");
+  assert.match(box.custom_text.terms_of_service_acceptance.message, /\[Terms\]\(https:\/\/cloutcity\.app\/terms\).*14-day right to withdraw/);
+  const sub = checkoutParams({ ...base, recurring: "month" }) as typeof box;
+  assert.match(sub.custom_text.terms_of_service_acceptance.message, /cancel any time/);
+  const notice = checkoutParams({ ...base, consent: "notice" }) as { consent_collection?: unknown; custom_text: { submit: { message: string } } };
+  assert.equal(notice.consent_collection, undefined);
+  assert.match(notice.custom_text.submit.message, /^By paying, you ask for your purchase right away/);
+  for (const m of [box.custom_text.terms_of_service_acceptance.message, notice.custom_text.submit.message]) assert.ok(m.length <= 1200);
+});
