@@ -93,6 +93,10 @@ components live in `app/globals.css`.
   (`app/home/membershipActions.ts`) reads the renewal date and cancel/payment status live from Stripe and opens the
   billing portal for the customer in `stripe_customers` (saved by the webhook, server only). Cancelling runs to the
   end of the paid period (owner, Oct 18).
+  Chargebacks (migration 0125, owner Oct 27): `charge.dispute.created`/`closed` → `payment_dispute` (`payment_disputes`,
+  service role). Open: recorded only. Lost: `payment_refund` under `<event>:lost`, the creator's commission reversed, and
+  for a VIP charge (no purchase matches; player found by the charge's customer) the webhook cancels their subscriptions.
+  Won or closed otherwise: nothing changes.
 - Insights (migration 0053): `admin_insights()` is the Studio's numbers (admin only). Sessions come from
   `session_ping()` (GameShell, every `GAME_CONFIG.sessionPingMs`); VIP renewals from the webhook's `invoice.paid`
   (`payment_renewal`). Revenue counts paid, unrefunded purchases plus renewals.

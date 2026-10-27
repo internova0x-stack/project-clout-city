@@ -133,6 +133,7 @@ from (values
   ('0121_home_visits.sql', coalesce((to_regclass('public.visits') is not null), false)),
   ('0122_starter_week.sql', coalesce((to_regclass('public.starter_marks') is not null), false)),
   ('0123_starter_dog_tip.sql', coalesce((select (value -> 'missions') @> '[{"id": "park", "cash": 500}]' from public.game_settings where key = 'starter'), false)),
-  ('0124_account_delete.sql', coalesce((to_regclass('public.account_deletions') is not null), false))
+  ('0124_account_delete.sql', coalesce((to_regclass('public.account_deletions') is not null), false)),
+  ('0125_payment_disputes.sql', coalesce((to_regclass('public.payment_disputes') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

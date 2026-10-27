@@ -129,8 +129,8 @@ export default function Privacy() {
       <h2>9. Children</h2>
       <p>
         Clout City is for adults 18 and older. We don&apos;t knowingly collect personal data from anyone under 18, and we
-        never knowingly collect data from children under 13. If you believe a minor has an account, tell us at [contact
-        email] and we&apos;ll delete it.
+        never knowingly collect data from children under 13. If you believe a minor has an account, tell us at <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a> and
+        we&apos;ll delete it.
       </p>
 
       <h2>10. International transfers</h2>

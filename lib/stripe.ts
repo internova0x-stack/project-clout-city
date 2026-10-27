@@ -127,6 +127,10 @@ export async function cancelAllSubscriptions(secretKey: string, customer: string
   return live.length;
 }
 
+/** Chargebacks (migration 0125): a dispute names its charge, and the charge its customer (and a VIP charge its invoice). */
+export const getCharge = (secretKey: string, charge: string) =>
+  stripeCall<{ customer: string | null; invoice?: string | null }>(secretKey, "GET", `charges/${encodeURIComponent(charge)}`);
+
 export const getCheckoutSession = (secretKey: string, id: string) =>
   stripeCall<{ id: string; customer: string | null }>(secretKey, "GET", `checkout/sessions/${encodeURIComponent(id)}`);
 

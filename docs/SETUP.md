@@ -104,7 +104,11 @@ aren't switched on and nothing is charged. Stay in **test mode** until v1.0.
    - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
      `checkout.session.expired`, `charge.refunded`, and (unlimited chat's monthly plan, migration
      0047) `customer.subscription.updated`, `customer.subscription.deleted`, and (VIP renewals in
-     the Studio's Insights, migration 0053) `invoice.paid`
+     the Studio's Insights, migration 0053) `invoice.paid`, and (chargebacks, migration 0125)
+     `charge.dispute.created` and `charge.dispute.closed`
+   - Chargebacks (migration 0125): an open dispute is only recorded; a lost one removes what the payment bought, like
+     a full refund, takes back a creator's commission on it, and for a VIP charge cancels the player's subscription
+     (the key needs write access to Subscriptions and read access to Charges); a won one changes nothing.
    - Creator commissions (migration 0088) use these same events: no new ones. For a referred player the webhook
      reads Stripe's fee from the payment's balance transaction (the restricted key, if you use one, needs read
      access to PaymentIntents, Charges, Balance transactions and Invoices); when it can't, it estimates 2.9% + 30¢
