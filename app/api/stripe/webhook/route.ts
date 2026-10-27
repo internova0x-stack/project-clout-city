@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { paymentCosts, verifyStripeSignature } from "@/lib/stripe";
+import { cancelAllSubscriptions, getCharge, paymentCosts, verifyStripeSignature } from "@/lib/stripe";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 
 // The Stripe webhook: the only thing that grants (or, on refund, revokes) what a
@@ -7,7 +7,8 @@ import { getAdminSupabase } from "@/lib/supabase/admin";
 // Point a Stripe webhook endpoint at /api/stripe/webhook with these events:
 // checkout.session.completed, checkout.session.async_payment_succeeded,
 // checkout.session.expired, charge.refunded, and (unlimited chat's monthly plan, migration 0047)
-// customer.subscription.updated and customer.subscription.deleted, plus invoice.paid (renewals).
+// customer.subscription.updated and customer.subscription.deleted, plus invoice.paid (renewals), and (chargebacks,
+// migration 0125) charge.dispute.created and charge.dispute.closed.
 // Creators (migration 0088): a payment by a referred player also writes the creator's commission on net revenue
 // (Stripe's fee from the balance transaction, and tax), and a refund, full or partial, takes back its share.
 
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
       call = { fn: "payment_refund", args: { p_event: event.id, p_payment: o.payment_intent } };
       break;
   }
+  if (event.type === "charge.dispute.created" || event.type === "charge.dispute.closed") return dispute(db, event, o);
   if (!call) {
     // A partial refund keeps access, but still takes back its share of a creator's commission.
     if (event.type === "charge.refunded") {
@@ -90,6 +92,47 @@ export async function POST(request: NextRequest) {
   const commission = await creatorCommission(db, event, o, call.args.p_player as string | undefined);
   if (commission === "error") return NextResponse.json({ error: "db" }, { status: 500 });
   return NextResponse.json({ received: true, result: data, commission });
+}
+
+/**
+ * Chargebacks (migration 0125, Terms section 5): an open dispute is recorded; a lost one is handled like a full refund
+ * (and, for a VIP charge, the customer's subscriptions are cancelled, which ends VIP); a won one changes nothing.
+ */
+async function dispute(db: NonNullable<ReturnType<typeof getAdminSupabase>>, event: StripeEvent, o: Record<string, unknown>) {
+  const secret = process.env.STRIPE_SECRET_KEY ?? "";
+  const id = (v: unknown) => (typeof v === "string" ? v : v && typeof v === "object" ? ((v as { id?: string }).id ?? null) : null);
+  const charge = id(o.charge);
+  let customer: string | null = null;
+  let invoice: string | null = null;
+  if (charge && secret) {
+    try {
+      const c = await getCharge(secret, charge);
+      customer = id(c.customer);
+      invoice = id(c.invoice);
+    } catch (e) { console.error(`stripe ${event.id} charge not read`, e); }
+  }
+  const { data, error } = await db.rpc("payment_dispute", {
+    p_event: event.id, p_dispute: o.id, p_payment: id(o.payment_intent), p_amount: o.amount, p_currency: o.currency,
+    p_reason: o.reason, p_status: event.type === "charge.dispute.created" ? "open" : o.status, p_customer: customer,
+  });
+  if (error) {
+    console.error(`stripe ${event.type} ${event.id} failed`, error);
+    return NextResponse.json({ error: "db" }, { status: 500 });
+  }
+  const lost = event.type === "charge.dispute.closed" && o.status === "lost"; // also on a retry (the commission step is idempotent)
+  if (lost) {
+    // A lost dispute takes back the creator's whole commission on that payment, like a full refund (migration 0088).
+    const r = await db.rpc("creator_commission_refund", {
+      p_event: `${event.id}:dispute`, p_payment_intent: id(o.payment_intent), p_invoice: invoice, p_refunded: o.amount, p_amount: o.amount,
+    });
+    if (r.error && !missing(r.error)) return NextResponse.json({ error: "db" }, { status: 500 });
+  }
+  let cancelled: number | null = null;
+  if ((data as { subscription_charge?: boolean } | null)?.subscription_charge && customer && secret) {
+    // A 500 makes Stripe resend the event, but the dispute is already recorded: cancelling is retried by hand.
+    try { cancelled = await cancelAllSubscriptions(secret, customer); } catch (e) { console.error(`stripe ${event.id} VIP not cancelled`, e); }
+  }
+  return NextResponse.json({ received: true, result: data, cancelled });
 }
 
 /**
