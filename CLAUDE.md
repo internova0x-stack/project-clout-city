@@ -230,6 +230,10 @@ components live in `app/globals.css`.
   Consent (owner, Oct 27; GDPR/ePrivacy): PostHog starts opted out (`opt_out_capturing_by_default`, no cookies or storage) until
   the player taps Accept on `ConsentBanner` (app/layout.tsx); Reject keeps it off; Settings has the `ConsentSwitch`
   (`setConsent`, `consentStatus` in lib/analytics.ts). VIP plans state the renewal and how to cancel above the button (ChatPass).
+- Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
+  tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
+  for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google
+  after its hour).
 - Delete my account (migration 0124, owner Oct 27; GDPR erasure): Settings' last row → `DeleteAccountSheet` (type DELETE) →
   `deleteAccount` (app/home/accountActions.ts): `account_delete_prepare` (service role: clears admin `reviewed_by` marks,
   counts the deletion in `account_deletions` without who, returns the Stripe customer), cancels every live subscription

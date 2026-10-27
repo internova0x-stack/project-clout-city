@@ -1,5 +1,7 @@
 "use client";
 
+import { isAdult, validBirthdate } from "@/lib/age";
+import { AgeBlockedNote, BirthdateField, useAgeBlocked, type PartialBirthdate } from "./AgeGate";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
@@ -166,7 +168,10 @@ function LookStep({
   onDone: (name: string) => void;
 }) {
   const [name, setName] = useState(keptName ?? "");
-  const [adult, setAdult] = useState(!needsAgeConfirm);
+  // The age screen (lib/age.ts) for a sign-in that didn't pass it at sign-up (a Google sign-in after its hour).
+  const [dob, setDob] = useState<PartialBirthdate>({});
+  const [blocked, block] = useAgeBlocked();
+  const adult = !needsAgeConfirm || !!(dob.year && dob.month && dob.day);
   const [touched, setTouched] = useState(false);
   const [taken, setTaken] = useState(false);
   const [error, setError] = useState<{ text: string; field?: string } | null>(null);
@@ -215,6 +220,10 @@ function LookStep({
     setTouched(true);
     setError(null);
     if (!canSubmit) return;
+    if (needsAgeConfirm) {
+      if (!validBirthdate(dob)) return setError({ text: "That date doesn't look right. Check your date of birth.", field: "age" });
+      if (!isAdult(dob)) return block();
+    }
     startTransition(async () => {
       const result = await onSubmit({ name, style: look.style, look: lookChoices(look), ageConfirmed: adult });
       if (result.ok) onDone(cleanName(name));
@@ -327,12 +336,7 @@ function LookStep({
       <OptionGroup label="Glasses" options={GLASSES} value={look.glasses} onPick={(v) => set("glasses", v)} />
       <p className="meta" style={{ margin: 0 }}>Body, hair, glasses and headwear are free for everyone, forever. The Shop will never sell them.</p>
 
-      {needsAgeConfirm && (
-        <label className="check-row">
-          <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
-          <span>I&apos;m 18 or older.</span>
-        </label>
-      )}
+      {needsAgeConfirm && (blocked ? <AgeBlockedNote /> : <BirthdateField id="creator-dob" value={dob} onChange={setDob} />)}
       {error && error.field !== "name" && <p className="error-text" role="alert">{error.text}</p>}
     </StepSheet>
   );

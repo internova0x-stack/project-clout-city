@@ -11,6 +11,8 @@ import { isStandalone } from "./game/FirstSession";
 import { MailIcon } from "./icons";
 import { Sheet } from "./Sheet";
 import { AFTER_SIGNIN_COOKIE } from "@/lib/authNext";
+import { isAdult, validBirthdate } from "@/lib/age";
+import { AgeBlockedNote, BirthdateField, useAgeBlocked, type PartialBirthdate } from "./AgeGate";
 
 function readCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
@@ -22,8 +24,9 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export type AuthMode = "signup" | "login";
 
-// Sign-up and log-in in one: email magic link (no password) plus the 18+
-// confirmation (Clarifications sections 1 and 13; Milestones v0.1).
+// Sign-up and log-in in one: email magic link (no password) plus the age screen (Clarifications sections 1 and 13;
+// Milestones v0.1): a date of birth since Oct 27 (lib/age.ts), asked on its own step after the email; under 18 is
+// turned away and the device remembers it.
 // v0.11 (spec section 11): in the installed app the 6-digit code is the main way in, because an
 // email link opens the browser, not the app. The same email carries both.
 export function SignUpSheet({
@@ -47,7 +50,12 @@ export function SignUpSheet({
   const login = mode === "login";
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [adult, setAdult] = useState(false);
+  const [dob, setDob] = useState<PartialBirthdate>({});
+  const [blocked, block] = useAgeBlocked();
+  const dobDone = !!(dob.year && dob.month && dob.day);
+  // Sign-up is two steps (owner, Oct 27): the email (or Google), then the date of birth. Nothing is sent until the
+  // date of birth passes, so no email ever leaves the device for someone under 18.
+  const [method, setMethod] = useState<"email" | "google" | null>(null);
   const [stage, setStage] = useState<"form" | "sent">("form");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,10 +69,19 @@ export function SignUpSheet({
   const [inApp, setInApp] = useState(false);
   useEffect(() => setInApp(isStandalone()), []);
 
-  const canSend = EMAIL.test(email.trim()) && (login || adult) && !busy && (login || !creatorCodeBad);
+  const canSend = EMAIL.test(email.trim()) && !busy && (login || !creatorCodeBad);
+
+  /** Sign-up only: a real date that's 18+ goes on; under 18 closes sign-up on this device. */
+  function ageOk(): boolean {
+    if (login) return true;
+    if (!validBirthdate(dob)) { setError("That date doesn't look right. Check your date of birth."); return false; }
+    if (!isAdult(dob)) { block(); return false; }
+    return true;
+  }
 
   async function send() {
     setError(null);
+    if (!ageOk()) return;
     const supabase = getBrowserSupabase();
     if (!supabase) {
       setError("Accounts aren't switched on yet. Check back very soon.");
@@ -84,6 +101,7 @@ export function SignUpSheet({
         // if the email is opened on another device.
         data: {
           age_confirmed: true,
+          age_check: "birthdate",
           invite_code: readInviteCookie(),
           ...(login ? {} : { creator_link: readCookie(GAME_CONFIG.creator.cookieName), creator_code: typedCreator }),
         },
@@ -108,6 +126,7 @@ export function SignUpSheet({
     setError(null);
     const supabase = getBrowserSupabase();
     if (!supabase) return setError("Accounts aren't switched on yet. Check back very soon.");
+    if (!ageOk()) return;
     // OAuth can't carry metadata, so the 18+ confirmation rides along in a short-lived cookie.
     if (!login) document.cookie = `${GAME_CONFIG.ageCookieName}=1; path=/; max-age=3600; samesite=lax`;
     if (!login) track("signup_started", { method: "google", invited: !!readInviteCookie(), via_creator: !!(readCookie(GAME_CONFIG.creator.cookieName) || typedCreator), installed_app: inApp });
@@ -141,12 +160,55 @@ export function SignUpSheet({
 
   return (
     <Sheet open={open} onClose={onClose} label={login ? "Log in" : "Sign up"}>
-      {stage === "form" ? (
+      {!login && blocked ? (
+        <div className="stack-16">
+          <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
+            <p className="overline">Sign up</p>
+            <h2 className="display-lg" style={{ margin: 0 }}>Not yet</h2>
+          </div>
+          <AgeBlockedNote />
+          {onSwitchMode && (
+            <button type="button" className="btn btn-ghost" onClick={() => { setError(null); onSwitchMode("login"); }}>
+              Already have an account? Log in
+            </button>
+          )}
+        </div>
+      ) : !login && method && stage === "form" ? (
         <form
           className="stack-16"
           onSubmit={(e) => {
             e.preventDefault();
-            if (canSend) void send();
+            if (!dobDone || busy) return;
+            void (method === "google" ? google() : send());
+          }}
+        >
+          <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
+            <p className="overline">Almost there</p>
+            <h2 className="display-lg" style={{ margin: 0 }}>When&apos;s your birthday?</h2>
+            <p className="subtext" style={{ margin: "4px 0 0" }}>We ask everyone. We don&apos;t keep it.</p>
+          </div>
+          <BirthdateField value={dob} onChange={(v) => { setDob(v); setError(null); }} />
+          <p className="meta" style={{ marginBottom: 0 }}>
+            By signing up you agree to the{" "}
+            <a href="/terms" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>Terms</a> and{" "}
+            <a href="/privacy" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>Privacy Policy</a>.
+          </p>
+          {error && <p className="error-text" role="alert">{error}</p>}
+          <button type="submit" className={method === "google" ? "btn btn-secondary" : "btn btn-taxi"} disabled={!dobDone || busy}>
+            {method === "google" ? <><GoogleMark /> Continue with Google</> : busy ? "Sending…" : inApp ? "Email me a code ›" : "Send my magic link ›"}
+          </button>
+          <button type="button" className="btn btn-ghost" onClick={() => { setError(null); setMethod(null); }}>
+            ‹ Back
+          </button>
+        </form>
+      ) : stage === "form" ? (
+        <form
+          className="stack-16"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!canSend) return;
+            if (login) void send();
+            else { setError(null); setMethod("email"); }
           }}
         >
           <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
@@ -179,16 +241,6 @@ export function SignUpSheet({
             />
           </label>
 
-          {!login && (
-          <label className="check-row">
-            <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
-            <span>
-              I&apos;m 18 or older and I agree to the{" "}
-              <a href="/terms" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>Terms</a> and{" "}
-              <a href="/privacy" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>Privacy Policy</a>.
-            </span>
-          </label>
-          )}
 
           {!login && !creator && (showCreatorCode ? (
             <div className="stack-4">
@@ -219,10 +271,10 @@ export function SignUpSheet({
           {error && <p className="error-text" role="alert">{error}</p>}
 
           <button type="submit" className="btn btn-taxi" disabled={!canSend}>
-            {busy ? "Sending…" : inApp ? "Email me a code ›" : "Send my magic link ›"}
+            {!login ? "Continue ›" : busy ? "Sending…" : inApp ? "Email me a code ›" : "Send my magic link ›"}
           </button>
           <div className="or-divider"><span>or</span></div>
-          <button type="button" className="btn btn-secondary" disabled={busy || (!login && !adult)} onClick={google}>
+          <button type="button" className="btn btn-secondary" disabled={busy || (!login && creatorCodeBad)} onClick={() => (login ? void google() : (setError(null), setMethod("google")))}>
             <GoogleMark /> Continue with Google
           </button>
           {onSwitchMode && (
@@ -274,7 +326,7 @@ export function SignUpSheet({
           {error && <p className="error-text" role="alert">{error}</p>}
           {inApp && <p className="meta" style={{ margin: "4px 0 0" }}>The email has a link too, but it opens your browser instead of the app. The code keeps you here.</p>}
 
-          <button className="btn btn-ghost" onClick={() => { setStage("form"); setCode(""); setError(null); }}>
+          <button className="btn btn-ghost" onClick={() => { setStage("form"); setMethod(null); setCode(""); setError(null); }}>
             Wrong email? Start over
           </button>
         </div>

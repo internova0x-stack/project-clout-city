@@ -1,5 +1,6 @@
 "use server";
 
+import { AGE_BLOCK_COOKIE } from "@/lib/age";
 import { cookies } from "next/headers";
 import { GAME_CONFIG } from "@/lib/config";
 import { normalizeInviteCode } from "@/lib/invite";
@@ -33,7 +34,9 @@ export async function createPlayer(input: {
   const cookieStore = await cookies();
   const ageConfirmed =
     meta.age_confirmed === true || input.ageConfirmed === true || cookieStore.get(GAME_CONFIG.ageCookieName)?.value === "1";
-  if (!ageConfirmed) return { ok: false, error: "Clout City is 18+. Confirm your age to continue.", field: "age" };
+  if (!ageConfirmed) return { ok: false, error: "Clout City is 18+. Enter your date of birth to continue.", field: "age" };
+  // A device the age screen turned away (lib/age.ts) can't make a character either.
+  if (cookieStore.get(AGE_BLOCK_COOKIE)) return { ok: false, error: "Clout City is for adults 18 and older.", field: "age" };
 
   const invite =
     normalizeInviteCode(typeof meta.invite_code === "string" ? meta.invite_code : null) ??
