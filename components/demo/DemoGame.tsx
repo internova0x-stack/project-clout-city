@@ -2,33 +2,22 @@
 
 import { useMemo, useState } from "react";
 import CALENDAR_FILE from "@/content/culture/calendar.json";
-import { Creator, type CreatorActions } from "@/components/Creator";
 import { GameShell, type Flow } from "@/components/GameShell";
 import type { CalendarData } from "@/lib/calendar";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
-import { ECONOMY } from "@/lib/economy";
-import { lookChoices, type Look } from "@/lib/look";
+import { lookChoices } from "@/lib/look";
+import { QuickPick, type QuickCharacter } from "./QuickPick";
 import type { CityResult } from "@/lib/cityState";
 import type { Player } from "@/lib/player";
 import { createStarterSim } from "@/lib/starterSim";
 import { Sheet } from "@/components/Sheet";
 
-// Demo mode (owner, Oct 27): a guest makes a character and plays the first session on the in-memory city
+// Demo mode (owner, Oct 27): a guest picks a ready-made character in one tap (QuickPick, owner Oct 28) and plays the first session on the in-memory city
 // (lib/citySim.ts), entirely in the browser. Nothing reaches the server and nothing is saved; the banner and the end
 // card send them to sign-up. Social features (chat, crew, dating, radio, TV) stay off: they need real people.
 
 const noop = async () => {};
 const SIGN_UP = "/?signup=1";
-
-const DEMO_ACTIONS: CreatorActions = {
-  createPlayer: async () => ({ ok: true }),
-  saveTraits: async () => ({ ok: true }),
-  rollBirthLottery: async () => {
-    const { min, max, step } = ECONOMY.birthLottery;
-    return { ok: true, cash: min + step * Math.floor(Math.random() * ((max - min) / step + 1)) };
-  },
-  moveIn: async () => ({ ok: true }),
-};
 
 export function DemoGame() {
   const [player, setPlayer] = useState<Player | null>(null);
@@ -36,18 +25,14 @@ export function DemoGame() {
     return (
       <div className="demo-mode">
         <DemoBanner />
-        <Creator
-          needsAgeConfirm={false}
-          actions={DEMO_ACTIONS}
-          onFinished={(c) => setPlayer(demoPlayer(c))}
-        />
+        <QuickPick onPick={(c) => setPlayer(demoPlayer(c))} />
       </div>
     );
   }
   return <DemoCity player={player} />;
 }
 
-function demoPlayer(c: { name: string; look: Look; traits: string[]; cash: number; homeId: string }): Player {
+function demoPlayer(c: QuickCharacter): Player {
   return {
     id: "demo", display_name: c.name || "you", starting_style: c.look.style, look: lookChoices(c.look), invite_code: "DEMO",
     onboarding_step: "home_done", created_at: new Date().toISOString(), traits: c.traits, birth_cash: c.cash, home_id: c.homeId,
