@@ -72,7 +72,7 @@ export function PartyDoneCard({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-interface Row { id?: string; rank: number; display_name: string; starting_style: string; clout: number; is_me: boolean }
+export interface Row { id?: string; rank: number; display_name: string; starting_style: string; clout: number; is_me: boolean }
 
 /** C27: the clout leaderboard, Queens or Crew. */
 export function LeaderboardSheet({
@@ -82,7 +82,7 @@ export function LeaderboardSheet({
   /** v0.5: tap a row to open that player's card (and message them). */
   onOpenPlayer?: (id: string) => void;
   /** Development previews: sample rows instead of the database. */
-  fetchRows?: (scope: "queens" | "clique") => Promise<Row[]>;
+  fetchRows?: (scope: "queens" | "clique", myClout: number) => Promise<Row[]>;
   /** Clout Couture (migration 0103): Clout Crown owners, for the crown by their name. */
   fetchCrowned?: () => Promise<string[]>;
 }) {
@@ -98,7 +98,7 @@ export function LeaderboardSheet({
     if (!open) return;
     if (fetchRows) {
       setRows(null);
-      void fetchRows(scope).then((r) => {
+      void fetchRows(scope, myClout ?? 0).then((r) => {
         setRows(r);
         const m = r.find((x) => x.is_me);
         if (m) setMe({ rank: m.rank, total: r.length });

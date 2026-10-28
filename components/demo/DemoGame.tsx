@@ -11,6 +11,7 @@ import type { CityResult } from "@/lib/cityState";
 import type { Player } from "@/lib/player";
 import { createStarterSim } from "@/lib/starterSim";
 import { Sheet } from "@/components/Sheet";
+import type { Row } from "@/components/game/FirstSession";
 
 // Demo mode (owner, Oct 27): a guest picks a ready-made character in one tap (QuickPick, owner Oct 28) and plays the first session on the in-memory city
 // (lib/citySim.ts), entirely in the browser. Nothing reaches the server and nothing is saved; the banner and the end
@@ -99,6 +100,7 @@ function DemoCity({ player }: { player: Player }) {
         starter={starter.api}
         demo={{ signUp: setAsk }}
         previewFlow={devFlow}
+        leaderboardRows={async (scope, clout) => demoLeaderboard(scope, clout, player)}
         actions={{
           setTutorialState: noop,
           finishHandoff: noop,
@@ -112,6 +114,20 @@ function DemoCity({ player }: { player: Player }) {
       <DemoSignUp why={ask} onClose={() => setAsk(null)} />
     </div>
   );
+}
+
+/** The demo has no other players, so its leaderboard is made up (owner, Oct 28): invented New Yorkers around a
+ *  newcomer's clout, so the first board isn't empty. Crew is only you: a demo can't have one. */
+const DEMO_BOARD: [string, string, number][] = [
+  ["nina.nyc", "pilates_princess", 3020], ["oatmilk_oligarch", "startup_founder", 2140], ["dev.r", "arcade_nerd", 1880],
+  ["brunch_tycoon", "midtown_finance", 1720], ["dee_rivera", "thrift_store_icon", 1310], ["lowkey_famous", "influencer_soft_glam", 990],
+  ["kai_beats", "bodega_drip", 760], ["mta_survivor", "night_owl_goth", 420], ["sublet_steve", "bodega_drip", 85],
+  ["vibes_llc", "startup_founder", 40], ["rent_is_due", "thrift_store_icon", 15],
+];
+function demoLeaderboard(scope: "queens" | "clique", myClout: number, player: Player): Row[] {
+  const me = { display_name: player.display_name, starting_style: player.starting_style, clout: myClout, is_me: true };
+  const all = scope === "clique" ? [me] : [...DEMO_BOARD.map(([display_name, starting_style, clout]) => ({ display_name, starting_style, clout, is_me: false })), me];
+  return all.sort((a, b) => b.clout - a.clout).map((r, i) => ({ ...r, rank: i + 1 }));
 }
 
 /** The demo's ask: from "Invite your Crew", and when the first session ends. Nothing carries over, so it never says it does. */
