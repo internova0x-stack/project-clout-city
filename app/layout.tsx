@@ -19,14 +19,14 @@ const NO_BLUR_SCRIPT = `window.addEventListener("beforeinstallprompt",function(e
 
 export const metadata: Metadata = {
   title: "Clout City NYC",
-  description: "Arrive in NY as a nobody. Become a somebody.",
+  description: "Arrive in New York as a nobody. Pretend to be somebody.",
   applicationName: "Clout City",
   // iPhone launch images (owner, Oct 23): the loading screen instead of black while the page arrives.
   appleWebApp: { capable: true, title: "Clout City", statusBarStyle: "black-translucent", startupImage: launchStartupImages() },
   icons: { icon: "/icons/favicon-64.png", apple: "/icons/apple-touch-icon.png" },
   openGraph: {
     title: "Clout City NYC",
-    description: "Arrive in NY as a nobody. Become a somebody.",
+    description: "Arrive in New York as a nobody. Pretend to be somebody.",
     type: "website",
   },
 };
