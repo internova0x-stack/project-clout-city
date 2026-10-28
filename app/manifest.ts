@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Clout City NYC",
     short_name: "Clout City",
-    description: "Arrive in NY as a nobody. Become a somebody.",
+    description: "Rent's too high. Dates are worse. Everyone thinks they're famous.",
     // Every page on the site is the app, so iOS keeps it full screen (owner, Oct 17: the PWA showed Safari's bars).
     id: "/",
     start_url: "/",
