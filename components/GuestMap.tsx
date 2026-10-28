@@ -152,12 +152,23 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
                 : "A friend saved you a spot. Claim your name before the city opens."}
             </p>
           )}
-          <div className="row" style={{ gap: 8, marginTop: 12 }}>
-            <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
-            <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
-          </div>
-          {/* Demo mode (owner, Oct 27): play the first session before signing up (app/demo). */}
-          <a className="guest-demo-link" href="/demo">Not sure yet? Play a quick demo, no sign-up ›</a>
+          {/* Owner, Oct 28: Play now (the demo, no account) leads for a plain visit; an invite or a creator's link leads
+              with Sign up, since their reward needs an account. */}
+          {invited || creator ? (
+            <>
+              <div className="row" style={{ gap: 8, marginTop: 12 }}>
+                <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
+                <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
+              </div>
+              <a className="guest-demo-link" href="/demo">Not sure yet? Play a quick demo, no sign-up ›</a>
+            </>
+          ) : (
+            <>
+              <a className="btn btn-taxi" style={{ marginTop: 12, textDecoration: "none" }} href="/demo">Play now, no sign-up ›</a>
+              {/* Owner, Oct 28: one Sign in button for both (SignUpSheet's "signin" mode works out which). */}
+              <button className="btn btn-secondary on-dark-secondary" style={{ marginTop: 8, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
+            </>
+          )}
           <p className="meta guest-foot">
             A parody · 18+ · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · No ad trackers
             <br />
