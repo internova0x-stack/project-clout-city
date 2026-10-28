@@ -244,7 +244,8 @@ components live in `app/globals.css`.
   ready-made New Yorkers, a made-up name, a lottery roll, the room share) and the first session on the in-memory
   city (lib/citySim.ts) in the browser only: nothing reaches the server, no social features. A top strip and `DemoSignUp`
   (GameShell's `demo` prop: "Invite your Crew" and the end of the first session) send guests to `/?signup=1`. The guest card leads
-  with "Play now, no sign-up" (Sign up first only for invites and creator links). Development only: `/demo?flow=leaderboard` jumps to the end card.
+  with "Play now, no sign-up", then one "Sign in" for both (SignUpSheet mode 'signin': a known email gets its link, a new one
+  carries on to the birthday step as a sign-up); invites and creator links lead with Sign up. Development only: `/demo?flow=leaderboard` jumps to the end card.
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google

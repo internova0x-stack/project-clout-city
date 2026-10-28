@@ -165,10 +165,8 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
           ) : (
             <>
               <a className="btn btn-taxi" style={{ marginTop: 12, textDecoration: "none" }} href="/demo">Play now, no sign-up ›</a>
-              <div className="row" style={{ gap: 8, marginTop: 8 }}>
-                <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1 }} onClick={signUp}>Sign up free</button>
-                <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
-              </div>
+              {/* Owner, Oct 28: one Sign in button for both (SignUpSheet's "signin" mode works out which). */}
+              <button className="btn btn-secondary on-dark-secondary" style={{ marginTop: 8, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
             </>
           )}
           <p className="meta guest-foot">

@@ -22,7 +22,9 @@ const readInviteCookie = () => normalizeInviteCode(readCookie(GAME_CONFIG.invite
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-export type AuthMode = "signup" | "login";
+/** "signin" (owner, Oct 28): one door for both. A known email gets its link at once; a new one goes on to sign-up's
+ *  date-of-birth step and becomes an account there. */
+export type AuthMode = "signup" | "login" | "signin";
 
 // Sign-up and log-in in one: email magic link (no password) plus the age screen (Clarifications sections 1 and 13;
 // Milestones v0.1): a date of birth since Oct 27 (lib/age.ts), asked on its own step after the email; under 18 is
@@ -47,7 +49,8 @@ export function SignUpSheet({
   creator?: string;
   gift?: string | null;
 }) {
-  const login = mode === "login";
+  const signin = mode === "signin";
+  const login = mode === "login" || signin;
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState<PartialBirthdate>({});
@@ -110,6 +113,12 @@ export function SignUpSheet({
     setBusy(false);
     if (err) {
       const noAccount = login && /signups? not allowed|not found|user/i.test(err.message);
+      // Sign in: a new email carries on as a sign-up, at the date of birth, with the address kept.
+      if (signin && noAccount && onSwitchMode) {
+        setMethod("email");
+        onSwitchMode("signup");
+        return;
+      }
       setError(
         err.status === 429
           ? `Easy, tiger. Wait a minute before asking for another ${inApp ? "code" : "link"}.`
@@ -159,7 +168,7 @@ export function SignUpSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} label={login ? "Log in" : "Sign up"}>
+    <Sheet open={open} onClose={onClose} label={signin ? "Sign in" : login ? "Log in" : "Sign up"}>
       {!login && blocked ? (
         <div className="stack-16">
           <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
@@ -212,10 +221,12 @@ export function SignUpSheet({
           }}
         >
           <div className="stack-4" style={{ paddingTop: 4, paddingRight: 40 }}>
-            <p className="overline">{login ? "Welcome back" : creator ? `${creator} sent you` : invited ? "You've been invited" : "Early access"}</p>
-            <h2 className="display-lg" style={{ margin: 0 }}>{login ? "Back to Queens" : "Claim your spot in Queens"}</h2>
+            <p className="overline">{signin ? "Sign in" : login ? "Welcome back" : creator ? `${creator} sent you` : invited ? "You've been invited" : "Early access"}</p>
+            <h2 className="display-lg" style={{ margin: 0 }}>{signin ? "Your spot in Queens" : login ? "Back to Queens" : "Claim your spot in Queens"}</h2>
             <p className="subtext" style={{ margin: "4px 0 0" }}>
-              {inApp
+              {signin
+                ? `Enter your email. Been here before? We'll send your ${inApp ? "6-digit code" : "magic link"}. New? We'll get you set up.`
+                : inApp
                 ? login
                   ? "Enter your email and we'll send a 6-digit code. Type it here; no leaving the app."
                   : "Sign up with your email. We'll send a 6-digit code: no password, no velvet rope."
@@ -271,13 +282,13 @@ export function SignUpSheet({
           {error && <p className="error-text" role="alert">{error}</p>}
 
           <button type="submit" className="btn btn-taxi" disabled={!canSend}>
-            {!login ? "Continue ›" : busy ? "Sending…" : inApp ? "Email me a code ›" : "Send my magic link ›"}
+            {signin ? (busy ? "Checking…" : "Continue ›") : !login ? "Continue ›" : busy ? "Sending…" : inApp ? "Email me a code ›" : "Send my magic link ›"}
           </button>
           <div className="or-divider"><span>or</span></div>
           <button type="button" className="btn btn-secondary" disabled={busy || (!login && creatorCodeBad)} onClick={() => (login ? void google() : (setError(null), setMethod("google")))}>
             <GoogleMark /> Continue with Google
           </button>
-          {onSwitchMode && (
+          {onSwitchMode && !signin && (
             <button type="button" className="btn btn-ghost" onClick={() => { setError(null); onSwitchMode(login ? "signup" : "login"); }}>
               {login ? "New here? Sign up free" : "Already have an account? Log in"}
             </button>
