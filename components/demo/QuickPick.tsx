@@ -50,7 +50,8 @@ function finish(a: Archetype, look: Look): QuickCharacter {
 
 export function QuickPick({ onPick }: { onPick: (c: QuickCharacter) => void }) {
   const [pick, setPick] = useState(ARCHETYPES[0]);
-  const [looks, setLooks] = useState<Record<string, Look>>(() => Object.fromEntries(ARCHETYPES.map((a) => [a.id, lookFor(a)])));
+  // One switch for every card (so a Female pick never shows "The Finance Bro" beside it).
+  const [looks, setLooks] = useState<Record<string, Look>>(() => Object.fromEntries(ARCHETYPES.map((a) => [a.id, lookFor(a, ARCHETYPES[0].body)])));
   const look = looks[pick.id];
 
   return (
@@ -72,7 +73,7 @@ export function QuickPick({ onPick }: { onPick: (c: QuickCharacter) => void }) {
           <div className="binary" role="group" aria-label="Presenting as">
             {BODIES.map((o) => (
               <button key={o.id} aria-pressed={look.body === o.id}
-                onClick={() => setLooks((l) => ({ ...l, [pick.id]: lookFor(pick, o.id, l[pick.id]) }))}>{o.label}</button>
+                onClick={() => setLooks((l) => (l[pick.id].body === o.id ? l : Object.fromEntries(ARCHETYPES.map((a) => [a.id, lookFor(a, o.id, l[a.id])]))))}>{o.label}</button>
             ))}
           </div>
           <div className="trait-grid" role="radiogroup" aria-label="Characters">
