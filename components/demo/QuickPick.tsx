@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { ECONOMY } from "@/lib/economy";
-import { BODIES, DEFAULT_BUILD, randomLook, type Look } from "@/lib/look";
+import { BODIES, DEFAULT_BUILD, SKIN_TONES, randomLook, type Look } from "@/lib/look";
 import { getStyle, STYLE_IDS, type StyleId } from "@/lib/styles";
 import { ShuffleIcon } from "@/components/icons";
 
@@ -13,14 +13,22 @@ const Avatar3D = dynamic(() => import("@/components/avatar/Avatar3D"), { ssr: fa
 // New Yorkers (Male | Female flips any of them, owner Oct 28) and is in. The name is made up, the cash is a birth-lottery roll and the home is the room share; Shuffle
 // changes the face, never the character. Nothing here is saved.
 
-interface Archetype { id: string; title: string; style: StyleId; body: Look["body"]; handles: string[] }
+interface Archetype {
+  id: string; title: string; style: StyleId; body: Look["body"]; handles: string[];
+  /** The other gender's title and names, where the default's don't fit (a woman isn't a Finance Bro). */
+  switched?: { title: string; handles: string[] };
+}
 
 const ARCHETYPES: Archetype[] = [
   { id: "influencer", title: "The Wannabe Influencer", style: "influencer_soft_glam", body: "curvy", handles: ["ContentPending", "LinkInBio", "SoftLaunchQueen"] },
-  { id: "finance", title: "The Finance Bro", style: "midtown_finance", body: "straight", handles: ["BullishBrad", "VestedInterest", "CircleBackChad"] },
+  { id: "finance", title: "The Finance Bro", style: "midtown_finance", body: "straight", handles: ["BullishBrad", "VestedInterest", "CircleBackChad"],
+    switched: { title: "The Finance Girlie", handles: ["GirlBossGains", "HedgeFundHer", "PowerSuitPending"] } },
   { id: "artist", title: "The Struggling Artist", style: "thrift_store_icon", body: "curvy", handles: ["RentIsArt", "ThriftedAndBroke", "GalleryPending"] },
   { id: "philosopher", title: "The Bodega Philosopher", style: "bodega_drip", body: "straight", handles: ["DeliCatWhisperer", "BaconEggCheese", "CornerStoreSage"] },
 ];
+
+/** The title and names for the gender on screen. */
+const named = (a: Archetype, body: Look["body"]) => (body !== a.body && a.switched ? a.switched : a);
 
 export interface QuickCharacter { name: string; look: Look; cash: number; homeId: string; traits: string[] }
 
@@ -28,14 +36,15 @@ export interface QuickCharacter { name: string; look: Look; cash: number; homeId
 function lookFor(a: Archetype, body: Look["body"] = a.body, keep?: Look): Look {
   const base = keep ?? randomLook(Math.random, STYLE_IDS);
   const hair = body === "curvy" ? (base.hair === "short" || base.hair === "buzz" ? "long" : base.hair) : base.hair === "long" ? "short" : base.hair;
-  // No hat or glasses: the face and hair are the character.
-  return { ...base, style: a.style, body, build: DEFAULT_BUILD[body], hair, covering: "none", glasses: "none", fit: null };
+  // No hat or glasses: the face and hair are the character. Owner, Oct 28: the ready-made characters are light-skinned.
+  return { ...base, style: a.style, body, build: DEFAULT_BUILD[body], hair, skin: SKIN_TONES[1], covering: "none", glasses: "none", fit: null };
 }
 
 function finish(a: Archetype, look: Look): QuickCharacter {
   const { min, max, step } = ECONOMY.birthLottery;
   const cash = min + step * Math.floor(Math.random() * ((max - min) / step + 1));
-  const handle = a.handles[Math.floor(Math.random() * a.handles.length)];
+  const { handles } = named(a, look.body);
+  const handle = handles[Math.floor(Math.random() * handles.length)];
   return { name: `${handle}_${1000 + Math.floor(Math.random() * 9000)}`, look, cash, homeId: "astoria_share", traits: [] };
 }
 
@@ -72,7 +81,7 @@ export function QuickPick({ onPick }: { onPick: (c: QuickCharacter) => void }) {
               return (
                 <button key={a.id} role="radio" aria-checked={pick.id === a.id} className="select-card single" onClick={() => setPick(a)}>
                   <span className="select-emoji" aria-hidden="true">{st.emoji}</span>
-                  <span className="title" style={{ display: "block" }}>{a.title}</span>
+                  <span className="title" style={{ display: "block" }}>{named(a, looks[a.id].body).title}</span>
                   <span className="subtext" style={{ display: "block" }}>{st.blurb}</span>
                 </button>
               );
@@ -80,7 +89,7 @@ export function QuickPick({ onPick }: { onPick: (c: QuickCharacter) => void }) {
           </div>
         </div>
         <div className="creator-cta">
-          <button className="btn btn-taxi" onClick={() => onPick(finish(pick, look))}>Play as {pick.title.replace(/^The /, "the ")} ›</button>
+          <button className="btn btn-taxi" onClick={() => onPick(finish(pick, look))}>Play as {named(pick, look.body).title.replace(/^The /, "the ")} ›</button>
         </div>
       </section>
     </main>
