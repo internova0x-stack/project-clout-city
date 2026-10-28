@@ -1970,7 +1970,9 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .tv-rules { margin:0; padding:0 0 0 18px; display:flex; flex-direction:column; gap:4px; font-size:13px; line-height:18px; color:var(--text-2); }
 
 /* Lola's tour (owner, Oct 17): her head in the bottom-right corner, each step in a chat bubble. */
-.lola-tip { position:fixed; right:max(12px, env(safe-area-inset-right, 0px)); bottom:calc(112px + env(safe-area-inset-bottom, 0px)); z-index:61; display:flex; align-items:flex-end; gap:8px; pointer-events:auto; animation:rise-in .25s ease-out; }
+.lola-tip { position:fixed; right:max(12px, env(safe-area-inset-right, 0px)); bottom:calc(112px + env(safe-area-inset-bottom, 0px)); z-index:61; display:flex; align-items:flex-end; gap:8px; pointer-events:none; animation:rise-in .25s ease-out; }
+/* Only the bubble and Lola take taps: the empty corner above her head sits over the side buttons the tour points at. */
+.lola-tip > * { pointer-events:auto; }
 .lola-tip-bubble { position:relative; width:min(268px, calc(100vw - 104px)); padding:14px 14px 12px; border-radius:20px 20px 6px 20px; background:#FFF8F2; color:var(--text-1); box-shadow:var(--elev-3); }
 .lola-tip-bubble::after { content:""; position:absolute; right:-6px; bottom:22px; width:14px; height:14px; background:#FFF8F2; transform:rotate(45deg); border-radius:2px; }
 .lola-tip-who { margin:0; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:#D6336C; }
