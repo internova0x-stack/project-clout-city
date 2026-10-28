@@ -2355,16 +2355,21 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 
 /* Loading (owner, Oct 23): the launch screen and the Continue button's spinner. */
 .app-loading { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:18px;
-  padding:calc(16vh + var(--safe-top, 0px)) 24px 0; background:#14111A; color:rgba(255,255,255,.9); overflow:hidden; isolation:isolate; }
-/* Owner, Oct 23: Queens at night in the game's style, framed from the bottom so the river, the train and the skyline
-   stay in view on any screen; it drifts slowly (a Ken Burns move). The sky above is empty, so the words sit there. */
-.app-loading::before { content:""; position:absolute; inset:0; z-index:-2; background:url("/loading-skyline.webp") center bottom / cover no-repeat;
-  transform-origin:50% 80%; animation:app-drift 24s ease-in-out infinite alternate; }
-/* A light veil: only the sky behind the words is darkened, the city keeps its colour. */
+  padding:0 24px; background:#14111A; color:rgba(255,255,255,.9); overflow:hidden; isolation:isolate; }
+/* Owner, Oct 28: the poster (the wordmark and line are in the picture), framed from the top so the title stays whole
+   on any screen; it drifts slowly (a Ken Burns move) about the title. The spinner and tip sit over the cast at the bottom. */
+.app-loading::before { content:""; position:absolute; inset:0; z-index:-2; background:#2a1240 url("/loading-poster.webp") center top / cover no-repeat;
+  animation:app-drift 24s ease-in-out infinite alternate; }
+/* A veil only at the bottom, so the spinner and the tip read over the cast. */
 .app-loading::after { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  background:linear-gradient(180deg, rgba(10,8,20,.55) 0%, rgba(10,8,20,.35) 28%, rgba(10,8,20,0) 48%, rgba(10,8,20,0) 80%, rgba(10,8,20,.25) 100%); }
-@keyframes app-drift { from { transform:scale(1); } to { transform:scale(1.07) translateY(-1%); } }
-.app-loading .welcome-mark { text-shadow:0 2px 24px rgba(10,8,20,.45); }
+  background:linear-gradient(180deg, rgba(10,8,20,0) 0%, rgba(10,8,20,0) 70%, rgba(10,8,20,.55) 100%); }
+/* The wordmark is in the poster: the heading stays for screen readers only. */
+.app-loading .welcome-mark { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.app-loading-status { position:absolute; left:50%; transform:translateX(-50%); bottom:calc(118px + var(--safe-bottom, 0px)); display:flex; align-items:center; gap:10px;
+  padding:8px 16px 8px 10px; border-radius:999px; background:rgba(20,17,26,.74); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); white-space:nowrap; }
+.app-loading-status .app-spinner { width:22px; height:22px; border-width:3px; }
+/* Only a slow rise, no zoom: on tall phones the title already fills the width. */
+@keyframes app-drift { from { transform:translateY(0); } to { transform:translateY(-1.5%); } }
 .app-spinner { width:40px; height:40px; border-radius:50%; border:4px solid rgba(255,255,255,.16); border-top-color:var(--neon-500);
   animation:app-spin .8s linear infinite; }
 .app-loading-text { margin:0; font-size:15px; font-weight:600; text-shadow:0 1px 10px rgba(0,0,0,.6); }
