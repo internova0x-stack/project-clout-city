@@ -51,6 +51,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
+//   /preview/home?choice=now|back|high|low|log  Moral Choices (migration 0131): now = a card on every arrival, back = a consequence lands
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
 //   /preview/home?member=vip|monthly|cancelling|pastdue|forever|free|none  Membership & purchases (Settings, profile)
 //   /preview/home?hint=daily  Lola's daily-tasks nudge (owner, Oct 17) after 2 seconds
@@ -102,7 +103,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, choice } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -191,6 +192,7 @@ export default async function Preview({
           couturePreset={couture}
           mayorPreset={mayor}
           campaignPreset={campaign}
+          choicePreset={choice}
           goalsPreset={goals}
           pushPreset={push}
           memberPreset={member}

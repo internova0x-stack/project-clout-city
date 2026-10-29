@@ -15,7 +15,8 @@
     "regular": "The lib/cast.ts regular id, or null when they don't stand on the place card",
     "slang": "Ids from content/culture/slang.json they reach for. Empty is fine: not everyone uses slang",
     "story": "Optional: the story whose place this is (they only speak through that story)",
-    "remembers": "Optional: { days, line }. After that many different days at the place, their first line is this one (C2: Sal remembers your order)"
+    "remembers": "Optional: { days, line }. After that many different days at the place, their first line is this one (C2: Sal remembers your order)",
+    "reputation": "Optional (Moral Choices, migration 0131): {high, low} lines said to players whose Integrity is high (70+) or low (below 40). Never name the number."
   },
   "profiles": [
     {
@@ -54,6 +55,16 @@
       "remembers": {
         "days": 3,
         "line": "Ock! BEC, salt, pepper, ketchup. Already on the grill. Also Sal saved you a spot on the bread."
+      },
+      "reputation": {
+        "high": [
+          "You, I trust. Watch the register a second, I gotta find the good mustard.",
+          "People say good things about you on this block. Don't make me regret the extra cheese."
+        ],
+        "low": [
+          "Cash only today. For you especially.",
+          "I heard some things. I'm not saying I believe them. I'm saying I'm counting the change twice."
+        ]
       }
     },
     {
@@ -86,7 +97,17 @@
         "regular-coffee",
         "deadass",
         "facts"
-      ]
+      ],
+      "reputation": {
+        "high": [
+          "I spelled your name right today. That's how you know you're in good standing.",
+          "Everybody in here says you're one of the good ones. Annoying, honestly. Want a free shot of oat?"
+        ],
+        "low": [
+          "Name for the cup? Actually, I'll just write 'that one'.",
+          "The tip jar's bolted down now. Unrelated. Totally unrelated."
+        ]
+      }
     },
     {
       "id": "effie",
@@ -440,7 +461,17 @@
       "placeId": "hell-gate-park",
       "role": "same bench, every day",
       "regular": "gus",
-      "slang": []
+      "slang": [],
+      "reputation": {
+        "high": [
+          "In 1987 a man returned my umbrella. You remind me of him. Good posture too.",
+          "Sit, sit. The bench saves a spot for honest people."
+        ],
+        "low": [
+          "In 1987 I knew a fella like you. Sold me a watch. It was a drawing of a watch.",
+          "The bench is full. The bench is always full, for some people."
+        ]
+      }
     },
     {
       "id": "yesenia",

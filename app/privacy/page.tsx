@@ -36,7 +36,7 @@ export default function Privacy() {
       <p><strong>Your character and play</strong></p>
       <ul>
         <li>Your in-game name, look, style, traits and &quot;what kind of New Yorker&quot; you picked.</li>
-        <li>Game progress: virtual cash and clout (with a record of every change), items, home and furniture, places you visit in the game, tasks, goals, skills, rank, businesses, campus, hunts, gossip, lotto cards, badges and story choices.</li>
+        <li>Game progress: virtual cash and clout (with a record of every change), items, home and furniture, places you visit in the game, tasks, goals, skills, rank, businesses, campus, hunts, gossip, lotto cards, badges, story choices, and the choices you make on situation cards with your Integrity (private: never shown to other players).</li>
         <li>Social features: your crew, crushes and dates, relationships, sublets, home visits and together plans.</li>
       </ul>
       <p><strong>What you send or post</strong></p>

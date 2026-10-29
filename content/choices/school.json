@@ -1,0 +1,266 @@
+[
+  {
+    "id": "exam-answers-chat",
+    "base": "exam-answers",
+    "area": "school",
+    "emoji": "📸",
+    "title": "The 8 AM Regret 101 group chat just got a photo of tomorrow's exam key. 140 people saw it.",
+    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "hangout"] },
+    "needs": { "student": true },
+    "options": [
+      {
+        "id": "study", "label": "Mute the chat and study", "get": "A grade that's yours", "cost": "Your evening",
+        "risk": "low", "riskWhy": "Only the exam itself",
+        "outcomes": [
+          { "weight": 1, "text": "You mute the chat and study at the library until security turns the lights off at you. Twice.",
+            "effects": { "integrity": 6, "energy": -15 } }
+        ]
+      },
+      {
+        "id": "peek", "label": "Take a peek", "get": "A night off", "cost": "Integrity, if it's even real",
+        "risk": "medium", "riskWhy": "Professors have tricks", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You peek and memorize. The exam matches. You feel smart for exactly as long as it takes to remember why.",
+            "effects": { "integrity": -6, "energy": 10, "mood": 4 } },
+          { "weight": 1, "text": "Dr. Pruitt wrote a fake key and leaked it himself. Question one: 'Who shared this?' You studied the wrong answers.",
+            "effects": { "integrity": -6, "mood": -10, "clout": -15 } }
+        ]
+      },
+      {
+        "id": "report", "label": "Tell Dr. Pruitt", "get": "A fair exam for everyone", "cost": "140 classmates' goodwill",
+        "risk": "medium", "riskWhy": "Group chats find their snitch", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Dr. Pruitt wakes up long enough to write a brand-new exam. The chat is furious and has a theory about who told.",
+            "effects": { "integrity": 8, "clout": -15, "energy": -5 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎓", "text": "Remember telling Dr. Pruitt about the leaked key? He gave you five points of extra credit 'for being awake.' Highest compliment he has.",
+                       "effects": { "clout": 20, "mood": 6 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "exam-answers-buy",
+    "base": "exam-answers",
+    "area": "school",
+    "emoji": "💵",
+    "title": "In the dining hall, an upperclassman leans in: 'Heard you're flexible. Last year's Clout Theory final, C$80.'",
+    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "eat", "hangout"] },
+    "needs": { "student": true, "integrityMax": 35 },
+    "options": [
+      {
+        "id": "no", "label": "Pass", "get": "A clean grade, maybe a worse one", "cost": "Hours of studying",
+        "risk": "low", "riskWhy": "Only the exam itself",
+        "outcomes": [
+          { "weight": 1, "text": "'Nah.' He shrugs and moves to the next table. You study Clout Theory, which is mostly about why he exists.",
+            "effects": { "integrity": 6, "energy": -15 } }
+        ]
+      },
+      {
+        "id": "buy", "label": "Buy it", "get": "A night off studying", "cost": "C$80 and a little more of your name",
+        "risk": "medium", "riskWhy": "Old exams get rewritten", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "Half the questions are the same. You pass, rested and C$80 poorer.",
+            "effects": { "cash": -80, "integrity": -8, "energy": 15, "mood": 4 } },
+          { "weight": 1, "text": "Prof. Tanabe rewrote the whole final. You bought a souvenir. A C$80 souvenir.",
+            "effects": { "cash": -80, "integrity": -8, "mood": -8 } }
+        ]
+      },
+      {
+        "id": "share", "label": "Buy it and share it", "get": "A study group that owes you", "cost": "C$80, and a lot of witnesses",
+        "risk": "high", "riskWhy": "Ten people can't keep a secret", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You send it to your study group. Instant legend. Eleven people, one old exam, zero discretion.",
+            "effects": { "cash": -80, "integrity": -12, "clout": 40, "energy": 10 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "📩", "text": "Remember sharing last year's Clout Theory final? Prof. Tanabe found it in the group chat. Everyone in it retakes, and they know who sent it.",
+                       "effects": { "clout": -50, "mood": -10, "energy": -10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "group-project-slides",
+    "base": "group-project",
+    "area": "school",
+    "emoji": "🧑‍🤝‍🧑",
+    "title": "Group Project Survival: your three teammates haven't opened the slides. It's due at 9 AM.",
+    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "hangout"] },
+    "needs": { "student": true },
+    "options": [
+      {
+        "id": "all", "label": "Do it all, credit everyone", "get": "A good grade for four", "cost": "Your whole night",
+        "risk": "low", "riskWhy": "Only your sleep",
+        "outcomes": [
+          { "weight": 1, "text": "You make 22 slides by 4 AM. Four names on the title slide. Dr. Osei says, 'One person did this.' He's looking at you.",
+            "effects": { "integrity": 6, "energy": -20, "clout": 10 } }
+        ]
+      },
+      {
+        "id": "off", "label": "Do it, leave their names off", "get": "All the credit", "cost": "Three people's grade",
+        "risk": "medium", "riskWhy": "Three people will notice", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "One name on the slide: yours. It's accurate. It's also a declaration of war.",
+            "effects": { "integrity": -4, "energy": -20, "clout": 25 },
+            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "📣", "text": "Remember leaving your teammates off the slides? They posted a long thread called 'erased.' It does not mention that they did nothing.",
+                       "effects": { "clout": -30, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "tell", "label": "Tell Dr. Osei", "get": "Maybe a fair split", "cost": "Looking like a tattletale",
+        "risk": "medium", "riskWhy": "Teammates hold grudges", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Dr. Osei sighs. He's heard this every semester since 2009. He splits the grade by who did what.",
+            "effects": { "integrity": 4, "energy": -10, "clout": -10 },
+            "later": { "afterDays": [3, 7], "chance": 0.5, "emoji": "🤝", "text": "Remember telling Dr. Osei about your group? He put you with the three keenest people in class for the next project. They're terrifying. You aced it.",
+                       "effects": { "clout": 20, "mood": 6 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "group-project-credit",
+    "base": "group-project",
+    "area": "school",
+    "emoji": "🖥️",
+    "title": "At Grand Street CC, the professor loves your group's best slide. Tomás made it. He's out sick.",
+    "where": { "places": ["astoria-cc"], "tags": ["college"], "after": ["arrive"] },
+    "needs": { "student": true },
+    "options": [
+      {
+        "id": "tomas", "label": "'That was Tomás'", "get": "Tomás gets his moment", "cost": "Yours",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "'Tomás made that one.' The professor writes it down. Tomás, on the video call from bed, gives a feverish thumbs-up.",
+            "effects": { "integrity": 6, "mood": 4 } }
+        ]
+      },
+      {
+        "id": "we", "label": "'We all worked on it'", "get": "Shared glory", "cost": "A small fudge",
+        "risk": "low", "riskWhy": "Technically you all exist",
+        "outcomes": [
+          { "weight": 1, "text": "'Team effort.' The professor nods. Nobody's lying exactly. Nobody's telling the truth exactly either.",
+            "effects": { "integrity": -3, "clout": 10 } }
+        ]
+      },
+      {
+        "id": "me", "label": "'That was me'", "get": "+30 clout and a gold star", "cost": "Tomás's credit",
+        "risk": "high", "riskWhy": "The presentation was recorded", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'That one was mine.' The professor beams and asks you to present it at the department fair.",
+            "effects": { "integrity": -10, "clout": 30, "mood": 4 },
+            "later": { "afterDays": [1, 5], "chance": 0.8, "emoji": "📼", "text": "Remember claiming Tomás's slide at Grand Street CC? He watched the recording. He's back, and he told the class exactly how he made it.",
+                       "effects": { "clout": -45, "mood": -8 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "essay-service-flyer",
+    "base": "essay-service",
+    "area": "school",
+    "emoji": "📝",
+    "title": "A flyer by the campus library: 'Guaranteed A. Any essay. C$90. Also wedding toasts.'",
+    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "hangout"] },
+    "needs": { "student": true },
+    "options": [
+      {
+        "id": "write", "label": "Write it yourself", "get": "An essay that's yours", "cost": "Two nights of energy",
+        "risk": "low", "riskWhy": "Only your own writing",
+        "outcomes": [
+          { "weight": 1, "text": "You write it yourself, mostly at 2 AM. Prof. Vale writes 'Main character energy!' in the margin. You frame it.",
+            "effects": { "integrity": 5, "energy": -20, "mood": 5 } }
+        ]
+      },
+      {
+        "id": "buy", "label": "Buy one", "get": "A finished essay, tonight", "cost": "C$90 and some integrity",
+        "risk": "high", "riskWhy": "They sell the same essay to many", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "The essay arrives in an hour. It's good. It's suspiciously good. It mentions a wedding.",
+            "effects": { "cash": -90, "integrity": -8, "energy": 15 },
+            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "📑", "text": "Remember the C$90 essay from the flyer? It was also sold to eleven classmates. Prof. Vale noticed. Rewrite, and 'a conversation.'",
+                       "effects": { "clout": -25, "mood": -12, "energy": -15 } } }
+        ]
+      },
+      {
+        "id": "rewrite", "label": "Buy one, rewrite it all", "get": "A head start", "cost": "C$90 and still a night's work",
+        "risk": "medium", "riskWhy": "Some of it might stick", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You buy it, then rewrite every sentence in your own words. It's basically yours now, and you paid C$90 for an outline.",
+            "effects": { "cash": -90, "integrity": -4, "energy": -10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "essay-service-ghostwrite",
+    "base": "essay-service",
+    "area": "school",
+    "emoji": "✍️",
+    "title": "A student on the St. Johnsons quad offers you C$120 to write his 'Main Character Energy' essay by Friday.",
+    "where": { "places": ["st-johnsons", "queensborough-u"], "after": ["arrive", "hangout"] },
+    "options": [
+      {
+        "id": "no", "label": "Decline", "get": "No part of it", "cost": "C$120",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "'Write it yourself, main character.' He looks hurt, then inspired, then hurt again.",
+            "effects": { "integrity": 4 } }
+        ]
+      },
+      {
+        "id": "tutor", "label": "Offer to tutor him, C$60", "get": "C$60, honestly", "cost": "Two hours of patience",
+        "risk": "low", "riskWhy": "He may not want to learn", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "Two hours at the library. He writes it himself. It's bad, but it's his. He pays C$60 and says it 'felt weird, in a good way.'",
+            "effects": { "cash": 60, "integrity": 6, "energy": -10 } }
+        ]
+      },
+      {
+        "id": "write", "label": "Write it for C$120", "get": "C$120", "cost": "A night, and a bit of integrity",
+        "risk": "medium", "riskWhy": "He'll tell people you're 'available'", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You write him a great essay. Too great: it's clearly not his voice. He pays and says 'perfect, bro.'",
+            "effects": { "cash": 120, "integrity": -6, "energy": -15 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎓", "text": "Remember the essay you wrote on the St. Johnsons quad? He got a B-minus and wants half back. And he told his whole floor you're 'available.'",
+                       "effects": { "cash": -60, "clout": -15 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pad-hours-library",
+    "base": "pad-the-hours",
+    "area": "school",
+    "emoji": "📖",
+    "title": "Your work-study job at the campus library: shelve for one hour, log three. The supervisor naps from 2 to 4.",
+    "where": { "tags": ["campus", "university", "college"], "after": ["arrive"] },
+    "needs": { "student": true },
+    "options": [
+      {
+        "id": "one", "label": "Log the one hour", "get": "A clean timesheet", "cost": "Two hours of pay",
+        "risk": "low", "riskWhy": "It's the truth",
+        "outcomes": [
+          { "weight": 1, "text": "You log one hour, then spend two more studying in the stacks for free. The supervisor snores approvingly.",
+            "effects": { "integrity": 5, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "three", "label": "Log all three", "get": "About C$45 extra", "cost": "Paid for napping too",
+        "risk": "medium", "riskWhy": "The book scanner logs every shelf", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Three hours logged, one worked. You nap in the reference section. Everybody here is napping.",
+            "effects": { "cash": 45, "integrity": -5, "energy": 10 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "📚", "text": "Remember logging three hours for one at the campus library? The book scanner logged 11 books. Your supervisor woke up for this one.",
+                       "effects": { "cash": -45, "clout": -15, "mood": -5 } } }
+        ]
+      },
+      {
+        "id": "work", "label": "Work all three hours", "get": "C$45 extra, earned", "cost": "Two more hours of shelving",
+        "risk": "low", "riskWhy": "Only your feet",
+        "outcomes": [
+          { "weight": 1, "text": "You shelve every book in the building, including some that were already shelved. C$45, earned.",
+            "effects": { "cash": 45, "integrity": 4, "energy": -15 } }
+        ]
+      }
+    ]
+  }
+]

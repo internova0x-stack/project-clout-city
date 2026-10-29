@@ -30,7 +30,7 @@ import { badgeInfo, chatterLine, mainArc, unseenBeats, type FeedArc, type StoryA
 import GENERIC_CHATTER from "@/content/chatter-generic.json";
 import CAST_LINES from "@/content/cast-lines.json";
 import NPC_PROFILES from "@/content/culture/npcs.json";
-import { rememberedLine, withCatchphrases, type NpcProfile, type Roommate } from "@/lib/culture";
+import { rememberedLine, reputationLine, withCatchphrases, type NpcProfile, type Roommate } from "@/lib/culture";
 import CALENDAR_FILE from "@/content/culture/calendar.json";
 import { calendarLive, phoneInvite, type CalendarData } from "@/lib/calendar";
 import { RoommateCard, roommateCardDue, roommateMet } from "./home/Roommate";
@@ -55,6 +55,8 @@ import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
+import { ChoiceBackSheet, ChoiceSheet } from "./game/Choices";
+import { integrityBand, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
 import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
@@ -260,6 +262,7 @@ export function GameShell({
   radio,
   mayor,
   campaign,
+  choices,
   campus,
   goals,
   push,
@@ -344,6 +347,8 @@ export function GameShell({
   mayor?: MayorApi;
   /** Campaign Mode (migration 0127): the Phone's Campaign app and its sheet; without it the app is hidden. */
   campaign?: CampaignApi;
+  /** Moral Choices (migration 0131): situation cards where you are, the private Integrity meter; off without it. */
+  choices?: ChoicesApi;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
   campus?: CampusApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
@@ -1232,12 +1237,13 @@ export function GameShell({
       setTimeout(done, seconds * 1000);
     }).then(() => { setDoing(null); return call(); });
   /** City actions can finish story tasks; the server already counted them, so just re-read the feed. */
-  const cityThenStory = async (key: string, call: () => Promise<CityResult>) => {
+  const cityThenStory = async (key: string, call: () => Promise<CityResult>): Promise<boolean> => {
     const ok = await run(key, call);
     if (ok && storyApi) await storyApi.refresh(offset).then((r) => r.ok && setFeed(r.feed));
     // A visit or an event can complete a date night.
     if (ok && inbox?.dates.some((d) => !d.paid && d.status !== "declined")) void loadInbox();
     if (ok && crewInbox?.outings.length) void loadCrew();
+    return !!ok;
   };
   const newsToday = city?.today ?? new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const latestNews = newsItems.find((i) => i.id === newsCard) ?? null;
@@ -1633,6 +1639,55 @@ export function GameShell({
     if (atPark && starter && !barksleyMet() && !barksley) setBarksley({ first: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [atPark, !!starter]);
+  // Moral Choices (migration 0131): the server decides whether a card turns up after something happened; consequences
+  // of earlier choices land when the game opens. Never during the first session or onboarding.
+  const [choiceS, setChoiceS] = useState<ChoiceState | null>(null);
+  const [choiceCard, setChoiceCard] = useState<ChoiceCardView | null>(null);
+  const [choiceMade, setChoiceMade] = useState<ChoiceMade | null>(null);
+  const [choiceBusy, setChoiceBusy] = useState(false);
+  const [choiceBack, setChoiceBack] = useState<ChoiceLogEntry[]>([]);
+  const choicesReady = !!choices && !!city && flow === "none";
+  const loadChoices = useCallback(async () => {
+    if (!choices) return;
+    const r = await choices.state();
+    if (!r.ok) return;
+    setChoiceS(r.data);
+    if (r.data.landed.length) setChoiceBack(r.data.landed);
+    return r.data;
+  }, [choices]);
+  useEffect(() => {
+    if (!choicesReady) return;
+    // A card still waiting from earlier today (the app was closed mid-decision) comes back on load.
+    const t = setTimeout(() => void loadChoices().then((d) => { if (d?.open && !d.landed.length) setChoiceCard(d.open); }), 2500);
+    return () => clearTimeout(t);
+  }, [choicesReady, loadChoices]);
+  const askChoice = (after: ChoiceAfter) => {
+    if (!choices || !choicesReady || choiceCard) return;
+    void choices.offer(after).then((r) => {
+      if (r.ok && r.data) { const card = r.data; setTimeout(() => { setChoiceMade(null); setChoiceCard(card); }, 900); }
+    });
+  };
+  const chooseChoice = async (option: string) => {
+    if (!choices || !choiceCard) return;
+    setChoiceBusy(true);
+    const r = await choices.choose(choiceCard.log, option);
+    setChoiceBusy(false);
+    if (!r.ok) { setToast(r.error); setChoiceCard(null); return; }
+    setChoiceMade(r.data);
+    if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  };
+  const closeChoice = () => {
+    if (choiceCard && !choiceMade && choices) void choices.skip(choiceCard.log);
+    setChoiceCard(null);
+    setChoiceMade(null);
+    void loadChoices();
+  };
+  const closeBack = () => {
+    const [first, ...rest] = choiceBack;
+    if (first && choices) void choices.seen([first.id]);
+    setChoiceBack(rest);
+    if (!rest.length && cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  };
   // The current mission's place glows on the map (owner, Oct 26).
   const starterPlace = (() => { const g = starter ? nextMission(starter.done)?.go : null; return g?.kind === "place" ? g.place : null; })();
   const starterPins = useMemo(() => starterPlace ? cityPins.map((p) => p.id === starterPlace ? { ...p, glow: true } : p) : cityPins, [cityPins, starterPlace]);
@@ -1750,7 +1805,11 @@ export function GameShell({
       const act = placeById(pl)?.actions.find((x) => x.id === a);
       const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
       // v0.13: a together plan for this activity pays its bonus once both have done it.
-      void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then(() => claimTogether(pl, a));
+      void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then((ok) => {
+        void claimTogether(pl, a);
+        // Moral Choices: a shift, a meal or a visit can bring a card that fits it.
+        if (ok && act) askChoice(act.kind === "shift" ? "shift" : act.kind === "eat" ? "eat" : act.kind === "hangout" ? "hangout" : "visit");
+      });
     },
     together: together && togetherIn ? {
       plans: togetherIn.plans,
@@ -1790,7 +1849,9 @@ export function GameShell({
       // Studio lines first, then this week's city news as gossip.
       // C2: Sal remembers your order after three different days at the deli.
       const known = rememberedLine(NPC_PROFILES.profiles as NpcProfile[], r.id, city?.regularDays?.[p.id] ?? 0);
-      const live = { [r.id]: [...(known ? [known] : []), ...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
+      // Moral Choices: regulars can feel your Integrity (never the number).
+      const rep = reputationLine(NPC_PROFILES.profiles as NpcProfile[], r.id, choiceS?.integrity != null ? integrityBand(choiceS.integrity) : null, n);
+      const live = { [r.id]: [...(known ? [known] : []), ...(rep ? [rep] : []), ...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
       return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: EVERYDAY_LINES }) };
     },
     hunt: hunt && huntOn ? {
@@ -2296,6 +2357,7 @@ export function GameShell({
     if (t.toId === "home") return setTab("home");
     const p = placeById(t.toId);
     if (p) setPlace(p);
+    if (p) askChoice(t.mode === "subway" ? "travel" : "arrive");
   };
   const [lockedBorough, setLockedBorough] = useState<BoroughId | null>(null);
   const onLockedTap = useCallback((_name: string, id: BoroughId) => setLockedBorough(id), []);
@@ -3089,7 +3151,7 @@ export function GameShell({
         state={cityOn ? city : null}
         busy={busy}
         onAccept={(id) => cityApi && void run(`gig:${id}`, () => cityApi.acceptGig(id))}
-        onCollect={(id) => cityApi && void run(`gig:${id}`, () => cityApi.collectGig(id))}
+        onCollect={(id) => cityApi && void run(`gig:${id}`, () => cityApi.collectGig(id)).then((ok) => { if (ok) askChoice("gig"); })}
         perks={perkHandlers}
         muted={muted}
         onToggleSound={toggleSound}
@@ -3165,6 +3227,8 @@ export function GameShell({
           {deleteAccount && <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={deleteAccount} />}
           {campaign && <CampaignSheet open={campaignOpen} onClose={() => setCampaignOpen(false)} api={campaign} clout={me.clout} onToast={setToast}
             focusTask={campaignFocus} onFocused={clearCampaignFocus} />}
+          <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
+          <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (
@@ -3318,6 +3382,7 @@ export function GameShell({
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
+        choices={choiceS ? { integrity: choiceS.integrity, log: choiceS.log } : undefined}
         vip={membership && member ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership }
           : membership && !memberLoaded ? { on: false, onOpen: openMembership, loading: true } : undefined}
       />

@@ -5,6 +5,8 @@ import CALENDAR_FILE from "@/content/culture/calendar.json";
 import { GameShell, type Flow } from "@/components/GameShell";
 import type { CalendarData } from "@/lib/calendar";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
+import { createChoicesSim } from "@/lib/choicesSim";
+import { placeById } from "@/lib/city";
 import { lookChoices } from "@/lib/look";
 import { QuickPick, type QuickCharacter } from "./QuickPick";
 import type { CityResult } from "@/lib/cityState";
@@ -53,6 +55,12 @@ function DemoCity({ player }: { player: Player }) {
     skills, { firstDay: true, startingStyle: player.starting_style },
   ), [player, skills]);
   const sim = useMemo(() => createSimApi(city, () => null, () => false, { delayFor: () => 0 }, calendar, player.starting_style), [city, calendar, player.starting_style]);
+  // Moral Choices in the browser only, with the real cards (nothing reaches the server).
+  const choices = useMemo(() => createChoicesSim(null, {
+    where: () => { const pl = placeById(sim.here() ?? ""); return { place: pl?.id ?? null, tags: pl?.tags ?? [] }; },
+    onEffects: (e) => sim.choicePay(e),
+    today: () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }),
+  }), [sim]);
   // Starter Week in memory, marked by the same calls as the preview (components/preview/PreviewHome.tsx).
   const starter = useMemo(() => createStarterSim(0, (cash, clout) => sim.huntReward(cash, clout)), [sim]);
   const api = useMemo(() => {
@@ -98,6 +106,7 @@ function DemoCity({ player }: { player: Player }) {
         city={city}
         cityApi={api}
         starter={starter.api}
+        choices={choices}
         demo={{ signUp: setAsk }}
         previewFlow={devFlow}
         leaderboardRows={async (scope, clout) => demoLeaderboard(scope, clout, player)}

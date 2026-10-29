@@ -1,0 +1,162 @@
+[
+  {
+    "id": "found-wallet-subway",
+    "base": "found-wallet",
+    "area": "transit",
+    "emoji": "👛",
+    "title": "A wallet on the N train seat. C$300 inside, and an ID from Ditmars.",
+    "where": { "tags": ["subway", "transit"], "after": ["arrive", "travel"] },
+    "options": [
+      {
+        "id": "return", "label": "Return it all", "get": "A clean conscience, maybe a thank-you", "cost": "Your afternoon",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You hand it to Yesenia at the booth. She writes your name down like it matters. It does.",
+            "effects": { "integrity": 8, "mood": 6, "energy": -5 },
+            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "💌", "text": "Remember the wallet on the N? Its owner tracked you down at Sal's with a thank-you card and a C$60 bodega credit.",
+                       "effects": { "cash": 60, "clout": 15 } } }
+        ]
+      },
+      {
+        "id": "skim", "label": "Keep the cash, return the wallet", "get": "C$300 now", "cost": "A little of your soul",
+        "risk": "medium", "riskWhy": "The owner knows what was in it", "comesBack": true,
+        "outcomes": [
+          { "weight": 3, "text": "You drop the empty wallet at the booth. C$300 richer and slightly unable to make eye contact with yourself.",
+            "effects": { "cash": 300, "integrity": -8 } },
+          { "weight": 2, "text": "C$300 in your pocket, wallet at the booth. Clean getaway, for now.",
+            "effects": { "cash": 300, "integrity": -8 },
+            "later": { "afterDays": [2, 6], "chance": 1, "emoji": "📸", "text": "The wallet's owner posted a station camera still of whoever returned it 'a little lighter'. People in Astoria have eyes.",
+                       "effects": { "clout": -40, "mood": -8, "integrity": -4 } } }
+        ]
+      },
+      {
+        "id": "keep", "label": "Keep it all", "get": "C$300 and a nice wallet", "cost": "Integrity",
+        "risk": "high", "riskWhy": "The ID has a face. So do you.", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Wallet in your pocket. It's a nice wallet, which somehow makes it worse.",
+            "effects": { "cash": 300, "integrity": -14 },
+            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "🍵", "text": "Remember the wallet on the N? Its owner posted a 'have you seen this person' flyer. It looks a lot like you.",
+                       "effects": { "clout": -60, "mood": -10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "extra-change-hailr",
+    "base": "extra-change",
+    "area": "transit",
+    "emoji": "🚗",
+    "title": "Your Hailr ride from Flushing glitched: C$0 for a C$48 trip. Driver Ramón doesn't know yet.",
+    "where": { "after": ["travel"] },
+    "options": [
+      {
+        "id": "report", "label": "Report it and pay", "get": "Ramón gets paid, and a five-star from him", "cost": "C$48",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "You flag the glitch. The app sends a C$48 bill and a survey about how the glitch made you feel. Ramón honks twice, happily.",
+            "effects": { "cash": -48, "integrity": 6, "mood": 4 } }
+        ]
+      },
+      {
+        "id": "ride", "label": "Enjoy the free ride", "get": "C$48 stays in your pocket", "cost": "Ramón eats the fare",
+        "risk": "medium", "riskWhy": "Apps have long memories", "comesBack": true,
+        "outcomes": [
+          { "weight": 3, "text": "Free ride across Queens. You tip Ramón zero stars of guilt and get out at Ditmars humming.",
+            "effects": { "integrity": -4, "mood": 3 } },
+          { "weight": 2, "text": "Free ride. Ramón asks if the app is working. You say 'seems fine.' Technically it is, for you.",
+            "effects": { "integrity": -4, "mood": 3 },
+            "later": { "afterDays": [2, 5], "chance": 1, "emoji": "🧾", "text": "Remember the C$0 Hailr ride from Flushing? The app found it. C$48, a C$15 'glitch recovery fee' and a rider rating of 3.9.",
+                       "effects": { "cash": -63, "clout": -10 } } }
+        ]
+      },
+      {
+        "id": "tip", "label": "Pay it, plus a tip", "get": "Ramón's undying loyalty", "cost": "C$60",
+        "risk": "low", "riskWhy": "Only your wallet complains", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You pay the C$48 and add twelve. Ramón says you're the first passenger in a month who didn't eat in his car.",
+            "effects": { "cash": -60, "integrity": 8, "mood": 5 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🚗", "text": "Remember paying Ramón for the glitched Flushing ride? He picked you up again and waved off the fare: 'You're the honest one.'",
+                       "effects": { "cash": 40, "mood": 5 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "borrowed-clip-subway",
+    "base": "borrowed-clip",
+    "area": "transit",
+    "emoji": "🤸",
+    "title": "Showtime on the 7! You caught the backflip on camera. It's better than anything you've ever posted.",
+    "where": { "tags": ["subway", "transit"], "after": ["travel", "arrive"] },
+    "options": [
+      {
+        "id": "tag", "label": "Post it and tag the dancers", "get": "Some clout, and the crew's thanks", "cost": "Half the views go to them",
+        "risk": "low", "riskWhy": "Credit is hard to get wrong", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You post it with the crew's handle. They repost it with three fire emojis. That's a handshake on the 7.",
+            "effects": { "clout": 20, "integrity": 4, "mood": 4 },
+            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "📣", "text": "Remember tagging the showtime crew on the 7? They shouted you out in their next video: 'the only camera that asked.'",
+                       "effects": { "clout": 30 } } }
+        ]
+      },
+      {
+        "id": "post", "label": "Post it, no credit", "get": "+60 clout tonight", "cost": "The dancers get nothing",
+        "risk": "medium", "riskWhy": "Dancers watch their own hashtags", "comesBack": true,
+        "outcomes": [
+          { "weight": 3, "text": "The clip takes off. People in the comments ask where to find 'your' dancers. You reply with a mysterious emoji.",
+            "effects": { "clout": 60, "integrity": -5 } },
+          { "weight": 2, "text": "The clip takes off overnight. Someone asks who the dancers are. You let the question sit.",
+            "effects": { "clout": 60, "integrity": -5 },
+            "later": { "afterDays": [1, 5], "chance": 1, "emoji": "🙃", "text": "The showtime crew from the 7 found your uncredited clip. Their stitch, 'who is this?', has twice your views.",
+                       "effects": { "clout": -45, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "ask", "label": "Tip C$10 and ask first", "get": "Their blessing and a better angle", "cost": "C$10, and you miss your stop",
+        "risk": "low", "riskWhy": "None, except Woodside", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You tip and ask. They do the flip again, for you, at 61st Street. You end up in Woodside, but the clip is perfect.",
+            "effects": { "cash": -10, "clout": 30, "integrity": 5, "energy": -5 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "overheard-secret-subway",
+    "base": "overheard-secret",
+    "area": "transit",
+    "emoji": "🤫",
+    "title": "On the N, Chardonnay Shade's assistant is on speaker: the 'surprise' engagement is a spin-off promo.",
+    "where": { "tags": ["subway", "transit"], "after": ["travel", "arrive"] },
+    "options": [
+      {
+        "id": "keep", "label": "Keep it to yourself", "get": "A quiet ride", "cost": "The scoop of the year",
+        "risk": "low", "riskWhy": "Nobody knows you heard", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You put your headphones in like a civilized New Yorker. The assistant keeps talking. You keep not listening, mostly.",
+            "effects": { "integrity": 4, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "sell", "label": "Sell it to Lola", "get": "C$150 and a Lola shout-out", "cost": "Someone's job, maybe",
+        "risk": "high", "riskWhy": "The assistant saw your face", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Lola pays C$150 and runs it as BREAKING within the hour. 'Sources on the N tell me...' You are the source on the N.",
+            "effects": { "cash": 150, "clout": 40, "integrity": -8 },
+            "later": { "afterDays": [1, 4], "chance": 0.6, "emoji": "🧥", "text": "Remember the call on the N? Chardonnay's assistant got fired, and the follow-up names 'a source in a green jacket.' Everyone knows your jacket.",
+                       "effects": { "clout": -30, "mood": -8, "integrity": -3 } } }
+        ]
+      },
+      {
+        "id": "tease", "label": "Post a vague teaser", "get": "+25 clout, deniable", "cost": "A little smugness",
+        "risk": "medium", "riskWhy": "Vague posts get decoded", "comesBack": false,
+        "outcomes": [
+          { "weight": 2, "text": "'Some engagements are just marketing 👀.' Two hundred people ask what you mean. You say nothing. Power.",
+            "effects": { "clout": 25, "integrity": -3, "mood": 3 } },
+          { "weight": 1, "text": "Your teaser gets decoded by a fan account in nine minutes. Clout now, and a fan army in your mentions.",
+            "effects": { "clout": 25, "integrity": -3, "mood": -4 } }
+        ]
+      }
+    ]
+  }
+]
