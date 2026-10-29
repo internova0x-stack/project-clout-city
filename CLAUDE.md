@@ -268,7 +268,7 @@ components live in `app/globals.css`.
   each at End Week, ledger 'campaign_task') in Campaign HQ and under the five in the Tasks sheet (not part of the five or the
   streak); "Your poll results are in" (`push_scan_campaign`, kind 'campaign_poll', run by the push sender); Lola's scandal write-ups
   in News → City (`lines.scandal`, `view.scandals`); Campaign HQ on the map (place 'campaign-hq', Steinway in Astoria, tag
-  'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race.
+  'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race. Candidates' portraits are public/cast/candidate-<id>.webp (owner, Oct 29); every issue has an emoji.
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google

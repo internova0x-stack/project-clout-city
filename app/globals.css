@@ -2493,7 +2493,10 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-cand-row, .camp-cand { display:flex; align-items:center; gap:12px; }
 .camp-cand-emoji { flex:none; display:grid; place-items:center; width:48px; height:48px; border-radius:50%; font-size:26px; background:var(--chip-off); }
 .camp-cand-emoji.big { width:64px; height:64px; font-size:36px; }
-.camp-issue { display:flex; flex-direction:column; gap:2px; padding:12px 14px; }
+.camp-cand-face { flex:none; display:block; width:56px; height:56px; border-radius:50%; object-fit:cover; background:var(--chip-off); box-shadow:var(--elev-1); }
+.camp-cand-face.big { width:112px; height:112px; box-shadow:var(--elev-2); }
+.camp-issue { display:flex; flex-direction:row; align-items:flex-start; gap:12px; padding:12px 14px; }
+.camp-issue-emoji { flex:none; display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--surface-raised); font-size:20px; }
 .camp-bar { height:10px; border-radius:6px; background:var(--chip-off); overflow:hidden; }
 .camp-bar span { display:block; height:100%; background:var(--g-neon); border-radius:6px; }
 .camp-head { display:flex; align-items:center; gap:12px; }
