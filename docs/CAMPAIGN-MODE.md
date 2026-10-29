@@ -112,7 +112,7 @@ chart. Her students loved her and her colleagues feared her office hours.
 
 **3. Frankie "The Hammer" Kowalczyk, "The Organizer"**
 
-*Bio:* Frankie ran Local 117 of the city's transit workers for 22 years and has a knee that "remembers the strike of '09."
+*Bio:* Frankie ran Local 117 of the city's transit workers for 22 years, and he has a knee that "remembers the strike of '09."
 Loud, warm and impossible to bully. Knows every bodega owner in Woodside by first name and brings a thermos to every
 meeting. Retired, was bored in three weeks, and started a campaign.
 
@@ -135,7 +135,7 @@ meeting. Retired, was bored in three weeks, and started a campaign.
 
 *Satire target:* the lovable old-school fighter who can't stand change.
 
-*(Owner to decide: Frankie's gender. The spec and drafts use the name only until then.)*
+*Frankie is a man (owner, Oct 29): he, him.*
 
 **4. Kaylee Starr, "The Influencer"**
 
@@ -284,7 +284,7 @@ The skip screen spells this out before the manager confirms.
   setting, `campaign.unlockRank`).
   - *Timing to know:* Rank 2 is 100 clout, and the first party pays exactly 100. Most players reach it at the end of
     their first session, so the teasers below mostly show during that session.
-  - *The alternative:* Rank 3 (500 clout, a few days of play) would give the teasers days to build up.
+  - *Kept at Rank 2* (owner, Oct 29) over Rank 3: the mode opens fast, and the teasers work as "coming right up".
 - **How it's introduced:**
   - a Lola News item: "Three challengers, one Mayor, and they all need a manager";
   - an inbox invitation from each candidate;
@@ -936,13 +936,12 @@ Content (candidates, situation cards, offers, stakeholders, lines) lives in `con
 | Skip a week? | Yes, with consequences |
 | Meetings a week | 3 |
 | Venues | Fictional, or real public landmarks only |
-| Unlock | Rank 2, with "Upcoming election" teasers before it (owner, Oct 29) |
+| Frankie Kowalczyk | A man (owner, Oct 29) |
+| Unlock | Rank 2, not Rank 3, with "Upcoming election" teasers before it (owner, Oct 29) |
 | Goals | Campaign goals on the ladder (owner, Oct 29) |
 
 ### Proposed, to confirm
 
-- **Teasers:** shown before the unlock, and they ship with the mode.
-- **Campaign goals:** the seven on the ladder.
 - **The test build** is 4 campaign weeks. The full campaign is 8.
 - **Caps:**
   - seeding C$1,000 per act;
@@ -954,7 +953,6 @@ Content (candidates, situation cards, offers, stakeholders, lines) lives in `con
 
 ### Still open
 
-- **Frankie Kowalczyk's gender.**
 - **Content per week:** how many cards, messages and tasks keep a campaign spread over several sessions.
 - **Team trouble rate:** whether the rate after dirty play feels fair (starting rates in section 10).
 - **Help for the underdog:** whether low-clout managers get a mentor stakeholder so their first campaign is

@@ -57,7 +57,7 @@ announces fixes that really shipped. Examples:
 - **Preston Vale Goldcrest III,** "The Disruptor": the slightly slimy towers-and-gondola billionaire.
 - **Dr. Ingrid Castellano,** "The Professor": a methodical former St. Johnsons professor of urban systems; transit,
   floods, open books.
-- **Frankie "The Hammer" Kowalczyk,** "The Organizer": the lovable, hard-nosed former transit union head; rent,
+- **Frankie "The Hammer" Kowalczyk,** "The Organizer": the lovable, hard-nosed former transit union head (a man); rent,
   wages, bodegas.
 - **Kaylee Starr,** "The Influencer": 2.3 million followers and a "Mayor era"; nightlife, free Wi-Fi, vibes.
 
