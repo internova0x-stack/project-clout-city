@@ -413,12 +413,8 @@ export function GameShell({
   const [campaignOpen, setCampaignOpen] = useState(false);
   // Whether a campaign is running (the election teasers step aside while one is).
   const [campaignRunning, setCampaignRunning] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (!campaign || campaignOpen) return;
-    let live = true;
-    void campaign.screen().then((r) => { if (live && r.ok) setCampaignRunning(!!r.data.view && r.data.view.phase !== "over"); });
-    return () => { live = false; };
-  }, [campaign, campaignOpen]);
+  const [campaignTasks, setCampaignTasks] = useState<{ id: string; title: string; tag: string; isDone: boolean }[]>([]);
+  const [campaignScandals, setCampaignScandals] = useState<string[]>([]);
   // Migration 0100: the day's venue boost, said once when it lands ("Your Goth look fits The Kiln: +5 Confidence").
   const styleBoostKey = city?.style?.boost ? `${city.today}:${city.style.boost.place}` : null;
   // A boost already earned before this visit to the game isn't news.
@@ -593,6 +589,19 @@ export function GameShell({
   // Skills (migration 0056): fresh each time the profile or the Tasks list (its skill task) opens.
   const [skills, setSkills] = useState(previewSkills);
   const tasksOpen = panel === "tasks" || panel === "skills";
+  // Campaign Mode: whether a campaign runs (the election teasers step aside) and its tasks for the Tasks sheet.
+  useEffect(() => {
+    if (!campaign || campaignOpen) return;
+    let live = true;
+    void campaign.screen().then((r) => {
+      if (!live || !r.ok) return;
+      const running = !!r.data.view && r.data.view.phase !== "over";
+      setCampaignRunning(running);
+      setCampaignTasks(running ? r.data.view!.tasks : []);
+      setCampaignScandals(r.data.view?.scandals.map((x) => x.text) ?? []);
+    });
+    return () => { live = false; };
+  }, [campaign, campaignOpen, tasksOpen]);
   useEffect(() => {
     // Loaded once at the start too, so the profile's Skills tab is ready the moment it opens (owner, Oct 22).
     if (!loadSkills || (skills && !(profileOpen || tasksOpen))) return;
@@ -1751,6 +1760,7 @@ export function GameShell({
     onBarksley: () => setBarksley({ first: !barksleyMet() }),
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
+    onOpenCampaign: campaign ? () => setCampaignOpen(true) : undefined,
     onStation: radio || tv ? onStation : undefined,
     onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
@@ -2731,6 +2741,7 @@ export function GameShell({
         onOpenTasks={() => { markTasksSeen(); setPanel("tasks"); }}
       />
       <TasksSheet
+        campaign={campaignRunning ? { tasks: campaignTasks, onOpen: () => { setPanel(null); setCampaignOpen(true); } } : null}
         open={panel === "tasks"}
         onClose={() => { setPanel(null); setTasksTab(undefined); }}
         tab={tasksTab}
@@ -3000,6 +3011,7 @@ export function GameShell({
         radio={radio}
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
         onOpenCampaign={campaign ? () => { setPhone({ open: false, app: null }); setCampaignOpen(true); } : undefined}
+        scandals={campaignScandals}
         election={campaign && campaignRunning === false ? {
           unlocked: myRank.level >= APP_UNLOCKS.campaign.rank, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
           onOpen: () => { setPhone({ open: false, app: null }); setCampaignOpen(true); },

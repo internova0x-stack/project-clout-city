@@ -28,7 +28,8 @@
       "catchphrases": [
         "Ock! The usual? Salt, pepper, ketchup. I know, I know.",
         "Also Sal is sleeping on the bread. Take the roll from the other side.",
-        "Mira, twenty-two years on this corner. I've seen landlords come and go. Mostly come."
+        "Mira, twenty-two years on this corner. I've seen landlords come and go. Mostly come.",
+        "Election's coming. Every campaign wants my bodega in their ad. Also Sal has endorsed nobody. Also Sal is sleeping."
       ],
       "likes": [
         "Regulars who say good morning",
@@ -65,7 +66,8 @@
       "catchphrases": [
         "Regular coffee? Milk, two sugars, one rumor. Coming right up.",
         "Deadass, I heard it before it happened.",
-        "Tip jar's for film school. Gossip's free with a large."
+        "Tip jar's for film school. Gossip's free with a large.",
+        "Four people running against Papa-Dani and every one of them wants a latte on camera. Tip jar's right there."
       ],
       "likes": [
         "Telenovelas",
@@ -96,7 +98,8 @@
       "catchphrases": [
         "Sit anywhere, hon. Not there. There.",
         "Coffee's bottomless. My patience isn't.",
-        "I don't gossip. I just remember out loud."
+        "I don't gossip. I just remember out loud.",
+        "Some campaign manager sat in booth four for three hours and ordered one coffee. Politics."
       ],
       "likes": [
         "Sunday regulars",
@@ -421,7 +424,8 @@
       "catchphrases": [
         "Seen a lot from this bench. Want to hear about 1987?",
         "The bridge was here first. Then me. Then the joggers.",
-        "Sit, sit. The bench is free. The stories cost nothing either."
+        "Sit, sit. The bench is free. The stories cost nothing either.",
+        "Papa-Dani fixed this bench himself. Well, he held the ribbon. Still voting for somebody, though. Haven't decided who."
       ],
       "likes": [
         "Backgammon",
@@ -539,7 +543,8 @@
       "catchphrases": [
         "Two slices and a soda? Say less. Already in the oven.",
         "The sign says a dollar. The sign is sentimental.",
-        "Fold it down the middle. Like a local. There you go."
+        "Fold it down the middle. Like a local. There you go.",
+        "A candidate ate a slice with a fork in here. On camera. I'm still recovering."
       ],
       "likes": [
         "A crispy bottom",
@@ -570,7 +575,8 @@
         "White sauce, yes. Red sauce, careful. I'm not responsible after that.",
         "Three a.m. is my rush hour. Everybody's honest at three a.m.",
         "You look tired, B. Extra rice. On the house this once.",
-        "Parking by my cart on a Friday night? Fuhgeddaboudit."
+        "Parking by my cart on a Friday night? Fuhgeddaboudit.",
+        "The billionaire's driver comes by at two a.m. White sauce, no red. Even his driver has a strategy."
       ],
       "likes": [
         "Cricket on the radio",
@@ -659,7 +665,8 @@
       "catchphrases": [
         "On line, not in line. You're in New York now.",
         "You want a schmear? Everything bagel, schmear, done. Next.",
-        "Don't kvetch about the wait. Kvetch about the rent. The wait is worth it."
+        "Don't kvetch about the wait. Kvetch about the rent. The wait is worth it.",
+        "The professor came in, ordered an everything bagel, and explained the 7 train to the whole line. Twenty minutes. Nobody left. Respect."
       ],
       "likes": [
         "Hand-sliced pastrami",
@@ -691,7 +698,8 @@
       "catchphrases": [
         "You on the list? You're on the list. Don't tell anyone how easy that was.",
         "Best view of the skyline in Queens. Deadass. Ask anybody who's been to the other ones.",
-        "New Year's up here: heaters, a countdown and nobody wearing a diaper. Times Square could never."
+        "New Year's up here: heaters, a countdown and nobody wearing a diaper. Times Square could never.",
+        "Kaylee Starr filmed a whole campaign video on this roof. Six hours. Forty seconds of video. Deadass."
       ],
       "likes": [
         "Heat lamps",
@@ -739,6 +747,33 @@
         "facts",
         "stoop"
       ]
+    },
+    {
+      "id": "bernie",
+      "name": "Bernadette \"Bernie\" Szabo",
+      "age": 63,
+      "background": "Hungarian-American, born in Astoria to a family of union printers",
+      "personality": "Has run volunteers for every campaign on Steinway since 1994, for whoever pays the rent on the storefront. Loyal to the envelopes, not the candidates.",
+      "yearsInNeighborhood": 63,
+      "catchphrases": [
+        "Grab a stack. Lick, fold, seal. Democracy is mostly envelopes.",
+        "Four candidates, one window. I tape up whoever pays this month.",
+        "The whiteboard stays facing the wall. I don't care whose campaign you run."
+      ],
+      "likes": [
+        "Rubber stamps",
+        "A full volunteer sheet",
+        "Pierogi from the church sale"
+      ],
+      "dislikes": [
+        "Phones near the whiteboard",
+        "Candidates who skip the volunteers",
+        "Glitter"
+      ],
+      "placeId": "campaign-hq",
+      "role": "the volunteer coordinator",
+      "regular": "bernie",
+      "slang": []
     }
   ],
   "roommates": [

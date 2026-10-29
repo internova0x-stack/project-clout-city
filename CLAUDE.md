@@ -20,7 +20,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
   current version's "In scope" list; anything else gets a "Coming soon" card.
 - `docs/SETUP.md`: Supabase, email template and Vercel setup.
 - `docs/STORIES.md`: adding, approving, scheduling and pausing stories in the Story Studio (`/studio`).
-- `docs/CAMPAIGN-MODE.md`: Campaign Mode (spec v0.5, not built): the player manages one of four challengers' campaigns
+- `docs/CAMPAIGN-MODE.md`: Campaign Mode (spec v0.5; the 4-week test build is in, migrations 0127 and 0128): the player manages one of four challengers' campaigns
   against Mayor Papa-Dani; his campaign voice rules are in `docs/CAST.md`.
 - `docs/CREATORS.md`: the creator program end to end: adding creators, links, sign-up credit, commissions, the
   creator page, payouts and video tracking.
@@ -263,6 +263,12 @@ components live in `app/globals.css`.
   and paid, but `goal_current` only suggests them while a campaign runs. Entry: the Phone's Campaign app (the teaser before Rank 2,
   `APP_UNLOCKS.campaign`), News → City's "Upcoming election" card while none runs, the Rank 2 reveal and Lola's unlock line;
   `/home?open=campaign`. Tuning: tests/campaign.test.ts plays thousands of campaigns (clean ~45-65% wins, dirty ~55-80%).
+  Part 2 (migration 0128): campaign tasks (content/campaign/tasks.json: two a campaign week, one from the campaign's state, one in
+  the candidate's voice; title ≤ 35 and tag ≤ 30 characters filled in, tests check it; `taskDone` reads the week's plan; 15 clout
+  each at End Week, ledger 'campaign_task') in Campaign HQ and under the five in the Tasks sheet (not part of the five or the
+  streak); "Your poll results are in" (`push_scan_campaign`, kind 'campaign_poll', run by the push sender); Lola's scandal write-ups
+  in News → City (`lines.scandal`, `view.scandals`); Campaign HQ on the map (place 'campaign-hq', Steinway in Astoria, tag
+  'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race.
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google

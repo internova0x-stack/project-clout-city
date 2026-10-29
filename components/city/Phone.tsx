@@ -81,7 +81,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
-  invite, mayor, locked, onOpenCampaign, election,
+  invite, mayor, locked, onOpenCampaign, election, scandals,
 }: {
   open: boolean;
   onClose: () => void;
@@ -154,6 +154,8 @@ export function PhoneModal({
   onOpenCampaign?: () => void;
   /** Campaign Mode's "Upcoming election" card in News → City (while no campaign runs). */
   election?: ElectionTeaser;
+  /** Campaign Mode: Lola's write-ups of the player's campaign scandals, in News → City. */
+  scandals?: string[];
   /** v0.10 gossip: the Tea app; without it the app is hidden. */
   tea?: { state: GossipState; busy: boolean; onShare?: (storyId: string, piece: number) => void; onOpenCard: (c: TeaCard) => void };
 }) {
@@ -268,7 +270,7 @@ export function PhoneModal({
                   {onDeleteAccount && <DeleteAccountRow onOpen={onDeleteAccount} />}
                 </div>
               )}
-              {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.wins} election={election} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
+              {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.wins} election={election} scandals={scandals} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "tea" && tea && <TeaApp stories={tea.state.stories} cards={tea.state.cards} busy={tea.busy} onHome={() => setApp(null)} onShare={tea.onShare} onOpenCard={tea.onOpenCard} />}
               {app === "messages" && (chat
                 ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} stations={stations} onOutOfMessages={onChatPass ? () => onChatPass(true) : undefined} />

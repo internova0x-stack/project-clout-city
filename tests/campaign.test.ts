@@ -9,7 +9,7 @@ import { CampaignError, campaignView, choose, debateRound, dilemma, endWeek, nex
 
 const read = (f: string) => JSON.parse(readFileSync(new URL(`../content/campaign/${f}.json`, import.meta.url), "utf8"));
 const content: CampaignContent = buildContent({
-  candidates: read("candidates"), city: read("city"), inbox: read("inbox"), situations: read("situations"), debate: read("debate"), lines: read("lines"),
+  candidates: read("candidates"), city: read("city"), inbox: read("inbox"), situations: read("situations"), debate: read("debate"), lines: read("lines"), tasks: read("tasks"),
 });
 const IDS: CandidateId[] = ["goldcrest", "castellano", "kowalczyk", "starr"];
 
@@ -209,4 +209,34 @@ test("money rules: the seed cap, the skim room, the end reward", () => {
   assert.equal(endReward("loss", 100, false), 95);
   const s = { places: { a: { you: 30, mayor: 40 }, b: { you: 50, mayor: 30 } } } as unknown as CampaignState;
   assert.deepEqual(citywide(s, [{ id: "a", name: "A", weight: 0.5, cares: "", mayor: 0 }, { id: "b", name: "B", weight: 0.5, cares: "", mayor: 0 }]), { you: 40, mayor: 35 });
+});
+
+test("campaign tasks fit the card, whatever names fill them (owner, Oct 29)", () => {
+  const longest = (xs: string[]) => xs.reduce((a, b) => (b.length > a.length ? b : a), "");
+  const first = (n: string) => n.replace(/^(Dean|Pastor|Auntie|Dr\.)\s+/, "").split(" ")[0];
+  const fills: Record<string, string> = {
+    who: longest(content.stakeholders.map((s) => first(s.name))),
+    place: longest(content.places.map((p) => p.short ?? p.name)),
+    staffer: longest(content.staff.map((s) => first(s.name))),
+    topic: "weak spot",
+    n: "99",
+  };
+  const fill = (t: string) => t.replace(/\{(\w+)\}/g, (_, k) => fills[k] ?? "");
+  const all = [...content.tasks.shared, ...Object.values(content.tasks.candidates).flat()];
+  for (const t of all) {
+    assert.ok([...fill(t.title)].length <= 35, `${t.id}: "${fill(t.title)}" is over 35`);
+    assert.ok([...fill(t.tag)].length <= 30, `${t.id}: "${fill(t.tag)}" is over 30`);
+  }
+  for (const id of IDS) assert.ok(content.tasks.candidates[id].length >= 3, `${id}: three tasks of their own`);
+});
+
+test("two campaign tasks a week, paid once each when the plan does them", () => {
+  for (const id of IDS) for (let seed = 1; seed <= 40; seed++) {
+    const { state, payouts } = play(id, "clean", 500 + seed);
+    const weeks = new Set((state.tasks ?? []).map((t) => t.week));
+    assert.ok(weeks.size >= 2, `${id} ${seed}: tasks kept for recent weeks`);
+    const paid = payouts.filter((p) => p.kind === "campaign_task");
+    for (let w = 1; w <= CAMPAIGN.weeks; w++) assert.ok(paid.filter((p) => p.ref.split(":")[1] === String(w)).length <= 2);
+    assert.ok(paid.every((p) => p.amount === CAMPAIGN.taskClout));
+  }
 });

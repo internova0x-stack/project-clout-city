@@ -6,42 +6,48 @@
       "name": "Astoria",
       "weight": 0.22,
       "cares": "Rent and nightlife",
-      "mayor": 42
+      "mayor": 42,
+      "short": "Astoria"
     },
     {
       "id": "lic",
       "name": "Long Island City",
       "weight": 0.14,
       "cares": "Towers and the waterfront",
-      "mayor": 40
+      "mayor": 40,
+      "short": "LIC"
     },
     {
       "id": "sunnyside-woodside",
       "name": "Sunnyside & Woodside",
       "weight": 0.15,
       "cares": "Rent and the 7 train",
-      "mayor": 41
+      "mayor": 41,
+      "short": "Sunnyside"
     },
     {
       "id": "jackson-heights",
       "name": "Jackson Heights",
       "weight": 0.18,
       "cares": "Small business and rent",
-      "mayor": 43
+      "mayor": 43,
+      "short": "Jackson Heights"
     },
     {
       "id": "flushing",
       "name": "Flushing",
       "weight": 0.17,
       "cares": "Business and transit",
-      "mayor": 44
+      "mayor": 44,
+      "short": "Flushing"
     },
     {
       "id": "jamaica",
       "name": "Jamaica",
       "weight": 0.14,
       "cares": "Transit and safety",
-      "mayor": 45
+      "mayor": 45,
+      "short": "Jamaica"
     }
   ],
   "staff": [
@@ -77,12 +83,12 @@
   "stakeholders": [
     {
       "id": "rosa",
-      "name": "Rosa Ferreira",
+      "name": "Inês Ferreira",
       "role": "Astoria Tenants' Alliance"
     },
     {
       "id": "gus",
-      "name": "Gus Papadakis",
+      "name": "Stavros Kallas",
       "role": "Ditmars Merchants' Association"
     },
     {
@@ -102,7 +108,7 @@
     },
     {
       "id": "jojo",
-      "name": "Jojo Reyes",
+      "name": "Dez Navarro",
       "role": "Nightlife promoter"
     },
     {
@@ -117,13 +123,13 @@
     },
     {
       "id": "teddy",
-      "name": "Teddy Vance",
+      "name": "Barry Vance",
       "role": "Vance Ribbon & Scissor Co., the Mayor's top donor",
       "mayorAlly": true
     },
     {
       "id": "joy",
-      "name": "Auntie Joy Mensah",
+      "name": "Auntie Joy Asante",
       "role": "Jamaica Block Association, endorses the Mayor",
       "mayorAlly": true
     },

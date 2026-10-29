@@ -36,6 +36,8 @@ export const CAMPAIGN = {
   /** Team trouble after dirty play (spec section 10). */
   teamRisk: { clean: 0.1, trace: 0.2, perExtraOp: 0.05 },
   /** Clout back into the main game. */
+  /** Each campaign task pays this much clout at End Week (ledger 'campaign_task'). */
+  taskClout: 15,
   reward: { finish: 100, win: 200, clean: 100, pollPerPoint: 5, pollWeekCap: 30, lossShare: 0.05, repeatWinFactor: 0.5 },
 } as const;
 
@@ -102,7 +104,13 @@ export interface Candidate {
   mayorJab: string;
 }
 
-export interface Place { id: string; name: string; weight: number; cares: string; mayor: number }
+export interface Place { id: string; name: string; weight: number; cares: string; mayor: number; /** For task cards. */ short?: string }
+
+/** A campaign daily task (content/campaign/tasks.json): what finishes it, and when the shared ones fit. */
+export type TaskDone = "reply" | "meeting" | "visit" | "rally" | "tour" | "donors" | "prep" | "rest" | "gotv";
+export interface TaskDef { id: string; title: string; tag: string; done: TaskDone; when?: "threat" | "request" | "meeting" | "weak" | "mayor_turf" | "debate" | "low_morale" | "election" }
+/** A task drawn for this week, its names filled in. `target` is the place, message or topic it's about. */
+export interface CampaignTask { id: string; title: string; tag: string; done: TaskDone; target?: string; week: number }
 export interface Staff { id: string; name: string; role: string; job: string; pronoun: "he" | "she" }
 export interface Stakeholder { id: string; name: string; role: string; mayorAlly?: boolean }
 
@@ -161,6 +169,7 @@ export interface CampaignContent {
   inbox: InboxMessage[];
   situations: Situation[];
   debate: DebateContent;
+  tasks: { shared: TaskDef[]; candidates: Record<CandidateId, TaskDef[]> };
   lines: {
     headlines: { up: string[]; down: string[]; flat: string[] };
     mayor: { up: string[]; down: string[] };
@@ -170,6 +179,8 @@ export interface CampaignContent {
     warning: string;
     leak: string;
     factCheck: { debunked: string; held: string };
+    /** Lola's News line when a scandal breaks, by how the campaign answered it. */
+    scandal: Record<string, string>;
   };
 }
 
@@ -252,6 +263,10 @@ export interface CampaignState {
   links: { clout: number; crew: number; home: string | null; fundMult: number; wonBefore: boolean };
   earned: number;
   dilemmas: Record<string, string>;
+  /** This week's two campaign tasks (drawn when the week opens; done is worked out from the week's plan). */
+  tasks?: CampaignTask[];
+  /** Scandals Lola has written up (News → City), newest last. */
+  scandals?: { week: number; text: string }[];
   /** Get-out-the-vote points per place (Election week). */
   turnout: Record<string, number>;
   /** Engine-made cards waiting for the next End Week: "exposure:<trace>", "poach", "lawsuit", "debunk". */
@@ -261,7 +276,7 @@ export interface CampaignState {
 }
 
 /** A payment into or out of the main game, which the server writes to the ledger once (ledger kind, ref). */
-export interface Payout { currency: "cash" | "clout"; amount: number; kind: "campaign_seed" | "campaign_skim" | "campaign_repay" | "campaign_poll" | "campaign_reward"; ref: string }
+export interface Payout { currency: "cash" | "clout"; amount: number; kind: "campaign_seed" | "campaign_skim" | "campaign_repay" | "campaign_poll" | "campaign_reward" | "campaign_task"; ref: string }
 
 /** Citywide rating: places weighted by population. */
 export function citywide(state: Pick<CampaignState, "places">, places: Place[]): { you: number; mayor: number } {
@@ -324,6 +339,7 @@ export function buildContent(files: {
   situations: { situations: Situation[] };
   debate: DebateContent;
   lines: CampaignContent["lines"];
+  tasks: CampaignContent["tasks"];
 }): CampaignContent {
   return {
     candidates: files.candidates.candidates,
@@ -334,6 +350,7 @@ export function buildContent(files: {
     situations: files.situations.situations,
     debate: { topics: files.debate.topics, questions: files.debate.questions, styles: files.debate.styles },
     lines: files.lines,
+    tasks: { shared: files.tasks.shared, candidates: files.tasks.candidates },
   };
 }
 

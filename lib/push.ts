@@ -66,6 +66,8 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   calendar_tonight: { tier: 1, category: "reminders", ttlMin: 300 },
   // P2: you won something
   rank_up: { tier: 2, category: "rewards", ttlMin: 1440 },
+  // Campaign Mode (migration 0128): the morning paper is out ("Your poll results are in").
+  campaign_poll: { tier: 2, category: "news", ttlMin: 720 },
   goal_done: { tier: 2, category: "rewards", ttlMin: 1440 },
   streak_reward: { tier: 2, category: "rewards", ttlMin: 1440 },
   skill_up: { tier: 2, category: "rewards", ttlMin: 1440 },

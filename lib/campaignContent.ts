@@ -7,6 +7,7 @@ import INBOX from "../content/campaign/inbox.json";
 import SITUATIONS from "../content/campaign/situations.json";
 import DEBATE from "../content/campaign/debate.json";
 import LINES from "../content/campaign/lines.json";
+import TASKS from "../content/campaign/tasks.json";
 import { buildContent, type CampaignContent } from "./campaign";
 
 export const CAMPAIGN_CONTENT: CampaignContent = buildContent({
@@ -16,4 +17,5 @@ export const CAMPAIGN_CONTENT: CampaignContent = buildContent({
   situations: SITUATIONS as never,
   debate: DEBATE as never,
   lines: LINES as never,
+  tasks: TASKS as never,
 });

@@ -37,7 +37,7 @@ export interface NewsHandlers {
 /** v0.6 City News handed to the News app. */
 export interface CityNews { items: NewsItem[]; today: string; focus?: string | null; onSeen?: (ids: string[]) => void }
 
-export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [], election }: {
+export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [], election, scandals = [] }: {
   feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews;
   /** v0.9: "Spotted at" lines from parties the player went to (empty when they opted out). */
   spotted?: PartyMention[];
@@ -45,6 +45,8 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
   jackpots?: LottoWin[];
   /** Campaign Mode (owner, Oct 29): the "Upcoming election" card while no campaign runs. */
   election?: ElectionTeaser;
+  /** Campaign Mode: Lola's write-ups of the player's own campaign scandals. */
+  scandals?: string[];
 }) {
   const storyLive = (feed?.arcs ?? []).some((a) => a.type === "main" && !a.finished);
   // Story and City are the feed's two tabs; the Archive opens from the header.
@@ -100,11 +102,17 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
         </div>
       )}
       {tab === "city" ? (
-        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 && !election ? (
+        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 && !election && scandals.length === 0 ? (
           <Quiet text="Slow news week. Even the celebrities are napping. Check back tomorrow." />
         ) : (
           <div className="stack-12">
             {election && <ElectionCard e={election} />}
+            {scandals.map((t) => (
+              <div key={t} className="card stack-4 camp-scandal">
+                <span className="overline" style={{ display: "block" }}>🗳️ The campaign trail · Lola Lowdown</span>
+                <p className="body" style={{ margin: 0 }}>{t}</p>
+              </div>
+            ))}
             {jackpots.slice(0, 1).map((w) => <PotWinNewsCard key={w.wonAt} w={w} />)}
             {spotted.map((m) => <SpottedCard key={m.eventId} m={m} />)}
             {cityNews.recent.map((i) => <CityNewsCard key={i.id} item={i} today={city!.today} focus={city!.focus === i.id} />)}

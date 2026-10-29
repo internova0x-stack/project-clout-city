@@ -8,12 +8,12 @@
       "kind": "request",
       "label": "Verified",
       "subject": "Where do you stand on the rent cap bill?",
-      "body": "Rosa Ferreira, Astoria Tenants' Alliance: \"Four thousand tenants want to know if {candidate} backs the rent cap bill. We vote as a block. A big one.\"",
+      "body": "Inês Ferreira, Astoria Tenants' Alliance: \"Four thousand tenants want to know if {candidate} backs the rent cap bill. We vote as a block. A big one.\"",
       "options": [
         {
           "id": "promise",
           "label": "Promise to back it",
-          "get": "+2 in Astoria, Rosa's trust",
+          "get": "+2 in Astoria, Inês's trust",
           "cost": "A promise you'll be held to",
           "risk": "medium",
           "why": "Developers hate it",
@@ -23,14 +23,14 @@
             "place": 2,
             "rating": 0.5
           },
-          "receipt": "Rosa's members cheered. Developers sharpened their pencils.",
+          "receipt": "Inês's members cheered. Developers sharpened their pencils.",
           "fail": {
             "chance": 0.2,
             "effects": {
               "rating": 0.5,
               "cash": -3000
             },
-            "receipt": "Rosa's members cheered, and a developer pulled a C$3,000 pledge."
+            "receipt": "Inês's members cheered, and a developer pulled a C$3,000 pledge."
           },
           "where": "astoria"
         },
@@ -38,27 +38,27 @@
           "id": "hedge",
           "label": "Say you're \"studying it\"",
           "get": "No enemies today",
-          "cost": "Rosa's patience",
+          "cost": "Inês's patience",
           "risk": "low",
           "why": "Tenants notice hedging",
           "trust": -1,
           "effects": {
             "rating": 0
           },
-          "receipt": "\"Studying it.\" Rosa has heard that one before."
+          "receipt": "\"Studying it.\" Inês has heard that one before."
         },
         {
           "id": "refuse",
           "label": "Say no, politely",
           "get": "Donors relax",
-          "cost": "Rosa's trust, -1 in Astoria",
+          "cost": "Inês's trust, -1 in Astoria",
           "risk": "low",
           "why": "It's honest, at least",
           "trust": -2,
           "effects": {
             "cash": 2000
           },
-          "receipt": "A developer sent a C$2,000 thank-you. Rosa sent a strongly worded flyer."
+          "receipt": "A developer sent a C$2,000 thank-you. Inês sent a strongly worded flyer."
         }
       ]
     },
@@ -69,7 +69,7 @@
       "kind": "invite",
       "label": "Verified",
       "subject": "Dinner Thursday at the Olympia Diner",
-      "body": "Gus Papadakis, Ditmars Merchants' Association: \"Thursday, 8pm, the corner booth. Bring {candidate}'s appetite and your pollster. The shop owners on Ditmars want to meet the person who wants their windows.\"",
+      "body": "Stavros Kallas, Ditmars Merchants' Association: \"Thursday, 8pm, the corner booth. Bring {candidate}'s appetite and your pollster. The shop owners on Ditmars want to meet the person who wants their windows.\"",
       "options": [
         {
           "id": "go",
@@ -84,31 +84,31 @@
             "favors": 1,
             "rating": 0.5
           },
-          "receipt": "Gus fed everyone and promised posters in forty windows. A Favor owed."
+          "receipt": "Stavros fed everyone and promised posters in forty windows. A Favor owed."
         },
         {
           "id": "staffer",
           "label": "Send Sol instead",
           "meeting": "public",
           "get": "Something, at least",
-          "cost": "One slot, Gus feels snubbed",
+          "cost": "One slot, Stavros feels snubbed",
           "risk": "low",
           "why": "He wanted you",
           "effects": {
             "rating": 0.2
           },
-          "receipt": "Sol ate the moussaka and got twelve windows. Gus asked where you were."
+          "receipt": "Sol ate the moussaka and got twelve windows. Stavros asked where you were."
         },
         {
           "id": "decline",
           "label": "Decline",
           "get": "A free evening",
-          "cost": "Gus's warmth",
+          "cost": "Stavros's warmth",
           "risk": "low",
           "why": "Diners remember",
           "trust": -1,
           "effects": {},
-          "receipt": "Gus said \"no problem\" in the voice that means problem."
+          "receipt": "Stavros said \"no problem\" in the voice that means problem."
         }
       ]
     },
@@ -434,7 +434,7 @@
       "kind": "request",
       "label": "Verified",
       "subject": "4am last call, yes or no?",
-      "body": "Jojo Reyes, nightlife promoter: \"Every club in Astoria wants to know: will {candidate} back 4am last call? I can put your face on every bathroom mirror in Queens.\"",
+      "body": "Dez Navarro, nightlife promoter: \"Every club in Astoria wants to know: will {candidate} back 4am last call? I can put your face on every bathroom mirror in Queens.\"",
       "options": [
         {
           "id": "yes",
@@ -455,12 +455,12 @@
           "id": "maybe",
           "label": "\"Let's talk after the election\"",
           "get": "Nobody upset yet",
-          "cost": "Jojo's patience",
+          "cost": "Dez's patience",
           "risk": "low",
           "why": "Promoters hate maybe",
           "trust": -1,
           "effects": {},
-          "receipt": "Jojo left you on read."
+          "receipt": "Dez left you on read."
         },
         {
           "id": "no",
@@ -473,7 +473,7 @@
           "effects": {
             "rating": 0.3
           },
-          "receipt": "Jojo booked a DJ to play your concession speech. Early."
+          "receipt": "Dez booked a DJ to play your concession speech. Early."
         }
       ]
     },
@@ -575,7 +575,7 @@
       "kind": "anonymous",
       "label": "Anonymous",
       "subject": "The ribbon man wants a word",
-      "body": "\"Teddy Vance here. I sell City Hall its ribbons. Forty years. If {candidate} wins, will they still need ribbons? Asking for a business.\"",
+      "body": "\"Barry Vance here. I sell City Hall its ribbons. Forty years. If {candidate} wins, will they still need ribbons? Asking for a business.\"",
       "options": [
         {
           "id": "promise",
@@ -593,19 +593,19 @@
             "integrity": -6,
             "cash": 5000
           },
-          "receipt": "Teddy switched sides with a C$5,000 check and a lifetime supply of ribbon."
+          "receipt": "Barry switched sides with a C$5,000 check and a lifetime supply of ribbon."
         },
         {
           "id": "honest",
           "label": "Tell him the truth: fewer ribbons",
           "get": "Integrity +2",
-          "cost": "Teddy stays put",
+          "cost": "Barry stays put",
           "risk": "low",
           "why": "Honest and boring",
           "effects": {
             "integrity": 2
           },
-          "receipt": "Teddy said he respected the honesty. Then ordered more ribbon for the Mayor."
+          "receipt": "Barry said he respected the honesty. Then ordered more ribbon for the Mayor."
         }
       ]
     }
