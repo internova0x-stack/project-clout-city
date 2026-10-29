@@ -334,12 +334,45 @@ The skip screen spells this out before the manager confirms.
 | **Clean hands** (win with Integrity 70+) | 2,000 | 300 | `campaign_won: clean` |
 | **Kingmaker** (run all four candidates) | 5,000 | 500 | `candidates_run: 4` |
 
-**Daily tasks:**
-- **Goal-linked tasks:** while a campaign goal is the suggested goal, the two goal-linked tasks point at it. For
-  example "Play this week's campaign turn" (done by End Week) and "Answer two inbox messages".
-- **The random slot:** while a campaign is running, it can draw a campaign task (for example "Book a meeting at a
-  public venue").
-- **Rewards:** campaign tasks pay the usual daily-task rewards. They never pay in campaign cash.
+**Daily tasks** (owner, Oct 29: specific, never generic).
+
+A campaign task always names **who, where and why**, from the campaign's real state that day: the candidate, a
+stakeholder waiting in the inbox, this week's fixed event, a weak place, a live scandal. It reads in the candidate's
+voice or Lola's, like the satirical first-day tasks.
+
+There is never a bare "Play your turn" or "Answer messages":
+- **End Week** completes whichever task names this week's big moment.
+- **Inbox tasks** name the person and what they want.
+
+**Shared templates** (the variables come from the campaign):
+
+| Task | Done by | Built from |
+|---|---|---|
+| "Call {stakeholder} back before {deadline}. They're threatening to endorse the Mayor" | Replying to that message | An inbox Threat with the nearest deadline |
+| "Get {candidate} to the {place} tour stop. {Place} is down {n} points and the Mayor's been cutting ribbons there" | A tour stop booked there | The weakest place in the last poll |
+| "Prep {candidate} for Thursday's debate: they still can't answer the {topic} question" | A prep slot on that topic | The fixed debate and an unprepped weak spot |
+| "Meet {stakeholder} at {venue} before {day}. They know who's funding the Mayor's ads" | That task done | An open "Meet X at Y" task |
+| "Kill the {scandal} story before the morning paper" | Answering the Exposure Event | A live Exposure Event |
+| "Pay {staffer} before they quit. {Pronoun} has been complaining since Tuesday" | A bonus or fair-pay choice | A staffer with low Morale |
+| "The Mayor's {event} is Saturday. Book something across the street" | An event in the same slot | A known opponent event (with intel) |
+
+**Candidate-only tasks** (a few per candidate, in their voice):
+
+| Candidate | Examples |
+|---|---|
+| **Goldcrest** | "Stop Preston calling the bus 'the poor people's Uber' at the Woodside rally." "Find Preston a donor who doesn't own a yacht. For the optics." "Talk him out of buying the newspaper. Again." |
+| **Castellano** | "Cut Dr. Castellano's transit speech from 40 minutes to 4." "Get her a photo with a dog. Voters need to see she has feelings." "Find a voter who's read her 600-page report. Anyone." |
+| **Kowalczyk** | "Keep Frankie from fighting the heckler at the Astoria rally." "Explain hashtags to Frankie. Bring coffee." "Book the union hall for Friday. Frankie's knee says it'll rain." |
+| **Starr** | "Approve Kaylee's caption before she posts it. This time." "Find a policy for the free Wi-Fi plan that isn't 'it's giving connected.'" "Get Kaylee to a debate prep without her ring-light." |
+
+**How the tasks fill the day:**
+- **The two goal-linked tasks** pick from the templates that serve the current campaign goal. "Win a debate" draws
+  debate prep and a weak-spot meeting; "Make it to week 3" draws this week's most urgent inbox item and tour stop.
+- **The random slot** can draw a candidate-only task.
+- **Variety:** no template repeats two days running.
+- **Rewards:** the usual daily-task rewards, never campaign cash.
+- **Where the lines live:** `content/campaign/tasks.json`, checked by `validate:content`. The weekly content routine
+  can draft extra variants for review in the Studio.
 
 ### 5.2 From Clout City into the campaign
 
