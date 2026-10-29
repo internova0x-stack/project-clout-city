@@ -110,6 +110,8 @@ import {
 } from "@/lib/together";
 import type { CrewPerson } from "@/lib/crew";
 import { CityMap, type MapApi } from "./map/CityMap";
+import { CompactMap } from "./map/CompactMap";
+import { compactMap } from "@/lib/graphics";
 import { BoroughSheet } from "./map/BoroughSheet";
 import type { BoroughId } from "@/lib/map/boroughs";
 import { Sheet } from "./Sheet";
@@ -1000,6 +1002,10 @@ export function GameShell({
     return () => { stop = true; clearInterval(t); };
   }, [presencePlace, presenceFloor, chat]);
   const myPos = atPlaceInfo?.at ?? home;
+  // The compact map (owner, Oct 29), tried behind a switch: ?map=compact on this device (lib/graphics.ts).
+  const [compact, setCompact] = useState(false);
+  useEffect(() => setCompact(compactMap()), []);
+  const MapView = compact ? CompactMap : CityMap;
   const myPosName = atPlaceInfo?.name ?? "home";
   // Owner, Oct 24: opening the game picks up where the player left off: inside the deli (or wherever) they were last
   // at, ground floor, or on the map beside it. Once per visit, and never over a push notification's own screen or
@@ -2570,7 +2576,7 @@ export function GameShell({
         </div>
       ) : (
         <>
-          <CityMap
+          <MapView
             ref={mapRef}
             rightInset={72}
             pins={cityOn ? starterPins : WAVE_1_PINS}

@@ -794,7 +794,7 @@ function lounge(t: Themed): Group {
 // ---------------------------------------------------------------------------
 // Ditmars Deli & Dreams: a corner bodega under a walk-up, green awning, fruit stand, fire escape
 // ---------------------------------------------------------------------------
-interface BodegaLook { name: string; awning: string; wall: string; seed: number }
+export interface BodegaLook { name: string; awning: string; wall: string; seed: number }
 
 function bodega(t: Themed, look: BodegaLook = { name: "DELI & DREAMS", awning: "#2E7D4F", wall: "#B9765A", seed: 81 }): Group {
   const g = new Group();
@@ -2234,6 +2234,9 @@ function brownstone(t: Themed): Group {
   g.add(at(lightPool(t, 7, C.amber, 0.6), 0, 0, 9));
   return g;
 }
+
+/** A corner store with its own name and colors (the compact map's places without a landmark of their own). */
+export function storefront(t: Themed, look: BodegaLook): Group { return bodega(t, look); }
 
 const BUILDERS: Record<LandmarkKind, (t: Themed) => Group> = {
   unisphere, gantries, "twin-towers": twinTowers, club, cafe, ballpark, tennis, bridge, studios, gallery,
