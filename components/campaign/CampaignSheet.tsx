@@ -544,6 +544,7 @@ function Inbox({ v, busy, onReply, initial = null }: { v: CampaignView; busy: bo
         <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start" }}>{m.message.label}</span>
         <p className="title" style={{ margin: 0 }}>{m.message.subject}</p>
         <p className="body ph-sensitive" style={{ margin: 0 }}>{m.message.body}</p>
+        {m.status === "new" && <p className="overline" style={{ margin: "4px 0 0" }}>Tap your reply</p>}
         {m.status === "new" ? m.message.options.map((o: InboxOption) => (
           <button key={o.id} className="camp-option" disabled={busy} onClick={async () => { onReply(m.message.id, o.id); setOpen(null); }}>
             <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
