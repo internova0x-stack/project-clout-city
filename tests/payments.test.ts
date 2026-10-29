@@ -73,3 +73,12 @@ test("checkout asks for the EU/UK withdrawal consent (a tick box), or says it by
   assert.match(notice.custom_text.submit.message, /^By paying, you ask for your purchase right away/);
   for (const m of [box.custom_text.terms_of_service_acceptance.message, notice.custom_text.submit.message]) assert.ok(m.length <= 1200);
 });
+
+test("numbered pieces are paid by card at once, never by a delayed method (security review)", () => {
+  const base = {
+    name: "Clout City: Cloud Nine Sofa", amountCents: 1499, currency: "usd", successUrl: "https://x/home", cancelUrl: "https://x/home",
+    playerId: "p1", sku: "cloud-nine-sofa", priceId: null,
+  };
+  assert.match(formEncode(checkoutParams({ ...base, productType: "collector_item" })), /payment_method_types%5B0%5D=card/);
+  assert.doesNotMatch(formEncode(checkoutParams({ ...base, productType: "side_arc" })), /payment_method_types/);
+});

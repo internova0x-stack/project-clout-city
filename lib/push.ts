@@ -17,6 +17,14 @@ export const PUSH_CATEGORIES: readonly { id: PushCategory; label: string; emoji:
 /** 0: someone's waiting on you; 1: something expires or costs you; 2: you won something; 3: come back and play. */
 export type PushTier = 0 | 1 | 2 | 3;
 
+/**
+ * Security review (migration 0130, push_endpoint_ok): a device's address must be a browser's push service, so the
+ * sender never posts anywhere else. Keep the two in step.
+ */
+export const PUSH_ENDPOINT =
+  /^https:\/\/(fcm\.googleapis\.com|android\.googleapis\.com|([a-z0-9-]+\.)*push\.services\.mozilla\.com|([a-z0-9-]+\.)*push\.apple\.com|([a-z0-9-]+\.)+notify\.windows\.com)\//;
+export const pushEndpointOk = (endpoint: string) => endpoint.length <= 1000 && PUSH_ENDPOINT.test(endpoint);
+
 export interface PushKind {
   tier: PushTier;
   category: PushCategory;

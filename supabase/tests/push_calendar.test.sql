@@ -17,10 +17,10 @@ insert into auth.users (id) values ('00000000-0000-0000-0000-000000000971'), ('0
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000971', false);
 select 1 from public.create_player('CalPushAna', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/97a', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/97a', 'k', 'a', 'America/New_York');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000972', false);
 select 1 from public.create_player('CalPushWent', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/97b', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/97b', 'k', 'a', 'America/New_York');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000973', false);
 select 1 from public.create_player('CalPushNoPhone', 'bodega_drip', '{}', null, true);
 reset role;

@@ -59,11 +59,13 @@ set role authenticated;
 select pg_temp.as_(1);
 create temp table k as select public.buy_lotto_card('lucky-star', 'penthouse-dreams', false) as r;
 select pg_temp.assert(not ((select r from k) ? 'pot'), 'the pot win stays hidden until scratched');
--- The pot starts again from the seed right away; the News doesn't show the win before it's scratched.
-select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50000, 'a won pot starts again at its seed');
+-- The pot shows as still there until the card is scratched (security review, 0130: its size never gives the win away);
+-- the News doesn't show the win before it's scratched.
+select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50005, 'a won pot shows until its card is scratched');
 select pg_temp.assert(jsonb_array_length(public.lotto_state() -> 'wins') = 0, 'no win in the News before the scratch');
 create temp table sc as select public.scratch_lotto_card((select (r ->> 'id')::bigint from k)) as r;
 select pg_temp.assert((select (r ->> 'pot')::int from sc) = 50005, 'the pot: seed plus this card''s 10%');
+select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50000, 'scratched: the pot starts again at its seed');
 select pg_temp.assert((select count(*) from jsonb_array_elements((select r -> 'numbers' from sc)) c where (c ->> 'n')::int = 0 and (c ->> 'prize')::int = 50005) = 1, 'one star on the card, with the pot under it');
 reset role;
 select pg_temp.assert((select p.bank_cash - c.bank_cash from public.players p join cash0 c using (id) where p.display_name = 'anabel')

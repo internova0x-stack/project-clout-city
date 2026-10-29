@@ -11,7 +11,7 @@ insert into auth.users (id) values ('00000000-0000-0000-0000-0000000082a1'), ('0
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000082a1', false);
 select 1 from public.create_player('Ping', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/82', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/82', 'k', 'a', 'America/New_York');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000082a2', false);
 select 1 from public.create_player('Tasha', 'bodega_drip', '{}', null, true);
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000082a3', false);

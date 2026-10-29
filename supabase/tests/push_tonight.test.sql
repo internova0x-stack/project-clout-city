@@ -11,10 +11,10 @@ insert into auth.users (id) values ('00000000-0000-0000-0000-0000000084a1'), ('0
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000084a1', false);
 select 1 from public.create_player('Romeo', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/84a', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/84a', 'k', 'a', 'America/New_York');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000084a2', false);
 select 1 from public.create_player('Juno', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/84b', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/84b', 'k', 'a', 'America/New_York');
 reset role;
 
 -- The crew is there: when Juno arrives, Romeo (in, not there yet) hears; an invited-only member doesn't.

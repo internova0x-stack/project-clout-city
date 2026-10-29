@@ -107,6 +107,9 @@ export function checkoutParams(i: CheckoutInput): Record<string, unknown> {
     },
     metadata,
     payment_intent_data: { metadata },
+    // Security review (Oct 29): a numbered piece is paid at once (cards and card wallets), never days later by a delayed
+    // method, which could land after the drop sold out.
+    ...(i.productType === "collector_item" ? { payment_method_types: { 0: "card" } } : {}),
     ...consentParams(i),
     // Sessions that are never paid end after 30 minutes, which clears the "unlocking" state.
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
@@ -176,7 +179,21 @@ export const getCharge = (secretKey: string, charge: string) =>
   stripeCall<{ customer: string | null; invoice?: string | null }>(secretKey, "GET", `charges/${encodeURIComponent(charge)}`);
 
 export const getCheckoutSession = (secretKey: string, id: string) =>
-  stripeCall<{ id: string; customer: string | null }>(secretKey, "GET", `checkout/sessions/${encodeURIComponent(id)}`);
+  stripeCall<{ id: string; customer: string | null; status?: string | null }>(secretKey, "GET", `checkout/sessions/${encodeURIComponent(id)}`);
+
+/**
+ * Security review (migration 0130): a player's older open checkout is closed when they start a new one, so they can't
+ * pay twice. False when it can't be closed because it was already paid.
+ */
+export async function expireCheckoutSession(secretKey: string, id: string): Promise<boolean> {
+  try {
+    await stripeCall(secretKey, "POST", `checkout/sessions/${encodeURIComponent(id)}/expire`);
+    return true;
+  } catch {
+    const s = await getCheckoutSession(secretKey, id);
+    return s.status !== "complete";
+  }
+}
 
 /** Stripe's standard US card fee, used when the real fee can't be read (spec section 21: commission on net). */
 export const estimateFee = (amountCents: number) => Math.round(amountCents * 0.029) + 30;

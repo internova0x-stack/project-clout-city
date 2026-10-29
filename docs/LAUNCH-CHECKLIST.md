@@ -3,7 +3,7 @@
 What to test by hand before the soft launch, on **your phone and one low-end Android phone** (2-3 GB of memory).
 Tick each line. Anything that fails: a screenshot and one sentence to Claude Code.
 
-The automated checks (typecheck, 384 game tests, 104 database scenario tests, story and content checks, the build)
+The automated checks (typecheck, 386 game tests, 104 database scenario tests, story and content checks, the build)
 run on every change; this list is the part a person has to see.
 
 ## Before you start

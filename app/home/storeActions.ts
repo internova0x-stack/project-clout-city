@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { createCheckoutSession, stripeUnknown, type CheckoutInput } from "@/lib/stripe";
+import { createCheckoutSession, expireCheckoutSession, stripeUnknown, type CheckoutInput } from "@/lib/stripe";
 import { forgetCustomer } from "@/lib/supabase/stripeCustomer";
 import { RETURN_PARAM, storeError, type CheckoutResult, type StoreProduct } from "@/lib/store";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -62,8 +62,19 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
       await forgetCustomer(user.id);
       session = await createCheckoutSession(secret, { ...input, customer: null });
     }
-    const { error } = await supabase.rpc("start_purchase", { p_sku: sku, p_session: session.id });
-    if (error) return { ok: false, error: storeError(error.message) };
+    const { data: replaced, error } = await supabase.rpc("start_purchase", { p_sku: sku, p_session: session.id });
+    if (error) {
+      await expireCheckoutSession(secret, session.id).catch(() => true);
+      return { ok: false, error: storeError(error.message) };
+    }
+    // Migration 0130: the player's older open checkout for this product (or another chat plan) is closed, so only this
+    // one can be paid. If the older one was paid in the meantime, this one closes instead.
+    for (const old of (replaced as string[] | null) ?? []) {
+      if (!(await expireCheckoutSession(secret, old))) {
+        await expireCheckoutSession(secret, session.id).catch(() => true);
+        return { ok: false, error: storeError("already_owned") };
+      }
+    }
     return { ok: true, url: session.url };
   } catch (e) {
     console.error("checkout failed", e);

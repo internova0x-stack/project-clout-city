@@ -31,6 +31,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Security review (Oct 29): only this site's own Continue button may sign in, so another site can't post its own
+  // token and sign a player in to the wrong account.
+  const from = request.headers.get("origin");
+  if (from && from !== new URL(request.url).origin && from !== process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")) {
+    return NextResponse.redirect(new URL("/?auth_error=link", request.url), { status: 303 });
+  }
   const form = await request.formData();
   const tokenHash = String(form.get("token_hash") ?? "");
   const rawType = String(form.get("type") ?? "email") as EmailOtpType;
