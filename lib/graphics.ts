@@ -45,15 +45,15 @@ export function newBodies(): boolean {
 export function setNewBodies(on: boolean) { write(KEY_BODIES, on ? null : "0"); }
 
 /**
- * The compact map (owner, Oct 29; lib/compactMap.ts), being tried behind a switch: ?map=compact turns it on for this
- * device (kept), ?map=classic turns it off again. Off by default until the owner switches it on for everyone.
+ * The compact map (owner, Oct 29; lib/compactMap.ts): on for everyone (owner, Oct 29: "the map"). A device can go back to
+ * the street map for a while with ?map=classic (kept), and return with ?map=compact.
  */
 export function compactMap(): boolean {
   const p = param("map");
-  if (p === "compact" || p === "classic") { write(KEY_MAP, p === "compact" ? "1" : null); return p === "compact"; }
-  return read(KEY_MAP) === "1";
+  if (p === "compact" || p === "classic") { write(KEY_MAP, p === "classic" ? "0" : null); return p === "compact"; }
+  return read(KEY_MAP) !== "0";
 }
-export function setCompactMap(on: boolean) { write(KEY_MAP, on ? "1" : null); }
+export function setCompactMap(on: boolean) { write(KEY_MAP, on ? null : "0"); }
 
 /** The renderer settings for the current mode: pixel ratio cap, shadows and antialiasing. */
 export function renderQuality(): { pixelRatio: number; shadows: boolean; antialias: boolean } {
