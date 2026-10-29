@@ -1,0 +1,48 @@
+{
+  "about": "Campaign Mode's recurring lines (docs/CAMPAIGN-MODE.md sections 4.4 and 7): Lola's morning-paper headlines, Papa-Dani's weekly reply (always warm, docs/CAST.md), the Mayor's ribbons and the team's grumbles. {candidate}, {points}, {place} and {name} are filled in.",
+  "headlines": {
+    "up": [
+      "BREAKING 🚨 {candidate} is up {points}. City Hall has ordered more ribbon.",
+      "Sources say {candidate} gained {points} this week. The Mayor's people are \"not worried\" (they're worried) 👀",
+      "Up {points}, babe. Somebody's campaign manager is cooking."
+    ],
+    "down": [
+      "Oof. {candidate} slipped {points} this week. Allegedly, the campaign office smells like panic.",
+      "Down {points}. Papa-Dani is cutting ribbons and smiling about it.",
+      "{candidate} lost {points}. Darling, the city is watching. Do something."
+    ],
+    "flat": [
+      "A quiet week. {candidate} held steady. The Mayor held a ribbon.",
+      "Flat polls, loud campaign. Something has to give, sweetie.",
+      "No movement this week. Lola is bored. Don't let Lola be bored."
+    ]
+  },
+  "mayor": {
+    "up": [
+      "Congratulations, neighbor! Good week for {candidate}. I'm still filling potholes!",
+      "You're climbing! Love that. My door's still open, by the way.",
+      "Three cheers for democracy! And for the new bike rack on 31st Street, which I opened today."
+    ],
+    "down": [
+      "Tough week, neighbor. Want a coffee? I know a great diner. I cut the ribbon there.",
+      "Hang in there! Campaigns are hard. Potholes are harder. Ask me how I know.",
+      "Forty-one potholes this month, neighbor! Just saying."
+    ]
+  },
+  "neglect": "Nobody from the campaign showed up in {place}. The Mayor did.",
+  "ribbon": [
+    "Papa-Dani cut a ribbon on a repaired bench in {place}. The bench is doing well.",
+    "Papa-Dani opened a water fountain in {place}. It works. He drank from it twice.",
+    "Papa-Dani filled a pothole in {place} \"personally\" (his team did; he held the ribbon)."
+  ],
+  "grumble": [
+    "{name} is grumbling about the dirty stuff. Quietly, for now.",
+    "{name} asked if \"this is who we are now.\" Nobody answered."
+  ],
+  "warning": "{name} came to your desk: \"I'll do this once. I won't do it every week.\" Consider yourself warned.",
+  "leak": "Someone talked. {name} had lunch with a reporter, and now the Bugle is asking questions. Heat +8.",
+  "factCheck": {
+    "debunked": "The Borough Bugle fact-checked your story about the Mayor. It did not survive. -4 there, Integrity -8, Heat +15.",
+    "held": "The fake story held. For now."
+  }
+}

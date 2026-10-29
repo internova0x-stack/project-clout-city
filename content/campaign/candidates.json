@@ -1,0 +1,321 @@
+{
+  "about": "Campaign Mode's four challengers (docs/CAMPAIGN-MODE.md section 2; owner, Oct 29). Every name is invented. Numbers are starting values for playtests: cash in C$, donor and channels are multipliers (1 = average), debate is 0 to 3 per style, places are starting points of lean.",
+  "candidates": [
+    {
+      "id": "goldcrest",
+      "name": "Preston Vale Goldcrest III",
+      "short": "Goldcrest",
+      "title": "The Disruptor",
+      "slogan": "Let's run this city like a business. Mine.",
+      "emoji": "🏙️",
+      "bio": "Inherited a parking-garage empire and calls himself self-made. Founder of Goldcrest Holdings: eleven luxury towers, a members-only kombucha bar and $QUEENS, a crypto coin that failed. Has never ridden the subway, but once funded a documentary about it.",
+      "issues": [
+        {
+          "title": "Towers everywhere",
+          "line": "Rezone Astoria for luxury high-rises. Supply! Eventually, trickling down!"
+        },
+        {
+          "title": "The private city",
+          "line": "A premium Concierge Lane, private patrols and VIP lines at the motor vehicles office."
+        },
+        {
+          "title": "Tax breaks for job creators",
+          "line": "Meaning himself."
+        },
+        {
+          "title": "The East River gondola",
+          "line": "His signature project. C$40 a ride."
+        }
+      ],
+      "satire": "Billionaires who think buying something means fixing it.",
+      "cash": 30000,
+      "donor": 1.4,
+      "channels": {
+        "digital": 1.2,
+        "street": 0.4,
+        "tv": 1.4
+      },
+      "debate": {
+        "facts": 1,
+        "charm": 2,
+        "attack": 3,
+        "deflect": 2,
+        "own": 0
+      },
+      "places": {
+        "lic": 4,
+        "flushing": 2,
+        "astoria": -2,
+        "jackson-heights": -2,
+        "jamaica": -1,
+        "sunnyside-woodside": 0
+      },
+      "warm": [
+        "harlan"
+      ],
+      "cold": [
+        "rosa",
+        "deb"
+      ],
+      "refuses": [],
+      "refuseLine": "",
+      "opIntegrity": 1,
+      "offScript": {
+        "chance": 0.35,
+        "lines": [
+          {
+            "text": "Goldcrest asked a Woodside crowd who still takes the bus. Several people raised their hands. -1.",
+            "rating": -1
+          },
+          {
+            "text": "Goldcrest tipped a deli worker C$500 on camera. Gross, but it played. +1.",
+            "rating": 1
+          },
+          {
+            "text": "Goldcrest called the 7 train \"rustic.\" The 7 train did not take it well. -1.",
+            "rating": -1
+          }
+        ]
+      },
+      "mayorJab": "out of touch"
+    },
+    {
+      "id": "castellano",
+      "name": "Dr. Ingrid Castellano",
+      "short": "Castellano",
+      "title": "The Professor",
+      "slogan": "I've done the math. You're welcome.",
+      "emoji": "📊",
+      "bio": "Former professor of urban systems at St. Johnsons University. Wrote a 600-page report on the 7 train that nobody at City Hall read, so she's running to read it to them. Methodical, dry, always carries a chart. Her students loved her; her colleagues feared her office hours.",
+      "issues": [
+        {
+          "title": "Transit that runs",
+          "line": "Signal upgrades for the 7, bus lanes, and arrival times that don't lie."
+        },
+        {
+          "title": "Flood-proof Queens",
+          "line": "Green roofs, storm drains and a waterfront seawall before the next big storm."
+        },
+        {
+          "title": "Schools and libraries",
+          "line": "Longer library hours, free tutoring, smaller classes."
+        },
+        {
+          "title": "Open books",
+          "line": "A public site for every city dollar, with a budget she audits herself."
+        }
+      ],
+      "satire": "The expert who is right and can't make anyone care.",
+      "cash": 22000,
+      "donor": 0.9,
+      "channels": {
+        "digital": 0.9,
+        "street": 1.1,
+        "tv": 0.8
+      },
+      "debate": {
+        "facts": 3,
+        "charm": 0,
+        "attack": 1,
+        "deflect": 1,
+        "own": 2
+      },
+      "places": {
+        "lic": 2,
+        "sunnyside-woodside": 2,
+        "jamaica": 2,
+        "flushing": 1,
+        "astoria": 0,
+        "jackson-heights": 0
+      },
+      "warm": [
+        "haddad",
+        "lin"
+      ],
+      "cold": [
+        "harlan"
+      ],
+      "refuses": [
+        "fake_news"
+      ],
+      "refuseLine": "\"I won't put my name on a number I made up.\" Talk her round? It'll cost the team's morale.",
+      "opIntegrity": 1.5,
+      "offScript": {
+        "chance": 0.35,
+        "lines": [
+          {
+            "text": "Castellano gave a 40-minute answer at a Sunnyside town hall. Half the room left. The other half joined. 0.",
+            "rating": 0
+          },
+          {
+            "text": "Castellano's flood chart went viral with students. +1.",
+            "rating": 1
+          },
+          {
+            "text": "Castellano corrected a voter's math at a rally. Correctly. -1.",
+            "rating": -1
+          }
+        ]
+      },
+      "mayorJab": "all charts, no heart"
+    },
+    {
+      "id": "kowalczyk",
+      "name": "Frankie \"The Hammer\" Kowalczyk",
+      "short": "Frankie",
+      "title": "The Organizer",
+      "slogan": "This city runs on people. Pay 'em.",
+      "emoji": "🔨",
+      "bio": "Ran Local 117 of the city's transit workers for 22 years, and he has a knee that \"remembers the strike of '09.\" Loud, warm, impossible to bully. Knows every bodega owner in Woodside by first name and brings a thermos to every meeting. Retired, got bored in three weeks, started a campaign.",
+      "issues": [
+        {
+          "title": "Rent",
+          "line": "Caps on rent hikes, a tenant hotline someone answers, and boilers that work."
+        },
+        {
+          "title": "Wages",
+          "line": "A raise for city workers, delivery riders and home aides. No more unpaid overtime."
+        },
+        {
+          "title": "Keep the neighborhood",
+          "line": "Protect the bodegas and small shops from the towers."
+        },
+        {
+          "title": "Safety the old way",
+          "line": "Crossing guards, streetlights and night buses."
+        }
+      ],
+      "satire": "The lovable old-school fighter who can't stand change.",
+      "cash": 24000,
+      "donor": 1.0,
+      "channels": {
+        "digital": 0.5,
+        "street": 1.7,
+        "tv": 0.6
+      },
+      "debate": {
+        "facts": 1,
+        "charm": 2,
+        "attack": 2,
+        "deflect": 0,
+        "own": 3
+      },
+      "places": {
+        "astoria": 2,
+        "sunnyside-woodside": 4,
+        "jackson-heights": 3,
+        "lic": -2,
+        "flushing": 0,
+        "jamaica": 1
+      },
+      "warm": [
+        "deb",
+        "rosa",
+        "gus"
+      ],
+      "cold": [
+        "harlan"
+      ],
+      "refuses": [
+        "poach_ally"
+      ],
+      "refuseLine": "\"Frankie don't buy people. Frankie organizes 'em.\" Talk him round? It'll cost the team's morale.",
+      "opIntegrity": 1,
+      "offScript": {
+        "chance": 0.35,
+        "lines": [
+          {
+            "text": "Frankie argued with a heckler in Jackson Heights and won. The clip is everywhere. +1.",
+            "rating": 1
+          },
+          {
+            "text": "Frankie asked a reporter what a \"hashtag\" is, live. -1.",
+            "rating": -1
+          },
+          {
+            "text": "Frankie's knee predicted rain. It rained. Woodside is impressed. +1.",
+            "rating": 1
+          }
+        ]
+      },
+      "mayorJab": "still fighting 1985"
+    },
+    {
+      "id": "starr",
+      "name": "Kaylee Starr",
+      "short": "Kaylee",
+      "title": "The Influencer",
+      "slogan": "Vote for vibes.",
+      "emoji": "✨",
+      "bio": "2.3 million followers, a sponsored tea, and a \"Mayor era\" announced in a get-ready-with-me video. Decided to run when City Hall didn't repost her. Surprisingly good at it.",
+      "issues": [
+        {
+          "title": "Nightlife",
+          "line": "Clubs open until 6am, content zones in every park, a ring-light at every subway stop."
+        },
+        {
+          "title": "Free Wi-Fi citywide",
+          "line": "Sponsored by her tea."
+        },
+        {
+          "title": "The 2am Slice Protection Act",
+          "line": "Pizza places stay open late. Forever."
+        },
+        {
+          "title": "Make New York iconic again",
+          "line": "Asked for details: \"it's giving iconic.\""
+        }
+      ],
+      "satire": "Fame as a qualification, which is Clout City's whole premise.",
+      "cash": 30000,
+      "donor": 1.2,
+      "channels": {
+        "digital": 1.6,
+        "street": 0.6,
+        "tv": 0.9
+      },
+      "debate": {
+        "facts": 0,
+        "charm": 3,
+        "attack": 1,
+        "deflect": 2,
+        "own": 1
+      },
+      "places": {
+        "astoria": 4,
+        "lic": 2,
+        "jamaica": -1,
+        "flushing": -1,
+        "sunnyside-woodside": 0,
+        "jackson-heights": 0
+      },
+      "warm": [
+        "jojo"
+      ],
+      "cold": [
+        "haddad"
+      ],
+      "refuses": [],
+      "refuseLine": "",
+      "opIntegrity": 1,
+      "offScript": {
+        "chance": 0.4,
+        "lines": [
+          {
+            "text": "Kaylee went live from the campaign office and showed the strategy whiteboard. -1.",
+            "rating": -1
+          },
+          {
+            "text": "Kaylee's slice-shop tour got 4 million views. +2.",
+            "rating": 2
+          },
+          {
+            "text": "Kaylee called the subway \"a vibe, honestly.\" Commuters disagree. -1.",
+            "rating": -1
+          }
+        ]
+      },
+      "mayorJab": "not serious"
+    }
+  ]
+}

@@ -1,0 +1,613 @@
+{
+  "about": "Campaign Mode's inbox (docs/CAMPAIGN-MODE.md section 12): messages arrive on their week and expire at that week's End Week. Each option shows the You get / It costs / Risk preview; 'meeting' books a slot (public, semi or shadow venue) and happens at End Week; 'fail' is a hidden chance; 'trace' a hidden trace weight; 'dirty' counts as dark play. Venues are invented, or public landmarks.",
+  "messages": [
+    {
+      "id": "rosa_rent",
+      "week": 1,
+      "from": "rosa",
+      "kind": "request",
+      "label": "Verified",
+      "subject": "Where do you stand on the rent cap bill?",
+      "body": "Rosa Ferreira, Astoria Tenants' Alliance: \"Four thousand tenants want to know if {candidate} backs the rent cap bill. We vote as a block. A big one.\"",
+      "options": [
+        {
+          "id": "promise",
+          "label": "Promise to back it",
+          "get": "+2 in Astoria, Rosa's trust",
+          "cost": "A promise you'll be held to",
+          "risk": "medium",
+          "why": "Developers hate it",
+          "later": true,
+          "trust": 2,
+          "effects": {
+            "place": 2,
+            "rating": 0.5
+          },
+          "receipt": "Rosa's members cheered. Developers sharpened their pencils.",
+          "fail": {
+            "chance": 0.2,
+            "effects": {
+              "rating": 0.5,
+              "cash": -3000
+            },
+            "receipt": "Rosa's members cheered, and a developer pulled a C$3,000 pledge."
+          },
+          "where": "astoria"
+        },
+        {
+          "id": "hedge",
+          "label": "Say you're \"studying it\"",
+          "get": "No enemies today",
+          "cost": "Rosa's patience",
+          "risk": "low",
+          "why": "Tenants notice hedging",
+          "trust": -1,
+          "effects": {
+            "rating": 0
+          },
+          "receipt": "\"Studying it.\" Rosa has heard that one before."
+        },
+        {
+          "id": "refuse",
+          "label": "Say no, politely",
+          "get": "Donors relax",
+          "cost": "Rosa's trust, -1 in Astoria",
+          "risk": "low",
+          "why": "It's honest, at least",
+          "trust": -2,
+          "effects": {
+            "cash": 2000
+          },
+          "receipt": "A developer sent a C$2,000 thank-you. Rosa sent a strongly worded flyer."
+        }
+      ]
+    },
+    {
+      "id": "gus_dinner",
+      "week": 1,
+      "from": "gus",
+      "kind": "invite",
+      "label": "Verified",
+      "subject": "Dinner Thursday at the Olympia Diner",
+      "body": "Gus Papadakis, Ditmars Merchants' Association: \"Thursday, 8pm, the corner booth. Bring {candidate}'s appetite and your pollster. The shop owners on Ditmars want to meet the person who wants their windows.\"",
+      "options": [
+        {
+          "id": "go",
+          "label": "Go, with your pollster",
+          "meeting": "public",
+          "get": "Shop windows for posters, a Favor",
+          "cost": "One evening slot",
+          "risk": "low",
+          "why": "A public dinner",
+          "trust": 1,
+          "effects": {
+            "favors": 1,
+            "rating": 0.5
+          },
+          "receipt": "Gus fed everyone and promised posters in forty windows. A Favor owed."
+        },
+        {
+          "id": "staffer",
+          "label": "Send Sol instead",
+          "meeting": "public",
+          "get": "Something, at least",
+          "cost": "One slot, Gus feels snubbed",
+          "risk": "low",
+          "why": "He wanted you",
+          "effects": {
+            "rating": 0.2
+          },
+          "receipt": "Sol ate the moussaka and got twelve windows. Gus asked where you were."
+        },
+        {
+          "id": "decline",
+          "label": "Decline",
+          "get": "A free evening",
+          "cost": "Gus's warmth",
+          "risk": "low",
+          "why": "Diners remember",
+          "trust": -1,
+          "effects": {},
+          "receipt": "Gus said \"no problem\" in the voice that means problem."
+        }
+      ]
+    },
+    {
+      "id": "anon_donor",
+      "week": 1,
+      "from": "anon",
+      "kind": "anonymous",
+      "label": "Anonymous",
+      "subject": "A gift, no strings (some strings)",
+      "body": "\"A friend of the campaign would like to help. C$20,000 in cash, delivered in a gym bag. He'll call in a small favor later. Nothing illegal. Mostly.\"",
+      "options": [
+        {
+          "id": "take",
+          "label": "Take the bag",
+          "dirty": true,
+          "get": "C$20,000 now",
+          "cost": "Integrity -8, a favor owed",
+          "risk": "high",
+          "why": "Cash leaves a trail",
+          "later": true,
+          "trace": 0.5,
+          "effects": {
+            "cash": 20000,
+            "integrity": -8,
+            "dirtyFavors": 1,
+            "heat": 5
+          },
+          "receipt": "C$20,000 in a gym bag. It smells like a gym bag."
+        },
+        {
+          "id": "decline",
+          "label": "Decline",
+          "get": "Clean hands",
+          "cost": "The money",
+          "risk": "low",
+          "why": "Nothing to find",
+          "effects": {
+            "integrity": 2
+          },
+          "receipt": "You said no. Your deputy said nothing, loudly."
+        },
+        {
+          "id": "report",
+          "label": "Tell a reporter",
+          "get": "A good story about you",
+          "cost": "A powerful enemy",
+          "risk": "medium",
+          "why": "He'll know it was you",
+          "later": true,
+          "effects": {
+            "rating": 1,
+            "integrity": 3,
+            "heat": 3
+          },
+          "receipt": "The Borough Bugle ran \"Campaign Turns Down Mystery Gym Bag.\" +1."
+        }
+      ]
+    },
+    {
+      "id": "lin_tip",
+      "week": 2,
+      "from": "lin",
+      "kind": "tip",
+      "label": "Unverified",
+      "subject": "Ever wonder what ribbons cost?",
+      "body": "Marguerite Lin, The Borough Bugle: \"I'm told City Hall spent more on ceremonial ribbon this year than on bus shelters. I need one more source. Coffee?\"",
+      "options": [
+        {
+          "id": "coffee",
+          "label": "Meet her for coffee",
+          "meeting": "semi",
+          "get": "Intel on the Mayor, a story",
+          "cost": "One slot",
+          "risk": "medium",
+          "why": "Someone may see you together",
+          "trust": 1,
+          "effects": {
+            "intel": 1,
+            "mayor": -1
+          },
+          "receipt": "Lin's ribbon story ran. The Mayor is now photographed with scissors less often."
+        },
+        {
+          "id": "trade",
+          "label": "Trade it for a friendly profile",
+          "get": "+1 citywide",
+          "cost": "Integrity -3",
+          "risk": "medium",
+          "why": "Reporters talk",
+          "later": true,
+          "trace": 0.2,
+          "effects": {
+            "rating": 1,
+            "integrity": -3
+          },
+          "receipt": "A glowing profile of {candidate} ran the same week. Coincidence, says everyone."
+        },
+        {
+          "id": "ignore",
+          "label": "Ignore it",
+          "get": "Nothing to explain later",
+          "cost": "A lead",
+          "risk": "low",
+          "why": "Quiet is safe",
+          "effects": {},
+          "receipt": "You let it go. Lin found another source."
+        }
+      ]
+    },
+    {
+      "id": "pryce_threat",
+      "week": 2,
+      "from": "harlan",
+      "kind": "threat",
+      "label": "Verified",
+      "subject": "About your housing plan",
+      "body": "Harlan Pryce, Pryce Development: \"I like {candidate}. I like towers more. Soften the housing talk, or my checks start going to City Hall.\"",
+      "options": [
+        {
+          "id": "appease",
+          "label": "Soften the housing talk",
+          "get": "His checks keep coming",
+          "cost": "-1 in Astoria and Jackson Heights",
+          "risk": "medium",
+          "why": "Tenants notice",
+          "trust": 1,
+          "effects": {
+            "cash": 8000,
+            "place": -1
+          },
+          "receipt": "Pryce's C$8,000 arrived. So did a tenants' flyer with your face on it.",
+          "where": "jackson-heights"
+        },
+        {
+          "id": "bluff",
+          "label": "Call his bluff",
+          "get": "Tenants respect it",
+          "cost": "Maybe his money",
+          "risk": "medium",
+          "why": "He might mean it",
+          "trust": -1,
+          "effects": {
+            "rating": 1
+          },
+          "receipt": "Pryce blinked. He also stopped returning calls.",
+          "fail": {
+            "chance": 0.4,
+            "effects": {
+              "mayor": 1,
+              "rating": 0.5
+            },
+            "receipt": "Pryce wasn't bluffing. His money went to the Mayor's machine."
+          }
+        },
+        {
+          "id": "counter",
+          "label": "Offer him a seat on a \"housing panel\"",
+          "get": "He stays, sort of",
+          "cost": "C$1,500 for the panel",
+          "risk": "low",
+          "why": "Panels are harmless",
+          "effects": {
+            "cash": -1500
+          },
+          "receipt": "Pryce loves a panel. He'll keep writing checks for now."
+        }
+      ]
+    },
+    {
+      "id": "bots",
+      "week": 2,
+      "from": "anon",
+      "kind": "anonymous",
+      "label": "Anonymous",
+      "subject": "50,000 followers by Friday",
+      "body": "\"We run accounts. Lots of accounts. C$4,000 and {candidate} trends by the weekend. Real people, mostly.\"",
+      "options": [
+        {
+          "id": "buy",
+          "label": "Buy the bot push",
+          "dirty": true,
+          "get": "+2 citywide, fast",
+          "cost": "C$4,000, Integrity -6",
+          "risk": "high",
+          "why": "Bots get flagged",
+          "later": true,
+          "trace": 0.45,
+          "effects": {
+            "cash": -4000,
+            "rating": 2,
+            "integrity": -6,
+            "heat": 6
+          },
+          "receipt": "{candidate} trended. Several of the fans have no faces.",
+          "fail": {
+            "chance": 0.3,
+            "effects": {
+              "cash": -4000,
+              "rating": -1,
+              "integrity": -6,
+              "heat": 10
+            },
+            "receipt": "The bots got flagged in a day. \"Bot-gate\" trended instead. -1."
+          }
+        },
+        {
+          "id": "decline",
+          "label": "Delete the message",
+          "get": "Clean hands",
+          "cost": "Nothing",
+          "risk": "low",
+          "why": "Nothing to find",
+          "effects": {},
+          "receipt": "Deleted. The internet stays exactly as fake as it was."
+        }
+      ]
+    },
+    {
+      "id": "aide",
+      "week": 2,
+      "from": "anon",
+      "kind": "anonymous",
+      "label": "Anonymous",
+      "subject": "Under the Hell Gate Bridge, 11pm",
+      "body": "\"I work for the Mayor. I'm tired. I have his debate notes. Come alone.\"",
+      "options": [
+        {
+          "id": "go",
+          "label": "Go",
+          "meeting": "shadow",
+          "get": "The Mayor's debate notes",
+          "cost": "One slot, Heat +6",
+          "risk": "high",
+          "why": "It could be a setup",
+          "later": true,
+          "effects": {
+            "intel": 2,
+            "heat": 6,
+            "dirtyFavors": 1
+          },
+          "receipt": "A nervous aide, a damp envelope, the Mayor's debate notes. Attack will land.",
+          "fail": {
+            "chance": 0.25,
+            "effects": {
+              "heat": 12,
+              "integrity": -4
+            },
+            "receipt": "Nobody came. Someone took a photo of you waiting under a bridge at 11pm."
+          }
+        },
+        {
+          "id": "cutout",
+          "label": "Send a cut-out",
+          "meeting": "shadow",
+          "get": "Some of the notes",
+          "cost": "One slot, C$1,000",
+          "risk": "medium",
+          "why": "Safer, less reliable",
+          "effects": {
+            "intel": 1,
+            "cash": -1000,
+            "heat": 2
+          },
+          "receipt": "Your cut-out came back with half the notes and a cold."
+        },
+        {
+          "id": "report",
+          "label": "Report it",
+          "get": "Integrity +3",
+          "cost": "The intel",
+          "risk": "low",
+          "why": "It's the right thing",
+          "effects": {
+            "integrity": 3
+          },
+          "receipt": "You reported it. The Mayor's office sent a thank-you card. With a ribbon."
+        }
+      ]
+    },
+    {
+      "id": "dean",
+      "week": 3,
+      "from": "haddad",
+      "kind": "invite",
+      "label": "Verified",
+      "subject": "Speak at the urban futures colloquium",
+      "body": "Dean Samir Haddad, St. Johnsons University: \"Our students would love to hear {candidate}'s plan for the city. There will be a Q&A. They ask hard questions. They've been practicing.\"",
+      "options": [
+        {
+          "id": "go",
+          "label": "Accept",
+          "meeting": "public",
+          "get": "Debate prep on transit, credibility",
+          "cost": "One slot",
+          "risk": "low",
+          "why": "Students ask hard questions",
+          "trust": 1,
+          "effects": {
+            "integrity": 2,
+            "rating": 0.5,
+            "favors": 1
+          },
+          "receipt": "The students grilled {candidate}. It was great practice. A Favor from the dean."
+        },
+        {
+          "id": "decline",
+          "label": "Decline",
+          "get": "A free slot",
+          "cost": "The dean's goodwill",
+          "risk": "low",
+          "why": "Academics remember",
+          "trust": -1,
+          "effects": {},
+          "receipt": "The dean said he understood. He wrote it down."
+        }
+      ]
+    },
+    {
+      "id": "jojo_hours",
+      "week": 3,
+      "from": "jojo",
+      "kind": "request",
+      "label": "Verified",
+      "subject": "4am last call, yes or no?",
+      "body": "Jojo Reyes, nightlife promoter: \"Every club in Astoria wants to know: will {candidate} back 4am last call? I can put your face on every bathroom mirror in Queens.\"",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Back 4am last call",
+          "get": "+2 in Astoria, the club crowd",
+          "cost": "-1 in Jamaica and Flushing",
+          "risk": "medium",
+          "why": "Families like sleep",
+          "trust": 2,
+          "effects": {
+            "rating": 0.5,
+            "place": 2
+          },
+          "receipt": "Your face is on every bathroom mirror in Astoria. The night owls are in.",
+          "where": "astoria"
+        },
+        {
+          "id": "maybe",
+          "label": "\"Let's talk after the election\"",
+          "get": "Nobody upset yet",
+          "cost": "Jojo's patience",
+          "risk": "low",
+          "why": "Promoters hate maybe",
+          "trust": -1,
+          "effects": {},
+          "receipt": "Jojo left you on read."
+        },
+        {
+          "id": "no",
+          "label": "Say no",
+          "get": "Families nod",
+          "cost": "Astoria's nightlife",
+          "risk": "low",
+          "why": "Clubs vote too",
+          "trust": -2,
+          "effects": {
+            "rating": 0.3
+          },
+          "receipt": "Jojo booked a DJ to play your concession speech. Early."
+        }
+      ]
+    },
+    {
+      "id": "deb_letter",
+      "week": 3,
+      "from": "deb",
+      "kind": "request",
+      "label": "Verified",
+      "subject": "Sign our letter on transit wages",
+      "body": "Deb Okonkwo, President of Local 117: \"Sign our letter for a transit worker raise and our members knock doors for you all week. Don't, and they knock for somebody else.\"",
+      "options": [
+        {
+          "id": "sign",
+          "label": "Sign it",
+          "get": "Street teams from Local 117",
+          "cost": "Donors grumble, C$2,000 pledge lost",
+          "risk": "medium",
+          "why": "Business groups hate it",
+          "trust": 2,
+          "effects": {
+            "rating": 1.5,
+            "cash": -2000
+          },
+          "receipt": "Local 117 hit the streets in matching jackets. A donor hit unsubscribe."
+        },
+        {
+          "id": "hedge",
+          "label": "Sign a softer version",
+          "get": "Some doors knocked",
+          "cost": "Deb's respect",
+          "risk": "low",
+          "why": "Unions know a hedge",
+          "trust": -1,
+          "effects": {
+            "rating": 0.5
+          },
+          "receipt": "Deb took the soft letter. Her members knocked on about half the doors."
+        },
+        {
+          "id": "no",
+          "label": "Decline",
+          "get": "Donors relax",
+          "cost": "Local 117",
+          "risk": "medium",
+          "why": "They'll knock for the Mayor",
+          "trust": -2,
+          "effects": {
+            "mayor": 1
+          },
+          "receipt": "Local 117 knocked doors for the Mayor. He brought them donuts. With ribbons."
+        }
+      ]
+    },
+    {
+      "id": "grant_breakfast",
+      "week": 4,
+      "from": "grant",
+      "kind": "invite",
+      "label": "Verified",
+      "subject": "Sunday breakfast in Jamaica",
+      "body": "Pastor Ellis Grant, Greater Jamaica Fellowship: \"Two hundred neighbors, eggs and coffee, and a microphone. No speeches longer than the grits stay warm.\"",
+      "options": [
+        {
+          "id": "go",
+          "label": "Go",
+          "meeting": "public",
+          "get": "+2 in Jamaica, turnout",
+          "cost": "One slot",
+          "risk": "low",
+          "why": "Keep it short",
+          "trust": 1,
+          "effects": {
+            "rating": 0.3,
+            "place": 2
+          },
+          "receipt": "{candidate} kept it short. The grits stayed warm. Jamaica noticed.",
+          "where": "jamaica"
+        },
+        {
+          "id": "decline",
+          "label": "Decline",
+          "get": "A free slot",
+          "cost": "Jamaica's warmth",
+          "risk": "low",
+          "why": "The Mayor will go",
+          "trust": -1,
+          "effects": {
+            "mayor": 0.5
+          },
+          "receipt": "The Mayor went instead. He cut a ribbon on the coffee urn."
+        }
+      ]
+    },
+    {
+      "id": "teddy_talk",
+      "week": 4,
+      "from": "anon",
+      "kind": "anonymous",
+      "label": "Anonymous",
+      "subject": "The ribbon man wants a word",
+      "body": "\"Teddy Vance here. I sell City Hall its ribbons. Forty years. If {candidate} wins, will they still need ribbons? Asking for a business.\"",
+      "options": [
+        {
+          "id": "promise",
+          "label": "Promise him the ribbon contract",
+          "dirty": true,
+          "get": "The Mayor's top donor flips",
+          "cost": "Integrity -6, a promise",
+          "risk": "high",
+          "why": "A deal for a donor",
+          "later": true,
+          "trace": 0.4,
+          "effects": {
+            "rating": 1.5,
+            "mayor": -1.5,
+            "integrity": -6,
+            "cash": 5000
+          },
+          "receipt": "Teddy switched sides with a C$5,000 check and a lifetime supply of ribbon."
+        },
+        {
+          "id": "honest",
+          "label": "Tell him the truth: fewer ribbons",
+          "get": "Integrity +2",
+          "cost": "Teddy stays put",
+          "risk": "low",
+          "why": "Honest and boring",
+          "effects": {
+            "integrity": 2
+          },
+          "receipt": "Teddy said he respected the honesty. Then ordered more ribbon for the Mayor."
+        }
+      ]
+    }
+  ]
+}
