@@ -269,6 +269,15 @@ components live in `app/globals.css`.
   streak); "Your poll results are in" (`push_scan_campaign`, kind 'campaign_poll', run by the push sender); Lola's scandal write-ups
   in News → City (`lines.scandal`, `view.scandals`); Campaign HQ on the map (place 'campaign-hq', Steinway in Astoria, tag
   'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race. Candidates' portraits are public/cast/candidate-<id>.webp (owner, Oct 29); every issue has an emoji.
+- Compact map (owner, Oct 29; behind a switch: `?map=compact` on a device, `?map=classic` back; lib/graphics.ts `compactMap()`):
+  New York in miniature. lib/compactMap.ts gives every place its own block (`SPOTS`, tests/compactMap.test.ts), the
+  neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and
+  the jokes (bronze Pizza Rat, LUXURY CONDOS SOON lot, Papa-Dani's billboard). components/map/CompactMap.tsx is a
+  drop-in for CityMap (same props, same `MapApi`); components/map/compactScene.ts draws it with the landmark models,
+  storefronts (`STOREFRONTS`), filler blocks and street life. Only the picture changes: travel, prices and lines keep
+  real lat/lng (`makeProjector` places any lat/lng among its nearest places). Names only for the most relevant places
+  (`labelPriority`, `FEATURED`, `pickLabels`: never overlapping), dots for the rest; a tap on a dot, name or building
+  opens the place's card. Story-only places stand there only while their story runs.
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google
