@@ -37,12 +37,14 @@ export interface NewsHandlers {
 /** v0.6 City News handed to the News app. */
 export interface CityNews { items: NewsItem[]; today: string; focus?: string | null; onSeen?: (ids: string[]) => void }
 
-export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [] }: {
+export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [], election }: {
   feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews;
   /** v0.9: "Spotted at" lines from parties the player went to (empty when they opted out). */
   spotted?: PartyMention[];
   /** Lucky Star's last pot wins (migration 0041), for Lola's card in the City tab. */
   jackpots?: LottoWin[];
+  /** Campaign Mode (owner, Oct 29): the "Upcoming election" card while no campaign runs. */
+  election?: ElectionTeaser;
 }) {
   const storyLive = (feed?.arcs ?? []).some((a) => a.type === "main" && !a.finished);
   // Story and City are the feed's two tabs; the Archive opens from the header.
@@ -98,10 +100,11 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
         </div>
       )}
       {tab === "city" ? (
-        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 ? (
+        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 && !election ? (
           <Quiet text="Slow news week. Even the celebrities are napping. Check back tomorrow." />
         ) : (
           <div className="stack-12">
+            {election && <ElectionCard e={election} />}
             {jackpots.slice(0, 1).map((w) => <PotWinNewsCard key={w.wonAt} w={w} />)}
             {spotted.map((m) => <SpottedCard key={m.eventId} m={m} />)}
             {cityNews.recent.map((i) => <CityNewsCard key={i.id} item={i} today={city!.today} focus={city!.focus === i.id} />)}
@@ -166,6 +169,23 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
 }
 
 /** One City News item: Lola's byline, the kind, the day and the full text. */
+export interface ElectionTeaser { unlocked: boolean; clout: number; need: number; onOpen: () => void }
+
+/** Campaign Mode's poster in the City feed: "Upcoming election: Become a campaign manager". */
+export function ElectionCard({ e }: { e: ElectionTeaser }) {
+  return (
+    <button className="camp-news" onClick={e.onOpen}>
+      <span className="camp-bunting" aria-hidden="true" />
+      <span className="overline">🗳️ Upcoming election</span>
+      <span className="title">Become a campaign manager</span>
+      <span className="subtext">Four challengers want Papa-Dani's job. Every one of them needs a manager. Sources say: you.</span>
+      {e.unlocked
+        ? <span className="camp-news-cta">Pick your candidate ›</span>
+        : <span className="meta">Unlocks at Rank 2 · {Math.min(e.clout, e.need)}/{e.need} 🔥</span>}
+    </button>
+  );
+}
+
 function CityNewsCard({ item, today, focus = false }: { item: NewsItem; today: string; focus?: boolean }) {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => { if (focus) ref.current?.scrollIntoView({ block: "start" }); }, [focus]);

@@ -351,6 +351,8 @@ export interface CampaignScreen {
   /** Rank 2 reached. */
   unlocked: boolean;
   rank: number;
+  /** The manager's clout (the teaser's progress to Rank 2). */
+  clout: number;
   /** A new campaign can start now (none running, the 7-day rule clear). */
   canStart: boolean;
   /** When the 7-day rule clears (New York date), if it hasn't. */

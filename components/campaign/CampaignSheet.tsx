@@ -7,6 +7,7 @@ import {
   type CampaignApi, type CampaignScreen, type CandidateCard, type CandidateId, type Channel, type DebateStyle, type InboxOption, type OpId, type Preview, type SlotAction,
 } from "@/lib/campaign";
 import type { CampaignView } from "@/lib/campaignEngine";
+import { RANKS } from "@/lib/ranks";
 
 // Campaign Mode (docs/CAMPAIGN-MODE.md): the player manages a challenger's campaign against Mayor Papa-Dani. One
 // sheet, opened from the Phone's Campaign app (or Campaign HQ on the map): the teaser before Rank 2, the candidate
@@ -59,7 +60,7 @@ export function CampaignSheet({ open, onClose, api, clout, onToast }: {
       <div className="camp">
         {!data && !error && <p className="meta">Calling the campaign office…</p>}
         {!data && error && <p className="error-text">{error}</p>}
-        {data && !data.unlocked && <Teaser data={data} clout={clout} />}
+        {data && !data.unlocked && <Teaser data={data} clout={data.clout ?? clout} />}
         {data && data.unlocked && !running && !(v?.phase === "over" && v.ending) && !picked && (
           <Pick data={data} onPick={setPicked} />
         )}
@@ -90,7 +91,7 @@ function Bunting() {
 
 /** Before Rank 2: the election is coming, the four candidates, and how far the player is from running one. */
 function Teaser({ data, clout }: { data: CampaignScreen; clout: number }) {
-  const need = 100;
+  const need = RANKS[CAMPAIGN.unlockRank - 1].clout;
   return (
     <div className="stack-16">
       <div className="camp-poster">
@@ -158,7 +159,7 @@ function CandidateDetail({ data, card, busy, onBack, onStart }: { data: Campaign
   const maxSeed = Math.max(0, Math.min(CAMPAIGN.seedMax, data.bank));
   return (
     <div className="stack-16">
-      <button className="btn btn-ghost" style={{ alignSelf: "flex-start", paddingLeft: 0 }} onClick={onBack}>‹ All candidates</button>
+      <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={onBack}>‹ All candidates</button>
       <div className="camp-poster">
         <Bunting />
         <span className="camp-cand-emoji big" aria-hidden="true">{card.emoji}</span>
@@ -272,6 +273,11 @@ function Week({ data, v, busy, api, run, onInbox }: { data: CampaignScreen; v: C
   const [debate, setDebate] = useState(false);
   const waiting = v.phase === "waiting";
   const newMail = v.inbox.filter((m) => m.status === "new").length;
+  if (editing !== null) {
+    return <SlotPicker v={v} data={data} index={editing} busy={busy} onClose={() => setEditing(null)}
+      onSet={async (a) => { const r = await run(api.slot(editing, a)); if (r) setEditing(null); }} />;
+  }
+  if (debate && v.debate) return <Debate v={v} busy={busy} onClose={() => setDebate(false)} onStyle={(st) => run(api.debate(st), false)} />;
   return (
     <div className="stack-16">
       {v.recap && v.recap.week === v.week - 1 && <Paper v={v} />}
@@ -310,9 +316,6 @@ function Week({ data, v, busy, api, run, onInbox }: { data: CampaignScreen; v: C
           <p className="meta" style={{ margin: 0 }}>Results arrive the next morning. Nothing moves while you're away.</p>
         </>
       )}
-      {editing !== null && <SlotPicker v={v} data={data} index={editing} busy={busy} onClose={() => setEditing(null)}
-        onSet={async (a) => { const r = await run(api.slot(editing, a)); if (r) setEditing(null); }} />}
-      {debate && <Debate v={v} busy={busy} onClose={() => setDebate(false)} onStyle={(s) => run(api.debate(s), false)} />}
     </div>
   );
 }
@@ -367,8 +370,8 @@ function SlotPicker({ v, index, busy, onClose, onSet }: { v: CampaignView; data:
   );
   const refused = v.refuses.includes(op);
   return (
-    <Sheet open onClose={onClose} label={slotName(index)}>
       <div className="stack-16">
+        <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={kind ? () => setKind(null) : onClose}>‹ {kind ? "Back" : "The week"}</button>
         <h3 className="display-md" style={{ margin: 0 }}>{slotName(index)}</h3>
         {!kind && (
           <div className="stack-8">
@@ -425,9 +428,7 @@ function SlotPicker({ v, index, busy, onClose, onSet }: { v: CampaignView; data:
             </div>
           </div>
         )}
-        {kind && <button className="btn btn-ghost" onClick={() => setKind(null)}>‹ Back</button>}
       </div>
-    </Sheet>
   );
 }
 
@@ -496,7 +497,7 @@ function Inbox({ v, busy, onReply }: { v: CampaignView; busy: boolean; onReply: 
   if (m) {
     return (
       <div className="stack-12">
-        <button className="btn btn-ghost" style={{ alignSelf: "flex-start", paddingLeft: 0 }} onClick={() => setOpen(null)}>‹ Inbox</button>
+        <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={() => setOpen(null)}>‹ Inbox</button>
         <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start" }}>{m.message.label}</span>
         <p className="title" style={{ margin: 0 }}>{m.message.subject}</p>
         <p className="body ph-sensitive" style={{ margin: 0 }}>{m.message.body}</p>
@@ -590,8 +591,8 @@ function Debate({ v, busy, onClose, onStyle }: { v: CampaignView; busy: boolean;
   const d = v.debate!;
   const q = d.questions[d.round];
   return (
-    <Sheet open onClose={onClose} label="The debate" tall>
       <div className="stack-16">
+        <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={onClose}>‹ The week</button>
         <p className="overline" style={{ margin: 0 }}>🎤 The debate · round {Math.min(d.round + 1, d.questions.length)} of {d.questions.length}</p>
         <div className="camp-crowd" aria-label={`Crowd ${d.crowd}`}><span style={{ left: `${50 + Math.max(-45, Math.min(45, d.crowd * 6))}%` }} /></div>
         <span className="meta">Crowd {d.crowd > 0 ? "+" : ""}{d.crowd}</span>
@@ -614,7 +615,6 @@ function Debate({ v, busy, onClose, onStyle }: { v: CampaignView; busy: boolean;
           </div>
         )}
       </div>
-    </Sheet>
   );
 }
 

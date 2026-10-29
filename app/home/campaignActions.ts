@@ -42,6 +42,7 @@ function screen(ctx: Context, today: string, extra: Partial<CampaignScreen> = {}
   return {
     unlocked: ctx.rank >= CAMPAIGN.unlockRank,
     rank: ctx.rank,
+    clout: ctx.clout,
     canStart: ctx.rank >= CAMPAIGN.unlockRank && !running && cleared,
     nextStartOn: cleared || !next ? null : nyDay(next),
     bank: ctx.bank,

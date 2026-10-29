@@ -81,6 +81,8 @@ export function RankUpCard({ rank, name, onClose }: { rank: Rank; name: string; 
         <span className="rank-up-emoji" aria-hidden="true">{rank.emoji}</span>
         <p className="display-md" style={{ margin: "6px 0 8px" }}>{rank.title}</p>
         <p className="body" style={{ margin: 0 }}>{rank.line}</p>
+        {/* Owner, Oct 29: the Rank 2 reveal names what it opens, Campaign Mode included. */}
+        {rank.level === 2 && <p className="meta rank-up-unlocks" style={{ margin: "10px 0 0" }}>Unlocks: 🏪 Businesses, 💼 Jobs and 🗳️ Campaign Mode</p>}
         <div className="row" style={{ gap: 8, marginTop: 18 }}>
           <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => void share()}>Share</button>
           <button className="btn btn-taxi" style={{ flex: 1 }} onClick={onClose}>{rank.level === 10 ? "Bow" : "Let's go"}</button>

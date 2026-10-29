@@ -249,6 +249,20 @@ components live in `app/globals.css`.
   with "Play now, no sign-up", then one "Sign in" for both (SignUpSheet mode 'signin': a known email gets its link, a new one
   carries on to the birthday step as a sign-up); invites and creator links lead with Sign up. Its leaderboard is made up
   (`demoLeaderboard`: invented New Yorkers around a newcomer's clout; Crew is only you). Development only: `/demo?flow=leaderboard` jumps to the end card.
+- Campaign Mode (migration 0127, owner Oct 29; docs/CAMPAIGN-MODE.md, the 4-week test build): the player manages one of four
+  challengers' campaigns (content/campaign/*.json: Goldcrest, Castellano, Kowalczyk, Starr) against Mayor Papa-Dani, one campaign
+  week per real New York day. The rules are TypeScript, not SQL: lib/campaignEngine.ts (pure, every roll from an injected random
+  source) runs in app/home/campaignActions.ts with a crypto random source and the service role, and in the preview's memory
+  (lib/campaignSim.ts, results in 6 seconds; `?campaign=locked|pick|week|situation|debate|waiting|election`). Players only get
+  `campaignView` (no traces, fact-checks, queued trouble, fail odds or effects; results hidden until the next New York day);
+  the content files hold the odds, so only the server and the preview import lib/campaignContent.ts (its client chunk is referenced only by /preview, a 404 in production). public.campaigns (state jsonb,
+  RLS on, no grants) is written by `campaign_begin` (Rank 2, one running, one start every 7 days, a seed up to C$1,000: ledger
+  'campaign_seed') and `campaign_save` (versioned; pays once per kind/ref: 'campaign_poll' and 'campaign_reward' clout,
+  'campaign_skim' (capped C$1,500 a campaign) and 'campaign_repay' cash; badges 'campaign-ran', 'campaign-mayor'; rate bucket
+  'campaign'). Start over abandons a running campaign. Seven campaign goals are side goals (`side: true` in lib/goals.ts): listed
+  and paid, but `goal_current` only suggests them while a campaign runs. Entry: the Phone's Campaign app (the teaser before Rank 2,
+  `APP_UNLOCKS.campaign`), News → City's "Upcoming election" card while none runs, the Rank 2 reveal and Lola's unlock line;
+  `/home?open=campaign`. Tuning: tests/campaign.test.ts plays thousands of campaigns (clean ~45-65% wins, dirty ~55-80%).
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google

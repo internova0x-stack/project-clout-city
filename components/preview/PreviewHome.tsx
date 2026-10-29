@@ -5,6 +5,7 @@ import type { CoutureApi } from "@/lib/coutureMap";
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
 import type { RadioApi } from "@/lib/radio";
 import type { MayorApi } from "@/lib/mayor";
+import { createCampaignSim } from "@/lib/campaignSim";
 import { previewMayorSeen, previewMayorState, previewMayorWrite } from "@/app/preview/mayorActions";
 import { createCampusSim } from "@/lib/campusSim";
 import { createGoalsSim } from "@/lib/goalsSim";
@@ -78,7 +79,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -142,6 +143,8 @@ export function PreviewHome({
   couturePreset?: string;
   /** Contact the Mayor: ?mayor=new (no letters yet) or reply (a reply waiting); otherwise one letter already read. */
   mayorPreset?: string;
+  /** Campaign Mode: ?campaign=locked|pick|week|situation|debate|waiting|election (Phone → Campaign). */
+  campaignPreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
   pushPreset?: string;
   /** Membership & purchases: ?member=vip|monthly|cancelling|pastdue|forever|free|none (default vip). */
@@ -253,6 +256,7 @@ export function PreviewHome({
     write: previewMayorWrite,
     seen: previewMayorSeen,
   }), [mayorPreset]);
+  const campaignApi = useMemo(() => createCampaignSim(campaignPreset ?? null, { clout: campaignPreset === "locked" ? 40 : Math.max(150, player.clout), bank: player.bank_cash }), [campaignPreset, player.clout, player.bank_cash]);
   const radioApi = useMemo<RadioApi>(() => ({
     state: () => previewRadioState(radioPreset ?? ""),
     request: previewRadioRequest,
@@ -587,6 +591,7 @@ export function PreviewHome({
       business={cityOff ? undefined : businessApi}
       radio={cityOff ? undefined : radioApi}
       mayor={cityOff ? undefined : mayorApi}
+      campaign={cityOff ? undefined : campaignApi}
       campus={cityOff ? undefined : campusApi}
       goals={cityOff ? undefined : goalsApi}
       push={cityOff ? undefined : pushApi}
