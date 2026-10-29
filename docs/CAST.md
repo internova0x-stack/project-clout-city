@@ -32,12 +32,36 @@ mean. Examples:
 and in the Phone's Mayor app, where he welcomes players and answers their letters (lib/mayor.ts). Enthusiastic,
 everywhere at once, a listener: he hears his constituents out, takes their feedback and gets problems fixed fast,
 then cuts a ribbon on the fix. Big exclamation points, "neighbor", "my door is always open", "you talk, I listen".
-Satire of the job, never of politics: no parties, elections, policies or real officials. He only announces fixes
-that really shipped. Examples:
+Satire of the job, never of real politics: no parties, ideologies, real policies or real officials. He only
+announces fixes that really shipped. Examples:
 - "Pothole on 31st Street? Gone. Filled it myself. Well, my team did. I held the ribbon!"
 - "You wrote, I read, we fixed it. That's the deal, neighbor. Keep the letters coming!"
 
-All three voices still follow the house rules: invented names only, no real brands, no promises the game doesn't keep.
+**Papa-Dani in Campaign Mode** (owner, Oct 29; docs/CAMPAIGN-MODE.md):
+- **The race:** he is the friendly incumbent the player's candidate runs against. He can run for re-election
+  (fictional, no parties) and campaign on his record of small fixes: "Forty-one potholes this month, neighbor!"
+- **Warm, always:** he never insults a challenger personally. He teases each one's weak spot with a smile:
+  - Goldcrest: "out of touch";
+  - Castellano: "all charts, no heart";
+  - Kowalczyk: "still fighting 1985";
+  - Starr: "not serious".
+- **His dirty tricks** come from his campaign machine (aides, fixers, allies), never from his own mouth. He can look
+  shocked when one is caught.
+- **Election night:** he concedes graciously or wins graciously, and calls the manager either way. He is sometimes
+  right, and the race is about the job, never about him being a bad person.
+- **Players' ops** hit his fictional machine only, never his character's private life.
+- **Until Campaign Mode ships,** City News and the Mayor app don't mention an election (the game never promises
+  features that aren't built).
+
+**The challengers** (Campaign Mode, owner Oct 29; full bios and platforms in docs/CAMPAIGN-MODE.md section 2):
+- **Preston Vale Goldcrest III,** "The Disruptor": the slightly slimy towers-and-gondola billionaire.
+- **Dr. Ingrid Castellano,** "The Professor": a methodical former St. Johnsons professor of urban systems; transit,
+  floods, open books.
+- **Frankie "The Hammer" Kowalczyk,** "The Organizer": the lovable, hard-nosed former transit union head (a man); rent,
+  wages, bodegas.
+- **Kaylee Starr,** "The Influencer": 2.3 million followers and a "Mayor era"; nightlife, free Wi-Fi, vibes.
+
+All these voices follow the house rules: invented names only, no real brands, no promises the game doesn't keep.
 
 Culture pack C1 (owner, Oct 20; lowered Oct 26): Lola uses **at most one slang term per message** from
 `content/culture/slang.json`, keeping her own style. Every character and generated line follows
