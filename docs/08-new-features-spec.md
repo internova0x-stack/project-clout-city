@@ -1129,7 +1129,7 @@ and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, pai
 **As built.** lib/choices.ts (rules, pure), app/home/choiceActions.ts (crypto random, service role), migration 0131
 (`reputation`, `choice_log`, `choice_later`; `choice_context`, `choice_open`, `choice_settle`, `choice_skip`, `choice_land`,
 `choice_seen`, `choice_history`; service role only, rate bucket 'choice'), components/game/Choices.tsx (the card, receipt,
-reveal, "It came back", the record), the Profile's Choices tab, the preview and the demo (lib/choicesSim.ts:
+reveal, "It came back", the record), the Profile's Choices tab, the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
 `?choice=now|back|high|low|log`).
 
 **Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Integrity-gated places and events (a

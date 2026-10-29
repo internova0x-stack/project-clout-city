@@ -12,7 +12,7 @@ import { Sheet } from "../Sheet";
 const RISK: Record<Risk, string> = { low: "Low", medium: "Medium", high: "High" };
 const AREA: Record<string, string> = {
   life: "Life in the city", transit: "On the move", gigs: "Gig life", work: "On the clock", school: "Campus",
-  business: "Your business", home: "At home", nightlife: "After dark", dating: "Date night", money: "Money talks",
+  business: "Your business", home: "Your building", nightlife: "After dark", dating: "Date night", money: "Money talks",
 };
 
 /** The meter, for the reveal, the stats panel and the profile. Private: only the player ever sees it. */
@@ -104,8 +104,8 @@ export function ChoiceBackSheet({ entry, onClose }: { entry: ChoiceLogEntry | nu
           <div className="choice-head">
             <span className="choice-icon" aria-hidden="true">{entry.emoji}</span>
             <span className="overline">It came back</span>
-            <p className="choice-title">{entry.receipt}</p>
           </div>
+          <p className="choice-receipt">{entry.receipt}</p>
           {line && <p className="choice-effects">{line}</p>}
           <p className="meta" style={{ margin: 0 }}>Because you chose <b>{entry.choice}</b>: “{entry.title}”</p>
           <button className="btn btn-taxi" onClick={onClose}>Okay</button>
@@ -129,10 +129,8 @@ export function ChoicesHistory({ integrity, log }: { integrity: number | null; l
           <div key={e.id} className={`choice-log${e.cameBack ? " back" : ""}`}>
             <span aria-hidden="true">{e.cameBack ? "↩️" : e.emoji}</span>
             <span style={{ minWidth: 0 }}>
-              <span className="title" style={{ display: "block" }}>{e.cameBack ? e.receipt : e.choice}</span>
-              <span className="meta" style={{ display: "block" }}>
-                {e.cameBack ? `Came back from: ${e.choice}` : e.receipt}
-              </span>
+              <span className="title" style={{ display: "block" }}>{e.cameBack ? `Came back: ${e.choice}` : e.choice}</span>
+              <span className="meta" style={{ display: "block" }}>{e.receipt}</span>
               {effectLine(e.effects) && <span className="meta choice-log-fx">{effectLine(e.effects)}</span>}
             </span>
           </div>

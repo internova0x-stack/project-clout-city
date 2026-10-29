@@ -302,7 +302,7 @@ components live in `app/globals.css`.
   the database pays once (`choice_settle`/`choice_land`, ledger 'choice'/'choice_later', caps in `choice_effects_ok`). Integrity
   (`reputation`, 0 to 100 from 70, losses full and gains half, private: Profile → Choices) is revealed by the first choice;
   regulars' `reputation` lines (npcs.json) react to its band. Only invented people, grey not criminal, never real money.
-  Start over resets it. `?choice=now|back|high|low|log` in the preview; the demo has it too.
+  Start over resets it. `?choice=now|back|high|low|log` in the preview (not the demo: its bundle would carry the outcomes).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

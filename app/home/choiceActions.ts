@@ -7,6 +7,7 @@ import {
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
 import { placeById } from "@/lib/city";
+import { ECONOMY } from "@/lib/economy";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -19,7 +20,7 @@ type Admin = NonNullable<ReturnType<typeof getAdminSupabase>>;
 
 interface Context {
   today: string; atPlace: string | null; integrity: number; revealed: boolean; rank: number; bank: number;
-  student: boolean; business: boolean; shownToday: number; lastShownAt: string | null;
+  student: boolean; business: boolean; home: string | null; shownToday: number; lastShownAt: string | null;
   open: { log: number; card: string; place: string | null } | null;
   history: { id: string; base: string; day: string }[];
 }
@@ -98,7 +99,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
   const place = ctx.atPlace ? placeById(ctx.atPlace) : undefined;
   const pick = pickCard(CHOICE_CARDS, {
     place: place?.id ?? null, tags: place?.tags ?? [], after, integrity: ctx.integrity, rank: ctx.rank,
-    student: ctx.student, business: ctx.business, history: ctx.history, today: ctx.today,
+    student: ctx.student, business: ctx.business, roommate: !!ECONOMY.homes.find((x) => x.id === ctx.home)?.roommate, history: ctx.history, today: ctx.today,
   }, rng);
   if (!pick) return { ok: true, data: null };
   const { data, error } = await w.admin.rpc("choice_open", { p_player: w.id, p_card: pick.id, p_base: pick.base, p_area: pick.area, p_place: place?.id ?? null });

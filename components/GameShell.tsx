@@ -2357,7 +2357,7 @@ export function GameShell({
     if (t.toId === "home") return setTab("home");
     const p = placeById(t.toId);
     if (p) setPlace(p);
-    if (p) askChoice(t.mode === "subway" ? "travel" : "arrive");
+    if (p) askChoice(t.mode === "subway" ? "travel" : t.mode === "taxi" || t.mode === "rideshare" ? "ride" : "arrive");
   };
   const [lockedBorough, setLockedBorough] = useState<BoroughId | null>(null);
   const onLockedTap = useCallback((_name: string, id: BoroughId) => setLockedBorough(id), []);

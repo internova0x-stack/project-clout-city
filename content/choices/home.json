@@ -6,34 +6,97 @@
     "emoji": "🏢",
     "title": "Your landlord's management company offers a C$100 rent credit for a 'Love my building!' review.",
     "who": "teddy",
-    "where": { "tags": ["astoria"], "after": ["arrive"] },
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
     "options": [
       {
-        "id": "honest", "label": "Write the honest version", "get": "The truth, about the radiator", "cost": "The C$100 credit",
-        "risk": "low", "riskWhy": "The management company sulks", "comesBack": true,
+        "id": "honest",
+        "label": "Write the honest version",
+        "get": "The truth, about the radiator",
+        "cost": "The C$100 credit",
+        "risk": "low",
+        "riskWhy": "The management company sulks",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Teddy is a hero. The radiator plays trombone at 3 AM.' Three stars. The credit evaporates like the hot water.",
-            "effects": { "integrity": 5, "clout": 5 },
-            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "🔧", "text": "Remember your honest review of the building? Teddy showed it to the owners and finally got the radiator part approved. Silence. Glorious silence.",
-                       "effects": { "mood": 10, "energy": 10 } } }
+          {
+            "weight": 1,
+            "text": "'Teddy is a hero. The radiator plays trombone at 3 AM.' Three stars. The credit evaporates like the hot water.",
+            "effects": {
+              "integrity": 5,
+              "clout": 5
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "🔧",
+              "text": "Remember your honest review of the building? Teddy showed it to the owners and finally got the radiator part approved. Silence. Glorious silence.",
+              "effects": {
+                "mood": 10,
+                "energy": 10
+              }
+            }
+          }
         ]
       },
       {
-        "id": "love", "label": "Five stars for C$100", "get": "C$100 off rent", "cost": "A lie on your building's listing",
-        "risk": "medium", "riskWhy": "They quote reviews on listings", "comesBack": true,
+        "id": "love",
+        "label": "Five stars for C$100",
+        "get": "C$100 off rent",
+        "cost": "A lie on your building's listing",
+        "risk": "medium",
+        "riskWhy": "They quote reviews on listings",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'A peaceful home!' you type, as the radiator honks. C$100 credit. The radiator honks again, louder.",
-            "effects": { "cash": 100, "integrity": -5 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📋", "text": "Remember your 'Love my building!' review? It's on the listing now, with your first name. Your new neighbor in 2B wants to talk about the radiator.",
-                       "effects": { "clout": -15, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "'A peaceful home!' you type, as the radiator honks. C$100 credit. The radiator honks again, louder.",
+            "effects": {
+              "cash": 100,
+              "integrity": -5
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.6,
+              "emoji": "📋",
+              "text": "Remember your 'Love my building!' review? It's on the listing now, with your first name. Your new neighbor in 2B wants to talk about the radiator.",
+              "effects": {
+                "clout": -15,
+                "mood": -6
+              }
+            }
+          }
         ]
       },
       {
-        "id": "teddy", "label": "Five stars for Teddy only", "get": "A laugh, and Teddy's thanks", "cost": "The credit, probably",
-        "risk": "low", "riskWhy": "They might not get the joke", "comesBack": false,
+        "id": "teddy",
+        "label": "Five stars for Teddy only",
+        "get": "A laugh, and Teddy's thanks",
+        "cost": "The credit, probably",
+        "risk": "low",
+        "riskWhy": "They might not get the joke",
+        "comesBack": false,
         "outcomes": [
-          { "weight": 1, "text": "'Teddy: five stars. Radiator: one. Average: Teddy.' No credit. Teddy prints it and tapes it to his folding chair.",
-            "effects": { "integrity": 3, "clout": 10, "mood": 5 } }
+          {
+            "weight": 1,
+            "text": "'Teddy: five stars. Radiator: one. Average: Teddy.' No credit. Teddy prints it and tapes it to his folding chair.",
+            "effects": {
+              "integrity": 3,
+              "clout": 10,
+              "mood": 5
+            }
+          }
         ]
       }
     ]
@@ -45,34 +108,97 @@
     "emoji": "💧",
     "title": "Teddy asks you to tell the owners the leak in your ceiling is 'handled.' It's a bucket.",
     "who": "teddy",
-    "where": { "tags": ["astoria"], "after": ["arrive"] },
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
     "options": [
       {
-        "id": "truth", "label": "Tell them it's a bucket", "get": "A real fix, eventually", "cost": "Teddy's mood, for a week",
-        "risk": "medium", "riskWhy": "Teddy forgets nothing", "comesBack": true,
+        "id": "truth",
+        "label": "Tell them it's a bucket",
+        "get": "A real fix, eventually",
+        "cost": "Teddy's mood, for a week",
+        "risk": "medium",
+        "riskWhy": "Teddy forgets nothing",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'It's a bucket.' The owners promise a roofer. Teddy says 'okay' in a tone that will haunt the hallway for days.",
-            "effects": { "integrity": 6, "mood": -4 },
-            "later": { "afterDays": [3, 7], "chance": 0.6, "emoji": "🧰", "text": "Remember telling the owners the leak was a bucket? The roofer came. Teddy admitted, at his folding chair, that you were right. Then he fixed your drawer.",
-                       "effects": { "mood": 8, "clout": 10 } } }
+          {
+            "weight": 1,
+            "text": "'It's a bucket.' The owners promise a roofer. Teddy says 'okay' in a tone that will haunt the hallway for days.",
+            "effects": {
+              "integrity": 6,
+              "mood": -4
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "🧰",
+              "text": "Remember telling the owners the leak was a bucket? The roofer came. Teddy admitted, at his folding chair, that you were right. Then he fixed your drawer.",
+              "effects": {
+                "mood": 8,
+                "clout": 10
+              }
+            }
+          }
         ]
       },
       {
-        "id": "cover", "label": "Cover for Teddy", "get": "Teddy owes you one", "cost": "A bucket in your ceiling, longer",
-        "risk": "medium", "riskWhy": "Buckets overflow", "comesBack": true,
+        "id": "cover",
+        "label": "Cover for Teddy",
+        "get": "Teddy owes you one",
+        "cost": "A bucket in your ceiling, longer",
+        "risk": "medium",
+        "riskWhy": "Buckets overflow",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Handled!' you tell the owners. Teddy winks. The bucket goes 'plink.'",
-            "effects": { "integrity": -4, "mood": 3 },
-            "later": { "afterDays": [2, 6], "chance": 0.7, "emoji": "🪣", "text": "Remember telling the owners the leak was 'handled'? The bucket overflowed onto your C$70 sneakers. Teddy brought you a towel and a guilty look.",
-                       "effects": { "cash": -70, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "'Handled!' you tell the owners. Teddy winks. The bucket goes 'plink.'",
+            "effects": {
+              "integrity": -4,
+              "mood": 3
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🪣",
+              "text": "Remember telling the owners the leak was 'handled'? The bucket overflowed onto your C$70 sneakers. Teddy brought you a towel and a guilty look.",
+              "effects": {
+                "cash": -70,
+                "mood": -8
+              }
+            }
+          }
         ]
       },
       {
-        "id": "both", "label": "Truth, and stick up for Teddy", "get": "A fix, and Teddy off the hook", "cost": "An awkward phone call",
-        "risk": "low", "riskWhy": "Owners hate long calls", "comesBack": false,
+        "id": "both",
+        "label": "Truth, and stick up for Teddy",
+        "get": "A fix, and Teddy off the hook",
+        "cost": "An awkward phone call",
+        "risk": "low",
+        "riskWhy": "Owners hate long calls",
+        "comesBack": false,
         "outcomes": [
-          { "weight": 1, "text": "'It's a bucket, and Teddy's asked for a roofer six times.' Silence on the line. Then: 'We'll send someone.' Teddy hears and nods.",
-            "effects": { "integrity": 8, "energy": -8, "mood": 5 } }
+          {
+            "weight": 1,
+            "text": "'It's a bucket, and Teddy's asked for a roofer six times.' Silence on the line. Then: 'We'll send someone.' Teddy hears and nods.",
+            "effects": {
+              "integrity": 8,
+              "energy": -8,
+              "mood": 5
+            }
+          }
         ]
       }
     ]
@@ -84,35 +210,92 @@
     "emoji": "☂️",
     "title": "You borrowed Priya's good umbrella and the wind on 31st Street ate it. Priya texts: 'Seen my umbrella?'",
     "who": "priya",
-    "where": { "places": ["ditmars-deli", "steinway-fresh", "astoria-blvd-station"], "after": ["arrive", "visit"] },
+    "where": {
+      "places": [
+        "ditmars-deli",
+        "steinway-fresh",
+        "astoria-blvd-station"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
     "options": [
       {
-        "id": "confess", "label": "Confess and replace it", "get": "A clear conscience", "cost": "C$35 for a good one",
-        "risk": "low", "riskWhy": "Priya is blunt, not cruel",
+        "id": "confess",
+        "label": "Confess and replace it",
+        "get": "A clear conscience",
+        "cost": "C$35 for a good one",
+        "risk": "low",
+        "riskWhy": "Priya is blunt, not cruel",
         "outcomes": [
-          { "weight": 1, "text": "'I killed it. I'm sorry. New one on the fridge.' Priya: 'You owe me a story about the wind.' Fair.",
-            "effects": { "cash": -35, "integrity": 6, "mood": 3 } }
+          {
+            "weight": 1,
+            "text": "'I killed it. I'm sorry. New one on the fridge.' Priya: 'You owe me a story about the wind.' Fair.",
+            "effects": {
+              "cash": -35,
+              "integrity": 6,
+              "mood": 3
+            }
+          }
         ]
       },
       {
-        "id": "dunno", "label": "'Haven't seen it'", "get": "No awkward talk", "cost": "A small lie to your roommate",
-        "risk": "medium", "riskWhy": "The pieces are in your trash", "comesBack": true,
+        "id": "dunno",
+        "label": "'Haven't seen it'",
+        "get": "No awkward talk",
+        "cost": "A small lie to your roommate",
+        "risk": "medium",
+        "riskWhy": "The pieces are in your trash",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Nope, haven't seen it.' Priya sends a sad emoji and blames Jersey. Your trash can is very quiet.",
-            "effects": { "integrity": -4 },
-            "later": { "afterDays": [1, 4], "chance": 0.6, "emoji": "🗑️", "text": "Remember 'haven't seen it'? Priya found her umbrella's skeleton in your trash. She's taped a sign to the fridge: 'Honesty is free.'",
-                       "effects": { "mood": -8, "clout": -5 } } }
+          {
+            "weight": 1,
+            "text": "'Nope, haven't seen it.' Priya sends a sad emoji and blames Jersey. Your trash can is very quiet.",
+            "effects": {
+              "integrity": -4
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.6,
+              "emoji": "🗑️",
+              "text": "Remember 'haven't seen it'? Priya found her umbrella's skeleton in your trash. She's taped a sign to the fridge: 'Honesty is free.'",
+              "effects": {
+                "mood": -8,
+                "clout": -5
+              }
+            }
+          }
         ]
       },
       {
-        "id": "quiet", "label": "Replace it, say nothing", "get": "Nobody has to know", "cost": "C$35 and a tiny secret",
-        "risk": "low", "riskWhy": "New umbrellas look new", "comesBack": false,
+        "id": "quiet",
+        "label": "Replace it, say nothing",
+        "get": "Nobody has to know",
+        "cost": "C$35 and a tiny secret",
+        "risk": "low",
+        "riskWhy": "New umbrellas look new",
+        "comesBack": false,
         "outcomes": [
-          { "weight": 1, "text": "You buy the same umbrella and hang it on the hook. Priya: 'Huh, it looks new.' You: 'Wild.'",
-            "effects": { "cash": -35, "integrity": -1, "mood": 2 } }
+          {
+            "weight": 1,
+            "text": "You buy the same umbrella and hang it on the hook. Priya: 'Huh, it looks new.' You: 'Wild.'",
+            "effects": {
+              "cash": -35,
+              "integrity": -1,
+              "mood": 2
+            }
+          }
         ]
       }
-    ]
+    ],
+    "needs": {
+      "roommate": true
+    }
   },
   {
     "id": "broke-borrowed-ladder",
@@ -120,34 +303,96 @@
     "area": "home",
     "emoji": "🪜",
     "title": "You borrowed Mr. Florakis's step stool from 3A and snapped a leg. He's in the hallway, asking around.",
-    "where": { "tags": ["astoria"], "after": ["arrive"] },
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
     "options": [
       {
-        "id": "own", "label": "Own up and offer to pay", "get": "Your neighbor's respect", "cost": "C$40 and some pride",
-        "risk": "low", "riskWhy": "He may tell a long story", "comesBack": true,
+        "id": "own",
+        "label": "Own up and offer to pay",
+        "get": "Your neighbor's respect",
+        "cost": "C$40 and some pride",
+        "risk": "low",
+        "riskWhy": "He may tell a long story",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'That was me.' Mr. Florakis waves off your money, then accepts it, then tells you about the stool's history since 1974.",
-            "effects": { "cash": -40, "integrity": 6, "energy": -5 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🥧", "text": "Remember owning up about Mr. Florakis's step stool? He left a spanakopita at your door, with a note: 'For the honest one, from 3A.'",
-                       "effects": { "mood": 8, "energy": 10 } } }
+          {
+            "weight": 1,
+            "text": "'That was me.' Mr. Florakis waves off your money, then accepts it, then tells you about the stool's history since 1974.",
+            "effects": {
+              "cash": -40,
+              "integrity": 6,
+              "energy": -5
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "🥧",
+              "text": "Remember owning up about Mr. Florakis's step stool? He left a spanakopita at your door, with a note: 'For the honest one, from 3A.'",
+              "effects": {
+                "mood": 8,
+                "energy": 10
+              }
+            }
+          }
         ]
       },
       {
-        "id": "teddy", "label": "Get Teddy to fix it first", "get": "A fixed stool, maybe no questions", "cost": "C$20 for Teddy's glue",
-        "risk": "medium", "riskWhy": "Teddy forgets nothing", "comesBack": false,
+        "id": "teddy",
+        "label": "Get Teddy to fix it first",
+        "get": "A fixed stool, maybe no questions",
+        "cost": "C$20 for Teddy's glue",
+        "risk": "medium",
+        "riskWhy": "Teddy forgets nothing",
+        "comesBack": false,
         "outcomes": [
-          { "weight": 1, "text": "Teddy glues it in ten minutes and charges you C$20 and a raised eyebrow. The stool goes back, stronger than before.",
-            "effects": { "cash": -20, "integrity": -2 } }
+          {
+            "weight": 1,
+            "text": "Teddy glues it in ten minutes and charges you C$20 and a raised eyebrow. The stool goes back, stronger than before.",
+            "effects": {
+              "cash": -20,
+              "integrity": -2
+            }
+          }
         ]
       },
       {
-        "id": "lean", "label": "Lean it back by his door", "get": "No conversation", "cost": "A neighbor's stool, and his knees",
-        "risk": "high", "riskWhy": "He'll stand on it", "comesBack": true,
+        "id": "lean",
+        "label": "Lean it back by his door",
+        "get": "No conversation",
+        "cost": "A neighbor's stool, and his knees",
+        "risk": "high",
+        "riskWhy": "He'll stand on it",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You lean the stool by 3A's door and tiptoe away. The broken leg is facing the wall. That's a choice.",
-            "effects": { "integrity": -8 },
-            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "😬", "text": "Remember leaning the broken stool by 3A's door? Mr. Florakis wobbled, caught himself, and told the whole building. Everyone looks at you on the stairs.",
-                       "effects": { "clout": -25, "mood": -10 } } }
+          {
+            "weight": 1,
+            "text": "You lean the stool by 3A's door and tiptoe away. The broken leg is facing the wall. That's a choice.",
+            "effects": {
+              "integrity": -8
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.7,
+              "emoji": "😬",
+              "text": "Remember leaning the broken stool by 3A's door? Mr. Florakis wobbled, caught himself, and told the whole building. Everyone looks at you on the stairs.",
+              "effects": {
+                "clout": -25,
+                "mood": -10
+              }
+            }
+          }
         ]
       }
     ]
@@ -158,36 +403,108 @@
     "area": "home",
     "emoji": "🔊",
     "title": "The building group chat: 'Who was blasting music at 2 AM?' It was you. 4B is getting blamed.",
-    "where": { "tags": ["astoria"], "after": ["arrive"] },
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
     "options": [
       {
-        "id": "own", "label": "'That was me, sorry'", "get": "4B off the hook", "cost": "Thirty angry emojis",
-        "risk": "low", "riskWhy": "The chat roasts you for a day", "comesBack": true,
+        "id": "own",
+        "label": "'That was me, sorry'",
+        "get": "4B off the hook",
+        "cost": "Thirty angry emojis",
+        "risk": "low",
+        "riskWhy": "The chat roasts you for a day",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'That was me, sorry all.' Thirty thumbs-down, one heart from 4B. Teddy replies 'thank you' with no punctuation.",
-            "effects": { "integrity": 6, "mood": -3 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎶", "text": "Remember owning up to the 2 AM music? 4B invited you to their name-day party. Andreas catered. You danced, at a reasonable volume.",
-                       "effects": { "mood": 10, "clout": 15 } } }
+          {
+            "weight": 1,
+            "text": "'That was me, sorry all.' Thirty thumbs-down, one heart from 4B. Teddy replies 'thank you' with no punctuation.",
+            "effects": {
+              "integrity": 6,
+              "mood": -3
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "🎶",
+              "text": "Remember owning up to the 2 AM music? 4B invited you to their name-day party. Andreas catered. You danced, at a reasonable volume.",
+              "effects": {
+                "mood": 10,
+                "clout": 15
+              }
+            }
+          }
         ]
       },
       {
-        "id": "silent", "label": "Say nothing", "get": "No heat in the chat", "cost": "4B takes the blame",
-        "risk": "medium", "riskWhy": "Walls are thin, so are alibis", "comesBack": true,
+        "id": "silent",
+        "label": "Say nothing",
+        "get": "No heat in the chat",
+        "cost": "4B takes the blame",
+        "risk": "medium",
+        "riskWhy": "Walls are thin, so are alibis",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You watch the chat pile on 4B. You put on a podcast about ethics, then turn it off.",
-            "effects": { "integrity": -5 },
-            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "🎧", "text": "Remember staying quiet while 4B got blamed for the 2 AM music? Teddy heard it from the hallway. He posted: 'It was not 4B.'",
-                       "effects": { "clout": -20, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "You watch the chat pile on 4B. You put on a podcast about ethics, then turn it off.",
+            "effects": {
+              "integrity": -5
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.5,
+              "emoji": "🎧",
+              "text": "Remember staying quiet while 4B got blamed for the 2 AM music? Teddy heard it from the hallway. He posted: 'It was not 4B.'",
+              "effects": {
+                "clout": -20,
+                "mood": -6
+              }
+            }
+          }
         ]
       },
       {
-        "id": "pile", "label": "Pile on 4B too", "get": "You look innocent", "cost": "4B, and some integrity",
-        "risk": "high", "riskWhy": "Teddy knows whose music it was", "comesBack": true,
+        "id": "pile",
+        "label": "Pile on 4B too",
+        "get": "You look innocent",
+        "cost": "4B, and some integrity",
+        "risk": "high",
+        "riskWhy": "Teddy knows whose music it was",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Honestly, 4B, some of us work.' Fifteen likes. 4B leaves the chat.",
-            "effects": { "integrity": -10, "clout": 10 },
-            "later": { "afterDays": [1, 4], "chance": 0.8, "emoji": "🧔", "text": "Remember piling on 4B for your own 2 AM music? Teddy posted a voice memo from the hallway. It's your playlist. 4B rejoined the chat just to react.",
-                       "effects": { "clout": -40, "mood": -10 } } }
+          {
+            "weight": 1,
+            "text": "'Honestly, 4B, some of us work.' Fifteen likes. 4B leaves the chat.",
+            "effects": {
+              "integrity": -10,
+              "clout": 10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.8,
+              "emoji": "🧔",
+              "text": "Remember piling on 4B for your own 2 AM music? Teddy posted a voice memo from the hallway. It's your playlist. 4B rejoined the chat just to react.",
+              "effects": {
+                "clout": -40,
+                "mood": -10
+              }
+            }
+          }
         ]
       }
     ]
@@ -199,34 +516,93 @@
     "emoji": "♻️",
     "title": "Teddy holds up a pizza box in the recycling, still full of crusts: 'Whose is this?' It's yours.",
     "who": "teddy",
-    "where": { "tags": ["astoria"], "after": ["arrive"] },
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
     "options": [
       {
-        "id": "own", "label": "'Mine, I'll fix it'", "get": "Teddy's nod", "cost": "Sorting the whole bin",
-        "risk": "low", "riskWhy": "The bin is gross, that's all",
+        "id": "own",
+        "label": "'Mine, I'll fix it'",
+        "get": "Teddy's nod",
+        "cost": "Sorting the whole bin",
+        "risk": "low",
+        "riskWhy": "The bin is gross, that's all",
         "outcomes": [
-          { "weight": 1, "text": "You sort the bin while Teddy supervises from his folding chair and explains which plastic is which. All of them, apparently.",
-            "effects": { "integrity": 5, "energy": -10 } }
+          {
+            "weight": 1,
+            "text": "You sort the bin while Teddy supervises from his folding chair and explains which plastic is which. All of them, apparently.",
+            "effects": {
+              "integrity": 5,
+              "energy": -10
+            }
+          }
         ]
       },
       {
-        "id": "shrug", "label": "Shrug: 'Not sure'", "get": "Out of the conversation", "cost": "A small lie to Teddy",
-        "risk": "medium", "riskWhy": "Teddy forgets nothing", "comesBack": true,
+        "id": "shrug",
+        "label": "Shrug: 'Not sure'",
+        "get": "Out of the conversation",
+        "cost": "A small lie to Teddy",
+        "risk": "medium",
+        "riskWhy": "Teddy forgets nothing",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Not sure, Teddy.' He looks at the box. The box says 'Still-a-Dollar Slice.' You get Still-a-Dollar Slice every day.",
-            "effects": { "integrity": -4 },
-            "later": { "afterDays": [1, 5], "chance": 0.5, "emoji": "🍕", "text": "Remember shrugging at Teddy about the pizza box? He taped it to your door with a note: 'Not sure either.' The whole floor walked past it.",
-                       "effects": { "clout": -15, "mood": -5 } } }
+          {
+            "weight": 1,
+            "text": "'Not sure, Teddy.' He looks at the box. The box says 'Still-a-Dollar Slice.' You get Still-a-Dollar Slice every day.",
+            "effects": {
+              "integrity": -4
+            },
+            "later": {
+              "afterDays": [
+                1,
+                5
+              ],
+              "chance": 0.5,
+              "emoji": "🍕",
+              "text": "Remember shrugging at Teddy about the pizza box? He taped it to your door with a note: 'Not sure either.' The whole floor walked past it.",
+              "effects": {
+                "clout": -15,
+                "mood": -5
+              }
+            }
+          }
         ]
       },
       {
-        "id": "neighbor", "label": "'Probably 4B'", "get": "Clean hands, dirty box", "cost": "4B's good name",
-        "risk": "high", "riskWhy": "There's a receipt on the box", "comesBack": true,
+        "id": "neighbor",
+        "label": "'Probably 4B'",
+        "get": "Clean hands, dirty box",
+        "cost": "4B's good name",
+        "risk": "high",
+        "riskWhy": "There's a receipt on the box",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Probably 4B.' Teddy heads for the stairs with the box. You feel the receipt taped to its lid in your bones.",
-            "effects": { "integrity": -8 },
-            "later": { "afterDays": [1, 3], "chance": 0.8, "emoji": "🧾", "text": "Remember blaming 4B for the pizza box? The receipt on the lid had your name and order. Teddy gave it to 4B, who gave it to the group chat.",
-                       "effects": { "clout": -30, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "'Probably 4B.' Teddy heads for the stairs with the box. You feel the receipt taped to its lid in your bones.",
+            "effects": {
+              "integrity": -8
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 0.8,
+              "emoji": "🧾",
+              "text": "Remember blaming 4B for the pizza box? The receipt on the lid had your name and order. Teddy gave it to 4B, who gave it to the group chat.",
+              "effects": {
+                "clout": -30,
+                "mood": -8
+              }
+            }
+          }
         ]
       }
     ]

@@ -17,7 +17,7 @@ const known = {
   npcs: [...new Set([...REGULARS.map((r) => r.id), ...npcs.profiles.map((p: { id: string }) => p.id), ...npcs.roommates.map((p: { id: string }) => p.id)])],
 };
 const ctx = (o: Partial<ChoiceContext> = {}): ChoiceContext => ({
-  place: "astoria-blvd-station", tags: ["subway", "transit"], after: "arrive", integrity: 70, rank: 1, student: false, business: false,
+  place: "astoria-blvd-station", tags: ["subway", "transit"], after: "arrive", integrity: 70, rank: 1, student: false, business: false, roommate: false,
   history: [], today: "2026-11-02", ...o,
 });
 const seq = (...xs: number[]) => { let i = 0; return () => xs[i++ % xs.length]; };

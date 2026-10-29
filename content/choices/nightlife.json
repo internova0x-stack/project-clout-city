@@ -1,1 +1,271 @@
-[]
+[
+  {
+    "id": "borrowed-clip-club",
+    "base": "borrowed-clip",
+    "area": "nightlife",
+    "emoji": "🎧",
+    "title": "At Velvet Static, the opening DJ drops a perfect mashup. You filmed it. The DJ has 41 followers.",
+    "who": "mags",
+    "where": { "places": ["velvet-static"], "tags": ["club"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "tag", "label": "Post it and tag the DJ", "get": "Clout, and a DJ who loves you", "cost": "Finding her handle",
+        "risk": "low", "riskWhy": "Credit is hard to get wrong", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Mags gives you the DJ's handle and an approving pour. The DJ goes from 41 followers to 900 overnight.",
+            "effects": { "clout": 20, "integrity": 4, "mood": 5 },
+            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "🎟️", "text": "Remember tagging the opening DJ at Velvet Static? She's headlining now, and she put you on her list for life. Mags poured you one on the house.",
+                       "effects": { "clout": 30, "mood": 6 } } }
+        ]
+      },
+      {
+        "id": "post", "label": "Post it as 'my set'", "get": "+60 clout", "cost": "The DJ's big break",
+        "risk": "high", "riskWhy": "DJs know their own mashups", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Cooked this one up 🔥.' You did not cook it. You don't own headphones. People think you're a DJ now.",
+            "effects": { "clout": 60, "integrity": -8 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🎚️", "text": "Remember posting the Velvet Static mashup as your set? The real DJ posted the project file with a timestamp. Mags waters your drinks now.",
+                       "effects": { "clout": -50, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "dance", "label": "Delete it and just dance", "get": "A great night", "cost": "The clip",
+        "risk": "low", "riskWhy": "None at all",
+        "outcomes": [
+          { "weight": 1, "text": "You put the phone away and dance like nobody's filming. Somebody is. You look great.",
+            "effects": { "integrity": 2, "mood": 10, "energy": -10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cut-the-line-club",
+    "base": "cut-the-line",
+    "area": "nightlife",
+    "emoji": "🕶️",
+    "title": "Rain, a 90-minute line at The Kiln, and Rocco the bouncer just recognized you from the 7 train.",
+    "who": "rocco",
+    "where": { "places": ["hellgate-hall"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "wait", "label": "Wait in line", "get": "A fair entry", "cost": "90 minutes in the rain",
+        "risk": "low", "riskWhy": "Only your hair",
+        "outcomes": [
+          { "weight": 1, "text": "You wave at Rocco and stay in line. He nods: respect. Your hair does not survive the 90 minutes.",
+            "effects": { "integrity": 4, "energy": -12, "mood": -3 } }
+        ]
+      },
+      {
+        "id": "in", "label": "Let Rocco wave you in", "get": "Inside, dry, now", "cost": "The line's opinion of you",
+        "risk": "medium", "riskWhy": "Wet people film", "comesBack": false,
+        "outcomes": [
+          { "weight": 2, "text": "Rocco unhooks the rope. You walk past eighty wet strangers like a minor celebrity. The music is better dry.",
+            "effects": { "integrity": -4, "clout": 20, "mood": 5 } },
+          { "weight": 1, "text": "Rocco unhooks the rope. The line boos with real commitment. Someone posts 'who is THAT' and it isn't flattering.",
+            "effects": { "integrity": -4, "clout": -15, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "umbrella", "label": "Wait, and share your umbrella", "get": "A new friend in line", "cost": "90 wet minutes, half an umbrella",
+        "risk": "low", "riskWhy": "Strangers can be a lot", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You share your umbrella with the woman behind you. She's a talent booker. You talk for 90 minutes. You're both soaked.",
+            "effects": { "integrity": 6, "energy": -12, "mood": 6 },
+            "later": { "afterDays": [2, 7], "chance": 0.5, "emoji": "☂️", "text": "Remember sharing your umbrella in The Kiln's line? The booker put you on the list for a private show. The rope opened by itself.",
+                       "effects": { "clout": 35 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "plus-one-rooftop",
+    "base": "plus-one-sneak",
+    "area": "nightlife",
+    "emoji": "📋",
+    "title": "You're on Kiki's rooftop list, no plus-one. A stranger in line offers C$60 to be your 'cousin.'",
+    "who": "kiki",
+    "where": { "places": ["ditmars-heights-rooftop"], "after": ["arrive", "eat"] },
+    "options": [
+      {
+        "id": "no", "label": "No cousins tonight", "get": "Kiki's trust intact", "cost": "C$60",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "'Sorry, no cousins.' Kiki checks you in with a grin. She heard. She hears everything at the rope.",
+            "effects": { "integrity": 5, "clout": 5 } }
+        ]
+      },
+      {
+        "id": "paid", "label": "Take the C$60", "get": "C$60 and a 'cousin'", "cost": "Lying to Kiki",
+        "risk": "high", "riskWhy": "Kiki knows everybody's cousins", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'This is my cousin.' Kiki looks at you, then at him, then at you. She lets you both in. C$60 richer.",
+            "effects": { "cash": 60, "integrity": -6 },
+            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "📋", "text": "Remember your C$60 'cousin' at the rooftop? He told Kiki how he got in. She's taken you off the list for a week. 'Family business,' she says.",
+                       "effects": { "clout": -30, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "ask", "label": "Ask Kiki if he can come", "get": "Maybe a yes, honestly", "cost": "Kiki's raised eyebrow",
+        "risk": "low", "riskWhy": "She might say no", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Kiki, he's not my cousin, but he's nice.' She laughs. 'Honest. Fine. He pays the door.' He does. You don't take his C$60.",
+            "effects": { "integrity": 6, "mood": 6, "clout": 10 } },
+          { "weight": 1, "text": "'He's not my cousin, but can he come?' Kiki: 'No, but thanks for not lying.' He leaves. She saves you the best heat lamp.",
+            "effects": { "integrity": 6, "mood": 4 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "plus-one-lounge",
+    "base": "plus-one-sneak",
+    "area": "nightlife",
+    "emoji": "🎷",
+    "title": "At Low Light Lounge, a man whispers: 'Tell Marcos I'm with you. I'm a talent scout. I'll owe you.'",
+    "who": "marcos",
+    "where": { "places": ["low-light-lounge"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "no", "label": "'Sorry, can't'", "get": "Marcos's trust", "cost": "Whatever a scout's favor is worth",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "You shake your head. Marcos, polishing a glass, gives you the smallest nod. In this lounge, that's a key.",
+            "effects": { "integrity": 5, "clout": 5 } }
+        ]
+      },
+      {
+        "id": "vouch", "label": "'He's with me'", "get": "A scout who owes you", "cost": "Vouching for a stranger to Marcos",
+        "risk": "medium", "riskWhy": "Marcos keeps a list of who vouched", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'He's with me.' Marcos lets him through. The scout winks and disappears into the back room.",
+            "effects": { "integrity": -5, "clout": 25 },
+            "later": { "afterDays": [1, 6], "chance": 0.5, "emoji": "🎺", "text": "Remember vouching for the 'talent scout' at Low Light? He was a tabloid photographer. Marcos lost a regular. He hasn't said a word to you since.",
+                       "effects": { "clout": -40, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "marcos", "label": "Introduce him to Marcos honestly", "get": "Marcos decides", "cost": "Some awkwardness",
+        "risk": "low", "riskWhy": "Marcos might say no", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Marcos, this guy says he's a scout. I just met him.' Marcos asks two questions and shows him the door, politely. He buys you a drink.",
+            "effects": { "integrity": 6, "mood": 5 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "overheard-secret-lounge",
+    "base": "overheard-secret",
+    "area": "nightlife",
+    "emoji": "🤫",
+    "title": "In Low Light's back room, you hear Lunaria's 3 AM 'surprise' album is delayed a year. Lola pays well.",
+    "who": "marcos",
+    "where": { "places": ["low-light-lounge", "brownstone-sessions"], "tags": ["lounge"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "keep", "label": "Keep it in the back room", "get": "Marcos's trust", "cost": "The scoop",
+        "risk": "low", "riskWhy": "Nobody knows you heard", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Marcos says it to everyone once: what's said in the back room stays there. You nod. It stays.",
+            "effects": { "integrity": 5, "mood": 2 },
+            "later": { "afterDays": [3, 7], "chance": 0.4, "emoji": "🎶", "text": "Remember keeping Lunaria's album news to yourself? Marcos noticed. He let you sit in on her secret listening session. Phones in the box.",
+                       "effects": { "clout": 30, "mood": 8 } } }
+        ]
+      },
+      {
+        "id": "sell", "label": "Sell it to Lola", "get": "C$200 and a 'sources say'", "cost": "Marcos's lounge, a little",
+        "risk": "high", "riskWhy": "Only six people were in that room", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Lola runs it as BREAKING: 'Lunaria's album? Delayed, babe.' C$200. Lunaria's fans are spiraling. So is Marcos.",
+            "effects": { "cash": 200, "clout": 30, "integrity": -8 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🚪", "text": "Remember selling Lunaria's album news to Lola? Marcos worked out who was in the back room. There were six. You're no longer one of them.",
+                       "effects": { "clout": -40, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "hint", "label": "Hint at it, no details", "get": "+20 clout, mysterious", "cost": "Feeding the rumor mill",
+        "risk": "medium", "riskWhy": "Fans decode everything", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Don't hold your breath for 3 AM, Lunaria fans.' Mystery clout. Marcos reads it and frowns, but can't prove a thing.",
+            "effects": { "clout": 20, "integrity": -3 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fake-hype-sticky",
+    "base": "fake-hype",
+    "area": "nightlife",
+    "emoji": "📢",
+    "title": "A promoter at The Sticky Floor: 'Heard you're flexible. C$250 to tell your followers Dunk Daniels is coming.'",
+    "where": { "places": ["the-sticky-floor"], "tags": ["club"], "after": ["arrive", "visit"] },
+    "needs": { "integrityMax": 35 },
+    "options": [
+      {
+        "id": "no", "label": "Not this time", "get": "Your followers keep trusting you", "cost": "C$250",
+        "risk": "low", "riskWhy": "The promoter shrugs", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Nah.' The promoter looks surprised. Your reputation had suggested otherwise. You surprise yourself a little too.",
+            "effects": { "integrity": 6, "mood": 3 } }
+        ]
+      },
+      {
+        "id": "post", "label": "Post it", "get": "C$250 and a packed club", "cost": "Your followers' trust",
+        "risk": "high", "riskWhy": "Dunk Daniels is never coming", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Dunk Daniels at The Sticky Floor tonight, trust me 🏀.' 300 people come. Dunk is late to everything, so it holds an hour.",
+            "effects": { "cash": 250, "clout": 30, "integrity": -8 },
+            "later": { "afterDays": [1, 3], "chance": 0.8, "emoji": "🏀", "text": "Remember telling everyone Dunk Daniels would be at The Sticky Floor? He wasn't. 300 people know whose post it was. The comments are not kind.",
+                       "effects": { "clout": -60, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "vague", "label": "Post 'rumor has it'", "get": "C$125 and deniability", "cost": "A little of your followers' trust",
+        "risk": "medium", "riskWhy": "Rumors are still your rumors", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Rumor has it someone tall is at The Sticky Floor 👀.' Half the crowd, half the pay. Someone tall shows up. It's a regular named Kevin.",
+            "effects": { "cash": 125, "clout": 10, "integrity": -4 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fake-hype-disco",
+    "base": "fake-hype",
+    "area": "nightlife",
+    "emoji": "🪩",
+    "title": "Discount Disco's owner: C$200 to post a teary 'this night changed my life' video. You've never been.",
+    "where": { "places": ["discount-disco"], "tags": ["club"], "after": ["arrive", "visit"] },
+    "needs": { "integrityMax": 35 },
+    "options": [
+      {
+        "id": "no", "label": "Decline", "get": "Your tears stay real", "cost": "C$200",
+        "risk": "low", "riskWhy": "The owner shrugs", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Pass.' The owner offers C$250. 'Still pass.' He's genuinely confused. So is your reputation.",
+            "effects": { "integrity": 6, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "cry", "label": "Cry on cue", "get": "C$200 and a viral clip", "cost": "Faking it on camera",
+        "risk": "medium", "riskWhy": "The internet compares clips", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You think about your rent and cry beautifully. 'This place healed me.' C$200. The video does numbers.",
+            "effects": { "cash": 200, "clout": 35, "integrity": -7 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "😭", "text": "Remember the teary Discount Disco video? Someone found four other people saying the same words, in the same shirt. Lola ran them side by side.",
+                       "effects": { "clout": -45, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "go", "label": "Go first, then post the truth", "get": "C$200, maybe", "cost": "A night at Discount Disco",
+        "risk": "medium", "riskWhy": "He paid for tears, not truth", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You go. It's fine. The DJ plays one song twice. You post 'honestly decent, C$5 drinks.' The owner pays half, grumbling.",
+            "effects": { "cash": 100, "integrity": 3, "energy": -10, "mood": 4 } },
+          { "weight": 1, "text": "You go and actually have a great night. Your honest post is glowing. The owner pays in full and looks confused.",
+            "effects": { "cash": 200, "integrity": 3, "energy": -10, "mood": 8 } }
+        ]
+      }
+    ]
+  }
+]

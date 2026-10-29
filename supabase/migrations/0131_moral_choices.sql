@@ -144,6 +144,7 @@ begin
     'bank', me.bank_cash,
     'student', exists (select 1 from public.campus_enrolments where player_id = p_player),
     'business', exists (select 1 from public.player_businesses where player_id = p_player),
+    'home', me.home_id,
     'shownToday', (select count(*) from public.choice_log where player_id = p_player and day = today),
     'lastShownAt', (select max(shown_at) from public.choice_log where player_id = p_player),
     'open', case when o.id is null then null else jsonb_build_object('log', o.id, 'card', o.card, 'place', o.place) end,

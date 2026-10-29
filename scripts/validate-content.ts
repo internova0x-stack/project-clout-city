@@ -82,7 +82,7 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
 // Moral Choices (migration 0131): every situation card follows lib/choices.ts's rules.
 {
   const cards = list("choices/").flatMap((f) => JSON.parse(readFileSync(new URL(`choices/${f}`, root), "utf8")));
-  const regulars = [...REGULARS.map((r) => r.id), ...culture.npcs.profiles.map((p) => p.id), ...(culture.npcs.roommates ?? []).map((p) => p.id)];
+  const regulars = [...REGULARS.map((r) => r.id), ...culture.npcs.profiles.map((p) => p.id), ...((culture.npcs as { roommates?: { id: string }[] }).roommates ?? []).map((p) => p.id)];
   const problems = validateCards(cards, { places: PLACES.map((p) => p.id), tags: [...new Set(PLACES.flatMap((p) => p.tags ?? []))], npcs: regulars });
   if (problems.length) fail("content/choices/", problems);
   else console.log(`✓ content/choices/ (${cards.length} cards, ${new Set(cards.map((c: { base: string }) => c.base)).size} dilemmas)`);

@@ -1,1 +1,189 @@
-[]
+[
+  {
+    "id": "rude-date-taverna",
+    "base": "rude-date",
+    "area": "dating",
+    "emoji": "🍽️",
+    "title": "Your blind date, Brayden, snaps his fingers at Andreas and calls the moussaka 'peasant lasagna.'",
+    "who": "andreas",
+    "where": { "places": ["feta-compli"], "after": ["eat"] },
+    "options": [
+      {
+        "id": "say", "label": "Say something", "get": "Andreas sees who you are", "cost": "The rest of the date",
+        "risk": "medium", "riskWhy": "Brayden doesn't take notes well",
+        "outcomes": [
+          { "weight": 1, "text": "'He's not a waiter you snap at, he's the owner, and the moussaka is perfect.' Brayden leaves. Andreas brings you dessert.",
+            "effects": { "integrity": 6, "mood": 4, "clout": 10 } }
+        ]
+      },
+      {
+        "id": "let", "label": "Let it go", "get": "A smooth dinner, and Brayden pays", "cost": "Watching Andreas swallow it",
+        "risk": "low", "riskWhy": "Only your appetite",
+        "outcomes": [
+          { "weight": 1, "text": "You smile at your plate. Brayden pays, loudly, and leaves a 5% tip. Andreas says 'Opa' with zero enthusiasm.",
+            "effects": { "integrity": -3, "mood": -6, "energy": 5 } }
+        ]
+      },
+      {
+        "id": "tip", "label": "Tip big, leave early", "get": "Andreas's eternal gratitude", "cost": "C$30 and your dinner",
+        "risk": "low", "riskWhy": "Brayden sulks, that's all", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You slip Andreas C$30 'for the trouble' and fake an early shift. Brayden finishes alone, explaining lasagna to nobody.",
+            "effects": { "cash": -30, "integrity": 5, "mood": 4 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🍯", "text": "Remember tipping big after Brayden's 'peasant lasagna'? Andreas sent you home with a whole tray of baklava and a hug you didn't see coming.",
+                       "effects": { "mood": 8, "energy": 10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rude-date-rooftop",
+    "base": "rude-date",
+    "area": "dating",
+    "emoji": "🌃",
+    "title": "On the rooftop, your date Sloane tells Kiki she's 'basically the help.' Kiki is smiling. Dangerously.",
+    "who": "kiki",
+    "where": { "places": ["ditmars-heights-rooftop"], "after": ["eat"] },
+    "options": [
+      {
+        "id": "say", "label": "Stick up for Kiki", "get": "Kiki in your corner, forever", "cost": "The date, and the heat lamp",
+        "risk": "medium", "riskWhy": "Sloane makes a scene", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Kiki runs this whole rooftop.' Sloane gasps theatrically and leaves. Kiki moves you to the best table, alone.",
+            "effects": { "integrity": 6, "mood": 3 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📋", "text": "Remember sticking up for Kiki on the rooftop? You're on her list with a plus-one for life. She added a note: 'not Sloane.'",
+                       "effects": { "clout": 30, "mood": 5 } } }
+        ]
+      },
+      {
+        "id": "laugh", "label": "Laugh along", "get": "Sloane likes you more", "cost": "Kiki likes you less",
+        "risk": "high", "riskWhy": "Kiki runs the list", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You laugh. Sloane loves it. Kiki's smile doesn't move at all, which is worse than anything.",
+            "effects": { "integrity": -6, "mood": 5, "clout": 10 },
+            "later": { "afterDays": [1, 5], "chance": 0.8, "emoji": "🚫", "text": "Remember laughing at 'basically the help' on the rooftop? Kiki's list somehow lost your name. For a while. 'Must be a typo, babe.'",
+                       "effects": { "clout": -35, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "change", "label": "Change the subject, fast", "get": "No scene at all", "cost": "A little self-respect",
+        "risk": "low", "riskWhy": "Kiki saw you squirm",
+        "outcomes": [
+          { "weight": 1, "text": "'Is that the Chromecap Building?' It isn't. Sloane looks anyway. Kiki raises one eyebrow at you and walks off.",
+            "effects": { "integrity": -2, "mood": -3 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rude-date-foodcourt",
+    "base": "rude-date",
+    "area": "dating",
+    "emoji": "🥟",
+    "title": "Downstairs on Main: your date haggles Wen down to half price, then posts the dumplings as 'my secret find.'",
+    "who": "wen",
+    "where": { "places": ["downstairs-on-main"], "after": ["eat"] },
+    "options": [
+      {
+        "id": "pay", "label": "Quietly pay Wen the rest", "get": "Wen's respect", "cost": "C$12",
+        "risk": "low", "riskWhy": "Only your wallet", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "While your date films, you slip Wen the other C$12. She nods once and adds a fried dumpling. 'For you. Not him.'",
+            "effects": { "cash": -12, "integrity": 6, "mood": 4 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🥟", "text": "Remember paying Wen the rest of the haggled dumplings? She remembered. Your next order came with extra soup and a better table.",
+                       "effects": { "mood": 6, "energy": 10 } } }
+        ]
+      },
+      {
+        "id": "call", "label": "Call it out, kindly", "get": "Honesty on a first date", "cost": "A second date",
+        "risk": "medium", "riskWhy": "Nobody likes a lecture",
+        "outcomes": [
+          { "weight": 1, "text": "'Her stall's been here twenty years. She's the find.' Your date edits the caption to tag Wen. Then leaves early.",
+            "effects": { "integrity": 6, "mood": -2, "clout": 5 } }
+        ]
+      },
+      {
+        "id": "eat", "label": "Enjoy the cheap dumplings", "get": "Half-price dinner, cute date", "cost": "Wen's half",
+        "risk": "low", "riskWhy": "Wen has a long memory",
+        "outcomes": [
+          { "weight": 1, "text": "The dumplings are perfect. The deal was not. Your date tags it '#hiddengem.' Wen watches you leave without a word.",
+            "effects": { "integrity": -4, "mood": 5, "clout": 10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inflated-profile-ceo",
+    "base": "inflated-profile",
+    "area": "dating",
+    "emoji": "💼",
+    "title": "Your dinner date, Marisol, asks about the 'tech company' from your dating profile. It's a domain name.",
+    "where": { "tags": ["dining_medium", "dining_luxury", "date_spot"], "after": ["eat"] },
+    "options": [
+      {
+        "id": "clean", "label": "Come clean", "get": "A real conversation", "cost": "Looking less impressive",
+        "risk": "medium", "riskWhy": "She might not find it charming", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'It's a domain name. I bought it at 3 AM.' Marisol laughs so hard she snorts. Second date: confirmed.",
+            "effects": { "integrity": 6, "mood": 10 } },
+          { "weight": 1, "text": "'It's a domain.' Marisol nods slowly. 'So, nothing.' She's polite, pays half and heads home early.",
+            "effects": { "integrity": 6, "mood": -4 } }
+        ]
+      },
+      {
+        "id": "double", "label": "Double down", "get": "+20 clout, and she's impressed", "cost": "Building on a lie",
+        "risk": "high", "riskWhy": "People look things up", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'We're in stealth.' You describe the everything app. She's impressed. You're impressed. Nobody is in stealth.",
+            "effects": { "integrity": -6, "clout": 20, "mood": 5 },
+            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "🔍", "text": "Remember your 'tech company' on the date with Marisol? She looked it up: a parked domain selling luxury socks. The screenshot is in her group chat.",
+                       "effects": { "clout": -30, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "joke", "label": "'It's more of a vibe'", "get": "A laugh, and a dodge", "cost": "A half-truth",
+        "risk": "low", "riskWhy": "She might ask again",
+        "outcomes": [
+          { "weight": 1, "text": "'It's more of a vibe than a company.' She squints, then laughs. You skate by, for now.",
+            "effects": { "integrity": -2, "mood": 4 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inflated-profile-hike",
+    "base": "inflated-profile",
+    "area": "dating",
+    "emoji": "🥾",
+    "title": "Your profile says you 'love hiking.' Your date just booked a 6 AM Bear Mountain trip for you both.",
+    "where": { "places": ["hell-gate-park", "ditmars-deli", "feta-compli", "reel-queens"], "after": ["eat", "hangout"] },
+    "options": [
+      {
+        "id": "confess", "label": "Confess: 'I've never hiked'", "get": "A real second date", "cost": "Your outdoorsy image",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "'I love the idea of hiking.' Your date laughs and swaps it for a walk round Astoria Park and a chopped cheese. Better plan.",
+            "effects": { "integrity": 6, "mood": 6 } }
+        ]
+      },
+      {
+        "id": "go", "label": "Go, and suffer quietly", "get": "Your story holds", "cost": "Your legs, and 6 AM",
+        "risk": "medium", "riskWhy": "Mountains are tall", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You hike Bear Mountain in sneakers from Thread Count. You survive. Your calves file for divorce. Your date had fun.",
+            "effects": { "integrity": -3, "energy": -20, "clout": 15, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "sick", "label": "Fake a cold", "get": "A morning in bed", "cost": "A lie, and maybe the date",
+        "risk": "medium", "riskWhy": "Dates check your posts", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Cough. So sad. Next time.' You sleep till ten. It's delicious.",
+            "effects": { "integrity": -5, "energy": 15 },
+            "later": { "afterDays": [1, 3], "chance": 0.6, "emoji": "🤧", "text": "Remember the cold you faked to skip Bear Mountain? You posted brunch at The Hub that same morning. Your date saw. The date's off.",
+                       "effects": { "mood": -10, "clout": -15 } } }
+        ]
+      }
+    ]
+  }
+]

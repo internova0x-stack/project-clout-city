@@ -59,8 +59,8 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   // ?choice=now: a card is already waiting where the player stands.
   if (always) {
     const w = opts.where();
-    const card = pickCard(CHOICE_CARDS, { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, history: [], today: opts.today() }, rng)
-      ?? pickCard(CHOICE_CARDS.filter((c) => !c.where.places && !c.where.tags), { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, history: [], today: opts.today() }, rng);
+    const card = pickCard(CHOICE_CARDS, { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today() }, rng)
+      ?? pickCard(CHOICE_CARDS.filter((c) => !c.where.places && !c.where.tags), { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today() }, rng);
     if (card) { open = { log: nextId++, card, place: w.place }; shown.push({ day: opts.today(), at: Date.now() }); }
   }
   if (preset === "back") {
@@ -108,7 +108,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       }
       const where = opts.where();
       const card = pickCard(CHOICE_CARDS, {
-        ...where, after, integrity, rank: 3, student: true, business: true, history: always ? [] : history, today,
+        ...where, after, integrity, rank: 3, student: true, business: true, roommate: true, history: always ? [] : history, today,
       }, rng);
       if (!card) return ok(null);
       open = { log: nextId++, card, place: where.place };

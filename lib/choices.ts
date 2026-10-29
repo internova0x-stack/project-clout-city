@@ -10,7 +10,8 @@
 export type ChoiceArea = "life" | "gigs" | "work" | "school" | "business" | "home" | "nightlife" | "transit" | "dating" | "money";
 export type Risk = "low" | "medium" | "high";
 /** What a player was just doing, so a card can feel like it happened because of it. */
-export type ChoiceAfter = "arrive" | "shift" | "gig" | "eat" | "visit" | "hangout" | "travel";
+/** "travel" is a subway ride, "ride" a cab or rideshare. */
+export type ChoiceAfter = "arrive" | "shift" | "gig" | "eat" | "visit" | "hangout" | "travel" | "ride";
 
 export interface ChoiceEffects {
   cash?: number;
@@ -66,7 +67,8 @@ export interface ChoiceCard {
   /** A regular in content/culture/npcs.json who is part of the scene. */
   who?: string;
   where: { places?: string[]; tags?: string[]; after?: ChoiceAfter[] };
-  needs?: { integrityMin?: number; integrityMax?: number; rank?: number; student?: boolean; business?: boolean };
+  /** `roommate`: the player shares a home with one (C3), for cards about them. */
+  needs?: { integrityMin?: number; integrityMax?: number; rank?: number; student?: boolean; business?: boolean; roommate?: boolean };
   options: ChoiceOption[];
 }
 
@@ -108,6 +110,7 @@ export interface ChoiceContext {
   rank: number;
   student: boolean;
   business: boolean;
+  roommate: boolean;
   /** Every card shown in the last 30 days: variant, base and the New York day. */
   history: { id: string; base: string; day: string }[];
   today: string;
@@ -149,6 +152,7 @@ export function fit(card: ChoiceCard, ctx: ChoiceContext): number {
   if (n.rank !== undefined && ctx.rank < n.rank) return 0;
   if (n.student && !ctx.student) return 0;
   if (n.business && !ctx.business) return 0;
+  if (n.roommate && !ctx.roommate) return 0;
   const w = card.where;
   if (w.after && !w.after.includes(ctx.after)) return 0;
   let score = 1;
@@ -299,7 +303,7 @@ export const choiceError = (code: string | undefined) => CHOICE_ERRORS[code ?? "
 // ---------------------------------------------------------------------------
 
 const AREAS: ChoiceArea[] = ["life", "gigs", "work", "school", "business", "home", "nightlife", "transit", "dating", "money"];
-const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel"];
+const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride"];
 
 function checkEffects(e: ChoiceEffects, where: string, out: string[]) {
   for (const [k, v] of Object.entries(e)) {
