@@ -280,12 +280,36 @@ The skip screen spells this out before the manager confirms.
 
 ### 5.1 Unlock
 
-- **When:** at **Rank 2**, the same rule as Businesses and Jobs (`APP_UNLOCKS`). This keeps Starter Week and the first
-  rent bill clear, and it is still within a new player's first few days.
+- **When:** at **Rank 2** (owner, Oct 29), the same rule as Businesses and Jobs (`APP_UNLOCKS`; the rank is a
+  setting, `campaign.unlockRank`).
+  - *Timing to know:* Rank 2 is 100 clout, and the first party pays exactly 100. Most players reach it at the end of
+    their first session, so the teasers below mostly show during that session.
+  - *The alternative:* Rank 3 (500 clout, a few days of play) would give the teasers days to build up.
 - **How it's introduced:**
   - a Lola News item: "Three challengers, one Mayor, and they all need a manager";
   - an inbox invitation from each candidate;
   - Lola's `UnlockReveal` once.
+- **Teasers before the unlock** (owner, Oct 29). Players should know an election is coming and that Rank 2 opens
+  it. All of these ship with the mode, never before it, because the game never promises what isn't built.
+  - **City News "Upcoming election" card:** a distinct election-poster treatment (red, white and blue bunting, the
+    four candidates' faces, "🗳️ Upcoming election: Become a campaign manager").
+    - **Before the unlock:** it shows the rank target and progress ("Unlocks at Rank 2 · 62/100 🔥") and turns up
+      **occasionally**: in the launch News rotation about one visit in four, and at most once a day in the feed.
+    - **Tapping it** opens a teaser sheet: the four candidates with slogans, "Reach Rank 2 to run one of their
+      campaigns", and how to earn clout fast (the tasks, the first party).
+    - **After the unlock with no campaign running:** the card becomes "Pick your candidate ›".
+    - **During a campaign:** it becomes the poll card.
+  - **The Rank 2 reveal:** the rank-up card lists what opens, "Unlocks: Businesses, Jobs and **Campaign Mode**", and
+    the rank ladder shows the 🗳️ next to Rank 2.
+  - **The locked Phone app:** the Campaign app shows "Rank 2" until then. Tapping it opens the same teaser sheet.
+  - **The world:**
+    - Campaign HQ on the map has a "Coming soon: Rank 2" poster;
+    - the candidates' campaign posters hang at a few Astoria places;
+    - regulars mention the race now and then (Sal: "Election's coming. Everybody wants my bodega in their ad.").
+  - **The weekly content:** once the mode ships, City News carries one election item a week (Lola's race gossip, or
+    Papa-Dani on his record). The news validator can require it, the way it requires the Mayor's item.
+  - **Lola's nudge:** one Lola tip in the first session: "Psst, babe. There's an election coming and every candidate
+    needs a manager. Hit Rank 2 and you're in."
 - **Low clout** just means starting as the underdog's manager: "Nobody's heard of you yet, babe. Neither have they."
 - **The entry point** (proposed):
   - **Main door:** a **Campaign** app on the Phone. It's locked with "Rank 2" until then, like the other locked apps,
@@ -293,6 +317,29 @@ The skip screen spells this out before the manager confirms.
   - **Second door:** a fictional campaign office on the map, **Campaign HQ** (a storefront in Astoria). Its card opens
     the same app, so the manager can stand in the office in 3D.
   - **The daily nudge:** the morning recap and "Your poll results are in" open the app (`/home?open=campaign`).
+
+### 5.1a Campaign goals and daily tasks
+
+**Goals on the ladder** (`GOALS.ladder` in lib/goals.ts, game_settings 'goals'):
+- Goals pay once (ledger 'goal'), like every goal.
+- Each needs a new `check` type the server's `goal_list` reads from the campaign tables.
+
+| Goal | Unlocks at | Reward (clout) | Check |
+|---|---|---|---|
+| **Pick your candidate** (start a campaign) | 0 (shows as the next goal before Rank 2, so the ladder points at it) | 75 | `campaign_started` |
+| **Make it to week 3** | 100 | 75 | `campaign_week: 3` |
+| **Win a debate** | 500 | 150 | `debate_won` |
+| **See it through** (finish a campaign) | 500 | 150 | `campaign_finished` |
+| **Make a Mayor** (any win) | 1,000 | 200 | `campaign_won` |
+| **Clean hands** (win with Integrity 70+) | 2,000 | 300 | `campaign_won: clean` |
+| **Kingmaker** (run all four candidates) | 5,000 | 500 | `candidates_run: 4` |
+
+**Daily tasks:**
+- **Goal-linked tasks:** while a campaign goal is the suggested goal, the two goal-linked tasks point at it. For
+  example "Play this week's campaign turn" (done by End Week) and "Answer two inbox messages".
+- **The random slot:** while a campaign is running, it can draw a campaign task (for example "Book a meeting at a
+  public venue").
+- **Rewards:** campaign tasks pay the usual daily-task rewards. They never pay in campaign cash.
 
 ### 5.2 From Clout City into the campaign
 
@@ -812,7 +859,9 @@ Content (candidates, situation cards, offers, stakeholders, lines) lives in `con
   - seeding;
   - clout for wins;
   - scandals as personal Tea cards.
-- **Unlock** at Rank 2.
+- **Unlock** at Rank 2, with the teasers (News card, teaser sheet, Rank 2 reveal line, locked app, Lola's tip,
+  posters).
+- **Goals and tasks:** the seven campaign goals and the campaign daily tasks.
 - **In the preview:** `/preview/home?campaign=pick|week|situation|debate|election` (sample data).
 - **First success metric:** do testers take a second dirty op after seeing their first trace?
 - **Second metric:** do testers come back for week 3?
@@ -847,10 +896,13 @@ Content (candidates, situation cards, offers, stakeholders, lines) lives in `con
 | Skip a week? | Yes, with consequences |
 | Meetings a week | 3 |
 | Venues | Fictional, or real public landmarks only |
+| Unlock | Rank 2, with "Upcoming election" teasers before it (owner, Oct 29) |
+| Goals | Campaign goals on the ladder (owner, Oct 29) |
 
 ### Proposed, to confirm
 
-- **Unlock** at Rank 2.
+- **Teasers:** shown before the unlock, and they ship with the mode.
+- **Campaign goals:** the seven on the ladder.
 - **The test build** is 4 campaign weeks. The full campaign is 8.
 - **Caps:**
   - seeding C$1,000 per act;
