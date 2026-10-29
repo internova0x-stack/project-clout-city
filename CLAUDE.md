@@ -20,6 +20,8 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
   current version's "In scope" list; anything else gets a "Coming soon" card.
 - `docs/SETUP.md`: Supabase, email template and Vercel setup.
 - `docs/STORIES.md`: adding, approving, scheduling and pausing stories in the Story Studio (`/studio`).
+- `docs/CAMPAIGN-MODE.md`: Campaign Mode (spec v0.5, not built): the player manages one of four challengers' campaigns
+  against Mayor Papa-Dani; his campaign voice rules are in `docs/CAST.md`.
 - `docs/CREATORS.md`: the creator program end to end: adding creators, links, sign-up credit, commissions, the
   creator page, payouts and video tracking.
 
