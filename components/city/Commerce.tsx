@@ -144,7 +144,7 @@ export function ShopSheet({
       <div key={item.sku} className="item-card">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
-          {isOwned ? <OwnedPill /> : item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? item.wear?.slot ?? ""}</span>}
+          {isOwned ? <OwnedPill /> : item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? ""}</span>}
         </div>
         <span className="title" style={{ display: "block" }}>{item.name}</span>
         <span className="subtext clamp-2">{item.blurb}</span>

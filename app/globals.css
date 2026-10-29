@@ -2536,7 +2536,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-mail { position:relative; display:flex; flex-direction:column; gap:2px; width:100%; padding:12px 36px 12px 14px; border-radius:14px; text-align:left; background:var(--surface-raised); color:var(--text-1); box-shadow:var(--elev-2); cursor:pointer; }
 .camp-mail.new { box-shadow:inset 4px 0 0 var(--neon-500), var(--elev-2); }
 .camp-situation { text-align:center; align-items:center; padding:20px 16px; }
-.camp-sit-icon { font-size:44px; }
+.camp-sit-icon { display:block; font-size:44px; line-height:1.15; margin-bottom:4px; }
 .camp-crowd { position:relative; height:12px; border-radius:6px; background:linear-gradient(90deg, #D93A2F, #E8EEF9 50%, #40B589); }
 .camp-crowd span { position:absolute; top:-5px; width:22px; height:22px; margin-left:-11px; border-radius:50%; background:#fff;
   box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .4s ease-out; }
