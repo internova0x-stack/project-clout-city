@@ -534,6 +534,8 @@ function Dilemmas({ v, busy, onPick }: { v: CampaignView; busy: boolean; onPick:
 
 function Inbox({ v, busy, onReply, initial = null }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void; initial?: string | null }) {
   const [open, setOpen] = useState<string | null>(initial);
+  // Replies are radio choices, sent with one button (owner, Oct 29).
+  const [sel, setSel] = useState<string | null>(null);
   const list = [...v.inbox].sort((a, b) => Number(b.status === "new") - Number(a.status === "new"));
   if (!list.length) return <p className="meta">No messages. Suspicious.</p>;
   const m = list.find((x) => x.message.id === open);
@@ -541,22 +543,28 @@ function Inbox({ v, busy, onReply, initial = null }: { v: CampaignView; busy: bo
     return (
       <div className="stack-12">
         <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={() => setOpen(null)}>‹ Inbox</button>
-        <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start" }}>{m.message.label}</span>
+        <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start", width: "fit-content", marginBottom: 8 }}>{m.message.label}</span>
         <p className="title" style={{ margin: 0 }}>{m.message.subject}</p>
         <p className="body ph-sensitive" style={{ margin: 0 }}>{m.message.body}</p>
-        {m.status === "new" && <p className="overline" style={{ margin: "4px 0 0" }}>Tap your reply</p>}
-        {m.status === "new" ? m.message.options.map((o: InboxOption) => (
-          <button key={o.id} className="camp-option" disabled={busy} onClick={async () => { onReply(m.message.id, o.id); setOpen(null); }}>
-            <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
-          </button>
-        )) : <p className="meta">{m.status === "expired" ? "Expired. They noticed." : `Answered: ${m.message.options.find((o) => o.id === m.option)?.label ?? ""}`}</p>}
+        {m.status === "new" ? (
+          <div className="stack-8" role="radiogroup" aria-label="Your reply">
+            <p className="overline" style={{ margin: "4px 0 0" }}>Pick your reply</p>
+            {m.message.options.map((o: InboxOption) => (
+              <button key={o.id} role="radio" aria-checked={sel === o.id} className="camp-option radio" disabled={busy} onClick={() => setSel(o.id)}>
+                <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
+              </button>
+            ))}
+            <button className="btn btn-taxi" disabled={busy || !sel || !m.message.options.some((o) => o.id === sel)}
+              onClick={() => { if (sel) { onReply(m.message.id, sel); setSel(null); setOpen(null); } }}>Send reply</button>
+          </div>
+        ) : <p className="meta">{m.status === "expired" ? "Expired. They noticed." : `Answered: ${m.message.options.find((o) => o.id === m.option)?.label ?? ""}`}</p>}
       </div>
     );
   }
   return (
     <div className="stack-8">
       {list.map((x) => (
-        <button key={x.message.id} className={`camp-mail${x.status === "new" ? " new" : ""}`} onClick={() => setOpen(x.message.id)}>
+        <button key={x.message.id} className={`camp-mail${x.status === "new" ? " new" : ""}`} onClick={() => { setSel(null); setOpen(x.message.id); }}>
           <span className="title">{x.message.subject}</span>
           <span className="meta">{x.message.label} · {x.status === "new" ? "expires when the week ends" : x.status}</span>
         </button>

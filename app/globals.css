@@ -2511,6 +2511,12 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 /* A chevron on every choice so it reads as a button (owner, Oct 29: the inbox options didn't look tappable). */
 .camp-option::after, .camp-mail::after { content:"›"; position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:24px; font-weight:700; line-height:1; color:var(--text-3); }
 .camp-option.dark::after { color:rgba(255,255,255,.75); }
+.camp-option.radio { padding:12px 14px 12px 48px; }
+.camp-option.radio::after { content:none; }
+.camp-option.radio::before { content:""; position:absolute; left:14px; top:14px; width:22px; height:22px; border-radius:50%; box-sizing:border-box;
+  border:2px solid var(--text-3); background:var(--surface-raised); }
+.camp-option.radio[aria-checked="true"] { border-color:var(--neon-500); }
+.camp-option.radio[aria-checked="true"]::before { border-color:var(--neon-500); background:radial-gradient(circle, var(--neon-500) 0 5px, var(--surface-raised) 6px); }
 .camp-option:active { border-color:var(--taxi-400); transform:scale(.99); }
 .camp-option:disabled { opacity:.6; }
 .camp-option.dark { background:var(--night-900); color:#fff; }
