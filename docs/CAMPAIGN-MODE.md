@@ -344,26 +344,33 @@ There is never a bare "Play your turn" or "Answer messages":
 - **End Week** completes whichever task names this week's big moment.
 - **Inbox tasks** name the person and what they want.
 
+**Card length** (owner, Oct 29): every campaign task fits the task card.
+- **Title:** at most 35 characters, one line on a phone where possible. It's the joke and the job.
+- **Tag line:** at most 30 characters, in the card's meta line beside the goal tag. It's the why: a deadline, a
+  number, a stakes word.
+- **Tapping the task** opens the campaign right at that message, place or debate, where the full story is.
+- `validate:content` fails a title or tag line over its limit.
+
 **Shared templates** (the variables come from the campaign):
 
-| Task | Done by | Built from |
-|---|---|---|
-| "Call {stakeholder} back before {deadline}. They're threatening to endorse the Mayor" | Replying to that message | An inbox Threat with the nearest deadline |
-| "Get {candidate} to the {place} tour stop. {Place} is down {n} points and the Mayor's been cutting ribbons there" | A tour stop booked there | The weakest place in the last poll |
-| "Prep {candidate} for Thursday's debate: they still can't answer the {topic} question" | A prep slot on that topic | The fixed debate and an unprepped weak spot |
-| "Meet {stakeholder} at {venue} before {day}. They know who's funding the Mayor's ads" | That task done | An open "Meet X at Y" task |
-| "Kill the {scandal} story before the morning paper" | Answering the Exposure Event | A live Exposure Event |
-| "Pay {staffer} before they quit. {Pronoun} has been complaining since Tuesday" | A bonus or fair-pay choice | A staffer with low Morale |
-| "The Mayor's {event} is Saturday. Book something across the street" | An event in the same slot | A known opponent event (with intel) |
+| Title | Tag line | Done by | Built from |
+|---|---|---|---|
+| "Call {stakeholder} before they flip" | "⏰ {day} · eyeing the Mayor" | Replying to that message | An inbox Threat with the nearest deadline |
+| "Win back {place}" | "📉 Down {n} points" | A tour stop booked there | The weakest place in the last poll |
+| "Prep the {topic} answer" | "🎤 Debate {day}" | A prep slot on that topic | The fixed debate and an unprepped weak spot |
+| "Meet {stakeholder} at {venue}" | "🕵️ Knows who funds his ads" | That task done | An open "Meet X at Y" task |
+| "Kill the {scandal} story" | "🔥 Before the morning paper" | Answering the Exposure Event | A live Exposure Event |
+| "Pay {staffer} before they quit" | "😤 Morale's tanking" | A bonus or fair-pay choice | A staffer with low Morale |
+| "Crash the Mayor's {event}" | "📅 {day} · book across the street" | An event in the same slot | A known opponent event (with intel) |
 
-**Candidate-only tasks** (a few per candidate, in their voice):
+**Candidate-only tasks:**
 
-| Candidate | Examples |
+| Candidate | Title · tag line |
 |---|---|
-| **Goldcrest** | "Stop Preston calling the bus 'the poor people's Uber' at the Woodside rally." "Find Preston a donor who doesn't own a yacht. For the optics." "Talk him out of buying the newspaper. Again." |
-| **Castellano** | "Cut Dr. Castellano's transit speech from 40 minutes to 4." "Get her a photo with a dog. Voters need to see she has feelings." "Find a voter who's read her 600-page report. Anyone." |
-| **Kowalczyk** | "Keep Frankie from fighting the heckler at the Astoria rally." "Explain hashtags to Frankie. Bring coffee." "Book the union hall for Friday. Frankie's knee says it'll rain." |
-| **Starr** | "Approve Kaylee's caption before she posts it. This time." "Find a policy for the free Wi-Fi plan that isn't 'it's giving connected.'" "Get Kaylee to a debate prep without her ring-light." |
+| **Goldcrest** | "Stop Preston dissing the bus" · "🚌 Woodside rally" ; "Find a donor without a yacht" · "📸 For the optics" ; "Don't let him buy the paper" · "🗞️ Again" |
+| **Castellano** | "Cut her speech to 4 minutes" · "⏱️ It's 40 now" ; "Get Ingrid a photo with a dog" · "🐶 Proof of feelings" ; "Find one reader of her report" · "📚 600 pages" |
+| **Kowalczyk** | "Keep Frankie off the heckler" · "🥊 Astoria rally" ; "Explain hashtags to Frankie" · "☕ Bring coffee" ; "Book the union hall Friday" · "🦵 The knee says rain" |
+| **Starr** | "Approve Kaylee's caption first" · "📱 This time" ; "Give Free Wi-Fi a real policy" · "📶 Not 'it's giving'" ; "Prep Kaylee, no ring-light" · "🎤 Debate {day}" |
 
 **How the tasks fill the day:**
 - **The two goal-linked tasks** pick from the templates that serve the current campaign goal. "Win a debate" draws
