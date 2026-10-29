@@ -269,7 +269,7 @@ components live in `app/globals.css`.
   streak); "Your poll results are in" (`push_scan_campaign`, kind 'campaign_poll', run by the push sender); Lola's scandal write-ups
   in News → City (`lines.scandal`, `view.scandals`); Campaign HQ on the map (place 'campaign-hq', Steinway in Astoria, tag
   'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race. Candidates' portraits are public/cast/candidate-<id>.webp (owner, Oct 29); every issue has an emoji.
-- Compact map (owner, Oct 29; behind a switch: `?map=compact` on a device, `?map=classic` back; lib/graphics.ts `compactMap()`):
+- Compact map (owner, Oct 29; on for everyone, players and guests; `?map=classic` puts a device back on the street map, `?map=compact` returns; lib/graphics.ts `compactMap()`):
   New York in miniature. lib/compactMap.ts gives every place its own block (`SPOTS`, tests/compactMap.test.ts), the
   neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and
   the jokes (bronze Pizza Rat, LUXURY CONDOS SOON lot, Papa-Dani's billboard). components/map/CompactMap.tsx is a
