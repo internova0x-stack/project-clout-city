@@ -31,7 +31,8 @@ from (values
   ('0019_hunt_review.sql', coalesce((exists (select 1 from information_schema.columns where table_schema='public' and table_name='hunts' and column_name='review_note')), false)),
   ('0020_player_profile.sql', coalesce((exists (select 1 from pg_proc where proname='player_recent' and pronamespace='public'::regnamespace)), false)),
   ('0021_save_look.sql', coalesce((exists (select 1 from pg_proc where proname='save_look' and pronamespace='public'::regnamespace)), false)),
-  ('0022_collection.sql', coalesce((exists (select 1 from pg_proc where proname='store_catalog' and pronamespace='public'::regnamespace and position('''serial'', (select 1 + (select count(*) from public.entitlements o' in prosrc) > 0)), false)),
+  -- 0102 rewrote store_catalog, so after it 0022's mark is gone: 0102 having run counts too.
+  ('0022_collection.sql', coalesce((exists (select 1 from pg_proc where proname='store_catalog' and pronamespace='public'::regnamespace and position('''serial'', (select 1 + (select count(*) from public.entitlements o' in prosrc) > 0)) or to_regprocedure('public.couture_edition(text)') is not null, false)),
   ('0023_ledger_feed.sql', coalesce((exists (select 1 from pg_proc where proname='ledger_feed' and pronamespace='public'::regnamespace)), false)),
   ('0024_gig_clout_networth.sql', coalesce((jsonb_path_query_first((select value from public.game_settings where key='city'), '$.economy.gigs.side.clout') = '0'::jsonb), false)),
   ('0025_travel.sql', coalesce((exists (select 1 from pg_proc where proname='miles_between' and pronamespace='public'::regnamespace)), false)),
@@ -85,7 +86,8 @@ from (values
   ('0073_daily_goals.sql', coalesce((exists (select 1 from pg_proc where proname='goals_settings' and pronamespace='public'::regnamespace)), false)),
   ('0074_goal_ladder.sql', coalesce((exists (select 1 from pg_proc where proname='goal_list' and pronamespace='public'::regnamespace and position('for g in select x from jsonb_array_elements(gs -> ''ladder'') x loop' in prosrc) > 0)), false)),
   ('0075_campus_areas.sql', coalesce((jsonb_path_query_first((select value from public.game_settings where key='city'), '$.places[*] ? (@.id == "st-johnsons").actions[*] ? (@.id == "quad").id') = '"quad"'::jsonb), false)),
-  ('0076_campus_classes_dates.sql', coalesce((exists (select 1 from pg_proc where proname='ensure_daily' and pronamespace='public'::regnamespace and position('select en.campus into v_campus from public.campus_enrolments en where en.player_id = p_player;' in prosrc) > 0)), false)),
+  -- 0100 renamed that ensure_daily to ensure_daily_v0094; campus_attend is 0076's own.
+  ('0076_campus_classes_dates.sql', coalesce((to_regprocedure('public.campus_attend(text)') is not null), false)),
   ('0077_exam_weeks.sql', coalesce((exists (select 1 from pg_proc where proname='content_import_exams' and pronamespace='public'::regnamespace)), false)),
   ('0078_push.sql', coalesce((to_regclass('public.push_subscriptions') is not null), false)),
   ('0079_membership.sql', coalesce((to_regclass('public.stripe_customers') is not null), false)),
@@ -137,6 +139,7 @@ from (values
   ('0125_payment_disputes.sql', coalesce((to_regclass('public.payment_disputes') is not null), false)),
   ('0126_rate_limits.sql', coalesce((to_regclass('public.rate_counters') is not null), false)),
   ('0127_campaign_mode.sql', coalesce((to_regclass('public.campaigns') is not null), false)),
-  ('0128_campaign_tasks_push.sql', coalesce((to_regprocedure('public.push_scan_campaign()') is not null), false))
+  ('0128_campaign_tasks_push.sql', coalesce((to_regprocedure('public.push_scan_campaign()') is not null), false)),
+  ('0129_catch_up_0071_0098.sql', coalesce((obj_description(to_regprocedure('public.content_import_story(jsonb)'), 'pg_proc') like '%caught up by 0129%'), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
