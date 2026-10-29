@@ -293,6 +293,18 @@ a { color:inherit; }
   border-radius:14px; pointer-events:auto; color:#fff; background:rgba(23,20,28,.86); box-shadow:var(--elev-2); }
 .compact-island .title { font-size:13px; font-weight:800; }
 .compact-island .meta { color:rgba(255,246,224,.75); font-size:10px; }
+.compact-district { pointer-events:auto; border:0; }
+/* Most places are a small dot on their building (owner, Oct 29); a tap opens the details card. */
+.compact-dot { position:absolute; left:0; top:0; width:28px; height:28px; display:grid; place-items:center; padding:0; border:0; background:none; pointer-events:auto; }
+.compact-dot span { width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.4); }
+.compact-dot.on span { width:16px; height:16px; box-shadow:0 0 0 4px rgba(255,46,136,.45), 0 1px 4px rgba(0,0,0,.4); }
+.compact-dot.glow span { box-shadow:0 0 0 4px rgba(255,194,26,.6), 0 0 14px rgba(255,194,26,.9); }
+.compact-detail { position:absolute; left:16px; right:88px; bottom:calc(196px + var(--safe-bottom)); z-index:15; display:flex; flex-direction:column; gap:8px;
+  padding:14px; border-radius:18px; background:var(--surface-sheet); box-shadow:var(--elev-3); pointer-events:auto; }
+.compact-detail .title { display:block; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.compact-detail .meta { display:block; }
+.compact-detail .btn { align-self:flex-start; }
+.compact-detail-x { position:absolute; right:8px; top:6px; border:0; background:none; font-size:20px; color:var(--text-3); padding:4px 8px; }
 /* v0.11: the side buttons sit above the bottom bar on the right, so these move to the left, above the stats. */
 .map-zoom-hint { position:absolute; z-index:14; left:50%; transform:translateX(-50%); bottom:calc(92px + var(--safe-bottom)); }
 

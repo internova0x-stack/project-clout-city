@@ -5,7 +5,7 @@
 // boroughs that haven't opened. No React here: components/map/CompactMap.tsx drives it.
 
 import {
-  Box3, BoxGeometry, CanvasTexture, RepeatWrapping, Color, ConeGeometry, CylinderGeometry, DirectionalLight, Group, HemisphereLight,
+  Box3, BoxGeometry, CanvasTexture, RepeatWrapping, Raycaster, Vector2, Color, ConeGeometry, CylinderGeometry, DirectionalLight, Group, HemisphereLight,
   InstancedMesh, type Material, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, type Object3D, PerspectiveCamera,
   PlaneGeometry, Quaternion, Scene, SphereGeometry, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderer,
 } from "three";
@@ -272,6 +272,8 @@ export interface CompactScene {
   setBigScreen(img: (CanvasImageSource & { width: number; height: number }) | null, handle?: string): void;
   /** Story-only places stand on the map only while their story runs (the pins say which are shown). */
   setShown(ids: ReadonlySet<string>): void;
+  /** The place whose building is under a screen point (normalized device coordinates), if any. */
+  pick(x: number, y: number): string | null;
   /** Builds a few more landmarks (the ones nearest `near` first); false once all are built. */
   buildMore(near: readonly [number, number], budgetMs: number): boolean;
   dispose(): void;
@@ -479,6 +481,8 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
   const store = (id: string) => storeModel(themed, id);
   const storyOnly = new Set(PLACES.filter((p) => p.story).map((p) => p.id));
   const storyModels = new Map<string, Group>();
+  const placeModels: Group[] = [];
+  const ray = new Raycaster();
   let shown: ReadonlySet<string> = new Set();
   const buildOne = (q: (typeof queue)[number]) => {
     if (!q.kind) return;
@@ -498,6 +502,8 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
     if (q.kind !== "cart") mergeStatic(model, new Set([...nightSkip, ...themed.sweep.map((w) => w.o)]), new Set<Material>(themed.glows.map((g) => g.mat)));
     heights.set(q.id, b.max.y * s + 2);
     if (shadows) model.traverse((o) => { if ((o as Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    model.userData.placeId = q.id;
+    placeModels.push(model);
     if (storyOnly.has(q.id)) { storyModels.set(q.id, model); model.visible = shown.has(q.id); }
     scene.add(model);
     if (q.kind === "clout-tower") paintBigScreen(screen.img, screen.handle);
@@ -530,6 +536,13 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
     setLocked(locked) {
       for (const [id, fog] of fogs) fog.visible = locked.has(id);
       for (const [id, br] of bridges) br.barrier.visible = locked.has(id);
+    },
+    pick(x, y) {
+      ray.setFromCamera(new Vector2(x, y), camera);
+      for (const hit of ray.intersectObjects(placeModels.filter((m) => m.visible), true)) {
+        for (let o: Object3D | null = hit.object; o; o = o.parent) if (o.userData.placeId) return o.userData.placeId as string;
+      }
+      return null;
     },
     setShown(ids) {
       shown = ids;

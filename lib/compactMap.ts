@@ -156,3 +156,40 @@ export function makeProjector(anchors: readonly { at: LatLng; spot: readonly [nu
     return [wx / sum, wz / sum];
   };
 }
+
+// ---------------------------------------------------------------------------
+// Which places get a name (owner, Oct 29: "name for only the most relevant locations, small dots for most buildings,
+// and taps that reveal building details")
+// ---------------------------------------------------------------------------
+/** The city's landmarks: named whenever there's room, after what matters to the player right now. */
+export const FEATURED: readonly string[] = [
+  "campaign-hq", "clout-tower", "hell-gate-park", "unisphere", "meteor-park", "astoria-blvd-station", "velvet-static",
+  "grind-and-gossip", "still-a-dollar-slice", "st-johnsons", "lucky-star", "gantry-plaza", "queensborough-u",
+];
+
+/** How much a place deserves its name on screen: the selected one, the mission's, where you are, then landmarks. */
+export function labelPriority(id: string, o: { selected?: string | null; glow?: boolean; here?: string | null }): number {
+  if (id === o.selected) return 100;
+  if (o.glow) return 90;
+  if (id === o.here) return 80;
+  const f = FEATURED.indexOf(id);
+  return f >= 0 ? 50 - f : 0;
+}
+
+/**
+ * Names that fit: highest priority first, never overlapping another name, at most `max` (plus any priority 80 and up).
+ * Boxes are screen rectangles centered on x, sitting above y.
+ */
+export function pickLabels<T extends { id: string; x: number; y: number; w: number; priority: number }>(items: readonly T[], max: number, h = 30): Set<string> {
+  const out = new Set<string>();
+  const taken: { x0: number; x1: number; y0: number; y1: number }[] = [];
+  for (const it of [...items].sort((a, b) => b.priority - a.priority)) {
+    if (it.priority <= 0) break;
+    if (out.size >= max && it.priority < 80) break;
+    const r = { x0: it.x - it.w / 2 - 4, x1: it.x + it.w / 2 + 4, y0: it.y - h, y1: it.y + 2 };
+    if (taken.some((t) => r.x0 < t.x1 && r.x1 > t.x0 && r.y0 < t.y1 && r.y1 > t.y0)) continue;
+    taken.push(r);
+    out.add(it.id);
+  }
+  return out;
+}

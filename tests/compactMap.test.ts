@@ -39,3 +39,20 @@ test("a place's real lat/lng lands on its own block; points between places land 
   const [x, z] = project([(a.at[0] + b.at[0]) / 2, (a.at[1] + b.at[1]) / 2]);
   assert.ok(Number.isFinite(x) && Number.isFinite(z));
 });
+
+test("only the most relevant places get names, never on top of each other", async () => {
+  const { FEATURED, labelPriority, pickLabels } = await import("../lib/compactMap.ts");
+  assert.ok(FEATURED.every((id) => SPOTS[id]), "every featured place is on the map");
+  assert.ok(labelPriority("deli", { selected: "deli" }) > labelPriority("x", { glow: true }));
+  assert.ok(labelPriority("x", { glow: true }) > labelPriority("campaign-hq", {}));
+  assert.equal(labelPriority("ditmars-deli", {}), 0);
+  const items = [
+    { id: "a", x: 100, y: 100, w: 80, priority: 50 },
+    { id: "b", x: 110, y: 105, w: 80, priority: 40 }, // overlaps a
+    { id: "c", x: 300, y: 100, w: 80, priority: 30 },
+    { id: "d", x: 500, y: 100, w: 80, priority: 0 }, // not relevant: a dot
+    { id: "e", x: 105, y: 100, w: 80, priority: 90 }, // the mission: always wins
+  ];
+  const got = pickLabels(items, 2);
+  assert.ok(got.has("e") && got.has("c") && !got.has("a") && !got.has("b") && !got.has("d"), [...got].join(","));
+});
