@@ -289,6 +289,17 @@ function Week({ data, v, busy, api, run, onInbox }: { data: CampaignScreen; v: C
       )}
       {!waiting && (
         <>
+          {v.tasks.length > 0 && (
+            <div className="card stack-8">
+              <p className="overline" style={{ margin: 0 }}>🗳️ This week's tasks · +{CAMPAIGN.taskClout} 🔥 each</p>
+              {v.tasks.map((t) => (
+                <div key={t.id} className={`camp-task${t.isDone ? " done" : ""}`}>
+                  <span className="title">{t.isDone ? "✓ " : ""}{t.title}</span>
+                  <span className="meta">{t.isDone ? "On the calendar. Pays at End Week." : t.tag}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {newMail > 0 && <button className="card camp-nudge" onClick={onInbox}>📬 {newMail} message{newMail === 1 ? "" : "s"} waiting. They expire when the week ends.</button>}
           {v.debateWeek && (
             <div className="card stack-8">

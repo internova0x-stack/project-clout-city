@@ -65,6 +65,8 @@ export interface PlaceHandlers {
   here?: (placeId: string) => PlaceCounts[string] | undefined;
   /** v0.10 Lucky Star Lotto's counter (migration 0032). */
   onOpenLotto?: (placeId: string) => void;
+  /** Campaign Mode: Campaign HQ's card opens the Campaign sheet (the teaser before Rank 2). */
+  onOpenCampaign?: () => void;
   /**
    * v0.14 On Air: the stations' own buttons. "shoutout" and "billboard" open the Radio and Clout TV
    * apps' forms (there, on arrival); "watch" opens the Big Screen's photo (from anywhere).
@@ -595,6 +597,9 @@ export function LocationSheet({
         <div className="stack-16">
           <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} />
           <StoryBanners place={place} story={handlers.story ?? null} />
+          {place.tags.includes("campaign") && handlers.onOpenCampaign && (
+            <button className="btn btn-taxi" onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
+          )}
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>
             {place.tier && <span className="tag tag-neutral">{place.tier} dining</span>}

@@ -2538,3 +2538,7 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-news > span { display:block; }
 .camp-news .camp-bunting { position:absolute; }
 .camp-news-cta { margin-top:4px; font-weight:800; color:var(--neon-text); }
+.camp-task { display:flex; flex-direction:column; gap:2px; padding:8px 0; border-top:1px solid var(--divider); }
+.camp-task > span { display:block; }
+.camp-task.done .title { color:var(--green-text); }
+.camp-scandal { box-shadow:inset 4px 0 0 var(--red-500); }

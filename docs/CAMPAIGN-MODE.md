@@ -2,7 +2,7 @@
 
 **Feature:** a self-paced mayoral race. The player is a **campaign manager** who picks one of four challengers
 and runs their campaign against the incumbent, Mayor Papa-Dani. Shadow Ops are the dark-arts layer underneath.
-**Status:** spec v0.5 (Oct 29, 2026), not built. Every number is a starting value for playtests.
+**Status:** spec v0.5 (Oct 29, 2026). The 4-week test build is in the game (migrations 0127 and 0128). Every number is a starting value for playtests.
 **Hook:** *"Fake it until the city finds out."*
 
 **Changes from v0.4 (owner, Oct 29):**

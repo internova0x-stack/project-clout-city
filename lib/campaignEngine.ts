@@ -5,7 +5,7 @@
 
 import {
   CAMPAIGN, citywide, cs, endReward, skimRoom,
-  type CampaignContent, type CampaignState, type Candidate, type CandidateId, type Choice, type DebateStyle, type Effects,
+  type CampaignContent, type CampaignState, type CampaignTask, type Candidate, type CandidateId, type TaskDef, type Choice, type DebateStyle, type Effects,
   type InboxMessage, type InboxOption, type OpId, type Payout, type Place, type Situation, type SlotAction,
 } from "./campaign.ts";
 
@@ -71,6 +71,7 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
     earned: 0, dilemmas: {}, turnout: {}, queue: [], before: null,
   };
   deliverInbox(content, state);
+  drawTasks(content, state, rng);
   return state;
 }
 
@@ -176,6 +177,77 @@ export function refresh(state: CampaignState, today: string): boolean {
     return true;
   }
   return false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Campaign daily tasks (content/campaign/tasks.json): two a week, one from the campaign's state, one in the
+// candidate's voice. Done is worked out from the week's plan and replies, and they pay at End Week.
+// ---------------------------------------------------------------------------------------------------------------
+
+const firstName = (name: string) => name.replace(/^(Dean|Pastor|Auntie|Dr\.)\s+/, "").split(" ")[0];
+
+/** Draws this week's two tasks, if the week has none yet. */
+export function drawTasks(content: CampaignContent, state: CampaignState, rng: Rng) {
+  if (state.phase === "over" || state.tasks?.some((t) => t.week === state.week)) return;
+  const place = (id: string) => content.places.find((p) => p.id === id)!;
+  const margin = (id: string) => state.places[id].you - state.places[id].mayor;
+  const ids = Object.keys(state.places);
+  const weak = [...ids].sort((a, b) => margin(a) - margin(b))[0];
+  const turf = [...ids].sort((a, b) => state.places[b].mayor - state.places[a].mayor)[0];
+  const newMsg = (kind: string) => state.inbox.map((m) => content.inbox.find((x) => x.id === m.id && m.status === "new")).find((m) => m && (kind === "meeting" ? m.options.some((o) => o.meeting) : m.kind === kind));
+  const tired = [...state.staff].filter((x) => !x.out).sort((a, b) => a.morale - b.morale)[0];
+  const lastWeek = (state.tasks ?? []).filter((t) => t.week === state.week - 1).map((t) => t.id);
+  const fit = (d: TaskDef): CampaignTask | null => {
+    const base = { id: d.id, done: d.done, week: state.week };
+    const who = (m: InboxMessage) => firstName(content.stakeholders.find((s) => s.id === m.from)?.name ?? "them");
+    switch (d.when) {
+      case "threat": case "request": case "meeting": {
+        const m = newMsg(d.when);
+        if (!m || m.from === "anon") return null;
+        return { ...base, title: fill(d.title, { who: who(m) }), tag: d.tag, target: m.id };
+      }
+      case "weak": return margin(weak) < 0 ? { ...base, title: fill(d.title, { place: place(weak).short ?? place(weak).name }), tag: fill(d.tag, { n: String(Math.round(-margin(weak))) }), target: weak } : null;
+      case "mayor_turf": return state.week >= 2 ? { ...base, title: fill(d.title, { place: place(turf).short ?? place(turf).name }), tag: d.tag, target: turf } : null;
+      case "debate": {
+        if (state.week !== CAMPAIGN.debateWeek) return null;
+        const topic = ["weak", "rent", "transit", "safety"].find((t) => !state.prepped.includes(t));
+        return topic ? { ...base, title: fill(d.title, { topic: topic === "weak" ? "weak spot" : topic }), tag: d.tag, target: topic } : null;
+      }
+      case "low_morale": return tired && tired.morale < 60 ? { ...base, title: fill(d.title, { staffer: firstName(content.staff.find((x) => x.id === tired.id)!.name) }), tag: d.tag } : null;
+      case "election": return state.week === CAMPAIGN.weeks ? { ...base, title: fill(d.title, { place: place(weak).short ?? place(weak).name }), tag: d.tag, target: weak } : null;
+      default: return null;
+    }
+  };
+  const shared = content.tasks.shared.map(fit).filter((t): t is CampaignTask => !!t);
+  const pickFrom = shared.filter((t) => !lastWeek.includes(t.id));
+  const one = (pickFrom.length ? pickFrom : shared)[0] ?? null;
+  const own = content.tasks.candidates[state.candidate].filter((d) => !lastWeek.includes(d.id) && !(state.tasks ?? []).some((t) => t.id === d.id));
+  const d = own.length ? pick(rng, own) : pick(rng, content.tasks.candidates[state.candidate]);
+  const spot = rallyPlaceFor(state, weak);
+  const second: CampaignTask = { id: d.id, title: d.title, tag: fill(d.tag, { place: place(spot).short ?? place(spot).name }), done: d.done, week: state.week, target: d.done === "rally" || d.done === "tour" ? spot : undefined };
+  state.tasks = [...(state.tasks ?? []).filter((t) => t.week >= state.week - 1), ...(one ? [one] : []), second];
+}
+
+function rallyPlaceFor(state: CampaignState, fallback: string): string {
+  const ids = Object.keys(state.places);
+  return ids[(state.week * 7 + state.candidate.length) % ids.length] ?? fallback;
+}
+
+/** Whether a task is done by this week's plan and replies. */
+export function taskDone(t: CampaignTask, state: CampaignState): boolean {
+  const slots = state.slots.filter(Boolean) as SlotAction[];
+  const at = (k: SlotAction["kind"]) => slots.some((s) => s.kind === k && (!t.target || !("place" in s) || s.place === t.target));
+  switch (t.done) {
+    case "reply": return state.inbox.some((m) => m.id === t.target && m.status === "answered");
+    case "meeting": return slots.some((s) => s.kind === "meeting" && s.message === t.target);
+    case "visit": return at("rally") || at("tour");
+    case "rally": return at("rally");
+    case "tour": return at("tour");
+    case "gotv": return at("gotv");
+    case "donors": return slots.some((s) => s.kind === "donors");
+    case "rest": return slots.some((s) => s.kind === "rest");
+    case "prep": return slots.some((s) => s.kind === "prep" && (!t.target || s.topic === t.target));
+  }
 }
 
 const spent = (state: CampaignState) => state.budget.digital + state.budget.street + state.budget.tv;
@@ -409,6 +481,10 @@ export function choose(content: CampaignContent, state: CampaignState, situation
     const t = state.traces.find((x) => x.id === p.target);
     if (t) t.weight = 0;
   }
+  if (card.trigger === "exposure") {
+    const line = content.lines.scandal[choiceId];
+    if (line) state.scandals = [...(state.scandals ?? []), { week: state.week, text: fill(line, vars(content, state)) }];
+  }
   if (card.trigger === "poach" && p.target) {
     const s = state.staff.find((x) => x.id === p.target);
     if (s && choiceId === "let_go") s.out = true;
@@ -436,12 +512,13 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
   let darkThisWeek = state.dirtyOps;
   state.dirtyOps = 0;
 
+  let donorTotal = 0;
   // 1. The calendar.
   for (const a of state.slots) {
     if (!a) continue;
     if (a.kind === "rally") { gain(state, a.place, round1(2.5 * comp(state, "field") * moraleMult * (0.4 + c.channels.street * 0.6))); visited.add(a.place); }
     if (a.kind === "tour") { gain(state, a.place, round1(1.5 * moraleMult)); visited.add(a.place); }
-    if (a.kind === "donors") { const got = Math.round(4000 * c.donor * state.links.fundMult); state.cash += got; state.raised += got; lines.push(`Donor calls raised ${cs(got)}.`); }
+    if (a.kind === "donors") { const got = Math.round(4000 * c.donor * state.links.fundMult); state.cash += got; state.raised += got; donorTotal += got; }
     if (a.kind === "prep" && !state.prepped.includes(a.topic)) state.prepped.push(a.topic);
     if (a.kind === "rest") state.morale = clamp(state.morale + 8);
     if (a.kind === "gotv") state.turnout[a.place] = (state.turnout[a.place] ?? 0) + 1;
@@ -458,6 +535,7 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
     }
     if (a.kind === "op") { lines.push(resolveOp(content, state, a, rng)); darkThisWeek += 1; }
   }
+  if (donorTotal) lines.push(`Donor calls raised ${cs(donorTotal)}.`);
   const booked = state.slots.filter(Boolean).length;
   if (booked >= CAMPAIGN.slots) { state.morale = clamp(state.morale - 6); lines.push("A packed week. The team is running on cold brew."); }
 
@@ -578,7 +656,12 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
   state.recap = { week: state.week, headline, lines: [...lines.slice(0, 7), `Papa-Dani: "${fill(mayorLine, { candidate: c.short })}"`], you: now.you, mayor: now.mayor, change, revealOn: nextDay(today) };
   state.log.push({ week: state.week, text: `Week ${state.week}: ${change >= 0 ? "+" : ""}${change} (${now.you} vs ${now.mayor}).` });
 
-  // 12. The next week, or Election Day.
+  // 12. This week's campaign tasks pay (15 clout each, once).
+  for (const t of (state.tasks ?? []).filter((x) => x.week === state.week)) {
+    if (taskDone(t, state)) payouts.push({ currency: "clout", amount: CAMPAIGN.taskClout, kind: "campaign_task", ref: `${state.id}:${state.week}:${t.id}` });
+  }
+
+  // 13. The next week, or Election Day.
   if (state.week >= CAMPAIGN.weeks) {
     payouts.push(...runElection(content, state, rng));
     state.phase = "over";
@@ -588,6 +671,7 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
     state.slots = Array(CAMPAIGN.slots).fill(null);
     state.budget = { digital: 0, street: 0, tv: 0 };
     deliverInbox(content, state);
+    drawTasks(content, state, rng);
   }
   state.receipts = [];
   return { payouts };
@@ -704,6 +788,10 @@ export interface CampaignView {
   shown: { favors: boolean; shadow: boolean; team: boolean };
   dilemmas: { skim: number | null; charity: boolean };
   refuses: OpId[];
+  /** Lola's write-ups of the campaign's scandals (News → City), newest first. */
+  scandals: { week: number; text: string }[];
+  /** This week's campaign tasks and whether the plan does them. */
+  tasks: (CampaignTask & { isDone: boolean })[];
   mayorAllies: { id: string; name: string; role: string }[];
 }
 
@@ -755,6 +843,8 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
       charity: state.week >= 2 && !state.dilemmas.charity,
     },
     refuses: c.refuses,
+    scandals: [...(state.scandals ?? [])].reverse().slice(0, 3),
+    tasks: state.phase === "over" ? [] : (state.tasks ?? []).filter((t) => t.week === state.week).map((t) => ({ ...t, isDone: taskDone(t, state) })),
     mayorAllies: content.stakeholders.filter((s) => s.mayorAlly && (state.trust[s.id] ?? 0) < 1).map((s) => ({ id: s.id, name: s.name, role: s.role })),
   };
 }

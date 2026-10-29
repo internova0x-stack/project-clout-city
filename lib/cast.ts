@@ -67,6 +67,8 @@ export const REGULARS: Regular[] = [
   { id: "mags", name: "Mags", title: "the bartender", placeId: "velvet-static", emoji: "👩‍🦰", role: "bartender" },
   { id: "captain-rosa", name: "Captain Rosa Díaz-Moore", title: "Engine 7", placeId: "engine-7", emoji: "👩‍🚒", role: "driver" },
   { id: "penwright", name: "Mr. Penwright", title: "the librarian", placeId: "ditmars-library", emoji: "🧓", role: "professor" },
+  // Campaign Mode (owner, Oct 29): Campaign HQ's volunteer coordinator.
+  { id: "bernie", name: "Bernie", title: "the volunteer coordinator", placeId: "campaign-hq", emoji: "🗳️", role: "clerk" },
   { id: "sgt-bev", name: "Sgt. Bev Kowalski", title: "the desk sergeant", placeId: "precinct-114-half", emoji: "👮‍♀️", role: "doorman" },
   { id: "pixel", name: "Pixel", title: "the arena manager", placeId: "respawn-arena", emoji: "🎧", role: "driver" },
   { id: "walt", name: "Walt", title: "the tour guide", placeId: "unisphere", emoji: "🧢", role: "driver" },

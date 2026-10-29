@@ -798,6 +798,16 @@ export const PLACES: Place[] = [
       { id: "gigs", kind: "gigs", label: "Check the gigs board", energy: 0, blurb: "Side gigs pin up here every morning. Some of them are even legal-sounding." },
     ],
   },
+  // Campaign Mode (owner, Oct 29): the campaign office on the map. Its card opens Campaign HQ (the Phone's Campaign app).
+  {
+    id: "campaign-hq", name: "Campaign HQ", emoji: "🗳️", category: "places", neighborhood: "Astoria",
+    at: [40.7628, -73.9195], depth: "scene", template: "office", palette: ["#D93A2F", "#F4F1EA", "#2F5BBF"],
+    tags: ["office", "campaign", "astoria"],
+    lore: "A storefront on Steinway with four candidates' posters taped to the same window. Volunteers, cold pizza and a whiteboard nobody is allowed to photograph. Allegedly.",
+    actions: [
+      { id: "volunteer", kind: "visit", label: "Stuff envelopes for an hour", task: "Lick 200 envelopes for democracy", energy: 8, mood: 2, blurb: "Paper cuts, cold pizza and gossip about the Mayor's ribbon budget." },
+    ],
+  },
   {
     id: "ditmars-library", name: "Ditmars Free Library", emoji: "📚", category: "places", neighborhood: "Astoria",
     at: [40.7735, -73.9098], depth: "scene", template: "civic", palette: ["#B8743A", "#F2E6D8", "#2A2530"],

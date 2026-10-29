@@ -1,5 +1,6 @@
 "use client";
 
+import { CAMPAIGN } from "@/lib/campaign";
 import { ExclusiveEventCard, type MoneyHandlers } from "../city/Money";
 import { liveParty } from "@/lib/store";
 import type { StoreProduct } from "@/lib/store";
@@ -60,7 +61,7 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
@@ -76,6 +77,8 @@ export function TasksSheet({
   goals?: GoalsState | null;
   /** Owner, Oct 23: the skill task links to the Skills sheet. */
   onOpenSkills?: (skill: string) => void;
+  /** Campaign Mode (owner, Oct 29): this week's two campaign tasks, under the five; tapping one opens the campaign. */
+  campaign?: { tasks: { id: string; title: string; tag: string; isDone: boolean }[]; onOpen: () => void } | null;
 }) {
   const [tab, setTab] = useState<"daily" | "goals" | "hunt" | "streaks">(initialTab ?? "daily");
   useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
@@ -140,6 +143,19 @@ export function TasksSheet({
                     {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
                   </div>
                 ))}
+                {campaign && campaign.tasks.length > 0 && (
+                  <>
+                    <p className="overline" style={{ margin: "8px 0 0" }}>🗳️ Campaign · +{CAMPAIGN.taskClout} 🔥 each at End Week</p>
+                    {campaign.tasks.map((t) => (
+                      <div key={t.id} className="select-card multi" aria-pressed={t.isDone} role="button" tabIndex={0} style={{ cursor: "pointer" }} onClick={campaign.onOpen}>
+                        <span className="select-emoji" aria-hidden="true">🗳️</span>
+                        <span className="title" style={{ display: "block" }}>{t.title}</span>
+                        <span className="task-meta"><span>{t.isDone ? "On the calendar. Pays at End Week." : t.tag}</span></span>
+                        {t.isDone && <span className="select-check" aria-hidden="true">✓</span>}
+                      </div>
+                    ))}
+                  </>
+                )}
               </>
             ) : (
               partyDone && (

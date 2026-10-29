@@ -44,5 +44,11 @@
   "factCheck": {
     "debunked": "The Borough Bugle fact-checked your story about the Mayor. It did not survive. -4 there, Integrity -8, Heat +15.",
     "held": "The fake story held. For now."
+  },
+  "scandal": {
+    "deny": "SCANDAL 🚨 {candidate}'s campaign got caught, and denied everything. The receipts say otherwise, babe 👀",
+    "blame": "SCANDAL 🚨 {candidate}'s campaign says \"a consultant acted alone.\" A consultant. Alone. Sure, sweetie.",
+    "confess": "SCANDAL 🚨 {candidate}'s campaign got caught and owned it. An apology in this economy? Iconic, honestly.",
+    "counter": "DOUBLE SCANDAL 🚨 {candidate}'s campaign got caught, then leaked dirt on the Mayor's people. Lola needs a nap."
   }
 }
