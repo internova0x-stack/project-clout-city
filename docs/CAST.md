@@ -50,8 +50,8 @@ announces fixes that really shipped. Examples:
 - **Election night:** he concedes graciously or wins graciously, and calls the manager either way. He is sometimes
   right, and the race is about the job, never about him being a bad person.
 - **Players' ops** hit his fictional machine only, never his character's private life.
-- **Until Campaign Mode ships,** City News and the Mayor app don't mention an election (the game never promises
-  features that aren't built).
+- **City News** carries one election item a week once migration 0127 has run (docs/WEEKLY-CONTENT.md); before then, no election
+  talk (the game never promises features that aren't built).
 
 **The challengers** (Campaign Mode, owner Oct 29; full bios and platforms in docs/CAMPAIGN-MODE.md section 2):
 - **Preston Vale Goldcrest III,** "The Disruptor": the slightly slimy towers-and-gondola billionaire.

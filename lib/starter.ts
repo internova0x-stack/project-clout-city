@@ -71,4 +71,6 @@ export const STARTER_FINISH_TOAST = `🏅 Starter Week done: “${STARTER_FINISH
 export const APP_UNLOCKS: Record<string, { rank: number; label: string }> = {
   businesses: { rank: 2, label: "Rank 2" },
   jobs: { rank: 2, label: "Rank 2" },
+  // Campaign Mode (owner, Oct 29): the app opens the election teaser until then.
+  campaign: { rank: 2, label: "Rank 2" },
 };

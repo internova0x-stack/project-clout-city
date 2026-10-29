@@ -80,6 +80,9 @@ it isn't in your working directory). Work from the main branch.
      requires it): a ribbon cutting, a fix, a civic event, in his voice from docs/CAST.md. When the team has marked
      Mayor's Inbox letters done that week, he can announce what really got fixed ("You wrote, we fixed it");
      never politics, and never a fix that didn't ship.
+   - one election item a week once migration 0127 has run (Campaign Mode, owner Oct 29): Lola's gossip about the race or
+     Papa-Dani on his record, with the four invented challengers from docs/CAST.md. Satire of campaigning, never real
+     politics or parties, and never about a player's own campaign.
    - 3 to 5 Metro Rail Authority updates ("transit", culture pack C4): delays, reroutes, weekend service changes
      and fare news for the lines players ride (N/W in Astoria and Long Island City, the 7 to Flushing, Jackson
      Heights and Sunnyside, the E to Jamaica). Each has "line", "from" (New York time, "HH:MM") and "hours" (1 to 6,

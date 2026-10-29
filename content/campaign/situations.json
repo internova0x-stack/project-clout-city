@@ -1,0 +1,177 @@
+{
+  "about": "Campaign Mode's situation cards (docs/CAMPAIGN-MODE.md section 6): 1 to 3 interrupt each End Week. {place} is where the card happens (the week's rally or tour stop), {candidate} the candidate's short name, {target} the staffer or stakeholder involved. Every choice has the You get / It costs / Risk preview; 'fail' is a hidden chance, 'trace' a hidden trace weight. Cards with a trigger are made by the engine: exposure, poach, lawsuit.",
+  "situations": [
+    {
+      "id": "heatwave", "weeks": [1, 4], "icon": "🥵",
+      "text": "A heatwave hits on the day of the {place} rally.",
+      "choices": [
+        { "id": "go", "label": "Go ahead anyway", "get": "The rally happens", "cost": "Nothing extra", "risk": "medium", "why": "Nobody wants to stand in this", "effects": { "place": 1 }, "receipt": "The rally went ahead. Small, sweaty, loyal. +1 in {place}.", "fail": { "chance": 0.4, "effects": { "place": -1 }, "receipt": "Twelve people came. One fainted. -1 in {place}." } },
+        { "id": "indoors", "label": "Move it indoors", "get": "A comfortable crowd", "cost": "C$3,000 for the hall", "risk": "low", "why": "Costs money", "effects": { "cash": -3000, "place": 1.5 }, "receipt": "Air conditioning wins elections. +1.5 in {place}." },
+        { "id": "water", "label": "Cancel, hand out water", "get": "A nice story", "cost": "The rally", "risk": "low", "why": "Could look like a stunt", "effects": { "place": 1, "integrity": 1 }, "receipt": "The water stand got {candidate} on the local news. +1 in {place}." }
+      ]
+    },
+    {
+      "id": "ambush", "weeks": [1, 4], "icon": "🎤",
+      "text": "A reporter ambushes {candidate} about a donor.",
+      "choices": [
+        { "id": "honest", "label": "Answer honestly", "get": "Trust, Integrity +3", "cost": "An awkward clip", "risk": "low", "why": "Honesty is slow", "effects": { "integrity": 3, "rating": 0.3 }, "receipt": "{candidate} answered straight. Boring clip. Good boring." },
+        { "id": "dodge", "label": "Dodge the question", "get": "No headline today", "cost": "It may come back", "risk": "medium", "why": "Reporters keep notes", "later": true, "effects": { "heat": 4 }, "receipt": "Dodged. The reporter wrote \"declined to answer\" in a very large font." },
+        { "id": "blame", "label": "Blame a staffer", "get": "The heat moves off {candidate}", "cost": "Integrity -5, team morale", "risk": "medium", "why": "Staff talk", "effects": { "integrity": -5, "morale": -8 }, "receipt": "Theo took the blame. Theo will remember." }
+      ]
+    },
+    {
+      "id": "subway", "weeks": [1, 4], "icon": "🚇",
+      "text": "The 7 train is down and your volunteers are stranded in {place}.",
+      "choices": [
+        { "id": "cabs", "label": "Pay for cabs", "get": "Canvassing goes on", "cost": "C$1,500", "risk": "low", "why": "Just money", "effects": { "cash": -1500, "place": 1 }, "receipt": "Cabs everywhere. The doors got knocked. +1 in {place}." },
+        { "id": "cancel", "label": "Cancel canvassing", "get": "Money saved", "cost": "A day of doors", "risk": "low", "why": "The Mayor's people kept going", "effects": { "place": -0.5 }, "receipt": "A lost day in {place}. The Mayor's volunteers waved from a bus." },
+        { "id": "crew", "label": "Ask your crew for rides", "get": "Doors knocked, a good story", "cost": "Your crew's patience", "risk": "medium", "why": "Your friends have jobs", "effects": { "place": 1.5, "morale": 3 }, "receipt": "Your crew drove volunteers all afternoon. +1.5 in {place}.", "fail": { "chance": 0.3, "effects": { "place": 0.5 }, "receipt": "Two cars showed up. One was a scooter." } }
+      ]
+    },
+    {
+      "id": "mayor_promise", "weeks": [1, 4], "icon": "🎀",
+      "text": "Papa-Dani promises something {candidate} actually agrees with.",
+      "choices": [
+        { "id": "praise", "label": "Praise him", "get": "Integrity +4, looks gracious", "cost": "He gets a bump too", "risk": "low", "why": "It helps him", "effects": { "integrity": 4, "rating": 0.5, "mayor": 0.5 }, "receipt": "\"Good idea, Mr. Mayor.\" Voters liked the class. So did he." },
+        { "id": "quiet", "label": "Stay quiet", "get": "Nothing", "cost": "Nothing", "risk": "low", "why": "Safe", "effects": {}, "receipt": "{candidate} said nothing. The news cycle moved on." },
+        { "id": "stunt", "label": "Call it a stunt", "get": "Takes the shine off him", "cost": "Can look petty", "risk": "medium", "why": "He's popular", "effects": { "mayor": -1 }, "receipt": "\"A stunt.\" It landed. -1 for the Mayor.", "fail": { "chance": 0.4, "effects": { "rating": -1 }, "receipt": "\"A stunt.\" It looked petty. -1 for {candidate}." } }
+      ]
+    },
+    {
+      "id": "aide_proof", "weeks": [2, 4], "icon": "📁",
+      "text": "A staffer brings proof that one of the Mayor's aides lied about a contract.",
+      "choices": [
+        { "id": "use", "label": "Use it now", "get": "The Mayor -2", "cost": "Heat +6", "risk": "high", "why": "It might not hold up", "later": true, "trace": 0.3, "effects": { "mayor": -2, "heat": 6 }, "receipt": "The story ran. The aide resigned to \"spend time with his ribbons.\" -2 for the Mayor.", "fail": { "chance": 0.3, "effects": { "rating": -2, "heat": 10, "integrity": -4 }, "receipt": "The \"proof\" was a parking receipt. -2 for {candidate}." } },
+        { "id": "verify", "label": "Verify it first", "get": "Safe, and intel", "cost": "Time: no swing this week", "risk": "low", "why": "Slow", "effects": { "intel": 1 }, "receipt": "Priya checked it. It's real, and it's ammunition for the debate." },
+        { "id": "refuse", "label": "Refuse to use it", "get": "Integrity +4", "cost": "A weapon left on the table", "risk": "low", "why": "Clean, and slow", "effects": { "integrity": 4 }, "receipt": "You put it in a drawer. Your conscience slept well." }
+      ]
+    },
+    {
+      "id": "fork", "weeks": [1, 4], "icon": "🍕",
+      "text": "{candidate} is photographed eating pizza with a fork in {place}.",
+      "choices": [
+        { "id": "own", "label": "Own it: \"I'm a fork person\"", "get": "Authenticity points", "cost": "Pizza purists", "risk": "medium", "why": "This is New York", "effects": { "rating": 0.5 }, "receipt": "\"I'm a fork person.\" Bold. Strangely respected.", "fail": { "chance": 0.5, "effects": { "rating": -1 }, "receipt": "\"Fork-gate\" trended for two days. -1." } },
+        { "id": "fold", "label": "Fold a slice on camera", "get": "Damage control", "cost": "C$500 for the slice photo op", "risk": "low", "why": "Obvious, but it works", "effects": { "cash": -500, "place": 0.5 }, "receipt": "A perfect fold. The fork is forgotten. Mostly." },
+        { "id": "blame", "label": "Say the fork was ironic", "get": "Maybe nothing", "cost": "Credibility", "risk": "medium", "why": "Nobody believes this", "effects": { "integrity": -2 }, "receipt": "\"It was ironic.\" Nobody bought it. Nobody cared much either." }
+      ]
+    },
+    {
+      "id": "cat", "weeks": [1, 4], "icon": "🐈",
+      "text": "Also Sal, the bodega cat, has fallen asleep on 500 of your flyers.",
+      "choices": [
+        { "id": "photo", "label": "Photo op with the cat", "get": "+1 citywide", "cost": "One unhappy cat", "risk": "low", "why": "He bites", "effects": { "rating": 1 }, "receipt": "\"Also Sal endorses {candidate}\" (he did not). +1.", "fail": { "chance": 0.25, "effects": { "rating": 0.5, "morale": -3 }, "receipt": "Also Sal bit the photographer. Still a good picture. +0.5." } },
+        { "id": "wait", "label": "Wait for him to move", "get": "The flyers, eventually", "cost": "A morning", "risk": "low", "why": "Cats don't hurry", "effects": { "morale": 3 }, "receipt": "Four hours later, he moved. The team bonded over it." },
+        { "id": "print", "label": "Print new flyers", "get": "Nothing lost", "cost": "C$800", "risk": "low", "why": "Just money", "effects": { "cash": -800 }, "receipt": "New flyers. Also Sal kept the old ones." }
+      ]
+    },
+    {
+      "id": "ribbon_crash", "weeks": [2, 4], "icon": "✂️",
+      "text": "Papa-Dani is cutting a ribbon on a fixed pothole across from your {place} rally.",
+      "choices": [
+        { "id": "join", "label": "Walk over and shake his hand", "get": "Looks big, Integrity +2", "cost": "He shares your crowd", "risk": "low", "why": "He's charming", "effects": { "integrity": 2, "place": 0.5, "mayor": 0.5 }, "receipt": "A handshake over a pothole. Very civic. Both of you got a bump." },
+        { "id": "heckle", "label": "Point at the next pothole", "get": "-1 for the Mayor", "cost": "Can look petty", "risk": "medium", "why": "Voters like him", "effects": { "mayor": -1 }, "receipt": "\"There's another one right there, Mr. Mayor.\" There was. -1 for him.", "fail": { "chance": 0.35, "effects": { "place": -1 }, "receipt": "The crowd booed. Not him. -1 in {place}." } },
+        { "id": "ignore", "label": "Ignore him", "get": "Your rally, your message", "cost": "Half the cameras", "risk": "low", "why": "He's louder", "effects": { "place": 0.5 }, "receipt": "{candidate} stuck to the plan. Half the cameras did too." }
+      ]
+    },
+    {
+      "id": "g_paper", "weeks": [1, 4], "candidate": "goldcrest", "icon": "🗞️",
+      "text": "Goldcrest wants to buy The Borough Bugle. \"How much is a newspaper?\"",
+      "choices": [
+        { "id": "let", "label": "Let him", "get": "Friendly coverage", "cost": "C$10,000, Integrity -8", "risk": "high", "why": "Everyone will know", "later": true, "trace": 0.4, "effects": { "cash": -10000, "rating": 1.5, "integrity": -8, "heat": 6 }, "receipt": "The Bugle now loves Goldcrest. Its readers noticed. +1.5, for now." },
+        { "id": "talk", "label": "Talk him down", "get": "Integrity +2", "cost": "Morale -6 (he sulks)", "risk": "low", "why": "He hates no", "effects": { "integrity": 2, "morale": -6 }, "receipt": "Goldcrest sulked for a day and bought a boat instead." },
+        { "id": "leak", "label": "Leak that he asked", "get": "A funny story, Heat on him", "cost": "Integrity -2, his trust", "risk": "medium", "why": "He'll find out", "effects": { "rating": -0.5, "integrity": -2, "heat": 2 }, "receipt": "\"Candidate Tried To Buy This Newspaper\" ran in the newspaper. -0.5." }
+      ]
+    },
+    {
+      "id": "g_bus", "weeks": [1, 4], "candidate": "goldcrest", "icon": "🚌",
+      "text": "A hot mic catches Goldcrest asking \"who still takes the bus?\"",
+      "choices": [
+        { "id": "ride", "label": "Put him on the Q32 tomorrow", "get": "Damage control", "cost": "A morning, C$0", "risk": "medium", "why": "He's never done it", "effects": { "rating": 0.5 }, "receipt": "Goldcrest rode the Q32 and tapped his card wrong four times. Strangely charming.", "fail": { "chance": 0.4, "effects": { "rating": -1 }, "receipt": "Goldcrest rode the Q32 in a car-service blazer. -1." } },
+        { "id": "spin", "label": "Say he meant \"the gondola\"", "get": "A laugh, maybe", "cost": "Credibility", "risk": "medium", "why": "Thin", "effects": { "integrity": -2 }, "receipt": "\"He meant the gondola.\" Nobody believes this. Some people laughed." },
+        { "id": "apologize", "label": "Apologize", "get": "Integrity +2", "cost": "-0.5 today", "risk": "low", "why": "It's a bad clip", "effects": { "integrity": 2, "rating": -0.5 }, "receipt": "A real apology, rare for him. The clip lived anyway." }
+      ]
+    },
+    {
+      "id": "c_speech", "weeks": [1, 4], "candidate": "castellano", "icon": "⏱️",
+      "text": "Castellano's {place} speech is 40 minutes long. It's minute 22.",
+      "choices": [
+        { "id": "cut", "label": "Signal her to wrap up", "get": "The crowd stays", "cost": "She's annoyed (morale -4)", "risk": "low", "why": "She hates being cut", "effects": { "place": 1, "morale": -4 }, "receipt": "She wrapped up at minute 25. The crowd cheered, partly from relief. +1 in {place}." },
+        { "id": "let", "label": "Let her finish", "get": "The faithful love it", "cost": "Half the crowd", "risk": "medium", "why": "It's a lot", "effects": { "integrity": 2 }, "receipt": "Forty minutes. Six students took notes. Everyone else took the bus." },
+        { "id": "music", "label": "Cue the music", "get": "A clean ending", "cost": "Her trust", "risk": "medium", "why": "She'll know", "effects": { "place": 1.5, "morale": -8 }, "receipt": "The music played her off. +1.5 in {place}. She did not speak to you all evening." }
+      ]
+    },
+    {
+      "id": "c_core", "weeks": [1, 4], "candidate": "castellano", "icon": "📚",
+      "text": "Her former students start a \"Castellano Core\" trend: cardigans and charts.",
+      "choices": [
+        { "id": "lean", "label": "Lean in: post with them", "get": "+1.5 with young voters", "cost": "She hates it", "risk": "medium", "why": "Could look try-hard", "effects": { "rating": 1.5, "morale": -4 }, "receipt": "Castellano posted a chart in a cardigan. The kids lost it. +1.5." },
+        { "id": "ignore", "label": "Let it run on its own", "get": "+0.5, free", "cost": "Nothing", "risk": "low", "why": "Safe", "effects": { "rating": 0.5 }, "receipt": "The trend ran by itself. +0.5." },
+        { "id": "merch", "label": "Sell \"Castellano Core\" cardigans", "get": "C$4,000", "cost": "Looks a bit cynical", "risk": "medium", "why": "She'd never", "effects": { "cash": 4000, "integrity": -3 }, "receipt": "Cardigans sold out. Castellano found out from a student." }
+      ]
+    },
+    {
+      "id": "k_heckler", "weeks": [1, 4], "candidate": "kowalczyk", "icon": "🥊",
+      "text": "A heckler is getting under Frankie's skin at the {place} rally.",
+      "choices": [
+        { "id": "let", "label": "Let Frankie answer him", "get": "A viral moment", "cost": "Could go badly", "risk": "high", "why": "It's Frankie", "effects": { "rating": 1.5 }, "receipt": "Frankie answered with a story about his father's bus route. The heckler hugged him. +1.5.", "fail": { "chance": 0.4, "effects": { "rating": -1.5 }, "receipt": "Frankie told the heckler where to put his sign. On camera. -1.5." } },
+        { "id": "pull", "label": "Pull Frankie off stage", "get": "No incident", "cost": "Frankie's mood (morale -5)", "risk": "low", "why": "He'll be mad", "effects": { "morale": -5 }, "receipt": "Frankie came off swearing about \"handlers.\" No incident." },
+        { "id": "music", "label": "Have the crowd drown him out", "get": "+0.5 in {place}", "cost": "Looks a bit rough", "risk": "low", "why": "Crowds are crowds", "effects": { "place": 0.5 }, "receipt": "The crowd chanted \"Ham-mer! Ham-mer!\" The heckler left." }
+      ]
+    },
+    {
+      "id": "k_picket", "weeks": [2, 4], "candidate": "kowalczyk", "icon": "🪧",
+      "text": "There's a picket line outside the hall booked for Frankie's fundraiser.",
+      "choices": [
+        { "id": "move", "label": "Move the fundraiser", "get": "Frankie keeps his word", "cost": "C$2,000 to rebook", "risk": "low", "why": "Just money", "effects": { "cash": -2000, "integrity": 3 }, "receipt": "Fundraiser moved. Frankie brought the strikers coffee." },
+        { "id": "join", "label": "Join the picket instead", "get": "+2 with workers", "cost": "The fundraiser's money", "risk": "low", "why": "Donors miss out", "effects": { "rating": 2, "cash": -3000 }, "receipt": "Frankie spent the fundraiser on the picket line. The photos are perfect. +2." },
+        { "id": "cross", "label": "Cross it", "get": "The money", "cost": "Frankie won't, unless you push", "risk": "high", "why": "It's Frankie", "effects": { "cash": 3000, "integrity": -10, "morale": -15 }, "receipt": "Frankie crossed, grim-faced. The money's in. Something isn't." }
+      ]
+    },
+    {
+      "id": "s_live", "weeks": [1, 4], "candidate": "starr", "icon": "📱",
+      "text": "Kaylee wants to go live from the campaign office. Right now.",
+      "choices": [
+        { "id": "let", "label": "Let her", "get": "+2 if it goes well", "cost": "Who knows", "risk": "high", "why": "The whiteboard is behind her", "effects": { "rating": 2 }, "receipt": "Kaylee's live hit a million viewers. +2.", "fail": { "chance": 0.45, "effects": { "rating": -1, "heat": 4 }, "receipt": "The whole strategy whiteboard was in frame. -1." } },
+        { "id": "script", "label": "Script it with her", "get": "+1, safe", "cost": "An hour of your day", "risk": "low", "why": "She hates scripts", "effects": { "rating": 1, "morale": -2 }, "receipt": "A scripted live. Kaylee ad-libbed only twice. +1." },
+        { "id": "no", "label": "Take the phone", "get": "No risk", "cost": "Kaylee sulks (morale -6)", "risk": "low", "why": "She'll post about it", "effects": { "morale": -6 }, "receipt": "Kaylee posted a black square about \"creative control.\"" }
+      ]
+    },
+    {
+      "id": "s_tea", "weeks": [1, 4], "candidate": "starr", "icon": "🧋",
+      "text": "Kaylee's tea sponsor wants a mention in every speech.",
+      "choices": [
+        { "id": "yes", "label": "Take the deal", "get": "C$8,000", "cost": "Integrity -5, looks sponsored", "risk": "medium", "why": "It is sponsored", "effects": { "cash": 8000, "integrity": -5, "rating": -0.5 }, "receipt": "\"This rally is brought to you by...\" C$8,000 richer. -0.5." },
+        { "id": "once", "label": "One mention, at the end", "get": "C$3,000", "cost": "Integrity -2", "risk": "low", "why": "Subtle-ish", "effects": { "cash": 3000, "integrity": -2 }, "receipt": "One mention. Kaylee sipped on cue. C$3,000." },
+        { "id": "no", "label": "Turn it down", "get": "Integrity +2", "cost": "The money", "risk": "low", "why": "She loves that tea", "effects": { "integrity": 2 }, "receipt": "No tea deal. Kaylee drinks it anyway, off camera." }
+      ]
+    },
+    {
+      "id": "exposure", "weeks": [1, 4], "trigger": "exposure", "icon": "🚨",
+      "text": "The Borough Bugle has your campaign's secret. It runs tomorrow.",
+      "choices": [
+        { "id": "deny", "label": "Deny everything", "get": "Maybe it dies", "cost": "Worse if it doesn't", "risk": "high", "why": "Denials age badly", "effects": { "rating": -1, "heat": 5 }, "receipt": "Denied. The story ran smaller than it could have. -1.", "fail": { "chance": 0.5, "effects": { "rating": -3, "integrity": -6, "heat": 10 }, "receipt": "Denied. Then the receipts came out. -3." } },
+        { "id": "blame", "label": "Blame a cut-out", "get": "{candidate} stays clean-ish", "cost": "Integrity -4, morale", "risk": "medium", "why": "Staff talk", "effects": { "rating": -1.5, "integrity": -4, "morale": -6 }, "receipt": "\"A consultant acted alone.\" Half the city believed it. -1.5." },
+        { "id": "confess", "label": "Confess and apologize", "get": "It stops the bleeding", "cost": "-2.5 now", "risk": "low", "why": "Honest hurts once", "effects": { "rating": -2.5, "integrity": 6, "heat": -10 }, "receipt": "{candidate} owned it. -2.5 today, and it's over." },
+        { "id": "counter", "label": "Counter-leak about the Mayor", "get": "Changes the story", "cost": "Heat +10, Integrity -6", "risk": "high", "why": "Escalation", "later": true, "trace": 0.4, "effects": { "rating": -1, "mayor": -2, "heat": 10, "integrity": -6 }, "receipt": "Two scandals, one news cycle. Everyone lost a little. The Mayor lost more." }
+      ]
+    },
+    {
+      "id": "poach", "weeks": [1, 4], "trigger": "poach", "icon": "🎣",
+      "text": "The Mayor's campaign offered {target} a job. Double the pay.",
+      "choices": [
+        { "id": "counter", "label": "Counter-offer", "get": "{target} stays, loyalty +20", "cost": "C$3,000", "risk": "low", "why": "Just money", "effects": { "cash": -3000 }, "receipt": "{target} stayed, with a raise and a better chair." },
+        { "id": "let_go", "label": "Let them go", "get": "Money saved", "cost": "One of your team, gone", "risk": "medium", "why": "Their job goes undone", "effects": { "morale": -6 }, "receipt": "{target} cleaned out their desk. The Mayor's office sent them a ribbon." },
+        { "id": "poach_back", "label": "Poach one of his in return", "get": "The Mayor -1", "cost": "C$4,000, Heat +4", "risk": "medium", "why": "Tit for tat", "effects": { "cash": -4000, "mayor": -1, "heat": 4 }, "receipt": "You hired his scheduler. He's \"reviewing his calendar.\"" }
+      ]
+    },
+    {
+      "id": "lawsuit", "weeks": [1, 4], "trigger": "lawsuit", "icon": "⚖️",
+      "text": "A lawsuit lands on the campaign office. Someone wants money, or an apology.",
+      "choices": [
+        { "id": "settle", "label": "Settle", "get": "It goes away fast", "cost": "C$5,000, Integrity -2", "risk": "low", "why": "Looks like guilt", "effects": { "cash": -5000, "integrity": -2 }, "receipt": "Settled for C$5,000. Nobody's talking about it. Good." },
+        { "id": "fight", "label": "Fight it", "get": "Maybe your name cleared", "cost": "C$2,000 now, maybe more", "risk": "medium", "why": "Courts are slow", "effects": { "cash": -2000, "rating": 0.5 }, "receipt": "You fought it and won the first round. +0.5.", "fail": { "chance": 0.4, "effects": { "cash": -4000, "rating": -1 }, "receipt": "You fought it and lost. C$6,000 in all. -1." } },
+        { "id": "ignore", "label": "Ignore it", "get": "Saves money now", "cost": "A default judgment", "risk": "high", "why": "Courts don't forget", "effects": { "cash": -7000, "rating": -1 }, "receipt": "Ignoring a lawsuit: C$7,000 and a headline. -1." }
+      ]
+    }
+  ]
+}

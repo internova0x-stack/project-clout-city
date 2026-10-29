@@ -1,0 +1,28 @@
+{
+  "about": "Campaign Mode's debate (docs/CAMPAIGN-MODE.md section 14.1): week 3, four rounds. Prep slots cover a topic; 'weak' preps the candidate's own weak spot (the Mayor's question and any scandal). The manager calls a style each round.",
+  "topics": [
+    { "id": "rent", "label": "Rent and housing" },
+    { "id": "transit", "label": "The 7 train" },
+    { "id": "safety", "label": "Safety" },
+    { "id": "money", "label": "Campaign money" },
+    { "id": "weak", "label": "Your candidate's weak spot" }
+  ],
+  "questions": [
+    { "id": "q_rent", "topic": "rent", "by": "moderator", "text": "Rent in Queens went up again. What would you actually do about it?" },
+    { "id": "q_transit", "topic": "transit", "by": "moderator", "text": "The 7 train was late 41 times last month. Why should riders believe you?" },
+    { "id": "q_safety", "topic": "safety", "by": "moderator", "text": "People want to feel safe walking home at night. What's your plan?" },
+    { "id": "q_money", "topic": "money", "by": "moderator", "text": "Who's paying for your campaign, and what do they want?" },
+    { "id": "q_scandal", "topic": "scandal", "by": "moderator", "text": "Let's talk about this week's headlines about your campaign." },
+    { "id": "q_goldcrest", "topic": "goldcrest", "by": "mayor", "text": "Papa-Dani: \"My friend here owns eleven towers. Neighbor, when did you last pay rent?\"" },
+    { "id": "q_castellano", "topic": "castellano", "by": "mayor", "text": "Papa-Dani: \"The professor has a chart for everything. Does she have a heart for anyone?\"" },
+    { "id": "q_kowalczyk", "topic": "kowalczyk", "by": "mayor", "text": "Papa-Dani: \"Frankie, I love you, but it's not 1985. Do you even have an email?\"" },
+    { "id": "q_starr", "topic": "starr", "by": "mayor", "text": "Papa-Dani: \"Kaylee, honey, City Hall isn't a content zone. What's your budget plan?\"" }
+  ],
+  "styles": {
+    "facts": { "label": "Facts", "good": "Numbers, sources, a plan. The crowd nods.", "bad": "Facts, unprepared. A number came out wrong.", "preview": { "get": "Strong if you prepped this topic", "cost": "Nothing", "risk": "medium", "why": "Weak if unprepared" } },
+    "charm": { "label": "Charm", "good": "A joke, a smile, a story. The room warms up.", "bad": "Charming, and somehow evasive.", "preview": { "get": "Works when morale is high", "cost": "Nothing", "risk": "medium", "why": "Can look evasive" } },
+    "attack": { "label": "Attack", "good": "Straight at the Mayor's record. It lands.", "bad": "An attack with nothing behind it. Booing.", "preview": { "get": "Hits hard with intel on him", "cost": "Uses one intel", "risk": "high", "why": "Backlash if it seems unfair" } },
+    "deflect": { "label": "Deflect", "good": "Pivoted gracefully. Nobody noticed.", "bad": "Everybody noticed the dodge.", "preview": { "get": "Gets you off a weak spot", "cost": "A little trust", "risk": "medium", "why": "Obvious if overused" } },
+    "own": { "label": "Own it", "good": "\"I got that wrong.\" The room respects it.", "bad": "Owning something nobody asked about. Odd.", "preview": { "get": "Stops a scandal's bleeding", "cost": "A short-term hit", "risk": "low", "why": "Only works on a real problem" } }
+  }
+}

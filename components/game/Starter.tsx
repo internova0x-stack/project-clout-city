@@ -64,7 +64,7 @@ export function UnlockReveal({ onOpen, onClose }: { onOpen: () => void; onClose:
       <div className="lola-tip">
         <div className="lola-tip-bubble">
           <p className="lola-tip-who">Lola Lowdown <span>· New for you</span></p>
-          <p className="lola-tip-text">EXCLUSIVE 🚨 Rank 2 just opened two new apps on your phone: 🏪 Businesses and 💼 Jobs. Sources say real money starts here, babe 👀</p>
+          <p className="lola-tip-text">EXCLUSIVE 🚨 Rank 2 just opened three new apps on your phone: 🏪 Businesses, 💼 Jobs and 🗳️ Campaign. Real money starts here, babe. Real power too 👀</p>
           <button className="btn btn-taxi lola-tip-next" onClick={onOpen}>Open my phone</button>
           <button className="lola-tip-skip" onClick={onClose}>Later</button>
         </div>

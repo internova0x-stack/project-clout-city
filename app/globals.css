@@ -2480,3 +2480,61 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .demo-banner-cta { background:var(--g-neon, #ff2d6f); color:#fff; font-weight:700; font-size:12px; text-decoration:none; padding:5px 11px; border-radius:999px; }
 .demo-mode > main, .demo-mode .game { top:calc(34px + var(--safe-top, 0px)) !important; }
 .guest-demo-link { display:block; margin-top:10px; text-align:center; color:inherit; font-weight:600; font-size:14px; text-decoration:underline; text-underline-offset:3px; opacity:.9; }
+
+/* Campaign Mode (docs/CAMPAIGN-MODE.md; components/campaign/CampaignSheet.tsx): election-poster treatment, the polls,
+   the calendar and the You get / It costs / Risk preview on every choice. */
+.camp { padding-right:4px; }
+.camp-poster { position:relative; display:flex; flex-direction:column; gap:6px; padding:28px 16px 16px; border-radius:var(--r-lg); overflow:hidden;
+  background:linear-gradient(180deg, #FFF6F0 0%, #FFFFFF 100%); box-shadow:inset 0 0 0 2px #E8EEF9; }
+.camp-bunting { position:absolute; top:0; left:0; right:0; height:16px;
+  background:repeating-linear-gradient(90deg, #D93A2F 0 18px, #FFFFFF 18px 36px, #2F5BBF 36px 54px);
+  -webkit-mask:radial-gradient(circle at 9px 0, #000 9px, transparent 9.5px) 0 0 / 18px 16px repeat-x;
+          mask:radial-gradient(circle at 9px 0, #000 9px, transparent 9.5px) 0 0 / 18px 16px repeat-x; }
+.camp-cand-row, .camp-cand { display:flex; align-items:center; gap:12px; }
+.camp-cand-emoji { flex:none; display:grid; place-items:center; width:48px; height:48px; border-radius:50%; font-size:26px; background:var(--chip-off); }
+.camp-cand-emoji.big { width:64px; height:64px; font-size:36px; }
+.camp-issue { display:flex; flex-direction:column; gap:2px; padding:12px 14px; }
+.camp-bar { height:10px; border-radius:6px; background:var(--chip-off); overflow:hidden; }
+.camp-bar span { display:block; height:100%; background:var(--g-neon); border-radius:6px; }
+.camp-head { display:flex; align-items:center; gap:12px; }
+.camp-poll { display:flex; height:14px; border-radius:8px; overflow:hidden; background:#E8EEF9; }
+.camp-poll.small { height:8px; }
+.camp-poll .you { background:linear-gradient(90deg, #FF6A3D, #FF2E88); }
+.camp-poll .mayor { flex:1; background:#2F5BBF; }
+.camp-meters { display:flex; flex-wrap:wrap; gap:6px; }
+.camp-chip { padding:6px 10px; border-radius:999px; background:var(--chip-off); font-size:13px; font-weight:700; }
+.camp-slot { display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; min-height:48px; padding:10px 14px;
+  border-radius:14px; background:var(--surface-card); text-align:left; color:var(--text-1); }
+.camp-slot:disabled { opacity:.6; }
+.camp-option { display:flex; flex-direction:column; gap:6px; width:100%; padding:12px 14px; border-radius:14px; text-align:left;
+  background:var(--surface-card); border:2px solid transparent; color:var(--text-1); }
+.camp-option:active { border-color:var(--taxi-400); }
+.camp-option.dark { background:var(--night-900); color:#fff; }
+.camp-option.dark .camp-preview { color:rgba(255,255,255,.75); }
+.camp-preview { display:flex; flex-direction:column; gap:2px; font-size:13px; line-height:18px; color:var(--text-2); }
+.camp-preview b { color:inherit; font-weight:800; margin-right:4px; }
+.camp-risk.low b { color:var(--green-text); }
+.camp-risk.medium b { color:#9A6A00; }
+.camp-risk.high b { color:var(--red-500); }
+.camp-option.dark .camp-risk.high b { color:#FF8A80; }
+.camp-paper { background:#FFFDF6; box-shadow:inset 0 0 0 1px #EFE6CC; }
+.camp-lines { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; font-size:14px; line-height:20px; color:var(--text-2); }
+.camp-nudge { text-align:left; font-weight:700; color:var(--text-1); }
+.camp-mail { display:flex; flex-direction:column; gap:2px; width:100%; padding:12px 14px; border-radius:14px; text-align:left; background:var(--surface-card); color:var(--text-1); }
+.camp-mail.new { box-shadow:inset 4px 0 0 var(--neon-500); }
+.camp-situation { text-align:center; align-items:center; padding:20px 16px; }
+.camp-sit-icon { font-size:44px; }
+.camp-crowd { position:relative; height:12px; border-radius:6px; background:linear-gradient(90deg, #D93A2F, #E8EEF9 50%, #40B589); }
+.camp-crowd span { position:absolute; top:-5px; width:22px; height:22px; margin-left:-11px; border-radius:50%; background:#fff;
+  box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .4s ease-out; }
+.camp-good { box-shadow:inset 4px 0 0 var(--green-500); }
+.camp-bad { box-shadow:inset 4px 0 0 var(--red-500); }
+.camp-result { animation:rise-in .3s ease-out; }
+.camp-ending { text-align:center; align-items:center; }
+.camp .stack-2 > * + * { margin-top:2px; }
+.camp .stack-2 > span, .camp .stack-4 > span, .camp .stack-8 > span, .camp .stack-12 > span, .camp-option > .title, .camp-mail > span { display:block; }
+.camp-news { position:relative; display:flex; flex-direction:column; gap:4px; width:100%; padding:26px 14px 14px; border-radius:var(--r-lg); text-align:left;
+  background:linear-gradient(180deg, #FFF6F0, #FFFFFF); box-shadow:inset 0 0 0 2px #E8EEF9; color:var(--text-1); overflow:hidden; }
+.camp-news > span { display:block; }
+.camp-news .camp-bunting { position:absolute; }
+.camp-news-cta { margin-top:4px; font-weight:800; color:var(--neon-text); }

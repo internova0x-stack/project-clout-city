@@ -121,6 +121,8 @@ import { tvCardSeenKey, type Station, type StationApi, type StationThread, type 
 import { uploadToBigScreen } from "@/lib/tvUpload";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 import type { MayorApi } from "@/lib/mayor";
+import type { CampaignApi } from "@/lib/campaign";
+import { CampaignSheet } from "@/components/campaign/CampaignSheet";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import { CampusSheet } from "./campus/CampusSheet";
 
@@ -255,6 +257,7 @@ export function GameShell({
   together,
   radio,
   mayor,
+  campaign,
   campus,
   goals,
   push,
@@ -337,6 +340,8 @@ export function GameShell({
   radio?: RadioApi;
   /** Contact the Mayor (migration 0105): the Phone's feedback app; hidden until mayor_letters_state answers. */
   mayor?: MayorApi;
+  /** Campaign Mode (migration 0127): the Phone's Campaign app and its sheet; without it the app is hidden. */
+  campaign?: CampaignApi;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
   campus?: CampusApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
@@ -405,6 +410,15 @@ export function GameShell({
   const [arranging, setArranging] = useState(false);
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [campaignOpen, setCampaignOpen] = useState(false);
+  // Whether a campaign is running (the election teasers step aside while one is).
+  const [campaignRunning, setCampaignRunning] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!campaign || campaignOpen) return;
+    let live = true;
+    void campaign.screen().then((r) => { if (live && r.ok) setCampaignRunning(!!r.data.view && r.data.view.phase !== "over"); });
+    return () => { live = false; };
+  }, [campaign, campaignOpen]);
   // Migration 0100: the day's venue boost, said once when it lands ("Your Goth look fits The Kiln: +5 Confidence").
   const styleBoostKey = city?.style?.boost ? `${city.today}:${city.style.boost.place}` : null;
   // A boost already earned before this visit to the game isn't news.
@@ -1248,6 +1262,8 @@ export function GameShell({
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
     // A visit invite (migration 0121).
     else if (open === "plans") setPanel("visits");
+    // Campaign Mode: "Your poll results are in".
+    else if (open === "campaign" && campaign) setCampaignOpen(true);
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
     else if (open === "shop") openShop("fashion");
@@ -2983,6 +2999,11 @@ export function GameShell({
         // The app shows whenever the station is on; if today's show can't load, the app says why.
         radio={radio}
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
+        onOpenCampaign={campaign ? () => { setPhone({ open: false, app: null }); setCampaignOpen(true); } : undefined}
+        election={campaign && campaignRunning === false ? {
+          unlocked: myRank.level >= APP_UNLOCKS.campaign.rank, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
+          onOpen: () => { setPhone({ open: false, app: null }); setCampaignOpen(true); },
+        } : undefined}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
         stations={stations && stationThreads.length ? { threads: stationThreads, onRead: readStation } : undefined}
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
@@ -3122,6 +3143,7 @@ export function GameShell({
             />
           )}
           {deleteAccount && <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={deleteAccount} />}
+          {campaign && <CampaignSheet open={campaignOpen} onClose={() => setCampaignOpen(false)} api={campaign} clout={me.clout} onToast={setToast} />}
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (

@@ -22,6 +22,13 @@ export type GoalCheck =
   | { type: "public" }
   /** C3: different New York days with something done at a place (Sal remembers your order after 3). */
   | { type: "regular"; place: string; days: number }
+  /** Campaign Mode (migration 0127; owner, Oct 29): read from the player's campaigns since their last Start over. */
+  | { type: "campaign_started" }
+  | { type: "campaign_week"; week: number }
+  | { type: "debate_won" }
+  | { type: "campaign_finished" }
+  | { type: "campaign_won"; clean?: boolean }
+  | { type: "candidates_run"; count: number }
   /** C3: living without a roommate (a home without `roommate`, or a house). */
   | { type: "solo" };
 
@@ -31,7 +38,11 @@ export type GoalCheck =
  * `lean` picks its two daily tasks: "cash" for a shift and somewhere to spend, "boost" for Confidence and clout;
  * `tags` are the places that fit it best.
  */
-export interface GoalDef { id: string; unlock: number; reward: number; lean: "cash" | "boost"; tags: string[]; check: GoalCheck }
+export interface GoalDef {
+  id: string; unlock: number; reward: number; lean: "cash" | "boost"; tags: string[]; check: GoalCheck;
+  /** A side goal (Campaign Mode): listed and paid like any goal, but only suggested while a campaign is running. */
+  side?: boolean;
+}
 
 /** The ladder as the database has it (game_settings 'goals'; tests/goals.test.ts keeps the two equal). */
 const LADDER: GoalDef[] = [
@@ -43,25 +54,33 @@ const LADDER: GoalDef[] = [
   { id: "full_day", unlock: 0, reward: 50, lean: "boost", tags: [], check: { type: "full_day" } },
   { id: "first_gig", unlock: 0, reward: 50, lean: "boost", tags: ["gym", "campus", "club", "monument"], check: { type: "gig" } },
   { id: "own_place", unlock: 0, reward: 75, lean: "cash", tags: [], check: { type: "solo" } },
+  // Campaign Mode (owner, Oct 29): side goals, in their chapters; "Pick your candidate" shows its Rank 2 progress first.
+  { id: "campaign_start", unlock: 0, reward: 75, lean: "boost", tags: [], check: { type: "campaign_started" }, side: true },
   // 🎓 Student Loan Survivor
   { id: "first_crew", unlock: 100, reward: 75, lean: "boost", tags: ["club", "nightlife"], check: { type: "crew", count: 1 } },
   { id: "save_15k", unlock: 100, reward: 75, lean: "cash", tags: [], check: { type: "save", cash: 15000 } },
   { id: "skill_3", unlock: 100, reward: 75, lean: "boost", tags: ["gym", "campus"], check: { type: "skill", level: 3 } },
+  { id: "campaign_week3", unlock: 100, reward: 75, lean: "boost", tags: [], check: { type: "campaign_week", week: 3 }, side: true },
   // 💼 Side Hustler
   { id: "pro_gigs", unlock: 500, reward: 150, lean: "boost", tags: ["gym", "campus", "club", "monument"], check: { type: "gig_tier", tier: "pro" } },
   { id: "first_business", unlock: 500, reward: 150, lean: "cash", tags: [], check: { type: "business", id: "hot-dog-cart" } },
   { id: "move_up", unlock: 500, reward: 150, lean: "cash", tags: [], check: { type: "home", home: "jackson_heights_1br" } },
+  { id: "campaign_debate", unlock: 500, reward: 150, lean: "boost", tags: [], check: { type: "debate_won" }, side: true },
+  { id: "campaign_finish", unlock: 500, reward: 150, lean: "boost", tags: [], check: { type: "campaign_finished" }, side: true },
   // 💬 Group Chat Famous
   { id: "first_car", unlock: 1000, reward: 200, lean: "cash", tags: ["dealership", "cars"], check: { type: "car" } },
   { id: "move_sunnyside", unlock: 1000, reward: 200, lean: "cash", tags: [], check: { type: "home", home: "sunnyside_gardens" } },
   { id: "skill_5", unlock: 1000, reward: 200, lean: "boost", tags: ["gym", "campus"], check: { type: "skill", level: 5 } },
+  { id: "campaign_win", unlock: 1000, reward: 200, lean: "boost", tags: [], check: { type: "campaign_won" }, side: true },
   // 📋 On the List
   { id: "big_gigs", unlock: 2000, reward: 300, lean: "boost", tags: ["gym", "campus", "club", "monument"], check: { type: "gig_tier", tier: "big" } },
   { id: "ultraviolet", unlock: 2000, reward: 300, lean: "boost", tags: ["club", "nightlife"], check: { type: "door", place: "ultraviolet-society" } },
   { id: "bodega", unlock: 2000, reward: 300, lean: "cash", tags: [], check: { type: "business", id: "bodega" } },
+  { id: "campaign_clean", unlock: 2000, reward: 300, lean: "boost", tags: [], check: { type: "campaign_won", clean: true }, side: true },
   // 📸 Local Celebrity
   { id: "vip_floor", unlock: 5000, reward: 500, lean: "boost", tags: ["club", "nightlife"], check: { type: "vip", level: "medium" } },
   { id: "move_highrise", unlock: 5000, reward: 500, lean: "cash", tags: [], check: { type: "home", home: "lic_highrise" } },
+  { id: "campaign_all", unlock: 5000, reward: 500, lean: "boost", tags: [], check: { type: "candidates_run", count: 4 }, side: true },
   // 🍼 Nepo Baby Energy
   { id: "own_home", unlock: 15000, reward: 1500, lean: "cash", tags: ["furniture", "home"], check: { type: "house", sku: "house-astoria-townhouse" } },
   { id: "laundromat", unlock: 15000, reward: 750, lean: "cash", tags: [], check: { type: "business", id: "laundromat" } },
@@ -186,6 +205,13 @@ export const GOAL_COPY: Record<string, { emoji: string; title: string; line: str
   cafe: { emoji: "☕", title: "Own a café", line: "Oat milk is now a revenue stream.", toward: "Toward your café" },
   duplex: { emoji: "🌇", title: "Buy the Hunters Point duplex", line: "A hot tub with a view of everyone who doubted you.", toward: "Toward the duplex" },
   taco_trucks: { emoji: "🌮", title: "Own a fleet of taco trucks", line: "An empire. On wheels. With salsa.", toward: "Toward the fleet" },
+  campaign_start: { emoji: "🗳️", title: "Pick your candidate", line: "Four challengers, one Mayor, and every one of them needs a manager. Opens at Rank 2.", toward: "Toward the campaign trail" },
+  campaign_week3: { emoji: "📅", title: "Make it to week 3", line: "Most campaigns don't. Most campaign managers don't sleep.", toward: "Toward week 3" },
+  campaign_debate: { emoji: "🎤", title: "Win a debate", line: "Four questions, one Mayor, zero teleprompters. Prep, or pray.", toward: "Toward the debate" },
+  campaign_finish: { emoji: "🏁", title: "See a campaign through", line: "Win or lose, you made it to Election Day. Your therapist is proud.", toward: "Toward Election Day" },
+  campaign_win: { emoji: "🏛️", title: "Make a Mayor", line: "Beat Papa-Dani. He'll call to congratulate you. He'll mean it.", toward: "Toward the win" },
+  campaign_clean: { emoji: "😇", title: "Win with clean hands", line: "Win with Integrity 70 or more and nothing buried. Rarer than a rent-stabilized two-bedroom.", toward: "Toward a clean win" },
+  campaign_all: { emoji: "👑", title: "Kingmaker", line: "Run a campaign for all four challengers. Every one of them still thinks they were your favorite.", toward: "Toward kingmaker" },
   go_public: { emoji: "🚀", title: "Take the startup public", line: "Ring the bell. Nobody knows what the company does. Valuation: huge.", toward: "Toward the bell" },
   [NEXT_CHAPTER]: { emoji: "🔓", title: "Unlock the next chapter", line: "Everything on your level is done. More clout opens more goals.", toward: "Toward the next chapter" },
 };

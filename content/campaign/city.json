@@ -1,0 +1,137 @@
+{
+  "about": "Campaign Mode's map, staff and stakeholders (docs/CAMPAIGN-MODE.md sections 8, 10 and 12). The test build runs in Queens. Weight is the share of the vote; mayor is Papa-Dani's starting rating there. Every person is invented.",
+  "places": [
+    {
+      "id": "astoria",
+      "name": "Astoria",
+      "weight": 0.22,
+      "cares": "Rent and nightlife",
+      "mayor": 42
+    },
+    {
+      "id": "lic",
+      "name": "Long Island City",
+      "weight": 0.14,
+      "cares": "Towers and the waterfront",
+      "mayor": 40
+    },
+    {
+      "id": "sunnyside-woodside",
+      "name": "Sunnyside & Woodside",
+      "weight": 0.15,
+      "cares": "Rent and the 7 train",
+      "mayor": 41
+    },
+    {
+      "id": "jackson-heights",
+      "name": "Jackson Heights",
+      "weight": 0.18,
+      "cares": "Small business and rent",
+      "mayor": 43
+    },
+    {
+      "id": "flushing",
+      "name": "Flushing",
+      "weight": 0.17,
+      "cares": "Business and transit",
+      "mayor": 44
+    },
+    {
+      "id": "jamaica",
+      "name": "Jamaica",
+      "weight": 0.14,
+      "cares": "Transit and safety",
+      "mayor": 45
+    }
+  ],
+  "staff": [
+    {
+      "id": "deputy",
+      "name": "Sol Brennan",
+      "role": "Deputy",
+      "job": "Runs the office so you can run the campaign",
+      "pronoun": "he"
+    },
+    {
+      "id": "pollster",
+      "name": "Priya Raman",
+      "role": "Pollster",
+      "job": "Reads the polls and the room",
+      "pronoun": "she"
+    },
+    {
+      "id": "comms",
+      "name": "Theo Marchetti",
+      "role": "Comms Director",
+      "job": "Ads, press and damage control",
+      "pronoun": "he"
+    },
+    {
+      "id": "field",
+      "name": "Marisol Vega",
+      "role": "Field Organizer",
+      "job": "Street teams and rallies",
+      "pronoun": "she"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "rosa",
+      "name": "Rosa Ferreira",
+      "role": "Astoria Tenants' Alliance"
+    },
+    {
+      "id": "gus",
+      "name": "Gus Papadakis",
+      "role": "Ditmars Merchants' Association"
+    },
+    {
+      "id": "harlan",
+      "name": "Harlan Pryce",
+      "role": "Pryce Development, donor"
+    },
+    {
+      "id": "deb",
+      "name": "Deb Okonkwo",
+      "role": "President, Local 117"
+    },
+    {
+      "id": "haddad",
+      "name": "Dean Samir Haddad",
+      "role": "St. Johnsons University"
+    },
+    {
+      "id": "jojo",
+      "name": "Jojo Reyes",
+      "role": "Nightlife promoter"
+    },
+    {
+      "id": "lin",
+      "name": "Marguerite Lin",
+      "role": "Reporter, The Borough Bugle"
+    },
+    {
+      "id": "grant",
+      "name": "Pastor Ellis Grant",
+      "role": "Greater Jamaica Fellowship"
+    },
+    {
+      "id": "teddy",
+      "name": "Teddy Vance",
+      "role": "Vance Ribbon & Scissor Co., the Mayor's top donor",
+      "mayorAlly": true
+    },
+    {
+      "id": "joy",
+      "name": "Auntie Joy Mensah",
+      "role": "Jamaica Block Association, endorses the Mayor",
+      "mayorAlly": true
+    },
+    {
+      "id": "lionel",
+      "name": "Lionel Chu",
+      "role": "Flushing Merchants' Guild, endorses the Mayor",
+      "mayorAlly": true
+    }
+  ]
+}
