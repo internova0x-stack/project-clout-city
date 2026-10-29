@@ -78,7 +78,7 @@ export function TasksSheet({
   /** Owner, Oct 23: the skill task links to the Skills sheet. */
   onOpenSkills?: (skill: string) => void;
   /** Campaign Mode (owner, Oct 29): this week's two campaign tasks, under the five; tapping one opens the campaign. */
-  campaign?: { tasks: { id: string; title: string; tag: string; isDone: boolean }[]; onOpen: () => void } | null;
+  campaign?: { tasks: { id: string; title: string; tag: string; how: string; isDone: boolean }[]; onOpen: (task: string) => void } | null;
 }) {
   const [tab, setTab] = useState<"daily" | "goals" | "hunt" | "streaks">(initialTab ?? "daily");
   useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
@@ -147,10 +147,10 @@ export function TasksSheet({
                   <>
                     <p className="overline" style={{ margin: "8px 0 0" }}>🗳️ Campaign · +{CAMPAIGN.taskClout} 🔥 each at End Week</p>
                     {campaign.tasks.map((t) => (
-                      <div key={t.id} className="select-card multi" aria-pressed={t.isDone} role="button" tabIndex={0} style={{ cursor: "pointer" }} onClick={campaign.onOpen}>
+                      <div key={t.id} className="select-card multi" aria-pressed={t.isDone} role="button" tabIndex={0} style={{ cursor: "pointer" }} onClick={() => campaign.onOpen(t.id)}>
                         <span className="select-emoji" aria-hidden="true">🗳️</span>
                         <span className="title" style={{ display: "block" }}>{t.title}</span>
-                        <span className="task-meta"><span>{t.isDone ? "On the calendar. Pays at End Week." : t.tag}</span></span>
+                        <span className="task-meta"><span>{t.isDone ? "On the calendar. Pays at End Week." : `👉 ${t.how}`}</span></span>
                         {t.isDone && <span className="select-check" aria-hidden="true">✓</span>}
                       </div>
                     ))}

@@ -2541,4 +2541,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-task { display:flex; flex-direction:column; gap:2px; padding:8px 0; border-top:1px solid var(--divider); }
 .camp-task > span { display:block; }
 .camp-task.done .title { color:var(--green-text); }
+button.camp-task { background:none; border:0; border-top:1px solid var(--divider); text-align:left; width:100%; color:inherit; font:inherit; cursor:pointer; }
+.camp-task-how { font-size:13px; font-weight:600; color:var(--neon-text); }
+.camp-task-tag { margin-left:8px; vertical-align:middle; }
+.camp-option.hint, .camp-slot.hint { box-shadow:0 0 0 2px var(--green-text) inset; }
 .camp-scandal { box-shadow:inset 4px 0 0 var(--red-500); }

@@ -1,5 +1,5 @@
 {
-  "about": "Campaign Mode's daily tasks (docs/CAMPAIGN-MODE.md section 5.1a; owner, Oct 29: specific, never generic, and they fit the card: title at most 35 characters, tag line at most 30, after the names are filled in). Two a campaign week: one built from the campaign's state, one in the candidate's voice. {who} is a stakeholder's first name, {staffer} a staffer's, {place} a place's short name, {n} points, {topic} a debate topic. 'done' is the action that finishes it this week; each pays 15 clout at End Week.",
+  "about": "Campaign Mode's daily tasks (docs/CAMPAIGN-MODE.md section 5.1a; owner, Oct 29: specific, never generic, and they fit the card: title at most 35 characters, tag line at most 30, after the names are filled in). Two a campaign week: one built from the campaign's state, one in the candidate's voice. {who} is a stakeholder's first name, {staffer} a staffer's, {place} a place's short name, {n} points, {topic} a debate topic. 'done' is the action that finishes it this week (the card says how, `taskHow`; a candidate's own tasks only use actions open every week: rally, tour, donors, rest); each pays 15 clout at End Week.",
   "shared": [
     { "id": "call_back", "title": "Call {who} before they flip", "tag": "⏰ Tonight · eyeing the Mayor", "done": "reply", "when": "threat" },
     { "id": "answer", "title": "Get back to {who}", "tag": "📬 Expires at End Week", "done": "reply", "when": "request" },
@@ -12,24 +12,24 @@
   ],
   "candidates": {
     "goldcrest": [
-      { "id": "g_bus", "title": "Stop Preston dissing the bus", "tag": "🚌 Tour stop in {place}", "done": "tour" },
+      { "id": "g_bus", "title": "Put Preston on a bus tour", "tag": "🚌 He calls it \"the poor car\"", "done": "tour" },
       { "id": "g_donor", "title": "Find a donor without a yacht", "tag": "📸 For the optics", "done": "donors" },
-      { "id": "g_rally", "title": "Get Preston to shake 50 hands", "tag": "🤝 Rally in {place}", "done": "rally" }
+      { "id": "g_rally", "title": "Get Preston to shake 50 hands", "tag": "🧴 He brought sanitizer", "done": "rally" }
     ],
     "castellano": [
-      { "id": "c_speech", "title": "Cut her speech to 4 minutes", "tag": "⏱️ It's 40 now", "done": "tour" },
-      { "id": "c_dog", "title": "Get Ingrid a photo with a dog", "tag": "🐶 Rally in {place}", "done": "rally" },
-      { "id": "c_report", "title": "Find one reader of her report", "tag": "📚 600 pages · donor calls", "done": "donors" }
+      { "id": "c_speech", "title": "Cut her rally speech to 4 minutes", "tag": "⏱️ It's 40 now", "done": "rally" },
+      { "id": "c_dog", "title": "Get Ingrid a photo with a dog", "tag": "🐶 Dogs live on tour stops", "done": "tour" },
+      { "id": "c_report", "title": "Pitch her 600-page plan to donors", "tag": "📚 Bring the summary", "done": "donors" }
     ],
     "kowalczyk": [
-      { "id": "k_heckler", "title": "Keep Frankie off the heckler", "tag": "🥊 Rally in {place}", "done": "rally" },
-      { "id": "k_hashtag", "title": "Explain hashtags to Frankie", "tag": "☕ Bring coffee · rest day", "done": "rest" },
-      { "id": "k_hall", "title": "Book the union hall Friday", "tag": "🦵 The knee says rain", "done": "rally" }
+      { "id": "k_heckler", "title": "Keep Frankie off the heckler", "tag": "🥊 He's stretching already", "done": "rally" },
+      { "id": "k_hashtag", "title": "Film Frankie on a tour stop", "tag": "📱 He holds it sideways", "done": "tour" },
+      { "id": "k_hall", "title": "Pack the union hall for Frankie", "tag": "🦵 The knee says rain", "done": "rally" }
     ],
     "starr": [
-      { "id": "s_caption", "title": "Approve Kaylee's caption first", "tag": "📱 This time", "done": "tour" },
-      { "id": "s_wifi", "title": "Give Free Wi-Fi a real policy", "tag": "📶 Not \"it's giving\"", "done": "prep" },
-      { "id": "s_ringlight", "title": "Hide Kaylee's ring-light", "tag": "🎤 Rest day, for focus", "done": "rest" }
+      { "id": "s_caption", "title": "Approve Kaylee's tour-stop caption", "tag": "📱 Before she posts it", "done": "tour" },
+      { "id": "s_wifi", "title": "Pitch Free Wi-Fi to donors", "tag": "📶 Not \"it's giving\"", "done": "donors" },
+      { "id": "s_ringlight", "title": "Give Kaylee a phone-free day", "tag": "💡 The ring-light needs it", "done": "rest" }
     ]
   }
 }
