@@ -336,3 +336,63 @@ export function buildContent(files: {
     lines: files.lines,
   };
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// The screen's calls (app/home/campaignActions.ts on the server; lib/campaignSim.ts in the preview)
+// ---------------------------------------------------------------------------------------------------------------
+
+/** One challenger on the pick screen (nothing hidden about them). */
+export interface CandidateCard {
+  id: CandidateId; name: string; short: string; title: string; slogan: string; emoji: string; bio: string;
+  issues: Issue[]; satire: string; cash: number; integrity: number;
+}
+
+export interface CampaignScreen {
+  /** Rank 2 reached. */
+  unlocked: boolean;
+  rank: number;
+  /** A new campaign can start now (none running, the 7-day rule clear). */
+  canStart: boolean;
+  /** When the 7-day rule clears (New York date), if it hasn't. */
+  nextStartOn: string | null;
+  bank: number;
+  candidates: CandidateCard[];
+  wonBefore: CandidateId[];
+  /** The running campaign, or the last one that ended (its results), or none. */
+  view: import("./campaignEngine.ts").CampaignView | null;
+  /** What just happened, after an action. */
+  receipt?: string;
+  round?: { delta: number; line: string };
+}
+
+export type CampaignResult<T> = { ok: true; data: T } | { ok: false; error: string };
+type R = Promise<CampaignResult<CampaignScreen>>;
+
+export interface CampaignApi {
+  screen(): R;
+  start(candidate: CandidateId, seed: number): R;
+  budget(budget: Record<Channel, number>): R;
+  slot(index: number, action: SlotAction | null): R;
+  reply(message: string, option: string): R;
+  dilemma(id: "skim" | "charity", choice: string): R;
+  debate(style: DebateStyle): R;
+  endWeek(): R;
+  choose(situation: string, choice: string): R;
+}
+
+/** The New York date (YYYY-MM-DD) a moment falls on. */
+export function nyDay(at: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(at);
+}
+
+/** The campaign place a player's home is in (their crew knocks doors there), or null. */
+export function campaignHome(homeId: string | null | undefined): string | null {
+  const h = homeId ?? "";
+  if (h.startsWith("astoria")) return "astoria";
+  if (h.startsWith("lic") || h.startsWith("hunters")) return "lic";
+  if (h.startsWith("sunnyside") || h.startsWith("woodside")) return "sunnyside-woodside";
+  if (h.startsWith("jackson")) return "jackson-heights";
+  if (h.startsWith("flushing")) return "flushing";
+  if (h.startsWith("jamaica")) return "jamaica";
+  return null;
+}
