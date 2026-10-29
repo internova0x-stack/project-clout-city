@@ -15,7 +15,7 @@
     { "id": "q_scandal", "topic": "scandal", "by": "moderator", "text": "Let's talk about this week's headlines about your campaign." },
     { "id": "q_goldcrest", "topic": "goldcrest", "by": "mayor", "text": "Papa-Dani: \"My friend here owns eleven towers. Neighbor, when did you last pay rent?\"" },
     { "id": "q_castellano", "topic": "castellano", "by": "mayor", "text": "Papa-Dani: \"The professor has a chart for everything. Does she have a heart for anyone?\"" },
-    { "id": "q_kowalczyk", "topic": "kowalczyk", "by": "mayor", "text": "Papa-Dani: \"Frankie, I love you, but it's not 1985. Do you even have an email?\"" },
+    { "id": "q_kowalczyk", "topic": "kowalczyk", "by": "mayor", "text": "Papa-Dani: \"Frankie, I love you, but the strike ended in 2009. Do you even have an email?\"" },
     { "id": "q_starr", "topic": "starr", "by": "mayor", "text": "Papa-Dani: \"Kaylee, honey, City Hall isn't a content zone. What's your budget plan?\"" }
   ],
   "styles": {

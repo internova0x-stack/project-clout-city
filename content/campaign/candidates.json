@@ -11,18 +11,22 @@
       "bio": "Inherited a parking-garage empire and calls himself self-made. Founder of Goldcrest Holdings: eleven luxury towers, a members-only kombucha bar and $QUEENS, a crypto coin that failed. Has never ridden the subway, but once funded a documentary about it.",
       "issues": [
         {
+          "emoji": "🏗️",
           "title": "Towers everywhere",
           "line": "Rezone Astoria for luxury high-rises. Supply! Eventually, trickling down!"
         },
         {
+          "emoji": "🛎️",
           "title": "The private city",
           "line": "A premium Concierge Lane, private patrols and VIP lines at the motor vehicles office."
         },
         {
+          "emoji": "💸",
           "title": "Tax breaks for job creators",
           "line": "Meaning himself."
         },
         {
+          "emoji": "🚡",
           "title": "The East River gondola",
           "line": "His signature project. C$40 a ride."
         }
@@ -89,18 +93,22 @@
       "bio": "Former professor of urban systems at St. Johnsons University. Wrote a 600-page report on the 7 train that nobody at City Hall read, so she's running to read it to them. Methodical, dry, always carries a chart. Her students loved her; her colleagues feared her office hours.",
       "issues": [
         {
+          "emoji": "🚇",
           "title": "Transit that runs",
           "line": "Signal upgrades for the 7, bus lanes, and arrival times that don't lie."
         },
         {
+          "emoji": "🌊",
           "title": "Flood-proof Queens",
           "line": "Green roofs, storm drains and a waterfront seawall before the next big storm."
         },
         {
+          "emoji": "📚",
           "title": "Schools and libraries",
           "line": "Longer library hours, free tutoring, smaller classes."
         },
         {
+          "emoji": "🧾",
           "title": "Open books",
           "line": "A public site for every city dollar, with a budget she audits herself."
         }
@@ -166,21 +174,25 @@
       "title": "The Organizer",
       "slogan": "This city runs on people. Pay 'em.",
       "emoji": "🔨",
-      "bio": "Ran Local 117 of the city's transit workers for 22 years, and he has a knee that \"remembers the strike of '09.\" Loud, warm, impossible to bully. Knows every bodega owner in Woodside by first name and brings a thermos to every meeting. Retired, got bored in three weeks, started a campaign.",
+      "bio": "Ran Local 117 of the city's transit workers for 12 years, and he has a knee that \"remembers the strike of '09.\" Loud, warm, impossible to bully. Knows every bodega owner in Woodside by first name and brings a thermos to every meeting. Stepped down at 41, got bored in three weeks, started a campaign.",
       "issues": [
         {
+          "emoji": "🏠",
           "title": "Rent",
           "line": "Caps on rent hikes, a tenant hotline someone answers, and boilers that work."
         },
         {
+          "emoji": "💵",
           "title": "Wages",
           "line": "A raise for city workers, delivery riders and home aides. No more unpaid overtime."
         },
         {
+          "emoji": "🏪",
           "title": "Keep the neighborhood",
           "line": "Protect the bodegas and small shops from the towers."
         },
         {
+          "emoji": "🚦",
           "title": "Safety the old way",
           "line": "Crossing guards, streetlights and night buses."
         }
@@ -238,7 +250,7 @@
           }
         ]
       },
-      "mayorJab": "still fighting 1985"
+      "mayorJab": "still fighting 2009"
     },
     {
       "id": "starr",
@@ -250,18 +262,22 @@
       "bio": "2.3 million followers, a sponsored tea, and a \"Mayor era\" announced in a get-ready-with-me video. Decided to run when City Hall didn't repost her. Surprisingly good at it.",
       "issues": [
         {
+          "emoji": "🪩",
           "title": "Nightlife",
           "line": "Clubs open until 6am, content zones in every park, a ring-light at every subway stop."
         },
         {
+          "emoji": "📶",
           "title": "Free Wi-Fi citywide",
           "line": "Sponsored by her tea."
         },
         {
+          "emoji": "🍕",
           "title": "The 2am Slice Protection Act",
           "line": "Pizza places stay open late. Forever."
         },
         {
+          "emoji": "💅",
           "title": "Make New York iconic again",
           "line": "Asked for details: \"it's giving iconic.\""
         }

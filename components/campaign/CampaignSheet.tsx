@@ -22,6 +22,12 @@ const ENDING: Record<string, { title: string; line: string; emoji: string }> = {
   loss: { emoji: "📉", title: "Lost", line: "Papa-Dani keeps City Hall. He called to say you ran a great race. He meant it." },
 };
 
+/** A candidate's portrait (public/cast/candidate-<id>.webp; owner, Oct 29). */
+function CandidateFace({ id, big = false }: { id: CandidateId; big?: boolean }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img className={`camp-cand-face${big ? " big" : ""}`} src={`/cast/candidate-${id}.webp`} alt="" aria-hidden="true" />;
+}
+
 type Tab = "week" | "inbox" | "map" | "team";
 type ViewTask = CampaignView["tasks"][number];
 /** What a tapped task points the slot picker at (owner, Oct 29: tapping a task takes you there). */
@@ -118,7 +124,7 @@ function Teaser({ data, clout }: { data: CampaignScreen; clout: number }) {
       <div className="stack-8">
         {data.candidates.map((c) => (
           <div key={c.id} className="card camp-cand-row">
-            <span className="camp-cand-emoji" aria-hidden="true">{c.emoji}</span>
+            <CandidateFace id={c.id} />
             <span className="stack-2">
               <span className="title">{c.name}</span>
               <span className="meta">{c.title} · "{c.slogan}"</span>
@@ -146,7 +152,7 @@ function Pick({ data, onPick }: { data: CampaignScreen; onPick: (id: CandidateId
       <div className="stack-8">
         {data.candidates.map((c) => (
           <button key={c.id} className="select-card camp-cand" onClick={() => onPick(c.id)}>
-            <span className="camp-cand-emoji" aria-hidden="true">{c.emoji}</span>
+            <CandidateFace id={c.id} />
             <span className="stack-2" style={{ flex: 1 }}>
               <span className="title">{c.name}{data.wonBefore.includes(c.id) && <span className="tag tag-positive" style={{ marginLeft: 6 }}>Won before</span>}</span>
               <span className="meta">{c.title}</span>
@@ -169,7 +175,7 @@ function CandidateDetail({ data, card, busy, onBack, onStart }: { data: Campaign
       <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={onBack}>‹ All candidates</button>
       <div className="camp-poster">
         <Bunting />
-        <span className="camp-cand-emoji big" aria-hidden="true">{card.emoji}</span>
+        <CandidateFace id={card.id} big />
         <p className="overline">{card.title}</p>
         <h2 className="display-lg" style={{ margin: 0 }}>{card.name}</h2>
         <p className="title" style={{ margin: 0 }}>"{card.slogan}"</p>
@@ -178,7 +184,10 @@ function CandidateDetail({ data, card, busy, onBack, onStart }: { data: Campaign
       <div className="stack-8">
         <p className="overline" style={{ margin: 0 }}>What they're running on</p>
         {card.issues.map((i) => (
-          <div key={i.title} className="card camp-issue"><span className="title">{i.title}</span><span className="subtext">{i.line}</span></div>
+          <div key={i.title} className="card camp-issue">
+            {i.emoji && <span className="camp-issue-emoji" aria-hidden="true">{i.emoji}</span>}
+            <span className="stack-2"><span className="title">{i.title}</span><span className="subtext">{i.line}</span></span>
+          </div>
         ))}
       </div>
       <div className="card stack-4">
@@ -229,7 +238,7 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
   return (
     <div className="stack-16">
       <div className="camp-head">
-        <span className="camp-cand-emoji" aria-hidden="true">{card.emoji}</span>
+        <CandidateFace id={card.id} />
         <span className="stack-2" style={{ flex: 1 }}>
           <span className="overline">Week {v.week} of {v.weeks}{v.debateWeek ? " · Debate week" : v.week === v.weeks ? " · Election week" : ""}</span>
           <span className="title">{card.name}</span>

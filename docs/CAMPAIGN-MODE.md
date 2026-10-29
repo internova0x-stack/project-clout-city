@@ -56,7 +56,7 @@ right, and players should feel that.
 - He jabs at a challenger's weak spot with a smile:
   - Goldcrest: "out of touch";
   - Castellano: "all charts, no heart";
-  - Kowalczyk: "still fighting 1985";
+  - Kowalczyk: "still fighting 2009";
   - Starr: "not serious".
 - His dirty tricks come from **his campaign machine** (aides, fixers and allies), never from his own mouth. He can
   look shocked when one is exposed.
@@ -112,9 +112,9 @@ chart. Her students loved her and her colleagues feared her office hours.
 
 **3. Frankie "The Hammer" Kowalczyk, "The Organizer"**
 
-*Bio:* Frankie ran Local 117 of the city's transit workers for 22 years, and he has a knee that "remembers the strike of '09."
+*Bio:* Frankie ran Local 117 of the city's transit workers for 12 years, and he has a knee that "remembers the strike of '09."
 Loud, warm and impossible to bully. Knows every bodega owner in Woodside by first name and brings a thermos to every
-meeting. Retired, was bored in three weeks, and started a campaign.
+meeting. Stepped down at 41, was bored in three weeks, and started a campaign.
 
 *Slogan:* "This city runs on people. Pay 'em."
 

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { CAMPAIGN, buildContent, citywide, endReward, skimRoom, type CampaignContent, type CampaignState, type CandidateId, type Payout } from "../lib/campaign.ts";
 import { CampaignError, campaignView, choose, debateRound, dilemma, endWeek, nextDay, refresh, reply, setBudget, setSlot, startCampaign, taskHow, type Rng } from "../lib/campaignEngine.ts";
 
@@ -228,6 +228,13 @@ test("campaign tasks fit the card, whatever names fill them (owner, Oct 29)", ()
     assert.ok([...fill(t.tag)].length <= 30, `${t.id}: "${fill(t.tag)}" is over 30`);
   }
   for (const id of IDS) assert.ok(content.tasks.candidates[id].length >= 3, `${id}: three tasks of their own`);
+});
+
+test("every candidate has a portrait and an emoji on every issue (owner, Oct 29)", () => {
+  for (const c of content.candidates) {
+    assert.ok(existsSync(`public/cast/candidate-${c.id}.webp`), `${c.id}: portrait`);
+    for (const i of c.issues) assert.ok(i.emoji, `${c.id} "${i.title}": emoji`);
+  }
 });
 
 test("every campaign task says how it's done, and a candidate's own can be done any week (owner, Oct 29)", () => {

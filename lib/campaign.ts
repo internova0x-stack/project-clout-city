@@ -77,7 +77,7 @@ export interface Choice extends Preview {
   trace?: number;
 }
 
-export interface Issue { title: string; line: string }
+export interface Issue { title: string; line: string; emoji?: string }
 
 export interface Candidate {
   id: CandidateId;

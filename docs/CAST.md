@@ -43,7 +43,7 @@ announces fixes that really shipped. Examples:
 - **Warm, always:** he never insults a challenger personally. He teases each one's weak spot with a smile:
   - Goldcrest: "out of touch";
   - Castellano: "all charts, no heart";
-  - Kowalczyk: "still fighting 1985";
+  - Kowalczyk: "still fighting 2009";
   - Starr: "not serious".
 - **His dirty tricks** come from his campaign machine (aides, fixers, allies), never from his own mouth. He can look
   shocked when one is caught.
