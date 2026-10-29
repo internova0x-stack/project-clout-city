@@ -622,6 +622,9 @@ function Team({ v }: { v: CampaignView }) {
 function SituationCard({ v, busy, onChoose }: { v: CampaignView; busy: boolean; onChoose: (s: string, c: string) => void }) {
   const p = v.pending[0];
   const s = p.situation;
+  // Choices are radio picks, decided with one button (owner, Oct 29), like the Inbox's replies.
+  const [sel, setSel] = useState<{ sit: string; choice: string } | null>(null);
+  const picked = sel?.sit === s.id ? sel.choice : null;
   return (
     <div className="stack-12">
       <p className="overline" style={{ margin: 0 }}>⚡ Something's happening · {v.pending.length} to decide</p>
@@ -629,11 +632,15 @@ function SituationCard({ v, busy, onChoose }: { v: CampaignView; busy: boolean; 
         <span className="camp-sit-icon" aria-hidden="true">{s.icon}</span>
         <p className="title" style={{ margin: 0 }}>{s.text}</p>
       </div>
-      {s.choices.map((c) => (
-        <button key={c.id} className="camp-option" disabled={busy} onClick={() => onChoose(s.id, c.id)}>
-          <span className="title">{c.label}</span><PreviewLines p={c} />
-        </button>
-      ))}
+      <div className="stack-8" role="radiogroup" aria-label="Your call">
+        <p className="overline" style={{ margin: "4px 0 0" }}>Make the call</p>
+        {s.choices.map((c) => (
+          <button key={c.id} role="radio" aria-checked={picked === c.id} className="camp-option radio" disabled={busy} onClick={() => setSel({ sit: s.id, choice: c.id })}>
+            <span className="title">{c.label}</span><PreviewLines p={c} />
+          </button>
+        ))}
+        <button className="btn btn-taxi" disabled={busy || !picked} onClick={() => { if (picked) { onChoose(s.id, picked); setSel(null); } }}>Decide</button>
+      </div>
     </div>
   );
 }
