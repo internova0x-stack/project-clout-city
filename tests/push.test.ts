@@ -75,3 +75,16 @@ test("the test push skips caps, quiet hours and switches", () => {
   const night = new Date("2026-10-19T03:00:00Z");
   assert.ok(planPush([q("test", { created_at: night.toISOString() })], ctx({ now: night, sentToday: 9, off: ["messages"], active: true })).send);
 });
+
+test("devices only at the browsers' push services, the same list as migration 0130 (security review)", async () => {
+  const { pushEndpointOk } = await import("../lib/push.ts");
+  for (const ok of ["https://fcm.googleapis.com/fcm/send/abc", "https://updates.push.services.mozilla.com/wpush/v2/x",
+                    "https://web.push.apple.com/QH", "https://wns2-par02p.notify.windows.com/w/?token=1"]) assert.ok(pushEndpointOk(ok), ok);
+  for (const bad of ["https://169.254.169.254/latest", "https://evil.example/fcm.googleapis.com/", "http://fcm.googleapis.com/x",
+                     "https://fcm.googleapis.com.evil.example/x", "https://notify.windows.com/x"]) assert.ok(!pushEndpointOk(bad), bad);
+  const { readFileSync } = await import("node:fs");
+  const sql = readFileSync(new URL("../supabase/migrations/0130_security_review.sql", import.meta.url), "utf8");
+  for (const host of ["fcm\\.googleapis\\.com", "android\\.googleapis\\.com", "push\\.services\\.mozilla\\.com", "push\\.apple\\.com", "notify\\.windows\\.com"]) {
+    assert.ok(sql.includes(host), host);
+  }
+});

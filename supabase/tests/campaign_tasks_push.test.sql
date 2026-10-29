@@ -15,7 +15,7 @@ select public.set_traits(array['loud', 'hustler']); select public.roll_birth_lot
 reset role;
 update public.players set clout = 150 where id = '00000000-0000-0000-0000-000000012801';
 insert into public.push_subscriptions (player_id, endpoint, p256dh, auth)
-  values ('00000000-0000-0000-0000-000000012801', 'https://push.example/campaign', 'k', 'a');
+  values ('00000000-0000-0000-0000-000000012801', 'https://fcm.googleapis.com/fcm/send/campaign', 'k', 'a');
 
 select public.campaign_begin('00000000-0000-0000-0000-000000012801', '20000000-0000-0000-0000-000000012801', 'starr', '{"phase":"planning"}', 0);
 

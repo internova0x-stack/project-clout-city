@@ -91,7 +91,22 @@ export async function POST(request: NextRequest) {
   }
   const commission = await creatorCommission(db, event, o, call.args.p_player as string | undefined);
   if (commission === "error") return NextResponse.json({ error: "db" }, { status: 500 });
-  return NextResponse.json({ received: true, result: data, commission });
+  const cancelled = call.fn === "payment_refund" ? await refundedVip(db, event, o) : null;
+  return NextResponse.json({ received: true, result: data, commission, cancelled });
+}
+
+/**
+ * Security review (migration 0130): a fully refunded VIP payment ends VIP, like a lost dispute. The charge bought nothing
+ * one-off, so it was the subscription's: its customer's subscriptions are cancelled, and Stripe's
+ * customer.subscription.deleted takes VIP away (payment_subscription).
+ */
+async function refundedVip(db: NonNullable<ReturnType<typeof getAdminSupabase>>, event: StripeEvent, o: Record<string, unknown>) {
+  const secret = process.env.STRIPE_SECRET_KEY ?? "";
+  const customer = typeof o.customer === "string" ? o.customer : null;
+  if (!secret || !customer || typeof o.payment_intent !== "string") return null;
+  const vip = await db.rpc("refund_is_subscription", { p_payment: o.payment_intent, p_customer: customer });
+  if (vip.error || !vip.data) return null;
+  try { return await cancelAllSubscriptions(secret, customer); } catch (e) { console.error(`stripe ${event.id} VIP not cancelled`, e); return null; }
 }
 
 /**

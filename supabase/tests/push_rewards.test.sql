@@ -11,10 +11,10 @@ insert into auth.users (id) values ('00000000-0000-0000-0000-0000000083a1'), ('0
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000083a1', false);
 select 1 from public.create_player('Winner', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/83a', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/83a', 'k', 'a', 'America/New_York');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000083a2', false);
 select 1 from public.create_player('Away', 'bodega_drip', '{}', null, true);
-select public.push_subscribe('https://push.example/83b', 'k', 'a', 'America/New_York');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/83b', 'k', 'a', 'America/New_York');
 reset role;
 delete from public.push_queue where player_id in ('00000000-0000-0000-0000-0000000083a1', '00000000-0000-0000-0000-0000000083a2');
 

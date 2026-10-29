@@ -8,6 +8,19 @@ const nextConfig: NextConfig = {
   // The Studio calendar reads week files from content/ at run time (lib/contentDrafts.ts), and the
   // game and the Studio store gossip weeks from content/gossip (lib/gossipImport.ts; story files for
   // its safety check). Server only: none of these reach a browser.
+  // Security review (Oct 29): no other site may frame the game (clickjacking), and browsers don't guess file types.
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+      ],
+    }];
+  },
   outputFileTracingIncludes: {
     // The Shop Manager's import (lib/shopImport.ts): the catalog files and the invented-names list.
     "/studio": ["./content/hunts/*.json", "./content/news/*.json", "./content/gossip/*.json", "./content/stories/*.json", "./content/shop/*.json", "./content/culture/parody-names.json"],

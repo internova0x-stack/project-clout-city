@@ -17,8 +17,8 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000078a1
 
 -- Subscribing: an https endpoint only; the time zone is kept; re-subscribing the same endpoint updates it.
 select pg_temp.assert(pg_temp.raises($$select public.push_subscribe('http://nope', 'k', 'a', 'UTC')$$, 'bad_subscription'), 'https only');
-select public.push_subscribe('https://push.example/abc', 'key1', 'auth1', 'America/Los_Angeles');
-select public.push_subscribe('https://push.example/abc', 'key2', 'auth2', 'America/Los_Angeles');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/abc', 'key1', 'auth1', 'America/Los_Angeles');
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/abc', 'key2', 'auth2', 'America/Los_Angeles');
 select pg_temp.assert((public.push_prefs_get() ->> 'devices')::int = 1, 'one device');
 -- Switches: known categories only; the prompt's "asked" is remembered.
 select pg_temp.assert(pg_temp.raises($$select public.push_prefs_set(array['spam'])$$, 'bad_category'), 'known categories');
@@ -27,7 +27,7 @@ select pg_temp.assert(public.push_prefs_set(null, true) ->> 'askedAt' is not nul
 select public.push_test();
 reset role;
 select pg_temp.assert((select tz from public.push_prefs where player_id = '00000000-0000-0000-0000-0000000078a1') = 'America/Los_Angeles', 'time zone kept');
-select pg_temp.assert((select p256dh from public.push_subscriptions where endpoint = 'https://push.example/abc') = 'key2', 'keys updated');
+select pg_temp.assert((select p256dh from public.push_subscriptions where endpoint = 'https://fcm.googleapis.com/fcm/send/abc') = 'key2', 'keys updated');
 select pg_temp.assert((select count(*) from public.push_queue where player_id = '00000000-0000-0000-0000-0000000078a1' and kind = 'test') = 1, 'test queued');
 
 -- The queue: one push per key; nothing for a player with no device.
@@ -37,10 +37,10 @@ select public.push_enqueue('00000000-0000-0000-0000-0000000078a2', 'gig_ready', 
 select pg_temp.assert((select count(*) from public.push_queue where kind = 'gig_ready') = 1, 'deduped, and only for subscribed players');
 
 -- A failing device goes after five failures in a row.
-select public.push_device_failed(id) from public.push_subscriptions, generate_series(1, 4) where endpoint = 'https://push.example/abc';
-select pg_temp.assert(exists (select 1 from public.push_subscriptions where endpoint = 'https://push.example/abc'), 'four: kept');
-select public.push_device_failed(id) from public.push_subscriptions where endpoint = 'https://push.example/abc';
-select pg_temp.assert(not exists (select 1 from public.push_subscriptions where endpoint = 'https://push.example/abc'), 'five: removed');
+select public.push_device_failed(id) from public.push_subscriptions, generate_series(1, 4) where endpoint = 'https://fcm.googleapis.com/fcm/send/abc';
+select pg_temp.assert(exists (select 1 from public.push_subscriptions where endpoint = 'https://fcm.googleapis.com/fcm/send/abc'), 'four: kept');
+select public.push_device_failed(id) from public.push_subscriptions where endpoint = 'https://fcm.googleapis.com/fcm/send/abc';
+select pg_temp.assert(not exists (select 1 from public.push_subscriptions where endpoint = 'https://fcm.googleapis.com/fcm/send/abc'), 'five: removed');
 
 -- Who may call what.
 select pg_temp.assert(not has_function_privilege('authenticated', 'public.push_enqueue(uuid, text, text, text, text, text, timestamptz, boolean, text)', 'execute'), 'players can''t queue pushes');

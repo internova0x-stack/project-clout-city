@@ -3,7 +3,7 @@
 // nudged by the game itself (kickPush), at most once a minute per server. Needs NEXT_PUBLIC_VAPID_PUBLIC_KEY,
 // VAPID_PRIVATE_KEY and VAPID_SUBJECT (docs/SETUP.md).
 import webpush from "web-push";
-import { PUSH_KINDS, PUSH_RULES, localDate, planPush, type QueuedPush } from "./push";
+import { PUSH_KINDS, PUSH_RULES, localDate, planPush, pushEndpointOk, type QueuedPush } from "./push";
 import { getAdminSupabase } from "./supabase/admin";
 
 let configured: boolean | null = null;
@@ -68,7 +68,7 @@ export async function runPush(opts: { player?: string } = {}): Promise<{ sent: n
     }
     dropCount += plan.drop.length;
     if (!plan.send) continue;
-    const devices = (subs.data ?? []).filter((s) => s.player_id === player);
+    const devices = (subs.data ?? []).filter((s) => s.player_id === player && pushEndpointOk(s.endpoint as string));
     const payload = JSON.stringify({ title: plan.send.title, body: plan.send.body, url: plan.send.url, tag: plan.send.tag });
     let delivered = false;
     for (const d of devices) {

@@ -42,6 +42,9 @@ async function run(fn: string, args: Record<string, unknown>, message: string): 
 export async function studioList(): Promise<StudioResult> {
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  // Security review (Oct 29): only an admin's visit runs the content sync.
+  const { data: admin } = await supabase.rpc("is_story_admin");
+  if (!admin) return list(supabase);
   // C6 (migration 0098): new story files in the repo wait in the list for review.
   const synced = await syncWeeklyContent({ force: true }).catch(() => []);
   const added = await addRepoStories();
