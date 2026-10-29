@@ -348,7 +348,12 @@ There is never a bare "Play your turn" or "Answer messages":
 - **Title:** at most 35 characters, one line on a phone where possible. It's the joke and the job.
 - **Tag line:** at most 30 characters, in the card's meta line beside the goal tag. It's the why: a deadline, a
   number, a stakes word.
-- **Tapping the task** opens the campaign right at that message, place or debate, where the full story is.
+- **A "how" line** (owner, Oct 29, `taskHow`): every card also says the one action that does it ("👉 Book a tour stop
+  in LIC", "👉 Reply to their message in the Inbox"). No hidden actions.
+- **Tapping the task** opens the campaign right at that message, or the slot picker on a free slot with the action and
+  place picked and marked "📌 Your task" (from the Tasks sheet too).
+- **A candidate's own tasks** only use actions open every week (rally, tour stop, donor calls, rest), and the title
+  says which: content/campaign/tasks.json is the current list.
 - `validate:content` fails a title or tag line over its limit.
 
 **Shared templates** (the variables come from the campaign):
@@ -367,10 +372,10 @@ There is never a bare "Play your turn" or "Answer messages":
 
 | Candidate | Title · tag line |
 |---|---|
-| **Goldcrest** | "Stop Preston dissing the bus" · "🚌 Woodside rally" ; "Find a donor without a yacht" · "📸 For the optics" ; "Don't let him buy the paper" · "🗞️ Again" |
-| **Castellano** | "Cut her speech to 4 minutes" · "⏱️ It's 40 now" ; "Get Ingrid a photo with a dog" · "🐶 Proof of feelings" ; "Find one reader of her report" · "📚 600 pages" |
-| **Kowalczyk** | "Keep Frankie off the heckler" · "🥊 Astoria rally" ; "Explain hashtags to Frankie" · "☕ Bring coffee" ; "Book the union hall Friday" · "🦵 The knee says rain" |
-| **Starr** | "Approve Kaylee's caption first" · "📱 This time" ; "Give Free Wi-Fi a real policy" · "📶 Not 'it's giving'" ; "Prep Kaylee, no ring-light" · "🎤 Debate {day}" |
+| **Goldcrest** | "Put Preston on a bus tour" (tour) ; "Find a donor without a yacht" (donor calls) ; "Get Preston to shake 50 hands" (rally) |
+| **Castellano** | "Cut her rally speech to 4 minutes" (rally) ; "Get Ingrid a photo with a dog" (tour) ; "Pitch her 600-page plan to donors" (donor calls) |
+| **Kowalczyk** | "Keep Frankie off the heckler" (rally) ; "Film Frankie on a tour stop" (tour) ; "Pack the union hall for Frankie" (rally) |
+| **Starr** | "Approve Kaylee's tour-stop caption" (tour) ; "Pitch Free Wi-Fi to donors" (donor calls) ; "Give Kaylee a phone-free day" (rest) |
 
 **How the tasks fill the day:**
 - **The two goal-linked tasks** pick from the templates that serve the current campaign goal. "Win a debate" draws

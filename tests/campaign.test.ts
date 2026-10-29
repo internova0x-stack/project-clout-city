@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { CAMPAIGN, buildContent, citywide, endReward, skimRoom, type CampaignContent, type CampaignState, type CandidateId, type Payout } from "../lib/campaign.ts";
-import { CampaignError, campaignView, choose, debateRound, dilemma, endWeek, nextDay, refresh, reply, setBudget, setSlot, startCampaign, type Rng } from "../lib/campaignEngine.ts";
+import { CampaignError, campaignView, choose, debateRound, dilemma, endWeek, nextDay, refresh, reply, setBudget, setSlot, startCampaign, taskHow, type Rng } from "../lib/campaignEngine.ts";
 
 // Campaign Mode (docs/CAMPAIGN-MODE.md): the content holds together, and thousands of simulated campaigns run start
 // to finish without breaking a rule (caps, one week a day, nothing hidden leaking into the player's view).
@@ -228,6 +228,20 @@ test("campaign tasks fit the card, whatever names fill them (owner, Oct 29)", ()
     assert.ok([...fill(t.tag)].length <= 30, `${t.id}: "${fill(t.tag)}" is over 30`);
   }
   for (const id of IDS) assert.ok(content.tasks.candidates[id].length >= 3, `${id}: three tasks of their own`);
+});
+
+test("every campaign task says how it's done, and a candidate's own can be done any week (owner, Oct 29)", () => {
+  for (const id of IDS) for (const d of content.tasks.candidates[id]) {
+    assert.ok(["rally", "tour", "donors", "rest"].includes(d.done), `${id} ${d.id}: ${d.done} isn't open every week`);
+  }
+  for (const id of IDS) for (let seed = 1; seed <= 10; seed++) {
+    const { state } = play(id, "clean", 900 + seed);
+    for (const t of state.tasks ?? []) {
+      const how = taskHow(t, content);
+      assert.ok(how.startsWith("Book") || how.includes("Inbox"), `${t.id}: "${how}"`);
+      if ((t.done === "rally" || t.done === "tour") && t.target) assert.ok(how.includes(" in "), `${t.id}: names the place`);
+    }
+  }
 });
 
 test("two campaign tasks a week, paid once each when the plan does them", () => {

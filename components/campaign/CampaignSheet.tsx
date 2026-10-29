@@ -23,10 +23,17 @@ const ENDING: Record<string, { title: string; line: string; emoji: string }> = {
 };
 
 type Tab = "week" | "inbox" | "map" | "team";
+type ViewTask = CampaignView["tasks"][number];
+/** What a tapped task points the slot picker at (owner, Oct 29: tapping a task takes you there). */
+type Hint = { kinds: string[]; place?: string; topic?: string };
+const HINT_KINDS: Record<string, string[]> = { visit: ["rally", "tour"], rally: ["rally"], tour: ["tour"], gotv: ["gotv"], donors: ["donors"], rest: ["rest"], prep: ["prep"] };
 
-export function CampaignSheet({ open, onClose, api, clout, onToast }: {
+export function CampaignSheet({ open, onClose, api, clout, onToast, focusTask = null, onFocused }: {
   open: boolean;
   onClose: () => void;
+  /** A task tapped in the Tasks sheet: HQ opens on the place that does it. */
+  focusTask?: string | null;
+  onFocused?: () => void;
   api: CampaignApi;
   /** The manager's clout, for the teaser's progress to Rank 2. */
   clout: number;
@@ -70,7 +77,7 @@ export function CampaignSheet({ open, onClose, api, clout, onToast }: {
             onStart={async (seed) => { const r = await run(api.start(picked, seed)); if (r) { setPicked(null); setTab("week"); } }} />
         )}
         {data && v && running && (
-          <Hq data={data} v={v} busy={busy} tab={tab} setTab={setTab} api={api} run={run} />
+          <Hq data={data} v={v} busy={busy} tab={tab} setTab={setTab} api={api} run={run} focusTask={focusTask} onFocused={onFocused} />
         )}
         {data && v && v.phase === "over" && v.ending && !picked && (
           <ElectionNight data={data} v={v} onNew={() => setPicked(null)} />
@@ -197,9 +204,28 @@ function CandidateDetail({ data, card, busy, onBack, onStart }: { data: Campaign
 
 type Run = (p: ReturnType<CampaignApi["screen"]>, toast?: boolean) => Promise<CampaignScreen | null>;
 
-function Hq({ data, v, busy, tab, setTab, api, run }: { data: CampaignScreen; v: CampaignView; busy: boolean; tab: Tab; setTab: (t: Tab) => void; api: CampaignApi; run: Run }) {
+function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
+  data: CampaignScreen; v: CampaignView; busy: boolean; tab: Tab; setTab: (t: Tab) => void; api: CampaignApi; run: Run; focusTask: string | null; onFocused?: () => void;
+}) {
   const card = data.candidates.find((c) => c.id === v.candidate)!;
   const newMail = v.inbox.filter((m) => m.status === "new").length;
+  const [mail, setMail] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ index: number; hint?: Hint } | null>(null);
+  // A task goes where it's done: its message in the Inbox, or the slot picker on a free slot, set to the right action.
+  const openTask = useCallback((t: ViewTask) => {
+    if (t.done === "reply" || t.done === "meeting") { setMail(t.target ?? null); setTab("inbox"); return; }
+    const free = v.slots.findIndex((s) => !s);
+    const index = free >= 0 ? free : v.slots.findIndex((s) => s?.kind !== "meeting");
+    if (index < 0) return;
+    setEditing({ index, hint: { kinds: HINT_KINDS[t.done] ?? [], place: t.done === "prep" ? undefined : t.target, topic: t.done === "prep" ? t.target : undefined } });
+    setTab("week");
+  }, [v.slots, setTab]);
+  useEffect(() => {
+    if (!focusTask || v.pending.length) return;
+    const t = v.tasks.find((x) => x.id === focusTask);
+    if (t) openTask(t);
+    onFocused?.();
+  }, [focusTask, v.pending.length, v.tasks, openTask, onFocused]);
   return (
     <div className="stack-16">
       <div className="camp-head">
@@ -216,13 +242,13 @@ function Hq({ data, v, busy, tab, setTab, api, run }: { data: CampaignScreen; v:
       ) : (
         <>
           <div className="segmented" role="group" aria-label="Campaign HQ">
-            <button aria-pressed={tab === "week"} onClick={() => setTab("week")}>This week</button>
-            <button aria-pressed={tab === "inbox"} onClick={() => setTab("inbox")}>Inbox{newMail ? ` (${newMail})` : ""}</button>
+            <button aria-pressed={tab === "week"} onClick={() => { setEditing(null); setTab("week"); }}>This week</button>
+            <button aria-pressed={tab === "inbox"} onClick={() => { setMail(null); setTab("inbox"); }}>Inbox{newMail ? ` (${newMail})` : ""}</button>
             <button aria-pressed={tab === "map"} onClick={() => setTab("map")}>Map</button>
             <button aria-pressed={tab === "team"} onClick={() => setTab("team")}>Team</button>
           </div>
-          {tab === "week" && <Week data={data} v={v} busy={busy} api={api} run={run} onInbox={() => setTab("inbox")} />}
-          {tab === "inbox" && <Inbox v={v} busy={busy} onReply={(m, o) => run(api.reply(m, o))} />}
+          {tab === "week" && <Week data={data} v={v} busy={busy} api={api} run={run} onInbox={() => { setMail(null); setTab("inbox"); }} editing={editing} setEditing={setEditing} onTask={openTask} />}
+          {tab === "inbox" && <Inbox key={mail ?? ""} initial={mail} v={v} busy={busy} onReply={(m, o) => run(api.reply(m, o))} />}
           {tab === "map" && <MapTab v={v} short={card.short} />}
           {tab === "team" && <Team v={v} />}
         </>
@@ -268,14 +294,16 @@ function PreviewLines({ p }: { p: Preview }) {
   );
 }
 
-function Week({ data, v, busy, api, run, onInbox }: { data: CampaignScreen; v: CampaignView; busy: boolean; api: CampaignApi; run: Run; onInbox: () => void }) {
-  const [editing, setEditing] = useState<number | null>(null);
+function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }: {
+  data: CampaignScreen; v: CampaignView; busy: boolean; api: CampaignApi; run: Run; onInbox: () => void;
+  editing: { index: number; hint?: Hint } | null; setEditing: (e: { index: number; hint?: Hint } | null) => void; onTask: (t: ViewTask) => void;
+}) {
   const [debate, setDebate] = useState(false);
   const waiting = v.phase === "waiting";
   const newMail = v.inbox.filter((m) => m.status === "new").length;
   if (editing !== null) {
-    return <SlotPicker v={v} data={data} index={editing} busy={busy} onClose={() => setEditing(null)}
-      onSet={async (a) => { const r = await run(api.slot(editing, a)); if (r) setEditing(null); }} />;
+    return <SlotPicker key={editing.index} v={v} data={data} index={editing.index} hint={editing.hint} busy={busy} onClose={() => setEditing(null)}
+      onSet={async (a) => { const r = await run(api.slot(editing.index, a)); if (r) setEditing(null); }} />;
   }
   if (debate && v.debate) return <Debate v={v} busy={busy} onClose={() => setDebate(false)} onStyle={(st) => run(api.debate(st), false)} />;
   return (
@@ -293,10 +321,11 @@ function Week({ data, v, busy, api, run, onInbox }: { data: CampaignScreen; v: C
             <div className="card stack-8">
               <p className="overline" style={{ margin: 0 }}>🗳️ This week's tasks · +{CAMPAIGN.taskClout} 🔥 each</p>
               {v.tasks.map((t) => (
-                <div key={t.id} className={`camp-task${t.isDone ? " done" : ""}`}>
+                <button key={t.id} className={`camp-task${t.isDone ? " done" : ""}`} disabled={busy} onClick={() => onTask(t)}>
                   <span className="title">{t.isDone ? "✓ " : ""}{t.title}</span>
                   <span className="meta">{t.isDone ? "On the calendar. Pays at End Week." : t.tag}</span>
-                </div>
+                  {!t.isDone && <span className="camp-task-how">👉 {t.how} ›</span>}
+                </button>
               ))}
             </div>
           )}
@@ -314,7 +343,7 @@ function Week({ data, v, busy, api, run, onInbox }: { data: CampaignScreen; v: C
           <div className="stack-8">
             <p className="overline" style={{ margin: 0 }}>The calendar</p>
             {v.slots.map((s, i) => (
-              <button key={i} className="camp-slot" disabled={busy || s?.kind === "meeting"} onClick={() => setEditing(i)}>
+              <button key={i} className="camp-slot" disabled={busy || s?.kind === "meeting"} onClick={() => setEditing({ index: i })}>
                 <span className="meta">{slotName(i)}</span>
                 <span className="title">{s ? slotLabel(s, v) : <span className="meta">Free</span>}</span>
               </button>
@@ -364,16 +393,19 @@ const ACTIVITIES: { kind: SlotAction["kind"]; label: string; p: Preview; place?:
   { kind: "rest", label: "😴 Rest", p: { get: "Team morale +8", cost: "One slot", risk: "low", why: "The Mayor doesn't rest" } },
 ];
 
-function SlotPicker({ v, index, busy, onClose, onSet }: { v: CampaignView; data: CampaignScreen; index: number; busy: boolean; onClose: () => void; onSet: (a: SlotAction | null) => void }) {
-  const [kind, setKind] = useState<string | null>(null);
+function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView; data: CampaignScreen; index: number; hint?: Hint; busy: boolean; onClose: () => void; onSet: (a: SlotAction | null) => void }) {
+  // A tapped task opens straight on its action when there's only one (and on the top list, marked, when there's a choice).
+  const [kind, setKind] = useState<string | null>(hint?.kinds.length === 1 && ["rally", "tour", "gotv", "prep"].includes(hint.kinds[0]) ? hint.kinds[0] : null);
+  const mine = (k: string) => !!hint?.kinds.includes(k);
+  const TASK = <span className="tag tag-positive camp-task-tag">📌 Your task</span>;
   const [op, setOp] = useState<OpId>("fake_news");
   const [cutout, setCutout] = useState(false);
   const current = v.slots[index];
   const placeList = (k: "rally" | "tour" | "gotv") => (
     <div className="stack-8">
       {v.places.map((p) => (
-        <button key={p.id} className="camp-slot" disabled={busy} onClick={() => onSet({ kind: k, place: p.id })}>
-          <span className="title">{p.name}</span>
+        <button key={p.id} className={`camp-slot${mine(k) && hint?.place === p.id ? " hint" : ""}`} disabled={busy} onClick={() => onSet({ kind: k, place: p.id })}>
+          <span className="title">{p.name}{mine(k) && hint?.place === p.id && TASK}</span>
           <span className="meta">{p.cares} · {p.you.toFixed(0)} vs {p.mayor.toFixed(0)}</span>
         </button>
       ))}
@@ -387,18 +419,18 @@ function SlotPicker({ v, index, busy, onClose, onSet }: { v: CampaignView; data:
         {!kind && (
           <div className="stack-8">
             {ACTIVITIES.map((a) => (
-              <button key={a.kind} className="camp-option" disabled={busy} onClick={() => (a.place ? setKind(a.kind) : onSet({ kind: a.kind } as SlotAction))}>
-                <span className="title">{a.label}</span><PreviewLines p={a.p} />
+              <button key={a.kind} className={`camp-option${mine(a.kind) ? " hint" : ""}`} disabled={busy} onClick={() => (a.place ? setKind(a.kind) : onSet({ kind: a.kind } as SlotAction))}>
+                <span className="title">{a.label}{mine(a.kind) && TASK}</span><PreviewLines p={a.p} />
               </button>
             ))}
             {v.week <= CAMPAIGN.debateWeek && (
-              <button className="camp-option" onClick={() => setKind("prep")}>
-                <span className="title">📚 Debate prep</span><PreviewLines p={{ get: "Facts answers land on that topic", cost: "One slot", risk: "low", why: "Only helps on debate night" }} />
+              <button className={`camp-option${mine("prep") ? " hint" : ""}`} onClick={() => setKind("prep")}>
+                <span className="title">📚 Debate prep{mine("prep") && TASK}</span><PreviewLines p={{ get: "Facts answers land on that topic", cost: "One slot", risk: "low", why: "Only helps on debate night" }} />
               </button>
             )}
             {v.week === v.weeks && (
-              <button className="camp-option" onClick={() => setKind("gotv")}>
-                <span className="title">🗳️ Get out the vote</span><PreviewLines p={{ get: "Turnout in one place on Election Day", cost: "One slot", risk: "low", why: "Only counts on the day" }} />
+              <button className={`camp-option${mine("gotv") ? " hint" : ""}`} onClick={() => setKind("gotv")}>
+                <span className="title">🗳️ Get out the vote{mine("gotv") && TASK}</span><PreviewLines p={{ get: "Turnout in one place on Election Day", cost: "One slot", risk: "low", why: "Only counts on the day" }} />
               </button>
             )}
             {v.heat !== null && (
@@ -413,8 +445,8 @@ function SlotPicker({ v, index, busy, onClose, onSet }: { v: CampaignView; data:
         {kind === "prep" && (
           <div className="stack-8">
             {[["rent", "Rent and housing"], ["transit", "The 7 train"], ["safety", "Safety"], ["money", "Campaign money"], ["weak", "Your candidate's weak spot"]].map(([id, label]) => (
-              <button key={id} className="camp-slot" disabled={busy} onClick={() => onSet({ kind: "prep", topic: id })}>
-                <span className="title">{label}</span>{v.prepped.includes(id) && <span className="meta">Prepped ✓</span>}
+              <button key={id} className={`camp-slot${hint?.topic === id ? " hint" : ""}`} disabled={busy} onClick={() => onSet({ kind: "prep", topic: id })}>
+                <span className="title">{label}{hint?.topic === id && TASK}</span>{v.prepped.includes(id) && <span className="meta">Prepped ✓</span>}
               </button>
             ))}
           </div>
@@ -500,8 +532,10 @@ function Dilemmas({ v, busy, onPick }: { v: CampaignView; busy: boolean; onPick:
   );
 }
 
-function Inbox({ v, busy, onReply }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void }) {
-  const [open, setOpen] = useState<string | null>(null);
+function Inbox({ v, busy, onReply, initial = null }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void; initial?: string | null }) {
+  const [open, setOpen] = useState<string | null>(initial);
+  // Replies are radio choices, sent with one button (owner, Oct 29).
+  const [sel, setSel] = useState<string | null>(null);
   const list = [...v.inbox].sort((a, b) => Number(b.status === "new") - Number(a.status === "new"));
   if (!list.length) return <p className="meta">No messages. Suspicious.</p>;
   const m = list.find((x) => x.message.id === open);
@@ -509,21 +543,28 @@ function Inbox({ v, busy, onReply }: { v: CampaignView; busy: boolean; onReply: 
     return (
       <div className="stack-12">
         <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={() => setOpen(null)}>‹ Inbox</button>
-        <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start" }}>{m.message.label}</span>
+        <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start", width: "fit-content", marginBottom: 8 }}>{m.message.label}</span>
         <p className="title" style={{ margin: 0 }}>{m.message.subject}</p>
         <p className="body ph-sensitive" style={{ margin: 0 }}>{m.message.body}</p>
-        {m.status === "new" ? m.message.options.map((o: InboxOption) => (
-          <button key={o.id} className="camp-option" disabled={busy} onClick={async () => { onReply(m.message.id, o.id); setOpen(null); }}>
-            <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
-          </button>
-        )) : <p className="meta">{m.status === "expired" ? "Expired. They noticed." : `Answered: ${m.message.options.find((o) => o.id === m.option)?.label ?? ""}`}</p>}
+        {m.status === "new" ? (
+          <div className="stack-8" role="radiogroup" aria-label="Your reply">
+            <p className="overline" style={{ margin: "4px 0 0" }}>Pick your reply</p>
+            {m.message.options.map((o: InboxOption) => (
+              <button key={o.id} role="radio" aria-checked={sel === o.id} className="camp-option radio" disabled={busy} onClick={() => setSel(o.id)}>
+                <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
+              </button>
+            ))}
+            <button className="btn btn-taxi" disabled={busy || !sel || !m.message.options.some((o) => o.id === sel)}
+              onClick={() => { if (sel) { onReply(m.message.id, sel); setSel(null); setOpen(null); } }}>Send reply</button>
+          </div>
+        ) : <p className="meta">{m.status === "expired" ? "Expired. They noticed." : `Answered: ${m.message.options.find((o) => o.id === m.option)?.label ?? ""}`}</p>}
       </div>
     );
   }
   return (
     <div className="stack-8">
       {list.map((x) => (
-        <button key={x.message.id} className={`camp-mail${x.status === "new" ? " new" : ""}`} onClick={() => setOpen(x.message.id)}>
+        <button key={x.message.id} className={`camp-mail${x.status === "new" ? " new" : ""}`} onClick={() => { setSel(null); setOpen(x.message.id); }}>
           <span className="title">{x.message.subject}</span>
           <span className="meta">{x.message.label} · {x.status === "new" ? "expires when the week ends" : x.status}</span>
         </button>

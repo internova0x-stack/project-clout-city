@@ -413,7 +413,9 @@ export function GameShell({
   const [campaignOpen, setCampaignOpen] = useState(false);
   // Whether a campaign is running (the election teasers step aside while one is).
   const [campaignRunning, setCampaignRunning] = useState<boolean | null>(null);
-  const [campaignTasks, setCampaignTasks] = useState<{ id: string; title: string; tag: string; isDone: boolean }[]>([]);
+  const [campaignTasks, setCampaignTasks] = useState<{ id: string; title: string; tag: string; how: string; isDone: boolean }[]>([]);
+  const [campaignFocus, setCampaignFocus] = useState<string | null>(null);
+  const clearCampaignFocus = useCallback(() => setCampaignFocus(null), []);
   const [campaignScandals, setCampaignScandals] = useState<string[]>([]);
   // Migration 0100: the day's venue boost, said once when it lands ("Your Goth look fits The Kiln: +5 Confidence").
   const styleBoostKey = city?.style?.boost ? `${city.today}:${city.style.boost.place}` : null;
@@ -2741,7 +2743,7 @@ export function GameShell({
         onOpenTasks={() => { markTasksSeen(); setPanel("tasks"); }}
       />
       <TasksSheet
-        campaign={campaignRunning ? { tasks: campaignTasks, onOpen: () => { setPanel(null); setCampaignOpen(true); } } : null}
+        campaign={campaignRunning ? { tasks: campaignTasks, onOpen: (task) => { setPanel(null); setCampaignFocus(task); setCampaignOpen(true); } } : null}
         open={panel === "tasks"}
         onClose={() => { setPanel(null); setTasksTab(undefined); }}
         tab={tasksTab}
@@ -3155,7 +3157,8 @@ export function GameShell({
             />
           )}
           {deleteAccount && <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={deleteAccount} />}
-          {campaign && <CampaignSheet open={campaignOpen} onClose={() => setCampaignOpen(false)} api={campaign} clout={me.clout} onToast={setToast} />}
+          {campaign && <CampaignSheet open={campaignOpen} onClose={() => setCampaignOpen(false)} api={campaign} clout={me.clout} onToast={setToast}
+            focusTask={campaignFocus} onFocused={clearCampaignFocus} />}
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (

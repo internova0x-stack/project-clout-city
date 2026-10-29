@@ -250,6 +250,23 @@ export function taskDone(t: CampaignTask, state: CampaignState): boolean {
   }
 }
 
+/** The one line that says how a task gets done (owner, Oct 29: no hidden actions). */
+export function taskHow(t: CampaignTask, content: CampaignContent): string {
+  const place = content.places.find((p) => p.id === t.target);
+  const at = place ? ` in ${place.short ?? place.name}` : "";
+  switch (t.done) {
+    case "reply": return "Reply to their message in the Inbox";
+    case "meeting": return "Accept the meeting in the Inbox";
+    case "visit": return `Book a rally or tour stop${at}`;
+    case "rally": return `Book a rally${at}`;
+    case "tour": return `Book a tour stop${at}`;
+    case "gotv": return `Book Get out the vote${at}`;
+    case "donors": return "Book donor calls";
+    case "rest": return "Book a rest day";
+    case "prep": return t.target ? `Book debate prep: ${t.target === "weak" ? "your weak spot" : t.target}` : "Book debate prep";
+  }
+}
+
 const spent = (state: CampaignState) => state.budget.digital + state.budget.street + state.budget.tv;
 
 export function setBudget(state: CampaignState, budget: Record<"digital" | "street" | "tv", number>) {
@@ -790,8 +807,8 @@ export interface CampaignView {
   refuses: OpId[];
   /** Lola's write-ups of the campaign's scandals (News → City), newest first. */
   scandals: { week: number; text: string }[];
-  /** This week's campaign tasks and whether the plan does them. */
-  tasks: (CampaignTask & { isDone: boolean })[];
+  /** This week's campaign tasks, whether the plan does them, and how to do them (owner, Oct 29: every card says how). */
+  tasks: (CampaignTask & { isDone: boolean; how: string })[];
   mayorAllies: { id: string; name: string; role: string }[];
 }
 
@@ -844,7 +861,7 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
     },
     refuses: c.refuses,
     scandals: [...(state.scandals ?? [])].reverse().slice(0, 3),
-    tasks: state.phase === "over" ? [] : (state.tasks ?? []).filter((t) => t.week === state.week).map((t) => ({ ...t, isDone: taskDone(t, state) })),
+    tasks: state.phase === "over" ? [] : (state.tasks ?? []).filter((t) => t.week === state.week).map((t) => ({ ...t, isDone: taskDone(t, state), how: taskHow(t, content) })),
     mayorAllies: content.stakeholders.filter((s) => s.mayorAlly && (state.trust[s.id] ?? 0) < 1).map((s) => ({ id: s.id, name: s.name, role: s.role })),
   };
 }

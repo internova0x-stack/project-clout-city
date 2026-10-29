@@ -2506,9 +2506,19 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-slot { display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; min-height:48px; padding:10px 14px;
   border-radius:14px; background:var(--surface-card); text-align:left; color:var(--text-1); }
 .camp-slot:disabled { opacity:.6; }
-.camp-option { display:flex; flex-direction:column; gap:6px; width:100%; padding:12px 14px; border-radius:14px; text-align:left;
-  background:var(--surface-card); border:2px solid transparent; color:var(--text-1); }
-.camp-option:active { border-color:var(--taxi-400); }
+.camp-option { position:relative; display:flex; flex-direction:column; gap:6px; width:100%; padding:12px 36px 12px 14px; border-radius:14px; text-align:left;
+  background:var(--surface-raised); border:2px solid transparent; color:var(--text-1); box-shadow:var(--elev-2); cursor:pointer; }
+/* A chevron on every choice so it reads as a button (owner, Oct 29: the inbox options didn't look tappable). */
+.camp-option::after, .camp-mail::after { content:"›"; position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:24px; font-weight:700; line-height:1; color:var(--text-3); }
+.camp-option.dark::after { color:rgba(255,255,255,.75); }
+.camp-option.radio { padding:12px 14px 12px 48px; }
+.camp-option.radio::after { content:none; }
+.camp-option.radio::before { content:""; position:absolute; left:14px; top:14px; width:22px; height:22px; border-radius:50%; box-sizing:border-box;
+  border:2px solid var(--text-3); background:var(--surface-raised); }
+.camp-option.radio[aria-checked="true"] { border-color:var(--neon-500); }
+.camp-option.radio[aria-checked="true"]::before { border-color:var(--neon-500); background:radial-gradient(circle, var(--neon-500) 0 5px, var(--surface-raised) 6px); }
+.camp-option:active { border-color:var(--taxi-400); transform:scale(.99); }
+.camp-option:disabled { opacity:.6; }
 .camp-option.dark { background:var(--night-900); color:#fff; }
 .camp-option.dark .camp-preview { color:rgba(255,255,255,.75); }
 .camp-preview { display:flex; flex-direction:column; gap:2px; font-size:13px; line-height:18px; color:var(--text-2); }
@@ -2520,8 +2530,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-paper { background:#FFFDF6; box-shadow:inset 0 0 0 1px #EFE6CC; }
 .camp-lines { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; font-size:14px; line-height:20px; color:var(--text-2); }
 .camp-nudge { text-align:left; font-weight:700; color:var(--text-1); }
-.camp-mail { display:flex; flex-direction:column; gap:2px; width:100%; padding:12px 14px; border-radius:14px; text-align:left; background:var(--surface-card); color:var(--text-1); }
-.camp-mail.new { box-shadow:inset 4px 0 0 var(--neon-500); }
+.camp-mail { position:relative; display:flex; flex-direction:column; gap:2px; width:100%; padding:12px 36px 12px 14px; border-radius:14px; text-align:left; background:var(--surface-raised); color:var(--text-1); box-shadow:var(--elev-2); cursor:pointer; }
+.camp-mail.new { box-shadow:inset 4px 0 0 var(--neon-500), var(--elev-2); }
 .camp-situation { text-align:center; align-items:center; padding:20px 16px; }
 .camp-sit-icon { font-size:44px; }
 .camp-crowd { position:relative; height:12px; border-radius:6px; background:linear-gradient(90deg, #D93A2F, #E8EEF9 50%, #40B589); }
@@ -2541,4 +2551,8 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-task { display:flex; flex-direction:column; gap:2px; padding:8px 0; border-top:1px solid var(--divider); }
 .camp-task > span { display:block; }
 .camp-task.done .title { color:var(--green-text); }
+button.camp-task { background:none; border:0; border-top:1px solid var(--divider); text-align:left; width:100%; color:inherit; font:inherit; cursor:pointer; }
+.camp-task-how { font-size:13px; font-weight:600; color:var(--neon-text); }
+.camp-task-tag { margin-left:8px; vertical-align:middle; }
+.camp-option.hint, .camp-slot.hint { box-shadow:0 0 0 2px var(--green-text) inset, var(--elev-2); }
 .camp-scandal { box-shadow:inset 4px 0 0 var(--red-500); }
