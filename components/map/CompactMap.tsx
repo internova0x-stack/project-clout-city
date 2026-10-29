@@ -50,7 +50,7 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
   const viewRef = useRef<View>((() => { const [x, z] = project(initialCenter); return { x, z, dist: DIST.start }; })());
   const animRef = useRef<{ from: View; to: View; start: number; ms: number } | null>(null);
   const dirtyRef = useRef(true);
-  // The building whose details are open (owner, Oct 29: taps reveal building details).
+  // The last place tapped: it keeps its name on the map.
   const [selected, setSelected] = useState<string | null>(null);
   const tapRef = useRef<(id: string | null) => void>(() => {});
   const [failed, setFailed] = useState(false);
@@ -271,12 +271,16 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     for (const pin of pins) { const [x, z] = project(pin.at); const d = Math.hypot(x - px, z - pz); if (d < bd) { bd = d; best = pin.id; } }
     return best;
   }, [player, pins]);
+  // Owner, Oct 29: a tap on a dot, a name or the building opens the place's card straight away (no extra step).
   const select = (id: string | null) => {
     setSelected(id);
-    if (id) { const pin = pins.find((p) => p.id === id); if (pin) { const [x, z] = project(pin.at); flyTo({ x, z }, 450); } }
+    const pin = id ? pins.find((p) => p.id === id) : null;
+    if (!pin) return;
+    const [x, z] = project(pin.at);
+    flyTo({ x, z }, 450);
+    tapPin(pin);
   };
   tapRef.current = (id) => select(id && pins.some((p) => p.id === id) ? id : null);
-  const selectedPin = selected ? pins.find((p) => p.id === selected) ?? null : null;
   const nudge = (x: number, w: number): React.CSSProperties | undefined => {
     if (!rightInset || !size.w) return undefined;
     const over = x + w / 2 - (size.w - rightInset);
@@ -371,23 +375,6 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
           })()}
         </div>
       )}
-      {selectedPin && (() => {
-        const place = PLACES.find((p) => p.id === selectedPin.id);
-        return (
-          <div className="compact-detail" role="dialog" aria-label={selectedPin.name}>
-            <button className="compact-detail-x" onClick={() => setSelected(null)} aria-label="Close">×</button>
-            <div className="row" style={{ gap: 10, alignItems: "center" }}>
-              <span className="map-pin-tile" aria-hidden="true" style={{ width: 36, height: 36, borderRadius: 10, background: tileBackground(glyphFor(selectedPin)) }}><Glyph name={glyphFor(selectedPin)} size={20} /></span>
-              <span className="stack-2" style={{ flex: 1, minWidth: 0 }}>
-                <span className="title">{selectedPin.name}</span>
-                <span className="meta">{selectedPin.neighborhood}{place?.tier ? ` · ${place.tier}` : ""}</span>
-              </span>
-            </div>
-            {place?.lore && <p className="subtext clamp-2" style={{ margin: 0 }}>{place.lore}</p>}
-            <button className="btn btn-taxi btn-sm" onClick={() => { setSelected(null); tapPin(selectedPin); }}>Open ›</button>
-          </div>
-        );
-      })()}
     </div>
   );
 });
