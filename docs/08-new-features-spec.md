@@ -1109,7 +1109,7 @@ they never reach the player. Then Decide, and a one- or two-line receipt with wh
   apart, one waiting at a time; "Not now" puts it away for the day. A variant never repeats within 30 days, its dilemma not
   within 7. Never during the first session.
 - **Where they come from:** `content/choices/*.json` (one file per area: life, transit, gigs, work, school, business, home,
-  nightlife, dating, money): about 25 dilemmas in 2 or 3 variants at launch, checked by `validateCards` (lib/choices.ts,
+  nightlife, dating, money): 40 dilemmas in 76 cards (Oct 30 rewrite for real stakes: theft, cover-ups, bribes, fencing; 10 of the first pool kept), checked by `validateCards` (lib/choices.ts,
   `npm run validate:content`, tests/choices.test.ts). The files hold every outcome's odds and what comes back, so only the server
   and the preview read them (lib/choicesContent.ts); players get the preview only (`cardView`).
 - **Guardrails:** only invented people are involved (never a real player); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed

@@ -1,11 +1,10 @@
 [
   {
-    "id": "building-cover-survey",
-    "base": "building-cover",
+    "id": "hallway-bike-crew",
+    "base": "hallway-bike",
     "area": "home",
-    "emoji": "🏢",
-    "title": "Your landlord's management company offers a C$100 rent credit for a 'Love my building!' review.",
-    "who": "teddy",
+    "emoji": "🚲",
+    "title": "Your friend Dante parks a C$3,000 bike in your hallway: 'Don't ask.' Sgt. Bev is asking around about a bike.",
     "where": {
       "tags": [
         "astoria"
@@ -16,85 +15,89 @@
     },
     "options": [
       {
-        "id": "honest",
-        "label": "Write the honest version",
-        "get": "The truth, about the radiator",
-        "cost": "The C$100 credit",
-        "risk": "low",
-        "riskWhy": "The management company sulks",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'Teddy is a hero. The radiator plays trombone at 3 AM.' Three stars. The credit evaporates like the hot water.",
-            "effects": {
-              "integrity": 5,
-              "clout": 5
-            },
-            "later": {
-              "afterDays": [
-                2,
-                7
-              ],
-              "chance": 0.6,
-              "emoji": "🔧",
-              "text": "Remember your honest review of the building? Teddy showed it to the owners and finally got the radiator part approved. Silence. Glorious silence.",
-              "effects": {
-                "mood": 10,
-                "energy": 10
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "love",
-        "label": "Five stars for C$100",
-        "get": "C$100 off rent",
-        "cost": "A lie on your building's listing",
+        "id": "bev",
+        "label": "Tell Bev it's here",
+        "get": "A clean hallway",
+        "cost": "Dante, probably forever",
         "risk": "medium",
-        "riskWhy": "They quote reviews on listings",
-        "comesBack": true,
+        "riskWhy": "Dante will know",
         "outcomes": [
           {
             "weight": 1,
-            "text": "'A peaceful home!' you type, as the radiator honks. C$100 credit. The radiator honks again, louder.",
+            "text": "Bev wheels it out with a pierogi in her teeth. Dante unfollows you. The bike's owner sends C$200 and a photo of the reunion.",
             "effects": {
-              "cash": 100,
-              "integrity": -5
-            },
-            "later": {
-              "afterDays": [
-                2,
-                6
-              ],
-              "chance": 0.6,
-              "emoji": "📋",
-              "text": "Remember your 'Love my building!' review? It's on the listing now, with your first name. Your new neighbor in 2B wants to talk about the radiator.",
-              "effects": {
-                "clout": -15,
-                "mood": -6
-              }
+              "cash": 200,
+              "integrity": 10,
+              "clout": 40,
+              "mood": -8
             }
           }
         ]
       },
       {
-        "id": "teddy",
-        "label": "Five stars for Teddy only",
-        "get": "A laugh, and Teddy's thanks",
-        "cost": "The credit, probably",
-        "risk": "low",
-        "riskWhy": "They might not get the joke",
-        "comesBack": false,
+        "id": "hide",
+        "label": "Hide it, take C$400",
+        "get": "C$400 'storage fee'",
+        "cost": "A stolen bike behind your coat",
+        "risk": "high",
+        "riskWhy": "Bev knocks twice",
+        "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "'Teddy: five stars. Radiator: one. Average: Teddy.' No credit. Teddy prints it and tapes it to his folding chair.",
+            "text": "You hang a coat over it. Bev knocks, peers, moves on. Dante pays C$400.",
             "effects": {
-              "integrity": 3,
-              "clout": 10,
-              "mood": 5
+              "cash": 400,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Coat over the bike, C$400 from Dante. Bev knocks again. She noticed the coat.",
+            "effects": {
+              "cash": 400,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🧥",
+              "text": "Remember Dante's bike? Bev came back with a clipboard. The bike was behind your coat. Two hours, and C$300 in 'storage fees' of her own.",
+              "effects": {
+                "cash": -700,
+                "clout": -100,
+                "holding": 2
+              },
+              "headline": "Developing: a stolen C$3,000 bike was found in {name}'s hallway. Sgt. Bev: 'It was behind a coat. A coat, hon.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "found",
+        "label": "Wheel it to the precinct as 'found'",
+        "get": "The bike gone, Dante none the wiser",
+        "cost": "A small story",
+        "risk": "medium",
+        "riskWhy": "Bev's heard 'found it' before",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Found it on 31st.' Bev looks at you for a long time. 'Sure, hon.' The owner gets it back by dinner.",
+            "effects": {
+              "integrity": 6,
+              "clout": 20
+            }
+          },
+          {
+            "weight": 1,
+            "text": "'Found it.' Bev: 'Found it, did you? Sit.' One hour, and she was right to.",
+            "effects": {
+              "integrity": 6,
+              "holding": 1
             }
           }
         ]
@@ -102,11 +105,125 @@
     ]
   },
   {
-    "id": "building-cover-leak",
-    "base": "building-cover",
+    "id": "hallway-bike-roommate",
+    "base": "hallway-bike",
     "area": "home",
-    "emoji": "💧",
-    "title": "Teddy asks you to tell the owners the leak in your ceiling is 'handled.' It's a bucket.",
+    "emoji": "📦",
+    "title": "Priya's new boyfriend stored six boxed laptops in your closet. 'Fell off a truck.' He offers you one.",
+    "who": "priya",
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
+    "needs": {
+      "roommate": true
+    },
+    "options": [
+      {
+        "id": "priya",
+        "label": "Tell Priya, they go",
+        "get": "Your closet back",
+        "cost": "An awkward week with Priya",
+        "risk": "medium",
+        "riskWhy": "Priya might take his side",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Priya reads the boxes, reads him, and reads him the riot act. The laptops leave. So does he.",
+            "effects": {
+              "integrity": 8,
+              "mood": -6
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "🫶",
+              "text": "Remember the laptops in the closet? Priya made you dinner: 'Thanks for not letting me date a warehouse.'",
+              "effects": {
+                "mood": 12,
+                "clout": 20
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "take",
+        "label": "Take one, sell it",
+        "get": "C$1,200",
+        "cost": "Your closet, an alibi",
+        "risk": "high",
+        "riskWhy": "Six laptops have six serial numbers",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "One laptop, C$1,200 in Woodside. The boyfriend calls you 'family.' Please don't.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,200. The laptop's serial is on a list.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the closet laptops? The one you sold was on a list. Bev followed it to your closet, where five more were waiting.",
+              "effects": {
+                "cash": -1200,
+                "clout": -150,
+                "holding": 3
+              },
+              "headline": "BREAKING: Five 'fell off a truck' laptops found in {name}'s closet. Sgt. Bev: 'It's always a closet. Why is it always a closet?'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "rent",
+        "label": "Charge him C$300 storage",
+        "get": "C$300",
+        "cost": "A closet full of trouble",
+        "risk": "medium",
+        "riskWhy": "Storing it is still storing it",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$300 for 'storage.' You don't open the closet for a week.",
+            "effects": {
+              "cash": 300,
+              "integrity": -8
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "basement-unit-inspector",
+    "base": "basement-unit",
+    "area": "home",
+    "emoji": "🔦",
+    "title": "A city inspector asks about the basement Teddy rents out illegally. Teddy mouths: 'C$600 off your rent.'",
     "who": "teddy",
     "where": {
       "tags": [
@@ -119,31 +236,31 @@
     "options": [
       {
         "id": "truth",
-        "label": "Tell them it's a bucket",
-        "get": "A real fix, eventually",
-        "cost": "Teddy's mood, for a week",
+        "label": "Tell the truth",
+        "get": "Safe neighbors downstairs",
+        "cost": "Teddy's goodwill, and your repairs",
         "risk": "medium",
-        "riskWhy": "Teddy forgets nothing",
+        "riskWhy": "Supers fix friends' sinks first",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "'It's a bucket.' The owners promise a roofer. Teddy says 'okay' in a tone that will haunt the hallway for days.",
+            "text": "The city moves the three guys somewhere legal, with a window. Teddy fixes your sink last, for a year.",
             "effects": {
-              "integrity": 6,
-              "mood": -4
+              "integrity": 10,
+              "mood": -8
             },
             "later": {
               "afterDays": [
                 3,
-                7
+                8
               ],
-              "chance": 0.6,
-              "emoji": "🧰",
-              "text": "Remember telling the owners the leak was a bucket? The roofer came. Teddy admitted, at his folding chair, that you were right. Then he fixed your drawer.",
+              "chance": 0.5,
+              "emoji": "🏠",
+              "text": "Remember the basement? The three guys found you to say thanks. Their new place has heat. They brought you a pie.",
               "effects": {
-                "mood": 8,
-                "clout": 10
+                "clout": 40,
+                "mood": 10
               }
             }
           }
@@ -151,358 +268,59 @@
       },
       {
         "id": "cover",
-        "label": "Cover for Teddy",
-        "get": "Teddy owes you one",
-        "cost": "A bucket in your ceiling, longer",
-        "risk": "medium",
-        "riskWhy": "Buckets overflow",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'Handled!' you tell the owners. Teddy winks. The bucket goes 'plink.'",
-            "effects": {
-              "integrity": -4,
-              "mood": 3
-            },
-            "later": {
-              "afterDays": [
-                2,
-                6
-              ],
-              "chance": 0.7,
-              "emoji": "🪣",
-              "text": "Remember telling the owners the leak was 'handled'? The bucket overflowed onto your C$70 sneakers. Teddy brought you a towel and a guilty look.",
-              "effects": {
-                "cash": -70,
-                "mood": -8
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "both",
-        "label": "Truth, and stick up for Teddy",
-        "get": "A fix, and Teddy off the hook",
-        "cost": "An awkward phone call",
-        "risk": "low",
-        "riskWhy": "Owners hate long calls",
-        "comesBack": false,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'It's a bucket, and Teddy's asked for a roofer six times.' Silence on the line. Then: 'We'll send someone.' Teddy hears and nods.",
-            "effects": {
-              "integrity": 8,
-              "energy": -8,
-              "mood": 5
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "broke-borrowed-umbrella",
-    "base": "broke-borrowed",
-    "area": "home",
-    "emoji": "☂️",
-    "title": "You borrowed Priya's good umbrella and the wind on 31st Street ate it. Priya texts: 'Seen my umbrella?'",
-    "who": "priya",
-    "where": {
-      "places": [
-        "ditmars-deli",
-        "steinway-fresh",
-        "astoria-blvd-station"
-      ],
-      "after": [
-        "arrive",
-        "visit"
-      ]
-    },
-    "options": [
-      {
-        "id": "confess",
-        "label": "Confess and replace it",
-        "get": "A clear conscience",
-        "cost": "C$35 for a good one",
-        "risk": "low",
-        "riskWhy": "Priya is blunt, not cruel",
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'I killed it. I'm sorry. New one on the fridge.' Priya: 'You owe me a story about the wind.' Fair.",
-            "effects": {
-              "cash": -35,
-              "integrity": 6,
-              "mood": 3
-            }
-          }
-        ]
-      },
-      {
-        "id": "dunno",
-        "label": "'Haven't seen it'",
-        "get": "No awkward talk",
-        "cost": "A small lie to your roommate",
-        "risk": "medium",
-        "riskWhy": "The pieces are in your trash",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'Nope, haven't seen it.' Priya sends a sad emoji and blames Jersey. Your trash can is very quiet.",
-            "effects": {
-              "integrity": -4
-            },
-            "later": {
-              "afterDays": [
-                1,
-                4
-              ],
-              "chance": 0.6,
-              "emoji": "🗑️",
-              "text": "Remember 'haven't seen it'? Priya found her umbrella's skeleton in your trash. She's taped a sign to the fridge: 'Honesty is free.'",
-              "effects": {
-                "mood": -8,
-                "clout": -5
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "quiet",
-        "label": "Replace it, say nothing",
-        "get": "Nobody has to know",
-        "cost": "C$35 and a tiny secret",
-        "risk": "low",
-        "riskWhy": "New umbrellas look new",
-        "comesBack": false,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "You buy the same umbrella and hang it on the hook. Priya: 'Huh, it looks new.' You: 'Wild.'",
-            "effects": {
-              "cash": -35,
-              "integrity": -1,
-              "mood": 2
-            }
-          }
-        ]
-      }
-    ],
-    "needs": {
-      "roommate": true
-    }
-  },
-  {
-    "id": "broke-borrowed-ladder",
-    "base": "broke-borrowed",
-    "area": "home",
-    "emoji": "🪜",
-    "title": "You borrowed Mr. Florakis's step stool from 3A and snapped a leg. He's in the hallway, asking around.",
-    "where": {
-      "tags": [
-        "astoria"
-      ],
-      "after": [
-        "arrive"
-      ]
-    },
-    "options": [
-      {
-        "id": "own",
-        "label": "Own up and offer to pay",
-        "get": "Your neighbor's respect",
-        "cost": "C$40 and some pride",
-        "risk": "low",
-        "riskWhy": "He may tell a long story",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'That was me.' Mr. Florakis waves off your money, then accepts it, then tells you about the stool's history since 1974.",
-            "effects": {
-              "cash": -40,
-              "integrity": 6,
-              "energy": -5
-            },
-            "later": {
-              "afterDays": [
-                2,
-                6
-              ],
-              "chance": 0.5,
-              "emoji": "🥧",
-              "text": "Remember owning up about Mr. Florakis's step stool? He left a spanakopita at your door, with a note: 'For the honest one, from 3A.'",
-              "effects": {
-                "mood": 8,
-                "energy": 10
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "teddy",
-        "label": "Get Teddy to fix it first",
-        "get": "A fixed stool, maybe no questions",
-        "cost": "C$20 for Teddy's glue",
-        "risk": "medium",
-        "riskWhy": "Teddy forgets nothing",
-        "comesBack": false,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "Teddy glues it in ten minutes and charges you C$20 and a raised eyebrow. The stool goes back, stronger than before.",
-            "effects": {
-              "cash": -20,
-              "integrity": -2
-            }
-          }
-        ]
-      },
-      {
-        "id": "lean",
-        "label": "Lean it back by his door",
-        "get": "No conversation",
-        "cost": "A neighbor's stool, and his knees",
+        "label": "'What basement?'",
+        "get": "C$600 off rent",
+        "cost": "Three guys in a basement with no window",
         "risk": "high",
-        "riskWhy": "He'll stand on it",
+        "riskWhy": "Inspectors come back",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "You lean the stool by 3A's door and tiptoe away. The broken leg is facing the wall. That's a choice.",
+            "text": "'Storage, I think?' The inspector leaves. Teddy knocks C$600 off your rent.",
             "effects": {
-              "integrity": -8
+              "cash": 600,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$600 off rent. The inspector writes down your name, just in case.",
+            "effects": {
+              "cash": 600,
+              "integrity": -12
             },
             "later": {
               "afterDays": [
-                1,
-                4
+                3,
+                8
               ],
-              "chance": 0.7,
-              "emoji": "😬",
-              "text": "Remember leaning the broken stool by 3A's door? Mr. Florakis wobbled, caught himself, and told the whole building. Everyone looks at you on the stairs.",
+              "chance": 1,
+              "emoji": "📝",
+              "text": "Remember 'what basement'? The inspector came back with a flashlight. You lied on a city form: C$1,000 fine. Teddy pays his own.",
               "effects": {
-                "clout": -25,
-                "mood": -10
+                "cash": -1000,
+                "clout": -80
               }
             }
           }
         ]
-      }
-    ]
-  },
-  {
-    "id": "who-did-it-noise",
-    "base": "who-did-it",
-    "area": "home",
-    "emoji": "🔊",
-    "title": "The building group chat: 'Who was blasting music at 2 AM?' It was you. 4B is getting blamed.",
-    "where": {
-      "tags": [
-        "astoria"
-      ],
-      "after": [
-        "arrive"
-      ]
-    },
-    "options": [
+      },
       {
-        "id": "own",
-        "label": "'That was me, sorry'",
-        "get": "4B off the hook",
-        "cost": "Thirty angry emojis",
+        "id": "fix",
+        "label": "'Ask Teddy for a week'",
+        "get": "Teddy fixes it first",
+        "cost": "C$200 toward a window",
         "risk": "low",
-        "riskWhy": "The chat roasts you for a day",
-        "comesBack": true,
+        "riskWhy": "Teddy might not fix it",
         "outcomes": [
           {
             "weight": 1,
-            "text": "'That was me, sorry all.' Thirty thumbs-down, one heart from 4B. Teddy replies 'thank you' with no punctuation.",
+            "text": "You stall the inspector, chip in C$200, and Teddy puts in a window and a smoke alarm. Inspector signs off. Teddy hugs you, briefly.",
             "effects": {
+              "cash": -200,
               "integrity": 6,
-              "mood": -3
-            },
-            "later": {
-              "afterDays": [
-                2,
-                6
-              ],
-              "chance": 0.5,
-              "emoji": "🎶",
-              "text": "Remember owning up to the 2 AM music? 4B invited you to their name-day party. Andreas catered. You danced, at a reasonable volume.",
-              "effects": {
-                "mood": 10,
-                "clout": 15
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "silent",
-        "label": "Say nothing",
-        "get": "No heat in the chat",
-        "cost": "4B takes the blame",
-        "risk": "medium",
-        "riskWhy": "Walls are thin, so are alibis",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "You watch the chat pile on 4B. You put on a podcast about ethics, then turn it off.",
-            "effects": {
-              "integrity": -5
-            },
-            "later": {
-              "afterDays": [
-                1,
-                4
-              ],
-              "chance": 0.5,
-              "emoji": "🎧",
-              "text": "Remember staying quiet while 4B got blamed for the 2 AM music? Teddy heard it from the hallway. He posted: 'It was not 4B.'",
-              "effects": {
-                "clout": -20,
-                "mood": -6
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "pile",
-        "label": "Pile on 4B too",
-        "get": "You look innocent",
-        "cost": "4B's reputation, and the truth",
-        "risk": "high",
-        "riskWhy": "Teddy knows whose music it was",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "'Honestly, 4B, some of us work.' Fifteen likes. 4B leaves the chat.",
-            "effects": {
-              "integrity": -10,
-              "clout": 10
-            },
-            "later": {
-              "afterDays": [
-                1,
-                4
-              ],
-              "chance": 0.8,
-              "emoji": "🧔",
-              "text": "Remember piling on 4B for your own 2 AM music? Teddy posted a voice memo from the hallway. It's your playlist. 4B rejoined the chat just to react.",
-              "effects": {
-                "clout": -40,
-                "mood": -10
-              }
+              "clout": 20
             }
           }
         ]
@@ -510,11 +328,11 @@
     ]
   },
   {
-    "id": "who-did-it-recycling",
-    "base": "who-did-it",
+    "id": "basement-unit-storage",
+    "base": "basement-unit",
     "area": "home",
-    "emoji": "♻️",
-    "title": "Teddy holds up a pizza box in the recycling, still full of crusts: 'Whose is this?' It's yours.",
+    "emoji": "🗝️",
+    "title": "Teddy offers C$1,000 if you tell the inspector his basement apartment is 'your storage.' It has a bed.",
     "who": "teddy",
     "where": {
       "tags": [
@@ -526,81 +344,260 @@
     },
     "options": [
       {
-        "id": "own",
-        "label": "'Mine, I'll fix it'",
-        "get": "Teddy's nod",
-        "cost": "Sorting the whole bin",
-        "risk": "low",
-        "riskWhy": "The bin is gross, that's all",
+        "id": "no",
+        "label": "Say no",
+        "get": "Clean hands",
+        "cost": "C$1,000 and Teddy's mood",
+        "risk": "medium",
+        "riskWhy": "Teddy holds your spare keys",
         "outcomes": [
           {
             "weight": 1,
-            "text": "You sort the bin while Teddy supervises from his folding chair and explains which plastic is which. All of them, apparently.",
+            "text": "Teddy sighs, 'Fine,' and spends the weekend making it legal. He's quiet with you for a month.",
             "effects": {
-              "integrity": 5,
-              "energy": -10
+              "integrity": 8,
+              "mood": -4
             }
           }
         ]
       },
       {
-        "id": "shrug",
-        "label": "Shrug: 'Not sure'",
-        "get": "Out of the conversation",
-        "cost": "A small lie to Teddy",
-        "risk": "medium",
-        "riskWhy": "Teddy forgets nothing",
+        "id": "yes",
+        "label": "'It's my storage'",
+        "get": "C$1,000",
+        "cost": "A lie on a city form",
+        "risk": "high",
+        "riskWhy": "Storage doesn't usually have a bed",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "'Not sure, Teddy.' He looks at the box. The box says 'Still-a-Dollar Slice.' You get Still-a-Dollar Slice every day.",
+            "text": "'My storage.' The inspector notes the bed. 'For naps,' you say. C$1,000.",
             "effects": {
-              "integrity": -4
+              "cash": 1000,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "'My storage.' C$1,000. The inspector notes the bed, the microwave and the three guys.",
+            "effects": {
+              "cash": 1000,
+              "integrity": -14
             },
             "later": {
               "afterDays": [
-                1,
-                5
+                2,
+                6
               ],
-              "chance": 0.5,
-              "emoji": "🍕",
-              "text": "Remember shrugging at Teddy about the pizza box? He taped it to your door with a note: 'Not sure either.' The whole floor walked past it.",
+              "chance": 1,
+              "emoji": "🛏️",
+              "text": "Remember the basement 'storage'? The city fined Teddy and you: C$1,500 for a false statement. Lola calls it 'the nap room scandal.'",
               "effects": {
-                "clout": -15,
-                "mood": -5
+                "cash": -1500,
+                "clout": -120
               }
             }
           }
         ]
+      }
+    ]
+  },
+  {
+    "id": "porch-pickup-lobby",
+    "base": "porch-pickup",
+    "area": "home",
+    "emoji": "📦",
+    "title": "Your neighbor lifts boxes off stoops and resells them. He wants your lobby as the drop: C$700 a week.",
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
+    "options": [
+      {
+        "id": "no",
+        "label": "Say no",
+        "get": "A lobby with nothing in it",
+        "cost": "C$700 a week",
+        "risk": "low",
+        "riskWhy": "Nothing to explain",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Nah.' He shrugs and asks the guy in 3C. The guy in 3C says yes. Of course he does.",
+            "effects": {
+              "integrity": 5
+            }
+          }
+        ]
       },
       {
-        "id": "neighbor",
-        "label": "'Probably 4B'",
-        "get": "Clean hands, dirty box",
-        "cost": "4B's good name",
-        "risk": "high",
-        "riskWhy": "There's a receipt on the box",
+        "id": "decoy",
+        "label": "Set a decoy box with Sgt. Bev",
+        "get": "A thief caught, a block grateful",
+        "cost": "A week of nerves",
+        "risk": "medium",
+        "riskWhy": "He might figure it out",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "'Probably 4B.' Teddy heads for the stairs with the box. You feel the receipt taped to its lid in your bones.",
+            "text": "You leave a box of Sal's expired coupons on a stoop. Bev catches him mid-lift. The block throws you a little party.",
             "effects": {
-              "integrity": -8
+              "integrity": 12,
+              "clout": 90
             },
             "later": {
               "afterDays": [
                 1,
                 3
               ],
-              "chance": 0.8,
-              "emoji": "🧾",
-              "text": "Remember blaming 4B for the pizza box? The receipt on the lid had your name and order. Teddy gave it to 4B, who gave it to the group chat.",
+              "chance": 1,
+              "emoji": "📰",
+              "text": "Remember the decoy box? Lola got the story from Bev.",
               "effects": {
-                "clout": -30,
-                "mood": -8
+                "clout": 60
               }
+            }
+          }
+        ]
+      },
+      {
+        "id": "yes",
+        "label": "Lend him the lobby",
+        "get": "C$700 a week",
+        "cost": "The block's packages",
+        "risk": "high",
+        "riskWhy": "Packages have tracking numbers",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Boxes in, boxes out. C$700. You learn to not read the labels.",
+            "effects": {
+              "cash": 700,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$700. Thirty-one boxes stacked by size in your lobby. Very tidy. Very visible.",
+            "effects": {
+              "cash": 700,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the lobby drop? A tracking number led Sgt. Bev straight to your lobby. Thirty-one packages, two hours on the bench.",
+              "effects": {
+                "cash": -700,
+                "clout": -150,
+                "holding": 2
+              },
+              "headline": "BREAKING: Thirty-one stolen packages found in {name}'s lobby, stacked by size. Sgt. Bev: 'Organized. I'll give them that.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "porch-pickup-stoop",
+    "base": "porch-pickup",
+    "area": "home",
+    "emoji": "🏠",
+    "title": "A stoop on 30th Avenue: eight boxes, nobody home. Your neighbor's 'pickup crew' is one short: C$300.",
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
+    "options": [
+      {
+        "id": "no",
+        "label": "Keep walking",
+        "get": "Your hands clean",
+        "cost": "C$300",
+        "risk": "low",
+        "riskWhy": "Nothing to explain",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You keep walking. You move one box behind a planter so nobody else gets ideas. Small things.",
+            "effects": {
+              "integrity": 6
+            }
+          }
+        ]
+      },
+      {
+        "id": "lift",
+        "label": "Do the hour",
+        "get": "C$300",
+        "cost": "Eight neighbors' deliveries",
+        "risk": "high",
+        "riskWhy": "Every door has a doorbell camera now",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "One hour, eight boxes, C$300. You don't know what was in them. You don't want to.",
+            "effects": {
+              "cash": 300,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 2,
+            "text": "C$300 for the hour. The stoop's doorbell camera got a lovely angle.",
+            "effects": {
+              "cash": 300,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🔔",
+              "text": "Remember the boxes on 30th? The doorbell clip is the block's group chat's favorite video. Bev booked you, the crew and the planter.",
+              "effects": {
+                "cash": -600,
+                "clout": -150,
+                "holding": 2
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "knock",
+        "label": "Knock next door",
+        "get": "Packages kept safe",
+        "cost": "Ten minutes",
+        "risk": "low",
+        "riskWhy": "Neighbors are nice, mostly",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "The neighbor takes the boxes in. 'You're a doll.' Your pickup-crew neighbor calls you 'a cop's cousin.'",
+            "effects": {
+              "integrity": 8,
+              "clout": 20
             }
           }
         ]

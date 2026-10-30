@@ -1,40 +1,321 @@
 [
   {
+    "id": "fake-review-bar",
+    "base": "fake-review",
+    "area": "gigs",
+    "emoji": "⭐",
+    "title": "Gig board: C$800 to post fifty five-star reviews of The Tipsy Turnstile, a bar you've never been to.",
+    "where": {
+      "tags": [
+        "gigs_board"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
+    "options": [
+      {
+        "id": "pass",
+        "label": "Skip it",
+        "get": "Your accounts stay clean",
+        "cost": "C$800",
+        "risk": "low",
+        "riskWhy": "Nobody's checking a gig you didn't take",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You scroll past. Someone else takes it in eleven seconds.",
+            "effects": {
+              "integrity": 5
+            }
+          }
+        ]
+      },
+      {
+        "id": "visit",
+        "label": "Go once, write one honest review",
+        "get": "C$200 for one real review",
+        "cost": "C$600 less, and a night out",
+        "risk": "low",
+        "riskWhy": "Honest reviews don't get flagged",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You go. It's fine. You write 'three stars, great pretzels, sticky stools.' The client pays C$200 and calls it 'weirdly useful.'",
+            "effects": {
+              "cash": 200,
+              "integrity": 4,
+              "energy": -10
+            }
+          }
+        ]
+      },
+      {
+        "id": "post",
+        "label": "Post all fifty",
+        "get": "C$800",
+        "cost": "Fifty lies under your name",
+        "risk": "high",
+        "riskWhy": "Review sites ban bulk posters",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Fifty reviews from fifty accounts named things like 'BarLover_88.' C$800 by morning.",
+            "effects": {
+              "cash": 800,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 2,
+            "text": "Fifty glowing reviews by midnight. C$800. The review site is very quiet. Too quiet.",
+            "effects": {
+              "cash": 800,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.9,
+              "emoji": "🚩",
+              "text": "Remember the fifty five-stars? The review site traced them to you and reported the gig. Valentina pulled you off the board and the client wants a refund.",
+              "effects": {
+                "cash": -600,
+                "clout": -100,
+                "gigLock": 3
+              },
+              "headline": "BREAKING: {name} exposed as the author of 50 glowing reviews for a bar they've never been to. The Tipsy Turnstile: 'We're also confused.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fake-review-startup",
+    "base": "fake-review",
+    "area": "gigs",
+    "emoji": "📉",
+    "title": "A Triborough Works startup offers C$1,200 to one-star its rival's app from thirty burner accounts.",
+    "who": "valentina",
+    "where": {
+      "places": [
+        "triborough-works"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
+    "options": [
+      {
+        "id": "no",
+        "label": "Turn it down",
+        "get": "A clean name on the board",
+        "cost": "C$1,200",
+        "risk": "low",
+        "riskWhy": "Valentina likes people who say no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Not my thing.' The founder calls you 'a real old-economy thinker.' Valentina, passing, gives you a tiny thumbs-up.",
+            "effects": {
+              "integrity": 6,
+              "clout": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "tell",
+        "label": "Tell Valentina",
+        "get": "Valentina's gratitude",
+        "cost": "The founder's C$1,200 and goodwill",
+        "risk": "medium",
+        "riskWhy": "Founders talk at every mixer",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Valentina pulls the gig and bans the startup from the board. She owes you one, which in Queens is legal tender.",
+            "effects": {
+              "integrity": 10,
+              "clout": 50
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "💻",
+              "text": "Remember telling Valentina about the burner reviews? She bumped you to the top of the board with a C$400 'trusted' gig.",
+              "effects": {
+                "cash": 400,
+                "clout": 30
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "post",
+        "label": "Post the thirty",
+        "get": "C$1,200",
+        "cost": "A rival's livelihood",
+        "risk": "high",
+        "riskWhy": "Rival apps hire lawyers",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Thirty one-stars, thirty burner names. The rival's rating drops a full star. C$1,200 lands.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,200 for thirty one-stars. The rival's lawyer is already typing.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 1,
+              "emoji": "⚖️",
+              "text": "Remember the thirty one-star reviews? The rival traced them. Valentina locked your board, Triborough banned you, and the settlement is C$1,500.",
+              "effects": {
+                "cash": -1500,
+                "clout": -150,
+                "gigLock": 3,
+                "ban": {
+                  "place": "triborough-works",
+                  "days": 7
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "skip-safety-banner",
     "base": "skip-safety",
     "area": "gigs",
-    "emoji": "🪜",
-    "title": "Gig: hang a launch banner off Skybridge Tower's mezzanine. The boss offers C$150 to skip the harness check.",
-    "where": { "places": ["skybridge-tower"], "after": ["gig"] },
+    "emoji": "🪧",
+    "title": "Gig: hang a 40-foot banner off Skybridge Tower's mezzanine. The boss offers C$600 to skip the harness check.",
+    "where": {
+      "places": [
+        "skybridge-tower"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
     "options": [
       {
-        "id": "check", "label": "Do the check anyway", "get": "Both feet on the mezzanine", "cost": "The C$150 bonus, and his sighs",
-        "risk": "low", "riskWhy": "The boss sighs, that's all", "comesBack": true,
+        "id": "check",
+        "label": "Do the check",
+        "get": "A banner that stays up",
+        "cost": "The C$600, and an hour",
+        "risk": "low",
+        "riskWhy": "Done right is done right",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You check the harness. One strap is frayed. The boss sighs, swaps it and doesn't mention the bonus again.",
-            "effects": { "integrity": 6, "energy": -10 },
-            "later": { "afterDays": [2, 6], "chance": 0.4, "emoji": "📋", "text": "Remember checking the harness at Skybridge Tower? The building's safety manager heard. She asked for you by name on a better gig.",
-                       "effects": { "cash": 120, "clout": 15 } } }
+          {
+            "weight": 1,
+            "text": "You check every clip. The boss sighs at his watch. The banner stays up through a thunderstorm.",
+            "effects": {
+              "integrity": 8,
+              "energy": -10
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.5,
+              "emoji": "🏢",
+              "text": "Remember the banner you hung properly? Skybridge's building manager asked for you by name: C$400 for a 'trustworthy hands' gig.",
+              "effects": {
+                "cash": 400,
+                "clout": 30
+              }
+            }
+          }
         ]
       },
       {
-        "id": "once", "label": "Skip it, just this once", "get": "C$150 and an early finish", "cost": "Your knees, possibly",
-        "risk": "medium", "riskWhy": "That strap looked old", "comesBack": false,
+        "id": "skip",
+        "label": "Skip it, take the C$600",
+        "get": "C$600",
+        "cost": "The banner's grip on reality",
+        "risk": "high",
+        "riskWhy": "Wind off the river is real",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 3, "text": "No check, no problem. The banner says 'DISRUPT EVERYTHING' and you get C$150 for not disrupting your schedule.",
-            "effects": { "cash": 150, "integrity": -5 } },
-          { "weight": 1, "text": "A strap gives. You slide six feet into a decorative ficus. You're fine. The ficus is not. You still get the C$150.",
-            "effects": { "cash": 150, "integrity": -5, "energy": -20, "mood": -8 } }
+          {
+            "weight": 2,
+            "text": "Up in nine minutes, no harness. C$600 and the boss calls you 'a closer.'",
+            "effects": {
+              "cash": 600,
+              "integrity": -10
+            }
+          },
+          {
+            "weight": 2,
+            "text": "Up fast, C$600 cash. The banner flaps in a way banners shouldn't.",
+            "effects": {
+              "cash": 600,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 1,
+              "emoji": "🌮",
+              "text": "Remember the banner you skipped the check on? It came down in the wind onto a taco truck's awning. Nobody hurt. The truck's lawyer is very awake.",
+              "effects": {
+                "cash": -1500,
+                "clout": -120,
+                "ban": {
+                  "place": "skybridge-tower",
+                  "days": 5
+                }
+              },
+              "headline": "BREAKING: A 40-foot banner {name} hung at Skybridge Tower has landed on a taco truck. No injuries. The tacos, we're told, are fine."
+            }
+          }
         ]
       },
       {
-        "id": "more", "label": "Skip it, ask for C$300", "get": "C$300", "cost": "Your reputation on the board",
-        "risk": "high", "riskWhy": "Bosses talk on the gigs board", "comesBack": true,
+        "id": "report",
+        "label": "Report the boss to the building",
+        "get": "The building's respect",
+        "cost": "Today's gig pay",
+        "risk": "medium",
+        "riskWhy": "The boss decides who gets rehired",
         "outcomes": [
-          { "weight": 1, "text": "'C$300 or I check every buckle twice.' He pays. You skip it. The banner goes up. So does your price.",
-            "effects": { "cash": 300, "integrity": -10 },
-            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "📌", "text": "Remember shaking down the Skybridge banner boss for C$300? He pinned a note on the gigs board: 'Will skip safety, for a fee.'",
-                       "effects": { "clout": -40, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "The building shuts the gig down. You lose today's C$200, but the building manager writes your name on a sticky note. A good sticky note.",
+            "effects": {
+              "cash": -200,
+              "integrity": 10,
+              "clout": 40
+            }
+          }
         ]
       }
     ]
@@ -44,112 +325,74 @@
     "base": "skip-safety",
     "area": "gigs",
     "emoji": "🎤",
-    "title": "Gig: build a pop-up stage for a startup launch. Skip the weight test, finish early, C$120 bonus.",
+    "title": "Gig: build Chad Kensington's launch stage. Skip the weight test, finish early, C$500 bonus.",
     "who": "valentina",
-    "where": { "places": ["triborough-works"], "after": ["gig"] },
+    "where": {
+      "places": [
+        "triborough-works"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
     "options": [
       {
-        "id": "test", "label": "Test it properly", "get": "A stage that holds a CEO", "cost": "Two hours and the bonus",
-        "risk": "low", "riskWhy": "Only the clock suffers",
+        "id": "test",
+        "label": "Run the weight test",
+        "get": "A stage that holds",
+        "cost": "The C$500, and two hours",
+        "risk": "low",
+        "riskWhy": "Nothing collapses on your watch",
         "outcomes": [
-          { "weight": 1, "text": "You stack sandbags and jump on it. One leg wobbles. You fix it. Valentina watches, writes something down, says nothing.",
-            "effects": { "integrity": 6, "energy": -15, "clout": 10 } }
+          {
+            "weight": 1,
+            "text": "The test finds a cracked leg. You fix it. Chad says 'no pressure' eleven times.",
+            "effects": {
+              "integrity": 8,
+              "energy": -15
+            }
+          }
         ]
       },
       {
-        "id": "skip", "label": "Skip it, take the C$120", "get": "C$120 and home by six", "cost": "Peace of mind during the speech",
-        "risk": "medium", "riskWhy": "A wobbly leg and a big founder", "comesBack": true,
+        "id": "skip",
+        "label": "Skip it, cash the bonus",
+        "get": "C$500",
+        "cost": "A stage of unknown strength",
+        "risk": "high",
+        "riskWhy": "Chad is going to jump. He always jumps.",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 2, "text": "You skip the test and leave by six. The stage holds. The founder's speech about 'moving fast' is very on theme.",
-            "effects": { "cash": 120, "integrity": -5 } },
-          { "weight": 1, "text": "You skip the test and take the C$120. The founder steps up. The stage creaks. It holds. Barely.",
-            "effects": { "cash": 120, "integrity": -5 },
-            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "📉", "text": "Remember skipping the stage test? It tilted during the founder's 'we never cut corners' line. The clip is everywhere. So is your name.",
-                       "effects": { "clout": -40, "mood": -8 } } }
-        ]
-      },
-      {
-        "id": "split", "label": "Test the front, skip the back", "get": "C$60 and a mostly safe stage", "cost": "Half the work, half the worry",
-        "risk": "low", "riskWhy": "Nobody stands at the back", "comesBack": false,
-        "outcomes": [
-          { "weight": 1, "text": "You test where the founder stands and trust the rest. The boss pays half the bonus for half the corner cut.",
-            "effects": { "cash": 60, "integrity": -2, "energy": -5 } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "fake-review-bar",
-    "base": "fake-review",
-    "area": "gigs",
-    "emoji": "⭐",
-    "title": "On the gigs board: C$200 to post five-star reviews of The Tipsy Turnstile, a bar you've never been to.",
-    "where": { "tags": ["gigs_board"], "after": ["gig"] },
-    "options": [
-      {
-        "id": "decline", "label": "Decline", "get": "Your reviews stay yours", "cost": "C$200",
-        "risk": "low", "riskWhy": "Nothing to hide",
-        "outcomes": [
-          { "weight": 1, "text": "You pass. The gig is gone in four minutes, to someone whose profile says 'review enthusiast.'",
-            "effects": { "integrity": 5 } }
-        ]
-      },
-      {
-        "id": "post", "label": "Post the five stars", "get": "C$200, no travel", "cost": "Your word, for a bar you've never seen",
-        "risk": "medium", "riskWhy": "Review sites hunt paid posters", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "'Life-changing negronis. Bartender has kind eyes.' You've never been there. C$200 lands in four seconds.",
-            "effects": { "cash": 200, "integrity": -6 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🚩", "text": "Remember the five stars for The Tipsy Turnstile? The review site wiped all 40 of them and pinned a 'paid reviewer' label on your profile.",
-                       "effects": { "clout": -35, "mood": -5 } } }
-        ]
-      },
-      {
-        "id": "visit", "label": "Go, then post an honest one", "get": "C$200 and a true review", "cost": "An evening there, and the owner's mood",
-        "risk": "medium", "riskWhy": "He paid for five stars, not three", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "You go. The negronis are fine. The bartender has normal eyes. You post three honest stars and keep the C$200.",
-            "effects": { "cash": 200, "integrity": -2, "energy": -15, "mood": 3 },
-            "later": { "afterDays": [1, 4], "chance": 0.4, "emoji": "😤", "text": "Remember your three honest stars for The Tipsy Turnstile? The owner demanded his C$200 back. He settled for C$100 and a long sulk.",
-                       "effects": { "cash": -100 } } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "split-the-tip-moving",
-    "base": "split-the-tip",
-    "area": "gigs",
-    "emoji": "🛋️",
-    "title": "Moving gig on 21st Street: the client hands YOU the C$120 tip. Kenji carried the couch up alone.",
-    "where": { "tags": ["gigs_board"], "after": ["gig"] },
-    "options": [
-      {
-        "id": "split", "label": "Split it down the middle", "get": "C$60 and a fair partner", "cost": "Half the tip",
-        "risk": "low", "riskWhy": "Nothing to hide",
-        "outcomes": [
-          { "weight": 1, "text": "You hand Kenji sixty. He nods like you passed a test you didn't know you were taking.",
-            "effects": { "cash": 60, "integrity": 6 } }
-        ]
-      },
-      {
-        "id": "all", "label": "Give it all to Kenji", "get": "Kenji's lifelong respect", "cost": "C$120 you were holding",
-        "risk": "low", "riskWhy": "Only your wallet", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "'You carried the couch.' Kenji stares at the money, then at you. 'Nobody does that.' You did that.",
-            "effects": { "integrity": 8, "mood": 6 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📦", "text": "Remember giving Kenji the whole tip on 21st Street? He passed you a moving gig of his own: a piano, a pro crew and C$150.",
-                       "effects": { "cash": 150, "clout": 10 } } }
-        ]
-      },
-      {
-        "id": "keep", "label": "Keep it, say nothing", "get": "C$120", "cost": "Kenji's share",
-        "risk": "medium", "riskWhy": "Clients tell the gigs board", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "C$120 in your pocket. Kenji asks if the client tipped. You say 'she said thanks.' That's also true.",
-            "effects": { "cash": 120, "integrity": -8 },
-            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "⭐", "text": "Remember the tip on 21st Street? The client's review thanked 'both movers for the C$120.' Kenji read it. So did Valentina.",
-                       "effects": { "clout": -30, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "Done early, C$500. The launch goes off and the stage holds. Chad does a little jump. It holds.",
+            "effects": {
+              "cash": 500,
+              "integrity": -10
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$500, done early. Then Chad jumps during his keynote.",
+            "effects": {
+              "cash": 500,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 1,
+              "emoji": "🎤",
+              "text": "Remember the stage you didn't test? It folded during Chad's keynote. Chad is fine and sitting on the floor. Valentina locked your board for three days.",
+              "effects": {
+                "cash": -1000,
+                "clout": -150,
+                "gigLock": 3
+              }
+            }
+          }
         ]
       }
     ]
@@ -158,122 +401,321 @@
     "id": "pad-hours-invoice",
     "base": "pad-the-hours",
     "area": "gigs",
-    "emoji": "⏱️",
-    "title": "Your gig client never checks hours. You worked six. The form says 'Hours: ___.'",
+    "emoji": "🧾",
+    "title": "Your gig client never checks hours. You worked six. Bill twenty and that's C$1,400 more.",
     "who": "valentina",
-    "where": { "places": ["triborough-works", "skybridge-tower"], "after": ["gig"] },
+    "where": {
+      "places": [
+        "triborough-works",
+        "skybridge-tower"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
     "options": [
       {
-        "id": "six", "label": "Write six", "get": "A clean invoice", "cost": "The extra you could've billed",
-        "risk": "low", "riskWhy": "It's the truth", "comesBack": true,
+        "id": "six",
+        "label": "Bill the six",
+        "get": "A client who comes back",
+        "cost": "C$1,400",
+        "risk": "low",
+        "riskWhy": "Six is six",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'6.' Valentina's app approves it in a second. It is the only app in Queens that works.",
-            "effects": { "integrity": 4, "mood": 2 },
-            "later": { "afterDays": [3, 7], "chance": 0.4, "emoji": "📈", "text": "Remember writing six honest hours? Valentina's app flagged you as 'reliable' and pushed you a pro gig first.",
-                       "effects": { "cash": 100, "clout": 15 } } }
+          {
+            "weight": 1,
+            "text": "Six hours, invoiced. The client pays the same day and adds a smiley.",
+            "effects": {
+              "integrity": 6
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.6,
+              "emoji": "📩",
+              "text": "Remember billing the honest six? The client booked you again with a C$400 'reliability bonus.' Apparently that's rare.",
+              "effects": {
+                "cash": 400,
+                "clout": 20
+              }
+            }
+          }
         ]
       },
       {
-        "id": "eight", "label": "Write eight", "get": "About C$80 more", "cost": "A small lie in ink",
-        "risk": "medium", "riskWhy": "Valentina audits now and then", "comesBack": true,
+        "id": "eight",
+        "label": "Round up to eight",
+        "get": "C$200",
+        "cost": "A little fiction",
+        "risk": "low",
+        "riskWhy": "Two hours is rounding, right?",
         "outcomes": [
-          { "weight": 2, "text": "'8.' Rounded up for vibes. Approved. Nobody blinks.",
-            "effects": { "cash": 80, "integrity": -5 } },
-          { "weight": 1, "text": "'8.' Approved. For now.",
-            "effects": { "cash": 80, "integrity": -5 },
-            "later": { "afterDays": [2, 6], "chance": 1, "emoji": "🔍", "text": "Remember writing eight hours for six? Valentina's audit matched the door log. She took the C$80 back with a very polite note.",
-                       "effects": { "cash": -80, "clout": -15 } } }
+          {
+            "weight": 1,
+            "text": "Eight hours. Nobody blinks. You blink once, at yourself.",
+            "effects": {
+              "cash": 200,
+              "integrity": -4
+            }
+          }
         ]
       },
       {
-        "id": "twelve", "label": "Write twelve", "get": "About C$240 more", "cost": "A big lie in ink",
-        "risk": "high", "riskWhy": "Twelve hours on a six-hour job?", "comesBack": true,
+        "id": "twenty",
+        "label": "Bill twenty",
+        "get": "C$1,400 extra",
+        "cost": "The client's trust",
+        "risk": "high",
+        "riskWhy": "Office badges log every swipe",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'12.' You stare at the number. It stares back. Approved, somehow.",
-            "effects": { "cash": 240, "integrity": -10 },
-            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🚫", "text": "Remember the twelve-hour invoice for a six-hour gig? Valentina took it back and benched you from pro gigs for the week.",
-                       "effects": { "cash": -240, "clout": -40, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "Twenty hours, paid in full. C$1,400 extra.",
+            "effects": {
+              "cash": 1400,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,400 extra. Then the client's office manager pulls the badge logs.",
+            "effects": {
+              "cash": 1400,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 1,
+              "emoji": "🪪",
+              "text": "Remember the twenty-hour invoice? The badge logs say six. The client wants it back, and Valentina locked you off the board.",
+              "effects": {
+                "cash": -1400,
+                "clout": -100,
+                "gigLock": 3
+              }
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "house-sit-penthouse",
-    "base": "house-sit",
+    "id": "warehouse-damaged-tvs",
+    "base": "warehouse-damaged",
     "area": "gigs",
-    "emoji": "🔑",
-    "title": "Valentina trusts you to house-sit a client's penthouse in Long Island City. The roof deck fits sixty.",
-    "who": "valentina",
-    "where": { "tags": ["gigs_board"], "after": ["gig"] },
-    "needs": { "integrityMin": 70 },
+    "emoji": "📦",
+    "title": "Warehouse inventory gig: the night lead marks 40 TVs 'damaged' and offers you C$1,200 of the resale.",
+    "where": {
+      "tags": [
+        "gigs_board"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
     "options": [
       {
-        "id": "plants", "label": "Water the plants, go home", "get": "C$150 and a client for life", "cost": "The party of the year",
-        "risk": "low", "riskWhy": "Ferns don't gossip", "comesBack": true,
+        "id": "count",
+        "label": "Count them as fine",
+        "get": "An honest count",
+        "cost": "C$1,200 and the lead's goodwill",
+        "risk": "medium",
+        "riskWhy": "The lead picks who gets rehired",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You water fourteen plants, feed one very judgmental fish and leave. C$150. The fish approves.",
-            "effects": { "cash": 150, "integrity": 6, "mood": 3 },
-            "later": { "afterDays": [3, 7], "chance": 0.7, "emoji": "🔑", "text": "Remember house-sitting the LIC penthouse like a saint? The client booked you for a whole month of weekends. C$200 up front.",
-                       "effects": { "cash": 200, "clout": 20 } } }
+          {
+            "weight": 1,
+            "text": "You write '40, fine.' The lead stares at you like you've insulted his mother. You don't get rehired.",
+            "effects": {
+              "integrity": 8,
+              "mood": -4
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.6,
+              "emoji": "🏭",
+              "text": "Remember your honest count in Long Island City? The warehouse owner noticed and asked Valentina for you by name: a C$500 bonus.",
+              "effects": {
+                "cash": 500,
+                "clout": 50
+              }
+            }
+          }
         ]
       },
       {
-        "id": "one", "label": "Invite one friend for the view", "get": "C$150 and a sunset", "cost": "A tiny breach of trust",
-        "risk": "low", "riskWhy": "One guest, one glass, one wipe", "comesBack": false,
+        "id": "cut",
+        "label": "Take the cut",
+        "get": "C$1,200",
+        "cost": "Forty TVs' worth of lies",
+        "risk": "high",
+        "riskWhy": "Insurers audit 'damaged' stock",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "One friend, one bottle of seltzer, the whole skyline. You wipe every glass twice. Nobody will ever know.",
-            "effects": { "cash": 150, "integrity": -3, "mood": 10 } }
+          {
+            "weight": 1,
+            "text": "C$1,200 in an envelope marked 'misc.' The TVs vanish into a van.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,200 cash. The forty 'damaged' TVs turn up on a resale site, very undamaged.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 1,
+              "emoji": "📺",
+              "text": "Remember the 'damaged' TVs? The insurer bought one off a resale site. It works great. The lead named you, Valentina locked your board and your cut goes back.",
+              "effects": {
+                "cash": -1200,
+                "clout": -120,
+                "gigLock": 3
+              }
+            }
+          }
         ]
       },
       {
-        "id": "party", "label": "Throw a 'small' party", "get": "C$150 and +60 clout", "cost": "The client's trust, Valentina's too",
-        "risk": "high", "riskWhy": "Doormen keep logs", "comesBack": true,
+        "id": "owner",
+        "label": "Tell the warehouse owner",
+        "get": "A reward, maybe",
+        "cost": "The night lead's lifelong hate",
+        "risk": "medium",
+        "riskWhy": "Owners sometimes shoot the messenger",
         "outcomes": [
-          { "weight": 1, "text": "Sixty people, a DJ named Polaroid, and the best roof photos of your life. The fish has seen things.",
-            "effects": { "cash": 150, "clout": 60, "integrity": -10, "energy": -15 },
-            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🪩", "text": "Remember the 'small' party at the LIC penthouse? The doorman's log said 61 guests. The client found a sequin in the fish tank. Valentina dropped you.",
-                       "effects": { "cash": -150, "clout": -50, "mood": -10 } } }
+          {
+            "weight": 2,
+            "text": "The owner recounts, fires the lead and hands you C$400. 'Come back anytime.'",
+            "effects": {
+              "cash": 400,
+              "integrity": 12,
+              "clout": 40
+            }
+          },
+          {
+            "weight": 1,
+            "text": "The owner thanks you, then asks why you knew so much about it. Awkward. No reward.",
+            "effects": {
+              "integrity": 12,
+              "mood": -6
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "house-sit-cheese",
-    "base": "house-sit",
+    "id": "warehouse-damaged-silver",
+    "base": "warehouse-damaged",
     "area": "gigs",
-    "emoji": "🧀",
-    "title": "A Skybridge client leaves you her keys, her cat and a fridge full of C$90 cheese while she's in Lisbon.",
-    "where": { "places": ["skybridge-tower"], "after": ["gig"] },
-    "needs": { "integrityMin": 70 },
+    "emoji": "🍴",
+    "title": "Moving gig at a rich aunt's house. Her nephew winks: 'Take a box of silver. C$900 at a pawn shop.'",
+    "where": {
+      "tags": [
+        "gigs_board"
+      ],
+      "after": [
+        "gig"
+      ]
+    },
     "options": [
       {
-        "id": "cat", "label": "Feed the cat, touch nothing", "get": "C$120, a five-star client", "cost": "The cheese, which is calling you",
-        "risk": "low", "riskWhy": "Cats can't testify", "comesBack": true,
+        "id": "pack",
+        "label": "Pack it all, properly",
+        "get": "A clean gig",
+        "cost": "C$900",
+        "risk": "low",
+        "riskWhy": "Nothing missing, nothing to explain",
         "outcomes": [
-          { "weight": 1, "text": "You feed the cat, scoop the box and stare at the cheese like a museum piece. C$120, and your dignity.",
-            "effects": { "cash": 120, "integrity": 6 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "🐈", "text": "Remember not touching the Lisbon client's cheese? She came home, counted it (she counts it), and sent you a wedge plus a C$50 tip.",
-                       "effects": { "cash": 50, "mood": 8 } } }
+          {
+            "weight": 1,
+            "text": "You wrap every spoon. The aunt, 91, counts them on arrival and gives you C$100 and a hard candy.",
+            "effects": {
+              "cash": 100,
+              "integrity": 8
+            }
+          }
         ]
       },
       {
-        "id": "nibble", "label": "Just a nibble of each", "get": "C$120 and the best snack of your life", "cost": "Eleven tiny lies",
-        "risk": "medium", "riskWhy": "Some people count their cheese", "comesBack": true,
+        "id": "take",
+        "label": "Take the box of silver",
+        "get": "C$900",
+        "cost": "An old lady's spoons",
+        "risk": "high",
+        "riskWhy": "Old ladies count spoons",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "A sliver of each, smoothed over with a butter knife. The aged gouda alone was worth a week's mood.",
-            "effects": { "cash": 120, "integrity": -4, "mood": 10, "energy": 10 },
-            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "🧀", "text": "Remember 'just a nibble' of the Lisbon client's cheese? She counts her cheese. Her review: 'Cat great. Cheese suspicious.'",
-                       "effects": { "clout": -20, "mood": -5 } } }
+          {
+            "weight": 1,
+            "text": "C$900 at a shop in Woodside, no questions. The nephew winks again. You don't wink back.",
+            "effects": {
+              "cash": 900,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 2,
+            "text": "C$900 at a shop in Woodside. The aunt, it turns out, counts spoons.",
+            "effects": {
+              "cash": 900,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🥄",
+              "text": "Remember the silver? The aunt counted. The nephew said it was you. Sgt. Bev agreed with neither of you and booked you both.",
+              "effects": {
+                "cash": -1200,
+                "clout": -120,
+                "holding": 2,
+                "gigLock": 2
+              },
+              "headline": "BREAKING: {name} booked over a box of a 91-year-old's silver spoons. The 91-year-old, to Sgt. Bev: 'I count them every Sunday, dear.'"
+            }
+          }
         ]
       },
       {
-        "id": "ask", "label": "Text her: 'Can I try one?'", "get": "Maybe cheese, definitely honesty", "cost": "Looking a little greedy",
-        "risk": "low", "riskWhy": "She might say no", "comesBack": false,
+        "id": "aunt",
+        "label": "Tell the aunt",
+        "get": "Her gratitude",
+        "cost": "The nephew's goodwill and the gig's mood",
+        "risk": "medium",
+        "riskWhy": "Family fights get loud",
         "outcomes": [
-          { "weight": 1, "text": "She replies from Lisbon: 'Take the brie, it turns Friday.' You eat the brie with a clear conscience.",
-            "effects": { "cash": 120, "integrity": 4, "mood": 6 } },
-          { "weight": 1, "text": "She replies: 'Please don't.' You don't. The cat eats its food. You eat a Steinway Fresh yogurt.",
-            "effects": { "cash": 120, "integrity": 4, "mood": -2 } }
+          {
+            "weight": 1,
+            "text": "The aunt hits the nephew with a newspaper and writes you a C$300 check 'for honesty, and for watching.'",
+            "effects": {
+              "cash": 300,
+              "integrity": 12,
+              "clout": 30
+            }
+          }
         ]
       }
     ]

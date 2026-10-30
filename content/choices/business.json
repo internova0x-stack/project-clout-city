@@ -4,36 +4,93 @@
     "base": "fake-review",
     "area": "business",
     "emoji": "⭐",
-    "title": "Your business got a one-star from 'Craig.' A guy at the counter offers twenty fake five-stars for C$40.",
-    "where": { "after": ["arrive"] },
-    "needs": { "business": true },
+    "title": "A guy at your counter offers 100 one-star reviews of your rival across the street for C$300.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
     "options": [
       {
-        "id": "reply", "label": "Reply to Craig politely", "get": "A dignified look", "cost": "Swallowing your pride",
-        "risk": "low", "riskWhy": "Craig might double down", "comesBack": true,
+        "id": "no",
+        "label": "'Beat them fair'",
+        "get": "A clean business",
+        "cost": "A rival who stays strong",
+        "risk": "low",
+        "riskWhy": "Nothing to trace",
         "outcomes": [
-          { "weight": 1, "text": "'Sorry to hear it, Craig. Come back, the next one's on us.' You type it through gritted teeth.",
-            "effects": { "integrity": 5, "mood": -2 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "⭐", "text": "Remember your polite reply to Craig's one-star? He came back, had a great time and changed it to four stars. 'Would have been five but Craig.'",
-                       "effects": { "clout": 25, "mood": 6 } } }
+          {
+            "weight": 1,
+            "text": "You send him off and run a two-for-one instead. Slow, honest, a little expensive.",
+            "effects": {
+              "cash": -100,
+              "integrity": 6,
+              "clout": 10
+            }
+          }
         ]
       },
       {
-        "id": "buy", "label": "Buy the twenty five-stars", "get": "+40 clout, Craig buried", "cost": "C$40 and the truth",
-        "risk": "medium", "riskWhy": "Review sites spot bulk praise", "comesBack": true,
+        "id": "buy",
+        "label": "Buy the hundred",
+        "get": "About C$1,500 of their customers",
+        "cost": "C$300 and the truth",
+        "risk": "high",
+        "riskWhy": "Review sites spot bulk attacks",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Twenty reviews appear overnight from accounts like 'GoodFood_Man_8.' Craig is buried. You're a 4.9 now.",
-            "effects": { "cash": -40, "clout": 40, "integrity": -6 },
-            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "🚩", "text": "Remember the twenty five-stars for C$40? The review site slapped a 'suspicious activity' banner on your page. Craig screenshotted it.",
-                       "effects": { "clout": -50, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "A hundred one-stars appear overnight. Their line moves across the street to yours. C$1,500 better by Sunday.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 1,
+            "text": "A hundred one-stars, a C$1,500 week. The rival's nephew does IT.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 1,
+              "emoji": "🚩",
+              "text": "Remember the hundred one-stars? The rival's nephew traced them to your card. A C$2,000 settlement and a 'fake reviews' banner on your page.",
+              "effects": {
+                "cash": -2000,
+                "clout": -200
+              },
+              "headline": "BREAKING: {name} caught buying 100 one-star reviews of the business across the street. The rival's nephew: 'I do IT. I do it well.'"
+            }
+          }
         ]
       },
       {
-        "id": "ask", "label": "Ask regulars for honest ones", "get": "Real reviews, slowly", "cost": "A week of asking nicely",
-        "risk": "low", "riskWhy": "Some regulars are honest about you", "comesBack": false,
+        "id": "ask",
+        "label": "Ask regulars for honest ones",
+        "get": "Real reviews, slowly",
+        "cost": "A week of asking nicely",
+        "risk": "low",
+        "riskWhy": "Some regulars will be honest",
         "outcomes": [
-          { "weight": 1, "text": "You ask your regulars. Eight post. Six are glowing, one says 'fine,' one is about the cat. It's real, and it shows.",
-            "effects": { "integrity": 6, "clout": 15, "energy": -10 } }
+          {
+            "weight": 1,
+            "text": "Twelve regulars post. Ten glow, one says 'fine,' one is about the cat. It's real, and it shows.",
+            "effects": {
+              "integrity": 6,
+              "clout": 40,
+              "energy": -15
+            }
+          }
         ]
       }
     ]
@@ -43,36 +100,98 @@
     "base": "staff-tips",
     "area": "business",
     "emoji": "🫙",
-    "title": "Slow week at your business. Luis's tip jar has C$85. 'Borrowing' it would cover the ice order.",
-    "where": { "after": ["arrive"] },
-    "needs": { "business": true },
+    "title": "Slow month at your business. Luis's tip jar has C$600. 'Borrowing' it would cover the supplier bill.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
     "options": [
       {
-        "id": "leave", "label": "Pay for the ice yourself", "get": "Luis keeps every cent", "cost": "C$85 from your own pocket",
-        "risk": "low", "riskWhy": "Only your margins",
+        "id": "own",
+        "label": "Pay from your own pocket",
+        "get": "Luis keeps every cent",
+        "cost": "C$600 of yours",
+        "risk": "low",
+        "riskWhy": "Only your margins suffer",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You pay the ice guy from your own wallet. Luis never knows. That's the point.",
-            "effects": { "cash": -85, "integrity": 5 } }
+          {
+            "weight": 1,
+            "text": "You pay the supplier from your own account. Luis never knows. That's the point.",
+            "effects": {
+              "cash": -600,
+              "integrity": 8
+            },
+            "later": {
+              "afterDays": [
+                4,
+                9
+              ],
+              "chance": 0.5,
+              "emoji": "🤝",
+              "text": "Remember the slow month? Luis found out you paid the supplier yourself. He's working Saturdays for free 'until it's even.'",
+              "effects": {
+                "cash": 300,
+                "clout": 40,
+                "mood": 8
+              }
+            }
+          }
         ]
       },
       {
-        "id": "borrow", "label": "'Borrow' the jar", "get": "C$85, problem solved", "cost": "Luis's tips",
-        "risk": "high", "riskWhy": "Luis counts his jar", "comesBack": true,
+        "id": "borrow",
+        "label": "'Borrow' the jar",
+        "get": "C$600, problem solved",
+        "cost": "Luis's tips",
+        "risk": "high",
+        "riskWhy": "Luis counts his jar",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You empty the jar into the ice order and leave a sticky note: 'IOU, the boss.' Very official.",
-            "effects": { "cash": 85, "integrity": -8 },
-            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🧊", "text": "Remember 'borrowing' Luis's tip jar for ice? He found the sticky note, quit, and now works across the street telling every customer why.",
-                       "effects": { "clout": -35, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "You empty the jar and leave a sticky note: 'IOU, the boss.' Very official.",
+            "effects": {
+              "cash": 600,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.8,
+              "emoji": "📣",
+              "text": "Remember the IOU sticky note? Luis quit, loudly, on video. 'My boss took my tips' has 40,000 views.",
+              "effects": {
+                "clout": -200,
+                "mood": -12
+              }
+            }
+          }
         ]
       },
       {
-        "id": "add", "label": "Add C$20 to his jar", "get": "A very loyal Luis", "cost": "C$105 this week",
-        "risk": "low", "riskWhy": "Only your margins", "comesBack": true,
+        "id": "ask",
+        "label": "Ask Luis for a loan",
+        "get": "C$600, honestly",
+        "cost": "An awkward conversation",
+        "risk": "medium",
+        "riskWhy": "Luis might say no",
         "outcomes": [
-          { "weight": 1, "text": "You cover the ice and slip a twenty in Luis's jar. He notices and pretends not to, which is the classiest thing in Queens.",
-            "effects": { "cash": -105, "integrity": 8, "mood": 5 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📣", "text": "Remember the twenty in Luis's jar during the slow week? He's been bringing his whole soccer league in after games.",
-                       "effects": { "cash": 150, "clout": 20 } } }
+          {
+            "weight": 1,
+            "text": "Luis says yes, then charges you 5% interest 'for the lesson.' Fair.",
+            "effects": {
+              "cash": 570,
+              "integrity": 4,
+              "mood": -4
+            }
+          }
         ]
       }
     ]
@@ -82,190 +201,905 @@
     "base": "staff-tips",
     "area": "business",
     "emoji": "💌",
-    "title": "A regular hands you C$100 'for the lovely lady who folds my shirts.' Grace is off today.",
-    "where": { "after": ["arrive"] },
-    "needs": { "business": true },
+    "title": "A regular hands you C$500 'for the lovely lady who folds my shirts.' Grace is off today.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
     "options": [
       {
-        "id": "pass", "label": "Pass it all to Grace", "get": "Grace's day, made", "cost": "C$100 that touched your hand",
-        "risk": "low", "riskWhy": "Nothing to hide",
+        "id": "pass",
+        "label": "Give it all to Grace",
+        "get": "Grace's loyalty",
+        "cost": "C$500",
+        "risk": "low",
+        "riskWhy": "It's hers",
         "outcomes": [
-          { "weight": 1, "text": "You put it in an envelope with 'From Mr. Ferreira, for the shirts.' Grace calls it the nicest Tuesday of her year.",
-            "effects": { "integrity": 6, "mood": 5 } }
+          {
+            "weight": 1,
+            "text": "Grace cries a little. She tells her church. Her church tells everybody.",
+            "effects": {
+              "integrity": 8,
+              "clout": 50
+            }
+          }
         ]
       },
       {
-        "id": "half", "label": "Give her half", "get": "C$50", "cost": "Half of Grace's tip",
-        "risk": "medium", "riskWhy": "Regulars ask, 'did she like it?'", "comesBack": true,
+        "id": "keep",
+        "label": "Keep it",
+        "get": "C$500",
+        "cost": "Grace's tip",
+        "risk": "high",
+        "riskWhy": "Regulars ask 'did she get it?'",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'He left you fifty.' Grace is thrilled. You are fifty dollars thrilled, quietly.",
-            "effects": { "cash": 50, "integrity": -5 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "👔", "text": "Remember giving Grace half of Mr. Ferreira's C$100? He asked her if she liked 'the hundred.' She liked fifty of it. She told everyone.",
-                       "effects": { "clout": -25, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "C$500 into the register. Grace never knows.",
+            "effects": {
+              "cash": 500,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$500 into the register. The regular comes back Thursday.",
+            "effects": {
+              "cash": 500,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 1,
+              "emoji": "👔",
+              "text": "Remember the C$500 for Grace? The regular asked her how she liked it. Grace quit, and the regular took his shirts and his friends elsewhere.",
+              "effects": {
+                "cash": -800,
+                "clout": -150
+              }
+            }
+          }
         ]
       },
       {
-        "id": "keep", "label": "Keep it, she'll never know", "get": "C$100", "cost": "Grace's tip",
-        "risk": "high", "riskWhy": "The regular will thank her", "comesBack": true,
+        "id": "half",
+        "label": "Give her half",
+        "get": "C$250",
+        "cost": "Half a gift",
+        "risk": "medium",
+        "riskWhy": "Regulars mention numbers",
         "outcomes": [
-          { "weight": 1, "text": "C$100 into the register. Mr. Ferreira waves goodbye. You wave back with his money.",
-            "effects": { "cash": 100, "integrity": -10 },
-            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "👔", "text": "Remember keeping Mr. Ferreira's C$100 for Grace? He thanked her for it. She asked you. You didn't have a good answer.",
-                       "effects": { "clout": -35, "mood": -10 } } }
+          {
+            "weight": 1,
+            "text": "'He left you C$250!' Grace hugs you. You hug back, carefully.",
+            "effects": {
+              "cash": 250,
+              "integrity": -8
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "safety-due-vent",
-    "base": "safety-due",
+    "id": "register-laundering-coat",
+    "base": "register-laundering",
     "area": "business",
-    "emoji": "🔥",
-    "title": "The vent filter at your business is due. C$180 now, or 'next month' like last month.",
-    "where": { "after": ["arrive"] },
-    "needs": { "business": true },
+    "emoji": "🧥",
+    "title": "A 'regular' in a very nice coat wants to ring up C$8,000 of catering that will never happen. You keep C$1,600.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true,
+      "integrityMax": 30
+    },
     "options": [
       {
-        "id": "fix", "label": "Fix it now", "get": "A clean vent, a clear head", "cost": "C$180",
-        "risk": "low", "riskWhy": "Only your margins", "comesBack": true,
+        "id": "no",
+        "label": "Decline politely",
+        "get": "Clean books",
+        "cost": "His C$300 weekly order, gone",
+        "risk": "low",
+        "riskWhy": "He'll take his coat elsewhere",
         "outcomes": [
-          { "weight": 1, "text": "The vent guy pulls out a filter that looks like a wet raccoon. C$180. You sleep better.",
-            "effects": { "cash": -180, "integrity": 5 },
-            "later": { "afterDays": [3, 7], "chance": 0.4, "emoji": "🚒", "text": "Remember fixing the vent filter on time? Captain Rosa did a walk-through and called your place 'the cleanest on the block.' She posted it.",
-                       "effects": { "clout": 30 } } }
+          {
+            "weight": 1,
+            "text": "'Not my kind of catering.' He tips his hat and takes his weekly order across the street.",
+            "effects": {
+              "cash": -300,
+              "integrity": 8
+            }
+          }
         ]
       },
       {
-        "id": "delay", "label": "Next month, promise", "get": "C$180 stays in the bank", "cost": "A greasy little gamble",
-        "risk": "medium", "riskWhy": "Old filters smoke", "comesBack": true,
+        "id": "yes",
+        "label": "Ring it up",
+        "get": "C$1,600",
+        "cost": "Your register, forever",
+        "risk": "high",
+        "riskWhy": "Auditors love round numbers",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Next month. The filter makes a sound like a disappointed parent.",
-            "effects": { "integrity": -4 } },
-          { "weight": 1, "text": "Next month, again. You tape a 'do not look' sign on the vent.",
-            "effects": { "integrity": -4 },
-            "later": { "afterDays": [2, 7], "chance": 1, "emoji": "💨", "text": "Remember putting off the vent filter? It smoked out the lunch rush. Captain Rosa smelled it from Engine 7. Rush repair: C$250 and a lecture.",
-                       "effects": { "cash": -250, "clout": -25, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "C$8,000 of 'catering for a gala.' No gala. C$1,600 for you. He says 'see you next month.'",
+            "effects": {
+              "cash": 1600,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                4,
+                9
+              ],
+              "chance": 0.85,
+              "emoji": "🧥",
+              "text": "Remember the catering that never happened? The man in the coat is back, with a bigger number.",
+              "effects": {},
+              "card": "register-laundering-more"
+            }
+          }
         ]
       },
       {
-        "id": "brag", "label": "Fix it and post about it", "get": "A clean vent and some clout", "cost": "C$180 and some dignity",
-        "risk": "low", "riskWhy": "Bragging about a vent is a choice", "comesBack": false,
+        "id": "bev",
+        "label": "Ask Sgt. Bev what 'catering' means",
+        "get": "A favor at the 114½",
+        "cost": "His business, and his mood",
+        "risk": "medium",
+        "riskWhy": "Nice coats have long memories",
         "outcomes": [
-          { "weight": 1, "text": "'Proud to announce our vent is clean 🙏.' It gets 300 likes and one comment: 'who is this for.' It's for you.",
-            "effects": { "cash": -180, "integrity": 2, "clout": 20 } }
+          {
+            "weight": 1,
+            "text": "Bev listens, eats a pierogi and says 'leave it with me.' The coat never comes back. A thank-you card from the precinct does.",
+            "effects": {
+              "integrity": 14,
+              "clout": 80,
+              "mood": -6
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "safety-due-extinguisher",
-    "base": "safety-due",
+    "id": "register-laundering-partner",
+    "base": "register-laundering",
+    "area": "business",
+    "emoji": "👜",
+    "title": "Your silent partner pays suppliers from a gym bag. He wants the books to say 'consulting.' Your cut: C$1,200.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
+    "options": [
+      {
+        "id": "buyout",
+        "label": "Buy him out",
+        "get": "Clean books",
+        "cost": "C$1,500 to end it",
+        "risk": "medium",
+        "riskWhy": "He doesn't love leaving",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$1,500 and he's gone, gym bag and all. Your books feel lighter. So does your account.",
+            "effects": {
+              "cash": -1500,
+              "integrity": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "sign",
+        "label": "Sign the 'consulting' line",
+        "get": "C$1,200",
+        "cost": "Your name on the books",
+        "risk": "high",
+        "riskWhy": "Consulting what, exactly?",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You sign. C$1,200. You still don't know what he consults on.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                4,
+                9
+              ],
+              "chance": 0.8,
+              "emoji": "👜",
+              "text": "Remember the 'consulting'? Your partner's friend in a very nice coat wants to talk bigger numbers.",
+              "effects": {},
+              "card": "register-laundering-more"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "You sign. C$1,200. A city auditor asks for the consulting reports. There are none.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 1,
+              "emoji": "🗂️",
+              "text": "Remember the 'consulting'? The city auditor found no reports, no consultants and no consulting. A C$2,500 penalty.",
+              "effects": {
+                "cash": -2500,
+                "clout": -150
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "bev",
+        "label": "Show Sgt. Bev the gym bag",
+        "get": "A clean name, a grateful precinct",
+        "cost": "Your partner, and his bag",
+        "risk": "medium",
+        "riskWhy": "He'll know who told",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Bev opens the bag, closes the bag and says 'oh, hon.' Your partner leaves the business by a different door.",
+            "effects": {
+              "integrity": 14,
+              "clout": 80
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "register-laundering-more",
+    "base": "register-laundering-more",
+    "area": "business",
+    "emoji": "💼",
+    "title": "The man in the coat is back: C$40,000 a month through your register, C$3,000 for you. A van idles outside.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
+    "chainOnly": true,
+    "options": [
+      {
+        "id": "out",
+        "label": "Tell him you're out",
+        "get": "Your business back",
+        "cost": "His orders and C$1,000 'exit fee'",
+        "risk": "medium",
+        "riskWhy": "Men in coats don't love goodbyes",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$1,000 'for his trouble.' He shrugs and leaves. The van leaves. You breathe.",
+            "effects": {
+              "cash": -1000,
+              "integrity": 12
+            }
+          }
+        ]
+      },
+      {
+        "id": "in",
+        "label": "Go bigger",
+        "get": "C$3,000 a month",
+        "cost": "Your business, if it goes wrong",
+        "risk": "high",
+        "riskWhy": "C$40,000 of catering is a lot of catering",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$40,000 of 'catering.' C$3,000 for you. You buy a new espresso machine and feel nothing.",
+            "effects": {
+              "cash": 3000,
+              "integrity": -20
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Sgt. Bev and two very excited auditors walk in during the 'delivery.' Bev: 'Catering, huh? Where's the food, hon?'",
+            "effects": {
+              "cash": -3000,
+              "clout": -300,
+              "integrity": -20,
+              "holding": 3
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "📰",
+              "text": "Remember the C$40,000 of catering? Lola ran the receipt. There was no food.",
+              "effects": {
+                "clout": -50
+              },
+              "headline": "BREAKING: Sgt. Bev and two auditors found C$40,000 of 'catering' at {name}'s business. No caterer has ever been located. Developing."
+            }
+          }
+        ]
+      },
+      {
+        "id": "wire",
+        "label": "Wear a wire for Sgt. Bev",
+        "get": "A reward and a clean slate",
+        "cost": "A very nervous week",
+        "risk": "high",
+        "riskWhy": "He might notice the tape",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Bev tapes a precinct walkie-talkie to your chest with masking tape. It works. The coat gets picked up. C$1,000 reward.",
+            "effects": {
+              "cash": 1000,
+              "integrity": 16,
+              "clout": 150
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 1,
+              "emoji": "🎙️",
+              "text": "Remember wearing the wire? Bev told Lola. Lola told everyone.",
+              "effects": {
+                "clout": 100
+              },
+              "headline": "Developing: {name} wore a wire, made of masking tape, to help Sgt. Bev close a laundering case. Bev: 'Best tape job in Queens.'"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "The walkie-talkie squawks mid-meeting. He looks at you. He leaves. Bev arrests him outside anyway. You're shaking for a day.",
+            "effects": {
+              "integrity": 16,
+              "clout": 80,
+              "mood": -15
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inspector-bribe-mouse",
+    "base": "inspector-bribe",
+    "area": "business",
+    "emoji": "🐭",
+    "title": "The health inspector finds a mouse. 'C$800 and I didn't see it.' The fine is C$2,000 and two days shut.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
+    "options": [
+      {
+        "id": "fine",
+        "label": "Take the fine",
+        "get": "A clean record",
+        "cost": "C$2,000 and two days",
+        "risk": "low",
+        "riskWhy": "That's the honest price",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$2,000 and two days of exterminators. The mouse is relocated, with honors.",
+            "effects": {
+              "cash": -2000,
+              "integrity": 10
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.6,
+              "emoji": "🅰️",
+              "text": "Remember the mouse? You passed reinspection with an A. Lola posted the certificate. Customers love a comeback.",
+              "effects": {
+                "clout": 100,
+                "cash": 400
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "fix",
+        "label": "Fix it overnight, appeal",
+        "get": "A smaller fine",
+        "cost": "C$1,100 and a sleepless night",
+        "risk": "medium",
+        "riskWhy": "Appeals don't always work",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "An exterminator at midnight, an appeal at 9. The fine drops to C$500. You're exhausted and correct.",
+            "effects": {
+              "cash": -1100,
+              "energy": -30,
+              "integrity": 6
+            }
+          }
+        ]
+      },
+      {
+        "id": "bribe",
+        "label": "Pay the C$800",
+        "get": "C$1,200 saved, open tomorrow",
+        "cost": "C$800 and a secret",
+        "risk": "high",
+        "riskWhy": "Some inspectors are stings",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "C$800 in an envelope. The mouse is 'not observed.' The inspector says 'see you next month.'",
+            "effects": {
+              "cash": -800,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                5,
+                10
+              ],
+              "chance": 0.85,
+              "emoji": "🐭",
+              "text": "Remember paying off the inspector? He's back for 'the monthly visit.'",
+              "effects": {},
+              "card": "inspector-bribe-monthly"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$800 in an envelope. The inspector smiles and touches his collar. His collar has a microphone.",
+            "effects": {
+              "cash": -800,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the envelope? It was a sting. Sgt. Bev was in the van outside, eating a pierogi and laughing. The fine doubled.",
+              "effects": {
+                "cash": -2500,
+                "clout": -200,
+                "holding": 2
+              },
+              "headline": "BREAKING: {name} handed C$800 to a health inspector who was wearing a wire. Sgt. Bev: 'It was his first sting. He's thrilled.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inspector-bribe-fire",
+    "base": "inspector-bribe",
     "area": "business",
     "emoji": "🧯",
-    "title": "The fire extinguisher at your business expired in 2024. A new one is C$90. Nobody ever checks.",
-    "where": { "after": ["arrive"] },
-    "needs": { "business": true },
+    "title": "A fire inspector clocks the boxes blocking your back exit. 'C$600 cash, or a C$1,800 violation.'",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
     "options": [
       {
-        "id": "buy", "label": "Buy a new one", "get": "Peace of mind", "cost": "C$90",
-        "risk": "low", "riskWhy": "Only your margins",
+        "id": "move",
+        "label": "Move the boxes, take the ticket",
+        "get": "A clear exit",
+        "cost": "C$1,800 and an afternoon",
+        "risk": "low",
+        "riskWhy": "That's the honest price",
         "outcomes": [
-          { "weight": 1, "text": "New extinguisher, shiny and red. You keep looking at it like it's art. It is, kind of.",
-            "effects": { "cash": -90, "integrity": 5, "mood": 2 } }
+          {
+            "weight": 1,
+            "text": "You clear the exit and pay the C$1,800. Captain Rosa hears about it and sends Hydrant over to approve.",
+            "effects": {
+              "cash": -1800,
+              "integrity": 10,
+              "clout": 30
+            }
+          }
         ]
       },
       {
-        "id": "sticker", "label": "Peel the date off", "get": "C$90 saved", "cost": "A small lie on a red can",
-        "risk": "high", "riskWhy": "Firefighters read labels", "comesBack": true,
+        "id": "bribe",
+        "label": "Pay the C$600",
+        "get": "C$1,200 saved",
+        "cost": "C$600 and a blocked exit",
+        "risk": "high",
+        "riskWhy": "Inspectors come back",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You peel off the date. The extinguisher looks fine. It's not fine. It's from 2024.",
-            "effects": { "integrity": -6 },
-            "later": { "afterDays": [2, 7], "chance": 0.5, "emoji": "🚒", "text": "Remember peeling the date off your extinguisher? Captain Rosa stopped in for coffee and checked it out of habit. C$90 now, plus a stern look.",
-                       "effects": { "cash": -90, "clout": -20, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "C$600 cash. The inspector writes 'clear' on a form while looking at the boxes.",
+            "effects": {
+              "cash": -600,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                5,
+                10
+              ],
+              "chance": 0.8,
+              "emoji": "🧯",
+              "text": "Remember paying the fire inspector? He's back for 'the monthly visit.'",
+              "effects": {},
+              "card": "inspector-bribe-monthly"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$600 cash. Then Captain Rosa walks past the back door with Hydrant.",
+            "effects": {
+              "cash": -600,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚒",
+              "text": "Remember the boxes at the back exit? Captain Rosa found them. Rosa reported the inspector and you. The violation is C$2,500 now.",
+              "effects": {
+                "cash": -2500,
+                "clout": -150
+              }
+            }
+          }
         ]
       },
       {
-        "id": "engine", "label": "Ask Engine 7 for advice", "get": "Expert help, maybe a deal", "cost": "An afternoon and a box of pastries",
-        "risk": "low", "riskWhy": "Firefighters love pastries", "comesBack": false,
+        "id": "rosa",
+        "label": "Call Captain Rosa",
+        "get": "A real inspection, and a friend",
+        "cost": "The inspector's goodwill",
+        "risk": "medium",
+        "riskWhy": "The inspector might retaliate",
         "outcomes": [
-          { "weight": 1, "text": "Captain Rosa takes the pastries and gives you the name of a guy who refills them for C$40. Hydrant gets a croissant.",
-            "effects": { "cash": -55, "integrity": 6, "energy": -10, "clout": 10 } }
+          {
+            "weight": 1,
+            "text": "Rosa comes over, laughs at the inspector until he leaves, and helps you move the boxes. No fine. Hydrant eats a muffin.",
+            "effects": {
+              "integrity": 12,
+              "clout": 50
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "surge-price-rain",
-    "base": "surge-price",
+    "id": "inspector-bribe-monthly",
+    "base": "inspector-bribe-monthly",
     "area": "business",
-    "emoji": "☔",
-    "title": "Sudden downpour on Steinway. Your business has a box of umbrellas. They usually go for C$8.",
-    "where": { "tags": ["astoria"], "after": ["arrive"] },
-    "needs": { "business": true },
+    "emoji": "📋",
+    "title": "The inspector's back, smiling: 'Monthly visit.' C$1,200 now. For C$1,000 more, he'll write up your rival too.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
+    "chainOnly": true,
     "options": [
       {
-        "id": "fair", "label": "Keep them at C$8", "get": "C$80 and a happy block", "cost": "What the rain could've paid",
-        "risk": "low", "riskWhy": "Nothing to hide",
+        "id": "bev",
+        "label": "Report him to Sgt. Bev",
+        "get": "Free of him, and a story",
+        "cost": "A C$1,000 fine for your first bribe",
+        "risk": "medium",
+        "riskWhy": "You paid him once",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Ten umbrellas, ten soaked neighbors saved. One of them kisses the umbrella. C$80.",
-            "effects": { "cash": 80, "integrity": 4, "clout": 15 } }
+          {
+            "weight": 1,
+            "text": "Bev arrests the inspector at your counter. Your first envelope costs you a C$1,000 fine. His costs him everything.",
+            "effects": {
+              "cash": -1000,
+              "integrity": 14,
+              "clout": 150
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 1,
+              "emoji": "📰",
+              "text": "Remember the inspector at your counter? Lola got Bev's side of it.",
+              "effects": {
+                "clout": 80
+              },
+              "headline": "Developing: Sgt. Bev nabbed a shakedown inspector at {name}'s counter. Bev: 'They paid once, then called me. That's growth, hon.'"
+            }
+          }
         ]
       },
       {
-        "id": "gouge", "label": "Make them C$25", "get": "C$250", "cost": "Your name on Steinway",
-        "risk": "medium", "riskWhy": "Wet people post angry", "comesBack": true,
+        "id": "pay",
+        "label": "Pay the C$1,200",
+        "get": "No trouble this month",
+        "cost": "C$1,200, and next month too",
+        "risk": "medium",
+        "riskWhy": "This never stops",
         "outcomes": [
-          { "weight": 1, "text": "C$25 each. They sell out in four minutes. The tenth buyer says 'wow' in a voice that's not a compliment.",
-            "effects": { "cash": 250, "integrity": -6 },
-            "later": { "afterDays": [1, 4], "chance": 0.6, "emoji": "🍵", "text": "Remember the C$25 umbrellas in the rain? Lola posted 'Steinway's umbrella situation 👀' with a photo of your sign. Comments are wet and angry.",
-                       "effects": { "clout": -40, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "C$1,200 in an envelope. 'See you next month.' You start budgeting for him like rent.",
+            "effects": {
+              "cash": -1200,
+              "integrity": -8
+            }
+          }
         ]
       },
       {
-        "id": "free", "label": "Give them to regulars, free", "get": "The block's undying love", "cost": "C$40 of stock",
-        "risk": "low", "riskWhy": "You might never see them again", "comesBack": true,
+        "id": "rival",
+        "label": "Pay him to hit your rival",
+        "get": "About C$2,500 of their customers",
+        "cost": "C$2,200 and your rival's week",
+        "risk": "high",
+        "riskWhy": "Two envelopes, twice the risk",
         "outcomes": [
-          { "weight": 1, "text": "You hand out umbrellas to every regular who runs past. 'Bring it back whenever.' Some of them will. Some of them.",
-            "effects": { "cash": -40, "integrity": 8, "clout": 30, "mood": 6 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "☂️", "text": "Remember the free umbrellas in the rain? Seven came back, each with a thank-you. One came back with a whole family who now shops only with you.",
-                       "effects": { "cash": 120, "clout": 15 } } }
+          {
+            "weight": 1,
+            "text": "Your rival gets 'a mouse problem.' Their customers cross the street. You clear C$1,300 after both envelopes.",
+            "effects": {
+              "cash": 1300,
+              "integrity": -18
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Your rival's mouse problem comes with a lawyer. The inspector gives the lawyer your name.",
+            "effects": {
+              "cash": -2500,
+              "clout": -250,
+              "integrity": -18,
+              "holding": 3
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "surge-price-heat",
-    "base": "surge-price",
+    "id": "wage-theft-overtime",
+    "base": "wage-theft",
     "area": "business",
-    "emoji": "🥵",
-    "title": "92 degrees and a Meteors game just let out. Your business has the only cold water for blocks.",
-    "where": { "after": ["arrive"] },
-    "needs": { "business": true },
+    "emoji": "💵",
+    "title": "Payroll's due. Skip Luis and Grace's overtime this month and you save C$1,400. 'They'd never make a fuss.'",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
     "options": [
       {
-        "id": "fair", "label": "Keep it at C$2", "get": "C$120 and a lot of thank-yous", "cost": "What the heat could've paid",
-        "risk": "low", "riskWhy": "Nothing to hide",
+        "id": "pay",
+        "label": "Pay every hour",
+        "get": "A crew that stays",
+        "cost": "C$1,400",
+        "risk": "low",
+        "riskWhy": "That's the job",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Sixty bottles, C$2 each, sixty grateful fans in orange. One tells you the Meteors lost. You knew.",
-            "effects": { "cash": 120, "integrity": 4, "clout": 15 } }
+          {
+            "weight": 1,
+            "text": "Full pay, on time. Grace brings you soup when you're sick, and you weren't even sick.",
+            "effects": {
+              "integrity": 8,
+              "mood": 4
+            },
+            "later": {
+              "afterDays": [
+                4,
+                9
+              ],
+              "chance": 0.6,
+              "emoji": "🤝",
+              "text": "Remember paying every hour? Luis brought his cousin to work for you. She's brilliant and she brought customers.",
+              "effects": {
+                "cash": 500,
+                "clout": 40
+              }
+            }
+          }
         ]
       },
       {
-        "id": "gouge", "label": "Make it C$6", "get": "C$360", "cost": "Your name with 40,000 fans",
-        "risk": "medium", "riskWhy": "Sports fans hold grudges for decades", "comesBack": true,
+        "id": "skip",
+        "label": "Skip the overtime",
+        "get": "C$1,400",
+        "cost": "Their rent money",
+        "risk": "high",
+        "riskWhy": "Grace knows the labor board's number",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "C$6 a bottle. They pay, sweating and furious. You make C$360 and a few enemies in foam fingers.",
-            "effects": { "cash": 360, "integrity": -6 },
-            "later": { "afterDays": [2, 7], "chance": 0.5, "emoji": "📸", "text": "Remember the C$6 water after the Meteors game? A fan's photo of your sign is the top post in the team's fan forum. Section 7 has opinions.",
-                       "effects": { "clout": -40, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "C$1,400 stays in the business. Luis notices. He says nothing. He's very quiet now.",
+            "effects": {
+              "cash": 1400,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,400 saved. Grace knows the labor board's number by heart.",
+            "effects": {
+              "cash": 1400,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                4,
+                9
+              ],
+              "chance": 1,
+              "emoji": "⚖️",
+              "text": "Remember the skipped overtime? Grace called the labor board. Back pay, a C$1,500 penalty and a notice taped to your window.",
+              "effects": {
+                "cash": -2900,
+                "clout": -200
+              }
+            }
+          }
         ]
       },
       {
-        "id": "cooler", "label": "Free cooler for anyone dizzy", "get": "Good karma, some clout", "cost": "C$60 of water",
-        "risk": "low", "riskWhy": "Everyone will claim to be dizzy", "comesBack": false,
+        "id": "half",
+        "label": "Pay half, 'next month' for the rest",
+        "get": "C$700",
+        "cost": "A promise you might not keep",
+        "risk": "medium",
+        "riskWhy": "'Next month' is a long time",
         "outcomes": [
-          { "weight": 1, "text": "You put out a cooler: 'Free if you're dizzy.' Everyone is suddenly dizzy. You let them be dizzy.",
-            "effects": { "cash": -60, "integrity": 7, "clout": 25, "mood": 5 } }
+          {
+            "weight": 1,
+            "text": "Half now, half 'next month.' Luis writes 'next month' in his phone with a timer.",
+            "effects": {
+              "cash": 700,
+              "integrity": -6
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wage-theft-exposure",
+    "base": "wage-theft",
+    "area": "business",
+    "emoji": "📸",
+    "title": "A new hire offers to work a month 'for exposure.' Your rival does it. It saves C$1,800.",
+    "where": {
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "business": true
+    },
+    "options": [
+      {
+        "id": "pay",
+        "label": "Pay a real wage",
+        "get": "A real employee",
+        "cost": "C$1,800",
+        "risk": "low",
+        "riskWhy": "That's the job",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'We pay here.' The new hire blinks, then works like a hurricane.",
+            "effects": {
+              "integrity": 8,
+              "clout": 20
+            }
+          }
+        ]
+      },
+      {
+        "id": "exposure",
+        "label": "Pay in 'exposure'",
+        "get": "C$1,800 saved",
+        "cost": "A month of someone's life",
+        "risk": "high",
+        "riskWhy": "Unpaid workers post about it",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "A month of free work, three photos on your page. C$1,800 saved.",
+            "effects": {
+              "cash": 1800,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,800 saved. On the last day, they post a video called 'My month of exposure.'",
+            "effects": {
+              "cash": 1800,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "📣",
+              "text": "Remember the month of 'exposure'? It went viral. The labor board saw it. Back pay plus a C$1,000 fine.",
+              "effects": {
+                "cash": -2800,
+                "clout": -250
+              },
+              "headline": "BREAKING: {name}'s business paid a new hire in 'exposure.' The hire's video got 2 million views. That's a lot of exposure, we're told."
+            }
+          }
         ]
       }
     ]

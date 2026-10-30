@@ -3,37 +3,113 @@
     "id": "lotto-mixup-benny",
     "base": "lotto-mixup",
     "area": "money",
-    "emoji": "🎟️",
-    "title": "Benny at Lucky Star mixed up two scratch cards. Yours is a C$200 winner. The lady before you got the dud.",
+    "emoji": "🎰",
+    "title": "Benny at Lucky Star mixed up two scratch cards. Yours is a C$1,500 winner. The lady before you got the dud.",
     "who": "benny",
-    "where": { "places": ["lucky-star"], "after": ["arrive", "visit"] },
+    "where": {
+      "places": [
+        "lucky-star"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
     "options": [
       {
-        "id": "tell", "label": "Tell Benny", "get": "The lady gets her win", "cost": "C$200",
-        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "id": "tell",
+        "label": "Tell Benny to fix it",
+        "get": "The lady's win, Benny's respect",
+        "cost": "C$1,500",
+        "risk": "low",
+        "riskWhy": "Nothing to hide",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Benny runs out to the sidewalk and catches her. She screams, he screams, a pigeon screams. She hugs you twice.",
-            "effects": { "integrity": 8, "mood": 6 },
-            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "🥟", "text": "Remember the scratch card mix-up at Lucky Star? The lady came back with a tray of homemade dumplings and C$40 'for the honest one.'",
-                       "effects": { "cash": 40, "mood": 6, "energy": 10 } } }
+          {
+            "weight": 1,
+            "text": "Benny runs out to catch her at the bus stop. She screams. He screams. You get a hug from a stranger.",
+            "effects": {
+              "integrity": 10,
+              "clout": 50
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.6,
+              "emoji": "🍀",
+              "text": "Remember the swapped card? The lady, Mrs. Ocampo, sent C$200 and a prayer card. Benny tells the story to every customer.",
+              "effects": {
+                "cash": 200,
+                "clout": 50
+              }
+            }
+          }
         ]
       },
       {
-        "id": "split", "label": "Find her, offer to split", "get": "C$100 and a clean-ish conscience", "cost": "Half the win",
-        "risk": "low", "riskWhy": "She might want it all", "comesBack": false,
+        "id": "keep",
+        "label": "Cash it",
+        "get": "C$1,500",
+        "cost": "A stranger's win",
+        "risk": "high",
+        "riskWhy": "Benny's camera is old but working",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You catch her at the bus stop. 'Half each?' She thinks, then laughs. 'Half each.' Benny calls it 'the Flushing compromise.'",
-            "effects": { "cash": 100, "integrity": 3, "mood": 5 } }
+          {
+            "weight": 1,
+            "text": "Benny pays C$1,500 from the safe, not looking at you.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,500 from the safe. Mrs. Ocampo comes back to complain her card was 'warm.'",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🎰",
+              "text": "Remember the swapped scratch card? The camera caught the swap. You're paying back Mrs. Ocampo and banned from Lucky Star for a week.",
+              "effects": {
+                "cash": -1500,
+                "clout": -150,
+                "ban": {
+                  "place": "lucky-star",
+                  "days": 7
+                }
+              },
+              "headline": "BREAKING: {name} cashed a C$1,500 scratch card meant for Mrs. Ocampo. Benny Fortuna, who has never bought a ticket: 'This is why.'"
+            }
+          }
         ]
       },
       {
-        "id": "keep", "label": "Keep the winner", "get": "C$200", "cost": "Her C$200",
-        "risk": "medium", "riskWhy": "She kept her receipt", "comesBack": true,
+        "id": "split",
+        "label": "Find her and split it",
+        "get": "C$750",
+        "cost": "Half a stranger's win",
+        "risk": "medium",
+        "riskWhy": "She might want all of it",
         "outcomes": [
-          { "weight": 1, "text": "You scratch, you win, you smile at Benny. Benny, who has never bought a ticket, smiles back. He doesn't know yet.",
-            "effects": { "cash": 200, "integrity": -8 },
-            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "🧾", "text": "Remember Benny's scratch card mix-up? The lady came back with her receipt. Benny paid her from his own pocket, and now he 'can't find' your favorite card.",
-                       "effects": { "clout": -20, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "You find her at the bus stop and offer half. She takes C$750 and calls you 'honest-ish.'",
+            "effects": {
+              "cash": 750,
+              "integrity": -4,
+              "clout": 20
+            }
+          }
         ]
       }
     ]
@@ -43,123 +119,515 @@
     "base": "lotto-mixup",
     "area": "money",
     "emoji": "🎫",
-    "title": "A scratched card on Lucky Star's floor. Whoever dropped it didn't check the back: it's a C$150 winner.",
+    "title": "A scratched card on Lucky Star's floor. Whoever dropped it didn't check the back: it's a C$900 winner.",
     "who": "benny",
-    "where": { "places": ["lucky-star"], "after": ["arrive", "visit"] },
+    "where": {
+      "places": [
+        "lucky-star"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
     "options": [
       {
-        "id": "ask", "label": "Ask around the store", "get": "Somebody's lucky day", "cost": "C$150 and twenty minutes",
-        "risk": "low", "riskWhy": "Everyone will claim it", "comesBack": true,
+        "id": "benny",
+        "label": "Give it to Benny",
+        "get": "Benny finds the owner",
+        "cost": "C$900",
+        "risk": "low",
+        "riskWhy": "Nothing to hide",
         "outcomes": [
-          { "weight": 1, "text": "Six people claim it. Benny asks what game it was. Only an old man in a Meteors cap gets it right. He kisses the card.",
-            "effects": { "integrity": 8, "energy": -8 },
-            "later": { "afterDays": [1, 5], "chance": 0.5, "emoji": "🧢", "text": "Remember finding the C$150 card on Lucky Star's floor? The man in the Meteors cap left C$40 with Benny 'for the one who asked around.'",
-                       "effects": { "cash": 40, "mood": 6 } } }
+          {
+            "weight": 1,
+            "text": "Benny pins it to the wall: 'Lost a winner? Describe it.' Three people try. The fourth is right.",
+            "effects": {
+              "integrity": 8,
+              "clout": 30
+            }
+          }
         ]
       },
       {
-        "id": "benny", "label": "Hand it to Benny", "get": "It's out of your hands", "cost": "C$150",
-        "risk": "low", "riskWhy": "Nothing to hide",
+        "id": "cash",
+        "label": "Cash it",
+        "get": "C$900",
+        "cost": "Someone's lucky day",
+        "risk": "medium",
+        "riskWhy": "Benny remembers who bought what",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Benny tapes it to the register: 'Is this yours? Prove it.' The crowd at Lucky Star loves a mystery.",
-            "effects": { "integrity": 5 } }
-        ]
-      },
-      {
-        "id": "cash", "label": "Cash it in", "get": "C$150", "cost": "Someone's lucky day",
-        "risk": "low", "riskWhy": "Nobody saw. Probably.",
-        "outcomes": [
-          { "weight": 1, "text": "Finders keepers, the oldest law in Queens. C$150. Somebody out there thinks they lost.",
-            "effects": { "cash": 150, "integrity": -5 } }
+          {
+            "weight": 2,
+            "text": "C$900. 'Lucky day,' says Benny, slowly.",
+            "effects": {
+              "cash": 900,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$900. Benny checks his book: he sold that card to his barber.",
+            "effects": {
+              "cash": 900,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "💈",
+              "text": "Remember the floor card? It was Benny's barber's. The barber wants his C$900 and Benny wants you out of Lucky Star for a week.",
+              "effects": {
+                "cash": -900,
+                "clout": -100,
+                "ban": {
+                  "place": "lucky-star",
+                  "days": 7
+                }
+              }
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "loan-npc-gym",
-    "base": "loan-npc",
+    "id": "hot-phones-cart",
+    "base": "hot-phones",
     "area": "money",
-    "emoji": "💪",
-    "title": "Dev from the gym asks to borrow C$300 'until Friday.' Dev said that last Friday too.",
-    "where": { "places": ["pressed-iron-gym", "rep-count"], "tags": ["gym"], "after": ["arrive", "visit"] },
+    "emoji": "📱",
+    "title": "2 AM at the White Sauce Cart: a guy sells new phones 'off a truck' at C$200. They resell for C$600.",
+    "who": "tariq",
+    "where": {
+      "places": [
+        "white-sauce-cart"
+      ],
+      "after": [
+        "eat"
+      ]
+    },
     "options": [
       {
-        "id": "lend", "label": "Lend him C$300", "get": "Dev's gratitude, maybe C$300 back", "cost": "C$300, maybe for good",
-        "risk": "high", "riskWhy": "Dev's Fridays are flexible", "comesBack": true,
+        "id": "pass",
+        "label": "Pass",
+        "get": "Nothing to explain",
+        "cost": "A C$2,000 flip",
+        "risk": "low",
+        "riskWhy": "You didn't buy anything",
         "outcomes": [
-          { "weight": 1, "text": "You hand Dev C$300. He hugs you so hard you hear your back realign.",
-            "effects": { "cash": -300, "integrity": 4, "mood": 3 },
-            "later": { "afterDays": [3, 7], "chance": 0.9, "emoji": "💵", "text": "Remember lending Dev C$300 'until Friday'? He paid it all back with C$30 on top and a protein shake that tastes like chalk.",
-                       "effects": { "cash": 330, "mood": 5 } } },
-          { "weight": 1, "text": "You lend Dev C$300. He promises Friday, then promises the gym owner he'll fix the leg press.",
-            "effects": { "cash": -300, "integrity": 4, "mood": 3 },
-            "later": { "afterDays": [5, 7], "chance": 1, "emoji": "🏋️", "text": "Remember lending Dev C$300 'until Friday'? It's been a few Fridays. He waves at you from across the gym, very warmly.",
-                       "effects": { "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "'Nah.' He closes his coat like a sad book and walks off. Tariq hands you extra white sauce for 'good sense.'",
+            "effects": {
+              "integrity": 5,
+              "mood": 3
+            }
+          }
         ]
       },
       {
-        "id": "half", "label": "Lend him C$150", "get": "Kindness with a limit", "cost": "C$150, for now",
-        "risk": "medium", "riskWhy": "Dev's Fridays are flexible", "comesBack": true,
+        "id": "flip",
+        "label": "Buy five, flip them",
+        "get": "C$2,000 profit",
+        "cost": "Five people's stolen phones",
+        "risk": "high",
+        "riskWhy": "Stolen phones get blocked",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Half, and you pay me Friday.' Dev salutes. You've drawn a line, and it's made of money.",
-            "effects": { "cash": -150, "integrity": 3 },
-            "later": { "afterDays": [3, 7], "chance": 0.7, "emoji": "💵", "text": "Remember lending Dev C$150? He paid it back, a week late, in crumpled fives. 'Told you Friday.' It was not Friday.",
-                       "effects": { "cash": 150 } } }
+          {
+            "weight": 2,
+            "text": "C$1,000 in, C$3,000 out by Friday. The phone guy gives you his number. 'You move product.'",
+            "effects": {
+              "cash": 2000,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.75,
+              "emoji": "📱",
+              "text": "Remember the phones off the truck? The seller's back: 'I have ten more. You're my guy now.'",
+              "effects": {},
+              "card": "hot-phones-ten"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$2,000 profit, until three buyers' phones get blocked as stolen.",
+            "effects": {
+              "cash": 2000,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the cart phones? Three buyers found you. Refunds, and an hour explaining yourself to Sgt. Bev.",
+              "effects": {
+                "cash": -1800,
+                "clout": -100,
+                "holding": 1
+              }
+            }
+          }
         ]
       },
       {
-        "id": "no", "label": "Say no, honestly", "get": "Your C$300 stays put", "cost": "An awkward set of squats",
-        "risk": "low", "riskWhy": "Dev sulks for a day",
+        "id": "one",
+        "label": "Buy one for yourself",
+        "get": "A new phone for C$200",
+        "cost": "A stolen phone in your pocket",
+        "risk": "medium",
+        "riskWhy": "It could get blocked",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'I can't, Dev.' He nods. He's heard it before. You do squats next to each other in a silence you can feel in your legs.",
-            "effects": { "integrity": 2, "mood": -3 } }
-        ]
-      },
-      {
-        "id": "broke", "label": "Say you're broke", "get": "No awkward 'no'", "cost": "A small lie",
-        "risk": "low", "riskWhy": "Unless he sees you spend",
-        "outcomes": [
-          { "weight": 1, "text": "'Man, I'm broke too.' Dev hugs you in solidarity. Then you buy a C$9 smoothie at the gym bar, in front of him.",
-            "effects": { "integrity": -3, "mood": -2 } }
+          {
+            "weight": 1,
+            "text": "A great phone for C$200. It works. It works fine. You check for a block every morning.",
+            "effects": {
+              "cash": -200,
+              "mood": 8,
+              "integrity": -6
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.5,
+              "emoji": "📵",
+              "text": "Remember the C$200 phone? It got blocked mid-call. You're out C$200 and a phone, and your contacts are gone.",
+              "effects": {
+                "mood": -10
+              }
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "loan-npc-deli",
-    "base": "loan-npc",
+    "id": "hot-phones-market",
+    "base": "hot-phones",
     "area": "money",
-    "emoji": "🎧",
-    "title": "Sal's nephew Karim at the deli: 'C$200 till my DJ gig pays. Uncle Sal can't know.'",
-    "who": "sal",
-    "where": { "places": ["ditmars-deli"], "after": ["arrive", "eat", "visit"] },
+    "emoji": "📟",
+    "title": "A stall at Downstairs on Main sells tablets 'off a truck' at C$150. Buy ten, flip them, clear C$2,000.",
+    "who": "wen",
+    "where": {
+      "places": [
+        "downstairs-on-main"
+      ],
+      "after": [
+        "eat",
+        "visit"
+      ]
+    },
+    "needs": {
+      "integrityMax": 30
+    },
     "options": [
       {
-        "id": "lend", "label": "Lend it, keep the secret", "get": "Karim owes you big", "cost": "C$200 and a secret from Sal",
-        "risk": "medium", "riskWhy": "Sal remembers everything", "comesBack": true,
+        "id": "pass",
+        "label": "Pass",
+        "get": "Nothing to explain",
+        "cost": "C$2,000",
+        "risk": "low",
+        "riskWhy": "Nothing bought",
         "outcomes": [
-          { "weight": 1, "text": "You slip Karim C$200 behind the chip rack. The cat sees. The cat says nothing. For now.",
-            "effects": { "cash": -200, "integrity": -2, "mood": 2 },
-            "later": { "afterDays": [3, 7], "chance": 0.8, "emoji": "🎧", "text": "Remember lending Karim C$200 behind Sal's back? His DJ gig paid. He paid you back, plus a spot on his guest list. Sal still doesn't know.",
-                       "effects": { "cash": 200, "clout": 20 } } }
+          {
+            "weight": 1,
+            "text": "You buy dumplings instead. Wen gives you an extra one. 'Smart.'",
+            "effects": {
+              "integrity": 5,
+              "mood": 3
+            }
+          }
         ]
       },
       {
-        "id": "sal", "label": "Lend it, but tell Sal", "get": "No secrets in the deli", "cost": "C$200 and Karim's annoyance",
-        "risk": "low", "riskWhy": "Karim sulks for a week", "comesBack": true,
+        "id": "flip",
+        "label": "Buy ten",
+        "get": "C$2,000 profit",
+        "cost": "Ten stolen tablets in your bag",
+        "risk": "high",
+        "riskWhy": "Sealed boxes have serial numbers",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You lend it and tell Sal. Sal sighs a sigh from 1998 and makes Karim mop to pay off the 'interest.'",
-            "effects": { "cash": -200, "integrity": 6, "mood": -2 },
-            "later": { "afterDays": [2, 6], "chance": 0.9, "emoji": "🧔", "text": "Remember telling Sal about Karim's C$200 loan? Sal paid you back himself, the next morning, with a sandwich. Karim still owes Sal.",
-                       "effects": { "cash": 200, "mood": 5 } } }
+          {
+            "weight": 1,
+            "text": "C$1,500 in, C$3,500 out. The stall guy hands you his card: 'Bigger shipment next week.'",
+            "effects": {
+              "cash": 2000,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.75,
+              "emoji": "📟",
+              "text": "Remember the tablets at Downstairs on Main? The seller's back: 'I have ten phones too. You're my guy now.'",
+              "effects": {},
+              "card": "hot-phones-ten"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$2,000 profit, then a buyer's tablet asks for its 'original owner.'",
+            "effects": {
+              "cash": 2000,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the 'fell off a truck' tablets? A serial number led Sgt. Bev to you. Refunds, and two hours on the bench.",
+              "effects": {
+                "cash": -2000,
+                "clout": -150,
+                "holding": 2,
+                "ban": {
+                  "place": "downstairs-on-main",
+                  "days": 5
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hot-phones-ten",
+    "base": "hot-phones-ten",
+    "area": "money",
+    "emoji": "📦",
+    "title": "The phone guy's back: ten more, C$2,500 profit for you. 'And I need your apartment for the boxes.'",
+    "where": {
+      "after": [
+        "arrive",
+        "eat"
+      ]
+    },
+    "chainOnly": true,
+    "options": [
+      {
+        "id": "out",
+        "label": "Tell him you're done",
+        "get": "Your apartment back",
+        "cost": "C$300 for a new lock and number",
+        "risk": "medium",
+        "riskWhy": "He knows where you live",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You change your lock and your number. C$300. He sends one sad emoji and moves on.",
+            "effects": {
+              "cash": -300,
+              "integrity": 10
+            }
+          }
         ]
       },
       {
-        "id": "no", "label": "Say no", "get": "Your C$200 stays home", "cost": "Karim's opinion of you",
-        "risk": "low", "riskWhy": "Karim sulks",
+        "id": "in",
+        "label": "Take the ten",
+        "get": "C$2,500",
+        "cost": "Your apartment as a warehouse",
+        "risk": "high",
+        "riskWhy": "More boxes, more eyes",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Sorry, Karim.' He shrugs and asks the next customer. Sal, from the register, says 'good' without looking up.",
-            "effects": { "integrity": 3 } }
+          {
+            "weight": 2,
+            "text": "Ten phones, C$2,500. Your living room is a stockroom. You sleep on a box.",
+            "effects": {
+              "cash": 2500,
+              "integrity": -18
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.8,
+              "emoji": "🚐",
+              "text": "Remember the ten phones? Now he wants you running the whole van.",
+              "effects": {},
+              "card": "hot-phones-van"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Ten phones in your living room. Then a knock: Sgt. Bev, holding a tracking printout.",
+            "effects": {
+              "cash": -2000,
+              "clout": -200,
+              "integrity": -18,
+              "holding": 3
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "📸",
+              "text": "Remember the living-room warehouse? Lola got the photo of Bev carrying a box.",
+              "effects": {
+                "clout": -60
+              },
+              "headline": "BREAKING: Ten 'off a truck' phones found in {name}'s living room. Sgt. Bev: 'They offered me one. I said, hon, I'm the police.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bev",
+        "label": "Tell Sgt. Bev",
+        "get": "A clean slate, maybe",
+        "cost": "Your old flip comes out",
+        "risk": "medium",
+        "riskWhy": "Bev may book you anyway",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Bev takes notes, then a pierogi, then the phone guy. 'You did good, hon.'",
+            "effects": {
+              "integrity": 16,
+              "clout": 120
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Bev thanks you, then books you for the first flip. 'One hour. Paperwork.'",
+            "effects": {
+              "integrity": 16,
+              "clout": 60,
+              "holding": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hot-phones-van",
+    "base": "hot-phones-van",
+    "area": "money",
+    "emoji": "🚐",
+    "title": "The phone guy offers the whole operation: a van and C$3,000 a week. Sgt. Bev is buying a pierogi beside you.",
+    "where": {
+      "after": [
+        "arrive",
+        "eat"
+      ]
+    },
+    "chainOnly": true,
+    "options": [
+      {
+        "id": "bev",
+        "label": "Turn around and tell Bev",
+        "get": "A clean slate and a story",
+        "cost": "Your phone guy, forever",
+        "risk": "medium",
+        "riskWhy": "He'll know who told",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tap Bev's shoulder. She puts down the pierogi. 'Talk to me, hon.' By Friday the van is impounded.",
+            "effects": {
+              "integrity": 18,
+              "clout": 200
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 1,
+              "emoji": "📰",
+              "text": "Remember turning in the phone van? Bev told Lola everything, as usual.",
+              "effects": {
+                "clout": 100
+              },
+              "headline": "Developing: Sgt. Bev credits {name} with the tip that closed Queens' 'van of phones.' Bev: 'They interrupted my pierogi. Worth it.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "in",
+        "label": "Run the operation",
+        "get": "C$3,000 a week",
+        "cost": "Everything",
+        "risk": "high",
+        "riskWhy": "Bev is literally standing there",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You shake on it, right next to Bev. She's reading the menu. C$3,000 by Sunday.",
+            "effects": {
+              "cash": 3000,
+              "integrity": -20
+            }
+          },
+          {
+            "weight": 2,
+            "text": "You shake on it. Bev, not looking up: 'I heard that, hon.'",
+            "effects": {
+              "cash": -3000,
+              "clout": -300,
+              "integrity": -20,
+              "holding": 3
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember shaking hands next to Bev? Lola has the whole thing, with pierogi.",
+              "effects": {
+                "clout": -50
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "ghost",
+        "label": "Take one week's pay, vanish",
+        "get": "C$1,500",
+        "cost": "A very annoyed phone guy",
+        "risk": "high",
+        "riskWhy": "He has your old texts",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You take the first C$1,500 and block him everywhere. He finds someone else. You hope.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -10
+            }
+          }
         ]
       }
     ]

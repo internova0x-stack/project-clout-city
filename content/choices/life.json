@@ -1,131 +1,965 @@
 [
   {
-    "id": "found-wallet-cafe",
-    "base": "found-wallet",
-    "area": "life",
-    "emoji": "📱",
-    "title": "A phone left at Grind & Gossip lights up: 'Reward if found: C$100.' Jojo's on break.",
-    "who": "jojo",
-    "where": { "places": ["grind-and-gossip"], "after": ["arrive", "eat"] },
-    "options": [
-      {
-        "id": "jojo", "label": "Leave it with Jojo", "get": "Done in ten seconds", "cost": "Probably not the reward",
-        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "You hand it to Jojo, who labels it 'PHONE (NOT YOURS) (JOANNE?)' and drops it in the lost-and-found mug.",
-            "effects": { "integrity": 5, "mood": 3 },
-            "later": { "afterDays": [1, 3], "chance": 0.5, "emoji": "☕", "text": "Remember the phone at Grind & Gossip? Its owner left you a prepaid latte. Jojo spelled your name wrong on it, on purpose.",
-                       "effects": { "mood": 5, "energy": 10 } } }
-        ]
-      },
-      {
-        "id": "call", "label": "Call 'Mom' and return it", "get": "The C$100 reward", "cost": "An hour across Astoria",
-        "risk": "low", "riskWhy": "Just your afternoon",
-        "outcomes": [
-          { "weight": 1, "text": "Mom answers, then the owner does. You meet on 30th Avenue. She cries a little and hands you C$100 in a birthday card.",
-            "effects": { "cash": 100, "integrity": 6, "energy": -10 } }
-        ]
-      },
-      {
-        "id": "snoop", "label": "Read the group chat first", "get": "Prime tea for the Tea app", "cost": "Someone's privacy",
-        "risk": "medium", "riskWhy": "Phones show 'read' receipts", "comesBack": true,
-        "outcomes": [
-          { "weight": 2, "text": "The group chat is planning a breakup at a taverna. You know everything now, and you hand the phone to Jojo like an angel.",
-            "effects": { "clout": 30, "integrity": -6 } },
-          { "weight": 1, "text": "Juicy chat, then you hand it over. Clout in your pocket, some guilt in the other.",
-            "effects": { "clout": 30, "integrity": -6 },
-            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "👁️", "text": "Remember the phone at Grind & Gossip? Its owner saw her chats marked 'read' while it was missing. Jojo told her who found it.",
-                       "effects": { "clout": -35, "mood": -8 } } }
-        ]
-      }
-    ]
-  },
-  {
     "id": "found-wallet-park",
     "base": "found-wallet",
     "area": "life",
     "emoji": "✉️",
-    "title": "An envelope taped under Gus's bench in Astoria Park: C$200 and a note, 'for Marisol.'",
+    "title": "An envelope taped under Gus's bench in Astoria Park: C$800 in twenties and a note, 'for Marisol's rent.'",
     "who": "gus",
-    "where": { "places": ["hell-gate-park"], "after": ["arrive", "hangout"] },
+    "where": {
+      "places": [
+        "hell-gate-park"
+      ],
+      "after": [
+        "arrive",
+        "hangout"
+      ]
+    },
     "options": [
       {
-        "id": "ask", "label": "Ask Gus who Marisol is", "get": "The story, and a warm feeling", "cost": "Forty minutes of 1987",
-        "risk": "low", "riskWhy": "Gus talks, nothing else", "comesBack": true,
+        "id": "give",
+        "label": "Give it to Gus",
+        "get": "Gus's respect, maybe more",
+        "cost": "C$800 you'll never see",
+        "risk": "low",
+        "riskWhy": "Gus knows everyone in the park",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Gus knows Marisol: she walks dogs here. He tells you how he met his wife in 1987, then calls her. The envelope gets home.",
-            "effects": { "integrity": 7, "mood": 4, "energy": -8 },
-            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "🥐", "text": "Remember the envelope under Gus's bench? Marisol left you a box of her mother's pão de queijo and a thank-you on the bench.",
-                       "effects": { "mood": 8, "energy": 10, "clout": 15 } } }
+          {
+            "weight": 1,
+            "text": "Gus counts it twice and nods once. 'Marisol cleans the chapel. This is her whole month.' He shakes your hand like it's a contract.",
+            "effects": {
+              "integrity": 10,
+              "mood": 8,
+              "clout": 20
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 0.7,
+              "emoji": "💐",
+              "text": "Remember the envelope under Gus's bench? Marisol found you in the park with a tray of pastelitos and C$150 she would not take back.",
+              "effects": {
+                "cash": 150,
+                "clout": 40,
+                "mood": 10
+              },
+              "headline": "Developing: {name} handed back C$800 in rent money found under a park bench in Astoria. Sources say Gus now calls them 'the kid.' 👀"
+            }
+          }
         ]
       },
       {
-        "id": "leave", "label": "Leave it where it is", "get": "No trouble at all", "cost": "Not knowing",
-        "risk": "low", "riskWhy": "It's not yours either way",
+        "id": "keep",
+        "label": "Pocket the envelope",
+        "get": "C$800 cash",
+        "cost": "Marisol's rent",
+        "risk": "high",
+        "riskWhy": "Gus never really sleeps on that bench",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You put it back exactly how it was taped. Gus nods. You're not sure if he saw, but Gus always saw.",
-            "effects": { "integrity": 3 } }
+          {
+            "weight": 3,
+            "text": "You peel the envelope off like a sticker. C$800. Gus is asleep, or doing a very good impression.",
+            "effects": {
+              "cash": 800,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 2,
+            "text": "You walk off C$800 richer. Gus opens one eye, then closes it. Somehow that's worse.",
+            "effects": {
+              "cash": 800,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "👮‍♀️",
+              "text": "Remember the envelope under Gus's bench? Gus told the park, the park told Sgt. Bev. You paid it back from the holding bench.",
+              "effects": {
+                "cash": -800,
+                "clout": -120,
+                "mood": -10,
+                "holding": 2
+              },
+              "headline": "BREAKING: {name} spent the afternoon on the 114½ Precinct's bench over C$800 lifted from a park bench. Sgt. Bev: 'Bench to bench. Poetic.'"
+            }
+          }
         ]
       },
       {
-        "id": "half", "label": "Take half, leave half", "get": "C$100", "cost": "Marisol's half of her C$200",
-        "risk": "medium", "riskWhy": "Gus watches that bench all day", "comesBack": true,
+        "id": "half",
+        "label": "Take half, tape back half",
+        "get": "C$400",
+        "cost": "Half of Marisol's month",
+        "risk": "medium",
+        "riskWhy": "Half a theft is still a theft",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "C$100 in your pocket, C$100 under the bench. A compromise nobody asked for.",
-            "effects": { "cash": 100, "integrity": -8 },
-            "later": { "afterDays": [1, 5], "chance": 0.5, "emoji": "👴", "text": "Remember the envelope under Gus's bench? He told Marisol it was 'a little lighter' after you sat there. Everyone on the bench knows now.",
-                       "effects": { "clout": -25, "mood": -6 } } }
-        ]
-      },
-      {
-        "id": "take", "label": "Take the envelope", "get": "C$200", "cost": "Marisol's money",
-        "risk": "high", "riskWhy": "Gus sees everything on that bench", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "Envelope in your jacket. The note says 'for Marisol, love Mom.' That's going to stay with you.",
-            "effects": { "cash": 200, "integrity": -12, "mood": -3 },
-            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🪑", "text": "Remember the envelope under Gus's bench? Gus has been telling every jogger about 'the one who took it.' He describes you very well.",
-                       "effects": { "clout": -45, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "You take C$400 and tape the rest back, neatly. A compromise with yourself that nobody else asked for.",
+            "effects": {
+              "cash": 400,
+              "integrity": -8
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "📝",
+              "text": "Remember the half-empty envelope? Marisol pinned the note up at the chapel: 'Whoever took half, God saw. So did Gus.' The park side-eyes you.",
+              "effects": {
+                "clout": -60,
+                "mood": -8
+              }
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "extra-change-cart",
-    "base": "extra-change",
+    "id": "found-wallet-cafe",
+    "base": "found-wallet",
     "area": "life",
-    "emoji": "🥙",
-    "title": "Tariq's cart, 2 AM. He gives you change for a fifty. You paid with a twenty.",
-    "who": "tariq",
-    "where": { "places": ["white-sauce-cart"], "after": ["eat"] },
+    "emoji": "📱",
+    "title": "A phone left at Grind & Gossip lights up: 'Reward if found: C$100.' A guy by the door offers C$450 for it.",
+    "who": "jojo",
+    "where": {
+      "places": [
+        "grind-and-gossip"
+      ],
+      "after": [
+        "arrive",
+        "eat"
+      ]
+    },
     "options": [
       {
-        "id": "tell", "label": "Tell him", "get": "Extra white sauce for life", "cost": "C$30 you could've kept",
-        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "id": "return",
+        "label": "Give it to Jojo",
+        "get": "C$100 and a friend for life",
+        "cost": "C$350 less than the guy",
+        "risk": "low",
+        "riskWhy": "Jojo will vouch for you",
         "outcomes": [
-          { "weight": 1, "text": "Tariq laughs, takes the thirty back and says honesty at 2 AM is rarer than a parking spot on Steinway. Extra sauce.",
-            "effects": { "integrity": 6, "mood": 5 },
-            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "🚕", "text": "Remember the wrong change at Tariq's cart? He told every cabbie on the block. One knocked C$20 off your ride home.",
-                       "effects": { "cash": 20, "clout": 10 } } }
+          {
+            "weight": 1,
+            "text": "The owner, a frantic grad student, runs in and cries. She sends C$100. Jojo writes your name on the regulars' wall in foam-heart pen.",
+            "effects": {
+              "cash": 100,
+              "integrity": 8,
+              "clout": 30,
+              "mood": 6
+            }
+          }
         ]
       },
       {
-        "id": "pocket", "label": "Pocket the C$30", "get": "C$30", "cost": "Tariq's till comes up short",
-        "risk": "medium", "riskWhy": "He counts the till at 4 AM", "comesBack": true,
+        "id": "sell",
+        "label": "Sell it to the guy",
+        "get": "C$450 cash",
+        "cost": "A stranger's whole life",
+        "risk": "high",
+        "riskWhy": "The café has a camera. And Jojo.",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 3, "text": "You walk off with a platter and thirty bonus dollars. The sauce tastes slightly of guilt. Still good.",
-            "effects": { "cash": 30, "integrity": -6 } },
-          { "weight": 1, "text": "Thirty dollars and a platter. Tariq waves you off with a smile that makes it worse.",
-            "effects": { "cash": 30, "integrity": -6 },
-            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "🥙", "text": "Remember the wrong change at Tariq's cart? His till came up C$30 short that night. Now he 'forgets' your extra white sauce.",
-                       "effects": { "mood": -6, "clout": -10 } } }
+          {
+            "weight": 1,
+            "text": "C$450, folded twice, no questions. The phone's gone before your coffee cools.",
+            "effects": {
+              "cash": 450,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$450, folded twice. Jojo is very still behind the machine.",
+            "effects": {
+              "cash": 450,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.9,
+              "emoji": "📹",
+              "text": "Remember the phone at Grind & Gossip? Jojo checked the tape. You're banned for a week, and the owner's post has 3,000 shares.",
+              "effects": {
+                "clout": -150,
+                "mood": -12,
+                "ban": {
+                  "place": "grind-and-gossip",
+                  "days": 7
+                }
+              },
+              "headline": "BREAKING: Grind & Gossip bans {name} for a week after a lost phone 'walked off.' Jojo, on the record: 'I make foam hearts. I also check the tape.'"
+            }
+          }
         ]
       },
       {
-        "id": "next", "label": "Fix it, pay for the next guy", "get": "A nurse off shift gets a free platter", "cost": "C$12",
-        "risk": "low", "riskWhy": "Only your wallet", "comesBack": false,
+        "id": "haggle",
+        "label": "Return it for C$250",
+        "get": "C$250",
+        "cost": "Some dignity",
+        "risk": "medium",
+        "riskWhy": "Owners screenshot negotiations",
         "outcomes": [
-          { "weight": 1, "text": "You hand the thirty back and cover the nurse behind you. She says it's the nicest thing since her shift started at 7 PM.",
-            "effects": { "cash": -12, "integrity": 8, "mood": 8, "clout": 10 } }
+          {
+            "weight": 1,
+            "text": "You text the owner: 'C$250 and it's yours.' She pays. She also posts your text, with a lot of crying emojis.",
+            "effects": {
+              "cash": 250,
+              "integrity": -6,
+              "clout": -40
+            }
+          },
+          {
+            "weight": 1,
+            "text": "She pays C$250 and says thank you. You feel strange about it, which is correct.",
+            "effects": {
+              "cash": 250,
+              "integrity": -6
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "charity-deposit-chapel",
+    "base": "charity-deposit",
+    "area": "life",
+    "emoji": "⛪",
+    "title": "Rev. Mercy hands you the roof fund, C$2,400 in a zip bag, to drop at the bank. 'I trust you, child.'",
+    "who": "rev-mercy",
+    "where": {
+      "places": [
+        "harmony-chapel"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
+    "needs": {
+      "integrityMin": 70
+    },
+    "options": [
+      {
+        "id": "bank",
+        "label": "Walk it to the bank",
+        "get": "Rev. Mercy's blessing",
+        "cost": "An hour, clutching C$2,400",
+        "risk": "low",
+        "riskWhy": "Nothing to explain",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "The teller counts C$2,400 out loud. Rev. Mercy gets the text and sends back nine praying-hands emojis.",
+            "effects": {
+              "integrity": 10,
+              "clout": 40,
+              "energy": -10
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🛐",
+              "text": "Remember the roof fund? The new roof is on, and your name ended up on the donor plaque by mistake. Rev. Mercy says leave it.",
+              "effects": {
+                "clout": 90,
+                "mood": 10
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "top",
+        "label": "Add C$100 of your own",
+        "get": "Your name on the roof",
+        "cost": "C$100",
+        "risk": "low",
+        "riskWhy": "Generosity rarely backfires",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$2,500 goes in. Rev. Mercy reads your name out on Sunday. The choir does a little run on it.",
+            "effects": {
+              "cash": -100,
+              "integrity": 12,
+              "clout": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "skim",
+        "label": "Skim C$600, blame the bake sale",
+        "get": "C$600",
+        "cost": "A church roof",
+        "risk": "high",
+        "riskWhy": "The bake-sale ladies keep spreadsheets",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$1,800 goes in. 'They must have miscounted at the bake sale,' you say. Rev. Mercy just looks at you for a long time.",
+            "effects": {
+              "cash": 600,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                1,
+                5
+              ],
+              "chance": 0.85,
+              "emoji": "🕊️",
+              "text": "Remember the roof fund? The bake-sale ladies had spreadsheets. Rev. Mercy forgave you in the sermon, by name, and asked you to stay away a week.",
+              "effects": {
+                "clout": -180,
+                "mood": -15,
+                "ban": {
+                  "place": "harmony-chapel",
+                  "days": 7
+                }
+              },
+              "headline": "BREAKING: {name} forgiven, by name, in Sunday's sermon at Harmony Chapel over C$600 missing from the roof fund. The choir gasped in harmony."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "charity-deposit-firehouse",
+    "base": "charity-deposit",
+    "area": "life",
+    "emoji": "🚒",
+    "title": "Captain Rosa's calendar money, C$1,500, needs counting. She's up a ladder. Hydrant is eating the receipts.",
+    "who": "captain-rosa",
+    "where": {
+      "places": [
+        "engine-7"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
+    "options": [
+      {
+        "id": "count",
+        "label": "Count it to the dollar",
+        "get": "Rosa's trust",
+        "cost": "Your afternoon",
+        "risk": "low",
+        "riskWhy": "Nothing missing, nothing to explain",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$1,500 exactly, rubber-banded by hundreds. Rosa yells 'Wepa!' from the ladder.",
+            "effects": {
+              "integrity": 8,
+              "clout": 30,
+              "energy": -10
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "📅",
+              "text": "Remember counting the calendar money? Captain Rosa put you in the calendar. February. Holding Hydrant, who is holding a helmet.",
+              "effects": {
+                "clout": 100,
+                "mood": 12
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "skim",
+        "label": "Skim C$400, blame the dog",
+        "get": "C$400",
+        "cost": "A firehouse fundraiser",
+        "risk": "high",
+        "riskWhy": "Rosa knows what Hydrant can eat",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "C$1,100 goes in the box. 'Hydrant got some,' you say. Hydrant looks offended.",
+            "effects": {
+              "cash": 400,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,100 in the box. Hydrant wags. Rosa climbs down slowly.",
+            "effects": {
+              "cash": 400,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🐶",
+              "text": "Remember the calendar money? Hydrant didn't eat the receipts, he buried them. Rosa dug them up and called Sgt. Bev, who loves a dog story.",
+              "effects": {
+                "cash": -400,
+                "clout": -150,
+                "holding": 1
+              },
+              "headline": "BREAKING: {name} blamed a dalmatian for C$400 missing from Engine 7's calendar fund. The dalmatian has been cleared. Sgt. Bev: 'Good boy.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "snack",
+        "label": "Take C$50 'for snacks'",
+        "get": "C$50",
+        "cost": "A small lie",
+        "risk": "low",
+        "riskWhy": "Fifty bucks among firefighters",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$1,450 in the box and a C$50 bagel run for you. Nobody notices. You notice.",
+            "effects": {
+              "cash": 50,
+              "integrity": -4,
+              "mood": 3
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lost-and-found-precinct",
+    "base": "lost-and-found",
+    "area": "life",
+    "emoji": "⌚",
+    "title": "Sgt. Bev waves at her lost-and-found bin: 'Point at whatever's yours, hon.' There's a C$1,500 watch.",
+    "who": "sgt-bev",
+    "where": {
+      "places": [
+        "precinct-114-half"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
+    "options": [
+      {
+        "id": "none",
+        "label": "'None of it's mine'",
+        "get": "Bev's respect",
+        "cost": "A C$1,500 watch",
+        "risk": "low",
+        "riskWhy": "Bev likes honest people. Barely.",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Bev looks up from her mug for the first time all day. 'Huh.' She writes something down. That's the service.",
+            "effects": {
+              "integrity": 8,
+              "mood": 4
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "👮‍♀️",
+              "text": "Remember the lost-and-found at the 114½? Sgt. Bev told Lola you were the only honest one at her desk all week. Lola ran it.",
+              "effects": {
+                "clout": 70
+              },
+              "headline": "Developing: Sgt. Bev Kowalski of the 114½ calls {name} 'the only honest person at my desk this week.' She adds: 'It was a slow week.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "watch",
+        "label": "'That watch is mine'",
+        "get": "A C$1,500 watch to sell",
+        "cost": "Somebody's grandpa's watch",
+        "risk": "high",
+        "riskWhy": "Owners come in with photos",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Bev slides it over without looking. 'Sign here, here and here. Triplicate.' A shop in Flushing gives you C$1,500.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Bev slides it over. You sign in triplicate and sell it in Flushing for C$1,500.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the watch from the 114½? Its real owner came in with a photo. Bev called you back, sighed for nine minutes and booked you.",
+              "effects": {
+                "cash": -1500,
+                "clout": -200,
+                "holding": 3
+              },
+              "headline": "BREAKING: {name} booked for claiming a stranger's watch from the 114½ Precinct's own lost-and-found. Sgt. Bev: 'At my desk. With my pen.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "scarf",
+        "label": "Claim the C$40 scarf",
+        "get": "A nice scarf",
+        "cost": "A little lie",
+        "risk": "low",
+        "riskWhy": "Nobody's crying over a scarf",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'That one.' Bev doesn't even look. It's cashmere-ish. You feel sort of cashmere-ish about it.",
+            "effects": {
+              "cash": 40,
+              "integrity": -4,
+              "mood": 3
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sneaker-van-steinway",
+    "base": "sneaker-van",
+    "area": "life",
+    "emoji": "👟",
+    "title": "A delivery van on Steinway, back door open: forty boxes of Dunk Daniels 9s. A crew: 'Lookout pays C$600.'",
+    "where": {
+      "places": [
+        "steinway-fresh",
+        "campaign-hq"
+      ],
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
+    "options": [
+      {
+        "id": "walk",
+        "label": "Keep walking",
+        "get": "Nothing to explain later",
+        "cost": "C$600 you didn't take",
+        "risk": "low",
+        "riskWhy": "Not your van, not your problem",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You keep walking. Behind you, someone yells 'yo, the driver!' and forty boxes go back in a van. Probably.",
+            "effects": {
+              "integrity": 4
+            }
+          }
+        ]
+      },
+      {
+        "id": "tip",
+        "label": "Text Sgt. Bev the plate",
+        "get": "A favor from the 114½",
+        "cost": "The crew's opinion of you",
+        "risk": "medium",
+        "riskWhy": "The crew might see you texting",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Bev rolls up eating a pierogi. The crew scatters. The courier company sends you C$300 and a very formal thank-you.",
+            "effects": {
+              "cash": 300,
+              "integrity": 10,
+              "clout": 60
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Bev arrives in four minutes, which she calls 'a personal best.' The crew saw you texting.",
+            "effects": {
+              "integrity": 10,
+              "clout": 40,
+              "mood": -6
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 0.6,
+              "emoji": "👟",
+              "text": "Remember the van on Steinway? The crew left one left-foot sneaker on your doorstep. Message received. Your block feels colder.",
+              "effects": {
+                "clout": -40,
+                "mood": -10
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "lookout",
+        "label": "Be the lookout",
+        "get": "C$600 cash",
+        "cost": "Your name on a crew's list",
+        "risk": "high",
+        "riskWhy": "Steinway is all doorbell cameras",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "You stare at a pigeon for six minutes. C$600 lands in your hand. You are, technically, in a crew now.",
+            "effects": {
+              "cash": 600,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                3,
+                6
+              ],
+              "chance": 1,
+              "emoji": "🚐",
+              "text": "Remember the van on Steinway? The crew's back. They have a bigger van in mind, and you in the driver's seat.",
+              "effects": {},
+              "card": "sneaker-crew-again"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Sgt. Bev's cruiser turns the corner. Everyone runs. You run worst. 'You were the lookout? You were looking at a pigeon.'",
+            "effects": {
+              "integrity": -12,
+              "clout": -100,
+              "holding": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "grab",
+        "label": "Grab a box yourself",
+        "get": "A C$1,400 pair to flip",
+        "cost": "Being the one holding the box",
+        "risk": "high",
+        "riskWhy": "You'll be carrying the evidence",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "A reseller on Ditmars takes the box by sundown: C$1,400, cash.",
+            "effects": {
+              "cash": 1400,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 1,
+            "text": "The driver comes back with his coffee. You're holding the box. He just points. Sgt. Bev does the rest.",
+            "effects": {
+              "cash": -500,
+              "clout": -150,
+              "integrity": -16,
+              "holding": 3
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "📸",
+              "text": "Remember the sneaker van? Lola got the precinct log. Your booking photo is her most-liked post this week.",
+              "effects": {
+                "clout": -60
+              },
+              "headline": "BREAKING: {name} caught holding a box of Dunk Daniels 9s off a Steinway delivery van. Sgt. Bev: 'Size 11. I checked.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sneaker-van-meteor",
+    "base": "sneaker-van",
+    "area": "life",
+    "emoji": "🧢",
+    "title": "Outside Meteor Park, a crew unloads a merch truck that isn't theirs. 'Carry two, keep one: C$500.'",
+    "who": "hector",
+    "where": {
+      "places": [
+        "meteor-park"
+      ],
+      "after": [
+        "arrive",
+        "eat"
+      ]
+    },
+    "options": [
+      {
+        "id": "walk",
+        "label": "Head for your seat",
+        "get": "The game, in peace",
+        "cost": "C$500 in jerseys",
+        "risk": "low",
+        "riskWhy": "You saw nothing, you know nothing",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You find Section 7. Hector says you look like someone who just made a good decision.",
+            "effects": {
+              "integrity": 4,
+              "mood": 4
+            }
+          }
+        ]
+      },
+      {
+        "id": "hector",
+        "label": "Tell Hector the usher",
+        "get": "Stadium gratitude",
+        "cost": "The crew's glare",
+        "risk": "medium",
+        "riskWhy": "The crew knows your face now",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Hector radios it in. Security saves the truck. The Meteors send two seats behind the dugout to 'our hero in 7.'",
+            "effects": {
+              "integrity": 10,
+              "clout": 80
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Hector radios it in. The crew is long gone, and one of them waves at you from the 7 train. Cute.",
+            "effects": {
+              "integrity": 10,
+              "clout": 30,
+              "mood": -6
+            }
+          }
+        ]
+      },
+      {
+        "id": "carry",
+        "label": "Carry two, keep one",
+        "get": "C$500 in jerseys",
+        "cost": "A stadium's merch truck",
+        "risk": "high",
+        "riskWhy": "Stadiums have cameras on every gate",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Two boxes carried, one kept. A jersey reseller in Flushing pays C$500 and doesn't ask which player.",
+            "effects": {
+              "cash": 500,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                3,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🚐",
+              "text": "Remember the jerseys at Meteor Park? The crew liked your work. They have a bigger van in mind, and you in the driver's seat.",
+              "effects": {},
+              "card": "sneaker-crew-again"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "The gate camera zooms in like it's a replay. Stadium security bans you for the week and hands you to Sgt. Bev, who is a Meteors fan.",
+            "effects": {
+              "integrity": -12,
+              "clout": -120,
+              "holding": 2,
+              "ban": {
+                "place": "here",
+                "days": 7
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sneaker-crew-again",
+    "base": "sneaker-crew",
+    "area": "life",
+    "emoji": "🚐",
+    "title": "The crew is back: 'Next van's electronics. You drive. C$2,500.' They already know where you live.",
+    "who": "sgt-bev",
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
+    "chainOnly": true,
+    "options": [
+      {
+        "id": "out",
+        "label": "Pay your way out",
+        "get": "Your life back",
+        "cost": "C$800 to 'settle up'",
+        "risk": "medium",
+        "riskWhy": "Crews don't love goodbyes",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You hand over C$800 'for the inconvenience.' They shrug and delete your number. You're out, and broke-ish.",
+            "effects": {
+              "cash": -800,
+              "integrity": 10,
+              "mood": 6
+            }
+          }
+        ]
+      },
+      {
+        "id": "drive",
+        "label": "Drive the van",
+        "get": "C$2,500",
+        "cost": "Everything, if it goes wrong",
+        "risk": "high",
+        "riskWhy": "Sgt. Bev knows this crew by name",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You drive like a grandmother on a Sunday. C$2,500. Nobody notices a thing.",
+            "effects": {
+              "cash": 2500,
+              "integrity": -18
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Bev pulls the van over for a broken taillight. She opens the back. She sighs so hard her radio crackles.",
+            "effects": {
+              "cash": -2000,
+              "clout": -250,
+              "integrity": -18,
+              "holding": 3
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "📸",
+              "text": "Remember the van? Lola has the photos. So does everyone you've ever met.",
+              "effects": {
+                "clout": -50
+              },
+              "headline": "BREAKING: {name} pulled over on 31st Street in a van of 'definitely ours' electronics. Sgt. Bev: 'Taillight's out too. Rough day.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bev",
+        "label": "Tell Sgt. Bev everything",
+        "get": "A clean slate, maybe a reward",
+        "cost": "You were in it once",
+        "risk": "medium",
+        "riskWhy": "Bev may book you anyway",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Bev listens, eats a pierogi and writes it all down. 'Go home, hon.' The crew gets picked up Tuesday. The courier company sends C$500.",
+            "effects": {
+              "cash": 500,
+              "integrity": 14,
+              "clout": 80
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 0.6,
+              "emoji": "📰",
+              "text": "Remember telling Sgt. Bev about the crew? She told Lola. Lola made you sound like a movie.",
+              "effects": {
+                "clout": 80
+              }
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Bev thanks you, then books you for the lookout job. 'Rules, hon. One hour. I'll get you a coffee.'",
+            "effects": {
+              "integrity": 14,
+              "clout": 40,
+              "holding": 1
+            }
+          }
         ]
       }
     ]
@@ -135,277 +969,112 @@
     "base": "extra-change",
     "area": "life",
     "emoji": "📚",
-    "title": "Mr. Penwright's book sale: a signed first edition priced C$2 by mistake. Collectors pay C$300.",
+    "title": "Mr. Penwright's book sale: a signed first edition priced C$2 by mistake. A collector in Flushing pays C$1,800.",
     "who": "penwright",
-    "where": { "places": ["ditmars-library"], "after": ["arrive", "visit"] },
+    "where": {
+      "places": [
+        "ditmars-library"
+      ],
+      "after": [
+        "arrive",
+        "visit"
+      ]
+    },
     "options": [
       {
-        "id": "tell", "label": "Tell Mr. Penwright", "get": "His gratitude, whispered", "cost": "A C$300 flip",
-        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "id": "tell",
+        "label": "Show Mr. Penwright",
+        "get": "Penwright's eternal respect",
+        "cost": "C$1,800",
+        "risk": "low",
+        "riskWhy": "Librarians remember everything",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Mr. Penwright goes pale, then pink. 'The roof fund thanks you.' He forgives a late fee you didn't know you had.",
-            "effects": { "integrity": 8, "mood": 5 },
-            "later": { "afterDays": [2, 6], "chance": 0.7, "emoji": "🏷️", "text": "Remember the C$2 first edition? It sold at auction for the roof fund. Mr. Penwright put your name on the thank-you board.",
-                       "effects": { "clout": 25, "mood": 6 } } }
+          {
+            "weight": 1,
+            "text": "Penwright removes his glasses, polishes them and puts them back on. 'Good heavens.' He shakes your hand for an uncomfortably long time.",
+            "effects": {
+              "integrity": 10,
+              "clout": 40
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.6,
+              "emoji": "📖",
+              "text": "Remember the first edition? The library auctioned it for a new reading corner. The little plaque says 'Thanks to an honest reader.' It's you.",
+              "effects": {
+                "clout": 120,
+                "mood": 10
+              },
+              "headline": "Developing: a signed first edition priced C$2 at the Ditmars Free Library went to auction thanks to {name}. Mr. Penwright: 'Good heavens.'"
+            }
+          }
         ]
       },
       {
-        "id": "keep", "label": "Buy it to keep", "get": "A signed first edition, C$2", "cost": "The library's roof fund",
-        "risk": "low", "riskWhy": "It's on your shelf, nowhere else",
+        "id": "fence",
+        "label": "Buy it, sell it in Flushing",
+        "get": "C$1,800 profit",
+        "cost": "A library's treasure",
+        "risk": "high",
+        "riskWhy": "Collectors post their finds",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "C$2 and it's yours. It looks incredible on your shelf. Your shelf is a milk crate.",
-            "effects": { "cash": -2, "integrity": -3, "mood": 8 } }
+          {
+            "weight": 2,
+            "text": "Two dollars at the desk. C$1,800 in Flushing. The collector calls you 'a person of taste.'",
+            "effects": {
+              "cash": 1800,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$2 in, C$1,800 out. The collector posts it, with the library's stamp in the corner of the photo.",
+            "effects": {
+              "cash": 1800,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 1,
+              "emoji": "🔖",
+              "text": "Remember the C$2 first edition? Penwright saw his own stamp online. You're buying it back at C$2,000 and staying out of the library for a week.",
+              "effects": {
+                "cash": -2000,
+                "clout": -120,
+                "ban": {
+                  "place": "ditmars-library",
+                  "days": 7
+                }
+              }
+            }
+          }
         ]
       },
       {
-        "id": "flip", "label": "Buy it and flip it", "get": "About C$300", "cost": "Mr. Penwright's roof fund",
-        "risk": "medium", "riskWhy": "Dealers on 30th Ave know Penwright", "comesBack": true,
+        "id": "keep",
+        "label": "Buy it for your shelf",
+        "get": "A signed first edition",
+        "cost": "Two dollars and a pang",
+        "risk": "low",
+        "riskWhy": "It's on your shelf, not on sale",
         "outcomes": [
-          { "weight": 1, "text": "A dealer on 30th Avenue pays C$300 without blinking. Mr. Penwright's whole roof fund is C$412.",
-            "effects": { "cash": 298, "integrity": -10 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🪟", "text": "Remember flipping the C$2 first edition? Mr. Penwright saw it in a window on 30th Ave. He whispers your name now. Not kindly.",
-                       "effects": { "clout": -40, "mood": -8 } } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "borrowed-clip-unisphere",
-    "base": "borrowed-clip",
-    "area": "life",
-    "emoji": "🎷",
-    "title": "A sax player at the Unisphere nails a solo. Walt's tour group is filming. You got the best angle.",
-    "who": "walt",
-    "where": { "places": ["unisphere"], "after": ["arrive", "hangout"] },
-    "options": [
-      {
-        "id": "tag", "label": "Post it with his name", "get": "Some clout, and a happy sax player", "cost": "Asking his name",
-        "risk": "low", "riskWhy": "Credit is hard to get wrong", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "His name's Desmond and he's played the Unisphere since it was 'only slightly rusty.' Walt adds your clip to his tour.",
-            "effects": { "clout": 20, "integrity": 4, "mood": 4 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎷", "text": "Remember crediting Desmond's sax solo at the Unisphere? A wedding booked him off your clip. He sent you C$40 and a voice note.",
-                       "effects": { "cash": 40, "clout": 15 } } }
-        ]
-      },
-      {
-        "id": "post", "label": "Post it as 'my find'", "get": "+55 clout", "cost": "Desmond gets nothing",
-        "risk": "medium", "riskWhy": "Walt's tour group filmed too", "comesBack": true,
-        "outcomes": [
-          { "weight": 2, "text": "'Found this legend in Flushing 🎷.' The legend is now yours, apparently. People ask you to book him.",
-            "effects": { "clout": 55, "integrity": -5 } },
-          { "weight": 1, "text": "Your clip does numbers. Walt's tour group posts theirs too, a few hours later, with his name.",
-            "effects": { "clout": 55, "integrity": -5 },
-            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "🧢", "text": "Remember the Unisphere sax clip? Walt's tour group posted theirs with Desmond's name and a comment: 'unlike some people.'",
-                       "effects": { "clout": -35, "mood": -5 } } }
-        ]
-      },
-      {
-        "id": "tip", "label": "Tip C$20, skip the post", "get": "Desmond plays your request", "cost": "C$20 and the clip",
-        "risk": "low", "riskWhy": "None at all",
-        "outcomes": [
-          { "weight": 1, "text": "You drop a twenty in his case and ask for something slow. Walt's whole tour group sways. No clip, all vibe.",
-            "effects": { "cash": -20, "integrity": 4, "mood": 10 } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "honor-box-chapel",
-    "base": "honor-box",
-    "area": "life",
-    "emoji": "🍰",
-    "title": "Rev. Mercy's bake sale honor box: C$4 a slice, nobody watching, and you have exactly C$1.",
-    "who": "rev-mercy",
-    "where": { "places": ["harmony-chapel"], "after": ["arrive", "visit"] },
-    "options": [
-      {
-        "id": "iou", "label": "Leave C$1 and an IOU", "get": "One slice, an honest one", "cost": "C$1 and your name on a napkin",
-        "risk": "low", "riskWhy": "Your name is literally on it", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "You write 'IOU C$3' on a napkin and sign it. The lemon pound cake is worth every cent you don't have.",
-            "effects": { "cash": -1, "integrity": 5, "mood": 5, "energy": 5 },
-            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "📌", "text": "Remember your napkin IOU in Rev. Mercy's honor box? She pinned it to the board: 'Honest folk eat free Friday.' You ate free Friday.",
-                       "effects": { "mood": 6, "energy": 10 } } }
-        ]
-      },
-      {
-        "id": "skip", "label": "Skip the cake", "get": "Nothing owed", "cost": "Smelling it all the way home",
-        "risk": "low", "riskWhy": "Only your stomach suffers",
-        "outcomes": [
-          { "weight": 1, "text": "You walk past the cake. The cake does not walk past you. You can smell lemon until 31st Street.",
-            "effects": { "integrity": 2, "mood": -3 } }
-        ]
-      },
-      {
-        "id": "take", "label": "Take a slice, 'pay later'", "get": "Lemon pound cake, now", "cost": "C$4 of the chapel's money",
-        "risk": "medium", "riskWhy": "Someone always sees in a chapel", "comesBack": true,
-        "outcomes": [
-          { "weight": 2, "text": "You take a slice and promise the box you'll be back. The box has heard that before.",
-            "effects": { "integrity": -4, "mood": 5, "energy": 10 } },
-          { "weight": 1, "text": "A slice for the road, and a promise to pay later. The cake is perfect. The promise is not.",
-            "effects": { "integrity": -4, "mood": 5, "energy": 10 },
-            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "⛪", "text": "Remember the 'pay later' slice? Rev. Mercy mentioned, very kindly, that the box was C$4 short Tuesday. She looked right at you.",
-                       "effects": { "mood": -6, "clout": -10 } } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "honor-box-firehouse",
-    "base": "honor-box",
-    "area": "life",
-    "emoji": "🌶️",
-    "title": "Engine 7's chili fundraiser: C$5 a bowl, honor jar, Captain Rosa up a ladder. You're starving and broke.",
-    "who": "captain-rosa",
-    "where": { "places": ["engine-7"], "after": ["arrive", "visit"] },
-    "options": [
-      {
-        "id": "help", "label": "Offer to work for a bowl", "get": "A bowl of chili, earned", "cost": "An hour scrubbing pots",
-        "risk": "low", "riskWhy": "Pots fight back, people don't", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "Captain Rosa hands you a sponge and a bowl. Hydrant the dalmatian supervises. The chili tastes like a job well done.",
-            "effects": { "integrity": 6, "energy": -10, "mood": 6 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🚒", "text": "Remember scrubbing pots for chili at Engine 7? Captain Rosa told the whole firehouse. They waved you to the front at the block party.",
-                       "effects": { "clout": 25, "mood": 5 } } }
-        ]
-      },
-      {
-        "id": "later", "label": "Eat now, pay 'next time'", "get": "Hot chili, right now", "cost": "C$5 of the fundraiser",
-        "risk": "medium", "riskWhy": "Firefighters notice smoke", "comesBack": true,
-        "outcomes": [
-          { "weight": 2, "text": "You eat fast and wave at the jar like it's a friend you'll call later. Captain Rosa is still up the ladder.",
-            "effects": { "integrity": -4, "energy": 15, "mood": 4 } },
-          { "weight": 1, "text": "The chili is incredible. You tell the jar you'll be back. Captain Rosa is looking down from the ladder.",
-            "effects": { "integrity": -4, "energy": 15, "mood": 4 },
-            "later": { "afterDays": [1, 3], "chance": 1, "emoji": "🧯", "text": "Remember the 'next time' chili at Engine 7? Captain Rosa saw from the ladder. She told the firehouse group chat, laughing. Mostly laughing.",
-                       "effects": { "clout": -15, "mood": -5 } } }
-        ]
-      },
-      {
-        "id": "walk", "label": "Walk on by", "get": "Nothing owed", "cost": "Smelling chili for six blocks",
-        "risk": "low", "riskWhy": "Hunger is the only risk",
-        "outcomes": [
-          { "weight": 1, "text": "You walk on. Hydrant follows you half a block, judging. Dalmatians are very judgmental.",
-            "effects": { "integrity": 2, "mood": -3, "energy": -3 } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "cut-the-line-slice",
-    "base": "cut-the-line",
-    "area": "life",
-    "emoji": "🍕",
-    "title": "The line at Still-a-Dollar Slice is 40 deep. A guy near the front waves: 'Yo, I saved you a spot.'",
-    "who": "arben",
-    "where": { "places": ["still-a-dollar-slice"], "after": ["arrive", "eat"] },
-    "options": [
-      {
-        "id": "back", "label": "Go to the back", "get": "A slice you can look at", "cost": "Thirty minutes on the sidewalk",
-        "risk": "low", "riskWhy": "Only your feet", "comesBack": false,
-        "outcomes": [
-          { "weight": 1, "text": "You wave him off and join the back. Arben, folding slices, gives you a nod that means 'correct.'",
-            "effects": { "integrity": 4, "energy": -10 } }
-        ]
-      },
-      {
-        "id": "cut", "label": "Take the spot", "get": "Pizza in two minutes", "cost": "39 people's patience",
-        "risk": "medium", "riskWhy": "The line has phones", "comesBack": false,
-        "outcomes": [
-          { "weight": 2, "text": "You slide in. Nobody says anything, because it's New York and everyone is saving it for the group chat.",
-            "effects": { "integrity": -4, "energy": 5, "mood": 3 } },
-          { "weight": 1, "text": "You slide in. A woman behind you narrates it into her phone like a nature documentary. It gets 4,000 views.",
-            "effects": { "integrity": -4, "energy": 5, "clout": -20 } }
-        ]
-      },
-      {
-        "id": "three", "label": "Take it and wave in two more", "get": "Pizza fast, and two grateful friends", "cost": "Everyone else's patience",
-        "risk": "high", "riskWhy": "Arben hates a crowd cutter", "comesBack": false,
-        "outcomes": [
-          { "weight": 1, "text": "You wave in two strangers you met eight seconds ago. Arben stops folding, points to the back, and the line applauds.",
-            "effects": { "integrity": -6, "clout": -25, "mood": -5 } },
-          { "weight": 1, "text": "You wave in two strangers. They're grateful. You're a hero to two people and a villain to thirty-seven.",
-            "effects": { "integrity": -6, "clout": 10, "energy": 5 } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "cut-the-line-meteor",
-    "base": "cut-the-line",
-    "area": "life",
-    "emoji": "⚾",
-    "title": "Bobblehead night at Meteor Park. Hector the usher can walk you past 300 people, 'friend of a friend.'",
-    "who": "hector",
-    "where": { "places": ["meteor-park"], "after": ["arrive", "eat"] },
-    "options": [
-      {
-        "id": "wait", "label": "Wait like everyone else", "get": "A fair shot at a bobblehead", "cost": "An hour in line",
-        "risk": "low", "riskWhy": "They might run out", "comesBack": false,
-        "outcomes": [
-          { "weight": 1, "text": "You wait. They run out four people ahead of you. The guy who got the last one lets you hold it for a photo.",
-            "effects": { "integrity": 4, "energy": -15, "mood": -3 } },
-          { "weight": 1, "text": "You wait an hour and get the second-to-last Meteors bobblehead. It nods at you like it knows.",
-            "effects": { "integrity": 4, "energy": -15, "mood": 8 } }
-        ]
-      },
-      {
-        "id": "skip", "label": "Let Hector walk you in", "get": "A guaranteed bobblehead", "cost": "300 people's patience",
-        "risk": "medium", "riskWhy": "Section 7 has a long memory", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "Hector walks you through like a dignitary. You get a bobblehead and a lot of looks.",
-            "effects": { "integrity": -5, "clout": 25, "mood": 5 },
-            "later": { "afterDays": [3, 7], "chance": 0.4, "emoji": "📣", "text": "Remember skipping the bobblehead line? Section 7 recognized you at the next game and chanted 'LINE! CUT-TER!' for an inning.",
-                       "effects": { "clout": -30, "mood": -6 } } }
-        ]
-      },
-      {
-        "id": "elder", "label": "Ask Hector to take the old-timer", "get": "Somebody's grandpa gets his bobblehead", "cost": "Your bobblehead",
-        "risk": "low", "riskWhy": "Nothing but a lost nod", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "Hector walks the 80-year-old in the '86 jersey to the front. He salutes you from the gate. You get nothing. You feel great.",
-            "effects": { "integrity": 8, "mood": 8, "energy": -5 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📬", "text": "Remember the old-timer at bobblehead night? He left a signed '86 program for you with Hector: 'To the kid with manners.'",
-                       "effects": { "clout": 20, "mood": 6 } } }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "fake-review-hub",
-    "base": "fake-review",
-    "area": "life",
-    "emoji": "🍟",
-    "title": "The Hub's new fries are soggy. The manager offers free fries for a month if you post five stars.",
-    "where": { "places": ["neon-spoon"], "after": ["eat"] },
-    "options": [
-      {
-        "id": "honest", "label": "Post an honest three stars", "get": "Your word means something", "cost": "A month of free fries",
-        "risk": "low", "riskWhy": "The manager sulks, that's all",
-        "outcomes": [
-          { "weight": 1, "text": "'Great booths, Lola is iconic, fries are a damp handshake.' The manager sulks. Three people thank you for the warning.",
-            "effects": { "integrity": 6, "clout": 10 } }
-        ]
-      },
-      {
-        "id": "five", "label": "Five stars, free fries", "get": "Free fries for a month", "cost": "Your word, for soggy fries",
-        "risk": "medium", "riskWhy": "People will try them because of you", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "'Best fries in Queens!!' The manager slides you a basket. They are soggy. You eat them anyway, because they're free.",
-            "effects": { "integrity": -5, "energy": 10, "mood": 4 },
-            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📉", "text": "Remember your five stars for The Hub's soggy fries? Twelve people came because of you. Lola read their replies aloud at the bar.",
-                       "effects": { "clout": -30, "mood": -5 } } }
-        ]
-      },
-      {
-        "id": "fix", "label": "Tell the cook how to fix them", "get": "Maybe better fries for everyone", "cost": "Ten minutes and some nerve",
-        "risk": "low", "riskWhy": "Cooks take notes badly", "comesBack": true,
-        "outcomes": [
-          { "weight": 1, "text": "You tell the cook: double-fry them. He squints, then tries it. 'Huh.' The manager pretends it was his idea.",
-            "effects": { "integrity": 4, "energy": -5, "mood": 6 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🍟", "text": "Remember telling The Hub's cook to double-fry? The new fries are a hit, and the menu calls them 'the regular's fries.' That's you.",
-                       "effects": { "clout": 25, "mood": 5 } } }
+          {
+            "weight": 1,
+            "text": "C$2. It looks incredible on your shelf. You will never read it.",
+            "effects": {
+              "cash": -2,
+              "integrity": -4,
+              "mood": 10
+            }
+          }
         ]
       }
     ]
