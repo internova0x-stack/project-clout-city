@@ -54,7 +54,6 @@ function Receipt({ made, onClose }: { made: ChoiceMade; onClose: () => void }) {
       <p className="choice-receipt">{made.receipt}</p>
       {line && <p className="choice-effects">{line}</p>}
       <div className="choice-reveal stack-8">
-        {made.first && <span className="overline">New: Halo or Hustler?</span>}
         <RepMeter value={made.integrity} from={made.integrity - moved} compact={!made.first} />
         {lola && (
           <p className="choice-lola">
@@ -64,9 +63,7 @@ function Receipt({ made, onClose }: { made: ChoiceMade; onClose: () => void }) {
           </p>
         )}
         {made.first && (
-          <p className="meta" style={{ margin: 0 }}>
-            Every choice nudges you one way. Halos get trusted, Hustlers get offers, and each is lucky at its own game. Only you see this.
-          </p>
+          <p className="meta" style={{ margin: 0 }}>Every choice nudges you. Only you see this.</p>
         )}
       </div>
       <button className="btn btn-taxi" onClick={onClose}>{made.first ? "Noted" : "Moving on"}</button>
@@ -88,8 +85,9 @@ export function ChoiceSheet({ card, made, busy, onChoose, onSkip, onClose }: {
         <div className="stack-16">
           <div className="choice-head">
             <span className="choice-icon" aria-hidden="true">{card.emoji}</span>
-            <span className="overline">{AREA[card.area] ?? "A choice"}{place ? ` · ${place.name}` : ""}</span>
-            <p className="choice-title">{card.title}</p>
+            {/* Owner, Oct 30 ("too much text"): after deciding, only the emoji stays; the situation was just read. */}
+            {!made && <span className="overline">{AREA[card.area] ?? "A choice"}{place ? ` · ${place.name}` : ""}</span>}
+            {!made && <p className="choice-title">{card.title}</p>}
           </div>
           {made ? <Receipt made={made} onClose={close} /> : (
             <>
@@ -133,7 +131,7 @@ export function ChoiceBackSheet({ entry, onClose }: { entry: ChoiceLogEntry | nu
           </div>
           <p className="choice-receipt">{entry.receipt}</p>
           {line && <p className="choice-effects">{line}</p>}
-          <p className="meta" style={{ margin: 0 }}>Because you chose <b>{entry.choice}</b>: “{entry.title}”</p>
+          <p className="meta" style={{ margin: 0 }}>Because you chose <b>{entry.choice}</b>.</p>
           <button className="btn btn-taxi" onClick={onClose}>Okay</button>
         </div>
       )}
