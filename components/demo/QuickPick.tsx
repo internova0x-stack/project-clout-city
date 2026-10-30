@@ -20,7 +20,8 @@ interface Archetype {
 }
 
 const ARCHETYPES: Archetype[] = [
-  { id: "influencer", title: "The Wannabe Influencer", style: "influencer_soft_glam", body: "curvy", handles: ["ContentPending", "LinkInBio", "SoftLaunchQueen"] },
+  // Wears New Money since the looks were renamed (owner, Oct 30); the id stays for analytics.
+  { id: "influencer", title: "The Overnight Millionaire", style: "influencer_soft_glam", body: "curvy", handles: ["RichSinceTuesday", "JustGotTheBag", "LinkInBio"] },
   { id: "finance", title: "The Finance Bro", style: "midtown_finance", body: "straight", handles: ["BullishBrad", "VestedInterest", "CircleBackChad"],
     switched: { title: "The Finance Girlie", handles: ["GirlBossGains", "HedgeFundHer", "PowerSuitPending"] } },
   { id: "artist", title: "The Struggling Artist", style: "thrift_store_icon", body: "curvy", handles: ["RentIsArt", "ThriftedAndBroke", "GalleryPending"] },
@@ -55,7 +56,7 @@ export function QuickPick({ onPick }: { onPick: (c: QuickCharacter) => void }) {
   const look = looks[pick.id];
 
   return (
-    <main style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: "#FFE3CC" }}>
+    <main className="creator-main">
       <section className="stage" style={{ flex: "1 1 42%", minHeight: 220 }}>
         <div className="row" style={{ position: "absolute", zIndex: 2, top: 12, left: 16, right: 16, alignItems: "flex-start", justifyContent: "flex-end" }}>
           <button className="icon-round" aria-label="Shuffle face" onClick={() => setLooks((l) => ({ ...l, [pick.id]: lookFor(pick, l[pick.id].body) }))}>

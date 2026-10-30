@@ -81,7 +81,7 @@ export function Creator({
   const canGoBack = step > 1 || (step === 1 && !lookLocked);
 
   return (
-    <main style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: "#FFE3CC" }}>
+    <main className="creator-main">
       <section className="stage" style={{ flex: step === 0 ? "1 1 44%" : "1 1 40%", minHeight: 240 }}>
         <div className="row" style={{ position: "absolute", zIndex: 2, top: "calc(12px + var(--safe-top))", left: 16, right: 16, alignItems: "flex-start" }}>
           <button
