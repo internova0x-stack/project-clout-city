@@ -66,7 +66,7 @@ components live in `app/globals.css`.
 - Every cash and clout change writes a `ledger` row, unique per (player, currency, kind, ref),
   so rewards pay once and refunds can take back exactly what was given.
 - Game data stores real lat/lng (`lib/map/geo.ts`); the map is swappable behind
-  the `MapApi` interface in `components/map/CityMap.tsx`.
+  the `MapApi` interface in `components/map/types.ts`.
 - Gold (`--gold-*`, `--g-gold`) is only for real-money products. The logo is the neon "Clout City" wordmark
   (`.studio-mark`, the `--g-neon` gradient) on the sign-in card, the Studio and the app icons (owner, Oct 14).
 - Creators (migration 0087, spec section 21, step 1 of 5): admins make creators (rate 20% default, 30% high performer,
@@ -171,6 +171,10 @@ components live in `app/globals.css`.
   in the app only (user agent `CloutCitySteam/`; Stripe refuses there, Steam refuses on the web): `start_purchase` with
   session `steam:<order>`, `InitTxn` in the wallet currency (game_settings 'steam_store' rates), the app relays Steam's
   answer (`cloutSteam.authorized`), `FinalizeTxn` then `payment_grant`. One-time items only (VIP later); refunds by hand.
+- Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
+  catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
+  a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check
+  (chat 30 s, party and visit rooms 15 s). New live features ring their own topic instead of polling fast.
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
@@ -283,11 +287,11 @@ components live in `app/globals.css`.
   streak); "Your poll results are in" (`push_scan_campaign`, kind 'campaign_poll', run by the push sender); Lola's scandal write-ups
   in News → City (`lines.scandal`, `view.scandals`); Campaign HQ on the map (place 'campaign-hq', Steinway in Astoria, tag
   'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race. Candidates' portraits are public/cast/candidate-<id>.webp (owner, Oct 29); every issue has an emoji.
-- Compact map (owner, Oct 29; on for everyone, players and guests; `?map=classic` puts a device back on the street map, `?map=compact` returns; lib/graphics.ts `compactMap()`):
+- Compact map (owner, Oct 29; the only map since the classic street map was retired, Oct 30):
   New York in miniature. lib/compactMap.ts gives every place its own block (`SPOTS`, tests/compactMap.test.ts), the
   neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and
   the jokes (bronze Pizza Rat, LUXURY CONDOS SOON lot, Papa-Dani's billboard). components/map/CompactMap.tsx is a
-  drop-in for CityMap (same props, same `MapApi`); components/map/compactScene.ts draws it with the landmark models,
+  the game's and the guest screen's map (props and `MapApi` in components/map/types.ts); components/map/compactScene.ts draws it with the landmark models,
   storefronts (`STOREFRONTS`), filler blocks and street life. Only the picture changes: travel, prices and lines keep
   real lat/lng (`makeProjector` places any lat/lng among its nearest places). Names only for the most relevant places
   (`labelPriority`, `FEATURED`, `pickLabels`: never overlapping), dots for the rest; a tap on a dot, name or building

@@ -6,7 +6,6 @@
 
 const KEY_LOW = "cc-graphics-low";
 const KEY_BODIES = "cc-new-bodies";
-const KEY_MAP = "cc-compact-map";
 
 function read(key: string): string | null {
   try { return typeof localStorage === "undefined" ? null : localStorage.getItem(key); } catch { return null; }
@@ -43,17 +42,6 @@ export function newBodies(): boolean {
   return read(KEY_BODIES) !== "0";
 }
 export function setNewBodies(on: boolean) { write(KEY_BODIES, on ? null : "0"); }
-
-/**
- * The compact map (owner, Oct 29; lib/compactMap.ts): on for everyone (owner, Oct 29: "the map"). A device can go back to
- * the street map for a while with ?map=classic (kept), and return with ?map=compact.
- */
-export function compactMap(): boolean {
-  const p = param("map");
-  if (p === "compact" || p === "classic") { write(KEY_MAP, p === "classic" ? "0" : null); return p === "compact"; }
-  return read(KEY_MAP) !== "0";
-}
-export function setCompactMap(on: boolean) { write(KEY_MAP, on ? null : "0"); }
 
 /** The renderer settings for the current mode: pixel ratio cap, shadows and antialiasing. */
 export function renderQuality(): { pixelRatio: number; shadows: boolean; antialias: boolean } {

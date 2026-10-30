@@ -1,5 +1,6 @@
 "use client";
 
+import { everyVisible, ring, useDoorbell } from "@/lib/live";
 import { SLOW_DOWN_EVENT, SLOW_DOWN_TEXT } from "@/lib/rateLimits";
 import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/lib/coutureMap";
 import dynamic from "next/dynamic";
@@ -111,9 +112,8 @@ import {
   type JobHome, type JobsBoard, type MyJob, type RideRequest, type TogetherApi, type TogetherBonus, type TogetherCandidate, type TogetherInbox, type TogetherResult,
 } from "@/lib/together";
 import type { CrewPerson } from "@/lib/crew";
-import { CityMap, type MapApi } from "./map/CityMap";
+import type { MapApi } from "./map/types";
 import { CompactMap } from "./map/CompactMap";
-import { compactMap } from "@/lib/graphics";
 import { BoroughSheet } from "./map/BoroughSheet";
 import type { BoroughId } from "@/lib/map/boroughs";
 import { Sheet } from "./Sheet";
@@ -453,8 +453,8 @@ export function GameShell({
       }
     };
     void check();
-    const t = setInterval(() => void check(), 5 * 60_000);
-    return () => { live = false; clearInterval(t); };
+    const t = everyVisible(() => void check(), 5 * 60_000);
+    return () => { live = false; t(); };
   }, [radio]);
   // Contact the Mayor: replies waiting (a badge on the app), checked on open and every few minutes; null hides the app.
   const [mayorUnseen, setMayorUnseen] = useState<number | null>(null);
@@ -466,8 +466,8 @@ export function GameShell({
       if (live && r?.ok) setMayorUnseen(r.data.unseen);
     };
     void check();
-    const t = setInterval(() => void check(), 5 * 60_000);
-    return () => { live = false; clearInterval(t); };
+    const t = everyVisible(() => void check(), 5 * 60_000);
+    return () => { live = false; t(); };
   }, [mayor]);
   const mayorSeen = useCallback(() => setMayorUnseen(0), []);
   // v0.14 Clout TV: today's feature (the home card once a feature, the tower's screen), checked every few minutes.
@@ -486,8 +486,8 @@ export function GameShell({
   useEffect(() => {
     if (!tv) return;
     void loadTv();
-    const t = setInterval(() => void loadTv(), 60_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadTv(), 60_000);
+    return () => t();
   }, [tv, loadTv]);
   const tvNextAt = tvNow?.nextAt;
   useEffect(() => {
@@ -528,8 +528,8 @@ export function GameShell({
       if (live && r?.ok) setStationThreads(r.data);
     };
     void check();
-    const t = setInterval(() => void check(), 5 * 60_000);
-    return () => { live = false; clearInterval(t); };
+    const t = everyVisible(() => void check(), 5 * 60_000);
+    return () => { live = false; t(); };
   }, [stations]);
   const readStation = (st: Station) => {
     setStationThreads((ts) => ts.map((t) => (t.station === st ? { ...t, unread: 0 } : t)));
@@ -649,8 +649,8 @@ export function GameShell({
     let live = true;
     const load = () => void coutureApi.map().then((r) => { if (live && r.ok) setCoutureMap(r.data); }).catch(() => undefined);
     load();
-    const t = setInterval(load, 60_000);
-    return () => { live = false; clearInterval(t); };
+    const t = everyVisible(load, 60_000);
+    return () => { live = false; t(); };
   }, [coutureApi]);
   // Meeting players (owner, Oct 15; migration 0047): who's here, how many are where, and the unlimited chat offer.
   const [here, setHere] = useState<HerePerson[]>([]);
@@ -703,8 +703,8 @@ export function GameShell({
     let stop = false;
     const tick = async () => { const r = await chat.counts!(); if (!stop && r.ok) setPlaceCounts(r.data); };
     void tick();
-    const t = setInterval(() => void tick(), COUNTS_POLL_MS);
-    return () => { stop = true; clearInterval(t); };
+    const t = everyVisible(() => void tick(), COUNTS_POLL_MS);
+    return () => { stop = true; t(); };
   }, [inside, chat]);
   const [inbox, setInbox] = useState<DatingInbox | null>(null);
   const [dateSpot, setDateSpot] = useState<{ kind: "place" | "event"; target: string; price: number } | null>(null);
@@ -846,8 +846,8 @@ export function GameShell({
     if (!together) return;
     void loadTogether();
     void loadJobs();
-    const t = setInterval(() => { if (document.visibilityState === "visible") { void loadTogether(); void loadJobs(); } }, 20_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => { void loadTogether(); void loadJobs(); }, 20_000);
+    return () => t();
   }, [together, loadTogether, loadJobs]);
   useEffect(() => {
     if (togetherTarget && crew && !crewPeople.length) void crew.members().then((r) => r.ok && setCrewPeople(r.data));
@@ -902,38 +902,38 @@ export function GameShell({
   useEffect(() => {
     if (!party) return;
     void loadParty();
-    const t = setInterval(() => void loadParty(), 60_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadParty(), 60_000);
+    return () => t();
   }, [party, loadParty]);
   useEffect(() => {
     if (!crew) return;
     void loadCrew();
-    const t = setInterval(() => void loadCrew(), 60_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadCrew(), 60_000);
+    return () => t();
   }, [crew, loadCrew]);
   useEffect(() => {
     if (!dating) return;
     void loadInbox();
-    const t = setInterval(() => void loadInbox(), 60_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadInbox(), 60_000);
+    return () => t();
   }, [dating, loadInbox]);
   useEffect(() => {
     if (!couple) return;
     void loadCouple();
-    const t = setInterval(() => void loadCouple(), 90_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadCouple(), 90_000);
+    return () => t();
   }, [couple, loadCouple]);
   useEffect(() => {
     if (!sublet) return;
     void loadSublet();
-    const t = setInterval(() => void loadSublet(), 120_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadSublet(), 120_000);
+    return () => t();
   }, [sublet, loadSublet]);
   useEffect(() => {
     if (!visits) return;
     void loadVisits();
-    const t = setInterval(() => void loadVisits(), 45_000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadVisits(), 45_000);
+    return () => t();
   }, [visits, loadVisits]);
   // The subtenant's room: the host's place, loaded once per sublet.
   const subLiveId = subS?.live?.role === "sub" ? subS.live.id : null;
@@ -975,8 +975,8 @@ export function GameShell({
     if (!chat) return;
     const check = () => void chat.list().then((r) => r.ok && setChatUnread(r.data.reduce((n, c) => n + c.unread, 0)));
     check();
-    const t = setInterval(check, 60_000);
-    return () => clearInterval(t);
+    const t = everyVisible(check, 60_000);
+    return () => t();
   }, [chat]);
   const gameNow = useGameNow(city?.clockOffsetSeconds ?? 0, 5000);
 
@@ -1003,14 +1003,12 @@ export function GameShell({
     let stop = false;
     const tick = async () => { const r = await chat.presence!(presencePlace, presenceFloor); if (!stop && r.ok) { setHere(r.data.people); setHereCount(r.data.count); } };
     void tick();
-    const t = setInterval(() => void tick(), PRESENCE_POLL_MS);
-    return () => { stop = true; clearInterval(t); };
+    const t = everyVisible(() => void tick(), PRESENCE_POLL_MS);
+    return () => { stop = true; t(); };
   }, [presencePlace, presenceFloor, chat]);
   const myPos = atPlaceInfo?.at ?? home;
-  // The compact map (owner, Oct 29), tried behind a switch: ?map=compact on this device (lib/graphics.ts).
-  const [compact, setCompact] = useState(false);
-  useEffect(() => setCompact(compactMap()), []);
-  const MapView = compact ? CompactMap : CityMap;
+  // The compact map is the only map (owner, Oct 30: the classic street map is retired).
+  const MapView = CompactMap;
   const myPosName = atPlaceInfo?.name ?? "home";
   // Owner, Oct 24: opening the game picks up where the player left off: inside the deli (or wherever) they were last
   // at, ground floor, or on the map beside it. Once per visit, and never over a push notification's own screen or
@@ -1064,8 +1062,8 @@ export function GameShell({
     let stop = false;
     const tick = () => void loadBoroughs().then((g) => { if (!stop && g) setGates(g); });
     tick();
-    const t = setInterval(tick, 3 * 60_000);
-    return () => { stop = true; clearInterval(t); };
+    const t = everyVisible(tick, 3 * 60_000);
+    return () => { stop = true; t(); };
   }, [loadBoroughs]);
   const openSet = useMemo(() => openBoroughs(gates), [gates]);
   const cityPins = useMemo(() => CITY_PINS(home, feed, openSet), [home, feed, openSet]);
@@ -1333,8 +1331,8 @@ export function GameShell({
       }
     };
     void check();
-    const t = setInterval(() => void check(), 2500);
-    return () => { stop = true; clearInterval(t); };
+    const t = everyVisible(() => void check(), 2500);
+    return () => { stop = true; t(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlocking, storeApi, storyApi, offset]);
   // Over $50, the confirmation sheet first (BigBuySheet), then checkout.
@@ -1410,6 +1408,8 @@ export function GameShell({
   const [room, setRoom] = useState<PartyRoomState | null>(null);
   const [partyChatOpen, setPartyChatOpen] = useState(false);
   const partyId = partyRoom && partyHere ? partyHere.id : null;
+  // Live push (lib/live.ts): a ring on the party's doorbell re-checks the room at once.
+  const partyTick = useRef<(() => void) | null>(null);
   useEffect(() => {
     setRoom(null);
     if (!partyRoom || !partyId) return;
@@ -1426,15 +1426,18 @@ export function GameShell({
       });
     };
     void tick();
-    const t = setInterval(() => void tick(), PARTY_POLL_MS);
-    return () => { stop = true; clearInterval(t); };
+    partyTick.current = () => void tick();
+    const t = everyVisible(() => void tick(), PARTY_POLL_MS);
+    return () => { stop = true; partyTick.current = null; t(); };
   }, [partyRoom, partyId]);
+  useDoorbell(partyRoom && partyId ? `party:${partyId}` : null, () => partyTick.current?.());
   const partySay = async (body: string) => {
     if (!partyRoom || !partyId) return false;
     setBusy("partychat");
     const r = await partyRoom.say(partyId, body).finally(() => setBusy(null));
     if (!r.ok) { setToast(r.error); return false; }
     trackEvent("chat_message_sent", { channel: "party", length: body.trim().length });
+    ring(`party:${partyId}`);
     setRoom((cur) => (cur && !cur.messages.some((m) => m.id === r.data.id) ? { ...cur, messages: [...cur.messages, r.data] } : cur));
     return true;
   };
@@ -1546,6 +1549,8 @@ export function GameShell({
   const hostLive = visitS?.hosting && Date.parse(visitS.hosting.starts) <= Date.now() ? visitS.hosting : null;
   const roomVisitId = visitAt ?? (hostLive && tab === "home" && !inside ? hostLive.id : null);
   const visitAfter = useRef(0);
+  // Live push (lib/live.ts): a ring on the visit's doorbell re-checks the room at once.
+  const visitTick = useRef<(() => void) | null>(null);
   useEffect(() => {
     visitAfter.current = 0;
     setVisitMsgs([]);
@@ -1567,10 +1572,12 @@ export function GameShell({
       if (r.data.over && visitAt === roomVisitId) { setVisitAt(null); setToast("That's a wrap. Everyone's heading home."); }
     };
     void poll();
-    const t = setInterval(() => void poll(), VISIT_POLL_MS);
-    return () => { stop = true; clearInterval(t); };
+    visitTick.current = () => void poll();
+    const t = everyVisible(() => void poll(), VISIT_POLL_MS);
+    return () => { stop = true; visitTick.current = null; t(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visits, roomVisitId]);
+  useDoorbell(visits && roomVisitId !== null ? `visit:${roomVisitId}` : null, () => visitTick.current?.());
   useEffect(() => {
     if (!visits || visitAt === null) { setVisitHomeData(null); return; }
     void visits.home(visitAt).then((r) => { if (r.ok) setVisitHomeData(r.data); });
@@ -1601,6 +1608,7 @@ export function GameShell({
     if (!visits) return;
     const r = await visitRun(() => visits.arrive(id));
     if (!r) return;
+    ring(`visit:${id}`);
     setPanel(null); setPhone({ open: false, app: null }); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1);
     setVisitAt(id);
     void loadVisits();
@@ -1735,6 +1743,7 @@ export function GameShell({
   const leaveVisit = async () => {
     if (!visits || visitAt === null) return;
     const st = await visitRun(() => visits.leave(visitAt), "Home sweet home.");
+    ring(`visit:${visitAt}`);
     setVisitAt(null);
     setVisitChatOpen(false);
     if (st) setVisitS(st);
@@ -2293,8 +2302,8 @@ export function GameShell({
         setTravelPlan(rideWait.plan);
       }
     };
-    const t = setInterval(() => void tick(), 2500);
-    return () => { stop = true; clearInterval(t); };
+    const t = everyVisible(() => void tick(), 2500);
+    return () => { stop = true; t(); };
   }, [rideWait, together, cityApi, applyCity]);
   const answerRide = async (ride: RideRequest, yes: boolean) => {
     if (!together) return;
@@ -3258,6 +3267,7 @@ export function GameShell({
                 const r = await visits.say(roomVisitId, body);
                 if (!r.ok) { setToast(r.error); return false; }
                 trackEvent("chat_message_sent", { channel: "visit", length: body.trim().length });
+                ring(`visit:${roomVisitId}`);
                 visitAfter.current = Math.max(visitAfter.current, r.data.id);
                 setVisitMsgs((m) => (m.some((y) => y.id === r.data.id) ? m : [...m, r.data]));
                 return true;

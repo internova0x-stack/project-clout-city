@@ -1,5 +1,5 @@
 // Real-world scale on the map at New York's latitude, shared by the road widths
-// (lib/map/style.ts) and the 3D traffic (components/map/vehicles.ts, drawn at exaggeration()), so two
+// (lib/map/style.ts) (and drew the classic map's traffic, retired Oct 30), so two
 // lanes of cars always fit inside the road they drive on.
 
 /** Meters per CSS pixel at zoom 0 for 512 px tiles at latitude 40.75°. */

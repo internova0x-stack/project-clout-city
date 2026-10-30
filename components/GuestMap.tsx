@@ -5,9 +5,7 @@ import { GUEST_START, type PlacePin } from "@/lib/places";
 import { PLACES, placeById } from "@/lib/city";
 import { music, readLocalMuted } from "@/lib/music";
 import { getBrowserSupabase } from "@/lib/supabase/client";
-import { CityMap } from "./map/CityMap";
 import { CompactMap } from "./map/CompactMap";
-import { compactMap } from "@/lib/graphics";
 import { SignUpSheet, type AuthMode } from "./SignUpSheet";
 import { useCityClock } from "./useCityClock";
 import { handle } from "@/lib/validation";
@@ -93,10 +91,8 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
     startMusic();
     setAuth("signup");
   };
-  // The compact map for guests too (owner, Oct 29), unless this device chose the street map.
-  const [compact, setCompact] = useState(false);
-  useEffect(() => setCompact(compactMap()), []);
-  const MapView = compact ? CompactMap : CityMap;
+  // The compact map is the only map (owner, Oct 30: the classic street map is retired).
+  const MapView = CompactMap;
   const arrival = arrivals.length ? arrivals[tick % arrivals.length] : null;
 
   return (
@@ -177,15 +173,6 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
           )}
           <p className="meta guest-foot">
             A parody · 18+ · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · No ad trackers
-            {/* The street map's credits; the compact map draws its own city. */}
-            {!compact && (
-              <>
-                <br />
-                Map <a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> ©{" "}
-                <a href="https://www.openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> ©{" "}
-                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
-              </>
-            )}
           </p>
         </section>
       </div>
