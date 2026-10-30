@@ -1,0 +1,67 @@
+{
+  "name": "clout-city-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Clout City for Steam: the game in a desktop window, signed in with Steam.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win dir",
+    "build:mac": "electron-builder --mac dir",
+    "build:linux": "electron-builder --linux dir"
+  },
+  "dependencies": {
+    "steamworks.js": "0.4.0"
+  },
+  "devDependencies": {
+    "electron": "38.8.6",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "app.cloutcity.desktop",
+    "productName": "Clout City",
+    "files": [
+      "main.js",
+      "preload.js",
+      "steam.json",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/steamworks.js/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "icons/icon.png",
+      "extraFiles": [
+        {
+          "from": "redist/win64",
+          "to": ".",
+          "filter": [
+            "*.dll"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "icon": "icons/icon.png",
+      "category": "public.app-category.simulation-games",
+      "extraFiles": [
+        {
+          "from": "redist/osx",
+          "to": "MacOS",
+          "filter": [
+            "*.dylib"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "icons/icon.png",
+      "category": "Game"
+    },
+    "executableName": "CloutCity",
+    "publish": null
+  }
+}

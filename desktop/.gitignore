@@ -1,0 +1,5 @@
+node_modules/
+dist/
+steam_appid.txt
+# The Steamworks SDK's redistributable libraries (steam_api64.dll, libsteam_api.dylib): copied in by hand, never committed.
+redist/

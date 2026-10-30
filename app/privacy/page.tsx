@@ -30,6 +30,7 @@ export default function Privacy() {
       <p><strong>Account</strong></p>
       <ul>
         <li>Your email address and sign-in method (email link or code, or Google), and sign-in session cookies.</li>
+        <li>If you play on Steam: your Steam ID (a number Steam gives your account), which signs you in. We don&apos;t get your Steam password, friends list or library.</li>
         <li>That you passed our age check, and when. We ask for your date of birth at sign-up but don&apos;t store it. If it shows you&apos;re under 18, sign-up closes on that device (a cookie and browser storage remember it for a year).</li>
         <li>The invite link or creator link or code you joined through, if any.</li>
       </ul>
