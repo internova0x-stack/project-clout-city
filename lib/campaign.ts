@@ -61,6 +61,8 @@ export interface Effects {
   dirtyFavors?: number;
   /** Intel on the Mayor's weak spots: makes Attack land in the debate. */
   intel?: number;
+  /** A stakeholder (city.json) now on the campaign's side: a bought or won endorsement (owner, Oct 30). */
+  ally?: string;
 }
 
 /** The "You get / It costs / Risk" preview every option shows (spec section 6.2). */

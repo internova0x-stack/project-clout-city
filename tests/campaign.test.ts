@@ -46,6 +46,9 @@ test("the content holds together", () => {
     assert.ok(s.choices.length >= 2 && s.choices.length <= 4, s.id);
     assert.ok(s.weeks[0] >= 1 && s.weeks[1] <= CAMPAIGN.weeks, s.id);
     previews.push(...s.choices.map((c) => ({ ...c, id: `${s.id}.${c.id}` })));
+    for (const c of s.choices) for (const e of [c.effects, c.fail?.effects]) {
+      if (e?.ally) assert.ok(content.stakeholders.some((x) => x.id === e.ally), `${s.id}.${c.id}: ally ${e.ally}`);
+    }
   }
   for (const m of content.inbox) {
     assert.ok(m.from === "anon" || people.has(m.from), m.id);
@@ -89,7 +92,9 @@ function play(candidate: CandidateId, style: Style, seed: number) {
     const put = (a: Parameters<typeof setSlot>[3]) => { const i = free(); if (i >= 0) try { setSlot(content, state, i, a); } catch (e) { if (!(e instanceof CampaignError)) throw e; } };
     if (style === "dirty") {
       put({ kind: "op", op: "fake_news", target: weak[0], cutout: false, persuaded: true });
-      if (state.week >= 2) put({ kind: "op", op: "poach_ally", target: content.stakeholders.find((s) => s.mayorAlly && (state.trust[s.id] ?? 0) < 1)!.id, cutout: false, persuaded: true });
+      // Bought endorsements (situation cards' `ally`) can leave the Mayor with no one to poach.
+      const ally = content.stakeholders.find((s) => s.mayorAlly && (state.trust[s.id] ?? 0) < 1);
+      if (state.week >= 2 && ally) put({ kind: "op", op: "poach_ally", target: ally.id, cutout: false, persuaded: true });
     }
     if (state.week === CAMPAIGN.weeks) for (const p of weak.slice(0, 3)) put({ kind: "gotv", place: p });
     if (state.week === 2 || state.week === 3) { put({ kind: "prep", topic: "weak" }); put({ kind: "prep", topic: "rent" }); }

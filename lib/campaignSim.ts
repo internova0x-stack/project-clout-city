@@ -1,7 +1,8 @@
 // Campaign Mode in the preview (/preview/home?campaign=...): the same engine as the server, in memory, with the
 // sample content. Results arrive 6 seconds after End Week instead of the next morning, so the whole loop can be
 // walked in a minute. Presets: locked (before Rank 2), pick, week (week 2 with mail), situation (End Week waiting on
-// a choice), debate (week 3), waiting (results not in yet), election (election night).
+// a choice), bribe (week 3, a bought endorsement and votes for cash), debate (week 3), waiting (results not in yet),
+// election (election night).
 
 import { CAMPAIGN, type CampaignApi, type CampaignResult, type CampaignScreen, type CampaignState, type CandidateId } from "./campaign";
 import { CAMPAIGN_CONTENT as content } from "./campaignContent";
@@ -9,7 +10,7 @@ import {
   CampaignError, campaignView, candidateCards, choose, debateRound, dilemma, endWeek, nextDay, refresh, reply, setBudget, setSlot, startCampaign,
 } from "./campaignEngine";
 
-export type CampaignPreset = "locked" | "pick" | "week" | "situation" | "debate" | "waiting" | "election";
+export type CampaignPreset = "locked" | "pick" | "week" | "situation" | "bribe" | "debate" | "waiting" | "election";
 
 export function createCampaignSim(preset: string | null, opts: { clout: number; bank: number; onBank?: (delta: number) => void }): CampaignApi {
   const rng = Math.random;
@@ -49,12 +50,15 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
 
   if (preset && preset !== "locked" && preset !== "pick") {
     begin("starr");
-    const weeks = preset === "debate" ? 2 : preset === "election" ? CAMPAIGN.weeks : 1;
+    const weeks = preset === "debate" ? 2 : preset === "bribe" ? 2 : preset === "election" ? CAMPAIGN.weeks : 1;
     for (let w = 0; w < weeks; w++) autoWeek();
-    if (preset === "situation" || preset === "waiting") {
+    if (preset === "situation" || preset === "bribe" || preset === "waiting") {
       const s = state!;
       s.week = Math.max(s.week, 2);
+      if (s.week === CAMPAIGN.debateWeek) for (let r = 0; r < 4 && !s.debate?.done; r++) debateRound(content, s, r === 2 ? "deflect" : "charm", rng);
       endWeek(content, s, day, rng);
+      // ?campaign=bribe: End Week opens on a bought endorsement and an offer of votes for cash.
+      if (preset === "bribe") s.pending = [{ id: "buy_joy" }, { id: "votes_cash", place: s.pending[0]?.place ?? "astoria" }];
       if (preset === "waiting") while (s.phase === "deciding") {
         const p = s.pending[0];
         choose(content, s, p.id, content.situations.find((x) => x.id === p.id)!.choices[0].id, day, rng);

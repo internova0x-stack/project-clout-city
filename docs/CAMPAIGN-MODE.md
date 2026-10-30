@@ -433,6 +433,19 @@ There is never a bare "Play your turn" or "Answer messages":
 | Goldcrest: "Can I just buy the newspaper?" | Let him / Talk him down (Morale) / Leak that he asked |
 | Starr wants to go live from the debate stage | Let her / Pull the phone (Morale) / Script it with her |
 
+**Buying endorsements and votes** (owner, Oct 30: "some choices around buying allies/endorsements, buying votes"). Nine
+cards in `content/campaign/situations.json`:
+- **Endorsements:** Local 117's endorsement for a no-show job for Deb's nephew (`buy_union`), Auntie Joy's C$12,000 sound
+  system (`buy_joy`), Lionel Chu's C$10,000 "menus" (`buy_lionel`) and Pastor Grant's roof (`buy_pastor`). A bought
+  endorsement uses the choice effect `ally`, which puts that stakeholder on the campaign's side. One of the Mayor's allies
+  bought this way leaves Poach Ally with one fewer target (the op says so when none are left).
+- **Votes:** C$20 a vote from a precinct captain (`votes_cash`), sandwiches for "I Voted" photos (`votes_sandwich`), dead
+  voters' absentee ballots (`votes_ghost`), a bus of out-of-town "residents" (`votes_bus`), and the Mayor's own C$20
+  "pothole refunds" (`mayor_buys`: match him, film it, or rise above it).
+- **How they play:** the bought option pays the most at once and leaves a heavy hidden trace (0.4 to 0.8), so Heat can bring
+  it out later as an exposure. Most bought votes also have a hidden chance of going wrong on the spot. Every card has a clean
+  option that costs something real. `?campaign=bribe` in the preview opens End Week on Joy's sound system and the C$20 votes.
+
 ### 6.2 Every choice explains itself
 
 Before choosing, each option shows a plain-language preview:
