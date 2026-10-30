@@ -292,7 +292,11 @@ components live in `app/globals.css`.
   neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and
   the jokes (bronze Pizza Rat, LUXURY CONDOS SOON lot, Papa-Dani's billboard). components/map/CompactMap.tsx is a
   the game's and the guest screen's map (props and `MapApi` in components/map/types.ts); components/map/compactScene.ts draws it with the landmark models,
-  storefronts (`STOREFRONTS`), filler blocks and street life. Only the picture changes: travel, prices and lines keep
+  storefronts (`STOREFRONTS`), filler blocks and street life. Street life moves (owner, Oct 30): lib/streetTraffic.ts
+  (pure, tests/streetTraffic.test.ts: right-hand lanes, curved corners, a light at every intersection, queues; people round
+  their block) drawn by components/map/streetLife.ts (instanced, open boroughs only); at night lamps at every corner and
+  mid-block pool light on the street, filler windows light up, cars show head- and taillights. Only the 3D view redraws
+  for it (30 fps, 20 in low graphics); the shadow map redraws only when something static changes. Only the picture changes: travel, prices and lines keep
   real lat/lng (`makeProjector` places any lat/lng among its nearest places). Names only for the most relevant places
   (`labelPriority`, `FEATURED`, `pickLabels`: never overlapping), dots for the rest; a tap on a dot, name or building
   opens the place's card. Story-only places stand there only while their story runs.

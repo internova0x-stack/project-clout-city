@@ -10,7 +10,7 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { PLACES } from "@/lib/city";
 import { DISTRICTS, ISLAND_CARD_AT, labelPriority, pickLabels, SPOTS, STREET_NAMES, WORLD_SIZE, COMPACT_GRID, gridToWorld, makeProjector } from "@/lib/compactMap";
-import { renderQuality } from "@/lib/graphics";
+import { lowGraphics, renderQuality } from "@/lib/graphics";
 import type { PlacePin } from "@/lib/places";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import type { CityMapProps, MapApi } from "./types";
@@ -80,6 +80,7 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     let raf = 0;
     let building = true;
     let lastAnim = 0;
+    const animMs = lowGraphics() ? 50 : 33;
     const started = performance.now();
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
@@ -94,9 +95,11 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
         building = scene.buildMore([viewRef.current.x, viewRef.current.z], 8);
         dirtyRef.current = true;
       }
-      // Searchlights at night, at most 30 frames a second.
-      if (now - lastAnim > 33 && scene.tick((now - started) / 1000)) { lastAnim = now; dirtyRef.current = true; }
-      if (!dirtyRef.current) return;
+      // Traffic, people and the searchlights at night: 30 frames a second (20 in low graphics). Only the 3D view
+      // redraws for them; the pins and names move only when the camera does.
+      let moving = false;
+      if (now - lastAnim > animMs) { lastAnim = now; moving = scene.tick((now - started) / 1000); }
+      if (!dirtyRef.current) { if (moving) scene.render(); return; }
       dirtyRef.current = false;
       const v = viewRef.current, p = (PITCH * Math.PI) / 180, yaw = (YAW * Math.PI) / 180;
       const h = v.dist * Math.sin(p);
