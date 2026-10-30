@@ -1643,6 +1643,8 @@ export function GameShell({
   // of earlier choices land when the game opens. Never during the first session or onboarding.
   const [choiceS, setChoiceS] = useState<ChoiceState | null>(null);
   const [choiceCard, setChoiceCard] = useState<ChoiceCardView | null>(null);
+  const choiceCardRef = useRef<ChoiceCardView | null>(null);
+  choiceCardRef.current = choiceCard;
   const [choiceMade, setChoiceMade] = useState<ChoiceMade | null>(null);
   const [choiceBusy, setChoiceBusy] = useState(false);
   const [choiceBack, setChoiceBack] = useState<ChoiceLogEntry[]>([]);
@@ -1658,13 +1660,17 @@ export function GameShell({
   useEffect(() => {
     if (!choicesReady) return;
     // A card still waiting from earlier today (the app was closed mid-decision) comes back on load.
-    const t = setTimeout(() => void loadChoices().then((d) => { if (d?.open && !d.landed.length) setChoiceCard(d.open); }), 2500);
+    // Never over a card already on screen (or its receipt).
+    const t = setTimeout(() => void loadChoices().then((d) => { if (d?.open && !d.landed.length) setChoiceCard((c) => c ?? d.open); }), 2500);
     return () => clearTimeout(t);
   }, [choicesReady, loadChoices]);
   const askChoice = (after: ChoiceAfter) => {
     if (!choices || !choicesReady || choiceCard) return;
     void choices.offer(after).then((r) => {
-      if (r.ok && r.data) { const card = r.data; setTimeout(() => { setChoiceMade(null); setChoiceCard(card); }, 900); }
+      if (r.ok && r.data) {
+        const card = r.data;
+        setTimeout(() => { if (!choiceCardRef.current) { setChoiceMade(null); setChoiceCard(card); } }, 900);
+      }
     });
   };
   const chooseChoice = async (option: string) => {

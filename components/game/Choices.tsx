@@ -9,7 +9,7 @@ import { Sheet } from "../Sheet";
 // and the record in the profile. Same format as Campaign Mode's situations (radio choices, then Decide): the server
 // decides everything; this only asks and shows what came back.
 
-const RISK: Record<Risk, string> = { low: "Low", medium: "Medium", high: "High" };
+const RISK: Record<Risk, string> = { low: "Low risk", medium: "Med risk", high: "High risk" };
 const AREA: Record<string, string> = {
   life: "Life in the city", transit: "On the move", gigs: "Gig life", work: "On the clock", school: "Campus",
   business: "Your business", home: "Your building", nightlife: "After dark", dating: "Date night", money: "Money talks",
@@ -48,9 +48,7 @@ function Receipt({ made, onClose }: { made: ChoiceMade; onClose: () => void }) {
           <span className="overline">New: Halo or Hustler?</span>
           <RepMeter value={made.integrity} />
           <p className="meta" style={{ margin: 0 }}>
-            Every choice nudges you one way. Halos get trusted: keys, tills, more clout for doing right, and good deeds
-            that come back. Hustlers get offers: side deals, more cash for the angle, and a knack for not getting caught.
-            Each end is lucky at its own game. Only you see where you stand, but the city acts on it.
+            Every choice nudges you one way. Halos get trusted, Hustlers get offers, and each is lucky at its own game. Only you see this.
           </p>
         </div>
       )}
@@ -78,15 +76,22 @@ export function ChoiceSheet({ card, made, busy, onChoose, onSkip, onClose }: {
           </div>
           {made ? <Receipt made={made} onClose={close} /> : (
             <>
-              <div className="stack-8" role="radiogroup" aria-label="Your choice">
+              {/* Owner, Oct 30 ("too much text"): one line per choice; the picked one opens to show what it means. */}
+              <div className="choice-options" role="radiogroup" aria-label="Your choice">
                 {card.options.map((o) => (
-                  <button key={o.id} role="radio" aria-checked={sel === o.id} className="camp-option radio" disabled={busy} onClick={() => setSel(o.id)}>
-                    <span className="title">{o.label}</span>
-                    <span className="camp-preview">
-                      <span><b>You get</b> {o.get}</span>
-                      <span><b>It costs</b> {o.cost}</span>
-                      <span className={`camp-risk ${o.risk}`}><b>Risk</b> {RISK[o.risk]}: {o.riskWhy}{o.comesBack ? " · ⏳ may come back later" : ""}</span>
+                  <button key={o.id} role="radio" aria-checked={sel === o.id} className="choice-opt" disabled={busy} onClick={() => setSel(o.id)}>
+                    <span className="choice-opt-row">
+                      <span className="choice-opt-label">{o.label}</span>
+                      {o.comesBack && <span className="choice-later" title="May come back later" aria-label="May come back later">⏳</span>}
+                      <span className={`choice-risk ${o.risk}`}>{RISK[o.risk]}</span>
                     </span>
+                    {sel === o.id && (
+                      <span className="choice-opt-more">
+                        <span><b>You get</b> {o.get}</span>
+                        <span><b>It costs</b> {o.cost}</span>
+                        <span><b>Risk</b> {o.riskWhy}</span>
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

@@ -260,11 +260,14 @@ export function PreviewHome({
     seen: previewMayorSeen,
   }), [mayorPreset]);
   // Moral Choices: the real cards in memory, standing wherever the simulated player is.
+  // One for the whole visit (it keeps its record and cooldowns), reading whichever simulated city is current.
+  const simRef = useRef(sim);
+  simRef.current = sim;
   const choicesApi = useMemo(() => createChoicesSim(choicePreset ?? null, {
-    where: () => { const id = sim.here(); const pl = id ? placeById(id) : undefined; return { place: pl?.id ?? null, tags: pl?.tags ?? [] }; },
-    onEffects: (e) => sim.choicePay(e),
+    where: () => { const id = simRef.current.here(); const pl = id ? placeById(id) : undefined; return { place: pl?.id ?? null, tags: pl?.tags ?? [] }; },
+    onEffects: (e) => simRef.current.choicePay(e),
     today: () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }),
-  }), [choicePreset, sim]);
+  }), [choicePreset]);
   const campaignApi = useMemo(() => createCampaignSim(campaignPreset ?? null, { clout: campaignPreset === "locked" ? 40 : Math.max(150, player.clout), bank: player.bank_cash }), [campaignPreset, player.clout, player.bank_cash]);
   const radioApi = useMemo<RadioApi>(() => ({
     state: () => previewRadioState(radioPreset ?? ""),
