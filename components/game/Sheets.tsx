@@ -7,7 +7,7 @@ import type { StoreProduct } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { CITY_ECONOMY, CLUB_EVENTS, closedLine, eventOpen, eventToday, formatCountdown, placeById, placeOpen, realMinutesUntilOpen, realMsUntilOpen } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { eventAvailability, eventById, taskDoneLine, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
+import { eventAvailability, eventById, taskDoneLine, taskQuip, taskRewardLine, taskTitle, type CityState, type DailyTask } from "@/lib/cityState";
 import { GOAL_COPY, type GoalsState } from "@/lib/goals";
 import { GoalLadder, StreakRow, StreaksSection } from "./Goals";
 import { GAME_CONFIG } from "@/lib/config";
@@ -114,7 +114,7 @@ export function TasksSheet({
                 <p className="meta" style={{ margin: 0 }}>
                   {tasks.length > 0 && done === tasks.length
                     ? "All five done. Unbothered. Moisturized. Paid. 💅"
-                    : `${done}/${tasks.length} done · all five: +${formatCash(CITY_ECONOMY.dailyTasks.bonus)} 💸 · new list ${resetTimeLocal()}`}
+                    : `${done} of ${tasks.length} done. Clear all five: +${formatCash(CITY_ECONOMY.dailyTasks.bonus)} 💸 · fresh list at ${resetTimeLocal()}`}
                 </p>
                 {tasks.map((t) => (
                   <div
@@ -128,8 +128,7 @@ export function TasksSheet({
                   >
                     <span className="select-emoji" aria-hidden="true">{t.skill ? SKILLS.find((d) => d.id === t.skill)?.emoji ?? "⭐" : t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
                     <span className="title" style={{ display: "block" }}>{taskTitle(t)}</span>
-                    {/* Owner, Oct 30 (fewer words): an open task is its title and what it pays; the quip waits for done. */}
-                    {t.done_at && <span className="subtext" style={{ display: "block" }}>{taskDoneLine(t)}</span>}
+                    <span className="subtext" style={{ display: "block" }}>{t.done_at ? taskDoneLine(t) : taskQuip(t)}</span>
                     {!t.done_at && (
                       <span className="task-meta">
                         <span>{taskRewardLine(t)} · {t.kind === "gossip" ? "Gossip · " : ""}{t.kind === "cook" ? "Your kitchen" : placeById(t.place_id)?.neighborhood ?? "Queens"}</span>
