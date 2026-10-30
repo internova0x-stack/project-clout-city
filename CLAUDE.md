@@ -306,7 +306,8 @@ components live in `app/globals.css`.
   either end); each end is lucky at its own game (`laterOdds`, owner Oct 30 "option 2": a Hustler's angles come back to
   bite ×0.5 and a Halo's ×1.5, a Halo's good deeds come back as rewards ×1.5 and a Hustler's ×0.5); regulars' `reputation`
   {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
-  (`validateCards`). Only invented people, grey not criminal, never real money.
+  (`validateCards`). Cards show no risk labels or "comes back" hints (owner, Oct 30: players learn from consequences;
+  `cardView` sends only label, get and cost). Only invented people, grey not criminal, never real money.
   Start over resets it. `?choice=now|back|high|low|log` in the preview (not the demo: its bundle would carry the outcomes).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".

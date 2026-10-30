@@ -81,12 +81,11 @@ test("never more than two a day, never two in a row, never over a waiting card",
   assert.ok(!mayOffer({ shownToday: 0, lastShownAt: null, open: true, now }));
 });
 
-test("the browser's view leaves out every outcome, and marks what may come back", () => {
+test("the browser's view leaves out every outcome, risk and hint of what comes back (owner, Oct 30)", () => {
   const wallet = CARDS.find((c) => c.id === "found-wallet-subway")!;
   const v = cardView(wallet, 7, "astoria-blvd-station");
   const json = JSON.stringify(v);
-  assert.ok(!/outcomes|weight|later|effects/.test(json), json);
-  assert.ok(v.options.every((o) => o.comesBack));
+  assert.ok(!/outcomes|weight|later|effects|risk|comesBack/i.test(json), json);
 });
 
 test("resolving rolls an outcome and, sometimes, a consequence on a later day", () => {

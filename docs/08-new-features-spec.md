@@ -1100,9 +1100,10 @@ of the day. Luxury rides (a limo, a helicopter) were previewed and taken out for
 From the owner's draft "Moral Choices System" v0.1, cut to a first build. Every player regularly decides what kind of person
 they are, with real rewards, consequences and tradeoffs; the game never calls them good or bad, it shows what happened.
 
-**Situation cards.** A one-line situation, an emoji and 2 to 4 choices. Each choice previews **You get**, **It costs** and
-**Risk** (Low, Medium, High, with a short reason), and "⏳ may come back later" when it can. The same format as Campaign Mode's
-situations (radio choices, then Decide). After the choice: a one- or two-line receipt and what it paid.
+**Situation cards.** A one-line situation, an emoji and 2 to 4 choices, one line each; the picked one opens to show **You get**
+and **It costs**. No risk labels and no "may come back later" hints (owner, Oct 30: they steer players away from choices;
+"leave the choices up to them, and let them learn from the consequences"). The card files keep `risk` and `riskWhy` for writers;
+they never reach the player. Then Decide, and a one- or two-line receipt with what it paid.
 - **When:** after arriving somewhere, a subway ride, a shift, a gig, a meal, a visit or a hangout, the server may offer a card
   that fits the place, the moment and the player (40% when one is allowed). At most **2 a New York day**, at least 90 minutes
   apart, one waiting at a time; "Not now" puts it away for the day. A variant never repeats within 30 days, its dilemma not
@@ -1113,7 +1114,7 @@ situations (radio choices, then Decide). After the choice: a one- or two-line re
   and the preview read them (lib/choicesContent.ts); players get the preview only (`cardView`).
 - **Guardrails:** only invented people are involved (never a real player); grey, everyday temptations, not crime (police stay
   ambient, docs/culture/VOICE.md); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
-  consequence only does what its preview warned about and names the earlier choice. Real money never touches it.
+  consequence fits the choice that caused it and names it ("Remember the wallet…?"). Real money never touches it.
 
 **Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
 two-ended meter, not a score: where the player stands between 😇 Halo and 💸 Hustler, and neither end is the bad one. It starts

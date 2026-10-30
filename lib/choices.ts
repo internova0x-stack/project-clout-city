@@ -83,7 +83,8 @@ export interface ChoiceCardView {
   title: string;
   who: string | null;
   place: string | null;
-  options: { id: string; label: string; get: string; cost: string; risk: Risk; riskWhy: string; comesBack: boolean }[];
+  /** Owner, Oct 30: no risk or "comes back" hints reach the player; they learn from what happens. */
+  options: { id: string; label: string; get: string; cost: string }[];
 }
 
 export const CHOICES = {
@@ -210,9 +211,7 @@ export function mayOffer(o: { shownToday: number; lastShownAt: string | null; op
 export function cardView(card: ChoiceCard, log: number, place: string | null): ChoiceCardView {
   return {
     log, id: card.id, area: card.area, emoji: card.emoji, title: card.title, who: card.who ?? null, place,
-    options: card.options.map((o) => ({
-      id: o.id, label: o.label, get: o.get, cost: o.cost, risk: o.risk, riskWhy: o.riskWhy, comesBack: !!o.comesBack || o.outcomes.some((x) => x.later),
-    })),
+    options: card.options.map((o) => ({ id: o.id, label: o.label, get: o.get, cost: o.cost })),
   };
 }
 

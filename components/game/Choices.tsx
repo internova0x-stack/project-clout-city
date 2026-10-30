@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CHOICES, effectLine, integrityBand, integrityWord, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type Risk } from "@/lib/choices";
+import { CHOICES, effectLine, integrityBand, integrityWord, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade } from "@/lib/choices";
 import { placeById } from "@/lib/city";
 import { Sheet } from "../Sheet";
 
@@ -9,7 +9,6 @@ import { Sheet } from "../Sheet";
 // and the record in the profile. Same format as Campaign Mode's situations (radio choices, then Decide): the server
 // decides everything; this only asks and shows what came back.
 
-const RISK: Record<Risk, string> = { low: "Low risk", medium: "Med risk", high: "High risk" };
 const AREA: Record<string, string> = {
   life: "Life in the city", transit: "On the move", gigs: "Gig life", work: "On the clock", school: "Campus",
   business: "Your business", home: "Your building", nightlife: "After dark", dating: "Date night", money: "Money talks",
@@ -80,16 +79,14 @@ export function ChoiceSheet({ card, made, busy, onChoose, onSkip, onClose }: {
               <div className="choice-options" role="radiogroup" aria-label="Your choice">
                 {card.options.map((o) => (
                   <button key={o.id} role="radio" aria-checked={sel === o.id} className="choice-opt" disabled={busy} onClick={() => setSel(o.id)}>
+                    {/* Owner, Oct 30: no risk labels or "may come back" hints; players learn from what happens. */}
                     <span className="choice-opt-row">
                       <span className="choice-opt-label">{o.label}</span>
-                      {o.comesBack && <span className="choice-later" title="May come back later" aria-label="May come back later">⏳</span>}
-                      <span className={`choice-risk ${o.risk}`}>{RISK[o.risk]}</span>
                     </span>
                     {sel === o.id && (
                       <span className="choice-opt-more">
                         <span><b>You get</b> {o.get}</span>
                         <span><b>It costs</b> {o.cost}</span>
-                        <span><b>Risk</b> {o.riskWhy}</span>
                       </span>
                     )}
                   </button>
