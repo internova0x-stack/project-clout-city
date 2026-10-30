@@ -48,9 +48,9 @@ function Receipt({ made, onClose }: { made: ChoiceMade; onClose: () => void }) {
           <span className="overline">New: Halo or Hustler?</span>
           <RepMeter value={made.integrity} />
           <p className="meta" style={{ margin: 0 }}>
-            Every choice nudges you one way. Halos get trusted: keys, tills, warmer regulars, more clout for doing right.
-            Hustlers get offers: side deals, back rooms, more cash for the angle. Only you see where you stand, but the
-            city acts on it. Some choices come back later.
+            Every choice nudges you one way. Halos get trusted: keys, tills, more clout for doing right, and good deeds
+            that come back. Hustlers get offers: side deals, more cash for the angle, and a knack for not getting caught.
+            Each end is lucky at its own game. Only you see where you stand, but the city acts on it.
           </p>
         </div>
       )}

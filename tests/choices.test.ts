@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import {
-  CHOICES, addDays, applyIntegrity, boundEffects, cardView, effectLine, fit, integrityBand, mayOffer, pickCard, repBonus, resolveChoice, validateCards,
+  CHOICES, addDays, applyIntegrity, boundEffects, cardView, effectLine, fit, integrityBand, laterOdds, mayOffer, pickCard, repBonus, resolveChoice, validateCards,
   type ChoiceCard, type ChoiceContext,
 } from "../lib/choices.ts";
 import { PLACES } from "../lib/city.ts";
@@ -114,4 +114,25 @@ test("three regulars can tell a Halo from a Hustler, in words, never the meter",
       assert.ok(l.length <= 240 && !/integrity|\bhalo\b|\bhustler\b/i.test(l), l);
     }
   }
+});
+
+test("each end is lucky at its own game: Hustlers' angles bite less, Halos' good deeds pay more", () => {
+  const bite = { weight: 1, text: "t", effects: { cash: 300, integrity: -8 }, later: { afterDays: [1, 3] as [number, number], chance: 0.6, text: "t", effects: { clout: -40 } } };
+  const pay = { weight: 1, text: "t", effects: { integrity: 6 }, later: { afterDays: [1, 3] as [number, number], chance: 0.6, text: "t", effects: { cash: 60 } } };
+  assert.equal(laterOdds(bite, 50), 1, "the middle plays the card's odds");
+  assert.equal(laterOdds(bite, 20), CHOICES.offGame, "a Hustler's angle bites half as often");
+  assert.equal(laterOdds(bite, 80), CHOICES.ownGame, "a Halo's slip bites more often");
+  assert.equal(laterOdds(pay, 80), CHOICES.ownGame, "a Halo's good deed pays more often");
+  assert.equal(laterOdds(pay, 20), CHOICES.offGame, "a Hustler's good deed pays less often");
+  // Played out: the wallet's "skim" (a clean getaway, or caught later) over many rolls.
+  const wallet = CARDS.find((c) => c.id === "found-wallet-subway")!;
+  let seed = 7;
+  const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const caught = (integrity: number) => {
+    let n = 0;
+    for (let i = 0; i < 4000; i++) if (resolveChoice(wallet, "skim", "2026-11-02", rng, integrity).later) n++;
+    return n / 4000;
+  };
+  const hustler = caught(20), middle = caught(50), halo = caught(80);
+  assert.ok(hustler < middle && middle < halo, `${hustler} < ${middle} < ${halo}`);
 });

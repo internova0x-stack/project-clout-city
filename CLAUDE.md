@@ -303,7 +303,9 @@ components live in `app/globals.css`.
   is 😇 Halo ↔ 💸 Hustler for players (owner, Oct 30: "Integrity" steered everyone to the good choice); code and database say
   `integrity` (`reputation`, 100 Halo, 0 Hustler, from 50, the same rate both ways, private: Profile → Choices), revealed by the
   first choice. Both ends pay (`repBonus`: Halo-ward clout ×1.25 at 70+, Hustler-ward cash ×1.25 at 30 or below; cards can need
-  either end) and regulars' `reputation` {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
+  either end); each end is lucky at its own game (`laterOdds`, owner Oct 30 "option 2": a Hustler's angles come back to
+  bite ×0.5 and a Halo's ×1.5, a Halo's good deeds come back as rewards ×1.5 and a Hustler's ×0.5); regulars' `reputation`
+  {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
   (`validateCards`). Only invented people, grey not criminal, never real money.
   Start over resets it. `?choice=now|back|high|low|log` in the preview (not the demo: its bundle would carry the outcomes).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`

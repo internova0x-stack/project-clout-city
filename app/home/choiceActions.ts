@@ -118,7 +118,7 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
   if (!ctx.open || ctx.open.log !== log) return { ok: false, error: choiceError("not_open") };
   const c = card(ctx.open.card);
   if (!c || !c.options.some((o) => o.id === option)) return { ok: false, error: choiceError("unknown_option") };
-  const r = resolveChoice(c, option, ctx.today, rng);
+  const r = resolveChoice(c, option, ctx.today, rng, ctx.integrity);
   // Each end of the meter pays its own way (repBonus): more clout for a Halo, more cash for a Hustler.
   const effects = boundEffects(repBonus(r.effects, ctx.integrity), ctx.bank);
   const { data, error } = await w.admin.rpc("choice_settle", {

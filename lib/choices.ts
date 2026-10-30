@@ -95,6 +95,12 @@ export const CHOICES = {
   /** What each end pays: Halos get more clout from choices that move them toward Halo, Hustlers more cash from the others. */
   haloClout: 1.25,
   hustlerCash: 1.25,
+  /**
+   * Each end is lucky at its own game (owner, Oct 30, "option 2"): a Hustler's angles come back to bite half as often and
+   * a Halo's 1.5 times as often; a Halo's good deeds come back as a reward 1.5 times as often and a Hustler's half as often.
+   */
+  ownGame: 1.5,
+  offGame: 0.5,
   /** At most this many cards a New York day (spec 3.2: 1 to 2). */
   perDay: 2,
   /** A variant never comes back within 30 days; its base dilemma not within 7. */
@@ -219,17 +225,43 @@ export interface ChoiceResolution {
   later: { due: string; emoji: string; text: string; effects: ChoiceEffects } | null;
 }
 
-/** Rolls the chosen option's outcome (and whether its consequence comes back) with the injected random source. */
-export function resolveChoice(card: ChoiceCard, optionId: string, today: string, rng: Rng): ChoiceResolution {
+/** Whether a later consequence helps (+1) or hurts (−1) the player: cash, clout, mood and energy together. */
+const laterSign = (e: ChoiceEffects) => Math.sign((e.cash ?? 0) / 10 + (e.clout ?? 0) + (e.mood ?? 0) + (e.energy ?? 0));
+
+/**
+ * How much more (or less) likely an outcome's consequence is for this player: each end is lucky at its own game. An
+ * option moving toward Hustler that can come back to bite is half as likely to for a Hustler and 1.5× for a Halo; one
+ * moving toward Halo that can come back as a reward is 1.5× for a Halo and half for a Hustler. The middle plays the card's odds.
+ */
+export function laterOdds(out: ChoiceOutcome, integrity: number): number {
+  const band = integrityBand(integrity);
+  if (!out.later || band === "middle") return 1;
+  const toward = Math.sign(out.effects.integrity ?? 0); // +1 toward Halo, −1 toward Hustler
+  const sign = laterSign(out.later.effects);
+  if (!toward || !sign) return 1;
+  // A Hustler's angle that bites, or a Halo's good deed that pays: the player's own game.
+  const own = (band === "low" && toward < 0 && sign < 0) || (band === "high" && toward > 0 && sign > 0);
+  const off = (band === "high" && toward < 0 && sign < 0) || (band === "low" && toward > 0 && sign > 0);
+  if (own) return toward < 0 ? CHOICES.offGame : CHOICES.ownGame; // own game: angles bite less, good deeds pay more
+  if (off) return toward < 0 ? CHOICES.ownGame : CHOICES.offGame; // off game: a Halo's slip bites more, a Hustler's good deed pays less
+  return 1;
+}
+
+/**
+ * Rolls the chosen option's outcome (and whether its consequence comes back) with the injected random source. `integrity`
+ * (the player's place on the meter) tilts the odds of what comes back (laterOdds), both which outcome and whether it lands.
+ */
+export function resolveChoice(card: ChoiceCard, optionId: string, today: string, rng: Rng, integrity: number = CHOICES.integrityStart): ChoiceResolution {
   const option = card.options.find((o) => o.id === optionId);
   if (!option) throw new Error("unknown_option");
-  const total = option.outcomes.reduce((s, o) => s + o.weight, 0);
+  const weights = option.outcomes.map((o) => o.weight * laterOdds(o, integrity));
+  const total = weights.reduce((s, w) => s + w, 0);
   let r = rng() * total;
   let i = 0;
-  for (; i < option.outcomes.length - 1; i++) if ((r -= option.outcomes[i].weight) < 0) break;
+  for (; i < option.outcomes.length - 1; i++) if ((r -= weights[i]) < 0) break;
   const out = option.outcomes[i];
   let later: ChoiceResolution["later"] = null;
-  if (out.later && rng() < out.later.chance) {
+  if (out.later && rng() < Math.min(1, out.later.chance * laterOdds(out, integrity))) {
     const [a, b] = out.later.afterDays;
     later = { due: addDays(today, a + Math.floor(rng() * (b - a + 1))), emoji: out.later.emoji ?? card.emoji, text: out.later.text, effects: out.later.effects };
   }

@@ -33,7 +33,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   const pending: { at: number; entry: ChoiceLogEntry; effects: ChoiceEffects }[] = [];
 
   const settle = (c: ChoiceCard, option: string, day: string, past = false) => {
-    const r = resolveChoice(c, option, day, rng);
+    const r = resolveChoice(c, option, day, rng, integrity);
     const e = boundEffects(repBonus(r.effects, integrity), Number.MAX_SAFE_INTEGER);
     const before = integrity;
     integrity = applyIntegrity(integrity, e.integrity);

@@ -1121,7 +1121,10 @@ in the middle and moves the same rate both ways (the draft's "recovers at half" 
 player sees it (Profile → Choices, and under the rank); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
 pay off:** at the Halo end (70+) choices that move toward Halo pay 25% more clout, and Halo-only cards turn up (Sal's till,
 house-sitting); at the Hustler end (30 or below) choices that move toward Hustler pay 25% more cash, and Hustler-only offers
-find you (a promoter's fake hype, last year's final). Sal, Jojo and Gus have lines for each end (`reputation` in npcs.json).
+find you (a promoter's fake hype, last year's final). **Each end is lucky at its own game** (owner, Oct 30, "option 2"): what
+comes back later is tilted by where the player stands (`laterOdds`). A Hustler's angles come back to bite half as often and a
+Halo's 1.5 times as often (everyone's watching a Halo); a Halo's good deeds come back as a reward 1.5 times as often and a
+Hustler's half as often (people are suspicious when a Hustler's nice). The middle plays the card's own odds. Sal, Jojo and Gus have lines for each end (`reputation` in npcs.json).
 Card text names the real cost ("Marisol's money", "the owner's goodwill"), never the meter. Code and database still say
 `integrity` (100 Halo, 0 Hustler). Start over is a new life: the meter and the record start again. Each player's meter is
 their own; Campaign Mode's Integrity stays the candidate's.
