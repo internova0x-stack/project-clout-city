@@ -126,7 +126,7 @@ export function BusinessesApp({ biz, cash, clout, otherWorth, offsetMs, handlers
       <div>
         <button className="phone-back" onClick={onHome}><ChevronLeftIcon size={20} /> Home</button>
         <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>Businesses</h2>
-        <p className="subtext" style={{ margin: 0 }}>Buy them, upgrade them, collect the till. Every empire starts with a hot dog cart.</p>
+        <p className="subtext" style={{ margin: 0 }}>Buy, upgrade, collect. Every empire starts with a hot dog cart.</p>
       </div>
       <div className="card biz-worth">
         <span className="overline">Net worth</span>
@@ -134,14 +134,15 @@ export function BusinessesApp({ biz, cash, clout, otherWorth, offsetMs, handlers
         <RankChip rank={rank} />
         {n && <div className="rank-bar" aria-hidden="true"><span style={{ width: `${Math.round(n.progress * 100)}%` }} /></div>}
         <span className="meta">
-          {nextRankLine(clout, worth)}{owned.length > 0 ? `. ${money(businessesValue(owned, clout))} of it is your businesses.` : "."}
+          {/* Owner, Oct 30 (fewer words): the next rank only; the businesses' share is in the tills below. */}
+          {nextRankLine(clout, worth)}
         </span>
       </div>
       {owned.length > 0 && (
         <div className="biz-dusk biz-worth">
           <span className="overline biz-ink">In the tills</span>
           <span className="biz-worth-n biz-ink">{money(total)}</span>
-          <span className="subtext biz-ink">{fullCount ? `${fullCount} ${fullCount === 1 ? "till is" : "tills are"} full. They stop filling after 2 days.` : "Tills fill by the hour and stop after 2 days."}</span>
+          <span className="subtext biz-ink">{fullCount ? `${fullCount} full. Tills stop at 2 days.` : "Tills fill by the hour, up to 2 days."}</span>
           <button className="btn btn-taxi" disabled={!!handlers.busy || total <= 0} onClick={handlers.onCollect}>Collect all</button>
         </div>
       )}
@@ -166,10 +167,9 @@ export function BusinessesApp({ biz, cash, clout, otherWorth, offsetMs, handlers
             <span className="biz-em" aria-hidden="true">{next.emoji}</span>
             <span style={{ minWidth: 0 }}>
               <span className="title" style={{ display: "block" }}>{next.name}</span>
-              <span className="meta">Pays {money(next.payPerDay)} a day</span>
+              <span className="meta">Next to buy · pays {money(next.payPerDay)} a day</span>
             </span>
           </div>
-          <div><span className="tag tag-event">Next to buy</span></div>
           <span className="subtext">{next.blurb}</span>
           <span className="biz-price"><b>{money(next.price)}</b> to buy</span>
           {cash < next.price && <span className="meta">{money(next.price - cash)} short</span>}

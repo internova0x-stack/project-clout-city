@@ -144,7 +144,7 @@ function Pick({ data, onPick }: { data: CampaignScreen; onPick: (id: CandidateId
         <Bunting />
         <p className="overline">🗳️ The race for City Hall</p>
         <h2 className="display-lg" style={{ margin: 0 }}>Pick your candidate</h2>
-        <p className="subtext" style={{ margin: 0 }}>You run the campaign: the money, the calendar, the meetings, the dirty work (or not). Four campaign weeks, one a day.</p>
+        <p className="subtext" style={{ margin: 0 }}>You run it: money, calendar, dirty work (or not). Four weeks, one a day.</p>
       </div>
       {!data.canStart && data.nextStartOn && (
         <div className="card"><p className="subtext" style={{ margin: 0 }}>Your next campaign opens {fmtDay(data.nextStartOn)}. Campaign managers need a week off. Legally.</p></div>
@@ -371,12 +371,20 @@ function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }:
 
 function Paper({ v }: { v: CampaignView }) {
   const r = v.recap!;
+  // Owner, Oct 30 (fewer words up front): the headline, the poll move and the top two stories; the rest on tap.
+  const [all, setAll] = useState(false);
+  const lines = all ? r.lines : r.lines.slice(0, 2);
   return (
     <div className="card camp-paper stack-8">
       <p className="overline" style={{ margin: 0 }}>📰 The morning paper · week {r.week}</p>
       <p className="title" style={{ margin: 0 }}>{r.headline}</p>
-      <ul className="camp-lines">{r.lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
       <span className="meta">Poll: {r.you.toFixed(1)} vs {r.mayor.toFixed(1)} ({r.change >= 0 ? "+" : ""}{r.change})</span>
+      <ul className="camp-lines">{lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
+      {r.lines.length > 2 && (
+        <button className="link-row" onClick={() => setAll((a) => !a)} aria-expanded={all}>
+          <span className="meta">{all ? "Show less" : `${r.lines.length - 2} more ${r.lines.length - 2 === 1 ? "story" : "stories"}`}</span>
+        </button>
+      )}
     </div>
   );
 }

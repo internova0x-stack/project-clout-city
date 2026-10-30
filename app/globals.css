@@ -2642,3 +2642,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .steam-bridge { position:fixed; z-index:70; left:50%; top:calc(16px + var(--safe-top)); transform:translateX(-50%); display:flex; align-items:center; gap:12px;
   padding:10px 16px; border-radius:var(--r-pill); background:var(--glass-solid); color:var(--text-1); box-shadow:var(--elev-3); font-size:14px; font-weight:600; max-width:calc(100% - 32px); }
 .steam-bridge .btn { height:40px; }
+
+/* A card's title row that opens its details (owner, Oct 30: fewer words up front, the rest on tap). */
+.link-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; width:100%; background:none; border:0; padding:0;
+  text-align:left; font:inherit; color:inherit; cursor:pointer; }
+.link-row > .meta { flex:none; color:var(--accent, #C8102E); font-weight:600; }

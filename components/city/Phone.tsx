@@ -312,6 +312,8 @@ function GigsApp({ state, now, busy, onAccept, onCollect, perks }: { state: City
           <div className="gig-card active">
             <span className={`tag ${TIER_TAG[active.tier].cls}`}>{TIER_TAG[active.tier].label} · In progress</span>
             <span className="title" style={{ display: "block" }}>{active.title}</span>
+            {/* The gig's joke plays while it runs, not on the offer. */}
+            <span className="subtext">{blurbFor(active)}</span>
             <div className="gig-progress"><span style={{ width: `${pct}%` }} /></div>
             {ready ? (
               <button className="btn btn-taxi btn-sm" disabled={busy !== null} onClick={() => onCollect(active.id)}>
@@ -324,6 +326,8 @@ function GigsApp({ state, now, busy, onAccept, onCollect, perks }: { state: City
         );
       })()}
       {offers.length === 0 && !active && <p className="subtext">No offers left today. New ones land after midnight.</p>}
+      {/* Owner, Oct 30 (fewer words): the title is the joke; "expires at midnight" is said once, not on every card. */}
+      {offers.length > 0 && <p className="meta" style={{ margin: 0 }}>Today&apos;s offers expire at midnight.</p>}
       {offers.map((g) => {
         const av = gigAvailability(g, state);
         const locked = state.player.confidence < g.confidence_req || state.player.clout < gigCloutReq(g.tier);
@@ -331,7 +335,6 @@ function GigsApp({ state, now, busy, onAccept, onCollect, perks }: { state: City
           <div key={g.id} className={`gig-card${locked ? " locked" : ""}`}>
             <span className={`tag ${TIER_TAG[g.tier].cls}`}>{locked ? "🔒 " : ""}{TIER_TAG[g.tier].label}</span>
             <span className="title" style={{ display: "block" }}>{g.title}</span>
-            <span className="subtext">{blurbFor(g)}</span>
             <span className="meta gig-meta">
               <span className="money-pos">{formatCash(g.pay)}</span> · ⚡ −{g.energy} · ⏱ {g.wait_minutes >= 60 ? `${g.wait_minutes / 60} h` : `${g.wait_minutes} min`}
             </span>
@@ -339,7 +342,6 @@ function GigsApp({ state, now, busy, onAccept, onCollect, perks }: { state: City
             <button className="btn btn-taxi btn-sm" disabled={!av.ok || busy !== null} onClick={() => onAccept(g.id)}>
               {busy === `gig:${g.id}` ? "…" : "Take the gig"}
             </button>
-            <span className="meta">Expires at midnight.</span>
           </div>
         );
       })}
