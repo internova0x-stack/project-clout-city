@@ -3,37 +3,118 @@
     "id": "exam-answers-chat",
     "base": "exam-answers",
     "area": "school",
-    "emoji": "📸",
+    "emoji": "📝",
     "title": "The 8 AM Regret 101 group chat just got a photo of tomorrow's exam key. 140 people saw it.",
-    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "hangout"] },
-    "needs": { "student": true },
+    "where": {
+      "tags": [
+        "campus",
+        "university",
+        "college"
+      ],
+      "after": [
+        "arrive",
+        "hangout"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
     "options": [
       {
-        "id": "study", "label": "Mute the chat and study", "get": "A grade that's yours", "cost": "Your evening",
-        "risk": "low", "riskWhy": "Only the exam itself",
+        "id": "report",
+        "label": "Tell the professor",
+        "get": "A fair exam",
+        "cost": "140 classmates' goodwill",
+        "risk": "medium",
+        "riskWhy": "The chat will know it was you",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "You mute the chat and study at the library until security turns the lights off at you. Twice.",
-            "effects": { "integrity": 6, "energy": -15 } }
+          {
+            "weight": 1,
+            "text": "The professor rewrites the exam overnight. The chat renames itself 'who snitched' and pins your photo.",
+            "effects": {
+              "integrity": 10,
+              "clout": -20,
+              "mood": -6
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.6,
+              "emoji": "🎓",
+              "text": "Remember telling the professor? She mentioned you to the scholarship office. C$500 and a handshake with the dean.",
+              "effects": {
+                "cash": 500,
+                "clout": 60
+              }
+            }
+          }
         ]
       },
       {
-        "id": "peek", "label": "Take a peek", "get": "A night off", "cost": "Nothing, if nobody finds out",
-        "risk": "medium", "riskWhy": "Professors have tricks", "comesBack": false,
+        "id": "study",
+        "label": "Don't open it, study",
+        "get": "An honest grade",
+        "cost": "Your whole evening",
+        "risk": "low",
+        "riskWhy": "You can't be caught knowing nothing",
         "outcomes": [
-          { "weight": 1, "text": "You peek and memorize. The exam matches. You feel smart for exactly as long as it takes to remember why.",
-            "effects": { "integrity": -6, "energy": 10, "mood": 4 } },
-          { "weight": 1, "text": "Dr. Pruitt wrote a fake key and leaked it himself. Question one: 'Who shared this?' You studied the wrong answers.",
-            "effects": { "integrity": -6, "mood": -10, "clout": -15 } }
+          {
+            "weight": 1,
+            "text": "You mute the chat and study until 2 AM. You get a B+ that's entirely yours.",
+            "effects": {
+              "integrity": 5,
+              "energy": -20,
+              "clout": 20
+            }
+          }
         ]
       },
       {
-        "id": "report", "label": "Tell Dr. Pruitt", "get": "A fair exam for everyone", "cost": "140 classmates' goodwill",
-        "risk": "medium", "riskWhy": "Group chats find their snitch", "comesBack": true,
+        "id": "use",
+        "label": "Memorize the key",
+        "get": "An easy A, and bragging rights",
+        "cost": "Your grade's honesty",
+        "risk": "high",
+        "riskWhy": "Professors sometimes plant keys",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Dr. Pruitt wakes up long enough to write a brand-new exam. The chat is furious and has a theory about who told.",
-            "effects": { "integrity": 8, "clout": -15, "energy": -5 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎓", "text": "Remember telling Dr. Pruitt about the leaked key? He gave you five points of extra credit 'for being awake.' Highest compliment he has.",
-                       "effects": { "clout": 20, "mood": 6 } } }
+          {
+            "weight": 1,
+            "text": "You ace it. 100. Your classmates also ace it. All 140 of them.",
+            "effects": {
+              "clout": 120,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "You memorize every answer, including a strange one about a llama.",
+            "effects": {
+              "clout": 120,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 1,
+              "emoji": "🦙",
+              "text": "Remember the leaked key? It was a trap. 140 identical wrong answers, yours included. You're suspended from campus for a week.",
+              "effects": {
+                "clout": -200,
+                "mood": -15,
+                "ban": {
+                  "place": "here",
+                  "days": 7
+                }
+              },
+              "headline": "BREAKING: 140 students, {name} among them, gave the same wrong answer on a Regret 101 exam. The professor: 'I put a llama in question 7.'"
+            }
+          }
         ]
       }
     ]
@@ -42,186 +123,659 @@
     "id": "exam-answers-buy",
     "base": "exam-answers",
     "area": "school",
-    "emoji": "💵",
-    "title": "In the dining hall, an upperclassman leans in: 'Heard you're flexible. Last year's Clout Theory final, C$80.'",
-    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "eat", "hangout"] },
-    "needs": { "student": true, "integrityMax": 30 },
+    "emoji": "🤫",
+    "title": "In the dining hall, an upperclassman leans in: 'Heard you're flexible. Tomorrow's Clout Theory final, C$300.'",
+    "where": {
+      "tags": [
+        "campus",
+        "university",
+        "college"
+      ],
+      "after": [
+        "arrive",
+        "eat",
+        "hangout"
+      ]
+    },
+    "needs": {
+      "student": true,
+      "integrityMax": 30
+    },
     "options": [
       {
-        "id": "no", "label": "Pass", "get": "A clean grade, maybe a worse one", "cost": "Hours of studying",
-        "risk": "low", "riskWhy": "Only the exam itself",
+        "id": "no",
+        "label": "Not interested",
+        "get": "Your own grade",
+        "cost": "A sure thing",
+        "risk": "low",
+        "riskWhy": "Nothing bought, nothing traced",
         "outcomes": [
-          { "weight": 1, "text": "'Nah.' He shrugs and moves to the next table. You study Clout Theory, which is mostly about why he exists.",
-            "effects": { "integrity": 6, "energy": -15 } }
+          {
+            "weight": 1,
+            "text": "'Pass.' He shrugs and slides to the next table. You eat your sad dining-hall pasta in peace.",
+            "effects": {
+              "integrity": 6
+            }
+          }
         ]
       },
       {
-        "id": "buy", "label": "Buy it", "get": "A night off studying", "cost": "C$80 and a little more of your name",
-        "risk": "medium", "riskWhy": "Old exams get rewritten", "comesBack": false,
+        "id": "buy",
+        "label": "Buy it",
+        "get": "A guaranteed A",
+        "cost": "C$300 and a paper trail",
+        "risk": "high",
+        "riskWhy": "Sellers keep customer lists",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Half the questions are the same. You pass, rested and C$80 poorer.",
-            "effects": { "cash": -80, "integrity": -8, "energy": 15, "mood": 4 } },
-          { "weight": 1, "text": "Prof. Tanabe rewrote the whole final. You bought a souvenir. A C$80 souvenir.",
-            "effects": { "cash": -80, "integrity": -8, "mood": -8 } }
+          {
+            "weight": 2,
+            "text": "C$300. The answers are real. You get an A and an uneasy feeling.",
+            "effects": {
+              "cash": -300,
+              "clout": 150,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$300. The answers are real. So is the dean's investigation.",
+            "effects": {
+              "cash": -300,
+              "clout": 150,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 1,
+              "emoji": "🎓",
+              "text": "Remember the C$300 final? The seller got caught with a list of buyers. You're on page one. A week off campus and a C$1,000 conduct fine.",
+              "effects": {
+                "cash": -1000,
+                "clout": -200,
+                "ban": {
+                  "place": "here",
+                  "days": 7
+                }
+              }
+            }
+          }
         ]
       },
       {
-        "id": "share", "label": "Buy it and share it", "get": "A study group that owes you", "cost": "C$80, and a lot of witnesses",
-        "risk": "high", "riskWhy": "Ten people can't keep a secret", "comesBack": true,
+        "id": "resell",
+        "label": "Buy it and resell it",
+        "get": "C$900 back on C$300",
+        "cost": "Every buyer's grade, and yours",
+        "risk": "high",
+        "riskWhy": "More buyers, more screenshots",
         "outcomes": [
-          { "weight": 1, "text": "You send it to your study group. Instant legend. Eleven people, one old exam, zero discretion.",
-            "effects": { "cash": -80, "integrity": -12, "clout": 40, "energy": 10 },
-            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "📩", "text": "Remember sharing last year's Clout Theory final? Prof. Tanabe found it in the group chat. Everyone in it retakes, and they know who sent it.",
-                       "effects": { "clout": -50, "mood": -10, "energy": -10 } } }
+          {
+            "weight": 1,
+            "text": "You sell copies to four friends at C$300. C$900 up. You are now an educational entrepreneur.",
+            "effects": {
+              "cash": 900,
+              "integrity": -16
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "group-project-slides",
-    "base": "group-project",
+    "id": "sell-answers-ta",
+    "base": "sell-answers",
     "area": "school",
-    "emoji": "🧑‍🤝‍🧑",
-    "title": "Group Project Survival: your three teammates haven't opened the slides. It's due at 9 AM.",
-    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "hangout"] },
-    "needs": { "student": true },
+    "emoji": "📑",
+    "title": "You graded last term's midterm and the professor is reusing it. Twenty classmates offer C$100 each.",
+    "where": {
+      "places": [
+        "st-johnsons",
+        "queensborough-u"
+      ],
+      "after": [
+        "arrive",
+        "hangout"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
     "options": [
       {
-        "id": "all", "label": "Do it all, credit everyone", "get": "A good grade for four", "cost": "Your whole night",
-        "risk": "low", "riskWhy": "Only your sleep",
+        "id": "tell",
+        "label": "Tell the professor it's reused",
+        "get": "A fair exam, and her respect",
+        "cost": "C$2,000 and twenty fans",
+        "risk": "low",
+        "riskWhy": "Professors appreciate warnings",
         "outcomes": [
-          { "weight": 1, "text": "You make 22 slides by 4 AM. Four names on the title slide. Dr. Osei says, 'One person did this.' He's looking at you.",
-            "effects": { "integrity": 6, "energy": -20, "clout": 10 } }
+          {
+            "weight": 1,
+            "text": "The professor writes a new one overnight and asks you to be her TA again. 'Paid, this time.'",
+            "effects": {
+              "integrity": 10,
+              "clout": 30,
+              "cash": 200
+            }
+          }
         ]
       },
       {
-        "id": "off", "label": "Do it, leave their names off", "get": "All the credit", "cost": "Three people's grade",
-        "risk": "medium", "riskWhy": "Three people will notice", "comesBack": true,
+        "id": "guide",
+        "label": "Post a free study guide",
+        "get": "Everyone's love, legally",
+        "cost": "A weekend of writing",
+        "risk": "low",
+        "riskWhy": "A study guide isn't the answers",
         "outcomes": [
-          { "weight": 1, "text": "One name on the slide: yours. It's accurate. It's also a declaration of war.",
-            "effects": { "integrity": -4, "energy": -20, "clout": 25 },
-            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "📣", "text": "Remember leaving your teammates off the slides? They posted a long thread called 'erased.' It does not mention that they did nothing.",
-                       "effects": { "clout": -30, "mood": -6 } } }
+          {
+            "weight": 1,
+            "text": "Your guide covers the topics, not the answers. Half the class passes. Your guide gets more likes than your selfies.",
+            "effects": {
+              "integrity": 6,
+              "clout": 80,
+              "energy": -20
+            }
+          }
         ]
       },
       {
-        "id": "tell", "label": "Tell Dr. Osei", "get": "Maybe a fair split", "cost": "Looking like a tattletale",
-        "risk": "medium", "riskWhy": "Teammates hold grudges", "comesBack": true,
+        "id": "sell",
+        "label": "Sell to all twenty",
+        "get": "C$2,000",
+        "cost": "Your degree, if it goes wrong",
+        "risk": "high",
+        "riskWhy": "Twenty buyers, twenty phones",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Dr. Osei sighs. He's heard this every semester since 2009. He splits the grade by who did what.",
-            "effects": { "integrity": 4, "energy": -10, "clout": -10 },
-            "later": { "afterDays": [3, 7], "chance": 0.5, "emoji": "🤝", "text": "Remember telling Dr. Osei about your group? He put you with the three keenest people in class for the next project. They're terrifying. You aced it.",
-                       "effects": { "clout": 20, "mood": 6 } } }
+          {
+            "weight": 1,
+            "text": "Twenty payments, twenty copies. C$2,000. Your inbox is a crime scene of thank-yous.",
+            "effects": {
+              "cash": 2000,
+              "integrity": -18
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.8,
+              "emoji": "🎩",
+              "text": "Remember selling the midterm? Word got around. Now a sophomore called 'The Registrar' wants every course you can get.",
+              "effects": {},
+              "card": "sell-answers-ring"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$2,000. Then one buyer screenshots the deal for their group chat.",
+            "effects": {
+              "cash": 2000,
+              "integrity": -18
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 1,
+              "emoji": "🎓",
+              "text": "Remember the C$100 midterms? A buyer's screenshot reached the dean. A C$2,000 fine and a week off campus.",
+              "effects": {
+                "cash": -2000,
+                "clout": -200,
+                "ban": {
+                  "place": "here",
+                  "days": 7
+                }
+              },
+              "headline": "BREAKING: {name} caught selling a reused midterm to twenty classmates. The dean: 'The real lesson was the answers we sold along the way.'"
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "group-project-credit",
-    "base": "group-project",
+    "id": "sell-answers-copier",
+    "base": "sell-answers",
     "area": "school",
-    "emoji": "🖥️",
-    "title": "At Grand Street CC, the professor loves your group's best slide. Tomás made it. He's out sick.",
-    "where": { "places": ["astoria-cc"], "tags": ["college"], "after": ["arrive"] },
-    "needs": { "student": true },
+    "emoji": "🖨️",
+    "title": "At Grand Street CC, the copy room printed tomorrow's final for 300 students. One spare copy sits in the tray.",
+    "where": {
+      "places": [
+        "astoria-cc"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
     "options": [
       {
-        "id": "tomas", "label": "'That was Tomás'", "get": "Tomás gets his moment", "cost": "Yours",
-        "risk": "low", "riskWhy": "Nothing to hide",
+        "id": "hand",
+        "label": "Hand it to the front office",
+        "get": "A fair final",
+        "cost": "A very tempting tray",
+        "risk": "low",
+        "riskWhy": "Nothing to hide",
         "outcomes": [
-          { "weight": 1, "text": "'Tomás made that one.' The professor writes it down. Tomás, on the video call from bed, gives a feverish thumbs-up.",
-            "effects": { "integrity": 6, "mood": 4 } }
+          {
+            "weight": 1,
+            "text": "The secretary gasps, shreds it and gives you a peppermint. Best peppermint of your life.",
+            "effects": {
+              "integrity": 8,
+              "mood": 4
+            }
+          }
         ]
       },
       {
-        "id": "we", "label": "'We all worked on it'", "get": "Shared glory", "cost": "A small fudge",
-        "risk": "low", "riskWhy": "Technically you all exist",
+        "id": "sell",
+        "label": "Sell photos of it",
+        "get": "C$1,500 by midnight",
+        "cost": "Everyone's final",
+        "risk": "high",
+        "riskWhy": "Photos travel",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "'Team effort.' The professor nods. Nobody's lying exactly. Nobody's telling the truth exactly either.",
-            "effects": { "integrity": -3, "clout": 10 } }
+          {
+            "weight": 1,
+            "text": "C$15 a photo, 100 buyers. C$1,500 by midnight. You feel like a startup.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.7,
+              "emoji": "🎩",
+              "text": "Remember the copier final? A sophomore called 'The Registrar' heard. He wants every course you can get.",
+              "effects": {},
+              "card": "sell-answers-ring"
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,500. The college prints a new final at 6 AM and checks the copier log.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚫",
+              "text": "Remember the photos of the final? The copier log had your student ID. A week off campus and a C$1,500 fine.",
+              "effects": {
+                "cash": -1500,
+                "clout": -150,
+                "ban": {
+                  "place": "astoria-cc",
+                  "days": 7
+                }
+              }
+            }
+          }
         ]
       },
       {
-        "id": "me", "label": "'That was me'", "get": "+30 clout and a gold star", "cost": "Tomás's credit",
-        "risk": "high", "riskWhy": "The presentation was recorded", "comesBack": true,
+        "id": "peek",
+        "label": "Just peek, then hand it in",
+        "get": "A head start",
+        "cost": "A little cheat",
+        "risk": "medium",
+        "riskWhy": "Peeking still shows on cameras",
         "outcomes": [
-          { "weight": 1, "text": "'That one was mine.' The professor beams and asks you to present it at the department fair.",
-            "effects": { "integrity": -10, "clout": 30, "mood": 4 },
-            "later": { "afterDays": [1, 5], "chance": 0.8, "emoji": "📼", "text": "Remember claiming Tomás's slide at Grand Street CC? He watched the recording. He's back, and he told the class exactly how he made it.",
-                       "effects": { "clout": -45, "mood": -8 } } }
+          {
+            "weight": 1,
+            "text": "One long look, then you hand it in with a straight face. The secretary gives you a peppermint anyway.",
+            "effects": {
+              "integrity": -6,
+              "clout": 60
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "essay-service-flyer",
-    "base": "essay-service",
+    "id": "sell-answers-ring",
+    "base": "sell-answers-ring",
     "area": "school",
-    "emoji": "📝",
-    "title": "A flyer by the campus library: 'Guaranteed A. Any essay. C$90. Also wedding toasts.'",
-    "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "hangout"] },
-    "needs": { "student": true },
+    "emoji": "🎩",
+    "title": "'The Registrar,' a sophomore in a blazer, wants keys for six courses. C$3,000. 'Think of it as a startup.'",
+    "where": {
+      "tags": [
+        "campus",
+        "university",
+        "college"
+      ],
+      "after": [
+        "arrive",
+        "hangout",
+        "eat"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
+    "chainOnly": true,
     "options": [
       {
-        "id": "write", "label": "Write it yourself", "get": "An essay that's yours", "cost": "Two nights of energy",
-        "risk": "low", "riskWhy": "Only your own writing",
+        "id": "out",
+        "label": "Walk away",
+        "get": "Your degree",
+        "cost": "C$500 to make him forget your name",
+        "risk": "medium",
+        "riskWhy": "He has your old texts",
         "outcomes": [
-          { "weight": 1, "text": "You write it yourself, mostly at 2 AM. Prof. Vale writes 'Main character energy!' in the margin. You frame it.",
-            "effects": { "integrity": 5, "energy": -20, "mood": 5 } }
+          {
+            "weight": 1,
+            "text": "You pay C$500 for him to delete the chat. He does, mostly. You sleep for the first time in a week.",
+            "effects": {
+              "cash": -500,
+              "integrity": 10
+            }
+          }
         ]
       },
       {
-        "id": "buy", "label": "Buy one", "get": "A finished essay, tonight", "cost": "C$90, and words that aren't yours",
-        "risk": "high", "riskWhy": "They sell the same essay to many", "comesBack": true,
+        "id": "in",
+        "label": "Co-found the startup",
+        "get": "C$3,000",
+        "cost": "Everything",
+        "risk": "high",
+        "riskWhy": "The Registrar has a pitch deck",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "The essay arrives in an hour. It's good. It's suspiciously good. It mentions a wedding.",
-            "effects": { "cash": -90, "integrity": -8, "energy": 15 },
-            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "📑", "text": "Remember the C$90 essay from the flyer? It was also sold to eleven classmates. Prof. Vale noticed. Rewrite, and 'a conversation.'",
-                       "effects": { "clout": -25, "mood": -12, "energy": -15 } } }
+          {
+            "weight": 1,
+            "text": "Six keys, six courses, C$3,000. The Registrar calls it 'a strong seed round.'",
+            "effects": {
+              "cash": 3000,
+              "integrity": -20
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Six keys. Then campus security and Sgt. Bev walk in during the 'board meeting.'",
+            "effects": {
+              "cash": -2500,
+              "clout": -300,
+              "integrity": -20,
+              "holding": 3,
+              "ban": {
+                "place": "here",
+                "days": 7
+              }
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "📰",
+              "text": "Remember The Registrar's startup? Lola got the pitch deck.",
+              "effects": {
+                "clout": -50
+              },
+              "headline": "BREAKING: Sgt. Bev busts an answer-key 'startup' with {name} as co-founder. The pitch deck had a slide titled 'Exit Strategy.'"
+            }
+          }
         ]
       },
       {
-        "id": "rewrite", "label": "Buy one, rewrite it all", "get": "A head start", "cost": "C$90 and still a night's work",
-        "risk": "medium", "riskWhy": "Some of it might stick", "comesBack": false,
+        "id": "dean",
+        "label": "Tell the dean everything",
+        "get": "A clean slate, maybe",
+        "cost": "Your old sale comes out too",
+        "risk": "medium",
+        "riskWhy": "The dean may punish you anyway",
         "outcomes": [
-          { "weight": 1, "text": "You buy it, then rewrite every sentence in your own words. It's basically yours now, and you paid C$90 for an outline.",
-            "effects": { "cash": -90, "integrity": -4, "energy": -10 } }
+          {
+            "weight": 1,
+            "text": "The dean shuts the ring down and lets your old sale go 'for courage.' The Registrar transfers to a college in Delaware.",
+            "effects": {
+              "integrity": 16,
+              "clout": 120
+            }
+          },
+          {
+            "weight": 1,
+            "text": "The dean thanks you, then fines you C$1,000 for the old sale. Fair, sort of.",
+            "effects": {
+              "cash": -1000,
+              "integrity": 16,
+              "clout": 60
+            }
+          }
         ]
       }
     ]
   },
   {
-    "id": "essay-service-ghostwrite",
-    "base": "essay-service",
+    "id": "grade-bribe-registrar",
+    "base": "grade-bribe",
     "area": "school",
-    "emoji": "✍️",
-    "title": "A student on the St. Johnsons quad offers you C$120 to write his 'Main Character Energy' essay by Friday.",
-    "where": { "places": ["st-johnsons", "queensborough-u"], "after": ["arrive", "hangout"] },
+    "emoji": "🅰️",
+    "title": "A registrar's-office kid will turn your C into an A for C$400. The A unlocks a C$1,500 grant.",
+    "where": {
+      "tags": [
+        "campus",
+        "university",
+        "college"
+      ],
+      "after": [
+        "arrive",
+        "hangout"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
     "options": [
       {
-        "id": "no", "label": "Decline", "get": "No part of it", "cost": "C$120",
-        "risk": "low", "riskWhy": "Nothing to hide",
+        "id": "no",
+        "label": "Keep your C",
+        "get": "Your real transcript",
+        "cost": "The C$1,500 grant",
+        "risk": "low",
+        "riskWhy": "A C is a C",
         "outcomes": [
-          { "weight": 1, "text": "'Write it yourself, main character.' He looks hurt, then inspired, then hurt again.",
-            "effects": { "integrity": 4 } }
+          {
+            "weight": 1,
+            "text": "'I'll earn it.' He shrugs. You'll earn it. Probably. Eventually.",
+            "effects": {
+              "integrity": 6
+            }
+          }
         ]
       },
       {
-        "id": "tutor", "label": "Offer to tutor him, C$60", "get": "C$60, honestly", "cost": "Two hours of patience",
-        "risk": "low", "riskWhy": "He may not want to learn", "comesBack": false,
+        "id": "pay",
+        "label": "Pay the C$400",
+        "get": "An A, and C$1,100 net",
+        "cost": "A transcript that lies",
+        "risk": "high",
+        "riskWhy": "Registrars audit grade changes",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Two hours at the library. He writes it himself. It's bad, but it's his. He pays C$60 and says it 'felt weird, in a good way.'",
-            "effects": { "cash": 60, "integrity": 6, "energy": -10 } }
+          {
+            "weight": 1,
+            "text": "A C becomes an A overnight. The grant lands: C$1,500, minus his C$400.",
+            "effects": {
+              "cash": 1100,
+              "clout": 50,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "An A, a grant, C$1,100 up. Then the registrar runs her yearly audit.",
+            "effects": {
+              "cash": 1100,
+              "clout": 50,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 1,
+              "emoji": "🗂️",
+              "text": "Remember the C that became an A? The audit found it. The grant goes back, the C comes back, and you're off campus for a week.",
+              "effects": {
+                "cash": -1500,
+                "clout": -150,
+                "ban": {
+                  "place": "here",
+                  "days": 7
+                }
+              }
+            }
+          }
         ]
       },
       {
-        "id": "write", "label": "Write it for C$120", "get": "C$120", "cost": "A night, and your name if it leaks",
-        "risk": "medium", "riskWhy": "He'll tell people you're 'available'", "comesBack": true,
+        "id": "report",
+        "label": "Report him",
+        "get": "A fair system",
+        "cost": "His friends' goodwill",
+        "risk": "medium",
+        "riskWhy": "He has a lot of friends",
         "outcomes": [
-          { "weight": 1, "text": "You write him a great essay. Too great: it's clearly not his voice. He pays and says 'perfect, bro.'",
-            "effects": { "cash": 120, "integrity": -6, "energy": -15 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎓", "text": "Remember the essay you wrote on the St. Johnsons quad? He got a B-minus and wants half back. And he told his whole floor you're 'available.'",
-                       "effects": { "cash": -60, "clout": -15 } } }
+          {
+            "weight": 1,
+            "text": "The registrar fires him and thanks you. His friends unfollow you in a coordinated wave.",
+            "effects": {
+              "integrity": 12,
+              "clout": 40,
+              "mood": -6
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "grade-bribe-ta",
+    "base": "grade-bribe",
+    "area": "school",
+    "emoji": "💯",
+    "title": "Your TA hints that a C$600 'tutoring fee' gets you an A in Statistics for Influencers. No tutoring included.",
+    "where": {
+      "places": [
+        "st-johnsons",
+        "queensborough-u",
+        "astoria-cc"
+      ],
+      "after": [
+        "arrive",
+        "hangout"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
+    "options": [
+      {
+        "id": "no",
+        "label": "Do the work",
+        "get": "An honest grade",
+        "cost": "Three weekends",
+        "risk": "low",
+        "riskWhy": "Effort never gets audited",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You study three weekends straight and get a B. The TA seems disappointed. In you, somehow.",
+            "effects": {
+              "integrity": 6,
+              "energy": -25,
+              "clout": 20
+            }
+          }
+        ]
+      },
+      {
+        "id": "pay",
+        "label": "Pay the 'fee'",
+        "get": "An A, a scholarship bump of C$1,200",
+        "cost": "C$600 and the truth",
+        "risk": "high",
+        "riskWhy": "TAs who take cash get caught",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$600 in, an A out, and the scholarship bumps you C$1,200.",
+            "effects": {
+              "cash": 600,
+              "clout": 60,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$600 in, an A out, C$1,200 scholarship. The TA brags at a party.",
+            "effects": {
+              "cash": 600,
+              "clout": 60,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 1,
+              "emoji": "🎓",
+              "text": "Remember the 'tutoring fee'? The TA bragged at a party. The department undid every grade he sold and fined the buyers C$1,500.",
+              "effects": {
+                "cash": -1500,
+                "clout": -150,
+                "ban": {
+                  "place": "here",
+                  "days": 5
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "record",
+        "label": "Get it in writing, then report",
+        "get": "A fair class, a grateful department",
+        "cost": "A TA who hates you",
+        "risk": "medium",
+        "riskWhy": "TAs talk to professors",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You ask him to text it. He does. The department thanks you and gives you a research job: C$300.",
+            "effects": {
+              "cash": 300,
+              "integrity": 12,
+              "clout": 50
+            }
+          }
         ]
       }
     ]
@@ -230,35 +784,77 @@
     "id": "pad-hours-library",
     "base": "pad-the-hours",
     "area": "school",
-    "emoji": "📖",
-    "title": "Your work-study job at the campus library: shelve for one hour, log three. The supervisor naps from 2 to 4.",
-    "where": { "tags": ["campus", "university", "college"], "after": ["arrive"] },
-    "needs": { "student": true },
+    "emoji": "📚",
+    "title": "Library work-study: shelve one hour, log three while the supervisor naps. That's C$400 a month.",
+    "where": {
+      "tags": [
+        "campus",
+        "university",
+        "college"
+      ],
+      "after": [
+        "arrive"
+      ]
+    },
+    "needs": {
+      "student": true
+    },
     "options": [
       {
-        "id": "one", "label": "Log the one hour", "get": "A clean timesheet", "cost": "Two hours of pay",
-        "risk": "low", "riskWhy": "It's the truth",
+        "id": "honest",
+        "label": "Log what you work",
+        "get": "A clean timesheet",
+        "cost": "C$400 a month",
+        "risk": "low",
+        "riskWhy": "Nothing to explain",
         "outcomes": [
-          { "weight": 1, "text": "You log one hour, then spend two more studying in the stacks for free. The supervisor snores approvingly.",
-            "effects": { "integrity": 5, "mood": 2 } }
+          {
+            "weight": 1,
+            "text": "One hour, logged as one hour. The supervisor wakes up and says 'oh, you're still here?' Yes.",
+            "effects": {
+              "integrity": 6
+            }
+          }
         ]
       },
       {
-        "id": "three", "label": "Log all three", "get": "About C$45 extra", "cost": "Paid for napping too",
-        "risk": "medium", "riskWhy": "The book scanner logs every shelf", "comesBack": true,
+        "id": "pad",
+        "label": "Log three",
+        "get": "C$400 a month",
+        "cost": "Federal work-study money",
+        "risk": "high",
+        "riskWhy": "Library doors log your card",
+        "comesBack": true,
         "outcomes": [
-          { "weight": 1, "text": "Three hours logged, one worked. You nap in the reference section. Everybody here is napping.",
-            "effects": { "cash": 45, "integrity": -5, "energy": 10 },
-            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "📚", "text": "Remember logging three hours for one at the campus library? The book scanner logged 11 books. Your supervisor woke up for this one.",
-                       "effects": { "cash": -45, "clout": -15, "mood": -5 } } }
-        ]
-      },
-      {
-        "id": "work", "label": "Work all three hours", "get": "C$45 extra, earned", "cost": "Two more hours of shelving",
-        "risk": "low", "riskWhy": "Only your feet",
-        "outcomes": [
-          { "weight": 1, "text": "You shelve every book in the building, including some that were already shelved. C$45, earned.",
-            "effects": { "cash": 45, "integrity": 4, "energy": -15 } }
+          {
+            "weight": 1,
+            "text": "Three hours logged, one worked. C$400 a month. You read magazines in the stacks.",
+            "effects": {
+              "cash": 400,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$400 a month, until the financial aid office pulls the door logs.",
+            "effects": {
+              "cash": 400,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 1,
+              "emoji": "📇",
+              "text": "Remember the three-hour shelving shifts? Financial aid matched the door logs. You pay back C$800 and lose the job.",
+              "effects": {
+                "cash": -800,
+                "clout": -80
+              }
+            }
+          }
         ]
       }
     ]

@@ -102,7 +102,12 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   };
 
   // ?choice=jail starts in holding; ?choice=chain has a chain's follow-up waiting.
-  if (preset === "jail") marks.push({ kind: "holding", place: "precinct-114-half", until: new Date(Date.now() + 2 * 3_600_000 - 60_000).toISOString() });
+  if (preset === "jail") {
+    marks.push({ kind: "holding", place: "precinct-114-half", until: new Date(Date.now() + 2 * 3_600_000 - 60_000).toISOString() });
+    // A headline for News → City's Lola's Blotter, as if this stay had made the news.
+    const l = CHOICE_CARDS.flatMap((c) => c.options.flatMap((o) => o.outcomes.map((x) => x.later))).find((x) => x?.headline && x.effects.holding);
+    if (l?.headline) blotter.unshift({ id: nextId++, text: l.headline.replace("{name}", "@you"), at: new Date().toISOString() });
+  }
   if (preset === "chain") {
     const c = CHOICE_CARDS.find((x) => x.chainOnly);
     if (c) chains.push({ at: 0, card: c.id, intro: "Remember that choice you made last week? It remembers you." });

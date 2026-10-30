@@ -4,7 +4,7 @@
     "base": "found-wallet",
     "area": "transit",
     "emoji": "👛",
-    "title": "A wallet on the N train seat. C$300 inside, and an ID from Ditmars.",
+    "title": "A wallet on the N train seat. C$600 inside, and an ID from Ditmars.",
     "where": {
       "tags": [
         "subway",
@@ -19,7 +19,7 @@
       {
         "id": "return",
         "label": "Return it all",
-        "get": "A clean conscience, maybe a thank-you",
+        "get": "A clean conscience, maybe a reward",
         "cost": "Your afternoon",
         "risk": "low",
         "riskWhy": "Nothing to hide",
@@ -40,10 +40,10 @@
               ],
               "chance": 0.7,
               "emoji": "💌",
-              "text": "Remember the wallet on the N? Its owner tracked you down at Sal's with a thank-you card and a C$60 bodega credit.",
+              "text": "Remember the wallet on the N? Its owner tracked you down at Sal's with a thank-you card and C$150 in cash.",
               "effects": {
-                "cash": 60,
-                "clout": 15
+                "cash": 150,
+                "clout": 30
               }
             }
           }
@@ -52,26 +52,26 @@
       {
         "id": "skim",
         "label": "Keep the cash, return the wallet",
-        "get": "C$300 now",
-        "cost": "The owner's goodwill",
+        "get": "C$600 now",
+        "cost": "The owner's rent money",
         "risk": "medium",
         "riskWhy": "The owner knows what was in it",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 3,
-            "text": "You drop the empty wallet at the booth. C$300 richer and slightly unable to make eye contact with yourself.",
+            "text": "You drop the empty wallet at the booth. C$600 richer and slightly unable to make eye contact with yourself.",
             "effects": {
-              "cash": 300,
-              "integrity": -8
+              "cash": 600,
+              "integrity": -10
             }
           },
           {
             "weight": 2,
-            "text": "C$300 in your pocket, wallet at the booth. Clean getaway, for now.",
+            "text": "C$600 in your pocket, wallet at the booth. Clean getaway, for now.",
             "effects": {
-              "cash": 300,
-              "integrity": -8
+              "cash": 600,
+              "integrity": -10
             },
             "later": {
               "afterDays": [
@@ -80,12 +80,14 @@
               ],
               "chance": 1,
               "emoji": "📸",
-              "text": "The wallet's owner posted a station camera still of whoever returned it 'a little lighter'. People in Astoria have eyes.",
+              "text": "Remember the wallet on the N? The owner got the station camera still. Sgt. Bev had you pay it back, plus an hour on her bench to 'reflect.'",
               "effects": {
-                "clout": -40,
+                "cash": -600,
+                "clout": -100,
                 "mood": -8,
-                "integrity": -4
-              }
+                "holding": 1
+              },
+              "headline": "BREAKING: {name} caught on a station camera returning a wallet 'a little lighter.' Sgt. Bev: 'Returning the wallet was the nice part. Points for that.'"
             }
           }
         ]
@@ -93,8 +95,8 @@
       {
         "id": "keep",
         "label": "Keep it all",
-        "get": "C$300 and a nice wallet",
-        "cost": "The owner, out C$300",
+        "get": "C$600 and a nice wallet",
+        "cost": "The owner, out C$600",
         "risk": "high",
         "riskWhy": "The ID has a face. So do you.",
         "comesBack": true,
@@ -103,7 +105,7 @@
             "weight": 1,
             "text": "Wallet in your pocket. It's a nice wallet, which somehow makes it worse.",
             "effects": {
-              "cash": 300,
+              "cash": 600,
               "integrity": -14
             },
             "later": {
@@ -112,11 +114,851 @@
                 5
               ],
               "chance": 0.6,
-              "emoji": "🍵",
-              "text": "Remember the wallet on the N? Its owner posted a 'have you seen this person' flyer. It looks a lot like you.",
+              "emoji": "🚫",
+              "text": "Remember the wallet on the N? Its owner's flyer is up at Astoria Blvd, with your face. Yesenia won't let you through her station for a week.",
               "effects": {
-                "clout": -60,
-                "mood": -10
+                "cash": -600,
+                "clout": -150,
+                "mood": -10,
+                "ban": {
+                  "place": "astoria-blvd-station",
+                  "days": 5
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lost-and-found-station",
+    "base": "lost-and-found",
+    "area": "transit",
+    "emoji": "💻",
+    "title": "Yesenia's lost-and-found shelf: a laptop bag nobody's claimed, a C$1,800 laptop inside. 'Hon, is that yours?'",
+    "who": "yesenia",
+    "where": {
+      "places": [
+        "astoria-blvd-station"
+      ],
+      "after": [
+        "arrive",
+        "travel"
+      ]
+    },
+    "options": [
+      {
+        "id": "no",
+        "label": "'Not mine'",
+        "get": "Yesenia's trust",
+        "cost": "A free C$1,800 laptop",
+        "risk": "low",
+        "riskWhy": "Nothing to explain",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Huh. Most people say yes to everything.' Yesenia gives you the good nod, the one usually saved for conductors.",
+            "effects": {
+              "integrity": 8,
+              "mood": 4
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "🚇",
+              "text": "Remember the laptop at the booth? Its owner, a coder from Ditmars, left C$200 with Yesenia 'for the honest one.'",
+              "effects": {
+                "cash": 200,
+                "clout": 30
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "yes",
+        "label": "'Oh, that's mine!'",
+        "get": "A C$1,800 laptop to flip",
+        "cost": "Someone's thesis, probably",
+        "risk": "high",
+        "riskWhy": "The laptop has a login screen",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "A guy in Flushing pays C$1,800 and asks no questions.",
+            "effects": {
+              "cash": 1800,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 2,
+            "text": "C$1,800 in Flushing. The laptop, it turns out, phones home.",
+            "effects": {
+              "cash": 1800,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the laptop at Astoria Blvd? It pinged its owner from the shop in Flushing. Sgt. Bev followed the ping, then your trail, then you.",
+              "effects": {
+                "cash": -1800,
+                "clout": -180,
+                "holding": 2,
+                "ban": {
+                  "place": "astoria-blvd-station",
+                  "days": 5
+                }
+              },
+              "headline": "BREAKING: {name} 'reclaimed' a stranger's laptop from the Astoria Blvd lost-and-found. It reclaimed them back. Sgt. Bev: 'Laptops phone home, hon.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "charger",
+        "label": "Just take the charger",
+        "get": "A free charger",
+        "cost": "A little lie",
+        "risk": "low",
+        "riskWhy": "It's a charger",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'The charger's mine.' Yesenia hands it over with a look. It doesn't even fit your phone.",
+            "effects": {
+              "integrity": -3,
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fender-claim-hailr",
+    "base": "fender-claim",
+    "area": "transit",
+    "emoji": "🚕",
+    "title": "A double-parked van taps your Hailr. Driver Ramón whispers: 'Say your neck hurts. We split the C$3,000 claim.'",
+    "where": {
+      "after": [
+        "ride"
+      ]
+    },
+    "options": [
+      {
+        "id": "honest",
+        "label": "Report a scrape, that's all",
+        "get": "A clear record and a ride credit",
+        "cost": "C$1,500 you could have had",
+        "risk": "low",
+        "riskWhy": "Nothing to keep straight",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You report a scrape and a startled noise. Hailr sends a C$50 credit and a survey.",
+            "effects": {
+              "cash": 50,
+              "integrity": 8
+            }
+          }
+        ]
+      },
+      {
+        "id": "fake",
+        "label": "Clutch your neck",
+        "get": "C$1,500, your half",
+        "cost": "An insurer's patience",
+        "risk": "high",
+        "riskWhy": "Insurers hire people to check",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You wear a neck brace to the claims office and wince on cue. C$1,500 lands Friday. Ramón sends a thumbs-up.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 2,
+            "text": "Neck brace, wince, C$1,500. You tell your crew you're 'healing.'",
+            "effects": {
+              "cash": 1500,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                4,
+                8
+              ],
+              "chance": 0.8,
+              "emoji": "🕵️",
+              "text": "Remember your 'neck injury'? An insurance investigator just sat down next to you. He has a folder.",
+              "effects": {},
+              "card": "fender-claim-investigator"
+            }
+          }
+        ]
+      },
+      {
+        "id": "ramon",
+        "label": "Let Ramón claim alone",
+        "get": "C$200 'for your silence'",
+        "cost": "Your name is still on the ride",
+        "risk": "medium",
+        "riskWhy": "You're a witness to his claim",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Ramón files alone and slips you C$200 'for not complicating things.'",
+            "effects": {
+              "cash": 200,
+              "integrity": -5
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fender-claim-cab",
+    "base": "fender-claim",
+    "area": "transit",
+    "emoji": "🚖",
+    "title": "A cab taps your rideshare at a light. The cabbie: 'Claim back pain for me, I'll give you C$1,000.'",
+    "where": {
+      "after": [
+        "ride"
+      ]
+    },
+    "options": [
+      {
+        "id": "honest",
+        "label": "Say you're fine",
+        "get": "A clear conscience",
+        "cost": "C$1,000",
+        "risk": "low",
+        "riskWhy": "You are, in fact, fine",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'I'm fine.' The cabbie looks at you like you've spoken Latin. You go home with your back and your record in one piece.",
+            "effects": {
+              "integrity": 8,
+              "mood": 3
+            }
+          }
+        ]
+      },
+      {
+        "id": "fake",
+        "label": "Groan on cue",
+        "get": "C$1,000",
+        "cost": "An insurer's money",
+        "risk": "high",
+        "riskWhy": "Investigators love a groaner",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "You groan, the cabbie files, C$1,000 arrives in a greeting card. 'Get well soon.'",
+            "effects": {
+              "cash": 1000,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "You groan beautifully. C$1,000 in a greeting card. Then a letter from an insurer.",
+            "effects": {
+              "cash": 1000,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                4,
+                8
+              ],
+              "chance": 0.9,
+              "emoji": "🕵️",
+              "text": "Remember your 'back pain'? An insurance investigator just sat down next to you. He has a folder.",
+              "effects": {},
+              "card": "fender-claim-investigator"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bev",
+        "label": "Tell Sgt. Bev he asked",
+        "get": "A favor at the 114½",
+        "cost": "The cabbie's C$1,000 and his goodwill",
+        "risk": "medium",
+        "riskWhy": "Cabbies talk to cabbies",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Bev writes up the cabbie and gives you a mint. 'Fraud's a lot of paperwork, hon. You saved me some.'",
+            "effects": {
+              "integrity": 10,
+              "clout": 40
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fender-claim-investigator",
+    "base": "fender-claim-investigator",
+    "area": "transit",
+    "emoji": "🕵️",
+    "title": "Insurance investigator Mr. Plunkett wants a sworn statement about your 'injury.' He has a folder.",
+    "where": {
+      "after": [
+        "arrive",
+        "ride",
+        "travel"
+      ]
+    },
+    "chainOnly": true,
+    "options": [
+      {
+        "id": "confess",
+        "label": "Come clean, pay it back",
+        "get": "No fraud on your record",
+        "cost": "The payout, plus C$500",
+        "risk": "medium",
+        "riskWhy": "Plunkett may still call Bev",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You hand back the payout plus a C$500 'administrative fee.' Plunkett almost smiles. Almost.",
+            "effects": {
+              "cash": -1800,
+              "integrity": 12,
+              "clout": -60
+            }
+          }
+        ]
+      },
+      {
+        "id": "swear",
+        "label": "Swear it still hurts",
+        "get": "Another C$1,500 for 'ongoing pain'",
+        "cost": "Perjury-adjacent energy",
+        "risk": "high",
+        "riskWhy": "Plunkett has a folder",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You swear, wince and limp out. A second C$1,500 lands. You limp all the way home, just in case.",
+            "effects": {
+              "cash": 1500,
+              "integrity": -18
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Plunkett plays a video: you, deadlifting at the gym. Sgt. Bev drives you to the 114½ herself, 'because my back is fine, unlike yours.'",
+            "effects": {
+              "cash": -2500,
+              "clout": -250,
+              "integrity": -18,
+              "holding": 3
+            },
+            "later": {
+              "afterDays": [
+                1,
+                2
+              ],
+              "chance": 1,
+              "emoji": "🏋️",
+              "text": "Remember your sworn injury? Lola got the deadlift video. It's set to music now.",
+              "effects": {
+                "clout": -50
+              },
+              "headline": "BREAKING: {name}'s 'injury' caught on a gym camera deadlifting 225. Insurers are not amused. Sgt. Bev: 'Good form, though.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "flip",
+        "label": "Say it was the driver's idea",
+        "get": "A deal: repay half",
+        "cost": "The driver's number, forever",
+        "risk": "medium",
+        "riskWhy": "The driver will remember",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Plunkett whose idea it was. He lets you repay half. The driver leaves you a voice note that's mostly breathing.",
+            "effects": {
+              "cash": -750,
+              "integrity": 4,
+              "clout": -40,
+              "mood": -10
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cheap-ebike-station",
+    "base": "cheap-ebike",
+    "area": "transit",
+    "emoji": "🚲",
+    "title": "Under the Astoria Blvd tracks, a guy sells a C$2,500 e-bike for C$300. The lock's still on it. Cut.",
+    "where": {
+      "places": [
+        "astoria-blvd-station"
+      ],
+      "tags": [
+        "subway"
+      ],
+      "after": [
+        "arrive",
+        "travel"
+      ]
+    },
+    "options": [
+      {
+        "id": "report",
+        "label": "Tell Sgt. Bev",
+        "get": "Maybe a reward from the owner",
+        "cost": "A cheap bike, and some nerve",
+        "risk": "low",
+        "riskWhy": "The seller is already leaving",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Bev finds the owner from a list of 140 stolen bikes. She sends C$250 and a selfie with the bike, crying.",
+            "effects": {
+              "cash": 250,
+              "integrity": 10,
+              "clout": 40
+            }
+          },
+          {
+            "weight": 1,
+            "text": "By the time Bev arrives, the guy and the bike are gone. Bev writes it down anyway. 'That's the service.'",
+            "effects": {
+              "integrity": 8
+            }
+          }
+        ]
+      },
+      {
+        "id": "flip",
+        "label": "Buy it and flip it",
+        "get": "C$900 profit by tonight",
+        "cost": "Somebody's commute",
+        "risk": "high",
+        "riskWhy": "Bike owners post everywhere",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "C$300 in, C$1,200 out to a guy in Woodside. C$900 for an afternoon of 'logistics.'",
+            "effects": {
+              "cash": 900,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$900 profit. Your buyer posts his new ride. Its owner sees the post.",
+            "effects": {
+              "cash": 900,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 1,
+              "emoji": "🚲",
+              "text": "Remember the cheap e-bike? Its owner found your buyer, your buyer found you, and Sgt. Bev found everybody.",
+              "effects": {
+                "cash": -1200,
+                "clout": -120,
+                "holding": 2
+              },
+              "headline": "BREAKING: {name} flipped a 'found' e-bike to the owner's own cousin. Sgt. Bev: 'Queens is four people, hon. Four.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "ride",
+        "label": "Buy it and ride it",
+        "get": "A C$2,500 bike for C$300",
+        "cost": "C$300 and a nagging feeling",
+        "risk": "medium",
+        "riskWhy": "It's very recognizable",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You ride it home. It's incredible. You feel like a getaway driver at a red light.",
+            "effects": {
+              "cash": -300,
+              "energy": 20,
+              "integrity": -8
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.5,
+              "emoji": "🔒",
+              "text": "Remember the C$300 e-bike? Bev spotted it outside the deli. She kept the bike and gave you a stern hour on the bench.",
+              "effects": {
+                "holding": 1,
+                "mood": -8
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cheap-ebike-battery",
+    "base": "cheap-ebike",
+    "area": "transit",
+    "emoji": "🔋",
+    "title": "A rider offers you a C$800 e-bike battery for C$100. Three bikes on the rack are missing theirs.",
+    "where": {
+      "places": [
+        "pedal-pushers"
+      ],
+      "after": [
+        "shift",
+        "arrive"
+      ]
+    },
+    "options": [
+      {
+        "id": "pass",
+        "label": "Pass, and tell dispatch",
+        "get": "A rack that keeps its batteries",
+        "cost": "A cheap battery and a coworker",
+        "risk": "medium",
+        "riskWhy": "The rider knows you told",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Dispatch puts a camera on the rack. The rider glares at you for a week. Three coworkers buy you coffee.",
+            "effects": {
+              "integrity": 10,
+              "clout": 30,
+              "mood": -4
+            }
+          }
+        ]
+      },
+      {
+        "id": "buy",
+        "label": "Buy two to resell",
+        "get": "C$1,300 profit",
+        "cost": "Two coworkers' batteries",
+        "risk": "high",
+        "riskWhy": "Batteries have serial numbers",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Two batteries, C$200 in, C$1,500 out on the resale boards.",
+            "effects": {
+              "cash": 1300,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$1,300 profit, until a coworker recognizes his battery by the sticker.",
+            "effects": {
+              "cash": 1300,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🔋",
+              "text": "Remember the cheap batteries? Pedal Pushers traced the serials. You're off the hub for a week and paying back every one.",
+              "effects": {
+                "cash": -1600,
+                "clout": -100,
+                "ban": {
+                  "place": "pedal-pushers",
+                  "days": 7
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass2",
+        "label": "Just say no thanks",
+        "get": "Nothing to explain",
+        "cost": "A cheap battery",
+        "risk": "low",
+        "riskWhy": "Not your business",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Nah.' The rider shrugs and moves to the next coworker. You keep pedaling on your sad old battery.",
+            "effects": {
+              "integrity": 4
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scrape-witness-31st",
+    "base": "scrape-witness",
+    "area": "transit",
+    "emoji": "🚐",
+    "title": "A delivery van scrapes a parked convertible on 31st. The driver offers you C$500: 'You didn't see nothing.'",
+    "where": {
+      "tags": [
+        "astoria"
+      ],
+      "after": [
+        "arrive",
+        "travel"
+      ]
+    },
+    "options": [
+      {
+        "id": "note",
+        "label": "Leave a note with the plate",
+        "get": "The owner's thanks",
+        "cost": "The driver's C$500",
+        "risk": "low",
+        "riskWhy": "You're doing the owner a favor",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tuck the plate number under the wiper. The driver sighs, then actually leaves his insurance details too.",
+            "effects": {
+              "integrity": 8
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🚗",
+              "text": "Remember the note on the convertible? Its owner, a dentist from Ditmars, sent C$300 and a free cleaning you'll never use.",
+              "effects": {
+                "cash": 300,
+                "clout": 30
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "take",
+        "label": "Take the C$500",
+        "get": "C$500",
+        "cost": "A stranger's paint job",
+        "risk": "medium",
+        "riskWhy": "31st Street has cameras",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "C$500, folded into a handshake. The van leaves. The convertible weeps quietly.",
+            "effects": {
+              "cash": 500,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$500 into your pocket, right in front of a deli camera.",
+            "effects": {
+              "cash": 500,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 1,
+              "emoji": "📹",
+              "text": "Remember the scrape on 31st? The owner got the deli's footage: the van, the scrape, and you counting money. Bev held you an hour 'as a witness, of yourself.'",
+              "effects": {
+                "cash": -500,
+                "clout": -90,
+                "holding": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "more",
+        "label": "'Make it C$1,000'",
+        "get": "C$1,000",
+        "cost": "The driver's day, and yours",
+        "risk": "high",
+        "riskWhy": "That's not a tip, it's a shakedown",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "He pays C$1,000, mutters something about Astoria, and goes.",
+            "effects": {
+              "cash": 1000,
+              "integrity": -16
+            }
+          },
+          {
+            "weight": 1,
+            "text": "He pays C$1,000. Then his boss files it as 'a pedestrian shakedown,' with your face.",
+            "effects": {
+              "cash": 1000,
+              "integrity": -16
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🚔",
+              "text": "Remember the C$1,000 on 31st? The van's boss filed a report. Sgt. Bev read it out loud, laughing, then booked you.",
+              "effects": {
+                "cash": -1000,
+                "clout": -150,
+                "holding": 2
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scrape-witness-meteor",
+    "base": "scrape-witness",
+    "area": "transit",
+    "emoji": "🚙",
+    "title": "In the Meteor Park lot, a minivan clips a sports car. Its driver: 'C$400 to forget my plate?'",
+    "who": "hector",
+    "where": {
+      "places": [
+        "meteor-park"
+      ],
+      "after": [
+        "arrive",
+        "eat"
+      ]
+    },
+    "options": [
+      {
+        "id": "hector",
+        "label": "Give the plate to Hector",
+        "get": "The sports car owner's thanks",
+        "cost": "C$400",
+        "risk": "low",
+        "riskWhy": "Hector loves a report",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Hector radios it in like it's game seven. The minivan driver pays up at the gate.",
+            "effects": {
+              "integrity": 8,
+              "clout": 30
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.6,
+              "emoji": "🏟️",
+              "text": "Remember the minivan in the lot? The sports car's owner sent you two seats behind the dugout.",
+              "effects": {
+                "clout": 80,
+                "mood": 10
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "forget",
+        "label": "Take the C$400",
+        "get": "C$400",
+        "cost": "A stranger's bumper",
+        "risk": "medium",
+        "riskWhy": "Parking lots have cameras on poles",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "C$400 and a shoulder pat. You forget the plate immediately, for real.",
+            "effects": {
+              "cash": 400,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 1,
+            "text": "C$400. The lot camera got all of it, including the shoulder pat.",
+            "effects": {
+              "cash": 400,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                5
+              ],
+              "chance": 1,
+              "emoji": "🚫",
+              "text": "Remember the minivan? Stadium security saw the tape. You're banned from Meteor Park for a week and paying the sports car's deductible.",
+              "effects": {
+                "cash": -800,
+                "clout": -80,
+                "ban": {
+                  "place": "meteor-park",
+                  "days": 7
+                }
               }
             }
           }
@@ -128,8 +970,8 @@
     "id": "extra-change-hailr",
     "base": "extra-change",
     "area": "transit",
-    "emoji": "🚗",
-    "title": "Your Hailr ride from Flushing glitched: C$0 for a C$48 trip. Driver Ramón doesn't know yet.",
+    "emoji": "💸",
+    "title": "A Hailr glitch dropped driver Ramón's whole week, C$1,200, into your account. Ramón doesn't know yet.",
     "where": {
       "after": [
         "ride"
@@ -138,304 +980,90 @@
     "options": [
       {
         "id": "report",
-        "label": "Report it and pay",
-        "get": "Ramón gets paid, and a five-star from him",
-        "cost": "C$48",
+        "label": "Report it and send it back",
+        "get": "Ramón's week, safe",
+        "cost": "C$1,200 you'll never touch",
         "risk": "low",
         "riskWhy": "Nothing to hide",
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "You flag the glitch. The app sends a C$48 bill and a survey about how the glitch made you feel. Ramón honks twice, happily.",
-            "effects": {
-              "cash": -48,
-              "integrity": 6,
-              "mood": 4
-            }
-          }
-        ]
-      },
-      {
-        "id": "ride",
-        "label": "Enjoy the free ride",
-        "get": "C$48 stays in your pocket",
-        "cost": "Ramón eats the fare",
-        "risk": "medium",
-        "riskWhy": "Apps have long memories",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 3,
-            "text": "Free ride across Queens. You tip Ramón zero stars of guilt and get out at Ditmars humming.",
-            "effects": {
-              "integrity": -4,
-              "mood": 3
-            }
-          },
-          {
-            "weight": 2,
-            "text": "Free ride. Ramón asks if the app is working. You say 'seems fine.' Technically it is, for you.",
-            "effects": {
-              "integrity": -4,
-              "mood": 3
-            },
-            "later": {
-              "afterDays": [
-                2,
-                5
-              ],
-              "chance": 1,
-              "emoji": "🧾",
-              "text": "Remember the C$0 Hailr ride from Flushing? The app found it. C$48, a C$15 'glitch recovery fee' and a rider rating of 3.9.",
-              "effects": {
-                "cash": -63,
-                "clout": -10
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "tip",
-        "label": "Pay it, plus a tip",
-        "get": "Ramón's undying loyalty",
-        "cost": "C$60",
-        "risk": "low",
-        "riskWhy": "Only your wallet complains",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "You pay the C$48 and add twelve. Ramón says you're the first passenger in a month who didn't eat in his car.",
+            "text": "You report the glitch. Hailr fixes it in four days and nine emails. Ramón sends a voice note that's mostly 'bless you.'",
             "effects": {
-              "cash": -60,
-              "integrity": 8,
-              "mood": 5
+              "integrity": 10,
+              "mood": 6
             },
             "later": {
               "afterDays": [
                 2,
                 6
               ],
-              "chance": 0.5,
-              "emoji": "🚗",
-              "text": "Remember paying Ramón for the glitched Flushing ride? He picked you up again and waved off the fare: 'You're the honest one.'",
+              "chance": 0.6,
+              "emoji": "🚕",
+              "text": "Remember Ramón's week? He told every driver in Queens. Free rides for a week and a horn salute on Steinway.",
               "effects": {
-                "cash": 40,
-                "mood": 5
-              }
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "borrowed-clip-subway",
-    "base": "borrowed-clip",
-    "area": "transit",
-    "emoji": "🤸",
-    "title": "Showtime on the 7! You caught the backflip on camera. It's better than anything you've ever posted.",
-    "where": {
-      "tags": [
-        "subway",
-        "transit"
-      ],
-      "after": [
-        "travel",
-        "arrive"
-      ]
-    },
-    "options": [
-      {
-        "id": "tag",
-        "label": "Post it and tag the dancers",
-        "get": "Some clout, and the crew's thanks",
-        "cost": "Half the views go to them",
-        "risk": "low",
-        "riskWhy": "Credit is hard to get wrong",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "You post it with the crew's handle. They repost it with three fire emojis. That's a handshake on the 7.",
-            "effects": {
-              "clout": 20,
-              "integrity": 4,
-              "mood": 4
-            },
-            "later": {
-              "afterDays": [
-                1,
-                4
-              ],
-              "chance": 0.5,
-              "emoji": "📣",
-              "text": "Remember tagging the showtime crew on the 7? They shouted you out in their next video: 'the only camera that asked.'",
-              "effects": {
-                "clout": 30
+                "cash": 150,
+                "clout": 50
               }
             }
           }
         ]
       },
-      {
-        "id": "post",
-        "label": "Post it, no credit",
-        "get": "+60 clout tonight",
-        "cost": "The dancers get nothing",
-        "risk": "medium",
-        "riskWhy": "Dancers watch their own hashtags",
-        "comesBack": true,
-        "outcomes": [
-          {
-            "weight": 3,
-            "text": "The clip takes off. People in the comments ask where to find 'your' dancers. You reply with a mysterious emoji.",
-            "effects": {
-              "clout": 60,
-              "integrity": -5
-            }
-          },
-          {
-            "weight": 2,
-            "text": "The clip takes off overnight. Someone asks who the dancers are. You let the question sit.",
-            "effects": {
-              "clout": 60,
-              "integrity": -5
-            },
-            "later": {
-              "afterDays": [
-                1,
-                5
-              ],
-              "chance": 1,
-              "emoji": "🙃",
-              "text": "Remember posting the showtime clip with no credit? The crew from the 7 found it. Their stitch, 'who is this?', has twice your views.",
-              "effects": {
-                "clout": -45,
-                "mood": -6
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "ask",
-        "label": "Tip C$10 and ask first",
-        "get": "Their blessing and a better angle",
-        "cost": "C$10, and you miss your stop",
-        "risk": "low",
-        "riskWhy": "None, except Woodside",
-        "comesBack": false,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "You tip and ask. They do the flip again, for you, at 61st Street. You end up in Woodside, but the clip is perfect.",
-            "effects": {
-              "cash": -10,
-              "clout": 30,
-              "integrity": 5,
-              "energy": -5
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "overheard-secret-subway",
-    "base": "overheard-secret",
-    "area": "transit",
-    "emoji": "🤫",
-    "title": "On the N, Chardonnay Shade's assistant is on speaker: the 'surprise' engagement is a spin-off promo.",
-    "where": {
-      "tags": [
-        "subway",
-        "transit"
-      ],
-      "after": [
-        "travel",
-        "arrive"
-      ]
-    },
-    "options": [
       {
         "id": "keep",
-        "label": "Keep it to yourself",
-        "get": "A quiet ride",
-        "cost": "The scoop of the year",
-        "risk": "low",
-        "riskWhy": "Nobody knows you heard",
-        "comesBack": false,
-        "outcomes": [
-          {
-            "weight": 1,
-            "text": "You put your headphones in like a civilized New Yorker. The assistant keeps talking. You keep not listening, mostly.",
-            "effects": {
-              "integrity": 4,
-              "mood": 2
-            }
-          }
-        ]
-      },
-      {
-        "id": "sell",
-        "label": "Sell it to Lola",
-        "get": "C$150 and a Lola shout-out",
-        "cost": "Someone's job, maybe",
+        "label": "Keep it, act surprised",
+        "get": "C$1,200",
+        "cost": "Ramón's rent",
         "risk": "high",
-        "riskWhy": "The assistant saw your face",
+        "riskWhy": "Apps claw money back",
         "comesBack": true,
         "outcomes": [
           {
             "weight": 1,
-            "text": "Lola pays C$150 and runs it as BREAKING within the hour. 'Sources on the N tell me...' You are the source on the N.",
+            "text": "C$1,200 moves to your bank before anyone notices.",
             "effects": {
-              "cash": 150,
-              "clout": 40,
-              "integrity": -8
+              "cash": 1200,
+              "integrity": -14
+            }
+          },
+          {
+            "weight": 2,
+            "text": "C$1,200. You move it out fast. Not fast enough.",
+            "effects": {
+              "cash": 1200,
+              "integrity": -14
             },
             "later": {
               "afterDays": [
-                1,
-                4
+                2,
+                6
               ],
-              "chance": 0.6,
-              "emoji": "🧥",
-              "text": "Remember the call on the N? Chardonnay's assistant got fired, and the follow-up names 'a source in a green jacket.' Everyone knows your jacket.",
+              "chance": 1,
+              "emoji": "📵",
+              "text": "Remember the C$1,200 glitch? Hailr clawed it back with a C$500 fee and froze your account. Ramón's voice note is not 'bless you.'",
               "effects": {
-                "clout": -30,
-                "mood": -8,
-                "integrity": -3
+                "cash": -1700,
+                "clout": -80
               }
             }
           }
         ]
       },
       {
-        "id": "tease",
-        "label": "Post a vague teaser",
-        "get": "+25 clout, deniable",
-        "cost": "A little smugness",
+        "id": "split",
+        "label": "Send Ramón half",
+        "get": "C$600",
+        "cost": "Half of Ramón's week",
         "risk": "medium",
-        "riskWhy": "Vague posts get decoded",
-        "comesBack": false,
+        "riskWhy": "Ramón can count",
         "outcomes": [
           {
-            "weight": 2,
-            "text": "'Some engagements are just marketing 👀.' Two hundred people ask what you mean. You say nothing. Power.",
-            "effects": {
-              "clout": 25,
-              "integrity": -3,
-              "mood": 3
-            }
-          },
-          {
             "weight": 1,
-            "text": "Your teaser gets decoded by a fan account in nine minutes. Clout now, and a fan army in your mentions.",
+            "text": "You send Ramón C$600 and a vague message. He's grateful, confused, then less grateful.",
             "effects": {
-              "clout": 25,
-              "integrity": -3,
+              "cash": 600,
+              "integrity": -6,
               "mood": -4
             }
           }
