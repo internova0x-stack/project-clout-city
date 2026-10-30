@@ -81,12 +81,11 @@ test("never more than two a day, never two in a row, never over a waiting card",
   assert.ok(!mayOffer({ shownToday: 0, lastShownAt: null, open: true, now }));
 });
 
-test("the browser's view leaves out every outcome, and marks what may come back", () => {
+test("the browser's view leaves out every outcome, risk and hint of what comes back (owner, Oct 30)", () => {
   const wallet = CARDS.find((c) => c.id === "found-wallet-subway")!;
   const v = cardView(wallet, 7, "astoria-blvd-station");
   const json = JSON.stringify(v);
-  assert.ok(!/outcomes|weight|later|effects/.test(json), json);
-  assert.ok(v.options.every((o) => o.comesBack));
+  assert.ok(!/outcomes|weight|later|effects|risk|comesBack/i.test(json), json);
 });
 
 test("resolving rolls an outcome and, sometimes, a consequence on a later day", () => {
@@ -100,14 +99,19 @@ test("resolving rolls an outcome and, sometimes, a consequence on a later day", 
 });
 
 test("effects are capped, and a loss never takes more than the bank holds", () => {
-  assert.deepEqual(boundEffects({ cash: -900, clout: 999 }, 200), { cash: -200, clout: CHOICES.caps.clout, mood: undefined, energy: undefined, integrity: undefined });
+  assert.deepEqual(boundEffects({ cash: -900, clout: 999 }, 200), {
+    cash: -200, clout: CHOICES.caps.clout, mood: undefined, energy: undefined, integrity: undefined, ban: undefined, gigLock: undefined, holding: undefined,
+  });
+  assert.deepEqual(boundEffects({ ban: { place: "here", days: 30 }, holding: 9 }, 0).ban, { place: "here", days: CHOICES.maxBanDays });
+  assert.equal(boundEffects({ holding: 9 }, 0).holding, CHOICES.maxHoldingHours);
+  assert.equal(effectLine({ cash: -500, holding: 2, ban: { place: "here", days: 3 } }), "−C$500 · 🚫 Banned for 3 days · 🚔 2 hours in holding");
   assert.equal(effectLine({ cash: 300, integrity: -8 }), "+C$300 · 💸 +8 Hustler");
 });
 
 test("three regulars can tell a Halo from a Hustler, in words, never the meter", async () => {
   const { reputationLine } = await import("../lib/culture.ts");
   const profiles = npcs.profiles;
-  for (const id of ["sal", "jojo", "gus"]) {
+  for (const id of ["sal", "jojo", "gus", "tariq", "hersh", "arben"]) {
     assert.ok(reputationLine(profiles, id, "high", 0) && reputationLine(profiles, id, "low", 1), id);
     assert.equal(reputationLine(profiles, id, "middle", 0), null);
     for (const l of [...profiles.find((p: { id: string }) => p.id === id).reputation.halo, ...profiles.find((p: { id: string }) => p.id === id).reputation.hustler]) {
@@ -135,4 +139,13 @@ test("each end is lucky at its own game: Hustlers' angles bite less, Halos' good
   };
   const hustler = caught(20), middle = caught(50), halo = caught(80);
   assert.ok(hustler < middle && middle < halo, `${hustler} < ${middle} < ${halo}`);
+});
+
+test("Lola speaks up only when a choice tips you into an end or back to the middle", async () => {
+  const { lolaRepLine, LOLA_REP } = await import("../lib/choices.ts");
+  assert.equal(lolaRepLine(50, 55), null, "no new band, no word");
+  assert.ok(LOLA_REP.high.includes(lolaRepLine(66, 72)!));
+  assert.ok(LOLA_REP.low.includes(lolaRepLine(34, 28)!));
+  assert.ok(LOLA_REP.middle.includes(lolaRepLine(72, 66)!));
+  for (const l of Object.values(LOLA_REP).flat()) assert.ok(l.length <= 240 && !/integrity|\bhalo\b|\bhustler\b/i.test(l), l);
 });

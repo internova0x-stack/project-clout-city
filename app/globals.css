@@ -2590,11 +2590,6 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .choice-opt:disabled { opacity:.6; }
 .choice-opt-row { display:flex; align-items:center; gap:8px; }
 .choice-opt-label { flex:1; min-width:0; font-size:16px; line-height:22px; font-weight:700; }
-.choice-later { flex:none; font-size:15px; }
-.choice-risk { flex:none; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
-.choice-risk.low { background:var(--green-tint); color:var(--green-text); }
-.choice-risk.medium { background:var(--taxi-tint); color:#8A5D00; }
-.choice-risk.high { background:var(--red-tint); color:var(--red-text); }
 .choice-opt-more { display:flex; flex-direction:column; gap:3px; font-size:14px; line-height:19px; color:var(--text-2); }
 .choice-opt-more b { color:var(--text-1); font-weight:800; margin-right:4px; }
 .choice-receipt { margin:0; font-size:16px; line-height:23px; color:var(--text-1); }
@@ -2609,8 +2604,11 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .rep-bar span { position:absolute; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:var(--surface-raised);
   box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .5s ease-out; }
 .rep.compact .rep-bar { height:8px; }
-.profile-rep { display:block; width:100%; padding:12px 14px; border-radius:14px; background:var(--surface-card); text-align:left; color:var(--text-1); }
-.choice-log { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; background:var(--surface-card); font-size:14px; line-height:19px; }
-.choice-log > span:first-child { font-size:20px; line-height:22px; }
-.choice-log.back { box-shadow:inset 4px 0 0 var(--neon-500); }
-.choice-log-fx { display:block; margin-top:2px; font-weight:700; }
+.choice-lola { display:flex; gap:8px; align-items:flex-start; margin:0; font-size:14px; line-height:19px; color:var(--text-1); }
+.choice-lola img { flex:none; border-radius:50%; object-fit:cover; }
+.choice-intro { margin:0; font-size:14px; line-height:19px; font-style:italic; color:var(--text-2); }
+.blotter { box-shadow:inset 4px 0 0 var(--red-500); }
+/* Breathing room above a modal's main button (owner, Oct 30: "the closer they are, the more cramped the modal feels"):
+   a full-width button, or a group of them, that follows content gets extra space above it. Buttons in a row keep theirs. */
+.sheet-body :where(p, div, ul, ol, section, h2, h3, form) + .btn.btn-taxi { margin-top:12px; }
+.sheet-body :where(p, div, ul, ol, section, h2, h3) + .sheet-actions { margin-top:12px; }

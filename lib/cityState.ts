@@ -307,6 +307,10 @@ const ERRORS: Record<string, string> = {
   dev_tools_off: "Time travel is switched off here.",
   still_travelling: "You're still on your way. Hang tight, or skip the rest of the ride.",
   closed_now: "Closed right now. The card says when they open.",
+  // Moral Choices' lasting effects (migration 0132).
+  banned_here: "You're banned here for now. They remember your face.",
+  in_holding: "You're on the bench at the 114½ Precinct. Wait it out, or pay bail.",
+  gigs_locked: "The gig board has you on a time-out. Check back in a day or two.",
   unknown_pass: "That pass isn't sold here.",
   no_showtime: "The dancers already got off. Showtime waits for no one.",
   unknown_event: "That isn't on the calendar.",

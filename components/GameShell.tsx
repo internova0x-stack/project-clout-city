@@ -55,8 +55,8 @@ import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
-import { ChoiceBackSheet, ChoiceSheet } from "./game/Choices";
-import { integrityBand, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
+import { ChoiceBackSheet, ChoiceSheet, HoldingSheet } from "./game/Choices";
+import { integrityBand, type BlotterItem, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
 import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
@@ -1648,6 +1648,10 @@ export function GameShell({
   const [choiceMade, setChoiceMade] = useState<ChoiceMade | null>(null);
   const [choiceBusy, setChoiceBusy] = useState(false);
   const [choiceBack, setChoiceBack] = useState<ChoiceLogEntry[]>([]);
+  // Migration 0132: the holding bench (open while in holding, until closed), and Lola's Blotter for News → City.
+  const [holdingOpen, setHoldingOpen] = useState(false);
+  const [blotter, setBlotter] = useState<BlotterItem[]>([]);
+  const holdingUntil = choiceS?.marks.find((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())?.until ?? null;
   const choicesReady = !!choices && !!city && flow === "none";
   const loadChoices = useCallback(async () => {
     if (!choices) return;
@@ -1655,6 +1659,7 @@ export function GameShell({
     if (!r.ok) return;
     setChoiceS(r.data);
     if (r.data.landed.length) setChoiceBack(r.data.landed);
+    if (r.data.marks.some((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())) setHoldingOpen(true);
     return r.data;
   }, [choices]);
   useEffect(() => {
@@ -1682,7 +1687,23 @@ export function GameShell({
     setChoiceMade(r.data);
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   };
+  const payBail = async () => {
+    if (!choices) return;
+    setChoiceBusy(true);
+    const r = await choices.bail();
+    setChoiceBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setToast(`🚔 Bail paid: C$${r.data.cost.toLocaleString("en-US")}. Sgt. Bev: "Don't make it a habit."`);
+    setHoldingOpen(false);
+    void loadChoices();
+    if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+  };
+  useEffect(() => {
+    if (!choices || !phone.open || phone.app !== "news") return;
+    void choices.blotter().then((r) => r.ok && setBlotter(r.data));
+  }, [choices, phone.open, phone.app]);
   const closeChoice = () => {
+    if (choiceMade?.effects.holding) setHoldingOpen(true);
     if (choiceCard && !choiceMade && choices) void choices.skip(choiceCard.log);
     setChoiceCard(null);
     setChoiceMade(null);
@@ -3088,6 +3109,7 @@ export function GameShell({
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
         onOpenCampaign={campaign ? () => { setPhone({ open: false, app: null }); setCampaignOpen(true); } : undefined}
         scandals={campaignScandals}
+        blotter={blotter}
         election={campaign && campaignRunning === false ? {
           unlocked: myRank.level >= APP_UNLOCKS.campaign.rank, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
           onOpen: () => { setPhone({ open: false, app: null }); setCampaignOpen(true); },
@@ -3235,6 +3257,8 @@ export function GameShell({
             focusTask={campaignFocus} onFocused={clearCampaignFocus} />}
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
+          <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length} until={holdingUntil} busy={choiceBusy}
+            onBail={() => void payBail()} onClose={() => setHoldingOpen(false)} />
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (
@@ -3383,12 +3407,9 @@ export function GameShell({
         }}
         crew={clique.map((c) => c.display_name)}
         recent={myCard?.recent}
-        skills={skills ?? (loadSkills ? null : undefined)}
-        perks={perkHandlers}
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
-        choices={choiceS ? { integrity: choiceS.integrity, log: choiceS.log } : undefined}
         vip={membership && member ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership }
           : membership && !memberLoaded ? { on: false, onOpen: openMembership, loading: true } : undefined}
       />

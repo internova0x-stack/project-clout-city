@@ -154,7 +154,10 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     };
     const down = (e: PointerEvent) => {
       if ((e.target as HTMLElement).closest("button")) return;
-      host.setPointerCapture(e.pointerId);
+      // The first finger of a new gesture: anything still remembered is a finger whose lift the browser never reported
+      // (owner, Oct 30: after a pinch, one-finger drags zoomed instead of scrolling). Forget it.
+      if (e.isPrimary) { pts.clear(); pinch = null; }
+      try { host.setPointerCapture(e.pointerId); } catch { /* the pointer is already gone */ }
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       tap = pts.size === 1 ? { x: e.clientX, y: e.clientY, moved: false } : null;
       animRef.current = null;
@@ -170,7 +173,11 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
       const next = { x: e.clientX, y: e.clientY };
       pts.set(e.pointerId, next);
       if (tap && Math.hypot(next.x - tap.x, next.y - tap.y) > 6) tap.moved = true;
-      if (pts.size >= 2 && pinch) {
+      if (pts.size >= 2 && !pinch) {
+        // A second finger without a pinch start (it arrived as the first lifted): start one now rather than guess.
+        const [a, b] = [...pts.values()];
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), dist: viewRef.current.dist };
+      } else if (pts.size >= 2 && pinch) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
         viewRef.current = clampView({ ...viewRef.current, dist: pinch.dist * (pinch.d / Math.max(1, d)) });
@@ -195,6 +202,8 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
       }
       tap = null;
       if (pts.size < 2) pinch = null;
+      // A pinch only counts the two fingers that started it; any extra are forgotten with it.
+      if (pts.size > 2) pts.clear();
       if (!pts.size) host.classList.remove("dragging");
     };
     const wheel = (e: WheelEvent) => {
@@ -206,12 +215,14 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     host.addEventListener("pointermove", move);
     host.addEventListener("pointerup", up);
     host.addEventListener("pointercancel", up);
+    host.addEventListener("lostpointercapture", up);
     host.addEventListener("wheel", wheel, { passive: false });
     return () => {
       host.removeEventListener("pointerdown", down);
       host.removeEventListener("pointermove", move);
       host.removeEventListener("pointerup", up);
       host.removeEventListener("pointercancel", up);
+      host.removeEventListener("lostpointercapture", up);
       host.removeEventListener("wheel", wheel);
     };
   }, []);

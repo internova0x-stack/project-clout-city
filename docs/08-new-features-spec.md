@@ -1100,9 +1100,10 @@ of the day. Luxury rides (a limo, a helicopter) were previewed and taken out for
 From the owner's draft "Moral Choices System" v0.1, cut to a first build. Every player regularly decides what kind of person
 they are, with real rewards, consequences and tradeoffs; the game never calls them good or bad, it shows what happened.
 
-**Situation cards.** A one-line situation, an emoji and 2 to 4 choices. Each choice previews **You get**, **It costs** and
-**Risk** (Low, Medium, High, with a short reason), and "⏳ may come back later" when it can. The same format as Campaign Mode's
-situations (radio choices, then Decide). After the choice: a one- or two-line receipt and what it paid.
+**Situation cards.** A one-line situation, an emoji and 2 to 4 choices, one line each; the picked one opens to show **You get**
+and **It costs**. No risk labels and no "may come back later" hints (owner, Oct 30: they steer players away from choices;
+"leave the choices up to them, and let them learn from the consequences"). The card files keep `risk` and `riskWhy` for writers;
+they never reach the player. Then Decide, and a one- or two-line receipt with what it paid.
 - **When:** after arriving somewhere, a subway ride, a shift, a gig, a meal, a visit or a hangout, the server may offer a card
   that fits the place, the moment and the player (40% when one is allowed). At most **2 a New York day**, at least 90 minutes
   apart, one waiting at a time; "Not now" puts it away for the day. A variant never repeats within 30 days, its dilemma not
@@ -1111,20 +1112,22 @@ situations (radio choices, then Decide). After the choice: a one- or two-line re
   nightlife, dating, money): about 25 dilemmas in 2 or 3 variants at launch, checked by `validateCards` (lib/choices.ts,
   `npm run validate:content`, tests/choices.test.ts). The files hold every outcome's odds and what comes back, so only the server
   and the preview read them (lib/choicesContent.ts); players get the preview only (`cardView`).
-- **Guardrails:** only invented people are involved (never a real player); grey, everyday temptations, not crime (police stay
-  ambient, docs/culture/VOICE.md); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
-  consequence only does what its preview warned about and names the earlier choice. Real money never touches it.
+- **Guardrails:** only invented people are involved (never a real player); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
+  consequence fits the choice that caused it and names it ("Remember the wallet…?"). Real money never touches it.
 
 **Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
 two-ended meter, not a score: where the player stands between 😇 Halo and 💸 Hustler, and neither end is the bad one. It starts
 in the middle and moves the same rate both ways (the draft's "recovers at half" went with the name). **Private**: only the
-player sees it (Profile → Choices, and under the rank); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
+player sees it, as a nudge on each choice's receipt: a slim Halo ↔ Hustler line with the dot sliding the way the choice
+pushed (owner, Oct 30: "Have it as a nudge for now"; not in the profile, and no list of past choices anywhere). Otherwise the
+city tells you (option 2): when a choice tips you into an end, or back to the middle, Lola says so in one line on that receipt
+(`LOLA_REP`), and six regulars (Sal, Jojo, Gus, Tariq, Hersh, Arben) talk to each end differently; it appears with the first choice ("New: Halo or Hustler?"). **Both ends
 pay off:** at the Halo end (70+) choices that move toward Halo pay 25% more clout, and Halo-only cards turn up (Sal's till,
 house-sitting); at the Hustler end (30 or below) choices that move toward Hustler pay 25% more cash, and Hustler-only offers
 find you (a promoter's fake hype, last year's final). **Each end is lucky at its own game** (owner, Oct 30, "option 2"): what
 comes back later is tilted by where the player stands (`laterOdds`). A Hustler's angles come back to bite half as often and a
 Halo's 1.5 times as often (everyone's watching a Halo); a Halo's good deeds come back as a reward 1.5 times as often and a
-Hustler's half as often (people are suspicious when a Hustler's nice). The middle plays the card's own odds. Sal, Jojo and Gus have lines for each end (`reputation` in npcs.json).
+Hustler's half as often (people are suspicious when a Hustler's nice). The middle plays the card's own odds. Sal, Jojo, Gus, Tariq, Hersh and Arben have lines for each end (`reputation` in npcs.json).
 Card text names the real cost ("Marisol's money", "the owner's goodwill"), never the meter. Code and database still say
 `integrity` (100 Halo, 0 Hustler). Start over is a new life: the meter and the record start again. Each player's meter is
 their own; Campaign Mode's Integrity stays the candidate's.
@@ -1133,13 +1136,27 @@ their own; Campaign Mode's Integrity stays the candidate's.
 and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, paid once, ledger 'choice_later'; shown once in
 "It came back", naming the choice, then kept in the record).
 
+**Real stakes** (owner, Oct 30: "Losing an umbrella has no real stakes. But taking part in stealing. Covering up criminality,
+have real stake"; migration 0132). Cards can now be about taking part in theft, covering for someone, fencing, skimming: the
+grey everyday ones stay only where they are the best of the old pool. Police are in it, **played for laughs** (the 114½
+Precinct, Sgt. Bev). What a choice can do:
+- **Bigger money:** per-card caps C$3,000 cash, 300 clout, 30 mood, 40 energy, 20 on the meter.
+- **Lasting effects** (`choice_marks`): banned from a place for up to 7 days (`ban`, "here" = where it happened; travel and
+  actions there refuse 'banned_here'), no gigs for up to 3 days (`gigLock`, 'gigs_locked'), or up to 3 hours in holding at the
+  114½ Precinct (`holding`: no travel or actions, 'in_holding'; bail C$150 an hour left, `choice_bail`, the holding sheet).
+- **Chains:** a delayed consequence can open a follow-up card (`later.card`, a `chainOnly` card reached from nowhere else):
+  "Remember the…?" as its intro, past the daily limit, so a choice escalates.
+- **Public headlines:** a delayed consequence can put a line in **Lola's Blotter** (News → City; `later.headline` with
+  `{name}`, the player's @username; `choice_blotter()`, the last 7 days; never for players who opted out of News mentions).
+
 **As built.** lib/choices.ts (rules, pure), app/home/choiceActions.ts (crypto random, service role), migration 0131
 (`reputation`, `choice_log`, `choice_later`; `choice_context`, `choice_open`, `choice_settle`, `choice_skip`, `choice_land`,
 `choice_seen`, `choice_history`; service role only, rate bucket 'choice'), components/game/Choices.tsx (the card, receipt,
-reveal, "It came back", the record), the Profile's Choices tab, the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
-`?choice=now|back|high|low|log`).
+reveal, "It came back"), the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
+`?choice=now|back|high|low|log|jail|chain`; migration 0132's stakes: `choice_marks`, `choice_bail`, `choice_chain_open`,
+`choice_status`, `choice_blotter`).
 
-**Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Halo- and Hustler-only places and events (a
+**Later** (from the draft): Street Rep and the fixer world; Heat; Halo- and Hustler-only places and events (a
 charity gala, a back room); stories and Campaign Mode writing to the player's meter; NPC memory beyond lines; more delayed
 consequences and recurring characters; about 4 new cards a week through the weekly content routine and the Studio; work cards
 for Careers.

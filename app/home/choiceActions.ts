@@ -3,7 +3,7 @@
 import { randomInt } from "node:crypto";
 import {
   CHOICES, boundEffects, cardView, repBonus, choiceError, mayOffer, pickCard, resolveChoice,
-  type ChoiceAfter, type ChoiceCard, type ChoiceCardView, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
+  type BlotterItem, type ChoiceAfter, type ChoiceCard, type ChoiceCardView, type ChoiceMark, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
 import { placeById } from "@/lib/city";
@@ -60,23 +60,50 @@ function entry(row: { id: number; kind: string; card: string; option: string | n
   };
 }
 
+/** A ban's "here" is the place the card happened (or wherever the player is); without one, the ban is dropped. */
+function resolveHere(e: ChoiceEffects, place: string | null): ChoiceEffects {
+  if (!e.ban || e.ban.place !== "here") return e;
+  return place ? { ...e, ban: { ...e.ban, place } } : { ...e, ban: undefined };
+}
+
+type Status = { chainDue: string | null; marks: ChoiceMark[] };
+
+/** Migration 0132: lasting effects and the chain card due (empty before it has run). */
+async function status(admin: Admin, id: string): Promise<Status> {
+  const { data, error } = await admin.rpc("choice_status", { p_player: id });
+  return error || !data ? { chainDue: null, marks: [] } : (data as Status);
+}
+
+/** A chain's follow-up card is due: it opens now, past the daily limit, with what came back as its intro. */
+async function openChain(admin: Admin, id: string, ctx: Context, st: Status): Promise<ChoiceCardView | null> {
+  if (!st.chainDue || ctx.open) return null;
+  const c = card(st.chainDue);
+  const { data, error } = await admin.rpc("choice_chain_open", { p_player: id, p_base: c?.base ?? st.chainDue, p_area: c?.area ?? "life", p_place: ctx.atPlace });
+  if (error || !data || !c) return null;
+  const d = data as { log: number; text: string };
+  return { ...cardView(c, d.log, ctx.atPlace), intro: d.text };
+}
+
 export async function choiceState(): Promise<ChoiceResult<ChoiceState>> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
   const ctx = await context(w.admin, w.id);
   if ("error" in ctx) return { ok: false, error: ctx.error };
-  const [landed, hist] = await Promise.all([
+  const [landed, hist, st] = await Promise.all([
     w.admin.rpc("choice_land", { p_player: w.id }),
     w.admin.rpc("choice_history", { p_player: w.id }),
+    status(w.admin, w.id),
   ]);
   if (landed.error || hist.error) return { ok: false, error: choiceError(undefined) };
   const h = hist.data as { integrity: number | null; log: Parameters<typeof entry>[0][] };
   const o = ctx.open ? card(ctx.open.card) : undefined;
+  const chain = await openChain(w.admin, w.id, ctx, st);
   return {
     ok: true,
     data: {
+      marks: st.marks,
       integrity: h.integrity,
-      open: o && ctx.open ? cardView(o, ctx.open.log, ctx.open.place) : null,
+      open: chain ?? (o && ctx.open ? cardView(o, ctx.open.log, ctx.open.place) : null),
       landed: (landed.data as { id: number; card: string; option: string; emoji: string; text: string; effects: ChoiceEffects; day: string }[])
         .map((x) => ({ ...entry({ id: x.id, kind: "later", card: x.card, option: x.option, receipt: x.text, emoji: x.emoji, effects: x.effects, day: x.day }) })),
       log: h.log.map(entry),
@@ -93,6 +120,8 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
     const o = card(ctx.open.card);
     return { ok: true, data: o ? cardView(o, ctx.open.log, ctx.open.place) : null };
   }
+  const chain = await openChain(w.admin, w.id, ctx, await status(w.admin, w.id));
+  if (chain) return { ok: true, data: chain };
   if (!mayOffer({ shownToday: ctx.shownToday, lastShownAt: ctx.lastShownAt, open: false, now: new Date() }) || rng() >= CHOICES.chance) {
     return { ok: true, data: null };
   }
@@ -120,11 +149,17 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
   if (!c || !c.options.some((o) => o.id === option)) return { ok: false, error: choiceError("unknown_option") };
   const r = resolveChoice(c, option, ctx.today, rng, ctx.integrity);
   // Each end of the meter pays its own way (repBonus): more clout for a Halo, more cash for a Hustler.
-  const effects = boundEffects(repBonus(r.effects, ctx.integrity), ctx.bank);
+  const where = ctx.open.place ?? ctx.atPlace;
+  const clean = (e: ChoiceEffects) => Object.fromEntries(Object.entries(e).filter(([, v]) => v));
+  const effects = boundEffects(resolveHere(repBonus(r.effects, ctx.integrity), where), ctx.bank);
   const { data, error } = await w.admin.rpc("choice_settle", {
     p_player: w.id, p_log: log, p_option: option, p_outcome: r.outcome, p_receipt: r.text,
-    p_effects: Object.fromEntries(Object.entries(effects).filter(([, v]) => v)),
-    p_later: r.later ? { due: r.later.due, emoji: r.later.emoji, text: r.later.text, effects: boundEffects(r.later.effects, Number.MAX_SAFE_INTEGER) } : null,
+    p_effects: clean(effects),
+    p_later: r.later ? {
+      due: r.later.due, emoji: r.later.emoji, text: r.later.text,
+      effects: clean(boundEffects(resolveHere(r.later.effects, where), Number.MAX_SAFE_INTEGER)),
+      card: r.later.card ?? null, headline: r.later.headline ?? null,
+    } : null,
   });
   if (error) {
     console.error("choice_settle failed", error);
@@ -146,4 +181,22 @@ export async function choiceSeen(ids: number[]): Promise<ChoiceResult<null>> {
   if ("error" in w) return { ok: false, error: w.error };
   const { error } = await w.admin.rpc("choice_seen", { p_player: w.id, p_ids: ids.filter((n) => Number.isInteger(n)).slice(0, 50) });
   return error ? { ok: false, error: err(error) } : { ok: true, data: null };
+}
+
+export async function choiceBail(): Promise<ChoiceResult<{ cost: number }>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const { data, error } = await w.admin.rpc("choice_bail", { p_player: w.id });
+  if (error) {
+    const code = error.message.match(/not_held|cant_afford/)?.[0];
+    return { ok: false, error: choiceError(code) };
+  }
+  return { ok: true, data: { cost: data as number } };
+}
+
+export async function choiceBlotter(): Promise<ChoiceResult<BlotterItem[]>> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: true, data: [] };
+  const { data, error } = await supabase.rpc("choice_blotter");
+  return error ? { ok: true, data: [] } : { ok: true, data: (data ?? []) as BlotterItem[] };
 }
