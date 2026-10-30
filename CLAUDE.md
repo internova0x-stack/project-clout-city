@@ -301,7 +301,7 @@ components live in `app/globals.css`.
   2 a New York day, 90 minutes apart, 30-day cooldown per card, 7 per dilemma) and settled there with a crypto random source;
   the database pays once (`choice_settle`/`choice_land`, ledger 'choice'/'choice_later', caps in `choice_effects_ok`). The meter
   is 😇 Halo ↔ 💸 Hustler for players (owner, Oct 30: "Integrity" steered everyone to the good choice); code and database say
-  `integrity` (`reputation`, 100 Halo, 0 Hustler, from 50, the same rate both ways, private: the meter under the rank in the profile; choices aren't listed anywhere, owner Oct 30), revealed by the
+  `integrity` (`reputation`, 100 Halo, 0 Hustler, from 50, the same rate both ways, private: shown only on the first-choice reveal for now; the profile shows neither the meter nor a list, owner Oct 30), revealed by the
   first choice. Both ends pay (`repBonus`: Halo-ward clout ×1.25 at 70+, Hustler-ward cash ×1.25 at 30 or below; cards can need
   either end); each end is lucky at its own game (`laterOdds`, owner Oct 30 "option 2": a Hustler's angles come back to
   bite ×0.5 and a Halo's ×1.5, a Halo's good deeds come back as rewards ×1.5 and a Hustler's ×0.5); regulars' `reputation`

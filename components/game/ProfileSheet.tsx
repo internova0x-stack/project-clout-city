@@ -9,7 +9,6 @@ import { recentLine, recentWhen, type RecentItem } from "@/lib/recent";
 import { RankClimb } from "./Ranks";
 import { Sheet } from "../Sheet";
 import { ProfileVip } from "../store/Membership";
-import { RepMeter } from "./Choices";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
@@ -19,7 +18,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  */
 export function ProfileSheet({
   open, onClose, look, outfit, name, subtitle, looks, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
-  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, vip, rep,
+  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, vip,
 }: {
   open: boolean;
   onClose: () => void;
@@ -44,8 +43,6 @@ export function ProfileSheet({
   onOpenLeaderboard?: () => void;
   /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
   vip?: { on: boolean; until?: string | null; onOpen: () => void; loading?: boolean };
-  /** Moral Choices (migration 0131): where the player stands, Halo ↔ Hustler (private); null until their first choice. */
-  rep?: number | null;
 }) {
   const lines = (recent ?? []).map((r) => ({ r, line: recentLine(r) })).filter((x) => x.line);
   const { postcards, huntCards } = collections;
@@ -68,14 +65,9 @@ export function ProfileSheet({
           {vip && <div style={{ textAlign: "center", visibility: vip.loading ? "hidden" : undefined }} aria-hidden={vip.loading || undefined}>
             <ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
         </div>
-        {/* One page, no tabs (owner, Oct 30): skills live on the home screen; choices aren't listed, only the meter shows. */}
+        {/* One page, no tabs (owner, Oct 30): skills live on the home screen; no choices or Halo ↔ Hustler meter here. */}
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
-        {rep != null && (
-          <div className="profile-rep">
-            <RepMeter value={rep} compact />
-          </div>
-        )}
         <div className="profile-kpis">
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>🔥 {formatShort(clout)}</b><span>Clout</span></button>
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>{rank ? `#${rank.toLocaleString()}` : "—"}</b><span>In Queens</span></button>
