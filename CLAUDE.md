@@ -309,7 +309,12 @@ components live in `app/globals.css`.
   {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
   (`validateCards`). Cards show no risk labels or "comes back" hints (owner, Oct 30: players learn from consequences;
   `cardView` sends only label, get and cost). Only invented people, grey not criminal, never real money.
-  Start over resets it. `?choice=now|back|high|low|log` in the preview (not the demo: its bundle would carry the outcomes).
+  Start over resets it. `?choice=now|back|high|low|log|jail|chain` in the preview (not the demo: its bundle would carry the outcomes).
+  Real stakes (migration 0132, owner Oct 30): bigger caps (C$3,000, 300 clout), lasting effects (`choice_marks`: a place ban up to
+  7 days, no gigs up to 3, up to 3 hours in holding at the 114½ Precinct, police played for laughs; bail `choice_bail`, C$150 an
+  hour left; enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
+  the daily limit, `choice_chain_open`) and public headlines (`later.headline` → Lola's Blotter in News → City, `choice_blotter()`,
+  never for news_opt_out players).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

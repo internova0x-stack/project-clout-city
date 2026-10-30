@@ -1,6 +1,8 @@
 "use client";
 
 import type { PartyMention } from "@/lib/party";
+import { BlotterCard } from "../game/Choices";
+import type { BlotterItem } from "@/lib/choices";
 import { SpottedCard } from "../city/Party";
 import { PotWinNewsCard } from "../city/Lotto";
 import type { LottoWin } from "@/lib/lotto";
@@ -37,7 +39,7 @@ export interface NewsHandlers {
 /** v0.6 City News handed to the News app. */
 export interface CityNews { items: NewsItem[]; today: string; focus?: string | null; onSeen?: (ids: string[]) => void }
 
-export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [], election, scandals = [] }: {
+export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpots = [], election, scandals = [], blotter = [] }: {
   feed: StoryFeed | null; handlers: NewsHandlers; focusBeat?: string | null; city?: CityNews;
   /** v0.9: "Spotted at" lines from parties the player went to (empty when they opted out). */
   spotted?: PartyMention[];
@@ -47,6 +49,8 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
   election?: ElectionTeaser;
   /** Campaign Mode: Lola's write-ups of the player's own campaign scandals. */
   scandals?: string[];
+  /** Moral Choices (migration 0132): Lola's Blotter, the week's public headlines from players' choices. */
+  blotter?: BlotterItem[];
 }) {
   const storyLive = (feed?.arcs ?? []).some((a) => a.type === "main" && !a.finished);
   // Story and City are the feed's two tabs; the Archive opens from the header.
@@ -102,7 +106,7 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
         </div>
       )}
       {tab === "city" ? (
-        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 && !election && scandals.length === 0 ? (
+        cityNews.recent.length === 0 && spotted.length === 0 && jackpots.length === 0 && !election && scandals.length === 0 && blotter.length === 0 ? (
           <Quiet text="Slow news week. Even the celebrities are napping. Check back tomorrow." />
         ) : (
           <div className="stack-12">
@@ -113,6 +117,7 @@ export function NewsApp({ feed, handlers, focusBeat, city, spotted = [], jackpot
                 <p className="body" style={{ margin: 0 }}>{t}</p>
               </div>
             ))}
+            <BlotterCard items={blotter} />
             {jackpots.slice(0, 1).map((w) => <PotWinNewsCard key={w.wonAt} w={w} />)}
             {spotted.map((m) => <SpottedCard key={m.eventId} m={m} />)}
             {cityNews.recent.map((i) => <CityNewsCard key={i.id} item={i} today={city!.today} focus={city!.focus === i.id} />)}

@@ -2606,3 +2606,9 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .rep.compact .rep-bar { height:8px; }
 .choice-lola { display:flex; gap:8px; align-items:flex-start; margin:0; font-size:14px; line-height:19px; color:var(--text-1); }
 .choice-lola img { flex:none; border-radius:50%; object-fit:cover; }
+.choice-intro { margin:0; font-size:14px; line-height:19px; font-style:italic; color:var(--text-2); }
+.blotter { box-shadow:inset 4px 0 0 var(--red-500); }
+/* Breathing room above a modal's main button (owner, Oct 30: "the closer they are, the more cramped the modal feels"):
+   a full-width button, or a group of them, that follows content gets extra space above it. Buttons in a row keep theirs. */
+.sheet-body :where(p, div, ul, ol, section, h2, h3, form) + .btn.btn-taxi { margin-top:12px; }
+.sheet-body :where(p, div, ul, ol, section, h2, h3) + .sheet-actions { margin-top:12px; }

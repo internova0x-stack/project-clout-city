@@ -16,7 +16,8 @@ They sit on top of the house rules in docs/CAST.md ("Writing for the cast").
 - **No group only in service or villain roles.** Each background shows up as owners, professionals and
   neighbors too (`tests/culture.test.ts` checks the four Astoria groups).
 - **Texture, not punchlines.** Communities come through food, festivals, language and named people with real
-  personalities. Satirize attitudes, never identities. Police stay ambient (no crime as a mechanic).
+  personalities. Satirize attitudes, never identities. Police are played for laughs (owner, Oct 30): Moral Choices can land you in holding at the
+  114½ Precinct with Sgt. Bev; keep it comic, never menacing or about real policing.
 - **Invented names only.** Use `content/culture/parody-names.json` for teams, the transit card, museums,
   trademarked landmarks, celebrity restaurants and brands. Real landmarks and streets are fine.
 - **Weather words follow the real calendar.** "Brick" and puffer-jacket jokes only in the cold months

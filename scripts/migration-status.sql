@@ -142,6 +142,7 @@ from (values
   ('0128_campaign_tasks_push.sql', coalesce((to_regprocedure('public.push_scan_campaign()') is not null), false)),
   ('0129_catch_up_0071_0098.sql', coalesce((obj_description(to_regprocedure('public.content_import_story(jsonb)'), 'pg_proc') like '%caught up by 0129%'), false)),
   ('0130_security_review.sql', coalesce((to_regprocedure('public.refund_is_subscription(text,text)') is not null), false)),
-  ('0131_moral_choices.sql', coalesce((to_regclass('public.choice_log') is not null), false))
+  ('0131_moral_choices.sql', coalesce((to_regclass('public.choice_log') is not null), false)),
+  ('0132_choice_stakes.sql', coalesce((to_regclass('public.choice_marks') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

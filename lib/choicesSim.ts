@@ -1,15 +1,16 @@
 // Moral Choices in the preview (/preview/home?choice=...): the same rules as the server, in memory, with the real
 // cards. Presets: now (every arrival, shift or gig brings a card, no daily limit), back (a consequence of an earlier
-// choice has just landed), high and low (start at the Halo or the Hustler end, with a record), log (a few choices already made).
+// choice has just landed), high and low (start at the Halo or the Hustler end, with a record), log (a few choices already made), jail (in
+// holding at the 114½ Precinct), chain (a chain's follow-up card waiting).
 // Consequences land 20 seconds after the choice instead of days later, so the whole loop fits in a minute.
 
 import {
-  CHOICES, applyIntegrity, boundEffects, cardView, repBonus, mayOffer, pickCard, resolveChoice,
-  type ChoiceAfter, type ChoiceCard, type ChoiceEffects, type ChoiceLogEntry, type ChoicesApi, type ChoiceState,
+  CHOICES, applyIntegrity, bailCost, boundEffects, cardView, repBonus, mayOffer, pickCard, resolveChoice,
+  type BlotterItem, type ChoiceAfter, type ChoiceMark, type ChoiceCard, type ChoiceEffects, type ChoiceLogEntry, type ChoicesApi, type ChoiceState,
 } from "./choices";
 import { CHOICE_CARDS } from "./choicesContent";
 
-export type ChoicePreset = "now" | "back" | "high" | "low" | "log";
+export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "chain";
 
 interface Opts {
   /** Where the preview's player is standing now. */
@@ -24,27 +25,41 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   const always = preset === "now";
   let integrity: number = preset === "low" ? 18 : preset === "high" ? 86 : CHOICES.integrityStart;
   let revealed = !!preset && preset !== "now";
-  let open: { log: number; card: ChoiceCard; place: string | null } | null = null;
+  let open: { log: number; card: ChoiceCard; place: string | null; intro?: string } | null = null;
+  // Migration 0132's stakes in memory: lasting effects, chain cards waiting, Lola's Blotter.
+  const marks: ChoiceMark[] = [];
+  const chains: { at: number; card: string; intro: string }[] = [];
+  const blotter: BlotterItem[] = [];
+  const mark = (e: ChoiceEffects, place: string | null) => {
+    const now = Date.now();
+    if (e.ban) marks.push({ kind: "ban", place: e.ban.place === "here" ? place : e.ban.place, until: new Date(now + e.ban.days * 86_400_000).toISOString() });
+    if (e.gigLock) marks.push({ kind: "gig_lock", place: null, until: new Date(now + e.gigLock * 86_400_000).toISOString() });
+    if (e.holding) marks.push({ kind: "holding", place: "precinct-114-half", until: new Date(now + e.holding * 3_600_000).toISOString() });
+  };
+  const live = () => marks.filter((m) => Date.parse(m.until) > Date.now());
   let nextId = 1;
   const log: ChoiceLogEntry[] = [];
   const landed: ChoiceLogEntry[] = [];
   const history: { id: string; base: string; day: string }[] = [];
   const shown: { day: string; at: number }[] = [];
-  const pending: { at: number; entry: ChoiceLogEntry; effects: ChoiceEffects }[] = [];
+  const pending: { at: number; entry: ChoiceLogEntry; effects: ChoiceEffects; headline?: string }[] = [];
 
-  const settle = (c: ChoiceCard, option: string, day: string, past = false) => {
+  const settle = (c: ChoiceCard, option: string, day: string, past = false, place: string | null = null) => {
     const r = resolveChoice(c, option, day, rng, integrity);
     const e = boundEffects(repBonus(r.effects, integrity), Number.MAX_SAFE_INTEGER);
     const before = integrity;
     integrity = applyIntegrity(integrity, e.integrity);
     const applied = { ...e, integrity: integrity - before || undefined };
-    if (!past) opts.onEffects?.(applied);
+    if (!past) { opts.onEffects?.(applied); mark(applied, place); }
     const id = nextId++;
     log.unshift({ id, day, emoji: c.emoji, title: c.title, choice: r.option.label, receipt: r.text, effects: applied });
     history.push({ id: c.id, base: c.base, day });
-    if (r.later) {
+    if (r.later?.card) {
+      chains.push({ at: past ? 0 : Date.now() + 20_000, card: r.later.card, intro: r.later.text });
+      if (r.later.headline) blotter.unshift({ id: nextId++, text: r.later.headline.replace("{name}", "@you"), at: new Date().toISOString() });
+    } else if (r.later) {
       const entry = { id: -id, day, emoji: r.later.emoji, title: c.title, choice: r.option.label, receipt: r.later.text, effects: r.later.effects, cameBack: true };
-      pending.push({ at: past ? 0 : Date.now() + 20_000, entry, effects: r.later.effects });
+      pending.push({ at: past ? 0 : Date.now() + 20_000, entry, effects: r.later.effects, headline: r.later.headline });
     }
     return { text: r.text, applied };
   };
@@ -78,20 +93,40 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       integrity = applyIntegrity(integrity, p.effects.integrity);
       const applied = { ...p.effects, integrity: integrity - before || undefined };
       opts.onEffects?.(applied);
+      mark(applied, opts.where().place);
+      if (p.headline) blotter.unshift({ id: nextId++, text: p.headline.replace("{name}", "@you"), at: new Date().toISOString() });
       const entry = { ...p.entry, effects: applied };
       log.unshift(entry);
       landed.push(entry);
     }
   };
 
+  // ?choice=jail starts in holding; ?choice=chain has a chain's follow-up waiting.
+  if (preset === "jail") marks.push({ kind: "holding", place: "precinct-114-half", until: new Date(Date.now() + 2 * 3_600_000 - 60_000).toISOString() });
+  if (preset === "chain") {
+    const c = CHOICE_CARDS.find((x) => x.chainOnly);
+    if (c) chains.push({ at: 0, card: c.id, intro: "Remember that choice you made last week? It remembers you." });
+  }
+  /** A chain's follow-up opens as soon as nothing else is waiting. */
+  const chainCard = () => {
+    const due = chains.find((x) => x.at <= Date.now());
+    if (!due || open) return;
+    const c = CHOICE_CARDS.find((x) => x.id === due.card);
+    chains.splice(chains.indexOf(due), 1);
+    if (c) open = { log: nextId++, card: c, place: opts.where().place, intro: due.intro };
+  };
+  const view = () => (open ? { ...cardView(open.card, open.log, open.place), intro: open.intro ?? null } : null);
+
   const ok = <T,>(data: T) => Promise.resolve({ ok: true as const, data });
 
   return {
     state: () => {
       land();
+      chainCard();
       const s: ChoiceState = {
+        marks: live(),
         integrity: revealed ? integrity : null,
-        open: open ? cardView(open.card, open.log, open.place) : null,
+        open: view(),
         landed: [...landed],
         log: [...log],
       };
@@ -99,7 +134,8 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
     },
     offer: (after: ChoiceAfter) => {
       land();
-      if (open) return ok(cardView(open.card, open.log, open.place));
+      chainCard();
+      if (open) return ok(view());
       const today = opts.today();
       const todays = shown.filter((s) => s.day === today);
       const last = shown.length ? new Date(shown[shown.length - 1].at).toISOString() : null;
@@ -118,10 +154,11 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
     choose: (logId: number, option: string) => {
       if (!open || open.log !== logId) return Promise.resolve({ ok: false as const, error: "That moment has passed." });
       const c = open.card;
+      const place = open.place;
       open = null;
       const first = !revealed;
       revealed = true;
-      const r = settle(c, option, opts.today());
+      const r = settle(c, option, opts.today(), false, place);
       return ok({ receipt: r.text, effects: r.applied, integrity, first });
     },
     skip: (logId: number) => {
@@ -132,5 +169,14 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       for (const id of ids) { const i = landed.findIndex((x) => x.id === id); if (i >= 0) landed.splice(i, 1); }
       return ok(null);
     },
+    bail: () => {
+      const h = live().find((m) => m.kind === "holding");
+      if (!h) return Promise.resolve({ ok: false as const, error: "You're already free to go. Sgt. Bev waves." });
+      const cost = bailCost(h.until);
+      opts.onEffects?.({ cash: -cost });
+      h.until = new Date().toISOString();
+      return ok({ cost });
+    },
+    blotter: () => ok([...blotter]),
   };
 }

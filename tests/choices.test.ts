@@ -99,7 +99,12 @@ test("resolving rolls an outcome and, sometimes, a consequence on a later day", 
 });
 
 test("effects are capped, and a loss never takes more than the bank holds", () => {
-  assert.deepEqual(boundEffects({ cash: -900, clout: 999 }, 200), { cash: -200, clout: CHOICES.caps.clout, mood: undefined, energy: undefined, integrity: undefined });
+  assert.deepEqual(boundEffects({ cash: -900, clout: 999 }, 200), {
+    cash: -200, clout: CHOICES.caps.clout, mood: undefined, energy: undefined, integrity: undefined, ban: undefined, gigLock: undefined, holding: undefined,
+  });
+  assert.deepEqual(boundEffects({ ban: { place: "here", days: 30 }, holding: 9 }, 0).ban, { place: "here", days: CHOICES.maxBanDays });
+  assert.equal(boundEffects({ holding: 9 }, 0).holding, CHOICES.maxHoldingHours);
+  assert.equal(effectLine({ cash: -500, holding: 2, ban: { place: "here", days: 3 } }), "−C$500 · 🚫 Banned for 3 days · 🚔 2 hours in holding");
   assert.equal(effectLine({ cash: 300, integrity: -8 }), "+C$300 · 💸 +8 Hustler");
 });
 

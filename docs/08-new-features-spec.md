@@ -1112,8 +1112,7 @@ they never reach the player. Then Decide, and a one- or two-line receipt with wh
   nightlife, dating, money): about 25 dilemmas in 2 or 3 variants at launch, checked by `validateCards` (lib/choices.ts,
   `npm run validate:content`, tests/choices.test.ts). The files hold every outcome's odds and what comes back, so only the server
   and the preview read them (lib/choicesContent.ts); players get the preview only (`cardView`).
-- **Guardrails:** only invented people are involved (never a real player); grey, everyday temptations, not crime (police stay
-  ambient, docs/culture/VOICE.md); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
+- **Guardrails:** only invented people are involved (never a real player); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
   consequence fits the choice that caused it and names it ("Remember the wallet…?"). Real money never touches it.
 
 **Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
@@ -1137,13 +1136,27 @@ their own; Campaign Mode's Integrity stays the candidate's.
 and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, paid once, ledger 'choice_later'; shown once in
 "It came back", naming the choice, then kept in the record).
 
+**Real stakes** (owner, Oct 30: "Losing an umbrella has no real stakes. But taking part in stealing. Covering up criminality,
+have real stake"; migration 0132). Cards can now be about taking part in theft, covering for someone, fencing, skimming: the
+grey everyday ones stay only where they are the best of the old pool. Police are in it, **played for laughs** (the 114½
+Precinct, Sgt. Bev). What a choice can do:
+- **Bigger money:** per-card caps C$3,000 cash, 300 clout, 30 mood, 40 energy, 20 on the meter.
+- **Lasting effects** (`choice_marks`): banned from a place for up to 7 days (`ban`, "here" = where it happened; travel and
+  actions there refuse 'banned_here'), no gigs for up to 3 days (`gigLock`, 'gigs_locked'), or up to 3 hours in holding at the
+  114½ Precinct (`holding`: no travel or actions, 'in_holding'; bail C$150 an hour left, `choice_bail`, the holding sheet).
+- **Chains:** a delayed consequence can open a follow-up card (`later.card`, a `chainOnly` card reached from nowhere else):
+  "Remember the…?" as its intro, past the daily limit, so a choice escalates.
+- **Public headlines:** a delayed consequence can put a line in **Lola's Blotter** (News → City; `later.headline` with
+  `{name}`, the player's @username; `choice_blotter()`, the last 7 days; never for players who opted out of News mentions).
+
 **As built.** lib/choices.ts (rules, pure), app/home/choiceActions.ts (crypto random, service role), migration 0131
 (`reputation`, `choice_log`, `choice_later`; `choice_context`, `choice_open`, `choice_settle`, `choice_skip`, `choice_land`,
 `choice_seen`, `choice_history`; service role only, rate bucket 'choice'), components/game/Choices.tsx (the card, receipt,
 reveal, "It came back"), the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
-`?choice=now|back|high|low|log`).
+`?choice=now|back|high|low|log|jail|chain`; migration 0132's stakes: `choice_marks`, `choice_bail`, `choice_chain_open`,
+`choice_status`, `choice_blotter`).
 
-**Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Halo- and Hustler-only places and events (a
+**Later** (from the draft): Street Rep and the fixer world; Heat; Halo- and Hustler-only places and events (a
 charity gala, a back room); stories and Campaign Mode writing to the player's meter; NPC memory beyond lines; more delayed
 consequences and recurring characters; about 4 new cards a week through the weekly content routine and the Studio; work cards
 for Careers.

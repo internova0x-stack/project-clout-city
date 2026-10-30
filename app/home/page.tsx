@@ -31,7 +31,7 @@ import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } f
 import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomActions";
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
-import { choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
+import { choiceBail, choiceBlotter, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
@@ -173,7 +173,7 @@ export default async function HomePage() {
         dilemma: campaignDilemma, debate: campaignDebate, endWeek: campaignEndWeek, choose: campaignChoose,
       } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).
-      choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen } : undefined}
+      choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter } : undefined}
       // Migration 0058 switches on Clout TV (tv_state failing hides it). Photos upload from the browser.
       tv={city ? { state: tvState, submit: tvSubmit, withdraw: tvWithdraw } : undefined}
       stations={city ? { inbox: stationInbox, read: stationRead } : undefined}

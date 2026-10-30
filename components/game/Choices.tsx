@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CHOICES, effectLine, integrityBand, integrityWord, lolaRepLine, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade } from "@/lib/choices";
+import { CHOICES, bailCost, effectLine, integrityBand, integrityWord, lolaRepLine, type BlotterItem, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade } from "@/lib/choices";
 import { placeById } from "@/lib/city";
 import { LOLA_PORTRAIT } from "@/lib/cast";
 import { Sheet } from "../Sheet";
@@ -87,6 +87,7 @@ export function ChoiceSheet({ card, made, busy, onChoose, onSkip, onClose }: {
             <span className="choice-icon" aria-hidden="true">{card.emoji}</span>
             {/* Owner, Oct 30 ("too much text"): after deciding, only the emoji stays; the situation was just read. */}
             {!made && <span className="overline">{AREA[card.area] ?? "A choice"}{place ? ` · ${place.name}` : ""}</span>}
+            {!made && card.intro && <p className="choice-intro">{card.intro}</p>}
             {!made && <p className="choice-title">{card.title}</p>}
           </div>
           {made ? <Receipt made={made} onClose={close} /> : (
@@ -136,5 +137,52 @@ export function ChoiceBackSheet({ entry, onClose }: { entry: ChoiceLogEntry | nu
         </div>
       )}
     </Sheet>
+  );
+}
+
+/**
+ * The holding bench at the 114½ Precinct (migration 0132, police played for laughs): no travel or actions until the time
+ * is up, or bail is paid (C$150 an hour left). Sgt. Bev keeps it light.
+ */
+export function HoldingSheet({ open, until, busy, onBail, onClose }: {
+  open: boolean; until: string | null; busy: boolean; onBail: () => void; onClose: () => void;
+}) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!open) return;
+    const t = setInterval(() => setNow(Date.now()), 15_000);
+    return () => clearInterval(t);
+  }, [open]);
+  const left = until ? Math.max(0, Date.parse(until) - now) : 0;
+  const mins = Math.ceil(left / 60_000);
+  const time = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
+  return (
+    <Sheet open={open && left > 0} onClose={onClose} label="Holding">
+      {until && (
+        <div className="stack-16">
+          <div className="choice-head">
+            <span className="choice-icon" aria-hidden="true">🚔</span>
+            <span className="overline">The 114½ Precinct</span>
+            <p className="choice-title">You&apos;re on the bench for {time}.</p>
+          </div>
+          <p className="choice-receipt"><b>Sgt. Bev:</b> &quot;Sit tight, there&apos;s a vending machine and it mostly works. Or pay the bail and we never speak of this.&quot;</p>
+          <div className="stack-8 sheet-actions">
+            <button className="btn btn-taxi" disabled={busy} onClick={onBail}>Pay bail C${bailCost(until, now).toLocaleString("en-US")}</button>
+            <button className="btn btn-ghost" disabled={busy} onClick={onClose}>Wait it out</button>
+          </div>
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+/** News → City: Lola's Blotter, the week's public headlines from players' choices. */
+export function BlotterCard({ items }: { items: BlotterItem[] }) {
+  if (!items.length) return null;
+  return (
+    <div className="card stack-8 blotter">
+      <span className="overline" style={{ display: "block" }}>🚨 Lola&apos;s Blotter</span>
+      {items.slice(0, 5).map((i) => <p key={i.id} className="body" style={{ margin: 0 }}>{i.text}</p>)}
+    </div>
   );
 }

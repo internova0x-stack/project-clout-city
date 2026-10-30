@@ -22,6 +22,14 @@ export interface ChoiceEffects {
   energy?: number;
   /** The rep meter: positive moves toward 😇 Halo, negative toward 💸 Hustler (same rate both ways). */
   integrity?: number;
+  /**
+   * Lasting effects (owner, Oct 30: "real stakes"): banned from a place ("here" = the card's place) for some days, the gig
+   * board locked for some days, or hours in holding at the 114½ Precinct (played for laughs: no travel or actions until
+   * it's over or bail is paid).
+   */
+  ban?: { place: string; days: number };
+  gigLock?: number;
+  holding?: number;
 }
 
 /** A consequence that lands later, naming the earlier choice in its text. */
@@ -33,6 +41,10 @@ export interface ChoiceLater {
   emoji?: string;
   text: string;
   effects: ChoiceEffects;
+  /** A chain: instead of (or as well as) effects, this follow-up card opens that day, past the daily limit. */
+  card?: string;
+  /** A public headline in Lola's Blotter when it lands, with {name} for the player (never for News opt-outs). */
+  headline?: string;
 }
 
 export interface ChoiceOutcome {
@@ -71,6 +83,8 @@ export interface ChoiceCard {
   where: { places?: string[]; tags?: string[]; after?: ChoiceAfter[] };
   /** `roommate`: the player shares a home with one (C3), for cards about them. */
   needs?: { integrityMin?: number; integrityMax?: number; rank?: number; student?: boolean; business?: boolean; roommate?: boolean };
+  /** A follow-up only reached through a chain (`later.card`), never picked on its own. */
+  chainOnly?: boolean;
   options: ChoiceOption[];
 }
 
@@ -83,6 +97,8 @@ export interface ChoiceCardView {
   title: string;
   who: string | null;
   place: string | null;
+  /** A chain's follow-up: what came back, shown above the situation ("Remember the phone you fenced?"). */
+  intro?: string | null;
   /** Owner, Oct 30: no risk or "comes back" hints reach the player; they learn from what happens. */
   options: { id: string; label: string; get: string; cost: string }[];
 }
@@ -112,7 +128,13 @@ export const CHOICES = {
   /** The chance a card turns up when one is allowed. */
   chance: 0.4,
   /** Effects are capped so no card can swing the economy (checked by validateCards and again by the database). */
-  caps: { cash: 1500, clout: 150, mood: 30, energy: 40, integrity: 20 },
+  caps: { cash: 3000, clout: 300, mood: 30, energy: 40, integrity: 20 },
+  /** Lasting effects' limits (the database checks them too). */
+  maxBanDays: 7,
+  maxGigLockDays: 3,
+  maxHoldingHours: 3,
+  /** Bail at the 114½ Precinct, per hour left (rounded up). */
+  bailPerHour: 150,
 } as const;
 
 export interface ChoiceContext {
@@ -195,6 +217,7 @@ export function repBonus(e: ChoiceEffects, now: number): ChoiceEffects {
 
 /** Whether a card fits here and now, and how well (0: no). A named place beats a tag, a tag beats anywhere. */
 export function fit(card: ChoiceCard, ctx: ChoiceContext): number {
+  if (card.chainOnly) return 0;
   const n = card.needs ?? {};
   if (n.integrityMin !== undefined && ctx.integrity < n.integrityMin) return 0;
   if (n.integrityMax !== undefined && ctx.integrity > n.integrityMax) return 0;
@@ -248,7 +271,7 @@ export interface ChoiceResolution {
   text: string;
   effects: ChoiceEffects;
   /** A consequence that will land, already rolled: the day and what it does. */
-  later: { due: string; emoji: string; text: string; effects: ChoiceEffects } | null;
+  later: { due: string; emoji: string; text: string; effects: ChoiceEffects; card?: string; headline?: string } | null;
 }
 
 /** Whether a later consequence helps (+1) or hurts (−1) the player: cash, clout, mood and energy together. */
@@ -289,7 +312,10 @@ export function resolveChoice(card: ChoiceCard, optionId: string, today: string,
   let later: ChoiceResolution["later"] = null;
   if (out.later && rng() < Math.min(1, out.later.chance * laterOdds(out, integrity))) {
     const [a, b] = out.later.afterDays;
-    later = { due: addDays(today, a + Math.floor(rng() * (b - a + 1))), emoji: out.later.emoji ?? card.emoji, text: out.later.text, effects: out.later.effects };
+    later = {
+      due: addDays(today, a + Math.floor(rng() * (b - a + 1))), emoji: out.later.emoji ?? card.emoji, text: out.later.text,
+      effects: out.later.effects ?? {}, card: out.later.card, headline: out.later.headline,
+    };
   }
   return { option, outcome: i, text: out.text, effects: out.effects, later };
 }
@@ -302,6 +328,9 @@ export function boundEffects(e: ChoiceEffects, bank: number): ChoiceEffects {
   return {
     cash: cash !== undefined && cash < 0 ? Math.max(cash, -Math.max(0, bank)) : cash,
     clout: cap(e.clout, c.clout), mood: cap(e.mood, c.mood), energy: cap(e.energy, c.energy), integrity: cap(e.integrity, c.integrity),
+    ban: e.ban ? { place: e.ban.place, days: Math.max(1, Math.min(CHOICES.maxBanDays, Math.round(e.ban.days))) } : undefined,
+    gigLock: e.gigLock ? Math.max(1, Math.min(CHOICES.maxGigLockDays, Math.round(e.gigLock))) : undefined,
+    holding: e.holding ? Math.max(1, Math.min(CHOICES.maxHoldingHours, Math.round(e.holding))) : undefined,
   };
 }
 
@@ -314,6 +343,9 @@ export function effectLine(e: ChoiceEffects): string {
   if (e.integrity) parts.push(e.integrity > 0 ? `😇 +${e.integrity} Halo` : `💸 +${-e.integrity} Hustler`);
   if (e.mood) parts.push(`${sign(e.mood)}${Math.abs(e.mood)} Mood`);
   if (e.energy) parts.push(`${sign(e.energy)}${Math.abs(e.energy)} Energy`);
+  if (e.ban) parts.push(`🚫 Banned for ${e.ban.days} day${e.ban.days === 1 ? "" : "s"}`);
+  if (e.gigLock) parts.push(`📵 No gigs for ${e.gigLock} day${e.gigLock === 1 ? "" : "s"}`);
+  if (e.holding) parts.push(`🚔 ${e.holding} hour${e.holding === 1 ? "" : "s"} in holding`);
   return parts.join(" · ");
 }
 
@@ -333,7 +365,17 @@ export interface ChoiceLogEntry {
   cameBack?: boolean;
 }
 
+/** A lasting effect in force: banned from a place, the gig board locked, or hours in holding (until when). */
+export interface ChoiceMark { kind: "ban" | "gig_lock" | "holding"; place: string | null; until: string }
+
+/** Bail at the 114½ Precinct for the time left in holding. */
+export const bailCost = (until: string, now = Date.now()) => CHOICES.bailPerHour * Math.max(1, Math.ceil((Date.parse(until) - now) / 3_600_000));
+
+export interface BlotterItem { id: number; text: string; at: string }
+
 export interface ChoiceState {
+  /** Lasting effects in force now. */
+  marks: ChoiceMark[];
   /** null until the first choice: the meter appears then (spec 2, gradual reveal). */
   integrity: number | null;
   /** A card waiting for an answer today, if any. */
@@ -361,12 +403,18 @@ export interface ChoicesApi {
   /** Not now: the card goes away for today and counts as shown. */
   skip: (log: number) => Promise<ChoiceResult<null>>;
   seen: (ids: number[]) => Promise<ChoiceResult<null>>;
+  /** Pay bail out of holding (the server works out what it costs). */
+  bail: () => Promise<ChoiceResult<{ cost: number }>>;
+  /** Lola's Blotter: the last week's public headlines (News → City). */
+  blotter: () => Promise<ChoiceResult<BlotterItem[]>>;
 }
 
 export const CHOICE_ERRORS: Record<string, string> = {
   not_open: "That moment has passed.",
   unknown_option: "That choice isn't on the card.",
   rate_limited: "Slow down. Big decisions deserve a breath.",
+  not_held: "You're already free to go. Sgt. Bev waves.",
+  cant_afford: "Not enough in the bank for bail. Sgt. Bev offers you the good bench.",
   unknown: "Something went wrong. Try again in a moment.",
 };
 export const choiceError = (code: string | undefined) => CHOICE_ERRORS[code ?? ""] ?? CHOICE_ERRORS.unknown;
@@ -378,8 +426,20 @@ export const choiceError = (code: string | undefined) => CHOICE_ERRORS[code ?? "
 const AREAS: ChoiceArea[] = ["life", "gigs", "work", "school", "business", "home", "nightlife", "transit", "dating", "money"];
 const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride"];
 
-function checkEffects(e: ChoiceEffects, where: string, out: string[]) {
+function checkEffects(e: ChoiceEffects, where: string, out: string[], places: string[] = []) {
   for (const [k, v] of Object.entries(e)) {
+    if (k === "ban") {
+      const b = v as ChoiceEffects["ban"];
+      if (!b || (b.place !== "here" && !places.includes(b.place)) || !Number.isInteger(b.days) || b.days < 1 || b.days > CHOICES.maxBanDays) {
+        out.push(`${where}: ban must be {place: "here" or a place id, days: 1 to ${CHOICES.maxBanDays}}`);
+      }
+      continue;
+    }
+    if (k === "gigLock" || k === "holding") {
+      const max = k === "gigLock" ? CHOICES.maxGigLockDays : CHOICES.maxHoldingHours;
+      if (typeof v !== "number" || !Number.isInteger(v) || v < 1 || v > max) out.push(`${where}: ${k} must be a whole number from 1 to ${max}`);
+      continue;
+    }
     const cap = (CHOICES.caps as Record<string, number>)[k];
     if (cap === undefined) out.push(`${where}: unknown effect "${k}"`);
     else if (typeof v !== "number" || !Number.isInteger(v) || Math.abs(v) > cap) out.push(`${where}: ${k} must be a whole number within ±${cap}`);
@@ -391,6 +451,7 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
   const out: string[] = [];
   const ids = new Set<string>();
   const bases = new Map<string, number>();
+  const chains: { from: string; to: string }[] = [];
   for (const c of cards) {
     const at = `card ${c.id}`;
     if (!/^[a-z0-9-]+$/.test(c.id ?? "")) out.push(`${at}: id must be lowercase-with-dashes`);
@@ -425,7 +486,7 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
         const xt = `${ot} outcome ${i + 1}`;
         if (!(x.weight > 0)) out.push(`${xt}: weight must be above 0`);
         if (!x.text || x.text.length > 240) out.push(`${xt}: text must be 1 to 240 characters`);
-        checkEffects(x.effects ?? {}, xt, out);
+        checkEffects(x.effects ?? {}, xt, out, known.places);
         if ((x.effects?.integrity ?? 0) < 0) sawLoss = true;
         if ((x.effects?.integrity ?? 0) > 0) sawGain = true;
         if (x.later) {
@@ -435,7 +496,11 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
           }
           if (!(l.chance > 0 && l.chance <= 1)) out.push(`${xt}: later.chance must be above 0 and at most 1`);
           if (!l.text || l.text.length > 240) out.push(`${xt}: later.text must be 1 to 240 characters`);
-          checkEffects(l.effects ?? {}, `${xt} later`, out);
+          checkEffects(l.effects ?? {}, `${xt} later`, out, known.places);
+          if (l.card !== undefined) chains.push({ from: xt, to: l.card });
+          if (l.headline !== undefined && (!l.headline.includes("{name}") || l.headline.length > 200)) {
+            out.push(`${xt}: later.headline must name {name} and be at most 200 characters`);
+          }
         }
       });
     }
@@ -443,8 +508,15 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
     if (!sawLoss) out.push(`${at}: no option moves toward Hustler, so there's no dilemma`);
     if (!sawGain && c.options.every((o) => o.outcomes.every((x) => (x.effects?.integrity ?? 0) < 0))) out.push(`${at}: every option moves toward Hustler`);
     // Owner, Oct 30: cards say what a choice really costs, never judge it ("costs Integrity").
-    const words = JSON.stringify([c.title, c.options.map((o) => [o.label, o.get, o.cost, o.riskWhy, o.outcomes.map((x) => [x.text, x.later?.text])])]);
+    const words = JSON.stringify([c.title, c.options.map((o) => [o.label, o.get, o.cost, o.riskWhy, o.outcomes.map((x) => [x.text, x.later?.text, x.later?.headline])])]);
     if (/integrity|\bhalo\b|\bhustler\b/i.test(words)) out.push(`${at}: name the real cost, not the meter (no "Integrity", "Halo" or "Hustler" in the text)`);
   }
+  // Chains: every follow-up exists and is chain-only; every chain-only card is reached by one.
+  for (const ch of chains) {
+    const to = cards.find((c) => c.id === ch.to);
+    if (!to) out.push(`${ch.from}: later.card "${ch.to}" is not a card`);
+    else if (!to.chainOnly) out.push(`${ch.from}: later.card "${ch.to}" must be chainOnly`);
+  }
+  for (const c of cards) if (c.chainOnly && !chains.some((ch) => ch.to === c.id)) out.push(`card ${c.id}: chainOnly, but no chain leads to it`);
   return out;
 }
