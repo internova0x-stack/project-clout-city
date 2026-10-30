@@ -11,6 +11,7 @@ import { validateNewsWeek } from "../lib/news.ts";
 import { validateGossipWeek } from "../lib/gossip.ts";
 import { validateExamWeek } from "../lib/exams.ts";
 import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts";
+import { validateCards } from "../lib/choices.ts";
 import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
@@ -78,6 +79,14 @@ const calendar = JSON.parse(readFileSync(new URL("culture/calendar.json", root),
 const calendarProblems = validateCalendar(calendar, PLACES.map((p) => p.id));
 if (calendarProblems.length) fail("content/culture/calendar.json", calendarProblems);
 else console.log(`✓ content/culture/calendar.json (${calendar.events.length} events)`);
+// Moral Choices (migration 0131): every situation card follows lib/choices.ts's rules.
+{
+  const cards = list("choices/").flatMap((f) => JSON.parse(readFileSync(new URL(`choices/${f}`, root), "utf8")));
+  const regulars = [...REGULARS.map((r) => r.id), ...culture.npcs.profiles.map((p) => p.id), ...((culture.npcs as { roommates?: { id: string }[] }).roommates ?? []).map((p) => p.id)];
+  const problems = validateCards(cards, { places: PLACES.map((p) => p.id), tags: [...new Set(PLACES.flatMap((p) => p.tags ?? []))], npcs: regulars });
+  if (problems.length) fail("content/choices/", problems);
+  else console.log(`✓ content/choices/ (${cards.length} cards, ${new Set(cards.map((c: { base: string }) => c.base)).size} dilemmas)`);
+}
 // No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
 const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {
   const u = new URL(f, dir);

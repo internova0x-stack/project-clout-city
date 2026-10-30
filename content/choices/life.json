@@ -1,0 +1,413 @@
+[
+  {
+    "id": "found-wallet-cafe",
+    "base": "found-wallet",
+    "area": "life",
+    "emoji": "📱",
+    "title": "A phone left at Grind & Gossip lights up: 'Reward if found: C$100.' Jojo's on break.",
+    "who": "jojo",
+    "where": { "places": ["grind-and-gossip"], "after": ["arrive", "eat"] },
+    "options": [
+      {
+        "id": "jojo", "label": "Leave it with Jojo", "get": "Done in ten seconds", "cost": "Probably not the reward",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You hand it to Jojo, who labels it 'PHONE (NOT YOURS) (JOANNE?)' and drops it in the lost-and-found mug.",
+            "effects": { "integrity": 5, "mood": 3 },
+            "later": { "afterDays": [1, 3], "chance": 0.5, "emoji": "☕", "text": "Remember the phone at Grind & Gossip? Its owner left you a prepaid latte. Jojo spelled your name wrong on it, on purpose.",
+                       "effects": { "mood": 5, "energy": 10 } } }
+        ]
+      },
+      {
+        "id": "call", "label": "Call 'Mom' and return it", "get": "The C$100 reward", "cost": "An hour across Astoria",
+        "risk": "low", "riskWhy": "Just your afternoon",
+        "outcomes": [
+          { "weight": 1, "text": "Mom answers, then the owner does. You meet on 30th Avenue. She cries a little and hands you C$100 in a birthday card.",
+            "effects": { "cash": 100, "integrity": 6, "energy": -10 } }
+        ]
+      },
+      {
+        "id": "snoop", "label": "Read the group chat first", "get": "Prime tea for the Tea app", "cost": "Someone's privacy",
+        "risk": "medium", "riskWhy": "Phones show 'read' receipts", "comesBack": true,
+        "outcomes": [
+          { "weight": 2, "text": "The group chat is planning a breakup at a taverna. You know everything now, and you hand the phone to Jojo like an angel.",
+            "effects": { "clout": 30, "integrity": -6 } },
+          { "weight": 1, "text": "Juicy chat, then you hand it over. Clout in your pocket, some guilt in the other.",
+            "effects": { "clout": 30, "integrity": -6 },
+            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "👁️", "text": "Remember the phone at Grind & Gossip? Its owner saw her chats marked 'read' while it was missing. Jojo told her who found it.",
+                       "effects": { "clout": -35, "mood": -8 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "found-wallet-park",
+    "base": "found-wallet",
+    "area": "life",
+    "emoji": "✉️",
+    "title": "An envelope taped under Gus's bench in Astoria Park: C$200 and a note, 'for Marisol.'",
+    "who": "gus",
+    "where": { "places": ["hell-gate-park"], "after": ["arrive", "hangout"] },
+    "options": [
+      {
+        "id": "ask", "label": "Ask Gus who Marisol is", "get": "The story, and a warm feeling", "cost": "Forty minutes of 1987",
+        "risk": "low", "riskWhy": "Gus talks, nothing else", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Gus knows Marisol: she walks dogs here. He tells you how he met his wife in 1987, then calls her. The envelope gets home.",
+            "effects": { "integrity": 7, "mood": 4, "energy": -8 },
+            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "🥐", "text": "Remember the envelope under Gus's bench? Marisol left you a box of her mother's pão de queijo and a thank-you on the bench.",
+                       "effects": { "mood": 8, "energy": 10, "clout": 15 } } }
+        ]
+      },
+      {
+        "id": "leave", "label": "Leave it where it is", "get": "No trouble at all", "cost": "Not knowing",
+        "risk": "low", "riskWhy": "It's not yours either way",
+        "outcomes": [
+          { "weight": 1, "text": "You put it back exactly how it was taped. Gus nods. You're not sure if he saw, but Gus always saw.",
+            "effects": { "integrity": 3 } }
+        ]
+      },
+      {
+        "id": "half", "label": "Take half, leave half", "get": "C$100", "cost": "Marisol's half of her C$200",
+        "risk": "medium", "riskWhy": "Gus watches that bench all day", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "C$100 in your pocket, C$100 under the bench. A compromise nobody asked for.",
+            "effects": { "cash": 100, "integrity": -8 },
+            "later": { "afterDays": [1, 5], "chance": 0.5, "emoji": "👴", "text": "Remember the envelope under Gus's bench? He told Marisol it was 'a little lighter' after you sat there. Everyone on the bench knows now.",
+                       "effects": { "clout": -25, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "take", "label": "Take the envelope", "get": "C$200", "cost": "Marisol's money",
+        "risk": "high", "riskWhy": "Gus sees everything on that bench", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Envelope in your jacket. The note says 'for Marisol, love Mom.' That's going to stay with you.",
+            "effects": { "cash": 200, "integrity": -12, "mood": -3 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🪑", "text": "Remember the envelope under Gus's bench? Gus has been telling every jogger about 'the one who took it.' He describes you very well.",
+                       "effects": { "clout": -45, "mood": -8 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "extra-change-cart",
+    "base": "extra-change",
+    "area": "life",
+    "emoji": "🥙",
+    "title": "Tariq's cart, 2 AM. He gives you change for a fifty. You paid with a twenty.",
+    "who": "tariq",
+    "where": { "places": ["white-sauce-cart"], "after": ["eat"] },
+    "options": [
+      {
+        "id": "tell", "label": "Tell him", "get": "Extra white sauce for life", "cost": "C$30 you could've kept",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Tariq laughs, takes the thirty back and says honesty at 2 AM is rarer than a parking spot on Steinway. Extra sauce.",
+            "effects": { "integrity": 6, "mood": 5 },
+            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "🚕", "text": "Remember the wrong change at Tariq's cart? He told every cabbie on the block. One knocked C$20 off your ride home.",
+                       "effects": { "cash": 20, "clout": 10 } } }
+        ]
+      },
+      {
+        "id": "pocket", "label": "Pocket the C$30", "get": "C$30", "cost": "Tariq's till comes up short",
+        "risk": "medium", "riskWhy": "He counts the till at 4 AM", "comesBack": true,
+        "outcomes": [
+          { "weight": 3, "text": "You walk off with a platter and thirty bonus dollars. The sauce tastes slightly of guilt. Still good.",
+            "effects": { "cash": 30, "integrity": -6 } },
+          { "weight": 1, "text": "Thirty dollars and a platter. Tariq waves you off with a smile that makes it worse.",
+            "effects": { "cash": 30, "integrity": -6 },
+            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "🥙", "text": "Remember the wrong change at Tariq's cart? His till came up C$30 short that night. Now he 'forgets' your extra white sauce.",
+                       "effects": { "mood": -6, "clout": -10 } } }
+        ]
+      },
+      {
+        "id": "next", "label": "Fix it, pay for the next guy", "get": "A nurse off shift gets a free platter", "cost": "C$12",
+        "risk": "low", "riskWhy": "Only your wallet", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You hand the thirty back and cover the nurse behind you. She says it's the nicest thing since her shift started at 7 PM.",
+            "effects": { "cash": -12, "integrity": 8, "mood": 8, "clout": 10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "extra-change-library",
+    "base": "extra-change",
+    "area": "life",
+    "emoji": "📚",
+    "title": "Mr. Penwright's book sale: a signed first edition priced C$2 by mistake. Collectors pay C$300.",
+    "who": "penwright",
+    "where": { "places": ["ditmars-library"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "tell", "label": "Tell Mr. Penwright", "get": "His gratitude, whispered", "cost": "A C$300 flip",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Mr. Penwright goes pale, then pink. 'The roof fund thanks you.' He forgives a late fee you didn't know you had.",
+            "effects": { "integrity": 8, "mood": 5 },
+            "later": { "afterDays": [2, 6], "chance": 0.7, "emoji": "🏷️", "text": "Remember the C$2 first edition? It sold at auction for the roof fund. Mr. Penwright put your name on the thank-you board.",
+                       "effects": { "clout": 25, "mood": 6 } } }
+        ]
+      },
+      {
+        "id": "keep", "label": "Buy it to keep", "get": "A signed first edition, C$2", "cost": "The library's roof fund",
+        "risk": "low", "riskWhy": "It's on your shelf, nowhere else",
+        "outcomes": [
+          { "weight": 1, "text": "C$2 and it's yours. It looks incredible on your shelf. Your shelf is a milk crate.",
+            "effects": { "cash": -2, "integrity": -3, "mood": 8 } }
+        ]
+      },
+      {
+        "id": "flip", "label": "Buy it and flip it", "get": "About C$300", "cost": "Mr. Penwright's roof fund",
+        "risk": "medium", "riskWhy": "Dealers on 30th Ave know Penwright", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "A dealer on 30th Avenue pays C$300 without blinking. Mr. Penwright's whole roof fund is C$412.",
+            "effects": { "cash": 298, "integrity": -10 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🪟", "text": "Remember flipping the C$2 first edition? Mr. Penwright saw it in a window on 30th Ave. He whispers your name now. Not kindly.",
+                       "effects": { "clout": -40, "mood": -8 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "borrowed-clip-unisphere",
+    "base": "borrowed-clip",
+    "area": "life",
+    "emoji": "🎷",
+    "title": "A sax player at the Unisphere nails a solo. Walt's tour group is filming. You got the best angle.",
+    "who": "walt",
+    "where": { "places": ["unisphere"], "after": ["arrive", "hangout"] },
+    "options": [
+      {
+        "id": "tag", "label": "Post it with his name", "get": "Some clout, and a happy sax player", "cost": "Asking his name",
+        "risk": "low", "riskWhy": "Credit is hard to get wrong", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "His name's Desmond and he's played the Unisphere since it was 'only slightly rusty.' Walt adds your clip to his tour.",
+            "effects": { "clout": 20, "integrity": 4, "mood": 4 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎷", "text": "Remember crediting Desmond's sax solo at the Unisphere? A wedding booked him off your clip. He sent you C$40 and a voice note.",
+                       "effects": { "cash": 40, "clout": 15 } } }
+        ]
+      },
+      {
+        "id": "post", "label": "Post it as 'my find'", "get": "+55 clout", "cost": "Desmond gets nothing",
+        "risk": "medium", "riskWhy": "Walt's tour group filmed too", "comesBack": true,
+        "outcomes": [
+          { "weight": 2, "text": "'Found this legend in Flushing 🎷.' The legend is now yours, apparently. People ask you to book him.",
+            "effects": { "clout": 55, "integrity": -5 } },
+          { "weight": 1, "text": "Your clip does numbers. Walt's tour group posts theirs too, a few hours later, with his name.",
+            "effects": { "clout": 55, "integrity": -5 },
+            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "🧢", "text": "Remember the Unisphere sax clip? Walt's tour group posted theirs with Desmond's name and a comment: 'unlike some people.'",
+                       "effects": { "clout": -35, "mood": -5 } } }
+        ]
+      },
+      {
+        "id": "tip", "label": "Tip C$20, skip the post", "get": "Desmond plays your request", "cost": "C$20 and the clip",
+        "risk": "low", "riskWhy": "None at all",
+        "outcomes": [
+          { "weight": 1, "text": "You drop a twenty in his case and ask for something slow. Walt's whole tour group sways. No clip, all vibe.",
+            "effects": { "cash": -20, "integrity": 4, "mood": 10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "honor-box-chapel",
+    "base": "honor-box",
+    "area": "life",
+    "emoji": "🍰",
+    "title": "Rev. Mercy's bake sale honor box: C$4 a slice, nobody watching, and you have exactly C$1.",
+    "who": "rev-mercy",
+    "where": { "places": ["harmony-chapel"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "iou", "label": "Leave C$1 and an IOU", "get": "One slice, an honest one", "cost": "C$1 and your name on a napkin",
+        "risk": "low", "riskWhy": "Your name is literally on it", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You write 'IOU C$3' on a napkin and sign it. The lemon pound cake is worth every cent you don't have.",
+            "effects": { "cash": -1, "integrity": 5, "mood": 5, "energy": 5 },
+            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "📌", "text": "Remember your napkin IOU in Rev. Mercy's honor box? She pinned it to the board: 'Honest folk eat free Friday.' You ate free Friday.",
+                       "effects": { "mood": 6, "energy": 10 } } }
+        ]
+      },
+      {
+        "id": "skip", "label": "Skip the cake", "get": "Nothing owed", "cost": "Smelling it all the way home",
+        "risk": "low", "riskWhy": "Only your stomach suffers",
+        "outcomes": [
+          { "weight": 1, "text": "You walk past the cake. The cake does not walk past you. You can smell lemon until 31st Street.",
+            "effects": { "integrity": 2, "mood": -3 } }
+        ]
+      },
+      {
+        "id": "take", "label": "Take a slice, 'pay later'", "get": "Lemon pound cake, now", "cost": "C$4 of the chapel's money",
+        "risk": "medium", "riskWhy": "Someone always sees in a chapel", "comesBack": true,
+        "outcomes": [
+          { "weight": 2, "text": "You take a slice and promise the box you'll be back. The box has heard that before.",
+            "effects": { "integrity": -4, "mood": 5, "energy": 10 } },
+          { "weight": 1, "text": "A slice for the road, and a promise to pay later. The cake is perfect. The promise is not.",
+            "effects": { "integrity": -4, "mood": 5, "energy": 10 },
+            "later": { "afterDays": [1, 4], "chance": 1, "emoji": "⛪", "text": "Remember the 'pay later' slice? Rev. Mercy mentioned, very kindly, that the box was C$4 short Tuesday. She looked right at you.",
+                       "effects": { "mood": -6, "clout": -10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "honor-box-firehouse",
+    "base": "honor-box",
+    "area": "life",
+    "emoji": "🌶️",
+    "title": "Engine 7's chili fundraiser: C$5 a bowl, honor jar, Captain Rosa up a ladder. You're starving and broke.",
+    "who": "captain-rosa",
+    "where": { "places": ["engine-7"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "help", "label": "Offer to work for a bowl", "get": "A bowl of chili, earned", "cost": "An hour scrubbing pots",
+        "risk": "low", "riskWhy": "Pots fight back, people don't", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Captain Rosa hands you a sponge and a bowl. Hydrant the dalmatian supervises. The chili tastes like a job well done.",
+            "effects": { "integrity": 6, "energy": -10, "mood": 6 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🚒", "text": "Remember scrubbing pots for chili at Engine 7? Captain Rosa told the whole firehouse. They waved you to the front at the block party.",
+                       "effects": { "clout": 25, "mood": 5 } } }
+        ]
+      },
+      {
+        "id": "later", "label": "Eat now, pay 'next time'", "get": "Hot chili, right now", "cost": "C$5 of the fundraiser",
+        "risk": "medium", "riskWhy": "Firefighters notice smoke", "comesBack": true,
+        "outcomes": [
+          { "weight": 2, "text": "You eat fast and wave at the jar like it's a friend you'll call later. Captain Rosa is still up the ladder.",
+            "effects": { "integrity": -4, "energy": 15, "mood": 4 } },
+          { "weight": 1, "text": "The chili is incredible. You tell the jar you'll be back. Captain Rosa is looking down from the ladder.",
+            "effects": { "integrity": -4, "energy": 15, "mood": 4 },
+            "later": { "afterDays": [1, 3], "chance": 1, "emoji": "🧯", "text": "Remember the 'next time' chili at Engine 7? Captain Rosa saw from the ladder. She told the firehouse group chat, laughing. Mostly laughing.",
+                       "effects": { "clout": -15, "mood": -5 } } }
+        ]
+      },
+      {
+        "id": "walk", "label": "Walk on by", "get": "Nothing owed", "cost": "Smelling chili for six blocks",
+        "risk": "low", "riskWhy": "Hunger is the only risk",
+        "outcomes": [
+          { "weight": 1, "text": "You walk on. Hydrant follows you half a block, judging. Dalmatians are very judgmental.",
+            "effects": { "integrity": 2, "mood": -3, "energy": -3 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cut-the-line-slice",
+    "base": "cut-the-line",
+    "area": "life",
+    "emoji": "🍕",
+    "title": "The line at Still-a-Dollar Slice is 40 deep. A guy near the front waves: 'Yo, I saved you a spot.'",
+    "who": "arben",
+    "where": { "places": ["still-a-dollar-slice"], "after": ["arrive", "eat"] },
+    "options": [
+      {
+        "id": "back", "label": "Go to the back", "get": "A slice you can look at", "cost": "Thirty minutes on the sidewalk",
+        "risk": "low", "riskWhy": "Only your feet", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You wave him off and join the back. Arben, folding slices, gives you a nod that means 'correct.'",
+            "effects": { "integrity": 4, "energy": -10 } }
+        ]
+      },
+      {
+        "id": "cut", "label": "Take the spot", "get": "Pizza in two minutes", "cost": "39 people's patience",
+        "risk": "medium", "riskWhy": "The line has phones", "comesBack": false,
+        "outcomes": [
+          { "weight": 2, "text": "You slide in. Nobody says anything, because it's New York and everyone is saving it for the group chat.",
+            "effects": { "integrity": -4, "energy": 5, "mood": 3 } },
+          { "weight": 1, "text": "You slide in. A woman behind you narrates it into her phone like a nature documentary. It gets 4,000 views.",
+            "effects": { "integrity": -4, "energy": 5, "clout": -20 } }
+        ]
+      },
+      {
+        "id": "three", "label": "Take it and wave in two more", "get": "Pizza fast, and two grateful friends", "cost": "Everyone else's patience",
+        "risk": "high", "riskWhy": "Arben hates a crowd cutter", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You wave in two strangers you met eight seconds ago. Arben stops folding, points to the back, and the line applauds.",
+            "effects": { "integrity": -6, "clout": -25, "mood": -5 } },
+          { "weight": 1, "text": "You wave in two strangers. They're grateful. You're a hero to two people and a villain to thirty-seven.",
+            "effects": { "integrity": -6, "clout": 10, "energy": 5 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cut-the-line-meteor",
+    "base": "cut-the-line",
+    "area": "life",
+    "emoji": "⚾",
+    "title": "Bobblehead night at Meteor Park. Hector the usher can walk you past 300 people, 'friend of a friend.'",
+    "who": "hector",
+    "where": { "places": ["meteor-park"], "after": ["arrive", "eat"] },
+    "options": [
+      {
+        "id": "wait", "label": "Wait like everyone else", "get": "A fair shot at a bobblehead", "cost": "An hour in line",
+        "risk": "low", "riskWhy": "They might run out", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You wait. They run out four people ahead of you. The guy who got the last one lets you hold it for a photo.",
+            "effects": { "integrity": 4, "energy": -15, "mood": -3 } },
+          { "weight": 1, "text": "You wait an hour and get the second-to-last Meteors bobblehead. It nods at you like it knows.",
+            "effects": { "integrity": 4, "energy": -15, "mood": 8 } }
+        ]
+      },
+      {
+        "id": "skip", "label": "Let Hector walk you in", "get": "A guaranteed bobblehead", "cost": "300 people's patience",
+        "risk": "medium", "riskWhy": "Section 7 has a long memory", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Hector walks you through like a dignitary. You get a bobblehead and a lot of looks.",
+            "effects": { "integrity": -5, "clout": 25, "mood": 5 },
+            "later": { "afterDays": [3, 7], "chance": 0.4, "emoji": "📣", "text": "Remember skipping the bobblehead line? Section 7 recognized you at the next game and chanted 'LINE! CUT-TER!' for an inning.",
+                       "effects": { "clout": -30, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "elder", "label": "Ask Hector to take the old-timer", "get": "Somebody's grandpa gets his bobblehead", "cost": "Your bobblehead",
+        "risk": "low", "riskWhy": "Nothing but a lost nod", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Hector walks the 80-year-old in the '86 jersey to the front. He salutes you from the gate. You get nothing. You feel great.",
+            "effects": { "integrity": 8, "mood": 8, "energy": -5 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📬", "text": "Remember the old-timer at bobblehead night? He left a signed '86 program for you with Hector: 'To the kid with manners.'",
+                       "effects": { "clout": 20, "mood": 6 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fake-review-hub",
+    "base": "fake-review",
+    "area": "life",
+    "emoji": "🍟",
+    "title": "The Hub's new fries are soggy. The manager offers free fries for a month if you post five stars.",
+    "where": { "places": ["neon-spoon"], "after": ["eat"] },
+    "options": [
+      {
+        "id": "honest", "label": "Post an honest three stars", "get": "Your word means something", "cost": "A month of free fries",
+        "risk": "low", "riskWhy": "The manager sulks, that's all",
+        "outcomes": [
+          { "weight": 1, "text": "'Great booths, Lola is iconic, fries are a damp handshake.' The manager sulks. Three people thank you for the warning.",
+            "effects": { "integrity": 6, "clout": 10 } }
+        ]
+      },
+      {
+        "id": "five", "label": "Five stars, free fries", "get": "Free fries for a month", "cost": "Your word, for soggy fries",
+        "risk": "medium", "riskWhy": "People will try them because of you", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Best fries in Queens!!' The manager slides you a basket. They are soggy. You eat them anyway, because they're free.",
+            "effects": { "integrity": -5, "energy": 10, "mood": 4 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📉", "text": "Remember your five stars for The Hub's soggy fries? Twelve people came because of you. Lola read their replies aloud at the bar.",
+                       "effects": { "clout": -30, "mood": -5 } } }
+        ]
+      },
+      {
+        "id": "fix", "label": "Tell the cook how to fix them", "get": "Maybe better fries for everyone", "cost": "Ten minutes and some nerve",
+        "risk": "low", "riskWhy": "Cooks take notes badly", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You tell the cook: double-fry them. He squints, then tries it. 'Huh.' The manager pretends it was his idea.",
+            "effects": { "integrity": 4, "energy": -5, "mood": 6 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🍟", "text": "Remember telling The Hub's cook to double-fry? The new fries are a hit, and the menu calls them 'the regular's fries.' That's you.",
+                       "effects": { "clout": 25, "mood": 5 } } }
+        ]
+      }
+    ]
+  }
+]

@@ -1094,3 +1094,52 @@ Pastel's launch party, on two tickets the player's roommate's cousin "found" at 
 billionaire's depressed Pomeranian, sits on a bench in Astoria Park with Dmitri, his walker: the first visit during Starter
 Week opens his scene (three ways to console him, each with its own reply); after that the park card shows Dmitri's update
 of the day. Luxury rides (a limo, a helicopter) were previewed and taken out for now.
+
+## 29. Moral Choices (owner, Oct 29: "Go ahead with moral choices. This is going to become the central theme of the game"; migration 0131)
+
+From the owner's draft "Moral Choices System" v0.1, cut to a first build. Every player regularly decides what kind of person
+they are, with real rewards, consequences and tradeoffs; the game never calls them good or bad, it shows what happened.
+
+**Situation cards.** A one-line situation, an emoji and 2 to 4 choices. Each choice previews **You get**, **It costs** and
+**Risk** (Low, Medium, High, with a short reason), and "⏳ may come back later" when it can. The same format as Campaign Mode's
+situations (radio choices, then Decide). After the choice: a one- or two-line receipt and what it paid.
+- **When:** after arriving somewhere, a subway ride, a shift, a gig, a meal, a visit or a hangout, the server may offer a card
+  that fits the place, the moment and the player (40% when one is allowed). At most **2 a New York day**, at least 90 minutes
+  apart, one waiting at a time; "Not now" puts it away for the day. A variant never repeats within 30 days, its dilemma not
+  within 7. Never during the first session.
+- **Where they come from:** `content/choices/*.json` (one file per area: life, transit, gigs, work, school, business, home,
+  nightlife, dating, money): about 25 dilemmas in 2 or 3 variants at launch, checked by `validateCards` (lib/choices.ts,
+  `npm run validate:content`, tests/choices.test.ts). The files hold every outcome's odds and what comes back, so only the server
+  and the preview read them (lib/choicesContent.ts); players get the preview only (`cardView`).
+- **Guardrails:** only invented people are involved (never a real player); grey, everyday temptations, not crime (police stay
+  ambient, docs/culture/VOICE.md); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
+  consequence only does what its preview warned about and names the earlier choice. Real money never touches it.
+
+**Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
+two-ended meter, not a score: where the player stands between 😇 Halo and 💸 Hustler, and neither end is the bad one. It starts
+in the middle and moves the same rate both ways (the draft's "recovers at half" went with the name). **Private**: only the
+player sees it (Profile → Choices, and under the rank); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
+pay off:** at the Halo end (70+) choices that move toward Halo pay 25% more clout, and Halo-only cards turn up (Sal's till,
+house-sitting); at the Hustler end (30 or below) choices that move toward Hustler pay 25% more cash, and Hustler-only offers
+find you (a promoter's fake hype, last year's final). **Each end is lucky at its own game** (owner, Oct 30, "option 2"): what
+comes back later is tilted by where the player stands (`laterOdds`). A Hustler's angles come back to bite half as often and a
+Halo's 1.5 times as often (everyone's watching a Halo); a Halo's good deeds come back as a reward 1.5 times as often and a
+Hustler's half as often (people are suspicious when a Hustler's nice). The middle plays the card's own odds. Sal, Jojo and Gus have lines for each end (`reputation` in npcs.json).
+Card text names the real cost ("Marisol's money", "the owner's goodwill"), never the meter. Code and database still say
+`integrity` (100 Halo, 0 Hustler). Start over is a new life: the meter and the record start again. Each player's meter is
+their own; Campaign Mode's Integrity stays the candidate's.
+
+**Consequences.** Immediate (cash, clout, mood, energy, the meter: capped per card, paid once through the ledger 'choice', cash
+and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, paid once, ledger 'choice_later'; shown once in
+"It came back", naming the choice, then kept in the record).
+
+**As built.** lib/choices.ts (rules, pure), app/home/choiceActions.ts (crypto random, service role), migration 0131
+(`reputation`, `choice_log`, `choice_later`; `choice_context`, `choice_open`, `choice_settle`, `choice_skip`, `choice_land`,
+`choice_seen`, `choice_history`; service role only, rate bucket 'choice'), components/game/Choices.tsx (the card, receipt,
+reveal, "It came back", the record), the Profile's Choices tab, the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
+`?choice=now|back|high|low|log`).
+
+**Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Halo- and Hustler-only places and events (a
+charity gala, a back room); stories and Campaign Mode writing to the player's meter; NPC memory beyond lines; more delayed
+consequences and recurring characters; about 4 new cards a week through the weekly content routine and the Studio; work cards
+for Careers.

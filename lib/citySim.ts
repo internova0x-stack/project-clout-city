@@ -144,6 +144,9 @@ export type SimApi = CityApi & {
   lottoPot(): void;
   /** v0.11 gossip tasks: talking or listening in at a place completes its task (the find runs on the dev server). */
   gossipTask(placeId: string, via: "overheard" | "regular" | "restroom"): number;
+  /** Moral Choices in the preview (lib/choicesSim.ts): where the player is, and what a choice paid. */
+  here(): string | null;
+  choicePay(e: { cash?: number; clout?: number; mood?: number; energy?: number }): void;
 
 };
 
@@ -624,6 +627,13 @@ export function createSimApi(
     huntReward(cash, clout) {
       p().bank_cash += cash;
       p().clout += clout;
+    },
+    here: () => p().at_place ?? null,
+    choicePay(e) {
+      p().bank_cash = Math.max(0, p().bank_cash + (e.cash ?? 0));
+      p().clout = Math.max(0, p().clout + (e.clout ?? 0));
+      p().mood = Math.min(100, Math.max(0, p().mood + (e.mood ?? 0)));
+      p().energy = Math.min(100, Math.max(0, p().energy + (e.energy ?? 0)));
     },
     peek() {
       return { cash: p().bank_cash, clout: p().clout, confidence: p().confidence, allDone: s.tasks.length > 0 && s.tasks.every((t) => t.done_at) };

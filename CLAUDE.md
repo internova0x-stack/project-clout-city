@@ -295,6 +295,19 @@ components live in `app/globals.css`.
   saved Stripe customer is kept; push devices only at the browsers' push services (`push_endpoint_ok`, `pushEndpointOk`
   in lib/push.ts); the lotto pot shows until its winning card is scratched; `/auth/confirm` POSTs need this site's Origin;
   next.config.ts sends no-framing and HTTPS headers.
+- Moral Choices (migration 0131, owner Oct 29: "the central theme of the game"; spec section 29): situation cards in
+  `content/choices/*.json` (checked by `validateCards`, lib/choices.ts; server and preview only, via lib/choicesContent.ts) are
+  offered by app/home/choiceActions.ts after arriving, riding, a shift, gig, meal, visit or hangout (`askChoice` in GameShell;
+  2 a New York day, 90 minutes apart, 30-day cooldown per card, 7 per dilemma) and settled there with a crypto random source;
+  the database pays once (`choice_settle`/`choice_land`, ledger 'choice'/'choice_later', caps in `choice_effects_ok`). The meter
+  is 😇 Halo ↔ 💸 Hustler for players (owner, Oct 30: "Integrity" steered everyone to the good choice); code and database say
+  `integrity` (`reputation`, 100 Halo, 0 Hustler, from 50, the same rate both ways, private: Profile → Choices), revealed by the
+  first choice. Both ends pay (`repBonus`: Halo-ward clout ×1.25 at 70+, Hustler-ward cash ×1.25 at 30 or below; cards can need
+  either end); each end is lucky at its own game (`laterOdds`, owner Oct 30 "option 2": a Hustler's angles come back to
+  bite ×0.5 and a Halo's ×1.5, a Halo's good deeds come back as rewards ×1.5 and a Hustler's ×0.5); regulars' `reputation`
+  {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
+  (`validateCards`). Only invented people, grey not criminal, never real money.
+  Start over resets it. `?choice=now|back|high|low|log` in the preview (not the demo: its bundle would carry the outcomes).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

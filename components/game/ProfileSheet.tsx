@@ -12,6 +12,8 @@ import type { SkillState } from "@/lib/skills";
 import { useState } from "react";
 import { Sheet } from "../Sheet";
 import { ProfileVip } from "../store/Membership";
+import { ChoicesHistory, RepMeter } from "./Choices";
+import type { ChoiceLogEntry } from "@/lib/choices";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
@@ -21,7 +23,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  */
 export function ProfileSheet({
   open, onClose, look, outfit, name, subtitle, looks, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
-  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills, perks, vip,
+  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, skills, perks, vip, choices,
 }: {
   open: boolean;
   onClose: () => void;
@@ -50,8 +52,11 @@ export function ProfileSheet({
   perks?: PerkHandlers;
   /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
   vip?: { on: boolean; until?: string | null; onOpen: () => void; loading?: boolean };
+  /** Moral Choices (migration 0131): the private Halo ↔ Hustler meter and the record of choices; absent until it runs. */
+  choices?: { integrity: number | null; log: ChoiceLogEntry[] };
 }) {
-  const [tab, setTab] = useState<"profile" | "skills">("profile");
+  const [tab, setTab] = useState<"profile" | "skills" | "choices">("profile");
+  const choicesOn = !!choices && (choices.integrity !== null || choices.log.length > 0);
   const lines = (recent ?? []).map((r) => ({ r, line: recentLine(r) })).filter((x) => x.line);
   const { postcards, huntCards } = collections;
   return (
@@ -73,15 +78,24 @@ export function ProfileSheet({
           {vip && <div style={{ textAlign: "center", visibility: vip.loading ? "hidden" : undefined }} aria-hidden={vip.loading || undefined}>
             <ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
         </div>
-        {skills !== undefined && (
+        {(skills !== undefined || choicesOn) && (
           <div className="segmented profile-tabs" role="group" aria-label="Profile sections">
             <button aria-pressed={tab === "profile"} onClick={() => setTab("profile")}>Profile</button>
-            <button aria-pressed={tab === "skills"} onClick={() => setTab("skills")}>Skills</button>
+            {skills !== undefined && <button aria-pressed={tab === "skills"} onClick={() => setTab("skills")}>Skills</button>}
+            {choicesOn && <button aria-pressed={tab === "choices"} onClick={() => setTab("choices")}>Choices</button>}
           </div>
         )}
-        {skills !== undefined && tab === "skills" ? (skills ? <SkillsList skills={skills} perks={perks} /> : <p className="subtext">Loading your skills…</p>) : (<>
+        {tab === "choices" && choices ? (<>
+          <ChoicesHistory integrity={choices.integrity} log={choices.log} />
+          <p className="meta" style={{ margin: 0 }}>Only you can see where you stand and what you chose. The city just acts on it.</p>
+        </>) : skills !== undefined && tab === "skills" ? (skills ? <SkillsList skills={skills} perks={perks} /> : <p className="subtext">Loading your skills…</p>) : (<>
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
+        {choices?.integrity != null && (
+          <button className="profile-rep" onClick={() => setTab("choices")} aria-label="Your choices">
+            <RepMeter value={choices.integrity} compact />
+          </button>
+        )}
         <div className="profile-kpis">
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>🔥 {formatShort(clout)}</b><span>Clout</span></button>
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>{rank ? `#${rank.toLocaleString()}` : "—"}</b><span>In Queens</span></button>

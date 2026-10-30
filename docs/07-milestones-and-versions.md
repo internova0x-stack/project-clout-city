@@ -258,6 +258,7 @@ The finished P1: real art in place, outside reviews done, then a soft launch fol
 - The security review and its fixes; lawyer-reviewed terms, privacy policy and 18+ wording (including the lotto as simulated gambling); Stripe Tax settings. Monument names are decided (owner, Oct 13): the real landmark names stay (The Unisphere, Gantry Plaza).
 - Stripe live mode, confirmed with one real $1.99 postcard purchase and refund.
 - Every acceptance test in the Story Production and Payments Brief, and the full Sarah Bird dry run.
+- **Moral Choices** (owner, Oct 29: "the central theme of the game"; spec section 29, migration 0131): situation cards where the player is, the private Halo ↔ Hustler meter, consequences that come back, the choices record in the profile.
 
 **Then, in order**
 

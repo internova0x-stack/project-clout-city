@@ -1,0 +1,167 @@
+[
+  {
+    "id": "lotto-mixup-benny",
+    "base": "lotto-mixup",
+    "area": "money",
+    "emoji": "🎟️",
+    "title": "Benny at Lucky Star mixed up two scratch cards. Yours is a C$200 winner. The lady before you got the dud.",
+    "who": "benny",
+    "where": { "places": ["lucky-star"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "tell", "label": "Tell Benny", "get": "The lady gets her win", "cost": "C$200",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Benny runs out to the sidewalk and catches her. She screams, he screams, a pigeon screams. She hugs you twice.",
+            "effects": { "integrity": 8, "mood": 6 },
+            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "🥟", "text": "Remember the scratch card mix-up at Lucky Star? The lady came back with a tray of homemade dumplings and C$40 'for the honest one.'",
+                       "effects": { "cash": 40, "mood": 6, "energy": 10 } } }
+        ]
+      },
+      {
+        "id": "split", "label": "Find her, offer to split", "get": "C$100 and a clean-ish conscience", "cost": "Half the win",
+        "risk": "low", "riskWhy": "She might want it all", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You catch her at the bus stop. 'Half each?' She thinks, then laughs. 'Half each.' Benny calls it 'the Flushing compromise.'",
+            "effects": { "cash": 100, "integrity": 3, "mood": 5 } }
+        ]
+      },
+      {
+        "id": "keep", "label": "Keep the winner", "get": "C$200", "cost": "Her C$200",
+        "risk": "medium", "riskWhy": "She kept her receipt", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You scratch, you win, you smile at Benny. Benny, who has never bought a ticket, smiles back. He doesn't know yet.",
+            "effects": { "cash": 200, "integrity": -8 },
+            "later": { "afterDays": [1, 4], "chance": 0.5, "emoji": "🧾", "text": "Remember Benny's scratch card mix-up? The lady came back with her receipt. Benny paid her from his own pocket, and now he 'can't find' your favorite card.",
+                       "effects": { "clout": -20, "mood": -8 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lotto-mixup-floor",
+    "base": "lotto-mixup",
+    "area": "money",
+    "emoji": "🎫",
+    "title": "A scratched card on Lucky Star's floor. Whoever dropped it didn't check the back: it's a C$150 winner.",
+    "who": "benny",
+    "where": { "places": ["lucky-star"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "ask", "label": "Ask around the store", "get": "Somebody's lucky day", "cost": "C$150 and twenty minutes",
+        "risk": "low", "riskWhy": "Everyone will claim it", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Six people claim it. Benny asks what game it was. Only an old man in a Meteors cap gets it right. He kisses the card.",
+            "effects": { "integrity": 8, "energy": -8 },
+            "later": { "afterDays": [1, 5], "chance": 0.5, "emoji": "🧢", "text": "Remember finding the C$150 card on Lucky Star's floor? The man in the Meteors cap left C$40 with Benny 'for the one who asked around.'",
+                       "effects": { "cash": 40, "mood": 6 } } }
+        ]
+      },
+      {
+        "id": "benny", "label": "Hand it to Benny", "get": "It's out of your hands", "cost": "C$150",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "Benny tapes it to the register: 'Is this yours? Prove it.' The crowd at Lucky Star loves a mystery.",
+            "effects": { "integrity": 5 } }
+        ]
+      },
+      {
+        "id": "cash", "label": "Cash it in", "get": "C$150", "cost": "Someone's lucky day",
+        "risk": "low", "riskWhy": "Nobody saw. Probably.",
+        "outcomes": [
+          { "weight": 1, "text": "Finders keepers, the oldest law in Queens. C$150. Somebody out there thinks they lost.",
+            "effects": { "cash": 150, "integrity": -5 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "loan-npc-gym",
+    "base": "loan-npc",
+    "area": "money",
+    "emoji": "💪",
+    "title": "Dev from the gym asks to borrow C$300 'until Friday.' Dev said that last Friday too.",
+    "where": { "places": ["pressed-iron-gym", "rep-count"], "tags": ["gym"], "after": ["arrive", "visit"] },
+    "options": [
+      {
+        "id": "lend", "label": "Lend him C$300", "get": "Dev's gratitude, maybe C$300 back", "cost": "C$300, maybe for good",
+        "risk": "high", "riskWhy": "Dev's Fridays are flexible", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You hand Dev C$300. He hugs you so hard you hear your back realign.",
+            "effects": { "cash": -300, "integrity": 4, "mood": 3 },
+            "later": { "afterDays": [3, 7], "chance": 0.9, "emoji": "💵", "text": "Remember lending Dev C$300 'until Friday'? He paid it all back with C$30 on top and a protein shake that tastes like chalk.",
+                       "effects": { "cash": 330, "mood": 5 } } },
+          { "weight": 1, "text": "You lend Dev C$300. He promises Friday, then promises the gym owner he'll fix the leg press.",
+            "effects": { "cash": -300, "integrity": 4, "mood": 3 },
+            "later": { "afterDays": [5, 7], "chance": 1, "emoji": "🏋️", "text": "Remember lending Dev C$300 'until Friday'? It's been a few Fridays. He waves at you from across the gym, very warmly.",
+                       "effects": { "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "half", "label": "Lend him C$150", "get": "Kindness with a limit", "cost": "C$150, for now",
+        "risk": "medium", "riskWhy": "Dev's Fridays are flexible", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Half, and you pay me Friday.' Dev salutes. You've drawn a line, and it's made of money.",
+            "effects": { "cash": -150, "integrity": 3 },
+            "later": { "afterDays": [3, 7], "chance": 0.7, "emoji": "💵", "text": "Remember lending Dev C$150? He paid it back, a week late, in crumpled fives. 'Told you Friday.' It was not Friday.",
+                       "effects": { "cash": 150 } } }
+        ]
+      },
+      {
+        "id": "no", "label": "Say no, honestly", "get": "Your C$300 stays put", "cost": "An awkward set of squats",
+        "risk": "low", "riskWhy": "Dev sulks for a day",
+        "outcomes": [
+          { "weight": 1, "text": "'I can't, Dev.' He nods. He's heard it before. You do squats next to each other in a silence you can feel in your legs.",
+            "effects": { "integrity": 2, "mood": -3 } }
+        ]
+      },
+      {
+        "id": "broke", "label": "Say you're broke", "get": "No awkward 'no'", "cost": "A small lie",
+        "risk": "low", "riskWhy": "Unless he sees you spend",
+        "outcomes": [
+          { "weight": 1, "text": "'Man, I'm broke too.' Dev hugs you in solidarity. Then you buy a C$9 smoothie at the gym bar, in front of him.",
+            "effects": { "integrity": -3, "mood": -2 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "loan-npc-deli",
+    "base": "loan-npc",
+    "area": "money",
+    "emoji": "🎧",
+    "title": "Sal's nephew Karim at the deli: 'C$200 till my DJ gig pays. Uncle Sal can't know.'",
+    "who": "sal",
+    "where": { "places": ["ditmars-deli"], "after": ["arrive", "eat", "visit"] },
+    "options": [
+      {
+        "id": "lend", "label": "Lend it, keep the secret", "get": "Karim owes you big", "cost": "C$200 and a secret from Sal",
+        "risk": "medium", "riskWhy": "Sal remembers everything", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You slip Karim C$200 behind the chip rack. The cat sees. The cat says nothing. For now.",
+            "effects": { "cash": -200, "integrity": -2, "mood": 2 },
+            "later": { "afterDays": [3, 7], "chance": 0.8, "emoji": "🎧", "text": "Remember lending Karim C$200 behind Sal's back? His DJ gig paid. He paid you back, plus a spot on his guest list. Sal still doesn't know.",
+                       "effects": { "cash": 200, "clout": 20 } } }
+        ]
+      },
+      {
+        "id": "sal", "label": "Lend it, but tell Sal", "get": "No secrets in the deli", "cost": "C$200 and Karim's annoyance",
+        "risk": "low", "riskWhy": "Karim sulks for a week", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You lend it and tell Sal. Sal sighs a sigh from 1998 and makes Karim mop to pay off the 'interest.'",
+            "effects": { "cash": -200, "integrity": 6, "mood": -2 },
+            "later": { "afterDays": [2, 6], "chance": 0.9, "emoji": "🧔", "text": "Remember telling Sal about Karim's C$200 loan? Sal paid you back himself, the next morning, with a sandwich. Karim still owes Sal.",
+                       "effects": { "cash": 200, "mood": 5 } } }
+        ]
+      },
+      {
+        "id": "no", "label": "Say no", "get": "Your C$200 stays home", "cost": "Karim's opinion of you",
+        "risk": "low", "riskWhy": "Karim sulks",
+        "outcomes": [
+          { "weight": 1, "text": "'Sorry, Karim.' He shrugs and asks the next customer. Sal, from the register, says 'good' without looking up.",
+            "effects": { "integrity": 3 } }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,273 @@
+[
+  {
+    "id": "fake-review-rival",
+    "base": "fake-review",
+    "area": "business",
+    "emoji": "⭐",
+    "title": "Your business got a one-star from 'Craig.' A guy at the counter offers twenty fake five-stars for C$40.",
+    "where": { "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "reply", "label": "Reply to Craig politely", "get": "A dignified look", "cost": "Swallowing your pride",
+        "risk": "low", "riskWhy": "Craig might double down", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'Sorry to hear it, Craig. Come back, the next one's on us.' You type it through gritted teeth.",
+            "effects": { "integrity": 5, "mood": -2 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "⭐", "text": "Remember your polite reply to Craig's one-star? He came back, had a great time and changed it to four stars. 'Would have been five but Craig.'",
+                       "effects": { "clout": 25, "mood": 6 } } }
+        ]
+      },
+      {
+        "id": "buy", "label": "Buy the twenty five-stars", "get": "+40 clout, Craig buried", "cost": "C$40 and the truth",
+        "risk": "medium", "riskWhy": "Review sites spot bulk praise", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Twenty reviews appear overnight from accounts like 'GoodFood_Man_8.' Craig is buried. You're a 4.9 now.",
+            "effects": { "cash": -40, "clout": 40, "integrity": -6 },
+            "later": { "afterDays": [2, 7], "chance": 0.6, "emoji": "🚩", "text": "Remember the twenty five-stars for C$40? The review site slapped a 'suspicious activity' banner on your page. Craig screenshotted it.",
+                       "effects": { "clout": -50, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "ask", "label": "Ask regulars for honest ones", "get": "Real reviews, slowly", "cost": "A week of asking nicely",
+        "risk": "low", "riskWhy": "Some regulars are honest about you", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You ask your regulars. Eight post. Six are glowing, one says 'fine,' one is about the cat. It's real, and it shows.",
+            "effects": { "integrity": 6, "clout": 15, "energy": -10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "staff-tips-jar",
+    "base": "staff-tips",
+    "area": "business",
+    "emoji": "🫙",
+    "title": "Slow week at your business. Luis's tip jar has C$85. 'Borrowing' it would cover the ice order.",
+    "where": { "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "leave", "label": "Pay for the ice yourself", "get": "Luis keeps every cent", "cost": "C$85 from your own pocket",
+        "risk": "low", "riskWhy": "Only your margins",
+        "outcomes": [
+          { "weight": 1, "text": "You pay the ice guy from your own wallet. Luis never knows. That's the point.",
+            "effects": { "cash": -85, "integrity": 5 } }
+        ]
+      },
+      {
+        "id": "borrow", "label": "'Borrow' the jar", "get": "C$85, problem solved", "cost": "Luis's tips",
+        "risk": "high", "riskWhy": "Luis counts his jar", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You empty the jar into the ice order and leave a sticky note: 'IOU, the boss.' Very official.",
+            "effects": { "cash": 85, "integrity": -8 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🧊", "text": "Remember 'borrowing' Luis's tip jar for ice? He found the sticky note, quit, and now works across the street telling every customer why.",
+                       "effects": { "clout": -35, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "add", "label": "Add C$20 to his jar", "get": "A very loyal Luis", "cost": "C$105 this week",
+        "risk": "low", "riskWhy": "Only your margins", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You cover the ice and slip a twenty in Luis's jar. He notices and pretends not to, which is the classiest thing in Queens.",
+            "effects": { "cash": -105, "integrity": 8, "mood": 5 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "📣", "text": "Remember the twenty in Luis's jar during the slow week? He's been bringing his whole soccer league in after games.",
+                       "effects": { "cash": 150, "clout": 20 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "staff-tips-regular",
+    "base": "staff-tips",
+    "area": "business",
+    "emoji": "💌",
+    "title": "A regular hands you C$100 'for the lovely lady who folds my shirts.' Grace is off today.",
+    "where": { "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "pass", "label": "Pass it all to Grace", "get": "Grace's day, made", "cost": "C$100 that touched your hand",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "You put it in an envelope with 'From Mr. Ferreira, for the shirts.' Grace calls it the nicest Tuesday of her year.",
+            "effects": { "integrity": 6, "mood": 5 } }
+        ]
+      },
+      {
+        "id": "half", "label": "Give her half", "get": "C$50", "cost": "Half of Grace's tip",
+        "risk": "medium", "riskWhy": "Regulars ask, 'did she like it?'", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'He left you fifty.' Grace is thrilled. You are fifty dollars thrilled, quietly.",
+            "effects": { "cash": 50, "integrity": -5 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "👔", "text": "Remember giving Grace half of Mr. Ferreira's C$100? He asked her if she liked 'the hundred.' She liked fifty of it. She told everyone.",
+                       "effects": { "clout": -25, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "keep", "label": "Keep it, she'll never know", "get": "C$100", "cost": "Grace's tip",
+        "risk": "high", "riskWhy": "The regular will thank her", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "C$100 into the register. Mr. Ferreira waves goodbye. You wave back with his money.",
+            "effects": { "cash": 100, "integrity": -10 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "👔", "text": "Remember keeping Mr. Ferreira's C$100 for Grace? He thanked her for it. She asked you. You didn't have a good answer.",
+                       "effects": { "clout": -35, "mood": -10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "safety-due-vent",
+    "base": "safety-due",
+    "area": "business",
+    "emoji": "🔥",
+    "title": "The vent filter at your business is due. C$180 now, or 'next month' like last month.",
+    "where": { "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "fix", "label": "Fix it now", "get": "A clean vent, a clear head", "cost": "C$180",
+        "risk": "low", "riskWhy": "Only your margins", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "The vent guy pulls out a filter that looks like a wet raccoon. C$180. You sleep better.",
+            "effects": { "cash": -180, "integrity": 5 },
+            "later": { "afterDays": [3, 7], "chance": 0.4, "emoji": "🚒", "text": "Remember fixing the vent filter on time? Captain Rosa did a walk-through and called your place 'the cleanest on the block.' She posted it.",
+                       "effects": { "clout": 30 } } }
+        ]
+      },
+      {
+        "id": "delay", "label": "Next month, promise", "get": "C$180 stays in the bank", "cost": "A greasy little gamble",
+        "risk": "medium", "riskWhy": "Old filters smoke", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Next month. The filter makes a sound like a disappointed parent.",
+            "effects": { "integrity": -4 } },
+          { "weight": 1, "text": "Next month, again. You tape a 'do not look' sign on the vent.",
+            "effects": { "integrity": -4 },
+            "later": { "afterDays": [2, 7], "chance": 1, "emoji": "💨", "text": "Remember putting off the vent filter? It smoked out the lunch rush. Captain Rosa smelled it from Engine 7. Rush repair: C$250 and a lecture.",
+                       "effects": { "cash": -250, "clout": -25, "mood": -8 } } }
+        ]
+      },
+      {
+        "id": "brag", "label": "Fix it and post about it", "get": "A clean vent and some clout", "cost": "C$180 and some dignity",
+        "risk": "low", "riskWhy": "Bragging about a vent is a choice", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "'Proud to announce our vent is clean 🙏.' It gets 300 likes and one comment: 'who is this for.' It's for you.",
+            "effects": { "cash": -180, "integrity": 2, "clout": 20 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "safety-due-extinguisher",
+    "base": "safety-due",
+    "area": "business",
+    "emoji": "🧯",
+    "title": "The fire extinguisher at your business expired in 2024. A new one is C$90. Nobody ever checks.",
+    "where": { "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "buy", "label": "Buy a new one", "get": "Peace of mind", "cost": "C$90",
+        "risk": "low", "riskWhy": "Only your margins",
+        "outcomes": [
+          { "weight": 1, "text": "New extinguisher, shiny and red. You keep looking at it like it's art. It is, kind of.",
+            "effects": { "cash": -90, "integrity": 5, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "sticker", "label": "Peel the date off", "get": "C$90 saved", "cost": "A small lie on a red can",
+        "risk": "high", "riskWhy": "Firefighters read labels", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You peel off the date. The extinguisher looks fine. It's not fine. It's from 2024.",
+            "effects": { "integrity": -6 },
+            "later": { "afterDays": [2, 7], "chance": 0.5, "emoji": "🚒", "text": "Remember peeling the date off your extinguisher? Captain Rosa stopped in for coffee and checked it out of habit. C$90 now, plus a stern look.",
+                       "effects": { "cash": -90, "clout": -20, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "engine", "label": "Ask Engine 7 for advice", "get": "Expert help, maybe a deal", "cost": "An afternoon and a box of pastries",
+        "risk": "low", "riskWhy": "Firefighters love pastries", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "Captain Rosa takes the pastries and gives you the name of a guy who refills them for C$40. Hydrant gets a croissant.",
+            "effects": { "cash": -55, "integrity": 6, "energy": -10, "clout": 10 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "surge-price-rain",
+    "base": "surge-price",
+    "area": "business",
+    "emoji": "☔",
+    "title": "Sudden downpour on Steinway. Your business has a box of umbrellas. They usually go for C$8.",
+    "where": { "tags": ["astoria"], "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "fair", "label": "Keep them at C$8", "get": "C$80 and a happy block", "cost": "What the rain could've paid",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "Ten umbrellas, ten soaked neighbors saved. One of them kisses the umbrella. C$80.",
+            "effects": { "cash": 80, "integrity": 4, "clout": 15 } }
+        ]
+      },
+      {
+        "id": "gouge", "label": "Make them C$25", "get": "C$250", "cost": "Your name on Steinway",
+        "risk": "medium", "riskWhy": "Wet people post angry", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "C$25 each. They sell out in four minutes. The tenth buyer says 'wow' in a voice that's not a compliment.",
+            "effects": { "cash": 250, "integrity": -6 },
+            "later": { "afterDays": [1, 4], "chance": 0.6, "emoji": "🍵", "text": "Remember the C$25 umbrellas in the rain? Lola posted 'Steinway's umbrella situation 👀' with a photo of your sign. Comments are wet and angry.",
+                       "effects": { "clout": -40, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "free", "label": "Give them to regulars, free", "get": "The block's undying love", "cost": "C$40 of stock",
+        "risk": "low", "riskWhy": "You might never see them again", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You hand out umbrellas to every regular who runs past. 'Bring it back whenever.' Some of them will. Some of them.",
+            "effects": { "cash": -40, "integrity": 8, "clout": 30, "mood": 6 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "☂️", "text": "Remember the free umbrellas in the rain? Seven came back, each with a thank-you. One came back with a whole family who now shops only with you.",
+                       "effects": { "cash": 120, "clout": 15 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "surge-price-heat",
+    "base": "surge-price",
+    "area": "business",
+    "emoji": "🥵",
+    "title": "92 degrees and a Meteors game just let out. Your business has the only cold water for blocks.",
+    "where": { "after": ["arrive"] },
+    "needs": { "business": true },
+    "options": [
+      {
+        "id": "fair", "label": "Keep it at C$2", "get": "C$120 and a lot of thank-yous", "cost": "What the heat could've paid",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "Sixty bottles, C$2 each, sixty grateful fans in orange. One tells you the Meteors lost. You knew.",
+            "effects": { "cash": 120, "integrity": 4, "clout": 15 } }
+        ]
+      },
+      {
+        "id": "gouge", "label": "Make it C$6", "get": "C$360", "cost": "Your name with 40,000 fans",
+        "risk": "medium", "riskWhy": "Sports fans hold grudges for decades", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "C$6 a bottle. They pay, sweating and furious. You make C$360 and a few enemies in foam fingers.",
+            "effects": { "cash": 360, "integrity": -6 },
+            "later": { "afterDays": [2, 7], "chance": 0.5, "emoji": "📸", "text": "Remember the C$6 water after the Meteors game? A fan's photo of your sign is the top post in the team's fan forum. Section 7 has opinions.",
+                       "effects": { "clout": -40, "mood": -6 } } }
+        ]
+      },
+      {
+        "id": "cooler", "label": "Free cooler for anyone dizzy", "get": "Good karma, some clout", "cost": "C$60 of water",
+        "risk": "low", "riskWhy": "Everyone will claim to be dizzy", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You put out a cooler: 'Free if you're dizzy.' Everyone is suddenly dizzy. You let them be dizzy.",
+            "effects": { "cash": -60, "integrity": 7, "clout": 25, "mood": 5 } }
+        ]
+      }
+    ]
+  }
+]

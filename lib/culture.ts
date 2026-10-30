@@ -41,6 +41,8 @@ export interface NpcProfile {
   story?: string;
   /** C2: after `days` different days at their place, they say `line` (Sal remembers your order). */
   remembers?: { days: number; line: string };
+  /** Moral Choices (migration 0131): what they say to a 😇 Halo (70+) or a 💸 Hustler (30 or below). */
+  reputation?: { halo: string[]; hustler: string[] };
 }
 
 export interface CultureData {
@@ -77,6 +79,13 @@ export function withCatchphrases(lines: Record<string, string[]>, profiles: NpcP
 export function rememberedLine(profiles: NpcProfile[], regularId: string, days: number): string | null {
   const r = profiles.find((p) => p.regular === regularId)?.remembers;
   return r && days >= r.days ? r.line : null;
+}
+
+/** Moral Choices: a regular's line for the player's end of the meter (`n` picks among them), or null in the middle. */
+export function reputationLine(profiles: NpcProfile[], regularId: string, band: "high" | "middle" | "low" | null, n: number): string | null {
+  const key = band === "high" ? "halo" : band === "low" ? "hustler" : null;
+  const lines = key ? profiles.find((p) => p.regular === regularId)?.reputation?.[key] : undefined;
+  return lines?.length ? lines[Math.abs(n) % lines.length] : null;
 }
 
 /** C3: the person who shares a home with the player (content/culture/npcs.json "roommates"). */

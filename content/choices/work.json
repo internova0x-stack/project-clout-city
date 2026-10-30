@@ -1,0 +1,311 @@
+[
+  {
+    "id": "skip-safety-ebike",
+    "base": "skip-safety",
+    "area": "work",
+    "emoji": "🚲",
+    "title": "Pedal Pushers: your e-bike's brakes squeal. Dispatch says skip the check, there's a C$60 rush bonus.",
+    "where": { "places": ["pedal-pushers"], "after": ["shift"] },
+    "options": [
+      {
+        "id": "check", "label": "Check the brakes first", "get": "Brakes that brake", "cost": "The rush bonus",
+        "risk": "low", "riskWhy": "Dispatch grumbles, that's all",
+        "outcomes": [
+          { "weight": 1, "text": "The pads are paper-thin. You swap them in twelve minutes. Dispatch types 'ok' in a way that sounds like a sigh.",
+            "effects": { "integrity": 5, "energy": -8 } }
+        ]
+      },
+      {
+        "id": "ride", "label": "Ride it, grab the bonus", "get": "C$60 on top of the shift", "cost": "Squealing down Steinway",
+        "risk": "medium", "riskWhy": "Those brakes are on their last squeal", "comesBack": false,
+        "outcomes": [
+          { "weight": 3, "text": "You make every drop. The brakes squeal at each light like a tiny opera. C$60 rush bonus.",
+            "effects": { "cash": 60, "integrity": -4 } },
+          { "weight": 1, "text": "The brakes give up on 31st Avenue. You stop by gently hugging a pile of trash bags. You're fine. The soup isn't.",
+            "effects": { "cash": 60, "integrity": -4, "energy": -20, "mood": -8, "clout": -10 } }
+        ]
+      },
+      {
+        "id": "swap", "label": "Swap bikes, ride slower", "get": "Half the bonus, safely", "cost": "A heavier bike and C$30",
+        "risk": "low", "riskWhy": "The spare bike is just slow", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "The spare bike weighs as much as a fridge. You make half the rush and earn half the bonus. Your thighs file a complaint.",
+            "effects": { "cash": 30, "integrity": 3, "energy": -12 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "split-the-tip-deli",
+    "base": "split-the-tip",
+    "area": "work",
+    "emoji": "🥪",
+    "title": "At Schlep & Schmear, a customer drops C$50 in the jar 'for the one who sliced it.' Hersh sliced it.",
+    "who": "hersh",
+    "where": { "places": ["schlep-and-schmear"], "after": ["shift"] },
+    "options": [
+      {
+        "id": "point", "label": "Point to Hersh", "get": "Hersh's grudging respect", "cost": "C$50",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "'He sliced it.' Hersh grunts, pockets it, then hands you a pickle the size of a forearm. That's a medal here.",
+            "effects": { "integrity": 6, "mood": 4 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "🥒", "text": "Remember pointing the C$50 tip at Hersh? He put you on the Sunday crew, the good tips crew. Your first Sunday: C$80.",
+                       "effects": { "cash": 80 } } }
+        ]
+      },
+      {
+        "id": "split", "label": "Split it with Hersh", "get": "C$25", "cost": "Half of someone else's tip",
+        "risk": "low", "riskWhy": "Hersh might not mind. Might.",
+        "outcomes": [
+          { "weight": 1, "text": "You hand Hersh twenty-five 'for the team.' He raises one eyebrow, which for Hersh is a speech.",
+            "effects": { "cash": 25, "integrity": -2 } }
+        ]
+      },
+      {
+        "id": "keep", "label": "Take a bow, keep it", "get": "C$50", "cost": "Hersh's tip",
+        "risk": "medium", "riskWhy": "Customers come back", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You bow. The customer beams. Hersh, slicing the next pastrami, does not look up. That's worse.",
+            "effects": { "cash": 50, "integrity": -6 },
+            "later": { "afterDays": [1, 5], "chance": 0.6, "emoji": "💬", "text": "Remember bowing for Hersh's pastrami? The customer came back and asked Hersh, 'Is the slicer in today?' Hersh was the slicer.",
+                       "effects": { "clout": -15, "mood": -6 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "split-the-tip-cafe",
+    "base": "split-the-tip",
+    "area": "work",
+    "emoji": "☕",
+    "title": "Jojo's latte art made a customer cry. The C$40 tip lands on your side of the counter.",
+    "who": "jojo",
+    "where": { "places": ["grind-and-gossip"], "after": ["shift"] },
+    "options": [
+      {
+        "id": "jojo", "label": "Slide it to Jojo", "get": "Jojo's film fund grows", "cost": "C$40",
+        "risk": "low", "riskWhy": "Nothing to hide", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Jojo pockets it for film school and writes your name on the next cup. Spelled right, for once.",
+            "effects": { "integrity": 6, "mood": 4 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🎬", "text": "Remember sliding Jojo the C$40 tip? She put you in her short film as 'Honest Customer #2.' It screened at The Hub. You were great.",
+                       "effects": { "clout": 25, "mood": 6 } } }
+        ]
+      },
+      {
+        "id": "jar", "label": "Put it in the shared jar", "get": "C$10 or so, fairly", "cost": "Jojo's moment",
+        "risk": "low", "riskWhy": "Shared is shared",
+        "outcomes": [
+          { "weight": 1, "text": "Into the jar. At close it's split four ways. Jojo says 'cool' in the tone of someone who knows whose art it was.",
+            "effects": { "cash": 10, "integrity": 2 } }
+        ]
+      },
+      {
+        "id": "keep", "label": "Pocket it", "get": "C$40", "cost": "Jojo's tip",
+        "risk": "medium", "riskWhy": "Jojo is nosy. Very nosy.", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Forty dollars, gone into your apron. The crying customer waves goodbye to Jojo, who waves back, confused.",
+            "effects": { "cash": 40, "integrity": -6 },
+            "later": { "afterDays": [1, 4], "chance": 0.7, "emoji": "☕", "text": "Remember pocketing the latte art tip? Jojo asked the customer. Now every cup she makes you says 'THIEF' in foam. Beautiful foam.",
+                       "effects": { "clout": -20, "mood": -6 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pad-hours-app",
+    "base": "pad-the-hours",
+    "area": "work",
+    "emoji": "📲",
+    "title": "The Pedal Pushers app forgot to clock you out. Leave it running and you're paid for three hours of nap.",
+    "where": { "places": ["pedal-pushers"], "after": ["shift"] },
+    "options": [
+      {
+        "id": "out", "label": "Clock out", "get": "A clean timesheet", "cost": "C$90 of free money",
+        "risk": "low", "riskWhy": "It's the truth",
+        "outcomes": [
+          { "weight": 1, "text": "You tap 'clock out.' The app asks you to rate your shift. You give it four stars, honestly.",
+            "effects": { "integrity": 4 } }
+        ]
+      },
+      {
+        "id": "report", "label": "Clock out and report the bug", "get": "Maybe a bug bounty", "cost": "Ten minutes on hold",
+        "risk": "low", "riskWhy": "Hold music is the only danger", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You report it. Hold music for nine minutes. A rep thanks you and says riders have been napping on the clock 'for months.'",
+            "effects": { "integrity": 7, "energy": -5 },
+            "later": { "afterDays": [2, 6], "chance": 0.6, "emoji": "🐞", "text": "Remember reporting the clock-out bug at Pedal Pushers? They fixed it and sent you a C$50 'bug bounty' with a cartoon beetle.",
+                       "effects": { "cash": 50, "mood": 4 } } }
+        ]
+      },
+      {
+        "id": "nap", "label": "Let it run", "get": "About C$90 for napping", "cost": "Billing for sleep",
+        "risk": "medium", "riskWhy": "Payroll checks the GPS", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You sleep the sleep of the paid. Three hours, C$90, and a dream about brakes.",
+            "effects": { "cash": 90, "integrity": -6, "energy": 15 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "📍", "text": "Remember the three paid hours of nap? Payroll noticed your GPS sat in your bed the whole time. They clawed back the C$90.",
+                       "effects": { "cash": -90, "clout": -10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trusted-till-sal",
+    "base": "trusted-till",
+    "area": "work",
+    "emoji": "🗝️",
+    "title": "Sal hands you the till key: 'Count it, I'm at the dentist.' The drawer is C$40 over.",
+    "who": "sal",
+    "where": { "places": ["ditmars-deli"], "after": ["shift"] },
+    "needs": { "integrityMin": 70 },
+    "options": [
+      {
+        "id": "write", "label": "Write it down for Sal", "get": "Sal's trust, for real", "cost": "C$40 nobody would miss",
+        "risk": "low", "riskWhy": "It's the truth", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You write 'Drawer +C$40, no idea why' on the pad. The cat sits on the pad. You move the cat.",
+            "effects": { "integrity": 8 },
+            "later": { "afterDays": [1, 5], "chance": 0.8, "emoji": "🧔", "text": "Remember the C$40 over in Sal's drawer? It was a test. Sal counts everything twice. He gave you the Sunday shift and a C$120 raise.",
+                       "effects": { "cash": 120, "clout": 15, "mood": 5 } } }
+        ]
+      },
+      {
+        "id": "quiet", "label": "Leave it, say nothing", "get": "No fuss", "cost": "A small question left hanging",
+        "risk": "low", "riskWhy": "Sal will find it himself",
+        "outcomes": [
+          { "weight": 1, "text": "You leave the forty in the drawer and say nothing. Sal finds it, grunts, and doesn't ask. Neither do you.",
+            "effects": { "integrity": 2 } }
+        ]
+      },
+      {
+        "id": "pocket", "label": "Pocket the C$40", "get": "C$40", "cost": "Sal's trust, if he counts",
+        "risk": "high", "riskWhy": "Sal counts everything twice", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Forty dollars in your pocket. The till balances. The cat is staring at you.",
+            "effects": { "cash": 40, "integrity": -12 },
+            "later": { "afterDays": [1, 4], "chance": 0.8, "emoji": "🐈", "text": "Remember the C$40 over in Sal's drawer? It was a test. Sal counts everything twice. He calls you 'the accountant' now, and not nicely.",
+                       "effects": { "clout": -25, "mood": -10, "integrity": -3 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trusted-till-hersh",
+    "base": "trusted-till",
+    "area": "work",
+    "emoji": "🧾",
+    "title": "Hersh leaves you to cash out. A customer's card overpaid by C$60, and his receipt is in your hand.",
+    "who": "hersh",
+    "where": { "places": ["schlep-and-schmear"], "after": ["shift"] },
+    "needs": { "integrityMin": 70 },
+    "options": [
+      {
+        "id": "refund", "label": "Chase him down the block", "get": "A customer for life", "cost": "Running, in an apron",
+        "risk": "low", "riskWhy": "Only your lungs", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You catch him at the corner of 31st and refund it. He's so stunned he orders another pound of pastrami.",
+            "effects": { "integrity": 8, "energy": -10, "mood": 5 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🥯", "text": "Remember chasing the overcharged customer down 31st? He catered his office lunch through Hersh and asked for 'the runner.' C$60 tip.",
+                       "effects": { "cash": 60, "clout": 10 } } }
+        ]
+      },
+      {
+        "id": "till", "label": "Leave it in the till", "get": "Hersh's till looks great", "cost": "The customer's C$60",
+        "risk": "low", "riskWhy": "It's Hersh's problem now",
+        "outcomes": [
+          { "weight": 1, "text": "The C$60 stays in the till. Hersh counts it, frowns, says 'good day' and doesn't ask. You don't tell.",
+            "effects": { "integrity": -3, "mood": -2 } }
+        ]
+      },
+      {
+        "id": "pocket", "label": "Pocket the extra C$60", "get": "C$60", "cost": "Hersh's trust and the customer's money",
+        "risk": "high", "riskWhy": "Card receipts don't forget", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You void the overpay in the drawer and keep the cash. The register agrees with you. The receipt doesn't.",
+            "effects": { "cash": 60, "integrity": -12 },
+            "later": { "afterDays": [1, 5], "chance": 0.7, "emoji": "🧾", "text": "Remember the C$60 overpay at Schlep & Schmear? The customer called his bank, then Hersh. Hersh paid him back and you off the register.",
+                       "effects": { "cash": -60, "clout": -25, "mood": -10 } } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dog-walk-short",
+    "base": "dog-walk-corners",
+    "area": "work",
+    "emoji": "🐕",
+    "title": "Noodle the dachshund's owner paid for a 60-minute walk. Noodle is done at 20. Gus's bench is right there.",
+    "who": "gus",
+    "where": { "places": ["hell-gate-park"], "tags": ["job_dogwalker"], "after": ["shift"] },
+    "options": [
+      {
+        "id": "hour", "label": "Walk the full hour", "get": "A tired, happy dachshund", "cost": "Forty more minutes, slowly",
+        "risk": "low", "riskWhy": "Nothing to hide",
+        "outcomes": [
+          { "weight": 1, "text": "You coax Noodle round the track at the speed of a sigh. The owner's tracker shows a perfect hour and a little heart.",
+            "effects": { "integrity": 4, "energy": -12, "mood": 4 } }
+        ]
+      },
+      {
+        "id": "sit", "label": "Sit with Gus, bill the hour", "get": "Forty minutes of rest", "cost": "Billing for a walk you didn't do",
+        "risk": "medium", "riskWhy": "Noodle wears a step tracker", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "Gus tells Noodle about 1987. Noodle sleeps. You bill the hour and feel rested and slightly guilty.",
+            "effects": { "integrity": -5, "energy": 10, "mood": 4 },
+            "later": { "afterDays": [1, 4], "chance": 0.6, "emoji": "📊", "text": "Remember billing Noodle's hour from Gus's bench? The owner checked the tracker: 20 minutes. Her review: 'Paid for a walk, got a sit.'",
+                       "effects": { "cash": -30, "clout": -20 } } }
+        ]
+      },
+      {
+        "id": "honest", "label": "Sit, and bill only 20", "get": "Rest, and a clean invoice", "cost": "Two-thirds of the fee",
+        "risk": "low", "riskWhy": "The owner may want a longer walker", "comesBack": false,
+        "outcomes": [
+          { "weight": 1, "text": "You bill 20 minutes and text: 'Noodle retired early.' The owner sends a laughing emoji and nothing else.",
+            "effects": { "cash": -40, "integrity": 6, "energy": 8, "mood": 6 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dog-walk-pack",
+    "base": "dog-walk-corners",
+    "area": "work",
+    "emoji": "🦮",
+    "title": "Three dogs is the limit. Two owners beg you to take six today, C$120 extra. The squirrels are out.",
+    "where": { "places": ["hell-gate-park"], "tags": ["job_dogwalker"], "after": ["shift"] },
+    "options": [
+      {
+        "id": "three", "label": "Stick to three", "get": "Three dogs, total control", "cost": "C$120",
+        "risk": "low", "riskWhy": "The rule exists for a reason",
+        "outcomes": [
+          { "weight": 1, "text": "Three dogs, three leashes, zero incidents. The other owners go to a walker who says yes to everything.",
+            "effects": { "integrity": 4, "mood": 2 } }
+        ]
+      },
+      {
+        "id": "six", "label": "Take all six", "get": "C$120 extra", "cost": "Breaking the rule, and a squirrel risk",
+        "risk": "medium", "riskWhy": "Six dogs, one squirrel", "comesBack": true,
+        "outcomes": [
+          { "weight": 2, "text": "Six dogs, one direction, mostly. You look like a sled team. C$120 extra.",
+            "effects": { "cash": 120, "integrity": -5, "energy": -10 } },
+          { "weight": 1, "text": "A squirrel. Six dogs. You water-ski across the lawn on your sneakers. Everyone's fine. You have grass in your teeth.",
+            "effects": { "cash": 120, "integrity": -5, "energy": -20, "mood": -6 },
+            "later": { "afterDays": [1, 3], "chance": 1, "emoji": "🐿️", "text": "Remember taking six dogs past the limit? A jogger's clip of you water-skiing behind them is the park's most-shared video this week.",
+                       "effects": { "clout": -15, "mood": -4 } } }
+        ]
+      },
+      {
+        "id": "refer", "label": "Take three, refer the rest", "get": "A favor from another walker", "cost": "C$120 to someone else",
+        "risk": "low", "riskWhy": "Favors come back, or don't", "comesBack": true,
+        "outcomes": [
+          { "weight": 1, "text": "You call Marisol, who walks dogs on the other side of the park. She takes three. Everybody gets walked.",
+            "effects": { "integrity": 6, "mood": 4 },
+            "later": { "afterDays": [2, 6], "chance": 0.5, "emoji": "🐾", "text": "Remember referring the extra dogs to Marisol? She sent you two clients of her own when she went to visit her mother.",
+                       "effects": { "cash": 80 } } }
+        ]
+      }
+    ]
+  }
+]
