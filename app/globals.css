@@ -2650,5 +2650,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 
 /* A count on a segmented tab (Campaign HQ's Inbox): a small pill instead of "(4)" (owner, Oct 30: even, tidy tabs). */
-.seg-badge { min-width:18px; height:18px; padding:0 5px; border-radius:var(--r-pill); background:var(--accent, #C8102E); color:#fff; font-size:11px; font-weight:700; line-height:18px; }
+.seg-label { position:relative; }
+/* The count rides the label's top-right corner, so it never pushes the label off center. */
+.seg-badge { position:absolute; left:calc(100% + 2px); top:-7px; min-width:16px; height:16px; padding:0 4px; border-radius:var(--r-pill);
+  background:var(--accent, #C8102E); color:#fff; font-size:10px; font-weight:700; line-height:16px; text-align:center; }
 .clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
