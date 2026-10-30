@@ -28,6 +28,10 @@ Add `content/hunts/<Monday>.json` (see `2026-10-19.json`):
 - `places`: 4 or 5 place ids, each with a regular. At least one costs C$10 or less.
 - `chatter`: 1 to 6 lines regulars say to joined players; `{treasure}` becomes the treasure.
 - `tracks`: one per starting style, each `{ treasure, emoji, lore, steps }` with one step per place.
+  The tracks are keyed by the style ids, which kept their old names when the looks were renamed (owner, Oct 30):
+  `startup_founder` Everyday Casual, `pilates_princess` Gym Regular, `bodega_drip` Bodega Streetwear, `midtown_finance`
+  Midtown Corporate, `influencer_soft_glam` New Money, `thrift_store_icon` Thrift Store Regular, `arcade_nerd` Arcade Prep,
+  `night_owl_goth` Night Owl Goth. Write each track for the look's name, not its id.
   A step is `{ say }`, or `{ say, question: { q, choices, answer }, then }` where `answer` is the
   index of the right choice (0 is the first) and `then` is said after it. The finale must ask.
 

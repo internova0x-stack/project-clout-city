@@ -411,6 +411,11 @@ components live in `app/globals.css`.
   fashion; a dress (slot 'one-piece') is a top and a bottom (`wear_slots`, equip_item, save_look 'one_piece_conflict',
   style_counts); lib/wearing.ts mirrors it (wearSlot, slotsClash, outfitFromSkus); Your Look has Dresses and a tab per
   accessory slot once something's owned there. The home bubble's portrait aims at the head (AvatarHead). `/preview/moves?outfit=hoodie` shows all eight body types.
+  The eight starting looks (owner, Oct 30): one outfit for everyone whatever the body, each clearly different, every top
+  a shade of blue in the look's own fixed colors (`styleColors`; no color picker): Everyday Casual, Gym Regular, Bodega
+  Streetwear, Midtown Corporate, New Money, Thrift Store Regular, Arcade Prep, Night Owl Goth (ids kept: lib/styles.ts,
+  docs/HUNTS.md maps them). Each look's signature piece shows on the new bodies (`starterAccessory`: gym bag, lanyard,
+  phone, tote, choker; headphones and the cap are headwear) unless a Shop piece fills that slot.
   Your Look keeps the starter clothes (migration 0109, owner Oct 22): Tops, Bottoms and Shoes list the starting style's
   pieces and colors (`STYLE_FITS`) free beside owned ones; `save_look(items, covering, fit)` stores players.look.fit.
   Oct 22 follow-ups: free pieces show Higgsfield pictures tinted to the color (`public/look-img/`, `StarterPic`); every style

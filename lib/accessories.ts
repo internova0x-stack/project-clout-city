@@ -19,7 +19,9 @@ export type AccessoryKind =
   | "tote" | "sling" | "doctor-bag" | "mini-bag" | "shoulder-bag" | "clutch"
   | "iced-watch" | "crown" | "tiara"
   // Sold in the Shop since Oct 22 (owner): worn as the coverings that used to be free (buildBaseAvatar, COVERING_ACCESSORIES).
-  | "durag" | "turban" | "headwrap" | "kippah";
+  | "durag" | "turban" | "headwrap" | "kippah"
+  // The starting looks' own pieces (owner, Oct 30): an office lanyard and a phone in hand. Never sold.
+  | "lanyard" | "phone";
 
 /** Shop headwear the avatar draws as a covering (buildAvatar's durag, turban, headwrap and kippah), not as a rigid hat. */
 export const COVERING_ACCESSORIES: ReadonlySet<AccessoryKind> = new Set<AccessoryKind>(["durag", "turban", "headwrap", "kippah"]);
@@ -74,4 +76,19 @@ export function accessoriesFor(skus: readonly string[]): AccessoryWear[] {
   const by = new Map<AccessorySlot, AccessoryWear>();
   for (const s of skus) { const a = ACCESSORIES[s]; if (a) by.set(a.slot, a); }
   return ACCESSORY_SLOTS.flatMap((s) => (by.get(s) ? [by.get(s)!] : []));
+}
+
+/**
+ * A starting look's signature piece on the new bodies (lib/styles.ts `accessory`), drawn like a Shop accessory in its
+ * slot; a Shop piece the player wears in that slot wins. Headphones and the cap are headwear (buildAvatar).
+ */
+export function starterAccessory(kind: string, color: string): AccessoryWear | null {
+  switch (kind) {
+    case "tote": return { slot: "hand", kind: "tote", color, accent: color };
+    case "gymbag": return { slot: "hand", kind: "sling", color, accent: "#26232D" };
+    case "choker": return { slot: "neck", kind: "ring-choker", color: "#14111A", accent: color };
+    case "lanyard": return { slot: "neck", kind: "lanyard", color, accent: "#FFFFFF" };
+    case "phone": return { slot: "hand", kind: "phone", color, accent: "#14111A" };
+    default: return null;
+  }
 }

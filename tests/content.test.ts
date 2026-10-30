@@ -5,10 +5,10 @@ import { STARTING_STYLES } from "../lib/styles.ts";
 import { SKIN_TONES } from "../lib/look.ts";
 import { WAVE_1_PINS } from "../lib/places.ts";
 
-test("exactly the eight starting styles from the spec", () => {
+test("exactly the eight starting styles (owner, Oct 30: casual, athletic, streetwear, corporate, new money, thrift, nerdy/preppy, goth)", () => {
   assert.deepEqual(
     STARTING_STYLES.map((s) => s.label),
-    ["Bodega Drip", "Thrift Store Icon", "Midtown Finance", "Night Owl Goth", "Pilates Princess", "Startup Founder", "Influencer Soft Glam", "Arcade Nerd"],
+    ["Everyday Casual", "Gym Regular", "Bodega Streetwear", "Midtown Corporate", "New Money", "Thrift Store Regular", "Arcade Prep", "Night Owl Goth"],
   );
 });
 

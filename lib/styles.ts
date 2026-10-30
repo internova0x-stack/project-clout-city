@@ -1,5 +1,7 @@
-// The eight starting styles (Clarifications section 1, build note 3).
-// Each sets 3 to 4 cheap starter items and gives no stats or bonuses.
+// The eight starting styles (Clarifications section 1, build note 3; owner, Oct 30: one for everyone, whatever the body,
+// covering casual, athletic, streetwear, corporate, new money, thrift, nerdy/preppy and goth, each clearly different).
+// Each sets 3 to 4 cheap starter items and gives no stats or bonuses. Ids are stored (players.look.style, the Shop's
+// style lines, hunts), so they stay as they were when a style was renamed.
 // Hair, glasses and coverings are free Look options, never part of a style.
 
 import type { AccessoryWear } from "./accessories.ts";
@@ -17,7 +19,7 @@ export type StyleId =
 
 export type TopKind = "puffer" | "cardigan" | "vest" | "hoodie" | "crop" | "zip" | "blazer" | "tee";
 export type BottomKind = "pants" | "skirt" | "shorts" | "leggings";
-export type AccessoryKind = "cap" | "tote" | "lanyard" | "choker" | "mat" | "headphones" | "phone" | "none";
+export type AccessoryKind = "cap" | "tote" | "lanyard" | "choker" | "mat" | "gymbag" | "headphones" | "phone" | "none";
 
 export type ShoeKind = "boots";
 
@@ -58,115 +60,109 @@ export interface StartingStyle {
 
 export const STARTING_STYLES: StartingStyle[] = [
   {
-    id: "bodega_drip",
-    label: "Bodega Drip",
-    emoji: "🥯",
-    blurb: "Knows the deli cat by name. The deli cat does not know you.",
-    starterItems: ["Oversized puffer", "Cargo sweats", "Box-fresh white sneakers", "Fitted cap"],
+    id: "startup_founder",
+    label: "Everyday Casual",
+    emoji: "😎",
+    blurb: "Tee, jeans, no plans. The plan is no plans.",
+    starterItems: ["Sky-blue tee", "Straight jeans", "White sneakers"],
     outfit: {
-      top: "puffer", topColor: "#E8692E", topAccent: "#1F1B26",
-      bottom: "pants", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA",
-      accessory: "cap", accessoryColor: "#1F1B26",
+      top: "tee", topColor: "#6FA8DC", topAccent: "#F4F1EA",
+      bottom: "pants", bottomColor: "#4A5F7E", shoeColor: "#F4F1EA",
+      accessory: "none", accessoryColor: "#000000",
     },
-    female: { topColor: "#E0457B", topAccent: "#1F1B26", bottomColor: "#26232D", accessoryColor: "#F4F1EA" },
   },
   {
-    id: "thrift_store_icon",
-    label: "Thrift Store Icon",
-    emoji: "🧶",
-    blurb: "Paid $4 for this cardigan and will tell you about it.",
-    starterItems: ["Grandpa cardigan", "Flared vintage jeans", "Chunky loafers", "Canvas tote"],
+    id: "pilates_princess",
+    label: "Gym Regular",
+    emoji: "🏃",
+    blurb: "Training for something. Won't say what.",
+    starterItems: ["Royal-blue hoodie", "Running shorts", "Trainers", "Gym bag"],
     outfit: {
-      top: "cardigan", topColor: "#D9A43A", topAccent: "#7A3E2B",
-      bottom: "pants", bottomColor: "#4C6A92", shoeColor: "#3A2418",
-      accessory: "tote", accessoryColor: "#E9DFC9",
+      top: "hoodie", topColor: "#2F6FDB", topAccent: "#F4F1EA",
+      bottom: "shorts", bottomColor: "#26232D", shoeColor: "#FFFFFF",
+      accessory: "gymbag", accessoryColor: "#26232D",
     },
-    female: { topColor: "#8DB38A", topAccent: "#F2E4C9", bottomColor: "#B0603F", accessoryColor: "#F6E7B8" },
+  },
+  {
+    id: "bodega_drip",
+    label: "Bodega Streetwear",
+    emoji: "🧢",
+    blurb: "Knows the deli cat by name. The deli cat does not know you.",
+    starterItems: ["Cobalt puffer", "Cargo pants", "Box-fresh white sneakers", "Fitted cap"],
+    outfit: {
+      top: "puffer", topColor: "#1F4FB5", topAccent: "#1F1B26",
+      bottom: "pants", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA",
+      // The fitted cap is headwear since v0.7 (look.covering): older rows without a headwear pick get it.
+      accessory: "cap", accessoryColor: "#1F1B26",
+    },
   },
   {
     id: "midtown_finance",
-    label: "Midtown Finance",
-    emoji: "📈",
-    blurb: "Fleece vest, firm handshake, zero personality. Bullish.",
-    starterItems: ["Fleece vest", "Oxford shirt", "Khaki chinos", "Brown loafers"],
+    label: "Midtown Corporate",
+    emoji: "💼",
+    blurb: "Firm handshake, two phones, zero personality. Bullish.",
+    starterItems: ["Navy blazer", "Charcoal trousers", "Dress shoes", "Office lanyard"],
     outfit: {
-      top: "vest", topColor: "#23314F", topAccent: "#A9C3E8",
-      bottom: "pants", bottomColor: "#C2AE86", shoeColor: "#5A3420",
-      accessory: "none", accessoryColor: "#000000",
+      top: "blazer", topColor: "#23314F", topAccent: "#A9C3E8",
+      bottom: "pants", bottomColor: "#3A3742", shoeColor: "#1F1B26", shoes: "boots", shoeAccent: "#14111A",
+      accessory: "lanyard", accessoryColor: "#2F6FDB",
     },
-    female: { topColor: "#7A2E3B", topAccent: "#F1D6C8", bottom: "skirt", bottomColor: "#3A3742", shoeColor: "#1F1B26" },
+  },
+  {
+    id: "influencer_soft_glam",
+    label: "New Money",
+    emoji: "💸",
+    blurb: "Got rich last Tuesday. Has mentioned it since Tuesday.",
+    starterItems: ["Electric-blue blazer", "Linen shorts", "Loafers, no socks", "The newest phone"],
+    outfit: {
+      top: "blazer", topColor: "#3B6FF6", topAccent: "#F4F1EA",
+      bottom: "shorts", bottomColor: "#F1E6D4", shoeColor: "#8A6A52", shoes: "boots", shoeAccent: "#5A3420",
+      accessory: "phone", accessoryColor: "#C9C3CF",
+    },
+  },
+  {
+    id: "thrift_store_icon",
+    label: "Thrift Store Regular",
+    emoji: "🧶",
+    blurb: "Paid C$4 for this cardigan and will tell you about it.",
+    starterItems: ["Denim-blue grandpa cardigan", "Corduroy pants", "Scuffed boots", "Canvas tote"],
+    outfit: {
+      top: "cardigan", topColor: "#4C6A92", topAccent: "#D9A43A",
+      bottom: "pants", bottomColor: "#8A5A3C", shoeColor: "#3A2418", shoes: "boots", shoeAccent: "#2A1A10",
+      accessory: "tote", accessoryColor: "#E9DFC9",
+    },
+  },
+  {
+    id: "arcade_nerd",
+    label: "Arcade Prep",
+    emoji: "🤓",
+    blurb: "Sweater vest, high score on every machine in Astoria. Low score in sunlight.",
+    starterItems: ["Powder-blue sweater vest", "Pressed shorts", "Red high-tops", "Over-ear headphones"],
+    outfit: {
+      top: "vest", topColor: "#8FA6E8", topAccent: "#F4F1EA",
+      bottom: "shorts", bottomColor: "#C2AE86", shoeColor: "#D93A2F",
+      accessory: "headphones", accessoryColor: "#14111A",
+    },
   },
   {
     id: "night_owl_goth",
     label: "Night Owl Goth",
     emoji: "🦇",
     blurb: "Hasn't seen the sun since 2019. Thriving.",
-    starterItems: ["Black mesh hoodie", "Pleated black skirt", "Platform boots", "Spiked choker"],
+    starterItems: ["Midnight-blue hoodie", "Black jeans", "Platform boots", "Ring choker"],
     outfit: {
-      top: "hoodie", topColor: "#1A161F", topAccent: "#6E2B5E",
-      bottom: "skirt", bottomColor: "#14111A", shoeColor: "#0E0C12",
+      top: "hoodie", topColor: "#26346B", topAccent: "#6E2B5E",
+      bottom: "pants", bottomColor: "#14111A", shoeColor: "#0E0C12", shoes: "boots", shoeAccent: "#2A2733",
       accessory: "choker", accessoryColor: "#C9C3CF",
     },
-    male: { topAccent: "#3E5C76", bottom: "pants", bottomColor: "#2A2733", accessory: "none" },
-  },
-  {
-    id: "pilates_princess",
-    label: "Pilates Princess",
-    emoji: "🧘",
-    blurb: "Matching set, iced matcha, core of steel. Mostly the matcha.",
-    starterItems: ["Matching crop top", "Ribbed leggings", "Cloud sneakers", "Rolled yoga mat"],
-    outfit: {
-      top: "crop", topColor: "#F2B8C6", topAccent: "#FFFFFF",
-      bottom: "leggings", bottomColor: "#E9A3B6", shoeColor: "#FFFFFF",
-      accessory: "mat", accessoryColor: "#9FD8C4",
-    },
-    male: { top: "tee", topColor: "#A7D8C9", topAccent: "#FFFFFF", bottom: "shorts", bottomColor: "#3F5A66", accessoryColor: "#F2B8C6" },
-  },
-  {
-    id: "startup_founder",
-    label: "Startup Founder",
-    emoji: "🚀",
-    blurb: "Disrupting the concept of sleep. Pre-revenue, post-humility.",
-    starterItems: ["Grey zip hoodie", "Slim black jeans", "Minimalist sneakers", "Conference lanyard"],
-    outfit: {
-      top: "hoodie", topColor: "#8A8794", topAccent: "#2A2530",
-      bottom: "pants", bottomColor: "#1F1B26", shoeColor: "#ECE6DC",
-      accessory: "lanyard", accessoryColor: "#40B589",
-    },
-    female: { topColor: "#C9B8E8", topAccent: "#2A2530", bottom: "leggings", bottomColor: "#2E2A38", shoeColor: "#FFFFFF" },
-  },
-  {
-    id: "influencer_soft_glam",
-    label: "Influencer Soft Glam",
-    emoji: "🤳",
-    blurb: "Every outfit is content. So is this sentence.",
-    starterItems: ["Cream oversized blazer", "Satin midi skirt", "Pointed ankle boots", "Phone with a sparkly case"],
-    outfit: {
-      top: "blazer", topColor: "#F1E6D4", topAccent: "#D7B9A0",
-      bottom: "skirt", bottomColor: "#C9A98A", shoeColor: "#6E5240",
-      accessory: "phone", accessoryColor: "#FFB3D1",
-    },
-    male: { topColor: "#D8C3A5", topAccent: "#F4EEE6", bottom: "pants", bottomColor: "#F1E6D4", shoeColor: "#8A6A52", accessoryColor: "#C9C3CF" },
-  },
-  {
-    id: "arcade_nerd",
-    label: "Arcade Nerd",
-    emoji: "🕹️",
-    blurb: "High score on every machine in Astoria. Low score in sunlight.",
-    starterItems: ["Retro graphic tee", "Cargo shorts", "High-top sneakers", "Over-ear headphones"],
-    outfit: {
-      top: "tee", topColor: "#6B4FD8", topAccent: "#FFC21A",
-      bottom: "shorts", bottomColor: "#4F5A3A", shoeColor: "#D93A2F",
-      accessory: "headphones", accessoryColor: "#14111A",
-    },
-    female: { topColor: "#FF7AA8", topAccent: "#FFC21A", bottomColor: "#2B3A67", shoeColor: "#FFFFFF", accessoryColor: "#6B4FD8" },
   },
 ];
 
 export const STYLE_IDS = STARTING_STYLES.map((s) => s.id);
 
 export function getStyle(id: string | null | undefined): StartingStyle {
-  return STARTING_STYLES.find((s) => s.id === id) ?? STARTING_STYLES[0];
+  // An unknown style reads as Bodega Streetwear, the default look since day one (the list's order is the creator's).
+  return STARTING_STYLES.find((s) => s.id === id) ?? STARTING_STYLES.find((s) => s.id === "bodega_drip")!;
 }
 
 export function isStyleId(id: unknown): id is StyleId {
@@ -207,69 +203,35 @@ export const BOTTOM_LABEL: Record<BottomKind, string> = { pants: "Pants", skirt:
 
 /**
  * Every style offers a tee and pants on top of its own pieces (owner, Oct 22), and the zip-up isn't a free top (it's
- * something to buy). Starter pieces come in one color each (owner, Oct 22): grey tops, black bottoms, white shoes, for
- * every style; a fit saved in another color wears these (normalizeLook, starterOutfit).
+ * something to buy). No color picker (owner, Oct 22): each look comes in its own colors, every top a shade of blue
+ * (owner, Oct 30: "the starting color should be blue"); a fit saved in another color wears these (storedFit, starterOutfit).
  */
 const BASIC_TOPS: TopKind[] = ["tee"];
 const BASIC_BOTTOMS: BottomKind[] = ["pants"];
-export const STARTER_COLORS = { topColor: "#8E8C94", bottomColor: "#26232D", shoeColor: "#F4F1EA" } as const;
 const withBasics = <T,>(own: T[], basics: T[]) => [...own, ...basics.filter((c) => !own.includes(c))];
 
-const OWN_FITS: Record<StyleId, StyleFits> = {
-  bodega_drip: {
-    tops: ["puffer", "hoodie"], bottoms: ["pants", "shorts", "leggings"],
-    topColors: ["#E8692E", "#E0457B", "#2F6FDB", "#26232D", "#F4F1EA", "#5B8C3A"],
-    bottomColors: ["#5B5A4A", "#26232D", "#3D5A80", "#8A7A62", "#C9C3B8", "#7A2E3B"],
-    shoeColors: ["#F4F1EA", "#26232D", "#E8692E", "#2F6FDB", "#C9A227", "#9A9A9A"],
-  },
-  thrift_store_icon: {
-    tops: ["cardigan", "tee", "vest"], bottoms: ["pants", "skirt", "shorts"],
-    topColors: ["#D9A43A", "#8DB38A", "#B0603F", "#7A3E2B", "#E9DFC9", "#4C6A92"],
-    bottomColors: ["#4C6A92", "#B0603F", "#5B5A4A", "#3A2418", "#C9B8A0", "#7A2E3B"],
-    shoeColors: ["#3A2418", "#F4F1EA", "#7A2E3B", "#26232D", "#D9A43A", "#8A7A62"],
-  },
-  midtown_finance: {
-    tops: ["vest", "blazer"], bottoms: ["pants", "skirt", "shorts"],
-    topColors: ["#23314F", "#7A2E3B", "#3A3742", "#8A8794", "#F1E6D4", "#2F5D50"],
-    bottomColors: ["#C2AE86", "#3A3742", "#23314F", "#1F1B26", "#8A8794", "#5B5A4A"],
-    shoeColors: ["#5A3420", "#1F1B26", "#8A6A52", "#ECE6DC", "#7A2E3B", "#3A3742"],
-  },
-  night_owl_goth: {
-    tops: ["hoodie", "crop", "blazer"], bottoms: ["skirt", "pants", "leggings"],
-    topColors: ["#1A161F", "#6E2B5E", "#3E5C76", "#2A2733", "#7A2E3B", "#C9C3CF"],
-    bottomColors: ["#14111A", "#2A2733", "#6E2B5E", "#3E5C76", "#4A4452", "#7A2E3B"],
-    shoeColors: ["#0E0C12", "#2A2733", "#6E2B5E", "#C9C3CF", "#7A2E3B", "#3E5C76"],
-  },
-  pilates_princess: {
-    tops: ["crop", "tee"], bottoms: ["leggings", "shorts", "skirt"],
-    topColors: ["#F2B8C6", "#A7D8C9", "#FFFFFF", "#C9B8E8", "#F6E7B8", "#9FD8C4"],
-    bottomColors: ["#E9A3B6", "#3F5A66", "#F2E4C9", "#C9B8E8", "#26232D", "#9FD8C4"],
-    shoeColors: ["#FFFFFF", "#F2B8C6", "#26232D", "#9FD8C4", "#C9B8E8", "#F6E7B8"],
-  },
-  startup_founder: {
-    tops: ["hoodie", "tee"], bottoms: ["pants", "leggings", "shorts"],
-    topColors: ["#8A8794", "#C9B8E8", "#26232D", "#2F6FDB", "#40B589", "#ECE6DC"],
-    bottomColors: ["#1F1B26", "#2E2A38", "#8A8794", "#3D5A80", "#C2AE86", "#5B5A4A"],
-    shoeColors: ["#ECE6DC", "#FFFFFF", "#1F1B26", "#40B589", "#2F6FDB", "#8A8794"],
-  },
-  influencer_soft_glam: {
-    tops: ["blazer", "crop", "cardigan"], bottoms: ["skirt", "pants", "leggings"],
-    topColors: ["#F1E6D4", "#D8C3A5", "#FFB3D1", "#C9B8E8", "#F2B8C6", "#FFFFFF"],
-    bottomColors: ["#C9A98A", "#F1E6D4", "#FFB3D1", "#26232D", "#D7B9A0", "#C9B8E8"],
-    shoeColors: ["#6E5240", "#8A6A52", "#FFFFFF", "#FFB3D1", "#26232D", "#D7B9A0"],
-  },
-  arcade_nerd: {
-    tops: ["tee", "hoodie"], bottoms: ["shorts", "pants", "leggings"],
-    topColors: ["#6B4FD8", "#FF7AA8", "#40B589", "#26232D", "#FFC21A", "#2F6FDB"],
-    bottomColors: ["#4F5A3A", "#2B3A67", "#26232D", "#8A7A62", "#6B4FD8", "#C9C3B8"],
-    shoeColors: ["#D93A2F", "#FFFFFF", "#26232D", "#6B4FD8", "#FFC21A", "#40B589"],
-  },
+/** A look's colors: its top, bottom and shoes. */
+export function styleColors(id: StyleId | string): { topColor: string; bottomColor: string; shoeColor: string } {
+  const o = getStyle(id).outfit;
+  return { topColor: o.topColor, bottomColor: o.bottomColor, shoeColor: o.shoeColor };
+}
+
+/** The other pieces each look offers in its creator (the look's own top and bottom come first). */
+const OWN_FITS: Record<StyleId, { tops: TopKind[]; bottoms: BottomKind[] }> = {
+  startup_founder: { tops: ["tee", "hoodie"], bottoms: ["pants", "shorts"] },
+  pilates_princess: { tops: ["hoodie", "tee"], bottoms: ["shorts", "leggings", "pants"] },
+  bodega_drip: { tops: ["puffer", "hoodie", "tee"], bottoms: ["pants", "shorts"] },
+  midtown_finance: { tops: ["blazer", "vest"], bottoms: ["pants", "skirt"] },
+  influencer_soft_glam: { tops: ["blazer", "cardigan"], bottoms: ["shorts", "pants", "skirt"] },
+  thrift_store_icon: { tops: ["cardigan", "vest", "tee"], bottoms: ["pants", "skirt", "shorts"] },
+  arcade_nerd: { tops: ["vest", "tee", "cardigan"], bottoms: ["shorts", "pants"] },
+  night_owl_goth: { tops: ["hoodie", "blazer", "crop"], bottoms: ["pants", "skirt", "leggings"] },
 };
 
-export const STYLE_FITS: Record<StyleId, StyleFits> = Object.fromEntries(Object.entries(OWN_FITS).map(([id, f]) => [id, {
-  ...f, tops: withBasics(f.tops, BASIC_TOPS), bottoms: withBasics(f.bottoms, BASIC_BOTTOMS),
-  topColors: [STARTER_COLORS.topColor], bottomColors: [STARTER_COLORS.bottomColor], shoeColors: [STARTER_COLORS.shoeColor],
-}])) as Record<StyleId, StyleFits>;
+export const STYLE_FITS: Record<StyleId, StyleFits> = Object.fromEntries(Object.entries(OWN_FITS).map(([id, f]) => {
+  const c = styleColors(id);
+  return [id, { tops: withBasics(f.tops, BASIC_TOPS), bottoms: withBasics(f.bottoms, BASIC_BOTTOMS), topColors: [c.topColor], bottomColors: [c.bottomColor], shoeColors: [c.shoeColor] }];
+})) as Record<StyleId, StyleFits>;
 
 /** A stored fit is valid only if every piece and color is on its style's lists. */
 /** A stored fit's pieces, in the starter colors (a fit saved in another color keeps its pieces); null if they aren't the style's. */
@@ -277,7 +239,7 @@ export function storedFit(style: StyleId, fit: unknown): Fit | null {
   const f = fit as Partial<Fit> | null;
   const o = STYLE_FITS[style];
   return f && typeof f === "object" && o.tops.includes(f.top as TopKind) && o.bottoms.includes(f.bottom as BottomKind)
-    ? { top: f.top as TopKind, bottom: f.bottom as BottomKind, ...STARTER_COLORS } : null;
+    ? { top: f.top as TopKind, bottom: f.bottom as BottomKind, ...styleColors(style) } : null;
 }
 
 export function isValidFit(style: StyleId, fit: unknown): fit is Fit {
@@ -290,11 +252,11 @@ export function isValidFit(style: StyleId, fit: unknown): fit is Fit {
 /** The fit a style starts with for a presentation. */
 export function defaultFit(style: StartingStyle, body: "straight" | "curvy"): Fit {
   const o = styleOutfit(style, body);
-  return { top: o.top, bottom: o.bottom, ...STARTER_COLORS };
+  return { top: o.top, bottom: o.bottom, ...styleColors(style.id) };
 }
 
 /** The outfit to draw: the style's (accent and accessory) with the player's fit on top. */
 export function starterOutfit(style: StartingStyle, body: "straight" | "curvy", fit?: Fit | null): Outfit {
   const o = styleOutfit(style, body);
-  return { ...o, ...(fit ? { top: fit.top, bottom: fit.bottom } : {}), ...STARTER_COLORS };
+  return { ...o, ...(fit ? { top: fit.top, bottom: fit.bottom } : {}), ...styleColors(style.id) };
 }
