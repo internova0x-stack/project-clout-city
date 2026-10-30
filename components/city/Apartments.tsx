@@ -31,6 +31,9 @@ export function moveBlock(state: CityState, home: Home): string | null {
   return null;
 }
 
+/** A listing's description, up to its first two sentences. */
+const twoSentences = (t: string) => t.split(/(?<=[.!?])\s+/).slice(0, 2).join(" ");
+
 export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
   state: CityState; busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void;
 }) {
@@ -61,8 +64,9 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
                 <span className="meta">{h.neighborhood} · {formatCash(h.rent)}/week · {rooms} room{rooms > 1 ? "s" : ""}</span>
               </span>
             </div>
-            {/* Owner, Oct 30 (fewer words): the listing's joke lives in Look inside, not on the card. */}
             {next?.id === h.id && !p.house_sku && <span className="tag tag-event" style={{ alignSelf: "flex-start" }}>Next step up</span>}
+            {/* Owner, Oct 30: the card keeps a two-sentence description. */}
+            <span className="subtext">{twoSentences(h.blurb)}</span>
             {/* The price on its own line, so the button never wraps (owner, Oct 14). */}
             <span className="apt-cost"><b>{formatCash(cost)}</b> to move in</span>
             {block ? <span className="meta locked">{block}</span>
@@ -90,7 +94,6 @@ export function ViewingBar({ home, state, busy, onBack, onMove }: {
       <span style={{ minWidth: 0 }}>
         <b>{home.emoji} {home.name}</b>
         <small>{block ?? `${formatCash(home.rent)} a week · ${formatCash(cost)} to move in`}</small>
-        {!block && home.blurb && <small>{home.blurb}</small>}
       </span>
       <button className="chip" onClick={onBack}>Back</button>
       {onMove && <button className="chip" aria-pressed="true" disabled={!!block || busy || (state?.player.bank_cash ?? 0) < cost} onClick={onMove}>Move in</button>}

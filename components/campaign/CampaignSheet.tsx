@@ -251,8 +251,8 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
       ) : (
         <>
           <div className="segmented" role="group" aria-label="Campaign HQ">
-            <button aria-pressed={tab === "week"} onClick={() => { setEditing(null); setTab("week"); }}>This week</button>
-            <button aria-pressed={tab === "inbox"} onClick={() => { setMail(null); setTab("inbox"); }}>Inbox{newMail ? ` (${newMail})` : ""}</button>
+            <button aria-pressed={tab === "week"} onClick={() => { setEditing(null); setTab("week"); }}>Week</button>
+            <button aria-pressed={tab === "inbox"} onClick={() => { setMail(null); setTab("inbox"); }}>Inbox{newMail ? <span className="seg-badge">{newMail}</span> : null}</button>
             <button aria-pressed={tab === "map"} onClick={() => setTab("map")}>Map</button>
             <button aria-pressed={tab === "team"} onClick={() => setTab("team")}>Team</button>
           </div>

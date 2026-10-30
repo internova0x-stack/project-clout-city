@@ -424,7 +424,7 @@ a { color:inherit; }
 .modal-light { background:var(--surface-sheet); color:var(--text-1); border-radius:var(--r-xl); padding:24px 20px 16px; box-shadow:var(--elev-4); animation:reveal-rise .32s ease-out; }
 .stat-fill.good { background:var(--green-500); } .stat-fill.mid { background:var(--taxi-400); } .stat-fill.low { background:var(--red-500); }
 .segmented { display:flex; height:44px; padding:4px; border-radius:14px; background:var(--chip-off); }
-.segmented button { flex:1; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out, color .2s ease-out; }
+.segmented button { flex:1 1 0; min-width:0; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out, color .2s ease-out; }
 .segmented button[aria-pressed="true"] { background:var(--night-900); color:#fff; }  /* Owner, Oct 19: the active tab is black, like done tasks. */
 .lb-sheet { display:flex; flex-direction:column; gap:20px; padding-bottom:12px; }
 .lb-summary { display:flex; flex-direction:column; gap:4px; }
@@ -2647,3 +2647,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .link-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; width:100%; background:none; border:0; padding:0;
   text-align:left; font:inherit; color:inherit; cursor:pointer; }
 .link-row > .meta { flex:none; color:var(--accent, #C8102E); font-weight:600; }
+.clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* A count on a segmented tab (Campaign HQ's Inbox): a small pill instead of "(4)" (owner, Oct 30: even, tidy tabs). */
+.seg-badge { min-width:18px; height:18px; padding:0 5px; border-radius:var(--r-pill); background:var(--accent, #C8102E); color:#fff; font-size:11px; font-weight:700; line-height:18px; }
