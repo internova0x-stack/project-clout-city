@@ -167,7 +167,10 @@ components live in `app/globals.css`.
   (migration 0133): the app's `window.cloutSteam.ticket()` → `components/SteamBridge.tsx` on `/` → `/api/steam/session`,
   which checks the ticket with Steam (lib/steam.ts, env `STEAM_APP_ID`, `STEAM_WEB_API_KEY`) and signs in the account in
   `steam_accounts` (or makes one, `steam-<id>@users.cloutcity.app`, never mailed); signed in with email inside the app, it
-  links instead. `/?bye=1` waits for "Continue with Steam". Next: Steam checkout for one-time items (VIP later).
+  links instead. `/?bye=1` waits for "Continue with Steam". Steam checkout (migration 0134, app/home/steamStoreActions.ts):
+  in the app only (user agent `CloutCitySteam/`; Stripe refuses there, Steam refuses on the web): `start_purchase` with
+  session `steam:<order>`, `InitTxn` in the wallet currency (game_settings 'steam_store' rates), the app relays Steam's
+  answer (`cloutSteam.authorized`), `FinalizeTxn` then `payment_grant`. One-time items only (VIP later); refunds by hand.
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome

@@ -64,3 +64,84 @@ export function steamError(code: string | undefined): string {
     default: return "Steam sign-in didn't work. Restart the game and try again.";
   }
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Steam checkout (step 3; docs/STEAM.md). Inside a Steam game, real-money items are paid through Steam's own checkout
+// (ISteamMicroTxn): the server starts an order (InitTxn), Steam shows the player its overlay, the app hears the answer
+// and the server finalizes it (FinalizeTxn). Then the same payment_grant the Stripe webhook uses unlocks the item.
+// ---------------------------------------------------------------------------------------------------------------
+
+/** Steam's checkout endpoints; the sandbox charges nothing (STEAM_MICROTXN_SANDBOX=1). */
+export const microTxnBase = (sandbox: boolean) => `${PARTNER_API}/${sandbox ? "ISteamMicroTxnSandbox" : "ISteamMicroTxn"}`;
+
+/** A product's Steam item id: a stable 32-bit number from its sku (FNV-1a), never 0. */
+export function steamItemId(sku: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < sku.length; i++) { h ^= sku.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h || 1;
+}
+
+/** A new order id: unique per checkout, a positive integer Steam takes as uint64 (kept within JavaScript's safe range). */
+export function newOrderId(now = Date.now(), rand = Math.random): string {
+  return String(now * 1000 + Math.floor(rand() * 1000));
+}
+
+/** The purchase row's session for a Steam order (purchases.stripe_session_id holds both kinds). */
+export const steamSession = (orderId: string) => `steam:${orderId}`;
+
+/**
+ * The price in the player's Steam wallet currency, in cents. Prices are set in US dollars (store_products); other
+ * wallets pay the dollar price times the rate in game_settings 'steam_store', rounded up to .99. A currency without a
+ * rate isn't offered (null).
+ */
+export function steamPrice(usdCents: number, currency: string, rates: Record<string, number>): number | null {
+  const c = currency.toUpperCase();
+  if (c === "USD") return usdCents;
+  const rate = rates[c];
+  if (!(rate > 0)) return null;
+  return Math.max(99, Math.ceil((usdCents * rate) / 100) * 100 - 1);
+}
+
+type Post = (url: string, body: URLSearchParams) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
+const post: Post = (url, body) => fetch(url, { method: "POST", body }) as unknown as ReturnType<Post>;
+
+type Answer = { ok: true; params: Record<string, unknown> } | { ok: false; error: string };
+
+async function steamCall(fn: () => ReturnType<Post>): Promise<Answer> {
+  try {
+    const res = await fn();
+    const body = (await res.json().catch(() => null)) as { response?: { result?: string; params?: Record<string, unknown>; error?: { errordesc?: string } } } | null;
+    const r = body?.response;
+    if (res.ok && r?.result === "OK") return { ok: true, params: r.params ?? {} };
+    return { ok: false, error: r?.error?.errordesc ?? `steam_${res.status}` };
+  } catch {
+    return { ok: false, error: "steam_down" };
+  }
+}
+
+/** The player's Steam wallet: its currency (and whether Steam lets them buy). */
+export async function steamWallet(cfg: SteamConfig, steamId: string, sandbox: boolean, fetchImpl: Fetch = fetch as unknown as Fetch): Promise<{ ok: true; currency: string } | { ok: false; error: string }> {
+  const r = await steamCall(() => fetchImpl(`${microTxnBase(sandbox)}/GetUserInfo/v2/?key=${encodeURIComponent(cfg.key)}&steamid=${steamId}`) as ReturnType<Post>);
+  if (!r.ok) return r;
+  const status = String(r.params.status ?? "");
+  if (status && status !== "Active" && status !== "Trusted") return { ok: false, error: "wallet_locked" };
+  return { ok: true, currency: String(r.params.currency ?? "USD") };
+}
+
+export interface SteamOrder { orderId: string; steamId: string; sku: string; name: string; amount: number; currency: string }
+
+/** Starts the order; Steam then shows the player its checkout in the overlay. */
+export function initTxn(cfg: SteamConfig, o: SteamOrder, sandbox: boolean, postImpl: Post = post): Promise<Answer> {
+  const body = new URLSearchParams({
+    key: cfg.key, orderid: o.orderId, steamid: o.steamId, appid: cfg.appId, itemcount: "1", language: "en",
+    currency: o.currency.toUpperCase(), usersession: "client",
+    "itemid[0]": String(steamItemId(o.sku)), "qty[0]": "1", "amount[0]": String(o.amount),
+    "description[0]": `Clout City: ${o.name}`.slice(0, 128),
+  });
+  return steamCall(() => postImpl(`${microTxnBase(sandbox)}/InitTxn/v3/`, body));
+}
+
+/** Completes an order the player approved; only then is the money taken. */
+export function finalizeTxn(cfg: SteamConfig, orderId: string, sandbox: boolean, postImpl: Post = post): Promise<Answer> {
+  return steamCall(() => postImpl(`${microTxnBase(sandbox)}/FinalizeTxn/v2/`, new URLSearchParams({ key: cfg.key, orderid: orderId, appid: cfg.appId })));
+}

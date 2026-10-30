@@ -341,7 +341,9 @@ Only needed for the Steam app. Without these, the Steam app still opens the game
 | `STEAM_APP_ID` | Steamworks → your app's number (the App ID). |
 | `STEAM_WEB_API_KEY` | Steamworks → Users & Permissions → Manage Groups → your group → **Create WebAPI Key** (a *publisher* key, not a personal one). Server only: never put it in `NEXT_PUBLIC_*`. |
 
-Run migration 0133 before turning Steam sign-in on.
+| `STEAM_MICROTXN_SANDBOX` | `1` while testing Steam checkout (Steam's sandbox, no money moves); remove it to sell for real. |
+
+Run migrations 0133 and 0134 before turning Steam on.
 
 ## 3. Local development (optional)
 

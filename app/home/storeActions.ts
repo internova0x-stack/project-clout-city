@@ -6,6 +6,7 @@ import { forgetCustomer } from "@/lib/supabase/stripeCustomer";
 import { RETURN_PARAM, storeError, type CheckoutResult, type StoreProduct } from "@/lib/store";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
+import { inSteamApp } from "./steamStoreActions";
 
 // Real-money checkout (Payments Brief v2). The server creates the Stripe Checkout
 // Session; only the webhook (app/api/stripe/webhook) ever grants what was bought.
@@ -29,6 +30,8 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
   if (!secret || !process.env.STRIPE_WEBHOOK_SECRET || !process.env.SUPABASE_SERVICE_ROLE_KEY || !supabase) {
     return { ok: false, error: storeError("payments_off") };
   }
+  // Steam doesn't allow another checkout inside a Steam game: the Steam app pays through Steam (steamStoreActions.ts).
+  if (await inSteamApp()) return { ok: false, error: "Buy this with Steam checkout in the Steam app." };
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Sign in first." };
   const { data: product } = await supabase
@@ -69,7 +72,8 @@ export async function startCheckout(sku: string): Promise<CheckoutResult> {
     }
     // Migration 0130: the player's older open checkout for this product (or another chat plan) is closed, so only this
     // one can be paid. If the older one was paid in the meantime, this one closes instead.
-    for (const old of (replaced as string[] | null) ?? []) {
+    // A replaced Steam order (steam:…) can't be paid any more: Steam never finalizes it.
+    for (const old of ((replaced as string[] | null) ?? []).filter((id) => id.startsWith("cs_"))) {
       if (!(await expireCheckoutSession(secret, old))) {
         await expireCheckoutSession(secret, session.id).catch(() => true);
         return { ok: false, error: storeError("already_owned") };

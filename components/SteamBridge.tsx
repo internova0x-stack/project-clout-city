@@ -11,7 +11,12 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 declare global {
   interface Window {
-    cloutSteam?: { ticket(): Promise<string>; name(): Promise<string> };
+    cloutSteam?: {
+      ticket(): Promise<string>;
+      name(): Promise<string>;
+      /** Waits for Steam's answer to a checkout order (the overlay's Authorize or Cancel); false after 15 minutes. */
+      authorized?(orderId: string): Promise<boolean>;
+    };
   }
 }
 
