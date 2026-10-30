@@ -33,7 +33,7 @@ import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
 import { buildSetHat, SET_HAT_HIDES_HAIR } from "./setHats";
 import { buildBodyAccessory, buildHeadAccessory, type BodyFit } from "./accessories";
-import { ACCESSORY_HATS, ACCESSORY_HIDES_HAIR, COVERING_ACCESSORIES } from "@/lib/accessories";
+import { ACCESSORY_HATS, ACCESSORY_HIDES_HAIR, COVERING_ACCESSORIES, starterAccessory } from "@/lib/accessories";
 import type { Finish } from "@/lib/avatarCatalog";
 import type { ModelAvatarOptions } from "./modelAvatar";
 
@@ -428,7 +428,11 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
   // Shop accessories (lib/accessories.ts): a Shop hat steps aside for a faith or culture covering too, and otherwise
   // wins over the outfit's hat; Shop glasses replace the Look's.
   const keeps = KEEPS_COVERING.has(look.covering);
-  const extras = (opts.bare ? [] : outfit.extras ?? []).filter((x) => !(x.slot === "head" && keeps));
+  // The starting look's signature piece (owner, Oct 30), unless a Shop piece fills its slot or a whole outfit is worn.
+  const own = opts.bare || outfit.set ? null : starterAccessory(outfit.accessory, outfit.accessoryColor);
+  const shopExtras = [...(opts.bare ? [] : outfit.extras ?? [])];
+  if (own && !shopExtras.some((x) => x.slot === own.slot)) shopExtras.push(own);
+  const extras = shopExtras.filter((x) => !(x.slot === "head" && keeps));
   const headExtra = extras.find((x) => x.slot === "head");
   const setHat = opts.bare || keeps || headExtra ? undefined : (outfit.set ? SET_LOOKS[outfit.set]?.[sex]?.hat : undefined);
   const anyHat = !!setHat || !!headExtra;

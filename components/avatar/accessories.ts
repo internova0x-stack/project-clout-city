@@ -259,6 +259,32 @@ export function buildBodyAccessory(a: AccessoryWear, f: BodyFit): { group: Group
       }
       break;
     }
+    case "lanyard": {
+      // A cord from behind the neck down to a badge on the chest.
+      const cord = mat(a.color, { roughness: 0.8 });
+      const badgeAt = new Vector3(f.neck.at.x, f.neck.at.y - 0.2, Math.max(f.neck.chestFront + f.gap, f.neck.at.z + neckR) + 0.01);
+      for (const s of [-1, 1]) {
+        const path = [
+          new Vector3(f.neck.at.x + s * 0.01, f.neck.at.y + 0.01, f.neck.at.z - neckR),
+          new Vector3(f.neck.at.x + s * (neckR + 0.004), f.neck.at.y, f.neck.at.z),
+          new Vector3(f.neck.at.x + s * 0.035, f.neck.at.y - 0.06, badgeAt.z - 0.004),
+          new Vector3(badgeAt.x + s * 0.008, badgeAt.y + 0.035, badgeAt.z),
+        ];
+        add(new TubeGeometry(new CatmullRomCurve3(path), 20, 0.004, 5, false), cord);
+      }
+      add(new BoxGeometry(0.055, 0.075, 0.005), mat(a.accent, { roughness: 0.4 }), badgeAt.x, badgeAt.y, badgeAt.z);
+      add(new BoxGeometry(0.035, 0.012, 0.006), cord, badgeAt.x, badgeAt.y + 0.022, badgeAt.z);
+      break;
+    }
+    case "phone": {
+      // A phone in the right hand, held a little out in front, screen lit toward the viewer.
+      bone = "RightHand";
+      const h = f.hand;
+      const x = h.x + Math.sign(h.x || 1) * 0.01;
+      add(new BoxGeometry(0.075, 0.15, 0.012), mat(a.color, { roughness: 0.3, metalness: 0.4 }), x, h.y - 0.05, h.z + 0.05);
+      add(new BoxGeometry(0.065, 0.135, 0.002), mat("#9FC3FF", { roughness: 0.1 }), x, h.y - 0.05, h.z + 0.0565);
+      break;
+    }
     case "sling": {
       // The strap follows the measured path (over one shoulder, across to the other hip, back up behind); the bag sits
       // at the front of that hip, tipped along the strap.

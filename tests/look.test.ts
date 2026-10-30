@@ -68,13 +68,13 @@ test("v0.7: body types per presentation; older rows keep their shape and Bodega 
   }
 });
 
-test("v0.7: a starter fit must use its style's garments; its colors are the starter ones (owner, Oct 22)", () => {
-  const fit = { top: "hoodie", topColor: "#8E8C94", bottom: "shorts", bottomColor: "#26232D", shoeColor: "#F4F1EA" };
+test("v0.7: a starter fit must use its style's garments; its colors are the look's own (owner, Oct 22 and 30)", () => {
+  const fit = { top: "hoodie", topColor: "#1F4FB5", bottom: "shorts", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA" };
   assert.deepEqual(normalizeLook({ fit }, "bodega_drip").fit, fit);
   assert.equal(normalizeLook({ fit: { ...fit, top: "blazer" } }, "bodega_drip").fit, null, "not a Bodega Drip top");
-  assert.deepEqual(normalizeLook({ fit: { ...fit, topColor: "#2F6FDB" } }, "bodega_drip").fit, fit, "an old color reads as the starter one");
+  assert.deepEqual(normalizeLook({ fit: { ...fit, topColor: "#8E8C94" } }, "bodega_drip").fit, fit, "an old color reads as the look's own");
   assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit }, "bodega_drip"), true);
-  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit: { ...fit, topColor: "#2F6FDB" } }, "bodega_drip"), false, "no other colors at sign-up");
+  assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit: { ...fit, topColor: "#8E8C94" } }, "bodega_drip"), false, "no other colors at sign-up");
   assert.equal(isValidLook({ ...lookChoices(DEFAULT_LOOK), fit: { ...fit, bottom: "gown" } }, "bodega_drip"), false);
 });
 
