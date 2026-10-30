@@ -21,8 +21,8 @@ export interface PartyRoomApi {
 
 /** How many other people each player sees at a party (spec: 8 to 10). */
 export const ROOM_SIZE = 9;
-/** How often the room checks in (ms). */
-export const PARTY_POLL_MS = 4000;
+/** How often the room checks in (ms): a backup now; new messages ring the room's doorbell (lib/live.ts) at once. */
+export const PARTY_POLL_MS = 15_000;
 
 /** One figure in the room: a real player, or an NPC filling the gap (no mark: only real players get the green dot). */
 export type CrowdMember =

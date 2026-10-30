@@ -167,7 +167,7 @@ export function buildMapStyle(theme: MapTheme, boroughs: GeoJSON.FeatureCollecti
       {
         // 3D buildings from OpenStreetMap heights; they rise in as you zoom to street level.
         id: "buildings-3d", type: "fill-extrusion", source: "osm", "source-layer": "building", minzoom: 13,
-        // Landmark models (components/map/landmarkLayer.ts) replace the blocks they stand on.
+        // Landmark sites stay clear of OpenStreetMap buildings (the borough sheet's street map).
         filter: ["all", ["!=", ["get", "hide_3d"], true], clearOfLandmarks(landmarks)],
         paint: {
           "fill-extrusion-color": [

@@ -1,5 +1,6 @@
 "use client";
 
+import { dmTopic, everyVisible, ring, useDoorbell, useMyId } from "@/lib/live";
 import { CrownMark } from "../city/Common";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ChatStatus, type ChatSummary, type ChatThread, type ReportReason } from "@/lib/chat";
@@ -81,14 +82,16 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
 
   useEffect(() => { void loadList(); }, [loadList]);
   useEffect(() => { if (openWith) setOpen(openWith); }, [openWith]);
-  // New messages arrive while a thread is open: check every few seconds.
+  // New messages while a thread is open arrive on its doorbell at once (lib/live.ts); a slow check backs it up.
   useEffect(() => {
     if (!open) return;
     setThread(null);
     void loadThread(open.id);
-    const t = setInterval(() => void loadThread(open.id), 5000);
-    return () => clearInterval(t);
+    const t = everyVisible(() => void loadThread(open.id), 30_000);
+    return () => t();
   }, [open, loadThread]);
+  const me = useMyId();
+  useDoorbell(open && me ? dmTopic(me, open.id) : null, () => { if (open) void loadThread(open.id); });
   useEffect(() => { bottom.current?.scrollIntoView({ block: "end" }); }, [thread?.messages.length]);
   // The crush button shows once the chat is two-way (or they're in the crew); re-check as replies arrive.
   const theirs = thread?.messages.filter((m) => !m.mine).length ?? 0;
@@ -121,6 +124,7 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
       return onToast(r.error);
     }
     setDraft("");
+    if (me) ring(dmTopic(me, open.id));
     setStatus((s) => (s ? { ...s, left: r.data.left ?? s.left } : s));
     void loadThread(open.id);
   };

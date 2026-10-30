@@ -61,8 +61,8 @@ export interface VisitApi {
   say(visitId: number, body: string): Promise<VisitResult<VisitMessage>>;
 }
 
-/** How often the room checks in (ms). */
-export const VISIT_POLL_MS = 4000;
+/** How often the room checks in (ms): a backup now; messages, arrivals and departures ring the doorbell (lib/live.ts). */
+export const VISIT_POLL_MS = 15_000;
 
 /** What the host gets for each guest who stays, by the Crib Rating at the start. */
 export function hostCloutPerGuest(kind: VisitKind, crib: number): number {

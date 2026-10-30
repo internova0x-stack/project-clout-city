@@ -13,7 +13,7 @@ import { DISTRICTS, ISLAND_CARD_AT, labelPriority, pickLabels, SPOTS, STREET_NAM
 import { renderQuality } from "@/lib/graphics";
 import type { PlacePin } from "@/lib/places";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
-import type { CityMapProps, MapApi } from "./CityMap";
+import type { CityMapProps, MapApi } from "./types";
 import { createCompactScene, type CompactScene } from "./compactScene";
 
 /** The camera looks north, tilted (degrees from straight down). */

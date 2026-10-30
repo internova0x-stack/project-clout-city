@@ -9,7 +9,7 @@ import type { LatLng } from "@/lib/map/geo";
 import { formatMiles, lineName, milesBetween, skipCost, TRAVEL_MODES, travelQuote, type TravelMode } from "@/lib/travel";
 import { CITY_ECONOMY } from "@/lib/city";
 import { transitUntil, type NewsItem } from "@/lib/news";
-import type { MapApi } from "../map/CityMap";
+import type { MapApi } from "../map/types";
 import { Sheet } from "../Sheet";
 
 export interface TripPlan { from: LatLng; to: LatLng; fromName: string; toName: string; toId: string }
