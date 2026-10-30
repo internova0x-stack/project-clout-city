@@ -1118,7 +1118,7 @@ situations (radio choices, then Decide). After the choice: a one- or two-line re
 **Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
 two-ended meter, not a score: where the player stands between 😇 Halo and 💸 Hustler, and neither end is the bad one. It starts
 in the middle and moves the same rate both ways (the draft's "recovers at half" went with the name). **Private**: only the
-player sees it (Profile → Choices, and under the rank); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
+player sees it (under the rank in the profile; owner, Oct 30: no list of past choices anywhere); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
 pay off:** at the Halo end (70+) choices that move toward Halo pay 25% more clout, and Halo-only cards turn up (Sal's till,
 house-sitting); at the Hustler end (30 or below) choices that move toward Hustler pay 25% more cash, and Hustler-only offers
 find you (a promoter's fake hype, last year's final). **Each end is lucky at its own game** (owner, Oct 30, "option 2"): what
@@ -1136,7 +1136,7 @@ and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, pai
 **As built.** lib/choices.ts (rules, pure), app/home/choiceActions.ts (crypto random, service role), migration 0131
 (`reputation`, `choice_log`, `choice_later`; `choice_context`, `choice_open`, `choice_settle`, `choice_skip`, `choice_land`,
 `choice_seen`, `choice_history`; service role only, rate bucket 'choice'), components/game/Choices.tsx (the card, receipt,
-reveal, "It came back", the record), the Profile's Choices tab, the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
+reveal, "It came back"), the meter under the rank in the profile, the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
 `?choice=now|back|high|low|log`).
 
 **Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Halo- and Hustler-only places and events (a

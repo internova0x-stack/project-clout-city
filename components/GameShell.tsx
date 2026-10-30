@@ -3386,7 +3386,7 @@ export function GameShell({
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
-        choices={choiceS ? { integrity: choiceS.integrity, log: choiceS.log } : undefined}
+        rep={choiceS?.integrity}
         vip={membership && member ? { on: memberVip === "vip", until: member?.vip?.status === "cancelling" ? member.vip.periodEnd : null, onOpen: openMembership }
           : membership && !memberLoaded ? { on: false, onOpen: openMembership, loading: true } : undefined}
       />

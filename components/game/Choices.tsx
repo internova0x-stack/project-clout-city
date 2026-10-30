@@ -125,29 +125,3 @@ export function ChoiceBackSheet({ entry, onClose }: { entry: ChoiceLogEntry | nu
     </Sheet>
   );
 }
-
-/** The profile's record: Halo or Hustler, then every choice and what came back, newest first. */
-export function ChoicesHistory({ integrity, log }: { integrity: number | null; log: ChoiceLogEntry[] }) {
-  const [all, setAll] = useState(false);
-  if (integrity === null && !log.length) return null;
-  const rows = all ? log : log.slice(0, 5);
-  return (
-    <section className="stack-12">
-      <h3 className="overline" style={{ margin: 0 }}>Your choices</h3>
-      {integrity !== null && <RepMeter value={integrity} />}
-      <div className="stack-8">
-        {rows.map((e) => (
-          <div key={e.id} className={`choice-log${e.cameBack ? " back" : ""}`}>
-            <span aria-hidden="true">{e.cameBack ? "↩️" : e.emoji}</span>
-            <span style={{ minWidth: 0 }}>
-              <span className="title" style={{ display: "block" }}>{e.cameBack ? `Came back: ${e.choice}` : e.choice}</span>
-              <span className="meta" style={{ display: "block" }}>{e.receipt}</span>
-              {effectLine(e.effects) && <span className="meta choice-log-fx">{effectLine(e.effects)}</span>}
-            </span>
-          </div>
-        ))}
-      </div>
-      {log.length > 5 && <button className="btn btn-ghost" onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show all ${log.length}`}</button>}
-    </section>
-  );
-}

@@ -2610,7 +2610,3 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .5s ease-out; }
 .rep.compact .rep-bar { height:8px; }
 .profile-rep { display:block; width:100%; padding:12px 14px; border-radius:14px; background:var(--surface-card); text-align:left; color:var(--text-1); }
-.choice-log { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; background:var(--surface-card); font-size:14px; line-height:19px; }
-.choice-log > span:first-child { font-size:20px; line-height:22px; }
-.choice-log.back { box-shadow:inset 4px 0 0 var(--neon-500); }
-.choice-log-fx { display:block; margin-top:2px; font-weight:700; }

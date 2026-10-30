@@ -7,11 +7,9 @@ import type { Outfit } from "@/lib/styles";
 import { formatCash, formatShort } from "@/lib/economy";
 import { recentLine, recentWhen, type RecentItem } from "@/lib/recent";
 import { RankClimb } from "./Ranks";
-import { useRef } from "react";
 import { Sheet } from "../Sheet";
 import { ProfileVip } from "../store/Membership";
-import { ChoicesHistory, RepMeter } from "./Choices";
-import type { ChoiceLogEntry } from "@/lib/choices";
+import { RepMeter } from "./Choices";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
 
@@ -21,7 +19,7 @@ const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
  */
 export function ProfileSheet({
   open, onClose, look, outfit, name, subtitle, looks, clout, rank, netWorth, bestRank, badges, collections, crew, recent,
-  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, vip, choices,
+  onOpenCollection, onOpenNetWorth, onOpenLeaderboard, vip, rep,
 }: {
   open: boolean;
   onClose: () => void;
@@ -46,11 +44,9 @@ export function ProfileSheet({
   onOpenLeaderboard?: () => void;
   /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
   vip?: { on: boolean; until?: string | null; onOpen: () => void; loading?: boolean };
-  /** Moral Choices (migration 0131): the private Halo ↔ Hustler meter and the record of choices; absent until it runs. */
-  choices?: { integrity: number | null; log: ChoiceLogEntry[] };
+  /** Moral Choices (migration 0131): where the player stands, Halo ↔ Hustler (private); null until their first choice. */
+  rep?: number | null;
 }) {
-  const choicesRef = useRef<HTMLDivElement>(null);
-  const choicesOn = !!choices && (choices.integrity !== null || choices.log.length > 0);
   const lines = (recent ?? []).map((r) => ({ r, line: recentLine(r) })).filter((x) => x.line);
   const { postcards, huntCards } = collections;
   return (
@@ -72,13 +68,13 @@ export function ProfileSheet({
           {vip && <div style={{ textAlign: "center", visibility: vip.loading ? "hidden" : undefined }} aria-hidden={vip.loading || undefined}>
             <ProfileVip vip={vip.on} until={vip.until} onOpen={vip.onOpen} /></div>}
         </div>
-        {/* One page, no tabs (owner, Oct 30): skills live on the home screen; choices sit further down. */}
+        {/* One page, no tabs (owner, Oct 30): skills live on the home screen; choices aren't listed, only the meter shows. */}
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
-        {choices?.integrity != null && (
-          <button className="profile-rep" onClick={() => choicesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-label="Your choices">
-            <RepMeter value={choices.integrity} compact />
-          </button>
+        {rep != null && (
+          <div className="profile-rep">
+            <RepMeter value={rep} compact />
+          </div>
         )}
         <div className="profile-kpis">
           <button className="profile-kpi" onClick={onOpenLeaderboard}><b>🔥 {formatShort(clout)}</b><span>Clout</span></button>
@@ -123,12 +119,6 @@ export function ProfileSheet({
               <p className="meta" style={{ margin: 0 }}>Nothing yet. Go be seen somewhere.</p>
             )}
             <p className="meta" style={{ margin: 0 }}>Other players can see this on your card.</p>
-          </div>
-        )}
-        {choicesOn && choices && (
-          <div ref={choicesRef} className="stack-8">
-            <ChoicesHistory integrity={null} log={choices.log} />
-            <p className="meta" style={{ margin: 0 }}>Only you can see where you stand and what you chose. The city just acts on it.</p>
           </div>
         )}
         <form action="/auth/signout" method="post">
