@@ -424,7 +424,7 @@ a { color:inherit; }
 .modal-light { background:var(--surface-sheet); color:var(--text-1); border-radius:var(--r-xl); padding:24px 20px 16px; box-shadow:var(--elev-4); animation:reveal-rise .32s ease-out; }
 .stat-fill.good { background:var(--green-500); } .stat-fill.mid { background:var(--taxi-400); } .stat-fill.low { background:var(--red-500); }
 .segmented { display:flex; height:44px; padding:4px; border-radius:14px; background:var(--chip-off); }
-.segmented button { flex:1; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out, color .2s ease-out; }
+.segmented button { flex:1 1 0; min-width:0; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:11px; font-size:15px; font-weight:600; color:var(--text-2); transition:background .2s ease-out, color .2s ease-out; }
 .segmented button[aria-pressed="true"] { background:var(--night-900); color:#fff; }  /* Owner, Oct 19: the active tab is black, like done tasks. */
 .lb-sheet { display:flex; flex-direction:column; gap:20px; padding-bottom:12px; }
 .lb-summary { display:flex; flex-direction:column; gap:4px; }
@@ -2642,3 +2642,16 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .steam-bridge { position:fixed; z-index:70; left:50%; top:calc(16px + var(--safe-top)); transform:translateX(-50%); display:flex; align-items:center; gap:12px;
   padding:10px 16px; border-radius:var(--r-pill); background:var(--glass-solid); color:var(--text-1); box-shadow:var(--elev-3); font-size:14px; font-weight:600; max-width:calc(100% - 32px); }
 .steam-bridge .btn { height:40px; }
+
+/* A card's title row that opens its details (owner, Oct 30: fewer words up front, the rest on tap). */
+.link-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; width:100%; background:none; border:0; padding:0;
+  text-align:left; font:inherit; color:inherit; cursor:pointer; }
+.link-row > .meta { flex:none; color:var(--accent, #C8102E); font-weight:600; }
+.clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* A count on a segmented tab (Campaign HQ's Inbox): a small pill instead of "(4)" (owner, Oct 30: even, tidy tabs). */
+.seg-label { position:relative; }
+/* The count rides the label's top-right corner, so it never pushes the label off center. */
+.seg-badge { position:absolute; left:calc(100% + 2px); top:-7px; min-width:16px; height:16px; padding:0 4px; border-radius:var(--r-pill);
+  background:var(--accent, #C8102E); color:#fff; font-size:10px; font-weight:700; line-height:16px; text-align:center; }
+.clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }

@@ -36,15 +36,17 @@ function CalendarCard({ e, city, nowMs, h }: { e: CalendarEvent; city: CityState
   const r = calendarReward(e, { dressed, gifts });
   const k = CALENDAR_KIND[e.kind];
   const place = placeById(e.place);
+  // Owner, Oct 30: like the block party card, every event shows about three lines of story, then where and when, then
+  // the dress code and gift as one short hint line.
+  const extras = [!went && e.dressCode ? `👗 ${dressed ? `Dressed (+${e.dressCode.clout} 🔥)` : `Dress up: +${e.dressCode.clout} 🔥`}` : "",
+    !went && e.gift ? `🎁 ${gifts > 0 ? "Gift in hand" : `Bring a gift (Sal's or Schlep & Schmear) or −${e.gift.penalty} 🔥`}` : ""].filter(Boolean);
   return (
     <div className={`item-card${e.kind === "invite" ? " calendar-invite" : ""}`}>
       <span className={`tag ${live ? "tag-event" : "tag-neutral"}`}>{k.emoji} {k.label}{live ? " · Happening now" : ""}</span>
       <span className="title" style={{ display: "block" }}>{e.title}</span>
-      {e.host && <span className="meta">From {e.host}</span>}
-      <span className="subtext">{e.blurb}</span>
-      <span className="meta">{place?.name ?? e.place} · {whenLine(e, nowMs)} New York time{e.entry ? ` · Entry ${formatCash(e.entry)}` : " · Free"}</span>
-      {!went && e.dressCode && <span className="meta">👗 {e.dressCode.label}: {dressed ? `you're dressed for it (+${e.dressCode.clout} 🔥)` : `+${e.dressCode.clout} 🔥 if you do`}</span>}
-      {!went && e.gift && <span className="meta">🎁 {e.gift.label}: {gifts > 0 ? "you have one" : `pick one up at Sal's or Schlep & Schmear, or lose ${e.gift.penalty} 🔥`}</span>}
+      <span className="subtext clamp-3">{e.blurb}</span>
+      <span className="meta">{place?.name ?? e.place} · {whenLine(e, nowMs)} New York time{e.entry ? ` · ${formatCash(e.entry)}` : " · Free"}</span>
+      {extras.map((x) => <span key={x} className="meta">{x}</span>)}
       {!went && <EffectChips clout={r.clout} mood={r.mood} />}
       {went ? (
         <span className="owned-chip">You went. The neighborhood remembers.</span>
@@ -55,7 +57,7 @@ function CalendarCard({ e, city, nowMs, h }: { e: CalendarEvent; city: CityState
       ) : !here && h.onGoThere ? (
         <button className="btn btn-secondary btn-sm" onClick={() => h.onGoThere!(e.place)}>{live ? "Go there now" : "Go there"}</button>
       ) : (
-        <span className="meta">It starts on its day and time. Come back then.</span>
+        <span className="meta">Opens on its day.</span>
       )}
     </div>
   );

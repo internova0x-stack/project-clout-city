@@ -31,6 +31,9 @@ export function moveBlock(state: CityState, home: Home): string | null {
   return null;
 }
 
+/** A listing's description, up to its first two sentences. */
+const twoSentences = (t: string) => t.split(/(?<=[.!?])\s+/).slice(0, 2).join(" ");
+
 export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
   state: CityState; busy: boolean; onLookInside: (homeId: string) => void; onMove: (homeId: string) => void;
 }) {
@@ -39,7 +42,7 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
   const next = nextHomeUp(state);
   return (
     <div className="stack-12">
-      <p className="subtext" style={{ margin: 0 }}>Move up when you can. The broker fee is a week&apos;s rent. Nobody knows what it&apos;s for.</p>
+      <p className="subtext" style={{ margin: 0 }}>Moving costs a week&apos;s rent as a broker fee. Nobody knows what for.</p>
       <div className="apt-current">
         <span aria-hidden="true">{p.house_sku ? "🏡" : current?.emoji ?? "🏠"}</span>
         <span>
@@ -58,14 +61,12 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
               <span className="apt-emoji" aria-hidden="true">{h.emoji}</span>
               <span style={{ minWidth: 0 }}>
                 <span className="title" style={{ display: "block" }}>{h.name}</span>
-                <span className="meta">{h.neighborhood} · {formatCash(h.rent)} rent a week</span>
+                <span className="meta">{h.neighborhood} · {formatCash(h.rent)}/week · {rooms} room{rooms > 1 ? "s" : ""}</span>
               </span>
             </div>
-            <div className="chip-row" style={{ gap: 6 }}>
-              {next?.id === h.id && !p.house_sku && <span className="tag tag-event">Next step up</span>}
-              <span className="tag tag-neutral">{rooms} room{rooms > 1 ? "s" : ""}</span>
-            </div>
-            <span className="subtext">{h.blurb}</span>
+            {next?.id === h.id && !p.house_sku && <span className="tag tag-event" style={{ alignSelf: "flex-start" }}>Next step up</span>}
+            {/* Owner, Oct 30: the card keeps a two-sentence description. */}
+            <span className="subtext">{twoSentences(h.blurb)}</span>
             {/* The price on its own line, so the button never wraps (owner, Oct 14). */}
             <span className="apt-cost"><b>{formatCash(cost)}</b> to move in</span>
             {block ? <span className="meta locked">{block}</span>
@@ -77,7 +78,7 @@ export function ApartmentsApp({ state, busy, onLookInside, onMove }: {
           </div>
         );
       })}
-      <p className="meta" style={{ margin: 0 }}>Houses are for sale in the Shop. Your furniture moves with you.</p>
+      <p className="meta" style={{ margin: 0 }}>Houses are in the Shop. Furniture moves with you.</p>
     </div>
   );
 }

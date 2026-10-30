@@ -331,7 +331,8 @@ function GigsApp({ state, now, busy, onAccept, onCollect, perks }: { state: City
           <div key={g.id} className={`gig-card${locked ? " locked" : ""}`}>
             <span className={`tag ${TIER_TAG[g.tier].cls}`}>{locked ? "🔒 " : ""}{TIER_TAG[g.tier].label}</span>
             <span className="title" style={{ display: "block" }}>{g.title}</span>
-            <span className="subtext">{blurbFor(g)}</span>
+            {/* Owner, Oct 30: the original card, its description held to two lines. */}
+            <span className="subtext clamp-2">{blurbFor(g)}</span>
             <span className="meta gig-meta">
               <span className="money-pos">{formatCash(g.pay)}</span> · ⚡ −{g.energy} · ⏱ {g.wait_minutes >= 60 ? `${g.wait_minutes / 60} h` : `${g.wait_minutes} min`}
             </span>
