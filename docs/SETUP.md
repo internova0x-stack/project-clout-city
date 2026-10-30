@@ -332,6 +332,17 @@ notify pgrst, 'reload config';
 
 Running 0126 again (or the `alter role ... set` line in it) switches them back on.
 
+## 2h. Steam (docs/STEAM.md, migration 0133)
+
+Only needed for the Steam app. Without these, the Steam app still opens the game but Steam sign-in says it isn't on.
+
+| Vercel variable | Where it comes from |
+|---|---|
+| `STEAM_APP_ID` | Steamworks → your app's number (the App ID). |
+| `STEAM_WEB_API_KEY` | Steamworks → Users & Permissions → Manage Groups → your group → **Create WebAPI Key** (a *publisher* key, not a personal one). Server only: never put it in `NEXT_PUBLIC_*`. |
+
+Run migration 0133 before turning Steam sign-in on.
+
 ## 3. Local development (optional)
 
 ```bash

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Bungee, Inter, Permanent_Marker } from "next/font/google";
 import Script from "next/script";
+import { Suspense } from "react";
+import { SteamBridge } from "@/components/SteamBridge";
 import "./globals.css";
 import { launchStartupImages } from "@/lib/launchImages";
 import { ConsentBanner } from "@/components/ConsentBanner";
@@ -46,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Script id="cc-boot" strategy="beforeInteractive">{NO_BLUR_SCRIPT}</Script>
         {/* On wide screens the game sits in a phone-sized frame (see .device in globals.css). */}
-        <div className="device">{children}<ConsentBanner /></div>
+        <div className="device">{children}<ConsentBanner /><Suspense fallback={null}><SteamBridge /></Suspense></div>
       </body>
     </html>
   );
