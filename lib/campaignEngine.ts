@@ -126,6 +126,7 @@ export function applyEffects(state: CampaignState, e: Effects, place: string | u
   if (e.favors) state.favors = Math.max(0, state.favors + e.favors);
   if (e.dirtyFavors) state.dirtyFavors = Math.max(0, state.dirtyFavors + e.dirtyFavors);
   if (e.intel) state.intel = Math.max(0, state.intel + e.intel);
+  if (e.ally) state.trust[e.ally] = Math.max(state.trust[e.ally] ?? 0, 1);
 }
 
 export function weakestPlace(state: CampaignState): string {

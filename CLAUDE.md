@@ -253,7 +253,7 @@ components live in `app/globals.css`.
   challengers' campaigns (content/campaign/*.json: Goldcrest, Castellano, Kowalczyk, Starr) against Mayor Papa-Dani, one campaign
   week per real New York day. The rules are TypeScript, not SQL: lib/campaignEngine.ts (pure, every roll from an injected random
   source) runs in app/home/campaignActions.ts with a crypto random source and the service role, and in the preview's memory
-  (lib/campaignSim.ts, results in 6 seconds; `?campaign=locked|pick|week|situation|debate|waiting|election`). Players only get
+  (lib/campaignSim.ts, results in 6 seconds; `?campaign=locked|pick|week|situation|bribe|debate|waiting|election`). Players only get
   `campaignView` (no traces, fact-checks, queued trouble, fail odds or effects; results hidden until the next New York day);
   the content files hold the odds, so only the server and the preview import lib/campaignContent.ts (its client chunk is referenced only by /preview, a 404 in production). public.campaigns (state jsonb,
   RLS on, no grants) is written by `campaign_begin` (Rank 2, one running, one start every 7 days, a seed up to C$1,000: ledger
@@ -263,6 +263,8 @@ components live in `app/globals.css`.
   and paid, but `goal_current` only suggests them while a campaign runs. Entry: the Phone's Campaign app (the teaser before Rank 2,
   `APP_UNLOCKS.campaign`), News → City's "Upcoming election" card while none runs, the Rank 2 reveal and Lola's unlock line;
   `/home?open=campaign`. Tuning: tests/campaign.test.ts plays thousands of campaigns (clean ~45-65% wins, dirty ~55-80%).
+  Bought endorsements and votes (owner, Oct 30): nine situation cards (`buy_*`, `votes_*`, `mayor_buys`); the choice effect
+  `ally` puts a stakeholder on the campaign's side (a bought Mayor ally leaves Poach Ally one fewer target).
   Part 2 (migration 0128): campaign tasks (content/campaign/tasks.json: two a campaign week, one from the campaign's state, one in
   the candidate's voice; title ≤ 35 and tag ≤ 30 characters filled in, tests check it; `taskDone` reads the week's plan; 15 clout
   each at End Week, ledger 'campaign_task') in Campaign HQ and under the five in the Tasks sheet (not part of the five or the

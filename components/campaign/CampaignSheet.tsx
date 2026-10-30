@@ -471,6 +471,7 @@ function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView;
               : { get: "One of his allies switches: you +1.5, him -1.5, and a check", cost: "C$15,000 or 3 Favors, Heat +6, Integrity -4", risk: "high", why: "Some allies double-cross", later: true }} />
             <label className="row" style={{ gap: 8 }}><input type="checkbox" checked={cutout} onChange={(e) => setCutout(e.target.checked)} /> Use a cut-out (+50% cost, harder to trace, may go off-script)</label>
             {refused && <p className="subtext" style={{ margin: 0 }}>Your candidate won't do this. Booking it talks them round: team morale -10.</p>}
+            {op === "poach_ally" && !v.mayorAllies.length && <p className="subtext" style={{ margin: 0 }}>Every one of the Mayor&apos;s allies is already on your side.</p>}
             <div className="stack-8">
               {(op === "fake_news" ? v.places.map((p) => ({ id: p.id, name: p.name, sub: `Mayor ${p.mayor.toFixed(0)}` })) : v.mayorAllies.map((a) => ({ id: a.id, name: a.name, sub: a.role }))).map((t) => (
                 <button key={t.id} className="camp-slot" disabled={busy} onClick={() => onSet({ kind: "op", op, target: t.id, cutout, persuaded: refused || undefined })}>
