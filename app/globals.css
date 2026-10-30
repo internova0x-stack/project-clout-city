@@ -2604,3 +2604,5 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .rep-bar span { position:absolute; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:var(--surface-raised);
   box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .5s ease-out; }
 .rep.compact .rep-bar { height:8px; }
+.choice-lola { display:flex; gap:8px; align-items:flex-start; margin:0; font-size:14px; line-height:19px; color:var(--text-1); }
+.choice-lola img { flex:none; border-radius:50%; object-fit:cover; }

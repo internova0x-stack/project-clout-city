@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { CHOICES, effectLine, integrityBand, integrityWord, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade } from "@/lib/choices";
+import { useEffect, useState } from "react";
+import { CHOICES, effectLine, integrityBand, integrityWord, lolaRepLine, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade } from "@/lib/choices";
 import { placeById } from "@/lib/city";
+import { LOLA_PORTRAIT } from "@/lib/cast";
 import { Sheet } from "../Sheet";
 
 // Moral Choices (spec section 29): the situation card, its receipt, the Halo ↔ Hustler reveal, a consequence coming back,
@@ -16,19 +17,25 @@ const AREA: Record<string, string> = {
 
 /**
  * The rep meter, 😇 Halo ↔ 💸 Hustler (owner, Oct 30): where you stand, never a score, and neither end is the bad one.
- * For the reveal and the profile. Private: only the player ever sees it.
+ * Shown only as the nudge after a choice (owner, Oct 30: "Have it as a nudge for now"): the dot slides from where you
+ * were (`from`) to where the choice put you. Private: only the player ever sees it.
  */
-export function RepMeter({ value, compact }: { value: number; compact?: boolean }) {
-  const band = integrityBand(value);
-  const at = 100 - value; // Halo on the left
+export function RepMeter({ value, from, compact }: { value: number; from?: number; compact?: boolean }) {
+  const [shown, setShown] = useState(from ?? value);
+  useEffect(() => {
+    const t = setTimeout(() => setShown(value), 350);
+    return () => clearTimeout(t);
+  }, [value]);
+  const band = integrityBand(shown);
+  const at = 100 - shown; // Halo on the left
   return (
     <div className={`rep ${band}${compact ? " compact" : ""}`}>
       <div className="rep-ends">
         <span>😇 Halo</span>
-        <b>{integrityWord(value)}</b>
+        <b>{integrityWord(shown)}</b>
         <span>Hustler 💸</span>
       </div>
-      <div className="rep-bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={at} aria-valuetext={integrityWord(value)} aria-label="Halo or Hustler">
+      <div className="rep-bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={at} aria-valuetext={integrityWord(shown)} aria-label="Halo or Hustler">
         <i style={{ left: `${100 - CHOICES.high}%` }} /><i style={{ left: `${100 - CHOICES.low}%` }} />
         <span style={{ left: `${at}%` }} />
       </div>
@@ -37,20 +44,31 @@ export function RepMeter({ value, compact }: { value: number; compact?: boolean 
 }
 
 function Receipt({ made, onClose }: { made: ChoiceMade; onClose: () => void }) {
-  const line = effectLine(made.effects);
+  // The nudge shows the Halo ↔ Hustler move, so the line of numbers leaves it out.
+  const line = effectLine({ ...made.effects, integrity: undefined });
+  const moved = made.effects.integrity ?? 0;
+  // Option 2: Lola says so when the choice tipped you into an end (or back to the middle). Not on the very first choice.
+  const lola = made.first ? null : lolaRepLine(made.integrity - moved, made.integrity, made.receipt.length);
   return (
     <div className="stack-16">
       <p className="choice-receipt">{made.receipt}</p>
       {line && <p className="choice-effects">{line}</p>}
-      {made.first && (
-        <div className="choice-reveal stack-8">
-          <span className="overline">New: Halo or Hustler?</span>
-          <RepMeter value={made.integrity} />
+      <div className="choice-reveal stack-8">
+        {made.first && <span className="overline">New: Halo or Hustler?</span>}
+        <RepMeter value={made.integrity} from={made.integrity - moved} compact={!made.first} />
+        {lola && (
+          <p className="choice-lola">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={LOLA_PORTRAIT} alt="" width={28} height={28} />
+            <span><b>Lola:</b> {lola}</span>
+          </p>
+        )}
+        {made.first && (
           <p className="meta" style={{ margin: 0 }}>
             Every choice nudges you one way. Halos get trusted, Hustlers get offers, and each is lucky at its own game. Only you see this.
           </p>
-        </div>
-      )}
+        )}
+      </div>
       <button className="btn btn-taxi" onClick={onClose}>{made.first ? "Noted" : "Moving on"}</button>
     </div>
   );

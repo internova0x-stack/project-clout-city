@@ -106,7 +106,7 @@ test("effects are capped, and a loss never takes more than the bank holds", () =
 test("three regulars can tell a Halo from a Hustler, in words, never the meter", async () => {
   const { reputationLine } = await import("../lib/culture.ts");
   const profiles = npcs.profiles;
-  for (const id of ["sal", "jojo", "gus"]) {
+  for (const id of ["sal", "jojo", "gus", "tariq", "hersh", "arben"]) {
     assert.ok(reputationLine(profiles, id, "high", 0) && reputationLine(profiles, id, "low", 1), id);
     assert.equal(reputationLine(profiles, id, "middle", 0), null);
     for (const l of [...profiles.find((p: { id: string }) => p.id === id).reputation.halo, ...profiles.find((p: { id: string }) => p.id === id).reputation.hustler]) {
@@ -134,4 +134,13 @@ test("each end is lucky at its own game: Hustlers' angles bite less, Halos' good
   };
   const hustler = caught(20), middle = caught(50), halo = caught(80);
   assert.ok(hustler < middle && middle < halo, `${hustler} < ${middle} < ${halo}`);
+});
+
+test("Lola speaks up only when a choice tips you into an end or back to the middle", async () => {
+  const { lolaRepLine, LOLA_REP } = await import("../lib/choices.ts");
+  assert.equal(lolaRepLine(50, 55), null, "no new band, no word");
+  assert.ok(LOLA_REP.high.includes(lolaRepLine(66, 72)!));
+  assert.ok(LOLA_REP.low.includes(lolaRepLine(34, 28)!));
+  assert.ok(LOLA_REP.middle.includes(lolaRepLine(72, 66)!));
+  for (const l of Object.values(LOLA_REP).flat()) assert.ok(l.length <= 240 && !/integrity|\bhalo\b|\bhustler\b/i.test(l), l);
 });

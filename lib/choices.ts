@@ -158,6 +158,33 @@ export function integrityWord(n: number): string {
   return "Certified Hustler";
 }
 
+/**
+ * Lola's word when a choice tips the player into an end, or back to the middle (owner, Oct 30, option 2: "let the city
+ * tell you"). One line on that receipt; never names the meter. Voice: docs/culture/VOICE.md (celebrity-news desk).
+ */
+export const LOLA_REP: Record<IntegrityBand, string[]> = {
+  high: [
+    "BREAKING: sources on Steinway say you're the one they trust with the spare keys. We reached out for comment. You were helping someone carry groceries.",
+    "Developing: three separate delis now let you run a tab. Insiders call it unheard of.",
+  ],
+  low: [
+    "BREAKING: word on the N is you always have an angle. We reached out for comment. Your reply: 'DM me.' 👀",
+    "Sources tell me half of Astoria owes you a favor and the other half owes you money. Developing.",
+  ],
+  middle: [
+    "Developing: nobody on the block can read you right now, babe. In this city, that's a flex.",
+    "Insiders say you're back in the middle. Keeping everyone guessing, we're told.",
+  ],
+};
+
+/** Lola's line when a choice moved the player into another band (`from` → `to`), or null. */
+export function lolaRepLine(from: number, to: number, n = 0): string | null {
+  const a = integrityBand(from), b = integrityBand(to);
+  if (a === b) return null;
+  const lines = LOLA_REP[b];
+  return lines[Math.abs(n) % lines.length];
+}
+
 /** Each end's payoff: a Halo's Halo-ward choices pay more clout, a Hustler's Hustler-ward choices more cash. */
 export function repBonus(e: ChoiceEffects, now: number): ChoiceEffects {
   const band = integrityBand(now);

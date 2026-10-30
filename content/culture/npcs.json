@@ -593,7 +593,17 @@
       "slang": [
         "say-less",
         "facts"
-      ]
+      ],
+      "reputation": {
+        "halo": [
+          "Two slices for a dollar. For you, spiritually and actually.",
+          "The sign is sentimental and so am I. You're good people. Say less."
+        ],
+        "hustler": [
+          "Whatever you're about to offer me, the answer's a dollar a slice.",
+          "You'd sell the sign if I let you. Two slices, cash, and nobody gets hurt."
+        ]
+      }
     },
     {
       "id": "tariq",
@@ -626,7 +636,17 @@
         "b",
         "deadass",
         "fuhgeddaboudit"
-      ]
+      ],
+      "reputation": {
+        "halo": [
+          "Everybody's honest at three a.m., but you're honest at noon. Extra white sauce, on the house.",
+          "The cabbies say you tipped right on a broken meter. Respect. Sit, the falafel's fresh."
+        ],
+        "hustler": [
+          "Three a.m. and here you are with a business plan. Red sauce for you. Careful.",
+          "Half the night shift owes you a favor, I hear. Pay for your platter like a civilian, please."
+        ]
+      }
     },
     {
       "id": "lou",
@@ -717,7 +737,17 @@
         "schmear",
         "kvetch",
         "putz"
-      ]
+      ],
+      "reputation": {
+        "halo": [
+          "You. The honest one. Extra pickles, don't argue.",
+          "On line, then straight to the front. People vouch for you. Don't let it go to your head."
+        ],
+        "hustler": [
+          "I'm watching the pickle barrel. Nothing personal. Everything bagel?",
+          "You've got an angle, I can see it from here. The pastrami's still full price."
+        ]
+      }
     },
     {
       "id": "kiki",

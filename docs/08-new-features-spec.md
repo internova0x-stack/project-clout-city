@@ -1119,13 +1119,16 @@ they never reach the player. Then Decide, and a one- or two-line receipt with wh
 **Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
 two-ended meter, not a score: where the player stands between 😇 Halo and 💸 Hustler, and neither end is the bad one. It starts
 in the middle and moves the same rate both ways (the draft's "recovers at half" went with the name). **Private**: only the
-player sees it (on the first-choice reveal; owner, Oct 30: not in the profile, and no list of past choices anywhere); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
+player sees it, as a nudge on each choice's receipt: a slim Halo ↔ Hustler line with the dot sliding the way the choice
+pushed (owner, Oct 30: "Have it as a nudge for now"; not in the profile, and no list of past choices anywhere). Otherwise the
+city tells you (option 2): when a choice tips you into an end, or back to the middle, Lola says so in one line on that receipt
+(`LOLA_REP`), and six regulars (Sal, Jojo, Gus, Tariq, Hersh, Arben) talk to each end differently; it appears with the first choice ("New: Halo or Hustler?"). **Both ends
 pay off:** at the Halo end (70+) choices that move toward Halo pay 25% more clout, and Halo-only cards turn up (Sal's till,
 house-sitting); at the Hustler end (30 or below) choices that move toward Hustler pay 25% more cash, and Hustler-only offers
 find you (a promoter's fake hype, last year's final). **Each end is lucky at its own game** (owner, Oct 30, "option 2"): what
 comes back later is tilted by where the player stands (`laterOdds`). A Hustler's angles come back to bite half as often and a
 Halo's 1.5 times as often (everyone's watching a Halo); a Halo's good deeds come back as a reward 1.5 times as often and a
-Hustler's half as often (people are suspicious when a Hustler's nice). The middle plays the card's own odds. Sal, Jojo and Gus have lines for each end (`reputation` in npcs.json).
+Hustler's half as often (people are suspicious when a Hustler's nice). The middle plays the card's own odds. Sal, Jojo, Gus, Tariq, Hersh and Arben have lines for each end (`reputation` in npcs.json).
 Card text names the real cost ("Marisol's money", "the owner's goodwill"), never the meter. Code and database still say
 `integrity` (100 Halo, 0 Hustler). Start over is a new life: the meter and the record start again. Each player's meter is
 their own; Campaign Mode's Integrity stays the candidate's.
