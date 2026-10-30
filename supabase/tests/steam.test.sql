@@ -42,5 +42,29 @@ reset role;
 delete from auth.users where id = '00000000-0000-0000-0000-000000000161';
 select pg_temp.assert((select count(*) = 0 from public.steam_accounts), 'the link goes with the account');
 
+-- Migration 0134: Steam checkout uses the same purchase rows as Stripe, under 'steam:<order>'.
+select pg_temp.assert((select (value -> 'rates' ->> 'EUR')::numeric > 0 from public.game_settings where key = 'steam_store'), 'wallet rates');
+insert into auth.users (id) values ('00000000-0000-0000-0000-000000000163');
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000163', false);
+select public.create_player('SteamBuyer', 'bodega_drip', '{}', null, true);
+select public.set_traits(array['loud', 'hustler']);
+select public.roll_birth_lottery();
+select public.move_in('astoria_studio');
+select public.start_purchase('chat-unlimited-forever', 'steam:1800000000000500');
+reset role;
+select pg_temp.assert((select status = 'pending' from public.purchases where stripe_session_id = 'steam:1800000000000500'), 'order opened');
+-- Declined in the overlay: the row closes.
+select public.payment_expired('steam:1800000000000500:declined', 'steam:1800000000000500');
+select pg_temp.assert((select status = 'expired' from public.purchases where stripe_session_id = 'steam:1800000000000500'), 'declined closes it');
+-- Approved and finalized: granted like a Stripe payment, once.
+set role authenticated;
+select public.start_purchase('chat-unlimited-forever', 'steam:1800000000000600');
+reset role;
+select pg_temp.assert(public.payment_grant('steam:1800000000000600:finalized', 'steam:1800000000000600', 'steam:9', '00000000-0000-0000-0000-000000000163', 'chat-unlimited-forever', 3799, 'eur') = 'granted', 'granted');
+select pg_temp.assert(public.payment_grant('steam:1800000000000600:finalized', 'steam:1800000000000600', 'steam:9', '00000000-0000-0000-0000-000000000163', 'chat-unlimited-forever', 3799, 'eur') = 'duplicate', 'once');
+select pg_temp.assert(public.has_entitlement('00000000-0000-0000-0000-000000000163', 'chat-unlimited-forever'), 'unlocked');
+select pg_temp.assert((select status = 'paid' and amount_cents = 3799 and currency = 'eur' from public.purchases where stripe_session_id = 'steam:1800000000000600'), 'paid in the wallet currency');
+
 select 'STEAM CHECKS PASSED';
 rollback;

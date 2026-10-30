@@ -144,6 +144,7 @@ from (values
   ('0130_security_review.sql', coalesce((to_regprocedure('public.refund_is_subscription(text,text)') is not null), false)),
   ('0131_moral_choices.sql', coalesce((to_regclass('public.choice_log') is not null), false)),
   ('0132_choice_stakes.sql', coalesce((to_regclass('public.choice_marks') is not null), false)),
-  ('0133_steam_accounts.sql', coalesce((to_regclass('public.steam_accounts') is not null), false))
+  ('0133_steam_accounts.sql', coalesce((to_regclass('public.steam_accounts') is not null), false)),
+  ('0134_steam_store.sql', coalesce((select true from public.game_settings where key = 'steam_store'), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

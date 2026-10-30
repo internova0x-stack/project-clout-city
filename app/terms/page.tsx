@@ -55,7 +55,8 @@ export default function Terms() {
       <p>
         Some extras cost real money: VIP, &quot;Chat forever&quot;, side stories, tickets to exclusive in-game events,
         collector items, postcards and Clout Couture pieces. Prices are shown before you pay, in the game and at
-        checkout, including any tax that applies. Payments are processed by Stripe; we never see or store your card.
+        checkout, including any tax that applies. Payments are processed by Stripe; we never see or store your card. In the
+        Steam version, purchases go through Steam&apos;s checkout instead, and Steam&apos;s own refund policy applies to them.
       </p>
       <ul>
         <li><strong>What you get:</strong> a licence to use the item or feature in Clout City for as long as your account exists and the game runs. Clout Couture pieces are numbered limited editions; a number is never reissued.</li>

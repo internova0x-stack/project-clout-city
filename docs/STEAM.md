@@ -4,8 +4,14 @@ Owner, Oct 30: "I want to publish to Steam". Three steps:
 
 1. **Desktop mode** (done, PR #199): from 900 × 560 px the game fills the window (CLAUDE.md "Desktop mode").
 2. **The Steam app and Steam sign-in** (this doc): `desktop/`, migration 0133, `/api/steam/session`.
-3. **Steam checkout** (next): one-time real-money items through Steam's own checkout (Steam doesn't allow Stripe inside
-   a Steam game). VIP comes later: Steam subscriptions need Valve's approval.
+3. **Steam checkout** (migration 0134, `app/home/steamStoreActions.ts`): one-time real-money items through Steam's own
+   checkout (Steam doesn't allow Stripe inside a Steam game). VIP comes later: Steam subscriptions need Valve's approval.
+
+**The web stays the web** (owner, Oct 30). At cloutcity.app in a browser nothing changes: email sign-in and Stripe. Only
+the Steam app turns on Steam sign-in and Steam checkout. The page knows it's in the app because the app gives the page
+`window.cloutSteam`, and the server checks the app's user agent (`CloutCitySteam/`). The server refuses Stripe inside the
+app and Steam checkout outside it. Accounts and the city are shared, so a linked player keeps their progress and
+purchases on both.
 
 ## How it works
 
@@ -28,6 +34,29 @@ Owner, Oct 30: "I want to publish to Steam". Three steps:
 - **What the app can reach:** links to other sites open in the player's browser. The page only reaches Steam through
   `window.cloutSteam` (`ticket()`, `name()`). F11 toggles fullscreen. Shift+Tab opens the Steam overlay.
 
+## Steam checkout
+
+1. **The order.** In the Steam app, a Shop item's buy button calls `steamCheckout(sku)`. The server:
+   - checks the player's Steam link;
+   - refuses subscriptions (VIP);
+   - asks Steam for the wallet's currency (`GetUserInfo`);
+   - opens the same purchase row as Stripe (`start_purchase`, session `steam:<order>`: owned, sold-out and edition
+     checks included);
+   - starts the order with `InitTxn`.
+
+   Other wallets pay the dollar price times the rate in game_settings 'steam_store', rounded up to .99. A currency with
+   no rate gets "isn't open yet".
+2. **The player's answer.** Steam shows its checkout in the overlay. The app hears the answer
+   (`MicroTxnAuthorizationResponse`) and the page calls `steamFinish(order, approved)`:
+   - **Approved:** `FinalizeTxn`, then `payment_grant`, the same function the Stripe webhook uses (once per order).
+   - **Declined:** the row closes.
+
+   Then the Shop's usual "unlocking" watch takes over.
+3. **Refunds and chargebacks.** Steam reports these through `GetReport`, which isn't read yet. Until it is, a Steam refund
+   doesn't take the item back automatically: refund it by hand in Studio → Players. Creator commissions aren't paid on
+   Steam purchases yet.
+4. **Testing.** Set `STEAM_MICROTXN_SANDBOX=1` to use Steam's sandbox (no money moves).
+
 ## What the owner sets up (once)
 
 1. **Steamworks account:** partner.steamgames.com. Pay the app fee and fill in the bank and tax forms.
@@ -36,7 +65,7 @@ Owner, Oct 30: "I want to publish to Steam". Three steps:
    - `desktop/steam.json` (`appId`; 480 is Valve's test app).
    - Vercel: `STEAM_APP_ID`.
 4. **Publisher Web API key:** create one (docs/SETUP.md 2h) and put it in Vercel as `STEAM_WEB_API_KEY`.
-5. **Migration:** run `0133_steam_accounts.sql`.
+5. **Migrations:** run `0133_steam_accounts.sql` and `0134_steam_store.sql`.
 6. **Store page:** description, screenshots and capsules, "Free to Play", and the content survey. The game is 18+ satire
    with a virtual-currency scratch card. No real money touches the lotto, so say that in the survey.
 

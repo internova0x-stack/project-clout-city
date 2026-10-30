@@ -1344,6 +1344,20 @@ export function GameShell({
     const product = catalog?.find((p) => p.sku === sku);
     if (!confirmed && needsConfirm(product)) return setBigBuy(product!);
     setBusy(`buy:${sku}`);
+    // Inside the Steam app, Steam's own checkout (docs/STEAM.md): Steam shows it in the overlay, the app hears the
+    // answer, the server finalizes it; then the same unlock watch as a Stripe return.
+    const steam = typeof window !== "undefined" ? window.cloutSteam : undefined;
+    if (steam?.authorized && storeApi.steamCheckout && storeApi.steamFinish) {
+      const o = await storeApi.steamCheckout(sku).catch(() => ({ ok: false as const, error: "Steam checkout didn't open. Nothing was charged; try again." }));
+      if (!o.ok) { setBusy(null); return setToast(o.error); }
+      const approved = await steam.authorized(o.orderId).catch(() => false);
+      const f = await storeApi.steamFinish(o.orderId, approved).catch(() => ({ ok: false, error: "Steam didn't confirm the payment. If you were charged, it unlocks on its own." }));
+      setBusy(null);
+      if (!approved) return setToast("Purchase cancelled. Nothing was charged.");
+      if (!f.ok) return setToast(f.error ?? "Steam didn't confirm the payment.");
+      setUnlocking(sku);
+      return;
+    }
     const r = await storeApi.checkout(sku).catch(() => ({ ok: false as const, error: "Checkout didn't open. Nothing was charged; try again." }));
     if (r.ok) return window.location.assign(r.url); // keeps "Opening checkout…" until Stripe loads
     setBusy(null);

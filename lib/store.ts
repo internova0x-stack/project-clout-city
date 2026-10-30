@@ -85,6 +85,10 @@ export interface StoreApi {
   catalog(): Promise<StoreProduct[] | null>;
   /** Starts Stripe Checkout for one product; the game then sends the player to `url`. */
   checkout(sku: string): Promise<CheckoutResult>;
+  /** Inside the Steam app (docs/STEAM.md): starts a Steam order, which Steam shows in its overlay. */
+  steamCheckout?(sku: string): Promise<{ ok: true; orderId: string } | { ok: false; error: string }>;
+  /** Steam's answer for the order: approved finalizes and unlocks it, declined closes it. */
+  steamFinish?(orderId: string, approved: boolean): Promise<{ ok: boolean; error?: string }>;
 }
 
 export function formatPrice(cents: number, currency = "usd"): string {

@@ -44,3 +44,37 @@ test("bad, banned and unreachable", async () => {
 test("Steam-made accounts are stored under an address nobody mails", () => {
   assert.equal(steamEmail("76561197960287930"), "steam-76561197960287930@users.cloutcity.app");
 });
+
+test("Steam checkout: item ids, order ids, prices in the wallet's currency", async () => {
+  const { steamItemId, newOrderId, steamPrice, steamSession } = await import("../lib/steam.ts");
+  assert.equal(steamItemId("chat_forever"), steamItemId("chat_forever"));
+  assert.notEqual(steamItemId("chat_forever"), steamItemId("vip_month"));
+  assert.ok(steamItemId("x") > 0 && steamItemId("x") < 2 ** 32);
+  const id = newOrderId(1_800_000_000_000, () => 0.5);
+  assert.equal(id, "1800000000000500");
+  assert.ok(Number.isSafeInteger(Number(id)));
+  assert.equal(steamSession(id), "steam:1800000000000500");
+  const rates = { EUR: 0.95, GBP: 0.8 };
+  assert.equal(steamPrice(1999, "usd", rates), 1999);
+  assert.equal(steamPrice(1999, "EUR", rates), 1899); // 18.99 → rounded up to .99
+  assert.equal(steamPrice(499, "GBP", rates), 399);
+  assert.equal(steamPrice(1999, "JPY", rates), null);
+});
+
+test("Steam checkout: the order Steam is sent, and its answers", async () => {
+  const { initTxn, finalizeTxn, steamWallet, steamItemId } = await import("../lib/steam.ts");
+  let url = "", sent: URLSearchParams | null = null;
+  const ok = async (u: string, b: URLSearchParams) => { url = u; sent = b; return { ok: true, status: 200, json: async () => ({ response: { result: "OK", params: { orderid: "1", transid: "9" } } }) }; };
+  const r = await initTxn(cfg, { orderId: "1", steamId: "76561197960287930", sku: "chat_forever", name: "Chat forever", amount: 11999, currency: "usd" }, true, ok);
+  assert.deepEqual(r, { ok: true, params: { orderid: "1", transid: "9" } });
+  assert.match(url, /ISteamMicroTxnSandbox\/InitTxn\/v3\//);
+  assert.equal(sent!.get("itemid[0]"), String(steamItemId("chat_forever")));
+  assert.equal(sent!.get("amount[0]"), "11999");
+  assert.equal(sent!.get("currency"), "USD");
+  assert.equal(sent!.get("usersession"), "client");
+  const fin = await finalizeTxn(cfg, "1", false, async (u) => { url = u; return { ok: true, status: 200, json: async () => ({ response: { result: "Failure", error: { errordesc: "Order not approved" } } }) }; });
+  assert.deepEqual(fin, { ok: false, error: "Order not approved" });
+  assert.match(url, /\/ISteamMicroTxn\/FinalizeTxn\/v2\//);
+  assert.deepEqual(await steamWallet(cfg, "76561197960287930", false, reply(200, { response: { result: "OK", params: { currency: "EUR", status: "Active" } } })), { ok: true, currency: "EUR" });
+  assert.deepEqual(await steamWallet(cfg, "76561197960287930", false, reply(200, { response: { result: "OK", params: { currency: "EUR", status: "Locked" } } })), { ok: false, error: "wallet_locked" });
+});

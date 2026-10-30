@@ -1,6 +1,6 @@
 // Clout City for Steam (owner, Oct 30; docs/STEAM.md). A desktop window around the live game at cloutcity.app, with
-// the Steam client behind it: sign-in with Steam (a Web API ticket the server checks), the Steam overlay, and later
-// Steam checkout. The game itself isn't bundled: the window loads the site, so every update ships the moment the
+// the Steam client behind it: sign-in with Steam (a Web API ticket the server checks), the Steam overlay and Steam
+// checkout. The game itself isn't bundled: the window loads the site, so every update ships the moment the
 // site deploys and Steam builds only change when this wrapper does.
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("node:path");
@@ -29,6 +29,28 @@ ipcMain.handle("steam:ticket", async () => {
   return Buffer.from(ticket.getBytes()).toString("hex");
 });
 ipcMain.handle("steam:name", () => (client ? client.localplayer.getName() : ""));
+
+// Steam checkout (docs/STEAM.md): the server starts an order, Steam shows it in the overlay, and Steam's answer comes
+// back here. The page waits for its order's answer (steam:authorized); unanswered after 15 minutes counts as cancelled.
+const answers = new Map(); // order id → approved, for answers that arrive before the page asks
+const waiting = new Map(); // order id → resolve
+if (client && steamworks) {
+  client.callback.register(steamworks.SteamCallback.MicroTxnAuthorizationResponse, (r) => {
+    if (r.app_id !== APP_ID) return;
+    const id = String(r.order_id);
+    const resolve = waiting.get(id);
+    if (resolve) { waiting.delete(id); resolve(!!r.authorized); } else answers.set(id, !!r.authorized);
+  });
+}
+ipcMain.handle("steam:authorized", (_e, orderId) => {
+  const id = String(orderId);
+  if (!/^[0-9]{1,19}$/.test(id)) return false;
+  if (answers.has(id)) { const a = answers.get(id); answers.delete(id); return a; }
+  return new Promise((resolve) => {
+    waiting.set(id, resolve);
+    setTimeout(() => { if (waiting.delete(id)) resolve(false); }, 15 * 60 * 1000);
+  });
+});
 
 function createWindow() {
   const win = new BrowserWindow({

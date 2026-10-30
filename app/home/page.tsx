@@ -18,6 +18,7 @@ import {
   attendStoryEvent, completeStoryTask, devEntitleStory, devStartStory, loadStoryFeed, markBeatSeen, readStoryPost, refreshStory, shadowGuessStory, voteStory,
 } from "./storyActions";
 import { loadCatalog, startCheckout } from "./storeActions";
+import { steamCheckout, steamFinish } from "./steamStoreActions";
 import { membershipPortal, membershipState } from "./membershipActions";
 import {
   chatBlock, chatList, chatCrowned, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
@@ -128,7 +129,7 @@ export default async function HomePage() {
         ...(city.devTools ? { devStart: devStartStory, devEntitle: devEntitleStory } : {}),
       } : undefined}
       catalog={catalog}
-      storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout } : undefined}
+      storeApi={catalog ? { catalog: loadCatalog, checkout: startCheckout, steamCheckout, steamFinish } : undefined}
       coutureApi={{ map: coutureMap, weeks: plazaWeeks, book: plazaBook }}
       membership={catalog ? { state: membershipState, portal: membershipPortal } : undefined}
       // Migration 0047 (owner, Oct 15: two players in the same café couldn't see each other, because
