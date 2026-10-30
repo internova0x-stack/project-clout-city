@@ -17,7 +17,7 @@
         ]
       },
       {
-        "id": "peek", "label": "Take a peek", "get": "A night off", "cost": "Integrity, if it's even real",
+        "id": "peek", "label": "Take a peek", "get": "A night off", "cost": "Nothing, if nobody finds out",
         "risk": "medium", "riskWhy": "Professors have tricks", "comesBack": false,
         "outcomes": [
           { "weight": 1, "text": "You peek and memorize. The exam matches. You feel smart for exactly as long as it takes to remember why.",
@@ -45,7 +45,7 @@
     "emoji": "💵",
     "title": "In the dining hall, an upperclassman leans in: 'Heard you're flexible. Last year's Clout Theory final, C$80.'",
     "where": { "tags": ["campus", "university", "college"], "after": ["arrive", "eat", "hangout"] },
-    "needs": { "student": true, "integrityMax": 35 },
+    "needs": { "student": true, "integrityMax": 30 },
     "options": [
       {
         "id": "no", "label": "Pass", "get": "A clean grade, maybe a worse one", "cost": "Hours of studying",
@@ -171,7 +171,7 @@
         ]
       },
       {
-        "id": "buy", "label": "Buy one", "get": "A finished essay, tonight", "cost": "C$90 and some integrity",
+        "id": "buy", "label": "Buy one", "get": "A finished essay, tonight", "cost": "C$90, and words that aren't yours",
         "risk": "high", "riskWhy": "They sell the same essay to many", "comesBack": true,
         "outcomes": [
           { "weight": 1, "text": "The essay arrives in an hour. It's good. It's suspiciously good. It mentions a wedding.",
@@ -215,7 +215,7 @@
         ]
       },
       {
-        "id": "write", "label": "Write it for C$120", "get": "C$120", "cost": "A night, and a bit of integrity",
+        "id": "write", "label": "Write it for C$120", "get": "C$120", "cost": "A night, and your name if it leaks",
         "risk": "medium", "riskWhy": "He'll tell people you're 'available'", "comesBack": true,
         "outcomes": [
           { "weight": 1, "text": "You write him a great essay. Too great: it's clearly not his voice. He pays and says 'perfect, bro.'",

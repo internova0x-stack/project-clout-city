@@ -12,7 +12,7 @@ import type { SkillState } from "@/lib/skills";
 import { useState } from "react";
 import { Sheet } from "../Sheet";
 import { ProfileVip } from "../store/Membership";
-import { ChoicesHistory, IntegrityMeter } from "./Choices";
+import { ChoicesHistory, RepMeter } from "./Choices";
 import type { ChoiceLogEntry } from "@/lib/choices";
 
 const Avatar3D = dynamic(() => import("../avatar/Avatar3D"), { ssr: false });
@@ -52,7 +52,7 @@ export function ProfileSheet({
   perks?: PerkHandlers;
   /** Membership (owner, Oct 18): the VIP badge (or "Go VIP") under your name; hidden without payments. */
   vip?: { on: boolean; until?: string | null; onOpen: () => void; loading?: boolean };
-  /** Moral Choices (migration 0131): the private Integrity meter and the record of choices; absent until it runs. */
+  /** Moral Choices (migration 0131): the private Halo ↔ Hustler meter and the record of choices; absent until it runs. */
   choices?: { integrity: number | null; log: ChoiceLogEntry[] };
 }) {
   const [tab, setTab] = useState<"profile" | "skills" | "choices">("profile");
@@ -87,13 +87,13 @@ export function ProfileSheet({
         )}
         {tab === "choices" && choices ? (<>
           <ChoicesHistory integrity={choices.integrity} log={choices.log} />
-          <p className="meta" style={{ margin: 0 }}>Only you can see your Integrity and your choices. The city just acts on them.</p>
+          <p className="meta" style={{ margin: 0 }}>Only you can see where you stand and what you chose. The city just acts on it.</p>
         </>) : skills !== undefined && tab === "skills" ? (skills ? <SkillsList skills={skills} perks={perks} /> : <p className="subtext">Loading your skills…</p>) : (<>
         {/* Player ranks (owner, Oct 15): the title, and how far to the next one by clout or money. */}
         <RankClimb clout={clout} netWorth={netWorth} best={bestRank} />
         {choices?.integrity != null && (
-          <button className="profile-integrity" onClick={() => setTab("choices")} aria-label="Your choices">
-            <IntegrityMeter value={choices.integrity} compact />
+          <button className="profile-rep" onClick={() => setTab("choices")} aria-label="Your choices">
+            <RepMeter value={choices.integrity} compact />
           </button>
         )}
         <div className="profile-kpis">

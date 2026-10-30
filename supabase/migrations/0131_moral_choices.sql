@@ -4,8 +4,9 @@
 -- what it costs and the risk. The rules and the card files (content/choices/*.json, with every outcome's odds) live
 -- in TypeScript on the server (app/home/choiceActions.ts, a crypto random source); this file keeps the record and
 -- pays, once, like Campaign Mode (0127):
---   * reputation: the player's Integrity, 0 to 100, from 70. Private: no function shows it to anyone else. Losses
---     apply in full, gains at half (owner: a reputation takes far longer to rebuild than to lose).
+--   * reputation: the player's rep meter, shown as 😇 Halo ↔ 💸 Hustler (owner, Oct 30; the column says integrity:
+--     100 is full Halo, 0 full Hustler), from 50 in the middle, the same rate both ways. Private: no function shows it
+--     to anyone else.
 --   * choice_log: every card shown (open, chosen, skipped or expired), with the receipt and what it paid.
 --   * choice_later: a consequence that lands on a later New York day and names the earlier choice.
 --   * At most 2 cards a New York day and one waiting at a time (choice_open); effects capped (CHOICES.caps) and paid
@@ -15,7 +16,7 @@
 
 create table if not exists public.reputation (
   player_id   uuid primary key references public.players (id) on delete cascade,
-  integrity   smallint not null default 70 check (integrity between 0 and 100),
+  integrity   smallint not null default 50 check (integrity between 0 and 100),
   revealed_at timestamptz,
   updated_at  timestamptz not null default now()
 );
@@ -75,7 +76,7 @@ $$;
 
 /**
  * Applies one set of effects, paid once under (kind, ref): cash and clout through the ledger (never below zero),
- * mood and energy within 0 to 100, Integrity with losses in full and gains at half. Returns what was applied.
+ * mood and energy within 0 to 100, the rep meter within 0 to 100. Returns what was applied.
  */
 create or replace function public.choice_apply(p_player uuid, p_effects jsonb, p_kind text, p_ref text) returns jsonb
 language plpgsql security definer set search_path = public
@@ -111,7 +112,6 @@ begin
   insert into public.reputation (player_id) values (p_player) on conflict (player_id) do nothing;
   select integrity into now_int from public.reputation where player_id = p_player for update;
   if v_int <> 0 then
-    v_int := case when v_int < 0 then v_int else v_int / 2 end;
     v_int := least(100, greatest(0, now_int + v_int)) - now_int;
     update public.reputation set integrity = integrity + v_int, updated_at = now() where player_id = p_player;
     if v_int <> 0 then out := out || jsonb_build_object('integrity', v_int); end if;
@@ -138,7 +138,7 @@ begin
   return jsonb_build_object(
     'today', today,
     'atPlace', me.at_place,
-    'integrity', coalesce(r.integrity, 70),
+    'integrity', coalesce(r.integrity, 50),
     'revealed', r.revealed_at is not null,
     'rank', greatest(me.best_rank, public.rank_level(me.clout, me.bank_cash)),
     'bank', me.bank_cash,

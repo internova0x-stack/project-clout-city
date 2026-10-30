@@ -199,7 +199,7 @@
     "emoji": "📢",
     "title": "A promoter at The Sticky Floor: 'Heard you're flexible. C$250 to tell your followers Dunk Daniels is coming.'",
     "where": { "places": ["the-sticky-floor"], "tags": ["club"], "after": ["arrive", "visit"] },
-    "needs": { "integrityMax": 35 },
+    "needs": { "integrityMax": 30 },
     "options": [
       {
         "id": "no", "label": "Not this time", "get": "Your followers keep trusting you", "cost": "C$250",
@@ -236,7 +236,7 @@
     "emoji": "🪩",
     "title": "Discount Disco's owner: C$200 to post a teary 'this night changed my life' video. You've never been.",
     "where": { "places": ["discount-disco"], "tags": ["club"], "after": ["arrive", "visit"] },
-    "needs": { "integrityMax": 35 },
+    "needs": { "integrityMax": 30 },
     "options": [
       {
         "id": "no", "label": "Decline", "get": "Your tears stay real", "cost": "C$200",

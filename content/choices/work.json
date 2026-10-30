@@ -159,7 +159,7 @@
     "title": "Sal hands you the till key: 'Count it, I'm at the dentist.' The drawer is C$40 over.",
     "who": "sal",
     "where": { "places": ["ditmars-deli"], "after": ["shift"] },
-    "needs": { "integrityMin": 75 },
+    "needs": { "integrityMin": 70 },
     "options": [
       {
         "id": "write", "label": "Write it down for Sal", "get": "Sal's trust, for real", "cost": "C$40 nobody would miss",
@@ -199,7 +199,7 @@
     "title": "Hersh leaves you to cash out. A customer's card overpaid by C$60, and his receipt is in your hand.",
     "who": "hersh",
     "where": { "places": ["schlep-and-schmear"], "after": ["shift"] },
-    "needs": { "integrityMin": 75 },
+    "needs": { "integrityMin": 70 },
     "options": [
       {
         "id": "refund", "label": "Chase him down the block", "get": "A customer for life", "cost": "Running, in an apron",

@@ -16,7 +16,7 @@
     "slang": "Ids from content/culture/slang.json they reach for. Empty is fine: not everyone uses slang",
     "story": "Optional: the story whose place this is (they only speak through that story)",
     "remembers": "Optional: { days, line }. After that many different days at the place, their first line is this one (C2: Sal remembers your order)",
-    "reputation": "Optional (Moral Choices, migration 0131): {high, low} lines said to players whose Integrity is high (70+) or low (below 40). Never name the number."
+    "reputation": "Optional (Moral Choices, migration 0131): {halo, hustler} lines for players at the 😇 Halo end (70+) or the 💸 Hustler end (30 or below). Neither end is the bad one; never name the meter."
   },
   "profiles": [
     {
@@ -57,13 +57,13 @@
         "line": "Ock! BEC, salt, pepper, ketchup. Already on the grill. Also Sal saved you a spot on the bread."
       },
       "reputation": {
-        "high": [
+        "halo": [
           "You, I trust. Watch the register a second, I gotta find the good mustard.",
           "People say good things about you on this block. Don't make me regret the extra cheese."
         ],
-        "low": [
-          "Cash only today. For you especially.",
-          "I heard some things. I'm not saying I believe them. I'm saying I'm counting the change twice."
+        "hustler": [
+          "You again. Cash only, and I'm counting it twice. With love.",
+          "Whatever you're selling, my nephew already bought two. What do you want on the roll?"
         ]
       }
     },
@@ -99,13 +99,13 @@
         "facts"
       ],
       "reputation": {
-        "high": [
+        "halo": [
           "I spelled your name right today. That's how you know you're in good standing.",
           "Everybody in here says you're one of the good ones. Annoying, honestly. Want a free shot of oat?"
         ],
-        "low": [
-          "Name for the cup? Actually, I'll just write 'that one'.",
-          "The tip jar's bolted down now. Unrelated. Totally unrelated."
+        "hustler": [
+          "I wrote 'Boss' on your cup. Don't make it weird. Don't touch the tip jar either.",
+          "Half the café owes you a favor and the other half owes you money. How?"
         ]
       }
     },
@@ -463,13 +463,13 @@
       "regular": "gus",
       "slang": [],
       "reputation": {
-        "high": [
+        "halo": [
           "In 1987 a man returned my umbrella. You remind me of him. Good posture too.",
-          "Sit, sit. The bench saves a spot for honest people."
+          "Sit, sit. The bench saves a spot for good people."
         ],
-        "low": [
-          "In 1987 I knew a fella like you. Sold me a watch. It was a drawing of a watch.",
-          "The bench is full. The bench is always full, for some people."
+        "hustler": [
+          "In 1987 I knew a fella like you. Sold me a watch. It was a drawing of a watch. Great salesman.",
+          "Sit. Tell me your angle. At my age, a good angle is entertainment."
         ]
       }
     },

@@ -2,7 +2,7 @@
 
 import { randomInt } from "node:crypto";
 import {
-  CHOICES, boundEffects, cardView, choiceError, mayOffer, pickCard, resolveChoice,
+  CHOICES, boundEffects, cardView, repBonus, choiceError, mayOffer, pickCard, resolveChoice,
   type ChoiceAfter, type ChoiceCard, type ChoiceCardView, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
@@ -119,7 +119,8 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
   const c = card(ctx.open.card);
   if (!c || !c.options.some((o) => o.id === option)) return { ok: false, error: choiceError("unknown_option") };
   const r = resolveChoice(c, option, ctx.today, rng);
-  const effects = boundEffects(r.effects, ctx.bank);
+  // Each end of the meter pays its own way (repBonus): more clout for a Halo, more cash for a Hustler.
+  const effects = boundEffects(repBonus(r.effects, ctx.integrity), ctx.bank);
   const { data, error } = await w.admin.rpc("choice_settle", {
     p_player: w.id, p_log: log, p_option: option, p_outcome: r.outcome, p_receipt: r.text,
     p_effects: Object.fromEntries(Object.entries(effects).filter(([, v]) => v)),

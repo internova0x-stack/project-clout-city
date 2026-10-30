@@ -479,7 +479,7 @@
         "id": "pile",
         "label": "Pile on 4B too",
         "get": "You look innocent",
-        "cost": "4B, and some integrity",
+        "cost": "4B's reputation, and the truth",
         "risk": "high",
         "riskWhy": "Teddy knows whose music it was",
         "comesBack": true,

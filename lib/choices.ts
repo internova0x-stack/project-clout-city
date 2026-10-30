@@ -1,7 +1,9 @@
 // Moral Choices (owner, Oct 29: "the central theme of the game"; spec section 29). Situation cards appear where the
 // player is: a one-line situation and 2 to 4 choices, each previewing what you get, what it costs and the risk. The
-// city keeps score with a private Integrity meter (0 to 100, starts at 70; nobody else ever sees it), and some choices
-// come back days later.
+// city keeps score on a private two-ended meter, 😇 Halo ↔ 💸 Hustler (owner, Oct 30: "Integrity" steered everyone to
+// the good choice; neither end is losing, and each pays off its own way). Code and database still say `integrity`
+// (0 = full Hustler, 100 = full Halo, starts at 50 in the middle), the way crew is still `clique`. Some choices come
+// back days later.
 //
 // Pure rules, no imports beyond types, so the server (app/home/choiceActions.ts, crypto random source), the preview's
 // in-memory city (lib/choicesSim.ts) and the tests share them. The card files (content/choices/*.json) hold the hidden
@@ -18,7 +20,7 @@ export interface ChoiceEffects {
   clout?: number;
   mood?: number;
   energy?: number;
-  /** Losses apply in full; gains at half (owner: a reputation takes far longer to rebuild than to lose). */
+  /** The rep meter: positive moves toward 😇 Halo, negative toward 💸 Hustler (same rate both ways). */
   integrity?: number;
 }
 
@@ -85,10 +87,14 @@ export interface ChoiceCardView {
 }
 
 export const CHOICES = {
-  integrityStart: 70,
-  /** Bands NPCs react to (spec section 2): high from 70, low below 40. */
+  /** The middle: nobody starts as a Halo or a Hustler. */
+  integrityStart: 50,
+  /** The two ends regulars react to and offers look for: Halo from 70, Hustler at 30 or below. */
   high: 70,
-  low: 40,
+  low: 30,
+  /** What each end pays: Halos get more clout from choices that move them toward Halo, Hustlers more cash from the others. */
+  haloClout: 1.25,
+  hustlerCash: 1.25,
   /** At most this many cards a New York day (spec 3.2: 1 to 2). */
   perDay: 2,
   /** A variant never comes back within 30 days; its base dilemma not within 7. */
@@ -124,24 +130,33 @@ export function addDays(d: string, n: number): string {
   return new Date((dayNum(d) + n) * 86_400_000).toISOString().slice(0, 10);
 }
 
-/** The player's Integrity after a change: losses in full, gains at half, always 0 to 100. */
+/** The meter after a change, the same rate both ways, always 0 (full Hustler) to 100 (full Halo). */
 export function applyIntegrity(now: number, delta: number | undefined): number {
   if (!delta) return now;
-  const d = delta < 0 ? delta : Math.floor(delta / 2);
-  return Math.max(0, Math.min(100, now + d));
+  return Math.max(0, Math.min(100, now + delta));
 }
 
+/** "high" is the Halo end, "low" the Hustler end. */
 export type IntegrityBand = "high" | "middle" | "low";
-export const integrityBand = (n: number): IntegrityBand => (n >= CHOICES.high ? "high" : n < CHOICES.low ? "low" : "middle");
+export const integrityBand = (n: number): IntegrityBand => (n >= CHOICES.high ? "high" : n <= CHOICES.low ? "low" : "middle");
 
-/** How the city sees you, in a word (the meter's label; the number itself stays private too). */
+/** Where you stand, in a few words; neither end is the bad one. */
 export function integrityWord(n: number): string {
-  if (n >= 90) return "Saint of Steinway";
-  if (n >= 70) return "Solid";
-  if (n >= 55) return "Mostly decent";
-  if (n >= 40) return "It's complicated";
-  if (n >= 20) return "Shady";
-  return "Public menace";
+  if (n >= 85) return "Certified Halo";
+  if (n >= CHOICES.high) return "Halo";
+  if (n >= 56) return "Leaning Halo";
+  if (n > 44) return "Right down the middle";
+  if (n > CHOICES.low) return "Leaning Hustler";
+  if (n > 15) return "Hustler";
+  return "Certified Hustler";
+}
+
+/** Each end's payoff: a Halo's Halo-ward choices pay more clout, a Hustler's Hustler-ward choices more cash. */
+export function repBonus(e: ChoiceEffects, now: number): ChoiceEffects {
+  const band = integrityBand(now);
+  if (band === "high" && (e.integrity ?? 0) > 0 && (e.clout ?? 0) > 0) return { ...e, clout: Math.round(e.clout! * CHOICES.haloClout) };
+  if (band === "low" && (e.integrity ?? 0) < 0 && (e.cash ?? 0) > 0) return { ...e, cash: Math.round(e.cash! * CHOICES.hustlerCash) };
+  return e;
 }
 
 /** Whether a card fits here and now, and how well (0: no). A named place beats a tag, a tag beats anywhere. */
@@ -232,13 +247,13 @@ export function boundEffects(e: ChoiceEffects, bank: number): ChoiceEffects {
   };
 }
 
-/** The receipt's line of numbers: "+C$300 · −6 Integrity · +5 Mood". */
+/** The receipt's line of numbers: "+C$300 · 💸 +6 Hustler · +5 Mood". */
 export function effectLine(e: ChoiceEffects): string {
   const parts: string[] = [];
   const sign = (n: number) => (n > 0 ? "+" : "−");
   if (e.cash) parts.push(`${sign(e.cash)}C$${Math.abs(e.cash).toLocaleString("en-US")}`);
   if (e.clout) parts.push(`${sign(e.clout)}${Math.abs(e.clout)} 🔥`);
-  if (e.integrity) parts.push(`${sign(e.integrity)}${Math.abs(e.integrity)} Integrity`);
+  if (e.integrity) parts.push(e.integrity > 0 ? `😇 +${e.integrity} Halo` : `💸 +${-e.integrity} Hustler`);
   if (e.mood) parts.push(`${sign(e.mood)}${Math.abs(e.mood)} Mood`);
   if (e.energy) parts.push(`${sign(e.energy)}${Math.abs(e.energy)} Energy`);
   return parts.join(" · ");
@@ -274,7 +289,7 @@ export interface ChoiceMade {
   receipt: string;
   effects: ChoiceEffects;
   integrity: number;
-  /** True on the player's very first choice: the Integrity reveal. */
+  /** True on the player's very first choice: the Halo ↔ Hustler reveal. */
   first: boolean;
 }
 
@@ -366,9 +381,12 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
         }
       });
     }
-    // Spec 3.4: a real tradeoff. Some option must cost Integrity and some must not.
-    if (!sawLoss) out.push(`${at}: no option costs Integrity, so there's no dilemma`);
-    if (!sawGain && c.options.every((o) => o.outcomes.every((x) => (x.effects?.integrity ?? 0) < 0))) out.push(`${at}: every option costs Integrity`);
+    // Spec 3.4: a real tradeoff. Some option must move toward Hustler and some must not.
+    if (!sawLoss) out.push(`${at}: no option moves toward Hustler, so there's no dilemma`);
+    if (!sawGain && c.options.every((o) => o.outcomes.every((x) => (x.effects?.integrity ?? 0) < 0))) out.push(`${at}: every option moves toward Hustler`);
+    // Owner, Oct 30: cards say what a choice really costs, never judge it ("costs Integrity").
+    const words = JSON.stringify([c.title, c.options.map((o) => [o.label, o.get, o.cost, o.riskWhy, o.outcomes.map((x) => [x.text, x.later?.text])])]);
+    if (/integrity|\bhalo\b|\bhustler\b/i.test(words)) out.push(`${at}: name the real cost, not the meter (no "Integrity", "Halo" or "Hustler" in the text)`);
   }
   return out;
 }

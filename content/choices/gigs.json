@@ -205,7 +205,7 @@
     "title": "Valentina trusts you to house-sit a client's penthouse in Long Island City. The roof deck fits sixty.",
     "who": "valentina",
     "where": { "tags": ["gigs_board"], "after": ["gig"] },
-    "needs": { "integrityMin": 75 },
+    "needs": { "integrityMin": 70 },
     "options": [
       {
         "id": "plants", "label": "Water the plants, go home", "get": "C$150 and a client for life", "cost": "The party of the year",
@@ -244,7 +244,7 @@
     "emoji": "🧀",
     "title": "A Skybridge client leaves you her keys, her cat and a fridge full of C$90 cheese while she's in Lisbon.",
     "where": { "places": ["skybridge-tower"], "after": ["gig"] },
-    "needs": { "integrityMin": 75 },
+    "needs": { "integrityMin": 70 },
     "options": [
       {
         "id": "cat", "label": "Feed the cat, touch nothing", "get": "C$120, a five-star client", "cost": "The cheese, which is calling you",

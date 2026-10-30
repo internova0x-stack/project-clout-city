@@ -78,7 +78,7 @@
         ]
       },
       {
-        "id": "take", "label": "Take the envelope", "get": "C$200", "cost": "Integrity, and Marisol's money",
+        "id": "take", "label": "Take the envelope", "get": "C$200", "cost": "Marisol's money",
         "risk": "high", "riskWhy": "Gus sees everything on that bench", "comesBack": true,
         "outcomes": [
           { "weight": 1, "text": "Envelope in your jacket. The note says 'for Marisol, love Mom.' That's going to stay with you.",
@@ -158,7 +158,7 @@
         ]
       },
       {
-        "id": "flip", "label": "Buy it and flip it", "get": "About C$300", "cost": "Integrity, and the roof fund",
+        "id": "flip", "label": "Buy it and flip it", "get": "About C$300", "cost": "Mr. Penwright's roof fund",
         "risk": "medium", "riskWhy": "Dealers on 30th Ave know Penwright", "comesBack": true,
         "outcomes": [
           { "weight": 1, "text": "A dealer on 30th Avenue pays C$300 without blinking. Mr. Penwright's whole roof fund is C$412.",

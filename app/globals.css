@@ -2583,16 +2583,16 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .choice-receipt { margin:0; font-size:16px; line-height:23px; color:var(--text-1); }
 .choice-effects { margin:0; font-size:14px; font-weight:800; color:var(--text-2); font-variant-numeric:tabular-nums; }
 .choice-reveal { padding:14px; border-radius:16px; background:var(--surface-card); }
-.integrity { display:flex; flex-direction:column; gap:6px; }
-.integrity-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
-.integrity-head b { font-variant-numeric:tabular-nums; }
-.integrity-bar { position:relative; height:10px; border-radius:5px; background:var(--chip-off); overflow:hidden; }
-.integrity-bar span { position:absolute; inset:0 auto 0 0; border-radius:5px; background:#F2A900; transition:width .5s ease-out; }
-.integrity.high .integrity-bar span { background:var(--green-500); }
-.integrity.low .integrity-bar span { background:var(--red-500); }
-.integrity-bar i { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--surface-sheet); opacity:.9; }
-.integrity.compact .integrity-bar { height:8px; }
-.profile-integrity { display:block; width:100%; padding:12px 14px; border-radius:14px; background:var(--surface-card); text-align:left; color:var(--text-1); }
+.rep { display:flex; flex-direction:column; gap:8px; }
+.rep-ends { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:13px; font-weight:700; color:var(--text-2); }
+.rep-ends b { font-size:15px; color:var(--text-1); text-align:center; }
+/* Two ends, neither the bad one: sky for Halo, neon for Hustler, never green and red (owner, Oct 30). */
+.rep-bar { position:relative; height:10px; border-radius:5px; background:linear-gradient(90deg, #9FDCFF, #E9E3F5 50%, #FF8FC4); }
+.rep-bar i { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--surface-sheet); opacity:.8; }
+.rep-bar span { position:absolute; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:var(--surface-raised);
+  box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .5s ease-out; }
+.rep.compact .rep-bar { height:8px; }
+.profile-rep { display:block; width:100%; padding:12px 14px; border-radius:14px; background:var(--surface-card); text-align:left; color:var(--text-1); }
 .choice-log { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; background:var(--surface-card); font-size:14px; line-height:19px; }
 .choice-log > span:first-child { font-size:20px; line-height:22px; }
 .choice-log.back { box-shadow:inset 4px 0 0 var(--neon-500); }

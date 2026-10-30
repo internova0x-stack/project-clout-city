@@ -1,10 +1,10 @@
 // Moral Choices in the preview (/preview/home?choice=...): the same rules as the server, in memory, with the real
 // cards. Presets: now (every arrival, shift or gig brings a card, no daily limit), back (a consequence of an earlier
-// choice has just landed), high and low (start with that Integrity and a record), log (a few choices already made).
+// choice has just landed), high and low (start at the Halo or the Hustler end, with a record), log (a few choices already made).
 // Consequences land 20 seconds after the choice instead of days later, so the whole loop fits in a minute.
 
 import {
-  CHOICES, applyIntegrity, boundEffects, cardView, mayOffer, pickCard, resolveChoice,
+  CHOICES, applyIntegrity, boundEffects, cardView, repBonus, mayOffer, pickCard, resolveChoice,
   type ChoiceAfter, type ChoiceCard, type ChoiceEffects, type ChoiceLogEntry, type ChoicesApi, type ChoiceState,
 } from "./choices";
 import { CHOICE_CARDS } from "./choicesContent";
@@ -22,7 +22,7 @@ interface Opts {
 export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi {
   const rng = Math.random;
   const always = preset === "now";
-  let integrity: number = preset === "low" ? 32 : preset === "high" ? 88 : CHOICES.integrityStart;
+  let integrity: number = preset === "low" ? 18 : preset === "high" ? 86 : CHOICES.integrityStart;
   let revealed = !!preset && preset !== "now";
   let open: { log: number; card: ChoiceCard; place: string | null } | null = null;
   let nextId = 1;
@@ -34,7 +34,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
 
   const settle = (c: ChoiceCard, option: string, day: string, past = false) => {
     const r = resolveChoice(c, option, day, rng);
-    const e = boundEffects(r.effects, Number.MAX_SAFE_INTEGER);
+    const e = boundEffects(repBonus(r.effects, integrity), Number.MAX_SAFE_INTEGER);
     const before = integrity;
     integrity = applyIntegrity(integrity, e.integrity);
     const applied = { ...e, integrity: integrity - before || undefined };
@@ -53,8 +53,8 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   if (preset === "log" || preset === "back" || preset === "high" || preset === "low") {
     const picks = CHOICE_CARDS.filter((c) => !c.needs).slice(0, 5);
     picks.forEach((c, i) => settle(c, c.options[i % 2 ? c.options.length - 1 : 0].id, opts.today(), true));
-    if (preset === "low") integrity = 32;
-    if (preset === "high") integrity = 88;
+    if (preset === "low") integrity = 18;
+    if (preset === "high") integrity = 86;
   }
   // ?choice=now: a card is already waiting where the player stands.
   if (always) {

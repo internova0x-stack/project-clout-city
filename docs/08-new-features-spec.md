@@ -1115,14 +1115,18 @@ situations (radio choices, then Decide). After the choice: a one- or two-line re
   ambient, docs/culture/VOICE.md); every option is a real tradeoff and dishonest ones genuinely pay better today; a delayed
   consequence only does what its preview warned about and names the earlier choice. Real money never touches it.
 
-**Integrity.** 0 to 100, starting at 70. **Private** (owner's decision in the draft): only the player sees the number (Profile →
-Choices, and a meter under the rank); regulars feel it (Sal, Jojo and Gus have lines for high and low Integrity,
-`reputation` in npcs.json). Losses apply in full, gains at half: a reputation takes far longer to rebuild than to lose. It
-appears with the first choice ("New: your Integrity"). Bands: high from 70, low below 40 (cards can require either, for
-honest-only chances and shadier offers). Start over is a new life: the meter and the record start again. Each player's
-Integrity is their own. Campaign Mode's Integrity stays the candidate's.
+**Halo ↔ Hustler** (owner, Oct 30: "By using the word 'Integrity', you're steering people to only make good choices"). A
+two-ended meter, not a score: where the player stands between 😇 Halo and 💸 Hustler, and neither end is the bad one. It starts
+in the middle and moves the same rate both ways (the draft's "recovers at half" went with the name). **Private**: only the
+player sees it (Profile → Choices, and under the rank); it appears with the first choice ("New: Halo or Hustler?"). **Both ends
+pay off:** at the Halo end (70+) choices that move toward Halo pay 25% more clout, and Halo-only cards turn up (Sal's till,
+house-sitting); at the Hustler end (30 or below) choices that move toward Hustler pay 25% more cash, and Hustler-only offers
+find you (a promoter's fake hype, last year's final). Sal, Jojo and Gus have lines for each end (`reputation` in npcs.json).
+Card text names the real cost ("Marisol's money", "the owner's goodwill"), never the meter. Code and database still say
+`integrity` (100 Halo, 0 Hustler). Start over is a new life: the meter and the record start again. Each player's meter is
+their own; Campaign Mode's Integrity stays the candidate's.
 
-**Consequences.** Immediate (cash, clout, mood, energy, Integrity: capped per card, paid once through the ledger 'choice', cash
+**Consequences.** Immediate (cash, clout, mood, energy, the meter: capped per card, paid once through the ledger 'choice', cash
 and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, paid once, ledger 'choice_later'; shown once in
 "It came back", naming the choice, then kept in the record).
 
@@ -1132,7 +1136,7 @@ and clout never below zero) and delayed (`choice_later`: 1 to 14 days later, pai
 reveal, "It came back", the record), the Profile's Choices tab, the preview (lib/choicesSim.ts, development only: the demo leaves it out so no public bundle carries the outcomes;
 `?choice=now|back|high|low|log`).
 
-**Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Integrity-gated places and events (a
+**Later** (from the draft): Street Rep and the fixer world; crime-level offers and Heat; Halo- and Hustler-only places and events (a
 charity gala, a back room); stories and Campaign Mode writing to the player's meter; NPC memory beyond lines; more delayed
 consequences and recurring characters; about 4 new cards a week through the weekly content routine and the Studio; work cards
 for Careers.

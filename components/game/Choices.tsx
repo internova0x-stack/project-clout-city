@@ -5,7 +5,7 @@ import { CHOICES, effectLine, integrityBand, integrityWord, type ChoiceCardView,
 import { placeById } from "@/lib/city";
 import { Sheet } from "../Sheet";
 
-// Moral Choices (spec section 29): the situation card, its receipt, the Integrity reveal, a consequence coming back,
+// Moral Choices (spec section 29): the situation card, its receipt, the Halo ↔ Hustler reveal, a consequence coming back,
 // and the record in the profile. Same format as Campaign Mode's situations (radio choices, then Decide): the server
 // decides everything; this only asks and shows what came back.
 
@@ -15,18 +15,23 @@ const AREA: Record<string, string> = {
   business: "Your business", home: "Your building", nightlife: "After dark", dating: "Date night", money: "Money talks",
 };
 
-/** The meter, for the reveal, the stats panel and the profile. Private: only the player ever sees it. */
-export function IntegrityMeter({ value, compact }: { value: number; compact?: boolean }) {
+/**
+ * The rep meter, 😇 Halo ↔ 💸 Hustler (owner, Oct 30): where you stand, never a score, and neither end is the bad one.
+ * For the reveal and the profile. Private: only the player ever sees it.
+ */
+export function RepMeter({ value, compact }: { value: number; compact?: boolean }) {
   const band = integrityBand(value);
+  const at = 100 - value; // Halo on the left
   return (
-    <div className={`integrity ${band}${compact ? " compact" : ""}`}>
-      <div className="integrity-head">
-        <span className="title">⚖️ Integrity <b>{value}</b></span>
-        <span className="meta">{integrityWord(value)}</span>
+    <div className={`rep ${band}${compact ? " compact" : ""}`}>
+      <div className="rep-ends">
+        <span>😇 Halo</span>
+        <b>{integrityWord(value)}</b>
+        <span>Hustler 💸</span>
       </div>
-      <div className="integrity-bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value} aria-label="Integrity">
-        <span style={{ width: `${value}%` }} />
-        <i style={{ left: `${CHOICES.low}%` }} /><i style={{ left: `${CHOICES.high}%` }} />
+      <div className="rep-bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={at} aria-valuetext={integrityWord(value)} aria-label="Halo or Hustler">
+        <i style={{ left: `${100 - CHOICES.high}%` }} /><i style={{ left: `${100 - CHOICES.low}%` }} />
+        <span style={{ left: `${at}%` }} />
       </div>
     </div>
   );
@@ -40,11 +45,12 @@ function Receipt({ made, onClose }: { made: ChoiceMade; onClose: () => void }) {
       {line && <p className="choice-effects">{line}</p>}
       {made.first && (
         <div className="choice-reveal stack-8">
-          <span className="overline">New: your Integrity</span>
-          <IntegrityMeter value={made.integrity} />
+          <span className="overline">New: Halo or Hustler?</span>
+          <RepMeter value={made.integrity} />
           <p className="meta" style={{ margin: 0 }}>
-            How the city sees you. Only you can see the number, but everyone you meet can feel it. Choices move it, and
-            some come back later. Losing it is quick; earning it back takes twice as long.
+            Every choice nudges you one way. Halos get trusted: keys, tills, warmer regulars, more clout for doing right.
+            Hustlers get offers: side deals, back rooms, more cash for the angle. Only you see where you stand, but the
+            city acts on it. Some choices come back later.
           </p>
         </div>
       )}
@@ -115,7 +121,7 @@ export function ChoiceBackSheet({ entry, onClose }: { entry: ChoiceLogEntry | nu
   );
 }
 
-/** The profile's record: Integrity, then every choice and what came back, newest first. */
+/** The profile's record: Halo or Hustler, then every choice and what came back, newest first. */
 export function ChoicesHistory({ integrity, log }: { integrity: number | null; log: ChoiceLogEntry[] }) {
   const [all, setAll] = useState(false);
   if (integrity === null && !log.length) return null;
@@ -123,7 +129,7 @@ export function ChoicesHistory({ integrity, log }: { integrity: number | null; l
   return (
     <section className="stack-12">
       <h3 className="overline" style={{ margin: 0 }}>Your choices</h3>
-      {integrity !== null && <IntegrityMeter value={integrity} />}
+      {integrity !== null && <RepMeter value={integrity} />}
       <div className="stack-8">
         {rows.map((e) => (
           <div key={e.id} className={`choice-log${e.cameBack ? " back" : ""}`}>
