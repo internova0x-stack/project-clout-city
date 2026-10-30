@@ -3383,8 +3383,6 @@ export function GameShell({
         }}
         crew={clique.map((c) => c.display_name)}
         recent={myCard?.recent}
-        skills={skills ?? (loadSkills ? null : undefined)}
-        perks={perkHandlers}
         onOpenCollection={catalog ? () => setPanel("collection") : undefined}
         onOpenNetWorth={city ? () => setPanel("networth") : undefined}
         onOpenLeaderboard={() => setPanel("leaderboard")}
