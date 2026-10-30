@@ -159,6 +159,10 @@ components live in `app/globals.css`.
   `lib/loadingTips.ts` over the cast); Continue spins.
   iPhone launch images are `public/splash/` (lib/launchImages.ts; regenerate with `npm run build:launch-images` on a running
   dev server after changing the loader; `/preview/loading?still=1` is what they show).
+- Desktop mode (owner, Oct 30; step 1 of Steam): from 900 × 560 px the game fills the window instead of the phone frame
+  (globals.css "Desktop mode"): the bottom bar and sheets keep a phone width in the middle, sheets float above the bottom
+  edge, and the creator and the demo's pick put the avatar beside its panel (`.creator-main`). 600 to 900 px keeps the frame.
+  Steam next: a `desktop/` wrapper in this repo, Steam login, then Steam checkout for one-time items (VIP later).
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
