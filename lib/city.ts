@@ -294,7 +294,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -421,7 +421,7 @@ export const PLACES: Place[] = [
   },
   {
     id: "skybridge-tower", borough: "brooklyn", name: "Skybridge Tower", emoji: "🏢", category: "places", neighborhood: "Williamsburg",
-    at: [40.7188, -73.9622], depth: "scene", template: "office", palette: ["#6C8CFF", "#D6CFC4", "#14111A"],
+    at: [40.7188, -73.9622], depth: "scene", template: "officeBig", palette: ["#6C8CFF", "#D6CFC4", "#14111A"],
     tags: ["office", "gigs_board"],
     lore: "Glass, steel and a lobby that smells like ambition and burnt coffee. The gigs board is where careers start, or at least side hustles. I've seen both.",
     actions: [
@@ -791,7 +791,7 @@ export const PLACES: Place[] = [
   },
   {
     id: "triborough-works", name: "Triborough Works", emoji: "🏢", category: "places", neighborhood: "Astoria",
-    at: [40.7660, -73.9252], depth: "scene", template: "office", palette: ["#6C8CFF", "#E6E8EC", "#1F1B26"],
+    at: [40.7660, -73.9252], depth: "scene", template: "officeBig", palette: ["#6C8CFF", "#E6E8EC", "#1F1B26"],
     tags: ["office", "coworking", "gigs_board", "astoria"],
     lore: "Coworking for people who are \"between rounds.\" Free kombucha, a ping-pong table nobody uses and a gigs board that actually pays. Take the gig, skip the kombucha.",
     actions: [
@@ -801,7 +801,7 @@ export const PLACES: Place[] = [
   // Campaign Mode (owner, Oct 29): the campaign office on the map. Its card opens Campaign HQ (the Phone's Campaign app).
   {
     id: "campaign-hq", name: "Campaign HQ", emoji: "🗳️", category: "places", neighborhood: "Astoria",
-    at: [40.7628, -73.9195], depth: "scene", template: "office", palette: ["#D93A2F", "#F4F1EA", "#2F5BBF"],
+    at: [40.7628, -73.9195], depth: "scene", template: "officeSmall", palette: ["#D93A2F", "#F4F1EA", "#2F5BBF"],
     tags: ["office", "campaign", "astoria"],
     lore: "A storefront on Steinway with four candidates' posters taped to the same window. Volunteers, cold pizza and a whiteboard nobody is allowed to photograph. Allegedly.",
     actions: [

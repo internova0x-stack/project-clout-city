@@ -390,6 +390,10 @@ components live in `app/globals.css`.
   Dolores and Preston; Mayor Papa-Dani is the big boss (`bigBoss.short`, `bigName`). Perks: +5 Energy a workday, photo ops
   from level 3 (8 × level clout, 'career_screen'), and campaigns start 1 point up (2 from level 3; `CAMPAIGN.background`).
   A gated task (`cityhall-conflict`, `when` snap campaign) has the Mayor ask about "your little campaign". `?career=cityhall`.
+  Office sizes (owner, Oct 31: "depending on the size of the company"): place templates `officeSmall` (two desks and a mini
+  fridge: Campaign HQ), `office` (Pedal Pushers Hub) and `officeBig` (12 × 9.5 open plan: two banks of six desks, a meeting
+  table by the whiteboard, a kitchen and drinks fridge, reception, a lounge corner, a dozen coworkers: Triborough Works,
+  Skybridge Tower); lib/rooms.ts, the template is in the city seed (migration 0145).
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only

@@ -473,7 +473,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -963,6 +963,77 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     spawn: [-0.4, 2.5],
     npcs: [{ x: -1.6, z: -2.95, facing: 0 }, { x: 1.6, z: -1.75, facing: 3.14, seated: true }, { x: -1.2, z: 0.6, facing: -1.57, seated: true }],
   },
+  // Office sizes (owner, Oct 31: "different office sizes… depending on the size of the company"). The small one: two desks
+  // shoved together, a mini fridge and nowhere to stand (a storefront campaign office, a tiny startup).
+  officeSmall: {
+    id: "officeSmall", w: 5.0, d: 4.4, wall: "#EEF0F2", wallAccent: "#5B7FA6", floor: "#BDB6AA", floorKind: "concrete", window: true,
+    items: [
+      { id: "desk-1", kind: "desk", x: -1.2, z: -1.85, rot: 0, use: MAIN(0), label: "*" },
+      { id: "chair-1", kind: "chair", x: -1.2, z: -1.1, rot: 2 },
+      { id: "desk-2", kind: "desk", x: 0.4, z: -1.85, rot: 0 },
+      { id: "chair-2", kind: "chair", x: 0.4, z: -1.1, rot: 2 },
+      { id: "fridge", kind: "fridge", x: 2.0, z: -1.8, rot: 0 },
+      { id: "shelf", kind: "bookshelf", x: 2.25, z: -0.5, rot: 1 },
+      { id: "desk-3", kind: "desk", x: -1.9, z: 0.6, rot: 1, use: MAIN(1), label: "*" },
+      { id: "chair-3", kind: "chair", x: -1.15, z: 0.6, rot: 3 },
+      { id: "plant", kind: "plant", x: 2.15, z: 1.85, rot: 0 },
+    ],
+    spawn: [0.6, 1.6],
+    npcs: [{ x: -1.2, z: -1.1, facing: 3.14, seated: true }, { x: 0.4, z: -1.1, facing: 3.14, seated: true }, { x: 1.2, z: 0.2, facing: -2.2 }],
+  },
+  // The big one: an open-plan floor, two banks of six desks, a meeting table by the whiteboard, a kitchen with a drinks
+  // fridge (the water cooler), reception by the door and a lounge corner; coworkers everywhere.
+  officeBig: {
+    id: "officeBig", w: 12.0, d: 9.5, wall: "#EDF1F4", wallAccent: "#5B7FA6", floor: "#CFC9BE", floorKind: "concrete", window: true, alwaysLit: true,
+    items: [
+      { id: "reception", kind: "storeCounter", x: -4.2, z: 3.0, rot: 0, use: MAIN(0), label: "*" },
+      { id: "desk-1", kind: "desk", x: -4.2, z: -0.25, rot: 0 },
+      { id: "chair-1", kind: "chair", x: -4.2, z: 0.5, rot: 2 },
+      { id: "desk-2", kind: "desk", x: -4.2, z: -0.95, rot: 2 },
+      { id: "chair-2", kind: "chair", x: -4.2, z: -1.7, rot: 0 },
+      { id: "desk-3", kind: "desk", x: -2.8, z: -0.25, rot: 0 },
+      { id: "chair-3", kind: "chair", x: -2.8, z: 0.5, rot: 2 },
+      { id: "desk-4", kind: "desk", x: -2.8, z: -0.95, rot: 2 },
+      { id: "chair-4", kind: "chair", x: -2.8, z: -1.7, rot: 0 },
+      { id: "desk-5", kind: "desk", x: -1.4, z: -0.25, rot: 0 },
+      { id: "chair-5", kind: "chair", x: -1.4, z: 0.5, rot: 2 },
+      { id: "desk-6", kind: "desk", x: -1.4, z: -0.95, rot: 2 },
+      { id: "chair-6", kind: "chair", x: -1.4, z: -1.7, rot: 0 },
+      { id: "desk-7", kind: "desk", x: 1.4, z: -0.25, rot: 0, use: MAIN(1), label: "*" },
+      { id: "chair-7", kind: "chair", x: 1.4, z: 0.5, rot: 2 },
+      { id: "desk-8", kind: "desk", x: 1.4, z: -0.95, rot: 2 },
+      { id: "chair-8", kind: "chair", x: 1.4, z: -1.7, rot: 0 },
+      { id: "desk-9", kind: "desk", x: 2.8, z: -0.25, rot: 0 },
+      { id: "chair-9", kind: "chair", x: 2.8, z: 0.5, rot: 2 },
+      { id: "desk-10", kind: "desk", x: 2.8, z: -0.95, rot: 2 },
+      { id: "chair-10", kind: "chair", x: 2.8, z: -1.7, rot: 0 },
+      { id: "desk-11", kind: "desk", x: 4.2, z: -0.25, rot: 0 },
+      { id: "chair-11", kind: "chair", x: 4.2, z: 0.5, rot: 2 },
+      { id: "desk-12", kind: "desk", x: 4.2, z: -0.95, rot: 2 },
+      { id: "chair-12", kind: "chair", x: 4.2, z: -1.7, rot: 0 },
+      { id: "whiteboard", kind: "chalkboard", x: 0.6, z: -4.45, rot: 0 },
+      { id: "meeting", kind: "diningTable", x: 0.6, z: -3.3, rot: 0 },
+      { id: "meeting-chair-1", kind: "chair", x: -0.3, z: -3.3, rot: 1 },
+      { id: "meeting-chair-2", kind: "chair", x: 1.5, z: -3.3, rot: 3 },
+      { id: "meeting-chair-3", kind: "chair", x: 0.6, z: -2.55, rot: 2 },
+      { id: "kitchen", kind: "kitchen", x: 4.6, z: -4.35, rot: 0 },
+      { id: "cooler", kind: "drinksFridge", x: 5.6, z: -2.9, rot: 3 },
+      { id: "shelf-1", kind: "bookshelf", x: -4.2, z: -4.5, rot: 0 },
+      { id: "shelf-2", kind: "bookshelf", x: -3.0, z: -4.5, rot: 0 },
+      { id: "shelf-3", kind: "bookshelf", x: -5.75, z: -2.0, rot: 1 },
+      { id: "sofa", kind: "sofa", x: 4.3, z: 4.0, rot: 2, color: "#5B7FA6", use: { kind: "sit" }, label: "Sit" },
+      { id: "table", kind: "coffeeTable", x: 4.3, z: 2.9, rot: 0 },
+      { id: "plant-1", kind: "plant", x: -5.6, z: -4.3, rot: 0 },
+      { id: "plant-2", kind: "plant", x: -5.6, z: 4.3, rot: 0 },
+      { id: "plant-3", kind: "plant", x: 5.6, z: 1.6, rot: 0 },
+      { id: "plant-4", kind: "plant", x: 2.45, z: -4.3, rot: 0 },
+    ],
+    spawn: [0.0, 3.8],
+    npcs: [
+      { x: -4.2, z: 2.45, facing: 3.14 }, { x: -4.2, z: 0.5, facing: 3.14, seated: true }, { x: -2.8, z: -1.7, facing: 0, seated: true }, { x: -1.4, z: 0.5, facing: 3.14, seated: true }, { x: 1.4, z: -1.7, facing: 0, seated: true }, { x: 2.8, z: 0.5, facing: 3.14, seated: true }, { x: 4.2, z: -1.7, facing: 0, seated: true }, { x: -4.2, z: -1.7, facing: 0, seated: true }, { x: 2.8, z: -1.7, facing: 0, seated: true },
+      { x: 0.6, z: -2.55, facing: 3.14, seated: true }, { x: 4.9, z: -3.5, facing: 0.4 }, { x: 4.0, z: -3.4, facing: -0.6 },
+    ],
+  },
   // Civic places (library, precinct, firehouse, chapel, lobbies, cinema): a front desk and rows of benches.
   civic: {
     id: "civic", w: 7.6, d: 6.6, wall: "#EFE7D8", wallAccent: "#7A6A55", floor: "#B39C7C", floorKind: "wood", window: true,
@@ -1390,7 +1461,7 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
  */
 export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
-  unisphere: 7, gantries: 7, office: 5, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
+  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
