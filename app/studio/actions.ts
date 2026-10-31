@@ -21,6 +21,7 @@ import type { StoryletAction, StudioStorylets } from "@/lib/storyletWeeks";
 import type { StudioCondition } from "@/lib/cityConditions";
 import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
 import type { EconomyAdmin, EconomyPhase, FlagOutcome } from "@/lib/playerEconomy";
+import type { AssetAdmin } from "@/lib/assetSales";
 import { studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
 import type { ChoiceCard } from "@/lib/choices";
 import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
@@ -237,6 +238,14 @@ export async function studioEconomyFlag(id: number, outcome: FlagOutcome, note: 
 }
 export async function studioEconomyFreeze(player: string, frozen: boolean, reason: string) {
   return admin<EconomyAdmin>("admin_economy_freeze", { p_player: player, p_frozen: frozen, p_reason: reason.slice(0, 300) });
+}
+// ---- Phase 3: business and property sales (migration 0153) ----
+const before0153 = <T,>(r: Admin<T>): Admin<T> => (!r.ok && r.error === "Run migration 0010 first." ? { ok: false, error: "Run migration 0153 first." } : r);
+export async function studioAssetSales() {
+  return before0153(await admin<AssetAdmin>("admin_asset_sales"));
+}
+export async function studioAssetReverse(id: number, reason: string) {
+  return before0153(await admin<AssetAdmin>("admin_asset_reverse", { p_id: id, p_reason: reason.slice(0, 300) }));
 }
 export async function studioUnderworldJobs() {
   return admin<StudioUnderworldJob[]>("admin_underworld_jobs");

@@ -52,6 +52,11 @@ export default function Terms() {
           items) can never be given or traded. These exchanges have limits (account age, rank, a weekly cap), a city fee on job pay
           that goes to no one, and a waiting period before a gift can be sold back or passed on. Every exchange is logged and shown
           to both players, and we may pause an account&apos;s trading, or reverse an exchange, if it looks like abuse or real-money trading.</li>
+        <li><strong>Selling a business or a house:</strong> when we switch it on, you can sell a business or a house you own in the game to
+          another player for C$, within a range around the game&apos;s appraisal. The buyer&apos;s C$ is held for 24 hours, during which either of
+          you can cancel; then the asset changes hands and a 10% city fee is taken from the seller. Rentals, public companies and anything
+          bought with real money can&apos;t be sold. There are limits on how often you can sell and how soon you can resell, and we may reverse
+          a sale within 7 days if it looks like theft, abuse or real-money trading.</li>
         <li>They&apos;re a limited licence to use in the game, not property you own. We may change how they work, including prices, rewards and rent, to keep the game fair and fun.</li>
         <li><strong>Lucky Star Lotto</strong> and other games of chance in Clout City use virtual cash only. Real money never touches them, and their prizes are virtual only.</li>
       </ul>

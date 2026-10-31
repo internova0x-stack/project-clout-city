@@ -30,6 +30,9 @@ import { subletAlerts, type SubletState } from "@/lib/sublets";
 import type { GossipState, TeaCard } from "@/lib/gossip";
 import { BankView } from "../game/Sheets";
 import { TradesAndGifts } from "../economy/Economy";
+// Phase 3 (migration 0153): business and property sales.
+import { AssetSalesPanel } from "../economy/AssetSales";
+import type { AssetApi } from "@/lib/assetSales";
 import type { EconomyApi } from "@/lib/playerEconomy";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
 import { MessagesApp, type MessagesDating } from "../chat/Messages";
@@ -86,6 +89,7 @@ export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
   invite, mayor, locked, onOpenCampaign, onOpenCareers, election, scandals, blotter, conditions, economy, onOpenGifts,
+  assets,
 }: {
   open: boolean;
   onClose: () => void;
@@ -143,6 +147,8 @@ export function PhoneModal({
   /** The Player Economy (migration 0151): Trades & gifts in the Bank. */
   economy?: EconomyApi;
   onOpenGifts?: () => void;
+  /** Phase 3 (migration 0153): Sell in Businesses and Apartments, live deals in the Bank. */
+  assets?: { api: AssetApi; onChanged: () => void };
   /** v0.14 Real Clout FM: the Radio app; without it the app is hidden. */
   radio?: RadioApi;
   /** A shoutout on air the player hasn't seen yet. */
@@ -249,6 +255,7 @@ export function PhoneModal({
               {app !== "news" && app !== "tea" && app !== "businesses" && app !== "jobs" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} perks={perks} /> : <Soon text="Gigs open with the city." />)}
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
+              {app === "businesses" && businesses && assets && <AssetSalesPanel api={assets.api} scope="business" onChanged={assets.onChanged} onToast={onToast} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
               {app === "mayor" && mayor && <MayorApp api={mayor.api} onSeen={mayor.onSeen} onToast={(t) => onToast?.(t)} />}
@@ -256,7 +263,9 @@ export function PhoneModal({
               {app === "apartments" && apartments && state && (apartments.sublets
                 ? <ApartmentsTabs apartments={apartments as Required<NonNullable<typeof apartments>>} state={state} />
                 : <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />)}
+              {app === "apartments" && apartments && state && assets && <AssetSalesPanel api={assets.api} scope="house" onChanged={assets.onChanged} onToast={onToast} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
+              {app === "bank" && state && assets && <AssetSalesPanel api={assets.api} scope="deals" onChanged={assets.onChanged} onToast={onToast} />}
               {app === "bank" && state && economy && <TradesAndGifts api={economy} onOpenGifts={onOpenGifts} />}
               {app === "settings" && (
                 <div className="stack-12">

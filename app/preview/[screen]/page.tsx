@@ -31,6 +31,7 @@ import { previewAutopilot, previewAutopilotSet } from "../autopilotActions";
 import { previewConditions, previewConditionSet, previewUnderworldJobs, previewUnderworldJobSet, previewLearning, previewLearningSet, previewStorylets, previewStoryletSet } from "../storyletActions";
 import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { previewEconomy, previewEconomyFlag, previewEconomyFreeze, previewEconomySet } from "../economyActions";
+import { previewAssetReverse, previewAssetSales } from "../assetSalesActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
 
@@ -42,6 +43,8 @@ import type { Player } from "@/lib/player";
 //   /preview/home?couple=progress|ask|dating|gift|ended|movein|together  relationships (0118) and living together (0149); open Phone → Messages → Us
 //   /preview/home?economy=gift|gifted|history|jobs|locked  the Player Economy (migration 0151): 🎁 in the Shop, a gift waiting,
 //                             Phone → Bank → Trades & gifts, the Jobs board's errands and event support
+//   /preview/home?assets=sell|offer|cooling|done|off  business and property sales (migration 0153): Phone → Businesses /
+//                             Apartments (Sell) and Phone → Bank (offers, the cooling-off, done; off: "Opening soon")
 //   /preview/home?starter=0-10&apps=locked  Starter Week (that many missions done) and apps locked as for a Rank 1 player
 //   /preview/home?visit=none|hosting|invite|guest  having people over (migration 0121): the stats panel's Mood row, the visit sheet
 //   /preview/home?homescore=furnished  the home score (migration 0120): furniture and three paintings placed; tap 🏠 under the top bar
@@ -110,7 +113,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy, assets } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -204,6 +207,7 @@ export default async function Preview({
           galaPreset={gala}
           choicePreset={choice}
           economyPreset={economy}
+          assetsPreset={assets}
           goalsPreset={goals}
           pushPreset={push}
           memberPreset={member}
@@ -246,6 +250,7 @@ export default async function Preview({
             mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet, storylets: previewStorylets, storyletSet: previewStoryletSet, conditions: previewConditions, conditionSet: previewConditionSet, underworldJobs: previewUnderworldJobs, underworldJobSet: previewUnderworldJobSet, learning: previewLearning, learningSet: previewLearningSet,
             shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
             economy: previewEconomy, economySet: previewEconomySet, economyFlag: previewEconomyFlag, economyFreeze: previewEconomyFreeze,
+            assetSales: previewAssetSales, assetReverse: previewAssetReverse,
           }}
         />
       );

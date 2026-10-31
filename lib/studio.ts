@@ -245,6 +245,9 @@ export interface StudioApi {
   economySet?(phase: EconomyPhase, on: boolean): Promise<Admin<EconomyAdmin>>;
   economyFlag?(id: number, outcome: FlagOutcome, note: string): Promise<Admin<EconomyAdmin>>;
   economyFreeze?(player: string, frozen: boolean, reason: string): Promise<Admin<EconomyAdmin>>;
+  /** Phase 3 (migration 0153): recent business and property sales, and reversing one within 7 days. */
+  assetSales?(): Promise<Admin<import("./assetSales.ts").AssetAdmin>>;
+  assetReverse?(id: number, reason: string): Promise<Admin<import("./assetSales.ts").AssetAdmin>>;
   /** Contact the Mayor (migration 0105): players' letters, marking them read or done, and writing back. */
   mailbag?(filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
   letter?(id: number, status: LetterStatus, reply: string | null, filter: MailbagFilter): Promise<Admin<StudioMailbag>>;

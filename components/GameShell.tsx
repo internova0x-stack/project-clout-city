@@ -111,6 +111,7 @@ import { InviteSheet } from "./InviteSheet";
 import { DecorApproveCard, DecoratingBar, JobsApp, RideWaitCard, TogetherBonusCard, TogetherPlansSheet, TogetherPrompt, TogetherSheet } from "./together/Together";
 import { GiftInboxSheet, GiftPrompt, GiftSheet, type GiftItem } from "./economy/Economy";
 import type { EconomyApi, EconomyState, GiftInbox } from "@/lib/playerEconomy";
+import type { AssetApi } from "@/lib/assetSales";
 import {
   canDoTogether, jobToApprove, rideShare, togetherAlerts, togetherVerb,
   type JobHome, type JobsBoard, type MyJob, type RideRequest, type TogetherApi, type TogetherBonus, type TogetherCandidate, type TogetherInbox, type TogetherResult,
@@ -270,6 +271,7 @@ export function GameShell({
   business,
   together,
   economy,
+  assets,
   radio,
   mayor,
   campaign,
@@ -358,6 +360,8 @@ export function GameShell({
   together?: TogetherApi;
   /** The Player Economy (migration 0151): gifts, Trades & gifts in the Bank, the open board; hidden without it. */
   economy?: EconomyApi;
+  /** Phase 3 (migration 0153): business and property sales in the Phone; hidden without it. */
+  assets?: AssetApi;
   /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
   radio?: RadioApi;
   /** Contact the Mayor (migration 0105): the Phone's feedback app; hidden until mayor_letters_state answers. */
@@ -1348,6 +1352,8 @@ export function GameShell({
     // The Player Economy (migration 0151): a gift arrived; a job was taken or paid.
     else if (open === "gifts" && economy) setGiftsOpen(true);
     else if (open === "jobs" && together) setPhone({ open: true, app: "jobs" });
+    // Phase 3 (migration 0153): an offer, a yes, a handover: the deals live in the Bank.
+    else if (open === "assets" && assets) setPhone({ open: true, app: "bank" });
     // Campaign Mode: "Your poll results are in".
     else if (open === "campaign" && campaign) setCampaignOpen(true);
     else if (open === "careers" && careers) setCareersOpen(true);
@@ -3296,6 +3302,7 @@ export function GameShell({
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
         jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers, economy } : undefined}
         economy={economy}
+        assets={assets ? { api: assets, onChanged: () => { void loadBiz(); resync.current(); } } : undefined}
         onOpenGifts={economy ? () => { setPhone({ open: false, app: null }); setGiftsOpen(true); } : undefined}
         // The offer opens over the game, so the Phone steps aside first (it would cover the card).
         onChatPass={(out) => { setPhone({ open: false, app: null }); setChatWith(null); setChatPass({ out }); }}

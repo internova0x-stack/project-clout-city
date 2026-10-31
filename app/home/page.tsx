@@ -3,6 +3,7 @@ import {
   togetherClaim, togetherInbox, togetherInvite, togetherRespond, togetherSeen,
 } from "./togetherActions";
 import { economyHistory, economySetOpen, economyState, giftAnswer, giftCandidates, giftInbox, giftSend } from "./economyActions";
+import { assetAnswer, assetBuyers, assetCancel, assetOffer, assetSalesState } from "./assetActions";
 import { coutureMap, plazaBook, plazaWeeks } from "./coutureActions";
 import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
 import { cookies } from "next/headers";
@@ -173,6 +174,8 @@ export default async function HomePage() {
       economy={city && econ.ok ? {
         state: economyState, setOpen: economySetOpen, history: economyHistory, candidates: giftCandidates, inbox: giftInbox, send: giftSend, answer: giftAnswer,
       } : undefined}
+      // Phase 3 (migration 0153): business and property sales (before 0153, or switched off, the panels stay hidden).
+      assets={city && econ.ok ? { state: assetSalesState, buyers: assetBuyers, offer: assetOffer, answer: assetAnswer, cancel: assetCancel } : undefined}
       // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
       goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}
       // Migration 0078: push notifications (Settings → Notifications and Lola's ask).

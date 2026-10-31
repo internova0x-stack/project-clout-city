@@ -74,6 +74,11 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   till_full: { tier: 1, category: "money", ttlMin: 1440 },
   job_taken: { tier: 1, category: "money", ttlMin: 720 },
   job_paid: { tier: 1, category: "money", ttlMin: 1440 },
+  // Phase 3 (migration 0153): business and property sales.
+  asset_offer: { tier: 1, category: "money", ttlMin: 2880 },
+  asset_accepted: { tier: 1, category: "money", ttlMin: 1440 },
+  asset_cancelled: { tier: 1, category: "money", ttlMin: 1440 },
+  asset_done: { tier: 1, category: "money", ttlMin: 1440 },
   streak_risk: { tier: 1, category: "reminders", ttlMin: 300 },
   exams_open: { tier: 1, category: "reminders", ttlMin: 720 },
   exams_last_day: { tier: 1, category: "reminders", ttlMin: 600 },

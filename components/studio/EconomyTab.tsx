@@ -5,6 +5,8 @@ import { formatCash } from "@/lib/economy";
 import { FLAG_COPY, PHASE_COPY, type EconomyAdmin, type EconomyFlag, type EconomyPhase, type FlagOutcome } from "@/lib/playerEconomy";
 import type { StudioApi } from "@/lib/studio";
 import { Toggle } from "../Toggle";
+// Phase 3 (migration 0153).
+import { AssetSalesAdmin } from "./AssetSalesAdmin";
 
 // The Player Economy (migration 0151): Studio → Economy. The phase switches, this week's numbers, the automatic flags to
 // review, and accounts whose trading is frozen. Plain words for the owner; nothing here moves anyone's money.
@@ -75,6 +77,8 @@ export function EconomyTab({ api }: { api: StudioApi }) {
             {open.length === 0 && <p className="meta" style={{ margin: 0 }}>Nothing flagged. The city is behaving. Suspicious.</p>}
             {open.map((f) => <FlagRow key={f.id} flag={f} busy={busy} onReview={(o, note) => void act(api.economyFlag!(f.id, o, note))} />)}
           </section>
+          {/* Phase 3 (migration 0153): business and property sales. */}
+          {api.assetSales && <AssetSalesAdmin api={api} />}
           <section className="studio-card stack-8">
             <span className="overline">Frozen accounts · {data.frozen.length}</span>
             {data.frozen.length === 0 && <p className="meta" style={{ margin: 0 }}>None. A frozen account can still play; it just can&apos;t give, receive or take jobs.</p>}
