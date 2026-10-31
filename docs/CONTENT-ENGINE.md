@@ -1,6 +1,6 @@
 # Clout City: Content Engine
 
-**Status:** spec v1 for owner approval (Oct 31). It replaces the Frameworks Map's "to write" Content Engine spec and the
+**Status:** spec v1 (Oct 31): both open questions answered by the owner; the build waits on the owner's go. It replaces the Frameworks Map's "to write" Content Engine spec and the
 reactive part of the World State brief.
 
 **Owner decisions (Oct 31):**
@@ -156,8 +156,8 @@ memory**.
   - The existing daily caps stay (2 cards a New York day, 90 minutes apart).
 - **One card format for the whole game.** The 76 Moral Choices cards and the 36 Climb cards become storylets with no
   conditions beyond today's. Campaign situations and career tasks move onto the same format later (section 9).
-  - Previews follow the owner's Oct 30 rule: You get and It costs, no risk labels or "comes back" hints. Campaign Mode
-    still shows risk labels; aligning it is an open question (section 10).
+  - Previews follow the owner's Oct 30 rule, extended to Campaign Mode on Oct 31: You get and It costs, no risk labels or
+    "comes back" hints anywhere in the game.
 
 ## 6. Generators (templates)
 
@@ -222,7 +222,7 @@ memory**.
 - Effects stay inside the Moral Choices caps (C$3,000, 300 clout a result). Real money never buys a way out.
 - Every change says why (a receipt, a line, a headline).
 
-**Open questions:**
-- **Campaign Mode's risk labels.** The Oct 30 rule removed them from cards, but campaigns still show them. Align campaigns
-  with the rule?
-- **The veto window length.** 24 hours by default; shorter for city storylets?
+**Settled (owner, Oct 31):**
+- Campaign Mode's risk labels are removed: no risk labels anywhere.
+- The veto window is 24 hours for generated content (storylets, city storylets, conditions).
+- **Stories and hunts run on a weekly beat** (owner, Oct 31): their veto window is Friday, and they go live on Saturday.

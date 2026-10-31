@@ -454,13 +454,12 @@ Before choosing, each option shows a plain-language preview:
 |---|---|
 | **You get** | "+2 Rating in the Bronx" |
 | **It costs** | "C$4,000 and one evening slot" |
-| **Risk** | "Medium: a reporter may call it a stunt" |
 
 - **Icons plus words:** each meter has one icon and one color, always with a short word.
-- **Risk is a level** (Low, Medium, High) with one short reason. Exact odds stay hidden.
-- **"This may come back later"** marks choices that create traces, debts or favors owed.
-- **No hidden gotchas:** a big downside is always in the preview. Surprises only come from risks the player was
-  warned about.
+- **No risk labels or "may come back" hints** (owner, Oct 31, the Oct 30 rule for every card in the game): players learn
+  from consequences. The odds, the traces and what comes back stay on the server.
+- **Real costs in the preview:** what a choice certainly costs is always in "It costs"; what might happen later is a
+  consequence to learn from, not a warning.
 - **Short words:** "Heat" is explained the first time as "how close people are to finding out."
 
 ### 6.3 After the choice

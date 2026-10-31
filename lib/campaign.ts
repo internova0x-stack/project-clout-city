@@ -7,7 +7,6 @@
 
 export type CandidateId = "goldcrest" | "castellano" | "kowalczyk" | "starr";
 export type Channel = "digital" | "street" | "tv";
-export type Risk = "low" | "medium" | "high";
 export type DebateStyle = "facts" | "charm" | "attack" | "deflect" | "own";
 export type OpId = "fake_news" | "poach_ally";
 export type Ending = "clean_win" | "dirty_win" | "loss";
@@ -42,7 +41,6 @@ export const CAMPAIGN = {
 } as const;
 
 /** "Low", "Medium", "High" with the color the meters use. */
-export const RISK_LABEL: Record<Risk, string> = { low: "Low", medium: "Medium", high: "High" };
 
 // ---------------------------------------------------------------------------------------------------------------
 // Content shapes (content/campaign/*.json)
@@ -65,8 +63,8 @@ export interface Effects {
   ally?: string;
 }
 
-/** The "You get / It costs / Risk" preview every option shows (spec section 6.2). */
-export interface Preview { get: string; cost: string; risk: Risk; why: string; later?: boolean }
+/** What a choice previews (owner, Oct 30/31: You get and It costs only; no risk labels or "may come back" hints anywhere). */
+export interface Preview { get: string; cost: string }
 
 export interface Choice extends Preview {
   id: string;

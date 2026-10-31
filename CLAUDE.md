@@ -279,6 +279,8 @@ components live in `app/globals.css`.
   and paid, but `goal_current` only suggests them while a campaign runs. Entry: the Phone's Campaign app (the teaser before Rank 2,
   `APP_UNLOCKS.campaign`), News → City's "Upcoming election" card while none runs, the Rank 2 reveal and Lola's unlock line;
   `/home?open=campaign`. Tuning: tests/campaign.test.ts plays thousands of campaigns (clean ~45-65% wins, dirty ~55-80%).
+  Previews show You get and It costs only (owner, Oct 31: no risk labels or "may come back" hints, the Oct 30 rule for every
+  card; content/campaign has no risk, why or later fields, tests/campaign.test.ts checks).
   Bought endorsements and votes (owner, Oct 30): nine situation cards (`buy_*`, `votes_*`, `mayor_buys`); the choice effect
   `ally` puts a stakeholder on the campaign's side (a bought Mayor ally leaves Poach Ally one fewer target).
   Part 2 (migration 0128): campaign tasks (content/campaign/tasks.json: two a campaign week, one from the campaign's state, one in

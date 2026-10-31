@@ -872,13 +872,13 @@ function hydrateMessage(content: CampaignContent, state: CampaignState, m: Inbox
   const v = vars(content, state);
   return {
     ...m, subject: fill(m.subject, v), body: fill(m.body, v),
-    options: m.options.map((o) => ({ id: o.id, label: fill(o.label, v), get: fill(o.get, v), cost: fill(o.cost, v), risk: o.risk, why: fill(o.why, v), later: o.later, meeting: o.meeting, effects: {}, receipt: "" })),
+    options: m.options.map((o) => ({ id: o.id, label: fill(o.label, v), get: fill(o.get, v), cost: fill(o.cost, v), meeting: o.meeting, effects: {}, receipt: "" })),
   };
 }
 
 function hydrate(content: CampaignContent, state: CampaignState, s: Situation, place?: string, target?: string): Situation {
   const v = vars(content, state, place, target);
-  return { ...s, text: fill(s.text, v), choices: s.choices.map((c) => ({ ...c, label: fill(c.label, v), get: fill(c.get, v), cost: fill(c.cost, v), why: fill(c.why, v), receipt: "", fail: undefined, effects: {}, trace: undefined })) };
+  return { ...s, text: fill(s.text, v), choices: s.choices.map((c) => ({ ...c, label: fill(c.label, v), get: fill(c.get, v), cost: fill(c.cost, v), receipt: "", fail: undefined, effects: {}, trace: undefined })) };
 }
 
 /** The player's candidate pick screen: everything about the four, nothing hidden. */
