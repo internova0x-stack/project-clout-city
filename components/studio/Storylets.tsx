@@ -5,6 +5,7 @@ import { effectLine } from "@/lib/choices";
 import { FAMILY_LABEL, sampleFill, storyletWhen, whenLines, type StoryletAction, type StudioStorylet, type StudioStorylets } from "@/lib/storyletWeeks";
 import type { StudioApi } from "@/lib/studio";
 import type { ConditionEffect, StudioCondition } from "@/lib/cityConditions";
+import { LEARNING, pct, type StudioLearning } from "@/lib/cardLearning";
 
 // Content Engine step 3 (migration 0139): Studio → Storylets. Each week's new cards arrive here and go live 24 hours
 // later by themselves (owner, Oct 31: automatic with a veto window). Veto one and it never shows; pause it to decide
@@ -44,6 +45,7 @@ export function StoryletsTab({ api }: { api: StudioApi }) {
         {error && <span className="meta error-text">{error}</span>}
       </section>
       {api.conditions && <ConditionsSection api={api} />}
+      {api.learning && <LearningSection api={api} />}
       {data?.cards.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No storylets yet. The weekly routine adds content/storylets/&lt;Monday&gt;.json.</p></section>}
       {weeks.map((w) => (
         <section key={w} className="stack-8">
@@ -146,6 +148,69 @@ function ConditionsSection({ api }: { api: StudioApi }) {
           </div>
         </article>
       ))}
+    </section>
+  );
+}
+
+// ---- Content Engine step 6 (migration 0141): what works ----
+
+const FILTERS = [
+  { id: "all", label: "All" }, { id: "up", label: "Shown more" }, { id: "down", label: "Shown less" }, { id: "retired", label: "Retired" }, { id: "mine", label: "Set by you" },
+] as const;
+
+function LearningSection({ api }: { api: StudioApi }) {
+  const [data, setData] = useState<StudioLearning | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
+  const [more, setMore] = useState(false);
+  useEffect(() => { void api.learning!().then((r) => (r.ok ? setData(r.data) : setError(r.error))); }, [api]);
+  const set = async (card: string, s: { weight: number; retired: boolean } | "auto") => {
+    setBusy(card); setError(null);
+    const r = await api.learningSet!(card, s);
+    setBusy(null);
+    if (r.ok) setData(r.data); else setError(r.error);
+  };
+  const rows = (data?.rows ?? []).filter((r) =>
+    filter === "up" ? !r.retired && r.weight > 1 : filter === "down" ? !r.retired && r.weight < 1 : filter === "retired" ? r.retired : filter === "mine" ? r.setBy === "admin" : true);
+  const shown = more ? rows : rows.slice(0, 15);
+  return (
+    <section className="stack-8">
+      <span className="title">📈 What works</span>
+      <span className="subtext">
+        Every card's last {LEARNING.windowDays} days: how often players made a choice instead of closing it, and how evenly they
+        split between the options. Once a day the game shows the strongest cards more and the weakest less, and retires cards
+        most players close (after {LEARNING.retire.minShown} showings). Your setting on a card always wins until you hand it
+        back.
+      </span>
+      {data && <span className="meta">{data.lastRun ? `Last worked out ${data.lastRun}.` : "Not worked out yet: it runs once a day once cards have been shown."} A card needs {LEARNING.minShown} showings before it moves.</span>}
+      {error && <span className="meta error-text">{error}</span>}
+      <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+        {FILTERS.map((f) => <button key={f.id} className="chip" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>{f.label}</button>)}
+      </div>
+      {data && rows.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>Nothing here yet.</p></section>}
+      {shown.map((r) => (
+        <article key={r.card} className="studio-card" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="row" style={{ justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+            <span className="body-strong" style={{ minWidth: 0 }}>{r.emoji} {sampleFill(r.title, r.slots)}</span>
+            <span className={`tag studio-review ${r.retired ? "declined" : r.weight > 1 ? "approved" : "draft"}`}>
+              {r.retired ? "Retired" : `×${r.weight.toFixed(2)}`}{r.setBy === "admin" ? " · you" : ""}
+            </span>
+          </div>
+          <span className="meta">
+            {r.shown ? `Shown ${r.shown} · chose ${pct(r.engage)} · closed ${pct(r.skipRate)} · split ${pct(r.split)}` : "Not shown in the last 4 weeks"}
+          </span>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <button className="btn btn-secondary btn-sm" disabled={busy === r.card} onClick={() => void set(r.card, { weight: 1.5, retired: false })}>Show more</button>
+            <button className="btn btn-secondary btn-sm" disabled={busy === r.card} onClick={() => void set(r.card, { weight: 0.5, retired: false })}>Show less</button>
+            {r.retired
+              ? <button className="btn btn-secondary btn-sm" disabled={busy === r.card} onClick={() => void set(r.card, { weight: 1, retired: false })}>Restore</button>
+              : <button className="btn btn-secondary btn-sm" disabled={busy === r.card} onClick={() => void set(r.card, { weight: r.weight, retired: true })}>Retire</button>}
+            {r.setBy === "admin" && <button className="btn btn-secondary btn-sm" disabled={busy === r.card} onClick={() => void set(r.card, "auto")}>Back to automatic</button>}
+          </div>
+        </article>
+      ))}
+      {rows.length > 15 && <button className="btn btn-secondary btn-sm" onClick={() => setMore(!more)}>{more ? "Show fewer" : `Show all ${rows.length}`}</button>}
     </section>
   );
 }

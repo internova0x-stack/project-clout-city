@@ -39,13 +39,15 @@ async function who(): Promise<{ id: string; admin: Admin } | { error: string }> 
 
 // Content Engine step 3 (migration 0139): the weekly storylets that have gone live (read every 5 minutes per server).
 // A vetoed or paused card is no longer offered, but an open card or a player's history still finds it.
-let weekly: { cards: ChoiceCard[]; offer: ChoiceCard[]; at: number } = { cards: [], offer: [], at: 0 };
+// Step 6 (migration 0141): the learned weights come with them.
+let weekly: { cards: ChoiceCard[]; offer: ChoiceCard[]; weights: Record<string, number>; at: number } = { cards: [], offer: [], weights: {}, at: 0 };
 async function loadWeekly(admin: Admin) {
   if (Date.now() - weekly.at < 5 * 60_000) return;
-  const { data, error } = await admin.rpc("storylets_live");
-  // Before migration 0139 the function is missing: no weekly cards (check again in 5 minutes).
-  const rows = error || !Array.isArray(data) ? [] : (data as { card: ChoiceCard; offer: boolean }[]);
-  weekly = { cards: rows.map((r) => r.card), offer: rows.filter((r) => r.offer).map((r) => r.card), at: Date.now() };
+  const [live, w] = await Promise.all([admin.rpc("storylets_live"), admin.rpc("card_weights_live")]);
+  // Before migrations 0139 and 0141 the functions are missing: no weekly cards, every weight 1 (check again in 5 minutes).
+  const rows = live.error || !Array.isArray(live.data) ? [] : (live.data as { card: ChoiceCard; offer: boolean }[]);
+  const weights = w.error || !w.data || typeof w.data !== "object" ? {} : (w.data as Record<string, number>);
+  weekly = { cards: rows.map((r) => r.card), offer: rows.filter((r) => r.offer).map((r) => r.card), weights, at: Date.now() };
 }
 const card = (id: string): ChoiceCard | undefined => CHOICE_CARDS.find((c) => c.id === id) ?? weekly.cards.find((c) => c.id === id);
 const err = (e: { message: string } | null) => {
@@ -154,7 +156,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
   const place = ctx.atPlace ? placeById(ctx.atPlace) : undefined;
   const memory = await memoryOf(w.admin, w.id);
   const pick = pickCard([...CHOICE_CARDS, ...weekly.offer], {
-    memory,
+    memory, weights: weekly.weights,
     place: place?.id ?? null, tags: place?.tags ?? [], after, integrity: ctx.integrity, rank: ctx.rank,
     student: ctx.student, business: ctx.business, roommate: !!ECONOMY.homes.find((x) => x.id === ctx.home)?.roommate, history: ctx.history, today: ctx.today,
   }, rng);

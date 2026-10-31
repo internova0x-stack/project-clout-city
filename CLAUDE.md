@@ -398,6 +398,11 @@ components live in `app/globals.css`.
   player's memory fits; `characterRemembered()` (app/home/characterActions.ts, service role via lib/memoryServer.ts, which
   choiceActions shares) returns filled lines by character; GameShell's `remembered` prop plays one every 3rd tap on a
   regular (`rememberedTap`). Hand-written in PRs, never by the weekly routine (it would skip the veto window).
+  Step 6, learning (migration 0141; lib/cardLearning.ts): `card_stats(days)` reads choice_log per card; once a New York day
+  (`card_learning_due`) syncWeeklyContent runs `learnWeights` (70% chosen ÷ shown, 30% option split, against the median;
+  0.5-1.6; 25 showings to move; retired at 60+ shown and ≤ 20% chosen) into `card_weights` (`card_weights_auto`, never over
+  the owner's `set_by = 'admin'`); `card_weights_live()` feeds `ChoiceContext.weights` (fit × weight, 0 = retired). Studio →
+  Storylets → What works (`admin_card_learning`, `admin_card_weight(card, weight, retired, auto)`).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

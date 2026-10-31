@@ -1,6 +1,6 @@
 # Clout City: Content Engine
 
-**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 5 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
+**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 6 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
 reactive part of the World State brief.
 
 **Owner decisions (Oct 31):**
@@ -210,7 +210,7 @@ memory**.
 | 3 ✅ | **Templates and the weekly generator** (built: migration 0139, lib/storyletWeeks.ts, content/storylets/, Studio → Storylets): slot filling, worst-case validation, the Studio Storylets tab with the veto window, the routine drafting templates | A steady stream of new situations |
 | 4 ✅ | **The city reacts** (built: migration 0140, lib/cityConditions.ts, content/conditions/, content/city/reactions.json): conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
 | 5 ✅ | **One character registry** (built: lib/characters.ts, lib/characterMemory.ts, content/characters/remembers.json): the cast, profiles, career people, campaign people and Barksley in one list with roles, places and memory keyed off facts | People who remember you |
-| 6 | **Learning:** weights from what's chosen and skipped; retiring what's skipped | Content that gets better |
+| 6 ✅ | **Learning** (built: migration 0141, lib/cardLearning.ts, Studio → Storylets → What works): weights from what's chosen and skipped; retiring what's skipped | Content that gets better |
 | 7 | **One card format:** campaign situations and career tasks on storylets | Consistency |
 
 ## 10. Rules (every storylet follows them)
@@ -272,3 +272,17 @@ memory**.
   storylets: lib/memoryServer.ts) and sends only the lines; tapping a regular plays one every 3 taps (`rememberedTap`).
 - Remembered lines are hand-written in pull requests (no veto window), not drafted by the weekly routine.
 - Not yet: coworkers' lines in the Careers People card, the Mayor's app remembering you, celebrities who react.
+
+**Step 6 as built (Oct 31):**
+- Every card's last 28 days come from `choice_log` (`card_stats`: shown, chosen, skipped, expired, picks per option).
+- Once a New York day, `syncWeeklyContent` works out weights with `learnWeights` (lib/cardLearning.ts): a score of
+  70% engagement (chosen ÷ shown) and 30% split (how evenly players divide between the options: a real dilemma), measured
+  against the median card; weights 0.5 to 1.6; a card needs 25 showings to move. Shown 60+ times and chosen 20% or less:
+  retired. Stored by `card_weights_auto`, which never overwrites a card the owner set.
+- The card picker multiplies each card's fit by its weight (`ChoiceContext.weights`, read with the weekly storylets every
+  5 minutes; a retired card weighs 0).
+- Studio → Storylets → **What works**: every card's numbers (shown, chose, closed, split), its weight and who set it,
+  filters (shown more, shown less, retired, set by you), Show more (×1.5), Show less (×0.5), Retire, Restore and Back to
+  automatic (`admin_card_learning`, `admin_card_weight`).
+- Not yet: weights for city storylets and remembered lines (they aren't chosen or skipped), and a report for the weekly
+  routine (it has no database access; the owner sees the numbers in the Studio).

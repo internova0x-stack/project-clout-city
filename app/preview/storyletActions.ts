@@ -6,6 +6,8 @@ import { previewOnly } from "./guard";
 import type { ChoiceCard } from "@/lib/choices";
 import type { StoryletAction, StudioStorylet, StudioStorylets } from "@/lib/storyletWeeks";
 import type { CityCondition, ReactionRule, StudioCondition } from "@/lib/cityConditions";
+import { learnWeights, studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
+import { CHOICE_CARDS } from "@/lib/choicesContent";
 
 // Development previews only: Studio → Storylets in memory (migration 0139), from the repo's content/storylets files.
 // Every card arrived 6 hours ago, so its window has 18 hours left.
@@ -87,4 +89,41 @@ export async function previewConditionSet(id: string, action: StoryletAction) {
     c.on = c.status === "live" && Date.parse(c.starts_at) <= Date.now() && Date.parse(c.ends_at) > Date.now();
   }
   return { ok: true as const, data: cs.map((x) => ({ ...x })) };
+}
+
+// Content Engine step 6: four weeks of made-up results for the game's cards (some loved, some closed by everyone),
+// weighted by the real rules, and the owner's overrides in memory.
+let learn: { stats: CardStats[]; weights: { card: string; weight: number; retired: boolean; set_by: "auto" | "admin" }[] } | null = null;
+function loadLearn() {
+  if (learn) return learn;
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const stats: CardStats[] = CHOICE_CARDS.filter((c) => !c.chainOnly).slice(0, 60).map((c, i) => {
+    const shown = 20 + Math.floor(rnd() * 140);
+    const engage = i % 11 === 3 ? 0.12 : 0.35 + rnd() * 0.55;
+    const chosen = Math.round(shown * engage);
+    const skipped = Math.round((shown - chosen) * 0.8);
+    const options = Object.fromEntries(c.options.map((o, k) => [o.id, Math.round(chosen * (k === 0 ? 0.3 + rnd() * 0.6 : rnd() * 0.4))]));
+    return { card: c.id, base: c.base, shown, chosen, skipped, expired: shown - chosen - skipped, options };
+  });
+  const auto = learnWeights(stats, Object.fromEntries(CHOICE_CARDS.map((c) => [c.id, c.options.length])));
+  learn = { stats, weights: auto.map((w) => ({ card: w.card, weight: w.weight, retired: w.retired, set_by: "auto" as const })) };
+  return learn;
+}
+const titles = () => Object.fromEntries(CHOICE_CARDS.map((c) => [c.id, { title: c.title, emoji: c.emoji, options: c.options.length, slots: c.slots }]));
+const learnView = (): StudioLearning => { const l = loadLearn(); return { rows: studioRows(l.stats, l.weights, titles()), lastRun: new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }) }; };
+
+export async function previewLearning() {
+  previewOnly();
+  return { ok: true as const, data: learnView() };
+}
+
+export async function previewLearningSet(card: string, set: { weight: number; retired: boolean } | "auto") {
+  previewOnly();
+  const l = loadLearn();
+  const w = l.weights.find((x) => x.card === card);
+  if (set === "auto") { if (w) w.set_by = "auto"; }
+  else if (w) Object.assign(w, { weight: set.weight, retired: set.retired, set_by: "admin" });
+  else l.weights.push({ card, weight: set.weight, retired: set.retired, set_by: "admin" });
+  return { ok: true as const, data: learnView() };
 }

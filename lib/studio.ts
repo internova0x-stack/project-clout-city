@@ -6,6 +6,7 @@ import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { Autopilot, AutopilotKind } from "./autopilot.ts";
 import type { StoryletAction, StudioStorylets } from "./storyletWeeks.ts";
 import type { StudioCondition } from "./cityConditions.ts";
+import type { StudioLearning } from "./cardLearning.ts";
 import type { CatalogItem, EditableField, ShopFile } from "./shopCatalog.ts";
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
@@ -231,6 +232,9 @@ export interface StudioApi {
   /** Content Engine step 4 (migration 0140): city conditions (weekly and fired by the city's tallies). */
   conditions?(): Promise<Admin<StudioCondition[]>>;
   conditionSet?(id: string, action: StoryletAction): Promise<Admin<StudioCondition[]>>;
+  /** Content Engine step 6 (migration 0141): what works: every card's numbers and weight, and the owner's override. */
+  learning?(): Promise<Admin<StudioLearning>>;
+  learningSet?(card: string, set: { weight: number; retired: boolean } | "auto"): Promise<Admin<StudioLearning>>;
   /** Contact the Mayor (migration 0105): players' letters, marking them read or done, and writing back. */
   mailbag?(filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
   letter?(id: number, status: LetterStatus, reply: string | null, filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
