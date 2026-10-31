@@ -390,6 +390,21 @@ components live in `app/globals.css`.
   Dolores and Preston; Mayor Papa-Dani is the big boss (`bigBoss.short`, `bigName`). Perks: +5 Energy a workday, photo ops
   from level 3 (8 × level clout, 'career_screen'), and campaigns start 1 point up (2 from level 3; `CAMPAIGN.background`).
   A gated task (`cityhall-conflict`, `when` snap campaign) has the Mayor ask about "your little campaign". `?career=cityhall`.
+  Office sizes (owner, Oct 31: "depending on the size of the company"): place templates `officeSmall` (two desks and a mini
+  fridge: Campaign HQ), `office` (Pedal Pushers Hub) and `officeBig` (12 × 9.5 open plan: two banks of six desks, a meeting
+  table by the whiteboard, a kitchen and drinks fridge, reception, a lounge corner, a dozen coworkers: Triborough Works,
+  Skybridge Tower); lib/rooms.ts, the template is in the city seed (migration 0145). Tower offices (owner, Oct 31: "multiple floors,
+  swanky design, cubicles, display glass, robots… for big technology or media companies"): `TOWERS` (lib/rooms.ts) gives a
+  place floors joined by an elevator (`towerElevators`: up to the next floor, from the top back to 1) and floor buttons in
+  GameShell; Skybridge Tower (big tech): Lobby (`towerLobby`: robot greeter, display cases, glass lounge), Open floor
+  (`techFloor`: 12 cubicles, server racks, robots) and Executive floor (`execFloor`: glass boardroom with a video wall, corner
+  office, robot butler); Clout TV Tower (media): the Studio, the Newsroom (`newsroom`) and the Executive floor. New pieces:
+  cubicle, glassWall, displayCase, robot, serverRack, elevator (components/room/furniture.ts).
+  Interior styles (owner, Oct 31: "old english, minimalist, futuristic, modern"): `INTERIOR_STYLES` and `PLACE_STYLES` (lib/rooms.ts,
+  by place id, so no seed change) re-dress a place's room with `styleRoom` (walls, floor, upholstery and rugs; Old English hangs
+  two oil paintings, minimalist keeps one plant and no lamps, futuristic is midnight with neon trim); the layout never moves.
+  Ground floors and tower floors wear the style; a club's restroom and VIP keep their own. No chat bubbles over people in rooms
+  (owner, Oct 31: "Remove the chat bubbles"): tap the person; the talk buttons stay hidden (`sr-only`) for keyboards.
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only

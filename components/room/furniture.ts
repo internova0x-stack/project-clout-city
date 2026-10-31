@@ -766,6 +766,87 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(w - 0.1, 0.6, 0.03, k.mat("#CFE3EC", { roughness: 0.05, metalness: 0.5, emissive: "#CFE3EC", emissiveIntensity: opts.night ? 0.2 : 0.08 }), 0, 1.15, -d / 2 + 0.02);
       return { group: g };
     }
+    // ---- Tower offices (owner, Oct 31: "multiple floors, swanky design, cubicles, display glass, robots") ----
+    // A cubicle: chest-high fabric partitions on three sides, a desk along the back with a monitor, a chair inside.
+    case "cubicle": {
+      const panel = color ?? "#8B95A6";
+      const h = 1.15;
+      for (const sx of [-1, 1]) box(0.05, h, d, panel, sx * (w / 2 - 0.025), 0, 0);
+      box(w, h, 0.05, panel, 0, 0, -d / 2 + 0.025);
+      for (const sx of [-1, 1]) box(0.06, 0.04, d, METAL, sx * (w / 2 - 0.025), h, 0);
+      box(w - 0.12, 0.04, 0.6, "#E8E2D6", 0, 0.72, -d / 2 + 0.36);
+      box(0.05, 0.72, 0.5, METAL, -w / 2 + 0.2, 0, -d / 2 + 0.36);
+      box(0.05, 0.72, 0.5, METAL, w / 2 - 0.2, 0, -d / 2 + 0.36);
+      const screen = box(0.55, 0.34, 0.03, glow("#7FB8FF", opts.night ? 0.8 : 0.45), 0, 0.92, -d / 2 + 0.22);
+      box(0.06, 0.18, 0.06, BLACK, 0, 0.76, -d / 2 + 0.25);
+      box(0.4, 0.02, 0.14, "#2A2530", 0, 0.76, -d / 2 + 0.5);
+      box(0.12, 0.1, 0.08, "#F4F1EA", w / 2 - 0.35, 0.76, -d / 2 + 0.3);
+      box(0.46, 0.06, 0.46, "#2A2F3A", 0, 0.44, 0.1);
+      box(0.46, 0.5, 0.06, "#2A2F3A", 0, 0.47, 0.33);
+      cyl(0.03, 0.03, 0.44, METAL, 0, 0, 0.1, 6);
+      return { group: g, seatY: 0.5, tick: (t) => { (screen.material as MeshStandardMaterial).emissiveIntensity = (opts.night ? 0.8 : 0.45) + Math.sin(t * 1.3 + item.x) * 0.08; } };
+    }
+    // Display glass: a floor-to-ceiling glass panel in a thin steel frame.
+    case "glassWall": {
+      box(w, 2.4, 0.04, k.mat("#BFE3F2", { opacity: 0.28, roughness: 0.05, metalness: 0.3 }), 0, 0, 0);
+      box(w, 0.06, 0.08, METAL, 0, 0, 0);
+      box(w, 0.05, 0.08, METAL, 0, 2.38, 0);
+      for (const sx of [-1, 0, 1]) box(0.05, 2.4, 0.08, METAL, sx * (w / 2 - 0.025), 0, 0);
+      box(w * 0.5, 0.05, 0.05, k.mat("#F4F6F8", { opacity: 0.6 }), 0, 1.3, 0.03);
+      return { group: g };
+    }
+    // A glass display case on a plinth, the company's latest gadget (or trophy) glowing inside.
+    case "displayCase": {
+      box(w, 0.8, d, "#F4F1EA");
+      box(w - 0.04, 0.03, d - 0.04, "#2A2530", 0, 0.8, 0);
+      box(w - 0.08, 0.7, d - 0.08, k.mat("#DDEFF6", { opacity: 0.25, roughness: 0.05 }), 0, 0.83, 0);
+      const gem = new Mesh(k.geo(new DodecahedronGeometry(0.16)), glow(color ?? "#7FE0FF", 0.8));
+      gem.position.set(0, 1.12, 0);
+      g.add(gem);
+      return { group: g, tick: (t) => { gem.rotation.y = t * 0.8; gem.position.y = 1.12 + Math.sin(t * 1.5) * 0.04; } };
+    }
+    // A robot: a white body on a wheeled base, a screen face with two glowing eyes, bobbing and turning on the spot.
+    case "robot": {
+      const bot = new Group();
+      const part = (geo: BufferGeometry, mat: Material, x: number, y: number, z: number) => { const m = new Mesh(k.geo(geo), mat); m.position.set(x, y, z); bot.add(m); return m; };
+      part(new CylinderGeometry(0.24, 0.26, 0.12, 14), k.mat("#2A2F3A"), 0, 0.06, 0);
+      part(new CylinderGeometry(0.2, 0.24, 0.62, 14), k.mat("#F4F6F8", { roughness: 0.3 }), 0, 0.43, 0);
+      part(new SphereGeometry(0.2, 14, 10), k.mat("#F4F6F8", { roughness: 0.3 }), 0, 0.88, 0);
+      part(new BoxGeometry(0.26, 0.14, 0.04), k.mat("#14111A", { roughness: 0.2 }), 0, 0.9, 0.17);
+      const eye = glow(color ?? "#3DDC97", 1.2);
+      part(new SphereGeometry(0.025, 8, 6), eye, -0.06, 0.91, 0.195);
+      part(new SphereGeometry(0.025, 8, 6), eye, 0.06, 0.91, 0.195);
+      part(new CylinderGeometry(0.01, 0.01, 0.14, 6), k.mat(METAL), 0, 1.12, 0);
+      const tip = part(new SphereGeometry(0.035, 8, 6), glow("#FF6A3D", 1.2), 0, 1.2, 0);
+      part(new BoxGeometry(0.3, 0.04, 0.24), k.mat(METAL), 0, 0.62, 0.18);
+      g.add(bot);
+      return { group: g, tick: (t) => {
+        bot.position.y = Math.abs(Math.sin(t * 2 + item.x)) * 0.03;
+        bot.rotation.y = Math.sin(t * 0.5 + item.z) * 0.9;
+        (tip.material as MeshStandardMaterial).emissiveIntensity = 0.6 + (Math.sin(t * 5) > 0 ? 0.8 : 0);
+      } };
+    }
+    // A server rack: a black cabinet with rows of blinking lights.
+    case "serverRack": {
+      box(w, 2.0, d, "#1C1F26");
+      box(w - 0.08, 1.85, 0.02, "#2A2F3A", 0, 0.08, d / 2 + 0.005);
+      const leds: Mesh[] = [];
+      for (let r = 0; r < 9; r++) {
+        box(w - 0.16, 0.03, 0.01, "#3A3F4A", 0, 0.2 + r * 0.19, d / 2 + 0.02);
+        for (let c = 0; c < 3; c++) leds.push(box(0.04, 0.04, 0.01, glow(c === 2 ? "#FF6A3D" : "#3DDC97", 1), -w / 2 + 0.16 + c * 0.08, 0.26 + r * 0.19, d / 2 + 0.02));
+      }
+      return { group: g, tick: (t) => leds.forEach((m, i) => { m.visible = Math.sin(t * (3 + (i % 5)) + i * 1.7) > -0.3; }) };
+    }
+    // The elevator bank's doors: brushed steel, a floor indicator above that glows.
+    case "elevator": {
+      box(w, 2.5, d, "#C9CDD4", 0, 0, 0);
+      box(w * 0.82, 2.15, 0.04, k.mat("#D8DCE2", { metalness: 0.6, roughness: 0.3 }), 0, 0, d / 2 + 0.01);
+      box(0.02, 2.15, 0.05, "#9AA0A8", 0, 0, d / 2 + 0.02);
+      box(0.36, 0.14, 0.03, glow("#FF6A3D", 0.9), 0, 2.25, d / 2 + 0.02);
+      box(0.08, 0.16, 0.03, BLACK, w / 2 - 0.12, 1.1, d / 2 + 0.02);
+      box(0.04, 0.04, 0.02, glow("#F4F1EA", 0.8), w / 2 - 0.12, 1.15, d / 2 + 0.035);
+      return { group: g };
+    }
     // #19 clubs: a restroom stall, side panels and a door left ajar, with legs showing underneath.
     case "stall": {
       const panel = color ?? "#3A2C5E";

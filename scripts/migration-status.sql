@@ -156,6 +156,7 @@ from (values
   ('0142_campaign_reputation.sql', coalesce((to_regclass('public.campaign_rep') is not null), false)),
   ('0143_aspirations.sql', coalesce((to_regclass('public.aspirations') is not null), false)),
   ('0144_city_hall_career.sql', coalesce((select pg_get_constraintdef(oid) like '%cityhall%' from pg_constraint
-                                          where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false))
+                                          where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false)),
+  ('0145_office_sizes.sql', coalesce((select value::text like '%officeBig%' from public.game_settings where key = 'city'), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

@@ -64,7 +64,7 @@ export interface Room3DProps {
   onUse?: (item: RoomItem) => void;
   /** A tap on one of the room's regulars (by index in template.npcs), e.g. for chatter. */
   onNpcTap?: (index: number) => void;
-  /** #20: names over the room's people by index (the place's regular first), next to their 💬. */
+  /** #20: the room's people by index (the place's regular first): their names, for the hidden talk buttons. */
   npcNames?: string[];
   /** Which of npcNames is the place's regular: their name gets the pink pill, so they're easy to find. */
   npcHost?: number;
@@ -1008,12 +1008,12 @@ export default function Room3D(props: Room3DProps) {
             <button
               key={i}
               ref={(el) => { if (el) bubblesRef.current.set(i, el); else bubblesRef.current.delete(i); }}
-              className={`npc-bubble${i === props.npcHost ? " npc-host" : ""}`}
+              // Owner, Oct 31: "Remove the chat bubbles": nothing over people's heads; tap the person to talk. The buttons stay,
+              // hidden, for keyboards and screen readers.
+              className="sr-only"
               onClick={() => actionsRef.current?.talk(i)}
               aria-label={props.npcNames?.[i] ? `Talk to ${props.npcNames[i]}` : "Talk"}
-            >
-              <span aria-hidden="true">💬</span>{props.npcNames?.[i] && <span className="npc-name">{props.npcNames[i]}</span>}
-            </button>
+            />
           ))}
         </div>
       )}

@@ -20,7 +20,7 @@ import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
 import { CATALOG_FURNITURE, CITY_ECONOMY, shopBase, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, ownedItem, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
+import { CAMPUS_AREAS, HOME_FLOORS, HOME_TEMPLATES, HUB_FLOORS, PLACE_TEMPLATES, TOWERS, applyLayout, freeSpot, homeTemplate, mergeFloorLayout, ownedId, ownedItem, placedElsewhere, type OwnedPiece, placeFloor, placeRoom, playerSlots, type RoomItem } from "@/lib/rooms";
 import { PARTY_POLL_MS, crowdFor, type CrowdMember, type PartyMessage, type PartyPerson, type PartyRoomApi, type PartyRoomState } from "@/lib/partyRoom";
 import { PartyChatSheet } from "./city/PartyChat";
 import { VIP_LOCKED, activeGig, clubDoor, dueBills, gigAvailability, rentAlert, gigReady, netWorth, taskTitle, tasksDone, isSupermarket, type CityApi, type RestKind, type CityResult, type CityState, type Gain } from "@/lib/cityState";
@@ -2055,8 +2055,8 @@ export function GameShell({
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
     if (it.use?.kind === "floor") {
       if (it.use.to <= 1) return setInsideFloor(it.use.to);
-      // The Hub's floors are open to everyone.
-      if (isHub(p)) return setInsideFloor(it.use.to);
+      // The Hub's floors are open to everyone, and so are the tower offices' (TOWERS).
+      if (isHub(p) || TOWERS[p.id]) return setInsideFloor(it.use.to);
       // #19 clubs: VIP is free from the club's clout, otherwise the cover for tonight (the server decides).
       if (p.club?.vip && !p.tags.includes("exclusive_venue")) {
         if (!cityApi?.enterVip) return setToast(VIP_LOCKED);
@@ -2525,7 +2525,7 @@ export function GameShell({
               look={look}
               outfit={outfit}
               daytime={daytime}
-              sign={isCampusPlace(inside) ? `${campusById(inside.id)?.short ?? inside.name} · ${CAMPUS_AREAS[insideFloor]?.name ?? ""}` : isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
+              sign={isCampusPlace(inside) ? `${campusById(inside.id)?.short ?? inside.name} · ${CAMPUS_AREAS[insideFloor]?.name ?? ""}` : TOWERS[inside.id] ? `${inside.name} · ${TOWERS[inside.id][insideFloor]?.name ?? ""}` : isHub(inside) ? `${inside.name} · ${HUB_FLOORS[insideFloor]?.name ?? ""}` : insideFloor === 0 ? `${inside.name} · Restroom` : insideFloor === 2 ? `${inside.name} · ${inside.tags.includes("exclusive_venue") ? "Penthouse" : "VIP"}` : inside.name}
               rotatable
               door
               labels={insideFloor === 2 && inside.tags.includes("exclusive_venue") ? { floor: partyHere && !partyHere.attended ? "Check in 🎟️" : "Dance" } : undefined}
@@ -2575,6 +2575,16 @@ export function GameShell({
               if (ok) { setInsideFloor(2); setToast("🥂 You're in. Act like you've been here before."); }
             })}
           />
+        )}
+        {/* Tower offices: the elevator's floor buttons. */}
+        {inside && TOWERS[inside.id] && (
+          <nav className="campus-areas" aria-label="Floors">
+            {Object.entries(TOWERS[inside.id]).map(([n, f]) => (
+              <button key={n} className="pill-glass glass-hud" aria-pressed={insideFloor === Number(n)} onClick={() => setInsideFloor(Number(n))}>
+                <span aria-hidden="true">{f.emoji}</span> {f.name}
+              </button>
+            ))}
+          </nav>
         )}
         {/* v0.15 campus areas: walk between the Quad and the buildings around it. */}
         {isCampusPlace(inside) && (

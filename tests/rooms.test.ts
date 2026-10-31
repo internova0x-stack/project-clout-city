@@ -159,3 +159,24 @@ test("The Hub: four floors (restroom, diner, game room, lounge), each with stair
     assert.ok(placeFloor(hub, f)!.items.some((i) => i.use?.kind === "action" && i.use.actionId === id), `floor ${f} has ${id}`);
   }
 });
+
+test("interior styles (owner, Oct 31): every styled place keeps a room that fits and can be walked, on every floor", async () => {
+  const { INTERIOR_STYLES, PLACE_STYLES, TOWERS, styleRoom } = await import("../lib/rooms.ts");
+  for (const [id, style] of Object.entries(PLACE_STYLES)) {
+    const p = PLACES.find((x) => x.id === id);
+    assert.ok(p, `${id} is a place`);
+    assert.ok(INTERIOR_STYLES[style], style);
+    for (const f of [1, ...placeFloors(p!)]) {
+      const room: RoomTemplate = placeFloor(p!, f)!;
+      // The ground floor and a tower's floors wear the style (a club's restroom and VIP keep their own look).
+      if (f === 1 || TOWERS[id]) assert.equal(room.wall, INTERIOR_STYLES[style].wall, `${id} floor ${f} wears ${style}`);
+      for (const i of room.items) assert.ok(placementOk(room, room.items, i), `${id} floor ${f}: ${i.id} fits`);
+      const grid = makeGrid(room, room.items);
+      for (const i of room.items.filter((x) => x.use)) assert.ok(findPath(grid, room.spawn, useSpot(i)).length > 0, `${id} floor ${f}: ${i.id} reachable`);
+    }
+  }
+  const lib = placeRoom(PLACES.find((p) => p.id === "ditmars-library")!)!;
+  assert.ok(lib.items.some((i) => i.id.startsWith("style-art")), "Old English hangs paintings");
+  const min = styleRoom(PLACE_TEMPLATES.office, "minimalist");
+  assert.ok(min.items.filter((i) => i.kind === "plant").length <= 1, "minimalist: one plant");
+});
