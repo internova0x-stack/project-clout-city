@@ -19,6 +19,8 @@ import type { LetterStatus, MailbagFilter, StudioMailbag } from "@/lib/mayor";
 import type { Autopilot, AutopilotKind } from "@/lib/autopilot";
 import type { StoryletAction, StudioStorylets } from "@/lib/storyletWeeks";
 import type { StudioCondition } from "@/lib/cityConditions";
+import { studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
+import type { ChoiceCard } from "@/lib/choices";
 import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
 import { headers } from "next/headers";
 
@@ -192,7 +194,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("mayor") ? "Run migration 0105 first." : fn.includes("autopilot") ? "Run migration 0107 first." : fn.includes("storylet") ? "Run migration 0139 first." : fn.includes("condition") ? "Run migration 0140 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("mayor") ? "Run migration 0105 first." : fn.includes("autopilot") ? "Run migration 0107 first." : fn.includes("storylet") ? "Run migration 0139 first." : fn.includes("condition") ? "Run migration 0140 first." : fn.includes("card_") ? "Run migration 0141 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -220,6 +222,31 @@ export async function studioConditions() {
 }
 export async function studioConditionSet(id: string, action: StoryletAction) {
   return admin<StudioCondition[]>("admin_condition_set", { p_id: id, p_action: action });
+}
+type LearningRaw = { stats: CardStats[]; weights: { card: string; weight: number; retired: boolean; set_by: "auto" | "admin" }[]; last_run: string | null };
+/** Every card's title: the game's cards and every weekly storylet file (Studio admins only; titles, no outcomes). */
+async function cardTitles(): Promise<Record<string, { title: string; emoji: string; options: number; slots?: ChoiceCard["slots"] }>> {
+  const { CHOICE_CARDS } = await import("@/lib/choicesContent");
+  const { readdir, readFile } = await import("node:fs/promises");
+  const path = await import("node:path");
+  const dir = path.join(process.cwd(), "content", "storylets");
+  const weekly: ChoiceCard[] = [];
+  for (const f of (await readdir(dir).catch(() => [] as string[])).filter((x) => x.endsWith(".json"))) {
+    try { weekly.push(...(JSON.parse(await readFile(path.join(dir, f), "utf8")) as { cards: ChoiceCard[] }).cards); } catch { /* validate:content reports it */ }
+  }
+  return Object.fromEntries([...CHOICE_CARDS, ...weekly].map((c) => [c.id, { title: c.title, emoji: c.emoji, options: c.options.length, slots: c.slots }]));
+}
+async function learningView(r: Admin<LearningRaw>): Promise<Admin<StudioLearning>> {
+  if (!r.ok) return r;
+  return { ok: true, data: { rows: studioRows(r.data.stats, r.data.weights, await cardTitles()), lastRun: r.data.last_run } };
+}
+export async function studioLearning() {
+  return learningView(await admin<LearningRaw>("admin_card_learning"));
+}
+export async function studioLearningSet(card: string, set: { weight: number; retired: boolean } | "auto") {
+  return learningView(await admin<LearningRaw>("admin_card_weight", set === "auto"
+    ? { p_card: card, p_weight: 1, p_retired: false, p_auto: true }
+    : { p_card: card, p_weight: set.weight, p_retired: set.retired, p_auto: false }));
 }
 export async function studioMailbag(filter: MailbagFilter) {
   return admin<StudioMailbag>("admin_mayor_letters", { p_filter: filter });

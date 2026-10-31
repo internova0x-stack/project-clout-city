@@ -28,7 +28,7 @@ import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus,
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
 import { previewStudioLetter, previewStudioMailbag } from "../mayorActions";
 import { previewAutopilot, previewAutopilotSet } from "../autopilotActions";
-import { previewConditions, previewConditionSet, previewStorylets, previewStoryletSet } from "../storyletActions";
+import { previewConditions, previewConditionSet, previewLearning, previewLearningSet, previewStorylets, previewStoryletSet } from "../storyletActions";
 import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -235,7 +235,7 @@ export default async function Preview({
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
             gossipList: previewGossipList, gossipStatus: previewGossipStatus, setupCheck: previewSetupCheck,
-            mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet, storylets: previewStorylets, storyletSet: previewStoryletSet, conditions: previewConditions, conditionSet: previewConditionSet,
+            mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet, storylets: previewStorylets, storyletSet: previewStoryletSet, conditions: previewConditions, conditionSet: previewConditionSet, learning: previewLearning, learningSet: previewLearningSet,
             shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
           }}
         />

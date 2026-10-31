@@ -19,6 +19,7 @@ import REACTIONS from "../content/city/reactions.json";
 import { PLACES } from "./city";
 import { CHOICE_CARDS, CHOICE_KNOWN } from "./choicesContent";
 import type { ChoiceCard } from "./choices";
+import { learnWeights, LEARNING, type CardStats } from "./cardLearning";
 
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
@@ -103,6 +104,17 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
   if (!condMissing && validateReactions(REACTIONS as ReactionRule[], known).length === 0) {
     const { data, error } = await admin.rpc("city_react", { p_rules: REACTIONS });
     if (!error && Array.isArray(data) && data.length) out.push({ file: "content/city/reactions.json", result: `fired: ${data.join(", ")}` });
+  }
+  // Content Engine step 6 (migration 0141): once a New York day, the cards' last 28 days become their weights.
+  const due = await admin.rpc("card_learning_due");
+  if (!due.error && due.data === true) {
+    const st = await admin.rpc("card_stats", { p_days: LEARNING.windowDays });
+    if (!st.error && Array.isArray(st.data)) {
+      const options = Object.fromEntries(seen.map((c) => [c.id, c.options.length]));
+      const rows = learnWeights(st.data as CardStats[], options);
+      const { data, error } = await admin.rpc("card_weights_auto", { p_rows: rows });
+      out.push({ file: "card learning", result: error ? `error: ${error.message}` : `${data} card weights` });
+    }
   }
   // Culture pack C6 (migration 0098): a story file the Studio doesn't have yet waits there for review. Stories the Studio
   // already has are never touched (edits go through the Studio's upload; approving and Day 1 stay the owner's).
