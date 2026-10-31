@@ -374,6 +374,13 @@ components live in `app/globals.css`.
   two-system storylets ×5 and one-system ×2; app/home/choiceActions.ts reads `player_memory`. content/choices/storylets.json
   (20 cross-system storylets and a chain), content/choices/climb.json (the 36 Climb cards, area 'fame', "The climb");
   storylet facts are `thread.*` in lib/memory.ts. `?choice=story` in the preview (a sample history; storylets first).
+  Step 3, weekly storylets (migration 0139): the routine writes `content/storylets/<Monday>.json` (6 to 14 cards, at least
+  four families: favor, temptation, betrayal, windfall, loyalty; each with `when`; lib/storyletWeeks.ts `validateStoryletWeek`,
+  run by validate:content and the import). `content_import_storylets` stores new cards scheduled, live 24 hours later
+  (game_settings 'storylets'; paused while autopilot 'storylets' is off; a stored card is never touched); Studio →
+  Storylets (`admin_storylets`, `admin_storylet_set`: veto, pause, restore, now; a live card's veto is final);
+  `storylets_live()` (service role) feeds choiceActions' pool every 5 minutes (`offer`; vetoed live cards stay readable).
+  Weekly cards are never in `CHOICE_CARDS` (that would skip the veto); the preview plays the first week as live.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

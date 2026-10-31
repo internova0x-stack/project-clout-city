@@ -1,0 +1,1117 @@
+{
+ "week": "2026-11-02",
+ "cards": [
+  {
+   "id": "covered-shift-party",
+   "base": "covered-shift-party",
+   "area": "work",
+   "emoji": "🍸",
+   "title": "{coworker} covered for you last month. Now they need you to take their shift on your crew's party night.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "career.helped"
+     },
+     {
+      "has": "nightlife.party"
+     },
+     {
+      "snap": "crew",
+      "min": 1
+     }
+    ]
+   },
+   "slots": {
+    "coworker": {
+     "fact": "career.helped",
+     "show": "coworker"
+    }
+   },
+   "options": [
+    {
+     "id": "cover",
+     "label": "Cover the shift",
+     "get": "{coworker}'s loyalty, paid back",
+     "cost": "Your crew's big night",
+     "risk": "low",
+     "riskWhy": "Crews notice absences",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You pour drinks while your crew posts the party. {coworker} brings you a breakfast sandwich the next morning.",
+       "effects": {
+        "mood": -10,
+        "integrity": 8,
+        "clout": 40
+       },
+       "later": {
+        "afterDays": [
+         4,
+         10
+        ],
+        "chance": 0.5,
+        "emoji": "🥪",
+        "text": "Remember covering {coworker}'s shift? They recommended you for the team lead spot. You got it.",
+        "effects": {
+         "cash": 1200,
+         "clout": 120
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "swap",
+     "label": "Find someone else to cover",
+     "get": "Both, if it works",
+     "cost": "A favor from someone new",
+     "risk": "medium",
+     "riskWhy": "New favors come due",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "A friend's cousin takes it for C$150. Everyone wins, especially the cousin.",
+       "effects": {
+        "cash": -150,
+        "mood": 6,
+        "integrity": 2
+       }
+      }
+     ]
+    },
+    {
+     "id": "ghost",
+     "label": "Leave the text on read",
+     "get": "The party",
+     "cost": "{coworker}'s good will",
+     "risk": "medium",
+     "riskWhy": "Coworkers keep score",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Great party. On Monday, {coworker} is suddenly 'super busy' whenever you need help.",
+       "effects": {
+        "mood": 12,
+        "integrity": -8,
+        "clout": 30
+       }
+      }
+     ]
+    }
+   ],
+   "family": "favor"
+  },
+  {
+   "id": "sublet-cousin-couch",
+   "base": "sublet-cousin-couch",
+   "area": "home",
+   "emoji": "🛋️",
+   "title": "Your subtenant's cousin needs your couch 'for two nights.' Everyone says two nights.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "home.sublet_host"
+     },
+     {
+      "snap": "crew",
+      "min": 1
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "yes",
+     "label": "Say yes",
+     "get": "A grateful subtenant",
+     "cost": "Your couch, for an unknown period",
+     "risk": "medium",
+     "riskWhy": "Two nights is a range",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "It's eleven nights. The cousin cooks every one of them. You've never eaten better.",
+       "effects": {
+        "mood": 8,
+        "integrity": 6,
+        "energy": -10
+       }
+      },
+      {
+       "weight": 1,
+       "text": "It's eleven nights and the cousin plays drums. Your crew stops visiting.",
+       "effects": {
+        "mood": -12,
+        "integrity": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "charge",
+     "label": "Charge C$40 a night",
+     "get": "Couch income",
+     "cost": "Being that host",
+     "risk": "medium",
+     "riskWhy": "Subtenants talk",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "C$440 later, the cousin leaves a review on the building group chat. It says 'transactional.'",
+       "effects": {
+        "cash": 440,
+        "integrity": -8,
+        "clout": -30
+       }
+      }
+     ]
+    },
+    {
+     "id": "no",
+     "label": "Say no",
+     "get": "Your couch, your nights",
+     "cost": "A cooler subtenant",
+     "risk": "low",
+     "riskWhy": "Leases are long",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Totally fine,' says your subtenant, in a voice that means the opposite.",
+       "effects": {
+        "mood": -4,
+        "integrity": -2
+       }
+      }
+     ]
+    }
+   ],
+   "family": "favor"
+  },
+  {
+   "id": "lotto-through-business",
+   "base": "lotto-through-business",
+   "area": "business",
+   "emoji": "🧾",
+   "title": "Your accountant suggests running your scratch-card win 'through the business.' Investors love profit.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "snap": "businesses",
+      "min": 1
+     }
+    ],
+    "any": [
+     {
+      "has": "money.lotto_win"
+     },
+     {
+      "has": "money.lotto_jackpot"
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "do",
+     "label": "Book it as revenue",
+     "get": "A business that looks booming",
+     "cost": "Books that don't add up",
+     "risk": "high",
+     "riskWhy": "Investors read statements",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your quarterly numbers glow. An investor sends a fruit basket and a term sheet.",
+       "effects": {
+        "cash": 2500,
+        "clout": 120,
+        "integrity": -16
+       },
+       "later": {
+        "afterDays": [
+         5,
+         12
+        ],
+        "chance": 0.6,
+        "emoji": "🔍",
+        "text": "Remember booking your scratch-card win as revenue? An investor's analyst noticed the business sells sandwiches, not lottery tickets.",
+        "effects": {
+         "cash": -3000,
+         "clout": -200
+        },
+        "headline": "Sandwich empire or scratch-card luck? Investors question {name}'s 'record quarter.' {name}'s accountant is 'reviewing the matter.'"
+       }
+      }
+     ]
+    },
+    {
+     "id": "keep",
+     "label": "Keep it separate",
+     "get": "Clean books",
+     "cost": "A quieter quarter",
+     "risk": "low",
+     "riskWhy": "Slow growth is still growth",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your accountant sighs. Your books are boring. Boring is underrated.",
+       "effects": {
+        "integrity": 8,
+        "mood": -2
+       }
+      }
+     ]
+    },
+    {
+     "id": "invest",
+     "label": "Put it in, honestly",
+     "get": "A real expansion",
+     "cost": "Your winnings",
+     "risk": "medium",
+     "riskWhy": "Expansions can stall",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You invest the win as yours, on paper. The new counter opens Saturday.",
+       "effects": {
+        "cash": -1000,
+        "clout": 80,
+        "integrity": 6
+       }
+      }
+     ]
+    }
+   ],
+   "family": "temptation"
+  },
+  {
+   "id": "hunt-answers-sale",
+   "base": "hunt-answers-sale",
+   "area": "money",
+   "emoji": "🗺️",
+   "title": "A group chat offers C$800 for this week's hunt answers. You've finished hunts, so they assume you know.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "hunt.finished"
+     }
+    ],
+    "any": [
+     {
+      "snap": "band",
+      "is": "hustler"
+     },
+     {
+      "has": "choice.made",
+      "minCount": 5
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "sell",
+     "label": "Sell your best guesses",
+     "get": "C$800",
+     "cost": "Thirty strangers' trust",
+     "risk": "high",
+     "riskWhy": "Wrong answers get reviews",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You send guesses with confidence. Half are right. The chat calls you 'the oracle' and 'a fraud' in the same hour.",
+       "effects": {
+        "cash": 800,
+        "integrity": -12,
+        "clout": -40
+       },
+       "later": {
+        "afterDays": [
+         3,
+         8
+        ],
+        "chance": 0.4,
+        "emoji": "📸",
+        "text": "Remember selling hunt answers? Someone screenshotted the chat for Lola.",
+        "effects": {
+         "clout": -150,
+         "mood": -8
+        },
+        "headline": "Treasure hunt black market? Lola's readers say {name} sold 'answers' that sent them to the wrong bridge."
+       }
+      }
+     ]
+    },
+    {
+     "id": "decline",
+     "label": "Say you don't know them",
+     "get": "A clean conscience",
+     "cost": "C$800",
+     "risk": "low",
+     "riskWhy": "Nothing to trace",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'I really don't know.' They don't believe you, which is its own kind of compliment.",
+       "effects": {
+        "integrity": 8
+       }
+      }
+     ]
+    },
+    {
+     "id": "troll",
+     "label": "Send fake answers for free",
+     "get": "A great story",
+     "cost": "The chat's patience",
+     "risk": "medium",
+     "riskWhy": "People hold grudges",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Thirty people go to the wrong pier. You get an enormous laugh and a small, organized enemy.",
+       "effects": {
+        "mood": 10,
+        "integrity": -6,
+        "clout": 20
+       }
+      }
+     ]
+    }
+   ],
+   "family": "temptation"
+  },
+  {
+   "id": "partner-call-sheet",
+   "base": "partner-call-sheet",
+   "area": "dating",
+   "emoji": "📋",
+   "title": "Your partner volunteers for the other campaign. Their call sheet, tomorrow's whole plan, is on your couch.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "snap": "campaign"
+     },
+     {
+      "snap": "partner"
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "photo",
+     "label": "Photograph it",
+     "get": "Your candidate's edge",
+     "cost": "Your partner's trust",
+     "risk": "high",
+     "riskWhy": "Partners notice moved papers",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your candidate is thrilled. Tomorrow's debate goes perfectly. Your partner asks why you're so quiet.",
+       "effects": {
+        "clout": 200,
+        "integrity": -16
+       },
+       "later": {
+        "afterDays": [
+         3,
+         9
+        ],
+        "chance": 0.6,
+        "emoji": "🛋️",
+        "text": "Remember photographing your partner's call sheet? Their campaign traced the leak to your couch.",
+        "effects": {
+         "mood": -25,
+         "clout": -100
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "return",
+     "label": "Hand it back, unread",
+     "get": "Your partner's trust",
+     "cost": "Tomorrow's edge",
+     "risk": "low",
+     "riskWhy": "Honesty, no notes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'You left this.' They kiss you on the forehead. Your candidate never knows what they missed.",
+       "effects": {
+        "mood": 10,
+        "integrity": 10
+       }
+      }
+     ]
+    },
+    {
+     "id": "talk",
+     "label": "Talk about it, openly",
+     "get": "Two campaigns, one couch",
+     "cost": "An awkward dinner",
+     "risk": "medium",
+     "riskWhy": "Politics at home",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You agree: no shop talk at home. It holds for almost a week.",
+       "effects": {
+        "mood": 4,
+        "integrity": 4
+       }
+      }
+     ]
+    }
+   ],
+   "family": "betrayal"
+  },
+  {
+   "id": "rival-in-your-class",
+   "base": "rival-in-your-class",
+   "area": "school",
+   "emoji": "📓",
+   "title": "{coworker}, whose credit you took, joined your class. They want to 'compare notes' before the exam.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "career.took_credit"
+     },
+     {
+      "snap": "campus"
+     }
+    ]
+   },
+   "slots": {
+    "coworker": {
+     "fact": "career.took_credit",
+     "show": "coworker"
+    }
+   },
+   "options": [
+    {
+     "id": "share",
+     "label": "Share your notes",
+     "get": "A peace treaty, maybe",
+     "cost": "Your exam edge",
+     "risk": "medium",
+     "riskWhy": "Truces can be tactical",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You both pass. {coworker} says 'we're even now' and almost means it.",
+       "effects": {
+        "integrity": 8,
+        "mood": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "bad",
+     "label": "Share notes with a few 'mistakes'",
+     "get": "Revenge, academically",
+     "cost": "A coworker who'll find out",
+     "risk": "high",
+     "riskWhy": "Grades get compared",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "{coworker} fails one section. You feel great for nearly an hour.",
+       "effects": {
+        "integrity": -12,
+        "mood": 6
+       },
+       "later": {
+        "afterDays": [
+         3,
+         8
+        ],
+        "chance": 0.6,
+        "emoji": "📓",
+        "text": "Remember the notes you 'shared' with {coworker}? They compared them with the textbook, then with the office group chat.",
+        "effects": {
+         "clout": -150,
+         "mood": -10
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "refuse",
+     "label": "Say you study alone",
+     "get": "Your grade, your business",
+     "cost": "A colder office",
+     "risk": "low",
+     "riskWhy": "Coworkers notice",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Cool, cool.' The class gets quieter on their side of the room.",
+       "effects": {
+        "integrity": -2,
+        "mood": -2
+       }
+      }
+     ]
+    }
+   ],
+   "family": "betrayal"
+  },
+  {
+   "id": "showtime-crew-invite",
+   "base": "showtime-crew-invite",
+   "area": "transit",
+   "emoji": "🕺",
+   "title": "The subway showtime crew saw your moves. They want you in tonight's routine, and someone always films.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "transit.showtime"
+     },
+     {
+      "has": "skill.level_up",
+      "subject": "dance"
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "join",
+     "label": "Join the routine",
+     "get": "A viral clip, maybe",
+     "cost": "Your dignity, temporarily",
+     "risk": "medium",
+     "riskWhy": "Pole spins are hard",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You nail the pole spin. The clip does numbers. A brand of gum asks if you're 'available.'",
+       "effects": {
+        "clout": 250,
+        "mood": 12,
+        "integrity": 2
+       }
+      },
+      {
+       "weight": 1,
+       "text": "You miss the pole. The clip still does numbers. Different numbers.",
+       "effects": {
+        "clout": 120,
+        "mood": -6,
+        "integrity": 2
+       }
+      }
+     ]
+    },
+    {
+     "id": "hat",
+     "label": "Pass the hat for them",
+     "get": "Good karma, cash split",
+     "cost": "The spotlight",
+     "risk": "low",
+     "riskWhy": "Helping is quieter",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You work the car like a pro. The crew splits the hat with you: C$180 and a dap.",
+       "effects": {
+        "cash": 180,
+        "integrity": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "own",
+     "label": "Film your own version, solo",
+     "get": "All the credit",
+     "cost": "The crew's respect",
+     "risk": "high",
+     "riskWhy": "Crews talk",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your solo version goes up first. The crew's version goes up second, with a caption about you.",
+       "effects": {
+        "clout": 150,
+        "integrity": -10,
+        "mood": -4
+       }
+      }
+     ]
+    }
+   ],
+   "family": "windfall"
+  },
+  {
+   "id": "jackpot-ex-dinner",
+   "base": "jackpot-ex-dinner",
+   "area": "dating",
+   "emoji": "🥂",
+   "title": "Your ex heard about your lotto pot. They'd 'love to catch up' at Altitude 718. Their treat, they insist.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "money.lotto_jackpot"
+     },
+     {
+      "has": "dating.breakup"
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "go",
+     "label": "Go, for the free dinner",
+     "get": "A great meal, on them",
+     "cost": "An evening of 'so, money'",
+     "risk": "medium",
+     "riskWhy": "Exes have angles",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Dinner is excellent. Dessert is a business pitch. You decline it with your mouth full.",
+       "effects": {
+        "mood": 8,
+        "integrity": 2
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Dinner is excellent. The bill arrives. 'I left my card at home,' your ex says, not even pretending.",
+       "effects": {
+        "cash": -400,
+        "mood": -6,
+        "integrity": 2
+       }
+      }
+     ]
+    },
+    {
+     "id": "bring",
+     "label": "Go, and bring your crew",
+     "get": "Backup and a feast",
+     "cost": "Your ex's budget",
+     "risk": "high",
+     "riskWhy": "Exes remember",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Six friends order the tasting menu. Your ex pays, smiling like a hostage.",
+       "effects": {
+        "mood": 15,
+        "integrity": -8,
+        "clout": 60
+       }
+      }
+     ]
+    },
+    {
+     "id": "no",
+     "label": "Leave them on read",
+     "get": "Peace",
+     "cost": "A free meal",
+     "risk": "low",
+     "riskWhy": "Nothing gained, nothing lost",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You eat a dollar slice in peace. It's honestly better.",
+       "effects": {
+        "mood": 4,
+        "integrity": 4
+       }
+      }
+     ]
+    }
+   ],
+   "family": "windfall"
+  },
+  {
+   "id": "crew-night-client-dinner",
+   "base": "crew-night-client-dinner",
+   "area": "work",
+   "emoji": "📅",
+   "title": "Your crew's big night is the night {boss} needs you at a client dinner. Both say 'it's fine.'",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "snap": "job"
+     },
+     {
+      "snap": "crew",
+      "min": 1
+     },
+     {
+      "has": "nightlife.party"
+     }
+    ]
+   },
+   "slots": {
+    "boss": {
+     "snap": "job.track",
+     "show": "boss"
+    }
+   },
+   "options": [
+    {
+     "id": "crew",
+     "label": "Go with your crew",
+     "get": "Your crew, all in",
+     "cost": "{boss}'s patience",
+     "risk": "medium",
+     "riskWhy": "Bosses notice",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Best night of the month. {boss} mentions the dinner at your next review. Twice.",
+       "effects": {
+        "mood": 15,
+        "integrity": 4,
+        "clout": -40
+       }
+      }
+     ]
+    },
+    {
+     "id": "boss",
+     "label": "Do the client dinner",
+     "get": "{boss}'s favor, a bonus",
+     "cost": "Your crew's big night",
+     "risk": "medium",
+     "riskWhy": "Crews notice",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The client loves you. C$600 bonus. Your crew's photos are all of the empty chair they saved.",
+       "effects": {
+        "cash": 600,
+        "integrity": -6,
+        "mood": -10
+       }
+      }
+     ]
+    },
+    {
+     "id": "both",
+     "label": "Do both, badly",
+     "get": "Half of each",
+     "cost": "Your energy, all of it",
+     "risk": "high",
+     "riskWhy": "No one can be two places",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Two hours at dinner, two at the party, zero hours of sleep. Everyone got a version of you.",
+       "effects": {
+        "energy": -30,
+        "mood": 4,
+        "integrity": 2
+       }
+      }
+     ]
+    }
+   ],
+   "family": "loyalty"
+  },
+  {
+   "id": "lola-wants-the-crew",
+   "base": "lola-wants-the-crew",
+   "area": "fame",
+   "emoji": "🍵",
+   "title": "Lola wants something on your crew this time. 'Nothing mean. Just juicy.' It's never just juicy.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "thread.lola_source"
+     },
+     {
+      "snap": "crew",
+      "min": 1
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "give",
+     "label": "Give her something small",
+     "get": "Lola's goodwill",
+     "cost": "Your crew's privacy",
+     "risk": "high",
+     "riskWhy": "Lola names sources, eventually",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "A harmless story about the group chat's name. Lola makes it sound like a scandal.",
+       "effects": {
+        "clout": 150,
+        "integrity": -12
+       },
+       "later": {
+        "afterDays": [
+         3,
+         9
+        ],
+        "chance": 0.6,
+        "emoji": "🫢",
+        "text": "Remember the story you gave Lola about your crew? They worked out where it came from.",
+        "effects": {
+         "mood": -20,
+         "clout": -80
+        },
+        "headline": "Lola's Blotter: sources close to {name} say the crew's group chat is called 'Board of Directors.' The crew says 'who told her.'"
+       }
+      }
+     ]
+    },
+    {
+     "id": "refuse",
+     "label": "Tell her the crew's off limits",
+     "get": "A crew that trusts you",
+     "cost": "Lola's attention",
+     "risk": "medium",
+     "riskWhy": "Lola has a long memory",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Noted, babe.' Lola's next column skips you entirely. It stings more than expected.",
+       "effects": {
+        "integrity": 8,
+        "clout": -30
+       }
+      }
+     ]
+    },
+    {
+     "id": "fake",
+     "label": "Give her a made-up story",
+     "get": "Lola's goodwill, crew safe",
+     "cost": "A lie with your name on it",
+     "risk": "high",
+     "riskWhy": "Lola fact-checks, sometimes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Lola runs it. Your crew laughs at how wrong it is. Lola doesn't laugh.",
+       "effects": {
+        "clout": 80,
+        "integrity": -6,
+        "mood": 6
+       }
+      }
+     ]
+    }
+   ],
+   "family": "loyalty"
+  },
+  {
+   "id": "bouncer-vouch",
+   "base": "bouncer-vouch",
+   "area": "nightlife",
+   "emoji": "🚪",
+   "title": "Your crew is in line at {place}, which banned you. One of them could vouch for you.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "has": "place.banned"
+     },
+     {
+      "snap": "crew",
+      "min": 1
+     }
+    ]
+   },
+   "slots": {
+    "place": {
+     "fact": "place.banned",
+     "show": "place"
+    }
+   },
+   "options": [
+    {
+     "id": "ask",
+     "label": "Ask them to vouch",
+     "get": "Back inside, with your crew",
+     "cost": "Their name on your behavior",
+     "risk": "high",
+     "riskWhy": "Vouching has a cost",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your friend vouches. You behave perfectly. It's the most boring good night of your life.",
+       "effects": {
+        "mood": 10,
+        "integrity": -4,
+        "clout": 40
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Your friend vouches. Ten minutes later, you're both walked out. They haven't texted since.",
+       "effects": {
+        "mood": -15,
+        "integrity": -4,
+        "clout": -60
+       }
+      }
+     ]
+    },
+    {
+     "id": "leave",
+     "label": "Tell them to go without you",
+     "get": "Their night, uncomplicated",
+     "cost": "Your night",
+     "risk": "low",
+     "riskWhy": "Patience pays off",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You go home. Your crew sends a blurry 2 a.m. photo captioned 'missed you.' It counts.",
+       "effects": {
+        "mood": -4,
+        "integrity": 8
+       }
+      }
+     ]
+    },
+    {
+     "id": "side",
+     "label": "Talk your way in alone",
+     "get": "Your night, your way",
+     "cost": "Getting caught again",
+     "risk": "high",
+     "riskWhy": "Bouncers remember faces",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You try the side door. The bouncer was waiting at the side door.",
+       "effects": {
+        "integrity": -8,
+        "holding": 1,
+        "mood": -10
+       }
+      }
+     ]
+    }
+   ],
+   "family": "loyalty"
+  }
+ ]
+}

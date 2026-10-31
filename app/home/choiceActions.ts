@@ -35,13 +35,24 @@ async function who(): Promise<{ id: string; admin: Admin } | { error: string }> 
   return { id: user.id, admin };
 }
 
-const card = (id: string): ChoiceCard | undefined => CHOICE_CARDS.find((c) => c.id === id);
+// Content Engine step 3 (migration 0139): the weekly storylets that have gone live (read every 5 minutes per server).
+// A vetoed or paused card is no longer offered, but an open card or a player's history still finds it.
+let weekly: { cards: ChoiceCard[]; offer: ChoiceCard[]; at: number } = { cards: [], offer: [], at: 0 };
+async function loadWeekly(admin: Admin) {
+  if (Date.now() - weekly.at < 5 * 60_000) return;
+  const { data, error } = await admin.rpc("storylets_live");
+  // Before migration 0139 the function is missing: no weekly cards (check again in 5 minutes).
+  const rows = error || !Array.isArray(data) ? [] : (data as { card: ChoiceCard; offer: boolean }[]);
+  weekly = { cards: rows.map((r) => r.card), offer: rows.filter((r) => r.offer).map((r) => r.card), at: Date.now() };
+}
+const card = (id: string): ChoiceCard | undefined => CHOICE_CARDS.find((c) => c.id === id) ?? weekly.cards.find((c) => c.id === id);
 const err = (e: { message: string } | null) => {
   const code = e?.message.match(/[a-z_]+/)?.[0];
   return choiceError(code && code in { not_open: 1, rate_limited: 1 } ? code : undefined);
 };
 
 async function context(admin: Admin, id: string): Promise<Context | { error: string }> {
+  await loadWeekly(admin);
   const { data, error } = await admin.rpc("choice_context", { p_player: id });
   if (error) {
     if (/choice_context/.test(error.message)) return { error: "Run migration 0131 to switch on Moral Choices." };
@@ -143,7 +154,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
   }
   const place = ctx.atPlace ? placeById(ctx.atPlace) : undefined;
   const memory = await memoryOf(w.admin, w.id);
-  const pick = pickCard(CHOICE_CARDS, {
+  const pick = pickCard([...CHOICE_CARDS, ...weekly.offer], {
     memory,
     place: place?.id ?? null, tags: place?.tags ?? [], after, integrity: ctx.integrity, rank: ctx.rank,
     student: ctx.student, business: ctx.business, roommate: !!ECONOMY.homes.find((x) => x.id === ctx.home)?.roommate, history: ctx.history, today: ctx.today,

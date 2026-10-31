@@ -8,8 +8,12 @@ import {
   CHOICES, applyIntegrity, bailCost, boundEffects, cardView, repBonus, mayOffer, pickCard, resolveChoice,
   type BlotterItem, type ChoiceAfter, type ChoiceMark, type ChoiceCard, type ChoiceEffects, type ChoiceLogEntry, type ChoicesApi, type ChoiceState,
 } from "./choices";
-import { CHOICE_CARDS } from "./choicesContent";
+import { CHOICE_CARDS as BASE_CARDS } from "./choicesContent";
+import WEEK_SAMPLE from "../content/storylets/2026-11-02.json";
 import type { Fact, FactKey, Memory } from "./memory";
+
+// The preview plays the first weekly storylets (Content Engine step 3) as if they'd gone live.
+const CHOICE_CARDS: ChoiceCard[] = [...BASE_CARDS, ...(WEEK_SAMPLE.cards as ChoiceCard[])];
 import { EMPTY_MEMORY } from "./storylets";
 
 export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "chain" | "story";
@@ -22,12 +26,13 @@ function storyMemory(): Memory {
   const now = new Date().toISOString();
   const f = (key: FactKey, subject = "", count = 1): Fact => ({ key, subject, value: {}, count, first: now, last: now, expires: null });
   return {
-    snapshot: { ...EMPTY_MEMORY.snapshot, rank: 3, band: "hustler", meter: 24, job: { track: "media", level: 2, workMood: 55 }, partner: "preview-partner", crew: 2 },
+    snapshot: { ...EMPTY_MEMORY.snapshot, rank: 3, band: "hustler", meter: 24, job: { track: "media", level: 2, workMood: 55 }, partner: "preview-partner", crew: 2, businesses: ["hot-dog-cart"], campus: "st-johnsons" },
     facts: [
       f("career.hired", "media"), f("career.promoted", "media"), f("career.took_credit", "media:rival"), f("career.started_rumor", "media:rival"),
       f("dating.official", "preview-partner"), f("dating.date"), f("place.banned", "the-sticky-floor"), f("police.held"),
       f("gossip.found", "a", 6), f("story.predicted"), f("choice.made", "fake-hype:post"), f("choice.made", "found-wallet:keep"),
       f("money.lotto_win"), f("home.sublet_host"), f("campus.aced", "clout-theory"), f("business.bought", "hot-dog-cart"),
+      f("career.helped", "media:friend"), f("nightlife.party", "first-party"), f("transit.showtime"), f("skill.level_up", "dance"), f("hunt.finished"),
     ],
   };
 }

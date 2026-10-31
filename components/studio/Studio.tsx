@@ -11,6 +11,7 @@ import { MayorInboxTab } from "./MayorInbox";
 import { AutopilotCard } from "./Autopilot";
 import { BigScreenTab } from "./BigScreen";
 import { ShopManagerTab } from "./ShopManager";
+import { StoryletsTab } from "./Storylets";
 import { StoryPreview, describeEffect } from "./StoryPreview";
 import { StoryBuilder, clearDraft, loadDraft } from "./StoryBuilder";
 import { newArc } from "@/lib/storyBuilder";
@@ -36,7 +37,7 @@ export function Studio({ initial, initialNote, api, who, preview = false }: { in
   const [selected, setSelected] = useState<string | null>(initial.find((a) => a.type === "main")?.id ?? initial[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "ok" | "error"; text: string; problems?: string[] } | null>(initialNote ? { kind: initialNote.includes("didn't") || initialNote.includes("couldn't") ? "error" : "ok", text: initialNote } : null);
-  const [tab, setTab] = useState<"stories" | "reports" | "mayor" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup" | "shop">(api.metrics ? "metrics" : "stories");
+  const [tab, setTab] = useState<"stories" | "reports" | "mayor" | "shoutouts" | "bigscreen" | "players" | "affiliates" | "insights" | "metrics" | "cast" | "news" | "hunts" | "gossip" | "calendar" | "setup" | "shop" | "storylets">(api.metrics ? "metrics" : "stories");
 
   const apply = async (key: string, call: () => Promise<StudioResult>) => {
     setBusy(key);
@@ -136,6 +137,7 @@ export function Studio({ initial, initialNote, api, who, preview = false }: { in
           {api.newsList && <button aria-pressed={tab === "news"} onClick={() => setTab("news")}>News</button>}
           {api.huntList && <button aria-pressed={tab === "hunts"} onClick={() => setTab("hunts")}>Hunts</button>}
           {api.gossipList && <button aria-pressed={tab === "gossip"} onClick={() => setTab("gossip")}>Gossip</button>}
+          {api.storylets && <button aria-pressed={tab === "storylets"} onClick={() => setTab("storylets")}>Storylets</button>}
           {api.castLines && <button aria-pressed={tab === "cast"} onClick={() => setTab("cast")}>Cast</button>}
           {api.shopList && <button aria-pressed={tab === "shop"} onClick={() => setTab("shop")}>Shop</button>}
           {api.players && <button aria-pressed={tab === "players"} onClick={() => setTab("players")}>Players</button>}
@@ -158,6 +160,7 @@ export function Studio({ initial, initialNote, api, who, preview = false }: { in
       {tab === "news" && <NewsTab api={api} />}
       {tab === "hunts" && <HuntsTab api={api} />}
       {tab === "gossip" && <GossipTab api={api} />}
+      {tab === "storylets" && api.storylets && <StoryletsTab api={api} />}
       {tab === "calendar" && <CalendarTab api={api} arcs={arcs} onOpen={setTab} />}
 
       {tab === "stories" && note && (

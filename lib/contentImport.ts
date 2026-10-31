@@ -13,11 +13,14 @@ import { loadArcs } from "./storyContent";
 import { validateArcs } from "./storyValidation";
 import { getAdminSupabase } from "./supabase/admin";
 import { readAutopilot } from "./autopilot";
+import { validateStoryletWeek } from "./storyletWeeks";
+import { CHOICE_CARDS, CHOICE_KNOWN } from "./choicesContent";
+import type { ChoiceCard } from "./choices";
 
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
 
-async function weekFiles(kind: "hunts" | "news" | "exams"): Promise<{ file: string; raw: unknown }[]> {
+async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets"): Promise<{ file: string; raw: unknown }[]> {
   const dir = path.join(process.cwd(), "content", kind);
   const files = (await readdir(dir).catch(() => [] as string[])).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out: { file: string; raw: unknown }[] = [];
@@ -69,6 +72,17 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const { data, error } = await admin.rpc("content_import_exams", { p_week: r.week, p_rows: r.rows });
     if (error) { if (missing(error.message)) { lastRun = 0; out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} questions` });
+  }
+  // Content Engine step 3 (migration 0139): each week's new storylets arrive scheduled, live 24 hours later unless the
+  // Studio vetoes them (paused while their autopilot is off). A card already stored keeps the Studio's decision.
+  let seen: ChoiceCard[] = [...CHOICE_CARDS];
+  for (const { file, raw } of await weekFiles("storylets")) {
+    const r = validateStoryletWeek(raw, { others: seen, known: CHOICE_KNOWN });
+    if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
+    seen = [...seen, ...r.week.cards];
+    const { data, error } = await admin.rpc("content_import_storylets", { p_week: r.week.week, p_cards: r.week.cards });
+    if (error) { if (missing(error.message)) { out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    out.push({ file, result: `${data} new storylets` });
   }
   // Culture pack C6 (migration 0098): a story file the Studio doesn't have yet waits there for review. Stories the Studio
   // already has are never touched (edits go through the Studio's upload; approving and Day 1 stay the owner's).

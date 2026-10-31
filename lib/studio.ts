@@ -4,6 +4,7 @@
 
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { Autopilot, AutopilotKind } from "./autopilot.ts";
+import type { StoryletAction, StudioStorylets } from "./storyletWeeks.ts";
 import type { CatalogItem, EditableField, ShopFile } from "./shopCatalog.ts";
 import type { GossipWeek } from "./gossip.ts";
 import type { Insights } from "./insights.ts";
@@ -223,6 +224,9 @@ export interface StudioApi {
   /** Autopilot (migration 0107): the switches, and flipping one. */
   autopilot?(): Promise<Admin<Autopilot>>;
   autopilotSet?(kind: AutopilotKind, on: boolean): Promise<Admin<Autopilot>>;
+  /** Content Engine step 3 (migration 0139): the weekly storylets and their veto window. */
+  storylets?(): Promise<Admin<StudioStorylets>>;
+  storyletSet?(id: string, action: StoryletAction): Promise<Admin<StudioStorylets>>;
   /** Contact the Mayor (migration 0105): players' letters, marking them read or done, and writing back. */
   mailbag?(filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
   letter?(id: number, status: LetterStatus, reply: string | null, filter: MailbagFilter): Promise<Admin<StudioMailbag>>;

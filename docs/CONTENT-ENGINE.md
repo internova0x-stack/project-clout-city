@@ -1,6 +1,6 @@
 # Clout City: Content Engine
 
-**Status:** spec v1 (Oct 31): both open questions answered by the owner; the build waits on the owner's go. It replaces the Frameworks Map's "to write" Content Engine spec and the
+**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 3 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
 reactive part of the World State brief.
 
 **Owner decisions (Oct 31):**
@@ -207,7 +207,7 @@ memory**.
 | --- | --- | --- |
 | 1 ✅ | **Player memory** (built, migration 0138; keys in lib/memory.ts): `player_facts`, `fact_note`, `player_snapshot`, writers in careers, campaigns, choices, dating, businesses, campus and bans; tallies | Nothing yet (the foundation) |
 | 2 ✅ | **Storylets** (built: lib/storylets.ts, content/choices/storylets.json, `?choice=story`): the engine (choice cards plus conditions, slots, `sets`); the 76 cards and the 36 Climb cards moved over; about 20 cross-system storylets | Cards that remember what you did elsewhere |
-| 3 | **Templates and the weekly generator:** slot filling, worst-case validation, the Studio Storylets tab with the veto window, the routine drafting templates | A steady stream of new situations |
+| 3 ✅ | **Templates and the weekly generator** (built: migration 0139, lib/storyletWeeks.ts, content/storylets/, Studio → Storylets): slot filling, worst-case validation, the Studio Storylets tab with the veto window, the routine drafting templates | A steady stream of new situations |
 | 4 | **The city reacts:** conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
 | 5 | **One character registry:** the cast, profiles, career people, campaign people and Barksley in one list with roles, places and memory keyed off facts | People who remember you |
 | 6 | **Learning:** weights from what's chosen and skipped; retiring what's skipped | Content that gets better |
@@ -228,3 +228,15 @@ memory**.
 - **Stories and hunts run on a weekly beat** (owner, Oct 31): their veto window is Friday, and they go live on Saturday.
 - **News and gossip keep the 24-hour veto** (owner, Oct 31) and their Monday weeks (migration 0137 moved hunts and the story
   autopilot to Saturdays).
+
+**Step 3 as built (Oct 31):**
+- The weekly routine writes `content/storylets/<Monday>.json`: 6 to 14 storylets (about 10) in at least four families
+  (favor, temptation, betrayal, windfall, loyalty), each with `when` over memory. `validateStoryletWeek` checks them
+  against every card in the game and every earlier week (ids never repeat; slots checked with the longest names).
+- The game stores new cards (`content_import_storylets`, run by `syncWeeklyContent`) as scheduled, live 24 hours later
+  (game_settings 'storylets' {window_hours}); the 'storylets' autopilot switch holds them as paused instead.
+- Studio → Storylets lists every card with sample names, who gets it (`whenLines`), every option, outcome, chance and
+  what comes back, with Veto, Pause, Restore and Go live now. A card that went live keeps a final veto but stays readable
+  so open cards and players' histories still find it (`storylets_live` → `offer`).
+- The server (app/home/choiceActions.ts) adds live weekly cards to the pool every 5 minutes.
+- Not yet: amounts scaled to the player's income (`{amount}`), city-wide slots (`{a_club_tonight}`), learning (step 6).

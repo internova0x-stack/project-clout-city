@@ -18,7 +18,7 @@ insert into public.story_admins (user_id) values ('00000000-0000-0000-0000-00000
 update public.story_arcs set status = 'retired';
 
 -- Every kind is on by default.
-select pg_temp.assert(public.autopilot() = '{"news": true, "hunts": true, "gossip": true, "stories": true}'::jsonb, 'all on');
+select pg_temp.assert(public.autopilot() = '{"news": true, "hunts": true, "gossip": true, "stories": true, "storylets": true}'::jsonb, 'all on');
 
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000009102', false);
