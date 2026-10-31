@@ -3,6 +3,7 @@
 
 import BUSINESS from "../content/choices/business.json";
 import CLIMB from "../content/choices/climb.json";
+import STORYLETS from "../content/choices/storylets.json";
 import DATING from "../content/choices/dating.json";
 import GIGS from "../content/choices/gigs.json";
 import HOME from "../content/choices/home.json";
@@ -15,5 +16,5 @@ import WORK from "../content/choices/work.json";
 import type { ChoiceCard } from "./choices";
 
 export const CHOICE_CARDS: ChoiceCard[] = [
-  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB,
+  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS,
 ] as ChoiceCard[];

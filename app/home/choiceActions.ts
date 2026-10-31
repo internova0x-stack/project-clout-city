@@ -6,6 +6,7 @@ import {
   type BlotterItem, type ChoiceAfter, type ChoiceCard, type ChoiceCardView, type ChoiceMark, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
+import type { Memory } from "@/lib/memory";
 import { placeById } from "@/lib/city";
 import { ECONOMY } from "@/lib/economy";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -66,6 +67,20 @@ function resolveHere(e: ChoiceEffects, place: string | null): ChoiceEffects {
   return place ? { ...e, ban: { ...e.ban, place } } : { ...e, ban: undefined };
 }
 
+/** The player's memory (migration 0138): storylets read it; without the migration, only cards that don't need it show. */
+async function memoryOf(admin: Admin, id: string): Promise<Memory | null> {
+  const { data, error } = await admin.rpc("player_memory", { p_player: id });
+  return error || !data ? null : (data as Memory);
+}
+
+/** Storylets: what a choice wrote to memory (never blocks the choice). */
+async function remember(admin: Admin, id: string, sets: { fact: string; subject: string }[]) {
+  for (const f of sets) {
+    const { error } = await admin.rpc("fact_note", { p_player: id, p_key: f.fact, p_subject: f.subject });
+    if (error && !/fact_note/.test(error.message)) console.error("fact_note failed", error);
+  }
+}
+
 type Status = { chainDue: string | null; marks: ChoiceMark[] };
 
 /** Migration 0132: lasting effects and the chain card due (empty before it has run). */
@@ -81,7 +96,7 @@ async function openChain(admin: Admin, id: string, ctx: Context, st: Status): Pr
   const { data, error } = await admin.rpc("choice_chain_open", { p_player: id, p_base: c?.base ?? st.chainDue, p_area: c?.area ?? "life", p_place: ctx.atPlace });
   if (error || !data || !c) return null;
   const d = data as { log: number; text: string };
-  return { ...cardView(c, d.log, ctx.atPlace), intro: d.text };
+  return { ...cardView(c, d.log, ctx.atPlace, c.slots ? await memoryOf(admin, id) : null), intro: d.text };
 }
 
 export async function choiceState(): Promise<ChoiceResult<ChoiceState>> {
@@ -98,12 +113,13 @@ export async function choiceState(): Promise<ChoiceResult<ChoiceState>> {
   const h = hist.data as { integrity: number | null; log: Parameters<typeof entry>[0][] };
   const o = ctx.open ? card(ctx.open.card) : undefined;
   const chain = await openChain(w.admin, w.id, ctx, st);
+  const mem = o?.slots ? await memoryOf(w.admin, w.id) : null;
   return {
     ok: true,
     data: {
       marks: st.marks,
       integrity: h.integrity,
-      open: chain ?? (o && ctx.open ? cardView(o, ctx.open.log, ctx.open.place) : null),
+      open: chain ?? (o && ctx.open ? cardView(o, ctx.open.log, ctx.open.place, mem) : null),
       landed: (landed.data as { id: number; card: string; option: string; emoji: string; text: string; effects: ChoiceEffects; day: string }[])
         .map((x) => ({ ...entry({ id: x.id, kind: "later", card: x.card, option: x.option, receipt: x.text, emoji: x.emoji, effects: x.effects, day: x.day }) })),
       log: h.log.map(entry),
@@ -118,7 +134,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
   if ("error" in ctx) return { ok: false, error: ctx.error };
   if (ctx.open) {
     const o = card(ctx.open.card);
-    return { ok: true, data: o ? cardView(o, ctx.open.log, ctx.open.place) : null };
+    return { ok: true, data: o ? cardView(o, ctx.open.log, ctx.open.place, o.slots ? await memoryOf(w.admin, w.id) : null) : null };
   }
   const chain = await openChain(w.admin, w.id, ctx, await status(w.admin, w.id));
   if (chain) return { ok: true, data: chain };
@@ -126,7 +142,9 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
     return { ok: true, data: null };
   }
   const place = ctx.atPlace ? placeById(ctx.atPlace) : undefined;
+  const memory = await memoryOf(w.admin, w.id);
   const pick = pickCard(CHOICE_CARDS, {
+    memory,
     place: place?.id ?? null, tags: place?.tags ?? [], after, integrity: ctx.integrity, rank: ctx.rank,
     student: ctx.student, business: ctx.business, roommate: !!ECONOMY.homes.find((x) => x.id === ctx.home)?.roommate, history: ctx.history, today: ctx.today,
   }, rng);
@@ -136,7 +154,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
     if (/already_open|enough_today/.test(error.message)) return { ok: true, data: null };
     return { ok: false, error: err(error) };
   }
-  return { ok: true, data: cardView(pick, data as number, place?.id ?? null) };
+  return { ok: true, data: cardView(pick, data as number, place?.id ?? null, memory) };
 }
 
 export async function choiceChoose(log: number, option: string): Promise<ChoiceResult<ChoiceMade>> {
@@ -147,7 +165,8 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
   if (!ctx.open || ctx.open.log !== log) return { ok: false, error: choiceError("not_open") };
   const c = card(ctx.open.card);
   if (!c || !c.options.some((o) => o.id === option)) return { ok: false, error: choiceError("unknown_option") };
-  const r = resolveChoice(c, option, ctx.today, rng, ctx.integrity);
+  const memory = c.slots || c.options.some((o) => o.outcomes.some((x) => x.sets)) ? await memoryOf(w.admin, w.id) : null;
+  const r = resolveChoice(c, option, ctx.today, rng, ctx.integrity, memory);
   // Each end of the meter pays its own way (repBonus): more clout for a Halo, more cash for a Hustler.
   const where = ctx.open.place ?? ctx.atPlace;
   const clean = (e: ChoiceEffects) => Object.fromEntries(Object.entries(e).filter(([, v]) => v));
@@ -166,6 +185,7 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
     return { ok: false, error: err(error) };
   }
   const d = data as { integrity: number; first: boolean; applied: ChoiceEffects };
+  if (r.sets.length) await remember(w.admin, w.id, r.sets);
   return { ok: true, data: { receipt: r.text, effects: d.applied, integrity: d.integrity, first: d.first } };
 }
 

@@ -67,6 +67,15 @@ export const FACTS = {
   "gossip.found": { means: "Found a piece of gossip", subject: "the gossip" },
   "skill.level_up": { means: "Reached a new skill level", subject: "the skill" },
   "transit.showtime": { means: "Watched the subway showtime dancers", subject: "" },
+  // Threads: what storylets remember (content/choices/storylets.json `sets`), so a story can pick up where it left off.
+  "thread.came_clean": { means: "Owned up to a partner about taking a coworker's credit", subject: "the coworker (track:who)" },
+  "thread.lied_to_partner": { means: "Lied to a partner about taking a coworker's credit", subject: "the coworker (track:who)" },
+  "thread.feud": { means: "In an open feud with a coworker", subject: "the coworker (track:who)" },
+  "thread.sold_client_list": { means: "Sold a former employer's client list", subject: "the track" },
+  "thread.covered_fraud": { means: "Signed off on a boss's fake numbers", subject: "" },
+  "thread.reported_fraud": { means: "Reported a boss's fake numbers to HR", subject: "" },
+  "thread.lent_money": { means: "Lent a crew member money from a lotto win", subject: "" },
+  "thread.lola_source": { means: "Became Lola's anonymous source", subject: "" },
 } as const satisfies Record<string, FactDef>;
 
 export type FactKey = keyof typeof FACTS;

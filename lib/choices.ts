@@ -9,6 +9,9 @@
 // in-memory city (lib/choicesSim.ts) and the tests share them. The card files (content/choices/*.json) hold the hidden
 // outcomes and their odds, so only the server and the preview import lib/choicesContent.ts: players get `cardView`.
 
+import type { FactKey, Memory } from "./memory.ts";
+import { fillSlots, fillText, storyletProblems, systemsOf, whenOk, type SlotDef, type When } from "./storylets.ts";
+
 export type ChoiceArea = "life" | "gigs" | "work" | "school" | "business" | "home" | "nightlife" | "transit" | "dating" | "money" | "fame";
 export type Risk = "low" | "medium" | "high";
 /** What a player was just doing, so a card can feel like it happened because of it. */
@@ -54,6 +57,8 @@ export interface ChoiceOutcome {
   text: string;
   effects: ChoiceEffects;
   later?: ChoiceLater;
+  /** Storylets (step 2): facts this outcome writes to the player's memory; a subject may use the card's {slots}. */
+  sets?: { fact: FactKey; subject?: string }[];
 }
 
 export interface ChoiceOption {
@@ -85,6 +90,9 @@ export interface ChoiceCard {
   needs?: { integrityMin?: number; integrityMax?: number; rank?: number; student?: boolean; business?: boolean; roommate?: boolean };
   /** A follow-up only reached through a chain (`later.card`), never picked on its own. */
   chainOnly?: boolean;
+  /** Storylets (lib/storylets.ts): only for players whose memory matches, with names filled in from it. */
+  when?: When;
+  slots?: Record<string, SlotDef>;
   options: ChoiceOption[];
 }
 
@@ -149,6 +157,8 @@ export interface ChoiceContext {
   /** Every card shown in the last 30 days: variant, base and the New York day. */
   history: { id: string; base: string; day: string }[];
   today: string;
+  /** The player's memory (migration 0138); storylets need it, other cards ignore it. */
+  memory?: Memory | null;
 }
 
 export type Rng = () => number;
@@ -238,6 +248,13 @@ export function fit(card: ChoiceCard, ctx: ChoiceContext): number {
     if (h.id === card.id && daysBetween(h.day, ctx.today) < CHOICES.cooldownDays) return 0;
     if (h.base === card.base && daysBetween(h.day, ctx.today) < CHOICES.baseCooldownDays) return 0;
   }
+  // Storylets: only when the player's memory matches and every slot can be filled. Combinations of two or more systems,
+  // unseen in the cooldown window, come first (docs/CONTENT-ENGINE.md section 5).
+  if (card.when || card.slots) {
+    if (!whenOk(card.when, ctx.memory ?? null, ctx.today)) return 0;
+    if (card.slots && !fillSlots(card.slots, ctx.memory ?? null)) return 0;
+    score *= systemsOf(card.when).size >= 2 ? 5 : 2;
+  }
   return score;
 }
 
@@ -258,10 +275,15 @@ export function mayOffer(o: { shownToday: number; lastShownAt: string | null; op
   return true;
 }
 
-export function cardView(card: ChoiceCard, log: number, place: string | null): ChoiceCardView {
+/** A storylet's slots, filled from the player's memory (shown names, and raw subjects for `sets`). */
+export const cardSlots = (card: ChoiceCard, memory: Memory | null | undefined) => (card.slots ? fillSlots(card.slots, memory ?? null) : null);
+
+export function cardView(card: ChoiceCard, log: number, place: string | null, memory?: Memory | null): ChoiceCardView {
+  const v = cardSlots(card, memory)?.text ?? {};
+  const f = (t: string) => fillText(t, v);
   return {
-    log, id: card.id, area: card.area, emoji: card.emoji, title: card.title, who: card.who ?? null, place,
-    options: card.options.map((o) => ({ id: o.id, label: o.label, get: o.get, cost: o.cost })),
+    log, id: card.id, area: card.area, emoji: card.emoji, title: f(card.title), who: card.who ?? null, place,
+    options: card.options.map((o) => ({ id: o.id, label: f(o.label), get: f(o.get), cost: f(o.cost) })),
   };
 }
 
@@ -272,6 +294,8 @@ export interface ChoiceResolution {
   effects: ChoiceEffects;
   /** A consequence that will land, already rolled: the day and what it does. */
   later: { due: string; emoji: string; text: string; effects: ChoiceEffects; card?: string; headline?: string } | null;
+  /** Facts to remember (storylets), subjects filled in. */
+  sets: { fact: FactKey; subject: string }[];
 }
 
 /** Whether a later consequence helps (+1) or hurts (−1) the player: cash, clout, mood and energy together. */
@@ -300,7 +324,9 @@ export function laterOdds(out: ChoiceOutcome, integrity: number): number {
  * Rolls the chosen option's outcome (and whether its consequence comes back) with the injected random source. `integrity`
  * (the player's place on the meter) tilts the odds of what comes back (laterOdds), both which outcome and whether it lands.
  */
-export function resolveChoice(card: ChoiceCard, optionId: string, today: string, rng: Rng, integrity: number = CHOICES.integrityStart): ChoiceResolution {
+export function resolveChoice(card: ChoiceCard, optionId: string, today: string, rng: Rng, integrity: number = CHOICES.integrityStart, memory?: Memory | null): ChoiceResolution {
+  const slots = cardSlots(card, memory);
+  const f = (t: string) => fillText(t, slots?.text ?? {});
   const option = card.options.find((o) => o.id === optionId);
   if (!option) throw new Error("unknown_option");
   const weights = option.outcomes.map((o) => o.weight * laterOdds(o, integrity));
@@ -313,11 +339,12 @@ export function resolveChoice(card: ChoiceCard, optionId: string, today: string,
   if (out.later && rng() < Math.min(1, out.later.chance * laterOdds(out, integrity))) {
     const [a, b] = out.later.afterDays;
     later = {
-      due: addDays(today, a + Math.floor(rng() * (b - a + 1))), emoji: out.later.emoji ?? card.emoji, text: out.later.text,
-      effects: out.later.effects ?? {}, card: out.later.card, headline: out.later.headline,
+      due: addDays(today, a + Math.floor(rng() * (b - a + 1))), emoji: out.later.emoji ?? card.emoji, text: f(out.later.text),
+      effects: out.later.effects ?? {}, card: out.later.card, headline: out.later.headline === undefined ? undefined : f(out.later.headline),
     };
   }
-  return { option, outcome: i, text: out.text, effects: out.effects, later };
+  const sets = (out.sets ?? []).map((x) => ({ fact: x.fact, subject: fillText(x.subject ?? "", slots?.raw ?? {}) }));
+  return { option, outcome: i, text: f(out.text), effects: out.effects, later, sets };
 }
 
 /** Caps a set of effects to what the database will accept, and never takes more cash than the bank holds. */
@@ -455,6 +482,7 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
   for (const c of cards) {
     const at = `card ${c.id}`;
     if (!/^[a-z0-9-]+$/.test(c.id ?? "")) out.push(`${at}: id must be lowercase-with-dashes`);
+    if (c.when || c.slots || c.options?.some((o) => o.outcomes?.some((x) => x.sets))) out.push(...storyletProblems(at, c));
     if (ids.has(c.id)) out.push(`${at}: repeated id`);
     ids.add(c.id);
     if (!/^[a-z0-9-]+$/.test(c.base ?? "")) out.push(`${at}: base must be lowercase-with-dashes`);

@@ -16,6 +16,9 @@ for (const s of ["fired", "quit"]) written.add(`career.${s}`);
 // The careers server: { key: "a.b" } and OFFICE_FACT.
 for (const m of code.matchAll(/key: "([a-z]+\.[a-z_]+)"/g)) written.add(m[1]);
 for (const k of Object.values(OFFICE_FACT)) written.add(k);
+// Storylets' outcomes: "sets": [{ "fact": "a.b" }] in content/choices.
+const cards = readdirSync(new URL("../content/choices/", import.meta.url)).map((f) => readFileSync(new URL(`../content/choices/${f}`, import.meta.url), "utf8")).join("\n");
+for (const m of cards.matchAll(/"fact": "([a-z]+\.[a-z_]+)"/g)) written.add(m[1]);
 
 test("every fact a writer can produce is listed (lib/memory.ts FACTS)", () => {
   const listed = new Set(Object.keys(FACTS));

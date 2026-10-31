@@ -1,0 +1,2276 @@
+[
+ {
+  "id": "ex-coworker-tells-partner",
+  "base": "ex-coworker-tells-partner",
+  "area": "dating",
+  "emoji": "📲",
+  "title": "{coworker} sent your partner screenshots of you taking credit for their work. Your partner is typing…",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.took_credit"
+    },
+    {
+     "snap": "partner"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.took_credit",
+    "show": "coworker"
+   }
+  },
+  "options": [
+   {
+    "id": "confess",
+    "label": "Own it before they ask",
+    "get": "Your partner's trust, mostly",
+    "cost": "A hard conversation",
+    "risk": "low",
+    "riskWhy": "Honesty costs up front",
+    "outcomes": [
+     {
+      "weight": 2,
+      "text": "You explain everything. Your partner goes quiet, then: 'Thanks for not lying to me too.'",
+      "effects": {
+       "mood": -8,
+       "integrity": 8
+      },
+      "sets": [
+       {
+        "fact": "thread.came_clean",
+        "subject": "{coworker}"
+       }
+      ]
+     },
+     {
+      "weight": 1,
+      "text": "Your partner needs a few days. They come back, a little warier.",
+      "effects": {
+       "mood": -15,
+       "integrity": 8
+      },
+      "sets": [
+       {
+        "fact": "thread.came_clean",
+        "subject": "{coworker}"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "Say the screenshots are fake",
+    "get": "This blows over, maybe",
+    "cost": "Lying to your partner",
+    "risk": "high",
+    "riskWhy": "Screenshots have metadata",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "They believe you. For now.",
+      "effects": {
+       "integrity": -8
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.5,
+       "emoji": "📸",
+       "text": "Remember calling {coworker}'s screenshots fake? {coworker} sent the originals, with timestamps. Your partner replied with one word: 'wow.'",
+       "effects": {
+        "mood": -25,
+        "clout": -100
+       }
+      },
+      "sets": [
+       {
+        "fact": "thread.lied_to_partner",
+        "subject": "{coworker}"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "confront",
+    "label": "Confront {coworker}",
+    "get": "They stop, maybe",
+    "cost": "Escalating at work",
+    "risk": "medium",
+    "riskWhy": "Coworkers keep receipts",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "{coworker} shrugs: 'Fair's fair.' Now you both have something on each other.",
+      "effects": {
+       "integrity": -2,
+       "mood": -5
+      },
+      "sets": [
+       {
+        "fact": "thread.feud",
+        "subject": "{coworker}"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fired-client-list",
+  "base": "fired-client-list",
+  "area": "work",
+  "emoji": "💼",
+  "title": "{employer}'s client list is still in your old work email. A rival firm offers C$2,500 for it.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.fired",
+     "withinDays": 30
+    }
+   ],
+   "none": [
+    {
+     "has": "thread.sold_client_list"
+    }
+   ]
+  },
+  "slots": {
+   "employer": {
+    "fact": "career.fired",
+    "show": "employer"
+   },
+   "employer_id": {
+    "fact": "career.fired",
+    "show": "raw"
+   }
+  },
+  "options": [
+   {
+    "id": "sell",
+    "label": "Sell it",
+    "get": "C$2,500",
+    "cost": "Your old employer's secrets",
+    "risk": "high",
+    "riskWhy": "Logins leave trails",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "C$2,500 lands. The rival firm sends a fruit basket. It's a very big fruit basket.",
+      "effects": {
+       "cash": 2500,
+       "integrity": -16
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "⚖️",
+       "text": "Remember {employer}'s client list? Their lawyers traced the download to your login.",
+       "effects": {
+        "clout": -250,
+        "gigLock": 3
+       },
+       "headline": "BREAKING: {employer} goes after former employee {name} over a client list that 'walked out the door.' {name} declined to comment."
+      },
+      "sets": [
+       {
+        "fact": "thread.sold_client_list",
+        "subject": "{employer_id}"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "delete",
+    "label": "Delete it",
+    "get": "A clean break",
+    "cost": "C$2,500",
+    "risk": "low",
+    "riskWhy": "Nothing to trace",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Deleted. You feel ten pounds lighter and C$2,500 poorer.",
+      "effects": {
+       "integrity": 8
+      },
+      "later": {
+       "afterDays": [
+        5,
+        14
+       ],
+       "chance": 0.3,
+       "emoji": "📞",
+       "text": "Remember deleting {employer}'s client list? Their IT team noticed. They called with a consulting gig.",
+       "effects": {
+        "cash": 1500,
+        "clout": 60
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "return",
+    "label": "Send it back to them",
+    "get": "A reference, maybe",
+    "cost": "Admitting you still had access",
+    "risk": "medium",
+    "riskWhy": "They might ask why",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "{employer} says 'thanks, weirdly.' Your reference now says 'honest to a fault.'",
+      "effects": {
+       "integrity": 6,
+       "clout": 40
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "promoted-fraud",
+  "base": "promoted-fraud",
+  "area": "work",
+  "emoji": "📊",
+  "title": "Fresh off your promotion, {boss} asks you to sign off on numbers that aren't real. 'Just this quarter.'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.promoted",
+     "withinDays": 10
+    },
+    {
+     "snap": "job"
+    }
+   ],
+   "none": [
+    {
+     "has": "thread.covered_fraud"
+    },
+    {
+     "has": "thread.reported_fraud"
+    }
+   ]
+  },
+  "slots": {
+   "boss": {
+    "snap": "job.track",
+    "show": "boss"
+   }
+  },
+  "options": [
+   {
+    "id": "sign",
+    "label": "Sign it",
+    "get": "C$2,000 bonus, {boss}'s favor",
+    "cost": "Your name on fake numbers",
+    "risk": "high",
+    "riskWhy": "Audits happen",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You sign. {boss} squeezes your shoulder. A C$2,000 'performance bonus' appears.",
+      "effects": {
+       "cash": 2000,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        6,
+        13
+       ],
+       "chance": 0.7,
+       "emoji": "🧮",
+       "text": "Remember the numbers you signed for {boss}? An auditor is in the lobby, asking for you.",
+       "effects": {},
+       "card": "fraud-audit"
+      },
+      "sets": [
+       {
+        "fact": "thread.covered_fraud"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Refuse, politely",
+    "get": "Your name stays clean",
+    "cost": "{boss}'s warmth",
+    "risk": "medium",
+    "riskWhy": "Bosses remember a no",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I'm not comfortable signing that.' {boss} says 'noted' in a way that echoes.",
+      "effects": {
+       "integrity": 6,
+       "mood": -5
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.4,
+       "emoji": "🪑",
+       "text": "Remember refusing {boss}'s numbers? Someone else signed. The audit took them, not you. You got their desk.",
+       "effects": {
+        "clout": 200,
+        "cash": 1000
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "report",
+    "label": "Report it to HR",
+    "get": "A clear conscience",
+    "cost": "{boss}, forever",
+    "risk": "high",
+    "riskWhy": "HR leaks",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "HR thanks you. {boss} is 'on leave.' The office is very quiet around you.",
+      "effects": {
+       "integrity": 12,
+       "clout": 100,
+       "mood": -5
+      },
+      "sets": [
+       {
+        "fact": "thread.reported_fraud"
+       }
+      ]
+     },
+     {
+      "weight": 1,
+      "text": "HR 'looks into it.' {boss} finds out who called. Your next review will be interesting.",
+      "effects": {
+       "integrity": 12,
+       "mood": -12
+      },
+      "sets": [
+       {
+        "fact": "thread.reported_fraud"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fraud-audit",
+  "base": "fraud-audit",
+  "area": "work",
+  "emoji": "🧮",
+  "title": "An auditor wants to know who signed off on the quarter's numbers. Your signature is on page one.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "chainOnly": true,
+  "options": [
+   {
+    "id": "blame",
+    "label": "Say you were told to",
+    "get": "A lighter landing",
+    "cost": "Your boss, and your desk",
+    "risk": "medium",
+    "riskWhy": "Bosses deny everything",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The auditor nods. Your boss is walked out. You're 'reassigned' to the supply closet desk.",
+      "effects": {
+       "integrity": 4,
+       "clout": -100,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "confess",
+    "label": "Confess everything",
+    "get": "A clean slate",
+    "cost": "A fine and a few hours",
+    "risk": "low",
+    "riskWhy": "Honesty has a price tag",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You talk for an hour. Two hours in holding at the 114½ and a fine. You sleep fine, for once.",
+      "effects": {
+       "integrity": 10,
+       "cash": -1500,
+       "holding": 2
+      }
+     }
+    ]
+   },
+   {
+    "id": "lawyer",
+    "label": "Lawyer up",
+    "get": "Time",
+    "cost": "C$2,000 in fees",
+    "risk": "high",
+    "riskWhy": "Lawyers don't always win",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your lawyer says 'no comment' beautifully. The audit drags on and then drifts away.",
+      "effects": {
+       "integrity": -8,
+       "cash": -2000
+      }
+     },
+     {
+      "weight": 1,
+      "text": "It doesn't drift. Fined, headlined, and locked off the gig board for a while.",
+      "effects": {
+       "integrity": -8,
+       "cash": -2000,
+       "clout": -250,
+       "gigLock": 3
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "banned-birthday",
+  "base": "banned-birthday",
+  "area": "dating",
+  "emoji": "🎂",
+  "title": "Your partner's birthday party is at {place}, the place you're banned from.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "place.banned"
+    },
+    {
+     "snap": "partner"
+    }
+   ]
+  },
+  "slots": {
+   "place": {
+    "fact": "place.banned",
+    "show": "place"
+   }
+  },
+  "options": [
+   {
+    "id": "sneak",
+    "label": "Sneak in the back",
+    "get": "The toast, the cake, the night",
+    "cost": "Getting caught there again",
+    "risk": "high",
+    "riskWhy": "Bouncers remember faces",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The kitchen door works. You make the toast. Nobody important saw.",
+      "effects": {
+       "integrity": -6,
+       "mood": 15
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Security remembers you. Your partner watches you get walked out, cake in hand.",
+      "effects": {
+       "integrity": -6,
+       "mood": -15,
+       "holding": 1
+      }
+     }
+    ]
+   },
+   {
+    "id": "second",
+    "label": "Throw a second party",
+    "get": "A party you can attend",
+    "cost": "C$600 and a lot of texting",
+    "risk": "low",
+    "riskWhy": "Two parties, one birthday",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Half the guests come to yours after. Your partner calls it 'the better party.'",
+      "effects": {
+       "cash": -600,
+       "mood": 10,
+       "integrity": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "confess",
+    "label": "Tell them why you can't come",
+    "get": "Honesty",
+    "cost": "Missing the birthday",
+    "risk": "medium",
+    "riskWhy": "Feelings may be hurt",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'You're banned? From there?' They laugh for a full minute, then go without you.",
+      "effects": {
+       "mood": -8,
+       "integrity": 6
+      },
+      "later": {
+       "afterDays": [
+        2,
+        6
+       ],
+       "chance": 0.4,
+       "emoji": "🎉",
+       "text": "Remember missing the party at {place}? Your partner's friends threw you a 'banned' party at your place. Iconic.",
+       "effects": {
+        "mood": 20,
+        "clout": 80
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "campaign-exam-record",
+  "base": "campaign-exam-record",
+  "area": "fame",
+  "emoji": "🗳️",
+  "title": "The opposition found your campus exam record, peeking and all. Your candidate wants a statement by noon.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "snap": "campaign"
+    }
+   ],
+   "any": [
+    {
+     "has": "campus.caught_cheating"
+    },
+    {
+     "has": "campus.peeked"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "own",
+    "label": "Own it publicly",
+    "get": "A redemption story",
+    "cost": "A rough news day",
+    "risk": "medium",
+    "riskWhy": "Voters forgive, sometimes",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I cut corners in school. I don't now.' It plays better than anyone expected.",
+      "effects": {
+       "integrity": 8,
+       "clout": 120
+      }
+     },
+     {
+      "weight": 1,
+      "text": "'I cut corners in school.' The clip is everywhere, minus the part where you apologize.",
+      "effects": {
+       "integrity": 8,
+       "clout": -60
+      }
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "Call it a smear",
+    "get": "A news cycle that moves on",
+    "cost": "The truth",
+    "risk": "high",
+    "riskWhy": "Professors keep records",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You call it a smear. It works, for now.",
+      "effects": {
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.5,
+       "emoji": "🧾",
+       "text": "Remember calling your exam record a smear? Your old professor posted the timestamps.",
+       "effects": {
+        "clout": -250,
+        "mood": -10
+       },
+       "headline": "Developing: a professor posts exam logs contradicting {name}, who called them 'a smear' last week. The campaign says it's 'moving forward.'"
+      }
+     }
+    ]
+   },
+   {
+    "id": "step",
+    "label": "Step back from the campaign",
+    "get": "Your candidate's safety",
+    "cost": "Your seat at the table",
+    "risk": "low",
+    "riskWhy": "Staffers get replaced",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You step back for a week. The candidate sends a handwritten note. It's nicer than you expected.",
+      "effects": {
+       "integrity": 4,
+       "mood": -10
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "lotto-crew-loan",
+  "base": "lotto-crew-loan",
+  "area": "money",
+  "emoji": "🎟️",
+  "title": "Your crew heard about your scratch-card win. One of them needs C$1,000 'for rent, I swear.'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "snap": "crew",
+     "min": 1
+    }
+   ],
+   "any": [
+    {
+     "has": "money.lotto_win"
+    },
+    {
+     "has": "money.lotto_jackpot"
+    }
+   ],
+   "none": [
+    {
+     "has": "thread.lent_money"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "lend",
+    "label": "Lend it all",
+    "get": "A friend's rent, covered",
+    "cost": "C$1,000",
+    "risk": "medium",
+    "riskWhy": "Loans test friendships",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You send it. They send twelve heart emojis.",
+      "effects": {
+       "cash": -1000,
+       "integrity": 6
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "🥯",
+       "text": "Remember the C$1,000 you lent? Paid back with interest and a bagel.",
+       "effects": {
+        "cash": 1200,
+        "mood": 8
+       }
+      },
+      "sets": [
+       {
+        "fact": "thread.lent_money"
+       }
+      ]
+     },
+     {
+      "weight": 1,
+      "text": "You send it. They go quiet.",
+      "effects": {
+       "cash": -1000,
+       "integrity": 6
+      },
+      "later": {
+       "afterDays": [
+        7,
+        14
+       ],
+       "chance": 0.5,
+       "emoji": "👟",
+       "text": "Remember the loan? Your friend's new sneakers say it's not coming back.",
+       "effects": {
+        "mood": -10
+       }
+      },
+      "sets": [
+       {
+        "fact": "thread.lent_money"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "half",
+    "label": "Lend half",
+    "get": "Half a rescue",
+    "cost": "C$500",
+    "risk": "low",
+    "riskWhy": "Half-help is still help",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'It's what I can do.' They take it, gratefully. Mostly.",
+      "effects": {
+       "cash": -500,
+       "integrity": 2
+      }
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Say you can't",
+    "get": "Your win, intact",
+    "cost": "Things get weird",
+    "risk": "medium",
+    "riskWhy": "Crews talk",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I can't right now, sorry.' The next hang is a little cold.",
+      "effects": {
+       "integrity": -2,
+       "mood": -4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "media-gossip-scoop",
+  "base": "media-gossip-scoop",
+  "area": "work",
+  "emoji": "🍵",
+  "title": "Vivian heard you collect gossip. 'Give me your best piece for the Big Screen and a promotion is yours.'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "snap": "job.track",
+     "is": "media"
+    },
+    {
+     "has": "gossip.found",
+     "minCount": 5
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "real",
+    "label": "Give her real gossip",
+    "get": "Vivian's favor, clout",
+    "cost": "Whoever it's about",
+    "risk": "high",
+    "riskWhy": "Sources get traced",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "It airs at 9. Vivian smiles for the first time since you met her.",
+      "effects": {
+       "clout": 200,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.5,
+       "emoji": "🍵",
+       "text": "Remember the gossip you gave Vivian? The person it was about found out it came from you.",
+       "effects": {
+        "mood": -15,
+        "clout": -100
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "invent",
+    "label": "Make something up",
+    "get": "Vivian's favor, clout",
+    "cost": "A lie on air",
+    "risk": "high",
+    "riskWhy": "Fact-checkers exist",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "It airs. It's juicy. It's also fiction.",
+      "effects": {
+       "clout": 150,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        2,
+        7
+       ],
+       "chance": 0.6,
+       "emoji": "🔍",
+       "text": "Remember the gossip you made up for Vivian? It was fact-checked. By the person it was about.",
+       "effects": {
+        "clout": -250
+       },
+       "headline": "BREAKING: Clout TV pulls a segment after its subject proves it was invented. Producers point at a junior staffer, {name}."
+      }
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Keep your tea to yourself",
+    "get": "Your sources' trust",
+    "cost": "Vivian's favor",
+    "risk": "low",
+    "riskWhy": "Vivian keeps lists",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Vivian says 'disappointing' and means it. Your sources send you better tea.",
+      "effects": {
+       "integrity": 6,
+       "mood": -3
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "blotter-boss",
+  "base": "blotter-boss",
+  "area": "work",
+  "emoji": "🚔",
+  "title": "{boss} saw you on Lola's Blotter. 'So. The 114½ Precinct. Want to explain?'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "police.held",
+     "withinDays": 14
+    },
+    {
+     "snap": "job"
+    }
+   ]
+  },
+  "slots": {
+   "boss": {
+    "snap": "job.track",
+    "show": "boss"
+   }
+  },
+  "options": [
+   {
+    "id": "explain",
+    "label": "Tell the truth",
+    "get": "{boss}'s respect, maybe",
+    "cost": "An awkward five minutes",
+    "risk": "low",
+    "riskWhy": "Bosses were young once",
+    "outcomes": [
+     {
+      "weight": 2,
+      "text": "{boss} laughs. 'Honestly? I've done worse.' You're fine.",
+      "effects": {
+       "integrity": 6,
+       "mood": 5
+      }
+     },
+     {
+      "weight": 1,
+      "text": "{boss} nods slowly and writes something down.",
+      "effects": {
+       "integrity": 6,
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "lie",
+    "label": "Say it was a mix-up",
+    "get": "A clean record at work",
+    "cost": "A lie that can unravel",
+    "risk": "high",
+    "riskWhy": "The precinct has your belt",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'A mix-up. Wrong person.' {boss} buys it.",
+      "effects": {
+       "integrity": -8
+      },
+      "later": {
+       "afterDays": [
+        2,
+        8
+       ],
+       "chance": 0.4,
+       "emoji": "👮",
+       "text": "Remember the 'mix-up'? Sgt. Bev came by the office to return your belt. In front of everyone.",
+       "effects": {
+        "clout": -120,
+        "mood": -10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "legend",
+    "label": "Make it a funny story",
+    "get": "Office legend status",
+    "cost": "Being 'that one' forever",
+    "risk": "medium",
+    "riskWhy": "Some laugh, some don't",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your telling of the holding cell is a hit. The office calls you 'the convict' with love.",
+      "effects": {
+       "clout": 80,
+       "mood": 6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ex-at-work",
+  "base": "ex-at-work",
+  "area": "dating",
+  "emoji": "💔",
+  "title": "Your ex just walked into {employer} as a customer. They asked for you. Loudly.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "dating.breakup",
+     "withinDays": 21
+    },
+    {
+     "snap": "job"
+    }
+   ]
+  },
+  "slots": {
+   "employer": {
+    "snap": "job.track",
+    "show": "employer"
+   }
+  },
+  "options": [
+   {
+    "id": "pro",
+    "label": "Serve them like a stranger",
+    "get": "Your dignity",
+    "cost": "Your heart, a little",
+    "risk": "low",
+    "riskWhy": "It'll sting either way",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You take their order like a stranger. They tip 20%. Somehow that hurts more.",
+      "effects": {
+       "integrity": 6,
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "pass",
+    "label": "Hand them to a coworker",
+    "get": "Distance",
+    "cost": "A favor you'll owe",
+    "risk": "low",
+    "riskWhy": "Coworkers gossip",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your work friend handles it. Then tells everyone. Then buys you a coffee.",
+      "effects": {
+       "mood": -2
+      }
+     }
+    ]
+   },
+   {
+    "id": "scene",
+    "label": "Make a scene",
+    "get": "Catharsis, clout",
+    "cost": "Your workplace's patience",
+    "risk": "high",
+    "riskWhy": "Everyone has a phone",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Everyone films it. You're a meme by lunch, a good one.",
+      "effects": {
+       "clout": 100,
+       "integrity": -6,
+       "mood": 8
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tutor-the-nephew",
+  "base": "tutor-the-nephew",
+  "area": "school",
+  "emoji": "📚",
+  "title": "{boss} heard you aced an exam. Their nephew's exam is tomorrow: 'Just help him with the answers.'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "campus.aced"
+    },
+    {
+     "snap": "job"
+    }
+   ]
+  },
+  "slots": {
+   "boss": {
+    "snap": "job.track",
+    "show": "boss"
+   }
+  },
+  "options": [
+   {
+    "id": "cheat",
+    "label": "Feed him the answers",
+    "get": "{boss}'s gratitude, C$600",
+    "cost": "An exam that isn't his",
+    "risk": "high",
+    "riskWhy": "Nephews talk",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "He gets an A. {boss} slips you C$600 'for your time.'",
+      "effects": {
+       "cash": 600,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        3,
+        10
+       ],
+       "chance": 0.4,
+       "emoji": "📝",
+       "text": "Remember helping {boss}'s nephew? He got caught. He said your name immediately.",
+       "effects": {
+        "clout": -120,
+        "mood": -10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "tutor",
+    "label": "Tutor him for real",
+    "get": "A kid who actually learns",
+    "cost": "An evening and your Energy",
+    "risk": "low",
+    "riskWhy": "He might still fail",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Three hours of flashcards. He gets it, sort of.",
+      "effects": {
+       "energy": -20,
+       "integrity": 6
+      },
+      "later": {
+       "afterDays": [
+        3,
+        10
+       ],
+       "chance": 0.5,
+       "emoji": "🎓",
+       "text": "Remember tutoring {boss}'s nephew? He passed, honestly. {boss} hasn't stopped mentioning it.",
+       "effects": {
+        "clout": 120,
+        "mood": 6
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Say you're busy",
+    "get": "Your evening",
+    "cost": "{boss}'s mild annoyance",
+    "risk": "low",
+    "riskWhy": "Bosses ask once",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I'm swamped, sorry.' {boss} says 'of course' and does not mean it.",
+      "effects": {
+       "integrity": 2,
+       "mood": -3
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "wallet-was-family",
+  "base": "wallet-was-family",
+  "area": "dating",
+  "emoji": "👛",
+  "title": "The wallet you kept? It belonged to your partner's cousin. They're telling the story at dinner tonight.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "choice.made",
+     "subjectStarts": "found-wallet:keep"
+    },
+    {
+     "snap": "partner"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "confess",
+    "label": "Confess at dinner",
+    "get": "A clean conscience",
+    "cost": "C$600 and a very long silence",
+    "risk": "medium",
+    "riskWhy": "Families remember",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You hand over C$600 and the truth. The cousin laughs. Your partner doesn't, yet.",
+      "effects": {
+       "cash": -600,
+       "integrity": 10,
+       "mood": -8
+      }
+     }
+    ]
+   },
+   {
+    "id": "quiet",
+    "label": "Say nothing",
+    "get": "A normal dinner",
+    "cost": "Living with it",
+    "risk": "high",
+    "riskWhy": "Park cameras exist",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You nod along to the story of the stolen wallet. You have seconds of everything.",
+      "effects": {
+       "integrity": -8
+      },
+      "later": {
+       "afterDays": [
+        4,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "📹",
+       "text": "Remember the cousin's wallet? They found you on the park camera footage. Dinner plans are cancelled indefinitely.",
+       "effects": {
+        "mood": -20
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "steer",
+    "label": "Change the subject, fast",
+    "get": "A dinner about something else",
+    "cost": "Your nerves",
+    "risk": "medium",
+    "riskWhy": "Cousins circle back",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You ask about everyone's fantasy football teams. It works. Barely.",
+      "effects": {
+       "integrity": -3,
+       "mood": -3
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fake-hype-newsroom",
+  "base": "fake-hype-newsroom",
+  "area": "work",
+  "emoji": "📣",
+  "title": "Vivian found your old fake 'Dunk Daniels is coming' post. 'Is this who we hired for the newsroom?'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "choice.made",
+     "subjectStarts": "fake-hype:post"
+    },
+    {
+     "snap": "job.track",
+     "is": "media"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "own",
+    "label": "Own it",
+    "get": "Vivian's grudging respect",
+    "cost": "An awkward meeting",
+    "risk": "low",
+    "riskWhy": "Honesty is rare here",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I needed rent money.' Vivian: 'Relatable. Don't do it again.'",
+      "effects": {
+       "integrity": 6,
+       "clout": -40,
+       "mood": -5
+      }
+     }
+    ]
+   },
+   {
+    "id": "joke",
+    "label": "Say it was a bit",
+    "get": "Distance from it",
+    "cost": "Vivian's patience",
+    "risk": "medium",
+    "riskWhy": "Vivian doesn't laugh",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Vivian doesn't laugh. She does write something down.",
+      "effects": {
+       "integrity": -6,
+       "mood": -8
+      }
+     }
+    ]
+   },
+   {
+    "id": "pitch",
+    "label": "Pitch 'I faked hype' as a story",
+    "get": "A viral confession",
+    "cost": "Your dignity",
+    "risk": "medium",
+    "riskWhy": "Confessions cut both ways",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'How I Lied To 400 People For C$900' does huge numbers. Vivian takes half the credit.",
+      "effects": {
+       "clout": 200,
+       "integrity": 2
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rumor-goes-political",
+  "base": "rumor-goes-political",
+  "area": "fame",
+  "emoji": "🗣️",
+  "title": "The rumor you started at work is now an opposition attack on your campaign: 'This is who they hire?'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.started_rumor"
+    },
+    {
+     "snap": "campaign"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "apologize",
+    "label": "Apologize to the coworker publicly",
+    "get": "A cleaner campaign",
+    "cost": "A humbling news day",
+    "risk": "medium",
+    "riskWhy": "Apologies get clipped",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your apology is short and real. The coworker accepts it on camera. The story dies.",
+      "effects": {
+       "integrity": 10,
+       "clout": -80,
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "double",
+    "label": "Double down",
+    "get": "The base fired up",
+    "cost": "The truth, again",
+    "risk": "high",
+    "riskWhy": "The coworker has a voice",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You double down. Your supporters love it.",
+      "effects": {
+       "integrity": -10,
+       "clout": 150
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.5,
+       "emoji": "📻",
+       "text": "Remember doubling down on the office rumor? The coworker went on Real Clout FM. They were charming.",
+       "effects": {
+        "clout": -250
+       },
+       "headline": "Developing: the coworker at the center of {name}'s office rumor tells Real Clout FM it was 'made up over a vending machine.'"
+      }
+     }
+    ]
+   },
+   {
+    "id": "silent",
+    "label": "Say nothing",
+    "get": "No new quotes",
+    "cost": "Looking like you're hiding",
+    "risk": "medium",
+    "riskWhy": "Silence reads as guilt",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You say nothing. The story fades in four days, slowly.",
+      "effects": {
+       "integrity": -2,
+       "clout": -40
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sublet-bags",
+  "base": "sublet-bags",
+  "area": "money",
+  "emoji": "👜",
+  "title": "Your subtenant left a closet of 'designer' bags behind. A buyer offers C$1,500, no questions.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "home.sublet_host"
+    },
+    {
+     "snap": "band",
+     "is": "hustler"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "sell",
+    "label": "Sell them",
+    "get": "C$1,500",
+    "cost": "Someone's bags",
+    "risk": "high",
+    "riskWhy": "Owners come back",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "C$1,500 and an empty closet.",
+      "effects": {
+       "cash": 1500,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        4,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "⚖️",
+       "text": "Remember the bags? They were your subtenant's mom's. She has a lawyer and a very loud voice.",
+       "effects": {
+        "cash": -1500,
+        "mood": -10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "return",
+    "label": "Return them",
+    "get": "A clean conscience",
+    "cost": "C$1,500",
+    "risk": "low",
+    "riskWhy": "Good deeds get noticed",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You box them up and mail them back. It costs C$40 in postage. Worth it.",
+      "effects": {
+       "integrity": 8
+      },
+      "later": {
+       "afterDays": [
+        4,
+        12
+       ],
+       "chance": 0.4,
+       "emoji": "💌",
+       "text": "Remember returning the bags? Your ex-subtenant's mom sent a C$500 thank-you card.",
+       "effects": {
+        "cash": 500
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "one",
+    "label": "Keep just one",
+    "get": "The nicest bag",
+    "cost": "A little of your soul",
+    "risk": "medium",
+    "riskWhy": "It might be fake",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You keep the nicest one. It's fake. Obviously.",
+      "effects": {
+       "integrity": -6,
+       "mood": -3
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "lola-wants-a-source",
+  "base": "lola-wants-a-source",
+  "area": "fame",
+  "emoji": "💋",
+  "title": "Lola noticed you always know things first. She wants you as an 'anonymous source.' Paid.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "gossip.found",
+     "minCount": 3
+    },
+    {
+     "has": "story.predicted"
+    }
+   ],
+   "none": [
+    {
+     "has": "thread.lola_source"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "yes",
+    "label": "Become her source",
+    "get": "C$800 and Lola's favor",
+    "cost": "Your friends' secrets, eventually",
+    "risk": "high",
+    "riskWhy": "Anonymous isn't forever",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lola sends C$800 and a kiss emoji. You're on the inside now.",
+      "effects": {
+       "cash": 800,
+       "clout": 100,
+       "integrity": -8
+      },
+      "later": {
+       "afterDays": [
+        5,
+        14
+       ],
+       "chance": 0.4,
+       "emoji": "💬",
+       "text": "Remember becoming Lola's source? Your name leaked in her group chat. Your crew is not amused.",
+       "effects": {
+        "mood": -15
+       }
+      },
+      "sets": [
+       {
+        "fact": "thread.lola_source"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Decline",
+    "get": "Your friends' trust",
+    "cost": "Lola's attention",
+    "risk": "low",
+    "riskWhy": "Lola moves on",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Babe, your loss.' It isn't.",
+      "effects": {
+       "integrity": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "trade",
+    "label": "Ask for a favor instead",
+    "get": "A Lola favor in the bank",
+    "cost": "A debt to Lola",
+    "risk": "medium",
+    "riskWhy": "Favors come due",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lola runs a glowing item about you instead. 'We'll talk.' You will.",
+      "effects": {
+       "clout": 150,
+       "integrity": -2
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hr-double-check",
+  "base": "hr-double-check",
+  "area": "work",
+  "emoji": "🗂️",
+  "title": "HR is checking résumés and exam records company-wide. Yours has two stories that don't match.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.lied_interview"
+    }
+   ],
+   "any": [
+    {
+     "has": "campus.peeked"
+    },
+    {
+     "has": "campus.caught_cheating"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "clean",
+    "label": "Come clean to HR",
+    "get": "No more stories to keep up",
+    "cost": "A tough meeting",
+    "risk": "medium",
+    "riskWhy": "HR has seen worse",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "HR thanks you for 'getting ahead of it.' A note goes in your file. A small one.",
+      "effects": {
+       "integrity": 12,
+       "mood": -8,
+       "clout": -50
+      }
+     }
+    ]
+   },
+   {
+    "id": "fix",
+    "label": "'Fix' the paperwork",
+    "get": "A file that matches",
+    "cost": "C$400 to a guy who knows a guy",
+    "risk": "high",
+    "riskWhy": "Registrars keep copies",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The guy fixes it. The paperwork matches now.",
+      "effects": {
+       "cash": -400,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "🗂️",
+       "text": "Remember fixing your paperwork? The registrar keeps copies. So does HR, now.",
+       "effects": {
+        "clout": -250,
+        "gigLock": 3
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "quiet",
+    "label": "Say nothing",
+    "get": "Maybe nothing happens",
+    "cost": "Waiting",
+    "risk": "medium",
+    "riskWhy": "Audits are random",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Nobody checks yours. This time.",
+      "effects": {
+       "integrity": -4
+      }
+     },
+     {
+      "weight": 1,
+      "text": "They check. 'Let's talk Monday.' Your weekend is ruined.",
+      "effects": {
+       "integrity": -4,
+       "mood": -12
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "new-hire-snitch",
+  "base": "new-hire-snitch",
+  "area": "work",
+  "emoji": "🕵️",
+  "title": "A new hire asks you, straight up: 'Are you the one who reports people?'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.reported"
+    },
+    {
+     "snap": "job"
+    }
+   ]
+  },
+  "options": [
+   {
+    "id": "own",
+    "label": "'I report mistakes. Not people.'",
+    "get": "Their respect, maybe",
+    "cost": "Being known for it",
+    "risk": "low",
+    "riskWhy": "It's true",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "They nod slowly. Maybe they get it. Maybe they'll tell everyone. Both, probably.",
+      "effects": {
+       "integrity": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "Deny it",
+    "get": "A fresh start with them",
+    "cost": "A lie with a short shelf life",
+    "risk": "medium",
+    "riskWhy": "Offices talk",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Me? Never.' They believe you until lunch.",
+      "effects": {
+       "integrity": -6,
+       "mood": -3
+      }
+     }
+    ]
+   },
+   {
+    "id": "joke",
+    "label": "Joke your way out",
+    "get": "A laugh",
+    "cost": "A real answer",
+    "risk": "low",
+    "riskWhy": "Jokes dodge, not fix",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Only on Tuesdays.' They laugh. The question hangs there anyway.",
+      "effects": {
+       "mood": 2
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "banned-owner-promo",
+  "base": "banned-owner-promo",
+  "area": "money",
+  "emoji": "🏪",
+  "title": "{place} banned you. Now it wants to promote your business, after an apology video.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "business.bought"
+    },
+    {
+     "has": "place.banned"
+    }
+   ]
+  },
+  "slots": {
+   "place": {
+    "fact": "place.banned",
+    "show": "place"
+   }
+  },
+  "options": [
+   {
+    "id": "apologize",
+    "label": "Film the apology",
+    "get": "A business partner, C$800",
+    "cost": "Your pride, on video",
+    "risk": "low",
+    "riskWhy": "Apologies age well, mostly",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your apology does numbers. Business is up, and the owner sends a free drink voucher.",
+      "effects": {
+       "cash": 800,
+       "clout": -30,
+       "integrity": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Refuse",
+    "get": "Your pride",
+    "cost": "The promo money",
+    "risk": "low",
+    "riskWhy": "Grudges are free",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'No apologies.' You feel great about it for an hour.",
+      "effects": {
+       "mood": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "fake",
+    "label": "Apologize now, trash them later",
+    "get": "The money and the last word",
+    "cost": "Your word",
+    "risk": "high",
+    "riskWhy": "The internet remembers",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You film a lovely apology. C$800. You have plans for next week.",
+      "effects": {
+       "cash": 800,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.5,
+       "emoji": "🎬",
+       "text": "Remember your apology video for {place}? You trashed them a week later. The owner posted both side by side.",
+       "effects": {
+        "clout": -150
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "zoning-favor",
+  "base": "zoning-favor",
+  "area": "fame",
+  "emoji": "🏛️",
+  "title": "Since your candidate won, {employer} wants you to ask City Hall for a 'small zoning favor.'",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "campaign.won"
+    },
+    {
+     "snap": "job"
+    }
+   ]
+  },
+  "slots": {
+   "employer": {
+    "snap": "job.track",
+    "show": "employer"
+   }
+  },
+  "options": [
+   {
+    "id": "ask",
+    "label": "Make the call",
+    "get": "A C$1,500 'thank-you bonus'",
+    "cost": "Your candidate's clean image",
+    "risk": "high",
+    "riskWhy": "The Blotter connects dots",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "One call. The favor goes through. The bonus arrives in an envelope, which is never a good sign.",
+      "effects": {
+       "cash": 1500,
+       "integrity": -12
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "🗞️",
+       "text": "Remember the zoning favor for {employer}? Lola's Blotter connected the dots.",
+       "effects": {
+        "clout": -200
+       },
+       "headline": "BREAKING: a zoning change at City Hall traces back to a phone call from {name}, who works for the company it helped. Developing."
+      }
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Refuse",
+    "get": "Your candidate's trust",
+    "cost": "Your boss's good mood",
+    "risk": "low",
+    "riskWhy": "Bosses sulk",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I don't do favors.' Your boss is cold to you for exactly one week.",
+      "effects": {
+       "integrity": 8,
+       "mood": -4
+      }
+     }
+    ]
+   },
+   {
+    "id": "public",
+    "label": "Point them to the public process",
+    "get": "A fair shot for them",
+    "cost": "A slower win",
+    "risk": "low",
+    "riskWhy": "Process is boring",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You send them the zoning board's forms. It takes three months. It goes through, legitimately.",
+      "effects": {
+       "integrity": 4,
+       "clout": 60
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rival-at-date-night",
+  "base": "rival-at-date-night",
+  "area": "dating",
+  "emoji": "🍷",
+  "title": "{coworker} is at the next table on your date night, and they're telling your date about you.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "when": {
+   "all": [
+    {
+     "has": "career.took_credit"
+    },
+    {
+     "has": "dating.date",
+     "withinDays": 7
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.took_credit",
+    "show": "coworker"
+   }
+  },
+  "options": [
+   {
+    "id": "apologize",
+    "label": "Introduce yourself, and apologize",
+    "get": "A clean slate with them",
+    "cost": "Your pride, in public",
+    "risk": "low",
+    "riskWhy": "Grace is attractive",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You walk over and apologize, for real. {coworker} is stunned. Your date is impressed.",
+      "effects": {
+       "integrity": 8,
+       "mood": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "leave",
+    "label": "Suggest another place",
+    "get": "Escape",
+    "cost": "The appetizer you ordered",
+    "risk": "low",
+    "riskWhy": "Running looks like running",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Let's try the place down the street.' Your date clocks it. Says nothing. Yet.",
+      "effects": {
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "match",
+    "label": "Match their energy",
+    "get": "The last word",
+    "cost": "A scene, on a date",
+    "risk": "high",
+    "riskWhy": "Dates don't love scenes",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You tell your side, louder. The waiter brings everyone free dessert to make it stop.",
+      "effects": {
+       "integrity": -6,
+       "clout": 60,
+       "mood": 4
+      }
+     }
+    ]
+   }
+  ]
+ }
+]
