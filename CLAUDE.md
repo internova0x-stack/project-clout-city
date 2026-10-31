@@ -516,6 +516,33 @@ components live in `app/globals.css`.
   `bigboss`, `newhire` (lib/storylets.ts) read `snap: "job.track"` beside `boss` and `employer`; outcomes write
   `thread.padded_expenses`, `thread.insider_trade`, `thread.buried_evidence`. tests/officeCards.test.ts; `?choice=office`
   (or `office-<track>`) in the preview.
+- Player Economy (migrations 0151-0153, owner Oct 31: "build the 3 phases"; docs/PLAYER-ECONOMY.md, spec section 31): value moves
+  between players only as Shop items, job pay and assets, never as free C$. game_settings 'player_economy' (lib/playerEconomy.ts,
+  tests/playerEconomy.test.ts): phase switches (gifting = phase 1 on; marketplace and assets off until the owner flips them in Studio →
+  Economy, `admin_economy_set`), unlock (7 days, Rank 2 as in Campaign Mode), fees (job/trade/sale 5%, asset 10%, gifts 0), the weekly
+  cap (C$5,000 or half a quarter of the last 28 days' earnings, sent and received apart), the 50-150% band, the 14-day no-resale hold.
+  The core (internal, 0151): `economy_can(player, kind, amount, dir)` (phase_off, economy_frozen, too_new, economy_locked,
+  weekly_limit), `economy_note` (once per (kind, ref) in `economy_log`; limits; flags repeat_pair, new_heavy, trivial_jobs, band_edge,
+  sku_limit, asset_new_buyer), `economy_release`, `economy_pay` (fee as ledger 'economy_fee', paid to no one), `economy_hold` (escrow),
+  `economy_band_check`, `economy_friends`/`economy_visible` (crew, partner, a two-way chat; or both on the open board), `economy_item_tradable`.
+  Rank fairness: `net_worth` counts items with `player_items.received_via` at Shop value at most and leaves out `economy_limits.uncounted`
+  (player C$ over C$5,000 a week). Studio → Economy: phases, the week's numbers, the flag queue (cleared, noted, frozen; `admin_economy_freeze`).
+  Phase 1 (0151): gifts (`gift_send`/`gift_answer`/`gift_inbox`: a C$ Shop item for a friend, 5 a week, decline or 7-day expiry returns it,
+  accepted gifts can't be sold to the game for 14 days, 'no_resale'; push 'gift_received'; Lola's 'win' line from C$1,000), and the Jobs
+  board (0050) on the core: unlock, caps, friends-or-open-board, the 5% fee, workers rate clients, errands and event support (`post_task`,
+  verified by place_visits/event_attendance triggers, refunded at the deadline). Phone → Bank → Trades & gifts (`economy_history`).
+  `?economy=gift|gifted|history|jobs|locked`.
+  Phase 2 (0152, game_settings 'marketplace', lib/marketplace.ts): Phone → Market: listings (a tradable C$ piece within the band, escrow,
+  5% fee, received_via 'sale' + hold, 2 of one sku a week) and swaps in the trade window (1-4 items a side, C$ at most half a side, both
+  within the band; confirming locks items, `player_items.market_lock`; any change resets both; over C$2,500 confirms twice). A 72-hour trade
+  hold after a new device (`economy_devices`) or an email change; `admin_market_reverse` within 7 days. Underworld runners: a player hands
+  one of Pablo's jobs to an invited friend for a cut (escrow, 5% fee, Heat for both). `?market=browse|listing|offer|confirm|off`.
+  Phase 3 (0153, game_settings 'asset_sales', lib/assetSales.ts): sell a business (not one gone public) or a C$ house (never rentals or real
+  money, not while living together or subletting) to a friend: `asset_appraise` (business 60% book + 20% put in + 20% a week's pay; house
+  70% Shop + 30% paid × neighborhood), offer → answer (escrow) → 24 real hours of cooling-off (either cancels) → the handover (on read and by
+  the push sender's `asset_sales_settle_all`; seller paid minus 10%); 2 deals per 30 days, 14 days' ownership; `player_businesses.traces`
+  warns of "undisclosed issues"; `admin_asset_reverse` within 7 days. Sell in Businesses and Apartments, deals in the Bank.
+  `?assets=sell|offer|cooling|done|off`.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

@@ -50,9 +50,9 @@ export function EconomyTab({ api }: { api: StudioApi }) {
             <span className="overline">Phases</span>
             {(Object.keys(PHASE_COPY) as EconomyPhase[]).map((id) => (
               <div key={id} className="row" style={{ justifyContent: "space-between", gap: 12 }}>
-                <span className="stack-4" style={{ minWidth: 0 }}>
+                <span className="stack-4" style={{ minWidth: 0, display: "flex", flexDirection: "column" }}>
                   <span className="title">{PHASE_COPY[id].title}</span>
-                  <span className="meta">{PHASE_COPY[id].line}{PHASE_COPY[id].built ? "" : " Not built yet: switching it on does nothing until it ships."}</span>
+                  <span className="meta">{PHASE_COPY[id].line}{PHASE_COPY[id].built ? (s.phases[id] ? "" : " Off: players see \"Opening soon\".") : " Not built yet: switching it on does nothing until it ships."}</span>
                 </span>
                 <Toggle on={!!s.phases[id]} label={PHASE_COPY[id].title} disabled={busy} onChange={() => void act(api.economySet!(id, !s.phases[id]))} />
               </div>
@@ -61,10 +61,10 @@ export function EconomyTab({ api }: { api: StudioApi }) {
           <section className="studio-card stack-8">
             <span className="overline">This week (from {data.week.start})</span>
             <div className="row" style={{ gap: 24, flexWrap: "wrap" }}>
-              <span className="stack-4"><b className="display-md">{data.week.gifts}</b><span className="meta">gifts</span></span>
-              <span className="stack-4"><b className="display-md">{data.week.jobs}</b><span className="meta">jobs paid</span></span>
-              <span className="stack-4"><b className="display-md">{formatCash(data.week.value)}</b><span className="meta">value moved</span></span>
-              <span className="stack-4"><b className="display-md">{formatCash(data.week.fees)}</b><span className="meta">city fees (gone for good)</span></span>
+              <span className="stack-4" style={{ display: "flex", flexDirection: "column" }}><b className="display-md">{data.week.gifts}</b><span className="meta">gifts</span></span>
+              <span className="stack-4" style={{ display: "flex", flexDirection: "column" }}><b className="display-md">{data.week.jobs}</b><span className="meta">jobs paid</span></span>
+              <span className="stack-4" style={{ display: "flex", flexDirection: "column" }}><b className="display-md">{formatCash(data.week.value)}</b><span className="meta">value moved</span></span>
+              <span className="stack-4" style={{ display: "flex", flexDirection: "column" }}><b className="display-md">{formatCash(data.week.fees)}</b><span className="meta">city fees (gone for good)</span></span>
             </div>
             <p className="meta" style={{ margin: 0 }}>
               The rules: accounts {s.unlock.minAccountDays}+ days old at Rank {s.unlock.minRank}+; a {Math.round(s.fees.job * 100)}% fee on job pay
@@ -87,7 +87,7 @@ export function EconomyTab({ api }: { api: StudioApi }) {
             {data.frozen.length === 0 && <p className="meta" style={{ margin: 0 }}>None. A frozen account can still play; it just can&apos;t give, receive or take jobs.</p>}
             {data.frozen.map((p) => (
               <div key={p.id} className="row" style={{ justifyContent: "space-between", gap: 12 }}>
-                <span className="stack-4" style={{ minWidth: 0 }}>
+                <span className="stack-4" style={{ minWidth: 0, display: "flex", flexDirection: "column" }}>
                   <span className="title">@{p.name}</span>
                   <span className="meta">Since {stamp(p.at)}{p.reason ? ` · ${p.reason}` : ""}</span>
                 </span>

@@ -1387,3 +1387,20 @@ LUGGAGE · NOTARY) and its regular Pablo. Preview: lib/underworldSim.ts, `?under
 - Preview: `?underworld=crew|table|weekly`, `?gala=on|off|new|done` (`&open=gala`).
 
 **Later:** Heat and traces shared with Campaign Mode.
+
+## 32. The Player Economy (owner, Oct 31: "build the 3 phases"; migrations 0151, 0152, 0153; the draft is docs/PLAYER-ECONOMY.md)
+
+Players exchange value only as items, job pay and assets, never as free C$, with escrow, fees as a money sink, weekly caps, price bands,
+a 14-day no-resale hold and an abuse queue in Studio → Economy. Defaults chosen for the owner (Oct 31): unlock at 7 days and Rank 2; 5% fee
+on jobs, sales and swap C$, 10% on asset sales, none on gifts; a weekly cap of C$5,000 sent and received (more for big earners); only
+C$5,000 a week of player-paid C$ counts toward rank, and traded or gifted items count at Shop value at most.
+
+- **Phase 1 (on):** gifting C$ Shop items to crew, a partner or someone you've chatted with (5 a week; accept or decline); the Jobs board
+  joins the core (the fee, both-way ratings, friends-or-open-board) and gains game-checked errands and event support.
+- **Phase 2 (off until the Studio switches it on):** the Market: listings and swaps in a two-sided trade window, trade holds after a new
+  device or email change, reversal within 7 days; underworld runners (hand a Pablo job to a friend for a cut; Heat for both).
+- **Phase 3 (off until switched on):** selling a business or a C$ house to a friend at an appraised price, with escrow, 24 hours of
+  cooling-off, a 10% fee, 2 deals a month, 14 days' ownership first, and "undisclosed issues" warnings.
+
+**Later / open:** party-planning jobs (only the host can invite guests today), cars and houses as gifts, a price-history view, lower fees
+between crew, a lawyer's review before phases 2 and 3 open (docs/PLAYER-ECONOMY.md section 11).
