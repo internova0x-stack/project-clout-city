@@ -439,7 +439,7 @@ function Welcome({ state, busy, today, onPick, onCancel }: {
       </p>
       <button className="btn btn-taxi" disabled={!sel || busy || sel === state.aspiration}
         onClick={() => sel && onPick(sel)}>
-        {sel ? `Make it ${aspirationName(sel)}` : "Pick one"}
+        {sel ? "Choose" : "Pick one"}
       </button>
       {onCancel && <button className="btn btn-ghost" onClick={onCancel}>Back</button>}
     </div>
