@@ -180,9 +180,11 @@ export function HoldingSheet({ open, until, busy, onBail, onClose }: {
 export function BlotterCard({ items }: { items: BlotterItem[] }) {
   if (!items.length) return null;
   return (
-    <div className="card stack-8 blotter">
+    <div className="card blotter" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <span className="overline" style={{ display: "block" }}>🚨 Lola&apos;s Blotter</span>
-      {items.slice(0, 5).map((i) => <p key={i.id} className="body" style={{ margin: 0 }}>{i.text}</p>)}
+      {items.slice(0, 5).map((i, n) => (
+        <p key={i.id} className="body" style={{ margin: 0, lineHeight: 1.5, ...(n ? { borderTop: "1px solid rgba(20,17,26,.1)", paddingTop: 12 } : {}) }}>{i.text}</p>
+      ))}
     </div>
   );
 }
