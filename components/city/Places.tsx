@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { TRACKS } from "@/lib/careers";
 import { campusById } from "@/lib/campus";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, eventToday, closedLine, formatCountdown, hoursLine, isHub, isStation, placeOpen, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
@@ -67,6 +68,8 @@ export interface PlaceHandlers {
   onOpenLotto?: (placeId: string) => void;
   /** Campaign Mode: Campaign HQ's card opens the Campaign sheet (the teaser before Rank 2). */
   onOpenCampaign?: () => void;
+  /** Careers (migration 0135): an employer's card opens the Careers sheet ("Go to work" at the player's own job). */
+  career?: { jobPlace: string | null; onOpen: () => void };
   /**
    * v0.14 On Air: the stations' own buttons. "shoutout" and "billboard" open the Radio and Clout TV
    * apps' forms (there, on arrival); "watch" opens the Big Screen's photo (from anywhere).
@@ -599,6 +602,11 @@ export function LocationSheet({
           <StoryBanners place={place} story={handlers.story ?? null} />
           {place.tags.includes("campaign") && handlers.onOpenCampaign && (
             <button className="btn btn-taxi" onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
+          )}
+          {handlers.career && TRACKS.some((t) => t.place === place.id) && (
+            <button className={`btn ${handlers.career.jobPlace === place.id ? "btn-taxi" : "btn-secondary"}`} onClick={handlers.career.onOpen}>
+              {handlers.career.jobPlace === place.id ? "💼 Go to work" : `💼 Careers at ${TRACKS.find((t) => t.place === place.id)!.employer}`}
+            </button>
           )}
           <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
             <span className={`tag tag-neutral`}>{place.emoji} {CATEGORY_LABEL[place.category]}</span>

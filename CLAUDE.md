@@ -6,7 +6,7 @@ Mobile-first browser life game: arrive in New York as a nobody and chase clout.
 
 ## Read first
 - `docs/testing-feedback.md`: decisions and fixes from the Oct 13 testing round. **Wins over the older docs.**
-- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11), the modeled avatars and Shop outfits (section 12), bigger homes and venues, including the clubs' restroom and VIP floors (section 13), meeting players at every place, with 20 messages a day and unlimited chat (section 14), v0.12's player ranks and businesses (section 15), v0.13's together bonuses and Jobs board (section 16), v0.14's Real Clout FM and Clout TV (section 17), v0.15's campus life (section 18), daily tasks 2.0: goals, streaks and guest-list passes (section 19), push notifications (section 20), the creator affiliates and UGC engine (section 21) and skill perks (section 22). **Wins over the older docs** for those features.
+- `docs/08-new-features-spec.md`: hunts, News, the cast and NPCs, the Astoria neighborhood, travel and groceries, Lucky Star Lotto, neighborhood gossip, and v0.11's content automation, exclusive events update and interface changes (sections 9 to 11), the modeled avatars and Shop outfits (section 12), bigger homes and venues, including the clubs' restroom and VIP floors (section 13), meeting players at every place, with 20 messages a day and unlimited chat (section 14), v0.12's player ranks and businesses (section 15), v0.13's together bonuses and Jobs board (section 16), v0.14's Real Clout FM and Clout TV (section 17), v0.15's campus life (section 18), daily tasks 2.0: goals, streaks and guest-list passes (section 19), push notifications (section 20), the creator affiliates and UGC engine (section 21), skill perks (section 22) and careers (section 30). **Wins over the older docs** for those features.
 - `docs/culture/README.md`: the culture packs C1 to C6 (NYC food, slang, transit, events, characters), their status and
   the owner's Oct 20 decisions; `docs/culture/VOICE.md` holds the voice rules for every character and generated line.
 - `docs/HUNTS.md`: weekly treasure hunts: how they play, writing a week file, approving in the Studio.
@@ -337,6 +337,17 @@ components live in `app/globals.css`.
   hour left; enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
   the daily limit, `choice_chain_open`) and public headlines (`later.headline` → Lola's Blotter in News → City, `choice_blotter()`,
   never for news_opt_out players).
+- Careers (migration 0135, owner Oct 31; spec section 30): steady jobs with a ladder, separate from the creator's looks and
+  traits (owner: "both are separate"). Three tracks of five levels (lib/careers.ts `TRACKS`: Hospitality at Grind & Gossip,
+  Tech at Triborough Works, Media at the Clout TV Tower), the Phone's Careers app (Phone → Jobs stays the players' hiring
+  board) and "💼 Go to work" on the employer's card. The rules are TypeScript like Campaign Mode (lib/careers.ts, pure; run by
+  app/home/careerActions.ts with a crypto random source and the service role; lib/careerSim.ts in the preview,
+  `?career=new|apply|work|day|review|warning|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
+  those two import lib/careersContent.ts. public.careers (state jsonb, RLS on, no grants): `career_hire` (one job; after the
+  sack a track waits 7 days, after quitting 2), `career_save` (versioned; the workday's Energy and Mood, the key skills
+  practised, pays once: 'career_pay' cash on the weekly review, 'career_promo' and 'career_screen' clout; rate bucket
+  'career'). A workday is the day's work: never after a shift, and `career_shift_guard` stops shifts after it. Start over ends
+  a job. Part 2 (office politics) is next.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

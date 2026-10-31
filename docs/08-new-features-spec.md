@@ -1160,3 +1160,49 @@ reveal, "It came back"), the preview (lib/choicesSim.ts, development only: the d
 charity gala, a back room); stories and Campaign Mode writing to the player's meter; NPC memory beyond lines; more delayed
 consequences and recurring characters; about 4 new cards a week through the weekly content routine and the Studio; work cards
 for Careers.
+
+## 30. Careers, part 1 (owner, Oct 31: "go", from "Clout City: Jobs and Careers" v0.1; migration 0135)
+
+Steady jobs with a ladder, next to the gigs and the casual shifts. **Careers have nothing to do with the creator** (owner,
+Oct 31: the looks and traits picked at the start "are looks, not career paths; both are separate"): anyone can apply to
+any track whose requirements they meet. The Phone's app is **Careers** (Phone → Jobs stays the board where players hire
+each other).
+
+| Track | Employer (place) | Ladder (weekly pay) | Key skills | Manager | Perks |
+| --- | --- | --- | --- | --- | --- |
+| 🍽️ Hospitality | The Gossip Group (Grind & Gossip) | Host 600 · Server 850 · Bartender 1,200 · Floor Manager 1,700 · General Manager 2,500 | Aura, Cooking | Odette Vlahos, supportive | Staff meal (+10 Energy a workday); tips from Bartender |
+| 💻 Tech | Pivotly, Skyler Beta's startup (Triborough Works) | Beta Tester 700 · Junior Dev 1,000 · Product Person 1,500 · Senior Engineer 2,200 · Head of Growth 3,200 | Smarts, Hustle | Dana Okafor, micromanager | Cold brew (+5 Energy); work from anywhere from Product Person |
+| 🎬 Media | Clout TV (Clout TV Tower) | Coffee Runner 500 · Social Media Assistant 800 · Reporter 1,200 · Producer 1,800 · On-Air Personality 2,800 | Gossip, Photography | Vivian Starke, credit-stealer | Screen time: 5 × level clout a workday, doubled from Producer |
+
+Each level needs skill levels (and clout at the top); Hospitality's first level needs nothing. Each employer has a work
+friend and a rival (Bashir and Kendall, Mateo and Brent, Nour and Jax Holloway).
+
+- **Applying:** the track's card shows where you'd start, the ladder and what's missing; then an interview card: *Tell it
+  straight*, *Polish the truth a little* (a better start; HR may check the story at any review: a warning and −30 trust,
+  once) or *Name-drop someone* (needs a crew or 500 clout: the boss trusts you, the rival doesn't). Coming back to a track
+  starts one level below your best there, unless the last job there ended in the sack; after the sack the track waits 7
+  days, after quitting 2. One job at a time.
+- **The workday:** once a New York day, at the employer's place (Tech from Product Person: anywhere). Pick a pace (🔥 Hustle
+  35 Energy, ⚖️ Steady 25, 🛋️ Coast 12), then the manager's 2 tasks (3 from level 3, always 3 for the micromanager), each a
+  You get / It costs choice with hidden outcomes (content/careers/careers.json: 21 tasks, 7 a track, by level). The day's
+  performance change is the pace, half the average task (a quarter when coasting), a little for the key skills and a
+  little luck; three Hustle days in a row burn you out (−10 Mood). The manager, the friend and the rival trust you more or
+  less by what you pick; a low-trust rival takes credit, a high-trust friend covers for you. A workday is the day's work: it
+  can't follow a shift and no shift pays after it. It practises the two key skills, and a Moral Choices card may follow it
+  (as after a shift).
+- **The review, every 7 New York days:** payday first (the weekly pay for the workdays done, up to 5, plus tips), then:
+  a **promotion** at performance 75+, the boss's trust 60+ (70 for the credit-stealer), as many good reviews at the level
+  as the level's number, and the next level's requirements (new title and pay, 50 × level clout, performance back to 50);
+  else a **raise** (+10%, two per level) at 60+; else a solid week. A bad week (performance under 40, 35 with the
+  supportive boss, or under 2 workdays) is a **warning**, then a **demotion**, then the **sack**. A player away for weeks
+  catches up review by review. Tuning: a steady full-time worker is promoted every few weeks; coasting every day keeps the
+  job but goes nowhere; coasting part-time gets you fired.
+
+**As built.** lib/careers.ts (pure rules, tests/careers.test.ts), app/home/careerActions.ts (crypto random, service role),
+migration 0135 (`careers`; `career_context`, `career_hire`, `career_save`, `career_shift_guard`, Start over ends a job;
+ledger 'career_pay', 'career_promo', 'career_screen'; rate bucket 'career'), components/careers/CareersSheet.tsx, the
+employers' place cards ("💼 Go to work" at your own job), `?open=careers`, and the preview (lib/careerSim.ts:
+`?career=new|apply|work|day|review|warning|fired`).
+
+**Part 2** (next): office politics (help, share credit, team up; take credit, report mistakes, feed the gossip a rumor),
+co-worker revenge, work mood, the office gossip in the Tea app, and the Climb's office cards for players with a job.

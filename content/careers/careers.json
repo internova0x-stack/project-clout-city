@@ -1,0 +1,1195 @@
+{
+ "tasks": [
+  {
+   "id": "hosp-rude-customer",
+   "track": "hospitality",
+   "minLevel": 1,
+   "emoji": "😤",
+   "title": "A man at table 4 says his oat latte is 'aggressively beige' and wants the manager.",
+   "options": [
+    {
+     "id": "charm",
+     "label": "Charm him",
+     "get": "A regular for life, maybe",
+     "cost": "Your patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You compliment his scarf. He tips C$5 and asks for you by name next time.",
+       "perf": 6,
+       "trust": {
+        "manager": 4
+       }
+      },
+      {
+       "weight": 1,
+       "text": "He's immune to charm. He leaves a one-star review about your 'energy.'",
+       "perf": -2,
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "odette",
+     "label": "Get Odette",
+     "get": "No risk to you",
+     "cost": "Odette's time",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Odette handles it in 30 seconds. 'Next time, try first,' she says, kindly.",
+       "perf": 1,
+       "trust": {
+        "manager": -3
+       }
+      }
+     ]
+    },
+    {
+     "id": "remake",
+     "label": "Remake it, smile",
+     "get": "A calm table",
+     "cost": "Ten minutes and a latte",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You remake it. It's exactly the same. He calls it 'transformative.'",
+       "perf": 4,
+       "trust": {
+        "manager": 2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-cover-section",
+   "track": "hospitality",
+   "minLevel": 1,
+   "emoji": "🧾",
+   "title": "Bashir is slammed: twelve tables and a birthday. Your section is quiet.",
+   "options": [
+    {
+     "id": "help",
+     "label": "Cover two of his tables",
+     "get": "Bashir owes you",
+     "cost": "Your break",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You run his tables. Bashir hugs you in the walk-in. 'Brother.'",
+       "perf": 4,
+       "trust": {
+        "friend": 12,
+        "manager": 3
+       }
+      }
+     ]
+    },
+    {
+     "id": "own",
+     "label": "Stay in your section",
+     "get": "A spotless section",
+     "cost": "Watching Bashir drown",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your section sparkles. Bashir notices you watching. He notices.",
+       "perf": 2,
+       "trust": {
+        "friend": -8
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-upsell",
+   "track": "hospitality",
+   "minLevel": 1,
+   "emoji": "🥐",
+   "title": "Odette wants the new C$9 'deconstructed croissant' pushed hard today.",
+   "options": [
+    {
+     "id": "push",
+     "label": "Push it to every table",
+     "get": "Odette's numbers up",
+     "cost": "Your dignity, a little",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You sell 22. Odette writes your name on the whiteboard with a star.",
+       "perf": 7,
+       "trust": {
+        "manager": 6
+       }
+      },
+      {
+       "weight": 1,
+       "text": "You push so hard a table leaves. Odette: 'Less... intensity.'",
+       "perf": -3,
+       "trust": {
+        "manager": -2
+       }
+      }
+     ]
+    },
+    {
+     "id": "honest",
+     "label": "Recommend it only if asked",
+     "get": "Customers' trust",
+     "cost": "Odette's numbers",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Three people ask. One loves it. The regulars trust you more than the menu.",
+       "perf": 2,
+       "trust": {
+        "manager": -2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-kendall-tips",
+   "track": "hospitality",
+   "minLevel": 1,
+   "emoji": "🫙",
+   "title": "You catch Kendall taking a twenty from the shared tip jar.",
+   "options": [
+    {
+     "id": "odette",
+     "label": "Tell Odette",
+     "get": "A clean tip jar",
+     "cost": "Kendall, forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Odette has a quiet word. Kendall glares at you through every shift.",
+       "perf": 4,
+       "trust": {
+        "manager": 6,
+        "rival": -15
+       }
+      }
+     ]
+    },
+    {
+     "id": "confront",
+     "label": "Talk to Kendall",
+     "get": "Kendall puts it back",
+     "cost": "An awkward week",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'It was a loan.' Kendall puts it back and, weirdly, respects you.",
+       "perf": 2,
+       "trust": {
+        "rival": 8
+       }
+      }
+     ]
+    },
+    {
+     "id": "ignore",
+     "label": "Say nothing",
+     "get": "No drama",
+     "cost": "Your share of the tips",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You say nothing. The tip jar is lighter all week.",
+       "perf": 0,
+       "mood": -4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-bar-rush",
+   "track": "hospitality",
+   "minLevel": 3,
+   "emoji": "🍸",
+   "title": "Saturday rush: forty drink orders and the ice machine is dying.",
+   "options": [
+    {
+     "id": "system",
+     "label": "Set up a system",
+     "get": "A smooth night",
+     "cost": "All your focus",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You line up the orders like a pit crew. Odette films it for training.",
+       "perf": 8,
+       "trust": {
+        "manager": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "speed",
+     "label": "Just go fast",
+     "get": "Speed",
+     "cost": "Mistakes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Fast and messy. Two mojitos become one very strong mojito. Nobody complains.",
+       "perf": 3
+      },
+      {
+       "weight": 1,
+       "text": "You drop a tray of six glasses. The room claps. Not kindly.",
+       "perf": -5,
+       "mood": -4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-critic",
+   "track": "hospitality",
+   "minLevel": 3,
+   "emoji": "📝",
+   "title": "A food critic is in, pretending not to be. Everybody knows. Kendall wants the table.",
+   "options": [
+    {
+     "id": "take",
+     "label": "Take the table yourself",
+     "get": "A shot at a rave review",
+     "cost": "Kendall's mood",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The critic writes 'service with the warmth of a sitcom family.' Odette frames it.",
+       "perf": 10,
+       "trust": {
+        "manager": 8,
+        "rival": -10
+       }
+      },
+      {
+       "weight": 1,
+       "text": "You overdo it. The review calls the service 'clingy.'",
+       "perf": -4,
+       "trust": {
+        "manager": -4,
+        "rival": -5
+       }
+      }
+     ]
+    },
+    {
+     "id": "give",
+     "label": "Let Kendall have it",
+     "get": "Kendall's goodwill",
+     "cost": "The glory",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Kendall nails it and, shockingly, thanks you in front of everyone.",
+       "perf": 2,
+       "trust": {
+        "rival": 15
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-staff-schedule",
+   "track": "hospitality",
+   "minLevel": 4,
+   "emoji": "📋",
+   "title": "You're writing next week's schedule. Bashir wants Friday off; so does Kendall. Only one can.",
+   "options": [
+    {
+     "id": "bashir",
+     "label": "Give it to Bashir",
+     "get": "A happy work friend",
+     "cost": "Kendall's opinion of you",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Bashir goes to his cousin's wedding. Kendall goes to HR, about nothing.",
+       "perf": 3,
+       "trust": {
+        "friend": 10,
+        "rival": -12
+       }
+      }
+     ]
+    },
+    {
+     "id": "kendall",
+     "label": "Give it to Kendall",
+     "get": "Peace with Kendall",
+     "cost": "Bashir's face",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Kendall's thrilled. Bashir says 'it's fine' in the voice that means it isn't.",
+       "perf": 3,
+       "trust": {
+        "rival": 12,
+        "friend": -10
+       }
+      }
+     ]
+    },
+    {
+     "id": "you",
+     "label": "Work Friday yourself",
+     "get": "Both of them happy",
+     "cost": "Your Friday night",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You cover Friday. Both of them bring you pastries Monday.",
+       "perf": 5,
+       "trust": {
+        "friend": 6,
+        "rival": 6
+       },
+       "mood": -5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-bug-demo",
+   "track": "tech",
+   "minLevel": 1,
+   "emoji": "🐛",
+   "title": "The demo is at 2. The login button logs people out. Dana is 'not panicking.'",
+   "options": [
+    {
+     "id": "fix",
+     "label": "Fix it properly",
+     "get": "A demo that works",
+     "cost": "Lunch, and your nerves",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You find it: a missing 'not'. The demo works. Dana nods once. Huge.",
+       "perf": 8,
+       "trust": {
+        "manager": 6
+       }
+      },
+      {
+       "weight": 1,
+       "text": "You fix it and break the signup page. The demo is mostly vibes.",
+       "perf": -3,
+       "trust": {
+        "manager": -4
+       }
+      }
+     ]
+    },
+    {
+     "id": "hide",
+     "label": "Hide the button",
+     "get": "A demo that looks fine",
+     "cost": "A problem for later",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "No button, no bug. Skyler calls it 'minimalist.'",
+       "perf": 3
+      },
+      {
+       "weight": 1,
+       "text": "An investor asks how to log in. Silence.",
+       "perf": -6,
+       "trust": {
+        "manager": -8
+       }
+      }
+     ]
+    },
+    {
+     "id": "mateo",
+     "label": "Ask Mateo",
+     "get": "Two brains",
+     "cost": "Mateo's afternoon",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Mateo spots it in a minute. 'You owe me a bagel.' Done by 1:30.",
+       "perf": 5,
+       "trust": {
+        "friend": 8
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-standup",
+   "track": "tech",
+   "minLevel": 1,
+   "emoji": "🗣️",
+   "title": "At the 10am stand-up, Dana asks who has 'a big idea.' You have a medium one.",
+   "options": [
+    {
+     "id": "pitch",
+     "label": "Pitch it big",
+     "get": "Dana's attention",
+     "cost": "Being held to it",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You call it 'AI for laundry.' Skyler hears it through the wall. It's on the roadmap now.",
+       "perf": 7,
+       "trust": {
+        "manager": 5
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Brent asks three follow-up questions you can't answer.",
+       "perf": -3,
+       "trust": {
+        "rival": -5
+       }
+      }
+     ]
+    },
+    {
+     "id": "quiet",
+     "label": "Say 'still exploring'",
+     "get": "No risk",
+     "cost": "A forgettable stand-up",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Still exploring.' Dana writes something down. It isn't praise.",
+       "perf": 0,
+       "trust": {
+        "manager": -3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-code-review",
+   "track": "tech",
+   "minLevel": 1,
+   "emoji": "🔍",
+   "title": "Brent's code review lands on your desk. It's bad. Like, hardcoded-passwords bad.",
+   "options": [
+    {
+     "id": "kind",
+     "label": "Flag it kindly",
+     "get": "A safer app",
+     "cost": "Brent's ego",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You flag it gently. Brent fixes it and pretends he meant to.",
+       "perf": 5,
+       "trust": {
+        "rival": 4,
+        "manager": 3
+       }
+      }
+     ]
+    },
+    {
+     "id": "public",
+     "label": "Flag it in the team channel",
+     "get": "Dana sees your eye for detail",
+     "cost": "Brent, in public",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Dana thanks you in the channel. Brent reacts with a single thumbs-up. Cold.",
+       "perf": 6,
+       "trust": {
+        "manager": 6,
+        "rival": -15
+       }
+      }
+     ]
+    },
+    {
+     "id": "approve",
+     "label": "Approve it, move on",
+     "get": "A short afternoon",
+     "cost": "Your name on that review",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Approved. Nothing happens. Yet.",
+       "perf": 1
+      },
+      {
+       "weight": 1,
+       "text": "The passwords leak in a week. Your name is on the approval.",
+       "perf": -8,
+       "trust": {
+        "manager": -10
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-overtime",
+   "track": "tech",
+   "minLevel": 1,
+   "emoji": "🌙",
+   "title": "Dana messages at 9 PM: 'quick thing.' It is never a quick thing.",
+   "options": [
+    {
+     "id": "yes",
+     "label": "Answer and fix it",
+     "get": "Dana's gratitude",
+     "cost": "Your evening",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Two hours later it's fixed. Dana replies 'ty'. Two letters. Worth it?",
+       "perf": 6,
+       "trust": {
+        "manager": 7
+       },
+       "mood": -5
+      }
+     ]
+    },
+    {
+     "id": "morning",
+     "label": "Reply 'first thing tomorrow'",
+     "get": "Your evening",
+     "cost": "Dana's patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Fine.' Dana fixes it herself and mentions it in stand-up.",
+       "perf": -1,
+       "trust": {
+        "manager": -4
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-pivot",
+   "track": "tech",
+   "minLevel": 3,
+   "emoji": "🔄",
+   "title": "Skyler announces a pivot: Pivotly is now 'a vibe marketplace.' Your team has to explain it to users.",
+   "options": [
+    {
+     "id": "write",
+     "label": "Write the announcement",
+     "get": "Skyler's notice",
+     "cost": "Your sanity",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your post makes the pivot sound almost sane. Skyler retweets it with 🚀.",
+       "perf": 9,
+       "trust": {
+        "manager": 5
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Users read it and ask for refunds. Skyler blames 'the copy.'",
+       "perf": -4,
+       "trust": {
+        "manager": -5
+       }
+      }
+     ]
+    },
+    {
+     "id": "push",
+     "label": "Push back on the pivot",
+     "get": "Integrity at work",
+     "cost": "Skyler's mood",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You say it out loud: users don't want vibes. Dana agrees, quietly, later.",
+       "perf": 3,
+       "trust": {
+        "manager": 4
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Skyler calls you 'a legacy thinker.' Ouch.",
+       "perf": -3,
+       "trust": {
+        "manager": -3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-hiring",
+   "track": "tech",
+   "minLevel": 3,
+   "emoji": "🤝",
+   "title": "You're on a hiring panel. Mateo's friend applied. Brent's candidate is better on paper.",
+   "options": [
+    {
+     "id": "merit",
+     "label": "Pick the best candidate",
+     "get": "A strong team",
+     "cost": "Mateo's friend's job",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You go with Brent's pick. She's brilliant. Mateo understands, mostly.",
+       "perf": 5,
+       "trust": {
+        "friend": -4,
+        "rival": 8
+       }
+      }
+     ]
+    },
+    {
+     "id": "friend",
+     "label": "Back Mateo's friend",
+     "get": "Mateo forever",
+     "cost": "A weaker hire",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Mateo's friend joins. He's... learning. Mateo buys your coffee for a month.",
+       "perf": 2,
+       "trust": {
+        "friend": 12,
+        "manager": -3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-growth",
+   "track": "tech",
+   "minLevel": 4,
+   "emoji": "📈",
+   "title": "Skyler wants growth numbers up 10x by Friday. Brent suggests counting bots as users.",
+   "options": [
+    {
+     "id": "real",
+     "label": "Grow it for real",
+     "get": "Numbers you can defend",
+     "cost": "A brutal week",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You run three campaigns. Growth: 2.3x. Real people. Dana fights for you upstairs.",
+       "perf": 10,
+       "trust": {
+        "manager": 8
+       },
+       "mood": -6
+      }
+     ]
+    },
+    {
+     "id": "bots",
+     "label": "Count the bots",
+     "get": "10x by Friday",
+     "cost": "A number that isn't true",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "10x! Skyler rings a gong. The board is thrilled. For now.",
+       "perf": 6,
+       "trust": {
+        "manager": 4,
+        "rival": 6
+       }
+      },
+      {
+       "weight": 1,
+       "text": "An investor checks. Most of your users are named 'User8812'.",
+       "perf": -10,
+       "trust": {
+        "manager": -12
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-headline",
+   "track": "media",
+   "minLevel": 1,
+   "emoji": "📰",
+   "title": "Vivian needs a headline for a story about a pigeon that rides the N train.",
+   "options": [
+    {
+     "id": "click",
+     "label": "Make it clickbait",
+     "get": "Clicks",
+     "cost": "Your journalism teacher's respect",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'YOU WON'T BELIEVE WHERE THIS PIGEON GETS OFF.' 400,000 clicks. Vivian takes credit at lunch.",
+       "perf": 7,
+       "trust": {
+        "manager": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "straight",
+     "label": "Write it straight",
+     "get": "A headline you're proud of",
+     "cost": "Clicks",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Pigeon commutes daily on N train.' 9,000 clicks. Nour loves it.",
+       "perf": 3,
+       "trust": {
+        "friend": 6,
+        "manager": -2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-coffee",
+   "track": "media",
+   "minLevel": 1,
+   "emoji": "☕",
+   "title": "Vivian's coffee order is eleven words long and she hates it every time.",
+   "options": [
+    {
+     "id": "perfect",
+     "label": "Practice until it's perfect",
+     "get": "Vivian's tiny smile",
+     "cost": "Your lunch break",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You nail it. Vivian says 'acceptable.' The newsroom gasps.",
+       "perf": 5,
+       "trust": {
+        "manager": 8
+       }
+      }
+     ]
+    },
+    {
+     "id": "nour",
+     "label": "Ask Nour for the secret",
+     "get": "The real recipe",
+     "cost": "Owing Nour",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Nour whispers: 'she wants it lukewarm.' Perfect. Nour winks.",
+       "perf": 4,
+       "trust": {
+        "friend": 6,
+        "manager": 4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-source",
+   "track": "media",
+   "minLevel": 1,
+   "emoji": "🕵️",
+   "title": "A tip: Chase Clout is about to be banned again. Your source wants to stay anonymous.",
+   "options": [
+    {
+     "id": "protect",
+     "label": "Protect your source",
+     "get": "A source who trusts you",
+     "cost": "A weaker story",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You run it with 'sources say.' It's right. The source sends you three more tips.",
+       "perf": 6,
+       "trust": {
+        "friend": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "name",
+     "label": "Name them for credibility",
+     "get": "A bulletproof story",
+     "cost": "Your source",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The story's airtight. Your source never answers your texts again.",
+       "perf": 4,
+       "trust": {
+        "manager": 4
+       },
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "jax",
+     "label": "Give it to Jax",
+     "get": "Jax owes you",
+     "cost": "Your scoop",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Jax runs it and thanks you on air, barely. It's something.",
+       "perf": 1,
+       "trust": {
+        "rival": 12
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-night-shift",
+   "track": "media",
+   "minLevel": 1,
+   "emoji": "🌃",
+   "title": "Someone has to cover the overnight desk. Jax is 'feeling sick.' Jax is at a party.",
+   "options": [
+    {
+     "id": "cover",
+     "label": "Cover it",
+     "get": "Vivian notices who shows up",
+     "cost": "Your night",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Quiet night until 3 AM, when a celebrity crashes a scooter into a fountain. You get it first.",
+       "perf": 9,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -4
+      },
+      {
+       "weight": 1,
+       "text": "Nothing happens all night. You learn every pigeon's name.",
+       "perf": 3,
+       "trust": {
+        "manager": 2
+       },
+       "mood": -5
+      }
+     ]
+    },
+    {
+     "id": "tell",
+     "label": "Tell Vivian where Jax is",
+     "get": "Jax in trouble",
+     "cost": "Being 'that coworker'",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Vivian makes Jax cover the next four nights. Jax will remember.",
+       "perf": 2,
+       "trust": {
+        "manager": 3,
+        "rival": -15
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-segment",
+   "track": "media",
+   "minLevel": 3,
+   "emoji": "🎙️",
+   "title": "You get a 90-second segment on the Big Screen. Vivian wants to 'look it over' first.",
+   "options": [
+    {
+     "id": "share",
+     "label": "Let Vivian look",
+     "get": "Vivian's support",
+     "cost": "Your idea becoming hers",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Vivian 'tweaks' it. It airs as her segment, with you as 'additional reporting.'",
+       "perf": 3,
+       "trust": {
+        "manager": 10
+       }
+      }
+     ]
+    },
+    {
+     "id": "own",
+     "label": "Keep it yours",
+     "get": "Your name on air",
+     "cost": "Vivian's mood",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "It airs. It's great. Vivian says 'cute' and doesn't speak to you for a day.",
+       "perf": 8,
+       "trust": {
+        "manager": -8
+       }
+      },
+      {
+       "weight": 1,
+       "text": "It airs with a typo in the lower third. Vivian sighs, loudly, near you.",
+       "perf": -3,
+       "trust": {
+        "manager": -6
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-scandal",
+   "track": "media",
+   "minLevel": 3,
+   "emoji": "💥",
+   "title": "You have proof that Jax made up a quote last month. Vivian doesn't know.",
+   "options": [
+    {
+     "id": "vivian",
+     "label": "Bring it to Vivian",
+     "get": "A newsroom that tells the truth",
+     "cost": "Jax's career",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Jax is off the desk for a month. The newsroom is quiet. Vivian looks at you differently.",
+       "perf": 6,
+       "trust": {
+        "manager": 8,
+        "rival": -20
+       }
+      }
+     ]
+    },
+    {
+     "id": "jax",
+     "label": "Tell Jax privately",
+     "get": "Jax owes you, big",
+     "cost": "Your silence",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Jax goes pale, issues a correction and becomes suspiciously nice to you.",
+       "perf": 3,
+       "trust": {
+        "rival": 15
+       }
+      }
+     ]
+    },
+    {
+     "id": "leak",
+     "label": "Leak it to Lola",
+     "get": "A scandal with your fingerprints off it",
+     "cost": "Everything, if it's traced",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Lola runs it. Jax is done. Nobody knows it was you. Probably.",
+       "perf": 4,
+       "trust": {
+        "rival": -20
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Lola names her source in a footnote, by accident. Vivian is not amused.",
+       "perf": -8,
+       "trust": {
+        "manager": -12,
+        "rival": -20
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-interview",
+   "track": "media",
+   "minLevel": 4,
+   "emoji": "🎬",
+   "title": "You land a sit-down with Lunaria. Her team says: no questions about the producer feud.",
+   "options": [
+    {
+     "id": "ask",
+     "label": "Ask about the feud anyway",
+     "get": "The interview of the year",
+     "cost": "Lunaria's team, forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "She answers. It goes everywhere. Her team bans Clout TV. Vivian: 'worth it.'",
+       "perf": 11,
+       "trust": {
+        "manager": 6
+       }
+      },
+      {
+       "weight": 1,
+       "text": "She walks out on camera. That clip goes everywhere too, sadly.",
+       "perf": -2,
+       "trust": {
+        "manager": -4
+       }
+      }
+     ]
+    },
+    {
+     "id": "respect",
+     "label": "Respect the deal",
+     "get": "More access later",
+     "cost": "A softer interview",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "A warm, funny interview. Lunaria's team offers you the album launch exclusive.",
+       "perf": 6,
+       "trust": {
+        "manager": 3
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "lines": {
+  "hospitality": {
+   "manager": {
+    "high": [
+     "You're the reason table 4 came back. Twice.",
+     "If you keep this up, I'm learning your coffee order.",
+     "Good shift. Go home before I find you more work."
+    ],
+    "mid": [
+     "Fine shift. Tomorrow, smile like you mean it.",
+     "Nobody cried today. I'll take it.",
+     "The croissants are still deconstructed. So are we. See you tomorrow."
+    ],
+    "low": [
+     "We need to talk about the latte foam. And the attitude.",
+     "I've seen better shifts from the espresso machine.",
+     "Take tonight to think about what 'service' means."
+    ]
+   },
+   "friend": [
+    "Staff meal is lentils again. I saved you the good bowl.",
+    "Table 9 asked if we're related. I said yes. Go with it.",
+    "Same time tomorrow? I'll bring the good playlist."
+   ],
+   "rival": [
+    "Cute. The regulars still ask for me.",
+    "Odette likes me more. Just so you know.",
+    "I'd tell you what you did wrong, but you'd just do it again."
+   ]
+  },
+  "tech": {
+   "manager": {
+    "high": [
+     "Solid work. Don't tell Skyler, he'll give you a title.",
+     "Pushed clean. I almost smiled.",
+     "If you're free tonight... kidding. Mostly."
+    ],
+    "mid": [
+     "Fine. Let's circle back tomorrow. And the day after.",
+     "Please update your status. Your status. Your status.",
+     "Okay. Noted. Logged. Tracked."
+    ],
+    "low": [
+     "I've added you to a 'quick sync.' It isn't quick.",
+     "Your commit messages say 'stuff'. All of them.",
+     "Let's talk about ownership. Tomorrow, 8 AM."
+    ]
+   },
+   "friend": [
+    "Bagel run tomorrow? Skyler's pivoting again, we'll need carbs.",
+    "I renamed your branch 'legend'. You're welcome.",
+    "Brent asked what you're working on. I said 'synergy.'"
+   ],
+   "rival": [
+    "I shipped three features today. How many did you ship? Zero? Cool.",
+    "Skyler and I are 'aligned', by the way.",
+    "Nice try at stand-up. Truly."
+   ]
+  },
+  "media": {
+   "manager": {
+    "high": [
+     "Good instincts today. I'll be using them in my segment.",
+     "You found the story before I did. Don't let it happen again.",
+     "Not bad. For an assistant. I mean that warmly."
+    ],
+    "mid": [
+     "Fine. The pigeon story did numbers.",
+     "Tomorrow, find me something with a celebrity in it.",
+     "Coffee was lukewarm. Correct. Everything else, average."
+    ],
+    "low": [
+     "Do you know how many people want your desk? I do. I have a list.",
+     "That was a story the way a napkin is a tablecloth.",
+     "Rethink your career. Also, my coffee."
+    ]
+   },
+   "friend": [
+    "Vivian took credit for your idea again. I wrote down that it was yours.",
+    "The overnight vending machine has the good chips now. Tip.",
+    "Big Screen night tomorrow. Bring snacks, we'll heckle."
+   ],
+   "rival": [
+    "I'm doing the red carpet. You're doing... the pigeon follow-up?",
+    "Vivian told me she's 'excited about my trajectory.'",
+    "Love that you're still trying."
+   ]
+  }
+ }
+}
