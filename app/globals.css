@@ -2688,3 +2688,5 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .careers-delta.up { background:var(--green-tint); color:var(--green-text); }
 .careers-delta.down { background:var(--red-tint); color:var(--red-text); }
 .careers-summary { padding:12px; border-radius:12px; background:var(--surface-raised); }
+.careers-grudge { margin:0; padding:8px 10px; border-radius:10px; background:var(--red-tint); color:var(--red-text); font-size:13px; line-height:18px; font-weight:600; }
+.chip-row.careers-who { margin:0; padding:2px 0; }

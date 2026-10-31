@@ -134,3 +134,82 @@ test("salary rises 10% a raise; the Careers list says where each track starts", 
   const cards = trackCards(ctx(), DAY);
   assert.deepEqual(cards.map((c) => c.missing.length > 0), [false, true, true]);
 });
+
+// ---- Part 2: office politics ----
+import { CAREER as C2, OFFICE, office, careerView as view2 } from "../lib/careers.ts";
+
+function clockedIn(seed = 0.5) {
+  const s = hire("o", "hospitality", ctx(), "honest", DAY);
+  startDay(content, s, "steady", ctx(), DAY, () => seed);
+  return s;
+}
+
+test("office moves: only on a day you clocked in, one collaborate and one sabotage a day", () => {
+  const s = hire("o", "hospitality", ctx(), "honest", DAY);
+  assert.throws(() => office(s, "help", "friend", ctx(), DAY, Math.random), /not_working/);
+  startDay(content, s, "steady", ctx(), DAY, Math.random);
+  const r = office(s, "help", "friend", ctx(), DAY, Math.random);
+  assert.equal(r.effects.energy, -C2.office.helpEnergy);
+  assert.ok(r.integrity > 0 && s.trust.friend > 50);
+  assert.throws(() => office(s, "share", "rival", ctx(), DAY, Math.random), /office_used/);
+  office(s, "report", "rival", ctx(), DAY, () => 0.9);
+  assert.throws(() => office(s, "credit", "friend", ctx(), DAY, Math.random), /office_used/);
+  assert.throws(() => office(clockedIn(), "credit", "manager", ctx(), DAY, Math.random), /bad_target/);
+  assert.deepEqual(view2(content, s, DAY, { skills: {}, clout: 0 }).officeLeft, { collab: false, sabotage: false });
+  assert.equal(OFFICE.filter((o) => o.kind === "collab").length, 3);
+});
+
+test("sabotage pays now, leaves a grudge, and can be traced", () => {
+  const quiet = clockedIn();
+  const r = office(quiet, "credit", "rival", ctx(), DAY, () => 0.99);
+  assert.ok(r.integrity < 0 && quiet.performance > 50 && quiet.trust.rival < 45);
+  assert.deepEqual(quiet.grudges!.map((g) => [g.who, g.level]), [["rival", 1]]);
+  const caught = clockedIn();
+  office(caught, "credit", "friend", ctx(), DAY, () => 0.01);
+  assert.equal(caught.exposed, 1);
+  assert.ok(caught.trust.manager < 55);
+  const rumor = clockedIn();
+  const rr = office(rumor, "rumor", "manager", ctx(), DAY, () => 0.01);
+  assert.equal(rumor.warnings, 1, "a traced rumor is a formal warning");
+  assert.match(rr.headline!, /\{name\}/);
+});
+
+test("revenge comes due at work, escalates with more sabotage, and amends cool it", () => {
+  const s = clockedIn();
+  office(s, "credit", "rival", ctx(), DAY, () => 0.99);
+  s.grudges![0].level = 3;
+  s.grudges![0].due = addDays(DAY, 1);
+  // Finish today, then work tomorrow: the grudge strikes.
+  for (let i = 0; i < s.today!.tasks.length; i++) answerTask(content, s, i, content.tasks.find((t) => t.id === s.today!.tasks[i].id)!.options[0].id, ctx(), () => 0.5);
+  const day2 = addDays(DAY, 1);
+  startDay(content, s, "steady", ctx(), day2, () => 0.5);
+  for (let i = 0; i < s.today!.tasks.length; i++) answerTask(content, s, i, content.tasks.find((t) => t.id === s.today!.tasks[i].id)!.options[0].id, ctx(), () => 0.5);
+  assert.ok(s.today!.summary.some((l) => /Kendall reported you/.test(l)), s.today!.summary.join(" | "));
+  assert.equal(s.grudges![0].level, 2, "they cool off a level");
+  office(s, "share", "rival", ctx(), day2, () => 0.5);
+  assert.equal(s.grudges!.length, 0, "sharing the credit ends it");
+});
+
+test("a joint project pays a team bonus at the review, or flops", () => {
+  const s = clockedIn();
+  office(s, "team", "friend", ctx(), DAY, () => 0.5);
+  assert.throws(() => { s.office = undefined; office(s, "team", "rival", ctx(), DAY, () => 0.5); }, /team_busy/);
+  s.worked = ["a", "b", "c", "d", "e"];
+  const won = refresh(structuredClone(s), s.nextReview, { skills: {}, clout: 0 }, () => 0.01);
+  assert.ok(won.payouts.some((p) => p.kind === "career_team" && p.amount === 90));
+  const lost = structuredClone(s);
+  refresh(lost, s.nextReview, { skills: {}, clout: 0 }, () => 0.99);
+  assert.ok(lost.review!.lines.some((l) => /flopped/.test(l)));
+});
+
+test("work mood: a miserable job drags performance and your evenings", () => {
+  const s = clockedIn();
+  s.workMood = 10;
+  let mood = 0;
+  for (let i = 0; i < s.today!.tasks.length; i++) {
+    const r = answerTask(content, s, i, content.tasks.find((t) => t.id === s.today!.tasks[i].id)!.options[0].id, ctx(), () => 0.5);
+    mood += r.effects.mood ?? 0;
+  }
+  assert.ok(s.today!.summary.some((l) => /dread/.test(l)));
+  assert.ok(mood < 0);
+});

@@ -347,7 +347,12 @@ components live in `app/globals.css`.
   sack a track waits 7 days, after quitting 2), `career_save` (versioned; the workday's Energy and Mood, the key skills
   practised, pays once: 'career_pay' cash on the weekly review, 'career_promo' and 'career_screen' clout; rate bucket
   'career'). A workday is the day's work: never after a shift, and `career_shift_guard` stops shifts after it. Start over ends
-  a job. Part 2 (office politics) is next.
+  a job. Part 2, office politics (migration 0136): on a day you clocked in, one collaborate move (help, share the credit, team
+  up) and one sabotage move (take credit, report mistakes, feed the gossip a rumor), aimed at the work friend, the rival (or the
+  boss for a rumor); `OFFICE` in lib/careers.ts. Sabotage leaves grudges that strike at work, always warned on the People card;
+  traced sabotage costs the boss's trust (a traced rumor: a warning and a Lola's Blotter headline); work mood feeds Mood and
+  performance; a joint project pays 'career_team' at the review; `career_office` nudges the private meter (±12) and posts the
+  headline (`choice_headline`, never for News opt-outs). `?career=office|grudge` in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
