@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import {
-  CAMPAIGN, RISK_LABEL, cs,
+  CAMPAIGN, cs,
   type CampaignApi, type CampaignScreen, type CandidateCard, type CandidateId, type Channel, type DebateStyle, type InboxOption, type OpId, type Preview, type SlotAction,
 } from "@/lib/campaign";
 import type { CampaignView } from "@/lib/campaignEngine";
@@ -12,7 +12,7 @@ import { RANKS } from "@/lib/ranks";
 // Campaign Mode (docs/CAMPAIGN-MODE.md): the player manages a challenger's campaign against Mayor Papa-Dani. One
 // sheet, opened from the Phone's Campaign app (or Campaign HQ on the map): the teaser before Rank 2, the candidate
 // pick, HQ (this week, inbox, the map, the team) while a campaign runs, and election night at the end. Every choice
-// shows the You get / It costs / Risk preview (spec section 6.2). The server decides everything; this only asks.
+// shows the You get / It costs preview (owner, Oct 31: no risk labels, as on every card). The server decides everything; this only asks.
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const slotName = (i: number) => `${DAYS[Math.floor(i / 2)]} ${i % 2 ? "evening" : "day"}`;
@@ -298,7 +298,6 @@ function PreviewLines({ p }: { p: Preview }) {
     <span className="camp-preview">
       <span><b>You get</b> {p.get}</span>
       <span><b>It costs</b> {p.cost}</span>
-      <span className={`camp-risk ${p.risk}`}><b>Risk</b> {RISK_LABEL[p.risk]}: {p.why}{p.later ? " · ⏳ may come back later" : ""}</span>
     </span>
   );
 }
@@ -404,10 +403,10 @@ function slotLabel(s: SlotAction, v: CampaignView): string {
 }
 
 const ACTIVITIES: { kind: SlotAction["kind"]; label: string; p: Preview; place?: boolean }[] = [
-  { kind: "rally", label: "📣 Rally", place: true, p: { get: "A good lift in one place", cost: "One slot", risk: "low", why: "Weather, crowds" } },
-  { kind: "tour", label: "🚶 Tour stop", place: true, p: { get: "A small lift, shows you care", cost: "One slot", risk: "low", why: "Safe and slow" } },
-  { kind: "donors", label: "📞 Donor calls", p: { get: "Campaign cash", cost: "One slot", risk: "low", why: "Some donors want things later" } },
-  { kind: "rest", label: "😴 Rest", p: { get: "Team morale +8", cost: "One slot", risk: "low", why: "The Mayor doesn't rest" } },
+  { kind: "rally", label: "📣 Rally", place: true, p: { get: "A good lift in one place", cost: "One slot" } },
+  { kind: "tour", label: "🚶 Tour stop", place: true, p: { get: "A small lift, shows you care", cost: "One slot" } },
+  { kind: "donors", label: "📞 Donor calls", p: { get: "Campaign cash", cost: "One slot" } },
+  { kind: "rest", label: "😴 Rest", p: { get: "Team morale +8", cost: "One slot" } },
 ];
 
 function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView; data: CampaignScreen; index: number; hint?: Hint; busy: boolean; onClose: () => void; onSet: (a: SlotAction | null) => void }) {
@@ -442,17 +441,17 @@ function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView;
             ))}
             {v.week <= CAMPAIGN.debateWeek && (
               <button className={`camp-option${mine("prep") ? " hint" : ""}`} onClick={() => setKind("prep")}>
-                <span className="title">📚 Debate prep{mine("prep") && TASK}</span><PreviewLines p={{ get: "Facts answers land on that topic", cost: "One slot", risk: "low", why: "Only helps on debate night" }} />
+                <span className="title">📚 Debate prep{mine("prep") && TASK}</span><PreviewLines p={{ get: "Facts answers land on that topic", cost: "One slot" }} />
               </button>
             )}
             {v.week === v.weeks && (
               <button className={`camp-option${mine("gotv") ? " hint" : ""}`} onClick={() => setKind("gotv")}>
-                <span className="title">🗳️ Get out the vote{mine("gotv") && TASK}</span><PreviewLines p={{ get: "Turnout in one place on Election Day", cost: "One slot", risk: "low", why: "Only counts on the day" }} />
+                <span className="title">🗳️ Get out the vote{mine("gotv") && TASK}</span><PreviewLines p={{ get: "Turnout in one place on Election Day", cost: "One slot" }} />
               </button>
             )}
             {v.heat !== null && (
               <button className="camp-option dark" onClick={() => setKind("op")}>
-                <span className="title">🕶️ Shadow op</span><PreviewLines p={{ get: "Fast damage to the Mayor's machine", cost: "Cash, Favors, Integrity", risk: "high", why: "Traces can surface weeks later", later: true }} />
+                <span className="title">🕶️ Shadow op</span><PreviewLines p={{ get: "Fast damage to the Mayor's machine", cost: "Cash, Favors, Integrity" }} />
               </button>
             )}
             {current && <button className="btn btn-ghost" disabled={busy} onClick={() => onSet(null)}>Clear this slot</button>}
@@ -475,8 +474,8 @@ function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView;
               <button aria-pressed={op === "poach_ally"} onClick={() => setOp("poach_ally")}>Poach Ally</button>
             </div>
             <PreviewLines p={op === "fake_news"
-              ? { get: "The Mayor -2 in a place, -0.5 everywhere", cost: "1 Favor + C$5,000, Heat +8, Integrity -5", risk: "high", why: "35% it's fact-checked within two weeks", later: true }
-              : { get: "One of his allies switches: you +1.5, him -1.5, and a check", cost: "C$15,000 or 3 Favors, Heat +6, Integrity -4", risk: "high", why: "Some allies double-cross", later: true }} />
+              ? { get: "The Mayor -2 in a place, -0.5 everywhere", cost: "1 Favor + C$5,000, Heat +8, Integrity -5" }
+              : { get: "One of his allies switches: you +1.5, him -1.5, and a check", cost: "C$15,000 or 3 Favors, Heat +6, Integrity -4" }} />
             <label className="row" style={{ gap: 8 }}><input type="checkbox" checked={cutout} onChange={(e) => setCutout(e.target.checked)} /> Use a cut-out (+50% cost, harder to trace, may go off-script)</label>
             {refused && <p className="subtext" style={{ margin: 0 }}>Your candidate won't do this. Booking it talks them round: team morale -10.</p>}
             {op === "poach_ally" && !v.mayorAllies.length && <p className="subtext" style={{ margin: 0 }}>Every one of the Mayor&apos;s allies is already on your side.</p>}
@@ -530,9 +529,9 @@ function Dilemmas({ v, busy, onPick }: { v: CampaignView; busy: boolean; onPick:
           <p className="title" style={{ margin: 0 }}>🧾 The books have a little wiggle room</p>
           <p className="subtext" style={{ margin: 0 }}>Nobody checks the stationery line. You could move some of it to your own account.</p>
           <button className="camp-option" disabled={busy} onClick={() => onPick("skim", "little")}><span className="title">Skim a little ({cs(Math.floor(v.dilemmas.skim / 2))})</span>
-            <PreviewLines p={{ get: "Money in your own bank", cost: "Integrity -6", risk: "medium", why: "It leaves a paper trail", later: true }} /></button>
+            <PreviewLines p={{ get: "Money in your own bank", cost: "Integrity -6" }} /></button>
           <button className="camp-option" disabled={busy} onClick={() => onPick("skim", "lot")}><span className="title">Skim a lot ({cs(v.dilemmas.skim)})</span>
-            <PreviewLines p={{ get: "More money in your own bank", cost: "Integrity -12", risk: "high", why: "Big trails get found; you'd pay it back", later: true }} /></button>
+            <PreviewLines p={{ get: "More money in your own bank", cost: "Integrity -12" }} /></button>
           <button className="btn btn-ghost" disabled={busy} onClick={() => onPick("skim", "leave")}>Leave it alone</button>
         </div>
       )}
@@ -540,9 +539,9 @@ function Dilemmas({ v, busy, onPick }: { v: CampaignView; busy: boolean; onPick:
         <div className="card stack-8">
           <p className="title" style={{ margin: 0 }}>🥫 The food pantry needs a hand</p>
           <button className="camp-option" disabled={busy} onClick={() => onPick("charity", "public")}><span className="title">Donate C$3,000, publicly</span>
-            <PreviewLines p={{ get: "+2 where you're weakest, a news beat", cost: "C$3,000", risk: "low", why: "Could be called a stunt" }} /></button>
+            <PreviewLines p={{ get: "+2 where you're weakest, a news beat", cost: "C$3,000" }} /></button>
           <button className="camp-option" disabled={busy} onClick={() => onPick("charity", "anon")}><span className="title">Donate C$3,000, anonymously</span>
-            <PreviewLines p={{ get: "Integrity +5, a loyal ally", cost: "C$3,000", risk: "low", why: "Nobody will know. That's the point" }} /></button>
+            <PreviewLines p={{ get: "Integrity +5, a loyal ally", cost: "C$3,000" }} /></button>
           <button className="btn btn-ghost" disabled={busy} onClick={() => onPick("charity", "none")}>Not this time</button>
         </div>
       )}
@@ -656,11 +655,11 @@ function SituationCard({ v, busy, onChoose }: { v: CampaignView; busy: boolean; 
 
 const STYLES: DebateStyle[] = ["facts", "charm", "attack", "deflect", "own"];
 const STYLE_LABEL: Record<DebateStyle, { label: string; p: Preview }> = {
-  facts: { label: "📊 Facts", p: { get: "Strong if you prepped this topic", cost: "Nothing", risk: "medium", why: "Weak if unprepared" } },
-  charm: { label: "😊 Charm", p: { get: "Works when morale is high", cost: "Nothing", risk: "medium", why: "Can look evasive" } },
-  attack: { label: "🎯 Attack", p: { get: "Hits hard with intel on him", cost: "Uses one intel", risk: "high", why: "Backlash if it seems unfair" } },
-  deflect: { label: "↪️ Deflect", p: { get: "Gets you off a weak spot", cost: "A little trust", risk: "medium", why: "Obvious if overused" } },
-  own: { label: "🙋 Own it", p: { get: "Stops a scandal's bleeding", cost: "A short-term hit", risk: "low", why: "Only works on a real problem" } },
+  facts: { label: "📊 Facts", p: { get: "Strong if you prepped this topic", cost: "Nothing" } },
+  charm: { label: "😊 Charm", p: { get: "Works when morale is high", cost: "Nothing" } },
+  attack: { label: "🎯 Attack", p: { get: "Hits hard with intel on him", cost: "Uses one intel" } },
+  deflect: { label: "↪️ Deflect", p: { get: "Gets you off a weak spot", cost: "A little trust" } },
+  own: { label: "🙋 Own it", p: { get: "Stops a scandal's bleeding", cost: "A short-term hit" } },
 };
 
 function Debate({ v, busy, onClose, onStyle }: { v: CampaignView; busy: boolean; onClose: () => void; onStyle: (s: DebateStyle) => Promise<CampaignScreen | null> }) {

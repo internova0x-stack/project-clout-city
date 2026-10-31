@@ -2544,10 +2544,6 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-option.dark .camp-preview { color:rgba(255,255,255,.75); }
 .camp-preview { display:flex; flex-direction:column; gap:2px; font-size:13px; line-height:18px; color:var(--text-2); }
 .camp-preview b { color:inherit; font-weight:800; margin-right:4px; }
-.camp-risk.low b { color:var(--green-text); }
-.camp-risk.medium b { color:#9A6A00; }
-.camp-risk.high b { color:var(--red-500); }
-.camp-option.dark .camp-risk.high b { color:#FF8A80; }
 .camp-paper { background:#FFFDF6; box-shadow:inset 0 0 0 1px #EFE6CC; }
 .camp-lines { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; font-size:14px; line-height:20px; color:var(--text-2); }
 .camp-nudge { text-align:left; font-weight:700; color:var(--text-1); }

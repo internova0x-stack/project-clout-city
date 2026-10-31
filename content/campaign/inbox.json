@@ -15,9 +15,6 @@
           "label": "Promise to back it",
           "get": "+2 in Astoria, Inês's trust",
           "cost": "A promise you'll be held to",
-          "risk": "medium",
-          "why": "Developers hate it",
-          "later": true,
           "trust": 2,
           "effects": {
             "place": 2,
@@ -39,8 +36,6 @@
           "label": "Say you're \"studying it\"",
           "get": "No enemies today",
           "cost": "Inês's patience",
-          "risk": "low",
-          "why": "Tenants notice hedging",
           "trust": -1,
           "effects": {
             "rating": 0
@@ -52,8 +47,6 @@
           "label": "Say no, politely",
           "get": "Donors relax",
           "cost": "Inês's trust, -1 in Astoria",
-          "risk": "low",
-          "why": "It's honest, at least",
           "trust": -2,
           "effects": {
             "cash": 2000
@@ -77,8 +70,6 @@
           "meeting": "public",
           "get": "Shop windows for posters, a Favor",
           "cost": "One evening slot",
-          "risk": "low",
-          "why": "A public dinner",
           "trust": 1,
           "effects": {
             "favors": 1,
@@ -92,8 +83,6 @@
           "meeting": "public",
           "get": "Something, at least",
           "cost": "One slot, Stavros feels snubbed",
-          "risk": "low",
-          "why": "He wanted you",
           "effects": {
             "rating": 0.2
           },
@@ -104,8 +93,6 @@
           "label": "Decline",
           "get": "A free evening",
           "cost": "Stavros's warmth",
-          "risk": "low",
-          "why": "Diners remember",
           "trust": -1,
           "effects": {},
           "receipt": "Stavros said \"no problem\" in the voice that means problem."
@@ -127,9 +114,6 @@
           "dirty": true,
           "get": "C$20,000 now",
           "cost": "Integrity -8, a favor owed",
-          "risk": "high",
-          "why": "Cash leaves a trail",
-          "later": true,
           "trace": 0.5,
           "effects": {
             "cash": 20000,
@@ -144,8 +128,6 @@
           "label": "Decline",
           "get": "Clean hands",
           "cost": "The money",
-          "risk": "low",
-          "why": "Nothing to find",
           "effects": {
             "integrity": 2
           },
@@ -156,9 +138,6 @@
           "label": "Tell a reporter",
           "get": "A good story about you",
           "cost": "A powerful enemy",
-          "risk": "medium",
-          "why": "He'll know it was you",
-          "later": true,
           "effects": {
             "rating": 1,
             "integrity": 3,
@@ -183,8 +162,6 @@
           "meeting": "semi",
           "get": "Intel on the Mayor, a story",
           "cost": "One slot",
-          "risk": "medium",
-          "why": "Someone may see you together",
           "trust": 1,
           "effects": {
             "intel": 1,
@@ -197,9 +174,6 @@
           "label": "Trade it for a friendly profile",
           "get": "+1 citywide",
           "cost": "Integrity -3",
-          "risk": "medium",
-          "why": "Reporters talk",
-          "later": true,
           "trace": 0.2,
           "effects": {
             "rating": 1,
@@ -212,8 +186,6 @@
           "label": "Ignore it",
           "get": "Nothing to explain later",
           "cost": "A lead",
-          "risk": "low",
-          "why": "Quiet is safe",
           "effects": {},
           "receipt": "You let it go. Lin found another source."
         }
@@ -233,8 +205,6 @@
           "label": "Soften the housing talk",
           "get": "His checks keep coming",
           "cost": "-1 in Astoria and Jackson Heights",
-          "risk": "medium",
-          "why": "Tenants notice",
           "trust": 1,
           "effects": {
             "cash": 8000,
@@ -248,8 +218,6 @@
           "label": "Call his bluff",
           "get": "Tenants respect it",
           "cost": "Maybe his money",
-          "risk": "medium",
-          "why": "He might mean it",
           "trust": -1,
           "effects": {
             "rating": 1
@@ -269,8 +237,6 @@
           "label": "Offer him a seat on a \"housing panel\"",
           "get": "He stays, sort of",
           "cost": "C$1,500 for the panel",
-          "risk": "low",
-          "why": "Panels are harmless",
           "effects": {
             "cash": -1500
           },
@@ -293,9 +259,6 @@
           "dirty": true,
           "get": "+2 citywide, fast",
           "cost": "C$4,000, Integrity -6",
-          "risk": "high",
-          "why": "Bots get flagged",
-          "later": true,
           "trace": 0.45,
           "effects": {
             "cash": -4000,
@@ -320,8 +283,6 @@
           "label": "Delete the message",
           "get": "Clean hands",
           "cost": "Nothing",
-          "risk": "low",
-          "why": "Nothing to find",
           "effects": {},
           "receipt": "Deleted. The internet stays exactly as fake as it was."
         }
@@ -342,9 +303,6 @@
           "meeting": "shadow",
           "get": "The Mayor's debate notes",
           "cost": "One slot, Heat +6",
-          "risk": "high",
-          "why": "It could be a setup",
-          "later": true,
           "effects": {
             "intel": 2,
             "heat": 6,
@@ -366,8 +324,6 @@
           "meeting": "shadow",
           "get": "Some of the notes",
           "cost": "One slot, C$1,000",
-          "risk": "medium",
-          "why": "Safer, less reliable",
           "effects": {
             "intel": 1,
             "cash": -1000,
@@ -380,8 +336,6 @@
           "label": "Report it",
           "get": "Integrity +3",
           "cost": "The intel",
-          "risk": "low",
-          "why": "It's the right thing",
           "effects": {
             "integrity": 3
           },
@@ -404,8 +358,6 @@
           "meeting": "public",
           "get": "Debate prep on transit, credibility",
           "cost": "One slot",
-          "risk": "low",
-          "why": "Students ask hard questions",
           "trust": 1,
           "effects": {
             "integrity": 2,
@@ -419,8 +371,6 @@
           "label": "Decline",
           "get": "A free slot",
           "cost": "The dean's goodwill",
-          "risk": "low",
-          "why": "Academics remember",
           "trust": -1,
           "effects": {},
           "receipt": "The dean said he understood. He wrote it down."
@@ -441,8 +391,6 @@
           "label": "Back 4am last call",
           "get": "+2 in Astoria, the club crowd",
           "cost": "-1 in Jamaica and Flushing",
-          "risk": "medium",
-          "why": "Families like sleep",
           "trust": 2,
           "effects": {
             "rating": 0.5,
@@ -456,8 +404,6 @@
           "label": "\"Let's talk after the election\"",
           "get": "Nobody upset yet",
           "cost": "Dez's patience",
-          "risk": "low",
-          "why": "Promoters hate maybe",
           "trust": -1,
           "effects": {},
           "receipt": "Dez left you on read."
@@ -467,8 +413,6 @@
           "label": "Say no",
           "get": "Families nod",
           "cost": "Astoria's nightlife",
-          "risk": "low",
-          "why": "Clubs vote too",
           "trust": -2,
           "effects": {
             "rating": 0.3
@@ -491,8 +435,6 @@
           "label": "Sign it",
           "get": "Street teams from Local 117",
           "cost": "Donors grumble, C$2,000 pledge lost",
-          "risk": "medium",
-          "why": "Business groups hate it",
           "trust": 2,
           "effects": {
             "rating": 1.5,
@@ -505,8 +447,6 @@
           "label": "Sign a softer version",
           "get": "Some doors knocked",
           "cost": "Deb's respect",
-          "risk": "low",
-          "why": "Unions know a hedge",
           "trust": -1,
           "effects": {
             "rating": 0.5
@@ -518,8 +458,6 @@
           "label": "Decline",
           "get": "Donors relax",
           "cost": "Local 117",
-          "risk": "medium",
-          "why": "They'll knock for the Mayor",
           "trust": -2,
           "effects": {
             "mayor": 1
@@ -543,8 +481,6 @@
           "meeting": "public",
           "get": "+2 in Jamaica, turnout",
           "cost": "One slot",
-          "risk": "low",
-          "why": "Keep it short",
           "trust": 1,
           "effects": {
             "rating": 0.3,
@@ -558,8 +494,6 @@
           "label": "Decline",
           "get": "A free slot",
           "cost": "Jamaica's warmth",
-          "risk": "low",
-          "why": "The Mayor will go",
           "trust": -1,
           "effects": {
             "mayor": 0.5
@@ -583,9 +517,6 @@
           "dirty": true,
           "get": "The Mayor's top donor flips",
           "cost": "Integrity -6, a promise",
-          "risk": "high",
-          "why": "A deal for a donor",
-          "later": true,
           "trace": 0.4,
           "effects": {
             "rating": 1.5,
@@ -600,8 +531,6 @@
           "label": "Tell him the truth: fewer ribbons",
           "get": "Integrity +2",
           "cost": "Barry stays put",
-          "risk": "low",
-          "why": "Honest and boring",
           "effects": {
             "integrity": 2
           },

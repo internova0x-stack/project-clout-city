@@ -19,10 +19,10 @@
     { "id": "q_starr", "topic": "starr", "by": "mayor", "text": "Papa-Dani: \"Kaylee, honey, City Hall isn't a content zone. What's your budget plan?\"" }
   ],
   "styles": {
-    "facts": { "label": "Facts", "good": "Numbers, sources, a plan. The crowd nods.", "bad": "Facts, unprepared. A number came out wrong.", "preview": { "get": "Strong if you prepped this topic", "cost": "Nothing", "risk": "medium", "why": "Weak if unprepared" } },
-    "charm": { "label": "Charm", "good": "A joke, a smile, a story. The room warms up.", "bad": "Charming, and somehow evasive.", "preview": { "get": "Works when morale is high", "cost": "Nothing", "risk": "medium", "why": "Can look evasive" } },
-    "attack": { "label": "Attack", "good": "Straight at the Mayor's record. It lands.", "bad": "An attack with nothing behind it. Booing.", "preview": { "get": "Hits hard with intel on him", "cost": "Uses one intel", "risk": "high", "why": "Backlash if it seems unfair" } },
-    "deflect": { "label": "Deflect", "good": "Pivoted gracefully. Nobody noticed.", "bad": "Everybody noticed the dodge.", "preview": { "get": "Gets you off a weak spot", "cost": "A little trust", "risk": "medium", "why": "Obvious if overused" } },
-    "own": { "label": "Own it", "good": "\"I got that wrong.\" The room respects it.", "bad": "Owning something nobody asked about. Odd.", "preview": { "get": "Stops a scandal's bleeding", "cost": "A short-term hit", "risk": "low", "why": "Only works on a real problem" } }
+    "facts": { "label": "Facts", "good": "Numbers, sources, a plan. The crowd nods.", "bad": "Facts, unprepared. A number came out wrong.", "preview": { "get": "Strong if you prepped this topic", "cost": "Nothing" } },
+    "charm": { "label": "Charm", "good": "A joke, a smile, a story. The room warms up.", "bad": "Charming, and somehow evasive.", "preview": { "get": "Works when morale is high", "cost": "Nothing" } },
+    "attack": { "label": "Attack", "good": "Straight at the Mayor's record. It lands.", "bad": "An attack with nothing behind it. Booing.", "preview": { "get": "Hits hard with intel on him", "cost": "Uses one intel" } },
+    "deflect": { "label": "Deflect", "good": "Pivoted gracefully. Nobody noticed.", "bad": "Everybody noticed the dodge.", "preview": { "get": "Gets you off a weak spot", "cost": "A little trust" } },
+    "own": { "label": "Own it", "good": "\"I got that wrong.\" The room respects it.", "bad": "Owning something nobody asked about. Odd.", "preview": { "get": "Stops a scandal's bleeding", "cost": "A short-term hit" } }
   }
 }

@@ -41,7 +41,7 @@ test("the content holds together", () => {
   }
   for (const t of ["exposure", "poach", "lawsuit"]) assert.ok(content.situations.some((s) => s.trigger === t), t);
   assert.ok(content.stakeholders.filter((s) => s.mayorAlly).length >= 2, "Poach Ally needs targets");
-  const previews: { id: string; get: string; cost: string; risk: string; why: string }[] = [];
+  const previews: { id: string; get: string; cost: string }[] = [];
   for (const s of content.situations) {
     assert.ok(s.choices.length >= 2 && s.choices.length <= 4, s.id);
     assert.ok(s.weeks[0] >= 1 && s.weeks[1] <= CAMPAIGN.weeks, s.id);
@@ -59,10 +59,10 @@ test("the content holds together", () => {
       previews.push({ ...o, id: `${m.id}.${o.id}` });
     }
   }
-  // Every option explains itself (spec section 6.2): You get, It costs, Risk with a reason.
+  // Every option says what you get and what it costs; no risk labels (owner, Oct 31, as on every card).
   for (const p of previews) {
-    assert.ok(p.get && p.cost && p.why, p.id);
-    assert.ok(["low", "medium", "high"].includes(p.risk), p.id);
+    assert.ok(p.get && p.cost, p.id);
+    assert.ok(!("risk" in p) && !("why" in p) && !("later" in p), `${p.id}: no risk, why or later`);
   }
 });
 
