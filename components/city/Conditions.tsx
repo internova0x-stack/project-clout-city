@@ -9,16 +9,17 @@ import { conditionWhen, type ConditionNow } from "@/lib/cityConditions";
 export function ConditionsCard({ items }: { items: ConditionNow[] }) {
   if (!items.length) return null;
   const sorted = [...items].sort((a, b) => Number(b.now) - Number(a.now) || a.startsAt.localeCompare(b.startsAt));
+  // One card each, like the rest of News → City, so every condition has room to breathe.
   return (
-    <div className="card stack-8">
-      <span className="overline" style={{ display: "block" }}>🌆 Around the city</span>
+    <>
       {sorted.map((c) => (
-        <div key={c.id} className="stack-4">
-          <span className="body-strong" style={{ display: "block" }}>{c.emoji} {c.title}{c.now ? "" : " · coming up"}</span>
-          <span className="body" style={{ display: "block", margin: 0 }}>{c.blurb}</span>
+        <div key={c.id} className="card" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <span className="overline" style={{ display: "block" }}>🌆 {c.now ? "Around the city" : "Coming up"}</span>
+          <span className="title" style={{ display: "block" }}>{c.emoji} {c.title}</span>
+          <p className="body" style={{ margin: 0, lineHeight: 1.5 }}>{c.blurb}</p>
           <span className="meta" style={{ display: "block" }}>{conditionWhen(c)}{c.source === "reaction" ? " · because of what players did" : ""}</span>
         </div>
       ))}
-    </div>
+    </>
   );
 }
