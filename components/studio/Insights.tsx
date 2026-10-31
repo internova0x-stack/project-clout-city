@@ -193,7 +193,7 @@ export function InsightsTab({ load }: { load: (days: number) => Promise<Admin<In
   );
 }
 
-const TRACK_LABEL: Record<string, string> = { hospitality: "🍽️ Hospitality", tech: "💻 Tech", media: "🎬 Media", cityhall: "🏛️ City Hall" };
+const TRACK_LABEL: Record<string, string> = { hospitality: "🍽️ Hospitality", tech: "💻 Tech", media: "🎬 Media", cityhall: "🏛️ City Hall", streaming: "🎮 Streaming", fashion: "👗 Fashion" };
 
 /** Careers (migration 0143): jobs taken, kept two weeks, promoted, working now, and aspirations picked. */
 function CareerCard({ c }: { c: NonNullable<Insights["careers"]> }) {

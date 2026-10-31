@@ -1290,4 +1290,22 @@ migration 0144). The Public Servant's career, so that aspiration now starts it a
 - The City Hall Annex on the map (a columned building on 31st St by Campaign HQ); Osvaldo, the lobby guard, is its regular.
 - Preview: `?career=cityhall`.
 
-**Later:** more tracks (Finance, Fashion, Law, Real Estate, Streaming), and the Climb's office cards for players with a job.
+**Streaming and Fashion** (owner, Oct 31: "next"; migration 0146). The Streamer's and the Budding Influencer's own careers (their
+aspirations start them a level higher; Media stays open to both).
+
+| Track | Employer (place) | Ladder (weekly pay) | Key skills | Manager | Perks |
+| --- | --- | --- | --- | --- | --- |
+| 🎮 Streaming | Glow Up Collective (The Glow Up House, an Astoria content house) | Chat Moderator 400 · Variety Streamer 650 · Partnered Streamer 1,000 · Top Creator 1,600 · Streaming Legend 2,600 | Aura, Hustle | Brayden Kross, supportive ("every stream is a win, bro") | Chat donations (C$25 × level a workday, on payday); raid nights from level 3 (6 × level clout, ×1.5 for Streamers) |
+| 👗 Fashion | Atelier Vernon (a Long Island City fashion house) | Sample Runner 450 · Assistant Stylist 750 · Stylist 1,100 · Head Designer 1,800 · Creative Director 2,900 | Photography, Aura | Valentina Moreau, micromanager ("re-pins every hem, every day") | Sample sale (+3 Mood a workday); front row from level 3 (7 × level clout) |
+
+People: Lulu and Dante, Bean the new hire, big boss Tyce Monroe (owns the house and 9 million followers), successor Gwen Okoro;
+Remy and Saskia, Pip the new hire, big boss Madame Odile Vernon, successor Bastian Kole. Seven tasks each (dead chat, a battery-
+flavored sponsor, Dante's "collab", the leftovers incident, a 24-hour charity stream, a diss video, burnout; a 2 mm hem, "a beige
+that says yes but means no", a model drops out, a gifting request, a copycat coat, the fashion-week photo, your one look). The
+Glow Up House has Marisela, the house manager, as its regular. It is a content house that serves as an office (owner, Oct 31),
+three floors joined by stairs: the Living room (couch, arcade, the house screen, a collab desk), the Stream floor (eight
+streaming booths, ring lights, the producer's desk under the week's stream schedule, servers) and the Brand deals floor (a
+glass meeting room for sponsors). Campaign background: Streaming +1 point (chat registered),
+Fashion staff morale +5.
+
+**Later:** more tracks (Finance, Law, Real Estate), and the Climb's office cards for players with a job.

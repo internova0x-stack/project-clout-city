@@ -294,7 +294,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby" | "streamHouse" | "atelier";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -817,6 +817,27 @@ export const PLACES: Place[] = [
     lore: "Mayor Papa-Dani's Queens office: marble lobby, a metal detector that beeps at everyone and a ribbon closet the size of a studio apartment. Rent-stabilized, obviously.",
     actions: [
       { id: "hearing", kind: "visit", label: "Sit in on a public hearing", task: "Testify about a pothole with feeling", energy: 6, mood: 2, blurb: "Three hours on bike lanes. One man brought a poster. You learn a lot about the man." },
+    ],
+  },
+  // Streaming and Fashion (owner, Oct 31): the Streamer's and the Budding Influencer's workplaces.
+  {
+    id: "glow-up-house", name: "The Glow Up House", emoji: "🎮", category: "places", neighborhood: "Astoria",
+    at: [40.7612, -73.9238], depth: "scene", template: "streamHouse", palette: ["#B14BFF", "#3DF2FF", "#1C1830"],
+    tags: ["content_house", "streaming", "astoria"],
+    lore: "Six creators, one rent-controlled brownstone, eleven ring lights and a group chat called \"HOUSE MEETING (MANDATORY)\". Someone is always live. Someone is always crying on camera. Same someone, usually.",
+    actions: [
+      { id: "collab", kind: "visit", label: "Jump on a collab stream", task: "Say hi to chat on someone else's stream", energy: 10, mood: 4, clout: 12, blurb: "Four minutes on screen. Chat calls you \"the new one.\" You'll take it." },
+      { id: "couch", kind: "visit", label: "Crash on the thumbnail couch", energy: -10, mood: 3, blurb: "This couch has been in eleven thumbnails. It has seen things." },
+    ],
+  },
+  {
+    id: "atelier-vernon", name: "Atelier Vernon", emoji: "👗", category: "places", neighborhood: "Long Island City",
+    at: [40.7449, -73.9497], depth: "scene", template: "atelier", palette: ["#C9A27A", "#F2EDE6", "#1F1B26"],
+    tags: ["fashion_house", "fashion", "lic"],
+    lore: "A fashion house in a converted LIC warehouse, run by Madame Vernon and her very strong opinions about beige. The runway is a strip of black carpet. The ambition is not.",
+    actions: [
+      { id: "fitting", kind: "visit", label: "Walk the runway at a fitting", task: "Walk the strip of black carpet like it's Paris", energy: 8, confidence: 6, clout: 10, blurb: "Madame Vernon watches, says \"again,\" and leaves. That's a compliment." },
+      { id: "sample", kind: "visit", label: "Dig through the sample rack", energy: 4, mood: 4, blurb: "A coat with one sleeve. A dress that's mostly a concept. You love it." },
     ],
   },
   {

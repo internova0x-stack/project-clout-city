@@ -32,14 +32,14 @@ export const ASPIRATIONS: Aspiration[] = [
   {
     id: "influencer", emoji: "🤳", name: "Budding Influencer",
     tagline: "312 followers and a ring light. The algorithm just hasn't met you yet.",
-    tracks: ["media"], later: ["Fashion"],
-    perks: ["Media jobs start one level higher"],
+    tracks: ["fashion", "media"], later: [],
+    perks: ["Fashion and Media jobs start one level higher"],
   },
   {
     id: "streamer", emoji: "🎮", name: "Streamer",
     tagline: "Chat is your family. Chat is also why you haven't slept.",
-    tracks: ["media"], later: ["Streaming"],
-    perks: ["Media jobs start one level higher", "Screen time pays half again in clout"],
+    tracks: ["streaming", "media"], later: [],
+    perks: ["Streaming and Media jobs start one level higher", "Screen time and raid nights pay half again in clout"],
   },
   {
     id: "celebrity", emoji: "🌟", name: "Future Celebrity",

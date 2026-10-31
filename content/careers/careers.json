@@ -1927,6 +1927,870 @@
      ]
     }
    ]
+  },
+  {
+   "id": "stream-dead-chat",
+   "track": "streaming",
+   "minLevel": 1,
+   "emoji": "🦗",
+   "title": "Your stream has 3 viewers. One is Marisela, checking the Wi-Fi. Chat is silent.",
+   "options": [
+    {
+     "id": "hype",
+     "label": "Talk to chat like it's 3,000",
+     "get": "Energy that's contagious",
+     "cost": "Your voice by hour two",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You narrate everything. Viewer four arrives. Then nine. 'Who is this guy,' types viewer nine. Engagement!",
+       "perf": 5,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "Two hours of enthusiasm to an empty room. Marisela says 'good job, mijo' and logs off.",
+       "perf": -1,
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "raid",
+     "label": "Raid Lulu's stream",
+     "get": "Her chat, and her goodwill",
+     "cost": "Your three viewers",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You send your three. Lulu shouts you out to 400 people. Friendship is the algorithm.",
+       "perf": 4,
+       "trust": {
+        "friend": 8
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "bait",
+     "label": "Title it 'I QUIT (not clickbait)'",
+     "get": "Clicks",
+     "cost": "Trust, if they notice",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Viewers flood in. You haven't quit. Comments are unkind. The numbers are great.",
+       "perf": 6,
+       "trust": {
+        "manager": 2
+       },
+       "mood": -2
+      },
+      {
+       "weight": 1,
+       "text": "A clip of 'I quit (not clickbait)' trends for the wrong reasons. Brayden: 'Interesting choice, bro.'",
+       "perf": -4,
+       "trust": {
+        "manager": -4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stream-sponsor",
+   "track": "streaming",
+   "minLevel": 1,
+   "emoji": "🥤",
+   "title": "A sponsor wants you to drink their energy drink, 'Volt Juice', on stream. It tastes like a battery.",
+   "options": [
+    {
+     "id": "drink",
+     "label": "Chug it on camera",
+     "get": "C$ and Brayden's approval",
+     "cost": "Your taste buds, your dignity",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You chug. You gag. Chat spams 'W'. The sponsor renews. Somehow.",
+       "perf": 5,
+       "trust": {
+        "manager": 5
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "honest",
+     "label": "Read the ad, honestly",
+     "get": "Chat's trust, mostly",
+     "cost": "The sponsor's patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'It tastes like a nine-volt, but it's cold.' Sales go up. People trust you.",
+       "perf": 4,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "pass",
+     "label": "Pass it to Dante",
+     "get": "Your dignity",
+     "cost": "Dante's sponsor money",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Dante drinks four. He's still awake. It's been two days.",
+       "perf": 1,
+       "trust": {
+        "rival": -6
+       },
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stream-collab",
+   "track": "streaming",
+   "minLevel": 1,
+   "emoji": "🤝",
+   "title": "Dante invites you on his stream. He's never invited anyone. It's probably a prank.",
+   "options": [
+    {
+     "id": "go",
+     "label": "Go on, guard up",
+     "get": "His audience",
+     "cost": "Possibly a bucket of slime",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "No prank. He just needed a second player. You win. He's annoyed. Chat loves it.",
+       "perf": 6,
+       "trust": {
+        "rival": 6
+       },
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "Bucket of slime. 2 million views. You're the slime guy now.",
+       "perf": 3,
+       "trust": {
+        "rival": -2
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "counter",
+     "label": "Invite him on yours instead",
+     "get": "Home advantage",
+     "cost": "His ego",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He comes, sulks, and still gets 20 new followers off you. Rivals, but make it content.",
+       "perf": 3,
+       "trust": {
+        "rival": 3
+       }
+      }
+     ]
+    },
+    {
+     "id": "ignore",
+     "label": "Leave him on read",
+     "get": "Peace",
+     "cost": "A rival with a grudge",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He streams about being 'left on read by a nobody.' Your follower count goes up. Huh.",
+       "perf": 2,
+       "trust": {
+        "rival": -8
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stream-house-meeting",
+   "track": "streaming",
+   "minLevel": 2,
+   "emoji": "🏠",
+   "title": "HOUSE MEETING (MANDATORY): someone ate Lulu's labeled leftovers. On stream. It was you, actually.",
+   "options": [
+    {
+     "id": "confess",
+     "label": "Confess on camera",
+     "get": "The house's respect",
+     "cost": "A very public apology",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You confess. Lulu laughs. The apology video does better than your real content.",
+       "perf": 5,
+       "trust": {
+        "friend": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "blame",
+     "label": "Blame Dante",
+     "get": "Plausible deniability",
+     "cost": "Dante, forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Dante has the hallway cam. He posts it. The house votes you onto dish duty.",
+       "perf": -4,
+       "trust": {
+        "rival": -10,
+        "friend": -6
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "replace",
+     "label": "Quietly order her a better dinner",
+     "get": "Lulu's gratitude",
+     "cost": "C$ and the truth",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Lulu gets a feast and a mystery. She suspects. She likes you more.",
+       "perf": 3,
+       "trust": {
+        "friend": 8
+       },
+       "mood": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stream-24h",
+   "track": "streaming",
+   "minLevel": 3,
+   "emoji": "⏰",
+   "title": "Tyce wants a 24-hour charity stream from you this weekend. For 'the brand.'",
+   "options": [
+    {
+     "id": "all",
+     "label": "Do all 24 hours",
+     "get": "Records, raised money, Tyce's eye",
+     "cost": "Sleep, sanity",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Hour 19 you cry over a cereal ad. Raised C$40,000 for charity. Tyce reposts it.",
+       "perf": 8,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "split",
+     "label": "Split it with Lulu",
+     "get": "Half the hours, double the fun",
+     "cost": "Half the credit",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Two streamers, one couch, 24 hours. The duo clips go viral.",
+       "perf": 6,
+       "trust": {
+        "friend": 8
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "decline",
+     "label": "Decline: 'my health first'",
+     "get": "Sleep",
+     "cost": "Tyce's attention",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Tyce: 'respect.' He gives the slot to Dante, who will not shut up about it.",
+       "perf": 1,
+       "trust": {
+        "rival": -4
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stream-drama",
+   "track": "streaming",
+   "minLevel": 3,
+   "emoji": "🍿",
+   "title": "A rival house dropped a diss video about the Glow Up House. Brayden wants a response by tonight.",
+   "options": [
+    {
+     "id": "response",
+     "label": "Make a response video",
+     "get": "Views, house loyalty",
+     "cost": "A feud with no end",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your response gets 3x their views. They respond to your response. It's a whole economy now.",
+       "perf": 7,
+       "trust": {
+        "manager": 5
+       }
+      }
+     ]
+    },
+    {
+     "id": "high",
+     "label": "Take the high road",
+     "get": "Your reputation",
+     "cost": "The algorithm's love",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'We don't do drama here.' Chat calls you mature. Views: modest.",
+       "perf": 3,
+       "trust": {
+        "manager": -2
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "collab",
+     "label": "Invite them to collab",
+     "get": "A truce, a crossover",
+     "cost": "The house's pride",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The crossover breaks the internet, a little. Brayden calls it 'diplomacy, bro.'",
+       "perf": 6,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stream-burnout",
+   "track": "streaming",
+   "minLevel": 4,
+   "emoji": "🕯️",
+   "title": "You've streamed 40 days straight. Your follower count is up. Your will to live is buffering.",
+   "options": [
+    {
+     "id": "break",
+     "label": "Announce a week off",
+     "get": "Your health",
+     "cost": "The algorithm's memory",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You come back rested. Chat missed you. Some of them, anyway.",
+       "perf": 2,
+       "mood": 5
+      }
+     ]
+    },
+    {
+     "id": "push",
+     "label": "Keep going",
+     "get": "Numbers",
+     "cost": "Everything else",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Day 41. You fall asleep live. 'Sleep stream' trends. You hate that it worked.",
+       "perf": 6,
+       "mood": -5
+      }
+     ]
+    },
+    {
+     "id": "hire",
+     "label": "Hire an editor to post clips",
+     "get": "Content without you",
+     "cost": "A slice of the pay",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your clips post daily. You touch grass. Brayden: 'growth mindset, bro.'",
+       "perf": 4,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-hem",
+   "track": "fashion",
+   "minLevel": 1,
+   "emoji": "🪡",
+   "title": "Valentina says the hem is 2 millimeters off. The show is in an hour.",
+   "options": [
+    {
+     "id": "fix",
+     "label": "Re-pin it by hand",
+     "get": "A perfect hem",
+     "cost": "Your fingertips",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You fix it. She checks with a ruler. A nod. You've never felt so seen.",
+       "perf": 6,
+       "trust": {
+        "manager": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "argue",
+     "label": "Say it's perfect as is",
+     "get": "Your pride",
+     "cost": "Valentina's patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "She measures. It was 2 mm off. She says nothing for an hour. Worse than yelling.",
+       "perf": -4,
+       "trust": {
+        "manager": -6
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "remy",
+     "label": "Ask Remy for help",
+     "get": "Two hands",
+     "cost": "Remy's lunch",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Remy does it in four minutes. 'You owe me a croissant.' Done.",
+       "perf": 4,
+       "trust": {
+        "friend": 8
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-beige",
+   "track": "fashion",
+   "minLevel": 1,
+   "emoji": "🎨",
+   "title": "Madame Vernon wants 'a beige that says yes but means no.' Fabric samples are due at noon.",
+   "options": [
+    {
+     "id": "ten",
+     "label": "Bring ten beiges",
+     "get": "Options",
+     "cost": "Your eyesight",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "She picks the fourth. Then the first. Then 'none of these, but closer.' Progress!",
+       "perf": 4,
+       "trust": {
+        "manager": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "bold",
+     "label": "Bring one bright orange, as a joke",
+     "get": "A laugh",
+     "cost": "Your career, possibly",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Silence. Then: 'Brave.' The orange closes the show. You're terrified.",
+       "perf": 6,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 3
+      },
+      {
+       "weight": 1,
+       "text": "She hands the orange back without a word. Valentina mouths 'why'.",
+       "perf": -5,
+       "trust": {
+        "manager": -6
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "ask",
+     "label": "Ask what 'no' feels like",
+     "get": "Clarity",
+     "cost": "Seeming junior",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'No feels like oatmeal at dusk.' You understand completely. Somehow.",
+       "perf": 3,
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-model",
+   "track": "fashion",
+   "minLevel": 1,
+   "emoji": "🚶",
+   "title": "A model dropped out. Valentina looks at you: 'You walk.'",
+   "options": [
+    {
+     "id": "walk",
+     "label": "Walk it",
+     "get": "A moment",
+     "cost": "Your nerves",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You walk like Astoria is Paris. Someone films it. 80,000 views by morning.",
+       "perf": 7,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 4
+      },
+      {
+       "weight": 1,
+       "text": "You trip at the turn. You own it with a spin. Saskia is livid it worked.",
+       "perf": 3,
+       "trust": {
+        "rival": -4
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "saskia",
+     "label": "Suggest Saskia",
+     "get": "Saskia's gratitude",
+     "cost": "The spotlight",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Saskia walks, nails it, and thanks you. Once. Quietly. It counts.",
+       "perf": 2,
+       "trust": {
+        "rival": 10
+       }
+      }
+     ]
+    },
+    {
+     "id": "refuse",
+     "label": "Say you're 'behind the scenes'",
+     "get": "Safety",
+     "cost": "Valentina's respect",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Valentina walks it herself, in heels, furious. She's incredible.",
+       "perf": -2,
+       "trust": {
+        "manager": -4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-influencer-gift",
+   "track": "fashion",
+   "minLevel": 2,
+   "emoji": "🎁",
+   "title": "An influencer with 2 million followers wants free clothes 'for exposure.' Madame Vernon hates exposure.",
+   "options": [
+    {
+     "id": "gift",
+     "label": "Send one piece",
+     "get": "Reach",
+     "cost": "Madame's wrath, if she finds out",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The influencer posts it. Orders triple. Madame says 'exposure is vulgar' and orders a second run.",
+       "perf": 6,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "invoice",
+     "label": "Send an invoice",
+     "get": "Respect for the work",
+     "cost": "The influencer's ego",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "They pay. Grudgingly. Then brag about it. Everyone wins, quietly.",
+       "perf": 4,
+       "trust": {
+        "manager": 5
+       }
+      }
+     ]
+    },
+    {
+     "id": "refuse",
+     "label": "Politely decline",
+     "get": "Madame's approval",
+     "cost": "Two million eyes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Madame Vernon: 'Good.' One word. You'll frame it.",
+       "perf": 3,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-copycat",
+   "track": "fashion",
+   "minLevel": 3,
+   "emoji": "🕵️",
+   "title": "A fast-fashion site copied last season's coat. Theirs is C$40. Ours is C$4,000.",
+   "options": [
+    {
+     "id": "post",
+     "label": "Post a side-by-side",
+     "get": "The internet on your side",
+     "cost": "A legal letter, maybe",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The post goes viral. They pull the coat. Madame Vernon smiles, nearly.",
+       "perf": 7,
+       "trust": {
+        "manager": 5
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "lawyer",
+     "label": "Call the lawyer",
+     "get": "The right way",
+     "cost": "Months",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The lawyer sends a letter. They change one button. Fashion law is a joke.",
+       "perf": 2,
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "flattered",
+     "label": "Call it flattery and move on",
+     "get": "Calm",
+     "cost": "The house's pride",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Madame: 'We do not flatter. We are flattered.' Somehow you're in trouble.",
+       "perf": -2,
+       "trust": {
+        "manager": -4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-week",
+   "track": "fashion",
+   "minLevel": 3,
+   "emoji": "📸",
+   "title": "Fashion week: the photographer wants a shot of 'the team.' Saskia is already in front.",
+   "options": [
+    {
+     "id": "front",
+     "label": "Step in front of Saskia",
+     "get": "The cover shot",
+     "cost": "Saskia, forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your face, the house's coat, the cover. Saskia unfollows you in real time.",
+       "perf": 6,
+       "trust": {
+        "rival": -10
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "together",
+     "label": "Pull everyone in together",
+     "get": "A team photo",
+     "cost": "Being one of many",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The whole team, laughing. Madame Vernon is in it, almost smiling. It's the photo of the year.",
+       "perf": 5,
+       "trust": {
+        "friend": 6,
+        "rival": 4
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "behind",
+     "label": "Take the photo yourself",
+     "get": "The best shot",
+     "cost": "Being in it",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your shot is better than the photographer's. They credit you. Madame notices.",
+       "perf": 5,
+       "trust": {
+        "manager": 4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fashion-collection",
+   "track": "fashion",
+   "minLevel": 4,
+   "emoji": "🧥",
+   "title": "Madame Vernon lets you design one look for the next collection. One. Don't waste it.",
+   "options": [
+    {
+     "id": "safe",
+     "label": "Do the house style, perfectly",
+     "get": "Madame's trust",
+     "cost": "Nobody remembers it",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Beige, perfect, forgettable. Madame: 'Correct.' The reviews don't mention it.",
+       "perf": 4,
+       "trust": {
+        "manager": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "wild",
+     "label": "Do something only you would do",
+     "get": "A signature",
+     "cost": "A public flop, maybe",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Reviewers call it 'the only interesting thing in the show.' Madame says nothing. That's a yes.",
+       "perf": 8,
+       "mood": 4
+      },
+      {
+       "weight": 1,
+       "text": "It's too much. A critic calls it 'a cry for help in taffeta.' Valentina hides you in the stockroom.",
+       "perf": -5,
+       "trust": {
+        "manager": -4
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "queens",
+     "label": "Make it about Queens",
+     "get": "A story",
+     "cost": "Madame's skepticism",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "A coat lined with subway-blue silk. The internet loses it. So does Madame, in a good way.",
+       "perf": 7,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
   }
  ],
  "lines": {
@@ -2044,6 +2908,64 @@
     "My uncle golfs with the Deputy Mayor. Just saying.",
     "I've been 'shadowing leadership.' You've been answering phones.",
     "Cute memo. I had mine bound."
+   ]
+  },
+  "streaming": {
+   "manager": {
+    "high": [
+     "You're a natural, bro. Natural natural.",
+     "Numbers are up. Vibes are up. Everything's up, bro.",
+     "Tyce mentioned you. In a good way. I think."
+    ],
+    "mid": [
+     "Solid stream, bro. Solid. Like, okay.",
+     "Let's brainstorm thumbnails tomorrow. Big faces. Bigger.",
+     "Engagement's flat. Have you tried yelling?"
+    ],
+    "low": [
+     "Bro. We need to talk about the vibes.",
+     "Your chat was three people and a bot. The bot left.",
+     "Maybe try being more... content?"
+    ]
+   },
+   "friend": [
+    "Raid me later? My chat loves you.",
+    "Marisela made tamales. I saved you two. Don't tell Dante.",
+    "Dead chat is just a quiet friend group."
+   ],
+   "rival": [
+    "Cute stream. My mod watched it. For research.",
+    "Chat asked who you were. I said 'the help'.",
+    "I hit 10K today. What did you hit? The snooze button?"
+   ]
+  },
+  "fashion": {
+   "manager": {
+    "high": [
+     "The hem was right. I measured twice. Don't tell anyone I'm pleased.",
+     "Madame asked who pinned that. I said you. She nodded. Once.",
+     "Good. Again tomorrow. Better."
+    ],
+    "mid": [
+     "Acceptable. Which is not a compliment.",
+     "Re-pin it. I know it's fine. Re-pin it.",
+     "Beige is a feeling. Today you felt it. Mostly."
+    ],
+    "low": [
+     "That is not beige. That is oatmeal with ambition.",
+     "Did you measure? Did you measure with your eyes closed?",
+     "Go home. Come back with taste."
+    ]
+   },
+   "friend": [
+    "I saved you a croissant from the fitting. It's slightly stepped on.",
+    "Valentina yelled at the steamer today. You're fine.",
+    "Saskia's 'vintage' bag is from the corner deli. I checked."
+   ],
+   "rival": [
+    "Cute pins. Did you use a stapler?",
+    "Madame looked at me today. For three seconds. You?",
+    "I'd say nice work, but I don't lie at work."
    ]
   }
  }

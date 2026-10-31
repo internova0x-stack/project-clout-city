@@ -43,10 +43,10 @@ export const SPOTS: Record<string, readonly [number, number]> = {
   "still-a-dollar-slice": [7, 7], "astoria-blvd-station": [8, 7], "city-hall-annex": [11, 7], "campaign-hq": [12, 7], "neon-spoon": [6, 8],
   "white-sauce-cart": [8, 8], "boiled-and-beloved": [9, 8], "steinway-fresh": [10, 8], "triborough-works": [12, 8],
   "precinct-114-half": [8, 9], "real-clout-fm": [9, 9], "low-light-lounge": [6, 9], "st-copays": [11, 9],
-  "engine-7": [7, 10], "rockaway-diner": [9, 10], "clout-tower": [10, 10],
+  "engine-7": [7, 10], "rockaway-diner": [9, 10], "clout-tower": [10, 10], "glow-up-house": [10, 9],
   // Long Island City waterfront
   "gantry-plaza": [6, 11], "velvet-static": [8, 11], "hunters-pier": [6, 12], "skyline-pier": [7, 12],
-  "court-square-courthouse": [9, 12],
+  "court-square-courthouse": [9, 12], "atelier-vernon": [10, 12],
   // Flushing Meadows and downtown Flushing
   "flushing-meadows": [13, 4], "unisphere": [14, 4], "meteor-park": [16, 3],
   "downstairs-on-main": [14, 7], "lucky-star": [15, 8], "queensborough-u": [16, 7],
@@ -101,7 +101,7 @@ export const BORROWED_KIND: Record<string, LandmarkKind | "cart" | "store"> = {
   "ditmars-heights-rooftop": "rooftop", "downstairs-on-main": "store", "ditmars-walkup": "brownstone",
   "queens-housing-court": "college", "court-square-courthouse": "precinct", "still-a-dollar-slice": "store",
   "white-sauce-cart": "cart", "boiled-and-beloved": "cart", "feta-compli": "store", "schlep-and-schmear": "store",
-  "campaign-hq": "store", "city-hall-annex": "college",
+  "campaign-hq": "store", "city-hall-annex": "college", "glow-up-house": "brownstone", "atelier-vernon": "gallery",
 };
 
 /** The storefronts: a corner store with the place's own sign and colors, and its rooftop joke. */
