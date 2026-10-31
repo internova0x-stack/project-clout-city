@@ -12,6 +12,11 @@ can Pause it or Hold it with a note.
 > `content/hunts/<Saturday>.json`. News and gossip keep their Monday weeks and a 24-hour window. A hunt is announced in
 > that Monday week's news on its Saturday.
 
+> **Storylets (owner, Oct 31; migration 0139, docs/CONTENT-ENGINE.md step 3):** the routine also drafts about ten
+> situation cards a week that react to what each player has done (`content/storylets/<Monday>.json`). Each card goes
+> live **24 hours after it arrives** unless you **Veto** or **Pause** it in Studio → **Storylets**, which shows every
+> card with sample names, who gets it, and every choice and outcome.
+
 > **Autopilot (owner, Oct 22; migration 0107, lib/autopilot.ts):** the routine merges its own pull request once its
 > checks pass, and everything goes live by itself: news, hunts and Tea from their files, and stories one after another
 > (when a story ends, the next one in the Studio's Stories order is approved and starts that day). Studio → **Calendar**
@@ -34,6 +39,8 @@ can Pause it or Hold it with a note.
 | Any time | You (optional) | Read the merged pull request; pause a kind in Studio → Calendar to approve it yourself next time |
 | After the deploy | You | Studio → **Calendar**: press **Load** on the week's hunt and news. Then **Hunts**: skim the eight tracks, read one in full, Approve (or Send back with a note). **News**: Approve all |
 | After the deploy | The game | Stores the gossip week by itself (within 10 minutes of the next visit). Nothing to approve: read it in the Studio's **Gossip** tab if you like, and Pause or Hold it if something's off |
+| After the deploy | The game | Stores the week's storylets by itself (migration 0139): each card goes live 24 hours later |
+| Within 24 hours | You (optional) | Studio → **Storylets**: read the new cards; Veto one and it never shows, Pause it to decide later |
 | After the deploy | The game | Stores the exam week by itself (migration 0077, `lib/contentImport.ts`). A course's questions can be changed until the first student sits that exam; after that the week's set is locked. Without a week file, exams use the standing question bank |
 | Friday | You (optional) | The veto window: Studio → Calendar shows the hunt and the story that start on Saturday. Pause the hunt, or decline or move the story, to stop them |
 | Saturday 00:00 | The game | The hunt starts (it runs to Friday), and a new main story starts if none is running (Day 1 is the Saturday) |
@@ -57,8 +64,8 @@ it isn't in your working directory). Work from the main branch.
 
 1. Find the week: the Monday after today, New York time (YYYY-MM-DD), and the hunt's Saturday: the
    Saturday after today (owner, Oct 31: hunts run Saturday to Friday). If content/hunts/<Saturday>.json,
-   content/news/<Monday>.json, content/gossip/<Monday>.json and content/exams/<Monday>.json all exist on
-   main already, stop and say so (write only the missing ones otherwise).
+   content/news/<Monday>.json, content/gossip/<Monday>.json, content/exams/<Monday>.json and
+   content/storylets/<Monday>.json all exist on main already, stop and say so (write only the missing ones otherwise).
 2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
    4 and 8), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they
    stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
@@ -117,13 +124,25 @@ it isn't in your working directory). Work from the main branch.
    napping, the subway, group projects, money, clout), answerable by common sense, with exactly one right
    answer, 2 to 5 short choices, and the right answer moved around (not always the second choice). No real
    people, schools, brands or politics; nothing mean about any group. Don't reuse last week's prompts.
+6b. Write content/storylets/<Monday>.json (Content Engine step 3, lib/storyletWeeks.ts, docs/CONTENT-ENGINE.md):
+   {"week": "<Monday>", "cards": [...]}, 8 to 12 Moral Choices cards in the format of content/choices/storylets.json,
+   each with a "family" (favor, temptation, betrayal, windfall, loyalty; use at least four, ideally all five) and a
+   "when" over player memory (lib/memory.ts FACTS for "has", lib/storylets.ts SNAP_PATHS for "snap"). Favor
+   combinations of two systems (a job and a relationship, a ban and the crew, a campaign and an exam): those are the
+   cards nobody writes by hand, and the game shows them first. Use "slots" for names from memory (a coworker, a place,
+   a boss, an employer; a slot's fact or snapshot must be in "when.all"). Every card is a real dilemma: memorable,
+   real stakes in both directions, costs said plainly (never "Integrity", "Halo" or "Hustler"), no risk labels in the
+   text, satire of New York ambition, only invented people and businesses. Never reuse an id from content/choices/ or
+   an earlier week. Read the last three weeks of content/storylets/ so situations don't repeat.
 7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report (validate:content
    also fails on any real brand, team or trademarked name).
 8. Commit only those files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news
-   headline by day, each gossip story's title and Tea headline, and one sample exam question per course. End with: "Autopilot:
-   merged by the routine; it goes live by itself unless it's paused in Studio → Calendar."
+   headline by day, each gossip story's title and Tea headline, one sample exam question per course, and each
+   storylet's family and title. End with: "Autopilot:
+   merged by the routine; it goes live by itself unless it's paused in Studio → Calendar (storylets: 24 hours
+   after they arrive, unless vetoed in Studio → Storylets)."
 9. Autopilot (owner, Oct 22): once validate:content and npm test pass, merge the pull request yourself (a merge commit).
    If a check fails and you can't fix it, leave the pull request open and say why in its description.
    Don't change any code.

@@ -9,6 +9,7 @@
 // in-memory city (lib/choicesSim.ts) and the tests share them. The card files (content/choices/*.json) hold the hidden
 // outcomes and their odds, so only the server and the preview import lib/choicesContent.ts: players get `cardView`.
 
+import type { StoryletFamily } from "./storyletWeeks.ts";
 import type { FactKey, Memory } from "./memory.ts";
 import { fillSlots, fillText, storyletProblems, systemsOf, whenOk, type SlotDef, type When } from "./storylets.ts";
 
@@ -93,6 +94,8 @@ export interface ChoiceCard {
   /** Storylets (lib/storylets.ts): only for players whose memory matches, with names filled in from it. */
   when?: When;
   slots?: Record<string, SlotDef>;
+  /** Weekly storylets (content/storylets/, lib/storyletWeeks.ts): the kind of situation. */
+  family?: StoryletFamily;
   options: ChoiceOption[];
 }
 

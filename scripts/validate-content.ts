@@ -12,6 +12,7 @@ import { validateGossipWeek } from "../lib/gossip.ts";
 import { validateExamWeek } from "../lib/exams.ts";
 import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts";
 import { validateCards } from "../lib/choices.ts";
+import { validateStoryletWeek } from "../lib/storyletWeeks.ts";
 import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
@@ -86,6 +87,18 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
   const problems = validateCards(cards, { places: PLACES.map((p) => p.id), tags: [...new Set(PLACES.flatMap((p) => p.tags ?? []))], npcs: regulars });
   if (problems.length) fail("content/choices/", problems);
   else console.log(`✓ content/choices/ (${cards.length} cards, ${new Set(cards.map((c: { base: string }) => c.base)).size} dilemmas)`);
+  // Content Engine step 3 (migration 0139): the weekly storylets, checked alongside every card already in the game
+  // and every earlier week (ids never repeat).
+  let seen = [...cards];
+  for (const f of list("storylets/")) {
+    const raw = JSON.parse(readFileSync(new URL(`storylets/${f}`, root), "utf8"));
+    const r = validateStoryletWeek(raw, { others: seen, known: { places: PLACES.map((p) => p.id), tags: [...new Set(PLACES.flatMap((p) => p.tags ?? []))], npcs: regulars } });
+    const file = `content/storylets/${f}`;
+    if (!r.ok) { fail(file, r.problems); continue; }
+    if (`${r.week.week}.json` !== f) { fail(file, [`the file name must be its week (${r.week.week}.json)`]); continue; }
+    seen = [...seen, ...r.week.cards];
+    console.log(`✓ ${file} (${r.week.cards.length} storylets, ${new Set(r.week.cards.map((c) => c.family)).size} families)`);
+  }
 }
 // No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
 const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {
