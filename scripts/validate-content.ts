@@ -13,6 +13,8 @@ import { validateExamWeek } from "../lib/exams.ts";
 import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts";
 import { validateCards } from "../lib/choices.ts";
 import { validateStoryletWeek } from "../lib/storyletWeeks.ts";
+import { contentProblems, type Job, type UnderworldContent } from "../lib/underworld.ts";
+import { validateUnderworldWeek } from "../lib/underworldWeeks.ts";
 import { validateConditionWeek, validateReactions } from "../lib/cityConditions.ts";
 import { validateRemembers } from "../lib/characterMemory.ts";
 import { faceProblems, gateProblems, type CardFace } from "../lib/cardFormat.ts";
@@ -101,6 +103,23 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
     if (`${r.week.week}.json` !== f) { fail(file, [`the file name must be its week (${r.week.week}.json)`]); continue; }
     seen = [...seen, ...r.week.cards];
     console.log(`✓ ${file} (${r.week.cards.length} storylets, ${new Set(r.week.cards.map((c) => c.family)).size} families)`);
+  }
+}
+// The underworld (migrations 0148, 0150): Pablo's job file, then each week's new jobs beside it (ids never repeat).
+{
+  const base = JSON.parse(readFileSync(new URL("underworld/jobs.json", root), "utf8")) as UnderworldContent;
+  const problems = contentProblems(base);
+  if (problems.length) fail("content/underworld/jobs.json", problems);
+  else console.log(`✓ content/underworld/jobs.json (${base.jobs.length} jobs, ${base.crew?.length ?? 0} crew)`);
+  let seen: Job[] = [];
+  for (const f of list("underworld-weeks/")) {
+    const raw = JSON.parse(readFileSync(new URL(`underworld-weeks/${f}`, root), "utf8"));
+    const r = validateUnderworldWeek(raw, base, seen);
+    const file = `content/underworld-weeks/${f}`;
+    if (!r.ok) { fail(file, r.problems); continue; }
+    if (`${r.week.week}.json` !== f) { fail(file, [`the file name must be its week (${r.week.week}.json)`]); continue; }
+    seen = [...seen, ...r.week.jobs];
+    console.log(`✓ ${file} (${r.week.jobs.length} jobs for Pablo)`);
   }
 }
 // Content Engine step 4 (migration 0140): the weekly city conditions and the city storylets (reactions to the tallies).

@@ -6,6 +6,7 @@ import { FAMILY_LABEL, sampleFill, storyletWhen, whenLines, type StoryletAction,
 import type { StudioApi } from "@/lib/studio";
 import type { ConditionEffect, StudioCondition } from "@/lib/cityConditions";
 import { LEARNING, pct, type StudioLearning } from "@/lib/cardLearning";
+import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
 
 // Content Engine step 3 (migration 0139): Studio → Storylets. Each week's new cards arrive here and go live 24 hours
 // later by themselves (owner, Oct 31: automatic with a veto window). Veto one and it never shows; pause it to decide
@@ -45,6 +46,7 @@ export function StoryletsTab({ api }: { api: StudioApi }) {
         {error && <span className="meta error-text">{error}</span>}
       </section>
       {api.conditions && <ConditionsSection api={api} />}
+      {api.underworldJobs && <UnderworldJobsSection api={api} />}
       {api.learning && <LearningSection api={api} />}
       {data?.cards.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No storylets yet. The weekly routine adds content/storylets/&lt;Monday&gt;.json.</p></section>}
       {weeks.map((w) => (
@@ -145,6 +147,51 @@ function ConditionsSection({ api }: { api: StudioApi }) {
             {c.status === "paused" && <button className="btn btn-secondary btn-sm" disabled={busy === c.id} onClick={() => void act(c.id, "restore")}>Restore</button>}
             {c.status === "vetoed" && !c.on && <button className="btn btn-secondary btn-sm" disabled={busy === c.id} onClick={() => void act(c.id, "restore")}>Undo veto</button>}
             {c.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === c.id} onClick={() => void act(c.id, "now")}>Approve now</button>}
+          </div>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+// ---- The underworld, part 2 (migration 0150): each week's new jobs for Pablo ----
+
+const REP_TIER: Record<number, string> = { 0: "Errand Kid", 15: "Corner Regular", 35: "Known Face", 60: "Pablo's Guy", 90: "Street Legend" };
+
+function UnderworldJobsSection({ api }: { api: StudioApi }) {
+  const [list, setList] = useState<StudioUnderworldJob[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  useEffect(() => { void api.underworldJobs!().then((r) => (r.ok ? setList(r.data) : setError(r.error))); }, [api]);
+  const act = async (id: string, action: StoryletAction) => {
+    setBusy(id); setError(null);
+    const r = await api.underworldJobSet!(id, action);
+    setBusy(null);
+    if (r.ok) setList(r.data); else setError(r.error);
+  };
+  return (
+    <section className="stack-8">
+      <span className="title">🧳 Pablo&apos;s jobs</span>
+      <span className="subtext">
+        New jobs for Pablo&apos;s back room from the weekly routine. Each joins his pool 24 hours after it arrives unless you veto it.
+        Only players Pablo has invited see them, and only once their Street Rep reaches the job&apos;s tier.
+      </span>
+      {error && <span className="meta error-text">{error}</span>}
+      {list?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>None yet. The weekly routine adds content/underworld-weeks/&lt;Monday&gt;.json.</p></section>}
+      {list?.map((j) => (
+        <article key={j.id} className="studio-card stack-8">
+          <div className="row" style={{ justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+            <span className="body-strong" style={{ minWidth: 0 }}>{j.job.emoji} {j.job.title}</span>
+            <span className={`tag studio-review ${STATUS[j.status]}`}>{storyletWhen(j)}</span>
+          </div>
+          <span className="meta">Week of {fmtWeek(j.week)} · {REP_TIER[j.job.minRep] ?? `Street Rep ${j.job.minRep}`}+{j.job.crew ? ` · ${j.job.crew}'s job` : ""}</span>
+          {j.job.options.map((o) => <span key={o.id} className="meta" style={{ display: "block" }}>• <b>{o.label}</b>: gets {o.get}; costs {o.cost} (C${o.pay[0]}–{o.pay[1]})</span>)}
+          <span className="meta">📰 If caught: “{j.job.headline.replace("{name}", "@player")}”</span>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            {j.status !== "vetoed" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "veto")}>Veto</button>}
+            {j.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "pause")}>Pause</button>}
+            {j.status === "paused" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "restore")}>Restore</button>}
+            {j.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "now")}>Approve now</button>}
           </div>
         </article>
       ))}

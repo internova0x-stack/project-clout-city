@@ -133,6 +133,8 @@ import type { CareerApi } from "@/lib/careers";
 import { CareersSheet } from "@/components/careers/CareersSheet";
 import { UNDERWORLD, type UnderworldApi } from "@/lib/underworld";
 import { BackRoomSheet } from "@/components/underworld/BackRoom";
+import { GALA, type GalaApi } from "@/lib/gala";
+import { GalaSheet } from "@/components/gala/Gala";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import { CampusSheet } from "./campus/CampusSheet";
 
@@ -270,6 +272,7 @@ export function GameShell({
   campaign,
   careers,
   underworld,
+  gala,
   choices,
   remembered,
   campus,
@@ -360,6 +363,8 @@ export function GameShell({
   careers?: CareerApi;
   /** The underworld (migration 0148): Pablo's back room, from his shop's card; without it, hidden. */
   underworld?: UnderworldApi;
+  /** The Charity Gala (migration 0150): Halo only, on Ditmars Heights Rooftop's card. */
+  gala?: GalaApi;
   /** Moral Choices (migration 0131): situation cards where you are, the private Integrity meter; off without it. */
   choices?: ChoicesApi;
   /** Content Engine step 5: what the city's people remember about this player (lines by character id). */
@@ -435,6 +440,7 @@ export function GameShell({
   const [campaignOpen, setCampaignOpen] = useState(false);
   const [careersOpen, setCareersOpen] = useState(false);
   const [backRoomOpen, setBackRoomOpen] = useState(false);
+  const [galaOpen, setGalaOpen] = useState(false);
   // Careers: where the player's job is (the employer's card says "Go to work" there).
   const [careerPlace, setCareerPlace] = useState<string | null>(null);
   // Whether a campaign is running (the election teasers step aside while one is).
@@ -1313,6 +1319,7 @@ export function GameShell({
     else if (open === "campaign" && campaign) setCampaignOpen(true);
     else if (open === "careers" && careers) setCareersOpen(true);
     else if (open === "backroom" && underworld) setBackRoomOpen(true);
+    else if (open === "gala" && gala) setGalaOpen(true);
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
     else if (open === "shop") openShop("fashion");
@@ -1914,6 +1921,7 @@ export function GameShell({
     onOpenCampaign: campaign ? () => setCampaignOpen(true) : undefined,
     career: careers ? { jobPlace: careerPlace, onOpen: () => { setPlace(null); setCareersOpen(true); } } : undefined,
     onBackRoom: underworld ? () => { setPlace(null); setBackRoomOpen(true); } : undefined,
+    onGala: gala ? () => { setPlace(null); setGalaOpen(true); } : undefined,
     onStation: radio || tv ? onStation : undefined,
     onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
@@ -3336,6 +3344,9 @@ export function GameShell({
             onWorkdayDone={() => askChoice("shift")} />}
           {underworld && <BackRoomSheet open={backRoomOpen} onClose={() => setBackRoomOpen(false)} api={underworld} onToast={setToast}
             onGo={() => { setBackRoomOpen(false); openPlace(UNDERWORLD.place); }}
+            onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
+          {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
+            here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />

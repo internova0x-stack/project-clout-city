@@ -14,6 +14,9 @@ import { validateArcs } from "./storyValidation";
 import { getAdminSupabase } from "./supabase/admin";
 import { readAutopilot } from "./autopilot";
 import { validateStoryletWeek } from "./storyletWeeks";
+import { validateUnderworldWeek } from "./underworldWeeks";
+import { UNDERWORLD_CONTENT } from "./underworldContent";
+import type { Job } from "./underworld";
 import { validateConditionWeek, validateReactions, type ReactionRule } from "./cityConditions";
 import REACTIONS from "../content/city/reactions.json";
 import { PLACES } from "./city";
@@ -24,7 +27,7 @@ import { learnWeights, LEARNING, type CardStats } from "./cardLearning";
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
 
-async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets" | "conditions"): Promise<{ file: string; raw: unknown }[]> {
+async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets" | "conditions" | "underworld-weeks"): Promise<{ file: string; raw: unknown }[]> {
   const dir = path.join(process.cwd(), "content", kind);
   const files = (await readdir(dir).catch(() => [] as string[])).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out: { file: string; raw: unknown }[] = [];
@@ -87,6 +90,19 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const { data, error } = await admin.rpc("content_import_storylets", { p_week: r.week.week, p_cards: r.week.cards });
     if (error) { if (missing(error.message)) { out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} new storylets` });
+  }
+  // The underworld, part 2 (migration 0150): each week's new jobs for Pablo arrive like storylets (live 24 hours later
+  // unless vetoed in Studio → Storylets → Pablo's jobs; held while the storylets autopilot is off).
+  {
+    let jobsSeen: Job[] = [];
+    for (const { file, raw } of await weekFiles("underworld-weeks")) {
+      const r = validateUnderworldWeek(raw, UNDERWORLD_CONTENT, jobsSeen);
+      if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
+      jobsSeen = [...jobsSeen, ...r.week.jobs];
+      const { data, error } = await admin.rpc("content_import_underworld", { p_week: r.week.week, p_jobs: r.week.jobs });
+      if (error) { if (missing(error.message)) { out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
+      out.push({ file, result: `${data} new jobs for Pablo` });
+    }
   }
   // Content Engine step 4 (migration 0140): the week's city conditions arrive like storylets (live 24 hours later unless
   // vetoed); then the city storylets fire any reaction whose tally has crossed its line.

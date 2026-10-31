@@ -34,7 +34,8 @@ import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
 import { characterRemembered } from "./characterActions";
 import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
-import { underworldJob, underworldLawyer, underworldScreen, underworldSeen } from "./underworldActions";
+import { underworldJob, underworldLawyer, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
+import { galaDonate, galaState } from "./galaActions";
 import { careerApply, careerOffice, careerQuit, careerStick, careerAspire, careerScreen, careerStart, careerTask } from "./careerActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
@@ -177,7 +178,8 @@ export default async function HomePage() {
         dilemma: campaignDilemma, debate: campaignDebate, endWeek: campaignEndWeek, choose: campaignChoose,
       } : undefined}
       // Migration 0135: Careers (the sheet says so if it hasn't run yet).
-      underworld={city ? { screen: underworldScreen, job: underworldJob, lawyer: underworldLawyer, seen: underworldSeen } : undefined}
+      underworld={city ? { screen: underworldScreen, job: underworldJob, lawyer: underworldLawyer, seen: underworldSeen, table: underworldTable } : undefined}
+      gala={city ? { state: galaState, donate: galaDonate } : undefined}
       careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit, stick: careerStick, aspire: careerAspire } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).
       choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter, conditions: choiceConditions } : undefined}

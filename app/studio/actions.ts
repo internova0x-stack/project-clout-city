@@ -19,6 +19,7 @@ import type { LetterStatus, MailbagFilter, StudioMailbag } from "@/lib/mayor";
 import type { Autopilot, AutopilotKind } from "@/lib/autopilot";
 import type { StoryletAction, StudioStorylets } from "@/lib/storyletWeeks";
 import type { StudioCondition } from "@/lib/cityConditions";
+import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
 import { studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
 import type { ChoiceCard } from "@/lib/choices";
 import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
@@ -222,6 +223,12 @@ export async function studioConditions() {
 }
 export async function studioConditionSet(id: string, action: StoryletAction) {
   return admin<StudioCondition[]>("admin_condition_set", { p_id: id, p_action: action });
+}
+export async function studioUnderworldJobs() {
+  return admin<StudioUnderworldJob[]>("admin_underworld_jobs");
+}
+export async function studioUnderworldJobSet(id: string, action: StoryletAction) {
+  return admin<StudioUnderworldJob[]>("admin_underworld_job_set", { p_id: id, p_action: action });
 }
 type LearningRaw = { stats: CardStats[]; weights: { card: string; weight: number; retired: boolean; set_by: "auto" | "admin" }[]; last_run: string | null };
 /** Every card's title: the game's cards and every weekly storylet file (Studio admins only; titles, no outcomes). */

@@ -72,6 +72,8 @@ export interface PlaceHandlers {
   career?: { jobPlace: string | null; onOpen: () => void };
   /** The underworld (migration 0148): Pablo's shop card opens his back room. */
   onBackRoom?: () => void;
+  /** The Charity Gala (migration 0150): on Ditmars Heights Rooftop's card. */
+  onGala?: () => void;
   /**
    * v0.14 On Air: the stations' own buttons. "shoutout" and "billboard" open the Radio and Clout TV
    * apps' forms (there, on arrival); "watch" opens the Big Screen's photo (from anywhere).
@@ -604,6 +606,9 @@ export function LocationSheet({
           <StoryBanners place={place} story={handlers.story ?? null} />
           {place.tags.includes("campaign") && handlers.onOpenCampaign && (
             <button className="btn btn-taxi" onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
+          )}
+          {place.id === "ditmars-heights-rooftop" && handlers.onGala && (
+            <button className="btn btn-secondary" onClick={handlers.onGala}>🥂 The Charity Gala</button>
           )}
           {place.tags.includes("underworld") && handlers.onBackRoom && (
             <button className="btn btn-secondary" onClick={handlers.onBackRoom}>🚪 Knock on the back door</button>

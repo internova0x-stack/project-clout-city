@@ -8,6 +8,7 @@ import type { MayorApi } from "@/lib/mayor";
 import { createCampaignSim } from "@/lib/campaignSim";
 import { createCareerSim } from "@/lib/careerSim";
 import { createUnderworldSim } from "@/lib/underworldSim";
+import { createGalaSim } from "@/lib/galaSim";
 import { createChoicesSim, storyMemory } from "@/lib/choicesSim";
 import { remembered as rememberedFor, type RememberRule } from "@/lib/characterMemory";
 import REMEMBERS from "@/content/characters/remembers.json";
@@ -91,7 +92,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, choicePreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, choicePreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -161,6 +162,8 @@ export function PreviewHome({
   careerPreset?: string;
   /** The underworld (migration 0148): ?underworld=locked|new|jobs|pro|hot|caught|lawyer. */
   underworldPreset?: string;
+  /** The Charity Gala (migration 0150): ?gala=on|off|new|done. */
+  galaPreset?: string;
   /** Moral Choices: ?choice=now|back|high|low|log|jail|chain|story (lib/choicesSim.ts; story = storylets from a sample history). */
   choicePreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
@@ -291,6 +294,10 @@ export function PreviewHome({
     atPlace: () => simRef.current.here(), bank: () => player.bank_cash,
     onBank: (cash) => simRef.current.choicePay({ cash }), onEnergy: (energy) => simRef.current.choicePay({ energy }),
   }), [underworldPreset, player.bank_cash]);
+  const galaApi = useMemo(() => createGalaSim(galaPreset ?? null, {
+    here: () => simRef.current.here(), bank: () => player.bank_cash,
+    onPay: (e) => simRef.current.choicePay(e),
+  }), [galaPreset, player.bank_cash]);
   const campaignApi = useMemo(() => createCampaignSim(campaignPreset ?? null, { clout: campaignPreset === "locked" ? 40 : Math.max(150, player.clout), bank: player.bank_cash }), [campaignPreset, player.clout, player.bank_cash]);
   const radioApi = useMemo<RadioApi>(() => ({
     state: () => previewRadioState(radioPreset ?? ""),
@@ -629,6 +636,7 @@ export function PreviewHome({
       campaign={cityOff ? undefined : campaignApi}
       careers={cityOff ? undefined : careerApi}
       underworld={cityOff ? undefined : underworldApi}
+      gala={cityOff ? undefined : galaApi}
       choices={cityOff ? undefined : choicesApi}
       remembered={cityOff || (choicePreset !== "story" && choicePreset !== "city") ? undefined : rememberedSim}
       campus={cityOff ? undefined : campusApi}

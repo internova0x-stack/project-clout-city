@@ -52,6 +52,11 @@ export const UNDERWORLD = {
   lawyer: { cost: 400, days: 7, fineCut: 0.5, holdingCut: 1 },
   /** Campaign Mode: Street Rep adds to a dark op's success, up to +10%. */
   campaign: { perRep: 0.001, max: 0.1, lineAt: 35 },
+  /** Part 2: Pablo's crew. A job from a crew member moves their loyalty; at 60 their jobs pay 10% more, at 80 they take
+   *  the fall once a New York week (no fine, no holding, no headline). */
+  crew: { win: 6, fizzle: 2, bust: -5, payAt: 60, payBonus: 0.1, coverAt: 80 },
+  /** Part 2: Pablo's Thursday table, Hustlers only (the meter at 30 or below), once a New York week in the back room. */
+  table: { energy: 10, pay: [300, 800] as [number, number], rep: 3, heat: 4, loyalty: 5 },
   receipts: 8,
 } as const;
 
@@ -91,18 +96,38 @@ export interface Job {
   caught: string;
   /** Lola's Blotter, with {name}. */
   headline: string;
+  /** Part 2: the crew member who brings the job (content's `crew`), if any. */
+  crew?: string;
 }
+
+/** Part 2: Pablo's crew, the regulars of the back room. */
+export interface CrewMember { id: string; name: string; emoji: string; role: string; lines: string[]; cover: string }
 
 export interface UnderworldContent {
   jobs: Job[];
+  crew?: CrewMember[];
+  /** Part 2: the Thursday table's lines (Hustlers only). */
+  table?: { title: string; blurb: string; locked: string; wins: string[] };
   pablo: { intro: string[]; greet: Record<string, string[]>; halo: string; refuse: string; holding: string; lawyer: string };
+  /** Part 2: weekly jobs that went live and were later vetoed or retired: never dealt, still found for an old trace. */
+  archive?: Job[];
+}
+
+const jobOf = (c: UnderworldContent, id: string) => c.jobs.find((j) => j.id === id) ?? c.archive?.find((j) => j.id === id);
+const crewOf = (c: UnderworldContent, id?: string) => (id ? c.crew?.find((m) => m.id === id) : undefined);
+
+/** The New York week a day falls in (its Monday). */
+export function weekOf(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
 }
 
 /** The job file's problems (validate:content and tests/underworld.test.ts run it). */
 export function contentProblems(c: UnderworldContent): string[] {
   const out: string[] = [];
   const ids = new Set<string>();
-  const banned = /\b(gun|knife|shoot|stab|drug|cocaine|weed|heroin|pills|kill|murder|assault|punch)\w*/i;
+  const banned = /\b(guns?|knife|knives|shoot\w*|stab|stabb\w*|drugs?|cocaine|weed|heroin|pills|kill|kill(ed|er|ing)|murder\w*|assault\w*|punch(ed|es|ing)?)\b/i;
   for (const j of c.jobs) {
     const at = `job ${j.id}`;
     if (!/^[a-z0-9-]{2,60}$/.test(j.id) || ids.has(j.id)) out.push(`${at}: missing or repeated id`);
@@ -112,6 +137,7 @@ export function contentProblems(c: UnderworldContent): string[] {
     for (const t of [j.bust, j.caught, j.headline]) if (!t || t.length > 260) out.push(`${at}: bust, caught and headline are 1 to 260 characters`);
     if (!j.headline.includes("{name}")) out.push(`${at}: the headline names {name}`);
     if (banned.test(JSON.stringify(j))) out.push(`${at}: no violence, drugs or weapons`);
+    if (j.crew !== undefined && !c.crew?.some((m) => m.id === j.crew)) out.push(`${at}: crew "${j.crew}" isn't in the crew`);
     for (const o of j.options) {
       const ot = `${at} option ${o.id}`;
       const [lo, hi] = o.pay ?? [];
@@ -130,6 +156,12 @@ export function contentProblems(c: UnderworldContent): string[] {
     if (c.jobs.filter((j) => j.minRep <= t.at).length < UNDERWORLD.offersPerDay) out.push(`tier ${t.name}: needs ${UNDERWORLD.offersPerDay} jobs open`);
   }
   for (const t of UNDERWORLD.tiers) if (!c.pablo.greet[t.name]?.length) out.push(`pablo.greet: a line for ${t.name}`);
+  for (const m of c.crew ?? []) {
+    if (!/^[a-z0-9-]{2,40}$/.test(m.id) || !m.name || !m.emoji || !m.role || !m.lines?.length || !m.cover) out.push(`crew ${m.id}: id, name, emoji, role, lines and cover`);
+    if (banned.test(JSON.stringify(m))) out.push(`crew ${m.id}: no violence, drugs or weapons`);
+    if (!c.jobs.some((j) => j.crew === m.id)) out.push(`crew ${m.id}: brings no job`);
+  }
+  if (c.table && (!c.table.title || !c.table.blurb || !c.table.locked || !c.table.wins?.length)) out.push("table: title, blurb, locked and wins");
   return out;
 }
 
@@ -159,6 +191,10 @@ export interface UnderworldState {
   receipts: string[];
   /** Pablo's intro was shown. */
   met: boolean;
+  /** Part 2: each crew member's loyalty (0 to 100), the week each last took the fall, and the week of the last table. */
+  crew?: Record<string, number>;
+  covered?: Record<string, string>;
+  tableWeek?: string;
 }
 
 /** What the server reads (underworld_context, migration 0148). */
@@ -192,6 +228,8 @@ const ERRORS: Record<string, string> = {
   has_lawyer: "Whitlock & Hale already has you on retainer.",
   conflict: "Something changed. Try again.",
   rate_limited: "Slow down a little.",
+  table_locked: "The Thursday table is for Hustlers. Pablo saves the good chairs for people who've earned them.",
+  table_done: "You sat at the table this week. Pablo's guests need a week to forget what you took.",
   unknown: "Pablo's phone cut out. Try again.",
 };
 export const underworldError = (code: string) => ERRORS[code] ?? ERRORS.unknown;
@@ -224,7 +262,7 @@ export function newState(today: string): UnderworldState {
   return { v: 1, invitedOn: today, rep: 0, heat: 0, day: today, offers: { day: "", ids: [], done: [] }, traces: [], landed: [], jobsDone: 0, busts: 0, earned: 0, lawyerUntil: null, worked: [], receipts: [], met: false };
 }
 
-export interface Payout { currency: "cash"; amount: number; kind: "underworld_pay" | "underworld_fine" | "underworld_lawyer"; ref: string }
+export interface Payout { currency: "cash"; amount: number; kind: "underworld_pay" | "underworld_fine" | "underworld_lawyer" | "underworld_table"; ref: string }
 export interface Change { payouts: Payout[]; holding: number; headline: string | null; energy: number; mood: number; integrity: number; changed: boolean }
 const none = (): Change => ({ payouts: [], holding: 0, headline: null, energy: 0, mood: 0, integrity: 0, changed: false });
 
@@ -255,7 +293,12 @@ export function refresh(content: UnderworldContent, s: UnderworldState, today: s
     for (const t of s.traces) {
       if (!found && rng() < (s.heat / 100) * t.weight * UNDERWORLD.bust.find) {
         found = true;
-        const job = content.jobs.find((j) => j.id === t.job);
+        const job = jobOf(content, t.job);
+        const cover = takesFall(content, s, job?.crew, day);
+        if (cover) {
+          s.landed.unshift({ id: t.id, emoji: "🫡", text: `${job?.caught ?? "The precinct caught up with an old job."} ${cover}`, fine: 0, holding: 0, day });
+          continue;
+        }
         const { fine, holding, law } = caughtCost(s, ctx, day, t.pay, t.weight);
         const hold = out.holding ? 0 : holding;
         s.rep = clamp(s.rep - UNDERWORLD.rep.caughtLoss);
@@ -282,6 +325,19 @@ export function refresh(content: UnderworldContent, s: UnderworldState, today: s
   }
   return out;
 }
+
+/** A loyal crew member (80+) takes the fall for their own job, once a New York week: returns their line, or null. */
+function takesFall(content: UnderworldContent, s: UnderworldState, crewId: string | undefined, day: string): string | null {
+  const m = crewOf(content, crewId);
+  if (!m || (s.crew?.[m.id] ?? 0) < UNDERWORLD.crew.coverAt || s.covered?.[m.id] === weekOf(day)) return null;
+  s.covered = { ...(s.covered ?? {}), [m.id]: weekOf(day) };
+  return `${m.emoji} ${m.cover}`;
+}
+
+const loyal = (s: UnderworldState, id: string | undefined, d: number) => {
+  if (!id) return;
+  s.crew = { ...(s.crew ?? {}), [id]: clamp((s.crew?.[id] ?? 20) + d) };
+};
 
 /** Today's 3 jobs from what Street Rep opens, the bigger ones first in the draw, never yesterday's three again if avoidable. */
 function deal(content: UnderworldContent, s: UnderworldState, rng: Rng): string[] {
@@ -329,7 +385,9 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
   let receipt: string;
   if (roll < odds) {
     const halo = s.jobsDone === 0 && ctx.integrity !== null && ctx.integrity >= UNDERWORLD.haloAt;
-    let pay = Math.round((o.pay[0] + rng() * (o.pay[1] - o.pay[0])) * (halo ? UNDERWORLD.haloFirstPay : 1) / 10) * 10;
+    const bonus = job.crew && (s.crew?.[job.crew] ?? 0) >= UNDERWORLD.crew.payAt ? 1 + UNDERWORLD.crew.payBonus : 1;
+    let pay = Math.round((o.pay[0] + rng() * (o.pay[1] - o.pay[0])) * (halo ? UNDERWORLD.haloFirstPay : 1) * bonus / 10) * 10;
+    loyal(s, job.crew, UNDERWORLD.crew.win);
     pay = Math.max(0, pay);
     s.rep = clamp(s.rep + o.rep);
     s.heat = clamp(s.heat + o.heat);
@@ -341,6 +399,15 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
     outcome = traced ? "trace" : "win";
     receipt = `${o.win}${pay ? ` +C$${pay.toLocaleString("en-US")}.` : ""}${halo ? ` ${content.pablo.halo}` : ""}`;
   } else if (rng() < UNDERWORLD.bust.onFail + o.trace * UNDERWORLD.bust.onFailTrace + s.heat / 250) {
+    loyal(s, job.crew, UNDERWORLD.crew.bust);
+    const cover = takesFall(content, s, job.crew, today);
+    if (cover) {
+      s.heat = clamp(s.heat + o.heat);
+      s.jobsDone += 1;
+      const r = `${job.bust} ${cover}`;
+      s.receipts = [`${job.emoji} ${r}`, ...s.receipts].slice(0, UNDERWORLD.receipts);
+      return { ...out, receipt: r, outcome: "bust" };
+    }
     const { fine, holding, law } = caughtCost(s, ctx, today, 0, o.trace);
     s.rep = clamp(s.rep - UNDERWORLD.rep.bustLoss);
     s.heat = clamp(s.heat + Math.round(o.heat * UNDERWORLD.heat.bustAdd));
@@ -353,6 +420,7 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
     receipt = `${job.bust}${extra ? ` It cost you ${extra}.` : ""}${law ? " Whitlock & Hale got it knocked down." : ""}`;
   } else {
     s.heat = clamp(s.heat + Math.round(o.heat / 2));
+    loyal(s, job.crew, UNDERWORLD.crew.fizzle);
     outcome = "fizzle";
     receipt = o.fizzle;
   }
@@ -360,6 +428,30 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
   s.receipts = [`${job.emoji} ${receipt}`, ...s.receipts].slice(0, UNDERWORLD.receipts);
   return { ...out, receipt, outcome };
 }
+
+/** Part 2: Pablo's Thursday table: Hustlers only, once a New York week, in the back room. Favors traded over cards: it
+ *  always pays something (no stake, no gambling), a little Street Rep and Heat, and each crew member warms to you. */
+export function sitTable(content: UnderworldContent, s: UnderworldState, today: string, ctx: UnderworldCtx, rng: Rng): Change & { receipt: string } {
+  if (!tableOpen(ctx)) throw new UnderworldError("table_locked");
+  if (ctx.holding) throw new UnderworldError("in_holding");
+  if (ctx.atPlace !== UNDERWORLD.place) throw new UnderworldError("not_here");
+  if (s.heat >= UNDERWORLD.heat.refuse) throw new UnderworldError("too_hot");
+  if (s.tableWeek === weekOf(today)) throw new UnderworldError("table_done");
+  if (ctx.energy < UNDERWORLD.table.energy) throw new UnderworldError("no_energy");
+  const t = UNDERWORLD.table;
+  const pay = Math.round((t.pay[0] + rng() * (t.pay[1] - t.pay[0])) / 10) * 10;
+  s.tableWeek = weekOf(today);
+  s.rep = clamp(s.rep + t.rep);
+  s.heat = clamp(s.heat + t.heat);
+  s.earned += pay;
+  for (const m of content.crew ?? []) loyal(s, m.id, t.loyalty);
+  const wins = content.table?.wins ?? ["A favor here, a favor there."];
+  const receipt = `${wins[Math.floor(rng() * wins.length) % wins.length]} +C$${pay.toLocaleString("en-US")}.`;
+  s.receipts = [`🃏 ${receipt}`, ...s.receipts].slice(0, UNDERWORLD.receipts);
+  return { ...none(), changed: true, energy: -t.energy, payouts: [{ currency: "cash", amount: pay, kind: "underworld_table", ref: `table:${s.tableWeek}` }], receipt };
+}
+
+export const tableOpen = (ctx: UnderworldCtx) => ctx.integrity !== null && ctx.integrity <= UNDERWORLD.hustlerAt;
 
 /** Whitlock & Hale on retainer for a week. */
 export function retainLawyer(s: UnderworldState, today: string, ctx: UnderworldCtx): Change {
@@ -384,7 +476,7 @@ export const campaignOpBonus = (rep: number) => Math.min(UNDERWORLD.campaign.max
 // The player's view (never the odds, the traces or what's coming)
 // ---------------------------------------------------------------------------------------------------------------
 
-export interface OfferView { id: string; emoji: string; title: string; done: boolean; options: { id: string; label: string; get: string; cost: string; energy: number }[] }
+export interface OfferView { id: string; emoji: string; title: string; done: boolean; crew?: { name: string; emoji: string } | null; options: { id: string; label: string; get: string; cost: string; energy: number }[] }
 
 export interface UnderworldView {
   invited: boolean;
@@ -405,6 +497,9 @@ export interface UnderworldView {
   greet: string;
   intro: string[] | null;
   stats: { jobs: number; busts: number; earned: number };
+  /** Part 2: the crew with their loyalty, and the Thursday table. */
+  crew: { id: string; name: string; emoji: string; role: string; loyalty: number; line: string; covers: boolean }[];
+  table: { open: boolean; done: boolean; title: string; blurb: string } | null;
 }
 
 export const heatBand = (h: number): UnderworldView["heatBand"] => (h >= UNDERWORLD.heat.refuse ? "glowing" : h >= UNDERWORLD.heat.watched ? "watched" : h >= 20 ? "warm" : "cool");
@@ -427,6 +522,7 @@ export function view(content: UnderworldContent, s: UnderworldState | null, toda
     heatBand: heatBand(st.heat),
     offers: (st.offers.day === today ? st.offers.ids : []).map((id) => content.jobs.find((j) => j.id === id)).filter((j): j is Job => !!j).map((j) => ({
       id: j.id, emoji: j.emoji, title: j.title, done: st.offers.done.includes(j.id),
+      crew: (() => { const m = crewOf(content, j.crew); return m ? { name: m.name, emoji: m.emoji } : null; })(),
       options: j.options.map((o) => ({ id: o.id, label: o.label, get: o.get, cost: o.cost, energy: o.energy })),
     })),
     here: ctx.atPlace === UNDERWORLD.place,
@@ -438,6 +534,15 @@ export function view(content: UnderworldContent, s: UnderworldState | null, toda
     greet: st.heat >= UNDERWORLD.heat.refuse ? content.pablo.refuse : ctx.holding ? content.pablo.holding : greets[daysBetween("2026-01-01", today) % greets.length] ?? "",
     intro: inv && !st.met ? content.pablo.intro : null,
     stats: { jobs: st.jobsDone, busts: st.busts, earned: st.earned },
+    crew: (content.crew ?? []).map((m, i) => {
+      const loyalty = st.crew?.[m.id] ?? 20;
+      return { id: m.id, name: m.name, emoji: m.emoji, role: m.role, loyalty, line: m.lines[(daysBetween("2026-01-01", today) + i) % m.lines.length],
+        covers: loyalty >= UNDERWORLD.crew.coverAt && st.covered?.[m.id] !== weekOf(today) };
+    }),
+    table: content.table ? {
+      open: tableOpen(ctx), done: st.tableWeek === weekOf(today),
+      title: content.table.title, blurb: tableOpen(ctx) ? content.table.blurb : content.table.locked,
+    } : null,
   };
 }
 
@@ -450,4 +555,6 @@ export interface UnderworldApi {
   job(job: string, option: string): Promise<UnderworldResult<UnderworldScreen>>;
   lawyer(): Promise<UnderworldResult<UnderworldScreen>>;
   seen(): Promise<UnderworldResult<UnderworldScreen>>;
+  /** Part 2: Pablo's Thursday table (Hustlers only). */
+  table(): Promise<UnderworldResult<UnderworldScreen>>;
 }

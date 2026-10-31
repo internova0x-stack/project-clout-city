@@ -2658,6 +2658,12 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .careers-poster { display:flex; flex-direction:column; gap:6px; padding:20px 16px 16px; border-radius:var(--r-lg);
   background:linear-gradient(135deg, #1D2B53 0%, #3E63DD 100%); color:#fff; }
 .careers-poster .overline, .careers-poster .subtext { color:rgba(255,255,255,.82); }
+/* The Charity Gala (migration 0150): the Halo end's night. */
+.gala-poster { display:flex; flex-direction:column; gap:8px; padding:20px 16px 16px; border-radius:var(--r-lg);
+  background:linear-gradient(135deg, #1B2340 0%, #3E4C8A 55%, #E8C9A0 100%); color:#fff; }
+.gala-poster .overline, .gala-poster .subtext { color:rgba(255,255,255,.88); }
+.backroom-crew { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.backroom-crew .card { padding:10px; }
 /* The underworld (migration 0148): Pablo's back room. */
 .backroom { padding-right:4px; }
 .backroom-poster { display:flex; flex-direction:column; gap:8px; padding:20px 16px 16px; border-radius:var(--r-lg);

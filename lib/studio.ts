@@ -6,6 +6,7 @@ import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { Autopilot, AutopilotKind } from "./autopilot.ts";
 import type { StoryletAction, StudioStorylets } from "./storyletWeeks.ts";
 import type { StudioCondition } from "./cityConditions.ts";
+import type { StudioUnderworldJob } from "./underworldWeeks.ts";
 import type { StudioLearning } from "./cardLearning.ts";
 import type { CatalogItem, EditableField, ShopFile } from "./shopCatalog.ts";
 import type { GossipWeek } from "./gossip.ts";
@@ -232,6 +233,9 @@ export interface StudioApi {
   /** Content Engine step 4 (migration 0140): city conditions (weekly and fired by the city's tallies). */
   conditions?(): Promise<Admin<StudioCondition[]>>;
   conditionSet?(id: string, action: StoryletAction): Promise<Admin<StudioCondition[]>>;
+  /** The underworld, part 2 (migration 0150): each week's new jobs for Pablo and their veto window. */
+  underworldJobs?(): Promise<Admin<StudioUnderworldJob[]>>;
+  underworldJobSet?(id: string, action: StoryletAction): Promise<Admin<StudioUnderworldJob[]>>;
   /** Content Engine step 6 (migration 0141): what works: every card's numbers and weight, and the owner's override. */
   learning?(): Promise<Admin<StudioLearning>>;
   learningSet?(card: string, set: { weight: number; retired: boolean } | "auto"): Promise<Admin<StudioLearning>>;
