@@ -9,8 +9,28 @@ import {
   type BlotterItem, type ChoiceAfter, type ChoiceMark, type ChoiceCard, type ChoiceEffects, type ChoiceLogEntry, type ChoicesApi, type ChoiceState,
 } from "./choices";
 import { CHOICE_CARDS } from "./choicesContent";
+import type { Fact, FactKey, Memory } from "./memory";
+import { EMPTY_MEMORY } from "./storylets";
 
-export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "chain";
+export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "chain" | "story";
+
+/**
+ * ?choice=story: a player with a history across the game (a Media job, a partner, a coworker they took credit from, a
+ * club that banned them, a lotto win…), so storylets (Content Engine step 2) turn up, and every arrival brings one.
+ */
+function storyMemory(): Memory {
+  const now = new Date().toISOString();
+  const f = (key: FactKey, subject = "", count = 1): Fact => ({ key, subject, value: {}, count, first: now, last: now, expires: null });
+  return {
+    snapshot: { ...EMPTY_MEMORY.snapshot, rank: 3, band: "hustler", meter: 24, job: { track: "media", level: 2, workMood: 55 }, partner: "preview-partner", crew: 2 },
+    facts: [
+      f("career.hired", "media"), f("career.promoted", "media"), f("career.took_credit", "media:rival"), f("career.started_rumor", "media:rival"),
+      f("dating.official", "preview-partner"), f("dating.date"), f("place.banned", "the-sticky-floor"), f("police.held"),
+      f("gossip.found", "a", 6), f("story.predicted"), f("choice.made", "fake-hype:post"), f("choice.made", "found-wallet:keep"),
+      f("money.lotto_win"), f("home.sublet_host"), f("campus.aced", "clout-theory"), f("business.bought", "hot-dog-cart"),
+    ],
+  };
+}
 
 interface Opts {
   /** Where the preview's player is standing now. */
@@ -22,7 +42,19 @@ interface Opts {
 
 export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi {
   const rng = Math.random;
-  const always = preset === "now";
+  const story = preset === "story";
+  const always = preset === "now" || story;
+  // The player's memory (migration 0138): storylets read it and their choices write to it.
+  const memory: Memory = story ? storyMemory() : structuredClone(EMPTY_MEMORY);
+  const remember = (sets: { fact: FactKey; subject: string }[]) => {
+    const now = new Date().toISOString();
+    for (const x of sets) {
+      const have = memory.facts.find((f) => f.key === x.fact && f.subject === x.subject);
+      if (have) { have.count += 1; have.last = now; } else memory.facts.unshift({ key: x.fact, subject: x.subject, value: {}, count: 1, first: now, last: now, expires: null });
+    }
+  };
+  // In ?choice=story, offer storylets first (the cards that read memory).
+  const pool = () => (story ? CHOICE_CARDS.filter((c) => c.when) : CHOICE_CARDS);
   let integrity: number = preset === "low" ? 18 : preset === "high" ? 86 : CHOICES.integrityStart;
   let revealed = !!preset && preset !== "now";
   let open: { log: number; card: ChoiceCard; place: string | null; intro?: string } | null = null;
@@ -45,7 +77,8 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   const pending: { at: number; entry: ChoiceLogEntry; effects: ChoiceEffects; headline?: string }[] = [];
 
   const settle = (c: ChoiceCard, option: string, day: string, past = false, place: string | null = null) => {
-    const r = resolveChoice(c, option, day, rng, integrity);
+    const r = resolveChoice(c, option, day, rng, integrity, memory);
+    remember(r.sets);
     const e = boundEffects(repBonus(r.effects, integrity), Number.MAX_SAFE_INTEGER);
     const before = integrity;
     integrity = applyIntegrity(integrity, e.integrity);
@@ -74,7 +107,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   // ?choice=now: a card is already waiting where the player stands.
   if (always) {
     const w = opts.where();
-    const card = pickCard(CHOICE_CARDS, { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today() }, rng)
+    const card = pickCard(pool(), { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today(), memory }, rng)
       ?? pickCard(CHOICE_CARDS.filter((c) => !c.where.places && !c.where.tags), { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today() }, rng);
     if (card) { open = { log: nextId++, card, place: w.place }; shown.push({ day: opts.today(), at: Date.now() }); }
   }
@@ -120,7 +153,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
     chains.splice(chains.indexOf(due), 1);
     if (c) open = { log: nextId++, card: c, place: opts.where().place, intro: due.intro };
   };
-  const view = () => (open ? { ...cardView(open.card, open.log, open.place), intro: open.intro ?? null } : null);
+  const view = () => (open ? { ...cardView(open.card, open.log, open.place, memory), intro: open.intro ?? null } : null);
 
   const ok = <T,>(data: T) => Promise.resolve({ ok: true as const, data });
 
@@ -148,13 +181,14 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
         return ok(null);
       }
       const where = opts.where();
-      const card = pickCard(CHOICE_CARDS, {
+      const card = pickCard(pool(), {
+        memory,
         ...where, after, integrity, rank: 3, student: true, business: true, roommate: true, history: always ? [] : history, today,
       }, rng);
       if (!card) return ok(null);
       open = { log: nextId++, card, place: where.place };
       shown.push({ day: today, at: Date.now() });
-      return ok(cardView(card, open.log, open.place));
+      return ok(cardView(card, open.log, open.place, memory));
     },
     choose: (logId: number, option: string) => {
       if (!open || open.log !== logId) return Promise.resolve({ ok: false as const, error: "That moment has passed." });

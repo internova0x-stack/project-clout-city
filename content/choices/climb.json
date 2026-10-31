@@ -1,0 +1,3808 @@
+[
+ {
+  "id": "steal-credit-pitch",
+  "base": "steal-credit",
+  "area": "fame",
+  "emoji": "💡",
+  "title": "Kwame's idea won the Triborough pitch. Chad Kensington thinks it was yours and offers you the lead.",
+  "where": {
+   "places": [
+    "triborough-works",
+    "skybridge-tower"
+   ],
+   "tags": [
+    "office",
+    "coworking"
+   ],
+   "after": [
+    "gig",
+    "shift",
+    "arrive"
+   ]
+  },
+  "options": [
+   {
+    "id": "correct",
+    "label": "Tell Chad it was Kwame's",
+    "get": "Kwame's trust, a clean name",
+    "cost": "The lead and a C$1,500 bonus",
+    "risk": "low",
+    "riskWhy": "Chad respects it, mostly",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 2,
+      "text": "Chad blinks, then gives Kwame the lead. Kwame mouths 'I owe you.' Half the floor saw what you did.",
+      "effects": {
+       "integrity": 10,
+       "clout": 40
+      },
+      "later": {
+       "afterDays": [
+        5,
+        10
+       ],
+       "chance": 0.6,
+       "emoji": "🚀",
+       "text": "Remember the pitch you gave back? Kwame's startup just got funded. He made you a founding partner, and his post naming you is everywhere.",
+       "effects": {
+        "cash": 2500,
+        "clout": 250
+       },
+       "headline": "Developing: newly funded founder Kwame names {name} as 'the reason I'm here.' Insiders say {name} once handed back a whole promotion."
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Chad shrugs: 'Fine, Kwame leads.' Kwame takes the bonus and forgets your name by Friday.",
+      "effects": {
+       "integrity": 10,
+       "mood": -5
+      }
+     }
+    ]
+   },
+   {
+    "id": "take",
+    "label": "Take the lead",
+    "get": "The lead and a C$1,500 bonus",
+    "cost": "Kwame, who sits next to you",
+    "risk": "high",
+    "riskWhy": "Kwame keeps his drafts",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You take the lead and the bonus. Kwame says nothing. He keeps saying nothing, very loudly, every day.",
+      "effects": {
+       "cash": 1500,
+       "clout": 200,
+       "integrity": -14,
+       "mood": -8
+      },
+      "later": {
+       "afterDays": [
+        3,
+        7
+       ],
+       "chance": 0.9,
+       "emoji": "🧾",
+       "text": "Remember Kwame's pitch? He kept the timestamps. He's asking you, in front of everyone, to set the record straight.",
+       "effects": {},
+       "card": "steal-credit-receipts"
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You take the lead. Kwame quits a week later for a rival firm. Nobody connects it. Yet.",
+      "effects": {
+       "cash": 1500,
+       "clout": 200,
+       "integrity": -14
+      }
+     }
+    ]
+   },
+   {
+    "id": "share",
+    "label": "Call it a team effort",
+    "get": "Half the bonus, some credit",
+    "cost": "The truth, slightly bent",
+    "risk": "medium",
+    "riskWhy": "'Team' is doing a lot of work",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Honestly? Team effort.' Chad splits the bonus. Kwame smiles like someone counting.",
+      "effects": {
+       "cash": 700,
+       "clout": 80,
+       "integrity": -5
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "steal-credit-receipts",
+  "base": "steal-credit-receipts",
+  "area": "fame",
+  "emoji": "🧾",
+  "title": "Kwame emailed the original pitch deck, timestamps and all, to the whole floor. Everyone's looking at you.",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig"
+   ]
+  },
+  "chainOnly": true,
+  "options": [
+   {
+    "id": "confess",
+    "label": "Admit it, out loud",
+    "get": "A way back, eventually",
+    "cost": "The lead, the bonus, the floor's respect",
+    "risk": "medium",
+    "riskWhy": "Apologies are long in this office",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You stand up and say it. Chad takes back the bonus and the lead. Kwame, weirdly, shakes your hand. Day one of the long way back.",
+      "effects": {
+       "cash": -1500,
+       "clout": -200,
+       "integrity": 14,
+       "mood": -12
+      }
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "Call his deck a fake",
+    "get": "The lead, if it holds",
+    "cost": "Everything, if it doesn't",
+    "risk": "high",
+    "riskWhy": "Timestamps don't blink",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You call it doctored. Half the floor believes you. Kwame's cousin, a lawyer, doesn't.",
+      "effects": {
+       "clout": 150,
+       "integrity": -12
+      },
+      "later": {
+       "afterDays": [
+        2,
+        5
+       ],
+       "chance": 1,
+       "emoji": "🪴",
+       "text": "Remember calling Kwame's deck a fake? IT pulled the server logs. Chad walked you out holding your desk plant.",
+       "effects": {
+        "clout": -300,
+        "gigLock": 3,
+        "mood": -20
+       },
+       "headline": "BREAKING: {name} walked out of Triborough Works holding a desk plant after server logs backed a coworker's claim. We reached out. The plant declined to comment."
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You call it doctored. Kwame shrugs and leaves for a rival. The lead is yours, and so is the silence at lunch.",
+      "effects": {
+       "clout": 150,
+       "integrity": -12,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "pay",
+    "label": "Offer Kwame half the bonus",
+    "get": "His silence, maybe",
+    "cost": "C$750 and a shared secret",
+    "risk": "medium",
+    "riskWhy": "Kwame might want more",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "He takes the C$750 and deletes the email. You both have to live with lunch now.",
+      "effects": {
+       "cash": -750,
+       "integrity": -6
+      }
+     },
+     {
+      "weight": 1,
+      "text": "He forwards your offer to Chad: 'They tried to buy me.' Fantastic.",
+      "effects": {
+       "clout": -250,
+       "integrity": -8,
+       "gigLock": 2
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "steal-credit-radio",
+  "base": "steal-credit",
+  "area": "fame",
+  "emoji": "🎙️",
+  "title": "Sharm hummed the hook that became Real Clout FM's new jingle. The station credits you and wants you on air.",
+  "who": "sharm",
+  "where": {
+   "places": [
+    "real-clout-fm"
+   ],
+   "tags": [
+    "radio"
+   ],
+   "after": [
+    "arrive",
+    "visit"
+   ]
+  },
+  "options": [
+   {
+    "id": "credit",
+    "label": "Tell them it was Sharm's",
+    "get": "Sharm's respect, a booth key",
+    "cost": "Your first on-air spot",
+    "risk": "low",
+    "riskWhy": "Radio people talk to each other",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'It was Sharm's.' The producer gives Sharm the credit. Sharm gives you a key to the booth and a standing invite.",
+      "effects": {
+       "integrity": 10,
+       "clout": 60
+      },
+      "later": {
+       "afterDays": [
+        4,
+        9
+       ],
+       "chance": 0.5,
+       "emoji": "📻",
+       "text": "Remember giving Sharm the jingle credit? Sharm got a second show and made you the weekly guest.",
+       "effects": {
+        "clout": 220,
+        "mood": 10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "take",
+    "label": "Take the credit",
+    "get": "On air tonight, a C$1,200 fee",
+    "cost": "Sharm hears it on her own station",
+    "risk": "high",
+    "riskWhy": "Sharm has the voice memo",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You do the segment. C$1,200. Sharm turns her studio speakers off when you walk by.",
+      "effects": {
+       "cash": 1200,
+       "clout": 180,
+       "integrity": -12
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You do the segment. C$1,200. Sharm plays her original voice memo on The Wake-Up Call the next morning.",
+      "effects": {
+       "cash": 1200,
+       "clout": 180,
+       "integrity": -12
+      },
+      "later": {
+       "afterDays": [
+        1,
+        3
+       ],
+       "chance": 1,
+       "emoji": "🎙️",
+       "text": "Remember the jingle? Sharm's voice memo from March went around. The station dropped your segment and is 'reviewing how it credits people.'",
+       "effects": {
+        "clout": -260,
+        "ban": {
+         "place": "real-clout-fm",
+         "days": 7
+        }
+       },
+       "headline": "Developing: Real Clout FM drops {name}'s segment after a voice memo shows the station jingle was hummed by its own morning DJ. We're told the jingle stays."
+      }
+     }
+    ]
+   },
+   {
+    "id": "duo",
+    "label": "Pitch going on with Sharm",
+    "get": "Half the spot, C$600",
+    "cost": "The spotlight, shared",
+    "risk": "medium",
+    "riskWhy": "The producer wanted one face",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You pitch a duo. The producer says 'cute' and books it. C$600 each and a running bit.",
+      "effects": {
+       "cash": 600,
+       "clout": 120,
+       "integrity": 6
+      }
+     },
+     {
+      "weight": 1,
+      "text": "The producer wanted one face, and now it's neither of yours.",
+      "effects": {
+       "integrity": 6,
+       "mood": -6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "plus-one-velvet",
+  "base": "plus-one",
+  "area": "fame",
+  "emoji": "🎟️",
+  "title": "Mags slides you one wristband for Peyton Pastel's VIP room. Just one. Ana paid for your ride here.",
+  "who": "mags",
+  "where": {
+   "places": [
+    "velvet-static"
+   ],
+   "tags": [
+    "club"
+   ],
+   "after": [
+    "arrive",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "alone",
+    "label": "Go in without Ana",
+    "get": "Peyton's VIP room, maybe her story",
+    "cost": "Ana, at the bar, alone",
+    "risk": "high",
+    "riskWhy": "Ana has a group chat",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Peyton tags you in her story. 40,000 people see your face. Ana sees it too, from the bus.",
+      "effects": {
+       "clout": 260,
+       "integrity": -12,
+       "mood": -8
+      },
+      "later": {
+       "afterDays": [
+        2,
+        6
+       ],
+       "chance": 0.8,
+       "emoji": "💬",
+       "text": "Remember leaving Ana at the bar? She posted the night from her side: 'Love that for you.' The comments picked a side, and it wasn't yours.",
+       "effects": {
+        "clout": -200,
+        "mood": -15
+       }
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Inside, Peyton never looks at you. You take selfies near her for an hour. Ana's not answering.",
+      "effects": {
+       "clout": 60,
+       "integrity": -12,
+       "mood": -12
+      }
+     }
+    ]
+   },
+   {
+    "id": "stay",
+    "label": "Give the wristband back",
+    "get": "Ana's night, and Ana",
+    "cost": "Peyton's VIP room",
+    "risk": "low",
+    "riskWhy": "There'll be other wristbands",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You and Ana dance by the speakers and roast every outfit going into VIP. Best night of the month.",
+      "effects": {
+       "mood": 20,
+       "integrity": 8
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "🎬",
+       "text": "Remember skipping Peyton's VIP room for Ana? Ana's cousin casts for Clout TV. She asked for you by name.",
+       "effects": {
+        "cash": 1500,
+        "clout": 200
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "sneak",
+    "label": "Get Ana in the back way",
+    "get": "Both of you in VIP",
+    "cost": "Mags's patience",
+    "risk": "high",
+    "riskWhy": "Mags has seen every trick",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The service corridor works. You're both in, and in the back of Peyton's photos all night.",
+      "effects": {
+       "clout": 180,
+       "integrity": -6,
+       "mood": 10
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Mags is at the service door. 'Seriously?' You're both off the list. Every list.",
+      "effects": {
+       "clout": -60,
+       "integrity": -6,
+       "ban": {
+        "place": "velvet-static",
+        "days": 7
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "plus-one-rooftop",
+  "base": "plus-one",
+  "area": "fame",
+  "emoji": "🌃",
+  "title": "Kiki's list for Lunaria's rooftop afterparty has your name. Not Dee's. Dee is mid-sentence.",
+  "who": "kiki",
+  "where": {
+   "places": [
+    "ditmars-heights-rooftop",
+    "altitude-718",
+    "up-on-thirty"
+   ],
+   "tags": [
+    "rooftop"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "up",
+    "label": "Go up alone",
+    "get": "Lunaria's afterparty",
+    "cost": "Dee, mid-sentence",
+    "risk": "high",
+    "riskWhy": "Dee notices exits",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lunaria asks your name twice and calls you 'the funny one.' It ends up in her caption.",
+      "effects": {
+       "clout": 280,
+       "integrity": -10,
+       "mood": -6
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.7,
+       "emoji": "🥀",
+       "text": "Remember leaving Dee at the rooftop? Dee stopped inviting you. So did Dee's friends, who turned out to be most of your friends.",
+       "effects": {
+        "mood": -20,
+        "clout": -120
+       }
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Upstairs is six people staring at phones. Lunaria leaves in four minutes. Dee went home.",
+      "effects": {
+       "clout": 40,
+       "integrity": -10,
+       "mood": -15
+      }
+     }
+    ]
+   },
+   {
+    "id": "stay",
+    "label": "Stay with Dee",
+    "get": "Dee's night",
+    "cost": "Lunaria, this once",
+    "risk": "low",
+    "riskWhy": "Lunaria has many afterparties",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'We're good down here.' Dee notices. Dee tells everyone. People like hearing it.",
+      "effects": {
+       "integrity": 8,
+       "mood": 12,
+       "clout": 40
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.4,
+       "emoji": "🎤",
+       "text": "Remember turning down Lunaria for Dee? Kiki told Lunaria's manager. 'Loyal people are rare.' You're invited to the next listening session.",
+       "effects": {
+        "clout": 260
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "pair",
+    "label": "Say 'we come as a pair'",
+    "get": "Both of you, or neither",
+    "cost": "Maybe the whole invite",
+    "risk": "medium",
+    "riskWhy": "Managers hate terms",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Kiki rolls her eyes, then waves you both up. Dee meets Lunaria. Dee will tell this story at your wedding.",
+      "effects": {
+       "clout": 160,
+       "mood": 15,
+       "integrity": 4
+      }
+     },
+     {
+      "weight": 1,
+      "text": "'Then neither.' The rope stays closed. Dee hugs you anyway.",
+      "effects": {
+       "integrity": 6,
+       "mood": 4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "leak-dm-voice-note",
+  "base": "leak-dm",
+  "area": "fame",
+  "emoji": "🍷",
+  "title": "Chardonnay Shade sent you a drunk voice note by mistake: every castmate, ranked, rudely. Lola will pay.",
+  "where": {
+   "places": [
+    "lucky-seven-deli",
+    "neon-spoon"
+   ],
+   "tags": [
+    "tea",
+    "mixer",
+    "social"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "sell",
+    "label": "Send it to Lola",
+    "get": "C$2,500 and the scoop",
+    "cost": "Chardonnay, forever",
+    "risk": "high",
+    "riskWhy": "Chardonnay can't keep a grudge quiet",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lola runs it: 'EXCLUSIVE.' C$2,500 and your name on the tip. The cast isn't speaking to Chardonnay. Or you.",
+      "effects": {
+       "cash": 2500,
+       "clout": 220,
+       "integrity": -16
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.9,
+       "emoji": "🎬",
+       "text": "Remember the voice note? Chardonnay found out who sold it. She's here, with a camera crew.",
+       "effects": {},
+       "card": "leak-dm-confront"
+      }
+     }
+    ]
+   },
+   {
+    "id": "delete",
+    "label": "Tell her, and delete it",
+    "get": "Chardonnay's number, maybe trust",
+    "cost": "C$2,500",
+    "risk": "low",
+    "riskWhy": "Deleting is free",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'You DELETED it?' She's genuinely stunned. She saves your number as 'the honest one.'",
+      "effects": {
+       "integrity": 10
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.6,
+       "emoji": "📺",
+       "text": "Remember deleting Chardonnay's voice note? She put you on her spin-off. 'Everyone needs one person who doesn't sell them out.'",
+       "effects": {
+        "clout": 300,
+        "cash": 1000
+       },
+       "headline": "Developing: Chardonnay Shade's spin-off adds {name}, called by Shade 'the only person in Queens who's never sold me out.' Filming starts soon, we're told."
+      }
+     }
+    ]
+   },
+   {
+    "id": "keep",
+    "label": "Keep it. Just in case.",
+    "get": "Leverage",
+    "cost": "Sleeping well",
+    "risk": "medium",
+    "riskWhy": "Phones get lost",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You file it in a folder called 'taxes.' It feels like carrying a lit match.",
+      "effects": {
+       "integrity": -8,
+       "mood": -6
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Weeks later Chardonnay asks, sweetly, if you got 'anything weird' from her. You say no. She knows.",
+      "effects": {
+       "integrity": -8,
+       "clout": -40
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "leak-dm-confront",
+  "base": "leak-dm-confront",
+  "area": "fame",
+  "emoji": "🎬",
+  "title": "Chardonnay Shade and a camera crew corner you: 'Did you sell my voice note?' The red light is on.",
+  "where": {
+   "after": [
+    "arrive"
+   ]
+  },
+  "chainOnly": true,
+  "options": [
+   {
+    "id": "admit",
+    "label": "Admit it on camera",
+    "get": "A clean conscience, maybe fans",
+    "cost": "Your face in a villain edit",
+    "risk": "medium",
+    "riskWhy": "Editors choose the music",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Yeah. I did. I'm sorry.' Chardonnay is speechless for the first time on camera. The episode makes you the honest villain.",
+      "effects": {
+       "clout": 120,
+       "integrity": 12,
+       "mood": -8
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You admit it. They score it with violins and a slow zoom. The comments are brutal for a week.",
+      "effects": {
+       "clout": -200,
+       "integrity": 12,
+       "mood": -15
+      }
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "Deny everything",
+    "get": "Plausible deniability",
+    "cost": "Lola, who has your email",
+    "risk": "high",
+    "riskWhy": "Lola keeps receipts",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You deny it. Lola posts your email, the timestamp and the C$2,500. On camera, Chardonnay just points.",
+      "effects": {
+       "clout": -300,
+       "integrity": -10,
+       "mood": -20
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You deny it and she believes you. Her assistant takes the blame and is fired. You sleep fine. Mostly.",
+      "effects": {
+       "clout": 80,
+       "integrity": -14
+      }
+     }
+    ]
+   },
+   {
+    "id": "lean",
+    "label": "Lean in: 'Someone had to'",
+    "get": "A villain era, and a following",
+    "cost": "Every club she drinks at",
+    "risk": "high",
+    "riskWhy": "Villains get booked and banned",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Someone had to tell the truth.' The clip goes huge. Producers love you. Velvet Static, where she drinks, doesn't.",
+      "effects": {
+       "clout": 300,
+       "integrity": -12,
+       "ban": {
+        "place": "velvet-static",
+        "days": 7
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "leak-dm-rehearsal",
+  "base": "leak-dm",
+  "area": "fame",
+  "emoji": "🎮",
+  "title": "Chase Clout left a private rehearsal on the arena's PC: an hour of him practicing his 'shocked' face.",
+  "who": "pixel",
+  "where": {
+   "places": [
+    "respawn-arena"
+   ],
+   "tags": [
+    "games",
+    "arena"
+   ],
+   "after": [
+    "arrive",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "leak",
+    "label": "Clip it and post it",
+    "get": "Millions of views",
+    "cost": "Chase's fans, forever",
+    "risk": "high",
+    "riskWhy": "Chase's chat is a hive",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Chase Clout rehearses his surprise face' gets 3 million views. Your followers triple. So does your hate mail.",
+      "effects": {
+       "clout": 300,
+       "integrity": -14,
+       "mood": -15
+      },
+      "later": {
+       "afterDays": [
+        2,
+        6
+       ],
+       "chance": 0.7,
+       "emoji": "🛑",
+       "text": "Remember the rehearsal clip? Chase's fans dug up your old posts. Pixel banned you from the arena 'to keep the peace.'",
+       "effects": {
+        "clout": -150,
+        "ban": {
+         "place": "respawn-arena",
+         "days": 7
+        }
+       }
+      }
+     },
+     {
+      "weight": 1,
+      "text": "The clip goes huge. Chase laughs it off on stream and calls you 'my biggest fan.' Somehow that's worse.",
+      "effects": {
+       "clout": 220,
+       "integrity": -14
+      }
+     }
+    ]
+   },
+   {
+    "id": "tell",
+    "label": "Close it, tell Pixel",
+    "get": "Pixel's trust, free sessions",
+    "cost": "The clip of the year",
+    "risk": "low",
+    "riskWhy": "Nobody gets hurt",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Pixel wipes the drive and comps your sessions for a month. 'You could have ended him. Weird flex not to.'",
+      "effects": {
+       "integrity": 10,
+       "energy": 20
+      },
+      "later": {
+       "afterDays": [
+        4,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "🏆",
+       "text": "Remember not leaking Chase's rehearsal? Pixel told him. Chase had you co-stream the tournament final.",
+       "effects": {
+        "clout": 280
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "shake",
+    "label": "DM Chase: 'Nice rehearsal'",
+    "get": "Cash from Chase, maybe",
+    "cost": "Your dignity, a little",
+    "risk": "high",
+    "riskWhy": "Blackmail is a strong word",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Chase's manager sends C$2,000 and 'we never spoke.' You've never spoken. You're richer.",
+      "effects": {
+       "cash": 2000,
+       "integrity": -16
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Chase reads your DM on stream: 'Chat, someone's trying to shake me down.' Chat is not on your side.",
+      "effects": {
+       "clout": -280,
+       "integrity": -16,
+       "mood": -10
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fake-romance-chase",
+  "base": "fake-romance",
+  "area": "fame",
+  "emoji": "💘",
+  "title": "Chase Clout's manager: date Chase on camera for a month. C$2,500 and a million viewers. You've met him twice.",
+  "where": {
+   "places": [
+    "respawn-arena",
+    "neon-spoon"
+   ],
+   "tags": [
+    "games",
+    "arena",
+    "hub"
+   ],
+   "after": [
+    "arrive",
+    "hangout",
+    "visit"
+   ]
+  },
+  "options": [
+   {
+    "id": "sign",
+    "label": "Sign the 'relationship'",
+    "get": "C$2,500, a million viewers",
+    "cost": "A month of fake love, then the breakup",
+    "risk": "high",
+    "riskWhy": "Fake breakups make real villains",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your first 'date' trends. C$2,500. Chase calls you 'babe' on stream and forgets your name off it.",
+      "effects": {
+       "cash": 2500,
+       "clout": 300,
+       "integrity": -12,
+       "mood": -10
+      },
+      "later": {
+       "afterDays": [
+        8,
+        14
+       ],
+       "chance": 0.8,
+       "emoji": "💔",
+       "text": "Remember dating Chase Clout 'for real'? The staged breakup aired. His edit made you the villain. His fans are thorough.",
+       "effects": {
+        "clout": -250,
+        "mood": -20
+       },
+       "headline": "BREAKING: Chase Clout and {name} split live on stream. Chase: 'I gave everything.' We're told the contract said thirty days."
+      }
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Pass",
+    "get": "Your own love life",
+    "cost": "C$2,500 and the audience",
+    "risk": "low",
+    "riskWhy": "Nothing fake to unwind",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Pass.' The manager calls Tiff next. Tiff says yes before he finishes the sentence.",
+      "effects": {
+       "integrity": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "collab",
+    "label": "Offer an honest collab",
+    "get": "A real collab, smaller money",
+    "cost": "The romance bump",
+    "risk": "medium",
+    "riskWhy": "Managers hate honesty",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Friends who game' gets C$800 and steady views. No fake tears needed.",
+      "effects": {
+       "cash": 800,
+       "clout": 120,
+       "integrity": 4
+      }
+     },
+     {
+      "weight": 1,
+      "text": "The manager laughs and hangs up. Chase's next 'girlfriend' gets your slot.",
+      "effects": {
+       "integrity": 4,
+       "mood": -4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fake-romance-brock",
+  "base": "fake-romance",
+  "area": "fame",
+  "emoji": "📸",
+  "title": "Brock Squarejaw's publicist: leave the club on Brock's arm tonight. His divorce news drops tomorrow.",
+  "where": {
+   "places": [
+    "ultraviolet-society",
+    "low-light-lounge"
+   ],
+   "tags": [
+    "exclusive_club",
+    "exclusive_venue"
+   ],
+   "after": [
+    "arrive",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "yes",
+    "label": "Walk out with Brock",
+    "get": "Every tabloid's front page",
+    "cost": "Being 'the reason,' in print",
+    "risk": "high",
+    "riskWhy": "Exes have lawyers and fans",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The photos run everywhere: 'MYSTERY NEW YORKER.' You're the mystery. The publicist sends flowers and C$1,500.",
+      "effects": {
+       "cash": 1500,
+       "clout": 300,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.7,
+       "emoji": "📰",
+       "text": "Remember leaving Ultraviolet with Brock? His ex did a tell-all. You're 'the distraction.' Her fans are organized.",
+       "effects": {
+        "clout": -220,
+        "mood": -15
+       },
+       "headline": "Developing: Brock Squarejaw's ex names {name} as 'the distraction' in a tell-all. Sources say the two left a club together once, for eleven seconds."
+      }
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Say no",
+    "get": "Your face, your story",
+    "cost": "The front page",
+    "risk": "low",
+    "riskWhy": "No photo, no fallout",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Nope.' The publicist finds someone at the bar in under a minute. You read the headlines at breakfast, unbothered.",
+      "effects": {
+       "integrity": 8,
+       "mood": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "tip",
+    "label": "Tip off Lola instead",
+    "get": "C$1,200 and Lola's gratitude",
+    "cost": "Brock's camp, and this club",
+    "risk": "medium",
+    "riskWhy": "Publicists have long memories",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lola runs 'Brock's team staging photos tonight.' C$1,200. The publicist has you walked out the side door.",
+      "effects": {
+       "cash": 1200,
+       "clout": 120,
+       "integrity": -6,
+       "ban": {
+        "place": "ultraviolet-society",
+        "days": 3
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "blame-assistant-tower",
+  "base": "blame-assistant",
+  "area": "fame",
+  "emoji": "💡",
+  "title": "You knocked over the key light at the Clout TV shoot. Nour assumes it was Jae, the 19-year-old assistant.",
+  "who": "nour",
+  "where": {
+   "places": [
+    "clout-tower"
+   ],
+   "tags": [
+    "tv"
+   ],
+   "after": [
+    "arrive",
+    "visit",
+    "gig"
+   ]
+  },
+  "options": [
+   {
+    "id": "own",
+    "label": "Say it was you",
+    "get": "A clear conscience",
+    "cost": "C$800 for the light, Nour's glare",
+    "risk": "low",
+    "riskWhy": "Honesty is rare on set",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'That was me.' You pay for the light. Nour stares, then writes something down.",
+      "effects": {
+       "cash": -800,
+       "integrity": 10
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "🎬",
+       "text": "Remember owning the light at Clout TV? Nour wrote 'trustworthy' next to your name. She's booking you for her next three shoots.",
+       "effects": {
+        "cash": 2000,
+        "clout": 200
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "blame",
+    "label": "Let them blame Jae",
+    "get": "Rebooked for the next shoot",
+    "cost": "Jae's job",
+    "risk": "high",
+    "riskWhy": "Behind-the-scenes cameras exist",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Jae gets sent home in tears. You get rebooked: C$1,200 and a better slot.",
+      "effects": {
+       "cash": 1200,
+       "clout": 150,
+       "integrity": -16
+      },
+      "later": {
+       "afterDays": [
+        2,
+        7
+       ],
+       "chance": 0.6,
+       "emoji": "📹",
+       "text": "Remember the light at Clout TV? The behind-the-scenes camera caught everything. Jae's mom posted it.",
+       "effects": {
+        "clout": -300,
+        "ban": {
+         "place": "clout-tower",
+         "days": 7
+        }
+       },
+       "headline": "BREAKING: behind-the-scenes footage shows {name} knocking over a light while a 19-year-old assistant took the fall. Clout TV is 'reviewing its talent list.'"
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Jae gets fired. You get the slot. Nobody ever finds out. You do, every time you see an assistant.",
+      "effects": {
+       "cash": 1200,
+       "clout": 150,
+       "integrity": -16,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "quiet",
+    "label": "Say nothing, help clean up",
+    "get": "Nothing, for now",
+    "cost": "Watching Jae take it",
+    "risk": "medium",
+    "riskWhy": "Silence counts too",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You sweep up glass while Jae apologizes for something you did. Nour thanks you for helping. Ouch.",
+      "effects": {
+       "integrity": -6,
+       "mood": -8
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "blame-assistant-stage",
+  "base": "blame-assistant",
+  "area": "fame",
+  "emoji": "🎛️",
+  "title": "You came in late on your set. The booker heard the screech and is glaring at Teo, the sound guy.",
+  "where": {
+   "places": [
+    "brownstone-sessions"
+   ],
+   "tags": [
+    "music_venue",
+    "lounge"
+   ],
+   "after": [
+    "arrive",
+    "gig",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "own",
+    "label": "'That was me, sorry Teo'",
+    "get": "Teo's loyalty",
+    "cost": "This booking, maybe",
+    "risk": "medium",
+    "riskWhy": "Bookers like flawless",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The booker shrugs: 'Happens.' Teo starts making you sound twice as good every set.",
+      "effects": {
+       "integrity": 10
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.6,
+       "emoji": "📼",
+       "text": "Remember owning your late entry? Teo mixed your set into a live tape. Real Clout FM won't stop playing it.",
+       "effects": {
+        "clout": 250
+       }
+      }
+     },
+     {
+      "weight": 1,
+      "text": "The booker drops you from next month. Teo buys you a drink: 'Respect.'",
+      "effects": {
+       "integrity": 10,
+       "cash": -500,
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "blame",
+    "label": "Blame the monitors",
+    "get": "Next month's headline slot",
+    "cost": "Teo's job",
+    "risk": "high",
+    "riskWhy": "Sound guys talk to every venue",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Teo's let go. You get the headline slot and C$1,500.",
+      "effects": {
+       "cash": 1500,
+       "clout": 200,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.7,
+       "emoji": "📠",
+       "text": "Remember blaming Teo's monitors? Every sound guy in Queens heard. Your next three sets sound like a fax machine.",
+       "effects": {
+        "clout": -250,
+        "mood": -15
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "joke",
+    "label": "Make it a bit on the mic",
+    "get": "A laugh, maybe",
+    "cost": "Nothing, if it lands",
+    "risk": "medium",
+    "riskWhy": "Jokes don't always land",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'That screech was the new single.' The room laughs. The booker laughs. Teo laughs loudest.",
+      "effects": {
+       "clout": 100,
+       "integrity": 2
+      }
+     },
+     {
+      "weight": 1,
+      "text": "The joke dies. The booker blames Teo anyway, and you let it happen.",
+      "effects": {
+       "clout": -40,
+       "integrity": -6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "old-friend-tiff",
+  "base": "old-friend",
+  "area": "fame",
+  "emoji": "🤳",
+  "title": "Tiff, who gave you your very first shoutout, wants a tag in your post. Your new followers find her 'cringe.'",
+  "where": {
+   "after": [
+    "arrive",
+    "hangout",
+    "eat"
+   ]
+  },
+  "options": [
+   {
+    "id": "tag",
+    "label": "Tag her",
+    "get": "Tiff's night made",
+    "cost": "Some new followers",
+    "risk": "medium",
+    "riskWhy": "Tiff's followers are bots",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You tag her. 300 people unfollow. Tiff cries in your DMs, the good kind.",
+      "effects": {
+       "clout": -100,
+       "integrity": 10,
+       "mood": 10
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.4,
+       "emoji": "📈",
+       "text": "Remember tagging Tiff when it cost you? Her 'cringe' video blew up. She's tagging you in everything. 2 million views.",
+       "effects": {
+        "clout": 300
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "Leave her on read",
+    "get": "A clean aesthetic",
+    "cost": "The person who started it",
+    "risk": "medium",
+    "riskWhy": "Tiff screenshots everything",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You leave her on read. Your engagement goes up. Tiff posts 'some people forget.'",
+      "effects": {
+       "clout": 120,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.6,
+       "emoji": "📱",
+       "text": "Remember leaving Tiff on read? Her 'some people forget' post had your old DMs in it. Everyone has a Tiff, and opinions.",
+       "effects": {
+        "clout": -200,
+        "mood": -12
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "story",
+    "label": "Tag her in a story instead",
+    "get": "Polite and quiet",
+    "cost": "Tiff can tell",
+    "risk": "low",
+    "riskWhy": "Stories vanish in a day",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "A story tag. Tiff reposts it 14 times. Nobody else notices. Fine.",
+      "effects": {
+       "integrity": 2,
+       "clout": 20
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "old-friend-polaroid",
+  "base": "old-friend",
+  "area": "fame",
+  "emoji": "🎧",
+  "title": "DJ Polaroid, who gave you your first set, begs you to come to his empty 7 PM slot. Lunaria's party is tonight.",
+  "where": {
+   "places": [
+    "hellgate-hall",
+    "discount-disco",
+    "the-sticky-floor"
+   ],
+   "tags": [
+    "club"
+   ],
+   "after": [
+    "arrive",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "go",
+    "label": "Go to Polaroid's set",
+    "get": "His night, his gratitude",
+    "cost": "Lunaria's party",
+    "risk": "low",
+    "riskWhy": "Empty rooms are honest",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You're one of four people there. You dance like it's sold out. Polaroid plays his best set ever, to you.",
+      "effects": {
+       "integrity": 10,
+       "mood": 10,
+       "clout": -40
+      },
+      "later": {
+       "afterDays": [
+        6,
+        13
+       ],
+       "chance": 0.6,
+       "emoji": "🎧",
+       "text": "Remember the empty 7 PM set? Polaroid just landed a headline night. He wants you there.",
+       "effects": {},
+       "card": "old-friend-headline"
+      }
+     }
+    ]
+   },
+   {
+    "id": "skip",
+    "label": "Go to Lunaria's",
+    "get": "Lunaria's party",
+    "cost": "Polaroid's empty room",
+    "risk": "medium",
+    "riskWhy": "DJs remember faces",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lunaria's party is everything. Polaroid plays to an empty room, and posts a photo of it.",
+      "effects": {
+       "clout": 220,
+       "integrity": -8
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "📻",
+       "text": "Remember skipping Polaroid's set? He's headlining now. Asked on the radio who stood by him, he listed everyone. Not you.",
+       "effects": {
+        "clout": -200,
+        "mood": -10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "both",
+    "label": "One song, then go",
+    "get": "Half of both nights",
+    "cost": "Feeling rushed",
+    "risk": "medium",
+    "riskWhy": "Polaroid counts minutes",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You catch one song, hug him, and make Lunaria's by midnight. Everybody sort of wins.",
+      "effects": {
+       "clout": 100,
+       "integrity": 2,
+       "energy": -15
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "old-friend-headline",
+  "base": "old-friend-headline",
+  "area": "fame",
+  "emoji": "🎉",
+  "title": "DJ Polaroid's headlining and offers you the opening set. A bigger name will pay you C$3,000 to step aside.",
+  "where": {
+   "after": [
+    "arrive"
+   ]
+  },
+  "chainOnly": true,
+  "options": [
+   {
+    "id": "open",
+    "label": "Play the opening set",
+    "get": "Your first big crowd",
+    "cost": "C$3,000",
+    "risk": "medium",
+    "riskWhy": "Big crowds are scary",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You open for Polaroid. The crowd is huge. He shouts your name on the mic like you're family.",
+      "effects": {
+       "clout": 300,
+       "integrity": 8,
+       "mood": 15
+      }
+     }
+    ]
+   },
+   {
+    "id": "sell",
+    "label": "Take C$3,000, step aside",
+    "get": "C$3,000",
+    "cost": "Polaroid's face when he hears",
+    "risk": "high",
+    "riskWhy": "Polaroid will hear why",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "C$3,000. Polaroid hears it from the big name, not from you. He doesn't call again.",
+      "effects": {
+       "cash": 3000,
+       "integrity": -14,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "give",
+    "label": "Give it to a kid who needs it",
+    "get": "Someone else's big break",
+    "cost": "Your own",
+    "risk": "low",
+    "riskWhy": "Generosity rarely backfires",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You hand it to a kid who DJs in a laundromat. Polaroid hugs you both. Lola writes it up.",
+      "effects": {
+       "clout": 150,
+       "integrity": 14,
+       "mood": 10
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "vouch-door",
+  "base": "vouch",
+  "area": "fame",
+  "emoji": "🚪",
+  "title": "At the door, a nervous kid in thrift-store clothes asks you to vouch for him. Your group is laughing.",
+  "where": {
+   "places": [
+    "ultraviolet-society",
+    "low-light-lounge"
+   ],
+   "tags": [
+    "exclusive_club",
+    "exclusive_venue"
+   ],
+   "after": [
+    "arrive"
+   ]
+  },
+  "options": [
+   {
+    "id": "vouch",
+    "label": "Vouch for him",
+    "get": "One night for him",
+    "cost": "Your group's respect, your standing",
+    "risk": "medium",
+    "riskWhy": "If he embarrasses you, you own it",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 2,
+      "text": "He gets in, dances badly and thanks you nine times. Your group calls you 'the charity.'",
+      "effects": {
+       "clout": -80,
+       "integrity": 10
+      },
+      "later": {
+       "afterDays": [
+        6,
+        14
+       ],
+       "chance": 0.5,
+       "emoji": "🧥",
+       "text": "Remember vouching for the kid at Ultraviolet? He's Skyler Beta's little brother. Skyler sent a thank-you, with stock.",
+       "effects": {
+        "cash": 3000,
+        "clout": 150
+       }
+      }
+     },
+     {
+      "weight": 1,
+      "text": "He gets in and is sick on the bouncer's shoes. You're off the list for a week.",
+      "effects": {
+       "integrity": 10,
+       "ban": {
+        "place": "ultraviolet-society",
+        "days": 7
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "laugh",
+    "label": "Laugh along",
+    "get": "Your group's approval",
+    "cost": "Being that person",
+    "risk": "medium",
+    "riskWhy": "Kids grow up",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You laugh. He leaves. Your group buys you a drink. It tastes fine.",
+      "effects": {
+       "clout": 60,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        6,
+        14
+       ],
+       "chance": 0.4,
+       "emoji": "👟",
+       "text": "Remember laughing at the kid at Ultraviolet's door? He's a designer now. He told the story in a big interview and described your shoes.",
+       "effects": {
+        "clout": -250
+       },
+       "headline": "BREAKING: rising designer recalls being laughed at by {name} outside Ultraviolet Society. 'Their shoes were worse than mine,' he told us."
+      }
+     }
+    ]
+   },
+   {
+    "id": "steer",
+    "label": "Point him to a friendlier spot",
+    "get": "A kind word, no risk",
+    "cost": "Nothing much",
+    "risk": "low",
+    "riskWhy": "Small kindness, small stakes",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Try The Sticky Floor, they're nicer.' He goes. He leaves a comment on your profile: '10/10 human.'",
+      "effects": {
+       "integrity": 6,
+       "clout": 30
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "vouch-dining-hall",
+  "base": "vouch",
+  "area": "fame",
+  "emoji": "🍽️",
+  "title": "The popular table at the dining hall waves you over. The freshman you've sat with all week has no one else.",
+  "where": {
+   "tags": [
+    "campus",
+    "university",
+    "college"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "stay",
+    "label": "Stay with the freshman",
+    "get": "His week, made",
+    "cost": "The popular table",
+    "risk": "low",
+    "riskWhy": "Popular tables ask again",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You stay. He talks about frogs for an hour. You learn a lot about frogs.",
+      "effects": {
+       "integrity": 8,
+       "mood": 8
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.4,
+       "emoji": "🗳️",
+       "text": "Remember the freshman you sat with? He won student government by a landslide. Guess who he named his chief of staff.",
+       "effects": {
+        "cash": 1500,
+        "clout": 200
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "go",
+    "label": "Switch tables",
+    "get": "Campus popularity",
+    "cost": "Someone eating alone",
+    "risk": "medium",
+    "riskWhy": "Everyone saw",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The popular table loves you. The freshman eats alone, and you see him eating alone all week.",
+      "effects": {
+       "clout": 180,
+       "integrity": -10,
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "bring",
+    "label": "Bring him along",
+    "get": "Maybe both",
+    "cost": "Maybe the invite",
+    "risk": "medium",
+    "riskWhy": "Popular tables guard chairs",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "They squeeze him in. He turns out to be hilarious. You're the one who found him.",
+      "effects": {
+       "clout": 120,
+       "integrity": 6
+      }
+     },
+     {
+      "weight": 1,
+      "text": "'Oh, we meant just you.' You both sit back down. He saw the look.",
+      "effects": {
+       "integrity": 6,
+       "mood": -6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "casting-email",
+  "base": "casting",
+  "area": "fame",
+  "emoji": "📧",
+  "title": "A casting email for Tiff landed in your inbox by mistake: a Clout TV pilot. Callbacks are tomorrow.",
+  "where": {
+   "tags": [
+    "office",
+    "coworking",
+    "gigs_board",
+    "cafe"
+   ],
+   "after": [
+    "arrive",
+    "gig",
+    "shift"
+   ]
+  },
+  "options": [
+   {
+    "id": "forward",
+    "label": "Forward it to Tiff",
+    "get": "Tiff's shot, good karma",
+    "cost": "Your own shot at it",
+    "risk": "low",
+    "riskWhy": "Nothing to hide",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You forward it. Tiff books it and thanks you on camera in episode one.",
+      "effects": {
+       "integrity": 10,
+       "clout": 80
+      },
+      "later": {
+       "afterDays": [
+        4,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "🎞️",
+       "text": "Remember forwarding Tiff's casting email? She remembered. You're her plus-one to the premiere, on the carpet.",
+       "effects": {
+        "clout": 250,
+        "mood": 10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "go",
+    "label": "Go to the callback yourself",
+    "get": "A shot at a TV pilot",
+    "cost": "Tiff's shot, quietly",
+    "risk": "high",
+    "riskWhy": "Inboxes keep records",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You show up: 'Tiff couldn't make it.' You get the part: C$2,000 and a recurring bit.",
+      "effects": {
+       "cash": 2000,
+       "clout": 250,
+       "integrity": -16
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.7,
+       "emoji": "📧",
+       "text": "Remember 'Tiff couldn't make it'? Tiff asked casting why they never emailed her. They checked. Your reply is in the chain.",
+       "effects": {
+        "clout": -300,
+        "gigLock": 3
+       },
+       "headline": "Developing: Clout TV recasts a pilot role after learning {name} answered a casting email meant for someone else. Insiders call it 'bold.'"
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You go in. They wanted Tiff's look, not yours. Nobody gets the part.",
+      "effects": {
+       "integrity": -16,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "delete",
+    "label": "Delete it",
+    "get": "One less rival",
+    "cost": "Nothing you can see",
+    "risk": "medium",
+    "riskWhy": "Deleting is a choice too",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Deleted. Tiff never knows. The role goes to someone neither of you has heard of.",
+      "effects": {
+       "integrity": -8,
+       "mood": -4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "casting-group-chat",
+  "base": "casting",
+  "area": "fame",
+  "emoji": "👟",
+  "title": "A sneaker brand wants 'one face from your friend group' and messaged you first. Your best friend fits better.",
+  "where": {
+   "after": [
+    "arrive",
+    "eat",
+    "hangout",
+    "shift"
+   ]
+  },
+  "options": [
+   {
+    "id": "recommend",
+    "label": "Recommend your friend",
+    "get": "Your friend's big break",
+    "cost": "Your own",
+    "risk": "low",
+    "riskWhy": "Friends remember",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your friend gets it and shouts you out in every interview. You're 'the friend.' It's a nice title.",
+      "effects": {
+       "integrity": 10,
+       "clout": 100
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "👟",
+       "text": "Remember giving your friend the sneaker deal? They got their own colorway. The launch party is half in your name.",
+       "effects": {
+        "cash": 2000,
+        "clout": 150
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "take",
+    "label": "Take it, say nothing",
+    "get": "A C$2,500 sneaker deal",
+    "cost": "A group chat that finds out",
+    "risk": "high",
+    "riskWhy": "Brands post their casting calls",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You take it. C$2,500. The brand posts 'we asked the whole friend group!' Your best friend reads it.",
+      "effects": {
+       "cash": 2500,
+       "clout": 200,
+       "integrity": -14,
+       "mood": -15
+      },
+      "later": {
+       "afterDays": [
+        2,
+        6
+       ],
+       "chance": 0.6,
+       "emoji": "🥞",
+       "text": "Remember the sneaker deal? The group chat renamed itself, without you in it. Brunch is cancelled indefinitely.",
+       "effects": {
+        "mood": -20,
+        "clout": -120
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "both",
+    "label": "Pitch the two of you",
+    "get": "Maybe both",
+    "cost": "Maybe neither",
+    "risk": "medium",
+    "riskWhy": "Brands like simple",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "They take you both. Half the money, double the fun.",
+      "effects": {
+       "cash": 1200,
+       "clout": 120,
+       "integrity": 4
+      }
+     },
+     {
+      "weight": 1,
+      "text": "They take neither and hire a model. At least you're even.",
+      "effects": {
+       "integrity": 4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "flatter-radio",
+  "base": "flatter",
+  "area": "fame",
+  "emoji": "🍿",
+  "title": "On air at Real Clout FM, the host asks about Brock Squarejaw's new movie. It's terrible. Brock is listening.",
+  "who": "sharm",
+  "where": {
+   "places": [
+    "real-clout-fm"
+   ],
+   "tags": [
+    "radio"
+   ],
+   "after": [
+    "arrive",
+    "visit"
+   ]
+  },
+  "options": [
+   {
+    "id": "gush",
+    "label": "Call it a masterpiece",
+    "get": "Brock's camp's attention",
+    "cost": "Your taste, on the record",
+    "risk": "medium",
+    "riskWhy": "Clips live forever",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'A masterpiece.' Brock's team DMs you set passes and C$1,500 for a cameo.",
+      "effects": {
+       "cash": 1500,
+       "clout": 200,
+       "integrity": -10
+      }
+     },
+     {
+      "weight": 1,
+      "text": "'A masterpiece.' The movie flops. Your clip becomes the movie's meme.",
+      "effects": {
+       "clout": -200,
+       "integrity": -10,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "honest",
+    "label": "Say it's bad, kindly",
+    "get": "Listeners' trust",
+    "cost": "Brock's whole camp",
+    "risk": "medium",
+    "riskWhy": "Brock reads his reviews",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Brock tries so hard, and it's so bad.' Listeners love it. The station wants you back weekly.",
+      "effects": {
+       "clout": 250,
+       "integrity": 8
+      }
+     },
+     {
+      "weight": 1,
+      "text": "'It's bad.' Brock's fans flood your posts with his abs. For days.",
+      "effects": {
+       "clout": -80,
+       "mood": -12,
+       "integrity": 8
+      }
+     }
+    ]
+   },
+   {
+    "id": "dodge",
+    "label": "Talk about the popcorn",
+    "get": "No enemies",
+    "cost": "A boring segment",
+    "risk": "low",
+    "riskWhy": "Nobody clips popcorn talk",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'The popcorn was elite.' Nobody's upset. Nobody remembers.",
+      "effects": {
+       "clout": 10,
+       "integrity": 1
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "flatter-listening",
+  "base": "flatter",
+  "area": "fame",
+  "emoji": "😭",
+  "title": "Lunaria's label wants a 'spontaneous' crying reaction to her new album, filmed before you've heard it.",
+  "where": {
+   "places": [
+    "brownstone-sessions",
+    "low-light-lounge"
+   ],
+   "tags": [
+    "music_venue",
+    "lounge"
+   ],
+   "after": [
+    "arrive",
+    "hangout",
+    "gig"
+   ]
+  },
+  "options": [
+   {
+    "id": "cry",
+    "label": "Cry on cue",
+    "get": "C$1,800 and Lunaria's repost",
+    "cost": "Every reaction you make, after",
+    "risk": "medium",
+    "riskWhy": "Fans compare timestamps",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You cry beautifully at a song you haven't heard. Lunaria reposts it. C$1,800.",
+      "effects": {
+       "cash": 1800,
+       "clout": 250,
+       "integrity": -12
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.5,
+       "emoji": "🔍",
+       "text": "Remember crying at Lunaria's album? A fan noticed you sobbed at track 4 before it started. Every reaction you ever posted is now 'evidence.'",
+       "effects": {
+        "clout": -250,
+        "mood": -10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "listen",
+    "label": "Listen first, react for real",
+    "get": "An honest reaction",
+    "cost": "Maybe the repost",
+    "risk": "medium",
+    "riskWhy": "Real reactions can be meh",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You listen. Track 3 genuinely wrecks you. The label posts it anyway, because it's real.",
+      "effects": {
+       "clout": 160,
+       "integrity": 8
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You listen and shrug. The label pays you C$200 to go away.",
+      "effects": {
+       "cash": 200,
+       "integrity": 8
+      }
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Say no",
+    "get": "Your face, unbought",
+    "cost": "C$1,800",
+    "risk": "low",
+    "riskWhy": "Labels have other criers",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I'll cry when I mean it.' The label finds another crier. You find dinner.",
+      "effects": {
+       "integrity": 6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "name-names-drink",
+  "base": "name-names",
+  "area": "fame",
+  "emoji": "🥂",
+  "title": "Lola wants to know who threw a drink at Chardonnay. It was Rudy, from your crew. Front page if you talk.",
+  "where": {
+   "places": [
+    "velvet-static",
+    "neon-spoon"
+   ],
+   "tags": [
+    "club",
+    "hub"
+   ],
+   "after": [
+    "arrive",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "name",
+    "label": "Give Lola the name",
+    "get": "Lola's front page, your quote",
+    "cost": "Rudy",
+    "risk": "high",
+    "riskWhy": "Rudy will read it",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lola runs it: 'a witness tells us.' Your quote is everywhere. So is Rudy's worst selfie.",
+      "effects": {
+       "clout": 250,
+       "integrity": -16
+      },
+      "later": {
+       "afterDays": [
+        1,
+        4
+       ],
+       "chance": 0.9,
+       "emoji": "🗣️",
+       "text": "Remember naming Rudy? Rudy knows. Rudy told the crew. Rudy is very good at telling the crew.",
+       "effects": {
+        "mood": -25,
+        "clout": -100
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "wall",
+    "label": "Say you didn't see",
+    "get": "Rudy's loyalty",
+    "cost": "The front page",
+    "risk": "low",
+    "riskWhy": "Lola respects a wall, slightly",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Didn't see a thing.' Lola sighs. Rudy buys your drinks for a month.",
+      "effects": {
+       "integrity": 6,
+       "mood": 10
+      }
+     }
+    ]
+   },
+   {
+    "id": "blame",
+    "label": "Say it was you",
+    "get": "Infamy, and Rudy owes you",
+    "cost": "Chardonnay's fans, a club ban",
+    "risk": "high",
+    "riskWhy": "Chardonnay's fans are organized",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You take it. 'The drink-thrower' turns out to be a brand. Followers pour in.",
+      "effects": {
+       "clout": 300,
+       "integrity": 4,
+       "mood": -10,
+       "ban": {
+        "place": "velvet-static",
+        "days": 7
+       }
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You take it. Chardonnay's fans flood you for a week. Rudy owes you forever, and he knows it.",
+      "effects": {
+       "clout": -150,
+       "integrity": 4,
+       "ban": {
+        "place": "velvet-static",
+        "days": 7
+       }
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "💸",
+       "text": "Remember taking the blame for Rudy's drink? Rudy got his first big paycheck. Half of it just landed in your account.",
+       "effects": {
+        "cash": 3000
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "name-names-producer",
+  "base": "name-names",
+  "area": "fame",
+  "emoji": "🎥",
+  "title": "Chardonnay Shade's producer wants a juicy secret about your best friend. A good one gets you on the show.",
+  "where": {
+   "tags": [
+    "rooftop",
+    "dining_luxury",
+    "lounge"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "spill",
+    "label": "Give them a real secret",
+    "get": "A recurring role, C$2,000",
+    "cost": "A friend's secret on TV",
+    "risk": "high",
+    "riskWhy": "Friends watch TV",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your friend's secret airs in episode two. You air in episodes two through nine.",
+      "effects": {
+       "cash": 2000,
+       "clout": 280,
+       "integrity": -18
+      },
+      "later": {
+       "afterDays": [
+        2,
+        7
+       ],
+       "chance": 1,
+       "emoji": "📺",
+       "text": "Remember the secret you sold to Chardonnay's show? Your friend watched episode two. The silence is loud.",
+       "effects": {
+        "mood": -25,
+        "clout": -60
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "invent",
+    "label": "Make up a harmless one",
+    "get": "Maybe the role",
+    "cost": "A lie on TV",
+    "risk": "medium",
+    "riskWhy": "Producers fact-check, sometimes",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You invent a story about your friend and a goose. They love it. Your friend plays along.",
+      "effects": {
+       "cash": 1000,
+       "clout": 150,
+       "integrity": -6
+      }
+     },
+     {
+      "weight": 1,
+      "text": "They check. There was no goose. You're cut, and your friend is confused.",
+      "effects": {
+       "clout": -80,
+       "integrity": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Say no",
+    "get": "A friend who keeps trusting you",
+    "cost": "The role",
+    "risk": "low",
+    "riskWhy": "No secret, no story",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Ask someone else.' The producer does. You hear their secret on TV a week later. Not yours to tell, thankfully.",
+      "effects": {
+       "integrity": 10
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "stolen-joke-cafe",
+  "base": "stolen-joke",
+  "area": "fame",
+  "emoji": "☕",
+  "title": "Your post is going viral. The joke in it is Jojo's, from the café counter last week. Nobody else knows.",
+  "who": "jojo",
+  "where": {
+   "places": [
+    "grind-and-gossip"
+   ],
+   "tags": [
+    "cafe"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "shift"
+   ]
+  },
+  "options": [
+   {
+    "id": "credit",
+    "label": "Add 'joke by Jojo'",
+    "get": "Jojo's gratitude",
+    "cost": "Half the attention",
+    "risk": "low",
+    "riskWhy": "Credit costs nothing",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You add the credit. Jojo's followers jump from 80 to 8,000. She draws free latte art for you forever.",
+      "effects": {
+       "clout": 80,
+       "integrity": 10
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "✍️",
+       "text": "Remember crediting Jojo? Her open mic tape got her into a sitcom writers' room. She got you a paid punch-up gig.",
+       "effects": {
+        "cash": 2500,
+        "clout": 100
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "keep",
+    "label": "Keep it as yours",
+    "get": "All the attention",
+    "cost": "Jojo, who saw",
+    "risk": "high",
+    "riskWhy": "Jojo has a phone",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "It's your joke now. 600,000 likes. Jojo slides your coffee across without the latte art.",
+      "effects": {
+       "clout": 250,
+       "integrity": -12
+      },
+      "later": {
+       "afterDays": [
+        2,
+        6
+       ],
+       "chance": 0.5,
+       "emoji": "🎤",
+       "text": "Remember 'your' joke? Jojo's open mic video from last spring surfaced. Same joke. Same pause.",
+       "effects": {
+        "clout": -300
+       },
+       "headline": "BREAKING: a barista's open mic tape shows {name}'s viral joke was hers first. Same punchline, same pause. We reached out. The barista said 'lol.'"
+      }
+     }
+    ]
+   },
+   {
+    "id": "pin",
+    "label": "Pin 'my barista said this'",
+    "get": "Most of the attention",
+    "cost": "Jojo's name, still missing",
+    "risk": "medium",
+    "riskWhy": "Close, but no tag",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'My barista said this 💀' pinned. It's technically true. Jojo calls it 'technically true.'",
+      "effects": {
+       "clout": 180,
+       "integrity": -4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "stolen-joke-open-mic",
+  "base": "stolen-joke",
+  "area": "fame",
+  "emoji": "📜",
+  "title": "At the campus open mic, a magazine editor is listening. The poem you're about to read as yours is your TA's.",
+  "where": {
+   "tags": [
+    "campus",
+    "university",
+    "college",
+    "library"
+   ],
+   "after": [
+    "arrive",
+    "hangout",
+    "visit"
+   ]
+  },
+  "options": [
+   {
+    "id": "read",
+    "label": "Read it as yours",
+    "get": "A shot at the magazine",
+    "cost": "Your TA's poem",
+    "risk": "high",
+    "riskWhy": "TAs read magazines",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Standing ovation. The editor wants it: C$800 and a page in print.",
+      "effects": {
+       "cash": 800,
+       "clout": 200,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.6,
+       "emoji": "📰",
+       "text": "Remember 'your' poem? The magazine printed it. Your TA reads that magazine. So does the dean.",
+       "effects": {
+        "clout": -250,
+        "mood": -15,
+        "gigLock": 2
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "credit",
+    "label": "Read it, credit her",
+    "get": "A good night, a grateful TA",
+    "cost": "The editor's interest",
+    "risk": "low",
+    "riskWhy": "Credit is safe",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'This is my TA's.' People clap anyway. The TA hears about it and offers you a paid research job.",
+      "effects": {
+       "integrity": 8,
+       "cash": 600,
+       "clout": 60
+      }
+     }
+    ]
+   },
+   {
+    "id": "own",
+    "label": "Read your own instead",
+    "get": "Your own voice",
+    "cost": "Your messiest draft, in public",
+    "risk": "medium",
+    "riskWhy": "First drafts are first drafts",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You read your own messy poem. Someone cries. It's you. Then others.",
+      "effects": {
+       "clout": 140,
+       "integrity": 8,
+       "mood": 10
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You read your own poem. A guy in the back yawns into the mic.",
+      "effects": {
+       "clout": -40,
+       "integrity": 8,
+       "mood": -8
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rumor-tea",
+  "base": "rumor",
+  "area": "fame",
+  "emoji": "🫖",
+  "title": "An anonymous gossip account wants a source to say your rival Tiff faked her charity trip. It isn't true.",
+  "where": {
+   "places": [
+    "lucky-seven-deli",
+    "neon-spoon"
+   ],
+   "tags": [
+    "tea",
+    "social",
+    "mixer"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "source",
+    "label": "Be the source",
+    "get": "Your rival, gone",
+    "cost": "A lie with your fingerprints",
+    "risk": "high",
+    "riskWhy": "Anonymous isn't forever",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The post runs. Tiff's brand deals pause. Two of them call you instead.",
+      "effects": {
+       "cash": 1500,
+       "clout": 200,
+       "integrity": -18
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.6,
+       "emoji": "🔓",
+       "text": "Remember the post about Tiff? The account got hacked. Every source is public now, including you.",
+       "effects": {
+        "clout": -300,
+        "gigLock": 3
+       },
+       "headline": "BREAKING: a gossip account's hacked inbox shows {name} fed it a false story about a rival. We reached out. They're 'taking time offline.'"
+      }
+     }
+    ]
+   },
+   {
+    "id": "warn",
+    "label": "Warn Tiff",
+    "get": "Tiff on your side",
+    "cost": "Your rival, still around",
+    "risk": "low",
+    "riskWhy": "Rivals make good allies",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Tiff gets ahead of it with receipts. The account looks foolish. Tiff owes you one.",
+      "effects": {
+       "integrity": 10,
+       "clout": 60
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.5,
+       "emoji": "🤝",
+       "text": "Remember warning Tiff? She landed the brand deal and asked them to bring you in too.",
+       "effects": {
+        "cash": 2000,
+        "clout": 100
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "pass",
+    "label": "Stay out of it",
+    "get": "Clean hands",
+    "cost": "Watching it happen anyway",
+    "risk": "medium",
+    "riskWhy": "Someone else might say yes",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You say no. Someone else says yes. The post runs anyway.",
+      "effects": {
+       "integrity": 2,
+       "mood": -6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rumor-gym",
+  "base": "rumor",
+  "area": "fame",
+  "emoji": "🏋️",
+  "title": "Your rival at the gym is up for the same sponsor. A guy offers 'proof' he's on something. It's photoshopped.",
+  "where": {
+   "places": [
+    "pressed-iron-gym",
+    "rep-count"
+   ],
+   "tags": [
+    "gym"
+   ],
+   "after": [
+    "arrive",
+    "visit"
+   ]
+  },
+  "options": [
+   {
+    "id": "post",
+    "label": "Post the 'proof'",
+    "get": "The sponsorship, probably",
+    "cost": "An innocent guy's name",
+    "risk": "high",
+    "riskWhy": "Gyms have mirrors and lawyers",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Your rival is dropped. The sponsor calls you: C$2,500 and a shoot.",
+      "effects": {
+       "cash": 2500,
+       "clout": 200,
+       "integrity": -18
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.5,
+       "emoji": "🥤",
+       "text": "Remember the 'proof'? The original photo turned up. Nothing in it but a protein shake. The gym wants your keycard back.",
+       "effects": {
+        "clout": -300,
+        "ban": {
+         "place": "pressed-iron-gym",
+         "days": 7
+        }
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "earn",
+    "label": "Beat him the hard way",
+    "get": "The sponsor, earned",
+    "cost": "Two weeks of 5 AM sessions",
+    "risk": "medium",
+    "riskWhy": "He's strong",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You train like a maniac and win the spot. You can't walk, but you won.",
+      "effects": {
+       "cash": 1500,
+       "clout": 150,
+       "integrity": 6,
+       "energy": -40
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You train like a maniac. He still wins. He spots you anyway.",
+      "effects": {
+       "integrity": 6,
+       "energy": -40,
+       "mood": -10
+      }
+     }
+    ]
+   },
+   {
+    "id": "tell",
+    "label": "Tell your rival about the fake",
+    "get": "His respect",
+    "cost": "The edge you were offered",
+    "risk": "low",
+    "riskWhy": "The truth tends to hold",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "He reports the guy. The gym bans the faker. Your rival says 'you're good people' and means it.",
+      "effects": {
+       "integrity": 10,
+       "clout": 60
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mentor-bar",
+  "base": "mentor",
+  "area": "fame",
+  "emoji": "🍸",
+  "title": "Dolores trained you behind the bar. Marcos offers you her job if you confirm she comps friends. She does.",
+  "who": "marcos",
+  "where": {
+   "places": [
+    "low-light-lounge"
+   ],
+   "tags": [
+    "lounge"
+   ],
+   "after": [
+    "shift",
+    "arrive",
+    "hangout"
+   ]
+  },
+  "options": [
+   {
+    "id": "confirm",
+    "label": "Confirm it",
+    "get": "Head bartender, C$2,000 more",
+    "cost": "Dolores",
+    "risk": "high",
+    "riskWhy": "Bar staff talk across Queens",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Dolores is out. You're in. C$2,000. The regulars ask where Dolores went, every night.",
+      "effects": {
+       "cash": 2000,
+       "clout": 120,
+       "integrity": -14,
+       "mood": -10
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.6,
+       "emoji": "🍹",
+       "text": "Remember taking Dolores's job? She opened her own bar across the street. Your regulars followed her.",
+       "effects": {
+        "cash": -1500,
+        "clout": -150
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "cover",
+    "label": "Say you never noticed",
+    "get": "Dolores's trust",
+    "cost": "The promotion",
+    "risk": "low",
+    "riskWhy": "Owners move on",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Never noticed.' Marcos sighs. Dolores slides you a drink: 'I heard.'",
+      "effects": {
+       "integrity": 8
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.5,
+       "emoji": "🍹",
+       "text": "Remember covering for Dolores? She opened her own bar and made you a partner.",
+       "effects": {
+        "cash": 2500,
+        "clout": 150
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "warn",
+    "label": "Tell Dolores to stop",
+    "get": "Both of you keep your jobs",
+    "cost": "An awkward talk",
+    "risk": "medium",
+    "riskWhy": "Dolores hates being told",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Dolores stops comping. Marcos forgets about it. Nobody loses a job.",
+      "effects": {
+       "integrity": 6,
+       "mood": 4
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Dolores stops, then works out how you knew. 'Who asked you?' Awkward month.",
+      "effects": {
+       "integrity": 6,
+       "mood": -8
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mentor-arena",
+  "base": "mentor",
+  "area": "fame",
+  "emoji": "🕹️",
+  "title": "Chase Clout's team offers you a mic if you trash Pixel's tournament on stream. Pixel gave you your start.",
+  "who": "pixel",
+  "where": {
+   "places": [
+    "respawn-arena"
+   ],
+   "tags": [
+    "games",
+    "arena"
+   ],
+   "after": [
+    "arrive",
+    "hangout",
+    "gig"
+   ]
+  },
+  "options": [
+   {
+    "id": "trash",
+    "label": "Trash the tournament",
+    "get": "Chase's commentator seat, C$1,800",
+    "cost": "Pixel, who gave you a mic first",
+    "risk": "high",
+    "riskWhy": "Pixel remembers who's loyal",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You call it 'a basement LAN party.' Chase's team hires you. Pixel watches the clip twice.",
+      "effects": {
+       "cash": 1800,
+       "clout": 250,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.6,
+       "emoji": "🚫",
+       "text": "Remember trashing Pixel's tournament? Chase got banned (again). His team dropped you the same day. Pixel's door is closed.",
+       "effects": {
+        "clout": -200,
+        "ban": {
+         "place": "respawn-arena",
+         "days": 7
+        }
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "Say no",
+    "get": "Pixel's mic, and Pixel",
+    "cost": "Chase's audience",
+    "risk": "low",
+    "riskWhy": "Loyalty is cheap to keep",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Not for me.' Pixel hears about it, somehow. He gives you the mic for the finals.",
+      "effects": {
+       "integrity": 10,
+       "clout": 120
+      }
+     }
+    ]
+   },
+   {
+    "id": "flip",
+    "label": "Go on Chase's, praise Pixel's",
+    "get": "The seat, maybe",
+    "cost": "Chase's script",
+    "risk": "medium",
+    "riskWhy": "Chase's team wanted blood",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You praise Pixel's tournament on Chase's stream. Chat loves it. Chase's team is furious, then hires you anyway.",
+      "effects": {
+       "clout": 200,
+       "cash": 800,
+       "integrity": 4
+      }
+     },
+     {
+      "weight": 1,
+      "text": "You go off script. The stream cuts you off mid-sentence.",
+      "effects": {
+       "integrity": 4,
+       "clout": -60
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "charity-pledge",
+  "base": "charity",
+  "area": "fame",
+  "emoji": "🎗️",
+  "title": "Peyton Pastel's charity stream wants pledges. Say a big number on camera and your face is on the thank-you.",
+  "where": {
+   "after": [
+    "hangout",
+    "visit",
+    "arrive"
+   ]
+  },
+  "options": [
+   {
+    "id": "real",
+    "label": "Give C$500, for real",
+    "get": "A spot on the thank-you list",
+    "cost": "C$500",
+    "risk": "low",
+    "riskWhy": "Real money is real",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "C$500 sent. Peyton reads your name between two celebrities. Small, but it's there.",
+      "effects": {
+       "cash": -500,
+       "clout": 120,
+       "integrity": 8
+      }
+     }
+    ]
+   },
+   {
+    "id": "fake",
+    "label": "Pledge C$3,000, never pay",
+    "get": "The biggest pledge, the shoutout",
+    "cost": "A promise on camera",
+    "risk": "high",
+    "riskWhy": "Charities publish who paid",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'C$3,000 from…' Peyton gasps. Your name trends. Nobody checks. Yet.",
+      "effects": {
+       "clout": 300,
+       "integrity": -18
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.7,
+       "emoji": "⭕",
+       "text": "Remember the C$3,000 pledge? The charity posted who actually paid. Your name was missing, and someone circled it.",
+       "effects": {
+        "clout": -300,
+        "mood": -15
+       },
+       "headline": "Developing: a kids' charity's donor list shows {name} pledged C$3,000 on Peyton Pastel's stream and paid C$0. Peyton has filmed an apology. For them."
+      }
+     }
+    ]
+   },
+   {
+    "id": "skip",
+    "label": "Just watch",
+    "get": "Your wallet, intact",
+    "cost": "The shoutout",
+    "risk": "low",
+    "riskWhy": "Nobody notices",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You watch. Tiff pledges C$12. Tiff gets a shoutout.",
+      "effects": {
+       "mood": -2
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "charity-game",
+  "base": "charity",
+  "area": "fame",
+  "emoji": "🏈",
+  "title": "Brick Tackleton's charity day at Meteor Park: pose with the kids for photos, or stay and coach all afternoon.",
+  "where": {
+   "places": [
+    "meteor-park",
+    "flushing-meadows"
+   ],
+   "tags": [
+    "stadium",
+    "sports",
+    "park"
+   ],
+   "after": [
+    "arrive",
+    "visit"
+   ]
+  },
+  "options": [
+   {
+    "id": "pose",
+    "label": "Pose, then leave",
+    "get": "Great photos, a free afternoon",
+    "cost": "The kids' afternoon",
+    "risk": "medium",
+    "riskWhy": "Kids talk to their parents",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Great photos. You're gone by 2. A kid asks Brick where 'the photo person' went.",
+      "effects": {
+       "clout": 200,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.4,
+       "emoji": "📸",
+       "text": "Remember the charity day photos? A parent posted you leaving at 2:03, still waving. 'The photo person.'",
+       "effects": {
+        "clout": -200
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "stay",
+    "label": "Stay and coach",
+    "get": "A dozen kids' afternoon",
+    "cost": "Your whole day",
+    "risk": "low",
+    "riskWhy": "Tired, not sorry",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You coach all afternoon. Your team loses 14 to 0. Brick hugs you like you won.",
+      "effects": {
+       "integrity": 10,
+       "energy": -30,
+       "mood": 15
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "📺",
+       "text": "Remember coaching at Brick's charity day? Brick told the story on a late-night show and called you 'the realest one there.'",
+       "effects": {
+        "clout": 300
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fake-cred-startup",
+  "base": "fake-cred",
+  "area": "fame",
+  "emoji": "🎓",
+  "title": "Skyler Beta's startup wants a 'Head of Vibes' with a degree you don't have. The form has a box to tick.",
+  "where": {
+   "places": [
+    "triborough-works",
+    "skybridge-tower"
+   ],
+   "tags": [
+    "office",
+    "coworking",
+    "gigs_board"
+   ],
+   "after": [
+    "arrive",
+    "gig"
+   ]
+  },
+  "options": [
+   {
+    "id": "tick",
+    "label": "Tick the box",
+    "get": "C$3,000 signing bonus, a title",
+    "cost": "A lie on paper",
+    "risk": "high",
+    "riskWhy": "Investors run checks",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You're Head of Vibes. C$3,000. You make a playlist and a beanbag plan.",
+      "effects": {
+       "cash": 3000,
+       "clout": 150,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.6,
+       "emoji": "🛋️",
+       "text": "Remember the degree box? Skyler's investors ran checks before a funding round. You're out. So is the playlist.",
+       "effects": {
+        "clout": -250,
+        "gigLock": 3
+       },
+       "headline": "BREAKING: Skyler Beta's latest startup parts ways with its Head of Vibes, {name}, over a degree that was 'mostly vibes.' The beanbags stay."
+      }
+     }
+    ]
+   },
+   {
+    "id": "honest",
+    "label": "Leave it blank, pitch anyway",
+    "get": "A shot on your own merits",
+    "cost": "Maybe the job",
+    "risk": "medium",
+    "riskWhy": "Startups love degrees, oddly",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Skyler hires you anyway: 'Degrees are legacy tech.' C$1,500.",
+      "effects": {
+       "cash": 1500,
+       "clout": 100,
+       "integrity": 8
+      }
+     },
+     {
+      "weight": 1,
+      "text": "They pass. Skyler says 'love the energy' and ghosts.",
+      "effects": {
+       "integrity": 8,
+       "mood": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "mill",
+    "label": "Buy an online degree tonight",
+    "get": "A 'degree,' technically",
+    "cost": "C$400 and some dignity",
+    "risk": "medium",
+    "riskWhy": "Diploma mills make the news",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The University of Excellence emails it in two hours. You start Monday: C$3,000 minus the C$400.",
+      "effects": {
+       "cash": 2600,
+       "clout": 100,
+       "integrity": -8
+      }
+     },
+     {
+      "weight": 1,
+      "text": "The University of Excellence is on the news tonight, with its student list. You're on it.",
+      "effects": {
+       "cash": -400,
+       "clout": -150,
+       "integrity": -8
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fake-cred-advisor",
+  "base": "fake-cred",
+  "area": "fame",
+  "emoji": "📈",
+  "title": "Chad Kensington, CEO, wants you as an 'advisor.' You just have to post that you've 'scaled three companies.'",
+  "where": {
+   "tags": [
+    "cafe",
+    "office",
+    "coworking",
+    "hub"
+   ],
+   "after": [
+    "arrive",
+    "eat",
+    "gig"
+   ]
+  },
+  "options": [
+   {
+    "id": "post",
+    "label": "Post it",
+    "get": "C$1,500 and a board title",
+    "cost": "A lie with your photo on it",
+    "risk": "high",
+    "riskWhy": "People check bios",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Advisor, Stealth Startup.' C$1,500. Chad's domain name now lists you.",
+      "effects": {
+       "cash": 1500,
+       "clout": 120,
+       "integrity": -10
+      },
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.5,
+       "emoji": "🍋",
+       "text": "Remember 'scaled three companies'? Someone asked which three. You named three. One is a lemonade stand. The thread has 4,000 replies.",
+       "effects": {
+        "clout": -200,
+        "mood": -10
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "honest",
+    "label": "Offer to advise, honestly",
+    "get": "A real title, smaller",
+    "cost": "The fancy bio",
+    "risk": "low",
+    "riskWhy": "Nothing to fact-check",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Advisor (learning).' Chad loves it: 'So authentic.' C$600.",
+      "effects": {
+       "cash": 600,
+       "integrity": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "pass",
+    "label": "Pass",
+    "get": "Distance from Chad",
+    "cost": "C$1,500",
+    "risk": "low",
+    "riskWhy": "Chad will pivot anyway",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You pass. Chad pivots to a new idea before dinner.",
+      "effects": {
+       "integrity": 4
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "take-the-fall-dunk",
+  "base": "take-the-fall",
+  "area": "fame",
+  "emoji": "🏀",
+  "title": "Dunk Daniels scraped a parked car outside Meteor Park. Before tip-off, he asks you to say you were driving.",
+  "where": {
+   "places": [
+    "meteor-park"
+   ],
+   "tags": [
+    "stadium",
+    "sports"
+   ],
+   "after": [
+    "arrive",
+    "ride"
+   ]
+  },
+  "options": [
+   {
+    "id": "yes",
+    "label": "Say you were driving",
+    "get": "Dunk owes you, courtside seats",
+    "cost": "An evening with Sgt. Bev",
+    "risk": "high",
+    "riskWhy": "Bev asks good questions",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Sgt. Bev takes your statement and three hours of your evening. Dunk sends courtside seats and a signed sneaker.",
+      "effects": {
+       "clout": 250,
+       "integrity": -12,
+       "holding": 3
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.8,
+       "emoji": "🏀",
+       "text": "Remember taking the fall for Dunk? He called. 'One more tiny favor.'",
+       "effects": {},
+       "card": "take-the-fall-again"
+      }
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Tell him to own it",
+    "get": "Your evening, your record",
+    "cost": "Dunk's goodwill",
+    "risk": "medium",
+    "riskWhy": "Stars don't love 'no'",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Own it, man.' Dunk stares, then laughs and leaves the owner his number and a signed ball. 'You're right.'",
+      "effects": {
+       "integrity": 10,
+       "clout": 60
+      }
+     },
+     {
+      "weight": 1,
+      "text": "Dunk shrugs and finds a rookie to say it. You're off his list.",
+      "effects": {
+       "integrity": 10,
+       "mood": -4
+      }
+     }
+    ]
+   },
+   {
+    "id": "film",
+    "label": "Film it, sell the clip",
+    "get": "C$2,500 from a tabloid",
+    "cost": "Dunk, and the stadium",
+    "risk": "high",
+    "riskWhy": "Stars have security teams",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "The clip sells for C$2,500: 'DUNK'S DING.' Meteor Park's security knows your face now.",
+      "effects": {
+       "cash": 2500,
+       "clout": 120,
+       "integrity": -14,
+       "ban": {
+        "place": "meteor-park",
+        "days": 7
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "take-the-fall-again",
+  "base": "take-the-fall-again",
+  "area": "fame",
+  "emoji": "🧳",
+  "title": "Dunk again: hold his bag at the airport while he 'talks to someone.' It's heavy. He's in a hurry.",
+  "where": {
+   "after": [
+    "arrive",
+    "ride",
+    "travel"
+   ]
+  },
+  "chainOnly": true,
+  "options": [
+   {
+    "id": "hold",
+    "label": "Hold the bag",
+    "get": "Dunk's eternal gratitude, C$3,000",
+    "cost": "Not knowing what's in it",
+    "risk": "high",
+    "riskWhy": "Airports have dogs",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "It's 200 pairs of sneakers. C$3,000 for your patience.",
+      "effects": {
+       "cash": 3000,
+       "integrity": -10
+      }
+     },
+     {
+      "weight": 1,
+      "text": "It's undeclared sneakers. Customs is not amused. Three hours in a back room.",
+      "effects": {
+       "integrity": -10,
+       "holding": 3,
+       "clout": -150
+      }
+     }
+    ]
+   },
+   {
+    "id": "done",
+    "label": "Tell him you're done",
+    "get": "Your own life back",
+    "cost": "Courtside seats",
+    "risk": "medium",
+    "riskWhy": "Stars hate a second 'no'",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'I'm done, Dunk.' He goes quiet, then says 'respect.' The courtside seats stop. You feel lighter.",
+      "effects": {
+       "integrity": 14,
+       "clout": -60,
+       "mood": 10
+      }
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "Ask what's in it first",
+    "get": "The truth",
+    "cost": "Dunk's patience",
+    "risk": "medium",
+    "riskWhy": "He might just leave",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Sneakers I didn't declare.' You walk. He finds someone who doesn't ask.",
+      "effects": {
+       "integrity": 6
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "take-the-fall-app",
+  "base": "take-the-fall",
+  "area": "fame",
+  "emoji": "🤳",
+  "title": "Skyler Beta's app leaked 10,000 users' selfies. His team asks you, intern for a day, to say you did it.",
+  "where": {
+   "places": [
+    "triborough-works",
+    "skybridge-tower"
+   ],
+   "tags": [
+    "office",
+    "coworking",
+    "gigs_board"
+   ],
+   "after": [
+    "arrive",
+    "gig",
+    "shift"
+   ]
+  },
+  "options": [
+   {
+    "id": "yes",
+    "label": "Say you pushed it",
+    "get": "C$3,000 and a 'job for life'",
+    "cost": "Your name on a data leak",
+    "risk": "high",
+    "riskWhy": "Leaks have long tails",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Intern error.' C$3,000. Skyler hugs you on stream. The internet learns your name, badly.",
+      "effects": {
+       "cash": 3000,
+       "clout": -100,
+       "integrity": -14
+      },
+      "later": {
+       "afterDays": [
+        5,
+        12
+       ],
+       "chance": 0.5,
+       "emoji": "🔎",
+       "text": "Remember 'intern error'? An investigation found the real button-pusher: Skyler. You lied for him, on the record.",
+       "effects": {
+        "clout": -300,
+        "gigLock": 3
+       },
+       "headline": "Developing: an investigation into Skyler Beta's selfie leak finds {name} was paid to take the blame. Skyler, reached for comment: 'We're pivoting.'"
+      }
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "Refuse",
+    "get": "Your name, clean",
+    "cost": "Skyler's network",
+    "risk": "low",
+    "riskWhy": "Founders forget fast",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'No.' Skyler calls you 'not a team player' on a podcast. Twelve people hear it.",
+      "effects": {
+       "integrity": 10,
+       "clout": -20
+      }
+     }
+    ]
+   },
+   {
+    "id": "lola",
+    "label": "Tell Lola who really did it",
+    "get": "Lola's scoop, C$1,500",
+    "cost": "Every startup on the gig board",
+    "risk": "medium",
+    "riskWhy": "Founders talk to each other",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "Lola runs it. Skyler's investors call him. The startups on the gig board quietly stop hiring you.",
+      "effects": {
+       "cash": 1500,
+       "clout": 200,
+       "integrity": 6,
+       "gigLock": 2
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

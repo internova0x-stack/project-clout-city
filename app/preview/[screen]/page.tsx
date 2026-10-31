@@ -52,7 +52,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
 //   /preview/home?career=new|apply|work|day|office|grudge|review|warning|fired  Careers (migration 0135; Phone → Careers)
-//   /preview/home?choice=now|back|high|low|log  Moral Choices (migration 0131): now = a card on every arrival, back = a consequence lands
+//   /preview/home?choice=now|back|high|low|log|story  Moral Choices (migration 0131): now = a card on every arrival, story = storylets from a sample history (Content Engine step 2), back = a consequence lands
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
 //   /preview/home?member=vip|monthly|cancelling|pastdue|forever|free|none  Membership & purchases (Settings, profile)
 //   /preview/home?hint=daily  Lola's daily-tasks nudge (owner, Oct 17) after 2 seconds

@@ -149,7 +149,7 @@ export function PreviewHome({
   campaignPreset?: string;
   /** Careers: ?career=new|apply|work|day|office|grudge|review|warning|fired (Phone → Careers). */
   careerPreset?: string;
-  /** Moral Choices: ?choice=now|back|high|low|log (lib/choicesSim.ts). */
+  /** Moral Choices: ?choice=now|back|high|low|log|jail|chain|story (lib/choicesSim.ts; story = storylets from a sample history). */
   choicePreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
   pushPreset?: string;

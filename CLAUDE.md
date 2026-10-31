@@ -366,8 +366,14 @@ components live in `app/globals.css`.
   ledger, careers, campaigns, choice_log, choice_marks, relationships and campus, and by the careers server (office moves, a
   polished interview). Every key is listed in lib/memory.ts `FACTS` (tests/memory.test.ts checks the list against the
   writers: add a key there when you add a writer). `player_snapshot` reads standing from the tables that hold it;
-  `player_memory` = snapshot + facts in force. Service role only; Start over forgets the player's facts. Storylets (step 2)
-  are next.
+  `player_memory` = snapshot + facts in force. Service role only; Start over forgets the player's facts.
+  Step 2, storylets (no migration): Moral Choices cards may carry `when` (conditions over memory: `has` a fact, with subject,
+  prefix, recency, count; `snap` paths), `slots` (names filled from memory: a coworker, a place, an employer, a boss; a slot's
+  source must be required by `when.all`) and outcome `sets` (facts written by `fact_note` after choice_settle). lib/storylets.ts
+  (pure: `whenOk`, `fillSlots`, `systemsOf`, `storyletProblems`, checked with the longest names filled in); `fit` weighs
+  two-system storylets ×5 and one-system ×2; app/home/choiceActions.ts reads `player_memory`. content/choices/storylets.json
+  (20 cross-system storylets and a chain), content/choices/climb.json (the 36 Climb cards, area 'fame', "The climb");
+  storylet facts are `thread.*` in lib/memory.ts. `?choice=story` in the preview (a sample history; storylets first).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
