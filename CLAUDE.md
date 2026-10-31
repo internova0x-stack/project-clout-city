@@ -400,6 +400,16 @@ components live in `app/globals.css`.
   house that serves as an office (owner, Oct 31): a TOWERS entry with stairs (`stairs: true`): Living room (`streamHouse`), Stream
   floor (`streamFloor`: eight streaming booths, ring lights, the producer's desk under the stream schedule, servers) and the Brand
   deals floor (`execFloor`).
+  Real Estate, Finance and Law (migration 0147, owner Oct 31: "go ahead"; the last "coming soon" careers): Real Estate (the
+  Hustler's) at No-Fee* Realty (31st St storefront, `officeSmall`, regular Fran the receptionist; Showing Agent 500 → Managing
+  Broker 3,000; Hustle and Smarts; Gary Pomeroy, credit-stealer; Inez, Chad; big boss Lorraine Kessler; broker fees as tips,
+  listing clout from level 3). Finance and Law (the Corporate Bro's / Girlie's): Queensboro Capital Partners in a Court Square
+  tower (`TOWERS`: Lobby, Trading floor `tradingFloor`, Executive floor; Analyst 900 → Managing Director 3,600; Smarts and
+  Hustle; Whit Carrington, micromanager; Anjali, Bradley; big boss Conrad Vance; +10 Energy, bonus season as tips from level 3)
+  and Whitlock & Hale LLP (`lawOffice`, Old English; Paralegal 600 → Name Partner 3,800; Smarts and Aura; Margaret Whitlock,
+  supportive; Desmond, Kimberly; big boss Harrison Hale III; +5 Energy, pro bono clout from level 3). Campaign background:
+  Finance fundraising ×1.3, Real Estate ×1.15, Law +1 point. Payday pays the wage and the tips as separate 'career_pay' rows
+  (`:pay:` and `:tips:`), since career_save caps each at C$5,000. `?career=realestate|finance|law`.
   Office sizes (owner, Oct 31: "depending on the size of the company"): place templates `officeSmall` (two desks and a mini
   fridge: Campaign HQ), `office` (Pedal Pushers Hub) and `officeBig` (12 × 9.5 open plan: two banks of six desks, a meeting
   table by the whiteboard, a kitchen and drinks fridge, reception, a lounge corner, a dozen coworkers: Triborough Works,

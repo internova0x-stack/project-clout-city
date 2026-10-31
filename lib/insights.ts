@@ -7,7 +7,7 @@ export interface InsightsCohort { week: string; size: number; d1: number; d1Elig
 /** Careers part 3 (migration 0143, admin_career_stats): how jobs are going; null before the migration. */
 export interface CareerStats {
   days: number; hired: number; cohort14: number; kept14: number; promoted: number;
-  working: Partial<Record<"hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion", number>>;
+  working: Partial<Record<"hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion" | "realestate" | "finance" | "law", number>>;
   aspirations: Record<string, number>;
 }
 

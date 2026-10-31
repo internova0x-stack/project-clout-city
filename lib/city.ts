@@ -294,7 +294,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby" | "streamHouse" | "atelier";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby" | "streamHouse" | "atelier" | "lawOffice";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -838,6 +838,36 @@ export const PLACES: Place[] = [
     actions: [
       { id: "fitting", kind: "visit", label: "Walk the runway at a fitting", task: "Walk the strip of black carpet like it's Paris", energy: 8, confidence: 6, clout: 10, blurb: "Madame Vernon watches, says \"again,\" and leaves. That's a compliment." },
       { id: "sample", kind: "visit", label: "Dig through the sample rack", energy: 4, mood: 4, blurb: "A coat with one sleeve. A dress that's mostly a concept. You love it." },
+    ],
+  },
+  // Real Estate, Finance and Law (owner, Oct 31): the last "coming soon" careers' workplaces.
+  {
+    id: "no-fee-realty", name: "No-Fee* Realty", emoji: "🏘️", category: "places", neighborhood: "Astoria",
+    at: [40.7622, -73.9168], depth: "scene", template: "officeSmall", palette: ["#2F7D5B", "#F2EFE8", "#1F2A2A"],
+    tags: ["office", "realty", "astoria"],
+    lore: "A storefront on 31st St with listings taped to the window: \"Sun-drenched (one window).\" \"Cozy (small).\" \"Luxury (has a door).\" The asterisk means there's a fee.",
+    actions: [
+      { id: "listings", kind: "visit", label: "Read the listings in the window", task: "Translate one listing from Realtor to English", energy: 2, mood: 3, blurb: "\"Charming\" means the radiator screams. \"Steps from the train\" means you hear it." },
+      { id: "showing", kind: "visit", label: "Tag along on a showing", energy: 8, confidence: 4, clout: 6, blurb: "A 'junior one-bedroom'. The bedroom is a loft above the fridge. Chad says 'European.'" },
+    ],
+  },
+  {
+    id: "queensboro-capital", name: "Queensboro Capital", emoji: "📈", category: "places", neighborhood: "Long Island City",
+    at: [40.7476, -73.9428], depth: "scene", template: "towerLobby", palette: ["#2FA36B", "#E6E9EE", "#14181F"],
+    tags: ["office", "finance", "lic"],
+    lore: "A glass tower in Court Square, forty floors of fleece vests. The lobby has a robot greeter and a water feature nobody is allowed to touch. The fund's slogan is \"Disrupt responsibly.\" Nobody knows what it means.",
+    actions: [
+      { id: "lobby", kind: "visit", label: "Network in the lobby", task: "Say 'let's circle back' to a stranger", energy: 6, confidence: 5, clout: 8, blurb: "Three business cards, one fleece vest compliment, zero follow-ups. Classic." },
+    ],
+  },
+  {
+    id: "whitlock-hale", name: "Whitlock & Hale LLP", emoji: "⚖️", category: "places", neighborhood: "Long Island City",
+    at: [40.7465, -73.9440], depth: "scene", template: "lawOffice", palette: ["#2F4A3A", "#E9E2D6", "#1F1B26"],
+    tags: ["office", "law", "lic"],
+    lore: "A law firm across from the courthouse: leather chairs, a wall of law books nobody has opened since 1987 and a coffee machine that bills in six-minute increments.",
+    actions: [
+      { id: "consult", kind: "visit", label: "Get a free consultation", task: "Ask a lawyer if your landlord can do that", energy: 5, mood: 3, blurb: "\"Technically, no. Practically, yes. That'll be nothing, this time.\"" },
+      { id: "library", kind: "visit", label: "Read in the law library", energy: 8, confidence: 5, blurb: "Volume 47 of something. You understand one sentence. It's a footnote." },
     ],
   },
   {
