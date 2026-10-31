@@ -1,4 +1,4 @@
--- Scenario test for migrations 0144 and 0146 (the City Hall, Streaming and Fashion careers): a 'cityhall' job can be taken, its key skills are Aura and
+-- Scenario test for migrations 0144, 0146 and 0147 (the City Hall, Streaming and Fashion careers): a 'cityhall' job can be taken, its key skills are Aura and
 -- Smarts, an unknown track is still refused, and the City Hall Annex is on the map. Rolls back.
 \set ON_ERROR_STOP on
 \pset tuples_only on
@@ -20,11 +20,15 @@ select pg_temp.assert(public.career_skills('cityhall') = array['charisma', 'smar
 select 1 from public.career_hire(pg_temp.u(1), '10000000-0000-0000-0000-000000014401', 'cityhall', 2, '{"v":1}');
 select pg_temp.assert((select track from public.careers where player_id = pg_temp.u(1)) = 'cityhall', 'hired at City Hall');
 update public.careers set status = 'quit', ended_at = now() where player_id = pg_temp.u(1);
-select pg_temp.assert(pg_temp.raises($$insert into public.careers (id, player_id, track, state) values (gen_random_uuid(), pg_temp.u(1), 'finance', '{}')$$, 'careers_track_check'), 'unknown tracks still refused');
+select pg_temp.assert(pg_temp.raises($$insert into public.careers (id, player_id, track, state) values (gen_random_uuid(), pg_temp.u(1), 'astronaut', '{}')$$, 'careers_track_check'), 'unknown tracks still refused');
 -- Migration 0146: Streaming and Fashion.
 select pg_temp.assert(public.career_skills('streaming') = array['charisma', 'hustle'] and public.career_skills('fashion') = array['photography', 'charisma'], 'streaming and fashion skills');
 insert into public.careers (id, player_id, track, state) values (gen_random_uuid(), pg_temp.u(1), 'fashion', '{}');
 select pg_temp.assert(exists (select 1 from jsonb_array_elements(public.game_settings_value('city') -> 'places') p where p ->> 'id' in ('glow-up-house', 'atelier-vernon') having count(*) = 2), 'both workplaces on the map');
+-- Migration 0147: Real Estate, Finance and Law.
+select pg_temp.assert(public.career_skills('law') = array['smarts', 'charisma'] and public.career_skills('realestate') = array['hustle', 'smarts'], 'new skills');
+insert into public.careers (id, player_id, track, status, state) values (gen_random_uuid(), pg_temp.u(1), 'law', 'quit', '{}');
+select pg_temp.assert(exists (select 1 from jsonb_array_elements(public.game_settings_value('city') -> 'places') p where p ->> 'id' in ('no-fee-realty', 'queensboro-capital', 'whitlock-hale') having count(*) = 3), 'three workplaces on the map');
 select pg_temp.assert(exists (select 1 from jsonb_array_elements(public.game_settings_value('city') -> 'places') p where p ->> 'id' = 'city-hall-annex'), 'the Annex is on the map');
 
 rollback;

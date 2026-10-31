@@ -12,7 +12,7 @@
 
 import { ASPIRE, headStart, type AspirationId } from "./aspirations.ts";
 
-export type TrackId = "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion";
+export type TrackId = "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion" | "realestate" | "finance" | "law";
 export type WorkStyle = "hustle" | "steady" | "coast";
 export type SkillId = "cooking" | "charisma" | "fitness" | "smarts" | "music" | "hustle" | "dance" | "gossip" | "photography";
 export type Persona = "supportive" | "micromanager" | "credit_stealer";
@@ -172,6 +172,68 @@ export const TRACKS: Track[] = [
       { title: "Stylist", salary: 1100, needs: { skills: { photography: 3, charisma: 3 } } },
       { title: "Head Designer", salary: 1800, needs: { skills: { photography: 5, charisma: 4 } } },
       { title: "Creative Director", salary: 2900, needs: { skills: { photography: 6, charisma: 6 }, clout: 4000 } },
+    ],
+  },
+  // Real Estate, Finance and Law (owner, Oct 31: "go ahead"): the last "coming soon" careers. Real Estate is the Hustler's,
+  // Finance and Law the Corporate Bro's / Corporate Girlie's.
+  {
+    id: "realestate", name: "Real Estate", emoji: "🏘️", employer: "No-Fee* Realty", place: "no-fee-realty",
+    blurb: "A storefront brokerage on 31st St. The asterisk is doing a lot of work. So are you.",
+    keySkills: ["hustle", "smarts"],
+    manager: { name: "Gary Pomeroy", emoji: "🕴️", persona: "credit_stealer", style: "Credit-stealer: your closings become his" },
+    friend: { name: "Inez", emoji: "🗝️" }, rival: { name: "Chad", emoji: "😁" },
+    bigBoss: { name: "Lorraine Kessler", emoji: "💍", title: "owns the brokerage, and nine buildings", short: "Lorraine" }, newHire: { name: "Milo", emoji: "🐣" },
+    successor: { name: "Deb Santangelo", emoji: "📋", persona: "supportive", style: "Supportive: fair reviews, real coaching" },
+    perks: [
+      { level: 1, text: "Broker fees: C$40 × your level a workday, paid on payday" },
+      { level: 3, text: "Listings with your face on them: 6 × your level in clout every workday" },
+    ],
+    levels: [
+      { title: "Showing Agent", salary: 500, needs: {} },
+      { title: "Leasing Agent", salary: 800, needs: { skills: { hustle: 2 } } },
+      { title: "Broker", salary: 1200, needs: { skills: { hustle: 3, smarts: 3 } } },
+      { title: "Senior Broker", salary: 1900, needs: { skills: { hustle: 5, smarts: 4 } } },
+      { title: "Managing Broker", salary: 3000, needs: { skills: { hustle: 6, smarts: 6 }, clout: 2500 } },
+    ],
+  },
+  {
+    id: "finance", name: "Finance", emoji: "📈", employer: "Queensboro Capital Partners", place: "queensboro-capital",
+    blurb: "A glass tower in Court Square. Forty floors of people who say \"circle back\" and mean \"never.\"",
+    keySkills: ["smarts", "hustle"],
+    manager: { name: "Whit Carrington", emoji: "🧑‍💼", persona: "micromanager", style: "Micromanager: three tasks a day, and a spreadsheet about them" },
+    friend: { name: "Anjali", emoji: "📊" }, rival: { name: "Bradley", emoji: "🦈" },
+    bigBoss: { name: "Conrad Vance", emoji: "🏦", title: "founded the fund (and says 'disrupt' a lot)", short: "Conrad" }, newHire: { name: "Ollie", emoji: "🧮" },
+    successor: { name: "Nadia Reyes", emoji: "📉", persona: "supportive", style: "Supportive: fair reviews, real coaching" },
+    perks: [
+      { level: 1, text: "Dinner on the firm after 8 PM: +10 Energy after every workday" },
+      { level: 3, text: "Bonus season: C$60 × your level a workday, paid on payday" },
+    ],
+    levels: [
+      { title: "Analyst", salary: 900, needs: { skills: { smarts: 3 } } },
+      { title: "Associate", salary: 1300, needs: { skills: { smarts: 4 } } },
+      { title: "Vice President", salary: 1900, needs: { skills: { smarts: 5, hustle: 4 } } },
+      { title: "Director", salary: 2700, needs: { skills: { smarts: 6, hustle: 5 } } },
+      { title: "Managing Director", salary: 3600, needs: { skills: { smarts: 8, hustle: 6 }, clout: 5000 } },
+    ],
+  },
+  {
+    id: "law", name: "Law", emoji: "⚖️", employer: "Whitlock & Hale LLP", place: "whitlock-hale",
+    blurb: "A law firm across from the Court Square Courthouse. Leather chairs, billable hours and a coffee machine older than you.",
+    keySkills: ["smarts", "charisma"],
+    manager: { name: "Margaret Whitlock", emoji: "👩‍⚖️", persona: "supportive", style: "Supportive: fair reviews, real coaching (billed in six-minute increments)" },
+    friend: { name: "Desmond", emoji: "📚" }, rival: { name: "Kimberly", emoji: "💼" },
+    bigBoss: { name: "Harrison Hale III", emoji: "🎩", title: "name partner, third of his name", short: "Mr. Hale" }, newHire: { name: "Juniper", emoji: "📝" },
+    successor: { name: "Victor Ames", emoji: "🕶️", persona: "credit_stealer", style: "Credit-stealer: your briefs, his signature" },
+    perks: [
+      { level: 1, text: "A car home after 10 PM: +5 Energy after every workday" },
+      { level: 3, text: "Pro bono wins: 7 × your level in clout every workday" },
+    ],
+    levels: [
+      { title: "Paralegal", salary: 600, needs: { skills: { smarts: 2 } } },
+      { title: "Junior Associate", salary: 1100, needs: { skills: { smarts: 3, charisma: 2 } } },
+      { title: "Senior Associate", salary: 1700, needs: { skills: { smarts: 5, charisma: 3 } } },
+      { title: "Junior Partner", salary: 2500, needs: { skills: { smarts: 6, charisma: 5 } } },
+      { title: "Name Partner", salary: 3800, needs: { skills: { smarts: 7, charisma: 6 }, clout: 3000 } },
     ],
   },
 ];
@@ -615,6 +677,18 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
     // A Streamer's raid nights pay half again (aspirations).
     if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: Math.round(6 * s.level * (_ctx.aspiration === "streamer" ? ASPIRE.streamerScreen : 1)), ref: `${s.id}:${day.day}` });
   }
+  if (s.track === "realestate") {
+    s.tips += 40 * s.level;
+    if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: 6 * s.level, ref: `${s.id}:${day.day}` });
+  }
+  if (s.track === "finance") {
+    energy += 10;
+    if (s.level >= 3) s.tips += 60 * s.level;
+  }
+  if (s.track === "law") {
+    energy += 5;
+    if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: 7 * s.level, ref: `${s.id}:${day.day}` });
+  }
   if (s.track === "fashion") {
     mood += 3;
     if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: 7 * s.level, ref: `${s.id}:${day.day}` });
@@ -664,9 +738,12 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
     s.performance = clamp(s.performance - penalty);
     lines.push(`📅 ${worked} of ${CAREER.expectedDays} workdays this week.`);
   }
-  const pay = Math.round((salaryOf(s) * Math.min(worked, CAREER.expectedDays)) / CAREER.expectedDays) + s.tips;
+  const wage = Math.round((salaryOf(s) * Math.min(worked, CAREER.expectedDays)) / CAREER.expectedDays);
+  const pay = wage + s.tips;
   if (pay > 0) {
-    payouts.push({ kind: "career_pay", currency: "cash", amount: pay, ref: `${s.id}:pay:${day}` });
+    // The wage and the tips (or bonus, or broker fees) are separate ledger rows: career_save caps each at C$5,000.
+    if (wage > 0) payouts.push({ kind: "career_pay", currency: "cash", amount: wage, ref: `${s.id}:pay:${day}` });
+    if (s.tips > 0) payouts.push({ kind: "career_pay", currency: "cash", amount: Math.min(5000, s.tips), ref: `${s.id}:tips:${day}` });
     lines.unshift(`💵 Payday: C$${pay.toLocaleString("en-US")}${s.tips ? ` (C$${s.tips.toLocaleString("en-US")} in tips)` : ""}.`);
   }
   // A joint project is judged first: a team bonus on top of payday, or a flop.

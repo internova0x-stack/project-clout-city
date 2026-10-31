@@ -159,6 +159,8 @@ from (values
                                           where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false)),
   ('0145_office_sizes.sql', coalesce((select value::text like '%officeBig%' from public.game_settings where key = 'city'), false)),
   ('0146_streaming_fashion_careers.sql', coalesce((select pg_get_constraintdef(oid) like '%fashion%' from pg_constraint
-                                                   where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false))
+                                                   where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false)),
+  ('0147_realestate_finance_law_careers.sql', coalesce((select pg_get_constraintdef(oid) like '%realestate%' from pg_constraint
+                                                        where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

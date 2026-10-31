@@ -6,7 +6,7 @@
 
 import {
   CareerError, addDays, answerTask, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, trackCards,
-  type CareerApi, type CareerCtx, type CareerResult, type CareerScreen, type CareerState,
+  type CareerApi, type CareerCtx, type TrackId, type CareerResult, type CareerScreen, type CareerState,
 } from "./careers";
 import { CAREER_CONTENT as content } from "./careersContent";
 import { changeOn, type AspirationState } from "./aspirations";
@@ -20,17 +20,17 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   // Aspirations (migration 0143): ?career=welcome opens with no pick (the welcome screen); every other preset has one.
   let asp: AspirationState = preset === "welcome" || preset === "new"
     ? { aspiration: null, chosenAt: null, degree: false, exams: 1 }
-    : { aspiration: preset === "cityhall" ? "public" : preset === "streaming" ? "streamer" : preset === "fashion" ? "influencer" : "hustler", chosenAt: "2026-10-30", degree: false, exams: 1 };
+    : { aspiration: preset === "cityhall" ? "public" : preset === "streaming" ? "streamer" : preset === "fashion" ? "influencer" : preset === "finance" || preset === "law" ? "corporate" : "hustler", chosenAt: "2026-10-30", degree: false, exams: 1 };
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1 });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1 });
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   if (preset && !["new", "apply", "welcome"].includes(preset)) {
     // ?career=cityhall: a Public Servant at the Mayor's office, clocked in.
-    state = hire(`preview-${Date.now()}`, preset === "cityhall" || preset === "streaming" || preset === "fashion" ? preset : "hospitality", ctx(), "honest", day);
-    if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit" || preset === "cityhall" || preset === "streaming" || preset === "fashion") startDay(content, state, "steady", ctx(), day, rng);
+    state = hire(`preview-${Date.now()}`, ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset) ? preset as TrackId : "hospitality", ctx(), "honest", day);
+    if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit" || ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset)) startDay(content, state, "steady", ctx(), day, rng);
     // ?career=office: clocked in with a joint project on; ?career=grudge: Kendall holds a grudge that strikes today.
     if (preset === "office") { state.workMood = 72; state.team = { with: "friend", due: state.nextReview }; }
     if (preset === "grudge") { state.workMood = 34; state.trust.rival = 20; state.grudges = [{ who: "rival", level: 2, due: day }]; }
@@ -103,4 +103,4 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 }
 
-export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "cityhall", "streaming", "fashion", "review", "warning", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "fired"] as const;

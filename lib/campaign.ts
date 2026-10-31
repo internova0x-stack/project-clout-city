@@ -45,6 +45,8 @@ export const CAMPAIGN = {
     cityhallPoints: [1, 2] as const,
     /** Streaming: chat shows up to vote. Fashion: the volunteers finally look good. */
     streamingPoints: 1, fashionMorale: 5,
+    /** Finance: donors who golf. Real Estate: landlords who donate. Law: you know the election rules cold. */
+    financeFunds: 1.3, realestateFunds: 1.15, lawPoints: 1,
     lines: {
       hospitality: "💼 You've run a floor before: the staff start in a better mood.",
       tech: "💼 Your startup contacts open their wallets: fundraising pays a fifth more.",
@@ -52,7 +54,10 @@ export const CAMPAIGN = {
       cityhall: "💼 You work in the Mayor's own office. You know his playbook, and he knows you know.",
       streaming: "💼 You told chat to register. Some of them did: 1 point up across the city.",
       fashion: "💼 You restyled the volunteers. They've never looked better, or worked harder.",
-    } as Record<"hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion", string>,
+      realestate: "💼 Every landlord in Astoria has your number. Some of them write checks: fundraising pays 15% more.",
+      finance: "💼 Your Court Square contacts golf with donors: fundraising pays 30% more.",
+      law: "💼 You know election law cold. Every filing on time: 1 point up across the city.",
+    } as Record<"hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion" | "realestate" | "finance" | "law", string>,
   },
   cleanIntegrity: 70,
   /** Team trouble after dirty play (spec section 10). */

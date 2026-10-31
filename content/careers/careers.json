@@ -2791,6 +2791,1269 @@
      ]
     }
    ]
+  },
+  {
+   "id": "re-tiny",
+   "track": "realestate",
+   "minLevel": 1,
+   "emoji": "📏",
+   "title": "You're showing a 'junior one-bedroom.' The bedroom is a loft above the fridge. The couple is 6'4\".",
+   "options": [
+    {
+     "id": "spin",
+     "label": "Call it 'European'",
+     "get": "A signed lease, maybe",
+     "cost": "Your soul, a little",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Very Parisian.' They sign. They'll hit their heads nightly. Gary high-fives you.",
+       "perf": 6,
+       "trust": {
+        "manager": 5
+       },
+       "mood": -2
+      },
+      {
+       "weight": 1,
+       "text": "He stands up into the loft. Loudly. They leave. Chad laughs from the hallway.",
+       "perf": -3,
+       "trust": {
+        "rival": -3
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "honest",
+     "label": "Tell them it won't fit",
+     "get": "Their trust",
+     "cost": "This commission",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Thank you for not lying.' They follow you to a better place. Three weeks later, a bigger deal.",
+       "perf": 4,
+       "trust": {
+        "friend": 4
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "inez",
+     "label": "Hand them to Inez",
+     "get": "Inez's goodwill",
+     "cost": "The commission",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Inez finds them a real one-bedroom. She splits the fee with you. Unheard of.",
+       "perf": 3,
+       "trust": {
+        "friend": 10
+       },
+       "mood": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "re-listing",
+   "track": "realestate",
+   "minLevel": 1,
+   "emoji": "✍️",
+   "title": "Write the listing for a basement studio next to a laundromat. Gary wants it 'aspirational.'",
+   "options": [
+    {
+     "id": "words",
+     "label": "'Garden-level oasis, fresh linen scent'",
+     "get": "Clicks",
+     "cost": "Accuracy",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Forty inquiries by lunch. The laundromat smell is, technically, fresh linen.",
+       "perf": 5,
+       "trust": {
+        "manager": 5
+       },
+       "mood": 1
+      }
+     ]
+    },
+    {
+     "id": "straight",
+     "label": "Describe it as it is",
+     "get": "Honest renters",
+     "cost": "Gary's patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Three inquiries, all serious, one signs. Gary: 'boring, but fine.'",
+       "perf": 3,
+       "trust": {
+        "manager": -2
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "chad",
+     "label": "Let Chad write it",
+     "get": "Your afternoon",
+     "cost": "Chad's adjectives",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Chad calls it 'a vibe'. It rents in a day. You hate that it worked.",
+       "perf": 2,
+       "trust": {
+        "rival": 4
+       },
+       "mood": -1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "re-key",
+   "track": "realestate",
+   "minLevel": 1,
+   "emoji": "🔑",
+   "title": "Showing in 10 minutes. You have 14 keys on a ring and none are labeled.",
+   "options": [
+    {
+     "id": "try",
+     "label": "Try every key, calmly",
+     "get": "Professionalism",
+     "cost": "Twelve awkward minutes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Key 13. The clients think you're 'thorough.' You're sweating.",
+       "perf": 3
+      }
+     ]
+    },
+    {
+     "id": "super",
+     "label": "Call the super",
+     "get": "The right key",
+     "cost": "Owing the super",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The super arrives with a sandwich and the key. You owe him a sandwich.",
+       "perf": 4,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 1
+      }
+     ]
+    },
+    {
+     "id": "charm",
+     "label": "Show the hallway 'as a teaser'",
+     "get": "Time",
+     "cost": "Credibility",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You describe the apartment from memory. They rent it sight unseen. New York, man.",
+       "perf": 5,
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "They leave after the hallway. 'We'll think about it.' They won't.",
+       "perf": -3,
+       "trust": {
+        "manager": -3
+       },
+       "mood": -2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "re-bidding",
+   "track": "realestate",
+   "minLevel": 2,
+   "emoji": "💸",
+   "title": "Two people want the same one-bedroom. One offers C$200 over asking. The other has a dog named Pickles.",
+   "options": [
+    {
+     "id": "money",
+     "label": "Take the money",
+     "get": "A bigger fee",
+     "cost": "Pickles's heart",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Lorraine is pleased. You see Pickles outside. Pickles sees you.",
+       "perf": 5,
+       "trust": {
+        "manager": 4
+       },
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "pickles",
+     "label": "Pick Pickles",
+     "get": "Your conscience",
+     "cost": "Two hundred dollars",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Pickles moves in. Their owner leaves you a five-star review that just says 'Pickles loves you'.",
+       "perf": 3,
+       "trust": {
+        "friend": 4
+       },
+       "mood": 4
+      }
+     ]
+    },
+    {
+     "id": "both",
+     "label": "Find the second one an apartment too",
+     "get": "Two deals",
+     "cost": "A long afternoon",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Both housed by 6 PM. Gary takes credit for both. Lorraine knows.",
+       "perf": 7,
+       "trust": {
+        "manager": -2
+       },
+       "mood": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "re-fee",
+   "track": "realestate",
+   "minLevel": 3,
+   "emoji": "*️⃣",
+   "title": "A client read the asterisk. They ask, very calmly, what 'No-Fee*' means.",
+   "options": [
+    {
+     "id": "explain",
+     "label": "Explain it honestly",
+     "get": "Their respect",
+     "cost": "The awkward silence",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'So there's a fee.' 'There's a fee.' They sign anyway, laughing. Honesty, a sales tool.",
+       "perf": 4,
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "waive",
+     "label": "Waive half your cut",
+     "get": "A happy client, a referral",
+     "cost": "Your money",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "They send you three friends. Two sign. The math works out.",
+       "perf": 5,
+       "trust": {
+        "friend": 4
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "deflect",
+     "label": "Change the subject to the light",
+     "get": "A signed lease",
+     "cost": "Their trust",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Look at that light!' They sign. They find the fee on their statement. A one-star review.",
+       "perf": 2,
+       "trust": {
+        "manager": 3
+       },
+       "mood": -3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "re-landlord",
+   "track": "realestate",
+   "minLevel": 3,
+   "emoji": "🏚️",
+   "title": "Lorraine wants a rent-stabilized tenant 'encouraged' to leave. She asks you to 'have a chat.'",
+   "options": [
+    {
+     "id": "refuse",
+     "label": "Refuse",
+     "get": "Your conscience",
+     "cost": "Lorraine's warmth",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Noted.' Lorraine finds someone else. Fran slips you a cookie and says 'good.'",
+       "perf": 3,
+       "trust": {
+        "friend": 6
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "buyout",
+     "label": "Negotiate a fair buyout",
+     "get": "A deal that's actually fair",
+     "cost": "Lorraine's margin",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The tenant gets enough to buy a house upstate. Lorraine grumbles and pays. Everyone survives.",
+       "perf": 6,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "chat",
+     "label": "Have the 'chat'",
+     "get": "Lorraine's favor",
+     "cost": "Something you can't take back",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You 'chat.' The tenant cries. Lorraine gives you her best listings. You don't sleep well.",
+       "perf": 5,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "re-open-house",
+   "track": "realestate",
+   "minLevel": 4,
+   "emoji": "🎈",
+   "title": "Your first luxury open house. Forty people came. Thirty-eight came for the free charcuterie.",
+   "options": [
+    {
+     "id": "work",
+     "label": "Work the room",
+     "get": "Two real buyers",
+     "cost": "Your feet",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You spot the two real ones by their shoes. Both make offers.",
+       "perf": 7,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "eat",
+     "label": "Eat the charcuterie too",
+     "get": "Morale",
+     "cost": "Professionalism",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You and the freeloaders have a great time. One of them is a buyer in disguise. Huh.",
+       "perf": 4,
+       "mood": 4
+      }
+     ]
+    },
+    {
+     "id": "milo",
+     "label": "Let Milo run it, coach from the side",
+     "get": "A protégé",
+     "cost": "Some control",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Milo sells it. He's shaking. He hugs you. Lorraine notices who trained him.",
+       "perf": 6,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-spreadsheet",
+   "track": "finance",
+   "minLevel": 1,
+   "emoji": "📊",
+   "title": "Whit wants the model 'refreshed' by 8 AM. It's 11 PM. The model has 47 tabs.",
+   "options": [
+    {
+     "id": "allnight",
+     "label": "Pull an all-nighter",
+     "get": "A flawless model",
+     "cost": "Sleep",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Tab 47 balances at 6:12 AM. Whit says 'fine' and changes the font.",
+       "perf": 7,
+       "trust": {
+        "manager": 5
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "smart",
+     "label": "Automate the boring tabs",
+     "get": "Speed",
+     "cost": "Whit's suspicion",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You script it, finish by 1 AM. Whit asks why it's 'so fast'. You say 'experience.'",
+       "perf": 6,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "anjali",
+     "label": "Split it with Anjali",
+     "get": "Half the work",
+     "cost": "A favor owed",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Two analysts, one pizza, done by 2. Anjali: 'you owe me a Sunday.'",
+       "perf": 4,
+       "trust": {
+        "friend": 8
+       },
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-jargon",
+   "track": "finance",
+   "minLevel": 1,
+   "emoji": "🗣️",
+   "title": "In the meeting, Conrad asks for your 'take on synergy-adjusted runway.' You don't think that's a thing.",
+   "options": [
+    {
+     "id": "bluff",
+     "label": "Say something confident",
+     "get": "Sounding smart",
+     "cost": "The truth",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Directionally accretive, with upside optionality.' Conrad nods. Nobody knows anything.",
+       "perf": 5,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 1
+      }
+     ]
+    },
+    {
+     "id": "ask",
+     "label": "Ask what he means",
+     "get": "Clarity",
+     "cost": "Looking junior",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He doesn't know either. He says 'let's take it offline.' Anjali kicks you under the table, proudly.",
+       "perf": 3,
+       "trust": {
+        "friend": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "bradley",
+     "label": "Let Bradley answer",
+     "get": "Safety",
+     "cost": "The spotlight",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Bradley bluffs for four minutes. Conrad loves it. You learn what not to do.",
+       "perf": 1,
+       "trust": {
+        "rival": 2
+       },
+       "mood": -1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-coffee",
+   "track": "finance",
+   "minLevel": 1,
+   "emoji": "☕",
+   "title": "Whit's coffee order is 11 words long and he wants it 'how I like it, obviously.'",
+   "options": [
+    {
+     "id": "exact",
+     "label": "Memorize it exactly",
+     "get": "Whit's grudging respect",
+     "cost": "Brain space",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Oat flat white, half-sweet, extra hot, no foam, lid off. He says nothing. That's a win.",
+       "perf": 4,
+       "trust": {
+        "manager": 5
+       }
+      }
+     ]
+    },
+    {
+     "id": "robot",
+     "label": "Send the espresso robot",
+     "get": "Efficiency",
+     "cost": "Risk",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The robot brings a double espresso. Whit stares at it, then drinks it. Character growth.",
+       "perf": 2,
+       "trust": {
+        "manager": -2
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "refuse",
+     "label": "Point out you're an analyst",
+     "get": "Dignity",
+     "cost": "Whit's mood all day",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Noted.' He gets his own coffee and sends you 30 'quick questions' about the model.",
+       "perf": -2,
+       "trust": {
+        "manager": -6
+       },
+       "mood": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-mistake",
+   "track": "finance",
+   "minLevel": 2,
+   "emoji": "🧮",
+   "title": "You find a decimal error in a deck already sent to clients. It's off by a factor of ten. In our favor.",
+   "options": [
+    {
+     "id": "flag",
+     "label": "Flag it to Whit right away",
+     "get": "A clean conscience, fast",
+     "cost": "An awful phone call",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Whit turns grey, then calls the client. They thank him for the honesty. He thanks you, quietly.",
+       "perf": 5,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "fix",
+     "label": "Quietly send a 'v2'",
+     "get": "No drama",
+     "cost": "A small cover-up",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Updated deck attached.' Nobody notices. Probably.",
+       "perf": 3,
+       "mood": -1
+      }
+     ]
+    },
+    {
+     "id": "bradley",
+     "label": "Note that Bradley built the slide",
+     "get": "Not your problem",
+     "cost": "Bradley, forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Bradley gets a talking-to. Bradley knows exactly who mentioned it.",
+       "perf": 2,
+       "trust": {
+        "rival": -10
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-tip",
+   "track": "finance",
+   "minLevel": 3,
+   "emoji": "🤫",
+   "title": "A friend at another firm hints a merger is coming. Bradley overheard. He's already opening his trading app.",
+   "options": [
+    {
+     "id": "stop",
+     "label": "Tell Bradley to stop",
+     "get": "A clean record, his maybe",
+     "cost": "Bradley's temper",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Are you serious?' He closes the app. A week later he thanks you, grudgingly, in the elevator.",
+       "perf": 4,
+       "trust": {
+        "rival": 6
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "report",
+     "label": "Report it to compliance",
+     "get": "Doing it by the book",
+     "cost": "Your friend's career",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Compliance thanks you. Your friend stops texting you. The office is very quiet.",
+       "perf": 3,
+       "trust": {
+        "manager": 4,
+        "friend": -4
+       },
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "ignore",
+     "label": "Pretend you didn't hear",
+     "get": "Peace",
+     "cost": "Being nearby when it blows up",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Bradley's trades get flagged. Compliance asks who else heard. You did.",
+       "perf": -5,
+       "trust": {
+        "manager": -6
+       },
+       "mood": -4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-pitch",
+   "track": "finance",
+   "minLevel": 3,
+   "emoji": "🎯",
+   "title": "Your first pitch to a client: a pickle company that wants to 'go global.' Conrad is watching.",
+   "options": [
+    {
+     "id": "numbers",
+     "label": "Lead with the numbers",
+     "get": "Credibility",
+     "cost": "Excitement",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Solid, careful, convincing. The pickle CEO signs. Conrad gives you a thumbs up from the back.",
+       "perf": 6,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "vision",
+     "label": "Lead with the vision",
+     "get": "Excitement",
+     "cost": "Rigor",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Pickles: the world's snack.' The CEO cries. Signs on the spot.",
+       "perf": 8,
+       "mood": 4
+      },
+      {
+       "weight": 1,
+       "text": "The CEO asks for a number. You don't have one. Bradley does.",
+       "perf": -4,
+       "trust": {
+        "rival": -4
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "tasting",
+     "label": "Bring a pickle tasting",
+     "get": "Memorable",
+     "cost": "Your fridge smells forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Everyone remembers 'the pickle pitch.' The deal closes. The fridge never recovers.",
+       "perf": 6,
+       "trust": {
+        "friend": 4
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fin-bonus",
+   "track": "finance",
+   "minLevel": 4,
+   "emoji": "💰",
+   "title": "Bonus season: Conrad asks you to rank your team. Anjali carried the year. Bradley carried the credit.",
+   "options": [
+    {
+     "id": "fair",
+     "label": "Rank by actual work",
+     "get": "A fair team",
+     "cost": "Bradley's fury",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Anjali gets the top bonus. She doesn't know it was you. Bradley suspects.",
+       "perf": 5,
+       "trust": {
+        "friend": 8,
+        "rival": -8
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "politics",
+     "label": "Rank whoever Conrad likes",
+     "get": "Conrad's approval",
+     "cost": "Your sense of self",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Bradley tops it. Conrad smiles. Anjali updates her résumé.",
+       "perf": 4,
+       "trust": {
+        "manager": 6,
+        "friend": -8
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "everyone",
+     "label": "Argue everyone deserves more",
+     "get": "Team loyalty",
+     "cost": "Seeming naive",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Conrad laughs, then raises the pool 10%. 'You're either brave or new.'",
+       "perf": 6,
+       "trust": {
+        "friend": 4,
+        "rival": 4
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-filing",
+   "track": "law",
+   "minLevel": 1,
+   "emoji": "📁",
+   "title": "A brief is due across the street at 5. It's 4:51. The printer says 'PC LOAD LETTER.'",
+   "options": [
+    {
+     "id": "run",
+     "label": "Hand-carry the USB and run",
+     "get": "Making it, barely",
+     "cost": "Dignity, in heels",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You burst in at 4:59. The clerk doesn't look up. 'Stamp.' You're a legend.",
+       "perf": 7,
+       "trust": {
+        "manager": 5
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "fix",
+     "label": "Fix the printer",
+     "get": "A clean copy",
+     "cost": "Two of your nine minutes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You kick the printer. It works. You make it with a minute to spare.",
+       "perf": 5,
+       "trust": {
+        "manager": 3
+       }
+      }
+     ]
+    },
+    {
+     "id": "desmond",
+     "label": "Call Desmond, who's at the courthouse",
+     "get": "Teamwork",
+     "cost": "A favor",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Desmond files the e-copy from the lobby. 'You owe me a pretzel.'",
+       "perf": 4,
+       "trust": {
+        "friend": 8
+       },
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-billable",
+   "track": "law",
+   "minLevel": 1,
+   "emoji": "⏱️",
+   "title": "Kimberly says she billed 26 hours yesterday. You ask how. She says 'efficiency.'",
+   "options": [
+    {
+     "id": "honest",
+     "label": "Bill your real hours",
+     "get": "Clean timesheets",
+     "cost": "Looking lazy next to her",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your 9.4 hours look tiny. Margaret circles them: 'accurate. good.'",
+       "perf": 3,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 1
+      }
+     ]
+    },
+    {
+     "id": "pad",
+     "label": "Round up generously",
+     "get": "Looking productive",
+     "cost": "A timesheet you can't defend",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your hours look great. A client questions 'Lunch (strategic)'. Margaret sighs.",
+       "perf": 2,
+       "trust": {
+        "manager": -3
+       },
+       "mood": -1
+      }
+     ]
+    },
+    {
+     "id": "report",
+     "label": "Mention it to Margaret",
+     "get": "The truth out",
+     "cost": "Kimberly's wrath",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Margaret audits. Kimberly's '26 hours' included sleeping. She knows who mentioned it.",
+       "perf": 3,
+       "trust": {
+        "rival": -10,
+        "manager": 2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-client",
+   "track": "law",
+   "minLevel": 1,
+   "emoji": "🤬",
+   "title": "A client wants to sue his upstairs neighbor for 'walking aggressively.' He's paying cash.",
+   "options": [
+    {
+     "id": "advise",
+     "label": "Advise him it won't work",
+     "get": "Honesty",
+     "cost": "The cash",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He's annoyed, then grateful. He refers his brother, who has a real case.",
+       "perf": 4,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "letter",
+     "label": "Send a strongly worded letter",
+     "get": "A happy client",
+     "cost": "Your time",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The neighbor buys a rug. Your client calls it 'a landmark victory.' He's not wrong.",
+       "perf": 5,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "take",
+     "label": "Take the case, bill everything",
+     "get": "Billable hours",
+     "cost": "The judge's patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The judge laughs for an uncomfortable time. You bill 40 hours. Margaret is not laughing.",
+       "perf": -3,
+       "trust": {
+        "manager": -6
+       },
+       "mood": -2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-research",
+   "track": "law",
+   "minLevel": 2,
+   "emoji": "📚",
+   "title": "Margaret needs a precedent by morning. The perfect case exists. It's in the law library, on paper, somewhere.",
+   "options": [
+    {
+     "id": "search",
+     "label": "Search the library by hand",
+     "get": "The case",
+     "cost": "Your evening, and your back",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Volume 47, page 1,203, footnote 9. Margaret actually says 'wow'.",
+       "perf": 7,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "database",
+     "label": "Search the database",
+     "get": "Speed",
+     "cost": "The perfect case",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You find a decent case fast. Margaret: 'There's a better one in Volume 47.' Of course.",
+       "perf": 3
+      }
+     ]
+    },
+    {
+     "id": "desmond",
+     "label": "Ask Desmond, who knows the library",
+     "get": "Teamwork",
+     "cost": "His evening",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Desmond walks straight to it. 'Volume 47. It's always 47.'",
+       "perf": 5,
+       "trust": {
+        "friend": 8
+       },
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-pro-bono",
+   "track": "law",
+   "minLevel": 3,
+   "emoji": "🤝",
+   "title": "A tenant from Queens Housing Court needs a lawyer for free. Mr. Hale says pro bono 'doesn't bill.'",
+   "options": [
+    {
+     "id": "take",
+     "label": "Take it on your own time",
+     "get": "Doing what's right",
+     "cost": "Your weekends",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You win. The tenant keeps her home and brings you baklava every month. Mr. Hale notices, quietly.",
+       "perf": 6,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 5
+      }
+     ]
+    },
+    {
+     "id": "convince",
+     "label": "Convince Mr. Hale it's good PR",
+     "get": "The firm's backing",
+     "cost": "Your pride in the motive",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Good optics.' The firm backs you. Lola runs a puff piece. You won, for the wrong reason.",
+       "perf": 5,
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "decline",
+     "label": "Decline politely",
+     "get": "Billable hours",
+     "cost": "Her case",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "She finds another lawyer. You think about it on the train home.",
+       "perf": 1,
+       "mood": -4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-cross",
+   "track": "law",
+   "minLevel": 3,
+   "emoji": "🎤",
+   "title": "Your first cross-examination. The witness is lying. You can tell. The jury can't.",
+   "options": [
+    {
+     "id": "careful",
+     "label": "Build it slowly",
+     "get": "An airtight moment",
+     "cost": "Time",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Twelve careful questions. On the thirteenth, he contradicts himself. The jury gasps.",
+       "perf": 8,
+       "trust": {
+        "manager": 5
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "bold",
+     "label": "Go for the dramatic gotcha",
+     "get": "A big moment",
+     "cost": "Risk",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Isn't it TRUE that—' 'Objection.' 'Sustained.' You sit down quietly.",
+       "perf": -4,
+       "trust": {
+        "rival": 4
+       },
+       "mood": -3
+      },
+      {
+       "weight": 1,
+       "text": "It lands. He breaks. Kimberly, in the gallery, drops her pen.",
+       "perf": 9,
+       "trust": {
+        "rival": -6
+       },
+       "mood": 4
+      }
+     ]
+    },
+    {
+     "id": "margaret",
+     "label": "Pass a note to Margaret",
+     "get": "Her experience",
+     "cost": "The spotlight",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "She does it in four questions. You learn more in four minutes than in four years.",
+       "perf": 4,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "law-partner",
+   "track": "law",
+   "minLevel": 4,
+   "emoji": "🍷",
+   "title": "Mr. Hale invites you to the partners' dinner. It's an audition. Kimberly was not invited. She knows.",
+   "options": [
+    {
+     "id": "go",
+     "label": "Go, be yourself",
+     "get": "The partners' measure of you",
+     "cost": "Kimberly's resentment",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You talk about the pro bono case. Mr. Hale says 'hm.' That's apparently very good.",
+       "perf": 6,
+       "trust": {
+        "rival": -6
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "bring",
+     "label": "Ask to bring Kimberly",
+     "get": "Grace",
+     "cost": "Some of your spotlight",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Mr. Hale is surprised, then impressed. Kimberly is speechless. Truce, maybe.",
+       "perf": 5,
+       "trust": {
+        "rival": 10
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "skip",
+     "label": "Skip it, prep for trial",
+     "get": "Your case",
+     "cost": "The audition",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You win the trial Monday. Mr. Hale: 'Missed you Friday. Good result.' Mixed signals.",
+       "perf": 4
+      }
+     ]
+    }
+   ]
   }
  ],
  "lines": {
@@ -2966,6 +4229,93 @@
     "Cute pins. Did you use a stapler?",
     "Madame looked at me today. For three seconds. You?",
     "I'd say nice work, but I don't lie at work."
+   ]
+  },
+  "realestate": {
+   "manager": {
+    "high": [
+     "Nice close. I'll tell Lorraine I mentored you. I mean, I did, spiritually.",
+     "You're a natural. Spin, smile, sign. Love it.",
+     "Keep this up and you'll get the corner of the window."
+    ],
+    "mid": [
+     "Fine. Rent it faster tomorrow.",
+     "'Cozy' is a feeling. Sell the feeling.",
+     "Call your leads. Call them again. Call them a third time."
+    ],
+    "low": [
+     "You told a client the truth? About the radiator? Why?",
+     "My grandmother closes faster, and she's not licensed.",
+     "Let's talk about urgency. Mostly yours."
+    ]
+   },
+   "friend": [
+    "Fran has cookies at the desk. Don't tell Chad.",
+    "That basement unit? Don't show it after it rains.",
+    "Lorraine asked who rented the walk-up. I said you."
+   ],
+   "rival": [
+    "I closed three today. 'European' is my word now. Trademarked.",
+    "Nice tie. Was it free with the apartment?",
+    "Gary says I'm 'the future'. You're 'the present'. Ouch."
+   ]
+  },
+  "finance": {
+   "manager": {
+    "high": [
+     "Model balanced. Font's wrong. Overall, good.",
+     "Conrad asked for you by name. Don't let it go to your head.",
+     "You can leave at nine tonight. Treat yourself."
+    ],
+    "mid": [
+     "Let's sync. Then re-sync. Then align on the sync.",
+     "Tab 12 is fine. Tab 13 is a cry for help.",
+     "Acceptable. Which here means 'try harder'."
+    ],
+    "low": [
+     "Your model has a circular reference. So does your career.",
+     "I've scheduled a 7 AM to discuss your 6 AM.",
+     "Bradley's deck had animations. Just saying."
+    ]
+   },
+   "friend": [
+    "Dinner on the firm tonight. Get the steak; we've earned it.",
+    "Bradley put 'thought leader' in his email signature.",
+    "The espresso robot likes you. It never likes anyone."
+   ],
+   "rival": [
+    "My model has 52 tabs. How many does yours have? Cute.",
+    "Conrad and I golf. Do you golf? Didn't think so.",
+    "I'd say good job, but I'm saving it for me."
+   ]
+  },
+  "law": {
+   "manager": {
+    "high": [
+     "Excellent work. I've billed nothing for saying so.",
+     "Mr. Hale asked who wrote that brief. I told him. Well done.",
+     "You found Volume 47 on your own. I'm almost proud."
+    ],
+    "mid": [
+     "Solid. Re-read it anyway. Then once more.",
+     "Good. Cite better. Sleep later.",
+     "Fine work, for the hour you did it at."
+    ],
+    "low": [
+     "That brief had a typo in the caption. The caption.",
+     "You argued with the judge? The judge?",
+     "Let's talk about 'reasonable diligence'. Yours."
+    ]
+   },
+   "friend": [
+    "Pretzel cart's back across the street. Lunch is on me.",
+    "Volume 47. Always Volume 47.",
+    "Kimberly billed 'thinking' again. Eight hours."
+   ],
+   "rival": [
+    "My brief was nine pages. Yours was eleven. Brevity, darling.",
+    "Mr. Hale complimented my tie. He's never seen yours.",
+    "I'd object, but you're not worth the motion."
    ]
   }
  }

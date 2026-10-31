@@ -1308,4 +1308,18 @@ streaming booths, ring lights, the producer's desk under the week's stream sched
 glass meeting room for sponsors). Campaign background: Streaming +1 point (chat registered),
 Fashion staff morale +5.
 
-**Later:** more tracks (Finance, Law, Real Estate), and the Climb's office cards for players with a job.
+**Real Estate, Finance and Law** (owner, Oct 31: "go ahead"; migration 0147): the last careers marked "coming soon".
+
+| Track | Employer (place) | Ladder (weekly pay) | Key skills | Manager | Perks |
+| --- | --- | --- | --- | --- | --- |
+| 🏘️ Real Estate | No-Fee* Realty (a storefront on 31st St, Astoria) | Showing Agent 500 · Leasing Agent 800 · Broker 1,200 · Senior Broker 1,900 · Managing Broker 3,000 | Hustle, Smarts | Gary Pomeroy, credit-stealer ("your closings become his") | Broker fees (C$40 × level a workday, on payday); listings with your face from level 3 (6 × level clout) |
+| 📈 Finance | Queensboro Capital Partners (a Court Square tower: lobby, trading floor, executive floor) | Analyst 900 · Associate 1,300 · Vice President 1,900 · Director 2,700 · Managing Director 3,600 | Smarts, Hustle | Whit Carrington, micromanager | Dinner on the firm (+10 Energy); bonus season from level 3 (C$60 × level a workday, on payday) |
+| ⚖️ Law | Whitlock & Hale LLP (across from the courthouse, LIC) | Paralegal 600 · Junior Associate 1,100 · Senior Associate 1,700 · Junior Partner 2,500 · Name Partner 3,800 | Smarts, Aura | Margaret Whitlock, supportive | A car home (+5 Energy); pro bono wins from level 3 (7 × level clout) |
+
+Hustlers start Real Estate a level higher; Corporate Bros and Girlies start Finance and Law a level higher. Seven tasks each
+(a 'junior one-bedroom' with a loft over the fridge, Pickles the dog, the asterisk; a 47-tab model, 'synergy-adjusted runway',
+an insider tip, the pickle pitch; PC LOAD LETTER at 4:51, Kimberly's 26-hour day, Volume 47, a cross-examination, the partners'
+dinner). Fran, the receptionist, is No-Fee* Realty's regular. Campaign background: Finance fundraising ×1.3, Real Estate ×1.15,
+Law +1 point. Payday now pays the wage and the tips (or bonus, or broker fees) as two ledger rows.
+
+**Later:** the Climb's office cards for players with a job.

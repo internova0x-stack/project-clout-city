@@ -318,7 +318,7 @@ export async function previewStudioInsights(days: number) {
     economy: { medianCash: 4180, medianClout: 640 },
     careers: {
       days: n, hired: Math.round(118 * n / 30), cohort14: Math.round(96 * n / 30), kept14: Math.round(61 * n / 30), promoted: Math.round(34 * n / 30),
-      working: { hospitality: 41, tech: 27, media: 33, cityhall: 12, streaming: 19, fashion: 14 },
+      working: { hospitality: 41, tech: 27, media: 33, cityhall: 12, streaming: 19, fashion: 14, realestate: 11, finance: 16, law: 9 },
       aspirations: { corporate: 212, influencer: 305, streamer: 168, celebrity: 241, hustler: 190, public: 64, home: 77 },
     },
   });

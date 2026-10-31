@@ -26,8 +26,8 @@ export const ASPIRATIONS: Aspiration[] = [
   {
     id: "corporate", emoji: "💼", name: "Corporate Bro / Corporate Girlie",
     tagline: "Lanyard on, calendar full, three meetings about the meeting.",
-    tracks: ["tech"], later: ["Finance", "Law"],
-    perks: ["Tech jobs start one level higher"],
+    tracks: ["tech", "finance", "law"], later: [],
+    perks: ["Tech, Finance and Law jobs start one level higher"],
   },
   {
     id: "influencer", emoji: "🤳", name: "Budding Influencer",
@@ -50,8 +50,8 @@ export const ASPIRATIONS: Aspiration[] = [
   {
     id: "hustler", emoji: "💸", name: "Hustler",
     tagline: "Three side hustles and a fourth that's 'in development.'",
-    tracks: ["hospitality"], later: ["Real Estate"],
-    perks: ["Hospitality jobs start one level higher"],
+    tracks: ["hospitality", "realestate"], later: [],
+    perks: ["Hospitality and Real Estate jobs start one level higher"],
   },
   {
     id: "public", emoji: "🏛️", name: "Public Servant",

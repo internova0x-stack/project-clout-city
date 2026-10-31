@@ -889,6 +889,33 @@
       "role": "the house manager",
       "regular": "marisela",
       "slang": []
+    },
+    {
+      "id": "fran",
+      "name": "Francesca \"Fran\" Lombardi",
+      "age": 61,
+      "background": "Italian-American, born in Astoria above her father's shoe-repair shop",
+      "personality": "Has answered No-Fee* Realty's phone for twenty-six years and translated every listing for every renter who asked. Knows which landlords fix radiators. Knows which ones lie about it.",
+      "yearsInNeighborhood": 61,
+      "catchphrases": [
+        "'Charming' means old. 'Cozy' means small. 'Vibrant' means loud.",
+        "Never sign anything Gary hands you on a Friday.",
+        "The asterisk is the fee, sweetheart. It's always the fee."
+      ],
+      "likes": [
+        "Rent-stabilized apartments",
+        "A good ricotta",
+        "Tenants who read the lease"
+      ],
+      "dislikes": [
+        "The word 'junior' before 'one-bedroom'",
+        "Chad's cologne",
+        "Landlords who say 'it's an old building'"
+      ],
+      "placeId": "no-fee-realty",
+      "role": "the receptionist",
+      "regular": "fran",
+      "slang": []
     }
   ],
   "roommates": [

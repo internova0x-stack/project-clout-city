@@ -44,7 +44,7 @@ export interface StartInput {
   aspiration?: string | null;
   /** Careers part 3 (owner, Oct 31): the manager's current job, as background (Hospitality: a happier staff; Tech: the
    * startup crowd's money; Media: name recognition). */
-  career?: { track: "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion"; level: number } | null;
+  career?: { track: "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion" | "realestate" | "finance" | "law"; level: number } | null;
   candidate: CandidateId;
   clout: number;
   crew: number;
@@ -63,7 +63,8 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5) + (input.aspiration === "public" ? 3 : 0)
     + (job?.track === "media" ? CAMPAIGN.background.mediaPoints : 0)
     + (job?.track === "cityhall" ? CAMPAIGN.background.cityhallPoints[job.level >= 3 ? 1 : 0] : 0)
-    + (job?.track === "streaming" ? CAMPAIGN.background.streamingPoints : 0);
+    + (job?.track === "streaming" ? CAMPAIGN.background.streamingPoints : 0)
+    + (job?.track === "law" ? CAMPAIGN.background.lawPoints : 0);
   const places: CampaignState["places"] = {};
   for (const p of content.places) {
     const lean = (c.places[p.id] ?? 0) + (input.home === p.id ? 3 : 0);
@@ -81,7 +82,7 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
     trust, budget: { digital: 0, street: 0, tv: 0 }, slots: Array(CAMPAIGN.slots).fill(null),
     inbox: [], pending: [], seen: [], traces: [], factChecks: [], dirtyOps: 0, exposures: 0, events: [], prepped: [],
     debate: null, recap: null, receipts: [], log: [], election: null, ending: null,
-    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: (1 + Math.min(1, Math.max(0, input.clout) / 5000)) * (job?.track === "tech" ? CAMPAIGN.background.techFunds : 1), wonBefore: input.wonBefore, band: input.band ?? undefined },
+    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: (1 + Math.min(1, Math.max(0, input.clout) / 5000)) * (job?.track === "tech" ? CAMPAIGN.background.techFunds : job?.track === "finance" ? CAMPAIGN.background.financeFunds : job?.track === "realestate" ? CAMPAIGN.background.realestateFunds : 1), wonBefore: input.wonBefore, band: input.band ?? undefined },
     earned: 0, dilemmas: {}, turnout: {}, queue: [], before: null,
   };
   if (job) {
