@@ -109,7 +109,7 @@ export function validateHunt(raw: unknown, opts: { storyPlaces?: string[] } = {}
   const f = raw as Partial<HuntFile> | null;
   if (!f || typeof f !== "object") return { ok: false, problems: ["That isn't a hunt file."] };
   const week = typeof f.week === "string" ? f.week : "";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(week) || new Date(`${week}T12:00:00Z`).getUTCDay() !== 1) problems.push(`week: "${week}" must be a Monday (YYYY-MM-DD)`);
+  if (!huntWeekOk(week)) problems.push(`week: "${week}" must be a Saturday (YYYY-MM-DD): hunts run Saturday to Friday`);
   if (!/^[a-z0-9-]{3,40}$/.test(f.id ?? "")) problems.push("id: 3 to 40 lowercase letters, numbers and dashes");
   if (!len(f.theme, 4, 60)) problems.push("theme: 4 to 60 characters");
   if (!len(f.intro, 20, 500)) problems.push("intro: 20 to 500 characters");
@@ -158,7 +158,18 @@ export function validateHunt(raw: unknown, opts: { storyPlaces?: string[] } = {}
   return problems.length ? { ok: false, problems } : { ok: true, hunt: f as HuntFile };
 }
 
-/** The hunt runs Monday to Sunday of its week, New York time. */
+/**
+ * Hunts run Saturday to Friday, New York time (owner, Oct 31: vetoed on Fridays, live on Saturdays). Weeks before the
+ * switch (`HUNT_SATURDAYS_FROM`) ran Monday to Sunday and keep their Monday.
+ */
+export const HUNT_SATURDAYS_FROM = "2026-11-07";
+export function huntWeekOk(week: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) return false;
+  const day = new Date(`${week}T12:00:00Z`).getUTCDay();
+  return week >= HUNT_SATURDAYS_FROM ? day === 6 : day === 1;
+}
+
+/** The hunt runs for seven days from its first day (a Saturday; a Monday before the switch). */
 export function huntLive(week: string, today: string): boolean {
   return today >= week && today <= addDays(week, 6);
 }

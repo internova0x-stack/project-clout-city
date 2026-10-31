@@ -18,13 +18,13 @@ database version players use).
    ledger kind `hunt`), keeps a **hunt card** (Collection and the Hunt tab; free, no net-worth
    value, can't be sold), and four hunts earn the 🏅 Treasure Hunter badge.
 5. **World.** Regulars mention the player's treasure in their everyday lines while they hunt.
-6. **Schedule.** Monday 00:00 to Sunday 23:59, New York time. Unfinished hunts simply end.
+6. **Schedule.** Saturday 00:00 to Friday 23:59, New York time (owner, Oct 31; Monday to Sunday before 2026-11-07). Friday is the owner's veto window: pause it in the Studio. Unfinished hunts simply end.
 
 ## Writing a week
 
-Add `content/hunts/<Monday>.json` (see `2026-10-19.json`):
+Add `content/hunts/<Saturday>.json` (see `2026-10-19.json`, from the Monday weeks):
 
-- `week` (a Monday), `id` (slug), `theme`, `intro` (shown before joining; name the first place).
+- `week` (a Saturday; Mondays before 2026-11-07), `id` (slug), `theme`, `intro` (shown before joining; name the first place).
 - `places`: 4 or 5 place ids, each with a regular. At least one costs C$10 or less.
 - `chatter`: 1 to 6 lines regulars say to joined players; `{treasure}` becomes the treasure.
 - `tracks`: one per starting style, each `{ treasure, emoji, lore, steps }` with one step per place.
@@ -48,7 +48,7 @@ places touched by any story running that week.
    (`docs/WEEKLY-CONTENT.md`).
 2. Skim the eight tracks (treasure and finale answer), then pick one to read in full, with the
    answers marked.
-3. **Approve**, or **Send back** with a note for the writer. It goes live on its Monday. **Pause**
+3. **Approve**, or **Send back** with a note for the writer. It goes live on its Saturday (pause it by Friday to veto). **Pause**
    hides it at once (players keep their progress); **Back to review** parks it. Re-uploading it
    unchanged keeps it approved; any edit sends it back to review.
 4. **Replacing a week's hunt:** upload a different hunt for the same week and it replaces the old

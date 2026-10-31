@@ -4,7 +4,7 @@ import { CITY_ECONOMY, placeById } from "@/lib/city";
 import { callName, regularAt } from "@/lib/cast";
 import { formatCash } from "@/lib/economy";
 import type { HuntState } from "@/lib/hunts";
-import { nextNyMonday, nyMidnightLine } from "@/lib/localTime";
+import { nextNySaturday, nyMidnightLine } from "@/lib/localTime";
 import { getStyle } from "@/lib/styles";
 
 const dayName = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(undefined, { weekday: "long", timeZone: "UTC" });
@@ -29,7 +29,7 @@ export function HuntTab({ state, style, busy, onJoin, onOpenPlace }: {
       {!h ? (
         <div className="card stack-4">
           <p className="overline" style={{ margin: 0 }}>🗺️ Treasure hunt</p>
-          <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>No hunt this week. A new one starts {nyMidnightLine(nextNyMonday(Date.now()))}.</p>
+          <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>No hunt this week. A new one starts {nyMidnightLine(nextNySaturday(Date.now()))}.</p>
         </div>
       ) : !h.joined ? (
         <div className="card stack-12">

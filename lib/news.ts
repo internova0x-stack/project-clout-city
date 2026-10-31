@@ -41,6 +41,8 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 const CAST_IDS = new Set([...[...CELEBRITIES, ...WANNABES, ...REGULARS, ...OFFICIALS].map((c) => c.id), ...MAYOR_OLD_IDS]);
 /** The Mayor is a weekly regular in City News from this week on (owner, Oct 22). */
 export const MAYOR_WEEKLY_FROM = "2026-10-26";
+/** The first news week whose hunt starts on its Saturday (the hunt of 2026-11-07). */
+export const HUNT_NEWS_SATURDAY_FROM = "2026-11-02";
 
 const addDays = (iso: string, n: number) => {
   const d = new Date(`${iso}T12:00:00Z`);
@@ -80,7 +82,9 @@ export function validateNewsWeek(raw: unknown): { ok: true; items: NewsItem[] } 
     if (typeof it.headline !== "string" || it.headline.trim().length < 8 || it.headline.length > 110) problems.push(`${at}: headline must be 8 to 110 characters`);
     if (typeof it.body !== "string" || it.body.trim().length < 20 || it.body.length > 600) problems.push(`${at}: body must be 20 to 600 characters`);
     for (const c of it.cast ?? []) if (!CAST_IDS.has(c)) problems.push(`${at}: "${c}" isn't in the cast (docs/CAST.md)`);
-    if (it.kind === "hunt" && it.day !== "Mon") problems.push(`${at}: hunt announcements run on Mondays`);
+    // The hunt is announced the day it starts: Saturday from the switch (owner, Oct 31), Monday before it.
+    const huntDay = week >= HUNT_NEWS_SATURDAY_FROM ? "Sat" : "Mon";
+    if (it.kind === "hunt" && it.day !== huntDay) problems.push(`${at}: hunt announcements run on ${huntDay === "Sat" ? "Saturdays, the day the hunt starts" : "Mondays"}`);
     if (problems.length === 0) items.push({ id: it.id, kind: it.kind, headline: it.headline.trim(), body: it.body.trim(), cast: it.cast ?? [], day: addDays(week, DAYS.indexOf(it.day)), ...(transit ? { transit } : {}) });
   }
   if (items.filter((x) => x.kind === "column").length > 1) problems.push("Lola's column runs once a week");

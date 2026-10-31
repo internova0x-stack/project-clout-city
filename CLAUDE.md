@@ -201,6 +201,10 @@ components live in `app/globals.css`.
   `story_autopilot()` (service role, run by the sync) starts the next main story in the Studio's order today when none is
   running or scheduled (declined and retired never start; a paused story mid-run keeps the slot). The weekly routine
   merges its own pull request once its checks pass (docs/WEEKLY-CONTENT.md).
+  Saturdays (migration 0137, owner Oct 31): hunts run Saturday to Friday from 2026-11-07 (`HUNT_SATURDAYS_FROM`,
+  `huntWeekOk`; content/hunts/<Saturday>.json, announced in that Monday news week on its Saturday) and `story_autopilot`
+  starts the next main story only on a Saturday (Day 1 that Saturday). Friday is the owner's veto window: the Calendar names
+  the Saturday's hunt and story. News and gossip keep their Monday weeks and a 24-hour window.
 - Relationships (migration 0118, owner Oct 26; spec section 24): a match goes official after 3 completed date nights
   (`couple_ask`/`couple_answer`; accounts 7+ days old, one partner each, 14-day cool-off after a breakup, blocking ends it,
   other crushes end and none can be made while dating). `couple_state()` is the "Us" screen (Phone → Messages → Us,

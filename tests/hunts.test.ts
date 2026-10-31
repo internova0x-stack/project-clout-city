@@ -1,14 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { huntAnswer, huntLive, huntTalk, huntView, validateHunt, type HuntFile, type HuntProgress } from "../lib/hunts.ts";
+import { HUNT_SATURDAYS_FROM, huntAnswer, huntLive, huntTalk, huntView, huntWeekOk, validateHunt, type HuntFile, type HuntProgress } from "../lib/hunts.ts";
 import { CITY_ECONOMY } from "../lib/city.ts";
 
 const dir = new URL("../content/hunts/", import.meta.url);
 const files = readdirSync(dir).filter((x) => x.endsWith(".json"));
 const load = (f: string) => JSON.parse(readFileSync(new URL(f, dir), "utf8")) as HuntFile;
 
-test("every hunt file in content/hunts/ is valid and named after its Monday", () => {
+test("every hunt file in content/hunts/ is valid and named after its first day", () => {
   assert.ok(files.length > 0);
   for (const f of files) {
     const r = validateHunt(load(f));
@@ -23,7 +23,7 @@ const problems = (f: unknown, o = {}) => { const r = validateHunt(f, o); return 
 const clone = () => structuredClone(hunt);
 
 test("hunt files are checked: places, story safety, a cheap step, complete tracks, one right answer", () => {
-  assert.match(problems({ ...clone(), week: "2026-10-20" }), /Monday/);
+  assert.match(problems({ ...clone(), week: "2026-10-20" }), /Saturday/);
   assert.match(problems({ ...clone(), places: ["nowhere", ...hunt.places.slice(1)] }), /isn't a place/);
   assert.match(problems({ ...clone(), places: ["two-bros-pizza", ...hunt.places.slice(1)] }), /no regular/);
   assert.match(problems(clone(), { storyPlaces: [hunt.places[2]] }), /part of a story/);
@@ -84,11 +84,21 @@ test("a full run: clues in order, visits required, wrong answers wait, the final
   assert.deepEqual(huntTalk(hunt, p, "ditmars-deli", true), { ok: false, code: "not_here" });
 });
 
-test("every hunt week has a Monday announcement in that week's City News", () => {
+test("every hunt is announced in City News the day it starts (Saturday from the switch, Monday before)", () => {
   const newsDir = new URL("../content/news/", import.meta.url);
   for (const f of files) {
     const h = load(f);
-    const news = JSON.parse(readFileSync(new URL(`${h.week}.json`, newsDir), "utf8")) as { items: { kind: string; day: string }[] };
-    assert.ok(news.items.some((i) => i.kind === "hunt" && i.day === "Mon"), `${f}: add a Monday "hunt" item to content/news/${h.week}.json`);
+    const saturday = h.week >= HUNT_SATURDAYS_FROM;
+    const newsWeek = saturday ? new Date(Date.parse(`${h.week}T12:00:00Z`) - 5 * 86_400_000).toISOString().slice(0, 10) : h.week;
+    const day = saturday ? "Sat" : "Mon";
+    const news = JSON.parse(readFileSync(new URL(`${newsWeek}.json`, newsDir), "utf8")) as { items: { kind: string; day: string }[] };
+    assert.ok(news.items.some((i) => i.kind === "hunt" && i.day === day), `${f}: add a ${day} "hunt" item to content/news/${newsWeek}.json`);
   }
+});
+
+test("owner, Oct 31: hunts start on Saturdays from the switch (Mondays before it)", () => {
+  assert.ok(huntWeekOk("2026-11-07") && huntWeekOk("2026-11-14"));
+  assert.ok(!huntWeekOk("2026-11-09"), "a Monday after the switch");
+  assert.ok(huntWeekOk("2026-10-26") && !huntWeekOk("2026-10-31"), "before it, Mondays only");
+  assert.ok(huntLive("2026-11-07", "2026-11-13") && !huntLive("2026-11-07", "2026-11-14"), "Saturday to Friday");
 });

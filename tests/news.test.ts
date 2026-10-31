@@ -22,6 +22,8 @@ test("week files are checked: Monday weeks, known cast, one column, hunts on Mon
   assert.match(bad({ week: "2026-10-12", items: [{ ...item, kind: "column" }, { ...item, id: "y-item", kind: "column" }] }).join(), /once a week/);
   assert.match(bad({ week: "2026-10-12", items: [{ ...item, kind: "hunt" }] }).join(), /Mondays/);
   assert.match(bad({ week: "2026-10-12", items: [item, item] }).join(), /duplicate/);
+  // From the switch the hunt is announced on its Saturday (owner, Oct 31).
+  assert.match(bad({ week: "2026-11-02", items: [{ ...item, kind: "hunt", day: "Mon" }] }).join(), /Saturdays/);
 });
 
 test("items publish on their day; a week later they move to the archive; regulars repeat city news", () => {
