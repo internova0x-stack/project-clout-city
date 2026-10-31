@@ -39,7 +39,7 @@ import { whenLine, type CalendarEvent } from "@/lib/calendar";
 import { PerkAction, type PerkHandlers } from "../game/Skills";
 import { SKILLS, SKILL_PERKS, perkStatus } from "@/lib/skills";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor" | "campaign";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor" | "campaign" | "careers";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -65,6 +65,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   { id: "mayor", label: "Mayor", emoji: "🏛️", tile: "columns" },
   // Campaign Mode (migration 0127): opens the Campaign sheet over the game; before Rank 2 it shows the teaser.
   { id: "campaign", label: "Campaign", emoji: "🗳️", tile: "news" },
+  // Careers (migration 0135): opens the Careers sheet over the game; hidden without it.
+  { id: "careers", label: "Careers", emoji: "💼", tile: "briefcase" },
   { id: "settings", label: "Settings", emoji: "⚙️", tile: "gear" },
 ];
 
@@ -81,7 +83,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
-  invite, mayor, locked, onOpenCampaign, election, scandals, blotter,
+  invite, mayor, locked, onOpenCampaign, onOpenCareers, election, scandals, blotter,
 }: {
   open: boolean;
   onClose: () => void;
@@ -152,6 +154,8 @@ export function PhoneModal({
   mayor?: { api: MayorApi; unseen: number; onSeen: () => void };
   /** Campaign Mode: the Campaign app closes the phone and opens the Campaign sheet; without it the app is hidden. */
   onOpenCampaign?: () => void;
+  /** Careers (migration 0135): the Careers app closes the phone and opens the Careers sheet; without it the app is hidden. */
+  onOpenCareers?: () => void;
   /** Campaign Mode's "Upcoming election" card in News → City (while no campaign runs). */
   election?: ElectionTeaser;
   /** Campaign Mode: Lola's write-ups of the player's campaign scandals, in News → City. */
@@ -206,9 +210,9 @@ export function PhoneModal({
                 </button>
               )}
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers)).map((a) => (
                   <button key={a.id} className={`phone-app${locked?.[a.id] ? " locked" : ""}`} aria-label={locked?.[a.id] ? `${a.label}, opens at ${locked[a.id]}` : undefined}
-                    onClick={() => (a.id === "campaign" ? onOpenCampaign!() : locked?.[a.id] ? onToast?.(`🔒 ${a.label} opens at ${locked[a.id]}. Keep earning clout.`) : a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
+                    onClick={() => (a.id === "campaign" ? onOpenCampaign!() : a.id === "careers" ? onOpenCareers!() : locked?.[a.id] ? onToast?.(`🔒 ${a.label} opens at ${locked[a.id]}. Keep earning clout.`) : a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span style={{ position: "relative" }}>
                     {locked?.[a.id] && <span className="phone-lock" aria-hidden="true">🔒</span>}
                     <span className="phone-icon" style={{ background: tileBackground(a.tile) }} aria-hidden="true">

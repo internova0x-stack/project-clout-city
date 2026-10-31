@@ -127,6 +127,8 @@ import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/
 import type { MayorApi } from "@/lib/mayor";
 import type { CampaignApi } from "@/lib/campaign";
 import { CampaignSheet } from "@/components/campaign/CampaignSheet";
+import type { CareerApi } from "@/lib/careers";
+import { CareersSheet } from "@/components/careers/CareersSheet";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import { CampusSheet } from "./campus/CampusSheet";
 
@@ -262,6 +264,7 @@ export function GameShell({
   radio,
   mayor,
   campaign,
+  careers,
   choices,
   campus,
   goals,
@@ -347,6 +350,8 @@ export function GameShell({
   mayor?: MayorApi;
   /** Campaign Mode (migration 0127): the Phone's Campaign app and its sheet; without it the app is hidden. */
   campaign?: CampaignApi;
+  /** Careers (migration 0135): the Phone's Careers app, its sheet and employers' "Go to work"; without it, hidden. */
+  careers?: CareerApi;
   /** Moral Choices (migration 0131): situation cards where you are, the private Integrity meter; off without it. */
   choices?: ChoicesApi;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
@@ -418,6 +423,9 @@ export function GameShell({
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [campaignOpen, setCampaignOpen] = useState(false);
+  const [careersOpen, setCareersOpen] = useState(false);
+  // Careers: where the player's job is (the employer's card says "Go to work" there).
+  const [careerPlace, setCareerPlace] = useState<string | null>(null);
   // Whether a campaign is running (the election teasers step aside while one is).
   const [campaignRunning, setCampaignRunning] = useState<boolean | null>(null);
   const [campaignTasks, setCampaignTasks] = useState<{ id: string; title: string; tag: string; how: string; isDone: boolean }[]>([]);
@@ -598,6 +606,13 @@ export function GameShell({
   // Skills (migration 0056): fresh each time the profile or the Tasks list (its skill task) opens.
   const [skills, setSkills] = useState(previewSkills);
   const tasksOpen = panel === "tasks" || panel === "skills";
+  // Careers: the job's place, read once and again whenever the Careers sheet closes.
+  useEffect(() => {
+    if (!careers || careersOpen) return;
+    let live = true;
+    void careers.screen().then((r) => { if (live && r.ok) setCareerPlace(r.data.job?.status === "employed" ? r.data.job.place : null); }).catch(() => undefined);
+    return () => { live = false; };
+  }, [careers, careersOpen]);
   // Campaign Mode: whether a campaign runs (the election teasers step aside) and its tasks for the Tasks sheet.
   useEffect(() => {
     if (!campaign || campaignOpen) return;
@@ -1285,6 +1300,7 @@ export function GameShell({
     else if (open === "plans") setPanel("visits");
     // Campaign Mode: "Your poll results are in".
     else if (open === "campaign" && campaign) setCampaignOpen(true);
+    else if (open === "careers" && careers) setCareersOpen(true);
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
     else if (open === "shop") openShop("fashion");
@@ -1878,6 +1894,7 @@ export function GameShell({
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
     onOpenLotto: lottoOn ? (id) => setLottoAt(id) : undefined,
     onOpenCampaign: campaign ? () => setCampaignOpen(true) : undefined,
+    career: careers ? { jobPlace: careerPlace, onOpen: () => { setPlace(null); setCareersOpen(true); } } : undefined,
     onStation: radio || tv ? onStation : undefined,
     onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
@@ -3131,6 +3148,7 @@ export function GameShell({
         radio={radio}
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
         onOpenCampaign={campaign ? () => { setPhone({ open: false, app: null }); setCampaignOpen(true); } : undefined}
+        onOpenCareers={careers ? () => { setPhone({ open: false, app: null }); setCareersOpen(true); } : undefined}
         scandals={campaignScandals}
         blotter={blotter}
         election={campaign && campaignRunning === false ? {
@@ -3279,6 +3297,10 @@ export function GameShell({
           {deleteAccount && <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={deleteAccount} />}
           {campaign && <CampaignSheet open={campaignOpen} onClose={() => setCampaignOpen(false)} api={campaign} clout={me.clout} onToast={setToast}
             focusTask={campaignFocus} onFocused={clearCampaignFocus} />}
+          {careers && <CareersSheet open={careersOpen} onClose={() => setCareersOpen(false)} api={careers} onToast={setToast}
+            onGo={(id) => { setCareersOpen(false); openPlace(id); }}
+            onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); }}
+            onWorkdayDone={() => askChoice("shift")} />}
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
           <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length} until={holdingUntil} busy={choiceBusy}
