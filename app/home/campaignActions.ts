@@ -151,6 +151,12 @@ async function managerCareer(admin: NonNullable<ReturnType<typeof getAdminSupaba
   return error || !data ? null : { track: data.track as NonNullable<StartInput["career"]>["track"], level: data.level as number };
 }
 
+/** The underworld (migration 0148): the manager's Street Rep (0 without the back room, or before the migration). */
+async function managerStreetRep(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<number> {
+  const { data, error } = await admin.from("underworld").select("state").eq("player_id", player).maybeSingle();
+  return error || !data ? 0 : Math.max(0, Number((data.state as { rep?: number })?.rep ?? 0));
+}
+
 export async function campaignStart(candidate: CandidateId, seed: number): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
@@ -161,7 +167,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   const id = randomUUID();
   let state: CampaignState;
   try {
-    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id), aspiration: await managerAspiration(w.admin, w.id), career: await managerCareer(w.admin, w.id) }, rng);
+    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id), aspiration: await managerAspiration(w.admin, w.id), career: await managerCareer(w.admin, w.id), streetRep: await managerStreetRep(w.admin, w.id) }, rng);
   } catch (e) {
     if (e instanceof CampaignError) return { ok: false, error: campaignError(e.code) };
     throw e;

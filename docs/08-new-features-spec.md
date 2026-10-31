@@ -1323,3 +1323,42 @@ dinner). Fran, the receptionist, is No-Fee* Realty's regular. Campaign backgroun
 Law +1 point. Payday now pays the wage and the tips (or bonus, or broker fees) as two ledger rows.
 
 **Later:** the Climb's office cards for players with a job.
+
+## 31. The underworld, part 1 (owner, Oct 31: "The underworld"; "Invite only", "Bite but recover", "Keep it a side hustle"; migration 0148)
+
+Pablo, an invented fixer, runs a back room behind **Pablo's Luggage & Notary** on 31st St, Astoria (a luggage shop that has
+never sold a suitcase; the notary license is "pending since 2009"). It is a **side hustle**, not a career: anyone invited can
+work for Pablo alongside any job (owner, Oct 31: "Keep it a side hustle"; the top Street Rep tiers are the "fixer" ladder).
+
+- **The invitation:** from Rank 2, Pablo finds you: at once at the Hustler end of the meter (30 or below), anyone else after
+  one Moral Choices option that moved the meter toward Hustler. A Halo (70+) is welcome but watched: the first job pays 70%.
+  Before that, the shop's card's "🚪 Knock on the back door" shows a closed door and a hint.
+- **The jobs:** 3 a New York day from `content/underworld/jobs.json` (14 jobs, checked by `contentProblems` in
+  lib/underworld.ts and tests/underworld.test.ts: the shared card face, ranges, never violence, drugs or weapons), dealt from
+  what Street Rep opens (a new tier's jobs weigh double). Each has 2 ways to do it (You get / It costs, Energy shown); the
+  riskier way pays more. Only in the back room, once each, never from holding or when too hot. Outcomes (hidden): a clean
+  win, a win that leaves a trace, a fizzle, or busted on the spot.
+- **Street Rep** (0 to 100): Errand Kid, Corner Regular (15), Known Face (35), Pablo's Guy (60), Street Legend (90). Each tier
+  opens bigger jobs (pay from about C$70 to C$1,400).
+- **Heat** (0 to 100): how close the 114½ Precinct is. Cools 8 a New York day after a day with a job, 15 after a quiet one.
+  From 50 (Watched) every job's odds drop; at 80 (Glowing) Pablo turns you away.
+- **Getting caught bites but recovers** (owner, Oct 31): busted on the spot, or a trace found on a later day (Heat ÷ 100 ×
+  the trace's weight × ½ a day; traces fade 15% a day and go after 14 days): a fine (the job's pay share and some, never over
+  C$1,500, never below zero), up to 3 hours in holding at the 114½ (bail as for Moral Choices), Street Rep down, Heat up, and
+  a Lola's Blotter headline (never for News opt-outs). It never touches your home, career or crew. "It came back" shows once.
+- **Whitlock & Hale:** C$400 for a week's retainer halves fines and takes an hour off holding; a Whitlock & Hale employee is
+  their own lawyer.
+- **The meter:** each way of doing a job nudges Halo ↔ Hustler (±8 at most), like a Moral Choices option.
+- **Campaign Mode:** Street Rep adds up to +10% to a dark op's success (`campaignOpBonus`); from 35 a week-1 line says so.
+- **Tuning** (200 simulated 28-day seasons): careful play and bold play that lays low when hot both net about C$7,000 a
+  month; reckless play nets about C$3,000 and gets caught most.
+
+**As built.** lib/underworld.ts (rules, pure), app/home/underworldActions.ts (crypto random, service role), migration 0148
+(`underworld` table; `underworld_context`, `underworld_save`: ledger 'underworld_pay', 'underworld_fine', 'underworld_lawyer',
+holding via `choice_marks`, headlines via `choice_headline`; rate bucket 'underworld'; Start over forgets it),
+components/underworld/BackRoom.tsx, the place (`pablos-luggage`, template `backRoom`, map square (11, 8), storefront DISCOUNT
+LUGGAGE · NOTARY) and its regular Pablo. Preview: lib/underworldSim.ts, `?underworld=locked|new|jobs|pro|hot|caught|lawyer`
+(`&open=backroom`).
+
+**Later:** Heat and traces shared with Campaign Mode; Halo- and Hustler-only places and events; weekly underworld jobs through
+the content routine; Pablo's crew of regulars.

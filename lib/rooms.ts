@@ -481,7 +481,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -1210,6 +1210,26 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     spawn: [0.0, 3.0],
     npcs: [{ x: -2.8, z: 2.05, facing: 0 }, { x: -2.4, z: -2.3, facing: 0, seated: true }, { x: -1.2, z: -0.7, facing: 3.14, seated: true }, { x: 2.6, z: -2.4, facing: 3.14, seated: true }],
   },
+  // Pablo's Discount Luggage & Notary (the underworld, owner Oct 31): a dusty luggage counter by the door that has never
+  // sold a suitcase, shelves of them nobody may touch ("load-bearing"), and the back room's card table under one lamp.
+  backRoom: {
+    id: "backRoom", w: 6.0, d: 5.0, wall: "#5A4636", wallAccent: "#B8862E", floor: "#6B5A48", floorKind: "wood", window: false,
+    items: [
+      { id: "counter", kind: "storeCounter", x: -0.6, z: 1.6, rot: 2, color: "#7A4E2A", use: MAIN(0), label: "*" },
+      { id: "luggage-1", kind: "shelf", x: -2.55, z: -1.25, rot: 1 },
+      { id: "luggage-2", kind: "shelf", x: -2.55, z: 0.9, rot: 1 },
+      { id: "wardrobe", kind: "wardrobe", x: -1.5, z: -2.15, rot: 0, color: "#4A3526" },
+      { id: "rug", kind: "rug", x: 1.2, z: -0.8, rot: 0, color: "#7A2E3A" },
+      { id: "card-table", kind: "diningTable", x: 1.2, z: -0.8, rot: 0, color: "#2F4A3A", use: MAIN(1), label: "*" },
+      { id: "seat-1", kind: "chair", x: 0.3, z: -0.8, rot: 1 },
+      { id: "seat-2", kind: "chair", x: 1.2, z: 0.0, rot: 2 },
+      { id: "pablo-chair", kind: "armchair", x: 2.3, z: -0.8, rot: 3, color: "#8A2E2E" },
+      { id: "lamp", kind: "floorLamp", x: 2.5, z: -2.1, rot: 0 },
+      { id: "plant", kind: "plant", x: 2.5, z: 2.0, rot: 0 },
+    ],
+    spawn: [1.4, 1.9],
+    npcs: [{ x: 2.3, z: -0.8, facing: -1.57, seated: true }, { x: -0.6, z: 1.05, facing: 0 }],
+  },
   // Atelier Vernon (Fashion): racks of samples, cutting tables, a mirror wall, a runway down the middle and a lit fitting
   // corner where a ring light lives.
   atelier: {
@@ -1533,7 +1553,7 @@ export const PLACE_STYLES: Record<string, InteriorStyle> = {
   // Modern: the TV tower, the rooftop restaurant, the campaign office, the furniture showroom, the atelier.
   "atelier-vernon": "minimalist", "glow-up-house": "futuristic",
   // Real Estate, Finance and Law (owner, Oct 31).
-  "no-fee-realty": "modern", "queensboro-capital": "modern", "whitlock-hale": "oldEnglish",
+  "no-fee-realty": "modern", "pablos-luggage": "oldEnglish", "queensboro-capital": "modern", "whitlock-hale": "oldEnglish",
   "clout-tower": "modern", "altitude-718": "modern", "campaign-hq": "modern", "fifs-furniture": "modern",
 };
 
@@ -1849,7 +1869,7 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
  */
 export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
-  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
+  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */

@@ -425,6 +425,18 @@ components live in `app/globals.css`.
   two oil paintings, minimalist keeps one plant and no lamps, futuristic is midnight with neon trim); the layout never moves.
   Ground floors and tower floors wear the style; a club's restroom and VIP keep their own. No chat bubbles over people in rooms
   (owner, Oct 31: "Remove the chat bubbles"): tap the person; the talk buttons stay hidden (`sr-only`) for keyboards.
+- The underworld (migration 0148, owner Oct 31: "Invite only", "Bite but recover", "Keep it a side hustle"; spec section 31):
+  Pablo's back room behind Pablo's Luggage & Notary (place `pablos-luggage`, template `backRoom`, regular Pablo), a side hustle
+  next to any career. From Rank 2 Pablo invites a Hustler (meter ≤ 30) or anyone after one Hustler-ward Moral Choices option.
+  The rules are TypeScript like Careers (lib/underworld.ts, pure; app/home/underworldActions.ts with a crypto random source and
+  the service role; lib/underworldSim.ts in the preview, `?underworld=locked|new|jobs|pro|hot|caught|lawyer&open=backroom`); the
+  job file content/underworld/jobs.json holds the odds, so only those two import lib/underworldContent.ts. 3 jobs a New York day
+  (You get / It costs), Street Rep (five tiers open bigger jobs), Heat (cools daily, faster on a quiet day; 50 riskier, 80 Pablo
+  refuses), traces found later. Caught: a fine (≤ C$1,500, never below zero), up to 3 hours in holding (`choice_marks`), Street
+  Rep down and a Blotter headline; never home, career or crew. Whitlock & Hale retainer C$400 a week (a law job is free).
+  public.underworld (RLS on, no grants): `underworld_context`, `underworld_save` (versioned; ledger 'underworld_pay',
+  'underworld_fine', 'underworld_lawyer'; rate bucket 'underworld'); Start over forgets it. Street Rep adds up to +10% to a
+  campaign's dark ops (`campaignOpBonus`, StartInput.streetRep). Never violence, drugs or weapons (`contentProblems`).
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only

@@ -161,6 +161,7 @@ from (values
   ('0146_streaming_fashion_careers.sql', coalesce((select pg_get_constraintdef(oid) like '%fashion%' from pg_constraint
                                                    where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false)),
   ('0147_realestate_finance_law_careers.sql', coalesce((select pg_get_constraintdef(oid) like '%realestate%' from pg_constraint
-                                                        where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false))
+                                                        where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false)),
+  ('0148_underworld.sql', to_regprocedure('public.underworld_save(uuid, integer, jsonb, integer, integer, integer, jsonb, integer, text)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

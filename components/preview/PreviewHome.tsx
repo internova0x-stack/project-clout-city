@@ -7,6 +7,7 @@ import type { RadioApi } from "@/lib/radio";
 import type { MayorApi } from "@/lib/mayor";
 import { createCampaignSim } from "@/lib/campaignSim";
 import { createCareerSim } from "@/lib/careerSim";
+import { createUnderworldSim } from "@/lib/underworldSim";
 import { createChoicesSim, storyMemory } from "@/lib/choicesSim";
 import { remembered as rememberedFor, type RememberRule } from "@/lib/characterMemory";
 import REMEMBERS from "@/content/characters/remembers.json";
@@ -90,7 +91,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, choicePreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, choicePreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -158,6 +159,8 @@ export function PreviewHome({
   campaignPreset?: string;
   /** Careers: ?career=new|apply|work|day|office|grudge|review|warning|fired (Phone → Careers). */
   careerPreset?: string;
+  /** The underworld (migration 0148): ?underworld=locked|new|jobs|pro|hot|caught|lawyer. */
+  underworldPreset?: string;
   /** Moral Choices: ?choice=now|back|high|low|log|jail|chain|story (lib/choicesSim.ts; story = storylets from a sample history). */
   choicePreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
@@ -284,6 +287,10 @@ export function PreviewHome({
     clout: player.clout, energy: player.energy, atPlace: () => simRef.current.here(),
     onBank: (cash) => simRef.current.choicePay({ cash }), onEnergy: (energy) => simRef.current.choicePay({ energy }),
   }), [careerPreset, player.clout, player.energy]);
+  const underworldApi = useMemo(() => createUnderworldSim(underworldPreset ?? null, {
+    atPlace: () => simRef.current.here(), bank: () => player.bank_cash,
+    onBank: (cash) => simRef.current.choicePay({ cash }), onEnergy: (energy) => simRef.current.choicePay({ energy }),
+  }), [underworldPreset, player.bank_cash]);
   const campaignApi = useMemo(() => createCampaignSim(campaignPreset ?? null, { clout: campaignPreset === "locked" ? 40 : Math.max(150, player.clout), bank: player.bank_cash }), [campaignPreset, player.clout, player.bank_cash]);
   const radioApi = useMemo<RadioApi>(() => ({
     state: () => previewRadioState(radioPreset ?? ""),
@@ -621,6 +628,7 @@ export function PreviewHome({
       mayor={cityOff ? undefined : mayorApi}
       campaign={cityOff ? undefined : campaignApi}
       careers={cityOff ? undefined : careerApi}
+      underworld={cityOff ? undefined : underworldApi}
       choices={cityOff ? undefined : choicesApi}
       remembered={cityOff || (choicePreset !== "story" && choicePreset !== "city") ? undefined : rememberedSim}
       campus={cityOff ? undefined : campusApi}

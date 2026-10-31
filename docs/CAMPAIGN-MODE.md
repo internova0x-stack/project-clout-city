@@ -987,7 +987,8 @@ but they're linked (lib/campaign.ts `CAMPAIGN.rep`, migration 0142):
   both ways: at most ±8 a week and ±15 a campaign. The week's recap says so in one line ("😇 Running it straight is
   rubbing off on you." / "💸 The campaign's habits are rubbing off on you."), never with the number.
 - In 30 simulated campaigns each, clean play ended +6 to +14 toward Halo and dirty play about −15 toward Hustler.
-- Heat, traces and Street Rep stay inside Campaign Mode until the underworld (Pablo) gives them somewhere to go.
+- Heat, traces and Street Rep stay inside Campaign Mode. The underworld (Pablo, migration 0148, spec section 31) has its own
+  Heat and Street Rep; the manager's Street Rep adds up to +10% to a dark op's success (`campaignOpBonus`).
 
 ## The manager's background (owner, Oct 31: careers and aspirations)
 

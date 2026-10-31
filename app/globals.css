@@ -2658,6 +2658,15 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .careers-poster { display:flex; flex-direction:column; gap:6px; padding:20px 16px 16px; border-radius:var(--r-lg);
   background:linear-gradient(135deg, #1D2B53 0%, #3E63DD 100%); color:#fff; }
 .careers-poster .overline, .careers-poster .subtext { color:rgba(255,255,255,.82); }
+/* The underworld (migration 0148): Pablo's back room. */
+.backroom { padding-right:4px; }
+.backroom-poster { display:flex; flex-direction:column; gap:8px; padding:20px 16px 16px; border-radius:var(--r-lg);
+  background:linear-gradient(135deg, #2A1E16 0%, #6B4423 60%, #B8862E 100%); color:#fff; }
+.backroom-poster .overline, .backroom-poster .subtext { color:rgba(255,255,255,.85); }
+.backroom-quote { font-style:italic; }
+.backroom-landed, .backroom-receipt.bust { box-shadow:inset 0 0 0 2px var(--red-500); }
+.backroom-receipt.win, .backroom-receipt.trace { box-shadow:inset 0 0 0 2px var(--green-500); }
+.backroom-job.done { opacity:.6; }
 /* Aspirations (migration 0143): the Careers welcome screen's picks and the chip above the app. */
 .careers-aspiration { display:flex; align-items:flex-start; gap:12px; width:100%; border:2px solid transparent; text-align:left; color:inherit; cursor:pointer; font:inherit; }
 .careers-aspiration .careers-col { gap:3px; }

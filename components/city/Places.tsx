@@ -70,6 +70,8 @@ export interface PlaceHandlers {
   onOpenCampaign?: () => void;
   /** Careers (migration 0135): an employer's card opens the Careers sheet ("Go to work" at the player's own job). */
   career?: { jobPlace: string | null; onOpen: () => void };
+  /** The underworld (migration 0148): Pablo's shop card opens his back room. */
+  onBackRoom?: () => void;
   /**
    * v0.14 On Air: the stations' own buttons. "shoutout" and "billboard" open the Radio and Clout TV
    * apps' forms (there, on arrival); "watch" opens the Big Screen's photo (from anywhere).
@@ -602,6 +604,9 @@ export function LocationSheet({
           <StoryBanners place={place} story={handlers.story ?? null} />
           {place.tags.includes("campaign") && handlers.onOpenCampaign && (
             <button className="btn btn-taxi" onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
+          )}
+          {place.tags.includes("underworld") && handlers.onBackRoom && (
+            <button className="btn btn-secondary" onClick={handlers.onBackRoom}>🚪 Knock on the back door</button>
           )}
           {handlers.career && TRACKS.some((t) => t.place === place.id) && (
             <button className={`btn ${handlers.career.jobPlace === place.id ? "btn-taxi" : "btn-secondary"}`} onClick={handlers.career.onOpen}>
