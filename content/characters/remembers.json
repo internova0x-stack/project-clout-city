@@ -709,5 +709,45 @@
   "lines": [
    "The power's out, so tonight's set is acoustic. Everything's acoustic if you believe."
   ]
+ },
+ {
+  "id": "sal-friend-for-life",
+  "who": "sal",
+  "when": {
+   "all": [
+    {
+     "has": "career.friend_for_life"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.friend_for_life",
+    "show": "coworker"
+   }
+  },
+  "lines": [
+   "{coworker} came in and ordered your usual 'for later.' A friend like that, you keep."
+  ]
+ },
+ {
+  "id": "jojo-friend-for-life",
+  "who": "jojo",
+  "when": {
+   "all": [
+    {
+     "has": "career.friend_for_life"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.friend_for_life",
+    "show": "coworker"
+   }
+  },
+  "lines": [
+   "You and {coworker}, work besties forever. Until one of you gets promoted. Kidding!"
+  ]
  }
 ]

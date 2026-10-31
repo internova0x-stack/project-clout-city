@@ -988,3 +988,10 @@ but they're linked (lib/campaign.ts `CAMPAIGN.rep`, migration 0142):
   rubbing off on you." / "💸 The campaign's habits are rubbing off on you."), never with the number.
 - In 30 simulated campaigns each, clean play ended +6 to +14 toward Halo and dirty play about −15 toward Hustler.
 - Heat, traces and Street Rep stay inside Campaign Mode until the underworld (Pablo) gives them somewhere to go.
+
+## The manager's background (owner, Oct 31: careers and aspirations)
+
+- **Aspiration** (migration 0143): a Public Servant's campaigns start 3 points up across the city.
+- **Job** (Careers part 3; `StartInput.career`, `CAMPAIGN.background`): a manager with a job when the campaign starts gets one
+  line in week 1's receipts and one edge: Hospitality's staff start 10 morale happier, Tech's startup contacts make
+  fundraising pay a fifth more, Media's familiar face is worth 2 points across the city.

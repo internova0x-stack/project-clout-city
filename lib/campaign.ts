@@ -38,6 +38,15 @@ export const CAMPAIGN = {
    * candidate's Integrity moved that week, both ways, at most ±8 a week and ±15 a campaign (migration 0142).
    */
   rep: { startBonus: 5, factor: 0.5, weekCap: 8, campaignCap: 15 },
+  /** Careers part 3 (owner, Oct 31): the manager's job as campaign background. */
+  background: {
+    hospitalityMorale: 10, techFunds: 1.2, mediaPoints: 2,
+    lines: {
+      hospitality: "💼 You've run a floor before: the staff start in a better mood.",
+      tech: "💼 Your startup contacts open their wallets: fundraising pays a fifth more.",
+      media: "💼 People know your face from Clout TV: 2 points up across the city.",
+    } as Record<"hospitality" | "tech" | "media", string>,
+  },
   cleanIntegrity: 70,
   /** Team trouble after dirty play (spec section 10). */
   teamRisk: { clean: 0.1, trace: 0.2, perExtraOp: 0.05 },

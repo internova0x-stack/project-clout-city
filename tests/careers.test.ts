@@ -156,7 +156,8 @@ test("office moves: only on a day you clocked in, one collaborate and one sabota
   assert.throws(() => office(s, "credit", "friend", ctx(), DAY, Math.random), /office_used/);
   assert.throws(() => office(clockedIn(), "credit", "manager", ctx(), DAY, Math.random), /bad_target/);
   assert.deepEqual(view2(content, s, DAY, { skills: {}, clout: 0 }).officeLeft, { collab: false, sabotage: false });
-  assert.equal(OFFICE.filter((o) => o.kind === "collab").length, 3);
+  assert.equal(OFFICE.filter((o) => o.kind === "collab").length, 6);
+  assert.equal(OFFICE.filter((o) => o.kind === "sabotage").length, 6);
 });
 
 test("sabotage pays now, leaves a grudge, and can be traced", () => {

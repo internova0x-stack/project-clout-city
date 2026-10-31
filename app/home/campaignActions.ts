@@ -7,7 +7,7 @@ import {
 } from "@/lib/campaign";
 import { CAMPAIGN_CONTENT as content } from "@/lib/campaignContent";
 import {
-  CampaignError, campaignView, candidateCards, choose, debateRound, dilemma, endWeek, refresh, reply, setBudget, setSlot, startCampaign,
+  CampaignError, campaignView, candidateCards, choose, debateRound, dilemma, endWeek, refresh, reply, setBudget, setSlot, startCampaign, type StartInput,
 } from "@/lib/campaignEngine";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -139,6 +139,18 @@ async function managerBand(admin: NonNullable<ReturnType<typeof getAdminSupabase
   return integrityBand(data.integrity as number);
 }
 
+/** Aspirations (migration 0143): the manager's pick (null before the migration). */
+async function managerAspiration(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<string | null> {
+  const { data, error } = await admin.rpc("aspiration_of", { p_player: player });
+  return error ? null : ((data as { aspiration?: string | null } | null)?.aspiration ?? null);
+}
+
+/** Careers part 3: the manager's current job, as campaign background (null without one, or before migration 0135). */
+async function managerCareer(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<StartInput["career"]> {
+  const { data, error } = await admin.from("careers").select("track, level").eq("player_id", player).eq("status", "employed").maybeSingle();
+  return error || !data ? null : { track: data.track as "hospitality" | "tech" | "media", level: data.level as number };
+}
+
 export async function campaignStart(candidate: CandidateId, seed: number): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
@@ -149,7 +161,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   const id = randomUUID();
   let state: CampaignState;
   try {
-    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id) }, rng);
+    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id), aspiration: await managerAspiration(w.admin, w.id), career: await managerCareer(w.admin, w.id) }, rng);
   } catch (e) {
     if (e instanceof CampaignError) return { ok: false, error: campaignError(e.code) };
     throw e;

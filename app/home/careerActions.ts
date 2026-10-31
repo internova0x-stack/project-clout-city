@@ -2,8 +2,8 @@
 
 import { randomInt, randomUUID } from "node:crypto";
 import {
-  CareerError, careerError, careerView, hire, office, quit, refresh, startDay, answerTask, trackCards, CAREER, trackById,
-  type Answer, type OfficeAction, type Who, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
+  CareerError, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, answerTask, trackCards, CAREER, trackById,
+  type Answer, type OfficeAction, type Target, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
 } from "@/lib/careers";
 import { CAREER_CONTENT as content } from "@/lib/careersContent";
 import { nyDay } from "@/lib/campaign";
@@ -11,6 +11,7 @@ import { OFFICE_FACT, type FactKey } from "@/lib/memory";
 import { conditionOn, type ConditionNow } from "@/lib/cityConditions";
 import { unlockedCards } from "@/lib/cardFormat";
 import { memoryOf } from "@/lib/memoryServer";
+import type { AspirationId, AspirationState } from "@/lib/aspirations";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -21,7 +22,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 
 type Admin = NonNullable<ReturnType<typeof getAdminSupabase>>;
 type Job = { id: string; status: CareerState["status"] | "abandoned"; version: number; state: CareerState };
-type Context = CareerCtx & { bank: number; job: Job | null };
+type Context = CareerCtx & { bank: number; job: Job | null; aspirationState?: AspirationState | null };
 type Out = CareerResult<CareerScreen>;
 
 const rng = () => randomInt(0, 2 ** 32) / 2 ** 32;
@@ -43,7 +44,18 @@ async function load(id: string, admin: Admin): Promise<Context | { error: string
     return { error: careerError("unknown") };
   }
   if (!data) return { error: "Create your character first." };
-  return data as Context;
+  const ctx = data as Context;
+  // Aspirations (migration 0143): the pick and the degree give a level's head start each (null before the migration).
+  const asp = await admin.rpc("aspiration_of", { p_player: id });
+  if (!asp.error && asp.data) {
+    ctx.aspirationState = asp.data as AspirationState;
+    ctx.aspiration = ctx.aspirationState.aspiration;
+    ctx.degree = ctx.aspirationState.degree;
+  }
+  // Part 3: businesses owned, for the quit card's "Quit to run your business".
+  const biz = await admin.from("player_businesses").select("business_id", { count: "exact", head: true }).eq("player_id", id);
+  ctx.businesses = biz.count ?? 0;
+  return ctx;
 }
 
 function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
@@ -54,6 +66,8 @@ function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
     energy: ctx.energy,
     atPlace: ctx.atPlace,
     receipt,
+    aspiration: ctx.aspirationState ?? null,
+    businesses: ctx.businesses ?? 0,
   };
 }
 
@@ -96,6 +110,7 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
   if (ctx.job?.status !== "employed") return { ok: false, error: careerError("not_employed") };
   const today = nyDay();
   const state = structuredClone(ctx.job.state);
+  const liferBefore = !!state.lifer;
   const caught = refresh(state, today, ctx, rng);
   let r: ReturnType<typeof change> = {};
   try {
@@ -111,7 +126,9 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
     const { error } = await w.admin.rpc("career_office", { p_player: w.id, p_id: ctx.job!.id, p_integrity: r.integrity ?? 0, p_headline: r.headline ?? null });
     if (error && !/career_office/.test(error.message)) console.error("career_office failed", error);
   }
-  if (r.facts?.length) await remember(w.admin, w.id, r.facts);
+  // Careers part 3: a work friend for life is remembered beyond this job (storylets, the friend's lines).
+  const facts = [...(r.facts ?? []), ...(!liferBefore && state.lifer ? [{ key: "career.friend_for_life" as FactKey, subject: `${state.track}:friend` }] : [])];
+  if (facts.length) await remember(w.admin, w.id, facts);
   return { ok: true, data: screen(ctx, today, r.receipt) };
 }
 
@@ -181,7 +198,10 @@ export async function careerTask(index: number, option: string): Promise<Out> {
   return act((s, ctx) => answerTask(content, s, index, option, ctx, rng));
 }
 
-export async function careerOffice(action: OfficeAction, who: Who): Promise<Out> {
+const OFFICE_ACTIONS: OfficeAction[] = ["help", "share", "team", "credit", "report", "rumor", "cover", "back", "mentor", "undermine", "overhead", "pushout"];
+
+export async function careerOffice(action: OfficeAction, who: Target): Promise<Out> {
+  if (!OFFICE_ACTIONS.includes(action) || !["manager", "friend", "rival", "hire"].includes(who)) return { ok: false, error: careerError("bad_target") };
   // Migration 0140: an HR crackdown week at this employer (a city storylet) traces sabotage twice as often.
   const conditions = await cityConditions();
   return act((s, ctx, today) => {
@@ -190,10 +210,33 @@ export async function careerOffice(action: OfficeAction, who: Who): Promise<Out>
     const subject = `${s.track}:${who}`;
     const facts: Change["facts"] = [{ key: OFFICE_FACT[action], subject }];
     if ((s.exposed ?? 0) > exposedBefore) facts.push({ key: "career.caught_sabotage", subject });
+    if (r.pushedOut) facts.push({ key: "career.pushed_out_boss", subject: s.track });
     return { ...r, facts };
   });
 }
 
-export async function careerQuit(): Promise<Out> {
-  return act((s, _ctx, today) => { quit(s, today); return { receipt: "You quit. The city is full of jobs. Probably." }; });
+export async function careerQuit(reason?: "business"): Promise<Out> {
+  return act((s, ctx, today) => {
+    const r = quit(s, today, { reason: reason === "business" ? "business" : undefined, businesses: ctx.businesses });
+    return { ...r, facts: reason === "business" ? [{ key: "career.quit_for_business", subject: s.track }] : [] };
+  });
+}
+
+/** The quit card's "Stick it out". */
+export async function careerStick(): Promise<Out> {
+  return act((s, _ctx, today) => stickItOut(s, today));
+}
+
+/** Aspirations (migration 0143): picks the player's life path; a new pick at most every 30 days. */
+export async function careerAspire(id: AspirationId): Promise<Out> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  const { error } = await supabase.rpc("aspiration_set", { p_aspiration: id });
+  if (error) {
+    if (/too_soon/.test(error.message)) return { ok: false, error: "You can pick a new aspiration 30 days after the last one." };
+    if (/aspiration_set/.test(error.message)) return { ok: false, error: "Run migration 0143 to switch on aspirations." };
+    console.error("aspiration_set failed", error);
+    return { ok: false, error: careerError("unknown") };
+  }
+  return careerScreen();
 }
