@@ -9,7 +9,7 @@
 // in-memory city (lib/choicesSim.ts) and the tests share them. The card files (content/choices/*.json) hold the hidden
 // outcomes and their odds, so only the server and the preview import lib/choicesContent.ts: players get `cardView`.
 
-export type ChoiceArea = "life" | "gigs" | "work" | "school" | "business" | "home" | "nightlife" | "transit" | "dating" | "money";
+export type ChoiceArea = "life" | "gigs" | "work" | "school" | "business" | "home" | "nightlife" | "transit" | "dating" | "money" | "fame";
 export type Risk = "low" | "medium" | "high";
 /** What a player was just doing, so a card can feel like it happened because of it. */
 /** "travel" is a subway ride, "ride" a cab or rideshare. */
@@ -423,7 +423,7 @@ export const choiceError = (code: string | undefined) => CHOICE_ERRORS[code ?? "
 // Checking the card files (tests and validate:content)
 // ---------------------------------------------------------------------------
 
-const AREAS: ChoiceArea[] = ["life", "gigs", "work", "school", "business", "home", "nightlife", "transit", "dating", "money"];
+const AREAS: ChoiceArea[] = ["life", "gigs", "work", "school", "business", "home", "nightlife", "transit", "dating", "money", "fame"];
 const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride"];
 
 function checkEffects(e: ChoiceEffects, where: string, out: string[], places: string[] = []) {

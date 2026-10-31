@@ -12,7 +12,7 @@ import { Sheet } from "../Sheet";
 
 const AREA: Record<string, string> = {
   life: "Life in the city", transit: "On the move", gigs: "Gig life", work: "On the clock", school: "Campus",
-  business: "Your business", home: "Your building", nightlife: "After dark", dating: "Date night", money: "Money talks",
+  business: "Your business", home: "Your building", nightlife: "After dark", dating: "Date night", money: "Money talks", fame: "The climb",
 };
 
 /**
