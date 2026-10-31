@@ -3341,7 +3341,7 @@ export function GameShell({
           {careers && <CareersSheet open={careersOpen} onClose={() => setCareersOpen(false)} api={careers} onToast={setToast}
             onGo={(id) => { setCareersOpen(false); openPlace(id); }}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); }}
-            onWorkdayDone={() => askChoice("shift")} />}
+            onWorkdayDone={() => askChoice("workday")} />}
           {underworld && <BackRoomSheet open={backRoomOpen} onClose={() => setBackRoomOpen(false)} api={underworld} onToast={setToast}
             onGo={() => { setBackRoomOpen(false); openPlace(UNDERWORLD.place); }}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}

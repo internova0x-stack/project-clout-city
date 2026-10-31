@@ -88,6 +88,10 @@ export const FACTS = {
   "thread.office_romance": { means: "Started dating a work friend", subject: "the coworker (track:who)" },
   "thread.kept_it_professional": { means: "Kept a work friendship a friendship (or strung it along)", subject: "the coworker (track:who)" },
   "thread.lola_source": { means: "Became Lola's anonymous source", subject: "" },
+  // Office cards (content/choices/office.json).
+  "thread.padded_expenses": { means: "Padded an expense report at work", subject: "the track" },
+  "thread.insider_trade": { means: "Traded on an inside tip at Queensboro Capital", subject: "" },
+  "thread.buried_evidence": { means: "Hid a client's damaging memo at Whitlock & Hale", subject: "" },
 } as const satisfies Record<string, FactDef>;
 
 export type FactKey = keyof typeof FACTS;

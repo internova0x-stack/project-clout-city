@@ -31,8 +31,12 @@ export interface SlotDef {
   subjectStarts?: string;
   /** …or the snapshot gives it. */
   snap?: SnapPath;
-  /** How to show it: a coworker's name ("tech:rival" → Brent), a place's name, an employer, a boss's first name, or as is. */
-  show: "coworker" | "place" | "employer" | "boss" | "raw";
+  /**
+   * How to show it: a coworker's name ("tech:rival" → Brent), a place's name, an employer, a boss's first name, or as is.
+   * Office cards (content/choices/office.json) read the job's track and show its people: the work friend, the rival,
+   * the big boss (what people call them) and the new hire.
+   */
+  show: "coworker" | "place" | "employer" | "boss" | "friend" | "rival" | "bigboss" | "newhire" | "raw";
 }
 
 const DAY = 86_400_000;
@@ -86,9 +90,23 @@ export function systemsOf(w: When | undefined): Set<string> {
   return out;
 }
 
+type TrackDef = (typeof TRACKS)[number];
+/** Office cards' people by track: the big boss by what people call them ("Papa-Dani"), the others by name. */
+const TRACK_PEOPLE = {
+  friend: (t: TrackDef) => t.friend.name,
+  rival: (t: TrackDef) => t.rival.name,
+  bigboss: (t: TrackDef) => t.bigBoss.short ?? t.bigBoss.name,
+  newhire: (t: TrackDef) => t.newHire.name,
+} as const;
+const isPeople = (k: string): k is keyof typeof TRACK_PEOPLE => k in TRACK_PEOPLE;
+
 /** What a slot shows for a subject or snapshot value. */
 function show(kind: SlotDef["show"], raw: string): string {
   if (kind === "place") return PLACES.find((p) => p.id === raw)?.name ?? raw;
+  if (isPeople(kind)) {
+    const t = TRACKS.find((x) => x.id === raw.split(":")[0]);
+    return t ? TRACK_PEOPLE[kind](t) : raw;
+  }
   if (kind === "employer" || kind === "boss" || kind === "coworker") {
     const [track, who] = raw.split(":");
     const t = TRACKS.find((x) => x.id === track);
@@ -130,8 +148,21 @@ export function longestShow(kind: SlotDef["show"]): string {
   if (kind === "employer") return pick(TRACKS.map((t) => t.employer));
   if (kind === "boss") return pick(TRACKS.map((t) => t.manager.name.split(" ")[0]));
   if (kind === "coworker") return pick(TRACKS.flatMap((t) => [t.friend.name, t.rival.name]));
+  if (isPeople(kind)) return pick(TRACKS.map(TRACK_PEOPLE[kind]));
   return "x".repeat(16);
 }
+
+/** The place the player's job is at (lib/careers.ts TRACKS), or null without a job: office cards happen there. */
+export function jobPlace(m: Memory | null | undefined): string | null {
+  const track = m?.snapshot.job?.track;
+  return (track && TRACKS.find((t) => t.id === track)?.place) || null;
+}
+
+/** Whether a card's conditions require a job now (a `job` or `job.*` snapshot condition in `when.all`). */
+export const needsJob = (w: When | undefined) =>
+  !!w?.all?.some((c) => "snap" in c && (c.snap === "job" || c.snap.startsWith("job.")) && c.exists !== false);
+
+const SHOW_KINDS: SlotDef["show"][] = ["coworker", "place", "employer", "boss", "friend", "rival", "bigboss", "newhire", "raw"];
 
 /** A storylet's own rules (lib/choices.ts validateCards runs them on every card that has them). */
 export function storyletProblems(at: string, card: { title: string; when?: When; slots?: Record<string, SlotDef>; options: { label: string; get: string; cost: string; outcomes: { text: string; sets?: { fact: string; subject?: string }[]; later?: { text: string } }[] }[] }): string[] {
@@ -146,6 +177,7 @@ export function storyletProblems(at: string, card: { title: string; when?: When;
   for (const [n, s] of Object.entries(slots)) {
     if (!/^[a-z_]+$/.test(n)) out.push(`${at}: slot names are lowercase_with_underscores`);
     if (!!s.fact === !!s.snap) out.push(`${at}: slot ${n} needs a fact or a snapshot, not both`);
+    if (!SHOW_KINDS.includes(s.show)) out.push(`${at}: slot ${n}: unknown show "${s.show}"`);
     if (s.fact && !facts.has(s.fact)) out.push(`${at}: slot ${n}: unknown fact "${s.fact}"`);
     // A slot's fact must be one the card requires, so it can always be filled.
     if (s.fact && !(card.when?.all ?? []).some((c) => "has" in c && c.has === s.fact)) out.push(`${at}: slot ${n} reads "${s.fact}", which "when.all" must require`);

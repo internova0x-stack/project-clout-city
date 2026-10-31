@@ -10,6 +10,7 @@ import HOME from "../content/choices/home.json";
 import LIFE from "../content/choices/life.json";
 import MONEY from "../content/choices/money.json";
 import NIGHTLIFE from "../content/choices/nightlife.json";
+import OFFICE from "../content/choices/office.json";
 import SCHOOL from "../content/choices/school.json";
 import TRANSIT from "../content/choices/transit.json";
 import WORK from "../content/choices/work.json";
@@ -19,7 +20,7 @@ import { PLACES } from "./city";
 import { REGULARS } from "./cast";
 
 export const CHOICE_CARDS: ChoiceCard[] = [
-  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS,
+  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS, ...OFFICE,
 ] as ChoiceCard[];
 
 /** What a card may name (the validator's lists): for checking weekly storylets on the server (lib/contentImport.ts). */
