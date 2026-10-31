@@ -2663,8 +2663,13 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   background:linear-gradient(135deg, #1B2340 0%, #3E4C8A 55%, #E8C9A0 100%); color:#fff; }
 .gala-poster .overline, .gala-poster .subtext { color:rgba(255,255,255,.88); }
 .backroom-crew { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
-.backroom-crew .card { padding:10px; display:flex; flex-direction:column; gap:4px; }
-.backroom-crew .card > span { display:block; }
+.backroom-crewcard { display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 8px; text-align:center; min-width:0; }
+.backroom-crewcard > span { display:block; max-width:100%; }
+.backroom-crew-emoji { font-size:26px; line-height:1; }
+.backroom-crew-name { font-weight:800; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.backroom-crew-role { font-size:12px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.backroom-crewcard .careers-bar { width:100%; margin:4px 0 2px; }
+.backroom-crew-status { font-size:12px; font-weight:600; white-space:nowrap; }
 /* The underworld (migration 0148): Pablo's back room. */
 .backroom { padding-right:4px; }
 .backroom-poster { display:flex; flex-direction:column; gap:8px; padding:20px 16px 16px; border-radius:var(--r-lg);

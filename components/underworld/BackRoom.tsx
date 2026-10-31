@@ -90,16 +90,24 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
               <div className="stack-8">
                 <p className="overline" style={{ margin: 0 }}>Pablo&apos;s crew</p>
                 <div className="backroom-crew">
-                  {v.crew.map((m) => (
-                    <div key={m.id} className="card stack-4">
-                      <span className="title" style={{ fontSize: 15 }}>{m.emoji} {m.name}</span>
-                      <span className="meta">{m.role}</span>
-                      <span className="careers-bar green" aria-label={`Loyalty ${m.loyalty}`}><span style={{ width: `${m.loyalty}%` }} /></span>
-                      <span className="meta">{m.covers ? "🫡 Has your back" : m.loyalty >= UNDERWORLD.crew.payAt ? "💸 Pays you extra" : "Getting to know you"}</span>
-                    </div>
-                  ))}
+                  {v.crew.map((m) => {
+                    const status = m.covers ? { icon: "🫡", text: "Has your back" } : m.loyalty >= UNDERWORLD.crew.payAt ? { icon: "💸", text: "Pays extra" } : { icon: "🤝", text: "Warming up" };
+                    return (
+                      <div key={m.id} className="card backroom-crewcard">
+                        <span className="backroom-crew-emoji" aria-hidden="true">{m.emoji}</span>
+                        <span className="backroom-crew-name">{m.name}</span>
+                        <span className="backroom-crew-role">{m.role}</span>
+                        <span className="careers-bar green" role="meter" aria-label={`${m.name}'s loyalty`} aria-valuenow={m.loyalty} aria-valuemin={0} aria-valuemax={100}>
+                          <span style={{ width: `${m.loyalty}%` }} />
+                        </span>
+                        <span className="backroom-crew-status">{status.icon} {status.text}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <p className="meta" style={{ margin: 0 }}>&quot;{v.crew[0].line}&quot; ({v.crew[0].name}). Do a crew member&apos;s jobs and they warm to you: at {UNDERWORLD.crew.payAt} their jobs pay more, at {UNDERWORLD.crew.coverAt} they&apos;ll take the fall for you once a week.</p>
+                <p className="meta" style={{ margin: 0 }}>
+                  Do their jobs to win them over. At {UNDERWORLD.crew.payAt}, their jobs pay more. At {UNDERWORLD.crew.coverAt}, they take the fall for you once a week.
+                </p>
               </div>
             )}
             {v.holding && <p className="card meta" style={{ margin: 0 }}>🚓 You&apos;re in holding at the 114½. Bail out from the precinct, or wait it out.</p>}
