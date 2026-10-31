@@ -31,6 +31,13 @@ export const CAMPAIGN = {
   exposuresPerCampaign: 2,
   factCheckChance: 0.35,
   integrityStart: { goldcrest: 55, starr: 60, kowalczyk: 75, castellano: 85 } as Record<CandidateId, number>,
+  /**
+   * Option C (owner, Oct 31): the manager's own Halo ↔ Hustler meter and the candidate's Integrity stay separate but
+   * linked. Going in, a Halo manager starts the candidate a little cleaner and a Hustler a little dirtier (and gets the
+   * anonymous offers a week early); coming out, each End Week moves the manager's meter by half of how far the
+   * candidate's Integrity moved that week, both ways, at most ±8 a week and ±15 a campaign (migration 0142).
+   */
+  rep: { startBonus: 5, factor: 0.5, weekCap: 8, campaignCap: 15 },
   cleanIntegrity: 70,
   /** Team trouble after dirty play (spec section 10). */
   teamRisk: { clean: 0.1, trace: 0.2, perExtraOp: 0.05 },
@@ -262,7 +269,12 @@ export interface CampaignState {
   election: ElectionResult[] | null;
   ending: Ending | null;
   /** Clout bonuses, worked out at the start. */
-  links: { clout: number; crew: number; home: string | null; fundMult: number; wonBefore: boolean };
+  links: { clout: number; crew: number; home: string | null; fundMult: number; wonBefore: boolean; band?: "high" | "middle" | "low" };
+  /** Option C: the candidate's Integrity at the start (after the manager's band), and where this week started. */
+  startIntegrity?: number;
+  repMark?: number;
+  /** The manager's own meter nudges, one per End Week (the server applies each once: campaign_rep). */
+  rep?: { week: number; delta: number }[];
   earned: number;
   dilemmas: Record<string, string>;
   /** This week's two campaign tasks (drawn when the week opens; done is worked out from the week's plan). */

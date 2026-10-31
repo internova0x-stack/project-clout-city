@@ -152,6 +152,7 @@ from (values
   ('0138_player_memory.sql', coalesce((to_regclass('public.player_facts') is not null), false)),
   ('0139_storylet_weeks.sql', coalesce((to_regclass('public.storylet_cards') is not null), false)),
   ('0140_city_reacts.sql', coalesce((to_regclass('public.city_conditions') is not null), false)),
-  ('0141_card_learning.sql', coalesce((to_regclass('public.card_weights') is not null), false))
+  ('0141_card_learning.sql', coalesce((to_regclass('public.card_weights') is not null), false)),
+  ('0142_campaign_reputation.sql', coalesce((to_regclass('public.campaign_rep') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
