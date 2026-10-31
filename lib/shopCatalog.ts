@@ -224,10 +224,11 @@ export function parseCatalogFile(raw: unknown, file: string, opts: { coutureClou
     const tier = (["budget", "mid", "luxury"] as const).find((t) => t === it.tier) ?? (realCash ? "luxury" : null);
     const { id: _i, name: _n, description: _d, category: _c, slot: _s, styleLines: _sl, tier: _t, stars: _st, priceCs: _p, priceUsd: _u,
       clout: _cl, currency: _cu, realCash: _r, template: _te, wearable: _w, sourceImage: _so, images: _im, transparent: _tr, tab: _tb,
-      editionSize: _e, ...extra } = it;
+      editionSize: _e, emoji: _em, ...extra } = it;
     drafts.push({
       sku: id, tab, slot, presentation: defaultPresentation({ template, name, description, slot }), name, description,
-      emoji: emojiFor(tab, slot, template), price,
+      // A file may name the piece's own emoji (the couple pieces, migration 0149); otherwise one by tab and slot.
+      emoji: str(it.emoji) || emojiFor(tab, slot, template), price,
       clout: realCash ? (opts.coutureCloutFor?.(tab) ?? 0) : cloutCurve(price),
       tier, stars: Number.isInteger(it.stars) ? (it.stars as number) : realCash ? 4 : 1,
       styleLines: Array.isArray(it.styleLines) ? (it.styleLines as unknown[]).map(String) : [],
@@ -316,9 +317,11 @@ export function readiness(i: CatalogItem, ctx: FieldContext = {}): Check[] {
   const dup = (ctx.others ?? []).find((o) => o.sku !== i.sku && o.status !== "deleted" && !(line(o) && line(o) === line(i))
     && (o.name.trim().toLowerCase() === i.name.trim().toLowerCase() || (!!i.sourceImage && o.sourceImage === i.sourceImage)));
   const off = i.realCash ? 0 : Math.abs(i.clout - cloutCurve(i.price)) / Math.max(1, cloutCurve(i.price));
+  // A file can say a piece shows its emoji until it gets a picture (extra.emojiOnly: the couple pieces, migration 0149).
+  const emojiOk = !i.sourceImage && (i.origin === "code" || i.extra?.emojiOnly === true);
   return [
-    { id: "image", label: "Image", ok: i.imageStatus === "ready" || (i.origin === "code" && !i.sourceImage), blocking: true,
-      detail: i.imageStatus === "ready" ? "Both sizes processed" : i.imageStatus === "failed" ? `Failed: ${i.imageError ?? "unknown"}` : i.origin === "code" ? "Shows its emoji" : "Not processed yet" },
+    { id: "image", label: "Image", ok: i.imageStatus === "ready" || emojiOk, blocking: true,
+      detail: i.imageStatus === "ready" ? "Both sizes processed" : i.imageStatus === "failed" ? `Failed: ${i.imageError ?? "unknown"}` : emojiOk ? "Shows its emoji" : "Not processed yet" },
     { id: "words", label: "Name and description", ok: !words.length, blocking: true, detail: words.join("; ") || "OK" },
     { id: "placement", label: "Tab, slot, style lines, presentation", ok: !place.length, blocking: true, detail: place.join("; ") || "OK" },
     { id: "price", label: "Price", ok: !problems.includes("price"), blocking: true,

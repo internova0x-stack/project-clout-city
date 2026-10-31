@@ -213,7 +213,23 @@ components live in `app/globals.css`.
   couple-7/14/30) and weekly/monthly anniversaries (ledger 'couple_anniv'). Gift boxes go to the partner (`couple_gift`,
   once a day). Partners' date nights pay 15 Mood and 35 clout. "💞 Dating @name" on the player card unless hidden
   (`couple_show`). Settings: game_settings 'couples', mirrored by lib/couples.ts (tests/couples.test.ts).
-  `?couple=progress|ask|dating|gift|ended` in the preview. Living together, Lola mentions and couple Shop items: later.
+  `?couple=progress|ask|dating|gift|ended` in the preview.
+  Living together (migration 0149, owner Oct 31): a couple official 7+ days moves into one partner's home (`cohabit_ask` from the
+  host, `cohabit_answer`; `cohabit_block_reason`: not a dorm or the room share, any owned house fits; no live sublet, open listing
+  or rent due on either side; the mover owns no house). The mover's home_id becomes the host's, their layout goes to storage and
+  next_rent_due lines up with the host's (no fee). `bills_cohabit_split` makes each rent bill the player's part
+  (`cohabit_rent_part`: mover floor(rent × rentShare), host the rest; none for the mover in an owned house; `cohabit_rent()`
+  feeds the Bills' next rent, CityPlayer.rent_part). "Home together" (`cohabit_hang`: both tap it the same New York day, Mood +8
+  and clout +5 once, ledger 'cohabit_home'). `cohabit_leave` (either), a breakup or block, either one moving or being evicted,
+  and Start over end it through `cohabit_close`: the host keeps the home at full rent, the mover goes to `cheapest_home()` with
+  an empty layout. While together the mover can't host visits ('partner_hosts') and neither can sublet ('living_together').
+  Lola's Blotter gets a 'win' line on move-in unless either partner opted out of News (removed when it ends). Us shows Move in
+  together, Living together since…, Home together and Move out; the mover's Home tab shows the host's place (`cohabit_home`,
+  `CohabitHomeBar`); "🏠 Living with @name" on the player card follows `couple_show`. Couple Shop pieces: content/shop/couple.json
+  (six C$ furniture pieces, extra.couplesOnly and emojiOnly, `COUPLE_ITEMS`), buyable only while dating (`shop_couples_guard`,
+  'couples_only'); they go on sale through the Studio. game_settings 'couples' gains moveInDays, moveInAskDays, rentShare,
+  homeMood, homeClout (lib/couples.ts); rate bucket 'cohabit'; facts 'couple.moved_in', 'couple.moved_out'.
+  `?couple=movein|together` in the preview.
 - Sublets (migration 0119, owner Oct 26; spec section 25): renters of the 1BR, Sunnyside or LIC let a spare room
   (`sublet_list`: a quarter to half their rent, 1 to 8 weeks, crew-first for 24 hours); `sublet_apply`, `sublet_answer`
   (first week + a one-week deposit, ledger 'sublet_rent'/'sublet_income'/'sublet_deposit'); rent every 7 days ahead
@@ -437,6 +453,12 @@ components live in `app/globals.css`.
   public.underworld (RLS on, no grants): `underworld_context`, `underworld_save` (versioned; ledger 'underworld_pay',
   'underworld_fine', 'underworld_lawyer'; rate bucket 'underworld'); Start over forgets it. Street Rep adds up to +10% to a
   campaign's dark ops (`campaignOpBonus`, StartInput.streetRep). Never violence, drugs or weapons (`contentProblems`).
+  Part 2 (migration 0150): Pablo's crew (Tito, Gigi, Auntie Bee: loyalty from their jobs, +10% pay at 60, take the fall once a
+  week at 80), Pablo's Thursday table (Hustlers only, once a week, always pays: ledger 'underworld_table'), the Charity Gala
+  (Halo only, Ditmars Heights Rooftop, once a week: `gala_donate`, ledger 'gala_donation'/'gala', game_settings 'gala' mirrored
+  by lib/gala.ts) and weekly jobs (content/underworld-weeks/<Monday>.json, `validateUnderworldWeek`; `content_import_underworld`
+  stores them live 24 hours later unless vetoed in Studio → Storylets → Pablo's jobs; `underworld_jobs_live()`; follows the
+  storylets autopilot). `?underworld=crew|table|weekly`, `?gala=on|off|new|done` in the preview.
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only
@@ -486,6 +508,14 @@ components live in `app/globals.css`.
   candidate's Integrity) and the storylet gate (`gateProblems`): career tasks may carry `when`/`slots`, campaign situations
   `when`; the servers pass the engines only what memory unlocked (`unlockedCards` → CareerCtx.unlocked, endWeek's
   `opts.unlocked`), one gated card first per workday or End Week. validate:content and tests/cardFormat.test.ts run it.
+- Office cards (no migration; owner, Oct 31: "go with 1, 2, and 3"; spec section 29): content/choices/office.json, 19 Moral
+  Choices cards for players with a career job (10 for any job, one per track) plus two chain follow-ups (office-expenses-audit,
+  finance-pickle-suits). `where.work` means a card happens at your job: right after a career workday (GameShell asks with after
+  "workday", which still counts as "shift") or at the employer's place (`jobPlace`), scored like a named place (×2/×5 as a
+  storylet). `validateCards` requires a job in `when.all` (`needsJob`) and no places or tags. Slot kinds `friend`, `rival`,
+  `bigboss`, `newhire` (lib/storylets.ts) read `snap: "job.track"` beside `boss` and `employer`; outcomes write
+  `thread.padded_expenses`, `thread.insider_trade`, `thread.buried_evidence`. tests/officeCards.test.ts; `?choice=office`
+  (or `office-<track>`) in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

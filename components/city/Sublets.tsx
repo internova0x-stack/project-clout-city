@@ -468,3 +468,16 @@ export function SubletHomeBar({ hostName, mine, onToggle }: { hostName: string; 
   );
 }
 
+/** Living together (migration 0149): the bar over the partner's home the mover now lives in. */
+export function CohabitHomeBar({ hostName, onOpen }: { hostName: string; onOpen: () => void }) {
+  return (
+    <div className="viewing-bar glass-hud" role="group" aria-label="Living together">
+      <span style={{ minWidth: 0 }}>
+        <b>🏠 Home with {handle(hostName)}</b>
+        <small>Their lease, their furniture, your toothbrush. Rent split 50/50.</small>
+      </span>
+      <button className="chip" onClick={onOpen}>Us</button>
+    </div>
+  );
+}
+

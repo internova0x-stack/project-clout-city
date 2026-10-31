@@ -93,6 +93,8 @@ const ERRORS: Record<string, string> = {
   bad_weeks: "That length isn't on offer.",
   note_too_long: `Keep the note under ${SUBLETS.noteMax} characters.`,
   home_too_small: "Spare rooms need a 1BR or bigger.",
+  // Living together (migration 0149).
+  living_together: "You live with your partner. The spare room is spoken for, emotionally.",
   own_house: "You own your place. Sublets are a renter's hustle.",
   too_new: `Sublets open once you've been in the city ${SUBLETS.minAccountDays} days.`,
   one_sublet: "One sublet at a time.",

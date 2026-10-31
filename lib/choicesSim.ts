@@ -1,7 +1,8 @@
 // Moral Choices in the preview (/preview/home?choice=...): the same rules as the server, in memory, with the real
 // cards. Presets: now (every arrival, shift or gig brings a card, no daily limit), back (a consequence of an earlier
 // choice has just landed), high and low (start at the Halo or the Hustler end, with a record), log (a few choices already made), jail (in
-// holding at the 114½ Precinct), chain (a chain's follow-up card waiting).
+// holding at the 114½ Precinct), chain (a chain's follow-up card waiting), office (a career job in memory, so an office
+// card from content/choices/office.json opens first; office-<track> picks the job, e.g. office-law).
 // Consequences land 20 seconds after the choice instead of days later, so the whole loop fits in a minute.
 
 import {
@@ -13,12 +14,26 @@ import WEEK_SAMPLE from "../content/storylets/2026-11-02.json";
 import CONDITION_SAMPLE from "../content/conditions/2026-11-02.json";
 import type { ConditionNow } from "./cityConditions";
 import type { Fact, FactKey, Memory } from "./memory";
+import { TRACKS } from "./careers";
 
 // The preview plays the first weekly storylets (Content Engine step 3) as if they'd gone live.
 const CHOICE_CARDS: ChoiceCard[] = [...BASE_CARDS, ...(WEEK_SAMPLE.cards as ChoiceCard[])];
 import { EMPTY_MEMORY } from "./storylets";
 
-export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "chain" | "story";
+export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "chain" | "story" | "office" | `office-${string}`;
+
+/**
+ * ?choice=office: a player with a career job (a random track, or office-<track>), recently promoted and with a credit they
+ * took from the rival, so office cards (content/choices/office.json) turn up first, after every workday and at the employer.
+ */
+export function officeMemory(track: string): Memory {
+  const now = new Date().toISOString();
+  const f = (key: FactKey, subject = ""): Fact => ({ key, subject, value: {}, count: 1, first: now, last: now, expires: null });
+  return {
+    snapshot: { ...EMPTY_MEMORY.snapshot, rank: 3, job: { track, level: 2, workMood: 60 } },
+    facts: [f("career.hired", track), f("career.promoted", track), f("career.took_credit", `${track}:rival`)],
+  };
+}
 
 /**
  * ?choice=story: a player with a history across the game (a Media job, a partner, a coworker they took credit from, a
@@ -64,13 +79,15 @@ interface Opts {
 export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi {
   const rng = Math.random;
   const story = preset === "story";
-  const always = preset === "now" || story;
+  const officeTrack = preset === "office" ? TRACKS[Math.floor(Math.random() * TRACKS.length)].id
+    : preset?.startsWith("office-") ? TRACKS.find((t) => t.id === preset.slice(7))?.id ?? TRACKS[0].id : null;
+  const always = preset === "now" || story || !!officeTrack;
   // ?choice=city (and story): the first week's city conditions as if they were on (a heatwave and a brownout now, the
   // street fair tomorrow) and a city storylet that fired, plus wins in the Blotter (Content Engine step 4).
   const city = preset === "city" || story;
   const conditions: ConditionNow[] = city ? previewConditions() : [];
   // The player's memory (migration 0138): storylets read it and their choices write to it.
-  const memory: Memory = story ? storyMemory() : structuredClone(EMPTY_MEMORY);
+  const memory: Memory = story ? storyMemory() : officeTrack ? officeMemory(officeTrack) : structuredClone(EMPTY_MEMORY);
   memory.snapshot.conditions = [...new Set(conditions.filter((c) => c.now).map((c) => c.kind))];
   const remember = (sets: { fact: FactKey; subject: string }[]) => {
     const now = new Date().toISOString();
@@ -79,8 +96,8 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       if (have) { have.count += 1; have.last = now; } else memory.facts.unshift({ key: x.fact, subject: x.subject, value: {}, count: 1, first: now, last: now, expires: null });
     }
   };
-  // In ?choice=story, offer storylets first (the cards that read memory).
-  const pool = () => (story ? CHOICE_CARDS.filter((c) => c.when) : CHOICE_CARDS);
+  // In ?choice=story, offer storylets first (the cards that read memory); in ?choice=office, office cards.
+  const pool = () => (story ? CHOICE_CARDS.filter((c) => c.when) : officeTrack ? CHOICE_CARDS.filter((c) => c.where.work) : CHOICE_CARDS);
   let integrity: number = preset === "low" ? 18 : preset === "high" ? 86 : CHOICES.integrityStart;
   let revealed = !!preset && preset !== "now";
   let open: { log: number; card: ChoiceCard; place: string | null; intro?: string } | null = null;
@@ -137,7 +154,8 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   // ?choice=now: a card is already waiting where the player stands.
   if (always) {
     const w = opts.where();
-    const card = pickCard(pool(), { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today(), memory }, rng)
+    // ?choice=office opens as if a workday had just ended, so an office card fits wherever the player stands.
+    const card = pickCard(pool(), { ...w, after: officeTrack ? "workday" : "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today(), memory }, rng)
       ?? pickCard(CHOICE_CARDS.filter((c) => !c.where.places && !c.where.tags), { ...w, after: "arrive", integrity, rank: 3, student: true, business: true, roommate: true, history: [], today: opts.today() }, rng);
     if (card) { open = { log: nextId++, card, place: w.place }; shown.push({ day: opts.today(), at: Date.now() }); }
   }

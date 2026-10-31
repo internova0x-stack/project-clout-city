@@ -8,6 +8,8 @@ import type { StoryletAction, StudioStorylet, StudioStorylets } from "@/lib/stor
 import type { CityCondition, ReactionRule, StudioCondition } from "@/lib/cityConditions";
 import { learnWeights, studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
+import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
+import type { Job } from "@/lib/underworld";
 
 // Development previews only: Studio → Storylets in memory (migration 0139), from the repo's content/storylets files.
 // Every card arrived 6 hours ago, so its window has 18 hours left.
@@ -126,4 +128,42 @@ export async function previewLearningSet(card: string, set: { weight: number; re
   else if (w) Object.assign(w, { weight: set.weight, retired: set.retired, set_by: "admin" });
   else l.weights.push({ card, weight: set.weight, retired: set.retired, set_by: "admin" });
   return { ok: true as const, data: learnView() };
+}
+
+// The underworld, part 2 (migration 0150): Studio → Storylets → Pablo's jobs, from content/underworld-weeks (arrived 6 hours
+// ago, like the storylets).
+let uwJobs: StudioUnderworldJob[] | null = null;
+async function loadUw(): Promise<StudioUnderworldJob[]> {
+  if (uwJobs) return uwJobs;
+  const dir = path.join(process.cwd(), "content", "underworld-weeks");
+  const files = (await readdir(dir).catch(() => [] as string[])).filter((f) => f.endsWith(".json")).sort().reverse();
+  const out: StudioUnderworldJob[] = [];
+  const arrived = new Date(Date.now() - 6 * 3_600_000).toISOString();
+  const live = new Date(Date.now() + 18 * 3_600_000).toISOString();
+  for (const f of files) {
+    const w = JSON.parse(await readFile(path.join(dir, f), "utf8")) as { week: string; jobs: Job[] };
+    for (const job of w.jobs) out.push({ id: job.id, week: w.week, job, status: "scheduled", live_at: live, arrived_at: arrived, decided_at: null });
+  }
+  uwJobs = out;
+  return out;
+}
+
+export async function previewUnderworldJobs() {
+  previewOnly();
+  return { ok: true as const, data: (await loadUw()).map((j) => ({ ...j })) };
+}
+
+export async function previewUnderworldJobSet(id: string, action: StoryletAction) {
+  previewOnly();
+  const js = await loadUw();
+  const j = js.find((x) => x.id === id);
+  if (!j) return { ok: false as const, error: "That job isn't here any more." };
+  j.decided_at = new Date().toISOString();
+  if (action === "veto") j.status = "vetoed";
+  else if (action === "pause") j.status = "paused";
+  else {
+    if (action === "now") j.live_at = new Date().toISOString();
+    j.status = Date.parse(j.live_at) <= Date.now() ? "live" : "scheduled";
+  }
+  return { ok: true as const, data: js.map((x) => ({ ...x })) };
 }

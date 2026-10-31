@@ -11,13 +11,13 @@
 
 import type { StoryletFamily } from "./storyletWeeks.ts";
 import type { FactKey, Memory } from "./memory.ts";
-import { fillSlots, fillText, storyletProblems, systemsOf, whenOk, type SlotDef, type When } from "./storylets.ts";
+import { fillSlots, fillText, jobPlace, needsJob, storyletProblems, systemsOf, whenOk, type SlotDef, type When } from "./storylets.ts";
 
 export type ChoiceArea = "life" | "gigs" | "work" | "school" | "business" | "home" | "nightlife" | "transit" | "dating" | "money" | "fame";
 export type Risk = "low" | "medium" | "high";
 /** What a player was just doing, so a card can feel like it happened because of it. */
-/** "travel" is a subway ride, "ride" a cab or rideshare. */
-export type ChoiceAfter = "arrive" | "shift" | "gig" | "eat" | "visit" | "hangout" | "travel" | "ride";
+/** "travel" is a subway ride, "ride" a cab or rideshare; "workday" a career workday (it also counts as a "shift"). */
+export type ChoiceAfter = "arrive" | "shift" | "gig" | "eat" | "visit" | "hangout" | "travel" | "ride" | "workday";
 
 export interface ChoiceEffects {
   cash?: number;
@@ -86,7 +86,11 @@ export interface ChoiceCard {
   title: string;
   /** A regular in content/culture/npcs.json who is part of the scene. */
   who?: string;
-  where: { places?: string[]; tags?: string[]; after?: ChoiceAfter[] };
+  /**
+   * `work`: an office card (content/choices/office.json): it happens at the player's job, right after a career workday
+   * (wherever they worked it) or at their employer's place, and its `when.all` must require a job.
+   */
+  where: { places?: string[]; tags?: string[]; after?: ChoiceAfter[]; work?: boolean };
   /** `roommate`: the player shares a home with one (C3), for cards about them. */
   needs?: { integrityMin?: number; integrityMax?: number; rank?: number; student?: boolean; business?: boolean; roommate?: boolean };
   /** A follow-up only reached through a chain (`later.card`), never picked on its own. */
@@ -243,9 +247,15 @@ export function fit(card: ChoiceCard, ctx: ChoiceContext): number {
   if (n.business && !ctx.business) return 0;
   if (n.roommate && !ctx.roommate) return 0;
   const w = card.where;
-  if (w.after && !w.after.includes(ctx.after)) return 0;
+  // A career workday is a shift too, so the shift cards (the till at Grind & Gossip) still turn up after one.
+  if (w.after && !w.after.includes(ctx.after) && !(ctx.after === "workday" && w.after.includes("shift"))) return 0;
   let score = 1;
-  if (w.places || w.tags) {
+  if (w.work) {
+    // Office cards: at your own job, after the workday or standing at the employer's place (as strong as a named place).
+    const at = jobPlace(ctx.memory);
+    if (!at || (ctx.after !== "workday" && ctx.place !== at)) return 0;
+    score = 4;
+  } else if (w.places || w.tags) {
     const atPlace = !!ctx.place && !!w.places?.includes(ctx.place);
     const tagged = !!w.tags?.some((t) => ctx.tags.includes(t));
     if (!atPlace && !tagged) return 0;
@@ -461,7 +471,7 @@ export const choiceError = (code: string | undefined) => CHOICE_ERRORS[code ?? "
 // ---------------------------------------------------------------------------
 
 const AREAS: ChoiceArea[] = ["life", "gigs", "work", "school", "business", "home", "nightlife", "transit", "dating", "money", "fame"];
-const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride"];
+const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride", "workday"];
 
 function checkEffects(e: ChoiceEffects, where: string, out: string[], places: string[] = []) {
   for (const [k, v] of Object.entries(e)) {
@@ -504,6 +514,10 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
     for (const p of c.where?.places ?? []) if (!known.places.includes(p)) out.push(`${at}: unknown place "${p}"`);
     for (const t of c.where?.tags ?? []) if (!known.tags.includes(t)) out.push(`${at}: unknown tag "${t}"`);
     for (const a of c.where?.after ?? []) if (!AFTERS.includes(a)) out.push(`${at}: unknown after "${a}"`);
+    if (c.where?.work) {
+      if (!needsJob(c.when)) out.push(`${at}: an office card (where.work) needs a job: "when.all" with a job or job.* snapshot`);
+      if (c.where.places || c.where.tags) out.push(`${at}: an office card happens at the job, so no places or tags`);
+    }
     if (!Array.isArray(c.options) || c.options.length < 2 || c.options.length > 4) { out.push(`${at}: needs 2 to 4 options`); continue; }
     const optIds = new Set<string>();
     let sawLoss = false;

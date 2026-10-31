@@ -1,6 +1,6 @@
 "use server";
 
-import { coupleError, type CoupleResult, type CoupleState } from "@/lib/couples";
+import { coupleError, type CohabitHome, type CoupleResult, type CoupleState } from "@/lib/couples";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Server actions behind relationships (supabase/migrations/0118). Each calls one SQL function, which checks
@@ -34,4 +34,23 @@ export async function coupleGift() {
 }
 export async function coupleSeen() {
   return call("couple_seen", {}, () => null);
+}
+// Living together (supabase/migrations/0149).
+export async function cohabitAsk() {
+  return call<CoupleState>("cohabit_ask");
+}
+export async function cohabitCancel() {
+  return call<CoupleState>("cohabit_cancel");
+}
+export async function cohabitAnswer(askId: number, yes: boolean) {
+  return call<CoupleState>("cohabit_answer", { p_ask: askId, p_yes: yes });
+}
+export async function cohabitLeave() {
+  return call<CoupleState>("cohabit_leave");
+}
+export async function cohabitHang() {
+  return call<CoupleState>("cohabit_hang");
+}
+export async function cohabitHome() {
+  return call<CohabitHome | null>("cohabit_home");
 }

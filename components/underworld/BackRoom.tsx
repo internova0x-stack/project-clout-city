@@ -86,6 +86,30 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
               </div>
             )}
             <Meters v={v} />
+            {v.crew.length > 0 && (
+              <div className="stack-8">
+                <p className="overline" style={{ margin: 0 }}>Pablo&apos;s crew</p>
+                <div className="backroom-crew">
+                  {v.crew.map((m) => {
+                    const status = m.covers ? { icon: "🫡", text: "Has your back" } : m.loyalty >= UNDERWORLD.crew.payAt ? { icon: "💸", text: "Pays extra" } : { icon: "🤝", text: "Warming up" };
+                    return (
+                      <div key={m.id} className="card backroom-crewcard">
+                        <span className="backroom-crew-emoji" aria-hidden="true">{m.emoji}</span>
+                        <span className="backroom-crew-name">{m.name}</span>
+                        <span className="backroom-crew-role">{m.role}</span>
+                        <span className="careers-bar green" role="meter" aria-label={`${m.name}'s loyalty`} aria-valuenow={m.loyalty} aria-valuemin={0} aria-valuemax={100}>
+                          <span style={{ width: `${m.loyalty}%` }} />
+                        </span>
+                        <span className="backroom-crew-status">{status.icon} {status.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="meta" style={{ margin: 0 }}>
+                  Do their jobs to win them over. At {UNDERWORLD.crew.payAt}, their jobs pay more. At {UNDERWORLD.crew.coverAt}, they take the fall for you once a week.
+                </p>
+              </div>
+            )}
             {v.holding && <p className="card meta" style={{ margin: 0 }}>🚓 You&apos;re in holding at the 114½. Bail out from the precinct, or wait it out.</p>}
             {!v.here && !v.holding && (
               <div className="card stack-8">
@@ -104,6 +128,18 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
               ))}
               <p className="meta" style={{ margin: 0 }}>New work every New York day. A day without a job cools you off twice as fast.</p>
             </div>
+            {v.table && (
+              <div className="card stack-8 backroom-table">
+                <p className="title" style={{ margin: 0 }}>🃏 {v.table.title}</p>
+                <p className="subtext" style={{ margin: 0 }}>{v.table.blurb}</p>
+                {v.table.open && (v.table.done
+                  ? <p className="meta" style={{ margin: 0 }}>✔️ You sat in this week. Next week&apos;s chair is yours.</p>
+                  : <button className="btn btn-taxi" disabled={busy || !v.here || v.holding || v.tooHot} onClick={async () => {
+                      const r = await run(api.table());
+                      if (r?.receipt) { setLast({ text: r.receipt, outcome: "win" }); onChanged(); }
+                    }}>Pull up a chair · ⚡ {UNDERWORLD.table.energy}</button>)}
+              </div>
+            )}
             <div className="card stack-8">
               <p className="title" style={{ margin: 0 }}>⚖️ Whitlock &amp; Hale LLP</p>
               {v.lawyer.free ? <p className="subtext" style={{ margin: 0 }}>You work at Whitlock &amp; Hale. You are the lawyer. Fines halved, an hour less in holding.</p>
@@ -157,6 +193,7 @@ function Offer({ o, busy, disabled, onDo }: { o: OfferView; busy: boolean; disab
   return (
     <div className={`card stack-12 backroom-job${o.done ? " done" : ""}`}>
       <p className="title" style={{ margin: 0 }}><span aria-hidden="true">{o.emoji}</span> {o.title}</p>
+      {o.crew && <p className="meta" style={{ margin: 0 }}>{o.crew.emoji} {o.crew.name}&apos;s job</p>}
       {o.done ? <p className="meta" style={{ margin: 0 }}>✔️ Done for today.</p> : (
         <>
           <div className="choice-options" role="radiogroup" aria-label="How you do it">

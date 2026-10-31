@@ -1,0 +1,44 @@
+{
+  "week": "2026-11-02",
+  "jobs": [
+    {
+      "id": "w1102-pumpkin-surplus", "emoji": "🎃", "minRep": 0, "crew": "auntie-bee",
+      "title": "Halloween is over and a Ditmars bodega has 200 unsold pumpkins. Auntie Bee has an idea: \"seasonal artisanal gourds.\"",
+      "options": [
+        { "id": "artisanal", "label": "Sell them as artisanal gourds", "get": "Brunch prices for pumpkins", "cost": "Every buyer's trust in the word \"artisanal\"", "pay": [150, 260], "rep": 3, "heat": 4, "trace": 0.2, "odds": 0.8, "energy": 12, "integrity": -3,
+          "win": "Hand-lettered sign, a little straw, \"locally sourced.\" They were sourced locally. From the bodega.", "fizzle": "A man asked which farm. You said \"Queens.\" He walked away. So did everybody." },
+        { "id": "pie", "label": "Sell them as pumpkins, cheap", "get": "Some cash, clean hands", "cost": "Auntie Bee's disappointment", "pay": [70, 120], "rep": 2, "heat": 0, "trace": 0, "odds": 0.9, "energy": 10, "integrity": 1,
+          "win": "Two for five dollars. A line of pie bakers. Auntie Bee called you \"too honest for this family\" and kept her cut.", "fizzle": "Nobody wants a pumpkin on November 2nd. Not even for pie." }
+      ],
+      "bust": "A food inspector asked to see the artisan. You pointed at a pumpkin. It did not help.",
+      "caught": "Remember the artisanal gourds? A brunch blogger traced them to the bodega and tagged the 114½ for some reason.",
+      "headline": "\"Artisanal gourds\" were bodega pumpkins, says brunch blogger. Seller: {name}."
+    },
+    {
+      "id": "w1102-marathon-shortcut", "emoji": "🏃", "minRep": 15, "crew": "tito",
+      "title": "Marathon Sunday. A runner from Long Island City wants a ride for \"miles 14 to 22\" in Tito's van. He'll pay well.",
+      "options": [
+        { "id": "drive", "label": "Drive him, drop him at mile 22", "get": "A very grateful runner's cash", "cost": "Every honest runner's race", "pay": [400, 600], "rep": 4, "heat": 7, "trace": 0.35, "odds": 0.75, "energy": 10, "integrity": -5,
+          "win": "Eight miles in air conditioning. He jogged out at mile 22 and finished \"strong.\" His medal photo is very sweaty for some reason.", "fizzle": "The bridge was closed for the race. Obviously. You sat in traffic with a man in short shorts for three hours." },
+        { "id": "water", "label": "Hand out water at mile 14 instead", "get": "Good vibes and a small tip", "cost": "The runner's big payday", "pay": [80, 140], "rep": 2, "heat": 0, "trace": 0, "odds": 0.95, "energy": 12, "integrity": 2,
+          "win": "Two hundred cups of water, two hundred high fives. The runner tipped you anyway and ran all 26.2. Mostly.", "fizzle": "You ran out of cups at mile 14 and a half. The runners didn't care. You did." }
+      ],
+      "bust": "Race officials found a runner with a perfect split time and a seatbelt mark. He pointed at the van.",
+      "caught": "Remember the marathon shortcut? The runner's watch tracked 31 miles an hour between miles 14 and 22. The 114½ ran the numbers.",
+      "headline": "Marathon runner's \"personal best\" included a van. Driver: {name}."
+    },
+    {
+      "id": "w1102-rent-board", "emoji": "📋", "minRep": 35, "crew": "gigi",
+      "title": "A landlord wants his building's rent-stabilized paperwork \"misplaced\" before an inspection. Gigi knows the filing cabinet.",
+      "options": [
+        { "id": "misplace", "label": "Misplace the paperwork", "get": "The landlord's fat envelope", "cost": "Six tenants' protections", "pay": [700, 1000], "rep": 6, "heat": 10, "trace": 0.45, "odds": 0.7, "energy": 8, "integrity": -7,
+          "win": "The folder is in a box marked XMAS DECORATIONS. The inspection found nothing. The tenants found out nothing. Yet.", "fizzle": "The filing cabinet was locked. Gigi had the key. Gigi was at bingo." },
+        { "id": "copy", "label": "Make a copy for the tenants first", "get": "Pablo's fee, and a clear conscience", "cost": "The landlord's bonus", "pay": [350, 500], "rep": 4, "heat": 4, "trace": 0.2, "odds": 0.75, "energy": 10, "integrity": -1,
+          "win": "The folder went missing. A copy went under six doors. The landlord paid. The tenants won. Gigi winked.", "fizzle": "The copy machine jammed on page one. It always jams on page one." }
+      ],
+      "bust": "The inspector arrived early with a coffee and found you holding the folder over a shredder.",
+      "caught": "Remember the misplaced paperwork? A tenant found the box marked XMAS DECORATIONS in October. She called the 114½ and Lola.",
+      "headline": "Rent paperwork found in a Christmas box. Who put it there? {name}, says the landlord's lawyer."
+    }
+  ]
+}

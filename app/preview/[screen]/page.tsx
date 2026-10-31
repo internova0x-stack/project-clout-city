@@ -28,7 +28,7 @@ import { previewDrafts, previewHuntList, previewGossipList, previewGossipStatus,
 import { previewStudioShoutoutAction, previewStudioShoutouts } from "../radioActions";
 import { previewStudioLetter, previewStudioMailbag } from "../mayorActions";
 import { previewAutopilot, previewAutopilotSet } from "../autopilotActions";
-import { previewConditions, previewConditionSet, previewLearning, previewLearningSet, previewStorylets, previewStoryletSet } from "../storyletActions";
+import { previewConditions, previewConditionSet, previewUnderworldJobs, previewUnderworldJobSet, previewLearning, previewLearningSet, previewStorylets, previewStoryletSet } from "../storyletActions";
 import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -38,7 +38,7 @@ import type { Player } from "@/lib/player";
 //   /preview/guest            the guest screen
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
-//   /preview/home?couple=progress|ask|dating|gift|ended  relationships (migration 0118); open Phone → Messages → Us
+//   /preview/home?couple=progress|ask|dating|gift|ended|movein|together  relationships (0118) and living together (0149); open Phone → Messages → Us
 //   /preview/home?starter=0-10&apps=locked  Starter Week (that many missions done) and apps locked as for a Rank 1 player
 //   /preview/home?visit=none|hosting|invite|guest  having people over (migration 0121): the stats panel's Mood row, the visit sheet
 //   /preview/home?homescore=furnished  the home score (migration 0120): furniture and three paintings placed; tap 🏠 under the top bar
@@ -52,9 +52,10 @@ import type { Player } from "@/lib/player";
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
-//   /preview/home?underworld=locked|new|jobs|pro|hot|caught|lawyer  The underworld (migration 0148; Pablo's back room from his shop's card, or ?open=backroom)
+//   /preview/home?underworld=locked|new|jobs|pro|hot|caught|lawyer|crew|table|weekly  The underworld (migrations 0148, 0150; Pablo's back room from his shop's card, or ?open=backroom; crew = loyal crew, table = a Hustler at the Thursday table, weekly = this week's new jobs)
+//   /preview/home?gala=on|off|new|done  The Charity Gala (migration 0150; Halo only, Ditmars Heights Rooftop's card, or ?open=gala)
 //   /preview/home?career=welcome|new|apply|work|day|office|grudge|boss|quit|cityhall|streaming|fashion|realestate|finance|law|review|warning|fired  Careers (migration 0135; Phone → Careers; welcome = the aspiration welcome screen, migration 0143; boss = Push the boss out open; quit = the quit card; cityhall = at work in the Mayor's office)
-//   /preview/home?choice=now|back|high|low|log|story|city  Moral Choices (migration 0131): now = a card on every arrival, story = storylets from a sample history (Content Engine step 2), city = the city conditions and Blotter wins of step 4 (News → City), back = a consequence lands
+//   /preview/home?choice=now|back|high|low|log|story|city|office  Moral Choices (migration 0131): now = a card on every arrival, story = storylets from a sample history (Content Engine step 2), city = the city conditions and Blotter wins of step 4 (News → City), office = a career job in memory, so an office card (content/choices/office.json) opens first and after every workday (office-<track>, e.g. office-law, picks the job), back = a consequence lands
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
 //   /preview/home?member=vip|monthly|cancelling|pastdue|forever|free|none  Membership & purchases (Settings, profile)
 //   /preview/home?hint=daily  Lola's daily-tasks nudge (owner, Oct 17) after 2 seconds
@@ -106,7 +107,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, choice } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -197,6 +198,7 @@ export default async function Preview({
           campaignPreset={campaign}
           careerPreset={career}
           underworldPreset={underworld}
+          galaPreset={gala}
           choicePreset={choice}
           goalsPreset={goals}
           pushPreset={push}
@@ -237,7 +239,7 @@ export default async function Preview({
             newsList: previewNewsList, newsUpload: previewNewsUpload, newsStatus: previewNewsStatus, newsReschedule: previewNewsReschedule,
             huntList: previewHuntList, huntUpload: previewHuntUpload, huntStatus: previewHuntStatus, drafts: previewDrafts,
             gossipList: previewGossipList, gossipStatus: previewGossipStatus, setupCheck: previewSetupCheck,
-            mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet, storylets: previewStorylets, storyletSet: previewStoryletSet, conditions: previewConditions, conditionSet: previewConditionSet, learning: previewLearning, learningSet: previewLearningSet,
+            mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet, storylets: previewStorylets, storyletSet: previewStoryletSet, conditions: previewConditions, conditionSet: previewConditionSet, underworldJobs: previewUnderworldJobs, underworldJobSet: previewUnderworldJobSet, learning: previewLearning, learningSet: previewLearningSet,
             shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
           }}
         />

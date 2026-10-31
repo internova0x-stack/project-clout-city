@@ -2,10 +2,11 @@
 
 import { randomInt } from "node:crypto";
 import {
-  UnderworldError, doJob, invited, markSeen, newState, refresh, retainLawyer, underworldError, view,
-  type Change, type UnderworldCtx, type UnderworldResult, type UnderworldScreen, type UnderworldState,
+  UnderworldError, doJob, invited, markSeen, newState, refresh, retainLawyer, sitTable, underworldError, view,
+  type Change, type UnderworldContent, type UnderworldCtx, type UnderworldResult, type UnderworldScreen, type UnderworldState,
 } from "@/lib/underworld";
-import { UNDERWORLD_CONTENT as content } from "@/lib/underworldContent";
+import { UNDERWORLD_CONTENT } from "@/lib/underworldContent";
+import { withWeekly, type LiveUnderworldJob } from "@/lib/underworldWeeks";
 import { nyDay } from "@/lib/campaign";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -21,6 +22,16 @@ type Ctx = UnderworldCtx & { row: { version: number; state: UnderworldState } | 
 type Out = UnderworldResult<UnderworldScreen>;
 
 const rng = () => randomInt(0, 2 ** 32) / 2 ** 32;
+
+// Part 2 (migration 0150): the weekly jobs that went live join Pablo's pool, read at most every 5 minutes.
+let weekly: { at: number; live: LiveUnderworldJob[] } = { at: 0, live: [] };
+async function contentFor(admin: Admin): Promise<UnderworldContent> {
+  if (Date.now() - weekly.at > 5 * 60_000) {
+    const { data, error } = await admin.rpc("underworld_jobs_live");
+    weekly = { at: Date.now(), live: error ? weekly.live : ((data ?? []) as LiveUnderworldJob[]) };
+  }
+  return withWeekly(UNDERWORLD_CONTENT, weekly.live);
+}
 
 async function who(): Promise<{ id: string; admin: Admin } | { error: string }> {
   const supabase = await getServerSupabase();
@@ -62,12 +73,13 @@ async function save(admin: Admin, player: string, ctx: Ctx, state: UnderworldSta
 }
 
 /** Loads the state (made on the invitation's first visit), brings it to today, runs one change and saves it. */
-async function act(change: ((s: UnderworldState, ctx: Ctx, today: string) => Change & { receipt?: string; outcome?: UnderworldScreen["outcome"] }) | null): Promise<Out> {
+async function act(change: ((s: UnderworldState, ctx: Ctx, today: string, content: UnderworldContent) => Change & { receipt?: string; outcome?: UnderworldScreen["outcome"] }) | null): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
   const ctx = await load(w.id, w.admin);
   if ("error" in ctx) return { ok: false, error: ctx.error };
   const today = nyDay();
+  const content = await contentFor(w.admin);
   if (!ctx.row && !invited(ctx)) {
     if (change) return { ok: false, error: underworldError("locked") };
     return { ok: true, data: { view: view(content, null, today, ctx) } };
@@ -81,7 +93,7 @@ async function act(change: ((s: UnderworldState, ctx: Ctx, today: string) => Cha
   if (!change) return { ok: true, data: { view: view(content, state, today, ctx) } };
   let c: ReturnType<NonNullable<typeof change>>;
   try {
-    c = change(state, ctx, today);
+    c = change(state, ctx, today, content);
   } catch (e) {
     if (e instanceof UnderworldError) return { ok: false, error: underworldError(e.code) };
     throw e;
@@ -99,11 +111,15 @@ export async function underworldScreen(): Promise<Out> {
 
 export async function underworldJob(job: string, option: string): Promise<Out> {
   if (typeof job !== "string" || typeof option !== "string") return { ok: false, error: underworldError("no_offer") };
-  return act((s, ctx, today) => doJob(content, s, job, option, today, ctx, rng));
+  return act((s, ctx, today, content) => doJob(content, s, job, option, today, ctx, rng));
 }
 
 export async function underworldLawyer(): Promise<Out> {
   return act((s, ctx, today) => retainLawyer(s, today, ctx));
+}
+
+export async function underworldTable(): Promise<Out> {
+  return act((s, ctx, today, content) => sitTable(content, s, today, ctx, rng));
 }
 
 export async function underworldSeen(): Promise<Out> {

@@ -968,7 +968,8 @@ The step after "It's mutual" (Clarifications section 14). Phase 1, as recommende
 - **Anniversaries.** Every week together +15 clout, every month +50.
 - **Breaking up.** Either partner, any time, no penalty and nothing public: the other sees a gentle note once. The same two can't go official again for 14 days. Blocking ends it at once.
 - **Pushes.** "wants to make it official" and "sent you a gift" (P0 social); taps open "Us".
-- **Later.** Living together (shared home, split rent), Lola's column mentions (opt-out), couple Shop items, the Clout TV couple photo, matching-fit clout.
+- **Living together (owner, Oct 31: "go with 1, 2, and 3"; migration 0149).** Official for 7+ days, one partner invites the other to their home (the ask lasts 7 days). The home must fit two: not a dorm or the room share (an owned house always fits), no sublet or listing and no rent due on either side, and the mover owns no house. The mover's rental ends with no fee, their furniture goes to storage and their rent day lines up with the host's. Rent splits: the mover pays half (rounded down), the host the rest; nothing for the mover in a partner's owned house. **Home together:** both tap it the same New York day for +8 Mood and +5 clout each, once a day. Either can move out any time; a breakup, a block, either one moving or being evicted, and Start over end it too: the host keeps the home at full rent, the mover goes to the room share, and they stay dating. While together the mover can't host people over and neither can sublet. **Lola** posts one Blotter line when they move in, unless either opted out of News mentions. **Couple Shop pieces** (content/shop/couple.json, live through the Studio): Joint Custody Monstera C$85, Mine, Yours, Ours Mug Shelf C$180, Big Enough to Argue On Rug C$240, Hammock Chair for Two C$420, Two-Seat Truce Loveseat C$560, The Compromise Queen Bed C$1,150, buyable only while dating. "🏠 Living with @name" on the player card follows the Dating line.
+- **Later.** The Clout TV couple photo, matching-fit clout, a weekly Lola line about a couple.
 
 ## 25. Sublets, phase 1 (owner, Oct 26: "Go with your recommendations"; migration 0119)
 
@@ -1322,7 +1323,14 @@ an insider tip, the pickle pitch; PC LOAD LETTER at 4:51, Kimberly's 26-hour day
 dinner). Fran, the receptionist, is No-Fee* Realty's regular. Campaign background: Finance fundraising ×1.3, Real Estate ×1.15,
 Law +1 point. Payday now pays the wage and the tips (or bonus, or broker fees) as two ledger rows.
 
-**Later:** the Climb's office cards for players with a job.
+**Office cards (owner, Oct 31: "go with 1, 2, and 3"; no migration).** Moral Choices at your job: content/choices/office.json
+holds 19 cards for players with a career job, ten for any job (padded expenses, the salary sheet on the printer, a client's
+C$900 watch, the boss's password on a sticky note, covering for a late work friend, the new hire who deleted the shared drive)
+and one per track (the tip jar at Grind & Gossip, a growth chart that must go "up and to the right", a made-up quote at Clout
+TV, the ribbon budget at City Hall, viewer bots at the Glow Up House, a missing sample at Atelier Vernon, "aspirational" listing
+photos, a pickle-stock tip at Queensboro Capital, a buried memo at Whitlock & Hale), with two chains (an expenses audit, the
+City Trading Commission). They appear right after a workday or at the employer's place, ahead of ordinary cards there, and
+name your own boss, work friend, rival, big boss or new hire. The daily limits are unchanged.
 
 ## 31. The underworld, part 1 (owner, Oct 31: "The underworld"; "Invite only", "Bite but recover", "Keep it a side hustle"; migration 0148)
 
@@ -1360,5 +1368,22 @@ components/underworld/BackRoom.tsx, the place (`pablos-luggage`, template `backR
 LUGGAGE · NOTARY) and its regular Pablo. Preview: lib/underworldSim.ts, `?underworld=locked|new|jobs|pro|hot|caught|lawyer`
 (`&open=backroom`).
 
-**Later:** Heat and traces shared with Campaign Mode; Halo- and Hustler-only places and events; weekly underworld jobs through
-the content routine; Pablo's crew of regulars.
+**Part 2 (owner, Oct 31: "go with 1, 2, and 3"; migration 0150).**
+- **Pablo's crew:** Tito the driver, Gigi the bookkeeper, Auntie Bee who knows everybody (content/underworld/jobs.json `crew`;
+  jobs carry `crew`). A crew member's job moves their loyalty (from 20: +6 a win, +2 a fizzle, −5 a bust); at 60 their jobs pay
+  10% more, at 80 they take the fall once a New York week (no fine, no holding, no headline: their own line instead). The back
+  room shows the three with their loyalty; each job names whose it is.
+- **Pablo's Thursday table, Hustlers only** (meter 30 or below): once a New York week in the back room, favors traded over
+  cards. No stake and no gambling: it always pays C$300 to 800, +3 Street Rep, +4 Heat and +5 loyalty with each of the crew
+  (ledger 'underworld_table'). Others see the curtain and Pablo's line.
+- **The Charity Gala, Halo only** (meter 70 or above, revealed): Ditmars Heights Rooftop's card, once a New York week, a gift of
+  C$100, 250, 500 or 1,000 to the Astoria Literacy & Rooftop Garden Fund; a quarter comes back as clout (250 at most), +10 Mood,
+  the meter +2 (`gala_state`, `gala_donate`; ledger 'gala_donation' and 'gala'; game_settings 'gala', lib/gala.ts).
+- **Weekly jobs for Pablo:** the routine writes content/underworld-weeks/<Monday>.json (2 to 5 jobs, lib/underworldWeeks.ts
+  `validateUnderworldWeek`, run by validate:content and the import); `content_import_underworld` stores each new job
+  scheduled, live 24 hours later unless vetoed or paused in Studio → Storylets → Pablo's jobs (held while the storylets
+  autopilot is off); `underworld_jobs_live()` feeds the server's pool. A vetoed job that went live is never dealt again but
+  still explains an old trace. The first week (Nov 2): artisanal gourds, a marathon shortcut, misplaced rent paperwork.
+- Preview: `?underworld=crew|table|weekly`, `?gala=on|off|new|done` (`&open=gala`).
+
+**Later:** Heat and traces shared with Campaign Mode.

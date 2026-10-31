@@ -52,7 +52,7 @@ import type { ChatApi } from "@/lib/chat";
 import { datingAlerts, type DatePerson, type DatingApi, type DatingInbox } from "@/lib/dating";
 import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { CouplePrompt, CoupleSheet } from "./dating/Couple";
-import { SubletHomeBar, type SubletHandlers } from "./city/Sublets";
+import { CohabitHomeBar, SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
@@ -68,7 +68,7 @@ import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/V
 import { KIND_LABEL, VISITS, VISIT_POLL_MS, hostCloutPerGuest, visitAlerts, visitClock, type VisitApi, type VisitHome, type VisitMessage, type VisitRoom, type VisitState } from "@/lib/visits";
 import { homeScore as scoreHome, qualityTarget, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
 import { subletAlerts, type SubletApi, type SubletHome, type SubletResult, type SubletState } from "@/lib/sublets";
-import { coupleAlerts, coupleBadge, type CoupleApi, type CoupleState } from "@/lib/couples";
+import { coupleAlerts, coupleBadge, type CohabitHome, type CoupleApi, type CoupleState } from "@/lib/couples";
 import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
 import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew";
 import { KeepsakeSheet, PartyPrompt, PlusOneSheet } from "./city/Party";
@@ -133,6 +133,8 @@ import type { CareerApi } from "@/lib/careers";
 import { CareersSheet } from "@/components/careers/CareersSheet";
 import { UNDERWORLD, type UnderworldApi } from "@/lib/underworld";
 import { BackRoomSheet } from "@/components/underworld/BackRoom";
+import { GALA, type GalaApi } from "@/lib/gala";
+import { GalaSheet } from "@/components/gala/Gala";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import { CampusSheet } from "./campus/CampusSheet";
 
@@ -270,6 +272,7 @@ export function GameShell({
   campaign,
   careers,
   underworld,
+  gala,
   choices,
   remembered,
   campus,
@@ -360,6 +363,8 @@ export function GameShell({
   careers?: CareerApi;
   /** The underworld (migration 0148): Pablo's back room, from his shop's card; without it, hidden. */
   underworld?: UnderworldApi;
+  /** The Charity Gala (migration 0150): Halo only, on Ditmars Heights Rooftop's card. */
+  gala?: GalaApi;
   /** Moral Choices (migration 0131): situation cards where you are, the private Integrity meter; off without it. */
   choices?: ChoicesApi;
   /** Content Engine step 5: what the city's people remember about this player (lines by character id). */
@@ -435,6 +440,7 @@ export function GameShell({
   const [campaignOpen, setCampaignOpen] = useState(false);
   const [careersOpen, setCareersOpen] = useState(false);
   const [backRoomOpen, setBackRoomOpen] = useState(false);
+  const [galaOpen, setGalaOpen] = useState(false);
   // Careers: where the player's job is (the employer's card says "Go to work" there).
   const [careerPlace, setCareerPlace] = useState<string | null>(null);
   // Whether a campaign is running (the election teasers step aside while one is).
@@ -967,6 +973,13 @@ export function GameShell({
     if (!sublet || !subLiveId) { setSubHome(null); setSubMine(false); return; }
     void sublet.home().then((r) => { if (r.ok) setSubHome(r.data); });
   }, [sublet, subLiveId]);
+  // Living together (migration 0149): the mover's home is the host's place, loaded once per move-in.
+  const [cohabHome, setCohabHome] = useState<CohabitHome | null>(null);
+  const cohabLiveId = coupleS?.home?.live?.role === "mover" ? coupleS.home.live.id : null;
+  useEffect(() => {
+    if (!couple?.moveIn || !cohabLiveId) { setCohabHome(null); return; }
+    void couple.moveIn.home().then((r) => { if (r.ok) setCohabHome(r.data); });
+  }, [couple, cohabLiveId]);
   // Opening "Us" refreshes it (dates done, today's streak) and marks gifts and the breakup note seen.
   useEffect(() => {
     if (panel !== "us" || !couple) return;
@@ -1313,6 +1326,7 @@ export function GameShell({
     else if (open === "campaign" && campaign) setCampaignOpen(true);
     else if (open === "careers" && careers) setCareersOpen(true);
     else if (open === "backroom" && underworld) setBackRoomOpen(true);
+    else if (open === "gala" && gala) setGalaOpen(true);
     // Creator links (migration 0087) can land on the News, the Shop or the VIP plans.
     else if (open === "news") openNews(null);
     else if (open === "shop") openShop("fashion");
@@ -1544,6 +1558,19 @@ export function GameShell({
     return { template, layout, owned: spot ? [...pieces, bed] : pieces, hostName: subHome.hostName };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subHome, subMine, subS?.live?.role]);
+  // Living together (migration 0149): the mover sees the host's place and furniture (their own pieces are in storage).
+  const cohabView = useMemo(() => {
+    if (!cohabHome || subView || coupleS?.home?.live?.role !== "mover") return null;
+    const template = homeTemplate(cohabHome.homeId, cohabHome.houseSku);
+    const owned: OwnedPiece[] = cohabHome.items.flatMap((i) => {
+      const it = homeItem(i.sku);
+      return it?.furniture ? [pieceOf(it, ownedId(i.id))] : [];
+    }).filter((p) => !placedElsewhere(cohabHome.layout, 1).has(p.id));
+    return { template, layout: cohabHome.layout, owned, hostName: cohabHome.hostName };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cohabHome, subView, coupleS?.home?.live?.role]);
+  // Someone else's place shown as home: a sublet's room, or the partner's home I moved into.
+  const sharedHome = subView ?? cohabView;
   // The home score (migration 0120): the pieces placed in my home, by room, line and stars; the server pays milestones.
   const homeScoreNow = useMemo<HomeScore | null>(() => {
     if (!city) return null;
@@ -1914,6 +1941,7 @@ export function GameShell({
     onOpenCampaign: campaign ? () => setCampaignOpen(true) : undefined,
     career: careers ? { jobPlace: careerPlace, onOpen: () => { setPlace(null); setCareersOpen(true); } } : undefined,
     onBackRoom: underworld ? () => { setPlace(null); setBackRoomOpen(true); } : undefined,
+    onGala: gala ? () => { setPlace(null); setGalaOpen(true); } : undefined,
     onStation: radio || tv ? onStation : undefined,
     onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
@@ -2455,7 +2483,7 @@ export function GameShell({
   const showDating = !!dating && datingAlerts(inbox) > 0 && datingDismissed !== datingKey && flow === "none" && !arranging && tab === "home" && !inside;
   const crewKey = crewInbox ? crewInbox.outings.filter((o) => !o.mine && o.myStatus === "invited").map((o) => o.id).join() : "";
   // One home card at a time: dates first, then crew plans, then the story.
-  const coupleKey = coupleS ? `${coupleS.asks.filter((a) => !a.mine).map((a) => a.id).join()}|${coupleS.gifts.received.map((g) => g.id).join()}|${coupleS.ended?.id ?? ""}` : "";
+  const coupleKey = coupleS ? `${coupleS.asks.filter((a) => !a.mine).map((a) => a.id).join()}|${coupleS.gifts.received.map((g) => g.id).join()}|${coupleS.ended?.id ?? ""}|${coupleS.home?.asks.filter((a) => !a.mine).map((a) => a.id).join() ?? ""}|${coupleS.home?.ended?.id ?? ""}` : "";
   const showCouple = !showDating && !!couple && coupleAlerts(coupleS) > 0 && coupleDismissed !== coupleKey && flow === "none" && !arranging && tab === "home" && !inside;
   const showCrew = !showDating && !showCouple && !!crew && crewAlerts(crewInbox) > 0 && crewDismissed !== crewKey && flow === "none" && !arranging && tab === "home" && !inside;
   const partyInvite = (partyIn?.plusOnes ?? []).find((x) => !x.mine && x.status === "invited");
@@ -2487,7 +2515,7 @@ export function GameShell({
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // C3: the roommate's intro, then a note a day, when no other home card is up.
   const homeRoommate = ((): Roommate | null => {
-    const id = city && !city.player.house_sku && !subView ? ECONOMY.homes.find((h) => h.id === me.home_id)?.roommate : undefined;
+    const id = city && !city.player.house_sku && !sharedHome ? ECONOMY.homes.find((h) => h.id === me.home_id)?.roommate : undefined;
     return (id && (NPC_PROFILES.roommates as Roommate[]).find((r) => r.id === id)) || null;
   })();
   // The intro comes before the TV and news cards (a new player meets their roommate first); the daily note waits for them.
@@ -2514,7 +2542,7 @@ export function GameShell({
   };
 
   return (
-    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${tab === "home" && !inside && (visitView || (hostLive && visitRoomS)) ? " in-visit" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? " has-crib" : ""}${starter && !inside && flow === "none" && !visitView ? " has-starter" : ""}`}>
+    <main className={`game${trip ? " travelling" : ""}${inside && city ? " inside" : ""}${arranging && tab === "home" ? " arranging" : ""}${showPrompt ? " has-story-prompt" : ""}${tab === "home" && !inside ? " at-home" : ""}${tab === "home" && !inside && (visitView || (hostLive && visitRoomS)) ? " in-visit" : ""}${cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !sharedHome && !visitView && flow === "none" ? " has-crib" : ""}${starter && !inside && flow === "none" && !visitView ? " has-starter" : ""}`}>
       {inside && city ? (
         <>
         <InteriorScene
@@ -2627,22 +2655,22 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
-            template={viewing ?? decorHome ?? visitView?.template ?? subView?.template ?? upstairs ?? baseHome}
-            floor={viewing || decorHome || visitView || subView ? 1 : floorNow}
-            layout={viewing ? null : decor ? decor.layout : visitView ? visitView.layout : subView ? subView.layout : city?.homeLayout}
+            template={viewing ?? decorHome ?? visitView?.template ?? sharedHome?.template ?? upstairs ?? baseHome}
+            floor={viewing || decorHome || visitView || sharedHome ? 1 : floorNow}
+            layout={viewing ? null : decor ? decor.layout : visitView ? visitView.layout : sharedHome ? sharedHome.layout : city?.homeLayout}
             crowd={viewing || decor ? undefined : visitCrowd}
             onCrowdTap={(m) => { if (!m.npc && chat) openPlayer(m.id); }}
             look={look}
             outfit={outfit}
             daytime={daytime}
-            editable={cityOn && flow === "none" && !viewing && !subView && !visitView}
+            editable={cityOn && flow === "none" && !viewing && !sharedHome && !visitView}
             rotatable={flow === "none"}
             door={flow === "none"}
-            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : visitView ? `${me.display_name} at ${visitView.hostName}'s place` : subView ? `${me.display_name} in the spare room at ${subView.hostName}'s place` : `${me.display_name} at home, wearing ${style.label}`}
+            label={viewing ? `Looking around ${ECONOMY.homes.find((h) => h.id === viewHome)?.name ?? "a listing"}` : decor ? `Decorating ${decor.posterName}'s place` : visitView ? `${me.display_name} at ${visitView.hostName}'s place` : subView ? `${me.display_name} in the spare room at ${subView.hostName}'s place` : cohabView ? `${me.display_name} at home with ${cohabView.hostName}` : `${me.display_name} at home, wearing ${style.label}`}
             insetBottom={170}
             onUse={(it) => {
               if (viewing || decor) return;
-              if (it.use?.kind === "floor") return subView || visitView ? undefined : setHomeFloor(it.use.to);
+              if (it.use?.kind === "floor") return sharedHome || visitView ? undefined : setHomeFloor(it.use.to);
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
               if (restOn && it.use?.kind === "sleep") setRestKind("nap");
               if (restOn && it.use?.kind === "sit") setRestKind("sit");
@@ -2651,8 +2679,8 @@ export function GameShell({
             onEditingChange={setArranging}
             mood={roomMood}
             onSaveLayout={(l) => (decor && together ? saveDecor(l) : cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
-            owned={viewing ? undefined : decor ? decorPieces : visitView ? visitView.owned : subView ? subView.owned : ownedHere}
-            trial={!decor && !subView && !visitView && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
+            owned={viewing ? undefined : decor ? decorPieces : visitView ? visitView.owned : sharedHome ? sharedHome.owned : ownedHere}
+            trial={!decor && !sharedHome && !visitView && tryHome?.furniture ? { piece: pieceOf(tryHome, "trial"), price: tryHome.price, canAfford: (city?.player.bank_cash ?? 0) >= tryHome.price } : undefined}
             onTrialEnd={() => setTryHome(null)}
             onTrialBuy={cityApi && ((l) => run(`buy:${tryHome!.sku}`, async () => {
               // Buy, then keep the piece where it was tried: the layout's "trial" becomes the new item.
@@ -2674,6 +2702,9 @@ export function GameShell({
           )}
           {subS?.live?.role === "sub" && subHome && !viewing && !decor && !visitView && (
             <SubletHomeBar hostName={subHome.hostName} mine={subMine} onToggle={() => { setSubMine((m) => !m); setHomeFloor(1); }} />
+          )}
+          {cohabView && !viewing && !decor && !visitView && (
+            <CohabitHomeBar hostName={cohabView.hostName} onOpen={() => setPanel("us")} />
           )}
           {viewing && viewHome && (
             <ViewingBar
@@ -2776,7 +2807,7 @@ export function GameShell({
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
         starter={starter && !inside && flow === "none" && !visitView ? <StarterPill done={starter.done} onOpen={() => setPanel("starter")} /> : null}
-        homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !subView && !visitView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
+        homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !sharedHome && !visitView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
         quests={trip ? [] : quests}
         time={clock.time}
         tab={tab}
@@ -3231,7 +3262,7 @@ export function GameShell({
           onOpenDates: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("dates"); },
           onCrushChange: () => void loadInbox(),
           us: couple && coupleS ? {
-            line: coupleS.partner ? `${coupleS.partner.name} · 🔥 ${coupleS.streak}-day streak` : coupleS.matches.length ? "Make it official with a match" : "Match, date three times, make it official",
+            line: coupleS.partner ? `${coupleS.partner.name} · 🔥 ${coupleS.streak}-day streak${coupleS.home?.live ? " · 🏠 living together" : ""}` : coupleS.matches.length ? "Make it official with a match" : "Match, date three times, make it official",
             alerts: coupleAlerts(coupleS),
             onOpen: () => { setPhone({ open: false, app: null }); setChatWith(null); setPanel("us"); },
           } : undefined,
@@ -3333,9 +3364,12 @@ export function GameShell({
           {careers && <CareersSheet open={careersOpen} onClose={() => setCareersOpen(false)} api={careers} onToast={setToast}
             onGo={(id) => { setCareersOpen(false); openPlace(id); }}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); }}
-            onWorkdayDone={() => askChoice("shift")} />}
+            onWorkdayDone={() => askChoice("workday")} />}
           {underworld && <BackRoomSheet open={backRoomOpen} onClose={() => setBackRoomOpen(false)} api={underworld} onToast={setToast}
             onGo={() => { setBackRoomOpen(false); openPlace(UNDERWORLD.place); }}
+            onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
+          {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
+            here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
@@ -3371,6 +3405,24 @@ export function GameShell({
                 onPlanDate: () => { setPanel("places"); setToast("Pick a restaurant or a club night, then tap “Make it a date”."); },
                 onMessage: (p) => { setPanel(null); openChatWith({ id: p.id, name: p.name, style: p.style }); },
                 onSeen: () => void couple.seen().then(() => loadCouple()),
+                // Living together (migration 0149).
+                home: couple.moveIn ? {
+                  onAsk: () => void coupleRun(() => couple.moveIn!.ask(), "🏠 Invitation sent. Clear a drawer, just in case."),
+                  onCancel: () => void coupleRun(() => couple.moveIn!.cancel(), "Invitation taken back. Nobody saw."),
+                  onAnswer: (id, yes) => void coupleRun(() => couple.moveIn!.answer(id, yes),
+                    yes ? "🏠 Moved in. Your furniture's in storage, your toothbrush is not." : "Not yet. The boxes can wait."),
+                  onLeave: () => void coupleRun(() => couple.moveIn!.leave(), "📦 Moved out. No fees, no hard feelings."),
+                  onHang: () => void coupleRun(async () => {
+                    const r = await couple.moveIn!.hang();
+                    const h = r.ok ? r.data.home : undefined;
+                    if (h?.live?.homeToday && h.live.homeOther) {
+                      setGain({ clout: h.rules.homeClout, mood: h.rules.homeMood });
+                      setToast(`🛋️ Home together. 🙂 +${h.rules.homeMood}, 🔥 +${h.rules.homeClout}.`);
+                    } else if (r.ok) setToast("Tapped in. Your partner gets a nudge.");
+                    return r;
+                  }),
+                  onSeeHome: () => { setPanel(null); setPhone({ open: false, app: null }); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1); },
+                } : undefined,
               }}
             />
           )}

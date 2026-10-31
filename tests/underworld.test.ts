@@ -187,3 +187,68 @@ test("tuning: both styles pay over a season, the careful one gets caught less, a
   // A season of jobs reaches the bigger tiers.
   assert.ok(avg(bold.map((x) => x.rep)) >= 35);
 });
+
+// ---- Part 2 (migration 0150): the crew, the Thursday table, weekly jobs ----
+import { sitTable, weekOf } from "../lib/underworld.ts";
+import { validateUnderworldWeek, withWeekly } from "../lib/underworldWeeks.ts";
+
+test("a crew member's jobs move their loyalty; at 60 they pay more; at 80 they take the fall once a week", () => {
+  const s = newState(DAY);
+  refresh(content, s, DAY, ctx(), seeded(9));
+  s.offers.ids = ["notary-stamp"];
+  s.crew = { gigi: 60 };
+  const r = doJob(content, s, "notary-stamp", "stamp", DAY, ctx(), fixed(0.5));
+  assert.ok(r.outcome === "win" || r.outcome === "trace");
+  const [lo, hi] = content.jobs.find((j) => j.id === "notary-stamp")!.options[0].pay;
+  assert.equal(r.payouts[0].amount, Math.round(((lo + 0.5 * (hi - lo)) * 1.1) / 10) * 10, "10% more at 60");
+  assert.equal(s.crew!.gigi, 66);
+
+  const b = newState(DAY);
+  b.rep = 20;
+  b.crew = { gigi: 85 };
+  b.offers = { day: DAY, ids: ["notary-stamp"], done: [] };
+  const rolls = [0.99, 0];
+  const caught = doJob(content, b, "notary-stamp", "stamp", DAY, ctx(), () => rolls.shift() ?? 0);
+  assert.equal(caught.outcome, "bust");
+  assert.deepEqual(caught.payouts, [], "no fine");
+  assert.equal(caught.holding, 0);
+  assert.equal(caught.headline, null);
+  assert.match(caught.receipt, /Gigi/);
+  assert.equal(b.covered!.gigi, weekOf(DAY));
+  // Once a week: the next bust that week is a real one.
+  b.offers = { day: DAY, ids: ["five-star-diner"], done: [] };
+  const rolls2 = [0.99, 0];
+  const again = doJob(content, b, "five-star-diner", "type", DAY, ctx(), () => rolls2.shift() ?? 0);
+  assert.ok(again.payouts.some((p) => p.kind === "underworld_fine"));
+});
+
+test("the Thursday table: Hustlers only, in the back room, once a New York week, always pays", () => {
+  const s = newState(DAY);
+  assert.throws(() => sitTable(content, s, DAY, ctx({ integrity: 50 }), fixed(0.5)), (e: unknown) => (e as UnderworldError).code === "table_locked");
+  assert.throws(() => sitTable(content, s, DAY, ctx({ integrity: 20, atPlace: "ditmars-deli" }), fixed(0.5)), (e: unknown) => (e as UnderworldError).code === "not_here");
+  const r = sitTable(content, s, DAY, ctx({ integrity: 20 }), fixed(0.5));
+  assert.equal(r.payouts[0].kind, "underworld_table");
+  assert.equal(r.payouts[0].amount, 550);
+  assert.equal(r.payouts[0].ref, `table:${weekOf(DAY)}`);
+  assert.throws(() => sitTable(content, s, addDays(DAY, 3), ctx({ integrity: 20 }), fixed(0.5)), (e: unknown) => (e as UnderworldError).code === "table_done");
+  assert.doesNotThrow(() => sitTable(content, s, addDays(DAY, 7), ctx({ integrity: 20 }), fixed(0.5)));
+  assert.equal(view(content, s, DAY, ctx({ integrity: 50 })).table?.open, false);
+});
+
+test("weekly jobs: the first week file passes; live ones join the pool, vetoed ones only explain old traces", () => {
+  const week = JSON.parse(readFileSync(new URL("../content/underworld-weeks/2026-11-02.json", import.meta.url), "utf8"));
+  const r = validateUnderworldWeek(week, content);
+  assert.ok(r.ok, JSON.stringify(!r.ok && r.problems));
+  assert.ok(!validateUnderworldWeek({ ...week, week: "2026-11-03" }, content).ok, "a Monday");
+  assert.ok(!validateUnderworldWeek({ ...week, jobs: [content.jobs[0], content.jobs[1]] }, content).ok, "ids never repeat");
+  const live = withWeekly(content, [{ job: week.jobs[0], offer: true }, { job: week.jobs[1], offer: false }]);
+  assert.ok(live.jobs.some((j) => j.id === week.jobs[0].id));
+  assert.ok(!live.jobs.some((j) => j.id === week.jobs[1].id));
+  assert.ok(live.archive!.some((j) => j.id === week.jobs[1].id));
+  // An old trace from a vetoed job still lands with its own words.
+  const s = newState(DAY);
+  s.heat = 60;
+  s.traces = [{ id: "x", job: week.jobs[1].id, weight: 0.5, day: DAY, pay: 400 }];
+  refresh(live, s, addDays(DAY, 1), ctx(), fixed(0));
+  assert.match(s.landed[0].text, /^Remember the marathon/);
+});

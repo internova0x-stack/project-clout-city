@@ -80,6 +80,8 @@ export const KIND_LABEL: Record<VisitKind, { name: string; emoji: string }> = {
 
 const ERRORS: Record<string, string> = {
   cant_invite: "They can't be invited: crew, your partner or people you chat with only.",
+  // Living together (migration 0149): the place is the host partner's, so they host.
+  partner_hosts: "It's your partner's lease, so they do the hosting. Ask them to have people over.",
   already_hosting: "You're already hosting. One thing at a time.",
   daily_limit: "That's enough hosting for today. Your neighbors need sleep.",
   bad_time: "Pick a time in the next 12 hours.",

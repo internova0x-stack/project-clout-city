@@ -49,6 +49,11 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   // Relationships (migration 0118)
   couple_ask: { tier: 0, category: "social", ttlMin: 2880 },
   couple_gift: { tier: 0, category: "social", ttlMin: 1440 },
+  // Living together (migration 0149)
+  cohabit_ask: { tier: 0, category: "social", ttlMin: 2880 },
+  cohabit_moved_in: { tier: 0, category: "social", ttlMin: 1440 },
+  cohabit_home: { tier: 0, category: "social", ttlMin: 240 },
+  cohabit_ended: { tier: 0, category: "social", ttlMin: 1440 },
   // Having people over (migration 0121)
   visit_invite: { tier: 0, category: "social", ttlMin: 720 },
   // Sublets (migration 0119)

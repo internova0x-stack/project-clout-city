@@ -36,6 +36,8 @@ export interface CityPlayer {
   moved_up?: boolean;
   /** C4 (migration 0095): when the player's OMG Card runs out (subway rides are free until then); missing before it runs. */
   transit_pass_until?: string | null;
+  /** Living together (migration 0149): my part of the weekly rent (0 in a partner's house); null or missing when I live alone. */
+  rent_part?: number | null;
 }
 
 /** C4: what the server says about a trip it just started: its real length (a delay included) and any showtime. */
@@ -321,6 +323,8 @@ const ERRORS: Record<string, string> = {
   // The Shop Manager (migration 0099).
   not_for_sale: "That one isn't on sale right now.",
   not_wearable_yet: "That piece is coming soon to your wardrobe.",
+  // Living together (migration 0149): couple pieces.
+  couples_only: "That one's for couples. Make it official first, then come back and nest.",
   bad_layout: "That arrangement didn't save. Try again.",
   unknown_action: "That isn't something you can do here.",
   event_cancelled: "That one's cancelled. The whole city's talking about why.",
@@ -436,7 +440,8 @@ export interface UpcomingBill { kind: Bill["kind"]; amount: number; due_date: st
 export function upcomingBills(s: CityState): UpcomingBill[] {
   const p = s.player;
   const out: UpcomingBill[] = [];
-  const rent = ECONOMY.homes.find((h) => h.id === p.home_id)?.rent;
+  // Living together (migration 0149): my part of it.
+  const rent = p.rent_part ?? ECONOMY.homes.find((h) => h.id === p.home_id)?.rent;
   if (!p.house_sku && p.next_rent_due && rent) out.push({ kind: "rent", amount: rent, due_date: p.next_rent_due });
   if (p.next_phone_due) out.push({ kind: "phone", amount: CITY_ECONOMY.bills.phone, due_date: p.next_phone_due });
   // A catalog car (Clout Couture's Veloce) is insured like the priciest C$ car (migration 0102 sets its price).

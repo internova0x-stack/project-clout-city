@@ -141,13 +141,19 @@ it isn't in your working directory). Work from the main branch.
    effects: price_multiplier (×0.5 to ×1.5 on place tags, with the reason players see), availability (closed at most 12
    hours, or restricted with an allow list) or place_state notes at real places. Never homes, campuses, civic places or
    transit. Optionally add a storylet that reacts to one ("snap": "conditions", "is": "<kind>").
+6d. Write content/underworld-weeks/<Monday>.json (the underworld, part 2; lib/underworldWeeks.ts): {"week": "<Monday>",
+   "jobs": [...]}, 2 to 4 new jobs for Pablo in the format of content/underworld/jobs.json (spread over Street Rep tiers 0,
+   15, 35, 60; give most a "crew": tito, gigi or auntie-bee). Small-time New York hustles that fit the week's season and news:
+   each with a riskier, better-paying way and a cleaner one, the bust, the "Remember the…?" caught line and a Blotter headline
+   with {name}. Never violence, drugs or weapons; only invented people; police are the 114½, played for laughs. Ids start with
+   "w<MMDD>-" and never repeat. Each job goes live 24 hours after it arrives unless vetoed in Studio → Storylets → Pablo's jobs.
 7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report (validate:content
    also fails on any real brand, team or trademarked name).
 8. Commit only those files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news
    headline by day, each gossip story's title and Tea headline, one sample exam question per course, and each
-   storylet's family and title, and each city condition with its days. End with: "Autopilot:
+   storylet's family and title, each city condition with its days, and each new job for Pablo. End with: "Autopilot:
    merged by the routine; it goes live by itself unless it's paused in Studio → Calendar (storylets: 24 hours
    after they arrive, unless vetoed in Studio → Storylets)."
 9. Autopilot (owner, Oct 22): once validate:content and npm test pass, merge the pull request yourself (a merge commit).

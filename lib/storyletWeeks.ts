@@ -79,7 +79,9 @@ export function validateStoryletWeek(
 
 // ---- The Studio's view: sample fills and plain-language conditions ----
 
-const SAMPLE: Record<SlotDef["show"], string> = { coworker: "Brent", place: "The Sticky Floor", employer: "Pivotly", boss: "Dana", raw: "something" };
+const SAMPLE: Record<SlotDef["show"], string> = {
+  coworker: "Brent", place: "The Sticky Floor", employer: "Pivotly", boss: "Dana", friend: "Mateo", rival: "Brent", bigboss: "Skyler Beta", newhire: "Priya", raw: "something",
+};
 
 /** A card's text with sample names filled in (the longest possible names are checked by the validator). */
 export function sampleFill(text: string, slots: Record<string, SlotDef> | undefined, longest = false): string {
