@@ -1290,7 +1290,9 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTe
   }
   // v0.15 campus areas wear the school's color.
   const schoolColor = campusArea && !base.dark && place.palette?.[0];
-  return { ...base, id: `${base.id}:${place.id}`, items, ...(accent ? { wallAccent: accent } : {}), ...(schoolColor ? { wallAccent: schoolColor } : {}) };
+  const room = { ...base, id: `${base.id}:${place.id}`, items, ...(accent ? { wallAccent: accent } : {}), ...(schoolColor ? { wallAccent: schoolColor } : {}) };
+  // Interior styles (owner, Oct 31): the place's own look, on its ground floor.
+  return campusArea ? room : styleRoom(room, PLACE_STYLES[place.id]);
 }
 
 /**
@@ -1316,7 +1318,7 @@ export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number
     const f = tower[floor];
     if (!f) return null;
     const t = PLACE_TEMPLATES[f.template];
-    return { ...t, id: `${t.id}:${place.id}`, items: [...t.items, ...towerElevators(t, place.id, floor)] };
+    return styleRoom({ ...t, id: `${t.id}:${place.id}`, items: [...t.items, ...towerElevators(t, place.id, floor)] }, PLACE_STYLES[place.id]);
   }
   if (floor === 0) return place.club ? { ...PLACE_TEMPLATES.restroom, id: `restroom:${place.id}` } : null;
   if (floor !== 2) return null;
@@ -1340,6 +1342,65 @@ export const TOWERS: Record<string, Record<number, { name: string; emoji: string
     3: { name: "Executive floor", emoji: "🥂", template: "execFloor" },
   },
 };
+
+// ---------------------------------------------------------------------------
+// Interior styles (owner, Oct 31: "Building interiors also need different styles; old english, minimalist, futuristic,
+// modern"). A style re-dresses a place's room: walls, floor, upholstery and a few touches. The layout never moves, so
+// every hotspot stays where it was; the place's own accent color (its brand) stays on the trim.
+// ---------------------------------------------------------------------------
+export type InteriorStyle = "oldEnglish" | "minimalist" | "futuristic" | "modern";
+
+export const INTERIOR_STYLES: Record<InteriorStyle, {
+  name: string; wall: string; floor: string; floorKind: RoomTemplate["floorKind"];
+  /** Upholstery and rugs: what sofas, armchairs, booths and rugs are re-covered in. */
+  seat: string; rug: string; accent?: string; dark?: boolean; alwaysLit?: boolean;
+}> = {
+  // Wood paneling, oxblood leather, racing green and oil paintings in gilt frames: a gentlemen's club in Queens.
+  oldEnglish: { name: "Old English", wall: "#6B4A35", floor: "#6A4226", floorKind: "wood", seat: "#7A2E3A", rug: "#2F4A3A" },
+  // White walls, pale concrete, oatmeal linen and almost nothing else.
+  minimalist: { name: "Minimalist", wall: "#F4F2EE", floor: "#DCD6CC", floorKind: "concrete", seat: "#D9D2C5", rug: "#E8E2D8", alwaysLit: true },
+  // Midnight walls, glossy dark tiles, neon trim and light-up seats.
+  futuristic: { name: "Futuristic", wall: "#151A2C", floor: "#232A40", floorKind: "tile", seat: "#2A3352", rug: "#3DF2FF", accent: "#3DF2FF", alwaysLit: true },
+  // Warm white, light oak, charcoal sofas, black trim.
+  modern: { name: "Modern", wall: "#ECEAE6", floor: "#C49A6C", floorKind: "wood", seat: "#3A3F4A", rug: "#C9B79C", accent: "#2F2A26" },
+};
+
+/** Which places wear which style (places not listed keep their template's own look). */
+export const PLACE_STYLES: Record<string, InteriorStyle> = {
+  // Old English: the library, the Mayor's annex, the speakeasy lounge, the jazz bar, the chapel.
+  "ditmars-library": "oldEnglish", "city-hall-annex": "oldEnglish", "low-light-lounge": "oldEnglish",
+  "brownstone-sessions": "oldEnglish", "harmony-chapel": "oldEnglish",
+  // Minimalist: the boutique, the coworking floor, the gym, the café.
+  "thread-count": "minimalist", "triborough-works": "minimalist", "pressed-iron-gym": "minimalist", "grind-and-gossip": "minimalist",
+  // Futuristic: the tech tower, the gaming arena, the UV club.
+  "skybridge-tower": "futuristic", "respawn-arena": "futuristic", "ultraviolet-society": "futuristic",
+  // Modern: the TV tower, the rooftop restaurant, the campaign office, the furniture showroom.
+  "clout-tower": "modern", "altitude-718": "modern", "campaign-hq": "modern", "fifs-furniture": "modern",
+};
+
+const RESTYLED: FurnitureKind[] = ["sofa", "armchair", "booth"];
+
+/** A room in a style: the same layout, re-dressed. */
+export function styleRoom(t: RoomTemplate, style: InteriorStyle | undefined): RoomTemplate {
+  if (!style || t.outdoor) return t;
+  const st = INTERIOR_STYLES[style];
+  let items = t.items.map((it) => (RESTYLED.includes(it.kind) ? { ...it, color: st.seat } : it.kind === "rug" && !it.use ? { ...it, color: st.rug } : it));
+  if (style === "minimalist") {
+    // Less is more: one plant, no lamps.
+    let plants = 0;
+    items = items.filter((it) => it.use || (it.kind === "plant" ? plants++ < 1 : it.kind !== "floorLamp"));
+  }
+  if (style === "oldEnglish") {
+    // Oil paintings in gilt frames along the back wall (they hang on the wall, so nothing is in their way).
+    const art = ["/art/art-bridge-rain.webp", "/art/art-pigeon-portrait.webp"];
+    [-t.w / 4, t.w / 4].forEach((x, i) => items.push({ id: `style-art-${i}`, kind: "painting", x: Math.round(x * 10) / 10, z: -t.d / 2 + 0.08, rot: 0, color: "#B08D57", art: art[i] }));
+  }
+  return {
+    ...t, items, wall: st.wall, floor: st.floor, floorKind: st.floorKind,
+    ...(st.accent ? { wallAccent: st.accent } : {}),
+    ...(st.alwaysLit ? { alwaysLit: true } : {}),
+  };
+}
 
 /** A tower floor's elevator: up to the next floor (from the top, back down to the ground); the floor buttons go anywhere. */
 export function towerElevators(t: Pick<RoomTemplate, "w" | "d">, placeId: string, floor: number): RoomItem[] {

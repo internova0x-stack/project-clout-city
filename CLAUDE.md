@@ -400,6 +400,11 @@ components live in `app/globals.css`.
   (`techFloor`: 12 cubicles, server racks, robots) and Executive floor (`execFloor`: glass boardroom with a video wall, corner
   office, robot butler); Clout TV Tower (media): the Studio, the Newsroom (`newsroom`) and the Executive floor. New pieces:
   cubicle, glassWall, displayCase, robot, serverRack, elevator (components/room/furniture.ts).
+  Interior styles (owner, Oct 31: "old english, minimalist, futuristic, modern"): `INTERIOR_STYLES` and `PLACE_STYLES` (lib/rooms.ts,
+  by place id, so no seed change) re-dress a place's room with `styleRoom` (walls, floor, upholstery and rugs; Old English hangs
+  two oil paintings, minimalist keeps one plant and no lamps, futuristic is midnight with neon trim); the layout never moves.
+  Ground floors and tower floors wear the style; a club's restroom and VIP keep their own. No chat bubbles over people in rooms
+  (owner, Oct 31: "Remove the chat bubbles"): tap the person; the talk buttons stay hidden (`sr-only`) for keyboards.
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only
