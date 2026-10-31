@@ -12,6 +12,7 @@ import {
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { unlockedCards } from "@/lib/cardFormat";
+import { integrityBand } from "@/lib/choices";
 import { memoryOf } from "@/lib/memoryServer";
 
 // Campaign Mode (docs/CAMPAIGN-MODE.md; migration 0127). The rules run here, on the server, with a crypto random
@@ -103,6 +104,11 @@ async function act(change: (state: CampaignState, today: string) => { payouts?: 
   }
   const err = await save(w.admin, w.id, ctx, state, r.payouts ?? []);
   if (err) return { ok: false, error: err };
+  // Option C (migration 0142): the week's nudge to the manager's own meter, once per (campaign, week).
+  for (const n of state.rep ?? []) {
+    const { error } = await w.admin.rpc("campaign_rep", { p_player: w.id, p_campaign: state.id, p_week: n.week, p_delta: n.delta });
+    if (error && !/campaign_rep/.test(error.message)) console.error("campaign_rep failed", error);
+  }
   if (r.payouts?.some((p) => p.currency === "cash")) {
     const fresh = await load(w.id, w.admin);
     if (!("error" in fresh)) ctx.bank = fresh.bank;
@@ -126,6 +132,13 @@ export async function campaignScreen(): Promise<Out> {
   return { ok: true, data: screen(ctx, today) };
 }
 
+/** Option C: the manager's own Halo ↔ Hustler band, once their meter has been revealed (null before). */
+async function managerBand(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<"high" | "middle" | "low" | null> {
+  const { data, error } = await admin.from("reputation").select("integrity, revealed_at").eq("player_id", player).maybeSingle();
+  if (error || !data?.revealed_at) return null;
+  return integrityBand(data.integrity as number);
+}
+
 export async function campaignStart(candidate: CandidateId, seed: number): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
@@ -136,7 +149,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   const id = randomUUID();
   let state: CampaignState;
   try {
-    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate) }, rng);
+    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id) }, rng);
   } catch (e) {
     if (e instanceof CampaignError) return { ok: false, error: campaignError(e.code) };
     throw e;

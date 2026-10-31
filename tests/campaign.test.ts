@@ -266,3 +266,32 @@ test("two campaign tasks a week, paid once each when the plan does them", () => 
     assert.ok(paid.every((p) => p.amount === CAMPAIGN.taskClout));
   }
 });
+
+test("option C: the manager's band sets the start, and the campaign rubs off on the manager both ways, capped", () => {
+  const base = { id: "b", candidate: "starr" as CandidateId, clout: 0, crew: 0, home: null, seed: 0, wonBefore: false };
+  const mid = startCampaign(content, base, rng(1));
+  const halo = startCampaign(content, { ...base, band: "high" }, rng(1));
+  const hustler = startCampaign(content, { ...base, band: "low" }, rng(1));
+  assert.equal(halo.integrity - mid.integrity, CAMPAIGN.rep.startBonus);
+  assert.equal(mid.integrity - hustler.integrity, CAMPAIGN.rep.startBonus);
+  // A Hustler manager hears from next week's anonymous offers now; the view doesn't flag the shifted start as shady.
+  const early = content.inbox.filter((m) => m.kind === "anonymous" && m.week === 2).map((m) => m.id);
+  assert.ok(early.length > 0 && early.every((id) => hustler.inbox.some((x) => x.id === id)));
+  assert.ok(!early.some((id) => mid.inbox.some((x) => x.id === id)));
+  // Played dirty to the end: the manager's meter moves toward Hustler, never past the campaign cap or a week's cap.
+  for (const [style, sign] of [["dirty", -1], ["clean", 1]] as const) {
+    for (let seed = 1; seed <= 30; seed++) {
+      const { state } = play("goldcrest", style, seed);
+      const total = (state.rep ?? []).reduce((n, r) => n + r.delta, 0);
+      assert.ok(Math.abs(total) <= CAMPAIGN.rep.campaignCap);
+      for (const r of state.rep ?? []) assert.ok(Math.abs(r.delta) <= CAMPAIGN.rep.weekCap && r.delta !== 0);
+      if (style === "dirty") assert.ok(total * sign >= 0, `dirty ${seed}: ${total}`);
+    }
+  }
+  const totals = (style: "clean" | "dirty") => Array.from({ length: 30 }, (_, i) => (play("goldcrest", style, i + 1).state.rep ?? []).reduce((n, r) => n + r.delta, 0));
+  // Thirty seeds each: clean campaigns end toward Halo, dirty ones toward Hustler (near the cap).
+  assert.ok(totals("clean").every((n) => n > 0), "a clean campaign pushes toward Halo");
+  assert.ok(totals("dirty").every((n) => n <= -10), "a dirty campaign pushes hard toward Hustler");
+  const dirty = play("goldcrest", "dirty", 7).state;
+  assert.ok((dirty.rep ?? []).reduce((n, r) => n + r.delta, 0) < 0, "a dirty campaign pushes toward Hustler");
+});

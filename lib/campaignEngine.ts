@@ -38,6 +38,8 @@ export function candidateOf(content: CampaignContent, id: CandidateId): Candidat
 
 export interface StartInput {
   id: string;
+  /** Option C: the manager's own Halo ↔ Hustler band (null before their first moral choice). */
+  band?: "high" | "middle" | "low" | null;
   candidate: CandidateId;
   clout: number;
   crew: number;
@@ -57,17 +59,19 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
     const lean = (c.places[p.id] ?? 0) + (input.home === p.id ? 3 : 0);
     places[p.id] = { you: round1(clamp(16 + cloutBonus + lean + (rng() - 0.5) * 2)), mayor: round1(clamp(p.mayor + (rng() - 0.5) * 2)) };
   }
+  // Option C: a Halo manager starts the candidate a little cleaner, a Hustler a little dirtier.
+  const start = clamp(CAMPAIGN.integrityStart[c.id] + (input.band === "high" ? CAMPAIGN.rep.startBonus : input.band === "low" ? -CAMPAIGN.rep.startBonus : 0));
   const trust: Record<string, number> = {};
   for (const s of content.stakeholders) trust[s.id] = c.warm.includes(s.id) ? 1 : c.cold.includes(s.id) ? -1 : 0;
   const state: CampaignState = {
     v: 1, id: input.id, candidate: c.id, week: 1, phase: "planning", endedOn: null,
     places, cash: c.cash + input.seed, raised: 0, seeded: input.seed, skimmed: 0,
-    favors: 0, dirtyFavors: 0, heat: 0, integrity: CAMPAIGN.integrityStart[c.id], intel: 0, morale: 70,
+    favors: 0, dirtyFavors: 0, heat: 0, integrity: start, intel: 0, morale: 70, startIntegrity: start, repMark: start, rep: [],
     staff: content.staff.map((s) => ({ id: s.id, competence: 50 + Math.floor(rng() * 30), morale: 70, loyalty: c.id === "kowalczyk" ? 80 : 60 + Math.floor(rng() * 15), out: false })),
     trust, budget: { digital: 0, street: 0, tv: 0 }, slots: Array(CAMPAIGN.slots).fill(null),
     inbox: [], pending: [], seen: [], traces: [], factChecks: [], dirtyOps: 0, exposures: 0, events: [], prepped: [],
     debate: null, recap: null, receipts: [], log: [], election: null, ending: null,
-    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: 1 + Math.min(1, Math.max(0, input.clout) / 5000), wonBefore: input.wonBefore },
+    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: 1 + Math.min(1, Math.max(0, input.clout) / 5000), wonBefore: input.wonBefore, band: input.band ?? undefined },
     earned: 0, dilemmas: {}, turnout: {}, queue: [], before: null,
   };
   deliverInbox(content, state);
@@ -77,7 +81,9 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
 
 function deliverInbox(content: CampaignContent, state: CampaignState) {
   for (const m of content.inbox) {
-    if (m.week !== state.week) continue;
+    // Option C: a Hustler manager hears from the anonymous offers a week early.
+    const early = state.links.band === "low" && m.kind === "anonymous" && m.week === state.week + 1;
+    if (m.week !== state.week && !early) continue;
     if (m.candidates && !m.candidates.includes(state.candidate)) continue;
     if (!state.inbox.some((x) => x.id === m.id)) state.inbox.push({ id: m.id, status: "new" });
   }
@@ -678,10 +684,19 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
   const clout = Math.min(CAMPAIGN.reward.pollWeekCap, Math.max(0, Math.round(change * CAMPAIGN.reward.pollPerPoint)));
   if (clout > 0) { state.earned += clout; payouts.push({ currency: "clout", amount: clout, kind: "campaign_poll", ref: `${state.id}:${state.week}` }); }
 
+  // Option C: how the candidate's week rubs off on the manager (half the Integrity it moved, capped), shown in the recap.
+  const mark = state.repMark ?? state.startIntegrity ?? CAMPAIGN.integrityStart[state.candidate];
+  const applied = (state.rep ?? []).reduce((n, r) => n + r.delta, 0);
+  const R = CAMPAIGN.rep;
+  let nudge = Math.max(-R.weekCap, Math.min(R.weekCap, Math.round((state.integrity - mark) * R.factor)));
+  nudge = Math.max(-R.campaignCap - applied, Math.min(R.campaignCap - applied, nudge));
+  state.repMark = state.integrity;
+  if (nudge) (state.rep ??= []).push({ week: state.week, delta: nudge });
+  const repLine = nudge > 0 ? "😇 Running it straight is rubbing off on you." : nudge < 0 ? "💸 The campaign's habits are rubbing off on you." : null;
   const h = content.lines.headlines;
   const headline = fill(pick(rng, change > 0.5 ? h.up : change < -0.5 ? h.down : h.flat), { candidate: c.short, points: String(Math.abs(change)) });
   const mayorLine = pick(rng, change > 0.5 ? content.lines.mayor.up : content.lines.mayor.down);
-  state.recap = { week: state.week, headline, lines: [...lines.slice(0, 7), `Papa-Dani: "${fill(mayorLine, { candidate: c.short })}"`], you: now.you, mayor: now.mayor, change, revealOn: nextDay(today) };
+  state.recap = { week: state.week, headline, lines: [...lines.slice(0, repLine ? 6 : 7), ...(repLine ? [repLine] : []), `Papa-Dani: "${fill(mayorLine, { candidate: c.short })}"`], you: now.you, mayor: now.mayor, change, revealOn: nextDay(today) };
   state.log.push({ week: state.week, text: `Week ${state.week}: ${change >= 0 ? "+" : ""}${change} (${now.you} vs ${now.mayor}).` });
 
   // 12. This week's campaign tasks pay (15 clout each, once).
@@ -826,7 +841,7 @@ export interface CampaignView {
 export function campaignView(content: CampaignContent, state: CampaignState, today: string): CampaignView {
   const waiting = (state.phase === "waiting" || state.phase === "over") && !!state.recap && today < state.recap.revealOn;
   const recapReady = !!state.recap && today >= state.recap.revealOn;
-  const shadow = state.integrity < CAMPAIGN.integrityStart[state.candidate] || state.traces.length > 0 || state.inbox.some((m) => content.inbox.find((x) => x.id === m.id)?.kind === "anonymous");
+  const shadow = state.integrity < (state.startIntegrity ?? CAMPAIGN.integrityStart[state.candidate]) || state.traces.length > 0 || state.inbox.some((m) => content.inbox.find((x) => x.id === m.id)?.kind === "anonymous");
   const team = state.week >= 2 || state.staff.some((s) => s.morale !== 70);
   // Until the reveal, the ratings stay where they stood when End Week was tapped.
   const shownPlaces = (waiting || state.phase === "deciding") && state.before ? state.before : state.places;

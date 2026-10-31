@@ -293,6 +293,13 @@ components live in `app/globals.css`.
   streak); "Your poll results are in" (`push_scan_campaign`, kind 'campaign_poll', run by the push sender); Lola's scandal write-ups
   in News → City (`lines.scandal`, `view.scandals`); Campaign HQ on the map (place 'campaign-hq', Steinway in Astoria, tag
   'campaign': its card's "Open Campaign HQ"; Bernie, the volunteer coordinator, is its regular); Astoria regulars mention the race. Candidates' portraits are public/cast/candidate-<id>.webp (owner, Oct 29); every issue has an emoji.
+  Reputation option C (migration 0142, owner Oct 31: "Stay with option c"): the candidate's Integrity and the manager's own
+  Halo ↔ Hustler meter stay separate but linked (`CAMPAIGN.rep`). Going in, the server reads the manager's band once
+  revealed (`managerBand`, StartInput.band): Halo starts the candidate +5, Hustler −5 and hears next week's anonymous offers
+  early (`state.startIntegrity`, the view's shadow check uses it). Coming out, each End Week records half the candidate's
+  Integrity change (both ways, ±8 a week; `state.rep`) with a recap line (😇/💸); `campaign_rep` (service role, once per
+  campaign and week, ±15 a campaign) moves the meter after the save. Heat, traces and Street Rep stay campaign-only until
+  the underworld exists.
 - Compact map (owner, Oct 29; the only map since the classic street map was retired, Oct 30):
   New York in miniature. lib/compactMap.ts gives every place its own block (`SPOTS`, tests/compactMap.test.ts), the
   neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and

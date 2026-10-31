@@ -974,3 +974,17 @@ Content (candidates, situation cards, offers, stakeholders, lines) lives in `con
 - **Team trouble rate:** whether the rate after dirty play feels fair (starting rates in section 10).
 - **Help for the underdog:** whether low-clout managers get a mentor stakeholder so their first campaign is
   winnable.
+
+
+## Reputation: the manager and the candidate (owner, Oct 31: option C)
+
+The candidate's Integrity (on screen in Campaign HQ) and the player's own private Halo ↔ Hustler meter stay two meters,
+but they're linked (lib/campaign.ts `CAMPAIGN.rep`, migration 0142):
+
+- **Going in:** a Halo manager (meter 70+) starts the candidate 5 Integrity cleaner; a Hustler manager (30 or less) starts
+  them 5 dirtier and hears the anonymous offers a week early. A manager whose meter hasn't been revealed yet starts even.
+- **Coming out:** each End Week moves the manager's meter by half of how far the candidate's Integrity moved that week,
+  both ways: at most ±8 a week and ±15 a campaign. The week's recap says so in one line ("😇 Running it straight is
+  rubbing off on you." / "💸 The campaign's habits are rubbing off on you."), never with the number.
+- In 30 simulated campaigns each, clean play ended +6 to +14 toward Halo and dirty play about −15 toward Hustler.
+- Heat, traces and Street Rep stay inside Campaign Mode until the underworld (Pablo) gives them somewhere to go.
