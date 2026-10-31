@@ -41,11 +41,14 @@ export const CAMPAIGN = {
   /** Careers part 3 (owner, Oct 31): the manager's job as campaign background. */
   background: {
     hospitalityMorale: 10, techFunds: 1.2, mediaPoints: 2,
+    /** City Hall: points up across the city below Policy Aide, and from it. */
+    cityhallPoints: [1, 2] as const,
     lines: {
       hospitality: "💼 You've run a floor before: the staff start in a better mood.",
       tech: "💼 Your startup contacts open their wallets: fundraising pays a fifth more.",
       media: "💼 People know your face from Clout TV: 2 points up across the city.",
-    } as Record<"hospitality" | "tech" | "media", string>,
+      cityhall: "💼 You work in the Mayor's own office. You know his playbook, and he knows you know.",
+    } as Record<"hospitality" | "tech" | "media" | "cityhall", string>,
   },
   cleanIntegrity: 70,
   /** Team trouble after dirty play (spec section 10). */

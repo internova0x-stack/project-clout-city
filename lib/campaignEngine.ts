@@ -44,7 +44,7 @@ export interface StartInput {
   aspiration?: string | null;
   /** Careers part 3 (owner, Oct 31): the manager's current job, as background (Hospitality: a happier staff; Tech: the
    * startup crowd's money; Media: name recognition). */
-  career?: { track: "hospitality" | "tech" | "media"; level: number } | null;
+  career?: { track: "hospitality" | "tech" | "media" | "cityhall"; level: number } | null;
   candidate: CandidateId;
   clout: number;
   crew: number;
@@ -61,7 +61,8 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   // Aspirations (migration 0143): a Public Servant's campaigns start 3 points up across the city.
   const job = input.career ?? null;
   const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5) + (input.aspiration === "public" ? 3 : 0)
-    + (job?.track === "media" ? CAMPAIGN.background.mediaPoints : 0);
+    + (job?.track === "media" ? CAMPAIGN.background.mediaPoints : 0)
+    + (job?.track === "cityhall" ? CAMPAIGN.background.cityhallPoints[job.level >= 3 ? 1 : 0] : 0);
   const places: CampaignState["places"] = {};
   for (const p of content.places) {
     const lean = (c.places[p.id] ?? 0) + (input.home === p.id ? 3 : 0);

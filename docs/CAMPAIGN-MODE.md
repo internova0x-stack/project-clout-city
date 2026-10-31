@@ -994,4 +994,6 @@ but they're linked (lib/campaign.ts `CAMPAIGN.rep`, migration 0142):
 - **Aspiration** (migration 0143): a Public Servant's campaigns start 3 points up across the city.
 - **Job** (Careers part 3; `StartInput.career`, `CAMPAIGN.background`): a manager with a job when the campaign starts gets one
   line in week 1's receipts and one edge: Hospitality's staff start 10 morale happier, Tech's startup contacts make
-  fundraising pay a fifth more, Media's familiar face is worth 2 points across the city.
+  fundraising pay a fifth more, Media's familiar face is worth 2 points across the city, and City Hall (migration 0144) knows the
+  Mayor's playbook: 1 point up, 2 from Policy Aide. A City Hall employee running a campaign may meet the Mayor at their desk
+  (career task `cityhall-conflict`).

@@ -20,16 +20,17 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   // Aspirations (migration 0143): ?career=welcome opens with no pick (the welcome screen); every other preset has one.
   let asp: AspirationState = preset === "welcome" || preset === "new"
     ? { aspiration: null, chosenAt: null, degree: false, exams: 1 }
-    : { aspiration: "hustler", chosenAt: "2026-10-30", degree: false, exams: 1 };
+    : { aspiration: preset === "cityhall" ? "public" : "hustler", chosenAt: "2026-10-30", degree: false, exams: 1 };
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1 });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1 });
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   if (preset && !["new", "apply", "welcome"].includes(preset)) {
-    state = hire(`preview-${Date.now()}`, "hospitality", ctx(), "honest", day);
-    if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit") startDay(content, state, "steady", ctx(), day, rng);
+    // ?career=cityhall: a Public Servant at the Mayor's office, clocked in.
+    state = hire(`preview-${Date.now()}`, preset === "cityhall" ? "cityhall" : "hospitality", ctx(), "honest", day);
+    if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit" || preset === "cityhall") startDay(content, state, "steady", ctx(), day, rng);
     // ?career=office: clocked in with a joint project on; ?career=grudge: Kendall holds a grudge that strikes today.
     if (preset === "office") { state.workMood = 72; state.team = { with: "friend", due: state.nextReview }; }
     if (preset === "grudge") { state.workMood = 34; state.trust.rival = 20; state.grudges = [{ who: "rival", level: 2, due: day }]; }
@@ -102,4 +103,4 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 }
 
-export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "review", "warning", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "cityhall", "review", "warning", "fired"] as const;

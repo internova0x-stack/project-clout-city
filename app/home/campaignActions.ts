@@ -148,7 +148,7 @@ async function managerAspiration(admin: NonNullable<ReturnType<typeof getAdminSu
 /** Careers part 3: the manager's current job, as campaign background (null without one, or before migration 0135). */
 async function managerCareer(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<StartInput["career"]> {
   const { data, error } = await admin.from("careers").select("track, level").eq("player_id", player).eq("status", "employed").maybeSingle();
-  return error || !data ? null : { track: data.track as "hospitality" | "tech" | "media", level: data.level as number };
+  return error || !data ? null : { track: data.track as NonNullable<StartInput["career"]>["track"], level: data.level as number };
 }
 
 export async function campaignStart(candidate: CandidateId, seed: number): Promise<Out> {

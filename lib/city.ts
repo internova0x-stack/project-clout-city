@@ -808,6 +808,17 @@ export const PLACES: Place[] = [
       { id: "volunteer", kind: "visit", label: "Stuff envelopes for an hour", task: "Lick 200 envelopes for democracy", energy: 8, mood: 2, blurb: "Paper cuts, cold pizza and gossip about the Mayor's ribbon budget." },
     ],
   },
+  // City Hall (owner, Oct 31: the first "coming soon" career): the Mayor's Queens office. Its card's "💼 Go to work" is the
+  // City Hall career's workplace (lib/careers.ts).
+  {
+    id: "city-hall-annex", name: "City Hall Annex", emoji: "🏛️", category: "places", neighborhood: "Astoria",
+    at: [40.7642, -73.9172], depth: "scene", template: "civic", palette: ["#3B5BA9", "#EDE6D6", "#1F2A44"],
+    tags: ["office", "civic", "astoria"],
+    lore: "Mayor Papa-Dani's Queens office: marble lobby, a metal detector that beeps at everyone and a ribbon closet the size of a studio apartment. Rent-stabilized, obviously.",
+    actions: [
+      { id: "hearing", kind: "visit", label: "Sit in on a public hearing", task: "Testify about a pothole with feeling", energy: 6, mood: 2, blurb: "Three hours on bike lanes. One man brought a poster. You learn a lot about the man." },
+    ],
+  },
   {
     id: "ditmars-library", name: "Ditmars Free Library", emoji: "📚", category: "places", neighborhood: "Astoria",
     at: [40.7735, -73.9098], depth: "scene", template: "civic", palette: ["#B8743A", "#F2E6D8", "#2A2530"],

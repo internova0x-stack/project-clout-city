@@ -835,6 +835,33 @@
       "role": "the volunteer coordinator",
       "regular": "bernie",
       "slang": []
+    },
+    {
+      "id": "osvaldo",
+      "name": "Osvaldo Valdés",
+      "age": 58,
+      "background": "Dominican-American, a retired subway conductor from Corona",
+      "personality": "Has guarded the City Hall Annex lobby through four mayors and one renovation. Treats the metal detector like a coworker who owes him money.",
+      "yearsInNeighborhood": 31,
+      "catchphrases": [
+        "Keys, phone, belt, dignity. In the tray.",
+        "It beeps for everybody. It beeped for the Mayor twice.",
+        "Hearing's on the third floor. Bring a snack, it's about bike lanes."
+      ],
+      "likes": [
+        "A quiet lobby",
+        "Mangú on Sundays",
+        "People who say good morning back"
+      ],
+      "dislikes": [
+        "Ribbon deliveries at 6 AM",
+        "Lanyards worn as necklaces",
+        "The word 'quick' before 'meeting'"
+      ],
+      "placeId": "city-hall-annex",
+      "role": "the lobby guard",
+      "regular": "osvaldo",
+      "slang": []
     }
   ],
   "roommates": [

@@ -56,8 +56,8 @@ export const ASPIRATIONS: Aspiration[] = [
   {
     id: "public", emoji: "🏛️", name: "Public Servant",
     tagline: "You want to fix the city. Or at least get your name on a plaque.",
-    tracks: [], later: ["City Hall"],
-    perks: ["Campaigns you manage start 3 points up across the city"],
+    tracks: ["cityhall"], later: [],
+    perks: ["City Hall jobs start one level higher", "Campaigns you manage start 3 points up across the city"],
   },
   {
     id: "home", emoji: "🏡", name: "Stay-at-home Spouse",
