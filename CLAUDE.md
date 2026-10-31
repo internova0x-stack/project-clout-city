@@ -213,7 +213,23 @@ components live in `app/globals.css`.
   couple-7/14/30) and weekly/monthly anniversaries (ledger 'couple_anniv'). Gift boxes go to the partner (`couple_gift`,
   once a day). Partners' date nights pay 15 Mood and 35 clout. "💞 Dating @name" on the player card unless hidden
   (`couple_show`). Settings: game_settings 'couples', mirrored by lib/couples.ts (tests/couples.test.ts).
-  `?couple=progress|ask|dating|gift|ended` in the preview. Living together, Lola mentions and couple Shop items: later.
+  `?couple=progress|ask|dating|gift|ended` in the preview.
+  Living together (migration 0149, owner Oct 31): a couple official 7+ days moves into one partner's home (`cohabit_ask` from the
+  host, `cohabit_answer`; `cohabit_block_reason`: not a dorm or the room share, any owned house fits; no live sublet, open listing
+  or rent due on either side; the mover owns no house). The mover's home_id becomes the host's, their layout goes to storage and
+  next_rent_due lines up with the host's (no fee). `bills_cohabit_split` makes each rent bill the player's part
+  (`cohabit_rent_part`: mover floor(rent × rentShare), host the rest; none for the mover in an owned house; `cohabit_rent()`
+  feeds the Bills' next rent, CityPlayer.rent_part). "Home together" (`cohabit_hang`: both tap it the same New York day, Mood +8
+  and clout +5 once, ledger 'cohabit_home'). `cohabit_leave` (either), a breakup or block, either one moving or being evicted,
+  and Start over end it through `cohabit_close`: the host keeps the home at full rent, the mover goes to `cheapest_home()` with
+  an empty layout. While together the mover can't host visits ('partner_hosts') and neither can sublet ('living_together').
+  Lola's Blotter gets a 'win' line on move-in unless either partner opted out of News (removed when it ends). Us shows Move in
+  together, Living together since…, Home together and Move out; the mover's Home tab shows the host's place (`cohabit_home`,
+  `CohabitHomeBar`); "🏠 Living with @name" on the player card follows `couple_show`. Couple Shop pieces: content/shop/couple.json
+  (six C$ furniture pieces, extra.couplesOnly and emojiOnly, `COUPLE_ITEMS`), buyable only while dating (`shop_couples_guard`,
+  'couples_only'); they go on sale through the Studio. game_settings 'couples' gains moveInDays, moveInAskDays, rentShare,
+  homeMood, homeClout (lib/couples.ts); rate bucket 'cohabit'; facts 'couple.moved_in', 'couple.moved_out'.
+  `?couple=movein|together` in the preview.
 - Sublets (migration 0119, owner Oct 26; spec section 25): renters of the 1BR, Sunnyside or LIC let a spare room
   (`sublet_list`: a quarter to half their rent, 1 to 8 weeks, crew-first for 24 hours); `sublet_apply`, `sublet_answer`
   (first week + a one-week deposit, ledger 'sublet_rent'/'sublet_income'/'sublet_deposit'); rent every 7 days ahead
