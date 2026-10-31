@@ -268,7 +268,7 @@
   "base": "promoted-fraud",
   "area": "work",
   "emoji": "📊",
-  "title": "Fresh off your promotion, {boss} asks you to sign off on numbers that aren't real. 'Just this quarter.'",
+  "title": "Fresh off your promotion, {boss} asks you to sign off on some very optimistic numbers. 'Just this quarter.'",
   "where": {
    "after": [
     "arrive",
@@ -309,7 +309,7 @@
     "id": "sign",
     "label": "Sign it",
     "get": "C$2,000 bonus, {boss}'s favor",
-    "cost": "Your name on fake numbers",
+    "cost": "Your name on the creative math",
     "risk": "high",
     "riskWhy": "Audits happen",
     "comesBack": true,
