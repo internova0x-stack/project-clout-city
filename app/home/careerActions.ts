@@ -8,6 +8,7 @@ import {
 import { CAREER_CONTENT as content } from "@/lib/careersContent";
 import { nyDay } from "@/lib/campaign";
 import { OFFICE_FACT, type FactKey } from "@/lib/memory";
+import { conditionOn, type ConditionNow } from "@/lib/cityConditions";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -156,6 +157,14 @@ export async function careerApply(track: TrackId, answer: Answer): Promise<Out> 
   return { ok: true, data: screen(ctx, today, `You're hired! First day whenever you're ready.`) };
 }
 
+/** The city's conditions now (migration 0140; empty before it has run). */
+async function cityConditions(): Promise<ConditionNow[]> {
+  const admin = getAdminSupabase();
+  if (!admin) return [];
+  const { data, error } = await admin.rpc("city_conditions_now");
+  return error || !Array.isArray(data) ? [] : (data as ConditionNow[]);
+}
+
 export async function careerStart(style: WorkStyle): Promise<Out> {
   if (!["hustle", "steady", "coast"].includes(style)) return { ok: false, error: careerError("unknown") };
   return act((s, ctx, today) => ({ ...startDay(content, s, style, ctx, today, rng), workday: today }));
@@ -166,9 +175,11 @@ export async function careerTask(index: number, option: string): Promise<Out> {
 }
 
 export async function careerOffice(action: OfficeAction, who: Who): Promise<Out> {
+  // Migration 0140: an HR crackdown week at this employer (a city storylet) traces sabotage twice as often.
+  const conditions = await cityConditions();
   return act((s, ctx, today) => {
     const exposedBefore = s.exposed ?? 0;
-    const r = office(s, action, who, ctx, today, rng);
+    const r = office(s, action, who, ctx, today, rng, { crackdown: conditionOn(conditions, "hr_crackdown", s.track) });
     const subject = `${s.track}:${who}`;
     const facts: Change["facts"] = [{ key: OFFICE_FACT[action], subject }];
     if ((s.exposed ?? 0) > exposedBefore) facts.push({ key: "career.caught_sabotage", subject });

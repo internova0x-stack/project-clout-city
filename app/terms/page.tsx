@@ -81,7 +81,8 @@ export default function Terms() {
         photos, notes on jobs and sublets, and anything else you put into the game are your content. You keep ownership
         of it. You give us a worldwide, non-exclusive, royalty-free licence to store, show and use it to run and promote
         Clout City: for example, a picked shoutout is read on air, a picked photo appears on the Big Screen, and your name
-        may appear in leaderboards or in Lola&apos;s &quot;Spotted at&quot; lines (you can opt out of those in Settings).
+        may appear in leaderboards, in Lola&apos;s &quot;Spotted at&quot; lines and in Lola&apos;s Blotter (a scandal from a choice, or a
+        big win such as a campaign win; you can opt out of those in Settings).
         The licence ends when you delete the content or your account, except for copies already shown or kept in backups
         for a short time.
       </p>

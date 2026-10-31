@@ -65,7 +65,7 @@ it isn't in your working directory). Work from the main branch.
 1. Find the week: the Monday after today, New York time (YYYY-MM-DD), and the hunt's Saturday: the
    Saturday after today (owner, Oct 31: hunts run Saturday to Friday). If content/hunts/<Saturday>.json,
    content/news/<Monday>.json, content/gossip/<Monday>.json, content/exams/<Monday>.json and
-   content/storylets/<Monday>.json all exist on main already, stop and say so (write only the missing ones otherwise).
+   content/storylets/<Monday>.json and content/conditions/<Monday>.json all exist on main already, stop and say so (write only the missing ones otherwise).
 2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
    4 and 8), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they
    stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
@@ -134,13 +134,20 @@ it isn't in your working directory). Work from the main branch.
    real stakes in both directions, costs said plainly (never "Integrity", "Halo" or "Hustler"), no risk labels in the
    text, satire of New York ambition, only invented people and businesses. Never reuse an id from content/choices/ or
    an earlier week. Read the last three weeks of content/storylets/ so situations don't repeat.
+6c. Write content/conditions/<Monday>.json (Content Engine step 4, lib/cityConditions.ts): {"week": "<Monday>",
+   "conditions": [...]}, 1 to 4 city conditions inside that week, each 2 to 72 hours (startsAt and endsAt with the New York
+   offset): weather that fits the real season (a heatwave, cold snap, rainstorm), an outage (a brownout, a transit
+   meltdown), a festival or a sample sale. Each has an id, kind, emoji, title (≤ 60), blurb (≤ 200, satire) and 1 to 4
+   effects: price_multiplier (×0.5 to ×1.5 on place tags, with the reason players see), availability (closed at most 12
+   hours, or restricted with an allow list) or place_state notes at real places. Never homes, campuses, civic places or
+   transit. Optionally add a storylet that reacts to one ("snap": "conditions", "is": "<kind>").
 7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report (validate:content
    also fails on any real brand, team or trademarked name).
 8. Commit only those files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news
    headline by day, each gossip story's title and Tea headline, one sample exam question per course, and each
-   storylet's family and title. End with: "Autopilot:
+   storylet's family and title, and each city condition with its days. End with: "Autopilot:
    merged by the routine; it goes live by itself unless it's paused in Studio → Calendar (storylets: 24 hours
    after they arrive, unless vetoed in Studio → Storylets)."
 9. Autopilot (owner, Oct 22): once validate:content and npm test pass, merge the pull request yourself (a merge commit).

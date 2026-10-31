@@ -14,13 +14,16 @@ import { validateArcs } from "./storyValidation";
 import { getAdminSupabase } from "./supabase/admin";
 import { readAutopilot } from "./autopilot";
 import { validateStoryletWeek } from "./storyletWeeks";
+import { validateConditionWeek, validateReactions, type ReactionRule } from "./cityConditions";
+import REACTIONS from "../content/city/reactions.json";
+import { PLACES } from "./city";
 import { CHOICE_CARDS, CHOICE_KNOWN } from "./choicesContent";
 import type { ChoiceCard } from "./choices";
 
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
 
-async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets"): Promise<{ file: string; raw: unknown }[]> {
+async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets" | "conditions"): Promise<{ file: string; raw: unknown }[]> {
   const dir = path.join(process.cwd(), "content", kind);
   const files = (await readdir(dir).catch(() => [] as string[])).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out: { file: string; raw: unknown }[] = [];
@@ -83,6 +86,23 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
     const { data, error } = await admin.rpc("content_import_storylets", { p_week: r.week.week, p_cards: r.week.cards });
     if (error) { if (missing(error.message)) { out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
     out.push({ file, result: `${data} new storylets` });
+  }
+  // Content Engine step 4 (migration 0140): the week's city conditions arrive like storylets (live 24 hours later unless
+  // vetoed); then the city storylets fire any reaction whose tally has crossed its line.
+  const known = { tags: [...new Set(PLACES.flatMap((p) => p.tags ?? []))], places: PLACES.map((p) => p.id) };
+  let condIds: string[] = [];
+  let condMissing = false;
+  for (const { file, raw } of await weekFiles("conditions")) {
+    const r = validateConditionWeek(raw, known, condIds);
+    if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
+    condIds = [...condIds, ...r.week.conditions.map((c) => c.id)];
+    const { data, error } = await admin.rpc("content_import_conditions", { p_week: r.week.week, p_items: r.week.conditions });
+    if (error) { if (missing(error.message)) { condMissing = true; out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
+    out.push({ file, result: `${data} new city conditions` });
+  }
+  if (!condMissing && validateReactions(REACTIONS as ReactionRule[], known).length === 0) {
+    const { data, error } = await admin.rpc("city_react", { p_rules: REACTIONS });
+    if (!error && Array.isArray(data) && data.length) out.push({ file: "content/city/reactions.json", result: `fired: ${data.join(", ")}` });
   }
   // Culture pack C6 (migration 0098): a story file the Studio doesn't have yet waits there for review. Stories the Studio
   // already has are never touched (edits go through the Studio's upload; approving and Day 1 stay the owner's).

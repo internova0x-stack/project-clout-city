@@ -90,6 +90,8 @@ export interface Snapshot {
   job: { track: string; level: number; workMood: number } | null;
   businesses: string[]; partner: string | null; campus: string | null; campaign: string | null;
   marks: ("ban" | "gig_lock" | "holding")[]; crew: number; skills: Record<string, number>;
+  /** Migration 0140: the city conditions in force now (kinds), added by the server from city_conditions_now(). */
+  conditions?: string[];
 }
 
 export interface Memory { snapshot: Snapshot; facts: Fact[] }

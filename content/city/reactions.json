@@ -1,0 +1,101 @@
+[
+ {
+  "id": "hr-crackdown-tech",
+  "key": "career.took_credit", "subjectStarts": "tech:",
+  "days": 7, "min": 8, "cooldownDays": 14,
+  "headline": "📋 Triborough Works HR has sent a company-wide email titled 'Let's Talk About Credit.' It is 3,000 words long. Sabotage at Pivotly gets traced twice as often this week.",
+  "condition": {
+   "kind": "hr_crackdown", "subject": "tech", "emoji": "📋", "title": "HR crackdown at Pivotly",
+   "blurb": "Too much credit-taking at Pivotly. HR is reading the Slack. Office sabotage there gets traced twice as often this week.",
+   "hours": 168,
+   "effects": [{ "type": "place_state", "place": "triborough-works", "note": "📋 HR is 'just observing' from the kitchen. Sabotage here gets traced twice as often this week." }]
+  }
+ },
+ {
+  "id": "hr-crackdown-media",
+  "key": "career.started_rumor", "subjectStarts": "media:",
+  "days": 7, "min": 6, "cooldownDays": 14,
+  "headline": "📋 Clout TV management has banned the word 'allegedly' from the break room. Rumors at the Tower get traced twice as often this week.",
+  "condition": {
+   "kind": "hr_crackdown", "subject": "media", "emoji": "📋", "title": "HR crackdown at Clout TV",
+   "blurb": "Too many rumors at the Tower. HR installed a suggestion box. It is a camera. Office sabotage there gets traced twice as often this week.",
+   "hours": 168,
+   "effects": [{ "type": "place_state", "place": "clout-tower", "note": "📋 HR is 'just observing' from the green room. Sabotage here gets traced twice as often this week." }]
+  }
+ },
+ {
+  "id": "doors-tighten",
+  "key": "place.banned",
+  "days": 3, "min": 5, "cooldownDays": 7,
+  "headline": "🚪 After a rowdy few nights, Queens' clubs have hired extra bouncers. Cover charges are up, and so is the attitude.",
+  "condition": {
+   "kind": "door_crackdown", "emoji": "🚪", "title": "The clubs tighten the door",
+   "blurb": "Too many people got thrown out this week. Every club in Queens added a bouncer and raised the cover. Behave accordingly.",
+   "hours": 72,
+   "effects": [{ "type": "price_multiplier", "tags": ["club"], "applies_to": "event_entry", "multiplier": 1.25, "reason": "The door tightened after a rowdy week: cover is up" }]
+  }
+ },
+ {
+  "id": "lotto-fever",
+  "key": "money.lotto_win",
+  "days": 2, "min": 15, "cooldownDays": 10,
+  "headline": "🎟️ Lucky Star Lotto reports 'unprecedented luck' in Flushing. The line is around the block. The odds have not changed. Nobody cares.",
+  "condition": {
+   "kind": "lotto_fever", "emoji": "🎟️", "title": "Lotto fever in Flushing",
+   "blurb": "Everyone heard someone won something. The line at Lucky Star is around the block and the food court next door is very happy about it.",
+   "hours": 48,
+   "effects": [
+    { "type": "price_multiplier", "tags": ["food_court"], "applies_to": "visit_price", "multiplier": 1.2, "reason": "Lotto fever: the line from Lucky Star ends here" },
+    { "type": "place_state", "place": "lucky-star", "note": "🎟️ The line is around the block. A man is selling folding chairs to the line." }
+   ]
+  }
+ },
+ {
+  "id": "ethics-probe",
+  "key": "campaign.won_dirty",
+  "days": 14, "min": 3, "cooldownDays": 21,
+  "headline": "🔍 The Mayor's office announced an ethics probe into 'recent campaign irregularities.' The probe's first meeting was catered. By a donor.",
+  "condition": {
+   "kind": "ethics_probe", "emoji": "🔍", "title": "City Hall's ethics probe",
+   "blurb": "Too many dirty wins. City Hall opened an ethics probe. Campaign HQ is suddenly very interested in its own paperwork.",
+   "hours": 168,
+   "effects": [{ "type": "place_state", "place": "campaign-hq", "note": "🔍 Bernie is shredding nothing. Loudly. 'For the record, I am shredding nothing.'" }]
+  }
+ },
+ {
+  "id": "full-precinct",
+  "key": "police.held",
+  "days": 1, "min": 6, "cooldownDays": 7,
+  "headline": "🚔 The 114½ Precinct is at capacity. Sgt. Bev has started a waitlist and a group chat.",
+  "condition": {
+   "kind": "full_precinct", "emoji": "🚔", "title": "The 114½ is full",
+   "blurb": "Busy night for the 114½. The holding cell has a waitlist, a group chat and a surprisingly good playlist.",
+   "hours": 24,
+   "effects": [{ "type": "place_state", "place": "precinct-114-half", "note": "🚔 Sgt. Bev: 'We're full. Commit your crimes tomorrow, please.'" }]
+  }
+ },
+ {
+  "id": "party-surge",
+  "key": "nightlife.party",
+  "days": 1, "min": 40, "cooldownDays": 5,
+  "headline": "🪩 Queens partied so hard last night the rooftops raised their prices this morning. Lola has never been prouder.",
+  "condition": {
+   "kind": "party_surge", "emoji": "🪩", "title": "Queens is partying",
+   "blurb": "Everyone went out last night, and everyone's going out again. The rooftops noticed and adjusted their prices accordingly.",
+   "hours": 24,
+   "effects": [{ "type": "price_multiplier", "tags": ["rooftop"], "applies_to": "visit_price", "multiplier": 1.2, "reason": "Party surge: the rooftops know you're coming" }]
+  }
+ },
+ {
+  "id": "showtime-season",
+  "key": "transit.showtime",
+  "days": 3, "min": 25, "cooldownDays": 10,
+  "headline": "🕺 Subway showtime crews report record tips. The Metro Rail Authority reports record 'concerns.'",
+  "condition": {
+   "kind": "showtime_season", "emoji": "🕺", "title": "Showtime season",
+   "blurb": "The showtime crews are having a moment. Hold onto the pole. Or don't, and become part of the act.",
+   "hours": 72,
+   "effects": [{ "type": "place_state", "place": "astoria-blvd-station", "note": "🕺 A showtime crew is rehearsing on the platform. The pigeons are judging." }]
+  }
+ }
+]

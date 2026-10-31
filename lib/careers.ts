@@ -640,7 +640,8 @@ function amends(s: CareerState, who: Who, all: boolean) {
 export interface OfficeResult { effects: Effects; receipt: string; integrity: number; headline: string | null }
 
 /** One office move, on a day you clocked in: at most one collaborate and one sabotage a workday. */
-export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick<CareerCtx, "energy">, today: string, rng: Rng): OfficeResult {
+/** `crackdown`: an HR crackdown week at this employer (a city storylet, migration 0140): sabotage is traced twice as often. */
+export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick<CareerCtx, "energy">, today: string, rng: Rng, opts: { crackdown?: boolean } = {}): OfficeResult {
   const track = trackById(s.track)!;
   const def = OFFICE.find((o) => o.id === action);
   if (s.status !== "employed") throw new CareerError("not_employed");
@@ -654,7 +655,7 @@ export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick
   const warm = (d: number) => (guarded ? Math.round(d / 2) : d);
   const mood = (d: number) => { s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + d); };
   const out: OfficeResult = { effects: {}, receipt: "", integrity: 0, headline: null };
-  const traced = (base: number) => rng() < base + CAREER.office.traced.per * Math.min(3, s.sabotages ?? 0);
+  const traced = (base: number) => rng() < Math.min(0.95, (base + CAREER.office.traced.per * Math.min(3, s.sabotages ?? 0)) * (opts.crackdown ? 2 : 1));
 
   if (action === "help") {
     if (ctx.energy < CAREER.office.helpEnergy) throw new CareerError("no_energy");

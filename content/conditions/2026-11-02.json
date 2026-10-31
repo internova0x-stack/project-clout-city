@@ -1,0 +1,45 @@
+{
+ "week": "2026-11-02",
+ "conditions": [
+  {
+   "id": "indian-summer-2026-11-04",
+   "kind": "heatwave",
+   "emoji": "🥵",
+   "title": "A November heatwave, somehow",
+   "blurb": "It's 81 degrees in November. Rooftops are packed, parks are full of people in coats they refuse to take off, and every iced coffee costs more.",
+   "startsAt": "2026-11-04T11:00:00-05:00",
+   "endsAt": "2026-11-05T21:00:00-05:00",
+   "effects": [
+    { "type": "price_multiplier", "tags": ["rooftop"], "applies_to": "visit_price", "multiplier": 1.3, "reason": "Heatwave: every rooftop in Queens is at capacity" },
+    { "type": "price_multiplier", "tags": ["cafe"], "applies_to": "visit_price", "multiplier": 1.2, "reason": "Heatwave pricing on anything iced" },
+    { "type": "place_state", "place": "hell-gate-park", "note": "🥵 Half of Astoria is lying on the grass. The other half is telling them it's November." }
+   ]
+  },
+  {
+   "id": "steinway-street-fair-2026-11-07",
+   "kind": "festival",
+   "emoji": "🎪",
+   "title": "The Steinway Street Fair",
+   "blurb": "Twelve blocks of zeppoles, phone cases and a man selling one (1) very large rug. The food carts are doing their best numbers of the year, and charging like it.",
+   "startsAt": "2026-11-07T10:00:00-05:00",
+   "endsAt": "2026-11-08T20:00:00-05:00",
+   "effects": [
+    { "type": "price_multiplier", "tags": ["halal_cart", "hot_dog_cart"], "applies_to": "visit_price", "multiplier": 1.25, "reason": "Street fair crowds: the carts have a line and a new price" },
+    { "type": "place_state", "place": "campaign-hq", "note": "🎪 Volunteers are working the street fair. Bernie brought 4,000 stickers and no plan." }
+   ]
+  },
+  {
+   "id": "astoria-brownout-2026-11-06",
+   "kind": "brownout",
+   "emoji": "🔌",
+   "title": "The grid is tired",
+   "blurb": "The power company asked everyone to 'use less electricity, please.' Astoria's lounges took that personally and went dark for the evening.",
+   "startsAt": "2026-11-06T18:00:00-05:00",
+   "endsAt": "2026-11-06T23:59:00-05:00",
+   "effects": [
+    { "type": "availability", "tags": ["lounge"], "state": "closed", "reason": "Brownout: the lounges went dark until midnight" },
+    { "type": "place_state", "place": "ditmars-deli", "note": "🔌 Sal is selling candles at the register. 'Ambience,' he says. 'Two dollars.'" }
+   ]
+  }
+ ]
+}

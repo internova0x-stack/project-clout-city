@@ -150,6 +150,7 @@ from (values
   ('0136_career_office.sql', coalesce((to_regprocedure('public.career_office(uuid,uuid,integer,text)') is not null), false)),
   ('0137_saturday_starts.sql', coalesce((to_regprocedure('public.story_autopilot(date)') is not null), false)),
   ('0138_player_memory.sql', coalesce((to_regclass('public.player_facts') is not null), false)),
-  ('0139_storylet_weeks.sql', coalesce((to_regclass('public.storylet_cards') is not null), false))
+  ('0139_storylet_weeks.sql', coalesce((to_regclass('public.storylet_cards') is not null), false)),
+  ('0140_city_reacts.sql', coalesce((to_regclass('public.city_conditions') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

@@ -13,6 +13,7 @@ import { validateExamWeek } from "../lib/exams.ts";
 import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts";
 import { validateCards } from "../lib/choices.ts";
 import { validateStoryletWeek } from "../lib/storyletWeeks.ts";
+import { validateConditionWeek, validateReactions } from "../lib/cityConditions.ts";
 import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
@@ -99,6 +100,23 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
     seen = [...seen, ...r.week.cards];
     console.log(`✓ ${file} (${r.week.cards.length} storylets, ${new Set(r.week.cards.map((c) => c.family)).size} families)`);
   }
+}
+// Content Engine step 4 (migration 0140): the weekly city conditions and the city storylets (reactions to the tallies).
+{
+  const known = { tags: [...new Set(PLACES.flatMap((p) => p.tags ?? []))], places: PLACES.map((p) => p.id) };
+  let ids: string[] = [];
+  for (const f of list("conditions/")) {
+    const file = `content/conditions/${f}`;
+    const r = validateConditionWeek(JSON.parse(readFileSync(new URL(`conditions/${f}`, root), "utf8")), known, ids);
+    if (!r.ok) { fail(file, r.problems); continue; }
+    if (`${r.week.week}.json` !== f) { fail(file, [`the file name must be its week (${r.week.week}.json)`]); continue; }
+    ids = [...ids, ...r.week.conditions.map((c) => c.id)];
+    console.log(`✓ ${file} (${r.week.conditions.length} city conditions)`);
+  }
+  const rules = JSON.parse(readFileSync(new URL("city/reactions.json", root), "utf8"));
+  const problems = validateReactions(rules, known);
+  if (problems.length) fail("content/city/reactions.json", problems);
+  else console.log(`✓ content/city/reactions.json (${rules.length} city storylets)`);
 }
 // No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
 const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {

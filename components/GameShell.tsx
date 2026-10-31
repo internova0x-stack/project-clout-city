@@ -58,6 +58,7 @@ import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
 import { ChoiceBackSheet, ChoiceSheet, HoldingSheet } from "./game/Choices";
 import { integrityBand, type BlotterItem, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
+import type { ConditionNow } from "@/lib/cityConditions";
 import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
@@ -1689,6 +1690,7 @@ export function GameShell({
   // Migration 0132: the holding bench (open while in holding, until closed), and Lola's Blotter for News → City.
   const [holdingOpen, setHoldingOpen] = useState(false);
   const [blotter, setBlotter] = useState<BlotterItem[]>([]);
+  const [conditions, setConditions] = useState<ConditionNow[]>([]);
   const holdingUntil = choiceS?.marks.find((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())?.until ?? null;
   const choicesReady = !!choices && !!city && flow === "none";
   const loadChoices = useCallback(async () => {
@@ -1739,6 +1741,7 @@ export function GameShell({
   useEffect(() => {
     if (!choices || !phone.open || phone.app !== "news") return;
     void choices.blotter().then((r) => r.ok && setBlotter(r.data));
+    void choices.conditions?.().then((r) => r.ok && setConditions(r.data));
   }, [choices, phone.open, phone.app]);
   const closeChoice = () => {
     if (choiceMade?.effects.holding) setHoldingOpen(true);
@@ -3151,6 +3154,7 @@ export function GameShell({
         onOpenCareers={careers ? () => { setPhone({ open: false, app: null }); setCareersOpen(true); } : undefined}
         scandals={campaignScandals}
         blotter={blotter}
+        conditions={conditions}
         election={campaign && campaignRunning === false ? {
           unlocked: myRank.level >= APP_UNLOCKS.campaign.rank, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
           onOpen: () => { setPhone({ open: false, app: null }); setCampaignOpen(true); },

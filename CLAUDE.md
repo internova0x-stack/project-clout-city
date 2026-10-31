@@ -381,6 +381,17 @@ components live in `app/globals.css`.
   Storylets (`admin_storylets`, `admin_storylet_set`: veto, pause, restore, now; a live card's veto is final);
   `storylets_live()` (service role) feeds choiceActions' pool every 5 minutes (`offer`; vetoed live cards stay readable).
   Weekly cards are never in `CHOICE_CARDS` (that would skip the veto); the preview plays the first week as live.
+  Step 4, the city reacts (migration 0140; lib/cityConditions.ts): `city_conditions` (heatwave, brownout, festival… and
+  reactions) add their effects to `world_effects()` (arc `condition:<id>`; only price_multiplier ×0.5-1.5, availability
+  (closures ≤ 12 h) and place_state notes; never protected tags). Weekly ones: `content/conditions/<Monday>.json`
+  (`validateConditionWeek`, `content_import_conditions`: live 24 h later unless vetoed in Studio → Storylets → City
+  conditions, `admin_conditions`/`admin_condition_set`). City storylets: `content/city/reactions.json` (`validateReactions`)
+  → `city_react` (run by syncWeeklyContent) fires a condition when world_tally crosses a line (min 3, cooldown) and posts a
+  city headline. `city_conditions_now()` (players): News → City's "Around the city" (components/city/Conditions.tsx), and
+  the snapshot's `conditions` for storylets (`snap: "conditions", is: kind`). An `hr_crackdown` for a track doubles tracing
+  (`office(..., { crackdown })`). choice_headlines gains `kind` (scandal, win, city) and a nullable player: a player's
+  first campaign win, business going public or scholarship posts a 🏆 line (trigger on player_facts), never for News
+  opt-outs. `?choice=city` (and `story`) in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

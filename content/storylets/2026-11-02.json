@@ -1112,6 +1112,209 @@
     }
    ],
    "family": "loyalty"
+  },
+  {
+   "id": "heatwave-cart-prices",
+   "base": "heatwave-cart-prices",
+   "area": "business",
+   "emoji": "🥵",
+   "title": "It's 81 degrees in November and you have the only cold drinks on the block. The line wraps the corner.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "snap": "conditions",
+      "is": "heatwave"
+     },
+     {
+      "snap": "businesses",
+      "min": 1
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "gouge",
+     "label": "Triple the prices",
+     "get": "C$2,000 by sundown",
+     "cost": "Every customer remembers",
+     "risk": "high",
+     "riskWhy": "Neighbors post receipts",
+     "comesBack": true,
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "A C$7 water. A C$12 lemonade. You sell out by four. Somebody posts the menu with three skull emojis.",
+       "effects": {
+        "cash": 2000,
+        "integrity": -14,
+        "clout": -60
+       },
+       "later": {
+        "afterDays": [
+         2,
+         6
+        ],
+        "chance": 0.5,
+        "emoji": "🧾",
+        "text": "Remember your heatwave prices? The block's group chat remembers. Business is slow this week.",
+        "effects": {
+         "cash": -800,
+         "mood": -6
+        },
+        "headline": "Heatwave hustle: {name} charged C$12 for lemonade during the November heatwave. Lola has questions. So does the block."
+       }
+      }
+     ]
+    },
+    {
+     "id": "fair",
+     "label": "Keep prices fair",
+     "get": "A block that loves you",
+     "cost": "Easy money",
+     "risk": "low",
+     "riskWhy": "Goodwill is slow money",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Same prices, longer line. The block starts calling it 'the decent place.' That's a real name now.",
+       "effects": {
+        "cash": 600,
+        "clout": 150,
+        "integrity": 10
+       }
+      }
+     ]
+    },
+    {
+     "id": "free",
+     "label": "Free water for the line",
+     "get": "A viral moment, maybe",
+     "cost": "C$300 in water",
+     "risk": "medium",
+     "riskWhy": "Kindness gets filmed",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Someone films you handing out water. The clip does numbers. A food blog calls you 'the hero of the heatwave.'",
+       "effects": {
+        "cash": -300,
+        "clout": 250,
+        "integrity": 12
+       }
+      }
+     ]
+    }
+   ],
+   "family": "temptation"
+  },
+  {
+   "id": "brownout-candle-date",
+   "base": "brownout-candle-date",
+   "area": "dating",
+   "emoji": "🕯️",
+   "title": "The brownout killed the lounge mid-date. Your partner wants to go home. Your crew is on a candlelit rooftop.",
+   "where": {
+    "after": [
+     "arrive",
+     "shift",
+     "gig",
+     "eat",
+     "visit",
+     "hangout"
+    ]
+   },
+   "when": {
+    "all": [
+     {
+      "snap": "conditions",
+      "is": "brownout"
+     },
+     {
+      "snap": "partner"
+     },
+     {
+      "snap": "crew",
+      "min": 1
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "home",
+     "label": "Go home with your partner",
+     "get": "A quiet night, together",
+     "cost": "The rooftop",
+     "risk": "low",
+     "riskWhy": "Quiet nights count",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Candles, takeout and a board game with three missing pieces. Your partner calls it 'the best date in months.'",
+       "effects": {
+        "mood": 15,
+        "integrity": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "rooftop",
+     "label": "Talk them into the rooftop",
+     "get": "The night of the year, maybe",
+     "cost": "Your partner's patience",
+     "risk": "medium",
+     "riskWhy": "Not everyone loves a crowd",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "It's magical. Candles everywhere, the whole skyline dark. Your partner admits it was worth it. Mostly.",
+       "effects": {
+        "mood": 12,
+        "clout": 80,
+        "integrity": -2
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Your partner hates it. Too loud, too dark, too many of your friends. The ride home is very quiet.",
+       "effects": {
+        "mood": -12,
+        "integrity": -2
+       }
+      }
+     ]
+    },
+    {
+     "id": "ditch",
+     "label": "Send them home, go alone",
+     "get": "The rooftop",
+     "cost": "Your partner's trust",
+     "risk": "high",
+     "riskWhy": "Partners notice",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Great night. The text the next morning just says 'cool.' With a period.",
+       "effects": {
+        "mood": 4,
+        "integrity": -10,
+        "clout": 60
+       }
+      }
+     ]
+    }
+   ],
+   "family": "loyalty"
   }
  ]
 }
