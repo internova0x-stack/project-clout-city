@@ -1322,7 +1322,14 @@ an insider tip, the pickle pitch; PC LOAD LETTER at 4:51, Kimberly's 26-hour day
 dinner). Fran, the receptionist, is No-Fee* Realty's regular. Campaign background: Finance fundraising ×1.3, Real Estate ×1.15,
 Law +1 point. Payday now pays the wage and the tips (or bonus, or broker fees) as two ledger rows.
 
-**Later:** the Climb's office cards for players with a job.
+**Office cards (owner, Oct 31: "go with 1, 2, and 3"; no migration).** Moral Choices at your job: content/choices/office.json
+holds 19 cards for players with a career job, ten for any job (padded expenses, the salary sheet on the printer, a client's
+C$900 watch, the boss's password on a sticky note, covering for a late work friend, the new hire who deleted the shared drive)
+and one per track (the tip jar at Grind & Gossip, a growth chart that must go "up and to the right", a made-up quote at Clout
+TV, the ribbon budget at City Hall, viewer bots at the Glow Up House, a missing sample at Atelier Vernon, "aspirational" listing
+photos, a pickle-stock tip at Queensboro Capital, a buried memo at Whitlock & Hale), with two chains (an expenses audit, the
+City Trading Commission). They appear right after a workday or at the employer's place, ahead of ordinary cards there, and
+name your own boss, work friend, rival, big boss or new hire. The daily limits are unchanged.
 
 ## 31. The underworld, part 1 (owner, Oct 31: "The underworld"; "Invite only", "Bite but recover", "Keep it a side hustle"; migration 0148)
 

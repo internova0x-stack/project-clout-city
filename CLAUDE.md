@@ -492,6 +492,14 @@ components live in `app/globals.css`.
   candidate's Integrity) and the storylet gate (`gateProblems`): career tasks may carry `when`/`slots`, campaign situations
   `when`; the servers pass the engines only what memory unlocked (`unlockedCards` → CareerCtx.unlocked, endWeek's
   `opts.unlocked`), one gated card first per workday or End Week. validate:content and tests/cardFormat.test.ts run it.
+- Office cards (no migration; owner, Oct 31: "go with 1, 2, and 3"; spec section 29): content/choices/office.json, 19 Moral
+  Choices cards for players with a career job (10 for any job, one per track) plus two chain follow-ups (office-expenses-audit,
+  finance-pickle-suits). `where.work` means a card happens at your job: right after a career workday (GameShell asks with after
+  "workday", which still counts as "shift") or at the employer's place (`jobPlace`), scored like a named place (×2/×5 as a
+  storylet). `validateCards` requires a job in `when.all` (`needsJob`) and no places or tags. Slot kinds `friend`, `rival`,
+  `bigboss`, `newhire` (lib/storylets.ts) read `snap: "job.track"` beside `boss` and `employer`; outcomes write
+  `thread.padded_expenses`, `thread.insider_trade`, `thread.buried_evidence`. tests/officeCards.test.ts; `?choice=office`
+  (or `office-<track>`) in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
