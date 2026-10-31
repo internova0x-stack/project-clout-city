@@ -52,6 +52,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
+//   /preview/home?underworld=locked|new|jobs|pro|hot|caught|lawyer  The underworld (migration 0148; Pablo's back room from his shop's card, or ?open=backroom)
 //   /preview/home?career=welcome|new|apply|work|day|office|grudge|boss|quit|cityhall|streaming|fashion|realestate|finance|law|review|warning|fired  Careers (migration 0135; Phone → Careers; welcome = the aspiration welcome screen, migration 0143; boss = Push the boss out open; quit = the quit card; cityhall = at work in the Mayor's office)
 //   /preview/home?choice=now|back|high|low|log|story|city  Moral Choices (migration 0131): now = a card on every arrival, story = storylets from a sample history (Content Engine step 2), city = the city conditions and Blotter wins of step 4 (News → City), back = a consequence lands
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
@@ -105,7 +106,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, choice } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, choice } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -195,6 +196,7 @@ export default async function Preview({
           mayorPreset={mayor}
           campaignPreset={campaign}
           careerPreset={career}
+          underworldPreset={underworld}
           choicePreset={choice}
           goalsPreset={goals}
           pushPreset={push}

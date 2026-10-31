@@ -3,6 +3,7 @@
 // the preview runs them in memory. Players only ever see `campaignView`, which leaves out the hidden rolls (traces,
 // fact-checks, queued trouble) and the overnight results until their New York day comes.
 
+import { UNDERWORLD, campaignOpBonus } from "./underworld.ts";
 import {
   CAMPAIGN, citywide, cs, endReward, skimRoom,
   type CampaignContent, type CampaignState, type CampaignTask, type Candidate, type CandidateId, type TaskDef, type Choice, type DebateStyle, type Effects,
@@ -44,6 +45,8 @@ export interface StartInput {
   aspiration?: string | null;
   /** Careers part 3 (owner, Oct 31): the manager's current job, as background (Hospitality: a happier staff; Tech: the
    * startup crowd's money; Media: name recognition). */
+  /** The underworld (migration 0148): the manager's Street Rep with Pablo; dark ops land a little easier. */
+  streetRep?: number;
   career?: { track: "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion" | "realestate" | "finance" | "law"; level: number } | null;
   candidate: CandidateId;
   clout: number;
@@ -82,11 +85,16 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
     trust, budget: { digital: 0, street: 0, tv: 0 }, slots: Array(CAMPAIGN.slots).fill(null),
     inbox: [], pending: [], seen: [], traces: [], factChecks: [], dirtyOps: 0, exposures: 0, events: [], prepped: [],
     debate: null, recap: null, receipts: [], log: [], election: null, ending: null,
-    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: (1 + Math.min(1, Math.max(0, input.clout) / 5000)) * (job?.track === "tech" ? CAMPAIGN.background.techFunds : job?.track === "finance" ? CAMPAIGN.background.financeFunds : job?.track === "realestate" ? CAMPAIGN.background.realestateFunds : 1), wonBefore: input.wonBefore, band: input.band ?? undefined },
+    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: (1 + Math.min(1, Math.max(0, input.clout) / 5000)) * (job?.track === "tech" ? CAMPAIGN.background.techFunds : job?.track === "finance" ? CAMPAIGN.background.financeFunds : job?.track === "realestate" ? CAMPAIGN.background.realestateFunds : 1), wonBefore: input.wonBefore, band: input.band ?? undefined, streetRep: input.streetRep ?? 0 },
     earned: 0, dilemmas: {}, turnout: {}, queue: [], before: null,
   };
   if (job) {
     const line = CAMPAIGN.background.lines[job.track];
+    state.receipts.push(line);
+    state.log.push({ week: 1, text: line });
+  }
+  if ((input.streetRep ?? 0) >= UNDERWORLD.campaign.lineAt) {
+    const line = "🧳 Pablo's people know people. Your dark ops will land a little easier.";
     state.receipts.push(line);
     state.log.push({ week: 1, text: line });
   }
@@ -744,7 +752,7 @@ function resolveOp(content: CampaignContent, state: CampaignState, a: Extract<Sl
   const c = candidateOf(content, state.candidate);
   if (a.persuaded) state.morale = clamp(state.morale - 10);
   const base = a.op === "fake_news" ? 0.7 : 0.6;
-  const success = clamp(base + (comp(state, "comms") - 1) * 0.5, 0.2, 0.9);
+  const success = clamp(base + (comp(state, "comms") - 1) * 0.5 + campaignOpBonus(state.links.streetRep ?? 0), 0.2, 0.9);
   const roll = rng();
   const traceW = (a.op === "fake_news" ? 0.5 : 0.4) * (a.cutout ? 0.7 : 1);
   const place = content.places.find((p) => p.id === a.target);

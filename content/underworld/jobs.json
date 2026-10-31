@@ -1,0 +1,220 @@
+{
+  "pablo": {
+    "intro": [
+      "So you're the one who's been bending rules around the neighborhood. Word gets around. I'm Pablo.",
+      "Out front I sell luggage. I have never sold a suitcase. Back here, I solve problems. People's problems become my problems, and my problems become your opportunities.",
+      "Three jobs a day. You pick how you do them. Do them clean, the 114½ never hears your name. Do them sloppy, Sgt. Bev learns how to spell it.",
+      "One more thing: we don't hurt anybody here. This is a business. Badly run, but a business."
+    ],
+    "greet": {
+      "Errand Kid": [
+        "The kid's back. Sit. Don't touch the suitcases, they're load-bearing.",
+        "You want work? Everybody starts at the bottom. The bottom is very busy today."
+      ],
+      "Corner Regular": [
+        "Ah, my regular. The corner speaks well of you. The corner speaks a lot.",
+        "People on Steinway know your face now. That's good. Also bad. Mostly good."
+      ],
+      "Known Face": [
+        "Look who it is. Sal at the deli asked about you. I told him you're in luggage.",
+        "You're a known face now. Keep the face. Lose the habit of using your real name."
+      ],
+      "Pablo's Guy": [
+        "My guy! Sit, sit. I saved you the good chair. It has all four legs.",
+        "When people ask who handles things, I say you. Don't make me a liar. I'm already a notary."
+      ],
+      "Street Legend": [
+        "A legend in my back room. My mother would be proud. She'd also be confused.",
+        "They tell stories about you on 30th Avenue. Some are true. Let's keep it that way."
+      ]
+    },
+    "halo": "Pablo took his cut first. \"You've got a churchgoer's face. I pay faces like that less until they prove me wrong.\"",
+    "refuse": "\"Not today. You're hot. You glow. Sgt. Bev could find you in the dark. Go lay low a day or two.\"",
+    "holding": "Pablo's phone goes straight to voicemail. \"You've reached Pablo's Discount Luggage. If you're calling from the 114½, wrong number.\"",
+    "lawyer": "Whitlock & Hale LLP: we never ask what you did. We bill for not asking."
+  },
+  "jobs": [
+    {
+      "id": "upside-down-sneakers", "emoji": "👟", "minRep": 0,
+      "title": "Pablo has forty pairs of designer sneakers with the logo printed upside down. Someone has to sell them on Steinway.",
+      "options": [
+        { "id": "real", "label": "Sell them as the real thing", "get": "The best price per pair", "cost": "A lie to every buyer", "pay": [140, 220], "rep": 3, "heat": 6, "trace": 0.3, "odds": 0.75, "energy": 12, "integrity": -4,
+          "win": "\"Limited edition,\" you said. \"Upside down is the point.\" Thirty-one pairs gone by lunch.", "fizzle": "A teenager turned the shoe over, laughed at you, and filmed it. Nobody bought a thing." },
+        { "id": "inspired", "label": "Sell them as \"inspired by\"", "get": "Some cash, no lies", "cost": "Half the price", "pay": [70, 110], "rep": 2, "heat": 2, "trace": 0.1, "odds": 0.9, "energy": 10, "integrity": -1,
+          "win": "\"Inspired by,\" you said, like a museum. People respect honesty in a knockoff.", "fizzle": "Turns out nobody is inspired by anything on a Tuesday." }
+      ],
+      "bust": "A man in a windbreaker asked for a size 10, then showed you a badge. It was a real badge. The shoes were not real shoes.",
+      "caught": "Remember the upside-down sneakers? A buyer's mom took a pair to the 114½. Sgt. Bev wore them to work while she wrote you up.",
+      "headline": "Steinway shoe sale ends badly: {name} tells police the logo was \"a design choice.\""
+    },
+    {
+      "id": "found-laptop", "emoji": "💻", "minRep": 0,
+      "title": "A laptop \"fell off a delivery bike.\" Pablo needs someone to find it a new home before the owner finds the old one.",
+      "options": [
+        { "id": "fence", "label": "Sell it to the guy at the pawnshop", "get": "Quick cash, no questions", "cost": "Someone's lost laptop", "pay": [110, 190], "rep": 3, "heat": 7, "trace": 0.35, "odds": 0.75, "energy": 8, "integrity": -5,
+          "win": "The pawnshop guy didn't ask. You didn't tell. A beautiful relationship.", "fizzle": "The pawnshop guy opened the lid. The lock screen said REWARD IF FOUND with a number. He slid it back to you." },
+        { "id": "wipe", "label": "Wipe it and sell it online", "get": "A better price", "cost": "An evening of nervous typing", "pay": [160, 250], "rep": 2, "heat": 5, "trace": 0.4, "odds": 0.65, "energy": 14, "integrity": -5,
+          "win": "Factory reset, a good photo, \"barely used.\" Technically true.", "fizzle": "It wanted a password to reset. You tried \"password.\" It was not password." }
+      ],
+      "bust": "The laptop's location tracker led the owner, a very calm accountant and two officers right to you.",
+      "caught": "Remember the laptop that fell off a bike? Its owner turned on the tracker. It led the 114½ to the pawnshop, and the pawnshop led them to you.",
+      "headline": "Laptop that \"fell off a bike\" lands {name} at the 114½. The bike could not be reached for comment."
+    },
+    {
+      "id": "lunaria-tickets", "emoji": "🎟️", "minRep": 0,
+      "title": "Lunaria's show is sold out. Pablo has a stack of tickets of \"varying realness.\" Work the line outside.",
+      "options": [
+        { "id": "mixed", "label": "Sell the whole stack, real or not", "get": "Every ticket sold", "cost": "Some fans won't get in", "pay": [160, 280], "rep": 4, "heat": 8, "trace": 0.35, "odds": 0.7, "energy": 12, "integrity": -6,
+          "win": "Every ticket gone in twenty minutes. Some of them will even scan.", "fizzle": "The fans had been burned before. They checked every ticket against a flashlight. You sold none." },
+        { "id": "real-only", "label": "Only sell the real ones, at a markup", "get": "Cash and happy fans", "cost": "Pablo keeps the fakes", "pay": [80, 140], "rep": 2, "heat": 3, "trace": 0.1, "odds": 0.85, "energy": 10, "integrity": -2,
+          "win": "Real tickets, unreal prices. Everybody cried, for different reasons.", "fizzle": "The venue released more seats at the door. Your markup lost to a box office." }
+      ],
+      "bust": "A fan's ticket bounced at the door. She pointed at you. Twelve fans and one security guard pointed at you.",
+      "caught": "Remember Lunaria's show? A fan with a fake ticket posted your face. A thousand fans found you. So did the 114½.",
+      "headline": "Lunaria fans identify ticket seller {name} in record time. \"We stream, we don't forget.\""
+    },
+    {
+      "id": "lawn-chair-spot", "emoji": "🪑", "minRep": 0,
+      "title": "A man pays cash to have a parking spot on 30th Avenue held with a lawn chair. All day. Against all comers.",
+      "options": [
+        { "id": "defend", "label": "Hold the spot like it's yours", "get": "A day's pay", "cost": "Every driver's goodwill", "pay": [70, 120], "rep": 3, "heat": 4, "trace": 0.15, "odds": 0.85, "energy": 14, "integrity": -2,
+          "win": "Eleven drivers tried. Eleven drivers left. You and the lawn chair are a legend on 30th.", "fizzle": "A tow truck took the spot, the chair and nearly you." },
+        { "id": "rent", "label": "Rent the spot out by the hour", "get": "Twice the cash", "cost": "The man finds out", "pay": [120, 210], "rep": 2, "heat": 6, "trace": 0.25, "odds": 0.7, "energy": 10, "integrity": -4,
+          "win": "Six cars, forty minutes each, cash only. The man came back to an empty spot and a chair.", "fizzle": "The man came back early. He took his chair and his money and gave you a look." }
+      ],
+      "bust": "A traffic agent wrote the chair a ticket. Then she wrote you one. Then she called it in, because she was bored.",
+      "caught": "Remember the lawn chair? The 114½ found it, with your name on the back in marker. Who labels a lawn chair?",
+      "headline": "30th Avenue parking feud: {name} and a lawn chair cited together. The chair has a lawyer."
+    },
+    {
+      "id": "hot-dog-contest", "emoji": "🌭", "minRep": 15,
+      "title": "The Astoria Park hot-dog contest is Saturday. Pablo bet big on the guy from Ditmars. Make sure the guy from Ditmars wins.",
+      "options": [
+        { "id": "buns", "label": "Swap the rivals' buns for stale ones", "get": "A sure thing for Pablo", "cost": "Three hungry men's dreams", "pay": [220, 360], "rep": 5, "heat": 8, "trace": 0.35, "odds": 0.7, "energy": 14, "integrity": -5,
+          "win": "The rivals chewed like they were eating a sofa. Ditmars won by nine dogs. Pablo wept.", "fizzle": "The rivals didn't eat the buns. They ate the hot dogs and threw the buns at the crowd. Ditmars lost." },
+        { "id": "coach", "label": "Coach the guy from Ditmars", "get": "An honest chance", "cost": "A long Saturday", "pay": [140, 220], "rep": 4, "heat": 1, "trace": 0, "odds": 0.55, "energy": 18, "integrity": 0,
+          "win": "Water, rhythm, no fear. Ditmars ate forty-one and called his mother. You earned your cut.", "fizzle": "Ditmars got the hiccups at dog twelve. You can't coach hiccups." }
+      ],
+      "bust": "A judge saw you at the bun table holding a bag of very old bread. Contest security is two retirees, and they are fast.",
+      "caught": "Remember the hot-dog contest? A runner-up sent the stale buns to a lab. The lab was his cousin. The cousin called the 114½.",
+      "headline": "Hot-dog contest scandal: {name} linked to \"Bungate.\" Astoria Park demands a rematch."
+    },
+    {
+      "id": "five-star-diner", "emoji": "⭐", "minRep": 15,
+      "title": "A diner wants 200 five-star reviews by Friday. Pablo has the accounts. He needs someone who can type like 200 different people.",
+      "options": [
+        { "id": "type", "label": "Write all 200 reviews", "get": "Steady cash", "cost": "Your thumbs and your soul", "pay": [190, 300], "rep": 4, "heat": 5, "trace": 0.3, "odds": 0.8, "energy": 16, "integrity": -4,
+          "win": "\"Best pancakes in Queens,\" you wrote, 200 ways. The diner is now 4.9 stars. The pancakes are a 3.", "fizzle": "You used the same typo in 60 reviews. The app deleted them all in an afternoon." },
+        { "id": "rivals", "label": "And one-star the diner across the street", "get": "Pablo pays double", "cost": "A family diner's week", "pay": [330, 500], "rep": 5, "heat": 9, "trace": 0.45, "odds": 0.65, "energy": 18, "integrity": -7,
+          "win": "Up goes one diner, down goes the other. Pablo calls it \"market forces.\"", "fizzle": "The diner across the street has a grandson in tech. Every review got traced to one phone in one afternoon." }
+      ],
+      "bust": "The reviews all came from Pablo's Discount Luggage's Wi-Fi. The 114½ has a detective who reads reviews for fun.",
+      "caught": "Remember the 200 reviews? The diner across the street hired someone to trace them. They traced them to you.",
+      "headline": "200 reviews, one author: {name} named in Astoria pancake review scandal."
+    },
+    {
+      "id": "notary-stamp", "emoji": "🖋️", "minRep": 15,
+      "title": "Pablo's notary stamp is real. His notary license has been \"pending since 2009.\" A stack of leases needs stamping.",
+      "options": [
+        { "id": "stamp", "label": "Stamp the whole stack", "get": "Easy money, sitting down", "cost": "A lot of leases on thin ice", "pay": [160, 280], "rep": 4, "heat": 6, "trace": 0.35, "odds": 0.8, "energy": 8, "integrity": -5,
+          "win": "Stamp, stamp, stamp. Eighty leases \"notarized.\" Your wrist hurts. Your bank doesn't.", "fizzle": "The stamp ran out of ink at lease four. Pablo had no more ink. Pablo never has more ink." },
+        { "id": "read", "label": "Read them first, stamp the clean ones", "get": "Less cash, a clear head", "cost": "Pablo thinks you're slow", "pay": [80, 140], "rep": 2, "heat": 2, "trace": 0.15, "odds": 0.9, "energy": 10, "integrity": -2,
+          "win": "Half the leases were fine. Half had a clause about \"the landlord's nephew.\" You stamped the fine half.", "fizzle": "None of them were clean. Not one. You stamped nothing and went home." }
+      ],
+      "bust": "A landlord brought a \"notarized\" lease to Queens Housing Court. The judge asked who the notary was. The lease said you.",
+      "caught": "Remember the lease stamps? One ended up in Queens Housing Court. The judge has a long memory and a short temper.",
+      "headline": "Housing Court asks: who notarized 80 leases with an expired stamp? The answer: {name}."
+    },
+    {
+      "id": "handbag-van", "emoji": "📦", "minRep": 35,
+      "title": "A van full of \"surplus\" designer handbags needs to get from the Bronx to Astoria before sunrise. Pablo says it's not stolen, \"just extremely discounted.\"",
+      "options": [
+        { "id": "drive", "label": "Drive the van yourself", "get": "The full fee", "cost": "Your face on every camera", "pay": [390, 600], "rep": 6, "heat": 10, "trace": 0.45, "odds": 0.72, "energy": 16, "integrity": -5,
+          "win": "Bridge, highway, 31st Street, done by 5 a.m. The handbags are in Pablo's \"luggage\" now.", "fizzle": "The van wouldn't start. You spent the night in it with 300 handbags and no heat." },
+        { "id": "cutout", "label": "Pay a cousin to drive it", "get": "No camera sees you", "cost": "Half the fee goes to the cousin", "pay": [190, 300], "rep": 4, "heat": 4, "trace": 0.2, "odds": 0.8, "energy": 6, "integrity": -4,
+          "win": "The cousin drove. You slept. The handbags arrived. Teamwork.", "fizzle": "The cousin took a wrong turn into New Jersey and came back with the van and a story." }
+      ],
+      "bust": "A bridge toll camera, a broken taillight and a cop who loves handbags. You never stood a chance.",
+      "caught": "Remember the handbag van? A toll camera had a very clear picture of the driver. It was you, eating a bagel.",
+      "headline": "Handbag van stopped on the bridge. Driver {name} insists it is \"a mobile closet.\""
+    },
+    {
+      "id": "block-raffle", "emoji": "🎰", "minRep": 35,
+      "title": "The block association raffle has a flat-screen TV for first prize. Pablo's cousin is going to win it. You're going to make sure.",
+      "options": [
+        { "id": "rig", "label": "Load the drum with his tickets", "get": "Pablo's gratitude, in cash", "cost": "Thirty neighbors' raffle money", "pay": [330, 500], "rep": 6, "heat": 9, "trace": 0.4, "odds": 0.7, "energy": 10, "integrity": -6,
+          "win": "The cousin won. He acted surprised. He is a terrible actor. Nobody noticed.", "fizzle": "Mrs. Papadopoulos runs the drum. Mrs. Papadopoulos checks the drum. You put the tickets back." },
+        { "id": "sell", "label": "Just sell him a lot of tickets", "get": "A fair-ish fix", "cost": "The cousin might still lose", "pay": [160, 280], "rep": 4, "heat": 2, "trace": 0.1, "odds": 0.6, "energy": 12, "integrity": -1,
+          "win": "He bought 300 tickets. Of course he won. That's just math.", "fizzle": "He bought 300 tickets. A girl with one ticket won. That's also math." }
+      ],
+      "bust": "Mrs. Papadopoulos caught you with a fistful of tickets and a guilty face. She called the 114½. She has them on speed dial.",
+      "caught": "Remember the block raffle? The cousin posted the flat-screen online with \"thanks to my inside man.\" He tagged you.",
+      "headline": "Block raffle rigged: the flat-screen goes back, and {name} goes to the 114½."
+    },
+    {
+      "id": "food-truck-sticker", "emoji": "🚚", "minRep": 35,
+      "title": "Pablo has one food-truck permit and four food trucks. The sticker has to move from truck to truck all day without an inspector noticing.",
+      "options": [
+        { "id": "shuffle", "label": "Run the sticker between trucks", "get": "A day's fee from four trucks", "cost": "A lot of running", "pay": [390, 550], "rep": 6, "heat": 8, "trace": 0.35, "odds": 0.7, "energy": 22, "integrity": -4,
+          "win": "Eight swaps, four trucks, one sticker, no inspector. You are the fastest runner on Steinway.", "fizzle": "The sticker lost its stick at swap three. You held it on the window with your hand for an hour." },
+        { "id": "one", "label": "Keep it on one truck, close the rest", "get": "No risk, less money", "cost": "Three angry cooks", "pay": [110, 160], "rep": 3, "heat": 0, "trace": 0, "odds": 0.95, "energy": 8, "integrity": 1,
+          "win": "One legal truck, one long line, one very honest afternoon. Pablo called you \"a coward with a future.\"", "fizzle": "It rained. Nobody bought tacos. Even legal tacos." }
+      ],
+      "bust": "The inspector photographed the same sticker on two trucks in the same minute. You were holding it.",
+      "caught": "Remember the food-truck sticker? The inspector compared photos. Same sticker, four trucks, one runner: you.",
+      "headline": "One permit, four food trucks: {name} fined in Steinway's sticker shuffle."
+    },
+    {
+      "id": "early-masterpiece", "emoji": "🖼️", "minRep": 60,
+      "title": "A gallery in Long Island City wants an \"undiscovered early work\" by a famous dead painter. Pablo has a guy and a hair dryer to age the paint.",
+      "options": [
+        { "id": "sell", "label": "Sell it to the gallery as real", "get": "The big payday", "cost": "A gallery's reputation, later", "pay": [660, 990], "rep": 8, "heat": 12, "trace": 0.5, "odds": 0.65, "energy": 12, "integrity": -7,
+          "win": "The gallery owner cried. She called it \"raw.\" The guy painted it Tuesday.", "fizzle": "The gallery owner sniffed it and said \"hair dryer.\" She's been in the business a long time." },
+        { "id": "tribute", "label": "Sell it as a \"tribute piece\"", "get": "Real money, no lie", "cost": "A fraction of the price", "pay": [280, 440], "rep": 5, "heat": 3, "trace": 0.1, "odds": 0.8, "energy": 10, "integrity": -1,
+          "win": "\"A tribute,\" you said. The gallery hung it beside a sign that said \"homage.\" Everybody won.", "fizzle": "Nobody wants a tribute. They want a scandal." }
+      ],
+      "bust": "The gallery's appraiser found a price sticker from a craft store under the paint.",
+      "caught": "Remember the early masterpiece? An art critic X-rayed it and found a grocery list underneath. The 114½ has an art squad now. It's one guy.",
+      "headline": "LIC gallery's \"lost masterpiece\" was painted last Tuesday. Seller: {name}."
+    },
+    {
+      "id": "quiet-community-meeting", "emoji": "🏗️", "minRep": 60,
+      "title": "The LUXURY CONDOS SOON lot needs a community meeting about the new tower. Pablo's client wants it held where nobody will hear about it.",
+      "options": [
+        { "id": "basement", "label": "Hold it in a basement at 7 a.m.", "get": "A developer's thank-you", "cost": "The block never gets a say", "pay": [550, 830], "rep": 7, "heat": 9, "trace": 0.4, "odds": 0.75, "energy": 10, "integrity": -7,
+          "win": "Three people came. Two were the developer. The tower is \"approved by the community.\"", "fizzle": "Ms. Abernathy from the block association heard. Ms. Abernathy hears everything. She brought forty people." },
+        { "id": "flyers", "label": "Post the flyers, in very small print", "get": "Deniability", "cost": "Half the thank-you", "pay": [280, 440], "rep": 5, "heat": 4, "trace": 0.2, "odds": 0.8, "energy": 8, "integrity": -4,
+          "win": "The flyers were up. Technically. Two millimeters tall. Nobody came. Legal.", "fizzle": "A man with a magnifying glass read every flyer. He is now running for City Council." }
+      ],
+      "bust": "Ms. Abernathy filmed the empty basement meeting and sent it to Lola Lowdown and the 114½ at the same time.",
+      "caught": "Remember the secret community meeting? Ms. Abernathy found the sign-in sheet. Three names. Yours was one.",
+      "headline": "Luxury condo \"community meeting\" held in a basement at dawn. Organizer: {name}."
+    },
+    {
+      "id": "ribbon-contract", "emoji": "🎀", "minRep": 90,
+      "title": "City Hall needs 10,000 ribbons for the Mayor's ribbon-cuttings. Pablo's cousin makes ribbons. Sort of. Get the contract.",
+      "options": [
+        { "id": "grease", "label": "Take the clerk to a very long lunch", "get": "The whole contract", "cost": "A clerk's career if it comes out", "pay": [990, 1380], "rep": 10, "heat": 14, "trace": 0.55, "odds": 0.65, "energy": 12, "integrity": -8,
+          "win": "Three courses, one handshake, 10,000 ribbons. Mayor Papa-Dani cut the first one live on Clout TV.", "fizzle": "The clerk ordered the lobster, thanked you, and gave the contract to a ribbon company with a website." },
+        { "id": "bid", "label": "Put in a low bid, fair and square", "get": "A real contract, maybe", "cost": "The cousin has to make real ribbons", "pay": [500, 770], "rep": 6, "heat": 2, "trace": 0.1, "odds": 0.55, "energy": 14, "integrity": 1,
+          "win": "Lowest bid, won fair. The cousin learned to make ribbons. The Mayor said they \"cut like a dream.\"", "fizzle": "A company in Ohio bid one cent lower. Ohio wins again." }
+      ],
+      "bust": "The purchasing clerk's lunch receipt was on the city's expense report. With your name. Spelled right.",
+      "caught": "Remember the ribbon contract? City Hall audited the lunch. The lobster was itemized. So were you.",
+      "headline": "Ribbongate: {name} named in City Hall ribbon contract probe. The Mayor \"has cut thousands and regrets none.\""
+    },
+    {
+      "id": "yacht-wine", "emoji": "🍷", "minRep": 90,
+      "title": "A billionaire's yacht off Astoria needs forty cases of \"vintage\" wine by tonight. The wine is from Tuesday. The labels are from 1961.",
+      "options": [
+        { "id": "serve", "label": "Deliver it with a straight face", "get": "A billionaire's tip", "cost": "Forty cases of lies", "pay": [880, 1320], "rep": 9, "heat": 12, "trace": 0.5, "odds": 0.7, "energy": 14, "integrity": -7,
+          "win": "The billionaire swirled, sniffed and said \"you can taste the history.\" You can taste Tuesday.", "fizzle": "The yacht's sommelier opened one bottle and quietly asked you to leave the boat. By rowboat." },
+        { "id": "honest", "label": "Tell him it's young and good", "get": "A smaller, honest tip", "cost": "Pablo's markup", "pay": [390, 600], "rep": 5, "heat": 2, "trace": 0.05, "odds": 0.85, "energy": 10, "integrity": 1,
+          "win": "\"Young and good,\" you said. He laughed, bought all forty cases and asked if you were single.", "fizzle": "He only drinks old wine. He only drinks old everything. Even his jokes." }
+      ],
+      "bust": "The harbor patrol stopped the delivery boat. One of the officers is a wine nerd. It was over in one sip.",
+      "caught": "Remember the yacht wine? The billionaire hosted a tasting. A guest read the label's fine print: \"bottled last week.\"",
+      "headline": "Billionaire's \"1961\" wine was bottled this month. Delivered by: {name}."
+    }
+  ]
+}

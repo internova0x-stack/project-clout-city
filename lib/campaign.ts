@@ -290,7 +290,7 @@ export interface CampaignState {
   election: ElectionResult[] | null;
   ending: Ending | null;
   /** Clout bonuses, worked out at the start. */
-  links: { clout: number; crew: number; home: string | null; fundMult: number; wonBefore: boolean; band?: "high" | "middle" | "low" };
+  links: { clout: number; crew: number; home: string | null; fundMult: number; wonBefore: boolean; band?: "high" | "middle" | "low"; /** The underworld (migration 0148): the manager's Street Rep at the start. */ streetRep?: number };
   /** Option C: the candidate's Integrity at the start (after the manager's band), and where this week started. */
   startIntegrity?: number;
   repMark?: number;

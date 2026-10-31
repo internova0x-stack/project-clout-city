@@ -41,7 +41,7 @@ export const SPOTS: Record<string, readonly [number, number]> = {
   // Astoria: Steinway St and 31st St, the elevated train between rows 6 and 7
   "grind-and-gossip": [7, 6], "harmony-chapel": [9, 6], "schlep-and-schmear": [11, 6], "radiant-harbor": [6, 7],
   "still-a-dollar-slice": [7, 7], "astoria-blvd-station": [8, 7], "city-hall-annex": [11, 7], "campaign-hq": [12, 7], "neon-spoon": [6, 8],
-  "white-sauce-cart": [8, 8], "boiled-and-beloved": [9, 8], "steinway-fresh": [10, 8], "triborough-works": [12, 8],
+  "white-sauce-cart": [8, 8], "boiled-and-beloved": [9, 8], "steinway-fresh": [10, 8], "pablos-luggage": [11, 8], "triborough-works": [12, 8],
   "precinct-114-half": [8, 9], "real-clout-fm": [9, 9], "low-light-lounge": [6, 9], "st-copays": [11, 9],
   "engine-7": [7, 10], "rockaway-diner": [9, 10], "clout-tower": [10, 10], "glow-up-house": [10, 9], "no-fee-realty": [12, 9],
   // Long Island City waterfront
@@ -101,7 +101,7 @@ export const BORROWED_KIND: Record<string, LandmarkKind | "cart" | "store"> = {
   "ditmars-heights-rooftop": "rooftop", "downstairs-on-main": "store", "ditmars-walkup": "brownstone",
   "queens-housing-court": "college", "court-square-courthouse": "precinct", "still-a-dollar-slice": "store",
   "white-sauce-cart": "cart", "boiled-and-beloved": "cart", "feta-compli": "store", "schlep-and-schmear": "store",
-  "campaign-hq": "store", "city-hall-annex": "college", "glow-up-house": "brownstone", "atelier-vernon": "gallery", "no-fee-realty": "store",
+  "campaign-hq": "store", "city-hall-annex": "college", "glow-up-house": "brownstone", "atelier-vernon": "gallery", "no-fee-realty": "store", "pablos-luggage": "store",
   "queensboro-capital": "twin-towers", "whitlock-hale": "college",
 };
 
@@ -112,6 +112,7 @@ export const STOREFRONTS: Record<string, { name: string; awning: string; wall: s
   "feta-compli": { name: "FETA COMPLI", awning: "#2C5FA8", wall: "#F1EEE6", roof: "olive" },
   "campaign-hq": { name: "CAMPAIGN HQ · VOTE", awning: "#C62C3B", wall: "#3B5BA9", roof: "balloons" },
   "no-fee-realty": { name: "NO-FEE* REALTY", awning: "#2F7D5B", wall: "#F2EFE8" },
+  "pablos-luggage": { name: "DISCOUNT LUGGAGE · NOTARY", awning: "#7A4E2A", wall: "#5A4636" },
   "downstairs-on-main": { name: "FOOD COURT ↓", awning: "#E0A21B", wall: "#9C4A3A", roof: "dumpling" },
 };
 

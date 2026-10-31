@@ -294,7 +294,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby" | "streamHouse" | "atelier" | "lawOffice";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby" | "streamHouse" | "atelier" | "lawOffice" | "backRoom";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -877,6 +877,17 @@ export const PLACES: Place[] = [
     lore: "Quiet, free and full of people pretending to read while charging their phones. The librarian has heard every excuse for a late book. Yours isn't new, sweetie.",
     actions: [
       { id: "study", kind: "visit", label: "Study in the quiet room", energy: 10, confidence: 5, blurb: "Fifty minutes of focus, ten minutes of looking at strangers' book choices." },
+    ],
+  },
+  // The underworld (owner, Oct 31): Pablo's front. The back room opens by invitation (lib/underworld.ts).
+  {
+    id: "pablos-luggage", name: "Pablo's Luggage & Notary", emoji: "🧳", category: "places", neighborhood: "Astoria",
+    at: [40.7640, -73.9150], depth: "scene", template: "backRoom", palette: ["#B8862E", "#5A4636", "#1F1B26"],
+    tags: ["shop", "underworld", "astoria"],
+    lore: "A luggage shop on 31st St that has never sold a suitcase. The sign says OPEN. The door says CLOSED. The notary license in the window says \"pending\" and is dated 2009. Babe, I don't ask what happens in the back. I just notice who walks out smiling.",
+    actions: [
+      { id: "browse", kind: "visit", label: "Try to buy a suitcase", task: "Try to buy a suitcase from Pablo", energy: 2, mood: 4, blurb: "\"That one's not for sale.\" Neither is the next one. Or the next. You leave with a mint." },
+      { id: "notary", kind: "visit", label: "Get something notarized", energy: 2, confidence: 3, blurb: "Pablo stamps it without reading it. He doesn't read anything. \"Reading is how people get involved.\"" },
     ],
   },
   {

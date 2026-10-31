@@ -916,6 +916,33 @@
       "role": "the receptionist",
       "regular": "fran",
       "slang": []
+    },
+    {
+      "id": "pablo",
+      "name": "Pablo Ferreira",
+      "age": 54,
+      "background": "Portuguese-Brazilian, came to Astoria from Newark in 1994 with two suitcases and an idea",
+      "personality": "Runs a luggage shop that has never sold a suitcase and a notary desk with a license that has been \"pending since 2009.\" Courteous, patient, allergic to violence and to paperwork. Fixes things. Asks no questions. Charges for both.",
+      "yearsInNeighborhood": 31,
+      "catchphrases": [
+        "We don't hurt anybody here. This is a business. Badly run, but a business.",
+        "The suitcases are load-bearing. Don't touch.",
+        "Reading is how people get involved."
+      ],
+      "likes": [
+        "Cash",
+        "A quiet Tuesday",
+        "Sgt. Bev's day off"
+      ],
+      "dislikes": [
+        "Receipts",
+        "People who say the word \"wire\" indoors",
+        "Customers who want luggage"
+      ],
+      "placeId": "pablos-luggage",
+      "role": "the luggage man",
+      "regular": "pablo",
+      "slang": []
     }
   ],
   "roommates": [

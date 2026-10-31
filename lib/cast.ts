@@ -73,6 +73,8 @@ export const REGULARS: Regular[] = [
   { id: "fran", name: "Fran", title: "the receptionist", placeId: "no-fee-realty", emoji: "☎️", role: "clerk" },
   // Streaming (owner, Oct 31): the Glow Up House's housekeeper, who has seen everything.
   { id: "marisela", name: "Marisela", title: "the house manager", placeId: "glow-up-house", emoji: "🧹", role: "doorman" },
+  // The underworld (owner, Oct 31): the fixer behind the luggage counter.
+  { id: "pablo", name: "Pablo", title: "the luggage man", placeId: "pablos-luggage", emoji: "🧳", role: "clerk" },
   // City Hall (owner, Oct 31): the Annex's lobby guard.
   { id: "osvaldo", name: "Osvaldo", title: "the lobby guard", placeId: "city-hall-annex", emoji: "💂", role: "doorman" },
   { id: "sgt-bev", name: "Sgt. Bev Kowalski", title: "the desk sergeant", placeId: "precinct-114-half", emoji: "👮‍♀️", role: "doorman" },
