@@ -359,6 +359,15 @@ components live in `app/globals.css`.
   traced sabotage costs the boss's trust (a traced rumor: a warning and a Lola's Blotter headline); work mood feeds Mood and
   performance; a joint project pays 'career_team' at the review; `career_office` nudges the private meter (±12) and posts the
   headline (`choice_headline`, never for News opt-outs). `?career=office|grudge` in the preview.
+- Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
+  automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
+  Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only
+  by `fact_note` (never raises; also bumps the city's `world_tally` by key, subject and New York day), by triggers on the
+  ledger, careers, campaigns, choice_log, choice_marks, relationships and campus, and by the careers server (office moves, a
+  polished interview). Every key is listed in lib/memory.ts `FACTS` (tests/memory.test.ts checks the list against the
+  writers: add a key there when you add a writer). `player_snapshot` reads standing from the tables that hold it;
+  `player_memory` = snapshot + facts in force. Service role only; Start over forgets the player's facts. Storylets (step 2)
+  are next.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

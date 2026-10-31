@@ -205,7 +205,7 @@ memory**.
 
 | Step | What ships | Visible to players |
 | --- | --- | --- |
-| 1 | **Player memory:** `player_facts`, `fact_note`, `player_snapshot`, writers in careers, campaigns, choices, dating, businesses, campus and bans; tallies | Nothing yet (the foundation) |
+| 1 ✅ | **Player memory** (built, migration 0138; keys in lib/memory.ts): `player_facts`, `fact_note`, `player_snapshot`, writers in careers, campaigns, choices, dating, businesses, campus and bans; tallies | Nothing yet (the foundation) |
 | 2 | **Storylets:** the engine (choice cards plus conditions, slots, `sets`); the 76 cards and the 36 Climb cards moved over; about 20 cross-system storylets | Cards that remember what you did elsewhere |
 | 3 | **Templates and the weekly generator:** slot filling, worst-case validation, the Studio Storylets tab with the veto window, the routine drafting templates | A steady stream of new situations |
 | 4 | **The city reacts:** conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
