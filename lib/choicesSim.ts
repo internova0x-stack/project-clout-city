@@ -24,7 +24,7 @@ export type ChoicePreset = "now" | "back" | "high" | "low" | "log" | "jail" | "c
  * ?choice=story: a player with a history across the game (a Media job, a partner, a coworker they took credit from, a
  * club that banned them, a lotto win…), so storylets (Content Engine step 2) turn up, and every arrival brings one.
  */
-function storyMemory(): Memory {
+export function storyMemory(): Memory {
   const now = new Date().toISOString();
   const f = (key: FactKey, subject = "", count = 1): Fact => ({ key, subject, value: {}, count, first: now, last: now, expires: null });
   return {

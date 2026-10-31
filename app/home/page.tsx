@@ -32,6 +32,7 @@ import { partyInbox, partyInvite, partyMentions, partyRespond, setNewsOptOut } f
 import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomActions";
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
+import { characterRemembered } from "./characterActions";
 import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
 import { careerApply, careerOffice, careerQuit, careerScreen, careerStart, careerTask } from "./careerActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
@@ -178,6 +179,7 @@ export default async function HomePage() {
       careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).
       choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter, conditions: choiceConditions } : undefined}
+      remembered={city ? characterRemembered : undefined}
       // Migration 0058 switches on Clout TV (tv_state failing hides it). Photos upload from the browser.
       tv={city ? { state: tvState, submit: tvSubmit, withdraw: tvWithdraw } : undefined}
       stations={city ? { inbox: stationInbox, read: stationRead } : undefined}

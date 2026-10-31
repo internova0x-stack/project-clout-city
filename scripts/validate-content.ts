@@ -14,6 +14,7 @@ import { brandHits, validateCulture, type CultureData } from "../lib/culture.ts"
 import { validateCards } from "../lib/choices.ts";
 import { validateStoryletWeek } from "../lib/storyletWeeks.ts";
 import { validateConditionWeek, validateReactions } from "../lib/cityConditions.ts";
+import { validateRemembers } from "../lib/characterMemory.ts";
 import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
@@ -117,6 +118,13 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
   const problems = validateReactions(rules, known);
   if (problems.length) fail("content/city/reactions.json", problems);
   else console.log(`✓ content/city/reactions.json (${rules.length} city storylets)`);
+}
+// Content Engine step 5: what the city's people remember about a player.
+{
+  const rules = JSON.parse(readFileSync(new URL("characters/remembers.json", root), "utf8"));
+  const problems = validateRemembers(rules);
+  if (problems.length) fail("content/characters/remembers.json", problems);
+  else console.log(`✓ content/characters/remembers.json (${rules.length} remembered lines, ${new Set(rules.map((r: { who: string }) => r.who)).size} characters)`);
 }
 // No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
 const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {
