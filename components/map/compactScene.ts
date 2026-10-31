@@ -5,7 +5,7 @@
 // boroughs that haven't opened. No React here: components/map/CompactMap.tsx drives it.
 
 import {
-  Box3, BoxGeometry, CanvasTexture, RepeatWrapping, Raycaster, Vector2, Color, ConeGeometry, CylinderGeometry, DirectionalLight, Group, HemisphereLight,
+  AdditiveBlending, Box3, BoxGeometry, CanvasTexture, RepeatWrapping, Raycaster, Vector2, Color, ConeGeometry, CylinderGeometry, DirectionalLight, Group, HemisphereLight,
   InstancedMesh, type Material, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, type Object3D, PerspectiveCamera,
   PlaneGeometry, Quaternion, Scene, SphereGeometry, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderer,
 } from "three";
@@ -18,12 +18,13 @@ import { PLACES } from "@/lib/city";
 import type { BoroughId } from "@/lib/map/boroughs";
 import { animate, applyTheme, buildLandmark, newThemed, paintBigScreen, storefront, type Themed } from "./landmarkModels";
 import { mergeStatic } from "./mergeModel";
+import { createStreetLife, glowTexture } from "./streetLife";
 
 const CELL = COMPACT_GRID.cell;
 /** A block's size inside its streets. */
 const BLOCK = CELL * 0.78;
 const ROAD = "#B9BBC3";
-const ROAD_NIGHT = "#3A3644";
+const ROAD_NIGHT = "#3F3B4E";
 const WATER = "#7CC4EE";
 /** Sidewalks and plazas: light pavement, like the mockups (owner, Oct 29). */
 const PAVEMENT = "#ECE8E0";
@@ -166,6 +167,8 @@ function billboard(): Group {
 
 /** Walls with rows of windows (shared per color), a flat roof on top. */
 const windowMats = new Map<string, Material[]>();
+/** Filler walls whose windows light up at night. */
+const litWindows: MeshStandardMaterial[] = [];
 function windowed(color: string, tall: boolean): Material[] {
   const key = `${color}:${tall}`;
   const have = windowMats.get(key);
@@ -180,7 +183,23 @@ function windowed(color: string, tall: boolean): Material[] {
   tex.colorSpace = SRGBColorSpace;
   tex.wrapS = tex.wrapT = RepeatWrapping;
   tex.repeat.set(2, tall ? 6 : 2);
-  const side = new MeshStandardMaterial({ map: tex, flatShading: true, roughness: 0.85 });
+  // At night some windows are lit (warm, a few cool TV-blue), the rest stay dark.
+  const e = document.createElement("canvas");
+  e.width = 64; e.height = 64;
+  const eg = e.getContext("2d")!;
+  eg.fillStyle = "#000"; eg.fillRect(0, 0, 64, 64);
+  const r = rand(color.length * 31 + (tall ? 7 : 3) + parseInt(color.slice(1), 16));
+  for (let y = 6; y < 64; y += 16) for (let x = 6; x < 64; x += 16) {
+    if (r() < 0.45) continue;
+    eg.fillStyle = r() < 0.15 ? "#9FC6FF" : "#FFD493";
+    eg.fillRect(x, y, 9, 9);
+  }
+  const lit = new CanvasTexture(e);
+  lit.colorSpace = SRGBColorSpace;
+  lit.wrapS = lit.wrapT = RepeatWrapping;
+  lit.repeat.copy(tex.repeat);
+  const side = new MeshStandardMaterial({ map: tex, emissiveMap: lit, emissive: "#FFFFFF", emissiveIntensity: 0, flatShading: true, roughness: 0.85 });
+  litWindows.push(side);
   const roof = solid("#6F6A76");
   const mats = [side, side, roof, roof, side, side];
   windowMats.set(key, mats);
@@ -284,7 +303,10 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
   renderer.setPixelRatio(quality.pixelRatio);
   // Soft shadows on good phones (the mockups' depth); off in low graphics.
   const shadows = quality.antialias;
-  if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = 2; }
+  // The sun never moves, so the shadow map is drawn again only when something that casts a shadow changes (a landmark
+  // built, a story place shown, a searchlight swinging), never for the moving cars and people.
+  if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = 2; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true; }
+  const reshadow = () => { if (shadows) renderer.shadowMap.needsUpdate = true; };
   const scene = new Scene();
   const camera = new PerspectiveCamera(40, 1, 5, 12000);
   const themed: Themed = newThemed();
@@ -337,9 +359,10 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
   dashes.forEach((m, i) => dashMesh.setMatrixAt(i, m));
   scene.add(dashMesh);
 
-  // ---- Street life (instanced): trees on the sidewalks, people, lamps, parked cars ----
-  const trees: Matrix4[] = [], people: { m: Matrix4; c: string }[] = [], lamps: Matrix4[] = [], cars: { m: Matrix4; c: string }[] = [];
-  const street = (x: number, y: number, cx: number, cz: number, free: boolean) => {
+  // ---- On the sidewalks (instanced): trees and streetlights ----
+  const trees: Matrix4[] = [], lamps: Matrix4[] = [], pools: Matrix4[] = [];
+  const blocks: { cx: number; cz: number; b: BoroughId }[] = [];
+  const street = (x: number, y: number, cx: number, cz: number, free: boolean, b: BoroughId) => {
     const r = rand(x * 977 + y * 131 + 5);
     const e = BLOCK / 2 + 0.5;
     // Trees every few meters along two or three sides.
@@ -350,21 +373,13 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
         trees.push(new Matrix4().compose(new Vector3(cx + ax + dx * t, 0, cz + az + dz * t), new Quaternion(), new Vector3(s, s, s)));
       }
     }
-    for (const [ax, az] of [[-e, -e], [e, e]] as const) lamps.push(new Matrix4().makeTranslation(cx + ax, 0, cz + az));
-    const n = free ? 2 + Math.floor(r() * 3) : 4 + Math.floor(r() * 5);
-    const shirts = ["#E5484D", "#3E63DD", "#2F8F5B", "#F5A524", "#8E4EC6", "#E54666", "#12A594", "#FFFFFF", "#1C2024"];
-    for (let i = 0; i < n; i++) {
-      const side = Math.floor(r() * 4), t = (r() - 0.5) * BLOCK;
-      const px = cx + (side === 0 ? -e + 1.5 : side === 1 ? e - 1.5 : t), pz = cz + (side === 2 ? -e + 1.5 : side === 3 ? e - 1.5 : t);
-      people.push({ m: new Matrix4().makeTranslation(px, 0, pz), c: shirts[Math.floor(r() * shirts.length)] });
+    // Streetlights at every corner and halfway along each side, each with its pool of light on the street at night.
+    for (const [ax, az] of [[-e, -e], [e, -e], [e, e], [-e, e], [0, -e], [e, 0], [0, e], [-e, 0]] as const) {
+      lamps.push(new Matrix4().makeTranslation(cx + ax, 0, cz + az));
+      const out = 3.2 / Math.max(1, Math.hypot(ax, az) / e);
+      pools.push(new Matrix4().makeTranslation(cx + ax + Math.sign(ax) * out, 0.45, cz + az + Math.sign(az) * out));
     }
-    if (r() < 0.45) {
-      const taxi = r() < 0.35;
-      const along = r() < 0.5;
-      const px = along ? cx + (r() - 0.5) * BLOCK : cx + CELL / 2 - 3, pz = along ? cz + CELL / 2 - 3 : cz + (r() - 0.5) * BLOCK;
-      cars.push({ m: new Matrix4().compose(new Vector3(px, 0, pz), new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), along ? 0 : Math.PI / 2), new Vector3(1, 1, 1)),
-        c: taxi ? "#F5C518" : ["#E5484D", "#3E63DD", "#FFFFFF", "#1C2024", "#8E8C99"][Math.floor(r() * 5)] });
-    }
+    blocks.push({ cx, cz, b });
   };
 
   const occupied = new Set([...Object.values(SPOTS), ...DECOR.map((d) => d.at)].map(([x, y]) => `${x},${y}`));
@@ -383,7 +398,7 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
       const lot = box(BLOCK - 4, 0.3, BLOCK - 4, blockMat(tint(color)), cx, 1, cz);
       curb.receiveShadow = lot.receiveShadow = true;
       scene.add(curb, lot);
-      street(x, y, cx, cz, !occupied.has(`${x},${y}`));
+      street(x, y, cx, cz, !occupied.has(`${x},${y}`), b);
       if (occupied.has(`${x},${y}`)) continue;
       const f = filler(x * 131 + y * 7919, b);
       if (shadows) f.traverse((o) => { if ((o as Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; } });
@@ -392,7 +407,7 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
     }
   }
 
-  const instanced = (geo: BoxGeometry | CylinderGeometry | SphereGeometry | ConeGeometry, mat: Material, list: Matrix4[], at: Matrix4 = new Matrix4(), colors?: string[]) => {
+  const instanced = (geo: BoxGeometry | CylinderGeometry | SphereGeometry | ConeGeometry | PlaneGeometry, mat: Material, list: Matrix4[], at: Matrix4 = new Matrix4(), colors?: string[]) => {
     const mesh = new InstancedMesh(geo, mat, Math.max(1, list.length));
     list.forEach((m, i) => mesh.setMatrixAt(i, m.clone().multiply(at)));
     colors?.forEach((c, i) => mesh.setColorAt(i, new Color(c)));
@@ -403,12 +418,15 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
   };
   instanced(new CylinderGeometry(0.35, 0.45, 4, 5), solid("#7A5A3A"), trees, new Matrix4().makeTranslation(0, 2, 0));
   instanced(new SphereGeometry(3.2, 7, 5), solid("#5FA85A"), trees, new Matrix4().makeTranslation(0, 6, 0));
-  instanced(new CylinderGeometry(0.2, 0.25, 7, 5), solid("#3B3F4A"), lamps, new Matrix4().makeTranslation(0, 3.5, 0));
-  const lampHead = instanced(new SphereGeometry(0.6, 6, 4), new MeshStandardMaterial({ color: "#FFF4D6", emissive: "#FFD27A", emissiveIntensity: 0 }), lamps, new Matrix4().makeTranslation(0, 7.2, 0));
-  instanced(new CylinderGeometry(0.55, 0.55, 2.2, 6), new MeshStandardMaterial({ flatShading: true, roughness: 0.9 }), people.map((p) => p.m), new Matrix4().makeTranslation(0, 1.1, 0), people.map((p) => p.c));
-  instanced(new SphereGeometry(0.55, 6, 5), solid("#C68E5F"), people.map((p) => p.m), new Matrix4().makeTranslation(0, 2.7, 0));
-  instanced(new BoxGeometry(5, 1.6, 2.4), new MeshStandardMaterial({ flatShading: true, roughness: 0.6 }), cars.map((c) => c.m), new Matrix4().makeTranslation(0, 1.2, 0), cars.map((c) => c.c));
-  instanced(new BoxGeometry(2.8, 1.2, 2.2), solid("#2A2F3A"), cars.map((c) => c.m), new Matrix4().makeTranslation(-0.2, 2.5, 0));
+  instanced(new CylinderGeometry(0.2, 0.25, 7, 5), solid("#3B3F4A"), lamps, new Matrix4().makeTranslation(0, 3.5, 0)).castShadow = false;
+  const lampHead = instanced(new SphereGeometry(0.75, 6, 4), new MeshStandardMaterial({ color: "#FFF4D6", emissive: "#FFD27A", emissiveIntensity: 0 }), lamps, new Matrix4().makeTranslation(0, 7.2, 0));
+  const poolGeo = new PlaneGeometry(20, 20);
+  poolGeo.rotateX(-Math.PI / 2);
+  const poolMesh = instanced(poolGeo, new MeshBasicMaterial({ map: glowTexture("round"), transparent: true, opacity: 0.6, blending: AdditiveBlending, depthWrite: false }), pools);
+  poolMesh.castShadow = false;
+  poolMesh.renderOrder = 1;
+  // Cars, cabs and people on the move (components/map/streetLife.ts), only in the boroughs that are open.
+  const life = createStreetLife(scene, { cell: CELL, block: BLOCK, cars: quality.antialias ? 120 : 60, peoplePerBlock: quality.antialias ? [2, 5] : [1, 3] });
 
   // ---- The elevated train, the bridges and the ferry ----
   const el = new Group();
@@ -478,6 +496,7 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
   const nightSkip = new Set<Object3D>();
   let screen: { img: Parameters<CompactScene["setBigScreen"]>[0]; handle?: string } = { img: null };
   let night = false;
+  let lastTick = -1;
   const store = (id: string) => storeModel(themed, id);
   const storyOnly = new Set(PLACES.filter((p) => p.story).map((p) => p.id));
   const storyModels = new Map<string, Group>();
@@ -507,6 +526,7 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
     if (storyOnly.has(q.id)) { storyModels.set(q.id, model); model.visible = shown.has(q.id); }
     scene.add(model);
     if (q.kind === "clout-tower") paintBigScreen(screen.img, screen.handle);
+    reshadow();
   };
 
   const api: CompactScene = {
@@ -519,7 +539,13 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
       camera.updateProjectionMatrix();
     },
     render() { renderer.render(scene, camera); },
-    tick(seconds) { return animate(themed, seconds, night); },
+    tick(seconds) {
+      const dt = lastTick < 0 ? 0 : Math.max(0, seconds - lastTick);
+      lastTick = seconds;
+      const swept = animate(themed, seconds, night);
+      if (swept) reshadow();
+      return life.update(dt, seconds) || swept;
+    },
     setNight(n) {
       night = n;
       applyTheme(themed, n);
@@ -528,7 +554,10 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
       sun.intensity = n ? 0.35 : 1.8;
       sun.color.set(n ? "#AFC3FF" : "#FFFFFF");
       waterMat.color.set(n ? WATER_NIGHT : WATER);
-      (lampHead.material as MeshStandardMaterial).emissiveIntensity = n ? 1.6 : 0;
+      (lampHead.material as MeshStandardMaterial).emissiveIntensity = n ? 2.4 : 0;
+      poolMesh.visible = n;
+      for (const m of litWindows) m.emissiveIntensity = n ? 0.9 : 0;
+      life.setNight(n);
       roadMat.color.set(n ? ROAD_NIGHT : ROAD);
       fogMat.color.set(n ? "#3B3550" : "#F4F1FA");
       scene.background = new Color(n ? WATER_NIGHT : WATER);
@@ -536,6 +565,8 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
     setLocked(locked) {
       for (const [id, fog] of fogs) fog.visible = locked.has(id);
       for (const [id, br] of bridges) br.barrier.visible = locked.has(id);
+      const open = (Object.keys(ISLANDS) as BoroughId[]).filter((id) => !locked.has(id));
+      life.setAreas(open.map((id) => ISLANDS[id]), blocks.filter((k) => !locked.has(k.b)));
     },
     pick(x, y) {
       ray.setFromCamera(new Vector2(x, y), camera);
@@ -547,6 +578,7 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
     setShown(ids) {
       shown = ids;
       for (const [id, m] of storyModels) m.visible = ids.has(id);
+      reshadow();
     },
     setBigScreen(img, handle) {
       screen = { img, handle };
