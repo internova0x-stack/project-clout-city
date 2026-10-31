@@ -15,6 +15,7 @@ import { validateCards } from "../lib/choices.ts";
 import { validateStoryletWeek } from "../lib/storyletWeeks.ts";
 import { validateConditionWeek, validateReactions } from "../lib/cityConditions.ts";
 import { validateRemembers } from "../lib/characterMemory.ts";
+import { faceProblems, gateProblems, type CardFace } from "../lib/cardFormat.ts";
 import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
@@ -125,6 +126,20 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
   const problems = validateRemembers(rules);
   if (problems.length) fail("content/characters/remembers.json", problems);
   else console.log(`✓ content/characters/remembers.json (${rules.length} remembered lines, ${new Set(rules.map((r: { who: string }) => r.who)).size} characters)`);
+}
+// Content Engine step 7: one card format. Career tasks and campaign situations share the Moral Choices face, and their
+// memory gates follow the storylet rules.
+{
+  const careers = JSON.parse(readFileSync(new URL("careers/careers.json", root), "utf8")) as { tasks: { id: string; emoji: string; title: string; when?: never; slots?: never; options: { id: string; label: string; get: string; cost: string; outcomes: { text: string }[] }[] }[] };
+  const sits = (JSON.parse(readFileSync(new URL("campaign/situations.json", root), "utf8")) as { situations: { id: string; icon: string; text: string; when?: never; choices: CardFace["options"] }[] }).situations;
+  const problems = [
+    ...careers.tasks.flatMap((t) => [...faceProblems(`task ${t.id}`, t), ...gateProblems(`task ${t.id}`, t, { title: t.title, more: t.options.flatMap((o) => [o.label, ...o.outcomes.map((x) => x.text)]) })]),
+    // The campaign shows the candidate's own Integrity on screen, so it may name it.
+    ...sits.flatMap((s) => [...faceProblems(`situation ${s.id}`, { emoji: s.icon, title: s.text, options: s.choices }).filter((x) => !/never the meter/.test(x)),
+      ...gateProblems(`situation ${s.id}`, s, { title: s.text.replace("{candidate}", "Candidate") })]),
+  ];
+  if (problems.length) fail("one card format (content/careers, content/campaign)", problems);
+  else console.log(`✓ one card format (${careers.tasks.length} career tasks, ${sits.length} campaign situations; ${careers.tasks.filter((t) => t.when).length + sits.filter((s) => s.when).length} react to memory)`);
 }
 // No real brand names anywhere in content/ (the invented-name list itself is the one place they're written down).
 const walk = (dir: URL): string[] => readdirSync(dir).flatMap((f) => {

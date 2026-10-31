@@ -149,7 +149,12 @@ export interface TaskOutcome {
   mood?: number;
 }
 export interface TaskOption { id: string; label: string; get: string; cost: string; outcomes: TaskOutcome[] }
-export interface CareerTask { id: string; track: TrackId; minLevel: number; emoji: string; title: string; options: TaskOption[] }
+export interface CareerTask {
+  id: string; track: TrackId; minLevel: number; emoji: string; title: string; options: TaskOption[];
+  /** Content Engine step 7 (lib/cardFormat.ts): a storylet gate. Only players whose memory fits get the task; {slot} names are filled. */
+  when?: import("./storylets.ts").When;
+  slots?: Record<string, import("./storylets.ts").SlotDef>;
+}
 export interface CareerContent {
   tasks: CareerTask[];
   /** End-of-day lines: the manager by trust band, the work friend and the rival. */
@@ -181,7 +186,7 @@ export interface CareerState {
   hustleStreak: number;
   today: {
     day: string; style: WorkStyle;
-    tasks: { id: string; picked: string | null; text: string | null; perf: number }[];
+    tasks: { id: string; picked: string | null; text: string | null; perf: number; names?: Record<string, string> }[];
     done: boolean; summary: string[];
   } | null;
   /** The last review, shown until the next workday. */
@@ -219,6 +224,8 @@ export interface CareerCtx {
   skills: Partial<Record<SkillId, number>>;
   /** Past jobs by track: the best level reached, how the last one ended and when. */
   past: Partial<Record<TrackId, { best: number; fired: number; lastStatus: "fired" | "quit" | null; lastEnded: string | null }>>;
+  /** Step 7: gated tasks this player has unlocked, with their filled names (the server reads memory: lib/cardFormat.ts). */
+  unlocked?: Record<string, Record<string, string>>;
 }
 
 export type Payout = { kind: "career_pay" | "career_promo" | "career_screen" | "career_team"; currency: "cash" | "clout"; amount: number; ref: string };
@@ -334,6 +341,9 @@ function note(s: CareerState, day: string, kind: CareerLog["kind"], text: string
   s.log.length = Math.min(s.log.length, CAREER.history);
 }
 
+/** Step 7: fills a gated task's {slot} names (lib/cardFormat.ts fillNames, kept here so this file imports no engine). */
+const names = (t: string, n: Record<string, string> | undefined) => (n ? t.replace(/\{([a-z_]+)\}/g, (all, k: string) => n[k] ?? all) : t);
+
 const tasksFor = (s: CareerState, persona: Persona) => (persona === "micromanager" || s.level >= 3 ? 3 : 2);
 const remote = (s: CareerState) => s.track === "tech" && s.level >= 3;
 
@@ -346,11 +356,15 @@ export function startDay(content: CareerContent, s: CareerState, style: WorkStyl
   if (!remote(s) && ctx.atPlace !== track.place) throw new CareerError("not_here");
   const cost = CAREER.styles[style].energy;
   if (ctx.energy < cost) throw new CareerError("no_energy");
-  const pool = content.tasks.filter((t) => t.track === s.track && t.minLevel <= s.level);
+  // Step 7: a gated task only for players whose memory unlocked it, and at most one a day, first.
+  const gated = (t: CareerTask) => !!(t.when || t.slots);
+  const pool = content.tasks.filter((t) => t.track === s.track && t.minLevel <= s.level && (!gated(t) || ctx.unlocked?.[t.id]));
   const chosen: CareerTask[] = [];
-  const bag = [...pool];
+  const mine = pool.filter(gated);
+  if (mine.length) chosen.push(mine[Math.floor(rng() * mine.length) % mine.length]);
+  const bag = pool.filter((t) => !gated(t));
   while (chosen.length < tasksFor(s, track.manager.persona) && bag.length) chosen.push(bag.splice(Math.floor(rng() * bag.length) % bag.length, 1)[0]);
-  s.today = { day: today, style, tasks: chosen.map((t) => ({ id: t.id, picked: null, text: null, perf: 0 })), done: false, summary: [] };
+  s.today = { day: today, style, tasks: chosen.map((t) => ({ id: t.id, picked: null, text: null, perf: 0, ...(ctx.unlocked?.[t.id] ? { names: ctx.unlocked[t.id] } : {}) })), done: false, summary: [] };
   s.worked.push(today);
   s.review = null;
   return { effects: { energy: -cost } };
@@ -385,7 +399,7 @@ export function answerTask(content: CareerContent, s: CareerState, index: number
     s.trust[w] = clamp(s.trust[w] + delta);
   }
   slot.picked = option.id;
-  slot.text = out.text;
+  slot.text = names(out.text, slot.names);
   slot.perf = perf;
   const effects: Effects = { mood: out.mood ?? 0 };
   const payouts: Payout[] = [];
@@ -796,7 +810,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
       style: t.style, done: t.done, summary: t.summary,
       tasks: t.tasks.map((x, index) => {
         const task = content.tasks.find((k) => k.id === x.id)!;
-        return { index, emoji: task.emoji, title: task.title, picked: x.picked, result: x.text, perf: x.perf, options: task.options.map((o) => ({ id: o.id, label: o.label, get: o.get, cost: o.cost })) };
+        return { index, emoji: task.emoji, title: names(task.title, x.names), picked: x.picked, result: x.text, perf: x.perf, options: task.options.map((o) => ({ id: o.id, label: names(o.label, x.names), get: names(o.get, x.names), cost: names(o.cost, x.names) })) };
       }),
     } : null,
     canWork: s.status === "employed" && !s.worked.includes(today),
@@ -879,7 +893,7 @@ export function validateCareerContent(c: CareerContent): string[] {
   }
   for (const tr of TRACKS) {
     for (let l = 1; l <= tr.levels.length; l++) {
-      const n = c.tasks.filter((t) => t.track === tr.id && t.minLevel <= l).length;
+      const n = c.tasks.filter((t) => t.track === tr.id && t.minLevel <= l && !t.when && !t.slots).length;
       if (n < 3) out.push(`${tr.id}: level ${l} needs at least 3 tasks (has ${n})`);
     }
     const L = c.lines[tr.id];

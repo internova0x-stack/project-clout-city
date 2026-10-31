@@ -152,6 +152,8 @@ export interface Situation {
   icon: string;
   text: string;
   choices: Choice[];
+  /** Content Engine step 7 (lib/cardFormat.ts): a memory gate. Only campaigns whose manager's memory fits get it. */
+  when?: import("./storylets.ts").When;
 }
 
 export interface DebateQuestion { id: string; topic: string; by: "moderator" | "mayor"; text: string }

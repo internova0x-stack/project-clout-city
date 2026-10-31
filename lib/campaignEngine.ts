@@ -441,7 +441,7 @@ export function debateRound(content: CampaignContent, state: CampaignState, styl
 // End Week: situations, then the week resolves (results revealed the next New York day)
 // ---------------------------------------------------------------------------------------------------------------
 
-function drawSituations(content: CampaignContent, state: CampaignState, rng: Rng): CampaignState["pending"] {
+function drawSituations(content: CampaignContent, state: CampaignState, rng: Rng, unlocked: readonly string[] = []): CampaignState["pending"] {
   const out: CampaignState["pending"] = [];
   for (const q of state.queue.splice(0, 2)) {
     const [trigger, arg] = q.split(":");
@@ -449,7 +449,17 @@ function drawSituations(content: CampaignContent, state: CampaignState, rng: Rng
     if (card) out.push({ id: card.id, target: arg });
   }
   const want = state.week === 1 ? 1 : 2;
-  const pool = content.situations.filter((s) => !s.trigger && !state.seen.includes(s.id) && state.week >= s.weeks[0] && state.week <= s.weeks[1] && (!s.candidate || s.candidate === state.candidate));
+  const pool = content.situations.filter((s) => !s.trigger && !state.seen.includes(s.id) && state.week >= s.weeks[0] && state.week <= s.weeks[1] && (!s.candidate || s.candidate === state.candidate)
+    // Step 7: a gated situation only when the manager's memory unlocked it (the server works that out).
+    && (!s.when || unlocked.includes(s.id)));
+  // A situation from the manager's own past comes first (one a week).
+  const mine = pool.filter((s) => s.when);
+  if (mine.length && out.length < 3) {
+    const s = pick(rng, mine);
+    pool.splice(pool.indexOf(s), 1);
+    out.push({ id: s.id, place: rallyPlace(state) ?? pick(rng, Object.keys(state.places)) });
+  }
+  for (const s of mine) if (pool.includes(s)) pool.splice(pool.indexOf(s), 1);
   // Each week leans toward a candidate card when one fits.
   const own = pool.filter((s) => s.candidate);
   while (out.length < Math.min(3, want + (out.length ? 1 : 0)) && pool.length) {
@@ -468,14 +478,14 @@ function rallyPlace(state: CampaignState): string | undefined {
   return a && "place" in a ? a.place : undefined;
 }
 
-export function endWeek(content: CampaignContent, state: CampaignState, today: string, rng: Rng, opts: { anyDay?: boolean } = {}): { payouts: Payout[] } {
+export function endWeek(content: CampaignContent, state: CampaignState, today: string, rng: Rng, opts: { anyDay?: boolean; unlocked?: readonly string[] } = {}): { payouts: Payout[] } {
   requirePlanning(state);
   if (!opts.anyDay && state.endedOn === today) fail("ended_today");
   if (state.week === CAMPAIGN.debateWeek && !state.debate?.done) fail("debate_first");
   state.endedOn = today;
   state.receipts = [];
   state.before = JSON.parse(JSON.stringify(state.places));
-  state.pending = drawSituations(content, state, rng);
+  state.pending = drawSituations(content, state, rng, opts.unlocked);
   for (const p of state.pending) if (!state.seen.includes(p.id)) state.seen.push(p.id);
   if (state.pending.length) {
     state.phase = "deciding";

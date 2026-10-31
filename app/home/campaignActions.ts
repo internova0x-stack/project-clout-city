@@ -11,6 +11,8 @@ import {
 } from "@/lib/campaignEngine";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
+import { unlockedCards } from "@/lib/cardFormat";
+import { memoryOf } from "@/lib/memoryServer";
 
 // Campaign Mode (docs/CAMPAIGN-MODE.md; migration 0127). The rules run here, on the server, with a crypto random
 // source: the browser sends a choice and gets back the player's view, never a roll or the hidden odds. The campaign's
@@ -164,7 +166,12 @@ export async function campaignDebate(style: DebateStyle): Promise<Out> {
   return act((s) => { const r = debateRound(content, s, style, rng); return { round: { delta: r.delta, line: r.line } }; });
 }
 export async function campaignEndWeek(): Promise<Out> {
-  return act((s, today) => endWeek(content, s, today, rng));
+  // Content Engine step 7: situations from the manager's own past (a firing, a cheating scandal…) if their memory fits.
+  const admin = getAdminSupabase();
+  const w = await getServerSupabase().then(async (sb) => (sb ? (await sb.auth.getUser()).data.user : null));
+  const memory = admin && w ? await memoryOf(admin, w.id) : null;
+  const unlocked = Object.keys(unlockedCards(content.situations, memory, new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" })));
+  return act((s, today) => endWeek(content, s, today, rng, { unlocked }));
 }
 export async function campaignChoose(situation: string, choice: string): Promise<Out> {
   return act((s, today) => choose(content, s, situation, choice, today, rng));
