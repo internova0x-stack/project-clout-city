@@ -878,8 +878,8 @@ export interface CareerApi {
   task(index: number, option: string): R;
   office(action: OfficeAction, who: Who): R;
   quit(): R;
-  /** Picks (or changes, once every 30 days) the player's aspiration; `variant` is Bro (0) or Girlie (1). */
-  aspire(id: AspirationId, variant?: number): R;
+  /** Picks (or changes, once every 30 days) the player's aspiration. */
+  aspire(id: AspirationId): R;
 }
 
 /** The content's own rules (tests/careers.test.ts runs them on the task file). */

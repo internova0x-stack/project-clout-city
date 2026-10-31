@@ -12,9 +12,7 @@ export type AspirationId = "corporate" | "influencer" | "streamer" | "celebrity"
 export interface Aspiration {
   id: AspirationId;
   emoji: string;
-  /** "Corporate Bro / Corporate Girlie" shows the variant the player picked. */
   name: string;
-  variants?: [string, string];
   tagline: string;
   /** Careers that start one level higher (if the player meets that level's skills). */
   tracks: TrackId[];
@@ -26,7 +24,7 @@ export interface Aspiration {
 
 export const ASPIRATIONS: Aspiration[] = [
   {
-    id: "corporate", emoji: "💼", name: "Corporate Bro / Corporate Girlie", variants: ["Corporate Bro", "Corporate Girlie"],
+    id: "corporate", emoji: "💼", name: "Corporate Bro / Corporate Girlie",
     tagline: "Lanyard on, calendar full, three meetings about the meeting.",
     tracks: ["tech"], later: ["Finance", "Law"],
     perks: ["Tech jobs start one level higher"],
@@ -84,11 +82,8 @@ export const ASPIRE = {
 
 export const aspirationById = (id: string | null | undefined): Aspiration | undefined => ASPIRATIONS.find((a) => a.id === id);
 
-/** The name the player sees ("Corporate Girlie", not both). */
-export function aspirationName(id: AspirationId, variant?: number | null): string {
-  const a = aspirationById(id)!;
-  return a.variants ? a.variants[variant === 1 ? 1 : 0] : a.name;
-}
+/** The name the player sees. */
+export const aspirationName = (id: AspirationId): string => aspirationById(id)!.name;
 
 /** Extra starting levels for a career: the aspiration's own, and a degree. */
 export function headStart(track: TrackId, a: { aspiration?: AspirationId | null; degree?: boolean }): number {
@@ -105,4 +100,4 @@ export function changeOn(chosenAt: string | null | undefined, today: string): st
 }
 
 /** What the server returns (aspiration_state). */
-export interface AspirationState { aspiration: AspirationId | null; variant: number | null; chosenAt: string | null; degree: boolean; exams: number }
+export interface AspirationState { aspiration: AspirationId | null; chosenAt: string | null; degree: boolean; exams: number }

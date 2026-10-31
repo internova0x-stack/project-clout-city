@@ -57,7 +57,7 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
         {welcome && asp && (
           <Welcome state={asp} busy={busy} today={new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" })}
             onCancel={asp.aspiration ? () => setPicking(false) : undefined}
-            onPick={async (id, variant) => { if (await run(api.aspire(id, variant), false)) { setPicking(false); onToast(`${aspirationById(id)!.emoji} Aspiration set: ${aspirationName(id, variant)}.`); } }} />
+            onPick={async (id) => { if (await run(api.aspire(id), false)) { setPicking(false); onToast(`${aspirationById(id)!.emoji} Aspiration set: ${aspirationName(id)}.`); } }} />
         )}
         {!welcome && asp?.aspiration && <AspirationChip state={asp} onChange={() => setPicking(true)} />}
         {!welcome && data && job && (
@@ -401,12 +401,10 @@ function headStartWhy(a: AspirationState | null | undefined, track: TrackId): st
 
 function Welcome({ state, busy, today, onPick, onCancel }: {
   state: AspirationState; busy: boolean; today: string;
-  onPick: (id: AspirationId, variant?: number) => void; onCancel?: () => void;
+  onPick: (id: AspirationId) => void; onCancel?: () => void;
 }) {
   const [sel, setSel] = useState<AspirationId | null>(state.aspiration);
-  const [variant, setVariant] = useState(state.variant ?? 0);
   const lockedUntil = changeOn(state.chosenAt, today);
-  const a = sel ? aspirationById(sel) : null;
   return (
     <div className="stack-16">
       <div className="careers-poster">
@@ -435,18 +433,13 @@ function Welcome({ state, busy, today, onPick, onCancel }: {
           );
         })}
       </div>
-      {a?.variants && (
-        <div className="segmented" role="group" aria-label="Which name?">
-          {a.variants.map((v, i) => <button key={v} aria-pressed={variant === i} onClick={() => setVariant(i)}>{v}</button>)}
-        </div>
-      )}
       <p className="meta" style={{ margin: 0 }}>
         {state.degree ? "🎓 Your degree (3 passed exams) adds a level too. " : `🎓 Pass ${ASPIRE.degreeExams} campus exams (${state.exams} so far) for a degree: another level of head start. `}
         {lockedUntil && state.aspiration ? `You can pick a new aspiration from ${lockedUntil}.` : `You can change it once every ${ASPIRE.changeDays} days.`}
       </p>
-      <button className="btn btn-taxi" disabled={!sel || busy || (sel === state.aspiration && (variant === (state.variant ?? 0) || !a?.variants))}
-        onClick={() => sel && onPick(sel, a?.variants ? variant : undefined)}>
-        {sel ? `Make it ${aspirationName(sel, variant)}` : "Pick one"}
+      <button className="btn btn-taxi" disabled={!sel || busy || sel === state.aspiration}
+        onClick={() => sel && onPick(sel)}>
+        {sel ? `Make it ${aspirationName(sel)}` : "Pick one"}
       </button>
       {onCancel && <button className="btn btn-ghost" onClick={onCancel}>Back</button>}
     </div>
@@ -457,7 +450,7 @@ function AspirationChip({ state, onChange }: { state: AspirationState; onChange:
   const a = aspirationById(state.aspiration)!;
   return (
     <button className="careers-aspiration-chip" onClick={onChange} aria-label="Your aspiration: change it">
-      <span aria-hidden="true">{a.emoji}</span> {aspirationName(a.id, state.variant)}{state.degree ? " · 🎓" : ""} <span className="meta">· Change</span>
+      <span aria-hidden="true">{a.emoji}</span> {aspirationName(a.id)}{state.degree ? " · 🎓" : ""} <span className="meta">· Change</span>
     </button>
   );
 }

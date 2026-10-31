@@ -2,10 +2,10 @@
 -- The Careers app opens with a welcome screen ("What's your aspiration?"): Corporate Bro / Corporate Girlie, Budding
 -- Influencer, Streamer, Future Celebrity, Hustler, Public Servant or Stay-at-home Spouse. The pick is the player's life
 -- path (separate from the creator's looks and traits), changeable once every 30 days; Start over clears it.
---   * aspirations: the pick, its variant (Bro or Girlie) and when.
+--   * aspirations: the pick and when.
 --   * aspiration_state() (players): the pick, when it can change, and the degree: 3 campus exams passed at C or better
 --     (owner, Oct 31: passed exams count as a degree until Campus Life has a graduation).
---   * aspiration_set(id, variant) (players): 30 days between picks ('too_soon').
+--   * aspiration_set(id) (players): 30 days between picks ('too_soon').
 --   * aspiration_of(player) (service role): the pick and the degree, for the careers, campaign and choices servers.
 --   * visit_settle: a Stay-at-home Spouse's hosting pays a quarter more clout.
 -- Safe to run more than once.
@@ -13,7 +13,6 @@
 create table if not exists public.aspirations (
   player_id  uuid primary key references public.players (id) on delete cascade,
   aspiration text not null check (aspiration in ('corporate', 'influencer', 'streamer', 'celebrity', 'hustler', 'public', 'home')),
-  variant    smallint check (variant in (0, 1)),
   chosen_at  timestamptz not null default now()
 );
 alter table public.aspirations enable row level security;
@@ -32,7 +31,7 @@ create or replace function public.aspiration_of(p_player uuid) returns jsonb
 language sql stable security definer set search_path = public
 as $$
   select jsonb_build_object(
-    'aspiration', a.aspiration, 'variant', a.variant, 'chosenAt', a.chosen_at,
+    'aspiration', a.aspiration, 'chosenAt', a.chosen_at,
     'exams', public.exams_passed(p_player), 'degree', public.exams_passed(p_player) >= 3)
     from (select 1) one left join public.aspirations a on a.player_id = p_player
 $$;
@@ -41,7 +40,7 @@ create or replace function public.aspiration_state() returns jsonb
 language sql stable security definer set search_path = public
 as $$ select public.aspiration_of(auth.uid()) $$;
 
-create or replace function public.aspiration_set(p_aspiration text, p_variant int default null) returns jsonb
+create or replace function public.aspiration_set(p_aspiration text) returns jsonb
 language plpgsql security definer set search_path = public
 as $$
 declare
@@ -53,18 +52,14 @@ begin
     raise exception 'unknown' using errcode = '22023';
   end if;
   select * into cur from public.aspirations where player_id = uid for update;
-  if cur.player_id is not null and cur.aspiration = p_aspiration and coalesce(cur.variant, -1) = coalesce(p_variant, -1) then
+  if cur.player_id is not null and cur.aspiration = p_aspiration then
     return public.aspiration_of(uid);
   end if;
-  -- Only the Bro/Girlie variant can be switched any time (it's a name, not a path).
   if cur.player_id is not null and cur.aspiration <> p_aspiration and cur.chosen_at > now() - interval '30 days' then
     raise exception 'too_soon' using errcode = '22023';
   end if;
-  insert into public.aspirations (player_id, aspiration, variant, chosen_at)
-  values (uid, p_aspiration, case when p_aspiration = 'corporate' then coalesce(p_variant, 0) else null end, now())
-  on conflict (player_id) do update
-     set aspiration = excluded.aspiration, variant = excluded.variant,
-         chosen_at = case when public.aspirations.aspiration = excluded.aspiration then public.aspirations.chosen_at else now() end;
+  insert into public.aspirations (player_id, aspiration, chosen_at) values (uid, p_aspiration, now())
+  on conflict (player_id) do update set aspiration = excluded.aspiration, chosen_at = now();
   perform public.fact_note(uid, 'life.aspiration', p_aspiration);
   return public.aspiration_of(uid);
 end;
@@ -126,8 +121,8 @@ revoke all on function public.exams_passed(uuid) from public, anon, authenticate
 revoke all on function public.aspiration_of(uuid) from public, anon, authenticated;
 revoke all on function public.aspiration_restart() from public, anon, authenticated;
 revoke all on function public.aspiration_state() from public, anon;
-revoke all on function public.aspiration_set(text, int) from public, anon;
+revoke all on function public.aspiration_set(text) from public, anon;
 grant execute on function public.aspiration_state() to authenticated;
-grant execute on function public.aspiration_set(text, int) to authenticated;
+grant execute on function public.aspiration_set(text) to authenticated;
 grant execute on function public.aspiration_of(uuid) to service_role;
 grant execute on function public.exams_passed(uuid) to service_role;

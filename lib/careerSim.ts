@@ -19,8 +19,8 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   let state: CareerState | null = null;
   // Aspirations (migration 0143): ?career=welcome opens with no pick (the welcome screen); every other preset has one.
   let asp: AspirationState = preset === "welcome" || preset === "new"
-    ? { aspiration: null, variant: null, chosenAt: null, degree: false, exams: 1 }
-    : { aspiration: "hustler", variant: null, chosenAt: "2026-10-30", degree: false, exams: 1 };
+    ? { aspiration: null, chosenAt: null, degree: false, exams: 1 }
+    : { aspiration: "hustler", chosenAt: "2026-10-30", degree: false, exams: 1 };
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
@@ -75,9 +75,9 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 
   return {
-    aspire: async (id, variant) => {
+    aspire: async (id) => {
       if (asp.aspiration && asp.aspiration !== id && changeOn(asp.chosenAt, day)) return { ok: false, error: "You can pick a new aspiration 30 days after the last one." };
-      asp = { ...asp, aspiration: id, variant: id === "corporate" ? (variant ?? 0) : null, chosenAt: asp.aspiration === id ? asp.chosenAt : day };
+      asp = { ...asp, aspiration: id, chosenAt: asp.aspiration === id ? asp.chosenAt : day };
       return screen();
     },
     screen: async () => { if (state) pay(refresh(state, day, ctx(), rng).payouts); return screen(); },

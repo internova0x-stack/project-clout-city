@@ -209,10 +209,10 @@ export async function careerQuit(): Promise<Out> {
 }
 
 /** Aspirations (migration 0143): picks the player's life path; a new pick at most every 30 days (Bro or Girlie any time). */
-export async function careerAspire(id: AspirationId, variant?: number): Promise<Out> {
+export async function careerAspire(id: AspirationId): Promise<Out> {
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
-  const { error } = await supabase.rpc("aspiration_set", { p_aspiration: id, p_variant: variant ?? null });
+  const { error } = await supabase.rpc("aspiration_set", { p_aspiration: id });
   if (error) {
     if (/too_soon/.test(error.message)) return { ok: false, error: "You can pick a new aspiration 30 days after the last one." };
     if (/aspiration_set/.test(error.message)) return { ok: false, error: "Run migration 0143 to switch on aspirations." };
