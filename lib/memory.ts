@@ -30,6 +30,15 @@ export const FACTS = {
   "career.reported": { means: "Reported a coworker's mistakes", subject: "track:who" },
   "career.started_rumor": { means: "Fed the office gossip a rumor", subject: "track:who" },
   "career.caught_sabotage": { means: "Office sabotage traced back to them", subject: "track:who" },
+  "career.covered": { means: "Covered a coworker's mistake", subject: "track:who" },
+  "career.backed_boss": { means: "Backed the boss in a meeting", subject: "track:who" },
+  "career.mentored": { means: "Mentored the new hire", subject: "track:who" },
+  "career.undermined": { means: "Quietly undermined a coworker's task", subject: "track:who" },
+  "career.went_over_head": { means: "Went over the boss's head", subject: "track:who" },
+  "career.tried_pushout": { means: "Tried to push the boss out", subject: "track:who" },
+  "career.pushed_out_boss": { means: "Pushed the boss out", subject: "the track" },
+  "career.friend_for_life": { means: "Became friends for life with a work friend", subject: "track:friend" },
+  "career.quit_for_business": { means: "Quit a job to run their businesses", subject: "the track" },
   // Business, home, money
   "business.bought": { means: "Bought a business", subject: "the business" },
   "business.upgraded": { means: "Upgraded a business", subject: "the business" },
@@ -52,6 +61,7 @@ export const FACTS = {
   "campaign.won_dirty": { means: "Won an election dirty", subject: "the candidate" },
   "campaign.lost": { means: "Lost an election", subject: "the candidate" },
   "choice.made": { means: "Made a moral choice", subject: "dilemma:option" },
+  "life.aspiration": { means: "Picked an aspiration in Careers", subject: "the aspiration (lib/aspirations.ts)" },
   "place.banned": { means: "Banned from a place (expires)", subject: "the place" },
   "police.held": { means: "Spent time in holding", subject: "" },
   "police.bailed": { means: "Paid bail", subject: "" },
@@ -75,6 +85,8 @@ export const FACTS = {
   "thread.covered_fraud": { means: "Signed off on a boss's fake numbers", subject: "" },
   "thread.reported_fraud": { means: "Reported a boss's fake numbers to HR", subject: "" },
   "thread.lent_money": { means: "Lent a crew member money from a lotto win", subject: "" },
+  "thread.office_romance": { means: "Started dating a work friend", subject: "the coworker (track:who)" },
+  "thread.kept_it_professional": { means: "Kept a work friendship a friendship (or strung it along)", subject: "the coworker (track:who)" },
   "thread.lola_source": { means: "Became Lola's anonymous source", subject: "" },
 } as const satisfies Record<string, FactDef>;
 
@@ -97,7 +109,9 @@ export interface Snapshot {
 export interface Memory { snapshot: Snapshot; facts: Fact[] }
 
 /** The office move a careers action writes (lib/careers.ts OFFICE ids → fact keys). */
-export const OFFICE_FACT: Record<"help" | "share" | "team" | "credit" | "report" | "rumor", FactKey> = {
+export const OFFICE_FACT: Record<"help" | "share" | "team" | "credit" | "report" | "rumor" | "cover" | "back" | "mentor" | "undermine" | "overhead" | "pushout", FactKey> = {
   help: "career.helped", share: "career.shared_credit", team: "career.teamed_up",
   credit: "career.took_credit", report: "career.reported", rumor: "career.started_rumor",
+  cover: "career.covered", back: "career.backed_boss", mentor: "career.mentored",
+  undermine: "career.undermined", overhead: "career.went_over_head", pushout: "career.tried_pushout",
 };

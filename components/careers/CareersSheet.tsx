@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { PLACES } from "@/lib/city";
-import { CAREER, INTERVIEW, OFFICE, type Answer, type CareerApi, type CareerScreen, type CareerView, type OfficeAction, type TrackCard, type TrackId, type Who, type WorkStyle } from "@/lib/careers";
+import { ASPIRATIONS, ASPIRE, aspirationById, aspirationName, changeOn, type AspirationId, type AspirationState } from "@/lib/aspirations";
+import { CAREER, INTERVIEW, OFFICE, type Answer, type CareerApi, type CareerScreen, type CareerView, type OfficeAction, type Target, type TrackCard, type TrackId, type WorkStyle } from "@/lib/careers";
 
 // Careers (spec section 30; migration 0135): the Phone's Careers app. Without a job: the three tracks, where you'd start
 // and what each needs, then a short interview card. With one: the job card (title, pay, performance, the people), today's
@@ -29,6 +30,7 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState<TrackCard | null>(null);
+  const [picking, setPicking] = useState(false);
 
   const run = useCallback(async (p: ReturnType<CareerApi["screen"]>, toast = true) => {
     setBusy(true);
@@ -41,15 +43,24 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
     return r.data;
   }, [onToast]);
 
-  useEffect(() => { if (open) { setApplying(null); void run(api.screen(), false); } }, [open, api, run]);
+  useEffect(() => { if (open) { setApplying(null); setPicking(false); void run(api.screen(), false); } }, [open, api, run]);
 
   const job = data?.job?.status === "employed" ? data.job : null;
+  // Aspirations (migration 0143): the welcome screen until the player picks one (never before the migration: null).
+  const asp = data?.aspiration ?? null;
+  const welcome = !!data && !!asp && (!asp.aspiration || picking);
   return (
     <Sheet open={open} onClose={onClose} label={job ? job.employer : "Careers"} tall>
       <div className="careers stack-16">
         {!data && !error && <p className="meta">Checking the job listings…</p>}
         {!data && error && <p className="error-text">{error}</p>}
-        {data && job && (
+        {welcome && asp && (
+          <Welcome state={asp} busy={busy} today={new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" })}
+            onCancel={asp.aspiration ? () => setPicking(false) : undefined}
+            onPick={async (id) => { if (await run(api.aspire(id), false)) { setPicking(false); onToast(`${aspirationById(id)!.emoji} Aspiration set: ${aspirationName(id)}.`); } }} />
+        )}
+        {!welcome && asp?.aspiration && <AspirationChip state={asp} onChange={() => setPicking(true)} />}
+        {!welcome && data && job && (
           <Job data={data} v={job} busy={busy}
             onGo={() => { onClose(); onGo(job.place); }}
             onStart={async (style) => { if (await run(api.start(style), false)) onChanged(); }}
@@ -58,10 +69,11 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
               if (r) { onChanged(); if (r.job?.today?.done) onWorkdayDone(); }
             }}
             onOffice={async (a, w) => { if (await run(api.office(a, w))) onChanged(); }}
-            onQuit={async () => { if (await run(api.quit())) onChanged(); }} />
+            onQuit={async (reason) => { if (await run(api.quit(reason))) onChanged(); }}
+            onStick={async () => { await run(api.stick()); }} />
         )}
-        {data && !job && !applying && <Listings data={data} onApply={setApplying} />}
-        {data && !job && applying && (
+        {!welcome && data && !job && !applying && <Listings data={data} onApply={setApplying} />}
+        {!welcome && data && !job && applying && (
           <Interview card={applying} canConnect={data.canConnect} busy={busy} onBack={() => setApplying(null)}
             onAnswer={async (a) => { const r = await run(api.apply(applying.id, a)); if (r?.job) setApplying(null); }} />
         )}
@@ -99,6 +111,7 @@ function Listings({ data, onApply }: { data: CareerScreen; onApply: (t: TrackCar
                 <span className="careers-col" style={{ flex: 1, minWidth: 0 }}>
                   <span className="title">{t.name} · {t.employer}</span>
                   <span className="meta">Start as {start.title} · {cs(start.salary)} a week · {placeName(t.place)}</span>
+                  {t.headStart > 0 && <span className="meta careers-headstart">⭐ {t.headStart === 2 ? "Two levels" : "A level"} of head start from your {headStartWhy(data.aspiration, t.id)}</span>}
                 </span>
                 <span className="careers-chev" aria-hidden="true">{openId === t.id ? "▴" : "▾"}</span>
               </button>
@@ -176,9 +189,10 @@ function Meter({ label, value, tone = "neon" }: { label: string; value: number; 
   );
 }
 
-function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit }: {
+function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }: {
   data: CareerScreen; v: CareerView; busy: boolean;
-  onGo: () => void; onStart: (s: WorkStyle) => void; onTask: (i: number, o: string) => void; onOffice: (a: OfficeAction, w: Who) => void; onQuit: () => void;
+  onGo: () => void; onStart: (s: WorkStyle) => void; onTask: (i: number, o: string) => void; onOffice: (a: OfficeAction, w: Target) => void;
+  onQuit: (reason?: "business") => void; onStick: () => void;
 }) {
   const [style, setStyle] = useState<WorkStyle>("steady");
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -201,6 +215,32 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit }: {
           {v.warnings > 0 ? " · ⚠️ on a warning" : ""}
         </p>
       </div>
+
+      {v.quitCard && (
+        <div className="card stack-12 careers-quitcard">
+          <p className="title" style={{ margin: 0 }}>😩 You dread coming in</p>
+          <p className="subtext" style={{ margin: 0 }}>
+            Work mood {v.workMood}. Sunday nights feel like a sentence. Is {v.employer} still worth it?
+          </p>
+          <div className="choice-options">
+            <button className="choice-opt" disabled={busy} onClick={onStick}>
+              <span className="choice-opt-row"><span className="choice-opt-label">💪 Stick it out</span></span>
+              <span className="choice-opt-more"><span><b>You get</b> The paycheck, a little calm</span><span><b>It costs</b> Another week of this</span></span>
+            </button>
+            <button className="choice-opt" disabled={busy} onClick={() => onQuit()}>
+              <span className="choice-opt-row"><span className="choice-opt-label">🚪 Hand in your notice</span></span>
+              <span className="choice-opt-more"><span><b>You get</b> Your evenings back, a lighter mood</span><span><b>It costs</b> This week's pay, and the job</span></span>
+            </button>
+            <button className="choice-opt" disabled={busy || !data.businesses} onClick={() => onQuit("business")}>
+              <span className="choice-opt-row"><span className="choice-opt-label">🏪 Quit to run your business</span></span>
+              <span className="choice-opt-more">
+                {data.businesses ? <><span><b>You get</b> Your own boss, a better mood</span><span><b>It costs</b> This week's pay, and the job</span></>
+                  : <span>Needs a business of your own (Phone → Businesses).</span>}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {v.review && (
         <div className={`card stack-8 careers-review ${v.review.outcome}`}>
@@ -251,9 +291,12 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit }: {
       <div className="card stack-8">
         <p className="title" style={{ margin: 0 }}>The people</p>
         <Meter label={`${v.people.manager.emoji} ${v.people.manager.name.split(" ")[0]} · boss`} value={v.trust.manager} tone={tone(v.trust.manager)} />
-        <Meter label={`${v.people.friend.emoji} ${v.people.friend.name}`} value={v.trust.friend} tone={tone(v.trust.friend)} />
+        <Meter label={`${v.people.friend.emoji} ${v.people.friend.name}${v.lifer ? " 💛" : ""}`} value={v.trust.friend} tone={tone(v.trust.friend)} />
         <Meter label={`${v.people.rival.emoji} ${v.people.rival.name}`} value={v.trust.rival} tone={tone(v.trust.rival)} />
-        <p className="meta" style={{ margin: 0 }}>How much each of them trusts you. {v.people.manager.style}.</p>
+        <Meter label={`${v.people.bigBoss.emoji} ${v.people.bigBoss.name.split(" ")[0]} · big boss`} value={v.bigBoss} tone={tone(v.bigBoss)} />
+        <p className="meta" style={{ margin: 0 }}>How much each of them trusts you. {v.people.manager.style}. {v.people.bigBoss.name} {v.people.bigBoss.title}.</p>
+        {v.lifer && <p className="meta" style={{ margin: 0 }}>💛 {v.people.friend.name} is a friend for life: they never fall far, and they cover a missed day a week.</p>}
+        {v.ally && <p className="meta" style={{ margin: 0 }}>{v.people.newHire.emoji} {v.people.newHire.name}, the new hire you mentored, has your back: they&apos;ll tip you off before the next payback.</p>}
         {v.grudges.map((g) => (
           <p key={g.who} className="careers-grudge">😠 {g.who === "manager" ? v.people.manager.name.split(" ")[0] : v.people[g.who].name} is holding a grudge{g.level >= 3 ? " (a big one)" : g.level === 2 ? " (a real one)" : ""}. Expect payback at work. Helping or sharing credit cools it.</p>
         ))}
@@ -294,20 +337,25 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit }: {
 }
 
 /** Office politics (part 2): one collaborate and one sabotage move a workday, aimed at someone. */
-function Office({ v, busy, onOffice }: { v: CareerView; busy: boolean; onOffice: (a: OfficeAction, w: Who) => void }) {
+function Office({ v, busy, onOffice }: { v: CareerView; busy: boolean; onOffice: (a: OfficeAction, w: Target) => void }) {
   const [sel, setSel] = useState<OfficeAction | null>(null);
-  const [who, setWho] = useState<Who | null>(null);
+  const [who, setWho] = useState<Target | null>(null);
   const left = v.officeLeft!;
   const def = OFFICE.find((o) => o.id === sel);
-  const name = (w: Who) => (w === "manager" ? `${v.people.manager.name.split(" ")[0]} (boss)` : v.people[w].name);
+  const name = (w: Target) => (w === "manager" ? `${v.people.manager.name.split(" ")[0]} (boss)` : w === "hire" ? `${v.people.newHire.name} (new hire)` : v.people[w].name);
+  // Pushing the boss out: once a job, with the big boss on your side and strong performance.
+  const locked = (id: OfficeAction) => (id === "team" && !!v.team) || (id === "pushout" && v.pushout !== "ready");
   const row = (kind: "collab" | "sabotage", title: string) => (
     <div className="stack-8">
       <p className="overline" style={{ margin: 0 }}>{title}{left[kind] ? "" : " · done today"}</p>
       <div className="choice-options" role="radiogroup" aria-label={title}>
         {OFFICE.filter((o) => o.kind === kind).map((o) => (
-          <button key={o.id} role="radio" aria-checked={sel === o.id} className="choice-opt" disabled={busy || !left[kind] || (o.id === "team" && !!v.team)}
+          <button key={o.id} role="radio" aria-checked={sel === o.id} className="choice-opt" disabled={busy || !left[kind] || locked(o.id)}
             onClick={() => { setSel(o.id); setWho(o.targets.length === 1 ? o.targets[0] : null); }}>
             <span className="choice-opt-row"><span className="choice-opt-label">{o.emoji} {o.label}</span></span>
+            {o.id === "pushout" && v.pushout !== "ready" && (
+              <span className="meta">{v.pushout === "done" ? "Once a job, and you've had yours." : `Needs ${v.people.bigBoss.name.split(" ")[0]}'s trust ${CAREER.office.pushout.bigBoss}+ and performance ${CAREER.office.pushout.perf}+.`}</span>
+            )}
             {sel === o.id && <span className="choice-opt-more"><span><b>You get</b> {o.get}</span><span><b>It costs</b> {o.cost}</span></span>}
           </button>
         ))}
@@ -376,5 +424,69 @@ function Workday({ v, busy, onTask }: { v: CareerView; busy: boolean; onTask: (i
         </div>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Aspirations (owner, Oct 31; migration 0143)
+
+function headStartWhy(a: AspirationState | null | undefined, track: TrackId): string {
+  const mine = a?.aspiration && aspirationById(a.aspiration)?.tracks.includes(track);
+  return [mine ? "aspiration" : null, a?.degree ? "degree" : null].filter(Boolean).join(" and ");
+}
+
+function Welcome({ state, busy, today, onPick, onCancel }: {
+  state: AspirationState; busy: boolean; today: string;
+  onPick: (id: AspirationId) => void; onCancel?: () => void;
+}) {
+  const [sel, setSel] = useState<AspirationId | null>(state.aspiration);
+  const lockedUntil = changeOn(state.chosenAt, today);
+  return (
+    <div className="stack-16">
+      <div className="careers-poster">
+        <p className="overline">💼 Welcome to Careers</p>
+        <h2 className="display-lg" style={{ margin: 0 }}>What&apos;s your aspiration?</h2>
+        <p className="subtext" style={{ margin: 0 }}>
+          This is where you manage your work life: your job, your boss, your coworkers and your climb. Pick where you&apos;re
+          headed and the city opens a door or two.
+        </p>
+      </div>
+      <div className="stack-8" role="radiogroup" aria-label="Aspirations">
+        {ASPIRATIONS.map((x) => {
+          const on = sel === x.id;
+          const blocked = !!lockedUntil && !!state.aspiration && state.aspiration !== x.id;
+          return (
+            <button key={x.id} role="radio" aria-checked={on} disabled={blocked || busy}
+              className={`card careers-aspiration${on ? " on" : ""}`} onClick={() => setSel(x.id)}>
+              <span className="careers-emoji" aria-hidden="true">{x.emoji}</span>
+              <span className="careers-col" style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <span className="title">{x.name}</span>
+                <span className="subtext">{x.tagline}</span>
+                {x.perks.map((p) => <span key={p} className="meta">⭐ {p}</span>)}
+                {x.later.length > 0 && <span className="meta">🔜 Coming soon: {x.later.join(", ")}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="meta" style={{ margin: 0 }}>
+        {state.degree ? "🎓 Your degree (3 passed exams) adds a level too. " : `🎓 Pass ${ASPIRE.degreeExams} campus exams (${state.exams} so far) for a degree: another level of head start. `}
+        {lockedUntil && state.aspiration ? `You can pick a new aspiration from ${lockedUntil}.` : `You can change it once every ${ASPIRE.changeDays} days.`}
+      </p>
+      <button className="btn btn-taxi" disabled={!sel || busy || sel === state.aspiration}
+        onClick={() => sel && onPick(sel)}>
+        {sel ? "Choose" : "Pick one"}
+      </button>
+      {onCancel && <button className="btn btn-ghost" onClick={onCancel}>Back</button>}
+    </div>
+  );
+}
+
+function AspirationChip({ state, onChange }: { state: AspirationState; onChange: () => void }) {
+  const a = aspirationById(state.aspiration)!;
+  return (
+    <button className="careers-aspiration-chip" onClick={onChange} aria-label="Your aspiration: change it">
+      <span aria-hidden="true">{a.emoji}</span> {aspirationName(a.id)}{state.degree ? " · 🎓" : ""} <span className="meta">· Change</span>
+    </button>
   );
 }

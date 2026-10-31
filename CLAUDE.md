@@ -355,7 +355,7 @@ components live in `app/globals.css`.
   Tech at Triborough Works, Media at the Clout TV Tower), the Phone's Careers app (Phone → Jobs stays the players' hiring
   board) and "💼 Go to work" on the employer's card. The rules are TypeScript like Campaign Mode (lib/careers.ts, pure; run by
   app/home/careerActions.ts with a crypto random source and the service role; lib/careerSim.ts in the preview,
-  `?career=new|apply|work|day|review|warning|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
+  `?career=welcome|new|apply|work|day|review|warning|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
   those two import lib/careersContent.ts. public.careers (state jsonb, RLS on, no grants): `career_hire` (one job; after the
   sack a track waits 7 days, after quitting 2), `career_save` (versioned; the workday's Energy and Mood, the key skills
   practised, pays once: 'career_pay' cash on the weekly review, 'career_promo' and 'career_screen' clout; rate bucket
@@ -366,6 +366,24 @@ components live in `app/globals.css`.
   traced sabotage costs the boss's trust (a traced rumor: a warning and a Lola's Blotter headline); work mood feeds Mood and
   performance; a joint project pays 'career_team' at the review; `career_office` nudges the private meter (±12) and posts the
   headline (`choice_headline`, never for News opt-outs). `?career=office|grudge` in the preview.
+  Aspirations (migration 0143, owner Oct 31: "careers be the entry point to choosing archetypes"; lib/aspirations.ts): the
+  Careers app opens on a welcome screen ("What's your aspiration?", one Choose button; `?career=welcome`) with seven:
+  Corporate Bro / Corporate Girlie (Tech), Budding Influencer, Streamer, Future Celebrity (Media), Hustler (Hospitality),
+  Public Servant (campaigns +3 points) and Stay-at-home Spouse (hosting clout ×1.25 in `visit_settle`); careers to come show
+  "Coming soon". The aspiration's careers start a level higher and a degree (3 campus exams at C+, never caught, since Start
+  over: `exams_passed`) adds one, up to level 3, only where the skills are met (`startLevel`); Streamers' screen time ×1.5,
+  Future Celebrities' Climb cards ×2 (`ChoiceContext.boost`). `aspirations` table; `aspiration_state()`, `aspiration_set(id)`
+  (a new pick once every 30 days, 'too_soon'), `aspiration_of` (service role); Start over clears it; fact 'life.aspiration'.
+  Part 3 (no migration; spec section 30): six more office moves (cover a mistake, back the boss, mentor the new hire: three
+  sessions and they tip you off before the next payback; quietly undermine, go over the boss's head, push the boss out: once a
+  job, the big boss's trust 65+ and performance 70+: the successor takes over and you're promoted, or a warning), a big boss,
+  new hire and successor per track (`Track.bigBoss|newHire|successor`, `managerOf`), friends for life (the work friend at 85
+  trust: never under 60 again, covers a missed day a week; fact 'career.friend_for_life'; Sal and Jojo remember them), the
+  quit card under 30 work mood (stick it out, hand in your notice, quit to run your business: `quit(s, day, {reason})`,
+  `stickItOut`), office romance storylets (content/choices/storylets.json: office-crush → office-romance-hr, office-temptation),
+  the job as campaign background (`StartInput.career`: Hospitality staff morale +10, Tech fundraising ×1.2, Media +2 points;
+  `CAMPAIGN.background`) and Studio → Insights' Careers card (`admin_career_stats`, migration 0143: kept 14 days, promoted,
+  aspirations). `?career=boss|quit` in the preview.
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only

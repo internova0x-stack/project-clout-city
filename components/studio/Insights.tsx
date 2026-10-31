@@ -4,6 +4,7 @@
 // whether they come back and which features they use. Admin-only, read from admin_insights().
 
 import { useEffect, useState } from "react";
+import { ASPIRATIONS } from "@/lib/aspirations";
 import { PRODUCT_LABEL, duration, share, type Insights, type InsightsDay } from "@/lib/insights";
 import { RANKS } from "@/lib/ranks";
 import { formatPrice } from "@/lib/store";
@@ -186,6 +187,37 @@ export function InsightsTab({ load }: { load: (days: number) => Promise<Admin<In
           <p className="meta" style={{ margin: 0 }}>Typical player: C${n(Math.round(data.economy.medianCash))} cash, {n(Math.round(data.economy.medianClout))} clout (medians).</p>
         </div>
       </div>
+
+      {data.careers && <CareerCard c={data.careers} />}
     </section>
+  );
+}
+
+const TRACK_LABEL: Record<string, string> = { hospitality: "🍽️ Hospitality", tech: "💻 Tech", media: "🎬 Media" };
+
+/** Careers (migration 0143): jobs taken, kept two weeks, promoted, working now, and aspirations picked. */
+function CareerCard({ c }: { c: NonNullable<Insights["careers"]> }) {
+  const working = Object.values(c.working).reduce((a, b) => a + (b ?? 0), 0);
+  const picked = Object.values(c.aspirations).reduce((a, b) => a + b, 0);
+  return (
+    <div className="insights-two">
+      <div className="studio-card stack-8">
+        <span className="overline">Careers, last {c.days} days</span>
+        <div className="insights-retention">
+          <div className="insights-stat"><span className="meta">Jobs taken</span><span className="display-md tabular">{n(c.hired)}</span><span className="meta">{n(working)} working now</span></div>
+          <div className="insights-stat"><span className="meta">Kept 14 days</span><span className="display-md tabular">{c.cohort14 ? share(c.kept14, c.cohort14) : "–"}</span><span className="meta tabular">{n(c.kept14)} of {n(c.cohort14)}</span></div>
+          <div className="insights-stat"><span className="meta">Promoted</span><span className="display-md tabular">{c.hired ? share(c.promoted, c.hired) : "–"}</span><span className="meta tabular">{n(c.promoted)} of {n(c.hired)}</span></div>
+        </div>
+        <div className="insights-rows">{Object.entries(c.working).map(([k, v]) => <ShareRow key={k} label={TRACK_LABEL[k] ?? k} value={v ?? 0} of={working} />)}</div>
+        <p className="meta" style={{ margin: 0 }}>Kept 14 days counts jobs started at least two weeks ago. Promoted means at least one promotion (head starts don&apos;t count).</p>
+      </div>
+      <div className="studio-card stack-8">
+        <span className="overline">Aspirations picked</span>
+        {picked === 0 && <p className="meta" style={{ margin: 0 }}>No picks yet.</p>}
+        <div className="insights-rows">
+          {ASPIRATIONS.map((a) => <ShareRow key={a.id} label={`${a.emoji} ${a.name}`} value={c.aspirations[a.id] ?? 0} of={picked} />)}
+        </div>
+      </div>
+    </div>
   );
 }

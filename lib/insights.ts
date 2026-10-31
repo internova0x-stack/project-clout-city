@@ -4,7 +4,15 @@
 export interface InsightsDay { date: string; signups: number; active: number; revenueCents: number; avgSessionSeconds: number }
 export interface InsightsCohort { week: string; size: number; d1: number; d1Eligible: number; d7: number; d7Eligible: number; d30: number; d30Eligible: number }
 
+/** Careers part 3 (migration 0143, admin_career_stats): how jobs are going; null before the migration. */
+export interface CareerStats {
+  days: number; hired: number; cohort14: number; kept14: number; promoted: number;
+  working: Partial<Record<"hospitality" | "tech" | "media", number>>;
+  aspirations: Record<string, number>;
+}
+
 export interface Insights {
+  careers?: CareerStats | null;
   days: number;
   today: string;
   totals: {

@@ -2272,5 +2272,353 @@
     ]
    }
   ]
+ },
+ {
+  "id": "office-crush",
+  "base": "office-crush",
+  "area": "dating",
+  "emoji": "🌙",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "title": "Working late. {coworker} brings your exact coffee order: 'Is it weird if this feels like a date?'",
+  "when": {
+   "all": [
+    {
+     "has": "career.friend_for_life"
+    }
+   ],
+   "none": [
+    {
+     "snap": "partner"
+    },
+    {
+     "has": "thread.office_romance"
+    },
+    {
+     "has": "thread.kept_it_professional"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.friend_for_life",
+    "show": "coworker"
+   }
+  },
+  "options": [
+   {
+    "id": "date",
+    "label": "Say it's a date",
+    "get": "Butterflies, a reason to come in",
+    "cost": "Work gets complicated",
+    "risk": "medium",
+    "riskWhy": "Offices have eyes",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Okay. It's a date.' {coworker} grins at the spreadsheet for the rest of the night.",
+      "effects": {
+       "mood": 12
+      },
+      "sets": [
+       {
+        "fact": "thread.office_romance",
+        "subject": "{coworker}"
+       }
+      ],
+      "later": {
+       "afterDays": [
+        3,
+        8
+       ],
+       "chance": 0.6,
+       "emoji": "📋",
+       "text": "Remember your late night with {coworker}? HR has booked 'a quick chat' with you both. Room 3B. Bring nothing.",
+       "effects": {},
+       "card": "office-romance-hr"
+      }
+     }
+    ]
+   },
+   {
+    "id": "friends",
+    "label": "Keep it friends",
+    "get": "The friendship stays easy",
+    "cost": "A little 'what if'",
+    "risk": "low",
+    "riskWhy": "Friends for life is friends for life",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'You're my favorite person here. Let's keep it that way.' {coworker} laughs, a little too fast. Still your person.",
+      "effects": {
+       "mood": -3
+      },
+      "sets": [
+       {
+        "fact": "thread.kept_it_professional",
+        "subject": "{coworker}"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "favors",
+    "label": "Flirt, for favors",
+    "get": "{coworker} covers your worst shifts",
+    "cost": "Their feelings, eventually",
+    "risk": "high",
+    "riskWhy": "People notice when it stops",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You let it hang there. {coworker} takes your Saturday shift without being asked.",
+      "effects": {
+       "mood": 5,
+       "integrity": -8
+      },
+      "sets": [
+       {
+        "fact": "thread.kept_it_professional",
+        "subject": "{coworker}"
+       }
+      ],
+      "later": {
+       "afterDays": [
+        4,
+        10
+       ],
+       "chance": 0.6,
+       "emoji": "💔",
+       "text": "Remember letting {coworker} think it was going somewhere? They worked it out. The whole break room knows.",
+       "effects": {
+        "mood": -12,
+        "clout": -80
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "office-romance-hr",
+  "base": "office-romance-hr",
+  "area": "dating",
+  "emoji": "📋",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "chainOnly": true,
+  "title": "HR's 'quick chat' about you and {coworker}. There's a form. It has a box for 'nature of relationship.'",
+  "when": {
+   "all": [
+    {
+     "has": "thread.office_romance"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "thread.office_romance",
+    "show": "coworker"
+   }
+  },
+  "options": [
+   {
+    "id": "disclose",
+    "label": "Fill in the form, honestly",
+    "get": "It's official, and allowed",
+    "cost": "Your love life in a filing cabinet",
+    "risk": "low",
+    "riskWhy": "Paperwork is survivable",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You tick 'dating.' HR stamps it. {coworker} squeezes your hand under the table. Weirdly romantic.",
+      "effects": {
+       "mood": 6,
+       "integrity": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "Say you're just friends",
+    "get": "No paperwork",
+    "cost": "Lying to HR, with {coworker} next to you",
+    "risk": "high",
+    "riskWhy": "Security cameras exist",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "'Just friends.' {coworker} goes very still. HR writes something down.",
+      "effects": {
+       "integrity": -6,
+       "mood": -4
+      },
+      "later": {
+       "afterDays": [
+        3,
+        9
+       ],
+       "chance": 0.5,
+       "emoji": "📹",
+       "text": "Remember telling HR you and {coworker} were 'just friends'? The lobby camera disagrees. So does Lola.",
+       "effects": {
+        "clout": -60,
+        "mood": -8
+       },
+       "headline": "Two coworkers at a certain Astoria employer are 'just friends,' per HR. Per the lobby camera, less so. One of them is {name}."
+      }
+     }
+    ]
+   },
+   {
+    "id": "end",
+    "label": "End it before it's a problem",
+    "get": "Your job stays simple",
+    "cost": "{coworker}, a bit",
+    "risk": "medium",
+    "riskWhy": "Breakups at work linger",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You end it in the stairwell. {coworker} nods: 'Professional.' The coffee orders stop.",
+      "effects": {
+       "mood": -10,
+       "integrity": 2
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "office-temptation",
+  "base": "office-temptation",
+  "area": "dating",
+  "emoji": "🍸",
+  "where": {
+   "after": [
+    "arrive",
+    "shift",
+    "gig",
+    "eat",
+    "visit",
+    "hangout"
+   ]
+  },
+  "title": "Drinks after work. {coworker} leans in: 'Your partner never has to know about tonight.'",
+  "when": {
+   "all": [
+    {
+     "has": "career.friend_for_life"
+    },
+    {
+     "snap": "partner"
+    }
+   ],
+   "none": [
+    {
+     "has": "thread.office_romance"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.friend_for_life",
+    "show": "coworker"
+   }
+  },
+  "options": [
+   {
+    "id": "home",
+    "label": "Go home to your partner",
+    "get": "A clear head tomorrow",
+    "cost": "An awkward Monday with {coworker}",
+    "risk": "low",
+    "riskWhy": "Friendships survive a no",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You pay your tab and go home. Your partner made too much pasta. Good call.",
+      "effects": {
+       "mood": 5,
+       "integrity": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "stay",
+    "label": "Stay for one more",
+    "get": "A fun night",
+    "cost": "Your partner's trust, if it gets out",
+    "risk": "high",
+    "riskWhy": "Someone always takes a photo",
+    "comesBack": true,
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "One more becomes three. Nothing happens. Probably. You get home at 2.",
+      "effects": {
+       "mood": 4,
+       "integrity": -8
+      },
+      "later": {
+       "afterDays": [
+        2,
+        7
+       ],
+       "chance": 0.5,
+       "emoji": "📸",
+       "text": "Remember 'one more' with {coworker}? Your partner saw the photos. They have questions.",
+       "effects": {
+        "mood": -15
+       }
+      }
+     }
+    ]
+   },
+   {
+    "id": "tell",
+    "label": "Tell your partner about it",
+    "get": "No secrets",
+    "cost": "A slightly tense dinner",
+    "risk": "low",
+    "riskWhy": "Honesty stings, then helps",
+    "outcomes": [
+     {
+      "weight": 1,
+      "text": "You tell them everything. They're quiet, then: 'Thanks for telling me.' You order takeout together.",
+      "effects": {
+       "mood": -2,
+       "integrity": 8
+      }
+     }
+    ]
+   }
+  ]
  }
 ]

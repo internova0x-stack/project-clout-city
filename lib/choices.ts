@@ -164,6 +164,8 @@ export interface ChoiceContext {
   memory?: Memory | null;
   /** Content Engine step 6 (migration 0141, lib/cardLearning.ts): what each card's fit is multiplied by (0 = retired). */
   weights?: Record<string, number>;
+  /** Aspirations (migration 0143): areas that come up more for this player (a Future Celebrity's Climb cards ×2). */
+  boost?: Partial<Record<ChoiceArea, number>>;
 }
 
 export type Rng = () => number;
@@ -260,7 +262,7 @@ export function fit(card: ChoiceCard, ctx: ChoiceContext): number {
     if (card.slots && !fillSlots(card.slots, ctx.memory ?? null)) return 0;
     score *= systemsOf(card.when).size >= 2 ? 5 : 2;
   }
-  return score * (ctx.weights?.[card.id] ?? 1);
+  return score * (ctx.weights?.[card.id] ?? 1) * (ctx.boost?.[card.area] ?? 1);
 }
 
 /** One card for this moment, weighted by how well it fits, or null. */

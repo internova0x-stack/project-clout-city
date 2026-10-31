@@ -10,6 +10,8 @@
 // crypto random, service role) and the preview (lib/careerSim.ts) run them. The task file (content/careers/tasks.json)
 // holds the hidden outcomes, so only those two import lib/careersContent.ts; players get `careerView`.
 
+import { ASPIRE, headStart, type AspirationId } from "./aspirations.ts";
+
 export type TrackId = "hospitality" | "tech" | "media";
 export type WorkStyle = "hustle" | "steady" | "coast";
 export type SkillId = "cooking" | "charisma" | "fitness" | "smarts" | "music" | "hustle" | "dance" | "gossip" | "photography";
@@ -36,6 +38,11 @@ export interface Track {
   manager: Person & { persona: Persona; style: string };
   friend: Person;
   rival: Person;
+  /** Part 3 (owner, Oct 31: "build the 'mentioned in the spec, but not built' section"): the manager's own boss (going over
+   * the manager's head, pushing the manager out), the new hire you can mentor, and who takes over if the manager is pushed out. */
+  bigBoss: Person & { title: string };
+  newHire: Person;
+  successor: Person & { persona: Persona; style: string };
   /** What the job gives besides pay, by level (shown on the ladder). */
   perks: { level: number; text: string }[];
   levels: Level[];
@@ -48,6 +55,8 @@ export const TRACKS: Track[] = [
     keySkills: ["charisma", "cooking"],
     manager: { name: "Odette Vlahos", emoji: "👩‍🍳", persona: "supportive", style: "Supportive: fair reviews, real coaching" },
     friend: { name: "Bashir", emoji: "🧑‍🍳" }, rival: { name: "Kendall", emoji: "💁" },
+    bigBoss: { name: "Despina Kouris", emoji: "👵", title: "owns The Gossip Group" }, newHire: { name: "Wren", emoji: "🧑‍🦱" },
+    successor: { name: "Theo Marangos", emoji: "🧔", persona: "micromanager", style: "Micromanager: three tasks a day, every day" },
     perks: [
       { level: 1, text: "Staff meal after every workday: +10 Energy" },
       { level: 3, text: "Tips: C$30 × your level a workday, paid on payday" },
@@ -66,6 +75,8 @@ export const TRACKS: Track[] = [
     keySkills: ["smarts", "hustle"],
     manager: { name: "Dana Okafor", emoji: "👩‍💻", persona: "micromanager", style: "Micromanager: three tasks a day, every day" },
     friend: { name: "Mateo", emoji: "🧑‍💻" }, rival: { name: "Brent", emoji: "🧢" },
+    bigBoss: { name: "Skyler Beta", emoji: "🧑‍🚀", title: "founder of Pivotly" }, newHire: { name: "Priya", emoji: "👩‍🎓" },
+    successor: { name: "Russ Kettering", emoji: "🧑‍💼", persona: "supportive", style: "Supportive: fair reviews, real coaching" },
     perks: [
       { level: 1, text: "Free cold brew: +5 Energy after every workday" },
       { level: 3, text: "Work from anywhere: start your workday without going in" },
@@ -84,6 +95,8 @@ export const TRACKS: Track[] = [
     keySkills: ["gossip", "photography"],
     manager: { name: "Vivian Starke", emoji: "🕶️", persona: "credit_stealer", style: "Credit-stealer: your best ideas become hers" },
     friend: { name: "Nour", emoji: "🎬" }, rival: { name: "Jax Holloway", emoji: "🎤" },
+    bigBoss: { name: "Montgomery Vale", emoji: "🎩", title: "runs the Clout TV network" }, newHire: { name: "Ozzie", emoji: "🧑‍🎤" },
+    successor: { name: "Lacey Dunmore", emoji: "💅", persona: "credit_stealer", style: "Credit-stealer: your best ideas become hers" },
     perks: [
       { level: 1, text: "Screen time: 5 × your level in clout every workday" },
       { level: 4, text: "Your face on the Big Screen's promos: double screen time" },
@@ -137,6 +150,18 @@ export const CAREER = {
     traced: { credit: 0.25, rumor: 0.35, per: 0.1 },
     /** Exposed this many times and coworkers' trust grows at half speed. */
     guarded: 2,
+    /** Part 3. A work friend's trust at this and you're friends for life: it never drops under `liferFloor`, and they cover a missed day a week. */
+    lifer: 85,
+    liferFloor: 60,
+    mentorEnergy: 10,
+    /** Mentoring sessions until the new hire has your back (they warn you off the next grudge). */
+    mentorAlly: 3,
+    coverCaught: 0.2,
+    undermineTraced: 0.3,
+    /** Pushing the manager out: once a job, with the big boss's trust and your performance at least this. */
+    pushout: { bigBoss: 65, perf: 70 },
+    /** Under the miserable line, the quit card shows (at most once a week if you stick it out). */
+    stickWeek: 7,
   },
 } as const;
 
@@ -208,11 +233,27 @@ export interface CareerState {
   /** Sabotage done, and how often it was traced back to you (twice and everyone's guarded). */
   sabotages?: number;
   exposed?: number;
+  // ---- Part 3 (optional): the big boss, the new hire, a push-out, the quit card ----
+  /** The big boss's trust in you (from 50). */
+  bigBoss?: number;
+  /** Mentoring sessions with the new hire, and whether they have your back right now. */
+  mentored?: number;
+  ally?: boolean;
+  /** The manager was pushed out (their successor runs the team); a push-out is tried once a job. */
+  ousted?: boolean;
+  coup?: boolean;
+  /** When you last chose to stick it out on the quit card. */
+  stuck?: string;
+  /** You and the work friend are friends for life (their trust reached 85). */
+  lifer?: boolean;
 }
 
 export type Peer = "friend" | "rival";
 export interface Grudge { who: Who; level: number; due: string }
-export type OfficeAction = "help" | "share" | "team" | "credit" | "report" | "rumor";
+export type OfficeAction = "help" | "share" | "team" | "credit" | "report" | "rumor"
+  | "cover" | "back" | "mentor" | "undermine" | "overhead" | "pushout";
+/** Who an office move is aimed at: the three people, plus the new hire (mentoring). */
+export type Target = Who | "hire";
 
 /** What the server reads from the player (career_context). */
 export interface CareerCtx {
@@ -226,6 +267,11 @@ export interface CareerCtx {
   past: Partial<Record<TrackId, { best: number; fired: number; lastStatus: "fired" | "quit" | null; lastEnded: string | null }>>;
   /** Step 7: gated tasks this player has unlocked, with their filled names (the server reads memory: lib/cardFormat.ts). */
   unlocked?: Record<string, Record<string, string>>;
+  /** Aspirations (migration 0143): the player's pick and their degree (3 passed exams), each a level's head start. */
+  aspiration?: AspirationId | null;
+  degree?: boolean;
+  /** Businesses the player owns (Quit to run your business). */
+  businesses?: number;
 }
 
 export type Payout = { kind: "career_pay" | "career_promo" | "career_screen" | "career_team"; currency: "cash" | "clout"; amount: number; ref: string };
@@ -253,6 +299,8 @@ const ERRORS: Record<string, string> = {
   office_used: "You've already made a move like that today. Tomorrow.",
   team_busy: "You already have a joint project going.",
   bad_target: "That doesn't work on them.",
+  not_ready: "Not yet. You need the big boss on your side (their trust 65+) and performance 70+, and it's once a job.",
+  no_business: "You don't own a business to run yet.",
   conflict: "Something changed. Try again.",
   rate_limited: "Slow down. Work will still be there.",
   unknown: "Work is closed for a second. Try again.",
@@ -275,6 +323,9 @@ function weighted<T extends { weight: number }>(xs: readonly T[], rng: Rng): T {
 export const salaryOf = (s: Pick<CareerState, "track" | "level" | "raises">) =>
   Math.round(trackById(s.track)!.levels[s.level - 1].salary * (1 + CAREER.raise.pct * s.raises));
 
+/** The manager running your team: theirs, or their successor once you pushed them out. */
+export const managerOf = (s: Pick<CareerState, "ousted">, track: Track): Track["manager"] => (s.ousted ? track.successor : track.manager);
+
 /** What a level still needs, in words ("Aura 3", "1,000 clout"); empty when it's met. */
 export function missing(track: Track, level: number, ctx: Pick<CareerCtx, "skills" | "clout">): string[] {
   const l = track.levels[level - 1];
@@ -291,9 +342,11 @@ export const SKILL_NAMES: Record<SkillId, string> = {
 };
 
 /** Where a hire starts: one below the best level reached before (unless the last job there ended in the sack), if met. */
-export function startLevel(track: Track, ctx: Pick<CareerCtx, "skills" | "clout" | "past">): number {
+export function startLevel(track: Track, ctx: Pick<CareerCtx, "skills" | "clout" | "past" | "aspiration" | "degree">): number {
   const p = ctx.past[track.id];
-  const top = p && p.lastStatus !== "fired" ? Math.max(1, p.best - 1) : 1;
+  const back = p && p.lastStatus !== "fired" ? Math.max(1, p.best - 1) : 1;
+  // Aspirations: a level higher in the aspiration's careers and a level for a degree, up to level 3 (owner, Oct 31).
+  const top = Math.max(back, Math.min(ASPIRE.headStartMax, 1 + headStart(track.id, ctx)));
   for (let l = top; l > 1; l--) if (!missing(track, l, ctx).length) return l;
   return 1;
 }
@@ -363,7 +416,7 @@ export function startDay(content: CareerContent, s: CareerState, style: WorkStyl
   const mine = pool.filter(gated);
   if (mine.length) chosen.push(mine[Math.floor(rng() * mine.length) % mine.length]);
   const bag = pool.filter((t) => !gated(t));
-  while (chosen.length < tasksFor(s, track.manager.persona) && bag.length) chosen.push(bag.splice(Math.floor(rng() * bag.length) % bag.length, 1)[0]);
+  while (chosen.length < tasksFor(s, managerOf(s, track).persona) && bag.length) chosen.push(bag.splice(Math.floor(rng() * bag.length) % bag.length, 1)[0]);
   s.today = { day: today, style, tasks: chosen.map((t) => ({ id: t.id, picked: null, text: null, perf: 0, ...(ctx.unlocked?.[t.id] ? { names: ctx.unlocked[t.id] } : {}) })), done: false, summary: [] };
   s.worked.push(today);
   s.review = null;
@@ -379,7 +432,7 @@ const skillBonus = (s: CareerState, ctx: Pick<CareerCtx, "skills">) => {
 export function answerTask(content: CareerContent, s: CareerState, index: number, optionId: string, ctx: CareerCtx, rng: Rng):
   { effects: Effects; payouts: Payout[]; receipt: string } {
   const track = trackById(s.track)!;
-  const persona = track.manager.persona;
+  const persona = managerOf(s, track).persona;
   if (s.status !== "employed") throw new CareerError("not_employed");
   const day = s.today;
   if (!day || day.done) throw new CareerError("no_day");
@@ -431,7 +484,7 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   }
   if (day.style === "coast" && rng() < 0.25) {
     s.trust.manager = clamp(s.trust.manager - 5);
-    lines.push(`👀 ${track.manager.name.split(" ")[0]} noticed you coasting.`);
+    lines.push(`👀 ${managerOf(s, track).name.split(" ")[0]} noticed you coasting.`);
   }
   // A rival busy fending off a rumor has no time to take your credit.
   const rivalBusy = s.rumor?.who === "rival" && daysBetween(day.day, s.rumor.until) >= 0;
@@ -446,7 +499,15 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   // Grudges: whoever you crossed gets even, the way the card warned (they cool off a level each time).
   for (const g of s.grudges ?? []) {
     if (daysBetween(g.due, day.day) < 0) continue;
-    const r = revenge(track, g);
+    // A new hire you mentored has your back: they tip you off once, and the payback misses.
+    if (s.ally) {
+      s.ally = false;
+      lines.push(`${track.newHire.emoji} ${track.newHire.name} tipped you off about ${nameOf(track, g.who, s)}'s payback. You dodged it.`);
+      g.level -= 1;
+      g.due = addDays(day.day, 3 + Math.floor(rng() * 4));
+      continue;
+    }
+    const r = revenge(track, g, s);
     perf += r.perf;
     s.trust.manager = clamp(s.trust.manager + r.manager);
     s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + r.workMood);
@@ -457,7 +518,7 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   }
   s.grudges = (s.grudges ?? []).filter((g) => g.level > 0);
   // Work mood: the boss, the work friend, the pace and how the tasks went.
-  const persona = track.manager.persona;
+  const persona = managerOf(s, track).persona;
   let wm = persona === "supportive" ? 2 : persona === "micromanager" ? -2 : -1;
   if (s.trust.friend >= 60) wm += 2;
   if (day.style === "hustle") wm -= 3;
@@ -480,12 +541,15 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   if (s.track === "hospitality") { energy += 10; if (s.level >= 3) s.tips += 30 * s.level; }
   if (s.track === "tech") energy += 5;
   if (s.track === "media") {
-    const clout = 5 * s.level * (s.level >= 4 ? 2 : 1);
+    // A Streamer's screen time pays half again (aspirations, migration 0143).
+    const clout = Math.round(5 * s.level * (s.level >= 4 ? 2 : 1) * (_ctx.aspiration === "streamer" ? ASPIRE.streamerScreen : 1));
     payouts.push({ kind: "career_screen", currency: "clout", amount: clout, ref: `${s.id}:${day.day}` });
   }
   const L = content.lines[s.track];
   const band = s.trust.manager >= 65 ? "high" : s.trust.manager >= 40 ? "mid" : "low";
-  lines.unshift(`${track.manager.emoji} ${track.manager.name.split(" ")[0]}: "${pick(L.manager[band], rng)}"`);
+  if (befriend(s)) lines.push(`💛 You and ${track.friend.name} are friends for life now. That doesn't wear off.`);
+  const boss = managerOf(s, track);
+  lines.unshift(`${boss.emoji} ${boss.name.split(" ")[0]}: "${pick(L.manager[band], rng)}"`);
   lines.push(s.trust.friend >= 50 ? `${track.friend.emoji} ${track.friend.name}: "${pick(L.friend, rng)}"` : `${track.rival.emoji} ${track.rival.name}: "${pick(L.rival, rng)}"`);
   day.summary = lines;
   day.done = true;
@@ -510,11 +574,12 @@ export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "ski
 
 function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: Rng, payouts: Payout[]) {
   const track = trackById(s.track)!;
-  const persona = track.manager.persona;
+  const persona = managerOf(s, track).persona;
   const day = s.nextReview;
   const worked = s.worked.length;
   const lines: string[] = [];
-  const missed = Math.max(0, CAREER.expectedDays - worked);
+  // A friend for life covers one missed day a week.
+  const missed = Math.max(0, CAREER.expectedDays - worked - (s.lifer ? 1 : 0));
   const penalty = missed * (s.trust.friend >= 70 ? CAREER.missedPenalty / 2 : CAREER.missedPenalty);
   if (missed) {
     s.performance = clamp(s.performance - penalty);
@@ -555,7 +620,7 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
   }
   const warnAt = persona === "supportive" ? CAREER.warn.supportive : CAREER.warn.perf;
   const bad = s.performance < warnAt || worked < CAREER.minDays;
-  const mgr = track.manager.name.split(" ")[0];
+  const mgr = managerOf(s, track).name.split(" ")[0];
   if (bad) {
     if (s.warnings === 0) {
       s.warnings = 1;
@@ -608,6 +673,7 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
   }
   const moodHit: Partial<Record<CareerLog["kind"], number>> = { promotion: 15, raise: 8, warning: -12, caught: -12, demotion: -20 };
   s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + (moodHit[outcome] ?? 0));
+  befriend(s);
   s.review = { day, lines, pay, outcome };
   s.periodStart = day;
   s.nextReview = addDays(day, CAREER.reviewEvery);
@@ -618,22 +684,42 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
 // ---- Part 2: office politics (spec section 30, part 2) ----
 
 /** The six moves, as the Office card shows them: who they can target and the usual preview. */
-export const OFFICE: { id: OfficeAction; kind: "collab" | "sabotage"; emoji: string; label: string; get: string; cost: string; targets: Who[] }[] = [
+export const OFFICE: { id: OfficeAction; kind: "collab" | "sabotage"; emoji: string; label: string; get: string; cost: string; targets: Target[] }[] = [
   { id: "help", kind: "collab", emoji: "🙋", label: "Help with their task", get: "Their trust, a favor owed", cost: `${CAREER.office.helpEnergy} Energy and your break`, targets: ["friend", "rival"] },
   { id: "share", kind: "collab", emoji: "🤲", label: "Share the credit", get: "A big jump in their trust", cost: "Some of today's performance", targets: ["friend", "rival"] },
   { id: "team", kind: "collab", emoji: "🤝", label: "Team up on a project", get: "A team bonus at your review, maybe", cost: "Your result rides on theirs", targets: ["friend", "rival"] },
   { id: "credit", kind: "sabotage", emoji: "🫳", label: "Take credit for their work", get: "Performance, and the boss's eye", cost: "Their trust, and worse if it's traced", targets: ["friend", "rival"] },
   { id: "report", kind: "sabotage", emoji: "📝", label: "Report their mistakes", get: "You look better by comparison", cost: "Their trust; snitches get noticed", targets: ["friend", "rival"] },
   { id: "rumor", kind: "sabotage", emoji: "🗣️", label: "Feed the office gossip a rumor", get: "They're busy defending themselves", cost: "If it's traced: HR, and the News", targets: ["friend", "rival", "manager"] },
+  // Part 3 (spec section 30's "later" list).
+  { id: "cover", kind: "collab", emoji: "🙈", label: "Cover their mistake", get: "Their trust, and a grudge cools", cost: "Your neck, if the boss finds out", targets: ["friend", "rival"] },
+  { id: "back", kind: "collab", emoji: "📣", label: "Back the boss in the meeting", get: "The boss's trust", cost: "Your coworkers call you a teacher's pet", targets: ["manager"] },
+  { id: "mentor", kind: "collab", emoji: "🧑‍🏫", label: "Mentor the new hire", get: "The boss notices; a new hire on your side", cost: `${CAREER.office.mentorEnergy} Energy and your lunch`, targets: ["hire"] },
+  { id: "undermine", kind: "sabotage", emoji: "🪤", label: "Quietly undermine their task", get: "You look better next to them", cost: "If it's traced: their trust and the boss's", targets: ["friend", "rival"] },
+  { id: "overhead", kind: "sabotage", emoji: "⏫", label: "Go over the boss's head", get: "The big boss hears your ideas", cost: "Your boss finds out. They always do", targets: ["manager"] },
+  { id: "pushout", kind: "sabotage", emoji: "🪑", label: "Push the boss out", get: "Their job gone, maybe a promotion for you", cost: "If it fails: a warning, and a boss who knows", targets: ["manager"] },
 ];
 
-const nameOf = (track: Track, who: Who) => (who === "manager" ? track.manager.name.split(" ")[0] : who === "friend" ? track.friend.name : track.rival.name);
+const nameOf = (track: Track, who: Target, s?: Pick<CareerState, "ousted">) =>
+  who === "manager" ? managerOf(s ?? {}, track).name.split(" ")[0] : who === "hire" ? track.newHire.name : who === "friend" ? track.friend.name : track.rival.name;
+
+/** Friends for life: once the work friend's trust reaches 85 it never drops under 60. Returns true the moment it happens. */
+export function befriend(s: CareerState): boolean {
+  if (s.lifer) { s.trust.friend = Math.max(CAREER.office.liferFloor, s.trust.friend); return false; }
+  if (s.trust.friend < CAREER.office.lifer) return false;
+  s.lifer = true;
+  return true;
+}
+
+/** Can this player try to push their boss out now? */
+export const pushoutReady = (s: CareerState) =>
+  !s.ousted && !s.coup && (s.bigBoss ?? 50) >= CAREER.office.pushout.bigBoss && s.performance >= CAREER.office.pushout.perf;
 
 /** What a grudge does when it comes due: never a surprise, always named. */
-function revenge(track: Track, g: Grudge): { perf: number; manager: number; workMood: number; mood: number; line: string } {
-  const n = nameOf(track, g.who);
+function revenge(track: Track, g: Grudge, s: CareerState): { perf: number; manager: number; workMood: number; mood: number; line: string } {
+  const n = nameOf(track, g.who, s);
   if (g.who === "manager") return { perf: -3, manager: -4, workMood: -8, mood: 0, line: `🧊 ${n} gave you the worst job in the building today. You know why.` };
-  if (g.level >= 3) return { perf: -6, manager: -8, workMood: -6, mood: -5, line: `📸 ${n} reported you to ${nameOf(track, "manager")}, with timestamps. Payback.` };
+  if (g.level >= 3) return { perf: -6, manager: -8, workMood: -6, mood: -5, line: `📸 ${n} reported you to ${nameOf(track, "manager", s)}, with timestamps. Payback.` };
   if (g.level === 2) return { perf: -2, manager: -8, workMood: -6, mood: 0, line: `🗣️ ${n} is telling everyone you take credit for other people's work.` };
   return { perf: -3, manager: 0, workMood: -3, mood: 0, line: `🙄 ${n} "forgot" to pass your work along. Petty, and on purpose.` };
 }
@@ -651,11 +737,11 @@ function amends(s: CareerState, who: Who, all: boolean) {
   s.grudges = (s.grudges ?? []).map((g) => (g.who === who ? { ...g, level: all ? 0 : g.level - 1 } : g)).filter((g) => g.level > 0);
 }
 
-export interface OfficeResult { effects: Effects; receipt: string; integrity: number; headline: string | null }
+export interface OfficeResult { effects: Effects; receipt: string; integrity: number; headline: string | null; payouts?: Payout[]; pushedOut?: boolean }
 
 /** One office move, on a day you clocked in: at most one collaborate and one sabotage a workday. */
 /** `crackdown`: an HR crackdown week at this employer (a city storylet, migration 0140): sabotage is traced twice as often. */
-export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick<CareerCtx, "energy">, today: string, rng: Rng, opts: { crackdown?: boolean } = {}): OfficeResult {
+export function office(s: CareerState, action: OfficeAction, who: Target, ctx: Pick<CareerCtx, "energy" | "skills" | "clout">, today: string, rng: Rng, opts: { crackdown?: boolean } = {}): OfficeResult {
   const track = trackById(s.track)!;
   const def = OFFICE.find((o) => o.id === action);
   if (s.status !== "employed") throw new CareerError("not_employed");
@@ -663,8 +749,10 @@ export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick
   if (s.today?.day !== today) throw new CareerError("not_working");
   if (s.office?.day !== today) s.office = { day: today, collab: false, sabotage: false };
   if (s.office[def.kind]) throw new CareerError("office_used");
-  const n = nameOf(track, who);
-  const boss = nameOf(track, "manager");
+  const n = nameOf(track, who, s);
+  const boss = nameOf(track, "manager", s);
+  const big = track.bigBoss.name.split(" ")[0];
+  const peer = who as Who;
   const guarded = (s.exposed ?? 0) >= CAREER.office.guarded;
   const warm = (d: number) => (guarded ? Math.round(d / 2) : d);
   const mood = (d: number) => { s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + d); };
@@ -673,33 +761,33 @@ export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick
 
   if (action === "help") {
     if (ctx.energy < CAREER.office.helpEnergy) throw new CareerError("no_energy");
-    s.trust[who] = clamp(s.trust[who] + warm(12));
+    s.trust[peer] = clamp(s.trust[peer] + warm(12));
     s.performance = clamp(s.performance + 1);
-    amends(s, who, false);
+    amends(s, peer, false);
     mood(3);
     out.effects.energy = -CAREER.office.helpEnergy;
     out.integrity = 3;
     out.receipt = who === "friend" ? `You stay late on ${n}'s pile. ${n} owes you one.` : `You help ${n} hit a deadline. ${n} looks suspicious, then grateful.`;
   } else if (action === "share") {
-    s.trust[who] = clamp(s.trust[who] + warm(18));
+    s.trust[peer] = clamp(s.trust[peer] + warm(18));
     s.trust.manager = clamp(s.trust.manager + 3);
     s.performance = clamp(s.performance - 2);
-    amends(s, who, true);
+    amends(s, peer, true);
     mood(2);
     out.integrity = 4;
     out.receipt = `"${n} did half of that." ${boss} nods: a team player. ${n} won't forget it.`;
   } else if (action === "team") {
     if (s.team) throw new CareerError("team_busy");
     s.team = { with: who as Peer, due: s.nextReview };
-    s.trust[who] = clamp(s.trust[who] + warm(5));
+    s.trust[peer] = clamp(s.trust[peer] + warm(5));
     out.integrity = 2;
     out.receipt = `You and ${n} pitch a joint project to ${boss}. It's judged at your next review.`;
   } else if (action === "credit") {
     s.sabotages = (s.sabotages ?? 0) + 1;
     s.performance = clamp(s.performance + 6);
     s.trust.manager = clamp(s.trust.manager + 4);
-    s.trust[who] = clamp(s.trust[who] - 25);
-    holdGrudge(s, who, today, rng);
+    s.trust[peer] = clamp(s.trust[peer] - 25);
+    holdGrudge(s, peer, today, rng);
     mood(-4);
     out.integrity = -6;
     if (traced(CAREER.office.traced.credit + (who === "friend" ? 0.1 : 0))) {
@@ -715,8 +803,8 @@ export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick
     s.sabotages = (s.sabotages ?? 0) + 1;
     s.performance = clamp(s.performance + 3);
     s.trust.manager = clamp(s.trust.manager + 3);
-    s.trust[who] = clamp(s.trust[who] - 20);
-    holdGrudge(s, who, today, rng);
+    s.trust[peer] = clamp(s.trust[peer] - 20);
+    holdGrudge(s, peer, today, rng);
     mood(-3);
     out.integrity = -4;
     out.receipt = `You walk ${boss} through ${n}'s mistakes. You look sharp. ${n} looks at you.`;
@@ -725,11 +813,121 @@ export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick
       s.trust[other] = clamp(s.trust[other] - 8);
       out.receipt += ` Word gets around: ${nameOf(track, other)} calls you a snitch.`;
     }
+  } else if (action === "cover") {
+    s.trust[peer] = clamp(s.trust[peer] + warm(15));
+    s.performance = clamp(s.performance - 1);
+    amends(s, peer, false);
+    mood(2);
+    if (rng() < CAREER.office.coverCaught) {
+      s.trust.manager = clamp(s.trust.manager - 8);
+      out.integrity = -2;
+      out.receipt = `You cover for ${n}'s mistake. ${boss} finds the real version anyway: "So you knew?" ${n} owes you big.`;
+    } else {
+      out.integrity = 2;
+      out.receipt = `${n}'s mistake quietly disappears before ${boss} sees it. ${n} mouths "thank you" across the room.`;
+    }
+  } else if (action === "back") {
+    s.trust.manager = clamp(s.trust.manager + warm(10));
+    s.performance = clamp(s.performance + 1);
+    s.trust.friend = clamp(s.trust.friend - 3);
+    s.trust.rival = clamp(s.trust.rival - 3);
+    out.integrity = 1;
+    out.receipt = `${boss}'s plan gets pushback in the meeting. You back it, loudly. ${boss} remembers; ${track.friend.name} and ${track.rival.name} roll their eyes.`;
+  } else if (action === "mentor") {
+    if (ctx.energy < CAREER.office.mentorEnergy) throw new CareerError("no_energy");
+    s.mentored = (s.mentored ?? 0) + 1;
+    s.trust.manager = clamp(s.trust.manager + 4);
+    s.performance = clamp(s.performance + 1);
+    mood(4);
+    out.effects.energy = -CAREER.office.mentorEnergy;
+    out.integrity = 3;
+    if (s.mentored % CAREER.office.mentorAlly === 0 && !s.ally) {
+      s.ally = true;
+      out.receipt = `Lunch with ${n} again. ${n}: "Anyone comes for you, I'll hear about it first." A new hire on your side.`;
+    } else {
+      out.receipt = `You show ${n} where everything is, and who to avoid. ${boss} notices you coaching.`;
+    }
+  } else if (action === "undermine") {
+    s.sabotages = (s.sabotages ?? 0) + 1;
+    s.performance = clamp(s.performance + 4);
+    mood(-2);
+    out.integrity = -5;
+    if (traced(CAREER.office.undermineTraced)) {
+      s.exposed = (s.exposed ?? 0) + 1;
+      s.trust[peer] = clamp(s.trust[peer] - 20);
+      s.trust.manager = clamp(s.trust.manager - 10);
+      holdGrudge(s, peer, today, rng);
+      out.integrity -= 4;
+      out.receipt = `${n}'s task falls apart, and the file history says you touched it last. ${n} knows. So does ${boss}.`;
+    } else {
+      out.receipt = `${n}'s task falls apart at the worst moment. Nobody knows why. You look great next to it.`;
+    }
+  } else if (action === "overhead") {
+    s.sabotages = (s.sabotages ?? 0) + 1;
+    const bb = s.bigBoss ?? 50;
+    const chance = Math.max(0.1, Math.min(0.8, 0.3 + (s.performance - 50) / 100 + (bb - 50) / 100));
+    holdGrudge(s, "manager", today, rng);
+    out.integrity = -3;
+    if (rng() < chance) {
+      s.bigBoss = clamp(bb + 12);
+      s.performance = clamp(s.performance + 5);
+      s.trust.manager = clamp(s.trust.manager - 15);
+      out.receipt = `You take your idea straight to ${big}, who ${track.bigBoss.title}. ${big} loves it. ${boss} hears about it by lunch.`;
+    } else {
+      s.bigBoss = clamp(bb - 5);
+      s.trust.manager = clamp(s.trust.manager - 25);
+      holdGrudge(s, "manager", today, rng);
+      mood(-4);
+      out.receipt = `You corner ${big} by the elevator. ${big}: "Have you talked to ${boss}?" ${big} has. ${boss} is furious.`;
+    }
+  } else if (action === "pushout") {
+    if (!pushoutReady(s)) throw new CareerError("not_ready");
+    s.coup = true;
+    s.sabotages = (s.sabotages ?? 0) + 1;
+    const bb = s.bigBoss ?? 50;
+    const chance = Math.max(0.15, Math.min(0.75, 0.4 + (bb - CAREER.office.pushout.bigBoss) / 100 + (s.performance - CAREER.office.pushout.perf) / 200 - 0.05 * Math.min(3, s.exposed ?? 0)));
+    const employer = track.employer;
+    if (rng() < chance) {
+      const old = boss;
+      s.ousted = true;
+      s.grudges = (s.grudges ?? []).filter((g) => g.who !== "manager");
+      s.trust.manager = 50;
+      s.bigBoss = clamp(bb + 5);
+      out.pushedOut = true;
+      out.integrity = -8;
+      const next = track.levels[s.level];
+      if (next && !missing(track, s.level + 1, ctx).length) {
+        s.level += 1;
+        s.raises = 0;
+        s.reviewsAtLevel = 0;
+        s.demoted = false;
+        s.performance = CAREER.promote.reset;
+        out.payouts = [{ kind: "career_promo", currency: "clout", amount: CAREER.promoClout * s.level, ref: `${s.id}:L${s.level}` }];
+        note(s, today, "promotion", `Pushed ${old} out. Promoted to ${next.title}.`);
+        out.receipt = `${big} calls you in: ${old} is "moving on to new challenges." You're promoted to ${next.title}. ${track.successor.name} runs the team now.`;
+      } else {
+        note(s, today, "review", `Pushed ${old} out.`);
+        out.receipt = `${big} calls you in: ${old} is "moving on to new challenges." ${track.successor.name} runs the team now, and knows exactly how that happened.`;
+      }
+      out.headline = `Shake-up at ${employer}: ${old} is out, and sources say {name} helped push. Ruthless or visionary? Astoria is split.`;
+    } else {
+      s.warnings = Math.max(1, s.warnings);
+      s.bigBoss = clamp(bb - 20);
+      s.trust.manager = clamp(10);
+      holdGrudge(s, "manager", today, rng);
+      holdGrudge(s, "manager", today, rng);
+      holdGrudge(s, "manager", today, rng);
+      mood(-10);
+      out.integrity = -10;
+      note(s, today, "warning", `Tried to push ${boss} out. It didn't work.`);
+      out.receipt = `${big} hears you out, then calls ${boss} in. ${boss} keeps the job. You keep yours, for now, on a formal warning.`;
+      out.headline = `Overheard at ${employer}: {name} tried to push out their boss. The boss is still there. So, for now, is {name}.`;
+    }
   } else {
     s.sabotages = (s.sabotages ?? 0) + 1;
-    s.trust[who] = clamp(s.trust[who] - 15);
-    s.rumor = { who, until: addDays(today, 5) };
-    holdGrudge(s, who, today, rng);
+    s.trust[peer] = clamp(s.trust[peer] - 15);
+    s.rumor = { who: peer, until: addDays(today, 5) };
+    holdGrudge(s, peer, today, rng);
     mood(-3);
     out.integrity = -8;
     if (traced(CAREER.office.traced.rumor)) {
@@ -749,16 +947,38 @@ export function office(s: CareerState, action: OfficeAction, who: Who, ctx: Pick
     }
   }
   s.office[def.kind] = true;
+  if (befriend(s)) out.receipt += ` 💛 You and ${track.friend.name} are friends for life now.`;
   return out;
 }
 
-export function quit(s: CareerState, today: string) {
+/** Quitting. From the quit card (work mood under 30) it lifts your Mood; "business" quits to run your businesses. */
+export function quit(s: CareerState, today: string, opts: { reason?: "business"; businesses?: number } = {}): { effects: Effects; receipt: string } {
   if (s.status !== "employed") throw new CareerError("not_employed");
+  if (opts.reason === "business" && !(opts.businesses ?? 0)) throw new CareerError("no_business");
+  const miserable = (s.workMood ?? CAREER.office.moodStart) < CAREER.office.miserable;
+  const employer = trackById(s.track)!.employer;
   s.status = "quit";
   s.endedOn = today;
   s.today = null;
-  note(s, today, "quit", `Quit ${trackById(s.track)!.employer}.`);
+  if (opts.reason === "business") {
+    note(s, today, "quit", `Quit ${employer} to run your businesses.`);
+    return { effects: { mood: 8 }, receipt: "You quit to run your own businesses. Your boss now answers to you: it's you." };
+  }
+  note(s, today, "quit", `Quit ${employer}.`);
+  return { effects: miserable ? { mood: 5 } : {}, receipt: miserable ? "You quit. The weight is gone before you reach the subway." : "You quit. The city is full of jobs. Probably." };
 }
+
+/** The quit card: you stick it out (work mood +5, the card rests for a week). */
+export function stickItOut(s: CareerState, today: string): { receipt: string } {
+  if (s.status !== "employed") throw new CareerError("not_employed");
+  s.stuck = today;
+  s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + 5);
+  return { receipt: "You remind yourself it pays the rent. It helps, a little." };
+}
+
+/** The quit card shows when work mood is under 30, unless you stuck it out in the last week. */
+export const quitCardDue = (s: CareerState, today: string) =>
+  s.status === "employed" && (s.workMood ?? CAREER.office.moodStart) < CAREER.office.miserable && (!s.stuck || daysBetween(s.stuck, today) >= CAREER.office.stickWeek);
 
 /** The player's view of their job: never a task's hidden outcomes. */
 export interface CareerView {
@@ -773,7 +993,7 @@ export interface CareerView {
   status: CareerState["status"];
   performance: number;
   trust: Record<Who, number>;
-  people: { manager: Track["manager"]; friend: Person; rival: Person };
+  people: { manager: Track["manager"]; friend: Person; rival: Person; bigBoss: Track["bigBoss"]; newHire: Person };
   warnings: number;
   nextReview: string;
   daysToReview: number;
@@ -795,6 +1015,12 @@ export interface CareerView {
   officeLeft: { collab: boolean; sabotage: boolean } | null;
   team: { with: Peer; name: string } | null;
   guarded: boolean;
+  /** Part 3: the big boss's trust, whether a push-out can be tried, the new hire on your side, the quit card. */
+  bigBoss: number;
+  pushout: "ready" | "not_ready" | "done";
+  ally: boolean;
+  quitCard: boolean;
+  lifer: boolean;
 }
 
 export function careerView(content: CareerContent, s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout">): CareerView {
@@ -804,7 +1030,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
   return {
     id: s.id, track: s.track, employer: track.employer, place: track.place, title: track.levels[s.level - 1].title,
     level: s.level, levels: track.levels.length, salary: salaryOf(s), status: s.status, performance: s.performance, trust: s.trust,
-    people: { manager: track.manager, friend: track.friend, rival: track.rival }, warnings: s.warnings,
+    people: { manager: managerOf(s, track), friend: track.friend, rival: track.rival, bigBoss: track.bigBoss, newHire: track.newHire }, warnings: s.warnings,
     nextReview: s.nextReview, daysToReview: Math.max(0, daysBetween(today, s.nextReview)), workedThisWeek: s.worked.length, remote: remote(s),
     today: t ? {
       style: t.style, done: t.done, summary: t.summary,
@@ -824,6 +1050,11 @@ export function careerView(content: CareerContent, s: CareerState, today: string
       ? { collab: !(s.office?.day === today && s.office.collab), sabotage: !(s.office?.day === today && s.office.sabotage) } : null,
     team: s.team ? { with: s.team.with, name: s.team.with === "friend" ? track.friend.name : track.rival.name } : null,
     guarded: (s.exposed ?? 0) >= CAREER.office.guarded,
+    bigBoss: s.bigBoss ?? 50,
+    pushout: s.ousted || s.coup ? "done" : pushoutReady(s) ? "ready" : "not_ready",
+    ally: !!s.ally,
+    quitCard: quitCardDue(s, today),
+    lifer: !!s.lifer,
   };
 }
 
@@ -833,6 +1064,8 @@ export interface TrackCard {
   manager: string; perks: Track["perks"];
   ladder: { title: string; salary: number; needs: string[] }[];
   start: number; missing: string[]; reapplyOn: string | null;
+  /** Levels of head start from the player's aspiration and degree (migration 0143). */
+  headStart: number;
 }
 export function trackCards(ctx: CareerCtx, today: string): TrackCard[] {
   return TRACKS.map((t) => {
@@ -842,6 +1075,7 @@ export function trackCards(ctx: CareerCtx, today: string): TrackCard[] {
       manager: `${t.manager.emoji} ${t.manager.name} · ${t.manager.style}`, perks: t.perks,
       ladder: t.levels.map((l, i) => ({ title: l.title, salary: l.salary, needs: missing(t, i + 1, { skills: {}, clout: 0 }) })),
       start, missing: missing(t, start, ctx), reapplyOn: rehireOn(t.id, ctx, today),
+      headStart: headStart(t.id, ctx),
     };
   });
 }
@@ -855,6 +1089,10 @@ export interface CareerScreen {
   atPlace: string | null;
   /** What just happened, after an action. */
   receipt?: string;
+  /** Aspirations (migration 0143): the player's pick, when it can change, their degree; null before the migration. */
+  aspiration?: import("./aspirations.ts").AspirationState | null;
+  /** Businesses owned (the quit card's "Quit to run your business"). */
+  businesses?: number;
 }
 export type CareerResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type R = Promise<CareerResult<CareerScreen>>;
@@ -863,8 +1101,13 @@ export interface CareerApi {
   apply(track: TrackId, answer: Answer): R;
   start(style: WorkStyle): R;
   task(index: number, option: string): R;
-  office(action: OfficeAction, who: Who): R;
-  quit(): R;
+  office(action: OfficeAction, who: Target): R;
+  /** "business": quit to run your businesses (needs one). */
+  quit(reason?: "business"): R;
+  /** The quit card's "Stick it out". */
+  stick(): R;
+  /** Picks (or changes, once every 30 days) the player's aspiration. */
+  aspire(id: AspirationId): R;
 }
 
 /** The content's own rules (tests/careers.test.ts runs them on the task file). */

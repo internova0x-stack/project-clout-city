@@ -2658,6 +2658,13 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .careers-poster { display:flex; flex-direction:column; gap:6px; padding:20px 16px 16px; border-radius:var(--r-lg);
   background:linear-gradient(135deg, #1D2B53 0%, #3E63DD 100%); color:#fff; }
 .careers-poster .overline, .careers-poster .subtext { color:rgba(255,255,255,.82); }
+/* Aspirations (migration 0143): the Careers welcome screen's picks and the chip above the app. */
+.careers-aspiration { display:flex; align-items:flex-start; gap:12px; width:100%; border:2px solid transparent; text-align:left; color:inherit; cursor:pointer; font:inherit; }
+.careers-aspiration .careers-col { gap:3px; }
+.careers-aspiration.on { border-color:var(--primary-bottom); box-shadow:0 0 0 3px rgba(225,29,116,.12), var(--elev-1); }
+.careers-aspiration:disabled { opacity:.45; cursor:not-allowed; }
+.careers-aspiration-chip { align-self:flex-start; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:0; background:var(--surface-raised); box-shadow:var(--elev-1); color:var(--text-1); font:inherit; font-weight:600; cursor:pointer; }
+.careers-headstart { color:var(--primary-bottom); font-weight:600; }
 .careers-track-head { display:flex; align-items:center; gap:12px; width:100%; padding:0; background:none; border:0; text-align:left; color:inherit; cursor:pointer; }
 .careers-emoji { flex:none; display:grid; place-items:center; width:44px; height:44px; border-radius:50%; background:var(--chip-off); font-size:24px; }
 .careers-chev { flex:none; color:var(--text-3); font-size:14px; }
