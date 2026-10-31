@@ -156,6 +156,7 @@ function ConditionsSection({ api }: { api: StudioApi }) {
 
 // ---- The underworld, part 2 (migration 0150): each week's new jobs for Pablo ----
 
+const CREW_NAME: Record<string, string> = { tito: "Tito", gigi: "Gigi", "auntie-bee": "Auntie Bee" };
 const REP_TIER: Record<number, string> = { 0: "Errand Kid", 15: "Corner Regular", 35: "Known Face", 60: "Pablo's Guy", 90: "Street Legend" };
 
 function UnderworldJobsSection({ api }: { api: StudioApi }) {
@@ -184,7 +185,7 @@ function UnderworldJobsSection({ api }: { api: StudioApi }) {
             <span className="body-strong" style={{ minWidth: 0 }}>{j.job.emoji} {j.job.title}</span>
             <span className={`tag studio-review ${STATUS[j.status]}`}>{storyletWhen(j)}</span>
           </div>
-          <span className="meta">Week of {fmtWeek(j.week)} · {REP_TIER[j.job.minRep] ?? `Street Rep ${j.job.minRep}`}+{j.job.crew ? ` · ${j.job.crew}'s job` : ""}</span>
+          <span className="meta">Week of {fmtWeek(j.week)} · {REP_TIER[j.job.minRep] ?? `Street Rep ${j.job.minRep}`}+{j.job.crew ? ` · ${CREW_NAME[j.job.crew] ?? j.job.crew}'s job` : ""}</span>
           {j.job.options.map((o) => <span key={o.id} className="meta" style={{ display: "block" }}>• <b>{o.label}</b>: gets {o.get}; costs {o.cost} (C${o.pay[0]}–{o.pay[1]})</span>)}
           <span className="meta">📰 If caught: “{j.job.headline.replace("{name}", "@player")}”</span>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
