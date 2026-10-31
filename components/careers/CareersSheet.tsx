@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { PLACES } from "@/lib/city";
-import { CAREER, INTERVIEW, type Answer, type CareerApi, type CareerScreen, type CareerView, type TrackCard, type TrackId, type WorkStyle } from "@/lib/careers";
+import { CAREER, INTERVIEW, OFFICE, type Answer, type CareerApi, type CareerScreen, type CareerView, type OfficeAction, type TrackCard, type TrackId, type Who, type WorkStyle } from "@/lib/careers";
 
 // Careers (spec section 30; migration 0135): the Phone's Careers app. Without a job: the three tracks, where you'd start
 // and what each needs, then a short interview card. With one: the job card (title, pay, performance, the people), today's
@@ -57,6 +57,7 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
               const r = await run(api.task(i, o), false);
               if (r) { onChanged(); if (r.job?.today?.done) onWorkdayDone(); }
             }}
+            onOffice={async (a, w) => { if (await run(api.office(a, w))) onChanged(); }}
             onQuit={async () => { if (await run(api.quit())) onChanged(); }} />
         )}
         {data && !job && !applying && <Listings data={data} onApply={setApplying} />}
@@ -175,9 +176,9 @@ function Meter({ label, value, tone = "neon" }: { label: string; value: number; 
   );
 }
 
-function Job({ data, v, busy, onGo, onStart, onTask, onQuit }: {
+function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit }: {
   data: CareerScreen; v: CareerView; busy: boolean;
-  onGo: () => void; onStart: (s: WorkStyle) => void; onTask: (i: number, o: string) => void; onQuit: () => void;
+  onGo: () => void; onStart: (s: WorkStyle) => void; onTask: (i: number, o: string) => void; onOffice: (a: OfficeAction, w: Who) => void; onQuit: () => void;
 }) {
   const [style, setStyle] = useState<WorkStyle>("steady");
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -241,6 +242,7 @@ function Job({ data, v, busy, onGo, onStart, onTask, onQuit }: {
         </div>
       )}
       {v.today && <Workday v={v} busy={busy} onTask={onTask} />}
+      {v.officeLeft && <Office v={v} busy={busy} onOffice={onOffice} />}
       {!v.today && !v.canWork && (
         <div className="card"><p className="subtext" style={{ margin: 0 }}>✅ You've worked today. Come back tomorrow.</p></div>
       )}
@@ -252,6 +254,11 @@ function Job({ data, v, busy, onGo, onStart, onTask, onQuit }: {
         <Meter label={`${v.people.friend.emoji} ${v.people.friend.name}`} value={v.trust.friend} tone={tone(v.trust.friend)} />
         <Meter label={`${v.people.rival.emoji} ${v.people.rival.name}`} value={v.trust.rival} tone={tone(v.trust.rival)} />
         <p className="meta" style={{ margin: 0 }}>How much each of them trusts you. {v.people.manager.style}.</p>
+        {v.grudges.map((g) => (
+          <p key={g.who} className="careers-grudge">😠 {g.who === "manager" ? v.people.manager.name.split(" ")[0] : v.people[g.who].name} is holding a grudge{g.level >= 3 ? " (a big one)" : g.level === 2 ? " (a real one)" : ""}. Expect payback at work. Helping or sharing credit cools it.</p>
+        ))}
+        {v.guarded && <p className="careers-grudge">🧱 People here have caught you twice. They're guarded now: trust grows half as fast.</p>}
+        <Meter label="💼 Work mood" value={v.workMood} tone={tone(v.workMood)} />
       </div>
 
       {v.next ? (
@@ -283,6 +290,49 @@ function Job({ data, v, busy, onGo, onStart, onTask, onQuit }: {
         </div>
       )}
     </>
+  );
+}
+
+/** Office politics (part 2): one collaborate and one sabotage move a workday, aimed at someone. */
+function Office({ v, busy, onOffice }: { v: CareerView; busy: boolean; onOffice: (a: OfficeAction, w: Who) => void }) {
+  const [sel, setSel] = useState<OfficeAction | null>(null);
+  const [who, setWho] = useState<Who | null>(null);
+  const left = v.officeLeft!;
+  const def = OFFICE.find((o) => o.id === sel);
+  const name = (w: Who) => (w === "manager" ? `${v.people.manager.name.split(" ")[0]} (boss)` : v.people[w].name);
+  const row = (kind: "collab" | "sabotage", title: string) => (
+    <div className="stack-8">
+      <p className="overline" style={{ margin: 0 }}>{title}{left[kind] ? "" : " · done today"}</p>
+      <div className="choice-options" role="radiogroup" aria-label={title}>
+        {OFFICE.filter((o) => o.kind === kind).map((o) => (
+          <button key={o.id} role="radio" aria-checked={sel === o.id} className="choice-opt" disabled={busy || !left[kind] || (o.id === "team" && !!v.team)}
+            onClick={() => { setSel(o.id); setWho(o.targets.length === 1 ? o.targets[0] : null); }}>
+            <span className="choice-opt-row"><span className="choice-opt-label">{o.emoji} {o.label}</span></span>
+            {sel === o.id && <span className="choice-opt-more"><span><b>You get</b> {o.get}</span><span><b>It costs</b> {o.cost}</span></span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div className="card stack-12">
+      <p className="title" style={{ margin: 0 }}>Office politics</p>
+      <p className="meta" style={{ margin: 0 }}>One move each way a workday. People remember.{v.team ? ` Joint project with ${v.team.name}: judged at your review.` : ""}</p>
+      {row("collab", "Work with someone")}
+      {row("sabotage", "Work against someone")}
+      {def && (
+        <>
+          <div className="chip-row careers-who" role="group" aria-label="Who">
+            {def.targets.map((t) => (
+              <button key={t} className="chip" aria-pressed={who === t} onClick={() => setWho(t)}>{name(t)}</button>
+            ))}
+          </div>
+          <button className="btn btn-taxi" disabled={busy || !who} onClick={() => { if (who) { onOffice(def.id, who); setSel(null); setWho(null); } }}>
+            {who ? `${def.label.replace("their", `${name(who).split(" ")[0]}'s`)}` : "Pick who"}
+          </button>
+        </>
+      )}
+    </div>
   );
 }
 

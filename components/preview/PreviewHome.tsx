@@ -147,7 +147,7 @@ export function PreviewHome({
   mayorPreset?: string;
   /** Campaign Mode: ?campaign=locked|pick|week|situation|debate|waiting|election (Phone → Campaign). */
   campaignPreset?: string;
-  /** Careers: ?career=new|apply|work|day|review|warning|fired (Phone → Careers). */
+  /** Careers: ?career=new|apply|work|day|office|grudge|review|warning|fired (Phone → Careers). */
   careerPreset?: string;
   /** Moral Choices: ?choice=now|back|high|low|log (lib/choicesSim.ts). */
   choicePreset?: string;

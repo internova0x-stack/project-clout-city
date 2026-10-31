@@ -1204,5 +1204,29 @@ ledger 'career_pay', 'career_promo', 'career_screen'; rate bucket 'career'), com
 employers' place cards ("💼 Go to work" at your own job), `?open=careers`, and the preview (lib/careerSim.ts:
 `?career=new|apply|work|day|review|warning|fired`).
 
-**Part 2** (next): office politics (help, share credit, team up; take credit, report mistakes, feed the gossip a rumor),
-co-worker revenge, work mood, the office gossip in the Tea app, and the Climb's office cards for players with a job.
+**Part 2: office politics** (owner, Oct 31: "careers part 2"; migration 0136). On a day you clocked in, one move each way:
+
+| Move | On | You get | It costs |
+| --- | --- | --- | --- |
+| 🙋 Help with their task | friend, rival | their trust +12, a grudge cools a level, performance +1 | 10 Energy |
+| 🤲 Share the credit | friend, rival | their trust +18, the boss +3, a grudge ends | performance −2 |
+| 🤝 Team up on a project | friend, rival | judged at the next review: a team bonus (15% of the week's pay, ledger 'career_team'), performance +6 | a flop: performance −4; the odds follow their trust and your performance |
+| 🫳 Take credit for their work | friend, rival | performance +6, the boss +4 | their trust −25, a grudge; traced 25% (+10% on a friend, +10% per earlier sabotage): the boss −15, performance back down |
+| 📝 Report their mistakes | friend, rival | performance +3, the boss +3 | their trust −20, a grudge; 40%: the other coworker calls you a snitch (−8) |
+| 🗣️ Feed the office gossip a rumor | friend, rival, boss | their trust −15; they're too busy to take your credit for 5 days; performance +2 | a grudge; traced 35% (+10% per earlier sabotage): the boss −20, a formal warning and a Lola's Blotter headline naming you; untraced, half the time Lola runs a blind item |
+
+- **Grudges and revenge:** sabotage leaves a grudge (levels 1 to 3; more sabotage on the same person raises it). It strikes at
+  work 2 to 5 days later, named and always warned about on the People card: "forgot" to pass your work along (level 1), tells
+  everyone you take credit (2), reports you with timestamps (3); a boss gives you the worst job in the building. Each strike
+  cools it a level; helping cools it a level, sharing the credit ends it.
+- **Office reputation:** caught twice and coworkers are guarded: trust you earn grows half as fast.
+- **Work mood** (0 to 100, from 60): the boss's style, a friendly work friend, the pace, how the tasks went, office moves,
+  reviews (promotion +15, raise +8, warning −12, demotion −20). Under 30 you dread coming in (performance −2, Mood −3 a
+  workday); 75 and up it shows (performance +1, Mood +2).
+- **The meter:** collaborate moves nudge Halo (+2 to +4), sabotage Hustler (−4 to −8, −4 more when traced), through
+  `career_office` (migration 0136, within ±12).
+- Preview: `?career=office` (clocked in, a joint project on) and `?career=grudge` (Kendall's grudge strikes today).
+
+**Later:** sponsorship (backing the boss), mentoring a new hire, going over the manager's head, pushing the manager out, office
+romance, quitting cards at low work mood, more tracks (Finance, Fashion, Law, City Hall, Real Estate) and City Hall's link to
+Campaign Mode, and the Climb's office cards for players with a job.

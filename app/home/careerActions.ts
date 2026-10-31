@@ -2,8 +2,8 @@
 
 import { randomInt, randomUUID } from "node:crypto";
 import {
-  CareerError, careerError, careerView, hire, quit, refresh, startDay, answerTask, trackCards, CAREER, trackById,
-  type Answer, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
+  CareerError, careerError, careerView, hire, office, quit, refresh, startDay, answerTask, trackCards, CAREER, trackById,
+  type Answer, type OfficeAction, type Who, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
 } from "@/lib/careers";
 import { CAREER_CONTENT as content } from "@/lib/careersContent";
 import { nyDay } from "@/lib/campaign";
@@ -74,7 +74,7 @@ async function save(admin: Admin, player: string, ctx: Context, state: CareerSta
 }
 
 /** Loads the job, brings it to today (reviews, payday), runs one change and saves it. */
-async function act(change: (state: CareerState, ctx: Context, today: string) => { workday?: string; effects?: Effects; payouts?: Payout[]; receipt?: string }): Promise<Out> {
+async function act(change: (state: CareerState, ctx: Context, today: string) => { workday?: string; effects?: Effects; payouts?: Payout[]; receipt?: string; integrity?: number; headline?: string | null }): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
   const ctx = await load(w.id, w.admin);
@@ -92,6 +92,11 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
   }
   const err = await save(w.admin, w.id, ctx, state, { ...r, payouts: [...caught.payouts, ...(r.payouts ?? [])] });
   if (err) return { ok: false, error: err };
+  // Part 2 (migration 0136): an office move nudges the private meter, and a rumor can make Lola's Blotter.
+  if (r.integrity || r.headline) {
+    const { error } = await w.admin.rpc("career_office", { p_player: w.id, p_id: ctx.job!.id, p_integrity: r.integrity ?? 0, p_headline: r.headline ?? null });
+    if (error && !/career_office/.test(error.message)) console.error("career_office failed", error);
+  }
   return { ok: true, data: screen(ctx, today, r.receipt) };
 }
 
@@ -145,6 +150,10 @@ export async function careerStart(style: WorkStyle): Promise<Out> {
 
 export async function careerTask(index: number, option: string): Promise<Out> {
   return act((s, ctx) => answerTask(content, s, index, option, ctx, rng));
+}
+
+export async function careerOffice(action: OfficeAction, who: Who): Promise<Out> {
+  return act((s, ctx, today) => office(s, action, who, ctx, today, rng));
 }
 
 export async function careerQuit(): Promise<Out> {

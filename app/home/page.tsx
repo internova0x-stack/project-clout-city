@@ -33,7 +33,7 @@ import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomAction
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
 import { choiceBail, choiceBlotter, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
-import { careerApply, careerQuit, careerScreen, careerStart, careerTask } from "./careerActions";
+import { careerApply, careerOffice, careerQuit, careerScreen, careerStart, careerTask } from "./careerActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
@@ -175,7 +175,7 @@ export default async function HomePage() {
         dilemma: campaignDilemma, debate: campaignDebate, endWeek: campaignEndWeek, choose: campaignChoose,
       } : undefined}
       // Migration 0135: Careers (the sheet says so if it hasn't run yet).
-      careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, quit: careerQuit } : undefined}
+      careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).
       choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter } : undefined}
       // Migration 0058 switches on Clout TV (tv_state failing hides it). Photos upload from the browser.
