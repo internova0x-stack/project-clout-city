@@ -862,6 +862,33 @@
       "role": "the lobby guard",
       "regular": "osvaldo",
       "slang": []
+    },
+    {
+      "id": "marisela",
+      "name": "Marisela Ortega",
+      "age": 52,
+      "background": "Mexican-American, raised in Corona, raised four kids and now six streamers",
+      "personality": "Keeps the Glow Up House running: groceries, Wi-Fi, ring-light bulbs and the occasional on-camera intervention. Refuses to be in any thumbnail. Has been in nine.",
+      "yearsInNeighborhood": 24,
+      "catchphrases": [
+        "Shoes off. Mic off. Then we talk.",
+        "If you're live, I'm not here. I'm never here.",
+        "The Wi-Fi password is 'pay rent'. All lowercase."
+      ],
+      "likes": [
+        "Quiet hours",
+        "Tamales on Sunday",
+        "When someone does the dishes without a donation goal"
+      ],
+      "dislikes": [
+        "Energy drink cans in the plants",
+        "'Prank' videos",
+        "The word 'content' before noon"
+      ],
+      "placeId": "glow-up-house",
+      "role": "the house manager",
+      "regular": "marisela",
+      "slang": []
     }
   ],
   "roommates": [

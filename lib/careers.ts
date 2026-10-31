@@ -12,7 +12,7 @@
 
 import { ASPIRE, headStart, type AspirationId } from "./aspirations.ts";
 
-export type TrackId = "hospitality" | "tech" | "media" | "cityhall";
+export type TrackId = "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion";
 export type WorkStyle = "hustle" | "steady" | "coast";
 export type SkillId = "cooking" | "charisma" | "fitness" | "smarts" | "music" | "hustle" | "dance" | "gossip" | "photography";
 export type Persona = "supportive" | "micromanager" | "credit_stealer";
@@ -130,6 +130,48 @@ export const TRACKS: Track[] = [
       { title: "Policy Aide", salary: 1150, needs: { skills: { charisma: 3, smarts: 3 } } },
       { title: "Deputy Chief of Staff", salary: 1750, needs: { skills: { charisma: 5, smarts: 4 } } },
       { title: "Deputy Mayor for Vibes", salary: 2700, needs: { skills: { charisma: 6, smarts: 6 }, clout: 2000 } },
+    ],
+  },
+  // Streaming (owner, Oct 31: "next", after City Hall): the Streamer's career, at a content house in Astoria.
+  {
+    id: "streaming", name: "Streaming", emoji: "🎮", employer: "Glow Up Collective", place: "glow-up-house",
+    blurb: "Six creators, one house, eleven ring lights. Stream for the house channel and try not to become content yourself.",
+    keySkills: ["charisma", "hustle"],
+    manager: { name: "Brayden Kross", emoji: "🧢", persona: "supportive", style: "Supportive: \"every stream is a win, bro\"" },
+    friend: { name: "Lulu", emoji: "🎧" }, rival: { name: "Dante", emoji: "😎" },
+    bigBoss: { name: "Tyce Monroe", emoji: "🤑", title: "owns the house (and 9 million followers)", short: "Tyce" }, newHire: { name: "Bean", emoji: "🐣" },
+    successor: { name: "Gwen Okoro", emoji: "📊", persona: "micromanager", style: "Micromanager: analytics every hour, on the hour" },
+    perks: [
+      { level: 1, text: "Chat donations: C$25 × your level a workday, paid on payday" },
+      { level: 3, text: "Raid nights: 6 × your level in clout every workday" },
+    ],
+    levels: [
+      { title: "Chat Moderator", salary: 400, needs: {} },
+      { title: "Variety Streamer", salary: 650, needs: { skills: { charisma: 2 } } },
+      { title: "Partnered Streamer", salary: 1000, needs: { skills: { charisma: 3, hustle: 3 } } },
+      { title: "Top Creator", salary: 1600, needs: { skills: { charisma: 5, hustle: 4 } } },
+      { title: "Streaming Legend", salary: 2600, needs: { skills: { charisma: 6, hustle: 6 }, clout: 3000 } },
+    ],
+  },
+  // Fashion (owner, Oct 31): the Budding Influencer's career, at a fashion house in Long Island City.
+  {
+    id: "fashion", name: "Fashion", emoji: "👗", employer: "Atelier Vernon", place: "atelier-vernon",
+    blurb: "A fashion house in a converted LIC warehouse. Everything is beige, everyone is exhausted, and the hem is never right.",
+    keySkills: ["photography", "charisma"],
+    manager: { name: "Valentina Moreau", emoji: "🪡", persona: "micromanager", style: "Micromanager: re-pins every hem, every day" },
+    friend: { name: "Remy", emoji: "✂️" }, rival: { name: "Saskia", emoji: "💄" },
+    bigBoss: { name: "Madame Odile Vernon", emoji: "🕶️", title: "founded the house, and says so", short: "Madame Vernon" }, newHire: { name: "Pip", emoji: "🧵" },
+    successor: { name: "Bastian Kole", emoji: "🧥", persona: "supportive", style: "Supportive: fair reviews, real coaching" },
+    perks: [
+      { level: 1, text: "Sample sale: +3 Mood after every workday" },
+      { level: 3, text: "Front row: 7 × your level in clout every workday" },
+    ],
+    levels: [
+      { title: "Sample Runner", salary: 450, needs: {} },
+      { title: "Assistant Stylist", salary: 750, needs: { skills: { photography: 2 } } },
+      { title: "Stylist", salary: 1100, needs: { skills: { photography: 3, charisma: 3 } } },
+      { title: "Head Designer", salary: 1800, needs: { skills: { photography: 5, charisma: 4 } } },
+      { title: "Creative Director", salary: 2900, needs: { skills: { photography: 6, charisma: 6 }, clout: 4000 } },
     ],
   },
 ];
@@ -481,7 +523,8 @@ export function answerTask(content: CareerContent, s: CareerState, index: number
   const payouts: Payout[] = [];
   if (day.tasks.every((t) => t.picked)) {
     const closing = closeDay(content, s, ctx, rng);
-    effects.mood = (effects.mood ?? 0) + (closing.mood ?? 0);
+    // career_save takes a workday's Mood within −20 to +10.
+    effects.mood = Math.max(-20, Math.min(10, (effects.mood ?? 0) + (closing.mood ?? 0)));
     effects.energy = closing.energy;
     payouts.push(...closing.payouts);
   }
@@ -566,6 +609,15 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   if (s.track === "cityhall") {
     energy += 5;
     if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: 8 * s.level, ref: `${s.id}:${day.day}` });
+  }
+  if (s.track === "streaming") {
+    s.tips += 25 * s.level;
+    // A Streamer's raid nights pay half again (aspirations).
+    if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: Math.round(6 * s.level * (_ctx.aspiration === "streamer" ? ASPIRE.streamerScreen : 1)), ref: `${s.id}:${day.day}` });
+  }
+  if (s.track === "fashion") {
+    mood += 3;
+    if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: 7 * s.level, ref: `${s.id}:${day.day}` });
   }
   if (s.track === "media") {
     // A Streamer's screen time pays half again (aspirations, migration 0143).

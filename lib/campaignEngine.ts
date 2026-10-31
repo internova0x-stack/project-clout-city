@@ -44,7 +44,7 @@ export interface StartInput {
   aspiration?: string | null;
   /** Careers part 3 (owner, Oct 31): the manager's current job, as background (Hospitality: a happier staff; Tech: the
    * startup crowd's money; Media: name recognition). */
-  career?: { track: "hospitality" | "tech" | "media" | "cityhall"; level: number } | null;
+  career?: { track: "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion"; level: number } | null;
   candidate: CandidateId;
   clout: number;
   crew: number;
@@ -62,7 +62,8 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   const job = input.career ?? null;
   const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5) + (input.aspiration === "public" ? 3 : 0)
     + (job?.track === "media" ? CAMPAIGN.background.mediaPoints : 0)
-    + (job?.track === "cityhall" ? CAMPAIGN.background.cityhallPoints[job.level >= 3 ? 1 : 0] : 0);
+    + (job?.track === "cityhall" ? CAMPAIGN.background.cityhallPoints[job.level >= 3 ? 1 : 0] : 0)
+    + (job?.track === "streaming" ? CAMPAIGN.background.streamingPoints : 0);
   const places: CampaignState["places"] = {};
   for (const p of content.places) {
     const lean = (c.places[p.id] ?? 0) + (input.home === p.id ? 3 : 0);
@@ -76,7 +77,7 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
     v: 1, id: input.id, candidate: c.id, week: 1, phase: "planning", endedOn: null,
     places, cash: c.cash + input.seed, raised: 0, seeded: input.seed, skimmed: 0,
     favors: 0, dirtyFavors: 0, heat: 0, integrity: start, intel: 0, morale: 70, startIntegrity: start, repMark: start, rep: [],
-    staff: content.staff.map((s) => ({ id: s.id, competence: 50 + Math.floor(rng() * 30), morale: 70 + (job?.track === "hospitality" ? CAMPAIGN.background.hospitalityMorale : 0), loyalty: c.id === "kowalczyk" ? 80 : 60 + Math.floor(rng() * 15), out: false })),
+    staff: content.staff.map((s) => ({ id: s.id, competence: 50 + Math.floor(rng() * 30), morale: 70 + (job?.track === "hospitality" ? CAMPAIGN.background.hospitalityMorale : job?.track === "fashion" ? CAMPAIGN.background.fashionMorale : 0), loyalty: c.id === "kowalczyk" ? 80 : 60 + Math.floor(rng() * 15), out: false })),
     trust, budget: { digital: 0, street: 0, tv: 0 }, slots: Array(CAMPAIGN.slots).fill(null),
     inbox: [], pending: [], seen: [], traces: [], factChecks: [], dirtyOps: 0, exposures: 0, events: [], prepped: [],
     debate: null, recap: null, receipts: [], log: [], election: null, ending: null,

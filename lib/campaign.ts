@@ -43,12 +43,16 @@ export const CAMPAIGN = {
     hospitalityMorale: 10, techFunds: 1.2, mediaPoints: 2,
     /** City Hall: points up across the city below Policy Aide, and from it. */
     cityhallPoints: [1, 2] as const,
+    /** Streaming: chat shows up to vote. Fashion: the volunteers finally look good. */
+    streamingPoints: 1, fashionMorale: 5,
     lines: {
       hospitality: "💼 You've run a floor before: the staff start in a better mood.",
       tech: "💼 Your startup contacts open their wallets: fundraising pays a fifth more.",
       media: "💼 People know your face from Clout TV: 2 points up across the city.",
       cityhall: "💼 You work in the Mayor's own office. You know his playbook, and he knows you know.",
-    } as Record<"hospitality" | "tech" | "media" | "cityhall", string>,
+      streaming: "💼 You told chat to register. Some of them did: 1 point up across the city.",
+      fashion: "💼 You restyled the volunteers. They've never looked better, or worked harder.",
+    } as Record<"hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion", string>,
   },
   cleanIntegrity: 70,
   /** Team trouble after dirty play (spec section 10). */

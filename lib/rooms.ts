@@ -481,7 +481,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "atelier" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -1088,6 +1088,51 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { x: 1.6, z: 1.95, facing: 3.14, seated: true }, { x: 2.5, z: -1.2, facing: -0.6 }, { x: 4.6, z: 3.2, facing: 2.6 },
     ],
   },
+  // The Glow Up House (Streaming): a content house's main room. Streaming desks with ring lights and glowing screens along the
+  // back, an arcade corner, a giant screen for the house channel and a couch that's been in eleven thumbnails.
+  streamHouse: {
+    id: "streamHouse", w: 10.0, d: 8.0, wall: "#1C1830", wallAccent: "#B14BFF", floor: "#2A2440", floorKind: "concrete", dark: true,
+    items: [
+      { id: "stream-desk", kind: "desk", x: -3.0, z: -3.3, rot: 0, color: "#1F1B26", use: MAIN(0), label: "*" },
+      { id: "stream-chair", kind: "chair", x: -3.0, z: -2.55, rot: 2 },
+      { id: "ring-1", kind: "ringLight", x: -4.2, z: -2.5, rot: 0 },
+      { id: "desk-2", kind: "desk", x: -0.8, z: -3.3, rot: 0, color: "#1F1B26" },
+      { id: "chair-2", kind: "chair", x: -0.8, z: -2.55, rot: 2 },
+      { id: "screen", kind: "bigScreen", x: 2.7, z: -3.7, rot: 0 },
+      { id: "arcade-1", kind: "arcade", x: 4.3, z: -1.5, rot: 3 },
+      { id: "arcade-2", kind: "arcade", x: 4.3, z: -0.4, rot: 3 },
+      { id: "couch", kind: "sofa", x: 1.6, z: 1.8, rot: 2, color: "#B14BFF", use: MAIN(1), label: "*" },
+      { id: "table", kind: "coffeeTable", x: 1.6, z: 0.8, rot: 0 },
+      { id: "ring-2", kind: "ringLight", x: -2.4, z: 1.2, rot: 1 },
+      { id: "rug", kind: "rug", x: -3.4, z: 1.2, rot: 1, color: "#3DF2FF" },
+      { id: "plant", kind: "plant", x: 4.4, z: 3.3, rot: 0 },
+      { id: "fridge", kind: "drinksFridge", x: 4.45, z: 1.8, rot: 3 },
+    ],
+    spawn: [-1.0, 3.2],
+    npcs: [{ x: -3.0, z: -2.55, facing: 3.14, seated: true }, { x: -0.8, z: -2.55, facing: 3.14, seated: true }, { x: 3.4, z: -1.0, facing: 1.57 }, { x: 1.2, z: 1.8, facing: 3.14, seated: true }],
+  },
+  // Atelier Vernon (Fashion): racks of samples, cutting tables, a mirror wall, a runway down the middle and a lit fitting
+  // corner where a ring light lives.
+  atelier: {
+    id: "atelier", w: 10.0, d: 8.0, wall: "#F2EDE6", wallAccent: "#C9A27A", floor: "#D8CFC2", floorKind: "concrete", window: true, alwaysLit: true,
+    items: [
+      { id: "runway", kind: "rug", x: 0.0, z: 0.4, rot: 1, color: "#1F1B26", use: MAIN(0), label: "*" },
+      { id: "rack-1", kind: "clothesRack", x: -3.6, z: -3.4, rot: 0 },
+      { id: "rack-2", kind: "clothesRack", x: -1.6, z: -3.4, rot: 0 },
+      { id: "rack-3", kind: "clothesRack", x: 4.4, z: 0.4, rot: 3 },
+      { id: "table-1", kind: "displayTable", x: -3.4, z: -0.6, rot: 0, use: MAIN(1), label: "*" },
+      { id: "table-2", kind: "displayTable", x: -3.4, z: 1.2, rot: 0 },
+      { id: "mirror-1", kind: "mirror", x: 1.4, z: -3.65, rot: 0 },
+      { id: "mirror-2", kind: "mirror", x: 2.5, z: -3.65, rot: 0 },
+      { id: "mirror-3", kind: "mirror", x: 3.6, z: -3.65, rot: 0 },
+      { id: "ring", kind: "ringLight", x: 2.6, z: -2.2, rot: 2 },
+      { id: "sofa", kind: "sofa", x: 2.6, z: 3.3, rot: 2, color: "#C9A27A", use: { kind: "sit" }, label: "Sit" },
+      { id: "plant-1", kind: "plant", x: -4.4, z: 3.3, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 4.4, z: -3.3, rot: 0 },
+    ],
+    spawn: [-1.6, 3.2],
+    npcs: [{ x: 0.0, z: -1.6, facing: 0 }, { x: -2.6, z: -0.6, facing: -1.57 }, { x: 2.6, z: -1.4, facing: 3.14 }, { x: 0.0, z: 1.8, facing: 3.14 }],
+  },
   // Office sizes (owner, Oct 31: "different office sizes… depending on the size of the company"). The small one: two desks
   // shoved together, a mini fridge and nowhere to stand (a storefront campaign office, a tiny startup).
   officeSmall: {
@@ -1374,7 +1419,8 @@ export const PLACE_STYLES: Record<string, InteriorStyle> = {
   "thread-count": "minimalist", "triborough-works": "minimalist", "pressed-iron-gym": "minimalist", "grind-and-gossip": "minimalist",
   // Futuristic: the tech tower, the gaming arena, the UV club.
   "skybridge-tower": "futuristic", "respawn-arena": "futuristic", "ultraviolet-society": "futuristic",
-  // Modern: the TV tower, the rooftop restaurant, the campaign office, the furniture showroom.
+  // Modern: the TV tower, the rooftop restaurant, the campaign office, the furniture showroom, the atelier.
+  "atelier-vernon": "minimalist", "glow-up-house": "futuristic",
   "clout-tower": "modern", "altitude-718": "modern", "campaign-hq": "modern", "fifs-furniture": "modern",
 };
 
@@ -1686,7 +1732,7 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
  */
 export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
-  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
+  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, atelier: 6, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */

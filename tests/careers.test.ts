@@ -132,7 +132,7 @@ test("salary rises 10% a raise; the Careers list says where each track starts", 
   s.raises = 2;
   assert.equal(salaryOf(s), 600);
   const cards = trackCards(ctx(), DAY);
-  assert.deepEqual(cards.map((c) => c.missing.length > 0), [false, true, true, false]);
+  assert.deepEqual(cards.map((c) => c.missing.length > 0), [false, true, true, false, false, false]);
 });
 
 // ---- Part 2: office politics ----
