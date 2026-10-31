@@ -11,6 +11,7 @@ import { OFFICE_FACT, type FactKey } from "@/lib/memory";
 import { conditionOn, type ConditionNow } from "@/lib/cityConditions";
 import { unlockedCards } from "@/lib/cardFormat";
 import { memoryOf } from "@/lib/memoryServer";
+import type { AspirationId, AspirationState } from "@/lib/aspirations";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -21,7 +22,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 
 type Admin = NonNullable<ReturnType<typeof getAdminSupabase>>;
 type Job = { id: string; status: CareerState["status"] | "abandoned"; version: number; state: CareerState };
-type Context = CareerCtx & { bank: number; job: Job | null };
+type Context = CareerCtx & { bank: number; job: Job | null; aspirationState?: AspirationState | null };
 type Out = CareerResult<CareerScreen>;
 
 const rng = () => randomInt(0, 2 ** 32) / 2 ** 32;
@@ -43,7 +44,15 @@ async function load(id: string, admin: Admin): Promise<Context | { error: string
     return { error: careerError("unknown") };
   }
   if (!data) return { error: "Create your character first." };
-  return data as Context;
+  const ctx = data as Context;
+  // Aspirations (migration 0143): the pick and the degree give a level's head start each (null before the migration).
+  const asp = await admin.rpc("aspiration_of", { p_player: id });
+  if (!asp.error && asp.data) {
+    ctx.aspirationState = asp.data as AspirationState;
+    ctx.aspiration = ctx.aspirationState.aspiration;
+    ctx.degree = ctx.aspirationState.degree;
+  }
+  return ctx;
 }
 
 function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
@@ -54,6 +63,7 @@ function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
     energy: ctx.energy,
     atPlace: ctx.atPlace,
     receipt,
+    aspiration: ctx.aspirationState ?? null,
   };
 }
 
@@ -196,4 +206,18 @@ export async function careerOffice(action: OfficeAction, who: Who): Promise<Out>
 
 export async function careerQuit(): Promise<Out> {
   return act((s, _ctx, today) => { quit(s, today); return { receipt: "You quit. The city is full of jobs. Probably." }; });
+}
+
+/** Aspirations (migration 0143): picks the player's life path; a new pick at most every 30 days (Bro or Girlie any time). */
+export async function careerAspire(id: AspirationId, variant?: number): Promise<Out> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
+  const { error } = await supabase.rpc("aspiration_set", { p_aspiration: id, p_variant: variant ?? null });
+  if (error) {
+    if (/too_soon/.test(error.message)) return { ok: false, error: "You can pick a new aspiration 30 days after the last one." };
+    if (/aspiration_set/.test(error.message)) return { ok: false, error: "Run migration 0143 to switch on aspirations." };
+    console.error("aspiration_set failed", error);
+    return { ok: false, error: careerError("unknown") };
+  }
+  return careerScreen();
 }

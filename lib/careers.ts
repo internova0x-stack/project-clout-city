@@ -10,6 +10,8 @@
 // crypto random, service role) and the preview (lib/careerSim.ts) run them. The task file (content/careers/tasks.json)
 // holds the hidden outcomes, so only those two import lib/careersContent.ts; players get `careerView`.
 
+import { ASPIRE, headStart, type AspirationId } from "./aspirations.ts";
+
 export type TrackId = "hospitality" | "tech" | "media";
 export type WorkStyle = "hustle" | "steady" | "coast";
 export type SkillId = "cooking" | "charisma" | "fitness" | "smarts" | "music" | "hustle" | "dance" | "gossip" | "photography";
@@ -226,6 +228,9 @@ export interface CareerCtx {
   past: Partial<Record<TrackId, { best: number; fired: number; lastStatus: "fired" | "quit" | null; lastEnded: string | null }>>;
   /** Step 7: gated tasks this player has unlocked, with their filled names (the server reads memory: lib/cardFormat.ts). */
   unlocked?: Record<string, Record<string, string>>;
+  /** Aspirations (migration 0143): the player's pick and their degree (3 passed exams), each a level's head start. */
+  aspiration?: AspirationId | null;
+  degree?: boolean;
 }
 
 export type Payout = { kind: "career_pay" | "career_promo" | "career_screen" | "career_team"; currency: "cash" | "clout"; amount: number; ref: string };
@@ -291,9 +296,11 @@ export const SKILL_NAMES: Record<SkillId, string> = {
 };
 
 /** Where a hire starts: one below the best level reached before (unless the last job there ended in the sack), if met. */
-export function startLevel(track: Track, ctx: Pick<CareerCtx, "skills" | "clout" | "past">): number {
+export function startLevel(track: Track, ctx: Pick<CareerCtx, "skills" | "clout" | "past" | "aspiration" | "degree">): number {
   const p = ctx.past[track.id];
-  const top = p && p.lastStatus !== "fired" ? Math.max(1, p.best - 1) : 1;
+  const back = p && p.lastStatus !== "fired" ? Math.max(1, p.best - 1) : 1;
+  // Aspirations: a level higher in the aspiration's careers and a level for a degree, up to level 3 (owner, Oct 31).
+  const top = Math.max(back, Math.min(ASPIRE.headStartMax, 1 + headStart(track.id, ctx)));
   for (let l = top; l > 1; l--) if (!missing(track, l, ctx).length) return l;
   return 1;
 }
@@ -480,7 +487,8 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   if (s.track === "hospitality") { energy += 10; if (s.level >= 3) s.tips += 30 * s.level; }
   if (s.track === "tech") energy += 5;
   if (s.track === "media") {
-    const clout = 5 * s.level * (s.level >= 4 ? 2 : 1);
+    // A Streamer's screen time pays half again (aspirations, migration 0143).
+    const clout = Math.round(5 * s.level * (s.level >= 4 ? 2 : 1) * (_ctx.aspiration === "streamer" ? ASPIRE.streamerScreen : 1));
     payouts.push({ kind: "career_screen", currency: "clout", amount: clout, ref: `${s.id}:${day.day}` });
   }
   const L = content.lines[s.track];
@@ -833,6 +841,8 @@ export interface TrackCard {
   manager: string; perks: Track["perks"];
   ladder: { title: string; salary: number; needs: string[] }[];
   start: number; missing: string[]; reapplyOn: string | null;
+  /** Levels of head start from the player's aspiration and degree (migration 0143). */
+  headStart: number;
 }
 export function trackCards(ctx: CareerCtx, today: string): TrackCard[] {
   return TRACKS.map((t) => {
@@ -842,6 +852,7 @@ export function trackCards(ctx: CareerCtx, today: string): TrackCard[] {
       manager: `${t.manager.emoji} ${t.manager.name} · ${t.manager.style}`, perks: t.perks,
       ladder: t.levels.map((l, i) => ({ title: l.title, salary: l.salary, needs: missing(t, i + 1, { skills: {}, clout: 0 }) })),
       start, missing: missing(t, start, ctx), reapplyOn: rehireOn(t.id, ctx, today),
+      headStart: headStart(t.id, ctx),
     };
   });
 }
@@ -855,6 +866,8 @@ export interface CareerScreen {
   atPlace: string | null;
   /** What just happened, after an action. */
   receipt?: string;
+  /** Aspirations (migration 0143): the player's pick, when it can change, their degree; null before the migration. */
+  aspiration?: import("./aspirations.ts").AspirationState | null;
 }
 export type CareerResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type R = Promise<CareerResult<CareerScreen>>;
@@ -865,6 +878,8 @@ export interface CareerApi {
   task(index: number, option: string): R;
   office(action: OfficeAction, who: Who): R;
   quit(): R;
+  /** Picks (or changes, once every 30 days) the player's aspiration; `variant` is Bro (0) or Girlie (1). */
+  aspire(id: AspirationId, variant?: number): R;
 }
 
 /** The content's own rules (tests/careers.test.ts runs them on the task file). */

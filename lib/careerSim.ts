@@ -9,6 +9,7 @@ import {
   type CareerApi, type CareerCtx, type CareerResult, type CareerScreen, type CareerState,
 } from "./careers";
 import { CAREER_CONTENT as content } from "./careersContent";
+import { changeOn, type AspirationState } from "./aspirations";
 
 export function createCareerSim(preset: string | null, opts: { clout: number; energy: number; atPlace: () => string | null; onBank?: (delta: number) => void; onEnergy?: (delta: number) => void }): CareerApi {
   const rng = Math.random;
@@ -16,13 +17,17 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   let energy = Math.max(60, opts.energy);
   const skills = preset === "new" ? { gossip: 2 } : { charisma: 4, cooking: 3, smarts: 4, hustle: 3, gossip: 4, photography: 3 };
   let state: CareerState | null = null;
+  // Aspirations (migration 0143): ?career=welcome opens with no pick (the welcome screen); every other preset has one.
+  let asp: AspirationState = preset === "welcome" || preset === "new"
+    ? { aspiration: null, variant: null, chosenAt: null, degree: false, exams: 1 }
+    : { aspiration: "hustler", variant: null, chosenAt: "2026-10-30", degree: false, exams: 1 };
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: ["work", "day", "office", "grudge"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past() });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: ["work", "day", "office", "grudge"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree });
   let timer: ReturnType<typeof setTimeout> | null = null;
 
-  if (preset && !["new", "apply"].includes(preset)) {
+  if (preset && !["new", "apply", "welcome"].includes(preset)) {
     state = hire(`preview-${Date.now()}`, "hospitality", ctx(), "honest", day);
     if (preset === "day" || preset === "office" || preset === "grudge") startDay(content, state, "steady", ctx(), day, rng);
     // ?career=office: clocked in with a joint project on; ?career=grudge: Kendall holds a grudge that strikes today.
@@ -41,7 +46,7 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
 
   const screen = (receipt?: string): CareerResult<CareerScreen> => ({
     ok: true,
-    data: { tracks: trackCards(ctx(), day), canConnect: true, job: state ? careerView(content, state, day, ctx()) : null, energy, atPlace: ctx().atPlace, receipt },
+    data: { tracks: trackCards(ctx(), day), canConnect: true, job: state ? careerView(content, state, day, ctx()) : null, energy, atPlace: ctx().atPlace, receipt, aspiration: asp },
   });
   const pay = (ps: { currency: string; amount: number }[]) => { for (const p of ps) if (p.currency === "cash") opts.onBank?.(p.amount); };
   const nextDay = () => {
@@ -70,6 +75,11 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 
   return {
+    aspire: async (id, variant) => {
+      if (asp.aspiration && asp.aspiration !== id && changeOn(asp.chosenAt, day)) return { ok: false, error: "You can pick a new aspiration 30 days after the last one." };
+      asp = { ...asp, aspiration: id, variant: id === "corporate" ? (variant ?? 0) : null, chosenAt: asp.aspiration === id ? asp.chosenAt : day };
+      return screen();
+    },
     screen: async () => { if (state) pay(refresh(state, day, ctx(), rng).payouts); return screen(); },
     apply: async (track, answer) => {
       if (state?.status === "employed") return { ok: false, error: careerError("employed") };

@@ -139,6 +139,12 @@ async function managerBand(admin: NonNullable<ReturnType<typeof getAdminSupabase
   return integrityBand(data.integrity as number);
 }
 
+/** Aspirations (migration 0143): the manager's pick (null before the migration). */
+async function managerAspiration(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<string | null> {
+  const { data, error } = await admin.rpc("aspiration_of", { p_player: player });
+  return error ? null : ((data as { aspiration?: string | null } | null)?.aspiration ?? null);
+}
+
 export async function campaignStart(candidate: CandidateId, seed: number): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
@@ -149,7 +155,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   const id = randomUUID();
   let state: CampaignState;
   try {
-    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id) }, rng);
+    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id), aspiration: await managerAspiration(w.admin, w.id) }, rng);
   } catch (e) {
     if (e instanceof CampaignError) return { ok: false, error: campaignError(e.code) };
     throw e;

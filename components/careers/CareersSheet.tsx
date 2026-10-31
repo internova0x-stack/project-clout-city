@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { PLACES } from "@/lib/city";
+import { ASPIRATIONS, ASPIRE, aspirationById, aspirationName, changeOn, type AspirationId, type AspirationState } from "@/lib/aspirations";
 import { CAREER, INTERVIEW, OFFICE, type Answer, type CareerApi, type CareerScreen, type CareerView, type OfficeAction, type TrackCard, type TrackId, type Who, type WorkStyle } from "@/lib/careers";
 
 // Careers (spec section 30; migration 0135): the Phone's Careers app. Without a job: the three tracks, where you'd start
@@ -29,6 +30,7 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState<TrackCard | null>(null);
+  const [picking, setPicking] = useState(false);
 
   const run = useCallback(async (p: ReturnType<CareerApi["screen"]>, toast = true) => {
     setBusy(true);
@@ -41,15 +43,24 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
     return r.data;
   }, [onToast]);
 
-  useEffect(() => { if (open) { setApplying(null); void run(api.screen(), false); } }, [open, api, run]);
+  useEffect(() => { if (open) { setApplying(null); setPicking(false); void run(api.screen(), false); } }, [open, api, run]);
 
   const job = data?.job?.status === "employed" ? data.job : null;
+  // Aspirations (migration 0143): the welcome screen until the player picks one (never before the migration: null).
+  const asp = data?.aspiration ?? null;
+  const welcome = !!data && !!asp && (!asp.aspiration || picking);
   return (
     <Sheet open={open} onClose={onClose} label={job ? job.employer : "Careers"} tall>
       <div className="careers stack-16">
         {!data && !error && <p className="meta">Checking the job listings…</p>}
         {!data && error && <p className="error-text">{error}</p>}
-        {data && job && (
+        {welcome && asp && (
+          <Welcome state={asp} busy={busy} today={new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" })}
+            onCancel={asp.aspiration ? () => setPicking(false) : undefined}
+            onPick={async (id, variant) => { if (await run(api.aspire(id, variant), false)) { setPicking(false); onToast(`${aspirationById(id)!.emoji} Aspiration set: ${aspirationName(id, variant)}.`); } }} />
+        )}
+        {!welcome && asp?.aspiration && <AspirationChip state={asp} onChange={() => setPicking(true)} />}
+        {!welcome && data && job && (
           <Job data={data} v={job} busy={busy}
             onGo={() => { onClose(); onGo(job.place); }}
             onStart={async (style) => { if (await run(api.start(style), false)) onChanged(); }}
@@ -60,8 +71,8 @@ export function CareersSheet({ open, onClose, api, onToast, onGo, onChanged, onW
             onOffice={async (a, w) => { if (await run(api.office(a, w))) onChanged(); }}
             onQuit={async () => { if (await run(api.quit())) onChanged(); }} />
         )}
-        {data && !job && !applying && <Listings data={data} onApply={setApplying} />}
-        {data && !job && applying && (
+        {!welcome && data && !job && !applying && <Listings data={data} onApply={setApplying} />}
+        {!welcome && data && !job && applying && (
           <Interview card={applying} canConnect={data.canConnect} busy={busy} onBack={() => setApplying(null)}
             onAnswer={async (a) => { const r = await run(api.apply(applying.id, a)); if (r?.job) setApplying(null); }} />
         )}
@@ -99,6 +110,7 @@ function Listings({ data, onApply }: { data: CareerScreen; onApply: (t: TrackCar
                 <span className="careers-col" style={{ flex: 1, minWidth: 0 }}>
                   <span className="title">{t.name} · {t.employer}</span>
                   <span className="meta">Start as {start.title} · {cs(start.salary)} a week · {placeName(t.place)}</span>
+                  {t.headStart > 0 && <span className="meta careers-headstart">⭐ {t.headStart === 2 ? "Two levels" : "A level"} of head start from your {headStartWhy(data.aspiration, t.id)}</span>}
                 </span>
                 <span className="careers-chev" aria-hidden="true">{openId === t.id ? "▴" : "▾"}</span>
               </button>
@@ -376,5 +388,76 @@ function Workday({ v, busy, onTask }: { v: CareerView; busy: boolean; onTask: (i
         </div>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Aspirations (owner, Oct 31; migration 0143)
+
+function headStartWhy(a: AspirationState | null | undefined, track: TrackId): string {
+  const mine = a?.aspiration && aspirationById(a.aspiration)?.tracks.includes(track);
+  return [mine ? "aspiration" : null, a?.degree ? "degree" : null].filter(Boolean).join(" and ");
+}
+
+function Welcome({ state, busy, today, onPick, onCancel }: {
+  state: AspirationState; busy: boolean; today: string;
+  onPick: (id: AspirationId, variant?: number) => void; onCancel?: () => void;
+}) {
+  const [sel, setSel] = useState<AspirationId | null>(state.aspiration);
+  const [variant, setVariant] = useState(state.variant ?? 0);
+  const lockedUntil = changeOn(state.chosenAt, today);
+  const a = sel ? aspirationById(sel) : null;
+  return (
+    <div className="stack-16">
+      <div className="careers-poster">
+        <p className="overline">💼 Welcome to Careers</p>
+        <h2 className="display-lg" style={{ margin: 0 }}>What&apos;s your aspiration?</h2>
+        <p className="subtext" style={{ margin: 0 }}>
+          This is where you manage your work life: your job, your boss, your coworkers and your climb. Pick where you&apos;re
+          headed and the city opens a door or two.
+        </p>
+      </div>
+      <div className="stack-8" role="radiogroup" aria-label="Aspirations">
+        {ASPIRATIONS.map((x) => {
+          const on = sel === x.id;
+          const blocked = !!lockedUntil && !!state.aspiration && state.aspiration !== x.id;
+          return (
+            <button key={x.id} role="radio" aria-checked={on} disabled={blocked || busy}
+              className={`card careers-aspiration${on ? " on" : ""}`} onClick={() => setSel(x.id)}>
+              <span className="careers-emoji" aria-hidden="true">{x.emoji}</span>
+              <span className="careers-col" style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <span className="title">{x.name}</span>
+                <span className="subtext">{x.tagline}</span>
+                {x.perks.map((p) => <span key={p} className="meta">⭐ {p}</span>)}
+                {x.later.length > 0 && <span className="meta">🔜 Coming soon: {x.later.join(", ")}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {a?.variants && (
+        <div className="segmented" role="group" aria-label="Which name?">
+          {a.variants.map((v, i) => <button key={v} aria-pressed={variant === i} onClick={() => setVariant(i)}>{v}</button>)}
+        </div>
+      )}
+      <p className="meta" style={{ margin: 0 }}>
+        {state.degree ? "🎓 Your degree (3 passed exams) adds a level too. " : `🎓 Pass ${ASPIRE.degreeExams} campus exams (${state.exams} so far) for a degree: another level of head start. `}
+        {lockedUntil && state.aspiration ? `You can pick a new aspiration from ${lockedUntil}.` : `You can change it once every ${ASPIRE.changeDays} days.`}
+      </p>
+      <button className="btn btn-taxi" disabled={!sel || busy || (sel === state.aspiration && (variant === (state.variant ?? 0) || !a?.variants))}
+        onClick={() => sel && onPick(sel, a?.variants ? variant : undefined)}>
+        {sel ? `Make it ${aspirationName(sel, variant)}` : "Pick one"}
+      </button>
+      {onCancel && <button className="btn btn-ghost" onClick={onCancel}>Back</button>}
+    </div>
+  );
+}
+
+function AspirationChip({ state, onChange }: { state: AspirationState; onChange: () => void }) {
+  const a = aspirationById(state.aspiration)!;
+  return (
+    <button className="careers-aspiration-chip" onClick={onChange} aria-label="Your aspiration: change it">
+      <span aria-hidden="true">{a.emoji}</span> {aspirationName(a.id, state.variant)}{state.degree ? " · 🎓" : ""} <span className="meta">· Change</span>
+    </button>
   );
 }

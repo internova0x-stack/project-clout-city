@@ -3,9 +3,10 @@
 import { randomInt } from "node:crypto";
 import {
   CHOICES, boundEffects, cardView, repBonus, choiceError, mayOffer, pickCard, resolveChoice,
-  type BlotterItem, type ChoiceAfter, type ChoiceCard, type ChoiceCardView, type ChoiceMark, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
+  type BlotterItem, type ChoiceAfter, type ChoiceContext, type ChoiceCard, type ChoiceCardView, type ChoiceMark, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
+import { ASPIRE } from "@/lib/aspirations";
 import type { Memory } from "@/lib/memory";
 import type { ConditionNow } from "@/lib/cityConditions";
 import { memoryOf as readMemory } from "@/lib/memoryServer";
@@ -85,6 +86,12 @@ function resolveHere(e: ChoiceEffects, place: string | null): ChoiceEffects {
 /** The player's memory (migration 0138): storylets read it; without the migration, only cards that don't need it show. */
 const memoryOf = (admin: Admin, id: string) => readMemory(admin, id);
 
+/** Aspirations (migration 0143): a Future Celebrity's Climb cards come up twice as often. */
+async function aspirationBoost(admin: Admin, id: string): Promise<ChoiceContext["boost"]> {
+  const { data, error } = await admin.rpc("aspiration_of", { p_player: id });
+  return !error && (data as { aspiration?: string } | null)?.aspiration === "celebrity" ? { fame: ASPIRE.celebrityClimb } : undefined;
+}
+
 /** Storylets: what a choice wrote to memory (never blocks the choice). */
 async function remember(admin: Admin, id: string, sets: { fact: string; subject: string }[]) {
   for (const f of sets) {
@@ -156,7 +163,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
   const place = ctx.atPlace ? placeById(ctx.atPlace) : undefined;
   const memory = await memoryOf(w.admin, w.id);
   const pick = pickCard([...CHOICE_CARDS, ...weekly.offer], {
-    memory, weights: weekly.weights,
+    memory, weights: weekly.weights, boost: await aspirationBoost(w.admin, w.id),
     place: place?.id ?? null, tags: place?.tags ?? [], after, integrity: ctx.integrity, rank: ctx.rank,
     student: ctx.student, business: ctx.business, roommate: !!ECONOMY.homes.find((x) => x.id === ctx.home)?.roommate, history: ctx.history, today: ctx.today,
   }, rng);

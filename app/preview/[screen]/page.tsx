@@ -52,7 +52,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
-//   /preview/home?career=new|apply|work|day|office|grudge|review|warning|fired  Careers (migration 0135; Phone → Careers)
+//   /preview/home?career=welcome|new|apply|work|day|office|grudge|review|warning|fired  Careers (migration 0135; Phone → Careers; welcome = the aspiration welcome screen, migration 0143)
 //   /preview/home?choice=now|back|high|low|log|story|city  Moral Choices (migration 0131): now = a card on every arrival, story = storylets from a sample history (Content Engine step 2), city = the city conditions and Blotter wins of step 4 (News → City), back = a consequence lands
 //   /preview/home?skills=pro  high skill levels, so skill gigs, invites and Dance's club access are open (migration 0092)
 //   /preview/home?member=vip|monthly|cancelling|pastdue|forever|free|none  Membership & purchases (Settings, profile)

@@ -40,6 +40,8 @@ export interface StartInput {
   id: string;
   /** Option C: the manager's own Halo ↔ Hustler band (null before their first moral choice). */
   band?: "high" | "middle" | "low" | null;
+  /** Aspirations (migration 0143): the manager's pick (a Public Servant starts ahead). */
+  aspiration?: string | null;
   candidate: CandidateId;
   clout: number;
   crew: number;
@@ -53,7 +55,8 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   const c = candidateOf(content, input.candidate);
   if (input.seed < 0 || input.seed > CAMPAIGN.seedMax) fail("bad_seed");
   // A famous manager opens doors: up to +6 points to start and up to double the fundraising.
-  const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5);
+  // Aspirations (migration 0143): a Public Servant's campaigns start 3 points up across the city.
+  const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5) + (input.aspiration === "public" ? 3 : 0);
   const places: CampaignState["places"] = {};
   for (const p of content.places) {
     const lean = (c.places[p.id] ?? 0) + (input.home === p.id ? 3 : 0);

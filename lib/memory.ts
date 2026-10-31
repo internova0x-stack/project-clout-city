@@ -52,6 +52,7 @@ export const FACTS = {
   "campaign.won_dirty": { means: "Won an election dirty", subject: "the candidate" },
   "campaign.lost": { means: "Lost an election", subject: "the candidate" },
   "choice.made": { means: "Made a moral choice", subject: "dilemma:option" },
+  "life.aspiration": { means: "Picked an aspiration in Careers", subject: "the aspiration (lib/aspirations.ts)" },
   "place.banned": { means: "Banned from a place (expires)", subject: "the place" },
   "police.held": { means: "Spent time in holding", subject: "" },
   "police.bailed": { means: "Paid bail", subject: "" },
