@@ -124,3 +124,42 @@ test("the quit card: under 30 work mood; stick it out rests it a week; quit to r
   const plain = structuredClone(s);
   assert.equal(quit(plain, DAY).effects.mood, 5, "quitting a job you dread lifts your mood");
 });
+
+test("friends for life: the work friend's trust reaches 85 and never falls under 60; they cover a missed day", async () => {
+  const { befriend } = await import("../lib/careers.ts");
+  const s = clockedIn();
+  s.trust.friend = 80;
+  const r = office(s, "share", "friend", ctx(), DAY, () => 0.5);
+  assert.equal(s.lifer, true);
+  assert.match(r.receipt, /friends for life/);
+  s.trust.friend = 20;
+  befriend(s);
+  assert.equal(s.trust.friend, 60);
+  assert.equal(careerView(content, s, DAY, ctx()).lifer, true);
+  // Four workdays of five: a friend for life covers the fifth.
+  const a = structuredClone(s); a.worked = ["a", "b", "c", "d"]; a.performance = 60;
+  const b = structuredClone(a); b.lifer = false;
+  const { refresh } = await import("../lib/careers.ts");
+  refresh(a, a.nextReview, ctx(), () => 0.5);
+  refresh(b, b.nextReview, ctx(), () => 0.5);
+  assert.ok(a.performance > b.performance, `${a.performance} vs ${b.performance}`);
+});
+
+test("a career is campaign background: Hospitality's staff mood, Tech's fundraising, Media's points", async () => {
+  const { startCampaign } = await import("../lib/campaignEngine.ts");
+  const { buildContent } = await import("../lib/campaign.ts");
+  const read = (f: string) => JSON.parse(readFileSync(new URL(`../content/campaign/${f}.json`, import.meta.url), "utf8"));
+  const CAMPAIGN_CONTENT = buildContent({ candidates: read("candidates"), city: read("city"), inbox: read("inbox"), situations: read("situations"), debate: read("debate"), lines: read("lines"), tasks: read("tasks") });
+  const base = { id: "c", candidate: CAMPAIGN_CONTENT.candidates[0].id, clout: 0, crew: 0, home: null, seed: 0, wonBefore: false };
+  const rng = () => 0.5;
+  const none = startCampaign(CAMPAIGN_CONTENT, base, rng);
+  const hosp = startCampaign(CAMPAIGN_CONTENT, { ...base, career: { track: "hospitality", level: 2 } }, rng);
+  const tech = startCampaign(CAMPAIGN_CONTENT, { ...base, career: { track: "tech", level: 2 } }, rng);
+  const media = startCampaign(CAMPAIGN_CONTENT, { ...base, career: { track: "media", level: 2 } }, rng);
+  assert.ok(hosp.staff.every((x, i) => x.morale === none.staff[i].morale + 10));
+  assert.ok(Math.abs(tech.links.fundMult - none.links.fundMult * 1.2) < 1e-9);
+  const p = Object.keys(none.places)[0];
+  assert.ok(media.places[p].you > none.places[p].you);
+  assert.ok(media.receipts.some((l) => /Clout TV/.test(l)));
+  assert.equal(none.receipts.length, 0);
+});

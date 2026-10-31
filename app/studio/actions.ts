@@ -12,7 +12,7 @@ import { storyImportTrouble, syncWeeklyContent } from "@/lib/contentImport";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { runSetupCheck } from "@/lib/setupCheck";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "@/lib/adminPlayers";
-import type { Insights } from "@/lib/insights";
+import type { CareerStats, Insights } from "@/lib/insights";
 import type { Affiliates, AffiliatesOverview, CreatorInput, CreatorPage, LinkInput, PayoutMethod, PayoutsAdmin, VideoInput, VideosAdmin } from "@/lib/creators";
 import type { ShoutoutAction, StudioShoutoutDay } from "@/lib/radio";
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "@/lib/mayor";
@@ -420,7 +420,11 @@ export async function studioLinkStatus(id: number, status: "active" | "retired")
   return r.ok ? { ok: true as const, data: null } : r;
 }
 export async function studioInsights(days: number) {
-  return admin<Insights>("admin_insights", { p_days: days });
+  const r = await admin<Insights>("admin_insights", { p_days: days });
+  if (!r.ok) return r;
+  // Careers (migration 0143): left out until it has run.
+  const c = await admin<CareerStats>("admin_career_stats", { p_days: days });
+  return { ok: true as const, data: { ...r.data, careers: c.ok ? c.data : null } };
 }
 
 // ---- Setup check (owner, Oct 14): admins only; reports what's missing, never a secret ----

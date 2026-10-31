@@ -37,6 +37,7 @@ export const FACTS = {
   "career.went_over_head": { means: "Went over the boss's head", subject: "track:who" },
   "career.tried_pushout": { means: "Tried to push the boss out", subject: "track:who" },
   "career.pushed_out_boss": { means: "Pushed the boss out", subject: "the track" },
+  "career.friend_for_life": { means: "Became friends for life with a work friend", subject: "track:friend" },
   "career.quit_for_business": { means: "Quit a job to run their businesses", subject: "the track" },
   // Business, home, money
   "business.bought": { means: "Bought a business", subject: "the business" },
@@ -84,6 +85,8 @@ export const FACTS = {
   "thread.covered_fraud": { means: "Signed off on a boss's fake numbers", subject: "" },
   "thread.reported_fraud": { means: "Reported a boss's fake numbers to HR", subject: "" },
   "thread.lent_money": { means: "Lent a crew member money from a lotto win", subject: "" },
+  "thread.office_romance": { means: "Started dating a work friend", subject: "the coworker (track:who)" },
+  "thread.kept_it_professional": { means: "Kept a work friendship a friendship (or strung it along)", subject: "the coworker (track:who)" },
   "thread.lola_source": { means: "Became Lola's anonymous source", subject: "" },
 } as const satisfies Record<string, FactDef>;
 

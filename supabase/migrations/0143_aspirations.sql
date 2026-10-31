@@ -8,6 +8,8 @@
 --   * aspiration_set(id) (players): 30 days between picks ('too_soon').
 --   * aspiration_of(player) (service role): the pick and the degree, for the careers, campaign and choices servers.
 --   * visit_settle: a Stay-at-home Spouse's hosting pays a quarter more clout.
+--   * admin_career_stats(days) (Studio admins; Insights): jobs taken, kept 14 days, promoted at least once, working now
+--     by track, and aspirations picked.
 -- Safe to run more than once.
 
 create table if not exists public.aspirations (
@@ -117,6 +119,32 @@ begin
 end;
 $$;
 
+/** Studio → Insights: how careers are doing (owner, Oct 31: the careers spec's "kept a job 14 days, reached level 2"). */
+create or replace function public.admin_career_stats(p_days int default 30) returns jsonb
+language plpgsql stable security definer set search_path = public
+as $$
+declare
+  d int := least(greatest(coalesce(p_days, 30), 7), 365);
+begin
+  perform public.require_story_admin();
+  return jsonb_build_object(
+    'days', d,
+    'hired', (select count(*) from public.careers where status <> 'abandoned' and started_at > now() - make_interval(days => d)),
+    -- Jobs old enough to have lasted two weeks (started 14+ days ago, within the period), and how many did.
+    'cohort14', (select count(*) from public.careers where status <> 'abandoned'
+                  and started_at <= now() - interval '14 days' and started_at > now() - make_interval(days => d + 14)),
+    'kept14', (select count(*) from public.careers where status <> 'abandoned'
+                and started_at <= now() - interval '14 days' and started_at > now() - make_interval(days => d + 14)
+                and coalesce(ended_at, now()) >= started_at + interval '14 days'),
+    'promoted', (select count(*) from public.careers c where status <> 'abandoned' and started_at > now() - make_interval(days => d)
+                  and exists (select 1 from jsonb_array_elements(coalesce(c.state -> 'log', '[]'::jsonb)) e where e ->> 'kind' = 'promotion')),
+    'working', coalesce((select jsonb_object_agg(track, n) from (select track, count(*) n from public.careers where status = 'employed' group by track) t), '{}'::jsonb),
+    'aspirations', coalesce((select jsonb_object_agg(aspiration, n) from (select aspiration, count(*) n from public.aspirations group by aspiration) a), '{}'::jsonb));
+end;
+$$;
+
+revoke all on function public.admin_career_stats(int) from public, anon;
+grant execute on function public.admin_career_stats(int) to authenticated;
 revoke all on function public.exams_passed(uuid) from public, anon, authenticated;
 revoke all on function public.aspiration_of(uuid) from public, anon, authenticated;
 revoke all on function public.aspiration_restart() from public, anon, authenticated;

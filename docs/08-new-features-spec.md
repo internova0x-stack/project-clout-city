@@ -1227,6 +1227,49 @@ employers' place cards ("💼 Go to work" at your own job), `?open=careers`, and
   `career_office` (migration 0136, within ±12).
 - Preview: `?career=office` (clocked in, a joint project on) and `?career=grudge` (Kendall's grudge strikes today).
 
-**Later:** sponsorship (backing the boss), mentoring a new hire, going over the manager's head, pushing the manager out, office
-romance, quitting cards at low work mood, more tracks (Finance, Fashion, Law, City Hall, Real Estate) and City Hall's link to
-Campaign Mode, and the Climb's office cards for players with a job.
+**Aspirations** (owner, Oct 31: "Let careers be the entry point to choosing archetypes"; migration 0143, lib/aspirations.ts).
+The Careers app opens on a welcome screen: "💼 Welcome to Careers / What's your aspiration? This is where you manage your
+work life…", seven cards (emoji, tagline, ⭐ what it gives, 🔜 careers still to come) and one **Choose** button.
+
+| Aspiration | Gives | Coming soon |
+| --- | --- | --- |
+| 💼 Corporate Bro / Corporate Girlie | Tech starts a level higher | Finance, Law |
+| 🤳 Budding Influencer | Media starts a level higher | Fashion |
+| 🎮 Streamer | Media a level higher; screen time pays ×1.5 | Streaming |
+| 🌟 Future Celebrity | Climb cards come up twice as often; Media a level higher | |
+| 💸 Hustler | Hospitality starts a level higher | Real Estate |
+| 🏛️ Public Servant | Campaigns you manage start 3 points up | City Hall |
+| 🏡 Stay-at-home Spouse | Having people over pays a quarter more clout; best with a partner | |
+
+A degree (owner: passed exams count until Campus Life graduates people: 3 exams at C or better, never caught, since the last
+Start over) adds another level; head starts stop at level 3 and need that level's skills (owner, Oct 31: "keep it"). A new
+pick once every 30 days; Start over clears it.
+
+**Part 3** (owner, Oct 31: "build the 'mentioned in the spec, but not built' section"; no migration, the job is jsonb).
+
+| Move | On | You get | It costs |
+| --- | --- | --- | --- |
+| 🙈 Cover their mistake | friend, rival | their trust +15, a grudge cools | performance −1; 20% the boss finds out (−8) |
+| 📣 Back the boss in the meeting | boss | the boss +10, performance +1 | the friend and the rival −3 each |
+| 🧑‍🏫 Mentor the new hire | the new hire | the boss +4, work mood +4; every third session they have your back (the next payback misses) | 10 Energy |
+| 🪤 Quietly undermine their task | friend, rival | performance +4 | traced 30% (+10% per earlier sabotage): their trust −20, the boss −10, a grudge |
+| ⏫ Go over the boss's head | boss | the big boss +12, performance +5 (30% + performance and big-boss trust) | the boss −15 and a grudge; failing: the big boss −5, the boss −25 |
+| 🪑 Push the boss out | boss | once a job, with the big boss's trust 65+ and performance 70+: the boss's successor takes over and you're promoted (if you meet the next level), and Lola's Blotter names you | failing: a formal warning, the big boss −20, the boss's trust 10 and a level-3 grudge |
+
+- **The big boss** of each employer: Despina Kouris (owns The Gossip Group), Skyler Beta (founder of Pivotly), Montgomery Vale
+  (runs the Clout TV network); the new hires Wren, Priya and Ozzie; the successors Theo Marangos, Russ Kettering and Lacey
+  Dunmore.
+- **Friends for life:** the work friend's trust at 85 and it never drops under 60 again; they cover a missed day a week, and
+  Sal and Jojo mention them afterwards.
+- **The quit card** under 30 work mood: 💪 Stick it out (work mood +5, the card rests a week), 🚪 Hand in your notice (Mood +5),
+  🏪 Quit to run your business (needs one; Mood +8).
+- **Office romance** (character versions, owner): with a friend for life, a late-night card ("Is it weird if this feels like a
+  date?"): say it's a date (HR's "quick chat" follows), keep it friends, or flirt for favors; with a partner, drinks after
+  work instead.
+- **Campaign background:** running a campaign with a job: Hospitality's staff start happier (+10 morale), Tech's startup
+  contacts give a fifth more money, Media's face is worth 2 points across the city.
+- **Studio → Insights → Careers:** jobs taken, kept 14 days, promoted at least once, working now by track, aspirations picked.
+- Preview: `?career=welcome|boss|quit`.
+
+**Later:** more tracks (Finance, Fashion, Law, City Hall, Real Estate, Streaming) and City Hall's link to Campaign Mode, and
+the Climb's office cards for players with a job.

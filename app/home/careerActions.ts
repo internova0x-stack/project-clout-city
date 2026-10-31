@@ -110,6 +110,7 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
   if (ctx.job?.status !== "employed") return { ok: false, error: careerError("not_employed") };
   const today = nyDay();
   const state = structuredClone(ctx.job.state);
+  const liferBefore = !!state.lifer;
   const caught = refresh(state, today, ctx, rng);
   let r: ReturnType<typeof change> = {};
   try {
@@ -125,7 +126,9 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
     const { error } = await w.admin.rpc("career_office", { p_player: w.id, p_id: ctx.job!.id, p_integrity: r.integrity ?? 0, p_headline: r.headline ?? null });
     if (error && !/career_office/.test(error.message)) console.error("career_office failed", error);
   }
-  if (r.facts?.length) await remember(w.admin, w.id, r.facts);
+  // Careers part 3: a work friend for life is remembered beyond this job (storylets, the friend's lines).
+  const facts = [...(r.facts ?? []), ...(!liferBefore && state.lifer ? [{ key: "career.friend_for_life" as FactKey, subject: `${state.track}:friend` }] : [])];
+  if (facts.length) await remember(w.admin, w.id, facts);
   return { ok: true, data: screen(ctx, today, r.receipt) };
 }
 

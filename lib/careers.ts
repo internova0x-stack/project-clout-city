@@ -150,7 +150,9 @@ export const CAREER = {
     traced: { credit: 0.25, rumor: 0.35, per: 0.1 },
     /** Exposed this many times and coworkers' trust grows at half speed. */
     guarded: 2,
-    /** Part 3. */
+    /** Part 3. A work friend's trust at this and you're friends for life: it never drops under `liferFloor`, and they cover a missed day a week. */
+    lifer: 85,
+    liferFloor: 60,
     mentorEnergy: 10,
     /** Mentoring sessions until the new hire has your back (they warn you off the next grudge). */
     mentorAlly: 3,
@@ -242,6 +244,8 @@ export interface CareerState {
   coup?: boolean;
   /** When you last chose to stick it out on the quit card. */
   stuck?: string;
+  /** You and the work friend are friends for life (their trust reached 85). */
+  lifer?: boolean;
 }
 
 export type Peer = "friend" | "rival";
@@ -543,6 +547,7 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   }
   const L = content.lines[s.track];
   const band = s.trust.manager >= 65 ? "high" : s.trust.manager >= 40 ? "mid" : "low";
+  if (befriend(s)) lines.push(`💛 You and ${track.friend.name} are friends for life now. That doesn't wear off.`);
   const boss = managerOf(s, track);
   lines.unshift(`${boss.emoji} ${boss.name.split(" ")[0]}: "${pick(L.manager[band], rng)}"`);
   lines.push(s.trust.friend >= 50 ? `${track.friend.emoji} ${track.friend.name}: "${pick(L.friend, rng)}"` : `${track.rival.emoji} ${track.rival.name}: "${pick(L.rival, rng)}"`);
@@ -573,7 +578,8 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
   const day = s.nextReview;
   const worked = s.worked.length;
   const lines: string[] = [];
-  const missed = Math.max(0, CAREER.expectedDays - worked);
+  // A friend for life covers one missed day a week.
+  const missed = Math.max(0, CAREER.expectedDays - worked - (s.lifer ? 1 : 0));
   const penalty = missed * (s.trust.friend >= 70 ? CAREER.missedPenalty / 2 : CAREER.missedPenalty);
   if (missed) {
     s.performance = clamp(s.performance - penalty);
@@ -667,6 +673,7 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
   }
   const moodHit: Partial<Record<CareerLog["kind"], number>> = { promotion: 15, raise: 8, warning: -12, caught: -12, demotion: -20 };
   s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + (moodHit[outcome] ?? 0));
+  befriend(s);
   s.review = { day, lines, pay, outcome };
   s.periodStart = day;
   s.nextReview = addDays(day, CAREER.reviewEvery);
@@ -695,6 +702,14 @@ export const OFFICE: { id: OfficeAction; kind: "collab" | "sabotage"; emoji: str
 
 const nameOf = (track: Track, who: Target, s?: Pick<CareerState, "ousted">) =>
   who === "manager" ? managerOf(s ?? {}, track).name.split(" ")[0] : who === "hire" ? track.newHire.name : who === "friend" ? track.friend.name : track.rival.name;
+
+/** Friends for life: once the work friend's trust reaches 85 it never drops under 60. Returns true the moment it happens. */
+export function befriend(s: CareerState): boolean {
+  if (s.lifer) { s.trust.friend = Math.max(CAREER.office.liferFloor, s.trust.friend); return false; }
+  if (s.trust.friend < CAREER.office.lifer) return false;
+  s.lifer = true;
+  return true;
+}
 
 /** Can this player try to push their boss out now? */
 export const pushoutReady = (s: CareerState) =>
@@ -932,6 +947,7 @@ export function office(s: CareerState, action: OfficeAction, who: Target, ctx: P
     }
   }
   s.office[def.kind] = true;
+  if (befriend(s)) out.receipt += ` 💛 You and ${track.friend.name} are friends for life now.`;
   return out;
 }
 
@@ -1004,6 +1020,7 @@ export interface CareerView {
   pushout: "ready" | "not_ready" | "done";
   ally: boolean;
   quitCard: boolean;
+  lifer: boolean;
 }
 
 export function careerView(content: CareerContent, s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout">): CareerView {
@@ -1037,6 +1054,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
     pushout: s.ousted || s.coup ? "done" : pushoutReady(s) ? "ready" : "not_ready",
     ally: !!s.ally,
     quitCard: quitCardDue(s, today),
+    lifer: !!s.lifer,
   };
 }
 

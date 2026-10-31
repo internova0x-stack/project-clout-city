@@ -42,6 +42,9 @@ export interface StartInput {
   band?: "high" | "middle" | "low" | null;
   /** Aspirations (migration 0143): the manager's pick (a Public Servant starts ahead). */
   aspiration?: string | null;
+  /** Careers part 3 (owner, Oct 31): the manager's current job, as background (Hospitality: a happier staff; Tech: the
+   * startup crowd's money; Media: name recognition). */
+  career?: { track: "hospitality" | "tech" | "media"; level: number } | null;
   candidate: CandidateId;
   clout: number;
   crew: number;
@@ -56,7 +59,9 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   if (input.seed < 0 || input.seed > CAMPAIGN.seedMax) fail("bad_seed");
   // A famous manager opens doors: up to +6 points to start and up to double the fundraising.
   // Aspirations (migration 0143): a Public Servant's campaigns start 3 points up across the city.
-  const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5) + (input.aspiration === "public" ? 3 : 0);
+  const job = input.career ?? null;
+  const cloutBonus = Math.min(6, Math.log10(1 + Math.max(0, input.clout)) * 1.5) + (input.aspiration === "public" ? 3 : 0)
+    + (job?.track === "media" ? CAMPAIGN.background.mediaPoints : 0);
   const places: CampaignState["places"] = {};
   for (const p of content.places) {
     const lean = (c.places[p.id] ?? 0) + (input.home === p.id ? 3 : 0);
@@ -70,13 +75,18 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
     v: 1, id: input.id, candidate: c.id, week: 1, phase: "planning", endedOn: null,
     places, cash: c.cash + input.seed, raised: 0, seeded: input.seed, skimmed: 0,
     favors: 0, dirtyFavors: 0, heat: 0, integrity: start, intel: 0, morale: 70, startIntegrity: start, repMark: start, rep: [],
-    staff: content.staff.map((s) => ({ id: s.id, competence: 50 + Math.floor(rng() * 30), morale: 70, loyalty: c.id === "kowalczyk" ? 80 : 60 + Math.floor(rng() * 15), out: false })),
+    staff: content.staff.map((s) => ({ id: s.id, competence: 50 + Math.floor(rng() * 30), morale: 70 + (job?.track === "hospitality" ? CAMPAIGN.background.hospitalityMorale : 0), loyalty: c.id === "kowalczyk" ? 80 : 60 + Math.floor(rng() * 15), out: false })),
     trust, budget: { digital: 0, street: 0, tv: 0 }, slots: Array(CAMPAIGN.slots).fill(null),
     inbox: [], pending: [], seen: [], traces: [], factChecks: [], dirtyOps: 0, exposures: 0, events: [], prepped: [],
     debate: null, recap: null, receipts: [], log: [], election: null, ending: null,
-    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: 1 + Math.min(1, Math.max(0, input.clout) / 5000), wonBefore: input.wonBefore, band: input.band ?? undefined },
+    links: { clout: input.clout, crew: input.crew, home: input.home, fundMult: (1 + Math.min(1, Math.max(0, input.clout) / 5000)) * (job?.track === "tech" ? CAMPAIGN.background.techFunds : 1), wonBefore: input.wonBefore, band: input.band ?? undefined },
     earned: 0, dilemmas: {}, turnout: {}, queue: [], before: null,
   };
+  if (job) {
+    const line = CAMPAIGN.background.lines[job.track];
+    state.receipts.push(line);
+    state.log.push({ week: 1, text: line });
+  }
   deliverInbox(content, state);
   drawTasks(content, state, rng);
   return state;

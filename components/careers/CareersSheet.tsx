@@ -291,10 +291,11 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
       <div className="card stack-8">
         <p className="title" style={{ margin: 0 }}>The people</p>
         <Meter label={`${v.people.manager.emoji} ${v.people.manager.name.split(" ")[0]} · boss`} value={v.trust.manager} tone={tone(v.trust.manager)} />
-        <Meter label={`${v.people.friend.emoji} ${v.people.friend.name}`} value={v.trust.friend} tone={tone(v.trust.friend)} />
+        <Meter label={`${v.people.friend.emoji} ${v.people.friend.name}${v.lifer ? " 💛" : ""}`} value={v.trust.friend} tone={tone(v.trust.friend)} />
         <Meter label={`${v.people.rival.emoji} ${v.people.rival.name}`} value={v.trust.rival} tone={tone(v.trust.rival)} />
         <Meter label={`${v.people.bigBoss.emoji} ${v.people.bigBoss.name.split(" ")[0]} · big boss`} value={v.bigBoss} tone={tone(v.bigBoss)} />
         <p className="meta" style={{ margin: 0 }}>How much each of them trusts you. {v.people.manager.style}. {v.people.bigBoss.name} {v.people.bigBoss.title}.</p>
+        {v.lifer && <p className="meta" style={{ margin: 0 }}>💛 {v.people.friend.name} is a friend for life: they never fall far, and they cover a missed day a week.</p>}
         {v.ally && <p className="meta" style={{ margin: 0 }}>{v.people.newHire.emoji} {v.people.newHire.name}, the new hire you mentored, has your back: they&apos;ll tip you off before the next payback.</p>}
         {v.grudges.map((g) => (
           <p key={g.who} className="careers-grudge">😠 {g.who === "manager" ? v.people.manager.name.split(" ")[0] : v.people[g.who].name} is holding a grudge{g.level >= 3 ? " (a big one)" : g.level === 2 ? " (a real one)" : ""}. Expect payback at work. Helping or sharing credit cools it.</p>
