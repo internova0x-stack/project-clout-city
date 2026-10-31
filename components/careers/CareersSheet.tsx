@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { PLACES } from "@/lib/city";
 import { ASPIRATIONS, ASPIRE, aspirationById, aspirationName, changeOn, type AspirationId, type AspirationState } from "@/lib/aspirations";
-import { CAREER, INTERVIEW, OFFICE, type Answer, type CareerApi, type CareerScreen, type CareerView, type OfficeAction, type Target, type TrackCard, type TrackId, type WorkStyle } from "@/lib/careers";
+import { CAREER, INTERVIEW, OFFICE, bigName, type Answer, type CareerApi, type CareerScreen, type CareerView, type OfficeAction, type Target, type TrackCard, type TrackId, type WorkStyle } from "@/lib/careers";
 
 // Careers (spec section 30; migration 0135): the Phone's Careers app. Without a job: the three tracks, where you'd start
 // and what each needs, then a short interview card. With one: the job card (title, pay, performance, the people), today's
@@ -293,8 +293,8 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
         <Meter label={`${v.people.manager.emoji} ${v.people.manager.name.split(" ")[0]} · boss`} value={v.trust.manager} tone={tone(v.trust.manager)} />
         <Meter label={`${v.people.friend.emoji} ${v.people.friend.name}${v.lifer ? " 💛" : ""}`} value={v.trust.friend} tone={tone(v.trust.friend)} />
         <Meter label={`${v.people.rival.emoji} ${v.people.rival.name}`} value={v.trust.rival} tone={tone(v.trust.rival)} />
-        <Meter label={`${v.people.bigBoss.emoji} ${v.people.bigBoss.name.split(" ")[0]} · big boss`} value={v.bigBoss} tone={tone(v.bigBoss)} />
-        <p className="meta" style={{ margin: 0 }}>How much each of them trusts you. {v.people.manager.style}. {v.people.bigBoss.name} {v.people.bigBoss.title}.</p>
+        <Meter label={`${v.people.bigBoss.emoji} ${bigName(v.people)}`} value={v.bigBoss} tone={tone(v.bigBoss)} />
+        <p className="meta" style={{ margin: 0 }}>How much each of them trusts you. {v.people.manager.style}. Big boss: {v.people.bigBoss.name}, who {v.people.bigBoss.title}.</p>
         {v.lifer && <p className="meta" style={{ margin: 0 }}>💛 {v.people.friend.name} is a friend for life: they never fall far, and they cover a missed day a week.</p>}
         {v.ally && <p className="meta" style={{ margin: 0 }}>{v.people.newHire.emoji} {v.people.newHire.name}, the new hire you mentored, has your back: they&apos;ll tip you off before the next payback.</p>}
         {v.grudges.map((g) => (
@@ -354,7 +354,7 @@ function Office({ v, busy, onOffice }: { v: CareerView; busy: boolean; onOffice:
             onClick={() => { setSel(o.id); setWho(o.targets.length === 1 ? o.targets[0] : null); }}>
             <span className="choice-opt-row"><span className="choice-opt-label">{o.emoji} {o.label}</span></span>
             {o.id === "pushout" && v.pushout !== "ready" && (
-              <span className="meta">{v.pushout === "done" ? "Once a job, and you've had yours." : `Needs ${v.people.bigBoss.name.split(" ")[0]}'s trust ${CAREER.office.pushout.bigBoss}+ and performance ${CAREER.office.pushout.perf}+.`}</span>
+              <span className="meta">{v.pushout === "done" ? "Once a job, and you've had yours." : `Needs ${bigName(v.people)}'s trust ${CAREER.office.pushout.bigBoss}+ and performance ${CAREER.office.pushout.perf}+.`}</span>
             )}
             {sel === o.id && <span className="choice-opt-more"><span><b>You get</b> {o.get}</span><span><b>It costs</b> {o.cost}</span></span>}
           </button>

@@ -1322,6 +1322,611 @@
      ]
     }
    ]
+  },
+  {
+   "id": "cityhall-ribbon",
+   "track": "cityhall",
+   "minLevel": 1,
+   "emoji": "🎀",
+   "title": "The Mayor is cutting a ribbon at noon. The giant scissors are missing. Marvin is 'not panicking.'",
+   "options": [
+    {
+     "id": "find",
+     "label": "Search the whole building",
+     "get": "The real scissors",
+     "cost": "Your whole morning",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Found them in the Deputy Mayor for Vibes' office, next to six other ribbons. Noon, on the dot.",
+       "perf": 6,
+       "trust": {
+        "manager": 6
+       }
+      },
+      {
+       "weight": 1,
+       "text": "You find them at 12:04. The Mayor ad-libbed for four minutes about 'the spirit of cutting.'",
+       "perf": -2,
+       "trust": {
+        "manager": -3
+       }
+      }
+     ]
+    },
+    {
+     "id": "kitchen",
+     "label": "Bring kitchen scissors",
+     "get": "Something that cuts",
+     "cost": "Your dignity on camera",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Tiny scissors, giant Mayor. The photo goes viral. Marvin calls it 'relatable.'",
+       "perf": 4,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 3
+      },
+      {
+       "weight": 1,
+       "text": "They don't cut the ribbon. The Mayor tears it with his teeth. Lola has the photo.",
+       "perf": -5,
+       "trust": {
+        "manager": -6
+       }
+      }
+     ]
+    },
+    {
+     "id": "dolores",
+     "label": "Ask Dolores",
+     "get": "She knows where everything is",
+     "cost": "Dolores remembers favors",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Dolores opens a drawer labeled 'SCISSORS, CEREMONIAL, 3 OF 3.' 'Since 1994, hon.'",
+       "perf": 5,
+       "trust": {
+        "friend": 8
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-311",
+   "track": "cityhall",
+   "minLevel": 1,
+   "emoji": "📞",
+   "title": "A constituent has called 311 eleven times about the same pigeon. He's on line 2. Again.",
+   "options": [
+    {
+     "id": "listen",
+     "label": "Actually listen",
+     "get": "A happy constituent",
+     "cost": "Forty minutes",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The pigeon has a name: Gerald. You promise to 'look into Gerald.' He sends a thank-you card.",
+       "perf": 5,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "Forty minutes in, he asks for your supervisor. Then your supervisor's supervisor.",
+       "perf": -2,
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "ticket",
+     "label": "Open a ticket and move on",
+     "get": "Line 2 is free",
+     "cost": "The pigeon stays",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Ticket #PIG-0011 joins the queue. The queue is long and full of pigeons.",
+       "perf": 2
+      }
+     ]
+    },
+    {
+     "id": "transfer",
+     "label": "Transfer him to Preston",
+     "get": "Your afternoon back",
+     "cost": "Preston's afternoon",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You hear Preston say 'Gerald?' through the wall. You smile.",
+       "perf": 3,
+       "trust": {
+        "rival": -6
+       },
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "Preston transfers him back with a note: 'He asked for you specifically.'",
+       "perf": -1,
+       "trust": {
+        "rival": -3
+       },
+       "mood": -2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-podium",
+   "track": "cityhall",
+   "minLevel": 1,
+   "emoji": "🎤",
+   "title": "Press briefing in ten minutes. The Mayor's notes say 'say something about the potholes.' That's all.",
+   "options": [
+    {
+     "id": "write",
+     "label": "Write him real talking points",
+     "get": "A Mayor who makes sense",
+     "cost": "A sprint to the printer",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He reads them word for word, including 'PAUSE FOR APPLAUSE.' The room applauds, confused.",
+       "perf": 6,
+       "trust": {
+        "manager": 5
+       }
+      },
+      {
+       "weight": 1,
+       "text": "He ignores them and talks about his billboard for eight minutes.",
+       "perf": 1,
+       "mood": -2
+      }
+     ]
+    },
+    {
+     "id": "slogan",
+     "label": "Give him a catchy slogan",
+     "get": "A soundbite",
+     "cost": "Substance",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Potholes are just roads with ambition.' It's on a T-shirt by dinner.",
+       "perf": 4,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "The slogan tests badly with the Pothole Victims Association. They exist now.",
+       "perf": -4,
+       "trust": {
+        "manager": -5
+       }
+      }
+     ]
+    },
+    {
+     "id": "rhonda",
+     "label": "Ask Marvin what to write",
+     "get": "No blame if it flops",
+     "cost": "Marvin takes the credit if it works",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Marvin dictates three lines, then tells the Mayor they were his idea. They were.",
+       "perf": 2,
+       "trust": {
+        "manager": 4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-budget-line",
+   "track": "cityhall",
+   "minLevel": 1,
+   "emoji": "🧾",
+   "title": "You found a C$40,000 line in the budget called 'Ribbon Futures.' Nobody can explain it.",
+   "options": [
+    {
+     "id": "ask",
+     "label": "Ask Marvin about it",
+     "get": "An answer, maybe",
+     "cost": "Marvin's raised eyebrow",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Marvin: 'It's for ribbons. In the future.' He closes the spreadsheet. Discussion over.",
+       "perf": 1,
+       "trust": {
+        "manager": -2
+       }
+      },
+      {
+       "weight": 1,
+       "text": "Marvin is impressed you read the budget. 'Nobody reads the budget.' You're on the next one.",
+       "perf": 5,
+       "trust": {
+        "manager": 6
+       }
+      }
+     ]
+    },
+    {
+     "id": "leave",
+     "label": "Leave it alone",
+     "get": "No trouble",
+     "cost": "Your curiosity",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You close the file. Somewhere, a ribbon is being futured.",
+       "perf": 1,
+       "mood": -1
+      }
+     ]
+    },
+    {
+     "id": "tell",
+     "label": "Mention it to Dolores",
+     "get": "The real story",
+     "cost": "Office gossip, forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Dolores laughs for a full minute. 'That's the Mayor's boat, hon.' You did not hear that.",
+       "perf": 2,
+       "trust": {
+        "friend": 6
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-town-hall",
+   "track": "cityhall",
+   "minLevel": 2,
+   "emoji": "🪑",
+   "title": "Tonight's town hall: 40 folding chairs, 300 angry residents, one topic: the new bike lane.",
+   "options": [
+    {
+     "id": "chairs",
+     "label": "Find 260 more chairs",
+     "get": "Everyone gets a seat",
+     "cost": "Your back",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You raid three churches and a bingo hall. Everyone sits. Everyone still yells, but seated.",
+       "perf": 6,
+       "trust": {
+        "manager": 5
+       }
+      }
+     ]
+    },
+    {
+     "id": "stream",
+     "label": "Livestream it for the overflow",
+     "get": "A modern solution",
+     "cost": "Comments section",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "4,000 viewers. The comments are worse than the room. The Mayor reads them aloud anyway.",
+       "perf": 3,
+       "mood": -2
+      },
+      {
+       "weight": 1,
+       "text": "It trends. 'Bike Lane Town Hall' is the funniest thing in Queens this week.",
+       "perf": 5,
+       "trust": {
+        "manager": 3
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "move",
+     "label": "Move it to a bigger room last minute",
+     "get": "Space",
+     "cost": "Chaos",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Half the crowd goes to the wrong building. The meeting is calm. Too calm. Suspicious.",
+       "perf": 2,
+       "trust": {
+        "manager": -3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-scandal",
+   "track": "cityhall",
+   "minLevel": 3,
+   "emoji": "📰",
+   "title": "Lola has a photo of the Mayor eating a hot dog with a knife and fork. It runs at 6 unless you call.",
+   "options": [
+    {
+     "id": "call",
+     "label": "Call Lola and plead",
+     "get": "Maybe it doesn't run",
+     "cost": "A favor owed to Lola",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Lola agrees, 'for now.' She will absolutely collect.",
+       "perf": 5,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -2
+      },
+      {
+       "weight": 1,
+       "text": "Lola runs it anyway, with your quote. 'No comment, please, I'm begging.'",
+       "perf": -4,
+       "trust": {
+        "manager": -6
+       }
+      }
+     ]
+    },
+    {
+     "id": "spin",
+     "label": "Spin it: 'a man of refinement'",
+     "get": "A story you control",
+     "cost": "Credibility",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Refined Papa-Dani' polls up two points. The hot dog cart guy is furious.",
+       "perf": 6,
+       "trust": {
+        "manager": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "own",
+     "label": "Have him eat one properly on camera",
+     "get": "A redemption arc",
+     "cost": "His dignity, briefly",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Mustard everywhere. Real New Yorker energy. The internet forgives him.",
+       "perf": 7,
+       "trust": {
+        "manager": 5
+       },
+       "mood": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-endorsement",
+   "track": "cityhall",
+   "minLevel": 3,
+   "emoji": "🤝",
+   "title": "A developer wants a 'quick meeting' with the Mayor. He brought a cake shaped like a condo tower.",
+   "options": [
+    {
+     "id": "book",
+     "label": "Book the meeting",
+     "get": "The Mayor's happy, the cake too",
+     "cost": "The LUXURY CONDOS SOON lot gets closer",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The meeting goes long. The cake goes fast. A permit appears.",
+       "perf": 4,
+       "trust": {
+        "manager": 5,
+        "friend": -4
+       }
+      }
+     ]
+    },
+    {
+     "id": "decline",
+     "label": "Decline politely",
+     "get": "Clean hands",
+     "cost": "The developer's number in your phone forever",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He sends the cake anyway. You eat it out of spite. It's lemon.",
+       "perf": 2,
+       "trust": {
+        "friend": 5
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "log",
+     "label": "Log it as a gift and report it",
+     "get": "By the book",
+     "cost": "Marvin's mood",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Ethics office: 'Thank you.' Marvin: 'Why.' The cake is evidence now.",
+       "perf": 3,
+       "trust": {
+        "manager": -6,
+        "friend": 6
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-deputy",
+   "track": "cityhall",
+   "minLevel": 4,
+   "emoji": "🗺️",
+   "title": "The Mayor wants a 'Five-Borough Vibe Plan' by Friday. He hasn't said what a vibe plan is.",
+   "options": [
+    {
+     "id": "plan",
+     "label": "Write a real plan",
+     "get": "Something you're proud of",
+     "cost": "Three nights",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Parks, buses, and a pothole map. The Mayor renames it 'The Papa-Dani Plan.' Of course.",
+       "perf": 8,
+       "trust": {
+        "manager": 6
+       },
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "deck",
+     "label": "Make a gorgeous slide deck",
+     "get": "It looks like a plan",
+     "cost": "It's mostly fonts",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Twelve slides, zero policies, one sunset photo. He loves it.",
+       "perf": 5,
+       "trust": {
+        "manager": 4
+       },
+       "mood": 2
+      },
+      {
+       "weight": 1,
+       "text": "A reporter asks what slide 7 means. Nobody knows. Not even slide 7.",
+       "perf": -5,
+       "trust": {
+        "manager": -6
+       }
+      }
+     ]
+    },
+    {
+     "id": "survey",
+     "label": "Ask residents what they want",
+     "get": "Real answers",
+     "cost": "Real answers",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Top answer: 'fix the potholes.' Second: 'stop cutting ribbons.' He reads the second one twice.",
+       "perf": 6,
+       "trust": {
+        "friend": 6
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cityhall-conflict",
+   "track": "cityhall",
+   "minLevel": 1,
+   "emoji": "🗳️",
+   "when": {
+    "all": [
+     {
+      "snap": "campaign"
+     }
+    ]
+   },
+   "title": "The Mayor stops by your desk: 'Heard you're running some little campaign against me. How's that going?'",
+   "options": [
+    {
+     "id": "laugh",
+     "label": "Laugh it off",
+     "get": "Your job, for today",
+     "cost": "An awkward elevator ride later",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He laughs too. Too long. You both keep laughing. Marvin watches from the doorway.",
+       "perf": 1,
+       "trust": {
+        "manager": -3
+       }
+      }
+     ]
+    },
+    {
+     "id": "honest",
+     "label": "Tell him it's going well",
+     "get": "Respect, maybe",
+     "cost": "His full attention",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Good. I like a challenge.' He leaves. Your parking permit is quietly revoked.",
+       "perf": 3,
+       "trust": {
+        "manager": -6
+       },
+       "mood": 2
+      }
+     ]
+    },
+    {
+     "id": "spy",
+     "label": "Offer to tell him their plans",
+     "get": "His trust",
+     "cost": "Your candidate, if anyone finds out",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "He pats your shoulder: 'Loyalty. I love it.' You feel slightly disgusting.",
+       "perf": 6,
+       "trust": {
+        "manager": 8
+       },
+       "mood": -6
+      }
+     ]
+    }
+   ]
   }
  ],
  "lines": {
@@ -1410,6 +2015,35 @@
     "I'm doing the red carpet. You're doing... the pigeon follow-up?",
     "Vivian told me she's 'excited about my trajectory.'",
     "Love that you're still trying."
+   ]
+  },
+  "cityhall": {
+   "manager": {
+    "high": [
+     "The Mayor mentioned you. By name. Correctly. Don't let it go to your head.",
+     "Good work. I'll tell the Mayor it was my idea, as usual. You'll know.",
+     "You're on the ribbon list now. Top of it."
+    ],
+    "mid": [
+     "Fine. File it under 'fine.'",
+     "The Mayor has thoughts. I have notes. You have both by 8 AM.",
+     "Noted. Laminated. Filed."
+    ],
+    "low": [
+     "The Mayor asked who you were. I said 'an intern.' I was being kind.",
+     "Let's discuss your 'vision' in my office. Bring no vision.",
+     "Your memo was a text message with a header."
+    ]
+   },
+   "friend": [
+    "Thirty years here, hon. The trick is: never be in the photo.",
+    "I saved you a seat in the good break room. The one with the working microwave.",
+    "Preston called the Mayor 'Dani' to his face. I almost died."
+   ],
+   "rival": [
+    "My uncle golfs with the Deputy Mayor. Just saying.",
+    "I've been 'shadowing leadership.' You've been answering phones.",
+    "Cute memo. I had mine bound."
    ]
   }
  }

@@ -154,6 +154,8 @@ from (values
   ('0140_city_reacts.sql', coalesce((to_regclass('public.city_conditions') is not null), false)),
   ('0141_card_learning.sql', coalesce((to_regclass('public.card_weights') is not null), false)),
   ('0142_campaign_reputation.sql', coalesce((to_regclass('public.campaign_rep') is not null), false)),
-  ('0143_aspirations.sql', coalesce((to_regclass('public.aspirations') is not null), false))
+  ('0143_aspirations.sql', coalesce((to_regclass('public.aspirations') is not null), false)),
+  ('0144_city_hall_career.sql', coalesce((select pg_get_constraintdef(oid) like '%cityhall%' from pg_constraint
+                                          where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

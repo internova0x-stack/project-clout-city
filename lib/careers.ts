@@ -12,7 +12,7 @@
 
 import { ASPIRE, headStart, type AspirationId } from "./aspirations.ts";
 
-export type TrackId = "hospitality" | "tech" | "media";
+export type TrackId = "hospitality" | "tech" | "media" | "cityhall";
 export type WorkStyle = "hustle" | "steady" | "coast";
 export type SkillId = "cooking" | "charisma" | "fitness" | "smarts" | "music" | "hustle" | "dance" | "gossip" | "photography";
 export type Persona = "supportive" | "micromanager" | "credit_stealer";
@@ -40,7 +40,7 @@ export interface Track {
   rival: Person;
   /** Part 3 (owner, Oct 31: "build the 'mentioned in the spec, but not built' section"): the manager's own boss (going over
    * the manager's head, pushing the manager out), the new hire you can mentor, and who takes over if the manager is pushed out. */
-  bigBoss: Person & { title: string };
+  bigBoss: Person & { title: string; /** What people call them ("Papa-Dani"); else the first name. */ short?: string };
   newHire: Person;
   successor: Person & { persona: Persona; style: string };
   /** What the job gives besides pay, by level (shown on the ladder). */
@@ -107,6 +107,29 @@ export const TRACKS: Track[] = [
       { title: "Reporter", salary: 1200, needs: { skills: { gossip: 4, photography: 3 } } },
       { title: "Producer", salary: 1800, needs: { skills: { gossip: 5, photography: 5 } } },
       { title: "On-Air Personality", salary: 2800, needs: { skills: { gossip: 7, photography: 6 }, clout: 5000 } },
+    ],
+  },
+  // City Hall (owner, Oct 31: the first "coming soon" career; the Public Servant's): Mayor Papa-Dani's Queens office, with
+  // the Mayor himself as the big boss. Linked to Campaign Mode: working for him while managing his challenger is a thing.
+  {
+    id: "cityhall", name: "City Hall", emoji: "🏛️", employer: "The Mayor's Office", place: "city-hall-annex",
+    blurb: "Mayor Papa-Dani's Queens office. Ribbons, press briefings and a budget line nobody can explain.",
+    keySkills: ["charisma", "smarts"],
+    manager: { name: "Marvin Szeto", emoji: "🧑‍💼", persona: "credit_stealer", style: "Credit-stealer: your best ideas become the Mayor's" },
+    friend: { name: "Dolores", emoji: "👵" }, rival: { name: "Preston", emoji: "🎩" },
+    bigBoss: { name: "Mayor Papa-Dani", emoji: "🎗️", title: "runs the city, allegedly", short: "Papa-Dani" }, newHire: { name: "Kai", emoji: "🧑‍🎓" },
+    successor: { name: "Rhonda Bleecker", emoji: "👩‍⚖️", persona: "supportive", style: "Supportive: fair reviews, real coaching" },
+    perks: [
+      { level: 1, text: "Free press-briefing coffee: +5 Energy after every workday" },
+      { level: 3, text: "Photo ops: 8 × your level in clout every workday" },
+      { level: 1, text: "Inside track: campaigns you manage start 1 point up (2 from Policy Aide)" },
+    ],
+    levels: [
+      { title: "Ribbon-Cutting Intern", salary: 550, needs: {} },
+      { title: "Constituent Liaison", salary: 800, needs: { skills: { charisma: 2 } } },
+      { title: "Policy Aide", salary: 1150, needs: { skills: { charisma: 3, smarts: 3 } } },
+      { title: "Deputy Chief of Staff", salary: 1750, needs: { skills: { charisma: 5, smarts: 4 } } },
+      { title: "Deputy Mayor for Vibes", salary: 2700, needs: { skills: { charisma: 6, smarts: 6 }, clout: 2000 } },
     ],
   },
 ];
@@ -540,6 +563,10 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   // Perks.
   if (s.track === "hospitality") { energy += 10; if (s.level >= 3) s.tips += 30 * s.level; }
   if (s.track === "tech") energy += 5;
+  if (s.track === "cityhall") {
+    energy += 5;
+    if (s.level >= 3) payouts.push({ kind: "career_screen", currency: "clout", amount: 8 * s.level, ref: `${s.id}:${day.day}` });
+  }
   if (s.track === "media") {
     // A Streamer's screen time pays half again (aspirations, migration 0143).
     const clout = Math.round(5 * s.level * (s.level >= 4 ? 2 : 1) * (_ctx.aspiration === "streamer" ? ASPIRE.streamerScreen : 1));
@@ -711,6 +738,9 @@ export function befriend(s: CareerState): boolean {
   return true;
 }
 
+/** The big boss as people say it ("Papa-Dani", "Despina"). */
+export const bigName = (track: Pick<Track, "bigBoss">) => track.bigBoss.short ?? track.bigBoss.name.split(" ")[0];
+
 /** Can this player try to push their boss out now? */
 export const pushoutReady = (s: CareerState) =>
   !s.ousted && !s.coup && (s.bigBoss ?? 50) >= CAREER.office.pushout.bigBoss && s.performance >= CAREER.office.pushout.perf;
@@ -751,7 +781,7 @@ export function office(s: CareerState, action: OfficeAction, who: Target, ctx: P
   if (s.office[def.kind]) throw new CareerError("office_used");
   const n = nameOf(track, who, s);
   const boss = nameOf(track, "manager", s);
-  const big = track.bigBoss.name.split(" ")[0];
+  const big = bigName(track);
   const peer = who as Who;
   const guarded = (s.exposed ?? 0) >= CAREER.office.guarded;
   const warm = (d: number) => (guarded ? Math.round(d / 2) : d);

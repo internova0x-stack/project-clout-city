@@ -369,7 +369,7 @@ components live in `app/globals.css`.
   Aspirations (migration 0143, owner Oct 31: "careers be the entry point to choosing archetypes"; lib/aspirations.ts): the
   Careers app opens on a welcome screen ("What's your aspiration?", one Choose button; `?career=welcome`) with seven:
   Corporate Bro / Corporate Girlie (Tech), Budding Influencer, Streamer, Future Celebrity (Media), Hustler (Hospitality),
-  Public Servant (campaigns +3 points) and Stay-at-home Spouse (hosting clout ×1.25 in `visit_settle`); careers to come show
+  Public Servant (City Hall, campaigns +3 points) and Stay-at-home Spouse (hosting clout ×1.25 in `visit_settle`); careers to come show
   "Coming soon". The aspiration's careers start a level higher and a degree (3 campus exams at C+, never caught, since Start
   over: `exams_passed`) adds one, up to level 3, only where the skills are met (`startLevel`); Streamers' screen time ×1.5,
   Future Celebrities' Climb cards ×2 (`ChoiceContext.boost`). `aspirations` table; `aspiration_state()`, `aspiration_set(id)`
@@ -384,6 +384,12 @@ components live in `app/globals.css`.
   the job as campaign background (`StartInput.career`: Hospitality staff morale +10, Tech fundraising ×1.2, Media +2 points;
   `CAMPAIGN.background`) and Studio → Insights' Careers card (`admin_career_stats`, migration 0143: kept 14 days, promoted,
   aspirations). `?career=boss|quit` in the preview.
+  City Hall (migration 0144, owner Oct 31: the first "coming soon" career, the Public Servant's): track 'cityhall' at the City
+  Hall Annex (Astoria; place 'city-hall-annex', regular Osvaldo the lobby guard), The Mayor's Office: Ribbon-Cutting Intern
+  550 → Deputy Mayor for Vibes 2,700, Aura and Smarts, Marvin Szeto (credit-stealer: "your best ideas become the Mayor's"),
+  Dolores and Preston; Mayor Papa-Dani is the big boss (`bigBoss.short`, `bigName`). Perks: +5 Energy a workday, photo ops
+  from level 3 (8 × level clout, 'career_screen'), and campaigns start 1 point up (2 from level 3; `CAMPAIGN.background`).
+  A gated task (`cityhall-conflict`, `when` snap campaign) has the Mayor ask about "your little campaign". `?career=cityhall`.
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only

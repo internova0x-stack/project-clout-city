@@ -40,7 +40,7 @@ export const SPOTS: Record<string, readonly [number, number]> = {
   "ditmars-library": [6, 4], "ditmars-walkup": [7, 5],
   // Astoria: Steinway St and 31st St, the elevated train between rows 6 and 7
   "grind-and-gossip": [7, 6], "harmony-chapel": [9, 6], "schlep-and-schmear": [11, 6], "radiant-harbor": [6, 7],
-  "still-a-dollar-slice": [7, 7], "astoria-blvd-station": [8, 7], "campaign-hq": [12, 7], "neon-spoon": [6, 8],
+  "still-a-dollar-slice": [7, 7], "astoria-blvd-station": [8, 7], "city-hall-annex": [11, 7], "campaign-hq": [12, 7], "neon-spoon": [6, 8],
   "white-sauce-cart": [8, 8], "boiled-and-beloved": [9, 8], "steinway-fresh": [10, 8], "triborough-works": [12, 8],
   "precinct-114-half": [8, 9], "real-clout-fm": [9, 9], "low-light-lounge": [6, 9], "st-copays": [11, 9],
   "engine-7": [7, 10], "rockaway-diner": [9, 10], "clout-tower": [10, 10],
@@ -101,7 +101,7 @@ export const BORROWED_KIND: Record<string, LandmarkKind | "cart" | "store"> = {
   "ditmars-heights-rooftop": "rooftop", "downstairs-on-main": "store", "ditmars-walkup": "brownstone",
   "queens-housing-court": "college", "court-square-courthouse": "precinct", "still-a-dollar-slice": "store",
   "white-sauce-cart": "cart", "boiled-and-beloved": "cart", "feta-compli": "store", "schlep-and-schmear": "store",
-  "campaign-hq": "store",
+  "campaign-hq": "store", "city-hall-annex": "college",
 };
 
 /** The storefronts: a corner store with the place's own sign and colors, and its rooftop joke. */

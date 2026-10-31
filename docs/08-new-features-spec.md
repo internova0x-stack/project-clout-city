@@ -1238,7 +1238,7 @@ work life…", seven cards (emoji, tagline, ⭐ what it gives, 🔜 careers stil
 | 🎮 Streamer | Media a level higher; screen time pays ×1.5 | Streaming |
 | 🌟 Future Celebrity | Climb cards come up twice as often; Media a level higher | |
 | 💸 Hustler | Hospitality starts a level higher | Real Estate |
-| 🏛️ Public Servant | Campaigns you manage start 3 points up | City Hall |
+| 🏛️ Public Servant | City Hall starts a level higher; campaigns you manage start 3 points up | |
 | 🏡 Stay-at-home Spouse | Having people over pays a quarter more clout; best with a partner | |
 
 A degree (owner: passed exams count until Campus Life graduates people: 3 exams at C or better, never caught, since the last
@@ -1271,5 +1271,23 @@ pick once every 30 days; Start over clears it.
 - **Studio → Insights → Careers:** jobs taken, kept 14 days, promoted at least once, working now by track, aspirations picked.
 - Preview: `?career=welcome|boss|quit`.
 
-**Later:** more tracks (Finance, Fashion, Law, City Hall, Real Estate, Streaming) and City Hall's link to Campaign Mode, and
-the Climb's office cards for players with a job.
+**City Hall** (owner, Oct 31: the first "coming soon" career, picked over Streaming, Fashion, Real Estate, Finance and Law;
+migration 0144). The Public Servant's career, so that aspiration now starts it a level higher.
+
+| Track | Employer (place) | Ladder (weekly pay) | Key skills | Manager | Perks |
+| --- | --- | --- | --- | --- | --- |
+| 🏛️ City Hall | The Mayor's Office (City Hall Annex, Astoria) | Ribbon-Cutting Intern 550 · Constituent Liaison 800 · Policy Aide 1,150 · Deputy Chief of Staff 1,750 · Deputy Mayor for Vibes 2,700 | Aura, Smarts | Marvin Szeto, credit-stealer ("your best ideas become the Mayor's") | Press-briefing coffee (+5 Energy a workday); photo ops from Policy Aide (8 × level clout a workday); campaigns you manage start 1 point up (2 from Policy Aide) |
+
+- The people: Dolores (thirty years in, "never be in the photo") is the work friend, Preston (his uncle golfs with the
+  Deputy Mayor) the rival, Kai the new hire, Rhonda Bleecker the successor, and **Mayor Papa-Dani the big boss**: going over
+  Marvin's head means going to the Mayor, and pushing Marvin out needs the Mayor's trust.
+- Eight tasks: the missing ribbon scissors, the pigeon caller on 311, a press briefing with one line of notes, the "Ribbon
+  Futures" budget line, the bike-lane town hall, Lola's knife-and-fork hot dog photo, a developer's condo-tower cake and the
+  Five-Borough Vibe Plan.
+- **Campaign Mode link:** a City Hall employee who runs a campaign gets "💼 You work in the Mayor's own office. You know his
+  playbook" (1 point up, 2 from Policy Aide), and a workday may bring the Mayor to your desk: "Heard you're running some
+  little campaign against me." Laugh it off, tell him it's going well, or offer to spy for him.
+- The City Hall Annex on the map (a columned building on 31st St by Campaign HQ); Osvaldo, the lobby guard, is its regular.
+- Preview: `?career=cityhall`.
+
+**Later:** more tracks (Finance, Fashion, Law, Real Estate, Streaming), and the Climb's office cards for players with a job.
