@@ -401,7 +401,8 @@ export interface ChoiceMark { kind: "ban" | "gig_lock" | "holding"; place: strin
 /** Bail at the 114½ Precinct for the time left in holding. */
 export const bailCost = (until: string, now = Date.now()) => CHOICES.bailPerHour * Math.max(1, Math.ceil((Date.parse(until) - now) / 3_600_000));
 
-export interface BlotterItem { id: number; text: string; at: string }
+/** kind (migration 0140): a scandal from a choice, a player's win, or city news (no player). */
+export interface BlotterItem { id: number; text: string; at: string; kind?: "scandal" | "win" | "city" }
 
 export interface ChoiceState {
   /** Lasting effects in force now. */
@@ -437,6 +438,8 @@ export interface ChoicesApi {
   bail: () => Promise<ChoiceResult<{ cost: number }>>;
   /** Lola's Blotter: the last week's public headlines (News → City). */
   blotter: () => Promise<ChoiceResult<BlotterItem[]>>;
+  /** The city's conditions now and in the next 48 hours (migration 0140): News → City. */
+  conditions?: () => Promise<ChoiceResult<import("./cityConditions.ts").ConditionNow[]>>;
 }
 
 export const CHOICE_ERRORS: Record<string, string> = {

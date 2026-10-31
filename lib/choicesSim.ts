@@ -10,6 +10,8 @@ import {
 } from "./choices";
 import { CHOICE_CARDS as BASE_CARDS } from "./choicesContent";
 import WEEK_SAMPLE from "../content/storylets/2026-11-02.json";
+import CONDITION_SAMPLE from "../content/conditions/2026-11-02.json";
+import type { ConditionNow } from "./cityConditions";
 import type { Fact, FactKey, Memory } from "./memory";
 
 // The preview plays the first weekly storylets (Content Engine step 3) as if they'd gone live.
@@ -37,6 +39,20 @@ function storyMemory(): Memory {
   };
 }
 
+/** The sample week's conditions re-timed around now, and an HR crackdown that players set off. */
+function previewConditions(): ConditionNow[] {
+  const h = (n: number) => new Date(Date.now() + n * 3_600_000).toISOString();
+  const [heat, fair, brown] = CONDITION_SAMPLE.conditions;
+  const row = (c: typeof heat, from: number, to: number, now: boolean): ConditionNow =>
+    ({ id: c.id, kind: c.kind, subject: "", emoji: c.emoji, title: c.title, blurb: c.blurb, startsAt: h(from), endsAt: h(to), now, source: "weekly" });
+  return [
+    row(heat, -5, 30, true), row(brown, -1, 4, true), row(fair, 20, 54, false),
+    { id: "hr-crackdown-tech-preview", kind: "hr_crackdown", subject: "tech", emoji: "📋", title: "HR crackdown at Pivotly",
+      blurb: "Too much credit-taking at Pivotly. HR is reading the Slack. Office sabotage there gets traced twice as often this week.",
+      startsAt: h(-20), endsAt: h(148), now: true, source: "reaction" },
+  ];
+}
+
 interface Opts {
   /** Where the preview's player is standing now. */
   where: () => { place: string | null; tags: string[] };
@@ -49,8 +65,13 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   const rng = Math.random;
   const story = preset === "story";
   const always = preset === "now" || story;
+  // ?choice=city (and story): the first week's city conditions as if they were on (a heatwave and a brownout now, the
+  // street fair tomorrow) and a city storylet that fired, plus wins in the Blotter (Content Engine step 4).
+  const city = preset === "city" || story;
+  const conditions: ConditionNow[] = city ? previewConditions() : [];
   // The player's memory (migration 0138): storylets read it and their choices write to it.
   const memory: Memory = story ? storyMemory() : structuredClone(EMPTY_MEMORY);
+  memory.snapshot.conditions = [...new Set(conditions.filter((c) => c.now).map((c) => c.kind))];
   const remember = (sets: { fact: FactKey; subject: string }[]) => {
     const now = new Date().toISOString();
     for (const x of sets) {
@@ -66,7 +87,11 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   // Migration 0132's stakes in memory: lasting effects, chain cards waiting, Lola's Blotter.
   const marks: ChoiceMark[] = [];
   const chains: { at: number; card: string; intro: string }[] = [];
-  const blotter: BlotterItem[] = [];
+  const blotter: BlotterItem[] = city ? [
+    { id: -1, kind: "city", at: new Date().toISOString(), text: "📋 Triborough Works HR has sent a company-wide email titled 'Let's Talk About Credit.' It is 3,000 words long. Sabotage at Pivotly gets traced twice as often this week." },
+    { id: -2, kind: "win", at: new Date().toISOString(), text: "🏆 @marisol.q just managed a campaign all the way to City Hall. Staffers are already asking for selfies." },
+    { id: -3, kind: "win", at: new Date().toISOString(), text: "🔔 @dev_from_ditmars took a business public. The bell was rung. The bell was a cowbell." },
+  ] : [];
   const mark = (e: ChoiceEffects, place: string | null) => {
     const now = Date.now();
     if (e.ban) marks.push({ kind: "ban", place: e.ban.place === "here" ? place : e.ban.place, until: new Date(now + e.ban.days * 86_400_000).toISOString() });
@@ -222,5 +247,6 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       return ok({ cost });
     },
     blotter: () => ok([...blotter]),
+    conditions: () => ok(conditions),
   };
 }

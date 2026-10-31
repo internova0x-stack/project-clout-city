@@ -7,6 +7,7 @@ import {
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
 import type { Memory } from "@/lib/memory";
+import { conditionsInForce, type ConditionNow } from "@/lib/cityConditions";
 import { placeById } from "@/lib/city";
 import { ECONOMY } from "@/lib/economy";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -80,8 +81,11 @@ function resolveHere(e: ChoiceEffects, place: string | null): ChoiceEffects {
 
 /** The player's memory (migration 0138): storylets read it; without the migration, only cards that don't need it show. */
 async function memoryOf(admin: Admin, id: string): Promise<Memory | null> {
-  const { data, error } = await admin.rpc("player_memory", { p_player: id });
-  return error || !data ? null : (data as Memory);
+  const [{ data, error }, cond] = await Promise.all([admin.rpc("player_memory", { p_player: id }), admin.rpc("city_conditions_now")]);
+  if (error || !data) return null;
+  const m = data as Memory;
+  // Migration 0140: the city's conditions in force (a heatwave, a crackdown) join the snapshot for storylets.
+  return { ...m, snapshot: { ...m.snapshot, conditions: !cond.error && Array.isArray(cond.data) ? conditionsInForce(cond.data as ConditionNow[]) : [] } };
 }
 
 /** Storylets: what a choice wrote to memory (never blocks the choice). */
@@ -230,4 +234,12 @@ export async function choiceBlotter(): Promise<ChoiceResult<BlotterItem[]>> {
   if (!supabase) return { ok: true, data: [] };
   const { data, error } = await supabase.rpc("choice_blotter");
   return error ? { ok: true, data: [] } : { ok: true, data: (data ?? []) as BlotterItem[] };
+}
+
+/** The city's conditions now and in the next 48 hours (migration 0140; none before it has run). */
+export async function choiceConditions(): Promise<ChoiceResult<ConditionNow[]>> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: true, data: [] };
+  const { data, error } = await supabase.rpc("city_conditions_now");
+  return error || !Array.isArray(data) ? { ok: true, data: [] } : { ok: true, data: data as ConditionNow[] };
 }

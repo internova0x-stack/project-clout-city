@@ -213,3 +213,13 @@ test("work mood: a miserable job drags performance and your evenings", () => {
   assert.ok(s.today!.summary.some((l) => /dread/.test(l)));
   assert.ok(mood < 0);
 });
+
+test("an HR crackdown week (a city storylet, migration 0140) traces sabotage twice as often", () => {
+  // The same roll: above the base chance, below it doubled.
+  const plain = clockedIn();
+  office(plain, "credit", "rival", ctx(), DAY, () => 0.4);
+  const crack = clockedIn();
+  office(crack, "credit", "rival", ctx(), DAY, () => 0.4, { crackdown: true });
+  assert.equal(plain.exposed ?? 0, 0);
+  assert.equal(crack.exposed ?? 0, 1);
+});

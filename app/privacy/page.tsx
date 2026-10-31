@@ -79,7 +79,7 @@ export default function Privacy() {
         <li>Your in-game name, look, style, rank, badges, crew, player card, and that you&apos;re at a place in the game.</li>
         <li>&quot;Dating @name&quot; on your card if you&apos;re in a relationship (you can hide it), and your sublet listings and ratings.</li>
         <li>Your chats with them, and party or home-visit chat with the people there.</li>
-        <li>Shoutouts and Clout TV photos after our team picks them, and your name in leaderboards and Lola&apos;s &quot;Spotted at&quot; lines (opt out in Settings).</li>
+        <li>Shoutouts and Clout TV photos after our team picks them, and your name in leaderboards, Lola&apos;s &quot;Spotted at&quot; lines and Lola&apos;s Blotter (public headlines from some choices and big wins) (opt out in Settings).</li>
         <li>Never your email, purchases, Mayor letters or reports.</li>
       </ul>
 

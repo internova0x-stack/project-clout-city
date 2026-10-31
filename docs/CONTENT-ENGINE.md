@@ -1,6 +1,6 @@
 # Clout City: Content Engine
 
-**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 3 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
+**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 4 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
 reactive part of the World State brief.
 
 **Owner decisions (Oct 31):**
@@ -208,7 +208,7 @@ memory**.
 | 1 ✅ | **Player memory** (built, migration 0138; keys in lib/memory.ts): `player_facts`, `fact_note`, `player_snapshot`, writers in careers, campaigns, choices, dating, businesses, campus and bans; tallies | Nothing yet (the foundation) |
 | 2 ✅ | **Storylets** (built: lib/storylets.ts, content/choices/storylets.json, `?choice=story`): the engine (choice cards plus conditions, slots, `sets`); the 76 cards and the 36 Climb cards moved over; about 20 cross-system storylets | Cards that remember what you did elsewhere |
 | 3 ✅ | **Templates and the weekly generator** (built: migration 0139, lib/storyletWeeks.ts, content/storylets/, Studio → Storylets): slot filling, worst-case validation, the Studio Storylets tab with the veto window, the routine drafting templates | A steady stream of new situations |
-| 4 | **The city reacts:** conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
+| 4 ✅ | **The city reacts** (built: migration 0140, lib/cityConditions.ts, content/conditions/, content/city/reactions.json): conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
 | 5 | **One character registry:** the cast, profiles, career people, campaign people and Barksley in one list with roles, places and memory keyed off facts | People who remember you |
 | 6 | **Learning:** weights from what's chosen and skipped; retiring what's skipped | Content that gets better |
 | 7 | **One card format:** campaign situations and career tasks on storylets | Consistency |
@@ -240,3 +240,23 @@ memory**.
   so open cards and players' histories still find it (`storylets_live` → `offer`).
 - The server (app/home/choiceActions.ts) adds live weekly cards to the pool every 5 minutes.
 - Not yet: amounts scaled to the player's income (`{amount}`), city-wide slots (`{a_club_tonight}`), learning (step 6).
+
+**Step 4 as built (Oct 31):**
+- **City conditions** (`city_conditions`): a heatwave, cold snap, rainstorm, brownout, transit meltdown, festival, sample
+  sale, or a reaction (HR crackdown, doors tighten, lotto fever, ethics probe, full precinct, party surge, showtime
+  season). Their effects join `world_effects()` (arc `condition:<id>`), so prices, closures and place notes work
+  everywhere the World State already reaches, with no new code in those systems. Only `price_multiplier` (×0.5 to
+  ×1.5), `availability` (a closure at most 12 hours) and `place_state` notes; never chatter, tasks, flags or spawned
+  events; never homes, campuses, civic places or transit (`CONDITIONS.protectedTags`).
+- **Weekly conditions**: the routine writes `content/conditions/<Monday>.json` (1 to 4, each 2 to 72 hours inside its
+  week). They arrive like storylets: live 24 hours later unless vetoed in Studio → Storylets → City conditions.
+- **City storylets** (`content/city/reactions.json`, 8 rules): when the city's tally for a fact (world_tally) over the
+  last N days reaches a line (at least 3: a crowd, never one player), the condition fires at once from its approved
+  template, with a cooldown, and Lola posts a headline in the Blotter. `city_react` runs with the weekly sync.
+  An HR crackdown at an employer doubles the chance office sabotage there is traced (`office(..., { crackdown })`).
+- **Storylets read conditions**: `snap: "conditions", is: "<kind>"` (the server adds the kinds in force to the snapshot).
+  The first week has two (a heatwave price-gouging dilemma for business owners, a brownout date night).
+- **Players in each other's News**: a player's first campaign win, business taken public or scholarship posts a 🏆 line
+  in Lola's Blotter (`player_facts` trigger), never for News opt-outs. News → City's "Around the city" card lists what's
+  on now and in the next 48 hours.
+- Not yet: weather on the map itself, regulars' lines per condition, players' scandals beyond the Blotter.

@@ -9,6 +9,7 @@
 import { TRACKS } from "./careers.ts";
 import { PLACES } from "./city.ts";
 import { FACTS, type FactKey, type Fact, type Memory, type Snapshot } from "./memory.ts";
+import { CONDITION_KINDS } from "./cityConditions.ts";
 
 /** A fact the player has (any subject unless one is given; `subjectStarts` matches a prefix, e.g. "found-wallet:"). */
 export interface HasCond { has: FactKey; subject?: string; subjectStarts?: string; withinDays?: number; minCount?: number }
@@ -19,7 +20,7 @@ export interface When { all?: Cond[]; any?: Cond[]; none?: Cond[] }
 
 export const SNAP_PATHS = [
   "band", "meter", "rank", "clout", "bank", "home", "at", "job", "job.track", "job.level", "job.workMood",
-  "businesses", "partner", "campus", "campaign", "marks", "crew",
+  "businesses", "partner", "campus", "campaign", "marks", "crew", "conditions",
 ] as const;
 export type SnapPath = (typeof SNAP_PATHS)[number];
 
@@ -80,7 +81,7 @@ export function systemsOf(w: When | undefined): Set<string> {
   const out = new Set<string>();
   for (const c of [...(w?.all ?? []), ...(w?.any ?? []), ...(w?.none ?? [])]) {
     if ("has" in c) out.add(c.has.split(".")[0]);
-    else out.add(c.snap.startsWith("job") ? "career" : c.snap === "partner" ? "dating" : c.snap === "band" || c.snap === "meter" ? "choice" : c.snap);
+    else out.add(c.snap.startsWith("job") ? "career" : c.snap === "partner" ? "dating" : c.snap === "band" || c.snap === "meter" ? "choice" : c.snap === "conditions" ? "city" : c.snap);
   }
   return out;
 }
@@ -139,6 +140,7 @@ export function storyletProblems(at: string, card: { title: string; when?: When;
   for (const c of [...(card.when?.all ?? []), ...(card.when?.any ?? []), ...(card.when?.none ?? [])]) {
     if ("has" in c) { if (!facts.has(c.has)) out.push(`${at}: unknown fact "${c.has}" (lib/memory.ts)`); }
     else if (!(SNAP_PATHS as readonly string[]).includes(c.snap)) out.push(`${at}: unknown snapshot "${c.snap}"`);
+    else if (c.snap === "conditions" && (typeof c.is !== "string" || !(c.is in CONDITION_KINDS))) out.push(`${at}: "conditions" needs is: a condition kind (lib/cityConditions.ts)`);
   }
   const slots = card.slots ?? {};
   for (const [n, s] of Object.entries(slots)) {
@@ -172,6 +174,6 @@ export function storyletProblems(at: string, card: { title: string; when?: When;
 
 /** An empty memory: what a brand-new player (or a preview without memory) has. */
 export const EMPTY_MEMORY: Memory = {
-  snapshot: { rank: 1, clout: 0, bank: 0, meter: 50, band: "middle", home: null, at: null, job: null, businesses: [], partner: null, campus: null, campaign: null, marks: [], crew: 0, skills: {} },
+  snapshot: { rank: 1, clout: 0, bank: 0, meter: 50, band: "middle", home: null, at: null, job: null, businesses: [], partner: null, campus: null, campaign: null, marks: [], crew: 0, skills: {}, conditions: [] },
   facts: [],
 };
