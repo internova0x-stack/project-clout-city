@@ -239,6 +239,6 @@ export interface EconomyAdmin {
 
 export const PHASE_COPY: Record<EconomyPhase, { title: string; line: string; built: boolean }> = {
   gifting: { title: "Phase 1 · Gifts and player jobs", line: "Buying Shop items for friends; the Jobs board with escrow, errands and event support.", built: true },
-  marketplace: { title: "Phase 2 · Item marketplace", line: "Listings, swaps in the trade window, and underworld runners between players (migration 0152).", built: true },
+  marketplace: { title: "Phase 2 · Item marketplace", line: "Listings, swaps in the trade window, and underworld runners between players.", built: true },
   assets: { title: "Phase 3 · Business and property sales", line: "Selling a business or a home to another player, with a cooling-off day.", built: true },
 };

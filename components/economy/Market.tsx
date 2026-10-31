@@ -142,9 +142,9 @@ function Browse({ s, cash, busy, canTrade, onBuy, onOpen }: {
             <span className="date-avatar" aria-hidden="true">{l.emoji ?? "🛍️"}</span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="title one-line" style={{ display: "block" }}>{l.name}</span>
-              <span className="meta one-line">{handle(l.sellerName)} · {l.friend ? "Crew & friends" : "Open board"} · Shop {formatCash(l.reference)}</span>
+              <span className="meta one-line" style={{ display: "block" }}>{l.friend ? "" : "🌐 "}{handle(l.sellerName)} · Shop {formatCash(l.reference)}</span>
             </span>
-            <span className="body-strong">{formatCash(l.price)}</span>
+            <span className="body-strong" style={{ flex: "none", marginLeft: 8 }}>{formatCash(l.price)}</span>
           </button>
           {pick === l.id && p && (
             <>
@@ -204,7 +204,7 @@ function ListFlow({ items, busy, onClose, onList }: { items: MyThing[]; busy: bo
               <span className="date-avatar" aria-hidden="true">{t.emoji ?? "🛍️"}</span>
               <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                 <span className="title one-line" style={{ display: "block" }}>{t.name}</span>
-                <span className="meta one-line">Shop {formatCash(t.reference)} · list for {formatCash(t.min)} to {formatCash(t.max)}</span>
+                <span className="meta one-line" style={{ display: "block" }}>Shop {formatCash(t.reference)} · list for {formatCash(t.min)} to {formatCash(t.max)}</span>
               </span>
             </button>
           ))}
