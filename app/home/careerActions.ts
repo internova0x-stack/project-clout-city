@@ -2,8 +2,8 @@
 
 import { randomInt, randomUUID } from "node:crypto";
 import {
-  CareerError, careerError, careerView, hire, office, quit, refresh, startDay, answerTask, trackCards, CAREER, trackById,
-  type Answer, type OfficeAction, type Who, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
+  CareerError, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, answerTask, trackCards, CAREER, trackById,
+  type Answer, type OfficeAction, type Target, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
 } from "@/lib/careers";
 import { CAREER_CONTENT as content } from "@/lib/careersContent";
 import { nyDay } from "@/lib/campaign";
@@ -52,6 +52,9 @@ async function load(id: string, admin: Admin): Promise<Context | { error: string
     ctx.aspiration = ctx.aspirationState.aspiration;
     ctx.degree = ctx.aspirationState.degree;
   }
+  // Part 3: businesses owned, for the quit card's "Quit to run your business".
+  const biz = await admin.from("player_businesses").select("business_id", { count: "exact", head: true }).eq("player_id", id);
+  ctx.businesses = biz.count ?? 0;
   return ctx;
 }
 
@@ -64,6 +67,7 @@ function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
     atPlace: ctx.atPlace,
     receipt,
     aspiration: ctx.aspirationState ?? null,
+    businesses: ctx.businesses ?? 0,
   };
 }
 
@@ -191,7 +195,10 @@ export async function careerTask(index: number, option: string): Promise<Out> {
   return act((s, ctx) => answerTask(content, s, index, option, ctx, rng));
 }
 
-export async function careerOffice(action: OfficeAction, who: Who): Promise<Out> {
+const OFFICE_ACTIONS: OfficeAction[] = ["help", "share", "team", "credit", "report", "rumor", "cover", "back", "mentor", "undermine", "overhead", "pushout"];
+
+export async function careerOffice(action: OfficeAction, who: Target): Promise<Out> {
+  if (!OFFICE_ACTIONS.includes(action) || !["manager", "friend", "rival", "hire"].includes(who)) return { ok: false, error: careerError("bad_target") };
   // Migration 0140: an HR crackdown week at this employer (a city storylet) traces sabotage twice as often.
   const conditions = await cityConditions();
   return act((s, ctx, today) => {
@@ -200,15 +207,24 @@ export async function careerOffice(action: OfficeAction, who: Who): Promise<Out>
     const subject = `${s.track}:${who}`;
     const facts: Change["facts"] = [{ key: OFFICE_FACT[action], subject }];
     if ((s.exposed ?? 0) > exposedBefore) facts.push({ key: "career.caught_sabotage", subject });
+    if (r.pushedOut) facts.push({ key: "career.pushed_out_boss", subject: s.track });
     return { ...r, facts };
   });
 }
 
-export async function careerQuit(): Promise<Out> {
-  return act((s, _ctx, today) => { quit(s, today); return { receipt: "You quit. The city is full of jobs. Probably." }; });
+export async function careerQuit(reason?: "business"): Promise<Out> {
+  return act((s, ctx, today) => {
+    const r = quit(s, today, { reason: reason === "business" ? "business" : undefined, businesses: ctx.businesses });
+    return { ...r, facts: reason === "business" ? [{ key: "career.quit_for_business", subject: s.track }] : [] };
+  });
 }
 
-/** Aspirations (migration 0143): picks the player's life path; a new pick at most every 30 days (Bro or Girlie any time). */
+/** The quit card's "Stick it out". */
+export async function careerStick(): Promise<Out> {
+  return act((s, _ctx, today) => stickItOut(s, today));
+}
+
+/** Aspirations (migration 0143): picks the player's life path; a new pick at most every 30 days. */
 export async function careerAspire(id: AspirationId): Promise<Out> {
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };

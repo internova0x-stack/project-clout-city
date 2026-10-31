@@ -5,7 +5,7 @@
 // ends, and a review every 3 preview days, so the loop can be walked in a minute.
 
 import {
-  CareerError, addDays, answerTask, careerError, careerView, hire, office, quit, refresh, startDay, trackCards,
+  CareerError, addDays, answerTask, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, trackCards,
   type CareerApi, type CareerCtx, type CareerResult, type CareerScreen, type CareerState,
 } from "./careers";
 import { CAREER_CONTENT as content } from "./careersContent";
@@ -24,15 +24,18 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: ["work", "day", "office", "grudge"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1 });
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   if (preset && !["new", "apply", "welcome"].includes(preset)) {
     state = hire(`preview-${Date.now()}`, "hospitality", ctx(), "honest", day);
-    if (preset === "day" || preset === "office" || preset === "grudge") startDay(content, state, "steady", ctx(), day, rng);
+    if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit") startDay(content, state, "steady", ctx(), day, rng);
     // ?career=office: clocked in with a joint project on; ?career=grudge: Kendall holds a grudge that strikes today.
     if (preset === "office") { state.workMood = 72; state.team = { with: "friend", due: state.nextReview }; }
     if (preset === "grudge") { state.workMood = 34; state.trust.rival = 20; state.grudges = [{ who: "rival", level: 2, due: day }]; }
+    // ?career=boss: the big boss likes you and you're performing: Push the boss out is open. ?career=quit: work mood 22, the quit card.
+    if (preset === "boss") { state.bigBoss = 72; state.performance = 78; state.mentored = 2; }
+    if (preset === "quit") { state.workMood = 22; }
     if (preset === "review" || preset === "warning" || preset === "fired") {
       state.performance = preset === "review" ? 82 : 30;
       state.trust.manager = preset === "review" ? 70 : 40;
@@ -46,7 +49,7 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
 
   const screen = (receipt?: string): CareerResult<CareerScreen> => ({
     ok: true,
-    data: { tracks: trackCards(ctx(), day), canConnect: true, job: state ? careerView(content, state, day, ctx()) : null, energy, atPlace: ctx().atPlace, receipt, aspiration: asp },
+    data: { tracks: trackCards(ctx(), day), canConnect: true, job: state ? careerView(content, state, day, ctx()) : null, energy, atPlace: ctx().atPlace, receipt, aspiration: asp, businesses: 1 },
   });
   const pay = (ps: { currency: string; amount: number }[]) => { for (const p of ps) if (p.currency === "cash") opts.onBank?.(p.amount); };
   const nextDay = () => {
@@ -94,8 +97,9 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
     start: async (style) => act((s) => startDay(content, s, style, ctx(), day, rng)),
     task: async (i, o) => act((s) => answerTask(content, s, i, o, ctx(), rng)),
     office: async (a, w) => act((s) => office(s, a, w, ctx(), day, rng)),
-    quit: async () => act((s) => { quit(s, day); return { receipt: "You quit. The city is full of jobs. Probably." }; }),
+    quit: async (reason) => act((s) => quit(s, day, { reason, businesses: 1 })),
+    stick: async () => act((s) => stickItOut(s, day)),
   };
 }
 
-export const CAREER_PRESETS = ["new", "apply", "work", "day", "office", "grudge", "review", "warning", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "review", "warning", "fired"] as const;
