@@ -88,6 +88,12 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     case "job_hold": return { emoji: "💼", title: "Job pay held", detail: "Jobs board" };
     case "job_pay": return { emoji: "💼", title: "Jobs board pay", detail: null };
     case "job_refund": return { emoji: "💼", title: "Job pay back", detail: "Jobs board" };
+    // Phase 2 (migration 0152): the Market. Refs: sale:<id>, trade:<id>:<side>, refund:..., reversal:...
+    case "market_hold": return { emoji: "🏷️", title: first === "sale" ? "Market purchase" : "Swap C$ held", detail: "Market" };
+    case "market_sale": return first === "refund" ? { emoji: "🏷️", title: "Swap C$ back", detail: "Market" }
+      : first === "reversal" ? { emoji: "🏛️", title: "Reversed by the city", detail: "Market" }
+      : first === "trade" ? { emoji: "🔁", title: "C$ from a swap", detail: "Market" }
+      : { emoji: "🏷️", title: "Market sale", detail: null };
     // Phase 3 (migration 0153): business and property sales.
     case "asset_hold": return { emoji: "🔑", title: "Asset purchase held", detail: "In escrow for the cooling-off" };
     case "asset_refund": return { emoji: "🔑", title: "Asset deal called off", detail: "Escrow back" };

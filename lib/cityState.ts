@@ -256,6 +256,8 @@ const ERRORS: Record<string, string> = {
   reward_unsellable: REWARD_KEEP,
   // The Player Economy (migration 0151): a gift can't go straight back to the game at 60%.
   no_resale: "Gifts stay with you for 14 days. No selling back, no regifting. It's the thought that counts.",
+  // Migration 0152: listed or in a swap on the Market.
+  item_locked: "That piece is listed on the Market or in a swap. Take it down first.",
   no_pass: "No guest-list pass on you. Keep the streak going: day 14 brings one.",
   pass_used_tonight: "You're already on a guest list tonight. One velvet rope at a time.",
   pass_not_needed: "You can already get in there. Save the pass for a door that says no.",

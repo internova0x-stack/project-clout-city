@@ -52,6 +52,12 @@ export default function Terms() {
           items) can never be given or traded. These exchanges have limits (account age, rank, a weekly cap), a city fee on job pay
           that goes to no one, and a waiting period before a gift can be sold back or passed on. Every exchange is logged and shown
           to both players, and we may pause an account&apos;s trading, or reverse an exchange, if it looks like abuse or real-money trading.</li>
+        <li><strong>The Market:</strong> when it&apos;s open you can sell C$ Shop items to other players for C$, or swap items (with C$ to
+          even things out) in the trade window, which moves nothing until both players confirm. Prices stay within a range around the Shop
+          price, the city keeps a 5% fee, and a piece you got from another player stays with you a while before you can sell or swap it.
+          Trading pauses for a few days after a sign-in from a new device or an email change. We can reverse a sale or swap within a week
+          if it came from a stolen account or an exploit. <strong>Nothing in the game can be cashed out</strong>: selling or buying C$,
+          items or accounts for real money, inside or outside the game, isn&apos;t allowed and gets accounts banned.</li>
         <li><strong>Selling a business or a house:</strong> when we switch it on, you can sell a business or a house you own in the game to
           another player for C$, within a range around the game&apos;s appraisal. The buyer&apos;s C$ is held for 24 hours, during which either of
           you can cancel; then the asset changes hands and a 10% city fee is taken from the seller. Rentals, public companies and anything

@@ -13,6 +13,7 @@
 // file holds the odds, so only they import lib/underworldContent.ts.
 
 import { faceProblems, type CardFace } from "./cardFormat.ts";
+import type { UnderworldHires, UnderworldRunner } from "./marketplace.ts";
 
 export type Rng = () => number;
 
@@ -195,6 +196,8 @@ export interface UnderworldState {
   crew?: Record<string, number>;
   covered?: Record<string, string>;
   tableWeek?: string;
+  /** Migration 0152: jobs run for another player (a runner's hires), so each runs once and its result can be paid again. */
+  hires?: { id: number; outcome: "win" | "trace" | "fizzle" | "bust"; pay: number }[];
 }
 
 /** What the server reads (underworld_context, migration 0148). */
@@ -363,24 +366,38 @@ export function liveOdds(o: JobOption, heat: number): number {
   return clamp(o.odds - Math.max(0, heat - UNDERWORLD.heat.watched) / 200, 0.05, 0.98);
 }
 
-/** Does a job: the hidden outcome (a clean win, a win that leaves a trace, a fizzle, or busted on the spot). */
-export function doJob(content: UnderworldContent, s: UnderworldState, jobId: string, optionId: string, today: string, ctx: UnderworldCtx, rng: Rng): Change & { receipt: string; outcome: "win" | "trace" | "fizzle" | "bust" } {
+/** Does a job: the hidden outcome (a clean win, a win that leaves a trace, a fizzle, or busted on the spot).
+ *  Migration 0152: with `hire`, a runner does another player's offer: not from today's three, once per hire, Pablo's take
+ *  goes to the poster (hirePay, paid by the database) and the runner gets `heat` more on top of the job's. */
+export function doJob(content: UnderworldContent, s: UnderworldState, jobId: string, optionId: string, today: string, ctx: UnderworldCtx, rng: Rng,
+  hire?: { id: number; heat: number }): Change & { receipt: string; outcome: "win" | "trace" | "fizzle" | "bust"; hirePay?: number } {
   if (ctx.holding) throw new UnderworldError("in_holding");
   if (ctx.atPlace !== UNDERWORLD.place) throw new UnderworldError("not_here");
   if (s.heat >= UNDERWORLD.heat.refuse) throw new UnderworldError("too_hot");
-  if (!s.offers.ids.includes(jobId) || s.offers.day !== today) throw new UnderworldError("no_offer");
-  if (s.offers.done.includes(jobId)) throw new UnderworldError("done");
-  const job = content.jobs.find((j) => j.id === jobId);
+  if (hire) {
+    if (s.hires?.some((h) => h.id === hire.id)) throw new UnderworldError("done");
+  } else {
+    if (!s.offers.ids.includes(jobId) || s.offers.day !== today) throw new UnderworldError("no_offer");
+    if (s.offers.done.includes(jobId)) throw new UnderworldError("done");
+  }
+  const job = content.jobs.find((j) => j.id === jobId) ?? (hire ? content.archive?.find((j) => j.id === jobId) : undefined);
   const o = job?.options.find((x) => x.id === optionId);
   if (!job || !o) throw new UnderworldError("no_offer");
   if (ctx.energy < o.energy) throw new UnderworldError("no_energy");
 
-  const out = { ...none(), changed: true, energy: -o.energy, mood: o.mood ?? 0, integrity: o.integrity };
-  s.offers.done.push(jobId);
+  const out: Change & { hirePay?: number } = { ...none(), changed: true, energy: -o.energy, mood: o.mood ?? 0, integrity: o.integrity };
+  if (!hire) s.offers.done.push(jobId);
   if (!s.worked.includes(today)) s.worked.push(today);
   const odds = liveOdds(o, s.heat);
   const roll = rng();
-  const tid = `${today}:${jobId}`;
+  const tid = hire ? `${today}:hire-${hire.id}` : `${today}:${jobId}`;
+  // Between players, everyone's a little more visible (spec 4.3: Heat for both).
+  const hired = <T extends { outcome: "win" | "trace" | "fizzle" | "bust" }>(r: T): T => {
+    if (!hire) return r;
+    s.heat = clamp(s.heat + hire.heat);
+    s.hires = [{ id: hire.id, outcome: r.outcome, pay: out.hirePay ?? 0 }, ...(s.hires ?? [])].slice(0, 20);
+    return r;
+  };
   let outcome: "win" | "trace" | "fizzle" | "bust";
   let receipt: string;
   if (roll < odds) {
@@ -391,13 +408,16 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
     pay = Math.max(0, pay);
     s.rep = clamp(s.rep + o.rep);
     s.heat = clamp(s.heat + o.heat);
-    s.earned += pay;
-    if (pay > 0) out.payouts.push({ currency: "cash", amount: pay, kind: "underworld_pay", ref: tid });
+    if (hire) out.hirePay = pay;
+    else {
+      s.earned += pay;
+      if (pay > 0) out.payouts.push({ currency: "cash", amount: pay, kind: "underworld_pay", ref: tid });
+    }
     // A trace is likelier the hotter you are.
     const traced = o.trace > 0 && rng() < UNDERWORLD.bust.trace + s.heat / 250;
     if (traced) s.traces.push({ id: tid, job: jobId, weight: o.trace, day: today, pay });
     outcome = traced ? "trace" : "win";
-    receipt = `${o.win}${pay ? ` +C$${pay.toLocaleString("en-US")}.` : ""}${halo ? ` ${content.pablo.halo}` : ""}`;
+    receipt = `${o.win}${pay ? hire ? ` C$${pay.toLocaleString("en-US")} for the boss.` : ` +C$${pay.toLocaleString("en-US")}.` : ""}${halo ? ` ${content.pablo.halo}` : ""}`;
   } else if (rng() < UNDERWORLD.bust.onFail + o.trace * UNDERWORLD.bust.onFailTrace + s.heat / 250) {
     loyal(s, job.crew, UNDERWORLD.crew.bust);
     const cover = takesFall(content, s, job.crew, today);
@@ -406,7 +426,7 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
       s.jobsDone += 1;
       const r = `${job.bust} ${cover}`;
       s.receipts = [`${job.emoji} ${r}`, ...s.receipts].slice(0, UNDERWORLD.receipts);
-      return { ...out, receipt: r, outcome: "bust" };
+      return hired({ ...out, receipt: r, outcome: "bust" as const });
     }
     const { fine, holding, law } = caughtCost(s, ctx, today, 0, o.trace);
     s.rep = clamp(s.rep - UNDERWORLD.rep.bustLoss);
@@ -426,7 +446,7 @@ export function doJob(content: UnderworldContent, s: UnderworldState, jobId: str
   }
   s.jobsDone += 1;
   s.receipts = [`${job.emoji} ${receipt}`, ...s.receipts].slice(0, UNDERWORLD.receipts);
-  return { ...out, receipt, outcome };
+  return hired({ ...out, receipt, outcome });
 }
 
 /** Part 2: Pablo's Thursday table: Hustlers only, once a New York week, in the back room. Favors traded over cards: it
@@ -557,4 +577,10 @@ export interface UnderworldApi {
   seen(): Promise<UnderworldResult<UnderworldScreen>>;
   /** Part 2: Pablo's Thursday table (Hustlers only). */
   table(): Promise<UnderworldResult<UnderworldScreen>>;
+  /** Migration 0152: runners, underworld jobs between players (hidden without them). */
+  hires?(): Promise<UnderworldResult<UnderworldHires>>;
+  runners?(): Promise<UnderworldResult<UnderworldRunner[]>>;
+  hire?(job: string, runner: string, cut: number): Promise<UnderworldResult<{ id: number; cash: number }>>;
+  runHire?(id: number, option: string): Promise<UnderworldResult<UnderworldScreen>>;
+  declineHire?(id: number): Promise<UnderworldResult<unknown>>;
 }

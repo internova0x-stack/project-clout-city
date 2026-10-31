@@ -5,6 +5,7 @@ import { formatCash } from "@/lib/economy";
 import { FLAG_COPY, PHASE_COPY, type EconomyAdmin, type EconomyFlag, type EconomyPhase, type FlagOutcome } from "@/lib/playerEconomy";
 import type { StudioApi } from "@/lib/studio";
 import { Toggle } from "../Toggle";
+import { MarketRecent } from "./MarketRecent";
 // Phase 3 (migration 0153).
 import { AssetSalesAdmin } from "./AssetSalesAdmin";
 
@@ -77,6 +78,8 @@ export function EconomyTab({ api }: { api: StudioApi }) {
             {open.length === 0 && <p className="meta" style={{ margin: 0 }}>Nothing flagged. The city is behaving. Suspicious.</p>}
             {open.map((f) => <FlagRow key={f.id} flag={f} busy={busy} onReview={(o, note) => void act(api.economyFlag!(f.id, o, note))} />)}
           </section>
+          {/* Phase 2 (migration 0152): sales and swaps, with Reverse. */}
+          {api.marketRecent && <MarketRecent api={api} />}
           {/* Phase 3 (migration 0153): business and property sales. */}
           {api.assetSales && <AssetSalesAdmin api={api} />}
           <section className="studio-card stack-8">

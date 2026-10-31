@@ -74,6 +74,12 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   till_full: { tier: 1, category: "money", ttlMin: 1440 },
   job_taken: { tier: 1, category: "money", ttlMin: 720 },
   job_paid: { tier: 1, category: "money", ttlMin: 1440 },
+  // The Market and runners (migration 0152): a swap waiting on you is someone waiting; a sale is money.
+  trade_offer: { tier: 0, category: "social", ttlMin: 1440 },
+  trade_done: { tier: 1, category: "money", ttlMin: 1440 },
+  market_sold: { tier: 1, category: "money", ttlMin: 1440 },
+  runner_hired: { tier: 0, category: "social", ttlMin: 1440 },
+  runner_done: { tier: 1, category: "money", ttlMin: 1440 },
   // Phase 3 (migration 0153): business and property sales.
   asset_offer: { tier: 1, category: "money", ttlMin: 2880 },
   asset_accepted: { tier: 1, category: "money", ttlMin: 1440 },

@@ -166,6 +166,7 @@ from (values
   ('0149_living_together.sql', to_regclass('public.cohabits') is not null),
   ('0150_underworld_part2.sql', to_regprocedure('public.gala_donate(integer)') is not null),
   ('0151_player_economy.sql', to_regclass('public.economy_limits') is not null),
+  ('0152_marketplace.sql', to_regclass('public.market_listings') is not null),
   ('0153_asset_sales.sql', to_regclass('public.asset_sales') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

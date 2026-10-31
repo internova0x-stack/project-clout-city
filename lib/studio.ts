@@ -3,6 +3,7 @@
 // on the schedule (product owner, Oct 12, 2026).
 
 import type { EconomyAdmin, EconomyPhase, FlagOutcome } from "./playerEconomy.ts";
+import type { MarketAdmin } from "./marketplace.ts";
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { Autopilot, AutopilotKind } from "./autopilot.ts";
 import type { StoryletAction, StudioStorylets } from "./storyletWeeks.ts";
@@ -245,6 +246,9 @@ export interface StudioApi {
   economySet?(phase: EconomyPhase, on: boolean): Promise<Admin<EconomyAdmin>>;
   economyFlag?(id: number, outcome: FlagOutcome, note: string): Promise<Admin<EconomyAdmin>>;
   economyFreeze?(player: string, frozen: boolean, reason: string): Promise<Admin<EconomyAdmin>>;
+  /** Phase 2 (migration 0152): Recent trades in the Economy tab, and reversing one after a reported theft. */
+  marketRecent?(): Promise<Admin<MarketAdmin>>;
+  marketReverse?(kind: "sale" | "trade", id: number, reason: string): Promise<Admin<MarketAdmin>>;
   /** Phase 3 (migration 0153): recent business and property sales, and reversing one within 7 days. */
   assetSales?(): Promise<Admin<import("./assetSales.ts").AssetAdmin>>;
   assetReverse?(id: number, reason: string): Promise<Admin<import("./assetSales.ts").AssetAdmin>>;

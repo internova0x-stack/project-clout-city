@@ -21,6 +21,7 @@ import type { StoryletAction, StudioStorylets } from "@/lib/storyletWeeks";
 import type { StudioCondition } from "@/lib/cityConditions";
 import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
 import type { EconomyAdmin, EconomyPhase, FlagOutcome } from "@/lib/playerEconomy";
+import type { MarketAdmin } from "@/lib/marketplace";
 import type { AssetAdmin } from "@/lib/assetSales";
 import { studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
 import type { ChoiceCard } from "@/lib/choices";
@@ -238,6 +239,15 @@ export async function studioEconomyFlag(id: number, outcome: FlagOutcome, note: 
 }
 export async function studioEconomyFreeze(player: string, frozen: boolean, reason: string) {
   return admin<EconomyAdmin>("admin_economy_freeze", { p_player: player, p_frozen: frozen, p_reason: reason.slice(0, 300) });
+}
+// ---- Phase 2, the Market (migration 0152) ----
+const market0152 = <T,>(r: { ok: true; data: T } | { ok: false; error: string }) =>
+  !r.ok && r.error === "Run migration 0010 first." ? { ok: false as const, error: "Run migration 0152 first." } : r;
+export async function studioMarketRecent() {
+  return market0152(await admin<MarketAdmin>("admin_market_recent"));
+}
+export async function studioMarketReverse(kind: "sale" | "trade", id: number, reason: string) {
+  return market0152(await admin<MarketAdmin>("admin_market_reverse", { p_kind: kind === "trade" ? "trade" : "sale", p_id: id, p_reason: reason.slice(0, 300) }));
 }
 // ---- Phase 3: business and property sales (migration 0153) ----
 const before0153 = <T,>(r: Admin<T>): Admin<T> => (!r.ok && r.error === "Run migration 0010 first." ? { ok: false, error: "Run migration 0153 first." } : r);

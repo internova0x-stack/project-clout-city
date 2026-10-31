@@ -31,6 +31,7 @@ import { previewAutopilot, previewAutopilotSet } from "../autopilotActions";
 import { previewConditions, previewConditionSet, previewUnderworldJobs, previewUnderworldJobSet, previewLearning, previewLearningSet, previewStorylets, previewStoryletSet } from "../storyletActions";
 import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActions";
 import { previewEconomy, previewEconomyFlag, previewEconomyFreeze, previewEconomySet } from "../economyActions";
+import { previewMarketRecent, previewMarketReverse } from "../marketActions";
 import { previewAssetReverse, previewAssetSales } from "../assetSalesActions";
 import { normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
@@ -41,6 +42,8 @@ import type { Player } from "@/lib/player";
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
 //   /preview/home?couple=progress|ask|dating|gift|ended|movein|together  relationships (0118) and living together (0149); open Phone → Messages → Us
+//   /preview/home?market=browse|listing|offer|confirm|off  the Market (migration 0152, lib/marketSim.ts): Phone → Market's Browse,
+//                             your listing, a swap waiting, a big swap they confirmed (the second "Are you sure?"), Opening soon
 //   /preview/home?economy=gift|gifted|history|jobs|locked  the Player Economy (migration 0151): 🎁 in the Shop, a gift waiting,
 //                             Phone → Bank → Trades & gifts, the Jobs board's errands and event support
 //   /preview/home?assets=sell|offer|cooling|done|off  business and property sales (migration 0153): Phone → Businesses /
@@ -113,7 +116,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy, assets } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy, assets, market } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -207,6 +210,7 @@ export default async function Preview({
           galaPreset={gala}
           choicePreset={choice}
           economyPreset={economy}
+          marketPreset={market}
           assetsPreset={assets}
           goalsPreset={goals}
           pushPreset={push}
@@ -250,6 +254,7 @@ export default async function Preview({
             mailbag: previewStudioMailbag, letter: previewStudioLetter, autopilot: previewAutopilot, autopilotSet: previewAutopilotSet, storylets: previewStorylets, storyletSet: previewStoryletSet, conditions: previewConditions, conditionSet: previewConditionSet, underworldJobs: previewUnderworldJobs, underworldJobSet: previewUnderworldJobSet, learning: previewLearning, learningSet: previewLearningSet,
             shoutouts: previewStudioShoutouts, shoutoutAction: previewStudioShoutoutAction, bigScreen: previewStudioBigScreen, bigScreenAction: previewStudioBigScreenAction,
             economy: previewEconomy, economySet: previewEconomySet, economyFlag: previewEconomyFlag, economyFreeze: previewEconomyFreeze,
+            marketRecent: previewMarketRecent, marketReverse: previewMarketReverse,
             assetSales: previewAssetSales, assetReverse: previewAssetReverse,
           }}
         />

@@ -130,13 +130,18 @@ export function historyLine(r: EconomyRow): { emoji: string; title: string; amou
     };
   }
   const gift = r.kind === "gift";
+  // Phase 2 (migration 0152): a sale is C$ for a piece; each side of a swap is a row of what went (Shop value).
+  const swap = r.kind === "trade";
   const title = gift
     ? (r.direction === "sent" ? `Gift to ${who}` : `Gift from ${who}`)
     : r.kind === "job" ? (r.direction === "sent" ? `Hired ${who}` : `Worked for ${who}`)
+    : r.kind === "sale" ? (r.direction === "sent" ? `Bought from ${who}` : `Sold to ${who}`)
+    : swap ? (r.direction === "sent" ? `Swapped away to ${who}` : `Swapped in from ${who}`)
     : r.direction === "sent" ? `To ${who}` : `From ${who}`;
-  const amount = gift ? money(r.value) : r.direction === "sent" ? `−${money(r.value)}` : `+${money(r.value - r.fee)}`;
-  const note = r.status === "reversed" ? "Sent back" : r.fee > 0 && r.direction === "received" ? `${money(r.fee)} city fee` : null;
-  return { emoji: gift ? "🎁" : r.kind === "job" ? "💼" : "🔁", title: r.label ? `${title} · ${r.label}` : title, amount, note };
+  const amount = gift || swap ? money(r.value) : r.direction === "sent" ? `−${money(r.value)}` : `+${money(r.value - r.fee)}`;
+  const note = r.status === "reversed" ? (r.kind === "sale" || swap ? "Reversed by the city" : "Sent back")
+    : swap ? "Shop value" : r.fee > 0 && r.direction === "received" ? `${money(r.fee)} city fee` : null;
+  return { emoji: gift ? "🎁" : r.kind === "job" ? "💼" : r.kind === "sale" ? "🏷️" : "🔁", title: r.label ? `${title} · ${r.label}` : title, amount, note };
 }
 
 /** Why the player can't trade yet, in words. */
@@ -194,6 +199,8 @@ export interface EconomyApi {
 // Studio: the Economy tab (admin_economy)
 // ---------------------------------------------------------------------------
 export type FlagRule = "repeat_pair" | "new_heavy" | "trivial_jobs" | "band_edge"
+  // Phase 2 (migration 0152).
+  | "sku_limit"
   // Phase 3 (migration 0153).
   | "asset_new_buyer";
 export type FlagOutcome = "cleared" | "noted" | "frozen";
@@ -204,6 +211,8 @@ export const FLAG_COPY: Record<FlagRule, { title: string; line: string }> = {
   new_heavy: { title: "New account moving a lot", line: `An account under ${PLAYER_ECONOMY.flags.newAccountDays} days old sent or received C$${PLAYER_ECONOMY.flags.newHeavyValue.toLocaleString("en-US")}+ in a week.` },
   trivial_jobs: { title: "Big pay for tiny jobs", line: `The same client paid the same worker over C$${PLAYER_ECONOMY.jobs.trivialPerStep.toLocaleString("en-US")} a step, ${PLAYER_ECONOMY.flags.trivialJobs}+ times in a week. Possibly cash in a job costume.` },
   band_edge: { title: "Price at the edge of the band", line: "A trade priced right at the bottom or top of what's allowed. Worth a look." },
+  // Phase 2 (migration 0152).
+  sku_limit: { title: "Buying up one item", line: "Hit the weekly limit on one Shop item from the Market (bought or swapped for). Could be a collector, could be someone cornering the sofa market." },
   // Phase 3 (migration 0153).
   asset_new_buyer: { title: "New account buying a business or a house", line: "An account under 14 days old said yes to an asset sale. Brand-new tycoons are rare; brand-new second accounts aren't." },
 };
@@ -230,6 +239,6 @@ export interface EconomyAdmin {
 
 export const PHASE_COPY: Record<EconomyPhase, { title: string; line: string; built: boolean }> = {
   gifting: { title: "Phase 1 · Gifts and player jobs", line: "Buying Shop items for friends; the Jobs board with escrow, errands and event support.", built: true },
-  marketplace: { title: "Phase 2 · Item marketplace", line: "Listings, swaps and the trade window.", built: false },
+  marketplace: { title: "Phase 2 · Item marketplace", line: "Listings, swaps in the trade window, and underworld runners between players (migration 0152).", built: true },
   assets: { title: "Phase 3 · Business and property sales", line: "Selling a business or a home to another player, with a cooling-off day.", built: true },
 };

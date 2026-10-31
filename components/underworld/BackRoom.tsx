@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
+// Migration 0152: runners (underworld jobs between players).
+import { Runners } from "./Runners";
 import { UNDERWORLD, type OfferView, type UnderworldApi, type UnderworldScreen, type UnderworldView } from "@/lib/underworld";
 
 // The underworld (spec section 31; migration 0148): Pablo's back room, behind the luggage counter. Before the invitation:
@@ -128,6 +130,8 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
               ))}
               <p className="meta" style={{ margin: 0 }}>New work every New York day. A day without a job cools you off twice as fast.</p>
             </div>
+            {api.hires && <Runners api={api} v={v} busy={busy} onToast={onToast}
+              onDone={(r) => { setData(r); if (r.receipt) { setLast({ text: r.receipt, outcome: r.outcome }); onChanged(); } }} />}
             {v.table && (
               <div className="card stack-8 backroom-table">
                 <p className="title" style={{ margin: 0 }}>🃏 {v.table.title}</p>

@@ -41,6 +41,10 @@ export default function Privacy() {
         <li>Social features: your crew, crushes and dates, relationships, sublets, home visits and together plans.</li>
         <li>Gifts and jobs between players: who sent what to whom, the note with a gift, job pay and fees, ratings, your weekly limits,
           and automatic checks for patterns that look like abuse (reviewed by our team).</li>
+        <li>The Market: your listings, sales, swaps (both sides, every change, who confirmed), fees, any reversal and its reason, and
+          underworld jobs you hand to or take from other players. To pause trading after a possible account takeover we note the devices
+          you play on (a fingerprint of your browser&apos;s name from your sign-in session, not the device itself) and when an email change
+          was requested.</li>
         <li>Business and property sales between players: the asset, its appraisal, the price, the fee, who sold to whom and when, and any
           cancellation or reversal.</li>
       </ul>
@@ -84,6 +88,8 @@ export default function Privacy() {
         <li>&quot;Dating @name&quot; on your card if you&apos;re in a relationship (you can hide it), and your sublet listings and ratings.</li>
         <li>Gifts and jobs: the player you gift or hire sees your name, the item or job and any note; your Jobs board posts go to your
           crew, partner and people you&apos;ve chatted with, or to anyone on the open board if you switch it on; your Jobs ratings.</li>
+        <li>The Market: your listings (name and price) go to the same people, or the open board if you switch it on; the player you swap
+          with sees the items and C$ on both sides; never your bank balance.</li>
         <li>Business and property sales: the player you offer to sees your name, the asset, its appraisal and your price, and whether it
           carries undisclosed issues from its past.</li>
         <li>Your chats with them, and party or home-visit chat with the people there.</li>

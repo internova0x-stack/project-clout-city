@@ -111,6 +111,8 @@ import { InviteSheet } from "./InviteSheet";
 import { DecorApproveCard, DecoratingBar, JobsApp, RideWaitCard, TogetherBonusCard, TogetherPlansSheet, TogetherPrompt, TogetherSheet } from "./together/Together";
 import { GiftInboxSheet, GiftPrompt, GiftSheet, type GiftItem } from "./economy/Economy";
 import type { EconomyApi, EconomyState, GiftInbox } from "@/lib/playerEconomy";
+// The Player Economy, Phase 2 (migration 0152): the Phone's Market.
+import { marketAlerts, type MarketApi, type MarketState } from "@/lib/marketplace";
 import type { AssetApi } from "@/lib/assetSales";
 import {
   canDoTogether, jobToApprove, rideShare, togetherAlerts, togetherVerb,
@@ -271,6 +273,7 @@ export function GameShell({
   business,
   together,
   economy,
+  market,
   assets,
   radio,
   mayor,
@@ -360,6 +363,8 @@ export function GameShell({
   together?: TogetherApi;
   /** The Player Economy (migration 0151): gifts, Trades & gifts in the Bank, the open board; hidden without it. */
   economy?: EconomyApi;
+  /** The Player Economy, Phase 2 (migration 0152): Phone → Market (listings and swaps); hidden without it. */
+  market?: MarketApi;
   /** Phase 3 (migration 0153): business and property sales in the Phone; hidden without it. */
   assets?: AssetApi;
   /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
@@ -908,6 +913,14 @@ export function GameShell({
     const t = everyVisible(() => void loadGifts(), 60_000);
     return () => t();
   }, [economy, loadGifts]);
+  // ---- Migration 0152: the Market's badge (swaps waiting on the player) ----
+  const [marketNow, setMarketNow] = useState<MarketState | null>(null);
+  useEffect(() => {
+    if (!market) return;
+    const load = () => void market.state().then((r) => r.ok && setMarketNow(r.data));
+    load();
+    return everyVisible(load, 60_000);
+  }, [market]);
   useEffect(() => {
     if (togetherTarget && crew && !crewPeople.length) void crew.members().then((r) => r.ok && setCrewPeople(r.data));
   }, [togetherTarget, crew, crewPeople.length]);
@@ -1352,6 +1365,8 @@ export function GameShell({
     // The Player Economy (migration 0151): a gift arrived; a job was taken or paid.
     else if (open === "gifts" && economy) setGiftsOpen(true);
     else if (open === "jobs" && together) setPhone({ open: true, app: "jobs" });
+    // Migration 0152: a swap offer, a sale, a swap done.
+    else if (open === "market" && market) setPhone({ open: true, app: "market" });
     // Phase 3 (migration 0153): an offer, a yes, a handover: the deals live in the Bank.
     else if (open === "assets" && assets) setPhone({ open: true, app: "bank" });
     // Campaign Mode: "Your poll results are in".
@@ -3302,6 +3317,10 @@ export function GameShell({
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
         jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers, economy } : undefined}
         economy={economy}
+        market={market && city ? {
+          api: market, cash: city.player.bank_cash, alerts: marketAlerts(marketNow), onToast: setToast,
+          onChanged: () => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void market.state().then((r) => r.ok && setMarketNow(r.data)); },
+        } : undefined}
         assets={assets ? { api: assets, onChanged: () => { void loadBiz(); resync.current(); } } : undefined}
         onOpenGifts={economy ? () => { setPhone({ open: false, app: null }); setGiftsOpen(true); } : undefined}
         // The offer opens over the game, so the Phone steps aside first (it would cover the card).
