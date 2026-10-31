@@ -1,7 +1,8 @@
 import {
-  cancelJob, decorateSave, endJob, jobFinish, jobHome, jobSettle, jobsBoard, managerCollect, postJob, rateJob, rideOffer, rideRespond, rideStatus, takeJob,
+  cancelJob, decorateSave, endJob, jobCheck, jobFinish, jobHome, jobSettle, jobsBoard, managerCollect, postJob, postTask, rateClient, rateJob, rideOffer, rideRespond, rideStatus, takeJob,
   togetherClaim, togetherInbox, togetherInvite, togetherRespond, togetherSeen,
 } from "./togetherActions";
+import { economyHistory, economySetOpen, economyState, giftAnswer, giftCandidates, giftInbox, giftSend } from "./economyActions";
 import { coutureMap, plazaBook, plazaWeeks } from "./coutureActions";
 import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
 import { cookies } from "next/headers";
@@ -72,10 +73,13 @@ export default async function HomePage() {
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
   // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
+  // Migration 0151 switches on the Player Economy (economy_state failing hides gifts and the jobs board's new kinds).
+  const econP = economyState();
   const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple, subletS, homeS, visitS, starterS] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
     playerCard(player.id), mySkills().catch(() => null), coupleState(), subletState(), homeScoreState(), visitState(), starterState(),
   ]);
+  const econ = await econP;
   // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
   after(() => kickPush());
   // Migration 0010 switches on chat; a banned account sees only a notice.
@@ -161,7 +165,13 @@ export default async function HomePage() {
       together={city && together.ok ? {
         inbox: togetherInbox, invite: togetherInvite, respond: togetherRespond, claim: togetherClaim, seen: togetherSeen,
         rideOffer, rideRespond, rideStatus,
-        jobs: { board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob },
+        jobs: {
+          board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob,
+          ...(econ.ok ? { postTask, check: jobCheck, rateClient } : {}),
+        },
+      } : undefined}
+      economy={city && econ.ok ? {
+        state: economyState, setOpen: economySetOpen, history: economyHistory, candidates: giftCandidates, inbox: giftInbox, send: giftSend, answer: giftAnswer,
       } : undefined}
       // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
       goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}

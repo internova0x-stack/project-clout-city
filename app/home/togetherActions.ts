@@ -74,3 +74,13 @@ export async function managerCollect(id: number) {
 export async function endJob(id: number) {
   return call<{ status: string }>("end_job", { p_id: id });
 }
+// Migration 0151: game-verified jobs and rating the client.
+export async function postTask(kind: "errand" | "event", pay: number, target: { places?: string[]; event?: string }, hours: number, note: string) {
+  return call<{ id: number; cash: number; fee: number }>("post_task", { p_kind: kind, p_pay: pay, p_target: target, p_hours: hours, p_note: note.slice(0, 140) });
+}
+export async function jobCheck(id: number) {
+  return call<{ status: string; progress: string[]; earned: number }>("job_check", { p_id: id });
+}
+export async function rateClient(id: number, stars: number) {
+  return call<null>("rate_client", { p_id: id, p_stars: stars });
+}

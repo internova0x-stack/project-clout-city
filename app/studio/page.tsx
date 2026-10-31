@@ -5,7 +5,7 @@ import { StudioSignIn } from "@/components/studio/StudioSignIn";
 import type { StudioArc } from "@/lib/studio";
 import { getServerSupabase } from "@/lib/supabase/server";
 import {
-  studioBeatEdit, studioBeatStatus, studioGoLive, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioMailbag, studioLetter, studioAutopilot, studioAutopilotSet, studioStorylets, studioStoryletSet, studioConditions, studioConditionSet, studioUnderworldJobs, studioUnderworldJobSet, studioLearning, studioLearningSet, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioAffiliates, studioAffiliatesOverview, studioPayouts, studioPayoutMark, studioPayoutVoid, studioVideos, studioVideoSave, studioVideoStatus, studioCreatorPage, studioCreatorSave, studioLinkSave, studioLinkStatus, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload, addRepoStories } from "./actions";
+  studioBeatEdit, studioBeatStatus, studioGoLive, studioDrafts, studioReorder, studioSetupCheck, studioShoutouts, studioShoutoutAction, studioMailbag, studioLetter, studioAutopilot, studioAutopilotSet, studioStorylets, studioStoryletSet, studioConditions, studioConditionSet, studioUnderworldJobs, studioUnderworldJobSet, studioEconomy, studioEconomySet, studioEconomyFlag, studioEconomyFreeze, studioLearning, studioLearningSet, studioBigScreen, studioBigScreenAction, studioGossipList, studioGossipStatus, studioHuntList, studioHuntStatus, studioHuntUpload, studioNewsList, studioNewsReschedule, studioNewsStatus, studioNewsUpload, studioCastAdd, studioCastLines, studioCastStatus, studioContent, studioInsights, studioPlayer, studioPlayerBan, studioPlayers, studioMetrics, studioAffiliates, studioAffiliatesOverview, studioPayouts, studioPayoutMark, studioPayoutVoid, studioVideos, studioVideoSave, studioVideoStatus, studioCreatorPage, studioCreatorSave, studioLinkSave, studioLinkStatus, studioReportAction, studioReports, studioReview, studioSchedule, studioStatus, studioUpload, addRepoStories } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +50,7 @@ export default async function StudioPage() {
         gossipList: studioGossipList, gossipStatus: studioGossipStatus, setupCheck: studioSetupCheck,
         mailbag: studioMailbag, letter: studioLetter, autopilot: studioAutopilot, autopilotSet: studioAutopilotSet, storylets: studioStorylets, storyletSet: studioStoryletSet, conditions: studioConditions, conditionSet: studioConditionSet, underworldJobs: studioUnderworldJobs, underworldJobSet: studioUnderworldJobSet, learning: studioLearning, learningSet: studioLearningSet,
         shoutouts: studioShoutouts, shoutoutAction: studioShoutoutAction, bigScreen: studioBigScreen, bigScreenAction: studioBigScreenAction,
+        economy: studioEconomy, economySet: studioEconomySet, economyFlag: studioEconomyFlag, economyFreeze: studioEconomyFreeze,
       }}
     />
   );

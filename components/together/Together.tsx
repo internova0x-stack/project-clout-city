@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { placeById } from "@/lib/city";
+import { CLUB_EVENTS, PLACES, placeById } from "@/lib/city";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import {
-  JOBS, TOGETHER, minutesLeft, ratingLine, togetherVerb,
-  type JobsBoard, type MyJob, type OpenJob, type TogetherBonus, type TogetherCandidate, type TogetherInbox, type TogetherPlan, type RideRequest, type WorkJob,
+  JOBS, TOGETHER, clientLine, minutesLeft, ratingLine, togetherVerb,
+  type JobTarget, type TaskKind, type JobsBoard, type MyJob, type OpenJob, type TogetherBonus, type TogetherCandidate, type TogetherInbox, type TogetherPlan, type RideRequest, type WorkJob,
 } from "@/lib/together";
 import { handle } from "@/lib/validation";
+import { PLAYER_ECONOMY, afterFee, economyError, lockedLine, type EconomyApi } from "@/lib/playerEconomy";
+import { OpenBoardRow } from "../economy/Economy";
 import { Avatar } from "../crew/Crew";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "../icons";
 import { Sheet } from "../Sheet";
@@ -269,9 +271,35 @@ export interface JobsHandlers {
   approve: (job: MyJob) => void;
   rate: (id: number, stars: number) => void;
   onPlayer?: (id: string) => void;
+  /** Migration 0151: errands and event support, checking the work, rating the client. */
+  postTask?: (kind: TaskKind, pay: number, target: JobTarget, hours: number, note: string) => void;
+  check?: (id: number) => void;
+  rateClient?: (id: number, stars: number) => void;
 }
 
+// ---- Migration 0151: game-verified jobs ----
+const isTask = (k: string): k is TaskKind => k === "errand" || k === "event";
+const eventName = (id?: string) => CLUB_EVENTS.find((e) => e.id === id)?.name ?? "a night out";
+const eventPlace = (id?: string) => placeName(CLUB_EVENTS.find((e) => e.id === id)?.placeId ?? "");
+const hoursLeft = (at: string | null | undefined) => (at ? Math.max(0, Math.ceil((Date.parse(at) - Date.now()) / 3_600_000)) : 0);
+/** "Velvet Static, Grind & Gossip" */
+const placeList = (t: JobTarget | null | undefined) => (t?.places ?? []).map(placeName).join(", ");
+function jobTitle(kind: string): string {
+  return kind === "decorator" ? "Decorate my place" : kind === "manager" ? "Run my tills" : kind === "errand" ? "Run my errands" : "Hype my night out";
+}
+function jobTag(kind: string): string {
+  return kind === "decorator" ? "🛋️ Interior decorator" : kind === "manager" ? "💼 Business manager" : kind === "errand" ? "🧾 Errands" : "🪩 Event support";
+}
+/** What the task asks, in a line. */
+function taskLine(kind: string, t: JobTarget | null | undefined): string {
+  if (kind === "errand") return `Check in at ${placeList(t)}`;
+  return `Be at ${eventName(t?.event)} (${eventPlace(t?.event)}) while it's on`;
+}
+/** "You get C$950 after the 5% city fee" (migration 0151), or the plain pay before it. */
+const youGet = (pay: number, fee: number | undefined) => (fee != null ? `You get ${formatCash(pay - fee)} after the ${Math.round(PLAYER_ECONOMY.fees.job * 100)}% city fee` : `${formatCash(pay)}`);
+
 function OpenJobCard({ job, h, canWork }: { job: OpenJob; h: JobsHandlers; canWork: boolean }) {
+  if (isTask(job.kind)) return <OpenTaskCard job={job} h={h} canWork={canWork} />;
   const decor = job.kind === "decorator";
   const home = ECONOMY.homes.find((x) => x.id === job.homeId)?.neighborhood;
   return (
@@ -286,8 +314,8 @@ function OpenJobCard({ job, h, canWork }: { job: OpenJob; h: JobsHandlers; canWo
       <div><span className={`tag ${decor ? "tag-event" : "tag-neutral"}`}>{decor ? "🛋️ Interior decorator" : "💼 Business manager"}</span></div>
       {job.note && <span className="subtext ph-sensitive">&ldquo;{job.note}&rdquo;</span>}
       {decor
-        ? <span className="biz-price"><b>{formatCash(job.pay)}</b> + {JOBS.decorator.clout} clout · held until they approve</span>
-        : <span className="biz-price"><b>{job.cut}%</b> of what you collect{job.perDay ? ` · about ${formatCash(job.perDay)} a day` : ""}</span>}
+        ? <span className="biz-price"><b>{formatCash(job.pay)}</b> + {JOBS.decorator.clout} clout · held until they approve{job.fee != null ? ` · ${youGet(job.pay, job.fee)}` : ""}</span>
+        : <span className="biz-price"><b>{job.cut}%</b> of what you collect{job.perDay ? ` · about ${formatCash(job.perDay)} a day` : ""}{job.fee != null ? ` · less the ${Math.round(PLAYER_ECONOMY.fees.job * 100)}% city fee` : ""}</span>}
       <button className={`btn ${decor ? "btn-taxi" : "btn-secondary"}`} disabled={!canWork || h.busy !== null} onClick={() => h.take(job.id)}>
         {h.busy === `take:${job.id}` ? "…" : decor ? `Take the job · ${JOBS.decorator.minutes} min` : "Take the job"}
       </button>
@@ -295,7 +323,59 @@ function OpenJobCard({ job, h, canWork }: { job: OpenJob; h: JobsHandlers; canWo
   );
 }
 
+function OpenTaskCard({ job, h, canWork }: { job: OpenJob; h: JobsHandlers; canWork: boolean }) {
+  return (
+    <div className="card stack-8">
+      <button className="row job-who" style={{ gap: 12 }} onClick={() => h.onPlayer?.(job.poster)} disabled={!h.onPlayer}>
+        <Avatar style={job.posterStyle} size={44} />
+        <span style={{ minWidth: 0, textAlign: "left" }}>
+          <span className="title" style={{ display: "block" }}>{jobTitle(job.kind)}</span>
+          <span className="meta">{handle(job.posterName)}{job.friend === false ? " · open board" : ""}{clientLine(job.posterRating) ? ` · ${clientLine(job.posterRating)}` : ""}</span>
+        </span>
+      </button>
+      <div><span className="tag tag-event">{jobTag(job.kind)}</span></div>
+      <span className="body">{taskLine(job.kind, job.target)}</span>
+      {job.note && <span className="subtext ph-sensitive">&ldquo;{job.note}&rdquo;</span>}
+      <span className="biz-price"><b>{formatCash(job.pay)}</b> + {PLAYER_ECONOMY.jobs.clout} clout · {hoursLeft(job.deadline)} h left · the game checks it, then pays</span>
+      <span className="meta">{youGet(job.pay, job.fee ?? 0)}.</span>
+      <button className="btn btn-taxi" disabled={!canWork || h.busy !== null} onClick={() => h.take(job.id)}>
+        {h.busy === `take:${job.id}` ? "…" : "Take the job"}
+      </button>
+    </div>
+  );
+}
+
+function WorkingTaskRow({ job, h }: { job: WorkJob; h: JobsHandlers }) {
+  const [stars, setStars] = useState(0);
+  const live = job.status === "active";
+  const done = job.kind === "errand" ? (job.progress?.length ?? 0) : 0;
+  const total = job.target?.places?.length ?? 0;
+  const line = live
+    ? job.kind === "errand" ? `${done} of ${total} check-ins · ${hoursLeft(job.deadline)} h left` : `${eventName(job.target?.event)} · ${hoursLeft(job.deadline)} h left`
+    : job.status === "kept" ? `Paid · +${formatCash(job.earned)} after the fee` : "Time ran out";
+  return (
+    <div className="stack-8">
+      <div className="list-row static job-row">
+        <Avatar style={job.posterStyle} size={36} />
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="title one-line">{handle(job.posterName)} · {jobTag(job.kind)}</span>
+          <span className="meta one-line">{line}</span>
+        </span>
+        {live && h.check && <button className="chip" aria-pressed="true" disabled={h.busy !== null} onClick={() => h.check!(job.id)}>{h.busy === `check:${job.id}` ? "…" : "Check"}</button>}
+      </div>
+      {live && <span className="meta">{taskLine(job.kind, job.target)}. Any activity at a place counts as a check-in.</span>}
+      {job.status === "kept" && !job.clientStars && h.rateClient && (
+        <div className="row" style={{ gap: 8 }}>
+          <span className="meta" style={{ flex: 1 }}>Rate {handle(job.posterName)} as a client</span>
+          <Stars value={stars} onPick={(n) => { setStars(n); h.rateClient!(job.id, n); }} small />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function WorkingRow({ job, h }: { job: WorkJob; h: JobsHandlers }) {
+  if (isTask(job.kind)) return <WorkingTaskRow job={job} h={h} />;
   const decor = job.kind === "decorator";
   const live = job.status === "active";
   return (
@@ -316,7 +396,36 @@ function WorkingRow({ job, h }: { job: WorkJob; h: JobsHandlers }) {
   );
 }
 
+function MyTaskRow({ job, h }: { job: MyJob; h: JobsHandlers }) {
+  const who = job.workerName ? handle(job.workerName) : null;
+  const [stars, setStars] = useState(0);
+  const total = job.target?.places?.length ?? 0;
+  const line = job.status === "open" ? `${formatCash(job.pay)} held · ${hoursLeft(job.deadline)} h left`
+    : job.status === "active" ? (job.kind === "errand" ? `${job.progress?.length ?? 0} of ${total} check-ins` : `${eventName(job.target?.event)} · waiting for them to show`)
+    : job.status === "kept" ? `Done · paid ${formatCash(job.pay)}` : job.status === "expired" ? "Time ran out · refunded" : "Cancelled · refunded";
+  const rateable = !job.stars && job.worker && job.status === "kept";
+  return (
+    <div className="stack-8">
+      <div className="list-row static job-row">
+        {job.workerStyle ? <Avatar style={job.workerStyle} size={36} /> : <span className="biz-em sm" aria-hidden="true">{job.kind === "errand" ? "🧾" : "🪩"}</span>}
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="title one-line">{who ? `${who} · ${jobTag(job.kind)}` : jobTitle(job.kind)}</span>
+          <span className="meta one-line">{line}</span>
+        </span>
+        {job.status === "open" && <button className="chip" disabled={h.busy !== null} onClick={() => h.cancel(job.id)}>Cancel</button>}
+      </div>
+      {rateable && (
+        <div className="row" style={{ gap: 8 }}>
+          <span className="meta" style={{ flex: 1 }}>Rate {who}</span>
+          <Stars value={stars} onPick={(n) => { setStars(n); h.rate(job.id, n); }} small />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MyJobRow({ job, h }: { job: MyJob; h: JobsHandlers }) {
+  if (isTask(job.kind)) return <MyTaskRow job={job} h={h} />;
   const decor = job.kind === "decorator";
   const who = job.workerName ? handle(job.workerName) : null;
   const [stars, setStars] = useState(0);
@@ -350,6 +459,60 @@ function MyJobRow({ job, h }: { job: MyJob; h: JobsHandlers }) {
   );
 }
 
+/** Migration 0151: post an errand (2 to 4 places) or event support (a club night), with the pay held and a deadline. */
+const ERRAND_PLACES = PLACES.filter((p) => !p.story && (p.borough ?? "queens") === "queens");
+function TaskForm({ kind, cash, busy, posted, onPost }: {
+  kind: TaskKind; cash: number; busy: string | null; posted: boolean;
+  onPost: (kind: TaskKind, pay: number, target: JobTarget, hours: number, note: string) => void;
+}) {
+  const J = PLAYER_ECONOMY.jobs;
+  const [pay, setPay] = useState<number>(J.payChoices[1]);
+  const [hours, setHours] = useState<number>(J.hours[1]);
+  const [places, setPlaces] = useState<string[]>([]);
+  const [event, setEvent] = useState<string>(CLUB_EVENTS[0]?.id ?? "");
+  const [note, setNote] = useState("");
+  const ready = kind === "errand" ? places.length >= J.errandPlaces.min && places.length <= J.errandPlaces.max : !!event;
+  const toggle = (id: string) => setPlaces((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= J.errandPlaces.max ? cur : [...cur, id]));
+  return (
+    <div className="stack-12">
+      {kind === "errand" ? (
+        <div className="stack-8">
+          <p className="overline" style={{ margin: 0 }}>Where · {places.length} of {J.errandPlaces.min} to {J.errandPlaces.max}</p>
+          <div className="option-chips">
+            {ERRAND_PLACES.map((p) => <button key={p.id} className="chip chip-sm" aria-pressed={places.includes(p.id)} onClick={() => toggle(p.id)}>{p.emoji} {p.name}</button>)}
+          </div>
+        </div>
+      ) : (
+        <div className="stack-8">
+          <p className="overline" style={{ margin: 0 }}>Which night</p>
+          <div className="option-chips">
+            {CLUB_EVENTS.map((e) => <button key={e.id} className="chip chip-sm" aria-pressed={event === e.id} onClick={() => setEvent(e.id)}>{e.name} · {placeName(e.placeId)}</button>)}
+          </div>
+        </div>
+      )}
+      <div className="stack-8">
+        <p className="overline" style={{ margin: 0 }}>Pay</p>
+        <div className="option-chips together-pay">
+          {J.payChoices.map((x) => <button key={x} className="chip" aria-pressed={pay === x} onClick={() => setPay(x)}>{formatCash(x)}</button>)}
+        </div>
+        <p className="overline" style={{ margin: "4px 0 0" }}>Deadline</p>
+        <div className="option-chips">
+          {J.hours.map((x) => <button key={x} className="chip chip-sm" aria-pressed={hours === x} onClick={() => setHours(x)}>{x} hours</button>)}
+        </div>
+        <p className="meta" style={{ margin: "4px 0 0" }}>
+          Held by the city until the game sees it done; back to you at the deadline if nobody does. They get {formatCash(afterFee("job", pay))} after
+          the {Math.round(PLAYER_ECONOMY.fees.job * 100)}% city fee, plus {J.clout} clout. Your Crew, partner and chats see it (and the open board, if you&apos;re on it).
+        </p>
+      </div>
+      <input className="chat-input job-note ph-sensitive" value={note} maxLength={140} placeholder="A note for them (optional)" onChange={(e) => setNote(e.target.value)} aria-label="A note for them" />
+      <button className="btn btn-taxi" disabled={busy !== null || posted || !ready || cash < pay}
+        onClick={() => onPost(kind, pay, kind === "errand" ? { places } : { event }, hours, note)}>
+        {busy === "post" ? "…" : posted ? "Already posted" : cash < pay ? `${formatCash(pay - cash)} short` : `Post the job · ${formatCash(pay)}`}
+      </button>
+    </div>
+  );
+}
+
 export function Stars({ value, onPick, small }: { value: number; onPick: (n: number) => void; small?: boolean }) {
   return (
     <div className={`row together-stars${small ? " sm" : ""}`} style={{ gap: 4 }} role="radiogroup" aria-label="Rating">
@@ -361,20 +524,23 @@ export function Stars({ value, onPick, small }: { value: number; onPick: (n: num
 }
 
 /** 5 and 6 · The Jobs app on the Phone: find work, or hire someone. */
-export function JobsApp({ board, cash, hasBusiness, h, onHome }: {
+export function JobsApp({ board, cash, hasBusiness, h, onHome, economy }: {
   board: JobsBoard | null;
   cash: number;
   hasBusiness: boolean;
   h: JobsHandlers;
   onHome: () => void;
+  /** Migration 0151: the open-board switch. */
+  economy?: EconomyApi;
 }) {
   const [tab, setTab] = useState<"work" | "hire">("work");
-  const [kind, setKind] = useState<"decorator" | "manager">("decorator");
+  const [kind, setKind] = useState<"decorator" | "manager" | TaskKind>("decorator");
   const [pay, setPay] = useState<number>(JOBS.decorator.payChoices[2]);
   const [cut, setCut] = useState<number>(JOBS.manager.cutChoices[1]);
   const [note, setNote] = useState("");
   const posted = board?.mine.some((j) => j.kind === kind && (j.status === "open" || j.status === "active" || j.status === "done"));
-  const cantPost = kind === "decorator" ? cash < pay : !hasBusiness;
+  const cantPost = kind === "decorator" ? cash < pay : kind === "manager" ? !hasBusiness : false;
+  const locked = board?.locked ? (board.locked === "phase_off" ? economyError("phase_off") : lockedLine({ reason: board.locked as "too_new", unlocksAt: "" })) : null;
   return (
     <div className="stack-12">
       <div>
@@ -395,15 +561,16 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome }: {
             </div>
           )}
           {!board.canWork && (
-            <p className="meta" style={{ margin: 0 }}>Jobs open up once your account is {TOGETHER.minAccountDays} days old.</p>
+            <p className="meta" style={{ margin: 0 }}>{locked ?? `Jobs open up once your account is ${TOGETHER.minAccountDays} days old.`}</p>
           )}
           {board.open.map((j) => <OpenJobCard key={j.id} job={j} h={h} canWork={board.canWork} />)}
           {board.open.length === 0 && (
             <div className="card stack-4">
               <p className="overline" style={{ margin: 0 }}>No jobs right now</p>
-              <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>Check back later, or post one yourself. Someone always needs a couch moved.</p>
+              <p className="body" style={{ margin: 0, color: "var(--text-2)" }}>{board.feeRate != null ? "You see jobs from your Crew, your partner and people you've chatted with. Switch on the open board to see strangers' too." : "Check back later, or post one yourself. Someone always needs a couch moved."}</p>
             </div>
           )}
+          {economy && <OpenBoardRow api={economy} />}
         </>
       ) : (
         <>
@@ -416,14 +583,28 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome }: {
               <span className="travel-mode-emoji" aria-hidden="true">💼</span>
               <span className="travel-mode-text"><b>Business manager</b><small>{hasBusiness ? "Collects your tills · never touches your cash" : "Buy a business first"}</small></span>
             </button>
+            {h.postTask && (
+              <>
+                <button role="radio" aria-checked={kind === "errand"} className={`travel-mode${kind === "errand" ? " on" : ""}`} onClick={() => setKind("errand")}>
+                  <span className="travel-mode-emoji" aria-hidden="true">🧾</span>
+                  <span className="travel-mode-text"><b>Errands</b><small>They check in at 2 to 4 places · the game checks</small></span>
+                </button>
+                <button role="radio" aria-checked={kind === "event"} className={`travel-mode${kind === "event" ? " on" : ""}`} onClick={() => setKind("event")}>
+                  <span className="travel-mode-emoji" aria-hidden="true">🪩</span>
+                  <span className="travel-mode-text"><b>Event support</b><small>They show up to a club night while it&apos;s on</small></span>
+                </button>
+              </>
+            )}
           </div>
-          {kind === "decorator" ? (
+          {isTask(kind) && h.postTask ? (
+            <TaskForm kind={kind} cash={cash} busy={h.busy} posted={!!posted} onPost={h.postTask} />
+          ) : kind === "decorator" ? (
             <div className="stack-8">
               <p className="overline" style={{ margin: 0 }}>Pay</p>
               <div className="option-chips together-pay">
                 {JOBS.decorator.payChoices.map((x) => <button key={x} className="chip" aria-pressed={pay === x} onClick={() => setPay(x)}>{formatCash(x)}</button>)}
               </div>
-              <p className="meta" style={{ margin: "4px 0 0" }}>Held by the city and paid when you approve (or after {JOBS.decorator.autoKeepHours} hours). Plus {JOBS.decorator.clout} clout for them.</p>
+              <p className="meta" style={{ margin: "4px 0 0" }}>Held by the city and paid when you approve (or after {JOBS.decorator.autoKeepHours} hours). Plus {JOBS.decorator.clout} clout for them.{h.postTask ? ` They get ${formatCash(afterFee("job", pay))} after the ${Math.round(PLAYER_ECONOMY.fees.job * 100)}% city fee.` : ""}</p>
             </div>
           ) : (
             <div className="stack-8">
@@ -434,10 +615,14 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome }: {
               <p className="meta" style={{ margin: "4px 0 0" }}>Of every till they collect. The rest goes straight to you. Fire them any time.</p>
             </div>
           )}
-          <input className="chat-input job-note" value={note} maxLength={140} placeholder="A note for them (optional)" onChange={(e) => setNote(e.target.value)} aria-label="A note for them" />
-          <button className="btn btn-taxi" disabled={h.busy !== null || !!posted || cantPost} onClick={() => h.post(kind, kind === "decorator" ? pay : 0, kind === "manager" ? cut : 0, note)}>
-            {h.busy === "post" ? "…" : posted ? "Already posted" : kind === "decorator" ? (cash < pay ? `${formatCash(pay - cash)} short` : `Post the job · ${formatCash(pay)}`) : "Post the job"}
-          </button>
+          {!isTask(kind) && (
+            <>
+              <input className="chat-input job-note" value={note} maxLength={140} placeholder="A note for them (optional)" onChange={(e) => setNote(e.target.value)} aria-label="A note for them" />
+              <button className="btn btn-taxi" disabled={h.busy !== null || !!posted || cantPost} onClick={() => h.post(kind, kind === "decorator" ? pay : 0, kind === "manager" ? cut : 0, note)}>
+                {h.busy === "post" ? "…" : posted ? "Already posted" : kind === "decorator" ? (cash < pay ? `${formatCash(pay - cash)} short` : `Post the job · ${formatCash(pay)}`) : "Post the job"}
+              </button>
+            </>
+          )}
           {board.mine.length > 0 && (
             <div className="card stack-4">
               <span className="overline">Your jobs</span>

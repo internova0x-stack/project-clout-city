@@ -56,6 +56,8 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   cohabit_ended: { tier: 0, category: "social", ttlMin: 1440 },
   // Having people over (migration 0121)
   visit_invite: { tier: 0, category: "social", ttlMin: 720 },
+  // The Player Economy (migration 0151): a gift is someone waiting on you; jobs are money.
+  gift_received: { tier: 0, category: "social", ttlMin: 2880 },
   // Sublets (migration 0119)
   sublet_app: { tier: 0, category: "social", ttlMin: 1440 },
   sublet_accepted: { tier: 0, category: "social", ttlMin: 1440 },
@@ -70,6 +72,8 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   rent_short: { tier: 1, category: "money", ttlMin: 1440 },
   gig_ready: { tier: 1, category: "money", ttlMin: 720 },
   till_full: { tier: 1, category: "money", ttlMin: 1440 },
+  job_taken: { tier: 1, category: "money", ttlMin: 720 },
+  job_paid: { tier: 1, category: "money", ttlMin: 1440 },
   streak_risk: { tier: 1, category: "reminders", ttlMin: 300 },
   exams_open: { tier: 1, category: "reminders", ttlMin: 720 },
   exams_last_day: { tier: 1, category: "reminders", ttlMin: 600 },

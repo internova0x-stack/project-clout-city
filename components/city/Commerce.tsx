@@ -16,6 +16,7 @@ import { CROWN_SKU, CROWN_STYLES, SUIT_CLOTHS, SUIT_LININGS, cleanMonogram, hasO
 import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, newArrivals, shippedPictures, shopOrder, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
 import { COUPLE_ITEMS } from "@/lib/couples";
+import { isGiftable } from "@/lib/playerEconomy";
 
 const COUTURE = "Clout Couture";
 
@@ -32,7 +33,7 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit, catalog,
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit, catalog, onGift,
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
   /** #15: owned clothes can be put on straight from the Shop. */
@@ -52,6 +53,8 @@ export function ShopSheet({
   fit?: "m" | "f";
   /** The Shop Manager (migration 0099): what's on sale, with pictures. Without it (before 0099) the Shop is the code's list. */
   catalog?: CatalogItem[];
+  /** The Player Economy (migration 0151): buy a C$ piece for a friend. Hidden without it. */
+  onGift?: (item: ShopCardItem) => void;
 }) {
   const [cat, setCat] = useState<ShopCategory | "couture">(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
@@ -96,6 +99,10 @@ export function ShopSheet({
   // Cheapest first, real-money pieces after the C$ ones (owner, Oct 22), with what's new in a row on top.
   const items = shopOrder(inTab.filter((i) => line === "all" || !lines.length || i.styleLines.includes(line)));
   const fresh = newArrivals(items.filter((i) => !owned.has(i.sku) && !i.retired), Date.now());
+  // 🎁 on C$ pieces that can be gifted (never real money, rewards, story pieces, cars or houses: lib/playerEconomy.ts).
+  const giftButton = (item: ShopCardItem) => onGift && item.wearableNow && !item.retired && isGiftable(item) ? (
+    <button className="btn btn-secondary btn-sm" aria-label={`Gift the ${item.name.toLowerCase()}`} disabled={busy !== null} onClick={() => onGift(item)}>🎁 Gift</button>
+  ) : null;
   // A piece in the New row isn't listed again below it (owner, Oct 22: no duplicates in the listing).
   const rest = items.filter((i) => !fresh.includes(i));
   const card = (item: ShopCardItem) => {
@@ -157,7 +164,10 @@ export function ShopSheet({
           <span className="meta">🔥 up to +{purchaseClout(item.clout, player.purchases_count)}</span>
         )}
         {isOwned ? (
-          wearControl(item.sku) ?? (player.car_sku === item.sku && player.car_mode === "rented" ? <span className="owned-chip">Renting</span> : null)
+          <>
+            {wearControl(item.sku) ?? (player.car_sku === item.sku && player.car_mode === "rented" ? <span className="owned-chip">Renting</span> : null)}
+            {giftButton(item)}
+          </>
         ) : soon ? (
           <>
             <span className="meta locked">🔒 Coming soon to your wardrobe</span>
@@ -180,6 +190,7 @@ export function ShopSheet({
                 Rent {formatCash(item.rentPerWeek)}/wk
               </button>
             )}
+            {!locked && giftButton(item)}
           </div>
         )}
       </div>
@@ -227,6 +238,7 @@ export function ShopSheet({
               section={section}
               onBuy={(item) => setConfirm({ item, mode: "buy" })}
               onTryAtHome={onTryAtHome}
+              giftButton={giftButton}
             />
           )}
           {cat === "cars" && <p className="subtext" style={{ margin: 0 }}>Owned cars cost {CITY_ECONOMY.bills.carInsuranceRate * 100}% of their price a week in insurance. Rentals bill weekly too.</p>}
@@ -610,9 +622,11 @@ export function BillsSheet({
 /** Bought pieces carry this pill on their card (owner, Oct 22). */
 const OwnedPill = () => <span className="tag tag-positive owned-pill">✓ Owned</span>;
 
-function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryAtHome }: {
+function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryAtHome, giftButton }: {
   items: ShopCardItem[]; owned: Set<string>; cash: number; purchases: number; busy: boolean; section?: string;
   onBuy: (item: ShopCardItem) => void; onTryAtHome?: (item: ShopItem) => void;
+  /** Migration 0151: 🎁 Gift for giftable pieces. */
+  giftButton?: (item: ShopCardItem) => React.ReactNode;
 }) {
   const start = FURNITURE_ROOMS.some((r) => r.id === section) ? (section as FurnitureRoom) : "living";
   const [room, setRoom] = useState<FurnitureRoom>(start);
@@ -652,10 +666,16 @@ function HomeShelf({ items, owned, cash, purchases, busy, section, onBuy, onTryA
                 </div>
               )}
               <span className="meta">🔥 up to +{purchaseClout(item.clout, purchases)}</span>
-              {mine ? (variants.length > 1 && <span className="meta">You have this color</span>) : (
+              {mine ? (
+                <>
+                  {variants.length > 1 && <span className="meta">You have this color</span>}
+                  {giftButton?.(item)}
+                </>
+              ) : (
                 <div className="buy-rent">
                   {onTryAtHome && <button className="btn btn-secondary btn-sm" onClick={() => onTryAtHome(item)}>Try it at home</button>}
                   <button className={`btn btn-taxi btn-sm${cash < item.price ? " short" : ""}`} disabled={busy} onClick={() => onBuy(item)}>{formatCash(item.price)}</button>
+                  {giftButton?.(item)}
                 </div>
               )}
             </div>

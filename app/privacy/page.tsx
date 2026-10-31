@@ -39,6 +39,8 @@ export default function Privacy() {
         <li>Your in-game name, look, style, traits and &quot;what kind of New Yorker&quot; you picked.</li>
         <li>Game progress: virtual cash and clout (with a record of every change), items, home and furniture, places you visit in the game, tasks, goals, skills, rank, businesses, campus, hunts, gossip, lotto cards, badges, story choices, and the choices you make on situation cards with where they put you between Halo and Hustler (private: never shown to other players).</li>
         <li>Social features: your crew, crushes and dates, relationships, sublets, home visits and together plans.</li>
+        <li>Gifts and jobs between players: who sent what to whom, the note with a gift, job pay and fees, ratings, your weekly limits,
+          and automatic checks for patterns that look like abuse (reviewed by our team).</li>
       </ul>
       <p><strong>What you send or post</strong></p>
       <ul>
@@ -78,6 +80,8 @@ export default function Privacy() {
       <ul>
         <li>Your in-game name, look, style, rank, badges, crew, player card, and that you&apos;re at a place in the game.</li>
         <li>&quot;Dating @name&quot; on your card if you&apos;re in a relationship (you can hide it), and your sublet listings and ratings.</li>
+        <li>Gifts and jobs: the player you gift or hire sees your name, the item or job and any note; your Jobs board posts go to your
+          crew, partner and people you&apos;ve chatted with, or to anyone on the open board if you switch it on; your Jobs ratings.</li>
         <li>Your chats with them, and party or home-visit chat with the people there.</li>
         <li>Shoutouts and Clout TV photos after our team picks them, and your name in leaderboards, Lola&apos;s &quot;Spotted at&quot; lines and Lola&apos;s Blotter (public headlines from some choices and big wins) (opt out in Settings).</li>
         <li>Never your email, purchases, Mayor letters or reports.</li>

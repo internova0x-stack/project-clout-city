@@ -254,6 +254,8 @@ const ERRORS: Record<string, string> = {
   // Daily tasks 2.0 (migration 0073): streak rewards and guest-list passes.
   reward_only: REWARD_ONLY,
   reward_unsellable: REWARD_KEEP,
+  // The Player Economy (migration 0151): a gift can't go straight back to the game at 60%.
+  no_resale: "Gifts stay with you for 14 days. No selling back, no regifting. It's the thought that counts.",
   no_pass: "No guest-list pass on you. Keep the streak going: day 14 brings one.",
   pass_used_tonight: "You're already on a guest list tonight. One velvet rope at a time.",
   pass_not_needed: "You can already get in there. Save the pass for a door that says no.",

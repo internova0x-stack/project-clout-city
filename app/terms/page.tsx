@@ -47,6 +47,11 @@ export default function Terms() {
       <ul>
         <li>In-game money (&quot;C$&quot; or &quot;virtual cash&quot;), clout, items, homes, businesses and other in-game things have <strong>no real-world value</strong>.</li>
         <li>C$ can&apos;t be bought with real money, sold, traded for real money or anything of value, or transferred outside the game.</li>
+        <li><strong>Between players:</strong> you can give another player a Shop item you buy with C$, and pay or be paid C$ for jobs on the
+          in-game Jobs board. You can&apos;t send C$ directly. Items bought with real money (VIP, Clout Couture and other real-money
+          items) can never be given or traded. These exchanges have limits (account age, rank, a weekly cap), a city fee on job pay
+          that goes to no one, and a waiting period before a gift can be sold back or passed on. Every exchange is logged and shown
+          to both players, and we may pause an account&apos;s trading, or reverse an exchange, if it looks like abuse or real-money trading.</li>
         <li>They&apos;re a limited licence to use in the game, not property you own. We may change how they work, including prices, rewards and rent, to keep the game fair and fun.</li>
         <li><strong>Lucky Star Lotto</strong> and other games of chance in Clout City use virtual cash only. Real money never touches them, and their prizes are virtual only.</li>
       </ul>

@@ -81,6 +81,13 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     // ref: game:card (migration 0041): a ⭐ on the card won the game's pot.
     case "lotto_pot": return { emoji: "⭐", title: "Lotto pot", detail: lottoGame(first)?.name ?? "Scratch card" };
     case "travel_skip": return { emoji: "⏩", title: "Skipped the rest of a trip", detail: null };
+    // The Player Economy (migration 0151).
+    case "gift_send": return { emoji: "🎁", title: "Gift for a friend", detail: null };
+    case "gift_refund": return { emoji: "🎁", title: "Gift sent back", detail: "Refunded" };
+    case "economy_fee": return { emoji: "🏛️", title: "City fee", detail: "5% of player pay, gone to the city" };
+    case "job_hold": return { emoji: "💼", title: "Job pay held", detail: "Jobs board" };
+    case "job_pay": return { emoji: "💼", title: "Jobs board pay", detail: null };
+    case "job_refund": return { emoji: "💼", title: "Job pay back", detail: "Jobs board" };
     default: {
       const bill = BILLS[e.kind];
       if (bill) return { emoji: bill[0], title: bill[1], detail: null };

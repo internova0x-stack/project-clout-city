@@ -109,6 +109,8 @@ import { contextTipLists } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
 import { DecorApproveCard, DecoratingBar, JobsApp, RideWaitCard, TogetherBonusCard, TogetherPlansSheet, TogetherPrompt, TogetherSheet } from "./together/Together";
+import { GiftInboxSheet, GiftPrompt, GiftSheet, type GiftItem } from "./economy/Economy";
+import type { EconomyApi, EconomyState, GiftInbox } from "@/lib/playerEconomy";
 import {
   canDoTogether, jobToApprove, rideShare, togetherAlerts, togetherVerb,
   type JobHome, type JobsBoard, type MyJob, type RideRequest, type TogetherApi, type TogetherBonus, type TogetherCandidate, type TogetherInbox, type TogetherResult,
@@ -267,6 +269,7 @@ export function GameShell({
   gossip,
   business,
   together,
+  economy,
   radio,
   mayor,
   campaign,
@@ -353,6 +356,8 @@ export function GameShell({
   business?: BusinessApi;
   /** v0.13 Better Together (migration 0050): together bonuses, rides and the Jobs app; hidden without it. */
   together?: TogetherApi;
+  /** The Player Economy (migration 0151): gifts, Trades & gifts in the Bank, the open board; hidden without it. */
+  economy?: EconomyApi;
   /** v0.14 Real Clout FM (migration 0057): the Radio app and the on-air banner; hidden until radio_state answers. */
   radio?: RadioApi;
   /** Contact the Mayor (migration 0105): the Phone's feedback app; hidden until mayor_letters_state answers. */
@@ -881,6 +886,24 @@ export function GameShell({
     const t = everyVisible(() => { void loadTogether(); void loadJobs(); }, 20_000);
     return () => t();
   }, [together, loadTogether, loadJobs]);
+  // ---- The Player Economy (migration 0151): gifts waiting, the gift sheet, the week's numbers ----
+  const [giftIn, setGiftIn] = useState<GiftInbox | null>(null);
+  const [giftItem, setGiftItem] = useState<GiftItem | null>(null);
+  const [giftsOpen, setGiftsOpen] = useState(false);
+  const [giftDismissed, setGiftDismissed] = useState<string | null>(null);
+  const [econ, setEcon] = useState<EconomyState | null>(null);
+  const loadGifts = useCallback(async () => {
+    if (!economy) return;
+    const [i, st] = await Promise.all([economy.inbox(), economy.state()]);
+    if (i.ok) setGiftIn(i.data);
+    if (st.ok) setEcon(st.data);
+  }, [economy]);
+  useEffect(() => {
+    if (!economy) return;
+    void loadGifts();
+    const t = everyVisible(() => void loadGifts(), 60_000);
+    return () => t();
+  }, [economy, loadGifts]);
   useEffect(() => {
     if (togetherTarget && crew && !crewPeople.length) void crew.members().then((r) => r.ok && setCrewPeople(r.data));
   }, [togetherTarget, crew, crewPeople.length]);
@@ -1322,6 +1345,9 @@ export function GameShell({
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
     // A visit invite (migration 0121).
     else if (open === "plans") setPanel("visits");
+    // The Player Economy (migration 0151): a gift arrived; a job was taken or paid.
+    else if (open === "gifts" && economy) setGiftsOpen(true);
+    else if (open === "jobs" && together) setPhone({ open: true, app: "jobs" });
     // Campaign Mode: "Your poll results are in".
     else if (open === "campaign" && campaign) setCampaignOpen(true);
     else if (open === "careers" && careers) setCareersOpen(true);
@@ -2048,7 +2074,8 @@ export function GameShell({
   // later is a climb.
   // Net worth is everything you own: cash, things and businesses at their worth (owner, Oct 15).
   const otherWorth = city ? netWorth(city) : me.bank_cash;
-  const myWorth = otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0);
+  // Migration 0151: C$ from other players over the weekly cap doesn't count (the server's net_worth agrees).
+  const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
   useEffect(() => {
     if (!city || !bizTried) return;
@@ -2440,6 +2467,21 @@ export function GameShell({
     end: (id: number) => void togetherRun(`end:${id}`, () => together.jobs.end(id)).then((r) => { if (r) { setToast("Done. They don't run your tills anymore."); void loadJobs(); } }),
     approve: () => { setApproveLater(null); setPhone({ open: false, app: null }); },
     rate: (id: number, stars: number) => void togetherRun(`rate:${id}`, () => together.jobs.rate(id, stars)).then((r) => { if (r !== null) setToast("Thanks. Rated."); void loadJobs(); }),
+    // Migration 0151: errands and event support, checked by the game.
+    postTask: together.jobs.postTask ? (kind: "errand" | "event", pay: number, target: { places?: string[]; event?: string }, hours: number, note: string) =>
+      void togetherRun("post", () => together.jobs.postTask!(kind, pay, target, hours, note)).then((r) => {
+        if (!r) return;
+        setToast(`Posted. ${formatCash(pay)} is held until the game sees it done (or back to you in ${hours} hours).`);
+        void loadJobs();
+        if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+      }) : undefined,
+    check: together.jobs.check ? (id: number) => void togetherRun(`check:${id}`, () => together.jobs.check!(id)).then((r) => {
+      if (!r) return;
+      setToast(r.status === "kept" ? `💼 Done and paid: ${formatCash(r.earned)} after the city fee.` : "Not done yet. Check in at every place on the list.");
+      void loadJobs();
+      if (r.status === "kept" && cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+    }) : undefined,
+    rateClient: together.jobs.rateClient ? (id: number, stars: number) => void togetherRun(`rate:${id}`, () => together.jobs.rateClient!(id, stars)).then((r) => { if (r !== null) setToast("Thanks. Rated."); void loadJobs(); }) : undefined,
   } : null;
   const approving = together && !decor && flow === "none" && !arranging ? jobToApprove(jobs) : null;
   const settleDecor = (job: MyJob, keep: boolean, stars: number | null) => {
@@ -2513,6 +2555,9 @@ export function GameShell({
   const rentAlarm = city ? rentAlert(city) : null;
   const rentAlarmKey = rentAlarm && city ? `${rentAlarm.level}:${rentAlarm.owed}:${city.today}` : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
+  // Migration 0151: a gift waiting, when no other social card is up.
+  const giftKey = giftIn ? giftIn.incoming.map((g) => g.id).join() : "";
+  const showGift = !showDating && !showCrew && !showParty && !showTogether && !!economy && !!giftIn?.incoming.length && giftDismissed !== giftKey && flow === "none" && !arranging && !decor;
   // C3: the roommate's intro, then a note a day, when no other home card is up.
   const homeRoommate = ((): Roommate | null => {
     const id = city && !city.player.house_sku && !sharedHome ? ECONOMY.homes.find((h) => h.id === me.home_id)?.roommate : undefined;
@@ -2736,6 +2781,9 @@ export function GameShell({
           )}
           {showTogether && togetherIn && (
             <TogetherPrompt inbox={togetherIn} onOpen={() => setTogetherPlansOpen(true)} onDismiss={() => setTogetherDismissed(togetherKey)} />
+          )}
+          {showGift && giftIn && (
+            <GiftPrompt inbox={giftIn} onOpen={() => setGiftsOpen(true)} onDismiss={() => setGiftDismissed(giftKey)} />
           )}
           {showDating && inbox && (
             <DatingPrompt inbox={inbox} onOpen={() => setPanel("dates")} onDismiss={() => setDatingDismissed(datingKey)} />
@@ -3073,7 +3121,18 @@ export function GameShell({
             fit={modelSex(look)}
             catalog={catalogOverride ?? city.catalog}
             realMoney={catalog ? { product: (sku) => products.find((p) => p.sku === sku), buy: money.buy, busy } : undefined}
+            onGift={economy ? (item) => setGiftItem({ sku: item.sku, name: item.name, emoji: item.emoji, price: item.price }) : undefined}
           />
+          {economy && (
+            <GiftSheet item={giftItem} api={economy} cash={city.player.bank_cash} onClose={() => setGiftItem(null)}
+              onSent={(_to, cash) => {
+                const name = giftItem?.name ?? "it";
+                setGiftItem(null);
+                setToast(`🎁 Sent. ${formatCash(-cash)} well spent on ${name.toLowerCase()}. They'll get a notification.`);
+                void loadGifts();
+                if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+              }} />
+          )}
           <BigBuySheet p={bigBuy} onClose={() => setBigBuy(null)} busy={busy !== null} onConfirm={(sku) => { setBigBuy(null); void buy(sku, true); }} />
           <NetWorthSheet
             open={panel === "networth"}
@@ -3182,6 +3241,19 @@ export function GameShell({
             onRide={(ride, yes) => void answerRide(ride, yes)}
             onOpenPlace={(id) => { setTogetherPlansOpen(false); openPlace(id); }}
           />
+          {economy && (
+            <GiftInboxSheet open={giftsOpen} inbox={giftIn} busy={busy !== null} onClose={() => setGiftsOpen(false)}
+              onAnswer={(id, accept) => {
+                setBusy(`gift:${id}`);
+                void economy.answer(id, accept).then((r) => {
+                  setBusy(null);
+                  if (!r.ok) { setToast(r.error); return; }
+                  setToast(accept ? "🎁 It's yours. Find it in Net Worth (and keep it at least two weeks, it's polite)." : "Declined. It went back to them, no questions asked.");
+                  void loadGifts();
+                  if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+                });
+              }} />
+          )}
           {bonusCard && (
             <TogetherBonusCard bonus={bonusCard} onClose={() => { const b = bonusCard; setBonusCard(null); void together.seen(b.id).then(() => loadTogether()); }} />
           )}
@@ -3222,7 +3294,9 @@ export function GameShell({
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
         stations={stations && stationThreads.length ? { threads: stationThreads, onRead: readStation } : undefined}
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
-        jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers } : undefined}
+        jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers, economy } : undefined}
+        economy={economy}
+        onOpenGifts={economy ? () => { setPhone({ open: false, app: null }); setGiftsOpen(true); } : undefined}
         // The offer opens over the game, so the Phone steps aside first (it would cover the card).
         onChatPass={(out) => { setPhone({ open: false, app: null }); setChatWith(null); setChatPass({ out }); }}
         // Hidden until migration 0048 runs (business_state answers).

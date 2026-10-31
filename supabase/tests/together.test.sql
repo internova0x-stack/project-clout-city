@@ -147,7 +147,8 @@ select pg_temp.assert((public.ride_respond((select (r ->> 'id')::bigint from rid
 -- Jobs: the interior decorator
 -- ---------------------------------------------------------------------------
 reset role;
-update public.players set home_layout = '[{"id":"sofa","x":1,"z":1,"rot":0}]', bank_cash = 10000, clout = 0
+-- Migration 0151: jobs need the economy's unlock (7 days, Rank 2) and friends or the open board.
+update public.players set home_layout = '[{"id":"sofa","x":1,"z":1,"rot":0}]', bank_cash = 10000, clout = 100, economy_open = true
  where id in (pg_temp.id(1), pg_temp.id(2), pg_temp.id(3));
 set role authenticated;
 select pg_temp.as_(1);
@@ -176,7 +177,7 @@ select 1 from public.job_finish((select id from job));
 select pg_temp.assert(pg_temp.raises($$select public.decorate_save((select id from job), '[]')$$, 'job_over'), 'no edits after');
 select pg_temp.as_(1);
 select 1 from public.job_settle((select id from job), true, 5);
-select pg_temp.assert((pg_temp.p(2)).bank_cash = 12500 and (pg_temp.p(2)).clout = 25, 'Bo is paid C$2,500 and 25 clout');
+select pg_temp.assert((pg_temp.p(2)).bank_cash = 12375 and (pg_temp.p(2)).clout = 125, 'Bo is paid C$2,500 less the 5% city fee (0151), and 25 clout');
 select pg_temp.assert((public.player_card(pg_temp.id(2)) -> 'jobs' ->> 'rating')::numeric = 5 and (public.player_card(pg_temp.id(2)) -> 'jobs' ->> 'hired')::int = 1, '⭐ 5 · hired once');
 
 -- Undo: every piece back and the pay refunded. Same pair again the same day is too much.
@@ -206,7 +207,7 @@ update public.jobs set status = 'done', worker = pg_temp.id(3), taken_at = now()
 set role authenticated;
 select pg_temp.as_(3);
 select 1 from public.jobs_board();
-select pg_temp.assert((pg_temp.p(3)).bank_cash = 10300, 'Cy paid after 24 hours');
+select pg_temp.assert((pg_temp.p(3)).bank_cash = 10285, 'Cy paid after 24 hours (less the fee)');
 
 -- Cancel an open job: the pay comes back.
 select pg_temp.as_(2);
@@ -234,8 +235,8 @@ grant all on before to authenticated;
 set role authenticated;
 create temp table mc as select public.manager_collect((select id from mjob)) r;
 grant all on mc to authenticated;
-select pg_temp.assert((select (r ->> 'collected')::int = 750 and (r ->> 'cash')::int = 150 from mc), 'collected C$750, kept C$150');
-select pg_temp.assert((pg_temp.p(2)).bank_cash = (select b from before) + 150 and (pg_temp.p(3)).bank_cash = (select c from before) + 600, 'the client keeps 80%');
+select pg_temp.assert((select (r ->> 'collected')::int = 750 and (r ->> 'cash')::int = 143 and (r ->> 'fee')::int = 7 from mc), 'collected C$750, kept C$150 less the fee');
+select pg_temp.assert((pg_temp.p(2)).bank_cash = (select b from before) + 143 and (pg_temp.p(3)).bank_cash = (select c from before) + 600, 'the client keeps 80%');
 select pg_temp.assert((public.manager_collect((select id from mjob)) ->> 'cash')::int = 0, 'an empty till pays nothing');
 select pg_temp.as_(3);
 select 1 from public.end_job((select id from mjob));

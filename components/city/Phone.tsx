@@ -29,6 +29,8 @@ import { SubletsApp, type SubletHandlers } from "./Sublets";
 import { subletAlerts, type SubletState } from "@/lib/sublets";
 import type { GossipState, TeaCard } from "@/lib/gossip";
 import { BankView } from "../game/Sheets";
+import { TradesAndGifts } from "../economy/Economy";
+import type { EconomyApi } from "@/lib/playerEconomy";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
 import { MessagesApp, type MessagesDating } from "../chat/Messages";
 import type { ChatApi } from "@/lib/chat";
@@ -83,7 +85,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
-  invite, mayor, locked, onOpenCampaign, onOpenCareers, election, scandals, blotter, conditions,
+  invite, mayor, locked, onOpenCampaign, onOpenCareers, election, scandals, blotter, conditions, economy, onOpenGifts,
 }: {
   open: boolean;
   onClose: () => void;
@@ -138,6 +140,9 @@ export function PhoneModal({
   businesses?: Omit<React.ComponentProps<typeof BusinessesApp>, "onHome">;
   /** v0.13 the Jobs app (migration 0050); without it the app is hidden. */
   jobs?: Omit<React.ComponentProps<typeof JobsApp>, "onHome">;
+  /** The Player Economy (migration 0151): Trades & gifts in the Bank. */
+  economy?: EconomyApi;
+  onOpenGifts?: () => void;
   /** v0.14 Real Clout FM: the Radio app; without it the app is hidden. */
   radio?: RadioApi;
   /** A shoutout on air the player hasn't seen yet. */
@@ -252,6 +257,7 @@ export function PhoneModal({
                 ? <ApartmentsTabs apartments={apartments as Required<NonNullable<typeof apartments>>} state={state} />
                 : <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />)}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
+              {app === "bank" && state && economy && <TradesAndGifts api={economy} onOpenGifts={onOpenGifts} />}
               {app === "settings" && (
                 <div className="stack-12">
                   {membership && <MembershipRow vip={membership.vip} onOpen={membership.onOpen} />}

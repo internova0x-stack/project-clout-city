@@ -20,6 +20,7 @@ import type { Autopilot, AutopilotKind } from "@/lib/autopilot";
 import type { StoryletAction, StudioStorylets } from "@/lib/storyletWeeks";
 import type { StudioCondition } from "@/lib/cityConditions";
 import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
+import type { EconomyAdmin, EconomyPhase, FlagOutcome } from "@/lib/playerEconomy";
 import { studioRows, type CardStats, type StudioLearning } from "@/lib/cardLearning";
 import type { ChoiceCard } from "@/lib/choices";
 import { TV, type StudioBigScreen, type StudioTvSubmission, type TvAction } from "@/lib/cloutTv";
@@ -195,7 +196,7 @@ async function admin<T>(fn: string, args: Record<string, unknown> = {}): Promise
   const supabase = await getServerSupabase();
   if (!supabase) return { ok: false, error: "Accounts aren't switched on yet." };
   const { data, error } = await supabase.rpc(fn, args);
-  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("mayor") ? "Run migration 0105 first." : fn.includes("autopilot") ? "Run migration 0107 first." : fn.includes("storylet") ? "Run migration 0139 first." : fn.includes("condition") ? "Run migration 0140 first." : fn.includes("card_") ? "Run migration 0141 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
+  if (error) return { ok: false, error: /function .* does not exist|schema cache/i.test(error.message) ? (fn.includes("npc") ? "Run migration 0016 first." : fn.includes("gossip") ? "Run migration 0034 first." : fn.includes("news") ? "Run migration 0017 first." : fn.includes("hunt") ? ("p_note" in args ? "Run migration 0019 first." : "Run migration 0018 first.") : fn.includes("insights") ? "Run migration 0053 first." : fn.includes("admin_player") ? "Run migration 0055 first." : fn.includes("shoutout") ? "Run migration 0057 first." : fn.includes("mayor") ? "Run migration 0105 first." : fn.includes("autopilot") ? "Run migration 0107 first." : fn.includes("storylet") ? "Run migration 0139 first." : fn.includes("condition") ? "Run migration 0140 first." : fn.includes("card_") ? "Run migration 0141 first." : fn.includes("economy") ? "Run migration 0151 first." : fn.includes("big_screen") ? "Run migration 0058 first." : fn.startsWith("admin_creator_video") ? "Run migration 0091 first." : fn.startsWith("admin_payout") ? "Run migration 0090 first." : fn === "admin_affiliates_overview" || fn === "admin_creator" ? "Run migration 0088 first." : fn.includes("creator") ? "Run migration 0087 first." : "Run migration 0010 first.") : studioError(error.message) };
   return { ok: true, data: data as T };
 }
 export async function studioReports(status: "open" | "all") {
@@ -223,6 +224,19 @@ export async function studioConditions() {
 }
 export async function studioConditionSet(id: string, action: StoryletAction) {
   return admin<StudioCondition[]>("admin_condition_set", { p_id: id, p_action: action });
+}
+// ---- The Player Economy (migration 0151) ----
+export async function studioEconomy() {
+  return admin<EconomyAdmin>("admin_economy");
+}
+export async function studioEconomySet(phase: EconomyPhase, on: boolean) {
+  return admin<EconomyAdmin>("admin_economy_set", { p_phase: phase, p_on: on });
+}
+export async function studioEconomyFlag(id: number, outcome: FlagOutcome, note: string) {
+  return admin<EconomyAdmin>("admin_economy_flag", { p_id: id, p_outcome: outcome, p_note: note.slice(0, 300) });
+}
+export async function studioEconomyFreeze(player: string, frozen: boolean, reason: string) {
+  return admin<EconomyAdmin>("admin_economy_freeze", { p_player: player, p_frozen: frozen, p_reason: reason.slice(0, 300) });
 }
 export async function studioUnderworldJobs() {
   return admin<StudioUnderworldJob[]>("admin_underworld_jobs");

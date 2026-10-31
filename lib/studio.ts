@@ -2,6 +2,7 @@
 // the admin_* SQL functions (supabase/migrations/0007); one approval puts a story
 // on the schedule (product owner, Oct 12, 2026).
 
+import type { EconomyAdmin, EconomyPhase, FlagOutcome } from "./playerEconomy.ts";
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { Autopilot, AutopilotKind } from "./autopilot.ts";
 import type { StoryletAction, StudioStorylets } from "./storyletWeeks.ts";
@@ -239,6 +240,11 @@ export interface StudioApi {
   /** Content Engine step 6 (migration 0141): what works: every card's numbers and weight, and the owner's override. */
   learning?(): Promise<Admin<StudioLearning>>;
   learningSet?(card: string, set: { weight: number; retired: boolean } | "auto"): Promise<Admin<StudioLearning>>;
+  /** The Player Economy (migration 0151): phase switches, the week's numbers, the flag queue and frozen accounts. */
+  economy?(): Promise<Admin<EconomyAdmin>>;
+  economySet?(phase: EconomyPhase, on: boolean): Promise<Admin<EconomyAdmin>>;
+  economyFlag?(id: number, outcome: FlagOutcome, note: string): Promise<Admin<EconomyAdmin>>;
+  economyFreeze?(player: string, frozen: boolean, reason: string): Promise<Admin<EconomyAdmin>>;
   /** Contact the Mayor (migration 0105): players' letters, marking them read or done, and writing back. */
   mailbag?(filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
   letter?(id: number, status: LetterStatus, reply: string | null, filter: MailbagFilter): Promise<Admin<StudioMailbag>>;
