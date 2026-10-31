@@ -1360,5 +1360,22 @@ components/underworld/BackRoom.tsx, the place (`pablos-luggage`, template `backR
 LUGGAGE · NOTARY) and its regular Pablo. Preview: lib/underworldSim.ts, `?underworld=locked|new|jobs|pro|hot|caught|lawyer`
 (`&open=backroom`).
 
-**Later:** Heat and traces shared with Campaign Mode; Halo- and Hustler-only places and events; weekly underworld jobs through
-the content routine; Pablo's crew of regulars.
+**Part 2 (owner, Oct 31: "go with 1, 2, and 3"; migration 0150).**
+- **Pablo's crew:** Tito the driver, Gigi the bookkeeper, Auntie Bee who knows everybody (content/underworld/jobs.json `crew`;
+  jobs carry `crew`). A crew member's job moves their loyalty (from 20: +6 a win, +2 a fizzle, −5 a bust); at 60 their jobs pay
+  10% more, at 80 they take the fall once a New York week (no fine, no holding, no headline: their own line instead). The back
+  room shows the three with their loyalty; each job names whose it is.
+- **Pablo's Thursday table, Hustlers only** (meter 30 or below): once a New York week in the back room, favors traded over
+  cards. No stake and no gambling: it always pays C$300 to 800, +3 Street Rep, +4 Heat and +5 loyalty with each of the crew
+  (ledger 'underworld_table'). Others see the curtain and Pablo's line.
+- **The Charity Gala, Halo only** (meter 70 or above, revealed): Ditmars Heights Rooftop's card, once a New York week, a gift of
+  C$100, 250, 500 or 1,000 to the Astoria Literacy & Rooftop Garden Fund; a quarter comes back as clout (250 at most), +10 Mood,
+  the meter +2 (`gala_state`, `gala_donate`; ledger 'gala_donation' and 'gala'; game_settings 'gala', lib/gala.ts).
+- **Weekly jobs for Pablo:** the routine writes content/underworld-weeks/<Monday>.json (2 to 5 jobs, lib/underworldWeeks.ts
+  `validateUnderworldWeek`, run by validate:content and the import); `content_import_underworld` stores each new job
+  scheduled, live 24 hours later unless vetoed or paused in Studio → Storylets → Pablo's jobs (held while the storylets
+  autopilot is off); `underworld_jobs_live()` feeds the server's pool. A vetoed job that went live is never dealt again but
+  still explains an old trace. The first week (Nov 2): artisanal gourds, a marathon shortcut, misplaced rent paperwork.
+- Preview: `?underworld=crew|table|weekly`, `?gala=on|off|new|done` (`&open=gala`).
+
+**Later:** Heat and traces shared with Campaign Mode.

@@ -437,6 +437,12 @@ components live in `app/globals.css`.
   public.underworld (RLS on, no grants): `underworld_context`, `underworld_save` (versioned; ledger 'underworld_pay',
   'underworld_fine', 'underworld_lawyer'; rate bucket 'underworld'); Start over forgets it. Street Rep adds up to +10% to a
   campaign's dark ops (`campaignOpBonus`, StartInput.streetRep). Never violence, drugs or weapons (`contentProblems`).
+  Part 2 (migration 0150): Pablo's crew (Tito, Gigi, Auntie Bee: loyalty from their jobs, +10% pay at 60, take the fall once a
+  week at 80), Pablo's Thursday table (Hustlers only, once a week, always pays: ledger 'underworld_table'), the Charity Gala
+  (Halo only, Ditmars Heights Rooftop, once a week: `gala_donate`, ledger 'gala_donation'/'gala', game_settings 'gala' mirrored
+  by lib/gala.ts) and weekly jobs (content/underworld-weeks/<Monday>.json, `validateUnderworldWeek`; `content_import_underworld`
+  stores them live 24 hours later unless vetoed in Studio → Storylets → Pablo's jobs; `underworld_jobs_live()`; follows the
+  storylets autopilot). `?underworld=crew|table|weekly`, `?gala=on|off|new|done` in the preview.
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only
