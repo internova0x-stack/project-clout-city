@@ -403,6 +403,11 @@ components live in `app/globals.css`.
   0.5-1.6; 25 showings to move; retired at 60+ shown and ≤ 20% chosen) into `card_weights` (`card_weights_auto`, never over
   the owner's `set_by = 'admin'`); `card_weights_live()` feeds `ChoiceContext.weights` (fit × weight, 0 = retired). Studio →
   Storylets → What works (`admin_card_learning`, `admin_card_weight(card, weight, retired, auto)`).
+  Step 7, one card format (no migration; lib/cardFormat.ts): Moral Choices cards, campaign situations and career tasks share
+  `faceProblems` (emoji, title, 2-4 options with label/get/cost, no risk fields, never the meter; the campaign may name its
+  candidate's Integrity) and the storylet gate (`gateProblems`): career tasks may carry `when`/`slots`, campaign situations
+  `when`; the servers pass the engines only what memory unlocked (`unlockedCards` → CareerCtx.unlocked, endWeek's
+  `opts.unlocked`), one gated card first per workday or End Week. validate:content and tests/cardFormat.test.ts run it.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

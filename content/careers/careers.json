@@ -626,7 +626,7 @@
     {
      "id": "push",
      "label": "Push back on the pivot",
-     "get": "Integrity at work",
+     "get": "A clear conscience at work",
      "cost": "Skyler's mood",
      "outcomes": [
       {
@@ -1096,6 +1096,227 @@
        "perf": 6,
        "trust": {
         "manager": 3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech-feud-cc",
+   "track": "tech",
+   "minLevel": 1,
+   "emoji": "📧",
+   "title": "{coworker} cc'd the whole floor on your typo. With a GIF. Dana is 'reading it now.'",
+   "when": {
+    "all": [
+     {
+      "has": "thread.feud",
+      "subjectStarts": "tech:"
+     }
+    ]
+   },
+   "slots": {
+    "coworker": {
+     "fact": "thread.feud",
+     "show": "coworker"
+    }
+   },
+   "options": [
+    {
+     "id": "own",
+     "label": "Reply-all: 'Good catch!'",
+     "get": "You look unbothered",
+     "cost": "Your pride, briefly",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Your 'Good catch!' gets more reactions than the GIF. {coworker} goes quiet.",
+       "perf": 5,
+       "trust": {
+        "manager": 4,
+        "rival": -3
+       }
+      }
+     ]
+    },
+    {
+     "id": "back",
+     "label": "Find their typo, reply-all",
+     "get": "Even",
+     "cost": "The office's patience",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You find two. Dana asks everyone to 'please stop replying-all.' Everyone blames you both.",
+       "perf": -2,
+       "trust": {
+        "manager": -5,
+        "rival": -6
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "dm",
+     "label": "DM {coworker}: 'Truce?'",
+     "get": "Maybe peace",
+     "cost": "Making the first move",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'...Fine. Truce.' {coworker} deletes the GIF from the shared drive. Mostly.",
+       "perf": 2,
+       "trust": {
+        "rival": 8
+       }
+      },
+      {
+       "weight": 1,
+       "text": "{coworker} screenshots your DM and sends it to the group chat.",
+       "perf": 0,
+       "trust": {
+        "rival": -4
+       },
+       "mood": -4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hosp-banned-regular",
+   "track": "hospitality",
+   "minLevel": 1,
+   "emoji": "🫖",
+   "title": "A customer recognizes you from the night {place} threw you out. She's telling table 6.",
+   "when": {
+    "all": [
+     {
+      "has": "place.banned"
+     }
+    ]
+   },
+   "slots": {
+    "place": {
+     "fact": "place.banned",
+     "show": "place"
+    }
+   },
+   "options": [
+    {
+     "id": "laugh",
+     "label": "Laugh it off",
+     "get": "A good story",
+     "cost": "Your mystery",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "You tell it better than she does. Table 6 tips C$20 'for the story.'",
+       "perf": 5,
+       "trust": {
+        "manager": 2
+       },
+       "mood": 3
+      }
+     ]
+    },
+    {
+     "id": "deny",
+     "label": "'Must be my twin'",
+     "get": "Your dignity, maybe",
+     "cost": "A lie at work",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "She shows table 6 the video. Odette watches it too. Twice.",
+       "perf": -3,
+       "trust": {
+        "manager": -4
+       },
+       "mood": -3
+      }
+     ]
+    },
+    {
+     "id": "comp",
+     "label": "Comp her latte",
+     "get": "A quieter table",
+     "cost": "A latte",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Free latte, closed case. She leaves you a heart on the receipt.",
+       "perf": 3,
+       "trust": {
+        "manager": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "media-lola-mole",
+   "track": "media",
+   "minLevel": 1,
+   "emoji": "🕵️",
+   "title": "Vivian thinks someone in the office is feeding Lola. She's looking at you. For a while.",
+   "when": {
+    "all": [
+     {
+      "has": "thread.lola_source"
+     }
+    ]
+   },
+   "options": [
+    {
+     "id": "cool",
+     "label": "Hold her gaze",
+     "get": "Nothing proven",
+     "cost": "A very long minute",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "Vivian blinks first. She moves on to Kofi. Kofi has never met Lola.",
+       "perf": 2,
+       "trust": {
+        "manager": -2
+       }
+      }
+     ]
+    },
+    {
+     "id": "blame",
+     "label": "Hint it's the intern",
+     "get": "Off the hook",
+     "cost": "The intern",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "The intern is 'reassigned to archives.' You feel fine about it for almost a day.",
+       "perf": 3,
+       "trust": {
+        "manager": 3,
+        "friend": -6
+       },
+       "mood": -4
+      }
+     ]
+    },
+    {
+     "id": "admit",
+     "label": "Admit you know Lola",
+     "get": "Honesty, a new angle",
+     "cost": "Vivian's trust",
+     "outcomes": [
+      {
+       "weight": 1,
+       "text": "'Then you can get us an interview with her.' Vivian smiles. That's worse.",
+       "perf": 4,
+       "trust": {
+        "manager": -4
        }
       }
      ]

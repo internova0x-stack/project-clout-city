@@ -9,6 +9,8 @@ import { CAREER_CONTENT as content } from "@/lib/careersContent";
 import { nyDay } from "@/lib/campaign";
 import { OFFICE_FACT, type FactKey } from "@/lib/memory";
 import { conditionOn, type ConditionNow } from "@/lib/cityConditions";
+import { unlockedCards } from "@/lib/cardFormat";
+import { memoryOf } from "@/lib/memoryServer";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -167,7 +169,12 @@ async function cityConditions(): Promise<ConditionNow[]> {
 
 export async function careerStart(style: WorkStyle): Promise<Out> {
   if (!["hustle", "steady", "coast"].includes(style)) return { ok: false, error: careerError("unknown") };
-  return act((s, ctx, today) => ({ ...startDay(content, s, style, ctx, today, rng), workday: today }));
+  // Content Engine step 7: gated tasks the player's memory unlocks (a feud, a ban, a source…), with names filled in.
+  const admin = getAdminSupabase();
+  const w = await who();
+  const memory = admin && !("error" in w) ? await memoryOf(admin, w.id) : null;
+  const unlocked = unlockedCards(content.tasks, memory, nyDay());
+  return act((s, ctx, today) => ({ ...startDay(content, s, style, { ...ctx, unlocked }, today, rng), workday: today }));
 }
 
 export async function careerTask(index: number, option: string): Promise<Out> {

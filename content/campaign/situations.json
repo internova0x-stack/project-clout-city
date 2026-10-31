@@ -251,6 +251,26 @@
         { "id": "fight", "label": "Fight it", "get": "Maybe your name cleared", "cost": "C$2,000 now, maybe more", "effects": { "cash": -2000, "rating": 0.5 }, "receipt": "You fought it and won the first round. +0.5.", "fail": { "chance": 0.4, "effects": { "cash": -4000, "rating": -1 }, "receipt": "You fought it and lost. C$6,000 in all. -1." } },
         { "id": "ignore", "label": "Ignore it", "get": "Saves money now", "cost": "A default judgment", "effects": { "cash": -7000, "rating": -1 }, "receipt": "Ignoring a lawsuit: C$7,000 and a headline. -1." }
       ]
+    },
+    {
+      "id": "manager-was-fired", "weeks": [1, 4], "icon": "🗂️",
+      "when": { "all": [{ "has": "career.fired" }] },
+      "text": "The Mayor's people found out {candidate}'s campaign manager was fired from their last job. That's you.",
+      "choices": [
+        { "id": "own", "label": "Own it on camera", "get": "A comeback story", "cost": "An awkward interview", "effects": { "integrity": 2, "rating": 0.2 }, "receipt": "\"I got fired. I learned. Now I win elections.\" The clip does better than expected." },
+        { "id": "spin", "label": "'I left to serve the city'", "get": "A cleaner story", "cost": "A story that isn't true", "effects": { "integrity": -3, "heat": 4, "rating": 0.1 }, "receipt": "The spin holds. Your old boss's group chat does not believe it." },
+        { "id": "quiet", "label": "Say nothing", "get": "No new headline", "cost": "Theirs runs anyway", "effects": { "rating": -0.2, "morale": -4 }, "receipt": "The story ran without you. The volunteers read it in the break room." }
+      ]
+    },
+    {
+      "id": "partner-at-fundraiser", "weeks": [1, 4], "icon": "📸",
+      "when": { "all": [{ "has": "dating.official" }] },
+      "text": "Your partner was photographed at Mayor Papa-Dani's fundraiser, holding a very small sandwich.",
+      "choices": [
+        { "id": "joke", "label": "Make it a joke", "get": "A charming moment", "cost": "Your partner's patience", "effects": { "rating": 0.3, "morale": 2 }, "receipt": "\"They were there for the sandwiches.\" It's the most-liked post of the week." },
+        { "id": "distance", "label": "Distance the campaign", "get": "A clean message", "cost": "A cold dinner at home", "effects": { "integrity": -1, "rating": 0.1 }, "receipt": "The statement is crisp. Dinner is not." },
+        { "id": "spy", "label": "Ask what they overheard", "get": "The Mayor's plans", "cost": "Using your partner", "effects": { "integrity": -4, "heat": 3, "rating": 0.4 }, "receipt": "Your partner overheard plenty. You use it. They noticed you used it." }
+      ]
     }
   ]
 }

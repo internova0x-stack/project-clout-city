@@ -1,6 +1,6 @@
 # Clout City: Content Engine
 
-**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 6 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
+**Status:** spec v1 (Oct 31): both open questions answered by the owner. All seven steps are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
 reactive part of the World State brief.
 
 **Owner decisions (Oct 31):**
@@ -211,7 +211,7 @@ memory**.
 | 4 ✅ | **The city reacts** (built: migration 0140, lib/cityConditions.ts, content/conditions/, content/city/reactions.json): conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
 | 5 ✅ | **One character registry** (built: lib/characters.ts, lib/characterMemory.ts, content/characters/remembers.json): the cast, profiles, career people, campaign people and Barksley in one list with roles, places and memory keyed off facts | People who remember you |
 | 6 ✅ | **Learning** (built: migration 0141, lib/cardLearning.ts, Studio → Storylets → What works): weights from what's chosen and skipped; retiring what's skipped | Content that gets better |
-| 7 | **One card format:** campaign situations and career tasks on storylets | Consistency |
+| 7 ✅ | **One card format** (built: lib/cardFormat.ts): campaign situations and career tasks on storylets | Consistency |
 
 ## 10. Rules (every storylet follows them)
 
@@ -286,3 +286,21 @@ memory**.
   automatic (`admin_card_learning`, `admin_card_weight`).
 - Not yet: weights for city storylets and remembered lines (they aren't chosen or skipped), and a report for the weekly
   routine (it has no database access; the owner sees the numbers in the Studio).
+
+**Step 7 as built (Oct 31):**
+- The three kinds of situation card (Moral Choices cards, campaign situations, career tasks) keep their own engines and
+  effects but share one face and one memory gate (lib/cardFormat.ts):
+  - `faceProblems`: an emoji, a one-line situation, 2 to 4 options with a label, You get and It costs, no risk fields,
+    never the meter's name (the campaign may name its candidate's own Integrity, which it shows on screen). Run on every
+    card of all three kinds by validate:content and tests/cardFormat.test.ts. It caught a career task naming the meter
+    ("Integrity at work"), now "A clear conscience at work".
+  - The storylet gate: career tasks may carry `when` and `slots`, campaign situations `when`. `gateProblems` checks them
+    with the storylet rules; the servers (careerActions, campaignActions) read the player's memory and pass the engines
+    only what's unlocked (`unlockedCards`), so lib/careers.ts and lib/campaignEngine.ts stay pure and memory-free.
+  - A gated task comes first in a workday (one a day; names filled by `names`); a gated situation comes first in an End
+    Week (one a week).
+- First gated content: three career tasks (a feud with {coworker} at Pivotly, a customer who saw {place} throw you out,
+  Vivian hunting Lola's source) and two campaign situations (the manager was fired from their last job; the manager's
+  partner at the Mayor's fundraiser).
+- Not yet: learning weights for career tasks and campaign situations (they can't be skipped, so only the option split
+  would count), and Studio editing of them.
