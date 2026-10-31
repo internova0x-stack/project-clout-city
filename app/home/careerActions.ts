@@ -7,6 +7,7 @@ import {
 } from "@/lib/careers";
 import { CAREER_CONTENT as content } from "@/lib/careersContent";
 import { nyDay } from "@/lib/campaign";
+import { OFFICE_FACT, type FactKey } from "@/lib/memory";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -74,7 +75,17 @@ async function save(admin: Admin, player: string, ctx: Context, state: CareerSta
 }
 
 /** Loads the job, brings it to today (reviews, payday), runs one change and saves it. */
-async function act(change: (state: CareerState, ctx: Context, today: string) => { workday?: string; effects?: Effects; payouts?: Payout[]; receipt?: string; integrity?: number; headline?: string | null }): Promise<Out> {
+type Change = { workday?: string; effects?: Effects; payouts?: Payout[]; receipt?: string; integrity?: number; headline?: string | null; facts?: { key: FactKey; subject: string }[] };
+
+/** Player memory (migration 0138): what this player did, for content to react to. Never blocks the action. */
+async function remember(admin: Admin, player: string, facts: { key: FactKey; subject: string }[]) {
+  for (const f of facts) {
+    const { error } = await admin.rpc("fact_note", { p_player: player, p_key: f.key, p_subject: f.subject });
+    if (error && !/fact_note/.test(error.message)) console.error("fact_note failed", error);
+  }
+}
+
+async function act(change: (state: CareerState, ctx: Context, today: string) => Change): Promise<Out> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
   const ctx = await load(w.id, w.admin);
@@ -97,6 +108,7 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
     const { error } = await w.admin.rpc("career_office", { p_player: w.id, p_id: ctx.job!.id, p_integrity: r.integrity ?? 0, p_headline: r.headline ?? null });
     if (error && !/career_office/.test(error.message)) console.error("career_office failed", error);
   }
+  if (r.facts?.length) await remember(w.admin, w.id, r.facts);
   return { ok: true, data: screen(ctx, today, r.receipt) };
 }
 
@@ -140,6 +152,7 @@ export async function careerApply(track: TrackId, answer: Answer): Promise<Out> 
     return { ok: false, error: careerError(code ?? "unknown") };
   }
   ctx.job = { id, status: "employed", version: 1, state };
+  if (answer === "polish") await remember(w.admin, w.id, [{ key: "career.lied_interview", subject: track }]);
   return { ok: true, data: screen(ctx, today, `You're hired! First day whenever you're ready.`) };
 }
 
@@ -153,7 +166,14 @@ export async function careerTask(index: number, option: string): Promise<Out> {
 }
 
 export async function careerOffice(action: OfficeAction, who: Who): Promise<Out> {
-  return act((s, ctx, today) => office(s, action, who, ctx, today, rng));
+  return act((s, ctx, today) => {
+    const exposedBefore = s.exposed ?? 0;
+    const r = office(s, action, who, ctx, today, rng);
+    const subject = `${s.track}:${who}`;
+    const facts: Change["facts"] = [{ key: OFFICE_FACT[action], subject }];
+    if ((s.exposed ?? 0) > exposedBefore) facts.push({ key: "career.caught_sabotage", subject });
+    return { ...r, facts };
+  });
 }
 
 export async function careerQuit(): Promise<Out> {
