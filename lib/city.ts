@@ -294,7 +294,7 @@ export const CITY_ECONOMY = {
 // ---------------------------------------------------------------------------
 // Places (location wave 1: Milestones v0.3)
 // ---------------------------------------------------------------------------
-export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig";
+export type InteriorTemplate = "apartment" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "civic" | "gym" | "plaza" | "radio" | "broadcast" | "hub" | "officeSmall" | "officeBig" | "towerLobby";
 export type PlaceDepth = "full" | "scene";
 
 export type ActionKind = "visit" | "eat" | "shift" | "hangout" | "gigs";
@@ -421,7 +421,7 @@ export const PLACES: Place[] = [
   },
   {
     id: "skybridge-tower", borough: "brooklyn", name: "Skybridge Tower", emoji: "🏢", category: "places", neighborhood: "Williamsburg",
-    at: [40.7188, -73.9622], depth: "scene", template: "officeBig", palette: ["#6C8CFF", "#D6CFC4", "#14111A"],
+    at: [40.7188, -73.9622], depth: "scene", template: "towerLobby", palette: ["#6C8CFF", "#D6CFC4", "#14111A"],
     tags: ["office", "gigs_board"],
     lore: "Glass, steel and a lobby that smells like ambition and burnt coffee. The gigs board is where careers start, or at least side hustles. I've seen both.",
     actions: [

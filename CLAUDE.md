@@ -393,7 +393,13 @@ components live in `app/globals.css`.
   Office sizes (owner, Oct 31: "depending on the size of the company"): place templates `officeSmall` (two desks and a mini
   fridge: Campaign HQ), `office` (Pedal Pushers Hub) and `officeBig` (12 × 9.5 open plan: two banks of six desks, a meeting
   table by the whiteboard, a kitchen and drinks fridge, reception, a lounge corner, a dozen coworkers: Triborough Works,
-  Skybridge Tower); lib/rooms.ts, the template is in the city seed (migration 0145).
+  Skybridge Tower); lib/rooms.ts, the template is in the city seed (migration 0145). Tower offices (owner, Oct 31: "multiple floors,
+  swanky design, cubicles, display glass, robots… for big technology or media companies"): `TOWERS` (lib/rooms.ts) gives a
+  place floors joined by an elevator (`towerElevators`: up to the next floor, from the top back to 1) and floor buttons in
+  GameShell; Skybridge Tower (big tech): Lobby (`towerLobby`: robot greeter, display cases, glass lounge), Open floor
+  (`techFloor`: 12 cubicles, server racks, robots) and Executive floor (`execFloor`: glass boardroom with a video wall, corner
+  office, robot butler); Clout TV Tower (media): the Studio, the Newsroom (`newsroom`) and the Executive floor. New pieces:
+  cubicle, glassWall, displayCase, robot, serverRack, elevator (components/room/furniture.ts).
 - Content Engine (docs/CONTENT-ENGINE.md; owner Oct 31: endless content that reacts to how each player plays; AI later;
   automatic with a veto window: 24 hours for generated content, Friday for stories and hunts, which go live on Saturdays).
   Step 1, player memory (migration 0138): `player_facts` (player, key, subject → value, count, first/last, expiry) written only

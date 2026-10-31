@@ -1,0 +1,386 @@
+▲ Next.js 16.3.8 (Turbopack)
+- Local:         http://localhost:3123
+- Network:       http://192.0.2.2:3123
+✓ Ready in 559ms
+✓ Running next.config.ts took 120ms
+
+ GET /preview/home?at=skybridge-tower 200 in 6.2s (next.js: 4.0s, proxy.ts: 881ms, application-code: 1339ms)
+ POST /preview/home?at=skybridge-tower 200 in 102ms (next.js: 58ms, proxy.ts: 10ms, application-code: 34ms)
+  └─ ƒ previewRadioState("") in 2ms app/preview/radioActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 60ms (next.js: 24ms, proxy.ts: 15ms, application-code: 21ms)
+  └─ ƒ previewMayorState("") in 2ms app/preview/mayorActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 128ms (next.js: 50ms, proxy.ts: 16ms, application-code: 62ms)
+  └─ ƒ previewTvState("") in 2ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 37ms (next.js: 7ms, proxy.ts: 6ms, application-code: 25ms)
+  └─ ƒ previewStationInbox() in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 102ms (next.js: 35ms, proxy.ts: 10ms, application-code: 57ms)
+  └─ ƒ previewNews() in 2ms app/preview/newsActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 43ms (next.js: 12ms, proxy.ts: 7ms, application-code: 25ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 1ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 81ms (next.js: 34ms, proxy.ts: 5ms, application-code: 42ms)
+  └─ ƒ previewHuntSetup("new", "arcade_nerd") in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 76ms (next.js: 27ms, proxy.ts: 18ms, application-code: 30ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 83ms (next.js: 41ms, proxy.ts: 6ms, application-code: 36ms)
+  └─ ƒ previewPlaceCounts() in 1ms app/preview/chatActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 106ms (next.js: 71ms, proxy.ts: 7ms, application-code: 29ms)
+  └─ ƒ previewGossipReset("some") in 1ms app/preview/gossipActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 79ms (next.js: 44ms, proxy.ts: 14ms, application-code: 21ms)
+  └─ ƒ previewPartyReset(undefined) in 0ms app/preview/storyActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 76ms (next.js: 41ms, proxy.ts: 5ms, application-code: 29ms)
+  └─ ƒ previewPartyMentions() in 0ms app/preview/storyActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 72ms (next.js: 37ms, proxy.ts: 7ms, application-code: 28ms)
+  └─ ƒ previewCrewReset(undefined) in 0ms app/preview/crewActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 89ms (next.js: 49ms, proxy.ts: 7ms, application-code: 33ms)
+  └─ ƒ previewDatingReset(undefined) in 0ms app/preview/datingActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 41ms (next.js: 19ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewCoupleReset(undefined) in 0ms app/preview/coupleActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 49ms (next.js: 22ms, proxy.ts: 4ms, application-code: 23ms)
+  └─ ƒ previewSubletReset(undefined) in 0ms app/preview/subletActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 112ms (next.js: 96ms, proxy.ts: 4ms, application-code: 12ms)
+  └─ ƒ previewVisitReset(undefined) in 0ms app/preview/visitActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 40ms (next.js: 20ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ previewChatList() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 64ms (next.js: 28ms, proxy.ts: 6ms, application-code: 31ms)
+  └─ ƒ previewPresence("skybridge-tower", 1) in 0ms app/preview/chatActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 69ms (next.js: 19ms, proxy.ts: 6ms, application-code: 44ms)
+  └─ ƒ previewStoryRefresh(0) in 4ms app/preview/storyActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 128ms (next.js: 17ms, proxy.ts: 5ms, application-code: 106ms)
+  └─ ƒ previewShopCatalog() in 68ms app/preview/shopActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 43ms (next.js: 19ms, proxy.ts: 5ms, application-code: 18ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 34ms (next.js: 17ms, proxy.ts: 5ms, application-code: 12ms)
+  └─ ƒ previewCrowdPreset(0) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 39ms (next.js: 18ms, proxy.ts: 5ms, application-code: 15ms)
+  └─ ƒ previewRadioState("") in 0ms app/preview/radioActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 239ms (next.js: 191ms, proxy.ts: 25ms, application-code: 24ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 38ms (next.js: 18ms, proxy.ts: 4ms, application-code: 16ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 48ms (next.js: 25ms, proxy.ts: 4ms, application-code: 19ms)
+  └─ ƒ previewStationInbox() in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 47ms (next.js: 25ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 41ms (next.js: 21ms, proxy.ts: 7ms, application-code: 14ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 44ms (next.js: 20ms, proxy.ts: 5ms, application-code: 19ms)
+  └─ ƒ previewHuntState() in 1ms app/preview/huntActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 36ms (next.js: 17ms, proxy.ts: 10ms, application-code: 9ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 45ms (next.js: 24ms, proxy.ts: 4ms, application-code: 17ms)
+  └─ ƒ previewPlaceCounts() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 33ms (next.js: 18ms, proxy.ts: 6ms, application-code: 9ms)
+  └─ ƒ previewPartyMentions() in 0ms app/preview/storyActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 60ms (next.js: 21ms, proxy.ts: 16ms, application-code: 23ms)
+  └─ ƒ previewCrewInbox() in 0ms app/preview/crewActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 33ms (next.js: 17ms, proxy.ts: 4ms, application-code: 12ms)
+  └─ ƒ previewChatList() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 61ms (next.js: 26ms, proxy.ts: 4ms, application-code: 30ms)
+  └─ ƒ previewPresence("skybridge-tower", 1) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 50ms (next.js: 17ms, proxy.ts: 4ms, application-code: 29ms)
+  └─ ƒ previewStoryRefresh(0) in 3ms app/preview/storyActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 195ms (next.js: 23ms, proxy.ts: 9ms, application-code: 163ms)
+  └─ ƒ previewShopCatalog() in 0ms app/preview/shopActions.ts
+ GET /preview/home?at=clout-tower 200 in 269ms (next.js: 37ms, proxy.ts: 4ms, application-code: 228ms)
+⨯ Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+ POST /preview/home?at=clout-tower 200 in 39ms (next.js: 23ms, proxy.ts: 6ms, application-code: 11ms)
+  └─ ƒ previewRadioState("") in 1ms app/preview/radioActions.ts
+ POST /preview/home?at=clout-tower 200 in 38ms (next.js: 8ms, proxy.ts: 11ms, application-code: 19ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=clout-tower 200 in 41ms (next.js: 22ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 26ms (next.js: 6ms, proxy.ts: 4ms, application-code: 15ms)
+  └─ ƒ previewStationInbox() in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 41ms (next.js: 27ms, proxy.ts: 5ms, application-code: 10ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=clout-tower 200 in 18ms (next.js: 6ms, proxy.ts: 4ms, application-code: 8ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 45ms (next.js: 19ms, proxy.ts: 10ms, application-code: 16ms)
+  └─ ƒ previewHuntSetup("new", "arcade_nerd") in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=clout-tower 200 in 34ms (next.js: 8ms, proxy.ts: 14ms, application-code: 11ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=clout-tower 200 in 45ms (next.js: 25ms, proxy.ts: 8ms, application-code: 12ms)
+  └─ ƒ previewPlaceCounts() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 25ms (next.js: 9ms, proxy.ts: 8ms, application-code: 9ms)
+  └─ ƒ previewGossipReset("some") in 0ms app/preview/gossipActions.ts
+ POST /preview/home?at=clout-tower 200 in 54ms (next.js: 10ms, proxy.ts: 5ms, application-code: 40ms)
+  └─ ƒ previewPartyReset(undefined) in 0ms app/preview/storyActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=clout-tower 200 in 40ms (next.js: 19ms, proxy.ts: 6ms, application-code: 15ms)
+  └─ ƒ previewPartyMentions() in 0ms app/preview/storyActions.ts
+ POST /preview/home?at=clout-tower 200 in 69ms (next.js: 42ms, proxy.ts: 6ms, application-code: 21ms)
+  └─ ƒ previewCrewReset(undefined) in 0ms app/preview/crewActions.ts
+ POST /preview/home?at=clout-tower 200 in 53ms (next.js: 20ms, proxy.ts: 6ms, application-code: 27ms)
+  └─ ƒ previewDatingReset(undefined) in 0ms app/preview/datingActions.ts
+ POST /preview/home?at=clout-tower 200 in 33ms (next.js: 17ms, proxy.ts: 4ms, application-code: 11ms)
+  └─ ƒ previewCoupleReset(undefined) in 0ms app/preview/coupleActions.ts
+ POST /preview/home?at=clout-tower 200 in 66ms (next.js: 25ms, proxy.ts: 6ms, application-code: 35ms)
+  └─ ƒ previewSubletReset(undefined) in 0ms app/preview/subletActions.ts
+ POST /preview/home?at=clout-tower 200 in 41ms (next.js: 18ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewVisitReset(undefined) in 0ms app/preview/visitActions.ts
+ POST /preview/home?at=clout-tower 200 in 63ms (next.js: 35ms, proxy.ts: 6ms, application-code: 22ms)
+  └─ ƒ previewChatList() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 35ms (next.js: 18ms, proxy.ts: 6ms, application-code: 11ms)
+  └─ ƒ previewPresence("clout-tower", 1) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 44ms (next.js: 22ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewStoryRefresh(0) in 3ms app/preview/storyActions.ts
+ POST /preview/home?at=clout-tower 200 in 41ms (next.js: 8ms, proxy.ts: 5ms, application-code: 27ms)
+  └─ ƒ previewShopCatalog() in 0ms app/preview/shopActions.ts
+ POST /preview/home?at=clout-tower 200 in 52ms (next.js: 24ms, proxy.ts: 4ms, application-code: 24ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=clout-tower 200 in 39ms (next.js: 25ms, proxy.ts: 6ms, application-code: 9ms)
+  └─ ƒ previewCrowdPreset(0) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 57ms (next.js: 19ms, proxy.ts: 4ms, application-code: 35ms)
+  └─ ƒ previewRadioState("") in 1ms app/preview/radioActions.ts
+ POST /preview/home?at=clout-tower 200 in 45ms (next.js: 20ms, proxy.ts: 5ms, application-code: 19ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=clout-tower 200 in 46ms (next.js: 23ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 47ms (next.js: 23ms, proxy.ts: 4ms, application-code: 20ms)
+  └─ ƒ previewStationInbox() in 5ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 45ms (next.js: 21ms, proxy.ts: 4ms, application-code: 20ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=clout-tower 200 in 40ms (next.js: 20ms, proxy.ts: 4ms, application-code: 16ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 40ms (next.js: 21ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ previewHuntState() in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=clout-tower 200 in 51ms (next.js: 24ms, proxy.ts: 4ms, application-code: 23ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=clout-tower 200 in 52ms (next.js: 21ms, proxy.ts: 4ms, application-code: 26ms)
+  └─ ƒ previewPlaceCounts() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 56ms (next.js: 25ms, proxy.ts: 5ms, application-code: 26ms)
+  └─ ƒ previewPartyMentions() in 0ms app/preview/storyActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=clout-tower 200 in 56ms (next.js: 26ms, proxy.ts: 11ms, application-code: 19ms)
+  └─ ƒ previewCrewInbox() in 0ms app/preview/crewActions.ts
+⨯ Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+ GET /preview/home?at=skybridge-tower 200 in 233ms (next.js: 43ms, proxy.ts: 6ms, application-code: 184ms)
+ POST /preview/home?at=skybridge-tower 200 in 56ms (next.js: 25ms, proxy.ts: 10ms, application-code: 21ms)
+  └─ ƒ previewRadioState("") in 1ms app/preview/radioActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 22ms (next.js: 10ms, proxy.ts: 4ms, application-code: 8ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 37ms (next.js: 12ms, proxy.ts: 7ms, application-code: 19ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 27ms (next.js: 11ms, proxy.ts: 8ms, application-code: 9ms)
+  └─ ƒ previewStationInbox() in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 84ms (next.js: 46ms, proxy.ts: 10ms, application-code: 29ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 72ms (next.js: 28ms, proxy.ts: 24ms, application-code: 19ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 53ms (next.js: 33ms, proxy.ts: 4ms, application-code: 16ms)
+  └─ ƒ previewHuntSetup("new", "arcade_nerd") in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 22ms (next.js: 7ms, proxy.ts: 7ms, application-code: 8ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 95ms (next.js: 52ms, proxy.ts: 7ms, application-code: 36ms)
+  └─ ƒ previewPlaceCounts() in 1ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 45ms (next.js: 12ms, proxy.ts: 8ms, application-code: 25ms)
+  └─ ƒ previewGossipReset("some") in 0ms app/preview/gossipActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 52ms (next.js: 23ms, proxy.ts: 9ms, application-code: 20ms)
+  └─ ƒ previewPartyReset(undefined) in 0ms app/preview/storyActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 63ms (next.js: 28ms, proxy.ts: 8ms, application-code: 28ms)
+  └─ ƒ previewPartyMentions() in 1ms app/preview/storyActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 101ms (next.js: 45ms, proxy.ts: 12ms, application-code: 44ms)
+  └─ ƒ previewCrewReset(undefined) in 0ms app/preview/crewActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 63ms (next.js: 36ms, proxy.ts: 8ms, application-code: 19ms)
+  └─ ƒ previewDatingReset(undefined) in 0ms app/preview/datingActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 58ms (next.js: 38ms, proxy.ts: 7ms, application-code: 13ms)
+  └─ ƒ previewCoupleReset(undefined) in 0ms app/preview/coupleActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 46ms (next.js: 29ms, proxy.ts: 4ms, application-code: 12ms)
+  └─ ƒ previewSubletReset(undefined) in 0ms app/preview/subletActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 72ms (next.js: 32ms, proxy.ts: 6ms, application-code: 34ms)
+  └─ ƒ previewVisitReset(undefined) in 0ms app/preview/visitActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 83ms (next.js: 29ms, proxy.ts: 4ms, application-code: 50ms)
+  └─ ƒ previewChatList() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 42ms (next.js: 25ms, proxy.ts: 5ms, application-code: 12ms)
+  └─ ƒ previewPresence("skybridge-tower", 1) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 49ms (next.js: 26ms, proxy.ts: 4ms, application-code: 19ms)
+  └─ ƒ previewStoryRefresh(0) in 3ms app/preview/storyActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 100ms (next.js: 8ms, proxy.ts: 6ms, application-code: 86ms)
+  └─ ƒ previewShopCatalog() in 0ms app/preview/shopActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 57ms (next.js: 36ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 46ms (next.js: 25ms, proxy.ts: 4ms, application-code: 16ms)
+  └─ ƒ previewCrowdPreset(0) in 0ms app/preview/chatActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 90ms (next.js: 47ms, proxy.ts: 15ms, application-code: 28ms)
+  └─ ƒ previewRadioState("") in 1ms app/preview/radioActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 63ms (next.js: 29ms, proxy.ts: 15ms, application-code: 19ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 46ms (next.js: 24ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 70ms (next.js: 39ms, proxy.ts: 6ms, application-code: 25ms)
+  └─ ƒ previewStationInbox() in 3ms app/preview/tvActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 65ms (next.js: 37ms, proxy.ts: 6ms, application-code: 22ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 50ms (next.js: 25ms, proxy.ts: 5ms, application-code: 20ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 42ms (next.js: 25ms, proxy.ts: 4ms, application-code: 12ms)
+  └─ ƒ previewHuntState() in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 69ms (next.js: 45ms, proxy.ts: 6ms, application-code: 17ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 63ms (next.js: 33ms, proxy.ts: 9ms, application-code: 21ms)
+  └─ ƒ previewPlaceCounts() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 117ms (next.js: 30ms, proxy.ts: 4ms, application-code: 83ms)
+  └─ ƒ previewPartyMentions() in 0ms app/preview/storyActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=skybridge-tower 200 in 47ms (next.js: 27ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ previewCrewInbox() in 0ms app/preview/crewActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 68ms (next.js: 39ms, proxy.ts: 10ms, application-code: 20ms)
+  └─ ƒ previewChatList() in 1ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 54ms (next.js: 31ms, proxy.ts: 5ms, application-code: 18ms)
+  └─ ƒ previewPresence("skybridge-tower", 1) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 64ms (next.js: 34ms, proxy.ts: 6ms, application-code: 25ms)
+  └─ ƒ previewStoryRefresh(0) in 5ms app/preview/storyActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 54ms (next.js: 26ms, proxy.ts: 10ms, application-code: 18ms)
+  └─ ƒ previewShopCatalog() in 0ms app/preview/shopActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 49ms (next.js: 27ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 53ms (next.js: 30ms, proxy.ts: 10ms, application-code: 12ms)
+  └─ ƒ previewCrowdPreset(0) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 51ms (next.js: 29ms, proxy.ts: 9ms, application-code: 13ms)
+  └─ ƒ previewDatingInbox() in 1ms app/preview/datingActions.ts
+ POST /preview/home?at=skybridge-tower 200 in 69ms (next.js: 38ms, proxy.ts: 6ms, application-code: 25ms)
+  └─ ƒ previewCoupleState() in 1ms app/preview/coupleActions.ts
+ GET /preview/home?at=clout-tower 200 in 219ms (next.js: 28ms, proxy.ts: 6ms, application-code: 185ms)
+⨯ Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+ POST /preview/home?at=clout-tower 200 in 56ms (next.js: 35ms, proxy.ts: 5ms, application-code: 16ms)
+  └─ ƒ previewRadioState("") in 1ms app/preview/radioActions.ts
+ POST /preview/home?at=clout-tower 200 in 28ms (next.js: 9ms, proxy.ts: 7ms, application-code: 12ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=clout-tower 200 in 88ms (next.js: 52ms, proxy.ts: 5ms, application-code: 31ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 23ms (next.js: 8ms, proxy.ts: 4ms, application-code: 12ms)
+  └─ ƒ previewStationInbox() in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 56ms (next.js: 40ms, proxy.ts: 4ms, application-code: 12ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=clout-tower 200 in 43ms (next.js: 12ms, proxy.ts: 14ms, application-code: 16ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 74ms (next.js: 38ms, proxy.ts: 9ms, application-code: 27ms)
+  └─ ƒ previewHuntSetup("new", "arcade_nerd") in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=clout-tower 200 in 25ms (next.js: 10ms, proxy.ts: 8ms, application-code: 7ms)
+  └─ ƒ previewCoutureMap() in 0ms app/preview/coutureActions.ts
+ POST /preview/home?at=clout-tower 200 in 69ms (next.js: 32ms, proxy.ts: 5ms, application-code: 31ms)
+  └─ ƒ previewPlaceCounts() in 1ms app/preview/chatActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=clout-tower 200 in 96ms (next.js: 42ms, proxy.ts: 5ms, application-code: 49ms)
+  └─ ƒ previewGossipReset("some") in 0ms app/preview/gossipActions.ts
+ POST /preview/home?at=clout-tower 200 in 65ms (next.js: 40ms, proxy.ts: 5ms, application-code: 19ms)
+  └─ ƒ previewPartyReset(undefined) in 0ms app/preview/storyActions.ts
+ POST /preview/home?at=clout-tower 200 in 52ms (next.js: 14ms, proxy.ts: 5ms, application-code: 34ms)
+  └─ ƒ previewPartyMentions() in 9ms app/preview/storyActions.ts
+ POST /preview/home?at=clout-tower 200 in 61ms (next.js: 34ms, proxy.ts: 6ms, application-code: 22ms)
+  └─ ƒ previewCrewReset(undefined) in 0ms app/preview/crewActions.ts
+ POST /preview/home?at=clout-tower 200 in 71ms (next.js: 45ms, proxy.ts: 10ms, application-code: 16ms)
+  └─ ƒ previewDatingReset(undefined) in 0ms app/preview/datingActions.ts
+ POST /preview/home?at=clout-tower 200 in 59ms (next.js: 38ms, proxy.ts: 7ms, application-code: 14ms)
+  └─ ƒ previewCoupleReset(undefined) in 0ms app/preview/coupleActions.ts
+ POST /preview/home?at=clout-tower 200 in 50ms (next.js: 27ms, proxy.ts: 5ms, application-code: 17ms)
+  └─ ƒ previewSubletReset(undefined) in 0ms app/preview/subletActions.ts
+ POST /preview/home?at=clout-tower 200 in 49ms (next.js: 34ms, proxy.ts: 4ms, application-code: 11ms)
+  └─ ƒ previewVisitReset(undefined) in 0ms app/preview/visitActions.ts
+ POST /preview/home?at=clout-tower 200 in 63ms (next.js: 32ms, proxy.ts: 5ms, application-code: 26ms)
+  └─ ƒ previewChatList() in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 68ms (next.js: 34ms, proxy.ts: 4ms, application-code: 30ms)
+  └─ ƒ previewPresence("clout-tower", 1) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 89ms (next.js: 52ms, proxy.ts: 5ms, application-code: 32ms)
+  └─ ƒ previewStoryRefresh(0) in 4ms app/preview/storyActions.ts
+ POST /preview/home?at=clout-tower 200 in 99ms (next.js: 24ms, proxy.ts: 5ms, application-code: 69ms)
+  └─ ƒ previewShopCatalog() in 0ms app/preview/shopActions.ts
+ POST /preview/home?at=clout-tower 200 in 80ms (next.js: 38ms, proxy.ts: 10ms, application-code: 32ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=clout-tower 200 in 48ms (next.js: 30ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ previewCrowdPreset(0) in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 60ms (next.js: 36ms, proxy.ts: 4ms, application-code: 20ms)
+  └─ ƒ previewRadioState("") in 1ms app/preview/radioActions.ts
+ POST /preview/home?at=clout-tower 200 in 46ms (next.js: 28ms, proxy.ts: 8ms, application-code: 10ms)
+  └─ ƒ previewMayorState("") in 1ms app/preview/mayorActions.ts
+ POST /preview/home?at=clout-tower 200 in 57ms (next.js: 37ms, proxy.ts: 5ms, application-code: 14ms)
+  └─ ƒ previewTvState("") in 1ms app/preview/tvActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=clout-tower 200 in 67ms (next.js: 40ms, proxy.ts: 4ms, application-code: 22ms)
+  └─ ƒ previewStationInbox() in 1ms app/preview/tvActions.ts
+ POST /preview/home?at=clout-tower 200 in 49ms (next.js: 27ms, proxy.ts: 4ms, application-code: 18ms)
+  └─ ƒ previewNews() in 1ms app/preview/newsActions.ts
+ POST /preview/home?at=clout-tower 200 in 70ms (next.js: 28ms, proxy.ts: 4ms, application-code: 38ms)
+  └─ ƒ previewPlayerCard("00000000-0000-0000-0000-000000000000") in 0ms app/preview/chatActions.ts
+ POST /preview/home?at=clout-tower 200 in 72ms (next.js: 35ms, proxy.ts: 6ms, application-code: 31ms)
+  └─ ƒ previewHuntState() in 1ms app/preview/huntActions.ts
+ POST /preview/home?at=clout-tower 200 in 58ms (next.js: 29ms, proxy.ts: 6ms, application-code: 22ms)
+  └─ ƒ previewCoutureMap() in 9ms app/preview/coutureActions.ts
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+[browser] THREE.Material: parameter 'side' has value of undefined. (components/avatar/accessories.ts:20:15)
+ POST /preview/home?at=clout-tower 200 in 62ms (next.js: 40ms, proxy.ts: 9ms, application-code: 14ms)
+  └─ ƒ previewPlaceCounts() in 1ms app/preview/chatActions.ts

@@ -37,6 +37,8 @@ export type FurnitureKind =
   | "arcade" | "poolTable"
   // Clout Couture (migration 0102): the owner in gold on a marble pedestal; the Clout Throne
   | "statue" | "throne"
+  // Tower offices (owner, Oct 31): cubicles, display glass, robots, server racks and the elevator bank
+  | "cubicle" | "glassWall" | "displayCase" | "robot" | "serverRack" | "elevator"
   // Wall art (migration 0120): a framed painting that hangs on a wall
   | "painting";
 
@@ -173,6 +175,12 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   starSign: { w: 1.6, d: 0.2, label: "Sign" },
   lottoBoard: { w: 1.8, d: 0.2, label: "Odds board" },
   stairs: { w: 1.2, d: 1.8, label: "Stairs" },
+  cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
+  glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
+  displayCase: { w: 0.9, d: 0.9, label: "Display case" },
+  robot: { w: 0.6, d: 0.6, label: "Robot" },
+  serverRack: { w: 0.8, d: 0.7, label: "Server rack" },
+  elevator: { w: 1.6, d: 0.6, label: "Elevator" },
   bathtub: { w: 1.6, d: 0.8, label: "Bathtub" },
   toilet: { w: 0.5, d: 0.7, label: "Toilet" },
   bathSink: { w: 0.7, d: 0.5, label: "Sink" },
@@ -473,7 +481,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -963,6 +971,123 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     spawn: [-0.4, 2.5],
     npcs: [{ x: -1.6, z: -2.95, facing: 0 }, { x: 1.6, z: -1.75, facing: 3.14, seated: true }, { x: -1.2, z: 0.6, facing: -1.57, seated: true }],
   },
+  // ---- Tower offices (owner, Oct 31: "offices with multiple floors, swanky design, cubicles, display glass, robots... for big
+  // technology or media companies"). Big companies get a tower (TOWERS below): a lobby, then floors up the elevator. The
+  // elevator doors on each floor are added by towerElevators. ----
+  // The lobby: marble, a reception desk with a robot greeter, glass display cases and a lounge behind a glass wall.
+  towerLobby: {
+    id: "towerLobby", w: 11.0, d: 9.0, wall: "#E9ECF1", wallAccent: "#6C8CFF", floor: "#E4E1DA", floorKind: "tile", window: true, alwaysLit: true,
+    items: [
+      { id: "reception", kind: "storeCounter", x: 0.6, z: -2.6, rot: 0, color: "#1F1B26", use: MAIN(0), label: "*" },
+      { id: "greeter", kind: "robot", x: 2.4, z: -2.2, rot: 2, color: "#7FE0FF" },
+      { id: "case-1", kind: "displayCase", x: -3.6, z: -0.6, rot: 0, color: "#7FE0FF" },
+      { id: "case-2", kind: "displayCase", x: -3.6, z: 1.2, rot: 0, color: "#C08BFF" },
+      { id: "case-3", kind: "displayCase", x: -1.8, z: 0.3, rot: 0, color: "#3DDC97" },
+      { id: "glass", kind: "glassWall", x: 2.4, z: 2.4, rot: 1 },
+      { id: "sofa", kind: "sofa", x: 4.2, z: 3.8, rot: 2, color: "#2A2F3A", use: { kind: "sit" }, label: "Sit" },
+      { id: "table", kind: "coffeeTable", x: 4.2, z: 2.8, rot: 0 },
+      { id: "chair-1", kind: "armchair", x: 4.6, z: 1.3, rot: 3, color: "#6C8CFF" },
+      { id: "plant-1", kind: "plant", x: 5.0, z: -4.0, rot: 0 },
+      { id: "plant-2", kind: "plant", x: -5.0, z: 4.0, rot: 0 },
+      { id: "plant-3", kind: "plant", x: 3.2, z: -4.0, rot: 0 },
+    ],
+    spawn: [0.0, 3.6],
+    npcs: [{ x: 0.6, z: -3.15, facing: 0 }, { x: -2.6, z: 1.6, facing: -2.2 }, { x: 1.2, z: 0.9, facing: 2.6 }, { x: 4.2, z: 3.75, facing: 3.14, seated: true }],
+  },
+  // The open floor: a dozen cubicles in two blocks, server racks humming at the back, robots on patrol, a coffee point.
+  techFloor: {
+    id: "techFloor", w: 12.0, d: 9.5, wall: "#E6EAF0", wallAccent: "#6C8CFF", floor: "#BFC6D1", floorKind: "concrete", window: true, alwaysLit: true,
+    items: [
+      { id: "cube-1", kind: "cubicle", x: -4.6, z: -1.9, rot: 0, color: "#8B95A6" },
+      { id: "cube-2", kind: "cubicle", x: -2.95, z: -1.9, rot: 0, color: "#8B95A6" },
+      { id: "cube-3", kind: "cubicle", x: -1.3, z: -1.9, rot: 0, color: "#8B95A6" },
+      { id: "cube-4", kind: "cubicle", x: -4.6, z: -0.35, rot: 0, color: "#8B95A6" },
+      { id: "cube-5", kind: "cubicle", x: -2.95, z: -0.35, rot: 0, color: "#8B95A6" },
+      { id: "cube-6", kind: "cubicle", x: -1.3, z: -0.35, rot: 0, color: "#8B95A6" },
+      { id: "cube-7", kind: "cubicle", x: 1.3, z: -1.9, rot: 0, color: "#6C8CFF" },
+      { id: "cube-8", kind: "cubicle", x: 2.95, z: -1.9, rot: 0, color: "#6C8CFF" },
+      { id: "cube-9", kind: "cubicle", x: 4.6, z: -1.9, rot: 0, color: "#6C8CFF" },
+      { id: "cube-10", kind: "cubicle", x: 1.3, z: -0.35, rot: 0, color: "#6C8CFF" },
+      { id: "cube-11", kind: "cubicle", x: 2.95, z: -0.35, rot: 0, color: "#6C8CFF" },
+      { id: "cube-12", kind: "cubicle", x: 4.6, z: -0.35, rot: 0, color: "#6C8CFF" },
+      { id: "rack-1", kind: "serverRack", x: 2.6, z: -4.35, rot: 0 },
+      { id: "rack-2", kind: "serverRack", x: 3.5, z: -4.35, rot: 0 },
+      { id: "rack-3", kind: "serverRack", x: 4.4, z: -4.35, rot: 0 },
+      { id: "bot-1", kind: "robot", x: 0.0, z: 1.6, rot: 2 },
+      { id: "bot-2", kind: "robot", x: -3.0, z: 2.8, rot: 1, color: "#FF6A3D" },
+      { id: "kitchen", kind: "kitchen", x: 4.4, z: 4.35, rot: 2 },
+      { id: "cooler", kind: "drinksFridge", x: 5.55, z: 2.6, rot: 3 },
+      { id: "sofa", kind: "sofa", x: -4.6, z: 4.25, rot: 2, color: "#6C8CFF", use: { kind: "sit" }, label: "Sit" },
+      { id: "plant-1", kind: "plant", x: 5.6, z: -4.3, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 1.6, z: 4.3, rot: 0 },
+    ],
+    spawn: [-4.0, -3.2],
+    npcs: [
+      { x: -4.6, z: -1.55, facing: 3.14, seated: true }, { x: -2.95, z: -1.55, facing: 3.14, seated: true }, { x: -1.3, z: -1.55, facing: 3.14, seated: true }, { x: 1.3, z: -1.55, facing: 3.14, seated: true }, { x: 2.95, z: -1.55, facing: 3.14, seated: true }, { x: 4.6, z: -1.55, facing: 3.14, seated: true }, { x: -4.6, z: 0.0, facing: 3.14, seated: true }, { x: -2.95, z: 0.0, facing: 3.14, seated: true }, { x: -1.3, z: 0.0, facing: 3.14, seated: true },
+      { x: 4.0, z: 3.5, facing: 0.4 }, { x: 4.9, z: 3.4, facing: -0.8 }, { x: 0.0, z: -3.4, facing: 1.2 },
+    ],
+  },
+  // The executive floor: a glass-walled boardroom with a video wall, a corner office with display cases, a robot butler and
+  // a lounge with a view.
+  execFloor: {
+    id: "execFloor", w: 11.0, d: 9.0, wall: "#1E2433", wallAccent: "#7FE0FF", floor: "#5A4636", floorKind: "wood", window: true, alwaysLit: true,
+    items: [
+      { id: "glass-side", kind: "glassWall", x: 0.9, z: -2.9, rot: 1 },
+      { id: "glass-front", kind: "glassWall", x: 2.55, z: -1.35, rot: 0 },
+      { id: "wall-screen", kind: "bigScreen", x: 3.0, z: -4.3, rot: 0 },
+      { id: "board", kind: "diningTable", x: 2.6, z: -3.0, rot: 0 },
+      { id: "board-1", kind: "chair", x: 1.75, z: -3.0, rot: 1 },
+      { id: "board-2", kind: "chair", x: 3.45, z: -3.0, rot: 3 },
+      { id: "board-3", kind: "chair", x: 2.6, z: -2.25, rot: 2 },
+      { id: "desk", kind: "desk", x: -2.4, z: 0.4, rot: 0, color: "#1F1B26" },
+      { id: "desk-chair", kind: "armchair", x: -2.4, z: 1.3, rot: 2, color: "#2A2F3A", use: { kind: "sit" }, label: "Sit in the big chair" },
+      { id: "case-1", kind: "displayCase", x: -4.7, z: -0.4, rot: 1, color: "#C08BFF" },
+      { id: "case-2", kind: "displayCase", x: -4.7, z: 1.2, rot: 1, color: "#7FE0FF" },
+      { id: "butler", kind: "robot", x: -0.4, z: 2.2, rot: 2, color: "#C08BFF" },
+      { id: "sofa", kind: "sofa", x: 3.2, z: 3.8, rot: 2, color: "#2A2F3A", use: { kind: "sit" }, label: "Sit" },
+      { id: "armchair", kind: "armchair", x: 4.8, z: 2.4, rot: 3, color: "#6C8CFF" },
+      { id: "table", kind: "coffeeTable", x: 3.2, z: 2.8, rot: 0 },
+      { id: "art", kind: "painting", x: -0.8, z: -4.4, rot: 0, color: "#C9CDD4" },
+      { id: "plant-1", kind: "plant", x: -5.0, z: 4.0, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 5.0, z: -0.6, rot: 0 },
+    ],
+    spawn: [-3.8, -3.0],
+    npcs: [
+      { x: 1.75, z: -3.0, facing: 1.57, seated: true }, { x: 3.45, z: -3.0, facing: -1.57, seated: true },
+      { x: -2.4, z: 1.3, facing: 3.14, seated: true }, { x: 2.6, z: 2.6, facing: 2.4 }, { x: 4.0, z: 0.8, facing: -2.6 },
+    ],
+  },
+  // A media newsroom: cubicles facing a wall of screens, a camera on its dolly and a robot running tapes.
+  newsroom: {
+    id: "newsroom", w: 12.0, d: 9.5, wall: "#2A2530", wallAccent: "#FF2E88", floor: "#3A3440", floorKind: "tile", window: true, alwaysLit: true,
+    items: [
+      { id: "screen-1", kind: "bigScreen", x: 1.4, z: -4.55, rot: 0 },
+      { id: "screen-2", kind: "bigScreen", x: 4.0, z: -2.5, rot: 1 },
+      { id: "on-air", kind: "onAirSign", x: -1.2, z: -4.6, rot: 0 },
+      { id: "cube-1", kind: "cubicle", x: -4.6, z: -1.6, rot: 0, color: "#5A4A6E" },
+      { id: "cube-2", kind: "cubicle", x: -2.95, z: -1.6, rot: 0, color: "#5A4A6E" },
+      { id: "cube-3", kind: "cubicle", x: -1.3, z: -1.6, rot: 0, color: "#5A4A6E" },
+      { id: "cube-4", kind: "cubicle", x: -4.6, z: 0.0, rot: 0, color: "#5A4A6E" },
+      { id: "cube-5", kind: "cubicle", x: -2.95, z: 0.0, rot: 0, color: "#5A4A6E" },
+      { id: "cube-6", kind: "cubicle", x: -1.3, z: 0.0, rot: 0, color: "#5A4A6E" },
+      { id: "cube-7", kind: "cubicle", x: -4.6, z: 1.55, rot: 0, color: "#FF6A3D" },
+      { id: "cube-8", kind: "cubicle", x: -2.95, z: 1.55, rot: 0, color: "#FF6A3D" },
+      { id: "camera", kind: "tvCamera", x: 1.8, z: -1.0, rot: 0 },
+      { id: "ring", kind: "ringLight", x: 3.2, z: 0.6, rot: 3 },
+      { id: "anchor-desk", kind: "desk", x: 1.6, z: 1.2, rot: 0, color: "#FF2E88" },
+      { id: "anchor-chair", kind: "chair", x: 1.6, z: 1.95, rot: 2 },
+      { id: "bot", kind: "robot", x: 0.2, z: 3.0, rot: 2, color: "#FF2E88" },
+      { id: "sofa", kind: "sofa", x: 4.4, z: 4.25, rot: 2, color: "#FF6A3D", use: { kind: "sit" }, label: "Sit" },
+      { id: "cooler", kind: "drinksFridge", x: 5.55, z: 2.2, rot: 3 },
+      { id: "plant-1", kind: "plant", x: -5.6, z: 4.3, rot: 0 },
+      { id: "plant-2", kind: "plant", x: 5.6, z: -4.3, rot: 0 },
+    ],
+    spawn: [-4.0, -3.2],
+    npcs: [
+      { x: -4.6, z: -1.25, facing: 3.14, seated: true }, { x: -2.95, z: -1.25, facing: 3.14, seated: true }, { x: -1.3, z: -1.25, facing: 3.14, seated: true }, { x: -4.6, z: 0.35, facing: 3.14, seated: true }, { x: -2.95, z: 0.35, facing: 3.14, seated: true }, { x: -1.3, z: 0.35, facing: 3.14, seated: true },
+      { x: 1.6, z: 1.95, facing: 3.14, seated: true }, { x: 2.5, z: -1.2, facing: -0.6 }, { x: 4.6, z: 3.2, facing: 2.6 },
+    ],
+  },
   // Office sizes (owner, Oct 31: "different office sizes… depending on the size of the company"). The small one: two desks
   // shoved together, a mini fridge and nowhere to stand (a storefront campaign office, a tiny startup).
   officeSmall: {
@@ -1151,6 +1276,8 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTe
   const accent = place.depth === "scene" && place.palette?.[0];
   // The exclusive venue has a second floor: stairs up from the lounge.
   if (place.tags?.includes("exclusive_venue")) items.push(VENUE_STAIRS);
+  // Tower offices: the ground floor's elevator doors.
+  if (TOWERS[place.id] && !area) items.push(...towerElevators(base, place.id, 1));
   // #19 clubs: stairs down to the restroom, and up to VIP where there is one.
   const stairs = place.club && CLUB_STAIRS[base.id as PlaceTemplateId];
   if (stairs) {
@@ -1183,10 +1310,47 @@ export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number
     const t = PLACE_TEMPLATES.restroom;
     return { ...t, id: `restroom:${place.id}`, items: t.items.map((it) => (it.use?.kind === "floor" ? { ...it, name: "Back up to the diner" } : it)) };
   }
+  // Tower offices: floors 2 and up, each with its elevator doors.
+  const tower = TOWERS[place.id];
+  if (tower) {
+    const f = tower[floor];
+    if (!f) return null;
+    const t = PLACE_TEMPLATES[f.template];
+    return { ...t, id: `${t.id}:${place.id}`, items: [...t.items, ...towerElevators(t, place.id, floor)] };
+  }
   if (floor === 0) return place.club ? { ...PLACE_TEMPLATES.restroom, id: `restroom:${place.id}` } : null;
   if (floor !== 2) return null;
   if (place.tags?.includes("exclusive_venue")) return { ...PLACE_TEMPLATES.penthouse, id: `penthouse:${place.id}` };
   return place.club?.vip ? { ...PLACE_TEMPLATES.vip, id: `vip:${place.id}` } : null;
+}
+
+/**
+ * Tower offices (owner, Oct 31): big technology and media companies have floors joined by an elevator bank. Floor 1 is the
+ * place's own room (its template); the rest come from here. Every floor gets elevator doors to every other floor.
+ */
+export const TOWERS: Record<string, Record<number, { name: string; emoji: string; template: PlaceTemplateId; lift?: [number, number, number] }>> = {
+  "skybridge-tower": {
+    1: { name: "Lobby", emoji: "🛎️", template: "towerLobby" },
+    2: { name: "Open floor", emoji: "💻", template: "techFloor" },
+    3: { name: "Executive floor", emoji: "🥂", template: "execFloor" },
+  },
+  "clout-tower": {
+    1: { name: "Studio", emoji: "📺", template: "broadcast", lift: [2.5, -2.62, 0] },
+    2: { name: "Newsroom", emoji: "🗞️", template: "newsroom" },
+    3: { name: "Executive floor", emoji: "🥂", template: "execFloor" },
+  },
+};
+
+/** A tower floor's elevator: up to the next floor (from the top, back down to the ground); the floor buttons go anywhere. */
+export function towerElevators(t: Pick<RoomTemplate, "w" | "d">, placeId: string, floor: number): RoomItem[] {
+  const floors = TOWERS[placeId];
+  if (!floors) return [];
+  const to = floors[floor + 1] ? floor + 1 : 1;
+  const [x, z, rot] = floors[floor]?.lift ?? [-t.w / 2 + 1.0, -t.d / 2 + 0.38, 0];
+  return [{
+    id: "elevator", kind: "elevator", x, z, rot,
+    use: { kind: "floor", to }, label: `🛗 ${to > floor ? "Up" : "Down"} to the ${floors[to].name.toLowerCase()}`, name: `Elevator to the ${floors[to].name.toLowerCase()}`,
+  }];
 }
 
 /** #19 clubs: the floors a place has besides the ground floor (0 restroom, 2 upstairs; the Hub also 3). */
@@ -1461,7 +1625,7 @@ export function findPath(grid: ReturnType<typeof makeGrid>, from: [number, numbe
  */
 export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
-  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
+  unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
