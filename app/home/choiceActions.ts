@@ -7,7 +7,8 @@ import {
 } from "@/lib/choices";
 import { CHOICE_CARDS } from "@/lib/choicesContent";
 import type { Memory } from "@/lib/memory";
-import { conditionsInForce, type ConditionNow } from "@/lib/cityConditions";
+import type { ConditionNow } from "@/lib/cityConditions";
+import { memoryOf as readMemory } from "@/lib/memoryServer";
 import { placeById } from "@/lib/city";
 import { ECONOMY } from "@/lib/economy";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -80,13 +81,7 @@ function resolveHere(e: ChoiceEffects, place: string | null): ChoiceEffects {
 }
 
 /** The player's memory (migration 0138): storylets read it; without the migration, only cards that don't need it show. */
-async function memoryOf(admin: Admin, id: string): Promise<Memory | null> {
-  const [{ data, error }, cond] = await Promise.all([admin.rpc("player_memory", { p_player: id }), admin.rpc("city_conditions_now")]);
-  if (error || !data) return null;
-  const m = data as Memory;
-  // Migration 0140: the city's conditions in force (a heatwave, a crackdown) join the snapshot for storylets.
-  return { ...m, snapshot: { ...m.snapshot, conditions: !cond.error && Array.isArray(cond.data) ? conditionsInForce(cond.data as ConditionNow[]) : [] } };
-}
+const memoryOf = (admin: Admin, id: string) => readMemory(admin, id);
 
 /** Storylets: what a choice wrote to memory (never blocks the choice). */
 async function remember(admin: Admin, id: string, sets: { fact: string; subject: string }[]) {

@@ -59,6 +59,7 @@ import { BarksleySheet } from "./city/Barksley";
 import { ChoiceBackSheet, ChoiceSheet, HoldingSheet } from "./game/Choices";
 import { integrityBand, type BlotterItem, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
 import type { ConditionNow } from "@/lib/cityConditions";
+import { rememberedTap } from "@/lib/characterMemory";
 import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
@@ -267,6 +268,7 @@ export function GameShell({
   campaign,
   careers,
   choices,
+  remembered,
   campus,
   goals,
   push,
@@ -355,6 +357,8 @@ export function GameShell({
   careers?: CareerApi;
   /** Moral Choices (migration 0131): situation cards where you are, the private Integrity meter; off without it. */
   choices?: ChoicesApi;
+  /** Content Engine step 5: what the city's people remember about this player (lines by character id). */
+  remembered?: () => Promise<Record<string, string[]>>;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
   campus?: CampusApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
@@ -1693,7 +1697,11 @@ export function GameShell({
   const [conditions, setConditions] = useState<ConditionNow[]>([]);
   const holdingUntil = choiceS?.marks.find((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())?.until ?? null;
   const choicesReady = !!choices && !!city && flow === "none";
+  // Content Engine step 5: what regulars remember about this player, refreshed with the choices state (a choice can
+  // change what they remember).
+  const [rememberedLines, setRemembered] = useState<Record<string, string[]>>({});
   const loadChoices = useCallback(async () => {
+    if (remembered) void remembered().then(setRemembered).catch(() => undefined);
     if (!choices) return;
     const r = await choices.state();
     if (!r.ok) return;
@@ -1701,7 +1709,7 @@ export function GameShell({
     if (r.data.landed.length) setChoiceBack(r.data.landed);
     if (r.data.marks.some((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())) setHoldingOpen(true);
     return r.data;
-  }, [choices]);
+  }, [choices, remembered]);
   useEffect(() => {
     if (!choicesReady) return;
     // A card still waiting from earlier today (the app was closed mid-decision) comes back on load.
@@ -1922,6 +1930,9 @@ export function GameShell({
       // Moral Choices: regulars can feel your Integrity (never the number).
       const rep = reputationLine(NPC_PROFILES.profiles as NpcProfile[], r.id, choiceS?.integrity != null ? integrityBand(choiceS.integrity) : null, n);
       const live = { [r.id]: [...(known ? [known] : []), ...(rep ? [rep] : []), ...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
+      // Content Engine step 5: every few taps, something they remember about you.
+      const mem = rememberedTap(rememberedLines[r.id], n);
+      if (mem) return { regular: r, line: mem };
       return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: EVERYDAY_LINES }) };
     },
     hunt: hunt && huntOn ? {

@@ -1,0 +1,713 @@
+[
+ {
+  "id": "sal-banned",
+  "who": "sal",
+  "when": {
+   "all": [
+    {
+     "has": "place.banned"
+    }
+   ]
+  },
+  "slots": {
+   "place": {
+    "fact": "place.banned",
+    "show": "place"
+   }
+  },
+  "lines": [
+   "Ock. {place} bounced you? My cousin works that door. He says you know.",
+   "{place}, huh? Also Sal is not judging. Sal is a cat. Sal judges everyone."
+  ]
+ },
+ {
+  "id": "sal-promoted",
+  "who": "sal",
+  "when": {
+   "all": [
+    {
+     "has": "career.promoted",
+     "withinDays": 7
+    }
+   ]
+  },
+  "lines": [
+   "Promoted! Mira, the pastrami's still the same price. Success doesn't change Sal's prices."
+  ]
+ },
+ {
+  "id": "sal-fraud",
+  "who": "sal",
+  "when": {
+   "all": [
+    {
+     "has": "thread.covered_fraud"
+    }
+   ]
+  },
+  "lines": [
+   "You've got the face of someone who signed something. Sandwich? Sandwiches don't get audited."
+  ]
+ },
+ {
+  "id": "sal-held",
+  "who": "sal",
+  "when": {
+   "all": [
+    {
+     "has": "police.held"
+    }
+   ]
+  },
+  "lines": [
+   "Heard you spent a few hours at the 114½. BEC on the house. Jail coffee is a crime."
+  ]
+ },
+ {
+  "id": "jojo-coworker",
+  "who": "jojo",
+  "when": {
+   "all": [
+    {
+     "snap": "job.track",
+     "is": "hospitality"
+    }
+   ]
+  },
+  "lines": [
+   "Off the clock and still here? Babe, you need a hobby. Or a different café."
+  ]
+ },
+ {
+  "id": "jojo-credit",
+  "who": "jojo",
+  "when": {
+   "all": [
+    {
+     "has": "career.took_credit",
+     "subjectStarts": "hospitality:"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.took_credit",
+    "show": "coworker"
+   }
+  },
+  "lines": [
+   "{coworker} is telling everyone about the idea you 'borrowed.' I'm not taking sides. I'm taking notes."
+  ]
+ },
+ {
+  "id": "jojo-fired",
+  "who": "jojo",
+  "when": {
+   "all": [
+    {
+     "has": "career.fired",
+     "subject": "hospitality"
+    }
+   ]
+  },
+  "lines": [
+   "You got let go and you still come here? Iconic. Your old apron's in lost and found."
+  ]
+ },
+ {
+  "id": "rocco-banned-kiln",
+  "who": "rocco",
+  "when": {
+   "all": [
+    {
+     "has": "place.banned",
+     "subject": "hellgate-hall"
+    }
+   ]
+  },
+  "lines": [
+   "You. The list says no. I am the list."
+  ]
+ },
+ {
+  "id": "rocco-held",
+  "who": "rocco",
+  "when": {
+   "all": [
+    {
+     "has": "police.held"
+    }
+   ]
+  },
+  "lines": [
+   "Heard you did a few hours at the 114½. Respect. Still not getting in early."
+  ]
+ },
+ {
+  "id": "mags-official",
+  "who": "mags",
+  "when": {
+   "all": [
+    {
+     "has": "dating.official",
+     "withinDays": 14
+    }
+   ]
+  },
+  "lines": [
+   "Look at you, officially taken. Two drinks, one tab? Romance is dead. Long live splitting the bill."
+  ]
+ },
+ {
+  "id": "mags-breakup",
+  "who": "mags",
+  "when": {
+   "all": [
+    {
+     "has": "dating.breakup",
+     "withinDays": 14
+    }
+   ]
+  },
+  "lines": [
+   "Breakup drink's on the house. The second one isn't. The third one is a warning."
+  ]
+ },
+ {
+  "id": "mags-feud",
+  "who": "mags",
+  "when": {
+   "all": [
+    {
+     "has": "thread.feud"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "thread.feud",
+    "show": "coworker"
+   }
+  },
+  "lines": [
+   "You and {coworker}? Pick a side of the bar. Not mine."
+  ]
+ },
+ {
+  "id": "bev-punchcard",
+  "who": "sgt-bev",
+  "when": {
+   "all": [
+    {
+     "has": "police.held",
+     "minCount": 2
+    }
+   ]
+  },
+  "lines": [
+   "Back again? We started you a punch card. Ten visits, the eleventh is also jail."
+  ]
+ },
+ {
+  "id": "bev-bail",
+  "who": "sgt-bev",
+  "when": {
+   "all": [
+    {
+     "has": "police.bailed"
+    }
+   ]
+  },
+  "lines": [
+   "You paid bail in cash. Bold. The coffee fund thanks you."
+  ]
+ },
+ {
+  "id": "bev-banned",
+  "who": "sgt-bev",
+  "when": {
+   "all": [
+    {
+     "has": "place.banned"
+    }
+   ]
+  },
+  "slots": {
+   "place": {
+    "fact": "place.banned",
+    "show": "place"
+   }
+  },
+  "lines": [
+   "{place} filed a report on you. Three pages. Two just say 'rude.'"
+  ]
+ },
+ {
+  "id": "benny-jackpot",
+  "who": "benny",
+  "when": {
+   "all": [
+    {
+     "has": "money.lotto_jackpot"
+    }
+   ]
+  },
+  "lines": [
+   "The jackpot kid! I never bought a ticket in my life. I'd like to start with yours."
+  ]
+ },
+ {
+  "id": "benny-lucky",
+  "who": "benny",
+  "when": {
+   "all": [
+    {
+     "has": "money.lotto_win",
+     "minCount": 3
+    }
+   ]
+  },
+  "lines": [
+   "Three winners? Lady Luck's either in love with you or running a very long con."
+  ]
+ },
+ {
+  "id": "bernie-won",
+  "who": "bernie",
+  "when": {
+   "all": [
+    {
+     "has": "campaign.won"
+    }
+   ]
+  },
+  "lines": [
+   "The winning manager walks in! I printed 4,000 stickers with your face. Please take some. Please."
+  ]
+ },
+ {
+  "id": "bernie-dirty",
+  "who": "bernie",
+  "when": {
+   "all": [
+    {
+     "has": "campaign.won_dirty"
+    }
+   ]
+  },
+  "lines": [
+   "Great win. Don't tell me how. Actually tell me. No, don't. Plausible deniability is my love language."
+  ]
+ },
+ {
+  "id": "bernie-lost",
+  "who": "bernie",
+  "when": {
+   "all": [
+    {
+     "has": "campaign.lost"
+    }
+   ],
+   "none": [
+    {
+     "has": "campaign.won"
+    }
+   ]
+  },
+  "lines": [
+   "We lose, we regroup, we order pizza. That's politics, kid. Mostly the pizza part."
+  ]
+ },
+ {
+  "id": "bernie-running",
+  "who": "bernie",
+  "when": {
+   "all": [
+    {
+     "snap": "campaign"
+    }
+   ]
+  },
+  "lines": [
+   "Your candidate's polling 'interestingly.' That's a real word in politics. It means bad."
+  ]
+ },
+ {
+  "id": "valentina-fired",
+  "who": "valentina",
+  "when": {
+   "all": [
+    {
+     "has": "career.fired",
+     "subject": "tech"
+    }
+   ]
+  },
+  "lines": [
+   "Pivotly's badge reader still beeps red when you walk past. I didn't program that. I wish I had."
+  ]
+ },
+ {
+  "id": "valentina-credit",
+  "who": "valentina",
+  "when": {
+   "all": [
+    {
+     "has": "career.took_credit",
+     "subjectStarts": "tech:"
+    }
+   ]
+  },
+  "slots": {
+   "coworker": {
+    "fact": "career.took_credit",
+    "show": "coworker"
+   }
+  },
+  "lines": [
+   "{coworker} made a slide about you. Slide 14. It has clip art and a timeline."
+  ]
+ },
+ {
+  "id": "valentina-promoted",
+  "who": "valentina",
+  "when": {
+   "all": [
+    {
+     "snap": "job.track",
+     "is": "tech"
+    },
+    {
+     "has": "career.promoted",
+     "subject": "tech"
+    }
+   ]
+  },
+  "lines": [
+   "Promoted at Pivotly. Now you get to attend the meetings about the meetings. Congrats, I think."
+  ]
+ },
+ {
+  "id": "nour-rumor",
+  "who": "nour",
+  "when": {
+   "all": [
+    {
+     "has": "career.started_rumor",
+     "subjectStarts": "media:"
+    }
+   ]
+  },
+  "lines": [
+   "Vivian asked me who started the rumor. I said 'the vents.' You owe me a muffin."
+  ]
+ },
+ {
+  "id": "nour-media",
+  "who": "nour",
+  "when": {
+   "all": [
+    {
+     "snap": "job.track",
+     "is": "media"
+    }
+   ]
+  },
+  "lines": [
+   "Big Screen's due at nine and Vivian has notes. Vivian always has notes. The notes have notes."
+  ]
+ },
+ {
+  "id": "lola-source",
+  "who": "lola",
+  "when": {
+   "all": [
+    {
+     "has": "thread.lola_source"
+    }
+   ]
+  },
+  "lines": [
+   "My favorite anonymous source! Kidding. Unless?"
+  ]
+ },
+ {
+  "id": "lola-banned",
+  "who": "lola",
+  "when": {
+   "all": [
+    {
+     "has": "place.banned"
+    }
+   ]
+  },
+  "slots": {
+   "place": {
+    "fact": "place.banned",
+    "show": "place"
+   }
+  },
+  "lines": [
+   "Banned from {place}? Babe, that's practically a press release."
+  ]
+ },
+ {
+  "id": "lola-kingmaker",
+  "who": "lola",
+  "when": {
+   "all": [
+    {
+     "has": "campaign.won"
+    }
+   ]
+  },
+  "lines": [
+   "Our new kingmaker. Remember who covered you first, babe. It was me. It's always me."
+  ]
+ },
+ {
+  "id": "lola-official",
+  "who": "lola",
+  "when": {
+   "all": [
+    {
+     "has": "dating.official",
+     "withinDays": 14
+    }
+   ]
+  },
+  "lines": [
+   "Official?! And I had to hear it from the group chat? I'll allow it. Once."
+  ]
+ },
+ {
+  "id": "kiki-rank",
+  "who": "kiki",
+  "when": {
+   "all": [
+    {
+     "snap": "rank",
+     "min": 5
+    }
+   ]
+  },
+  "lines": [
+   "You're on the list. You're always on the list now. Funny how that works, right?"
+  ]
+ },
+ {
+  "id": "kiki-banned",
+  "who": "kiki",
+  "when": {
+   "all": [
+    {
+     "has": "place.banned"
+    }
+   ]
+  },
+  "slots": {
+   "place": {
+    "fact": "place.banned",
+    "show": "place"
+   }
+  },
+  "lines": [
+   "{place} called ahead. They said you'd try the rooftop next. Behave and you can stay."
+  ]
+ },
+ {
+  "id": "hersh-student",
+  "who": "hersh",
+  "when": {
+   "all": [
+    {
+     "snap": "campus"
+    }
+   ]
+  },
+  "lines": [
+   "A student! Half a bagel at student price. The other half, full price. That's an education."
+  ]
+ },
+ {
+  "id": "penwright-caught",
+  "who": "penwright",
+  "when": {
+   "all": [
+    {
+     "has": "campus.caught_cheating"
+    }
+   ]
+  },
+  "lines": [
+   "I heard about the exam. The library has no answers. Only books. Which contain answers. Legitimately."
+  ]
+ },
+ {
+  "id": "penwright-aced",
+  "who": "penwright",
+  "when": {
+   "all": [
+    {
+     "has": "campus.aced"
+    }
+   ],
+   "none": [
+    {
+     "has": "campus.caught_cheating"
+    }
+   ]
+  },
+  "lines": [
+   "An A! I've reserved your carrel. The one with the good outlet. Don't tell the others."
+  ]
+ },
+ {
+  "id": "rosa-heat",
+  "who": "captain-rosa",
+  "when": {
+   "all": [
+    {
+     "snap": "conditions",
+     "is": "heatwave"
+    }
+   ]
+  },
+  "lines": [
+   "Heatwave in November. Hydrate, or we'll be seeing each other professionally."
+  ]
+ },
+ {
+  "id": "yesenia-showtime",
+  "who": "yesenia",
+  "when": {
+   "all": [
+    {
+     "has": "transit.showtime",
+     "minCount": 3
+    }
+   ]
+  },
+  "lines": [
+   "You and showtime again. They rehearse on my platform. I know every move now. Against my will."
+  ]
+ },
+ {
+  "id": "eleni-held",
+  "who": "dr-eleni",
+  "when": {
+   "all": [
+    {
+     "has": "police.held"
+    }
+   ]
+  },
+  "lines": [
+   "The 114½ sends us its 'tired' cases. Sit. Drink water. Make better choices. In that order."
+  ]
+ },
+ {
+  "id": "gus-party",
+  "who": "gus",
+  "when": {
+   "all": [
+    {
+     "has": "nightlife.party",
+     "minCount": 5
+    }
+   ]
+  },
+  "lines": [
+   "You party a lot for someone with a park-bench face. That's a compliment. From me it is."
+  ]
+ },
+ {
+  "id": "mercy-breakup",
+  "who": "rev-mercy",
+  "when": {
+   "all": [
+    {
+     "has": "dating.breakup",
+     "withinDays": 30
+    }
+   ]
+  },
+  "lines": [
+   "Heartbreak is just love with nowhere to go. Light a candle. Two dollars. Sal's prices."
+  ]
+ },
+ {
+  "id": "tariq-business",
+  "who": "tariq",
+  "when": {
+   "all": [
+    {
+     "snap": "businesses",
+     "min": 1
+    }
+   ]
+  },
+  "lines": [
+   "Business owner now? Then you know: the cart is never closed. It's just thinking."
+  ]
+ },
+ {
+  "id": "lou-fair",
+  "who": "lou",
+  "when": {
+   "all": [
+    {
+     "snap": "conditions",
+     "is": "festival"
+    }
+   ]
+  },
+  "lines": [
+   "Street fair weekend! Hot dogs are up a dollar. Don't look at me like that. It's tradition."
+  ]
+ },
+ {
+  "id": "arben-lotto",
+  "who": "arben",
+  "when": {
+   "all": [
+    {
+     "has": "money.lotto_win"
+    }
+   ]
+  },
+  "lines": [
+   "A winner buys a slice for the whole line. That's the law. I just made it, but it's the law."
+  ]
+ },
+ {
+  "id": "camila-host",
+  "who": "camila",
+  "when": {
+   "all": [
+    {
+     "has": "home.hosted",
+     "minCount": 2
+    }
+   ]
+  },
+  "lines": [
+   "Party supplies again? Aisle 4. The good chips are behind the bad chips. On purpose."
+  ]
+ },
+ {
+  "id": "marcos-brownout",
+  "who": "marcos",
+  "when": {
+   "all": [
+    {
+     "snap": "conditions",
+     "is": "brownout"
+    }
+   ]
+  },
+  "lines": [
+   "The power's out, so tonight's set is acoustic. Everything's acoustic if you believe."
+  ]
+ }
+]

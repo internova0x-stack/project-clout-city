@@ -7,7 +7,16 @@ import type { RadioApi } from "@/lib/radio";
 import type { MayorApi } from "@/lib/mayor";
 import { createCampaignSim } from "@/lib/campaignSim";
 import { createCareerSim } from "@/lib/careerSim";
-import { createChoicesSim } from "@/lib/choicesSim";
+import { createChoicesSim, storyMemory } from "@/lib/choicesSim";
+import { remembered as rememberedFor, type RememberRule } from "@/lib/characterMemory";
+import REMEMBERS from "@/content/characters/remembers.json";
+
+/** Content Engine step 5 in the preview: the sample history's remembered lines (with a heatwave and a brownout on). */
+const rememberedSim = async () => {
+  const m = storyMemory();
+  m.snapshot.conditions = ["heatwave", "brownout"];
+  return rememberedFor(REMEMBERS as RememberRule[], m, new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }));
+};
 import { previewMayorSeen, previewMayorState, previewMayorWrite } from "@/app/preview/mayorActions";
 import { createCampusSim } from "@/lib/campusSim";
 import { createGoalsSim } from "@/lib/goalsSim";
@@ -613,6 +622,7 @@ export function PreviewHome({
       campaign={cityOff ? undefined : campaignApi}
       careers={cityOff ? undefined : careerApi}
       choices={cityOff ? undefined : choicesApi}
+      remembered={cityOff || (choicePreset !== "story" && choicePreset !== "city") ? undefined : rememberedSim}
       campus={cityOff ? undefined : campusApi}
       goals={cityOff ? undefined : goalsApi}
       push={cityOff ? undefined : pushApi}

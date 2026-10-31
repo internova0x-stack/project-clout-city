@@ -392,6 +392,12 @@ components live in `app/globals.css`.
   (`office(..., { crackdown })`). choice_headlines gains `kind` (scandal, win, city) and a nullable player: a player's
   first campaign win, business going public or scholarship posts a 🏆 line (trigger on player_facts), never for News
   opt-outs. `?choice=city` (and `story`) in the preview.
+  Step 5, one character registry (no migration): lib/characters.ts `CHARACTERS` (regulars, the Mayor, celebrities,
+  wannabes, career bosses and coworkers `<track>-manager|friend|rival`, Sir Barksley). content/characters/remembers.json
+  (`validateRemembers`, lib/characterMemory.ts): lines with storylet `when`/`slots` that a character says only when the
+  player's memory fits; `characterRemembered()` (app/home/characterActions.ts, service role via lib/memoryServer.ts, which
+  choiceActions shares) returns filled lines by character; GameShell's `remembered` prop plays one every 3rd tap on a
+  regular (`rememberedTap`). Hand-written in PRs, never by the weekly routine (it would skip the veto window).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

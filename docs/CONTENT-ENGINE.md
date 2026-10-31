@@ -1,6 +1,6 @@
 # Clout City: Content Engine
 
-**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 4 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
+**Status:** spec v1 (Oct 31): both open questions answered by the owner. Steps 1 to 5 are built. It replaces the Frameworks Map's "to write" Content Engine spec and the
 reactive part of the World State brief.
 
 **Owner decisions (Oct 31):**
@@ -209,7 +209,7 @@ memory**.
 | 2 ✅ | **Storylets** (built: lib/storylets.ts, content/choices/storylets.json, `?choice=story`): the engine (choice cards plus conditions, slots, `sets`); the 76 cards and the 36 Climb cards moved over; about 20 cross-system storylets | Cards that remember what you did elsewhere |
 | 3 ✅ | **Templates and the weekly generator** (built: migration 0139, lib/storyletWeeks.ts, content/storylets/, Studio → Storylets): slot filling, worst-case validation, the Studio Storylets tab with the veto window, the routine drafting templates | A steady stream of new situations |
 | 4 ✅ | **The city reacts** (built: migration 0140, lib/cityConditions.ts, content/conditions/, content/city/reactions.json): conditions (weather, outages, festivals), city storylets on tallies, players in each other's News | A city that changes because of players |
-| 5 | **One character registry:** the cast, profiles, career people, campaign people and Barksley in one list with roles, places and memory keyed off facts | People who remember you |
+| 5 ✅ | **One character registry** (built: lib/characters.ts, lib/characterMemory.ts, content/characters/remembers.json): the cast, profiles, career people, campaign people and Barksley in one list with roles, places and memory keyed off facts | People who remember you |
 | 6 | **Learning:** weights from what's chosen and skipped; retiring what's skipped | Content that gets better |
 | 7 | **One card format:** campaign situations and career tasks on storylets | Consistency |
 
@@ -260,3 +260,15 @@ memory**.
   in Lola's Blotter (`player_facts` trigger), never for News opt-outs. News → City's "Around the city" card lists what's
   on now and in the next 48 hours.
 - Not yet: weather on the map itself, regulars' lines per condition, players' scandals beyond the Blotter.
+
+**Step 5 as built (Oct 31):**
+- `lib/characters.ts` `CHARACTERS`: every invented person in one list with a kind and a place: the regulars, the Mayor,
+  the celebrity cast and the wannabes, each career's boss, work friend and rival, and Sir Barksley.
+- `content/characters/remembers.json` (45 lines, 23 characters, checked by `validateRemembers`): what a character says
+  only to players whose memory fits, with storylet conditions and slots (Sal heard {place} bounced you; Mags knows you
+  just went official; Sgt. Bev started you a punch card; Bernie printed 4,000 stickers with the winning manager's face;
+  Captain Rosa warns you about the heatwave). The most specific (two-system) lines first, up to 3 per character.
+- `characterRemembered()` (app/home/characterActions.ts) fills them on the server from `player_memory` (shared with
+  storylets: lib/memoryServer.ts) and sends only the lines; tapping a regular plays one every 3 taps (`rememberedTap`).
+- Remembered lines are hand-written in pull requests (no veto window), not drafted by the weekly routine.
+- Not yet: coworkers' lines in the Careers People card, the Mayor's app remembering you, celebrities who react.
