@@ -396,7 +396,10 @@ components live in `app/globals.css`.
   as tips, raid-night clout from level 3, ×1.5 for Streamers). Fashion: Atelier Vernon (LIC fashion house, `atelier` room;
   Sample Runner 450 → Creative Director 2,900; Photography and Aura; Valentina Moreau, micromanager; Remy, Saskia; big boss
   Madame Odile Vernon; +3 Mood a workday, front-row clout from level 3). Campaign background: Streaming +1 point, Fashion staff
-  morale +5. A workday's Mood is clamped to career_save's −20 to +10. `?career=streaming|fashion`.
+  morale +5. A workday's Mood is clamped to career_save's −20 to +10. `?career=streaming|fashion`. The Glow Up House is a content
+  house that serves as an office (owner, Oct 31): a TOWERS entry with stairs (`stairs: true`): Living room (`streamHouse`), Stream
+  floor (`streamFloor`: eight streaming booths, ring lights, the producer's desk under the stream schedule, servers) and the Brand
+  deals floor (`execFloor`).
   Office sizes (owner, Oct 31: "depending on the size of the company"): place templates `officeSmall` (two desks and a mini
   fridge: Campaign HQ), `office` (Pedal Pushers Hub) and `officeBig` (12 × 9.5 open plan: two banks of six desks, a meeting
   table by the whiteboard, a kitchen and drinks fridge, reception, a lounge corner, a dozen coworkers: Triborough Works,

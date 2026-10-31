@@ -1302,7 +1302,10 @@ People: Lulu and Dante, Bean the new hire, big boss Tyce Monroe (owns the house 
 Remy and Saskia, Pip the new hire, big boss Madame Odile Vernon, successor Bastian Kole. Seven tasks each (dead chat, a battery-
 flavored sponsor, Dante's "collab", the leftovers incident, a 24-hour charity stream, a diss video, burnout; a 2 mm hem, "a beige
 that says yes but means no", a model drops out, a gifting request, a copycat coat, the fashion-week photo, your one look). The
-Glow Up House has Marisela, the house manager, as its regular. Campaign background: Streaming +1 point (chat registered),
+Glow Up House has Marisela, the house manager, as its regular. It is a content house that serves as an office (owner, Oct 31),
+three floors joined by stairs: the Living room (couch, arcade, the house screen, a collab desk), the Stream floor (eight
+streaming booths, ring lights, the producer's desk under the week's stream schedule, servers) and the Brand deals floor (a
+glass meeting room for sponsors). Campaign background: Streaming +1 point (chat registered),
 Fashion staff morale +5.
 
 **Later:** more tracks (Finance, Law, Real Estate), and the Climb's office cards for players with a job.
