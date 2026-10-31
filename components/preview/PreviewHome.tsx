@@ -63,7 +63,10 @@ import {
   previewCrush, previewCrushStatus, previewDateCancel, previewDateCandidates, previewDateInvite, previewDateRespond, previewDateWent, previewDatingInbox,
   previewDatingReset, previewMatchSeen,
 } from "@/app/preview/datingActions";
-import { previewCoupleAnswer, previewCoupleAsk, previewCoupleEnd, previewCoupleGift, previewCoupleReset, previewCoupleSeen, previewCoupleShow, previewCoupleState } from "@/app/preview/coupleActions";
+import {
+  previewCohabitAnswer, previewCohabitAsk, previewCohabitCancel, previewCohabitHang, previewCohabitHome, previewCohabitLeave,
+  previewCoupleAnswer, previewCoupleAsk, previewCoupleEnd, previewCoupleGift, previewCoupleReset, previewCoupleSeen, previewCoupleShow, previewCoupleState,
+} from "@/app/preview/coupleActions";
 import type { CoupleApi, CoupleResult, CoupleState } from "@/lib/couples";
 import {
   previewSubletAnswer, previewSubletApply, previewSubletHang, previewSubletHome, previewSubletLeave, previewSubletList, previewSubletNotice,
@@ -521,6 +524,11 @@ export function PreviewHome({
       ask: async (id) => mirror(await previewCoupleAsk(id)),
       answer: async (id, yes) => mirror(await previewCoupleAnswer(id, yes)),
       end: previewCoupleEnd, show: previewCoupleShow, gift: previewCoupleGift, seen: previewCoupleSeen,
+      // Living together (migration 0149): ?couple=movein|together.
+      moveIn: {
+        ask: previewCohabitAsk, cancel: previewCohabitCancel, answer: previewCohabitAnswer, leave: previewCohabitLeave,
+        hang: previewCohabitHang, async home() { await ready(); return previewCohabitHome(); },
+      },
     };
   }, [couplePreset, sim]);
   // Having people over in memory (app/preview/visitActions.ts).

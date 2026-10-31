@@ -53,6 +53,8 @@ export const FACTS = {
   "dating.date": { means: "Went on a date night", subject: "" },
   "dating.official": { means: "Made a relationship official", subject: "the partner (player id)" },
   "dating.breakup": { means: "Broke up (value.byMe, value.reason)", subject: "the ex (player id)" },
+  "couple.moved_in": { means: "Moved in with their partner (value.role: host or mover, value.home)", subject: "the partner (player id)" },
+  "couple.moved_out": { means: "Stopped living together (value.reason, value.byMe, value.role)", subject: "the partner (player id)" },
   "nightlife.party": { means: "Went to a party", subject: "the party" },
   "nightlife.event": { means: "Went to a club event", subject: "the event" },
   // Campaigns, choices, the law

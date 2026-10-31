@@ -15,6 +15,7 @@ import { JET_SKU, PLAZA_SKU, YACHT_SKU, weekLabel, type CoutureApi, type PlazaWe
 import { CROWN_SKU, CROWN_STYLES, SUIT_CLOTHS, SUIT_LININGS, cleanMonogram, hasOptions, optionsLine, type ItemOptions } from "@/lib/couture";
 import { STYLE_LINES, STYLE_LINE_LABEL, catalogShopItems, newArrivals, shippedPictures, shopOrder, type CatalogItem, type ShopCardItem } from "@/lib/shopCatalog";
 import { ShopArt } from "./ShopCard";
+import { COUPLE_ITEMS } from "@/lib/couples";
 
 const COUTURE = "Clout Couture";
 
@@ -144,7 +145,7 @@ export function ShopSheet({
       <div key={item.sku} className="item-card">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <ShopArt image={item.image} emoji={item.emoji} item={item} size={item.image ? 72 : 52} />
-          {isOwned ? <OwnedPill /> : item.storyOnly ? <span className="tag tag-event">Limited</span> : <span className="meta">{item.neighborhood ?? ""}</span>}
+          {isOwned ? <OwnedPill /> : item.storyOnly ? <span className="tag tag-event">Limited</span> : COUPLE_ITEMS.has(item.sku) ? <span className="tag tag-event">💞 Couples</span> : <span className="meta">{item.neighborhood ?? ""}</span>}
         </div>
         <span className="title" style={{ display: "block" }}>{item.name}</span>
         <span className="subtext clamp-2">{item.blurb}</span>

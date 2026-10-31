@@ -59,7 +59,8 @@ export interface PlayerCard {
   canMessage?: boolean;
   crew?: boolean;
   /** Relationships (migration 0118): who they're dating, unless they hide it. */
-  partner?: { id: string; name: string; since: string } | null;
+  /** Relationships (0118); `together` while they share a home (living together, migration 0149). */
+  partner?: { id: string; name: string; since: string; together?: boolean; togetherSince?: string | null } | null;
   /** Sublets (migration 0119): "🏠 Subletting from" / "🔑 Hosting", unless they hide it. */
   sublet?: { role: "host" | "sub"; id: string; name: string } | null;
   /** The home score (migration 0120), 0 to 100. */

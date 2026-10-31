@@ -46,7 +46,10 @@ import { kickPush } from "@/lib/pushServer";
 import { after } from "next/server";
 import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
-import { coupleAnswer, coupleAsk, coupleEnd, coupleGift, coupleSeen, coupleShow, coupleState } from "./coupleActions";
+import {
+  cohabitAnswer, cohabitAsk, cohabitCancel, cohabitHang, cohabitHome, cohabitLeave,
+  coupleAnswer, coupleAsk, coupleEnd, coupleGift, coupleSeen, coupleShow, coupleState,
+} from "./coupleActions";
 import {
   subletAnswer, subletApply, subletHang, subletHome, subletLeave, subletList, subletNotice, subletRate, subletRenew, subletRenewAnswer,
   subletSeen, subletShow, subletState, subletUnlist, subletWithdraw,
@@ -205,6 +208,10 @@ export default async function HomePage() {
       // Migration 0118 switches on relationships (couple_state fails before it runs).
       couple={chatOn && dating.ok && couple.ok ? {
         state: coupleState, ask: coupleAsk, answer: coupleAnswer, end: coupleEnd, show: coupleShow, gift: coupleGift, seen: coupleSeen,
+        // Migration 0149 switches on living together (couple_state carries `home` once it has run).
+        moveIn: couple.data && "home" in couple.data ? {
+          ask: cohabitAsk, cancel: cohabitCancel, answer: cohabitAnswer, leave: cohabitLeave, hang: cohabitHang, home: cohabitHome,
+        } : undefined,
       } : undefined}
       // Migration 0120 switches on the home score's milestones (the score shows either way).
       homeScoreApi={homeS.ok ? { state: homeScoreState } : undefined}

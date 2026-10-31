@@ -1297,14 +1297,21 @@ export const CATALOG_FURNITURE: Record<string, NonNullable<ShopItem["furniture"]
   "art-bridge-rain": { kind: "painting", room: "art", line: "art-bridge-rain", art: "/art/art-bridge-rain.webp" },
   "art-self-made": { kind: "painting", room: "art", line: "art-self-made", art: "/art/art-self-made.webp" },
   "art-clout": { kind: "painting", room: "art", line: "art-clout", art: "/art/art-clout.webp" },
+  // Couple pieces (migration 0149; content/shop/couple.json): sold only to players who are dating, drawn with existing shapes.
+  "couple-custody-monstera": { kind: "plant", room: "decor", line: "couple-custody-monstera" },
+  "couple-mug-shelf": { kind: "bookshelf", color: "#C9A27E", room: "living", line: "couple-mug-shelf" },
+  "couple-argument-rug": { kind: "rug", color: "#E8A87C", room: "living", line: "couple-argument-rug" },
+  "couple-hammock-chair": { kind: "armchair", color: "#C2AE86", room: "living", line: "couple-hammock-chair" },
+  "couple-truce-loveseat": { kind: "sofa", color: "#D9667F", room: "living", line: "couple-truce-loveseat" },
+  "couple-compromise-bed": { kind: "bed", color: "#B9A3D9", room: "bedroom", line: "couple-compromise-bed" },
 };
 
-/** The code's piece for a sku, or a catalog painting's (its furniture only; the catalog has the words and price). */
+/** The code's piece for a sku, or a catalog painting's or couple piece's (its furniture only; the catalog has the words and price). */
 export function shopBase(sku: string): ShopItem | undefined {
   const it = itemBySku(sku);
   const f = CATALOG_FURNITURE[sku];
-  if (it || f?.room !== "art") return it;
-  return { sku, category: "home", name: sku, emoji: "🖼️", price: 0, clout: 0, rating: 1, blurb: "", furniture: f };
+  if (it || !f || (f.room !== "art" && !sku.startsWith("couple-"))) return it;
+  return { sku, category: "home", name: sku, emoji: f.room === "art" ? "🖼️" : "🛋️", price: 0, clout: 0, rating: 1, blurb: "", furniture: f };
 }
 
 /** Clout from a visit or meal: by price (base value, never a story-modified price), scaled by Mood and Confidence. */

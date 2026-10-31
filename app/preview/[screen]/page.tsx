@@ -38,7 +38,7 @@ import type { Player } from "@/lib/player";
 //   /preview/guest            the guest screen
 //   /preview/creator?step=0-3 a creator step
 //   /preview/home?state=new   right after "Move in" (welcome, tour, party)
-//   /preview/home?couple=progress|ask|dating|gift|ended  relationships (migration 0118); open Phone → Messages → Us
+//   /preview/home?couple=progress|ask|dating|gift|ended|movein|together  relationships (0118) and living together (0149); open Phone → Messages → Us
 //   /preview/home?starter=0-10&apps=locked  Starter Week (that many missions done) and apps locked as for a Rank 1 player
 //   /preview/home?visit=none|hosting|invite|guest  having people over (migration 0121): the stats panel's Mood row, the visit sheet
 //   /preview/home?homescore=furnished  the home score (migration 0120): furniture and three paintings placed; tap 🏠 under the top bar

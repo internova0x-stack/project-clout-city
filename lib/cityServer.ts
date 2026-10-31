@@ -21,7 +21,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
-  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks, days, calendar, catalog, style] = await Promise.all([
+  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks, days, calendar, catalog, style, rentPart] = await Promise.all([
     supabase.from("daily_tasks").select("*").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
@@ -54,6 +54,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     supabase.rpc("shop_catalog_public"),
     // Migration 0100; missing until it runs, which hides style looks and their venue boost.
     supabase.rpc("style_state"),
+    // Migration 0149; missing until it runs, which means the whole rent (living together splits it).
+    supabase.rpc("cohabit_rent"),
   ]);
   const devValue = (dev.data?.value ?? {}) as { tools?: boolean; clockOffsetSeconds?: number };
   return {
@@ -80,6 +82,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
       moved_up: "moved_up" in player ? !!player.moved_up : undefined,
       // Migration 0095; undefined before it runs, which hides the OMG Card.
       transit_pass_until: "transit_pass_until" in player ? player.transit_pass_until ?? null : undefined,
+      rent_part: rentPart.error || typeof rentPart.data !== "number" ? null : rentPart.data,
     },
     today: day,
     tasks: (tasks.data ?? []) as DailyTask[],
