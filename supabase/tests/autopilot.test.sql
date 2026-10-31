@@ -33,24 +33,32 @@ reset role;
 
 -- Paused: nothing starts.
 update public.game_settings set value = value || '{"stories": false}' where key = 'autopilot';
-select pg_temp.assert(public.story_autopilot() is null, 'paused: nothing starts');
+select pg_temp.assert(public.story_autopilot('2031-01-04') is null, 'paused: nothing starts');
 update public.game_settings set value = value || '{"stories": true}' where key = 'autopilot';
 
--- On: the first in the list starts today, approved; while it runs nothing else starts.
-select pg_temp.assert(public.story_autopilot() = 'auto-b', 'first in order starts');
-select pg_temp.assert((select review_status = 'approved' and start_at = public.ny_today() from public.story_arcs where id = 'auto-b'), 'approved, Day 1 today');
-select pg_temp.assert(public.story_autopilot() is null, 'one story at a time');
+-- Migration 0137: only on a Saturday (or the Sunday after), Day 1 that Saturday; Friday is the veto window.
+select pg_temp.assert(public.story_autopilot('2031-01-03') is null, 'not on a Friday');
+select pg_temp.assert(public.story_autopilot('2031-01-07') is null, 'not mid-week');
 
--- When it has ended, the next one starts; a declined story never does.
-update public.story_arcs set start_at = public.ny_today() - 5 where id = 'auto-b';
-select pg_temp.assert(public.story_autopilot() = 'auto-a', 'next after the end');
-update public.story_arcs set start_at = public.ny_today() - 10 where id = 'auto-a';
-select pg_temp.assert(public.story_autopilot() is null, 'declined never starts, and nothing is left');
+-- On: the first in the list starts on the Saturday, approved; while it runs nothing else starts.
+select pg_temp.assert(public.story_autopilot('2031-01-05') = 'auto-b', 'first in order starts (the Sunday after counts)');
+select pg_temp.assert((select review_status = 'approved' and start_at = '2031-01-04' from public.story_arcs where id = 'auto-b'), 'approved, Day 1 the Saturday');
+select pg_temp.assert(public.story_autopilot('2031-01-05') is null, 'one story at a time');
+
+-- When it has ended, the next one starts the next Saturday; a declined story never does.
+select pg_temp.assert(public.story_autopilot('2031-01-11') = 'auto-a', 'next after the end, on a Saturday');
+select pg_temp.assert((select start_at = '2031-01-11' from public.story_arcs where id = 'auto-a'), 'Day 1 that Saturday');
+select pg_temp.assert(public.story_autopilot('2031-01-25') is null, 'declined never starts, and nothing is left');
 
 -- A story paused mid-run keeps the slot.
 select pg_temp.arc('auto-d', 2);
-update public.story_arcs set start_at = public.ny_today(), review_status = 'approved', status = 'paused' where id = 'auto-a';
-select pg_temp.assert(public.story_autopilot() is null, 'paused mid-run keeps the slot');
+update public.story_arcs set start_at = '2031-01-31', review_status = 'approved', status = 'paused' where id = 'auto-a';
+select pg_temp.assert(public.story_autopilot('2031-02-01') is null, 'paused mid-run keeps the slot');
+
+-- Hunts may start on a Saturday (and on a Monday, for the weeks before the switch), never another day.
+select pg_temp.assert(pg_temp.raises($$insert into public.hunts (id, week, data) values ('tue-hunt', '2031-01-07', '{}')$$,
+  'new row for relation "hunts" violates check constraint "hunts_week_start"'), 'a Tuesday hunt is refused');
+insert into public.hunts (id, week, data) values ('sat-hunt', '2031-01-04', '{}');
 
 -- Tea: a new week arrives live; while paused, it waits for review.
 select pg_temp.assert(public.gossip_import('{"week": "2031-01-06", "stories": []}'::jsonb) = 'new', 'imported');

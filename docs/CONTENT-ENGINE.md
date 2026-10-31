@@ -226,3 +226,5 @@ memory**.
 - Campaign Mode's risk labels are removed: no risk labels anywhere.
 - The veto window is 24 hours for generated content (storylets, city storylets, conditions).
 - **Stories and hunts run on a weekly beat** (owner, Oct 31): their veto window is Friday, and they go live on Saturday.
+- **News and gossip keep the 24-hour veto** (owner, Oct 31) and their Monday weeks (migration 0137 moved hunts and the story
+  autopilot to Saturdays).

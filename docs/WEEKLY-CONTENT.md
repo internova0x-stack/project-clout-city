@@ -7,6 +7,11 @@ approve the hunt and news in the Studio. **Gossip is automatic** (owner, Oct 13)
 merged it goes live on its Monday by itself; the Studio's **Gossip** tab shows it in full, and you
 can Pause it or Hold it with a note.
 
+> **Saturdays (owner, Oct 31; migration 0137):** hunts and new stories start on **Saturdays**, and **Friday** is your
+> window to veto them in Studio → Calendar (pause the hunt; decline or move the story). Hunts run Saturday to Friday, in
+> `content/hunts/<Saturday>.json`. News and gossip keep their Monday weeks and a 24-hour window. A hunt is announced in
+> that Monday week's news on its Saturday.
+
 > **Autopilot (owner, Oct 22; migration 0107, lib/autopilot.ts):** the routine merges its own pull request once its
 > checks pass, and everything goes live by itself: news, hunts and Tea from their files, and stories one after another
 > (when a story ends, the next one in the Studio's Stories order is approved and starts that day). Studio → **Calendar**
@@ -24,16 +29,18 @@ can Pause it or Hold it with a note.
 
 | When (New York) | Who | What |
 | --- | --- | --- |
-| Thursday morning | The Routine | Drafts `content/hunts/<Monday>.json`, `content/news/<Monday>.json` and `content/gossip/<Monday>.json` for the coming Monday's week, runs the checks, opens a pull request "Content: week of …" |
+| Thursday morning | The Routine | Drafts `content/hunts/<Saturday>.json` for the hunt starting in two days (and adds its Saturday announcement to this week's news), and `content/news/<Monday>.json` and `content/gossip/<Monday>.json` for the coming Monday's week, runs the checks, opens a pull request "Content: week of …" |
 | Thursday | The Routine | Merges its own pull request once its checks pass (autopilot) |
 | Any time | You (optional) | Read the merged pull request; pause a kind in Studio → Calendar to approve it yourself next time |
 | After the deploy | You | Studio → **Calendar**: press **Load** on the week's hunt and news. Then **Hunts**: skim the eight tracks, read one in full, Approve (or Send back with a note). **News**: Approve all |
 | After the deploy | The game | Stores the gossip week by itself (within 10 minutes of the next visit). Nothing to approve: read it in the Studio's **Gossip** tab if you like, and Pause or Hold it if something's off |
 | After the deploy | The game | Stores the exam week by itself (migration 0077, `lib/contentImport.ts`). A course's questions can be changed until the first student sits that exam; after that the week's set is locked. Without a week file, exams use the standing question bank |
-| Monday 00:00 | The game | The hunt starts, the news publishes day by day, and the week's gossip stories become findable for 14 days |
+| Friday | You (optional) | The veto window: Studio → Calendar shows the hunt and the story that start on Saturday. Pause the hunt, or decline or move the story, to stop them |
+| Saturday 00:00 | The game | The hunt starts (it runs to Friday), and a new main story starts if none is running (Day 1 is the Saturday) |
+| Monday 00:00 | The game | The news publishes day by day, and the week's gossip stories become findable for 14 days |
 
 If a week is missing on Friday, the Calendar shows "⚠️ No hunt yet" for this week and next.
-Nothing breaks without a hunt: the Hunt tab says a new one starts Monday.
+Nothing breaks without a hunt: the Hunt tab says a new one starts Saturday.
 
 ## Running it by hand
 
@@ -48,7 +55,8 @@ This is the prompt the Routine runs each Thursday (kept here so it can be read a
 Draft next week's Clout City content (repository internova0x-stack/project-clout-city; clone it if
 it isn't in your working directory). Work from the main branch.
 
-1. Find the week: the Monday after today, New York time (YYYY-MM-DD). If content/hunts/<Monday>.json,
+1. Find the week: the Monday after today, New York time (YYYY-MM-DD), and the hunt's Saturday: the
+   Saturday after today (owner, Oct 31: hunts run Saturday to Friday). If content/hunts/<Saturday>.json,
    content/news/<Monday>.json, content/gossip/<Monday>.json and content/exams/<Monday>.json all exist on
    main already, stop and say so (write only the missing ones otherwise).
 2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
@@ -58,7 +66,7 @@ it isn't in your working directory). Work from the main branch.
    and content/culture/ (slang.json, parody-names.json, npcs.json): write each regular from their profile
    (personality, likes, dislikes, the slang they use), give Lola at most one slang term per message (mostly TMZ, a little Shade Room: docs/culture/VOICE.md), and use
    the invented names from parody-names.json for any team, transit card, museum, landmark or brand.
-3. Write content/hunts/<Monday>.json: a hunt players will talk about.
+3. Write content/hunts/<Saturday>.json ("week" is that Saturday): a hunt players will talk about.
    - Make it an event, not an errand: real stakes (a rival crew racing you, a celebrity's stolen
      prize, a mystery with a deadline), a cast member or two caught up in it, and a finale that
      pays off the whole trail.
@@ -70,7 +78,9 @@ it isn't in your working directory). Work from the main branch.
    Lola's lines (news, "Ask Lola", Tea cards) and DJ Sharm Almight's are written in their voices from
    docs/CAST.md "Voices": Lola the spicy tea queen, Sharm New York hype with younger slang.
 4. Write content/news/<Monday>.json: 9 to 12 news items across Monday to Sunday (plus the transit updates below), including
-   - a Monday "hunt" item announcing the hunt (it must name the first place's regular),
+   - no "hunt" item: the hunt is announced in the week it starts. Add a Saturday "hunt" item for the hunt from step 3
+     (it starts this Saturday) to this week's news file, content/news/<the Monday before today>.json (it must name the
+     first place's regular),
    - exactly one Lola column ("column"), answering an NYC dating complaint (culture pack C6, owner Oct 21): the
      New York kind ("he lives in Staten Island and won't take the ferry", "she stands on the subway stairs to text",
      "he calls every cab a Hailr"), never about anyone's background; Lola rules on it in her voice,
@@ -109,7 +119,7 @@ it isn't in your working directory). Work from the main branch.
    people, schools, brands or politics; nothing mean about any group. Don't reuse last week's prompts.
 7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report (validate:content
    also fails on any real brand, team or trademarked name).
-8. Commit only those four files on a new branch content/week-<Monday>, push it, and open a pull
+8. Commit only those files on a new branch content/week-<Monday>, push it, and open a pull
    request titled "Content: week of <Monday>". In its description list: the hunt's theme and pitch
    in two sentences, the route (place and regular per step), the eight treasures, every news
    headline by day, each gossip story's title and Tea headline, and one sample exam question per course. End with: "Autopilot:

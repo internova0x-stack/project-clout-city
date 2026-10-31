@@ -147,6 +147,7 @@ from (values
   ('0133_steam_accounts.sql', coalesce((to_regclass('public.steam_accounts') is not null), false)),
   ('0134_steam_store.sql', coalesce((select true from public.game_settings where key = 'steam_store'), false)),
   ('0135_careers.sql', coalesce((to_regclass('public.careers') is not null), false)),
-  ('0136_career_office.sql', coalesce((to_regprocedure('public.career_office(uuid,uuid,integer,text)') is not null), false))
+  ('0136_career_office.sql', coalesce((to_regprocedure('public.career_office(uuid,uuid,integer,text)') is not null), false)),
+  ('0137_saturday_starts.sql', coalesce((to_regprocedure('public.story_autopilot(date)') is not null), false))
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

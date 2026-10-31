@@ -1093,9 +1093,9 @@ function HuntsTab({ api }: { api: StudioApi }) {
       <section className="studio-card stack-8">
         <span className="title">Upload a hunt</span>
         <p className="meta" style={{ margin: 0 }}>
-          Paste a hunt file from <code>content/hunts/</code> (or choose it). It&apos;s checked first: a Monday week, real places with a regular,
+          Paste a hunt file from <code>content/hunts/</code> (or choose it). It&apos;s checked first: a Saturday start, real places with a regular,
           none touched by a story that week, at least one free or cheap step, all eight tracks, exactly one right answer per question.
-          It runs Monday to Sunday once approved; re-uploading it unchanged keeps it approved.
+          It runs Saturday to Friday once approved (pause it by Friday to veto); re-uploading it unchanged keeps it approved.
         </p>
         <input type="file" accept="application/json,.json" className="studio-input" aria-label="Hunt file"
           onChange={async (e) => { const f = e.target.files?.[0]; if (f) setJson(await f.text()); }} />
@@ -1131,7 +1131,7 @@ function HuntsTab({ api }: { api: StudioApi }) {
             <p className="body" style={{ margin: 0 }}>{h.data.intro}</p>
             <p className="meta" style={{ margin: 0 }}>Route: {h.data.places.map((id, i) => `${i + 1}. ${placeById(id)?.name ?? id} (${regularAt(id)?.name ?? "?"})`).join(" → ")}</p>
             <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-              {h.status !== "approved" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "approved"), "Approved. It runs Monday to Sunday of its week.")}>Approve</button>}
+              {h.status !== "approved" && <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "approved"), "Approved. It runs Saturday to Friday from its start.")}>Approve</button>}
               {h.status === "approved" && <button className="btn btn-destructive btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "paused"), "Paused. Players no longer see it; their progress is kept.")}>Pause</button>}
               {h.status !== "review" && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void go(() => api.huntStatus!(h.id, "review"))}>Back to review</button>}
             </div>
@@ -1230,7 +1230,8 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
   const monday = addDaysISO(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
   const weeks = [...new Set([
     ...Array.from({ length: 6 }, (_, i) => addDaysISO(monday, 7 * (i - 1))),
-    ...drafts.map((d) => d.week).filter((w) => w >= monday),
+    // A hunt draft's week is its Saturday: its row is the Monday week it starts in.
+    ...drafts.map((d) => addDaysISO(d.week, -((new Date(`${d.week}T12:00:00Z`).getUTCDay() + 6) % 7))).filter((w) => w >= monday),
   ])].sort();
   const loadDraft = async (d: ContentDraft) => {
     setBusy(true); setError(null); setOk(null);
@@ -1253,8 +1254,10 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
     <section className="stack-12">
       <AutopilotCard api={api} />
       <p className="meta" style={{ margin: 0 }}>
-        Each week: the stories running, the hunt (Monday to Sunday) and the news by day. With autopilot on, the weekly drafting
-        routine's files go live by themselves; while one is paused, its files show a Load button here and wait for your approval.
+        Each week: the stories running, the hunt and the news by day. Hunts and new stories start on Saturdays: Friday is your
+        window to veto them (pause the hunt, or decline or move the story). News and gossip go live on their own days, 24 hours
+        after they arrive. With autopilot on, the weekly drafting routine's files go live by themselves; while one is paused,
+        its files show a Load button here and wait for your approval.
       </p>
       {ok && <div className="studio-note ok" role="status"><span className="body-strong">{ok}</span></div>}
       {error && (
@@ -1266,8 +1269,16 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
       {(hunts === null || news === null) && !error && <p className="meta">Loading…</p>}
       {hunts && news && weeks.map((w) => {
         const end = addDaysISO(w, 6);
-        const hunt = hunts.find((h) => h.week === w);
-        const huntDraft = drafts.find((d) => d.kind === "hunt" && d.week === w);
+        // Hunts start on a Saturday (owner, Oct 31; a Monday before the switch): the one starting inside this week.
+        const hunt = hunts.find((h) => h.week >= w && h.week <= end);
+        const huntDraft = drafts.find((d) => d.kind === "hunt" && d.week >= w && d.week <= end);
+        const saturday = addDaysISO(w, 5);
+        const vetoHunt = !!hunt && hunt.status === "approved" && hunt.week > today && hunt.week === saturday;
+        // The story autopilot would start next on this week's Saturday: the first not-yet-started main story in the Studio's order.
+        const storyOnSat = arcs.some((a) => a.type === "main" && a.startAt && a.status === "active" && a.startAt <= saturday && addDaysISO(a.startAt, Math.max(0, a.lastDay - 1)) >= saturday);
+        const nextAuto = saturday > today && !storyOnSat
+          ? arcs.filter((a) => a.type === "main" && a.status === "active" && !a.startAt && a.review !== "declined").sort((a, b) => (a.position ?? 1e9) - (b.position ?? 1e9) || a.id.localeCompare(b.id))[0]
+          : undefined;
         const newsDraft = drafts.find((d) => d.kind === "news" && d.week === w);
         const stories = arcs.filter((a) => a.startAt && a.status === "active" && a.startAt <= end && addDaysISO(a.startAt, Math.max(0, a.lastDay - 1)) >= w);
         const when = w === monday ? " · this week" : w === addDaysISO(monday, 7) ? " · next week" : w < monday ? " · last week" : "";
@@ -1277,16 +1288,22 @@ function CalendarTab({ api, arcs, onOpen }: { api: StudioApi; arcs: StudioArc[];
             <span className="title">Week of {fmtDate(w)}{when}</span>
             <div className="calendar-row">
               <span className="overline">Story</span>
-              <span className="body">{stories.length ? stories.map((a) => `${a.title}${a.review !== "approved" ? " (not approved)" : ""}`).join(" · ") : <span className="meta">No story running</span>}</span>
+              <span className="stack-4">
+                <span className="body">{stories.length ? stories.map((a) => `${a.title}${a.review !== "approved" ? " (not approved)" : ""}`).join(" · ") : <span className="meta">No story running</span>}</span>
+                {nextAuto && (
+                  <span className="meta reason">🗓️ Autopilot starts “{nextAuto.title}” on {fmtDate(saturday)}. Veto by Friday: decline it, or move it down the order.</span>
+                )}
+              </span>
             </div>
             <div className="calendar-row">
               <span className="overline">Hunt</span>
               <span className="row" style={{ gap: 8, flexWrap: "wrap" }}>
                 {hunt ? (
-                  <button className="chip" onClick={() => onOpen("hunts")}>🗺️ {hunt.data.theme} · {hunt.status === "review" ? "needs review" : hunt.status}{hunt.joined ? ` · ${hunt.joined} joined` : ""}</button>
+                  <button className="chip" onClick={() => onOpen("hunts")}>🗺️ {hunt.data.theme} · {hunt.status === "review" ? "needs review" : hunt.status}{hunt.joined ? ` · ${hunt.joined} joined` : ""} · starts {fmtDate(hunt.week)}</button>
                 ) : (
                   <span className={soon ? "meta reason" : "meta"}>{soon ? "⚠️ No hunt yet" : "No hunt yet"}</span>
                 )}
+                {vetoHunt && <span className="meta reason">Goes live {fmtDate(hunt!.week)}. Veto by Friday: pause it in Hunts.</span>}
                 {huntDraft && !huntDraftLoaded(huntDraft, hunt) && w >= monday && (
                   <button className="btn btn-taxi btn-sm" disabled={busy} onClick={() => void loadDraft(huntDraft)}>Load hunt: {huntDraft.label}</button>
                 )}

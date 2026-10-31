@@ -63,6 +63,14 @@ export function nyMidnightLine(date: string, tz?: string): string {
 }
 
 /** The next Monday on New York's calendar (YYYY-MM-DD), when a new hunt week starts. */
+/** The next Saturday in New York (a hunt's first day). */
+export function nextNySaturday(nowMs: number): string {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: NY }).format(nowMs);
+  const d = new Date(`${today}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + (((6 - d.getUTCDay() + 7) % 7) || 7));
+  return d.toISOString().slice(0, 10);
+}
+
 export function nextNyMonday(nowMs: number): string {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: NY }).format(nowMs);
   const d = new Date(`${today}T12:00:00Z`);
