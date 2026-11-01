@@ -129,6 +129,8 @@ components live in `app/globals.css`.
   done by `campus_attend`) and free study dates (`date_target` treats a campus as a date spot at C$0). Exam weeks
   (migration 0077) live in `content/exams/<Monday>.json` with answers (server and scripts only, `lib/exams.ts`);
   the game stores them with `content_import_exams`, locking a course once someone has sat it.
+  Migration 0154 (owner, Nov 1): every fresh list gives an enrolled student "Go to class" when their campus is open; a task that
+  landed at the campus (never gossip) or else the last plain task becomes it (`ensure_daily` wraps `ensure_daily_v0100`).
 - Daily tasks 2.0 (migrations 0073, 0074, spec section 19): the goal ladder is data (`GOALS.ladder`: 25 goals, each
   unlocked at a rank's clout, with a `check` the server's `goal_list` reads); five tasks = 1 gossip, 2 goal-linked (the game's suggested goal,
   `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a
