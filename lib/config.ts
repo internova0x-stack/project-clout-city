@@ -7,6 +7,9 @@ export const GAME_CONFIG = {
 
   /** Owner, Oct 24: the launch splash stays at least this long from the moment the app opens (a typical splash). */
   splashMinMs: 2200,
+  /** The splash stays on screen at least this long once it shows, and waits for the first screen to draw at most splashMaxMs. */
+  splashShownMs: 1500,
+  splashMaxMs: 9000,
   /** Tap-to-open screens (the Phone, Shop, Campaign…) download this long after the game starts (cheap phones, Nov 1). */
   prefetchSheetsMs: 10_000,
 
