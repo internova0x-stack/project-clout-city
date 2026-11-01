@@ -5,6 +5,7 @@ import { SLOW_DOWN_EVENT, SLOW_DOWN_TEXT } from "@/lib/rateLimits";
 import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/lib/coutureMap";
 import dynamic from "next/dynamic";
 import { lazySheet, prefetchSheets } from "./lazySheet";
+import { installTapGuard } from "@/lib/tapGuard";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -484,6 +485,8 @@ export function GameShell({
     setToast(`Your ${LOOK_LABEL[b.line] ?? ""} look fits ${placeById(b.place)?.name ?? "here"}: +${STYLE.venueConfidence} Confidence 💅`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [styleBoostKey]);
+  // Closing a layer never lets the next tap land on what it revealed (lib/tapGuard.ts).
+  useEffect(() => { installTapGuard(); }, []);
   // The tap-to-open screens download in the background once the game has settled (components/lazySheet.tsx).
   useEffect(() => {
     const t = setTimeout(prefetchSheets, GAME_CONFIG.prefetchSheetsMs);

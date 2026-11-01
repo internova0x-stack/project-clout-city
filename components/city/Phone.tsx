@@ -41,6 +41,7 @@ import { MessagesApp, type MessagesDating } from "../chat/Messages";
 import type { ChatApi } from "@/lib/chat";
 import { unseenBeats, type StoryFeed } from "@/lib/storyFeed";
 import { ChevronLeftIcon, CloseIcon } from "../icons";
+import { guardTaps } from "@/lib/tapGuard";
 import { formatCountdown, useGameNow } from "./Common";
 import { whenLine, type CalendarEvent } from "@/lib/calendar";
 import { PerkAction, type PerkHandlers } from "../game/Skills";
@@ -197,8 +198,8 @@ export function PhoneModal({
 
   return (
     <div className="modal-wrap phone-wrap" role="dialog" aria-modal="true" aria-label="Phone">
-      <div className="scrim" onClick={onClose} aria-hidden="true" />
-      <button className="icon-round phone-close" onClick={onClose} aria-label="Close phone"><CloseIcon size={18} /></button>
+      <div className="scrim" onClick={() => { guardTaps(); onClose(); }} aria-hidden="true" />
+      <button className="icon-round phone-close" onClick={() => { guardTaps(); onClose(); }} aria-label="Close phone"><CloseIcon size={18} /></button>
       <div className="phone-device">
         <div className="phone-screen">
           <div className={`phone-status${app ? " light" : ""}`}>
