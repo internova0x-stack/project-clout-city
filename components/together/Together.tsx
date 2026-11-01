@@ -561,7 +561,7 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome, economy }: {
             </div>
           )}
           {!board.canWork && (
-            <p className="meta" style={{ margin: 0 }}>{locked ?? `Jobs open up once your account is ${TOGETHER.minAccountDays} days old.`}</p>
+            <p className="meta" style={{ margin: 0 }}>{locked ?? "Jobs are closed right now."}</p>
           )}
           {board.open.map((j) => <OpenJobCard key={j.id} job={j} h={h} canWork={board.canWork} />)}
           {board.open.length === 0 && (
@@ -574,6 +574,9 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome, economy }: {
         </>
       ) : (
         <>
+          {board.canPost === false && board.postLocked && (
+            <p className="meta" style={{ margin: 0 }}>{lockedLine({ reason: board.postLocked as "too_new", unlocksAt: board.postUnlocksAt ?? "" })}</p>
+          )}
           <div className="stack-8" role="radiogroup" aria-label="Job">
             <button role="radio" aria-checked={kind === "decorator"} className={`travel-mode${kind === "decorator" ? " on" : ""}`} onClick={() => setKind("decorator")}>
               <span className="travel-mode-emoji" aria-hidden="true">🛋️</span>
@@ -597,7 +600,7 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome, economy }: {
             )}
           </div>
           {isTask(kind) && h.postTask ? (
-            <TaskForm kind={kind} cash={cash} busy={h.busy} posted={!!posted} onPost={h.postTask} />
+            <TaskForm kind={kind} cash={cash} busy={board.canPost === false ? "locked" : h.busy} posted={!!posted} onPost={h.postTask} />
           ) : kind === "decorator" ? (
             <div className="stack-8">
               <p className="overline" style={{ margin: 0 }}>Pay</p>
@@ -618,7 +621,7 @@ export function JobsApp({ board, cash, hasBusiness, h, onHome, economy }: {
           {!isTask(kind) && (
             <>
               <input className="chat-input job-note" value={note} maxLength={140} placeholder="A note for them (optional)" onChange={(e) => setNote(e.target.value)} aria-label="A note for them" />
-              <button className="btn btn-taxi" disabled={h.busy !== null || !!posted || cantPost} onClick={() => h.post(kind, kind === "decorator" ? pay : 0, kind === "manager" ? cut : 0, note)}>
+              <button className="btn btn-taxi" disabled={h.busy !== null || !!posted || cantPost || board.canPost === false} onClick={() => h.post(kind, kind === "decorator" ? pay : 0, kind === "manager" ? cut : 0, note)}>
                 {h.busy === "post" ? "…" : posted ? "Already posted" : kind === "decorator" ? (cash < pay ? `${formatCash(pay - cash)} short` : `Post the job · ${formatCash(pay)}`) : "Post the job"}
               </button>
             </>

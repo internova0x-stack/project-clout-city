@@ -67,7 +67,7 @@ export function EconomyTab({ api }: { api: StudioApi }) {
               <span className="stack-4" style={{ display: "flex", flexDirection: "column" }}><b className="display-md">{formatCash(data.week.fees)}</b><span className="meta">city fees (gone for good)</span></span>
             </div>
             <p className="meta" style={{ margin: 0 }}>
-              The rules: accounts {s.unlock.minAccountDays}+ days old at Rank {s.unlock.minRank}+; a {Math.round(s.fees.job * 100)}% fee on job pay
+              The rules: anyone can receive gifts and take jobs; sending needs an account {s.unlock.minAccountDays}+ days old at Rank {s.unlock.minRank}+; a {Math.round(s.fees.job * 100)}% fee on job pay
               ({Math.round(s.fees.asset * 100)}% on asset sales later), none on gifts; each player sends and receives at most {formatCash(s.weeklyCap.min)} a week
               (or half their usual weekly earnings, if that&apos;s more); gifts can&apos;t be resold for {s.noResaleDays} days; only {formatCash(s.worthCap.weekly)} a week
               of what players pay each other counts toward rank.

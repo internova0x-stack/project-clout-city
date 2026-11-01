@@ -2,7 +2,7 @@
 -- Value moves between players only as an item, a job's pay or (later) an asset: never as free cash.
 --
 --   * Settings: game_settings 'player_economy' (mirrored by lib/playerEconomy.ts, tests/playerEconomy.test.ts): the phase
---     switches (gifting: phase 1, gifts and player jobs; marketplace: phase 2; assets: phase 3), the unlock (account 7 days
+--     switches (gifting: phase 1, gifts and player jobs; marketplace: phase 2; assets: phase 3), the unlock to send (account 3 days; receiving needs only a home, owner Nov 1
 --     old and Rank 2), the city fee by kind (5% on job pay and sales, 10% on assets, none on gifts), the weekly cap, the
 --     price band (50% to 150%), the 14-day no-resale hold and the abuse-flag thresholds.
 --   * The core every phase calls (internal, never the browser):
@@ -37,7 +37,7 @@ begin
   end if;
 end $$;
 
-insert into public.game_settings (key, value) values ('player_economy', '{"phases":{"gifting":true,"marketplace":false,"assets":false},"kinds":{"gift":"gifting","job":"gifting","trade":"marketplace","sale":"marketplace","asset":"assets"},"unlock":{"minAccountDays":7,"minRank":2},"fees":{"gift":0,"job":0.05,"trade":0.05,"sale":0.05,"asset":0.1},"weeklyCap":{"min":5000,"earningsShare":0.5,"earningsDays":28,"notEarnings":["job_pay","job_cut","job_refund","gift_refund","sale","economy_fee","market_sale","asset_sale"]},"worthCap":{"weekly":5000},"band":{"min":0.5,"max":1.5,"edge":0.05},"noResaleDays":14,"gifts":{"perWeek":5,"messageMax":140,"expireDays":7,"headlineMin":1000,"categories":["fashion","accessories","home","luxury","makeup"]},"jobs":{"payMin":100,"payMax":5000,"payChoices":[250,500,1000,2500],"hours":[6,24,72],"errandPlaces":{"min":2,"max":4},"clout":10,"trivialPerStep":1000},"flags":{"pairTransfers":3,"pairDays":7,"newAccountDays":14,"newHeavyValue":3000,"trivialJobs":2}}'::jsonb)
+insert into public.game_settings (key, value) values ('player_economy', '{"phases":{"gifting":true,"marketplace":false,"assets":false},"kinds":{"gift":"gifting","job":"gifting","trade":"marketplace","sale":"marketplace","asset":"assets"},"unlock":{"minAccountDays":3,"minRank":2},"fees":{"gift":0,"job":0.05,"trade":0.05,"sale":0.05,"asset":0.1},"weeklyCap":{"min":5000,"earningsShare":0.5,"earningsDays":28,"notEarnings":["job_pay","job_cut","job_refund","gift_refund","sale","economy_fee","market_sale","asset_sale"]},"worthCap":{"weekly":5000},"band":{"min":0.5,"max":1.5,"edge":0.05},"noResaleDays":14,"gifts":{"perWeek":5,"messageMax":140,"expireDays":7,"headlineMin":1000,"categories":["fashion","accessories","home","luxury","makeup"]},"jobs":{"payMin":100,"payMax":5000,"payChoices":[250,500,1000,2500],"hours":[6,24,72],"errandPlaces":{"min":2,"max":4},"clout":10,"trivialPerStep":1000},"flags":{"pairTransfers":3,"pairDays":7,"newAccountDays":14,"newHeavyValue":3000,"trivialJobs":2}}'::jsonb)
 on conflict (key) do nothing;
 
 -- ---------------------------------------------------------------------------
@@ -177,6 +177,24 @@ begin
 end;
 $$;
 
+/**
+ * Owner, Nov 1 ("most players would've churned before then"): receiving needs nothing but a home. A new player can accept a
+ * gift, take a job or be hired as a runner from day one; only sending value (gifts, posting jobs, buying, swaps, sales) waits
+ * for the unlock above. Returns 'no_player' or 'economy_frozen', or null.
+ */
+create or replace function public.economy_unlock_receive(p_player uuid) returns text
+language plpgsql stable security definer set search_path = public
+as $$
+declare
+  me public.players;
+begin
+  select * into me from public.players where id = p_player;
+  if me.id is null or me.home_id is null or me.banned_at is not null then return 'no_player'; end if;
+  if me.economy_frozen_at is not null then return 'economy_frozen'; end if;
+  return null;
+end;
+$$;
+
 /** This week's cap, sent and received alike: the larger of weeklyCap.min and earningsShare × the last earningsDays' earnings ÷ 4. */
 create or replace function public.economy_cap(p_player uuid) returns bigint
 language sql stable security definer set search_path = public
@@ -209,7 +227,7 @@ declare
 begin
   if p_direction not in ('send', 'receive') then raise exception 'bad_direction' using errcode = '22023'; end if;
   if not public.economy_phase_on(p_kind) then raise exception 'phase_off' using errcode = '22023'; end if;
-  why := public.economy_unlock(p_player);
+  why := case when p_direction = 'receive' then public.economy_unlock_receive(p_player) else public.economy_unlock(p_player) end;
   if why = 'no_player' then raise exception 'no_player' using errcode = '28000'; end if;
   if why is not null then raise exception '%', why using errcode = '22023'; end if;
   if coalesce(p_amount, 0) > public.economy_room(p_player, p_direction) then
@@ -638,7 +656,7 @@ begin
   return coalesce((select jsonb_agg(jsonb_build_object(
       'id', p.id, 'name', p.display_name, 'style', p.starting_style,
       'crew', p.id in (select id from public.crew_of(uid)), 'partner', coalesce(p.id = partner, false),
-      'canReceive', public.economy_unlock(p.id) is null) order by coalesce(p.id = partner, false) desc, p.display_name)
+      'canReceive', public.economy_unlock_receive(p.id) is null) order by coalesce(p.id = partner, false) desc, p.display_name)
     from public.players p
    where p.id <> uid and p.banned_at is null and p.home_id is not null
      and (p.id in (select id from public.crew_of(uid)) or p.id = partner
@@ -945,7 +963,7 @@ begin
   if p_kind = 'decorator' and (p_pay is null or p_pay < (cfg -> 'decorator' ->> 'payMin')::bigint or p_pay > (cfg -> 'decorator' ->> 'payMax')::bigint) then
     raise exception 'bad_pay' using errcode = '22023';
   end if;
-  -- 0151: the economy's unlock (7 days, Rank 2), its phase switch and the weekly cap on what's held.
+  -- 0151: the economy's unlock to send (3 days, Rank 2), its phase switch and the weekly cap on what's held.
   perform public.economy_can(uid, 'job', case when p_kind = 'decorator' then coalesce(p_pay, 0) else 0 end, 'send');
   if exists (select 1 from public.jobs where poster = uid and kind = p_kind and status in ('open', 'active', 'done')) then
     raise exception 'already_posted' using errcode = '22023';
@@ -1138,9 +1156,13 @@ declare
 begin
   if not exists (select 1 from public.players where id = uid and home_id is not null) then raise exception 'no_player' using errcode = '28000'; end if;
   perform public.jobs_settle_due(uid);
-  why := public.economy_unlock(uid);
+  -- Owner, Nov 1: anyone can take work from day one; posting a job (paying someone) waits for the unlock.
+  why := public.economy_unlock_receive(uid);
   return jsonb_build_object(
     'canWork', why is null and public.economy_phase_on('job'),
+    'canPost', public.economy_unlock(uid) is null and public.economy_phase_on('job'),
+    'postLocked', public.economy_unlock(uid),
+    'postUnlocksAt', (select p.created_at + make_interval(days => coalesce((public.economy_settings() -> 'unlock' ->> 'minAccountDays')::int, 3)) from public.players p where p.id = uid),
     'locked', case when not public.economy_phase_on('job') then 'phase_off' else why end,
     'feeRate', coalesce((public.economy_settings() -> 'fees' ->> 'job')::numeric, 0),
     'open', coalesce((select jsonb_agg(x order by sunk, at desc) from (
@@ -1274,7 +1296,7 @@ do $$
 declare f text;
 begin
   foreach f in array array[
-    'public.economy_settings()', 'public.economy_phase_on(text)', 'public.economy_unlock(uuid)', 'public.economy_cap(uuid)',
+    'public.economy_settings()', 'public.economy_phase_on(text)', 'public.economy_unlock(uuid)', 'public.economy_unlock_receive(uuid)', 'public.economy_cap(uuid)',
     'public.economy_room(uuid, text)', 'public.economy_can(uuid, text, bigint, text)', 'public.economy_fee(text, bigint)',
     'public.economy_hold(uuid, bigint, text, text)', 'public.economy_pay(uuid, bigint, bigint, text, text)',
     'public.economy_friends(uuid, uuid)', 'public.economy_visible(uuid, uuid)', 'public.economy_flag(text, uuid[], text, jsonb)',

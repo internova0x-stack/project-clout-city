@@ -8,7 +8,8 @@ export const PLAYER_ECONOMY = {
   phases: { gifting: true, marketplace: false, assets: false },
   /** Which phase each kind of transfer belongs to. */
   kinds: { gift: "gifting", job: "gifting", trade: "marketplace", sale: "marketplace", asset: "assets" },
-  unlock: { minAccountDays: 7, minRank: 2 },
+  /** To send value (gift, post a job, buy, swap, sell). Receiving needs only a home (owner, Nov 1). */
+  unlock: { minAccountDays: 3, minRank: 2 },
   /** The city fee: a money sink, removed from the economy and shown up front. Gifts have none (the giver pays the Shop price). */
   fees: { gift: 0, job: 0.05, trade: 0.05, sale: 0.05, asset: 0.1 },
   /** Per New York week (Monday start), sent and received separately: the larger of min and
@@ -149,9 +150,9 @@ export function lockedLine(s: Pick<EconomyState, "reason" | "unlocksAt"> | null)
   if (!s?.reason) return null;
   if (s.reason === "too_new") {
     const d = Math.max(1, Math.ceil((new Date(s.unlocksAt).getTime() - Date.now()) / 86_400_000));
-    return `Gifts and jobs open when your account is ${PLAYER_ECONOMY.unlock.minAccountDays} days old: ${d === 1 ? "tomorrow" : `in ${d} days`}.`;
+    return `Sending gifts and posting jobs open ${d === 1 ? "tomorrow" : `in ${d} days`}. You can already receive gifts and take jobs.`;
   }
-  if (s.reason === "economy_locked") return "Gifts and jobs open at Rank 2. The city wants to see a little hustle first.";
+  if (s.reason === "economy_locked") return "Sending gifts and posting jobs open at Rank 2. You can already receive gifts and take jobs.";
   if (s.reason === "economy_frozen") return "Your trading is paused while the city takes a look. Write to the Mayor if that's a mistake.";
   return null;
 }
@@ -162,11 +163,11 @@ export function economyError(message: string): string {
   if (m.includes("rate_limited")) return "Whoa, slow down. The city needs a minute to catch up.";
   if (m.includes("phase_off")) return "That's switched off for now. The city is recalibrating its generosity.";
   if (m.includes("economy_frozen")) return lockedLine({ reason: "economy_frozen", unlocksAt: "" })!;
-  if (m.includes("too_new")) return `Gifts and jobs open once your account is ${PLAYER_ECONOMY.unlock.minAccountDays} days old.`;
-  if (m.includes("economy_locked")) return "Gifts and jobs open at Rank 2.";
+  if (m.includes("too_new")) return `Sending opens once your account is ${PLAYER_ECONOMY.unlock.minAccountDays} days old. Receiving and taking jobs already work.`;
+  if (m.includes("economy_locked")) return "Sending opens at Rank 2. Receiving and taking jobs already work.";
   if (m.includes("their_weekly_limit")) return "They've had enough generosity for one week. Try again Monday.";
   if (m.includes("weekly_limit")) return "That's over your weekly limit for gifts and jobs. It resets Monday.";
-  if (m.includes("they_cant_receive")) return "They can't receive gifts yet: new accounts and Rank 1 have to wait.";
+  if (m.includes("they_cant_receive")) return "They can't receive gifts right now.";
   if (m.includes("not_friends")) return "Only your Crew, your partner and people you've chatted with.";
   if (m.includes("not_giftable")) return "That one can't be gifted. Real-money pieces, rewards, cars and houses stay with their owner.";
   if (m.includes("they_own_it")) return "They already have one. Or one's already on its way.";

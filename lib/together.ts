@@ -190,6 +190,10 @@ export interface JobsBoard {
   canWork: boolean; open: OpenJob[]; mine: MyJob[]; working: WorkJob[]; rating: JobRating;
   /** Migration 0151: why jobs are closed (too_new, economy_locked, economy_frozen, phase_off) and the fee rate. */
   locked?: string | null;
+  /** Owner, Nov 1: taking work is open from day one; posting (paying someone) waits for the unlock. */
+  canPost?: boolean;
+  postLocked?: string | null;
+  postUnlocksAt?: string | null;
   feeRate?: number;
 }
 

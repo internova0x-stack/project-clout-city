@@ -1035,7 +1035,7 @@ create or replace function public.underworld_runners(p_player uuid) returns json
 language sql stable security definer set search_path = public
 as $$
   select coalesce(jsonb_agg(jsonb_build_object('id', p.id, 'name', p.display_name, 'style', p.starting_style,
-           'canTake', public.economy_unlock(p.id) is null) order by p.display_name), '[]'::jsonb)
+           'canTake', public.economy_unlock_receive(p.id) is null) order by p.display_name), '[]'::jsonb)
     from public.players p join public.underworld u on u.player_id = p.id
    where p.id <> p_player and p.banned_at is null and public.economy_friends(p_player, p.id)
 $$;

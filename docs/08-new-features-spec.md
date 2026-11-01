@@ -1391,7 +1391,8 @@ LUGGAGE · NOTARY) and its regular Pablo. Preview: lib/underworldSim.ts, `?under
 ## 32. The Player Economy (owner, Oct 31: "build the 3 phases"; migrations 0151, 0152, 0153; the draft is docs/PLAYER-ECONOMY.md)
 
 Players exchange value only as items, job pay and assets, never as free C$, with escrow, fees as a money sink, weekly caps, price bands,
-a 14-day no-resale hold and an abuse queue in Studio → Economy. Defaults chosen for the owner (Oct 31): unlock at 7 days and Rank 2; 5% fee
+a 14-day no-resale hold and an abuse queue in Studio → Economy. Defaults chosen for the owner (Oct 31; the unlock changed Nov 1, owner: "most players would've churned before then"): anyone can
+receive gifts and take jobs from day one; sending (gifts, posting jobs, buying, swaps, sales) needs 3 days and Rank 2; 5% fee
 on jobs, sales and swap C$, 10% on asset sales, none on gifts; a weekly cap of C$5,000 sent and received (more for big earners); only
 C$5,000 a week of player-paid C$ counts toward rank, and traded or gifted items count at Shop value at most.
 

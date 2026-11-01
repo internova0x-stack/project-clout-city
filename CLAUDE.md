@@ -519,7 +519,8 @@ components live in `app/globals.css`.
 - Player Economy (migrations 0151-0153, owner Oct 31: "build the 3 phases"; docs/PLAYER-ECONOMY.md, spec section 31): value moves
   between players only as Shop items, job pay and assets, never as free C$. game_settings 'player_economy' (lib/playerEconomy.ts,
   tests/playerEconomy.test.ts): phase switches (gifting = phase 1 on; marketplace and assets off until the owner flips them in Studio →
-  Economy, `admin_economy_set`), unlock (7 days, Rank 2 as in Campaign Mode), fees (job/trade/sale 5%, asset 10%, gifts 0), the weekly
+  Economy, `admin_economy_set`), unlock to send (3 days, Rank 2 as in Campaign Mode; receiving a gift, taking a job or a runner's cut
+  needs only a home from day one, owner Nov 1: `economy_unlock_receive`, `economy_can(..., 'receive')`; jobs_board `canPost`), fees (job/trade/sale 5%, asset 10%, gifts 0), the weekly
   cap (C$5,000 or half a quarter of the last 28 days' earnings, sent and received apart), the 50-150% band, the 14-day no-resale hold.
   The core (internal, 0151): `economy_can(player, kind, amount, dir)` (phase_off, economy_frozen, too_new, economy_locked,
   weekly_limit), `economy_note` (once per (kind, ref) in `economy_log`; limits; flags repeat_pair, new_heavy, trivial_jobs, band_edge,

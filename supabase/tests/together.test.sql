@@ -147,7 +147,7 @@ select pg_temp.assert((public.ride_respond((select (r ->> 'id')::bigint from rid
 -- Jobs: the interior decorator
 -- ---------------------------------------------------------------------------
 reset role;
--- Migration 0151: jobs need the economy's unlock (7 days, Rank 2) and friends or the open board.
+-- Migration 0151: posting needs the economy's unlock (3 days, Rank 2); taking work needs only a home and friends or the open board.
 update public.players set home_layout = '[{"id":"sofa","x":1,"z":1,"rot":0}]', bank_cash = 10000, clout = 100, economy_open = true
  where id in (pg_temp.id(1), pg_temp.id(2), pg_temp.id(3));
 set role authenticated;
@@ -160,7 +160,8 @@ select pg_temp.assert((pg_temp.p(1)).bank_cash = 7500, 'the pay is held');
 select pg_temp.assert(pg_temp.raises($$select public.post_job('decorator', 500, null, null)$$, 'already_posted'), 'one at a time');
 select pg_temp.assert(pg_temp.raises($$select public.take_job((select id from job))$$, 'own_job'), 'not your own');
 select pg_temp.as_(4);
-select pg_temp.assert(pg_temp.raises($$select public.take_job((select id from job))$$, 'too_new'), 'new accounts can''t work');
+-- Owner, Nov 1: new accounts may take work from day one (this one just isn't Ana's friend or on the open board).
+select pg_temp.assert(pg_temp.raises($$select public.take_job((select id from job))$$, 'not_friends'), 'new accounts can work, friends first');
 select pg_temp.as_(2);
 select pg_temp.assert(jsonb_array_length(public.jobs_board() -> 'open') = 1, 'Bo sees it');
 select 1 from public.take_job((select id from job));

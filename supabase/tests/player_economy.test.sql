@@ -82,7 +82,7 @@ select pg_temp.assert(pg_temp.raises($$select * from public.gifts$$, 'permission
 select pg_temp.assert(pg_temp.raises($$select public.admin_economy()$$, 'admin'), 'the Studio is for admins');
 
 -- ---------------------------------------------------------------------------
--- Unlock: 7 days and Rank 2
+-- Unlock to send: 3 days and Rank 2 (receiving needs only a home)
 -- ---------------------------------------------------------------------------
 select pg_temp.assert((public.economy_state() ->> 'unlocked')::boolean, 'Ana is unlocked');
 select pg_temp.as_(4);
@@ -96,8 +96,13 @@ select pg_temp.assert(public.economy_state() ->> 'reason' = 'economy_locked', 'D
 select pg_temp.as_(1);
 select pg_temp.assert(jsonb_array_length(public.gift_candidates()) = 3, 'crew: Bo, Dee and newbie');
 select pg_temp.assert(pg_temp.raises($$select public.gift_send(pg_temp.id(3), 'home-tv', null)$$, 'not_friends'), 'strangers get no gifts');
-select pg_temp.assert(pg_temp.raises($$select public.gift_send(pg_temp.id(5), 'home-tv', null)$$, 'they_cant_receive'), 'Rank 1 can''t receive');
-select pg_temp.assert(pg_temp.raises($$select public.gift_send(pg_temp.id(4), 'home-tv', null)$$, 'they_cant_receive'), 'too new to receive');
+-- Owner, Nov 1: receiving needs only a home; sending waits for 3 days and Rank 2.
+select pg_temp.assert((select bool_and((x ->> 'canReceive')::boolean) from jsonb_array_elements(public.gift_candidates()) x), 'new and Rank 1 players can receive');
+select pg_temp.as_(4);
+select pg_temp.assert(pg_temp.raises(format($$select public.gift_send(%L, 'home-tv', null)$$, pg_temp.id(1)), 'too_new'), 'too new to send');
+select pg_temp.as_(5);
+select pg_temp.assert(pg_temp.raises(format($$select public.gift_send(%L, 'home-tv', null)$$, pg_temp.id(1)), 'economy_locked'), 'Rank 1 can''t send');
+select pg_temp.as_(1);
 select pg_temp.assert(pg_temp.raises($$select public.gift_send(pg_temp.id(2), 'col-holo-boots', null)$$, 'not_giftable'), 'never real-money pieces');
 select pg_temp.assert(pg_temp.raises($$select public.gift_send(pg_temp.id(2), 'home-streak-lava-lamp', null)$$, 'not_giftable'), 'never streak rewards');
 select pg_temp.assert(pg_temp.raises($$select public.gift_send(pg_temp.id(2), 'house-astoria-townhouse', null)$$, 'not_giftable'), 'never houses');

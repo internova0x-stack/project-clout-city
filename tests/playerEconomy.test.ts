@@ -17,7 +17,7 @@ test("lib/playerEconomy.ts mirrors game_settings 'player_economy' in migration 0
 
 test("the owner's defaults (Oct 31)", () => {
   assert.deepEqual(PLAYER_ECONOMY.phases, { gifting: true, marketplace: false, assets: false });
-  assert.deepEqual(PLAYER_ECONOMY.unlock, { minAccountDays: 7, minRank: 2 });
+  assert.deepEqual(PLAYER_ECONOMY.unlock, { minAccountDays: 3, minRank: 2 });
   assert.equal(PLAYER_ECONOMY.fees.job, 0.05);
   assert.equal(PLAYER_ECONOMY.fees.sale, 0.05);
   assert.equal(PLAYER_ECONOMY.fees.asset, 0.1);
