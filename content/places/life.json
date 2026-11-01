@@ -1,0 +1,784 @@
+{
+  "activities": [
+    {
+      "id": "feta-opa",
+      "place": "feta-compli",
+      "emoji": "🍽️",
+      "title": "Opa!",
+      "blurb": "Andreas lets one guest a night smash a plate. Tonight he's looking at you. The whole room is looking at you.",
+      "energy": 5,
+      "options": [
+        {
+          "id": "smash",
+          "label": "Smash it with conviction",
+          "get": "Applause and clout",
+          "cost": "5 Energy",
+          "skill": "dance",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Perfect arc, perfect shatter. The table by the window stands up. Andreas wipes a single tear.",
+              "clout": 20,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "It bounces. Twice. Then breaks. The room claps out of pity, which still counts.",
+              "clout": 8,
+              "mood": 2
+            },
+            {
+              "weight": 1,
+              "text": "It shatters into the dessert case. Andreas adds the baklava to your bill. \"Opa,\" he says, quietly.",
+              "cash": -45,
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "pass",
+          "label": "Hand it to the birthday table",
+          "get": "Mood, a free shot of ouzo",
+          "cost": "Not your moment",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The birthday girl smashes it like it owes her money. Her whole table adopts you. Free ouzo.",
+              "mood": 8,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "They don't speak to you, but the ouzo arrives anyway. Andreas winks. You're family now. Minor family.",
+              "mood": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feta-offmenu",
+      "place": "feta-compli",
+      "emoji": "🐙",
+      "title": "Order off the menu",
+      "blurb": "There's a menu, and then there's what Andreas makes for people he respects. You have to ask the right way.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "yiayia",
+          "label": "\"What would your yiayia eat?\"",
+          "get": "His mother's recipe, Mood",
+          "cost": "C$40",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "He disappears for twenty minutes. Comes back with lamb that makes you call your own grandmother.",
+              "cash": -40,
+              "mood": 10,
+              "clout": 6
+            },
+            {
+              "weight": 1,
+              "text": "\"My yiayia ate standing up, in silence.\" He brings you bread. It's excellent bread.",
+              "cash": -10,
+              "mood": 3
+            }
+          ]
+        },
+        {
+          "id": "challenge",
+          "label": "\"Make it spicy. Really spicy.\"",
+          "get": "Clout if you survive",
+          "cost": "C$35, possibly your dignity",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Your eyes water. You don't flinch. A busboy films it. The clip does numbers in Astoria.",
+              "cash": -35,
+              "clout": 25
+            },
+            {
+              "weight": 2,
+              "text": "You make it two bites. Andreas pats your shoulder and brings yogurt like a paramedic.",
+              "cash": -35,
+              "mood": -4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feta-lunch-rush",
+      "place": "feta-compli",
+      "emoji": "🥙",
+      "title": "Help with the lunch rush",
+      "happening": "feta-lunch",
+      "blurb": "The line is out the door and the new waiter just quit to \"focus on his podcast.\" Andreas looks at you.",
+      "energy": 15,
+      "options": [
+        {
+          "id": "tables",
+          "label": "Run plates for an hour",
+          "get": "Cash and Andreas's respect",
+          "cost": "15 Energy",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Twenty-two plates, zero drops. Andreas pays you in cash and calls you \"the good one.\"",
+              "cash": 140,
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "You drop one moussaka. Just the one. It still counts against your pay.",
+              "cash": 80
+            }
+          ]
+        },
+        {
+          "id": "door",
+          "label": "Work the line outside",
+          "get": "Cash, a little clout",
+          "cost": "15 Energy, your charm",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You keep forty hungry New Yorkers calm with jokes and free pita. Somebody asks for your card.",
+              "cash": 110,
+              "clout": 12
+            },
+            {
+              "weight": 1,
+              "text": "A man in a fleece vest asks to speak to the manager. You are not the manager. It's a long hour.",
+              "cash": 90,
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feta-circle-dance",
+      "place": "feta-compli",
+      "emoji": "💃",
+      "title": "Join the circle dance",
+      "happening": "feta-greek-night",
+      "blurb": "The bouzouki speeds up, someone's uncle grabs your hand, and suddenly you're in a circle of forty people who all know the steps.",
+      "energy": 8,
+      "options": [
+        {
+          "id": "go",
+          "label": "Throw yourself in",
+          "get": "Clout, a new uncle",
+          "cost": "8 Energy",
+          "skill": "dance",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You catch the steps by the second lap. By the fifth, you're leading. An uncle you've never met calls you his favorite.",
+              "clout": 22,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You go left when everyone goes right. Twice. They keep you in anyway. That's Greek night.",
+              "clout": 6,
+              "mood": 5
+            }
+          ]
+        },
+        {
+          "id": "film",
+          "label": "Film it from your table",
+          "get": "A clip that might travel",
+          "cost": "Being the person filming",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Your clip catches the exact moment Andreas does the lift. It's on three Astoria pages by midnight.",
+              "clout": 16
+            },
+            {
+              "weight": 2,
+              "text": "Forty seconds of the back of someone's head. Beautiful head, though.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hub-arcade",
+      "place": "neon-spoon",
+      "emoji": "🕹️",
+      "title": "Beat the arcade high score",
+      "blurb": "The Galaxy Gobbler cabinet upstairs has had the same initials at the top since 2019: DAD. Nobody knows whose dad.",
+      "energy": 5,
+      "options": [
+        {
+          "id": "go",
+          "label": "Go for the top spot",
+          "get": "Clout if you beat DAD",
+          "cost": "5 Energy, C$5 in quarters",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "New high score. You type your initials. A small crowd forms. Somewhere, a dad feels it.",
+              "cash": -5,
+              "clout": 25,
+              "mood": 5
+            },
+            {
+              "weight": 3,
+              "text": "Second place. DAD remains. The machine plays a sad little song just for you.",
+              "cash": -5,
+              "clout": 4
+            }
+          ]
+        },
+        {
+          "id": "coach",
+          "label": "Coach the kid who's losing",
+          "get": "Mood, a small fan",
+          "cost": "Your own high score dreams",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The kid beats level six. He tells everyone you're his \"manager.\" You accept the role.",
+              "mood": 7,
+              "clout": 6
+            },
+            {
+              "weight": 1,
+              "text": "The kid loses anyway and blames you, loudly, to his mom. Character building.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hub-hotseat",
+      "place": "neon-spoon",
+      "emoji": "🎙️",
+      "title": "Lola's hot seat",
+      "blurb": "Lola pulls up a stool, opens her notes app and says, \"Three questions. Don't be boring.\"",
+      "energy": 0,
+      "options": [
+        {
+          "id": "spill",
+          "label": "Spill something real",
+          "get": "Clout, a mention in her column",
+          "cost": "A little privacy",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Lola gasps, actually gasps. \"Oh, that's going in.\" You're quoted, anonymously, which everyone will decode.",
+              "clout": 30,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "\"That's… a story about your dentist.\" She closes the notes app. Gently.",
+              "clout": 3,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "deflect",
+          "label": "Answer like a publicist",
+          "get": "Nothing to regret",
+          "cost": "Lola's interest",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "\"No comment, but thank you for asking.\" Lola stares. \"You'll go far. Unfortunately.\"",
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "She likes it. \"Mysterious. Keep that up and they'll write about you without me.\"",
+              "clout": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hub-candlelight",
+      "place": "neon-spoon",
+      "emoji": "🕯️",
+      "title": "Candlelight story night",
+      "happening": "hub-brownout",
+      "blurb": "The power's out, so Lola lit every candle in the building and declared it an event. It's honestly nicer.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "tell",
+          "label": "Tell your worst NYC story",
+          "get": "Clout, a room that loves you",
+          "cost": "Reliving it",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "The one about the rat on the G train. The room is screaming. Someone asks if you do weddings.",
+              "clout": 22,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You tell it well but a retired cop tops it immediately. You both get a round of applause.",
+              "clout": 10,
+              "mood": 5
+            }
+          ]
+        },
+        {
+          "id": "listen",
+          "label": "Listen by the candles",
+          "get": "Mood",
+          "cost": "Nothing",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "An old man tells a story about Astoria in 1979 and it's the best thing you've heard all year.",
+              "mood": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sal-order",
+      "place": "ditmars-deli",
+      "emoji": "🥯",
+      "title": "Order like a New Yorker",
+      "blurb": "Sal respects exactly one thing: knowing what you want and saying it fast. The line behind you is already sighing.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "fast",
+          "label": "\"BEC, salt pepper ketchup, roll.\"",
+          "get": "Sal's respect, a fast breakfast",
+          "cost": "C$9",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Sal nods once. That's the highest honor in Astoria. The sandwich is in your hand in forty seconds.",
+              "cash": -9,
+              "mood": 6,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "You say it so fast you order two by mistake. Sal charges you for both and respects you more.",
+              "cash": -18,
+              "mood": 7,
+              "clout": 8
+            }
+          ]
+        },
+        {
+          "id": "browse",
+          "label": "Ask what he recommends",
+          "get": "A surprise",
+          "cost": "C$9, the line's patience",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "\"Recommend? Buddy, it's a deli.\" He makes you his own lunch out of spite. It's the best thing on the street.",
+              "cash": -9,
+              "mood": 8
+            },
+            {
+              "weight": 2,
+              "text": "The guy behind you says \"come ON\" and the whole line agrees. Sal gives you a roll. Just a roll.",
+              "cash": -3,
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sal-cat",
+      "place": "ditmars-deli",
+      "emoji": "🐈",
+      "title": "Win over Meatball",
+      "blurb": "The deli cat, Meatball, sleeps on the bread. She has never once acknowledged a customer. Some say she can't.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "patience",
+          "label": "Sit very still and wait",
+          "get": "Her approval, maybe",
+          "cost": "Time, dignity",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "Eleven minutes. Then she walks over and sits on your foot. Sal drops a tray. \"She never does that.\"",
+              "mood": 10,
+              "clout": 10
+            },
+            {
+              "weight": 3,
+              "text": "Meatball looks at you, yawns, and turns to face the wall. A clear message.",
+              "mood": 1
+            }
+          ]
+        },
+        {
+          "id": "bribe",
+          "label": "Bribe her with turkey",
+          "get": "Probably works",
+          "cost": "C$6 of turkey, your integrity",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "She takes the turkey and lets you touch her head for one second. Transactional. Like New York.",
+              "cash": -6,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "She takes the turkey and leaves. Sal: \"She's smarter than you.\"",
+              "cash": -6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sal-morning-rush",
+      "place": "ditmars-deli",
+      "emoji": "☕",
+      "title": "Get behind the counter",
+      "happening": "sal-rush",
+      "blurb": "It's the morning rush, Sal's nephew is \"stuck on the N,\" and there are thirty construction workers who need coffee now.",
+      "energy": 10,
+      "options": [
+        {
+          "id": "coffee",
+          "label": "Run the coffee station",
+          "get": "Cash, Sal's trust",
+          "cost": "10 Energy",
+          "skill": "cooking",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Light and sweet, black, regular, regular, black. You nail every one. Sal pays you and says \"not bad.\"",
+              "cash": 90,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "You give a guy decaf. He knows. Somehow he knows. Sal docks you a little.",
+              "cash": 55
+            }
+          ]
+        },
+        {
+          "id": "register",
+          "label": "Work the register",
+          "get": "Cash",
+          "cost": "10 Energy, small talk",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Fast hands, correct change, one compliment on your energy. You might be a natural.",
+              "cash": 80
+            },
+            {
+              "weight": 1,
+              "text": "Someone pays in quarters. All quarters. It takes nine minutes. Sal watches the whole thing.",
+              "cash": 60,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "happenings": [
+    {
+      "id": "feta-lunch",
+      "place": "feta-compli",
+      "emoji": "🥙",
+      "title": "Lunch rush",
+      "blurb": "The line's out the door. Andreas could use a hand.",
+      "hours": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "feta-greek-night",
+      "place": "feta-compli",
+      "emoji": "💃",
+      "title": "Greek night",
+      "blurb": "Live bouzouki and a lot of plates. Fridays and Saturdays.",
+      "hours": [
+        19,
+        24
+      ],
+      "days": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "hub-brownout",
+      "place": "neon-spoon",
+      "emoji": "🕯️",
+      "title": "Candlelight story night",
+      "blurb": "The power's out. Lola made it an event.",
+      "condition": "brownout"
+    },
+    {
+      "id": "sal-rush",
+      "place": "ditmars-deli",
+      "emoji": "☕",
+      "title": "Morning rush",
+      "blurb": "Thirty coffees, one Sal. He needs help.",
+      "hours": [
+        6,
+        10
+      ],
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "moments": [
+    {
+      "id": "tourist-directions",
+      "crowd": [
+        "tourist"
+      ],
+      "emoji": "🗺️",
+      "title": "A tourist needs directions",
+      "blurb": "\"Excuse me, which way to Times Square?\" They're holding a paper map upside down and wearing a foam Statue of Liberty crown.",
+      "options": [
+        {
+          "id": "help",
+          "label": "Walk them to the right train",
+          "get": "Mood, a grateful stranger",
+          "cost": "Ten minutes",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You get them on the right N train. They take a selfie with you. You're in a family album in Ohio now.",
+              "mood": 6,
+              "clout": 4
+            },
+            {
+              "weight": 1,
+              "text": "You get them on the right train going the wrong way. You find out an hour later. You tell no one.",
+              "mood": 1
+            }
+          ]
+        },
+        {
+          "id": "scenic",
+          "label": "Send them \"the scenic way\"",
+          "get": "A story",
+          "cost": "A tiny bit of your soul",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "You send them to a great slice place in Astoria instead. They post a review thanking \"a local legend.\"",
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "You send them to Staten Island. You feel bad for nine seconds.",
+              "mood": -2,
+              "clout": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "influencer-ringlight",
+      "crowd": [
+        "influencer"
+      ],
+      "emoji": "💡",
+      "title": "Hold my ring light?",
+      "blurb": "An influencer needs someone to hold their ring light \"for literally one take.\" You can see forty takes in their eyes.",
+      "options": [
+        {
+          "id": "hold",
+          "label": "Hold the light",
+          "get": "A tag, maybe clout",
+          "cost": "Twenty minutes, your arms",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Take 31 is the one. They tag you. Their 80,000 followers ask who the hot assistant is.",
+              "clout": 18
+            },
+            {
+              "weight": 2,
+              "text": "Take 46. They thank you and forget to tag you. Your arms will remember this.",
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "pitch",
+          "label": "Pitch a collab instead",
+          "get": "Clout if they bite",
+          "cost": "Your pride if they don't",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "\"Wait, that's actually a good idea.\" You film it together. It does better than their solo stuff. Awkward.",
+              "clout": 22
+            },
+            {
+              "weight": 2,
+              "text": "\"I'll have my team reach out.\" They do not have a team. Nobody will reach out.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finance-bro-tip",
+      "crowd": [
+        "finance_bro"
+      ],
+      "emoji": "📈",
+      "title": "A hot tip",
+      "blurb": "A guy in a fleece vest leans over: \"Not financial advice, but… are you in on Bodega Coin?\"",
+      "options": [
+        {
+          "id": "listen",
+          "label": "Hear him out",
+          "get": "Maybe something",
+          "cost": "Fifteen minutes of your life",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "Buried in the nonsense is one real tip: the deli on 31st is hiring at double pay. You pocket it.",
+              "mood": 2,
+              "clout": 4
+            },
+            {
+              "weight": 3,
+              "text": "It's a coin with a cat on it. It was down 90% while he explained it. He's still bullish.",
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "roast",
+          "label": "Roast the vest",
+          "get": "The room laughing",
+          "cost": "His goodwill",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "\"Is the vest also not financial advice?\" The table behind you loses it. He takes the vest off. Growth.",
+              "clout": 12,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "He laughs harder than anyone and asks you to co-host his podcast. You've made it worse.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stamps": {
+    "feta-compli": [
+      {
+        "days": 3,
+        "text": "Andreas remembers your name. Mostly. \"My friend!\"",
+        "cash": 60
+      },
+      {
+        "days": 7,
+        "text": "Family table: Andreas sits you at the good table by the window.",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "His mother's lamb, not on the menu, saved for you on Fridays.",
+        "cash": 150,
+        "clout": 40
+      }
+    ],
+    "neon-spoon": [
+      {
+        "days": 3,
+        "text": "Lola learns your name and starts mispronouncing it on purpose.",
+        "cash": 50
+      },
+      {
+        "days": 7,
+        "text": "Your initials on the regulars' wall, next to a dog nobody remembers.",
+        "clout": 30
+      },
+      {
+        "days": 15,
+        "text": "Lola saves you a booth during every Tea drop. You're inner circle.",
+        "cash": 120,
+        "clout": 45
+      }
+    ],
+    "ditmars-deli": [
+      {
+        "days": 3,
+        "text": "Sal starts your order when you walk in. You didn't tell him what it was.",
+        "cash": 40
+      },
+      {
+        "days": 7,
+        "text": "Meatball the cat tolerates you. This is unprecedented.",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "Your sandwich goes on the board: \"The Regular.\" Sal denies naming it after you.",
+        "cash": 120,
+        "clout": 40
+      }
+    ]
+  }
+}

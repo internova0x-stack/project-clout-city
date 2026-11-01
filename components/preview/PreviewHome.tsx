@@ -56,6 +56,9 @@ import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
 import type { StoreApi, StoreProduct } from "@/lib/store";
 import { createSeasonSim } from "@/lib/seasonSim";
+import { createLifeSim } from "@/lib/placeLifeSim";
+import { cityMinutes } from "@/lib/cityClock";
+import { GAME_CONFIG } from "@/lib/config";
 import { CLUB_EVENTS, placeById } from "@/lib/city";
 import type { ChatApi } from "@/lib/chat";
 import type { DatingApi } from "@/lib/dating";
@@ -99,7 +102,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, passPreset, packPreset, choicePreset, economyPreset, assetsPreset, marketPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, passPreset, packPreset, lifePreset, choicePreset, economyPreset, assetsPreset, marketPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -173,6 +176,8 @@ export function PreviewHome({
   galaPreset?: string;
   /** The Clout Pass and the starter pack (migration 0156): ?pass=soon|new|progress|paid|vip|done, ?pack=offer|owned|none. */
   passPreset?: string;
+  /** Living places (migration 0157): ?life=rush|regular|brownout. */
+  lifePreset?: string;
   packPreset?: string;
   /** Moral Choices: ?choice=now|back|high|low|log|jail|chain|story (lib/choicesSim.ts; story = storylets from a sample history). */
   choicePreset?: string;
@@ -316,6 +321,15 @@ export function PreviewHome({
     reward: (cash, clout) => sim.huntReward(cash, clout),
     item: (sku) => sim.grantReward(sku),
   }), [passPreset, packPreset, sim]);
+  const lifeApi = useMemo(() => createLifeSim(lifePreset ?? null, {
+    at: () => sim.here(),
+    energy: () => 100,
+    minute: () => cityMinutes(Date.now(), GAME_CONFIG.cityClock),
+    weekday: () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date())) + 1,
+    regularDays: () => 4,
+    conditions: () => [],
+    pay: (r) => sim.choicePay({ cash: r.cash, clout: r.clout, mood: r.mood, energy: -r.energy }),
+  }), [lifePreset, sim]);
   const galaApi = useMemo(() => createGalaSim(galaPreset ?? null, {
     here: () => simRef.current.here(), bank: () => player.bank_cash,
     onPay: (e) => simRef.current.choicePay(e),
@@ -681,6 +695,7 @@ export function PreviewHome({
       underworld={cityOff ? undefined : underworldApi}
       gala={cityOff ? undefined : galaApi}
       pass={cityOff ? undefined : passApi}
+      life={cityOff ? undefined : lifeApi}
       choices={cityOff ? undefined : choicesApi}
       remembered={cityOff || (choicePreset !== "story" && choicePreset !== "city") ? undefined : rememberedSim}
       campus={cityOff ? undefined : campusApi}

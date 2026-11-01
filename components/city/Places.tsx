@@ -752,13 +752,15 @@ function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null 
 
 /** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, handlers, onBack, room, talkNonce = 0, here,
+  place, state, handlers, onBack, room, talkNonce = 0, here, life,
 }: {
   place: Place;
   state: CityState;
   handlers: PlaceHandlers;
   onBack: () => void;
   room: React.ReactNode;
+  /** Living places (owner, Nov 1): happening now, things to do here, the regular card. */
+  life?: React.ReactNode;
   /** #20: bumped each time the player taps the place's regular in the room. */
   talkNonce?: number;
   /**
@@ -808,6 +810,7 @@ export function InteriorScene({
           </button>
         </div>
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
+        {life}
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
         ) : (

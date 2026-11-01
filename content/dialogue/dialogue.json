@@ -1,0 +1,149 @@
+{
+  "crowd": [
+    {
+      "id": "tourist", "label": "tourist", "haunts": { "monument": 5, "park": 3, "pizza": 3, "taverna": 2, "hub": 2, "diner": 2, "subway": 3, "*": 1 },
+      "time": ["morning", "afternoon", "evening"],
+      "lines": [
+        { "text": "Is this the real New York or the one from the movies? It smells like the real one." },
+        { "text": "We walked here from Times Square. Our feet are filing a complaint." },
+        { "text": "Someone told me Queens is 'the new Brooklyn.' Brooklyn was the new Manhattan. Where does it end?" },
+        { "text": "I asked a man for directions and he just said 'no.' Is that a local custom?" },
+        { "text": "We came for the octopus. My husband came for the free bread. Both delivered.", "places": ["feta-compli"] },
+        { "text": "The menu has a whole page of 'not on the menu.' I respect it.", "places": ["feta-compli"] },
+        { "text": "Is it rude to take a picture of a pancake? I'm doing it anyway.", "places": ["neon-spoon"] },
+        { "text": "The man behind the counter sighed at me in three languages.", "places": ["ditmars-deli"] },
+        { "text": "The cat on the bread is part of the experience, right? Right?", "places": ["ditmars-deli"] },
+        { "text": "Everybody here is walking like they're late. Are they all late?", "time": ["morning"] },
+        { "text": "It's so hot the subway grates are breathing on me.", "condition": ["heatwave"] },
+        { "text": "Our hotel lost power and the elevator guy said 'welcome to New York' like a threat.", "condition": ["brownout"] }
+      ]
+    },
+    {
+      "id": "influencer", "label": "influencer", "haunts": { "cafe": 5, "rooftop": 5, "hub": 3, "club": 3, "fashion": 4, "boutique": 4, "taverna": 2, "*": 1 },
+      "lines": [
+        { "text": "Don't mind me, I'm just getting B-roll of my oat latte for the next forty minutes." },
+        { "text": "The lighting in here is giving 'struggling but make it aesthetic.'" },
+        { "text": "I posted this place yesterday. You're welcome for the line." },
+        { "text": "I'm not an influencer, I'm a 'storyteller with a ring light.'" },
+        { "text": "Do you think the plate smash would hit harder in slow motion? Asking for 80K people.", "places": ["feta-compli"] },
+        { "text": "The arcade upstairs is SO retro. I'm calling it 'dad core.'", "places": ["neon-spoon"] },
+        { "text": "I asked for a 'deconstructed' bacon egg and cheese and Sal just looked at me until I left. Iconic content.", "places": ["ditmars-deli"] },
+        { "text": "Golden hour on a rooftop is basically a second job.", "at": ["rooftop"], "time": ["evening"] },
+        { "text": "Everyone's posting the brownout. Candlelight content is so saturated right now.", "condition": ["brownout"] },
+        { "text": "Wait, you're @ someone, right? You have main-character jawline.", "stage": ["known", "famous"] },
+        { "text": "A brand sent me forty free sweaters and now I can't feel my closet." },
+        { "text": "The restroom mirror here is the best one in Queens. That's a professional opinion.", "at": ["restroom"] }
+      ]
+    },
+    {
+      "id": "finance_bro", "label": "finance guy", "haunts": { "finance": 5, "office": 4, "rooftop": 4, "club": 3, "lounge": 3, "gym": 3, "*": 1 },
+      "time": ["morning", "evening", "late"],
+      "lines": [
+        { "text": "I don't drink coffee anymore. I drink a mushroom thing. It's going to be huge." },
+        { "text": "My Q4 is crushing it. Don't ask what Q4 means. I don't know either." },
+        { "text": "I moved to Queens for the value. I take a car back to Manhattan every night." },
+        { "text": "Not financial advice, but the lotto is a tax on people who aren't me." },
+        { "text": "This vest has seen things. Earnings calls. A wedding. Tonight.", "time": ["evening", "late"] },
+        { "text": "Opa is just a high-five with ceramics. I'm in.", "places": ["feta-compli"] },
+        { "text": "Bro, I networked so hard at the gym I forgot to lift.", "at": ["gym"] },
+        { "text": "Bottle service is an investment if you think about it. Don't think about it.", "at": ["club", "lounge"] },
+        { "text": "The market's down, which is a great time to buy a second vest.", "player": ["broke"] },
+        { "text": "Heard the Mayor's taking meetings in diners now. Very populist. Very bullish.", "places": ["neon-spoon"] }
+      ]
+    },
+    {
+      "id": "dog_walker", "label": "dog walker", "haunts": { "park": 6, "cafe": 2, "bodega": 3, "hub": 1, "outdoors": 5 },
+      "time": ["morning", "afternoon"],
+      "lines": [
+        { "text": "I'm walking six dogs and one of them is emotionally running the group." },
+        { "text": "The pug is named Kevin. Kevin has a better apartment than me." },
+        { "text": "Billionaire's Pomeranian is having a rough week. I'm not allowed to say more. NDA.", "at": ["park"] },
+        { "text": "I get paid in cash and in dogs looking at me like I'm the sun." },
+        { "text": "Sal lets me bring them in if they don't look at the bread. They always look at the bread.", "places": ["ditmars-deli"] },
+        { "text": "It's too hot for the doodles. They're wearing shoes. Tiny dog shoes.", "condition": ["heatwave"] },
+        { "text": "Rainy days the dogs come back looking like wet regret.", "condition": ["rainstorm"] },
+        { "text": "Every dog in Astoria knows which deli gives out ends of the turkey." },
+        { "text": "Morning walk is just me and the guy hosing the sidewalk. We nod. It's a relationship.", "time": ["morning"] }
+      ]
+    },
+    {
+      "id": "night_nurse", "label": "night-shift nurse", "haunts": { "diner": 5, "hub": 4, "halal_cart": 5, "late_night": 5, "bodega": 4, "hospital": 6 },
+      "time": ["late", "morning"],
+      "lines": [
+        { "text": "Twelve hours at St. Copay's and the first thing I want is pancakes. Don't judge." },
+        { "text": "Someone came in tonight because they 'felt a vibe.' The vibe was a pigeon." },
+        { "text": "You look tired. Drink water. That's free medical advice and the only free thing here." },
+        { "text": "I've been up for nineteen hours. Everything this diner makes is a miracle.", "places": ["neon-spoon"] },
+        { "text": "My breakfast is your dinner. My dinner is a coffee. It's fine.", "time": ["morning"] },
+        { "text": "Sal had my BEC ready before I walked in. That man is the real healthcare.", "places": ["ditmars-deli"] },
+        { "text": "Heatwave nights are the busiest. Everyone's dehydrated and nobody believes it.", "condition": ["heatwave"] },
+        { "text": "The generators kicked on during the brownout and I've never loved a machine more.", "condition": ["brownout"] },
+        { "text": "If you're dating someone in this city, check in on them. That's my medical opinion.", "player": ["dating"] }
+      ]
+    },
+    {
+      "id": "gamer", "label": "gamer", "haunts": { "games": 6, "hub": 5, "arena": 6, "*": 0 },
+      "lines": [
+        { "text": "DAD has held the Galaxy Gobbler record since 2019. We think DAD is a ghost.", "places": ["neon-spoon"] },
+        { "text": "I've been on level six for four years. Level six owes me money." },
+        { "text": "Respawn Arena wifi is faster than my life choices." },
+        { "text": "The claw machine is rigged. I've spent forty dollars proving it." },
+        { "text": "I streamed this pancake. Two viewers. One was my mom. Still counts.", "places": ["neon-spoon"] },
+        { "text": "Brownout means the arcade's down, so now I'm just a guy in a room.", "condition": ["brownout"] },
+        { "text": "If you beat DAD I'll follow you on everything.", "places": ["neon-spoon"] },
+        { "text": "Glow Up House hires people who are bad at games but good at yelling. I'm good at both." },
+        { "text": "Late-night arcade is the only place where everyone's equally bad.", "time": ["late"] }
+      ]
+    }
+  ],
+  "places": [
+    { "text": "Andreas threw out a critic once. Not his review. Him.", "places": ["feta-compli"] },
+    { "text": "The bouzouki player knows four songs and they are all bangers.", "places": ["feta-compli"], "days": [5, 6] },
+    { "text": "Lunch rush in here is a contact sport. Elbows in.", "places": ["feta-compli"], "time": ["afternoon"] },
+    { "text": "The pancakes are shaped like the Hub sign. Nobody asked for that. Everybody loves it.", "places": ["neon-spoon"] },
+    { "text": "Lola's booth is reserved for whoever has the best gossip. You'll know when it's you.", "places": ["neon-spoon"] },
+    { "text": "Third stall's been 'on a call' for forty minutes.", "at": ["restroom"] },
+    { "text": "Somebody wrote 'Tea is free, therapy isn't' on the mirror. Nobody's cleaned it.", "at": ["restroom"] },
+    { "text": "The hand dryer here could launch a satellite.", "at": ["restroom"] },
+    { "text": "Meatball the cat has bitten two health inspectors. Both passed the deli anyway.", "places": ["ditmars-deli"] },
+    { "text": "Sal's coffee is a dollar. It's been a dollar since the Mets were good.", "places": ["ditmars-deli"] },
+    { "text": "Morning rush at Sal's is thirty hard hats and one guy ordering a matcha. Sal pretends not to hear him.", "places": ["ditmars-deli"], "time": ["morning"] },
+    { "text": "Everybody's in here because it's the only place with AC.", "condition": ["heatwave"] },
+    { "text": "Somebody brought a candle and now it's 'a vibe.'", "condition": ["brownout"] }
+  ],
+  "city": [
+    { "text": "The N is running express, which means it's running wherever it wants.", "condition": ["transit_meltdown"] },
+    { "text": "Street fair on Ditmars this weekend. Six funnel cake stands, one porta-potty. Plan accordingly.", "condition": ["festival"] },
+    { "text": "Rain like this, the bodega cats come out to judge us.", "condition": ["rainstorm"] },
+    { "text": "Lotto fever's back. My aunt bought twelve tickets and a vision board.", "condition": ["lotto_fever"] },
+    { "text": "Cops are carding at every club door this week. Bring your real ID, not your vibe.", "condition": ["door_crackdown"] },
+    { "text": "The Mayor cut a ribbon on a new ribbon-cutting ceremony. I'm not joking." },
+    { "text": "Somebody said the rent went up again. Somebody always says that. Somebody's always right." },
+    { "text": "Heard a celebrity's in Astoria this week. Everyone's wearing sunglasses indoors just in case." },
+    { "text": "You still working at that job? People are talking about your boss.", "player": ["has_job"] },
+    { "text": "How's the campaign? Half this street has a yard sign and none of us have yards.", "player": ["campaign"] },
+    { "text": "You and your person are the talk of the block. In a good way. Mostly.", "player": ["dating"] },
+    { "text": "Tell me you're not studying in here. Okay, study. I'll be quiet. I won't.", "player": ["student"] }
+  ],
+  "lola": [
+    { "text": "New in town? Cute. Stick with me and in a week the whole borough will be asking who you are.", "stage": ["new"] },
+    { "text": "First rule of Queens: never stand still on a subway stair. Second rule: tell me everything.", "stage": ["new"] },
+    { "text": "You've been here, what, three days? And you already have a regular order. I'm impressed. Barely.", "stage": ["new"] },
+    { "text": "People are starting to say your name. Not correctly, but they're saying it.", "stage": ["rising"] },
+    { "text": "You're in that awkward middle bit. Too known to be nobody, not known enough to get a free table.", "stage": ["rising"] },
+    { "text": "I heard you were at the taverna smashing plates. Good. Content.", "stage": ["rising", "known"] },
+    { "text": "Three people asked me about you today. I said 'who?' Keeps them hungry.", "stage": ["known"] },
+    { "text": "You're officially someone. Which means everyone's waiting for you to mess up. Don't. Or do, but call me first.", "stage": ["known"] },
+    { "text": "Oh look, it's the famous one. Sit. Not there. That's the gossip seat. Okay, sit there.", "stage": ["famous"] },
+    { "text": "You used to need me. Now I need you. I hate it. Spill.", "stage": ["famous"] },
+    { "text": "A job? Look at you, with a lanyard. I'll be gentle in my column.", "player": ["has_job"] },
+    { "text": "Dating someone? Don't post them yet. Never post them first. Rule one.", "player": ["dating"] },
+    { "text": "A campaign. In this economy. I respect the delusion.", "player": ["campaign"] },
+    { "text": "You've got a little halo glow. Careful, people love to see that slip.", "player": ["halo"] },
+    { "text": "I know what you've been up to with Pablo. Everyone knows. Nobody's saying. That's Queens.", "player": ["hustler"] },
+    { "text": "Power's out, so I lit every candle I own. This is the best night the Hub's had all year.", "condition": ["brownout"] },
+    { "text": "It's a hundred degrees and somehow the tea is still hot. That's talent.", "condition": ["heatwave"] },
+    { "text": "Morning gossip is the freshest. Sit, eat a pancake, I'll talk.", "time": ["morning"] },
+    { "text": "Late night is when the real stuff comes out. Order something and stay a while.", "time": ["late"] }
+  ]
+}
