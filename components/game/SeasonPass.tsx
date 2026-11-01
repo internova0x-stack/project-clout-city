@@ -113,10 +113,10 @@ function HowItWorks({ season: s, price }: { season: PassState["season"]; price: 
     try { if (!localStorage.getItem(KEY)) { setOpen(true); localStorage.setItem(KEY, "1"); } } catch { /* stays folded */ }
   }, []);
   const steps: [string, string, React.ReactNode][] = [
-    ["🎯", "Play as usual", <>Tasks and goals earn XP.</>],
-    ["🪜", "Climb tiers", <>Each tier has a free reward.</>],
-    ["✨", "Get the Clout Pass", <>{price ?? "One payment"} or free with VIP: an exclusive piece on every tier.</>],
-    ["⏳", "Season ends", <>{new Date(s.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}.</>],
+    ["🎯", "Play like you already do", <>Daily tasks <b>+{s.xp.daily_task} XP</b>, all five in a day <b>+{s.xp.daily_bonus}</b>, each goal <b>+{s.xp.goal}</b>.</>],
+    ["🪜", "Climb the tiers", <>Every {s.xpPerTier} XP is a new tier. Each one has a free reward: C$, clout or a piece for your place.</>],
+    ["✨", "The Clout Pass adds the good stuff", <>One payment for the season{price ? ` (${price})` : ""}, or free with VIP: an exclusive outfit or furniture piece on every tier. Looks only. XP you already have counts.</>],
+    ["⏳", "It's a season", <>Ends {new Date(s.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You get {s.claimDays} more days to claim, then a new season starts.</>],
   ];
   return (
     <div className="pass-how">
