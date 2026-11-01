@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CloseIcon } from "./icons";
+import { guardTaps, installTapGuard } from "@/lib/tapGuard";
 
 // Bottom sheet over the world (C13). Drag the handle down, tap the scrim or
 // press Escape to dismiss. Opens in 320 ms with a spring, closes in 240 ms
@@ -42,6 +43,9 @@ export function Sheet({
   // seconds), so it lives in a ref: focus moves only when the sheet opens or closes, never
   // mid-typing, or the phone keyboard would drop (bug #1).
   const closeRef = useRef({ onClose, dismissible });
+  useEffect(() => { installTapGuard(); }, []);
+  // Every way of closing (✕, the scrim, Escape, a drag) also stops the next tap reaching what's revealed underneath.
+  const close = () => { guardTaps(); onClose(); };
   useEffect(() => {
     closeRef.current = { onClose, dismissible };
   });
@@ -51,7 +55,7 @@ export function Sheet({
     const prev = document.activeElement as HTMLElement | null;
     ref.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && closeRef.current.dismissible) closeRef.current.onClose();
+      if (e.key === "Escape" && closeRef.current.dismissible) { guardTaps(); closeRef.current.onClose(); }
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -106,12 +110,12 @@ export function Sheet({
     drag.current = null;
     if (!d?.active || !ref.current) return;
     ref.current.style.transform = "";
-    if (d.dy > 80) onClose();
+    if (d.dy > 80) close();
   };
 
   return (
     <>
-      <div className={`scrim${closing ? " closing" : ""}`} onClick={dismissible && !closing ? onClose : undefined} aria-hidden="true" />
+      <div className={`scrim${closing ? " closing" : ""}`} onClick={dismissible && !closing ? close : undefined} aria-hidden="true" />
       <div
         ref={ref}
         className={`sheet${tall ? " tall" : ""}${hero ? " hero" : ""}${closing ? " closing" : ""}`}
@@ -128,7 +132,7 @@ export function Sheet({
           <div className="sheet-handle" />
         </div>
         {dismissible && (
-          <button className="icon-round sheet-close" onClick={onClose} aria-label="Close">
+          <button className="icon-round sheet-close" onClick={close} aria-label="Close">
             <CloseIcon size={18} />
           </button>
         )}

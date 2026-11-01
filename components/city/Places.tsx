@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { guardTaps } from "@/lib/tapGuard";
 import { TRACKS } from "@/lib/careers";
 import { campusById } from "@/lib/campus";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, eventToday, closedLine, formatCountdown, hoursLine, isHub, isStation, placeOpen, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
@@ -774,7 +775,7 @@ export function InteriorScene({
   return (
     <div className="layer interior">
       {room}
-      <button className="pill-glass glass-hud interior-back" onClick={onBack}>
+      <button className="pill-glass glass-hud interior-back" onClick={() => { guardTaps(); onBack(); }}>
         <ChevronLeftIcon size={18} /> Map
       </button>
       {/* Owner, Oct 15: who's here sits under the top HUD, right-aligned, not on the activity card. */}
