@@ -6,6 +6,12 @@ import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/li
 import dynamic from "next/dynamic";
 import { lazySheet, prefetchSheets } from "./lazySheet";
 import { installTapGuard } from "@/lib/tapGuard";
+import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, stageOf, type Scene, type Tier } from "@/lib/dialogue";
+import { DIALOGUE } from "@/lib/dialogueContent";
+import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
+import { LifeSheet, LifeStrip } from "./city/PlaceLife";
+import { DailyWelcome, type WelcomeChip, type WelcomeRow } from "./city/DailyPick";
+import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -15,7 +21,7 @@ import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
-import { SKILL_PERKS, perkStatus, skillBadge } from "@/lib/skills";
+import { LEVEL_AT, MAX_LEVEL, SKILLS, SKILL_PERKS, levelFor, levelProgress, perkStatus, skillBadge } from "@/lib/skills";
 import { SkillsSheet } from "./game/Skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
@@ -100,7 +106,7 @@ import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
 import type { MembershipApi, MembershipState } from "@/lib/membership";
 import type { PushApi } from "@/lib/pushClient";
-import type { GoalsApi, GoalsState } from "@/lib/goals";
+import { GOAL_COPY, goalProgress, partLine, type GoalsApi, type GoalsState } from "@/lib/goals";
 import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
 import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
 import { RANKS, rankFor, type Rank } from "@/lib/ranks";
@@ -294,6 +300,7 @@ export function GameShell({
   campus,
   goals,
   pass,
+  life,
   push,
   previewPushAsk = false,
   membership,
@@ -398,6 +405,8 @@ export function GameShell({
   goals?: GoalsApi;
   /** The Clout Pass and the starter pack (migration 0156): the Tasks sheet's Pass tab and the Shop's pack card. */
   pass?: PassApi;
+  /** Living places (migration 0157): things to do at each place, happenings, crowd moments and regular cards. */
+  life?: LifeApi;
   /** Push notifications (migration 0078): Lola's ask and Settings → Notifications; hidden without it. */
   push?: PushApi;
   /** Development previews (?push=ask): Lola asks after 2 seconds. */
@@ -1516,6 +1525,102 @@ export function GameShell({
     ? <StarterPackCard state={packS} price={priceOf(STARTER_PACK.sku)} busy={busy !== null} onBuy={() => void buy(STARTER_PACK.sku)} />
     : null;
 
+  // ---- Living places (lib/placeLife.ts) and what people say (lib/dialogue.ts) ----
+  const [lifeV, setLifeV] = useState<LifeView | null>(null);
+  /** The line each tap on a regular got, for this visit (the panel asks on every redraw). */
+  const regularSaid = useRef(new Map<string, string>());
+  useEffect(() => { regularSaid.current.clear(); }, [inside?.id, place?.id]);
+  const [lifeCard, setLifeCard] = useState<{ card: ActivityView | MomentView; kind: "activity" | "moment"; who?: string } | null>(null);
+  const [lifeResult, setLifeResult] = useState<LifeResult | null>(null);
+  const insideId = inside?.id ?? null;
+  const loadLife = useCallback(async (id: string) => {
+    if (!life) return;
+    const r = await life.view(id).catch(() => null);
+    if (r?.ok) setLifeV(r.data);
+  }, [life]);
+  useEffect(() => { setLifeV(null); if (insideId) void loadLife(insideId); }, [insideId, loadLife]);
+  const lifePaid = (r: LifeResult) => {
+    if (r.cash || r.clout || r.mood) setGain({ cash: r.cash || undefined, clout: r.clout || undefined, mood: r.mood || undefined });
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+  };
+  const chooseLife = async (option: string) => {
+    if (!life || !lifeCard) return;
+    setBusy("life");
+    const r = lifeCard.kind === "activity"
+      ? await life.activity(lifeCard.card.id, option).then((x) => (x.ok ? { ok: true as const, result: x.data.result, view: x.data.view } : x))
+      : await life.playMoment(lifeCard.card.id, option).then((x) => (x.ok ? { ok: true as const, result: x.data, view: null } : x));
+    setBusy(null);
+    if (!r.ok) { setLifeCard(null); return setToast(r.error); }
+    setLifeResult(r.result);
+    if (r.view) setLifeV(r.view);
+    lifePaid(r.result);
+  };
+  const claimStampLife = async (days: number) => {
+    if (!life || !insideId) return;
+    setBusy("life");
+    const r = await life.stamp(insideId, days);
+    setBusy(null);
+    if (!r.ok) return setToast(r.error);
+    setLifeV(r.data.view);
+    setToast(`🎟️ ${r.data.result.text}`);
+    lifePaid(r.data.result);
+  };
+  // Today's pick (owner, Nov 1): once a New York day, after the game settles and only when nothing else is on screen.
+  const [dailyPick, setDailyPick] = useState<TodayPick | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const pickAsked = useRef(false);
+  useEffect(() => {
+    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip) return;
+    const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
+    const key = `cc-daily-pick:${new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date())}`;
+    try { if (!force && localStorage.getItem(key)) return; } catch { /* show it */ }
+    pickAsked.current = true;
+    const t = setTimeout(() => {
+      // The welcome back (owner, Nov 1: "like mobile games have"): shown even before Living places runs (no pick then).
+      const show = (p: TodayPick | null) => {
+        try { localStorage.setItem(key, "1"); } catch { /* fine */ }
+        setDailyPick(p);
+        setWelcomeOpen(true);
+      };
+      if (!life?.today) return show(null);
+      void life.today().then((r) => show(r.ok ? r.data : null)).catch(() => show(null));
+    }, force ? 1500 : 3000);
+    return () => { clearTimeout(t); pickAsked.current = false; };
+  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip]);
+  const goToPick = () => {
+    const p = dailyPick ? placeById(dailyPick.place) : undefined;
+    setWelcomeOpen(false);
+    if (!p) return;
+    if (atPlace === p.id) { setInside(p); setLifeResult(null); setLifeCard({ card: dailyPick!.activity, kind: "activity" }); return; }
+    setTravelPlan({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id });
+  };
+
+  /** Everything known about this moment, for what people say here. */
+  const sceneFor = (p: Place, floor: number): Scene => {
+    const integ = choiceS?.integrity;
+    const tags: string[] = [];
+    if (coupleS?.partner) tags.push("dating"); else tags.push("single");
+    if (campaignRunning) tags.push("campaign");
+    if (clique.length) tags.push("has_crew");
+    if (integ != null && integ >= 70) tags.push("halo");
+    if (integ != null && integ <= 30) tags.push("hustler");
+    const bank = city?.player.bank_cash ?? me.bank_cash;
+    if (bank < 200) tags.push("broke"); else if (bank > 20_000) tags.push("rich");
+    if (biz?.owned?.length) tags.push("business");
+    const nyDow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date(gameNow))) + 1;
+    return {
+      placeId: p.id, tags: p.tags, floor, part: dayPart(cityMinutes(gameNow, GAME_CONFIG.cityClock)), weekday: nyDow,
+      stage: stageOf({ clout: me.clout, daysIn: (Date.now() - Date.parse(me.created_at)) / 86_400_000 }),
+      conditions: conditions.filter((c) => c.now).map((c) => c.kind), player: tags,
+    };
+  };
+  /** A line for someone, from the most relevant tier this device hasn't heard lately; remembered so it won't come right back. */
+  const say = (tiers: Tier[]): string | null => {
+    const pick = pickLine(tiers, recentLines());
+    if (pick) rememberLine(pick.text);
+    return pick?.text ?? null;
+  };
+
   const money: MoneyHandlers = {
     busy,
     onShared: () => track?.("postcard_shared"),
@@ -2070,10 +2175,27 @@ export function GameShell({
       // Moral Choices: regulars can feel your Integrity (never the number).
       const rep = reputationLine(NPC_PROFILES.profiles as NpcProfile[], r.id, choiceS?.integrity != null ? integrityBand(choiceS.integrity) : null, n);
       const live = { [r.id]: [...(known ? [known] : []), ...(rep ? [rep] : []), ...(city?.npcLines?.[r.id] ?? []), ...newsGossip(newsItems, newsToday, 1), ...(huntOn ? huntState!.hunt!.chatter : [])] };
+      // Living places (owner, Nov 1): each tap's line is picked once (the panel asks again on every redraw) from the most
+      // relevant tier not heard lately: the story, what's live (memory, Integrity, news, the hunt), Lola's lines for where
+      // the player is in their story, this place now, then their own voice.
+      const key = `${p.id}:${n}`;
+      const kept = regularSaid.current.get(key);
+      if (kept) return { regular: r, line: kept };
       // Content Engine step 5: every few taps, something they remember about you.
       const mem = rememberedTap(rememberedLines[r.id], n);
-      if (mem) return { regular: r, line: mem };
-      return { regular: r, line: regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: EVERYDAY_LINES }) };
+      const scene = sceneFor(p, inside?.id === p.id ? insideFloor : 1);
+      const placeTiers = matching([...DIALOGUE.places, ...DIALOGUE.city], scene, "place");
+      const line = mem ?? say([
+        { name: "story", lines: story?.[r.role] ?? [] },
+        ...(r.id === "lola" ? matching(DIALOGUE.lola, scene, "lola").slice(0, 1) : []),
+        { name: "live", lines: live[r.id] ?? [] },
+        placeTiers[0],
+        ...(r.id === "lola" ? matching(DIALOGUE.lola, scene, "lola").slice(1) : []),
+        { name: "voice", lines: EVERYDAY_LINES[r.id] ?? [] },
+        placeTiers[1],
+      ]) ?? regularLine(r, n + Math.floor(gameNow / 600_000), { story, live, evergreen: EVERYDAY_LINES });
+      regularSaid.current.set(key, line);
+      return { regular: r, line };
     },
     hunt: hunt && huntOn ? {
       talk: async (placeId) => {
@@ -2631,6 +2753,50 @@ export function GameShell({
   }
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
   const rentAlarm = city ? rentAlert(city) : null;
+  // The welcome back's greeting and "Since you left" (owner, Nov 1).
+  const welcomeHour = Math.floor(cityMinutes(gameNow, GAME_CONFIG.cityClock) / 60);
+  const welcomeHello = welcomeHour >= 5 && welcomeHour < 12 ? "Good morning" : welcomeHour < 17 && welcomeHour >= 12 ? "Good afternoon" : welcomeHour >= 17 && welcomeHour < 22 ? "Good evening" : "Up late";
+  const welcomeChips: WelcomeChip[] = [
+    ...(rentAlarm ? [{ id: "rent", emoji: "", text: rentAlarm.title, onTap: () => { setWelcomeOpen(false); setPanel("bills"); } }] : []),
+    ...(chatUnread > 0 ? [{ id: "chat", emoji: "💬", text: `${chatUnread} new message${chatUnread === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setPhone({ open: true, app: "messages" }); } }] : []),
+    ...(passReady > 0 ? [{ id: "pass", emoji: "🎁", text: `${passReady} Clout Pass reward${passReady === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setTasksTab("pass"); setPanel("tasks"); } }] : []),
+  ];
+  // Today's mix (owner, Nov 1: "a mix of tasks, a goal that is close to completion, skill upgrade, story").
+  const welcomeRows = ((): WelcomeRow[] => {
+    const rows: WelcomeRow[] = [];
+    const go = (fn: () => void) => () => { setWelcomeOpen(false); fn(); };
+    if (city && city.tasks.length) {
+      const done = tasksDone(city);
+      const next = city.tasks.find((t) => !t.done_at);
+      rows.push({ id: "tasks", emoji: "✅", kicker: "Tasks", title: done === city.tasks.length ? "All five done. Look at you." : next ? taskTitle(next) : "Your daily tasks",
+        sub: `${done} of ${city.tasks.length} done`, progress: done / city.tasks.length,
+        onTap: go(() => { setTasksTab("daily"); setPanel("tasks"); }) });
+    }
+    const g = goalsNow?.goal;
+    const gc = g ? GOAL_COPY[g.id] : undefined;
+    if (g && gc) {
+      const pct = goalProgress(g.parts);
+      const left = g.parts.find((x) => x.have < x.need);
+      rows.push({ id: "goal", emoji: gc.emoji, kicker: pct >= 0.6 ? `Almost · ${Math.round(pct * 100)}%` : `Goal · ${Math.round(pct * 100)}%`, title: gc.title,
+        sub: left ? partLine(left) : gc.toward, progress: pct, hot: pct >= 0.6, onTap: go(() => { setTasksTab("goals"); setPanel("tasks"); }) });
+    }
+    const sk = (skills ?? []).filter((x) => levelFor(x.practice) < MAX_LEVEL && x.practice > 0)
+      .map((x) => ({ x, l: levelFor(x.practice), p: levelProgress(x.practice) })).sort((a, b) => b.p - a.p)[0];
+    const def = sk && SKILLS.find((d) => d.id === sk.x.id);
+    if (sk && def) {
+      const more = LEVEL_AT[sk.l + 1] - sk.x.practice;
+      const perk = SKILL_PERKS.find((pk) => pk.skill === sk.x.id && pk.level === sk.l + 1);
+      rows.push({ id: "skill", emoji: def.emoji, kicker: more <= 2 ? "Level up!" : "Skill", title: `${def.name} ${sk.l} → ${sk.l + 1}`,
+        sub: `${more} more to go${perk ? " · new perk" : ""}`, progress: sk.p, hot: more <= 2, onTap: go(() => setPanel("skills")) });
+    }
+    if (storyNow) {
+      const fresh = unseenBeats(feed);
+      rows.push({ id: "story", emoji: storyNow.emoji ?? "🗞️", kicker: fresh ? `${fresh} new` : "Story",
+        title: storyNow.title, sub: `Day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}`, hot: fresh > 0,
+        onTap: go(() => openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null)) });
+    }
+    return rows;
+  })();
   const rentAlarmKey = rentAlarm && city ? `${rentAlarm.level}:${rentAlarm.owed}:${city.today}` : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // Migration 0151: a gift waiting, when no other social card is up.
@@ -2674,6 +2840,7 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           talkNonce={talkNonce}
+          life={lifeV ? <LifeStrip view={lifeV} busy={busy !== null} onOpen={(a) => { setLifeResult(null); setLifeCard({ card: a, kind: "activity" }); }} onStamp={(d) => void claimStampLife(d)} /> : null}
           here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={
             <Room3D
@@ -2700,14 +2867,28 @@ export function GameShell({
                 // hunt clue first, in the panel below the room.
                 if (i === 0 && insideFloor === 1 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
                 const { who: kind, role } = npcRole(inside, insideFloor, i);
-                const who = `${crowdName(inside.id, insideFloor, i)} (${kind.replace(/^(A|An|The|Your) /, "")})`;
-                // v0.10: the regular may tell you a piece of gossip first.
-                const tea = gossipOn && regularAt(inside.id) ? await hearRegular(inside.id) : null;
-                // v0.11: some of the others point the player to a gossip lead; owner, Oct 18: not everyone says the same
-                // thing, so each NPC has their own line (and lead) for the city-minute, and only every other one gossips.
-                const beat = Math.floor(Date.now() / 60_000);
-                const lead = !tea && gossipOn && i % 2 === 1 ? leadFrom(teaState, inside.id, beat + i) : null;
-                setToast(tea ? `${who}: “${tea.text}” ${tea.note}${tea.next ? ` · Next: ${tea.next}` : ""}` : lead ? `${who}: “${leadLine(lead)}”` : `${who}: “${chatterLine(feed, role, GENERIC_CHATTER, beat + i)}”`);
+                const name = crowdName(inside.id, insideFloor, i);
+                const scene = sceneFor(inside, insideFloor);
+                // Living places (owner, Nov 1): the crowd are New Yorkers with their own types and lines (lib/dialogue.ts), the
+                // same person all day; staff keep their role's lines. Only one of them passes on Tea leads, now and then.
+                const type = i > 0 ? crowdTypeFor(DIALOGUE.crowd, scene, inside.id.length * 131 + insideFloor * 17 + i * 7 + Math.floor(Date.now() / 86_400_000)) : null;
+                const who = `${name} (${type ? type.label : kind.replace(/^(A|An|The|Your) /, "")})`;
+                if (type && life) {
+                  const m = await life.moment(type.id).catch(() => null);
+                  if (m?.ok && m.data) { setLifeResult(null); setLifeCard({ card: m.data, kind: "moment", who }); return; }
+                }
+                const lead = gossipOn && i === 1 && Math.random() < 0.3 ? leadFrom(teaState, inside.id, Math.floor(Date.now() / 60_000)) : null;
+                if (lead) return setToast(`${who}: “${leadLine(lead)}” 🍵 A lead for your Tea`);
+                const placeTiers = matching([...DIALOGUE.places, ...DIALOGUE.city], scene, "place");
+                const own = type ? matching(type.lines, scene, "crowd") : [];
+                const line = say([
+                  ...(own[0] ? [own[0]] : []),
+                  placeTiers[0],
+                  ...(own[1] ? [own[1]] : []),
+                  { name: "role", lines: chatterLine(feed, role, GENERIC_CHATTER, Math.floor(Date.now() / 60_000) + i) ? [chatterLine(feed, role, GENERIC_CHATTER, Math.floor(Date.now() / 60_000) + i)] : [] },
+                  placeTiers[1],
+                ]) ?? chatterLine(feed, role, GENERIC_CHATTER, i);
+                setToast(`${who}: “${line}”`);
               })()}
             />
           }
@@ -3535,6 +3716,10 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
+          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={goalsNow ? { current: goalsNow.streak.current, nextDay: goalsNow.streak.next.day, doneToday: goalsNow.streak.today } : null}
+            chips={welcomeChips} rows={welcomeRows} pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setWelcomeOpen(false)} />
+          <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
+            onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
           <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length} until={holdingUntil} busy={choiceBusy}

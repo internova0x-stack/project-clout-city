@@ -21,6 +21,10 @@ import { faceProblems, gateProblems, type CardFace } from "../lib/cardFormat.ts"
 import { validateCalendar } from "../lib/calendar.ts";
 import { PLACES, boroughOf } from "../lib/city.ts";
 import { REGULARS } from "../lib/cast.ts";
+import { validateLife, type LifeContent } from "../lib/placeLife.ts";
+import { PLAYER_TAGS, validateDialogue, type DialogueFile } from "../lib/dialogue.ts";
+import { CONDITION_KINDS } from "../lib/cityConditions.ts";
+import { SKILLS } from "../lib/skills.ts";
 
 const root = new URL("../content/", import.meta.url);
 const list = (dir: string) => readdirSync(new URL(dir, root)).filter((f) => f.endsWith(".json")).sort();
@@ -145,6 +149,19 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
   const problems = validateRemembers(rules);
   if (problems.length) fail("content/characters/remembers.json", problems);
   else console.log(`✓ content/characters/remembers.json (${rules.length} remembered lines, ${new Set(rules.map((r: { who: string }) => r.who)).size} characters)`);
+}
+// Living places (migration 0157): what people say, and the things to do at each place.
+{
+  const dialogue = JSON.parse(readFileSync(new URL("dialogue/dialogue.json", root), "utf8")) as DialogueFile;
+  const life = JSON.parse(readFileSync(new URL("places/life.json", root), "utf8")) as LifeContent;
+  const places = new Set(PLACES.map((p) => p.id));
+  const conds = new Set(Object.keys(CONDITION_KINDS));
+  const d = validateDialogue(dialogue, { tags: new Set(PLACES.flatMap((p) => p.tags)), places, conditions: conds, player: new Set(PLAYER_TAGS) });
+  if (d.length) fail("content/dialogue/dialogue.json", d);
+  else console.log(`✓ content/dialogue/dialogue.json (${dialogue.crowd.length} crowd types, ${dialogue.crowd.reduce((a, c) => a + c.lines.length, 0) + dialogue.places.length + dialogue.city.length + dialogue.lola.length} lines)`);
+  const l = validateLife(life, places, new Set(dialogue.crowd.map((c) => c.id)), conds, new Set(SKILLS.map((s) => s.id)));
+  if (l.length) fail("content/places/life.json", l);
+  else console.log(`✓ content/places/life.json (${life.activities.length} activities, ${life.happenings.length} happenings, ${life.moments.length} moments, ${Object.keys(life.stamps).length} regular cards)`);
 }
 // Content Engine step 7: one card format. Career tasks and campaign situations share the Moral Choices face, and their
 // memory gates follow the storylet rules.

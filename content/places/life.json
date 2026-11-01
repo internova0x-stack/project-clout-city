@@ -1,0 +1,3600 @@
+{
+  "activities": [
+    {
+      "id": "feta-opa",
+      "place": "feta-compli",
+      "emoji": "🍽️",
+      "title": "Opa!",
+      "blurb": "Andreas lets one guest a night smash a plate. Tonight he's looking at you. The whole room is looking at you.",
+      "energy": 5,
+      "options": [
+        {
+          "id": "smash",
+          "label": "Smash it with conviction",
+          "get": "Applause and clout",
+          "cost": "5 Energy",
+          "skill": "dance",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Perfect arc, perfect shatter. The table by the window stands up. Andreas wipes a single tear.",
+              "clout": 20,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "It bounces. Twice. Then breaks. The room claps out of pity, which still counts.",
+              "clout": 8,
+              "mood": 2
+            },
+            {
+              "weight": 1,
+              "text": "It shatters into the dessert case. Andreas adds the baklava to your bill. \"Opa,\" he says, quietly.",
+              "cash": -45,
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "pass",
+          "label": "Hand it to the birthday table",
+          "get": "Mood, a free shot of ouzo",
+          "cost": "Not your moment",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The birthday girl smashes it like it owes her money. Her whole table adopts you. Free ouzo.",
+              "mood": 8,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "They don't speak to you, but the ouzo arrives anyway. Andreas winks. You're family now. Minor family.",
+              "mood": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feta-offmenu",
+      "place": "feta-compli",
+      "emoji": "🐙",
+      "title": "Order off the menu",
+      "blurb": "There's a menu, and then there's what Andreas makes for people he respects. You have to ask the right way.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "yiayia",
+          "label": "\"What would your yiayia eat?\"",
+          "get": "His mother's recipe, Mood",
+          "cost": "C$40",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "He disappears for twenty minutes. Comes back with lamb that makes you call your own grandmother.",
+              "cash": -40,
+              "mood": 10,
+              "clout": 6
+            },
+            {
+              "weight": 1,
+              "text": "\"My yiayia ate standing up, in silence.\" He brings you bread. It's excellent bread.",
+              "cash": -10,
+              "mood": 3
+            }
+          ]
+        },
+        {
+          "id": "challenge",
+          "label": "\"Make it spicy. Really spicy.\"",
+          "get": "Clout if you survive",
+          "cost": "C$35, possibly your dignity",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Your eyes water. You don't flinch. A busboy films it. The clip does numbers in Astoria.",
+              "cash": -35,
+              "clout": 25
+            },
+            {
+              "weight": 2,
+              "text": "You make it two bites. Andreas pats your shoulder and brings yogurt like a paramedic.",
+              "cash": -35,
+              "mood": -4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feta-lunch-rush",
+      "place": "feta-compli",
+      "emoji": "🥙",
+      "title": "Help with the lunch rush",
+      "happening": "feta-lunch",
+      "blurb": "The line is out the door and the new waiter just quit to \"focus on his podcast.\" Andreas looks at you.",
+      "energy": 15,
+      "options": [
+        {
+          "id": "tables",
+          "label": "Run plates for an hour",
+          "get": "Cash and Andreas's respect",
+          "cost": "15 Energy",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Twenty-two plates, zero drops. Andreas pays you in cash and calls you \"the good one.\"",
+              "cash": 140,
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "You drop one moussaka. Just the one. It still counts against your pay.",
+              "cash": 80
+            }
+          ]
+        },
+        {
+          "id": "door",
+          "label": "Work the line outside",
+          "get": "Cash, a little clout",
+          "cost": "15 Energy, your charm",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You keep forty hungry New Yorkers calm with jokes and free pita. Somebody asks for your card.",
+              "cash": 110,
+              "clout": 12
+            },
+            {
+              "weight": 1,
+              "text": "A man in a fleece vest asks to speak to the manager. You are not the manager. It's a long hour.",
+              "cash": 90,
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feta-circle-dance",
+      "place": "feta-compli",
+      "emoji": "💃",
+      "title": "Join the circle dance",
+      "happening": "feta-greek-night",
+      "blurb": "The bouzouki speeds up, someone's uncle grabs your hand, and suddenly you're in a circle of forty people who all know the steps.",
+      "energy": 8,
+      "options": [
+        {
+          "id": "go",
+          "label": "Throw yourself in",
+          "get": "Clout, a new uncle",
+          "cost": "8 Energy",
+          "skill": "dance",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You catch the steps by the second lap. By the fifth, you're leading. An uncle you've never met calls you his favorite.",
+              "clout": 22,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You go left when everyone goes right. Twice. They keep you in anyway. That's Greek night.",
+              "clout": 6,
+              "mood": 5
+            }
+          ]
+        },
+        {
+          "id": "film",
+          "label": "Film it from your table",
+          "get": "A clip that might travel",
+          "cost": "Being the person filming",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Your clip catches the exact moment Andreas does the lift. It's on three Astoria pages by midnight.",
+              "clout": 16
+            },
+            {
+              "weight": 2,
+              "text": "Forty seconds of the back of someone's head. Beautiful head, though.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hub-arcade",
+      "place": "neon-spoon",
+      "emoji": "🕹️",
+      "title": "Beat the arcade high score",
+      "blurb": "The Galaxy Gobbler cabinet upstairs has had the same initials at the top since 2019: DAD. Nobody knows whose dad.",
+      "energy": 5,
+      "options": [
+        {
+          "id": "go",
+          "label": "Go for the top spot",
+          "get": "Clout if you beat DAD",
+          "cost": "5 Energy, C$5 in quarters",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "New high score. You type your initials. A small crowd forms. Somewhere, a dad feels it.",
+              "cash": -5,
+              "clout": 25,
+              "mood": 5
+            },
+            {
+              "weight": 3,
+              "text": "Second place. DAD remains. The machine plays a sad little song just for you.",
+              "cash": -5,
+              "clout": 4
+            }
+          ]
+        },
+        {
+          "id": "coach",
+          "label": "Coach the kid who's losing",
+          "get": "Mood, a small fan",
+          "cost": "Your own high score dreams",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The kid beats level six. He tells everyone you're his \"manager.\" You accept the role.",
+              "mood": 7,
+              "clout": 6
+            },
+            {
+              "weight": 1,
+              "text": "The kid loses anyway and blames you, loudly, to his mom. Character building.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hub-hotseat",
+      "place": "neon-spoon",
+      "emoji": "🎙️",
+      "title": "Lola's hot seat",
+      "blurb": "Lola pulls up a stool, opens her notes app and says, \"Three questions. Don't be boring.\"",
+      "energy": 0,
+      "options": [
+        {
+          "id": "spill",
+          "label": "Spill something real",
+          "get": "Clout, a mention in her column",
+          "cost": "A little privacy",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Lola gasps, actually gasps. \"Oh, that's going in.\" You're quoted, anonymously, which everyone will decode.",
+              "clout": 30,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "\"That's… a story about your dentist.\" She closes the notes app. Gently.",
+              "clout": 3,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "deflect",
+          "label": "Answer like a publicist",
+          "get": "Nothing to regret",
+          "cost": "Lola's interest",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "\"No comment, but thank you for asking.\" Lola stares. \"You'll go far. Unfortunately.\"",
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "She likes it. \"Mysterious. Keep that up and they'll write about you without me.\"",
+              "clout": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hub-candlelight",
+      "place": "neon-spoon",
+      "emoji": "🕯️",
+      "title": "Candlelight story night",
+      "happening": "hub-brownout",
+      "blurb": "The power's out, so Lola lit every candle in the building and declared it an event. It's honestly nicer.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "tell",
+          "label": "Tell your worst NYC story",
+          "get": "Clout, a room that loves you",
+          "cost": "Reliving it",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "The one about the rat on the G train. The room is screaming. Someone asks if you do weddings.",
+              "clout": 22,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You tell it well but a retired cop tops it immediately. You both get a round of applause.",
+              "clout": 10,
+              "mood": 5
+            }
+          ]
+        },
+        {
+          "id": "listen",
+          "label": "Listen by the candles",
+          "get": "Mood",
+          "cost": "Nothing",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "An old man tells a story about Astoria in 1979 and it's the best thing you've heard all year.",
+              "mood": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sal-order",
+      "place": "ditmars-deli",
+      "emoji": "🥯",
+      "title": "Order like a New Yorker",
+      "blurb": "Sal respects exactly one thing: knowing what you want and saying it fast. The line behind you is already sighing.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "fast",
+          "label": "\"BEC, salt pepper ketchup, roll.\"",
+          "get": "Sal's respect, a fast breakfast",
+          "cost": "C$9",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Sal nods once. That's the highest honor in Astoria. The sandwich is in your hand in forty seconds.",
+              "cash": -9,
+              "mood": 6,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "You say it so fast you order two by mistake. Sal charges you for both and respects you more.",
+              "cash": -18,
+              "mood": 7,
+              "clout": 8
+            }
+          ]
+        },
+        {
+          "id": "browse",
+          "label": "Ask what he recommends",
+          "get": "A surprise",
+          "cost": "C$9, the line's patience",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "\"Recommend? Buddy, it's a deli.\" He makes you his own lunch out of spite. It's the best thing on the street.",
+              "cash": -9,
+              "mood": 8
+            },
+            {
+              "weight": 2,
+              "text": "The guy behind you says \"come ON\" and the whole line agrees. Sal gives you a roll. Just a roll.",
+              "cash": -3,
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sal-cat",
+      "place": "ditmars-deli",
+      "emoji": "🐈",
+      "title": "Win over Meatball",
+      "blurb": "The deli cat, Meatball, sleeps on the bread. She has never once acknowledged a customer. Some say she can't.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "patience",
+          "label": "Sit very still and wait",
+          "get": "Her approval, maybe",
+          "cost": "Time, dignity",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "Eleven minutes. Then she walks over and sits on your foot. Sal drops a tray. \"She never does that.\"",
+              "mood": 10,
+              "clout": 10
+            },
+            {
+              "weight": 3,
+              "text": "Meatball looks at you, yawns, and turns to face the wall. A clear message.",
+              "mood": 1
+            }
+          ]
+        },
+        {
+          "id": "bribe",
+          "label": "Bribe her with turkey",
+          "get": "Probably works",
+          "cost": "C$6 of turkey, your integrity",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "She takes the turkey and lets you touch her head for one second. Transactional. Like New York.",
+              "cash": -6,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "She takes the turkey and leaves. Sal: \"She's smarter than you.\"",
+              "cash": -6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sal-morning-rush",
+      "place": "ditmars-deli",
+      "emoji": "☕",
+      "title": "Get behind the counter",
+      "happening": "sal-rush",
+      "blurb": "It's the morning rush, Sal's nephew is \"stuck on the N,\" and there are thirty construction workers who need coffee now.",
+      "energy": 10,
+      "options": [
+        {
+          "id": "coffee",
+          "label": "Run the coffee station",
+          "get": "Cash, Sal's trust",
+          "cost": "10 Energy",
+          "skill": "cooking",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Light and sweet, black, regular, regular, black. You nail every one. Sal pays you and says \"not bad.\"",
+              "cash": 90,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "You give a guy decaf. He knows. Somehow he knows. Sal docks you a little.",
+              "cash": 55
+            }
+          ]
+        },
+        {
+          "id": "register",
+          "label": "Work the register",
+          "get": "Cash",
+          "cost": "10 Energy, small talk",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Fast hands, correct change, one compliment on your energy. You might be a natural.",
+              "cash": 80
+            },
+            {
+              "weight": 1,
+              "text": "Someone pays in quarters. All quarters. It takes nine minutes. Sal watches the whole thing.",
+              "cash": 60,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gg-cupname",
+      "place": "grind-and-gossip",
+      "emoji": "☕",
+      "title": "Get your name on the cup",
+      "blurb": "Jojo spells every name wrong on purpose. Today she says she's taking requests. She's smiling, which is worrying.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "spell",
+          "label": "Spell it for her, slowly",
+          "get": "Your actual name, maybe",
+          "cost": "C$7 for a latte",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "She writes it perfectly. Then adds \"(allegedly)\" underneath. The whole line reads it out loud.",
+              "cash": -7,
+              "clout": 6,
+              "mood": 4
+            },
+            {
+              "weight": 2,
+              "text": "\"Brinleigh.\" That's not your name. It's nobody's name. You answer to it for the rest of the day.",
+              "cash": -7,
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "alias",
+          "label": "Give her a fake name",
+          "get": "A new identity, a story",
+          "cost": "C$7, your credibility",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You say \"Duchess.\" Jojo calls \"Duchess\" across the café with total commitment. Three people ask who you are.",
+              "cash": -7,
+              "clout": 12,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "You say \"Duchess.\" She writes \"Dutch.\" A man at table four asks you about tulips for ten minutes.",
+              "cash": -7,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gg-eavesdrop",
+      "place": "grind-and-gossip",
+      "emoji": "👂",
+      "title": "Laptop row",
+      "blurb": "Table four has been \"taking a meeting\" since Tuesday. Jojo slides you a refill and nods at it. Your move.",
+      "energy": 3,
+      "options": [
+        {
+          "id": "listen",
+          "label": "Listen in and take notes",
+          "get": "Tea for the Hub",
+          "cost": "3 Energy, your ethics",
+          "skill": "gossip",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "A founder pitches an investor a calendar app for your other calendars. Lola is going to love this.",
+              "clout": 14,
+              "mood": 3
+            },
+            {
+              "weight": 1,
+              "text": "Forty minutes of \"circle back\" and \"synergy.\" You learn nothing. You feel older.",
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "pitch",
+          "label": "Pull up a chair and pitch",
+          "get": "Clout if they bite",
+          "cost": "3 Energy, all your shame",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You pitch \"Jojo's tip jar, but as an app.\" They take your number. Jojo takes ten percent.",
+              "clout": 18,
+              "mood": 4
+            },
+            {
+              "weight": 2,
+              "text": "They think you're the barista. You take their order. Jojo lets you keep the tip.",
+              "cash": 12,
+              "mood": -1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gg-bar-rush",
+      "place": "grind-and-gossip",
+      "emoji": "🥛",
+      "title": "Jump on the bar",
+      "blurb": "Jojo is frothing two pitchers at once and the line has started a group chat about her. She points at the spare apron.",
+      "energy": 12,
+      "happening": "gg-morning",
+      "options": [
+        {
+          "id": "shots",
+          "label": "Pull shots next to Jojo",
+          "get": "Cash, Jojo's respect",
+          "cost": "12 Energy",
+          "skill": "cooking",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Twenty-six drinks, one perfect leaf in the foam. Jojo films it \"for film school\" and pays you out of the tip jar.",
+              "cash": 120,
+              "clout": 6
+            },
+            {
+              "weight": 1,
+              "text": "You steam the oat milk until it screams. So does a customer. Jojo still pays you, with a look.",
+              "cash": 70,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "names",
+          "label": "Call out names (wrong)",
+          "get": "Cash, a running bit",
+          "cost": "12 Energy, your voice",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "\"Large cold brew for… Sir Latte?\" The line cracks up and the tips go up. Jojo calls you \"a natural liar.\"",
+              "cash": 100,
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "You call \"Kevin\" eleven times. There are four Kevins. None of them is the right Kevin.",
+              "cash": 65,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gg-rain-table",
+      "place": "grind-and-gossip",
+      "emoji": "☂️",
+      "title": "Share a table",
+      "blurb": "The only free seat is across from a stranger with a wet umbrella and a very long story. Jojo raises an eyebrow.",
+      "energy": 0,
+      "happening": "gg-rain",
+      "options": [
+        {
+          "id": "chat",
+          "label": "Strike up a conversation",
+          "get": "A new friend, maybe tea",
+          "cost": "Your quiet hour",
+          "skill": "gossip",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Her ex dated a guy who works the door at Velvet Static. You leave with a name, a tip and her number.",
+              "clout": 12,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "It's forty minutes about her umbrella. It's a very good umbrella. She shows you the receipt.",
+              "mood": 1
+            }
+          ]
+        },
+        {
+          "id": "headphones",
+          "label": "Headphones in, no music",
+          "get": "Peace, eavesdropping",
+          "cost": "Looking a little rude",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "The table behind you breaks up and gets back together before the rain stops. You heard every word.",
+              "clout": 4,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "She taps you to ask what you're listening to. Nothing. You're listening to nothing. She knows.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vs-bar",
+      "place": "velvet-static",
+      "emoji": "🍸",
+      "title": "Get Mags's attention",
+      "blurb": "Forty people are waving cards at the bar. Mags has looked at none of them. There's an art to this.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "still",
+          "label": "Stand still and make eye contact",
+          "get": "Fast service, Mags's respect",
+          "cost": "Your patience, C$14",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You don't wave. You don't shout. Mags serves you first and says \"finally, a professional.\"",
+              "cash": -14,
+              "clout": 8,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "Six minutes of eye contact. She serves the guy next to you. He tips her in autographs.",
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "tip",
+          "label": "Wave a big tip",
+          "get": "Speed, in theory",
+          "cost": "C$30 and some dignity",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Mags takes the tip, makes your drink and says \"Rough day? Same.\" Worth every coin.",
+              "cash": -30,
+              "clout": 4,
+              "mood": 7
+            },
+            {
+              "weight": 2,
+              "text": "She takes the tip, nods, and serves you in the exact order she was going to anyway. Fair, honestly.",
+              "cash": -30,
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vs-circle",
+      "place": "velvet-static",
+      "emoji": "🪩",
+      "title": "Step into the circle",
+      "blurb": "The DJ just dropped the song. A circle opens in the middle of the floor and nobody's brave enough to go in.",
+      "energy": 10,
+      "options": [
+        {
+          "id": "center",
+          "label": "Take the center",
+          "get": "Clout, a moment",
+          "cost": "10 Energy, the risk of a circle",
+          "skill": "dance",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You hit every beat. The circle roars. Someone films from the balcony and Mags swings a light your way.",
+              "clout": 24,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You slip on a glow stick, recover into a spin and act like it was choreography. Half the room believes you.",
+              "clout": 12,
+              "mood": 2
+            },
+            {
+              "weight": 1,
+              "text": "You step in. The DJ changes the song mid-move. You commit anyway. The room respects it, sort of.",
+              "clout": 6,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "edge",
+          "label": "Dance at the edge, mysteriously",
+          "get": "Mood, an air of mystery",
+          "cost": "10 Energy",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You dance like nobody's watching. Nobody is. It's the best twenty minutes of your week.",
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "A theater kid joins you and turns it into a duet. You're in their group chat now.",
+              "clout": 8,
+              "mood": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vs-golden-photo",
+      "place": "velvet-static",
+      "emoji": "🌇",
+      "title": "The eleven-minute light",
+      "blurb": "For eleven minutes the sun hits the brick just right. Everyone in the room knows it. There's a line to stand in it.",
+      "energy": 5,
+      "happening": "vs-golden-hour",
+      "options": [
+        {
+          "id": "pose",
+          "label": "Wait in line for the light",
+          "get": "The photo of the year",
+          "cost": "5 Energy, eleven minutes",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Your turn lands at minute ten. Perfect light. The photo does better than your last six posts combined.",
+              "clout": 22
+            },
+            {
+              "weight": 1,
+              "text": "The sun goes behind a cloud the second it's your turn. You get a lovely photo of a cloud.",
+              "clout": 3,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "shoot",
+          "label": "Shoot everyone else's photos",
+          "get": "Clout, favors owed",
+          "cost": "5 Energy, your own shot",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Nine strangers in the good light, nine tags crediting you. Mags asks for one too. That's the real honor.",
+              "clout": 16,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "Eight of the nine ask you to \"try one more from lower.\" You end up lying on the floor of a club.",
+              "clout": 6,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vs-barback",
+      "place": "velvet-static",
+      "emoji": "🧊",
+      "title": "Barback for Mags",
+      "blurb": "Ice, glasses, more ice. Mags hands you an apron and one rule: never, ever touch her bottle opener.",
+      "energy": 15,
+      "happening": "vs-surge",
+      "options": [
+        {
+          "id": "ice",
+          "label": "Run ice and glasses",
+          "get": "Cash, a backstage view",
+          "cost": "15 Energy, your forearms",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Nine buckets of ice up two flights. Mags pays you and pours you something with a tiny umbrella in it.",
+              "cash": 130,
+              "clout": 5
+            },
+            {
+              "weight": 1,
+              "text": "You drop a tray of glasses in the DJ's quiet bit. The whole club cheers. Mags docks you, smiling.",
+              "cash": 70,
+              "clout": 8,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "line",
+          "label": "Help work the line",
+          "get": "Cash, door clout",
+          "cost": "15 Energy, being yelled at",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Two hundred people, one long line, jokes the whole way. A guy offers you a job at his startup. You pass.",
+              "cash": 110,
+              "clout": 12
+            },
+            {
+              "weight": 1,
+              "text": "A man asks \"do you know who I am?\" You don't. Nobody does. It takes an hour to find out.",
+              "cash": 80,
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "park-gus",
+      "place": "hell-gate-park",
+      "emoji": "👴",
+      "title": "Sit with Gus",
+      "blurb": "Gus has had the same bench since 1968. He pats the seat beside him. \"Want to hear about 1987?\"",
+      "energy": 0,
+      "options": [
+        {
+          "id": "listen",
+          "label": "Yes. Tell me about 1987.",
+          "get": "A story, Mood",
+          "cost": "An hour, minimum",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "1987: a blackout, a borrowed accordion and a wedding on this lawn. Best story you've heard all year.",
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "The story about 1987 turns into a story about 1974, then a recipe. You leave with the recipe.",
+              "mood": 6
+            }
+          ]
+        },
+        {
+          "id": "backgammon",
+          "label": "Challenge him to backgammon",
+          "get": "Clout if you win, his respect",
+          "cost": "C$10 on the game",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You win. Gus stares at the board for a full minute, then shakes your hand. \"Rematch. Tomorrow. Same bench.\"",
+              "cash": 10,
+              "clout": 14,
+              "mood": 4
+            },
+            {
+              "weight": 3,
+              "text": "Gus wins in four minutes and rates your form out loud, like a jogger's. \"Good effort. Terrible strategy.\"",
+              "cash": -10,
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "park-barksley",
+      "place": "hell-gate-park",
+      "emoji": "🐕",
+      "title": "Walk Sir Barksley",
+      "blurb": "Dmitri needs a coffee. Sir Barksley, the billionaire's depressed Pomeranian, needs someone who won't mention Miami.",
+      "energy": 6,
+      "options": [
+        {
+          "id": "walk",
+          "label": "Take him along the river",
+          "get": "Mood, a tip from his allowance",
+          "cost": "6 Energy, going at his pace",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "He trots. Actually trots. Dmitri nearly drops his coffee: \"He hasn't trotted since the divorce.\" Big tip.",
+              "cash": 60,
+              "clout": 6,
+              "mood": 8
+            },
+            {
+              "weight": 2,
+              "text": "He sits at the first tree and won't move. You stand there together for twenty minutes. It's kind of nice.",
+              "cash": 20,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "A pigeon looks at him. He looks at you. You carry him back. Dmitri says that counts.",
+              "cash": 30,
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "talk",
+          "label": "Talk him through it",
+          "get": "His trust, maybe clout",
+          "cost": "6 Energy, emotional labor",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You tell him moving on is a process. He licks your hand. Dmitri reports it to the owner, who follows you.",
+              "clout": 18,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "You mention boats. He hears \"yacht.\" He lies down facing the river. Dmitri sighs: \"We don't say that word.\"",
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "park-pool-swim",
+      "place": "hell-gate-park",
+      "emoji": "🏊",
+      "title": "Get past the swim-cap lady",
+      "blurb": "Cap, lock, no cutoffs. She once turned away a city councilman. Right now she's looking directly at your head.",
+      "energy": 10,
+      "happening": "park-pool",
+      "options": [
+        {
+          "id": "cap",
+          "label": "Buy a cap from the machine",
+          "get": "Entry, laps, Mood",
+          "cost": "C$8, a neon-yellow cap",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Twelve laps in a neon cap. A 70-year-old laps you twice and gives you a thumbs-up. You'll take it.",
+              "cash": -8,
+              "clout": 4,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "The cap is a child's size. You swim anyway, looking like a highlighter. Nobody will ever forget you.",
+              "cash": -8,
+              "clout": 8,
+              "mood": 4
+            }
+          ]
+        },
+        {
+          "id": "bluff",
+          "label": "Say your cap is \"invisible\"",
+          "get": "Entry, if she's in a mood",
+          "cost": "Your dignity, in public",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 1,
+              "good": true,
+              "text": "She laughs. Actually laughs. \"Okay, comedian. Today only.\" The lifeguards are stunned.",
+              "clout": 14,
+              "mood": 6
+            },
+            {
+              "weight": 3,
+              "text": "\"Invisible cap, invisible swim.\" She points at the gate. A kid behind you says \"oof.\"",
+              "mood": -4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "park-sprinkler",
+      "place": "hell-gate-park",
+      "emoji": "💦",
+      "title": "Run through the sprinklers",
+      "blurb": "Kids, dogs and a man in a full suit on his lunch break. Gus watches from the bench, scoring everyone's form.",
+      "energy": 4,
+      "happening": "park-heat",
+      "options": [
+        {
+          "id": "run",
+          "label": "Sprint through, arms out",
+          "get": "Mood, Gus's score",
+          "cost": "4 Energy, wet socks",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Gus holds up a napkin with a 9 on it. The man in the suit gives you a 7. You'll frame both.",
+              "clout": 6,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "You slip, slide four feet and stand up like you meant it. The kids give it a 10. Gus gives it a 4.",
+              "clout": 10,
+              "mood": 6
+            }
+          ]
+        },
+        {
+          "id": "dogs",
+          "label": "Sit at the edge with the dogs",
+          "get": "Mood, cool paws",
+          "cost": "4 Energy, smelling like wet dog",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Six wet dogs decide you're their dock. Sir Barksley watches from the shade. He almost looks interested.",
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "A doodle shakes itself dry directly onto you. Your phone is fine. Your outfit has notes.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slice-fold",
+      "place": "still-a-dollar-slice",
+      "emoji": "🍕",
+      "title": "Fold it like a local",
+      "blurb": "Arben watches every new customer's first bite. A fork and he's sad all afternoon. A fold and you're family.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "fold",
+          "label": "Fold it down the middle",
+          "get": "Arben's respect",
+          "cost": "C$6, the roof of your mouth",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Clean fold, no drip, a bite like you've done it ten thousand times. Arben nods once. \"Say less.\"",
+              "cash": -6,
+              "clout": 6,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "The fold holds. The grease doesn't. Your shirt now has a map of Queens on it.",
+              "cash": -6,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "fork",
+          "label": "Ask for a fork, for science",
+          "get": "A reaction",
+          "cost": "C$6, Arben's whole afternoon",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Arben hands you a napkin and says \"that's the fork.\" The line applauds him. Somebody posts it.",
+              "cash": -6,
+              "clout": 10,
+              "mood": 2
+            },
+            {
+              "weight": 1,
+              "text": "He gives you a fork. Silently. He doesn't speak again until closing. You feel it in your soul.",
+              "cash": -6,
+              "mood": -4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slice-sign",
+      "place": "still-a-dollar-slice",
+      "emoji": "💲",
+      "title": "Argue about the sign",
+      "blurb": "The sign says a dollar. A slice is three. Arben says it's a dollar \"spiritually.\" Want to take this up with him?",
+      "energy": 0,
+      "options": [
+        {
+          "id": "argue",
+          "label": "Call it false advertising",
+          "get": "A discount, maybe",
+          "cost": "Arben's patience",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You argue so well he charges you one dollar, \"for the effort.\" Never again, he says, smiling.",
+              "cash": -1,
+              "clout": 10,
+              "mood": 5
+            },
+            {
+              "weight": 2,
+              "text": "Arben argues back for twenty minutes, mostly about 2009. You pay full price and learn a lot about 2009.",
+              "cash": -6,
+              "mood": 3
+            }
+          ]
+        },
+        {
+          "id": "agree",
+          "label": "Agree: a dollar, spiritually",
+          "get": "A friend for life",
+          "cost": "C$6, the truth",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "\"Finally, somebody who gets it.\" He gives you the corner slice. The corner slice is a privilege.",
+              "cash": -6,
+              "clout": 4,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "He narrows his eyes. \"You're being sarcastic.\" You were. He charges you for the soda too.",
+              "cash": -9,
+              "mood": -1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slice-counter",
+      "place": "still-a-dollar-slice",
+      "emoji": "🧑‍🍳",
+      "title": "Work the counter",
+      "blurb": "Arben's daughter has a soccer game and his cousin has been \"running late\" since 2019. He tosses you an apron. \"Fast hands.\"",
+      "energy": 12,
+      "happening": "slice-lunch",
+      "options": [
+        {
+          "id": "oven",
+          "label": "Work the oven",
+          "get": "Cash, Arben's trust",
+          "cost": "12 Energy, oven arms",
+          "skill": "cooking",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Crispy bottoms, every one. Arben checks a slice, says nothing, and pays you extra. That's a speech, for him.",
+              "cash": 110,
+              "clout": 6
+            },
+            {
+              "weight": 1,
+              "text": "One pie slides off the peel and lands cheese-down. Arben mourns it briefly and pays you anyway.",
+              "cash": 70,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "register",
+          "label": "Run the register",
+          "get": "Cash",
+          "cost": "12 Energy",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Two slices and a soda, two slices and a soda. You find a rhythm like a drummer. Cash and a slice.",
+              "cash": 95,
+              "mood": 3
+            },
+            {
+              "weight": 1,
+              "text": "A man pays with a coupon from 2009. It's real. Arben honors it. You lose six minutes and some faith.",
+              "cash": 70,
+              "mood": -1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slice-stranded",
+      "place": "still-a-dollar-slice",
+      "emoji": "🚇",
+      "title": "Feed the stranded",
+      "blurb": "A whole train's worth of people are in here, hungry and furious at the Metro Rail Authority. Arben looks at you.",
+      "energy": 6,
+      "happening": "slice-meltdown",
+      "options": [
+        {
+          "id": "deliver",
+          "label": "Carry pies up to the platform",
+          "get": "Clout, a hero moment",
+          "cost": "6 Energy, two flights of stairs",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Six pies up to the stuck platform. A whole train car applauds. A nurse calls you \"a public service.\"",
+              "clout": 20,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "The trains start moving the second you get up there. You eat a whole pie alone on the platform. Not bad.",
+              "clout": 4,
+              "mood": 4
+            }
+          ]
+        },
+        {
+          "id": "circle",
+          "label": "Start a commuter support group",
+          "get": "Clout, new friends",
+          "cost": "6 Energy, hearing everyone's commute",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Twelve strangers share their worst commutes. One man has been on the N since Tuesday. You swap numbers.",
+              "clout": 14,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "Everyone talks over each other about a train none of them even takes. Arben hands out napkins.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arena-cabinet",
+      "place": "respawn-arena",
+      "emoji": "🕹️",
+      "title": "Take on cabinet three",
+      "blurb": "A twelve-year-old has held the top score on cabinet three for a month. He's here. He's watching you put in a token.",
+      "energy": 6,
+      "options": [
+        {
+          "id": "go",
+          "label": "Go for the record",
+          "get": "Clout if you beat the kid",
+          "cost": "6 Energy, C$5 in tokens",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "New record. The kid nods once and leaves to practice. Pixel announces it over the speakers, twice.",
+              "cash": -5,
+              "clout": 22,
+              "mood": 5
+            },
+            {
+              "weight": 3,
+              "text": "You reach level nine. The kid's record is level forty. He pats your shoulder on his way out.",
+              "cash": -5,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "lessons",
+          "label": "Ask the kid for lessons",
+          "get": "Mood, a mentor half your age",
+          "cost": "Your pride, one soda",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "He teaches you a combo and charges one soda. Pixel says you're \"the first student who ever listened.\"",
+              "cash": -3,
+              "clout": 6,
+              "mood": 7
+            },
+            {
+              "weight": 1,
+              "text": "He explains for twenty minutes in words you don't know. You nod at every one of them.",
+              "cash": -3,
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arena-fridge",
+      "place": "respawn-arena",
+      "emoji": "🥤",
+      "title": "Save the honor system",
+      "blurb": "The energy-drink fridge runs on the honor system. The honor system is failing. Pixel needs someone who looks honest.",
+      "energy": 4,
+      "options": [
+        {
+          "id": "guard",
+          "label": "Guard the fridge, sternly",
+          "get": "Cash, Pixel's thanks",
+          "cost": "4 Energy, being the bad guy",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You collect every dollar owed, plus a handwritten apology. Pixel pays you and laminates the apology.",
+              "cash": 60,
+              "clout": 4
+            },
+            {
+              "weight": 1,
+              "text": "A streamer argues with you live for nine minutes. You lose the argument. You win the chat.",
+              "cash": 30,
+              "clout": 10,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "sign",
+          "label": "Write a guilt-trip sign",
+          "get": "Clout if it catches on",
+          "cost": "4 Energy, one marker",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "\"The fridge sees you, Tyler.\" There are four Tylers. All four pay. One cries a little.",
+              "clout": 14,
+              "mood": 5
+            },
+            {
+              "weight": 2,
+              "text": "Someone writes \"no\" under your sign. Then \"ok fine\" under that. Then pays in nickels.",
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arena-bracket",
+      "place": "respawn-arena",
+      "emoji": "🏆",
+      "title": "Enter the bracket",
+      "blurb": "Sixteen players, one stage, a crowd that boos for fun and a trophy shaped like a controller. Pixel's on the mic.",
+      "energy": 15,
+      "happening": "arena-tourney",
+      "options": [
+        {
+          "id": "play",
+          "label": "Play your heart out",
+          "get": "Clout, maybe the trophy",
+          "cost": "C$20 entry, 15 Energy",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 1,
+              "good": true,
+              "text": "You win. The whole thing. The controller trophy is heavier than it looks. Pixel gets emotional on the mic.",
+              "cash": 80,
+              "clout": 40,
+              "mood": 10
+            },
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You make the final and lose to a guy in a cape. Still: a bracket screenshot and a lot of new followers.",
+              "cash": -20,
+              "clout": 25,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "Out in round one to a twelve-year-old. The crowd boos. Not you. The kid. Strange crowd.",
+              "cash": -20,
+              "clout": 5,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "cast",
+          "label": "Commentate instead",
+          "get": "Clout, a whole new career",
+          "cost": "15 Energy, your voice",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "\"HE'S IN THE CORNER. HE'S STILL IN THE CORNER.\" You're a natural. Pixel offers you the mic every Friday.",
+              "clout": 20,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "You call the wrong player's name for an entire match. Both players' moms complain.",
+              "clout": 4,
+              "mood": -3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arena-oldschool",
+      "place": "respawn-arena",
+      "emoji": "📺",
+      "title": "Winner stays on",
+      "blurb": "Pixel dug out a console from 2004 and hooked it to the generator. One controller, forty gamers, winner stays on.",
+      "energy": 5,
+      "happening": "arena-brownout",
+      "options": [
+        {
+          "id": "stay",
+          "label": "Win and stay on",
+          "get": "Clout, the room's love",
+          "cost": "5 Energy, every eye on you",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Eleven straight wins. The room chants your name. The generator nearly gives out from the noise.",
+              "clout": 24,
+              "mood": 8
+            },
+            {
+              "weight": 2,
+              "text": "You lose your first game to a guy who's never played. Beginner's luck is real and it hates you.",
+              "clout": 3,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "hype",
+          "label": "Run the hype from the couch",
+          "get": "Mood, a room that loves you",
+          "cost": "5 Energy, your voice",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You narrate every game like a nature documentary. By midnight people are requesting you by name.",
+              "clout": 12,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You hype so hard you knock over the only lamp. Darkness. Cheering. Pixel finds a flashlight.",
+              "clout": 6,
+              "mood": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iron-spot",
+      "place": "pressed-iron-gym",
+      "emoji": "🏋️",
+      "title": "Spot the narrator",
+      "blurb": "A man is benching a lot of weight and narrating it in full sentences. He catches your eye. \"Spot me, chief?\"",
+      "energy": 8,
+      "options": [
+        {
+          "id": "spot",
+          "label": "Spot him, seriously",
+          "get": "His gratitude, clout",
+          "cost": "8 Energy, your lower back",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Textbook spot. He hugs you, sweatily, and tells the whole gym you're \"a real one.\" Coach Bogdana nods.",
+              "clout": 14,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "Rep two gets stuck. You lift it together, both shaking. It's the closest you've felt to anyone all week.",
+              "clout": 8,
+              "mood": 6
+            }
+          ]
+        },
+        {
+          "id": "narrate",
+          "label": "Narrate his set back to him",
+          "get": "Laughs, maybe a friend",
+          "cost": "8 Energy, the risk he hears",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "\"He's reaching deep. He's thinking about his father.\" The whole row laughs. He laughs hardest. New gym friend.",
+              "clout": 12,
+              "mood": 7
+            },
+            {
+              "weight": 2,
+              "text": "He doesn't laugh. He finishes the set and asks for your form notes. You do not have form notes.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iron-mirror",
+      "place": "pressed-iron-gym",
+      "emoji": "🪞",
+      "title": "The forbidden mirror selfie",
+      "blurb": "Pressed Iron has the best mirror in Brooklyn and a sign: NO MIRROR SELFIES. Coach Bogdana enforces it personally.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "sneak",
+          "label": "Sneak one mid-set",
+          "get": "The photo, clout",
+          "cost": "Coach Bogdana, possibly",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Perfect angle, perfect pump, zero witnesses. You post it as \"just a normal Tuesday.\" It does numbers.",
+              "clout": 18
+            },
+            {
+              "weight": 2,
+              "text": "Coach Bogdana appears behind you in the mirror like a horror movie. Twenty burpees. Someone films them.",
+              "clout": 3,
+              "mood": -4
+            }
+          ]
+        },
+        {
+          "id": "ask",
+          "label": "Ask Coach Bogdana to take it",
+          "get": "Her respect, or else",
+          "cost": "All your nerve",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "She stares. Then takes it. Then retakes it lower. \"Shoulders back. Again.\" Best photo of you ever taken.",
+              "clout": 22,
+              "mood": 6
+            },
+            {
+              "weight": 3,
+              "text": "\"Absolutely not.\" But she fixes your squat stance on the way past. You'll take it.",
+              "clout": 2,
+              "mood": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iron-class",
+      "place": "pressed-iron-gym",
+      "emoji": "📣",
+      "title": "Survive the 6 AM class",
+      "blurb": "Forty-five minutes, no breaks, one bucket by the door \"just in case.\" Coach Bogdana looks at you: \"New? Front row.\"",
+      "energy": 18,
+      "happening": "iron-6am",
+      "options": [
+        {
+          "id": "front",
+          "label": "Take the front row",
+          "get": "Clout, her nod",
+          "cost": "18 Energy, your legs for two days",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You finish. Front row. She says \"not bad,\" which regulars swear she's said four times in ten years.",
+              "clout": 25,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You make it to minute thirty and lie down. She lets you. \"Rest is a choice. A wrong one.\"",
+              "clout": 5,
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "back",
+          "label": "Hide in the back row",
+          "get": "Mood, survival",
+          "cost": "18 Energy, her eyes find you anyway",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "You hide behind a finance guy in a vest for forty minutes. It works. You leave feeling great, secretly.",
+              "clout": 4,
+              "mood": 8
+            },
+            {
+              "weight": 2,
+              "text": "\"Back row. I see you.\" She moves you to the front, alone, facing the class. Everyone learns your name.",
+              "clout": 12,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alt-table",
+      "place": "altitude-718",
+      "emoji": "🍾",
+      "title": "Get the edge table",
+      "blurb": "The edge table has the whole skyline behind it. Thaddeus, the host, has a clipboard and a waitlist \"into next spring.\"",
+      "energy": 0,
+      "options": [
+        {
+          "id": "charm",
+          "label": "Charm Thaddeus",
+          "get": "The edge table",
+          "cost": "Your pride",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You compliment the clipboard. Specifically. He softens. The edge table is suddenly free. \"A cancellation,\" he lies.",
+              "clout": 20,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "He smiles, writes your name down and seats you by the kitchen door. With a view. Of the kitchen.",
+              "clout": 2,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "pay",
+          "label": "Pay the C$45 \"view supplement\"",
+          "get": "The edge table, guaranteed",
+          "cost": "C$45 for air",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "It's literally air. But it's air with a skyline in it, and your photo looks like a magazine cover.",
+              "cash": -45,
+              "clout": 16,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "You get the edge table. A cloud parks on the skyline for your entire meal. Thaddeus shrugs. \"Weather.\"",
+              "cash": -45,
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alt-plate",
+      "place": "altitude-718",
+      "emoji": "🥢",
+      "title": "The tiny plate",
+      "blurb": "The chef's signature: one perfect bite on a plate the size of a car tire. C$38. It's suspicious how good it is.",
+      "energy": 0,
+      "options": [
+        {
+          "id": "photo",
+          "label": "Shoot it from twelve angles",
+          "get": "Clout, a cold bite",
+          "cost": "C$38, the bite's temperature",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Angle eleven is the one. Your post beats the restaurant's own. Thaddeus asks if they can repost it.",
+              "cash": -38,
+              "clout": 18
+            },
+            {
+              "weight": 1,
+              "text": "By angle twelve a waiter clears it. \"You were finished, yes?\" You were not finished.",
+              "cash": -38,
+              "mood": -4
+            }
+          ]
+        },
+        {
+          "id": "eat",
+          "label": "Just eat it, like a person",
+          "get": "Mood, a mystery solved",
+          "cost": "C$38 for one bite",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You eat it. You understand everything. You understand nothing. You think about it the whole ride home.",
+              "cash": -38,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "Gone in one bite. You ask what it was. The waiter says \"an idea.\"",
+              "cash": -38,
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alt-sunset-shot",
+      "place": "altitude-718",
+      "emoji": "🌆",
+      "title": "The corner at sunset",
+      "blurb": "There's one corner where the sun drops right between two towers. Six people want it. There's room for one.",
+      "energy": 4,
+      "happening": "alt-sunset",
+      "options": [
+        {
+          "id": "corner",
+          "label": "Claim the corner",
+          "get": "The shot, clout",
+          "cost": "4 Energy, a polite elbow war",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "The sun drops right between the towers. Your photo looks fake. People ask if it's fake. It's not.",
+              "clout": 22,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "A finance guy's vest gets into every single frame. It's the vest's sunset now.",
+              "clout": 4,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "give",
+          "label": "Let a nervous couple have it",
+          "get": "Mood, good karma",
+          "cost": "The shot of the year",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The nervous guy proposes in your corner. She says yes. They want you in the wedding photos.",
+              "clout": 12,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "They take one photo and leave. The sun's gone. You photograph the dark. It's moody. It works.",
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alt-fireworks",
+      "place": "altitude-718",
+      "emoji": "🎆",
+      "title": "Watch the fireworks",
+      "blurb": "Thaddeus is renting railing space at C$30 a foot. The show starts in ten minutes and the roof is filling fast.",
+      "energy": 0,
+      "happening": "alt-festival",
+      "options": [
+        {
+          "id": "rail",
+          "label": "Rent a foot of railing",
+          "get": "The best view in Brooklyn",
+          "cost": "C$30 for one foot of railing",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Your foot of railing is perfect. The first burst goes off right in front of you and the whole roof gasps.",
+              "cash": -30,
+              "clout": 8,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "You're behind a man holding his phone up the entire time. You watch the fireworks on his phone.",
+              "cash": -30,
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "staff",
+          "label": "Watch from the back with the staff",
+          "get": "Mood, new friends",
+          "cost": "The view, mostly",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The busboys have a crate and a secret angle that beats the railing. They let you stay. They share fries.",
+              "clout": 4,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "Mostly smoke and the backs of heads. But the staff share their fries, and it's a good night.",
+              "mood": 6
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "happenings": [
+    {
+      "id": "feta-lunch",
+      "place": "feta-compli",
+      "emoji": "🥙",
+      "title": "Lunch rush",
+      "blurb": "The line's out the door. Andreas could use a hand.",
+      "hours": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "feta-greek-night",
+      "place": "feta-compli",
+      "emoji": "💃",
+      "title": "Greek night",
+      "blurb": "Live bouzouki and a lot of plates. Fridays and Saturdays.",
+      "hours": [
+        19,
+        24
+      ],
+      "days": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "hub-brownout",
+      "place": "neon-spoon",
+      "emoji": "🕯️",
+      "title": "Candlelight story night",
+      "blurb": "The power's out. Lola made it an event.",
+      "condition": "brownout"
+    },
+    {
+      "id": "sal-rush",
+      "place": "ditmars-deli",
+      "emoji": "☕",
+      "title": "Morning rush",
+      "blurb": "Thirty coffees, one Sal. He needs help.",
+      "hours": [
+        6,
+        10
+      ],
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "gg-morning",
+      "place": "grind-and-gossip",
+      "emoji": "🌅",
+      "title": "Pre-work stampede",
+      "blurb": "Every commuter in Astoria needs oat milk in ninety seconds. Jojo's on alone. Weekdays.",
+      "hours": [
+        6,
+        10
+      ],
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "gg-rain",
+      "place": "grind-and-gossip",
+      "emoji": "🌧️",
+      "title": "Rain refuge",
+      "blurb": "Half of Astoria is waiting out the storm in here. Every seat's taken. Every rumor's out.",
+      "condition": "rainstorm"
+    },
+    {
+      "id": "vs-golden-hour",
+      "place": "velvet-static",
+      "emoji": "🌇",
+      "title": "Golden Hour day party",
+      "blurb": "Sunlight through warehouse windows, sunglasses indoors, a DJ who calls it \"afternoon energy.\" Weekends.",
+      "hours": [
+        15,
+        19
+      ],
+      "days": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "vs-surge",
+      "place": "velvet-static",
+      "emoji": "🔥",
+      "title": "Line around the block",
+      "blurb": "The whole city wants out tonight. The line runs past the bodega and Mags needs hands behind the bar.",
+      "condition": "party_surge"
+    },
+    {
+      "id": "park-pool",
+      "place": "hell-gate-park",
+      "emoji": "🏊",
+      "title": "Pool hours",
+      "blurb": "The public pool is open. The swim-cap lady is on duty. She will check.",
+      "hours": [
+        11,
+        18
+      ]
+    },
+    {
+      "id": "park-heat",
+      "place": "hell-gate-park",
+      "emoji": "🥵",
+      "title": "Sprinkler day",
+      "blurb": "Too hot to think, so the Parks guy opened the sprinklers and half of Astoria is standing in them.",
+      "condition": "heatwave"
+    },
+    {
+      "id": "slice-lunch",
+      "place": "still-a-dollar-slice",
+      "emoji": "🧱",
+      "title": "Hard-hat lunch",
+      "blurb": "Every construction worker on 31st Street wants two slices and a soda in the next eight minutes. Weekdays.",
+      "hours": [
+        12,
+        14
+      ],
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "slice-meltdown",
+      "place": "still-a-dollar-slice",
+      "emoji": "🚇",
+      "title": "Stranded commuters",
+      "blurb": "The trains stopped. Half of 31st Street is stuck under the el with nowhere to go but Arben's.",
+      "condition": "transit_meltdown"
+    },
+    {
+      "id": "arena-tourney",
+      "place": "respawn-arena",
+      "emoji": "🏆",
+      "title": "Friday tournament",
+      "blurb": "Brackets on the big screen, a stage, a crowd and a trophy shaped like a controller. Pixel hosts.",
+      "hours": [
+        19,
+        24
+      ],
+      "days": [
+        5
+      ]
+    },
+    {
+      "id": "arena-brownout",
+      "place": "respawn-arena",
+      "emoji": "🔌",
+      "title": "Generator night",
+      "blurb": "The power's out and the rigs are dark. Pixel's running one old TV off the backup generator.",
+      "condition": "brownout"
+    },
+    {
+      "id": "iron-6am",
+      "place": "pressed-iron-gym",
+      "emoji": "📣",
+      "title": "Coach Bogdana's 6 AM",
+      "blurb": "No music. Just her voice and the sound of people regretting it. Monday, Wednesday, Friday.",
+      "hours": [
+        5,
+        8
+      ],
+      "days": [
+        1,
+        3,
+        5
+      ]
+    },
+    {
+      "id": "alt-sunset",
+      "place": "altitude-718",
+      "emoji": "🌆",
+      "title": "Sunset hour",
+      "blurb": "The skyline turns gold and every phone on the roof goes up at once. Thaddeus dims the music out of respect.",
+      "hours": [
+        17,
+        20
+      ]
+    },
+    {
+      "id": "alt-festival",
+      "place": "altitude-718",
+      "emoji": "🎆",
+      "title": "Fireworks night",
+      "blurb": "There's a festival on the waterfront and the roof has the best seat in Brooklyn. Thaddeus is charging for the railing.",
+      "condition": "festival"
+    }
+  ],
+  "moments": [
+    {
+      "id": "tourist-directions",
+      "crowd": [
+        "tourist"
+      ],
+      "emoji": "🗺️",
+      "title": "A tourist needs directions",
+      "blurb": "\"Excuse me, which way to Times Square?\" They're holding a paper map upside down and wearing a foam Statue of Liberty crown.",
+      "options": [
+        {
+          "id": "help",
+          "label": "Walk them to the right train",
+          "get": "Mood, a grateful stranger",
+          "cost": "Ten minutes",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You get them on the right N train. They take a selfie with you. You're in a family album in Ohio now.",
+              "mood": 6,
+              "clout": 4
+            },
+            {
+              "weight": 1,
+              "text": "You get them on the right train going the wrong way. You find out an hour later. You tell no one.",
+              "mood": 1
+            }
+          ]
+        },
+        {
+          "id": "scenic",
+          "label": "Send them \"the scenic way\"",
+          "get": "A story",
+          "cost": "A tiny bit of your soul",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "You send them to a great slice place in Astoria instead. They post a review thanking \"a local legend.\"",
+              "clout": 8
+            },
+            {
+              "weight": 1,
+              "text": "You send them to Staten Island. You feel bad for nine seconds.",
+              "mood": -2,
+              "clout": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "influencer-ringlight",
+      "crowd": [
+        "influencer"
+      ],
+      "emoji": "💡",
+      "title": "Hold my ring light?",
+      "blurb": "An influencer needs someone to hold their ring light \"for literally one take.\" You can see forty takes in their eyes.",
+      "options": [
+        {
+          "id": "hold",
+          "label": "Hold the light",
+          "get": "A tag, maybe clout",
+          "cost": "Twenty minutes, your arms",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Take 31 is the one. They tag you. Their 80,000 followers ask who the hot assistant is.",
+              "clout": 18
+            },
+            {
+              "weight": 2,
+              "text": "Take 46. They thank you and forget to tag you. Your arms will remember this.",
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "pitch",
+          "label": "Pitch a collab instead",
+          "get": "Clout if they bite",
+          "cost": "Your pride if they don't",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "\"Wait, that's actually a good idea.\" You film it together. It does better than their solo stuff. Awkward.",
+              "clout": 22
+            },
+            {
+              "weight": 2,
+              "text": "\"I'll have my team reach out.\" They do not have a team. Nobody will reach out.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finance-bro-tip",
+      "crowd": [
+        "finance_bro"
+      ],
+      "emoji": "📈",
+      "title": "A hot tip",
+      "blurb": "A guy in a fleece vest leans over: \"Not financial advice, but… are you in on Bodega Coin?\"",
+      "options": [
+        {
+          "id": "listen",
+          "label": "Hear him out",
+          "get": "Maybe something",
+          "cost": "Fifteen minutes of your life",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "Buried in the nonsense is one real tip: the deli on 31st is hiring at double pay. You pocket it.",
+              "mood": 2,
+              "clout": 4
+            },
+            {
+              "weight": 3,
+              "text": "It's a coin with a cat on it. It was down 90% while he explained it. He's still bullish.",
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "roast",
+          "label": "Roast the vest",
+          "get": "The room laughing",
+          "cost": "His goodwill",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "\"Is the vest also not financial advice?\" The table behind you loses it. He takes the vest off. Growth.",
+              "clout": 12,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "He laughs harder than anyone and asks you to co-host his podcast. You've made it worse.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tourist-photo",
+      "crowd": [
+        "tourist"
+      ],
+      "emoji": "📸",
+      "title": "Take our picture?",
+      "blurb": "A family of six hands you a phone. \"Get the bridge in. And all of us. And our shoes. We bought the shoes here.\"",
+      "options": [
+        {
+          "id": "pro",
+          "label": "Shoot it like a pro",
+          "get": "A thank-you, maybe clout",
+          "cost": "Five minutes of crouching",
+          "skill": "photography",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You crouch, tilt and get the bridge, six faces and the shoes. It's their holiday card now. You're credited.",
+              "clout": 10,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "Forty photos. The dad blinks in every one. On purpose, you realize. It's his thing.",
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "selfie",
+          "label": "Accidentally take selfies",
+          "get": "A laugh",
+          "cost": "Their trust",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "You flip the camera by mistake and take nine photos of yourself. They keep one. \"You have a good face for it.\"",
+              "clout": 6,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "They find the selfies at dinner. Their review of New York mentions you. Three stars.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "influencer-grwm",
+      "crowd": [
+        "influencer"
+      ],
+      "emoji": "💄",
+      "title": "Be in my \"get ready with me\"?",
+      "blurb": "An influencer is filming and needs \"a random New Yorker\" to react to her outfit. You are, apparently, random.",
+      "options": [
+        {
+          "id": "honest",
+          "label": "Give an honest review",
+          "get": "Clout if it lands",
+          "cost": "Possibly her friendship",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "\"The jacket's doing a lot. Too much. Keep it.\" She loves it. Your quote becomes the caption.",
+              "clout": 16,
+              "mood": 4
+            },
+            {
+              "weight": 2,
+              "text": "\"Okay, we'll cut that.\" She cuts it. She cuts you. You were never there.",
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "hype",
+          "label": "Hype her up, loudly",
+          "get": "A tag, probably",
+          "cost": "Your credibility",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "\"Iconic. Who did your eyebrows?\" She tags you. Her followers find you very supportive.",
+              "clout": 10,
+              "mood": 3
+            },
+            {
+              "weight": 1,
+              "text": "You hype so hard the comments ask if you're paid. You're not. You wish.",
+              "clout": 4,
+              "mood": -1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finance-bro-card",
+      "crowd": [
+        "finance_bro",
+        "startup_founder"
+      ],
+      "emoji": "🤝",
+      "title": "A metal business card",
+      "blurb": "\"Love your energy. Ever think about consulting?\" He hands you a card. It's metal. It's heavy. It says \"Visionary.\"",
+      "options": [
+        {
+          "id": "network",
+          "label": "Network back, harder",
+          "get": "A contact, maybe a gig",
+          "cost": "Twenty minutes of jargon",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You out-jargon him. \"Let's take this offline.\" He pays you C$80 on the spot for \"advisory.\" You advised nothing.",
+              "cash": 80,
+              "clout": 6
+            },
+            {
+              "weight": 2,
+              "text": "It's a pyramid. A very nice pyramid, with a mission statement. You leave before the second slide.",
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "gum",
+          "label": "Scrape gum off your shoe with it",
+          "get": "Peace",
+          "cost": "One heavy business card",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "It works perfectly. Best tool you've ever owned. He sees, and nods slowly. \"That's disruption.\"",
+              "clout": 4,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "He sees. He's hurt. He hands you another card. This one says \"Visionary (Forgiving).\"",
+              "mood": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dog-walker-leashes",
+      "crowd": [
+        "dog_walker"
+      ],
+      "emoji": "🐕",
+      "title": "Hold these six leashes?",
+      "blurb": "\"Thirty seconds, I swear.\" A dog walker hands you six leashes and runs into the bodega. The dogs pick six directions.",
+      "options": [
+        {
+          "id": "hold",
+          "label": "Plant your feet",
+          "get": "Six grateful dogs, a tip",
+          "cost": "Your shoulders",
+          "skill": "fitness",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You hold the line. The dogs sit, impressed. The walker comes back and tips you C$20 and a biscuit.",
+              "cash": 20,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "Kevin the pug leads a coup. You're dragged half a block. The walker films it. You're \"leash guy\" now.",
+              "clout": 10,
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "sit",
+          "label": "Sit down on the sidewalk with them",
+          "get": "Mood, dog therapy",
+          "cost": "Your pants",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Six dogs climb on you. A stranger says \"thank you for this.\" You don't know what for. Same.",
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "A doodle sits on your phone and posts a photo of the sky. It does better than your average post.",
+              "clout": 6,
+              "mood": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dog-walker-intel",
+      "crowd": [
+        "dog_walker",
+        "nanny"
+      ],
+      "emoji": "🗣️",
+      "title": "Park-bench intel",
+      "blurb": "\"You didn't hear it from me, but Sir Barksley has a new walker. Second one this month. Want to know why?\"",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Obviously yes",
+          "get": "Premium tea",
+          "cost": "Your conscience",
+          "skill": "gossip",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "The new walker tried to put Sir Barksley on a juice cleanse. Lola is going to faint. You run to tell her.",
+              "clout": 14,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "The reason is \"scheduling.\" That's it. That's the tea. It's decaf.",
+              "mood": -1
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "label": "Change the subject, nobly",
+          "get": "Their respect",
+          "cost": "The best tea in Astoria",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "\"Wow, okay, principled.\" They tell the whole park you're trustworthy. That's its own kind of clout.",
+              "clout": 8,
+              "mood": 3
+            },
+            {
+              "weight": 1,
+              "text": "They tell you anyway, louder. You'll tell no one. You'll think about it all week.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "night-nurse-water",
+      "crowd": [
+        "night_nurse"
+      ],
+      "emoji": "💧",
+      "title": "Free medical advice",
+      "blurb": "A nurse fresh off twelve hours squints at you. \"When did you last drink water? Real water. Not coffee.\"",
+      "options": [
+        {
+          "id": "truth",
+          "label": "Tell the truth",
+          "get": "Advice, Mood",
+          "cost": "Admitting it was Tuesday",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "She buys you a water and watches you drink all of it. You feel ten years younger.",
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "She sighs the sigh of someone who has seen everything. \"Tuesday. Of course.\"",
+              "mood": 3
+            }
+          ]
+        },
+        {
+          "id": "lie",
+          "label": "Say \"this morning\"",
+          "get": "Your dignity",
+          "cost": "She knows",
+          "outcomes": [
+            {
+              "weight": 1,
+              "text": "She almost believes you. Then she sees your lips. \"Liar.\" She buys you two waters.",
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "\"Your lips say Tuesday.\" She hands you a water and writes HYDRATE on a napkin. You keep the napkin.",
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "night-shift-round",
+      "crowd": [
+        "night_nurse",
+        "delivery_rider"
+      ],
+      "emoji": "☕",
+      "title": "Who's buying?",
+      "blurb": "Two night-shift workers argue about who bought the last coffee. Neither remembers. Both are too tired. Both look at you.",
+      "options": [
+        {
+          "id": "buy",
+          "label": "Buy this round",
+          "get": "Two friends, Mood",
+          "cost": "C$12",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "Two coffees, two worst-shift stories. You're friends now, the tired kind.",
+              "cash": -12,
+              "clout": 4,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "They both fall asleep before the coffee arrives. You drink all three. You're vibrating.",
+              "cash": -12,
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "toss",
+          "label": "Settle it with a coin toss",
+          "get": "Justice",
+          "cost": "Your coin",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Heads. The nurse wins. The rider pays and says \"best two out of three\" for the rest of the night.",
+              "clout": 3,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "The coin rolls under the counter. Everyone stares at it. Nobody has the energy. They split it.",
+              "mood": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gamer-duo",
+      "crowd": [
+        "gamer"
+      ],
+      "emoji": "🎮",
+      "title": "Need a duo partner",
+      "blurb": "\"My duo partner just rage-quit. Out loud. In front of his mom. You play?\"",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Say yes, confidently",
+          "get": "Clout if you carry",
+          "cost": "Your reputation in this chat",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You don't know the game. You win anyway. He calls you \"a natural\" on stream. Fourteen viewers saw it.",
+              "clout": 14,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "You walk into a wall for four minutes. He mutes you. Chat calls you \"the wall guy.\" It's catching on.",
+              "clout": 4,
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "cheer",
+          "label": "Cheer from the side",
+          "get": "Mood, a hype role",
+          "cost": "No glory",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "He wins with you yelling \"GO\" at every moment and insists you were the reason. You were not.",
+              "clout": 4,
+              "mood": 7
+            },
+            {
+              "weight": 1,
+              "text": "He loses and blames the cheering. Fair. You were yelling \"go\" at a loading screen.",
+              "mood": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gamer-beta",
+      "crowd": [
+        "gamer",
+        "startup_founder"
+      ],
+      "emoji": "📱",
+      "title": "Try my app?",
+      "blurb": "\"You build a startup. Inside the startup, you build a game. It's games all the way down.\" They hold out a phone.",
+      "options": [
+        {
+          "id": "test",
+          "label": "Test it seriously",
+          "get": "Clout as a beta tester",
+          "cost": "Twenty minutes of a buggy app",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You find six bugs and one feature. They put you in the credits as \"Chief Vibes Officer.\"",
+              "clout": 12,
+              "mood": 4
+            },
+            {
+              "weight": 2,
+              "text": "It crashes on launch. Four times. They call that \"the beta experience.\"",
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "invest",
+          "label": "Offer to invest C$10",
+          "get": "Equity, allegedly",
+          "cost": "C$10",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "They take it and hand you a sticker that says INVESTOR. The sticker is great. The sticker may be the asset.",
+              "cash": -10,
+              "clout": 6,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "\"We're pre-revenue, so cash is weird for us.\" They decline and give you a sticker anyway.",
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rider-chazz",
+      "crowd": [
+        "delivery_rider"
+      ],
+      "emoji": "🛵",
+      "title": "Is this your order?",
+      "blurb": "A rider holds up a bag. \"Order for… Chazz? It says this building.\" You are not Chazz. Nobody here is Chazz.",
+      "options": [
+        {
+          "id": "find",
+          "label": "Help him find Chazz",
+          "get": "Mood, a grateful rider",
+          "cost": "Ten minutes yelling \"Chazz\"",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You find Chazz on a fire escape. Chazz tips big. The rider splits it with you.",
+              "cash": 15,
+              "clout": 3,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "There is no Chazz. There never was. The rider says this happens every week. You share a moment.",
+              "mood": 3
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "label": "Wait with him for Chazz",
+          "get": "A new friend",
+          "cost": "Your afternoon",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Forty minutes on the stoop. You learn his whole route and his mom's soup recipe. Chazz never shows.",
+              "clout": 6,
+              "mood": 7
+            },
+            {
+              "weight": 1,
+              "text": "Chazz walks up, takes the bag and says \"you two look close.\" You are, now.",
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rider-chain",
+      "crowd": [
+        "delivery_rider"
+      ],
+      "emoji": "🔧",
+      "title": "Chain's off",
+      "blurb": "A rider's chain just came off in front of you. Four orders going cold and a look like the whole city owes him.",
+      "options": [
+        {
+          "id": "fix",
+          "label": "Fix the chain",
+          "get": "His thanks, a free dumpling",
+          "cost": "Grease to the elbows",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Chain's back on in two minutes. He hands you a dumpling from \"an order that was going to be late anyway.\"",
+              "clout": 4,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You put it on backwards. Somehow it works better. He's confused but grateful.",
+              "clout": 6,
+              "mood": 5
+            }
+          ]
+        },
+        {
+          "id": "hold",
+          "label": "Hold the bags while he fixes it",
+          "get": "Good karma",
+          "cost": "Smelling like four cuisines",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "He fixes it, thanks you and tells every rider on 31st you're good people. Free word of mouth.",
+              "clout": 8,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "A customer walks up, takes their food straight from you and tips you. You split it with him, honorably.",
+              "cash": 8,
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "theater-pigeon",
+      "crowd": [
+        "theater_kid"
+      ],
+      "emoji": "🎭",
+      "title": "Run lines with me?",
+      "blurb": "\"My audition is in an hour for Woman Who Screams at Pigeon Number Two. Read the pigeon. Please. I need a pigeon.\"",
+      "options": [
+        {
+          "id": "pigeon",
+          "label": "Commit to the pigeon",
+          "get": "Mood, art",
+          "cost": "Your dignity, in public",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "You coo with your whole chest. Strangers stop. A man claps. They get the part and thank \"my pigeon\" online.",
+              "clout": 12,
+              "mood": 7
+            },
+            {
+              "weight": 1,
+              "text": "Your pigeon is too good. They say you upstaged them. As a pigeon. You both get a little emotional.",
+              "clout": 6,
+              "mood": 4
+            }
+          ]
+        },
+        {
+          "id": "note",
+          "label": "Give a director's note",
+          "get": "Clout if they take it",
+          "cost": "They may hate notes",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "\"Try it angrier at the pigeon.\" Perfect. They get the callback and credit you loudly.",
+              "clout": 14,
+              "mood": 4
+            },
+            {
+              "weight": 2,
+              "text": "\"I didn't ask for notes, I asked for a pigeon.\" Fair. They go find another pigeon.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "theater-number",
+      "crowd": [
+        "theater_kid",
+        "art_student"
+      ],
+      "emoji": "🎶",
+      "title": "A sudden musical number",
+      "blurb": "Someone starts singing at you. It's a song about rent. They're looking at you to take the harmony.",
+      "options": [
+        {
+          "id": "harmony",
+          "label": "Take the harmony",
+          "get": "Clout, a moment that travels",
+          "cost": "Total vulnerability",
+          "skill": "music",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Your harmony lands. The whole room joins the chorus about rent. Somebody films it and it travels.",
+              "clout": 20,
+              "mood": 8
+            },
+            {
+              "weight": 1,
+              "text": "You find a harmony nobody has ever heard. Not a good one. They keep singing, braver than anyone.",
+              "clout": 4,
+              "mood": 3
+            }
+          ]
+        },
+        {
+          "id": "clap",
+          "label": "Clap on one and three",
+          "get": "Their gratitude",
+          "cost": "Everyone hears you clap on one and three",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "They forgive the clapping and take a bow. You take a smaller bow. It feels right.",
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "A man beside you says \"two and four\" firmly. You learn something today.",
+              "clout": 2,
+              "mood": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "retiree-block",
+      "crowd": [
+        "retiree"
+      ],
+      "emoji": "📜",
+      "title": "Back in my day",
+      "blurb": "\"This used to be a bakery. Then a bank. Then a bakery again. Now it's an oat milk place. Sit, I'll explain.\"",
+      "options": [
+        {
+          "id": "listen",
+          "label": "Sit and listen",
+          "get": "A story, Mood",
+          "cost": "An hour, at least",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "The 1977 blackout, on this exact block. Better than any podcast. He makes you promise to remember it.",
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "The story becomes about his knee. Then his other knee. Both knees have excellent stories.",
+              "mood": 5
+            }
+          ]
+        },
+        {
+          "id": "food",
+          "label": "Ask for the best food on the block",
+          "get": "A local secret",
+          "cost": "Admitting you're new",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "He writes it on a napkin: \"Arben's, the corner slice. Tell him Yiannis sent you.\" You're in.",
+              "clout": 6,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "\"Everything's terrible now.\" A pause. \"Except the deli. And the bakery. And the cart.\" It's a long list.",
+              "mood": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "retiree-chess",
+      "crowd": [
+        "retiree"
+      ],
+      "emoji": "♟️",
+      "title": "A dollar a game",
+      "blurb": "\"I've played here since 1971. I've lost eleven times. Want to be number twelve?\"",
+      "options": [
+        {
+          "id": "play",
+          "label": "Play, for real",
+          "get": "Clout if you win",
+          "cost": "A dollar a game, your pride",
+          "skill": "smarts",
+          "outcomes": [
+            {
+              "weight": 1,
+              "good": true,
+              "text": "Checkmate in thirty moves. He laughs and adds your name to a list in his pocket. You're number twelve.",
+              "cash": 1,
+              "clout": 20,
+              "mood": 6
+            },
+            {
+              "weight": 3,
+              "text": "He beats you in nine moves while eating a sandwich. \"Come back tomorrow. You're getting worse.\"",
+              "cash": -3,
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "watch",
+          "label": "Watch him play others",
+          "get": "Lessons, Mood",
+          "cost": "An afternoon",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "He destroys a finance guy in six moves and explains every one to you. Better than a semester.",
+              "mood": 7
+            },
+            {
+              "weight": 1,
+              "text": "His next opponent is a pigeon. Not chess, exactly. You're not sure who's winning.",
+              "clout": 2,
+              "mood": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "founder-cofounder",
+      "crowd": [
+        "startup_founder"
+      ],
+      "emoji": "💡",
+      "title": "Be my co-founder?",
+      "blurb": "\"It's a dating app, but for co-founders. I need a co-founder to build it. You look free.\"",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Say yes, for the story",
+          "get": "Clout, a title",
+          "cost": "Your entire evening",
+          "skill": "hustle",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "You sketch it on a napkin. It's actually good. You both agree to \"circle back.\" Great napkin, though.",
+              "clout": 14,
+              "mood": 4
+            },
+            {
+              "weight": 2,
+              "text": "Your role is \"everything except the idea.\" The idea is a website. You resign in nine minutes.",
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "pitch",
+          "label": "Pitch him your idea instead",
+          "get": "Respect, maybe",
+          "cost": "Him borrowing it",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "He loves it so much he gets visibly nervous. \"Let's not talk numbers here.\" You've won.",
+              "clout": 12,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "He writes it down, badly. You watch him misunderstand your idea into a worse one. It's freeing.",
+              "mood": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "founder-routine",
+      "crowd": [
+        "startup_founder",
+        "finance_bro"
+      ],
+      "emoji": "⏱️",
+      "title": "Rate my morning routine",
+      "blurb": "\"Four AM cold plunge, journaling at 4:15, mushroom coffee at 4:30, then a meeting with myself. Thoughts?\"",
+      "options": [
+        {
+          "id": "praise",
+          "label": "Call it inspiring",
+          "get": "A new fan",
+          "cost": "Your honesty",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "He lights up and follows you everywhere. Online. You get a thank-you message at 4:15 AM.",
+              "clout": 8,
+              "mood": 2
+            },
+            {
+              "weight": 1,
+              "text": "He invites you to join tomorrow at four. You agree, panic and set eleven alarms.",
+              "clout": 4,
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "sleep",
+          "label": "Suggest sleeping until seven",
+          "get": "A breakthrough",
+          "cost": "His whole personality",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "A long silence. \"Seven.\" He tries it. Next week he looks ten years younger and credits \"a stranger.\"",
+              "clout": 14,
+              "mood": 6
+            },
+            {
+              "weight": 2,
+              "text": "\"Sleep is a mindset.\" He leaves to go be awake somewhere else.",
+              "mood": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "art-sketch",
+      "crowd": [
+        "art_student"
+      ],
+      "emoji": "🎨",
+      "title": "Sit for a sketch?",
+      "blurb": "An art student holds up a sketchbook. \"Can I draw you? You have a very specific face. That's a compliment. Mostly.\"",
+      "options": [
+        {
+          "id": "pose",
+          "label": "Hold still and pose",
+          "get": "A portrait, clout",
+          "cost": "Twenty minutes, your nose's privacy",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "It's beautiful and slightly too honest about your nose. They post it. People say \"that's so them.\"",
+              "clout": 14,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "They draw you as a pigeon. \"It's how I see you.\" You're not sure how to feel. You kind of love it.",
+              "clout": 6,
+              "mood": 4
+            }
+          ]
+        },
+        {
+          "id": "trade",
+          "label": "Offer to draw them back",
+          "get": "A fair trade",
+          "cost": "Your drawing skills, exposed",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Your drawing is a stick figure with great hair. They frame it. \"Raw. Outsider. Honest.\"",
+              "clout": 10,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "They look at your drawing for a long time. \"Do you want to talk about it?\"",
+              "mood": -1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "art-laundromat",
+      "crowd": [
+        "art_student"
+      ],
+      "emoji": "🖼️",
+      "title": "Come to my show?",
+      "blurb": "\"It's my thesis show. It's in a laundromat. The theme is 'spin cycle.' There's wine in paper cups.\"",
+      "options": [
+        {
+          "id": "buy",
+          "label": "Go, and buy a piece",
+          "get": "Clout, a piece of art",
+          "cost": "C$40 for a sock on a canvas",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You buy the sock. The artist tears up. Three people ask who the collector is. You are, now.",
+              "cash": -40,
+              "clout": 16,
+              "mood": 6
+            },
+            {
+              "weight": 1,
+              "text": "You buy the sock, then it goes through a dryer by accident. The artist calls it \"the final form.\"",
+              "cash": -40,
+              "clout": 8,
+              "mood": 2
+            }
+          ]
+        },
+        {
+          "id": "review",
+          "label": "Promise to review it online",
+          "get": "Their gratitude",
+          "cost": "Actually writing a review",
+          "skill": "gossip",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "Your review calls it \"a wash, in the best way.\" It goes on the laundromat wall. People quote you.",
+              "clout": 12,
+              "mood": 4
+            },
+            {
+              "weight": 1,
+              "text": "You forget. They remind you daily for a week. You write \"good show\" and it's somehow worse.",
+              "mood": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nanny-stroller",
+      "crowd": [
+        "nanny"
+      ],
+      "emoji": "👶",
+      "title": "Watch the stroller?",
+      "blurb": "\"Two seconds, I'm grabbing his juice.\" A nanny parks a stroller beside you. The baby stares at you like a landlord.",
+      "options": [
+        {
+          "id": "faces",
+          "label": "Make faces at the baby",
+          "get": "A baby's laugh, Mood",
+          "cost": "Your public dignity",
+          "skill": "charisma",
+          "outcomes": [
+            {
+              "weight": 3,
+              "good": true,
+              "text": "He laughs so hard he hiccups. The nanny comes back and says you're hired. She's joking. Mostly.",
+              "clout": 4,
+              "mood": 10
+            },
+            {
+              "weight": 1,
+              "text": "The baby does not laugh. The baby judges. It feels like a job interview you failed.",
+              "mood": -2
+            }
+          ]
+        },
+        {
+          "id": "guard",
+          "label": "Stand guard, very still",
+          "get": "Professional respect",
+          "cost": "Two very long seconds",
+          "outcomes": [
+            {
+              "weight": 3,
+              "text": "You guard it like a museum guard guards a painting. The nanny gives you a nod that says \"you get it.\"",
+              "clout": 4,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "The baby throws a sock. You catch it, one hand, clean. A man across the street applauds.",
+              "clout": 8,
+              "mood": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nanny-playground",
+      "crowd": [
+        "nanny",
+        "retiree"
+      ],
+      "emoji": "🛝",
+      "title": "Playground politics",
+      "blurb": "\"The Tuesday nannies and the Thursday nannies aren't speaking. You're new. Pick a side, sweetie, and pick it fast.\"",
+      "options": [
+        {
+          "id": "tuesday",
+          "label": "Side with the Tuesday crew",
+          "get": "Allies, tea",
+          "cost": "Thursday's cold shoulder",
+          "skill": "gossip",
+          "outcomes": [
+            {
+              "weight": 2,
+              "good": true,
+              "text": "Tuesday adopts you. You learn which building's doorman is secretly dating which super.",
+              "clout": 12,
+              "mood": 5
+            },
+            {
+              "weight": 1,
+              "text": "Thursday finds out in eleven minutes. The sandbox goes quiet when you walk in.",
+              "clout": 4,
+              "mood": -3
+            }
+          ]
+        },
+        {
+          "id": "neutral",
+          "label": "Declare yourself neutral",
+          "get": "Both sides' respect",
+          "cost": "Nobody tells you anything",
+          "outcomes": [
+            {
+              "weight": 2,
+              "text": "Both sides respect it. Neither tells you anything ever again. Neutral is lonely.",
+              "clout": 6,
+              "mood": 2
+            },
+            {
+              "weight": 1,
+              "text": "They make you referee the sandbox dispute. You rule for a toddler. Everyone accepts it.",
+              "clout": 10,
+              "mood": 6
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stamps": {
+    "feta-compli": [
+      {
+        "days": 3,
+        "text": "Andreas remembers your name. Mostly. \"My friend!\"",
+        "cash": 60
+      },
+      {
+        "days": 7,
+        "text": "Family table: Andreas sits you at the good table by the window.",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "His mother's lamb, not on the menu, saved for you on Fridays.",
+        "cash": 150,
+        "clout": 40
+      }
+    ],
+    "neon-spoon": [
+      {
+        "days": 3,
+        "text": "Lola learns your name and starts mispronouncing it on purpose.",
+        "cash": 50
+      },
+      {
+        "days": 7,
+        "text": "Your initials on the regulars' wall, next to a dog nobody remembers.",
+        "clout": 30
+      },
+      {
+        "days": 15,
+        "text": "Lola saves you a booth during every Tea drop. You're inner circle.",
+        "cash": 120,
+        "clout": 45
+      }
+    ],
+    "ditmars-deli": [
+      {
+        "days": 3,
+        "text": "Sal starts your order when you walk in. You didn't tell him what it was.",
+        "cash": 40
+      },
+      {
+        "days": 7,
+        "text": "Meatball the cat tolerates you. This is unprecedented.",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "Your sandwich goes on the board: \"The Regular.\" Sal denies naming it after you.",
+        "cash": 120,
+        "clout": 40
+      }
+    ],
+    "grind-and-gossip": [
+      {
+        "days": 3,
+        "text": "Jojo spells your name right. Once. As a warning.",
+        "cash": 50
+      },
+      {
+        "days": 7,
+        "text": "Your drink goes on the chalkboard as \"The Usual (Don't Ask).\"",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "Jojo tells you the gossip before it happens. The tip jar is still for film school.",
+        "cash": 130,
+        "clout": 40
+      }
+    ],
+    "velvet-static": [
+      {
+        "days": 3,
+        "text": "Mags knows your drink. She makes it before you ask, and judges it.",
+        "cash": 40
+      },
+      {
+        "days": 7,
+        "text": "The bouncer nods at you. Not a smile. A nod. That's the whole VIP.",
+        "clout": 28
+      },
+      {
+        "days": 15,
+        "text": "Mags lets you pick the last song of the night. Choose wisely.",
+        "cash": 120,
+        "clout": 45
+      }
+    ],
+    "hell-gate-park": [
+      {
+        "days": 3,
+        "text": "Gus saves you the end of the bench. You have to hear about 1987, but still.",
+        "cash": 40
+      },
+      {
+        "days": 7,
+        "text": "Sir Barksley wags once when you arrive. Dmitri wrote it down.",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "Gus teaches you his backgammon opening. He hasn't shown anyone since 1974.",
+        "cash": 120,
+        "clout": 40
+      }
+    ],
+    "still-a-dollar-slice": [
+      {
+        "days": 3,
+        "text": "Arben folds your slice before you can. It's an honor and also kind of a lot.",
+        "cash": 45
+      },
+      {
+        "days": 7,
+        "text": "You get the corner slice. Nobody gets the corner slice.",
+        "clout": 25
+      },
+      {
+        "days": 15,
+        "text": "A dollar, spiritually and actually: Arben charges you the sign price. Once.",
+        "cash": 130,
+        "clout": 40
+      }
+    ],
+    "respawn-arena": [
+      {
+        "days": 3,
+        "text": "Pixel learns your gamer tag and says it with total respect.",
+        "cash": 40
+      },
+      {
+        "days": 7,
+        "text": "A good chair. Not the Arcade Nerds' chairs, but a good chair.",
+        "clout": 27
+      },
+      {
+        "days": 15,
+        "text": "Your name on the wall of champions, in Pixel's best marker.",
+        "cash": 120,
+        "clout": 42
+      }
+    ],
+    "pressed-iron-gym": [
+      {
+        "days": 3,
+        "text": "The front desk stops asking your name. They've written it down. Somewhere.",
+        "cash": 40
+      },
+      {
+        "days": 7,
+        "text": "Coach Bogdana says \"not bad.\" Out loud. In front of people.",
+        "clout": 26
+      },
+      {
+        "days": 15,
+        "text": "Your own locker and your name on the chalk wall of PRs. Spelled right.",
+        "cash": 125,
+        "clout": 40
+      }
+    ],
+    "altitude-718": [
+      {
+        "days": 3,
+        "text": "Thaddeus finds your name on the list without looking. It's a trick. It still works.",
+        "cash": 50
+      },
+      {
+        "days": 7,
+        "text": "The edge table, no waitlist. Thaddeus calls it \"a cancellation.\" Every time.",
+        "clout": 28
+      },
+      {
+        "days": 15,
+        "text": "The chef sends out a tiny plate with your name on it. It's still one bite.",
+        "cash": 140,
+        "clout": 45
+      }
+    ]
+  }
+}

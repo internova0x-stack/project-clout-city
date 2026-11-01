@@ -196,6 +196,30 @@ components live in `app/globals.css`.
   PostHog downloads only after Accept (lib/analytics.ts `startAnalytics`, consent kept in `cc-consent`). The map and rooms
   time their frames (`frameWatch`, lib/graphics.ts): a phone under ~22 fps drops to pixel ratio 1 without shadows at once
   and low graphics from then on (`cc-graphics-auto`; the player's Settings choice wins).
+- Living places (owner, Nov 1: "the dialogue is repetitive", "there aren't interesting things to do at locations", "go ahead"):
+  What people say (lib/dialogue.ts, content/dialogue/dialogue.json, no migration): one picker for every tap. Lines carry
+  conditions (place tags/ids incl. "restroom", city-clock part of day, weekday, the player's stage new/rising/known/famous from
+  clout and days in, city condition kinds, player tags worked out in GameShell `sceneFor`: dating, campaign, halo, hustler,
+  broke, rich, has_crew, business…); `matching` ranks specific lines first and `pickLine` takes the first tier with a line this
+  device hasn't heard (`cc-said`, the last 60). Regulars: story, Lola's stage lines (r.id 'lola'), live lines (memory, Integrity,
+  news, hunt), this place now, their own voice; each tap's line is kept for the visit (`regularSaid`). The crowd are New Yorker
+  types (`crowd`: haunts by place tag, `crowdTypeFor`, the same person per seat and day: "Pia (dog walker)"); only the second
+  person in a room passes on a Tea lead, about 1 tap in 3. validate:content runs `validateDialogue` (≤ 140 characters, no repeats).
+  Things to do (lib/placeLife.ts, content/places/life.json; server and preview only via lib/placeLifeContent.ts, since it holds the
+  odds): signature activities (2-3 option cards, once a New York day, Energy, skills make good outcomes likelier), happenings
+  (city-clock hours, weekdays or a city condition, each with its own activity; "Happening now" on the place panel), crowd moments
+  (a crowd tap may start one: 5 a day, each once a week) and regular cards (3, 7, 15 days visited: a perk line and a reward once).
+  app/home/placeLifeActions.ts rolls with a crypto random source; migration 0157 `place_life_save` (service role) pays once per
+  once-key in `place_life_log` (ledger 'place_life'), checks the place, its hours, holding, Energy and the caps (game_settings
+  'place_life'), and a cost never takes the bank below zero; `place_life_context` gives the server today's refs and days per place.
+  UI: components/city/PlaceLife.tsx (`LifeStrip` on the place panel, `LifeSheet`). `?life=rush|regular|brownout` in the preview.
+  The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"): once a New
+  York day (`cc-daily-pick:<date>`), 3 s after the game settles and only when nothing else is open, a floating card
+  (components/city/DailyPick.tsx `DailyWelcome`, no scrim): a greeting by the city hour and the player's name, the all-five task
+  streak, "Since you left" chips (rent alarm, unread messages, Clout Pass rewards; each opens its screen), and "Today" (owner, Nov 1: "a mix of
+  tasks, a goal that is close to completion, skill upgrade, story"): tiles for the five tasks, the current goal's progress, the skill
+  nearest its next level and the running story (new chapters), each opening its screen (GameShell `welcomeRows`), under Lola's `todaysPick`: a happening on now, else a regular card one visit from its reward, else a place to try (rotated by day);
+  Let's go plans the trip (Do it now when already there). `lifeToday` on the server; `?daily=pick` forces it in the preview.
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
