@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { NodeIO } from "@gltf-transform/core";
 import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
-import { lowGraphics, newBodies, renderQuality, weakDevice } from "../lib/graphics.ts";
+import { frameWatch, lowGraphics, newBodies, renderQuality, weakDevice } from "../lib/graphics.ts";
 
 test("only clearly weak phones get low graphics by themselves", () => {
   assert.equal(weakDevice({ deviceMemory: 2, hardwareConcurrency: 8 }), true);
@@ -12,6 +12,26 @@ test("only clearly weak phones get low graphics by themselves", () => {
   assert.equal(weakDevice({ deviceMemory: 4, hardwareConcurrency: 8 }), false);
   assert.equal(weakDevice({}), false);
   assert.equal(weakDevice(undefined), false);
+});
+
+test("the frame watch calls a phone slow once, after settling, from the middle frame time", () => {
+  const run = (gap: number, n = 200, spikes = 0) => {
+    const w = frameWatch({ settleMs: 1000, samples: 60, slowMs: 45 });
+    const said: string[] = [];
+    let t = 0;
+    for (let i = 0; i < n; i++) { t += i < spikes ? 2000 : gap; const r = w(t); if (r) said.push(r); }
+    return said;
+  };
+  assert.deepEqual(run(16.7), ["ok"], "60 fps is fine");
+  assert.deepEqual(run(33.4), ["ok"], "30 fps is fine");
+  assert.deepEqual(run(70), ["slow"], "14 fps is too slow");
+  assert.deepEqual(run(70, 30), [], "not enough frames yet: no verdict");
+  assert.deepEqual(run(16.7, 200, 20), ["ok"], "pauses over a second (a hidden tab) don't count");
+  // One long hitch among fast frames (a landmark being built) doesn't make a phone slow.
+  const w = frameWatch({ settleMs: 0, samples: 60 });
+  let t = 0, said: string | null = null;
+  for (let i = 0; i < 80 && !said; i++) { t += i % 10 === 0 ? 400 : 16; said = w(t); }
+  assert.equal(said, "ok");
 });
 
 test("on the server (no browser) the defaults are full graphics and the new bodies", () => {

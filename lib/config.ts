@@ -7,6 +7,8 @@ export const GAME_CONFIG = {
 
   /** Owner, Oct 24: the launch splash stays at least this long from the moment the app opens (a typical splash). */
   splashMinMs: 2200,
+  /** Tap-to-open screens (the Phone, Shop, Campaign…) download this long after the game starts (cheap phones, Nov 1). */
+  prefetchSheetsMs: 10_000,
 
   cityClock: {
     /** One in-game day every N real hours (Clarifications section 12). */

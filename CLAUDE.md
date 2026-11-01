@@ -178,6 +178,12 @@ components live in `app/globals.css`.
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check
   (chat 30 s, party and visit rooms 15 s). New live features ring their own topic instead of polling fast.
+- Cheap phones (owner, Nov 1): tap-to-open screens (Phone, Shop, Bills, Net worth, Look, Lotto, Profile, Membership,
+  Campaign, Careers, Pablo's back room, Gala, Campus) are `lazySheet`s in GameShell (components/lazySheet.tsx): downloaded on
+  first open, prefetched while idle after `GAME_CONFIG.prefetchSheetsMs`; a module also imported statically gains nothing.
+  PostHog downloads only after Accept (lib/analytics.ts `startAnalytics`, consent kept in `cc-consent`). The map and rooms
+  time their frames (`frameWatch`, lib/graphics.ts): a phone under ~22 fps drops to pixel ratio 1 without shadows at once
+  and low graphics from then on (`cc-graphics-auto`; the player's Settings choice wins).
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
