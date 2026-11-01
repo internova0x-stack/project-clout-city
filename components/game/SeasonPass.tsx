@@ -2,6 +2,7 @@
 
 import { claimable, daysLeft, rewardLabel, tierFor, type PassReward, type PassState, type StarterPackState, STARTER_PACK } from "@/lib/seasonPass";
 import { itemBySku } from "@/lib/city";
+import { useEffect, useState } from "react";
 
 // The Clout Pass (Tasks → Pass) and the starter pack card (the Shop's top, the Pass tab's foot). lib/seasonPass.ts has the
 // rules; the server claims and pays (season_claim_all, migration 0156).
@@ -38,30 +39,41 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
   return (
     <div className="stack-16">
       <div className="pass-hero">
-        <div className="meta" style={{ opacity: 0.85 }}>CLOUT PASS · SEASON 1</div>
-        <div className="display-md" style={{ margin: "2px 0 4px" }}>💘 {s.name}</div>
-        <p className="subtext" style={{ margin: 0, opacity: 0.9 }}>{s.tagline}</p>
-        <div className="row" style={{ justifyContent: "space-between", marginTop: 12 }}>
-          <span className="title">Tier {tier} of {s.tiers.length}</span>
-          <span className="meta">
+        <span className="pass-snow" aria-hidden />
+        <span className="pass-skyline" aria-hidden />
+        <div className="pass-hero-top">
+          <span className="pass-chip">Clout Pass · Season 1</span>
+          <span className="pass-chip pass-chip-soft">
             {state.phase === "soon" ? `Starts ${new Date(s.starts + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`
-              : state.phase === "on" ? `${left} day${left === 1 ? "" : "s"} left`
-              : state.phase === "claim" ? "Season over: claim what you earned" : "Season over"}
+              : state.phase === "on" ? `⏳ ${left} day${left === 1 ? "" : "s"} left`
+              : state.phase === "claim" ? "Claim what you earned" : "Season over"}
           </span>
         </div>
-        <div className="pass-bar" role="progressbar" aria-valuemin={0} aria-valuemax={need} aria-valuenow={into} aria-label="XP to the next tier">
-          <span style={{ width: `${Math.round((into / need) * 100)}%` }} />
+        <h3 className="pass-title">Cuffing<br />Season <span aria-hidden>💘</span></h3>
+        <p className="pass-tagline">{s.tagline}</p>
+        <div className="pass-stickers" aria-hidden>
+          <span style={{ ["--r" as string]: "-10deg" }}>🧣</span>
+          <span style={{ ["--r" as string]: "8deg" }}>🛋️</span>
+          <span style={{ ["--r" as string]: "-4deg" }}>⛸️</span>
+          <span style={{ ["--r" as string]: "12deg" }}>🧢</span>
         </div>
-        <div className="meta" style={{ marginTop: 4 }}>
-          {max ? "Every tier reached. Icon behavior." : `${into} / ${need} XP to tier ${tier + 1}`}
-          {state.today > 0 ? ` · +${state.today} XP today` : ""}
+        <div className="pass-progress">
+          <span className="pass-tier-badge" aria-label={`Tier ${tier} of ${s.tiers.length}`}>
+            <b>{tier}</b><small>/{s.tiers.length}</small>
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span className="pass-bar" role="progressbar" aria-valuemin={0} aria-valuemax={need} aria-valuenow={into} aria-label="XP to the next tier">
+              <span style={{ width: `${Math.round((into / need) * 100)}%` }} />
+            </span>
+            <span className="pass-xp">
+              {max ? "Every tier reached. Icon behavior." : `${into} / ${need} XP to tier ${tier + 1}`}
+              {state.today > 0 ? ` · +${state.today} today` : ""}
+            </span>
+          </span>
         </div>
       </div>
 
-      <p className="subtext" style={{ margin: 0 }}>
-        Earn XP from what you already do: <b>+{s.xp.daily_task}</b> per daily task, <b>+{s.xp.daily_bonus}</b> for all five in a day,
-        <b> +{s.xp.goal}</b> per goal.
-      </p>
+      <HowItWorks season={s} price={price} />
 
       {readyCount > 0 && (
         <button className="btn btn-taxi" disabled={busy} onClick={onClaim}>
@@ -107,6 +119,39 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
         })}
       </div>
       {starter && starter.state.offer && <StarterPackCard state={starter.state} price={starter.price} busy={busy} onBuy={starter.onBuy} />}
+    </div>
+  );
+}
+
+/** What the Clout Pass is: open the first time, folded after (remembered on this device). */
+function HowItWorks({ season: s, price }: { season: PassState["season"]; price: string | null }) {
+  const KEY = "cc-pass-how-seen";
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    try { if (!localStorage.getItem(KEY)) { setOpen(true); localStorage.setItem(KEY, "1"); } } catch { /* stays folded */ }
+  }, []);
+  const steps: [string, string, React.ReactNode][] = [
+    ["🎯", "Play like you already do", <>Daily tasks <b>+{s.xp.daily_task} XP</b>, all five in a day <b>+{s.xp.daily_bonus}</b>, each goal <b>+{s.xp.goal}</b>.</>],
+    ["🪜", "Climb the tiers", <>Every {s.xpPerTier} XP is a new tier. Each one has a free reward: C$, clout or a piece for your place.</>],
+    ["✨", "The Clout Pass adds the good stuff", <>One payment for the season{price ? ` (${price})` : ""}, or free with VIP: an exclusive outfit or furniture piece on every tier. Looks only. XP you already have counts.</>],
+    ["⏳", "It's a season", <>Ends {new Date(s.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You get {s.claimDays} more days to claim, then a new season starts.</>],
+  ];
+  return (
+    <div className="pass-how">
+      <button className="pass-how-head" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span>What&apos;s the Clout Pass?</span>
+        <span aria-hidden className="pass-how-chev">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <ol className="pass-how-steps">
+          {steps.map(([e, t, d]) => (
+            <li key={t}>
+              <span className="pass-how-emoji" aria-hidden>{e}</span>
+              <span><b className="title">{t}</b><span className="subtext" style={{ display: "block" }}>{d}</span></span>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
