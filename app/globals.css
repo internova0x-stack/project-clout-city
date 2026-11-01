@@ -2717,40 +2717,13 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 
 /* The Clout Pass and the starter pack (owner, Nov 1; components/game/SeasonPass.tsx). The paid row and the pack are real
    money, so they wear the gold. */
-.pass-hero { position:relative; overflow:hidden; isolation:isolate; color:#fff; border-radius:22px; padding:16px 16px 14px;
-  background:radial-gradient(120% 90% at 85% 0%, #FF7AA8 0%, rgba(255,122,168,0) 55%), linear-gradient(160deg,#2B0F3A 0%,#6A1B4D 48%,#C2185B 100%);
-  box-shadow:0 10px 28px rgba(106,27,77,.35), inset 0 0 0 1px rgba(255,255,255,.12); }
-.pass-snow { position:absolute; inset:0; z-index:-1; opacity:.55; pointer-events:none;
-  background-image:radial-gradient(2px 2px at 12% 22%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 30% 60%,#fff 50%,transparent 51%),
-    radial-gradient(2px 2px at 52% 18%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 70% 45%,#fff 50%,transparent 51%),
-    radial-gradient(2.5px 2.5px at 88% 70%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 42% 85%,#fff 50%,transparent 51%),
-    radial-gradient(2px 2px at 8% 75%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 62% 92%,#fff 50%,transparent 51%);
-  animation:pass-snow 9s linear infinite; }
-@keyframes pass-snow { from { background-position:0 -40px; } to { background-position:0 160px; } }
-@media (prefers-reduced-motion: reduce) { .pass-snow { animation:none; } }
-.pass-skyline { position:absolute; left:0; right:0; bottom:0; height:58px; z-index:-1; background:rgba(20,6,30,.55);
-  clip-path:polygon(0 100%,0 60%,6% 60%,6% 35%,11% 35%,11% 55%,17% 55%,17% 20%,20% 12%,23% 20%,23% 50%,30% 50%,30% 30%,36% 30%,36% 62%,
-    44% 62%,44% 25%,47% 25%,47% 8%,50% 25%,53% 25%,53% 58%,60% 58%,60% 38%,66% 38%,66% 52%,72% 52%,72% 22%,78% 22%,78% 48%,85% 48%,85% 32%,
-    91% 32%,91% 58%,100% 58%,100% 100%); }
-.pass-hero-top { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
-.pass-chip { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px;
-  border-radius:999px; background:var(--g-gold); color:var(--night-900); }
-.pass-chip-soft { background:rgba(255,255,255,.16); color:#fff; letter-spacing:.04em; text-transform:none; font-size:13px; }
-.pass-title { margin:12px 0 4px; font-family:var(--ff-marker),'Permanent Marker','Marker Felt',cursive; font-weight:400; font-size:34px; line-height:34px;
-  transform:rotate(-3deg); transform-origin:left; text-shadow:0 3px 0 rgba(43,15,58,.6); }
-.pass-tagline { margin:0; max-width:62%; font-size:13px; line-height:18px; color:rgba(255,255,255,.88); }
-.pass-stickers { position:absolute; right:10px; top:44px; width:42%; height:110px; pointer-events:none; }
-.pass-stickers span { position:absolute; display:grid; place-items:center; width:46px; height:46px; border-radius:14px; font-size:26px;
-  background:#fff; box-shadow:0 6px 14px rgba(0,0,0,.25); transform:rotate(var(--r)); }
-.pass-stickers span:nth-child(1) { left:4%; top:6px; } .pass-stickers span:nth-child(2) { left:40%; top:0; }
-.pass-stickers span:nth-child(3) { left:18%; top:56px; } .pass-stickers span:nth-child(4) { left:58%; top:52px; box-shadow:0 0 0 3px #FFD6E5, 0 6px 14px rgba(0,0,0,.25); }
-.pass-progress { display:flex; align-items:center; gap:12px; margin-top:22px; padding:10px 12px; border-radius:16px; background:rgba(20,6,30,.45);
-  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
-.pass-tier-badge { flex:none; display:grid; place-items:center; width:48px; height:48px; border-radius:50%; background:var(--g-gold); color:var(--night-900);
-  box-shadow:0 0 0 3px rgba(255,255,255,.25); line-height:1; }
-.pass-tier-badge b { font-family:var(--font-label); font-size:22px; }
-.pass-tier-badge small { font-size:10px; font-weight:700; opacity:.7; margin-top:-8px; }
-.pass-xp { display:block; margin-top:5px; font-size:12px; font-weight:600; color:rgba(255,255,255,.85); }
+.pass-hero { color:#fff; border-radius:var(--r-lg); padding:16px; text-shadow:0 1px 2px rgba(59,35,70,.25);
+  background:linear-gradient(135deg,#4F5FA8 0%,#8E6BB5 34%,#D77B95 68%,#F4B38E 100%); box-shadow:0 8px 22px rgba(79,95,168,.28); }
+.pass-hero-kicker { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.85; }
+.pass-hero-title { margin-top:2px; font-size:24px; line-height:30px; font-weight:800; }
+.pass-hero-meta { font-size:12px; font-weight:600; opacity:.9; }
+.pass-hero .title { color:#fff; }
+.pass-hero .pass-bar { margin-top:8px; }
 .pass-bar { display:block; height:10px; border-radius:999px; background:rgba(255,255,255,.22); overflow:hidden; }
 .pass-bar > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#FFD6E5,#fff); box-shadow:0 0 10px rgba(255,214,229,.8); transition:width .4s ease; }
 .pass-how { border-radius:var(--r-lg); background:var(--surface-card); box-shadow:inset 0 0 0 1px #EADFC8; overflow:hidden; }
