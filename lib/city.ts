@@ -1212,6 +1212,21 @@ export const SHOP_ITEMS: ShopItem[] = [
   { sku: "home-trophy-shelf", category: "home", name: "Trophy shelf", emoji: "🏆", price: 0, clout: 0, rating: 3, reward: true, blurb: "Trophies for showing up. Participation has never looked this good.", furniture: { kind: "bookshelf", color: "#B87333", room: "decor", line: "trophy-shelf" } },
   { sku: "home-employee-frame", category: "home", name: "Framed \"Employee of the Month\"", emoji: "🖼️", price: 0, clout: 0, rating: 3, reward: true, blurb: "You don't have an employer. The frame doesn't need to know.", furniture: { kind: "nightstand", color: "#6C8CFF", room: "decor", line: "employee-frame" } },
   { sku: "home-streak-lava-lamp", category: "home", name: "Streak lava lamp", emoji: "🌋", price: 0, clout: 0, rating: 4, reward: true, blurb: "Bubbles up every time you don't break the streak. Do not shake.", furniture: { kind: "floorLamp", color: "#8A3FFC", room: "decor", line: "streak-lava-lamp" } },
+  { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 21000, clout: 120, rating: 2, rentPerWeek: 525, blurb: "Previously loved. Heavily. It still gets you to the club." },
+  { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 78000, clout: 300, rating: 4, rentPerWeek: 1350, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
+  { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 117000, clout: 420, rating: 4, rentPerWeek: 1950, blurb: "Silent, fast and smug. Like a startup founder." },
+  // Houses
+  { sku: "house-astoria-townhouse", category: "houses", name: "Astoria townhouse", emoji: "🏡", price: 270000, clout: 900, rating: 3, neighborhood: "Astoria", blurb: "A stoop of your own. Neighbors will judge your plants." },
+  { sku: "house-hunters-point-duplex", category: "houses", name: "Hunters Point duplex penthouse", emoji: "🏙️", price: 2400000, clout: 4200, rating: 4, neighborhood: "Long Island City", blurb: "Two floors, a terrace and a hot tub with a view of everyone who doubted you." },
+  { sku: "house-lic-penthouse", category: "houses", name: "LIC penthouse", emoji: "🌆", price: 975000, clout: 2400, rating: 4, neighborhood: "Long Island City", blurb: "Floor-to-ceiling windows, so the city can watch you thrive." },
+  // Luxury
+  { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "⛓️", price: 2250, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },
+  { sku: "lux-diamond-studs", category: "luxury", name: "Diamond-ish studs", emoji: "💎", price: 6000, clout: 140, rating: 4, blurb: "They sparkle. That's the whole personality." },
+  { sku: "lux-designer-watch", category: "luxury", name: "Designer watch", emoji: "⌚", price: 17000, clout: 260, rating: 4, blurb: "Tells the time and tells everyone you're doing fine." },
+  // Makeup
+  { sku: "mu-glow-kit", category: "makeup", name: "Glass-skin glow kit", emoji: "✨", price: 165, clout: 12, rating: 3, blurb: "Look like you sleep eight hours. You don't." },
+  { sku: "mu-lip-set", category: "makeup", name: "Lip set in 12 shades of \"nude\"", emoji: "💄", price: 210, clout: 14, rating: 3, blurb: "Twelve shades. You'll wear one. Forever." },
+  { sku: "mu-lash-bar", category: "makeup", name: "Lash bar appointment", emoji: "👁️", price: 350, clout: 20, rating: 2, blurb: "Blink and you'll fan the person next to you." },
   // The Clout Pass and the starter pack (owner, Nov 1; lib/seasonPass.ts): never on sale, never sold back or traded, and worth
   // nothing in Net Worth or the Crib Rating. They arrive from a claimed tier or the pack (player_items acquired 'collector', value 0).
   ...([
@@ -1224,7 +1239,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     ["pass-s1-cuffed-cap", "fashion", "Cuffed cap", "🧢", "The finale. Wear it like you made it to January.", { slot: "accessory", kind: "cap", color: "#7A1F3D", accent: "#FFD6E5" }],
     ["pass-s1-winter-tee", "fashion", "\"Not looking for anything serious\" tee", "👕", "A lie, in a comfortable cotton blend.", { slot: "top", kind: "tee", color: "#F7F1E8", accent: "#B3263A" }],
     ["pp-first-week-hoodie", "fashion", "First Week in NYC hoodie", "🗽", "You've been here six days and already have opinions about bagels.", { slot: "top", kind: "hoodie", color: "#FF5A36", accent: "#1C1C28" }],
-    ["pp-subway-cargos", "fashion", "Subway-proof cargo pants", "🚇", "Pockets for a MetroCard, three chargers and a granola bar from 2019.", { slot: "bottom", kind: "pants", color: "#3B3F46", accent: "#FF5A36" }],
+    ["pp-subway-cargos", "fashion", "Subway-proof cargo pants", "🚇", "Pockets for an OMG Card, three chargers and a granola bar from 2019.", { slot: "bottom", kind: "pants", color: "#3B3F46", accent: "#FF5A36" }],
     ["pp-puddle-boots", "fashion", "Puddle-jumper boots", "🥾", "Every corner in Queens has a lake. Now you don't care.", { slot: "shoes", kind: "boots", color: "#22222A", accent: "#FF5A36" }],
   ] as [string, ShopCategory, string, string, string, NonNullable<ShopItem["wear"]>][]).map(([sku, category, name, emoji, blurb, wear]): ShopItem =>
     ({ sku, category, name, emoji, price: 0, clout: 0, rating: 4, reward: true, blurb, wear })),
@@ -1246,21 +1261,6 @@ export const SHOP_ITEMS: ShopItem[] = [
     ["pp-ring-lamp", "Ring-light floor lamp", "💡", "Every room is content now.", "floorLamp", "#F7F7FF", "decor"],
   ] as [string, string, string, string, string, string, FurnitureRoom][]).map(([sku, name, emoji, blurb, kind, color, room]): ShopItem =>
     ({ sku: `home-${sku}`, category: "home", name, emoji, price: 0, clout: 0, rating: 4, reward: true, blurb, furniture: { kind, color, room, line: sku } })),
-  { sku: "car-hatchback", category: "cars", name: "Pre-loved hatchback", emoji: "🚗", price: 21000, clout: 120, rating: 2, rentPerWeek: 525, blurb: "Previously loved. Heavily. It still gets you to the club." },
-  { sku: "car-luxury-sedan", category: "cars", name: "Luxury sedan", emoji: "🚘", price: 78000, clout: 300, rating: 4, rentPerWeek: 1350, blurb: "Rent this luxury sedan. Might be fake life, but it's oh so worth it when you pull up to the club." },
-  { sku: "car-electric-coupe", category: "cars", name: "Electric coupe", emoji: "🏎️", price: 117000, clout: 420, rating: 4, rentPerWeek: 1950, blurb: "Silent, fast and smug. Like a startup founder." },
-  // Houses
-  { sku: "house-astoria-townhouse", category: "houses", name: "Astoria townhouse", emoji: "🏡", price: 270000, clout: 900, rating: 3, neighborhood: "Astoria", blurb: "A stoop of your own. Neighbors will judge your plants." },
-  { sku: "house-hunters-point-duplex", category: "houses", name: "Hunters Point duplex penthouse", emoji: "🏙️", price: 2400000, clout: 4200, rating: 4, neighborhood: "Long Island City", blurb: "Two floors, a terrace and a hot tub with a view of everyone who doubted you." },
-  { sku: "house-lic-penthouse", category: "houses", name: "LIC penthouse", emoji: "🌆", price: 975000, clout: 2400, rating: 4, neighborhood: "Long Island City", blurb: "Floor-to-ceiling windows, so the city can watch you thrive." },
-  // Luxury
-  { sku: "lux-gold-chain", category: "luxury", name: "Chunky gold-tone chain", emoji: "⛓️", price: 2250, clout: 70, rating: 3, blurb: "Not gold. Nobody needs to know." },
-  { sku: "lux-diamond-studs", category: "luxury", name: "Diamond-ish studs", emoji: "💎", price: 6000, clout: 140, rating: 4, blurb: "They sparkle. That's the whole personality." },
-  { sku: "lux-designer-watch", category: "luxury", name: "Designer watch", emoji: "⌚", price: 17000, clout: 260, rating: 4, blurb: "Tells the time and tells everyone you're doing fine." },
-  // Makeup
-  { sku: "mu-glow-kit", category: "makeup", name: "Glass-skin glow kit", emoji: "✨", price: 165, clout: 12, rating: 3, blurb: "Look like you sleep eight hours. You don't." },
-  { sku: "mu-lip-set", category: "makeup", name: "Lip set in 12 shades of \"nude\"", emoji: "💄", price: 210, clout: 14, rating: 3, blurb: "Twelve shades. You'll wear one. Forever." },
-  { sku: "mu-lash-bar", category: "makeup", name: "Lash bar appointment", emoji: "👁️", price: 350, clout: 20, rating: 2, blurb: "Blink and you'll fan the person next to you." },
 ];
 
 export function placeById(id: string): Place | undefined {

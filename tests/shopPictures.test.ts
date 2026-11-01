@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { PASS_SKUS } from "../lib/seasonPass.ts";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
 import { imageMatches, parseCatalogFile, RETIRED_DUPLICATES, shippedPictures } from "../lib/shopCatalog.ts";
@@ -35,7 +36,8 @@ test("every item on sale before the catalog files has its picture", () => {
 test("no item on sale shows an emoji any more (the duplicates retired by migration 0108 aside)", () => {
   const files = readdirSync("content/shop").filter((f) => f.endsWith(".json"));
   const pictured = new Set(files.flatMap((f) => parseCatalogFile(JSON.parse(readFileSync(`content/shop/${f}`, "utf8")), f).images.flatMap((m) => imageMatches(m, SHOP_ITEMS).map((i) => i.sku))));
-  assert.deepEqual(SHOP_ITEMS.filter((i) => !pictured.has(i.sku) && !RETIRED_DUPLICATES.has(i.sku)).map((i) => i.sku), []);
+  // The Clout Pass and the starter pack's pieces are never on sale; they show their emoji until pictures come (migration 0156).
+  assert.deepEqual(SHOP_ITEMS.filter((i) => !pictured.has(i.sku) && !RETIRED_DUPLICATES.has(i.sku) && !PASS_SKUS.includes(i.sku)).map((i) => i.sku), []);
   for (const sku of RETIRED_DUPLICATES) assert.ok(!pictured.has(sku) && !shippedPictures(sku), `${sku} has no borrowed picture`);
   const sql = readFileSync("supabase/migrations/0108_shop_duplicates.sql", "utf8");
   for (const sku of RETIRED_DUPLICATES) assert.ok(sql.includes(`'${sku}'`), `migration 0108 retires ${sku}`);

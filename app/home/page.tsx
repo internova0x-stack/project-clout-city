@@ -44,6 +44,7 @@ import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campai
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { goalsState, spendGuestPass } from "./goalsActions";
+import { passClaimAll, passState, starterPackState } from "./seasonActions";
 import { pushAsked, pushPrefs, pushSetOff, pushSubscribe, pushTest, pushUnsubscribe } from "./pushActions";
 import { kickPush } from "@/lib/pushServer";
 import { after } from "next/server";
@@ -184,6 +185,8 @@ export default async function HomePage() {
       assets={city && econ.ok ? { state: assetSalesState, buyers: assetBuyers, offer: assetOffer, answer: assetAnswer, cancel: assetCancel } : undefined}
       // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
       goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}
+      // Migration 0156: the Clout Pass (Tasks → Pass) and the starter pack (season_state failing hides them).
+      pass={city ? { state: passState, claimAll: passClaimAll, starter: starterPackState } : undefined}
       // Migration 0078: push notifications (Settings → Notifications and Lola's ask).
       push={city ? { prefs: pushPrefs, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, setOff: pushSetOff, asked: pushAsked, test: pushTest } : undefined}
       // Migration 0072 switches on campus life (campus_state failing hides it).

@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { PASS_SKUS } from "../lib/seasonPass.ts";
 import { readdirSync, readFileSync } from "node:fs";
 import { GOALS, GOAL_COPY, NEXT_CHAPTER, chapters, goalProgress, nextStreakReward, nextUnlock, partLine, streakRewardOn } from "../lib/goals.ts";
 import { CITY_ECONOMY, PLACES, SHOP_ITEMS, citySeed } from "../lib/city.ts";
@@ -71,8 +72,9 @@ test("streak collectibles are reward-only Home pieces, never priced, and the see
     assert.ok(it && it.reward && it.category === "home" && it.price === 0 && it.furniture, sku);
     assert.equal((seed.find((s) => s.sku === sku) as { reward?: boolean } | undefined)?.reward, true, sku);
   }
-  assert.equal(SHOP_ITEMS.filter((i) => i.reward).length, GOALS.streak.collectibles.length, "every reward piece is a streak reward");
-  assert.ok(seed.filter((s) => !("reward" in s)).length === seed.length - GOALS.streak.collectibles.length, "other items' seed unchanged");
+  // The Clout Pass and the starter pack (migration 0156) give the other reward pieces.
+  assert.equal(SHOP_ITEMS.filter((i) => i.reward && !PASS_SKUS.includes(i.sku)).length, GOALS.streak.collectibles.length, "every other reward piece is a streak reward");
+  assert.ok(seed.filter((s) => !("reward" in s)).length === seed.length - GOALS.streak.collectibles.length - PASS_SKUS.length, "other items' seed unchanged");
 });
 
 test("goal progress and words", () => {

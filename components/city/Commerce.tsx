@@ -33,7 +33,7 @@ type Busy = string | null;
 // Shop (C10 category chips, C23 item cards). Virtual cash only.
 // ---------------------------------------------------------------------------
 export function ShopSheet({
-  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit, catalog, onGift,
+  open, onClose, state, busy, onBuy, onEquip, story = null, realMoney, initialCategory = "fashion", onTryOn, section, onTryAtHome, fit, catalog, onGift, top,
 }: {
   open: boolean; onClose: () => void; state: CityState; busy: Busy; onBuy: (sku: string, mode: "buy" | "rent") => Promise<boolean>;
   /** #15: owned clothes can be put on straight from the Shop. */
@@ -55,6 +55,8 @@ export function ShopSheet({
   catalog?: CatalogItem[];
   /** The Player Economy (migration 0151): buy a C$ piece for a friend. Hidden without it. */
   onGift?: (item: ShopCardItem) => void;
+  /** Above the tabs: the starter pack offer (owner, Nov 1; components/game/SeasonPass.tsx). */
+  top?: React.ReactNode;
 }) {
   const [cat, setCat] = useState<ShopCategory | "couture">(initialCategory);
   const [lastInitial, setLastInitial] = useState(initialCategory);
@@ -207,6 +209,7 @@ export function ShopSheet({
       <Sheet open={open && !confirm} onClose={onClose} label="Shop" tall>
         <div className="stack-16">
           <SheetTitle right={formatCash(player.bank_cash)}>Shop</SheetTitle>
+          {top}
           <div className="chip-row" role="group" aria-label="Categories">
             {tabs.map((c) => (
               <button key={c.id} className="chip" aria-pressed={cat === c.id} onClick={() => { setCat(c.id); setLine("all"); }}>
