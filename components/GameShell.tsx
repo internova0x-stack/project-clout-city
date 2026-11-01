@@ -10,6 +10,8 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
+import { DailyPickSheet } from "./city/DailyPick";
+import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -1563,6 +1565,32 @@ export function GameShell({
     setToast(`🎟️ ${r.data.result.text}`);
     lifePaid(r.data.result);
   };
+  // Today's pick (owner, Nov 1): once a New York day, after the game settles and only when nothing else is on screen.
+  const [dailyPick, setDailyPick] = useState<TodayPick | null>(null);
+  const pickAsked = useRef(false);
+  useEffect(() => {
+    if (!life?.today || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip) return;
+    const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
+    const key = `cc-daily-pick:${new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date())}`;
+    try { if (!force && localStorage.getItem(key)) return; } catch { /* show it */ }
+    pickAsked.current = true;
+    const t = setTimeout(() => {
+      void life.today!().then((r) => {
+        if (!r.ok || !r.data) return;
+        try { localStorage.setItem(key, "1"); } catch { /* fine */ }
+        setDailyPick(r.data);
+      }).catch(() => {});
+    }, force ? 1500 : 3000);
+    return () => { clearTimeout(t); pickAsked.current = false; };
+  }, [life, flow, panel, phone.open, lifeCard, travelPlan, trip]);
+  const goToPick = () => {
+    const p = dailyPick ? placeById(dailyPick.place) : undefined;
+    setDailyPick(null);
+    if (!p) return;
+    if (atPlace === p.id) { setInside(p); setLifeResult(null); setLifeCard({ card: dailyPick!.activity, kind: "activity" }); return; }
+    setTravelPlan({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id });
+  };
+
   /** Everything known about this moment, for what people say here. */
   const sceneFor = (p: Place, floor: number): Scene => {
     const integ = choiceS?.integrity;
@@ -3640,6 +3668,7 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
+          <DailyPickSheet pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setDailyPick(null)} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />

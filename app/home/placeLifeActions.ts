@@ -1,7 +1,7 @@
 "use server";
 
 import { randomInt } from "node:crypto";
-import { LifeError, claimStamp, doActivity, doMoment, lifeError, lifeView, momentFor, momentView, type LifeDone, type LifeResult, type LifeScene, type LifeView, type MomentView } from "@/lib/placeLife";
+import { LifeError, todaysPick, type TodayPick, claimStamp, doActivity, doMoment, lifeError, lifeView, momentFor, momentView, type LifeDone, type LifeResult, type LifeScene, type LifeView, type MomentView } from "@/lib/placeLife";
 import { LIFE_CONTENT } from "@/lib/placeLifeContent";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -138,4 +138,13 @@ export async function lifeStamp(place: string, days: number): Promise<R<{ result
   if (err) return { ok: false, error: err };
   c.done.refs.add(r.ref);
   return { ok: true, data: { result: r, view: lifeView(LIFE_CONTENT, place, c.scene, c.done, visited) } };
+}
+
+export async function lifeToday(): Promise<R<TodayPick | null>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const c = await context(w);
+  if ("error" in c) return { ok: false, error: c.error };
+  const day = Date.parse(`${c.ctx.today}T12:00:00Z`) / 86_400_000;
+  return { ok: true, data: todaysPick(LIFE_CONTENT, c.scene, c.done, c.ctx.regularDays, Math.floor(day)) };
 }

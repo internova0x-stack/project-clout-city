@@ -145,6 +145,44 @@ export function momentFor(c: LifeContent, crowdType: string, done: LifeDone, ran
 }
 export const momentView = (m: LifeMoment): MomentView => ({ id: m.id, emoji: m.emoji, title: m.title, blurb: m.blurb, options: m.options.map(optionView) });
 
+/** Today's pick (owner, Nov 1: "when a player logs in for the first time in a day… a pop up that shows an activity"). */
+export interface TodayPick {
+  place: string;
+  activity: ActivityView;
+  /** Why this one: a happening on now, a regular card one visit from a reward, or a place to try. */
+  why: "happening" | "stamp" | "new";
+  /** For "happening": its title and until when; for "stamp": the reward that's one visit away. */
+  note: string | null;
+}
+
+/**
+ * The one thing worth doing today, best first: an activity of a happening on now (one not done today), then a place whose
+ * regular card is one visit from a reward, then a signature activity at a place the player hasn't been to much, rotated by
+ * the day so it changes. Null when there's nothing left to suggest.
+ */
+export function todaysPick(c: LifeContent, s: LifeScene, done: LifeDone, regularDays: Record<string, number>, dayKey: number): TodayPick | null {
+  const view = (a: LifeActivity): ActivityView => ({
+    id: a.id, emoji: a.emoji, title: a.title, blurb: a.blurb, energy: a.energy, happening: a.happening ?? null, done: false, options: a.options.map(optionView),
+  });
+  const open = (a: LifeActivity) => !done.refs.has(`a:${a.id}`);
+  for (const h of c.happenings) {
+    if (!happeningsNow(c, h.place, s).some((x) => x.id === h.id)) continue;
+    const a = c.activities.find((x) => x.happening === h.id && open(x));
+    if (a) return { place: h.place, activity: view(a), why: "happening", note: h.hours ? `${h.title} · until ${h.hours[1] % 12 === 0 ? 12 : h.hours[1] % 12} ${h.hours[1] % 24 < 12 ? "AM" : "PM"}` : `${h.title} · now` };
+  }
+  for (const [place, perks] of Object.entries(c.stamps)) {
+    const days = regularDays[place] ?? 0;
+    const next = perks.find((p) => days < p.days);
+    if (!next || next.days - days !== 1 || !(next.cash || next.clout)) continue;
+    const a = c.activities.find((x) => x.place === place && !x.happening && open(x));
+    if (a) return { place, activity: view(a), why: "stamp", note: next.text };
+  }
+  const fresh = c.activities.filter((a) => !a.happening && open(a)).sort((x, y) => (regularDays[x.place] ?? 0) - (regularDays[y.place] ?? 0));
+  const least = fresh.filter((a) => (regularDays[a.place] ?? 0) === (regularDays[fresh[0]?.place] ?? 0));
+  const a = least[((dayKey % least.length) + least.length) % least.length];
+  return a ? { place: a.place, activity: view(a), why: "new", note: null } : null;
+}
+
 export class LifeError extends Error {
   code: string;
   constructor(code: string) { super(code); this.code = code; }
@@ -219,6 +257,8 @@ export type LifeApi = {
   moment(crowdType: string): Promise<{ ok: true; data: MomentView | null } | { ok: false; error: string }>;
   playMoment(id: string, option: string): Promise<{ ok: true; data: LifeResult } | { ok: false; error: string }>;
   stamp(place: string, days: number): Promise<{ ok: true; data: { result: LifeResult; view: LifeView } } | { ok: false; error: string }>;
+  /** Today's pick for the once-a-day card (null when there's nothing to suggest). */
+  today?(): Promise<{ ok: true; data: TodayPick | null } | { ok: false; error: string }>;
 };
 
 /** The Studio's rules for content/places/life.json. */

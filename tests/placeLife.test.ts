@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { PLACES } from "../lib/city.ts";
 import { CONDITION_KINDS } from "../lib/cityConditions.ts";
 import { SKILLS } from "../lib/skills.ts";
-import { LIFE, LifeError, activitiesAt, claimStamp, doActivity, doMoment, happeningsNow, lifeView, momentFor, rollOption, validateLife, type LifeDone } from "../lib/placeLife.ts";
+import { LIFE, LifeError, todaysPick, activitiesAt, claimStamp, doActivity, doMoment, happeningsNow, lifeView, momentFor, rollOption, validateLife, type LifeDone } from "../lib/placeLife.ts";
 import { PLAYER_TAGS, crowdTypeFor, dayPart, fits, pickLine, stageOf, validateDialogue, type Scene } from "../lib/dialogue.ts";
 import { readFileSync } from "node:fs";
 import type { LifeContent } from "../lib/placeLife.ts";
@@ -103,4 +103,22 @@ test("every crowd type turns up somewhere, and the same seat is the same person"
   const s = { tags: ["taverna", "dining_medium"], part: "afternoon" as const, floor: 1 };
   assert.equal(crowdTypeFor(DIALOGUE.crowd, s, 42)?.id, crowdTypeFor(DIALOGUE.crowd, s, 42)?.id);
   assert.ok(crowdTypeFor(DIALOGUE.crowd, s, 7));
+});
+
+test("today's pick: a happening on now first, then a regular card one visit from a reward, then somewhere new", () => {
+  const lunch = { minute: 12 * 60 + 10, weekday: 2, conditions: [] };
+  const quiet = { minute: 3 * 60, weekday: 2, conditions: [] };
+  const h = todaysPick(LIFE_CONTENT, lunch, fresh(), {}, 1)!;
+  assert.equal(h.why, "happening");
+  assert.ok(h.activity.happening, h.activity.id);
+  const st = todaysPick(LIFE_CONTENT, quiet, fresh(), { "ditmars-deli": 6 }, 1);
+  if (st?.why !== "happening") {
+    assert.equal(st?.why, "stamp");
+    assert.equal(st?.place, "ditmars-deli");
+  }
+  const n = todaysPick(LIFE_CONTENT, { minute: 3 * 60, weekday: 2, conditions: [] }, fresh(), {}, 5);
+  assert.ok(n && !n.activity.options.some((o) => "outcomes" in o), "never the outcomes");
+  // Everything done today: nothing to suggest.
+  const all: LifeDone = { refs: new Set(LIFE_CONTENT.activities.map((a) => `a:${a.id}`)), momentsToday: 0 };
+  assert.equal(todaysPick(LIFE_CONTENT, lunch, all, {}, 1), null);
 });

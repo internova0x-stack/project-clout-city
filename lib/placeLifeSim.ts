@@ -2,7 +2,7 @@
 // Presets: (none) as it is; `rush` puts the clock in every place's happening; `regular` gives 8 days at every place (the
 // 7-day stamp waiting); `brownout` runs a brownout today.
 
-import { LIFE, LifeError, claimStamp, doActivity, doMoment, lifeError, lifeView, momentFor, momentView, type LifeApi, type LifeDone, type LifeScene } from "./placeLife.ts";
+import { LIFE, LifeError, todaysPick, claimStamp, doActivity, doMoment, lifeError, lifeView, momentFor, momentView, type LifeApi, type LifeDone, type LifeScene } from "./placeLife.ts";
 import { LIFE_CONTENT } from "./placeLifeContent.ts";
 
 export const LIFE_PRESETS = ["rush", "regular", "brownout"] as const;
@@ -53,6 +53,13 @@ export function createLifeSim(preset: string | null, opts: {
         apply(r);
         return { ok: true, data: r };
       } catch (e) { return fail(e); }
+    },
+    async today() {
+      const all = Object.fromEntries(Object.keys(LIFE_CONTENT.stamps).map((p) => [p, days(p)]));
+      // ?life=regular puts one place a visit from its reward; the rest as they are.
+      if (preset === "regular") for (const p of Object.keys(all)) all[p] = p === "ditmars-deli" ? 6 : 0;
+      const place = preset === "rush" ? "feta-compli" : undefined;
+      return { ok: true, data: todaysPick(LIFE_CONTENT, scene(place), done, all, Math.floor(Date.now() / 86_400_000)) };
     },
     async stamp(place, d) {
       try {
