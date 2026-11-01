@@ -216,8 +216,9 @@ components live in `app/globals.css`.
   The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"): once a New
   York day (`cc-daily-pick:<date>`), 3 s after the game settles and only when nothing else is open, a floating card
   (components/city/DailyPick.tsx `DailyWelcome`, no scrim): a greeting by the city hour and the player's name, the all-five task
-  streak, "Since you left" chips (rent alarm, unread messages, Clout Pass rewards, today's tasks; each opens its screen), and
-  Lola's `todaysPick`: a happening on now, else a regular card one visit from its reward, else a place to try (rotated by day);
+  streak, "Since you left" chips (rent alarm, unread messages, Clout Pass rewards; each opens its screen), and "Today" (owner, Nov 1: "a mix of
+  tasks, a goal that is close to completion, skill upgrade, story"): tiles for the five tasks, the current goal's progress, the skill
+  nearest its next level and the running story (new chapters), each opening its screen (GameShell `welcomeRows`), under Lola's `todaysPick`: a happening on now, else a regular card one visit from its reward, else a place to try (rotated by day);
   Let's go plans the trip (Do it now when already there). `lifeToday` on the server; `?daily=pick` forces it in the preview.
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).

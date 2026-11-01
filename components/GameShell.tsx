@@ -10,7 +10,7 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
-import { DailyWelcome, type WelcomeChip } from "./city/DailyPick";
+import { DailyWelcome, type WelcomeChip, type WelcomeRow } from "./city/DailyPick";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
@@ -21,7 +21,7 @@ import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
-import { SKILL_PERKS, perkStatus, skillBadge } from "@/lib/skills";
+import { LEVEL_AT, MAX_LEVEL, SKILLS, SKILL_PERKS, levelFor, levelProgress, perkStatus, skillBadge } from "@/lib/skills";
 import { SkillsSheet } from "./game/Skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
@@ -106,7 +106,7 @@ import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
 import type { MembershipApi, MembershipState } from "@/lib/membership";
 import type { PushApi } from "@/lib/pushClient";
-import type { GoalsApi, GoalsState } from "@/lib/goals";
+import { GOAL_COPY, goalProgress, partLine, type GoalsApi, type GoalsState } from "@/lib/goals";
 import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
 import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
 import { RANKS, rankFor, type Rank } from "@/lib/ranks";
@@ -2760,8 +2760,43 @@ export function GameShell({
     ...(rentAlarm ? [{ id: "rent", emoji: "", text: rentAlarm.title, onTap: () => { setWelcomeOpen(false); setPanel("bills"); } }] : []),
     ...(chatUnread > 0 ? [{ id: "chat", emoji: "💬", text: `${chatUnread} new message${chatUnread === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setPhone({ open: true, app: "messages" }); } }] : []),
     ...(passReady > 0 ? [{ id: "pass", emoji: "🎁", text: `${passReady} Clout Pass reward${passReady === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setTasksTab("pass"); setPanel("tasks"); } }] : []),
-    ...(city && city.tasks.length ? [{ id: "tasks", emoji: "✅", text: `${tasksDone(city)}/${city.tasks.length} daily tasks`, onTap: () => { setWelcomeOpen(false); setTasksTab("daily"); setPanel("tasks"); } }] : []),
   ];
+  // Today's mix (owner, Nov 1: "a mix of tasks, a goal that is close to completion, skill upgrade, story").
+  const welcomeRows = ((): WelcomeRow[] => {
+    const rows: WelcomeRow[] = [];
+    const go = (fn: () => void) => () => { setWelcomeOpen(false); fn(); };
+    if (city && city.tasks.length) {
+      const done = tasksDone(city);
+      const next = city.tasks.find((t) => !t.done_at);
+      rows.push({ id: "tasks", emoji: "✅", kicker: "Tasks", title: done === city.tasks.length ? "All five done. Look at you." : next ? taskTitle(next) : "Your daily tasks",
+        sub: `${done} of ${city.tasks.length} done`, progress: done / city.tasks.length,
+        onTap: go(() => { setTasksTab("daily"); setPanel("tasks"); }) });
+    }
+    const g = goalsNow?.goal;
+    const gc = g ? GOAL_COPY[g.id] : undefined;
+    if (g && gc) {
+      const pct = goalProgress(g.parts);
+      const left = g.parts.find((x) => x.have < x.need);
+      rows.push({ id: "goal", emoji: gc.emoji, kicker: pct >= 0.6 ? `Almost · ${Math.round(pct * 100)}%` : `Goal · ${Math.round(pct * 100)}%`, title: gc.title,
+        sub: left ? partLine(left) : gc.toward, progress: pct, hot: pct >= 0.6, onTap: go(() => { setTasksTab("goals"); setPanel("tasks"); }) });
+    }
+    const sk = (skills ?? []).filter((x) => levelFor(x.practice) < MAX_LEVEL && x.practice > 0)
+      .map((x) => ({ x, l: levelFor(x.practice), p: levelProgress(x.practice) })).sort((a, b) => b.p - a.p)[0];
+    const def = sk && SKILLS.find((d) => d.id === sk.x.id);
+    if (sk && def) {
+      const more = LEVEL_AT[sk.l + 1] - sk.x.practice;
+      const perk = SKILL_PERKS.find((pk) => pk.skill === sk.x.id && pk.level === sk.l + 1);
+      rows.push({ id: "skill", emoji: def.emoji, kicker: more <= 2 ? "Level up!" : "Skill", title: `${def.name} ${sk.l} → ${sk.l + 1}`,
+        sub: `${more} more to go${perk ? " · new perk" : ""}`, progress: sk.p, hot: more <= 2, onTap: go(() => setPanel("skills")) });
+    }
+    if (storyNow) {
+      const fresh = unseenBeats(feed);
+      rows.push({ id: "story", emoji: storyNow.emoji ?? "🗞️", kicker: fresh ? `${fresh} new` : "Story",
+        title: storyNow.title, sub: `Day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}`, hot: fresh > 0,
+        onTap: go(() => openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null)) });
+    }
+    return rows;
+  })();
   const rentAlarmKey = rentAlarm && city ? `${rentAlarm.level}:${rentAlarm.owed}:${city.today}` : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // Migration 0151: a gift waiting, when no other social card is up.
@@ -3682,7 +3717,7 @@ export function GameShell({
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
           <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={goalsNow ? { current: goalsNow.streak.current, nextDay: goalsNow.streak.next.day, doneToday: goalsNow.streak.today } : null}
-            chips={welcomeChips} pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setWelcomeOpen(false)} />
+            chips={welcomeChips} rows={welcomeRows} pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setWelcomeOpen(false)} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />

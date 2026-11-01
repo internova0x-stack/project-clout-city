@@ -19,8 +19,10 @@ const WHY: Record<TodayPick["why"], { tag: string; lola: string }> = {
 };
 
 export interface WelcomeChip { id: string; emoji: string; text: string; onTap: () => void }
+/** One line of "Today": the tasks, the goal that's nearly done, the skill about to level up, the story's new chapter. */
+export interface WelcomeRow { id: string; emoji: string; kicker: string; title: string; sub: string; progress?: number; hot?: boolean; onTap: () => void }
 
-export function DailyWelcome({ open, name, hello, streak, chips, pick, here, onGo, onClose }: {
+export function DailyWelcome({ open, name, hello, streak, chips, rows, pick, here, onGo, onClose }: {
   open: boolean;
   name: string;
   /** "Good morning" … by the city clock. */
@@ -29,6 +31,8 @@ export function DailyWelcome({ open, name, hello, streak, chips, pick, here, onG
   streak: { current: number; nextDay: number; doneToday: boolean } | null;
   /** What's waiting since you left: up to three. */
   chips: WelcomeChip[];
+  /** Today's mix, in order (up to four). */
+  rows: WelcomeRow[];
   pick: TodayPick | null;
   here: boolean;
   onGo: () => void;
@@ -67,28 +71,41 @@ export function DailyWelcome({ open, name, hello, streak, chips, pick, here, onG
           </div>
         </div>
       )}
-      {pick && place && why && (
+      {(rows.length > 0 || (pick && place)) && (
         <div className="welcome-section">
-          <div className="daily-pop-lola">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LOLA_PORTRAIT} alt="" width={32} height={32} />
-            <span><b>Lola:</b> {why.lola}</span>
+          <span className="overline">Today</span>
+          <div className="welcome-rows">
+            {pick && place && why && (
+              <button className="welcome-row pick" onClick={() => { guardTaps(); onGo(); }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="welcome-row-lola" src={LOLA_PORTRAIT} alt="" width={40} height={40} />
+                <span className="welcome-row-text">
+                  <span className="welcome-row-kicker">{pick.why === "happening" && <span className="life-live" aria-hidden="true" />}Lola&apos;s pick · {why.tag}</span>
+                  <span className="welcome-row-title">{pick.activity.emoji} {pick.activity.title}</span>
+                  <span className="welcome-row-sub">{place.emoji} {place.name}{pick.activity.energy ? ` · ⚡ ${pick.activity.energy}` : ""}{pick.note ? ` · ${pick.note}` : ""}</span>
+                </span>
+                <span className="welcome-row-go" aria-hidden="true">›</span>
+              </button>
+            )}
           </div>
-          <div className="daily-pop-body">
-            <span className="daily-pop-emoji" aria-hidden="true">{pick.activity.emoji}</span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="daily-pick-tag">{pick.why === "happening" && <span className="life-live" aria-hidden="true" />}{why.tag}</span>
-              <span className="daily-pop-title">{pick.activity.title}</span>
-              <span className="meta" style={{ display: "block" }}>{place.emoji} {place.name}{pick.activity.energy ? ` · ⚡ ${pick.activity.energy}` : ""}</span>
-              {pick.note && <span className="daily-pop-note">{pick.why === "stamp" ? `🎟️ ${pick.note}` : `🔥 ${pick.note}`}</span>}
-            </span>
-          </div>
+          {rows.length > 0 && (
+            <div className="welcome-tiles">
+              {rows.slice(0, 4).map((r) => (
+                <button key={r.id} className={`welcome-tile${r.hot ? " hot" : ""}`} onClick={() => { guardTaps(); r.onTap(); }} aria-label={`${r.kicker}: ${r.title}. ${r.sub}`}>
+                  <span className="welcome-tile-top"><span aria-hidden="true">{r.emoji}</span>{r.kicker}</span>
+                  <span className="welcome-tile-title">{r.title}</span>
+                  <span className="welcome-tile-sub">{r.sub}</span>
+                  {r.progress != null && <span className="welcome-bar"><span style={{ width: `${Math.round(Math.max(0.04, Math.min(1, r.progress)) * 100)}%` }} /></span>}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <div className="daily-pop-actions">
         <button className="btn btn-ghost btn-sm" onClick={close}>Later</button>
-        <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} onClick={() => { guardTaps(); if (pick) onGo(); else onClose(); }}>
-          {pick ? (here ? "Do it now" : "Let's go") : "Let's go"}
+        <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} onClick={() => { guardTaps(); if (pick) onGo(); else if (rows[0]) rows[0].onTap(); else onClose(); }}>
+          {pick && here ? "Do it now" : "Let's go"}
         </button>
       </div>
     </div>
