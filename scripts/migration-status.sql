@@ -164,6 +164,10 @@ from (values
                                                         where conname = 'careers_track_check' and conrelid = to_regclass('public.careers')), false)),
   ('0148_underworld.sql', to_regprocedure('public.underworld_save(uuid, integer, jsonb, integer, integer, integer, jsonb, integer, text)') is not null),
   ('0149_living_together.sql', to_regclass('public.cohabits') is not null),
-  ('0150_underworld_part2.sql', to_regprocedure('public.gala_donate(integer)') is not null)
+  ('0150_underworld_part2.sql', to_regprocedure('public.gala_donate(integer)') is not null),
+  ('0151_player_economy.sql', to_regclass('public.economy_limits') is not null),
+  ('0152_marketplace.sql', to_regclass('public.market_listings') is not null),
+  ('0153_asset_sales.sql', to_regclass('public.asset_sales') is not null),
+  ('0154_class_task_always.sql', to_regprocedure('public.ensure_daily_v0100(uuid)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

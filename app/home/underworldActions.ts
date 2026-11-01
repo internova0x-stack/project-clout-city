@@ -8,6 +8,7 @@ import {
 import { UNDERWORLD_CONTENT } from "@/lib/underworldContent";
 import { withWeekly, type LiveUnderworldJob } from "@/lib/underworldWeeks";
 import { nyDay } from "@/lib/campaign";
+import { MARKETPLACE, hireError, marketError, type UnderworldHires, type UnderworldRunner } from "@/lib/marketplace";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -124,4 +125,96 @@ export async function underworldTable(): Promise<Out> {
 
 export async function underworldSeen(): Promise<Out> {
   return act((s) => ({ payouts: [], holding: 0, headline: null, energy: 0, mood: 0, integrity: 0, changed: markSeen(s) }));
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Migration 0152: underworld jobs between players (runners; NPC targets only). The poster hands one of today's offers to
+// an invited friend for a cut the database holds in escrow; the runner does it here through doJob's hire mode (their own
+// Heat, Energy, fines and holding); then underworld_hire_settle pays the cut minus the fee, gives Pablo's take to the poster
+// and adds the poster's Heat. A runner's state remembers each hire it ran, so a settle that failed is paid on the next look.
+// ---------------------------------------------------------------------------------------------------------------
+const hireMessage = (message: string) => hireError(message) ?? marketError(message);
+
+export async function underworldRunners(): Promise<UnderworldResult<UnderworldRunner[]>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const { data, error } = await w.admin.rpc("underworld_runners", { p_player: w.id });
+  if (error) return { ok: false, error: hireMessage(error.message) };
+  return { ok: true, data: (data ?? []) as UnderworldRunner[] };
+}
+
+export async function underworldHires(): Promise<UnderworldResult<UnderworldHires>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const { data, error } = await w.admin.rpc("underworld_hire_list", { p_player: w.id });
+  if (error) return { ok: false, error: /underworld_hire_list/.test(error.message) ? "Runners open with migration 0152." : hireMessage(error.message) };
+  const content = await contentFor(w.admin);
+  const withOptions = (l: UnderworldHires): UnderworldHires => ({
+    ...l,
+    received: l.received.map((h) => ({ ...h, options: content.jobs.find((j) => j.id === h.job)?.options.map((o) => ({ id: o.id, label: o.label, get: o.get, cost: o.cost, energy: o.energy })) ?? [] })),
+  });
+  const list = withOptions(data as UnderworldHires);
+  // A hire this runner already ran but that wasn't paid (the settle failed): pay it now, once.
+  const waiting = list.received.filter((h) => h.status === "offered");
+  if (waiting.length) {
+    const ctx = await load(w.id, w.admin);
+    const ran = "error" in ctx ? [] : ctx.row?.state.hires ?? [];
+    let again = false;
+    for (const h of waiting) {
+      const r = ran.find((x) => x.id === h.id);
+      if (!r) continue;
+      const { error: e } = await w.admin.rpc("underworld_hire_settle", { p_id: h.id, p_runner: w.id, p_outcome: r.outcome, p_pay: r.pay });
+      if (!e) again = true;
+    }
+    if (again) {
+      const { data: d2 } = await w.admin.rpc("underworld_hire_list", { p_player: w.id });
+      if (d2) return { ok: true, data: withOptions(d2 as UnderworldHires) };
+    }
+  }
+  return { ok: true, data: list };
+}
+
+export async function underworldHire(job: string, runner: string, cut: number): Promise<UnderworldResult<{ id: number; cash: number }>> {
+  if (typeof job !== "string" || typeof runner !== "string" || !Number.isInteger(cut)) return { ok: false, error: underworldError("no_offer") };
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const content = await contentFor(w.admin);
+  const j = content.jobs.find((x) => x.id === job);
+  if (!j) return { ok: false, error: underworldError("no_offer") };
+  const { data, error } = await w.admin.rpc("underworld_hire_post", { p_poster: w.id, p_runner: runner, p_job: job, p_title: j.title, p_emoji: j.emoji, p_cut: cut });
+  if (error) return { ok: false, error: hireMessage(error.message) };
+  return { ok: true, data: data as { id: number; cash: number } };
+}
+
+export async function underworldRunHire(id: number, option: string): Promise<Out> {
+  if (!Number.isInteger(id) || typeof option !== "string") return { ok: false, error: underworldError("no_offer") };
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const { data: h, error } = await w.admin.rpc("underworld_hire_get", { p_runner: w.id, p_id: id });
+  if (error) return { ok: false, error: hireMessage(error.message) };
+  if (!h) return { ok: false, error: hireError("hire_gone")! };
+  const hire = h as { id: number; job: string; title: string; cut: number; posterName: string | null };
+  const ran: { outcome?: "win" | "trace" | "fizzle" | "bust"; pay: number } = { pay: 0 };
+  const r = await act((s, ctx, today, content) => {
+    const x = doJob(content, s, hire.job, option, today, ctx, rng, { id: hire.id, heat: MARKETPLACE.hire.runnerHeat });
+    ran.outcome = x.outcome;
+    ran.pay = x.hirePay ?? 0;
+    return x;
+  });
+  if (!r.ok || !ran.outcome) return r;
+  const { data: paid, error: e } = await w.admin.rpc("underworld_hire_settle", { p_id: hire.id, p_runner: w.id, p_outcome: ran.outcome, p_pay: ran.pay });
+  if (e) console.error("underworld_hire_settle failed", e);
+  const cut = (paid as { cut?: number } | null)?.cut ?? 0;
+  const boss = hire.posterName ? `@${hire.posterName}` : "your boss";
+  const tail = e ? " The cut is on its way." : cut > 0 ? ` Your cut: C$${cut.toLocaleString("en-US")} after the city fee, from ${boss}.` : "";
+  return { ok: true, data: { ...r.data, receipt: `${r.data.receipt ?? ""}${tail}` } };
+}
+
+export async function underworldDeclineHire(id: number): Promise<UnderworldResult<unknown>> {
+  if (!Number.isInteger(id)) return { ok: false, error: hireError("hire_gone")! };
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const { error } = await w.admin.rpc("underworld_hire_decline", { p_runner: w.id, p_id: id });
+  if (error) return { ok: false, error: hireMessage(error.message) };
+  return { ok: true, data: null };
 }

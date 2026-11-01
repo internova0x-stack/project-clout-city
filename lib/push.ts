@@ -56,6 +56,8 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   cohabit_ended: { tier: 0, category: "social", ttlMin: 1440 },
   // Having people over (migration 0121)
   visit_invite: { tier: 0, category: "social", ttlMin: 720 },
+  // The Player Economy (migration 0151): a gift is someone waiting on you; jobs are money.
+  gift_received: { tier: 0, category: "social", ttlMin: 2880 },
   // Sublets (migration 0119)
   sublet_app: { tier: 0, category: "social", ttlMin: 1440 },
   sublet_accepted: { tier: 0, category: "social", ttlMin: 1440 },
@@ -70,6 +72,19 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   rent_short: { tier: 1, category: "money", ttlMin: 1440 },
   gig_ready: { tier: 1, category: "money", ttlMin: 720 },
   till_full: { tier: 1, category: "money", ttlMin: 1440 },
+  job_taken: { tier: 1, category: "money", ttlMin: 720 },
+  job_paid: { tier: 1, category: "money", ttlMin: 1440 },
+  // The Market and runners (migration 0152): a swap waiting on you is someone waiting; a sale is money.
+  trade_offer: { tier: 0, category: "social", ttlMin: 1440 },
+  trade_done: { tier: 1, category: "money", ttlMin: 1440 },
+  market_sold: { tier: 1, category: "money", ttlMin: 1440 },
+  runner_hired: { tier: 0, category: "social", ttlMin: 1440 },
+  runner_done: { tier: 1, category: "money", ttlMin: 1440 },
+  // Phase 3 (migration 0153): business and property sales.
+  asset_offer: { tier: 1, category: "money", ttlMin: 2880 },
+  asset_accepted: { tier: 1, category: "money", ttlMin: 1440 },
+  asset_cancelled: { tier: 1, category: "money", ttlMin: 1440 },
+  asset_done: { tier: 1, category: "money", ttlMin: 1440 },
   streak_risk: { tier: 1, category: "reminders", ttlMin: 300 },
   exams_open: { tier: 1, category: "reminders", ttlMin: 720 },
   exams_last_day: { tier: 1, category: "reminders", ttlMin: 600 },

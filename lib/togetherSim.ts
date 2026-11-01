@@ -2,7 +2,8 @@
 // Sample players answer on their own after a few seconds. ?together=invite|ride|plan|bonus|decorate|approve
 // starts in that state.
 
-import { placeById, visitClout } from "./city.ts";
+import { CLUB_EVENTS, placeById, visitClout } from "./city.ts";
+import { PLAYER_ECONOMY, economyFee } from "./playerEconomy.ts";
 import {
   JOBS, TOGETHER, canDoTogether, rideShare, togetherError,
   type JobHome, type JobsBoard, type MyJob, type OpenJob, type RideRequest, type RideStatus, type TogetherApi, type TogetherBonus,
@@ -33,7 +34,8 @@ const who = (id: string) => SAMPLE[id] ?? { name: "a friend", style: "bodega_dri
 const iso = (msAgo = 0) => new Date(Date.now() - msAgo).toISOString();
 const MIN = 60_000;
 
-export function createTogetherSim(hooks: SimHooks, preset?: string): TogetherApi {
+/** economy: migration 0151's Jobs board (the city fee, errands and event support, rating clients). */
+export function createTogetherSim(hooks: SimHooks, preset?: string, opts: { economy?: boolean; jobsPreset?: boolean } = {}): TogetherApi {
   let nextId = 100;
   let left: number = TOGETHER.perDay;
   const plans: (TogetherPlan & { theyDid: boolean })[] = [];
@@ -48,6 +50,24 @@ export function createTogetherSim(hooks: SimHooks, preset?: string): TogetherApi
   const mine: MyJob[] = [];
   const working: WorkJob[] = [];
   let homeBefore: unknown = null;
+  // Migration 0151 in the preview: errands and event support from friends, with the fee shown up front.
+  const ev = CLUB_EVENTS[0];
+  if (opts.economy) {
+    for (const j of open) j.fee = economyFee("job", j.pay);
+    open.unshift(
+      { id: 3, kind: "errand", pay: 1_000, cut: 0, note: "Pick up my dry cleaning. Metaphorically. Just be seen there.", createdAt: iso(5 * MIN), poster: "p-tasha", posterName: "tasha.b", posterStyle: "pilates_princess", homeId: "astoria_studio", posterRating: { hired: 2, rating: 5, rated: 2, clientRating: 4.6, clientRated: 5 }, businesses: 0, perDay: null, friend: true,
+        target: { places: ["grind-and-gossip", "lucky-seven-deli", "velvet-static"] }, deadline: new Date(Date.now() + 24 * 60 * MIN).toISOString(), fee: economyFee("job", 1_000) },
+      { id: 4, kind: "event", pay: 500, cut: 0, note: "Stand near me and laugh at my jokes.", createdAt: iso(9 * MIN), poster: "p-kai", posterName: "kai_beats", posterStyle: "bodega_drip", homeId: "astoria_studio", posterRating: { hired: 0, rating: null, rated: 0 }, businesses: 0, perDay: null, friend: false,
+        target: { event: ev?.id }, deadline: new Date(Date.now() + 6 * 60 * MIN).toISOString(), fee: economyFee("job", 500) },
+    );
+  }
+  if (opts.economy && opts.jobsPreset) {
+    const j = open.shift()!;
+    working.push({ id: j.id, kind: j.kind, pay: j.pay, cut: 0, note: j.note, status: "active", earned: 0, takenAt: iso(30 * MIN), moved: 0, endsAt: null,
+      poster: j.poster, posterName: j.posterName, posterStyle: j.posterStyle, target: j.target, deadline: j.deadline, fee: j.fee, progress: ["grind-and-gossip"] });
+    mine.push({ id: nextId++, kind: "event", pay: 250, cut: 0, note: null, status: "kept", stars: null, moved: 0, earned: 238, createdAt: iso(5 * 60 * MIN), takenAt: iso(4 * 60 * MIN), finishedAt: null, endsAt: null, keepBy: null,
+      worker: "p-dee", workerName: "dee_rivera", workerStyle: "thrift_store_icon", workerRating: { hired: 4, rating: 4.5, rated: 4 }, target: { event: ev?.id }, deadline: iso(-60 * MIN), fee: 12, progress: [ev?.id ?? ""] });
+  }
 
   const plan = (id: string, place: string, action: string, status: TogetherPlan["status"], isMine: boolean, theyDid = false) => {
     const p = who(id);
@@ -154,7 +174,7 @@ export function createTogetherSim(hooks: SimHooks, preset?: string): TogetherApi
       async board() {
         // Decorators finish at their deadline on their own.
         for (const j of working) if (j.status === "active" && j.endsAt && new Date(j.endsAt).getTime() < Date.now()) j.status = "done";
-        const data: JobsBoard = { canWork: true, open: structuredClone(open), mine: structuredClone(mine), working: structuredClone(working), rating };
+        const data: JobsBoard = { canWork: true, open: structuredClone(open), mine: structuredClone(mine), working: structuredClone(working), rating, ...(opts.economy ? { locked: null, feeRate: PLAYER_ECONOMY.fees.job } : {}) };
         return ok(data);
       },
       async post(kind, pay, cut, note) {
@@ -183,7 +203,8 @@ export function createTogetherSim(hooks: SimHooks, preset?: string): TogetherApi
         if (working.some((w) => w.kind === open[i].kind && w.status === "active")) return fail("already_working");
         const j = open.splice(i, 1)[0];
         working.unshift({ id: j.id, kind: j.kind, pay: j.pay, cut: j.cut, note: j.note, status: "active", earned: 0, takenAt: iso(), moved: 0,
-          endsAt: j.kind === "decorator" ? new Date(Date.now() + JOBS.decorator.minutes * MIN).toISOString() : null, poster: j.poster, posterName: j.posterName, posterStyle: j.posterStyle });
+          endsAt: j.kind === "decorator" ? new Date(Date.now() + JOBS.decorator.minutes * MIN).toISOString() : null, poster: j.poster, posterName: j.posterName, posterStyle: j.posterStyle,
+          target: j.target, deadline: j.deadline, fee: j.fee, progress: [] });
         return ok({ id, kind: j.kind });
       },
       async home(id) {
@@ -236,6 +257,39 @@ export function createTogetherSim(hooks: SimHooks, preset?: string): TogetherApi
         j.status = "ended";
         return ok({ status: "ended" });
       },
+      ...(opts.economy ? {
+        async postTask(kind: "errand" | "event", pay: number, target: { places?: string[]; event?: string }, hours: number, note: string) {
+          if (mine.some((j) => j.kind === kind && ["open", "active"].includes(j.status))) return fail("already_posted");
+          if (pay < PLAYER_ECONOMY.jobs.payMin || pay > PLAYER_ECONOMY.jobs.payMax) return fail("bad_pay");
+          if (hooks.cash() < pay) return fail("cant_afford");
+          hooks.pay(-pay);
+          const id = nextId++;
+          const fee = economyFee("job", pay);
+          mine.unshift({ id, kind, pay, cut: 0, note: note || null, status: "open", stars: null, moved: 0, earned: 0, createdAt: iso(), takenAt: null, finishedAt: null, endsAt: null, keepBy: null,
+            worker: null, workerName: null, workerStyle: null, workerRating: null, target, deadline: new Date(Date.now() + hours * 60 * MIN).toISOString(), fee, progress: [] });
+          // A friend takes it, then the game sees it done.
+          setTimeout(() => { const j = mine.find((x) => x.id === id); if (j?.status === "open") Object.assign(j, { status: "active", worker: "p-dev", workerName: "dev.r", workerStyle: "arcade_nerd", workerRating: rating, takenAt: iso() }); }, 4000);
+          setTimeout(() => { const j = mine.find((x) => x.id === id); if (j?.status === "active") Object.assign(j, { status: "kept", earned: pay - fee, progress: target.places ?? [target.event ?? ""] }); }, 10000);
+          return ok({ id, cash: -pay, fee });
+        },
+        async check(id: number) {
+          const j = working.find((x) => x.id === id && (x.kind === "errand" || x.kind === "event"));
+          if (!j) return fail("unknown_job");
+          // The preview counts the rest of the check-ins as done.
+          if (j.status === "active") {
+            j.progress = j.kind === "errand" ? [...(j.target?.places ?? [])] : [j.target?.event ?? ""];
+            j.status = "kept";
+            j.earned = j.pay - (j.fee ?? 0);
+            hooks.pay(j.earned, PLAYER_ECONOMY.jobs.clout);
+          }
+          return ok({ status: j.status, progress: j.progress ?? [], earned: j.earned });
+        },
+        async rateClient(id: number, stars: number) {
+          const j = working.find((x) => x.id === id);
+          if (j) j.clientStars = stars;
+          return ok(null);
+        },
+      } : {}),
     },
   };
 }

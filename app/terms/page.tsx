@@ -47,6 +47,22 @@ export default function Terms() {
       <ul>
         <li>In-game money (&quot;C$&quot; or &quot;virtual cash&quot;), clout, items, homes, businesses and other in-game things have <strong>no real-world value</strong>.</li>
         <li>C$ can&apos;t be bought with real money, sold, traded for real money or anything of value, or transferred outside the game.</li>
+        <li><strong>Between players:</strong> you can give another player a Shop item you buy with C$, and pay or be paid C$ for jobs on the
+          in-game Jobs board. You can&apos;t send C$ directly. Items bought with real money (VIP, Clout Couture and other real-money
+          items) can never be given or traded. These exchanges have limits (account age, rank, a weekly cap), a city fee on job pay
+          that goes to no one, and a waiting period before a gift can be sold back or passed on. Every exchange is logged and shown
+          to both players, and we may pause an account&apos;s trading, or reverse an exchange, if it looks like abuse or real-money trading.</li>
+        <li><strong>The Market:</strong> when it&apos;s open you can sell C$ Shop items to other players for C$, or swap items (with C$ to
+          even things out) in the trade window, which moves nothing until both players confirm. Prices stay within a range around the Shop
+          price, the city keeps a 5% fee, and a piece you got from another player stays with you a while before you can sell or swap it.
+          Trading pauses for a few days after a sign-in from a new device or an email change. We can reverse a sale or swap within a week
+          if it came from a stolen account or an exploit. <strong>Nothing in the game can be cashed out</strong>: selling or buying C$,
+          items or accounts for real money, inside or outside the game, isn&apos;t allowed and gets accounts banned.</li>
+        <li><strong>Selling a business or a house:</strong> when we switch it on, you can sell a business or a house you own in the game to
+          another player for C$, within a range around the game&apos;s appraisal. The buyer&apos;s C$ is held for 24 hours, during which either of
+          you can cancel; then the asset changes hands and a 10% city fee is taken from the seller. Rentals, public companies and anything
+          bought with real money can&apos;t be sold. There are limits on how often you can sell and how soon you can resell, and we may reverse
+          a sale within 7 days if it looks like theft, abuse or real-money trading.</li>
         <li>They&apos;re a limited licence to use in the game, not property you own. We may change how they work, including prices, rewards and rent, to keep the game fair and fun.</li>
         <li><strong>Lucky Star Lotto</strong> and other games of chance in Clout City use virtual cash only. Real money never touches them, and their prizes are virtual only.</li>
       </ul>

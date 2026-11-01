@@ -81,6 +81,24 @@ export function describeEntry(e: LedgerEntry): { emoji: string; title: string; d
     // ref: game:card (migration 0041): a ⭐ on the card won the game's pot.
     case "lotto_pot": return { emoji: "⭐", title: "Lotto pot", detail: lottoGame(first)?.name ?? "Scratch card" };
     case "travel_skip": return { emoji: "⏩", title: "Skipped the rest of a trip", detail: null };
+    // The Player Economy (migration 0151).
+    case "gift_send": return { emoji: "🎁", title: "Gift for a friend", detail: null };
+    case "gift_refund": return { emoji: "🎁", title: "Gift sent back", detail: "Refunded" };
+    case "economy_fee": return { emoji: "🏛️", title: "City fee", detail: "The city's cut of player deals, gone for good" };
+    case "job_hold": return { emoji: "💼", title: "Job pay held", detail: "Jobs board" };
+    case "job_pay": return { emoji: "💼", title: "Jobs board pay", detail: null };
+    case "job_refund": return { emoji: "💼", title: "Job pay back", detail: "Jobs board" };
+    // Phase 2 (migration 0152): the Market. Refs: sale:<id>, trade:<id>:<side>, refund:..., reversal:...
+    case "market_hold": return { emoji: "🏷️", title: first === "sale" ? "Market purchase" : "Swap C$ held", detail: "Market" };
+    case "market_sale": return first === "refund" ? { emoji: "🏷️", title: "Swap C$ back", detail: "Market" }
+      : first === "reversal" ? { emoji: "🏛️", title: "Reversed by the city", detail: "Market" }
+      : first === "trade" ? { emoji: "🔁", title: "C$ from a swap", detail: "Market" }
+      : { emoji: "🏷️", title: "Market sale", detail: null };
+    // Phase 3 (migration 0153): business and property sales.
+    case "asset_hold": return { emoji: "🔑", title: "Asset purchase held", detail: "In escrow for the cooling-off" };
+    case "asset_refund": return { emoji: "🔑", title: "Asset deal called off", detail: "Escrow back" };
+    case "asset_sale": return { emoji: "🔑", title: "Sold to a player", detail: "Business or property sale" };
+    case "asset_reverse": return { emoji: "🏛️", title: "Sale reversed", detail: "By the city" };
     default: {
       const bill = BILLS[e.kind];
       if (bill) return { emoji: bill[0], title: bill[1], detail: null };

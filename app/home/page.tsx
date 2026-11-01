@@ -1,7 +1,10 @@
 import {
-  cancelJob, decorateSave, endJob, jobFinish, jobHome, jobSettle, jobsBoard, managerCollect, postJob, rateJob, rideOffer, rideRespond, rideStatus, takeJob,
+  cancelJob, decorateSave, endJob, jobCheck, jobFinish, jobHome, jobSettle, jobsBoard, managerCollect, postJob, postTask, rateClient, rateJob, rideOffer, rideRespond, rideStatus, takeJob,
   togetherClaim, togetherInbox, togetherInvite, togetherRespond, togetherSeen,
 } from "./togetherActions";
+import { economyHistory, economySetOpen, economyState, giftAnswer, giftCandidates, giftInbox, giftSend } from "./economyActions";
+import { marketBuy, marketCancel, marketCloset, marketList, marketPeople, marketSetOpen, marketState, tradeCancel, tradeConfirm, tradeEdit, tradeOffer } from "./marketActions";
+import { assetAnswer, assetBuyers, assetCancel, assetOffer, assetSalesState } from "./assetActions";
 import { coutureMap, plazaBook, plazaWeeks } from "./coutureActions";
 import { businessState, buyBusiness, collectTills, goPublic, upgradeBusiness } from "./businessActions";
 import { cookies } from "next/headers";
@@ -34,7 +37,7 @@ import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
 import { characterRemembered } from "./characterActions";
 import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
-import { underworldJob, underworldLawyer, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
+import { underworldDeclineHire, underworldHire, underworldHires, underworldJob, underworldLawyer, underworldRunHire, underworldRunners, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
 import { galaDonate, galaState } from "./galaActions";
 import { careerApply, careerOffice, careerQuit, careerStick, careerAspire, careerScreen, careerStart, careerTask } from "./careerActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
@@ -72,10 +75,13 @@ export default async function HomePage() {
   // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
   await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
   // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
+  // Migration 0151 switches on the Player Economy (economy_state failing hides gifts and the jobs board's new kinds).
+  const econP = economyState();
   const [clique, city, story, catalog, chat, dating, crew, party, together, campus, myCard, skills, couple, subletS, homeS, visitS, starterS] = await Promise.all([
     getClique(), supabase ? loadCityState(supabase) : null, loadStoryFeed(), loadCatalog(), chatStatus(), datingInbox(), crewInbox(), partyInbox(), togetherInbox(), campusState(),
     playerCard(player.id), mySkills().catch(() => null), coupleState(), subletState(), homeScoreState(), visitState(), starterState(),
   ]);
+  const econ = await econP;
   // Push notifications: game traffic nudges the sender (at most once a minute per server); a cron covers quiet times.
   after(() => kickPush());
   // Migration 0010 switches on chat; a banned account sees only a notice.
@@ -161,8 +167,21 @@ export default async function HomePage() {
       together={city && together.ok ? {
         inbox: togetherInbox, invite: togetherInvite, respond: togetherRespond, claim: togetherClaim, seen: togetherSeen,
         rideOffer, rideRespond, rideStatus,
-        jobs: { board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob },
+        jobs: {
+          board: jobsBoard, post: postJob, cancel: cancelJob, take: takeJob, home: jobHome, save: decorateSave, finish: jobFinish, settle: jobSettle, rate: rateJob, collect: managerCollect, end: endJob,
+          ...(econ.ok ? { postTask, check: jobCheck, rateClient } : {}),
+        },
       } : undefined}
+      economy={city && econ.ok ? {
+        state: economyState, setOpen: economySetOpen, history: economyHistory, candidates: giftCandidates, inbox: giftInbox, send: giftSend, answer: giftAnswer,
+      } : undefined}
+      // Migration 0152: the Market (it says "Opening soon" while the Studio keeps phase 2 off).
+      market={city && econ.ok ? {
+        state: marketState, people: marketPeople, closet: marketCloset, list: marketList, cancel: marketCancel, buy: marketBuy,
+        offer: tradeOffer, edit: tradeEdit, confirm: tradeConfirm, cancelTrade: tradeCancel, setOpen: marketSetOpen,
+      } : undefined}
+      // Phase 3 (migration 0153): business and property sales (before 0153, or switched off, the panels stay hidden).
+      assets={city && econ.ok ? { state: assetSalesState, buyers: assetBuyers, offer: assetOffer, answer: assetAnswer, cancel: assetCancel } : undefined}
       // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
       goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}
       // Migration 0078: push notifications (Settings → Notifications and Lola's ask).
@@ -181,7 +200,11 @@ export default async function HomePage() {
         dilemma: campaignDilemma, debate: campaignDebate, endWeek: campaignEndWeek, choose: campaignChoose,
       } : undefined}
       // Migration 0135: Careers (the sheet says so if it hasn't run yet).
-      underworld={city ? { screen: underworldScreen, job: underworldJob, lawyer: underworldLawyer, seen: underworldSeen, table: underworldTable } : undefined}
+      underworld={city ? {
+        screen: underworldScreen, job: underworldJob, lawyer: underworldLawyer, seen: underworldSeen, table: underworldTable,
+        // Migration 0152: runners (underworld jobs between players).
+        ...(econ.ok ? { hires: underworldHires, runners: underworldRunners, hire: underworldHire, runHire: underworldRunHire, declineHire: underworldDeclineHire } : {}),
+      } : undefined}
       gala={city ? { state: galaState, donate: galaDonate } : undefined}
       careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit, stick: careerStick, aspire: careerAspire } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).

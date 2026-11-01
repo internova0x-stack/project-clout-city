@@ -3,6 +3,7 @@
 // the numbers in CITY_ECONOMY.together and .jobs (lib/city.ts). Safe to import anywhere.
 
 import { CITY_ECONOMY, placeById, type Place } from "./city.ts";
+import { economyError } from "./playerEconomy.ts";
 
 export const TOGETHER = CITY_ECONOMY.together;
 export const JOBS = CITY_ECONOMY.jobs;
@@ -106,12 +107,28 @@ export const togetherAlerts = (inbox: TogetherInbox | null) =>
 // ---------------------------------------------------------------------------
 // Jobs
 // ---------------------------------------------------------------------------
-export type JobKind = "decorator" | "manager";
-export type JobStatus = "open" | "active" | "done" | "kept" | "undone" | "ended" | "cancelled";
+export type JobKind = "decorator" | "manager" | "errand" | "event";
+/** Migration 0151's game-verified jobs: the game checks the work itself. */
+export type TaskKind = "errand" | "event";
+export type JobStatus = "open" | "active" | "done" | "kept" | "undone" | "ended" | "cancelled" | "expired";
 
-export interface JobRating { hired: number; rating: number | null; rated: number }
+/** As a worker (rating, rated) and, since migration 0151, as a client (clientRating, clientRated). */
+export interface JobRating { hired: number; rating: number | null; rated: number; clientRating?: number | null; clientRated?: number }
 
-export interface OpenJob {
+/** What an errand or event job asks for (migration 0151). */
+export interface JobTarget { places?: string[]; event?: string }
+
+/** Migration 0151's extra fields on every job row (absent before it). */
+export interface JobExtras {
+  target?: JobTarget | null;
+  deadline?: string | null;
+  /** The city fee: on open jobs what it will be, on paid jobs what it was. */
+  fee?: number;
+  /** Errands: the places checked in at so far; events: the event once attended. */
+  progress?: string[];
+}
+
+export interface OpenJob extends JobExtras {
   id: number;
   kind: JobKind;
   pay: number;
@@ -126,9 +143,11 @@ export interface OpenJob {
   businesses: number;
   /** Manager jobs: the cut of a day's pay at the client's businesses. */
   perDay: number | null;
+  /** Crew, partner or a chat (migration 0151); otherwise they're both on the open board. */
+  friend?: boolean;
 }
 
-export interface MyJob {
+export interface MyJob extends JobExtras {
   id: number;
   kind: JobKind;
   pay: number;
@@ -149,7 +168,7 @@ export interface MyJob {
   workerRating: JobRating | null;
 }
 
-export interface WorkJob {
+export interface WorkJob extends JobExtras {
   id: number;
   kind: JobKind;
   pay: number;
@@ -163,9 +182,20 @@ export interface WorkJob {
   poster: string;
   posterName: string;
   posterStyle: string;
+  /** The stars the worker gave the client (migration 0151). */
+  clientStars?: number | null;
 }
 
-export interface JobsBoard { canWork: boolean; open: OpenJob[]; mine: MyJob[]; working: WorkJob[]; rating: JobRating }
+export interface JobsBoard {
+  canWork: boolean; open: OpenJob[]; mine: MyJob[]; working: WorkJob[]; rating: JobRating;
+  /** Migration 0151: why jobs are closed (too_new, economy_locked, economy_frozen, phase_off) and the fee rate. */
+  locked?: string | null;
+  /** Owner, Nov 1: taking work is open from day one; posting (paying someone) waits for the unlock. */
+  canPost?: boolean;
+  postLocked?: string | null;
+  postUnlocksAt?: string | null;
+  feeRate?: number;
+}
 
 /** What the decorator sees: the client's home, furniture and layout, and when time is up. */
 export interface JobHome {
@@ -181,6 +211,9 @@ export interface JobHome {
 }
 
 /** "⭐ 4.8 · hired 12 times", or "New on the Jobs board". */
+/** "⭐ 4.6 as a client", or null before anyone rated them. */
+export const clientLine = (r: JobRating | null | undefined) => (r?.clientRating != null ? `⭐ ${r.clientRating.toFixed(1)} as a client` : null);
+
 export function ratingLine(r: JobRating | null | undefined): string {
   if (!r || !r.hired) return "New on the Jobs board";
   const hired = `hired ${r.hired === 1 ? "once" : `${r.hired} times`}`;
@@ -221,8 +254,12 @@ export function togetherError(message: string): string {
   if (m.includes("job_over")) return "Time's up on that job.";
   if (m.includes("not_done")) return "They're still working on it.";
   if (m.includes("bad_layout")) return "That layout didn't save. Try moving it again.";
+  if (m.includes("bad_target")) return "Pick real places on the map (2 to 4), or an event.";
+  if (m.includes("bad_hours")) return "Pick one of the deadlines.";
+  if (m.includes("bad_stars")) return "One to five stars.";
   if (m.includes("unknown")) return "That's not around anymore.";
-  return "That didn't work. Try again.";
+  // Migration 0151: the Player Economy's unlock, caps and phase switch.
+  return economyError(message);
 }
 
 export type TogetherResult<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -249,5 +286,11 @@ export interface TogetherApi {
     rate(id: number, stars: number): Promise<TogetherResult<null>>;
     collect(id: number): Promise<TogetherResult<{ collected: number; cash: number }>>;
     end(id: number): Promise<TogetherResult<{ status: string }>>;
+    /** Migration 0151: post an errand or event job (pay held until the game sees it done). */
+    postTask?(kind: TaskKind, pay: number, target: JobTarget, hours: number, note: string): Promise<TogetherResult<{ id: number; cash: number; fee: number }>>;
+    /** The worker asks the game to check their errand or event now. */
+    check?(id: number): Promise<TogetherResult<{ status: string; progress: string[]; earned: number }>>;
+    /** The worker rates the client. */
+    rateClient?(id: number, stars: number): Promise<TogetherResult<null>>;
   };
 }

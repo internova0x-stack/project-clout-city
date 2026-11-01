@@ -29,6 +29,13 @@ import { SubletsApp, type SubletHandlers } from "./Sublets";
 import { subletAlerts, type SubletState } from "@/lib/sublets";
 import type { GossipState, TeaCard } from "@/lib/gossip";
 import { BankView } from "../game/Sheets";
+import { TradesAndGifts } from "../economy/Economy";
+// Phase 3 (migration 0153): business and property sales.
+import { AssetSalesPanel } from "../economy/AssetSales";
+import type { AssetApi } from "@/lib/assetSales";
+import type { EconomyApi } from "@/lib/playerEconomy";
+// The Player Economy, Phase 2 (migration 0152): the Market app.
+import { MarketApp } from "../economy/Market";
 import { NewsApp, type CityNews, type NewsHandlers } from "../story/News";
 import { MessagesApp, type MessagesDating } from "../chat/Messages";
 import type { ChatApi } from "@/lib/chat";
@@ -39,7 +46,7 @@ import { whenLine, type CalendarEvent } from "@/lib/calendar";
 import { PerkAction, type PerkHandlers } from "../game/Skills";
 import { SKILLS, SKILL_PERKS, perkStatus } from "@/lib/skills";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor" | "campaign" | "careers";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor" | "campaign" | "careers" | "market";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
@@ -56,6 +63,8 @@ const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boo
   { id: "businesses", label: "Businesses", emoji: "🏪", tile: "condo" },
   // v0.13 Better Together (migration 0050); hidden until it runs.
   { id: "jobs", label: "Jobs", emoji: "🛋️", tile: "briefcase" },
+  // The Player Economy, Phase 2 (migration 0152): listings and swaps; hidden without it.
+  { id: "market", label: "Market", emoji: "🏷️", tile: "cash" },
   // #19 moving up (migration 0045); hidden until it runs.
   { id: "apartments", label: "Apartments", emoji: "🔑", tile: "house" },
   // v0.7: the Collection's front door (owner, Oct 13). It opens the Collection sheet over the game.
@@ -83,7 +92,8 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
-  invite, mayor, locked, onOpenCampaign, onOpenCareers, election, scandals, blotter, conditions,
+  invite, mayor, locked, onOpenCampaign, onOpenCareers, election, scandals, blotter, conditions, economy, onOpenGifts, market,
+  assets,
 }: {
   open: boolean;
   onClose: () => void;
@@ -138,6 +148,13 @@ export function PhoneModal({
   businesses?: Omit<React.ComponentProps<typeof BusinessesApp>, "onHome">;
   /** v0.13 the Jobs app (migration 0050); without it the app is hidden. */
   jobs?: Omit<React.ComponentProps<typeof JobsApp>, "onHome">;
+  /** The Player Economy (migration 0151): Trades & gifts in the Bank. */
+  economy?: EconomyApi;
+  onOpenGifts?: () => void;
+  /** Migration 0152: the Market app (and swaps waiting on the player, for its badge); without it the app is hidden. */
+  market?: React.ComponentProps<typeof MarketApp> & { alerts: number };
+  /** Phase 3 (migration 0153): Sell in Businesses and Apartments, live deals in the Bank. */
+  assets?: { api: AssetApi; onChanged: () => void };
   /** v0.14 Real Clout FM: the Radio app; without it the app is hidden. */
   radio?: RadioApi;
   /** A shoutout on air the player hasn't seen yet. */
@@ -212,7 +229,7 @@ export function PhoneModal({
                 </button>
               )}
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers) && (a.id !== "market" || market)).map((a) => (
                   <button key={a.id} className={`phone-app${locked?.[a.id] ? " locked" : ""}`} aria-label={locked?.[a.id] ? `${a.label}, opens at ${locked[a.id]}` : undefined}
                     onClick={() => (a.id === "campaign" ? onOpenCampaign!() : a.id === "careers" ? onOpenCareers!() : locked?.[a.id] ? onToast?.(`🔒 ${a.label} opens at ${locked[a.id]}. Keep earning clout.`) : a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span style={{ position: "relative" }}>
@@ -223,6 +240,7 @@ export function PhoneModal({
                       {a.id === "mayor" && mayor && mayor.unseen > 0 && <span className="count-badge">{mayor.unseen}</span>}
                       {a.id === "apartments" && subletAlerts(apartments?.sublets?.state ?? null) > 0 && <span className="count-badge">{subletAlerts(apartments!.sublets!.state)}</span>}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
+                      {a.id === "market" && !!market?.alerts && <span className="count-badge">{market.alerts}</span>}
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
                       {a.id === "messages" && (() => {
@@ -244,14 +262,19 @@ export function PhoneModal({
               {app !== "news" && app !== "tea" && app !== "businesses" && app !== "jobs" && <h2 className="display-lg" style={{ margin: "4px 0 12px" }}>{APPS.find((a) => a.id === app)!.label}</h2>}
               {app === "gigs" && (state ? <GigsApp state={state} now={now} busy={busy} onAccept={onAccept} onCollect={onCollect} perks={perks} /> : <Soon text="Gigs open with the city." />)}
               {app === "businesses" && businesses && <BusinessesApp {...businesses} onHome={() => setApp(null)} />}
+              {app === "businesses" && businesses && assets && <AssetSalesPanel api={assets.api} scope="business" onChanged={assets.onChanged} onToast={onToast} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
+              {app === "market" && market && <MarketApp api={market.api} cash={market.cash} onChanged={market.onChanged} onToast={market.onToast} />}
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
               {app === "mayor" && mayor && <MayorApp api={mayor.api} onSeen={mayor.onSeen} onToast={(t) => onToast?.(t)} />}
               {app === "tv" && tv && <TvApp api={tv.api} startForm={openForm && app === initialApp} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
               {app === "apartments" && apartments && state && (apartments.sublets
                 ? <ApartmentsTabs apartments={apartments as Required<NonNullable<typeof apartments>>} state={state} />
                 : <ApartmentsApp state={state} busy={apartments.busy} onLookInside={apartments.onLookInside} onMove={apartments.onMove} />)}
+              {app === "apartments" && apartments && state && assets && <AssetSalesPanel api={assets.api} scope="house" onChanged={assets.onChanged} onToast={onToast} />}
               {app === "bank" && (state ? <BankView balance={state.player.bank_cash} handle={handle} /> : <Soon text="The Bank opens with the city." />)}
+              {app === "bank" && state && assets && <AssetSalesPanel api={assets.api} scope="deals" onChanged={assets.onChanged} onToast={onToast} />}
+              {app === "bank" && state && economy && <TradesAndGifts api={economy} onOpenGifts={onOpenGifts} />}
               {app === "settings" && (
                 <div className="stack-12">
                   {membership && <MembershipRow vip={membership.vip} onOpen={membership.onOpen} />}

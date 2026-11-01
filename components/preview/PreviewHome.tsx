@@ -48,6 +48,9 @@ import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
 import { createStarterSim } from "@/lib/starterSim";
 import { createBusinessSim } from "@/lib/businessSim";
 import { createTogetherSim } from "@/lib/togetherSim";
+import { createEconomySim, simItem } from "@/lib/economySim";
+import { createMarketSim } from "@/lib/marketSim";
+import { createAssetSalesSim } from "@/lib/assetSalesSim";
 import type { CityResult } from "@/lib/cityState";
 import type { CliqueMember, Player } from "@/lib/player";
 import type { StoryApi, StoryFeed, StoryResult } from "@/lib/storyFeed";
@@ -95,7 +98,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, choicePreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, choicePreset, economyPreset, assetsPreset, marketPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -169,6 +172,12 @@ export function PreviewHome({
   galaPreset?: string;
   /** Moral Choices: ?choice=now|back|high|low|log|jail|chain|story (lib/choicesSim.ts; story = storylets from a sample history). */
   choicePreset?: string;
+  /** The Player Economy (migration 0151): ?economy=gift|gifted|history|jobs|locked (lib/economySim.ts). */
+  economyPreset?: string;
+  /** Phase 2, the Market (migration 0152): ?market=browse|listing|offer|confirm|off (lib/marketSim.ts). */
+  marketPreset?: string;
+  /** Phase 3 (migration 0153): ?assets=sell|offer|cooling|done|off (lib/assetSalesSim.ts). */
+  assetsPreset?: string;
   /** Push notifications: ?push=ask shows Lola's ask after 2 seconds. */
   pushPreset?: string;
   /** Membership & purchases: ?member=vip|monthly|cancelling|pastdue|forever|free|none (default vip). */
@@ -335,8 +344,24 @@ export function PreviewHome({
       home: () => ({ homeId: "lic_highrise", layout }),
       saveHome: (l) => { layout = l; },
       hasBusiness: () => !!bizPreset,
-    }, togetherPreset);
-  }, [sim, togetherPreset, bizPreset]);
+    }, togetherPreset, { economy: !!economyPreset, jobsPreset: economyPreset === "jobs" });
+  }, [sim, togetherPreset, bizPreset, economyPreset]);
+  // The Player Economy (migration 0151): gifts to sample friends, who answer on their own.
+  const catalogNow = useRef(catalog);
+  catalogNow.current = catalog;
+  const economyApi = useMemo(() => createEconomySim({
+    cash: () => sim.peek().cash,
+    pay: (cash) => sim.huntReward(cash, 0),
+    grant: (sku) => sim.grantGift(sku),
+    item: (sku) => simItem(sku, catalogNow.current),
+  }, economyPreset), [sim, economyPreset]);
+  // Migration 0152: the Market's sample closets; sample friends answer swaps on their own.
+  const marketApi = useMemo(() => createMarketSim({ cash: () => sim.peek().cash, pay: (cash) => sim.huntReward(cash, 0) }, marketPreset), [sim, marketPreset]);
+  // Phase 3 (migration 0153): sample assets and friends of its own.
+  const assetsApi = useMemo(() => assetsPreset ? createAssetSalesSim({
+    cash: () => sim.peek().cash,
+    pay: (cash) => sim.huntReward(cash, 0),
+  }, assetsPreset) : undefined, [sim, assetsPreset]);
 
   // The story store lives on the dev server; clout it pays is mirrored into the sim's player.
   const story = useMemo<StoryApi>(() => {
@@ -665,6 +690,9 @@ export function PreviewHome({
       tv={cityOff ? undefined : tvApi}
       stations={cityOff ? undefined : STATIONS_PREVIEW}
       together={cityOff ? undefined : togetherApi}
+      economy={cityOff ? undefined : economyApi}
+      market={cityOff ? undefined : marketApi}
+      assets={cityOff ? undefined : assetsApi}
       leaderboardRows={cityOff ? undefined : async () => previewLeaderboard(player.clout)}
       coutureApi={cityOff ? undefined : PREVIEW_COUTURE}
       actions={{

@@ -30,6 +30,24 @@ select pg_temp.assert((select count(*) from public.daily_tasks where player_id =
 select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a1') = 5, 'still five');
 select pg_temp.assert(not exists (select 1 from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a2' and kind = 'class'), 'not for visitors');
 
+-- Migration 0154: every fresh list has it, even when another task would have landed at the campus (it used to fail ~1 in 5).
+do $$
+declare i int;
+begin
+  for i in 1..40 loop
+    delete from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a1' and ny_date = public.ny_today();
+    perform public.ensure_daily('00000000-0000-0000-0000-0000000076a1');
+    if (select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a1' and ny_date = public.ny_today() and kind = 'class') <> 1
+       or (select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a1' and ny_date = public.ny_today()) <> 5 then
+      raise exception 'FAIL: Go to class on every fresh list (try %)', i;
+    end if;
+  end loop;
+end $$;
+-- And once more on its own: exactly one "Go to class".
+delete from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a1' and ny_date = public.ny_today();
+select public.ensure_daily('00000000-0000-0000-0000-0000000076a1');
+select pg_temp.assert((select count(*) from public.daily_tasks where player_id = '00000000-0000-0000-0000-0000000076a1' and ny_date = public.ny_today() and kind = 'class') = 1, 'class once');
+
 -- Attending a class completes it and pays the task.
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000076a1', false);
