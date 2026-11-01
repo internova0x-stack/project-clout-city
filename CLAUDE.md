@@ -213,6 +213,10 @@ components live in `app/globals.css`.
   once-key in `place_life_log` (ledger 'place_life'), checks the place, its hours, holding, Energy and the caps (game_settings
   'place_life'), and a cost never takes the bank below zero; `place_life_context` gives the server today's refs and days per place.
   UI: components/city/PlaceLife.tsx (`LifeStrip` on the place panel, `LifeSheet`). `?life=rush|regular|brownout` in the preview.
+  Today's pick (owner, Nov 1: "a pop up instead of a modal"): once a New York day (`cc-daily-pick:<date>`), 3 s after the game
+  settles and only when nothing else is open, a floating card (components/city/DailyPick.tsx, no scrim) where Lola points at
+  `todaysPick`: a happening on now, else a regular card one visit from its reward, else a place to try (rotated by day); Go there
+  plans the trip (Do it now when already there). `lifeToday` on the server; `?daily=pick` forces it in the preview.
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome

@@ -10,7 +10,7 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
-import { DailyPickSheet } from "./city/DailyPick";
+import { DailyPickPopup } from "./city/DailyPick";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
@@ -3668,7 +3668,7 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
-          <DailyPickSheet pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setDailyPick(null)} />
+          <DailyPickPopup pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setDailyPick(null)} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
