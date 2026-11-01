@@ -10,7 +10,7 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
-import { DailyPickPopup } from "./city/DailyPick";
+import { DailyWelcome, type WelcomeChip } from "./city/DailyPick";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
@@ -1567,25 +1567,29 @@ export function GameShell({
   };
   // Today's pick (owner, Nov 1): once a New York day, after the game settles and only when nothing else is on screen.
   const [dailyPick, setDailyPick] = useState<TodayPick | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
   const pickAsked = useRef(false);
   useEffect(() => {
-    if (!life?.today || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip) return;
+    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip) return;
     const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
     const key = `cc-daily-pick:${new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date())}`;
     try { if (!force && localStorage.getItem(key)) return; } catch { /* show it */ }
     pickAsked.current = true;
     const t = setTimeout(() => {
-      void life.today!().then((r) => {
-        if (!r.ok || !r.data) return;
+      // The welcome back (owner, Nov 1: "like mobile games have"): shown even before Living places runs (no pick then).
+      const show = (p: TodayPick | null) => {
         try { localStorage.setItem(key, "1"); } catch { /* fine */ }
-        setDailyPick(r.data);
-      }).catch(() => {});
+        setDailyPick(p);
+        setWelcomeOpen(true);
+      };
+      if (!life?.today) return show(null);
+      void life.today().then((r) => show(r.ok ? r.data : null)).catch(() => show(null));
     }, force ? 1500 : 3000);
     return () => { clearTimeout(t); pickAsked.current = false; };
-  }, [life, flow, panel, phone.open, lifeCard, travelPlan, trip]);
+  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip]);
   const goToPick = () => {
     const p = dailyPick ? placeById(dailyPick.place) : undefined;
-    setDailyPick(null);
+    setWelcomeOpen(false);
     if (!p) return;
     if (atPlace === p.id) { setInside(p); setLifeResult(null); setLifeCard({ card: dailyPick!.activity, kind: "activity" }); return; }
     setTravelPlan({ from: myPos, to: p.at, fromName: myPosName, toName: p.name, toId: p.id });
@@ -2749,6 +2753,15 @@ export function GameShell({
   }
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
   const rentAlarm = city ? rentAlert(city) : null;
+  // The welcome back's greeting and "Since you left" (owner, Nov 1).
+  const welcomeHour = Math.floor(cityMinutes(gameNow, GAME_CONFIG.cityClock) / 60);
+  const welcomeHello = welcomeHour >= 5 && welcomeHour < 12 ? "Good morning" : welcomeHour < 17 && welcomeHour >= 12 ? "Good afternoon" : welcomeHour >= 17 && welcomeHour < 22 ? "Good evening" : "Up late";
+  const welcomeChips: WelcomeChip[] = [
+    ...(rentAlarm ? [{ id: "rent", emoji: "", text: rentAlarm.title, onTap: () => { setWelcomeOpen(false); setPanel("bills"); } }] : []),
+    ...(chatUnread > 0 ? [{ id: "chat", emoji: "💬", text: `${chatUnread} new message${chatUnread === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setPhone({ open: true, app: "messages" }); } }] : []),
+    ...(passReady > 0 ? [{ id: "pass", emoji: "🎁", text: `${passReady} Clout Pass reward${passReady === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setTasksTab("pass"); setPanel("tasks"); } }] : []),
+    ...(city && city.tasks.length ? [{ id: "tasks", emoji: "✅", text: `${tasksDone(city)}/${city.tasks.length} daily tasks`, onTap: () => { setWelcomeOpen(false); setTasksTab("daily"); setPanel("tasks"); } }] : []),
+  ];
   const rentAlarmKey = rentAlarm && city ? `${rentAlarm.level}:${rentAlarm.owed}:${city.today}` : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // Migration 0151: a gift waiting, when no other social card is up.
@@ -3668,7 +3681,8 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
-          <DailyPickPopup pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setDailyPick(null)} />
+          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={goalsNow ? { current: goalsNow.streak.current, nextDay: goalsNow.streak.next.day, doneToday: goalsNow.streak.today } : null}
+            chips={welcomeChips} pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setWelcomeOpen(false)} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
