@@ -5,7 +5,7 @@
 
 import { businessById, payPerDay, upgradeCost } from "./businesses.ts";
 import { CITY_ECONOMY, itemBySku } from "./city.ts";
-import { PLAYER_ECONOMY, afterFee, economyError, priceBand, type GiftCandidate } from "./playerEconomy.ts";
+import { PLAYER_ECONOMY, afterFee, economyError, type GiftCandidate } from "./playerEconomy.ts";
 
 export const ASSET_SALES = {
   /** Sales a player can be part of (seller or buyer) per 30 days, counted from the buyer's yes. */
@@ -62,9 +62,16 @@ export function saleFeeLine(price: number): string {
   return `You get ${money(afterFee("asset", price))} after the ${Math.round(PLAYER_ECONOMY.fees.asset * 100)}% city fee.`;
 }
 
+/** Migration 0155 (owner, Nov 1): a business or house sells within 80% to 120% of its appraisal (game_settings
+ *  'asset_sales'.band), tighter than items' band, since asset sales skip the weekly cap. */
+export const ASSET_BAND = { min: 0.8, max: 1.2, edge: 0.03 } as const;
+export function assetBand(appraisal: number): { min: number; max: number } {
+  return { min: Math.ceil(appraisal * ASSET_BAND.min), max: Math.floor(appraisal * ASSET_BAND.max) };
+}
+
 /** The price band, and a few sensible prices inside it (the sale sheet's chips). */
 export function priceChips(appraisal: number): number[] {
-  const b = priceBand(appraisal);
+  const b = assetBand(appraisal);
   const round = (n: number) => (n >= 100_000 ? Math.round(n / 1000) * 1000 : n >= 10_000 ? Math.round(n / 100) * 100 : Math.round(n / 10) * 10);
   const out = [0.8, 1, 1.2].map((x) => Math.min(b.max, Math.max(b.min, round(appraisal * x))));
   return [...new Set(out)];
@@ -182,7 +189,7 @@ export function saleResultLine(s: AssetSale): string {
 export function assetError(message: string): string {
   const m = message.toLowerCase();
   if (m.includes("phase_off")) return "Business and property sales open soon. The city's notary is still learning to stamp.";
-  if (m.includes("out_of_band")) return "That price is outside what the city allows for this one (50% to 150% of its appraisal).";
+  if (m.includes("out_of_band")) return "That price is outside what the city allows for this one (80% to 120% of its appraisal).";
   if (m.includes("too_soon")) return `You need to own it ${ASSET_SALES.minOwnDays} days before you sell it.`;
   if (m.includes("went_public")) return blockLine({ block: "went_public", sellableFrom: "", kind: "business" })!;
   if (m.includes("real_money")) return blockLine({ block: "real_money", sellableFrom: "", kind: "house" })!;

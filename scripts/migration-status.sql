@@ -168,6 +168,7 @@ from (values
   ('0151_player_economy.sql', to_regclass('public.economy_limits') is not null),
   ('0152_marketplace.sql', to_regclass('public.market_listings') is not null),
   ('0153_asset_sales.sql', to_regclass('public.asset_sales') is not null),
-  ('0154_class_task_always.sql', to_regprocedure('public.ensure_daily_v0100(uuid)') is not null)
+  ('0154_class_task_always.sql', to_regprocedure('public.ensure_daily_v0100(uuid)') is not null),
+  ('0155_asset_cap_rent_alarm.sql', to_regprocedure('public.asset_band(bigint)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

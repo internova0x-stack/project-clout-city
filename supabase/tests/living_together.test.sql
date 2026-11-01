@@ -125,6 +125,20 @@ reset role;
 update public.bills set status = 'paid', paid_at = now() where player_id in (pg_temp.h(), pg_temp.m()) and kind = 'rent' and status = 'due';
 set role authenticated;
 
+-- ---- Migration 0155: the rent alarm warns about his part (C$300), not the whole C$600 ----
+select pg_temp.as_(pg_temp.m()::text);
+select public.push_subscribe('https://fcm.googleapis.com/fcm/send/0155m', 'k', 'a', 'America/New_York');
+reset role;
+update public.players set next_rent_due = public.ny_today() + 2, bank_cash = 400 where id = pg_temp.m();
+delete from public.push_queue where player_id = pg_temp.m();
+select public.push_scan_rent_short();
+select pg_temp.assert(not exists (select 1 from public.push_queue where player_id = pg_temp.m() and kind = 'rent_short'), 'C$400 covers his C$300: no alarm');
+update public.players set bank_cash = 200 where id = pg_temp.m();
+select public.push_scan_rent_short();
+select pg_temp.assert((select body from public.push_queue where player_id = pg_temp.m() and kind = 'rent_short') like 'C$300 due%', 'short of his part: warned about C$300');
+update public.players set next_rent_due = (select next_rent_due from public.players where id = pg_temp.h()), bank_cash = 5000 where id = pg_temp.m();
+set role authenticated;
+
 -- ---- While together: no sublets, the mover doesn't host visits ----
 select pg_temp.assert(public.sublet_state() ->> 'hostBlock' = 'living_together', 'no listing while together');
 reset role;

@@ -5,12 +5,12 @@
 // went through; off: the Studio's switch is off ("Opening soon"). Sample buyers answer an offer after a few seconds.
 
 import {
-  ASSET_SALES, appraiseBusiness, appraiseHouse, assetError,
+  ASSET_SALES, appraiseBusiness, appraiseHouse, assetBand, assetError,
   type AssetApi, type AssetKind, type AssetSale, type AssetSalesState, type AssetView,
 } from "./assetSales.ts";
 import { businessById } from "./businesses.ts";
 import { itemBySku } from "./city.ts";
-import { economyFee, priceBand, type GiftCandidate } from "./playerEconomy.ts";
+import { economyFee, type GiftCandidate } from "./playerEconomy.ts";
 
 interface SimHooks {
   cash(): number;
@@ -74,7 +74,7 @@ export function createAssetSalesSim(hooks: SimHooks, preset?: string): AssetApi 
     const block = Date.parse(sellableFrom) > Date.now() ? "too_soon"
       : live ? "sale_live"
       : used() + sales.filter((s) => s.role === "seller" && s.status === "offered").length >= ASSET_SALES.perMonth ? "sales_limit" : null;
-    return { kind: a.kind, id: a.id, ...nameOf(a.kind, a.id), level: a.level, appraisal: v, band: priceBand(v), feeRate: 0.1, block, sellableFrom };
+    return { kind: a.kind, id: a.id, ...nameOf(a.kind, a.id), level: a.level, appraisal: v, band: assetBand(v), feeRate: 0.1, block, sellableFrom };
   };
   const ok = <T,>(data: T) => ({ ok: true as const, data: structuredClone(data) });
   const fail = (code: string) => ({ ok: false as const, error: assetError(code), off: code === "phase_off" });
