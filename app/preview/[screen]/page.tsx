@@ -62,6 +62,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
 //   /preview/home?underworld=locked|new|jobs|pro|hot|caught|lawyer|crew|table|weekly  The underworld (migrations 0148, 0150; Pablo's back room from his shop's card, or ?open=backroom; crew = loyal crew, table = a Hustler at the Thursday table, weekly = this week's new jobs)
+//   /preview/home?pass=soon|new|progress|paid|vip|done&pack=offer|owned|none  The Clout Pass (Tasks → Pass) and the starter pack (Shop's top; migration 0156)
 //   /preview/home?gala=on|off|new|done  The Charity Gala (migration 0150; Halo only, Ditmars Heights Rooftop's card, or ?open=gala)
 //   /preview/home?career=welcome|new|apply|work|day|office|grudge|boss|quit|cityhall|streaming|fashion|realestate|finance|law|review|warning|fired  Careers (migration 0135; Phone → Careers; welcome = the aspiration welcome screen, migration 0143; boss = Push the boss out open; quit = the quit card; cityhall = at work in the Mayor's office)
 //   /preview/home?choice=now|back|high|low|log|story|city|office  Moral Choices (migration 0131): now = a card on every arrival, story = storylets from a sample history (Content Engine step 2), city = the city conditions and Blotter wins of step 4 (News → City), office = a career job in memory, so an office card (content/choices/office.json) opens first and after every workday (office-<track>, e.g. office-law, picks the job), back = a consequence lands
@@ -116,7 +117,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy, assets, market } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy, assets, market, pass, pack } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -208,6 +209,8 @@ export default async function Preview({
           careerPreset={career}
           underworldPreset={underworld}
           galaPreset={gala}
+          passPreset={pass}
+          packPreset={pack}
           choicePreset={choice}
           economyPreset={economy}
           marketPreset={market}

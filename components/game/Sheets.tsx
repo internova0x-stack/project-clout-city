@@ -61,14 +61,16 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign, pass,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
   story?: StoryFeed | null; onStoryTask?: (task: StoryFeed["tasks"][number]) => void;
   /** v0.6 treasure hunts (migration 0018): the Hunt tab. */
   hunt?: { state: HuntState; style: string; busy: boolean; onJoin: () => void };
-  tab?: "daily" | "goals" | "hunt" | "streaks";
+  tab?: "daily" | "goals" | "hunt" | "streaks" | "pass";
+  /** The Clout Pass (migration 0156): its own tab, with a dot while a reward waits. */
+  pass?: { node: React.ReactNode; ready: number } | null;
   /** Migration 0063: the player's skills, for the skill task's level and progress. */
   skills?: SkillState[];
   /** The cooking task opens the kitchen instead of a place. */
@@ -80,7 +82,7 @@ export function TasksSheet({
   /** Campaign Mode (owner, Oct 29): this week's two campaign tasks, under the five; tapping one opens the campaign. */
   campaign?: { tasks: { id: string; title: string; tag: string; how: string; isDone: boolean }[]; onOpen: (task: string) => void } | null;
 }) {
-  const [tab, setTab] = useState<"daily" | "goals" | "hunt" | "streaks">(initialTab ?? "daily");
+  const [tab, setTab] = useState<"daily" | "goals" | "hunt" | "streaks" | "pass">(initialTab ?? "daily");
   useEffect(() => { if (open && initialTab) setTab(initialTab); }, [open, initialTab]);
   const { cliqueSize } = ECONOMY.invites;
   const tasks = city?.tasks ?? [];
@@ -93,8 +95,11 @@ export function TasksSheet({
           <button aria-pressed={tab === "daily"} onClick={() => setTab("daily")}>Daily</button>
           <button aria-pressed={tab === "goals"} onClick={() => setTab("goals")}>Goals</button>
           {hunt && <button aria-pressed={tab === "hunt"} onClick={() => setTab("hunt")}>Hunt{hunt.state.hunt && !hunt.state.hunt.completedAt ? " 🗺️" : ""}</button>}
+          {pass && <button aria-pressed={tab === "pass"} onClick={() => setTab("pass")}>Pass{pass.ready > 0 ? " 🎁" : ""}</button>}
         </div>
-        {tab === "streaks" && goals ? (
+        {tab === "pass" && pass ? (
+          pass.node
+        ) : tab === "streaks" && goals ? (
           <StreaksSection goals={goals} owned={(sku) => !!city?.items.some((i) => i.sku === sku)} onBack={() => setTab("daily")} />
         ) : tab === "hunt" && hunt ? (
           <HuntTab state={hunt.state} style={hunt.style} busy={hunt.busy} onJoin={hunt.onJoin} onOpenPlace={onOpenPlace} />

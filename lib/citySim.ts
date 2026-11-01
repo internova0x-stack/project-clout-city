@@ -136,6 +136,8 @@ export type SimApi = CityApi & {
   peek(): { cash: number; clout: number; confidence: number; allDone: boolean };
   /** What the preview's pretend Stripe webhook grants. */
   grantCollector(sku: string): void;
+  /** The Clout Pass and the starter pack (migration 0156): a reward-only piece, worth nothing in Net Worth. */
+  grantReward(sku: string): void;
   /** The Player Economy in the preview (lib/economySim.ts): an accepted gift lands in the player's things at Shop value. */
   grantGift(sku: string): boolean;
   grantTicket(clout: number): void;
@@ -650,6 +652,11 @@ export function createSimApi(
       if (c?.tab === "cars" && p().car_mode !== "owned") Object.assign(p(), { car_sku: sku, car_mode: "owned" });
       p().clout += purchaseClout(item.clout, p().purchases_count);
       p().purchases_count += 1;
+    },
+    grantReward(sku) {
+      const item = itemBySku(sku);
+      if (!item || s.items.some((i) => i.sku === sku)) return;
+      s.items.push({ id: nextId++, sku, category: item.category, value: 0, acquired: "collector", equipped: false });
     },
     grantGift(sku) {
       const item = itemBySku(sku) ?? (() => { const c = s.catalog?.find((x) => x.sku === sku); return c && { category: c.tab as ShopItem["category"], price: c.price }; })();

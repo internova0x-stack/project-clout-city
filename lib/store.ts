@@ -3,7 +3,7 @@
 
 export interface StoreProduct {
   sku: string;
-  type: "side_arc" | "exclusive_event" | "collector_item" | "postcard" | "chat_pass";
+  type: "side_arc" | "exclusive_event" | "collector_item" | "postcard" | "chat_pass" | "season_pass" | "bundle";
   name: string;
   priceCents: number;
   currency: string;

@@ -41,7 +41,7 @@ update public.players set bank_cash = 5000, energy = 100, mood = 50, confidence 
 set role authenticated;
 
 -- ---- The catalog ----
-select pg_temp.assert((select count(*) from jsonb_array_elements(public.store_catalog()) x where x ->> 'type' <> 'chat_pass') = 12, 'side stories (six since 0116), postcards, collector pieces and two parties (plus the chat passes, 0047)');
+select pg_temp.assert((select count(*) from jsonb_array_elements(public.store_catalog()) x where x ->> 'type' not in ('chat_pass', 'season_pass', 'bundle')) = 12, 'side stories (six since 0116), postcards, collector pieces and two parties (plus the chat passes, 0047, and the Clout Pass and starter pack, 0156)');
 select pg_temp.assert((pg_temp.product('col-faux-chinchilla') ->> 'value')::int = 1388, 'collector value is 1.5x the priciest fashion item');
 select pg_temp.assert((pg_temp.product('postcard-unisphere') ->> 'visited')::boolean is false, 'not visited yet');
 select pg_temp.assert(pg_temp.product('event-jada-sol-listening') #>> '{event,host}' = 'Jada Sol', 'party details');

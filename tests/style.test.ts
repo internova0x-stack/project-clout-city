@@ -20,7 +20,8 @@ test("every line has places to shine, every starting style a line, every old fas
     assert.ok(venues?.some((t) => tags.has(t)), `${line} fits a real place`);
   }
   for (const s of STARTING_STYLES) assert.ok((STYLE.startingLines as Record<string, string>)[s.id], s.id);
-  for (const i of SHOP_ITEMS.filter((x) => x.category === "fashion")) {
+  // Reward pieces (streaks, the Clout Pass, the starter pack) carry no style line: real money never buys a venue boost.
+  for (const i of SHOP_ITEMS.filter((x) => x.category === "fashion" && !x.reward)) {
     const lines = (STYLE.liveLines as Record<string, readonly string[]>)[i.sku];
     assert.ok(lines?.length, `${i.sku} has lines`);
     assert.ok(lines.every((l) => (STYLE_LINES as readonly string[]).includes(l)), `${i.sku}: real lines`);

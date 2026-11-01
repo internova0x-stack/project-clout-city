@@ -2714,3 +2714,41 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .careers-summary { padding:12px; border-radius:12px; background:var(--surface-raised); }
 .careers-grudge { margin:0; padding:8px 10px; border-radius:10px; background:var(--red-tint); color:var(--red-text); font-size:13px; line-height:18px; font-weight:600; }
 .chip-row.careers-who { margin:0; padding:2px 0; }
+
+/* The Clout Pass and the starter pack (owner, Nov 1; components/game/SeasonPass.tsx). The paid row and the pack are real
+   money, so they wear the gold. */
+.pass-hero { color:#fff; border-radius:var(--r-lg); padding:16px; text-shadow:0 1px 2px rgba(59,35,70,.25);
+  background:linear-gradient(135deg,#4F5FA8 0%,#8E6BB5 34%,#D77B95 68%,#F4B38E 100%); box-shadow:0 8px 22px rgba(79,95,168,.28); }
+.pass-hero-kicker { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.85; }
+.pass-hero-title { margin-top:2px; font-size:24px; line-height:30px; font-weight:800; }
+.pass-hero-meta { font-size:12px; font-weight:600; opacity:.9; }
+.pass-hero .title { color:#fff; }
+.pass-hero .pass-bar { margin-top:8px; }
+.pass-bar { display:block; height:10px; border-radius:999px; background:rgba(255,255,255,.22); overflow:hidden; }
+.pass-bar > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#FFD6E5,#fff); box-shadow:0 0 10px rgba(255,214,229,.8); transition:width .4s ease; }
+.pass-how { border-radius:var(--r-lg); background:var(--surface-card); box-shadow:inset 0 0 0 1px #EADFC8; overflow:hidden; }
+.pass-how-head { display:flex; width:100%; justify-content:space-between; align-items:center; padding:12px 16px; background:none; border:0;
+  font-weight:700; font-size:15px; color:var(--night-900); cursor:pointer; }
+.pass-how-chev { display:grid; place-items:center; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:inset 0 0 0 1px #E2DBD0; }
+.pass-how-steps { list-style:none; margin:0; padding:0 16px 14px; display:flex; flex-direction:column; gap:12px; }
+.pass-how-steps li { display:flex; gap:12px; align-items:flex-start; }
+.pass-how-emoji { flex:none; display:grid; place-items:center; width:36px; height:36px; border-radius:12px; background:#fff; font-size:20px;
+  box-shadow:inset 0 0 0 1px #EADFC8; }
+.pass-upsell { border-radius:var(--r-lg); padding:14px 16px; background:var(--surface-card); box-shadow:inset 0 0 0 1px var(--gold-300); }
+.pass-grid { display:flex; flex-direction:column; gap:6px; }
+.pass-row { display:grid; grid-template-columns:36px 1fr 1fr; gap:8px; align-items:stretch; }
+.pass-head { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-2); }
+.pass-head span:last-child { color:var(--gold-700); }
+.pass-tier { display:grid; place-items:center; font-weight:800; border-radius:var(--r-sm); background:var(--surface-card); color:var(--text-2); min-height:44px; }
+.pass-row[data-reached] .pass-tier { background:var(--night-900); color:#fff; }
+.pass-cell { position:relative; display:flex; flex-direction:column; gap:2px; justify-content:center; padding:8px 26px 8px 10px; border-radius:var(--r-sm);
+  background:var(--surface-card); font-size:13px; line-height:1.25; min-height:44px; }
+.pass-paid { box-shadow:inset 0 0 0 1px var(--gold-300); background:linear-gradient(180deg,#FFFBEA,#FBF1D8); }
+.pass-cell[data-done] { opacity:.55; }
+.pass-reward { display:flex; gap:6px; align-items:baseline; }
+.pass-reward[data-locked] { color:var(--text-2); }
+.pass-cell > [aria-label] { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:13px; }
+.pass-check { color:var(--green-500); font-weight:800; }
+.pack-card { border-radius:var(--r-lg); padding:14px 16px; background:linear-gradient(180deg,#FFFBEA,#FBF1D8); box-shadow:inset 0 0 0 1px var(--gold-300), var(--elev-2); }
+.pack-items { display:flex; flex-wrap:wrap; gap:6px; }
+.pack-item { display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; background:#fff; font-size:13px; box-shadow:inset 0 0 0 1px #EADFC8; }

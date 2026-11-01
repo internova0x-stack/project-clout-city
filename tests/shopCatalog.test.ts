@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { PASS_SKUS } from "../lib/seasonPass.ts";
 import { readdirSync, readFileSync } from "node:fs";
 import { SHOP_ITEMS } from "../lib/city.ts";
 import { brandHits } from "../lib/culture.ts";
@@ -120,7 +121,9 @@ test("migration 0099 seeds every item on sale, exactly as the Shop had it", asyn
   const sql = readFileSync(new URL("../supabase/migrations/0099_shop_manager.sql", import.meta.url), "utf8");
   const m = sql.match(/jsonb_to_recordset\('((?:[^']|'')*)'::jsonb\)/);
   assert.ok(m, "seed");
-  assert.deepEqual(JSON.parse(m[1].replace(/''/g, "'")), JSON.parse(JSON.stringify(shopSeed())));
+  // Later pieces have their own migrations (the Clout Pass and the starter pack: 0156); 0099's positions were before them.
+  const before = shopSeed().filter((x) => !PASS_SKUS.includes(x.sku));
+  assert.deepEqual(JSON.parse(m[1].replace(/''/g, "'")), JSON.parse(JSON.stringify(before)));
   assert.equal(shopSeed().length, SHOP_ITEMS.length);
 });
 

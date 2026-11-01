@@ -70,12 +70,13 @@ export default function Terms() {
       <h2>5. Real-money purchases</h2>
       <p>
         Some extras cost real money: VIP, &quot;Chat forever&quot;, side stories, tickets to exclusive in-game events,
-        collector items, postcards and Clout Couture pieces. Prices are shown before you pay, in the game and at
+        collector items, postcards, Clout Couture pieces, the Clout Pass and the starter pack. Prices are shown before you pay, in the game and at
         checkout, including any tax that applies. Payments are processed by Stripe; we never see or store your card. In the
         Steam version, purchases go through Steam&apos;s checkout instead, and Steam&apos;s own refund policy applies to them.
       </p>
       <ul>
         <li><strong>What you get:</strong> a licence to use the item or feature in Clout City for as long as your account exists and the game runs. Clout Couture pieces are numbered limited editions; a number is never reissued.</li>
+        <li><strong>The Clout Pass</strong> is a single payment for one season (its dates are shown in the game). It opens the season&apos;s paid rewards, which you unlock by playing; rewards can be claimed until a short time after the season ends, then the pass is over. It never renews. VIP includes it while your VIP lasts; pieces you&apos;ve already claimed stay yours. <strong>The starter pack</strong> is a single payment, offered once, in your first 14 days. Pass and pack items are looks only: they can&apos;t be sold, traded or gifted, and they don&apos;t add to Net Worth.</li>
         <li><strong>Delivery:</strong> digital purchases are delivered to your account right after payment (it can take a minute).</li>
         <li><strong>Refunds:</strong> purchases are final except where the law gives you a right to a refund, or where we choose to give one (for example, if something you bought didn&apos;t arrive or didn&apos;t work). Ask at <a href="mailto:hello@cloutcity.app">hello@cloutcity.app</a>. If a payment is refunded, the item or time it paid for is removed.</li>
         <li><strong>Chargebacks:</strong> if you dispute a payment with your bank, we may remove what it paid for while the dispute is open, and close the account if it&apos;s found to be fraudulent.</li>

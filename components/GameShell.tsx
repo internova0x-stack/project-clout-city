@@ -5,6 +5,8 @@ import { SLOW_DOWN_EVENT, SLOW_DOWN_TEXT } from "@/lib/rateLimits";
 import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/lib/coutureMap";
 import dynamic from "next/dynamic";
 import { lazySheet, prefetchSheets } from "./lazySheet";
+import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
+import { PassTab, StarterPackCard } from "./game/SeasonPass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY, formatCash } from "@/lib/economy";
@@ -290,6 +292,7 @@ export function GameShell({
   remembered,
   campus,
   goals,
+  pass,
   push,
   previewPushAsk = false,
   membership,
@@ -392,6 +395,8 @@ export function GameShell({
   campus?: CampusApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
   goals?: GoalsApi;
+  /** The Clout Pass and the starter pack (migration 0156): the Tasks sheet's Pass tab and the Shop's pack card. */
+  pass?: PassApi;
   /** Push notifications (migration 0078): Lola's ask and Settings → Notifications; hidden without it. */
   push?: PushApi;
   /** Development previews (?push=ask): Lola asks after 2 seconds. */
@@ -643,7 +648,7 @@ export function GameShell({
   // v0.7 step 3: my own public card, for the bubble's rank and the profile's "Recently".
   const [myCard, setMyCard] = useState<PlayerCard | null>(initialCard ?? null);
   const profileOpen = panel === "profile";
-  const [tasksTab, setTasksTab] = useState<"daily" | "goals" | "hunt" | undefined>(undefined);
+  const [tasksTab, setTasksTab] = useState<"daily" | "goals" | "hunt" | "pass" | undefined>(undefined);
   // Skills (migration 0056): fresh each time the profile or the Tasks list (its skill task) opens.
   const [skills, setSkills] = useState(previewSkills);
   const tasksOpen = panel === "tasks" || panel === "skills";
@@ -1418,6 +1423,12 @@ export function GameShell({
         setToast(p.type === "exclusive_event" ? `🎟️ You're on the list: ${p.name}` : p.type === "chat_pass" ? (VIP_SKUS.includes(p.sku) ? "👑 You're a VIP. Chat away; every side story is unlocked." : "✨ Unlimited chat is on. Say hi to everyone.") : `🔓 Unlocked: ${p.name}`);
         // Show it where it lives; collector pieces and tickets also change clout and Net Worth.
         if (p.type === "side_arc") openNews(null);
+        // The Clout Pass opens its paid row; the starter pack's pieces arrive (migration 0156).
+        if (p.type === "season_pass" || p.type === "bundle") {
+          void loadPass();
+          if (cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r));
+          if (p.type === "season_pass") { setTasksTab("pass"); setPanel("tasks"); }
+        }
         if (p.type === "postcard") setPanel("collection");
         if (p.type === "collector_item") setPanel("networth");
         if (p.type === "exclusive_event") setPanel("events");
@@ -1468,6 +1479,39 @@ export function GameShell({
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [cityApi, applyCity]);
+
+  // ---- The Clout Pass and the starter pack (migration 0156) ----
+  const [passS, setPassS] = useState<PassState | null>(null);
+  const [packS, setPackS] = useState<StarterPackState | null>(null);
+  const loadPass = useCallback(async () => {
+    if (!pass) return;
+    const [a, b] = await Promise.all([pass.state().catch(() => null), pass.starter().catch(() => null)]);
+    if (a?.ok) setPassS(a.data);
+    if (b?.ok) setPackS(b.data);
+  }, [pass]);
+  useEffect(() => { void loadPass(); }, [loadPass]);
+  useEffect(() => { if (panel === "tasks" || panel === "shop") void loadPass(); }, [panel, loadPass]);
+  const priceOf = (sku: string) => {
+    const p = catalog?.find((x) => x.sku === sku);
+    return p ? formatPrice(p.priceCents, p.currency) : null;
+  };
+  const claimPass = async () => {
+    if (!pass) return;
+    setBusy("pass");
+    const r = await pass.claimAll();
+    setBusy(null);
+    if (!r.ok) return setToast(r.error);
+    setPassS(r.data);
+    const got = r.data.got;
+    setToast(got.length === 0 ? "Nothing new to claim yet." : got.length === 1
+      ? `🎁 ${rewardLabel(got[0], (sku) => itemBySku(sku)?.name)}`
+      : `🎁 ${got.length} rewards: ${got.slice(0, 2).map((g) => rewardLabel(g, (sku) => itemBySku(sku)?.name)).join(", ")}${got.length > 2 ? "…" : ""}`);
+    if (got.length && cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+  };
+  const passReady = passS ? claimable(passS).free.length + claimable(passS).paid.length : 0;
+  const packCard = packS && (packS.offer || packS.owned)
+    ? <StarterPackCard state={packS} price={priceOf(STARTER_PACK.sku)} busy={busy !== null} onBuy={() => void buy(STARTER_PACK.sku)} />
+    : null;
 
   const money: MoneyHandlers = {
     busy,
@@ -3020,6 +3064,12 @@ export function GameShell({
         onOpenTasks={() => { markTasksSeen(); setPanel("tasks"); }}
       />
       <TasksSheet
+        pass={passS ? {
+          ready: passReady,
+          node: <PassTab state={passS} today={city?.today ?? new Date().toISOString().slice(0, 10)} busy={busy !== null} price={priceOf(SEASON.sku)}
+            onClaim={() => void claimPass()} onBuy={() => void buy(SEASON.sku)}
+            starter={packS ? { state: packS, price: priceOf(STARTER_PACK.sku), onBuy: () => void buy(STARTER_PACK.sku) } : null} />,
+        } : null}
         campaign={campaignRunning ? { tasks: campaignTasks, onOpen: (task) => { setPanel(null); setCampaignFocus(task); setCampaignOpen(true); } } : null}
         open={panel === "tasks"}
         onClose={() => { setPanel(null); setTasksTab(undefined); }}
@@ -3138,6 +3188,7 @@ export function GameShell({
           <PlacesSheet open={panel === "places"} onClose={() => setPanel(null)} from={home} state={city} story={storyOn ? feed : null} here={chat?.counts ? (id) => placeCounts[id] : undefined} onPick={(p) => openPlace(p.id)}
             openBoroughs={openSet} gates={gates} />
           <ShopSheet
+            top={packS?.offer ? packCard : null}
             open={panel === "shop"}
             onClose={() => setPanel(null)}
             state={city}
@@ -3642,7 +3693,7 @@ export function GameShell({
         netWorth={myWorth}
         bestRank={biz?.bestRank}
         badges={(feed?.badges ?? []).map((b) => {
-          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id) ?? coupleBadge(b.id) ?? lookBadge(b.id));
+          const info = badgeInfo(feed, b.id) ?? partyBadge(b.id, products) ?? (b.id === HUNT_BADGE ? { emoji: "🗺️", name: "Treasure hunter" } : b.id === LOTTO_BADGE ? { emoji: "🌟", name: "Jackpot winner" } : b.id === TEA_BADGE ? { emoji: "☕", name: "Spills the Tea" } : skillBadge(b.id) ?? coupleBadge(b.id) ?? passBadge(b.id) ?? lookBadge(b.id));
           return { id: b.id, emoji: info?.emoji ?? "🏅", name: info?.name ?? b.id };
         })}
         collections={{

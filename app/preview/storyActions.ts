@@ -161,6 +161,9 @@ export async function previewStoreCatalog(): Promise<StoreProduct[] | null> {
         edition: { ...e, issued: e.issued + mine, left: Math.max(0, e.left - mine - held), soldOut: e.soldOut || e.left - mine - held <= 0 },
       };
     }),
+    // The Clout Pass and the starter pack (migration 0156); VIP includes the pass.
+    { ...base("season-pass-s1"), type: "season_pass" as const, name: "Clout Pass: Cuffing Season", priceCents: 799, owned: owned("season-pass-s1") || vip },
+    { ...base("starter-pack"), type: "bundle" as const, name: "Day One Starter Pack", priceCents: 299 },
     // Meeting players (migrations 0047, 0051): unlimited chat, monthly, yearly or forever.
     { ...base("chat-unlimited-monthly"), type: "chat_pass" as const, name: "VIP (monthly)", priceCents: 499 },
     { ...base("chat-unlimited-yearly"), type: "chat_pass" as const, name: "VIP (yearly)", priceCents: 3999 },

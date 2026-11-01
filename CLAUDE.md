@@ -102,6 +102,18 @@ components live in `app/globals.css`.
   EU/UK withdrawal (owner, Oct 27): every Checkout Session requires the buyer's tick (`consent_collection.terms_of_service`,
   `withdrawalText` in lib/stripe.ts: delivered at once, the 14-day right ends); without the Terms URL in Stripe's public details
   it falls back to the same words by the pay button (`consent: "notice"`).
+- The Clout Pass and the starter pack (migration 0156, owner Nov 1: "go with your recommendation"; lib/seasonPass.ts mirrors
+  game_settings 'season_pass' and 'starter_pack', tests/seasonPass.test.ts). Season 1 "Cuffing Season" (Nov 7 to Jan 1, claims 14 days
+  after): 18 tiers of 160 XP; XP from ledger rows (`season_xp` via the `ledger_season_xp` trigger: daily_task 10, daily_bonus 30, goal 50,
+  once per ref, kept by Start over). Free row: C$, clout or a piece (ledger 'season_free'); paid row ('season-pass-s1', $7.99,
+  product_type 'season_pass'): pieces and the season badge only. VIP includes the pass (`has_entitlement` says yes; start_purchase
+  'vip_has_pass'). `season_state()`, `season_claim_all()`. Starter pack ('starter-pack', $2.99, product_type 'bundle'): once, in the
+  account's first 14 days ('offer_over'), `starter_pack_state()`; its pieces and 'day-one' badge arrive with the entitlement
+  (`entitlements_season_items` trigger; a refund takes them back, a refunded pass its paid row unless VIP). Every pass/pack piece is
+  `reward: true` in lib/city.ts (`PASS_SKUS`), in shop_catalog, given as acquired 'collector' at value 0 (`collector_tab_value` keeps
+  reward pieces at 0): never sold, sold back, traded or gifted, nothing in Net Worth, no style line, the Crib Rating counts bought
+  pieces only. UI: Tasks → Pass (components/game/SeasonPass.tsx `PassTab`), the Shop's top card (`StarterPackCard`, also under the
+  pass). A new season = a new migration with new settings, sku and pieces. `?pass=soon|new|progress|paid|vip|done&pack=offer|owned|none`.
 - Insights (migration 0053): `admin_insights()` is the Studio's numbers (admin only). Sessions come from
   `session_ping()` (GameShell, every `GAME_CONFIG.sessionPingMs`); VIP renewals from the webhook's `invoice.paid`
   (`payment_renewal`). Revenue counts paid, unrefunded purchases plus renewals.
