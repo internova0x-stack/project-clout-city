@@ -94,7 +94,7 @@ set role authenticated;
 -- ---------------------------------------------------------------------------
 -- Hot dog cart, 1 upgrade: book 7,500 (0.6), put in 5,000 + 3,000 (0.2), a week of 1,125 a day (0.2) = 7,675.
 select pg_temp.assert((public.asset_appraise('business', 'hot-dog-cart') ->> 'appraisal')::bigint = 7675, 'business appraisal');
-select pg_temp.assert(public.asset_appraise('business', 'hot-dog-cart') -> 'band' = '{"min": 3838, "max": 11512}'::jsonb, 'band 50% to 150%');
+select pg_temp.assert(public.asset_appraise('business', 'hot-dog-cart') -> 'band' = '{"min": 6140, "max": 9210}'::jsonb, 'band 80% to 120% (migration 0155)');
 select pg_temp.assert((public.asset_appraise('house', 'house-astoria-townhouse') ->> 'appraisal')::bigint = 270000, 'house appraisal: Shop price, Astoria ×1');
 select pg_temp.assert(public.asset_appraise('house', 'house-astoria-townhouse') ->> 'block' = 'too_soon', 'owned a day: not yet');
 select pg_temp.assert(pg_temp.raises($$select public.asset_appraise('business', 'laundromat')$$, 'not_owned'), 'only your own');
@@ -102,12 +102,14 @@ select pg_temp.assert(jsonb_array_length(public.asset_sales_state() -> 'assets')
 select pg_temp.assert(jsonb_array_length(public.asset_buyers()) = 2, 'Bo and Dee');
 
 select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('house', 'house-astoria-townhouse', pg_temp.id(2), 270000)$$, 'too_soon'), 'minimum ownership');
-select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('business', 'hot-dog-cart', pg_temp.id(2), 20000)$$, 'out_of_band'), 'over 150%');
-select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('business', 'hot-dog-cart', pg_temp.id(2), 3000)$$, 'out_of_band'), 'under 50%');
+select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('business', 'hot-dog-cart', pg_temp.id(2), 9300)$$, 'out_of_band'), 'over 120%');
+select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('business', 'hot-dog-cart', pg_temp.id(2), 6000)$$, 'out_of_band'), 'under 80%');
 select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('business', 'hot-dog-cart', pg_temp.id(3), 7000)$$, 'not_friends'), 'friends only');
 select pg_temp.assert(pg_temp.raises($$select public.asset_sale_offer('business', 'bodega', pg_temp.id(2), 48000)$$, 'business_locked'), 'buyers keep the ladder');
 reset role;
 select pg_temp.assert(not exists (select 1 from public.asset_sales), 'nothing stored by refused offers');
+-- Migration 0155: asset sales skip the weekly cap (their own limits and band apply instead).
+select pg_temp.assert(public.economy_can(pg_temp.id(2), 'asset', 10000000, 'send'), 'no weekly cap on asset sales');
 set role authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -184,8 +186,8 @@ set role authenticated;
 -- ---------------------------------------------------------------------------
 -- Flags: the band's edge, a new account buying
 -- ---------------------------------------------------------------------------
--- Bodega: book 50,000 × 0.6 + 50,000 × 0.2 + 42,000 × 0.2 = 48,400; the top of the band is 72,600.
-create temp table s3 as select (public.asset_sale_offer('business', 'bodega', pg_temp.id(2), 72600) ->> 'id')::bigint id;
+-- Bodega: book 50,000 × 0.6 + 50,000 × 0.2 + 42,000 × 0.2 = 48,400; the top of the band is 58,080 (0155: 120%).
+create temp table s3 as select (public.asset_sale_offer('business', 'bodega', pg_temp.id(2), 58080) ->> 'id')::bigint id;
 grant all on s3 to authenticated;
 select pg_temp.assert(pg_temp.flags('band_edge', (select id from s3)) = 1, 'flagged at the band''s edge');
 select 1 from public.asset_sale_cancel((select id from s3));

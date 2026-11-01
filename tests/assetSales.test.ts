@@ -91,3 +91,13 @@ test("history shows sales to both sides", () => {
 test("pushes the migration queues are known kinds", () => {
   for (const k of sql.matchAll(/push_enqueue\([^,]+, '([a-z_]+)'/g)) assert.ok(k[1] in PUSH_KINDS, k[1]);
 });
+
+// Migration 0155 (owner, Nov 1): asset sales skip the weekly cap, inside a tighter band.
+import { ASSET_BAND, assetBand } from "../lib/assetSales.ts";
+test("ASSET_BAND mirrors game_settings 'asset_sales'.band in migration 0155", () => {
+  const sql0155 = readFileSync(new URL("../supabase/migrations/0155_asset_cap_rent_alarm.sql", import.meta.url), "utf8");
+  const m = sql0155.match(/value \|\| '(\{"band":.*?\})'::jsonb/);
+  assert.ok(m, "the band update");
+  assert.deepEqual(JSON.parse(m![1]).band, { ...ASSET_BAND });
+  assert.deepEqual(assetBand(300_000), { min: 240_000, max: 360_000 });
+});

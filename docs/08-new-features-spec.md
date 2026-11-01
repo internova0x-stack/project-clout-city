@@ -1401,7 +1401,8 @@ C$5,000 a week of player-paid C$ counts toward rank, and traded or gifted items 
 - **Phase 2 (off until the Studio switches it on):** the Market: listings and swaps in a two-sided trade window, trade holds after a new
   device or email change, reversal within 7 days; underworld runners (hand a Pablo job to a friend for a cut; Heat for both).
 - **Phase 3 (off until switched on):** selling a business or a C$ house to a friend at an appraised price, with escrow, 24 hours of
-  cooling-off, a 10% fee, 2 deals a month, 14 days' ownership first, and "undisclosed issues" warnings.
+  cooling-off, a 10% fee, 2 deals a month, 14 days' ownership first, and "undisclosed issues" warnings. Owner, Nov 1 (migration
+  0155): these sales skip the C$5,000 weekly cap and sell within 80% to 120% of the appraisal instead of 50% to 150%.
 
 **Later / open:** party-planning jobs (only the host can invite guests today), cars and houses as gifts, a price-history view, lower fees
 between crew, a lawyer's review before phases 2 and 3 open (docs/PLAYER-ECONOMY.md section 11).

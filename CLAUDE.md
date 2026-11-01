@@ -149,7 +149,8 @@ components live in `app/globals.css`.
   real New York evening, since the city clock loops every two hours).
   Rent alarm (migration 0112, owner Oct 22): rent due within 3 days and too little in the bank sends 'rent_short' once per
   rent date (`push_scan_rent_short`, run by the sender after push_scan, opens Gigs); in the game, `rentAlert()` (lib/cityState.ts)
-  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills) and turns the Bills button's pin into a ❗ (the bank pill stays the balance)
+  shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills; migration 0155: both compare the bank
+  with the player's own part of the rent, `cohabit_rent_part`, so a partner living together isn't warned about the whole rent) and turns the Bills button's pin into a ❗ (the bank pill stays the balance)
   (`?rent=short|late|evict` in the preview).
 - HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt) and its
   pin pulses until the day's tasks are opened; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
@@ -545,6 +546,8 @@ components live in `app/globals.css`.
   70% Shop + 30% paid × neighborhood), offer → answer (escrow) → 24 real hours of cooling-off (either cancels) → the handover (on read and by
   the push sender's `asset_sales_settle_all`; seller paid minus 10%); 2 deals per 30 days, 14 days' ownership; `player_businesses.traces`
   warns of "undisclosed issues"; `admin_asset_reverse` within 7 days. Sell in Businesses and Apartments, deals in the Bank.
+  Migration 0155 (owner, Nov 1): asset sales skip the weekly cap (`economy_can` ignores it for 'asset'; they still count) and sell
+  within 80-120% of the appraisal (`asset_band`, `asset_band_check`, asset_sales.band, lib/assetSales.ts `ASSET_BAND`).
   `?assets=sell|offer|cooling|done|off`.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
