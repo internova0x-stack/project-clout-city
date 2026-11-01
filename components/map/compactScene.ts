@@ -293,6 +293,8 @@ export interface CompactScene {
   setShown(ids: ReadonlySet<string>): void;
   /** The place whose building is under a screen point (normalized device coordinates), if any. */
   pick(x: number, y: number): string | null;
+  /** The phone is too slow for full graphics (cheap phones, Nov 1): one pixel per screen pixel, no shadows. */
+  lower(): void;
   /** Builds a few more landmarks (the ones nearest `near` first); false once all are built. */
   buildMore(near: readonly [number, number], budgetMs: number): boolean;
   dispose(): void;
@@ -302,7 +304,7 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
   const renderer = new WebGLRenderer({ antialias: quality.antialias, alpha: false });
   renderer.setPixelRatio(quality.pixelRatio);
   // Soft shadows on good phones (the mockups' depth); off in low graphics.
-  const shadows = quality.antialias;
+  let shadows = quality.antialias;
   // The sun never moves, so the shadow map is drawn again only when something that casts a shadow changes (a landmark
   // built, a story place shown, a searchlight swinging), never for the moving cars and people.
   if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = 2; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true; }
@@ -539,6 +541,16 @@ export function createCompactScene(quality: { pixelRatio: number; antialias: boo
       camera.updateProjectionMatrix();
     },
     render() { renderer.render(scene, camera); },
+    lower() {
+      renderer.setPixelRatio(1);
+      if (!shadows) return;
+      shadows = false;
+      renderer.shadowMap.enabled = false;
+      scene.traverse((o) => {
+        const m = (o as { material?: { needsUpdate: boolean } | { needsUpdate: boolean }[] }).material;
+        for (const x of Array.isArray(m) ? m : m ? [m] : []) x.needsUpdate = true;
+      });
+    },
     tick(seconds) {
       const dt = lastTick < 0 ? 0 : Math.max(0, seconds - lastTick);
       lastTick = seconds;

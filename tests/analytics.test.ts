@@ -49,8 +49,11 @@ test("a C$ purchase carries the item, the price and the currency", () => {
 test("no typed text or email goes to PostHog", () => {
   const shell = readFileSync(new URL("../components/GameShell.tsx", import.meta.url), "utf8");
   for (const m of shell.matchAll(/trackEvent\("chat_message_sent", (\{[^}]*\})/g)) assert.doesNotMatch(m[1], /body[,}]|body:|text/, m[1]);
-  const init = readFileSync(new URL("../instrumentation-client.ts", import.meta.url), "utf8");
+  // PostHog is set up in lib/analytics.ts (loaded only after Accept, Nov 1); instrumentation-client.ts starts it.
+  assert.match(readFileSync(new URL("../instrumentation-client.ts", import.meta.url), "utf8"), /startAnalytics\(\)/);
+  const init = readFileSync(new URL("../lib/analytics.ts", import.meta.url), "utf8");
   assert.match(init, /maskAllInputs: true/);
+  assert.doesNotMatch(init, /^import posthog/m, "PostHog downloads only after Accept");
   // Consent (GDPR/ePrivacy): nothing is sent or stored until the player accepts the banner.
   assert.match(init, /opt_out_capturing_by_default: true/);
   assert.match(init, /opt_out_persistence_by_default: true/);

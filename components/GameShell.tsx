@@ -4,6 +4,7 @@ import { everyVisible, ring, useDoorbell } from "@/lib/live";
 import { SLOW_DOWN_EVENT, SLOW_DOWN_TEXT } from "@/lib/rateLimits";
 import { PLAZA_SKU, plazaWeekOver, type CoutureApi, type CoutureMap } from "@/lib/coutureMap";
 import dynamic from "next/dynamic";
+import { lazySheet, prefetchSheets } from "./lazySheet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY, formatCash } from "@/lib/economy";
@@ -37,11 +38,8 @@ import { calendarLive, phoneInvite, type CalendarData } from "@/lib/calendar";
 import { RoommateCard, roommateCardDue, roommateMet } from "./home/Roommate";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, needsConfirm, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
-import { BillsSheet, NetWorthSheet, ShopSheet } from "./city/Commerce";
-import { LookRoom } from "./city/LookRoom";
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
 import { KitchenSheet, RestSheet } from "./city/Rest";
-import { LottoSheet } from "./city/Lotto";
 import { TeaRevealSheet } from "./city/Gossip";
 import { TEA_BADGE, leadAction, leadFrom, leadLine, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
 import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
@@ -77,7 +75,7 @@ import type { ShopCategory } from "@/lib/city";
 import { ActionTimer, GainToast, useGameNow } from "./city/Common";
 import { actionSeconds, actionVerb, OTHER_SECONDS } from "@/lib/actionTime";
 import { DevClock } from "./city/DevClock";
-import { PhoneModal, type App } from "./city/Phone";
+import type { App } from "./city/Phone";
 import { ViewingBar } from "./city/Apartments";
 import { ChatPassCard } from "./chat/ChatPass";
 import { COUNTS_POLL_MS, PRESENCE_POLL_MS, ROTATE_MS, VIP_SKUS, pickInView, type HerePerson, type PlaceCounts } from "@/lib/meet";
@@ -94,11 +92,9 @@ import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
 import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
-import { ProfileSheet } from "./game/ProfileSheet";
 import { RankUpCard } from "./game/Ranks";
 import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
-import { MembershipSheet } from "./store/Membership";
 import type { MembershipApi, MembershipState } from "@/lib/membership";
 import type { PushApi } from "@/lib/pushClient";
 import type { GoalsApi, GoalsState } from "@/lib/goals";
@@ -133,21 +129,30 @@ import { uploadToBigScreen } from "@/lib/tvUpload";
 import { bannerSeenKey, type RadioApi, type RadioState, type Shoutout } from "@/lib/radio";
 import type { MayorApi } from "@/lib/mayor";
 import type { CampaignApi } from "@/lib/campaign";
-import { CampaignSheet } from "@/components/campaign/CampaignSheet";
 import type { CareerApi } from "@/lib/careers";
-import { CareersSheet } from "@/components/careers/CareersSheet";
 import { UNDERWORLD, type UnderworldApi } from "@/lib/underworld";
-import { BackRoomSheet } from "@/components/underworld/BackRoom";
 import { GALA, type GalaApi } from "@/lib/gala";
-import { GalaSheet } from "@/components/gala/Gala";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
-import { CampusSheet } from "./campus/CampusSheet";
 
 /** Culture pack C1: a regular's everyday lines plus their profile's catchphrases. */
 const EVERYDAY_LINES = withCatchphrases(CAST_LINES, NPC_PROFILES.profiles as NpcProfile[]);
 
 const Room3D = dynamic(() => import("./room/Room3D"), { ssr: false });
 const AvatarHead = dynamic(() => import("./avatar/AvatarHead"), { ssr: false });
+// Speed on cheap phones (owner, Nov 1): screens that open on a tap download the first time they open (components/lazySheet.tsx).
+const PhoneModal = lazySheet(() => import("./city/Phone").then((m) => m.PhoneModal));
+const ShopSheet = lazySheet(() => import("./city/Commerce").then((m) => m.ShopSheet));
+const BillsSheet = lazySheet(() => import("./city/Commerce").then((m) => m.BillsSheet));
+const NetWorthSheet = lazySheet(() => import("./city/Commerce").then((m) => m.NetWorthSheet));
+const LookRoom = lazySheet(() => import("./city/LookRoom").then((m) => m.LookRoom));
+const LottoSheet = lazySheet(() => import("./city/Lotto").then((m) => m.LottoSheet));
+const ProfileSheet = lazySheet(() => import("./game/ProfileSheet").then((m) => m.ProfileSheet));
+const MembershipSheet = lazySheet(() => import("./store/Membership").then((m) => m.MembershipSheet));
+const CampaignSheet = lazySheet(() => import("./campaign/CampaignSheet").then((m) => m.CampaignSheet));
+const CareersSheet = lazySheet(() => import("./careers/CareersSheet").then((m) => m.CareersSheet));
+const BackRoomSheet = lazySheet(() => import("./underworld/BackRoom").then((m) => m.BackRoomSheet));
+const GalaSheet = lazySheet(() => import("./gala/Gala").then((m) => m.GalaSheet));
+const CampusSheet = lazySheet(() => import("./campus/CampusSheet").then((m) => m.CampusSheet));
 
 export interface GameActions {
   setTutorialState: (state: "done" | "skipped") => Promise<void>;
@@ -474,6 +479,11 @@ export function GameShell({
     setToast(`Your ${LOOK_LABEL[b.line] ?? ""} look fits ${placeById(b.place)?.name ?? "here"}: +${STYLE.venueConfidence} Confidence 💅`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [styleBoostKey]);
+  // The tap-to-open screens download in the background once the game has settled (components/lazySheet.tsx).
+  useEffect(() => {
+    const t = setTimeout(prefetchSheets, GAME_CONFIG.prefetchSheetsMs);
+    return () => clearTimeout(t);
+  }, []);
   // v0.14 Real Clout FM: today's show, checked on open and every few minutes; the banner shows once a shoutout.
   const [radioNow, setRadioNow] = useState<RadioState | null>(null);
   const [radioBanner, setRadioBanner] = useState<Shoutout | null>(null);

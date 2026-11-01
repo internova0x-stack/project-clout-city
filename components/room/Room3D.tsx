@@ -19,7 +19,7 @@ import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
 import { goldStatue } from "../avatar/goldStatue";
 import { buildFurniture, makeKit, STATUE_TOP, tagItem, type Built, type Kit } from "./furniture";
-import { renderQuality } from "@/lib/graphics";
+import { frameWatch, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
 
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
 // player's avatar, which walks where you tap, sits on seats, naps on the bed and
@@ -648,8 +648,20 @@ export default function Room3D(props: Room3DProps) {
     let last = performance.now();
     const start = last;
     const proj = new Vector3();
+    // Cheap phones (owner, Nov 1): too slow for full graphics → sharpness and shadows drop now, low graphics after.
+    const watch = quality.shadows ? frameWatch() : null;
     const frame = (now: number) => {
       raf = 0;
+      if (watch?.(now) === "slow") {
+        setAutoLowGraphics();
+        renderer.setPixelRatio(1);
+        renderer.shadowMap.enabled = false;
+        scene.traverse((o) => {
+          const m = (o as { material?: { needsUpdate: boolean } | { needsUpdate: boolean }[] }).material;
+          for (const x of Array.isArray(m) ? m : m ? [m] : []) x.needsUpdate = true;
+        });
+        fit();
+      }
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const t = (now - start) / 1000;

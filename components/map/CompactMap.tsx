@@ -10,7 +10,7 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { PLACES } from "@/lib/city";
 import { DISTRICTS, ISLAND_CARD_AT, labelPriority, pickLabels, SPOTS, STREET_NAMES, WORLD_SIZE, COMPACT_GRID, gridToWorld, makeProjector } from "@/lib/compactMap";
-import { lowGraphics, renderQuality } from "@/lib/graphics";
+import { frameWatch, lowGraphics, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
 import type { PlacePin } from "@/lib/places";
 import { Glyph, glyphFor, tileBackground } from "../AppGlyph";
 import type { CityMapProps, MapApi } from "./types";
@@ -80,10 +80,19 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     let raf = 0;
     let building = true;
     let lastAnim = 0;
-    const animMs = lowGraphics() ? 50 : 33;
+    let animMs = lowGraphics() ? 50 : 33;
     const started = performance.now();
+    // Cheap phones (owner, Nov 1): a phone too slow for full graphics drops to low ones now (sharpness, shadows, the
+    // street's pace) and from the next screen on (rooms, avatars, fewer cars), until the player picks in Settings.
+    const watch = lowGraphics() ? null : frameWatch();
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
+      if (watch?.(now) === "slow") {
+        setAutoLowGraphics();
+        scene.lower();
+        fit();
+        animMs = 50;
+      }
       const a = animRef.current;
       if (a) {
         const t = Math.min(1, (now - a.start) / a.ms), e = 1 - (1 - t) ** 3;

@@ -6,6 +6,8 @@
 
 const KEY_LOW = "cc-graphics-low";
 const KEY_BODIES = "cc-new-bodies";
+/** Speed on cheap phones (owner, Nov 1): set by the map when its frames come too slowly (`frameWatch`). */
+const KEY_AUTO = "cc-graphics-auto";
 
 function read(key: string): string | null {
   try { return typeof localStorage === "undefined" ? null : localStorage.getItem(key); } catch { return null; }
@@ -31,9 +33,34 @@ export function lowGraphics(): boolean {
   if (p === "low" || p === "high") return p === "low";
   const saved = read(KEY_LOW);
   if (saved !== null) return saved === "1";
-  return weakDevice();
+  return read(KEY_AUTO) === "1" || weakDevice();
 }
 export function setLowGraphics(on: boolean) { write(KEY_LOW, on ? "1" : "0"); }
+/** The phone struggled with full graphics: low graphics from now on, unless the player chose (Settings wins). */
+export function setAutoLowGraphics() { write(KEY_AUTO, "1"); }
+
+/**
+ * Watches the time between animation frames and says once whether this phone is too slow for full graphics: after a
+ * settling time, the middle of `samples` frames slower than `slowMs` (about 22 frames a second). Gaps over a second
+ * (the tab hidden, a pause) don't count. Returns "slow" once, "ok" once it has seen enough fast frames, else null.
+ */
+export function frameWatch(opts: { settleMs?: number; samples?: number; slowMs?: number } = {}) {
+  const { settleMs = 4000, samples = 90, slowMs = 45 } = opts;
+  let first = -1, last = -1, done = false;
+  const gaps: number[] = [];
+  return (now: number): "slow" | "ok" | null => {
+    if (done) return null;
+    if (first < 0) first = now;
+    const gap = last < 0 ? 0 : now - last;
+    last = now;
+    if (now - first < settleMs || gap <= 0 || gap > 1000) return null;
+    gaps.push(gap);
+    if (gaps.length < samples) return null;
+    done = true;
+    const mid = [...gaps].sort((a, b) => a - b)[Math.floor(gaps.length / 2)];
+    return mid > slowMs ? "slow" : "ok";
+  };
+}
 
 /** The new base bodies: on, unless this device chose the old ones. */
 export function newBodies(): boolean {
