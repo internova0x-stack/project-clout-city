@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sheet } from "./Sheet";
 import { CATALOG_FURNITURE, itemBySku, type ShopItem } from "@/lib/city";
+import { screenReady } from "@/lib/splash";
 import { GAME_CONFIG } from "@/lib/config";
 import { formatCashShort } from "@/lib/economy";
 import { normalizeLook } from "@/lib/look";
@@ -89,7 +90,7 @@ export function WelcomeBack({ data, onRestart, preview = false }: { data: Welcom
   return (
     <main className="welcome">
       <div className="welcome-room" aria-hidden="true">
-        <Room3D template={template} layout={data.homeLayout} owned={owned} look={look} outfit={outfit} daytime label={`${data.name} at home`}
+        <Room3D template={template} layout={data.homeLayout} owned={owned} look={look} outfit={outfit} daytime label={`${data.name} at home`} onReady={screenReady}
           insetTop={170} insetBottom={300} />
       </div>
       <header className="welcome-head">

@@ -9,6 +9,7 @@ import { Vector3 } from "three";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { PLACES } from "@/lib/city";
+import { screenReady } from "@/lib/splash";
 import { DISTRICTS, ISLAND_CARD_AT, labelPriority, pickLabels, SPOTS, STREET_NAMES, WORLD_SIZE, COMPACT_GRID, gridToWorld, makeProjector } from "@/lib/compactMap";
 import { frameWatch, lowGraphics, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
 import type { PlacePin } from "@/lib/places";
@@ -64,6 +65,7 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
       scene = createCompactScene(renderQuality());
     } catch {
       setFailed(true);
+      screenReady();
       return;
     }
     sceneRef.current = scene;
@@ -79,6 +81,7 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
 
     let raf = 0;
     let building = true;
+    let buildFrames = 0;
     let lastAnim = 0;
     let animMs = lowGraphics() ? 50 : 33;
     const started = performance.now();
@@ -102,6 +105,8 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
       }
       if (building) {
         building = scene.buildMore([viewRef.current.x, viewRef.current.z], 8);
+        // The nearest blocks build first: the launch splash may go once the view is filled (or everything is built).
+        if (!building || ++buildFrames === 30 || now - started > 1500) requestAnimationFrame(screenReady);
         dirtyRef.current = true;
       }
       // Traffic, people and the searchlights at night: 30 frames a second (20 in low graphics). Only the 3D view

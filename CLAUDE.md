@@ -169,7 +169,8 @@ components live in `app/globals.css`.
   today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
 - Loading (owner, Oct 23-24): the launch splash `AppLoading` is `/`'s Suspense fallback only (no loading.tsx, so Continue
   keeps the welcome screen and its spinner up until the game is ready); it shows at once and `SplashHold` keeps it up
-  `GAME_CONFIG.splashMinMs` (2.2 s) from launch (owner, Oct 28: the poster `public/loading-poster.webp`, wordmark and line in
+  until the screen behind it has drawn (owner, Nov 1: lib/splash.ts `screenReady`: the welcome screen's Room3D onReady, the map's
+  nearest blocks), at least `GAME_CONFIG.splashMinMs` (2.2 s) from launch and `splashShownMs` on screen, at most `splashMaxMs` (owner, Oct 28: the poster `public/loading-poster.webp`, wordmark and line in
   the picture, a little wider than tall phones so the title keeps its margins; spinner pill and Mayor Papa-Dani's tips from
   `lib/loadingTips.ts` over the cast); Continue spins.
   iPhone launch images are `public/splash/` (lib/launchImages.ts; regenerate with `npm run build:launch-images` on a running
