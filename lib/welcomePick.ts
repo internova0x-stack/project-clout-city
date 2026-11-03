@@ -28,7 +28,24 @@ export interface WelcomeAction {
   why: string | null;
   cta: string;
   target: WelcomeTarget;
+  /** Lola's line for it (the "Lola says" treatment). */
+  lola?: string;
 }
+
+/** Lola's voice for each kind (docs/culture/VOICE.md: short, knowing, a little mean, never cruel). */
+export const LOLA_SAYS: Record<WelcomeKind, string> = {
+  rent: "Babe. The landlord called. Twice. Handle it.",
+  reward: "You have presents waiting. Open them before I do.",
+  streak: "Don't you dare break that streak tonight.",
+  happening: "Drop everything. This is only on for a bit.",
+  stamp: "One more visit and you're officially a regular.",
+  skill: "You're this close to leveling up. Go.",
+  goal: "You're nearly there. Finish it, superstar.",
+  messages: "Someone texted you. I didn't read it. Much.",
+  story: "New chapter just dropped. Everyone's talking.",
+  task: "Start with this one. Easy win.",
+  new: "You've never done this. Everyone who matters has.",
+};
 
 export interface WelcomeSituation {
   rent: { title: string; line: string; canPay: boolean } | null;
@@ -101,7 +118,7 @@ export function welcomeLadder(s: WelcomeSituation): WelcomeAction[] {
     out.push({ kind: "task", emoji: "✅", title: s.tasks.next.title, sub: null, detail: `${s.tasks.done} of ${s.tasks.total} daily tasks done`, why: null, cta: "Let's go", target: "tasks" });
   }
   if (pick?.why === "new") out.push(pickAction("new", "You've never done this. Everyone who matters has."));
-  return out;
+  return out.map((a) => ({ ...a, lola: LOLA_SAYS[a.kind] }));
 }
 
 /** The one action to show, or null when there's nothing to suggest. */

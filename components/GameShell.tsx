@@ -10,7 +10,7 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
-import { DailyWelcome } from "./city/DailyPick";
+import { DailyWelcome, WELCOME_VARIANTS, type WelcomeVariant } from "./city/DailyPick";
 import { pickWelcome, type WelcomeAction, type WelcomeKind } from "@/lib/welcomePick";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
@@ -3732,7 +3732,8 @@ export function GameShell({
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
           <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={goalsNow?.streak.current ?? 0}
-            action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater} />
+            action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
+            variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
