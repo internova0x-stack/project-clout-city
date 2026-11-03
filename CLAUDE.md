@@ -206,7 +206,10 @@ components live in `app/globals.css`.
   `sparks` and a ribbon when a friendship levels up, held while a card is open (`FavorHandlers.hold`). The station sign
   (components/city/StationSign.tsx): entering a place (not the resume, not a floor change) flips down its name, train lines,
   hours and the first happening for 3.4 s (tap closes). Lola says (DailyPick `LolaSays`): she bounces in, typing dots for 0.95 s,
-  her line word by word as the task slides up, the button shines once. CSS: globals.css "The motion kit".
+  her line word by word as the task slides up, the button shines once. The streak welcome (DailyPick `StreakWelcome`, owner Nov 3:
+  "yes, build the streak animation"): the flame grows from an ember with sparks, the number rolls like an odometer from yesterday's
+  count (`Reel`), this week's dots light along a fuse; when the pick is the at-risk rung (kind 'streak'), the card drains to grey,
+  the flame gutters and today's dot blinks red. CSS: globals.css "The motion kit" and "The streak welcome".
 - Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check
