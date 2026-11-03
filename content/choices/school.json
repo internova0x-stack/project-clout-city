@@ -124,7 +124,7 @@
     "base": "exam-answers",
     "area": "school",
     "emoji": "🤫",
-    "title": "In the dining hall, an upperclassman leans in: 'Heard you're flexible. Tomorrow's Clout Theory final, C$300.'",
+    "title": "In the dining hall, an upperclassman leans in: 'Tomorrow's Clout Theory final. C$300, answers and all.'",
     "where": {
       "tags": [
         "campus",
@@ -138,9 +138,9 @@
       ]
     },
     "needs": {
-      "student": true,
-      "integrityMax": 30
+      "student": true
     },
+    "pull": "tempt",
     "options": [
       {
         "id": "no",

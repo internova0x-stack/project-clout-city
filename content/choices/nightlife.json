@@ -17,9 +17,7 @@
         "visit"
       ]
     },
-    "needs": {
-      "integrityMax": 30
-    },
+    "pull": "tempt",
     "options": [
       {
         "id": "no",
@@ -121,9 +119,7 @@
         "visit"
       ]
     },
-    "needs": {
-      "integrityMax": 30
-    },
+    "pull": "tempt",
     "options": [
       {
         "id": "no",

@@ -434,6 +434,14 @@ components live in `app/globals.css`.
   on the house once a week at their place, Energy +10, Mood +8), Family 10 (`npc_big_favor`: C$300 once every 30 days, ledger
   'npc_favor', or Sgt. Bev ends holding). `npc_bonds_state()`; UI components/city/Favors.tsx (`FavorStrip` under the regular's
   line: the "needs a hand" chip, hearts and level). `?bonds=friend|family` in the preview.
+  The meter tests you, not confirms you (owner, Nov 3: "If halo players only get asked for good favors and hustler players only get
+  proposed angles, then there is no real dilemma"; no migration): `pullOf` (lib/choices.ts, tests/temptation.test.ts) replaces the end
+  bonuses on favors and on cards with `pull`. Favors and `pull: "tempt"` cards pay Hustler-ward cash ×1.25 in the middle and ×1.5 for a
+  Halo (a favor ×1.25 more from a Friend, ×1.5 from Family; no Hustler bonus on a favor); favors and `pull: "redeem"` cards (Hustlers
+  only, `needs.integrityMax` ≤ 30: content/choices/redemption.json, five ways back) pay a Hustler's Halo-ward clout ×1.5. Favors play the
+  card's own odds (no `laterOdds`). The card's "get" line shows the scaled amount (`cardView`'s `pull`, `pullText`); the server reads
+  the friendship from `npc_bonds` (`pullFor` in choiceActions.ts). Every Hustler-only card is a way back (`validateCards`): the old
+  Hustler-only angles are `tempt` cards open to everyone, and the Halo-only trust cards (Sal's and Hersh's till, the roof fund) are `tempt`.
 - Careers (migration 0135, owner Oct 31; spec section 30): steady jobs with a ladder, separate from the creator's looks and
   traits (owner: "both are separate"). Three tracks of five levels (lib/careers.ts `TRACKS`: Hospitality at Grind & Gossip,
   Tech at Triborough Works, Media at the Clout TV Tower), the Phone's Careers app (Phone → Jobs stays the players' hiring

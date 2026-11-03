@@ -6,7 +6,7 @@ import {
   type BlotterItem, type ChoiceAfter, type ChoiceContext, type ChoiceCard, type ChoiceCardView, type ChoiceMark, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
 } from "@/lib/choices";
 import { CHOICE_CARDS, FAVOR_CARDS } from "@/lib/choicesContent";
-import { bondKind, pickFavor, type Bond, type FavorPeek } from "@/lib/npcBonds";
+import { bondKind, bondLevel, pickFavor, type Bond, type FavorPeek } from "@/lib/npcBonds";
 import { REGULARS } from "@/lib/cast";
 import { ASPIRE } from "@/lib/aspirations";
 import type { Memory } from "@/lib/memory";
@@ -105,6 +105,18 @@ async function remember(admin: Admin, id: string, sets: { fact: string; subject:
 type Status = { chainDue: string | null; marks: ChoiceMark[] };
 
 /** Migration 0132: lasting effects and the chain card due (empty before it has run). */
+/**
+ * What the player's place on the meter (and, for a favor, the friendship) does to a card's pay (lib/choices.ts pullOf):
+ * the card's "get" lines show it and the choice pays it. A burned friendship counts as none.
+ */
+async function pullFor(admin: Admin, id: string, c: ChoiceCard, integrity: number): Promise<{ integrity: number; bond?: ReturnType<typeof bondLevel> }> {
+  if (!c.who || !c.where?.after?.includes("talk")) return { integrity };
+  const { data } = await admin.from("npc_bonds").select("favors, burned_until").eq("player_id", id).eq("npc", c.who).maybeSingle();
+  const b = data as { favors: number; burned_until: string | null } | null;
+  const burned = !!b?.burned_until && b.burned_until > new Date().toISOString().slice(0, 10);
+  return { integrity, bond: b && !burned ? bondLevel(b.favors) : "stranger" };
+}
+
 async function status(admin: Admin, id: string): Promise<Status> {
   const { data, error } = await admin.rpc("choice_status", { p_player: id });
   return error || !data ? { chainDue: null, marks: [] } : (data as Status);
@@ -117,7 +129,7 @@ async function openChain(admin: Admin, id: string, ctx: Context, st: Status): Pr
   const { data, error } = await admin.rpc("choice_chain_open", { p_player: id, p_base: c?.base ?? st.chainDue, p_area: c?.area ?? "life", p_place: ctx.atPlace });
   if (error || !data || !c) return null;
   const d = data as { log: number; text: string };
-  return { ...cardView(c, d.log, ctx.atPlace, c.slots ? await memoryOf(admin, id) : null), intro: d.text };
+  return { ...cardView(c, d.log, ctx.atPlace, c.slots ? await memoryOf(admin, id) : null, await pullFor(admin, id, c, ctx.integrity)), intro: d.text };
 }
 
 export async function choiceState(): Promise<ChoiceResult<ChoiceState>> {
@@ -140,7 +152,7 @@ export async function choiceState(): Promise<ChoiceResult<ChoiceState>> {
     data: {
       marks: st.marks,
       integrity: h.integrity,
-      open: chain ?? (o && ctx.open ? cardView(o, ctx.open.log, ctx.open.place, mem) : null),
+      open: chain ?? (o && ctx.open ? cardView(o, ctx.open.log, ctx.open.place, mem, await pullFor(w.admin, w.id, o, ctx.integrity)) : null),
       landed: (landed.data as { id: number; card: string; option: string; emoji: string; text: string; effects: ChoiceEffects; day: string }[])
         .map((x) => ({ ...entry({ id: x.id, kind: "later", card: x.card, option: x.option, receipt: x.text, emoji: x.emoji, effects: x.effects, day: x.day }) })),
       log: h.log.map(entry),
@@ -155,7 +167,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
   if ("error" in ctx) return { ok: false, error: ctx.error };
   if (ctx.open) {
     const o = card(ctx.open.card);
-    return { ok: true, data: o ? cardView(o, ctx.open.log, ctx.open.place, o.slots ? await memoryOf(w.admin, w.id) : null) : null };
+    return { ok: true, data: o ? cardView(o, ctx.open.log, ctx.open.place, o.slots ? await memoryOf(w.admin, w.id) : null, await pullFor(w.admin, w.id, o, ctx.integrity)) : null };
   }
   const chain = await openChain(w.admin, w.id, ctx, await status(w.admin, w.id));
   if (chain) return { ok: true, data: chain };
@@ -175,7 +187,7 @@ export async function choiceOffer(after: ChoiceAfter): Promise<ChoiceResult<Choi
     if (/already_open|enough_today/.test(error.message)) return { ok: true, data: null };
     return { ok: false, error: err(error) };
   }
-  return { ok: true, data: cardView(pick, data as number, place?.id ?? null, memory) };
+  return { ok: true, data: cardView(pick, data as number, place?.id ?? null, memory, { integrity: ctx.integrity }) };
 }
 
 export async function choiceChoose(log: number, option: string): Promise<ChoiceResult<ChoiceMade>> {
@@ -188,10 +200,11 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
   if (!c || !c.options.some((o) => o.id === option)) return { ok: false, error: choiceError("unknown_option") };
   const memory = c.slots || c.options.some((o) => o.outcomes.some((x) => x.sets)) ? await memoryOf(w.admin, w.id) : null;
   const r = resolveChoice(c, option, ctx.today, rng, ctx.integrity, memory);
-  // Each end of the meter pays its own way (repBonus): more clout for a Halo, more cash for a Hustler.
+  // Each end of the meter pays its own way, and temptations grow with trust (repBonus, pullOf): the card showed the same.
+  const pull = await pullFor(w.admin, w.id, c, ctx.integrity);
   const where = ctx.open.place ?? ctx.atPlace;
   const clean = (e: ChoiceEffects) => Object.fromEntries(Object.entries(e).filter(([, v]) => v));
-  const effects = boundEffects(resolveHere(repBonus(r.effects, ctx.integrity), where), ctx.bank);
+  const effects = boundEffects(resolveHere(repBonus(r.effects, ctx.integrity, c, pull.bond), where), ctx.bank);
   const { data, error } = await w.admin.rpc("choice_settle", {
     p_player: w.id, p_log: log, p_option: option, p_outcome: r.outcome, p_receipt: r.text,
     p_effects: clean(effects),
@@ -290,7 +303,7 @@ export async function favorOpen(npc: string): Promise<ChoiceResult<ChoiceCardVie
   if (!c) return { ok: true, data: null };
   const { data, error } = await w.admin.rpc("favor_open", { p_player: w.id, p_card: c.id, p_base: c.base, p_npc: npc, p_place: reg.placeId });
   if (error) return { ok: false, error: favorErr(error) };
-  return { ok: true, data: cardView(c, data as number, reg.placeId, c.slots ? await memoryOf(w.admin, w.id) : null) };
+  return { ok: true, data: cardView(c, data as number, reg.placeId, c.slots ? await memoryOf(w.admin, w.id) : null, await pullFor(w.admin, w.id, c, ctx.integrity)) };
 }
 
 export async function npcBonds(): Promise<ChoiceResult<Bond[]>> {

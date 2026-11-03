@@ -96,6 +96,12 @@ export interface ChoiceCard {
   needs?: { integrityMin?: number; integrityMax?: number; rank?: number; student?: boolean; business?: boolean; roommate?: boolean };
   /** A follow-up only reached through a chain (`later.card`), never picked on its own. */
   chainOnly?: boolean;
+  /**
+   * The meter tests you, not confirms you (owner, Nov 3): "tempt" (an angle open to everyone) pays its Hustler-ward cash
+   * more the further the player is from Hustler; "redeem" (a way back, `needs.integrityMax`) pays a Hustler's Halo-ward
+   * clout more. Favors (after "talk") do both, by themselves (`pullOf`).
+   */
+  pull?: "tempt" | "redeem";
   /** Storylets (lib/storylets.ts): only for players whose memory matches, with names filled in from it. */
   when?: When;
   slots?: Record<string, SlotDef>;
@@ -136,6 +142,18 @@ export const CHOICES = {
    */
   ownGame: 1.5,
   offGame: 0.5,
+  /**
+   * The meter tests you, not confirms you (owner, Nov 3: "If halo players only get asked for good favors and hustler players
+   * only get proposed angles, then there is no real dilemma"). Temptation grows with trust: a "tempt" card's or a favor's
+   * Hustler-ward cash x temptMiddle in the middle and x temptHalo for a Halo (a favor's not at all for a Hustler, who gets
+   * no end bonus there); a favor from a Friend x bondFriend more, from Family x bondFamily. A way back: a "redeem" card's or a
+   * favor's Halo-ward clout x redeem for a Hustler. Favors take no end bonus and no "own game" luck: the stake is the friendship.
+   */
+  temptMiddle: 1.25,
+  temptHalo: 1.5,
+  bondFriend: 1.25,
+  bondFamily: 1.5,
+  redeem: 1.5,
   /** At most this many cards a New York day (spec 3.2: 1 to 2). */
   perDay: 2,
   /** A variant never comes back within 30 days; its base dilemma not within 7. */
@@ -231,13 +249,52 @@ export function lolaRepLine(from: number, to: number, n = 0): string | null {
   return lines[Math.abs(n) % lines.length];
 }
 
-/** Each end's payoff: a Halo's Halo-ward choices pay more clout, a Hustler's Hustler-ward choices more cash. */
-export function repBonus(e: ChoiceEffects, now: number): ChoiceEffects {
+/** A favor a regular asks when the player talks to them (content/choices/favors.json). */
+export const isFavor = (card: Pick<ChoiceCard, "where">) => !!card.where?.after?.includes("talk");
+
+/** The friendship with the card's regular, for a favor's temptation (lib/npcBonds.ts levels). */
+export type PullBond = "stranger" | "friendly" | "friend" | "family" | null | undefined;
+
+/**
+ * What the player's place on the meter does to an outcome's pay: multipliers for its cash and clout. Ordinary cards: each
+ * end pays its own way (a Halo's Halo-ward clout x haloClout, a Hustler's Hustler-ward cash x hustlerCash). "tempt" cards
+ * and favors tempt those with more to lose; "redeem" cards and favors pay a Hustler's way back.
+ */
+export function pullOf(card: Pick<ChoiceCard, "where" | "pull"> | null | undefined, toward: number, now: number, bond?: PullBond): { cash: number; clout: number } {
   const band = integrityBand(now);
-  if (band === "high" && (e.integrity ?? 0) > 0 && (e.clout ?? 0) > 0) return { ...e, clout: Math.round(e.clout! * CHOICES.haloClout) };
-  if (band === "low" && (e.integrity ?? 0) < 0 && (e.cash ?? 0) > 0) return { ...e, cash: Math.round(e.cash! * CHOICES.hustlerCash) };
-  return e;
+  const favor = !!card && isFavor(card);
+  let cash = 1, clout = 1;
+  if (toward < 0) {
+    if (favor || card?.pull === "tempt") cash = band === "high" ? CHOICES.temptHalo : band === "middle" ? CHOICES.temptMiddle : favor ? 1 : CHOICES.hustlerCash;
+    else if (band === "low") cash = CHOICES.hustlerCash;
+    if (favor) cash *= bond === "family" ? CHOICES.bondFamily : bond === "friend" ? CHOICES.bondFriend : 1;
+  } else if (toward > 0) {
+    if (favor || card?.pull === "redeem") clout = band === "low" ? CHOICES.redeem : 1;
+    else if (band === "high") clout = CHOICES.haloClout;
+  }
+  return { cash, clout };
 }
+
+/** Each end's payoff, and the temptations (pullOf), applied to an outcome's effects. */
+export function repBonus(e: ChoiceEffects, now: number, card?: Pick<ChoiceCard, "where" | "pull"> | null, bond?: PullBond): ChoiceEffects {
+  const m = pullOf(card, Math.sign(e.integrity ?? 0), now, bond);
+  const out = { ...e };
+  if (m.cash !== 1 && (e.cash ?? 0) > 0) out.cash = Math.round(e.cash! * m.cash);
+  if (m.clout !== 1 && (e.clout ?? 0) > 0) out.clout = Math.round(e.clout! * m.clout);
+  return out;
+}
+
+/** An option's "get" line with its amounts scaled the way repBonus will pay them (C$300 becomes C$450 for a tempted Halo). */
+export function pullText(get: string, m: { cash: number; clout: number }): string {
+  const scale = (n: string, k: number) => Math.round(Number(n.replace(/,/g, "")) * k).toLocaleString("en-US");
+  let t = get;
+  if (m.cash !== 1) t = t.replace(/C\$(\d[\d,]*)/g, (_, n: string) => `C$${scale(n, m.cash)}`);
+  if (m.clout !== 1) t = t.replace(/(\d[\d,]*)(\s*(?:🔥\s*)?clout)/gi, (_, n: string, rest: string) => `${scale(n, m.clout)}${rest}`);
+  return t;
+}
+
+/** Which way an option moves the meter: the sign of its outcomes' nudges, by weight. */
+const optionToward = (o: ChoiceOption) => Math.sign(o.outcomes.reduce((s, x) => s + x.weight * (x.effects.integrity ?? 0), 0));
 
 /** Whether a card fits here and now, and how well (0: no). A named place beats a tag, a tag beats anywhere. */
 export function fit(card: ChoiceCard, ctx: ChoiceContext): number {
@@ -298,13 +355,14 @@ export function mayOffer(o: { shownToday: number; lastShownAt: string | null; op
 /** A storylet's slots, filled from the player's memory (shown names, and raw subjects for `sets`). */
 export const cardSlots = (card: ChoiceCard, memory: Memory | null | undefined) => (card.slots ? fillSlots(card.slots, memory ?? null) : null);
 
-export function cardView(card: ChoiceCard, log: number, place: string | null, memory?: Memory | null): ChoiceCardView {
+export function cardView(card: ChoiceCard, log: number, place: string | null, memory?: Memory | null, pull?: { integrity: number; bond?: PullBond }): ChoiceCardView {
   const v = cardSlots(card, memory)?.text ?? {};
   const f = (t: string) => fillText(t, v);
+  const g = (o: ChoiceOption) => (pull ? pullText(f(o.get), pullOf(card, optionToward(o), pull.integrity, pull.bond)) : f(o.get));
   return {
     log, id: card.id, area: card.area, emoji: card.emoji, title: f(card.title), who: card.who ?? null, place,
     ...(card.where?.after?.includes("talk") ? { favor: true } : {}),
-    options: card.options.map((o) => ({ id: o.id, label: f(o.label), get: f(o.get), cost: f(o.cost) })),
+    options: card.options.map((o) => ({ id: o.id, label: f(o.label), get: g(o), cost: f(o.cost) })),
   };
 }
 
@@ -350,14 +408,16 @@ export function resolveChoice(card: ChoiceCard, optionId: string, today: string,
   const f = (t: string) => fillText(t, slots?.text ?? {});
   const option = card.options.find((o) => o.id === optionId);
   if (!option) throw new Error("unknown_option");
-  const weights = option.outcomes.map((o) => o.weight * laterOdds(o, integrity));
+  // A favor plays the card's own odds: the stake is the friendship, not which end you're at (owner, Nov 3).
+  const odds = (o: ChoiceOutcome) => (isFavor(card) ? 1 : laterOdds(o, integrity));
+  const weights = option.outcomes.map((o) => o.weight * odds(o));
   const total = weights.reduce((s, w) => s + w, 0);
   let r = rng() * total;
   let i = 0;
   for (; i < option.outcomes.length - 1; i++) if ((r -= weights[i]) < 0) break;
   const out = option.outcomes[i];
   let later: ChoiceResolution["later"] = null;
-  if (out.later && rng() < Math.min(1, out.later.chance * laterOdds(out, integrity))) {
+  if (out.later && rng() < Math.min(1, out.later.chance * odds(out))) {
     const [a, b] = out.later.afterDays;
     later = {
       due: addDays(today, a + Math.floor(rng() * (b - a + 1))), emoji: out.later.emoji ?? card.emoji, text: f(out.later.text),
@@ -532,6 +592,14 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
     if (c.where?.work) {
       if (!needsJob(c.when)) out.push(`${at}: an office card (where.work) needs a job: "when.all" with a job or job.* snapshot`);
       if (c.where.places || c.where.tags) out.push(`${at}: an office card happens at the job, so no places or tags`);
+    }
+    if (c.pull !== undefined) {
+      const toward = (s: number) => c.options?.some((o) => o.outcomes?.some((x) => Math.sign(x.effects?.integrity ?? 0) === s));
+      if (c.pull !== "tempt" && c.pull !== "redeem") out.push(`${at}: pull must be "tempt" or "redeem"`);
+      if (c.pull === "tempt" && c.needs?.integrityMax !== undefined) out.push(`${at}: a "tempt" card tempts everyone, so no integrityMax`);
+      if (c.pull === "tempt" && !c.options?.some((o) => o.outcomes?.some((x) => (x.effects?.integrity ?? 0) < 0 && (x.effects?.cash ?? 0) > 0))) out.push(`${at}: a "tempt" card needs a Hustler-ward option that pays cash`);
+      if (c.pull === "redeem" && (c.needs?.integrityMax === undefined || c.needs.integrityMax > CHOICES.low)) out.push(`${at}: a "redeem" card is a way back for Hustlers: needs.integrityMax ${CHOICES.low} or less`);
+      if (c.pull === "redeem" && !toward(1)) out.push(`${at}: a "redeem" card needs a Halo-ward option`);
     }
     if (!Array.isArray(c.options) || c.options.length < 2 || c.options.length > 4) { out.push(`${at}: needs 2 to 4 options`); continue; }
     const optIds = new Set<string>();
