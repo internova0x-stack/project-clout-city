@@ -164,8 +164,8 @@ components live in `app/globals.css`.
   shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills; migration 0155: both compare the bank
   with the player's own part of the rent, `cohabit_rent_part`, so a partner living together isn't warned about the whole rent) and turns the Bills button's pin into a ❗ (the bank pill stays the balance)
   (`?rent=short|late|evict` in the preview).
-- HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt) and its
-  pin pulses until the day's tasks are opened; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
+- HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt); its pin is gone (owner,
+  Nov 3: it collided with the 🔥 streak badge), the streak badge stays; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
   today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
 - Loading (owner, Oct 23-24): the launch splash `AppLoading` is `/`'s Suspense fallback only (no loading.tsx, so Continue
   keeps the welcome screen and its spinner up until the game is ready); it shows at once and `SplashHold` keeps it up
