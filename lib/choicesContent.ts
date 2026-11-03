@@ -15,13 +15,14 @@ import SCHOOL from "../content/choices/school.json";
 import TRANSIT from "../content/choices/transit.json";
 import WORK from "../content/choices/work.json";
 import FAVORS from "../content/choices/favors.json";
+import REDEMPTION from "../content/choices/redemption.json";
 import NPCS from "../content/culture/npcs.json";
 import type { ChoiceCard } from "./choices";
 import { PLACES } from "./city";
 import { REGULARS } from "./cast";
 
 export const CHOICE_CARDS: ChoiceCard[] = [
-  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS, ...OFFICE, ...FAVORS,
+  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS, ...OFFICE, ...FAVORS, ...REDEMPTION,
 ] as ChoiceCard[];
 
 /** NPC favors (owner, Nov 3; content/choices/favors.json): offered only when the player talks to the card's regular. */

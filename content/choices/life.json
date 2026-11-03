@@ -258,6 +258,7 @@
     "needs": {
       "integrityMin": 70
     },
+    "pull": "tempt",
     "options": [
       {
         "id": "bank",

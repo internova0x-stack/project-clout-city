@@ -1,0 +1,301 @@
+[
+  {
+    "id": "way-back-wallet-wen",
+    "base": "way-back-wallet",
+    "area": "money",
+    "emoji": "👛",
+    "title": "A tourist leaves a fat wallet on Wen's counter. Wen looks at you: 'Your kind knows what to do with these.'",
+    "who": "wen",
+    "where": { "places": ["downstairs-on-main"], "after": ["eat", "visit"] },
+    "needs": { "integrityMax": 30 },
+    "pull": "redeem",
+    "options": [
+      {
+        "id": "chase",
+        "label": "Chase the tourist down",
+        "get": "40 clout and a very confused hug",
+        "cost": "10 Energy and your reputation for being slippery",
+        "risk": "low",
+        "riskWhy": "Running in a food court",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You catch him at the escalator. He hugs you and cries a little. Wen watches the whole thing with his mouth open.",
+            "effects": { "energy": -10, "integrity": 9, "clout": 40, "mood": 6 },
+            "later": {
+              "afterDays": [2, 6],
+              "chance": 0.6,
+              "emoji": "🥟",
+              "text": "Remember the wallet at Downstairs on Main? Wen tells everyone. Your dumplings come with a free extra now, and people nod at you.",
+              "effects": { "clout": 50, "mood": 5 }
+            }
+          }
+        ]
+      },
+      {
+        "id": "keep",
+        "label": "Lighten it a little first",
+        "get": "C$220 from a stranger's vacation fund",
+        "cost": "Wen saw you do it",
+        "risk": "medium",
+        "riskWhy": "Wen counts things",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$220 lighter, the wallet goes back to the tourist. Wen says nothing and gives you exact change from now on.",
+            "effects": { "cash": 220, "integrity": -8 }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "way-back-bev-tip",
+    "base": "way-back-bev",
+    "area": "life",
+    "emoji": "🚔",
+    "title": "Sgt. Bev, off duty, buys you a coffee: 'Somebody's fencing scooters off 31st. You'd know. Help me out once.'",
+    "who": "sgt-bev",
+    "where": { "places": ["grind-and-gossip"], "after": ["arrive", "visit"] },
+    "needs": { "integrityMax": 30 },
+    "pull": "redeem",
+    "options": [
+      {
+        "id": "help",
+        "label": "Tell her what you know",
+        "get": "60 clout and a friend at the 114½",
+        "cost": "Your scooter guy's business",
+        "risk": "medium",
+        "riskWhy": "The scooter guy has cousins",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 3,
+            "text": "Bev writes it all on a napkin. 'You didn't say this.' Two days later the scooters are back on their owners' porches.",
+            "effects": { "integrity": 10, "clout": 60 },
+            "later": {
+              "afterDays": [3, 9],
+              "chance": 0.7,
+              "emoji": "☕",
+              "text": "Remember the scooter napkin? Bev waves you past the long line at the precinct coffee drive. 'Civic hero. Don't let it go to your head.'",
+              "effects": { "clout": 40, "mood": 6 }
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Bev nods, the scooters come back, and your scooter guy stops answering your texts. Worth it, mostly.",
+            "effects": { "integrity": 10, "clout": 60, "mood": -4 }
+          }
+        ]
+      },
+      {
+        "id": "sell",
+        "label": "Warn the scooter guy instead",
+        "get": "C$350 thank-you from the scooter guy",
+        "cost": "Bev's coffee, and Bev",
+        "risk": "high",
+        "riskWhy": "Bev was a detective once",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "The scooters vanish overnight. Your guy sends C$350 and a scooter emoji. Bev finishes her coffee slowly.",
+            "effects": { "cash": 350, "integrity": -12 },
+            "later": {
+              "afterDays": [2, 7],
+              "chance": 0.6,
+              "emoji": "🛴",
+              "text": "Remember tipping off the scooter guy? Bev found the scooters, and your texts. Two hours on the good bench.",
+              "effects": { "cash": -350, "clout": -80, "holding": 2 }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "'I don't know any scooter guys'",
+        "get": "Nothing changes",
+        "cost": "A free coffee you now feel weird about",
+        "risk": "low",
+        "riskWhy": "Bev expected it",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Sure you don't.' Bev pays for both coffees anyway, which is somehow worse.",
+            "effects": { "integrity": -1, "mood": -2 }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "way-back-rev-mercy",
+    "base": "way-back-chapel",
+    "area": "life",
+    "emoji": "⛪",
+    "title": "Rev. Mercy: 'The food pantry needs someone who can talk a store manager out of anything. That's you, child.'",
+    "who": "rev-mercy",
+    "where": { "places": ["harmony-chapel"], "after": ["arrive", "visit"] },
+    "needs": { "integrityMax": 30 },
+    "pull": "redeem",
+    "options": [
+      {
+        "id": "pantry",
+        "label": "Hustle for the pantry",
+        "get": "50 clout and a full pantry",
+        "cost": "15 Energy and an afternoon of free talking",
+        "risk": "low",
+        "riskWhy": "Store managers fold",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You talk three grocery managers out of their 'expired' pallets. The pantry is full by sunset. Rev. Mercy calls it a miracle; you call it Tuesday.",
+            "effects": { "energy": -15, "integrity": 10, "clout": 50, "mood": 8 },
+            "later": {
+              "afterDays": [4, 10],
+              "chance": 0.6,
+              "emoji": "🙏",
+              "text": "Remember the pantry pallets? Rev. Mercy named you in Sunday's announcements. Half of Astoria now thinks you're a deacon.",
+              "effects": { "clout": 60 }
+            }
+          }
+        ]
+      },
+      {
+        "id": "cut",
+        "label": "Hustle, and keep a cut of the pallets",
+        "get": "C$280 reselling a few cases",
+        "cost": "The pantry's best cases",
+        "risk": "medium",
+        "riskWhy": "Somebody always counts cans",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "The pantry gets most of it. A few cases of the good coffee find their way to a bodega. C$280, and a sermon about loaves.",
+            "effects": { "energy": -10, "cash": 280, "integrity": -9 }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "way-back-tito-kid",
+    "base": "way-back-kid",
+    "area": "money",
+    "emoji": "🎒",
+    "title": "Pablo's nephew wants in on your kind of work. Pablo shrugs: 'He listens to you. Your call.'",
+    "who": "pablo",
+    "where": { "places": ["pablos-luggage"], "after": ["arrive", "visit"] },
+    "needs": { "integrityMax": 30, "rank": 2 },
+    "pull": "redeem",
+    "options": [
+      {
+        "id": "school",
+        "label": "Talk him into the night classes",
+        "get": "45 clout and one kid who stays out of it",
+        "cost": "C$150 for his first semester's books",
+        "risk": "low",
+        "riskWhy": "Kids listen to people who did it",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You buy the books and give the speech you never got. He rolls his eyes, then enrols. Pablo pours you something without asking.",
+            "effects": { "cash": -150, "integrity": 10, "clout": 45, "mood": 6 },
+            "later": {
+              "afterDays": [7, 14],
+              "chance": 0.7,
+              "emoji": "📚",
+              "text": "Remember Pablo's nephew? B+ on his first exam. Pablo knocks C$200 off whatever you owe him, which you didn't know you owed.",
+              "effects": { "cash": 200, "clout": 40 }
+            }
+          }
+        ]
+      },
+      {
+        "id": "runner",
+        "label": "Put him to work as your runner",
+        "get": "C$300 a week in saved legwork",
+        "cost": "A kid's first job is with you",
+        "risk": "medium",
+        "riskWhy": "Kids talk",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "He's fast, he's cheap, he's thrilled. You clear C$300 in saved legwork the first week.",
+            "effects": { "cash": 300, "integrity": -10 },
+            "later": {
+              "afterDays": [3, 8],
+              "chance": 0.5,
+              "emoji": "🎒",
+              "text": "Remember Pablo's nephew? He bragged to his teacher about his 'boss.' His mother has questions, and so does Sgt. Bev.",
+              "effects": { "clout": -70, "mood": -8 }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "way-back-jojo-refund",
+    "base": "way-back-refund",
+    "area": "work",
+    "emoji": "☕",
+    "title": "Jojo's card reader double-charged a whole morning. Nobody's noticed. Jojo whispers: 'You'd keep it, right?'",
+    "who": "jojo",
+    "where": { "places": ["grind-and-gossip"], "after": ["shift", "visit"] },
+    "needs": { "integrityMax": 30 },
+    "pull": "redeem",
+    "options": [
+      {
+        "id": "refund",
+        "label": "Help Jojo refund every one",
+        "get": "35 clout and Jojo's respect",
+        "cost": "10 Energy and C$640 of easy money",
+        "risk": "low",
+        "riskWhy": "Refunds are boring",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Forty-one refunds, one by one. A regular comes back to tip you both. Jojo: 'Who even are you today?'",
+            "effects": { "energy": -10, "integrity": 9, "clout": 35, "mood": 5 },
+            "later": {
+              "afterDays": [2, 6],
+              "chance": 0.6,
+              "emoji": "⭐",
+              "text": "Remember the double charges? A customer left a five-star review naming you. Grind & Gossip framed it.",
+              "effects": { "clout": 45 }
+            }
+          }
+        ]
+      },
+      {
+        "id": "split",
+        "label": "Split it with Jojo",
+        "get": "C$320, half the morning's mistake",
+        "cost": "Forty-one regulars' coffee money",
+        "risk": "medium",
+        "riskWhy": "Bank statements exist",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$320 each. Jojo looks thrilled for about an hour, then guilty for a week.",
+            "effects": { "cash": 320, "integrity": -10 },
+            "later": {
+              "afterDays": [2, 6],
+              "chance": 0.5,
+              "emoji": "💳",
+              "text": "Remember the double charges? A regular checked his statement. Jojo refunded everyone and docked your next shift's tips.",
+              "effects": { "cash": -320, "clout": -50 }
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

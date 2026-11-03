@@ -121,6 +121,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   // In ?choice=story, offer storylets first (the cards that read memory); in ?choice=office, office cards.
   const pool = () => (story ? CHOICE_CARDS.filter((c) => c.when) : officeTrack ? CHOICE_CARDS.filter((c) => c.where.work) : CHOICE_CARDS);
   let integrity: number = preset === "low" ? 18 : preset === "high" ? 86 : CHOICES.integrityStart;
+  const pullView = (c: ChoiceCard) => ({ integrity, bond: c.who && c.where?.after?.includes("talk") ? bondOf(c.who).level : null });
   let revealed = !!preset && preset !== "now";
   let open: { log: number; card: ChoiceCard; place: string | null; intro?: string } | null = null;
   // Migration 0132's stakes in memory: lasting effects, chain cards waiting, Lola's Blotter.
@@ -148,7 +149,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   const settle = (c: ChoiceCard, option: string, day: string, past = false, place: string | null = null) => {
     const r = resolveChoice(c, option, day, rng, integrity, memory);
     remember(r.sets);
-    const e = boundEffects(repBonus(r.effects, integrity), Number.MAX_SAFE_INTEGER);
+    const e = boundEffects(repBonus(r.effects, integrity, c, c.who ? bondOf(c.who).level : null), Number.MAX_SAFE_INTEGER);
     const before = integrity;
     integrity = applyIntegrity(integrity, e.integrity);
     const applied = { ...e, integrity: integrity - before || undefined };
@@ -223,7 +224,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
     chains.splice(chains.indexOf(due), 1);
     if (c) open = { log: nextId++, card: c, place: opts.where().place, intro: due.intro };
   };
-  const view = () => (open ? { ...cardView(open.card, open.log, open.place, memory), intro: open.intro ?? null } : null);
+  const view = () => (open ? { ...cardView(open.card, open.log, open.place, memory, pullView(open.card)), intro: open.intro ?? null } : null);
 
   const ok = <T,>(data: T) => Promise.resolve({ ok: true as const, data });
 
@@ -258,7 +259,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       if (!card) return ok(null);
       open = { log: nextId++, card, place: where.place };
       shown.push({ day: today, at: Date.now() });
-      return ok(cardView(card, open.log, open.place, memory));
+      return ok(cardView(card, open.log, open.place, memory, pullView(card)));
     },
     choose: (logId: number, option: string) => {
       if (!open || open.log !== logId) return Promise.resolve({ ok: false as const, error: "That moment has passed." });
@@ -301,7 +302,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       if (!reg || !c) return ok(null);
       asked.add(npc);
       open = { log: nextId++, card: c, place: reg.placeId };
-      return ok(cardView(c, open.log, open.place, memory));
+      return ok(cardView(c, open.log, open.place, memory, pullView(c)));
     },
     bonds: () => ok([...new Set([...favors.keys(), ...burned.keys()])].map(bondOf)),
     perk: (npc: string) => {

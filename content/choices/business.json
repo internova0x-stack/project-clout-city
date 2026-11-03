@@ -301,9 +301,9 @@
       ]
     },
     "needs": {
-      "business": true,
-      "integrityMax": 30
+      "business": true
     },
+    "pull": "tempt",
     "options": [
       {
         "id": "no",
