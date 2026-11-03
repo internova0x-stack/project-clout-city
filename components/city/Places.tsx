@@ -1,5 +1,6 @@
 "use client";
 
+import { FavorStrip, type FavorHandlers } from "./Favors";
 import { useEffect, useRef, useState } from "react";
 import { guardTaps } from "@/lib/tapGuard";
 import { TRACKS } from "@/lib/careers";
@@ -91,6 +92,8 @@ export interface PlaceHandlers {
   chatter?: (place: Place) => { who: string; line: string } | null;
   /** v0.6: the regular who's always here, and what they say on tap number n (lib/cast.ts). */
   regular?: (place: Place, n: number) => { regular: Regular; line: string } | null;
+  /** NPC favors and friendships (migration 0159): under the regular's line. */
+  favor?: FavorHandlers;
   /** v0.5 real-money products shown on cards: postcards at monuments, exclusive events at their venue. */
   money?: { products: StoreProduct[]; nowMs: number; h: MoneyHandlers };
   /** Shopping places open the Shop on their category. */
@@ -454,9 +457,9 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
  * and sometimes a question to answer right there in the bubble. */
 type HuntLine = { say: string; question?: { q: string; choices: string[] }; note?: string; tone?: "hint" | "found" };
 
-function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"] }) {
+function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip, favor }: { place: Place; daytime: boolean; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"]; favor?: FavorHandlers }) {
   return (
-    <RegularTalk place={place} talk={talk} hunt={hunt} gossip={gossip}
+    <RegularTalk place={place} talk={talk} hunt={hunt} gossip={gossip} favor={favor}
       frame={(tag) => (
         <div className="place-art-wrap">
           <PlaceArt place={place} daytime={daytime} />
@@ -471,8 +474,8 @@ function PlaceArtWithRegular({ place, daytime, talk, hunt, gossip }: { place: Pl
  * their everyday lines. Shared by the place card's picture and the room (#20, owner Oct 14: tapping the
  * regular inside, e.g. Sal at the deli, says the same things). `nonce` changes start a new tap.
  */
-export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
-  place: Place; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"];
+export function RegularTalk({ place, talk, hunt, gossip, frame, nonce, favor }: {
+  place: Place; talk?: PlaceHandlers["regular"]; hunt?: PlaceHandlers["hunt"]; gossip?: PlaceHandlers["gossip"]; favor?: FavorHandlers;
   /** Wraps the tappable name tag (the card puts it on the picture); omitted inside a room, where the avatar is tapped. */
   frame?: (tag: React.ReactNode) => React.ReactNode;
   nonce?: number;
@@ -522,6 +525,10 @@ export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
     if (!r.correct) return setHuntLine({ ...huntLine, note: "Not quite. They'll ask again in 10 minutes." });
     setHuntLine({ say: r.line?.say ?? "That's it.", tone: r.reward ? "found" : undefined, note: r.reward ? "🗺️ Treasure found! It's in your Collection." : undefined });
   };
+  // NPC favors (migration 0159): once the regular has said something, ask whether they have a favor today.
+  const favorNpc = first?.regular.id;
+  const talked = n >= 0 || !!tea || !!huntLine;
+  useEffect(() => { if (favor && favorNpc && talked) favor.load(favorNpc); }, [favor, favorNpc, talked]);
   // Inside a room the regular's avatar is the button: each tap there bumps `nonce`.
   const tapRef = useRef(onTap);
   tapRef.current = onTap;
@@ -570,6 +577,7 @@ export function RegularTalk({ place, talk, hunt, gossip, frame, nonce }: {
           &ldquo;{said.line}&rdquo;
         </div>
       )}
+      {favor && first && talked && <FavorStrip npc={first.regular.id} name={firstName} favor={favor} />}
     </div>
   );
 }
@@ -603,7 +611,7 @@ export function LocationSheet({
     <Sheet open={!!place} onClose={onClose} label={place?.name ?? "Place"}>
       {place && (
         <div className="stack-16">
-          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} />
+          <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} favor={handlers.favor} />
           <StoryBanners place={place} story={handlers.story ?? null} />
           {place.tags.includes("campaign") && handlers.onOpenCampaign && (
             <button className="btn btn-taxi" onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
@@ -809,7 +817,7 @@ export function InteriorScene({
             <ChevronDownIcon size={18} />
           </button>
         </div>
-        <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} />
+        <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} favor={handlers.favor} />
         {life}
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />

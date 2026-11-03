@@ -36,7 +36,7 @@ import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomAction
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
 import { characterRemembered } from "./characterActions";
-import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState } from "./choiceActions";
+import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState, favorOpen, favorPeek, npcBigFavor, npcBonds, npcPerk } from "./choiceActions";
 import { underworldDeclineHire, underworldHire, underworldHires, underworldJob, underworldLawyer, underworldRunHire, underworldRunners, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
 import { galaDonate, galaState } from "./galaActions";
 import { careerApply, careerOffice, careerQuit, careerStick, careerAspire, careerScreen, careerStart, careerTask } from "./careerActions";
@@ -214,7 +214,7 @@ export default async function HomePage() {
       gala={city ? { state: galaState, donate: galaDonate } : undefined}
       careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit, stick: careerStick, aspire: careerAspire } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).
-      choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter, conditions: choiceConditions } : undefined}
+      choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter, conditions: choiceConditions, favorPeek, favorOpen, bonds: npcBonds, perk: npcPerk, bigFavor: npcBigFavor } : undefined}
       remembered={city ? characterRemembered : undefined}
       // Migration 0058 switches on Clout TV (tv_state failing hides it). Photos upload from the browser.
       tv={city ? { state: tvState, submit: tvSubmit, withdraw: tvWithdraw } : undefined}

@@ -426,6 +426,14 @@ components live in `app/globals.css`.
   hour left; enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
   the daily limit, `choice_chain_open`) and public headlines (`later.headline` → Lola's Blotter in News → City, `choice_blotter()`,
   never for news_opt_out players).
+  NPC favors (migration 0159, owner Nov 3: "go with your recommendation"; lib/npcBonds.ts mirrors game_settings 'npc_bonds',
+  tests/npcBonds.test.ts): after a regular talks, they may ask a favor (content/choices/favors.json: cards with `who` and
+  `where.after: ["talk"]`, `validateCards` checks; area 'favor' in choice_log, outside the 2 a day: 2 favors a New York day, once
+  every 3 days per regular, `favor_block`, `favor_open`). Every card with a `who` moves the friendship (`npc_bond_note`, from the
+  chosen outcome's meter nudge: Halo-ward +1, Hustler-ward −2, at Family it burns for 30 days): Friendly 2, Friend 5 (`npc_perk`:
+  on the house once a week at their place, Energy +10, Mood +8), Family 10 (`npc_big_favor`: C$300 once every 30 days, ledger
+  'npc_favor', or Sgt. Bev ends holding). `npc_bonds_state()`; UI components/city/Favors.tsx (`FavorStrip` under the regular's
+  line: the "needs a hand" chip, hearts and level). `?bonds=friend|family` in the preview.
 - Careers (migration 0135, owner Oct 31; spec section 30): steady jobs with a ladder, separate from the creator's looks and
   traits (owner: "both are separate"). Three tracks of five levels (lib/careers.ts `TRACKS`: Hospitality at Grind & Gossip,
   Tech at Triborough Works, Media at the Clout TV Tower), the Phone's Careers app (Phone → Jobs stays the players' hiring

@@ -67,6 +67,8 @@ import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
 import { ChoiceBackSheet, ChoiceSheet, HoldingSheet } from "./game/Choices";
+import type { Bond, FavorPeek } from "@/lib/npcBonds";
+import type { FavorHandlers } from "./city/Favors";
 import { integrityBand, type BlotterItem, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
 import type { ConditionNow } from "@/lib/cityConditions";
 import { rememberedTap } from "@/lib/characterMemory";
@@ -1987,6 +1989,59 @@ export function GameShell({
       }
     });
   };
+  // NPC favors and friendships (migration 0159): what each regular would ask today (asked once a visit) and the friendships.
+  const [favorPeeks, setFavorPeeks] = useState<Record<string, FavorPeek | null>>({});
+  const [bonds, setBonds] = useState<Bond[]>([]);
+  const [favorBusy, setFavorBusy] = useState(false);
+  const loadBonds = useCallback(() => {
+    if (!choices?.bonds) return;
+    void choices.bonds().then((r) => { if (r.ok) setBonds(r.data); }).catch(() => {});
+  }, [choices]);
+  useEffect(() => { if (choicesReady) loadBonds(); }, [choicesReady, loadBonds]);
+  useEffect(() => { setFavorPeeks({}); }, [inside?.id, place?.id]);
+  const favorHandlers: FavorHandlers | undefined = choices?.favorPeek && choices.favorOpen ? {
+    busy: favorBusy,
+    load: (npc) => {
+      if (npc in favorPeeks) return;
+      setFavorPeeks((m) => ({ ...m, [npc]: null }));
+      void choices.favorPeek!(npc).then((r) => { if (r.ok && r.data) setFavorPeeks((m) => ({ ...m, [npc]: r.data })); }).catch(() => {});
+    },
+    peek: (npc) => favorPeeks[npc] ?? null,
+    bond: (npc) => bonds.find((b) => b.npc === npc) ?? null,
+    onHelp: (npc) => {
+      if (choiceCard) return;
+      setFavorBusy(true);
+      void choices.favorOpen!(npc).then((r) => {
+        setFavorBusy(false);
+        setFavorPeeks((m) => ({ ...m, [npc]: null }));
+        if (!r.ok) return setToast(r.error);
+        if (r.data) { setChoiceMade(null); setChoiceCard(r.data); }
+      }).catch(() => setFavorBusy(false));
+    },
+    onPerk: (npc) => {
+      if (!choices.perk) return;
+      setFavorBusy(true);
+      void choices.perk(npc).then((r) => {
+        setFavorBusy(false);
+        if (!r.ok) return setToast(r.error);
+        setToast(`☕ On the house: +${r.data.energy} ⚡ Energy, +${r.data.mood} Mood. Friends look after friends.`);
+        loadBonds();
+        if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+      });
+    },
+    onBig: (npc) => {
+      if (!choices.bigFavor) return;
+      setFavorBusy(true);
+      void choices.bigFavor(npc).then((r) => {
+        setFavorBusy(false);
+        if (!r.ok) return setToast(r.error);
+        setToast(r.data.kind === "holding" ? "🚔 Sgt. Bev signs you out early. “You were never here.”" : `💛 Family looks after family: +C$${(r.data.cash ?? 0).toLocaleString("en-US")}.`);
+        loadBonds();
+        void loadChoices();
+        if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
+      });
+    },
+  } : undefined;
   const chooseChoice = async (option: string) => {
     if (!choices || !choiceCard) return;
     setChoiceBusy(true);
@@ -1994,6 +2049,7 @@ export function GameShell({
     setChoiceBusy(false);
     if (!r.ok) { setToast(r.error); setChoiceCard(null); return; }
     setChoiceMade(r.data);
+    loadBonds();
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   };
   const payBail = async () => {
@@ -2183,6 +2239,7 @@ export function GameShell({
       onBuy: () => void run("gift", () => cityApi.buyGift!()),
     } : undefined,
     calendarOn: city?.calendar ? (placeId) => calendarData.events.find((e) => e.place === placeId && calendarLive(e, gameNow))?.title ?? null : undefined,
+    favor: favorHandlers,
     regular: (p, n) => {
       const r = regularAt(p.id);
       if (!r) return null;

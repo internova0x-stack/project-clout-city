@@ -102,7 +102,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, passPreset, packPreset, lifePreset, choicePreset, economyPreset, assetsPreset, marketPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, passPreset, packPreset, lifePreset, choicePreset, bondsPreset, economyPreset, assetsPreset, marketPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -181,6 +181,8 @@ export function PreviewHome({
   packPreset?: string;
   /** Moral Choices: ?choice=now|back|high|low|log|jail|chain|story (lib/choicesSim.ts; story = storylets from a sample history). */
   choicePreset?: string;
+  /** NPC friendships (migration 0159): ?bonds=friend|family. */
+  bondsPreset?: string;
   /** The Player Economy (migration 0151): ?economy=gift|gifted|history|jobs|locked (lib/economySim.ts). */
   economyPreset?: string;
   /** Phase 2, the Market (migration 0152): ?market=browse|listing|offer|confirm|off (lib/marketSim.ts). */
@@ -306,7 +308,8 @@ export function PreviewHome({
     where: () => { const id = simRef.current.here(); const pl = id ? placeById(id) : undefined; return { place: pl?.id ?? null, tags: pl?.tags ?? [] }; },
     onEffects: (e) => simRef.current.choicePay(e),
     today: () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }),
-  }), [choicePreset]);
+    bonds: bondsPreset ?? null,
+  }), [choicePreset, bondsPreset]);
   const careerApi = useMemo(() => createCareerSim(careerPreset ?? null, {
     clout: player.clout, energy: player.energy, atPlace: () => simRef.current.here(),
     onBank: (cash) => simRef.current.choicePay({ cash }), onEnergy: (energy) => simRef.current.choicePay({ energy }),

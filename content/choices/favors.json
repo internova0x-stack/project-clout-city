@@ -1,0 +1,2682 @@
+[
+  {
+    "id": "favor-sal-freezer",
+    "base": "favor-sal-freezer",
+    "area": "business",
+    "emoji": "🧊",
+    "title": "Sal's walk-in freezer died in the heat. 'Forty pounds of pastrami, my friend. Forty.'",
+    "who": "sal",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "help",
+        "label": "Haul it to your fridge",
+        "get": "Sal's gratitude, which is rare",
+        "cost": "15 Energy and every shelf you own",
+        "risk": "low",
+        "riskWhy": "Pastrami is heavy, Sal is grateful",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Six trips up your stairs with pastrami in your arms. Your fridge is now a deli. Sal says nothing, then says 'good,' which from Sal is a parade.",
+            "effects": {
+              "energy": -15,
+              "integrity": 8,
+              "clout": 25,
+              "mood": 5
+            },
+            "later": {
+              "afterDays": [
+                3,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "🥪",
+              "text": "Remember the pastrami relay? Sal put a sandwich on the board with your name on it. It sells. He hands you C$120 in 'royalties' and denies it.",
+              "effects": {
+                "cash": 120,
+                "clout": 40,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "sell",
+        "label": "Sell it to the carts on the side",
+        "get": "C$300 in pastrami money",
+        "cost": "Sal's pastrami, and Sal",
+        "risk": "high",
+        "riskWhy": "Sal remembers everything, including slicing",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 3,
+            "text": "You move forty pounds of 'spoiled' pastrami to three carts on Steinway by sundown. C$300, and Sal thinks it went in the dumpster.",
+            "effects": {
+              "cash": 300,
+              "integrity": -12
+            }
+          },
+          {
+            "weight": 2,
+            "text": "Three carts, C$300, no questions. Sal waves at you the next morning like nothing happened. Which is how Sal waves when something happened.",
+            "effects": {
+              "cash": 300,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 1,
+              "emoji": "🔪",
+              "text": "Remember Sal's 'spoiled' pastrami? A cart on Steinway had it on special. Sal recognized his own slicing from across the street. You paid him back. All of it.",
+              "effects": {
+                "cash": -300,
+                "clout": -80,
+                "mood": -8,
+                "ban": {
+                  "place": "ditmars-deli",
+                  "days": 3
+                }
+              },
+              "headline": "Developing: {name} sold a bodega's rescued pastrami to street carts. Sal: 'Twenty-two years on this corner. I know my own slice.' 👀"
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You wish Sal luck. He nods and starts making a sandwich the size of a toddler, alone. Respect.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-sal-cat",
+    "base": "favor-sal-cat",
+    "area": "life",
+    "emoji": "🐈",
+    "title": "Sal's cat has been gone two days. 'Not my cat. The store's cat. Find her, please.'",
+    "who": "sal",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "search",
+        "label": "Search the whole block",
+        "get": "A cat back on the bread",
+        "cost": "12 Energy and an evening of 'pspsps'",
+        "risk": "low",
+        "riskWhy": "Cats come home when they feel like it",
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "You find her asleep in the laundromat's lost-and-found, on someone's good sweater. Sal pretends not to be relieved for almost four seconds.",
+            "effects": {
+              "energy": -12,
+              "integrity": 8,
+              "mood": 8,
+              "clout": 20
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Two hours of 'pspsps' up and down 31st Street. She strolls back on her own at midnight. Sal still gives you the credit, and a free roll.",
+            "effects": {
+              "energy": -12,
+              "integrity": 6,
+              "mood": 4,
+              "clout": 15
+            }
+          }
+        ]
+      },
+      {
+        "id": "fee",
+        "label": "Find her, charge a finder's fee",
+        "get": "C$150 finder's fee",
+        "cost": "What Sal thinks of you",
+        "risk": "medium",
+        "riskWhy": "Sal knows where the cat goes",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You bring her back and say 'C$150, standard rate.' Sal pays from the register very slowly, one bill at a time, looking at you the whole way.",
+            "effects": {
+              "cash": 150,
+              "integrity": -9
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "🐾",
+              "text": "Remember the cat finder's fee? Turns out she visits the laundromat every Thursday. Sal knew. He told the whole stoop you charged him for a Thursday.",
+              "effects": {
+                "clout": -50,
+                "mood": -6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Sal she'll turn up. He says 'everyone says that' and goes back to staring at the door.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-sal-landlord",
+    "base": "favor-sal-landlord",
+    "area": "money",
+    "emoji": "📝",
+    "title": "Sal's landlord wants 40% more. 'Mira, you're good with phones. Help me write back?'",
+    "who": "sal",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "letter",
+        "label": "Write the letter with him",
+        "get": "Sal's corner, still Sal's",
+        "cost": "10 Energy and a night of polite fury",
+        "risk": "low",
+        "riskWhy": "Landlords come and go. Mostly come.",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Two drafts, one backgammon break and a final letter so polite it's terrifying. Sal signs it like a treaty.",
+            "effects": {
+              "energy": -10,
+              "integrity": 8,
+              "clout": 30,
+              "mood": 6
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.7,
+              "emoji": "✉️",
+              "text": "Remember the letter to Sal's landlord? He folded to 8%. Sal hands you an envelope marked NOT A TIP. It's C$200. It's a tip.",
+              "effects": {
+                "cash": 200,
+                "clout": 30,
+                "mood": 8
+              }
+            }
+          },
+          {
+            "weight": 1,
+            "text": "The landlord doesn't budge an inch. Sal pays it, tears the letter into confetti, and gives you a coffee for trying.",
+            "effects": {
+              "energy": -10,
+              "integrity": 6,
+              "clout": 15,
+              "mood": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "tip",
+        "label": "Tip off a realtor about the lease",
+        "get": "C$400 'lead fee' from No-Fee* Realty",
+        "cost": "Sal's corner",
+        "risk": "high",
+        "riskWhy": "Fran answers every phone on 31st Street",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You mention the lease to No-Fee* Realty and a C$400 'lead fee' lands the same day. Somewhere, a luxury condo sign gets printed.",
+            "effects": {
+              "cash": 400,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "☎️",
+              "text": "Remember the tip to No-Fee* Realty? Fran told Sal who called. Sal stopped saying good morning to you. The whole block noticed before you did.",
+              "effects": {
+                "clout": -100,
+                "mood": -10,
+                "ban": {
+                  "place": "ditmars-deli",
+                  "days": 5
+                }
+              },
+              "headline": "BREAKING: Sources say {name} sold out Sal's lease to a realtor for a 'lead fee.' The cat has been told. 👀"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-jojo-shift",
+    "base": "favor-jojo-shift",
+    "area": "work",
+    "emoji": "🎬",
+    "title": "Jojo's film school interview is in an hour. 'Cover the bar? It's just coffee. And rumors.'",
+    "who": "jojo",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "cover",
+        "label": "Cover her shift",
+        "get": "Jojo's whole future, a little",
+        "cost": "18 Energy and three hours of oat milk",
+        "risk": "low",
+        "riskWhy": "Laptop campers can smell a new barista",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You spell every name wrong on purpose and nobody notices. Jojo runs back in shrieking. The interview went 'deadass perfect.'",
+            "effects": {
+              "energy": -18,
+              "integrity": 9,
+              "clout": 20,
+              "mood": 4
+            },
+            "later": {
+              "afterDays": [
+                4,
+                10
+              ],
+              "chance": 0.7,
+              "emoji": "🎞️",
+              "text": "Remember covering Jojo's shift? She got in. Her first short film thanks you in the credits. Your name is spelled wrong. On purpose.",
+              "effects": {
+                "clout": 60,
+                "mood": 8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "jar",
+        "label": "Cover it, skim the tip jar",
+        "get": "C$180 from the film-school jar",
+        "cost": "Jojo's film school, one tip at a time",
+        "risk": "high",
+        "riskWhy": "Jojo counts that jar to the quarter",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Three hours, one shift, C$180 lighter jar. You tell Jojo it was 'a slow day.' It was not a slow day. It's never a slow day.",
+            "effects": {
+              "cash": 180,
+              "integrity": -14
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 0.8,
+              "emoji": "☕",
+              "text": "Remember the light tip jar? Jojo counts it every night. For a week she wrote 'THIEF' on your cup, spelled right for once. You paid it back.",
+              "effects": {
+                "cash": -180,
+                "clout": -90,
+                "mood": -8,
+                "ban": {
+                  "place": "grind-and-gossip",
+                  "days": 3
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Can't, sorry",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You can't today. Jojo calls her cousin, who arrives in pajamas and makes everyone a cortado nobody ordered.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-jojo-espresso",
+    "base": "favor-jojo-espresso",
+    "area": "business",
+    "emoji": "🔧",
+    "title": "Grind & Gossip's espresso machine is screaming. 'Deadass, it's possessed. You know machines?'",
+    "who": "jojo",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "fix",
+        "label": "Fix it with a butter knife",
+        "get": "A working machine and a hero's latte",
+        "cost": "10 Energy and a steam burn's worth of nerves",
+        "risk": "medium",
+        "riskWhy": "Nobody really knows machines",
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "One butter knife, one YouTube tutorial on mute, one loud hiss. It works. The café applauds. Jojo names a drink 'The Exorcist.'",
+            "effects": {
+              "energy": -10,
+              "integrity": 6,
+              "clout": 25,
+              "mood": 6
+            }
+          },
+          {
+            "weight": 1,
+            "text": "It works, mostly. It now sings a little while it steams. Jojo says it's better this way and tips you in gossip.",
+            "effects": {
+              "energy": -10,
+              "mood": -2,
+              "integrity": 6,
+              "clout": 15
+            }
+          }
+        ]
+      },
+      {
+        "id": "flip",
+        "label": "Call it dead, buy it, flip it",
+        "get": "About C$350 after reselling",
+        "cost": "Jojo's machine, and her trust",
+        "risk": "high",
+        "riskWhy": "Resale listings have photos",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Jojo it's a goner and take it off her hands for C$50 'to be nice.' A screwdriver and a listing later, it's worth C$400.",
+            "effects": {
+              "cash": 350,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.6,
+              "emoji": "📸",
+              "text": "Remember the 'dead' espresso machine? It's on a resale listing, and your face is in the chrome. Jojo screenshotted it before you could blink. You refunded half.",
+              "effects": {
+                "cash": -150,
+                "clout": -80,
+                "mood": -6
+              },
+              "headline": "Developing: {name} called a café's espresso machine 'dead,' then sold it working. Jojo: 'I heard it before it happened.' 👀"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-jojo-camper",
+    "base": "favor-jojo-camper",
+    "area": "life",
+    "emoji": "💻",
+    "title": "A laptop camper has had Jojo's best table nine hours on one water. 'Get him out, nicely?'",
+    "who": "jojo",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "charm",
+        "label": "Charm him out the door",
+        "get": "Jojo's best table, freed",
+        "cost": "8 Energy and some of your best small talk",
+        "risk": "low",
+        "riskWhy": "Campers fight for outlets",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You ask about his startup. Forty minutes later he leaves to 'take a call with himself.' Jojo slides you a large with extra rumor.",
+            "effects": {
+              "energy": -8,
+              "mood": -3,
+              "integrity": 6,
+              "clout": 20
+            }
+          }
+        ]
+      },
+      {
+        "id": "rent",
+        "label": "Rent him the table by the hour",
+        "get": "C$120 in 'table fees'",
+        "cost": "Jojo's café, sold out from under her",
+        "risk": "medium",
+        "riskWhy": "It's Jojo's table, not yours",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell him the table is 'premium seating now, C$40 an hour.' He pays. He stays. Jojo watches you pocket it from behind the register.",
+            "effects": {
+              "cash": 120,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.5,
+              "emoji": "🪑",
+              "text": "Remember charging rent at Grind & Gossip? The camper left a review: 'Great tables, strict landlord.' Jojo printed it and taped it to the door, with your name.",
+              "effects": {
+                "clout": -50,
+                "mood": -5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Jojo you're not built for confrontation. She sighs and turns the Wi-Fi off. He leaves in four minutes.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-mags-barback",
+    "base": "favor-mags-barback",
+    "area": "nightlife",
+    "emoji": "🧊",
+    "title": "Mags's barback quit mid-shift. 'Two hundred thirsty people and me. Grab the ice?'",
+    "who": "mags",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "ice",
+        "label": "Haul ice all night",
+        "get": "Mags's list, forever",
+        "cost": "20 Energy and arms like noodles",
+        "risk": "low",
+        "riskWhy": "Ice is heavy and the stairs are dark",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Forty bags of ice, three spilled trays, one standing ovation from the bar. Mags slides you water like it's champagne.",
+            "effects": {
+              "energy": -20,
+              "integrity": 8,
+              "clout": 30,
+              "mood": 3
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "📋",
+              "text": "Remember hauling ice for Mags? You're on Velvet Static's list now, plus one, for good. Brock Squarejaw asked the door who you were.",
+              "effects": {
+                "clout": 70,
+                "mood": 8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pour",
+        "label": "Pour free shots for your followers",
+        "get": "A wild night and 60 clout",
+        "cost": "Mags's bottles and Mags's night",
+        "risk": "high",
+        "riskWhy": "Mags counts bottles after close",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Behind the bar for one hour and every follower you have drinks free. The stories go everywhere. Mags is too busy to notice. Tonight.",
+            "effects": {
+              "clout": 60,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 0.6,
+              "emoji": "🍾",
+              "text": "Remember those free shots at Velvet Static? Mags counted the bottles. You paid for every one, and the doorman has your photo now.",
+              "effects": {
+                "cash": -200,
+                "clout": -40,
+                "mood": -8,
+                "ban": {
+                  "place": "velvet-static",
+                  "days": 3
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You say you're off the clock. Mags says 'same,' and keeps pouring with two hands.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-mags-autographs",
+    "base": "favor-mags-autographs",
+    "area": "money",
+    "emoji": "✍️",
+    "title": "Brock Squarejaw tipped Mags in autographs again. 'Help me sell these so I can make rent?'",
+    "who": "mags",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "sell",
+        "label": "Sell them for her, fair price",
+        "get": "Mags's rent, covered",
+        "cost": "8 Energy and an afternoon of collectors",
+        "risk": "low",
+        "riskWhy": "Autograph people are intense",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You find three collectors and one very emotional fan. Mags makes rent. She says it's the first time Brock has been useful.",
+            "effects": {
+              "energy": -8,
+              "integrity": 7,
+              "clout": 20,
+              "mood": 4
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.5,
+              "emoji": "💵",
+              "text": "Remember selling Brock's autographs for Mags? She insisted on a cut. C$100, slid across the bar under a coaster.",
+              "effects": {
+                "cash": 100,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "sign",
+        "label": "Sign a few more yourself",
+        "get": "C$300 from 'extra' autographs",
+        "cost": "Mags's name, next to yours",
+        "risk": "high",
+        "riskWhy": "Brock's team checks the spelling",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Mags's stack sells, and so do the twelve you signed at home. C$300 extra. Your Brock has a nice loop on the B.",
+            "effects": {
+              "cash": 300,
+              "integrity": -13
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🖊️",
+              "text": "Remember the extra Brock Squarejaw autographs? Half of them say 'Brok.' His team called Mags. Mags called you, very loudly. You bought them all back.",
+              "effects": {
+                "cash": -300,
+                "clout": -100,
+                "mood": -8
+              },
+              "headline": "BREAKING: Fake Brock Squarejaw autographs flood Astoria. Sources trace them to {name}. Brock: 'I would never write a B like that.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-mags-purse",
+    "base": "favor-mags-purse",
+    "area": "fame",
+    "emoji": "👛",
+    "title": "Chardonnay Shade left her purse on the bar. Mags: 'Run it to her hotel? I can't leave the well.'",
+    "who": "mags",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "run",
+        "label": "Run it across the bridge",
+        "get": "A star who owes you one",
+        "cost": "15 Energy and a late Hailr home",
+        "risk": "low",
+        "riskWhy": "Hotel lobbies can be rude",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "The concierge tries to stop you. Chardonnay herself comes down in a robe, hugs you and calls you 'the only honest person in Queens.'",
+            "effects": {
+              "energy": -15,
+              "integrity": 9,
+              "clout": 35,
+              "mood": 5
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "🌟",
+              "text": "Remember returning Chardonnay Shade's purse? She told the story on a podcast. You were 'an angel from Astoria.' Your follower count noticed.",
+              "effects": {
+                "clout": 90,
+                "mood": 8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "post",
+        "label": "Post what's inside first",
+        "get": "90 clout from a viral purse dump",
+        "cost": "Chardonnay's privacy, and Mags's bar",
+        "risk": "high",
+        "riskWhy": "Stars have lawyers on speed dial",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Three lipsticks, a parking ticket and a handwritten list titled 'Enemies (ranked).' The post is everywhere in an hour.",
+            "effects": {
+              "clout": 90,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.7,
+              "emoji": "⚖️",
+              "text": "Remember posting Chardonnay's purse? Her lawyer called Mags. Mags called you. The Velvet Static door has your face on a sticky note.",
+              "effects": {
+                "clout": -120,
+                "mood": -10,
+                "ban": {
+                  "place": "velvet-static",
+                  "days": 5
+                }
+              },
+              "headline": "Developing: {name} posted Chardonnay Shade's purse before returning it. The 'Enemies (ranked)' list has a new name. 👀"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-gus-pigeons",
+    "base": "favor-gus-pigeons",
+    "area": "life",
+    "emoji": "🐦",
+    "title": "Pigeons with ambition took Gus's bench. 'Thirty years that's my spot. Help me take it back.'",
+    "who": "gus",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "sit",
+        "label": "Sit with him till they leave",
+        "get": "The bench back, and a story about 1987",
+        "cost": "8 Energy and an hour on cold wood",
+        "risk": "low",
+        "riskWhy": "Pigeons are patient",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You sit. Gus tells you about 1987. The pigeons, bored by 1987, leave. Gus says that's why he tells it.",
+            "effects": {
+              "energy": -8,
+              "integrity": 6,
+              "mood": 6,
+              "clout": 15
+            }
+          }
+        ]
+      },
+      {
+        "id": "film",
+        "label": "Film him chasing them, post it",
+        "get": "80 clout from a viral clip",
+        "cost": "Gus's dignity, publicly",
+        "risk": "medium",
+        "riskWhy": "The whole park watches the internet",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Gus waving his cap at forty pigeons, slow motion, opera music. Two million views by dinner.",
+            "effects": {
+              "clout": 80,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.6,
+              "emoji": "📱",
+              "text": "Remember the video of Gus vs. the pigeons? He saw it at the barbershop. He's not mad, he says. The whole park is mad for him.",
+              "effects": {
+                "clout": -60,
+                "mood": -8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Gus the pigeons have rights too. He looks at you like you're one of them.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-gus-suit",
+    "base": "favor-gus-suit",
+    "area": "life",
+    "emoji": "🧵",
+    "title": "Gus's hands shake too much to finish his grandson's wedding suit. 'Thread the needle for me?'",
+    "who": "gus",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "thread",
+        "label": "Sew with him all afternoon",
+        "get": "A finished suit and an old tailor's thanks",
+        "cost": "15 Energy and a pricked thumb",
+        "risk": "low",
+        "riskWhy": "Wool doesn't forgive",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "He talks, you thread, he sews. By sunset the suit is done and Gus holds it up to the river like a flag.",
+            "effects": {
+              "energy": -15,
+              "integrity": 10,
+              "mood": 10,
+              "clout": 25
+            },
+            "later": {
+              "afterDays": [
+                4,
+                10
+              ],
+              "chance": 0.7,
+              "emoji": "🎩",
+              "text": "Remember threading Gus's needle? He made you a pocket square from the leftover wool. Everyone at the deli asks where you got it.",
+              "effects": {
+                "clout": 60,
+                "mood": 8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter",
+        "label": "Help, at C$30 an hour",
+        "get": "C$120 for the afternoon",
+        "cost": "Gus's pension, and his good opinion",
+        "risk": "medium",
+        "riskWhy": "Grandsons hear everything",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Four hours, C$120, a suit. Gus pays in exact change from a coin purse older than you, and doesn't tell any stories.",
+            "effects": {
+              "cash": 120,
+              "integrity": -9
+            },
+            "later": {
+              "afterDays": [
+                5,
+                12
+              ],
+              "chance": 0.5,
+              "emoji": "🥂",
+              "text": "Remember charging Gus by the hour? His grandson gave a toast about 'a helper with a meter running.' The whole wedding knew who he meant.",
+              "effects": {
+                "clout": -50,
+                "mood": -6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Gus your hands shake too. He laughs and says 'then we're two old men.'",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-gus-backgammon",
+    "base": "favor-gus-backgammon",
+    "area": "money",
+    "emoji": "🎲",
+    "title": "Gus bet his rival C$200 and his eyes are bad today. 'Be my eyes. Just call the dice, honest.'",
+    "who": "gus",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "call",
+        "label": "Call the dice honestly",
+        "get": "A seat at the bench, for life",
+        "cost": "An hour of shouting about doubles",
+        "risk": "low",
+        "riskWhy": "Gus might lose anyway",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Double sixes, called true. Gus wins and splits it: 'C$50 for the eyes.' His rival demands a rematch and a new set of eyes.",
+            "effects": {
+              "cash": 50,
+              "integrity": 7,
+              "mood": 6,
+              "clout": 15
+            }
+          },
+          {
+            "weight": 1,
+            "text": "You call every roll true and Gus still loses. He laughs, pays up and tells you this is how it went in 1987 too.",
+            "effects": {
+              "energy": -5,
+              "integrity": 7,
+              "mood": 4,
+              "clout": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "throw",
+        "label": "Call them wrong for the rival",
+        "get": "C$150 slipped under the board",
+        "cost": "Gus's C$200 and his trust",
+        "risk": "high",
+        "riskWhy": "Rivals brag",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "A four becomes a two, twice. Gus loses by a hair. His rival tucks C$150 in your jacket during the handshake.",
+            "effects": {
+              "cash": 150,
+              "integrity": -13
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.7,
+              "emoji": "🪑",
+              "text": "Remember misreading the dice for Gus? His rival bragged about the C$150 at the bench. Gus moved benches. Gus has never moved benches.",
+              "effects": {
+                "clout": -100,
+                "mood": -12
+              },
+              "headline": "BREAKING: Astoria Park in shock after {name} threw a backgammon game against Gus. Gus has moved benches. Sources say the pigeons took the old one."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-andreas-nameday",
+    "base": "favor-andreas-nameday",
+    "area": "work",
+    "emoji": "🍋",
+    "title": "Andreas has a name-day party for forty and his waiter is stuck on a dead N train. 'Opa? Please?'",
+    "who": "andreas",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "wait",
+        "label": "Wait tables all night",
+        "get": "Andreas's family, adopted",
+        "cost": "22 Energy and forty orders of octopus",
+        "risk": "low",
+        "riskWhy": "Name-day tables are loud",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Forty plates out, forty back empty, one 'Opa!' you'll hear in your sleep. Andreas kisses you on both cheeks and both hands.",
+            "effects": {
+              "energy": -22,
+              "integrity": 8,
+              "clout": 30,
+              "mood": 6
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.6,
+              "emoji": "🥧",
+              "text": "Remember the name-day rush at Feta Compli? Andreas sent C$150 and a tray of spanakopita with your name written in phyllo.",
+              "effects": {
+                "cash": 150,
+                "clout": 20,
+                "mood": 8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "triple",
+        "label": "Name your price, then triple it",
+        "get": "C$300, cash up front",
+        "cost": "Andreas's night, at his worst moment",
+        "risk": "medium",
+        "riskWhy": "30th Avenue talks at every name day",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Andreas pays C$300 before you tie the apron, sighing like his grandmother. You do a fine job. That's not the part he remembers.",
+            "effects": {
+              "cash": 300,
+              "energy": -22,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.5,
+              "emoji": "📨",
+              "text": "Remember your triple rate at Feta Compli? Andreas told 30th Avenue. Every name day on the block somehow forgot your invitation.",
+              "effects": {
+                "clout": -70,
+                "mood": -8
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Andreas you're busy. He says 'nobody is busy on a name day' and calls his cousin, sadly.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-andreas-critic",
+    "base": "favor-andreas-critic",
+    "area": "business",
+    "emoji": "🐙",
+    "title": "A food critic comes to Feta Compli tonight. Andreas: 'Taste the octopus. Be honest. Be kind. Mostly kind.'",
+    "who": "andreas",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "honest",
+        "label": "Tell him the truth: more lemon",
+        "get": "A better octopus and a grateful host",
+        "cost": "The look on his face, briefly",
+        "risk": "low",
+        "riskWhy": "Chefs hear 'more' as 'bad'",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'More lemon.' Andreas stares, then laughs so hard the bread basket falls. He adds lemon. He adds lemon to everything.",
+            "effects": {
+              "mood": -3,
+              "integrity": 8,
+              "clout": 25
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "📰",
+              "text": "Remember telling Andreas 'more lemon'? The critic called it 'the best octopus in Queens.' Andreas tells everyone it was his idea, then winks at you.",
+              "effects": {
+                "clout": 50,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "cousin",
+        "label": "Tip off his cousin's taverna",
+        "get": "C$250 from the cousin",
+        "cost": "Andreas's big night",
+        "risk": "high",
+        "riskWhy": "Families talk at christenings",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "His cousin pays C$250 to know the critic's table time. The cousin's place gets a surprise visit first, and a surprise review.",
+            "effects": {
+              "cash": 250,
+              "integrity": -13
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.7,
+              "emoji": "⛪",
+              "text": "Remember tipping off Andreas's cousin? It came out at a christening, in front of everyone. Andreas's door is shut to you for a while.",
+              "effects": {
+                "clout": -100,
+                "mood": -10,
+                "ban": {
+                  "place": "feta-compli",
+                  "days": 4
+                }
+              },
+              "headline": "Developing: {name} sold a food critic's reservation to the rival taverna. Andreas, on the record: 'Opa. But sad.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-andreas-lemons",
+    "base": "favor-andreas-lemons",
+    "area": "life",
+    "emoji": "🍋",
+    "title": "Andreas is out of lemons. 'A taverna without lemons is a diner. Run to Steinway Fresh?'",
+    "who": "andreas",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "run",
+        "label": "Run for lemons",
+        "get": "Andreas's lemon gratitude",
+        "cost": "8 Energy and C$20 for the lemons",
+        "risk": "low",
+        "riskWhy": "Steinway Fresh is busy at dinner",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Two bags of lemons, one sprint down Steinway. Andreas squeezes one over your head like a blessing. It's a blessing.",
+            "effects": {
+              "energy": -8,
+              "cash": -20,
+              "integrity": 6,
+              "clout": 15,
+              "mood": 4
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.5,
+              "emoji": "🍰",
+              "text": "Remember the lemon run? Andreas named a dessert after you. It's mostly lemon. It's very good.",
+              "effects": {
+                "clout": 30,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "markup",
+        "label": "Charge C$120 for C$20 of lemons",
+        "get": "C$100 in lemon profit",
+        "cost": "Andreas, at dinner rush",
+        "risk": "medium",
+        "riskWhy": "The receipt is in the bag",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'Lemons are expensive right now,' you say. They are not. Andreas pays C$120 because the dining room is full and he has no choice.",
+            "effects": {
+              "cash": 100,
+              "integrity": -9
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.5,
+              "emoji": "🧾",
+              "text": "Remember the C$120 lemons? Andreas found the C$20 receipt in the bag. He taped it by the register, under 'Do not give lemons to.'",
+              "effects": {
+                "clout": -50,
+                "mood": -5
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-arben-oven",
+    "base": "favor-arben-oven",
+    "area": "work",
+    "emoji": "🍕",
+    "title": "Arben's oven door broke mid-rush. 'Hold it shut. Gently. Like it's family.'",
+    "who": "arben",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "hold",
+        "label": "Hold the oven door for an hour",
+        "get": "Free slices and Arben's slow smile",
+        "cost": "15 Energy and very warm forearms",
+        "risk": "low",
+        "riskWhy": "The oven runs hot",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "An hour of holding a door at 500 degrees. The rush gets fed. Arben folds you a slice and says 'like a local.'",
+            "effects": {
+              "energy": -15,
+              "integrity": 7,
+              "clout": 20,
+              "mood": 4
+            }
+          }
+        ]
+      },
+      {
+        "id": "film",
+        "label": "Film the meltdown for your feed",
+        "get": "70 clout from a chaos clip",
+        "cost": "Arben's lunch rush, on display",
+        "risk": "medium",
+        "riskWhy": "Comment sections are mean about crust",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Smoke, shouting, a slice on the floor. It's beautiful content. Arben is too busy to notice your phone.",
+            "effects": {
+              "clout": 70,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                5
+              ],
+              "chance": 0.6,
+              "emoji": "💬",
+              "text": "Remember filming Arben's oven meltdown? The comments were cruel about his crust. His daughter read them. Arben read them to you.",
+              "effects": {
+                "clout": -60,
+                "mood": -8,
+                "ban": {
+                  "place": "still-a-dollar-slice",
+                  "days": 3
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You back away from the heat. Arben holds the door shut with a mop and his whole personality.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-arben-soccer",
+    "base": "favor-arben-soccer",
+    "area": "business",
+    "emoji": "⚽",
+    "title": "Arben's daughter has her soccer final at four. 'Watch the counter? A dollar a slice. Spiritually.'",
+    "who": "arben",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "watch",
+        "label": "Watch the counter",
+        "get": "Arben at the game, and a debt of pizza",
+        "cost": "18 Energy and a few burnt fingers",
+        "risk": "low",
+        "riskWhy": "The lunch rush is relentless",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You fold slices, take cash and shout at a man with a fork. Arben comes back glowing: she scored. Twice.",
+            "effects": {
+              "energy": -18,
+              "integrity": 9,
+              "clout": 25,
+              "mood": 5
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🏆",
+              "text": "Remember watching Arben's counter? His daughter brought you the game ball. Arben brought a whole pie with your name in pepperoni.",
+              "effects": {
+                "clout": 60,
+                "mood": 10
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "double",
+        "label": "Charge two dollars, keep one",
+        "get": "About C$200 in extra dollars",
+        "cost": "Arben's sign and Arben's trust",
+        "risk": "high",
+        "riskWhy": "Regulars know the price by heart",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Two dollars a slice all afternoon. A hundred-something slices later, there's C$200 in your pocket and the register looks exactly right.",
+            "effects": {
+              "cash": 200,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 0.8,
+              "emoji": "🧾",
+              "text": "Remember the two-dollar slices? Three regulars told Arben before he took his coat off. You paid back every dollar, plus a lecture.",
+              "effects": {
+                "cash": -200,
+                "clout": -80,
+                "mood": -6,
+                "ban": {
+                  "place": "still-a-dollar-slice",
+                  "days": 4
+                }
+              },
+              "headline": "BREAKING: {name} ran Still-a-Dollar Slice for one afternoon and doubled the price. Arben: 'The sign is sentimental. You are not.'"
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You can't today. Arben closes for two hours and the whole block acts like it's a holiday.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-arben-fork",
+    "base": "favor-arben-fork",
+    "area": "fame",
+    "emoji": "🍴",
+    "title": "A candidate wants to film an ad at Arben's. 'He'll eat with a fork. Help me say no politely?'",
+    "who": "arben",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "no",
+        "label": "Do the talking for him",
+        "get": "Arben's shop, fork-free",
+        "cost": "6 Energy and one awkward campaign aide",
+        "risk": "low",
+        "riskWhy": "Campaigns don't hear 'no' often",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell the aide the lighting is bad and the slices are 'not camera trained.' They leave. Arben gives you a slow, proud nod.",
+            "effects": {
+              "energy": -6,
+              "integrity": 7,
+              "clout": 20,
+              "mood": 4
+            }
+          }
+        ]
+      },
+      {
+        "id": "fee",
+        "label": "Take a 'location fee,' let them film",
+        "get": "C$300 from the campaign",
+        "cost": "Arben's peace, and a fork on camera",
+        "risk": "high",
+        "riskWhy": "Ads air everywhere",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "The campaign pays you C$300 as 'local consultant.' The candidate eats a slice with a fork and a knife. Arben has to sit down.",
+            "effects": {
+              "cash": 300,
+              "integrity": -11
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.6,
+              "emoji": "📺",
+              "text": "Remember the fork ad? It aired. Still-a-Dollar Slice is right there, fork in the foreground. Arben taped your photo inside the register. Not fondly.",
+              "effects": {
+                "clout": -80,
+                "mood": -6
+              },
+              "headline": "Developing: Campaign ad shot at Still-a-Dollar Slice features a fork. Sources say {name} took the location fee. Arben is 'still recovering.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-pixel-ref",
+    "base": "favor-pixel-ref",
+    "area": "nightlife",
+    "emoji": "🕹️",
+    "title": "Tournament Friday and Pixel's ref bailed. 'Ref it? You just say no a lot. Like a parent.'",
+    "who": "pixel",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "ref",
+        "label": "Ref the tournament straight",
+        "get": "The Arcade Nerds' respect",
+        "cost": "15 Energy and a lot of booing",
+        "risk": "low",
+        "riskWhy": "Losers always blame the ref",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Six hours, nine finals, one tantrum from a grown man in a headset. Every call fair. Pixel names you 'Ref of the Year,' a title invented on the spot.",
+            "effects": {
+              "energy": -15,
+              "integrity": 8,
+              "clout": 30
+            },
+            "later": {
+              "afterDays": [
+                3,
+                8
+              ],
+              "chance": 0.5,
+              "emoji": "🎧",
+              "text": "Remember refereeing Respawn Arena's Friday? The Arcade Nerds saved you a good chair. That has never happened to anyone.",
+              "effects": {
+                "clout": 50,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "bribe",
+        "label": "Take a team's C$250",
+        "get": "C$250 for a few close calls",
+        "cost": "The tournament, and Pixel's arena",
+        "risk": "high",
+        "riskWhy": "Everything at an arcade is streamed",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "A team captain slips you C$250 by the claw machine. You make three very generous calls. They win. Pixel hands them the trophy, frowning.",
+            "effects": {
+              "cash": 250,
+              "integrity": -13
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.7,
+              "emoji": "📹",
+              "text": "Remember the close calls at Tournament Friday? The losing team's stream clipped every one. Pixel banned you from the cabinets and made you refund the prize.",
+              "effects": {
+                "cash": -250,
+                "clout": -100,
+                "mood": -6,
+                "ban": {
+                  "place": "respawn-arena",
+                  "days": 4
+                }
+              },
+              "headline": "BREAKING: Respawn Arena's Tournament Friday was rigged, sources say, by {name} with a whistle. Pixel: 'The honor system is failing.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-pixel-fridge",
+    "base": "favor-pixel-fridge",
+    "area": "business",
+    "emoji": "🥤",
+    "title": "The energy-drink honor fridge is C$300 short. Pixel: 'Watch it with me tonight? I need to know.'",
+    "who": "pixel",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "watch",
+        "label": "Stake out the fridge",
+        "get": "The answer, and Pixel's thanks",
+        "cost": "15 Energy and a night under neon",
+        "risk": "low",
+        "riskWhy": "Stakeouts are mostly boring",
+        "outcomes": [
+          {
+            "weight": 2,
+            "text": "Midnight. A hooded figure. It's Chase Clout, filming himself 'stealing for the content.' Pixel bans him for the third time. You get the good chair.",
+            "effects": {
+              "energy": -15,
+              "integrity": 7,
+              "clout": 25,
+              "mood": 4
+            }
+          },
+          {
+            "weight": 1,
+            "text": "Nobody comes. Pixel buys a padlock. You both eat chips at 2 AM and talk about cabinet three's high score.",
+            "effects": {
+              "energy": -15,
+              "integrity": 5,
+              "mood": 4,
+              "clout": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "help",
+        "label": "Watch it, and help yourself",
+        "get": "Free drinks and C$80 from the box",
+        "cost": "The fridge, and Pixel's faith in it",
+        "risk": "medium",
+        "riskWhy": "There might be a camera",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You 'keep watch' with three cans and the honor box in reach. By morning you're wired, C$80 richer, and the fridge is more short.",
+            "effects": {
+              "cash": 80,
+              "energy": 15,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.6,
+              "emoji": "📷",
+              "text": "Remember the stakeout at Respawn Arena? Pixel forgot there was a camera. Then he remembered. You're on the wall of shame, next to Chase Clout.",
+              "effects": {
+                "cash": -80,
+                "clout": -60,
+                "mood": -5,
+                "ban": {
+                  "place": "respawn-arena",
+                  "days": 3
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Pixel you've got an early day. He nods and tapes a sad face to the fridge door.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-pixel-sponsor",
+    "base": "favor-pixel-sponsor",
+    "area": "business",
+    "emoji": "📱",
+    "title": "Skyler Beta's app wants to sponsor the arena. Pixel: 'Test it? If it crashes, I need a reason to say no.'",
+    "who": "pixel",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "test",
+        "label": "Test it honestly",
+        "get": "Pixel's arena, saved from a bad deal",
+        "cost": "8 Energy and 40 minutes of crashes",
+        "risk": "low",
+        "riskWhy": "Testing apps is its own punishment",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "It crashes on launch, at login and once while closing. You write it all up. Pixel says no with a three-page report and a smile.",
+            "effects": {
+              "energy": -8,
+              "mood": -4,
+              "integrity": 7,
+              "clout": 20
+            }
+          }
+        ]
+      },
+      {
+        "id": "vouch",
+        "label": "Tell Pixel it's great, for a cut",
+        "get": "C$300 'ambassador fee' from Skyler",
+        "cost": "Pixel's tournament, on a broken app",
+        "risk": "high",
+        "riskWhy": "Crashes happen on stream",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Skyler pays you C$300 to say the app is 'seamless.' You say it. Pixel signs. Skyler sends a heart emoji and a contract.",
+            "effects": {
+              "cash": 300,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.7,
+              "emoji": "💥",
+              "text": "Remember vouching for Skyler Beta's app? It crashed during Tournament Friday, live, on the big screen. Pixel told everyone who said 'seamless.'",
+              "effects": {
+                "cash": -150,
+                "clout": -90,
+                "mood": -6
+              },
+              "headline": "Developing: Skyler Beta's app crashed live at Respawn Arena. Sources say {name} called it 'seamless.' We reached out. The app crashed."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-lola-source",
+    "base": "favor-lola-source",
+    "area": "fame",
+    "emoji": "👂",
+    "title": "Lola's best source went quiet. 'Babe, sit in the booth at Neon Spoon and listen. Just listen.'",
+    "who": "lola",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "listen",
+        "label": "Listen, report only facts",
+        "get": "A friend in the gossip business",
+        "cost": "10 Energy and an evening of overhearing",
+        "risk": "low",
+        "riskWhy": "Most of it is about parking",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Two hours of eavesdropping. Mostly parking, one real engagement. You bring Lola only what you heard. She calls it 'clean tea' and buys your dessert.",
+            "effects": {
+              "energy": -10,
+              "integrity": 7,
+              "clout": 35
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.5,
+              "emoji": "☕",
+              "text": "Remember sitting in Lola's booth? Your tip checked out. She called you 'a source with receipts' in her column. Everybody read it.",
+              "effects": {
+                "clout": 60,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "invent",
+        "label": "Spice it up, make some up",
+        "get": "90 clout as Lola's hottest source",
+        "cost": "Lola's column, and whoever you named",
+        "risk": "high",
+        "riskWhy": "Lola checks receipts, eventually",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Nothing happened, so you make something happen: a secret wedding, a fake breakup. Lola posts it. The comments explode. You're 'a source close to it.'",
+            "effects": {
+              "clout": 90,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🧾",
+              "text": "Remember the tea you gave Lola? None of it was true. She ran a correction with your initials. Lola has never run a correction before.",
+              "effects": {
+                "clout": -120,
+                "mood": -10
+              },
+              "headline": "CORRECTION: Lola Lowdown regrets the secret wedding story. Sources say it came from {name}. On the record: 'Never again, sweetie.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-lola-phone",
+    "base": "favor-lola-phone",
+    "area": "life",
+    "emoji": "📱",
+    "title": "Lola's phone died on deadline. 'Lend me yours? Five minutes. I won't read your texts. Much.'",
+    "who": "lola",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "lend",
+        "label": "Hand it over",
+        "get": "Lola's gratitude, which is currency",
+        "cost": "Five minutes of her in your camera roll",
+        "risk": "medium",
+        "riskWhy": "She will read your texts",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "She posts the story, reads three of your texts and gives the phone back warm. 'Your ex is still typing, babe. Don't.'",
+            "effects": {
+              "mood": -4,
+              "integrity": 6,
+              "clout": 40
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.5,
+              "emoji": "💅",
+              "text": "Remember lending Lola your phone? She mentioned you in her column: 'a real one, with a full battery.' People asked for your number.",
+              "effects": {
+                "clout": 60,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "charge",
+        "label": "Rent it to her by the minute",
+        "get": "C$100 in phone rent",
+        "cost": "Lola's goodwill, at deadline",
+        "risk": "medium",
+        "riskWhy": "Lola remembers who invoices her",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'C$20 a minute.' Lola pays without blinking, posts the story, and writes something in a tiny notebook. It's your name.",
+            "effects": {
+              "cash": 100,
+              "integrity": -8
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.5,
+              "emoji": "📓",
+              "text": "Remember renting Lola your phone? She wrote you into the column as 'a source who invoices.' Doors got a little colder.",
+              "effects": {
+                "clout": -50,
+                "mood": -4
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Your battery is at 4% too. Lola says 'tragic,' and borrows the waiter's.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-lola-table",
+    "base": "favor-lola-table",
+    "area": "nightlife",
+    "emoji": "👕",
+    "title": "Tourists in matching shirts took Lola's table. 'Sweetie, I need it back before the nine o'clock spill.'",
+    "who": "lola",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "move",
+        "label": "Talk them to the next table",
+        "get": "Lola's table back, and her seal of approval",
+        "cost": "8 Energy and too many group photos",
+        "risk": "low",
+        "riskWhy": "Tour groups travel in packs",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell them the next table 'gets the better light for photos.' They move. Lola sits, spills at nine sharp, and points at you: 'Mine.'",
+            "effects": {
+              "energy": -8,
+              "integrity": 6,
+              "clout": 30,
+              "mood": 4
+            }
+          }
+        ]
+      },
+      {
+        "id": "sell",
+        "label": "Sell them 'the famous seat'",
+        "get": "C$200 from the tour group",
+        "cost": "Lola's table, on her big night",
+        "risk": "high",
+        "riskWhy": "Lola always has the receipt",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "'That's Lola Lowdown's table, the most famous seat in Queens.' They pay C$200 to keep it all night. Lola spills standing up.",
+            "effects": {
+              "cash": 200,
+              "integrity": -11
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.7,
+              "emoji": "📸",
+              "text": "Remember selling Lola's table? She posted the receipt. She always has the receipt. The Neon Spoon host has your face on a list.",
+              "effects": {
+                "clout": -100,
+                "mood": -8,
+                "ban": {
+                  "place": "neon-spoon",
+                  "days": 3
+                }
+              },
+              "headline": "BREAKING: {name} sold Lola Lowdown's table to a tour group. Allegedly. With receipts."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-bev-triplicate",
+    "base": "favor-bev-triplicate",
+    "area": "life",
+    "emoji": "📋",
+    "title": "Sgt. Bev has a parking report in triplicate and the copier died. 'Got neat handwriting, hon?'",
+    "who": "sgt-bev",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "copy",
+        "label": "Copy it out by hand, three times",
+        "get": "Bev's favor, which is a real thing",
+        "cost": "12 Energy and a cramp in your hand",
+        "risk": "low",
+        "riskWhy": "Paperwork never ends",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Three copies of a fight about a parking spot, word for word. Bev reads one and says 'beautiful,' which she has never said about paperwork.",
+            "effects": {
+              "energy": -12,
+              "integrity": 7,
+              "clout": 20,
+              "mood": 2
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.6,
+              "emoji": "🎫",
+              "text": "Remember the triplicate at the 114½? Bev 'misfiled' a parking ticket of yours. C$65, gone. Lola says that's love.",
+              "effects": {
+                "cash": 65,
+                "clout": 20
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "lose",
+        "label": "Lose your own ticket in the pile",
+        "get": "C$115 parking ticket, gone",
+        "cost": "Bev's paperwork, and Bev's patience",
+        "risk": "medium",
+        "riskWhy": "Bev counts copies",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "While you copy, your own parking ticket slides into the shredder. Very neat handwriting. Very neat crime.",
+            "effects": {
+              "cash": 115,
+              "integrity": -10
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.6,
+              "emoji": "🪑",
+              "text": "Remember 'helping' with Bev's paperwork? The fourth copy turned up. Bev gave you two hours on the bench to think about carbon paper.",
+              "effects": {
+                "cash": -115,
+                "clout": -40,
+                "mood": -6,
+                "holding": 2
+              },
+              "headline": "Developing: {name} spent two hours at the 114½ Precinct over a parking ticket that 'fell into a shredder.' Sgt. Bev: 'I write it down. That's the service.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-bev-pierogi",
+    "base": "favor-bev-pierogi",
+    "area": "life",
+    "emoji": "🥟",
+    "title": "It's Pierogi Friday and Sgt. Bev's order never came. 'I can't leave. I'm the whole desk.'",
+    "who": "sgt-bev",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "fetch",
+        "label": "Pick up her pierogi",
+        "get": "Bev's best mood of the week",
+        "cost": "10 Energy and C$25 for the order",
+        "risk": "low",
+        "riskWhy": "The pierogi place has a line",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "A dozen pierogi, still warm. Bev eats one, closes her eyes and says 'quiet night' like a prayer. It works for an hour.",
+            "effects": {
+              "energy": -10,
+              "cash": -25,
+              "integrity": 6,
+              "clout": 15,
+              "mood": 5
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.5,
+              "emoji": "📞",
+              "text": "Remember Bev's pierogi run? She told Lola you're 'good people.' Lola posted it. Being vouched for by a cop and a gossip at once is a lot.",
+              "effects": {
+                "clout": 40,
+                "mood": 4
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "eat",
+        "label": "Eat a few on the way",
+        "get": "A full stomach and some Energy",
+        "cost": "Bev's dozen, now eleven. Then nine.",
+        "risk": "medium",
+        "riskWhy": "Bev counts pierogi",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "One on the subway stairs. Two at the corner. You hand Bev the bag. 'Nine is not a dozen, hon.'",
+            "effects": {
+              "energy": 10,
+              "mood": 6,
+              "integrity": -8
+            },
+            "later": {
+              "afterDays": [
+                1,
+                3
+              ],
+              "chance": 0.6,
+              "emoji": "🥟",
+              "text": "Remember Bev's short dozen? She did the math. You did an hour on the precinct bench. Bev did a word search.",
+              "effects": {
+                "clout": -30,
+                "mood": -5,
+                "holding": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Bev you're not a delivery app. She writes it down. That's the service.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-bev-alarm",
+    "base": "favor-bev-alarm",
+    "area": "life",
+    "emoji": "🚨",
+    "title": "A car alarm has wailed outside the 114½ for an hour. Bev: 'Find whose it is. I'll owe you one.'",
+    "who": "sgt-bev",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "knock",
+        "label": "Knock on every door on the block",
+        "get": "A quiet street and a sergeant's favor",
+        "cost": "15 Energy and a lot of 'not mine'",
+        "risk": "low",
+        "riskWhy": "Everyone says it isn't theirs",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Fourteen doors. The fifteenth: a man asleep in headphones. He turns it off. The block applauds from its windows. Bev raises her mug.",
+            "effects": {
+              "energy": -15,
+              "integrity": 7,
+              "clout": 25
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.6,
+              "emoji": "☕",
+              "text": "Remember the car alarm outside the 114½? Bev 'owes you one,' she says, and buys you a coffee in her World's Okayest Cop mug. It's an honor.",
+              "effects": {
+                "clout": 30,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "charge",
+        "label": "Find the owner, charge a fee",
+        "get": "C$150 to keep it off the tow list",
+        "cost": "Bev's name, used to shake someone down",
+        "risk": "high",
+        "riskWhy": "Bev hears everything, eventually",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You find him, tell him the tow is coming 'unless,' and take C$150 to 'talk to the sergeant.' You never talk to the sergeant.",
+            "effects": {
+              "cash": 150,
+              "integrity": -11
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.6,
+              "emoji": "📋",
+              "text": "Remember charging the car alarm guy to 'talk to the sergeant'? He came in to thank Bev. Bev gave you an hour on the bench and his C$150 back.",
+              "effects": {
+                "cash": -150,
+                "clout": -50,
+                "mood": -5,
+                "holding": 1
+              },
+              "headline": "BREAKING: {name} charged a neighbor C$150 to 'talk to the sergeant.' The sergeant, on the record: 'Nobody talks to me. Get on line.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-pablo-customer",
+    "base": "favor-pablo-customer",
+    "area": "business",
+    "emoji": "🧳",
+    "title": "Someone actually wants to buy a suitcase. Pablo: 'Talk them out of it. I don't know the prices.'",
+    "who": "pablo",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "honest",
+        "label": "Point them to a real luggage shop",
+        "get": "Pablo's quiet Tuesday, restored",
+        "cost": "8 Energy and a confused customer",
+        "risk": "low",
+        "riskWhy": "Customers don't like being turned away",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You walk the customer to a real luggage store on Steinway. Pablo watches from the door and gives you a mint, which is the highest honor.",
+            "effects": {
+              "energy": -8,
+              "integrity": 7,
+              "clout": 15,
+              "mood": 4
+            }
+          }
+        ]
+      },
+      {
+        "id": "sell",
+        "label": "Sell the load-bearing one for C$450",
+        "get": "C$450 for a very old suitcase",
+        "cost": "Pablo's back wall, literally",
+        "risk": "high",
+        "riskWhy": "The suitcases are load-bearing",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "C$450, cash, for the brown one at the bottom of the stack. The customer leaves happy. The shelf above makes a small sound.",
+            "effects": {
+              "cash": 450,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                1,
+                4
+              ],
+              "chance": 0.8,
+              "emoji": "🧱",
+              "text": "Remember selling Pablo's load-bearing suitcase? The back wall shifted an inch. Pablo sent you a bill, a mint and a look. Pay the bill.",
+              "effects": {
+                "cash": -400,
+                "clout": -40,
+                "mood": -6,
+                "ban": {
+                  "place": "pablos-luggage",
+                  "days": 5
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Pablo you don't do retail. He nods. 'Nobody does. That's the business model.'",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-pablo-renewal",
+    "base": "favor-pablo-renewal",
+    "area": "money",
+    "emoji": "📄",
+    "title": "Pablo's notary license has been 'pending since 2009.' 'Help me fill in the renewal? I don't read forms.'",
+    "who": "pablo",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "fill",
+        "label": "Fill it in, truthfully",
+        "get": "A legal notary on Steinway, finally",
+        "cost": "12 Energy and a form in triplicate",
+        "risk": "low",
+        "riskWhy": "The city loses forms",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Nineteen pages. You read every one. Pablo winces at the word 'address.' It goes in the mail, an honest envelope for once.",
+            "effects": {
+              "energy": -12,
+              "mood": -4,
+              "integrity": 9,
+              "clout": 15
+            },
+            "later": {
+              "afterDays": [
+                5,
+                14
+              ],
+              "chance": 0.5,
+              "emoji": "🖼️",
+              "text": "Remember Pablo's renewal? It came through after seventeen years. He framed it, then hid the frame. He pressed C$200 into your hand. 'Don't count it here.'",
+              "effects": {
+                "cash": 200,
+                "clout": 20,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "stamp",
+        "label": "Rent out his stamp while you're at it",
+        "get": "C$350 in 'notary fees'",
+        "cost": "Pablo's seal on strangers' papers",
+        "risk": "high",
+        "riskWhy": "Sgt. Bev likes to look at everything",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "While the form waits, you stamp twelve strangers' papers at C$30 each, no questions. Pablo would be proud, if he knew. He doesn't.",
+            "effects": {
+              "cash": 350,
+              "integrity": -13
+            },
+            "later": {
+              "afterDays": [
+                2,
+                7
+              ],
+              "chance": 0.7,
+              "emoji": "👮‍♀️",
+              "text": "Remember stamping papers with Pablo's seal? One was a lease for a closet inside a closet. Sgt. Bev came by, bought nothing and took you for a chat.",
+              "effects": {
+                "cash": -200,
+                "clout": -60,
+                "mood": -6,
+                "holding": 2
+              },
+              "headline": "Developing: {name} notarized a lease for a closet inside a closet with a borrowed stamp. Sgt. Bev: 'I write it down. That's the service.'"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "favor-pablo-auntie",
+    "base": "favor-pablo-auntie",
+    "area": "life",
+    "emoji": "🍲",
+    "title": "Auntie Bee has a cold and won't ask for help. Pablo: 'Bring her soup? She'd never let me.'",
+    "who": "pablo",
+    "where": {
+      "after": [
+        "talk"
+      ]
+    },
+    "options": [
+      {
+        "id": "soup",
+        "label": "Bring soup and sit with her",
+        "get": "A friend in Pablo's family",
+        "cost": "12 Energy and C$20 for the soup",
+        "risk": "low",
+        "riskWhy": "Auntie Bee argues with soup",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "Auntie Bee says she's fine, eats two bowls, beats you at cards and tells you about Pablo in 2009. You will never unhear it.",
+            "effects": {
+              "energy": -12,
+              "cash": -20,
+              "integrity": 8,
+              "mood": 8,
+              "clout": 15
+            },
+            "later": {
+              "afterDays": [
+                3,
+                9
+              ],
+              "chance": 0.6,
+              "emoji": "🧣",
+              "text": "Remember the soup for Auntie Bee? She knitted you a scarf with a pocket nobody would think to check. Pablo's people nod at you on the street now.",
+              "effects": {
+                "clout": 40,
+                "mood": 6
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "cut",
+        "label": "Cover her counter, keep her cut",
+        "get": "C$300 of Auntie Bee's week",
+        "cost": "Auntie Bee's money, while she's sick",
+        "risk": "high",
+        "riskWhy": "Auntie Bee gets better",
+        "comesBack": true,
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You cover her shift at the counter and keep the envelope Pablo leaves for her. C$300. Auntie Bee is too sick to ask. For now.",
+            "effects": {
+              "cash": 300,
+              "integrity": -12
+            },
+            "later": {
+              "afterDays": [
+                2,
+                6
+              ],
+              "chance": 0.7,
+              "emoji": "🚪",
+              "text": "Remember Auntie Bee's envelope? She's better now, and she asked. Pablo made you pay it back. His door is 'closed.' It's always closed, but now it means it.",
+              "effects": {
+                "cash": -300,
+                "clout": -30,
+                "mood": -8,
+                "ban": {
+                  "place": "pablos-luggage",
+                  "days": 5
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "pass",
+        "label": "Not today",
+        "get": "Your afternoon back",
+        "cost": "Nothing, really",
+        "risk": "low",
+        "riskWhy": "Nobody keeps score of a no",
+        "outcomes": [
+          {
+            "weight": 1,
+            "text": "You tell Pablo you don't do sickbeds. He sends Tito, who brings a fan instead of soup.",
+            "effects": {
+              "mood": -2
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

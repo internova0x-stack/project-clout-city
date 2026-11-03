@@ -2921,3 +2921,19 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .repair-opt-text { display:flex; flex-direction:column; font-size:12.5px; color:var(--text-2); }
 .repair-opt-text b { font-size:14.5px; color:var(--text-1); }
 .repair-opts { display:flex; flex-wrap:wrap; gap:6px; }
+/* NPC favors and friendships (migration 0159; components/city/Favors.tsx). */
+.favor-strip { display:flex; flex-direction:column; gap:8px; }
+.favor-ask { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:0; border-radius:var(--r-md); text-align:left; cursor:pointer;
+  font:inherit; color:var(--text-1); background:linear-gradient(120deg,var(--taxi-tint),#fff 80%); box-shadow:inset 0 0 0 1.5px var(--taxi-400);
+  animation:favor-in .45s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes favor-in { from { opacity:0; transform:translateY(6px) scale(.98); } to { opacity:1; transform:none; } }
+.favor-ask-emoji { font-size:26px; flex:none; }
+.favor-ask-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; font-size:12.5px; line-height:16px; color:var(--text-2); }
+.favor-ask-text b { font-size:14px; color:var(--text-1); }
+.favor-ask-go { font-size:20px; color:var(--text-3); }
+.favor-bond { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.favor-level { display:inline-flex; align-items:center; gap:6px; font-size:13px; }
+.favor-level.burned { color:var(--red-text); }
+.favor-hearts { display:inline-flex; gap:1px; font-size:14px; color:var(--chip-off); }
+.favor-hearts .on { color:var(--neon-500); }
+@media (prefers-reduced-motion: reduce) { .favor-ask { animation:none; } }

@@ -172,6 +172,7 @@ from (values
   ('0155_asset_cap_rent_alarm.sql', to_regprocedure('public.asset_band(bigint)') is not null),
   ('0156_season_pass_starter_pack.sql', to_regclass('public.season_xp') is not null),
   ('0157_place_life.sql', to_regclass('public.place_life_log') is not null),
-  ('0158_streak_repair.sql', to_regclass('public.streak_repairs') is not null)
+  ('0158_streak_repair.sql', to_regclass('public.streak_repairs') is not null),
+  ('0159_npc_bonds.sql', to_regclass('public.npc_bonds') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

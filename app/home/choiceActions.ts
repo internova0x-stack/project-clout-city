@@ -5,7 +5,9 @@ import {
   CHOICES, boundEffects, cardView, repBonus, choiceError, mayOffer, pickCard, resolveChoice,
   type BlotterItem, type ChoiceAfter, type ChoiceContext, type ChoiceCard, type ChoiceCardView, type ChoiceMark, type ChoiceEffects, type ChoiceLogEntry, type ChoiceMade, type ChoiceResult, type ChoiceState,
 } from "@/lib/choices";
-import { CHOICE_CARDS } from "@/lib/choicesContent";
+import { CHOICE_CARDS, FAVOR_CARDS } from "@/lib/choicesContent";
+import { bondKind, pickFavor, type Bond, type FavorPeek } from "@/lib/npcBonds";
+import { REGULARS } from "@/lib/cast";
 import { ASPIRE } from "@/lib/aspirations";
 import type { Memory } from "@/lib/memory";
 import type { ConditionNow } from "@/lib/cityConditions";
@@ -24,7 +26,7 @@ type Admin = NonNullable<ReturnType<typeof getAdminSupabase>>;
 
 interface Context {
   today: string; atPlace: string | null; integrity: number; revealed: boolean; rank: number; bank: number;
-  student: boolean; business: boolean; home: string | null; shownToday: number; lastShownAt: string | null;
+  student: boolean; business: boolean; home: string | null; shownToday: number; lastShownAt: string | null; favorsToday?: number;
   open: { log: number; card: string; place: string | null } | null;
   history: { id: string; base: string; day: string }[];
 }
@@ -205,6 +207,11 @@ export async function choiceChoose(log: number, option: string): Promise<ChoiceR
   }
   const d = data as { integrity: number; first: boolean; applied: ChoiceEffects };
   if (r.sets.length) await remember(w.admin, w.id, r.sets);
+  // NPC friendships (migration 0159): a choice with a regular in it moves the friendship (never blocks the choice).
+  if (c.who) {
+    const { error: be } = await w.admin.rpc("npc_bond_note", { p_player: w.id, p_npc: c.who, p_kind: bondKind(r.effects.integrity) });
+    if (be && !/npc_bond_note/.test(be.message)) console.error("npc_bond_note failed", be);
+  }
   return { ok: true, data: { receipt: r.text, effects: d.applied, integrity: d.integrity, first: d.first } };
 }
 
@@ -246,4 +253,64 @@ export async function choiceConditions(): Promise<ChoiceResult<ConditionNow[]>> 
   if (!supabase) return { ok: true, data: [] };
   const { data, error } = await supabase.rpc("city_conditions_now");
   return error || !Array.isArray(data) ? { ok: true, data: [] } : { ok: true, data: data as ConditionNow[] };
+}
+
+// ---- NPC favors and friendships (migration 0159) ----------------------------------------------------------------------
+const FAVOR_ERRORS: Record<string, string> = {
+  not_here: "You have to be there to help.", enough_favors: "You've done enough favors for one day.",
+  asked_lately: "They asked you recently. Give it a few days.", burned: "They're not asking you for anything right now.",
+  not_friends: "That's for friends.", not_family: "That's for family.", done: "Already done.", not_needed: "You're not in holding.",
+  rate_limited: "Slow down a little.",
+};
+const favorErr = (e: { message: string }) => FAVOR_ERRORS[e.message.match(/[a-z_]+/)?.[0] ?? ""] ?? choiceError(undefined);
+
+/** The favor this regular would ask, if they would (no writes): the chip under their line. */
+export async function favorPeek(npc: string): Promise<ChoiceResult<FavorPeek | null>> {
+  const reg = REGULARS.find((r) => r.id === npc);
+  if (!reg) return { ok: true, data: null };
+  const w = await who();
+  if ("error" in w) return { ok: true, data: null };
+  const ctx = await context(w.admin, w.id);
+  if ("error" in ctx) return { ok: true, data: null };
+  const { data: why, error } = await w.admin.rpc("favor_block", { p_player: w.id, p_npc: npc, p_place: reg.placeId });
+  if (error || why) return { ok: true, data: null };
+  const c = pickFavor(FAVOR_CARDS, npc, ctx);
+  return { ok: true, data: c ? { npc, emoji: c.emoji, title: c.title } : null };
+}
+
+/** The player said yes, tell me: opens the favor card. */
+export async function favorOpen(npc: string): Promise<ChoiceResult<ChoiceCardView | null>> {
+  const reg = REGULARS.find((r) => r.id === npc);
+  if (!reg) return { ok: false, error: choiceError(undefined) };
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const ctx = await context(w.admin, w.id);
+  if ("error" in ctx) return { ok: false, error: ctx.error };
+  const c = pickFavor(FAVOR_CARDS, npc, ctx);
+  if (!c) return { ok: true, data: null };
+  const { data, error } = await w.admin.rpc("favor_open", { p_player: w.id, p_card: c.id, p_base: c.base, p_npc: npc, p_place: reg.placeId });
+  if (error) return { ok: false, error: favorErr(error) };
+  return { ok: true, data: cardView(c, data as number, reg.placeId, c.slots ? await memoryOf(w.admin, w.id) : null) };
+}
+
+export async function npcBonds(): Promise<ChoiceResult<Bond[]>> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { ok: true, data: [] };
+  const { data, error } = await supabase.rpc("npc_bonds_state");
+  return error || !Array.isArray(data) ? { ok: true, data: [] } : { ok: true, data: data as Bond[] };
+}
+
+export async function npcPerk(npc: string): Promise<ChoiceResult<{ energy: number; mood: number }>> {
+  const reg = REGULARS.find((r) => r.id === npc);
+  const supabase = await getServerSupabase();
+  if (!supabase || !reg) return { ok: false, error: choiceError(undefined) };
+  const { data, error } = await supabase.rpc("npc_perk", { p_npc: npc, p_place: reg.placeId });
+  return error ? { ok: false, error: favorErr(error) } : { ok: true, data: data as { energy: number; mood: number } };
+}
+
+export async function npcBigFavor(npc: string): Promise<ChoiceResult<{ kind: "cash" | "holding"; cash?: number }>> {
+  const supabase = await getServerSupabase();
+  if (!supabase || !REGULARS.some((r) => r.id === npc)) return { ok: false, error: choiceError(undefined) };
+  const { data, error } = await supabase.rpc("npc_big_favor", { p_npc: npc });
+  return error ? { ok: false, error: favorErr(error) } : { ok: true, data: data as { kind: "cash" | "holding"; cash?: number } };
 }

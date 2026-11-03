@@ -17,7 +17,8 @@ export type ChoiceArea = "life" | "gigs" | "work" | "school" | "business" | "hom
 export type Risk = "low" | "medium" | "high";
 /** What a player was just doing, so a card can feel like it happened because of it. */
 /** "travel" is a subway ride, "ride" a cab or rideshare; "workday" a career workday (it also counts as a "shift"). */
-export type ChoiceAfter = "arrive" | "shift" | "gig" | "eat" | "visit" | "hangout" | "travel" | "ride" | "workday";
+/** "talk" (owner, Nov 3: NPC favors, content/choices/favors.json): offered only when the player talks to the card's regular. */
+export type ChoiceAfter = "arrive" | "shift" | "gig" | "eat" | "visit" | "hangout" | "travel" | "ride" | "workday" | "talk";
 
 export interface ChoiceEffects {
   cash?: number;
@@ -116,6 +117,8 @@ export interface ChoiceCardView {
   intro?: string | null;
   /** Owner, Oct 30: no risk or "comes back" hints reach the player; they learn from what happens. */
   options: { id: string; label: string; get: string; cost: string }[];
+  /** A favor a regular asked (migration 0159): the card says "A favor for Sal". */
+  favor?: boolean;
 }
 
 export const CHOICES = {
@@ -300,6 +303,7 @@ export function cardView(card: ChoiceCard, log: number, place: string | null, me
   const f = (t: string) => fillText(t, v);
   return {
     log, id: card.id, area: card.area, emoji: card.emoji, title: f(card.title), who: card.who ?? null, place,
+    ...(card.where?.after?.includes("talk") ? { favor: true } : {}),
     options: card.options.map((o) => ({ id: o.id, label: f(o.label), get: f(o.get), cost: f(o.cost) })),
   };
 }
@@ -454,6 +458,12 @@ export interface ChoicesApi {
   blotter: () => Promise<ChoiceResult<BlotterItem[]>>;
   /** The city's conditions now and in the next 48 hours (migration 0140): News → City. */
   conditions?: () => Promise<ChoiceResult<import("./cityConditions.ts").ConditionNow[]>>;
+  /** NPC favors and friendships (migration 0159). */
+  favorPeek?: (npc: string) => Promise<ChoiceResult<import("./npcBonds.ts").FavorPeek | null>>;
+  favorOpen?: (npc: string) => Promise<ChoiceResult<ChoiceCardView | null>>;
+  bonds?: () => Promise<ChoiceResult<import("./npcBonds.ts").Bond[]>>;
+  perk?: (npc: string) => Promise<ChoiceResult<{ energy: number; mood: number }>>;
+  bigFavor?: (npc: string) => Promise<ChoiceResult<{ kind: "cash" | "holding"; cash?: number }>>;
 }
 
 export const CHOICE_ERRORS: Record<string, string> = {
@@ -471,7 +481,7 @@ export const choiceError = (code: string | undefined) => CHOICE_ERRORS[code ?? "
 // ---------------------------------------------------------------------------
 
 const AREAS: ChoiceArea[] = ["life", "gigs", "work", "school", "business", "home", "nightlife", "transit", "dating", "money", "fame"];
-const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride", "workday"];
+const AFTERS: ChoiceAfter[] = ["arrive", "shift", "gig", "eat", "visit", "hangout", "travel", "ride", "workday", "talk"];
 
 function checkEffects(e: ChoiceEffects, where: string, out: string[], places: string[] = []) {
   for (const [k, v] of Object.entries(e)) {
@@ -514,6 +524,11 @@ export function validateCards(cards: readonly ChoiceCard[], known: { places: str
     for (const p of c.where?.places ?? []) if (!known.places.includes(p)) out.push(`${at}: unknown place "${p}"`);
     for (const t of c.where?.tags ?? []) if (!known.tags.includes(t)) out.push(`${at}: unknown tag "${t}"`);
     for (const a of c.where?.after ?? []) if (!AFTERS.includes(a)) out.push(`${at}: unknown after "${a}"`);
+    if (c.where?.after?.includes("talk")) {
+      if (!c.who) out.push(`${at}: a favor (after "talk") needs its regular in "who"`);
+      if (c.where.after.length !== 1) out.push(`${at}: a favor happens only when you talk to them: after must be just ["talk"]`);
+      if (c.where.places || c.where.tags) out.push(`${at}: a favor happens where its regular is, so no places or tags`);
+    }
     if (c.where?.work) {
       if (!needsJob(c.when)) out.push(`${at}: an office card (where.work) needs a job: "when.all" with a job or job.* snapshot`);
       if (c.where.places || c.where.tags) out.push(`${at}: an office card happens at the job, so no places or tags`);
