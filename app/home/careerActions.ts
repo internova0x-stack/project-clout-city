@@ -189,6 +189,11 @@ export async function careerStart(style: WorkStyle): Promise<Out> {
   // Content Engine step 7: gated tasks the player's memory unlocks (a feud, a ban, a source…), with names filled in.
   const admin = getAdminSupabase();
   const w = await who();
+  // No workday from the bench (owner, Nov 3), not even with "work from anywhere".
+  if (!("error" in w)) {
+    const { data: held } = await w.admin.rpc("choice_marked", { p_player: w.id, p_kind: "holding" });
+    if (held === true) return { ok: false, error: careerError("in_holding") };
+  }
   const memory = admin && !("error" in w) ? await memoryOf(admin, w.id) : null;
   const unlocked = unlockedCards(content.tasks, memory, nyDay());
   return act((s, ctx, today) => ({ ...startDay(content, s, style, { ...ctx, unlocked }, today, rng), workday: today }));

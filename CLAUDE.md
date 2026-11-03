@@ -459,7 +459,9 @@ components live in `app/globals.css`.
   7 days, no gigs up to 3, up to 3 hours in holding at the 114½ Precinct, police played for laughs; bail `choice_bail`, C$150 an
   hour left; the bench is a pop-up, never a toast (owner, Nov 3: HoldingSheet in components/game/Choices.tsx: a live countdown ring,
   why you're here from the log's latest holding choice (`holdingWhy`), what it stops, Pay bail, Sgt. Bev's Family favor, the Phone
-  and tasks while you wait; GameShell turns any "You're on the bench / in holding" refusal into it); enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
+  and tasks while you wait; GameShell turns any "You're on the bench / in holding" refusal into it);
+  no tasks from the bench (migration 0160, owner Nov 3: `complete_task` does nothing while held, so a task at the precinct
+  waits; `careerStart` refuses 'in_holding', even with "work from anywhere"); enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
   the daily limit, `choice_chain_open`) and public headlines (`later.headline` → Lola's Blotter in News → City, `choice_blotter()`,
   never for news_opt_out players).
   NPC favors (migration 0159, owner Nov 3: "go with your recommendation"; lib/npcBonds.ts mirrors game_settings 'npc_bonds',

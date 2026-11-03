@@ -203,7 +203,8 @@ export function HoldingSheet({ open, until, since, why, busy, actions, onBail, o
             <span className="overline">While you&apos;re held</span>
             <ul>
               <li>🚫 No travel: you stay at the precinct</li>
-              <li>📵 No gigs, shifts or activities</li>
+              <li>📵 No gigs, shifts, work or activities</li>
+              <li>✅ Daily tasks wait until you&apos;re out</li>
               <li>📱 Your Phone still works</li>
             </ul>
           </div>

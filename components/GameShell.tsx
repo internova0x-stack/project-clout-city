@@ -2175,7 +2175,7 @@ export function GameShell({
     ...(bonds.find((b) => b.npc === "sgt-bev")?.bigReady && favorHandlers ? [{ id: "bev", emoji: "💛", label: "Ask Sgt. Bev", meta: "Family favor", onClick: () => { setHoldingOpen(false); favorHandlers.onBig("sgt-bev"); } }] : []),
     { id: "chat", emoji: "💬", label: "Text someone", onClick: () => { setHoldingOpen(false); setPhone({ open: true, app: "messages" }); } },
     { id: "news", emoji: "📰", label: "Read the news", onClick: () => { setHoldingOpen(false); setPhone({ open: true, app: "news", beat: null }); } },
-    { id: "tasks", emoji: "✅", label: "Your tasks", onClick: () => { setHoldingOpen(false); setTasksTab("daily"); setPanel("tasks"); } },
+    { id: "look", emoji: "👕", label: "Change your look", onClick: () => { setHoldingOpen(false); setPanel("look"); } },
   ];
   useEffect(() => {
     if (!choices || !phone.open || phone.app !== "news") return;
