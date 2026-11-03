@@ -3022,11 +3022,13 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   .daily-ring circle { transition:none; }
 }
 /* The streak welcome (owner, Nov 3: "yes, build the streak animation"): ignite and count, or at risk in the evening. */
-.wb-reel-col { display:inline-block; height:76px; overflow:hidden; vertical-align:top; }
+/* The reels are taller than the line (88px, margin -6px) so the glyphs' tops and bottoms never clip while rolling. */
+.wb-reel-col { display:inline-block; height:88px; margin:-6px 0; overflow:hidden; vertical-align:top; }
 .wb-reel { display:flex; flex-direction:column; }
-.wb-reel-digit { display:block; height:76px; background:linear-gradient(90deg,#0F4C81,#0B6B5E); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.wb-reel-digit { display:block; height:88px; line-height:88px;
+  background:linear-gradient(90deg,#0F4C81,#0B6B5E) var(--gx, 0%) 0 / var(--gw, 100%) 100% no-repeat; -webkit-background-clip:text; background-clip:text; color:transparent; }
 .wb-reel.rolling { animation:wb-roll .7s .64s cubic-bezier(.3,1.25,.5,1) both; }
-@keyframes wb-roll { from { transform:translateY(0); } to { transform:translateY(calc(var(--steps) * -76px)); } }
+@keyframes wb-roll { from { transform:translateY(0); } to { transform:translateY(calc(var(--steps) * -88px)); } }
 .wb-streak.ignite .wb-streak-flame { display:inline-block; transform-origin:50% 90%; animation:wb-ignite .75s .15s cubic-bezier(.2,1.2,.4,1) both, welcome-flame 1.2s 1s ease-in-out infinite alternate; }
 @keyframes wb-ignite { 0% { transform:scale(.25); filter:saturate(.3) brightness(1.6); } 35% { transform:scale(.35); } 70% { transform:scale(1.35) translateY(-4px); filter:none; } 100% { transform:none; } }
 .wb-streak.ignite .wb-streak-n { animation:wb-pop .55s .1s cubic-bezier(.2,1.4,.4,1) both, wb-land .3s 1.34s ease-out; }
