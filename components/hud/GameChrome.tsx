@@ -114,7 +114,6 @@ export function GameChrome({
             <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
             {!!values?.streak && <span className="hud-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
-            {values?.tasksBadge && <span className="pin-dot hud-tasks-dot pin-pulse" />}
           </button>
           <button
             className="hud-icon-btn"

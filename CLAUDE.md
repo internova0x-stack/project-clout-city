@@ -148,6 +148,16 @@ components live in `app/globals.css`.
   `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a
   week forgiven) pays clout, reward-only furniture (`reward: true`, never sold or sellable) and guest-list passes
   (`use_guest_pass`: one night past a club door or onto a VIP floor; `travel` and `vip_access` accept it).
+  Streak milestones (owner, Nov 3): lib/streakMilestones.ts (3, every week to 35, then 30, 50, 75, 100… a year, every 100) fire
+  components/Confetti.tsx (a body-level canvas, time-based, none for reduced motion) in the streak reveal (`kind: "milestone"` for
+  round days without a reward, `?goals=day30`) and the next day's welcome back. Streak repair (migration 0158, owner Nov 3: "go with
+  your recommendation"; lib/streakRepair.ts mirrors game_settings 'streak_repair', tests/streakRepair.test.ts): a broken 3+ day
+  streak, within 3 days of its last full day, once every 30 days: `streak_repair(method)` 'earn' (finish today's five: streak_tick
+  carries the run on), 'cash' (C$20 a day, max C$1,500, ledger 'streak_repair'), 'pass' (a guest-list pass) or 'vip' (free for a
+  VIP); never a real-money purchase of its own. `streak_repair_state()` → the card on top of Tasks → Daily
+  (components/game/StreakRepair.tsx) and the welcome back's 'repair' rung (right after rent). Pushes (`push_scan_streak`, run by the
+  sender): 'streak_last' at 9 PM New York (7+ days, tasks left, no freeze to cover it), 'streak_freeze' in the morning when the
+  freeze saved yesterday, 'streak_repair' while a repair is open. `?goals=broken` in the preview.
 - Push notifications (migration 0078, owner Oct 18: push only): game events only add rows with `push_enqueue`
   (one per dedupe key, only for players with a device); `lib/pushServer.ts` (run by `/api/push/run` with `CRON_SECRET`, and
   nudged by game traffic) applies `lib/push.ts`: tier score + deadline urgency + close-person bonus − fatigue, merging by
@@ -164,8 +174,8 @@ components live in `app/globals.css`.
   shows a card on the home screen (short, late, eviction countdown; Find a gig / Bills; migration 0155: both compare the bank
   with the player's own part of the rent, `cohabit_rent_part`, so a partner living together isn't warned about the whole rent) and turns the Bills button's pin into a ❗ (the bank pill stays the balance)
   (`?rent=short|late|evict` in the preview).
-- HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt) and its
-  pin pulses until the day's tasks are opened; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
+- HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt); its pin is gone (owner,
+  Nov 3: it collided with the 🔥 streak badge), the streak badge stays; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
   today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
 - Loading (owner, Oct 23-24): the launch splash `AppLoading` is `/`'s Suspense fallback only (no loading.tsx, so Continue
   keeps the welcome screen and its spinner up until the game is ready); it shows at once and `SplashHold` keeps it up
@@ -214,13 +224,17 @@ components live in `app/globals.css`.
   once-key in `place_life_log` (ledger 'place_life'), checks the place, its hours, holding, Energy and the caps (game_settings
   'place_life'), and a cost never takes the bank below zero; `place_life_context` gives the server today's refs and days per place.
   UI: components/city/PlaceLife.tsx (`LifeStrip` on the place panel, `LifeSheet`). `?life=rush|regular|brownout` in the preview.
-  The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"): once a New
-  York day (`cc-daily-pick:<date>`), 3 s after the game settles and only when nothing else is open, a floating card
-  (components/city/DailyPick.tsx `DailyWelcome`, no scrim): a greeting by the city hour and the player's name, the all-five task
-  streak, "Since you left" chips (rent alarm, unread messages, Clout Pass rewards; each opens its screen), and "Today" (owner, Nov 1: "a mix of
-  tasks, a goal that is close to completion, skill upgrade, story"): tiles for the five tasks, the current goal's progress, the skill
-  nearest its next level and the running story (new chapters), each opening its screen (GameShell `welcomeRows`), under Lola's `todaysPick`: a happening on now, else a regular card one visit from its reward, else a place to try (rotated by day);
-  Let's go plans the trip (Do it now when already there). `lifeToday` on the server; `?daily=pick` forces it in the preview.
+  The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3: "too much
+  information which will lead to indecision. Pick the highest leverage action"): once a New York day (`cc-daily-pick:<date>`), 3 s after
+  the game settles and only when nothing else is open, a floating card (components/city/DailyPick.tsx `DailyWelcome`, no scrim; owner, Nov 3:
+  "Lola says" is the default: her portrait and line, `LOLA_SAYS`; `?welcome=card|ticket|streak|banner` previews the others): a
+  greeting by the city hour, the player's name with the 🔥 streak, and ONE action from lib/welcomePick.ts (`pickWelcome`, pure,
+  tests/welcomePick.test.ts), the first that applies: rent trouble (Bills or a gig), Clout Pass rewards to collect, a 3+ day streak at
+  risk from 5 PM New York with tasks left, a happening on now, one step from done (a regular card one visit off, a skill 1-2 practice from
+  its level, a goal 80%+; the one that also clears a daily task first), messages, a new story chapter, the next task, a place to try.
+  It shows what you get · what it costs and why now ("It also clears a daily task"); Later remembers the kind (`cc-welcome-later`) and
+  the next day skips it, rent excepted. Lola's `todaysPick` (`lifeToday` on the server) supplies the happening, regular card and place
+  to try. `?daily=pick` forces it in the preview (`&nyhour=20` sets the New York hour).
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome

@@ -1,8 +1,9 @@
 // The preview's in-memory goals (daily tasks 2.0), standing in for goals_state and use_guest_pass (migrations 0073,
 // 0074). Presets (?goals=): "" day one (first purchase, no streak), "streak" a 6-day streak (finish today's five for
 // the day-7 collectible), "pass" a guest-list pass in hand, "tonight" a pass used at Ultraviolet Society tonight,
-// "chapter" every unlocked goal done (reach the next chapter's clout).
+// "chapter" every unlocked goal done (reach the next chapter's clout), "broken" a 12-day streak that broke (repair it, 0158).
 
+import { repairCash } from "./streakRepair.ts";
 import { GOALS, NEXT_CHAPTER, addDay, nextStreakReward, nextUnlock, streakMilestones, streakRewardOn, type GoalsApi, type GoalsResult, type GoalsState } from "./goals.ts";
 
 const ok = <T,>(data: T): Promise<GoalsResult<T>> => Promise.resolve({ ok: true, data });
@@ -22,11 +23,14 @@ export function createGoalsSim(preset = "", city: GoalsSimCity): GoalsApi & { pa
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
   const ids = GOALS.ladder.map((g) => g.id);
   const done = new Set<string>(preset === "chapter" ? ids.filter((_, i) => GOALS.ladder[i].unlock <= city.clout()) : preset ? ["first_purchase", "first_shift", "full_day"] : []);
-  let current = preset === "streak" ? 6 : preset === "pass" || preset === "tonight" ? 15 : preset ? 2 : 0;
+  let current = preset === "streak" ? 6 : preset === "pass" || preset === "tonight" ? 15 : preset === "broken" ? 0 : preset ? 2 : 0;
   let best = Math.max(current, preset ? 15 : 0);
   let lastDay: string | null = current ? "yesterday" : null;
-  let held = preset === "pass" ? 1 : 0;
+  let held = preset === "pass" || preset === "broken" ? 1 : 0;
   let tonight: string | null = preset === "tonight" ? "ultraviolet-society" : null;
+  // ?goals=broken (migration 0158): a 12-day streak that broke; it can be repaired today.
+  let broken = preset === "broken" ? 12 : 0;
+  let earning = false;
 
   const goal = (): GoalsState["goal"] => {
     const clout = city.clout();
@@ -53,6 +57,8 @@ export function createGoalsSim(preset = "", city: GoalsSimCity): GoalsApi & { pa
   const tick = () => {
     // The day's five, done: the streak grows (the server does this from the daily bonus).
     if (city.allDone() && lastDay !== today) {
+      if (broken && earning) { current = broken; broken = 0; earning = false; }
+      else if (broken) { current = 0; broken = 0; }
       current += 1;
       best = Math.max(best, current);
       lastDay = today;
@@ -96,5 +102,15 @@ export function createGoalsSim(preset = "", city: GoalsSimCity): GoalsApi & { pa
       return ok(state());
     },
     passTonight: (place) => tonight === place,
+    async repairState() {
+      return { ok: true as const, data: { offer: broken ? { streak: broken, lastDay: addDay(today, -3), earnPending: earning, cash: repairCash(broken), passes: held, vip: true, bank: city.cash() } : null } };
+    },
+    async repair(method) {
+      if (!broken) return fail("There's nothing to repair right now.");
+      if (method === "earn") { earning = true; return this.repairState!(); }
+      if (method === "pass") { if (!held) return fail("You don't have a guest-list pass."); held -= 1; }
+      current = broken; lastDay = addDay(today, -1); broken = 0; earning = false;
+      return { ok: true as const, data: { offer: null, repaired: true, streak: current } };
+    },
   };
 }

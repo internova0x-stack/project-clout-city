@@ -10,7 +10,10 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
-import { DailyWelcome, type WelcomeChip, type WelcomeRow } from "./city/DailyPick";
+import { DailyWelcome, WELCOME_VARIANTS, type WelcomeVariant } from "./city/DailyPick";
+import { pickWelcome, type WelcomeAction, type WelcomeKind } from "@/lib/welcomePick";
+import type { RepairMethod, RepairOffer } from "@/lib/streakRepair";
+import { StreakRepairCard } from "./game/StreakRepair";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
@@ -1227,7 +1230,22 @@ export function GameShell({
     goalsPrev.current = r.data;
     setGoalsNow(r.data);
     if (reveal) setGoalsReveal(reveal);
+    // Streak repair (migration 0158): the offer rides along with the goals.
+    if (goals.repairState) void goals.repairState().then((x) => { if (x.ok) setRepairOffer(x.data.offer); }).catch(() => {});
   }, [goals]);
+  const [repairOffer, setRepairOffer] = useState<RepairOffer | null>(null);
+  const repairStreak = async (method: RepairMethod) => {
+    if (!goals?.repair) return;
+    setBusy("repair");
+    const r = await goals.repair(method).catch(() => null);
+    setBusy(null);
+    if (!r) return;
+    if (!r.ok) return setToast(r.error);
+    setRepairOffer(r.data.offer);
+    if (r.data.repaired) setToast(`🔧 Your ${r.data.streak}-day streak is back. Don't make Lola do that twice.`);
+    else if (method === "earn") setToast("💪 Deal. Finish all five today and the streak lives.");
+    void loadGoals();
+  };
   const goalsKey = city ? `${tasksDone(city)}:${city.player.clout}:${city.player.bank_cash}:${city.player.home_id}:${city.player.car_sku}:${city.player.house_sku}:${city.items.length}` : "";
   useEffect(() => {
     if (!goals || !goalsKey) return;
@@ -2753,50 +2771,65 @@ export function GameShell({
   }
   const togetherKey = togetherIn ? [...togetherIn.rides.map((r) => `r${r.id}`), ...togetherIn.plans.filter((x) => !x.mine && x.status === "pending").map((x) => x.id)].join() : "";
   const rentAlarm = city ? rentAlert(city) : null;
-  // The welcome back's greeting and "Since you left" (owner, Nov 1).
+  // The welcome back's greeting (owner, Nov 1).
   const welcomeHour = Math.floor(cityMinutes(gameNow, GAME_CONFIG.cityClock) / 60);
   const welcomeHello = welcomeHour >= 5 && welcomeHour < 12 ? "Good morning" : welcomeHour < 17 && welcomeHour >= 12 ? "Good afternoon" : welcomeHour >= 17 && welcomeHour < 22 ? "Good evening" : "Up late";
-  const welcomeChips: WelcomeChip[] = [
-    ...(rentAlarm ? [{ id: "rent", emoji: "", text: rentAlarm.title, onTap: () => { setWelcomeOpen(false); setPanel("bills"); } }] : []),
-    ...(chatUnread > 0 ? [{ id: "chat", emoji: "💬", text: `${chatUnread} new message${chatUnread === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setPhone({ open: true, app: "messages" }); } }] : []),
-    ...(passReady > 0 ? [{ id: "pass", emoji: "🎁", text: `${passReady} Clout Pass reward${passReady === 1 ? "" : "s"}`, onTap: () => { setWelcomeOpen(false); setTasksTab("pass"); setPanel("tasks"); } }] : []),
-  ];
-  // Today's mix (owner, Nov 1: "a mix of tasks, a goal that is close to completion, skill upgrade, story").
-  const welcomeRows = ((): WelcomeRow[] => {
-    const rows: WelcomeRow[] = [];
-    const go = (fn: () => void) => () => { setWelcomeOpen(false); fn(); };
-    if (city && city.tasks.length) {
-      const done = tasksDone(city);
-      const next = city.tasks.find((t) => !t.done_at);
-      rows.push({ id: "tasks", emoji: "✅", kicker: "Tasks", title: done === city.tasks.length ? "All five done. Look at you." : next ? taskTitle(next) : "Your daily tasks",
-        sub: `${done} of ${city.tasks.length} done`, progress: done / city.tasks.length,
-        onTap: go(() => { setTasksTab("daily"); setPanel("tasks"); }) });
-    }
-    const g = goalsNow?.goal;
-    const gc = g ? GOAL_COPY[g.id] : undefined;
-    if (g && gc) {
-      const pct = goalProgress(g.parts);
-      const left = g.parts.find((x) => x.have < x.need);
-      rows.push({ id: "goal", emoji: gc.emoji, kicker: pct >= 0.6 ? `Almost · ${Math.round(pct * 100)}%` : `Goal · ${Math.round(pct * 100)}%`, title: gc.title,
-        sub: left ? partLine(left) : gc.toward, progress: pct, hot: pct >= 0.6, onTap: go(() => { setTasksTab("goals"); setPanel("tasks"); }) });
-    }
+  // The welcome back's one action (owner, Nov 3: "pick the highest leverage action, based on the situation of the player").
+  const welcomeAction = ((): WelcomeAction | null => {
+    if (!welcomeOpen) return null;
+    const nyDate = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(d);
+    const devHour = process.env.NODE_ENV !== "production" ? new URLSearchParams(window.location.search).get("nyhour") : null;
+    const nyHour = devHour ? Number(devHour) : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date()));
+    let skipped: WelcomeKind[] = [];
+    try {
+      const later = JSON.parse(localStorage.getItem("cc-welcome-later") ?? "null") as { day: string; kind: WelcomeKind } | null;
+      if (later && later.day === nyDate(new Date(Date.now() - 86_400_000))) skipped = [later.kind];
+    } catch { /* nothing put off */ }
+    const g = goalsNow?.goal, gc = g ? GOAL_COPY[g.id] : undefined;
     const sk = (skills ?? []).filter((x) => levelFor(x.practice) < MAX_LEVEL && x.practice > 0)
-      .map((x) => ({ x, l: levelFor(x.practice), p: levelProgress(x.practice) })).sort((a, b) => b.p - a.p)[0];
+      .map((x) => ({ x, l: levelFor(x.practice) })).sort((a, b) => (LEVEL_AT[a.l + 1] - a.x.practice) - (LEVEL_AT[b.l + 1] - b.x.practice))[0];
     const def = sk && SKILLS.find((d) => d.id === sk.x.id);
-    if (sk && def) {
-      const more = LEVEL_AT[sk.l + 1] - sk.x.practice;
-      const perk = SKILL_PERKS.find((pk) => pk.skill === sk.x.id && pk.level === sk.l + 1);
-      rows.push({ id: "skill", emoji: def.emoji, kicker: more <= 2 ? "Level up!" : "Skill", title: `${def.name} ${sk.l} → ${sk.l + 1}`,
-        sub: `${more} more to go${perk ? " · new perk" : ""}`, progress: sk.p, hot: more <= 2, onTap: go(() => setPanel("skills")) });
-    }
-    if (storyNow) {
-      const fresh = unseenBeats(feed);
-      rows.push({ id: "story", emoji: storyNow.emoji ?? "🗞️", kicker: fresh ? `${fresh} new` : "Story",
-        title: storyNow.title, sub: `Day ${Math.min(storyNow.day, storyNow.lastDay)} of ${storyNow.lastDay}`, hot: fresh > 0,
-        onTap: go(() => openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null)) });
-    }
-    return rows;
+    const undone = city ? city.tasks.filter((t) => !t.done_at) : [];
+    const pickPlace = dailyPick ? placeById(dailyPick.place) : undefined;
+    return pickWelcome({
+      rent: rentAlarm ? { title: rentAlarm.title, line: rentAlarm.line, canPay: rentAlarm.canPay } : null,
+      repair: repairOffer && !repairOffer.earnPending ? { streak: repairOffer.streak } : null,
+      passReady,
+      streak: goalsNow ? { current: goalsNow.streak.current, doneToday: goalsNow.streak.today } : null,
+      nyHour,
+      tasks: { done: city ? tasksDone(city) : 0, total: city?.tasks.length ?? 0, next: undone[0] ? { title: taskTitle(undone[0]), place: undone[0].place_id } : null, undonePlaces: undone.map((t) => t.place_id) },
+      pick: dailyPick && pickPlace ? { why: dailyPick.why, emoji: dailyPick.activity.emoji, title: dailyPick.activity.title, place: pickPlace.id, placeName: pickPlace.name,
+        get: dailyPick.activity.options[0]?.get ?? null, energy: dailyPick.activity.energy, note: dailyPick.note, here: atPlace === pickPlace.id } : null,
+      goal: g && gc ? { emoji: gc.emoji, title: gc.title, pct: goalProgress(g.parts), left: ((x) => (x ? partLine(x) : null))(g.parts.find((x) => x.have < x.need)) } : null,
+      skill: sk && def ? { emoji: def.emoji, name: def.name, level: sk.l, more: LEVEL_AT[sk.l + 1] - sk.x.practice, how: def.how,
+        perk: SKILL_PERKS.some((pk) => pk.skill === sk.x.id && pk.level === sk.l + 1) } : null,
+      unread: chatUnread,
+      story: storyNow ? { title: storyNow.title, emoji: storyNow.emoji ?? "🗞️", fresh: unseenBeats(feed) } : null,
+      skipped,
+    });
   })();
+  const welcomeGo = () => {
+    const a = welcomeAction;
+    setWelcomeOpen(false);
+    if (!a) return;
+    switch (a.target) {
+      case "bills": return setPanel("bills");
+      case "gigs": return setPhone({ open: true, app: "gigs" });
+      case "pass": setTasksTab("pass"); return setPanel("tasks");
+      case "tasks": setTasksTab("daily"); return setPanel("tasks");
+      case "goals": setTasksTab("goals"); return setPanel("tasks");
+      case "skills": return setPanel("skills");
+      case "messages": return setPhone({ open: true, app: "messages" });
+      case "story": return storyNow ? openNews(storyNow.beats.filter((b) => !b.locked).at(-1)?.id ?? null) : undefined;
+      case "pick": return goToPick();
+    }
+  };
+  const welcomeLater = () => {
+    if (welcomeAction) {
+      try { localStorage.setItem("cc-welcome-later", JSON.stringify({ day: new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()), kind: welcomeAction.kind })); } catch { /* fine */ }
+    }
+    setWelcomeOpen(false);
+  };
   const rentAlarmKey = rentAlarm && city ? `${rentAlarm.level}:${rentAlarm.owed}:${city.today}` : "";
   const showTogether = !showDating && !showCrew && !showParty && !!together && togetherAlerts(togetherIn) > 0 && togetherDismissed !== togetherKey && flow === "none" && !arranging && !decor;
   // Migration 0151: a gift waiting, when no other social card is up.
@@ -3263,6 +3296,7 @@ export function GameShell({
         cliqueCount={clique.length}
         city={cityOn ? city : null}
         goals={goalsNow}
+        repair={repairOffer ? <StreakRepairCard offer={repairOffer} busy={busy === "repair"} onRepair={(m) => void repairStreak(m)} /> : null}
         onOpenPlace={openPlace}
         skills={skills}
         onOpenSkills={loadSkills || skills ? () => setPanel("skills") : undefined}
@@ -3716,8 +3750,9 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
-          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={goalsNow ? { current: goalsNow.streak.current, nextDay: goalsNow.streak.next.day, doneToday: goalsNow.streak.today } : null}
-            chips={welcomeChips} rows={welcomeRows} pick={dailyPick} here={!!dailyPick && atPlace === dailyPick.place} onGo={goToPick} onClose={() => setWelcomeOpen(false)} />
+          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
+            action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
+            variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
           <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />

@@ -1,113 +1,187 @@
 "use client";
 
 import { LOLA_PORTRAIT } from "@/lib/cast";
-import { placeById } from "@/lib/city";
-import type { TodayPick } from "@/lib/placeLife";
 import { CloseIcon } from "../icons";
 import { guardTaps } from "@/lib/tapGuard";
+import type { WelcomeAction } from "@/lib/welcomePick";
+import { isStreakMilestone, milestoneName, milestoneSize } from "@/lib/streakMilestones";
+import { Confetti } from "../Confetti";
 
-// The welcome back (owner, Nov 1: "a pop up that shows an activity to be completed"; "a pop up instead of a modal"; "a sort of
-// welcome back treatment like mobile games have"): once a New York day, when nothing else is on screen, a card floats over the
-// game (no scrim, the game stays live): a greeting by the hour, the task streak, what's waiting since you left (messages, rent,
-// rewards, today's tasks), and Lola's pick of one thing worth doing today (a happening on now, a regular card one visit from its
-// reward, or a place to try). Let's go, or ✕ / Later.
+// The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3:
+// "too much information which will lead to indecision. Pick the highest leverage action"): once a New York day, when nothing
+// else is on screen, a card floats over the game (no scrim, the game stays live): a greeting with the streak, and ONE thing
+// to do, picked for the player's situation by lib/welcomePick.ts. One button, or Later.
+// Treatments (owner, Nov 3: "explore other treatments, benchmark against top sim and mobile games"; "make lola says the default"),
+// `?welcome=` in the preview tries the others:
+//   card   the gradient greeting over one action card (today's)
+//   lola   the host tells you (Isabelle's morning announcement, The Sims' quest giver): Lola's portrait and a speech bubble
+//   ticket today's mission ticket (daily commissions, quest boards): a ticket stub, reward chips, one big Go
+//   streak the streak is the hero (Duolingo, Snapchat): the flame count and the week, the action under it
+//   banner a slim banner under the HUD (Pokémon GO, Royal Match): the least in the way
 
-const WHY: Record<TodayPick["why"], { tag: string; lola: string }> = {
-  happening: { tag: "Happening now", lola: "Drop everything. This is only on for a bit." },
-  stamp: { tag: "One visit from a reward", lola: "You're one visit from being a real regular." },
-  new: { tag: "Try something new", lola: "You've never done this. Everyone who matters has." },
-};
+export type WelcomeVariant = "card" | "lola" | "ticket" | "streak" | "banner";
+export const WELCOME_VARIANTS: readonly WelcomeVariant[] = ["card", "lola", "ticket", "streak", "banner"];
 
-export interface WelcomeChip { id: string; emoji: string; text: string; onTap: () => void }
-/** One line of "Today": the tasks, the goal that's nearly done, the skill about to level up, the story's new chapter. */
-export interface WelcomeRow { id: string; emoji: string; kicker: string; title: string; sub: string; progress?: number; hot?: boolean; onTap: () => void }
+/** "Cash · ⚡ 15 Energy" → reward chips, tinted by what they are. */
+function chips(detail: string | null) {
+  return (detail ?? "").split(" · ").filter(Boolean).map((t, i) => {
+    const tone = /⚡|Energy/.test(t) ? "cost" : /C\$|[Cc]ash|tip/.test(t) ? "cash" : /🔥|[Cc]lout|respect|[Mm]ood/.test(t) ? "clout" : "plain";
+    return <span key={i} className={`wb-chip t-${tone}`}>{t}</span>;
+  });
+}
 
-export function DailyWelcome({ open, name, hello, streak, chips, rows, pick, here, onGo, onClose }: {
+export function DailyWelcome({ open, name, hello, streak, streakNext, action, variant = "lola", onGo, onLater }: {
   open: boolean;
   name: string;
   /** "Good morning" … by the city clock. */
   hello: string;
-  /** The all-five streak: days in a row and the next reward day (null with no goals yet). */
-  streak: { current: number; nextDay: number; doneToday: boolean } | null;
-  /** What's waiting since you left: up to three. */
-  chips: WelcomeChip[];
-  /** Today's mix, in order (up to four). */
-  rows: WelcomeRow[];
-  pick: TodayPick | null;
-  here: boolean;
+  /** The all-five streak in days (0 = none). */
+  streak: number;
+  /** The day of the next streak reward (goals_state's streak.next.day). */
+  streakNext?: number;
+  action: WelcomeAction | null;
+  variant?: WelcomeVariant;
   onGo: () => void;
-  onClose: () => void;
+  /** Later or ✕: put off for today. */
+  onLater: () => void;
 }) {
-  if (!open) return null;
-  const place = pick ? placeById(pick.place) : undefined;
-  const why = pick ? WHY[pick.why] : null;
-  const close = () => { guardTaps(); onClose(); };
+  if (!open || !action) return null;
+  // A milestone streak (owner, Nov 3) gets confetti in every treatment.
+  const mile = isStreakMilestone(streak);
+  const party = mile ? <Confetti size={milestoneSize(streak)} /> : null;
+  const later = () => { guardTaps(); onLater(); };
+  const go = () => { guardTaps(); onGo(); };
+  const x = (cls = "") => <button className={`daily-pop-x welcome-x ${cls}`} onClick={later} aria-label="Close"><CloseIcon size={14} /></button>;
+  const buttons = (
+    <div className="daily-pop-actions">
+      <button className="btn btn-ghost btn-sm" onClick={later}>Later</button>
+      <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} onClick={go}>{action.cta}</button>
+    </div>
+  );
+
+  if (variant === "banner") {
+    return (
+      <div className={`wb-banner k-${action.kind}`} role="dialog" aria-label="Welcome back">
+        {party}
+        <button className="wb-banner-main" onClick={go}>
+          <span className="wb-banner-emoji" aria-hidden="true">{action.emoji}</span>
+          <span className="wb-banner-text">
+            <span className="wb-banner-hello">{hello}, {name}{streak > 0 ? ` · 🔥 ${streak}` : ""}</span>
+            <span className="wb-banner-title">{action.title}</span>
+            <span className="wb-banner-why">{action.why ?? action.sub ?? action.detail}</span>
+          </span>
+          <span className="wb-banner-go">{action.cta} ›</span>
+        </button>
+        <button className="wb-banner-x" onClick={later} aria-label="Later"><CloseIcon size={12} /></button>
+      </div>
+    );
+  }
+
+  if (variant === "lola") {
+    return (
+      <div className="welcome-pop wb-lola" role="dialog" aria-label="Welcome back">
+        {party}
+        {x("on-dark")}
+        <div className="wb-lola-stage">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="wb-lola-face" src={LOLA_PORTRAIT} alt="Lola Lowdown" width={72} height={72} />
+          <div className="wb-lola-bubble">
+            <span className="wb-lola-hi">{hello}, {name}!{streak > 0 && <span className="wb-lola-streak"> 🔥 {streak}</span>}</span>
+            <span className="wb-lola-line">{action.lola}</span>
+          </div>
+        </div>
+        <div className="wb-lola-task">
+          <span className="wb-lola-emoji" aria-hidden="true">{action.emoji}</span>
+          <span className="wb-lola-text">
+            <span className="wb-lola-title">{action.title}</span>
+            {action.sub && <span className="wb-lola-sub">{action.sub}</span>}
+            {action.detail && <span className="wb-chips">{chips(action.detail)}</span>}
+          </span>
+        </div>
+        {action.why && <p className="wb-why">{action.why}</p>}
+        {buttons}
+      </div>
+    );
+  }
+
+  if (variant === "ticket") {
+    return (
+      <div className="welcome-pop wb-ticket" role="dialog" aria-label="Welcome back">
+        {party}
+        <div className="wb-ticket-stub">
+          <span className="wb-ticket-kicker">Today&apos;s move</span>
+          <span className="wb-ticket-hello">{hello}, {name}{streak > 0 ? ` · 🔥 ${streak} days` : ""}</span>
+          {x("on-taxi")}
+        </div>
+        <div className="wb-ticket-body">
+          <span className="wb-ticket-emoji" aria-hidden="true">{action.emoji}</span>
+          <span className="wb-ticket-title">{action.title}</span>
+          {action.sub && <span className="wb-ticket-sub">{action.sub}</span>}
+          {action.detail && <span className="wb-chips center">{chips(action.detail)}</span>}
+          {action.why && <span className="wb-ticket-why">{action.why}</span>}
+        </div>
+        <div className="wb-ticket-foot">
+          <button className="btn btn-taxi wb-ticket-go" onClick={go}>{action.cta}</button>
+          <button className="link-btn wb-ticket-later" onClick={later}>Later</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "streak") {
+    const days = Math.max(0, streak);
+    // This week's dots: a full week (7, 14, 42 days) lights all seven; the next dot to earn pulses.
+    const lit = days > 0 && days % 7 === 0 ? 7 : days % 7;
+    const weeks = Math.floor(days / 7);
+    return (
+      <div className="welcome-pop wb-streak" role="dialog" aria-label="Welcome back">
+        {party}
+        {x("on-light")}
+        <div className="wb-streak-hero">
+          <span className="wb-streak-flame" aria-hidden="true">🔥</span>
+          <span className="wb-streak-n"><span className="wb-streak-slant">{days}</span></span>
+          <span className="wb-streak-label">{days ? "day streak" : "Start a streak today"}</span>
+          {mile ? <span className="wb-streak-mile">🎉 {milestoneName(days)}!</span>
+            : weeks > 0 && <span className="wb-streak-weeks">🏅 {weeks} {weeks === 1 ? "week" : "weeks"} straight</span>}
+          <span className="wb-streak-week" aria-hidden="true">
+            {Array.from({ length: 7 }, (_, i) => <span key={i} className={`wb-day${i < lit ? " on" : ""}${i === lit ? " now" : ""}`} />)}
+          </span>
+          {!!streakNext && streakNext > days && <span className="wb-streak-next">Next reward on day {streakNext}</span>}
+          <span className="wb-streak-hello">{hello}, {name}</span>
+        </div>
+        <div className="wb-streak-task">
+          <span className="wb-lola-emoji" aria-hidden="true">{action.emoji}</span>
+          <span className="wb-lola-text">
+            <span className="wb-lola-title">{action.title}</span>
+            <span className="wb-lola-sub">{action.why ?? action.sub ?? action.detail}</span>
+          </span>
+        </div>
+        {buttons}
+      </div>
+    );
+  }
+
   return (
     <div className="welcome-pop" role="dialog" aria-label="Welcome back">
+      {party}
       <div className="welcome-hero">
-        <button className="daily-pop-x welcome-x" onClick={close} aria-label="Close"><CloseIcon size={14} /></button>
+        {x()}
         <span className="welcome-spark" aria-hidden="true">✦</span>
         <span className="welcome-spark s2" aria-hidden="true">✦</span>
         <span className="welcome-hello">{hello},</span>
-        <span className="welcome-name">{name}</span>
-        {streak && (
-          <span className="welcome-streak">
-            <span className="welcome-flame" aria-hidden="true">🔥</span>
-            {streak.current > 0
-              ? <><b>Day {streak.current}</b> streak{!streak.doneToday ? " · finish today's five to keep it" : " · locked in today"}</>
-              : <>Start a streak: finish all five tasks today</>}
-          </span>
-        )}
+        <span className="welcome-name">
+          {name}
+          {streak > 0 && <span className="welcome-streak-chip" aria-label={`${streak}-day streak`}><span className="welcome-flame" aria-hidden="true">🔥</span>{streak}</span>}
+        </span>
       </div>
-      {chips.length > 0 && (
-        <div className="welcome-section">
-          <span className="overline">Since you left</span>
-          <div className="welcome-chips">
-            {chips.slice(0, 3).map((c) => (
-              <button key={c.id} className="welcome-chip" onClick={() => { guardTaps(); c.onTap(); }}>
-                {c.emoji && <span aria-hidden="true">{c.emoji}</span>}{c.text}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      {(rows.length > 0 || (pick && place)) && (
-        <div className="welcome-section">
-          <span className="overline">Today</span>
-          <div className="welcome-rows">
-            {pick && place && why && (
-              <button className="welcome-row pick" onClick={() => { guardTaps(); onGo(); }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="welcome-row-lola" src={LOLA_PORTRAIT} alt="" width={40} height={40} />
-                <span className="welcome-row-text">
-                  <span className="welcome-row-kicker">{pick.why === "happening" && <span className="life-live" aria-hidden="true" />}Lola&apos;s pick · {why.tag}</span>
-                  <span className="welcome-row-title">{pick.activity.emoji} {pick.activity.title}</span>
-                  <span className="welcome-row-sub">{place.emoji} {place.name}{pick.activity.energy ? ` · ⚡ ${pick.activity.energy}` : ""}{pick.note ? ` · ${pick.note}` : ""}</span>
-                </span>
-                <span className="welcome-row-go" aria-hidden="true">›</span>
-              </button>
-            )}
-          </div>
-          {rows.length > 0 && (
-            <div className="welcome-tiles">
-              {rows.slice(0, 4).map((r) => (
-                <button key={r.id} className={`welcome-tile${r.hot ? " hot" : ""}`} onClick={() => { guardTaps(); r.onTap(); }} aria-label={`${r.kicker}: ${r.title}. ${r.sub}`}>
-                  <span className="welcome-tile-top"><span aria-hidden="true">{r.emoji}</span>{r.kicker}</span>
-                  <span className="welcome-tile-title">{r.title}</span>
-                  <span className="welcome-tile-sub">{r.sub}</span>
-                  {r.progress != null && <span className="welcome-bar"><span style={{ width: `${Math.round(Math.max(0.04, Math.min(1, r.progress)) * 100)}%` }} /></span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-      <div className="daily-pop-actions">
-        <button className="btn btn-ghost btn-sm" onClick={close}>Later</button>
-        <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} onClick={() => { guardTaps(); if (pick) onGo(); else if (rows[0]) rows[0].onTap(); else onClose(); }}>
-          {pick && here ? "Do it now" : "Let's go"}
-        </button>
+      <div className={`welcome-one k-${action.kind}`}>
+        <span className="welcome-one-emoji" aria-hidden="true">{action.emoji}</span>
+        <span className="welcome-one-title">{action.title}</span>
+        {action.sub && <span className="welcome-one-sub">{action.sub}</span>}
+        {action.detail && <span className="welcome-one-detail">{action.detail}</span>}
+        {action.why && <span className="welcome-one-why">{action.why}</span>}
       </div>
+      {buttons}
     </div>
   );
 }

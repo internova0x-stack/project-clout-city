@@ -10,7 +10,7 @@ import { ConsentBanner } from "@/components/ConsentBanner";
 // The three typefaces from the Design System Guide (section 4), downloaded at
 // build time and served with the app, so they never depend on Google at runtime.
 const bungee = Bungee({ weight: "400", subsets: ["latin"], variable: "--ff-bungee", display: "swap" });
-const barlow = Barlow_Condensed({ weight: ["600", "700"], subsets: ["latin"], variable: "--ff-barlow", display: "swap" });
+const barlow = Barlow_Condensed({ weight: ["600", "700", "800"], subsets: ["latin"], variable: "--ff-barlow", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--ff-inter", display: "swap" });
 // Only the Clout TV card's spray-painted "TV" (owner, Oct 16), so it isn't preloaded.
 const marker = Permanent_Marker({ weight: "400", subsets: ["latin"], variable: "--ff-marker", display: "swap", preload: false });

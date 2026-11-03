@@ -4,6 +4,8 @@
 // the ladder on the Goals tab, and the reveals when a goal or a streak day pays.
 
 import { GOALS, GOAL_COPY, NEXT_CHAPTER, addDay, chapters, goalById, goalProgress, partLine, streakMilestones, type GoalsState, type StreakReward } from "@/lib/goals";
+import { isStreakMilestone, milestoneName, milestoneSize } from "@/lib/streakMilestones";
+import { Confetti } from "../Confetti";
 import { RANKS } from "@/lib/ranks";
 import { itemBySku } from "@/lib/city";
 
@@ -220,7 +222,9 @@ export function GoalLadder({ goals, clout }: { goals: GoalsState; clout: number 
 /** What just paid: a finished goal, or a streak day's reward. */
 export type GoalsReveal =
   | { kind: "goal"; id: string; next: string | null }
-  | { kind: "streak"; day: number; reward: StreakReward; sku?: string };
+  | { kind: "streak"; day: number; reward: StreakReward; sku?: string }
+  /** A round-number streak day with no reward of its own (30, 50, 100…): confetti and a line (owner, Nov 3). */
+  | { kind: "milestone"; day: number };
 
 export function GoalsRevealCard({ reveal, onClose, onOpenGoals }: { reveal: GoalsReveal; onClose: () => void; onOpenGoals?: () => void }) {
   let tag: string, title: string, body: string;
@@ -230,6 +234,10 @@ export function GoalsRevealCard({ reveal, onClose, onOpenGoals }: { reveal: Goal
     tag = "🎯 Goal done";
     title = `${copy.emoji} ${copy.title}`;
     body = `+${(goalById(reveal.id)?.reward ?? 0).toLocaleString("en-US")} clout, banked. ${next ? `Next up: ${next.title.charAt(0).toLowerCase()}${next.title.slice(1)}. No pressure. Some pressure.` : "That's the whole ladder. Iconic behavior."}`;
+  } else if (reveal.kind === "milestone") {
+    tag = `🔥 ${reveal.day}-day streak`;
+    title = `🎉 ${milestoneName(reveal.day)} straight`;
+    body = reveal.day >= 365 ? "A whole year of showing up. New York has never been this consistent about anything." : `${reveal.day} days in a row. Your landlord wishes you were this reliable with rent.`;
   } else {
     tag = `🔥 ${reveal.day}-day streak`;
     if (reveal.reward === "pass") {
@@ -246,6 +254,7 @@ export function GoalsRevealCard({ reveal, onClose, onOpenGoals }: { reveal: Goal
   }
   return (
     <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={tag}>
+      {reveal.kind !== "goal" && isStreakMilestone(reveal.day) && <Confetti size={milestoneSize(reveal.day)} />}
       <div className="scrim" onClick={onClose} />
       <div className="modal-card reveal-card">
         <span className="tag tag-event">{tag}</span>
@@ -273,6 +282,7 @@ export function revealBetween(before: GoalsState | null, after: GoalsState, coll
       const sku = [...GOALS.streak.collectibles].reverse().find((x) => collectibleOwned(x));
       if ((day / GOALS.streak.every) % 2 === 1) return { kind: "streak", day, reward: "collectible", sku };
     }
+    if (isStreakMilestone(day)) return { kind: "milestone", day };
   }
   return null;
 }

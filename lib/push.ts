@@ -86,6 +86,9 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   asset_cancelled: { tier: 1, category: "money", ttlMin: 1440 },
   asset_done: { tier: 1, category: "money", ttlMin: 1440 },
   streak_risk: { tier: 1, category: "reminders", ttlMin: 300 },
+  // Migration 0158: the last call (9 PM New York), and a broken streak that can still be repaired today.
+  streak_last: { tier: 1, category: "reminders", ttlMin: 150 },
+  streak_repair: { tier: 1, category: "reminders", ttlMin: 720 },
   exams_open: { tier: 1, category: "reminders", ttlMin: 720 },
   exams_last_day: { tier: 1, category: "reminders", ttlMin: 600 },
   party_soon: { tier: 1, category: "reminders", ttlMin: 60 },
@@ -98,6 +101,8 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   campaign_poll: { tier: 2, category: "news", ttlMin: 720 },
   goal_done: { tier: 2, category: "rewards", ttlMin: 1440 },
   streak_reward: { tier: 2, category: "rewards", ttlMin: 1440 },
+  // Migration 0158: the weekly freeze saved yesterday's streak.
+  streak_freeze: { tier: 2, category: "rewards", ttlMin: 600 },
   skill_up: { tier: 2, category: "rewards", ttlMin: 1440 },
   grades: { tier: 2, category: "rewards", ttlMin: 1440 },
   lotto_win: { tier: 2, category: "rewards", ttlMin: 1440 },
