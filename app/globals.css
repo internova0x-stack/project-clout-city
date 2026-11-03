@@ -2835,6 +2835,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .wb-chip.t-plain { background:var(--surface-card); color:var(--text-1); }
 .wb-why { margin:0 16px; font-size:12.5px; line-height:17px; color:var(--text-2); }
 .welcome-x.on-dark { background:rgba(255,255,255,.16); color:#fff; z-index:2; }
+.welcome-x.on-light { background:rgba(20,17,26,.10); color:var(--night-900); z-index:2; }
 .welcome-x.on-taxi { background:rgba(20,17,26,.12); color:var(--night-900); }
 /* lola: the host tells you */
 .wb-lola { padding-top:0; }
@@ -2872,16 +2873,17 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .wb-ticket-later { font-size:14px; color:var(--text-2); }
 /* streak: the flame is the hero */
 .wb-streak { padding-top:0; }
-.wb-streak-hero { position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; padding:22px 18px 18px; background:var(--g-night-reveal); color:var(--text-on-dark); }
+/* Owner, Nov 3: the blue banner gradient (--g-story), not the purple night. */
+.wb-streak-hero { position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; padding:22px 18px 18px; background:var(--g-story); color:var(--night-900); }
 .wb-streak-flame { font-size:46px; line-height:50px; animation:welcome-flame 1.2s ease-in-out infinite alternate; }
-.wb-streak-n { font-family:var(--font-display); font-size:56px; line-height:56px; background:var(--g-neon); -webkit-background-clip:text; background-clip:text; color:transparent;
+.wb-streak-n { font-family:var(--font-display); font-size:56px; line-height:56px; background:linear-gradient(90deg,#FF6A3D,#FF2E88); -webkit-background-clip:text; background-clip:text; color:transparent;
   animation:wb-pop .55s .1s cubic-bezier(.2,1.4,.4,1) both; }
 .wb-streak-label { font-family:var(--font-label); font-size:16px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
 .wb-streak-week { display:flex; gap:8px; margin:10px 0 6px; }
-.wb-day { width:22px; height:22px; border-radius:50%; background:rgba(255,246,224,.14); }
+.wb-day { width:22px; height:22px; border-radius:50%; background:rgba(20,17,26,.12); }
 .wb-day.on { background:var(--g-neon); }
-.wb-day.now { box-shadow:0 0 0 2px var(--taxi-400); animation:wb-pulse 1.6s ease-in-out infinite; }
-.wb-streak-hello { font-size:13px; opacity:.8; }
+.wb-day.now { box-shadow:0 0 0 2px var(--neon-500); animation:wb-pulse 1.6s ease-in-out infinite; }
+.wb-streak-hello { font-size:13px; font-weight:600; opacity:.75; }
 /* banner: slim, under the HUD */
 .wb-banner { position:fixed; z-index:70; left:50%; top:calc(64px + var(--safe-top)); transform:translateX(-50%); width:min(362px, calc(100% - 24px));
   display:flex; align-items:center; border-radius:var(--r-lg); background:rgba(20,17,26,.94); backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur));

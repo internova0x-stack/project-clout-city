@@ -121,7 +121,7 @@ export function DailyWelcome({ open, name, hello, streak, action, variant = "car
     const days = Math.max(0, streak);
     return (
       <div className="welcome-pop wb-streak" role="dialog" aria-label="Welcome back">
-        {x("on-dark")}
+        {x("on-light")}
         <div className="wb-streak-hero">
           <span className="wb-streak-flame" aria-hidden="true">🔥</span>
           <span className="wb-streak-n">{days}</span>
