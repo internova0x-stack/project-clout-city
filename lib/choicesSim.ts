@@ -15,6 +15,8 @@ import CONDITION_SAMPLE from "../content/conditions/2026-11-02.json";
 import type { ConditionNow } from "./cityConditions";
 import type { Fact, FactKey, Memory } from "./memory";
 import { TRACKS } from "./careers";
+import { REGULARS } from "./cast";
+import { NPC_BONDS, bigFavorOf, bondKind, bondLevel, pickFavor, type Bond } from "./npcBonds";
 
 // The preview plays the first weekly storylets (Content Engine step 3) as if they'd gone live.
 const CHOICE_CARDS: ChoiceCard[] = [...BASE_CARDS, ...(WEEK_SAMPLE.cards as ChoiceCard[])];
@@ -74,6 +76,8 @@ interface Opts {
   /** Pays the preview city (cash, clout, mood, energy). */
   onEffects?: (e: ChoiceEffects) => void;
   today: () => string;
+  /** ?bonds=friend|family (migration 0159): Sal starts a Friend (or Family, with Sgt. Bev), so the perks show. */
+  bonds?: string | null;
 }
 
 export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi {
@@ -82,6 +86,24 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
   const officeTrack = preset === "office" ? TRACKS[Math.floor(Math.random() * TRACKS.length)].id
     : preset?.startsWith("office-") ? TRACKS.find((t) => t.id === preset.slice(7))?.id ?? TRACKS[0].id : null;
   const always = preset === "now" || story || !!officeTrack;
+  // NPC favors (migration 0159): friendships in memory; every regular has a favor ready once per preview visit.
+  const favors = new Map<string, number>(opts.bonds === "family" ? [["sal", 10], ["sgt-bev", 10], ["jojo", 3]] : opts.bonds === "friend" ? [["sal", 5], ["jojo", 1]] : []);
+  const burned = new Map<string, string>();
+  const asked = new Set<string>();
+  const perkUsed = new Set<string>();
+  const bigUsed = new Set<string>();
+  const bondOf = (npc: string): Bond => {
+    const n = favors.get(npc) ?? 0, level = bondLevel(n), b = burned.get(npc) ?? null;
+    return { npc, favors: n, level, burnedUntil: b, perkReady: !b && (level === "friend" || level === "family") && !perkUsed.has(npc), bigReady: !b && level === "family" && !bigUsed.has(npc) };
+  };
+  const noteBond = (npc: string, integ: number | undefined) => {
+    const k = bondKind(integ), n = favors.get(npc) ?? 0;
+    if (k === "help" && !burned.has(npc)) favors.set(npc, n + 1);
+    if (k === "exploit") {
+      if (bondLevel(n) === "family") { favors.set(npc, 0); burned.set(npc, new Date(Date.now() + NPC_BONDS.burnDays * 86_400_000).toISOString().slice(0, 10)); }
+      else favors.set(npc, Math.max(0, n - NPC_BONDS.exploitCost));
+    }
+  };
   // ?choice=city (and story): the first week's city conditions as if they were on (a heatwave and a brownout now, the
   // street fair tomorrow) and a city storylet that fired, plus wins in the Blotter (Content Engine step 4).
   const city = preset === "city" || story;
@@ -246,6 +268,7 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
       const first = !revealed;
       revealed = true;
       const r = settle(c, option, opts.today(), false, place);
+      if (c.who) noteBond(c.who, r.applied.integrity);
       return ok({ receipt: r.text, effects: r.applied, integrity, first });
     },
     skip: (logId: number) => {
@@ -266,5 +289,40 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
     },
     blotter: () => ok([...blotter]),
     conditions: () => ok(conditions),
+    favorPeek: (npc: string) => {
+      const reg = REGULARS.find((r) => r.id === npc);
+      if (!reg || asked.has(npc) || burned.has(npc) || opts.where().place !== reg.placeId) return ok(null);
+      const c = pickFavor(CHOICE_CARDS, npc, { today: opts.today(), integrity, rank: 3, history: [] });
+      return ok(c ? { npc, emoji: c.emoji, title: c.title } : null);
+    },
+    favorOpen: (npc: string) => {
+      const reg = REGULARS.find((r) => r.id === npc);
+      const c = reg ? pickFavor(CHOICE_CARDS, npc, { today: opts.today(), integrity, rank: 3, history: [] }) : null;
+      if (!reg || !c) return ok(null);
+      asked.add(npc);
+      open = { log: nextId++, card: c, place: reg.placeId };
+      return ok(cardView(c, open.log, open.place, memory));
+    },
+    bonds: () => ok([...new Set([...favors.keys(), ...burned.keys()])].map(bondOf)),
+    perk: (npc: string) => {
+      if (!bondOf(npc).perkReady) return Promise.resolve({ ok: false as const, error: "That's for friends." });
+      perkUsed.add(npc);
+      opts.onEffects?.({ energy: NPC_BONDS.perk.energy, mood: NPC_BONDS.perk.mood });
+      return ok({ energy: NPC_BONDS.perk.energy, mood: NPC_BONDS.perk.mood });
+    },
+    bigFavor: (npc: string) => {
+      if (!bondOf(npc).bigReady) return Promise.resolve({ ok: false as const, error: "That's for family." });
+      const f = bigFavorOf(npc);
+      if (f.kind === "holding") {
+        const h = live().find((m) => m.kind === "holding");
+        if (!h) return Promise.resolve({ ok: false as const, error: "You're not in holding." });
+        h.until = new Date().toISOString();
+        bigUsed.add(npc);
+        return ok({ kind: "holding" as const });
+      }
+      bigUsed.add(npc);
+      opts.onEffects?.({ cash: f.cash });
+      return ok({ kind: "cash" as const, cash: f.cash });
+    },
   };
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CHOICES, bailCost, effectLine, integrityBand, integrityWord, lolaRepLine, type BlotterItem, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade } from "@/lib/choices";
 import { placeById } from "@/lib/city";
-import { LOLA_PORTRAIT } from "@/lib/cast";
+import { LOLA_PORTRAIT, REGULARS } from "@/lib/cast";
 import { Sheet } from "../Sheet";
 
 // Moral Choices (spec section 29): the situation card, its receipt, the Halo ↔ Hustler reveal, a consequence coming back,
@@ -86,7 +86,7 @@ export function ChoiceSheet({ card, made, busy, onChoose, onSkip, onClose }: {
           <div className="choice-head">
             <span className="choice-icon" aria-hidden="true">{card.emoji}</span>
             {/* Owner, Oct 30 ("too much text"): after deciding, only the emoji stays; the situation was just read. */}
-            {!made && <span className="overline">{AREA[card.area] ?? "A choice"}{place ? ` · ${place.name}` : ""}</span>}
+            {!made && <span className="overline">{card.favor && card.who ? `A favor for ${REGULARS.find((r) => r.id === card.who)?.name ?? "a regular"}` : AREA[card.area] ?? "A choice"}{place ? ` · ${place.name}` : ""}</span>}
             {!made && card.intro && <p className="choice-intro">{card.intro}</p>}
             {!made && <p className="choice-title">{card.title}</p>}
           </div>

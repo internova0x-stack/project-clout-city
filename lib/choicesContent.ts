@@ -14,14 +14,18 @@ import OFFICE from "../content/choices/office.json";
 import SCHOOL from "../content/choices/school.json";
 import TRANSIT from "../content/choices/transit.json";
 import WORK from "../content/choices/work.json";
+import FAVORS from "../content/choices/favors.json";
 import NPCS from "../content/culture/npcs.json";
 import type { ChoiceCard } from "./choices";
 import { PLACES } from "./city";
 import { REGULARS } from "./cast";
 
 export const CHOICE_CARDS: ChoiceCard[] = [
-  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS, ...OFFICE,
+  ...LIFE, ...TRANSIT, ...GIGS, ...WORK, ...SCHOOL, ...BUSINESS, ...HOME, ...NIGHTLIFE, ...DATING, ...MONEY, ...CLIMB, ...STORYLETS, ...OFFICE, ...FAVORS,
 ] as ChoiceCard[];
+
+/** NPC favors (owner, Nov 3; content/choices/favors.json): offered only when the player talks to the card's regular. */
+export const FAVOR_CARDS: ChoiceCard[] = CHOICE_CARDS.filter((c) => c.where?.after?.includes("talk"));
 
 /** What a card may name (the validator's lists): for checking weekly storylets on the server (lib/contentImport.ts). */
 export const CHOICE_KNOWN = {
