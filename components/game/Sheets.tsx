@@ -59,6 +59,28 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
   );
 }
 
+/**
+ * The tick you can feel (owner, Nov 3, the motion kit): tasks finished since the player last looked play the pop, the
+ * drawn tick and the strike-through once, on this device (`cc-tasks-seen`, the day's done ids).
+ */
+function useJustDone(tasks: DailyTask[], open: boolean): Set<string> {
+  const [fresh, setFresh] = useState<Set<string>>(new Set());
+  const doneIds = tasks.filter((t) => t.done_at).map((t) => String(t.id)).join(",");
+  useEffect(() => {
+    if (!open || !doneIds) return;
+    let seen: string[] = [];
+    try { seen = JSON.parse(localStorage.getItem("cc-tasks-seen") ?? "[]"); } catch { /* none */ }
+    const ids = doneIds.split(",");
+    const now = ids.filter((id) => !seen.includes(id));
+    if (!now.length) return;
+    setFresh(new Set(now));
+    try { localStorage.setItem("cc-tasks-seen", JSON.stringify(ids)); } catch { /* private mode */ }
+    const t = setTimeout(() => setFresh(new Set()), 2400);
+    return () => clearTimeout(t);
+  }, [open, doneIds]);
+  return fresh;
+}
+
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
   open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign, pass, repair,
@@ -89,6 +111,7 @@ export function TasksSheet({
   const { cliqueSize } = ECONOMY.invites;
   const tasks = city?.tasks ?? [];
   const done = tasks.filter((t) => t.done_at).length;
+  const justDone = useJustDone(tasks, open);
   return (
     <Sheet open={open} onClose={onClose} label="Tasks and goals">
       <div className="stack-16">
@@ -127,7 +150,7 @@ export function TasksSheet({
                 {tasks.map((t) => (
                   <div
                     key={t.id}
-                    className="select-card multi"
+                    className={`select-card multi${justDone.has(String(t.id)) ? " just-done" : ""}`}
                     aria-pressed={!!t.done_at}
                     role="button"
                     tabIndex={0}
@@ -148,7 +171,11 @@ export function TasksSheet({
                     {t.skill && onOpenSkills && (
                       <button className="task-skills-link" onClick={(e) => { e.stopPropagation(); onOpenSkills(t.skill!); }}>See skills ›</button>
                     )}
-                    {t.done_at && <span className="select-check" aria-hidden="true">✓</span>}
+                    {t.done_at && (
+                      <span className="select-check" aria-hidden="true">
+                        <svg viewBox="0 0 16 16" width="13" height="13"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      </span>
+                    )}
                   </div>
                 ))}
                 {campaign && campaign.tasks.length > 0 && (

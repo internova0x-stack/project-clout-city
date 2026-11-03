@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { bump, coinsFor, flyTo, lastTap, reducedMotion, useCountUp } from "../motion";
 import { ECONOMY, formatCash, formatCashShort, formatShort } from "@/lib/economy";
 import type { StatKey, StatTip } from "@/lib/recent";
 import type { ComingSoonKey } from "../ComingSoon";
@@ -100,6 +101,45 @@ export function GameChrome({
     const t = setInterval(() => setTick((n) => n + 1), 5000);
     return () => clearInterval(t);
   }, [headline]);
+  // The motion kit (owner, Nov 3): rewards fly from where you tapped to their pill and the number counts up; a task
+  // done bumps the counter with a "✓ 3/5" pop. The first values (loading) and drops never animate.
+  const cloutRef = useRef<HTMLButtonElement>(null);
+  const bankRef = useRef<HTMLButtonElement>(null);
+  const tasksRef = useRef<HTMLButtonElement>(null);
+  const prev = useRef<{ clout?: number; bank?: number; done?: number }>({});
+  const [landed, setLanded] = useState<{ clout?: number; bank?: number }>({});
+  const [taskPop, setTaskPop] = useState<string | null>(null);
+  useEffect(() => {
+    if (!values) return;
+    const p = prev.current;
+    const from = lastTap();
+    const gain = (key: "clout" | "bank", ref: typeof cloutRef) => {
+      const before = p[key], now = values[key];
+      p[key] = now;
+      if (before === undefined || now <= before || !ref.current) { setLanded((l) => ({ ...l, [key]: now })); return; }
+      const amount = now - before, kind = key === "bank" ? "cash" : "clout";
+      flyTo(ref.current, {
+        from, kind, count: coinsFor(amount, kind),
+        label: key === "bank" ? `+${formatCash(amount)}` : `+${amount.toLocaleString("en-US")} 🔥`,
+        onLand: () => setLanded((l) => ({ ...l, [key]: now })),
+      });
+    };
+    gain("bank", bankRef);
+    gain("clout", cloutRef);
+    const d = p.done;
+    p.done = values.dailyDone;
+    if (d !== undefined && values.dailyDone > d) {
+      bump(tasksRef.current);
+      if (!reducedMotion()) {
+        setTaskPop(`✓ ${values.dailyDone}/${values.dailyTotal}`);
+        const t = setTimeout(() => setTaskPop(null), 1800);
+        return () => clearTimeout(t);
+      }
+    }
+  }, [values?.clout, values?.bank, values?.dailyDone]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Until the coins land the pill shows the old value; then it counts up.
+  const shownClout = useCountUp(values ? landed.clout ?? values.clout : undefined, 600);
+  const shownBank = useCountUp(values ? landed.bank ?? values.bank : undefined, 650);
   const online = values?.online != null && values.online >= ECONOMY.playersOnlineThreshold;
   const showHeadline = !!headline && (!online || tick % 2 === 0);
 
@@ -110,10 +150,11 @@ export function GameChrome({
           <span className="hud-time hud-number" aria-label="City time">
             {time ? <>{time.split(" ")[0]}{time.includes(" ") && <small className="hud-ampm">{time.split(" ").slice(1).join(" ")}</small>}</> : "\u00a0"}
           </span>
-          <button className="hud-btn" data-tour="tasks" onClick={() => onAction("daily")} aria-label={values ? `Tasks and goals, ${values.dailyDone} of ${values.dailyTotal} daily tasks done` : "Tasks and goals"}>
+          <button ref={tasksRef} className="hud-btn" data-tour="tasks" onClick={() => onAction("daily")} aria-label={values ? `Tasks and goals, ${values.dailyDone} of ${values.dailyTotal} daily tasks done` : "Tasks and goals"}>
             <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
             <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
             {!!values?.streak && <span className="hud-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
+            {taskPop && <span className="hud-task-pop" aria-hidden="true">{taskPop}</span>}
           </button>
           <button
             className="hud-icon-btn"
@@ -125,16 +166,16 @@ export function GameChrome({
           </button>
         </div>
         <div className="hud-cluster">
-          <button className="hud-btn hud-clout" data-tour="clout" onClick={() => onAction(values ? "leaderboard" : "clout")} aria-label="Clout score">
+          <button ref={cloutRef} className="hud-btn hud-clout" data-tour="clout" onClick={() => onAction(values ? "leaderboard" : "clout")} aria-label="Clout score">
             <FlameFilled size={20} />
-            <span className="hud-number">{values ? formatShort(values.clout) : "—"}</span>
+            <span className="hud-number">{values ? formatShort(shownClout ?? values.clout) : "—"}</span>
           </button>
           <button className="hud-icon-btn" data-tour="money" onClick={() => onAction("networth")} aria-label="Net worth">
             <span className="circle"><DiamondIcon size={18} /></span>
             {netWorthPin && <span className="pin-dot" />}
           </button>
-          <button className="hud-btn" data-tour="money" onClick={() => onAction("bank")} aria-label="Bank balance">
-            <span className="hud-number">{values ? formatCashShort(values.bank) : "C$—"}</span>
+          <button ref={bankRef} className="hud-btn" data-tour="money" onClick={() => onAction("bank")} aria-label="Bank balance">
+            <span className="hud-number">{values ? formatCashShort(shownBank ?? values.bank) : "C$—"}</span>
           </button>
         </div>
       </header>

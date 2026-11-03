@@ -77,13 +77,15 @@ export function RankUpCard({ rank, name, onClose }: { rank: Rank; name: string; 
     <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={`New rank: ${rank.title}`}>
       <div className="scrim" onClick={onClose} />
       <div className={`modal-card rank-up${rank.level >= 8 ? " top" : ""}${rank.level === 10 ? " god" : ""}`}>
-        <span className="overline rank-up-kicker">New rank · {rank.level} of 10</span>
-        <span className="rank-up-emoji" aria-hidden="true">{rank.emoji}</span>
-        <p className="display-md" style={{ margin: "6px 0 8px" }}>{rank.title}</p>
-        <p className="body" style={{ margin: 0 }}>{rank.line}</p>
+        {/* The rank stamp (owner, Nov 3, the motion kit): rays turn behind, the title stamps down with a jolt, the rest rises in. */}
+        <span className="rank-up-rays" aria-hidden="true" />
+        <span className="overline rank-up-kicker rank-up-rise" style={{ animationDelay: ".55s" }}>New rank · {rank.level} of 10</span>
+        <span className="rank-up-emoji rank-up-rise" style={{ animationDelay: ".05s" }} aria-hidden="true">{rank.emoji}</span>
+        <p className="display-md rank-up-title" style={{ margin: "6px 0 8px" }}>{rank.title}</p>
+        <p className="body rank-up-rise" style={{ margin: 0, animationDelay: ".75s" }}>{rank.line}</p>
         {/* Owner, Oct 29: the Rank 2 reveal names what it opens, Campaign Mode included. */}
-        {rank.level === 2 && <p className="meta rank-up-unlocks" style={{ margin: "10px 0 0" }}>Unlocks: 🏪 Businesses, 💼 Jobs and 🗳️ Campaign Mode</p>}
-        <div className="row" style={{ gap: 8, marginTop: 18 }}>
+        {rank.level === 2 && <p className="meta rank-up-unlocks rank-up-rise" style={{ margin: "10px 0 0", animationDelay: ".95s" }}>Unlocks: 🏪 Businesses, 💼 Jobs and 🗳️ Campaign Mode</p>}
+        <div className="row" style={{ gap: 8, marginTop: 18, position: "relative" }}>
           <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => void share()}>Share</button>
           <button className="btn btn-taxi" style={{ flex: 1 }} onClick={onClose}>{rank.level === 10 ? "Bow" : "Let's go"}</button>
         </div>

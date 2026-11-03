@@ -760,7 +760,7 @@ function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null 
 
 /** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, handlers, onBack, room, talkNonce = 0, here, life,
+  place, state, handlers, onBack, room, talkNonce = 0, here, life, sign,
 }: {
   place: Place;
   state: CityState;
@@ -769,6 +769,8 @@ export function InteriorScene({
   room: React.ReactNode;
   /** Living places (owner, Nov 1): happening now, things to do here, the regular card. */
   life?: React.ReactNode;
+  /** The station sign (owner, Nov 3): flips down over the room on arrival. */
+  sign?: React.ReactNode;
   /** #20: bumped each time the player taps the place's regular in the room. */
   talkNonce?: number;
   /**
@@ -785,6 +787,7 @@ export function InteriorScene({
   return (
     <div className="layer interior">
       {room}
+      {sign}
       <button className="pill-glass glass-hud interior-back" onClick={() => { guardTaps(); onBack(); }}>
         <ChevronLeftIcon size={18} /> Map
       </button>

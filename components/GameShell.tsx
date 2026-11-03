@@ -10,6 +10,7 @@ import { crowdTypeFor, dayPart, matching, pickLine, recentLines, rememberLine, s
 import { DIALOGUE } from "@/lib/dialogueContent";
 import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/lib/placeLife";
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
+import { StationSign } from "./city/StationSign";
 import { DailyWelcome, WELCOME_VARIANTS, type WelcomeVariant } from "./city/DailyPick";
 import { pickWelcome, type WelcomeAction, type WelcomeKind } from "@/lib/welcomePick";
 import type { RepairMethod, RepairOffer } from "@/lib/streakRepair";
@@ -623,6 +624,19 @@ export function GameShell({
   }, []);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  // The station sign (owner, Nov 3, the motion kit): walking into a place flips its sign down once; not when the game
+  // reopens inside a place (the resume) and not when only the floor changes.
+  const [sign, setSign] = useState<Place | null>(null);
+  const signSkip = useRef(false);
+  const signLast = useRef<string | null>(null);
+  useEffect(() => {
+    const id = inside?.id ?? null;
+    if (id === signLast.current) return;
+    signLast.current = id;
+    if (!inside) { setSign(null); return; }
+    if (signSkip.current) { signSkip.current = false; return; }
+    setSign(inside);
+  }, [inside]);
   // Delete my account (owner, Oct 27): Settings' last row opens the confirmation sheet.
   const [deleteOpen, setDeleteOpen] = useState(false);
   // Sir Barksley (owner, Oct 27): his scene; `first` is the Starter Week consoling, once per device.
@@ -1131,7 +1145,7 @@ export function GameShell({
     resumed.current = true;
     if (deepLinked || flow !== "none" || !atPlaceInfo) return;
     setTab("map");
-    if (placeRoom(atPlaceInfo)) setInside(atPlaceInfo);
+    if (placeRoom(atPlaceInfo)) { signSkip.current = true; setInside(atPlaceInfo); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [city]);
   const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
@@ -1589,6 +1603,7 @@ export function GameShell({
   const [dailyPick, setDailyPick] = useState<TodayPick | null>(null);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const pickAsked = useRef(false);
+  const pickShown = useRef(false);
   useEffect(() => {
     if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip) return;
     const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
@@ -1598,6 +1613,7 @@ export function GameShell({
     const t = setTimeout(() => {
       // The welcome back (owner, Nov 1: "like mobile games have"): shown even before Living places runs (no pick then).
       const show = (p: TodayPick | null) => {
+        pickShown.current = true;
         try { localStorage.setItem(key, "1"); } catch { /* fine */ }
         setDailyPick(p);
         setWelcomeOpen(true);
@@ -1605,7 +1621,8 @@ export function GameShell({
       if (!life?.today) return show(null);
       void life.today().then((r) => show(r.ok ? r.data : null)).catch(() => show(null));
     }, force ? 1500 : 3000);
-    return () => { clearTimeout(t); pickAsked.current = false; };
+    // Once shown, it stays shown for the visit (the preview's ?daily=pick used to bring it back after every sheet).
+    return () => { clearTimeout(t); if (!pickShown.current) pickAsked.current = false; };
   }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip]);
   const goToPick = () => {
     const p = dailyPick ? placeById(dailyPick.place) : undefined;
@@ -2001,6 +2018,7 @@ export function GameShell({
   useEffect(() => { setFavorPeeks({}); }, [inside?.id, place?.id]);
   const favorHandlers: FavorHandlers | undefined = choices?.favorPeek && choices.favorOpen ? {
     busy: favorBusy,
+    hold: !!choiceCard,
     load: (npc) => {
       if (npc in favorPeeks) return;
       setFavorPeeks((m) => ({ ...m, [npc]: null }));
@@ -2930,6 +2948,14 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           talkNonce={talkNonce}
+          sign={sign && sign.id === inside.id ? (
+            <StationSign
+              place={sign}
+              cityMinutes={cityMinutes(gameNow, GAME_CONFIG.cityClock)}
+              happening={lifeV?.place === sign.id ? lifeV.happenings[0] ?? null : null}
+              onDone={() => setSign(null)}
+            />
+          ) : null}
           life={lifeV ? <LifeStrip view={lifeV} busy={busy !== null} onOpen={(a) => { setLifeResult(null); setLifeCard({ card: a, kind: "activity" }); }} onStamp={(d) => void claimStampLife(d)} /> : null}
           here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={

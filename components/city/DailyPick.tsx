@@ -6,6 +6,8 @@ import { guardTaps } from "@/lib/tapGuard";
 import type { WelcomeAction } from "@/lib/welcomePick";
 import { isStreakMilestone, milestoneName, milestoneSize } from "@/lib/streakMilestones";
 import { Confetti } from "../Confetti";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { reducedMotion, sparks } from "../motion";
 
 // The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3:
 // "too much information which will lead to indecision. Pick the highest leverage action"): once a New York day, when nothing
@@ -77,32 +79,7 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
     );
   }
 
-  if (variant === "lola") {
-    return (
-      <div className="welcome-pop wb-lola" role="dialog" aria-label="Welcome back">
-        {party}
-        {x("on-dark")}
-        <div className="wb-lola-stage">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="wb-lola-face" src={LOLA_PORTRAIT} alt="Lola Lowdown" width={72} height={72} />
-          <div className="wb-lola-bubble">
-            <span className="wb-lola-hi">{hello}, {name}!{streak > 0 && <span className="wb-lola-streak"> 🔥 {streak}</span>}</span>
-            <span className="wb-lola-line">{action.lola}</span>
-          </div>
-        </div>
-        <div className="wb-lola-task">
-          <span className="wb-lola-emoji" aria-hidden="true">{action.emoji}</span>
-          <span className="wb-lola-text">
-            <span className="wb-lola-title">{action.title}</span>
-            {action.sub && <span className="wb-lola-sub">{action.sub}</span>}
-            {action.detail && <span className="wb-chips">{chips(action.detail)}</span>}
-          </span>
-        </div>
-        {action.why && <p className="wb-why">{action.why}</p>}
-        {buttons}
-      </div>
-    );
-  }
+  if (variant === "lola") return <LolaSays name={name} hello={hello} streak={streak} action={action} party={party} close={x("on-dark")} buttons={buttons} />;
 
   if (variant === "ticket") {
     return (
@@ -128,38 +105,8 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
     );
   }
 
-  if (variant === "streak") {
-    const days = Math.max(0, streak);
-    // This week's dots: a full week (7, 14, 42 days) lights all seven; the next dot to earn pulses.
-    const lit = days > 0 && days % 7 === 0 ? 7 : days % 7;
-    const weeks = Math.floor(days / 7);
-    return (
-      <div className="welcome-pop wb-streak" role="dialog" aria-label="Welcome back">
-        {party}
-        {x("on-light")}
-        <div className="wb-streak-hero">
-          <span className="wb-streak-flame" aria-hidden="true">🔥</span>
-          <span className="wb-streak-n"><span className="wb-streak-slant">{days}</span></span>
-          <span className="wb-streak-label">{days ? "day streak" : "Start a streak today"}</span>
-          {mile ? <span className="wb-streak-mile">🎉 {milestoneName(days)}!</span>
-            : weeks > 0 && <span className="wb-streak-weeks">🏅 {weeks} {weeks === 1 ? "week" : "weeks"} straight</span>}
-          <span className="wb-streak-week" aria-hidden="true">
-            {Array.from({ length: 7 }, (_, i) => <span key={i} className={`wb-day${i < lit ? " on" : ""}${i === lit ? " now" : ""}`} />)}
-          </span>
-          {!!streakNext && streakNext > days && <span className="wb-streak-next">Next reward on day {streakNext}</span>}
-          <span className="wb-streak-hello">{hello}, {name}</span>
-        </div>
-        <div className="wb-streak-task">
-          <span className="wb-lola-emoji" aria-hidden="true">{action.emoji}</span>
-          <span className="wb-lola-text">
-            <span className="wb-lola-title">{action.title}</span>
-            <span className="wb-lola-sub">{action.why ?? action.sub ?? action.detail}</span>
-          </span>
-        </div>
-        {buttons}
-      </div>
-    );
-  }
+  if (variant === "streak") return <StreakWelcome name={name} hello={hello} streak={streak} streakNext={streakNext} action={action} mile={mile} party={party} close={x("on-light")} buttons={buttons} />;
+
 
   return (
     <div className="welcome-pop" role="dialog" aria-label="Welcome back">
@@ -180,6 +127,135 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
         {action.sub && <span className="welcome-one-sub">{action.sub}</span>}
         {action.detail && <span className="welcome-one-detail">{action.detail}</span>}
         {action.why && <span className="welcome-one-why">{action.why}</span>}
+      </div>
+      {buttons}
+    </div>
+  );
+}
+
+/**
+ * Lola says, texting you (owner, Nov 3, the motion lab's pick): she bounces in, typing dots show in her bubble for a beat,
+ * her line arrives a word at a time as the one task slides up, and a shine sweeps the button once. Under two seconds;
+ * the buttons work from the first frame; "reduce motion" shows it all at once.
+ */
+function LolaSays({ name, hello, streak, action, party, close, buttons }: {
+  name: string; hello: string; streak: number; action: WelcomeAction; party: ReactNode; close: ReactNode; buttons: ReactNode;
+}) {
+  const [typing, setTyping] = useState(true);
+  useEffect(() => {
+    if (reducedMotion()) { setTyping(false); return; }
+    const t = setTimeout(() => setTyping(false), 950);
+    return () => clearTimeout(t);
+  }, []);
+  const words = (action.lola ?? "").split(" ");
+  // The task slides up while her line is still arriving, so the card never sits half empty.
+  const after = typing ? 0 : 180;
+  return (
+    <div className={`welcome-pop wb-lola${typing ? " is-typing" : " is-said"}`} role="dialog" aria-label="Welcome back">
+      {party}
+      {close}
+      <div className="wb-lola-stage">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="wb-lola-face" src={LOLA_PORTRAIT} alt="Lola Lowdown" width={72} height={72} />
+        <div className="wb-lola-bubble">
+          {typing ? (
+            <span className="wb-typing" aria-label="Lola is typing"><i /><i /><i /></span>
+          ) : (
+            <>
+              <span className="wb-lola-hi wb-word-in">{hello}, {name}!{streak > 0 && <span className="wb-lola-streak"> 🔥 {streak}</span>}</span>
+              <span className="wb-lola-line">
+                {words.map((w, i) => <span key={i} className="wb-word wb-word-in" style={{ animationDelay: `${60 + i * 70}ms` }}>{w}{i < words.length - 1 ? " " : ""}</span>)}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      <div className={`wb-lola-task${typing ? " wb-wait" : " wb-slide-in"}`} style={typing ? undefined : { animationDelay: `${after}ms` }}>
+        <span className="wb-lola-emoji" aria-hidden="true">{action.emoji}</span>
+        <span className="wb-lola-text">
+          <span className="wb-lola-title">{action.title}</span>
+          {action.sub && <span className="wb-lola-sub">{action.sub}</span>}
+          {action.detail && <span className="wb-chips">{chips(action.detail)}</span>}
+        </span>
+      </div>
+      {action.why && <p className={`wb-why${typing ? " wb-wait" : " wb-slide-in"}`} style={typing ? undefined : { animationDelay: `${after + 60}ms` }}>{action.why}</p>}
+      <div className={`wb-lola-foot${typing ? " wb-wait" : " wb-slide-in"}`} style={typing ? undefined : { animationDelay: `${after + 90}ms`, ["--shine-delay" as string]: `${60 + words.length * 70 + 300}ms` }}>{buttons}</div>
+    </div>
+  );
+}
+
+/** One digit column of the odometer: rolls up from `from` (null: a new digit appearing) to `to`, wrapping past 9. */
+function Reel({ from, to }: { from: number | null; to: number }) {
+  const seq: (number | null)[] = [from];
+  if (from === null) seq.push(to);
+  else for (let k = from; k !== to;) { k = (k + 1) % 10; seq.push(k); }
+  return (
+    <span className="wb-reel-col">
+      <span className={`wb-reel${seq.length > 1 ? " rolling" : ""}`} style={{ ["--steps" as string]: seq.length - 1 }}>
+        {seq.map((d, i) => <span key={i} className="wb-reel-digit">{d === null ? "\u00a0" : d}</span>)}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * The streak welcome (owner, Nov 3: "yes, build the streak animation"; the Welcome Back Motion pick): the flame starts as an
+ * ember and whooshes up with sparks, the number rolls like an odometer from yesterday's count to today's, and this week's dots
+ * light one after another along a fuse, ending on the one to earn today. When the streak is at risk (the evening rung,
+ * kind 'streak'), the colours drain, the flame gutters and today's dot blinks red instead.
+ */
+function StreakWelcome({ name, hello, streak, streakNext, action, mile, party, close, buttons }: {
+  name: string; hello: string; streak: number; streakNext?: number; action: WelcomeAction; mile: boolean;
+  party: ReactNode; close: ReactNode; buttons: ReactNode;
+}) {
+  const days = Math.max(0, streak);
+  // This week's dots: a full week (7, 14, 42 days) lights all seven; the next dot to earn pulses.
+  const lit = days > 0 && days % 7 === 0 ? 7 : days % 7;
+  const weeks = Math.floor(days / 7);
+  const risk = action.kind === "streak";
+  const [still] = useState(() => reducedMotion());
+  const roll = !still && !risk && days > 0;
+  const flame = useRef<HTMLSpanElement>(null);
+  const week = useRef<HTMLSpanElement>(null);
+  // The timeline (ms after the card opens): the flame flares at 560, the number rolls 640 to 1340, the dots light from 1440.
+  const DOTS_AT = 1440, DOT_STEP = 90;
+  useEffect(() => {
+    if (!roll) return;
+    const a = setTimeout(() => sparks(flame.current, 14, 54), 560);
+    const b = setTimeout(() => sparks(week.current?.querySelectorAll(".wb-day")[Math.max(0, lit - 1)], 8, 30), DOTS_AT + lit * DOT_STEP);
+    return () => { clearTimeout(a); clearTimeout(b); };
+  }, [roll, lit]);
+  const to = String(days), from = String(Math.max(0, days - 1)).padStart(to.length, " ");
+  return (
+    <div className={`welcome-pop wb-streak${roll ? " ignite" : ""}${risk ? " at-risk" : ""}`} role="dialog" aria-label="Welcome back">
+      {party}
+      {close}
+      <div className="wb-streak-hero">
+        <span className="wb-streak-flame" ref={flame} aria-hidden="true">🔥</span>
+        <span className="wb-streak-n" aria-label={`${days}`}>
+          <span className="wb-streak-slant" aria-hidden="true">
+            {roll ? to.split("").map((d, i) => <Reel key={`${i}-${to.length}`} from={from[i] === " " ? null : Number(from[i])} to={Number(d)} />) : days}
+          </span>
+        </span>
+        <span className="wb-streak-label">{days ? "day streak" : "Start a streak today"}</span>
+        {mile ? <span className="wb-streak-mile">🎉 {milestoneName(days)}!</span>
+          : weeks > 0 && <span className="wb-streak-weeks">🏅 {weeks} {weeks === 1 ? "week" : "weeks"} straight</span>}
+        <span className="wb-streak-week" ref={week} aria-hidden="true" style={roll ? { ["--fuse" as string]: `${Math.max(0, lit - 1) * 30}px` } : undefined}>
+          {roll && lit > 1 && <span className="wb-fuse" style={{ animationDelay: `${DOTS_AT}ms`, animationDuration: `${(lit - 1) * DOT_STEP}ms` }} />}
+          {Array.from({ length: 7 }, (_, i) => (
+            <span key={i} className={`wb-day${i < lit ? " on" : ""}${i === lit ? " now" : ""}`}
+              style={roll && i < lit ? { animationDelay: `${DOTS_AT + i * DOT_STEP}ms` } : roll && i === lit ? { animationDelay: `${DOTS_AT + lit * DOT_STEP + 200}ms` } : undefined} />
+          ))}
+        </span>
+        {!!streakNext && streakNext > days && <span className="wb-streak-next">Next reward on day {streakNext}</span>}
+        <span className="wb-streak-hello">{hello}, {name}</span>
+      </div>
+      <div className="wb-streak-task">
+        <span className="wb-lola-emoji" aria-hidden="true">{action.emoji}</span>
+        <span className="wb-lola-text">
+          <span className="wb-lola-title">{action.title}</span>
+          <span className="wb-lola-sub">{action.why ?? action.sub ?? action.detail}</span>
+        </span>
       </div>
       {buttons}
     </div>
