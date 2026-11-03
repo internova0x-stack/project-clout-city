@@ -64,3 +64,10 @@ test("what was put off yesterday is skipped, unless it's all there is", () => {
 test("already there: Do it now", () => {
   assert.equal(pickWelcome(base({ pick: { ...happening, here: true } }))?.cta, "Do it now");
 });
+
+test("lines end in one stop and read naturally", () => {
+  const s = base({ streak: { current: 6, doneToday: false }, nyHour: 20 });
+  assert.equal(pickWelcome(s)?.detail, "1 of 5 tasks done · 4 to go");
+  const stamp = { ...happening, why: "stamp" as const, note: "Meatball tolerates you. This is unprecedented.", place: "x", placeName: "Sal's" };
+  assert.equal(pickWelcome(base({ pick: stamp }))?.why, "One more visit: Meatball tolerates you. This is unprecedented.");
+});

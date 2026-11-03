@@ -49,6 +49,8 @@ export interface WelcomeSituation {
 export const WELCOME = { streakMin: 3, streakLateHour: 17, goalPct: 0.8, skillMore: 2 } as const;
 
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+/** A sentence ending in exactly one stop. */
+const stop = (t: string) => `${t.replace(/[.!?]+$/, "")}.`;
 
 /** Every rung that applies, best first (the first is the pick). */
 export function welcomeLadder(s: WelcomeSituation): WelcomeAction[] {
@@ -65,7 +67,7 @@ export function welcomeLadder(s: WelcomeSituation): WelcomeAction[] {
   const left = s.tasks.total - s.tasks.done;
   if (s.streak && s.streak.current >= WELCOME.streakMin && !s.streak.doneToday && left > 0 && s.nyHour >= WELCOME.streakLateHour) {
     out.push({ kind: "streak", emoji: "🔥", title: `Keep your ${s.streak.current}-day streak alive`, sub: s.tasks.next ? `Next up: ${s.tasks.next.title}` : null,
-      detail: `${s.tasks.done} of ${s.tasks.total} tasks done · ${plural(left, "to go")}`, why: "It resets at midnight.", cta: "Finish today's five", target: "tasks" });
+      detail: `${s.tasks.done} of ${s.tasks.total} tasks done · ${left} to go`, why: "It resets at midnight.", cta: "Finish today's five", target: "tasks" });
   }
   const pick = s.pick;
   const pickAction = (kind: WelcomeKind, why: string | null): WelcomeAction => ({
@@ -74,10 +76,10 @@ export function welcomeLadder(s: WelcomeSituation): WelcomeAction[] {
     why: clearsTask(pick!.place) ? `${why ? `${why} ` : ""}It also clears a daily task.` : why,
     cta: pick!.here ? "Do it now" : "Let's go", target: "pick",
   });
-  if (pick?.why === "happening") out.push(pickAction("happening", pick.note ? `${pick.note}.` : "On right now."));
+  if (pick?.why === "happening") out.push(pickAction("happening", pick.note ? stop(pick.note) : "On right now."));
   // One step from done: the regular card, the skill, the goal; the one that also clears a task first.
   const close: (WelcomeAction & { doubles: boolean })[] = [];
-  if (pick?.why === "stamp") close.push({ ...pickAction("stamp", pick.note ? `One more visit: ${pick.note}.` : "One more visit to a reward."), doubles: clearsTask(pick.place) });
+  if (pick?.why === "stamp") close.push({ ...pickAction("stamp", pick.note ? stop(`One more visit: ${pick.note}`) : "One more visit to a reward."), doubles: clearsTask(pick.place) });
   if (s.skill && s.skill.more <= WELCOME.skillMore) {
     close.push({ kind: "skill", emoji: s.skill.emoji, title: `${s.skill.name} ${s.skill.level} → ${s.skill.level + 1}`, sub: s.skill.how,
       detail: `${plural(s.skill.more, "more practice")}${s.skill.perk ? " · opens a new perk" : ""}`, why: "So close you can taste it.", cta: "See how", target: "skills", doubles: false });
