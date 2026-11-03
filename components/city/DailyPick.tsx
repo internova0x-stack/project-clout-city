@@ -11,7 +11,8 @@ import { Confetti } from "../Confetti";
 // "too much information which will lead to indecision. Pick the highest leverage action"): once a New York day, when nothing
 // else is on screen, a card floats over the game (no scrim, the game stays live): a greeting with the streak, and ONE thing
 // to do, picked for the player's situation by lib/welcomePick.ts. One button, or Later.
-// Treatments (owner, Nov 3: "explore other treatments, benchmark against top sim and mobile games"), `?welcome=` in the preview:
+// Treatments (owner, Nov 3: "explore other treatments, benchmark against top sim and mobile games"; "make lola says the default"),
+// `?welcome=` in the preview tries the others:
 //   card   the gradient greeting over one action card (today's)
 //   lola   the host tells you (Isabelle's morning announcement, The Sims' quest giver): Lola's portrait and a speech bubble
 //   ticket today's mission ticket (daily commissions, quest boards): a ticket stub, reward chips, one big Go
@@ -29,7 +30,7 @@ function chips(detail: string | null) {
   });
 }
 
-export function DailyWelcome({ open, name, hello, streak, streakNext, action, variant = "card", onGo, onLater }: {
+export function DailyWelcome({ open, name, hello, streak, streakNext, action, variant = "lola", onGo, onLater }: {
   open: boolean;
   name: string;
   /** "Good morning" … by the city clock. */

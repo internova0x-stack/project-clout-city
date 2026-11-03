@@ -226,7 +226,8 @@ components live in `app/globals.css`.
   UI: components/city/PlaceLife.tsx (`LifeStrip` on the place panel, `LifeSheet`). `?life=rush|regular|brownout` in the preview.
   The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3: "too much
   information which will lead to indecision. Pick the highest leverage action"): once a New York day (`cc-daily-pick:<date>`), 3 s after
-  the game settles and only when nothing else is open, a floating card (components/city/DailyPick.tsx `DailyWelcome`, no scrim): a
+  the game settles and only when nothing else is open, a floating card (components/city/DailyPick.tsx `DailyWelcome`, no scrim; owner, Nov 3:
+  "Lola says" is the default: her portrait and line, `LOLA_SAYS`; `?welcome=card|ticket|streak|banner` previews the others): a
   greeting by the city hour, the player's name with the 🔥 streak, and ONE action from lib/welcomePick.ts (`pickWelcome`, pure,
   tests/welcomePick.test.ts), the first that applies: rent trouble (Bills or a gig), Clout Pass rewards to collect, a 3+ day streak at
   risk from 5 PM New York with tasks left, a happening on now, one step from done (a regular card one visit off, a skill 1-2 practice from
