@@ -124,7 +124,7 @@ export function DailyWelcome({ open, name, hello, streak, action, variant = "car
         {x("on-light")}
         <div className="wb-streak-hero">
           <span className="wb-streak-flame" aria-hidden="true">🔥</span>
-          <span className="wb-streak-n">{days}</span>
+          <span className="wb-streak-n"><span className="wb-streak-slant">{days}</span></span>
           <span className="wb-streak-label">{days === 1 ? "day streak" : days ? "day streak" : "Start a streak today"}</span>
           <span className="wb-streak-week" aria-hidden="true">
             {Array.from({ length: 7 }, (_, i) => <span key={i} className={`wb-day${i < days % 7 || (days >= 7 && days % 7 === 0) ? " on" : ""}${i === days % 7 ? " now" : ""}`} />)}
