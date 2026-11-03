@@ -12,6 +12,8 @@ import type { ActivityView, LifeApi, LifeResult, LifeView, MomentView } from "@/
 import { LifeSheet, LifeStrip } from "./city/PlaceLife";
 import { DailyWelcome, WELCOME_VARIANTS, type WelcomeVariant } from "./city/DailyPick";
 import { pickWelcome, type WelcomeAction, type WelcomeKind } from "@/lib/welcomePick";
+import type { RepairMethod, RepairOffer } from "@/lib/streakRepair";
+import { StreakRepairCard } from "./game/StreakRepair";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
@@ -1228,7 +1230,22 @@ export function GameShell({
     goalsPrev.current = r.data;
     setGoalsNow(r.data);
     if (reveal) setGoalsReveal(reveal);
+    // Streak repair (migration 0158): the offer rides along with the goals.
+    if (goals.repairState) void goals.repairState().then((x) => { if (x.ok) setRepairOffer(x.data.offer); }).catch(() => {});
   }, [goals]);
+  const [repairOffer, setRepairOffer] = useState<RepairOffer | null>(null);
+  const repairStreak = async (method: RepairMethod) => {
+    if (!goals?.repair) return;
+    setBusy("repair");
+    const r = await goals.repair(method).catch(() => null);
+    setBusy(null);
+    if (!r) return;
+    if (!r.ok) return setToast(r.error);
+    setRepairOffer(r.data.offer);
+    if (r.data.repaired) setToast(`🔧 Your ${r.data.streak}-day streak is back. Don't make Lola do that twice.`);
+    else if (method === "earn") setToast("💪 Deal. Finish all five today and the streak lives.");
+    void loadGoals();
+  };
   const goalsKey = city ? `${tasksDone(city)}:${city.player.clout}:${city.player.bank_cash}:${city.player.home_id}:${city.player.car_sku}:${city.player.house_sku}:${city.items.length}` : "";
   useEffect(() => {
     if (!goals || !goalsKey) return;
@@ -2776,6 +2793,7 @@ export function GameShell({
     const pickPlace = dailyPick ? placeById(dailyPick.place) : undefined;
     return pickWelcome({
       rent: rentAlarm ? { title: rentAlarm.title, line: rentAlarm.line, canPay: rentAlarm.canPay } : null,
+      repair: repairOffer && !repairOffer.earnPending ? { streak: repairOffer.streak } : null,
       passReady,
       streak: goalsNow ? { current: goalsNow.streak.current, doneToday: goalsNow.streak.today } : null,
       nyHour,
@@ -3278,6 +3296,7 @@ export function GameShell({
         cliqueCount={clique.length}
         city={cityOn ? city : null}
         goals={goalsNow}
+        repair={repairOffer ? <StreakRepairCard offer={repairOffer} busy={busy === "repair"} onRepair={(m) => void repairStreak(m)} /> : null}
         onOpenPlace={openPlace}
         skills={skills}
         onOpenSkills={loadSkills || skills ? () => setPanel("skills") : undefined}

@@ -43,7 +43,7 @@ import { careerApply, careerOffice, careerQuit, careerStick, careerAspire, caree
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
-import { goalsState, spendGuestPass } from "./goalsActions";
+import { goalsState, spendGuestPass, streakRepair, streakRepairState } from "./goalsActions";
 import { passClaimAll, passState, starterPackState } from "./seasonActions";
 import { lifeActivity, lifeMoment, lifePlace, lifePlayMoment, lifeStamp, lifeToday } from "./placeLifeActions";
 import { pushAsked, pushPrefs, pushSetOff, pushSubscribe, pushTest, pushUnsubscribe } from "./pushActions";
@@ -185,7 +185,7 @@ export default async function HomePage() {
       // Phase 3 (migration 0153): business and property sales (before 0153, or switched off, the panels stay hidden).
       assets={city && econ.ok ? { state: assetSalesState, buyers: assetBuyers, offer: assetOffer, answer: assetAnswer, cancel: assetCancel } : undefined}
       // Migrations 0073 and 0074: goals, streaks and guest-list passes (goals_state failing just hides them).
-      goals={city ? { state: goalsState, usePass: spendGuestPass } : undefined}
+      goals={city ? { state: goalsState, usePass: spendGuestPass, repairState: streakRepairState, repair: streakRepair } : undefined}
       // Migration 0156: the Clout Pass (Tasks → Pass) and the starter pack (season_state failing hides them).
       pass={city ? { state: passState, claimAll: passClaimAll, starter: starterPackState } : undefined}
       // Migration 0157: Living places (things to do at each place, happenings, crowd moments, regular cards).

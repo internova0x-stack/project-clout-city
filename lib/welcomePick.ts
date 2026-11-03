@@ -2,6 +2,7 @@
 // leverage action, based on the situation of the player"). Pure: GameShell gathers the situation, this picks ONE thing, first
 // match down the ladder:
 //   1 rent trouble (eviction, late, or due and short)      → Bills / a gig
+//   1b a broken streak that can still be repaired today   → repair it (migration 0158)
 //   2 a reward waiting to collect (Clout Pass)              → collect it
 //   3 a 3+ day streak at risk late in the New York day       → finish today's five
 //   4 a happening on right now                              → go to it
@@ -12,7 +13,7 @@
 // Ties inside a rung go to the one that also clears a daily task (the "why" line says so). A kind the player put off with
 // Later yesterday is skipped today, rent excepted.
 
-export type WelcomeKind = "rent" | "reward" | "streak" | "happening" | "stamp" | "skill" | "goal" | "messages" | "story" | "task" | "new";
+export type WelcomeKind = "rent" | "repair" | "reward" | "streak" | "happening" | "stamp" | "skill" | "goal" | "messages" | "story" | "task" | "new";
 
 export type WelcomeTarget = "bills" | "gigs" | "pass" | "tasks" | "goals" | "skills" | "messages" | "story" | "pick";
 
@@ -35,6 +36,7 @@ export interface WelcomeAction {
 /** Lola's voice for each kind (docs/culture/VOICE.md: short, knowing, a little mean, never cruel). */
 export const LOLA_SAYS: Record<WelcomeKind, string> = {
   rent: "Babe. The landlord called. Twice. Handle it.",
+  repair: "Your streak broke. I can fix it, just this once.",
   reward: "You have presents waiting. Open them before I do.",
   streak: "Don't you dare break that streak tonight.",
   happening: "Drop everything. This is only on for a bit.",
@@ -49,6 +51,8 @@ export const LOLA_SAYS: Record<WelcomeKind, string> = {
 
 export interface WelcomeSituation {
   rent: { title: string; line: string; canPay: boolean } | null;
+  /** A broken streak that can be repaired today (migration 0158). */
+  repair?: { streak: number } | null;
   passReady: number;
   streak: { current: number; doneToday: boolean } | null;
   /** The New York hour, 0-23. */
@@ -76,6 +80,10 @@ export function welcomeLadder(s: WelcomeSituation): WelcomeAction[] {
   if (s.rent) {
     out.push({ kind: "rent", emoji: s.rent.canPay ? "🧾" : "💼", title: s.rent.title.replace(/^\p{Extended_Pictographic}\s*/u, ""), sub: null, detail: s.rent.line, why: null,
       cta: s.rent.canPay ? "Pay in Bills" : "Find a gig", target: s.rent.canPay ? "bills" : "gigs" });
+  }
+  if (s.repair) {
+    out.push({ kind: "repair", emoji: "💔", title: `Repair your ${s.repair.streak}-day streak`, sub: "Today only",
+      detail: "Finish today's five to earn it back, free", why: "Tomorrow it's gone for good.", cta: "Repair it", target: "tasks" });
   }
   if (s.passReady > 0) {
     out.push({ kind: "reward", emoji: "🎁", title: `${plural(s.passReady, "Clout Pass reward")} to collect`, sub: null,

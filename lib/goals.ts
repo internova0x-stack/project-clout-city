@@ -135,6 +135,9 @@ export type GoalsResult<T> = { ok: true; data: T } | { ok: false; error: string 
 export interface GoalsApi {
   state(): Promise<GoalsResult<GoalsState>>;
   usePass(place: string): Promise<GoalsResult<GoalsState>>;
+  /** Streak repair (migration 0158). */
+  repairState?(): Promise<GoalsResult<{ offer: import("./streakRepair.ts").RepairOffer | null }>>;
+  repair?(method: import("./streakRepair.ts").RepairMethod): Promise<GoalsResult<{ offer: import("./streakRepair.ts").RepairOffer | null; repaired?: boolean; streak?: number }>>;
 }
 
 /** The numbers (the database's game_settings 'goals' row is the truth). */

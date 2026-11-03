@@ -71,3 +71,10 @@ test("lines end in one stop and read naturally", () => {
   const stamp = { ...happening, why: "stamp" as const, note: "Meatball tolerates you. This is unprecedented.", place: "x", placeName: "Sal's" };
   assert.equal(pickWelcome(base({ pick: stamp }))?.why, "One more visit: Meatball tolerates you. This is unprecedented.");
 });
+
+test("a broken streak to repair comes right after rent", () => {
+  const s = base({ repair: { streak: 21 }, passReady: 2, rent: null });
+  assert.equal(pickWelcome(s)?.kind, "repair");
+  assert.equal(pickWelcome(s)?.title, "Repair your 21-day streak");
+  assert.equal(pickWelcome({ ...s, rent: { title: "🧾 C$600", line: "x", canPay: true } })?.kind, "rent");
+});

@@ -148,6 +148,16 @@ components live in `app/globals.css`.
   `goal_current`), 1 skill, 1 random. Goal rewards pay once (ledger 'goal'); a streak of all-five days (one missed day a
   week forgiven) pays clout, reward-only furniture (`reward: true`, never sold or sellable) and guest-list passes
   (`use_guest_pass`: one night past a club door or onto a VIP floor; `travel` and `vip_access` accept it).
+  Streak milestones (owner, Nov 3): lib/streakMilestones.ts (3, every week to 35, then 30, 50, 75, 100… a year, every 100) fire
+  components/Confetti.tsx (a body-level canvas, time-based, none for reduced motion) in the streak reveal (`kind: "milestone"` for
+  round days without a reward, `?goals=day30`) and the next day's welcome back. Streak repair (migration 0158, owner Nov 3: "go with
+  your recommendation"; lib/streakRepair.ts mirrors game_settings 'streak_repair', tests/streakRepair.test.ts): a broken 3+ day
+  streak, within 3 days of its last full day, once every 30 days: `streak_repair(method)` 'earn' (finish today's five: streak_tick
+  carries the run on), 'cash' (C$20 a day, max C$1,500, ledger 'streak_repair'), 'pass' (a guest-list pass) or 'vip' (free for a
+  VIP); never a real-money purchase of its own. `streak_repair_state()` → the card on top of Tasks → Daily
+  (components/game/StreakRepair.tsx) and the welcome back's 'repair' rung (right after rent). Pushes (`push_scan_streak`, run by the
+  sender): 'streak_last' at 9 PM New York (7+ days, tasks left, no freeze to cover it), 'streak_freeze' in the morning when the
+  freeze saved yesterday, 'streak_repair' while a repair is open. `?goals=broken` in the preview.
 - Push notifications (migration 0078, owner Oct 18: push only): game events only add rows with `push_enqueue`
   (one per dedupe key, only for players with a device); `lib/pushServer.ts` (run by `/api/push/run` with `CRON_SECRET`, and
   nudged by game traffic) applies `lib/push.ts`: tier score + deadline urgency + close-person bonus − fatigue, merging by

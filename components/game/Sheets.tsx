@@ -61,7 +61,7 @@ function TaskSkill({ id, skills }: { id: string; skills: SkillState[] }) {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign, pass,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign, pass, repair,
 }: {
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
@@ -71,6 +71,8 @@ export function TasksSheet({
   tab?: "daily" | "goals" | "hunt" | "streaks" | "pass";
   /** The Clout Pass (migration 0156): its own tab, with a dot while a reward waits. */
   pass?: { node: React.ReactNode; ready: number } | null;
+  /** Streak repair (migration 0158): the repair card, on top of the Daily tab while a broken streak can be put back. */
+  repair?: React.ReactNode;
   /** Migration 0063: the player's skills, for the skill task's level and progress. */
   skills?: SkillState[];
   /** The cooking task opens the kitchen instead of a place. */
@@ -115,6 +117,7 @@ export function TasksSheet({
             {/* Owner, Oct 18: five tasks a day, no more. A story's task shows on its place's action instead (Places). */}
             {city ? (
               <>
+                {repair}
                 {goals && partyDone && <StreakRow goals={goals} onOpen={() => setTab("streaks")} />}
                 <p className="meta" style={{ margin: 0 }}>
                   {tasks.length > 0 && done === tasks.length
