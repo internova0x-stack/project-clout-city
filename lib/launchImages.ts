@@ -2,8 +2,9 @@
 // without one. Each iPhone screen needs its own size (CSS width × height at a pixel ratio); scripts/launch-images.mjs
 // renders /preview/loading?still=1 at each into public/splash/, and app/layout.tsx lists them.
 export const LAUNCH_SCREENS: readonly { w: number; h: number; dpr: number }[] = [
-  { w: 440, h: 956, dpr: 3 }, // 16 Pro Max
-  { w: 402, h: 874, dpr: 3 }, // 16 Pro
+  { w: 440, h: 956, dpr: 3 }, // 16 Pro Max, 17 Pro Max
+  { w: 420, h: 912, dpr: 3 }, // Air
+  { w: 402, h: 874, dpr: 3 }, // 16 Pro, 17, 17 Pro
   { w: 430, h: 932, dpr: 3 }, // 14 Pro Max, 15 Plus/Pro Max, 16 Plus
   { w: 393, h: 852, dpr: 3 }, // 14 Pro, 15, 15 Pro, 16
   { w: 428, h: 926, dpr: 3 }, // 12/13 Pro Max, 14 Plus

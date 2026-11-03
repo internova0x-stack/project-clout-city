@@ -258,8 +258,9 @@ components live in `app/globals.css`.
   'place_life'), and a cost never takes the bank below zero; `place_life_context` gives the server today's refs and days per place.
   UI: components/city/PlaceLife.tsx (`LifeStrip` on the place panel, `LifeSheet`). `?life=rush|regular|brownout` in the preview.
   The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3: "too much
-  information which will lead to indecision. Pick the highest leverage action"): once a New York day (`cc-daily-pick:<date>`), 3 s after
-  the game settles and only when nothing else is open, a floating card (components/city/DailyPick.tsx `DailyWelcome`, no scrim; owner, Nov 3:
+  information which will lead to indecision. Pick the highest leverage action"): once a New York day (`cc-daily-pick:<date>`), 1.5 s after
+  the game settles (today's pick is fetched as soon as the city is on) and only when nothing else is open (a choice card,
+  a consequence coming back and the holding bench included; those wait while it's up: one decision at a time, owner Nov 3), a floating card (components/city/DailyPick.tsx `DailyWelcome`, no scrim; owner, Nov 3:
   "Lola says" is the default: her portrait and line, `LOLA_SAYS`; `?welcome=card|ticket|streak|banner` previews the others): a
   greeting by the city hour, the player's name with the 🔥 streak, and ONE action from lib/welcomePick.ts (`pickWelcome`, pure,
   tests/welcomePick.test.ts), the first that applies: rent trouble (Bills or a gig), Clout Pass rewards to collect, a 3+ day streak at
@@ -456,7 +457,11 @@ components live in `app/globals.css`.
   Start over resets it. `?choice=now|back|high|low|log|jail|chain` in the preview (not the demo: its bundle would carry the outcomes).
   Real stakes (migration 0132, owner Oct 30): bigger caps (C$3,000, 300 clout), lasting effects (`choice_marks`: a place ban up to
   7 days, no gigs up to 3, up to 3 hours in holding at the 114½ Precinct, police played for laughs; bail `choice_bail`, C$150 an
-  hour left; enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
+  hour left; the bench is a pop-up, never a toast (owner, Nov 3: HoldingSheet in components/game/Choices.tsx: a live countdown ring,
+  why you're here from the log's latest holding choice (`holdingWhy`), what it stops, Pay bail, Sgt. Bev's Family favor, the Phone
+  and tasks while you wait; GameShell turns any "You're on the bench / in holding" refusal into it);
+  no tasks from the bench (migration 0160, owner Nov 3: `complete_task` does nothing while held, so a task at the precinct
+  waits; `careerStart` refuses 'in_holding', even with "work from anywhere"); enforced by triggers: 'banned_here', 'gigs_locked', 'in_holding'), chains (`later.card` opens a `chainOnly` card past
   the daily limit, `choice_chain_open`) and public headlines (`later.headline` → Lola's Blotter in News → City, `choice_blotter()`,
   never for news_opt_out players).
   NPC favors (migration 0159, owner Nov 3: "go with your recommendation"; lib/npcBonds.ts mirrors game_settings 'npc_bonds',

@@ -67,7 +67,7 @@ import { CohabitHomeBar, SubletHomeBar, type SubletHandlers } from "./city/Suble
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
-import { ChoiceBackSheet, ChoiceSheet, HoldingSheet } from "./game/Choices";
+import { ChoiceBackSheet, ChoiceSheet, HoldingSheet, holdingWhy, type HoldingAction } from "./game/Choices";
 import type { Bond, FavorPeek } from "@/lib/npcBonds";
 import type { FavorHandlers } from "./city/Favors";
 import { integrityBand, type BlotterItem, type ChoiceAfter, type ChoiceCardView, type ChoiceLogEntry, type ChoiceMade, type ChoicesApi, type ChoiceState } from "@/lib/choices";
@@ -1659,13 +1659,30 @@ export function GameShell({
     setToast(`🎟️ ${r.data.result.text}`);
     lifePaid(r.data.result);
   };
+  // Moral Choices (migration 0131): the card on screen, its receipt, consequences coming back; migration 0132: the holding bench.
+  const [choiceCard, setChoiceCard] = useState<ChoiceCardView | null>(null);
+  const choiceCardRef = useRef<ChoiceCardView | null>(null);
+  choiceCardRef.current = choiceCard;
+  const [choiceMade, setChoiceMade] = useState<ChoiceMade | null>(null);
+  const [choiceBusy, setChoiceBusy] = useState(false);
+  const [choiceBack, setChoiceBack] = useState<ChoiceLogEntry[]>([]);
+  // Migration 0132: the holding bench (open while in holding, until closed), and Lola's Blotter for News → City.
+  const [holdingOpen, setHoldingOpen] = useState(false);
   // Today's pick (owner, Nov 1): once a New York day, after the game settles and only when nothing else is on screen.
   const [dailyPick, setDailyPick] = useState<TodayPick | null>(null);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const pickAsked = useRef(false);
   const pickShown = useRef(false);
+  // Today's pick is asked for as soon as the city is on, so the welcome shows the moment the game settles (owner, Nov 3:
+  // "had to wait for about 5 secs").
+  const todayP = useRef<Promise<TodayPick | null> | null>(null);
   useEffect(() => {
-    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip) return;
+    if (!cityOn || todayP.current || !life?.today) return;
+    todayP.current = life.today().then((r) => (r.ok ? r.data : null)).catch(() => null);
+  }, [cityOn, life]);
+  useEffect(() => {
+    // One decision at a time (owner, Nov 3): never over a choice card, a consequence coming back or the holding bench.
+    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip || choiceCard || choiceBack.length || holdingOpen) return;
     const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
     const key = `cc-daily-pick:${new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date())}`;
     try { if (!force && localStorage.getItem(key)) return; } catch { /* show it */ }
@@ -1678,12 +1695,12 @@ export function GameShell({
         setDailyPick(p);
         setWelcomeOpen(true);
       };
-      if (!life?.today) return show(null);
-      void life.today().then((r) => show(r.ok ? r.data : null)).catch(() => show(null));
-    }, force ? 1500 : 3000);
+      if (!todayP.current) return show(null);
+      void todayP.current.then(show);
+    }, force ? 1200 : 1500);
     // Once shown, it stays shown for the visit (the preview's ?daily=pick used to bring it back after every sheet).
     return () => { clearTimeout(t); if (!pickShown.current) pickAsked.current = false; };
-  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip]);
+  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip, choiceCard, choiceBack.length, holdingOpen]);
   const goToPick = () => {
     const p = dailyPick ? placeById(dailyPick.place) : undefined;
     setWelcomeOpen(false);
@@ -2037,14 +2054,7 @@ export function GameShell({
   // Moral Choices (migration 0131): the server decides whether a card turns up after something happened; consequences
   // of earlier choices land when the game opens. Never during the first session or onboarding.
   const [choiceS, setChoiceS] = useState<ChoiceState | null>(null);
-  const [choiceCard, setChoiceCard] = useState<ChoiceCardView | null>(null);
-  const choiceCardRef = useRef<ChoiceCardView | null>(null);
-  choiceCardRef.current = choiceCard;
-  const [choiceMade, setChoiceMade] = useState<ChoiceMade | null>(null);
-  const [choiceBusy, setChoiceBusy] = useState(false);
-  const [choiceBack, setChoiceBack] = useState<ChoiceLogEntry[]>([]);
-  // Migration 0132: the holding bench (open while in holding, until closed), and Lola's Blotter for News → City.
-  const [holdingOpen, setHoldingOpen] = useState(false);
+  // Moral Choices state is declared with the welcome (above), which waits for it.
   const [blotter, setBlotter] = useState<BlotterItem[]>([]);
   const [conditions, setConditions] = useState<ConditionNow[]>([]);
   const holdingUntil = choiceS?.marks.find((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())?.until ?? null;
@@ -2142,6 +2152,13 @@ export function GameShell({
     loadBonds();
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   };
+  // Owner, Nov 3: something refused because you're held (travel, a gig, an activity) opens the bench, never a toast.
+  useEffect(() => {
+    if (!toast || !/^You're (on the bench|in holding)/.test(toast)) return;
+    setToast(null);
+    setHoldingOpen(true);
+    void loadChoices();
+  }, [toast, loadChoices]);
   const payBail = async () => {
     if (!choices) return;
     setChoiceBusy(true);
@@ -2153,6 +2170,13 @@ export function GameShell({
     void loadChoices();
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   };
+  // While you wait (owner, Nov 3: "actions I can take in that period"): the Phone still works, and Sgt. Bev helps family.
+  const holdingActions: HoldingAction[] = [
+    ...(bonds.find((b) => b.npc === "sgt-bev")?.bigReady && favorHandlers ? [{ id: "bev", emoji: "💛", label: "Ask Sgt. Bev", meta: "Family favor", onClick: () => { setHoldingOpen(false); favorHandlers.onBig("sgt-bev"); } }] : []),
+    { id: "chat", emoji: "💬", label: "Text someone", onClick: () => { setHoldingOpen(false); setPhone({ open: true, app: "messages" }); } },
+    { id: "news", emoji: "📰", label: "Read the news", onClick: () => { setHoldingOpen(false); setPhone({ open: true, app: "news", beat: null }); } },
+    { id: "look", emoji: "👕", label: "Change your look", onClick: () => { setHoldingOpen(false); setPanel("look"); } },
+  ];
   useEffect(() => {
     if (!choices || !phone.open || phone.app !== "news") return;
     void choices.blotter().then((r) => r.ok && setBlotter(r.data));
@@ -3928,9 +3952,10 @@ export function GameShell({
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
-          <ChoiceSheet card={choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
-          <ChoiceBackSheet entry={!choiceCard && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
-          <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length} until={holdingUntil} busy={choiceBusy}
+          <ChoiceSheet card={welcomeOpen && !choiceMade ? null : choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
+          <ChoiceBackSheet entry={!choiceCard && !welcomeOpen && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
+          <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length && !welcomeOpen} until={holdingUntil} busy={choiceBusy || favorBusy}
+            why={holdingWhy(choiceS?.log)} actions={holdingActions}
             onBail={() => void payBail()} onClose={() => setHoldingOpen(false)} />
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />

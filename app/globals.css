@@ -2585,6 +2585,23 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .choice-opt-more { display:flex; flex-direction:column; gap:3px; font-size:14px; line-height:19px; color:var(--text-2); }
 .choice-opt-more b { color:var(--text-1); font-weight:800; margin-right:4px; }
 .choice-receipt { margin:0; font-size:16px; line-height:23px; color:var(--text-1); }
+/* The holding bench (owner, Nov 3): a live countdown ring, why you're here, what it costs, things to do while you wait. */
+.holding-clock { position:relative; width:150px; height:150px; margin:0 auto; }
+.holding-clock svg { width:100%; height:100%; transform:rotate(-90deg); }
+.holding-ring-bg { fill:none; stroke:var(--surface-card); stroke-width:10; }
+.holding-ring { fill:none; stroke:#FA2D48; stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.holding-time { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+.holding-time b { font-family:var(--font-label); font-weight:800; font-size:34px; line-height:1; color:var(--text-1); font-variant-numeric:tabular-nums; letter-spacing:.01em; }
+.holding-time span { font-size:12px; color:var(--text-3); }
+.holding-why, .holding-cost { background:var(--surface-raised); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+.holding-why-title { margin:0; font-size:15px; font-weight:800; color:var(--text-1); }
+.holding-cost ul { margin:2px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; font-size:14px; color:var(--text-2); }
+.holding-do { display:grid; grid-template-columns:repeat(auto-fit, minmax(96px, 1fr)); gap:8px; }
+.holding-do-btn { display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 6px; border:1px solid rgba(20,17,26,.1); border-radius:14px; background:var(--surface-raised); color:var(--text-1); font:inherit; font-size:13px; cursor:pointer; }
+.holding-do-btn > span:first-child { font-size:22px; line-height:1.2; }
+.holding-do-btn .meta { font-size:11px; }
+.holding-do-btn:disabled { opacity:.5; }
+@media (prefers-reduced-motion: reduce) { .holding-ring { transition:none; } }
 .choice-effects { margin:0; font-size:14px; font-weight:800; color:var(--text-2); font-variant-numeric:tabular-nums; }
 .choice-reveal { padding:14px; border-radius:16px; background:var(--surface-card); }
 .rep { display:flex; flex-direction:column; gap:8px; padding-bottom:8px; }

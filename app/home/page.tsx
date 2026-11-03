@@ -74,8 +74,9 @@ export default async function HomePage() {
   // Owner, Oct 15: a friend's invite from a place opens that place (the /i/CODE?at= link's cookie).
   const invitedAt = (await cookies()).get(GAME_CONFIG.invite.placeCookieName)?.value;
   const supabase = await getServerSupabase();
-  // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes).
-  await Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]);
+  // Gossip weeks, news and hunts go live on their own: store the repo's week files (at most every 10 minutes). After the
+  // page is sent (owner, Nov 3: Continue said "Loading…" for 12 seconds): a fresh server ran every week file first.
+  after(() => Promise.all([syncGossipWeeks().catch(() => []), syncWeeklyContent().catch(() => [])]));
   // The profile's Queens rank and skills come with the page, so they're there the moment it opens (owner, Oct 22).
   // Migration 0151 switches on the Player Economy (economy_state failing hides gifts and the jobs board's new kinds).
   const econP = economyState();

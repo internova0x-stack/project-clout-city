@@ -418,6 +418,7 @@ const ERRORS: Record<string, string> = {
   worked_today: "You've already worked today. Come back tomorrow.",
   shifted_today: "You already worked a shift today. Your job starts again tomorrow.",
   not_here: "Head to work first.",
+  in_holding: "You're on the bench at the 114½ Precinct. Work can wait until you're out.",
   no_energy: "Not enough Energy for that. Eat, nap or pick an easier pace.",
   no_day: "Start your workday first.",
   bad_task: "That task isn't on today's list.",
