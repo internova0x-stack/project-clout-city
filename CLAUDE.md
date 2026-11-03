@@ -220,7 +220,12 @@ components live in `app/globals.css`.
   the streak card's leaning Barlow). Wired: rank-ups (`rankCelebration`, Rank 10 a legend; it replaces RankUpCard), goals reveals
   (`goalsCelebration`: a goal is a banner, streak rewards and round days takeovers, 100+ days legends; it replaces GoalsRevealCard),
   all five tasks (banner), a hunt finished (takeover with the chest), a new best skill level (banner; 5 and 10 with their badge a
-  takeover) and Family with a regular (takeover; Friendly and Friend keep the ribbon). Confetti takes `origin` center|top|sides.
+  takeover) and Family with a regular (takeover; Friend also a banner, Friendly the ribbon only). Promotions (owner, Nov 3: "not just
+  inside careers… the home screen as well as when entering the game"): GameShell reads careers.screen() when the game opens, on
+  the home tab and when Careers closes, and compares the job's level with the one this device last saw (`cc-career-seen`, by job
+  id): a higher level is a takeover (`promotionCelebration`, components/careers/promotion.ts; the top level a legend). Also: It's
+  official (`takeCouple`, once per relationship in its first week, `cc-couple-seen`), Starter Week's tenth mission (replaces the
+  toast) and Crib Rating milestones (40 and 70 banners, 100 a takeover). Confetti takes `origin` center|top|sides.
   lib/sfx.ts synthesizes every sound in the music's key (no files): coin (climbs a note per reward within 2 s), sparkle, tick,
   heart, jingle (banner), fanfare (takeover, twists chest|chimes|register|stamp) and anthem (legend), which `music().duck()` under;
   started on the first tap (`unlockSfx`), 80 ms apart per sound, Settings → Sounds (components/SoundSwitch.tsx, `cc-sfx-muted`)

@@ -76,12 +76,12 @@ import { rememberedTap } from "@/lib/characterMemory";
 import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
-import { APP_UNLOCKS, STARTER_FINISH_TOAST, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
+import { APP_UNLOCKS, STARTER_FINISH, STARTER_MISSIONS, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
 import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/Visits";
 import { KIND_LABEL, VISITS, VISIT_POLL_MS, hostCloutPerGuest, visitAlerts, visitClock, type VisitApi, type VisitHome, type VisitMessage, type VisitRoom, type VisitState } from "@/lib/visits";
-import { homeScore as scoreHome, qualityTarget, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
+import { homeScore as scoreHome, qualityTarget, tierFor, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
 import { subletAlerts, type SubletApi, type SubletHome, type SubletResult, type SubletState } from "@/lib/sublets";
-import { coupleAlerts, coupleBadge, type CohabitHome, type CoupleApi, type CoupleState } from "@/lib/couples";
+import { COUPLES, coupleAlerts, coupleBadge, type CohabitHome, type CoupleApi, type CoupleState } from "@/lib/couples";
 import { crewAlerts, type CrewApi, type CrewInbox, type CrewOuting } from "@/lib/crew";
 import { CrewFullCard, CrewPlansSheet, CrewPrompt, CrewSheet } from "./crew/Crew";
 import { KeepsakeSheet, PartyPrompt, PlusOneSheet } from "./city/Party";
@@ -109,6 +109,7 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
+import { promotionCelebration } from "./careers/promotion";
 import { sfx, unlockSfx } from "@/lib/sfx";
 import { goalsCelebration, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
@@ -689,9 +690,21 @@ export function GameShell({
   useEffect(() => {
     if (!careers || careersOpen) return;
     let live = true;
-    void careers.screen().then((r) => { if (live && r.ok) setCareerPlace(r.data.job?.status === "employed" ? r.data.job.place : null); }).catch(() => undefined);
+    void careers.screen().then((r) => {
+      if (!live || !r.ok) return;
+      const job = r.data.job;
+      setCareerPlace(job?.status === "employed" ? job.place : null);
+      // A promotion is celebrated where the player first sees it (owner, Nov 3: "not just inside careers… the home screen as
+      // well as when entering the game"): the level this device last saw for this job, kept in cc-career-seen.
+      if (!job || job.status !== "employed") return;
+      let seen: { id: string; level: number } | null = null;
+      try { seen = JSON.parse(localStorage.getItem("cc-career-seen") ?? "null"); } catch { /* none */ }
+      try { localStorage.setItem("cc-career-seen", JSON.stringify({ id: job.id, level: job.level })); } catch { /* private mode */ }
+      if (!seen || seen.id !== job.id || job.level <= seen.level) return;
+      celebrate(promotionCelebration(job, placeById(job.place)?.name ?? job.employer, () => setCareersOpen(true)));
+    }).catch(() => undefined);
     return () => { live = false; };
-  }, [careers, careersOpen]);
+  }, [careers, careersOpen, tab]);
   // Campaign Mode: whether a campaign runs (the election teasers step aside) and its tasks for the Tasks sheet.
   useEffect(() => {
     if (!campaign || campaignOpen) return;
@@ -859,6 +872,19 @@ export function GameShell({
   const [coupleDismissed, setCoupleDismissed] = useState<string | null>(null);
   const takeCouple = useCallback((st: CoupleState) => {
     setCoupleS(st);
+    if (st.partner && st.relId && (st.days ?? 0) <= 7) {
+      let seen: number | null = null;
+      try { seen = Number(localStorage.getItem("cc-couple-seen")) || null; } catch { /* none */ }
+      if (seen !== st.relId) {
+        try { localStorage.setItem("cc-couple-seen", String(st.relId)); } catch { /* private mode */ }
+        const name = handle(st.partner.name);
+        celebrate({ rung: 3, emoji: "💞", art: "people", twist: "chimes", tag: "It\u2019s official", title: `You and ${name}`,
+          line: "Three date nights and nobody ghosted. In this economy.",
+          rewards: [{ text: "💞 On your card" }, { tone: "clout", text: `+${COUPLES.dateClout} 🔥 a date` }, { text: `🏠 Move in from day ${COUPLES.moveInDays}` }],
+          lola: "Official? In this city? I\u2019m already writing the headline.", share: `It's official: me and ${name} in Clout City.`, cta: "Open Us",
+          onCta: () => setPanel("us") });
+      }
+    }
     // couple_state pays streak days and anniversaries as it reads them.
     const total = st.paid.reduce((n, x) => n + x.clout, 0);
     if (total > 0) {
@@ -1873,7 +1899,14 @@ export function GameShell({
       setHomeReached(r.data.reached);
       const n = r.data.paid.reduce((t, m) => t + m.clout, 0);
       if (n) {
-        setToast(`🏠 Crib Rating ${Math.max(...r.data.paid.map((m) => m.score))}. +${n} clout.`);
+        const top = Math.max(...r.data.paid.map((m) => m.score));
+        celebrate(top >= 100
+          ? { rung: 3, emoji: "🏠", num: "100", art: "stage", tag: "Crib Rating", title: tierFor(100), line: "A perfect 100. Every room furnished, every wall dressed.",
+              rewards: [{ tone: "clout", text: `+${n.toLocaleString("en-US")} 🔥` }, { text: "🎉 Host a party" }],
+              lola: "A hundred out of a hundred. Your landlord is going to raise the rent out of spite.", cta: "Show it off",
+              share: "My place scored a perfect 100 Crib Rating in Clout City.", onCta: () => setPanel("homescore") }
+          : { rung: 2, emoji: top >= 70 ? "🛋️" : "🪴", tag: `Crib Rating ${top}`, title: tierFor(top),
+              rewards: [{ tone: "clout", text: `+${n} 🔥` }, { text: `Next: ${top >= 70 ? 100 : 70}` }], onCta: () => setPanel("homescore") });
         if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
       }
     });
@@ -1972,7 +2005,12 @@ export function GameShell({
     setStarter(r.data && r.data.active ? r.data : null);
     const d = r.data;
     if (!d || (!d.paid.length && !d.finished)) return;
-    setToast(d.finished ? STARTER_FINISH_TOAST : d.paid.length === 1 ? starterToast(d.paid[0].id) : `⭐ Starter Week: ${d.paid.length} missions done`);
+    if (d.finished) {
+      celebrate({ rung: 3, emoji: "🗽", num: String(STARTER_MISSIONS.length), art: "story", twist: "stamp", tag: "Starter Week · All ten", title: STARTER_FINISH.name,
+        line: "Ten missions in your first week. You live here now. Rent and all.",
+        rewards: [{ tone: "cash", text: `+C$${STARTER_FINISH.cash}` }, { text: `🏅 ${STARTER_FINISH.name}` }, { text: `🧶 ${STARTER_FINISH.furniture}` }],
+        lola: "You consoled a depressed Pomeranian and paid rent on time. That\u2019s more than most.", share: `I finished Starter Week in Clout City: ${STARTER_FINISH.name}.` });
+    } else setToast(d.paid.length === 1 ? starterToast(d.paid[0].id) : `⭐ Starter Week: ${d.paid.length} missions done`);
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   }, [starterIn, cityApi, applyCity]);
   // Missions are marked by what the player just did: check after the city changes, or the phone or a sheet closes
