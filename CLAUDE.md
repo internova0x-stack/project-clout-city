@@ -214,13 +214,16 @@ components live in `app/globals.css`.
   once-key in `place_life_log` (ledger 'place_life'), checks the place, its hours, holding, Energy and the caps (game_settings
   'place_life'), and a cost never takes the bank below zero; `place_life_context` gives the server today's refs and days per place.
   UI: components/city/PlaceLife.tsx (`LifeStrip` on the place panel, `LifeSheet`). `?life=rush|regular|brownout` in the preview.
-  The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"): once a New
-  York day (`cc-daily-pick:<date>`), 3 s after the game settles and only when nothing else is open, a floating card
-  (components/city/DailyPick.tsx `DailyWelcome`, no scrim): a greeting by the city hour and the player's name, the all-five task
-  streak, "Since you left" chips (rent alarm, unread messages, Clout Pass rewards; each opens its screen), and "Today" (owner, Nov 1: "a mix of
-  tasks, a goal that is close to completion, skill upgrade, story"): tiles for the five tasks, the current goal's progress, the skill
-  nearest its next level and the running story (new chapters), each opening its screen (GameShell `welcomeRows`), under Lola's `todaysPick`: a happening on now, else a regular card one visit from its reward, else a place to try (rotated by day);
-  Let's go plans the trip (Do it now when already there). `lifeToday` on the server; `?daily=pick` forces it in the preview.
+  The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3: "too much
+  information which will lead to indecision. Pick the highest leverage action"): once a New York day (`cc-daily-pick:<date>`), 3 s after
+  the game settles and only when nothing else is open, a floating card (components/city/DailyPick.tsx `DailyWelcome`, no scrim): a
+  greeting by the city hour, the player's name with the 🔥 streak, and ONE action from lib/welcomePick.ts (`pickWelcome`, pure,
+  tests/welcomePick.test.ts), the first that applies: rent trouble (Bills or a gig), Clout Pass rewards to collect, a 3+ day streak at
+  risk from 5 PM New York with tasks left, a happening on now, one step from done (a regular card one visit off, a skill 1-2 practice from
+  its level, a goal 80%+; the one that also clears a daily task first), messages, a new story chapter, the next task, a place to try.
+  It shows what you get · what it costs and why now ("It also clears a daily task"); Later remembers the kind (`cc-welcome-later`) and
+  the next day skips it, rent excepted. Lola's `todaysPick` (`lifeToday` on the server) supplies the happening, regular card and place
+  to try. `?daily=pick` forces it in the preview (`&nyhour=20` sets the New York hour).
 - Resume (owner, Oct 24): the game opens where the player last was (`players.at_place`): inside that place on its ground
   floor (or on the map beside it), never over a push's `?open=` or the first-session flow (`?at=<place id>` in the preview).
 - Welcome back and Start over (migration 0114, owner Oct 22): `/` shows a signed-in player who has a home the welcome
