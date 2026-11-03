@@ -2875,7 +2875,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 /* Owner, Nov 3: the blue banner gradient (--g-story), not the purple night. */
 .wb-streak-hero { position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; padding:22px 18px 18px; background:var(--g-story); color:#0F3B4C; }
 .wb-streak-flame { font-size:46px; line-height:50px; animation:welcome-flame 1.2s ease-in-out infinite alternate; }
-.wb-streak-n { font-family:var(--font-display); font-size:56px; line-height:56px; background:linear-gradient(90deg,#0F4C81,#0B6B5E); -webkit-background-clip:text; background-clip:text; color:transparent;
+/* Owner, Nov 3: a bold condensed number like Nike Run Club's (theirs is Nike's own typeface; Barlow Condensed 800 is the closest free one). */
+.wb-streak-n { font-family:var(--font-label); font-weight:800; font-size:84px; line-height:76px; letter-spacing:-.01em; font-variant-numeric:tabular-nums; background:linear-gradient(90deg,#0F4C81,#0B6B5E); -webkit-background-clip:text; background-clip:text; color:transparent;
   animation:wb-pop .55s .1s cubic-bezier(.2,1.4,.4,1) both; }
 .wb-streak-label { font-family:var(--font-label); font-size:16px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
 .wb-streak-week { display:flex; gap:8px; margin:10px 0 6px; }
