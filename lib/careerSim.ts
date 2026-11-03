@@ -29,7 +29,7 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
 
   if (preset && !["new", "apply", "welcome"].includes(preset)) {
     // ?career=cityhall: a Public Servant at the Mayor's office, clocked in.
-    state = hire(`preview-${Date.now()}`, ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset) ? preset as TrackId : "hospitality", ctx(), "honest", day);
+    state = hire(`preview-${preset}`, ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset) ? preset as TrackId : "hospitality", ctx(), "honest", day);
     if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit" || ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset)) startDay(content, state, "steady", ctx(), day, rng);
     // ?career=office: clocked in with a joint project on; ?career=grudge: Kendall holds a grudge that strikes today.
     if (preset === "office") { state.workMood = 72; state.team = { with: "friend", due: state.nextReview }; }

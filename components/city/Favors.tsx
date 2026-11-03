@@ -47,6 +47,9 @@ export function FavorStrip({ npc, name, favor }: { npc: string; name: string; fa
     if (level === "family") celebrate({ rung: 3, emoji: "💛", art: "people", tag: "Family", title: `${name} is family now`,
       line: `${name} trusts you completely. Once a month, they\u2019ll do you a big favor back.`, rewards: [{ text: "💛 A big favor back" }, { text: "☕ On the house" }],
       lola: "Family in this city? That\u2019s rarer than a fair rent.", share: `${name} is family now in Clout City.`, cta: "Aww" });
+    // Friend opens "on the house": a banner says so (rung 2); the hearts and ribbon play under the regular's line too.
+    else if (level === "friend") celebrate({ rung: 2, emoji: "\u2615", tag: `${name} \u00b7 Friend`, title: "On the house, once a week",
+      rewards: [{ text: "\u2665\u2665 Friend" }, ...(next ? [{ text: `${next.need} favors to Family` }] : [])] });
     const s = setTimeout(() => sparks(heartsRef.current?.children[HEARTS[level] - 1], 14, 46), 120);
     const t = setTimeout(() => setLevelUp(null), 3200);
     return () => { clearTimeout(s); clearTimeout(t); };
