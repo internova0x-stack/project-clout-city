@@ -3731,7 +3731,7 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
-          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={goalsNow?.streak.current ?? 0}
+          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
             action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}

@@ -27,13 +27,15 @@ function chips(detail: string | null) {
   });
 }
 
-export function DailyWelcome({ open, name, hello, streak, action, variant = "card", onGo, onLater }: {
+export function DailyWelcome({ open, name, hello, streak, streakNext, action, variant = "card", onGo, onLater }: {
   open: boolean;
   name: string;
   /** "Good morning" … by the city clock. */
   hello: string;
   /** The all-five streak in days (0 = none). */
   streak: number;
+  /** The day of the next streak reward (goals_state's streak.next.day). */
+  streakNext?: number;
   action: WelcomeAction | null;
   variant?: WelcomeVariant;
   onGo: () => void;
@@ -119,16 +121,21 @@ export function DailyWelcome({ open, name, hello, streak, action, variant = "car
 
   if (variant === "streak") {
     const days = Math.max(0, streak);
+    // This week's dots: a full week (7, 14, 42 days) lights all seven; the next dot to earn pulses.
+    const lit = days > 0 && days % 7 === 0 ? 7 : days % 7;
+    const weeks = Math.floor(days / 7);
     return (
       <div className="welcome-pop wb-streak" role="dialog" aria-label="Welcome back">
         {x("on-light")}
         <div className="wb-streak-hero">
           <span className="wb-streak-flame" aria-hidden="true">🔥</span>
           <span className="wb-streak-n"><span className="wb-streak-slant">{days}</span></span>
-          <span className="wb-streak-label">{days === 1 ? "day streak" : days ? "day streak" : "Start a streak today"}</span>
+          <span className="wb-streak-label">{days ? "day streak" : "Start a streak today"}</span>
+          {weeks > 0 && <span className="wb-streak-weeks">🏅 {weeks} {weeks === 1 ? "week" : "weeks"} straight</span>}
           <span className="wb-streak-week" aria-hidden="true">
-            {Array.from({ length: 7 }, (_, i) => <span key={i} className={`wb-day${i < days % 7 || (days >= 7 && days % 7 === 0) ? " on" : ""}${i === days % 7 ? " now" : ""}`} />)}
+            {Array.from({ length: 7 }, (_, i) => <span key={i} className={`wb-day${i < lit ? " on" : ""}${i === lit ? " now" : ""}`} />)}
           </span>
+          {!!streakNext && streakNext > days && <span className="wb-streak-next">Next reward on day {streakNext}</span>}
           <span className="wb-streak-hello">{hello}, {name}</span>
         </div>
         <div className="wb-streak-task">
