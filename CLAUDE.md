@@ -197,6 +197,16 @@ components live in `app/globals.css`.
   in the app only (user agent `CloutCitySteam/`; Stripe refuses there, Steam refuses on the web): `start_purchase` with
   session `steam:<order>`, `InitTxn` in the wallet currency (game_settings 'steam_store' rates), the app relays Steam's
   answer (`cloutSteam.authorized`), `FinalizeTxn` then `payment_grant`. One-time items only (VIP later); refunds by hand.
+- The motion kit (owner, Nov 3: "go with your recommendations", after the Motion Lab and Welcome Back Motion artifacts):
+  components/motion.tsx (transforms and opacity only; "reduce motion" gets the end state). Rewards fly: GameChrome watches the
+  bank and clout and, on a rise, `flyTo` sends coins from the last tap (`lastTap`) to the pill with a "+C$120" floater, then
+  `useCountUp` counts it up (no call site changes; drops and the first value jump). A task done bumps the 1/5 counter with a
+  "✓ 3/5" pop; the Tasks sheet plays the pop and drawn tick once for tasks done since this device last looked (`cc-tasks-seen`).
+  The rank stamp: RankUpCard's rays, stamped title, jolt and rising lines (CSS). Hearts fill: FavorStrip pops the new heart with
+  `sparks` and a ribbon when a friendship levels up, held while a card is open (`FavorHandlers.hold`). The station sign
+  (components/city/StationSign.tsx): entering a place (not the resume, not a floor change) flips down its name, train lines,
+  hours and the first happening for 3.4 s (tap closes). Lola says (DailyPick `LolaSays`): she bounces in, typing dots for 0.95 s,
+  her line word by word as the task slides up, the button shines once. CSS: globals.css "The motion kit".
 - Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check

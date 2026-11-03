@@ -2937,3 +2937,87 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .favor-hearts { display:inline-flex; gap:1px; font-size:14px; color:var(--chip-off); }
 .favor-hearts .on { color:var(--neon-500); }
 @media (prefers-reduced-motion: reduce) { .favor-ask { animation:none; } }
+
+/* ---------------------------------------------------------------------------------------------------------------
+   The motion kit (owner, Nov 3: "go with your recommendations"; components/motion.tsx). Transforms and opacity only;
+   "reduce motion" gets the end state.
+   --------------------------------------------------------------------------------------------------------------- */
+#motion-layer { position:fixed; inset:0; z-index:200; pointer-events:none; overflow:hidden; }
+.motion-coin { position:absolute; left:0; top:0; width:20px; height:20px; border-radius:50%; will-change:transform;
+  background:radial-gradient(circle at 35% 30%, #FFF3CC, #FFC21A 55%, #C78A00); box-shadow:0 0 10px rgba(255,194,26,.7); }
+.motion-coin.clout { background:radial-gradient(circle at 35% 30%, #FFE3EF, #FF6A3D 55%, #E0186F); box-shadow:0 0 10px rgba(255,46,136,.6); }
+.motion-floater { position:absolute; white-space:nowrap; font-family:var(--font-label); font-style:italic; font-weight:800; font-size:28px; line-height:1;
+  color:var(--taxi-400); text-shadow:0 2px 0 #8A5B00, 0 0 12px rgba(0,0,0,.25); }
+.motion-floater.clout { color:#FF6A9E; text-shadow:0 2px 0 #8C1046, 0 0 12px rgba(0,0,0,.25); }
+.motion-spark { position:absolute; width:7px; height:7px; border-radius:2px; }
+/* Tasks: the counter's ring fills, a "✓ 3/5" pops under it; a task finished since you last looked plays the tick. */
+.daily-ring circle { transition:stroke-dasharray .6s cubic-bezier(.3,1.3,.5,1); }
+.hud-task-pop { position:absolute; left:50%; top:calc(100% + 4px); transform:translateX(-50%); white-space:nowrap; padding:4px 9px; border-radius:999px;
+  background:var(--green-500); color:#fff; font-family:var(--font-label); font-size:14px; font-weight:800; letter-spacing:.04em; box-shadow:var(--elev-2);
+  animation:task-pop 1.8s cubic-bezier(.3,1.5,.5,1) both; pointer-events:none; }
+@keyframes task-pop { 0% { opacity:0; transform:translate(-50%,-6px) scale(.6); } 15% { opacity:1; transform:translate(-50%,0) scale(1.08); } 25% { transform:translate(-50%,0) scale(1); } 80% { opacity:1; } 100% { opacity:0; transform:translate(-50%,-4px); } }
+.select-check svg path { stroke-dasharray:20; stroke-dashoffset:0; }
+.select-card.just-done .select-check { animation:just-pop .45s .15s cubic-bezier(.3,1.7,.5,1) both; }
+.select-card.just-done .select-check svg path { animation:tick-draw .32s .35s ease-out both; }
+@keyframes just-pop { 0% { transform:scale(0); } 60% { transform:scale(1.35); } 100% { transform:scale(1); } }
+@keyframes tick-draw { from { stroke-dashoffset:20; } to { stroke-dashoffset:0; } }
+/* The rank stamp: rays turn behind the card, the title stamps down with a jolt, the rest rises in. */
+.modal-card.rank-up { overflow:hidden; isolation:isolate; animation:reveal-rise .4s ease-out, rank-jolt .4s .45s; }
+.rank-up-rays { position:absolute; inset:-60%; z-index:-1; pointer-events:none; opacity:0;
+  background:repeating-conic-gradient(from 0deg, rgba(255,194,26,.22) 0 9deg, transparent 9deg 22deg);
+  animation:rank-rays-in .5s .3s ease-out forwards, rank-rays-turn 14s linear infinite; }
+.modal-card.rank-up.top .rank-up-rays { background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.4) 0 9deg, transparent 9deg 22deg); }
+.rank-up-title { animation:rank-stamp .55s .2s cubic-bezier(.2,1.5,.4,1) both; }
+.rank-up-rise { animation:rank-rise .45s ease-out both; }
+@keyframes rank-stamp { 0% { opacity:0; transform:scale(3) rotate(-8deg); } 60% { opacity:1; transform:scale(.92) rotate(2deg); } 100% { opacity:1; transform:none; } }
+@keyframes rank-rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+@keyframes rank-rays-in { to { opacity:1; } }
+@keyframes rank-rays-turn { to { transform:rotate(360deg); } }
+@keyframes rank-jolt { 20% { transform:translate(-5px,3px); } 40% { transform:translate(4px,-3px); } 60% { transform:translate(-3px,2px); } 80% { transform:translate(2px,-1px); } }
+/* Friendships: the new heart pops, sparks fly (motion.tsx), a ribbon names the level. */
+.favor-hearts .pop { display:inline-block; animation:heart-pop .55s cubic-bezier(.3,1.8,.5,1); }
+@keyframes heart-pop { 0% { transform:scale(.3); } 40% { transform:scale(1.7) rotate(-10deg); } 100% { transform:none; } }
+.favor-ribbon { display:inline-block; padding:4px 9px; border-radius:6px; background:var(--neon-500); color:#fff; font-family:var(--font-label); font-size:12.5px;
+  font-weight:800; letter-spacing:.08em; text-transform:uppercase; animation:ribbon-in .5s .3s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes ribbon-in { from { transform:scale(0) rotate(-10deg); } to { transform:scale(1) rotate(-3deg); } }
+/* The station sign: flips down over the room on arrival, with a live strip; tap or wait to close. */
+.station-sign { position:absolute; z-index:17; left:50%; top:calc(118px + var(--safe-top)); width:min(340px, calc(100% - 32px)); transform:translateX(-50%);
+  display:flex; flex-direction:column; gap:8px; padding:0; border:0; background:none; text-align:left; cursor:pointer; perspective:700px;
+  animation:sign-out .35s calc(3.4s - .35s) ease-in forwards; }
+.station-sign-plate { display:block; padding:0 14px 13px; border-radius:10px; background:#0E0C12; color:#fff; box-shadow:0 12px 30px rgba(0,0,0,.45);
+  transform-origin:top center; animation:sign-flip .7s cubic-bezier(.2,1.4,.4,1) both; }
+.station-sign-stripe { display:block; height:5px; margin:0 -14px 10px; border-radius:10px 10px 0 0; background:#fff; opacity:.92; }
+.station-sign-name { display:block; font-family:var(--font-ui); font-size:24px; line-height:1.15; font-weight:700; letter-spacing:-.01em; }
+.station-sign-sub { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:7px; font-size:13px; font-weight:600; color:rgba(255,246,224,.72); }
+.station-sign-bullet { width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; }
+.station-sign-now { display:flex; gap:8px; align-items:center; padding:9px 12px; border-radius:12px; background:rgba(20,17,26,.78); border:1px solid rgba(64,181,137,.55);
+  color:#BFEFD9; font-size:13px; line-height:1.3; animation:rank-rise .4s .8s ease-out both; }
+@keyframes sign-flip { from { opacity:0; transform:rotateX(90deg); } to { opacity:1; transform:none; } }
+@keyframes sign-out { to { opacity:0; transform:translate(-50%,-10px); } }
+/* Lola says: typing dots, then her line word by word, then the task slides up and the button shines once. */
+.wb-typing { display:inline-flex; gap:5px; padding:10px 2px 6px; }
+.wb-typing i { width:8px; height:8px; border-radius:50%; background:#B9B1BD; animation:wb-dot 1s infinite; }
+.wb-typing i:nth-child(2) { animation-delay:.15s; } .wb-typing i:nth-child(3) { animation-delay:.3s; }
+@keyframes wb-dot { 0%,60%,100% { transform:translateY(0); opacity:.5; } 30% { transform:translateY(-4px); opacity:1; } }
+.wb-lola-face { animation:wb-face-in .52s .1s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes wb-face-in { 0% { opacity:0; transform:translateY(-34px) scale(.7); } 70% { opacity:1; transform:translateY(4px) scale(1.04); } 100% { opacity:1; transform:none; } }
+.wb-lola.is-typing .wb-lola-bubble { min-height:58px; }
+.wb-word { display:inline; }
+.wb-word-in { animation:wb-word .26s ease-out both; }
+@keyframes wb-word { from { opacity:0; } to { opacity:1; } }
+.wb-wait { display:none; }
+.wb-slide-in { animation:wb-slide .42s cubic-bezier(.2,1.2,.4,1) both; }
+@keyframes wb-slide { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
+.wb-lola-foot { padding:0 14px; }
+.wb-lola.is-said .wb-lola-foot .btn-taxi { position:relative; overflow:hidden; }
+.wb-lola.is-said .wb-lola-foot .btn-taxi::after { content:""; position:absolute; top:0; bottom:0; left:-60%; width:40%; pointer-events:none;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform:skewX(-20deg); animation:wb-shine .8s var(--shine-delay, .8s) ease-in-out both; }
+@keyframes wb-shine { from { left:-60%; } to { left:130%; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-task-pop, .select-card.just-done .select-check, .select-card.just-done .select-check svg path, .rank-up-title, .rank-up-rise, .rank-up-rays,
+  .modal-card.rank-up, .favor-hearts .pop, .favor-ribbon, .station-sign-plate, .station-sign-now, .wb-typing i, .wb-lola-face, .wb-word-in,
+  .wb-slide-in, .wb-lola.is-said .wb-lola-foot .btn-taxi::after { animation:none; }
+  .rank-up-rays { opacity:1; }
+  .station-sign { animation:sign-out .2s 3.2s forwards; }
+  .daily-ring circle { transition:none; }
+}
