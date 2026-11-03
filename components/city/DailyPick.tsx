@@ -4,6 +4,8 @@ import { LOLA_PORTRAIT } from "@/lib/cast";
 import { CloseIcon } from "../icons";
 import { guardTaps } from "@/lib/tapGuard";
 import type { WelcomeAction } from "@/lib/welcomePick";
+import { isStreakMilestone, milestoneName, milestoneSize } from "@/lib/streakMilestones";
+import { Confetti } from "../Confetti";
 
 // The welcome back (owner, Nov 1: "a pop up instead of a modal", "a welcome back treatment like mobile games have"; Nov 3:
 // "too much information which will lead to indecision. Pick the highest leverage action"): once a New York day, when nothing
@@ -43,6 +45,9 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
   onLater: () => void;
 }) {
   if (!open || !action) return null;
+  // A milestone streak (owner, Nov 3) gets confetti in every treatment.
+  const mile = isStreakMilestone(streak);
+  const party = mile ? <Confetti size={milestoneSize(streak)} /> : null;
   const later = () => { guardTaps(); onLater(); };
   const go = () => { guardTaps(); onGo(); };
   const x = (cls = "") => <button className={`daily-pop-x welcome-x ${cls}`} onClick={later} aria-label="Close"><CloseIcon size={14} /></button>;
@@ -56,6 +61,7 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
   if (variant === "banner") {
     return (
       <div className={`wb-banner k-${action.kind}`} role="dialog" aria-label="Welcome back">
+        {party}
         <button className="wb-banner-main" onClick={go}>
           <span className="wb-banner-emoji" aria-hidden="true">{action.emoji}</span>
           <span className="wb-banner-text">
@@ -73,6 +79,7 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
   if (variant === "lola") {
     return (
       <div className="welcome-pop wb-lola" role="dialog" aria-label="Welcome back">
+        {party}
         {x("on-dark")}
         <div className="wb-lola-stage">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -99,6 +106,7 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
   if (variant === "ticket") {
     return (
       <div className="welcome-pop wb-ticket" role="dialog" aria-label="Welcome back">
+        {party}
         <div className="wb-ticket-stub">
           <span className="wb-ticket-kicker">Today&apos;s move</span>
           <span className="wb-ticket-hello">{hello}, {name}{streak > 0 ? ` · 🔥 ${streak} days` : ""}</span>
@@ -126,12 +134,14 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
     const weeks = Math.floor(days / 7);
     return (
       <div className="welcome-pop wb-streak" role="dialog" aria-label="Welcome back">
+        {party}
         {x("on-light")}
         <div className="wb-streak-hero">
           <span className="wb-streak-flame" aria-hidden="true">🔥</span>
           <span className="wb-streak-n"><span className="wb-streak-slant">{days}</span></span>
           <span className="wb-streak-label">{days ? "day streak" : "Start a streak today"}</span>
-          {weeks > 0 && <span className="wb-streak-weeks">🏅 {weeks} {weeks === 1 ? "week" : "weeks"} straight</span>}
+          {mile ? <span className="wb-streak-mile">🎉 {milestoneName(days)}!</span>
+            : weeks > 0 && <span className="wb-streak-weeks">🏅 {weeks} {weeks === 1 ? "week" : "weeks"} straight</span>}
           <span className="wb-streak-week" aria-hidden="true">
             {Array.from({ length: 7 }, (_, i) => <span key={i} className={`wb-day${i < lit ? " on" : ""}${i === lit ? " now" : ""}`} />)}
           </span>
@@ -152,6 +162,7 @@ export function DailyWelcome({ open, name, hello, streak, streakNext, action, va
 
   return (
     <div className="welcome-pop" role="dialog" aria-label="Welcome back">
+      {party}
       <div className="welcome-hero">
         {x()}
         <span className="welcome-spark" aria-hidden="true">✦</span>

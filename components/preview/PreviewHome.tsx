@@ -191,7 +191,7 @@ export function PreviewHome({
   pushPreset?: string;
   /** Membership & purchases: ?member=vip|monthly|cancelling|pastdue|forever|free|none (default vip). */
   memberPreset?: string;
-  /** Daily tasks 2.0: ?goals=new|streak|pass|tonight|chapter starts goals, streaks and passes in that state; day3|day7|day14|goaldone opens that reveal. */
+  /** Daily tasks 2.0: ?goals=new|streak|pass|tonight|chapter starts goals, streaks and passes in that state; day3|day7|day14|day30|goaldone opens that reveal. */
   goalsPreset?: string;
   /** Owner, Oct 17: show Lola's daily-tasks nudge after 2 seconds (?hint=daily). */
   dailyHintPreset?: boolean;
@@ -706,6 +706,7 @@ export function PreviewHome({
       previewGoalsReveal={goalsPreset === "day3" ? { kind: "streak", day: 3, reward: "clout" }
         : goalsPreset === "day7" ? { kind: "streak", day: 7, reward: "collectible", sku: "home-neon-five-sign" }
         : goalsPreset === "day14" ? { kind: "streak", day: 14, reward: "pass" }
+        : goalsPreset === "day30" ? { kind: "milestone", day: 30 }
         : goalsPreset === "goaldone" ? { kind: "goal", id: "pro_gigs", next: "first_business" } : undefined}
       boroughGates={[
         { id: "brooklyn", open: brooklynPreset === "open", target: 100, online: 37, peakToday: 64, counting: brooklynPreset !== "open" },

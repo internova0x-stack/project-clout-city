@@ -2901,3 +2901,6 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .wb-banner-go { flex:none; padding:7px 10px; border-radius:var(--r-pill); background:var(--taxi-400); color:var(--night-900); font-size:13px; font-weight:800; white-space:nowrap; }
 .wb-banner-x { flex:none; width:32px; height:44px; display:grid; place-items:center; border:0; background:none; color:rgba(255,246,224,.6); cursor:pointer; }
 @media (prefers-reduced-motion: reduce) { .wb-lola-face, .wb-lola-bubble, .wb-ticket-emoji, .wb-ticket-go, .wb-streak-flame, .wb-streak-n, .wb-day.now, .wb-banner { animation:none; } }
+/* Confetti (components/Confetti.tsx): over everything, never in the way of a tap. */
+.confetti { position:fixed; inset:0; width:100vw; height:100vh; z-index:200; pointer-events:none; }
+.wb-streak-mile { margin-top:6px; padding:4px 12px; border-radius:var(--r-pill); background:var(--g-neon); color:#fff; font-size:13px; font-weight:800; letter-spacing:.02em; }
