@@ -202,7 +202,7 @@ components live in `app/globals.css`.
   bank and clout and, on a rise, `flyTo` sends coins from the last tap (`lastTap`) to the pill with a "+C$120" floater, then
   `useCountUp` counts it up (no call site changes; drops and the first value jump). A task done bumps the 1/5 counter with a
   "✓ 3/5" pop; the Tasks sheet plays the pop and drawn tick once for tasks done since this device last looked (`cc-tasks-seen`).
-  The rank stamp: RankUpCard's rays, stamped title, jolt and rising lines (CSS). Hearts fill: FavorStrip pops the new heart with
+  Hearts fill: FavorStrip pops the new heart with
   `sparks` and a ribbon when a friendship levels up, held while a card is open (`FavorHandlers.hold`). The station sign
   (components/city/StationSign.tsx): entering a place (not the resume, not a floor change) flips down its name, train lines,
   hours and the first happening for 3.4 s (tap closes). Lola says (DailyPick `LolaSays`): she bounces in, typing dots for 0.95 s,
@@ -210,6 +210,21 @@ components live in `app/globals.css`.
   "yes, build the streak animation"): the flame grows from an ember with sparks, the number rolls like an odometer from yesterday's
   count (`Reel`), this week's dots light along a fuse; when the pick is the at-risk rung (kind 'streak'), the card drains to grey,
   the flame gutters and today's dot blinks red. CSS: globals.css "The motion kit" and "The streak welcome".
+- Celebrations and the sound kit (owner, Nov 3: "yes build with the reward sounds", after the Sound Lab, Celebrations and
+  Achievement Screens artifacts; round 3: "Use our design system… Use our font as well"). components/Celebrate.tsx: any feature
+  calls `celebrate({ rung, emoji, tag, title, line, num, unit, art, rewards, lola, cta, onCta, share, twist })`; `CelebrationHost` in
+  GameShell shows one card at a time (more queue; banners wait behind a card), never while a choice card, a trip, the first
+  session or the welcome is up (`hold`). Rung 2 the banner (the HUD's white glass, reward chips, a puff of confetti, gone after
+  3.4 s; a tap runs onCta), rung 3 the takeover (the light sheet card, an art band `stage|story|people` with rays and a white
+  medal, the display font, chips, Lola's line, Share and the red button), rung 4 the legend (the same card, the number as hero in
+  the streak card's leaning Barlow). Wired: rank-ups (`rankCelebration`, Rank 10 a legend; it replaces RankUpCard), goals reveals
+  (`goalsCelebration`: a goal is a banner, streak rewards and round days takeovers, 100+ days legends; it replaces GoalsRevealCard),
+  all five tasks (banner), a hunt finished (takeover with the chest), a new best skill level (banner; 5 and 10 with their badge a
+  takeover) and Family with a regular (takeover; Friendly and Friend keep the ribbon). Confetti takes `origin` center|top|sides.
+  lib/sfx.ts synthesizes every sound in the music's key (no files): coin (climbs a note per reward within 2 s), sparkle, tick,
+  heart, jingle (banner), fanfare (takeover, twists chest|chimes|register|stamp) and anthem (legend), which `music().duck()` under;
+  started on the first tap (`unlockSfx`), 80 ms apart per sound, Settings → Sounds (components/SoundSwitch.tsx, `cc-sfx-muted`)
+  apart from Music. GameChrome plays the coin or sparkle as the flying coins land and the tick on a task.
 - Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check

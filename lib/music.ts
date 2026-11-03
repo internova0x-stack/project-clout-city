@@ -70,6 +70,14 @@ class Music {
     return () => { for (const e of events) window.removeEventListener(e, tap); };
   }
 
+  /** Steps the music back for a celebration (lib/sfx.ts fanfare and anthem), then swells back. */
+  duck(seconds: number) {
+    if (!this.ctx || !this.master || this.muted) return;
+    const t = this.ctx.currentTime, g = this.master.gain;
+    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(0.04, t + 0.08); g.setValueAtTime(0.04, t + seconds); g.linearRampToValueAtTime(0.16, t + seconds + 0.6);
+  }
+
   setMuted(muted: boolean) {
     this.muted = muted;
     if (this.ctx && this.master) {

@@ -3054,3 +3054,68 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   .wb-streak.at-risk .wb-streak-flame, .wb-streak.at-risk .wb-day.now { animation:none; }
   .wb-streak.at-risk .wb-streak-hero::before { animation:none; opacity:.85; }
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+   Celebrations (owner, Nov 3: "Use our design system… Use our font as well"; components/Celebrate.tsx): the banner is the
+   HUD's white glass, the takeover and legend are the light sheet card with an art band, in the display font, reward chips
+   and the red button. Bright, one accent each; the motion does the celebrating.
+   --------------------------------------------------------------------------------------------------------------- */
+.cel-banner { position:fixed; z-index:70; left:50%; top:calc(64px + var(--safe-top)); width:min(362px, calc(100% - 24px)); transform:translateX(-50%);
+  display:flex; gap:12px; align-items:center; padding:10px 12px; border:0; border-radius:var(--r-lg); text-align:left; cursor:pointer; color:var(--text-1);
+  background:rgba(255,255,255,.92); -webkit-backdrop-filter:blur(var(--blur)); backdrop-filter:blur(var(--blur)); box-shadow:var(--elev-3);
+  animation:cel-drop .5s cubic-bezier(.2,1.3,.4,1) both; }
+.cel-banner.leaving { animation:cel-lift .36s ease-in both; }
+@keyframes cel-drop { from { opacity:0; transform:translate(-50%,-150%); } 70% { opacity:1; transform:translate(-50%,4px); } to { opacity:1; transform:translate(-50%,0); } }
+@keyframes cel-lift { to { opacity:0; transform:translate(-50%,-150%); } }
+.cel-banner-ico { width:44px; height:44px; flex:none; display:grid; place-items:center; border-radius:var(--r-sm); background:var(--g-stage); font-size:26px; animation:cel-pop .48s .18s cubic-bezier(.2,1.5,.4,1) both; }
+.cel-banner-txt { min-width:0; display:grid; gap:2px; }
+.cel-banner-title { font-family:var(--font-display); font-size:16px; line-height:20px; font-weight:700; letter-spacing:-.01em; }
+.cel-chips { display:flex; flex-wrap:wrap; gap:6px 8px; justify-content:center; }
+.cel-banner .cel-chips { justify-content:flex-start; margin-top:4px; }
+.cel-banner .fx { height:24px; font-size:12.5px; padding:0 9px; }
+.cel-chips .fx { animation:cel-chip .34s cubic-bezier(.2,1.4,.4,1) both; }
+.fx-cash { background:var(--green-tint); color:#1F6B4A; }
+@keyframes cel-pop { from { opacity:0; transform:scale(.4); } 60% { opacity:1; transform:scale(1.14); } to { opacity:1; transform:none; } }
+@keyframes cel-chip { from { opacity:0; transform:scale(.6); } to { opacity:1; transform:none; } }
+
+.cel-wrap { z-index:80; }
+.cel-veil { position:absolute; inset:0; background:rgba(251,248,242,.4); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); animation:fade-in .3s ease-out both; }
+.cel-card { overflow:hidden; text-align:center; border-radius:var(--r-xl); background:var(--surface-sheet); color:var(--text-1); box-shadow:0 24px 60px rgba(20,17,26,.22);
+  animation:cel-rise-card .48s cubic-bezier(.2,1.2,.4,1) both; }
+@keyframes cel-rise-card { from { opacity:0; transform:translateY(40px) scale(.96); } to { opacity:1; transform:none; } }
+.cel-art { position:relative; height:180px; display:grid; place-items:center; overflow:hidden; background:var(--g-stage); }
+.cel-art.story { background:var(--g-story); }
+.cel-art.people { background:radial-gradient(120% 90% at 50% 12%, #FFF0F6 0%, var(--neon-tint) 55%, #FFCFE3 100%); }
+.cel-rays { position:absolute; left:50%; top:50%; width:520px; height:520px; margin:-260px 0 0 -260px; opacity:0;
+  background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.8) 0 6deg, rgba(255,255,255,0) 6deg 20deg);
+  -webkit-mask:radial-gradient(circle, #000 20%, transparent 62%); mask:radial-gradient(circle, #000 20%, transparent 62%);
+  animation:cel-rays-in .6s .2s ease-out forwards, cel-rays-turn 18s linear infinite; }
+@keyframes cel-rays-in { to { opacity:.55; } }
+@keyframes cel-rays-turn { to { transform:rotate(360deg); } }
+.cel-medal { position:relative; width:104px; height:104px; border-radius:50%; display:grid; place-items:center; font-size:54px; background:#fff;
+  box-shadow:var(--elev-3), 0 0 0 8px rgba(255,255,255,.45); animation:cel-pop .56s .24s cubic-bezier(.2,1.4,.4,1) both; }
+.cel-num { position:absolute; right:-8px; bottom:-6px; min-width:38px; height:38px; padding:0 8px; border-radius:var(--r-pill); display:grid; place-items:center;
+  background:var(--night-900); color:#fff; font-family:var(--font-label); font-size:22px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; box-shadow:0 0 0 3px #fff;
+  animation:cel-pop .42s .65s cubic-bezier(.2,1.6,.4,1) both; }
+.cel-body { display:grid; gap:10px; justify-items:center; padding:18px 20px; }
+.cel-line { margin:0; color:var(--text-2); font-size:15px; line-height:21px; max-width:30ch; }
+.cel-rise { animation:rank-rise .38s ease-out both; }
+.cel-body .cel-chips .fx { animation-delay:.9s; }
+.cel-lola { display:flex; gap:10px; align-items:center; width:100%; text-align:left; padding:10px 12px; border-radius:var(--r-md); background:var(--surface-card); }
+.cel-lola img { width:36px; height:36px; border-radius:50%; object-fit:cover; flex:none; box-shadow:0 0 0 2px var(--neon-500); }
+.cel-lola span { font-size:13.5px; line-height:18px; font-weight:500; }
+.cel-acts { display:flex; gap:8px; width:100%; margin-top:4px; }
+.cel-acts .btn { white-space:nowrap; font-size:16px; }
+.cel-card.legend .cel-art { height:236px; }
+.cel-big { position:relative; display:grid; justify-items:center; animation:cel-big .7s .85s cubic-bezier(.2,1.3,.4,1) both; }
+.cel-big-n { font-family:var(--font-label); font-style:italic; font-weight:800; font-size:112px; line-height:96px; letter-spacing:-.01em; display:inline-block; transform:skewX(-6deg);
+  background:linear-gradient(90deg,#0F4C81,#0B6B5E); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.cel-big small { font-family:var(--font-label); font-size:16px; line-height:20px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0F3B4C; }
+.cel-card.legend .cel-art.stage .cel-big small { color:#7A3A1C; }
+@keyframes cel-big { from { opacity:0; transform:scale(.4); } 60% { opacity:1; transform:scale(1.08); } to { opacity:1; transform:none; } }
+.cel-rare { position:absolute; top:14px; right:14px; z-index:1; animation:cel-stamp .4s 1.5s cubic-bezier(.2,1.5,.4,1) both; }
+@keyframes cel-stamp { from { opacity:0; transform:scale(1.8) rotate(-8deg); } to { opacity:1; transform:rotate(-3deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .cel-banner, .cel-banner.leaving, .cel-banner-ico, .cel-chips .fx, .cel-veil, .cel-card, .cel-rays, .cel-medal, .cel-num, .cel-rise, .cel-big, .cel-rare { animation:none; }
+  .cel-rays { opacity:.55; } .cel-banner.leaving { opacity:0; }
+}

@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import { RANKS, money, nextRank, nextRankLine, rankFor, type Rank } from "@/lib/ranks";
 import { Sheet } from "../Sheet";
 import { SheetTitle } from "../city/Common";
+import type { Celebration } from "../Celebrate";
 
 export function RankChip({ rank, onClick }: { rank: Rank; onClick?: () => void }) {
   const cls = `rank-chip${rank.level === 10 ? " god" : rank.level >= 8 ? " rich" : ""}`;
@@ -64,32 +65,27 @@ export function RanksSheet({ open, onClose, clout, netWorth }: { open: boolean; 
   );
 }
 
-/** Crossing into a new rank: the reveal (bigger for the top three). */
-export function RankUpCard({ rank, name, onClose }: { rank: Rank; name: string; onClose: () => void }) {
-  const share = async () => {
-    const text = `${name} just hit ${rank.title} in Clout City. ${rank.line}`;
-    try {
-      if (navigator.share) await navigator.share({ text });
-      else await navigator.clipboard.writeText(text);
-    } catch { /* cancelled */ }
+/** A rank-up as a celebration (components/Celebrate.tsx): a takeover, and the top rank a legend. */
+export function rankCelebration(rank: Rank, name: string): Celebration {
+  const share = `${name} just hit ${rank.title} in Clout City. ${rank.line}`;
+  if (rank.level >= 10) {
+    return { rung: 4, emoji: rank.emoji, tag: "Rank 10 of 10", num: "10", unit: "rank of 10", title: rank.title, line: rank.line, art: "story",
+      rewards: [{ text: "👑 The top of Clout City" }], share, cta: "Bow" };
+  }
+  return {
+    rung: 3, emoji: rank.emoji, num: String(rank.level), tag: "New rank", title: rank.title, line: `Rank ${rank.level} of 10. ${rank.line}`,
+    rewards: rank.level === 2 ? [{ text: "🏪 Businesses" }, { text: "💼 Jobs" }, { text: "🗳️ Campaigns" }] : undefined,
+    lola: RANK_LOLA[rank.level] ?? "Look who\u2019s climbing. I knew you when.", share, cta: "Let's go",
   };
-  return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={`New rank: ${rank.title}`}>
-      <div className="scrim" onClick={onClose} />
-      <div className={`modal-card rank-up${rank.level >= 8 ? " top" : ""}${rank.level === 10 ? " god" : ""}`}>
-        {/* The rank stamp (owner, Nov 3, the motion kit): rays turn behind, the title stamps down with a jolt, the rest rises in. */}
-        <span className="rank-up-rays" aria-hidden="true" />
-        <span className="overline rank-up-kicker rank-up-rise" style={{ animationDelay: ".55s" }}>New rank · {rank.level} of 10</span>
-        <span className="rank-up-emoji rank-up-rise" style={{ animationDelay: ".05s" }} aria-hidden="true">{rank.emoji}</span>
-        <p className="display-md rank-up-title" style={{ margin: "6px 0 8px" }}>{rank.title}</p>
-        <p className="body rank-up-rise" style={{ margin: 0, animationDelay: ".75s" }}>{rank.line}</p>
-        {/* Owner, Oct 29: the Rank 2 reveal names what it opens, Campaign Mode included. */}
-        {rank.level === 2 && <p className="meta rank-up-unlocks rank-up-rise" style={{ margin: "10px 0 0", animationDelay: ".95s" }}>Unlocks: 🏪 Businesses, 💼 Jobs and 🗳️ Campaign Mode</p>}
-        <div className="row" style={{ gap: 8, marginTop: 18, position: "relative" }}>
-          <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => void share()}>Share</button>
-          <button className="btn btn-taxi" style={{ flex: 1 }} onClick={onClose}>{rank.level === 10 ? "Bow" : "Let's go"}</button>
-        </div>
-      </div>
-    </div>
-  );
 }
+// Lola on each rank (docs/culture/VOICE.md: short, knowing, a little mean, never cruel).
+const RANK_LOLA: Record<number, string> = {
+  2: "Rank 2. You can open a business now. Please don\u2019t open a candle shop.",
+  3: "Side Hustler. Sleep is for people with one income.",
+  4: "Eleven people know your name now. Eleven more than last week.",
+  5: "On the list. Act like you\u2019ve been here before. You haven\u2019t.",
+  6: "Local celebrity. Strangers will now ask for selfies and then not post them.",
+  7: "Nepo baby energy, no nepo. Respect.",
+  8: "New money. Take the price tags off. Or don\u2019t, it\u2019s a look.",
+  9: "A billionaire. Allegedly. I\u2019ll be watching the asterisk.",
+};

@@ -8,7 +8,9 @@ import { createPortal } from "react-dom";
 
 const COLORS = ["#FFC21A", "#FF2E88", "#40B589", "#2F7BEA", "#FF6A3D", "#9FDCFF"];
 
-export function Confetti({ size = "small", onDone }: { size?: "small" | "big"; onDone?: () => void }) {
+/** `origin` (owner, Nov 3, celebrations): "center" bursts from the middle (streaks), "top" puffs from under the HUD (the
+ * banner), "sides" fires up from both bottom corners (the legend). */
+export function Confetti({ size = "small", origin = "center", onDone }: { size?: "small" | "big"; origin?: "center" | "top" | "sides"; onDone?: () => void }) {
   const ref = useRef<HTMLCanvasElement>(null);
   // Drawn on document.body: a card's transform and overflow would clip it otherwise.
   const [host, setHost] = useState<HTMLElement | null>(null);
@@ -22,11 +24,13 @@ export function Confetti({ size = "small", onDone }: { size?: "small" | "big"; o
     const w = window.innerWidth, h = window.innerHeight;
     canvas.width = w * dpr; canvas.height = h * dpr;
     ctx.scale(dpr, dpr);
-    const n = size === "big" ? 220 : 110;
+    const n = origin === "top" ? 46 : size === "big" ? 220 : 110;
     const bursts = size === "big" ? [w * 0.2, w * 0.5, w * 0.8] : [w * 0.5];
     const bits = Array.from({ length: n }, (_, i) => {
-      const x0 = bursts[i % bursts.length], a = -Math.PI / 2 + (Math.random() - 0.5) * 1.6, v = 7 + Math.random() * 9;
-      return { x: x0, y: h * 0.42, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.4,
+      let x0 = bursts[i % bursts.length], y0 = h * 0.42, a = -Math.PI / 2 + (Math.random() - 0.5) * 1.6, v = 7 + Math.random() * 9;
+      if (origin === "top") { y0 = Math.min(150, h * 0.2); a = -Math.PI / 2 + (Math.random() - 0.5) * 2.6; v = 3 + Math.random() * 5; }
+      if (origin === "sides") { const left = i % 2 === 0; x0 = left ? -8 : w + 8; y0 = h * 0.82; a = left ? -Math.PI / 3 - Math.random() * 0.5 : -Math.PI * 2 / 3 + Math.random() * 0.5; v = 13 + Math.random() * 9; }
+      return { x: x0, y: y0, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.4,
         w: 6 + Math.random() * 6, h: 3 + Math.random() * 4, c: COLORS[i % COLORS.length], round: i % 4 === 0 };
     });
     const t0 = performance.now(), life = size === "big" ? 2600 : 2000;

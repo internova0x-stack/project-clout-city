@@ -4,8 +4,8 @@
 // the ladder on the Goals tab, and the reveals when a goal or a streak day pays.
 
 import { GOALS, GOAL_COPY, NEXT_CHAPTER, addDay, chapters, goalById, goalProgress, partLine, streakMilestones, type GoalsState, type StreakReward } from "@/lib/goals";
-import { isStreakMilestone, milestoneName, milestoneSize } from "@/lib/streakMilestones";
-import { Confetti } from "../Confetti";
+import { isStreakMilestone, milestoneName } from "@/lib/streakMilestones";
+import type { Celebration } from "../Celebrate";
 import { RANKS } from "@/lib/ranks";
 import { itemBySku } from "@/lib/city";
 
@@ -226,49 +226,6 @@ export type GoalsReveal =
   /** A round-number streak day with no reward of its own (30, 50, 100…): confetti and a line (owner, Nov 3). */
   | { kind: "milestone"; day: number };
 
-export function GoalsRevealCard({ reveal, onClose, onOpenGoals }: { reveal: GoalsReveal; onClose: () => void; onOpenGoals?: () => void }) {
-  let tag: string, title: string, body: string;
-  if (reveal.kind === "goal") {
-    const copy = GOAL_COPY[reveal.id] ?? GOAL_COPY[NEXT_CHAPTER];
-    const next = reveal.next ? GOAL_COPY[reveal.next] : null;
-    tag = "🎯 Goal done";
-    title = `${copy.emoji} ${copy.title}`;
-    body = `+${(goalById(reveal.id)?.reward ?? 0).toLocaleString("en-US")} clout, banked. ${next ? `Next up: ${next.title.charAt(0).toLowerCase()}${next.title.slice(1)}. No pressure. Some pressure.` : "That's the whole ladder. Iconic behavior."}`;
-  } else if (reveal.kind === "milestone") {
-    tag = `🔥 ${reveal.day}-day streak`;
-    title = `🎉 ${milestoneName(reveal.day)} straight`;
-    body = reveal.day >= 365 ? "A whole year of showing up. New York has never been this consistent about anything." : `${reveal.day} days in a row. Your landlord wishes you were this reliable with rent.`;
-  } else {
-    tag = `🔥 ${reveal.day}-day streak`;
-    if (reveal.reward === "pass") {
-      title = "🎟️ A guest-list pass";
-      body = "One night past any club door, or up to a VIP floor you can't reach yet. The bouncer will pretend he always knew you.";
-    } else if (reveal.reward === "collectible") {
-      const it = reveal.sku ? itemBySku(reveal.sku) : undefined;
-      title = `${it?.emoji ?? "🏆"} ${it?.name ?? "A collectible"}`;
-      body = "Not sold anywhere. Ever. It's in your Possessions, ready to show off at home.";
-    } else {
-      title = `+${GOALS.streak.day3Clout} clout`;
-      body = "Three full days in a row. Consistency is the new main character energy.";
-    }
-  }
-  return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={tag}>
-      {reveal.kind !== "goal" && isStreakMilestone(reveal.day) && <Confetti size={milestoneSize(reveal.day)} />}
-      <div className="scrim" onClick={onClose} />
-      <div className="modal-card reveal-card">
-        <span className="tag tag-event">{tag}</span>
-        <p className="display-md" style={{ margin: "12px 0 8px" }}>{title}</p>
-        <p className="body" style={{ margin: 0, color: "rgba(255,246,224,.85)" }}>{body}</p>
-        <div className="row" style={{ gap: 8, marginTop: 18 }}>
-          {reveal.kind === "goal" && onOpenGoals && <button className="btn btn-secondary" style={{ flex: 1 }} onClick={onOpenGoals}>See goals</button>}
-          <button className="btn btn-taxi" style={{ flex: 1 }} onClick={onClose}>Love that</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /** Compares two goals states for what just paid (the first one found). */
 export function revealBetween(before: GoalsState | null, after: GoalsState, collectibleOwned: (sku: string) => boolean): GoalsReveal | null {
   if (!before) return null;
@@ -285,4 +242,41 @@ export function revealBetween(before: GoalsState | null, after: GoalsState, coll
     if (isStreakMilestone(day)) return { kind: "milestone", day };
   }
   return null;
+}
+
+/**
+ * A goals reveal as a celebration (components/Celebrate.tsx): a goal done is a banner; a streak reward or a round-number day
+ * is a takeover; 100 days and every hundred after, and a year, are legends.
+ */
+export function goalsCelebration(reveal: GoalsReveal, onOpenGoals?: () => void): Celebration {
+  if (reveal.kind === "goal") {
+    const copy = GOAL_COPY[reveal.id] ?? GOAL_COPY[NEXT_CHAPTER];
+    const next = reveal.next ? GOAL_COPY[reveal.next] : null;
+    const reward = goalById(reveal.id)?.reward ?? 0;
+    return { rung: 2, emoji: copy.emoji, tag: "Goal done", title: copy.title,
+      rewards: [{ tone: "clout", text: `+${reward.toLocaleString("en-US")} 🔥` }, ...(next ? [{ text: `Next: ${next.title}` }] : [])], onCta: onOpenGoals };
+  }
+  const day = reveal.day;
+  const share = `A ${day}-day streak in Clout City.`;
+  if (reveal.kind === "milestone" && day >= 100) {
+    return { rung: 4, emoji: "🔥", tag: `${milestoneName(day)} straight`, num: String(day), unit: "days in a row", title: day >= 365 ? "A whole year" : `${milestoneName(day)} straight`,
+      line: day >= 365 ? "All five, every day, for a year. The subway has been on time less often than you." : `${day} days in a row. Your landlord wishes you were this reliable with rent.`,
+      art: "story", share, cta: "Keep going" };
+  }
+  if (reveal.kind === "milestone") {
+    return { rung: 3, emoji: "🔥", num: String(day), tag: `${day}-day streak`, title: `${milestoneName(day)} straight`, art: "story",
+      line: `${day} days in a row. Your landlord wishes you were this reliable with rent.`, lola: "Consistency is the new main character energy.", share, cta: "Keep going" };
+  }
+  const base = { rung: 3 as const, emoji: "🔥", num: String(day), tag: `${day}-day streak`, art: "story" as const, share, cta: "Love that" };
+  if (reveal.reward === "pass") {
+    return { ...base, emoji: "🎟️", title: "A guest-list pass", line: "One night past any club door, or up to a VIP floor you can\u2019t reach yet.",
+      rewards: [{ text: "🎟️ +1 guest pass" }], lola: "The bouncer will pretend he always knew you." };
+  }
+  if (reveal.reward === "collectible") {
+    const it = reveal.sku ? itemBySku(reveal.sku) : undefined;
+    return { ...base, emoji: it?.emoji ?? "🏆", title: it?.name ?? "A collectible", line: "Not sold anywhere. Ever. It\u2019s in your Possessions.",
+      rewards: [{ text: `${it?.emoji ?? "🏆"} Yours to keep` }], lola: "Put it somewhere guests will trip over it." };
+  }
+  return { ...base, title: "Three days straight", line: "Three full days in a row.", rewards: [{ tone: "clout", text: `+${GOALS.streak.day3Clout} 🔥` }],
+    lola: "Consistency is the new main character energy." };
 }
