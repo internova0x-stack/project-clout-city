@@ -140,34 +140,85 @@ export function ChoiceBackSheet({ entry, onClose }: { entry: ChoiceLogEntry | nu
   );
 }
 
+/** Why you're on the bench: the choice that put you there (the latest one with hours in holding), if it's known. */
+export interface HoldingWhy { emoji: string; title: string; choice: string; receipt: string; hours: number }
+export const holdingWhy = (log: ChoiceLogEntry[] | undefined): HoldingWhy | null => {
+  const e = (log ?? []).filter((x) => x.effects.holding).sort((x, y) => y.id - x.id)[0];
+  return e ? { emoji: e.emoji, title: e.title, choice: e.choice, receipt: e.receipt, hours: e.effects.holding ?? 0 } : null;
+};
+
+/** Something to do from the bench: the Phone, the tasks, a favor. */
+export interface HoldingAction { id: string; emoji: string; label: string; meta?: string; onClick: () => void }
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
 /**
- * The holding bench at the 114½ Precinct (migration 0132, police played for laughs): no travel or actions until the time
- * is up, or bail is paid (C$150 an hour left). Sgt. Bev keeps it light.
+ * The holding bench at the 114½ Precinct (migration 0132, police played for laughs; owner, Nov 3: "a pop-up, the reason for
+ * me being at the station, the consequence, how long it will take for me to be freed (with a timer), and actions I can take
+ * in that period"). Opens when a choice puts you there, when the game opens while you're held, and whenever something you
+ * try is refused for it (travel, a gig, an activity) instead of a toast. Bail is C$150 an hour left.
  */
-export function HoldingSheet({ open, until, busy, onBail, onClose }: {
-  open: boolean; until: string | null; busy: boolean; onBail: () => void; onClose: () => void;
+export function HoldingSheet({ open, until, since, why, busy, actions, onBail, onClose }: {
+  open: boolean; until: string | null; since?: string | null; why: HoldingWhy | null; busy: boolean;
+  actions: HoldingAction[]; onBail: () => void; onClose: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!open) return;
-    const t = setInterval(() => setNow(Date.now()), 15_000);
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [open]);
-  const left = until ? Math.max(0, Date.parse(until) - now) : 0;
-  const mins = Math.ceil(left / 60_000);
-  const time = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
+  const end = until ? Date.parse(until) : 0;
+  const left = Math.max(0, end - now);
+  const total = why?.hours ? why.hours * 3_600_000 : since ? end - Date.parse(since) : Math.max(left, 3_600_000);
+  const done = total > 0 ? Math.min(1, Math.max(0, 1 - left / total)) : 0;
+  const s = Math.ceil(left / 1000);
+  const clock = `${Math.floor(s / 3600)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+  const freeAt = until ? new Date(until).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+  const R = 52, C = 2 * Math.PI * R;
   return (
     <Sheet open={open && left > 0} onClose={onClose} label="Holding">
       {until && (
-        <div className="stack-16">
+        <div className="stack-16 holding">
           <div className="choice-head">
-            <span className="choice-icon" aria-hidden="true">🚔</span>
-            <span className="overline">The 114½ Precinct</span>
-            <p className="choice-title">You&apos;re on the bench for {time}.</p>
+            <span className="overline">🚔 The 114½ Precinct · Holding</span>
+            <p className="choice-title">You&apos;re on the bench.</p>
           </div>
-          <p className="choice-receipt"><b>Sgt. Bev:</b> &quot;Sit tight, there&apos;s a vending machine and it mostly works. Or pay the bail and we never speak of this.&quot;</p>
+          <div className="holding-clock" role="timer" aria-label={`Free in ${clock}`}>
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r={R} className="holding-ring-bg" />
+              <circle cx="60" cy="60" r={R} className="holding-ring" strokeDasharray={C} strokeDashoffset={C * (1 - done)} />
+            </svg>
+            <span className="holding-time"><b>{clock}</b><span>free at {freeAt}</span></span>
+          </div>
+          {why && (
+            <div className="holding-why">
+              <span className="overline">Why you&apos;re here</span>
+              <p className="holding-why-title"><span aria-hidden="true">{why.emoji}</span> {why.title}</p>
+              <p className="meta" style={{ margin: 0 }}>You chose <b>{why.choice}</b>. {why.receipt}</p>
+            </div>
+          )}
+          <div className="holding-cost">
+            <span className="overline">While you&apos;re held</span>
+            <ul>
+              <li>🚫 No travel: you stay at the precinct</li>
+              <li>📵 No gigs, shifts or activities</li>
+              <li>📱 Your Phone still works</li>
+            </ul>
+          </div>
+          <p className="choice-receipt"><b>Sgt. Bev:</b> &quot;Vending machine mostly works. Or pay the bail and we never speak of this.&quot;</p>
           <div className="stack-8 sheet-actions">
             <button className="btn btn-taxi" disabled={busy} onClick={onBail}>Pay bail C${bailCost(until, now).toLocaleString("en-US")}</button>
+            {actions.length > 0 && (
+              <div className="holding-do" role="group" aria-label="While you wait">
+                {actions.map((a) => (
+                  <button key={a.id} className="holding-do-btn" disabled={busy} onClick={a.onClick}>
+                    <span aria-hidden="true">{a.emoji}</span><b>{a.label}</b>{a.meta && <span className="meta">{a.meta}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
             <button className="btn btn-ghost" disabled={busy} onClick={onClose}>Wait it out</button>
           </div>
         </div>

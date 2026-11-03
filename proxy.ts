@@ -23,8 +23,10 @@ export async function proxy(request: NextRequest) {
         },
       },
     });
-    // Touching the user refreshes an expiring session.
-    await supabase.auth.getUser();
+    // Touching the session refreshes an expiring one. getClaims checks the token locally when the project signs with
+    // asymmetric keys (no round trip before the first byte; owner, Nov 3: a black screen at launch) and asks the Auth
+    // server otherwise, like getUser did.
+    await supabase.auth.getClaims();
   }
 
   const ref = normalizeInviteCode(request.nextUrl.searchParams.get("ref"));

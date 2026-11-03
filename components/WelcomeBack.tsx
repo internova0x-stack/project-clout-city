@@ -10,6 +10,7 @@ import { Sheet } from "./Sheet";
 import { CATALOG_FURNITURE, itemBySku, type ShopItem } from "@/lib/city";
 import { screenReady } from "@/lib/splash";
 import { GAME_CONFIG } from "@/lib/config";
+import { music, readLocalMuted } from "@/lib/music";
 import { formatCashShort } from "@/lib/economy";
 import { normalizeLook } from "@/lib/look";
 import { homeTemplate, ownedId, placedElsewhere, type OwnedPiece } from "@/lib/rooms";
@@ -55,6 +56,8 @@ export function WelcomeBack({ data, onRestart, preview = false }: { data: Welcom
     window.addEventListener("pageshow", reset);
     return () => { window.removeEventListener("pageshow", reset); window.clearTimeout(fallback.current); };
   }, []);
+  // The game's code downloads while the player looks at their home, so Continue only waits for the server (owner, Nov 3).
+  useEffect(() => { if (!preview) router.prefetch("/home"); }, [router, preview]);
   const [error, setError] = useState<string | null>(null);
   const look = useMemo(() => normalizeLook(data.look, data.style), [data.look, data.style]);
   const outfit = useMemo(() => {
@@ -113,6 +116,9 @@ export function WelcomeBack({ data, onRestart, preview = false }: { data: Welcom
             e.preventDefault();
             if (going) return;
             setGoing(true);
+            // Owner, Nov 3: the music starts on this tap (phones allow audio only from a tap), so it's already playing
+            // when the game opens instead of waiting for the next one.
+            try { music().setMuted(readLocalMuted()); music().start(); } catch { /* no audio */ }
             router.push("/home");
             fallback.current = window.setTimeout(() => window.location.assign("/home"), 20000);
           }}>

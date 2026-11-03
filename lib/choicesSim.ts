@@ -211,6 +211,11 @@ export function createChoicesSim(preset: string | null, opts: Opts): ChoicesApi 
     // A headline for News → City's Lola's Blotter, as if this stay had made the news.
     const l = CHOICE_CARDS.flatMap((c) => c.options.flatMap((o) => o.outcomes.map((x) => x.later))).find((x) => x?.headline && x.effects.holding);
     if (l?.headline) blotter.unshift({ id: nextId++, text: l.headline.replace("{name}", "@you"), at: new Date().toISOString() });
+    // The choice that put you there, for the bench's "Why you're here".
+    const c = CHOICE_CARDS.find((x) => x.options.some((o) => o.outcomes.some((y) => y.effects.holding)));
+    const o = c?.options.find((x) => x.outcomes.some((y) => y.effects.holding));
+    const y = o?.outcomes.find((x) => x.effects.holding);
+    if (c && o && y) log.unshift({ id: nextId++, day: opts.today(), emoji: c.emoji, title: c.title, choice: o.label, receipt: y.text, effects: { holding: 2 } });
   }
   if (preset === "chain") {
     const c = CHOICE_CARDS.find((x) => x.chainOnly);
