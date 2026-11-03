@@ -3,6 +3,7 @@
 import { PushSettings } from "../push/Push";
 import { MembershipRow } from "../store/Membership";
 import { GraphicsSwitch } from "../GraphicsSwitch";
+import { SoundSwitch } from "../SoundSwitch";
 import { ConsentSwitch } from "../ConsentBanner";
 import { DeleteAccountRow } from "../DeleteAccount";
 import { Toggle } from "../Toggle";
@@ -283,6 +284,7 @@ export function PhoneModal({
                     <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Lo-fi city loop</span></span>
                     <Toggle on={!muted} label="Music" onChange={onToggleSound} />
                   </div>
+                  <SoundSwitch />
                   <GraphicsSwitch kind="low" onToast={onToast} />
                   {/* Privacy choices (owner, Oct 27): the analytics consent, changeable any time. */}
                   <ConsentSwitch onToast={onToast} />

@@ -107,8 +107,10 @@ import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
 import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
 import { handle } from "@/lib/validation";
-import { RankUpCard } from "./game/Ranks";
-import { GoalsRevealCard, revealBetween, type GoalsReveal } from "./game/Goals";
+import { rankCelebration } from "./game/Ranks";
+import { CelebrationHost, celebrate } from "./Celebrate";
+import { sfx, unlockSfx } from "@/lib/sfx";
+import { goalsCelebration, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
 import type { MembershipApi, MembershipState } from "@/lib/membership";
 import type { PushApi } from "@/lib/pushClient";
@@ -714,6 +716,25 @@ export function GameShell({
     void chat.card(me.id).then((r) => r.ok && r.data && setMyCard(r.data));
   }, [chat, me.id, profileOpen]);
   const [huntState, setHuntState] = useState<HuntState | null>(null);
+  // Celebrations (owner, Nov 3): a new best skill level is a banner (5 and 10, with their badge, a takeover).
+  const skillSeen = useRef<Record<string, number> | null>(null);
+  useEffect(() => {
+    if (!skills) return;
+    const prev = skillSeen.current;
+    skillSeen.current = Object.fromEntries(skills.map((x) => [x.id, x.best]));
+    if (!prev) return;
+    for (const x of skills) {
+      if (x.best <= (prev[x.id] ?? 0)) continue;
+      const def = SKILLS.find((d) => d.id === x.id);
+      if (!def) continue;
+      const badge = skillBadge(`skill-${x.id}-${x.best}`);
+      const clout = { tone: "clout" as const, text: `+${10 * x.best} 🔥` };
+      celebrate(badge
+        ? { rung: 3, emoji: def.emoji, num: String(x.best), tag: `${def.name} · Level ${x.best}`, title: badge.name, line: `${def.name} level ${x.best}. That\u2019s a badge now.`,
+            rewards: [clout, { text: `${badge.emoji} ${badge.name}` }], lola: "Practice pays. Literally, in this case.", share: `${def.name} level ${x.best} in Clout City: ${badge.name}.` }
+        : { rung: 2, emoji: def.emoji, tag: `${def.name} · Level ${x.best}`, title: `${def.name} level ${x.best}`, rewards: [clout] });
+    }
+  }, [skills]);
   useEffect(() => {
     if (!hunt) return;
     void hunt.state().then((r) => r.ok && setHuntState(r.state));
@@ -782,6 +803,13 @@ export function GameShell({
   useEffect(() => { void loadBiz(); }, [loadBiz]);
   // Player ranks (owner, Oct 15): the reveal when clout or net worth crosses into a new rank.
   const [rankUp, setRankUp] = useState<Rank | null>(previewRankUp ? RANKS[previewRankUp - 1] ?? null : null);
+  // A rank-up is a takeover (the top rank a legend): components/Celebrate.tsx.
+  useEffect(() => {
+    if (!rankUp) return;
+    celebrate(rankCelebration(rankUp, handle(me.display_name)));
+    setRankUp(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rankUp]);
   const [unlockReveal, setUnlockReveal] = useState(previewRankUp === 2);
   const seenRank = useRef<number | null>(null);
   useEffect(() => {
@@ -1235,6 +1263,12 @@ export function GameShell({
   // runs when the Tasks sheet opens and shortly after anything that could finish one (a task, clout, cash, a move).
   const [goalsNow, setGoalsNow] = useState<GoalsState | null>(null);
   const [goalsReveal, setGoalsReveal] = useState<GoalsReveal | null>(previewGoalsReveal ?? null);
+  // Celebrations (owner, Nov 3; components/Celebrate.tsx): a goal done is a banner, streak rewards a takeover, 100+ days a legend.
+  useEffect(() => {
+    if (!goalsReveal) return;
+    celebrate(goalsCelebration(goalsReveal, () => { setTasksTab("goals"); setPanel("tasks"); }));
+    setGoalsReveal(null);
+  }, [goalsReveal]);
   const goalsPrev = useRef<GoalsState | null>(null);
   const ownedSkus = useRef<Set<string>>(new Set());
   ownedSkus.current = new Set((city?.items ?? []).map((i) => i.sku));
@@ -2302,7 +2336,13 @@ export function GameShell({
         setHuntState(r.state);
         if (r.reward) {
           setGain({ cash: r.reward.cash, clout: r.reward.clout });
-          setToast(r.reward.badge ? "🏅 Treasure Hunter badge! Four hunts, four treasures." : `🗺️ Found it: ${r.state.cards[0]?.treasure ?? "the treasure"}. It's in your Collection.`);
+          const treasure = r.state.cards[0]?.treasure ?? "The treasure";
+          celebrate({
+            rung: 3, emoji: "🗺️", art: "story", twist: "chest", tag: r.reward.badge ? "Treasure Hunter badge" : "Treasure found", title: treasure,
+            line: r.reward.badge ? "Four hunts, four treasures. Nobody in Queens is hiding anything from you now." : "This week\u2019s hunt, done. It\u2019s in your Collection.",
+            rewards: [...(r.reward.clout ? [{ tone: "clout" as const, text: `+${r.reward.clout.toLocaleString("en-US")} 🔥` }] : []), ...(r.reward.cash ? [{ tone: "cash" as const, text: `+C$${r.reward.cash.toLocaleString("en-US")}` }] : []), ...(r.reward.badge ? [{ text: "🏅 Treasure Hunter" }] : [])],
+            lola: "You found it before half of Queens did. I\u2019m a little scared of you.", share: `I found ${treasure} in this week's Clout City hunt.`, cta: "Nice",
+          });
           if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
         }
         return r;
@@ -2367,6 +2407,17 @@ export function GameShell({
   // later is a climb.
   // Net worth is everything you own: cash, things and businesses at their worth (owner, Oct 15).
   const otherWorth = city ? netWorth(city) : me.bank_cash;
+  // Celebrations: the fifth task of the day is a banner (rung 2), once, as it happens.
+  const doneSeen = useRef<number | null>(null);
+  useEffect(() => {
+    if (!city) return;
+    const d = tasksDone(city), total = city.tasks.length, before = doneSeen.current;
+    doneSeen.current = d;
+    if (before === null || total === 0 || before >= total || d < total) return;
+    celebrate({ rung: 2, emoji: "💅", tag: "All five done", title: "Unbothered. Moisturized. Paid.",
+      rewards: [{ tone: "cash", text: `+${formatCash(CITY_ECONOMY.dailyTasks.bonus)}` }], onCta: () => { setTasksTab("daily"); setPanel("tasks"); } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city]);
   // Migration 0151: C$ from other players over the weekly cap doesn't count (the server's net_worth agrees).
   const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
@@ -2529,6 +2580,7 @@ export function GameShell({
     music().setMuted(m);
     return music().unlockOnTap();
   }, [player.music_muted]);
+  useEffect(() => unlockSfx(), []);
   const toggleSound = () => {
     const next = !muted;
     setMuted(next);
@@ -3975,17 +4027,10 @@ export function GameShell({
           onUpgrade={() => { setTillsPaid(null); setPhone({ open: true, app: "businesses" }); }} />
       )}
       {wentPublic && <WentPublicCard worth={myWorth} onClose={() => setWentPublic(false)} />}
-      {rankUp && <RankUpCard rank={rankUp} name={handle(me.display_name)} onClose={() => setRankUp(null)} />}
       {unlockReveal && !rankUp && flow === "none" && (
         <UnlockReveal onClose={() => setUnlockReveal(false)} onOpen={() => { setUnlockReveal(false); setPanel(null); setPhone({ open: true, app: null }); }} />
       )}
-      {goalsReveal && !rankUp && (
-        <GoalsRevealCard
-          reveal={goalsReveal}
-          onClose={() => setGoalsReveal(null)}
-          onOpenGoals={() => { setGoalsReveal(null); setTasksTab("goals"); setPanel("tasks"); }}
-        />
-      )}
+      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen} />
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}

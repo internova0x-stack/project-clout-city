@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { LEVEL_NAME, toNext, type Bond, type BondLevel, type FavorPeek } from "@/lib/npcBonds";
 import { sparks } from "../motion";
+import { sfx } from "@/lib/sfx";
+import { celebrate } from "../Celebrate";
 
 // NPC favors and friendships (migration 0159; owner, Nov 3): under a regular's line, the favor they'd ask ("🤝 Can you
 // help?") and how close you are (hearts, the next level, "on the house" for a Friend, the big favor back for Family).
@@ -40,6 +42,11 @@ export function FavorStrip({ npc, name, favor }: { npc: string; name: string; fa
     seenLevel.set(npc, level);
     if (!before || HEARTS[level] <= HEARTS[before] || bond.burnedUntil) return;
     setLevelUp(level);
+    sfx.heart();
+    // Family is a takeover (components/Celebrate.tsx): the regular will do you a big favor now.
+    if (level === "family") celebrate({ rung: 3, emoji: "💛", art: "people", tag: "Family", title: `${name} is family now`,
+      line: `${name} trusts you completely. Once a month, they\u2019ll do you a big favor back.`, rewards: [{ text: "💛 A big favor back" }, { text: "☕ On the house" }],
+      lola: "Family in this city? That\u2019s rarer than a fair rent.", share: `${name} is family now in Clout City.`, cta: "Aww" });
     const s = setTimeout(() => sparks(heartsRef.current?.children[HEARTS[level] - 1], 14, 46), 120);
     const t = setTimeout(() => setLevelUp(null), 3200);
     return () => { clearTimeout(s); clearTimeout(t); };

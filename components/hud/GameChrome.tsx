@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { bump, coinsFor, flyTo, lastTap, reducedMotion, useCountUp } from "../motion";
+import { sfx } from "@/lib/sfx";
 import { ECONOMY, formatCash, formatCashShort, formatShort } from "@/lib/economy";
 import type { StatKey, StatTip } from "@/lib/recent";
 import type { ComingSoonKey } from "../ComingSoon";
@@ -121,7 +122,8 @@ export function GameChrome({
       flyTo(ref.current, {
         from, kind, count: coinsFor(amount, kind),
         label: key === "bank" ? `+${formatCash(amount)}` : `+${amount.toLocaleString("en-US")} 🔥`,
-        onLand: () => setLanded((l) => ({ ...l, [key]: now })),
+        // The sound kit: the coin (climbing on a combo) for cash, the sparkle for clout, as the coins land.
+        onLand: () => { setLanded((l) => ({ ...l, [key]: now })); if (kind === "cash") sfx.coin(); else sfx.sparkle(); },
       });
     };
     gain("bank", bankRef);
@@ -130,6 +132,7 @@ export function GameChrome({
     p.done = values.dailyDone;
     if (d !== undefined && values.dailyDone > d) {
       bump(tasksRef.current);
+      sfx.tick();
       if (!reducedMotion()) {
         setTaskPop(`✓ ${values.dailyDone}/${values.dailyTotal}`);
         const t = setTimeout(() => setTaskPop(null), 1800);

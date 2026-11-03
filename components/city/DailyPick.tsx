@@ -185,12 +185,13 @@ function LolaSays({ name, hello, streak, action, party, close, buttons }: {
 }
 
 /** One digit column of the odometer: rolls up from `from` (null: a new digit appearing) to `to`, wrapping past 9. */
-function Reel({ from, to }: { from: number | null; to: number }) {
+function Reel({ from, to, i, n }: { from: number | null; to: number; i: number; n: number }) {
   const seq: (number | null)[] = [from];
   if (from === null) seq.push(to);
   else for (let k = from; k !== to;) { k = (k + 1) % 10; seq.push(k); }
   return (
-    <span className="wb-reel-col">
+    // One gradient across the whole number: each column shows its own slice of it.
+    <span className="wb-reel-col" style={{ ["--gx" as string]: n > 1 ? `${(i / (n - 1)) * 100}%` : "0%", ["--gw" as string]: `${n * 100}%` }}>
       <span className={`wb-reel${seq.length > 1 ? " rolling" : ""}`} style={{ ["--steps" as string]: seq.length - 1 }}>
         {seq.map((d, i) => <span key={i} className="wb-reel-digit">{d === null ? "\u00a0" : d}</span>)}
       </span>
@@ -215,6 +216,13 @@ function StreakWelcome({ name, hello, streak, streakNext, action, mile, party, c
   const risk = action.kind === "streak";
   const [still] = useState(() => reducedMotion());
   const roll = !still && !risk && days > 0;
+  // The reels only while the number rolls; once it lands it is the plain number again (one glyph run, nothing clipped).
+  const [rolling, setRolling] = useState(roll);
+  useEffect(() => {
+    if (!rolling) return;
+    const t = setTimeout(() => setRolling(false), 1450);
+    return () => clearTimeout(t);
+  }, [rolling]);
   const flame = useRef<HTMLSpanElement>(null);
   const week = useRef<HTMLSpanElement>(null);
   // The timeline (ms after the card opens): the flame flares at 560, the number rolls 640 to 1340, the dots light from 1440.
@@ -234,7 +242,7 @@ function StreakWelcome({ name, hello, streak, streakNext, action, mile, party, c
         <span className="wb-streak-flame" ref={flame} aria-hidden="true">🔥</span>
         <span className="wb-streak-n" aria-label={`${days}`}>
           <span className="wb-streak-slant" aria-hidden="true">
-            {roll ? to.split("").map((d, i) => <Reel key={`${i}-${to.length}`} from={from[i] === " " ? null : Number(from[i])} to={Number(d)} />) : days}
+            {rolling ? to.split("").map((d, i) => <Reel key={`${i}-${to.length}`} from={from[i] === " " ? null : Number(from[i])} to={Number(d)} i={i} n={to.length} />) : days}
           </span>
         </span>
         <span className="wb-streak-label">{days ? "day streak" : "Start a streak today"}</span>
