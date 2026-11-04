@@ -2,7 +2,7 @@
 
 import { randomInt, randomUUID } from "node:crypto";
 import {
-  CareerError, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, answerTask, trackCards, CAREER, trackById,
+  CareerError, careerError, careerView, hire, leaveTransition, office, quit, stickItOut, refresh, startDay, answerTask, trackCards, CAREER, trackById,
   type Answer, type OfficeAction, type Target, type CareerCtx, type CareerResult, type CareerScreen, type CareerState, type Effects, type Payout, type TrackId, type WorkStyle,
 } from "@/lib/careers";
 import { CAREER_CONTENT as content } from "@/lib/careersContent";
@@ -15,6 +15,7 @@ import type { AspirationId, AspirationState } from "@/lib/aspirations";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { companyOf, companyView, type CompanyState, type CompanyView } from "@/lib/companies";
 import { companiesNow, companyAdd, companyNow } from "@/lib/companyServer";
+import { CAMPAIGN_CONTENT } from "@/lib/campaignContent";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Careers (spec section 30; migration 0135). The rules run here with a crypto random source: the browser sends a choice
@@ -57,6 +58,10 @@ async function load(id: string, admin: Admin): Promise<Context | { error: string
   // Part 3: businesses owned, for the quit card's "Quit to run your business".
   const biz = await admin.from("player_businesses").select("business_id", { count: "exact", head: true }).eq("player_id", id);
   ctx.businesses = biz.count ?? 0;
+  // A running campaign is a full-time job (owner, Nov 4): the career job goes on leave while it runs.
+  const camp = await admin.from("campaigns").select("candidate").eq("player_id", id).eq("status", "running").maybeSingle();
+  const cand = camp.data ? CAMPAIGN_CONTENT.candidates.find((c) => c.id === (camp.data as { candidate: string }).candidate) : null;
+  ctx.onLeave = cand ? { candidate: cand.short } : null;
   // Company health (migration 0161): the employer's week, shared city-wide (nothing before the migration).
   const track = ctx.job?.status === "employed" ? ctx.job.state.track : null;
   const def = track ? companyOf(track) : undefined;
@@ -126,6 +131,7 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
   const state = structuredClone(ctx.job.state);
   const liferBefore = !!state.lifer;
   const dayDoneBefore = !!(state.today?.day === today && state.today.done);
+  leaveTransition(state, ctx.onLeave, today);
   const caught = refresh(state, today, ctx, rng);
   let r: ReturnType<typeof change> = {};
   try {
@@ -165,8 +171,9 @@ export async function careerScreen(): Promise<Out> {
   const today = nyDay();
   if (ctx.job?.status === "employed") {
     const state = structuredClone(ctx.job.state);
+    const moved = leaveTransition(state, ctx.onLeave, today);
     const r = refresh(state, today, ctx, rng);
-    if (r.changed) {
+    if (r.changed || moved) {
       const err = await save(w.admin, w.id, ctx, state, { payouts: r.payouts });
       if (err) return { ok: false, error: err };
     }
@@ -181,6 +188,7 @@ export async function careerApply(track: TrackId, answer: Answer): Promise<Out> 
   if ("error" in ctx) return { ok: false, error: ctx.error };
   if (!trackById(track) || !["honest", "polish", "connection"].includes(answer)) return { ok: false, error: careerError("unknown") };
   if (ctx.job?.status === "employed") return { ok: false, error: careerError("employed") };
+  if (ctx.onLeave) return { ok: false, error: careerError("campaign_running") };
   const today = nyDay();
   const id = randomUUID();
   let state: CareerState;

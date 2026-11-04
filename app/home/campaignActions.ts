@@ -14,6 +14,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 import { unlockedCards } from "@/lib/cardFormat";
 import { integrityBand } from "@/lib/choices";
 import { memoryOf } from "@/lib/memoryServer";
+import { leaveTransition, trackById, type CareerState } from "@/lib/careers";
 
 // Campaign Mode (docs/CAMPAIGN-MODE.md; migration 0127). The rules run here, on the server, with a crypto random
 // source: the browser sends a choice and gets back the player's view, never a roll or the hidden odds. The campaign's
@@ -129,7 +130,7 @@ export async function campaignScreen(): Promise<Out> {
       if (err) return { ok: false, error: err };
     }
   }
-  return { ok: true, data: screen(ctx, today) };
+  return { ok: true, data: screen(ctx, today, { job: await careerJob(w.admin, w.id) }) };
 }
 
 /** Option C: the manager's own Halo ↔ Hustler band, once their meter has been revealed (null before). */
@@ -178,7 +179,31 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
     if (!code) console.error("campaign_begin failed", error);
     return { ok: false, error: code ? campaignError(code) : campaignError("unknown") };
   }
+  // A campaign is a full-time job (owner, Nov 4): the career job goes on leave now (no reviews or pay until it's over).
+  await careerLeave(w.admin, w.id, content.candidates.find((c) => c.id === candidate)!.short);
   return campaignScreen();
+}
+
+/** Puts the player's career job on leave (lib/careers.ts leaveTransition) through career_save. Never blocks the campaign. */
+async function careerLeave(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string, candidate: string) {
+  const { data } = await admin.from("careers").select("id, version, level, status, state").eq("player_id", player).eq("status", "employed").maybeSingle();
+  const job = data as { id: string; version: number; level: number; status: string; state: CareerState } | null;
+  if (!job) return;
+  const state = structuredClone(job.state);
+  if (!leaveTransition(state, { candidate }, nyDay())) return;
+  const { error } = await admin.rpc("career_save", {
+    p_player: player, p_id: job.id, p_version: job.version, p_state: state, p_level: state.level, p_status: state.status,
+    p_workday: null, p_energy: 0, p_mood: 0, p_payouts: [],
+  });
+  if (error) console.error("career leave failed", error);
+}
+
+/** The player's career job, for the start screen's "your job goes on leave" note. */
+async function careerJob(admin: NonNullable<ReturnType<typeof getAdminSupabase>>, player: string): Promise<CampaignScreen["job"]> {
+  const { data } = await admin.from("careers").select("state").eq("player_id", player).eq("status", "employed").maybeSingle();
+  const st = (data as { state: CareerState } | null)?.state;
+  const track = st ? trackById(st.track) : undefined;
+  return st && track ? { employer: track.employer, title: track.levels[st.level - 1]?.title ?? "", leave: !!st.leave } : null;
 }
 
 export async function campaignBudget(budget: Budget): Promise<Out> {

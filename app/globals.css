@@ -3267,4 +3267,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .co-row-name { font-weight:700; font-size:14px; color:var(--text-1); }
 .co-row-health { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
 @media (prefers-reduced-motion: reduce) { .co-bar > span { transition:none; } }
+/* A campaign puts the career job on leave (owner, Nov 4). */
+.careers-leave, .camp-leave-note { border:1px solid rgba(47,95,179,.25); background:#EAF0FA; }
+.camp-leave-note .title, .careers-leave .title { color:#1F3F78; }
 

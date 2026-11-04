@@ -76,6 +76,8 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
       clout: opts.clout,
       canStart: unlocked && (!state || state.phase === "over"),
       nextStartOn: null,
+      // A sample job, so the start screen shows that it goes on leave (owner, Nov 4).
+      job: { employer: "The Gossip Group", title: "Host", leave: !!state && state.phase !== "over" },
       bank,
       candidates: candidateCards(content),
       wonBefore: won,

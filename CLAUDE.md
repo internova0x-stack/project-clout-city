@@ -656,6 +656,12 @@ components live in `app/globals.css`.
   raises frozen and work mood −3; under 20 a hiring freeze (promotions wait); never layoffs. UI: components/careers/Company.tsx
   (`CompanyCard` under the job card, `BusinessPages` in News → City via `careers.companies()`). `?company=high|low|freeze` in the
   preview (with `?career=work`).
+  A campaign is a full-time job (owner, Nov 4: "put the job on leave"): while a campaign runs (campaigns.status 'running', read by
+  careerActions `load` as CareerCtx.onLeave) the career job is on leave (`leaveTransition`, lib/careers.ts: CareerState.leave; no
+  workdays 'on_leave', no reviews or pay, level and trust kept; back the day the campaign ends with a fresh week); campaignStart puts it
+  on leave at once (`careerLeave` through career_save); no new job mid-campaign ('campaign_running'); City Hall staff get their own line.
+  The campaign pays its manager C$300 a campaign week from its funds (`CAMPAIGN.money.fee`, ledger 'campaign_fee', which migration 0161's
+  campaign_save accepts; the Budget card lists it). The start screen says so (`CampaignScreen.job`). `?career=leave` in the preview.
 - Office cards (no migration; owner, Oct 31: "go with 1, 2, and 3"; spec section 29): content/choices/office.json, 19 Moral
   Choices cards for players with a career job (10 for any job, one per track) plus two chain follow-ups (office-expenses-audit,
   finance-pickle-suits). `where.work` means a card happens at your job: right after a career workday (GameShell asks with after

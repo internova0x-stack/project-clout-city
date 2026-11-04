@@ -5,7 +5,7 @@
 // ends, and a review every 3 preview days, so the loop can be walked in a minute.
 
 import {
-  CareerError, addDays, answerTask, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, trackCards,
+  CareerError, addDays, answerTask, careerError, careerView, hire, leaveTransition, office, quit, stickItOut, refresh, startDay, trackCards,
   type CareerApi, type CareerCtx, type TrackId, type CareerResult, type CareerScreen, type CareerState,
 } from "./careers";
 import { CAREER_CONTENT as content } from "./careersContent";
@@ -28,7 +28,7 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1, company: coCtx() });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1, company: coCtx(), onLeave: preset === "leave" ? { candidate: "Kaylee" } : null });
   const coCtx = (): CareerCtx["company"] => {
     const c = employer();
     const def = c ? companyOf(c.track) : undefined;
@@ -57,6 +57,8 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
     // ?career=boss: the big boss likes you and you're performing: Push the boss out is open. ?career=quit: work mood 22, the quit card.
     if (preset === "boss") { state.bigBoss = 72; state.performance = 78; state.mentored = 2; }
     if (preset === "quit") { state.workMood = 22; }
+    // ?career=leave: running Kaylee Starr's campaign, so the job is on leave.
+    if (preset === "leave") leaveTransition(state, { candidate: "Kaylee" }, day);
     if (preset === "review" || preset === "warning" || preset === "fired") {
       state.performance = preset === "review" ? 82 : 30;
       state.trust.manager = preset === "review" ? 70 : 40;
@@ -130,4 +132,4 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 }
 
-export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "leave", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "fired"] as const;

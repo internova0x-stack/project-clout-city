@@ -200,6 +200,13 @@ function CandidateDetail({ data, card, busy, onBack, onStart }: { data: Campaign
         <input type="range" min={0} max={maxSeed} step={100} value={Math.min(seed, maxSeed)} onChange={(e) => setSeed(Number(e.target.value))} aria-label="Seed money" disabled={maxSeed === 0} />
         <span className="hud-number">{cs(Math.min(seed, maxSeed))}</span>
       </div>
+      {/* A campaign is a full-time job (owner, Nov 4): the career job goes on leave. */}
+      {data.job && !data.job.leave && (
+        <div className="card stack-4 camp-leave-note">
+          <span className="title">💼 Your job goes on leave</span>
+          <span className="subtext">Running a campaign is a full-time job. Your job as {data.job.title} at {data.job.employer} pauses: no workdays, reviews or pay until the election. Your level and coworkers wait for you, and the campaign pays you {cs(CAMPAIGN.money.fee)} a week as its manager.</span>
+        </div>
+      )}
       <button className="btn btn-taxi" disabled={busy || !data.canStart} onClick={() => onStart(Math.min(seed, maxSeed))}>
         {data.canStart ? `Run ${card.short}'s campaign ›` : data.nextStartOn ? `Opens ${fmtDay(data.nextStartOn)}` : "Not yet"}
       </button>
@@ -593,7 +600,7 @@ function BudgetCard({ v, busy, onSave }: { v: CampaignView; busy: boolean; onSav
   const m = v.money;
   const ads = b.digital + b.street + b.tv;
   const comingIn = m.small + m.donors;
-  const goingOut = ads + b.staff + b.community + m.calendar + m.payroll;
+  const goingOut = ads + b.staff + b.community + m.calendar + m.payroll + m.fee;
   const net = comingIn - goingOut;
   return (
     <div className="card stack-12">
@@ -618,6 +625,7 @@ function BudgetCard({ v, busy, onSave }: { v: CampaignView; busy: boolean; onSav
         {b.community > 0 && <div className="camp-ledger-row"><span>🎁 Community giving</span><b>−{cs(b.community)}</b></div>}
         {m.calendar > 0 && <div className="camp-ledger-row"><span>📅 Calendar (rallies, tours, turnout)</span><b>−{cs(m.calendar)}</b></div>}
         <div className="camp-ledger-row"><span>🧾 Team payroll</span><b>−{cs(m.payroll)}</b></div>
+        <div className="camp-ledger-row"><span>🧑‍💼 Your fee <span className="meta">(to your bank)</span></span><b>−{cs(m.fee)}</b></div>
         {m.ops > 0 && <div className="camp-ledger-row paid"><span>🕶️ Shadow ops <span className="meta">(already paid)</span></span><b>{cs(m.ops)}</b></div>}
         <div className={`camp-ledger-total ${net >= 0 ? "up" : "down"}`}><span>This week</span><b>{net >= 0 ? "+" : "−"}{cs(Math.abs(net))}</b></div>
         <span className="meta">Funds after End Week: about {cs(Math.max(0, v.cash + net))}{dirty ? " (once saved)" : ""}.</span>
