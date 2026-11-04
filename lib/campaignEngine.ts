@@ -658,6 +658,9 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
   const small = Math.round(CAMPAIGN.money.small * c.donor * state.links.fundMult * (momentumLevel === "low" ? M.lowDonors : 1));
   state.cash += small;
   state.raised += small;
+  // The manager's fee comes first: you're the one doing this full time.
+  const fee = Math.min(state.cash, CAMPAIGN.money.fee);
+  if (fee > 0) { state.cash -= fee; payouts.push({ currency: "cash", amount: fee, kind: "campaign_fee", ref: `${state.id}:fee:${state.week}` }); }
   const payroll = CAMPAIGN.money.payroll;
   if (state.cash >= payroll) state.cash -= payroll;
   else { state.cash = 0; state.morale = clamp(state.morale - 15); for (const s of state.staff) s.loyalty = clamp(s.loyalty - 10); lines.push("Payroll bounced. The team noticed."); }
@@ -898,7 +901,7 @@ export interface CampaignView {
   energy: number;
   energyPlan: number;
   /** The week's money (owner, Nov 4): what comes in (estimated; donor calls as booked) and what goes out at End Week. */
-  money: { small: number; donors: number; ads: number; staff: number; community: number; calendar: number; payroll: number; ops: number };
+  money: { small: number; donors: number; ads: number; staff: number; community: number; calendar: number; payroll: number; fee: number; ops: number };
   /** Every stakeholder and where they stand with the campaign (−2 to +2; mayorAlly: one of Papa-Dani's people). */
   allies: { id: string; name: string; role: string; age?: number; vibe?: string; trust: number; mayorAlly: boolean }[];
   intel: number;
@@ -966,7 +969,7 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
         small: Math.round(CAMPAIGN.money.small * per),
         donors: state.slots.filter((a) => a?.kind === "donors").length * Math.round(CAMPAIGN.money.donorCall * per),
         ads: b.digital + b.street + b.tv, staff: b.staff ?? 0, community: b.community ?? 0,
-        calendar: calendarCash(state), payroll: CAMPAIGN.money.payroll,
+        calendar: calendarCash(state), payroll: CAMPAIGN.money.payroll, fee: CAMPAIGN.money.fee,
         ops: state.slots.reduce((n, a) => n + (a?.kind === "op" ? a.paid?.cash ?? 0 : 0), 0),
       };
     })(),

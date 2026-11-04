@@ -59,6 +59,9 @@ export const CAMPAIGN = {
     payroll: 1200,
     slotCost: { rally: 800, tour: 200, gotv: 500 } as Record<string, number>,
     small: 3000, donorCall: 4000,
+    /** The campaign manager's fee (owner, Nov 4: a campaign is a full-time job, so the job goes on leave): paid from the
+     * campaign's funds to the manager's own bank each campaign week (ledger 'campaign_fee', migration 0161). */
+    fee: 300,
     staff: { per: 500, morale: 2, loyalty: 1, maxMorale: 10 },
     community: { per: 1000, integrity: 1, maxIntegrity: 4, rating: 0.2, maxRating: 0.8 },
   },
@@ -350,7 +353,7 @@ export interface CampaignState {
 }
 
 /** A payment into or out of the main game, which the server writes to the ledger once (ledger kind, ref). */
-export interface Payout { currency: "cash" | "clout"; amount: number; kind: "campaign_seed" | "campaign_skim" | "campaign_repay" | "campaign_poll" | "campaign_reward" | "campaign_task"; ref: string }
+export interface Payout { currency: "cash" | "clout"; amount: number; kind: "campaign_seed" | "campaign_skim" | "campaign_repay" | "campaign_poll" | "campaign_reward" | "campaign_task" | "campaign_fee"; ref: string }
 
 /** Citywide rating: places weighted by population. */
 export function citywide(state: Pick<CampaignState, "places">, places: Place[]): { you: number; mayor: number } {
@@ -472,6 +475,8 @@ export interface CampaignScreen {
   /** What just happened, after an action. */
   receipt?: string;
   round?: { delta: number; line: string };
+  /** The manager's career job (owner, Nov 4): it goes on leave while a campaign runs. */
+  job?: { employer: string; title: string; leave: boolean } | null;
 }
 
 export type CampaignResult<T> = { ok: true; data: T } | { ok: false; error: string };

@@ -1,5 +1,6 @@
 "use client";
 
+import { CompanyCard } from "./Company";
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { PLACES } from "@/lib/city";
@@ -216,6 +217,9 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
         </p>
       </div>
 
+      {/* Company health (migration 0161): the business, the boss's target this week and what its health does to you. */}
+      {data.company && <CompanyCard c={data.company} mine={data.companyMine} />}
+
       {v.quitCard && (
         <div className="card stack-12 careers-quitcard">
           <p className="title" style={{ margin: 0 }}>😩 You dread coming in</p>
@@ -281,9 +285,19 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
           )}
         </div>
       )}
-      {v.today && <Workday v={v} busy={busy} onTask={onTask} />}
+      {/* On leave while a campaign runs (owner, Nov 4: a campaign is a full-time job). */}
+      {v.leave && (
+        <div className="card stack-8 careers-leave">
+          <p className="title" style={{ margin: 0 }}>🗳️ On leave: you&apos;re running {v.leave.candidate}&apos;s campaign</p>
+          <p className="subtext" style={{ margin: 0 }}>
+            No workdays, reviews or pay until the election. Your level, your coworkers and your desk wait for you, and you&apos;re back
+            the day the campaign ends. The campaign pays you a manager&apos;s fee each week.
+          </p>
+        </div>
+      )}
+      {v.today && !v.leave && <Workday v={v} busy={busy} onTask={onTask} />}
       {v.officeLeft && <Office v={v} busy={busy} onOffice={onOffice} />}
-      {!v.today && !v.canWork && (
+      {!v.today && !v.canWork && !v.leave && (
         <div className="card"><p className="subtext" style={{ margin: 0 }}>✅ You've worked today. Come back tomorrow.</p></div>
       )}
 

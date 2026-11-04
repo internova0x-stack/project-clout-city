@@ -641,6 +641,27 @@ components live in `app/globals.css`.
   candidate's Integrity) and the storylet gate (`gateProblems`): career tasks may carry `when`/`slots`, campaign situations
   `when`; the servers pass the engines only what memory unlocked (`unlockedCards` → CareerCtx.unlocked, endWeek's
   `opts.unlocked`), one gated card first per workday or End Week. validate:content and tests/cardFormat.test.ts run it.
+- Company health (migration 0161, owner Nov 4: "context into the office work and business… the health of the business should be
+  part of the world state"; "Keep the bonuses", "Only freeze"): lib/companies.ts (pure, tests/companies.test.ts) gives every career
+  track a company (`COMPANIES`: situation, the big boss's weekly target in the business's units, lines for each level, Blotter
+  headlines) and one shared state per company in public.companies (RLS on, no grants): health 0-100 (from 55), this week's target and
+  the players' part (`contrib`). The week (Monday to Sunday, New York) closes the first time anyone looks after it ends
+  (lib/companyServer.ts `syncCompanies`, versioned so only one writer rolls it): the simulated staff's share (`staffShare`, seeded by
+  company and week, 0.72-1.08 of the target, a little better when healthy) plus players' work against the target: hit +8 (+4 at 120%),
+  missed −8 (−4 under 70%); Thriving raises next week's target ×1.1, Struggling eases it ×0.95. Turning Thriving or Struggling (or
+  recovering) posts Lola's Blotter (choice_headlines kind 'city'). A finished workday adds `workdayShare` (hustle/steady/coast × how the
+  tasks went, at most 3% of the target) through `company_add` (only to the week it names) and the line "You moved <boss>'s target";
+  CareerState.coPart keeps the player's own part for the red slice of the bar. What health does (`companyRules`, read through
+  CareerCtx.company): Thriving (67+) a 10% bonus on payday (with the tips row) and work mood +2 a workday; Struggling (under 34)
+  raises frozen and work mood −3; under 20 a hiring freeze (promotions wait); never layoffs. UI: components/careers/Company.tsx
+  (`CompanyCard` under the job card, `BusinessPages` in News → City via `careers.companies()`). `?company=high|low|freeze` in the
+  preview (with `?career=work`).
+  A campaign is a full-time job (owner, Nov 4: "put the job on leave"): while a campaign runs (campaigns.status 'running', read by
+  careerActions `load` as CareerCtx.onLeave) the career job is on leave (`leaveTransition`, lib/careers.ts: CareerState.leave; no
+  workdays 'on_leave', no reviews or pay, level and trust kept; back the day the campaign ends with a fresh week); campaignStart puts it
+  on leave at once (`careerLeave` through career_save); no new job mid-campaign ('campaign_running'); City Hall staff get their own line.
+  The campaign pays its manager C$300 a campaign week from its funds (`CAMPAIGN.money.fee`, ledger 'campaign_fee', which migration 0161's
+  campaign_save accepts; the Budget card lists it). The start screen says so (`CampaignScreen.job`). `?career=leave` in the preview.
 - Office cards (no migration; owner, Oct 31: "go with 1, 2, and 3"; spec section 29): content/choices/office.json, 19 Moral
   Choices cards for players with a career job (10 for any job, one per track) plus two chain follow-ups (office-expenses-audit,
   finance-pickle-suits). `where.work` means a card happens at your job: right after a career workday (GameShell asks with after

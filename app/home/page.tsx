@@ -39,7 +39,7 @@ import { characterRemembered } from "./characterActions";
 import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState, favorOpen, favorPeek, npcBigFavor, npcBonds, npcPerk } from "./choiceActions";
 import { underworldDeclineHire, underworldHire, underworldHires, underworldJob, underworldLawyer, underworldRunHire, underworldRunners, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
 import { galaDonate, galaState } from "./galaActions";
-import { careerApply, careerOffice, careerQuit, careerStick, careerAspire, careerScreen, careerStart, careerTask } from "./careerActions";
+import { careerApply, careerCompanies, careerOffice, careerQuit, careerStick, careerAspire, careerScreen, careerStart, careerTask } from "./careerActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
@@ -213,7 +213,7 @@ export default async function HomePage() {
         ...(econ.ok ? { hires: underworldHires, runners: underworldRunners, hire: underworldHire, runHire: underworldRunHire, declineHire: underworldDeclineHire } : {}),
       } : undefined}
       gala={city ? { state: galaState, donate: galaDonate } : undefined}
-      careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit, stick: careerStick, aspire: careerAspire } : undefined}
+      careers={city ? { screen: careerScreen, apply: careerApply, start: careerStart, task: careerTask, office: careerOffice, quit: careerQuit, stick: careerStick, aspire: careerAspire, companies: careerCompanies } : undefined}
       // Migration 0131: Moral Choices (the actions answer quietly until it has run).
       choices={city ? { state: choiceState, offer: choiceOffer, choose: choiceChoose, skip: choiceSkip, seen: choiceSeen, bail: choiceBail, blotter: choiceBlotter, conditions: choiceConditions, favorPeek, favorOpen, bonds: npcBonds, perk: npcPerk, bigFavor: npcBigFavor } : undefined}
       remembered={city ? characterRemembered : undefined}

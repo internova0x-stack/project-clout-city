@@ -5,13 +5,17 @@
 // ends, and a review every 3 preview days, so the loop can be walked in a minute.
 
 import {
-  CareerError, addDays, answerTask, careerError, careerView, hire, office, quit, stickItOut, refresh, startDay, trackCards,
+  CareerError, addDays, answerTask, careerError, careerView, hire, leaveTransition, office, quit, stickItOut, refresh, startDay, trackCards,
   type CareerApi, type CareerCtx, type TrackId, type CareerResult, type CareerScreen, type CareerState,
 } from "./careers";
 import { CAREER_CONTENT as content } from "./careersContent";
 import { changeOn, type AspirationState } from "./aspirations";
+import { COMPANIES, companyOf, companyView, newCompany, type CompanyState } from "./companies";
 
-export function createCareerSim(preset: string | null, opts: { clout: number; energy: number; atPlace: () => string | null; onBank?: (delta: number) => void; onEnergy?: (delta: number) => void }): CareerApi {
+/** Sample company health in the preview (?company=high|low|freeze sets the employer's; the rest are fixed). */
+const SAMPLE_HEALTH: Record<string, number> = { hospitality: 58, tech: 24, media: 41, cityhall: 63, streaming: 31, fashion: 58, realestate: 69, finance: 47, law: 36 };
+
+export function createCareerSim(preset: string | null, opts: { clout: number; energy: number; atPlace: () => string | null; onBank?: (delta: number) => void; onEnergy?: (delta: number) => void; company?: string | null }): CareerApi {
   const rng = Math.random;
   let day = "2026-11-02";
   let energy = Math.max(60, opts.energy);
@@ -24,10 +28,26 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1 });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1, company: coCtx(), onLeave: preset === "leave" ? { candidate: "Kaylee" } : null });
+  const coCtx = (): CareerCtx["company"] => {
+    const c = employer();
+    const def = c ? companyOf(c.track) : undefined;
+    return c && def ? { health: c.health, target: c.target, unit: def.unit, boss: def.boss, decimals: def.decimals } : undefined;
+  };
   let timer: ReturnType<typeof setTimeout> | null = null;
+  // Company health (migration 0161) in memory: this week, the sample health, last week's result.
+  const companies = new Map<string, CompanyState>(COMPANIES.map((d) => {
+    const c = newCompany(d, Date.now());
+    c.health = SAMPLE_HEALTH[d.track] ?? 55;
+    c.history = [{ week: c.week, hit: c.health >= 50, progress: d.target, target: d.target, health: c.health }];
+    return [d.track, c];
+  }));
+  let mine = 0;
+  const employer = () => (state && state.status === "employed" ? companies.get(state.track) ?? null : null);
 
   if (preset && !["new", "apply", "welcome"].includes(preset)) {
+    const pickHealth = opts.company === "high" ? 82 : opts.company === "low" ? 28 : opts.company === "freeze" ? 15 : null;
+    if (pickHealth !== null) for (const t of ["hospitality", "cityhall", "streaming", "fashion", "realestate", "finance", "law"]) companies.get(t)!.health = pickHealth;
     // ?career=cityhall: a Public Servant at the Mayor's office, clocked in.
     state = hire(`preview-${preset}`, ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset) ? preset as TrackId : "hospitality", ctx(), "honest", day);
     if (preset === "day" || preset === "office" || preset === "grudge" || preset === "boss" || preset === "quit" || ["cityhall", "streaming", "fashion", "realestate", "finance", "law"].includes(preset)) startDay(content, state, "steady", ctx(), day, rng);
@@ -37,6 +57,8 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
     // ?career=boss: the big boss likes you and you're performing: Push the boss out is open. ?career=quit: work mood 22, the quit card.
     if (preset === "boss") { state.bigBoss = 72; state.performance = 78; state.mentored = 2; }
     if (preset === "quit") { state.workMood = 22; }
+    // ?career=leave: running Kaylee Starr's campaign, so the job is on leave.
+    if (preset === "leave") leaveTransition(state, { candidate: "Kaylee" }, day);
     if (preset === "review" || preset === "warning" || preset === "fired") {
       state.performance = preset === "review" ? 82 : 30;
       state.trust.manager = preset === "review" ? 70 : 40;
@@ -50,7 +72,10 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
 
   const screen = (receipt?: string): CareerResult<CareerScreen> => ({
     ok: true,
-    data: { tracks: trackCards(ctx(), day), canConnect: true, job: state ? careerView(content, state, day, ctx()) : null, energy, atPlace: ctx().atPlace, receipt, aspiration: asp, businesses: 1 },
+    data: {
+      tracks: trackCards(ctx(), day), canConnect: true, job: state ? careerView(content, state, day, ctx()) : null, energy, atPlace: ctx().atPlace, receipt, aspiration: asp, businesses: 1,
+      company: employer() ? companyView(companyOf(employer()!.track)!, employer()!, Date.now()) : null, companyMine: mine,
+    },
   });
   const pay = (ps: { currency: string; amount: number }[]) => { for (const p of ps) if (p.currency === "cash") opts.onBank?.(p.amount); };
   const nextDay = () => {
@@ -67,7 +92,10 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
     if (!state || state.status !== "employed") return { ok: false, error: careerError("not_employed") };
     try {
       pay(refresh(state, day, ctx(), rng).payouts);
+      const wasDone = !!state.today?.done;
       const r = fn(state) || {};
+      const c = employer();
+      if (!wasDone && state.today?.done && state.today.gain && c) { c.contrib += state.today.gain * c.target; mine += state.today.gain * c.target; }
       if (r.effects?.energy) { energy = Math.max(0, Math.min(100, energy + r.effects.energy)); opts.onEnergy?.(r.effects.energy); }
       pay(r.payouts ?? []);
       if (state.today?.done) nextDay();
@@ -100,7 +128,8 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
     office: async (a, w) => act((s) => office(s, a, w, ctx(), day, rng)),
     quit: async (reason) => act((s) => quit(s, day, { reason, businesses: 1 })),
     stick: async () => act((s) => stickItOut(s, day)),
+    companies: async () => ({ ok: true, data: COMPANIES.map((d) => companyView(d, companies.get(d.track)!, Date.now())) }),
   };
 }
 
-export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "leave", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "fired"] as const;

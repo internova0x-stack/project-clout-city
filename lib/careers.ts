@@ -11,6 +11,7 @@
 // holds the hidden outcomes, so only those two import lib/careersContent.ts; players get `careerView`.
 
 import { ASPIRE, headStart, type AspirationId } from "./aspirations.ts";
+import { companyRules, units as companyUnits, workdayShare } from "./companies.ts";
 
 export type TrackId = "hospitality" | "tech" | "media" | "cityhall" | "streaming" | "fashion" | "realestate" | "finance" | "law";
 export type WorkStyle = "hustle" | "steady" | "coast";
@@ -340,7 +341,13 @@ export interface CareerState {
     day: string; style: WorkStyle;
     tasks: { id: string; picked: string | null; text: string | null; perf: number; names?: Record<string, string> }[];
     done: boolean; summary: string[];
+    /** The share of the company's weekly target this day added (lib/companies.ts workdayShare), once it's done. */
+    gain?: number;
   } | null;
+  /** On leave while the player runs a campaign: since when (no workdays, reviews or pay; level and trust kept). */
+  leave?: { since: string; candidate: string };
+  /** Company health: this player's part of the boss's target this company week (for the red part of the bar). */
+  coPart?: { week: string; units: number };
   /** The last review, shown until the next workday. */
   review: { day: string; lines: string[]; pay: number; outcome: CareerLog["kind"] } | null;
   log: CareerLog[];
@@ -399,6 +406,10 @@ export interface CareerCtx {
   degree?: boolean;
   /** Businesses the player owns (Quit to run your business). */
   businesses?: number;
+  /** Company health (migration 0161, lib/companies.ts): the employer's health and this week's target, shared city-wide. */
+  company?: { health: number; target: number; unit: string; boss: string; decimals?: number };
+  /** A campaign is running (owner, Nov 4: "Campaign mode is a full-time job… put the job on leave"): the candidate's short name. */
+  onLeave?: { candidate: string } | null;
 }
 
 export type Payout = { kind: "career_pay" | "career_promo" | "career_screen" | "career_team"; currency: "cash" | "clout"; amount: number; ref: string };
@@ -418,6 +429,8 @@ const ERRORS: Record<string, string> = {
   worked_today: "You've already worked today. Come back tomorrow.",
   shifted_today: "You already worked a shift today. Your job starts again tomorrow.",
   not_here: "Head to work first.",
+  on_leave: "You're on leave while you run a campaign. Your desk will be waiting when it's over.",
+  campaign_running: "You're running a campaign, and that's a full-time job. Take a job when the election's over.",
   in_holding: "You're on the bench at the 114½ Precinct. Work can wait until you're out.",
   no_energy: "Not enough Energy for that. Eat, nap or pick an easier pace.",
   no_day: "Start your workday first.",
@@ -530,6 +543,7 @@ const remote = (s: CareerState) => s.track === "tech" && s.level >= 3;
 
 /** Starts today's workday: the pace, the Energy it costs, and the manager's tasks. */
 export function startDay(content: CareerContent, s: CareerState, style: WorkStyle, ctx: CareerCtx, today: string, rng: Rng): { effects: Effects } {
+  if (s.leave || ctx.onLeave) throw new CareerError("on_leave");
   const track = trackById(s.track)!;
   if (s.status !== "employed") throw new CareerError("not_employed");
   if (s.today?.day === today || s.worked.includes(today)) throw new CareerError("worked_today");
@@ -705,13 +719,22 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
   const boss = managerOf(s, track);
   lines.unshift(`${boss.emoji} ${boss.name.split(" ")[0]}: "${pick(L.manager[band], rng)}"`);
   lines.push(s.trust.friend >= 50 ? `${track.friend.emoji} ${track.friend.name}: "${pick(L.friend, rng)}"` : `${track.rival.emoji} ${track.rival.name}: "${pick(L.rival, rng)}"`);
+  // Company health (migration 0161): the day pushes the boss's weekly target, and the company's state sets the mood.
+  if (_ctx.company) {
+    const c = _ctx.company;
+    day.gain = workdayShare(day.style, avg);
+    const moved = day.gain * c.target;
+    lines.push(`🎯 You moved ${c.boss}'s target: +${companyUnits({ decimals: c.decimals, target: c.target }, moved)} ${c.unit}.`);
+    const wmCo = companyRules(c.health).workMood;
+    if (wmCo) s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + wmCo);
+  }
   day.summary = lines;
   day.done = true;
   return { mood, energy, payouts };
 }
 
 /** Runs every review that's due (payday first), so a player who was away catches up. */
-export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout">, rng: Rng): { payouts: Payout[]; changed: boolean } {
+export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout" | "company">, rng: Rng): { payouts: Payout[]; changed: boolean } {
   const payouts: Payout[] = [];
   let changed = false;
   if (s.today && s.today.day !== today && !s.today.done) {
@@ -719,14 +742,15 @@ export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "ski
     s.today.done = true;
     changed = true;
   }
-  while (s.status === "employed" && daysBetween(s.nextReview, today) >= 0) {
+  // On leave (a campaign running): no reviews and no pay until the player is back.
+  while (s.status === "employed" && !s.leave && daysBetween(s.nextReview, today) >= 0) {
     review(s, ctx, rng, payouts);
     changed = true;
   }
   return { payouts, changed };
 }
 
-function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: Rng, payouts: Payout[]) {
+function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "company">, rng: Rng, payouts: Payout[]) {
   const track = trackById(s.track)!;
   const persona = managerOf(s, track).persona;
   const day = s.nextReview;
@@ -740,6 +764,10 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
     lines.push(`📅 ${worked} of ${CAREER.expectedDays} workdays this week.`);
   }
   const wage = Math.round((salaryOf(s) * Math.min(worked, CAREER.expectedDays)) / CAREER.expectedDays);
+  // Company health (migration 0161): a thriving company pays a bonus on payday (with the tips row).
+  const co = ctx.company ? companyRules(ctx.company.health) : null;
+  const coBonus = co?.bonus && wage > 0 ? Math.round(wage * co.bonus) : 0;
+  if (coBonus) { s.tips += coBonus; lines.push(`📈 The company is thriving: a C$${coBonus.toLocaleString("en-US")} bonus on top.`); }
   const pay = wage + s.tips;
   if (pay > 0) {
     // The wage and the tips (or bonus, or broker fees) are separate ledger rows: career_save caps each at C$5,000.
@@ -807,7 +835,9 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
     const trustNeed = persona === "credit_stealer" ? CAREER.promote.creditStealerTrust : CAREER.promote.trust;
     const ready = s.performance >= CAREER.promote.perf && s.trust.manager >= trustNeed && s.reviewsAtLevel >= s.level;
     const short = next ? missing(track, s.level + 1, ctx) : [];
-    if (ready && next && !short.length) {
+    if (ready && next && !short.length && co?.promotionsFrozen) {
+      lines.push(`⛔ You've earned a promotion, but there's a hiring freeze until the company recovers. It's on hold, not gone.`);
+    } else if (ready && next && !short.length) {
       s.level += 1;
       s.raises = 0;
       s.reviewsAtLevel = 0;
@@ -818,6 +848,8 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout">, rng: R
       lines.push(`🎉 Promoted to ${next.title}! New desk, new salary: C$${salaryOf(s).toLocaleString("en-US")} a week.`);
       note(s, day, "promotion", `Promoted to ${next.title}.`);
       if (s.trust.rival < 50) lines.push(`😤 ${track.rival.name} slammed a drawer when they heard.`);
+    } else if (s.performance >= CAREER.raise.perf && s.raises < CAREER.raise.max && co?.raisesFrozen) {
+      lines.push(`🧊 A strong week, but raises are frozen until the company turns the numbers around.`);
     } else if (s.performance >= CAREER.raise.perf && s.raises < CAREER.raise.max) {
       s.raises += 1;
       outcome = "raise";
@@ -1112,6 +1144,34 @@ export function office(s: CareerState, action: OfficeAction, who: Target, ctx: P
 }
 
 /** Quitting. From the quit card (work mood under 30) it lifts your Mood; "business" quits to run your businesses. */
+/**
+ * Leave of absence (owner, Nov 4: "Campaign mode is a full-time job… put the job on leave"). The server works out whether
+ * a campaign is running and calls this before anything else: going on leave closes an unfinished workday and stops
+ * reviews and pay; coming back starts a fresh week at the same level, with the same people. Returns what changed.
+ */
+export function leaveTransition(s: CareerState, onLeave: CareerCtx["onLeave"], today: string): "left" | "back" | null {
+  if (s.status !== "employed") return null;
+  const track = trackById(s.track)!;
+  if (onLeave && !s.leave) {
+    s.leave = { since: today, candidate: onLeave.candidate };
+    if (s.today && !s.today.done) s.today.done = true;
+    note(s, today, "review", s.track === "cityhall"
+      ? `On leave to run ${onLeave.candidate}'s campaign against your own boss. Marvin is thrilled. Papa-Dani "respects the hustle."`
+      : `On leave from ${track.employer} to run ${onLeave.candidate}'s campaign.`);
+    return "left";
+  }
+  if (!onLeave && s.leave) {
+    s.leave = undefined;
+    s.periodStart = today;
+    s.nextReview = addDays(today, CAREER.reviewEvery);
+    s.worked = [];
+    s.tips = 0;
+    note(s, today, "review", `Back at ${track.employer} after the campaign. Your desk was exactly where you left it.`);
+    return "back";
+  }
+  return null;
+}
+
 export function quit(s: CareerState, today: string, opts: { reason?: "business"; businesses?: number } = {}): { effects: Effects; receipt: string } {
   if (s.status !== "employed") throw new CareerError("not_employed");
   if (opts.reason === "business" && !(opts.businesses ?? 0)) throw new CareerError("no_business");
@@ -1183,6 +1243,8 @@ export interface CareerView {
   ally: boolean;
   quitCard: boolean;
   lifer: boolean;
+  /** On leave while running a campaign (whose candidate, since when). */
+  leave: { since: string; candidate: string } | null;
 }
 
 export function careerView(content: CareerContent, s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout">): CareerView {
@@ -1201,7 +1263,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
         return { index, emoji: task.emoji, title: names(task.title, x.names), picked: x.picked, result: x.text, perf: x.perf, options: task.options.map((o) => ({ id: o.id, label: names(o.label, x.names), get: names(o.get, x.names), cost: names(o.cost, x.names) })) };
       }),
     } : null,
-    canWork: s.status === "employed" && !s.worked.includes(today),
+    canWork: s.status === "employed" && !s.leave && !s.worked.includes(today),
     review: s.review,
     next: nextLevel ? {
       title: nextLevel.title, salary: nextLevel.salary, missing: missing(track, s.level + 1, ctx),
@@ -1213,7 +1275,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
     endedOn: s.endedOn,
     workMood: s.workMood ?? CAREER.office.moodStart,
     grudges: (s.grudges ?? []).map((g) => ({ who: g.who, level: g.level })),
-    officeLeft: t && s.status === "employed"
+    officeLeft: t && s.status === "employed" && !s.leave
       ? { collab: !(s.office?.day === today && s.office.collab), sabotage: !(s.office?.day === today && s.office.sabotage) } : null,
     team: s.team ? { with: s.team.with, name: s.team.with === "friend" ? track.friend.name : track.rival.name } : null,
     guarded: (s.exposed ?? 0) >= CAREER.office.guarded,
@@ -1222,6 +1284,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
     ally: !!s.ally,
     quitCard: quitCardDue(s, today),
     lifer: !!s.lifer,
+    leave: s.leave ?? null,
   };
 }
 
@@ -1260,6 +1323,10 @@ export interface CareerScreen {
   aspiration?: import("./aspirations.ts").AspirationState | null;
   /** Businesses owned (the quit card's "Quit to run your business"). */
   businesses?: number;
+  /** Company health (migration 0161): the employer's situation, the boss's weekly target and the shared health. */
+  company?: import("./companies.ts").CompanyView | null;
+  /** The player's own part of this week's target, in the company's units. */
+  companyMine?: number;
 }
 export type CareerResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type R = Promise<CareerResult<CareerScreen>>;
@@ -1275,6 +1342,8 @@ export interface CareerApi {
   stick(): R;
   /** Picks (or changes, once every 30 days) the player's aspiration. */
   aspire(id: AspirationId): R;
+  /** News → City's Business pages (migration 0161): every company now. */
+  companies?(): Promise<CareerResult<import("./companies.ts").CompanyView[]>>;
 }
 
 /** The content's own rules (tests/careers.test.ts runs them on the task file). */
