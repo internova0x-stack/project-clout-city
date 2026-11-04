@@ -313,6 +313,8 @@ export function PreviewHome({
   const careerApi = useMemo(() => createCareerSim(careerPreset ?? null, {
     clout: player.clout, energy: player.energy, atPlace: () => simRef.current.here(),
     onBank: (cash) => simRef.current.choicePay({ cash }), onEnergy: (energy) => simRef.current.choicePay({ energy }),
+    // ?company=high|low|freeze sets the employer's company health (migration 0161).
+    company: typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("company") : null,
   }), [careerPreset, player.clout, player.energy]);
   const underworldApi = useMemo(() => createUnderworldSim(underworldPreset ?? null, {
     atPlace: () => simRef.current.here(), bank: () => player.bank_cash,

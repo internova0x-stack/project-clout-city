@@ -67,6 +67,7 @@ import { CohabitHomeBar, SubletHomeBar, type SubletHandlers } from "./city/Suble
 import { HomeScoreSheet } from "./home/HomeScore";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
+import type { CompanyView } from "@/lib/companies";
 import { ChoiceBackSheet, ChoiceSheet, HoldingSheet, holdingWhy, type HoldingAction } from "./game/Choices";
 import type { Bond, FavorPeek } from "@/lib/npcBonds";
 import type { FavorHandlers } from "./city/Favors";
@@ -2188,6 +2189,12 @@ export function GameShell({
     void choices.blotter().then((r) => r.ok && setBlotter(r.data));
     void choices.conditions?.().then((r) => r.ok && setConditions(r.data));
   }, [choices, phone.open, phone.app]);
+  // Company health (migration 0161): the Business pages in News → City.
+  const [companies, setCompanies] = useState<CompanyView[]>([]);
+  useEffect(() => {
+    if (!careers?.companies || !phone.open || phone.app !== "news") return;
+    void careers.companies().then((r) => { if (r.ok) setCompanies(r.data); }).catch(() => undefined);
+  }, [careers, phone.open, phone.app]);
   const closeChoice = () => {
     if (choiceMade?.effects.holding) setHoldingOpen(true);
     if (choiceCard && !choiceMade && choices) void choices.skip(choiceCard.log);
@@ -3790,6 +3797,7 @@ export function GameShell({
         scandals={campaignScandals}
         blotter={blotter}
         conditions={conditions}
+        companies={companies}
         election={campaign && campaignRunning === false ? {
           unlocked: myRank.level >= APP_UNLOCKS.campaign.rank, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
           onOpen: () => { setPhone({ open: false, app: null }); setCampaignOpen(true); },

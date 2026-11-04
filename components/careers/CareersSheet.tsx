@@ -1,5 +1,6 @@
 "use client";
 
+import { CompanyCard } from "./Company";
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { PLACES } from "@/lib/city";
@@ -215,6 +216,9 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
           {v.warnings > 0 ? " · ⚠️ on a warning" : ""}
         </p>
       </div>
+
+      {/* Company health (migration 0161): the business, the boss's target this week and what its health does to you. */}
+      {data.company && <CompanyCard c={data.company} mine={data.companyMine} />}
 
       {v.quitCard && (
         <div className="card stack-12 careers-quitcard">

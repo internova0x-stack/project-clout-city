@@ -13,6 +13,8 @@ import { unlockedCards } from "@/lib/cardFormat";
 import { memoryOf } from "@/lib/memoryServer";
 import type { AspirationId, AspirationState } from "@/lib/aspirations";
 import { getAdminSupabase } from "@/lib/supabase/admin";
+import { companyOf, companyView, type CompanyState, type CompanyView } from "@/lib/companies";
+import { companiesNow, companyAdd, companyNow } from "@/lib/companyServer";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 // Careers (spec section 30; migration 0135). The rules run here with a crypto random source: the browser sends a choice
@@ -22,7 +24,7 @@ import { getServerSupabase } from "@/lib/supabase/server";
 
 type Admin = NonNullable<ReturnType<typeof getAdminSupabase>>;
 type Job = { id: string; status: CareerState["status"] | "abandoned"; version: number; state: CareerState };
-type Context = CareerCtx & { bank: number; job: Job | null; aspirationState?: AspirationState | null };
+type Context = CareerCtx & { bank: number; job: Job | null; aspirationState?: AspirationState | null; companyState?: CompanyState | null };
 type Out = CareerResult<CareerScreen>;
 
 const rng = () => randomInt(0, 2 ** 32) / 2 ** 32;
@@ -55,7 +57,17 @@ async function load(id: string, admin: Admin): Promise<Context | { error: string
   // Part 3: businesses owned, for the quit card's "Quit to run your business".
   const biz = await admin.from("player_businesses").select("business_id", { count: "exact", head: true }).eq("player_id", id);
   ctx.businesses = biz.count ?? 0;
+  // Company health (migration 0161): the employer's week, shared city-wide (nothing before the migration).
+  const track = ctx.job?.status === "employed" ? ctx.job.state.track : null;
+  const def = track ? companyOf(track) : undefined;
+  ctx.companyState = def ? await companyNow(admin, def.track) : null;
+  if (def && ctx.companyState) ctx.company = { health: ctx.companyState.health, target: ctx.companyState.target, unit: def.unit, boss: def.boss, decimals: def.decimals };
   return ctx;
+}
+
+function companyFor(ctx: Context): CompanyView | null {
+  const def = ctx.companyState ? companyOf(ctx.companyState.track) : undefined;
+  return def && ctx.companyState ? companyView(def, ctx.companyState, Date.now()) : null;
 }
 
 function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
@@ -68,6 +80,8 @@ function screen(ctx: Context, today: string, receipt?: string): CareerScreen {
     receipt,
     aspiration: ctx.aspirationState ?? null,
     businesses: ctx.businesses ?? 0,
+    company: companyFor(ctx),
+    companyMine: ctx.job && ctx.companyState && ctx.job.state.coPart?.week === ctx.companyState.week ? ctx.job.state.coPart.units : 0,
   };
 }
 
@@ -111,6 +125,7 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
   const today = nyDay();
   const state = structuredClone(ctx.job.state);
   const liferBefore = !!state.lifer;
+  const dayDoneBefore = !!(state.today?.day === today && state.today.done);
   const caught = refresh(state, today, ctx, rng);
   let r: ReturnType<typeof change> = {};
   try {
@@ -119,8 +134,18 @@ async function act(change: (state: CareerState, ctx: Context, today: string) => 
     if (e instanceof CareerError) return { ok: false, error: careerError(e.code) };
     throw e;
   }
+  // Company health: a workday that just ended adds its part to the boss's target (written after the save, so it counts once).
+  const closed = !dayDoneBefore && state.today?.day === today && state.today.done && !!state.today.gain && !!ctx.companyState;
+  if (closed && ctx.companyState) {
+    const add = state.today!.gain! * ctx.companyState.target;
+    state.coPart = { week: ctx.companyState.week, units: (state.coPart?.week === ctx.companyState.week ? state.coPart.units : 0) + add };
+  }
   const err = await save(w.admin, w.id, ctx, state, { ...r, payouts: [...caught.payouts, ...(r.payouts ?? [])] });
   if (err) return { ok: false, error: err };
+  if (closed && ctx.companyState) {
+    await companyAdd(w.admin, ctx.companyState, state.today!.gain!);
+    ctx.companyState = { ...ctx.companyState, contrib: ctx.companyState.contrib + state.today!.gain! * ctx.companyState.target };
+  }
   // Part 2 (migration 0136): an office move nudges the private meter, and a rumor can make Lola's Blotter.
   if (r.integrity || r.headline) {
     const { error } = await w.admin.rpc("career_office", { p_player: w.id, p_id: ctx.job!.id, p_integrity: r.integrity ?? 0, p_headline: r.headline ?? null });
@@ -244,4 +269,11 @@ export async function careerAspire(id: AspirationId): Promise<Out> {
     return { ok: false, error: careerError("unknown") };
   }
   return careerScreen();
+}
+
+/** News → City's Business pages (migration 0161): every company's health and this week's target. Anyone signed in. */
+export async function careerCompanies(): Promise<CareerResult<CompanyView[]>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  return { ok: true, data: await companiesNow(w.admin) };
 }
