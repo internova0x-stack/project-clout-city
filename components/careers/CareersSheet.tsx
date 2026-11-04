@@ -295,6 +295,15 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
           </p>
         </div>
       )}
+      {/* Part-time while a school race runs (docs/SCHOOL-RACE.md). */}
+      {v.partTime && (
+        <div className="card stack-8 careers-leave">
+          <p className="title" style={{ margin: 0 }}>🎓 Part-time: you&apos;re running for the crown</p>
+          <p className="subtext" style={{ margin: 0 }}>
+            {v.partTime.days} workdays a week until Homecoming, paid for the days you work. {v.partTime.left ? `${v.partTime.left} left this week.` : "This week's are done."}
+          </p>
+        </div>
+      )}
       {v.today && !v.leave && <Workday v={v} busy={busy} onTask={onTask} />}
       {v.officeLeft && <Office v={v} busy={busy} onOffice={onOffice} />}
       {!v.today && !v.canWork && !v.leave && (

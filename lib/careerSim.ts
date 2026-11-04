@@ -28,7 +28,7 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   // Like career_context's past jobs: the one that ended, so reapplying waits.
   const past = (): CareerCtx["past"] => (state && state.status !== "employed"
     ? { [state.track]: { best: state.level, fired: state.status === "fired" ? 1 : 0, lastStatus: state.status, lastEnded: state.endedOn } } : {});
-  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1, company: coCtx(), onLeave: preset === "leave" ? { candidate: "Kaylee" } : null });
+  const ctx = (): CareerCtx => ({ clout: Math.max(opts.clout, 600), crew: 2, energy, atPlace: preset === "cityhall" ? "city-hall-annex" : preset === "streaming" ? "glow-up-house" : preset === "fashion" ? "atelier-vernon" : preset === "realestate" ? "no-fee-realty" : preset === "finance" ? "queensboro-capital" : preset === "law" ? "whitlock-hale" : ["work", "day", "office", "grudge", "boss", "quit", "parttime"].includes(preset ?? "") ? "grind-and-gossip" : opts.atPlace(), shiftsToday: 0, skills, past: past(), aspiration: asp.aspiration, degree: asp.degree, businesses: 1, company: coCtx(), onLeave: preset === "leave" ? { candidate: "Kaylee" } : null, partTime: preset === "parttime" });
   const coCtx = (): CareerCtx["company"] => {
     const c = employer();
     const def = c ? companyOf(c.track) : undefined;
@@ -134,4 +134,4 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 }
 
-export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "leave", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "probation", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "leave", "parttime", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "probation", "fired"] as const;

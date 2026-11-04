@@ -23,6 +23,9 @@ The top tier says it: Queen Bee / Big Man on Campus; the one below, It Girl / It
 3. **Declare for the crown** (Crown HQ's start screen): the four weeks, "Running for Homecoming Queen · Your rival: Marisol",
    the rules (keep a 2.5 GPA, your job goes part-time), **I'm running**. The semester starts the next Monday.
    One race at a time; **not while a city campaign runs** (and no campaign while a race runs: both are full-time).
+   **Your job goes part-time** (owner, Nov 4: "build it"): while a race runs, a career job allows `CAREER.partTime.days` (2)
+   workdays a week, pays for the days worked, and the review judges the part-time week (1 day is the least it accepts);
+   level and coworkers stay (`CareerCtx.partTime`, read from `school_races` by careerActions; `?career=parttime`).
 
 ## The four weeks
 

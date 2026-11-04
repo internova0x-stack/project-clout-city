@@ -262,6 +262,8 @@ export const CAREER = {
   strikes: { dock: 0.2, fireAfter: 3 },
   /** A review needs at least this many workdays, or it's a bad one whatever the performance. */
   minDays: 2,
+  /** Part-time while a school race runs (owner, Nov 4: "build it"): workdays a week, and the fewest a review accepts. */
+  partTime: { days: 2, minDays: 1 },
   burnout: { streak: 3, mood: -10 },
   /** Clout for a promotion: this × the new level. */
   promoClout: 50,
@@ -419,6 +421,8 @@ export interface CareerCtx {
   company?: { health: number; target: number; unit: string; boss: string; decimals?: number };
   /** A campaign is running (owner, Nov 4: "Campaign mode is a full-time job… put the job on leave"): the candidate's short name. */
   onLeave?: { candidate: string } | null;
+  /** A school race is running (docs/SCHOOL-RACE.md): the job goes part-time (CAREER.partTime). */
+  partTime?: boolean;
 }
 
 export type Payout = { kind: "career_pay" | "career_promo" | "career_screen" | "career_team"; currency: "cash" | "clout"; amount: number; ref: string };
@@ -438,6 +442,7 @@ const ERRORS: Record<string, string> = {
   worked_today: "You've already worked today. Come back tomorrow.",
   shifted_today: "You already worked a shift today. Your job starts again tomorrow.",
   not_here: "Head to work first.",
+  part_time_full: "You're part-time while you run for the crown: that's this week's workdays done.",
   on_leave: "You're on leave while you run a campaign. Your desk will be waiting when it's over.",
   campaign_running: "You're running a campaign, and that's a full-time job. Take a job when the election's over.",
   in_holding: "You're on the bench at the 114½ Precinct. Work can wait until you're out.",
@@ -557,6 +562,7 @@ export function startDay(content: CareerContent, s: CareerState, style: WorkStyl
   if (s.status !== "employed") throw new CareerError("not_employed");
   if (s.today?.day === today || s.worked.includes(today)) throw new CareerError("worked_today");
   if (ctx.shiftsToday > 0) throw new CareerError("shifted_today");
+  if (ctx.partTime && s.worked.length >= CAREER.partTime.days) throw new CareerError("part_time_full");
   if (!remote(s) && ctx.atPlace !== track.place) throw new CareerError("not_here");
   const cost = CAREER.styles[style].energy;
   if (ctx.energy < cost) throw new CareerError("no_energy");
@@ -743,7 +749,7 @@ function closeDay(content: CareerContent, s: CareerState, _ctx: CareerCtx, rng: 
 }
 
 /** Runs every review that's due (payday first), so a player who was away catches up. */
-export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout" | "company">, rng: Rng): { payouts: Payout[]; changed: boolean } {
+export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout" | "company" | "partTime">, rng: Rng): { payouts: Payout[]; changed: boolean } {
   const payouts: Payout[] = [];
   let changed = false;
   if (s.today && s.today.day !== today && !s.today.done) {
@@ -759,20 +765,23 @@ export function refresh(s: CareerState, today: string, ctx: Pick<CareerCtx, "ski
   return { payouts, changed };
 }
 
-function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "company">, rng: Rng, payouts: Payout[]) {
+function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "company" | "partTime">, rng: Rng, payouts: Payout[]) {
   const track = trackById(s.track)!;
   const persona = managerOf(s, track).persona;
   const day = s.nextReview;
   const worked = s.worked.length;
   const lines: string[] = [];
+  // Part-time while a school race runs: judged on CAREER.partTime.days, paid for the days worked.
+  const expected = ctx.partTime ? CAREER.partTime.days : CAREER.expectedDays;
+  if (ctx.partTime) lines.push(`🎓 Part-time while you run for the crown: ${Math.min(worked, expected)} of ${expected} workdays.`);
   // A friend for life covers one missed day a week.
-  const missed = Math.max(0, CAREER.expectedDays - worked - (s.lifer ? 1 : 0));
+  const missed = Math.max(0, expected - worked - (s.lifer ? 1 : 0));
   const penalty = missed * (s.trust.friend >= 70 ? CAREER.missedPenalty / 2 : CAREER.missedPenalty);
   if (missed) {
     s.performance = clamp(s.performance - penalty);
-    lines.push(`📅 ${worked} of ${CAREER.expectedDays} workdays this week.`);
+    if (!ctx.partTime) lines.push(`📅 ${worked} of ${CAREER.expectedDays} workdays this week.`);
   }
-  let wage = Math.round((salaryOf(s) * Math.min(worked, CAREER.expectedDays)) / CAREER.expectedDays);
+  let wage = Math.round((salaryOf(s) * Math.min(worked, expected)) / CAREER.expectedDays);
   if (s.docked) {
     const cut = Math.round(wage * CAREER.strikes.dock);
     wage -= cut;
@@ -819,7 +828,7 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "compa
     outcome = "caught";
   }
   const warnAt = persona === "supportive" ? CAREER.warn.supportive : CAREER.warn.perf;
-  const bad = s.performance < warnAt || worked < CAREER.minDays;
+  const bad = s.performance < warnAt || worked < (ctx.partTime ? CAREER.partTime.minDays : CAREER.minDays);
   const mgr = managerOf(s, track).name.split(" ")[0];
   if (bad) {
     s.goodRun = 0;
@@ -1280,9 +1289,11 @@ export interface CareerView {
   lifer: boolean;
   /** On leave while running a campaign (whose candidate, since when). */
   leave: { since: string; candidate: string } | null;
+  /** Part-time while a school race runs: workdays left this week (null when full-time). */
+  partTime: { days: number; left: number } | null;
 }
 
-export function careerView(content: CareerContent, s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout">): CareerView {
+export function careerView(content: CareerContent, s: CareerState, today: string, ctx: Pick<CareerCtx, "skills" | "clout" | "partTime">): CareerView {
   const track = trackById(s.track)!;
   const nextLevel = track.levels[s.level];
   const t = s.today && s.today.day === today ? s.today : null;
@@ -1298,7 +1309,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
         return { index, emoji: task.emoji, title: names(task.title, x.names), picked: x.picked, result: x.text, perf: x.perf, options: task.options.map((o) => ({ id: o.id, label: names(o.label, x.names), get: names(o.get, x.names), cost: names(o.cost, x.names) })) };
       }),
     } : null,
-    canWork: s.status === "employed" && !s.leave && !s.worked.includes(today),
+    canWork: s.status === "employed" && !s.leave && !s.worked.includes(today) && !(ctx.partTime && s.worked.length >= CAREER.partTime.days),
     review: s.review,
     next: nextLevel ? {
       title: nextLevel.title, salary: nextLevel.salary, missing: missing(track, s.level + 1, ctx),
@@ -1320,6 +1331,7 @@ export function careerView(content: CareerContent, s: CareerState, today: string
     quitCard: quitCardDue(s, today),
     lifer: !!s.lifer,
     leave: s.leave ?? null,
+    partTime: ctx.partTime && !s.leave ? { days: CAREER.partTime.days, left: Math.max(0, CAREER.partTime.days - s.worked.length) } : null,
   };
 }
 
