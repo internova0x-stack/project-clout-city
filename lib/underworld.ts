@@ -572,6 +572,8 @@ export interface UnderworldScreen {
   /** What the action itself moved (the results card, components/underworld/result.ts): cash in or out (a fine is
    *  negative) and hours in holding. */
   cash?: number; held?: number;
+  /** Migration 0152: a runner's cut for a friend's job, after the city fee (underworldRunHire). */
+  cut?: number;
 }
 
 /** What GameShell calls: the server's actions, or the preview's memory. */

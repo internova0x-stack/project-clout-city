@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import { GALA, galaClout, type GalaApi, type GalaState } from "@/lib/gala";
+import { celebrate } from "../Celebrate";
+import { galaResult } from "./galaResult";
 
 // The Charity Gala (the underworld, part 2; migration 0150): the Halo end's own night at Ditmars Heights Rooftop. On the
 // list: pick a gift, once a New York week; off it: who gets in, said the city's way. The database decides.
@@ -33,7 +35,7 @@ export function GalaSheet({ open, onClose, api, here, onToast, onChanged }: {
     const r = await api.donate(pick);
     setBusy(false);
     if (!r.ok) { onToast(r.error); return; }
-    onToast(`🥂 ${cs(pick)} to the Astoria Literacy & Rooftop Garden Fund. +${r.data.clout} 🔥, +${r.data.mood} Mood. The committee will mention you in calligraphy.`);
+    celebrate(galaResult(pick, r.data));
     onChanged();
     void load();
   };

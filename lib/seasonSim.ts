@@ -1,11 +1,11 @@
 // The Clout Pass and the starter pack in the preview (/preview/home?pass=...&pack=...): the same tiers as the server, in
 // memory. Presets: soon (before the season), new (day one, 0 XP), progress (tier 6, rewards waiting), paid (the pass
-// bought, tier 9), vip (VIP, tier 12), done (every tier). The paid row and the pack follow the preview store (buying them
+// bought, tier 9), vip (VIP, tier 12), done (every tier), ended (the claim days after the season: tier 14, two tiers waiting). The paid row and the pack follow the preview store (buying them
 // there unlocks them after its 4-second wait). ?pack=offer|owned|none.
 
 import { SEASON, STARTER_PACK, claimable, type PassApi, type PassReward, type PassState, type StarterPackState } from "./seasonPass.ts";
 
-export const PASS_PRESETS = ["soon", "new", "progress", "paid", "vip", "done"] as const;
+export const PASS_PRESETS = ["soon", "new", "progress", "paid", "vip", "done", "ended"] as const;
 
 export function createSeasonSim(preset: string | null, pack: string | null, opts: {
   owns: (sku: string) => boolean;
@@ -13,16 +13,17 @@ export function createSeasonSim(preset: string | null, pack: string | null, opts
   reward: (cash: number, clout: number) => void;
   item: (sku: string) => void;
 }): PassApi {
-  const xp = { soon: 0, new: 0, progress: 6 * SEASON.xpPerTier + 60, paid: 9 * SEASON.xpPerTier + 20, vip: 12 * SEASON.xpPerTier + 90, done: SEASON.tiers.length * SEASON.xpPerTier }[preset ?? "progress"] ?? 6 * SEASON.xpPerTier + 60;
+  const xp = { soon: 0, new: 0, progress: 6 * SEASON.xpPerTier + 60, paid: 9 * SEASON.xpPerTier + 20, vip: 12 * SEASON.xpPerTier + 90, done: SEASON.tiers.length * SEASON.xpPerTier, ended: 14 * SEASON.xpPerTier + 40 }[preset ?? "progress"] ?? 6 * SEASON.xpPerTier + 60;
   const vip = preset === "vip";
   const claimed = { free: [] as number[], paid: [] as number[] };
-  if (preset === "paid" || preset === "done") for (let t = 1; t <= 4; t++) { claimed.free.push(t); claimed.paid.push(t); }
+  if (preset === "ended") for (let t = 1; t <= 12; t++) { claimed.free.push(t); claimed.paid.push(t); }
+  else if (preset === "paid" || preset === "done") for (let t = 1; t <= 4; t++) { claimed.free.push(t); claimed.paid.push(t); }
   else if (preset === "progress") for (let t = 1; t <= 3; t++) claimed.free.push(t);
   const state = (): PassState => ({
     season: SEASON, xp, vip, today: preset === "new" ? 0 : 50,
-    paid: vip || preset === "paid" || preset === "done" || opts.owns(SEASON.sku),
+    paid: vip || preset === "paid" || preset === "done" || preset === "ended" || opts.owns(SEASON.sku),
     pending: opts.pending(SEASON.sku),
-    phase: preset === "soon" ? "soon" : "on",
+    phase: preset === "soon" ? "soon" : preset === "ended" ? "claim" : "on",
     claimed: { free: [...claimed.free], paid: [...claimed.paid] },
   });
   let packGranted = false;

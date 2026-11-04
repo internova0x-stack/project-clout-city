@@ -76,10 +76,10 @@ export function ResultCard({ c, onClose }: { c: Celebration & { result: ResultSp
         <div className="res-body">
           {r.meter && (
             <div className={`res-meter${good ? " good" : ""}`}>
-              <span className="res-meter-top"><span>{r.meter.label}</span><b>{r.meter.have} / {r.meter.need}</b></span>
+              <span className="res-meter-top"><span>{r.meter.label}</span><b>{r.meter.have.toLocaleString("en-US")} / {r.meter.need.toLocaleString("en-US")}</b></span>
               <span className="res-track">
                 <span className="res-fill" style={{ width: pct(fill) }} />
-                <span className="res-goal" style={{ left: pct(r.meter.need) }} data-label={r.meter.need} />
+                <span className="res-goal" style={{ left: pct(r.meter.need) }} data-label={r.meter.need.toLocaleString("en-US")} />
               </span>
               {r.meter.say && <span className="res-say">{r.meter.say}</span>}
             </div>

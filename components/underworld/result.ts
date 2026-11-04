@@ -8,7 +8,8 @@
 // The bar is Street Rep on a good night (what the job builds: bigger jobs) and Heat on a bad one (what the bust built:
 // how close Pablo is to turning you away). Getting caught never costs home, career or crew, so those are the pills.
 
-import { UNDERWORLD, type OfferView, type UnderworldScreen, type UnderworldView } from "../../lib/underworld.ts";
+import { UNDERWORLD, type Landed, type OfferView, type UnderworldScreen, type UnderworldView } from "../../lib/underworld.ts";
+import type { UnderworldHire } from "../../lib/marketplace.ts";
 import type { Celebration } from "../Celebrate.tsx";
 import type { ResultSpec } from "../ResultCard.tsx";
 
@@ -82,4 +83,61 @@ export function jobResult(offer: OfferView | undefined, before: UnderworldView, 
     cta: held ? "Go to the bench" : "Lay low", onCta: held ? onBench : undefined,
     result: { tone: "lose", stamp: { text: "CAUGHT", tone: "bad" }, ...(fine ? { amount: fine, unit: "fine" } : {}), story,
       meter: heatMeter(after), keep: ["Your home", "Your job", "Your crew"] } };
+}
+
+// ---- Pablo's extras (owner, Nov 4) -------------------------------------------------------------------------------------
+//   the Thursday table (always pays)    a win card like a paid job: the take, Street Rep toward the next tier
+//   a runner's job, you ran it          a banner with your cut (a fizzle or a bust is the job's own card: you wore it)
+//   a runner's job, your runner ran it  a banner with Pablo's take (or that it didn't come off)
+//   an old job that came back           a near miss: the fine (or the crew covering), Heat against 80, home, job and crew kept
+
+/** Pablo's Thursday table: Hustlers only, once a week, always pays. */
+export function tableResult(before: UnderworldView, r: UnderworldScreen): Celebration | null {
+  if (!r.receipt) return null;
+  const after = r.view;
+  const dRep = after.rep - before.rep;
+  const tierUp = after.tier.name !== before.tier.name;
+  return { rung: 3, emoji: "🃏", tag: "Pablo's table", title: tierUp ? `You're a ${after.tier.name} now` : "The table paid", cta: "Back to Pablo", twist: "register",
+    result: { tone: "win", amount: Math.max(0, r.cash ?? 0), unit: "from the table", story: shortLine(r.receipt) || undefined,
+      stamp: tierUp ? { text: after.tier.name.toUpperCase(), tone: "good" } : undefined,
+      meter: repMeter(after),
+      keep: [...(dRep > 0 ? [`+${dRep} Street Rep`] : []), "A chair next Thursday", `${after.tier.emoji} ${after.tier.name}`] } };
+}
+
+const at = (name: string | null | undefined) => (name ? `@${name}` : "your friend");
+const cs = (n: number) => `C$${Math.round(n).toLocaleString("en-US")}`;
+
+/** You ran a friend's job. A clean one is a banner with the cut; anything else is the job's own card. */
+export function runnerResult(hire: Pick<UnderworldHire, "emoji" | "title" | "withName">, before: UnderworldView, r: UnderworldScreen, onBench?: () => void): Celebration | null {
+  if (!r.outcome) return null;
+  if (r.outcome === "win" || r.outcome === "trace") {
+    const cut = r.cut ?? 0;
+    return { rung: 2, emoji: hire.emoji ?? "🏃", tag: "Runner job", title: `Done for ${at(hire.withName)}`,
+      rewards: cut > 0 ? [{ tone: "cash", text: `+${cs(cut)} cut` }] : undefined };
+  }
+  const offer: OfferView = { id: "hire", emoji: hire.emoji ?? "🏃", title: hire.title, done: true, options: [] };
+  return jobResult(offer, before, r, onBench);
+}
+
+/** Your runner ran your job: Pablo's take, or that it didn't come off. Null while it's still waiting. */
+export function hireBanner(h: UnderworldHire): Celebration | null {
+  if (h.status !== "done" || !h.outcome) return null;
+  const emoji = h.emoji ?? "🧳";
+  if (h.outcome === "win" || h.outcome === "trace") {
+    return { rung: 2, emoji, tag: "Your runner", title: `${at(h.withName)} ran it`, rewards: h.pay > 0 ? [{ tone: "cash", text: `+${cs(h.pay)} Pablo's take` }] : undefined };
+  }
+  return { rung: 2, emoji: h.outcome === "bust" ? "🚓" : "🤷", tag: "Your runner",
+    title: h.outcome === "bust" ? `${at(h.withName)} got caught. Not on you.` : `${at(h.withName)} came back empty` };
+}
+
+/** An old job that came back (a trace the 114½ found): a near miss, never grey. */
+export function landedResult(l: Landed, v: UnderworldView, onBench?: () => void): Celebration {
+  const covered = l.fine === 0 && l.holding === 0;
+  const held = l.holding;
+  return { rung: 3, emoji: l.emoji || "🚨", tag: "It came back",
+    title: covered ? "Somebody covered for you" : held ? `${held} hour${held > 1 ? "s" : ""} at the 114½` : "An old job caught up",
+    cta: held ? "Go to the bench" : "Got it", onCta: held ? onBench : undefined,
+    result: { tone: "warn", stamp: covered ? { text: "COVERED", tone: "good" } : { text: "TRACED", tone: "bad" },
+      ...(l.fine > 0 ? { amount: l.fine, unit: "fine" } : {}), story: shortLine(l.text) || undefined, meter: heatMeter(v),
+      keep: ["Your home", "Your job", "Your crew"] } };
 }
