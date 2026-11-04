@@ -796,9 +796,9 @@ function Allies({ v }: { v: CampaignView }) {
   return (
     <div className="stack-12">
       <div className="card camp-allies-sum">
-        <span className="stack-2"><span className="balance-big" style={{ fontSize: 34, lineHeight: "38px" }}>{mine}</span><span className="meta">on your side</span></span>
-        <span className="stack-2"><span className="balance-big" style={{ fontSize: 34, lineHeight: "38px" }}>{v.mayorAllies.length}</span><span className="meta">with Papa-Dani</span></span>
-        <span className="stack-2"><span className="balance-big" style={{ fontSize: 34, lineHeight: "38px" }}>{v.allies.length - mine - v.mayorAllies.length}</span><span className="meta">up for grabs</span></span>
+        <span className="stack-2"><span className="camp-count">{mine}</span><span className="meta">on your side</span></span>
+        <span className="stack-2"><span className="camp-count">{v.mayorAllies.length}</span><span className="meta">with Papa-Dani</span></span>
+        <span className="stack-2"><span className="camp-count">{v.allies.length - mine - v.mayorAllies.length}</span><span className="meta">up for grabs</span></span>
       </div>
       <p className="meta" style={{ margin: 0 }}>Answer their messages and meet them to win them over. A message left to expire cools them off.</p>
       {groups.map((g) => (

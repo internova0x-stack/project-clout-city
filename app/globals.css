@@ -2609,6 +2609,11 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-bubble.me { align-self:flex-end; background:#0A84FF; color:#fff; border-bottom-right-radius:6px; }
 .camp-bubble-meta { font-size:11px; opacity:.8; align-self:flex-end; }
 .camp-allies-sum { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); text-align:center; gap:8px; }
+/* The allies summary: each count over its label. */
+.camp-allies-sum > span { display:flex; flex-direction:column; align-items:center; gap:2px; }
+/* Owner, Nov 4: the allies counts in the streak's number font (Barlow Condensed 800, leaning like .wb-streak-slant). */
+.camp-count { display:inline-block; font-family:var(--font-label); font-weight:800; font-size:44px; line-height:44px; letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums; transform:skewX(-10deg); color:var(--text-1); }
 .camp-ally { display:flex; align-items:center; gap:12px; }
 .camp-standing { font-family:var(--font-label); font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 8px; border-radius:999px; white-space:nowrap; }
 .camp-standing.good { background:var(--green-tint); color:#1F6B4A; }
