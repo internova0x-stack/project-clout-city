@@ -55,7 +55,8 @@ import type { Player } from "@/lib/player";
 //   /preview/home?at=ditmars-deli  the player was last at that place: the game opens inside it
 //   /preview/home?campus=new|pick|week|friday|done  campus life (v0.15), standing at St. Johnsons
 //   /preview/home?transit=showtime  showtime dancers on every subway ride (C4); ?transit=pass starts with an OMG Card.
-//   /preview/home?rent=short|late|evict  the rent alarm: C$930 in the bank with rent due in 2 days, a day late, or 4 days late.
+//   /preview/home?rent=short|late|evict  the rent alarm: C$930 in the bank with rent due in 2 days, a day late, or 4 days late;
+//   ?rent=evicted moved to the room share today (the eviction results card).
 //   The preview's News always has a live 7-train delay, so trips to Flushing take longer by subway.
 //   /preview/home?calendar=today  every calendar event (C5) is on right now; ?calendar=gift also starts with a gift box
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)

@@ -59,7 +59,7 @@ import { createSeasonSim } from "@/lib/seasonSim";
 import { createLifeSim } from "@/lib/placeLifeSim";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
-import { CLUB_EVENTS, placeById } from "@/lib/city";
+import { CITY_ECONOMY, CLUB_EVENTS, placeById } from "@/lib/city";
 import type { ChatApi } from "@/lib/chat";
 import type { DatingApi } from "@/lib/dating";
 import type { CrewApi } from "@/lib/crew";

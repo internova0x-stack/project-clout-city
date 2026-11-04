@@ -42,13 +42,14 @@ export function evictionOf(st: CityState, withinDays = 7): Eviction | null {
   const forgiven = rent.filter((b) => b.status === "forgiven");
   if (!forgiven.length) return null;
   const last = forgiven.reduce((a, b) => (b.id > a.id ? b : a));
-  const after = rent.filter((b) => b.status !== "forgiven" && b.due_date > last.due_date).sort((a, b) => a.due_date.localeCompare(b.due_date))[0];
+  // The new home's first rent: issued right after the forgiving (the next id).
+  const after = rent.filter((b) => b.id > last.id).sort((a, b) => a.id - b.id)[0];
   const { evictAfterDays } = CITY_ECONOMY.bills;
   const day = after?.due_date ?? last.due_date;
   if (daysBetween(day, st.today) > withinDays || daysBetween(day, st.today) < 0) return null;
   // The bills forgiven together: since the last rent that wasn't.
-  const before = rent.filter((b) => b.status !== "forgiven" && b.due_date <= last.due_date).reduce((m, b) => (b.due_date > m ? b.due_date : m), "");
-  const batch = forgiven.filter((b) => b.due_date > before && b.due_date <= last.due_date);
+  const before = rent.filter((b) => b.status !== "forgiven" && b.id < last.id).reduce((m, b) => Math.max(m, b.id), 0);
+  const batch = forgiven.filter((b) => b.id > before && b.id <= last.id);
   const first = batch.reduce((m, b) => (b.due_date < m ? b.due_date : m), last.due_date);
   const home = ECONOMY.homes.find((h) => h.id === st.player.home_id);
   return {
