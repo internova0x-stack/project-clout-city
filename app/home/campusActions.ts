@@ -28,3 +28,8 @@ export async function campusSubmit(course: string, answers: number[], peek: bool
 }
 export async function campusEat() { return call<{ cash: number; energy: number }>("campus_eat"); }
 export async function campusLeaderboard() { return call<Leaderboard>("campus_leaderboard"); }
+/** Exams passed toward a degree (aspiration_state, migration 0143; fails quietly before it). */
+export async function campusDegree() {
+  const r = await call<{ exams: number; degree: boolean }>("aspiration_state");
+  return r.ok ? { ok: true as const, data: { exams: Number(r.data?.exams ?? 0), degree: !!r.data?.degree } } : r;
+}

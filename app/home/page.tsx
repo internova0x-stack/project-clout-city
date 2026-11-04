@@ -49,7 +49,7 @@ import { lifeActivity, lifeMoment, lifePlace, lifePlayMoment, lifeStamp, lifeTod
 import { pushAsked, pushPrefs, pushSetOff, pushSubscribe, pushTest, pushUnsubscribe } from "./pushActions";
 import { kickPush } from "@/lib/pushServer";
 import { after } from "next/server";
-import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit } from "./campusActions";
+import { campusAttend, campusEat, campusEnrol, campusExam, campusLeaderboard, campusPick, campusState, campusSubmit, campusDegree } from "./campusActions";
 import { crushStatus, crushToggle, dateCancel, dateCandidates, dateInvite, dateRespond, datingInbox, matchSeen } from "./datingActions";
 import {
   cohabitAnswer, cohabitAsk, cohabitCancel, cohabitHang, cohabitHome, cohabitLeave,
@@ -195,7 +195,7 @@ export default async function HomePage() {
       push={city ? { prefs: pushPrefs, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, setOff: pushSetOff, asked: pushAsked, test: pushTest } : undefined}
       // Migration 0072 switches on campus life (campus_state failing hides it).
       campus={city && campus.ok ? {
-        state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard,
+        state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard, degree: campusDegree,
       } : undefined}
       // Migration 0057 switches on Real Clout FM (radio_state failing hides the Radio app).
       radio={city ? { state: radioState, request: radioRequest, report: radioReport } : undefined}

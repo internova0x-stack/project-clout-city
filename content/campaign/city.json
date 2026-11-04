@@ -1,5 +1,5 @@
 {
-  "about": "Campaign Mode's map, staff and stakeholders (docs/CAMPAIGN-MODE.md sections 8, 10 and 12). The test build runs in Queens. Weight is the share of the vote; mayor is Papa-Dani's starting rating there. Every person is invented. Every person has an age and a one-line vibe, and a portrait at public/cast/campaign-<id>.webp (owner, Nov 4: a diverse cast: races, ages, personality types).",
+  "about": "Campaign Mode's map, staff and stakeholders (docs/CAMPAIGN-MODE.md sections 8, 10 and 12). The test build runs in Queens. Weight is the share of the vote; mayor is Papa-Dani's starting rating there. Every person is invented. Every person has an age and a one-line vibe, and a portrait at public/cast/campaign-<id>.webp (owner, Nov 4: a diverse cast: races, ages, personality types). Owner, Nov 4 (\"the mayor role is for the whole city\"): Queens is the swing borough. Its places are where you campaign; the other four boroughs (weights are their share of the city's vote, Queens 0.27) start mostly decided, with a lean per candidate, and only citywide moves (ads, TV, the debate, scandals) reach them, at half strength.",
   "places": [
     {
       "id": "astoria",
@@ -168,6 +168,64 @@
       "mayorAlly": true,
       "age": 38,
       "vibe": "Polished and careful. Never says yes until he's counted the votes."
+    }
+  ],
+  "boroughs": [
+    {
+      "id": "manhattan",
+      "name": "Manhattan",
+      "weight": 0.19,
+      "you": 34,
+      "mayor": 46,
+      "cares": "Rents, towers and the trains in",
+      "leans": {
+        "goldcrest": 3,
+        "castellano": 4,
+        "kowalczyk": 2.5,
+        "starr": 2
+      }
+    },
+    {
+      "id": "brooklyn",
+      "name": "Brooklyn",
+      "weight": 0.31,
+      "you": 36,
+      "mayor": 45,
+      "cares": "Rent, bike lanes and bodegas",
+      "leans": {
+        "goldcrest": -1,
+        "castellano": 4,
+        "kowalczyk": 5.5,
+        "starr": 4
+      }
+    },
+    {
+      "id": "bronx",
+      "name": "The Bronx",
+      "weight": 0.17,
+      "you": 34,
+      "mayor": 46,
+      "cares": "Jobs, safety and the 4 train",
+      "leans": {
+        "goldcrest": -2,
+        "castellano": 3,
+        "kowalczyk": 7.5,
+        "starr": 1
+      }
+    },
+    {
+      "id": "staten-island",
+      "name": "Staten Island",
+      "weight": 0.06,
+      "you": 30,
+      "mayor": 50,
+      "cares": "The ferry and being left alone",
+      "leans": {
+        "goldcrest": 1,
+        "castellano": 0,
+        "kowalczyk": 7.5,
+        "starr": -2
+      }
     }
   ]
 }

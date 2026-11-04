@@ -1026,3 +1026,15 @@ lib/campaignEngine.ts `resolveWeek`).
   Papa-Dani's), with the counts on top.
 
 Tuning (tests/campaign.test.ts, 200 campaigns each): clean play wins 38-66% (Kowalczyk hardest), dirty play 64-83%.
+
+## The whole city votes; Queens decides (owner, Nov 4: "go with recommendation 1")
+
+The mayor is elected citywide, but the campaign plays in Queens. Queens is the swing borough: the other four boroughs
+(content/campaign/city.json `boroughs`: Manhattan 19%, Brooklyn 31%, the Bronx 17%, Staten Island 6%; Queens is
+`CAMPAIGN.boroughs.queens`, 27%) start mostly decided, close to even overall, with a lean per candidate. Rallies, street
+teams and anything aimed at a Queens place move only Queens; citywide moves (ads, TV, the debate, scandals) reach the other
+boroughs at half strength (`CAMPAIGN.boroughs.reach`). The poll the player sees is the city's (`cityTotal`), with Queens
+under it; the weekly reward and momentum follow the Queens change, since that is the player's work. Election night counts
+the other boroughs first, then the Queens places one by one, the closest last; the winner's face (the candidate, or
+Papa-Dani when he keeps City Hall) heads the results. State: `boroughs` (and `beforeBoroughs` while results are hidden);
+an older campaign without them plays as before. Tuning: clean play still wins about 55-68%, dirty about 75-83%.

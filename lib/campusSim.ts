@@ -59,6 +59,8 @@ export function createCampusSim(preset = "", opts: { here?: () => CampusId | nul
   };
   // Without opts.here the sheet's own "you're here" check stands in (the preview passes it from the city).
   const away = (c: CampusId | null) => !!opts.here && opts.here() !== c;
+  // Exams passed toward a degree (the "done" preset's three count), so the third pass shows the degree moment.
+  let passed = preset === "done" ? 3 : 0;
   const copy = () => JSON.parse(JSON.stringify(s)) as CampusState;
 
   return {
@@ -108,6 +110,7 @@ export function createCampusSim(preset = "", opts: { here?: () => CampusId | nul
       const percent = coursePercent(c.daysThisWeek, correct);
       const grade = caught ? "F" : gradeFor(percent).letter;
       c.exam = { grade, percent, correct, caught };
+      if (!caught && ["A", "B", "C"].includes(grade)) passed += 1;
       const done = s.courses.every((x) => x.exam);
       const pts = (g: string) => ({ A: 4, B: 3, C: 2, D: 1 } as Record<string, number>)[g] ?? 0;
       const weekGpa = done ? Math.round((s.courses.reduce((a, x) => a + pts(x.exam!.grade), 0) / s.courses.length) * 100) / 100 : null;
@@ -123,6 +126,7 @@ export function createCampusSim(preset = "", opts: { here?: () => CampusId | nul
       return ok({ cash: -(at === s.campus ? CAMPUS.dining.student : CAMPUS.dining.visitor), energy: -CAMPUS.dining.energy });
     },
     leaderboard: () => ok(JSON.parse(JSON.stringify(board)) as Leaderboard),
+    degree: () => ok({ exams: passed, degree: passed >= 3 }),
   };
 }
 

@@ -69,7 +69,7 @@ export function createUnderworldSim(preset: string | null, opts: { atPlace: () =
       const r = fn(state);
       pay(r);
       if (state.offers.done.length >= state.offers.ids.length) nextDay();
-      return screen({ receipt: r.receipt, outcome: r.outcome });
+      return screen({ receipt: r.receipt, outcome: r.outcome, cash: r.payouts.reduce((n, p) => n + p.amount, 0), held: r.holding });
     } catch (e) {
       if (e instanceof UnderworldError) return { ok: false, error: underworldError(e.code) };
       throw e;

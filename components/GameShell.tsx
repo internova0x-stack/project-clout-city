@@ -110,7 +110,9 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
+import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
 import { promotionCelebration } from "./careers/promotion";
+import { reviewResult } from "./careers/review";
 import { sfx, unlockSfx } from "@/lib/sfx";
 import { goalsCelebration, revealBetween, type GoalsReveal } from "./game/Goals";
 import { PushPrompt, shouldAskPush } from "./push/Push";
@@ -482,6 +484,7 @@ export function GameShell({
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [campaignOpen, setCampaignOpen] = useState(false);
+  const bootAt = useRef(Date.now());
   const [careersOpen, setCareersOpen] = useState(false);
   const [backRoomOpen, setBackRoomOpen] = useState(false);
   const [galaOpen, setGalaOpen] = useState(false);
@@ -695,14 +698,28 @@ export function GameShell({
       if (!live || !r.ok) return;
       const job = r.data.job;
       setCareerPlace(job?.status === "employed" ? job.place : null);
+      if (!job) return;
+      // The weekly review's results screen (owner, Nov 4: "right after the weekly review"): the first time this device sees a
+      // review (cc-review-seen, by job and review day). careers.screen() settles a review that's due, so this is that moment.
+      const reviewKey = job.review ? `${job.id}:${job.review.day}` : null;
+      let reviewSeen: string | null = null;
+      try { reviewSeen = localStorage.getItem("cc-review-seen"); } catch { /* none */ }
+      const freshReview = !!reviewKey && reviewSeen !== reviewKey;
+      if (reviewKey) { try { localStorage.setItem("cc-review-seen", reviewKey); } catch { /* private mode */ } }
       // A promotion is celebrated where the player first sees it (owner, Nov 3: "not just inside careers… the home screen as
       // well as when entering the game"): the level this device last saw for this job, kept in cc-career-seen.
-      if (!job || job.status !== "employed") return;
       let seen: { id: string; level: number } | null = null;
-      try { seen = JSON.parse(localStorage.getItem("cc-career-seen") ?? "null"); } catch { /* none */ }
-      try { localStorage.setItem("cc-career-seen", JSON.stringify({ id: job.id, level: job.level })); } catch { /* private mode */ }
-      if (!seen || seen.id !== job.id || job.level <= seen.level) return;
-      celebrate(promotionCelebration(job, placeById(job.place)?.name ?? job.employer, () => setCareersOpen(true)));
+      if (job.status === "employed") {
+        try { seen = JSON.parse(localStorage.getItem("cc-career-seen") ?? "null"); } catch { /* none */ }
+        try { localStorage.setItem("cc-career-seen", JSON.stringify({ id: job.id, level: job.level })); } catch { /* private mode */ }
+      }
+      const promoted = job.status === "employed" && !!seen && seen.id === job.id && job.level > seen.level;
+      const open = () => setCareersOpen(true);
+      // The top of the ladder stays a legend; any other review is its results screen.
+      if (promoted && job.level >= job.levels) { celebrate(promotionCelebration(job, placeById(job.place)?.name ?? job.employer, open)); return; }
+      const res = freshReview ? reviewResult(job, open) : null;
+      if (res) { celebrate(res); return; }
+      if (promoted) celebrate(promotionCelebration(job, placeById(job.place)?.name ?? job.employer, open));
     }).catch(() => undefined);
     return () => { live = false; };
   }, [careers, careersOpen, tab]);
@@ -716,6 +733,23 @@ export function GameShell({
       setCampaignRunning(running);
       setCampaignTasks(running ? r.data.view!.tasks : []);
       setCampaignScandals(r.data.view?.scandals.map((x) => x.text) ?? []);
+      // The week's results as a banner (owner, Nov 4: the end-state treatments): once per campaign week on this device
+      // (cc-camp-results), the morning the overnight poll is in; election night is its own screen in Campaign HQ.
+      const v = r.data.view;
+      if (!v?.recapReady || !v.recap) return;
+      const key = `${v.id}:${v.phase === "over" ? "over" : v.recap.week}`;
+      let seenKey: string | null = null;
+      try { seenKey = localStorage.getItem("cc-camp-results"); } catch { /* none */ }
+      if (seenKey === key) return;
+      try { localStorage.setItem("cc-camp-results", key); } catch { /* private mode */ }
+      const recap = v.recap;
+      const ch = recap.change;
+      // A beat after the game settles, so the banner isn't spent behind the launch splash.
+      const at = Date.now() - bootAt.current < 6000 ? 6000 - (Date.now() - bootAt.current) : 0;
+      setTimeout(() => celebrate(v.phase === "over"
+        ? { rung: 2, emoji: "🗳️", tag: "Election night", title: "The results are in", rewards: [{ text: "Open Campaign HQ ›" }], onCta: () => setCampaignOpen(true) }
+        : { rung: 2, emoji: ch >= 0 ? "📈" : "📉", tag: `Week ${recap.week} results`, title: recap.headline,
+            rewards: [{ tone: ch >= 0 ? "cash" : undefined, text: `City ${v.you.toFixed(1)}% vs ${v.mayor.toFixed(1)}%` }, { text: "Open HQ ›" }], onCta: () => setCampaignOpen(true) }), at);
     });
     return () => { live = false; };
   }, [campaign, campaignOpen, tasksOpen]);
@@ -852,6 +886,8 @@ export function GameShell({
   /** Re-reads the player from the server (bonuses paid by someone else's visit). Set once the city API is ready. */
   const resync = useRef<() => void>(() => {});
   const inboxRef = useRef<DatingInbox | null>(null);
+  const nightCtx = useRef<NightCtx>({ who: player.id });
+  nightCtx.current = { who: player.id, onUs: () => setPanel("us"), onDates: () => setPanel("dates"), onCrew: () => setPanel("crew") };
   const loadInbox = useCallback(async () => {
     if (!dating) return;
     const r = await dating.inbox();
@@ -859,10 +895,10 @@ export function GameShell({
     const prev = inboxRef.current;
     inboxRef.current = r.data;
     setInbox(r.data);
-    const paid = r.data.dates.find((d) => d.paid && prev?.dates.some((p) => p.id === d.id && !p.paid));
+    // The night's results card (components/nightResults.ts) replaces the old toast.
+    const paid = dateNightsRead(prev, r.data, nightCtx.current);
     if (paid) {
       setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
-      setToast(`Date night with ${paid.with.name}. You both pulled up. 💗`);
       resync.current();
     }
   }, [dating]);
@@ -873,6 +909,7 @@ export function GameShell({
   const [coupleDismissed, setCoupleDismissed] = useState<string | null>(null);
   const takeCouple = useCallback((st: CoupleState) => {
     setCoupleS(st);
+    nightsCouple(st);
     if (st.partner && st.relId && (st.days ?? 0) <= 7) {
       let seen: number | null = null;
       try { seen = Number(localStorage.getItem("cc-couple-seen")) || null; } catch { /* none */ }
@@ -950,10 +987,10 @@ export function GameShell({
     const prev = crewRef.current;
     crewRef.current = r.data;
     setCrewInbox(r.data);
+    // A full crew, everyone in, or midnight: the night's results card (components/nightResults.ts).
+    const full = crewNightsRead(prev, r.data, nightCtx.current);
     if (!prev) return;
     const gained = r.data.clout - prev.clout;
-    const full = r.data.outings.find((o) => o.full && o.iWent && prev.outings.some((p) => p.id === o.id && !p.full));
-    if (full) setCrewFull(full);
     if (gained > 0) {
       // Friends who arrived since the last look (not you: your own visit has its own toast).
       const arrived = r.data.outings.flatMap((o) => o.members.filter((m) => m.went && m.id !== player.id
@@ -2176,7 +2213,7 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || !!place || !!panel || phone.open || careersOpen || campaignOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || !!place || !!panel || phone.open || careersOpen || campaignOpen || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
   // While you wait (owner, Nov 3: "actions I can take in that period"): the Phone still works, and Sgt. Bev helps family.
   const holdingActions: HoldingAction[] = [
     ...(bonds.find((b) => b.npc === "sgt-bev")?.bigReady && favorHandlers ? [{ id: "bev", emoji: "💛", label: "Ask Sgt. Bev", meta: "Family favor", onClick: () => { setHoldingOpen(false); favorHandlers.onBig("sgt-bev"); } }] : []),

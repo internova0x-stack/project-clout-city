@@ -256,6 +256,10 @@ export const CAREER = {
   promote: { perf: 75, trust: 60, creditStealerTrust: 70, reset: 50 },
   raise: { perf: 60, max: 2, pct: 0.1 },
   warn: { perf: 40, supportive: 35 },
+  /** The strike ladder (owner, Nov 4: "failure shouldn't always lead to firing"): a bad week adds a strike (1 a warning,
+   *  2 probation with next week's wage docked, 3 a demotion, or probation again at level 1); a bad week on 3 strikes is the
+   *  sack. A good week takes one strike off, two good weeks in a row clear them. */
+  strikes: { dock: 0.2, fireAfter: 3 },
   /** A review needs at least this many workdays, or it's a bad one whatever the performance. */
   minDays: 2,
   burnout: { streak: 3, mood: -10 },
@@ -314,7 +318,7 @@ export interface CareerContent {
   lines: Record<TrackId, { manager: { high: string[]; mid: string[]; low: string[] }; friend: string[]; rival: string[] }>;
 }
 
-export interface CareerLog { day: string; kind: "hired" | "raise" | "promotion" | "review" | "warning" | "demotion" | "fired" | "quit" | "caught"; text: string }
+export interface CareerLog { day: string; kind: "hired" | "raise" | "promotion" | "review" | "warning" | "probation" | "demotion" | "fired" | "quit" | "caught"; text: string }
 
 export interface CareerState {
   v: 1;
@@ -327,8 +331,13 @@ export interface CareerState {
   hiredOn: string;
   performance: number;
   trust: Record<Who, number>;
+  /** Strikes, 0 to 3 (CAREER.strikes): 1 a warning, 2 probation, 3 the last chance. */
   warnings: number;
   demoted: boolean;
+  /** Probation: the next review's wage is docked (CAREER.strikes.dock). */
+  docked?: boolean;
+  /** Good reviews in a row (two clear every strike). */
+  goodRun?: number;
   /** Exaggerated in the interview, not caught yet. */
   lie: boolean;
   periodStart: string;
@@ -763,7 +772,13 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "compa
     s.performance = clamp(s.performance - penalty);
     lines.push(`📅 ${worked} of ${CAREER.expectedDays} workdays this week.`);
   }
-  const wage = Math.round((salaryOf(s) * Math.min(worked, CAREER.expectedDays)) / CAREER.expectedDays);
+  let wage = Math.round((salaryOf(s) * Math.min(worked, CAREER.expectedDays)) / CAREER.expectedDays);
+  if (s.docked) {
+    const cut = Math.round(wage * CAREER.strikes.dock);
+    wage -= cut;
+    s.docked = false;
+    if (cut) lines.push(`📋 Probation: C$${cut.toLocaleString("en-US")} docked from this week's wage.`);
+  }
   // Company health (migration 0161): a thriving company pays a bonus on payday (with the tips row).
   const co = ctx.company ? companyRules(ctx.company.health) : null;
   const coBonus = co?.bonus && wage > 0 ? Math.round(wage * co.bonus) : 0;
@@ -807,20 +822,36 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "compa
   const bad = s.performance < warnAt || worked < CAREER.minDays;
   const mgr = managerOf(s, track).name.split(" ")[0];
   if (bad) {
+    s.goodRun = 0;
+    const dockPct = Math.round(CAREER.strikes.dock * 100);
     if (s.warnings === 0) {
       s.warnings = 1;
       outcome = "warning";
-      lines.push(`⚠️ ${mgr} gave you a warning. Another bad week and it gets worse.`);
+      lines.push(`⚠️ ${mgr} gave you a warning. A good week clears it.`);
       note(s, day, "warning", "A warning at your review.");
-    } else if (s.level > 1 && !s.demoted) {
-      s.level -= 1;
-      s.raises = 0;
-      s.reviewsAtLevel = 0;
-      s.demoted = true;
-      outcome = "demotion";
-      const title = track.levels[s.level - 1].title;
-      lines.push(`⬇️ Demoted to ${title}. ${mgr}: "Let's call it a reset."`);
-      note(s, day, "demotion", `Demoted to ${title}.`);
+    } else if (s.warnings === 1) {
+      s.warnings = 2;
+      s.docked = true;
+      outcome = "probation";
+      lines.push(`📋 On probation: next week's wage is docked ${dockPct}%. A good week gets you off it.`);
+      note(s, day, "probation", "On probation.");
+    } else if (s.warnings < CAREER.strikes.fireAfter) {
+      s.warnings = CAREER.strikes.fireAfter;
+      if (s.level > 1 && !s.demoted) {
+        s.level -= 1;
+        s.raises = 0;
+        s.reviewsAtLevel = 0;
+        s.demoted = true;
+        outcome = "demotion";
+        const title = track.levels[s.level - 1].title;
+        lines.push(`⬇️ Demoted to ${title}. ${mgr}: "Let's call it a reset." One more bad week and you're out.`);
+        note(s, day, "demotion", `Demoted to ${title}.`);
+      } else {
+        s.docked = true;
+        outcome = "probation";
+        lines.push(`📋 Last chance: still on probation, next week's wage docked ${dockPct}%. One more bad week and you're out.`);
+        note(s, day, "probation", "Last chance on probation.");
+      }
     } else {
       s.status = "fired";
       s.endedOn = day;
@@ -830,7 +861,11 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "compa
     }
   } else {
     s.reviewsAtLevel += 1;
-    if (s.performance >= 60) s.warnings = 0;
+    s.goodRun = (s.goodRun ?? 0) + 1;
+    if (s.warnings > 0) {
+      s.warnings = s.goodRun >= 2 ? 0 : s.warnings - 1;
+      lines.push(s.warnings === 0 ? `🧹 A clean slate: no warnings on your record.` : `🪜 A good week takes a strike off (${s.warnings} left).`);
+    }
     const next = track.levels[s.level];
     const trustNeed = persona === "credit_stealer" ? CAREER.promote.creditStealerTrust : CAREER.promote.trust;
     const ready = s.performance >= CAREER.promote.perf && s.trust.manager >= trustNeed && s.reviewsAtLevel >= s.level;
@@ -860,7 +895,7 @@ function review(s: CareerState, ctx: Pick<CareerCtx, "skills" | "clout" | "compa
       if (!ready && next) lines.push(`🎯 For a promotion: performance ${CAREER.promote.perf}+, ${mgr}'s trust ${trustNeed}+ and ${s.level} good review${s.level > 1 ? "s" : ""} as ${track.levels[s.level - 1].title} (${s.reviewsAtLevel} so far).`);
     }
   }
-  const moodHit: Partial<Record<CareerLog["kind"], number>> = { promotion: 15, raise: 8, warning: -12, caught: -12, demotion: -20 };
+  const moodHit: Partial<Record<CareerLog["kind"], number>> = { promotion: 15, raise: 8, warning: -12, probation: -15, caught: -12, demotion: -20 };
   s.workMood = clamp((s.workMood ?? CAREER.office.moodStart) + (moodHit[outcome] ?? 0));
   befriend(s);
   s.review = { day, lines, pay, outcome };

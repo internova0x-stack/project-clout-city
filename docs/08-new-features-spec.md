@@ -1195,7 +1195,7 @@ friend and a rival (Bashir and Kendall, Mateo and Brent, Nour and Jax Holloway).
   a **promotion** at performance 75+, the boss's trust 60+ (70 for the credit-stealer), as many good reviews at the level
   as the level's number, and the next level's requirements (new title and pay, 50 × level clout, performance back to 50);
   else a **raise** (+10%, two per level) at 60+; else a solid week. A bad week (performance under 40, 35 with the
-  supportive boss, or under 2 workdays) is a **warning**, then a **demotion**, then the **sack**. A player away for weeks
+  supportive boss, or under 2 workdays) is a strike (owner, Nov 4): a **warning**, then **probation** (next week's wage docked 20%), then a **demotion** (at level 1 a last-chance probation), and only a fourth bad week on the last strike is the **sack**; a good week takes a strike off, two in a row clear them. A player away for weeks
   catches up review by review. Tuning: a steady full-time worker is promoted every few weeks; coasting every day keeps the
   job but goes nowhere; coasting part-time gets you fired.
 

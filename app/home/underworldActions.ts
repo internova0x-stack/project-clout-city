@@ -103,7 +103,8 @@ async function act(change: ((s: UnderworldState, ctx: Ctx, today: string, conten
     const err = await save(w.admin, w.id, ctx, state, c);
     if (err) return { ok: false, error: err };
   }
-  return { ok: true, data: { view: view(content, state, today, ctx), receipt: c.receipt, outcome: c.outcome } };
+  return { ok: true, data: { view: view(content, state, today, ctx), receipt: c.receipt, outcome: c.outcome,
+    cash: c.payouts.reduce((n, p) => n + p.amount, 0), held: c.holding } };
 }
 
 export async function underworldScreen(): Promise<Out> {

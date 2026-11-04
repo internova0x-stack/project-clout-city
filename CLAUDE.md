@@ -230,6 +230,16 @@ components live in `app/globals.css`.
   heart, jingle (banner), fanfare (takeover, twists chest|chimes|register|stamp) and anthem (legend), which `music().duck()` under;
   started on the first tap (`unlockSfx`), 80 ms apart per sound, Settings → Sounds (components/SoundSwitch.tsx, `cc-sfx-muted`)
   apart from Music. GameChrome plays the coin or sparkle as the flying coins land and the tick on a task.
+- Results screens (owner, Nov 4: "build the top 5… right after the weekly review", with the reward sounds; the Results Screens
+  artifact): components/ResultCard.tsx, shown by CelebrationHost for `celebrate({ rung: 3, result })`: the medal (or a face), a
+  stamp, the amount counting up (or a word: a grade, "Solo") with the line under it, one bar against the line you needed, the
+  You keep pills and one button; a near miss keeps its colour (tone warn/lose, never grey) and plays only a tick, a win the
+  fanfare. Wired: the careers weekly review (components/careers/review.ts `reviewResult`, the first time a device sees a review,
+  cc-review-seen; a promotion to the top level stays a legend), the campaign's weekly results as a banner (cc-camp-results,
+  6 s after launch; election night stays in Campaign HQ), campus exams (CampusSheet `showExamResult`, pass line 70%,
+  `EXAM_PASS_PERCENT`; the third pass also a 🎓 degree takeover via `campusDegree`), date nights and crew outings
+  (components/nightResults.ts: won, rain check, stood up, full crew, so close; cc-nights keeps what was shown) and Pablo's jobs
+  (components/underworld/result.ts `jobResult`: paid, fizzle, covered, caught; "Go to the bench" opens the holding pop-up).
 - Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check
@@ -422,6 +432,10 @@ components live in `app/globals.css`.
   (`view.money`). The inbox is a messaging app (sender avatar, time stamp from `inbox[].at`, unread dot kept on the device in
   `cc-camp-read:<campaign>`, the reply as a sent bubble) and the Allies tab lists every stakeholder by standing (`view.allies`).
   A trace is exposed at most once (`events` 'exposed:<id>').
+  The whole city votes (owner, Nov 4: "go with recommendation 1"; no migration): Queens is the swing borough (27%), the other
+  four (`boroughs` in content/campaign/city.json) start mostly decided and move only with citywide campaigning at half strength
+  (`CAMPAIGN.boroughs`, `reachBoroughs`); the poll is citywide (`cityTotal`) with Queens under it; election night counts the
+  boroughs first, then Queens, and shows the winner's face.
   The cast (owner, Nov 4: "a diverse cast of people… different races, ages, personality types"): staff and stakeholders carry
   `age` and `vibe` (content/campaign/city.json) and a portrait public/cast/campaign-<id>.webp (Higgsfield, the candidates'
   style; initials if one is missing); the Team tab shows the staff from day one (morale and loyalty after week 1).
@@ -504,7 +518,7 @@ components live in `app/globals.css`.
   Tech at Triborough Works, Media at the Clout TV Tower), the Phone's Careers app (Phone → Jobs stays the players' hiring
   board) and "💼 Go to work" on the employer's card. The rules are TypeScript like Campaign Mode (lib/careers.ts, pure; run by
   app/home/careerActions.ts with a crypto random source and the service role; lib/careerSim.ts in the preview,
-  `?career=welcome|new|apply|work|day|review|warning|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
+  `?career=welcome|new|apply|work|day|review|warning|probation|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
   those two import lib/careersContent.ts. public.careers (state jsonb, RLS on, no grants): `career_hire` (one job; after the
   sack a track waits 7 days, after quitting 2), `career_save` (versioned; the workday's Energy and Mood, the key skills
   practised, pays once: 'career_pay' cash on the weekly review, 'career_promo' and 'career_screen' clout; rate bucket
@@ -515,6 +529,9 @@ components live in `app/globals.css`.
   traced sabotage costs the boss's trust (a traced rumor: a warning and a Lola's Blotter headline); work mood feeds Mood and
   performance; a joint project pays 'career_team' at the review; `career_office` nudges the private meter (±12) and posts the
   headline (`choice_headline`, never for News opt-outs). `?career=office|grudge` in the preview.
+  The strike ladder (owner, Nov 4: "failure shouldn't always lead to firing"; no migration, `CAREER.strikes`): a bad review adds
+  a strike (`warnings`): 1 a warning, 2 probation (next week's wage docked 20%, `docked`), 3 a demotion (at level 1 probation
+  again, the last chance); only a bad week on 3 strikes is the sack. A good week takes one off, two in a row clear them (`goodRun`).
   Aspirations (migration 0143, owner Oct 31: "careers be the entry point to choosing archetypes"; lib/aspirations.ts): the
   Careers app opens on a welcome screen ("What's your aspiration?", one Choose button; `?career=welcome`) with seven:
   Corporate Bro / Corporate Girlie (Tech), Budding Influencer, Streamer, Future Celebrity (Media), Hustler (Hospitality),
