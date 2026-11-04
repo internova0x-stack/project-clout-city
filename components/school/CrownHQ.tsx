@@ -36,6 +36,8 @@ export function CrownHQ({ open, onClose, api, me, onToast }: {
   const [data, setData] = useState<SchoolScreen | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // The slot picker is a sheet of its own, beside Crown HQ's (a sheet inside a sheet would sit under its close button).
+  const [picking, setPicking] = useState<{ day: number; slot: Slot } | null>(null);
 
   const run: Run = useCallback(async (p) => {
     setBusy(true);
@@ -54,6 +56,8 @@ export function CrownHQ({ open, onClose, api, me, onToast }: {
   const verdict = v?.verdict ?? null;
   useEffect(() => {
     if (!open || !v || !verdict || v.phase === "over") return;
+    // Only while it's news: the weekend after Friday, or the Monday after (an old verdict stays quiet).
+    if (!(verdict.week === v.week || (verdict.week === v.week - 1 && v.today === 0))) return;
     if (!firstTime("crown-verdict", `${v.id}:${verdict.week}`)) return;
     const ok = verdict.eligible;
     const tier = tierOf(verdict.rep, v.crown);
@@ -73,15 +77,22 @@ export function CrownHQ({ open, onClose, api, me, onToast }: {
 
   const label = !v || v.phase === "over" ? (v?.result ? "Homecoming night" : "Homecoming") : "Crown HQ";
   return (
+    <>
     <Sheet open={open} onClose={onClose} label={label} tall>
       <div className="camp">
         {!data && !error && <p className="meta">Checking the ballot…</p>}
         {!data && error && <p className="error-text">{error}</p>}
         {data && (!v || (v.phase === "over" && !v.result)) && <Declare data={data} busy={busy} onGo={() => void run(api.declare()).then((d) => d?.receipt && onToast(d.receipt))} />}
-        {data && v && v.phase === "running" && <Hq data={data} v={v} busy={busy} api={api} run={run} me={me} onToast={onToast} />}
+        {data && v && v.phase === "running" && <Hq data={data} v={v} busy={busy} api={api} run={run} me={me} onToast={onToast} onPick={setPicking} />}
         {data && v && v.phase === "over" && v.result && <Homecoming v={v} me={me} />}
       </div>
     </Sheet>
+    {data && v && (
+      <Picker at={open && v.phase === "running" ? picking : null} current={picking ? v.plan[picking.day][picking.slot] : null} can={data.can}
+        examEve={!!picking && picking.day === EXAM_DAY - 1 && picking.slot === 1}
+        onClose={() => setPicking(null)} onPick={(a) => { if (picking) void run(api.slot(picking.day, picking.slot, a)); setPicking(null); }} />
+    )}
+    </>
   );
 }
 
@@ -134,7 +145,7 @@ function Declare({ data, busy, onGo }: { data: SchoolScreen; busy: boolean; onGo
 
 // ---------------------------------------------------------------------------------------------------------------
 
-function Hq({ data, v, busy, api, run, me, onToast }: { data: SchoolScreen; v: RaceView; busy: boolean; api: SchoolApi; run: Run; me: ReactNode; onToast: (t: string) => void }) {
+function Hq({ data, v, busy, api, run, me, onToast, onPick }: { data: SchoolScreen; v: RaceView; busy: boolean; api: SchoolApi; run: Run; me: ReactNode; onToast: (t: string) => void; onPick: (at: { day: number; slot: Slot }) => void }) {
   const [tab, setTab] = useState<Tab>("week");
   const [later, setLater] = useState<string | null>(null);
   const [made, setMade] = useState<{ emoji: string; receipt: string; line: string } | null>(null);
@@ -196,7 +207,7 @@ function Hq({ data, v, busy, api, run, me, onToast }: { data: SchoolScreen; v: R
             <button aria-pressed={tab === "allies"} onClick={() => setTab("allies")}>Allies</button>
             <button aria-pressed={tab === "budget"} onClick={() => setTab("budget")}>Budget</button>
           </div>
-          {tab === "week" && <Week data={data} v={v} busy={busy} onSet={(d, s, a) => void run(api.slot(d, s, a))} />}
+          {tab === "week" && <Week v={v} busy={busy} onPick={onPick} />}
           {tab === "inbox" && <Inbox v={v} busy={busy} read={read} onReply={async (m, o) => { const d = await run(api.reply(m, o)); if (d?.receipt) onToast(d.receipt); }} />}
           {tab === "squad" && <Squad v={v} />}
           {tab === "allies" && <Allies v={v} />}
@@ -274,8 +285,7 @@ function ChoiceCard({ card, busy, onChoose, onSkip }: { card: NonNullable<RaceVi
 // ---------------------------------------------------------------------------------------------------------------
 // The week: seven days, a day and a night slot each; a tap opens the picker.
 
-function Week({ data, v, busy, onSet }: { data: SchoolScreen; v: RaceView; busy: boolean; onSet: (d: number, s: Slot, a: Activity) => void }) {
-  const [picking, setPicking] = useState<{ day: number; slot: Slot } | null>(null);
+function Week({ v, busy, onPick }: { v: RaceView; busy: boolean; onPick: (at: { day: number; slot: Slot }) => void }) {
   const lastWeek = v.week === v.weeks;
   const nights = v.plan.filter((d, i) => i >= v.locked && ["party", "hang", "club", "date"].includes(d[1])).length;
   const examEve = (d: number, s: Slot) => d === EXAM_DAY - 1 && s === 1;
@@ -295,7 +305,7 @@ function Week({ data, v, busy, onSet }: { data: SchoolScreen; v: RaceView; busy:
                 return (
                   <button key={s} className={`crown-slot${examEve(i, s as Slot) && a === "party" ? " hot" : ""}`} disabled={busy || past || homecoming}
                     aria-label={`${DAYS[i]} ${s ? "night" : "day"}: ${label}${past ? ", played" : ""}`}
-                    onClick={() => setPicking({ day: i, slot: s as Slot })}>
+                    onClick={() => onPick({ day: i, slot: s as Slot })}>
                     <span className="e" aria-hidden="true">{homecoming ? (i === HOMECOMING_DAY ? "👑" : "🛌") : ACT[a].emoji}</span>{label}
                   </button>
                 );
@@ -304,8 +314,6 @@ function Week({ data, v, busy, onSet }: { data: SchoolScreen; v: RaceView; busy:
           );
         })}
       </div>
-      <Picker at={picking} current={picking ? v.plan[picking.day][picking.slot] : null} can={data.can} examEve={!!picking && examEve(picking.day, picking.slot)}
-        onClose={() => setPicking(null)} onPick={(a) => { if (picking) onSet(picking.day, picking.slot, a); setPicking(null); }} />
     </div>
   );
 }
@@ -561,7 +569,7 @@ function Homecoming({ v, me }: { v: RaceView; me: ReactNode }) {
         unit: res.ending === "ineligible" ? "votes · your GPA kept you off" : `votes · ${gap} ${won ? "ahead of" : "short of"} ${rival}`,
         story: won ? winLine(v) : lossLine(v),
         stamp: won ? { text: res.ending === "dirty" ? "CROWNED*" : "CROWNED", tone: "good" } : { text: res.ending === "ineligible" ? "INELIGIBLE" : "RUNNER-UP", tone: "warn" },
-        meter: { label: "🗳️ Your share", have: share, need: 50, max: 100, say: won ? `${res.cliques.length} cliques voted. ${mine} were yours.` : "Two cliques away from the crown." },
+        meter: { label: "🗳️ Your share, %", have: share, need: 50, max: 100, say: won ? `${res.cliques.length} cliques voted. ${mine} were yours.` : "Two cliques away from the crown." },
         keep: won ? ["👑 by your name", v.tier, `+${RACE.rewards.crown} clout`] : [v.tier, "Your squad", `+${RACE.rewards.runnerUp} clout`],
       },
     });
