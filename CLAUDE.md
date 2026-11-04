@@ -240,6 +240,18 @@ components live in `app/globals.css`.
   `EXAM_PASS_PERCENT`; the third pass also a 🎓 degree takeover via `campusDegree`), date nights and crew outings
   (components/nightResults.ts: won, rain check, stood up, full crew, so close; cc-nights keeps what was shown) and Pablo's jobs
   (components/underworld/result.ts `jobResult`: paid, fizzle, covered, caught; "Go to the bench" opens the holding pop-up).
+  The rest (owner, Nov 4: "build the remaining"; emoji medals, owner: "Stay with emojis"): businesses (components/business/results.ts:
+  an upgrade is a banner, going public the legend; WentPublicCard is gone), having people over (components/home/visitResults.ts: the
+  host's card when a visit ends, FULL HOUSE / SO CLOSE / NO-SHOWS, the guest's banner on `me.paid`; cc-visit-seen), the Clout Pass
+  (components/game/passResults.ts: every tier = a legend, Collect all = a banner, the season wrap-up card in the claim window;
+  cc-pass-max/cc-pass-wrap; `?pass=ended`), the Charity Gala's gift card (components/gala/galaResult.ts), a Tea story finished (a
+  takeover, components/city/cityCelebrations.ts, cc-tea-done) and a calendar event attended (a banner), the bad news as near misses
+  (components/game/badNews.ts + badNewsReads.ts, cc-bad-news: eviction, inferred from a forgiven rent bill, `?rent=evicted`; a
+  breakup; a broken 3+ day streak, "Repair it" while a repair is open; a sublet ending), the player economy
+  (components/economy/results.ts + announce.ts: gifts accepted and received, Market sales, buys and swaps, an asset handover: the
+  seller's SOLD card, the buyer's banner), leaving holding (components/game/holdingOut.ts: bail, Sgt. Bev or time served; cc-held)
+  and Pablo's extras (result.ts `tableResult`, `runnerResult`, `hireBanner`, `landedResult` for a job that came back).
+  components/seenOnce.ts `firstTime(scope, key)` is the shared once-per-device check (cc-seen:<scope>).
 - Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check
