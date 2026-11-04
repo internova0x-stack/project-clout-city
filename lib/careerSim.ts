@@ -59,11 +59,13 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
     if (preset === "quit") { state.workMood = 22; }
     // ?career=leave: running Kaylee Starr's campaign, so the job is on leave.
     if (preset === "leave") leaveTransition(state, { candidate: "Kaylee" }, day);
-    if (preset === "review" || preset === "warning" || preset === "fired") {
+    if (preset === "review" || preset === "warning" || preset === "probation" || preset === "fired") {
       state.performance = preset === "review" ? 82 : 30;
       state.trust.manager = preset === "review" ? 70 : 40;
       if (preset === "review") state.reviewsAtLevel = 1;
-      if (preset === "fired") state.warnings = 1;
+      // ?career=probation: the second bad week; ?career=fired: a bad week on the last strike.
+      if (preset === "fired") state.warnings = 3;
+      if (preset === "probation") state.warnings = 1;
       state.worked = preset === "review" ? ["a", "b", "c", "d", "e"] : ["a"];
       refresh(state, state.nextReview, ctx(), rng);
       day = state.periodStart;
@@ -132,4 +134,4 @@ export function createCareerSim(preset: string | null, opts: { clout: number; en
   };
 }
 
-export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "leave", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "fired"] as const;
+export const CAREER_PRESETS = ["welcome", "new", "apply", "work", "day", "office", "grudge", "boss", "quit", "leave", "cityhall", "streaming", "fashion", "realestate", "finance", "law", "review", "warning", "probation", "fired"] as const;

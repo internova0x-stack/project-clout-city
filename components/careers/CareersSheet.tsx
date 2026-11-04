@@ -213,7 +213,7 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
         <Meter label="Performance" value={v.performance} tone={tone(v.performance)} />
         <p className="meta" style={{ margin: 0 }}>
           📅 {v.workedThisWeek} of {CAREER.expectedDays} workdays · review {v.daysToReview === 0 ? "today" : `in ${v.daysToReview} day${v.daysToReview > 1 ? "s" : ""}`}
-          {v.warnings > 0 ? " · ⚠️ on a warning" : ""}
+          {v.warnings === 1 ? " · ⚠️ on a warning" : v.warnings === 2 ? " · 📋 on probation" : v.warnings >= 3 ? " · 🚨 last chance" : ""}
         </p>
       </div>
 

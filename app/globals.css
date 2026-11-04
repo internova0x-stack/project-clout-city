@@ -2798,7 +2798,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .careers-bar.green span { background:var(--green-500); }
 .careers-bar.red span { background:var(--red-500); }
 .careers-review.promotion, .careers-review.raise { box-shadow:inset 0 0 0 2px var(--green-500); }
-.careers-review.warning, .careers-review.demotion, .careers-review.fired, .careers-review.caught { box-shadow:inset 0 0 0 2px var(--red-500); }
+.careers-review.warning, .careers-review.probation, .careers-review.demotion, .careers-review.fired, .careers-review.caught { box-shadow:inset 0 0 0 2px var(--red-500); }
 .careers-task + .careers-task { padding-top:12px; border-top:1px solid var(--chip-off); }
 .careers-task-title { margin:0; font-size:15px; line-height:21px; font-weight:700; }
 .careers-delta { display:inline-block; margin-left:6px; padding:0 6px; border-radius:var(--r-pill); font-size:12px; font-weight:800; }

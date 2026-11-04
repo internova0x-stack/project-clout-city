@@ -508,7 +508,7 @@ components live in `app/globals.css`.
   Tech at Triborough Works, Media at the Clout TV Tower), the Phone's Careers app (Phone → Jobs stays the players' hiring
   board) and "💼 Go to work" on the employer's card. The rules are TypeScript like Campaign Mode (lib/careers.ts, pure; run by
   app/home/careerActions.ts with a crypto random source and the service role; lib/careerSim.ts in the preview,
-  `?career=welcome|new|apply|work|day|review|warning|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
+  `?career=welcome|new|apply|work|day|review|warning|probation|fired`); the task file content/careers/careers.json holds hidden outcomes, so only
   those two import lib/careersContent.ts. public.careers (state jsonb, RLS on, no grants): `career_hire` (one job; after the
   sack a track waits 7 days, after quitting 2), `career_save` (versioned; the workday's Energy and Mood, the key skills
   practised, pays once: 'career_pay' cash on the weekly review, 'career_promo' and 'career_screen' clout; rate bucket
@@ -519,6 +519,9 @@ components live in `app/globals.css`.
   traced sabotage costs the boss's trust (a traced rumor: a warning and a Lola's Blotter headline); work mood feeds Mood and
   performance; a joint project pays 'career_team' at the review; `career_office` nudges the private meter (±12) and posts the
   headline (`choice_headline`, never for News opt-outs). `?career=office|grudge` in the preview.
+  The strike ladder (owner, Nov 4: "failure shouldn't always lead to firing"; no migration, `CAREER.strikes`): a bad review adds
+  a strike (`warnings`): 1 a warning, 2 probation (next week's wage docked 20%, `docked`), 3 a demotion (at level 1 probation
+  again, the last chance); only a bad week on 3 strikes is the sack. A good week takes one off, two in a row clear them (`goodRun`).
   Aspirations (migration 0143, owner Oct 31: "careers be the entry point to choosing archetypes"; lib/aspirations.ts): the
   Careers app opens on a welcome screen ("What's your aspiration?", one Choose button; `?career=welcome`) with seven:
   Corporate Bro / Corporate Girlie (Tech), Budding Influencer, Streamer, Future Celebrity (Media), Hustler (Hospitality),

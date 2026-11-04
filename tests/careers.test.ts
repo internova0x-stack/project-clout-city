@@ -110,14 +110,47 @@ test("payday pays for the days worked; working hard gets raises and promotions",
   assert.ok(s.log.some((l) => l.kind === "promotion"));
 });
 
-test("skipping work: a warning, then a demotion, then the sack", () => {
+const ladder = (s: CareerState) => s.log.map((l) => l.kind).reverse().filter((k) => ["warning", "probation", "demotion", "fired"].includes(k));
+
+test("skipping work: a warning, probation, a demotion, then the sack", () => {
   const c = ctx({ skills: { charisma: 6, cooking: 5 } });
   const s = hire("f", "hospitality", c, "honest", DAY);
   s.level = 2;
-  play(s, 4, 1, "coast", c, seq(0.6));
+  play(s, 6, 1, "coast", c, seq(0.6));
   assert.equal(s.status, "fired");
-  const kinds = s.log.map((l) => l.kind).reverse();
-  assert.deepEqual(kinds.filter((k) => ["warning", "demotion", "fired"].includes(k)), ["warning", "demotion", "fired"]);
+  assert.deepEqual(ladder(s), ["warning", "probation", "demotion", "fired"]);
+});
+
+test("one bad week never fires anyone: at level 1 it takes four in a row", () => {
+  const c = ctx({ skills: { charisma: 6, cooking: 5 } });
+  const s = hire("g", "hospitality", c, "honest", DAY);
+  play(s, 6, 1, "coast", c, seq(0.6));
+  assert.equal(s.status, "fired");
+  assert.deepEqual(ladder(s), ["warning", "probation", "probation", "fired"], "level 1 gets a last chance instead of a demotion");
+});
+
+test("probation docks the next wage", () => {
+  const c = ctx({ skills: { charisma: 6, cooking: 5 } });
+  const s = hire("d", "hospitality", c, "honest", DAY);
+  s.warnings = 1;
+  const pays = play(s, 2, 1, "coast", c, seq(0.6));
+  assert.equal(ladder(s)[0], "probation");
+  assert.ok(pays.length >= 2 && pays[1] < pays[0], `docked: ${pays.join(", ")}`);
+});
+
+test("good weeks climb back down the ladder", () => {
+  const c = ctx({ skills: { charisma: 6, cooking: 5 } });
+  const one = hire("h", "hospitality", c, "honest", DAY);
+  one.warnings = 3;
+  one.performance = 70;
+  play(one, 1, 5, "steady", c, seq(0.6));
+  assert.equal(one.status, "employed");
+  assert.equal(one.warnings, 2, "one good week takes a strike off");
+  const two = hire("i", "hospitality", c, "honest", DAY);
+  two.warnings = 3;
+  two.performance = 70;
+  play(two, 2, 5, "steady", c, seq(0.6));
+  assert.equal(two.warnings, 0, "two good weeks in a row clear them");
 });
 
 test("a player away for weeks catches up review by review", () => {
