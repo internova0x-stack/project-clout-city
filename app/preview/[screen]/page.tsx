@@ -62,6 +62,7 @@ import type { Player } from "@/lib/player";
 //   /preview/home?couture=soldout  every Clout Couture drop has sold out (migration 0102)
 //   /preview/home?mayor=new|reply  the Mayor app with no letters yet, or a reply waiting (migration 0105)
 //   /preview/home?campaign=locked|pick|week|situation|debate|waiting|election  Campaign Mode (migration 0127; Phone → Campaign)
+//   /preview/home?school=intro|declare|plan|clash|verdict|crown|hq|ineligible  The Homecoming race (lib/schoolSim.ts; St. Johnsons' card → Crown HQ, or ?open=crown; &crown=king|queen)
 //   /preview/home?underworld=locked|new|jobs|pro|hot|caught|lawyer|crew|table|weekly  The underworld (migrations 0148, 0150; Pablo's back room from his shop's card, or ?open=backroom; crew = loyal crew, table = a Hustler at the Thursday table, weekly = this week's new jobs)
 //   /preview/home?pass=soon|new|progress|paid|vip|done|ended&pack=offer|owned|none  The Clout Pass (Tasks → Pass) and the starter pack (Shop's top; migration 0156)
 //   /preview/home?gala=on|off|new|done  The Charity Gala (migration 0150; Halo only, Ditmars Heights Rooftop's card, or ?open=gala)
@@ -118,7 +119,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, career, underworld, gala, choice, economy, assets, market, pass, pack, life, bonds } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, school, crown, career, underworld, gala, choice, economy, assets, market, pass, pack, life, bonds } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -207,6 +208,8 @@ export default async function Preview({
           couturePreset={couture}
           mayorPreset={mayor}
           campaignPreset={campaign}
+          schoolPreset={school}
+          crownPreset={crown}
           careerPreset={career}
           underworldPreset={underworld}
           galaPreset={gala}

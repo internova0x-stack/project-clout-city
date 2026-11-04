@@ -200,6 +200,7 @@ export default async function HomePage() {
       // Migration 0078: push notifications (Settings → Notifications and Lola's ask).
       push={city ? { prefs: pushPrefs, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, setOff: pushSetOff, asked: pushAsked, test: pushTest } : undefined}
       // Migration 0072 switches on campus life (campus_state failing hides it).
+      school={school}
       campus={city && campus.ok ? {
         state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard, degree: campusDegree,
       } : undefined}

@@ -21,6 +21,9 @@ const rememberedSim = async () => {
 };
 import { previewMayorSeen, previewMayorState, previewMayorWrite } from "@/app/preview/mayorActions";
 import { createCampusSim } from "@/lib/campusSim";
+import { createSchoolSim } from "@/lib/schoolSim";
+import { modelSex } from "@/lib/avatarCatalog";
+import { normalizeLook } from "@/lib/look";
 import { createGoalsSim } from "@/lib/goalsSim";
 import type { PushApi, PushPrefs } from "@/lib/pushClient";
 import { previewMembership } from "@/lib/membershipSim";
@@ -102,7 +105,7 @@ const STATIONS_PREVIEW = { inbox: previewStationInbox, read: previewStationRead 
 const PREVIEW_COUTURE: CoutureApi = { map: previewCoutureMap, weeks: previewPlazaWeeks, book: previewPlazaBook };
 
 export function PreviewHome({
-  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, passPreset, packPreset, lifePreset, choicePreset, bondsPreset, economyPreset, assetsPreset, marketPreset,
+  player, clique, flow, daytimeOverride, cityOff, roomMood, devTools = false, storyOff = false, storyDay, storyArc, tasksDone = false, datingPreset, crewPreset, partyPreset, huntPreset = "new", lottoPreset, rankUpPreset, bizPreset, togetherPreset, radioPreset, tvPreset, brooklynPreset, gossipPreset = "some", dailyHintPreset = false, campusPreset: campusPresetIn, schoolPreset, crownPreset, goalsPreset, pushPreset, memberPreset, skillsPreset, transitPreset, rentPreset, calendarPreset, couturePreset, mayorPreset, atPreset, couplePreset, subletPreset, homeScorePreset, visitPreset, starterPreset, appsPreset, campaignPreset, careerPreset, underworldPreset, galaPreset, passPreset, packPreset, lifePreset, choicePreset, bondsPreset, economyPreset, assetsPreset, marketPreset,
 }: {
   player: Player; clique: CliqueMember[]; flow?: Flow; daytimeOverride?: boolean; cityOff?: boolean;
   roomMood?: "natural" | "dream";
@@ -169,6 +172,10 @@ export function PreviewHome({
   mayorPreset?: string;
   /** Campaign Mode: ?campaign=locked|pick|week|situation|debate|waiting|election (Phone → Campaign). */
   campaignPreset?: string;
+  /** The Homecoming race: ?school=intro|declare|plan|clash|verdict|crown|hq|ineligible (lib/schoolSim.ts), standing at St. Johnsons. */
+  schoolPreset?: string;
+  /** ?crown=king|queen overrides the crown the preview player's look gives. */
+  crownPreset?: string;
   /** Careers: ?career=new|apply|work|day|office|grudge|review|warning|fired (Phone → Careers). */
   careerPreset?: string;
   /** The underworld (migration 0148): ?underworld=locked|new|jobs|pro|hot|caught|lawyer. */
@@ -207,6 +214,8 @@ export function PreviewHome({
   // v0.12 ?biz=some|rich|public: start with businesses, and the cash and clout to match.
   const boost = bizPreset === "some" ? { cash: 60_000, clout: 11_000 } : bizPreset === "rich" || bizPreset === "public" ? { cash: 60_000_000, clout: 60_000 } : null;
   const rentOn = rentPreset === "short" || rentPreset === "late" || rentPreset === "evict" || rentPreset === "evicted";
+  // The Homecoming race needs an enrolled student (not for ?school=ineligible), standing at St. Johnsons.
+  const campusPreset = campusPresetIn ?? (schoolPreset ? (schoolPreset === "ineligible" ? "" : "week") : undefined);
   const me = useMemo(() => (boost ? { ...player, bank_cash: player.bank_cash + boost.cash, clout: player.clout + boost.clout } : rentOn ? { ...player, bank_cash: 230 } : player),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [player, bizPreset]);
@@ -347,6 +356,11 @@ export function PreviewHome({
     here: () => simRef.current.here(), bank: () => player.bank_cash,
     onPay: (e) => simRef.current.choicePay(e),
   }), [galaPreset, player.bank_cash]);
+  const schoolApi = useMemo(() => createSchoolSim(schoolPreset ?? null, {
+    crown: crownPreset === "king" || crownPreset === "queen" ? crownPreset : modelSex({ body: normalizeLook(player.look, player.starting_style).body }) === "f" ? "queen" : "king",
+    bank: () => player.bank_cash,
+    onPay: (e) => simRef.current.choicePay(e),
+  }), [schoolPreset, crownPreset, player.look, player.starting_style, player.bank_cash]);
   const campaignApi = useMemo(() => createCampaignSim(campaignPreset ?? null, { clout: campaignPreset === "locked" ? 40 : Math.max(150, player.clout), bank: player.bank_cash }), [campaignPreset, player.clout, player.bank_cash]);
   const radioApi = useMemo<RadioApi>(() => ({
     state: () => previewRadioState(radioPreset ?? ""),
@@ -712,6 +726,7 @@ export function PreviewHome({
       choices={cityOff ? undefined : choicesApi}
       remembered={cityOff || (choicePreset !== "story" && choicePreset !== "city") ? undefined : rememberedSim}
       campus={cityOff ? undefined : campusApi}
+      school={cityOff ? undefined : schoolApi}
       goals={cityOff ? undefined : goalsApi}
       push={cityOff ? undefined : pushApi}
       membership={cityOff ? undefined : memberApi}
