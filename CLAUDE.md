@@ -230,6 +230,16 @@ components live in `app/globals.css`.
   heart, jingle (banner), fanfare (takeover, twists chest|chimes|register|stamp) and anthem (legend), which `music().duck()` under;
   started on the first tap (`unlockSfx`), 80 ms apart per sound, Settings → Sounds (components/SoundSwitch.tsx, `cc-sfx-muted`)
   apart from Music. GameChrome plays the coin or sparkle as the flying coins land and the tick on a task.
+- Results screens (owner, Nov 4: "build the top 5… right after the weekly review", with the reward sounds; the Results Screens
+  artifact): components/ResultCard.tsx, shown by CelebrationHost for `celebrate({ rung: 3, result })`: the medal (or a face), a
+  stamp, the amount counting up (or a word: a grade, "Solo") with the line under it, one bar against the line you needed, the
+  You keep pills and one button; a near miss keeps its colour (tone warn/lose, never grey) and plays only a tick, a win the
+  fanfare. Wired: the careers weekly review (components/careers/review.ts `reviewResult`, the first time a device sees a review,
+  cc-review-seen; a promotion to the top level stays a legend), the campaign's weekly results as a banner (cc-camp-results,
+  6 s after launch; election night stays in Campaign HQ), campus exams (CampusSheet `showExamResult`, pass line 70%,
+  `EXAM_PASS_PERCENT`; the third pass also a 🎓 degree takeover via `campusDegree`), date nights and crew outings
+  (components/nightResults.ts: won, rain check, stood up, full crew, so close; cc-nights keeps what was shown) and Pablo's jobs
+  (components/underworld/result.ts `jobResult`: paid, fizzle, covered, caught; "Go to the bench" opens the holding pop-up).
 - Fewer server checks (owner, Oct 30; lib/live.ts): polls use `everyVisible` (paused while the game is off screen, one
   catch-up when it's back), never a bare setInterval. Chat, party rooms and home visits ring a doorbell (`ring`/`useDoorbell`:
   a Supabase Realtime broadcast with no data; listeners re-fetch through their own calls) and keep a slow backup check
