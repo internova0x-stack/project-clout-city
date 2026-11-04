@@ -5,6 +5,7 @@ import { LOLA_PORTRAIT } from "@/lib/cast";
 import { sfx, type SfxTwist } from "@/lib/sfx";
 import { guardTaps } from "@/lib/tapGuard";
 import { Confetti } from "./Confetti";
+import { ResultCard, type ResultSpec } from "./ResultCard";
 
 // Celebrations (owner, Nov 3: "yes build with the reward sounds"; the Achievement Screens artifact, round 3: "Use our design
 // system… Use our font as well"). One ladder for every win, so the same kind of win always gets the same size:
@@ -35,6 +36,8 @@ export interface Celebration {
   /** What Share copies or sends. */
   share?: string;
   twist?: SfxTwist;
+  /** A results screen (components/ResultCard.tsx): a week's review, an exam, a night out, a job for Pablo. */
+  result?: ResultSpec;
 }
 
 const EVENT = "cc-celebrate";
@@ -66,7 +69,9 @@ export function CelebrationHost({ hold = false }: { hold?: boolean }) {
   return (
     <>
       {banner && <CelebrationBanner key={`${banner.title}-${banners.length}`} c={banner} onDone={nextBanner} />}
-      {card && <CelebrationCard key={`${card.title}-${cards.length}`} c={card} onClose={closeCard} />}
+      {card && (card.result
+        ? <ResultCard key={`${card.title}-${cards.length}`} c={card as Celebration & { result: ResultSpec }} onClose={closeCard} />
+        : <CelebrationCard key={`${card.title}-${cards.length}`} c={card} onClose={closeCard} />)}
     </>
   );
 }

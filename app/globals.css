@@ -3275,3 +3275,40 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .camp-borough { opacity:.92; }
 .camp-winner { width:96px; height:96px; border-radius:50%; object-fit:cover; align-self:center; box-shadow:0 8px 22px rgba(20,17,26,.18); border:4px solid var(--surface-raised); }
 
+
+/* Results screens (components/ResultCard.tsx, owner Nov 4): the colour stays on a near miss; transforms and opacity only. */
+.res-card { max-height:calc(100dvh - 32px); overflow-y:auto; }
+.res-art { position:relative; display:grid; justify-items:center; gap:6px; padding:26px 18px 22px; overflow:hidden; background:var(--g-stage); }
+.res-art.warn { background:linear-gradient(160deg,#FFF3CC 0%,#F6E9D4 100%); }
+.res-art.lose { background:linear-gradient(160deg,#E6ECFA 0%,#ECE4F6 100%); }
+.res-art > *:not(.cel-rays) { position:relative; }
+.res-medal { width:84px; height:84px; font-size:44px; }
+.res-medal.calm { animation:cel-pop .42s .2s ease-out both; }
+.res-face { width:92px; height:92px; border-radius:50%; object-fit:cover; background:#fff; box-shadow:var(--elev-3), 0 0 0 5px #fff; animation:cel-pop .56s .24s cubic-bezier(.2,1.4,.4,1) both; }
+.res-tag { margin-top:6px; color:var(--text-3); animation:rank-rise .38s .5s ease-out both; }
+.res-title { font-family:var(--font-display); font-size:22px; line-height:26px; letter-spacing:-.01em; animation:rank-rise .38s .58s ease-out both; }
+.res-num { font-family:var(--font-label); font-style:italic; font-weight:800; font-size:52px; line-height:52px; transform:skewX(-6deg); color:var(--text-1);
+  font-variant-numeric:tabular-nums; animation:rank-rise .38s .66s ease-out both; }
+.res-num.good { color:#1F6B4A; }
+.res-unit { font-family:var(--font-label); font-weight:700; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); animation:rank-rise .38s .7s ease-out both; }
+.res-story { margin:4px 0 0; max-width:30ch; text-align:center; font-size:14px; line-height:20px; color:var(--text-2); animation:rank-rise .38s 1.1s ease-out both; }
+.res-stamp { position:absolute !important; top:16px; right:-6px; transform:rotate(9deg); padding:4px 10px; border:3px solid currentColor; border-radius:8px;
+  font-family:var(--font-label); font-weight:800; font-size:17px; letter-spacing:.08em; animation:res-stamp .4s 1s cubic-bezier(.2,1.6,.4,1) both; }
+.res-stamp.good { color:var(--green-text); } .res-stamp.warn { color:#9A6A00; } .res-stamp.bad { color:var(--red-500); }
+@keyframes res-stamp { from { opacity:0; transform:rotate(9deg) scale(2.2); } to { opacity:1; transform:rotate(9deg) scale(1); } }
+.res-body { display:grid; gap:16px; padding:18px 20px 20px; }
+.res-meter { display:grid; gap:8px; padding:14px; border-radius:var(--r-md); background:var(--surface-raised); text-align:left; animation:fade-in .4s 1s ease-out both; }
+.res-meter-top { display:flex; justify-content:space-between; font-size:13px; font-weight:700; }
+.res-meter.good .res-meter-top b { color:var(--green-text); }
+.res-track { position:relative; height:12px; border-radius:7px; background:var(--chip-off); margin-bottom:12px; }
+.res-fill { position:absolute; inset:0 auto 0 0; border-radius:7px; background:linear-gradient(90deg,#FF7AA8,var(--red-500)); transition:width 1.1s cubic-bezier(.2,.8,.2,1); }
+.res-meter.good .res-fill { background:linear-gradient(90deg,#5FD39A,#1E9E62); }
+.res-goal { position:absolute; top:-4px; bottom:-4px; width:3px; margin-left:-1px; border-radius:2px; background:var(--text-1); }
+.res-goal::after { content:attr(data-label); position:absolute; top:18px; left:50%; transform:translateX(-50%); font-family:var(--font-label); font-size:11px; font-weight:700; color:var(--text-2); }
+.res-say { font-size:13px; color:var(--text-2); }
+.res-keep { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; }
+.res-keep .overline { margin-right:2px; }
+.res-k { height:25px; padding:0 9px; display:inline-flex; align-items:center; border-radius:var(--r-pill); background:var(--green-tint); color:#1F6B4A; font-size:12.5px; font-weight:600;
+  animation:cel-chip .34s cubic-bezier(.2,1.4,.4,1) both; }
+.res-cta { width:100%; animation:rank-rise .38s 1.9s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .res-card *, .res-card { animation:none !important; transition:none !important; } }
