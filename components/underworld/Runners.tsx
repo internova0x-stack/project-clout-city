@@ -6,18 +6,23 @@ import { MARKETPLACE, cutLine, type UnderworldHire, type UnderworldHires, type U
 import type { UnderworldApi, UnderworldScreen, UnderworldView } from "@/lib/underworld";
 import { handle } from "@/lib/validation";
 import { Avatar } from "../crew/Crew";
+import { celebrate } from "../Celebrate";
+import { firstTime, recent } from "../seenOnce";
+import { hireBanner, runnerResult } from "./result";
 
 // Migration 0152: underworld jobs between players, in Pablo's back room. Hand one of today's offers to a friend Pablo also
 // knows (a runner) for a cut held in escrow; they do it here like any job and take the risk; you get Pablo's take; both of
 // you get Heat. Only NPC targets: Pablo's jobs never touch a real player.
 
-export function Runners({ api, v, busy, onToast, onDone }: {
+export function Runners({ api, v, busy, onToast, onDone, onBench }: {
   api: UnderworldApi;
   v: UnderworldView;
   busy: boolean;
   onToast: (text: string) => void;
   /** A hire ran: the receipt, and the screen to show. */
   onDone: (r: UnderworldScreen) => void;
+  /** A runner's job put you in holding: the results card's button goes to the bench. */
+  onBench?: () => void;
 }) {
   const [hires, setHires] = useState<UnderworldHires | null>(null);
   const [runners, setRunners] = useState<UnderworldRunner[] | null>(null);
@@ -29,7 +34,13 @@ export function Runners({ api, v, busy, onToast, onDone }: {
   const load = useCallback(async () => {
     if (!api.hires) return;
     const r = await api.hires();
-    if (r.ok) setHires(r.data);
+    if (!r.ok) return;
+    setHires(r.data);
+    // Your runner ran your job (owner, Nov 4): a banner with Pablo's take, once per hire on this device.
+    for (const h of r.data.sent) {
+      const b = hireBanner(h);
+      if (b && recent(h.createdAt, 3) && firstTime("pablo", `hire:${h.id}`)) celebrate(b);
+    }
   }, [api]);
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (posting && !runners && api.runners) void api.runners().then((r) => setRunners(r.ok ? r.data : [])); }, [posting, runners, api]);
@@ -60,6 +71,9 @@ export function Runners({ api, v, busy, onToast, onDone }: {
           setWorking(false);
           if (!r.ok) { onToast(r.error); return; }
           onDone(r.data);
+          // You ran a friend's job: a banner with your cut, or the job's own card when it went wrong.
+          const card = runnerResult(h, v, r.data, onBench);
+          if (card) celebrate(card);
           void load();
         }}
         onDecline={async () => {

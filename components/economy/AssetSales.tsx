@@ -10,6 +10,7 @@ import { PLAYER_ECONOMY, afterFee, economyFee, type GiftCandidate } from "@/lib/
 import { handle } from "@/lib/validation";
 import { Avatar } from "../crew/Crew";
 import { ChevronLeftIcon } from "../icons";
+import { announceAssets } from "./announce";
 
 // The Player Economy, Phase 3 (migration 0153): selling a business or your house to a friend. The panel sits inside the
 // Phone (Businesses, Apartments and the Bank) and shows the deals in play, your sellable assets and, in place, the sale
@@ -37,7 +38,7 @@ export function AssetSalesPanel({ api, scope, onChanged, onToast }: {
   const [selling, setSelling] = useState<AssetView | null>(null);
   const load = useCallback(async () => {
     const r = await api.state();
-    if (r.ok) { setData(r.data); setOff(false); } else { setOff(!!r.off); setError(r.off ? null : r.error); }
+    if (r.ok) { setData(r.data); setOff(false); announceAssets(r.data); } else { setOff(!!r.off); setError(r.off ? null : r.error); }
   }, [api]);
   useEffect(() => { void load(); }, [load]);
   const act = async (id: number, p: Promise<{ ok: true; data: AssetSale } | { ok: false; error: string }>, done: (s: AssetSale) => string) => {

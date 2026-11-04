@@ -11,6 +11,9 @@ import {
 import { handle } from "@/lib/validation";
 import { Avatar } from "../crew/Crew";
 import { Toggle } from "../Toggle";
+import { celebrate } from "../Celebrate";
+import { announceMarket, announceSwap } from "./announce";
+import { listingBoughtBanner } from "./results";
 
 // The Player Economy, Phase 2 (migration 0152): Phone → Market. Browse (friends, or the open board), My listings with the
 // List-an-item flow, and Offers: the trade window, both sides side by side, confirmed by both. The server decides every
@@ -40,7 +43,7 @@ export function MarketApp({ api, cash, onChanged, onToast }: {
   const [draft, setDraft] = useState<Draft | null>(null);
   const load = useCallback(async () => {
     const r = await api.state();
-    if (r.ok) { setS(r.data); setError(null); } else setError(r.error);
+    if (r.ok) { setS(r.data); setError(null); announceMarket(r.data); } else setError(r.error);
   }, [api]);
   useEffect(() => {
     void load();
@@ -72,7 +75,7 @@ export function MarketApp({ api, cash, onChanged, onToast }: {
   const waiting = marketAlerts(s);
   if (draft) {
     return <TradeWindow api={api} draft={draft} me={s} cash={cash} busy={busy} onClose={() => setDraft(null)}
-      run={run} onDone={(t) => { setDraft(null); setTab("offers"); if (t?.status === "done") onToast("🔁 Swap done. Everything moved at once, as promised."); }} />;
+      run={run} onDone={(t) => { setDraft(null); setTab("offers"); announceSwap(t); }} />;
   }
   if (listing) {
     return <ListFlow items={s.items} busy={busy !== null} onClose={() => setListing(false)}
@@ -88,7 +91,7 @@ export function MarketApp({ api, cash, onChanged, onToast }: {
       </div>
       {(locked || hold) && <div className="card"><p className="body" style={{ margin: 0 }}>{locked ?? hold}</p></div>}
       {tab === "browse" && <Browse s={s} cash={cash} busy={busy} canTrade={!locked && !hold}
-        onBuy={(l, sure) => run(`buy:${l.id}`, api.buy(l.id, sure), () => onToast(`🛍️ It's yours: ${l.name.toLowerCase()}. Keep it ${PLAYER_ECONOMY.noResaleDays} days before you flip it.`))}
+        onBuy={(l, sure) => run(`buy:${l.id}`, api.buy(l.id, sure), () => celebrate(listingBoughtBanner(l)))}
         onOpen={(on) => void run("open", api.setOpen(on))} />}
       {tab === "listings" && (
         <div className="stack-8">

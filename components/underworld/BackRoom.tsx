@@ -5,7 +5,8 @@ import { Sheet } from "@/components/Sheet";
 // Migration 0152: runners (underworld jobs between players).
 import { Runners } from "./Runners";
 import { celebrate } from "@/components/Celebrate";
-import { jobResult } from "./result";
+import { firstTime } from "@/components/seenOnce";
+import { jobResult, landedResult, tableResult } from "./result";
 import { UNDERWORLD, underworldError, type OfferView, type UnderworldApi, type UnderworldScreen, type UnderworldView } from "@/lib/underworld";
 
 // The underworld (spec section 31; migration 0148): Pablo's back room, behind the luggage counter. Before the invitation:
@@ -49,6 +50,12 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
   useEffect(() => { if (open) { setLast(null); void run(api.screen()); } }, [open, api, run]);
 
   const v = data?.view ?? null;
+  // An old job that came back (owner, Nov 4): a near-miss card, once per trace on this device; the "It came back" card stays.
+  const toBench = useCallback(() => { onClose(); onToast(underworldError("in_holding")); }, [onClose, onToast]);
+  useEffect(() => {
+    if (!open || !v?.invited) return;
+    for (const l of v.landed) if (firstTime("pablo", `landed:${l.id}`)) celebrate(landedResult(l, v, toBench));
+  }, [open, v, toBench]);
   const seen = async () => { await run(api.seen()); };
   return (
     <Sheet open={open} onClose={onClose} label="Pablo's back room" tall>
@@ -132,14 +139,14 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
                       setLast({ text: r.receipt, outcome: r.outcome }); onChanged();
                       // The results screen (owner, Nov 4); its button takes a held player to the bench: GameShell opens
                       // the holding pop-up on an in_holding message, as for any refusal while held.
-                      const card = jobResult(o, before, r, () => { onClose(); onToast(underworldError("in_holding")); });
+                      const card = jobResult(o, before, r, toBench);
                       if (card) celebrate(card);
                     }
                   }} />
               ))}
               <p className="meta" style={{ margin: 0 }}>New work every New York day. A day without a job cools you off twice as fast.</p>
             </div>
-            {api.hires && <Runners api={api} v={v} busy={busy} onToast={onToast}
+            {api.hires && <Runners api={api} v={v} busy={busy} onToast={onToast} onBench={toBench}
               onDone={(r) => { setData(r); if (r.receipt) { setLast({ text: r.receipt, outcome: r.outcome }); onChanged(); } }} />}
             {v.table && (
               <div className="card stack-8 backroom-table">
@@ -148,8 +155,13 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
                 {v.table.open && (v.table.done
                   ? <p className="meta" style={{ margin: 0 }}>✔️ You sat in this week. Next week&apos;s chair is yours.</p>
                   : <button className="btn btn-taxi" disabled={busy || !v.here || v.holding || v.tooHot} onClick={async () => {
+                      const before = v;
                       const r = await run(api.table());
-                      if (r?.receipt) { setLast({ text: r.receipt, outcome: "win" }); onChanged(); }
+                      if (r?.receipt) {
+                        setLast({ text: r.receipt, outcome: "win" }); onChanged();
+                        const card = tableResult(before, r);
+                        if (card) celebrate(card);
+                      }
                     }}>Pull up a chair · ⚡ {UNDERWORLD.table.energy}</button>)}
               </div>
             )}

@@ -231,19 +231,3 @@ export function TillsCollectedCard({ paid, clout, worth, onClose, onUpgrade }: {
     </div>
   );
 }
-
-/** Going public: the bell rings. */
-export function WentPublicCard({ worth, onClose }: { worth: number; onClose: () => void }) {
-  return (
-    <div className="modal-wrap biz-modal" role="dialog" aria-modal="true" aria-label="You went public">
-      <div className="scrim biz-sky" onClick={onClose} />
-      <div className="modal-card modal-light biz-reveal">
-        <span className="tag tag-event">🔔 Disruptive App Startup is public</span>
-        <p className="display-md" style={{ margin: "14px 0 8px" }}>You rang the bell</p>
-        <p className="subtext" style={{ margin: 0 }}>Your app for apps is worth three times as much now. Nobody can explain why.</p>
-        <p className="biz-price" style={{ margin: "12px 0 0" }}>Net worth: <b>{money(worth)}</b></p>
-        <button className="btn btn-taxi" style={{ marginTop: 18, width: "100%" }} onClick={onClose}>Act humble</button>
-      </div>
-    </div>
-  );
-}

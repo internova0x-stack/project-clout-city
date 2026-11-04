@@ -26,9 +26,11 @@ interface S {
   messages: VisitMessage[];
   left: Record<VisitKind, number>;
   paid: Set<string>;
+  /** When I walked into @kai_beats's party (the preview pays my stay 10 seconds later). */
+  arrivedAt: number;
 }
 const iso = (ms: number) => new Date(ms).toISOString();
-const fresh = (): S => ({ hosting: null, hostedAt: 0, invite: null, messages: [], left: { hang: 3, party: 1 }, paid: new Set() });
+const fresh = (): S => ({ hosting: null, hostedAt: 0, invite: null, messages: [], left: { hang: 3, party: 1 }, paid: new Set(), arrivedAt: 0 });
 let s = fresh();
 const ok = <T,>(data: T): VisitResult<T> => (process.env.NODE_ENV === "production" ? { ok: false, error: "Previews are off in production." } : { ok: true, data });
 const fail = (error: string): VisitResult<never> => ({ ok: false, error });
@@ -106,6 +108,7 @@ function room(id: number, after: number): VisitRoom | null {
       messages: s.messages.filter((m) => m.id > after) };
   }
   if (s.invite && s.invite.id === id) {
+    if (s.arrivedAt && Date.now() - s.arrivedAt > 10_000) s.paid.add("guest");
     return { id, kind: s.invite.kind, starts: s.invite.starts, ends: s.invite.ends, over: false, host: KAI, mine: false, crib: 74,
       me: { status: "accepted", paid: s.paid.has("guest") }, people: [{ ...KAI, host: true }, { ...TASHA, host: false }, { ...DEV, host: false }],
       messages: s.messages.filter((m) => m.id > after) };
@@ -116,6 +119,7 @@ export async function previewVisitArrive(id: number) {
   previewOnly();
   if (!s.invite || s.invite.id !== id) return fail("You're not on that guest list.");
   s.invite.status = "accepted";
+  if (!s.arrivedAt) s.arrivedAt = Date.now();
   return ok(room(id, 0)!);
 }
 export async function previewVisitLeave(id: number) { previewOnly(); void id; s.invite = null; return ok(state()); }

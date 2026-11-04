@@ -16,7 +16,7 @@ import { pickWelcome, type WelcomeAction, type WelcomeKind } from "@/lib/welcome
 import type { RepairMethod, RepairOffer } from "@/lib/streakRepair";
 import { StreakRepairCard } from "./game/StreakRepair";
 import type { TodayPick } from "@/lib/placeLife";
-import { SEASON, STARTER_PACK, claimable, passBadge, rewardLabel, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
+import { SEASON, STARTER_PACK, claimable, passBadge, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassTab, StarterPackCard } from "./game/SeasonPass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
@@ -47,7 +47,7 @@ import CAST_LINES from "@/content/cast-lines.json";
 import NPC_PROFILES from "@/content/culture/npcs.json";
 import { rememberedLine, reputationLine, withCatchphrases, type NpcProfile, type Roommate } from "@/lib/culture";
 import CALENDAR_FILE from "@/content/culture/calendar.json";
-import { calendarLive, phoneInvite, type CalendarData } from "@/lib/calendar";
+import { calendarLive, calendarReward, dressedUp, phoneInvite, type CalendarData } from "@/lib/calendar";
 import { RoommateCard, roommateCardDue, roommateMet } from "./home/Roommate";
 import { callName, crowdName, regularAt, regularLine } from "@/lib/cast";
 import { formatPrice, liveParty, needsConfirm, readReturn, type ExclusiveEvent, type StoreApi, type StoreProduct } from "@/lib/store";
@@ -111,6 +111,10 @@ import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
 import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
+import { passClaimBanner, passRead } from "./game/passResults";
+import { calendarBanner, teaCelebration } from "./city/cityCelebrations";
+import { publicCelebration, upgradeBanner } from "./business/results";
+import { visitRoomRead, visitStateRead } from "./home/visitResults";
 import { promotionCelebration } from "./careers/promotion";
 import { reviewResult } from "./careers/review";
 import { sfx, unlockSfx } from "@/lib/sfx";
@@ -119,14 +123,16 @@ import { PushPrompt, shouldAskPush } from "./push/Push";
 import type { MembershipApi, MembershipState } from "@/lib/membership";
 import type { PushApi } from "@/lib/pushClient";
 import { GOAL_COPY, goalProgress, partLine, type GoalsApi, type GoalsState } from "@/lib/goals";
-import { TillsCollectedCard, WentPublicCard } from "./city/Businesses";
-import { businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
+import { TillsCollectedCard } from "./city/Businesses";
+import { BUSINESSES, businessById, businessesValue, type BusinessApi, type BusinessResult, type BusinessState } from "@/lib/businesses";
 import { RANKS, rankFor, type Rank } from "@/lib/ranks";
 import { contextTipLists } from "@/lib/statTips";
 import type { PlayerCard } from "@/lib/chat";
 import { InviteSheet } from "./InviteSheet";
 import { DecorApproveCard, DecoratingBar, JobsApp, RideWaitCard, TogetherBonusCard, TogetherPlansSheet, TogetherPrompt, TogetherSheet } from "./together/Together";
 import { GiftInboxSheet, GiftPrompt, GiftSheet, type GiftItem } from "./economy/Economy";
+import { announceAssets, announceGiftAccepted, announceGifts, announceMarket } from "./economy/announce";
+import { leftHolding, useHoldingOut } from "./game/holdingOut";
 import type { EconomyApi, EconomyState, GiftInbox } from "@/lib/playerEconomy";
 // The Player Economy, Phase 2 (migration 0152): the Phone's Market.
 import { marketAlerts, type MarketApi, type MarketState } from "@/lib/marketplace";
@@ -836,7 +842,6 @@ export function GameShell({
   const [biz, setBiz] = useState<BusinessState | null>(null);
   const [bizOffset, setBizOffset] = useState(0);
   const [tillsPaid, setTillsPaid] = useState<{ id: string; cash: number }[] | null>(null);
-  const [wentPublic, setWentPublic] = useState(false);
   // Net worth includes businesses, so ranks wait for this first answer (or its failure, before 0048 runs).
   const [bizTried, setBizTried] = useState(!business);
   const loadBiz = useCallback(async () => {
@@ -958,6 +963,8 @@ export function GameShell({
     const r = await visits.state();
     if (r.ok && r.data) setVisitS(r.data);
   }, [visits]);
+  // The visit I hosted ends on a results card (components/home/visitResults.ts), once per visit on this device.
+  useEffect(() => { visitStateRead(visitS, { who: me.id, show: celebrate, onAgain: () => setPanel("visits") }); }, [visitS, me.id]);
   const loadCouple = useCallback(async () => {
     if (!couple) return;
     const r = await couple.state();
@@ -1042,7 +1049,7 @@ export function GameShell({
   const loadGifts = useCallback(async () => {
     if (!economy) return;
     const [i, st] = await Promise.all([economy.inbox(), economy.state()]);
-    if (i.ok) setGiftIn(i.data);
+    if (i.ok) { setGiftIn(i.data); announceGifts(i.data); }
     if (st.ok) setEcon(st.data);
   }, [economy]);
   useEffect(() => {
@@ -1055,10 +1062,12 @@ export function GameShell({
   const [marketNow, setMarketNow] = useState<MarketState | null>(null);
   useEffect(() => {
     if (!market) return;
-    const load = () => void market.state().then((r) => r.ok && setMarketNow(r.data));
+    const load = () => void market.state().then((r) => { if (r.ok) { setMarketNow(r.data); announceMarket(r.data); } });
     load();
     return everyVisible(load, 60_000);
   }, [market]);
+  // Migration 0153: a business or house sale handed over while away (the read settles it): the seller's card, the buyer's banner.
+  useEffect(() => { if (assets) void assets.state().then((r) => { if (r.ok) announceAssets(r.data); }); }, [assets]);
   useEffect(() => {
     if (togetherTarget && crew && !crewPeople.length) void crew.members().then((r) => r.ok && setCrewPeople(r.data));
   }, [togetherTarget, crew, crewPeople.length]);
@@ -1630,7 +1639,11 @@ export function GameShell({
   const loadPass = useCallback(async () => {
     if (!pass) return;
     const [a, b] = await Promise.all([pass.state().catch(() => null), pass.starter().catch(() => null)]);
-    if (a?.ok) setPassS(a.data);
+    if (a?.ok) {
+      setPassS(a.data);
+      const c = passRead(a.data, (sku) => itemBySku(sku)?.name, () => { setTasksTab("pass"); setPanel("tasks"); });
+      if (c) celebrate(c);
+    }
     if (b?.ok) setPackS(b.data);
   }, [pass]);
   useEffect(() => { void loadPass(); }, [loadPass]);
@@ -1647,9 +1660,8 @@ export function GameShell({
     if (!r.ok) return setToast(r.error);
     setPassS(r.data);
     const got = r.data.got;
-    setToast(got.length === 0 ? "Nothing new to claim yet." : got.length === 1
-      ? `🎁 ${rewardLabel(got[0], (sku) => itemBySku(sku)?.name)}`
-      : `🎁 ${got.length} rewards: ${got.slice(0, 2).map((g) => rewardLabel(g, (sku) => itemBySku(sku)?.name)).join(", ")}${got.length > 2 ? "…" : ""}`);
+    if (got.length === 0) setToast("Nothing new to claim yet.");
+    else celebrate(passClaimBanner(got, (sku) => itemBySku(sku)?.name));
     if (got.length && cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
   };
   const passReady = passS ? claimable(passS).free.length + claimable(passS).paid.length : 0;
@@ -1985,7 +1997,7 @@ export function GameShell({
       if (stop) return;
       if (!r.ok) { if (visitAt === roomVisitId) { setVisitAt(null); setToast(r.error); } return; }
       setVisitRoomS((prev) => {
-        if (r.data.me?.paid && prev && !prev.me?.paid) setToast(`${KIND_LABEL[r.data.kind].emoji} +${VISITS.kinds[r.data.kind].guestClout} clout, +${VISITS.kinds[r.data.kind].guestMood} Mood. Good hang.`);
+        visitRoomRead(prev, r.data, { who: me.id, show: celebrate });
         return r.data;
       });
       if (r.data.messages.length) {
@@ -2041,7 +2053,8 @@ export function GameShell({
     error: visitErr,
     onHost: (kind, guests, startsAt) => void visitRun(() => visits.host(kind, guests, startsAt), kind === "party" ? "🎉 Invites sent. Snacks are on the way." : "🏠 Invites sent. Tidy up.")
       .then((st) => { if (st) { setVisitS(st); if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); } }),
-    onEnd: () => void visitRun(() => visits.end(), "Wrapped. Everyone out, nicely.").then((st) => st && setVisitS(st)),
+    // A visit that had started ends on its results card (visitResults.ts); only a call-off gets the toast.
+    onEnd: () => void visitRun(() => visits.end(), visitS?.hosting && Date.parse(visitS.hosting.starts) > Date.now() ? "Called off. The snacks will keep." : undefined).then((st) => st && setVisitS(st)),
     onSendHome: (id) => void visitRun(() => visits.sendHome(id)).then((st) => st && setVisitS(st)),
     onAnswer: (id, yes) => void visitRun(() => visits.answer(id, yes), yes ? "See you there." : "Maybe next time.").then((st) => st && setVisitS(st)),
     onGo: (id) => void goToVisit(id),
@@ -2096,6 +2109,8 @@ export function GameShell({
   const [blotter, setBlotter] = useState<BlotterItem[]>([]);
   const [conditions, setConditions] = useState<ConditionNow[]>([]);
   const holdingUntil = choiceS?.marks.find((m) => m.kind === "holding" && Date.parse(m.until) > Date.now())?.until ?? null;
+  // Leaving the bench (owner, Nov 4): "You're out", once per stay (components/game/holdingOut.ts).
+  useHoldingOut(holdingUntil, celebrate);
   const choicesReady = !!choices && !!city && flow === "none";
   // Content Engine step 5: what regulars remember about this player, refreshed with the choices state (a choice can
   // change what they remember).
@@ -2173,7 +2188,8 @@ export function GameShell({
       void choices.bigFavor(npc).then((r) => {
         setFavorBusy(false);
         if (!r.ok) return setToast(r.error);
-        setToast(r.data.kind === "holding" ? "🚔 Sgt. Bev signs you out early. “You were never here.”" : `💛 Family looks after family: +C$${(r.data.cash ?? 0).toLocaleString("en-US")}.`);
+        if (r.data.kind === "holding") leftHolding("bev", holdingUntil, 0, celebrate);
+        else setToast(`💛 Family looks after family: +C$${(r.data.cash ?? 0).toLocaleString("en-US")}.`);
         loadBonds();
         void loadChoices();
         if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
@@ -2206,7 +2222,7 @@ export function GameShell({
     const r = await choices.bail();
     setChoiceBusy(false);
     if (!r.ok) return setToast(r.error);
-    setToast(`🚔 Bail paid: C$${r.data.cost.toLocaleString("en-US")}. Sgt. Bev: "Don't make it a habit."`);
+    leftHolding("bail", holdingUntil, r.data.cost, celebrate);
     setHoldingOpen(false);
     void loadChoices();
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
@@ -2278,7 +2294,9 @@ export function GameShell({
     const st = f.found.length ? await loadTea() : teaState;
     if (f.finished.length) {
       const card = st?.cards.find((c) => c.storyId === f.finished[0]);
-      if (card) setTeaCard({ card, fresh: true });
+      const c = card && teaCelebration(card, { finished: st?.cards.length ?? 0, weekDone: !!st && st.stories.filter((x) => x.week === card.week).every((x) => x.done),
+        onRead: () => setTeaCard({ card, fresh: false }) });
+      if (c) celebrate(c);
     }
     if ((f.finished.length || f.taskCash) && cityApi) void cityApi.refresh().then((r) => r.ok && applyCity(r));
     return st;
@@ -2312,6 +2330,7 @@ export function GameShell({
       return setToast(`👂 ${lead ? `Nothing new here. ${leadLine(lead)}` : quietLine(r.data.later, Date.now())}${taskNote(r.data)}`);
     }
     const x = r.data.found[0];
+    if (r.data.finished.length) return;
     setToast(`🍵 ${pieceNote(x)}${r.data.found.length > 1 ? ` (+${r.data.found.length - 1} more)` : ""}${bonus}${nextNote(st, x.story)}${taskNote(r.data)}`);
   };
   /** The regular here: a piece of gossip, or else where to go next. Null when there's nothing to pass on. */
@@ -3574,7 +3593,11 @@ export function GameShell({
         calendar={cityApi?.calendarAttend && city?.calendar ? {
           data: calendarData,
           busy,
-          onAttend: (id) => void run(`calendar:${id}`, () => cityApi.calendarAttend!(id)),
+          onAttend: (id) => {
+            const e = calendarData.events.find((x) => x.id === id);
+            const paid = e && city ? calendarReward(e, { dressed: dressedUp(city.items), gifts: city.calendar?.gifts ?? 0 }) : null;
+            void run(`calendar:${id}`, () => cityApi.calendarAttend!(id)).then((ok) => { if (ok && e && paid) celebrate(calendarBanner(e, paid)); });
+          },
           onGoThere: handlers.travel ? (id) => { const p = placeById(id); if (p) { setPanel(null); handlers.travel!.onGoThere(p); } } : undefined,
         } : undefined}
       />
@@ -3795,7 +3818,8 @@ export function GameShell({
                 void economy.answer(id, accept).then((r) => {
                   setBusy(null);
                   if (!r.ok) { setToast(r.error); return; }
-                  setToast(accept ? "🎁 It's yours. Find it in Net Worth (and keep it at least two weeks, it's polite)." : "Declined. It went back to them, no questions asked.");
+                  if (accept) announceGiftAccepted(giftIn?.incoming.find((g) => g.id === id));
+                  else setToast("Declined. It went back to them, no questions asked.");
                   void loadGifts();
                   if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
                 });
@@ -3858,9 +3882,9 @@ export function GameShell({
           handlers: {
             busy,
             onBuy: (id) => void bizRun(`biz:${id}`, () => business.buy(id)).then((r) => { if (r) setToast(`${businessById(id)?.emoji} ${businessById(id)?.name} is yours. Open for business.`); }),
-            onUpgrade: (id) => void bizRun(`biz:up:${id}`, () => business.upgrade(id)).then((r) => { if (r) setToast(`Upgraded: ${businessById(id)?.upgrades[r.level - 1]?.name}.`); }),
+            onUpgrade: (id) => void bizRun(`biz:up:${id}`, () => business.upgrade(id)).then((r) => { const c = r && upgradeBanner(id, r.level); if (c) celebrate(c); else if (r) setToast(`Upgraded: ${businessById(id)?.upgrades[r.level - 1]?.name}.`); }),
             onCollect: () => void bizRun("biz:collect", () => business.collect()).then((r) => { if (r && r.paid.length) setTillsPaid(r.paid); }),
-            onGoPublic: () => void bizRun("biz:public", () => business.goPublic()).then((r) => { if (r) setWentPublic(true); }),
+            onGoPublic: () => void bizRun("biz:public", () => business.goPublic()).then((r) => { const c = r && publicCelebration(BUSINESSES[BUSINESSES.length - 1].id, me.clout, myWorth, handle(me.display_name)); if (c) celebrate(c); }),
           },
         } : undefined}
         apartments={cityOn && cityApi?.moveHome && city?.player.moved_up !== undefined ? {
@@ -4140,7 +4164,6 @@ export function GameShell({
         <TillsCollectedCard paid={tillsPaid} clout={me.clout} worth={myWorth} onClose={() => setTillsPaid(null)}
           onUpgrade={() => { setTillsPaid(null); setPhone({ open: true, app: "businesses" }); }} />
       )}
-      {wentPublic && <WentPublicCard worth={myWorth} onClose={() => setWentPublic(false)} />}
       {unlockReveal && !rankUp && flow === "none" && (
         <UnlockReveal onClose={() => setUnlockReveal(false)} onOpen={() => { setUnlockReveal(false); setPanel(null); setPhone({ open: true, app: null }); }} />
       )}

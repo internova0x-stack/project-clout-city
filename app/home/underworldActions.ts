@@ -208,7 +208,7 @@ export async function underworldRunHire(id: number, option: string): Promise<Out
   const cut = (paid as { cut?: number } | null)?.cut ?? 0;
   const boss = hire.posterName ? `@${hire.posterName}` : "your boss";
   const tail = e ? " The cut is on its way." : cut > 0 ? ` Your cut: C$${cut.toLocaleString("en-US")} after the city fee, from ${boss}.` : "";
-  return { ok: true, data: { ...r.data, receipt: `${r.data.receipt ?? ""}${tail}` } };
+  return { ok: true, data: { ...r.data, receipt: `${r.data.receipt ?? ""}${tail}`, cut } };
 }
 
 export async function underworldDeclineHire(id: number): Promise<UnderworldResult<unknown>> {
