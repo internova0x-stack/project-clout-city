@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 // Migration 0152: runners (underworld jobs between players).
 import { Runners } from "./Runners";
-import { UNDERWORLD, type OfferView, type UnderworldApi, type UnderworldScreen, type UnderworldView } from "@/lib/underworld";
+import { celebrate } from "@/components/Celebrate";
+import { jobResult } from "./result";
+import { UNDERWORLD, underworldError, type OfferView, type UnderworldApi, type UnderworldScreen, type UnderworldView } from "@/lib/underworld";
 
 // The underworld (spec section 31; migration 0148): Pablo's back room, behind the luggage counter. Before the invitation:
 // a closed door and a hint. After: Pablo's line, Street Rep and its tier, Heat (how close the 114½ is), today's three jobs
@@ -124,8 +126,15 @@ export function BackRoomSheet({ open, onClose, api, onToast, onGo, onChanged }: 
               {v.offers.map((o) => (
                 <Offer key={o.id} o={o} busy={busy} disabled={!v.here || v.holding || v.tooHot}
                   onDo={async (opt) => {
+                    const before = v;
                     const r = await run(api.job(o.id, opt));
-                    if (r?.receipt) { setLast({ text: r.receipt, outcome: r.outcome }); onChanged(); }
+                    if (r?.receipt) {
+                      setLast({ text: r.receipt, outcome: r.outcome }); onChanged();
+                      // The results screen (owner, Nov 4); its button takes a held player to the bench: GameShell opens
+                      // the holding pop-up on an in_holding message, as for any refusal while held.
+                      const card = jobResult(o, before, r, () => { onClose(); onToast(underworldError("in_holding")); });
+                      if (card) celebrate(card);
+                    }
                   }} />
               ))}
               <p className="meta" style={{ margin: 0 }}>New work every New York day. A day without a job cools you off twice as fast.</p>

@@ -567,7 +567,12 @@ export function view(content: UnderworldContent, s: UnderworldState | null, toda
 }
 
 export type UnderworldResult<T> = { ok: true; data: T } | { ok: false; error: string };
-export interface UnderworldScreen { view: UnderworldView; receipt?: string; outcome?: "win" | "trace" | "fizzle" | "bust" }
+export interface UnderworldScreen {
+  view: UnderworldView; receipt?: string; outcome?: "win" | "trace" | "fizzle" | "bust";
+  /** What the action itself moved (the results card, components/underworld/result.ts): cash in or out (a fine is
+   *  negative) and hours in holding. */
+  cash?: number; held?: number;
+}
 
 /** What GameShell calls: the server's actions, or the preview's memory. */
 export interface UnderworldApi {

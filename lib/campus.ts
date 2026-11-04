@@ -148,7 +148,13 @@ export interface CampusApi {
   submit(course: string, answers: number[], peek: boolean): Promise<CampusResult<SubmitResult>>;
   eat(): Promise<CampusResult<{ cash: number; energy: number }>>;
   leaderboard(): Promise<CampusResult<Leaderboard>>;
+  /** Exams passed at C or better since the last Start over (aspiration_state, migration 0143); for the degree moment. */
+  degree?(): Promise<CampusResult<{ exams: number; degree: boolean }>>;
 }
+
+/** The pass line: a C (70%) or better, never a caught one; what `exams_passed` (migration 0143) counts toward a degree. */
+export const EXAM_PASS_PERCENT = 70;
+export const examPassed = (r: ExamResult) => !r.caught && ["A", "B", "C"].includes(r.grade);
 
 /** The joke under each grade on the result card. */
 export function gradeLine(r: ExamResult): string {

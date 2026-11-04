@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  CAMPUS, CAMPUSES, COURSES, campusById, courseById, gradeLine, menuFor, roommateNote,
+  CAMPUS, CAMPUSES, COURSES, EXAM_PASS_PERCENT, campusById, courseById, examPassed, gradeLine, menuFor, roommateNote,
   type CampusApi, type CampusId, type CampusState, type ExamQuestion, type Leaderboard, type SubmitResult,
 } from "@/lib/campus";
+import { ASPIRE } from "@/lib/aspirations";
 import { formatCash } from "@/lib/economy";
+import { celebrate } from "../Celebrate";
 import { Sheet } from "../Sheet";
 
 type Tab = "classes" | "exams" | "dining" | "pride";
@@ -84,9 +86,60 @@ export function CampusSheet({
       setQuiz(null);
       setResult({ ...d, course: quiz.course });
       void load();
-      if (d.scholarship) onDone(`🎓 Scholarship! +${formatCash(d.scholarship)} for a ${d.weekGpa?.toFixed(2)} week.`);
+      showExamResult(d, quiz.course);
+      // The results card replaces the scholarship toast; an empty message only refreshes the city (the cash).
+      if (d.scholarship) onDone("");
     });
   };
+  // The exam's results screen (owner, Nov 4): the grade as the hero, the score against the pass line, what you keep.
+  function showExamResult(d: SubmitResult, courseId: string) {
+    const course = courseById(courseId);
+    const passed = examPassed(d);
+    const short = Math.max(0, EXAM_PASS_PERCENT - d.percent);
+    const keep = [
+      ...(d.scholarship ? [`${formatCash(d.scholarship)} scholarship`] : []),
+      passed ? `${d.grade} on your transcript` : `${d.correct}/${CAMPUS.quizSize} answers right`,
+      "Your enrollment",
+      "Your class streaks",
+    ];
+    celebrate({
+      rung: 3,
+      emoji: course?.emoji ?? "📝",
+      tag: "Exam results",
+      title: d.caught ? "Caught peeking" : passed ? (d.grade === "A" ? "Top of the class" : "You passed") : "So close",
+      cta: "Back to campus",
+      twist: "stamp",
+      result: {
+        tone: passed ? "win" : "warn",
+        stamp: d.caught ? { text: "CAUGHT", tone: "bad" } : passed ? { text: "PASSED", tone: "good" } : { text: "RETAKE", tone: "warn" },
+        big: d.grade,
+        unit: `Exam · ${course?.name ?? "Course"}`,
+        story: d.caught ? "The professor saw everything. Next Friday, eyes on your own paper."
+          : passed ? (d.scholarship ? `A ${d.weekGpa?.toFixed(2)} week. The scholarship committee noticed.` : gradeLine(d))
+          : `${short} point${short === 1 ? "" : "s"} short of a C. New exams next Friday.`,
+        meter: {
+          label: "Score", have: d.percent, need: EXAM_PASS_PERCENT, max: 100,
+          say: passed ? `${d.percent}% · pass line ${EXAM_PASS_PERCENT}%` : d.caught ? `${d.percent}% before the F` : `${d.percent}% · ${short} to pass`,
+        },
+        keep,
+      },
+    });
+    if (!passed || !api.degree) return;
+    // The third pass at C or better is a degree: careers start a level higher (lib/aspirations.ts, migration 0143).
+    void api.degree().then((r) => {
+      if (!r.ok || r.data.exams !== ASPIRE.degreeExams) return;
+      celebrate({
+        rung: 3,
+        emoji: "🎓",
+        tag: "Degree",
+        title: "You have a degree",
+        line: `${ASPIRE.degreeExams} exams passed. New careers can start you a level higher. Frame it; your mom already did.`,
+        art: "stage",
+        rewards: [{ text: "+1 starting level" }, { text: `${campus.short} alum` }],
+        cta: "Back to campus",
+      });
+    });
+  }
   const eat = () => act("eat", () => api.eat(), (d) => onDone(`🍽️ ${formatCash(-d.cash)} · +${-d.energy} Energy. ${menuFor(s?.today ?? "").split(":")[0]} survived.`));
 
   return (
