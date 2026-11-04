@@ -1,0 +1,99 @@
+{
+  "about": "The Homecoming race (docs/SCHOOL-RACE.md). Cliques, the squad, the reigning royals, other people, the clash and choice cards (with hidden odds and later consequences) and the weekly inbox. Read only by the server and the preview (lib/schoolContent.ts).",
+  "cliques": [
+    { "id": "greek", "emoji": "🏛️", "name": "Greek Row", "lead": "Trey votes the block", "rivalSide": true, "likes": ["party"] },
+    { "id": "theater", "emoji": "🎭", "name": "Theater Kids", "lead": "Who runs the bake sale", "rivalSide": false, "likes": ["club"] },
+    { "id": "finance", "emoji": "📈", "name": "Finance Club", "lead": "{Rival}'s dad funds it", "rivalSide": false, "likes": ["work", "study"] },
+    { "id": "athletes", "emoji": "🏈", "name": "Athletes", "lead": "{Rival} is on the team", "rivalSide": true, "likes": ["sleep"] },
+    { "id": "influencers", "emoji": "📱", "name": "Influencers", "lead": "Want content, not friends", "rivalSide": false, "likes": ["hang", "date"] }
+  ],
+  "squad": [
+    { "id": "priya", "name": "Priya Raman", "role": "Study partner", "age": 20, "vibe": "Fact-checks your group chat", "wants": "Honesty. She leaves if you cheat twice." },
+    { "id": "marco", "name": "Marco Reyes", "role": "Party promoter", "age": 21, "vibe": "Knows every door code on Greek Row", "wants": "You out every night." },
+    { "id": "dee", "name": "Dee Park", "role": "Photographer", "age": 22, "vibe": "Makes a 6 look like a 10", "wants": "A cut of the budget." },
+    { "id": "tobi", "name": "Tobi Adeyemi", "role": "Freshman fan", "age": 18, "vibe": "Made you a sign. Unasked.", "wants": "Your attention, or he joins {rival}." }
+  ],
+  "rivals": [
+    { "id": "chad", "crown": "king", "campus": "st-johnsons", "name": "Chad Wellington III", "role": "Reigning Homecoming King", "age": 21, "vibe": "Three crowns, zero books",
+      "entrance": "New face? Cute. Homecoming's mine. It's always mine.",
+      "taunts": ["Saw your poster. Bold font choice.", "My dad's name is on the library. What's on yours?", "Cute week. Mine was better."],
+      "win": "Chad has been dethroned. He's taking it well. He is not.", "loss": "Chad keeps the crown. His speech thanked his dad twice." },
+    { "id": "marisol", "crown": "queen", "campus": "st-johnsons", "name": "Marisol Vega", "role": "Reigning Homecoming Queen", "age": 21, "vibe": "Three crowns and a podcast",
+      "entrance": "Oh, you're running? That's adorable. I have a podcast about adorable.",
+      "taunts": ["Saw your poster. Bold font choice.", "My podcast has 40,000 listeners. Who listens to you?", "Cute week. Mine was better."],
+      "win": "Marisol has been dethroned. She's taking it well. She is not.", "loss": "Marisol keeps the crown. Her speech thanked her podcast sponsors twice." }
+  ],
+  "people": [
+    { "id": "dean", "name": "Dean Harwell", "role": "Dean of Students", "age": 61, "vibe": "Has read every complaint ever filed" },
+    { "id": "mom", "name": "Mom", "role": "Your mother", "vibe": "Calls on Sundays. And Tuesdays." },
+    { "id": "trey", "name": "Trey Whitmore", "role": "Greek Row president", "age": 22, "vibe": "Sells votes by the house" },
+    { "id": "unknown", "name": "Unknown number", "role": "No caller ID" }
+  ],
+  "cards": [
+    { "id": "rager", "emoji": "🎉", "over": "Thursday night · Theta Mu", "title": "The rager is Thursday. The midterm is Friday.", "week": 2, "slot": { "day": 3, "slot": 1 },
+      "options": [
+        { "id": "all", "label": "Go all night", "get": "+12 Rep", "cost": "−0.30 GPA", "effects": { "rep": 12, "gpa": -0.3, "standing": { "greek": 1 } }, "receipt": "You closed it down. The midterm was a blur." },
+        { "id": "cameo", "label": "Show up, leave by 11", "get": "+5 Rep", "cost": "−10 Energy", "effects": { "rep": 5, "energy": -10 }, "receipt": "Three photos, one perfect exit. Studied until 1." },
+        { "id": "stay", "label": "Stay in and study", "get": "+0.10 GPA", "cost": "−3 Rep", "effects": { "gpa": 0.1, "rep": -3, "squad": { "priya": { "loyalty": 5 } } }, "receipt": "Aced the practice test. {Rival} owned the night." }
+      ] },
+    { "id": "leak", "emoji": "📄", "over": "A text from an unknown number", "title": "Friday's midterm answers. Free. Delete after reading.", "week": 2, "slot": { "day": 2, "slot": 1 },
+      "options": [
+        { "id": "use", "label": "Use them", "get": "A sure pass on Friday", "cost": "Your name on a file somewhere", "effects": { "gpa": 0.4, "meter": -6, "dean": 25, "squad": { "priya": { "loyalty": -25 } } }, "receipt": "You passed with an 88. Nobody else noticed. Yet.", "later": { "week": 2, "chance": 0.7, "card": "leak-back" } },
+        { "id": "report", "label": "Report it to the Dean", "get": "A clean conscience", "cost": "Marco's roommate is in trouble", "effects": { "meter": 6, "squad": { "marco": { "loyalty": -15 } } }, "receipt": "The Dean thanked you. Marco hasn't spoken to you since.", "later": { "week": 2, "chance": 1, "card": "leak-honor" } },
+        { "id": "delete", "label": "Delete it, study instead", "get": "Nothing to hide", "cost": "−10 Energy", "effects": { "gpa": 0.1, "energy": -10, "meter": 3 }, "receipt": "Two nights in the library. You passed. Barely." }
+      ] },
+    { "id": "secret", "emoji": "🤫", "over": "Overheard outside the library", "title": "{Rival} pays a grad student to take their exams.", "week": 3, "slot": { "day": 1, "slot": 0 },
+      "options": [
+        { "id": "expose", "label": "Tell Lola's Blotter", "get": "{Rival} off the ballot", "cost": "You win with a cloud over it", "effects": { "rivalRep": -20, "meter": -6, "standing": { "athletes": -1 } }, "receipt": "It's on the Blotter by midnight. {Rival}'s phone hasn't stopped buzzing." },
+        { "id": "hold", "label": "Keep it. For now.", "get": "Something on {rival}", "cost": "You know, and they'll find out you know", "effects": { "meter": -2 }, "receipt": "You save the screenshot. Nobody knows. Yet.", "later": { "week": 1, "chance": 1, "card": "secret-deal" } },
+        { "id": "drop", "label": "Let it go", "get": "A clean race", "cost": "{Rival} keeps every advantage", "effects": { "meter": 4, "standing": { "theater": 1 } }, "receipt": "You walk past. Some wins aren't worth it." }
+      ] },
+    { "id": "noise", "emoji": "🚨", "over": "A noise complaint", "title": "Your party got reported. The Dean wants a name.", "week": 3, "slot": { "day": 5, "slot": 0 },
+      "options": [
+        { "id": "own", "label": "Take the blame", "get": "Tobi's undying loyalty", "cost": "A Dean warning · −0.10 GPA", "effects": { "dean": 15, "gpa": -0.1, "meter": 4, "squad": { "tobi": { "loyalty": 15 } } }, "receipt": "You signed the form. Tobi made you a second sign." },
+        { "id": "tobi", "label": "Let Tobi say it was his", "get": "A clean record", "cost": "Tobi is suspended for a week, and he knows", "effects": { "meter": -6, "squad": { "tobi": { "loyalty": -40 } } }, "receipt": "Tobi took it. He hasn't looked at you since." }
+      ] },
+    { "id": "mom", "emoji": "📞", "over": "Your mom is calling", "title": "\"How are classes going?\"", "week": 1, "slot": { "day": 6, "slot": 0 },
+      "options": [
+        { "id": "truth", "label": "Tell the truth", "get": "+Mood", "cost": "A long conversation", "effects": { "mood": 6, "energy": -5, "meter": 2 }, "receipt": "She's worried. She's also proud. Mostly worried." },
+        { "id": "lie", "label": "\"Great! Straight As!\"", "get": "An easy call", "cost": "Nothing, for now", "effects": { "meter": -2 }, "receipt": "She sounded so happy.", "later": { "week": 3, "chance": 0.8, "card": "mom-back" } }
+      ] },
+    { "id": "leak-back", "emoji": "📁", "over": "It came back", "title": "The Dean found the answer key in a group chat. Your name is on the read list.", "laterOnly": true,
+      "options": [
+        { "id": "face", "label": "Go to the hearing", "get": "A chance to explain", "cost": "Off the ballot until it's cleared", "effects": { "eligible": false, "rep": -15 }, "receipt": "\"My office. 9 AM. Bring nothing but the truth.\"" }
+      ] },
+    { "id": "leak-honor", "emoji": "🏅", "over": "It came back", "title": "The Dean names you in the Honor Code newsletter.", "laterOnly": true,
+      "options": [
+        { "id": "ok", "label": "Take the bow", "get": "+8 Rep · two cliques warm to you", "cost": "Nothing", "effects": { "rep": 8, "standing": { "theater": 1, "finance": 1 } }, "receipt": "\"Integrity is rare. Consider it noticed.\"" }
+      ] },
+    { "id": "secret-deal", "emoji": "🤝", "over": "It came back", "title": "{Rival} finds out you know. They offer a deal: the Athletes' votes for your silence.", "laterOnly": true,
+      "options": [
+        { "id": "take", "label": "Take the deal", "get": "The Athletes' votes", "cost": "You owe {rival} your silence", "effects": { "standing": { "athletes": 3 }, "meter": -6, "dean": 10 }, "receipt": "A handshake behind the gym. Nobody saw. Probably." },
+        { "id": "refuse", "label": "Refuse", "get": "Your hands stay clean", "cost": "{Rival} knows you'll talk", "effects": { "meter": 4, "rivalRep": 5 }, "receipt": "\"Your loss,\" they said. It sounded like a threat." }
+      ] },
+    { "id": "mom-back", "emoji": "🧳", "over": "It came back", "title": "Your mom is coming to Homecoming. She wants to meet your professors.", "laterOnly": true,
+      "options": [
+        { "id": "confess", "label": "Tell her before she lands", "get": "No surprises", "cost": "−Mood this week", "effects": { "mood": -6, "meter": 2 }, "receipt": "She cried. Then she bought you a tutor." },
+        { "id": "stall", "label": "Hope she forgets", "get": "One more week of peace", "cost": "A very public conversation", "effects": { "rep": -8, "mood": -4 }, "receipt": "She did not forget. She found your professor. In the stands." }
+      ] }
+  ],
+  "inbox": [
+    { "id": "m-trey", "from": "trey", "week": 2, "subject": "Greek Row could be yours", "body": "Our house votes as a block. For C$500 and one favor later, they're yours. Thursday, my place.",
+      "options": [
+        { "id": "pay", "label": "Pay the C$500", "get": "Greek Row's votes", "cost": "C$500 · a favor owed", "effects": { "cash": -500, "standing": { "greek": 3 }, "meter": -4, "dean": 10 }, "receipt": "" },
+        { "id": "earn", "label": "Earn them instead", "get": "Trey's respect", "cost": "Two party nights", "effects": { "standing": { "greek": 1 } }, "receipt": "" },
+        { "id": "ignore", "label": "Ignore him", "get": "Nothing", "cost": "Trey cools on you", "effects": { "standing": { "greek": -1 } }, "receipt": "" }
+      ] },
+    { "id": "m-priya", "from": "priya", "week": 2, "subject": "Paper due Friday", "body": "My scholarship rides on this paper. Can you co-write Thursday night? I know the mixer is Thursday.",
+      "options": [
+        { "id": "yes", "label": "I'll be there", "get": "Priya's loyalty", "cost": "Miss the Greek mixer", "effects": { "squad": { "priya": { "loyalty": 15 } }, "standing": { "greek": -1 }, "meter": 3 }, "receipt": "" },
+        { "id": "later", "label": "Next week, I promise", "get": "The mixer", "cost": "Priya's scholarship at risk", "effects": { "squad": { "priya": { "loyalty": -20 } }, "standing": { "greek": 1 } }, "receipt": "" }
+      ] },
+    { "id": "m-rival", "from": "rival", "week": 1, "subject": "lol", "body": "Saw your poster. Bold font choice. See you at Homecoming, Nobody.", "options": [] },
+    { "id": "m-dee", "from": "dee", "week": 1, "subject": "Your angles", "body": "I can make you look like you've always been famous. C$150 a week, and you post what I say.",
+      "options": [
+        { "id": "hire", "label": "Deal", "get": "+Rep from every night out", "cost": "C$150", "effects": { "cash": -150, "rep": 6, "squad": { "dee": { "loyalty": 15 } } }, "receipt": "" },
+        { "id": "pass", "label": "My phone camera is fine", "get": "C$150 saved", "cost": "Dee's interest", "effects": { "squad": { "dee": { "loyalty": -10 } } }, "receipt": "" }
+      ] }
+  ]
+}
