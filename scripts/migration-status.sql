@@ -175,6 +175,7 @@ from (values
   ('0158_streak_repair.sql', to_regclass('public.streak_repairs') is not null),
   ('0159_npc_bonds.sql', to_regclass('public.npc_bonds') is not null),
   ('0160_no_tasks_in_holding.sql', coalesce((exists (select 1 from pg_proc where proname='complete_task' and pronamespace='public'::regnamespace and position('0160: nothing is done from the bench' in prosrc) > 0)), false)),
-  ('0161_companies.sql', to_regclass('public.companies') is not null)
+  ('0161_companies.sql', to_regclass('public.companies') is not null),
+  ('0162_school_race.sql', to_regclass('public.school_races') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
