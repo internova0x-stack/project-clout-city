@@ -158,7 +158,8 @@ export function PreviewHome({
   skillsPreset?: string;
   /** C4: "showtime" puts dancers on every subway ride; "pass" starts with an OMG Card. */
   transitPreset?: string;
-  /** The rent alarm (owner, Oct 22): short (rent in 2 days), late (a day late) or evict (4 days late), C$930 in the bank. */
+  /** The rent alarm (owner, Oct 22): short (rent in 2 days), late (a day late) or evict (4 days late), C$930 in the bank;
+   *  evicted: moved to the room share today after 6 days late (the eviction results card, components/game/badNews.ts). */
   rentPreset?: string;
   /** C5: "today" moves every calendar event to right now, so each can be tried; "gift" also starts with a gift box. */
   calendarPreset?: string;
@@ -205,7 +206,7 @@ export function PreviewHome({
   useEffect(() => { void previewShopCatalog().then(setCatalog).catch(() => undefined); }, []);
   // v0.12 ?biz=some|rich|public: start with businesses, and the cash and clout to match.
   const boost = bizPreset === "some" ? { cash: 60_000, clout: 11_000 } : bizPreset === "rich" || bizPreset === "public" ? { cash: 60_000_000, clout: 60_000 } : null;
-  const rentOn = rentPreset === "short" || rentPreset === "late" || rentPreset === "evict";
+  const rentOn = rentPreset === "short" || rentPreset === "late" || rentPreset === "evict" || rentPreset === "evicted";
   const me = useMemo(() => (boost ? { ...player, bank_cash: player.bank_cash + boost.cash, clout: player.clout + boost.clout } : rentOn ? { ...player, bank_cash: 230 } : player),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [player, bizPreset]);
@@ -217,6 +218,13 @@ export function PreviewHome({
       const rent = ECONOMY.homes.find((h) => h.id === s.player.home_id)?.rent ?? 425;
       s.bills = s.bills.map((b) => (b.status === "due" ? { ...b, status: "paid" as const, paid_at: new Date().toISOString() } : b));
       if (rentPreset === "short") s.player.next_rent_due = day(2);
+      else if (rentPreset === "evicted") {
+        const share = [...ECONOMY.homes].sort((a, b) => a.rent - b.rent)[0];
+        s.player.home_id = share.id;
+        s.player.next_rent_due = day(7);
+        s.bills = [...s.bills, { id: 298, kind: "rent", amount: rent, due_date: day(-CITY_ECONOMY.bills.evictAfterDays), status: "forgiven", paid_at: null },
+          { id: 299, kind: "rent", amount: share.rent, due_date: day(0), status: "due", paid_at: null }];
+      }
       else s.bills = [...s.bills, { id: 299, kind: "rent", amount: rent, due_date: day(rentPreset === "late" ? -1 : -4), status: "due", paid_at: null }];
     }
     if (tasksDone) s.tasks = s.tasks.map((t) => ({ ...t, done_at: t.done_at ?? new Date().toISOString() }));

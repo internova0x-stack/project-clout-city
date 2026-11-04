@@ -111,6 +111,7 @@ import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
 import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
+import { coupleRead, evictionRead, streakRead, subletRead, type BadNewsCtx } from "./game/badNewsReads";
 import { passClaimBanner, passRead } from "./game/passResults";
 import { calendarBanner, teaCelebration } from "./city/cityCelebrations";
 import { publicCelebration, upgradeBanner } from "./business/results";
@@ -893,6 +894,11 @@ export function GameShell({
   const inboxRef = useRef<DatingInbox | null>(null);
   const nightCtx = useRef<NightCtx>({ who: player.id });
   nightCtx.current = { who: player.id, onUs: () => setPanel("us"), onDates: () => setPanel("dates"), onCrew: () => setPanel("crew") };
+  // Bad news as results cards, once per device (components/game/badNews.ts): eviction, a breakup, a broken streak, a sublet ending.
+  const badCtx = useRef<BadNewsCtx>({ who: player.id });
+  badCtx.current = { who: player.id, onGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
+    onHome: () => { setPhone({ open: false, app: null }); setPanel(null); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1); },
+    onDaily: () => { setTasksTab("daily"); setPanel("tasks"); }, onSublets: () => { setPanel(null); setPhone({ open: true, app: "apartments" }); } };
   const loadInbox = useCallback(async () => {
     if (!dating) return;
     const r = await dating.inbox();
@@ -915,6 +921,7 @@ export function GameShell({
   const takeCouple = useCallback((st: CoupleState) => {
     setCoupleS(st);
     nightsCouple(st);
+    coupleRead(st, badCtx.current);
     if (st.partner && st.relId && (st.days ?? 0) <= 7) {
       let seen: number | null = null;
       try { seen = Number(localStorage.getItem("cc-couple-seen")) || null; } catch { /* none */ }
@@ -938,6 +945,8 @@ export function GameShell({
     }
   }, []);
   const [subS, setSubS] = useState<SubletState | null>(null);
+  useEffect(() => { subletRead(subS, badCtx.current); }, [subS]);
+  useEffect(() => { evictionRead(city, badCtx.current); }, [city]);
   const [subHome, setSubHome] = useState<SubletHome | null>(null);
   const [subBusy, setSubBusy] = useState(false);
   const [subError, setSubError] = useState<string | null>(null);
@@ -1354,7 +1363,8 @@ export function GameShell({
     setGoalsNow(r.data);
     if (reveal) setGoalsReveal(reveal);
     // Streak repair (migration 0158): the offer rides along with the goals.
-    if (goals.repairState) void goals.repairState().then((x) => { if (x.ok) setRepairOffer(x.data.offer); }).catch(() => {});
+    if (goals.repairState) void goals.repairState().then((x) => { if (x.ok) { setRepairOffer(x.data.offer); streakRead(r.data, x.data.offer, badCtx.current); } }).catch(() => {});
+    else streakRead(r.data, undefined, badCtx.current);
   }, [goals]);
   const [repairOffer, setRepairOffer] = useState<RepairOffer | null>(null);
   const repairStreak = async (method: RepairMethod) => {
@@ -1908,7 +1918,7 @@ export function GameShell({
     withdraw: (id) => void subletRun(() => sublet.withdraw(id), "Application withdrawn."),
     answer: (id, yes) => void subletRun(() => sublet.answer(id, yes), yes ? "🔑 You've got a subtenant. First week's rent is in." : "Declined.", yes),
     notice: (on) => void subletRun(() => sublet.notice(on), on ? "Notice given. Seven days." : "Notice taken back."),
-    leave: () => void subletRun(() => sublet.leave(), "Moved out. Deposit's back.", true),
+    leave: () => void subletRun(() => sublet.leave(), undefined, true),
     renew: (w) => void subletRun(() => sublet.renew(w), "Asked to renew."),
     renewAnswer: (yes) => void subletRun(() => sublet.renewAnswer(yes), yes ? "Renewed." : "Not renewing."),
     hang: () => void subletRun(() => sublet.hang(), undefined, true),
@@ -4058,7 +4068,7 @@ export function GameShell({
                 onAnswer: (id, yes) => void coupleRun(() => couple.answer(id, yes), yes ? "💞 It's official." : "No rush. They'll understand."),
                 onGift: () => void coupleRun(() => couple.gift(), "🎁 Gift box sent."),
                 onShow: (on) => void coupleRun(() => couple.show(on)),
-                onEnd: () => void coupleRun(() => couple.end(), "It's over. Be kind to yourself."),
+                onEnd: () => void coupleRun(() => couple.end()),
                 onPlanDate: () => { setPanel("places"); setToast("Pick a restaurant or a club night, then tap “Make it a date”."); },
                 onMessage: (p) => { setPanel(null); openChatWith({ id: p.id, name: p.name, style: p.style }); },
                 onSeen: () => void couple.seen().then(() => loadCouple()),
