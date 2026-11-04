@@ -98,7 +98,7 @@ export function CampusSheet({
     const short = Math.max(0, EXAM_PASS_PERCENT - d.percent);
     const keep = [
       ...(d.scholarship ? [`${formatCash(d.scholarship)} scholarship`] : []),
-      passed ? `${d.grade} on your transcript` : `${d.correct}/${CAMPUS.quizSize} answers right`,
+      passed ? `${d.grade} on your transcript` : "Your attendance marks",
       "Your enrollment",
       "Your class streaks",
     ];
