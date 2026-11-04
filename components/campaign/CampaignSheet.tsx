@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import {
-  CAMPAIGN, cs,
-  type CampaignApi, type CampaignScreen, type CandidateCard, type CandidateId, type Channel, type DebateStyle, type InboxOption, type OpId, type Preview, type SlotAction,
+  CAMPAIGN, cs, energyCost, meterLevel, slotCash,
+  type Budget, type CampaignApi, type CampaignScreen, type CandidateCard, type CandidateId, type DebateStyle, type InboxOption, type MeterLevel, type OpId, type Preview, type SlotAction,
 } from "@/lib/campaign";
 import type { CampaignView } from "@/lib/campaignEngine";
 import { RANKS } from "@/lib/ranks";
@@ -28,7 +28,7 @@ function CandidateFace({ id, big = false }: { id: CandidateId; big?: boolean }) 
   return <img className={`camp-cand-face${big ? " big" : ""}`} src={`/cast/candidate-${id}.webp`} alt="" aria-hidden="true" />;
 }
 
-type Tab = "week" | "inbox" | "map" | "team";
+type Tab = "week" | "inbox" | "map" | "allies" | "team";
 type ViewTask = CampaignView["tasks"][number];
 /** What a tapped task points the slot picker at (owner, Oct 29: tapping a task takes you there). */
 type Hint = { kinds: string[]; place?: string; topic?: string };
@@ -217,8 +217,11 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
   data: CampaignScreen; v: CampaignView; busy: boolean; tab: Tab; setTab: (t: Tab) => void; api: CampaignApi; run: Run; focusTask: string | null; onFocused?: () => void;
 }) {
   const card = data.candidates.find((c) => c.id === v.candidate)!;
-  const newMail = v.inbox.filter((m) => m.status === "new").length;
+  const read = useReadMail(v.id);
+  const newMail = v.inbox.filter((m) => m.status === "new" && !read.has(m.message.id)).length;
   const [mail, setMail] = useState<string | null>(null);
+  // Owner, Nov 4: the candidate's face opens their profile.
+  const [profile, setProfile] = useState(false);
   const [editing, setEditing] = useState<{ index: number; hint?: Hint } | null>(null);
   // A task goes where it's done: its message in the Inbox, or the slot picker on a free slot, set to the right action.
   const openTask = useCallback((t: ViewTask) => {
@@ -235,17 +238,20 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
     if (t) openTask(t);
     onFocused?.();
   }, [focusTask, v.pending.length, v.tasks, openTask, onFocused]);
+  if (profile) return <CandidateProfile card={card} v={v} onBack={() => setProfile(false)} />;
   return (
     <div className="stack-16">
-      <div className="camp-head">
+      <button className="camp-head camp-head-btn" onClick={() => setProfile(true)} aria-label={`${card.name}'s profile`}>
         <CandidateFace id={card.id} />
-        <span className="stack-2" style={{ flex: 1 }}>
+        <span className="stack-2" style={{ flex: 1, textAlign: "left" }}>
           <span className="overline">Week {v.week} of {v.weeks}{v.debateWeek ? " · Debate week" : v.week === v.weeks ? " · Election week" : ""}</span>
           <span className="title">{card.name}</span>
+          <span className="meta">{card.title} · Profile ›</span>
         </span>
-      </div>
+      </button>
+      <Funds v={v} />
       <Polls you={v.you} mayor={v.mayor} short={card.short} />
-      <Meters v={v} />
+      <Meters v={v} short={card.short} />
       {v.pending.length > 0 ? (
         <SituationCard v={v} busy={busy} onChoose={(s, c) => run(api.choose(s, c))} />
       ) : (
@@ -254,11 +260,13 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
             <button aria-pressed={tab === "week"} onClick={() => { setEditing(null); setTab("week"); }}>Week</button>
             <button aria-pressed={tab === "inbox"} onClick={() => { setMail(null); setTab("inbox"); }}><span className="seg-label">Inbox{newMail ? <span className="seg-badge">{newMail}</span> : null}</span></button>
             <button aria-pressed={tab === "map"} onClick={() => setTab("map")}>Map</button>
+            <button aria-pressed={tab === "allies"} onClick={() => setTab("allies")}>Allies</button>
             <button aria-pressed={tab === "team"} onClick={() => setTab("team")}>Team</button>
           </div>
           {tab === "week" && <Week data={data} v={v} busy={busy} api={api} run={run} onInbox={() => { setMail(null); setTab("inbox"); }} editing={editing} setEditing={setEditing} onTask={openTask} />}
-          {tab === "inbox" && <Inbox key={mail ?? ""} initial={mail} v={v} busy={busy} onReply={(m, o) => run(api.reply(m, o))} />}
+          {tab === "inbox" && <Inbox key={mail ?? ""} initial={mail} v={v} busy={busy} read={read} onReply={(m, o) => run(api.reply(m, o))} />}
           {tab === "map" && <MapTab v={v} short={card.short} />}
+          {tab === "allies" && <Allies v={v} />}
           {tab === "team" && <Team v={v} />}
         </>
       )}
@@ -280,15 +288,77 @@ function Polls({ you, mayor, short }: { you: number; mayor: number; short: strin
   );
 }
 
-function Meters({ v }: { v: CampaignView }) {
+/** The campaign's money, like a bank balance (owner, Nov 4). */
+function Funds({ v }: { v: CampaignView }) {
   return (
-    <div className="camp-meters">
-      <span className="camp-chip" title="Campaign cash not yet committed this week">💵 {cs(v.free)}</span>
-      {(v.favors > 0 || v.shown.favors) && <span className="camp-chip">🤝 {v.favors} Favor{v.favors === 1 ? "" : "s"}</span>}
-      {v.heat !== null && <span className="camp-chip" title="How close people are to finding out">🔥 Heat {v.heat}</span>}
-      {v.integrity !== null && <span className="camp-chip">⚖️ Integrity {v.integrity}</span>}
-      {v.morale !== null && <span className="camp-chip">💪 Morale {v.morale}</span>}
-      {v.intel > 0 && <span className="camp-chip">🗂️ Intel {v.intel}</span>}
+    <div className="card camp-funds">
+      <div className="balance-hero">
+        <span className="overline">🏦 Campaign funds</span>
+        <span className="balance-big">{cs(v.cash)}</span>
+      </div>
+      <div className="camp-funds-row">
+        <span><span className="meta">Free to spend</span><b>{cs(v.free)}</b></span>
+        <span><span className="meta">Planned</span><b>{cs(v.cash - v.free)}</b></span>
+        <span><span className="meta">Raised so far</span><b>{cs(v.raised)}</b></span>
+      </div>
+    </div>
+  );
+}
+
+const LEVEL: Record<MeterLevel, string> = { low: "Low", medium: "Medium", high: "High" };
+type MeterId = "momentum" | "energy" | "morale" | "integrity";
+/** What each level does, in a line (owner, Nov 4: "so players know when each is low, medium, high"). */
+const METER_LINES: Record<MeterId, Record<MeterLevel, string>> = {
+  momentum: { high: "Favors come to you. So do the Mayor's attacks.", medium: "Steady. A good week pushes it up.", low: "Donors are waiting to see. Win a week to turn it round." },
+  energy: { high: "{c} is fresh: rallies land a little better.", medium: "{c} is holding up.", low: "{c} is tired: rallies land worse and off-script moments get likelier. Book a rest." },
+  morale: { high: "The team works harder for you.", medium: "The team is fine. Bonuses and rest help.", low: "The team is slipping. Rest days and bonuses help." },
+  integrity: { high: "A clean win is in reach.", medium: `A clean win needs ${CAMPAIGN.cleanIntegrity}.`, low: "Scandals stick. A clean win is out of reach for now." },
+};
+
+function MeterBar({ id, emoji, label, value, after }: { id: MeterId; emoji: string; label: string; value: number; after?: number }) {
+  const lv = meterLevel(value);
+  const plan = after !== undefined && after !== value ? Math.max(0, Math.min(100, after)) : null;
+  return (
+    <div className={`camp-meter ${lv}`} data-meter={id}>
+      <div className="camp-meter-top">
+        <span className="camp-meter-name">{emoji} {label}</span>
+        <span className={`camp-level ${lv}`}>{LEVEL[lv]}</span>
+      </div>
+      <div className="camp-meter-bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value} aria-label={`${label} ${value} of 100, ${LEVEL[lv]}`}>
+        <span className="fill" style={{ width: `${value}%` }} />
+        {plan !== null && plan < value && <span className="plan" style={{ left: `${plan}%`, width: `${value - plan}%` }} />}
+        <i style={{ left: `${CAMPAIGN.meters.low}%` }} /><i style={{ left: `${CAMPAIGN.meters.high}%` }} />
+      </div>
+    </div>
+  );
+}
+
+/** Momentum, Energy, Morale and Integrity as bars, then the smaller counts as chips. */
+function Meters({ v, short }: { v: CampaignView; short: string }) {
+  const bars: { id: MeterId; emoji: string; label: string; value: number; after?: number }[] = [
+    { id: "momentum", emoji: "🚀", label: "Momentum", value: v.momentum },
+    { id: "energy", emoji: "⚡", label: "Energy", value: v.energy, after: v.energy - v.energyPlan },
+    ...(v.morale !== null ? [{ id: "morale" as const, emoji: "💪", label: "Morale", value: v.morale }] : []),
+    ...(v.integrity !== null ? [{ id: "integrity" as const, emoji: "⚖️", label: "Integrity", value: v.integrity }] : []),
+  ];
+  // The lines for the meters that are low or high (medium says little), most urgent first.
+  const notes = bars.filter((b) => meterLevel(b.value) !== "medium").sort((a, b) => Number(meterLevel(b.value) === "low") - Number(meterLevel(a.value) === "low"));
+  const allies = v.allies.filter((a) => a.trust >= 1).length;
+  return (
+    <div className="card stack-12">
+      <div className="camp-meter-grid">{bars.map((b) => <MeterBar key={b.id} {...b} />)}</div>
+      {v.energyPlan > 0 && <span className="meta">⚡ This week&apos;s calendar uses {v.energyPlan} Energy.</span>}
+      {notes.length > 0 && (
+        <ul className="camp-meter-notes">
+          {notes.slice(0, 2).map((b) => <li key={b.id} className={meterLevel(b.value)}><b>{b.label}:</b> {METER_LINES[b.id][meterLevel(b.value)].replace("{c}", short)}</li>)}
+        </ul>
+      )}
+      <div className="camp-meters">
+        {(v.favors > 0 || v.shown.favors) && <span className="camp-chip">🤝 {v.favors} Favor{v.favors === 1 ? "" : "s"}</span>}
+        <span className="camp-chip">🫂 {allies} {allies === 1 ? "Ally" : "Allies"}</span>
+        {v.heat !== null && <span className="camp-chip" title="How close people are to finding out">🔥 Heat {v.heat}</span>}
+        {v.intel > 0 && <span className="camp-chip">🗂️ Intel {v.intel}</span>}
+      </div>
     </div>
   );
 }
@@ -347,13 +417,14 @@ function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }:
                     <button className="btn btn-secondary" onClick={() => setDebate(true)}>{v.debate?.round ? "Back on stage ›" : "Take the stage ›"}</button></>}
             </div>
           )}
-          <Budget v={v} busy={busy} onSave={(b) => run(api.budget(b))} />
+          <BudgetCard v={v} busy={busy} onSave={(b) => run(api.budget(b))} />
           <div className="stack-8">
-            <p className="overline" style={{ margin: 0 }}>The calendar</p>
+            <p className="overline" style={{ margin: 0 }}>📅 The calendar</p>
             {v.slots.map((s, i) => (
               <button key={i} className="camp-slot" disabled={busy || s?.kind === "meeting"} onClick={() => setEditing({ index: i })}>
                 <span className="meta">{slotName(i)}</span>
                 <span className="title">{s ? slotLabel(s, v) : <span className="meta">Free</span>}</span>
+                {s && slotCash(s) > 0 && <span className="camp-slot-cost">{cs(slotCash(s))}</span>}
               </button>
             ))}
           </div>
@@ -402,11 +473,13 @@ function slotLabel(s: SlotAction, v: CampaignView): string {
   }
 }
 
+/** "One slot · C$800 · ⚡ 12": what a calendar stop costs in cash and the candidate's Energy (owner, Nov 4). */
+const slotCostLine = (kind: string) => ["One slot", slotCash({ kind }) ? cs(slotCash({ kind })) : null, energyCost({ kind }) > 0 ? `⚡ ${energyCost({ kind })} Energy` : null].filter(Boolean).join(" · ");
 const ACTIVITIES: { kind: SlotAction["kind"]; label: string; p: Preview; place?: boolean }[] = [
-  { kind: "rally", label: "📣 Rally", place: true, p: { get: "A good lift in one place", cost: "One slot" } },
-  { kind: "tour", label: "🚶 Tour stop", place: true, p: { get: "A small lift, shows you care", cost: "One slot" } },
-  { kind: "donors", label: "📞 Donor calls", p: { get: "Campaign cash", cost: "One slot" } },
-  { kind: "rest", label: "😴 Rest", p: { get: "Team morale +8", cost: "One slot" } },
+  { kind: "rally", label: "📣 Rally", place: true, p: { get: "A good lift in one place", cost: slotCostLine("rally") } },
+  { kind: "tour", label: "🚶 Tour stop", place: true, p: { get: "A small lift, shows you care", cost: slotCostLine("tour") } },
+  { kind: "donors", label: "📞 Donor calls", p: { get: "Campaign cash", cost: slotCostLine("donors") } },
+  { kind: "rest", label: "😴 Rest", p: { get: `Team morale +8, ⚡ Energy +${-energyCost({ kind: "rest" })}`, cost: "One slot" } },
 ];
 
 function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView; data: CampaignScreen; index: number; hint?: Hint; busy: boolean; onClose: () => void; onSet: (a: SlotAction | null) => void }) {
@@ -441,12 +514,12 @@ function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView;
             ))}
             {v.week <= CAMPAIGN.debateWeek && (
               <button className={`camp-option${mine("prep") ? " hint" : ""}`} onClick={() => setKind("prep")}>
-                <span className="title">📚 Debate prep{mine("prep") && TASK}</span><PreviewLines p={{ get: "Facts answers land on that topic", cost: "One slot" }} />
+                <span className="title">📚 Debate prep{mine("prep") && TASK}</span><PreviewLines p={{ get: "Facts answers land on that topic", cost: slotCostLine("prep") }} />
               </button>
             )}
             {v.week === v.weeks && (
               <button className={`camp-option${mine("gotv") ? " hint" : ""}`} onClick={() => setKind("gotv")}>
-                <span className="title">🗳️ Get out the vote{mine("gotv") && TASK}</span><PreviewLines p={{ get: "Turnout in one place on Election Day", cost: "One slot" }} />
+                <span className="title">🗳️ Get out the vote{mine("gotv") && TASK}</span><PreviewLines p={{ get: "Turnout in one place on Election Day", cost: slotCostLine("gotv") }} />
               </button>
             )}
             {v.heat !== null && (
@@ -492,30 +565,63 @@ function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView;
   );
 }
 
-function Budget({ v, busy, onSave }: { v: CampaignView; busy: boolean; onSave: (b: Record<Channel, number>) => void }) {
-  const [b, setB] = useState(v.budget);
+type Line = "digital" | "street" | "tv" | "staff" | "community";
+const BUDGET_ROWS: { id: Line; label: string; line: string; group: "ads" | "people" }[] = [
+  { id: "digital", label: "📱 Digital ads", line: "Cheap and fast. Volatile.", group: "ads" },
+  { id: "street", label: "🚪 Street teams", line: "Slow, durable, best where you visit.", group: "ads" },
+  { id: "tv", label: "📺 TV", line: "Expensive, broad, big swings.", group: "ads" },
+  { id: "staff", label: "👥 Staff bonuses", line: `Morale +${CAMPAIGN.money.staff.morale} per ${cs(CAMPAIGN.money.staff.per)}, up to +${CAMPAIGN.money.staff.maxMorale}.`, group: "people" },
+  { id: "community", label: "🎁 Community giving", line: `Integrity +${CAMPAIGN.money.community.integrity} per ${cs(CAMPAIGN.money.community.per)} and a small lift everywhere.`, group: "people" },
+];
+
+/**
+ * The week's money (owner, Nov 4): ads, bonuses and giving in steps of C$500, then the whole week added up: what
+ * comes in, what goes out (payroll and the calendar too) and what's left.
+ */
+function BudgetCard({ v, busy, onSave }: { v: CampaignView; busy: boolean; onSave: (b: Budget) => void }) {
+  const norm = (x: Budget): Required<Budget> => ({ digital: x.digital, street: x.street, tv: x.tv, staff: x.staff ?? 0, community: x.community ?? 0 });
+  const [b, setB] = useState(norm(v.budget));
   const [last, setLast] = useState(v.budget);
-  if (v.budget !== last) { setLast(v.budget); setB(v.budget); }
-  const committed = v.budget.digital + v.budget.street + v.budget.tv;
-  const room = v.free + committed;
-  const total = b.digital + b.street + b.tv;
-  const step = (c: Channel, d: number) => setB((x) => ({ ...x, [c]: Math.max(0, Math.min(x[c] + d, x[c] + room - total)) }));
-  const ROWS: [Channel, string, string][] = [["digital", "📱 Digital", "Cheap and fast. Volatile."], ["street", "🚪 Street teams", "Slow, durable, best where you visit."], ["tv", "📺 TV", "Expensive, broad, big swings."]];
-  const dirty = b.digital !== v.budget.digital || b.street !== v.budget.street || b.tv !== v.budget.tv;
+  if (v.budget !== last) { setLast(v.budget); setB(norm(v.budget)); }
+  const saved = norm(v.budget);
+  const sum = (x: Required<Budget>) => x.digital + x.street + x.tv + x.staff + x.community;
+  const room = v.free + sum(saved);
+  const total = sum(b);
+  const step = CAMPAIGN.money.step;
+  const move = (c: Line, d: number) => setB((x) => ({ ...x, [c]: Math.max(0, Math.min(x[c] + d, x[c] + room - total)) }));
+  const dirty = (Object.keys(b) as Line[]).some((k) => b[k] !== saved[k]);
+  const m = v.money;
+  const ads = b.digital + b.street + b.tv;
+  const comingIn = m.small + m.donors;
+  const goingOut = ads + b.staff + b.community + m.calendar + m.payroll;
+  const net = comingIn - goingOut;
   return (
     <div className="card stack-12">
-      <div className="row" style={{ justifyContent: "space-between" }}><span className="title">This week's budget</span><span className="meta">{cs(room - total)} left</span></div>
-      {ROWS.map(([c, label, line]) => (
-        <div key={c} className="row" style={{ justifyContent: "space-between", gap: 8 }}>
-          <span className="stack-2"><span className="title">{label}</span><span className="meta">{line}</span></span>
+      <div className="row" style={{ justifyContent: "space-between" }}><span className="title">💰 This week&apos;s budget</span><span className="meta">{cs(room - total)} left to plan</span></div>
+      {BUDGET_ROWS.map((r, i) => (
+        <div key={r.id} className={`camp-budget-row${i === 3 ? " first-people" : ""}`}>
+          <span className="stack-2"><span className="title">{r.label}</span><span className="meta">{r.line}</span></span>
           <span className="row" style={{ gap: 6 }}>
-            <button className="icon-round" aria-label={`Less ${c}`} onClick={() => step(c, -1000)}>−</button>
-            <span className="hud-number" style={{ minWidth: 64, textAlign: "center" }}>{cs(b[c])}</span>
-            <button className="icon-round" aria-label={`More ${c}`} onClick={() => step(c, 1000)}>+</button>
+            <button className="icon-round" aria-label={`Less ${r.label}`} disabled={busy || b[r.id] === 0} onClick={() => move(r.id, -step)}>−</button>
+            <span className="hud-number" style={{ minWidth: 72, textAlign: "center" }}>{cs(b[r.id])}</span>
+            <button className="icon-round" aria-label={`More ${r.label}`} disabled={busy || room - total < step} onClick={() => move(r.id, step)}>+</button>
           </span>
         </div>
       ))}
       {dirty && <button className="btn btn-secondary" disabled={busy} onClick={() => onSave(b)}>Save the budget</button>}
+      <div className="camp-ledger" aria-label="The week added up">
+        <p className="overline" style={{ margin: 0 }}>The week, added up</p>
+        <div className="camp-ledger-row in"><span>💵 Small donors <span className="meta">(about)</span></span><b>+{cs(m.small)}</b></div>
+        {m.donors > 0 && <div className="camp-ledger-row in"><span>📞 Donor calls <span className="meta">(about)</span></span><b>+{cs(m.donors)}</b></div>}
+        {ads > 0 && <div className="camp-ledger-row"><span>📣 Ads</span><b>−{cs(ads)}</b></div>}
+        {b.staff > 0 && <div className="camp-ledger-row"><span>👥 Staff bonuses</span><b>−{cs(b.staff)}</b></div>}
+        {b.community > 0 && <div className="camp-ledger-row"><span>🎁 Community giving</span><b>−{cs(b.community)}</b></div>}
+        {m.calendar > 0 && <div className="camp-ledger-row"><span>📅 Calendar (rallies, tours, turnout)</span><b>−{cs(m.calendar)}</b></div>}
+        <div className="camp-ledger-row"><span>🧾 Team payroll</span><b>−{cs(m.payroll)}</b></div>
+        {m.ops > 0 && <div className="camp-ledger-row paid"><span>🕶️ Shadow ops <span className="meta">(already paid)</span></span><b>{cs(m.ops)}</b></div>}
+        <div className={`camp-ledger-total ${net >= 0 ? "up" : "down"}`}><span>This week</span><b>{net >= 0 ? "+" : "−"}{cs(Math.abs(net))}</b></div>
+        <span className="meta">Funds after End Week: about {cs(Math.max(0, v.cash + net))}{dirty ? " (once saved)" : ""}.</span>
+      </div>
     </div>
   );
 }
@@ -549,23 +655,81 @@ function Dilemmas({ v, busy, onPick }: { v: CampaignView; busy: boolean; onPick:
   );
 }
 
-function Inbox({ v, busy, onReply, initial = null }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void; initial?: string | null }) {
+/** Messages this device has opened, per campaign (read/unread is a convenience, kept on the device). */
+function useReadMail(campaign: string) {
+  const key = `cc-camp-read:${campaign}`;
+  const [ids, setIds] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    try { setIds(new Set(JSON.parse(localStorage.getItem(key) ?? "[]") as string[])); } catch { setIds(new Set()); }
+  }, [key]);
+  const mark = useCallback((id: string) => setIds((cur) => {
+    if (cur.has(id)) return cur;
+    const next = new Set(cur).add(id);
+    try { localStorage.setItem(key, JSON.stringify([...next])); } catch { /* private mode */ }
+    return next;
+  }), [key]);
+  return { has: (id: string) => ids.has(id), mark };
+}
+type ReadMail = ReturnType<typeof useReadMail>;
+
+/** "9:41 AM" today, "Yesterday", "Mon" this week, "Nov 2" before that; "Week 2" for mail from before time stamps. */
+function mailTime(at: string | undefined, week: number): string {
+  if (!at) return `Week ${week}`;
+  const d = new Date(at), now = new Date();
+  const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((day(now) - day(d)) / 86_400_000);
+  if (days <= 0) return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  if (days === 1) return "Yesterday";
+  if (days < 7) return d.toLocaleDateString("en-US", { weekday: "short" });
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/** Who a message is from: a stakeholder, or an unknown number. */
+function sender(v: CampaignView, from: string): { name: string; role: string; initials: string; anon: boolean } {
+  const s = v.allies.find((a) => a.id === from);
+  if (!s) return { name: "Unknown number", role: "No caller ID", initials: "?", anon: true };
+  const initials = s.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  return { name: s.name, role: s.role, initials, anon: false };
+}
+
+function Avatar({ who, big = false }: { who: ReturnType<typeof sender>; big?: boolean }) {
+  return <span className={`camp-avatar${who.anon ? " anon" : ""}${big ? " big" : ""}`} aria-hidden="true">{who.anon ? "🕶️" : who.initials}</span>;
+}
+
+/** The campaign's inbox as a messaging app (owner, Nov 4): who, when, a preview, read and unread. */
+function Inbox({ v, busy, onReply, read, initial = null }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void; read: ReadMail; initial?: string | null }) {
   const [open, setOpen] = useState<string | null>(initial);
   // Replies are radio choices, sent with one button (owner, Oct 29).
   const [sel, setSel] = useState<string | null>(null);
-  const list = [...v.inbox].sort((a, b) => Number(b.status === "new") - Number(a.status === "new"));
+  useEffect(() => { if (open) read.mark(open); }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  const when = (x: CampaignView["inbox"][number]) => (x.at ? Date.parse(x.at) : 0) + x.message.week * 1000;
+  const list = [...v.inbox].sort((a, b) => Number(b.status === "new") - Number(a.status === "new") || when(b) - when(a));
   if (!list.length) return <p className="meta">No messages. Suspicious.</p>;
   const m = list.find((x) => x.message.id === open);
   if (m) {
+    const who = sender(v, m.message.from);
+    const mine = m.message.options.find((o) => o.id === m.option);
     return (
       <div className="stack-12">
         <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={() => setOpen(null)}>‹ Inbox</button>
-        <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`} style={{ alignSelf: "flex-start", width: "fit-content", marginBottom: 8 }}>{m.message.label}</span>
-        <p className="title" style={{ margin: 0 }}>{m.message.subject}</p>
-        <p className="body ph-sensitive" style={{ margin: 0 }}>{m.message.body}</p>
-        {m.status === "new" ? (
+        <div className="camp-thread-head">
+          <Avatar who={who} big />
+          <span className="stack-2" style={{ flex: 1, minWidth: 0 }}>
+            <span className="title">{who.name}</span>
+            <span className="meta">{who.role}</span>
+          </span>
+          <span className={`tag ${m.message.label === "Verified" ? "tag-positive" : m.message.label === "Anonymous" ? "tag-event" : "tag-neutral"}`}>{m.message.label}</span>
+        </div>
+        <span className="camp-thread-time">{mailTime(m.at, m.message.week)}</span>
+        <div className="camp-bubble them">
+          <b>{m.message.subject}</b>
+          <span className="ph-sensitive">{m.message.body}</span>
+        </div>
+        {m.status === "answered" && mine && <div className="camp-bubble me">{mine.label}<span className="camp-bubble-meta">Sent ✓</span></div>}
+        {m.status === "expired" && <p className="meta" style={{ textAlign: "center" }}>You never replied. They noticed.</p>}
+        {m.status === "new" && (
           <div className="stack-8" role="radiogroup" aria-label="Your reply">
-            <p className="overline" style={{ margin: "4px 0 0" }}>Pick your reply</p>
+            <p className="overline" style={{ margin: "4px 0 0" }}>Pick your reply · expires when the week ends</p>
             {m.message.options.map((o: InboxOption) => (
               <button key={o.id} role="radio" aria-checked={sel === o.id} className="camp-option radio" disabled={busy} onClick={() => setSel(o.id)}>
                 <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
@@ -574,18 +738,114 @@ function Inbox({ v, busy, onReply, initial = null }: { v: CampaignView; busy: bo
             <button className="btn btn-taxi" disabled={busy || !sel || !m.message.options.some((o) => o.id === sel)}
               onClick={() => { if (sel) { onReply(m.message.id, sel); setSel(null); setOpen(null); } }}>Send reply</button>
           </div>
-        ) : <p className="meta">{m.status === "expired" ? "Expired. They noticed." : `Answered: ${m.message.options.find((o) => o.id === m.option)?.label ?? ""}`}</p>}
+        )}
       </div>
     );
   }
+  const unread = list.filter((x) => x.status === "new" && !read.has(x.message.id)).length;
   return (
-    <div className="stack-8">
-      {list.map((x) => (
-        <button key={x.message.id} className={`camp-mail${x.status === "new" ? " new" : ""}`} onClick={() => { setSel(null); setOpen(x.message.id); }}>
-          <span className="title">{x.message.subject}</span>
-          <span className="meta">{x.message.label} · {x.status === "new" ? "expires when the week ends" : x.status}</span>
-        </button>
+    <div className="camp-inbox" role="list" aria-label={`Inbox, ${unread} unread`}>
+      {list.map((x) => {
+        const who = sender(v, x.message.from);
+        const isUnread = x.status === "new" && !read.has(x.message.id);
+        return (
+          <button key={x.message.id} role="listitem" className={`camp-mail-row${isUnread ? " unread" : ""}`} onClick={() => { setSel(null); setOpen(x.message.id); }}
+            aria-label={`${isUnread ? "Unread. " : ""}${who.name}: ${x.message.subject}`}>
+            <span className="camp-unread-dot" aria-hidden="true" />
+            <Avatar who={who} />
+            <span className="camp-mail-text">
+              <span className="camp-mail-top"><span className="camp-mail-from">{who.name}</span><span className="camp-mail-time">{mailTime(x.at, x.message.week)}</span></span>
+              <span className="camp-mail-subject">{x.message.subject}</span>
+              <span className="camp-mail-preview">
+                {x.status === "answered" ? "✓ Replied: " + (x.message.options.find((o) => o.id === x.option)?.label ?? "") : x.status === "expired" ? "Expired · no reply" : x.message.body}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const STANDING: Record<string, { label: string; tone: string }> = {
+  "2": { label: "Close ally", tone: "good" }, "1": { label: "Ally", tone: "good" }, "0": { label: "Undecided", tone: "mid" },
+  "-1": { label: "Cool", tone: "bad" }, "-2": { label: "Against you", tone: "bad" },
+};
+
+/** Who's with the campaign (owner, Nov 4: "a way to track allies"): every stakeholder and where they stand. */
+function Allies({ v }: { v: CampaignView }) {
+  const groups = [
+    { title: "On your side", list: v.allies.filter((a) => a.trust >= 1) },
+    { title: "Still deciding", list: v.allies.filter((a) => a.trust === 0 && !a.mayorAlly) },
+    { title: "With Papa-Dani", list: v.allies.filter((a) => a.trust < 1 && a.mayorAlly) },
+    { title: "Cool on you", list: v.allies.filter((a) => a.trust < 0 && !a.mayorAlly) },
+  ].filter((g) => g.list.length);
+  const mine = v.allies.filter((a) => a.trust >= 1).length;
+  return (
+    <div className="stack-12">
+      <div className="card camp-allies-sum">
+        <span className="stack-2"><span className="balance-big" style={{ fontSize: 34, lineHeight: "38px" }}>{mine}</span><span className="meta">on your side</span></span>
+        <span className="stack-2"><span className="balance-big" style={{ fontSize: 34, lineHeight: "38px" }}>{v.mayorAllies.length}</span><span className="meta">with Papa-Dani</span></span>
+        <span className="stack-2"><span className="balance-big" style={{ fontSize: 34, lineHeight: "38px" }}>{v.allies.length - mine - v.mayorAllies.length}</span><span className="meta">up for grabs</span></span>
+      </div>
+      <p className="meta" style={{ margin: 0 }}>Answer their messages and meet them to win them over. A message left to expire cools them off.</p>
+      {groups.map((g) => (
+        <div key={g.title} className="stack-8">
+          <p className="overline" style={{ margin: 0 }}>{g.title}</p>
+          {g.list.map((a) => {
+            const st = STANDING[String(Math.max(-2, Math.min(2, a.trust)))];
+            const who = sender(v, a.id);
+            return (
+              <div key={a.id} className="card camp-ally">
+                <Avatar who={who} />
+                <span className="stack-2" style={{ flex: 1, minWidth: 0 }}>
+                  <span className="title">{a.name}</span>
+                  <span className="meta">{a.role}</span>
+                </span>
+                <span className="stack-2" style={{ alignItems: "flex-end" }}>
+                  <span className={`camp-standing ${a.mayorAlly && a.trust < 1 ? "mayor" : st.tone}`}>{a.mayorAlly && a.trust < 1 ? "Mayor's ally" : st.label}</span>
+                  <span className={`camp-trust ${st.tone}`} aria-hidden="true">{[0, 1, 2, 3].map((n) => <i key={n} className={n < a.trust + 2 ? "on" : ""} />)}</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
       ))}
+    </div>
+  );
+}
+
+/** The candidate's profile (owner, Nov 4: "a profile page for each candidate when players click on the profile pic"). */
+function CandidateProfile({ card, v, onBack }: { card: CandidateCard; v: CampaignView; onBack: () => void }) {
+  return (
+    <div className="stack-16">
+      <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={onBack}>‹ Campaign HQ</button>
+      <div className="camp-poster">
+        <Bunting />
+        <CandidateFace id={card.id} big />
+        <p className="overline">{card.title}</p>
+        <h2 className="display-lg" style={{ margin: 0 }}>{card.name}</h2>
+        <p className="title" style={{ margin: 0 }}>&quot;{card.slogan}&quot;</p>
+      </div>
+      <div className="stack-8">
+        <p className="overline" style={{ margin: 0 }}>Bio</p>
+        <p className="body" style={{ margin: 0 }}>{card.bio}</p>
+      </div>
+      <div className="stack-8">
+        <p className="overline" style={{ margin: 0 }}>Running on</p>
+        {card.issues.map((i) => (
+          <div key={i.title} className="card camp-issue">
+            {i.emoji && <span className="camp-issue-emoji" aria-hidden="true">{i.emoji}</span>}
+            <span className="stack-2"><span className="title">{i.title}</span><span className="subtext">{i.line}</span></span>
+          </div>
+        ))}
+      </div>
+      <div className="card stack-4">
+        <span className="title">In this race</span>
+        <span className="meta">Week {v.week} of {v.weeks} · {v.you.toFixed(1)}% vs Papa-Dani&apos;s {v.mayor.toFixed(1)}%</span>
+        <span className="meta">Started with {cs(card.cash)} and Integrity {card.integrity}</span>
+        <span className="meta">Satire target: {card.satire}</span>
+      </div>
     </div>
   );
 }

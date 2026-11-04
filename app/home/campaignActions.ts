@@ -3,7 +3,7 @@
 import { randomInt, randomUUID } from "node:crypto";
 import {
   CAMPAIGN, campaignError, campaignHome, nyDay,
-  type CampaignResult, type CampaignScreen, type CampaignState, type CandidateId, type Channel, type DebateStyle, type Payout, type SlotAction,
+  type Budget, type CampaignResult, type CampaignScreen, type CampaignState, type CandidateId, type Channel, type DebateStyle, type Payout, type SlotAction,
 } from "@/lib/campaign";
 import { CAMPAIGN_CONTENT as content } from "@/lib/campaignContent";
 import {
@@ -167,7 +167,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   const id = randomUUID();
   let state: CampaignState;
   try {
-    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id), aspiration: await managerAspiration(w.admin, w.id), career: await managerCareer(w.admin, w.id), streetRep: await managerStreetRep(w.admin, w.id) }, rng);
+    state = startCampaign(content, { id, candidate, clout: ctx.clout, crew: ctx.crew, home: campaignHome(ctx.home), seed: s, wonBefore: ctx.won.includes(candidate), band: await managerBand(w.admin, w.id), aspiration: await managerAspiration(w.admin, w.id), career: await managerCareer(w.admin, w.id), streetRep: await managerStreetRep(w.admin, w.id), now: Date.now() }, rng);
   } catch (e) {
     if (e instanceof CampaignError) return { ok: false, error: campaignError(e.code) };
     throw e;
@@ -181,7 +181,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   return campaignScreen();
 }
 
-export async function campaignBudget(budget: Record<Channel, number>): Promise<Out> {
+export async function campaignBudget(budget: Budget): Promise<Out> {
   return act((s) => { setBudget(s, budget); return {}; });
 }
 export async function campaignSlot(index: number, action: SlotAction | null): Promise<Out> {
@@ -202,8 +202,8 @@ export async function campaignEndWeek(): Promise<Out> {
   const w = await getServerSupabase().then(async (sb) => (sb ? (await sb.auth.getUser()).data.user : null));
   const memory = admin && w ? await memoryOf(admin, w.id) : null;
   const unlocked = Object.keys(unlockedCards(content.situations, memory, new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" })));
-  return act((s, today) => endWeek(content, s, today, rng, { unlocked }));
+  return act((s, today) => endWeek(content, s, today, rng, { unlocked, now: Date.now() }));
 }
 export async function campaignChoose(situation: string, choice: string): Promise<Out> {
-  return act((s, today) => choose(content, s, situation, choice, today, rng));
+  return act((s, today) => choose(content, s, situation, choice, today, rng, Date.now()));
 }

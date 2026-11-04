@@ -7,6 +7,8 @@
 
 export type CandidateId = "goldcrest" | "castellano" | "kowalczyk" | "starr";
 export type Channel = "digital" | "street" | "tv";
+/** Owner, Nov 4: the week's budget also pays staff bonuses and community giving (absent on older campaigns: 0). */
+export type Budget = Record<Channel, number> & { staff?: number; community?: number };
 export type DebateStyle = "facts" | "charm" | "attack" | "deflect" | "own";
 export type OpId = "fake_news" | "poach_ally";
 export type Ending = "clean_win" | "dirty_win" | "loss";
@@ -38,6 +40,38 @@ export const CAMPAIGN = {
    * candidate's Integrity moved that week, both ways, at most ±8 a week and ±15 a campaign (migration 0142).
    */
   rep: { startBonus: 5, factor: 0.5, weekCap: 8, campaignCap: 15 },
+  /**
+   * Momentum and the candidate's Energy (owner, Nov 4: "momentum, morale, energy, integrity should be bars… World state
+   * should react: when momentum is high, you should get more favors, but attacks to derail you should be more").
+   * Every meter reads Low under `low`, High from `high`. Momentum follows the poll: each End Week it settles toward 50
+   * and moves with the week's change (and the debate). High momentum brings a favor a week and draws the Mayor's
+   * attacks; low momentum makes donors wait and see. Energy is spent by the calendar and won back by rest; a tired
+   * candidate rallies worse and goes off-script more, a fresh one a little better.
+   */
+  meters: { low: 34, high: 67 },
+  /**
+   * The week's money (owner, Nov 4: "the calendar also has budgetary implications", "team salary, donations… seem
+   * missing", steps of C$500). Calendar stops cost money, paid at End Week; payroll is fixed. Staff bonuses lift morale and
+   * loyalty; community giving lifts Integrity and the whole city a little. Both are capped.
+   */
+  money: {
+    step: 500,
+    payroll: 1200,
+    slotCost: { rally: 800, tour: 200, gotv: 500 } as Record<string, number>,
+    small: 3000, donorCall: 4000,
+    staff: { per: 500, morale: 2, loyalty: 1, maxMorale: 10 },
+    community: { per: 1000, integrity: 1, maxIntegrity: 4, rating: 0.2, maxRating: 0.8 },
+  },
+  momentum: {
+    start: 50, keep: 0.6, perPoint: 12, debate: 10,
+    highFavors: 1, highAttack: 0.5, attackBest: 1.5, attackAll: 0.3,
+    lowDonors: 0.8,
+  },
+  energy: {
+    start: 80, weekly: 10,
+    cost: { rally: 12, tour: 6, donors: 4, prep: 4, gotv: 8, meeting: 4, op: 2, rest: -20 } as Record<string, number>,
+    lowMult: 0.75, highMult: 1.1, lowOffScript: 1.5,
+  },
   /** Careers part 3 (owner, Oct 31): the manager's job as campaign background. */
   background: {
     hospitalityMorale: 10, techFunds: 1.2, mediaPoints: 2,
@@ -268,11 +302,15 @@ export interface CampaignState {
   integrity: number;
   intel: number;
   morale: number;
+  /** Owner, Nov 4 (absent on campaigns from before: CAMPAIGN.momentum.start and CAMPAIGN.energy.start). */
+  momentum?: number;
+  energy?: number;
   staff: StaffState[];
   trust: Record<string, number>;
-  budget: Record<Channel, number>;
+  budget: Budget;
   slots: (SlotAction | null)[];
-  inbox: { id: string; status: "new" | "answered" | "expired"; option?: string }[];
+  /** at: when it arrived (ISO), for the inbox's time stamp (owner, Nov 4); older campaigns have none. */
+  inbox: { id: string; status: "new" | "answered" | "expired"; option?: string; at?: string }[];
   /** Situations waiting for a choice during End Week. */
   pending: { id: string; place?: string; target?: string }[];
   seen: string[];
@@ -322,6 +360,22 @@ export function citywide(state: Pick<CampaignState, "places">, places: Place[]):
     you += r.you * p.weight; mayor += r.mayor * p.weight; w += p.weight;
   }
   return w ? { you: Math.round((you / w) * 10) / 10, mayor: Math.round((mayor / w) * 10) / 10 } : { you: 0, mayor: 0 };
+}
+
+/** Low, medium or high, for every campaign meter's bar (CAMPAIGN.meters). */
+export type MeterLevel = "low" | "medium" | "high";
+export function meterLevel(n: number): MeterLevel {
+  return n < CAMPAIGN.meters.low ? "low" : n >= CAMPAIGN.meters.high ? "high" : "medium";
+}
+
+/** What a calendar slot costs in campaign cash (paid at End Week). */
+export function slotCash(a: { kind: string } | null | undefined): number {
+  return a ? CAMPAIGN.money.slotCost[a.kind] ?? 0 : 0;
+}
+
+/** The candidate's Energy a slot costs (rest gives it back). */
+export function energyCost(a: { kind: string } | null | undefined): number {
+  return a ? CAMPAIGN.energy.cost[a.kind] ?? 0 : 0;
 }
 
 /** "C$4,000". */
@@ -425,7 +479,7 @@ type R = Promise<CampaignResult<CampaignScreen>>;
 export interface CampaignApi {
   screen(): R;
   start(candidate: CandidateId, seed: number): R;
-  budget(budget: Record<Channel, number>): R;
+  budget(budget: Budget): R;
   slot(index: number, action: SlotAction | null): R;
   reply(message: string, option: string): R;
   dilemma(id: "skim" | "charity", choice: string): R;
