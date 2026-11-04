@@ -22,7 +22,7 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
   let pendingReveal: ReturnType<typeof setTimeout> | null = null;
 
   const begin = (candidate: CandidateId) => {
-    state = startCampaign(content, { id: `preview-${Date.now()}`, candidate, clout: opts.clout, crew: 3, home: "astoria", seed: 0, wonBefore: won.includes(candidate) }, rng);
+    state = startCampaign(content, { id: `preview-${Date.now()}`, candidate, clout: opts.clout, crew: 3, home: "astoria", seed: 0, wonBefore: won.includes(candidate), now: Date.now() - (preset && !["locked", "pick"].includes(preset) ? 3 * 86_400_000 : 0) }, rng);
   };
   /** Plays a quick, sensible week so a preset can start mid-campaign. */
   const autoWeek = () => {
@@ -39,10 +39,12 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
     const spend = Math.floor(s.cash * 0.6 / 3);
     setBudget(s, { digital: spend, street: spend, tv: spend });
     if (s.week === CAMPAIGN.debateWeek) for (let r = 0; r < 4 && !s.debate?.done; r++) debateRound(content, s, r === 2 ? "deflect" : "charm", rng);
-    endWeek(content, s, day, rng);
+    // A preset's earlier weeks happened on earlier days: its mail is stamped a day apart, the last one this morning.
+    const at = Date.now() - Math.max(0, 2 - s.week) * 86_400_000 - 5 * 3_600_000;
+    endWeek(content, s, day, rng, { now: at });
     while (s.phase === "deciding") {
       const p = s.pending[0];
-      choose(content, s, p.id, content.situations.find((x) => x.id === p.id)!.choices[0].id, day, rng);
+      choose(content, s, p.id, content.situations.find((x) => x.id === p.id)!.choices[0].id, day, rng, at);
     }
     day = nextDay(day);
     refresh(s, day);
@@ -118,7 +120,7 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
     reply: (m, o) => act((s) => ({ receipt: reply(content, s, m, o, rng) })),
     dilemma: (id, c) => act((s) => dilemma(content, s, id, c)),
     debate: (style) => act((s) => { const r = debateRound(content, s, style, rng); return { round: { delta: r.delta, line: r.line } }; }),
-    endWeek: async () => { const r = await act((s) => endWeek(content, s, day, rng)); scheduleReveal(); return r; },
-    choose: async (sit, c) => { const r = await act((s) => choose(content, s, sit, c, day, rng)); scheduleReveal(); return r; },
+    endWeek: async () => { const r = await act((s) => endWeek(content, s, day, rng, { now: Date.now() })); scheduleReveal(); return r; },
+    choose: async (sit, c) => { const r = await act((s) => choose(content, s, sit, c, day, rng, Date.now())); scheduleReveal(); return r; },
   };
 }

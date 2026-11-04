@@ -2544,6 +2544,88 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-mail { position:relative; display:flex; flex-direction:column; gap:2px; width:100%; padding:12px 36px 12px 14px; border-radius:14px; text-align:left; background:var(--surface-raised); color:var(--text-1); box-shadow:var(--elev-2); cursor:pointer; }
 .camp-mail.new { box-shadow:inset 4px 0 0 var(--neon-500), var(--elev-2); }
 .camp-situation { text-align:center; align-items:center; padding:20px 16px; }
+/* Campaign HQ, owner Nov 4: the profile link, funds like a bank balance, meter bars, a messaging inbox, allies, the week's money. */
+.camp-head-btn { width:100%; padding:0; background:none; border:0; color:inherit; font:inherit; cursor:pointer; text-align:left; }
+.camp-funds { display:flex; flex-direction:column; gap:12px; }
+.camp-funds .balance-big { font-size:38px; line-height:42px; }
+.camp-funds-row { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; padding-top:10px; border-top:1px solid rgba(20,17,26,.08); }
+.camp-funds-row > span { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.camp-funds-row b { font-size:15px; font-variant-numeric:tabular-nums; color:var(--text-1); }
+.camp-meter-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px 12px; }
+.camp-meter { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.camp-meter-top { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+.camp-meter-name { font-size:13px; font-weight:700; min-width:0; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.camp-level { flex:none; font-family:var(--font-label); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:1px 6px; border-radius:999px; }
+.camp-level.low { background:var(--red-tint); color:var(--red-text); }
+.camp-level.medium { background:var(--taxi-tint); color:#8A5A00; }
+.camp-level.high { background:var(--green-tint); color:#1F6B4A; }
+.camp-meter-bar { position:relative; height:10px; border-radius:6px; background:var(--chip-off); overflow:hidden; }
+.camp-meter-bar .fill { position:absolute; left:0; top:0; bottom:0; border-radius:6px; transition:width .6s cubic-bezier(.2,.8,.2,1); }
+.camp-meter.low .fill { background:var(--red-500); }
+.camp-meter.medium .fill { background:var(--taxi-500); }
+.camp-meter.high .fill { background:var(--green-500); }
+.camp-meter-bar .plan { position:absolute; top:0; bottom:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,.75) 0 3px, transparent 3px 6px); }
+.camp-meter-bar i { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--surface-card); opacity:.9; }
+.camp-meter-notes { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; font-size:13px; line-height:18px; color:var(--text-2); }
+.camp-meter-notes li.low b { color:var(--red-text); }
+.camp-meter-notes li.high b { color:#1F6B4A; }
+.camp-slot-cost { font-family:var(--font-label); font-size:13px; font-weight:700; color:var(--text-3); white-space:nowrap; }
+.camp-budget-row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.camp-budget-row.first-people { padding-top:12px; border-top:1px solid rgba(20,17,26,.08); }
+.camp-ledger { display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:14px; background:var(--surface-raised); }
+.camp-ledger-row, .camp-ledger-total { display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:14px; color:var(--text-2); }
+.camp-ledger-row b, .camp-ledger-total b { font-variant-numeric:tabular-nums; color:var(--text-1); white-space:nowrap; }
+.camp-ledger-row.in b { color:var(--green-text); }
+.camp-ledger-row.paid b { color:var(--text-3); font-weight:600; }
+.camp-ledger-total { margin-top:4px; padding-top:8px; border-top:1px solid rgba(20,17,26,.1); font-weight:800; color:var(--text-1); font-size:15px; }
+.camp-ledger-total.up b { color:var(--green-text); }
+.camp-ledger-total.down b { color:var(--red-text); }
+.camp-avatar { flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:var(--night-900); color:#fff; font-weight:800; font-size:15px; letter-spacing:.02em; }
+.camp-avatar.anon { background:#2B2433; font-size:20px; }
+.camp-avatar { overflow:hidden; }
+.camp-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.camp-vibe { font-size:13px; line-height:18px; color:var(--text-2); font-style:italic; }
+.camp-staff { align-items:flex-start; }
+.camp-staff-stats { display:flex; gap:12px; font-size:13px; color:var(--text-3); margin-top:2px; }
+.camp-staff-stats b { color:var(--text-1); font-variant-numeric:tabular-nums; }
+.camp-avatar.big { width:52px; height:52px; font-size:17px; }
+.camp-inbox { display:flex; flex-direction:column; border-radius:16px; overflow:hidden; background:var(--surface-raised); box-shadow:var(--elev-2); }
+.camp-mail-row { position:relative; display:flex; align-items:flex-start; gap:10px; width:100%; padding:12px 14px 12px 22px; text-align:left; background:none; border:0; color:var(--text-1); font:inherit; cursor:pointer; }
+.camp-mail-row + .camp-mail-row::before { content:""; position:absolute; left:76px; right:0; top:0; height:1px; background:rgba(20,17,26,.08); }
+.camp-unread-dot { position:absolute; left:8px; top:28px; width:9px; height:9px; border-radius:50%; background:transparent; }
+.camp-mail-row.unread .camp-unread-dot { background:#0A84FF; }
+.camp-mail-text { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+.camp-mail-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.camp-mail-from { font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.camp-mail-time { flex:none; font-size:13px; color:var(--text-3); }
+.camp-mail-subject { font-size:14px; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.camp-mail-preview { font-size:13px; line-height:18px; color:var(--text-3); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.camp-mail-row.unread .camp-mail-from, .camp-mail-row.unread .camp-mail-subject { font-weight:800; }
+.camp-mail-row.unread .camp-mail-time { color:#0A84FF; font-weight:600; }
+.camp-thread-head { display:flex; align-items:center; gap:12px; }
+.camp-thread-time { text-align:center; font-size:12px; color:var(--text-3); }
+.camp-bubble { max-width:86%; display:flex; flex-direction:column; gap:4px; padding:10px 14px; border-radius:20px; font-size:15px; line-height:21px; }
+.camp-bubble.them { align-self:flex-start; background:var(--surface-raised); color:var(--text-1); border-bottom-left-radius:6px; box-shadow:var(--elev-2); }
+.camp-bubble.me { align-self:flex-end; background:#0A84FF; color:#fff; border-bottom-right-radius:6px; }
+.camp-bubble-meta { font-size:11px; opacity:.8; align-self:flex-end; }
+.camp-allies-sum { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); text-align:center; gap:8px; }
+/* The allies summary: each count over its label. */
+.camp-allies-sum > span { display:flex; flex-direction:column; align-items:center; gap:2px; }
+/* Owner, Nov 4: the allies counts in the streak's number font (Barlow Condensed 800, leaning like .wb-streak-slant). */
+.camp-count { display:inline-block; font-family:var(--font-label); font-weight:800; font-size:44px; line-height:44px; letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums; transform:skewX(-10deg); color:var(--text-1); }
+.camp-ally { display:flex; align-items:center; gap:12px; }
+.camp-standing { font-family:var(--font-label); font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 8px; border-radius:999px; white-space:nowrap; }
+.camp-standing.good { background:var(--green-tint); color:#1F6B4A; }
+.camp-standing.mid { background:var(--chip-off); color:var(--text-2); }
+.camp-standing.bad { background:var(--red-tint); color:var(--red-text); }
+.camp-standing.mayor { background:#E3EAF8; color:#2F5FB3; }
+.camp-trust { display:flex; gap:3px; }
+.camp-trust i { width:14px; height:5px; border-radius:3px; background:var(--chip-off); }
+.camp-trust.good i.on { background:var(--green-500); }
+.camp-trust.mid i.on { background:var(--taxi-500); }
+.camp-trust.bad i.on { background:var(--red-500); }
+@media (prefers-reduced-motion: reduce) { .camp-meter-bar .fill { transition:none; } }
 .camp-sit-icon { display:block; font-size:44px; line-height:1.15; margin-bottom:4px; }
 .camp-crowd { position:relative; height:12px; border-radius:6px; background:linear-gradient(90deg, #D93A2F, #E8EEF9 50%, #40B589); }
 .camp-crowd span { position:absolute; top:-5px; width:22px; height:22px; margin-left:-11px; border-radius:50%; background:#fff;
@@ -2611,7 +2693,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .rep-bar { position:relative; height:10px; border-radius:5px; background:linear-gradient(90deg, #9FDCFF, #E9E3F5 50%, #FF8FC4); }
 .rep-bar i { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--surface-sheet); opacity:.8; }
 .rep-bar span { position:absolute; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:var(--surface-raised);
-  box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .5s ease-out; }
+  box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left 1.6s cubic-bezier(.45,0,.2,1); } /* Owner, Nov 4: a slow, gradual slide. */
 .rep.compact .rep-bar { height:8px; }
 .choice-lola { display:flex; gap:8px; align-items:flex-start; margin:0; font-size:14px; line-height:19px; color:var(--text-1); }
 .choice-lola img { flex:none; border-radius:50%; object-fit:cover; }
@@ -3138,3 +3220,21 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   .cel-banner, .cel-banner.leaving, .cel-banner-ico, .cel-chips .fx, .cel-veil, .cel-card, .cel-rays, .cel-medal, .cel-num, .cel-rise, .cel-big, .cel-rare { animation:none; }
   .cel-rays { opacity:.55; } .cel-banner.leaving { opacity:0; }
 }
+
+/* Careers, owner Nov 4: the next promotion as a checklist, and Quit as a quiet danger row set apart. */
+.careers-checklist { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+.careers-checklist li { display:flex; align-items:center; gap:10px; }
+.careers-checklist li > span.stack-2, .careers-quit > span.stack-2 { display:flex; flex-direction:column; gap:2px; }
+.careers-check { flex:none; width:24px; height:24px; border-radius:50%; border:2px solid var(--divider); display:grid; place-items:center; font-size:13px; font-weight:800; color:#fff; }
+.careers-checklist li.ok .careers-check { background:var(--green-500); border-color:var(--green-500); }
+.careers-check-label { font-size:15px; font-weight:700; color:var(--text-1); }
+.careers-checklist li.ok .careers-check-label { color:var(--text-2); }
+.careers-check-now { flex:none; font-family:var(--font-label); font-size:13px; font-weight:700; color:var(--text-3); white-space:nowrap; }
+.careers-checklist li.ok .careers-check-now { color:var(--green-text); }
+.careers-quit { display:flex; align-items:center; gap:12px; width:100%; margin-top:8px; padding:14px 16px; border-radius:16px; border:1px solid rgba(217,58,47,.25); background:var(--red-tint); color:var(--text-1); font:inherit; cursor:pointer; }
+.careers-quit-icon { font-size:22px; }
+.careers-quit-title { font-size:15px; font-weight:800; color:var(--red-text); }
+.careers-quit-go { font-size:20px; color:var(--red-text); }
+.careers-quit:disabled { opacity:.5; }
+.careers-quit-confirm { border:1px solid rgba(217,58,47,.25); }
+

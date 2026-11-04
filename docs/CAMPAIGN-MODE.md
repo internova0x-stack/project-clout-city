@@ -998,3 +998,31 @@ but they're linked (lib/campaign.ts `CAMPAIGN.rep`, migration 0142):
   fundraising pay a fifth more, Media's familiar face is worth 2 points across the city, and City Hall (migration 0144) knows the
   Mayor's playbook: 1 point up, 2 from Policy Aide. A City Hall employee running a campaign may meet the Mayor at their desk
   (career task `cityhall-conflict`).
+
+## Campaign HQ upgrade (owner, Nov 4)
+
+What the owner asked for, and what it does in the rules (lib/campaign.ts `CAMPAIGN.meters`, `momentum`, `energy`, `money`;
+lib/campaignEngine.ts `resolveWeek`).
+
+- **Candidate profile.** The candidate's face at the top of HQ opens their profile: bio, what they're running on, this race.
+- **Campaign funds.** The money reads like a bank balance: the balance, then free to spend, planned and raised so far.
+- **Meters as bars.** Momentum, Energy, Morale and Integrity show as bars marked Low (under 34), Medium and High (67 and up),
+  with a line saying what a Low or High level does right now.
+- **Momentum** starts at 50 and follows the poll: at End Week it keeps 60% of itself, settles toward 50, moves 12 per point
+  the poll moved and 10 for the debate result. High momentum brings a favor every week (someone wants to be with a winner)
+  and draws the Mayor's people half the time (−1.5 in your best place and −0.3 everywhere, unless comms kills it). Low
+  momentum makes donors wait and see (donor money ×0.8).
+- **Energy** is the candidate's. It starts at 80, comes back 10 a week, and the calendar spends it: rally 12, get out the
+  vote 8, tour 6, donor calls, prep and meetings 4, an op 2; a rest day gives 20 back. Tired (Low): rallies and tours land
+  ×0.75 and off-script moments are 1.5 times as likely. Fresh (High): ×1.1.
+- **The week's money.** The budget moves in steps of C$500. Calendar stops cost cash at End Week (rally C$800, tour C$200,
+  get out the vote C$500); ops are still paid when booked. Payroll is C$1,200 a week. Two new lines sit beside the ads:
+  staff bonuses (morale +2 per C$500, up to +10, and a little loyalty) and community giving (Integrity +1 and +0.2 points
+  everywhere per C$1,000, up to +4 and +0.8). The Budget card adds the week up: small donors and donor calls coming in,
+  everything going out, the net, and the funds after End Week.
+- **Inbox.** A messaging app: who it's from (initials, or 🕶️ for an unknown number), when it arrived, the subject and a
+  preview, an unread dot (kept on the device) and, once answered, your reply as a sent bubble.
+- **Allies.** A tab listing every stakeholder by where they stand (close ally, ally, undecided, cool, against you, or one of
+  Papa-Dani's), with the counts on top.
+
+Tuning (tests/campaign.test.ts, 200 campaigns each): clean play wins 38-66% (Kowalczyk hardest), dirty play 64-83%.

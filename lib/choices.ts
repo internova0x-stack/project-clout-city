@@ -166,6 +166,11 @@ export const CHOICES = {
   /** Effects are capped so no card can swing the economy (checked by validateCards and again by the database). */
   caps: { cash: 3000, clout: 300, mood: 30, energy: 40, integrity: 20 },
   /** Lasting effects' limits (the database checks them too). */
+  /**
+   * Owner, Nov 4: "the meter makes big leaps instead of a slow gradual move towards each side". Every choice's meter
+   * nudge (and a consequence landing later) moves at this rate: a card's −14 moves the meter 7. At least 1 either way.
+   */
+  meterRate: 0.5,
   maxBanDays: 7,
   maxGigLockDays: 3,
   maxHoldingHours: 3,
@@ -429,13 +434,20 @@ export function resolveChoice(card: ChoiceCard, optionId: string, today: string,
 }
 
 /** Caps a set of effects to what the database will accept, and never takes more cash than the bank holds. */
+/** A meter nudge at CHOICES.meterRate, never rounded away to nothing. */
+export function meterStep(n: number | undefined): number | undefined {
+  if (n === undefined || n === 0) return n;
+  const v = Math.round(Math.abs(n) * CHOICES.meterRate);
+  return Math.sign(n) * Math.max(1, v);
+}
+
 export function boundEffects(e: ChoiceEffects, bank: number): ChoiceEffects {
   const cap = (v: number | undefined, m: number) => (v === undefined ? undefined : Math.max(-m, Math.min(m, Math.round(v))));
   const c = CHOICES.caps;
   const cash = cap(e.cash, c.cash);
   return {
     cash: cash !== undefined && cash < 0 ? Math.max(cash, -Math.max(0, bank)) : cash,
-    clout: cap(e.clout, c.clout), mood: cap(e.mood, c.mood), energy: cap(e.energy, c.energy), integrity: cap(e.integrity, c.integrity),
+    clout: cap(e.clout, c.clout), mood: cap(e.mood, c.mood), energy: cap(e.energy, c.energy), integrity: cap(meterStep(e.integrity), c.integrity),
     ban: e.ban ? { place: e.ban.place, days: Math.max(1, Math.min(CHOICES.maxBanDays, Math.round(e.ban.days))) } : undefined,
     gigLock: e.gigLock ? Math.max(1, Math.min(CHOICES.maxGigLockDays, Math.round(e.gigLock))) : undefined,
     holding: e.holding ? Math.max(1, Math.min(CHOICES.maxHoldingHours, Math.round(e.holding))) : undefined,

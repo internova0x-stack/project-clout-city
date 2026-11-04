@@ -1,5 +1,5 @@
 {
-  "about": "Campaign Mode's map, staff and stakeholders (docs/CAMPAIGN-MODE.md sections 8, 10 and 12). The test build runs in Queens. Weight is the share of the vote; mayor is Papa-Dani's starting rating there. Every person is invented.",
+  "about": "Campaign Mode's map, staff and stakeholders (docs/CAMPAIGN-MODE.md sections 8, 10 and 12). The test build runs in Queens. Weight is the share of the vote; mayor is Papa-Dani's starting rating there. Every person is invented. Every person has an age and a one-line vibe, and a portrait at public/cast/campaign-<id>.webp (owner, Nov 4: a diverse cast: races, ages, personality types).",
   "places": [
     {
       "id": "astoria",
@@ -56,88 +56,118 @@
       "name": "Sol Brennan",
       "role": "Deputy",
       "job": "Runs the office so you can run the campaign",
-      "pronoun": "he"
+      "pronoun": "he",
+      "age": 63,
+      "vibe": "Unflappable. Has run nine campaigns, won four, and remembers every one of them."
     },
     {
       "id": "pollster",
       "name": "Priya Raman",
       "role": "Pollster",
       "job": "Reads the polls and the room",
-      "pronoun": "she"
+      "pronoun": "she",
+      "age": 24,
+      "vibe": "Brilliant and a little anxious. Talks in percentages, sleeps in spreadsheets."
     },
     {
       "id": "comms",
       "name": "Theo Marchetti",
       "role": "Comms Director",
       "job": "Ads, press and damage control",
-      "pronoun": "he"
+      "pronoun": "he",
+      "age": 38,
+      "vibe": "Smooth as a press release. Has never once been off his phone."
     },
     {
       "id": "field",
       "name": "Marisol Vega",
       "role": "Field Organizer",
       "job": "Street teams and rallies",
-      "pronoun": "she"
+      "pronoun": "she",
+      "age": 31,
+      "vibe": "Fearless. Knows every building super in Queens by name, and they all owe her."
     }
   ],
   "stakeholders": [
     {
       "id": "rosa",
       "name": "Inês Ferreira",
-      "role": "Astoria Tenants' Alliance"
+      "role": "Astoria Tenants' Alliance",
+      "age": 70,
+      "vibe": "Forty years of rent strikes. She will outlast your landlord and you."
     },
     {
       "id": "gus",
       "name": "Stavros Kallas",
-      "role": "Ditmars Merchants' Association"
+      "role": "Ditmars Merchants' Association",
+      "age": 55,
+      "vibe": "Warm, generous, suspicious of anyone who has never worked a counter."
     },
     {
       "id": "harlan",
       "name": "Harlan Pryce",
-      "role": "Pryce Development, donor"
+      "role": "Pryce Development, donor",
+      "age": 48,
+      "vibe": "Smiles like a brochure. Every favor comes with a floor plan."
     },
     {
       "id": "deb",
       "name": "Deb Okonkwo",
-      "role": "President, Local 117"
+      "role": "President, Local 117",
+      "age": 52,
+      "vibe": "Tough, fair and impossible to bluff. Her members vote together."
     },
     {
       "id": "haddad",
       "name": "Dean Samir Haddad",
-      "role": "St. Johnsons University"
+      "role": "St. Johnsons University",
+      "age": 60,
+      "vibe": "Dry wit, bow ties, strong views on student housing."
     },
     {
       "id": "jojo",
       "name": "Dez Navarro",
-      "role": "Nightlife promoter"
+      "role": "Nightlife promoter",
+      "age": 29,
+      "vibe": "Knows everyone who's anyone after midnight. Can fill a room in an hour."
     },
     {
       "id": "lin",
       "name": "Marguerite Lin",
-      "role": "Reporter, The Borough Bugle"
+      "role": "Reporter, The Borough Bugle",
+      "age": 45,
+      "vibe": "Relentless. Never forgets a quote, especially the ones you wish you hadn't said."
     },
     {
       "id": "grant",
       "name": "Pastor Ellis Grant",
-      "role": "Greater Jamaica Fellowship"
+      "role": "Greater Jamaica Fellowship",
+      "age": 67,
+      "vibe": "A booming voice and a bigger heart. His Sunday sermon moves votes."
     },
     {
       "id": "teddy",
       "name": "Barry Vance",
       "role": "Vance Ribbon & Scissor Co., the Mayor's top donor",
-      "mayorAlly": true
+      "mayorAlly": true,
+      "age": 72,
+      "vibe": "Made a fortune cutting ribbons. Would like to keep cutting them."
     },
     {
       "id": "joy",
       "name": "Auntie Joy Asante",
       "role": "Jamaica Block Association, endorses the Mayor",
-      "mayorAlly": true
+      "mayorAlly": true,
+      "age": 58,
+      "vibe": "Everyone's Auntie. Runs the block, the cookout and the endorsement."
     },
     {
       "id": "lionel",
       "name": "Lionel Chu",
       "role": "Flushing Merchants' Guild, endorses the Mayor",
-      "mayorAlly": true
+      "mayorAlly": true,
+      "age": 38,
+      "vibe": "Polished and careful. Never says yes until he's counted the votes."
     }
   ]
 }

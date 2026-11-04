@@ -104,7 +104,7 @@ function play(candidate: CandidateId, style: Style, seed: number) {
     put({ kind: "donors" });
     put({ kind: "donors" });
     put({ kind: "rest" });
-    const room = state.cash - 0;
+    const room = campaignView(content, state, day).free; // what the calendar leaves (owner, Nov 4: stops cost money)
     const spend = Math.floor(room * 0.6);
     setBudget(state, { digital: Math.floor(spend / 3), street: Math.floor(spend / 3), tv: Math.floor(spend / 3) });
     if (state.week === CAMPAIGN.debateWeek) {
@@ -294,4 +294,46 @@ test("option C: the manager's band sets the start, and the campaign rubs off on 
   assert.ok(totals("dirty").every((n) => n <= -10), "a dirty campaign pushes hard toward Hustler");
   const dirty = play("goldcrest", "dirty", 7).state;
   assert.ok((dirty.rep ?? []).reduce((n, r) => n + r.delta, 0) < 0, "a dirty campaign pushes toward Hustler");
+});
+
+test("owner, Nov 4: the calendar costs money, the budget adds up, and momentum and energy react", () => {
+  const start = () => startCampaign(content, { id: "m", candidate: "starr", clout: 0, crew: 0, home: null, seed: 0, wonBefore: false, now: Date.parse("2026-11-04T14:00:00Z") }, rng(3));
+  const day = "2026-11-04";
+  // Mail carries when it arrived.
+  const s = start();
+  assert.ok(s.inbox.length && s.inbox.every((m) => m.at === "2026-11-04T14:00:00.000Z"));
+  // A rally costs C$800 at End Week; the free cash knows, and the budget can't spend it twice.
+  const cash = s.cash;
+  setSlot(content, s, 0, { kind: "rally", place: content.places[0].id });
+  let v = campaignView(content, s, day);
+  assert.equal(v.free, cash - CAMPAIGN.money.slotCost.rally);
+  assert.equal(v.money.calendar, CAMPAIGN.money.slotCost.rally);
+  assert.equal(v.money.payroll, CAMPAIGN.money.payroll);
+  assert.throws(() => setBudget(s, { digital: cash, street: 0, tv: 0 }), /no_cash/);
+  setBudget(s, { digital: 500, street: 0, tv: 0, staff: 1000, community: 0 });
+  v = campaignView(content, s, day);
+  assert.equal(v.free, cash - CAMPAIGN.money.slotCost.rally - 1500);
+  assert.equal(v.energyPlan, CAMPAIGN.energy.cost.rally);
+  // Staff bonuses lift morale (C$1,000 = two steps of +2).
+  const morale = s.morale;
+  endWeek(content, s, day, rng(4), { now: Date.parse("2026-11-04T15:00:00Z") });
+  while (s.phase === "deciding") choose(content, s, s.pending[0].id, content.situations.find((x) => x.id === s.pending[0].id)!.choices[0].id, day, rng(5));
+  assert.ok(s.morale >= Math.min(100, morale + 4) - 6 - 15, "bonuses went into morale");
+  assert.equal(s.energy, Math.min(100, CAMPAIGN.energy.start - CAMPAIGN.energy.cost.rally + CAMPAIGN.energy.weekly));
+  assert.ok(typeof s.momentum === "number");
+  // High momentum brings a favor every week (and the Mayor's people come for it).
+  const h = start();
+  h.momentum = 90;
+  const favors = h.favors;
+  endWeek(content, h, day, rng(6));
+  while (h.phase === "deciding") choose(content, h, h.pending[0].id, content.situations.find((x) => x.id === h.pending[0].id)!.choices[0].id, day, rng(7));
+  assert.ok(h.favors >= favors + CAMPAIGN.momentum.highFavors - 3, "a favor for the surge");
+  assert.ok((h.recap?.lines ?? []).some((l) => /Momentum brings friends/.test(l)) || h.recap!.lines.length >= 7);
+  // Older campaigns (no momentum, energy or new budget lines) still read.
+  const old = start();
+  delete old.momentum; delete old.energy; old.budget = { digital: 0, street: 0, tv: 0 };
+  const ov = campaignView(content, old, day);
+  assert.equal(ov.momentum, CAMPAIGN.momentum.start);
+  assert.equal(ov.energy, CAMPAIGN.energy.start);
+  assert.equal(ov.money.staff, 0);
 });

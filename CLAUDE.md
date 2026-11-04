@@ -410,6 +410,21 @@ components live in `app/globals.css`.
   Integrity change (both ways, ±8 a week; `state.rep`) with a recap line (😇/💸); `campaign_rep` (service role, once per
   campaign and week, ±15 a campaign) moves the meter after the save. Heat, traces and Street Rep stay campaign-only until
   the underworld exists.
+  HQ upgrade (owner, Nov 4; no migration, state is jsonb with defaults): the candidate's face opens their profile (bio, issues,
+  this race); the money is a bank-style "Campaign funds" card (free, planned, raised); Momentum, Energy, Morale and Integrity
+  are bars with Low/Medium/High at 34/67 (`CAMPAIGN.meters`, `meterLevel`). Momentum (state.momentum, from 50) follows the poll at
+  End Week (settles toward 50, ±12 a point, ±10 for the debate); High pays +1 Favor a week and draws a Mayor attack (half the
+  time, comms may kill it), Low cuts donor money ×0.8. Energy (state.energy, from 80, +10 a week) is spent by the calendar
+  (`CAMPAIGN.energy.cost`, rest gives 20 back); Low rallies ×0.75 and off-script ×1.5, High ×1.1. The week's money
+  (`CAMPAIGN.money`): steps of C$500, calendar stops cost cash at End Week (rally C$800, tour C$200, get-out-the-vote C$500;
+  counted in `free`), payroll C$1,200, small donors C$3,000 × donor, and two new budget lines: staff bonuses (morale +2 per
+  C$500, up to +10) and community giving (Integrity +1 and +0.2 everywhere per C$1,000, capped); the Budget card adds the week up
+  (`view.money`). The inbox is a messaging app (sender avatar, time stamp from `inbox[].at`, unread dot kept on the device in
+  `cc-camp-read:<campaign>`, the reply as a sent bubble) and the Allies tab lists every stakeholder by standing (`view.allies`).
+  A trace is exposed at most once (`events` 'exposed:<id>').
+  The cast (owner, Nov 4: "a diverse cast of people… different races, ages, personality types"): staff and stakeholders carry
+  `age` and `vibe` (content/campaign/city.json) and a portrait public/cast/campaign-<id>.webp (Higgsfield, the candidates'
+  style; initials if one is missing); the Team tab shows the staff from day one (morale and loyalty after week 1).
 - Compact map (owner, Oct 29; the only map since the classic street map was retired, Oct 30):
   New York in miniature. lib/compactMap.ts gives every place its own block (`SPOTS`, tests/compactMap.test.ts), the
   neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and
@@ -454,6 +469,10 @@ components live in `app/globals.css`.
   {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
   (`validateCards`). Cards show no risk labels or "comes back" hints (owner, Oct 30: players learn from consequences;
   `cardView` sends only label, get and cost). Only invented people, grey not criminal, never real money.
+  The meter moves gradually (owner, Nov 4: "big leaps"): `boundEffects` applies `CHOICES.meterRate` (0.5, at least 1) to every
+  choice's and landed consequence's nudge (`meterStep`), and the receipt's dot slides over 1.6 s. A choice card, a consequence or
+  the bench never opens over another sheet (GameShell `choiceWaits`: the place card, a panel, the Phone, Careers, Campaign, an
+  activity, a trip, the welcome); it waits and shows when that closes.
   Start over resets it. `?choice=now|back|high|low|log|jail|chain` in the preview (not the demo: its bundle would carry the outcomes).
   Real stakes (migration 0132, owner Oct 30): bigger caps (C$3,000, 300 clout), lasting effects (`choice_marks`: a place ban up to
   7 days, no gigs up to 3, up to 3 hours in holding at the 114½ Precinct, police played for laughs; bail `choice_bail`, C$150 an

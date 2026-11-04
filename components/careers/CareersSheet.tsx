@@ -305,12 +305,27 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
       </div>
 
       {v.next ? (
-        <div className="card stack-4">
-          <p className="title" style={{ margin: 0 }}>Next up: {v.next.title} · {cs(v.next.salary)}</p>
-          <p className="meta" style={{ margin: 0 }}>
-            Performance {CAREER.promote.perf}+, your boss's trust, and {v.level} good review{v.level > 1 ? "s" : ""} at this level
-            {v.next.missing.length ? `. You also need ${v.next.missing.join(" and ")}.` : "."}
-          </p>
+        // Owner, Nov 4 ("I don't understand Up Next"): the next promotion as a checklist of what it takes, ticked as you go.
+        <div className="card stack-12 careers-next">
+          <div className="stack-2">
+            <p className="overline" style={{ margin: 0 }}>Your next promotion</p>
+            <p className="title" style={{ margin: 0 }}>{v.next.title} · {cs(v.next.salary)} a week</p>
+            <p className="meta" style={{ margin: 0 }}>Promotions happen at your weekly review{v.daysToReview ? `, in ${v.daysToReview} day${v.daysToReview === 1 ? "" : "s"}` : ", today"}, once all of these are ticked.</p>
+          </div>
+          <ul className="careers-checklist">
+            {[
+              { ok: v.performance >= v.next.perfNeed, label: `Performance ${v.next.perfNeed}+`, now: `${v.performance} now`, how: "Work your days and handle the tasks well." },
+              { ok: v.trust.manager >= v.next.trustNeed, label: `${v.people.manager.name.split(" ")[0]}'s trust ${v.next.trustNeed}+`, now: `${v.trust.manager} now`, how: "Help out, share credit, don't get caught." },
+              { ok: v.next.reviewsHave >= v.next.reviewsNeed, label: `${v.next.reviewsNeed} good review${v.next.reviewsNeed > 1 ? "s" : ""} as ${v.title}`, now: `${v.next.reviewsHave} of ${v.next.reviewsNeed}`, how: "A review comes every week you work." },
+              ...v.next.missing.map((m) => ({ ok: false, label: m, now: "not yet", how: "Practice it around the city." })),
+            ].map((c) => (
+              <li key={c.label} className={c.ok ? "ok" : ""}>
+                <span className="careers-check" aria-hidden="true">{c.ok ? "✓" : ""}</span>
+                <span className="stack-2" style={{ flex: 1, minWidth: 0 }}><span className="careers-check-label">{c.label}</span>{!c.ok && <span className="meta">{c.how}</span>}</span>
+                <span className="careers-check-now">{c.ok ? "Done" : c.now}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : <div className="card"><p className="subtext" style={{ margin: 0 }}>👑 Top of the ladder. Act like it.</p></div>}
 
@@ -322,10 +337,16 @@ function Job({ data, v, busy, onGo, onStart, onTask, onOffice, onQuit, onStick }
       )}
 
       {!confirmQuit ? (
-        <button className="btn btn-ghost" disabled={busy} onClick={() => setConfirmQuit(true)}>Quit this job</button>
+        // Owner, Nov 4 ("the Quit button needs a better treatment"): a quiet danger row at the end, set apart, with what it costs.
+        <button className="careers-quit" disabled={busy} onClick={() => setConfirmQuit(true)}>
+          <span className="careers-quit-icon" aria-hidden="true">🚪</span>
+          <span className="stack-2" style={{ flex: 1, textAlign: "left" }}><span className="careers-quit-title">Quit this job</span><span className="meta">You lose this week&apos;s pay. They&apos;ll rehire you in 2 days, one level down.</span></span>
+          <span aria-hidden="true" className="careers-quit-go">›</span>
+        </button>
       ) : (
-        <div className="card stack-8">
-          <p className="subtext" style={{ margin: 0 }}>Quit {v.employer}? Payday for this week is gone, and they'll take you back in two days, one level down.</p>
+        <div className="card stack-8 careers-quit-confirm">
+          <p className="title" style={{ margin: 0 }}>🚪 Quit {v.employer}?</p>
+          <p className="subtext" style={{ margin: 0 }}>Payday for this week is gone, and they'll take you back in two days, one level down.</p>
           <div className="row" style={{ gap: 8 }}>
             <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmQuit(false)}>Stay</button>
             <button className="btn btn-destructive" style={{ flex: 1 }} disabled={busy} onClick={() => { setConfirmQuit(false); onQuit(); }}>Quit</button>
