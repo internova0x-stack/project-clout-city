@@ -173,8 +173,9 @@ export type TaskDone = "reply" | "meeting" | "visit" | "rally" | "tour" | "donor
 export interface TaskDef { id: string; title: string; tag: string; done: TaskDone; when?: "threat" | "request" | "meeting" | "weak" | "mayor_turf" | "debate" | "low_morale" | "election" }
 /** A task drawn for this week, its names filled in. `target` is the place, message or topic it's about. */
 export interface CampaignTask { id: string; title: string; tag: string; done: TaskDone; target?: string; week: number }
-export interface Staff { id: string; name: string; role: string; job: string; pronoun: "he" | "she" }
-export interface Stakeholder { id: string; name: string; role: string; mayorAlly?: boolean }
+/** age and vibe (owner, Nov 4): who they are at a glance; the portrait is public/cast/campaign-<id>.webp. */
+export interface Staff { id: string; name: string; role: string; job: string; pronoun: "he" | "she"; age?: number; vibe?: string }
+export interface Stakeholder { id: string; name: string; role: string; mayorAlly?: boolean; age?: number; vibe?: string }
 
 export interface InboxOption extends Preview {
   id: string;

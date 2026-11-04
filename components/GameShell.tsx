@@ -2156,6 +2156,9 @@ export function GameShell({
   useEffect(() => {
     if (!toast || !/^You're (on the bench|in holding)/.test(toast)) return;
     setToast(null);
+    // The bench takes over from whatever was asking to go somewhere (the trip sheet, the place card).
+    setTravelPlan(null);
+    setPlace(null);
     setHoldingOpen(true);
     void loadChoices();
   }, [toast, loadChoices]);
@@ -2170,6 +2173,9 @@ export function GameShell({
     void loadChoices();
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   };
+  // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
+  // a consequence or the bench waits while another sheet is open, and shows when it closes.
+  const choiceWaits = welcomeOpen || !!place || !!panel || phone.open || careersOpen || campaignOpen || !!lifeCard || !!travelPlan || !!trip;
   // While you wait (owner, Nov 3: "actions I can take in that period"): the Phone still works, and Sgt. Bev helps family.
   const holdingActions: HoldingAction[] = [
     ...(bonds.find((b) => b.npc === "sgt-bev")?.bigReady && favorHandlers ? [{ id: "bev", emoji: "💛", label: "Ask Sgt. Bev", meta: "Family favor", onClick: () => { setHoldingOpen(false); favorHandlers.onBig("sgt-bev"); } }] : []),
@@ -3952,9 +3958,9 @@ export function GameShell({
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
             onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
-          <ChoiceSheet card={welcomeOpen && !choiceMade ? null : choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
-          <ChoiceBackSheet entry={!choiceCard && !welcomeOpen && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
-          <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length && !welcomeOpen} until={holdingUntil} busy={choiceBusy || favorBusy}
+          <ChoiceSheet card={choiceWaits && !choiceMade ? null : choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
+          <ChoiceBackSheet entry={!choiceCard && !choiceWaits && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
+          <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length && !choiceWaits} until={holdingUntil} busy={choiceBusy || favorBusy}
             why={holdingWhy(choiceS?.log)} actions={holdingActions}
             onBail={() => void payBail()} onClose={() => setHoldingOpen(false)} />
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}

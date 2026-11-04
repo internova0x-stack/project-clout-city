@@ -900,9 +900,10 @@ export interface CampaignView {
   /** The week's money (owner, Nov 4): what comes in (estimated; donor calls as booked) and what goes out at End Week. */
   money: { small: number; donors: number; ads: number; staff: number; community: number; calendar: number; payroll: number; ops: number };
   /** Every stakeholder and where they stand with the campaign (−2 to +2; mayorAlly: one of Papa-Dani's people). */
-  allies: { id: string; name: string; role: string; trust: number; mayorAlly: boolean }[];
+  allies: { id: string; name: string; role: string; age?: number; vibe?: string; trust: number; mayorAlly: boolean }[];
   intel: number;
-  staff: { id: string; name: string; role: string; job: string; morale: number; loyalty: number; out: boolean }[] | null;
+  /** The team, from day one (owner, Nov 4: "when I first entered, the team mates were not there"). */
+  staff: { id: string; name: string; role: string; job: string; age?: number; vibe?: string; morale: number; loyalty: number; out: boolean }[];
   budget: CampaignState["budget"];
   slots: CampaignState["slots"];
   inbox: { message: InboxMessage; status: "new" | "answered" | "expired"; option?: string; at?: string }[];
@@ -969,9 +970,9 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
         ops: state.slots.reduce((n, a) => n + (a?.kind === "op" ? a.paid?.cash ?? 0 : 0), 0),
       };
     })(),
-    allies: content.stakeholders.map((s) => ({ id: s.id, name: s.name, role: s.role, trust: state.trust[s.id] ?? 0, mayorAlly: !!s.mayorAlly })),
+    allies: content.stakeholders.map((s) => ({ id: s.id, name: s.name, role: s.role, age: s.age, vibe: s.vibe, trust: state.trust[s.id] ?? 0, mayorAlly: !!s.mayorAlly })),
     intel: state.intel,
-    staff: team ? content.staff.map((s) => { const x = state.staff.find((y) => y.id === s.id)!; return { id: s.id, name: s.name, role: s.role, job: s.job, morale: x.morale, loyalty: x.loyalty, out: x.out }; }) : null,
+    staff: content.staff.map((s) => { const x = state.staff.find((y) => y.id === s.id)!; return { id: s.id, name: s.name, role: s.role, job: s.job, age: s.age, vibe: s.vibe, morale: x.morale, loyalty: x.loyalty, out: x.out }; }),
     budget: state.budget,
     slots: state.slots,
     inbox: state.inbox.map((m) => ({ message: content.inbox.find((x) => x.id === m.id)!, status: m.status, option: m.option, at: m.at })).filter((m) => m.message)

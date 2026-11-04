@@ -422,6 +422,9 @@ components live in `app/globals.css`.
   (`view.money`). The inbox is a messaging app (sender avatar, time stamp from `inbox[].at`, unread dot kept on the device in
   `cc-camp-read:<campaign>`, the reply as a sent bubble) and the Allies tab lists every stakeholder by standing (`view.allies`).
   A trace is exposed at most once (`events` 'exposed:<id>').
+  The cast (owner, Nov 4: "a diverse cast of people… different races, ages, personality types"): staff and stakeholders carry
+  `age` and `vibe` (content/campaign/city.json) and a portrait public/cast/campaign-<id>.webp (Higgsfield, the candidates'
+  style; initials if one is missing); the Team tab shows the staff from day one (morale and loyalty after week 1).
 - Compact map (owner, Oct 29; the only map since the classic street map was retired, Oct 30):
   New York in miniature. lib/compactMap.ts gives every place its own block (`SPOTS`, tests/compactMap.test.ts), the
   neighborhoods, the boroughs as islands (locked ones under fog with their card, bridges and the ferry barred), and
@@ -466,6 +469,10 @@ components live in `app/globals.css`.
   {halo, hustler} lines (npcs.json) react; card text names real costs, never the meter
   (`validateCards`). Cards show no risk labels or "comes back" hints (owner, Oct 30: players learn from consequences;
   `cardView` sends only label, get and cost). Only invented people, grey not criminal, never real money.
+  The meter moves gradually (owner, Nov 4: "big leaps"): `boundEffects` applies `CHOICES.meterRate` (0.5, at least 1) to every
+  choice's and landed consequence's nudge (`meterStep`), and the receipt's dot slides over 1.6 s. A choice card, a consequence or
+  the bench never opens over another sheet (GameShell `choiceWaits`: the place card, a panel, the Phone, Careers, Campaign, an
+  activity, a trip, the welcome); it waits and shows when that closes.
   Start over resets it. `?choice=now|back|high|low|log|jail|chain` in the preview (not the demo: its bundle would carry the outcomes).
   Real stakes (migration 0132, owner Oct 30): bigger caps (C$3,000, 300 clout), lasting effects (`choice_marks`: a place ban up to
   7 days, no gigs up to 3, up to 3 hours in holding at the 114½ Precinct, police played for laughs; bail `choice_bail`, C$150 an

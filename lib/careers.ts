@@ -1166,7 +1166,9 @@ export interface CareerView {
   } | null;
   canWork: boolean;
   review: CareerState["review"];
-  next: { title: string; salary: number; missing: string[] } | null;
+  /** The next promotion and what it takes (owner, Nov 4: a checklist): performance, the boss's trust, good reviews at
+   * this level, and any skills still missing. */
+  next: { title: string; salary: number; missing: string[]; perfNeed: number; trustNeed: number; reviewsNeed: number; reviewsHave: number } | null;
   log: CareerLog[];
   endedOn: string | null;
   /** Part 2: work mood, who's holding a grudge, today's office moves left, the joint project, how guarded people are. */
@@ -1201,7 +1203,12 @@ export function careerView(content: CareerContent, s: CareerState, today: string
     } : null,
     canWork: s.status === "employed" && !s.worked.includes(today),
     review: s.review,
-    next: nextLevel ? { title: nextLevel.title, salary: nextLevel.salary, missing: missing(track, s.level + 1, ctx) } : null,
+    next: nextLevel ? {
+      title: nextLevel.title, salary: nextLevel.salary, missing: missing(track, s.level + 1, ctx),
+      perfNeed: CAREER.promote.perf,
+      trustNeed: managerOf(s, track).persona === "credit_stealer" ? CAREER.promote.creditStealerTrust : CAREER.promote.trust,
+      reviewsNeed: s.level, reviewsHave: Math.min(s.level, s.reviewsAtLevel ?? 0),
+    } : null,
     log: s.log,
     endedOn: s.endedOn,
     workMood: s.workMood ?? CAREER.office.moodStart,

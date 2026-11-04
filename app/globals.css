@@ -2582,6 +2582,12 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .camp-ledger-total.down b { color:var(--red-text); }
 .camp-avatar { flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:var(--night-900); color:#fff; font-weight:800; font-size:15px; letter-spacing:.02em; }
 .camp-avatar.anon { background:#2B2433; font-size:20px; }
+.camp-avatar { overflow:hidden; }
+.camp-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.camp-vibe { font-size:13px; line-height:18px; color:var(--text-2); font-style:italic; }
+.camp-staff { align-items:flex-start; }
+.camp-staff-stats { display:flex; gap:12px; font-size:13px; color:var(--text-3); margin-top:2px; }
+.camp-staff-stats b { color:var(--text-1); font-variant-numeric:tabular-nums; }
 .camp-avatar.big { width:52px; height:52px; font-size:17px; }
 .camp-inbox { display:flex; flex-direction:column; border-radius:16px; overflow:hidden; background:var(--surface-raised); box-shadow:var(--elev-2); }
 .camp-mail-row { position:relative; display:flex; align-items:flex-start; gap:10px; width:100%; padding:12px 14px 12px 22px; text-align:left; background:none; border:0; color:var(--text-1); font:inherit; cursor:pointer; }
@@ -2682,7 +2688,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .rep-bar { position:relative; height:10px; border-radius:5px; background:linear-gradient(90deg, #9FDCFF, #E9E3F5 50%, #FF8FC4); }
 .rep-bar i { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--surface-sheet); opacity:.8; }
 .rep-bar span { position:absolute; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:var(--surface-raised);
-  box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left .5s ease-out; }
+  box-shadow:var(--elev-2), 0 0 0 3px var(--night-900); transition:left 1.6s cubic-bezier(.45,0,.2,1); } /* Owner, Nov 4: a slow, gradual slide. */
 .rep.compact .rep-bar { height:8px; }
 .choice-lola { display:flex; gap:8px; align-items:flex-start; margin:0; font-size:14px; line-height:19px; color:var(--text-1); }
 .choice-lola img { flex:none; border-radius:50%; object-fit:cover; }
@@ -3209,3 +3215,21 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   .cel-banner, .cel-banner.leaving, .cel-banner-ico, .cel-chips .fx, .cel-veil, .cel-card, .cel-rays, .cel-medal, .cel-num, .cel-rise, .cel-big, .cel-rare { animation:none; }
   .cel-rays { opacity:.55; } .cel-banner.leaving { opacity:0; }
 }
+
+/* Careers, owner Nov 4: the next promotion as a checklist, and Quit as a quiet danger row set apart. */
+.careers-checklist { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+.careers-checklist li { display:flex; align-items:center; gap:10px; }
+.careers-checklist li > span.stack-2, .careers-quit > span.stack-2 { display:flex; flex-direction:column; gap:2px; }
+.careers-check { flex:none; width:24px; height:24px; border-radius:50%; border:2px solid var(--divider); display:grid; place-items:center; font-size:13px; font-weight:800; color:#fff; }
+.careers-checklist li.ok .careers-check { background:var(--green-500); border-color:var(--green-500); }
+.careers-check-label { font-size:15px; font-weight:700; color:var(--text-1); }
+.careers-checklist li.ok .careers-check-label { color:var(--text-2); }
+.careers-check-now { flex:none; font-family:var(--font-label); font-size:13px; font-weight:700; color:var(--text-3); white-space:nowrap; }
+.careers-checklist li.ok .careers-check-now { color:var(--green-text); }
+.careers-quit { display:flex; align-items:center; gap:12px; width:100%; margin-top:8px; padding:14px 16px; border-radius:16px; border:1px solid rgba(217,58,47,.25); background:var(--red-tint); color:var(--text-1); font:inherit; cursor:pointer; }
+.careers-quit-icon { font-size:22px; }
+.careers-quit-title { font-size:15px; font-weight:800; color:var(--red-text); }
+.careers-quit-go { font-size:20px; color:var(--red-text); }
+.careers-quit:disabled { opacity:.5; }
+.careers-quit-confirm { border:1px solid rgba(217,58,47,.25); }
+

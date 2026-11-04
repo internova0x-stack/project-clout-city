@@ -685,15 +685,27 @@ function mailTime(at: string | undefined, week: number): string {
 }
 
 /** Who a message is from: a stakeholder, or an unknown number. */
-function sender(v: CampaignView, from: string): { name: string; role: string; initials: string; anon: boolean } {
-  const s = v.allies.find((a) => a.id === from);
-  if (!s) return { name: "Unknown number", role: "No caller ID", initials: "?", anon: true };
-  const initials = s.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-  return { name: s.name, role: s.role, initials, anon: false };
+type Who = { id: string; name: string; role: string; initials: string; anon: boolean };
+const initialsOf = (name: string) => name.replace(/^(Dean|Pastor|Auntie)\s+/, "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+function sender(v: CampaignView, from: string): Who {
+  const s = v.allies.find((a) => a.id === from) ?? v.staff.find((a) => a.id === from);
+  if (!s) return { id: from, name: "Unknown number", role: "No caller ID", initials: "?", anon: true };
+  return { id: s.id, name: s.name, role: s.role, initials: initialsOf(s.name), anon: false };
 }
 
-function Avatar({ who, big = false }: { who: ReturnType<typeof sender>; big?: boolean }) {
-  return <span className={`camp-avatar${who.anon ? " anon" : ""}${big ? " big" : ""}`} aria-hidden="true">{who.anon ? "🕶️" : who.initials}</span>;
+/** A cast member's portrait (public/cast/campaign-<id>.webp; owner, Nov 4), initials until it loads or if it's missing. */
+function Avatar({ who, big = false, size }: { who: Who; big?: boolean; size?: number }) {
+  const [broken, setBroken] = useState(false);
+  const style = size ? { width: size, height: size } : undefined;
+  if (who.anon) return <span className={`camp-avatar anon${big ? " big" : ""}`} style={style} aria-hidden="true">🕶️</span>;
+  return (
+    <span className={`camp-avatar${big ? " big" : ""}`} style={style} aria-hidden="true">
+      {broken ? who.initials : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/cast/campaign-${who.id}.webp`} alt="" loading="lazy" onError={() => setBroken(true)} />
+      )}
+    </span>
+  );
 }
 
 /** The campaign's inbox as a messaging app (owner, Nov 4): who, when, a preview, read and unread. */
@@ -800,9 +812,10 @@ function Allies({ v }: { v: CampaignView }) {
                 <Avatar who={who} />
                 <span className="stack-2" style={{ flex: 1, minWidth: 0 }}>
                   <span className="title">{a.name}</span>
-                  <span className="meta">{a.role}</span>
+                  <span className="meta">{a.age ? `${a.age} · ` : ""}{a.role}</span>
+                  {a.vibe && <span className="camp-vibe">{a.vibe}</span>}
                 </span>
-                <span className="stack-2" style={{ alignItems: "flex-end" }}>
+                <span className="stack-2" style={{ alignItems: "flex-end", alignSelf: "flex-start" }}>
                   <span className={`camp-standing ${a.mayorAlly && a.trust < 1 ? "mayor" : st.tone}`}>{a.mayorAlly && a.trust < 1 ? "Mayor's ally" : st.label}</span>
                   <span className={`camp-trust ${st.tone}`} aria-hidden="true">{[0, 1, 2, 3].map((n) => <i key={n} className={n < a.trust + 2 ? "on" : ""} />)}</span>
                 </span>
@@ -867,16 +880,26 @@ function MapTab({ v, short }: { v: CampaignView; short: string }) {
   );
 }
 
+/** The team, from day one, with faces and who they are (owner, Nov 4). Morale and loyalty show once the team has had a week. */
 function Team({ v }: { v: CampaignView }) {
   return (
     <div className="stack-12">
-      {v.staff ? v.staff.map((s) => (
-        <div key={s.id} className="card stack-2">
-          <span className="title">{s.name}{s.out && <span className="tag tag-neutral" style={{ marginLeft: 6 }}>Gone</span>}</span>
-          <span className="meta">{s.role} · {s.job}</span>
-          <span className="meta">Morale {s.morale} · Loyalty {s.loyalty}</span>
+      {v.staff.map((s) => (
+        <div key={s.id} className="card camp-ally camp-staff">
+          <Avatar who={{ id: s.id, name: s.name, role: s.role, initials: initialsOf(s.name), anon: false }} size={56} />
+          <span className="stack-2" style={{ flex: 1, minWidth: 0 }}>
+            <span className="title">{s.name}{s.out && <span className="tag tag-neutral" style={{ marginLeft: 6 }}>Gone</span>}</span>
+            <span className="meta">{s.age ? `${s.age} · ` : ""}{s.role} · {s.job}</span>
+            {s.vibe && <span className="camp-vibe">{s.vibe}</span>}
+            {v.shown.team && (
+              <span className="camp-staff-stats">
+                <span>💪 Morale <b>{s.morale}</b></span><span>🤞 Loyalty <b>{s.loyalty}</b></span>
+              </span>
+            )}
+          </span>
         </div>
-      )) : <p className="meta">Your team: Sol, Priya, Theo and Marisol. You'll get to know them.</p>}
+      ))}
+      {!v.shown.team && <p className="meta" style={{ margin: 0 }}>Their morale and loyalty show after your first week together.</p>}
       {v.log.length > 0 && (
         <div className="stack-4">
           <p className="overline" style={{ margin: 0 }}>What happened</p>
