@@ -422,6 +422,10 @@ components live in `app/globals.css`.
   (`view.money`). The inbox is a messaging app (sender avatar, time stamp from `inbox[].at`, unread dot kept on the device in
   `cc-camp-read:<campaign>`, the reply as a sent bubble) and the Allies tab lists every stakeholder by standing (`view.allies`).
   A trace is exposed at most once (`events` 'exposed:<id>').
+  The whole city votes (owner, Nov 4: "go with recommendation 1"; no migration): Queens is the swing borough (27%), the other
+  four (`boroughs` in content/campaign/city.json) start mostly decided and move only with citywide campaigning at half strength
+  (`CAMPAIGN.boroughs`, `reachBoroughs`); the poll is citywide (`cityTotal`) with Queens under it; election night counts the
+  boroughs first, then Queens, and shows the winner's face.
   The cast (owner, Nov 4: "a diverse cast of people… different races, ages, personality types"): staff and stakeholders carry
   `age` and `vibe` (content/campaign/city.json) and a portrait public/cast/campaign-<id>.webp (Higgsfield, the candidates'
   style; initials if one is missing); the Team tab shows the staff from day one (morale and loyalty after week 1).

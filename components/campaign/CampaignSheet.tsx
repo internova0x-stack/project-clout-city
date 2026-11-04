@@ -257,7 +257,7 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
         </span>
       </button>
       <Funds v={v} />
-      <Polls you={v.you} mayor={v.mayor} short={card.short} />
+      <Polls you={v.you} mayor={v.mayor} short={card.short} queens={v.boroughs.length ? v.queens : undefined} />
       <Meters v={v} short={card.short} />
       {v.pending.length > 0 ? (
         <SituationCard v={v} busy={busy} onChoose={(s, c) => run(api.choose(s, c))} />
@@ -281,8 +281,10 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
   );
 }
 
-function Polls({ you, mayor, short }: { you: number; mayor: number; short: string }) {
+/** The whole city's poll, with Queens under it (owner, Nov 4: the mayor is elected citywide; Queens is the swing borough). */
+function Polls({ you, mayor, short, queens }: { you: number; mayor: number; short: string; queens?: { you: number; mayor: number } }) {
   const total = Math.max(1, you + mayor);
+  const qt = queens ? Math.max(1, queens.you + queens.mayor) : 1;
   return (
     <div className="card stack-8">
       <div className="row" style={{ justifyContent: "space-between" }}>
@@ -290,7 +292,16 @@ function Polls({ you, mayor, short }: { you: number; mayor: number; short: strin
         <span className="title">Papa-Dani {mayor.toFixed(1)}%</span>
       </div>
       <div className="camp-poll"><span className="you" style={{ width: `${(you / total) * 100}%` }} /><span className="mayor" /></div>
-      <span className="meta">Queens poll · margin of error ±2 · the rest are undecided</span>
+      <span className="meta">{queens ? "Citywide poll" : "Queens poll"} · margin of error ±2 · the rest are undecided</span>
+      {queens && (
+        <div className="camp-queens">
+          <span className="row" style={{ justifyContent: "space-between" }}>
+            <span className="meta"><b>Queens decides it.</b> You campaign here.</span>
+            <span className="meta">{queens.you.toFixed(1)} vs {queens.mayor.toFixed(1)}</span>
+          </span>
+          <span className="camp-poll small"><span className="you" style={{ width: `${(queens.you / qt) * 100}%` }} /><span className="mayor" /></span>
+        </div>
+      )}
     </div>
   );
 }
@@ -455,7 +466,10 @@ function Paper({ v }: { v: CampaignView }) {
     <div className="card camp-paper stack-8">
       <p className="overline" style={{ margin: 0 }}>📰 The morning paper · week {r.week}</p>
       <p className="title" style={{ margin: 0 }}>{r.headline}</p>
-      <span className="meta">Poll: {r.you.toFixed(1)} vs {r.mayor.toFixed(1)} ({r.change >= 0 ? "+" : ""}{r.change})</span>
+      <span className="meta">
+        {r.queens ? "City" : "Poll"}: {r.you.toFixed(1)} vs {r.mayor.toFixed(1)} ({r.change >= 0 ? "+" : ""}{r.change})
+        {r.queens ? ` · Queens ${r.queens.change >= 0 ? "+" : ""}${r.queens.change}` : ""}
+      </span>
       <ul className="camp-lines">{lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
       {r.lines.length > 2 && (
         <button className="link-row" onClick={() => setAll((a) => !a)} aria-expanded={all}>
@@ -874,6 +888,7 @@ function CandidateProfile({ card, v, onBack }: { card: CandidateCard; v: Campaig
 function MapTab({ v, short }: { v: CampaignView; short: string }) {
   return (
     <div className="stack-8">
+      {v.boroughs.length > 0 && <p className="overline" style={{ margin: 0 }}>Queens · where you campaign</p>}
       {v.places.map((p) => {
         const t = Math.max(1, p.you + p.mayor);
         return (
@@ -884,6 +899,22 @@ function MapTab({ v, short }: { v: CampaignView; short: string }) {
           </div>
         );
       })}
+      {v.boroughs.length > 0 && (
+        <>
+          <p className="overline" style={{ margin: "8px 0 0" }}>The other boroughs · mostly decided</p>
+          <p className="meta" style={{ margin: 0 }}>They vote too. Rallies and street teams don&apos;t reach them; ads, TV, the debate and scandals do, at half strength.</p>
+          {v.boroughs.map((b) => {
+            const t = Math.max(1, b.you + b.mayor);
+            return (
+              <div key={b.id} className="card stack-4 camp-borough">
+                <div className="row" style={{ justifyContent: "space-between" }}><span className="title">{b.name}</span><span className="meta">{Math.round(b.weight * 100)}% of the city · {b.you > b.mayor ? `${short} leads` : "Papa-Dani leads"}</span></div>
+                <div className="camp-poll small"><span className="you" style={{ width: `${(b.you / t) * 100}%` }} /><span className="mayor" /></div>
+                <span className="meta">{b.you.toFixed(1)} vs {b.mayor.toFixed(1)} · cares about {b.cares.toLowerCase()}</span>
+              </div>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }
@@ -987,7 +1018,9 @@ function Debate({ v, busy, onClose, onStyle }: { v: CampaignView; busy: boolean;
 
 function ElectionNight({ data, v, onNew }: { data: CampaignScreen; v: CampaignView; onNew: () => void }) {
   const card = data.candidates.find((c) => c.id === v.candidate)!;
-  const results = [...(v.election ?? [])].sort((a, b) => Math.abs(b.you - b.mayor) - Math.abs(a.you - a.mayor));
+  // The other boroughs report first; then Queens, place by place, the closest last (owner, Nov 4).
+  const votes = v.election ?? [];
+  const results = [...votes.filter((r) => r.borough), ...votes.filter((r) => !r.borough).sort((a, b) => Math.abs(b.you - b.mayor) - Math.abs(a.you - a.mayor))];
   const [shown, setShown] = useState(0);
   useEffect(() => {
     if (shown >= results.length) return;
@@ -1006,7 +1039,7 @@ function ElectionNight({ data, v, onNew }: { data: CampaignScreen; v: CampaignVi
       </div>
       <div className="stack-8">
         {results.slice(0, shown).map((r) => {
-          const name = v.places.find((p) => p.id === r.place)?.name ?? r.place;
+          const name = v.places.find((p) => p.id === r.place)?.name ?? v.boroughs.find((b) => b.id === r.place)?.name ?? r.place;
           return (
             <div key={r.place} className="card stack-4 camp-result">
               <div className="row" style={{ justifyContent: "space-between" }}><span className="title">{name}</span><span className="meta">Turnout {r.turnout}%</span></div>
@@ -1018,7 +1051,9 @@ function ElectionNight({ data, v, onNew }: { data: CampaignScreen; v: CampaignVi
       </div>
       {all && (
         <div className="card stack-8 camp-ending">
-          <span className="camp-cand-emoji big" aria-hidden="true">{e.emoji}</span>
+          {/* The winner's face (owner, Nov 4): the candidate, or Papa-Dani when he keeps City Hall. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="camp-winner" src={v.ending === "loss" ? "/cast/mayor-papa-dani.webp" : `/cast/candidate-${card.id}.webp`} alt={v.ending === "loss" ? "Mayor Papa-Dani" : card.name} />
           <p className="display-md" style={{ margin: 0 }}>{e.title}</p>
           <p className="subtext" style={{ margin: 0 }}>{e.line}</p>
           <p className="meta" style={{ margin: 0 }}>📞 Papa-Dani: "{v.ending === "loss" ? "Great race, neighbor! My door's always open. Literally, the hinge is broken." : "Congratulations, neighbor! The ribbon scissors are in the top drawer."}"</p>

@@ -3270,4 +3270,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 /* A campaign puts the career job on leave (owner, Nov 4). */
 .careers-leave, .camp-leave-note { border:1px solid rgba(47,95,179,.25); background:#EAF0FA; }
 .camp-leave-note .title, .careers-leave .title { color:#1F3F78; }
+/* Queens is the swing borough (owner, Nov 4): its own poll under the citywide one, the other boroughs on the Map tab, the winner's face. */
+.camp-queens { display:flex; flex-direction:column; gap:4px; padding-top:8px; border-top:1px solid rgba(20,17,26,.08); }
+.camp-borough { opacity:.92; }
+.camp-winner { width:96px; height:96px; border-radius:50%; object-fit:cover; align-self:center; box-shadow:0 8px 22px rgba(20,17,26,.18); border:4px solid var(--surface-raised); }
 

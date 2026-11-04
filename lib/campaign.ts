@@ -50,6 +50,11 @@ export const CAMPAIGN = {
    */
   meters: { low: 34, high: 67 },
   /**
+   * The whole city votes (owner, Nov 4: "the mayor role is for the whole city"): Queens is the swing borough and carries
+   * this share of the vote; the other boroughs (content.boroughs) take the rest. Citywide moves reach them at `reach`.
+   */
+  boroughs: { queens: 0.27, reach: 0.5, cloutShare: 0.5 },
+  /**
    * The week's money (owner, Nov 4: "the calendar also has budgetary implications", "team salary, donations… seem
    * missing", steps of C$500). Calendar stops cost money, paid at End Week; payroll is fixed. Staff bonuses lift morale and
    * loyalty; community giving lifts Integrity and the whole city a little. Both are capped.
@@ -229,9 +234,14 @@ export interface DebateContent {
   styles: Record<DebateStyle, { label: string; good: string; bad: string; preview: Preview }>;
 }
 
+/** Another borough (owner, Nov 4): mostly decided, moved only by citywide campaigning. weight is its share of the city. */
+export interface Borough { id: string; name: string; weight: number; you: number; mayor: number; cares: string; leans: Partial<Record<CandidateId, number>> }
+
 export interface CampaignContent {
   candidates: Candidate[];
   places: Place[];
+  /** The other four boroughs; Queens (the places) is CAMPAIGN.boroughs.queens of the city. */
+  boroughs: Borough[];
   staff: Staff[];
   stakeholders: Stakeholder[];
   inbox: InboxMessage[];
@@ -276,8 +286,10 @@ export interface Recap {
   week: number;
   headline: string;
   lines: string[];
+  /** The whole city (owner, Nov 4); queens is the swing borough's own poll and change (older recaps: none). */
   you: number;
   mayor: number;
+  queens?: { you: number; mayor: number; change: number };
   change: number;
   /** Shown from this New York day (results arrive overnight). */
   revealOn: string;
@@ -285,7 +297,8 @@ export interface Recap {
 
 export interface DebateState { round: number; crowd: number; rounds: { q: string; style: DebateStyle; delta: number; line: string }[]; done: boolean; won?: boolean }
 
-export interface ElectionResult { place: string; you: number; mayor: number; turnout: number }
+/** borough: one of the other four boroughs (they report first on election night). */
+export interface ElectionResult { place: string; you: number; mayor: number; turnout: number; borough?: boolean }
 
 export interface CampaignState {
   v: 1;
@@ -296,6 +309,9 @@ export interface CampaignState {
   /** The New York day End Week was last tapped. */
   endedOn: string | null;
   places: Record<string, { you: number; mayor: number }>;
+  /** The other four boroughs' ratings (owner, Nov 4); campaigns from before have none (boroughsOf fills them in). */
+  boroughs?: Record<string, { you: number; mayor: number }>;
+  beforeBoroughs?: Record<string, { you: number; mayor: number }> | null;
   cash: number;
   raised: number;
   seeded: number;
@@ -355,7 +371,33 @@ export interface CampaignState {
 /** A payment into or out of the main game, which the server writes to the ledger once (ledger kind, ref). */
 export interface Payout { currency: "cash" | "clout"; amount: number; kind: "campaign_seed" | "campaign_skim" | "campaign_repay" | "campaign_poll" | "campaign_reward" | "campaign_task" | "campaign_fee"; ref: string }
 
-/** Citywide rating: places weighted by population. */
+/** The other boroughs where a campaign starts: their lean for this candidate plus half the manager's fame. */
+export function startBoroughs(content: Pick<CampaignContent, "boroughs">, candidate: CandidateId, cloutBonus = 0): Record<string, { you: number; mayor: number }> {
+  const out: Record<string, { you: number; mayor: number }> = {};
+  for (const b of content.boroughs) {
+    out[b.id] = { you: Math.round((b.you + (b.leans[candidate] ?? 0) + cloutBonus * CAMPAIGN.boroughs.cloutShare) * 10) / 10, mayor: b.mayor };
+  }
+  return out;
+}
+
+/** The boroughs' ratings now (a campaign from before 0161 gets the start values). */
+export function boroughsOf(state: Pick<CampaignState, "boroughs" | "candidate">, content: Pick<CampaignContent, "boroughs">): Record<string, { you: number; mayor: number }> {
+  return state.boroughs ?? startBoroughs(content, state.candidate);
+}
+
+/** The whole city's poll: Queens (its places) at CAMPAIGN.boroughs.queens, plus every other borough by its weight. */
+export function cityTotal(
+  state: Pick<CampaignState, "places" | "boroughs" | "candidate">, content: Pick<CampaignContent, "places" | "boroughs">,
+): { you: number; mayor: number } {
+  const q = citywide(state, content.places);
+  if (!content.boroughs.length) return q;
+  const bs = boroughsOf(state, content);
+  let you = q.you * CAMPAIGN.boroughs.queens, mayor = q.mayor * CAMPAIGN.boroughs.queens, w = CAMPAIGN.boroughs.queens;
+  for (const b of content.boroughs) { const r = bs[b.id]; if (!r) continue; you += r.you * b.weight; mayor += r.mayor * b.weight; w += b.weight; }
+  return { you: Math.round((you / w) * 10) / 10, mayor: Math.round((mayor / w) * 10) / 10 };
+}
+
+/** Queens' rating: its places weighted by population. (Named citywide from before the other boroughs.) */
 export function citywide(state: Pick<CampaignState, "places">, places: Place[]): { you: number; mayor: number } {
   let you = 0, mayor = 0, w = 0;
   for (const p of places) {
@@ -427,7 +469,7 @@ export function campaignError(code: string): string {
 /** The content files as they're stored, put together (lib/campaignContent.ts for the app, readFileSync for tests). */
 export function buildContent(files: {
   candidates: { candidates: Candidate[] };
-  city: { places: Place[]; staff: Staff[]; stakeholders: Stakeholder[] };
+  city: { places: Place[]; staff: Staff[]; stakeholders: Stakeholder[]; boroughs?: Borough[] };
   inbox: { messages: InboxMessage[] };
   situations: { situations: Situation[] };
   debate: DebateContent;
@@ -437,6 +479,7 @@ export function buildContent(files: {
   return {
     candidates: files.candidates.candidates,
     places: files.city.places,
+    boroughs: files.city.boroughs ?? [],
     staff: files.city.staff,
     stakeholders: files.city.stakeholders,
     inbox: files.inbox.messages,

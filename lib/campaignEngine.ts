@@ -5,7 +5,7 @@
 
 import { UNDERWORLD, campaignOpBonus } from "./underworld.ts";
 import {
-  CAMPAIGN, citywide, cs, endReward, energyCost, meterLevel, skimRoom, slotCash,
+  CAMPAIGN, boroughsOf, cityTotal, citywide, cs, endReward, energyCost, meterLevel, skimRoom, slotCash, startBoroughs,
   type Budget, type CampaignContent, type CampaignState, type CampaignTask, type Candidate, type CandidateId, type TaskDef, type Choice, type DebateStyle, type Effects,
   type InboxMessage, type InboxOption, type OpId, type Payout, type Place, type Situation, type SlotAction,
 } from "./campaign.ts";
@@ -81,7 +81,7 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   for (const s of content.stakeholders) trust[s.id] = c.warm.includes(s.id) ? 1 : c.cold.includes(s.id) ? -1 : 0;
   const state: CampaignState = {
     v: 1, id: input.id, candidate: c.id, week: 1, phase: "planning", endedOn: null,
-    places, cash: c.cash + input.seed, raised: 0, seeded: input.seed, skimmed: 0,
+    places, boroughs: jitterBoroughs(startBoroughs(content, c.id, cloutBonus), rng), cash: c.cash + input.seed, raised: 0, seeded: input.seed, skimmed: 0,
     favors: 0, dirtyFavors: 0, heat: 0, integrity: start, intel: 0, morale: 70, momentum: CAMPAIGN.momentum.start, energy: CAMPAIGN.energy.start, startIntegrity: start, repMark: start, rep: [],
     staff: content.staff.map((s) => ({ id: s.id, competence: 50 + Math.floor(rng() * 30), morale: 70 + (job?.track === "hospitality" ? CAMPAIGN.background.hospitalityMorale : job?.track === "fashion" ? CAMPAIGN.background.fashionMorale : 0), loyalty: c.id === "kowalczyk" ? 80 : 60 + Math.floor(rng() * 15), out: false })),
     trust, budget: { digital: 0, street: 0, tv: 0, staff: 0, community: 0 }, slots: Array(CAMPAIGN.slots).fill(null),
@@ -103,6 +103,11 @@ export function startCampaign(content: CampaignContent, input: StartInput, rng: 
   deliverInbox(content, state, input.now);
   drawTasks(content, state, rng);
   return state;
+}
+
+function jitterBoroughs(b: Record<string, { you: number; mayor: number }>, rng: Rng) {
+  for (const r of Object.values(b)) { r.you = round1(clamp(r.you + (rng() - 0.5) * 2)); r.mayor = round1(clamp(r.mayor + (rng() - 0.5) * 2)); }
+  return b;
 }
 
 function deliverInbox(content: CampaignContent, state: CampaignState, now?: number) {
@@ -142,10 +147,25 @@ function gain(state: CampaignState, place: string, amount: number) {
 }
 function gainAll(state: CampaignState, amount: number) {
   for (const id of Object.keys(state.places)) gain(state, id, amount);
+  reachBoroughs(state, amount, -round1(amount * 0.3));
 }
 
 function bumpAll(state: CampaignState, you: number, mayor: number) {
   for (const id of Object.keys(state.places)) bump(state, id, you, mayor);
+  reachBoroughs(state, you, mayor);
+}
+
+/** Citywide moves (ads, TV, the debate, scandals) reach the other boroughs at CAMPAIGN.boroughs.reach (owner, Nov 4). */
+function reachBoroughs(state: CampaignState, you: number, mayor: number) {
+  if (!state.boroughs) return;
+  const k = CAMPAIGN.boroughs.reach;
+  for (const r of Object.values(state.boroughs)) {
+    r.you = clamp(r.you + you * k);
+    r.mayor = clamp(r.mayor + mayor * k);
+    const over = r.you + r.mayor - 95;
+    if (over > 0) { const t = r.you + r.mayor; r.you -= (over * r.you) / t; r.mayor -= (over * r.mayor) / t; }
+    r.you = round1(r.you); r.mayor = round1(r.mayor);
+  }
 }
 
 export function applyEffects(state: CampaignState, e: Effects, place: string | undefined, integrityMult = 1) {
@@ -208,6 +228,7 @@ export function refresh(state: CampaignState, today: string): boolean {
   if (state.phase === "waiting" && state.recap && today >= state.recap.revealOn) {
     state.phase = "planning";
     state.before = null;
+    state.beforeBoroughs = null;
     return true;
   }
   return false;
@@ -525,6 +546,7 @@ export function endWeek(content: CampaignContent, state: CampaignState, today: s
   state.endedOn = today;
   state.receipts = [];
   state.before = JSON.parse(JSON.stringify(state.places));
+  state.beforeBoroughs = state.boroughs ? JSON.parse(JSON.stringify(state.boroughs)) : null;
   state.pending = drawSituations(content, state, rng, opts.unlocked);
   for (const p of state.pending) if (!state.seen.includes(p.id)) state.seen.push(p.id);
   if (state.pending.length) {
@@ -573,6 +595,7 @@ const comp = (state: CampaignState, id: string) => {
 function resolveWeek(content: CampaignContent, state: CampaignState, today: string, rng: Rng, nowMs?: number): { payouts: Payout[] } {
   const c = candidateOf(content, state.candidate);
   const before = citywide(state, content.places).you;
+  const beforeCity = cityTotal(state, content).you;
   const lines: string[] = [...state.receipts];
   const payouts: Payout[] = [];
   const visited = new Set<string>();
@@ -761,8 +784,11 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
 
   // 11. The poll, with a little noise.
   for (const p of Object.keys(state.places)) bump(state, p, round1((rng() - 0.5) * 1.2), round1((rng() - 0.5) * 1.2));
-  const now = citywide(state, content.places);
-  const change = round1(now.you - before);
+  const queensNow = citywide(state, content.places);
+  // Queens' change pays the clout and moves momentum (it's where the player campaigns); the paper prints the whole city.
+  const change = round1(queensNow.you - before);
+  const now = cityTotal(state, content);
+  const cityChange = round1(now.you - beforeCity);
   const debated = state.week === CAMPAIGN.debateWeek && state.debate?.done ? (state.debate.won ? M.debate : -M.debate) : 0;
   state.momentum = clamp(Math.round(momentum0 * M.keep + M.start * (1 - M.keep) + change * M.perPoint + debated));
   const clout = Math.min(CAMPAIGN.reward.pollWeekCap, Math.max(0, Math.round(change * CAMPAIGN.reward.pollPerPoint)));
@@ -780,8 +806,8 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
   const h = content.lines.headlines;
   const headline = fill(pick(rng, change > 0.5 ? h.up : change < -0.5 ? h.down : h.flat), { candidate: c.short, points: String(Math.abs(change)) });
   const mayorLine = pick(rng, change > 0.5 ? content.lines.mayor.up : content.lines.mayor.down);
-  state.recap = { week: state.week, headline, lines: [...lines.slice(0, repLine ? 6 : 7), ...(repLine ? [repLine] : []), `Papa-Dani: "${fill(mayorLine, { candidate: c.short })}"`], you: now.you, mayor: now.mayor, change, revealOn: nextDay(today) };
-  state.log.push({ week: state.week, text: `Week ${state.week}: ${change >= 0 ? "+" : ""}${change} (${now.you} vs ${now.mayor}).` });
+  state.recap = { week: state.week, headline, lines: [...lines.slice(0, repLine ? 6 : 7), ...(repLine ? [repLine] : []), `Papa-Dani: "${fill(mayorLine, { candidate: c.short })}"`], you: now.you, mayor: now.mayor, change: cityChange, queens: { you: queensNow.you, mayor: queensNow.mayor, change }, revealOn: nextDay(today) };
+  state.log.push({ week: state.week, text: `Week ${state.week}: city ${cityChange >= 0 ? "+" : ""}${cityChange} (${now.you} vs ${now.mayor}), Queens ${change >= 0 ? "+" : ""}${change}.` });
 
   // 12. This week's campaign tasks pay (15 clout each, once).
   for (const t of (state.tasks ?? []).filter((x) => x.week === state.week)) {
@@ -862,10 +888,28 @@ function runElection(content: CampaignContent, state: CampaignState, rng: Rng): 
     you = round1((you / t) * 100);
     mayor = round1(100 - you);
     const turnout = round1(clamp(42 + gotv * 4 + (rng() - 0.5) * 6, 25, 75));
-    youVotes += you * turnout * p.weight;
-    mayorVotes += mayor * turnout * p.weight;
+    // Queens is CAMPAIGN.boroughs.queens of the city's vote (owner, Nov 4: the mayor is elected citywide).
+    const q = content.boroughs.length ? CAMPAIGN.boroughs.queens : 1;
+    youVotes += you * turnout * p.weight * q;
+    mayorVotes += mayor * turnout * p.weight * q;
     return { place: p.id, you, mayor, turnout };
   });
+  // The other boroughs vote too: mostly decided, so their undecided split by their lean, with a little luck.
+  const bs = boroughsOf(state, content);
+  for (const b of content.boroughs) {
+    const r = bs[b.id];
+    const undecided = 100 - r.you - r.mayor;
+    const lean = r.you / Math.max(1, r.you + r.mayor);
+    let you = r.you + undecided * lean + (rng() - 0.5) * 3;
+    let mayor = r.mayor + undecided * (1 - lean) + (rng() - 0.5) * 3;
+    const t = you + mayor;
+    you = round1((you / t) * 100);
+    mayor = round1(100 - you);
+    const turnout = round1(clamp(44 + (rng() - 0.5) * 6, 25, 75));
+    youVotes += you * turnout * b.weight;
+    mayorVotes += mayor * turnout * b.weight;
+    state.election.unshift({ place: b.id, you, mayor, turnout, borough: true });
+  }
   const won = youVotes > mayorVotes;
   const liveTraces = state.traces.some((t) => t.weight > 0.05);
   state.ending = !won ? "loss" : state.integrity >= CAMPAIGN.cleanIntegrity && !liveTraces ? "clean_win" : "dirty_win";
@@ -885,9 +929,14 @@ export interface CampaignView {
   phase: CampaignState["phase"];
   /** End Week already used today. */
   endedToday: boolean;
+  /** The whole city's poll (owner, Nov 4: the mayor is elected citywide). */
   you: number;
   mayor: number;
+  /** Queens, the swing borough, where the campaign runs. */
+  queens: { you: number; mayor: number };
   places: { id: string; name: string; you: number; mayor: number; cares: string }[];
+  /** The other four boroughs: mostly decided, moved only by citywide campaigning. */
+  boroughs: { id: string; name: string; weight: number; you: number; mayor: number; cares: string }[];
   cash: number;
   free: number;
   raised: number;
@@ -939,7 +988,9 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
   const team = state.week >= 2 || state.staff.some((s) => s.morale !== 70);
   // Until the reveal, the ratings stay where they stood when End Week was tapped.
   const shownPlaces = (waiting || state.phase === "deciding") && state.before ? state.before : state.places;
-  const shownState = citywide({ places: shownPlaces }, content.places);
+  const shownBoroughs = (waiting || state.phase === "deciding") && state.beforeBoroughs ? state.beforeBoroughs : boroughsOf(state, content);
+  const shownQueens = citywide({ places: shownPlaces }, content.places);
+  const shownState = cityTotal({ places: shownPlaces, boroughs: shownBoroughs, candidate: state.candidate }, content);
   const c = candidateOf(content, state.candidate);
   return {
     id: state.id,
@@ -950,7 +1001,9 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
     endedToday: state.endedOn === today,
     you: shownState.you,
     mayor: shownState.mayor,
+    queens: shownQueens,
     places: content.places.map((p) => ({ id: p.id, name: p.name, you: shownPlaces[p.id].you, mayor: shownPlaces[p.id].mayor, cares: p.cares })),
+    boroughs: content.boroughs.map((b) => ({ id: b.id, name: b.name, weight: b.weight, you: shownBoroughs[b.id]?.you ?? b.you, mayor: shownBoroughs[b.id]?.mayor ?? b.mayor, cares: b.cares })),
     cash: state.cash,
     free: state.cash - spent(state),
     raised: state.raised,
