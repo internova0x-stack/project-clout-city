@@ -48,7 +48,7 @@ import type { Player } from "@/lib/player";
 //                             Phone → Bank → Trades & gifts, the Jobs board's errands and event support
 //   /preview/home?assets=sell|offer|cooling|done|off  business and property sales (migration 0153): Phone → Businesses /
 //                             Apartments (Sell) and Phone → Bank (offers, the cooling-off, done; off: "Opening soon")
-//   /preview/home?starter=0-10&apps=locked  Starter Week (that many missions done) and apps locked as for a Rank 1 player
+//   /preview/home?starter=0-13|day1-8&apps=locked  Starter Week (that many missions done, or that day) and apps locked as for a Rank 1 player
 //   /preview/home?visit=none|hosting|invite|guest  having people over (migration 0121): the stats panel's Mood row, the visit sheet
 //   /preview/home?homescore=furnished  the home score (migration 0120): furniture and three paintings placed; tap 🏠 under the top bar
 //   /preview/home?sublet=browse|listed|living|hosting|notice|ended  sublets (migration 0119); open Phone → Apartments → Sublets

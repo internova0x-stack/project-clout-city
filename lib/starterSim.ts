@@ -1,12 +1,18 @@
-// Development previews only: Starter Week in memory, following supabase/migrations/0122. The preview marks missions from
+// Development previews only: Starter Week in memory, following supabase/migrations/0122 and 0163. The preview marks missions from
 // the simulated city's own calls (PreviewHome wraps them) and pays through `pay`, like starter_state() does.
 import { STARTER_DAYS, STARTER_FINISH, STARTER_MISSIONS, type StarterApi, type StarterState } from "./starter.ts";
 
-export function createStarterSim(doneCount: number, pay: (cash: number, clout: number) => void) {
-  const done = new Set(STARTER_MISSIONS.slice(0, Math.max(0, Math.min(STARTER_MISSIONS.length, doneCount))).map((m) => m.id));
+export function createStarterSim(preset: string | number, pay: (cash: number, clout: number) => void) {
+  // ?starter=N: that many missions done, on the day of the next one. ?starter=dayN: day N, every earlier day's missions done.
+  const p = String(preset);
+  // ?starter=done: day 1 with all of day 1's missions done ("Today's done · 2 more tomorrow").
+  const dayPreset = p === "done" ? ["day2", "2"] : /^day(\d+)$/.exec(p);
+  const doneCount = dayPreset ? STARTER_MISSIONS.filter((m) => m.day < Number(dayPreset[1])).length : Math.max(0, Math.min(STARTER_MISSIONS.length, Number(p) || 0));
+  const done = new Set(STARTER_MISSIONS.slice(0, doneCount).map((m) => m.id));
+  const day = p === "done" ? 1 : dayPreset ? Math.min(STARTER_DAYS, Math.max(1, Number(dayPreset[1]))) : STARTER_MISSIONS[doneCount]?.day ?? STARTER_DAYS;
   // Missions done by the preset were paid before the preview opened.
   const paid = new Set(done);
-  const startedAt = new Date(Date.now() - 86400e3).toISOString();
+  const startedAt = new Date(Date.now() - (day - 1) * 86400e3).toISOString();
   let hidden = false;
   let finished = done.size === STARTER_MISSIONS.length;
   const active = () => !hidden && !finished;
@@ -25,7 +31,7 @@ export function createStarterSim(doneCount: number, pay: (cash: number, clout: n
         finished = justFinished = true;
         pay(STARTER_FINISH.cash, 0);
       }
-      return { ok: true, data: { done: [...done], startedAt, daysLeft: STARTER_DAYS - 1, active: active(), paid: now, finished: justFinished } };
+      return { ok: true, data: { done: [...done], startedAt, day, daysLeft: STARTER_DAYS - day, active: active(), paid: now, finished: justFinished } };
     },
     async hide() { hidden = true; return { ok: true, data: null }; },
   };

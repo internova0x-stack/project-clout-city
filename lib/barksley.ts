@@ -8,7 +8,7 @@ export const BARKSLEY = {
   name: "Sir Barksley",
   walker: "Dmitri",
   portrait: "/cast/sir-barksley.webp",
-  /** The tip for consoling him (Starter Week's park mission, migration 0123: C$500 from his allowance). */
+  /** The tip for consoling him (Starter Week's park mission, migration 0163: C$150 from his allowance). */
   tip: "Sir Barksley would like to tip you. He tips like he still lives in Miami.",
   intro: [
     "This is Sir Barksley. His owner moved to Miami \"for tax reasons.\" They FaceTime. Sir Barksley doesn't do FaceTime.",

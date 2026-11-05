@@ -368,12 +368,19 @@ components live in `app/globals.css`.
   / 100), a partner's couple day). lib/visits.ts mirrors game_settings 'visits' (tests/visits.test.ts); components/home/
   Visits.tsx (sheet, home card, bar); the entry is the stats panel's Mood row, which like every stat lists up to three
   actions (`contextTipLists`, lib/statTips.ts). `?visit=none|hosting|invite|guest` in the preview.
-- Starter Week (migration 0122, owner Oct 26; spec section 28): ten missions for players who joined after it (game_settings
+- Starter Week (migration 0122, owner Oct 26; spec section 28): missions for players who joined after it (game_settings
   'starter', mirrored by lib/starter.ts, tests/starter.test.ts), marked by error-swallowing triggers (`starter_mark`) and paid by
-  `starter_state()` (ledger 'starter' per mission, 'starter_finish': C$500, badge 'starter-week', the violet rug); 7 days, (migration 0123: the park mission, consoling Sir Barksley, pays a C$500 tip; a mission pays once in any currency);
-  `starter_hide`. The pill sits under "Invite your Crew" (components/game/Starter.tsx); the current mission's place glows on
-  the map (`PlacePin.glow`). Businesses and Jobs open at Rank 2 (`APP_UNLOCKS`, Lola's `UnlockReveal` once); the daily tasks
-  open once when onboarding ends. `?starter=0-10` in the preview (lib/starterSim.ts marks from the simulated city's calls).
+  `starter_state()` (ledger 'starter' per mission, 'starter_finish': badge 'starter-week', the violet rug; a mission pays once in
+  any currency); `starter_hide`. By the day (migration 0163, owner Nov 5: "go with your recommendations"): 13 missions with a
+  `day` (1 = the New York day it started, `starter_day`); the week runs by New York day through rent day, day 8 (the first rent
+  bill appears a week after moving in, so the old 168-hour end made rent nearly impossible); one done early still counts and
+  pays; new missions clock in at a job (day 5, careers.last_work_day), make a choice (day 6, choice_log 'chosen') and have
+  people over (day 7, visits); Sir Barksley's tip C$150, the finish C$1,000. The pill sits under "Invite your Crew"
+  (components/game/Starter.tsx: today's next mission, or "Today's done · 2 more tomorrow"; the sheet groups the days, later
+  ones locked); the current mission's place glows on the map (`PlacePin.glow`). Businesses, Jobs and Campaign open at Rank 2
+  (`APP_UNLOCKS`, Lola's `UnlockReveal` once), but during Starter Week they wait until its day 3 (`STARTER_UNLOCK_DAY`,
+  GameShell `starterHold`); the daily tasks open once when onboarding ends. PostHog: 'starter_mission_done' {mission, day},
+  'starter_week_finished'. `?starter=0-13|day1-8|done` in the preview (lib/starterSim.ts marks from the simulated city's calls).
   Satire pass (owner, Oct 27): missions, the first-day tasks and the first goals read as New York satire; the first party is
   celebrity influencer Peyton Pastel's, on tickets "found" at a coat check (FirstSession.tsx `PARTY_HOST`). Sir Barksley
   (lib/barksley.ts, components/city/Barksley.tsx): the billionaire's depressed Pomeranian in Astoria Park; his scene opens on

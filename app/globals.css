@@ -2453,6 +2453,9 @@ button.rank-chip::after { content:"›"; margin-left:2px; opacity:.6; }
 .starter-dot { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:800; background:var(--chip-off); color:var(--text-2); }
 .starter-row.done .starter-dot { background:var(--green-tint, #DEF2E9); color:var(--green-text, #2E8B63); }
 .starter-row.now .starter-dot { background:var(--neon-500); color:#fff; }
+.starter-row.locked { opacity:.5; }
+.starter-day-done .title { text-decoration:none !important; }
+.starter-row:not(.done) .starter-dot { font-size:15px; }
 /* Locked apps (owner, Oct 26): the same icon, dimmed, with a lock and when it opens. */
 .phone-app.locked .phone-icon { filter:grayscale(.6); opacity:.5; }
 .phone-lock { position:absolute; z-index:2; right:-4px; bottom:-4px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:11px; background:#14111A; box-shadow:0 0 0 2px rgba(255,255,255,.7); }

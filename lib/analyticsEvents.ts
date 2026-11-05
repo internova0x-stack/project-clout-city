@@ -16,7 +16,9 @@ export type AnalyticsEvent =
   | "shop_item_bought"
   | "story_chapter_read"
   | "chat_message_sent"
-  | "purchase_completed";
+  | "purchase_completed"
+  | "starter_mission_done"
+  | "starter_week_finished";
 
 export type EventProps = Record<string, string | number | boolean | null>;
 export interface Tracked { event: AnalyticsEvent; props: EventProps }
