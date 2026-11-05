@@ -376,7 +376,7 @@ components live in `app/globals.css`.
   bill appears a week after moving in, so the old 168-hour end made rent nearly impossible); one done early still counts and
   pays; new missions clock in at a job (day 5, careers.last_work_day), make a choice (day 6, choice_log 'chosen') and have
   people over (day 7, visits); Sir Barksley's tip C$150, the finish C$1,000. The pill sits under "Invite your Crew"
-  (components/game/Starter.tsx: today's next mission, or "Today's done · 2 more tomorrow"; the sheet groups the days, later
+  (components/game/Starter.tsx: today's next mission, or "✅ 2 more tomorrow" once today's are done; the sheet groups the days, later
   ones locked); the current mission's place glows on the map (`PlacePin.glow`). Businesses, Jobs and Campaign open at Rank 2
   (`APP_UNLOCKS`, Lola's `UnlockReveal` once), but during Starter Week they wait until its day 3 (`STARTER_UNLOCK_DAY`,
   GameShell `starterHold`); the daily tasks open once when onboarding ends. PostHog: 'starter_mission_done' {mission, day},

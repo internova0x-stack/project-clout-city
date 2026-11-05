@@ -17,7 +17,7 @@ export function StarterPill({ done, day, onOpen }: { done: readonly string[]; da
     <button className="pill-glass glass-hud starter-pill" onClick={onOpen}
       aria-label={m ? `Starter Week, ${done.length} of ${STARTER_MISSIONS.length} done. Next: ${m.title}` : `Starter Week: today's done. More ${soon!.day === day + 1 ? "tomorrow" : `on ${dayLabel(soon!.day)}`}`}>
       <span className="starter-count">{count}</span>
-      <span className="starter-next">{m ? `${m.emoji} ${m.title}` : `✅ Today's done · ${soon!.count} more ${soon!.day === day + 1 ? "tomorrow" : `on ${dayLabel(soon!.day)}`}`}</span>
+      <span className="starter-next">{m ? `${m.emoji} ${m.title}` : `✅ ${soon!.count} more ${soon!.day === day + 1 ? "tomorrow" : `on ${dayLabel(soon!.day)}`}`}</span>
       <span aria-hidden="true">›</span>
     </button>
   );
@@ -45,7 +45,7 @@ export function StarterSheet({ open, onClose, done, day, onGo, onHide }: {
           if (list.every((m) => done.includes(m.id))) return (
             <div key={d} className="list-row starter-row done starter-day-done">
               <span className="starter-dot" aria-hidden="true">✓</span>
-              <span className="title" style={{ flex: 1 }}>{dayLabel(d)} · all {list.length} done</span>
+              <span className="title" style={{ flex: 1 }}>{dayLabel(d)} · {list.length === 1 ? "done" : `all ${list.length} done`}</span>
             </div>
           );
           return (
