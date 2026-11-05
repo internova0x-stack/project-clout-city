@@ -76,7 +76,7 @@ export function CrownHQ({ open, onClose, api, me, onToast }: {
     });
   }, [open, v, verdict]);
 
-  const label = !v || v.phase === "over" ? (v?.result ? "Homecoming night" : "Homecoming") : "Crown HQ";
+  const label = !v || v.phase === "over" ? (v?.result ? "Homecoming night" : "Homecoming") : "University HQ";
   return (
     <>
     <Sheet open={open} onClose={onClose} label={label} tall>
@@ -201,7 +201,7 @@ function Hq({ data, v, busy, api, run, me, onToast, onPick }: { data: SchoolScre
               <span className="meta">Open ›</span>
             </button>
           )}
-          <div className="segmented" role="group" aria-label="Crown HQ">
+          <div className="segmented" role="group" aria-label="University HQ">
             <button aria-pressed={tab === "week"} onClick={() => setTab("week")}>Week</button>
             <button aria-pressed={tab === "inbox"} onClick={() => setTab("inbox")}><span className="seg-label">Inbox{unread ? <span className="seg-badge">{unread}</span> : null}</span></button>
             <button aria-pressed={tab === "squad"} onClick={() => setTab("squad")}>Squad</button>

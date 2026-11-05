@@ -283,7 +283,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
       {handlers.onCrown && isCampus(place) && (
         <div className="action-row">
           <div style={{ minWidth: 0, flex: 1 }}>
-            <span className="title" style={{ display: "block" }}>👑 Crown HQ</span>
+            <span className="title" style={{ display: "block" }}>🎓 University HQ</span>
             {!compact && <span className="subtext" style={{ display: "block" }}>Run for Homecoming. Keep your GPA. Ruin a legacy.</span>}
           </div>
           <button className="btn btn-secondary btn-sm" onClick={() => handlers.onCrown!(place.id)}>Open</button>
@@ -442,7 +442,7 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
     ...(handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed ? ["Scratch cards"] : []),
     ...(handlers.onStation && isStation(place) && !world.closed ? STATION_ROWS.filter((r) => place.tags.includes(r.tag) && !r.anywhere).map((r) => r.name) : []),
     ...(handlers.onCampus && isCampus(place) ? ["Campus life"] : []),
-    ...(handlers.onCrown && isCampus(place) ? ["Crown HQ"] : []),
+    ...(handlers.onCrown && isCampus(place) ? ["University HQ"] : []),
     ...(handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed ? ["Groceries"] : []),
     ...(handlers.onBarDrink && hasBar(place.tags) && !world.closed ? ["A drink"] : []),
     ...CLUB_EVENTS.filter((e) => e.placeId === place.id).map((e) => e.name),

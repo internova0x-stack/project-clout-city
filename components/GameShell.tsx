@@ -3893,6 +3893,7 @@ export function GameShell({
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
         onOpenCampaign={campaign ? () => { setPhone({ open: false, app: null }); setCampaignOpen(true); } : undefined}
         onOpenCareers={careers ? () => { setPhone({ open: false, app: null }); setCareersOpen(true); } : undefined}
+        onOpenUniversity={school ? () => { setPhone({ open: false, app: null }); setCrownOpen(true); } : undefined}
         scandals={campaignScandals}
         blotter={blotter}
         conditions={conditions}
