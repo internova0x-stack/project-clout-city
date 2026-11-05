@@ -447,6 +447,7 @@ export function campaignError(code: string): string {
   const map: Record<string, string> = {
     locked: `Campaign Mode opens at Rank ${CAMPAIGN.unlockRank}.`,
     running: "You're already running a campaign. One at a time, boss.",
+    school_running: "You're running for Homecoming. One full-time race at a time.",
     too_soon: `A new campaign opens ${CAMPAIGN.restartDays} days after your last one started.`,
     no_campaign: "No campaign running.",
     not_planning: "The week's already in motion. Results arrive tomorrow morning.",

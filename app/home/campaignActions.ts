@@ -175,7 +175,7 @@ export async function campaignStart(candidate: CandidateId, seed: number): Promi
   }
   const { error } = await w.admin.rpc("campaign_begin", { p_player: w.id, p_id: id, p_candidate: candidate, p_state: state, p_seed: s });
   if (error) {
-    const code = /^(locked|running|too_soon|bad_seed|no_bank)/.exec(error.message)?.[1];
+    const code = /^(locked|running|school_running|too_soon|bad_seed|no_bank)/.exec(error.message)?.[1];
     if (!code) console.error("campaign_begin failed", error);
     return { ok: false, error: code ? campaignError(code) : campaignError("unknown") };
   }

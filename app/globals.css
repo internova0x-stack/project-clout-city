@@ -3312,3 +3312,44 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   animation:cel-chip .34s cubic-bezier(.2,1.4,.4,1) both; }
 .res-cta { width:100%; animation:rank-rise .38s 1.9s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .res-card *, .res-card { animation:none !important; transition:none !important; } }
+
+/* Crown HQ, the Homecoming race (components/school/CrownHQ.tsx; lib/schoolRace.ts): Campaign HQ's pieces plus the week
+   planner (day and night slots), the student IDs on Meet the rival, and Homecoming night's You vs rival. Tokens only. */
+.crown-ids { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+.crown-id { display:grid; gap:2px; justify-items:center; padding:12px 8px; border-radius:var(--r-md); background:var(--surface-raised); box-shadow:var(--elev-2); min-width:0; }
+.crown-id.you { box-shadow:var(--elev-2), inset 0 0 0 2px var(--taxi-400); }
+.crown-id .meta { text-align:center; }
+.crown-face { width:48px; height:48px; border-radius:50%; object-fit:cover; background:var(--surface-card); margin-bottom:4px; overflow:hidden; display:block; }
+.crown-face canvas, .crown-face img { width:100% !important; height:100% !important; display:block; object-fit:cover; }
+.cel-medal.crown-medal { padding:0; width:112px; height:112px; overflow:hidden; }
+.cel-medal.crown-medal img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.crown-steps .num { width:28px; height:28px; flex:none; border-radius:50%; display:grid; place-items:center; background:var(--night-900); color:#fff; font:700 14px var(--font-label); }
+.crown-steps .list-row.now .num { background:var(--taxi-500); color:var(--night-900); }
+.camp-meter.crown .fill { background:var(--green-500); }
+.camp-meter.crown.low .fill { background:var(--red-500); }
+.camp-meter.crown.rep .fill { background:var(--g-neon); }
+.camp-meter.crown.gpa .fill { background:var(--tag-blue); }
+.camp-meter.crown.gpa.low .fill { background:var(--red-500); }
+.camp-meter-bar .crown-line { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--night-900); }
+.crown-days { display:flex; flex-direction:column; gap:8px; }
+.crown-dayrow { display:grid; grid-template-columns:44px minmax(0,1fr) minmax(0,1fr); gap:8px; align-items:center; }
+.crown-dayrow > .overline { text-align:center; }
+.crown-dayrow > .overline.exam { color:var(--red-500); }
+.crown-slot { height:44px; min-width:0; border:0; border-radius:var(--r-sm); background:var(--surface-raised); box-shadow:var(--elev-2); display:flex; align-items:center; gap:8px; padding:0 10px;
+  font:600 15px var(--font-ui); color:var(--text-1); text-align:left; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.crown-slot .e { font-size:17px; flex:none; }
+.crown-slot.hot { box-shadow:var(--elev-2), inset 0 0 0 2px var(--neon-500); }
+.crown-slot:disabled { opacity:.55; cursor:default; box-shadow:none; background:var(--chip-off); }
+.crown-pick { min-height:0; padding:12px 14px 12px 48px; gap:6px; }
+.crown-pick .e { font-size:18px; }
+.crown-vs { display:grid; grid-template-columns:1fr auto 1fr; align-items:end; gap:8px; }
+.crown-vs .r { text-align:right; justify-items:end; }
+.crown-vs > span { display:grid; gap:2px; }
+.crown-vote { font-family:var(--font-label); font-style:italic; font-weight:800; font-size:34px; line-height:34px; font-variant-numeric:tabular-nums; }
+.crown-q { animation:crown-in .35s ease-out both; }
+@keyframes crown-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .crown-q { animation:none; } }
+.fx.fx-warn { background:var(--neon-tint); color:var(--neon-text); }
+.crown-later { display:flex; align-items:center; gap:10px; width:100%; border:0; text-align:left; font:inherit; color:inherit; cursor:pointer; }
+.camp-winner.crown-win { display:block; overflow:hidden; margin:0 auto; background:var(--night-900); }
+.camp-winner.crown-win canvas, .camp-winner.crown-win img, .camp-avatar canvas { width:100% !important; height:100% !important; display:block; object-fit:cover; }

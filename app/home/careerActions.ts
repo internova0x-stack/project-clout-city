@@ -62,6 +62,9 @@ async function load(id: string, admin: Admin): Promise<Context | { error: string
   const camp = await admin.from("campaigns").select("candidate").eq("player_id", id).eq("status", "running").maybeSingle();
   const cand = camp.data ? CAMPAIGN_CONTENT.candidates.find((c) => c.id === (camp.data as { candidate: string }).candidate) : null;
   ctx.onLeave = cand ? { candidate: cand.short } : null;
+  // A running school race (migration 0162, docs/SCHOOL-RACE.md): the job goes part-time (nothing before the migration).
+  const race = await admin.from("school_races").select("id", { count: "exact", head: true }).eq("player_id", id).eq("status", "running");
+  ctx.partTime = !race.error && (race.count ?? 0) > 0;
   // Company health (migration 0161): the employer's week, shared city-wide (nothing before the migration).
   const track = ctx.job?.status === "employed" ? ctx.job.state.track : null;
   const def = track ? companyOf(track) : undefined;

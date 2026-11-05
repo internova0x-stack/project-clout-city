@@ -41,6 +41,8 @@ import { underworldDeclineHire, underworldHire, underworldHires, underworldJob, 
 import { galaDonate, galaState } from "./galaActions";
 import { careerApply, careerCompanies, careerOffice, careerQuit, careerStick, careerAspire, careerScreen, careerStart, careerTask } from "./careerActions";
 import { campaignBudget, campaignChoose, campaignDebate, campaignDilemma, campaignEndWeek, campaignReply, campaignScreen, campaignSlot, campaignStart } from "./campaignActions";
+import { schoolBudget, schoolChoose, schoolDeclare, schoolReply, schoolScreen, schoolSlot } from "./schoolActions";
+import type { SchoolApi } from "@/lib/schoolApi";
 import { stationInbox, stationRead, tvState, tvSubmit, tvWithdraw } from "./tvActions";
 import { huntAnswer, huntJoin, huntState, huntTalk } from "./huntActions";
 import { goalsState, spendGuestPass, streakRepair, streakRepairState } from "./goalsActions";
@@ -90,6 +92,10 @@ export default async function HomePage() {
   // Migration 0010 switches on chat; a banned account sees only a notice.
   const chatOn = chat.ok;
   if (chat.ok && chat.data.banned) return <Suspended />;
+  // Migration 0162: the Homecoming race (Crown HQ says so if it hasn't run yet). GameShell takes it as `school={school}`.
+  const school: SchoolApi | undefined = city && campus.ok ? {
+    screen: schoolScreen, declare: schoolDeclare, slot: schoolSlot, budget: schoolBudget, choose: schoolChoose, reply: schoolReply,
+  } : undefined;
   return (
     <>
     <AnalyticsUser id={player.id} />
@@ -194,6 +200,7 @@ export default async function HomePage() {
       // Migration 0078: push notifications (Settings → Notifications and Lola's ask).
       push={city ? { prefs: pushPrefs, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, setOff: pushSetOff, asked: pushAsked, test: pushTest } : undefined}
       // Migration 0072 switches on campus life (campus_state failing hides it).
+      school={school}
       campus={city && campus.ok ? {
         state: campusState, enrol: campusEnrol, pick: campusPick, attend: campusAttend, exam: campusExam, submit: campusSubmit, eat: campusEat, leaderboard: campusLeaderboard, degree: campusDegree,
       } : undefined}

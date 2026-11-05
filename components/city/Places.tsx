@@ -83,6 +83,8 @@ export interface PlaceHandlers {
   onStation?: (what: "shoutout" | "billboard" | "watch") => void;
   /** v0.15 Campus (migration 0072): campus life at the two universities (opens from anywhere; acting needs you there). */
   onCampus?: (placeId: string) => void;
+  /** The Homecoming race (migration 0162): Crown HQ, on a campus's card. */
+  onCrown?: (placeId: string) => void;
   /** v0.8 grocery bundles at supermarkets (migration 0027). */
   onBuyGroceries?: (placeId: string, bundleId: string) => void;
   /** The story world (v0.4): closures, prices, story events and tasks. */
@@ -278,6 +280,15 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           <button className="btn btn-taxi btn-sm" onClick={() => handlers.onCampus!(place.id)}>Open</button>
         </div>
       )}
+      {handlers.onCrown && isCampus(place) && (
+        <div className="action-row">
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span className="title" style={{ display: "block" }}>🎓 University HQ</span>
+            {!compact && <span className="subtext" style={{ display: "block" }}>Run for Homecoming. Keep your GPA. Ruin a legacy.</span>}
+          </div>
+          <button className="btn btn-secondary btn-sm" onClick={() => handlers.onCrown!(place.id)}>Open</button>
+        </div>
+      )}
       {handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
         const av = groceryAvailability(b, state);
         const room = CITY_ECONOMY.groceries.fridgeMax - (state.player.fridge_meals ?? 0);
@@ -431,6 +442,7 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
     ...(handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed ? ["Scratch cards"] : []),
     ...(handlers.onStation && isStation(place) && !world.closed ? STATION_ROWS.filter((r) => place.tags.includes(r.tag) && !r.anywhere).map((r) => r.name) : []),
     ...(handlers.onCampus && isCampus(place) ? ["Campus life"] : []),
+    ...(handlers.onCrown && isCampus(place) ? ["University HQ"] : []),
     ...(handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed ? ["Groceries"] : []),
     ...(handlers.onBarDrink && hasBar(place.tags) && !world.closed ? ["A drink"] : []),
     ...CLUB_EVENTS.filter((e) => e.placeId === place.id).map((e) => e.name),

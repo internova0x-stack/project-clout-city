@@ -161,6 +161,9 @@ import type { CareerApi } from "@/lib/careers";
 import { UNDERWORLD, type UnderworldApi } from "@/lib/underworld";
 import { GALA, type GalaApi } from "@/lib/gala";
 import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
+import type { SchoolApi, SchoolRival } from "@/lib/schoolApi";
+import type { Crown } from "@/lib/schoolRace";
+import { firstTime } from "./seenOnce";
 
 /** Culture pack C1: a regular's everyday lines plus their profile's catchphrases. */
 const EVERYDAY_LINES = withCatchphrases(CAST_LINES, NPC_PROFILES.profiles as NpcProfile[]);
@@ -181,6 +184,8 @@ const CareersSheet = lazySheet(() => import("./careers/CareersSheet").then((m) =
 const BackRoomSheet = lazySheet(() => import("./underworld/BackRoom").then((m) => m.BackRoomSheet));
 const GalaSheet = lazySheet(() => import("./gala/Gala").then((m) => m.GalaSheet));
 const CampusSheet = lazySheet(() => import("./campus/CampusSheet").then((m) => m.CampusSheet));
+const CrownHQ = lazySheet(() => import("./school/CrownHQ").then((m) => m.CrownHQ));
+const MeetRival = lazySheet(() => import("./school/MeetRival").then((m) => m.MeetRival));
 
 export interface GameActions {
   setTutorialState: (state: "done" | "skipped") => Promise<void>;
@@ -317,6 +322,7 @@ export function GameShell({
   choices,
   remembered,
   campus,
+  school,
   goals,
   pass,
   life,
@@ -420,6 +426,8 @@ export function GameShell({
   remembered?: () => Promise<Record<string, string[]>>;
   /** v0.15 Campus (migration 0072): campus life at the two universities; hidden until campus_state answers. */
   campus?: CampusApi;
+  /** The Homecoming race (migration 0162): Crown HQ from the campus card and the Phone, Meet the rival on the Quad. */
+  school?: SchoolApi;
   /** Daily tasks 2.0 (migrations 0073, 0074): the suggested goal, streaks and guest-list passes; hidden without it. */
   goals?: GoalsApi;
   /** The Clout Pass and the starter pack (migration 0156): the Tasks sheet's Pass tab and the Shop's pack card. */
@@ -491,6 +499,9 @@ export function GameShell({
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [campaignOpen, setCampaignOpen] = useState(false);
+  // The Homecoming race: Crown HQ, and Meet the rival on the first walk onto the Quad.
+  const [crownOpen, setCrownOpen] = useState(false);
+  const [rivalMeet, setRivalMeet] = useState<{ rival: SchoolRival; crown: Crown } | null>(null);
   const bootAt = useRef(Date.now());
   const [careersOpen, setCareersOpen] = useState(false);
   const [backRoomOpen, setBackRoomOpen] = useState(false);
@@ -1549,6 +1560,7 @@ export function GameShell({
     else if (open === "assets" && assets) setPhone({ open: true, app: "bank" });
     // Campaign Mode: "Your poll results are in".
     else if (open === "campaign" && campaign) setCampaignOpen(true);
+    else if (open === "crown" && school) setCrownOpen(true);
     else if (open === "careers" && careers) setCareersOpen(true);
     else if (open === "backroom" && underworld) setBackRoomOpen(true);
     else if (open === "gala" && gala) setGalaOpen(true);
@@ -2239,7 +2251,22 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || !!place || !!panel || phone.open || careersOpen || campaignOpen || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  // The Homecoming race: the first walk onto a campus's Quad (its ground floor) for an enrolled student without a race
+  // brings on the reigning royal, once per device (cc-seen:crown-rival); "Run against" opens Crown HQ's Declare screen.
+  const onQuad = !!school && !!inside && isCampusPlace(inside) && insideFloor === 1 ? inside.id : null;
+  useEffect(() => {
+    if (!onQuad || !school || welcomeOpen || place || panel || phone.open || crownOpen) return;
+    let live = true;
+    const t = setTimeout(() => {
+      void school.screen().then((r) => {
+        if (!live || !r.ok || r.data.campus !== onQuad || r.data.view || !r.data.rival || !r.data.canDeclare) return;
+        if (!firstTime("crown-rival", onQuad)) return;
+        setRivalMeet({ rival: r.data.rival, crown: r.data.crown });
+      });
+    }, 1800);
+    return () => { live = false; clearTimeout(t); };
+  }, [onQuad, school, welcomeOpen, place, panel, phone.open, crownOpen]);
   // While you wait (owner, Nov 3: "actions I can take in that period"): the Phone still works, and Sgt. Bev helps family.
   const holdingActions: HoldingAction[] = [
     ...(bonds.find((b) => b.npc === "sgt-bev")?.bigReady && favorHandlers ? [{ id: "bev", emoji: "💛", label: "Ask Sgt. Bev", meta: "Family favor", onClick: () => { setHoldingOpen(false); favorHandlers.onBig("sgt-bev"); } }] : []),
@@ -2420,6 +2447,7 @@ export function GameShell({
     onGala: gala ? () => { setPlace(null); setGalaOpen(true); } : undefined,
     onStation: radio || tv ? onStation : undefined,
     onCampus: campus ? (id) => { if (campusById(id)) { setCampusTab(undefined); setCampusAt(id as CampusId); } } : undefined,
+    onCrown: school ? () => { setPlace(null); setCrownOpen(true); } : undefined,
     gossip: gossipOn ? { listen: (id) => void listenIn(id), hear: hearRegular, openPlace: (id) => openPlace(id) } : undefined,
     onBarDrink: restOn && travelOn && cityApi?.barDrink ? (id) => void run(`drink:${id}`, timed("🍸", "At the bar", OTHER_SECONDS.drink, () => cityApi.barDrink!(id))) : undefined,
     story: storyOn ? feed : null,
@@ -3865,6 +3893,7 @@ export function GameShell({
         mayor={mayor && mayorUnseen !== null ? { api: mayor, unseen: mayorUnseen, onSeen: mayorSeen } : undefined}
         onOpenCampaign={campaign ? () => { setPhone({ open: false, app: null }); setCampaignOpen(true); } : undefined}
         onOpenCareers={careers ? () => { setPhone({ open: false, app: null }); setCareersOpen(true); } : undefined}
+        onOpenUniversity={school ? () => { setPhone({ open: false, app: null }); setCrownOpen(true); } : undefined}
         scandals={campaignScandals}
         blotter={blotter}
         conditions={conditions}
@@ -4022,6 +4051,10 @@ export function GameShell({
           {deleteAccount && <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={deleteAccount} />}
           {campaign && <CampaignSheet open={campaignOpen} onClose={() => setCampaignOpen(false)} api={campaign} clout={me.clout} onToast={setToast}
             focusTask={campaignFocus} onFocused={clearCampaignFocus} />}
+          {school && <CrownHQ open={crownOpen} onClose={() => { setCrownOpen(false); void cityApi?.refresh().then((r) => r.ok && applyCity(r)); }} api={school}
+            me={<AvatarHead look={look} outfit={outfit} />} onToast={setToast} />}
+          {school && <MeetRival open={!!rivalMeet} rival={rivalMeet?.rival ?? null} crown={rivalMeet?.crown ?? "king"} me={<AvatarHead look={look} outfit={outfit} />}
+            onLater={() => setRivalMeet(null)} onRun={() => { setRivalMeet(null); setCrownOpen(true); }} />}
           {careers && <CareersSheet open={careersOpen} onClose={() => setCareersOpen(false)} api={careers} onToast={setToast}
             onGo={(id) => { setCareersOpen(false); openPlace(id); }}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); }}
