@@ -95,7 +95,7 @@ const NO_STORY: NewsHandlers = { busy: null, vote: noop, shadowGuess: noop, mark
 
 export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
-  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, openForm, push, membership, onDeleteAccount,
+  chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, lola, openForm, push, membership, onDeleteAccount,
   invite, mayor, locked, onOpenCampaign, onOpenUniversity, onOpenCareers, election, scandals, blotter, conditions, companies, economy, onOpenGifts, market,
   assets,
 }: {
@@ -169,6 +169,8 @@ export function PhoneModal({
   tv?: { api: TvApi; onChange?: (s: TvState) => void };
   /** v0.14 texts from Real Clout FM and Clout TV, in Messages. */
   stations?: { threads: StationThread[]; onRead: (station: Station) => void };
+  /** Starter Week (migration 0164): Lola's text in Messages, which counts as the message mission. */
+  lola?: { onReply: (reply: number) => Promise<boolean> };
   /** Culture pack C5: a neighbor's name-day invite on the home screen; "See it" opens it in Events. */
   invite?: { event: CalendarEvent; onOpen: () => void };
   /** Contact the Mayor (migration 0105): the feedback app, and whether a reply waits unread; without it the app is hidden. */
@@ -252,7 +254,7 @@ export function PhoneModal({
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
                       {a.id === "messages" && (() => {
-                        const n = chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0) + (stations?.threads.reduce((x, t) => x + t.unread, 0) ?? 0);
+                        const n = chatUnread + (dating?.alerts ?? 0) + (crew?.alerts ?? 0) + (stations?.threads.reduce((x, t) => x + t.unread, 0) ?? 0) + (lola ? 1 : 0);
                         return n > 0 && <span className="count-badge">{n}</span>;
                       })()}
                     </span>
@@ -313,7 +315,7 @@ export function PhoneModal({
               {app === "news" && (news || cityNews ? <NewsApp feed={story ?? null} handlers={news ?? NO_STORY} focusBeat={focusBeat} city={cityNews} spotted={gossip?.spotted} jackpots={state?.lotto?.wins} election={election} scandals={scandals} blotter={blotter} conditions={conditions} companies={companies} /> : <Soon text="Lola Lowdown is still fact-checking. Barely. The News app opens soon." />)}
               {app === "tea" && tea && <TeaApp stories={tea.state.stories} cards={tea.state.cards} busy={tea.busy} onHome={() => setApp(null)} onShare={tea.onShare} onOpenCard={tea.onOpenCard} />}
               {app === "messages" && (chat
-                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} stations={stations} onOutOfMessages={onChatPass ? () => onChatPass(true) : undefined} />
+                ? <MessagesApp api={chat} openWith={chatWith} onToast={(t) => onToast?.(t)} onUnread={onChatUnread} dating={dating} crew={crew} stations={stations} lola={lola} onOutOfMessages={onChatPass ? () => onChatPass(true) : undefined} />
                 : <Soon text="The group chat is on mute until the city is ready to gossip. Messages arrive soon." />)}
             </div>
           )}

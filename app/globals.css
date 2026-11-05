@@ -3356,3 +3356,4 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .crown-later { display:flex; align-items:center; gap:10px; width:100%; border:0; text-align:left; font:inherit; color:inherit; cursor:pointer; }
 .camp-winner.crown-win { display:block; overflow:hidden; margin:0 auto; background:var(--night-900); }
 .camp-winner.crown-win canvas, .camp-winner.crown-win img, .camp-avatar canvas { width:100% !important; height:100% !important; display:block; object-fit:cover; }
+.lola-replies { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; padding:8px 0 4px; }

@@ -1,5 +1,7 @@
 "use client";
 
+import { LOLA_TEXT } from "@/lib/starter";
+import { LOLA_PORTRAIT } from "@/lib/cast";
 import { dmTopic, everyVisible, ring, useDoorbell, useMyId } from "@/lib/live";
 import { CrownMark } from "../city/Common";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -36,7 +38,7 @@ export function messagesLeftLine(status: ChatStatus | null): string {
 
 type Overlay = { kind: "menu" } | { kind: "block" } | { kind: "report"; messageId: number | null } | null;
 
-export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, onOutOfMessages, stations }: {
+export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, onOutOfMessages, stations, lola }: {
   api: ChatApi;
   /** Open (or start) a thread with this player, e.g. from their profile card. */
   openWith?: { id: string; name: string; style: string } | null;
@@ -48,8 +50,13 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
   onOutOfMessages?: () => void;
   /** v0.14 texts from Real Clout FM and Clout TV (read-only threads). */
   stations?: { threads: StationThread[]; onRead: (station: Station) => void };
+  /** Starter Week (migration 0164): Lola's text; answering it counts as the message mission. Absent once it's done. */
+  lola?: { onReply: (reply: number) => Promise<boolean> };
 }) {
   const [station, setStation] = useState<Station | null>(null);
+  const [lolaOpen, setLolaOpen] = useState(false);
+  const [lolaPicked, setLolaPicked] = useState<number | null>(null);
+  const [lolaBusy, setLolaBusy] = useState(false);
   const [list, setList] = useState<ChatSummary[] | null>(null);
   const [status, setStatus] = useState<ChatStatus | null>(null);
   const [open, setOpen] = useState<{ id: string; name: string; style: string } | null>(openWith ?? null);
@@ -155,6 +162,35 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
   const muted = !!status?.mutedUntil || !!status?.banned;
   const out = !status?.unlimited && left <= 0;
 
+  // Lola's text: her line, three ready-made replies, her answer. Kept open after the mission pays (lolaPicked).
+  if (lolaOpen && (lola || lolaPicked !== null)) {
+    const picked = lolaPicked !== null ? LOLA_TEXT.replies[lolaPicked] : null;
+    return (
+      <div className="chat-thread">
+        <div className="chat-head station-head">
+          <button className="phone-back" onClick={() => setLolaOpen(false)}>‹ Messages</button>
+          <span className="title one-line">Lola Lowdown 💋</span>
+          <span aria-hidden="true" />
+        </div>
+        <div className="chat-bubbles">
+          <div className="bubble"><span>{LOLA_TEXT.hello}</span></div>
+          {picked && <div className="bubble mine"><span>{picked.label}</span></div>}
+          {picked && <div className="bubble"><span>{picked.answer}</span></div>}
+        </div>
+        {!picked && lola && (
+          <div className="lola-replies" role="group" aria-label="Reply to Lola">
+            {LOLA_TEXT.replies.map((r, i) => (
+              <button key={i} className="btn btn-secondary btn-sm" disabled={lolaBusy} onClick={() => {
+                setLolaBusy(true);
+                void lola.onReply(i).then((ok) => { if (ok) setLolaPicked(i); else onToast("Lola's phone is on silent. Try again."); }).finally(() => setLolaBusy(false));
+              }}>{r.label}</button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   const stationThread = station ? stations?.threads.find((t) => t.station === station) : null;
   if (stationThread) {
     const st = STATIONS[stationThread.station];
@@ -183,6 +219,17 @@ export function MessagesApp({ api, openWith, onToast, onUnread, dating, crew, on
     return (
       <div className="stack-12">
         {status && <span className="chat-left">{messagesLeftLine(status)}</span>}
+        {(lola || lolaPicked !== null) && (
+          <button className="chat-row date-row" onClick={() => setLolaOpen(true)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="chat-avatar" src={LOLA_PORTRAIT} alt="" width={48} height={48} />
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+              <span className="title" style={{ display: "block" }}>Lola Lowdown</span>
+              <span className="subtext chat-last">{lolaPicked !== null ? LOLA_TEXT.replies[lolaPicked].answer : LOLA_TEXT.hello}</span>
+            </span>
+            <span className="chat-meta">{lolaPicked === null && <span className="count-badge">1</span>}</span>
+          </button>
+        )}
         {stations?.threads.map((t) => {
           const last = t.messages[t.messages.length - 1];
           return (

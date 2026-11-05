@@ -31,7 +31,7 @@ export const STARTER_MISSIONS: StarterMission[] = [
   { id: "look", day: 2, emoji: "🕶️", title: "Change your look so your ex's cousin won't recognize you", why: "Fits are clout. Disguises are a bonus.", reward: { clout: 10 }, go: { kind: "panel", panel: "look" } },
   { id: "furniture", day: 2, emoji: "🛋️", title: "Buy furniture a stranger online called \"a vibe\"", why: "Then place it at home. A better crib, a better Crib Rating.", reward: { cash: 75 }, go: { kind: "shop", category: "home" } },
   { id: "gossip", day: 3, emoji: "🍵", title: "Overhear something you'll swear you weren't listening to", why: "Lola's Tea pays for what you dig up.", reward: { clout: 20 }, go: { kind: "app", app: "tea" } },
-  { id: "message", day: 3, emoji: "💬", title: "Slide into a stranger's DMs with no plan", why: "Message another player. Everyone else is winging it too.", reward: { clout: 15 }, go: { kind: "app", app: "messages" } },
+  { id: "message", day: 3, emoji: "💬", title: "Slide into a stranger's DMs with no plan", why: "Message another player, or answer Lola's text in Messages. Everyone else is winging it too.", reward: { clout: 15 }, go: { kind: "app", app: "messages" } },
   { id: "event", day: 4, emoji: "🥂", title: "Walk into an event like you're on the list", why: "Confidence is a guest list. Nights out are where clout lives.", reward: { clout: 25 }, go: { kind: "panel", panel: "events" } },
   { id: "work", day: 5, emoji: "🪪", title: "Clock in at a real job, with a lanyard and everything", why: "Careers pay every week and climb a ladder. Pick one in the Careers app.", reward: { clout: 20 }, go: { kind: "careers" } },
   { id: "choice", day: 6, emoji: "⚖️", title: "Make a choice your mother wouldn't approve of. Or would", why: "Go places and things come up. What you pick comes back later.", reward: { clout: 20 }, go: { kind: "map" } },
@@ -64,7 +64,20 @@ export type StarterResult<T> = { ok: true; data: T } | { ok: false; error: strin
 export interface StarterApi {
   state(): Promise<StarterResult<StarterState | null>>;
   hide(): Promise<StarterResult<null>>;
+  /** Migration 0164: answering Lola's text (a reply's index in LOLA_TEXT) counts as the message mission. */
+  lola?(reply: number): Promise<StarterResult<boolean>>;
 }
+
+/** Lola Lowdown's text in Messages during Starter Week (migration 0164, owner Nov 5): three ready-made replies, nothing
+    typed, so it needs no other player and nothing to moderate. Her voice: docs/culture/VOICE.md. */
+export const LOLA_TEXT = {
+  hello: "Psst 👀 New in town and already on my radar. Text me back, babe. Everyone does eventually 💋",
+  replies: [
+    { label: "Hi! I'm new here 👋", answer: "New AND polite? In Queens? Chile, write that down 📝 I'll be watching you, babe 💋" },
+    { label: "Who gave you my number?", answer: "Sources, sweetie. I always have sources 👀 Welcome to the city 💋" },
+    { label: "Got any tea?", answer: "Do I have tea. Open my Tea app and start digging 🍵 First sip's on me 💋" },
+  ],
+} as const;
 
 /** Today's Starter Week day; before migration 0163 every mission counts as open. */
 export const starterDay = (s: Pick<StarterState, "day"> | null | undefined) => s?.day ?? STARTER_DAYS;

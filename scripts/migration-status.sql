@@ -177,6 +177,7 @@ from (values
   ('0160_no_tasks_in_holding.sql', coalesce((exists (select 1 from pg_proc where proname='complete_task' and pronamespace='public'::regnamespace and position('0160: nothing is done from the bench' in prosrc) > 0)), false)),
   ('0161_companies.sql', to_regclass('public.companies') is not null),
   ('0162_school_race.sql', to_regclass('public.school_races') is not null),
-  ('0163_starter_days.sql', to_regprocedure('public.starter_day(uuid)') is not null)
+  ('0163_starter_days.sql', to_regprocedure('public.starter_day(uuid)') is not null),
+  ('0164_starter_lola_text.sql', to_regprocedure('public.starter_lola_reply(integer)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
