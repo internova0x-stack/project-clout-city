@@ -3351,3 +3351,5 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 @media (prefers-reduced-motion: reduce) { .crown-q { animation:none; } }
 .fx.fx-warn { background:var(--neon-tint); color:var(--neon-text); }
 .crown-later { display:flex; align-items:center; gap:10px; width:100%; border:0; text-align:left; font:inherit; color:inherit; cursor:pointer; }
+.camp-winner.crown-win { display:block; overflow:hidden; margin:0 auto; background:var(--night-900); }
+.camp-winner.crown-win canvas, .camp-winner.crown-win img, .camp-avatar canvas { width:100% !important; height:100% !important; display:block; object-fit:cover; }

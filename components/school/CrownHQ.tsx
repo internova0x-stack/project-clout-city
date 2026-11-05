@@ -5,6 +5,7 @@ import { Sheet } from "@/components/Sheet";
 import { celebrate } from "@/components/Celebrate";
 import { firstTime } from "@/components/seenOnce";
 import { campusById } from "@/lib/campus";
+import { CAREER } from "@/lib/careers";
 import { ACTIVITIES, RACE, tierOf, type Activity, type RaceView, type Slot } from "@/lib/schoolRace";
 import type { SchoolApi, SchoolResult, SchoolScreen } from "@/lib/schoolApi";
 
@@ -129,12 +130,12 @@ function Declare({ data, busy, onGo }: { data: SchoolScreen; busy: boolean; onGo
           {rival && <span className="meta">Your rival: {rival.name}, {queen ? "Queen" : "King"} three years running.</span>}
         </span>
       </div>
-      <div className="fx-row" style={{ marginTop: 0 }}>
+      <div className="fx-row">
         <span className="fx">📚 Keep a {RACE.eligibleGpa.toFixed(1)} GPA</span>
-        <span className="fx">🗓️ {RACE.weeks} weeks</span>
+        <span className="fx">💼 Your job goes part-time: {CAREER.partTime.days} workdays a week</span>
         <span className="fx fx-clout">👑 +{RACE.rewards.crown} clout</span>
       </div>
-      {data.blockText && data.block !== "running" && <p className="meta" style={{ margin: 0, color: "var(--red-text)" }}>{data.blockText}</p>}
+      {data.blockText && data.block !== "running" && <p className="meta" style={{ marginBottom: 0, color: "var(--red-text)" }}>{data.blockText}</p>}
       <div className="stack-8">
         <button className="btn btn-taxi" style={{ width: "100%" }} disabled={busy || !data.canDeclare} onClick={onGo}>I&apos;m running</button>
         <p className="meta" style={{ textAlign: "center", margin: 0 }}>Starts {starts} · Homecoming in {RACE.weeks} weeks</p>
@@ -325,7 +326,7 @@ function Picker({ at, current, can, examEve, onClose, onPick }: {
   return (
     <Sheet open={!!at} onClose={onClose} label="Pick an activity">
       {at && (
-        <div className="stack-12">
+        <div className="camp stack-12">
           <div className="stack-2"><span className="overline">{DAYS[at.day]} · {at.slot ? "Night" : "Day"}</span><span className="display-sm">What are you doing?</span></div>
           <div className="choice-options" role="radiogroup" aria-label="Activities">
             {list.map((a) => (
@@ -605,7 +606,7 @@ function Homecoming({ v, me }: { v: RaceView; me: ReactNode }) {
       {all && (
         <div className="card stack-8 camp-ending">
           {won
-            ? <span className="camp-winner" style={{ display: "block", overflow: "hidden" }}>{me}</span>
+            ? <div className="camp-winner crown-win">{me}</div>
             // eslint-disable-next-line @next/next/no-img-element
             : <img className="camp-winner" src={`/cast/school-${v.rival.id}.webp`} alt={v.rival.name} />}
           <p className="display-md" style={{ margin: 0 }}>{won ? `Homecoming ${crownWord}` : res.ending === "ineligible" ? "Off the ballot" : "Runner-up"}</p>
@@ -617,5 +618,5 @@ function Homecoming({ v, me }: { v: RaceView; me: ReactNode }) {
   );
 }
 
-const winLine = (v: RaceView) => `${first(v.rival.name)} has been dethroned. ${v.crown === "queen" ? "She's" : "He's"} taking it well. ${v.crown === "queen" ? "She" : "He"} is not.`;
-const lossLine = (v: RaceView) => `${first(v.rival.name)} keeps the crown. Again. The speech ran long.`;
+const winLine = (v: RaceView) => v.rival.win;
+const lossLine = (v: RaceView) => v.rival.loss;

@@ -110,3 +110,16 @@ test("tiers follow the crown's own words", () => {
   assert.equal(nextMonday("2026-11-04"), "2026-11-09");
   assert.equal(nextMonday("2026-11-09"), "2026-11-09");
 });
+
+test("a new week starts on its Monday: the view and that week's mail arrive that day", () => {
+  const s = startRace(content, { id: "mon", campus: "st-johnsons", crown: "queen", startOn: START, job: true, dating: true });
+  const monday = addDays(START, 7);
+  for (let i = 0; i < 20; i++) {
+    refresh(content, s, monday, () => 0.5);
+    if (!s.pending.length) break;
+    choose(content, s, s.pending[0], content.cards.find((c) => c.id === s.pending[0])!.options[0].id, () => 0.5);
+  }
+  assert.equal(s.playedTo, monday);
+  assert.equal(raceView(content, s, monday).week, 2);
+  for (const m of content.inbox.filter((x) => x.week === 2)) assert.ok(s.inbox.some((x) => x.id === m.id), m.id);
+});

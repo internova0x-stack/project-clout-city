@@ -691,6 +691,21 @@ components live in `app/globals.css`.
   on leave at once (`careerLeave` through career_save); no new job mid-campaign ('campaign_running'); City Hall staff get their own line.
   The campaign pays its manager C$300 a campaign week from its funds (`CAMPAIGN.money.fee`, ledger 'campaign_fee', which migration 0161's
   campaign_save accepts; the Budget card lists it). The start screen says so (`CampaignScreen.job`). `?career=leave` in the preview.
+- The Homecoming race (migration 0162, owner Nov 4: "big man/woman on campus… schooling as a balancing act"; docs/SCHOOL-RACE.md):
+  an enrolled student declares for the crown (Crown HQ, a lazySheet: components/school/CrownHQ.tsx; the campus card's "👑 Crown HQ",
+  `?open=crown`) after meeting the reigning royal on the Quad (components/school/MeetRival.tsx, once per device). The crown follows the
+  creator's body (`modelSex(look)`): Queen against Marisol Vega, King against Chad Wellington III (tiers Queen Bee / It Girl, Big Man on
+  Campus / It Person); other players are never rivals. Four real weeks from the next Monday; the planner (7 days × day and night: Class,
+  Study, Party, Club, Work shift, Hang out, Date, Sleep) plays one New York day per day (catch-up on read), Friday's exam and verdict (a
+  results card; under a 2.5 GPA is a strike), clash cards in the Moral Choices format with consequences that come back, the Dean's
+  hidden heat (60 = off the ballot), Inbox, Squad, Allies (five cliques) and Budget; Homecoming (Saturday of week 4) counts the votes
+  clique by clique. The rules are TypeScript (lib/schoolRace.ts, pure; app/home/schoolActions.ts with a crypto random source and the
+  service role; lib/schoolSim.ts in the preview); content/school/race.json holds the odds, so only those import lib/schoolContent.ts.
+  public.school_races: `school_begin` (enrolled, account 7+ days, one running, not while a campaign runs and `campaign_begin` refuses
+  'school_running'), `school_save` (versioned; ledger school_cash, school_spend, school_mood, school_meter (±15 a race),
+  school_week, school_crown; badges homecoming-king/queen; rate bucket 'school'); Start over abandons it. A career job goes part-time
+  while a race runs (`CareerCtx.partTime`, `CAREER.partTime`: 2 workdays a week, paid for the days worked; `?career=parttime`).
+  `?school=intro|declare|plan|clash|verdict|crown|hq|ineligible` (with `&open=crown`; `&crown=king|queen`) in the preview.
 - Office cards (no migration; owner, Oct 31: "go with 1, 2, and 3"; spec section 29): content/choices/office.json, 19 Moral
   Choices cards for players with a career job (10 for any job, one per track) plus two chain follow-ups (office-expenses-audit,
   finance-pickle-suits). `where.work` means a card happens at your job: right after a career workday (GameShell asks with after

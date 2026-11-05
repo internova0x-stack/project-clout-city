@@ -252,8 +252,10 @@ export function refresh(content: RaceContent, s: RaceState, today: string, rng: 
     s.playedTo = addDays(s.playedTo, 1);
     changed = true;
   }
-  // Today's clash shows as the day starts (before its slots play).
   const at = weekDay(s, today);
+  // A new week starts on its Monday, before any of its slots play: the planner, mail and Monday's clash are that week's.
+  if (s.phase === "running" && !s.pending.length && at.week > s.week && at.week <= RACE.weeks && s.playedTo === today) { newWeek(content, s, pay); changed = true; }
+  // Today's clash shows as the day starts (before its slots play).
   if (s.phase === "running" && at.week >= 1 && !s.pending.length) {
     const due = content.cards.find((c) => c.week === s.week && c.slot && c.slot.day === at.day && !s.seen.includes(c.id) && !c.laterOnly);
     if (due) { s.pending.push(due.id); changed = true; }
@@ -350,7 +352,7 @@ function homecoming(content: RaceContent, s: RaceState, rng: Rng, pay: Payout[])
 export interface RaceView {
   id: string; campus: string; crown: Crown; week: number; weeks: number; phase: RaceState["phase"]; today: number;
   gpa: number; rep: number; energy: number; tier: string; eligible: boolean; strikes: number;
-  rival: { id: string; name: string; tier: string; lead: number };
+  rival: { id: string; name: string; tier: string; lead: number; win: string; loss: string };
   plan: Activity[][]; locked: number;
   budget: RaceState["budget"];
   pending: { id: string; emoji: string; over: string; title: string; options: { id: string; label: string; get: string; cost: string }[] } | null;
@@ -373,7 +375,7 @@ export function raceView(content: RaceContent, s: RaceState, today: string): Rac
   return {
     id: s.id, campus: s.campus, crown: s.crown, week: s.week, weeks: RACE.weeks, phase: s.phase, today: at.day,
     gpa: s.gpa, rep: s.rep, energy: s.energy, tier: tierOf(s.rep, s.crown), eligible: s.eligible && s.gpa >= RACE.eligibleGpa, strikes: s.strikes,
-    rival: { id: rival.id, name: rival.name, tier: tierOf(s.rivalRep, s.crown), lead: Math.max(0, s.rivalRep - s.rep) },
+    rival: { id: rival.id, name: rival.name, tier: tierOf(s.rivalRep, s.crown), lead: Math.max(0, s.rivalRep - s.rep), win: rival.win, loss: rival.loss },
     plan: s.plan, locked: at.week === s.week ? at.day : 0, budget: s.budget,
     pending: card ? { id: card.id, emoji: card.emoji, over: fill(card.over), title: fill(card.title), options: card.options.map(({ id, label, get, cost }) => ({ id, label: fill(label), get: fill(get), cost: fill(cost) })) } : null,
     inbox: s.inbox.map((x) => { const m = content.inbox.find((y) => y.id === x.id)!;

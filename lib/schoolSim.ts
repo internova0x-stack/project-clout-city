@@ -48,6 +48,8 @@ export function createSchoolSim(preset: string | null, opts: { crown: Crown; ban
     s.plan = [["class", "club"], ["class", "hang"], ["class", "study"], ["class", "party"], ["class", "sleep"], ["work", "party"], ["sleep", "study"]];
     if (preset === "crown") { s.rep = 70; s.standing = { greek: 0, theater: 2, finance: 1, athletes: -1, influencers: 2 }; }
     refresh(content, s, today, rng);
+    // The sample week leaves Energy near empty; the presets open rested (time is faked here anyway).
+    if (s.phase === "running") s.energy = Math.max(s.energy, 64);
     if (preset === "hq") {
       s.budget = { party: 300, look: 150, merch: 100, tutor: 0, squad: 200 };
       const m = s.inbox.find((x) => x.id === "m-dee");
