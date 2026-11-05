@@ -77,7 +77,7 @@ import { rememberedTap } from "@/lib/characterMemory";
 import { DeleteAccountSheet, type DeleteAccountAction } from "./DeleteAccount";
 import { BARKSLEY, barksleyMeet, barksleyMet } from "@/lib/barksley";
 import { track as trackEvent, trackedCity } from "@/lib/analytics";
-import { APP_UNLOCKS, STARTER_FINISH, STARTER_MISSIONS, nextMission, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
+import { APP_UNLOCKS, STARTER_FINISH, STARTER_MISSIONS, STARTER_UNLOCK_DAY, nextMission, starterDay, starterToast, type StarterApi, type StarterMission, type StarterState } from "@/lib/starter";
 import { VisitBar, VisitPrompt, VisitsSheet, type VisitHandlers } from "./home/Visits";
 import { KIND_LABEL, VISITS, VISIT_POLL_MS, hostCloutPerGuest, visitAlerts, visitClock, type VisitApi, type VisitHome, type VisitMessage, type VisitRoom, type VisitState } from "@/lib/visits";
 import { homeScore as scoreHome, qualityTarget, tierFor, type HomeScore, type ScoredPiece } from "@/lib/homeScore";
@@ -2084,6 +2084,8 @@ export function GameShell({
   // Starter Week: the current mission; Go takes the player where it happens.
   const [starter, setStarter] = useState<StarterState | null>(null);
   const starterLoading = useRef(false);
+  /** Rank 2's apps wait until Starter Week's day 3 (owner, Nov 5: day 1 is just the city). */
+  const starterHold = !!starter?.active && starterDay(starter) < STARTER_UNLOCK_DAY;
   // Null or over once: never asked again this session (older players, hidden, finished, or past its days).
   const starterOver = useRef(false);
   const loadStarter = useCallback(async () => {
@@ -2095,10 +2097,12 @@ export function GameShell({
     setStarter(r.data && r.data.active ? r.data : null);
     const d = r.data;
     if (!d || (!d.paid.length && !d.finished)) return;
+    for (const m of d.paid) trackEvent("starter_mission_done", { mission: m.id, day: starterDay(d) });
     if (d.finished) {
-      celebrate({ rung: 3, emoji: "🗽", num: String(STARTER_MISSIONS.length), art: "story", twist: "stamp", tag: "Starter Week · All ten", title: STARTER_FINISH.name,
-        line: "Ten missions in your first week. You live here now. Rent and all.",
-        rewards: [{ tone: "cash", text: `+C$${STARTER_FINISH.cash}` }, { text: `🏅 ${STARTER_FINISH.name}` }, { text: `🧶 ${STARTER_FINISH.furniture}` }],
+      trackEvent("starter_week_finished", { day: starterDay(d) });
+      celebrate({ rung: 3, emoji: "🗽", num: String(STARTER_MISSIONS.length), art: "story", twist: "stamp", tag: `Starter Week · All ${STARTER_MISSIONS.length}`, title: STARTER_FINISH.name,
+        line: "Your first week, start to rent day. You live here now. Rent and all.",
+        rewards: [{ tone: "cash", text: `+C$${STARTER_FINISH.cash.toLocaleString("en-US")}` }, { text: `🏅 ${STARTER_FINISH.name}` }, { text: `🧶 ${STARTER_FINISH.furniture}` }],
         lola: "You consoled a depressed Pomeranian and paid rent on time. That\u2019s more than most.", share: `I finished Starter Week in Clout City: ${STARTER_FINISH.name}.` });
     } else setToast(d.paid.length === 1 ? starterToast(d.paid[0].id) : `⭐ Starter Week: ${d.paid.length} missions done`);
     if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
@@ -2116,6 +2120,8 @@ export function GameShell({
     if (g.kind === "place") { setTab("map"); openPlace(g.place); }
     else if (g.kind === "app") setPhone({ open: true, app: g.app });
     else if (g.kind === "shop") openShop(g.category);
+    else if (g.kind === "careers") setCareersOpen(true);
+    else if (g.kind === "map") setTab("map");
     else setPanel(g.panel === "look" ? (cityOn ? "look" : "profile") : g.panel);
   };
   // Starter Week's dog: at Astoria Park for the first time this week, Sir Barksley's scene opens by itself (owner, Oct 27).
@@ -2299,7 +2305,7 @@ export function GameShell({
     if (!rest.length && cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c));
   };
   // The current mission's place glows on the map (owner, Oct 26).
-  const starterPlace = (() => { const g = starter ? nextMission(starter.done)?.go : null; return g?.kind === "place" ? g.place : null; })();
+  const starterPlace = (() => { const g = starter ? nextMission(starter.done, starterDay(starter))?.go : null; return g?.kind === "place" ? g.place : null; })();
   const starterPins = useMemo(() => starterPlace ? cityPins.map((p) => p.id === starterPlace ? { ...p, glow: true } : p) : cityPins, [cityPins, starterPlace]);
   const leaveVisit = async () => {
     if (!visits || visitAt === null) return;
@@ -2594,8 +2600,9 @@ export function GameShell({
     if (!city || !bizTried) return;
     if (seenRank.current !== null && myRank.level > seenRank.current) setRankUp(myRank);
     // Businesses and Jobs open at Rank 2 (owner, Oct 26): a device that saw them locked gets Lola's "New for you" once.
+    // During Starter Week they wait until its day 3 (owner, Nov 5: one thing at a time), then the reveal plays.
     try {
-      if (myRank.level < APP_UNLOCKS.jobs.rank) localStorage.setItem(UNLOCK_KEY, "locked");
+      if (myRank.level < APP_UNLOCKS.jobs.rank || starterHold) localStorage.setItem(UNLOCK_KEY, "locked");
       else if (localStorage.getItem(UNLOCK_KEY) === "locked") { localStorage.setItem(UNLOCK_KEY, "shown"); setUnlockReveal(true); }
     } catch { /* private mode: no reveal */ }
     seenRank.current = myRank.level;
@@ -3450,7 +3457,7 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
-        starter={starter && !inside && flow === "none" && !visitView ? <StarterPill done={starter.done} onOpen={() => setPanel("starter")} /> : null}
+        starter={starter && !inside && flow === "none" && !visitView ? <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} /> : null}
         homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !sharedHome && !visitView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
         quests={trip ? [] : quests}
         time={clock.time}
@@ -3880,7 +3887,7 @@ export function GameShell({
         </>
       )}
       <PhoneModal
-        locked={lockAppsPreview || myRank.level < 2 ? Object.fromEntries(Object.entries(APP_UNLOCKS).filter(([, u]) => lockAppsPreview || myRank.level < u.rank).map(([id, u]) => [id, u.label])) : undefined}
+        locked={lockAppsPreview || myRank.level < 2 || starterHold ? Object.fromEntries(Object.entries(APP_UNLOCKS).filter(([, u]) => lockAppsPreview || starterHold || myRank.level < u.rank).map(([id, u]) => [id, starterHold && myRank.level >= u.rank ? `day ${STARTER_UNLOCK_DAY} of Starter Week` : u.label])) : undefined}
         invite={(() => {
           const e = city?.calendar && cityApi?.calendarAttend ? phoneInvite(calendarData.events, city.calendar.attended, gameNow) : null;
           return e ? { event: e, onOpen: () => { setPhone({ open: false, app: null }); setPanel("events"); } } : undefined;
@@ -3899,7 +3906,7 @@ export function GameShell({
         conditions={conditions}
         companies={companies}
         election={campaign && campaignRunning === false ? {
-          unlocked: myRank.level >= APP_UNLOCKS.campaign.rank, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
+          unlocked: myRank.level >= APP_UNLOCKS.campaign.rank && !starterHold, clout: me.clout, need: RANKS[APP_UNLOCKS.campaign.rank - 1].clout,
           onOpen: () => { setPhone({ open: false, app: null }); setCampaignOpen(true); },
         } : undefined}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
@@ -4078,7 +4085,7 @@ export function GameShell({
           <BarksleySheet open={!!barksley} first={!!barksley?.first} today={city?.today ?? ""}
             onClose={() => { if (barksley?.first) { barksleyMeet(); setToast("⭐ You consoled a billionaire's depressed dog. Tipped from his allowance."); } setBarksley(null); }} />
           {starter && (
-            <StarterSheet open={panel === "starter"} onClose={() => setPanel(null)} done={starter.done} daysLeft={starter.daysLeft}
+            <StarterSheet open={panel === "starter"} onClose={() => setPanel(null)} done={starter.done} day={starterDay(starter)}
               onGo={starterGo} onHide={() => { setStarter(null); setPanel(null); void starterIn?.hide(); setToast("Starter Week hidden. You've got this."); }} />
           )}
           <HomeScoreSheet

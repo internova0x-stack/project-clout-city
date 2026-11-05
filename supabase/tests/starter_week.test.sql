@@ -1,5 +1,7 @@
 -- Scenario test for migration 0122 (Starter Week): missions marked by what the game already writes, paid once by
--- starter_state(), the finish reward, hiding, the 7-day end, and players from before it never seeing it.
+-- starter_state(), the finish reward, hiding, the end after rent day, and players from before it never seeing it.
+-- Migration 0163: missions by the day (day 1 on the day it started), three new missions (work, choice, host), the dog's
+-- C$150 tip, the C$1,000 finish, and the week running by New York day through rent day (day 8).
 \set ON_ERROR_STOP on
 \pset tuples_only on
 begin;
@@ -30,7 +32,8 @@ set role authenticated;
 -- ---- Before anything: the first mission is next, nothing paid ----
 select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'done') = 0, 'nothing done yet');
-select pg_temp.assert((public.starter_state() ->> 'daysLeft')::int = 7, 'seven days');
+select pg_temp.assert((public.starter_state() ->> 'day')::int = 1, 'day 1');
+select pg_temp.assert((public.starter_state() ->> 'daysLeft')::int = 7, 'seven more days, through rent day');
 select pg_temp.as_(pg_temp.u(12)::text);
 select pg_temp.assert(public.starter_state() is null, 'older players never see it');
 
@@ -43,7 +46,7 @@ insert into public.place_visits (player_id, place_id, ny_date) values (pg_temp.u
 set role authenticated;
 select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'paid') = 2, 'breakfast and park paid now');
-select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 525, 'C$25 + the dog''s C$500 tip (migration 0123)');
+select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 175, 'C$25 + the dog''s C$150 tip (migration 0163)');
 select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'paid') = 0, 'paid once');
 select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(12)) = 0, 'veteran: nothing');
 reset role;
@@ -66,14 +69,22 @@ insert into public.gossip_found (player_id, story_id, piece, via) values (pg_tem
 insert into public.bills (player_id, kind, amount, due_date) values (pg_temp.u(11), 'rent', 100, public.ny_today());
 update public.bills set status = 'paid', paid_at = now() where player_id = pg_temp.u(11) and kind = 'rent';
 insert into public.event_attendance (player_id, event_id, ny_date) values (pg_temp.u(11), 'test-night', public.ny_today());
-select pg_temp.assert((select count(*) from public.starter_marks where player_id = pg_temp.u(11)) = 10, 'all ten marked');
+-- Migration 0163: a workday at a career job, a choice made, people over.
+insert into public.careers (id, player_id, track, state) values (gen_random_uuid(), pg_temp.u(11), 'hospitality', '{}');
+update public.careers set last_work_day = public.ny_today() where player_id = pg_temp.u(11);
+insert into public.choice_log (player_id, card, base, area, day) values (pg_temp.u(11), 'test-card', 'test-card', 'street', public.ny_today());
+select pg_temp.assert(not exists (select 1 from public.starter_marks where player_id = pg_temp.u(11) and mission = 'choice'), 'a card shown is not a choice made');
+update public.choice_log set status = 'chosen', option = 'a', chosen_at = now() where player_id = pg_temp.u(11);
+insert into public.visits (host, kind, home_id, starts_at, ends_at, capacity, ny_date)
+  values (pg_temp.u(11), 'hang', 'astoria_studio', now(), now() + interval '1 hour', 4, public.ny_today());
+select pg_temp.assert((select count(*) from public.starter_marks where player_id = pg_temp.u(11)) = 13, 'all thirteen marked');
 set role authenticated;
 
 -- ---- Finishing: every mission paid, then C$500, the badge and the rug ----
 select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert((public.starter_state() ->> 'finished')::boolean, 'finished');
-select pg_temp.assert(pg_temp.paid('starter_finish', pg_temp.u(11)) = 500, 'C$500');
-select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 25 + 500 + 15 + 50 + 10 + 75 + 15 + 20 + 20 + 25, 'every mission once');
+select pg_temp.assert(pg_temp.paid('starter_finish', pg_temp.u(11)) = 1000, 'C$1,000');
+select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(11)) = 25 + 150 + 15 + 50 + 10 + 75 + 20 + 15 + 25 + 20 + 20 + 25 + 20, 'every mission once');
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'starter-week'), 'badge');
 select pg_temp.assert(exists (select 1 from public.player_items where player_id = pg_temp.u(11) and sku = 'home-rug-violet' and acquired = 'earned'), 'the rug');
 select pg_temp.assert(not (public.starter_state() ->> 'finished')::boolean, 'finish shows once');
@@ -87,8 +98,13 @@ select pg_temp.assert(not (public.starter_state() ->> 'active')::boolean, 'hidde
 reset role;
 select public.starter_mark(pg_temp.u(13), 'event');
 select pg_temp.assert(not exists (select 1 from public.starter_marks where player_id = pg_temp.u(13)), 'no marks once hidden');
-update public.starter_progress set hidden_at = null, started_at = now() - interval '8 days' where player_id = pg_temp.u(13);
-select pg_temp.assert(not public.starter_active(pg_temp.u(13)), 'over after 7 days');
+-- The rent fix (0163): a week after it started is rent day, day 8, and it's still on; the day after, it's over.
+update public.starter_progress set hidden_at = null, started_at = (public.ny_today() - 7)::timestamp at time zone 'America/New_York' + interval '23 hours'
+ where player_id = pg_temp.u(13);
+select pg_temp.assert(public.starter_active(pg_temp.u(13)), 'still on on rent day, even for a late-night start');
+select pg_temp.assert(public.starter_day(pg_temp.u(13)) = 8, 'rent day is day 8');
+update public.starter_progress set started_at = now() - interval '8 days' where player_id = pg_temp.u(13);
+select pg_temp.assert(not public.starter_active(pg_temp.u(13)), 'over after rent day');
 
 -- ---- Players can't call the internals ----
 set role authenticated;

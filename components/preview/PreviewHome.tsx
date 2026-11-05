@@ -153,7 +153,7 @@ export function PreviewHome({
   homeScorePreset?: string;
   /** ?visit=none|hosting|invite|guest: having people over (migration 0121) in that state. */
   visitPreset?: string;
-  /** ?starter=0-10: Starter Week with that many missions done. */
+  /** ?starter=0-13: Starter Week with that many missions done; ?starter=day1-8: that day, earlier days done. */
   starterPreset?: string;
   /** ?apps=locked: Businesses and Jobs locked as for a Rank 1 player. */
   appsPreset?: string;
@@ -481,8 +481,11 @@ export function PreviewHome({
 
   // City actions can finish story tasks (as do_action does in SQL).
   // Starter Week in memory (lib/starterSim.ts): the wrapped calls below mark missions the way migration 0122's triggers do.
-  const starterSim = useMemo(() => createStarterSim(Number(starterPreset) || 0, (cash, clout) => sim.huntReward(cash, clout)), [starterPreset, sim]);
+  const starterSim = useMemo(() => createStarterSim(starterPreset ?? 0, (cash, clout) => sim.huntReward(cash, clout)), [starterPreset, sim]);
   const mark = starterSim.mark;
+  // Migration 0163's new missions: a workday, a choice made, people over.
+  const starterCareers = useMemo(() => ({ ...careerApi, start: async (...a: Parameters<typeof careerApi.start>) => { const r = await careerApi.start(...a); if (r.ok) mark("work"); return r; } }), [careerApi, mark]);
+  const starterChoices = useMemo(() => ({ ...choicesApi, choose: async (...a: Parameters<typeof choicesApi.choose>) => { const r = await choicesApi.choose(...a); if (r.ok) mark("choice"); return r; } }), [choicesApi, mark]);
   const api = useMemo(() => ({
     ...sim,
     async travel(...a: Parameters<NonNullable<typeof sim.travel>>): Promise<CityResult> {
@@ -683,6 +686,7 @@ export function PreviewHome({
     };
   }, [huntPreset, player.starting_style, sim]);
   const noop = async () => {};
+  const starterVisits = useMemo<VisitApi>(() => ({ ...visitApi, host: async (...a) => { const r = await visitApi.host(...a); if (r.ok) mark("host"); return r; } }), [visitApi, mark]);
   return (
     <GameShell
       calendarData={calendar}
@@ -703,7 +707,7 @@ export function PreviewHome({
       dating={cityOff ? undefined : dating}
       couple={cityOff ? undefined : couple}
       sublet={cityOff ? undefined : sublet}
-      visits={cityOff ? undefined : visitApi}
+      visits={cityOff ? undefined : starterVisits}
       starter={cityOff || starterPreset === undefined ? undefined : starterSim.api}
       lockAppsPreview={appsPreset === "locked"}
       // Delete my account: the preview says what would happen and deletes nothing.
@@ -718,12 +722,12 @@ export function PreviewHome({
       radio={cityOff ? undefined : radioApi}
       mayor={cityOff ? undefined : mayorApi}
       campaign={cityOff ? undefined : campaignApi}
-      careers={cityOff ? undefined : careerApi}
+      careers={cityOff ? undefined : starterCareers}
       underworld={cityOff ? undefined : underworldApi}
       gala={cityOff ? undefined : galaApi}
       pass={cityOff ? undefined : passApi}
       life={cityOff ? undefined : lifeApi}
-      choices={cityOff ? undefined : choicesApi}
+      choices={cityOff ? undefined : starterChoices}
       remembered={cityOff || (choicePreset !== "story" && choicePreset !== "city") ? undefined : rememberedSim}
       campus={cityOff ? undefined : campusApi}
       school={cityOff ? undefined : schoolApi}

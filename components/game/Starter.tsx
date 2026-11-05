@@ -1,56 +1,75 @@
 "use client";
 
-import { STARTER_DAYS, STARTER_FINISH, STARTER_MISSIONS, nextMission, rewardLine, type StarterMission } from "@/lib/starter";
+import { STARTER_FINISH, STARTER_MISSIONS, dayLabel, nextDay, nextMission, rewardLine, type StarterMission } from "@/lib/starter";
 import { LOLA_PORTRAIT } from "@/lib/cast";
 import { Sheet } from "../Sheet";
 
-// Starter Week (owner, Oct 26): the current mission in a pill under "Invite your Crew", and the whole list in a sheet
-// with a Go button for the one that's next. Missions can be done in any order (migration 0122 marks them as they happen);
-// the pill shows the first one in the list that isn't done. Daily tasks and the tour are unchanged.
+// Starter Week (owner, Oct 26; by the day, migration 0163, owner Nov 5): today's mission in a pill under "Invite your
+// Crew", and the week in a sheet, grouped by day, with a Go button for the one that's next. A few missions open each New
+// York day; one done early still counts and pays. Later days show what they hold but no Go.
 
-export function StarterPill({ done, onOpen }: { done: readonly string[]; onOpen: () => void }) {
-  const m = nextMission(done);
-  if (!m) return null;
+export function StarterPill({ done, day, onOpen }: { done: readonly string[]; day: number; onOpen: () => void }) {
+  const m = nextMission(done, day);
+  const soon = m ? null : nextDay(done, day);
+  if (!m && !soon) return null;
+  const count = `⭐ ${done.length}/${STARTER_MISSIONS.length}`;
   return (
-    <button className="pill-glass glass-hud starter-pill" onClick={onOpen} aria-label={`Starter Week, ${done.length} of ${STARTER_MISSIONS.length} done. Next: ${m.title}`}>
-      <span className="starter-count">⭐ {done.length}/{STARTER_MISSIONS.length}</span>
-      <span className="starter-next">{m.emoji} {m.title}</span>
+    <button className="pill-glass glass-hud starter-pill" onClick={onOpen}
+      aria-label={m ? `Starter Week, ${done.length} of ${STARTER_MISSIONS.length} done. Next: ${m.title}` : `Starter Week: today's done. More ${soon!.day === day + 1 ? "tomorrow" : `on ${dayLabel(soon!.day)}`}`}>
+      <span className="starter-count">{count}</span>
+      <span className="starter-next">{m ? `${m.emoji} ${m.title}` : `✅ ${soon!.count} more ${soon!.day === day + 1 ? "tomorrow" : `on ${dayLabel(soon!.day)}`}`}</span>
       <span aria-hidden="true">›</span>
     </button>
   );
 }
 
-export function StarterSheet({ open, onClose, done, daysLeft, onGo, onHide }: {
-  open: boolean; onClose: () => void; done: readonly string[]; daysLeft: number;
+export function StarterSheet({ open, onClose, done, day, onGo, onHide }: {
+  open: boolean; onClose: () => void; done: readonly string[]; day: number;
   onGo: (m: StarterMission) => void; onHide: () => void;
 }) {
+  const next = nextMission(done, day);
+  const days = [...new Set(STARTER_MISSIONS.map((m) => m.day))];
   return (
     <Sheet open={open} onClose={onClose} label="Starter Week" tall>
       <div className="stack-16">
         <div className="stack-4" style={{ paddingRight: 44 }}>
-          <span className="overline">Starter Week · {daysLeft} day{daysLeft === 1 ? "" : "s"} left</span>
+          <span className="overline">Starter Week · {dayLabel(day)}</span>
           <h2 className="display-md" style={{ margin: 0 }}>Your first week in Queens</h2>
-          <span className="meta">Ten small things that show you how the city works. Each one pays.</span>
+          <span className="meta">A few new things each day, ending with your first rent. Each one pays.</span>
         </div>
         <div className="home-score-bar" aria-hidden="true"><i style={{ width: `${(100 * done.length) / STARTER_MISSIONS.length}%`, background: "var(--neon-500)" }} /></div>
-        <div className="stack-8">
-          {STARTER_MISSIONS.map((m, i) => {
-            const state = done.includes(m.id) ? "done" : m.id === nextMission(done)?.id ? "now" : "later";
-            return (
-              <div key={m.id} className={`list-row starter-row ${state}`}>
-                <span className="starter-dot" aria-hidden="true">{state === "done" ? "✓" : i + 1}</span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span className="title" style={{ display: "block" }}>{m.emoji} {m.title}</span>
-                  <span className="meta">{state === "now" ? `${m.why} ${rewardLine(m.reward)}` : rewardLine(m.reward)}</span>
-                </span>
-                {state === "now" && <button className="btn btn-taxi btn-sm" onClick={() => onGo(m)}>Go</button>}
-              </div>
-            );
-          })}
-        </div>
-        <div className="crew-bonus">🏅 All ten: the “{STARTER_FINISH.name}” badge, C${STARTER_FINISH.cash} and a {STARTER_FINISH.furniture.toLowerCase()}.</div>
+        {days.map((d) => {
+          const list = STARTER_MISSIONS.filter((m) => m.day === d);
+          const locked = d > day;
+          // A finished day folds into one line, so today is at the top of the list.
+          if (list.every((m) => done.includes(m.id))) return (
+            <div key={d} className="list-row starter-row done starter-day-done">
+              <span className="starter-dot" aria-hidden="true">✓</span>
+              <span className="title" style={{ flex: 1 }}>{dayLabel(d)} · {list.length === 1 ? "done" : `all ${list.length} done`}</span>
+            </div>
+          );
+          return (
+            <div key={d} className="stack-8">
+              <span className="overline">{dayLabel(d)}{d === day ? " · today" : locked ? (d === day + 1 ? " · tomorrow" : "") : ""}</span>
+              {list.map((m) => {
+                const state = done.includes(m.id) ? "done" : m.id === next?.id ? "now" : "later";
+                return (
+                  <div key={m.id} className={`list-row starter-row ${state}${locked && state !== "done" ? " locked" : ""}`}>
+                    <span className="starter-dot" aria-hidden="true">{state === "done" ? "✓" : locked ? "🔒" : m.emoji}</span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span className="title" style={{ display: "block" }}>{m.title}</span>
+                      <span className="meta">{state === "now" ? `${m.why} ${rewardLine(m.reward)}` : rewardLine(m.reward)}</span>
+                    </span>
+                    {state === "now" && <button className="btn btn-taxi btn-sm" onClick={() => onGo(m)}>Go</button>}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+        <div className="crew-bonus">🏅 All {STARTER_MISSIONS.length}: the “{STARTER_FINISH.name}” badge, C${STARTER_FINISH.cash.toLocaleString("en-US")} and a {STARTER_FINISH.furniture.toLowerCase()}.</div>
         <button className="link-btn" style={{ alignSelf: "center" }} onClick={onHide}>Hide Starter Week</button>
-        <span className="meta" style={{ textAlign: "center" }}>It goes away by itself after {STARTER_DAYS} days.</span>
+        <span className="meta" style={{ textAlign: "center" }}>It ends by itself after rent day.</span>
       </div>
     </Sheet>
   );
