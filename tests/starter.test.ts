@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { STARTER_DAYS, STARTER_FINISH, STARTER_MISSIONS, STARTER_UNLOCK_DAY, dayLabel, nextDay, nextMission, rewardLine } from "../lib/starter.ts";
+import { LOLA_TEXT, STARTER_DAYS, STARTER_FINISH, STARTER_MISSIONS, STARTER_UNLOCK_DAY, dayLabel, nextDay, nextMission, rewardLine } from "../lib/starter.ts";
 import { createStarterSim } from "../lib/starterSim.ts";
 
 // Starter Week (migrations 0122, 0123; by the day since 0163): the code's mission list mirrors game_settings 'starter'.
@@ -64,4 +64,12 @@ test("the preview sim: presets by count or by day, each mission paid once, then 
   assert.ok(b.ok && b.data?.finished && cash === STARTER_FINISH.cash && !b.data.active);
   const c = await sim.api.state();
   assert.ok(c.ok && !c.data?.finished && c.data?.paid.length === 0);
+});
+
+test("Lola's text: three short replies, each answered, in her voice", () => {
+  assert.equal(LOLA_TEXT.replies.length, 3, "migration 0164 accepts replies 0 to 2");
+  for (const line of [LOLA_TEXT.hello, ...LOLA_TEXT.replies.flatMap((r) => [r.label, r.answer])]) assert.ok(line.length <= 140, line);
+  assert.ok(LOLA_TEXT.replies.every((r) => r.answer.endsWith("💋")), "she signs off with a kiss");
+  const sql = readFileSync(new URL("../supabase/migrations/0164_starter_lola_text.sql", import.meta.url), "utf8");
+  assert.match(sql, new RegExp(`not between 0 and ${LOLA_TEXT.replies.length - 1}`));
 });

@@ -124,4 +124,17 @@ select pg_temp.as_(pg_temp.u(13)::text);
 select pg_temp.assert(jsonb_array_length(public.starter_state() -> 'paid') = 0, 'the park paid once, in clout');
 select pg_temp.assert(pg_temp.paid('starter', pg_temp.u(13)) = 10, 'no tip on top');
 
+-- ---- Migration 0164: answering Lola's text counts as the message mission ----
+reset role;
+select pg_temp.assert(not exists (select 1 from public.starter_marks where player_id = pg_temp.u(13) and mission = 'message'), 'no message yet');
+set role authenticated;
+select pg_temp.as_(pg_temp.u(13)::text);
+select pg_temp.assert(public.starter_lola_reply(1), 'Lola answered');
+do $$ begin perform public.starter_lola_reply(7); raise exception 'FAIL: a reply that does not exist';
+exception when sqlstate '22023' then null; end $$;
+select pg_temp.as_(pg_temp.u(12)::text);
+select pg_temp.assert(not public.starter_lola_reply(0), 'older players: nothing to mark');
+reset role;
+select pg_temp.assert(exists (select 1 from public.starter_marks where player_id = pg_temp.u(13) and mission = 'message'), 'message mission marked');
+select pg_temp.assert(not exists (select 1 from public.starter_marks where player_id = pg_temp.u(12)), 'veteran: still no marks');
 rollback;

@@ -375,7 +375,9 @@ components live in `app/globals.css`.
   `day` (1 = the New York day it started, `starter_day`); the week runs by New York day through rent day, day 8 (the first rent
   bill appears a week after moving in, so the old 168-hour end made rent nearly impossible); one done early still counts and
   pays; new missions clock in at a job (day 5, careers.last_work_day), make a choice (day 6, choice_log 'chosen') and have
-  people over (day 7, visits); Sir Barksley's tip C$150, the finish C$1,000. The pill sits under "Invite your Crew"
+  people over (day 7, visits); Sir Barksley's tip C$150, the finish C$1,000. The message mission also counts by answering Lola's text
+  in Messages (migration 0164, owner Nov 5: `starter_lola_reply`, three ready-made replies in `LOLA_TEXT`, nothing typed or stored), shown
+  until the mission is done. The pill sits under "Invite your Crew"
   (components/game/Starter.tsx: today's next mission, or "✅ 2 more tomorrow" once today's are done; the sheet groups the days, later
   ones locked); the current mission's place glows on the map (`PlacePin.glow`). Businesses, Jobs and Campaign open at Rank 2
   (`APP_UNLOCKS`, Lola's `UnlockReveal` once), but during Starter Week they wait until its day 3 (`STARTER_UNLOCK_DAY`,

@@ -3911,6 +3911,8 @@ export function GameShell({
         } : undefined}
         tv={tvApi && tvNow ? { api: tvApi, onChange: setTvNow } : undefined}
         stations={stations && stationThreads.length ? { threads: stationThreads, onRead: readStation } : undefined}
+        lola={starterIn?.lola && starter?.active && !starter.done.includes("message")
+          ? { onReply: async (i) => { const r = await starterIn.lola!(i); if (r.ok && r.data) void loadStarter(); return r.ok && r.data; } } : undefined}
         radioDot={!!radioNow?.onAir && radioNow.onAir.date === radioNow.today && !!radioBanner}
         jobs={together && jobsHandlers ? { board: jobs, cash: city?.player.bank_cash ?? 0, hasBusiness: (biz?.owned.length ?? 0) > 0, h: jobsHandlers, economy } : undefined}
         economy={economy}

@@ -63,7 +63,7 @@ import {
 } from "./subletActions";
 import { homeScoreState } from "./homeScoreActions";
 import { AnalyticsUser } from "@/components/Analytics";
-import { starterHide, starterState } from "./starterActions";
+import { starterHide, starterLola, starterState } from "./starterActions";
 import { deleteAccount } from "./accountActions";
 import { visitAnswer, visitArrive, visitEnd, visitHome, visitHost, visitLeave, visitRoom, visitSay, visitSendHome, visitState } from "./visitActions";
 
@@ -253,7 +253,7 @@ export default async function HomePage() {
       // Migration 0120 switches on the home score's milestones (the score shows either way).
       homeScoreApi={homeS.ok ? { state: homeScoreState } : undefined}
       // Migration 0122 switches on Starter Week (starter_state fails before it runs).
-      starter={starterS.ok ? { state: starterState, hide: starterHide } : undefined}
+      starter={starterS.ok ? { state: starterState, hide: starterHide, lola: starterLola } : undefined}
       // Migration 0124 switches on Delete my account (account_delete_prepare fails before it runs, and nothing is deleted).
       deleteAccount={deleteAccount}
       // Migration 0121 switches on having people over (visit_state fails before it runs).

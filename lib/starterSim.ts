@@ -34,6 +34,7 @@ export function createStarterSim(preset: string | number, pay: (cash: number, cl
       return { ok: true, data: { done: [...done], startedAt, day, daysLeft: STARTER_DAYS - day, active: active(), paid: now, finished: justFinished } };
     },
     async hide() { hidden = true; return { ok: true, data: null }; },
+    async lola() { if (active()) done.add("message"); return { ok: true, data: active() || done.has("message") }; },
   };
   return { api, mark(id: string) { if (active()) done.add(id); } };
 }
