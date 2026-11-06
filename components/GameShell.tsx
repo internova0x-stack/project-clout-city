@@ -54,7 +54,7 @@ import { formatPrice, liveParty, needsConfirm, readReturn, type ExclusiveEvent, 
 import { TravelSheet, TripView, type Trip, type TripPlan } from "./city/Travel";
 import { KitchenSheet, RestSheet } from "./city/Rest";
 import { TeaRevealSheet } from "./city/Gossip";
-import { TEA_BADGE, leadAction, leadFrom, leadLine, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
+import { TEA_BADGE, gossipLeads, leadAction, leadFrom, leadLine, quietLine, type GossipApi, type GossipFind, type GossipState, type TeaCard } from "@/lib/gossip";
 import { LOTTO_BADGE, type LottoCard } from "@/lib/lotto";
 import { formatMiles, lineFor, milesBetween, travelQuote, type TravelMode } from "@/lib/travel";
 import { BigBuySheet, CollectionSheet, type MoneyHandlers } from "./city/Money";
@@ -2350,7 +2350,7 @@ export function GameShell({
   const nextOf = (st: GossipState | null, storyId: string): string | null => {
     const s = st?.stories.find((x) => x.id === storyId);
     const p = s && !s.done ? s.pieces.find((x) => !x.found && x.place) : undefined;
-    return p && !p.found && p.place ? leadAction({ place: p.place, source: p.source, hours: p.hours }) : null;
+    return p && !p.found && p.place ? leadAction({ place: p.place, source: p.source, hours: p.hours, title: s?.title }) : null;
   };
   const nextPlaceOf = (st: GossipState | null, storyId: string): string | null => {
     const s = st?.stories.find((x) => x.id === storyId);
@@ -3592,6 +3592,7 @@ export function GameShell({
         onOpenTasks={() => { markTasksSeen(); setPanel("tasks"); }}
       />
       <TasksSheet
+        gossipTopic={(placeId) => gossipLeads(teaState).find((l) => l.place === placeId)?.title}
         pass={passS ? {
           ready: passReady,
           node: <PassTab state={passS} today={city?.today ?? new Date().toISOString().slice(0, 10)} busy={busy !== null} price={priceOf(SEASON.sku)}

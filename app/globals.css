@@ -3366,7 +3366,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .camp-lead { font-size:12px; font-weight:800; white-space:nowrap; }
 .camp-lead.up { color:#1F6B4A; }
 .camp-lead.down { color:var(--neon-600, #D6246E); }
-.camp-option.radio[aria-checked="true"].camp-place { background:var(--neon-tint, #FFF0F6); }
+.camp-option.radio[aria-checked="true"].camp-place { background:var(--green-tint, #DEF2E9); border-color:var(--green-500, #2FB37A); }
+.camp-option.radio[aria-checked="true"].camp-place::before { border-color:var(--green-500, #2FB37A); background:radial-gradient(circle, var(--green-500, #2FB37A) 0 5px, var(--surface-raised) 6px); }
 .camp-slot.just { box-shadow:0 0 0 2px var(--green-500, #2FB37A) inset; animation:camp-just 2.6s ease-out; }
 .camp-just { color:#1F6B4A; font-weight:800; }
 @keyframes camp-just { 0% { background:var(--green-tint, #DEF2E9); transform:scale(1.02); } 20% { transform:scale(1); } 70% { background:var(--green-tint, #DEF2E9); } 100% { background:var(--surface-card); } }
@@ -3381,3 +3382,19 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 @keyframes camp-pop { from { opacity:0; transform:translateY(8px) scale(.96); } to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion: reduce) { .camp-pop, .camp-slot.just { animation:none; } }
 .camp-book-bar { position:sticky; bottom:0; display:flex; flex-direction:column; gap:6px; padding:12px 0 calc(8px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--surface-sheet, #FBF7F0) 75%, transparent); z-index:2; }
+
+/* Opening Campaign HQ (owner, Nov 6): the candidate's face, their chant, a loading bar. */
+.camp-loading { display:flex; flex-direction:column; align-items:center; gap:14px; padding:40px 8px 24px; }
+.camp-loading-face { position:relative; width:150px; height:150px; }
+.camp-loading-face img { width:100%; height:100%; border-radius:50%; object-fit:cover; position:relative; z-index:1; box-shadow:var(--elev-3); animation:camp-face-in .45s cubic-bezier(.2,1.4,.4,1) both; }
+.camp-loading-ring { position:absolute; inset:-8px; border-radius:50%; background:conic-gradient(#FF6A3D, #FF2E88, #2F5BBF, #FF6A3D); animation:camp-spin 2.4s linear infinite; }
+.camp-loading-ring::after { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--surface-sheet); }
+.camp-loading-chant { margin:4px 0 0; font-family:var(--font-display, inherit); font-weight:800; font-size:26px; letter-spacing:.04em; text-align:center; color:var(--text-1); }
+.camp-loading-chant span { display:inline-block; animation:camp-chant 1.4s ease-in-out infinite; }
+.camp-loading-bar { width:min(260px, 80%); height:10px; border-radius:99px; background:var(--chip-off); overflow:hidden; }
+.camp-loading-bar i { display:block; height:100%; width:90%; border-radius:99px; background:linear-gradient(90deg, #FF6A3D, #FF2E88); transform-origin:left; animation:camp-load 2.6s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes camp-spin { to { transform:rotate(360deg); } }
+@keyframes camp-face-in { from { opacity:0; transform:scale(.85); } to { opacity:1; transform:none; } }
+@keyframes camp-chant { 0%, 100% { transform:none; } 30% { transform:translateY(-6px) scale(1.06); } }
+@keyframes camp-load { from { transform:scaleX(.04); } to { transform:scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .camp-loading-ring, .camp-loading-chant span, .camp-loading-face img { animation:none; } .camp-loading-bar i { animation:none; } }

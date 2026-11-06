@@ -10,7 +10,7 @@ import {
   CampaignError, campaignView, candidateCards, choose, debateRound, dilemma, endWeek, nextDay, refresh, reply, setBudget, setSlot, startCampaign,
 } from "./campaignEngine";
 
-export type CampaignPreset = "locked" | "pick" | "week" | "situation" | "bribe" | "debate" | "waiting" | "election";
+export type CampaignPreset = "locked" | "pick" | "week" | "situation" | "bribe" | "debate" | "waiting" | "election" | "loading";
 
 export function createCampaignSim(preset: string | null, opts: { clout: number; bank: number; onBank?: (delta: number) => void }): CampaignApi {
   const rng = Math.random;
@@ -111,7 +111,8 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
   };
 
   return {
-    screen: async () => { if (state) refresh(state, day); return screen(); },
+    // ?campaign=loading: the office takes its time picking up, to preview the loading screen (owner, Nov 6).
+    screen: async () => { if (preset === "loading") await new Promise((r) => setTimeout(r, 60_000)); if (state) refresh(state, day); return screen(); },
     start: async (candidate) => {
       if (!unlocked) return { ok: false, error: "Campaign Mode opens at Rank 2." };
       begin(candidate);

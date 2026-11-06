@@ -22,6 +22,43 @@ const ENDING: Record<string, { title: string; line: string; emoji: string }> = {
   loss: { emoji: "📉", title: "Lost", line: "Papa-Dani keeps City Hall. He called to say you ran a great race. He meant it." },
 };
 
+const CAND_KEY = "cc-camp-cand";
+/** Each candidate's rally chant and a line under it, for the loading screen (owner, Nov 6: "more delightful"). */
+const CHANTS: Record<string, { chant: string; line: string }> = {
+  goldcrest: { chant: "GOLD-CREST! GOLD-CREST!", line: "Old money. Brand-new slogans." },
+  castellano: { chant: "IN-GRID! IN-GRID!", line: "Facts don't take days off." },
+  kowalczyk: { chant: "HAM-MER! HAM-MER!", line: "Frankie's on the way. Hide the coffee." },
+  starr: { chant: "KAY-LEE! KAY-LEE!", line: "Ring light on. Mic hot." },
+};
+const ANY_CHANT = { chant: "VOTE! VOTE! VOTE!", line: "Papa-Dani isn't going to unseat himself." };
+
+/**
+ * Opening Campaign HQ (owner, Nov 6: "the face of the candidate, a chant copy and a loading bar"): the candidate this
+ * device last ran, their chant bouncing in, and a bar filling while the office picks up. Before any campaign, the four
+ * challengers take turns.
+ */
+function CampaignLoading() {
+  const [cand] = useState<string | null>(() => { try { return localStorage.getItem(CAND_KEY); } catch { return null; } });
+  const [turn, setTurn] = useState(0);
+  const all = ["goldcrest", "castellano", "kowalczyk", "starr"];
+  useEffect(() => { if (cand) return; const t = setInterval(() => setTurn((n) => n + 1), 700); return () => clearInterval(t); }, [cand]);
+  const id = cand && CHANTS[cand] ? cand : all[turn % all.length];
+  const c = cand && CHANTS[cand] ? CHANTS[cand] : ANY_CHANT;
+  return (
+    <div className="camp-loading" role="status" aria-label="Opening Campaign HQ">
+      <div className="camp-loading-face">
+        <span className="camp-loading-ring" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img key={id} src={`/cast/candidate-${id}.webp`} alt="" />
+      </div>
+      <p className="camp-loading-chant" aria-hidden="true">{c.chant.split(" ").map((w, i) => <span key={i} style={{ animationDelay: `${i * 0.35}s` }}>{w} </span>)}</p>
+      <p className="subtext" style={{ margin: 0, textAlign: "center" }}>{c.line}</p>
+      <div className="camp-loading-bar" aria-hidden="true"><i /></div>
+      <p className="meta" style={{ margin: 0, textAlign: "center" }}>Calling the campaign office…</p>
+    </div>
+  );
+}
+
 /** A candidate's portrait (public/cast/candidate-<id>.webp; owner, Oct 29). */
 function CandidateFace({ id, big = false }: { id: CandidateId; big?: boolean }) {
   // eslint-disable-next-line @next/next/no-img-element
@@ -66,12 +103,14 @@ export function CampaignSheet({ open, onClose, api, clout, onToast, focusTask = 
 
   const v = data?.view ?? null;
   const running = !!v && v.phase !== "over";
+  // The loading screen shows the candidate you're running (owner, Nov 6), so this device remembers who it was.
+  useEffect(() => { try { if (v && running) localStorage.setItem(CAND_KEY, v.candidate); } catch { /* private mode */ } }, [v, running]);
   const label = !data ? "Campaign" : !data.unlocked ? "Upcoming election" : running ? "Campaign HQ" : "Campaign";
 
   return (
     <Sheet open={open} onClose={onClose} label={label} tall>
       <div className="camp">
-        {!data && !error && <p className="meta">Calling the campaign office…</p>}
+        {!data && !error && <CampaignLoading />}
         {!data && error && <p className="error-text">{error}</p>}
         {data && !data.unlocked && <Teaser data={data} clout={data.clout ?? clout} />}
         {data && data.unlocked && !running && !(v?.phase === "over" && v.ending) && !picked && (
