@@ -390,19 +390,22 @@ export function setSlot(content: CampaignContent, state: CampaignState, index: n
 
 /** Answers an inbox message. A meeting books a slot (it happens at End Week); anything else happens now. */
 export function reply(content: CampaignContent, state: CampaignState, messageId: string, optionId: string, rng: Rng): string {
-  requirePlanning(state);
+  // Once the week is set (owner, Nov 6), messages can still be answered; only a reply that books a calendar slot waits.
+  if (state.phase !== "waiting") requirePlanning(state);
   const box = state.inbox.find((x) => x.id === messageId) ?? fail("unknown");
   if (box.status !== "new") fail("unknown");
   const msg = content.inbox.find((m) => m.id === messageId) ?? fail("unknown");
   const opt = msg.options.find((o) => o.id === optionId) ?? fail("unknown");
   if (opt.meeting) {
+    if (state.phase === "waiting") fail("week_set");
     if (state.slots.filter((s) => s?.kind === "meeting").length >= CAMPAIGN.maxMeetings) fail("meetings_full");
     const free = state.slots.findIndex((s) => s === null);
     if (free < 0) fail("no_slot");
     state.slots[free] = { kind: "meeting", message: msg.id, option: opt.id };
     box.status = "answered";
     box.option = opt.id;
-    return "Booked. It's on the calendar.";
+    box.receipt = "Booked. It's on the calendar.";
+    return box.receipt;
   }
   box.status = "answered";
   box.option = opt.id;
@@ -411,6 +414,7 @@ export function reply(content: CampaignContent, state: CampaignState, messageId:
   const receipt = resolveChoice(state, opt, opt.where, candidateOf(content, state.candidate).opIntegrity, rng, `inbox:${msg.id}`);
   const text = fill(receipt, vars(content, state));
   state.receipts.push(text);
+  box.receipt = text;
   return text;
 }
 
@@ -958,7 +962,9 @@ export interface CampaignView {
   staff: { id: string; name: string; role: string; job: string; age?: number; vibe?: string; morale: number; loyalty: number; out: boolean }[];
   budget: CampaignState["budget"];
   slots: CampaignState["slots"];
-  inbox: { message: InboxMessage; status: "new" | "answered" | "expired"; option?: string; at?: string }[];
+  inbox: { message: InboxMessage; status: "new" | "answered" | "expired"; option?: string; at?: string; receipt?: string }[];
+  /** Whether a reply that books a calendar slot can go in now, or why not (owner, Nov 6: declining always can). */
+  booking: "ok" | "full" | "meetings_full" | "week_set";
   pending: { situation: Situation; place?: string; target?: string }[];
   debate: (CampaignState["debate"] & { questions: string[] }) | null;
   debateWeek: boolean;
@@ -1031,7 +1037,10 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
     staff: content.staff.map((s) => { const x = state.staff.find((y) => y.id === s.id)!; return { id: s.id, name: s.name, role: s.role, job: s.job, age: s.age, vibe: s.vibe, morale: x.morale, loyalty: x.loyalty, out: x.out }; }),
     budget: state.budget,
     slots: state.slots,
-    inbox: state.inbox.map((m) => ({ message: content.inbox.find((x) => x.id === m.id)!, status: m.status, option: m.option, at: m.at })).filter((m) => m.message)
+    booking: state.phase === "waiting" ? "week_set"
+      : state.slots.filter((s) => s?.kind === "meeting").length >= CAMPAIGN.maxMeetings ? "meetings_full"
+      : state.slots.some((s) => s === null) ? "ok" : "full",
+    inbox: state.inbox.map((m) => ({ message: content.inbox.find((x) => x.id === m.id)!, status: m.status, option: m.option, at: m.at, receipt: m.receipt })).filter((m) => m.message)
       .map((m) => ({ ...m, message: hydrateMessage(content, state, m.message) })),
     pending: state.pending.map((p) => ({ situation: hydrate(content, state, content.situations.find((s) => s.id === p.id)!, p.place, p.target), place: p.place, target: p.target })),
     debate: state.debate || state.week === CAMPAIGN.debateWeek ? { ...(state.debate ?? { round: 0, crowd: 0, rounds: [], done: false }), questions: debateQuestions(content, state).map((id) => content.debate.questions.find((q) => q.id === id)!.text) } : null,

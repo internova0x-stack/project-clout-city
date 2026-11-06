@@ -330,7 +330,7 @@ export interface CampaignState {
   budget: Budget;
   slots: (SlotAction | null)[];
   /** at: when it arrived (ISO), for the inbox's time stamp (owner, Nov 4); older campaigns have none. */
-  inbox: { id: string; status: "new" | "answered" | "expired"; option?: string; at?: string }[];
+  inbox: { id: string; status: "new" | "answered" | "expired"; option?: string; at?: string; receipt?: string }[];
   /** Situations waiting for a choice during End Week. */
   pending: { id: string; place?: string; target?: string }[];
   seen: string[];
@@ -454,6 +454,7 @@ export function campaignError(code: string): string {
     ended_today: "One campaign week a day. The results arrive tomorrow morning.",
     no_cash: "The campaign can't afford that.",
     no_slot: "The week is full. Free a slot first.",
+    week_set: "This week is locked in. Decline for now, or book it next week.",
     meetings_full: `${CAMPAIGN.maxMeetings} meetings a week, max. Even you need sleep.`,
     no_favors: "Not enough Favors for that.",
     refused: "Your candidate won't do it.",

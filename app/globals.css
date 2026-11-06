@@ -3357,3 +3357,26 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .camp-winner.crown-win { display:block; overflow:hidden; margin:0 auto; background:var(--night-900); }
 .camp-winner.crown-win canvas, .camp-winner.crown-win img, .camp-avatar canvas { width:100% !important; height:100% !important; display:block; object-fit:cover; }
 .lola-replies { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; padding:8px 0 4px; }
+
+/* Campaign HQ (owner, Nov 6): neighbourhoods as real choices, the slot just booked, a reply's outcome in its thread. */
+.camp-place { gap:6px; }
+.camp-place-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.camp-place-race { display:flex; align-items:center; gap:10px; }
+.camp-place-race .camp-poll { flex:1; height:8px; border-radius:99px; overflow:hidden; display:flex; }
+.camp-lead { font-size:12px; font-weight:800; white-space:nowrap; }
+.camp-lead.up { color:#1F6B4A; }
+.camp-lead.down { color:var(--neon-600, #D6246E); }
+.camp-option.radio[aria-checked="true"].camp-place { background:var(--neon-tint, #FFF0F6); }
+.camp-slot.just { box-shadow:0 0 0 2px var(--green-500, #2FB37A) inset; animation:camp-just 2.6s ease-out; }
+.camp-just { color:#1F6B4A; font-weight:800; }
+@keyframes camp-just { 0% { background:var(--green-tint, #DEF2E9); transform:scale(1.02); } 20% { transform:scale(1); } 70% { background:var(--green-tint, #DEF2E9); } 100% { background:var(--surface-card); } }
+.camp-option.locked { opacity:.55; }
+.camp-locked-note { font-size:12px; font-weight:700; color:var(--text-2); }
+.camp-outcome { display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:16px; background:var(--surface-raised); box-shadow:var(--elev-2); }
+.camp-outcome-icon { font-size:26px; line-height:1; }
+.camp-outcome-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+.camp-outcome-chips .fx { height:auto; min-height:26px; white-space:normal; padding:4px 10px; }
+.camp-pop { animation:camp-pop .35s cubic-bezier(.2,1.4,.4,1) both; }
+.camp-pop.late { animation-delay:.25s; }
+@keyframes camp-pop { from { opacity:0; transform:translateY(8px) scale(.96); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .camp-pop, .camp-slot.just { animation:none; } }
