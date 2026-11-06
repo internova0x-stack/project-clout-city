@@ -122,3 +122,9 @@ test("today's pick: a happening on now first, then a regular card one visit from
   const all: LifeDone = { refs: new Set(LIFE_CONTENT.activities.map((a) => `a:${a.id}`)), momentsToday: 0 };
   assert.equal(todaysPick(LIFE_CONTENT, lunch, all, {}, 1), null);
 });
+
+test("an activity that is also a daily task names an action at its own place (owner, Nov 6: one dog walk)", () => {
+  const linked = LIFE_CONTENT.activities.filter((a) => a.task);
+  assert.ok(linked.some((a) => a.id === "park-barksley" && a.task === "walk-dogs"), "walking Sir Barksley is the dog-walking task");
+  for (const a of linked) assert.ok(PLACES.find((p) => p.id === a.place)?.actions.some((x) => x.id === a.task), `${a.id}: ${a.task} at ${a.place}`);
+});

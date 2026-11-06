@@ -3399,3 +3399,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 @keyframes camp-chant { 0%, 100% { transform:none; } 30% { transform:translateY(-6px) scale(1.06); } }
 @keyframes camp-load { from { transform:scaleX(.04); } to { transform:scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .camp-loading-ring, .camp-loading-chant span, .camp-loading-face img { animation:none; } .camp-loading-bar i { animation:none; } }
+
+/* Owner, Nov 6: on a place's card outside, a task row says it's done inside and, when you're there, a tap goes in. */
+.place-tasks li:has(> .place-task-go) { padding:0; }
+.place-task-go { display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border:0; background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; border-radius:inherit; }
+.place-task-title .place-task-where { display:block; margin-top:2px; color:var(--neon-text); font-weight:600; }

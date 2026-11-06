@@ -148,6 +148,8 @@ export type SimApi = CityApi & {
   lottoPot(): void;
   /** v0.11 gossip tasks: talking or listening in at a place completes its task (the find runs on the dev server). */
   gossipTask(placeId: string, via: "overheard" | "regular" | "restroom"): number;
+  /** An activity that is also a daily task (lib/placeLife.ts LifeActivity.task) ticks it, as complete_task does. */
+  lifeTask(placeId: string, actionId: string): number;
   /** Moral Choices in the preview (lib/choicesSim.ts): where the player is, and what a choice paid. */
   here(): string | null;
   choicePay(e: { cash?: number; clout?: number; mood?: number; energy?: number }): void;
@@ -220,6 +222,7 @@ export function createSimApi(
     lottoNext(times) { lottoQueue = [...times]; },
     lottoPot() { potNext = true; },
     gossipTask: (placeId, via) => completeTask(placeId, `gossip-${via}`),
+    lifeTask: (placeId, actionId) => completeTask(placeId, actionId),
 
     buyLottoCard(placeId, gameId, free) {
       const place = PLACES.find((x) => x.id === placeId);

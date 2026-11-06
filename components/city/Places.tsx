@@ -403,18 +403,31 @@ function TaskTick({ t }: { t: DailyTask }) {
 }
 
 /** Every daily task at this place, ticked when done: shown even while the actions are folded away. */
-export function PlaceTasks({ place, state }: { place: Place; state: CityState }) {
+/**
+ * Today's tasks at a place. On the card outside (`outside`), a task is done inside (owner, Nov 6: "Tasks attached to a
+ * location should be done inside the location"), so each row says so and, when you're here, a tap goes in.
+ */
+export function PlaceTasks({ place, state, outside }: { place: Place; state: CityState; outside?: { onGoInside?: () => void } }) {
   const tasks = tasksAt(state, place.id);
   if (!tasks.length) return null;
   return (
     <ul className="place-tasks" aria-label="Daily tasks here">
-      {tasks.map((t) => (
-        <li key={t.id} className={t.done_at ? "done" : ""}>
-          <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
-          <span className="place-task-title">{taskTitle(t)}</span>
-          <span className="meta">{t.done_at ? "Done" : taskRewardLine(t)}</span>
-        </li>
-      ))}
+      {tasks.map((t) => {
+        const body = (
+          <>
+            <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
+            <span className="place-task-title">{taskTitle(t)}{outside && !t.done_at && <span className="meta place-task-where">{outside.onGoInside ? "Go inside to do it ›" : "Done inside, once you're there"}</span>}</span>
+            <span className="meta">{t.done_at ? "Done" : taskRewardLine(t)}</span>
+          </>
+        );
+        return (
+          <li key={t.id} className={t.done_at ? "done" : ""}>
+            {outside?.onGoInside && !t.done_at
+              ? <button className="place-task-go" onClick={outside.onGoInside} aria-label={`${taskTitle(t)}: go inside to do it`}>{body}</button>
+              : body}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -457,7 +470,7 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
         </span>
         <ChevronDownIcon size={20} className="actions-fold-chev" />
       </button>
-      {!open && <PlaceTasks place={place} state={state} />}
+      {!open && <PlaceTasks place={place} state={state} outside={enterable ? { onGoInside } : undefined} />}
       {open && <ActionList place={place} state={state} handlers={handlers} preview={enterable ? { onTap: onGoInside } : undefined} />}
     </section>
   );
@@ -705,8 +718,9 @@ export function LocationSheet({
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
           {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
-          {/* Owner, Oct 27: Sir Barksley, the billionaire's depressed dog, on his bench in Astoria Park. */}
-          {handlers.onBarksley && place.id === BARKSLEY.placeId && <BarksleyRow onOpen={handlers.onBarksley} today={state.today} />}
+          {/* Owner, Oct 27: Sir Barksley, the billionaire's depressed dog, on his bench in Astoria Park. Owner, Nov 6: you see
+              him inside the park (his walk is a thing to do in there), so the card outside only says he's there. */}
+          {place.id === BARKSLEY.placeId && <p className="meta" style={{ margin: "6px 0 0" }}>🐕 {BARKSLEY.name} is on his bench inside{here ? "" : ". Go there and step in to see him"}.</p>}
           {/* C6: Lola's four New York date spots get her line (content/culture/date-spots.json). */}
           {handlers.dating && (() => {
             const spot = DATE_SPOTS.spots.find((d) => d.place === place.id);
@@ -835,6 +849,8 @@ export function InteriorScene({
         </div>
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} favor={handlers.favor} />
         {life}
+        {/* Owner, Nov 6: Sir Barksley lives inside the park now (his row left the card outside). */}
+        {handlers.onBarksley && place.id === BARKSLEY.placeId && <BarksleyRow onOpen={handlers.onBarksley} today={state.today} />}
         {open ? (
           <ActionList place={place} state={state} handlers={handlers} compact />
         ) : (

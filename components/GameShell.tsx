@@ -2124,8 +2124,9 @@ export function GameShell({
     else if (g.kind === "map") setTab("map");
     else setPanel(g.panel === "look" ? (cityOn ? "look" : "profile") : g.panel);
   };
-  // Starter Week's dog: at Astoria Park for the first time this week, Sir Barksley's scene opens by itself (owner, Oct 27).
-  const atPark = (inside?.id ?? (city?.player.at_place === BARKSLEY.placeId ? place?.id : null)) === BARKSLEY.placeId;
+  // Starter Week's dog: inside Astoria Park for the first time this week, Sir Barksley's scene opens by itself (owner, Oct 27;
+  // Nov 6: inside, never from the card outside).
+  const atPark = inside?.id === BARKSLEY.placeId;
   useEffect(() => {
     if (atPark && starter && !barksleyMet() && !barksley) setBarksley({ first: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
