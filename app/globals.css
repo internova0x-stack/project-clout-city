@@ -3380,3 +3380,4 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .camp-pop.late { animation-delay:.25s; }
 @keyframes camp-pop { from { opacity:0; transform:translateY(8px) scale(.96); } to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion: reduce) { .camp-pop, .camp-slot.just { animation:none; } }
+.camp-book-bar { position:sticky; bottom:0; display:flex; flex-direction:column; gap:6px; padding:12px 0 calc(8px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--surface-sheet, #FBF7F0) 75%, transparent); z-index:2; }

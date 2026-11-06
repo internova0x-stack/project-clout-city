@@ -547,10 +547,12 @@ function PlacePicker({ v, kind, busy, hint, booked, task, onBook }: {
           );
         })}
       </div>
-      <button className="btn btn-taxi" disabled={busy || !chosen || chosen === booked} onClick={() => chosen && onBook(chosen)}>
-        {!chosen ? "Pick a neighbourhood" : chosen === booked ? `Booked in ${name}` : `Book the ${VERB[kind]} in ${name}`}
-      </button>
-      <p className="meta" style={{ margin: 0, textAlign: "center" }}>{slotCostLine(kind)}</p>
+      <div className="camp-book-bar">
+        <button className="btn btn-taxi" disabled={busy || !chosen || chosen === booked} onClick={() => chosen && onBook(chosen)}>
+          {!chosen ? "Pick a neighbourhood" : chosen === booked ? `Booked in ${name}` : `Book the ${VERB[kind]} in ${name}`}
+        </button>
+        <p className="meta" style={{ margin: 0, textAlign: "center" }}>{slotCostLine(kind)}</p>
+      </div>
     </div>
   );
 }
