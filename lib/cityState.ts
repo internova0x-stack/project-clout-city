@@ -587,12 +587,13 @@ export function eventById(id: string): ClubEvent | undefined {
 }
 
 // Owner, Oct 18: task copy in Clout City's voice. The title still says what to do and where; a line under it jokes.
-const TASK_VERB: Record<Exclude<DailyTask["kind"], StyleTaskKind>, string> = { visit: "Be seen at", eat: "Grab a bite at", shift: "Clock in at", hangout: "Kick it at", event: "Pull up to", gossip: "Eavesdrop at", cook: "Cook something at", class: "Go to class at" };
+// Owner, Nov 6: "Players should be taking actions to achieve something": every title names what it gets you.
+const TASK_VERB: Record<Exclude<DailyTask["kind"], StyleTaskKind>, string> = { visit: "Become a regular at", eat: "Refuel your Energy at", shift: "Earn rent money at", hangout: "Lift your Mood at", event: "Gain clout at", gossip: "Dig up gossip at", cook: "Cook something at", class: "Go to class at" };
 
 /** The joke under each task, a few per kind; the task's id picks one, so it stays put all day. */
 const TASK_QUIPS: Record<Exclude<DailyTask["kind"], StyleTaskKind> | "skill" | "style", readonly string[]> = {
   style: ["Dress for the place you want.", "The outfit does the talking. You just walk in.", "Matching the venue is a love language."],
-  visit: ["If nobody saw you there, did you even go?", "Stand near the good lighting.", "Look busy. Look famous. Ideally both."],
+  visit: ["Show up enough and they start knowing your order.", "Regulars get perks. Tourists get the bill.", "Three visits and you're furniture. The good kind."],
   eat: ["Calories don't count if you post them.", "Eat like nobody's watching. Someone is.", "Fuel for the grind. And the gossip."],
   shift: ["Smile at customers. Die a little inside. Get paid.", "Rent is due, babe. Rent is always due.", "Honest work. Gross, but honest."],
   hangout: ["Doing nothing, but on purpose.", "Touch grass. Influencers swear by it.", "Hang out like your schedule isn't empty."],
@@ -625,22 +626,24 @@ export function taskRewardLine(t: Pick<DailyTask, "kind" | "reward">): string {
 }
 const formatCashPlain = (n: number) => `C$${n.toLocaleString("en-US")}`;
 
-export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" | "skill">): string {
+/** `topic`: for a gossip task, the Tea story the lead belongs to, so the title says what you'll learn (owner, Nov 6). */
+export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" | "skill">, topic?: string): string {
   // C3: an action can carry its own task title ("Get a BEC at Sal's").
   const own = placeById(t.place_id)?.actions.find((a) => a.id === t.action_id)?.task;
   if (own) return own;
   // Migration 0063 (owner, Oct 16), owner Oct 18: the skill shows as a tag under the title, so the title is the doing.
   if (t.skill) {
     if (t.kind === "cook") return "Cook something at home";
+    // Owner, Nov 6: the point is the skill, so the title says so ("Level up Dance at Velvet Static").
     const place = placeById(t.place_id);
-    const label = place?.actions.find((a) => a.id === t.action_id)?.label;
-    return label ? `${label} at ${place?.name ?? "a place"}` : `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${place?.name ?? "a place"}`;
+    const skill = SKILLS.find((x) => x.id === t.skill)?.name;
+    return skill ? `Level up ${skill} at ${place?.name ?? "a place"}` : `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${place?.name ?? "a place"}`;
   }
   if (t.kind === "event") return `${TASK_VERB.event} ${eventById(t.action_id)?.name ?? "a club event"}`;
   // Migration 0100: a style task.
   if (t.kind.startsWith("style:")) return `Wear a full ${LOOK_LABEL[t.kind.slice(6)] ?? "matching"} look to ${placeById(t.place_id)?.name ?? "a place"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
-  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null });
+  if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null, title: topic });
   return `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${placeById(t.place_id)?.name ?? "a place"}`;
 }
 

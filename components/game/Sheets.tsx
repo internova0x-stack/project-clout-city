@@ -83,8 +83,10 @@ function useJustDone(tasks: DailyTask[], open: boolean): Set<string> {
 
 /** Tasks/Goals (C9 Daily / Goals). */
 export function TasksSheet({
-  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign, pass, repair,
+  open, onClose, partyDone, onOpenParty, cliqueCount, city, onOpenPlace, story = null, onStoryTask, hunt, tab: initialTab, skills = [], onCook, goals = null, onOpenSkills, campaign, pass, repair, gossipTopic,
 }: {
+  /** The Tea story a gossip task's lead belongs to, by place, so its title says what you'll learn (owner, Nov 6). */
+  gossipTopic?: (placeId: string) => string | undefined;
   open: boolean; onClose: () => void; partyDone: boolean; onOpenParty: () => void; cliqueCount: number;
   city: CityState | null; onOpenPlace: (placeId: string) => void;
   story?: StoryFeed | null; onStoryTask?: (task: StoryFeed["tasks"][number]) => void;
@@ -158,7 +160,7 @@ export function TasksSheet({
                     onClick={t.done_at ? undefined : () => (t.kind === "cook" && onCook ? onCook() : onOpenPlace(t.place_id))}
                   >
                     <span className="select-emoji" aria-hidden="true">{t.skill ? SKILLS.find((d) => d.id === t.skill)?.emoji ?? "⭐" : t.kind === "event" ? "🍸" : t.kind === "gossip" ? "🍵" : placeById(t.place_id)?.emoji ?? "📍"}</span>
-                    <span className="title" style={{ display: "block" }}>{taskTitle(t)}</span>
+                    <span className="title" style={{ display: "block" }}>{taskTitle(t, t.kind === "gossip" ? gossipTopic?.(t.place_id) : undefined)}</span>
                     <span className="subtext" style={{ display: "block" }}>{t.done_at ? taskDoneLine(t) : taskQuip(t)}</span>
                     {!t.done_at && (
                       <span className="task-meta">

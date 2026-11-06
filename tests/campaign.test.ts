@@ -337,3 +337,24 @@ test("owner, Nov 4: the calendar costs money, the budget adds up, and momentum a
   assert.equal(ov.energy, CAMPAIGN.energy.start);
   assert.equal(ov.money.staff, 0);
 });
+
+test("once the week is set, messages can still be answered; only a reply that books a slot waits (owner, Nov 6)", () => {
+  const r = rng(9);
+  const s = startCampaign(content, { id: "w", candidate: "starr", clout: 0, crew: 0, home: null, seed: 0, wonBefore: false }, r);
+  endWeek(content, s, "2026-11-02", r);
+  while (s.phase === "deciding") choose(content, s, s.pending[0].id, content.situations.find((x) => x.id === s.pending[0].id)!.choices[0].id, "2026-11-02", r);
+  assert.equal(s.phase, "waiting");
+  const v = campaignView(content, s, "2026-11-02");
+  assert.equal(v.booking, "week_set");
+  const open = s.inbox.filter((m) => m.status === "new").map((m) => content.inbox.find((x) => x.id === m.id)!);
+  const plain = open.find((m) => m.options.some((o) => !o.meeting));
+  assert.ok(plain, "a new message waits over the night");
+  const decline = plain!.options.find((o) => !o.meeting)!;
+  const receipt = reply(content, s, plain!.id, decline.id, r);
+  const box = s.inbox.find((m) => m.id === plain!.id)!;
+  assert.equal(box.status, "answered");
+  assert.equal(box.receipt, receipt, "the thread keeps what happened");
+  assert.equal(campaignView(content, s, "2026-11-02").inbox.find((m) => m.message.id === plain!.id)?.receipt, receipt);
+  const meeting = open.find((m) => m.id !== plain!.id && m.options.some((o) => o.meeting));
+  if (meeting) assert.throws(() => reply(content, s, meeting.id, meeting.options.find((o) => o.meeting)!.id, r), /week_set/);
+});

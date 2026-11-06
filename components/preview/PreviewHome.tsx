@@ -170,7 +170,7 @@ export function PreviewHome({
   couturePreset?: string;
   /** Contact the Mayor: ?mayor=new (no letters yet) or reply (a reply waiting); otherwise one letter already read. */
   mayorPreset?: string;
-  /** Campaign Mode: ?campaign=locked|pick|week|situation|debate|waiting|election (Phone → Campaign). */
+  /** Campaign Mode: ?campaign=locked|pick|week|situation|debate|waiting|election|loading (Phone → Campaign). */
   campaignPreset?: string;
   /** The Homecoming race: ?school=intro|declare|plan|clash|verdict|crown|hq|ineligible (lib/schoolSim.ts), standing at St. Johnsons. */
   schoolPreset?: string;

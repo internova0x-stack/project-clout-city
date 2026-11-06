@@ -222,13 +222,17 @@ export function leadFrom(state: GossipState | null, here: string | null, seed = 
   return leads.length ? leads[Math.abs(seed) % leads.length] : null;
 }
 
-/** "Talk to Rosa at Grind & Gossip Café" or "Listen in at Velvet Static, 9 PM to 3 AM": a task or a pointer. */
-export function leadAction(l: Pick<GossipLead, "place" | "source" | "hours">): string {
+/**
+ * "Get the latest from Rosa at Grind & Gossip Café" or "Dig up gossip at Velvet Static, 9 PM to 3 AM": a task or a pointer.
+ * Owner, Nov 6 ("Talk to xyz to learn about abc"): it says what you'll learn, and names the story when it's known.
+ */
+export function leadAction(l: Pick<GossipLead, "place" | "source" | "hours"> & { title?: string }): string {
   const place = PLACES.find((x) => x.id === l.place)?.name ?? "somewhere";
   const who = l.source === "regular" ? regularAt(l.place)?.name : undefined;
   const when = windowLine(l.hours ?? undefined)?.replace(" (city time)", "");
   // Owner, Oct 18: Clout City's voice.
-  return `${who ? `Spill the tea with ${who} at` : l.source === "restroom" ? "Eavesdrop in the restroom at" : "Eavesdrop at"} ${place}${when ? `, ${when}` : ""}`;
+  if (who && l.title) return `Ask ${who} at ${place} about “${l.title}”`;
+  return `${who ? `Get the latest from ${who} at` : l.source === "restroom" ? "Catch the restroom gossip at" : "Dig up gossip at"} ${place}${when ? `, ${when}` : ""}`;
 }
 
 /** What a person says when they point the player on: "Ask Rosa at Grind & Gossip Café about “…”." */

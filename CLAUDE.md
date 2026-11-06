@@ -68,7 +68,10 @@ components live in `app/globals.css`.
 - Game data stores real lat/lng (`lib/map/geo.ts`); the map is swappable behind
   the `MapApi` interface in `components/map/types.ts`.
 - Gold (`--gold-*`, `--g-gold`) is only for real-money products. The logo is the neon "Clout City" wordmark
-  (`.studio-mark`, the `--g-neon` gradient) on the sign-in card, the Studio and the app icons (owner, Oct 14).
+  (`.studio-mark`, the `--g-neon` gradient) on the sign-in card and the Studio (owner, Oct 14). The app icon (owner, Nov 6)
+  is the Statue of Liberty in sunglasses, mid-yell, on a waving flag over midnight blue: master `assets/app-icon-master.png`,
+  sizes in `public/icons/` (192, 512, maskable 512 with the art at 80% for circle crops, 180 Apple, 64 favicon), `app/icon.png`
+  and the Steam app's `desktop/icons/icon.png`; the push badge (`badge-72.png`) stays the white glyph.
 - Creators (migration 0087, spec section 21, step 1 of 5): admins make creators (rate 20% default, 30% high performer,
   0 to 50; length 12, 24 months or life) and `/c/<slug>` links in Studio → Affiliates; links are retired, never deleted.
   `app/c/[slug]` counts the click (`creator_link`, service role, a daily count per link) and keeps the slug 30 days in

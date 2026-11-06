@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/Sheet";
 import {
   CAMPAIGN, cs, energyCost, meterLevel, slotCash,
@@ -21,6 +21,43 @@ const ENDING: Record<string, { title: string; line: string; emoji: string }> = {
   dirty_win: { emoji: "🕶️", title: "Dirty win", line: "Your candidate is Mayor-elect. Some things are still buried. Keep your phone on." },
   loss: { emoji: "📉", title: "Lost", line: "Papa-Dani keeps City Hall. He called to say you ran a great race. He meant it." },
 };
+
+const CAND_KEY = "cc-camp-cand";
+/** Each candidate's rally chant and a line under it, for the loading screen (owner, Nov 6: "more delightful"). */
+const CHANTS: Record<string, { chant: string; line: string }> = {
+  goldcrest: { chant: "GOLD-CREST! GOLD-CREST!", line: "Old money. Brand-new slogans." },
+  castellano: { chant: "IN-GRID! IN-GRID!", line: "Facts don't take days off." },
+  kowalczyk: { chant: "HAM-MER! HAM-MER!", line: "Frankie's on the way. Hide the coffee." },
+  starr: { chant: "KAY-LEE! KAY-LEE!", line: "Ring light on. Mic hot." },
+};
+const ANY_CHANT = { chant: "VOTE! VOTE! VOTE!", line: "Papa-Dani isn't going to unseat himself." };
+
+/**
+ * Opening Campaign HQ (owner, Nov 6: "the face of the candidate, a chant copy and a loading bar"): the candidate this
+ * device last ran, their chant bouncing in, and a bar filling while the office picks up. Before any campaign, the four
+ * challengers take turns.
+ */
+function CampaignLoading() {
+  const [cand] = useState<string | null>(() => { try { return localStorage.getItem(CAND_KEY); } catch { return null; } });
+  const [turn, setTurn] = useState(0);
+  const all = ["goldcrest", "castellano", "kowalczyk", "starr"];
+  useEffect(() => { if (cand) return; const t = setInterval(() => setTurn((n) => n + 1), 700); return () => clearInterval(t); }, [cand]);
+  const id = cand && CHANTS[cand] ? cand : all[turn % all.length];
+  const c = cand && CHANTS[cand] ? CHANTS[cand] : ANY_CHANT;
+  return (
+    <div className="camp-loading" role="status" aria-label="Opening Campaign HQ">
+      <div className="camp-loading-face">
+        <span className="camp-loading-ring" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img key={id} src={`/cast/candidate-${id}.webp`} alt="" />
+      </div>
+      <p className="camp-loading-chant" aria-hidden="true">{c.chant.split(" ").map((w, i) => <span key={i} style={{ animationDelay: `${i * 0.35}s` }}>{w}</span>)}</p>
+      <p className="subtext" style={{ margin: 0, textAlign: "center" }}>{c.line}</p>
+      <div className="camp-loading-bar" aria-hidden="true"><i /></div>
+      <p className="meta" style={{ margin: 0, textAlign: "center" }}>Calling the campaign office…</p>
+    </div>
+  );
+}
 
 /** A candidate's portrait (public/cast/candidate-<id>.webp; owner, Oct 29). */
 function CandidateFace({ id, big = false }: { id: CandidateId; big?: boolean }) {
@@ -66,12 +103,14 @@ export function CampaignSheet({ open, onClose, api, clout, onToast, focusTask = 
 
   const v = data?.view ?? null;
   const running = !!v && v.phase !== "over";
+  // The loading screen shows the candidate you're running (owner, Nov 6), so this device remembers who it was.
+  useEffect(() => { try { if (v && running) localStorage.setItem(CAND_KEY, v.candidate); } catch { /* private mode */ } }, [v, running]);
   const label = !data ? "Campaign" : !data.unlocked ? "Upcoming election" : running ? "Campaign HQ" : "Campaign";
 
   return (
     <Sheet open={open} onClose={onClose} label={label} tall>
       <div className="camp">
-        {!data && !error && <p className="meta">Calling the campaign office…</p>}
+        {!data && !error && <CampaignLoading />}
         {!data && error && <p className="error-text">{error}</p>}
         {data && !data.unlocked && <Teaser data={data} clout={data.clout ?? clout} />}
         {data && data.unlocked && !running && !(v?.phase === "over" && v.ending) && !picked && (
@@ -271,7 +310,7 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
             <button aria-pressed={tab === "team"} onClick={() => setTab("team")}>Team</button>
           </div>
           {tab === "week" && <Week data={data} v={v} busy={busy} api={api} run={run} onInbox={() => { setMail(null); setTab("inbox"); }} editing={editing} setEditing={setEditing} onTask={openTask} />}
-          {tab === "inbox" && <Inbox key={mail ?? ""} initial={mail} v={v} busy={busy} read={read} onReply={(m, o) => run(api.reply(m, o))} />}
+          {tab === "inbox" && <Inbox key={mail ?? ""} initial={mail} v={v} busy={busy} read={read} onReply={(m, o) => run(api.reply(m, o), false)} />}
           {tab === "map" && <MapTab v={v} short={card.short} />}
           {tab === "allies" && <Allies v={v} />}
           {tab === "team" && <Team v={v} />}
@@ -395,11 +434,20 @@ function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }:
   editing: { index: number; hint?: Hint } | null; setEditing: (e: { index: number; hint?: Hint } | null) => void; onTask: (t: ViewTask) => void;
 }) {
   const [debate, setDebate] = useState(false);
+  // The slot just booked lights up on the calendar for a moment (owner, Nov 6: a post-selection state).
+  const [just, setJust] = useState<number | null>(null);
+  const justRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (just === null) return;
+    justRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    const t = setTimeout(() => setJust(null), 2600);
+    return () => clearTimeout(t);
+  }, [just]);
   const waiting = v.phase === "waiting";
   const newMail = v.inbox.filter((m) => m.status === "new").length;
   if (editing !== null) {
     return <SlotPicker key={editing.index} v={v} data={data} index={editing.index} hint={editing.hint} busy={busy} onClose={() => setEditing(null)}
-      onSet={async (a) => { const r = await run(api.slot(editing.index, a)); if (r) setEditing(null); }} />;
+      onSet={async (a) => { const at = editing.index; const r = await run(api.slot(at, a), false); if (r) { setEditing(null); if (a) setJust(at); } }} />;
   }
   if (debate && v.debate) return <Debate v={v} busy={busy} onClose={() => setDebate(false)} onStyle={(st) => run(api.debate(st), false)} />;
   return (
@@ -439,9 +487,9 @@ function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }:
           <div className="stack-8">
             <p className="overline" style={{ margin: 0 }}>📅 The calendar</p>
             {v.slots.map((s, i) => (
-              <button key={i} className="camp-slot" disabled={busy || s?.kind === "meeting"} onClick={() => setEditing({ index: i })}>
+              <button key={i} ref={just === i ? justRef : undefined} className={`camp-slot${just === i ? " just" : ""}`} disabled={busy || s?.kind === "meeting"} onClick={() => setEditing({ index: i })}>
                 <span className="meta">{slotName(i)}</span>
-                <span className="title">{s ? slotLabel(s, v) : <span className="meta">Free</span>}</span>
+                <span className="title">{just === i && <span className="camp-just" aria-label="Booked">✓ </span>}{s ? slotLabel(s, v) : <span className="meta">Free</span>}</span>
                 {s && slotCash(s) > 0 && <span className="camp-slot-cost">{cs(slotCash(s))}</span>}
               </button>
             ))}
@@ -503,6 +551,51 @@ const ACTIVITIES: { kind: SlotAction["kind"]; label: string; p: Preview; place?:
   { kind: "rest", label: "😴 Rest", p: { get: `Team morale +8, ⚡ Energy +${-energyCost({ kind: "rest" })}`, cost: "One slot" } },
 ];
 
+const VERB: Record<"rally" | "tour" | "gotv", string> = { rally: "rally", tour: "tour stop", gotv: "get-out-the-vote push" };
+
+/**
+ * Where a rally, tour stop or get-out-the-vote push goes (owner, Nov 6: "the options don't look like options… no treatment
+ * for pre and post selection"): each neighbourhood is a radio card with what it cares about and the race there; a tap picks
+ * it, the button books it, and the calendar lights the slot up.
+ */
+function PlacePicker({ v, kind, busy, hint, booked, task, onBook }: {
+  v: CampaignView; kind: "rally" | "tour" | "gotv"; busy: boolean; hint?: string; booked?: string; task: React.ReactNode; onBook: (place: string) => void;
+}) {
+  const [chosen, setChosen] = useState<string | null>(booked ?? hint ?? null);
+  const name = v.places.find((p) => p.id === chosen)?.name;
+  return (
+    <div className="stack-12">
+      <p className="subtext" style={{ margin: 0 }}>Pick a neighbourhood. Where you trail is where a {VERB[kind]} helps most.</p>
+      <div className="stack-8" role="radiogroup" aria-label="Neighbourhood">
+        {v.places.map((p) => {
+          const lead = p.you - p.mayor;
+          const share = Math.max(4, Math.min(96, (p.you / Math.max(1, p.you + p.mayor)) * 100));
+          return (
+            <button key={p.id} role="radio" aria-checked={chosen === p.id} className={`camp-option radio camp-place${hint === p.id ? " hint" : ""}`} disabled={busy} onClick={() => setChosen(p.id)}>
+              <span className="camp-place-top">
+                <span className="title">{p.name}</span>
+                {booked === p.id && <span className="tag tag-neutral">Booked now</span>}
+                {hint === p.id && task}
+              </span>
+              <span className="meta">Cares about {p.cares.toLowerCase()}</span>
+              <span className="camp-place-race">
+                <span className="camp-poll" aria-hidden="true"><span className="you" style={{ width: `${share}%` }} /><span className="mayor" /></span>
+                <span className={`camp-lead ${lead >= 0 ? "up" : "down"}`}>{lead >= 0 ? `You +${lead.toFixed(0)}` : `Behind ${Math.abs(lead).toFixed(0)}`}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="camp-book-bar">
+        <button className="btn btn-taxi" disabled={busy || !chosen || chosen === booked} onClick={() => chosen && onBook(chosen)}>
+          {!chosen ? "Pick a neighbourhood" : chosen === booked ? `Booked in ${name}` : `Book the ${VERB[kind]} in ${name}`}
+        </button>
+        <p className="meta" style={{ margin: 0, textAlign: "center" }}>{slotCostLine(kind)}</p>
+      </div>
+    </div>
+  );
+}
+
 function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView; data: CampaignScreen; index: number; hint?: Hint; busy: boolean; onClose: () => void; onSet: (a: SlotAction | null) => void }) {
   // A tapped task opens straight on its action when there's only one (and on the top list, marked, when there's a choice).
   const [kind, setKind] = useState<string | null>(hint?.kinds.length === 1 && ["rally", "tour", "gotv", "prep"].includes(hint.kinds[0]) ? hint.kinds[0] : null);
@@ -511,16 +604,8 @@ function SlotPicker({ v, index, hint, busy, onClose, onSet }: { v: CampaignView;
   const [op, setOp] = useState<OpId>("fake_news");
   const [cutout, setCutout] = useState(false);
   const current = v.slots[index];
-  const placeList = (k: "rally" | "tour" | "gotv") => (
-    <div className="stack-8">
-      {v.places.map((p) => (
-        <button key={p.id} className={`camp-slot${mine(k) && hint?.place === p.id ? " hint" : ""}`} disabled={busy} onClick={() => onSet({ kind: k, place: p.id })}>
-          <span className="title">{p.name}{mine(k) && hint?.place === p.id && TASK}</span>
-          <span className="meta">{p.cares} · {p.you.toFixed(0)} vs {p.mayor.toFixed(0)}</span>
-        </button>
-      ))}
-    </div>
-  );
+  const placeList = (k: "rally" | "tour" | "gotv") => <PlacePicker v={v} kind={k} busy={busy} hint={mine(k) ? hint?.place : undefined}
+    booked={current && current.kind === k && "place" in current ? current.place : undefined} task={TASK} onBook={(place) => onSet({ kind: k, place })} />;
   const refused = v.refuses.includes(op);
   return (
       <div className="stack-16">
@@ -731,6 +816,14 @@ function Avatar({ who, big = false, size }: { who: Who; big?: boolean; size?: nu
 }
 
 /** The campaign's inbox as a messaging app (owner, Nov 4): who, when, a preview, read and unread. */
+/** Why a reply that books a calendar slot can't go in now (owner, Nov 6: declining always can). */
+const BOOKING_NOTE: Record<CampaignView["booking"], string> = {
+  ok: "",
+  full: "Your week is full. Free a slot to book this.",
+  meetings_full: `${CAMPAIGN.maxMeetings} meetings this week already.`,
+  week_set: "Your week is locked in. Book it next week.",
+};
+
 function Inbox({ v, busy, onReply, read, initial = null }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void; read: ReadMail; initial?: string | null }) {
   const [open, setOpen] = useState<string | null>(initial);
   // Replies are radio choices, sent with one button (owner, Oct 29).
@@ -759,18 +852,36 @@ function Inbox({ v, busy, onReply, read, initial = null }: { v: CampaignView; bu
           <b>{m.message.subject}</b>
           <span className="ph-sensitive">{m.message.body}</span>
         </div>
-        {m.status === "answered" && mine && <div className="camp-bubble me">{mine.label}<span className="camp-bubble-meta">Sent ✓</span></div>}
+        {m.status === "answered" && mine && (
+          <>
+            <div className="camp-bubble me camp-pop">{mine.label}<span className="camp-bubble-meta">Sent ✓</span></div>
+            {/* After a reply (owner, Nov 6: a state in the thread, not a toast): what it did, in the reply's own words. */}
+            <div className="camp-outcome camp-pop late" role="status">
+              <span className="camp-outcome-icon" aria-hidden="true">{mine.meeting ? "📅" : "📨"}</span>
+              <span className="stack-4" style={{ minWidth: 0 }}>
+                <span className="title">{mine.meeting ? "Booked on your calendar" : `You went with “${mine.label}”`}</span>
+                {m.receipt && <span className="subtext">{m.receipt}</span>}
+                <span className="camp-outcome-chips"><span className="fx fx-pay">{mine.get}</span><span className="fx fx-cost">{mine.cost}</span></span>
+              </span>
+            </div>
+            <button className="btn btn-secondary" onClick={() => setOpen(null)}>Back to inbox</button>
+          </>
+        )}
         {m.status === "expired" && <p className="meta" style={{ textAlign: "center" }}>You never replied. They noticed.</p>}
         {m.status === "new" && (
           <div className="stack-8" role="radiogroup" aria-label="Your reply">
             <p className="overline" style={{ margin: "4px 0 0" }}>Pick your reply · expires when the week ends</p>
-            {m.message.options.map((o: InboxOption) => (
-              <button key={o.id} role="radio" aria-checked={sel === o.id} className="camp-option radio" disabled={busy} onClick={() => setSel(o.id)}>
-                <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
-              </button>
-            ))}
-            <button className="btn btn-taxi" disabled={busy || !sel || !m.message.options.some((o) => o.id === sel)}
-              onClick={() => { if (sel) { onReply(m.message.id, sel); setSel(null); setOpen(null); } }}>Send reply</button>
+            {m.message.options.map((o: InboxOption) => {
+              const locked = !!o.meeting && v.booking !== "ok";
+              return (
+                <button key={o.id} role="radio" aria-checked={sel === o.id} className={`camp-option radio${locked ? " locked" : ""}`} disabled={busy || locked} onClick={() => setSel(o.id)}>
+                  <span className="title">{o.label}{o.meeting && <span className="meta"> · books a slot</span>}</span><PreviewLines p={o} />
+                  {locked && <span className="camp-locked-note">🔒 {BOOKING_NOTE[v.booking]}</span>}
+                </button>
+              );
+            })}
+            <button className="btn btn-taxi" disabled={busy || !sel || !m.message.options.some((o) => o.id === sel && !(o.meeting && v.booking !== "ok"))}
+              onClick={() => { if (sel) { onReply(m.message.id, sel); setSel(null); } }}>Send reply</button>
           </div>
         )}
       </div>

@@ -626,7 +626,8 @@ export function LocationSheet({
           <PlaceArtWithRegular key={place.id} place={place} daytime={daytime} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} favor={handlers.favor} />
           <StoryBanners place={place} story={handlers.story ?? null} />
           {place.tags.includes("campaign") && handlers.onOpenCampaign && (
-            <button className="btn btn-taxi" onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
+            // One red button per card (owner, Nov 6): here, opening HQ is the action; away, "Go there" is, and HQ stays a secondary button.
+            <button className={`btn ${here ? "btn-taxi" : "btn-secondary"}`} onClick={handlers.onOpenCampaign}>🗳️ Open Campaign HQ</button>
           )}
           {place.id === "ditmars-heights-rooftop" && handlers.onGala && (
             <button className="btn btn-secondary" onClick={handlers.onGala}>🥂 The Charity Gala</button>
