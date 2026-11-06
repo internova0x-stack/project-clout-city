@@ -51,7 +51,7 @@ function CampaignLoading() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img key={id} src={`/cast/candidate-${id}.webp`} alt="" />
       </div>
-      <p className="camp-loading-chant" aria-hidden="true">{c.chant.split(" ").map((w, i) => <span key={i} style={{ animationDelay: `${i * 0.35}s` }}>{w} </span>)}</p>
+      <p className="camp-loading-chant" aria-hidden="true">{c.chant.split(" ").map((w, i) => <span key={i} style={{ animationDelay: `${i * 0.35}s` }}>{w}</span>)}</p>
       <p className="subtext" style={{ margin: 0, textAlign: "center" }}>{c.line}</p>
       <div className="camp-loading-bar" aria-hidden="true"><i /></div>
       <p className="meta" style={{ margin: 0, textAlign: "center" }}>Calling the campaign office…</p>

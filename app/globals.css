@@ -3390,6 +3390,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .camp-loading-ring { position:absolute; inset:-8px; border-radius:50%; background:conic-gradient(#FF6A3D, #FF2E88, #2F5BBF, #FF6A3D); animation:camp-spin 2.4s linear infinite; }
 .camp-loading-ring::after { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--surface-sheet); }
 .camp-loading-chant { margin:4px 0 0; font-family:var(--font-display, inherit); font-weight:800; font-size:26px; letter-spacing:.04em; text-align:center; color:var(--text-1); }
+.camp-loading-chant { display:flex; flex-wrap:wrap; justify-content:center; gap:0 .35em; }
 .camp-loading-chant span { display:inline-block; animation:camp-chant 1.4s ease-in-out infinite; }
 .camp-loading-bar { width:min(260px, 80%); height:10px; border-radius:99px; background:var(--chip-off); overflow:hidden; }
 .camp-loading-bar i { display:block; height:100%; width:90%; border-radius:99px; background:linear-gradient(90deg, #FF6A3D, #FF2E88); transform-origin:left; animation:camp-load 2.6s cubic-bezier(.2,.8,.2,1) both; }
