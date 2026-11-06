@@ -57,7 +57,7 @@ export function CampusSheet({
 
   const enrolledHere = s?.campus === campusId;
   const other = s?.campus && s.campus !== campusId ? campusById(s.campus) : null;
-  // Visitors see the dining hall and the leaderboard only.
+  // Visitors see only the enrolment card (owner, Nov 6); the tabs are for students.
   const view: Tab = enrolledHere ? tab : tab === "pride" ? "pride" : "dining";
 
   async function act<T>(key: string, fn: () => Promise<{ ok: true; data: T } | { ok: false; error: string }>, after?: (d: T) => void) {
@@ -189,7 +189,8 @@ export function CampusSheet({
           </div>
         )}
 
-        {s && (
+        {/* Owner, Nov 6: the dining hall and the rivalry are for students, so the tabs show after enrolling here. */}
+        {s && enrolledHere && (
           <div className="segmented" role="tablist">
             {(enrolledHere ? (["classes", "exams", "dining", "pride"] as Tab[]) : (["dining", "pride"] as Tab[])).map((t) => (
               <button key={t} role="tab" aria-pressed={view === t} onClick={() => setTab(t)}>
@@ -342,7 +343,7 @@ export function CampusSheet({
         })()}
 
         {/* ---- Dining hall (students and visitors) ---- */}
-        {s && view === "dining" && (
+        {s && enrolledHere && view === "dining" && (
           <div className="card stack-8 campus-dining">
             <p className="overline" style={{ margin: 0 }}>Today at the dining hall</p>
             <p className="title" style={{ margin: 0 }}>{menuFor(s.today)}</p>
@@ -354,7 +355,7 @@ export function CampusSheet({
         )}
 
         {/* ---- School pride: the leaderboard ---- */}
-        {s && view === "pride" && board && (
+        {s && enrolledHere && view === "pride" && board && (
           <div className="stack-8">
             <p className="subtext" style={{ margin: 0 }}>Which campus studies harder this week. Students score for their school: 1 point a class, 5 a grade point. Resets Monday.</p>
             {board.campuses.map((row, i) => {
