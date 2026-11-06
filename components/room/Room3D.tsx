@@ -115,6 +115,13 @@ export interface Room3DProps {
   mood?: "natural" | "dream";
   /** Called once, after the first frame with the player's avatar loaded (the launch screen waits for it). */
   onReady?: () => void;
+  /**
+   * Owner, Nov 6 ("tapping on a sit action doesn't make the player walk to a sit and sit"): an action started from a
+   * list (Sit, Nap, Sleep, a place's Go). The avatar walks to the piece that does it and sits, lies down or uses it,
+   * without calling onUse again. `key` changes for each new one. `use` is a piece's use kind ("sit", "sleep", "cook")
+   * or a place action's id.
+   */
+  act?: { use: "sit" | "sleep" | "cook" | { action: string; index?: number }; key: number } | null;
 }
 
 export default function Room3D(props: Room3DProps) {
@@ -151,7 +158,7 @@ export default function Room3D(props: Room3DProps) {
   editRef.current = { editing, selected };
   const savedRef = useRef<RoomItem[]>(items);
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
-  const actionsRef = useRef<{ goUse: (it: RoomItem) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number] } | null>(null);
+  const actionsRef = useRef<{ goUse: (it: RoomItem, silent?: boolean) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number] } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
@@ -813,12 +820,18 @@ export default function Room3D(props: Room3DProps) {
       if (!me.path.length) arrive(use);
       else me.mode = "walk";
     }
-    function goUse(it: RoomItem) {
+    // An act from a list (props.act): walk there and pose, but the action already ran, so no onUse.
+    let silent: RoomItem | null = null;
+    function goUse(it: RoomItem, quiet = false) {
+      silent = quiet ? it : null;
       walkTo(useSpot(it), it);
     }
     function arrive(it: RoomItem | null) {
       me.pending = null;
       if (!it?.use) return;
+      const quiet = silent === it;
+      silent = null;
+      const onUse = (x: RoomItem) => { if (!quiet) propsRef.current.onUse?.(x); };
       const [fx, fz] = FACING[it.rot % 4];
       const b = world.current?.built.get(it.id);
       if (it.use.kind === "sit" && me.parts) {
@@ -827,7 +840,7 @@ export default function Room3D(props: Room3DProps) {
         me.heading = (it.rot * Math.PI) / 2;
         me.mode = "sit";
         poseSit(me.parts, b?.seatY ?? 0.48);
-        propsRef.current.onUse?.(it);
+        onUse(it);
         return;
       }
       if (it.use.kind === "sleep" && me.parts) {
@@ -836,12 +849,12 @@ export default function Room3D(props: Room3DProps) {
         me.z = it.z + fz * 0.85;
         me.mode = "sleep";
         poseLie(me.parts, b?.seatY ?? 0.5);
-        propsRef.current.onUse?.(it);
+        onUse(it);
         return;
       }
       me.heading = Math.atan2(it.x - me.x, it.z - me.z);
       if (it.use.kind === "events") me.mode = "dance";
-      propsRef.current.onUse?.(it);
+      onUse(it);
     }
 
     return () => {
@@ -970,6 +983,24 @@ export default function Room3D(props: Room3DProps) {
   const sel = items.find((i) => i.id === selected);
 
   const tapChip = (it: RoomItem) => actionsRef.current?.goUse(it);
+  // props.act (owner, Nov 6): an action started from a list walks the avatar to its piece and plays it out there.
+  const actKey = props.act?.key;
+  useEffect(() => {
+    const act = props.act;
+    if (!act) return;
+    const want = act.use;
+    const fits = itemsRef.current.filter((i) => {
+      const u = i.use;
+      if (!u) return false;
+      if (typeof want === "string") return u.kind === want;
+      return u.kind === "action" && (u.actionId === want.action || (want.index !== undefined && u.actionId === `*${want.index}`));
+    });
+    // Sit on the sofa (then an armchair) rather than a stool; sleep in the bed.
+    const rank = (k: string) => (want === "sit" ? ["sofa", "armchair", "bench"] : want === "sleep" ? ["bed"] : []).indexOf(k);
+    const it = [...fits].sort((x, y) => (rank(x.kind) < 0 ? 99 : rank(x.kind)) - (rank(y.kind) < 0 ? 99 : rank(y.kind)))[0];
+    if (it) actionsRef.current?.goUse(it, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actKey]);
   // Move the selected piece a grid step; clamped to the room. Overlaps are allowed on the way (the
   // ring turns red and Save waits) so a piece can pass another to reach a free spot.
   const nudge = (k: number) => {

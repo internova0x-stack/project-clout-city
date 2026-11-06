@@ -12,15 +12,17 @@ const NAME: Record<StatKey, string> = { energy: "Energy", mood: "Mood", confiden
 const line = (gain: number, stat: StatKey, price: number, seconds: number, limit?: string) =>
   [`+${gain} ${NAME[stat]}`, price > 0 ? formatCash(price) : "Free", seconds > 0 ? `⏱ ${seconds}s` : null, limit ?? null].filter(Boolean).join(" · ");
 
-/** A rest at home ("rest:nap", "rest:sit") for a stat, if it raises it and is left today. */
-function restTip(kind: "nap" | "sit", stat: StatKey, s: CityState): StatTip | null {
+const REST_NAME = { sleep: ["Go to sleep", "🛏️", "Sleep"], nap: ["Take a nap", "😴", "Nap"], sit: ["Sit a while", "🛋️", "Sit"] } as const;
+
+/** A rest at home ("rest:sleep", "rest:nap", "rest:sit") for a stat, if it raises it and is left today. */
+function restTip(kind: "nap" | "sit" | "sleep", stat: StatKey, s: CityState): StatTip | null {
   const r = CITY_ECONOMY.rest[kind];
   const gain = stat === "energy" ? r.energy : stat === "mood" ? r.mood : 0;
   const av = restAvailability(kind, s);
   if (!av.ok || gain <= 0) return null;
   return {
-    stat, placeId: `rest:${kind}`, placeName: kind === "nap" ? "Take a nap" : "Sit a while", emoji: kind === "nap" ? "😴" : "🛋️",
-    price: 0, gain, go: kind === "nap" ? "Nap" : "Sit",
+    stat, placeId: `rest:${kind}`, placeName: REST_NAME[kind][0], emoji: REST_NAME[kind][1],
+    price: 0, gain, go: REST_NAME[kind][2],
     detail: line(gain, stat, 0, r.seconds, `${av.perDay - av.used} of ${av.perDay} left today`),
   };
 }
@@ -72,7 +74,8 @@ export function contextTipLists(places: readonly Place[], s: CityState, opts: { 
   const atHome = (s.player.at_place ?? null) === null;
   const homeOptions = (stat: StatKey): StatTip[] => {
     if (!atHome || !opts.restOn) return [];
-    const out = stat === "energy" ? [restTip("nap", stat, s), opts.kitchenOn ? cookTip(s) : null, restTip("sit", stat, s)]
+    // Owner, Nov 6: a night's sleep first (the most Energy, once a day), then a nap, cooking and sitting.
+    const out = stat === "energy" ? [restTip("sleep", stat, s), restTip("nap", stat, s), opts.kitchenOn ? cookTip(s) : null, restTip("sit", stat, s)]
       : stat === "mood" ? [restTip("sit", stat, s)] : [];
     return out.filter((t): t is StatTip => !!t);
   };

@@ -106,6 +106,23 @@ test("monument plazas: each activity's boost once a day, clout once per place (v
   assert.ok(pose.ok && pose.gain?.clout === 20 && pose.gain?.mood === 6);
   const tour = await api.doAction("unisphere", "tour");
   assert.ok(tour.ok && tour.gain?.confidence === 5 && tour.gain?.clout === 0, "a second activity still lifts its stat, no clout");
+  // Owner, Nov 6 (migration 0165): the same activity twice in a day isn't allowed at all now; it's ticked off.
   const again = await api.doAction("unisphere", "tour");
-  assert.ok(again.ok && again.gain?.confidence === 0, "the same activity twice: no second boost");
+  assert.ok(!again.ok && /Done that here today/.test(again.error), "the same activity twice: done for today");
+});
+
+test("activities once a New York day; meals and shifts repeat (owner, Nov 6, migration 0165)", async () => {
+  const { createSimApi, sampleCityState } = await import("../lib/citySim.ts");
+  const { actionAvailability, onceADay } = await import("../lib/cityState.ts");
+  const { placeById } = await import("../lib/city.ts");
+  assert.deepEqual((["visit", "hangout", "eat", "shift", "gigs"] as const).map(onceADay), [true, true, false, false, false]);
+  const s = sampleCityState({ energy: 100, bank_cash: 1000 });
+  const api = createSimApi(s);
+  await api.travel!("queensborough-u", "taxi");
+  const quad = placeById("queensborough-u")!.actions.find((a) => a.id === "quad")!;
+  const first = await api.doAction("queensborough-u", "quad");
+  assert.ok(first.ok);
+  const av = actionAvailability("queensborough-u", quad, first.ok ? first.state : s);
+  assert.ok(!av.ok && av.done, "the row shows it ticked off");
+  assert.equal((await api.doAction("queensborough-u", "quad")).ok, false);
 });

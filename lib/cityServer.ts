@@ -105,6 +105,6 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     calendar: calendar.error || !calendar.data ? undefined : (calendar.data as CalendarState),
     catalog: catalog.error || !Array.isArray(catalog.data) ? undefined : (catalog.data as CatalogItem[]),
     style: style.error || !style.data ? undefined : (style.data as StyleState),
-    restToday: rest.error ? undefined : Object.assign({ nap: 0, sit: 0 }, Object.fromEntries(((rest.data ?? []) as { kind: string; uses: number }[]).map((r) => [r.kind, r.uses]))),
+    restToday: rest.error ? undefined : Object.assign({ nap: 0, sit: 0, sleep: 0 }, Object.fromEntries(((rest.data ?? []) as { kind: string; uses: number }[]).map((r) => [r.kind, r.uses]))),
   };
 }

@@ -32,10 +32,12 @@ set role authenticated;
 
 -- A lecture is free: Energy for Confidence and a fixed 15 clout, the clout once a day.
 select pg_temp.assert((pg_temp.act('st-johnsons', 'lecture') ->> 'clout')::int = 15, 'lecture pays 15 clout');
-select pg_temp.assert((pg_temp.act('st-johnsons', 'lecture') ->> 'clout')::int = 0, 'second lecture today pays no clout');
+-- Migration 0165 (owner, Nov 6): a second lecture the same day is refused outright.
+do $$ begin perform pg_temp.act('st-johnsons', 'lecture'); raise exception 'FAIL: two lectures';
+exception when others then if sqlerrm not like '%done_today%' then raise; end if; end $$;
 select pg_temp.assert((pg_temp.act('queensborough-u', 'lecture') ->> 'confidence')::int = 6, 'the other campus counts separately');
 reset role;
-select pg_temp.assert((select confidence = 62 and energy = 55 from public.players where id = '00000000-0000-0000-0000-000000000081'),
+select pg_temp.assert((select confidence = 62 and energy = 70 from public.players where id = '00000000-0000-0000-0000-000000000081'),
   'confidence +6 twice (once per campus), energy -15 per lecture');
 select pg_temp.assert((select count(*) = 2 from public.ledger where player_id = '00000000-0000-0000-0000-000000000081' and kind = 'visit'
                          and ref like any (array['st-johnsons:%', 'queensborough-u:%'])), 'one clout row per campus');

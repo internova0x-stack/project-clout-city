@@ -62,6 +62,9 @@ export const CITY_ECONOMY = {
    * the pricey, convenient option: C$60 for +20 Energy, no clout, no cap.
    */
   rest: {
+    // Owner, Nov 6: "players should be able to Sleep, which would be a much longer nap that rejuvenates more energy":
+    // once a New York day, in bed (migration 0165).
+    sleep: { energy: 80, mood: 5, perDay: 1, seconds: 20 },
     nap: { energy: 30, mood: 0, perDay: 2, seconds: 8 },
     sit: { energy: 10, mood: 6, perDay: 3, seconds: 4 },
   },
@@ -321,6 +324,11 @@ export interface PlaceAction {
   skill?: SkillId;
   /** C3: the daily task's own title when this action is picked ("Get a BEC at Sal's"), instead of the generic one. */
   task?: string;
+  /**
+   * The floor it happens on, in a place with floors (owner, Nov 6: "each location should have specific actions relevant
+   * to place": the Quad's aren't the restroom's). 1, the ground floor, when unset; campus areas are CAMPUS_AREAS' numbers.
+   */
+  floor?: number;
 }
 
 export interface Place {
@@ -569,10 +577,10 @@ export const PLACES: Place[] = [
     tags: ["university", "campus"],
     lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the students are here on scholarship; the other half are here on a parking permit.",
     actions: [
-      { id: "lecture", kind: "visit", label: "Sit in on a lecture", energy: 15, confidence: 6, clout: 15, blurb: "Intro to Marketing. You take notes on the professor's outfit." },
-      // v0.15 campus areas: the Quad and the Library (CAMPUS_AREAS in lib/rooms.ts).
+      { id: "lecture", kind: "visit", floor: 2, label: "Sit in on a lecture", energy: 15, confidence: 6, clout: 15, blurb: "Intro to Marketing. You take notes on the professor's outfit." },
+      // v0.15 campus areas (CAMPUS_AREAS in lib/rooms.ts): the lecture in the Lecture Hall (2), the Quad (1), the Library (3).
       { id: "quad", kind: "hangout", label: "Hang out on the Quad", energy: 5, mood: 8, clout: 8, blurb: "Frisbee, a guitar nobody asked for and the best people-watching in Queens." },
-      { id: "study", kind: "visit", label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Silent floor. Someone is eating chips like it's a percussion solo." },
+      { id: "study", kind: "visit", floor: 3, label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Silent floor. Someone is eating chips like it's a percussion solo." },
     ],
   },
   {
@@ -581,10 +589,10 @@ export const PLACES: Place[] = [
     tags: ["university", "campus"],
     lore: "A leafy quad, a library open until 2 AM and forty languages overheard on the walk to class. Tuition is reasonable, which around here counts as a personality.",
     actions: [
-      { id: "lecture", kind: "visit", label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
-      // v0.15 campus areas: the Quad and the Library (CAMPUS_AREAS in lib/rooms.ts).
+      { id: "lecture", kind: "visit", floor: 2, label: "Catch a lecture in the big hall", energy: 15, confidence: 6, clout: 15, blurb: "Philosophy 101. Someone asks if the professor is real. Fair question." },
+      // v0.15 campus areas (CAMPUS_AREAS in lib/rooms.ts): the lecture in the Lecture Hall (2), the Quad (1), the Library (3).
       { id: "quad", kind: "hangout", label: "Hang out on the Quad", energy: 5, mood: 8, clout: 8, blurb: "Forty languages, one frisbee and a squirrel with a reputation." },
-      { id: "study", kind: "visit", label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Open until 2 AM. The vending machine is the real librarian." },
+      { id: "study", kind: "visit", floor: 3, label: "Study in the Library", energy: 12, confidence: 5, clout: 6, skill: "smarts", blurb: "Open until 2 AM. The vending machine is the real librarian." },
     ],
   },  // ---- v0.6: the Astoria neighborhood (docs/08-new-features-spec.md section 5). Invented names. ----
   {
@@ -730,8 +738,8 @@ export const PLACES: Place[] = [
     lore: "Four floors of glass rings stacked like a spaceship parked on 31st Street, babe. The Neon Spoon diner's chrome counter and all-day breakfast downstairs, games on two, couches on three, and everybody worth knowing. Ask for me.",
     actions: [
       { id: "eat", kind: "eat", label: "Pancakes at the Neon Spoon counter", price: 38, energy: -28, blurb: "The waitress calls you \"hon.\" You've never felt more seen." },
-      { id: "play", kind: "visit", label: "A round in the game room", price: 12, energy: 8, mood: 6, confidence: 2, blurb: "You lose to a stranger. You're friends now. That's how it works up here." },
-      { id: "hang", kind: "hangout", label: "Hang out in the lounge", energy: 2, mood: 8, blurb: "Big couches, bigger opinions. Nobody's in a hurry on the third floor." },
+      { id: "play", kind: "visit", floor: 2, label: "A round in the game room", price: 12, energy: 8, mood: 6, confidence: 2, blurb: "You lose to a stranger. You're friends now. That's how it works up here." },
+      { id: "hang", kind: "hangout", floor: 3, label: "Hang out in the lounge", energy: 2, mood: 8, blurb: "Big couches, bigger opinions. Nobody's in a hurry on the third floor." },
     ],
   },
   {
@@ -1049,6 +1057,8 @@ export interface ClubEvent {
   blurb: string;
   /** v0.15 (owner, Oct 18): the New York weekdays it runs (ISO, 1 Monday to 7 Sunday); every day when absent. */
   days?: number[];
+  /** The floor it's on (owner, Nov 6: Greek Row's party is on Greek Row, 5); the ground floor when unset. */
+  floor?: number;
 }
 
 export const CLUB_EVENTS: ClubEvent[] = [
@@ -1065,8 +1075,8 @@ export const CLUB_EVENTS: ClubEvent[] = [
   // v0.15 Greek Row party night (owner, Oct 18): Tuesday, Thursday, Friday and Saturday.
   // C5 (owner, Oct 20): the Flushing Meteors' home games at Meteor Park, five nights a week (no league is ever named).
   { id: "meteors-home-game", name: "Meteors home game", placeId: "meteor-park", startHour: 19, hours: 3, entry: 45, clout: 45, confidence: 4, mood: 10, days: [2, 3, 5, 6, 7], blurb: "Queens vs. whoever's in town. Boo the Bronx Bigshots even when they're not playing. Tradition." },
-  { id: "greek-row-sj", name: "Greek Row Party Night", placeId: "st-johnsons", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "A theme nobody understood, a playlist from 2016 and a couch that has seen things." },
-  { id: "greek-row-qu", name: "Greek Row Party Night", placeId: "queensborough-u", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "Mystery punch, a ping-pong table with a past and someone's cousin DJing." },
+  { id: "greek-row-sj", floor: 5, name: "Greek Row Party Night", placeId: "st-johnsons", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "A theme nobody understood, a playlist from 2016 and a couch that has seen things." },
+  { id: "greek-row-qu", floor: 5, name: "Greek Row Party Night", placeId: "queensborough-u", startHour: 21, hours: 5, entry: 20, clout: 40, confidence: 6, mood: 10, days: [2, 4, 5, 6], blurb: "Mystery punch, a ping-pong table with a past and someone's cousin DJing." },
 ];
 
 // ---------------------------------------------------------------------------

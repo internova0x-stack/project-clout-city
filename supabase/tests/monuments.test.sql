@@ -28,8 +28,11 @@ select pg_temp.assert((select p.bank_cash - coalesce((select sum(amount) from pu
 select pg_temp.assert((pg_temp.act('unisphere', 'pretzel') ->> 'energy')::int = 12, 'a pretzel is +12 Energy');
 select pg_temp.assert((pg_temp.act('unisphere', 'people') ->> 'mood')::int = 6, 'people-watching');
 
-select pg_temp.assert((pg_temp.act('unisphere', 'people') ->> 'mood')::int = 0, 'the same activity twice: no second boost');
-select pg_temp.assert((pg_temp.act('unisphere', 'visit') ->> 'clout')::int = 0, 'clout once a day per place');
+-- Migration 0165 (owner, Nov 6): the same activity twice in a day is refused outright now.
+do $$ begin perform pg_temp.act('unisphere', 'people'); raise exception 'FAIL: people-watching twice';
+exception when others then if sqlerrm not like '%done_today%' then raise; end if; end $$;
+do $$ begin perform pg_temp.act('unisphere', 'visit'); raise exception 'FAIL: posing twice';
+exception when others then if sqlerrm not like '%done_today%' then raise; end if; end $$;
 
 -- Gantry Plaza.
 select pg_temp.assert((pg_temp.act('gantry-plaza', 'photoshoot') ->> 'confidence')::int = 6, 'golden hour photoshoot');

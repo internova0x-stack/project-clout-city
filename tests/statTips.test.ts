@@ -36,7 +36,9 @@ test("each stat offers more than one action (owner, Oct 26): home options first,
   s.player.fridge_meals = 3;
   s.restToday = { nap: 0, sit: 0 };
   const t = contextTipLists(PLACES, s, { restOn: true, kitchenOn: true });
-  assert.deepEqual(t.energy.map((x) => x.placeId), ["rest:nap", "cook", "rest:sit"]);
+  assert.deepEqual(t.energy.map((x) => x.placeId), ["rest:sleep", "rest:nap", "cook"], "a night's sleep first (owner, Nov 6)");
+  s.restToday = { nap: 0, sit: 0, sleep: 1 };
+  assert.deepEqual(contextTipLists(PLACES, s, { restOn: true, kitchenOn: true }).energy.map((x) => x.placeId), ["rest:nap", "cook", "rest:sit"]);
   assert.equal(t.mood[0].placeId, "rest:sit");
   assert.ok(t.mood.length >= 2 && t.mood[1].go === "Go", "and a place to go");
   assert.ok(Object.values(t).every((l) => l.length <= 3));
